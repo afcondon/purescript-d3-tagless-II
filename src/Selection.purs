@@ -78,7 +78,7 @@ instance d3TaglessD3M :: D3Tagless D3M where
 
   append (SelectionPS { element, attributes, children }) = do
     selection <- get
-    let appended = d3Append_ (show element) (spy "select in append is: " selection) 
+    let appended = d3Append_ (show element) selection
         _ = d3SetAttr_ "x" (unsafeCoerce "foo") appended
     put appended
     pure appended 
@@ -102,14 +102,11 @@ foreign import data D3Attr :: Type -- we'll just coerce all our Variants to one 
 
 script :: ∀ m. (D3Tagless m) => m SelectionJS
 script = do
-    root <- spy "hook" $ 
-      hook "div#root"
+    _ <- hook "div#root"
     
-    _ <- spy "append" $
-      append $ SelectionPS { element: Svg, attributes: [], children: [] } 
+    _ <- append $ SelectionPS { element: Svg, attributes: [], children: [] } 
 
-    foo <- spy "join" $ 
-      join Circle emptyJoinSelections 
+    _ <- join Circle emptyJoinSelections 
 
-    pure foo
+    pure nullSelectionJS
 
