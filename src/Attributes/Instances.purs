@@ -2,6 +2,8 @@ module Attributes.Instances where
 
 import Prelude
 
+import Unsafe.Coerce (unsafeCoerce)
+
 
 foreign import data Datum :: Type
 
@@ -15,6 +17,21 @@ type Attributes = Array Attribute
 data Attr = StringAttr (Attrib String)
           | NumberAttr (Attrib Number)
           | ArrayAttr (Attrib (Array Number))
+
+unbox :: forall a. Attr -> a
+unbox = 
+  case _ of
+    (StringAttr (Static a)) -> unsafeCoerce a
+    (StringAttr (Fn a))     -> unsafeCoerce a
+    (StringAttr (FnI a))    -> unsafeCoerce a
+
+    (NumberAttr (Static a)) -> unsafeCoerce a
+    (NumberAttr (Fn a))     -> unsafeCoerce a
+    (NumberAttr (FnI a))    -> unsafeCoerce a
+
+    (ArrayAttr (Static a))  -> unsafeCoerce a
+    (ArrayAttr (Fn a))      -> unsafeCoerce a
+    (ArrayAttr (FnI a))     -> unsafeCoerce a
 
 data Attrib a = Static a
               | Fn (Datum -> a)

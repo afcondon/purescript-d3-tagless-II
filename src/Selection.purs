@@ -3,9 +3,10 @@ module Selection where
 import Attributes.Instances
 import Prelude
 
-import Attributes.Helpers (strokeColor, strokeOpacity)
+import Attributes.Helpers (fill, strokeColor, strokeOpacity)
 import Control.Monad.State (class MonadState, StateT, get, put, runStateT)
 import Data.Foldable (class Foldable)
+import Data.Functor.Contravariant (coerce)
 import Data.Identity (Identity)
 import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy)
@@ -86,7 +87,7 @@ instance d3TaglessD3M :: D3Tagless D3M where
     pure joined
 
 setAttributeOnSelection :: SelectionJS -> Attribute -> Unit
-setAttributeOnSelection selection (Attribute label attr) = d3SetAttr_ label (unsafeCoerce attr) selection
+setAttributeOnSelection selection (Attribute label attr) = d3SetAttr_ label (unbox attr) selection
 
 foreign import d3SelectAll_ :: Selector -> SelectionJS
 foreign import d3Append_    :: String   -> SelectionJS -> SelectionJS
@@ -97,13 +98,20 @@ foreign import d3Join_      :: String   -> SelectionJS -> SelectionJS
 -- foreign import d3GetAttr_ :: String -> SelectionJS -> ???? -- solve the ???? as needed later
 foreign import d3SetAttr_      :: String -> D3Attr -> SelectionJS -> Unit 
 
-foreign import data D3Attr :: Type -- we'll just coerce all our Variants to one thing for the FFI since JS don't care
+-- we'll just coerce all our setters to one thing for the FFI since JS don't care
+foreign import data D3Attr :: Type 
+
+type SomeDatum = { fillColorField :: String }
 
 someAttributes :: Attributes
 someAttributes = [
     strokeColor "green"
   , strokeOpacity 0.75
+  -- , fill ((\d -> "blue") :: SomeDatum -> String)
 ]
+
+coerceToSomeDatum :: forall d. d -> SomeDatum
+coerceToSomeDatum = unsafeCoerce
 
 script :: ∀ m. (D3Tagless m) => m SelectionJS
 script = do
