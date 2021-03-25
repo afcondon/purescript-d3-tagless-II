@@ -3,10 +3,11 @@ module Selection where
 import Attributes.Instances
 import Prelude
 
-import Control.Monad.State (class MonadState, StateT, get, runStateT)
+import Control.Monad.State (class MonadState, StateT, get, put, runStateT)
 import Data.Foldable (class Foldable)
 import Data.Identity (Identity)
 import Data.Tuple (Tuple(..), fst, snd)
+import Debug (spy)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Unsafe.Coerce (unsafeCoerce)
@@ -32,10 +33,11 @@ data Selection =
 foreign import data SelectionJS :: Type
 foreign import nullSelectionJS :: SelectionJS -- probably just null
 
-newtype SelectionPS = SelectionPS { attributes :: Attributes
+newtype SelectionPS = SelectionPS { element    :: Element
+                                  , attributes :: Attributes
                                   , children   :: Array SelectionPS }
 
-emptySelectionPS = SelectionPS { attributes: [], children: [] }
+emptySelectionPS = SelectionPS { element: Group, attributes: [], children: [] }
 emptyJoinSelections = { enter: emptySelectionPS, update: emptySelectionPS, exit: emptySelectionPS }
 
 type EnterUpdateExit = {
@@ -56,7 +58,7 @@ derive newtype instance monadEffD3M    :: MonadEffect       D3M
 
 class (Monad m) <= D3Tagless m where
   hook   :: Selector -> m SelectionJS
-  append :: Element -> Attributes -> SelectionPS -> m SelectionJS
+  append :: SelectionPS -> m SelectionJS
   join   :: Element -> EnterUpdateExit -> m SelectionJS
 
 runD3M :: ∀ a. D3M a -> SelectionJS -> Effect (Tuple a SelectionJS)
@@ -69,34 +71,45 @@ d3Run :: ∀ a. D3M a -> Effect a
 d3Run (D3M fse) = liftA1 fst $ runStateT fse nullSelectionJS
 
 instance d3TaglessD3M :: D3Tagless D3M where
-  hook selector = pure $ d3SelectAll_ selector
+  hook selector = do
+    let selection = d3SelectAll_ selector
+    put selection
+    pure selection  -- no attributes or children on hook point (at least for now, KISS)
 
-  append element attributes selection = do
-    (activeSelection :: SelectionJS) <- get
-    let appended = d3Append_ (show element) activeSelection 
+  append (SelectionPS { element, attributes, children }) = do
+    selection <- get
+    let appended = d3Append_ (show element) (spy "select in append is: " selection) 
         _ = d3SetAttr_ "x" (unsafeCoerce "foo") appended
+    put appended
     pure appended 
 
   join element enterUpdateExit = do
-    activeSelection <- get
-    let joined = d3Join_ (show element) activeSelection
+    selection <- get
+    let joined = d3Join_ (show element) selection
+    put joined
     pure joined
 
 foreign import d3SelectAll_ :: Selector -> SelectionJS
-foreign import d3Append_    :: String -> SelectionJS -> SelectionJS
-foreign import d3Join_      :: String -> SelectionJS -> SelectionJS
+foreign import d3Append_    :: String   -> SelectionJS -> SelectionJS
+foreign import d3Join_      :: String   -> SelectionJS -> SelectionJS
 
 -- NB D3 returns the selection after setting an Attr but we will only capture Selections that are 
 -- meaningfully different _as_ selections, we're not chaining them in the same way
--- foreign import d3GetAttr_      :: String ->           SelectionJS -> ???? -- solve the ???? if needed 
+-- foreign import d3GetAttr_ :: String -> SelectionJS -> ???? -- solve the ???? as needed later
 foreign import d3SetAttr_      :: String -> D3Attr -> SelectionJS -> Unit 
 
-foreign import data D3Attr :: Type -- we'll just coerce all our 
+foreign import data D3Attr :: Type -- we'll just coerce all our Variants to one thing for the FFI since JS don't care
 
 script :: ∀ m. (D3Tagless m) => m SelectionJS
 script = do
-    root  <- hook "div#root"
-    svg   <- append Svg [] emptySelectionPS
-    joined <- join Circle emptyJoinSelections 
-    pure svg
+    root <- spy "hook" $ 
+      hook "div#root"
+    
+    _ <- spy "append" $
+      append $ SelectionPS { element: Svg, attributes: [], children: [] } 
+
+    foo <- spy "join" $ 
+      join Circle emptyJoinSelections 
+
+    pure foo
 
