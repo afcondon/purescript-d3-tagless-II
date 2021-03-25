@@ -74,7 +74,7 @@ instance d3TaglessD3M :: D3Tagless D3M where
   append element attributes selection = do
     (activeSelection :: SelectionJS) <- get
     let appended = d3Append_ (show element) activeSelection 
-    -- attributes would go here
+        _ = d3SetAttr_ "x" (unsafeCoerce "foo") appended
     pure appended 
 
   join element enterUpdateExit = do
@@ -85,6 +85,13 @@ instance d3TaglessD3M :: D3Tagless D3M where
 foreign import d3SelectAll_ :: Selector -> SelectionJS
 foreign import d3Append_    :: String -> SelectionJS -> SelectionJS
 foreign import d3Join_      :: String -> SelectionJS -> SelectionJS
+
+-- NB D3 returns the selection after setting an Attr but we will only capture Selections that are 
+-- meaningfully different _as_ selections, we're not chaining them in the same way
+-- foreign import d3GetAttr_      :: String ->           SelectionJS -> ???? -- solve the ???? if needed 
+foreign import d3SetAttr_      :: String -> D3Attr -> SelectionJS -> Unit 
+
+foreign import data D3Attr :: Type -- we'll just coerce all our 
 
 script :: ∀ m. (D3Tagless m) => m SelectionJS
 script = do

@@ -15,3 +15,9 @@ exports.d3Join_ = element => selection => {
   console.log(`d3Join: ${element}`);
   return null;
 }
+
+// d3SetAttr_      :: String -> D3Attr -> SelectionJS -> Unit 
+exports.d3SetAttr_ = name => value => selection => {
+  console.log(`selection.attr(${name}, ${value})`);
+  // selection.attr(name, value);
+}
