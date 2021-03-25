@@ -3,6 +3,7 @@ module Selection where
 import Attributes.Instances
 import Prelude
 
+import Attributes.Helpers (strokeColor, strokeOpacity)
 import Control.Monad.State (class MonadState, StateT, get, put, runStateT)
 import Data.Foldable (class Foldable)
 import Data.Identity (Identity)
@@ -22,12 +23,6 @@ instance showElement :: Show Element where
   show Circle = "circle"
   show Line   = "line"
   show Group  = "group"
-
-data Selection =
-    Hook   Selector Selection
-  | Append Element Attributes (Array Selection)
-  | Join   Element Selection
-  | End
   
 -- || trying this with Finally Tagless instead of interpreter
 foreign import data SelectionJS :: Type
@@ -80,6 +75,7 @@ instance d3TaglessD3M :: D3Tagless D3M where
     selection <- get
     let appended = d3Append_ (show element) selection
         _ = d3SetAttr_ "x" (unsafeCoerce "foo") appended
+        _ = (setAttributeOnSelection appended) <$> attributes
     put appended
     pure appended 
 
@@ -88,6 +84,9 @@ instance d3TaglessD3M :: D3Tagless D3M where
     let joined = d3Join_ (show element) selection
     put joined
     pure joined
+
+setAttributeOnSelection :: SelectionJS -> Attribute -> Unit
+setAttributeOnSelection selection (Attribute label attr) = d3SetAttr_ label (unsafeCoerce attr) selection
 
 foreign import d3SelectAll_ :: Selector -> SelectionJS
 foreign import d3Append_    :: String   -> SelectionJS -> SelectionJS
@@ -100,11 +99,17 @@ foreign import d3SetAttr_      :: String -> D3Attr -> SelectionJS -> Unit
 
 foreign import data D3Attr :: Type -- we'll just coerce all our Variants to one thing for the FFI since JS don't care
 
+someAttributes :: Attributes
+someAttributes = [
+    strokeColor "green"
+  , strokeOpacity 0.75
+]
+
 script :: ∀ m. (D3Tagless m) => m SelectionJS
 script = do
     _ <- hook "div#root"
     
-    _ <- append $ SelectionPS { element: Svg, attributes: [], children: [] } 
+    _ <- append $ SelectionPS { element: Svg, attributes: someAttributes, children: [] } 
 
     _ <- join Circle emptyJoinSelections 
 
