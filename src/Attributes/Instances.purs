@@ -10,6 +10,7 @@ type Label = String
 data UnitType = Px | Pt | Em | Rem | Percent
 
 data Attribute = Attribute Label Attr
+type Attributes = Array Attribute
 
 data Attr = StringAttr (Attrib String)
           | NumberAttr (Attrib Number)

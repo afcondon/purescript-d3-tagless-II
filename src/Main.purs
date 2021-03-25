@@ -1,15 +1,16 @@
 module Main where
 
 import Attributes.Helpers
+import Prelude
+import Selection
 
 import Attributes.Instances (Attribute, Datum)
 import Data.Foldable (class Foldable)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
+import Effect.Class (liftEffect)
 import Effect.Console (log)
-import Prelude (Unit, ($), (*), (==))
 import Unsafe.Coerce (unsafeCoerce)
-import Selection
 
 -- | Model types
 type Model = { links :: Links, nodes :: Nodes }
@@ -52,30 +53,31 @@ linkWidth a = strokeOpacity $ a.count * 5.0
 linkAttrs :: Array (Link -> Attribute)
 linkAttrs = [ linkWidth, linkColor ]
 
-tree :: Selection Model
-tree = 
-  Hook "div" $ 
-    Append "svg" [] [
-        Join "g" (mkJoin joinNodes)
-      , Join "g" (mkJoin joinLinks)
-      , Join "g" (mkJoin joinLabels)
-    ]
+-- tree :: Selection Model
+-- tree = 
+--   Hook "div" $ 
+--     Append Svg [] [
+--         Join Group (\a -> a.links) End
+--       , Join Group (\a -> a.nodes) End
+--       , Join Group (\a -> a.nodes) End
+--     ]
 
-joinNodes :: JoinData Model Nodes
-joinNodes m = 
-  Tuple m.nodes $
-    Append "circle" [ strokeOpacity 0.75
-                    , x (\d -> (datumToNode d).x * 5.0) ] [
-    ]
+-- joinNodes :: JoinData Model Nodes
+-- joinNodes m = 
+--   Tuple m.nodes $
+--     Append "circle" [ strokeOpacity 0.75
+--                     , x (\d -> (datumToNode d).x * 5.0) ] [
+--     ]
 
-joinLinks :: JoinData Model Links
-joinLinks m =
-  Tuple m.links End
+-- joinLinks :: JoinData Model Links
+-- joinLinks m =
+--   Tuple m.links End
 
-joinLabels :: JoinData Model Nodes
-joinLabels m =
-  Tuple m.nodes End
+-- joinLabels :: JoinData Model Nodes
+-- joinLabels m =
+--   Tuple m.nodes End
 
 main :: Effect Unit
 main = do
+  _ <- d3Run script
   log "🍝"
