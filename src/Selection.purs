@@ -12,6 +12,7 @@ import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
+import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 
@@ -101,27 +102,33 @@ foreign import d3SetAttr_      :: String -> D3Attr -> SelectionJS -> Unit
 -- we'll just coerce all our setters to one thing for the FFI since JS don't care
 foreign import data D3Attr :: Type 
 
-type SomeDatum = { fillColorField :: String }
-proxySomeDatum = { fillColorField: "red" }
+type SomeDatum = forall r. { fillColorField :: String | r }
+_SomeDatum :: Proxy SomeDatum
+_SomeDatum = Proxy
+
+coerceFromSomeDatum :: (SomeDatum -> String) -> (Datum -> String)
+coerceFromSomeDatum= unsafeCoerce
+
+type SomeOtherDatum = forall r. { snek :: String | r }
+_SomeOtherDatum :: Proxy SomeOtherDatum
+_SomeOtherDatum = Proxy
 
 -- WIP all the attr functions are written in terms of Datum which is opaque, but we know at compile-time what they 
 -- really are so if we coerce the function AFTER we've type checked it against the type we know it will really be
 -- we should be able to have polymorphism AND type-checking
-someAttributes :: forall r. { fillColorField :: String | r } -> Attributes
+someAttributes :: Proxy SomeDatum -> Attributes
 someAttributes _ = [
     strokeColor "green"
   , strokeOpacity 0.75
   , fill $ coerceFromSomeDatum (\d -> d.fillColorField)
 ]
 
-coerceFromSomeDatum :: forall d. (d -> String) -> (Datum -> String)
-coerceFromSomeDatum= unsafeCoerce
 
 script :: ∀ m. (D3Tagless m) => m SelectionJS
 script = do
     _ <- hook "div#root"
     
-    _ <- append $ SelectionPS { element: Svg, attributes: (someAttributes proxySomeDatum), children: [] } 
+    _ <- append $ SelectionPS { element: Svg, attributes: (someAttributes _SomeDatum ), children: [] } 
 
     _ <- join Circle emptyJoinSelections 
 
