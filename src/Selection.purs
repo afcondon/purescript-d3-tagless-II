@@ -1,13 +1,14 @@
 module Selection where
 
 import Attributes.Instances
-import Prelude
+import Prelude hiding (append)
 
 import Attributes.Helpers (fill, strokeColor, strokeOpacity)
 import Control.Monad.State (class MonadState, StateT, get, put, runStateT)
 import Data.Foldable (class Foldable)
 import Data.Functor.Contravariant (coerce)
 import Data.Identity (Identity)
+import Data.Traversable (sequence)
 import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy)
 import Effect (Effect)
@@ -30,11 +31,9 @@ instance showElement :: Show Element where
 foreign import data SelectionJS :: Type
 foreign import nullSelectionJS :: SelectionJS -- probably just null
 
-newtype SelectionPS = SelectionPS { element    :: Element
-                                  , attributes :: Attributes
-                                  , children   :: Array SelectionPS }
+data SelectionPS = SelectionPS Element Attributes (Array SelectionPS)
 
-emptySelectionPS = SelectionPS { element: Group, attributes: [], children: [] }
+emptySelectionPS = SelectionPS Group [] []
 emptyJoinSelections = { enter: emptySelectionPS, update: emptySelectionPS, exit: emptySelectionPS }
 
 type EnterUpdateExit = {
@@ -55,7 +54,7 @@ derive newtype instance monadEffD3M    :: MonadEffect       D3M
 
 class (Monad m) <= D3Tagless m where
   hook   :: Selector -> m SelectionJS
-  append :: SelectionPS -> m SelectionJS
+  child :: SelectionPS -> m SelectionJS
   join   :: Element -> EnterUpdateExit -> m SelectionJS
 
 runD3M :: ∀ a. D3M a -> SelectionJS -> Effect (Tuple a SelectionJS)
@@ -73,7 +72,7 @@ instance d3TaglessD3M :: D3Tagless D3M where
     put selection
     pure selection  -- no attributes or children on hook point (at least for now, KISS)
 
-  append (SelectionPS { element, attributes, children }) = do
+  child (SelectionPS element attributes children) = do
     selection <- get
     let appended = d3Append_ (show element) selection
         _ = d3SetAttr_ "x" (unsafeCoerce "foo") appended
@@ -89,6 +88,9 @@ instance d3TaglessD3M :: D3Tagless D3M where
 
 setAttributeOnSelection :: SelectionJS -> Attribute -> Unit
 setAttributeOnSelection selection (Attribute label attr) = d3SetAttr_ label (unbox attr) selection
+
+appendChildToSelection :: SelectionJS -> SelectionPS -> SelectionJS
+appendChildToSelection selection (SelectionPS element attributes children)  = d3Append_ (show element) selection
 
 foreign import d3SelectAll_ :: Selector -> SelectionJS
 foreign import d3Append_    :: String   -> SelectionJS -> SelectionJS
@@ -123,12 +125,24 @@ someAttributes _ = [
   , fill $ coerceFromSomeDatum (\d -> d.fillColorField)
 ]
 
+-- linksGroup :: ∀ m. (D3Tagless m) => m SelectionJS
+-- linksGroup = do
+--   _ <- sequence append [ SelectionPS { element: Group, attributes: [] } ]
+
+addChildToExisting :: ∀ m. (D3Tagless m) => SelectionJS -> SelectionPS -> m SelectionJS
+addChildToExisting selection (SelectionPS element attributes children) = do
+    let appended = d3Append_ (show element) selection
+        _ = d3SetAttr_ "x" (unsafeCoerce "baar") appended
+        _ = (setAttributeOnSelection appended) <$> attributes
+    pure appended
+
 
 script :: ∀ m. (D3Tagless m) => m SelectionJS
 script = do
-    _ <- hook "div#root"
+    root <- hook "div#root"
     
-    _ <- append $ SelectionPS { element: Svg, attributes: (someAttributes _SomeDatum ), children: [] } 
+    svg <- child $ SelectionPS Svg (someAttributes _SomeDatum ) []
+    g1 <- addChildToExisting svg (SelectionPS Group (someAttributes _SomeDatum ) [])
 
     _ <- join Circle emptyJoinSelections 
 
