@@ -1,8 +1,8 @@
 module Selection where
 
-import Attributes.Instances (Attribute(..), Attributes, Datum, unbox)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, Unit, bind, discard, liftA1, pure, show, ($), (<$>))
+import Prelude hiding (append, join)
 
+import Attributes.Instances (Attribute(..), Attributes, Datum, unbox)
 import Attributes.Helpers (fill, strokeColor, strokeOpacity)
 import Control.Monad.State (class MonadState, StateT, get, put, runStateT)
 import Data.Tuple (Tuple, fst, snd)
@@ -28,20 +28,20 @@ foreign import nullSelectionJS :: SelectionJS -- probably just null
 
 data Node = Node Element Attributes (Array Node)
 
-node :: Element -> Array Attribute -> Array Node -> Node
-node = Node
 node_ :: Element -> Array Attribute -> Node
 node_ = \e a -> Node e a []
 node__ :: Element -> Node
 node__ = \e -> Node e [] []
 
-emptyNode :: Node
-emptyNode = Node Group [] []
-emptyJoinSelections :: { enter :: Node
+appendChildren :: Node -> Array Node -> Node
+appendChildren (Node element attrs children) newChildren
+  = Node element attrs (children <> newChildren)
+
+testEnterUpdateExit :: { enter :: Node
 , exit :: Node
 , update :: Node
 }
-emptyJoinSelections = { enter: emptyNode, update: emptyNode, exit: emptyNode }
+testEnterUpdateExit = { enter: node__ Line, update: node__ Circle, exit: node__ Group }
 
 type EnterUpdateExit = {
     enter  :: Node
@@ -61,7 +61,7 @@ derive newtype instance monadEffD3M    :: MonadEffect       D3M
 
 class (Monad m) <= D3Tagless m where
   hook   :: Selector -> m SelectionJS
-  child :: Node -> m SelectionJS
+  append :: Node -> m SelectionJS
   join   :: Element -> EnterUpdateExit -> m SelectionJS
 
 runD3M :: ∀ a. D3M a -> SelectionJS -> Effect (Tuple a SelectionJS)
@@ -79,20 +79,31 @@ instance d3TaglessD3M :: D3Tagless D3M where
     put selection
     pure selection  -- no attributes or children on hook point (at least for now, KISS)
 
-  child (Node element attributes children) = do
+  append node = do
     selection <- get
-    let appended = d3Append_ (show element) selection
-        _ = d3SetAttr_ "x" (unsafeCoerce "foo") appended
-        _ = (setAttributeOnSelection appended) <$> attributes
-        _ = (addChildToExisting appended) <$> children
+    let appended = doAppend node selection
     put appended
     pure appended 
 
   join element enterUpdateExit = do
     selection <- get
     let joined = d3Join_ (show element) selection
+        enter  = doAppend enterUpdateExit.enter joined
+        update = doAppend enterUpdateExit.update joined -- won't use doAppend with update and exit, i think
+        -- plus we might want to handle children differently for all three cases because transitions, attrs, sequencing
+        exit   = doAppend enterUpdateExit.exit joined -- then add the remove() call to exit??
+        -- call merge now with enter + update? i think so
     put joined
     pure joined
+
+doAppend :: Node -> SelectionJS -> SelectionJS
+doAppend (Node element attributes children) selection = do
+  let appended = d3Append_ (show element) selection
+      _ = d3SetAttr_ "x" (unsafeCoerce "foo") appended
+      _ = (setAttributeOnSelection appended) <$> attributes
+      _ = (addChildToExisting appended) <$> children
+  appended
+
 
 addChildToExisting :: SelectionJS -> Node -> SelectionJS
 addChildToExisting selection (Node element attributes children) = do
@@ -145,14 +156,15 @@ someAttributes _ = [
 -- linksGroup = do
 --   _ <- sequence append [ Node { element: Group, attributes: [] } ]
 
+infixl 1 appendChildren as ++
 
 script :: ∀ m. (D3Tagless m) => m SelectionJS
 script = do
     root <- hook "div#root"
     
-    svg <- child $ Node Svg (someAttributes _SomeDatum ) [ Node Group [] [ Node Circle [] []]]
+    svg <- append $ Node Svg (someAttributes _SomeDatum ) [ Node Group [] [ node__ Circle ] ]
 
-    _ <- join Circle emptyJoinSelections 
+    _ <- join Circle testEnterUpdateExit 
 
     pure nullSelectionJS
 
