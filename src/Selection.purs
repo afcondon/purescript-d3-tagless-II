@@ -1,16 +1,11 @@
 module Selection where
 
-import Attributes.Instances
-import Prelude hiding (append)
+import Attributes.Instances (Attribute(..), Attributes, Datum, unbox)
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, Unit, bind, discard, liftA1, pure, show, ($), (<$>))
 
 import Attributes.Helpers (fill, strokeColor, strokeOpacity)
 import Control.Monad.State (class MonadState, StateT, get, put, runStateT)
-import Data.Foldable (class Foldable)
-import Data.Functor.Contravariant (coerce)
-import Data.Identity (Identity)
-import Data.Traversable (sequence)
-import Data.Tuple (Tuple(..), fst, snd)
-import Debug (spy)
+import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Type.Proxy (Proxy(..))
@@ -31,15 +26,27 @@ instance showElement :: Show Element where
 foreign import data SelectionJS :: Type
 foreign import nullSelectionJS :: SelectionJS -- probably just null
 
-data SelectionPS = SelectionPS Element Attributes (Array SelectionPS)
+data Node = Node Element Attributes (Array Node)
 
-emptySelectionPS = SelectionPS Group [] []
-emptyJoinSelections = { enter: emptySelectionPS, update: emptySelectionPS, exit: emptySelectionPS }
+node :: Element -> Array Attribute -> Array Node -> Node
+node = Node
+node_ :: Element -> Array Attribute -> Node
+node_ = \e a -> Node e a []
+node__ :: Element -> Node
+node__ = \e -> Node e [] []
+
+emptyNode :: Node
+emptyNode = Node Group [] []
+emptyJoinSelections :: { enter :: Node
+, exit :: Node
+, update :: Node
+}
+emptyJoinSelections = { enter: emptyNode, update: emptyNode, exit: emptyNode }
 
 type EnterUpdateExit = {
-    enter  :: SelectionPS
-  , update :: SelectionPS
-  , exit   :: SelectionPS
+    enter  :: Node
+  , update :: Node
+  , exit   :: Node
 }
 
 newtype D3M a = D3M (StateT SelectionJS Effect a) -- not using Effect to keep sigs simple for now
@@ -54,7 +61,7 @@ derive newtype instance monadEffD3M    :: MonadEffect       D3M
 
 class (Monad m) <= D3Tagless m where
   hook   :: Selector -> m SelectionJS
-  child :: SelectionPS -> m SelectionJS
+  child :: Node -> m SelectionJS
   join   :: Element -> EnterUpdateExit -> m SelectionJS
 
 runD3M :: ∀ a. D3M a -> SelectionJS -> Effect (Tuple a SelectionJS)
@@ -72,11 +79,12 @@ instance d3TaglessD3M :: D3Tagless D3M where
     put selection
     pure selection  -- no attributes or children on hook point (at least for now, KISS)
 
-  child (SelectionPS element attributes children) = do
+  child (Node element attributes children) = do
     selection <- get
     let appended = d3Append_ (show element) selection
         _ = d3SetAttr_ "x" (unsafeCoerce "foo") appended
         _ = (setAttributeOnSelection appended) <$> attributes
+        _ = (addChildToExisting appended) <$> children
     put appended
     pure appended 
 
@@ -86,11 +94,19 @@ instance d3TaglessD3M :: D3Tagless D3M where
     put joined
     pure joined
 
+addChildToExisting :: SelectionJS -> Node -> SelectionJS
+addChildToExisting selection (Node element attributes children) = do
+    let appended = d3Append_ (show element) selection
+        _ = d3SetAttr_ "x" (unsafeCoerce "baar") appended
+        _ = (setAttributeOnSelection appended) <$> attributes
+    appended
+
+
 setAttributeOnSelection :: SelectionJS -> Attribute -> Unit
 setAttributeOnSelection selection (Attribute label attr) = d3SetAttr_ label (unbox attr) selection
 
-appendChildToSelection :: SelectionJS -> SelectionPS -> SelectionJS
-appendChildToSelection selection (SelectionPS element attributes children)  = d3Append_ (show element) selection
+appendChildToSelection :: SelectionJS -> Node -> SelectionJS
+appendChildToSelection selection (Node element attributes children)  = d3Append_ (show element) selection
 
 foreign import d3SelectAll_ :: Selector -> SelectionJS
 foreign import d3Append_    :: String   -> SelectionJS -> SelectionJS
@@ -127,22 +143,14 @@ someAttributes _ = [
 
 -- linksGroup :: ∀ m. (D3Tagless m) => m SelectionJS
 -- linksGroup = do
---   _ <- sequence append [ SelectionPS { element: Group, attributes: [] } ]
-
-addChildToExisting :: ∀ m. (D3Tagless m) => SelectionJS -> SelectionPS -> m SelectionJS
-addChildToExisting selection (SelectionPS element attributes children) = do
-    let appended = d3Append_ (show element) selection
-        _ = d3SetAttr_ "x" (unsafeCoerce "baar") appended
-        _ = (setAttributeOnSelection appended) <$> attributes
-    pure appended
+--   _ <- sequence append [ Node { element: Group, attributes: [] } ]
 
 
 script :: ∀ m. (D3Tagless m) => m SelectionJS
 script = do
     root <- hook "div#root"
     
-    svg <- child $ SelectionPS Svg (someAttributes _SomeDatum ) []
-    g1 <- addChildToExisting svg (SelectionPS Group (someAttributes _SomeDatum ) [])
+    svg <- child $ Node Svg (someAttributes _SomeDatum ) [ Node Group [] [ Node Circle [] []]]
 
     _ <- join Circle emptyJoinSelections 
 
