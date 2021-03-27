@@ -24,6 +24,27 @@ exports.d3Exit_ = selection => {
   return "exit selection"
   // return selection.exit();
 }
+// d3AddTransition :: D3Selection -> D3Selection
+exports.d3AddTransition = selection => transition => {
+  var handle; 
+  if (transition.name == "") {
+    console.log(`\td3addTransition: ${selection}.transition(${transition})`);
+    handle = selection.transition();
+  } else {
+    console.log(`\td3addNamedTransition: ${selection}.transition(${transition})`);
+    handle = selection.transition();
+  }
+  if (transition.duration != 0) {
+    console.log(`transition.duration(${transition.duration})`);
+    handle.duration(transition.duration);
+  }
+  if (transition.delay != 0) {
+    console.log(`transition.delay(${transition.delay})`);
+    handle.delay(transition.delay);
+  }
+  return handle;
+}
+
 // d3RemoveSelection_ :: D3Selection -> D3Selection
 exports.d3RemoveSelection_ = selection => {
   console.log(`\td3Remove: ${selection}.remove()`);

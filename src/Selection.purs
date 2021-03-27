@@ -5,7 +5,9 @@ import Prelude hiding (append,join)
 import Attributes.Helpers (fill, strokeColor, strokeOpacity)
 import Attributes.Instances (Attribute(..), Attributes, Datum, unbox)
 import Control.Monad.State (class MonadState, StateT, get, put, runStateT)
-import Data.Tuple (Tuple, fst, snd)
+import Data.Foldable (foldl)
+import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Type.Proxy (Proxy(..))
@@ -23,7 +25,11 @@ instance showElement :: Show Element where
   show Group  = "group"
   
 -- || trying this with Finally Tagless instead of interpreter
-foreign import data D3Selection :: Type
+foreign import data D3Selection  :: Type
+foreign import data D3DomNode    :: Type
+foreign import data D3This       :: Type
+type D3Group = Array D3DomNode
+foreign import data D3Transition :: Type -- not clear yet if we need to distinguish from Selection
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
 foreign import data D3Data :: Type 
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
@@ -37,6 +43,7 @@ foreign import d3Append_             :: String   -> D3Selection -> D3Selection
 foreign import d3Exit_               :: D3Selection -> D3Selection
 foreign import d3Data_               :: D3Data   -> D3Selection -> D3Selection
 foreign import d3RemoveSelection_    :: D3Selection -> D3Selection
+foreign import d3AddTransition       :: D3Selection -> Transition -> D3Selection -- this is the PS transition record
 
 -- NB D3 returns the selection after setting an Attr but we will only capture Selections that are 
 -- meaningfully different _as_ selections, we're not chaining them in the same way
@@ -45,7 +52,6 @@ foreign import d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit
 
 coerceD3Data :: forall a. a -> D3Data
 coerceD3Data = unsafeCoerce
-
 
 data Node = Node Element Attributes (Array Node)
 
@@ -57,17 +63,28 @@ node__ = \e -> Node e [] []
 appendChildren :: Node -> Array Node -> Node
 appendChildren (Node element attrs children) newChildren
   = Node element attrs (children <> newChildren)
+infixl 1 appendChildren as ++
 
-testEnterUpdateExit :: { enter :: Node
-, exit :: Node
-, update :: Node
+type Milliseconds = Int -- TODO smart constructor? possibly not worth it
+type EasingTime = Number
+type D3EasingFn = EasingTime -> EasingTime -- easing function maps 0-1 to 0-1 in some way with 0 -> 0, 1 -> 1
+data EasingFunction = 
+    DefaultCubic
+  | EasingFunction D3EasingFn
+  | EasingFactory (Datum -> Int -> D3Group -> D3This -> D3EasingFn)
+type Transition = { 
+    name     :: String
+  , delay    :: Milliseconds -- can also be a function, ie (\d -> f d)
+  , duration :: Milliseconds -- can also be a function, ie (\d -> f d)
+  , easing   :: EasingFunction
 }
-testEnterUpdateExit = { enter: node__ Line, update: node__ Circle, exit: node__ Group }
-
+makeTransition = { name: "", delay: 0.0, duration: 0.0, easing: DefaultCubic }
+type TransitionStage = (Tuple Attributes (Maybe Transition))
+type AttributeTransitionChain = Array TransitionStage
 type EnterUpdateExit = {
-    enter  :: Attributes -- BUT, these might become [ Tuple Attributes Transition ]
-  , update :: Attributes -- BUT, these might become [ Tuple Attributes Transition ]
-  , exit   :: Attributes -- BUT, these might become [ Tuple Attributes Transition ]
+    enter  :: AttributeTransitionChain
+  , update :: AttributeTransitionChain
+  , exit   :: AttributeTransitionChain
 }
 
 newtype D3M a = D3M (StateT D3Selection Effect a) -- not using Effect to keep sigs simple for now
@@ -111,20 +128,28 @@ instance d3TaglessD3M :: D3Tagless D3M where
     let -- TOOD d3Data_ with data
         initialS = d3SelectionSelectAll_ (show element) selection
         updateS  = d3Data_ (coerceD3Data [1,2,3]) initialS -- TODO this is where it's really tricky - attribute processing with shape of data open
-        _ = (setAttributeOnSelection updateS) <$> enterUpdateExit.update
+        _ = foldl setAttributesAndTransition updateS enterUpdateExit.update
         -- TODO process further Tuple Transition Attributes things from enterUpdateExit.update
 
         enterS  = d3Append_ (show element) updateS -- TODO add Attrs for the inserted element here
-        _      = (setAttributeOnSelection enterS) <$> enterUpdateExit.enter
+        _      = foldl setAttributesAndTransition enterS enterUpdateExit.enter
         -- TODO process further Tuple Transition Attributes things from enterUpdateExit.enter
 
         exitS   = d3Exit_ updateS
-        _       = (setAttributeOnSelection exitS) <$> enterUpdateExit.exit
-        _       = d3RemoveSelection_ exitS
+        _       = foldl setAttributesAndTransition exitS enterUpdateExit.exit
+        _       = d3RemoveSelection_ exitS -- TODO this is actually optional but by far more common to always remove
 
-    put updateS -- not clear to me what actually has to be returned from 
+    put updateS -- not clear to me what actually has to be returned from join
     pure updateS
 
+setAttributesAndTransition :: D3Selection -> TransitionStage -> D3Selection
+setAttributesAndTransition selection (Tuple attributes (Just transition)) = do
+  let _ = (setAttributeOnSelection selection) <$> attributes
+  -- returning the transition as a "selection"
+  d3AddTransition selection transition
+setAttributesAndTransition selection (Tuple attributes Nothing) = do -- last stage of chain
+  let _ = (setAttributeOnSelection selection) <$> attributes
+  selection -- there's no next stage at end of chain
 
 doAppend :: Node -> D3Selection -> D3Selection
 doAppend (Node element attributes children) selection = do
@@ -173,8 +198,6 @@ someAttributes _ = [
 -- linksGroup :: ∀ m. (D3Tagless m) => m D3Selection
 -- linksGroup = do
 --   _ <- sequence append [ Node { element: Group, attributes: [] } ]
-
-infixl 1 appendChildren as ++
 
 script :: ∀ m. (D3Tagless m) => m D3Selection
 script = do
