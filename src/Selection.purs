@@ -78,6 +78,12 @@ type Transition = {
   , duration :: Milliseconds -- can also be a function, ie (\d -> f d)
   , easing   :: EasingFunction
 }
+makeTransition :: { 
+  delay :: Number
+, duration :: Number
+, easing :: EasingFunction
+, name :: String
+}
 makeTransition = { name: "", delay: 0.0, duration: 0.0, easing: DefaultCubic }
 type TransitionStage = (Tuple Attributes (Maybe Transition))
 type AttributeTransitionChain = Array TransitionStage
