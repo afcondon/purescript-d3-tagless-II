@@ -101,23 +101,3 @@ setAttributeOnSelection selection (Attribute label attr) = d3SetAttr_ label (unb
 appendChildToSelection :: D3Selection -> Node -> D3Selection
 appendChildToSelection selection (Node element attributes children)  = d3Append_ (show element) selection
 
-type SomeDatum = forall r. { fillColorField :: String | r }
-_SomeDatum :: Proxy SomeDatum
-_SomeDatum = Proxy
-
-coerceFromSomeDatum :: (SomeDatum -> String) -> (Datum -> String)
-coerceFromSomeDatum= unsafeCoerce
-
-type SomeOtherDatum = forall r. { snek :: String | r }
-_SomeOtherDatum :: Proxy SomeOtherDatum
-_SomeOtherDatum = Proxy
-
--- WIP all the attr functions are written in terms of Datum which is opaque, but we know at compile-time what they 
--- really are so if we coerce the function AFTER we've type checked it against the type we know it will really be
--- we should be able to have polymorphism AND type-checking
-someAttributes :: Proxy SomeDatum -> Attributes
-someAttributes _ = [
-    strokeColor "green"
-  , strokeOpacity 0.75
-  , fill $ coerceFromSomeDatum (\d -> d.fillColorField)
-]
