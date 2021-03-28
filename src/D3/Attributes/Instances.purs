@@ -1,4 +1,4 @@
-module Attributes.Instances where
+module D3.Attributes.Instances where
 
 import Prelude
 

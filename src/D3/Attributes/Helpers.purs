@@ -1,8 +1,8 @@
-module Attributes.Helpers where
+module D3.Attributes.Sugar where
 
 import Prelude
 
-import Attributes.Instances (class ToAttr, Attribute(..), toAttr)
+import D3.Attributes.Instances (class ToAttr, Attribute(..), toAttr)
 
 strokeColor :: forall a. ToAttr String a => a -> Attribute
 strokeColor = Attribute "stroke" <<< toAttr
