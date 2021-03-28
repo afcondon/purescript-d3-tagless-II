@@ -28,9 +28,8 @@ foreign import data D3Transition :: Type -- not clear yet if we need to distingu
 foreign import data D3Data :: Type 
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
 foreign import data D3Attr :: Type 
-foreign import nullD3Selection :: D3Selection -- probably just null
 
-foreign import d3SelectAllInDOM_     :: Selector -> D3Selection
+foreign import d3SelectAllInDOM_     :: Selector -> D3Selection -> D3Selection -- NB passed D3Selection is IGNORED
 foreign import d3SelectionSelectAll_ :: Selector -> D3Selection -> D3Selection
 foreign import d3EnterAndAppend_     :: String   -> D3Selection -> D3Selection
 foreign import d3Append_             :: String   -> D3Selection -> D3Selection
@@ -44,19 +43,21 @@ foreign import d3AddTransition       :: D3Selection -> Transition -> D3Selection
 -- foreign import d3GetAttr_ :: String -> D3Selection -> ???? -- solve the ???? as needed later
 foreign import d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit
 
+foreign import emptyD3Selection :: D3Selection -- probably just null
+
 coerceD3Data :: forall a. a -> D3Data
 coerceD3Data = unsafeCoerce
 
-data Node = Node Element Attributes (Array Node)
+data D3_Node = D3_Node Element Attributes (Array D3_Node)
 
-node_ :: Element -> Array Attribute -> Node
-node_ = \e a -> Node e a []
-node__ :: Element -> Node
-node__ = \e -> Node e [] []
+node_ :: Element -> Array Attribute -> D3_Node
+node_ = \e a -> D3_Node e a []
+node__ :: Element -> D3_Node
+node__ = \e -> D3_Node e [] []
 
-appendChildren :: Node -> Array Node -> Node
-appendChildren (Node element attrs children) newChildren
-  = Node element attrs (children <> newChildren)
+appendChildren :: D3_Node -> Array D3_Node -> D3_Node
+appendChildren (D3_Node element attrs children) newChildren
+  = D3_Node element attrs (children <> newChildren)
 infixl 1 appendChildren as ++
 
 type Milliseconds = Int -- TODO smart constructor? possibly not worth it
@@ -79,8 +80,8 @@ makeTransition :: {
 , name :: String
 }
 makeTransition = { name: "", delay: 0.0, duration: 0.0, easing: DefaultCubic }
-type TransitionStage = (Tuple Attributes (Maybe Transition))
-type AttributeTransitionChain = Array TransitionStage
+type TransitionStep = (Tuple Attributes (Maybe Transition))
+type AttributeTransitionChain = Array TransitionStep
 type EnterUpdateExit = {
     enter  :: AttributeTransitionChain
   , update :: AttributeTransitionChain
@@ -91,5 +92,5 @@ type EnterUpdateExit = {
 
 -- linksGroup :: ∀ m. (D3Tagless m) => m D3Selection
 -- linksGroup = do
---   _ <- sequence append [ Node { element: Group, attributes: [] } ]
+--   _ <- sequence append [ D3_Node { element: Group, attributes: [] } ]
 

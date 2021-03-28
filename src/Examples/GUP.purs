@@ -3,10 +3,12 @@ module D3.Examples.GUP where
 import D3.Attributes.Instances (Datum, Attributes)
 import D3.Attributes.Sugar
 import D3.Interpreter.Tagless (class D3Tagless, append, hook, join)
-import D3.Selection (D3Selection, Element(..), Node(..), node__, nullD3Selection)
+import D3.Selection (D3Selection, Element(..), D3_Node(..), node__)
 import Prelude (bind, pure, ($))
 import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
+
+
 
 type SomeDatum = forall r. { fillColorField :: String | r }
 _SomeDatum :: Proxy SomeDatum
@@ -33,8 +35,8 @@ script :: ∀ m. (D3Tagless m) => m D3Selection
 script = do
     root <- hook "div#root"
     
-    svg <- append $ Node Svg (someAttributes _SomeDatum ) [ Node Group [] [ node__ Circle ] ]
+    svg <- append $ D3_Node Svg (someAttributes _SomeDatum ) [ D3_Node Group [] [ node__ Circle ] ]
 
     _ <- join Circle { enter: [], update: [], exit: [] }
 
-    pure nullD3Selection
+    pure svg
