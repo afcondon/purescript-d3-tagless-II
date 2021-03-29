@@ -8,7 +8,7 @@ import D3.Interpreter.Tagless (class D3Tagless, append, hook, join)
 import D3.Selection (D3Selection, D3State(..), D3_Node(..), EasingFunction(..), Element(..), Transition, TransitionStage(..), node__)
 import Data.Char (toCharCode)
 import Data.Int (toNumber)
-import Data.String (singleton)
+import Data.String.CodeUnits (singleton)
 import Prelude (class Bind, bind, pure, show, ($), (*), (+), (-), (<<<))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -40,9 +40,9 @@ enterAttributes1 :: Attributes
 enterAttributes1 = [
     classed "enter1"
   , fill "black"
-  , x $ offsetXByIndex 200.0 200.0
+  , x $ offsetXByIndex 200.0 20.0
   , y 0.0
-  , text (\(d :: Datum) -> "A" ) -- singleton $ unsafeCoerce $ datumIsChar d) -- TODO gross, needs fixing
+  , text (\(d :: Datum) -> singleton (datumIsChar d) ) -- singleton $ unsafeCoerce $ datumIsChar d) -- TODO gross, needs fixing
   -- , strokeColor "blue"
   -- , strokeOpacity 0.25
   -- , strokeWidth circleStrokeWidth
@@ -61,7 +61,7 @@ enterAttributes2 = [
 ]
 
 updateAttributes1 :: Array Attribute
-updateAttributes1 = [ classed "update1", x $ offsetXByIndex 200.0 200.0 ]
+updateAttributes1 = [ classed "update1", x $ offsetXByIndex 200.0 20.0 ]
 
 updateAttributes2 :: Attributes
 updateAttributes2 = [ fill "green" ]
