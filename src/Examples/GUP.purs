@@ -3,9 +3,9 @@ module D3.Examples.GUP where
 import Prelude
 
 import D3.Attributes.Instances (Datum, Attributes)
-import D3.Attributes.Sugar (classed, strokeColor, strokeOpacity, strokeWidth)
+import D3.Attributes.Sugar
 import D3.Interpreter.Tagless (class D3Tagless, append, hook, join, model)
-import D3.Selection (D3Selection, D3_Node(..), EasingFunction(..), Element(..), Milliseconds, Transition, TransitionStage(..), makeTransition, node__)
+import D3.Selection (D3Selection, D3_Node(..), EasingFunction(..), Element(..), Milliseconds, Transition, TransitionStage(..), node__)
 import Data.Char (toCharCode)
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
@@ -33,6 +33,9 @@ enterAttributes f = [
   , strokeColor "blue"
   , strokeOpacity 0.25
   , strokeWidth $ toNumber <<< (_ * 3) <<< (_ - 97) <<< toCharCode <<< f
+  , r 10.0
+  , cx $ ((\d i -> (toNumber i) * 16.0) :: Datum -> Int -> Number) -- TODO this is obviously unacceptably clunky
+  , cy 25.0
 ]
 
 t :: Transition
@@ -46,10 +49,12 @@ enterAttributes2 f = [
 ]
 
 updateAttributes1 = [ classed "update1", strokeColor "green" ]
-updateAttributes2 = [ strokeColor "purple" ]
+-- updateAttributes2 :: (Datum -> Char) -> Attributes
+-- updateAttributes2 f = [ strokeColor "purple"
+--                       , cx $ (\d i -> i * 16 ) :: Datum -> Int -> Number ]
 
 
-script :: ∀ m. (D3Tagless m) => m D3Selection
+script :: ∀ m. (D3Tagless m) => m D3Selection -- TODO we can actually return much more structured output, selection tree etc
 script = do
   _    <- model [ 'a', 'b', 'c', 'd' ]
 
@@ -61,7 +66,8 @@ script = do
   _    <- join Circle { enter: [ AttrsAndTransition (enterAttributes d_Char) t
                                , OnlyAttrs (enterAttributes2 d_Char) ]
                       , update: [ AttrsAndTransition updateAttributes1 t
-                                , OnlyAttrs updateAttributes2 ]
+                      ]
+                                -- , OnlyAttrs (updateAttributes2 d_Char) ]
                       , exit: [] }
 
   pure svg

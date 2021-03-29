@@ -84,13 +84,13 @@ type Transition = {
   , duration :: Milliseconds -- can also be a function, ie (\d -> f d)
   , easing   :: EasingFunction
 }
-makeTransition :: { 
-  delay :: Number
-, duration :: Number
-, easing :: EasingFunction
-, name :: String
-}
-makeTransition = { name: "", delay: 0.0, duration: 0.0, easing: DefaultCubic }
+-- makeTransition :: { 
+--   delay :: Number
+-- , duration :: Number
+-- , easing :: EasingFunction
+-- , name :: String
+-- }
+-- makeTransition = { name: "", delay: 0.0, duration: 0.0, easing: DefaultCubic }
 data TransitionStage = OnlyAttrs Attributes 
                      | AttrsAndTransition Attributes Transition
 type AttributeTransitionChain = Array TransitionStage

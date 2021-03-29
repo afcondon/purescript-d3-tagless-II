@@ -7,6 +7,7 @@ You can edit this file as you like.
   [ "console"
   , "debug"
   , "effect"
+  , "functions"
   , "psci-support"
   , "strings"
   , "transformers"

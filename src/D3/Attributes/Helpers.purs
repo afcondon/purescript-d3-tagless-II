@@ -43,11 +43,20 @@ x = Attribute "x" <<< toAttr
 y :: forall a. ToAttr Number a => a -> Attribute
 y = Attribute "y" <<< toAttr
 
+r :: forall a. ToAttr Number a => a -> Attribute
+r = Attribute "r" <<< toAttr
+
 dx :: forall a. ToAttr Number a => a -> Attribute
 dx = Attribute "dx" <<< toAttr
 
 dy :: forall a. ToAttr Number a => a -> Attribute
 dy = Attribute "dy" <<< toAttr
+
+cx :: forall a. ToAttr Number a => a -> Attribute
+cx = Attribute "cx" <<< toAttr
+
+cy :: forall a. ToAttr Number a => a -> Attribute
+cy = Attribute "cy" <<< toAttr
 
 text :: forall a. ToAttr String a => a -> Attribute
 text = Attribute "text" <<< toAttr

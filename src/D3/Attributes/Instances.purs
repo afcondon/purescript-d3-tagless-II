@@ -2,6 +2,7 @@ module D3.Attributes.Instances where
 
 import Prelude
 
+import Data.Function.Uncurried (Fn2, mkFn2, runFn2)
 import Unsafe.Coerce (unsafeCoerce)
 
 
@@ -33,9 +34,11 @@ unbox =
     (ArrayAttr (Fn a))      -> unsafeCoerce a
     (ArrayAttr (FnI a))     -> unsafeCoerce a
 
+type IndexedLambda a = Fn2 Datum Int a
+
 data Attrib a = Static a
               | Fn (Datum -> a)
-              | FnI (Datum -> Int -> a)
+              | FnI (IndexedLambda a)
 
 
 -- Kind annotation to avoid "fun" with polykinds.
@@ -53,7 +56,7 @@ instance toAttrStringFn :: ToAttr String (Datum -> String) where
   toAttr = StringAttr <<< Fn
 
 instance toAttrStringFnI :: ToAttr String (Datum -> Int -> String) where
-  toAttr = StringAttr <<< FnI
+  toAttr = StringAttr <<< FnI <<< mkFn2
 
 instance toAttrNumber :: ToAttr Number Number where
   toAttr = NumberAttr <<< Static
@@ -62,7 +65,7 @@ instance toAttrNumberFn :: ToAttr Number (Datum -> Number) where
   toAttr = NumberAttr <<< Fn
 
 instance toAttrNumberFnI :: ToAttr Number (Datum -> Int -> Number) where
-  toAttr = NumberAttr <<< FnI
+  toAttr = NumberAttr <<< FnI <<< mkFn2
 
 instance toAttrArray :: ToAttr (Array Number) (Array Number) where
   toAttr = ArrayAttr <<< Static
@@ -71,4 +74,4 @@ instance toAttrArrayFn :: ToAttr (Array Number) (Datum -> Array Number) where
   toAttr = ArrayAttr <<< Fn
 
 instance toAttrArrayFnI :: ToAttr (Array Number) (Datum -> Int -> Array Number) where
-  toAttr = ArrayAttr <<< FnI
+  toAttr = ArrayAttr <<< FnI <<< mkFn2
