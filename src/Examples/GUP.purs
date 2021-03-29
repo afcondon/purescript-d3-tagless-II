@@ -75,12 +75,12 @@ script = do
 
   circles <- append $ node__ Group
   -- now the active selection is "circles" and these circles that are joining will be inside it
-  _    <- join Circle { enter: [ AttrsAndTransition (enterAttributes ) t
-                               , OnlyAttrs (enterAttributes2 )
-                               ]
-                      , update: [ AttrsAndTransition updateAttributes1 t
-                                , OnlyAttrs (updateAttributes2 )
-                                ]
-                      , exit: [] }
+  _    <- join Circle circles { enter: [ AttrsAndTransition (enterAttributes ) t
+                                       , OnlyAttrs (enterAttributes2 )
+                                       ]
+                              , update: [ AttrsAndTransition updateAttributes1 t
+                                        , OnlyAttrs (updateAttributes2 )
+                                        ]
+                              , exit: [] }
 
   pure svg

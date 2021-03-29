@@ -34,7 +34,7 @@ class (Monad m) <= D3Tagless m where
   model  :: forall d. d -> m D3State
   hook   :: Selector -> m D3Selection
   append :: D3_Node -> m D3Selection
-  join   :: Element -> EnterUpdateExit -> m D3Selection
+  join   :: Element -> D3Selection -> EnterUpdateExit -> m D3Selection
 
 runD3M :: ∀ a. D3M a -> D3State -> Effect (Tuple a D3State)
 runD3M (D3M state) = runStateT state
@@ -53,13 +53,16 @@ instance d3TaglessD3M :: D3Tagless D3M where
     (D3State d3data selection) <- get
     setSelection $ doAppend node selection
 
-  join element enterUpdateExit = do -- TODO add data to the join
-    (D3State d3data selection) <- get
+  join element selection enterUpdateExit = do -- TODO add data to the join
+    -- TODO this is a bit weird, we're taking the selection from params not state here
+    -- in order to allow join to be called separately, revisit the whole state / selection issue later
+    -- when (at least) GUP is working
+    (D3State d3data _) <- get 
     let -- TOOD d3Data_ with data
         initialS = d3SelectionSelectAll_ (show element) selection
         -- TODO this is where it's really tricky - attribute processing with shape of data open
-        updateS  = d3Data_ d3data initialS 
-        _ = foldl doTransitionStage updateS enterUpdateExit.update
+        updateS = d3Data_ d3data initialS 
+        _       = foldl doTransitionStage updateS enterUpdateExit.update
 
         enterS  = d3EnterAndAppend_ (show element) updateS -- TODO add Attrs for the inserted element here
         _       = foldl doTransitionStage enterS enterUpdateExit.enter
