@@ -16,7 +16,7 @@ instance showElement :: Show Element where
   show Svg    = "svg"
   show Circle = "circle"
   show Line   = "line"
-  show Group  = "group"
+  show Group  = "g"
   
 -- || trying this with Finally Tagless instead of interpreter
 foreign import data D3Selection  :: Type

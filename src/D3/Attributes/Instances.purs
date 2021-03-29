@@ -75,3 +75,14 @@ instance toAttrArrayFn :: ToAttr (Array Number) (Datum -> Array Number) where
 
 instance toAttrArrayFnI :: ToAttr (Array Number) (Datum -> Int -> Array Number) where
   toAttr = ArrayAttr <<< FnI <<< mkFn2
+
+
+-- common coercions
+datumIsChar :: Datum -> Char
+datumIsChar = unsafeCoerce
+
+datumIsNumber :: Datum -> Number
+datumIsNumber = unsafeCoerce
+
+datumIsString :: Datum -> String
+datumIsString = unsafeCoerce
