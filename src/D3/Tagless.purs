@@ -23,7 +23,7 @@ derive newtype instance monadStateD3M  :: MonadState D3State D3M
 derive newtype instance monadEffD3M    :: MonadEffect       D3M
 
 class (Monad m) <= D3Tagless m where
-  model  :: D3Data -> m D3State
+  model  :: forall d. d -> m D3State
   hook   :: Selector -> m D3Selection
   append :: D3_Node -> m D3Selection
   join   :: Element -> EnterUpdateExit -> m D3Selection
@@ -38,7 +38,7 @@ d3Run :: ∀ a. D3M a -> Effect a
 d3Run (D3M state) = liftA1 fst $ runStateT state emptyD3State
 
 instance d3TaglessD3M :: D3Tagless D3M where
-  model         = modify <<< setData
+  model         = modify <<< setData <<< unsafeCoerce
   hook selector = setSelection $ d3SelectAllInDOM_ selector 
 
   append node = do
@@ -50,7 +50,7 @@ instance d3TaglessD3M :: D3Tagless D3M where
     let -- TOOD d3Data_ with data
         initialS = d3SelectionSelectAll_ (show element) selection
         -- TODO this is where it's really tricky - attribute processing with shape of data open
-        updateS  = d3Data_ (coerceD3Data d3data) initialS 
+        updateS  = d3Data_ d3data initialS 
         _ = foldl doTransitionStep updateS enterUpdateExit.update
 
         enterS  = d3Append_ (show element) updateS -- TODO add Attrs for the inserted element here
