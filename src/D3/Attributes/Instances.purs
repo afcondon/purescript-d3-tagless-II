@@ -10,6 +10,7 @@ foreign import data Datum :: Type
 
 type Label = String
 
+-- TODO find a way to get units back in without making DSL hideous
 data UnitType = Px | Pt | Em | Rem | Percent
 
 data Attribute = Attribute Label Attr

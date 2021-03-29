@@ -10,13 +10,14 @@ import Unsafe.Coerce (unsafeCoerce)
 
 type Selector = String 
 
-data Element = Div | Svg | Circle | Line | Group
+data Element = Div | Svg | Circle | Line | Group | Text
 instance showElement :: Show Element where
   show Div    = "div"
   show Svg    = "svg"
   show Circle = "circle"
   show Line   = "line"
   show Group  = "g"
+  show Text   = "text"
   
 -- || trying this with Finally Tagless instead of interpreter
 foreign import data D3Selection  :: Type
@@ -42,6 +43,7 @@ foreign import d3AddTransition       :: D3Selection -> Transition -> D3Selection
 -- meaningfully different _as_ selections, we're not chaining them in the same way
 -- foreign import d3GetAttr_ :: String -> D3Selection -> ???? -- solve the ???? as needed later
 foreign import d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit
+foreign import d3SetText_      :: D3Attr -> D3Selection -> Unit
 
 foreign import emptyD3Selection :: D3Selection -- probably just null
 foreign import emptyD3Data :: D3Data -- probably just null

@@ -70,3 +70,10 @@ exports.d3SetAttr_ = name => value => selection => {
   // return `attrAdded`
   selection.attr(name, value);
 }
+
+// d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit 
+exports.d3SetText_ = value => selection => {
+  console.log(`\t${selection}.text(${value})`);
+  // return `attrAdded`
+  selection.text(value);
+}

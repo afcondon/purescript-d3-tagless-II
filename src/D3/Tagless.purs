@@ -96,6 +96,7 @@ doAppend (D3_Node element attributes children) selection = do
   appended
 
 setAttributeOnSelection :: D3Selection -> Attribute -> Unit
+setAttributeOnSelection selection (Attribute "text" attr) = d3SetText_ (unbox attr) selection
 setAttributeOnSelection selection (Attribute label attr) = d3SetAttr_ label (unbox attr) selection
 
 appendChildToSelection :: D3Selection -> D3_Node -> D3Selection

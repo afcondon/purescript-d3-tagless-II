@@ -1,13 +1,16 @@
 module D3.Examples.GUP where
 
+import D3.Attributes.Sugar
+
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Attribute, Attributes, Datum, datumIsChar)
-import D3.Attributes.Sugar (classed, cx, cy, fill, height, r, strokeColor, strokeOpacity, strokeWidth, width)
 import D3.Interpreter.Tagless (class D3Tagless, append, hook, join)
 import D3.Selection (D3Selection, D3State(..), D3_Node(..), EasingFunction(..), Element(..), Transition, TransitionStage(..), node__)
 import Data.Char (toCharCode)
 import Data.Int (toNumber)
-import Prelude (class Bind, bind, pure, ($), (*), (+), (-), (<<<))
+import Data.String (singleton)
+import Prelude (class Bind, bind, pure, show, ($), (*), (+), (-), (<<<))
+import Unsafe.Coerce (unsafeCoerce)
 
 
 -- simple attributes don't use data, no hassle
@@ -24,8 +27,8 @@ svgAttributes = [
 -- and coercion functions
 type Model = Array Char
 
-circlePositionX :: Datum -> Int -> Number
-circlePositionX d i = 200.0 + (toNumber i) * 200.0
+offsetXByIndex :: Number -> Number -> Datum -> Int -> Number
+offsetXByIndex offset factor d i = offset + (toNumber i) * factor
 
 circleRadius :: Datum -> Number
 circleRadius = toNumber <<< (_ * 10) <<< (_ - 96) <<< toCharCode <<< datumIsChar
@@ -33,16 +36,19 @@ circleRadius = toNumber <<< (_ * 10) <<< (_ - 96) <<< toCharCode <<< datumIsChar
 circleStrokeWidth :: Datum -> Number
 circleStrokeWidth = toNumber <<< (_ * 2) <<< (_ - 97) <<< toCharCode <<< datumIsChar
 
-enterAttributes :: Attributes
-enterAttributes = [
+enterAttributes1 :: Attributes
+enterAttributes1 = [
     classed "enter1"
-  , strokeColor "blue"
-  , strokeOpacity 0.25
-  , fill "yellow"
-  , strokeWidth circleStrokeWidth
-  , r circleRadius
-  , cx circlePositionX
-  , cy 100.0
+  , fill "black"
+  , x $ offsetXByIndex 200.0 200.0
+  , y 0.0
+  , text (\(d :: Datum) -> "A" ) -- singleton $ unsafeCoerce $ datumIsChar d) -- TODO gross, needs fixing
+  -- , strokeColor "blue"
+  -- , strokeOpacity 0.25
+  -- , strokeWidth circleStrokeWidth
+  -- , r circleRadius
+  -- , cx offsetXByIndex
+  -- , cy 100.0
 ]
 
 t :: Transition
@@ -50,19 +56,20 @@ t = { name: "", delay: 1000, duration: 1000, easing: DefaultCubic }
 
 enterAttributes2 :: Attributes
 enterAttributes2 = [
-    strokeColor "red"
-  , strokeOpacity 0.85
-  , strokeWidth circleStrokeWidth
+    fill "black"
+  , y 100.0
 ]
 
 updateAttributes1 :: Array Attribute
-updateAttributes1 = [ classed "update1"
-                    , strokeColor "green" ]
+updateAttributes1 = [ classed "update1", x $ offsetXByIndex 200.0 200.0 ]
 
 updateAttributes2 :: Attributes
-updateAttributes2 = [ strokeColor "purple"
-                    , cx circlePositionX ]
+updateAttributes2 = [ fill "green" ]
 
+exitAttributes1 :: Array Attribute
+exitAttributes1 = [ classed "exit1"
+                  , fill "red"
+                  , y 200.0 ]
 
 -- TODO we can actually potentially return _much_ more structured output, selection tree etc
 enter :: ∀ m. (D3Tagless m) => m D3Selection 
@@ -71,29 +78,34 @@ enter = do -- modelData is already in stateT
   
   svg  <- append $ D3_Node Svg svgAttributes []
 
-  circles <- append $ node__ Group
-  -- now the active selection is "circles" and these circles that are joining will be inside it
-  _ <- join Circle circles { enter: [ AttrsAndTransition (enterAttributes ) t
-                                    , OnlyAttrs (enterAttributes2 )
-                                    ]
-                          , update: [ AttrsAndTransition updateAttributes1 t
-                                    , OnlyAttrs (updateAttributes2 )
-                                    ]
-                          , exit: [] }
+  letters <- append $ node__ Group
+  -- now the active selection is "letters" and these letters that are joining will be inside it
+  -- TODO we need to call "update" from here so as not to repeat this code
+  joinSelection <- join Text letters { enter: [ AttrsAndTransition enterAttributes1 t
+                                              , OnlyAttrs enterAttributes2
+                                              ]
+                                     , update: [ AttrsAndTransition updateAttributes1 t
+                                               , OnlyAttrs updateAttributes2
+                                               ]
+                                     , exit: [ AttrsAndTransition exitAttributes1 t
+                                            --  , OnlyAttrs exitAttributes2
+                                             ] }
 
-  pure circles
+  pure letters
 
 
 -- TODO we can actually return much more structured output, selection tree etc
 update :: forall m. Bind m => MonadState D3State m => D3Tagless m => m D3Selection
 update = do
-  (D3State d circles) <- get  
-  joinSelection <- join Circle circles { enter: [ AttrsAndTransition enterAttributes t
-                                                , OnlyAttrs enterAttributes2
-                                                ]
-                                       , update: [ AttrsAndTransition updateAttributes1 t
-                                                 , OnlyAttrs (updateAttributes2 )
-                                                 ]
-                                       , exit: [] }
+  (D3State d letters) <- get  
+  joinSelection <- join Text letters { enter: [ AttrsAndTransition enterAttributes1 t
+                                              , OnlyAttrs enterAttributes2
+                                              ]
+                                     , update: [ AttrsAndTransition updateAttributes1 t
+                                               , OnlyAttrs updateAttributes2
+                                               ]
+                                     , exit: [ AttrsAndTransition exitAttributes1 t
+                                            --  , OnlyAttrs exitAttributes2
+                                             ] }
 
   pure joinSelection
