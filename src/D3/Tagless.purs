@@ -61,8 +61,8 @@ instance d3TaglessD3M :: D3Tagless D3M where
         updateS  = d3Data_ d3data initialS 
         _ = foldl doTransitionStep updateS enterUpdateExit.update
 
-        enterS  = d3Append_ (show element) updateS -- TODO add Attrs for the inserted element here
-        _      = foldl doTransitionStep enterS enterUpdateExit.enter
+        enterS  = d3EnterAndAppend_ (show element) updateS -- TODO add Attrs for the inserted element here
+        _       = foldl doTransitionStep enterS enterUpdateExit.enter
 
         exitS   = d3Exit_ updateS
         _       = foldl doTransitionStep exitS enterUpdateExit.exit
