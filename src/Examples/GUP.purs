@@ -3,7 +3,7 @@ module D3.Examples.GUP where
 import Prelude
 
 import D3.Attributes.Instances (Datum, Attributes)
-import D3.Attributes.Sugar (strokeColor, strokeOpacity, strokeWidth)
+import D3.Attributes.Sugar (classed, strokeColor, strokeOpacity, strokeWidth)
 import D3.Interpreter.Tagless (class D3Tagless, append, hook, join, model)
 import D3.Selection (D3Selection, D3_Node(..), EasingFunction(..), Element(..), Milliseconds, Transition, TransitionStage(..), makeTransition, node__)
 import Data.Char (toCharCode)
@@ -29,7 +29,8 @@ d_Char = unsafeCoerce
 
 enterAttributes :: (Datum -> Char) -> Attributes
 enterAttributes f = [
-    strokeColor "blue"
+    classed "enter1"
+  , strokeColor "blue"
   , strokeOpacity 0.25
   , strokeWidth $ toNumber <<< (_ * 3) <<< (_ - 97) <<< toCharCode <<< f
 ]
@@ -44,7 +45,7 @@ enterAttributes2 f = [
   , strokeWidth $ toNumber <<< (_ * 5) <<< (_ - 97) <<< toCharCode <<< f
 ]
 
-updateAttributes1 = [ strokeColor "green" ]
+updateAttributes1 = [ classed "update1", strokeColor "green" ]
 updateAttributes2 = [ strokeColor "purple" ]
 
 
