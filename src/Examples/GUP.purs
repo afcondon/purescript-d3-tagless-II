@@ -1,14 +1,13 @@
 module D3.Examples.GUP where
 
-import D3.Attributes.Sugar
-import Prelude
-
+import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Attribute, Attributes, Datum, datumIsChar)
-import D3.Interpreter.Tagless (class D3Tagless, append, hook, join, model)
-import D3.Selection (D3Selection, D3_Node(..), EasingFunction(..), Element(..), Transition, TransitionStage(..), node__)
+import D3.Attributes.Sugar (classed, cx, cy, fill, height, r, strokeColor, strokeOpacity, strokeWidth, width)
+import D3.Interpreter.Tagless (class D3Tagless, append, hook, join)
+import D3.Selection (D3Selection, D3State(..), D3_Node(..), EasingFunction(..), Element(..), Transition, TransitionStage(..), node__)
 import Data.Char (toCharCode)
 import Data.Int (toNumber)
-import Unsafe.Coerce (unsafeCoerce)
+import Prelude (class Bind, bind, pure, ($), (*), (+), (-), (<<<))
 
 
 -- simple attributes don't use data, no hassle
@@ -65,21 +64,36 @@ updateAttributes2 = [ strokeColor "purple"
                     , cx circlePositionX ]
 
 
-script :: ∀ m. (D3Tagless m) => m D3Selection -- TODO we can actually return much more structured output, selection tree etc
-script = do -- modelData is already in stateT
-
+-- TODO we can actually potentially return _much_ more structured output, selection tree etc
+enter :: ∀ m. (D3Tagless m) => m D3Selection 
+enter = do -- modelData is already in stateT   
   root <- hook "div#root"
   
-  svg     <- append $ D3_Node Svg svgAttributes []
+  svg  <- append $ D3_Node Svg svgAttributes []
 
   circles <- append $ node__ Group
   -- now the active selection is "circles" and these circles that are joining will be inside it
-  _    <- join Circle circles { enter: [ AttrsAndTransition (enterAttributes ) t
-                                       , OnlyAttrs (enterAttributes2 )
-                                       ]
-                              , update: [ AttrsAndTransition updateAttributes1 t
-                                        , OnlyAttrs (updateAttributes2 )
-                                        ]
-                              , exit: [] }
+  _ <- join Circle circles { enter: [ AttrsAndTransition (enterAttributes ) t
+                                    , OnlyAttrs (enterAttributes2 )
+                                    ]
+                          , update: [ AttrsAndTransition updateAttributes1 t
+                                    , OnlyAttrs (updateAttributes2 )
+                                    ]
+                          , exit: [] }
 
-  pure svg
+  pure circles
+
+
+-- TODO we can actually return much more structured output, selection tree etc
+update :: forall m. Bind m => MonadState D3State m => D3Tagless m => m D3Selection
+update = do
+  (D3State d circles) <- get  
+  joinSelection <- join Circle circles { enter: [ AttrsAndTransition enterAttributes t
+                                                , OnlyAttrs enterAttributes2
+                                                ]
+                                       , update: [ AttrsAndTransition updateAttributes1 t
+                                                 , OnlyAttrs (updateAttributes2 )
+                                                 ]
+                                       , exit: [] }
+
+  pure joinSelection
