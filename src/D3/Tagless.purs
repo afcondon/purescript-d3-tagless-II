@@ -22,6 +22,14 @@ derive newtype instance monadD3M       :: Monad             D3M
 derive newtype instance monadStateD3M  :: MonadState D3State D3M
 derive newtype instance monadEffD3M    :: MonadEffect       D3M
 
+
+-- TODO
+-- there's definitely some indexed monad or state machine kinda stuff here 
+-- because you need to have a Selection in order to bind some data
+-- and you also need to have some data before using any attributes that 
+-- are (Datum -> <something>)
+-- there are thus several things that are legal under the type system which
+-- would lead to run time errors
 class (Monad m) <= D3Tagless m where
   model  :: forall d. d -> m D3State
   hook   :: Selector -> m D3Selection
@@ -81,14 +89,8 @@ doAppend :: D3_Node -> D3Selection -> D3Selection
 doAppend (D3_Node element attributes children) selection = do
   let appended = d3Append_ (show element) selection
       _ = (setAttributeOnSelection appended) <$> attributes
-      _ = (addChildToExisting appended) <$> children
+      _ = (flip doAppend $ appended) <$> children
   appended
-
-addChildToExisting :: D3Selection -> D3_Node -> D3Selection
-addChildToExisting selection (D3_Node element attributes children) = do
-    let appended = d3Append_ (show element) selection
-        _ = (setAttributeOnSelection appended) <$> attributes
-    appended
 
 setAttributeOnSelection :: D3Selection -> Attribute -> Unit
 setAttributeOnSelection selection (Attribute label attr) = d3SetAttr_ label (unbox attr) selection

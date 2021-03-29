@@ -1,38 +1,48 @@
 module D3.Examples.GUP where
 
 import D3.Attributes.Sugar
+import Prelude
 
 import D3.Attributes.Instances (Datum, Attributes)
 import D3.Interpreter.Tagless (class D3Tagless, append, hook, join, model)
 import D3.Selection (D3Selection, D3State, D3_Node(..), Element(..), node__)
 import Data.Char (toCharCode)
 import Data.Int (toNumber)
-import Prelude 
+import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 
--- WIP all the attr functions are written in terms of Datum which is opaque, but we know at compile-time what they 
--- really are so if we coerce the function AFTER we've type checked it against the type we know it will really be
--- we should be able to have polymorphism AND type-checking
-type CharDatum = Char
-_CharDatum :: Proxy CharDatum
-_CharDatum = Proxy
-
-someAttributes :: Proxy CharDatum -> Attributes
-someAttributes proxy = [
+-- simple attributes don't use data, no hassle
+svgAttributes :: Attributes
+svgAttributes = [
     strokeColor "green"
   , strokeOpacity 0.75
-  , strokeWidth (strokeWidthFn proxy )
 ]
 
-strokeWidthFn :: Proxy CharDatum -> Datum -> Number
-strokeWidthFn proxy d = toNumber $ 
-                        (toCharCode
-                        (unsafeCoerce d :: CharDatum)) - 97 
-
-
+-- attributes that use (\d -> <something>) or (\d i -> <something>) need type hints
+-- and coercion functions
 type Model = Array Char
+coerceToChar :: Datum -> Char
+coerceToChar = unsafeCoerce
+
+_char :: Proxy "char"
+_char = Proxy
+
+_string :: Proxy "string"
+_string = Proxy
+
+_int :: Proxy "int"
+_int = Proxy
+
+
+circleAttributes :: forall a. Proxy a -> Attributes
+circleAttributes proxy = [
+    strokeColor "green"
+  , strokeOpacity 0.75
+  , strokeWidth $ toNumber <<< (_ - 97) <<< toCharCode <<< coerceToChar
+]
 
 script :: ∀ m. (D3Tagless m) => m D3Selection
 script = do
@@ -40,8 +50,8 @@ script = do
 
   root <- hook "div#root"
   
-  svg  <- append $ D3_Node Svg (someAttributes _CharDatum) [ D3_Node Group [] [ node__ Circle ] ]
+  svg  <- append $ D3_Node Svg svgAttributes [ D3_Node Group [] [ node__ Circle ] ]
 
-  _    <- join Circle { enter: [], update: [], exit: [] }
+  _    <- join Circle { enter: [ Tuple (circleAttributes _char) Nothing ], update: [], exit: [] }
 
   pure svg
