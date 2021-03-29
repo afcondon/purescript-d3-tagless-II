@@ -80,7 +80,6 @@ doTransitionStep selection (Tuple attributes Nothing) = do -- last stage of chai
 doAppend :: D3_Node -> D3Selection -> D3Selection
 doAppend (D3_Node element attributes children) selection = do
   let appended = d3Append_ (show element) selection
-      _ = d3SetAttr_ "x" (unsafeCoerce "foo") appended
       _ = (setAttributeOnSelection appended) <$> attributes
       _ = (addChildToExisting appended) <$> children
   appended
@@ -88,7 +87,6 @@ doAppend (D3_Node element attributes children) selection = do
 addChildToExisting :: D3Selection -> D3_Node -> D3Selection
 addChildToExisting selection (D3_Node element attributes children) = do
     let appended = d3Append_ (show element) selection
-        _ = d3SetAttr_ "x" (unsafeCoerce "baar") appended
         _ = (setAttributeOnSelection appended) <$> attributes
     appended
 
