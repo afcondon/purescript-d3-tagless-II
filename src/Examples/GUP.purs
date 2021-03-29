@@ -5,7 +5,7 @@ import Prelude
 import D3.Attributes.Instances (Datum, Attributes)
 import D3.Attributes.Sugar (strokeColor, strokeOpacity, strokeWidth)
 import D3.Interpreter.Tagless (class D3Tagless, append, hook, join, model)
-import D3.Selection (D3Selection, D3_Node(..), Element(..), TransitionStage(..), node__)
+import D3.Selection (D3Selection, D3_Node(..), EasingFunction(..), Element(..), Milliseconds, Transition, TransitionStage(..), makeTransition, node__)
 import Data.Char (toCharCode)
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
@@ -24,15 +24,29 @@ svgAttributes = [
 -- and coercion functions
 type Model = Array Char
 
-coerceToChar :: Datum -> Char
-coerceToChar = unsafeCoerce
+d_Char :: Datum -> Char
+d_Char = unsafeCoerce
 
-circleAttributes :: (Datum -> Char) -> Attributes
-circleAttributes f = [
+enterAttributes :: (Datum -> Char) -> Attributes
+enterAttributes f = [
     strokeColor "blue"
   , strokeOpacity 0.25
   , strokeWidth $ toNumber <<< (_ * 3) <<< (_ - 97) <<< toCharCode <<< f
 ]
+
+t :: Transition
+t = { name: "", delay: 2000, duration: 5000, easing: DefaultCubic }
+
+enterAttributes2 :: (Datum -> Char) -> Attributes
+enterAttributes2 f = [
+    strokeColor "red"
+  , strokeOpacity 0.85
+  , strokeWidth $ toNumber <<< (_ * 5) <<< (_ - 97) <<< toCharCode <<< f
+]
+
+updateAttributes1 = [ strokeColor "green" ]
+updateAttributes2 = [ strokeColor "purple" ]
+
 
 script :: ∀ m. (D3Tagless m) => m D3Selection
 script = do
@@ -43,6 +57,10 @@ script = do
   svg     <- append $ D3_Node Svg svgAttributes []
   circles <- append $ node__ Group
   -- now the active selection is "circles" and these circles that are joining will be inside it
-  _    <- join Circle { enter: [ OnlyAttrs (circleAttributes coerceToChar)  ], update: [], exit: [] }
+  _    <- join Circle { enter: [ AttrsAndTransition (enterAttributes d_Char) t
+                               , OnlyAttrs (enterAttributes2 d_Char) ]
+                      , update: [ AttrsAndTransition updateAttributes1 t
+                                , OnlyAttrs updateAttributes2 ]
+                      , exit: [] }
 
   pure svg
