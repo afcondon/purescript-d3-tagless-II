@@ -66,8 +66,7 @@ updateAttributes2 = [ strokeColor "purple"
 
 
 script :: ∀ m. (D3Tagless m) => m D3Selection -- TODO we can actually return much more structured output, selection tree etc
-script = do
-  _    <- model [ 'a', 'b', 'c', 'd' ]
+script = do -- modelData is already in stateT
 
   root <- hook "div#root"
   

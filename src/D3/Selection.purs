@@ -47,6 +47,9 @@ foreign import emptyD3Selection :: D3Selection -- probably just null
 foreign import emptyD3Data :: D3Data -- probably just null
 data D3State = D3State D3Data D3Selection
 
+makeD3State :: forall a. a -> D3State
+makeD3State d = D3State (coerceD3Data d) emptyD3Selection
+
 setData :: D3Data -> D3State -> D3State
 setData d' (D3State d s) = (D3State d' s)
 
