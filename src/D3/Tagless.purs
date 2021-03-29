@@ -46,7 +46,7 @@ d3Run :: ∀ a. D3M a -> Effect a
 d3Run (D3M state) = liftA1 fst $ runStateT state emptyD3State
 
 instance d3TaglessD3M :: D3Tagless D3M where
-  model         = modify <<< setData <<< unsafeCoerce
+  model         = modify <<< setData <<< coerceD3Data
   hook selector = setSelection $ d3SelectAllInDOM_ selector 
 
   append node = do
@@ -59,13 +59,13 @@ instance d3TaglessD3M :: D3Tagless D3M where
         initialS = d3SelectionSelectAll_ (show element) selection
         -- TODO this is where it's really tricky - attribute processing with shape of data open
         updateS  = d3Data_ d3data initialS 
-        _ = foldl doTransitionStep updateS enterUpdateExit.update
+        _ = foldl doTransitionStage updateS enterUpdateExit.update
 
         enterS  = d3EnterAndAppend_ (show element) updateS -- TODO add Attrs for the inserted element here
-        _       = foldl doTransitionStep enterS enterUpdateExit.enter
+        _       = foldl doTransitionStage enterS enterUpdateExit.enter
 
         exitS   = d3Exit_ updateS
-        _       = foldl doTransitionStep exitS enterUpdateExit.exit
+        _       = foldl doTransitionStage exitS enterUpdateExit.exit
         _       = d3RemoveSelection_ exitS -- TODO this is actually optional but by far more common to always remove
 
     -- put updateS -- not clear to me what actually has to be returned from join
@@ -76,12 +76,12 @@ setSelection newSelection = do
     modify_ (\(D3State d s) -> D3State d newSelection) 
     pure newSelection
 
-doTransitionStep :: D3Selection -> TransitionStep -> D3Selection
-doTransitionStep selection (Tuple attributes (Just transition)) = do
+doTransitionStage :: D3Selection -> TransitionStage -> D3Selection
+doTransitionStage selection (AttrsAndTransition attributes transition) = do
   let _ = (setAttributeOnSelection selection) <$> attributes
   -- returning the transition as a "selection"
   d3AddTransition selection transition
-doTransitionStep selection (Tuple attributes Nothing) = do -- last stage of chain
+doTransitionStage selection (OnlyAttrs attributes) = do -- last stage of chain
   let _ = (setAttributeOnSelection selection) <$> attributes
   selection -- there's no next stage at end of chain, this "selection" might well be a "transition" but i don't think we care
 

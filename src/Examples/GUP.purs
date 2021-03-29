@@ -1,16 +1,15 @@
 module D3.Examples.GUP where
 
-import D3.Attributes.Sugar
 import Prelude
 
 import D3.Attributes.Instances (Datum, Attributes)
+import D3.Attributes.Sugar (strokeColor, strokeOpacity, strokeWidth)
 import D3.Interpreter.Tagless (class D3Tagless, append, hook, join, model)
-import D3.Selection (D3Selection, D3State, D3_Node(..), Element(..), node__)
+import D3.Selection (D3Selection, D3_Node(..), Element(..), TransitionStage(..), node__)
 import Data.Char (toCharCode)
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 
@@ -24,24 +23,15 @@ svgAttributes = [
 -- attributes that use (\d -> <something>) or (\d i -> <something>) need type hints
 -- and coercion functions
 type Model = Array Char
+
 coerceToChar :: Datum -> Char
 coerceToChar = unsafeCoerce
 
-_char :: Proxy "char"
-_char = Proxy
-
-_string :: Proxy "string"
-_string = Proxy
-
-_int :: Proxy "int"
-_int = Proxy
-
-
-circleAttributes :: forall a. Proxy a -> Attributes
-circleAttributes proxy = [
-    strokeColor "green"
-  , strokeOpacity 0.75
-  , strokeWidth $ toNumber <<< (_ - 97) <<< toCharCode <<< coerceToChar
+circleAttributes :: (Datum -> Char) -> Attributes
+circleAttributes f = [
+    strokeColor "blue"
+  , strokeOpacity 0.25
+  , strokeWidth $ toNumber <<< (_ * 3) <<< (_ - 97) <<< toCharCode <<< f
 ]
 
 script :: ∀ m. (D3Tagless m) => m D3Selection
@@ -50,8 +40,9 @@ script = do
 
   root <- hook "div#root"
   
-  svg  <- append $ D3_Node Svg svgAttributes [ D3_Node Group [] [ node__ Circle ] ]
-
-  _    <- join Circle { enter: [ Tuple (circleAttributes _char) Nothing ], update: [], exit: [] }
+  svg     <- append $ D3_Node Svg svgAttributes []
+  circles <- append $ node__ Group
+  -- now the active selection is "circles" and these circles that are joining will be inside it
+  _    <- join Circle { enter: [ OnlyAttrs (circleAttributes coerceToChar)  ], update: [], exit: [] }
 
   pure svg

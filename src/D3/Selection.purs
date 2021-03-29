@@ -91,17 +91,12 @@ makeTransition :: {
 , name :: String
 }
 makeTransition = { name: "", delay: 0.0, duration: 0.0, easing: DefaultCubic }
-type TransitionStep = (Tuple Attributes (Maybe Transition))
-type AttributeTransitionChain = Array TransitionStep
+data TransitionStage = OnlyAttrs Attributes 
+                     | AttrsAndTransition Attributes Transition
+type AttributeTransitionChain = Array TransitionStage
 type EnterUpdateExit = {
     enter  :: AttributeTransitionChain
   , update :: AttributeTransitionChain
   , exit   :: AttributeTransitionChain
 }
-
-
-
--- linksGroup :: ∀ m. (D3Tagless m) => m D3Selection
--- linksGroup = do
---   _ <- sequence append [ D3_Node { element: Group, attributes: [] } ]
 
