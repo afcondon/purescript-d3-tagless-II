@@ -1,7 +1,8 @@
 exports.emptyD3Selection = null
+exports.emptyD3Data = null
 
 // d3SelectAll_ :: Selector -> D3Selection
-exports.d3SelectAllInDOM_ = selector => selection => { // NB not USING selection but want it cause called from inside State Monad
+exports.d3SelectAllInDOM_ = selector => { // NB not USING selection but want it cause called from inside State Monad
   console.log(`\td3SelectAllInDOM: ${selector}`);
   // return "rootSelection";
   return d3.selectAll(selector);

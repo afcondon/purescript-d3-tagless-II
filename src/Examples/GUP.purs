@@ -1,9 +1,10 @@
 module D3.Examples.GUP where
 
-import D3.Attributes.Instances (Datum, Attributes)
 import D3.Attributes.Sugar
+
+import D3.Attributes.Instances (Datum, Attributes)
 import D3.Interpreter.Tagless (class D3Tagless, append, hook, join)
-import D3.Selection (D3Selection, Element(..), D3_Node(..), node__)
+import D3.Selection (D3Selection, D3State, D3_Node(..), Element(..), node__)
 import Prelude (bind, pure, ($))
 import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
@@ -33,10 +34,10 @@ someAttributes _ = [
 
 script :: ∀ m. (D3Tagless m) => m D3Selection
 script = do
-    root <- hook "div#root"
-    
-    svg <- append $ D3_Node Svg (someAttributes _SomeDatum ) [ D3_Node Group [] [ node__ Circle ] ]
+  root <- hook "div#root"
+  
+  svg <- append $ D3_Node Svg (someAttributes _SomeDatum ) [ D3_Node Group [] [ node__ Circle ] ]
 
-    _ <- join Circle { enter: [], update: [], exit: [] }
+  _ <- join Circle { enter: [], update: [], exit: [] }
 
-    pure svg
+  pure svg

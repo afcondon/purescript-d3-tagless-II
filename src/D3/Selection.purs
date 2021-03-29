@@ -29,7 +29,7 @@ foreign import data D3Data :: Type
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
 foreign import data D3Attr :: Type 
 
-foreign import d3SelectAllInDOM_     :: Selector -> D3Selection -> D3Selection -- NB passed D3Selection is IGNORED
+foreign import d3SelectAllInDOM_     :: Selector -> D3Selection -- NB passed D3Selection is IGNORED
 foreign import d3SelectionSelectAll_ :: Selector -> D3Selection -> D3Selection
 foreign import d3EnterAndAppend_     :: String   -> D3Selection -> D3Selection
 foreign import d3Append_             :: String   -> D3Selection -> D3Selection
@@ -44,6 +44,17 @@ foreign import d3AddTransition       :: D3Selection -> Transition -> D3Selection
 foreign import d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit
 
 foreign import emptyD3Selection :: D3Selection -- probably just null
+foreign import emptyD3Data :: D3Data -- probably just null
+data D3State = D3State D3Data D3Selection
+
+setData :: D3Data -> D3State -> D3State
+setData d' (D3State d s) = (D3State d' s)
+
+-- setSelection :: D3Selection -> D3State -> D3State
+-- setSelection s' (D3State d s) = (D3State d s')
+
+emptyD3State :: D3State
+emptyD3State = D3State emptyD3Data emptyD3Selection
 
 coerceD3Data :: forall a. a -> D3Data
 coerceD3Data = unsafeCoerce
