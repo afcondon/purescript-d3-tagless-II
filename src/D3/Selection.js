@@ -64,6 +64,12 @@ exports.d3Data_ = data => selection => {
   // return "dataBoundSelection"
   return selection.data(data);
 }
+// d3Data_ :: D3Data -> KeyFunction -> D3Selection -> D3Selection
+exports.d3DataKeyFn_ = data => keyFunction => selection => {
+  console.log(`\td3Data: ${selection}.data(${data}, ${keyFunction})`);
+  // return "dataBoundSelection"
+  return selection.data(data, keyFunction);
+}
 // d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit 
 exports.d3SetAttr_ = name => value => selection => {
   console.log(`\t${selection}.attr(${name}, ${value})`);

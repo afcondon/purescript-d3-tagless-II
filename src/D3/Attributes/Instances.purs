@@ -7,6 +7,7 @@ import Unsafe.Coerce (unsafeCoerce)
 
 
 foreign import data Datum :: Type
+foreign import data Index :: Type
 
 type Label = String
 
@@ -35,7 +36,7 @@ unbox =
     (ArrayAttr (Fn a))      -> unsafeCoerce a
     (ArrayAttr (FnI a))     -> unsafeCoerce a
 
-type IndexedLambda a = Fn2 Datum Int a
+type IndexedLambda a = Fn2 Datum Index a
 
 data Attrib a = Static a
               | Fn (Datum -> a)
@@ -56,7 +57,7 @@ instance toAttrString :: ToAttr String String where
 instance toAttrStringFn :: ToAttr String (Datum -> String) where
   toAttr = StringAttr <<< Fn
 
-instance toAttrStringFnI :: ToAttr String (Datum -> Int -> String) where
+instance toAttrStringFnI :: ToAttr String (Datum -> Index -> String) where
   toAttr = StringAttr <<< FnI <<< mkFn2
 
 instance toAttrNumber :: ToAttr Number Number where
@@ -65,7 +66,7 @@ instance toAttrNumber :: ToAttr Number Number where
 instance toAttrNumberFn :: ToAttr Number (Datum -> Number) where
   toAttr = NumberAttr <<< Fn
 
-instance toAttrNumberFnI :: ToAttr Number (Datum -> Int -> Number) where
+instance toAttrNumberFnI :: ToAttr Number (Datum -> Index -> Number) where
   toAttr = NumberAttr <<< FnI <<< mkFn2
 
 instance toAttrArray :: ToAttr (Array Number) (Array Number) where
@@ -74,7 +75,7 @@ instance toAttrArray :: ToAttr (Array Number) (Array Number) where
 instance toAttrArrayFn :: ToAttr (Array Number) (Datum -> Array Number) where
   toAttr = ArrayAttr <<< Fn
 
-instance toAttrArrayFnI :: ToAttr (Array Number) (Datum -> Int -> Array Number) where
+instance toAttrArrayFnI :: ToAttr (Array Number) (Datum -> Index -> Array Number) where
   toAttr = ArrayAttr <<< FnI <<< mkFn2
 
 
@@ -87,3 +88,10 @@ datumIsNumber = unsafeCoerce
 
 datumIsString :: Datum -> String
 datumIsString = unsafeCoerce
+
+indexIsNumber :: Index -> Number
+indexIsNumber = unsafeCoerce
+
+indexIsString :: Index -> String
+indexIsString = unsafeCoerce
+

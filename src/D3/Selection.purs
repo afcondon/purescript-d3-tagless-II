@@ -2,7 +2,7 @@ module D3.Selection where
 
 import Prelude hiding (append,join)
 
-import D3.Attributes.Instances (Attribute, Attributes, Datum)
+import D3.Attributes.Instances (Attribute, Attributes, Datum, Index)
 import Data.Maybe (Maybe)
 import Data.Tuple (Tuple)
 import Unsafe.Coerce (unsafeCoerce)
@@ -23,6 +23,7 @@ instance showElement :: Show Element where
 foreign import data D3Selection  :: Type
 foreign import data D3DomNode    :: Type
 foreign import data D3This       :: Type
+type KeyFunction = Datum -> Index
 type D3Group = Array D3DomNode
 foreign import data D3Transition :: Type -- not clear yet if we need to distinguish from Selection
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
@@ -36,6 +37,7 @@ foreign import d3EnterAndAppend_     :: String   -> D3Selection -> D3Selection
 foreign import d3Append_             :: String   -> D3Selection -> D3Selection
 foreign import d3Exit_               :: D3Selection -> D3Selection
 foreign import d3Data_               :: D3Data   -> D3Selection -> D3Selection
+foreign import d3DataKeyFn_          :: D3Data   -> KeyFunction -> D3Selection -> D3Selection
 foreign import d3RemoveSelection_    :: D3Selection -> D3Selection
 foreign import d3AddTransition       :: D3Selection -> Transition -> D3Selection -- this is the PS transition record
 

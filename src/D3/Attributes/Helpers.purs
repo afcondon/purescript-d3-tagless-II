@@ -16,6 +16,7 @@ strokeWidth = Attribute "stroke-width" <<< toAttr
 fill :: forall a. ToAttr String a => a -> Attribute
 fill = Attribute "fill" <<< toAttr
 
+-- TODO this definitely needs to be Number-with-unit here
 viewBox :: Number -> Number -> Number -> Number -> Attribute
 viewBox xo yo w h = Attribute "viewbox" $ toAttr [ xo, yo, w, h ]
 
