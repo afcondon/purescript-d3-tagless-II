@@ -4,6 +4,7 @@ import Prelude hiding (append,join)
 
 import D3.Attributes.Instances (Attribute, Attributes, Datum, Index)
 import Data.Maybe (Maybe)
+import Data.Time.Duration (Milliseconds)
 import Data.Tuple (Tuple)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -81,7 +82,6 @@ appendChildren (D3_Node element attrs children) newChildren
   = D3_Node element attrs (children <> newChildren)
 infixl 1 appendChildren as ++
 
-type Milliseconds = Int -- TODO smart constructor? possibly not worth it
 type EasingTime = Number
 type D3EasingFn = EasingTime -> EasingTime -- easing function maps 0-1 to 0-1 in some way with 0 -> 0, 1 -> 1
 data EasingFunction = 
@@ -90,7 +90,7 @@ data EasingFunction =
   | EasingFactory (Datum -> Int -> D3Group -> D3This -> D3EasingFn)
 type Transition = { 
     name     :: String
-  , delay    :: Milliseconds -- can also be a function, ie (\d -> f d)
+  , delay    :: Milliseconds-- can also be a function, ie (\d -> f d)
   , duration :: Milliseconds -- can also be a function, ie (\d -> f d)
   , easing   :: EasingFunction
 }

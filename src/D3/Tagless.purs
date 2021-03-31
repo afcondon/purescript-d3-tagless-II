@@ -71,8 +71,8 @@ instance d3TaglessD3M :: D3Tagless D3M where
         _       = foldl doTransitionStage enterS enterUpdateExit.enter
 
         exitS   = d3Exit_ updateS
-        _       = foldl doTransitionStage exitS enterUpdateExit.exit
-        _       = d3RemoveSelection_ exitS -- TODO this is actually optional but by far more common to always remove
+        exited  = foldl doTransitionStage exitS enterUpdateExit.exit
+        _       = d3RemoveSelection_ exited
 
     -- put updateS -- not clear to me what actually has to be returned from join
     pure updateS

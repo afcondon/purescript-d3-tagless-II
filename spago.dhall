@@ -10,6 +10,7 @@ You can edit this file as you like.
   , "effect"
   , "functions"
   , "psci-support"
+  , "random"
   , "strings"
   , "transformers"
   , "variant"

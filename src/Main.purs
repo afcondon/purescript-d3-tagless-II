@@ -1,27 +1,51 @@
 module Main where
 
+import Data.Array
 import Prelude
 
+import Control.Monad.Rec.Class (forever)
 import D3.Examples.GUP (enter, update) as GUP
-import D3.Interpreter.Tagless (d3Run, runD3M)
-import D3.Selection (D3State(..), EasingFunction(..), Transition, emptyD3Selection, makeD3State, makeD3State')
-import Data.Tuple (snd)
+import D3.Interpreter.Tagless (runD3M)
+import D3.Selection (D3Selection, D3State(..), EasingFunction(..), Transition, makeD3State, makeD3State')
+import Data.Maybe (Maybe(..))
+import Data.String.CodeUnits (toCharArray)
+import Data.Traversable (sequence, traverse)
+import Data.Tuple (Tuple(..), snd)
+import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Milliseconds(..), delay, launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Console (log)
+import Effect.Random (random)
 
-initialState = makeD3State' [ 'a', 'b', 'c', 'd' ]
+initialState :: D3State
+initialState = makeD3State' (toCharArray "this data is ignored - FIX ME")
+
+duration :: Milliseconds
+duration = Milliseconds 1000.0
 
 t :: Transition
-t = { name: "", delay: 0, duration: 500, easing: DefaultCubic }
+t = { name: "", delay: Milliseconds 0.0, duration, easing: DefaultCubic }
+
+getLetters :: Effect (Array Char)
+getLetters = do
+  let 
+    letters = toCharArray "abcdefghijklmnopqrstuvwxyz"
+    coinToss :: Char -> Effect (Maybe Char)
+    coinToss c = do
+      n <- random
+      pure $ if n > 0.5 then Just c else Nothing
+  choices <- sequence $ coinToss <$> letters
+  let selected = catMaybes choices
+  pure selected
 
 main :: Effect Unit
 main = launchAff_  do
   (D3State _ circles) <- liftEffect $ liftA1 snd $ runD3M GUP.enter initialState
-  _ <- liftEffect $ runD3M (GUP.update t) (makeD3State [ 'a', 'b', 'c', 'd' ] circles)
-  _ <- delay  $ Milliseconds 1000.0
-  _ <- liftEffect $ runD3M (GUP.update t) (makeD3State [ 'a', 'c', 'd', 'f', 'z' ] circles)
-  _ <- delay  $ Milliseconds 1000.0
-  _ <- liftEffect $ runD3M (GUP.update t) (makeD3State [ 'c', 'd', 'f', 'p', 's', 'z' ] circles)
+
+  _ <- forever $ do
+        letters <- liftEffect $ getLetters
+        _ <- liftEffect $ runD3M (GUP.update t) (makeD3State letters circles)
+        delay duration
+
   liftEffect $ log "🍝"

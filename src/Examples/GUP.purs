@@ -6,7 +6,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState, get)
 import D3.Interpreter.Tagless (class D3Tagless, Keys(..), append, hook, join)
-import D3.Selection (D3Selection, D3State(..), D3_Node(..), EasingFunction(..), Element(..), TransitionStage(..), Transition, node__)
+import D3.Selection (D3Selection, D3State(..), D3_Node(..), EasingFunction(..), Element(..), Transition, TransitionStage(..), node__)
 import Data.Char (toCharCode)
 import Data.Int (toNumber)
 import Data.String.CodeUnits (singleton)
@@ -36,8 +36,8 @@ offsetXByIndex d i = offset + ((indexIsNumber i) * factor)
 textFromDatum :: Datum -> String
 textFromDatum = singleton <<< datumIsChar
 
-enterAttributes1 :: Attributes
-enterAttributes1 = [
+enterInitial :: Attributes
+enterInitial = [
     classed "enter1"
   , fill "black"
   , x $ offsetXByIndex
@@ -46,23 +46,24 @@ enterAttributes1 = [
   , fontSize 48.0
 ]
 
-enterAttributes2 :: Attributes
-enterAttributes2 = [
+enterFinal :: Attributes
+enterFinal = [
     classed "enter2"
   , fill "black"
   , y 500.0
 ]
+updateInitial :: Attributes
+updateInitial = [ classed "update2", fill "green" ]
 
-updateAttributes1 :: Array Attribute
-updateAttributes1 = [ classed "update1", x $ offsetXByIndex ]
+updateFinal :: Array Attribute
+updateFinal = [ classed "update1", x $ offsetXByIndex ]
 
-updateAttributes2 :: Attributes
-updateAttributes2 = [ classed "update2", fill "green" ]
+exitInitial :: Array Attribute
+exitInitial = [ classed "exit1", fill "red" ]
 
-exitAttributes1 :: Array Attribute
-exitAttributes1 = [ classed "exit1"
-                  , fill "red"
-                  , y 900.0 ]
+exitFinal :: Array Attribute
+exitFinal = [ y 900.0
+            ]
 
 -- TODO we can actually potentially return _much_ more structured output, selection tree etc
 enter :: ∀ m. (D3Tagless m) => m D3Selection 
@@ -75,13 +76,14 @@ enter = do -- modelData is already in stateT
 update :: forall m. Bind m => MonadState D3State m => D3Tagless m => Transition -> m D3Selection
 update t = do
   (D3State _ letters) <- get  
-  joinSelection <- join Text DatumIsKey letters { enter: [ AttrsAndTransition enterAttributes1 t
-                                                          , OnlyAttrs enterAttributes2
+  joinSelection <- join Text DatumIsKey letters { enter: [ AttrsAndTransition enterInitial t
+                                                          , OnlyAttrs enterFinal
                                                           ]
-                                                , update: [ AttrsAndTransition updateAttributes2 t
-                                                          , OnlyAttrs updateAttributes1
+                                                , update: [ AttrsAndTransition updateInitial t
+                                                          , OnlyAttrs updateFinal
                                                           ]
-                                                , exit: [ AttrsAndTransition exitAttributes1 t
+                                                , exit: [ AttrsAndTransition exitInitial t
+                                                        , OnlyAttrs exitFinal
                                                         ] }
 
   pure joinSelection
