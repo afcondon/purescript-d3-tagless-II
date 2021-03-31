@@ -22,7 +22,7 @@ initialState :: D3State
 initialState = makeD3State' (toCharArray "this data is ignored - FIX ME")
 
 duration :: Milliseconds
-duration = Milliseconds 1000.0
+duration = Milliseconds 10000.0
 
 t :: Transition
 t = { name: "", delay: Milliseconds 0.0, duration, easing: DefaultCubic }
@@ -36,8 +36,8 @@ getLetters = do
       n <- random
       pure $ if n > 0.5 then Just c else Nothing
   choices <- sequence $ coinToss <$> letters
-  let selected = catMaybes choices
-  pure selected
+  
+  pure $ spy "random letters" $ catMaybes choices
 
 main :: Effect Unit
 main = launchAff_  do

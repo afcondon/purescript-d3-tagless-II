@@ -85,8 +85,8 @@ setSelection newSelection = do
 doTransitionStage :: D3Selection -> TransitionStage -> D3Selection
 doTransitionStage selection (AttrsAndTransition attributes transition) = do
   let _ = (setAttributeOnSelection selection) <$> attributes
-  -- returning the transition as a "selection"
-  d3AddTransition selection transition
+      _ = d3AddTransition selection transition
+  selection
 doTransitionStage selection (OnlyAttrs attributes) = do -- last stage of chain
   let _ = (setAttributeOnSelection selection) <$> attributes
   selection -- there's no next stage at end of chain, this "selection" might well be a "transition" but i don't think we care

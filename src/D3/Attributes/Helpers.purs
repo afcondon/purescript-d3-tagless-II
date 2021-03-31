@@ -63,4 +63,4 @@ text :: forall a. ToAttr String a => a -> Attribute
 text = Attribute "text" <<< toAttr
 
 classed :: forall a. ToAttr String a => a -> Attribute
-classed = Attribute "classed" <<< toAttr
+classed = Attribute "class" <<< toAttr

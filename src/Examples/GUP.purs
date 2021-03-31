@@ -38,7 +38,7 @@ textFromDatum = singleton <<< datumIsChar
 
 enterInitial :: Attributes
 enterInitial = [
-    classed "enter1"
+    classed "enter"
   , fill "black"
   , x $ offsetXByIndex
   , y 0.0
@@ -47,23 +47,19 @@ enterInitial = [
 ]
 
 enterFinal :: Attributes
-enterFinal = [
-    classed "enter2"
-  , fill "black"
-  , y 500.0
-]
+enterFinal = [ y 500.0 ]
+
 updateInitial :: Attributes
-updateInitial = [ classed "update2", fill "green" ]
+updateInitial = [ classed "update", fill "green" ]
 
 updateFinal :: Array Attribute
-updateFinal = [ classed "update1", x $ offsetXByIndex ]
+updateFinal = [ x $ offsetXByIndex ]
 
 exitInitial :: Array Attribute
-exitInitial = [ classed "exit1", fill "red" ]
+exitInitial = [ classed "exit", fill "red", strokeColor "red" ]
 
 exitFinal :: Array Attribute
-exitFinal = [ y 900.0
-            ]
+exitFinal = [ y 900.0 ]
 
 -- TODO we can actually potentially return _much_ more structured output, selection tree etc
 enter :: ∀ m. (D3Tagless m) => m D3Selection 
