@@ -2,8 +2,9 @@ module D3.Selection where
 
 import Prelude hiding (append,join)
 
-import D3.Attributes.Instances (Attribute, Attributes, Datum, Index)
+import D3.Attributes.Instances (Attrib, Attribute, Datum, Index)
 import Data.Maybe (Maybe)
+import Data.Maybe.First (First)
 import Data.Time.Duration (Milliseconds)
 import Data.Tuple (Tuple)
 import Unsafe.Coerce (unsafeCoerce)
@@ -21,7 +22,8 @@ instance showElement :: Show Element where
   show Text   = "text"
   
 -- || trying this with Finally Tagless instead of interpreter
-foreign import data D3Selection  :: Type
+foreign import data D3Selection_  :: Type
+type D3Selection = First D3Selection_
 foreign import data D3DomNode    :: Type
 foreign import data D3This       :: Type
 type KeyFunction = Datum -> Index
@@ -40,13 +42,13 @@ foreign import d3Exit_               :: D3Selection -> D3Selection
 foreign import d3Data_               :: D3Data   -> D3Selection -> D3Selection
 foreign import d3DataKeyFn_          :: D3Data   -> KeyFunction -> D3Selection -> D3Selection
 foreign import d3RemoveSelection_    :: D3Selection -> D3Selection
-foreign import d3AddTransition       :: D3Selection -> Transition -> D3Selection -- this is the PS transition record
 
 -- NB D3 returns the selection after setting an Attr but we will only capture Selections that are 
 -- meaningfully different _as_ selections, we're not chaining them in the same way
 -- foreign import d3GetAttr_ :: String -> D3Selection -> ???? -- solve the ???? as needed later
-foreign import d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit
-foreign import d3SetText_      :: D3Attr -> D3Selection -> Unit
+foreign import d3AddTransition :: D3Selection -> Transition -> D3Selection -- this is the PS transition record
+foreign import d3SetAttr_      :: String -> D3Attr -> D3Selection -> D3Selection
+foreign import d3SetText_      :: D3Attr -> D3Selection -> D3Selection
 
 foreign import emptyD3Selection :: D3Selection -- probably just null
 foreign import emptyD3Data :: D3Data -- probably just null
@@ -70,43 +72,33 @@ emptyD3State = D3State emptyD3Data emptyD3Selection
 coerceD3Data :: forall a. a -> D3Data
 coerceD3Data = unsafeCoerce
 
-data D3_Node = D3_Node Element Attributes (Array D3_Node)
+data D3_Node = D3_Node Element (Array Chainable)
 
-node_ :: Element -> Array Attribute -> D3_Node
-node_ = \e a -> D3_Node e a []
-node__ :: Element -> D3_Node
-node__ = \e -> D3_Node e [] []
+-- sugar for appending with no attributes
+node_ :: Element -> D3_Node
+node_ = \e -> D3_Node e []
 
-appendChildren :: D3_Node -> Array D3_Node -> D3_Node
-appendChildren (D3_Node element attrs children) newChildren
-  = D3_Node element attrs (children <> newChildren)
-infixl 1 appendChildren as ++
-
+-- Transition types
 type EasingTime = Number
 type D3EasingFn = EasingTime -> EasingTime -- easing function maps 0-1 to 0-1 in some way with 0 -> 0, 1 -> 1
 data EasingFunction = 
     DefaultCubic
   | EasingFunction D3EasingFn
   | EasingFactory (Datum -> Int -> D3Group -> D3This -> D3EasingFn)
-type Transition = { 
-    name     :: String
-  , delay    :: Milliseconds-- can also be a function, ie (\d -> f d)
-  , duration :: Milliseconds -- can also be a function, ie (\d -> f d)
-  , easing   :: EasingFunction
+
+type Transition = { name     :: String
+                  , delay    :: Milliseconds-- can also be a function, ie (\d -> f d)
+                  , duration :: Milliseconds -- can also be a function, ie (\d -> f d)
+                  , easing   :: EasingFunction
 }
--- makeTransition :: { 
---   delay :: Number
--- , duration :: Number
--- , easing :: EasingFunction
--- , name :: String
--- }
--- makeTransition = { name: "", delay: 0.0, duration: 0.0, easing: DefaultCubic }
-data TransitionStage = OnlyAttrs Attributes 
-                     | AttrsAndTransition Attributes Transition
-type AttributeTransitionChain = Array TransitionStage
+
+data Chainable =  AttrT Attribute
+                | TextT (Attrib String)
+                | TransitionT Transition
+                
 type EnterUpdateExit = {
-    enter  :: AttributeTransitionChain
-  , update :: AttributeTransitionChain
-  , exit   :: AttributeTransitionChain
+    enter  :: Array Chainable
+  , update :: Array Chainable
+  , exit   :: Array Chainable
 }
 

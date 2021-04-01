@@ -15,7 +15,6 @@ type Label = String
 data UnitType = Px | Pt | Em | Rem | Percent
 
 data Attribute = Attribute Label Attr
-type Attributes = Array Attribute
 
 data Attr = StringAttr (Attrib String)
           | NumberAttr (Attrib Number)
@@ -35,6 +34,13 @@ unbox =
     (ArrayAttr (Static a))  -> unsafeCoerce a
     (ArrayAttr (Fn a))      -> unsafeCoerce a
     (ArrayAttr (FnI a))     -> unsafeCoerce a
+
+unboxText :: forall a. Attrib String -> a
+unboxText = 
+  case _ of
+    (Static a) -> unsafeCoerce a
+    (Fn a)     -> unsafeCoerce a
+    (FnI a)    -> unsafeCoerce a
 
 type IndexedLambda a = Fn2 Datum Index a
 

@@ -2,11 +2,11 @@ module D3.Examples.GUP where
 
 import D3.Attributes.Instances
 import D3.Attributes.Sugar
+import D3.Selection 
 import Prelude
 
 import Control.Monad.State (class MonadState, get)
 import D3.Interpreter.Tagless (class D3Tagless, Keys(..), append, hook, join)
-import D3.Selection (D3Selection, D3State(..), D3_Node(..), EasingFunction(..), Element(..), Transition, TransitionStage(..), node__)
 import Data.Char (toCharCode)
 import Data.Int (toNumber)
 import Data.String.CodeUnits (singleton)
@@ -65,7 +65,7 @@ exitFinal = [ y 900.0 ]
 enter :: ∀ m. (D3Tagless m) => m D3Selection 
 enter = do -- modelData is already in stateT   
   root <- hook "div#root"
-  svg  <- append $ D3_Node Svg svgAttributes []
+  svg  <- append $ D3_Node Svg svgAttributes
   append $ node__ Group
 
 -- TODO we can actually return much more structured output, selection tree etc

@@ -4,9 +4,10 @@ import D3.Selection
 import Prelude
 
 import Control.Monad.State (class MonadState, StateT, get, modify, modify_, put, runStateT)
-import D3.Attributes.Instances (Attribute(..), unbox)
+import D3.Attributes.Instances (Attribute(..), unbox, unboxText)
 import Data.Foldable (foldl)
 import Data.Maybe (Maybe(..))
+import Data.Semigroup.Foldable (foldl1)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
@@ -65,16 +66,13 @@ instance d3TaglessD3M :: D3Tagless D3M where
         updateS = case keys of
                     DatumIsKey -> d3DataKeyFn_ d3data (unsafeCoerce (\d -> d)) initialS 
                     (KeyF fn)  -> d3DataKeyFn_ d3data fn initialS 
-        _       = foldl doTransitionStage updateS enterUpdateExit.update
-
         enterS  = d3EnterAndAppend_ (show element) updateS
-        _       = foldl doTransitionStage enterS enterUpdateExit.enter
-
         exitS   = d3Exit_ updateS
-        exited  = foldl doTransitionStage exitS enterUpdateExit.exit
-        _       = d3RemoveSelection_ exited
 
-    -- put updateS -- not clear to me what actually has to be returned from join
+        _ = foldl applyChainable updateS enterUpdateExit.update
+        _ = foldl applyChainable enterS  enterUpdateExit.enter
+        _ = foldl applyChainable exitS   enterUpdateExit.exit
+
     pure updateS
 
 setSelection :: forall m. Bind m => MonadState D3State m => D3Selection -> m D3Selection
@@ -82,26 +80,15 @@ setSelection newSelection = do
     modify_ (\(D3State d s) -> D3State d newSelection) 
     pure newSelection
 
-doTransitionStage :: D3Selection -> TransitionStage -> D3Selection
-doTransitionStage selection (AttrsAndTransition attributes transition) = do
-  let _ = (setAttributeOnSelection selection) <$> attributes
-      _ = d3AddTransition selection transition
-  selection
-doTransitionStage selection (OnlyAttrs attributes) = do -- last stage of chain
-  let _ = (setAttributeOnSelection selection) <$> attributes
-  selection -- there's no next stage at end of chain, this "selection" might well be a "transition" but i don't think we care
+applyChainable :: D3Selection -> Chainable -> D3Selection
+applyChainable selection (AttrT (Attribute label attr))   = d3SetAttr_ label (unbox attr) selection
+applyChainable selection (TextT string_attr)              = d3SetText_ (unboxText string_attr) selection
+-- for transition we must use .call(selection, transition) so that chain continues
+applyChainable selection (TransitionT transition)         = d3AddTransition selection transition 
 
 doAppend :: D3_Node -> D3Selection -> D3Selection
-doAppend (D3_Node element attributes children) selection = do
+doAppend (D3_Node element attributes) selection = do
   let appended = d3Append_ (show element) selection
-      _ = (setAttributeOnSelection appended) <$> attributes
-      _ = (flip doAppend $ appended) <$> children
-  appended
-
-setAttributeOnSelection :: D3Selection -> Attribute -> Unit
-setAttributeOnSelection selection (Attribute "text" attr) = d3SetText_ (unbox attr) selection
-setAttributeOnSelection selection (Attribute label attr) = d3SetAttr_ label (unbox attr) selection
-
-appendChildToSelection :: D3Selection -> D3_Node -> D3Selection
-appendChildToSelection selection (D3_Node element attributes children)  = d3Append_ (show element) selection
+      appended' = foldl applyChainable appended attributes
+  appended'
 
