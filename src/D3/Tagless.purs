@@ -86,8 +86,10 @@ applyChainable selection (AttrT (Attribute label attr)) = d3SetAttr_ label (unbo
 applyChainable selection (TextT (Attribute label attr)) = d3SetText_ (unbox attr) selection 
 -- for transition we must use .call(selection, transition) so that chain continues
 -- TODO handle the chain with recursive call but return selection not transition
-applyChainable selection (TransitionT chain transition)
-  = d3AddTransition selection transition 
+applyChainable selection (TransitionT chain transition) = do
+  let tHandler = d3AddTransition selection transition
+      _ = foldl applyChainable tHandler chain
+  selection
 
 doAppend :: D3_Node -> D3Selection -> D3Selection
 doAppend (D3_Node element attributes) selection = do

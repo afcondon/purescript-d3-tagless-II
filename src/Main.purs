@@ -23,7 +23,7 @@ initialState :: D3State
 initialState = makeD3State' (toCharArray "this data is ignored - FIX ME")
 
 duration :: Milliseconds
-duration = Milliseconds 1000.0
+duration = Milliseconds 2000.0
 
 t :: Chainable
 t = transitionWithDuration duration
