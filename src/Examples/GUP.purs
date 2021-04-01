@@ -14,7 +14,7 @@ import Unsafe.Coerce (unsafeCoerce)
 
 
 -- simple attributes don't use data, no hassle
-svgAttributes :: Attributes
+svgAttributes :: Array Chainable
 svgAttributes = [
     strokeColor "green"
   , strokeOpacity 0.75
@@ -36,7 +36,7 @@ offsetXByIndex d i = offset + ((indexIsNumber i) * factor)
 textFromDatum :: Datum -> String
 textFromDatum = singleton <<< datumIsChar
 
-enterInitial :: Attributes
+enterInitial :: Array Chainable
 enterInitial = [
     classed "enter"
   , fill "black"
@@ -46,19 +46,19 @@ enterInitial = [
   , fontSize 48.0
 ]
 
-enterFinal :: Attributes
+enterFinal :: Array Chainable
 enterFinal = [ y 500.0 ]
 
-updateInitial :: Attributes
+updateInitial :: Array Chainable
 updateInitial = [ classed "update", fill "green" ]
 
-updateFinal :: Array Attribute
+updateFinal :: Array Chainable
 updateFinal = [ x $ offsetXByIndex ]
 
-exitInitial :: Array Attribute
+exitInitial :: Array Chainable
 exitInitial = [ classed "exit", fill "red", strokeColor "red" ]
 
-exitFinal :: Array Attribute
+exitFinal :: Array Chainable
 exitFinal = [ y 900.0 ]
 
 -- TODO we can actually potentially return _much_ more structured output, selection tree etc
@@ -66,20 +66,14 @@ enter :: ∀ m. (D3Tagless m) => m D3Selection
 enter = do -- modelData is already in stateT   
   root <- hook "div#root"
   svg  <- append $ D3_Node Svg svgAttributes
-  append $ node__ Group
+  append $ node_ Group
 
 -- TODO we can actually return much more structured output, selection tree etc
-update :: forall m. Bind m => MonadState D3State m => D3Tagless m => Transition -> m D3Selection
+update :: forall m. Bind m => MonadState D3State m => D3Tagless m => Chainable -> m D3Selection
 update t = do
   (D3State _ letters) <- get  
-  joinSelection <- join Text DatumIsKey letters { enter: [ AttrsAndTransition enterInitial t
-                                                          , OnlyAttrs enterFinal
-                                                          ]
-                                                , update: [ AttrsAndTransition updateInitial t
-                                                          , OnlyAttrs updateFinal
-                                                          ]
-                                                , exit: [ AttrsAndTransition exitInitial t
-                                                        , OnlyAttrs exitFinal
-                                                        ] }
+  joinSelection <- join Text DatumIsKey letters { enter: enterInitial <> [t] <> enterFinal
+                                                , update: updateInitial <> [t] <> updateFinal
+                                                , exit: exitInitial <> [t] <> exitFinal }
 
   pure joinSelection

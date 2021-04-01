@@ -5,7 +5,7 @@ import Prelude hiding (append,join)
 import D3.Attributes.Instances (Attrib, Attribute, Datum, Index)
 import Data.Maybe (Maybe)
 import Data.Maybe.First (First)
-import Data.Time.Duration (Milliseconds)
+import Effect.Aff (Milliseconds(..))
 import Data.Tuple (Tuple)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -86,11 +86,14 @@ data EasingFunction =
   | EasingFunction D3EasingFn
   | EasingFactory (Datum -> Int -> D3Group -> D3This -> D3EasingFn)
 
+-- TODO make this a Newtype and give it monoid instance
 type Transition = { name     :: String
                   , delay    :: Milliseconds-- can also be a function, ie (\d -> f d)
                   , duration :: Milliseconds -- can also be a function, ie (\d -> f d)
                   , easing   :: EasingFunction
 }
+defaultTransition :: Transition -- this can be mempty for monoid
+defaultTransition = { name: "", delay: Milliseconds 0.0, duration: Milliseconds 0.0, easing: DefaultCubic }
 
 data Chainable =  AttrT Attribute
                 | TextT (Attrib String)

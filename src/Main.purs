@@ -6,7 +6,7 @@ import Prelude
 import Control.Monad.Rec.Class (forever)
 import D3.Examples.GUP (enter, update) as GUP
 import D3.Interpreter.Tagless (runD3M)
-import D3.Selection (D3Selection, D3State(..), EasingFunction(..), Transition, makeD3State, makeD3State')
+import D3.Selection (Chainable(..), D3Selection, D3State(..), EasingFunction(..), Transition, defaultTransition, makeD3State, makeD3State')
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence, traverse)
@@ -22,10 +22,10 @@ initialState :: D3State
 initialState = makeD3State' (toCharArray "this data is ignored - FIX ME")
 
 duration :: Milliseconds
-duration = Milliseconds 10000.0
+duration = Milliseconds 1000.0
 
-t :: Transition
-t = { name: "", delay: Milliseconds 0.0, duration, easing: DefaultCubic }
+t :: Chainable
+t = TransitionT $ defaultTransition { duration = duration }
 
 getLetters :: Effect (Array Char)
 getLetters = do

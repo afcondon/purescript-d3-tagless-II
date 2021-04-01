@@ -1,8 +1,10 @@
 module D3.Examples.Tree where
 
+import Prelude
+
 import D3.Attributes.Instances (Attribute, Datum)
 import D3.Attributes.Sugar (strokeColor, strokeOpacity)
-import Prelude
+import D3.Selection (Chainable)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | Model types
@@ -34,17 +36,17 @@ model = { links: exampleLinks, nodes: exampleNodes }
 
 -- | Example Chart to work with Model types and data above
 
-linkColor :: Link -> Attribute
-linkColor a = 
-  if a.source == a.target
-  then strokeColor"green"
-  else strokeColor "blue"
+-- linkColor :: Link -> Chainable
+-- linkColor a = 
+--   if a.source == a.target
+--   then strokeColor"green"
+--   else strokeColor "blue"
 
-linkWidth :: Link -> Attribute
-linkWidth a = strokeOpacity $ a.count * 5.0
+-- linkWidth :: Link -> Chainable
+-- linkWidth a = strokeOpacity $ a.count * 5.0
 
-linkAttrs :: Array (Link -> Attribute)
-linkAttrs = [ linkWidth, linkColor ]
+-- linkAttrs :: Array (Link -> Attribute)
+-- linkAttrs = [ linkWidth, linkColor ]
 
 -- || this example is written using the Data Structure style of interpreter, not tagless
 -- || kept for reference to be re-written with Tagless soon
