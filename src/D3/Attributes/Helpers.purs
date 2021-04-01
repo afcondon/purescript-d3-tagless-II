@@ -63,7 +63,7 @@ cy :: forall a. ToAttr Number a => a -> Chainable
 cy = AttrT <<< Attribute "cy" <<< toAttr
 
 text :: forall a. ToAttr String a => a -> Chainable
-text = AttrT <<< Attribute "text" <<< toAttr
+text = TextT <<< Attribute "text" <<< toAttr
 
 classed :: forall a. ToAttr String a => a -> Chainable
 classed = AttrT <<< Attribute "class" <<< toAttr

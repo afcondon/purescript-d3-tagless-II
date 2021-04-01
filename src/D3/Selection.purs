@@ -92,8 +92,8 @@ type Transition = { name     :: String
 }
 
 data Chainable =  AttrT Attribute
-                | TextT (Attrib String)
-                | TransitionT (Array Chainable) Transition-- the idea would be that the array is filled out locally
+                | TextT Attribute -- we can't narrow it to String here but helper function will do that
+                | TransitionT (Array Chainable) Transition -- the idea would be that the array is filled out locally
                 
 type EnterUpdateExit = {
     enter  :: Array Chainable

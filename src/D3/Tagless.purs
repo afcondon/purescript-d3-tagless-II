@@ -81,8 +81,9 @@ setSelection newSelection = do
     pure newSelection
 
 applyChainable :: D3Selection -> Chainable -> D3Selection
-applyChainable selection (AttrT (Attribute label attr))   = d3SetAttr_ label (unbox attr) selection
-applyChainable selection (TextT string_attr)              = d3SetText_ (unboxText string_attr) selection
+applyChainable selection (AttrT (Attribute label attr)) = d3SetAttr_ label (unbox attr) selection
+-- NB only protection against non-text attribute for Text field is in the helper function
+applyChainable selection (TextT (Attribute label attr)) = d3SetText_ (unbox attr) selection 
 -- for transition we must use .call(selection, transition) so that chain continues
 -- TODO handle the chain with recursive call but return selection not transition
 applyChainable selection (TransitionT chain transition)
