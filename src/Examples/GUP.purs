@@ -72,8 +72,9 @@ enter = do -- modelData is already in stateT
 update :: forall m. Bind m => MonadState D3State m => D3Tagless m => Chainable -> m D3Selection
 update t = do
   (D3State _ letters) <- get  
-  joinSelection <- join Text DatumIsKey letters { enter: enterAttrsBeforeTransition <> [t] <> enterAttrsAfterTransition
-                                                , update: updateAttrsBeforeTransition <> [t] <> updateAttrsAfterTransition
-                                                , exit: exitAttrsBeforeTransition <> [t] <> exitAttrsAfterTransition }
+  joinSelection <- join Text DatumIsKey letters { enter:  enterAttrsBeforeTransition  <> (t `with` enterAttrsAfterTransition) 
+                                                , update: updateAttrsBeforeTransition <> (t `with` updateAttrsAfterTransition) 
+                                                , exit:   exitAttrsBeforeTransition   <> (t `with` exitAttrsAfterTransition)
+                                                }
 
   pure joinSelection

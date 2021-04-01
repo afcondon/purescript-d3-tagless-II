@@ -5,6 +5,7 @@ import Prelude
 import D3.Attributes.Instances (class ToAttr, Attribute(..), toAttr)
 import D3.Selection (Chainable(..), EasingFunction(..), Transition)
 import Effect.Aff (Milliseconds(..))
+import Data.Array ((:))
 
 strokeColor :: forall a. ToAttr String a => a -> Chainable
 strokeColor = AttrT <<< Attribute "stroke" <<< toAttr
@@ -82,3 +83,8 @@ namedTransition name = TransitionT [] $ defaultTransition { name = name }
 
 transitionWithDuration :: Milliseconds -> Chainable -- this can be mempty for monoid
 transitionWithDuration duration = TransitionT [] defaultTransition { duration = duration }
+
+with :: Chainable -> Array Chainable -> Array Chainable
+with (TransitionT [] t) chain = [ TransitionT chain t ]
+with (TransitionT existingChain t) newChain = [ TransitionT (existingChain <> newChain) t ]
+with otherChainable chain = otherChainable:chain

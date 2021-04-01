@@ -4,9 +4,8 @@ import Prelude hiding (append,join)
 
 import D3.Attributes.Instances (Attrib, Attribute, Datum, Index)
 import Data.Maybe (Maybe)
-import Data.Maybe.First (First)
-import Effect.Aff (Milliseconds(..))
-import Data.Tuple (Tuple)
+import Data.Maybe.Last (Last)
+import Effect.Aff (Milliseconds)
 import Unsafe.Coerce (unsafeCoerce)
 
 
@@ -23,7 +22,7 @@ instance showElement :: Show Element where
   
 -- || trying this with Finally Tagless instead of interpreter
 foreign import data D3Selection_  :: Type
-type D3Selection = First D3Selection_
+type D3Selection = Last (Maybe D3Selection_)
 foreign import data D3DomNode    :: Type
 foreign import data D3This       :: Type
 type KeyFunction = Datum -> Index
@@ -50,12 +49,11 @@ foreign import d3AddTransition :: D3Selection -> Transition -> D3Selection -- th
 foreign import d3SetAttr_      :: String -> D3Attr -> D3Selection -> D3Selection
 foreign import d3SetText_      :: D3Attr -> D3Selection -> D3Selection
 
-foreign import emptyD3Selection :: D3Selection -- probably just null
-foreign import emptyD3Data :: D3Data -- probably just null
+foreign import emptyD3Data :: D3Data -- probably just null, could this be monoid too??? ie Last (Maybe D3Data)
 data D3State = D3State D3Data D3Selection
 
 makeD3State' :: forall a. a -> D3State
-makeD3State' d = D3State (coerceD3Data d) emptyD3Selection
+makeD3State' d = D3State (coerceD3Data d) mempty
 
 makeD3State :: forall a. a -> D3Selection -> D3State
 makeD3State d selection = D3State (coerceD3Data d) selection
@@ -67,7 +65,7 @@ setData d' (D3State d s) = (D3State d' s)
 -- setSelection s' (D3State d s) = (D3State d s')
 
 emptyD3State :: D3State
-emptyD3State = D3State emptyD3Data emptyD3Selection
+emptyD3State = D3State emptyD3Data mempty
 
 coerceD3Data :: forall a. a -> D3Data
 coerceD3Data = unsafeCoerce

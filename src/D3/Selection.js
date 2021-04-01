@@ -1,4 +1,3 @@
-exports.emptyD3Selection = null
 exports.emptyD3Data = null
 
 const debug = true;
@@ -43,7 +42,7 @@ exports.d3AddTransition = selection => transition => {
     console.log(`\td3addNamedTransition: ${selection}.transition(${transition})`);
     handle = selection.transition(transition.name);
   }
-  return handle;
+  return handle; 
 }
 
 // d3RemoveSelection_ :: D3Selection -> D3Selection
@@ -69,11 +68,11 @@ exports.d3DataKeyFn_ = data => keyFunction => selection => {
 // d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit 
 exports.d3SetAttr_ = name => value => selection => {
   if (debug) {(`\t${selection}.attr(${name}, ${value})`);}
-  selection.attr(name, value);
+  return selection.attr(name, value);
 }
 
 // d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit 
 exports.d3SetText_ = value => selection => {
   if (debug) {(`\t${selection}.text(${value})`);}
-  selection.text(value);
+  return selection.text(value);
 }
