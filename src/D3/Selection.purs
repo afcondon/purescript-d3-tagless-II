@@ -50,7 +50,8 @@ foreign import d3SetAttr_      :: String -> D3Attr -> D3Selection -> D3Selection
 foreign import d3SetText_      :: D3Attr -> D3Selection -> D3Selection
 
 foreign import emptyD3Data :: D3Data -- probably just null, could this be monoid too??? ie Last (Maybe D3Data)
-data D3State = D3State D3Data D3Selection
+
+data D3State = D3State D3Data D3Selection -- other candidates for State include named Transitions and selections???
 
 makeD3State' :: forall a. a -> D3State
 makeD3State' d = D3State (coerceD3Data d) mempty
@@ -60,9 +61,6 @@ makeD3State d selection = D3State (coerceD3Data d) selection
 
 setData :: D3Data -> D3State -> D3State
 setData d' (D3State d s) = (D3State d' s)
-
--- setSelection :: D3Selection -> D3State -> D3State
--- setSelection s' (D3State d s) = (D3State d s')
 
 emptyD3State :: D3State
 emptyD3State = D3State emptyD3Data mempty
@@ -93,7 +91,11 @@ type Transition = { name     :: String
 
 data Chainable =  AttrT Attribute
                 | TextT Attribute -- we can't narrow it to String here but helper function will do that
-                | TransitionT (Array Chainable) Transition -- the idea would be that the array is filled out locally
+                | TransitionT (Array Chainable) Transition -- the array is set situationally
+                | RemoveT
+  -- other candidates for this ADT include
+                -- | On
+                -- | Merge
                 
 type EnterUpdateExit = {
     enter  :: Array Chainable

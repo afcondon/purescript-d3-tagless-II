@@ -1,16 +1,13 @@
 module D3.Examples.GUP where
 
-import D3.Attributes.Instances
-import D3.Attributes.Sugar
-import D3.Selection 
-import Prelude
+import D3.Attributes.Instances (Datum, Index, datumIsChar, indexIsNumber)
+import D3.Attributes.Sugar (classed, fill, fontSize, height, remove, strokeColor, strokeOpacity, text, viewBox, width, with, x, y)
+import D3.Selection (Chainable, D3Selection, D3State(..), D3_Node(..), Element(..), EnterUpdateExit, node_) 
+import Prelude (class Bind, bind, negate, pure, ($), (*), (+), (<<<), (<>))
 
 import Control.Monad.State (class MonadState, get)
 import D3.Interpreter.Tagless (class D3Tagless, Keys(..), append, hook, join)
-import Data.Char (toCharCode)
-import Data.Int (toNumber)
 import Data.String.CodeUnits (singleton)
-import Unsafe.Coerce (unsafeCoerce)
 
 
 -- simple attributes don't use data, no hassle
@@ -36,30 +33,22 @@ offsetXByIndex d i = offset + ((indexIsNumber i) * factor)
 textFromDatum :: Datum -> String
 textFromDatum = singleton <<< datumIsChar
 
-enterAttrsBeforeTransition :: Array Chainable
-enterAttrsBeforeTransition = [
-    classed "enter"
-  , fill "black"
-  , x $ offsetXByIndex
-  , y 0.0
-  , text textFromDatum
-  , fontSize 48.0
-]
+enterUpdateExit :: Chainable -> EnterUpdateExit
+enterUpdateExit t =
+  { enter:  
+    [ classed "enter"
+    , fill "green"
+    , x offsetXByIndex
+    , y 0.0
+    , text textFromDatum
+    , fontSize 48.0
+    ]  <> 
+    (t `with` [ y 200.0 ] )
 
-enterAttrsAfterTransition :: Array Chainable
-enterAttrsAfterTransition = [ y 500.0 ]
+  , update: [ classed "update", fill "gray" ] <> (t `with` [ x offsetXByIndex ] ) 
 
-updateAttrsBeforeTransition :: Array Chainable
-updateAttrsBeforeTransition = [ classed "update", fill "green" ]
-
-updateAttrsAfterTransition :: Array Chainable
-updateAttrsAfterTransition = [ x $ offsetXByIndex ]
-
-exitAttrsBeforeTransition :: Array Chainable
-exitAttrsBeforeTransition = [ classed "exit", fill "red", strokeColor "red" ]
-
-exitAttrsAfterTransition :: Array Chainable
-exitAttrsAfterTransition = [ y 900.0 ]
+  , exit:   [ classed "exit", fill "brown" ]  <> (t `with` [ y 400.0, remove ])
+  }
 
 -- TODO we can actually potentially return _much_ more structured output, selection tree etc
 enter :: ∀ m. (D3Tagless m) => m D3Selection 
@@ -72,9 +61,6 @@ enter = do -- modelData is already in stateT
 update :: forall m. Bind m => MonadState D3State m => D3Tagless m => Chainable -> m D3Selection
 update t = do
   (D3State _ letters) <- get  
-  joinSelection <- join Text DatumIsKey letters { enter:  enterAttrsBeforeTransition  <> (t `with` enterAttrsAfterTransition) 
-                                                , update: updateAttrsBeforeTransition <> (t `with` updateAttrsAfterTransition) 
-                                                , exit:   exitAttrsBeforeTransition   <> (t `with` exitAttrsAfterTransition)
-                                                }
+  joinSelection <- join Text DatumIsKey letters (enterUpdateExit t)
 
   pure joinSelection

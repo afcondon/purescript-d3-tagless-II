@@ -9,7 +9,7 @@ exports.d3SelectAllInDOM_ = selector => { // NB not USING selection but want it 
 } 
 // d3SelectAll_ :: Selector -> D3Selection
 exports.d3SelectionSelectAll_ = selector => selection => {
-  if (debug) {console.log(`\td3SelectionSelectAll: ${selection}.selectAll(${selector})`);}
+  // if (debug) {console.log(`\td3SelectionSelectAll: ${selection}.selectAll(${selector})`);}
   return selection.selectAll(selector);
 } 
 // d3Enter_ :: D3Selection -> D3Selection

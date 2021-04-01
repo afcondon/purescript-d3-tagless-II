@@ -4,8 +4,8 @@ import Prelude
 
 import D3.Attributes.Instances (class ToAttr, Attribute(..), toAttr)
 import D3.Selection (Chainable(..), EasingFunction(..), Transition)
-import Effect.Aff (Milliseconds(..))
 import Data.Array ((:))
+import Effect.Aff (Milliseconds(..))
 
 strokeColor :: forall a. ToAttr String a => a -> Chainable
 strokeColor = AttrT <<< Attribute "stroke" <<< toAttr
@@ -88,3 +88,6 @@ with :: Chainable -> Array Chainable -> Array Chainable
 with (TransitionT [] t) chain = [ TransitionT chain t ]
 with (TransitionT existingChain t) newChain = [ TransitionT (existingChain <> newChain) t ]
 with otherChainable chain = otherChainable:chain
+
+remove :: Chainable
+remove = RemoveT

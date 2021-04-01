@@ -64,7 +64,7 @@ instance d3TaglessD3M :: D3Tagless D3M where
         initialS = d3SelectionSelectAll_ (show element) selection
 
         updateS = case keys of
-                    DatumIsKey -> d3DataKeyFn_ d3data (unsafeCoerce (\d -> d)) initialS 
+                    DatumIsKey -> d3Data_ d3data initialS 
                     (KeyF fn)  -> d3DataKeyFn_ d3data fn initialS 
         enterS  = d3EnterAndAppend_ (show element) updateS
         exitS   = d3Exit_ updateS
@@ -85,15 +85,16 @@ applyChainable selection (AttrT (Attribute label attr)) = d3SetAttr_ label (unbo
 -- NB only protection against non-text attribute for Text field is in the helper function
 applyChainable selection (TextT (Attribute label attr)) = d3SetText_ (unbox attr) selection 
 -- for transition we must use .call(selection, transition) so that chain continues
--- TODO handle the chain with recursive call but return selection not transition
+-- TODO handle the chain with recursive call
 applyChainable selection (TransitionT chain transition) = do
   let tHandler = d3AddTransition selection transition
-      _ = foldl applyChainable tHandler chain
-  selection
+      _        = foldl applyChainable tHandler chain
+  selection -- we return selection, not transition
+applyChainable selection RemoveT = d3RemoveSelection_ selection -- "selection" will often be a "transition"
 
 doAppend :: D3_Node -> D3Selection -> D3Selection
 doAppend (D3_Node element attributes) selection = do
-  let appended = d3Append_ (show element) selection
+  let appended  = d3Append_ (show element) selection
       appended' = foldl applyChainable appended attributes
   appended'
 
