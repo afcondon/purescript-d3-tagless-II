@@ -3,7 +3,8 @@ module D3.Attributes.Sugar where
 import Prelude
 
 import D3.Attributes.Instances (class ToAttr, Attribute(..), toAttr)
-import D3.Selection (Chainable(..), Transition, defaultTransition)
+import D3.Selection (Chainable(..), EasingFunction(..), Transition)
+import Effect.Aff (Milliseconds(..))
 
 strokeColor :: forall a. ToAttr String a => a -> Chainable
 strokeColor = AttrT <<< Attribute "stroke" <<< toAttr
@@ -66,8 +67,18 @@ text = AttrT <<< Attribute "text" <<< toAttr
 classed :: forall a. ToAttr String a => a -> Chainable
 classed = AttrT <<< Attribute "class" <<< toAttr
 
+
+-- helpers for transitions 
+
+defaultTransition :: Transition
+defaultTransition = { name: "", delay: Milliseconds 0.0, duration: Milliseconds 0.0, easing: DefaultCubic }
+
+-- always make this empty because the other chainable things compose at the use-point
 transition :: Transition -> Chainable
-transition t = TransitionT t
+transition t = TransitionT [] t
 
 namedTransition :: String -> Chainable
-namedTransition name = TransitionT $ defaultTransition { name = name } 
+namedTransition name = TransitionT [] $ defaultTransition { name = name } 
+
+transitionWithDuration :: Milliseconds -> Chainable -- this can be mempty for monoid
+transitionWithDuration duration = TransitionT [] defaultTransition { duration = duration }

@@ -36,8 +36,8 @@ offsetXByIndex d i = offset + ((indexIsNumber i) * factor)
 textFromDatum :: Datum -> String
 textFromDatum = singleton <<< datumIsChar
 
-enterInitial :: Array Chainable
-enterInitial = [
+enterAttrsBeforeTransition :: Array Chainable
+enterAttrsBeforeTransition = [
     classed "enter"
   , fill "black"
   , x $ offsetXByIndex
@@ -46,20 +46,20 @@ enterInitial = [
   , fontSize 48.0
 ]
 
-enterFinal :: Array Chainable
-enterFinal = [ y 500.0 ]
+enterAttrsAfterTransition :: Array Chainable
+enterAttrsAfterTransition = [ y 500.0 ]
 
-updateInitial :: Array Chainable
-updateInitial = [ classed "update", fill "green" ]
+updateAttrsBeforeTransition :: Array Chainable
+updateAttrsBeforeTransition = [ classed "update", fill "green" ]
 
-updateFinal :: Array Chainable
-updateFinal = [ x $ offsetXByIndex ]
+updateAttrsAfterTransition :: Array Chainable
+updateAttrsAfterTransition = [ x $ offsetXByIndex ]
 
-exitInitial :: Array Chainable
-exitInitial = [ classed "exit", fill "red", strokeColor "red" ]
+exitAttrsBeforeTransition :: Array Chainable
+exitAttrsBeforeTransition = [ classed "exit", fill "red", strokeColor "red" ]
 
-exitFinal :: Array Chainable
-exitFinal = [ y 900.0 ]
+exitAttrsAfterTransition :: Array Chainable
+exitAttrsAfterTransition = [ y 900.0 ]
 
 -- TODO we can actually potentially return _much_ more structured output, selection tree etc
 enter :: ∀ m. (D3Tagless m) => m D3Selection 
@@ -72,8 +72,8 @@ enter = do -- modelData is already in stateT
 update :: forall m. Bind m => MonadState D3State m => D3Tagless m => Chainable -> m D3Selection
 update t = do
   (D3State _ letters) <- get  
-  joinSelection <- join Text DatumIsKey letters { enter: enterInitial <> [t] <> enterFinal
-                                                , update: updateInitial <> [t] <> updateFinal
-                                                , exit: exitInitial <> [t] <> exitFinal }
+  joinSelection <- join Text DatumIsKey letters { enter: enterAttrsBeforeTransition <> [t] <> enterAttrsAfterTransition
+                                                , update: updateAttrsBeforeTransition <> [t] <> updateAttrsAfterTransition
+                                                , exit: exitAttrsBeforeTransition <> [t] <> exitAttrsAfterTransition }
 
   pure joinSelection

@@ -92,12 +92,10 @@ type Transition = { name     :: String
                   , duration :: Milliseconds -- can also be a function, ie (\d -> f d)
                   , easing   :: EasingFunction
 }
-defaultTransition :: Transition -- this can be mempty for monoid
-defaultTransition = { name: "", delay: Milliseconds 0.0, duration: Milliseconds 0.0, easing: DefaultCubic }
 
 data Chainable =  AttrT Attribute
                 | TextT (Attrib String)
-                | TransitionT Transition
+                | TransitionT (Array Chainable) Transition-- the idea would be that the array is filled out locally
                 
 type EnterUpdateExit = {
     enter  :: Array Chainable
