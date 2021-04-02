@@ -1,4 +1,4 @@
-exports.emptyD3Data = null
+exports.emptyD3Data_ = null
 
 const debug = true;
 

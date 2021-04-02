@@ -1,13 +1,15 @@
 module D3.Examples.GUP where
 
+import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum, Index, datumIsChar, indexIsNumber)
 import D3.Attributes.Sugar (classed, fill, fontSize, height, remove, strokeColor, strokeOpacity, text, viewBox, width, with, x, y)
-import D3.Selection (Chainable, D3Selection, D3State(..), D3_Node(..), Element(..), EnterUpdateExit, node_) 
-import Prelude (class Bind, bind, negate, pure, ($), (*), (+), (<<<), (<>))
-
-import Control.Monad.State (class MonadState, get)
-import D3.Interpreter.Tagless (class D3Tagless, Keys(..), append, hook, join)
+import D3.Interpreter.Tagless (class D3Tagless, append, hook, join)
+import D3.Selection (Chainable, D3Selection, D3State(..), D3_Node(..), Element(..), EnterUpdateExit, Keys(..), SelectionName(..), node_)
+import Data.Maybe (Maybe(..))
+import Data.Maybe.Last (Last(..))
 import Data.String.CodeUnits (singleton)
+import Prelude (class Bind, bind, negate, pure, ($), (*), (+), (<<<), (<>))
+import Unsafe.Coerce (unsafeCoerce)
 
 
 -- simple attributes don't use data, no hassle
@@ -50,17 +52,23 @@ enterUpdateExit t =
   , exit:   [ classed "exit",   fill "brown" ] <> (t `with` [ y 400.0, remove ])
   }
 
--- TODO we can actually potentially return _much_ more structured output, selection tree etc
+-- modelData is probably already in stateT but doesn't need to be until we hit a join
 enter :: ∀ m. (D3Tagless m) => m D3Selection 
-enter = do -- modelData is already in stateT   
+enter = do 
   root <- hook "div#root"
   svg  <- append $ D3_Node Svg svgAttributes
   append $ node_ Group
 
--- TODO we can actually return much more structured output, selection tree etc
-update :: forall m. Bind m => MonadState D3State m => D3Tagless m => Chainable -> m D3Selection
-update t = do
-  (D3State _ letters) <- get  
-  joinSelection <- join Text DatumIsKey letters (enterUpdateExit t)
+update :: forall m. Bind m => MonadState (D3State (Array Char)) m => D3Tagless m => Chainable -> m D3Selection
+update transition = do
+  (D3State state) <- get  
 
-  pure joinSelection
+  -- joinSelection_ <- join state.model {
+  --     element   : Text
+  --   , key       : DatumIsKey
+  --   , selection : SelectionName "letters"
+  --   , projection: unsafeCoerce -- null projection
+  --   , behaviour : enterUpdateExit transition
+  -- }
+
+  pure $ state.active -- Last $ Just joinSelection_

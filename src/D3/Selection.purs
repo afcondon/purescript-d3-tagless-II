@@ -3,8 +3,10 @@ module D3.Selection where
 import Prelude hiding (append,join)
 
 import D3.Attributes.Instances (Attrib, Attribute, Datum, Index)
+import Data.Map (Map, empty)
 import Data.Maybe (Maybe)
 import Data.Maybe.Last (Last)
+import Data.Tuple (Tuple(..))
 import Effect.Aff (Milliseconds)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -20,53 +22,65 @@ instance showElement :: Show Element where
   show Group  = "g"
   show Text   = "text"
   
--- || trying this with Finally Tagless instead of interpreter
+-- (Opaque) foreign types generated for (ie unsafeCoerce), or by (ie returned selections), D3 
+foreign import data D3Data_       :: Type 
 foreign import data D3Selection_  :: Type
-type D3Selection = Last (Maybe D3Selection_)
-foreign import data D3DomNode    :: Type
-foreign import data D3This       :: Type
-type KeyFunction = Datum -> Index
-type D3Group = Array D3DomNode
-foreign import data D3Transition :: Type -- not clear yet if we need to distinguish from Selection
+foreign import data D3Transition_ :: Type -- not clear yet if we need to distinguish from Selection
+foreign import data D3DomNode     :: Type -- not yet used but may be needed, ex. in callbacks
+foreign import data D3This        :: Type -- not yet used but may be needed, ex. in callbacks
+
+foreign import d3SelectAllInDOM_     :: Selector    -> D3Selection_ -- NB passed D3Selection is IGNORED
+foreign import d3SelectionSelectAll_ :: Selector    -> D3Selection_  -> D3Selection_
+foreign import d3EnterAndAppend_     :: String      -> D3Selection_  -> D3Selection_
+foreign import d3Append_             :: String      -> D3Selection_  -> D3Selection_
+foreign import d3Exit_               ::                D3Selection_ -> D3Selection_
+foreign import d3Data_               :: D3Data_     -> D3Selection_  -> D3Selection_
+foreign import d3DataKeyFn_          :: D3Data_     -> KeyFunction_ -> D3Selection_ -> D3Selection_
+foreign import d3RemoveSelection_    :: D3Selection_ -> D3Selection_
+
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
-foreign import data D3Data :: Type 
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
 foreign import data D3Attr :: Type 
-
-foreign import d3SelectAllInDOM_     :: Selector -> D3Selection -- NB passed D3Selection is IGNORED
-foreign import d3SelectionSelectAll_ :: Selector -> D3Selection -> D3Selection
-foreign import d3EnterAndAppend_     :: String   -> D3Selection -> D3Selection
-foreign import d3Append_             :: String   -> D3Selection -> D3Selection
-foreign import d3Exit_               :: D3Selection -> D3Selection
-foreign import d3Data_               :: D3Data   -> D3Selection -> D3Selection
-foreign import d3DataKeyFn_          :: D3Data   -> KeyFunction -> D3Selection -> D3Selection
-foreign import d3RemoveSelection_    :: D3Selection -> D3Selection
-
 -- NB D3 returns the selection after setting an Attr but we will only capture Selections that are 
 -- meaningfully different _as_ selections, we're not chaining them in the same way
 -- foreign import d3GetAttr_ :: String -> D3Selection -> ???? -- solve the ???? as needed later
-foreign import d3AddTransition :: D3Selection -> Transition -> D3Selection -- this is the PS transition record
-foreign import d3SetAttr_      :: String -> D3Attr -> D3Selection -> D3Selection
-foreign import d3SetText_      :: D3Attr -> D3Selection -> D3Selection
+foreign import d3AddTransition :: D3Selection_ -> Transition -> D3Selection_ -- this is the PS transition record
+foreign import d3SetAttr_      :: String      -> D3Attr -> D3Selection_ -> D3Selection_
+foreign import d3SetText_      :: D3Attr      -> D3Selection_ -> D3Selection_
 
-foreign import emptyD3Data :: D3Data -- probably just null, could this be monoid too??? ie Last (Maybe D3Data)
+foreign import emptyD3Data_ :: D3Data_ -- probably just null, could this be monoid too??? ie Last (Maybe D3Data_)
 
-data D3State = D3State D3Data D3Selection -- other candidates for State include named Transitions and selections???
+type D3Group      = Array D3DomNode
 
-makeD3State' :: forall a. a -> D3State
-makeD3State' d = D3State (coerceD3Data d) mempty
+type D3Selection  = Last D3Selection_
+type KeyFunction_ = Datum -> Index
+data Keys = KeyF KeyFunction_ | DatumIsKey
+data Join model = Join {
+    element    :: Element           -- what we're going to insert in the DOM
+  , key        :: Keys              -- how D3 is going to identify data so that 
+  , selection  :: SelectionName     -- pending a better system we'll look up the selection using a newtype for string
+  , projection :: model -> D3Data_  -- the join might operate on some subset or transformation of the data
+  , behaviour  :: EnterUpdateExit   -- what we're going to do for each set (enter, exit, update) each refresh of data
+}
+newtype SelectionName = SelectionName String
+derive instance eqSelectionName  :: Eq SelectionName
+derive instance ordSelectionName :: Ord SelectionName
+data D3State model = D3State {
+    model            :: model
+  , active           :: D3Selection
+  , namedSelections  :: Map SelectionName D3Selection_
+  , namedTransitions :: Map SelectionName D3Selection_
+  , namedJoins       :: Map SelectionName (Join model)
+}
 
-makeD3State :: forall a. a -> D3Selection -> D3State
-makeD3State d selection = D3State (coerceD3Data d) selection
+makeD3State' :: forall model. model -> D3State model
+makeD3State' model = D3State { model, active: mempty, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
 
-setData :: D3Data -> D3State -> D3State
-setData d' (D3State d s) = (D3State d' s)
+makeD3State :: forall model. model -> D3Selection -> D3State model
+makeD3State model selection = D3State { model, active: selection, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
 
-emptyD3State :: D3State
-emptyD3State = D3State emptyD3Data mempty
-
-coerceD3Data :: forall a. a -> D3Data
-coerceD3Data = unsafeCoerce
+setData :: forall model. model -> D3State model -> D3State model
+setData model (D3State state) = D3State state { model=model}
 
 data D3_Node = D3_Node Element (Array Chainable)
 

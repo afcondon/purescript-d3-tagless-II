@@ -6,23 +6,25 @@ import Prelude
 import Control.Monad.State (class MonadState, StateT, get, modify, modify_, put, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox, unboxText)
 import Data.Foldable (foldl)
+import Data.Map (lookup)
 import Data.Maybe (Maybe(..))
+import Data.Maybe.Last (Last(..))
 import Data.Semigroup.Foldable (foldl1)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Unsafe.Coerce (unsafeCoerce)
 
-newtype D3M a = D3M (StateT D3State Effect a) -- not actually using Effect in foreign fns to keep sigs simple (for now)
+-- not actually using Effect in foreign fns to keep sigs simple (for now)
+newtype D3M model a = D3M (StateT (D3State model) Effect a) 
 
-derive newtype instance functorD3M     :: Functor           D3M
-derive newtype instance applyD3M       :: Apply             D3M
-derive newtype instance applicativeD3M :: Applicative       D3M
-derive newtype instance bindD3M        :: Bind              D3M
-derive newtype instance monadD3M       :: Monad             D3M
-derive newtype instance monadStateD3M  :: MonadState D3State D3M
-derive newtype instance monadEffD3M    :: MonadEffect       D3M
-
+derive newtype instance functorD3M     :: Functor                    (D3M model)
+derive newtype instance applyD3M       :: Apply                      (D3M model)
+derive newtype instance applicativeD3M :: Applicative                (D3M model)
+derive newtype instance bindD3M        :: Bind                       (D3M model)
+derive newtype instance monadD3M       :: Monad                      (D3M model)
+derive newtype instance monadStateD3M  :: MonadState (D3State model) (D3M model)
+derive newtype instance monadEffD3M    :: MonadEffect                (D3M model)
 
 -- TODO
 -- there's definitely some indexed monad or state machine kinda stuff here 
@@ -31,70 +33,68 @@ derive newtype instance monadEffD3M    :: MonadEffect       D3M
 -- are (Datum -> <something>)
 -- there are thus several things that are legal under the type system which
 -- would lead to run time errors
-data Keys = KeyF KeyFunction | DatumIsKey
 class (Monad m) <= D3Tagless m where
-  model  :: forall d. d -> m D3State
-  hook   :: Selector -> m D3Selection
-  append :: D3_Node -> m D3Selection
-  join   :: Element -> Keys -> D3Selection -> EnterUpdateExit -> m D3Selection
+  hook   :: Selector                          -> m D3Selection
+  append :: D3_Node                           -> m D3Selection
+  join   :: forall model. model -> Join model -> m D3Selection
 
-runD3M :: ∀ a. D3M a -> D3State -> Effect (Tuple a D3State)
+runD3M :: ∀ a model. D3M model a -> (D3State model) -> Effect (Tuple a (D3State model))
 runD3M (D3M state) = runStateT state
 
-d3State :: ∀ a. D3M a -> Effect D3State
-d3State (D3M state) = liftA1 snd $ runStateT state emptyD3State
+d3State :: ∀ a model. model -> D3M model a -> Effect (D3State model)
+d3State model (D3M state) = liftA1 snd $ runStateT state (makeD3State' model)
 
-d3Run :: ∀ a. D3M a -> Effect a
-d3Run (D3M state) = liftA1 fst $ runStateT state emptyD3State
+d3Run :: ∀ a model. model -> D3M model a -> Effect a
+d3Run model (D3M state) = liftA1 fst $ runStateT state (makeD3State' model)
 
-instance d3TaglessD3M :: D3Tagless D3M where
-  model         = modify <<< setData <<< coerceD3Data
+instance d3TaglessD3M :: D3Tagless (D3M model) where
   hook selector = setSelection $ d3SelectAllInDOM_ selector 
 
-  append node = do
-    (D3State d3data selection) <- get
-    setSelection $ doAppend node selection
+  append (D3_Node element attributes) = do
+    (D3State state) <- get
+    case state.active of
+      (Last Nothing) -> pure state.active
+      (Last (Just selection_)) -> do
+        let appended_ = d3Append_ (show element) selection_
+        setSelection $ foldl applyChainable appended_ attributes     
 
-  join element keys selection enterUpdateExit = do
-    -- TODO this is a bit weird, we're taking the selection from params not state here
-    -- in order to allow join to be called separately, revisit the whole state / selection issue later
-    -- when (at least) GUP is working
-    (D3State d3data _) <- get 
-    let
-        initialS = d3SelectionSelectAll_ (show element) selection
+  join model (Join j) = do
+    (D3State state) <- get 
+    let selectionM = lookup j.selection state.namedSelections
+        (model :: D3Data_) = unsafeCoerce state.model -- TODO but in fact, it's the projection that we coerce
+    case selectionM of
+      Nothing -> pure state.active
+      (Just selection) -> do
+        let 
+          initialS = d3SelectionSelectAll_ (show j.element) selection
 
-        updateS = case keys of
-                    DatumIsKey -> d3Data_ d3data initialS 
-                    (KeyF fn)  -> d3DataKeyFn_ d3data fn initialS 
-        enterS  = d3EnterAndAppend_ (show element) updateS
-        exitS   = d3Exit_ updateS
+          updateS = case j.key of
+                      DatumIsKey -> d3Data_      model initialS 
+                      (KeyF fn)  -> d3DataKeyFn_ model fn initialS 
+          enterS  = d3EnterAndAppend_ (show j.element) updateS
+          exitS   = d3Exit_ updateS -- updateS.exit ??????
 
-        _ = foldl applyChainable updateS enterUpdateExit.update
-        _ = foldl applyChainable enterS  enterUpdateExit.enter
-        _ = foldl applyChainable exitS   enterUpdateExit.exit
+          _ = foldl applyChainable updateS j.behaviour.update
+          _ = foldl applyChainable enterS  j.behaviour.enter
+          _ = foldl applyChainable exitS   j.behaviour.exit
 
-    pure updateS
+        pure $ Last $ Just updateS
 
-setSelection :: forall m. Bind m => MonadState D3State m => D3Selection -> m D3Selection
-setSelection newSelection = do
-    modify_ (\(D3State d s) -> D3State d newSelection) 
-    pure newSelection
+setSelection :: forall m model. Bind m => MonadState (D3State model) m => D3Selection_ -> m D3Selection
+setSelection selection_ = do
+    let active = Last $ Just selection_
+    modify_ (\(D3State d) -> D3State d { active=active }) 
+    pure active
 
-applyChainable :: D3Selection -> Chainable -> D3Selection
+applyChainable :: D3Selection_ -> Chainable -> D3Selection_
 applyChainable selection (AttrT (Attribute label attr)) = d3SetAttr_ label (unbox attr) selection
 -- NB only protection against non-text attribute for Text field is in the helper function
 applyChainable selection (TextT (Attribute label attr)) = d3SetText_ (unbox attr) selection 
 -- for transition we must use .call(selection, transition) so that chain continues
--- TODO handle the chain with recursive call
 applyChainable selection (TransitionT chain transition) = do
   let tHandler = d3AddTransition selection transition
       _        = foldl applyChainable tHandler chain
   selection -- we return selection, not transition
 applyChainable selection RemoveT = d3RemoveSelection_ selection -- "selection" will often be a "transition"
 
-doAppend :: D3_Node -> D3Selection -> D3Selection
-doAppend (D3_Node element attributes) selection = do
-  let appended  = d3Append_ (show element) selection
-      appended' = foldl applyChainable appended attributes
-  appended'
 
