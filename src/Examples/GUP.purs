@@ -45,9 +45,9 @@ enterUpdateExit t =
     ]  <> 
     (t `with` [ y 200.0 ] )
 
-  , update: [ classed "update", fill "gray" ] <> (t `with` [ x offsetXByIndex ] ) 
+  , update: [ classed "update", fill "gray", y 200.0 ] <> (t `with` [ x offsetXByIndex ] ) 
 
-  , exit:   [ classed "exit", fill "brown" ]  <> (t `with` [ y 400.0, remove ])
+  , exit:   [ classed "exit",   fill "brown" ] <> (t `with` [ y 400.0, remove ])
   }
 
 -- TODO we can actually potentially return _much_ more structured output, selection tree etc
