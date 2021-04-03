@@ -43,4 +43,4 @@ main = launchAff_  do
     _          <- liftEffect $ runD3M 
                                 (GUP.update $ transition duration)
                                 (setData newletters state)
-    delay duration
+    delay (Milliseconds 2300.0)

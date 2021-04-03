@@ -26,15 +26,15 @@ exports.d3Exit_ = selection => {
 exports.d3AddTransition = selection => transition => {
   var handle; 
   if (transition.name == "") {
-    if(debug) {console.log(`\td3addTransition: ${selection}.transition(${transition})`);}
+    // if (debug) {console.log(`\td3addTransition: ${selection}.transition(${transition})`);}
     handle = selection.transition();
     // if transition is unnamed we configure it...
     if (transition.duration != 0) {
-      if (debug) {console.log(`transition.duration(${transition.duration})`);}
+      // if (debug) {console.log(`transition.duration(${transition.duration})`);}
       handle.duration(transition.duration);
     }
     if (transition.delay != 0) {
-      if (debug) {console.log(`transition.delay(${transition.delay})`);}
+      // if (debug) {console.log(`transition.delay(${transition.delay})`);}
       handle.delay(transition.delay);
     }
   } else {
@@ -48,6 +48,7 @@ exports.d3AddTransition = selection => transition => {
 // d3RemoveSelection_ :: D3Selection -> D3Selection
 exports.d3RemoveSelection_ = selection => {
   if (debug) {console.log(`\td3Remove: ${selection}.remove()`);}
+  if (debug) {console.log(selection);}
   return selection.remove();
 }
 // d3Append_ :: String -> D3Selection -> D3Selection

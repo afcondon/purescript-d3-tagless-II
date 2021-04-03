@@ -79,9 +79,9 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
           exitS    = -- spy "exit: " $ 
                      d3Exit_ updateS -- updateS.exit ??????
 
-          _        = foldl applyChainable updateS j.behaviour.update
           _        = foldl applyChainable enterS  j.behaviour.enter
           _        = foldl applyChainable exitS   j.behaviour.exit
+          _        = foldl applyChainable updateS j.behaviour.update
 
         pure $ Last $ Just updateS
 
@@ -93,14 +93,17 @@ setSelection name selection_ = do
     pure active
 
 applyChainable :: D3Selection_ -> Chainable -> D3Selection_
-applyChainable selection (AttrT (Attribute label attr)) = d3SetAttr_ label (unbox attr) selection
+applyChainable selection (AttrT (Attribute label attr)) = -- trace { applyAttr: label } \_ -> 
+  d3SetAttr_ label (unbox attr) selection
 -- NB only protection against non-text attribute for Text field is in the helper function
-applyChainable selection (TextT (Attribute label attr)) = d3SetText_ (unbox attr) selection 
+applyChainable selection (TextT (Attribute label attr)) = -- trace { applyAttr: label } \_ -> 
+  d3SetText_ (unbox attr) selection 
 -- for transition we must use .call(selection, transition) so that chain continues
-applyChainable selection (TransitionT chain transition) = do
+applyChainable selection (TransitionT chain transition) = spy "start transition" do
   let tHandler = d3AddTransition selection transition
       _        = foldl applyChainable tHandler chain
   selection -- we return selection, not transition
-applyChainable selection RemoveT = d3RemoveSelection_ selection -- "selection" will often be a "transition"
+applyChainable selection RemoveT = trace { remove: selection } \_ -> 
+  d3RemoveSelection_ selection -- "selection" will often be a "transition"
 
 
