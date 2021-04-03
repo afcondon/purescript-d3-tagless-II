@@ -57,7 +57,7 @@ enter = do
   svg  <- append "svg" $ D3_Node Svg svgAttributes
   append "letter-group" $ node_ Group
 
-update :: forall m. Bind m => MonadState (D3State (Array Char)) m => D3Tagless m => Chainable -> m D3Selection
+update :: ∀ m. Bind m => MonadState (D3State (Array Char)) m => D3Tagless m => Chainable -> m D3Selection
 update transition = do
   (D3State state) <- get  
 

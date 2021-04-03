@@ -3,6 +3,7 @@ module Main where
 import Control.Monad.Rec.Class (forever)
 import D3.Attributes.Sugar (transitionWithDuration)
 import D3.Examples.GUP (enter, update) as GUP
+import D3.Examples.Tree  as Tree
 import D3.Interpreter.Tagless (runD3M)
 import D3.Selection (Chainable, makeD3State', setData)
 import Data.Array (catMaybes)
@@ -36,6 +37,8 @@ main :: Effect Unit
 main = launchAff_  do
   letters <- liftEffect $ getLetters
   state   <- liftEffect $ liftA1 snd $ runD3M GUP.enter (makeD3State' letters)
+
+  state2  <- liftEffect $ liftA1 snd $ runD3M Tree.enter (makeD3State' letters)
 
   let duration = Milliseconds 2000.0
   forever $ do

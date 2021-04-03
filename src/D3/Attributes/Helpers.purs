@@ -7,65 +7,65 @@ import D3.Selection (Chainable(..), EasingFunction(..), Transition)
 import Data.Array ((:))
 import Effect.Aff (Milliseconds(..))
 
-strokeColor :: forall a. ToAttr String a => a -> Chainable
+strokeColor :: ∀ a. ToAttr String a => a -> Chainable
 strokeColor = AttrT <<< Attribute "stroke" <<< toAttr
 
-strokeOpacity :: forall a. ToAttr Number a => a -> Chainable
+strokeOpacity :: ∀ a. ToAttr Number a => a -> Chainable
 strokeOpacity = AttrT <<< Attribute "stroke-opacity" <<< toAttr
 
-strokeWidth :: forall a. ToAttr Number a => a -> Chainable
+strokeWidth :: ∀ a. ToAttr Number a => a -> Chainable
 strokeWidth = AttrT <<< Attribute "stroke-width" <<< toAttr
 
-fill :: forall a. ToAttr String a => a -> Chainable
+fill :: ∀ a. ToAttr String a => a -> Chainable
 fill = AttrT <<< Attribute "fill" <<< toAttr
 
 -- TODO this definitely needs to be Number-with-unit here
 viewBox :: Number -> Number -> Number -> Number -> Chainable
 viewBox xo yo w h = AttrT <<< Attribute "viewbox" $ toAttr [ xo, yo, w, h ]
 
-fontFamily :: forall a. ToAttr String a => a -> Chainable
+fontFamily :: ∀ a. ToAttr String a => a -> Chainable
 fontFamily = AttrT <<< Attribute "font-family" <<< toAttr
 
-textAnchor :: forall a. ToAttr String a => a -> Chainable
+textAnchor :: ∀ a. ToAttr String a => a -> Chainable
 textAnchor = AttrT <<< Attribute "text-anchor" <<< toAttr
 
-radius :: forall a. ToAttr Number a => a -> Chainable
+radius :: ∀ a. ToAttr Number a => a -> Chainable
 radius = AttrT <<< Attribute "r" <<< toAttr
 
-fontSize :: forall a. ToAttr Number a => a -> Chainable
+fontSize :: ∀ a. ToAttr Number a => a -> Chainable
 fontSize = AttrT <<< Attribute "font-size" <<< toAttr
 
-width :: forall a. ToAttr Number a => a -> Chainable
+width :: ∀ a. ToAttr Number a => a -> Chainable
 width = AttrT <<< Attribute "width" <<< toAttr
 
-height :: forall a. ToAttr Number a => a -> Chainable
+height :: ∀ a. ToAttr Number a => a -> Chainable
 height = AttrT <<< Attribute "height" <<< toAttr
 
-x :: forall a. ToAttr Number a => a -> Chainable
+x :: ∀ a. ToAttr Number a => a -> Chainable
 x = AttrT <<< Attribute "x" <<< toAttr
 
-y :: forall a. ToAttr Number a => a -> Chainable
+y :: ∀ a. ToAttr Number a => a -> Chainable
 y = AttrT <<< Attribute "y" <<< toAttr
 
-r :: forall a. ToAttr Number a => a -> Chainable
+r :: ∀ a. ToAttr Number a => a -> Chainable
 r = AttrT <<< Attribute "r" <<< toAttr
 
-dx :: forall a. ToAttr Number a => a -> Chainable
+dx :: ∀ a. ToAttr Number a => a -> Chainable
 dx = AttrT <<< Attribute "dx" <<< toAttr
 
-dy :: forall a. ToAttr Number a => a -> Chainable
+dy :: ∀ a. ToAttr Number a => a -> Chainable
 dy = AttrT <<< Attribute "dy" <<< toAttr
 
-cx :: forall a. ToAttr Number a => a -> Chainable
+cx :: ∀ a. ToAttr Number a => a -> Chainable
 cx = AttrT <<< Attribute "cx" <<< toAttr
 
-cy :: forall a. ToAttr Number a => a -> Chainable
+cy :: ∀ a. ToAttr Number a => a -> Chainable
 cy = AttrT <<< Attribute "cy" <<< toAttr
 
-text :: forall a. ToAttr String a => a -> Chainable
+text :: ∀ a. ToAttr String a => a -> Chainable
 text = TextT <<< Attribute "text" <<< toAttr
 
-classed :: forall a. ToAttr String a => a -> Chainable
+classed :: ∀ a. ToAttr String a => a -> Chainable
 classed = AttrT <<< Attribute "class" <<< toAttr
 
 

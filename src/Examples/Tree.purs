@@ -1,10 +1,11 @@
 module D3.Examples.Tree where
 
-import Prelude
+import D3.Attributes.Sugar
+import Prelude (bind, negate, pure, ($))
 
 import D3.Attributes.Instances (Attribute, Datum)
-import D3.Attributes.Sugar (strokeColor, strokeOpacity)
-import D3.Selection (Chainable)
+import D3.Interpreter.Tagless (class D3Tagless, append, hook)
+import D3.Selection (Chainable, D3Selection, D3_Node, Element(..), node, node_)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | Model types
@@ -18,6 +19,14 @@ type Nodes = Array Node
 
 datumToNode = unsafeCoerce :: Datum -> Node
 datumToLink = unsafeCoerce :: Datum -> Link
+
+-- | Script components, attributes, transformations etc
+svgAttributes :: Array Chainable
+svgAttributes = [
+    width 1000.0
+  , height 1000.0
+  , viewBox (-500.0) (-500.0) 1000.0 1000.0
+]
 
 -- | Example Model data
 exampleLink :: Link
@@ -34,44 +43,22 @@ exampleNodes = [ exampleNode, exampleNode, exampleNode ]
 model :: Model
 model = { links: exampleLinks, nodes: exampleNodes }
 
--- | Example Chart to work with Model types and data above
+enter :: ∀ m. (D3Tagless m) => m D3Selection
+enter = do
+  root <- hook "div#tree"
+  svg  <- append "svg-tree" $ node Svg svgAttributes
+  _    <- append "links-group"  $ node_ Group
+  _    <- append "nodes-group"  $ node_ Group
+  _    <- append "labels-group" $ node_ Group
 
--- linkColor :: Link -> Chainable
--- linkColor a = 
---   if a.source == a.target
---   then strokeColor"green"
---   else strokeColor "blue"
+  pure svg
 
--- linkWidth :: Link -> Chainable
--- linkWidth a = strokeOpacity $ a.count * 5.0
 
--- linkAttrs :: Array (Link -> Attribute)
--- linkAttrs = [ linkWidth, linkColor ]
 
--- || this example is written using the Data Structure style of interpreter, not tagless
--- || kept for reference to be re-written with Tagless soon
-{-
-tree :: Selection Model
-tree = 
-  Hook "div" $ 
-    Append Svg [] [
-        Join Group (\a -> a.links) End
-      , Join Group (\a -> a.nodes) End
-      , Join Group (\a -> a.nodes) End
-    ]
-
-joinNodes :: JoinData Model Nodes
-joinNodes m = 
-  Tuple m.nodes $
-    Append "circle" [ strokeOpacity 0.75
-                    , x (\d -> (datumToNode d).x * 5.0) ] [
-    ]
-
-joinLinks :: JoinData Model Links
-joinLinks m =
-  Tuple m.links End
-
-joinLabels :: JoinData Model Nodes
-joinLabels m =
-  Tuple m.nodes End
--}
+  -- joinSelection_ <- join state.model $ Join {
+  --     element   : Text
+  --   , key       : DatumIsKey
+  --   , selection : SelectionName "letter-group"
+  --   , projection: unsafeCoerce -- null projection
+  --   , behaviour : enterUpdateExit transition
+  -- }

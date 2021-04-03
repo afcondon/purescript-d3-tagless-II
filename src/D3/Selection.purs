@@ -73,20 +73,23 @@ data D3State model = D3State {
   , namedJoins       :: Map SelectionName (Join model)
 }
 
-makeD3State' :: forall model. model -> D3State model
+makeD3State' :: ∀ model. model -> D3State model
 makeD3State' model = D3State { model, active: mempty, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
 
-makeD3State :: forall model. model -> D3Selection -> D3State model
+makeD3State :: ∀ model. model -> D3Selection -> D3State model
 makeD3State model selection = D3State { model, active: selection, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
 
-setData :: forall model. model -> D3State model -> D3State model
+setData :: ∀ model. model -> D3State model -> D3State model
 setData model (D3State state) = D3State state { model=model}
 
 data D3_Node = D3_Node Element (Array Chainable)
 
 -- sugar for appending with no attributes
+node :: Element -> (Array Chainable) -> D3_Node
+node e a = D3_Node e a
+
 node_ :: Element -> D3_Node
-node_ = \e -> D3_Node e []
+node_ e = D3_Node e []
 
 -- Transition types
 type EasingTime = Number

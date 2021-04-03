@@ -28,7 +28,7 @@ derive newtype instance monadEffD3M    :: MonadEffect                (D3M model)
 class (Monad m) <= D3Tagless m where
   hook   :: Selector                          -> m D3Selection
   append :: String              -> D3_Node    -> m D3Selection
-  join   :: forall model. model -> Join model -> m D3Selection
+  join   :: ∀ model. model -> Join model -> m D3Selection
 
 runD3M :: ∀ a model. D3M model a -> (D3State model) -> Effect (Tuple a (D3State model))
 runD3M (D3M state) = runStateT state
@@ -73,7 +73,7 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
 
         pure $ Last $ Just updateS
 
-setSelection :: forall m model. Bind m => MonadState (D3State model) m => 
+setSelection :: ∀ m model. Bind m => MonadState (D3State model) m => 
   SelectionName -> D3Selection_ -> m D3Selection
 setSelection name selection_ = do
     let active = Last $ Just selection_

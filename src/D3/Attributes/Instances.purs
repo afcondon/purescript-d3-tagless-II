@@ -20,7 +20,7 @@ data Attr = StringAttr (Attrib String)
           | NumberAttr (Attrib Number)
           | ArrayAttr (Attrib (Array Number))
 
-unbox :: forall a. Attr -> a
+unbox :: ∀ a. Attr -> a
 unbox = 
   case _ of
     (StringAttr (Static a)) -> unsafeCoerce a
@@ -35,7 +35,7 @@ unbox =
     (ArrayAttr (Fn a))      -> unsafeCoerce a
     (ArrayAttr (FnI a))     -> unsafeCoerce a
 
-unboxText :: forall a. Attrib String -> a
+unboxText :: ∀ a. Attrib String -> a
 unboxText = 
   case _ of
     (Static a) -> unsafeCoerce a
