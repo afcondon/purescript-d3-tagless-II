@@ -2,10 +2,10 @@ module D3.Examples.Tree where
 
 import D3.Attributes.Sugar
 
-import D3.Attributes.Instances (Attribute, Datum)
+import D3.Attributes.Instances (Datum)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook)
-import D3.Selection (Chainable, D3Selection, D3Selection_, D3_Node, Element(..), node, node_)
-import Prelude (bind, negate, pure, ($))
+import D3.Selection (Chainable, D3Selection_, Element(..), node, node_)
+import Prelude (bind, negate, pure)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | Model types
@@ -45,11 +45,11 @@ model = { links: exampleLinks, nodes: exampleNodes }
 
 enter :: ∀ m. (D3Tagless m) => m D3Selection_
 enter = do
-  root <- hook "div#tree"
-  svg  <- appendTo root "svg-tree" $ node Svg svgAttributes
-  _    <- appendTo svg "links-group"  $ node_ Group
-  _    <- appendTo svg "nodes-group"  $ node_ Group
-  _    <- appendTo svg "labels-group" $ node_ Group
+  root   <- hook "div#tree"
+  svg    <- appendTo root "svg-tree" (node Svg svgAttributes)
+  links  <- appendTo svg "links-group"  (node Group [ classed "links"])
+  nodes  <- appendTo svg "nodes-group"  (node Group [ classed "nodes"])
+  labels <- appendTo svg "labels-group" (node Group [ classed "labels"])
 
   pure svg
 
