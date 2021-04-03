@@ -26,9 +26,9 @@ derive newtype instance monadStateD3M  :: MonadState (D3State model) (D3M model)
 derive newtype instance monadEffD3M    :: MonadEffect                (D3M model)
 
 class (Monad m) <= D3Tagless m where
-  hook   :: Selector                          -> m D3Selection
-  append :: String              -> D3_Node    -> m D3Selection
-  join   :: ∀ model. model -> Join model -> m D3Selection
+  hook     :: Selector                            -> m D3Selection_
+  appendTo :: D3Selection_   -> String -> D3_Node -> m D3Selection_
+  join     :: ∀ model. model -> Join model        -> m (Maybe D3Selection_)
 
 runD3M :: ∀ a model. D3M model a -> (D3State model) -> Effect (Tuple a (D3State model))
 runD3M (D3M state) = runStateT state
@@ -42,18 +42,14 @@ d3Run model (D3M state) = liftA1 fst $ runStateT state (makeD3State' model)
 instance d3TaglessD3M :: D3Tagless (D3M model) where
   hook selector = setSelection (SelectionName "root") $ d3SelectAllInDOM_ selector 
 
-  append name (D3_Node element attributes) = do
-    (D3State state) <- get
-    case state.active of
-      (Last Nothing) -> pure state.active
-      (Last (Just selection_)) -> do
-        let appended_ = d3Append_ (show element) selection_
-        setSelection (SelectionName name) $ foldl applyChainable appended_ attributes     
+  appendTo selection_ name (D3_Node element attributes) = do
+    let appended_ = d3Append_ (show element) selection_
+    setSelection (SelectionName name) $ foldl applyChainable appended_ attributes     
 
   join model (Join j) = do
     (D3State state) <- get 
     case lookup j.selection state.namedSelections of
-      Nothing          -> pure $ Last Nothing
+      Nothing          -> pure Nothing
       (Just selection) -> do
         let 
           (model :: D3Data_) = unsafeCoerce state.model -- TODO but in fact, it's the projection that we coerce
@@ -71,29 +67,28 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
           _        = foldl applyChainable exitS   j.behaviour.exit
           _        = foldl applyChainable updateS j.behaviour.update
 
-        pure $ Last $ Just updateS
+        pure $ Just updateS
 
 setSelection :: ∀ m model. Bind m => MonadState (D3State model) m => 
-  SelectionName -> D3Selection_ -> m D3Selection
+  SelectionName -> D3Selection_ -> m D3Selection_
 setSelection name selection_ = do
-    let active = Last $ Just selection_
-    modify_ (\(D3State d) -> D3State d { active=active, namedSelections=insert name selection_ d.namedSelections }) 
-    pure active
+    modify_ (\(D3State d) -> D3State d { namedSelections=insert name selection_ d.namedSelections }) 
+    pure selection_
 
 applyChainable :: D3Selection_ -> Chainable -> D3Selection_
-applyChainable selection (AttrT (Attribute label attr)) = d3SetAttr_ label (unbox attr) selection
+applyChainable selection_ (AttrT (Attribute label attr)) = d3SetAttr_ label (unbox attr) selection_
 -- NB only protection against non-text attribute for Text field is in the helper function
-applyChainable selection (TextT (Attribute label attr)) = d3SetText_ (unbox attr) selection 
+applyChainable selection_ (TextT (Attribute label attr)) = d3SetText_ (unbox attr) selection_ 
 -- NB this remove call will have no effect on elements with active or pending transitions
 -- and this gives rise to very counter-intuitive misbehaviour as subsequent enters clash with 
 -- elements that should have been removed
-applyChainable selection RemoveT = d3RemoveSelection_ selection -- "selection" here will often be a "transition"
+applyChainable selection_ RemoveT = d3RemoveSelection_ selection_ -- "selection" here will often be a "transition"
 -- for transition in D3 we must use .call(selection, transition) so that chain continues
 -- in this interpreter it's enought to just return the selection instead of the transition
-applyChainable selection (TransitionT chain transition) = do
-  let tHandler = d3AddTransition selection transition
+applyChainable selection_ (TransitionT chain transition) = do
+  let tHandler = d3AddTransition selection_ transition
       _        = foldl applyChainable tHandler chain
-  selection -- NB we return selection, not transition
+  selection_ -- NB we return selection, not transition
 
 
 
