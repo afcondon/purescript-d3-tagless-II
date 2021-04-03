@@ -1,13 +1,11 @@
 module Main where
 
-import Data.Array (catMaybes)
-import Prelude (Unit, bind, liftA1, pure, ($), (<$>), (>))
-
 import Control.Monad.Rec.Class (forever)
 import D3.Attributes.Sugar (transitionWithDuration)
 import D3.Examples.GUP (enter, update) as GUP
 import D3.Interpreter.Tagless (runD3M)
-import D3.Selection (Chainable, D3State(..), makeD3State, makeD3State')
+import D3.Selection (Chainable, D3State(..), makeD3State, makeD3State', setData)
+import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence)
@@ -16,9 +14,7 @@ import Effect (Effect)
 import Effect.Aff (Milliseconds(..), delay, launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Random (random)
-
-initialState :: D3State (Array Char)
-initialState = makeD3State' (toCharArray "this data is ignored - FIX ME")
+import Prelude (Unit, bind, liftA1, pure, ($), (<$>), (>))
 
 -- TODO could preload this as a named transition? is that cleaner or more obscure?
 transition :: Milliseconds -> Chainable
@@ -38,12 +34,13 @@ getLetters = do
 
 main :: Effect Unit
 main = launchAff_  do
-  state <- liftEffect $ liftA1 snd $ runD3M GUP.enter initialState
+  letters <- liftEffect $ getLetters
+  state   <- liftEffect $ liftA1 snd $ runD3M GUP.enter (makeD3State' letters)
 
   let duration = Milliseconds 2000.0
   forever $ do
-    letters <- liftEffect $ getLetters
-    _       <- liftEffect $ runD3M 
-                            (GUP.update $ transition duration)
-                            (makeD3State' letters)
+    newletters <- liftEffect $ getLetters
+    _          <- liftEffect $ runD3M 
+                                (GUP.update $ transition duration)
+                                (setData newletters state)
     delay duration

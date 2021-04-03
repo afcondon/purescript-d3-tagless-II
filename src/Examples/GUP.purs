@@ -4,7 +4,7 @@ import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum, Index, datumIsChar, indexIsNumber)
 import D3.Attributes.Sugar (classed, fill, fontSize, height, remove, strokeColor, strokeOpacity, text, viewBox, width, with, x, y)
 import D3.Interpreter.Tagless (class D3Tagless, append, hook, join)
-import D3.Selection (Chainable, D3Selection, D3State(..), D3_Node(..), Element(..), EnterUpdateExit, Keys(..), SelectionName(..), node_)
+import D3.Selection (Chainable, D3Selection, D3State(..), D3_Node(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), node_)
 import Data.Maybe (Maybe(..))
 import Data.Maybe.Last (Last(..))
 import Data.String.CodeUnits (singleton)
@@ -56,19 +56,19 @@ enterUpdateExit t =
 enter :: ∀ m. (D3Tagless m) => m D3Selection 
 enter = do 
   root <- hook "div#root"
-  svg  <- append $ D3_Node Svg svgAttributes
-  append $ node_ Group
+  svg  <- append "svg" $ D3_Node Svg svgAttributes
+  append "letter-group" $ node_ Group
 
 update :: forall m. Bind m => MonadState (D3State (Array Char)) m => D3Tagless m => Chainable -> m D3Selection
 update transition = do
   (D3State state) <- get  
 
-  -- joinSelection_ <- join state.model {
-  --     element   : Text
-  --   , key       : DatumIsKey
-  --   , selection : SelectionName "letters"
-  --   , projection: unsafeCoerce -- null projection
-  --   , behaviour : enterUpdateExit transition
-  -- }
+  joinSelection_ <- join state.model $ Join {
+      element   : Text
+    , key       : DatumIsKey
+    , selection : SelectionName "letter-group"
+    , projection: unsafeCoerce -- null projection
+    , behaviour : enterUpdateExit transition
+  }
 
   pure $ state.active -- Last $ Just joinSelection_

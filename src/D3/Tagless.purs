@@ -6,11 +6,12 @@ import Prelude
 import Control.Monad.State (class MonadState, StateT, get, modify, modify_, put, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox, unboxText)
 import Data.Foldable (foldl)
-import Data.Map (lookup)
+import Data.Map (insert, lookup)
 import Data.Maybe (Maybe(..))
 import Data.Maybe.Last (Last(..))
 import Data.Semigroup.Foldable (foldl1)
 import Data.Tuple (Tuple(..), fst, snd)
+import Debug (spy, trace)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Unsafe.Coerce (unsafeCoerce)
@@ -35,7 +36,7 @@ derive newtype instance monadEffD3M    :: MonadEffect                (D3M model)
 -- would lead to run time errors
 class (Monad m) <= D3Tagless m where
   hook   :: Selector                          -> m D3Selection
-  append :: D3_Node                           -> m D3Selection
+  append :: String              -> D3_Node    -> m D3Selection
   join   :: forall model. model -> Join model -> m D3Selection
 
 runD3M :: ∀ a model. D3M model a -> (D3State model) -> Effect (Tuple a (D3State model))
@@ -48,42 +49,46 @@ d3Run :: ∀ a model. model -> D3M model a -> Effect a
 d3Run model (D3M state) = liftA1 fst $ runStateT state (makeD3State' model)
 
 instance d3TaglessD3M :: D3Tagless (D3M model) where
-  hook selector = setSelection $ d3SelectAllInDOM_ selector 
+  hook selector = setSelection (SelectionName "root") $ d3SelectAllInDOM_ selector 
 
-  append (D3_Node element attributes) = do
+  append name (D3_Node element attributes) = do
     (D3State state) <- get
     case state.active of
       (Last Nothing) -> pure state.active
       (Last (Just selection_)) -> do
         let appended_ = d3Append_ (show element) selection_
-        setSelection $ foldl applyChainable appended_ attributes     
+        setSelection (SelectionName name) $ foldl applyChainable appended_ attributes     
 
   join model (Join j) = do
     (D3State state) <- get 
-    let selectionM = lookup j.selection state.namedSelections
-        (model :: D3Data_) = unsafeCoerce state.model -- TODO but in fact, it's the projection that we coerce
-    case selectionM of
-      Nothing -> pure state.active
+    let _ = trace { state: state } \_ -> unit
+    case lookup j.selection state.namedSelections of
+      Nothing -> spy "selection not found for join: " $ pure $ Last Nothing
       (Just selection) -> do
         let 
+          (model :: D3Data_) = unsafeCoerce state.model -- TODO but in fact, it's the projection that we coerce
           initialS = d3SelectionSelectAll_ (show j.element) selection
 
-          updateS = case j.key of
-                      DatumIsKey -> d3Data_      model initialS 
-                      (KeyF fn)  -> d3DataKeyFn_ model fn initialS 
-          enterS  = d3EnterAndAppend_ (show j.element) updateS
-          exitS   = d3Exit_ updateS -- updateS.exit ??????
+          updateS  = spy "update: " $
+                     case j.key of
+                        DatumIsKey -> d3Data_      model initialS 
+                        (KeyF fn)  -> d3DataKeyFn_ model fn initialS 
+          enterS   = spy "enter: " $
+                     d3EnterAndAppend_ (show j.element) updateS
+          exitS    = spy "exit: " $ 
+                     d3Exit_ updateS -- updateS.exit ??????
 
-          _ = foldl applyChainable updateS j.behaviour.update
-          _ = foldl applyChainable enterS  j.behaviour.enter
-          _ = foldl applyChainable exitS   j.behaviour.exit
+          _        = foldl applyChainable updateS j.behaviour.update
+          _        = foldl applyChainable enterS  j.behaviour.enter
+          _        = foldl applyChainable exitS   j.behaviour.exit
 
         pure $ Last $ Just updateS
 
-setSelection :: forall m model. Bind m => MonadState (D3State model) m => D3Selection_ -> m D3Selection
-setSelection selection_ = do
+setSelection :: forall m model. Bind m => MonadState (D3State model) m => 
+  SelectionName -> D3Selection_ -> m D3Selection
+setSelection name selection_ = do
     let active = Last $ Just selection_
-    modify_ (\(D3State d) -> D3State d { active=active }) 
+    modify_ (\(D3State d) -> D3State d { active=active, namedSelections=insert name selection_ d.namedSelections }) 
     pure active
 
 applyChainable :: D3Selection_ -> Chainable -> D3Selection_
