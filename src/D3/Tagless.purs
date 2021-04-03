@@ -61,21 +61,22 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
 
   join model (Join j) = do
     (D3State state) <- get 
-    let _ = trace { state: state } \_ -> unit
+    -- let _ = trace { state: state } \_ -> unit
     case lookup j.selection state.namedSelections of
-      Nothing -> spy "selection not found for join: " $ pure $ Last Nothing
+      Nothing -> -- spy "selection not found for join: " $ 
+        pure $ Last Nothing
       (Just selection) -> do
         let 
           (model :: D3Data_) = unsafeCoerce state.model -- TODO but in fact, it's the projection that we coerce
           initialS = d3SelectionSelectAll_ (show j.element) selection
 
-          updateS  = spy "update: " $
+          updateS  = -- spy "update: " $
                      case j.key of
                         DatumIsKey -> d3Data_      model initialS 
                         (KeyF fn)  -> d3DataKeyFn_ model fn initialS 
-          enterS   = spy "enter: " $
+          enterS   = -- spy "enter: " $
                      d3EnterAndAppend_ (show j.element) updateS
-          exitS    = spy "exit: " $ 
+          exitS    = -- spy "exit: " $ 
                      d3Exit_ updateS -- updateS.exit ??????
 
           _        = foldl applyChainable updateS j.behaviour.update

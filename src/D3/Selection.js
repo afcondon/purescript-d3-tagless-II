@@ -26,7 +26,7 @@ exports.d3Exit_ = selection => {
 exports.d3AddTransition = selection => transition => {
   var handle; 
   if (transition.name == "") {
-    console.log(`\td3addTransition: ${selection}.transition(${transition})`);
+    if(debug) {console.log(`\td3addTransition: ${selection}.transition(${transition})`);}
     handle = selection.transition();
     // if transition is unnamed we configure it...
     if (transition.duration != 0) {
