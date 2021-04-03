@@ -4,7 +4,7 @@ import Control.Monad.Rec.Class (forever)
 import D3.Attributes.Sugar (transitionWithDuration)
 import D3.Examples.GUP (enter, update) as GUP
 import D3.Interpreter.Tagless (runD3M)
-import D3.Selection (Chainable, D3State(..), makeD3State, makeD3State', setData)
+import D3.Selection (Chainable, makeD3State', setData)
 import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (toCharArray)

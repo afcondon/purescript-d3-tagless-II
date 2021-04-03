@@ -1,17 +1,15 @@
 module D3.Interpreter.Tagless where
 
-import D3.Selection
-import Prelude
+import D3.Selection (Chainable(..), D3Data_, D3Selection, D3Selection_, D3State(..), D3_Node(..), Join(..), Keys(..), SelectionName(..), Selector, d3AddTransition, d3Append_, d3DataKeyFn_, d3Data_, d3EnterAndAppend_, d3Exit_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, makeD3State')
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, bind, discard, liftA1, pure, show, ($))
 
-import Control.Monad.State (class MonadState, StateT, get, modify, modify_, put, runStateT)
-import D3.Attributes.Instances (Attribute(..), unbox, unboxText)
+import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
+import D3.Attributes.Instances (Attribute(..), unbox)
 import Data.Foldable (foldl)
 import Data.Map (insert, lookup)
 import Data.Maybe (Maybe(..))
 import Data.Maybe.Last (Last(..))
-import Data.Semigroup.Foldable (foldl1)
-import Data.Tuple (Tuple(..), fst, snd)
-import Debug (spy, trace)
+import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Unsafe.Coerce (unsafeCoerce)
@@ -27,13 +25,6 @@ derive newtype instance monadD3M       :: Monad                      (D3M model)
 derive newtype instance monadStateD3M  :: MonadState (D3State model) (D3M model)
 derive newtype instance monadEffD3M    :: MonadEffect                (D3M model)
 
--- TODO
--- there's definitely some indexed monad or state machine kinda stuff here 
--- because you need to have a Selection in order to bind some data
--- and you also need to have some data before using any attributes that 
--- are (Datum -> <something>)
--- there are thus several things that are legal under the type system which
--- would lead to run time errors
 class (Monad m) <= D3Tagless m where
   hook   :: Selector                          -> m D3Selection
   append :: String              -> D3_Node    -> m D3Selection
@@ -61,23 +52,20 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
 
   join model (Join j) = do
     (D3State state) <- get 
-    -- let _ = trace { state: state } \_ -> unit
     case lookup j.selection state.namedSelections of
-      Nothing -> -- spy "selection not found for join: " $ 
-        pure $ Last Nothing
+      Nothing          -> pure $ Last Nothing
       (Just selection) -> do
         let 
           (model :: D3Data_) = unsafeCoerce state.model -- TODO but in fact, it's the projection that we coerce
           initialS = d3SelectionSelectAll_ (show j.element) selection
 
-          updateS  = -- spy "update: " $
-                     case j.key of
+          updateS  = case j.key of
                         DatumIsKey -> d3Data_      model initialS 
                         (KeyF fn)  -> d3DataKeyFn_ model fn initialS 
-          enterS   = -- spy "enter: " $
-                     d3EnterAndAppend_ (show j.element) updateS
-          exitS    = -- spy "exit: " $ 
-                     d3Exit_ updateS -- updateS.exit ??????
+
+          enterS   = d3EnterAndAppend_ (show j.element) updateS
+
+          exitS    = d3Exit_ updateS
 
           _        = foldl applyChainable enterS  j.behaviour.enter
           _        = foldl applyChainable exitS   j.behaviour.exit
@@ -93,17 +81,19 @@ setSelection name selection_ = do
     pure active
 
 applyChainable :: D3Selection_ -> Chainable -> D3Selection_
-applyChainable selection (AttrT (Attribute label attr)) = -- trace { applyAttr: label } \_ -> 
-  d3SetAttr_ label (unbox attr) selection
+applyChainable selection (AttrT (Attribute label attr)) = d3SetAttr_ label (unbox attr) selection
 -- NB only protection against non-text attribute for Text field is in the helper function
-applyChainable selection (TextT (Attribute label attr)) = -- trace { applyAttr: label } \_ -> 
-  d3SetText_ (unbox attr) selection 
--- for transition we must use .call(selection, transition) so that chain continues
-applyChainable selection (TransitionT chain transition) = spy "start transition" do
+applyChainable selection (TextT (Attribute label attr)) = d3SetText_ (unbox attr) selection 
+-- NB this remove call will have no effect on elements with active or pending transitions
+-- and this gives rise to very counter-intuitive misbehaviour as subsequent enters clash with 
+-- elements that should have been removed
+applyChainable selection RemoveT = d3RemoveSelection_ selection -- "selection" here will often be a "transition"
+-- for transition in D3 we must use .call(selection, transition) so that chain continues
+-- in this interpreter it's enought to just return the selection instead of the transition
+applyChainable selection (TransitionT chain transition) = do
   let tHandler = d3AddTransition selection transition
       _        = foldl applyChainable tHandler chain
-  selection -- we return selection, not transition
-applyChainable selection RemoveT = trace { remove: selection } \_ -> 
-  d3RemoveSelection_ selection -- "selection" will often be a "transition"
+  selection -- NB we return selection, not transition
+
 
 
