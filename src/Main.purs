@@ -57,23 +57,23 @@ main :: Effect Unit
 main = launchAff_  do
   widthHeight    <- liftEffect getWindowWidthHeight
 
-  -- log "Radial tree example"
-  -- treeJSON      <- AJAX.get ResponseFormat.string "http://localhost:1234/flare-2.json"
-  -- case readTreeFromFileContents widthHeight treeJSON of
-  --   (Left error) -> liftEffect $ log $ printError error
+  log "Radial tree example"
+  treeJSON      <- AJAX.get ResponseFormat.string "http://localhost:1234/flare-2.json"
+  case readTreeFromFileContents widthHeight treeJSON of
+    (Left error) -> liftEffect $ log $ printError error
 
-  --   (Right treeModel) -> liftEffect $ runD3M Tree.enter (makeD3State' treeModel) *> pure unit
+    (Right treeModel) -> liftEffect $ runD3M Tree.enter (makeD3State' treeModel) *> pure unit
 
-  log "General Update Pattern example"
-  letters <- liftEffect $ getLetters
-  state   <- liftEffect $ liftA1 snd $ runD3M GUP.enter (makeD3State' letters)
-  let duration = Milliseconds 2000.0
-  forever $ do -- need to fork here or nothing else will run
-    newletters <- liftEffect $ getLetters
-    _          <- liftEffect $ runD3M 
-                                (GUP.update $ transition duration)
-                                (setData newletters state)
-    delay (Milliseconds 2300.0)
+  -- log "General Update Pattern example"
+  -- letters <- liftEffect $ getLetters
+  -- state   <- liftEffect $ liftA1 snd $ runD3M GUP.enter (makeD3State' letters)
+  -- let duration = Milliseconds 2000.0
+  -- forever $ do -- need to fork here or nothing else will run
+  --   newletters <- liftEffect $ getLetters
+  --   _          <- liftEffect $ runD3M 
+  --                               (GUP.update $ transition duration)
+  --                               (setData newletters state)
+  --   delay (Milliseconds 2300.0)
 
 
-
+  

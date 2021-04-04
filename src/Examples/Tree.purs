@@ -63,14 +63,12 @@ enterNodes =
   , exit: []
   }
 
-type ModelData  = { name :: String }
--- the Model given to D3
-type MyModel    = Model      ModelData 
--- nodes of tree AFTER D3 has processed them, contains original ModelData as "data" field
-type MyTreeNode = D3TreeNode ModelData 
+-- this is the extra row info that is part of a Datum beyond the D3Tree minimum
+type TreeNodeExtra = (name :: String) 
+type TreeNode = D3TreeNode TreeNodeExtra 
 
-makeModel :: Number -> TreeJson -> Model String
-makeModel width json = Model { json, d3Tree, config }
+makeModel :: Number -> TreeJson -> Model TreeNodeExtra
+makeModel width json = { json, d3Tree, config }
   where
     config           = radialTreeConfig width
     hierarchicalData = d3Hierarchy_ json
@@ -106,7 +104,7 @@ enter = do
   pure svg
 
 
--- | TODO All this stuff belongs eventually in the d3 base
+-- | TODO All this stuff below belongs eventually in library, ie D3.Layout.Hierarchical or something
 data Tree a = Node a (Array (Tree a))
 type TreeConfig :: forall k. k -> Type
 type TreeConfig a = {
@@ -116,20 +114,18 @@ type TreeConfig a = {
 
 radialTreeConfig :: forall a. Number -> TreeConfig a
 radialTreeConfig width = 
-  { size: [2.0 * pi, width / 2.0]
+  { size      : [2.0 * pi, width / 2.0]
   , separation: radialSeparationJS_
   }
 
-data Model :: forall k. k -> Type
-data Model a = Model {
+type Model a = {
       json   :: TreeJson
     , d3Tree :: D3Tree
     , config :: TreeConfig a
 }
 
-type D3TreeNode a = {
-    "data"   :: a -- guaranteed coercible to the `a` of the `Model a`
-  , x        :: Number
+type D3TreeNode r = {
+    x        :: Number
   , y        :: Number
   , value    :: String
   , depth    :: Number
@@ -139,6 +135,7 @@ type D3TreeNode a = {
 -- TODO code out exceptions
   , parent   :: RecursiveD3TreeNode       -- this won't be present in the root node
   , children :: Array RecursiveD3TreeNode -- this won't be present in leaf nodes
+  | r -- whatever other fields we fed in to D3.hierarchy will still be present, but they're not generic, ie need coercion
 }
 
 -- helpers for Radial tree
@@ -156,12 +153,12 @@ foreign import data RecursiveD3TreeNode :: Type
 foreign import data D3Tree              :: Type
 foreign import data D3Hierarchical      :: Type
 foreign import data TreeJson            :: Type
-foreign import radialSeparationJS_       :: Datum -> Datum -> Int
-foreign import readJSONJS_               :: String -> TreeJson -- TODO no error handling at all here RN
-foreign import d3Hierarchy_              :: TreeJson -> D3Hierarchical
-foreign import d3InitTree_               :: forall a. TreeConfig a -> D3Hierarchical -> D3Tree 
-foreign import hasChildren_              :: Datum -> Boolean
-foreign import d3LinkRadial_ :: (Datum -> Number) -> (Datum -> Number) -> (Datum -> String)
+foreign import radialSeparationJS_ :: Datum -> Datum -> Int
+foreign import readJSONJS_         :: String -> TreeJson -- TODO no error handling at all here RN
+foreign import d3Hierarchy_        :: TreeJson -> D3Hierarchical
+foreign import d3InitTree_         :: forall a. TreeConfig a -> D3Hierarchical -> D3Tree 
+foreign import hasChildren_        :: Datum -> Boolean
+foreign import d3LinkRadial_       :: (Datum -> Number) -> (Datum -> Number) -> (Datum -> String)
 
 foreign import d3HierarchyLinks_       :: D3Tree -> D3Data_
 foreign import d3HierarchyDescendants_ :: D3Tree -> D3Data_
