@@ -55,6 +55,9 @@ type D3Group      = Array D3DomNode
 type D3Selection  = Last D3Selection_
 type KeyFunction_ = Datum -> Index
 data Keys = KeyF KeyFunction_ | DatumIsKey
+-- TODO hide the "unsafeCoerce/makeProjection" in a smart constructor
+makeProjection :: forall model model'. (model' -> D3Data_) -> (model -> D3Data_)
+makeProjection = unsafeCoerce
 data Join model = Join {
     element    :: Element           -- what we're going to insert in the DOM
   , key        :: Keys              -- how D3 is going to identify data so that 
@@ -119,4 +122,3 @@ type EnterUpdateExit = {
   , update :: Array Chainable
   , exit   :: Array Chainable
 }
-

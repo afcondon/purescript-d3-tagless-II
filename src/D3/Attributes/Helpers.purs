@@ -2,10 +2,11 @@ module D3.Attributes.Sugar where
 
 import Prelude
 
-import D3.Attributes.Instances (class ToAttr, Attribute(..), toAttr)
+import D3.Attributes.Instances (class ToAttr, Attr(..), Attrib(..), Attribute(..), Datum, toAttr)
 import D3.Selection (Chainable(..), EasingFunction(..), Transition)
-import Data.Array ((:))
+import Data.Array (intercalate, (:))
 import Effect.Aff (Milliseconds(..))
+import Unsafe.Coerce (unsafeCoerce)
 
 strokeColor :: ∀ a. ToAttr String a => a -> Chainable
 strokeColor = AttrT <<< Attribute "stroke" <<< toAttr
@@ -46,9 +47,6 @@ x = AttrT <<< Attribute "x" <<< toAttr
 
 y :: ∀ a. ToAttr Number a => a -> Chainable
 y = AttrT <<< Attribute "y" <<< toAttr
-
-r :: ∀ a. ToAttr Number a => a -> Chainable
-r = AttrT <<< Attribute "r" <<< toAttr
 
 dx :: ∀ a. ToAttr Number a => a -> Chainable
 dx = AttrT <<< Attribute "dx" <<< toAttr
@@ -91,3 +89,30 @@ with otherChainable chain = otherChainable:chain
 
 remove :: Chainable
 remove = RemoveT
+
+
+data LineJoin = Arcs | Bevel | Miter | MiterClip | Round
+instance showLineJoin :: Show LineJoin where
+  show Arcs      = "arcs"
+  show Bevel     = "bevel"
+  show Miter     = "miter"
+  show MiterClip = "miter-clip"
+  show Round     = "round"
+
+strokeLineJoin :: LineJoin -> Chainable
+strokeLineJoin = AttrT <<< Attribute "stroke-linejoin" <<< toAttr <<< show
+
+-- helpers for transitions, a sequence of functions but expressed as text in the DOM
+-- TODO don't export transform'
+transform' :: (Datum -> String) -> Chainable
+transform' = AttrT <<< Attribute "transform" <<< StringAttr <<< Fn
+
+-- make a single (Datum -> String) function out of the array (ie sequence) of functions provided
+transform :: forall a. Array (a -> String) -> Chainable
+transform = transform' <<< assembleTransforms
+
+-- we take a stack of (Datum -> String) functions and produce just one
+-- we can't know here in the library code if this is safe but if the transforms themselves are written in terms of 
+-- what we know the Datum will actually be (ie D3TreeNode for example) then we have some limited type checking
+assembleTransforms :: ∀ a. Array (a -> String) -> (Datum -> String)
+assembleTransforms fs = unsafeCoerce (\d -> intercalate " " $ flap fs d)

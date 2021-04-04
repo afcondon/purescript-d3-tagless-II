@@ -100,4 +100,3 @@ indexIsNumber = unsafeCoerce
 
 indexIsString :: Index -> String
 indexIsString = unsafeCoerce
-

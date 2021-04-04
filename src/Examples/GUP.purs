@@ -13,7 +13,7 @@ import Unsafe.Coerce (unsafeCoerce)
 
 -- simple attributes don't use data, no hassle
 svgAttributes :: Array Chainable
-svgAttributes = [
+svgAttributes = [ -- TODO remove totally meaningless attributes only here to demo, fix viewbox width etc too
     strokeColor "green"
   , strokeOpacity 0.75
   , width 1000.0
@@ -37,7 +37,7 @@ textFromDatum = singleton <<< datumIsChar
 enterUpdateExit :: Chainable -> EnterUpdateExit
 enterUpdateExit t =
   { enter:  
-    [ classed "enter" -- TODO remove totally meaningless attributes only here to demo
+    [ classed "enter"
     , fill "green"
     , x offsetXByIndex
     , y 0.0

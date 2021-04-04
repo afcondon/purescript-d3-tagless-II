@@ -1,24 +1,31 @@
 module D3.Examples.Tree where
 
-import D3.Attributes.Sugar
-
-import D3.Attributes.Instances (Datum)
-import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook)
-import D3.Selection (Chainable, D3Selection_, Element(..), node, node_)
-import Prelude (bind, negate, pure)
+import Affjax (Error)
+import Control.Monad.State (class MonadState, get)
+import D3.Attributes.Instances (Attribute(..), Datum, toAttr)
+import D3.Attributes.Sugar (classed, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, transform, viewBox, width)
+import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join)
+import D3.Selection (Chainable(..), D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), makeProjection, node)
+import Data.Either (Either(..))
+import Data.Tuple (Tuple(..))
+import Math (pi)
+import Prelude (class Bind, bind, negate, pure, show, ($), (*), (-), (/), (<>), (>=))
 import Unsafe.Coerce (unsafeCoerce)
 
--- | Model types
-type Model = { links :: Links, nodes :: Nodes }
+-- three little transform functions to build up the transforms on nodes and labels
+rotate :: Number -> String
+rotate x       = show $ (x * 180.0 / pi - 90.0)
+rotateCommon :: forall a. D3TreeNode a -> String
+rotateCommon d = "rotate(" <> rotate d.x <> ")"
+rotateText2 d  = "rotate(" <> if d.x >= pi 
+                              then "180" <> ")" 
+                              else "0" <> ")"
+-- same translation for both text and node
+translate :: forall a. D3TreeNode a -> String
+translate d = "translate(" <> show d.y <> ",0)"
 
-type Node = { name :: String, x :: Number, y :: Number }
-type Link = { source :: String, target :: String, count :: Number }
-
-type Links = Array Link
-type Nodes = Array Node
-
-datumToNode = unsafeCoerce :: Datum -> Node
-datumToLink = unsafeCoerce :: Datum -> Link
+transformations :: forall a. Array (D3TreeNode a -> String)
+transformations = [ rotateCommon, translate ]
 
 -- | Script components, attributes, transformations etc
 svgAttributes :: Array Chainable
@@ -28,37 +35,130 @@ svgAttributes = [
   , viewBox (-500.0) (-500.0) 1000.0 1000.0
 ]
 
--- | Example Model data
-exampleLink :: Link
-exampleLink = { source: "a", target: "b", count: 1.0 }
+-- | instructions for entering the links in the radial tree
+enterLinks :: EnterUpdateExit
+enterLinks =
+  { enter:  
+    [ strokeWidth 1.5
+    , strokeColor "#555"
+    , strokeOpacity 0.4
+    , fill "none"
+    , radialLink (\d -> d.x) (\d -> d.y)
+    ] 
 
-exampleNode :: Node
-exampleNode = { name: "a", x: 0.0,  y: 0.0 }
+  , update: [] 
+  , exit:   []
+  }
 
-exampleLinks :: Links
-exampleLinks = [ exampleLink, exampleLink, exampleLink ]
-exampleNodes :: Nodes
-exampleNodes = [ exampleNode, exampleNode, exampleNode ]
+-- | instructions for entering the nodes in the radial tree
+enterNodes :: EnterUpdateExit
+enterNodes =
+  { enter:
+    [ transform transformations
+    , fill (\d -> if hasChildren_ d then "#555" else "#999")
+    , radius 2.5
+    ]
+  
+  , update: []
+  , exit: []
+  }
 
-model :: Model
-model = { links: exampleLinks, nodes: exampleNodes }
+type ModelData  = { name :: String }
+-- the Model given to D3
+type MyModel    = Model      ModelData 
+-- nodes of tree AFTER D3 has processed them, contains original ModelData as "data" field
+type MyTreeNode = D3TreeNode ModelData 
 
-enter :: ∀ m. (D3Tagless m) => m D3Selection_
+makeModel :: Number -> TreeJson -> Model String
+makeModel width json = Model { json, d3Tree, config }
+  where
+    config           = radialTreeConfig width
+    hierarchicalData = d3Hierarchy_ json
+    d3Tree           = d3InitTree_ config hierarchicalData
+
+-- | recipe for a radial tree
+enter :: forall m. Bind m => D3Tagless m => MonadState (D3State MyModel) m => m D3Selection_
 enter = do
   root   <- hook "div#tree"
-  svg    <- appendTo root "svg-tree" (node Svg svgAttributes)
+  svg    <- appendTo root "svg-tree"    (node Svg svgAttributes)
   links  <- appendTo svg "links-group"  (node Group [ classed "links"])
   nodes  <- appendTo svg "nodes-group"  (node Group [ classed "nodes"])
   labels <- appendTo svg "labels-group" (node Group [ classed "labels"])
 
+  (D3State state) <- get
+
+  linkJoinSelection_ <- join state.model $ Join {
+      element   : Text
+    , key       : DatumIsKey
+    , selection : SelectionName "links"
+    , projection: makeProjection (\model -> model.links)
+    , behaviour : enterLinks
+  }
+
+  nodeJoinSelection_ <- join state.model $ Join {
+      element   : Circle
+    , key       : DatumIsKey
+    , selection : SelectionName "nodes"
+    , projection: makeProjection (\model -> model.descendants)
+    , behaviour : enterNodes
+  }
+
   pure svg
 
 
+-- | TODO All this stuff belongs eventually in the d3 base
+data Tree a = Node a (Array (Tree a))
+type TreeConfig :: forall k. k -> Type
+type TreeConfig a = {
+    size       :: Array Number
+  , separation :: Datum -> Datum -> Int
+}
 
-  -- joinSelection_ <- join state.model $ Join {
-  --     element   : Text
-  --   , key       : DatumIsKey
-  --   , selection : SelectionName "letter-group"
-  --   , projection: unsafeCoerce -- null projection
-  --   , behaviour : enterUpdateExit transition
-  -- }
+radialTreeConfig :: forall a. Number -> TreeConfig a
+radialTreeConfig width = 
+  { size: [2.0 * pi, width / 2.0]
+  , separation: radialSeparationJS_
+  }
+
+data Model :: forall k. k -> Type
+data Model a = Model {
+      json   :: TreeJson
+    , d3Tree :: D3Tree
+    , config :: TreeConfig a
+}
+
+type D3TreeNode a = {
+    "data"   :: a -- guaranteed coercible to the `a` of the `Model a`
+  , x        :: Number
+  , y        :: Number
+  , value    :: String
+  , depth    :: Number
+  , height   :: Number
+-- these next too are guaranteed coercible to the same type, ie D3TreeNode
+-- BUT ONLY IF the D3Tree is a successful conversion using d3Hierarchy
+-- TODO code out exceptions
+  , parent   :: RecursiveD3TreeNode       -- this won't be present in the root node
+  , children :: Array RecursiveD3TreeNode -- this won't be present in leaf nodes
+}
+
+-- helpers for Radial tree
+radialLink :: forall a b. (a -> Number) -> (b -> Number) -> Chainable
+radialLink angleFn radius_Fn = do
+  let radialFn = d3LinkRadial_ (unsafeCoerce angleFn) (unsafeCoerce radius_Fn)
+  AttrT $ Attribute "d" $ toAttr radialFn
+
+
+-- do the decode on the Purescript side unless files are ginormous, this is just for prototyping
+-- this is an opaque type behind which hides the data type of the Purescript tree that was converted
+foreign import data RecursiveD3TreeNode :: Type
+-- this is the Purescript Tree after processing in JS to remove empty child fields from leaves etc
+-- need to ensure that this structure is encapsulated in libraries (ie by moving this code)
+foreign import data D3Tree              :: Type
+foreign import data D3Hierarchical      :: Type
+foreign import data TreeJson            :: Type
+foreign import radialSeparationJS_       :: Datum -> Datum -> Int
+foreign import readJSONJS_               :: String -> TreeJson -- TODO no error handling at all here RN
+foreign import d3Hierarchy_              :: TreeJson -> D3Hierarchical
+foreign import d3InitTree_               :: forall a. TreeConfig a -> D3Hierarchical -> D3Tree 
+foreign import hasChildren_              :: Datum -> Boolean
+foreign import d3LinkRadial_ :: (Datum -> Number) -> (Datum -> Number) -> (Datum -> String)
