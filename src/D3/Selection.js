@@ -1,6 +1,6 @@
 exports.emptyD3Data_ = null
 
-const debug = false;
+const debug = true;
 
 // d3SelectAll_ :: Selector -> D3Selection
 exports.d3SelectAllInDOM_ = selector => { // NB not USING selection but want it cause called from inside State Monad
@@ -57,14 +57,14 @@ exports.d3Append_ = element => selection => {
   return selection.append(element);
 }
 // d3Data_ :: D3Data -> D3Selection -> D3Selection
-exports.d3Data_ = data => selection => {
+exports.d3Data_ = data => projection => selection => {
   if (debug) {console.log(`\td3Data: ${selection}.data(${data})`);}
-  return selection.data(data, d => d );
+  return selection.data(projection(data), d => d );
 }
 // d3Data_ :: D3Data -> KeyFunction -> D3Selection -> D3Selection
-exports.d3DataKeyFn_ = data => keyFunction => selection => {
+exports.d3DataKeyFn_ = data => projection => keyFunction => selection => {
   if (debug) {console.log(`\td3Data: ${selection}.data(${data}, ${keyFunction})`);}
-  return selection.data(data, keyFunction);
+  return selection.data(projection(data), keyFunction);
 }
 // d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit 
 exports.d3SetAttr_ = name => value => selection => {
@@ -77,4 +77,5 @@ exports.d3SetText_ = value => selection => {
   if (debug) {(`\t${selection}.text(${value})`);}
   return selection.text(value);
 }
+
 

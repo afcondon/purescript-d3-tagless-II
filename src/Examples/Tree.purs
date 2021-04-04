@@ -5,7 +5,7 @@ import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Attribute(..), Datum, toAttr)
 import D3.Attributes.Sugar (classed, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, transform, viewBox, width)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join)
-import D3.Selection (Chainable(..), D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), makeProjection, node)
+import D3.Selection (Chainable(..), D3Data_, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), makeProjection, node)
 import Data.Either (Either(..))
 import Data.Tuple (Tuple(..))
 import Math (pi)
@@ -77,7 +77,7 @@ makeModel width json = Model { json, d3Tree, config }
     d3Tree           = d3InitTree_ config hierarchicalData
 
 -- | recipe for a radial tree
-enter :: forall m. Bind m => D3Tagless m => MonadState (D3State MyModel) m => m D3Selection_
+enter :: forall m. Bind m => D3Tagless m => MonadState (D3State (Model String)) m => m D3Selection_
 enter = do
   root   <- hook "div#tree"
   svg    <- appendTo root "svg-tree"    (node Svg svgAttributes)
@@ -88,18 +88,18 @@ enter = do
   (D3State state) <- get
 
   linkJoinSelection_ <- join state.model $ Join {
-      element   : Text
+      element   : Path
     , key       : DatumIsKey
-    , selection : SelectionName "links"
-    , projection: makeProjection (\model -> model.links)
+    , selection : SelectionName "links-group"
+    , projection: unsafeCoerce $ makeProjection (\model -> d3HierarchyLinks_ model.d3Tree)
     , behaviour : enterLinks
   }
 
   nodeJoinSelection_ <- join state.model $ Join {
       element   : Circle
     , key       : DatumIsKey
-    , selection : SelectionName "nodes"
-    , projection: makeProjection (\model -> model.descendants)
+    , selection : SelectionName "nodes-group"
+    , projection: unsafeCoerce $ makeProjection (\model -> d3HierarchyDescendants_ model.d3Tree)
     , behaviour : enterNodes
   }
 
@@ -162,3 +162,6 @@ foreign import d3Hierarchy_              :: TreeJson -> D3Hierarchical
 foreign import d3InitTree_               :: forall a. TreeConfig a -> D3Hierarchical -> D3Tree 
 foreign import hasChildren_              :: Datum -> Boolean
 foreign import d3LinkRadial_ :: (Datum -> Number) -> (Datum -> Number) -> (Datum -> String)
+
+foreign import d3HierarchyLinks_       :: D3Tree -> D3Data_
+foreign import d3HierarchyDescendants_ :: D3Tree -> D3Data_

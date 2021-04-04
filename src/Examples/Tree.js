@@ -18,3 +18,10 @@ exports.hasChildren_ = d => !d.children
 
 
 exports.d3LinkRadial_ = angleFn => radiusFn => d3.linkRadial().angle(angleFn).radius(radiusFn)
+
+
+// foreign import d3HierarchyLinks :: D3Tree -> SubModel
+exports.d3HierarchyLinks_ = tree => tree.links()
+
+// foreign import d3HierarchyDescendants :: D3Tree -> SubModel
+exports.d3HierarchyDescendants_ = tree => tree.descendants()

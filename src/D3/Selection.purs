@@ -13,7 +13,7 @@ import Unsafe.Coerce (unsafeCoerce)
 
 type Selector = String 
 
-data Element = Div | Svg | Circle | Line | Group | Text
+data Element = Div | Svg | Circle | Line | Group | Text | Path
 instance showElement :: Show Element where
   show Div    = "div"
   show Svg    = "svg"
@@ -21,6 +21,7 @@ instance showElement :: Show Element where
   show Line   = "line"
   show Group  = "g"
   show Text   = "text"
+  show Path   = "path"
   
 -- (Opaque) foreign types generated for (ie unsafeCoerce), or by (ie returned selections), D3 
 foreign import data D3Data_       :: Type 
@@ -30,13 +31,15 @@ foreign import data D3DomNode     :: Type -- not yet used but may be needed, ex.
 foreign import data D3This        :: Type -- not yet used but may be needed, ex. in callbacks
 
 foreign import d3SelectAllInDOM_     :: Selector    -> D3Selection_ -- NB passed D3Selection is IGNORED
-foreign import d3SelectionSelectAll_ :: Selector    -> D3Selection_  -> D3Selection_
-foreign import d3EnterAndAppend_     :: String      -> D3Selection_  -> D3Selection_
-foreign import d3Append_             :: String      -> D3Selection_  -> D3Selection_
-foreign import d3Exit_               ::                D3Selection_ -> D3Selection_
-foreign import d3Data_               :: D3Data_     -> D3Selection_  -> D3Selection_
-foreign import d3DataKeyFn_          :: D3Data_     -> KeyFunction_ -> D3Selection_ -> D3Selection_
+foreign import d3SelectionSelectAll_ :: Selector    -> D3Selection_ -> D3Selection_
+foreign import d3EnterAndAppend_     :: String      -> D3Selection_ -> D3Selection_
+foreign import d3Append_             :: String      -> D3Selection_ -> D3Selection_
+
+foreign import d3Exit_               :: D3Selection_ -> D3Selection_
 foreign import d3RemoveSelection_    :: D3Selection_ -> D3Selection_
+
+foreign import d3Data_               :: forall model. model -> (model -> D3Data_) -> D3Selection_ -> D3Selection_
+foreign import d3DataKeyFn_          :: forall model. model -> (model -> D3Data_)   -> KeyFunction_ -> D3Selection_ -> D3Selection_
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
@@ -56,7 +59,8 @@ type D3Selection  = Last D3Selection_
 type KeyFunction_ = Datum -> Index
 data Keys = KeyF KeyFunction_ | DatumIsKey
 -- TODO hide the "unsafeCoerce/makeProjection" in a smart constructor
-makeProjection :: forall model model'. (model' -> D3Data_) -> (model -> D3Data_)
+type Projection = forall model. (model -> D3Data_)
+makeProjection :: forall model model'. (model -> model') -> (model -> D3Data_)
 makeProjection = unsafeCoerce
 data Join model = Join {
     element    :: Element           -- what we're going to insert in the DOM

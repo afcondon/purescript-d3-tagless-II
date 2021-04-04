@@ -52,12 +52,12 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
       Nothing          -> pure Nothing
       (Just selection) -> do
         let 
-          (model :: D3Data_) = unsafeCoerce state.model -- TODO but in fact, it's the projection that we coerce
+          -- (model :: D3Data_) = j.projection state.model -- TODO but in fact, it's the projection that we coerce
           initialS = d3SelectionSelectAll_ (show j.element) selection
 
           updateS  = case j.key of
-                        DatumIsKey -> d3Data_      model initialS 
-                        (KeyF fn)  -> d3DataKeyFn_ model fn initialS 
+                        DatumIsKey -> d3Data_      model j.projection initialS 
+                        (KeyF fn)  -> d3DataKeyFn_ model j.projection fn initialS 
 
           enterS   = d3EnterAndAppend_ (show j.element) updateS
 
