@@ -1,15 +1,13 @@
 module D3.Examples.Tree where
 
-import Affjax (Error)
+import D3.Attributes.Sugar
+
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Attribute(..), Datum, toAttr)
-import D3.Attributes.Sugar (classed, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, transform, viewBox, width)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join)
 import D3.Selection (Chainable(..), D3Data_, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), makeProjection, node)
-import Data.Either (Either(..))
-import Data.Tuple (Tuple(..))
 import Math (pi)
-import Prelude (class Bind, bind, negate, pure, show, ($), (*), (-), (/), (<>), (>=))
+import Prelude (class Bind, bind, negate, pure, show, ($), (*), (-), (/), (<>), (>=), (==), (<))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- three little transform functions to build up the transforms on nodes and labels
@@ -17,6 +15,7 @@ rotate :: Number -> String
 rotate x       = show $ (x * 180.0 / pi - 90.0)
 rotateCommon :: forall a. D3TreeNode a -> String
 rotateCommon d = "rotate(" <> rotate d.x <> ")"
+rotateText2 :: forall a. D3TreeNode a -> String
 rotateText2 d  = "rotate(" <> if d.x >= pi 
                               then "180" <> ")" 
                               else "0" <> ")"
@@ -27,12 +26,40 @@ translate d = "translate(" <> show d.y <> ",0)"
 transformations :: forall a. Array (D3TreeNode a -> String)
 transformations = [ rotateCommon, translate ]
 
+labelTransformations :: forall a. Array (D3TreeNode a -> String)
+labelTransformations = [ rotateCommon, translate, rotateText2 ]
+
+datumIsTreeNode :: Datum -> TreeNode
+datumIsTreeNode = unsafeCoerce
+
+unwrapInnerDatum :: Datum -> TreeNodeExtra
+unwrapInnerDatum d = (unsafeCoerce d)."data"
+
+labelOffset :: Datum -> Number
+labelOffset d = do
+  let node = datumIsTreeNode d
+  if (node.x < pi) == hasChildren_ d
+  then 6.0
+  else (-6.0)
+
+labelName :: Datum -> String
+labelName d = do
+  let node = unwrapInnerDatum d
+  node.name
+
+textOffset :: Datum -> String
+textOffset d = do
+  let node = datumIsTreeNode d
+  if (node.x < pi) == hasChildren_ d
+  then "start"
+  else "end"
+
 -- | Script components, attributes, transformations etc
 svgAttributes :: Array Chainable
 svgAttributes = [
     width 1000.0
   , height 1000.0
-  , viewBox (-500.0) (-500.0) 1000.0 1000.0
+  , viewBox 0.0 0.0 1000.0 1000.0
 ]
 
 -- | instructions for entering the links in the radial tree
@@ -63,8 +90,23 @@ enterNodes =
   , exit: []
   }
 
+enterLabels :: EnterUpdateExit
+enterLabels =
+  { enter:
+    [
+        transform labelTransformations
+      , dy 0.31
+      , x          labelOffset
+      , textAnchor textOffset
+      , text       labelName
+    ]
+
+  , update: []
+  , exit: []
+  }
+
 -- this is the extra row info that is part of a Datum beyond the D3Tree minimum
-type TreeNodeExtra = (name :: String) 
+type TreeNodeExtra = { name :: String }
 type TreeNode = D3TreeNode TreeNodeExtra 
 
 makeModel :: Number -> TreeJson -> Model TreeNodeExtra
@@ -101,6 +143,14 @@ enter = do
     , behaviour : enterNodes
   }
 
+  labelJoinSelection_ <- join state.model $ Join {
+      element   : Text
+    , key       : DatumIsKey
+    , selection : SelectionName "labels-group"
+    , projection: unsafeCoerce $ makeProjection (\model -> d3HierarchyDescendants_ model.d3Tree)
+    , behaviour : enterLabels
+  }
+
   pure svg
 
 
@@ -118,13 +168,14 @@ radialTreeConfig width =
   , separation: radialSeparationJS_
   }
 
+type Model :: forall k. k -> Type
 type Model a = {
       json   :: TreeJson
     , d3Tree :: D3Tree
     , config :: TreeConfig a
 }
 
-type D3TreeNode r = {
+type D3TreeNode d = {
     x        :: Number
   , y        :: Number
   , value    :: String
@@ -135,7 +186,7 @@ type D3TreeNode r = {
 -- TODO code out exceptions
   , parent   :: RecursiveD3TreeNode       -- this won't be present in the root node
   , children :: Array RecursiveD3TreeNode -- this won't be present in leaf nodes
-  | r -- whatever other fields we fed in to D3.hierarchy will still be present, but they're not generic, ie need coercion
+  , "data"   :: d -- whatever other fields we fed in to D3.hierarchy will still be present, but they're not generic, ie need coercion
 }
 
 -- helpers for Radial tree
