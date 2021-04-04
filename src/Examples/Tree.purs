@@ -131,7 +131,7 @@ enter = do
       element   : Path
     , key       : DatumIsKey
     , selection : SelectionName "links-group"
-    , projection: unsafeCoerce $ makeProjection (\model -> d3HierarchyLinks_ model.d3Tree)
+    , projection: makeProjection (\model -> d3HierarchyLinks_ model.d3Tree)
     , behaviour : enterLinks
   }
 
@@ -139,7 +139,7 @@ enter = do
       element   : Circle
     , key       : DatumIsKey
     , selection : SelectionName "nodes-group"
-    , projection: unsafeCoerce $ makeProjection (\model -> d3HierarchyDescendants_ model.d3Tree)
+    , projection: makeProjection (\model -> d3HierarchyDescendants_ model.d3Tree)
     , behaviour : enterNodes
   }
 
@@ -147,7 +147,7 @@ enter = do
       element   : Text
     , key       : DatumIsKey
     , selection : SelectionName "labels-group"
-    , projection: unsafeCoerce $ makeProjection (\model -> d3HierarchyDescendants_ model.d3Tree)
+    , projection: makeProjection (\model -> d3HierarchyDescendants_ model.d3Tree)
     , behaviour : enterLabels
   }
 
