@@ -13,6 +13,7 @@ import D3.Selection (Chainable(..), D3Data_, D3Selection_, D3State(..), Element(
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Map (fromFoldable)
+import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
@@ -42,9 +43,15 @@ drawGraph = do
 
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
   let graph      = readGraphFromFileContents forceJSON
-  let forceModel = makeModel graph.links graph.nodes
   
-  liftEffect $ runD3M (enter widthHeight) (makeD3State' forceModel) *> pure unit
+  -- this stuff might be stateful, will have to check if model is being changed by being put in simulation, assume it is
+  let s   = initSimulation_ defaultConfigSimulation
+      s'  = putNodesInSimulation_ s graph.nodes
+      s'' = putLinksInSimulation_ s graph.links
+
+  liftEffect $ runD3M (enter widthHeight) (makeD3State' { links: graph.links, nodes: graph.nodes }) *> pure unit
+
+  pure unit
 
 
 
@@ -96,13 +103,12 @@ enter (Tuple width height) = do
   
 
 -- | definition of the particular Simulation that we are going to run
-simulationConfig :: Simulation
-simulationConfig =
-  Simulation { 
+simulationForModel :: Simulation
+simulationForModel = Simulation { 
       label : "simulation" -- TODO stringy label
     , config: defaultConfigSimulation
     , forces: [ Force (ForceName "charge") ForceMany, centerForce 800.0 900.0 ] 
-    , nodes : []
+    , nodes : [] 
     , links : []
     , tick  : identity
     , drag  : const unit

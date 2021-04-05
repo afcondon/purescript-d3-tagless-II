@@ -69,7 +69,7 @@ type SimulationRecord_ = {
   , drag   :: Simulation -> Unit -- could be Effect Unit
 }
 
-data Simulation = Simulation SimulationRecord_
+newtype Simulation = Simulation SimulationRecord_
 type TickMap :: forall k. k -> Type
 type TickMap model = Map String (Array Chainable)
 data DragBehavior = DefaultDrag String String -- only one implementation rn and implemented on _ side 
