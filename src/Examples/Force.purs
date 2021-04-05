@@ -1,7 +1,7 @@
 module D3.Examples.Force where
 
 import D3.Attributes.Sugar
-import D3.Layouts.Tree
+import D3.Layouts.Simulation
 
 import Affjax (Error, printError)
 import Affjax as AJAX
@@ -9,49 +9,69 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Attribute(..), Datum, toAttr)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
-import D3.Selection (Chainable(..), D3Data_, D3Selection_, D3State(..), Element(..), Join(..), Keys(..), SelectionName(..), EnterUpdateExit, makeD3State', makeProjection, node)
+import D3.Selection (Chainable(..), D3Data_, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), enterOnly, makeD3State', makeProjection, node)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
+import Data.Map (fromFoldable)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (pi, sqrt)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (*>), (-), (/), (<), (<>), (==), (>=))
+import Prelude (class Bind, Unit, bind, const, discard, identity, negate, pure, show, unit, ($), (*), (*>), (-), (/), (<), (<>), (==), (>=))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.HTML (window)
 import Web.HTML.Window (innerHeight, innerWidth)
 
-type Scale = Number -> String
-foreign import readJSONJS :: String -> Model -- TODO no error handling at all here RN
+getWindowWidthHeight :: Effect (Tuple Number Number)
+getWindowWidthHeight = do
+  win <- window
+  width <- innerWidth win
+  height <- innerHeight win
+  pure $ Tuple (toNumber width) (toNumber height)
 
-readModelFromFileContents :: forall r. Either Error { body ∷ String | r } -> Model
-readModelFromFileContents (Right { body } ) = readJSONJS body
-readModelFromFileContents (Left err)        = { links: [], nodes: [] }
+readGraphFromFileContents :: forall r. Either Error { body ∷ String | r } -> Model
+readGraphFromFileContents (Right { body } ) = readJSONJS body
+readGraphFromFileContents (Left err)        = { links: [], nodes: [] }
 
-foreign import d3SchemeCategory10JS :: Scale -- not modelling the scale / domain distinction yet
+drawGraph :: Aff Unit
+drawGraph = do
+  log "Force layout example"
+  widthHeight <- liftEffect getWindowWidthHeight
+
+  forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
+  let graph      = readGraphFromFileContents forceJSON
+  let forceModel = makeModel graph.links graph.nodes
+  
+  liftEffect $ runD3M (enter widthHeight) (makeD3State' forceModel) *> pure unit
+
+
 
 -- this is the model used by this particular "chart" (ie force layout simulation)
+type ModelNodeExtra = (group :: Number) -- any extra fields beyond what's required of all ForceLayout nodes
+type ModelLinkExtra :: forall k. Row k
+type ModelLinkExtra = ()                -- empty row, this simulation doesn't yet have extra stuff in the links
+type GraphNode = D3SimulationNode ModelNodeExtra
+type GraphLink = D3SimulationLink ModelNodeExtra ModelLinkExtra
 type Model = { links :: Array GraphLink, nodes :: Array GraphNode }
 
-type GraphNode = SimulationNodeRow { group :: Number }
-type GraphLink = { id :: ID, source :: ID, target :: ID, value :: Number }
-
--- | express the additions that D3 makes in terms of rows for clarity and DRY
--- after the GraphLink type has been bound in D3 it is changed to the following
-type D3GraphLink = { id :: ID, source :: GraphNode, target :: GraphNode, value :: Number }
 
 colorByGroup :: Datum -> String
 colorByGroup datum = d3SchemeCategory10JS d.group
   where
-    d = unsafeCoerce datum
+    d = datumIsGraphNode datum
+
+linkWidth :: Datum -> Number
+linkWidth datum = sqrt d.value
+  where
+    d = datumIsGraphLink datum
 
 -- | recipe for this force layout graph
-enter :: forall m. Bind m => D3Tagless m => MonadState (D3State Model) m => m D3Selection_
-enter = do
-  root <- hook "div#force"
-  svg  <- appendTo root "svg-tree" (node Svg [ viewBox 0.0 0.0 width height ] )
+enter :: forall m. Bind m => D3Tagless m => MonadState (D3State Model) m => Tuple Number Number -> m D3Selection_ -- going to actually be a simulation right? 
+enter (Tuple width height) = do
+  root  <- hook "div#force"
+  svg   <- appendTo root "svg-tree" (node Svg [ viewBox 0.0 0.0 width height ] )
   links <- appendTo svg "links-group" (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodes <- appendTo svg "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
@@ -62,7 +82,7 @@ enter = do
     , key       : DatumIsKey
     , hook      : SelectionName "links-group"
     , projection: makeProjection (\model -> model.links)
-    , behaviour : { enter: [ strokeWidth (\d -> sqrt d.value) ], update: [], exit: [] }
+    , behaviour : enterOnly [ strokeWidth linkWidth ]
   }
 
   nodeJoinSelection <- join state.model $ Join {
@@ -70,7 +90,7 @@ enter = do
     , key       : DatumIsKey
     , hook      : SelectionName "nodes-group"
     , projection: makeProjection (\model -> model.nodes)
-    , behaviour : { enter: [ radius 5.0, fill colorByGroup ]}
+    , behaviour : enterOnly [ radius 5.0, fill colorByGroup ]
   }
   pure svg
   
@@ -79,28 +99,28 @@ enter = do
 simulationConfig :: Simulation
 simulationConfig =
   Simulation { 
-      label: "simulation" -- TODO stringy label
+      label : "simulation" -- TODO stringy label
     , config: defaultConfigSimulation
-    , forces: [ Force "charge" ForceMany, centerForce 800.0 900.0 ] 
-    , nodes: []
-    , links: []
-    , tick: identity
-    , drag: const unit
+    , forces: [ Force (ForceName "charge") ForceMany, centerForce 800.0 900.0 ] 
+    , nodes : []
+    , links : []
+    , tick  : identity
+    , drag  : const unit
   }
 
 centerForce :: Number -> Number -> Force
-centerForce width height = Force "center" $ ForceCenter (width / 2.0) (height / 2.0)
+centerForce width height = Force (ForceName "center") $ ForceCenter (width / 2.0) (height / 2.0)
 
 -- | function to build the tick function, quite tricky
-myTickMap :: TickMap Model
-myTickMap = fromFoldable
-  [ Tuple "link" [ NumberAttr "x1" (\d -> (unsafeCoerce d).source.x)
-                 , NumberAttr "y1" (\d -> (unsafeCoerce d).source.y)
-                 , NumberAttr "x2" (\d -> (unsafeCoerce d).target.x)
-                 , NumberAttr "y2" (\d -> (unsafeCoerce d).target.y) ]
-  , Tuple "node" [ NumberAttr "cx" (\d -> (unsafeCoerce d).x)
-                 , NumberAttr "cy" (\d -> (unsafeCoerce d).y) ]
-  ]
+-- myTickMap :: TickMap Model
+-- myTickMap = fromFoldable
+--   [ Tuple "link" [ x1 (\d -> d.source.x)
+--                  , y1 (\d -> d.source.y)
+--                  , x2 (\d -> d.target.x)
+--                  , y2 (\d -> d.target.y) ]
+--   , Tuple "node" [ cx (\d -> d.x)
+--                  , cy (\d -> d.y) ]
+--   ]
 
 -- | utility functions and boilerplate
 myDrag :: DragBehavior
@@ -112,7 +132,7 @@ makeModel links nodes = { links, nodes }
 -- we give the chart our Model type but behind the scenes it is mutated by D3 and additionally
 -- which projection of the "Model" is active in each Join varies so we can't have both strong
 -- static type representations AND lightweight syntax with JS compatible lambdas
-datumIsGraphLink :: Datum -> D3GraphLink
+datumIsGraphLink :: Datum -> GraphLink
 datumIsGraphLink = unsafeCoerce
 datumIsGraphNode :: Datum -> GraphNode
 datumIsGraphNode = unsafeCoerce
@@ -128,3 +148,6 @@ datumIsGraphNode = unsafeCoerce
 -- attachTickMap :: (Unit -> Unit) -> Simulation -> Unit
 -- attachTickMap tick simulation = 
 
+type Scale = Number -> String
+foreign import readJSONJS :: String -> Model -- TODO no error handling at all here RN
+foreign import d3SchemeCategory10JS :: Scale -- not modelling the scale / domain distinction yet

@@ -48,6 +48,18 @@ x = AttrT <<< Attribute "x" <<< toAttr
 y :: ∀ a. ToAttr Number a => a -> Chainable
 y = AttrT <<< Attribute "y" <<< toAttr
 
+x1 :: ∀ a. ToAttr Number a => a -> Chainable
+x1 = AttrT <<< Attribute "x1" <<< toAttr
+
+y1 :: ∀ a. ToAttr Number a => a -> Chainable
+y1 = AttrT <<< Attribute "y1" <<< toAttr
+
+x2 :: ∀ a. ToAttr Number a => a -> Chainable
+x2 = AttrT <<< Attribute "x2" <<< toAttr
+
+y2 :: ∀ a. ToAttr Number a => a -> Chainable
+y2 = AttrT <<< Attribute "y2" <<< toAttr
+
 dx :: ∀ a. ToAttr Number a => a -> Chainable
 dx = AttrT <<< Attribute "dx" <<< toAttr
 

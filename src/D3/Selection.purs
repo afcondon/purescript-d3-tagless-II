@@ -2,11 +2,9 @@ module D3.Selection where
 
 import Prelude hiding (append,join)
 
-import D3.Attributes.Instances (Attrib, Attribute, Datum, Index)
+import D3.Attributes.Instances (Attribute, Datum, Index)
 import Data.Map (Map, empty)
-import Data.Maybe (Maybe)
 import Data.Maybe.Last (Last)
-import Data.Tuple (Tuple(..))
 import Effect.Aff (Milliseconds)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -126,3 +124,6 @@ type EnterUpdateExit = {
   , update :: Array Chainable
   , exit   :: Array Chainable
 }
+
+enterOnly :: Array Chainable -> EnterUpdateExit
+enterOnly as = { enter: as, update: [], exit: [] }

@@ -48,12 +48,12 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
 
   join model (Join j) = do
     (D3State state) <- get 
-    case lookup j.selection state.namedSelections of
+    case lookup j.hook state.namedSelections of
       Nothing          -> pure Nothing
-      (Just selection) -> do
+      (Just hook) -> do
         let 
           -- (model :: D3Data_) = j.projection state.model -- TODO but in fact, it's the projection that we coerce
-          initialS = d3SelectionSelectAll_ (show j.element) selection
+          initialS = d3SelectionSelectAll_ (show j.element) hook
 
           updateS  = case j.key of
                         DatumIsKey -> d3Data_      model j.projection initialS 

@@ -1,15 +1,15 @@
 module D3.Examples.Tree where
 
-import D3.Attributes.Sugar
-import D3.Layouts.Tree
+import D3.Attributes.Sugar (classed, dy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x)
+import D3.Layouts.Tree (D3TreeNode, Model, TreeJson, d3HierarchyDescendants_, d3HierarchyLinks_, d3Hierarchy_, d3InitTree_, hasChildren_, radialLink, radialTreeConfig, readJSONJS_)
 
 import Affjax (Error, printError)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
-import D3.Attributes.Instances (Attribute(..), Datum, toAttr)
+import D3.Attributes.Instances (Datum)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
-import D3.Selection (Chainable(..), D3Data_, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), makeD3State', makeProjection, node)
+import D3.Selection (Chainable, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), enterOnly, makeD3State', makeProjection, node)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -99,48 +99,33 @@ svgAttributes = [
   , viewBox 0.0 0.0 1000.0 1000.0
 ]
 
--- | instructions for entering the links in the radial tree
+-- | instructions for entering the links of the radial tree
 enterLinks :: EnterUpdateExit
 enterLinks =
-  { enter:  
-    [ strokeWidth 1.5
-    , strokeColor "#555"
-    , strokeOpacity 0.4
-    , fill "none"
-    , radialLink (\d -> d.x) (\d -> d.y)
-    ] 
+  enterOnly [ strokeWidth 1.5
+            , strokeColor "#555"
+            , strokeOpacity 0.4
+            , fill "none"
+            , radialLink (\d -> d.x) (\d -> d.y)
+            ] 
 
-  , update: [] 
-  , exit:   []
-  }
-
--- | instructions for entering the nodes in the radial tree
+-- | instructions for entering the nodes of the radial tree
 enterNodes :: EnterUpdateExit
-enterNodes =
-  { enter:
-    [ transform transformations
-    , fill (\d -> if hasChildren_ d then "#555" else "#999")
-    , radius 2.5
-    ]
-  
-  , update: []
-  , exit: []
-  }
+enterNodes = 
+  enterOnly [ transform transformations
+            , fill (\d -> if hasChildren_ d then "#555" else "#999")
+            , radius 2.5
+            ]
 
+-- | instructions for entering the labels of the radial tree
 enterLabels :: EnterUpdateExit
 enterLabels =
-  { enter:
-    [
-        transform labelTransformations
-      , dy 0.31
-      , x          labelOffset
-      , textAnchor textOffset
-      , text       labelName
-    ]
-
-  , update: []
-  , exit: []
-  }
+  enterOnly [ transform labelTransformations
+            , dy 0.31
+            , x          labelOffset
+            , textAnchor textOffset
+            , text       labelName
+            ]
 
 -- this is the extra row info that is part of a Datum beyond the D3Tree minimum
 type TreeNodeExtra = { name :: String }
