@@ -99,7 +99,7 @@ update transition = do
   joinSelection_ <- join state.model $ Join {
       element   : Text
     , key       : DatumIsKey
-    , selection : SelectionName "letter-group"
+    , hook      : SelectionName "letter-group"
     , projection: unsafeCoerce -- null projection
     , behaviour : enterUpdateExit transition
   }

@@ -65,7 +65,7 @@ makeProjection = unsafeCoerce
 data Join model = Join {
     element    :: Element           -- what we're going to insert in the DOM
   , key        :: Keys              -- how D3 is going to identify data so that 
-  , selection  :: SelectionName     -- pending a better system we'll look up the selection using a newtype for string
+  , hook       :: SelectionName     -- pending a better system we'll look up the selection using a newtype for string
   , projection :: model -> D3Data_  -- the join might operate on some subset or transformation of the data
   , behaviour  :: EnterUpdateExit   -- what we're going to do for each set (enter, exit, update) each refresh of data
 }

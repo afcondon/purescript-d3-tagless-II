@@ -167,7 +167,7 @@ enter = do
   linkJoinSelection_ <- join state.model $ Join {
       element   : Path
     , key       : DatumIsKey
-    , selection : SelectionName "links-group"
+    , hook      : SelectionName "links-group"
     , projection: makeProjection (\model -> d3HierarchyLinks_ model.d3Tree)
     , behaviour : enterLinks
   }
@@ -175,7 +175,7 @@ enter = do
   nodeJoinSelection_ <- join state.model $ Join {
       element   : Circle
     , key       : DatumIsKey
-    , selection : SelectionName "nodes-group"
+    , hook      : SelectionName "nodes-group"
     , projection: makeProjection (\model -> d3HierarchyDescendants_ model.d3Tree)
     , behaviour : enterNodes
   }
@@ -183,7 +183,7 @@ enter = do
   labelJoinSelection_ <- join state.model $ Join {
       element   : Text
     , key       : DatumIsKey
-    , selection : SelectionName "labels-group"
+    , hook      : SelectionName "labels-group"
     , projection: makeProjection (\model -> d3HierarchyDescendants_ model.d3Tree)
     , behaviour : enterLabels
   }
