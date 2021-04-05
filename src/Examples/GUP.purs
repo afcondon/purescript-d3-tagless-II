@@ -1,15 +1,49 @@
 module D3.Examples.GUP where
 
+import Control.Monad.Rec.Class (forever)
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum, Index, datumIsChar, indexIsNumber)
-import D3.Attributes.Sugar (classed, fill, fontSize, height, remove, strokeColor, strokeOpacity, text, viewBox, width, with, x, y)
-import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join)
-import D3.Selection (Chainable, D3Selection_, D3State(..), D3_Node(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), node_)
-import Data.Maybe (Maybe)
-import Data.String.CodeUnits (singleton)
-import Prelude (class Bind, bind, negate, pure, ($), (*), (+), (<<<), (<>))
+import D3.Attributes.Sugar (classed, fill, fontSize, height, remove, strokeColor, strokeOpacity, text, transitionWithDuration, viewBox, width, with, x, y)
+import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
+import D3.Selection (Chainable, D3Selection_, D3State(..), D3_Node(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), makeD3State', node_, setData)
+import Data.Array (catMaybes)
+import Data.Maybe (Maybe(..))
+import Data.String.CodeUnits (singleton, toCharArray)
+import Data.Traversable (sequence)
+import Data.Tuple (snd)
+import Effect (Effect)
+import Effect.Aff (Aff, Milliseconds(..), delay)
+import Effect.Class (liftEffect)
+import Effect.Class.Console (log)
+import Effect.Random (random)
+import Prelude (class Bind, Unit, bind, discard, liftA1, negate, pure, ($), (*), (+), (<$>), (<<<), (<>), (>))
 import Unsafe.Coerce (unsafeCoerce)
 
+
+getLetters :: Effect (Array Char)
+getLetters = do
+  let 
+    letters = toCharArray "abcdefghijklmnopqrstuvwxyz"
+    coinToss :: Char -> Effect (Maybe Char)
+    coinToss c = do
+      n <- random
+      pure $ if n > 0.6 then Just c else Nothing
+  
+  choices <- sequence $ coinToss <$> letters
+  pure $ catMaybes choices
+
+runGeneralUpdatePattern :: Aff Unit
+runGeneralUpdatePattern = do
+  log "General Update Pattern example"
+  let transition = transitionWithDuration $ Milliseconds 2000.0
+  letters      <- liftEffect $ getLetters
+  state        <- liftEffect $ liftA1 snd $ runD3M enter (makeD3State' letters)
+  forever $ do
+    newletters <- liftEffect $ getLetters
+    _          <- liftEffect $ runD3M 
+                                (update transition)
+                                (setData newletters state)
+    delay (Milliseconds 2300.0)
 
 -- simple attributes don't use data, no hassle
 svgAttributes :: Array Chainable

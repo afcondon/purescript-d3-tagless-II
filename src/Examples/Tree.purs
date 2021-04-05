@@ -2,13 +2,49 @@ module D3.Examples.Tree where
 
 import D3.Attributes.Sugar
 
+import Affjax (Error, printError)
+import Affjax as AJAX
+import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Attribute(..), Datum, toAttr)
-import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join)
-import D3.Selection (Chainable(..), D3Data_, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), makeProjection, node)
+import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
+import D3.Selection (Chainable(..), D3Data_, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), makeD3State', makeProjection, node)
+import Data.Either (Either(..))
+import Data.Int (toNumber)
+import Data.Tuple (Tuple(..))
+import Effect (Effect)
+import Effect.Aff (Aff)
+import Effect.Class (liftEffect)
+import Effect.Class.Console (log)
 import Math (pi)
-import Prelude (class Bind, bind, negate, pure, show, ($), (*), (-), (/), (<>), (>=), (==), (<))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (*>), (-), (/), (<), (<>), (==), (>=))
 import Unsafe.Coerce (unsafeCoerce)
+import Web.HTML (window)
+import Web.HTML.Window (innerHeight, innerWidth)
+
+
+getWindowWidthHeight :: Effect (Tuple Number Number)
+getWindowWidthHeight = do
+  win <- window
+  width <- innerWidth win
+  height <- innerHeight win
+  pure $ Tuple (toNumber width) (toNumber height)
+
+readTreeFromFileContents :: forall r. Tuple Number Number -> Either Error { body ∷ String | r } -> Either Error (Model String)
+readTreeFromFileContents (Tuple width _) (Right { body } ) = Right $ makeModel width (readJSONJS_ body)
+readTreeFromFileContents _               (Left error)      = Left error
+
+drawTree :: Aff Unit
+drawTree = do
+  log "Radial tree example"
+  widthHeight   <- liftEffect getWindowWidthHeight
+  treeJSON      <- AJAX.get ResponseFormat.string "http://localhost:1234/flare-2.json"
+
+  case readTreeFromFileContents widthHeight treeJSON of
+    (Left error)      -> liftEffect $ log $ printError error
+    (Right treeModel) -> liftEffect $ runD3M enter (makeD3State' treeModel) *> pure unit
+
+
 
 -- three little transform functions to build up the transforms on nodes and labels
 rotate :: Number -> String
