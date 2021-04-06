@@ -1,26 +1,23 @@
 module D3.Examples.Force where
 
-import D3.Attributes.Sugar
-import D3.Layouts.Simulation
-
-import Affjax (Error, printError)
+import Affjax (Error)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
-import D3.Attributes.Instances (Attribute(..), Datum, toAttr)
+import D3.Attributes.Instances (Datum)
+import D3.Attributes.Sugar (classed, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
-import D3.Selection (Chainable(..), D3Data_, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), enterOnly, makeD3State', makeProjection, node)
+import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, D3Simulation_, DragBehavior(..), Force(..), ForceName(..), ForceType(..), defaultConfigSimulation, initSimulation_, putForcesInSimulation, putLinksInSimulation_, putNodesInSimulation_, startSimulation_)
+import D3.Selection (D3Selection_, D3State(..), Element(..), Join(..), Keys(..), SelectionName(..), enterOnly, makeD3State', makeProjection, node)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
-import Data.Map (fromFoldable)
-import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Math (pi, sqrt)
-import Prelude (class Bind, Unit, bind, const, discard, identity, negate, pure, show, unit, ($), (*), (*>), (-), (/), (<), (<>), (==), (>=))
+import Math (sqrt)
+import Prelude (class Bind, Unit, bind, discard, pure, unit, ($), (*>), (/))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.HTML (window)
 import Web.HTML.Window (innerHeight, innerWidth)
@@ -77,13 +74,13 @@ enter (Tuple width height) = do
   nodes <- appendTo svg "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   (D3State state) <- get
-  let s   = initSimulation_ defaultConfigSimulation
+  let s   = initSimulation state.model (\model -> model.nodes) (\model -> model.links)
 
   linkJoinSelection_ <- join state.model $ Join {
       element   : Line
     , key       : DatumIsKey
     , hook      : SelectionName "links-group"
-    , projection: (selectForceLinks s) (\model -> model.links) -- NB!!!! side-effects links into sim
+    , projection: makeProjection (\model -> model.links) -- NB!!!! side-effects links into sim
     , behaviour : enterOnly [ strokeWidth linkWidth ]
   }
 
@@ -91,24 +88,35 @@ enter (Tuple width height) = do
       element   : Circle
     , key       : DatumIsKey
     , hook      : SelectionName "nodes-group"
-    , projection: (selectForceNodes s) (\model -> model.nodes) -- NB!!!! side-effects nodes into sim
+    , projection: makeProjection (\model -> model.nodes) -- NB!!!! side-effects nodes into sim
     , behaviour : enterOnly [ radius 5.0, fill colorByGroup ]
   }
+
+  let _ = startSimulation_ s
 
   pure svg
   
 
 -- | definition of the particular Simulation that we are going to run
-simulationForModel :: Simulation NodeExtension LinkExtension
-simulationForModel = Simulation { 
-      label : "simulation" -- TODO stringy label
-    , config: defaultConfigSimulation
-    , forces: [ Force (ForceName "charge") ForceMany, centerForce 800.0 900.0 ] 
-    , nodes : [] 
-    , links : []
-    , tick  : identity
-    , drag  : const unit
-  }
+-- initSimulation :: forall model. model -> (model -> D3Data_) -> (model -> D3Data_) -> D3Simulation_
+initSimulation :: forall t61 t70 t75. t61 -> (t61 -> t70) -> (t61 -> t75) -> D3Simulation_
+initSimulation model nodeProjection linkProjection = do
+  let nodes      =  nodeProjection model
+      links      =  linkProjection model
+      simulation = initSimulation_ defaultConfigSimulation
+      _          = simulation `putNodesInSimulation_` (unsafeCoerce nodes)
+      _          = simulation `putLinksInSimulation_` (unsafeCoerce links)
+      _          = simulation `putForcesInSimulation` [ Force (ForceName "charge") ForceMany, centerForce 800.0 900.0 ]
+  simulation
+  --     { 
+  --     label : "simulation" -- TODO stringy label
+  --   , config: defaultConfigSimulation
+  --   , forces:  
+  --   , nodes : [] 
+  --   , links : []
+  --   , tick  : identity
+  --   , drag  : const unit
+  -- }
 
 centerForce :: Number -> Number -> Force
 centerForce width height = Force (ForceName "center") $ ForceCenter (width / 2.0) (height / 2.0)

@@ -2,7 +2,7 @@ module D3.Layouts.Simulation where
 
 import D3.Selection (Chainable, D3Attr, D3Data_, D3Selection_)
 import Data.Map (Map)
-import Prelude (Unit)
+import Prelude (Unit, unit, (<$>))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- import D3.Base.Attributes (Attr)
@@ -69,24 +69,22 @@ type TickMap :: forall k. k -> Type
 type TickMap model = Map String (Array Chainable)
 data DragBehavior = DefaultDrag String String -- only one implementation rn and implemented on _ side 
 
--- TODO this is a completely dirty workaround hiding a side-effect inside the projection function
--- TODO and is only being done as a stop-gap to see if the resulting shape of the DSL is attractive / intuitive
--- TODO and should be revisited. It is hoped this can have a nice solution using extension of tagless i/f 
-selectForceNodes :: forall model model'. D3Simulation_ -> (model -> model') -> (model -> D3Data_)
-selectForceNodes simulation projection = \model -> do
-  let nodes = projection model
-      -- the projection function must produce simulation-able nodes
-      _     = putNodesInSimulation_ simulation (unsafeCoerce nodes) 
-      -- but it must also coerce the resulting nodes to be opaque D3Data_ expected by other parts of DSL
-  unsafeCoerce nodes 
-
-selectForceLinks :: forall model model'. D3Simulation_ -> (model -> model') -> (model -> D3Data_)
-selectForceLinks simulation projection = \model -> do
-  let links = projection model
-      -- the projection function must produce simulation-able links
-      _     = putNodesInSimulation_ simulation (unsafeCoerce links) 
-      -- but it must also coerce the resulting links to be opaque D3Data_ expected by other parts of DSL
-  unsafeCoerce links 
+putForcesInSimulation :: D3Simulation_ -> Array Force -> D3Simulation_
+putForcesInSimulation simulation forces = do
+  let 
+    addForce :: Force -> D3Simulation_
+    addForce =
+      case _ of
+        (Force (ForceName label) ForceMany)                 -> forceMany_ simulation label 
+        (Force (ForceName label) (ForceCenter cx cy))       -> forceCenter_ simulation label cx cy
+        -- (Force (ForceLink links idFn)) -> forceLinks
+        (Force (ForceName label) (ForceCollide radius_))    -> forceCollide_ simulation label radius_
+        (Force (ForceName label) (ForceX x))                -> forceX_ simulation label x
+        (Force (ForceName label) (ForceY y))                -> forceY_ simulation label y
+        (Force (ForceName label) (ForceRadial cx cy))       -> forceRadial_ simulation label cx cy
+        (Force (ForceName label) Custom)                    -> simulation -- do this later as needed
+    _ = addForce <$> forces
+  simulation
 
 
 {-
@@ -200,9 +198,9 @@ foreign import attachDefaultDragBehavior_ :: D3Selection_ -> D3Selection_ -> Uni
 foreign import setAlphaTarget_            :: D3Selection_ -> Number -> Unit
 
 -- 
-foreign import forceMany_                 :: D3Simulation_ -> String -> Unit
-foreign import forceCenter_               :: D3Simulation_ -> String -> Number -> Number -> Unit
-foreign import forceCollide_              :: D3Simulation_ -> String -> Number -> Unit
-foreign import forceX_                    :: D3Simulation_ -> String -> Number -> Unit
-foreign import forceY_                    :: D3Simulation_ -> String -> Number -> Unit
-foreign import forceRadial_               :: D3Simulation_ -> String -> Number -> Number -> Unit
+foreign import forceMany_                 :: D3Simulation_ -> String -> D3Simulation_
+foreign import forceCenter_               :: D3Simulation_ -> String -> Number -> Number -> D3Simulation_
+foreign import forceCollide_              :: D3Simulation_ -> String -> Number -> D3Simulation_
+foreign import forceX_                    :: D3Simulation_ -> String -> Number -> D3Simulation_
+foreign import forceY_                    :: D3Simulation_ -> String -> Number -> D3Simulation_
+foreign import forceRadial_               :: D3Simulation_ -> String -> Number -> Number -> D3Simulation_
