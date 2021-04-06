@@ -8,12 +8,12 @@ exports.initSimulation_ = config => {
             .velocityDecay(config.velocityDecay) // default is 0.4
 }
 //  :: Simulation -> Array NativeNode -> Array NativeNode
-exports.putNodesInSimulation_ = simulation => nodes => { 
+exports.setNodes_ = simulation => nodes => { 
   simulation.nodes(nodes)
   return simulation;
 }
 //  :: Simulation -> Array NativeLink -> Array NativeLink
-exports.putLinksInSimulation_ = simulation => links => { 
+exports.setLinks_ = simulation => links => { 
   simulation.force("links", d3.forceLink(links).id(d => d.id))
   return simulation;
 }
@@ -24,14 +24,14 @@ exports.startSimulation_ = simulation => simulation.restart()
 //  :: NativeSelection -> Unit
 exports.stopSimulation_ = simulation => simulation.stop()
 
-var tickAttrArray = [] // TODO probably want API to reset this too, but defer til adding named tick functions
-exports.addAttrFnToTick_ = selection => pursAttr => {
-  tickAttrArray.push({ selection: selection, attr: pursAttr.value0, fn: pursAttr.value1 })
-} 
+// var tickAttrArray = [] // TODO probably want API to reset this too, but defer til adding named tick functions
+// exports.addAttrFnToTick_ = selection => pursAttr => {
+//   tickAttrArray.push({ selection: selection, attr: pursAttr.value0, fn: pursAttr.value1 })
+// } 
 // assumes we've already put all the things we want to happen into the tickAttrArray
-exports.attachTickFnToSimulation_ = simulation => simulation.on("tick", () => {
-  tickAttrArray.forEach(element => (element.selection).attr(element.attr, element.fn))
-})
+exports.onTick_ = simulation => tickFn => {
+  return simulation.on("tick", tickFn);
+}
 // default drag function, useful in probably most simulations
 exports.attachDefaultDragBehavior_ = selection => simulation => {
   

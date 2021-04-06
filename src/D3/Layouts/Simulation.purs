@@ -1,6 +1,6 @@
 module D3.Layouts.Simulation where
 
-import D3.Selection (Chainable, D3Attr, D3Data_, D3Selection_)
+import D3.Selection (Chainable, D3Attr, D3Data_, D3Selection, D3Selection_)
 import Data.Map (Map)
 import Prelude (Unit, unit, (<$>))
 import Unsafe.Coerce (unsafeCoerce)
@@ -86,90 +86,7 @@ putForcesInSimulation simulation forces = do
     _ = addForce <$> forces
   simulation
 
-
 {-
--- |                   FORCE LAYOUT (SIMULATION) interpreter
-startSimulation :: forall model. NativeSelection -> D3 model Unit
-startSimulation simulation = pure $ startSimulation_ simulation
-
-stopSimulation :: forall model. NativeSelection -> D3 model Unit
-stopSimulation simulation = pure $ stopSimulation_ simulation
-
--- | get a reference to a simulation that we can then use elsewhere
--- | ie having interpreted a Selection such that the DOM is set up to run a simulation
--- | NB this is actually modifying the model in the Context
-interpretSimulation :: forall model node link. Simulation -> 
-                              (model -> Array node) ->  -- project nodes from model
-                              (model -> Array link) ->  -- project links from model
-                              (Array link -> Array node -> model) -> -- repackage nodes & links as model
-                              D3 model NativeSelection
-interpretSimulation (Simulation r) getNodes getLinks repackage =
-  do
-    (Context model scope) <- get
-    let sim = initSimulation_ r.config
-        nodes = nativeNodes $ getNodes model
-        links = nativeLinks $ getLinks model
-    -- updateScope sim (Just r.label)
-    traverse_ (interpretForce sim) r.forces
-    let initializedNodes = unnativeNodes $ putNodesInSimulation_ sim nodes
-        initializedLinks = unnativeLinks $ putLinksInSimulation_ sim links
-        initializedModel = repackage initializedLinks initializedNodes
-    put (Context initializedModel (insert r.label sim scope))
-    pure sim
-  where
-    nativeNodes   = unsafeCoerce :: Array node -> Array Native_
-    nativeLinks   = unsafeCoerce :: Array link -> Array Native_
-    unnativeNodes = unsafeCoerce :: Array Native_ -> Array node
-    unnativeLinks = unsafeCoerce :: Array Native_ -> Array link
-
-interpretForce :: forall model. NativeSelection -> Force -> D3 model Unit
-interpretForce simulation = do
-  case _ of
-    (Force label ForceMany)                 -> pure $ forceMany_ simulation label 
-    (Force label (ForceCenter cx cy))       -> pure $ forceCenter_ simulation label cx cy
-    -- (Force (ForceLink links idFn)) -> pure $ forceLinks
-    (Force label (ForceCollide radius_))    -> pure $ forceCollide_ simulation label radius_
-    (Force label (ForceX x))                -> pure $ forceX_ simulation label x
-    (Force label (ForceY y))                -> pure $ forceY_ simulation label y
-    (Force label (ForceRadial cx cy))       -> pure $ forceRadial_ simulation label cx cy
-    (Force label Custom)                    -> pure $ unit -- do this later as needed
-
--- getNativeSelections :: Map String NativeSelection -> TickMap model -> Array (Tuple NativeSelection (Array (Tuple attr fn)))
--- getNativeSelections scope []
-
-
-getNativeSelection :: forall x. (Map String NativeSelection) -> Map String x -> Array (Tuple NativeSelection x)
-getNativeSelection scopeMap tickMap = fromFoldable nativeTuples
-  where
-    tickTuples :: Array (Tuple String x)
-    tickTuples = toUnfoldable tickMap
-
-    maybeNativeTuple :: Tuple String x -> Tuple (Maybe NativeSelection) x
-    maybeNativeTuple = lmap (flip lookup scopeMap)
-
-    maybeNativeTuples :: Array (Tuple (Maybe NativeSelection) x)
-    maybeNativeTuples = maybeNativeTuple <$> tickTuples
-
-    nativeTuples :: Array (Tuple NativeSelection x)
-    nativeTuples = foldl foldFn [] maybeNativeTuples 
-
-    foldFn list (Tuple (Just a) b) = (Tuple a b) : list
-    foldFn list (Tuple Nothing _)  = list
-
-addAttrFnToTick :: forall model. Tuple NativeSelection Attr -> D3 model Unit
-addAttrFnToTick (Tuple selection attr) = pure $ addAttrFnToTick_ selection attr 
-
-interpretTickMap :: forall model. NativeSelection -> TickMap model -> D3 model Unit
-interpretTickMap simulation tickMap = do
-  (Context model scope) <- get
-  --  [(label,attrs)] -> [(nativeselection, attr)] so as enable build up of list on JS side
-  let 
-    attrs :: Array (Tuple NativeSelection Attr)
-    attrs = concatMap (\(Tuple x ys) -> (Tuple x) <$> ys) (getNativeSelection scope tickMap)
-  -- TODO pending better solution will pass Attr (purescript type) over FFI and decode there
-  traverse_ addAttrFnToTick attrs
-  pure $ attachTickFnToSimulation_ simulation
-
 interpretDrag :: forall model. DragBehavior -> D3 model Unit 
 interpretDrag (DefaultDrag selectionName simulationName) = do
   (Context model scope) <- get
@@ -184,16 +101,16 @@ interpretDrag (DefaultDrag selectionName simulationName) = do
 -- TODO structures here carried over from previous interpreter - review and refactor
 foreign import data D3Simulation_ :: Type
 
-foreign import initSimulation_            :: SimulationConfig_ -> D3Simulation_
-foreign import startSimulation_           :: D3Simulation_ -> Unit
-foreign import stopSimulation_            :: D3Simulation_ -> Unit
-foreign import putNodesInSimulation_      :: forall r.   D3Simulation_ -> Array (D3ForceNode_ r) -> D3Simulation_
-foreign import putLinksInSimulation_      :: forall r l. D3Simulation_ -> Array (D3ForceLink_ r l) -> D3Simulation_
+foreign import initSimulation_  :: SimulationConfig_ -> D3Simulation_
+foreign import startSimulation_ :: D3Simulation_ -> Unit
+foreign import stopSimulation_  :: D3Simulation_ -> Unit
+foreign import setNodes_        :: forall r.   D3Simulation_ -> Array (D3ForceNode_ r) -> D3Simulation_
+foreign import setLinks_        :: forall r l. D3Simulation_ -> Array (D3ForceLink_ r l) -> D3Simulation_
 
 -- TODO this all has to change completely to work within Tagless 
-foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass
-foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr -> Unit
-foreign import attachTickFnToSimulation_  :: D3Selection_ -> Unit
+-- foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass
+-- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr -> Unit
+foreign import onTick_                    :: D3Simulation_ -> (D3Simulation_ -> D3Simulation_) -> D3Simulation_
 foreign import attachDefaultDragBehavior_ :: D3Selection_ -> D3Selection_ -> Unit
 foreign import setAlphaTarget_            :: D3Selection_ -> Number -> Unit
 
