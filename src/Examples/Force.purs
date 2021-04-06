@@ -44,10 +44,11 @@ drawGraph = do
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
   let graph      = readGraphFromFileContents forceJSON
   
-  -- this stuff might be stateful, will have to check if model is being changed by being put in simulation, assume it is
+  -- this stuff might be stateful, will have to check if model is being changed by being put in simulation,
+  -- assume it is for now, better if it wasn't tho
   let s   = initSimulation_ defaultConfigSimulation
       s'  = putNodesInSimulation_ s graph.nodes
-      s'' = putLinksInSimulation_ s graph.links
+      s'' = putLinksInSimulation_ s' graph.links
 
   liftEffect $ runD3M (enter widthHeight) (makeD3State' { links: graph.links, nodes: graph.nodes }) *> pure unit
 
@@ -56,11 +57,10 @@ drawGraph = do
 
 
 -- this is the model used by this particular "chart" (ie force layout simulation)
-type ModelNodeExtra = (group :: Number) -- any extra fields beyond what's required of all ForceLayout nodes
-type ModelLinkExtra :: forall k. Row k
-type ModelLinkExtra = ()                -- empty row, this simulation doesn't yet have extra stuff in the links
-type GraphNode = D3SimulationNode ModelNodeExtra
-type GraphLink = D3SimulationLink ModelNodeExtra ModelLinkExtra
+type NodeExtension = (group :: Number) -- any extra fields beyond what's required of all ForceLayout nodes
+type LinkExtension = (value :: Number) -- empty row, this simulation doesn't yet have extra stuff in the links
+type GraphNode = D3ForceNode_ NodeExtension
+type GraphLink = D3ForceLink_ NodeExtension LinkExtension
 type Model = { links :: Array GraphLink, nodes :: Array GraphNode }
 
 
@@ -103,7 +103,7 @@ enter (Tuple width height) = do
   
 
 -- | definition of the particular Simulation that we are going to run
-simulationForModel :: Simulation
+simulationForModel :: Simulation NodeExtension LinkExtension
 simulationForModel = Simulation { 
       label : "simulation" -- TODO stringy label
     , config: defaultConfigSimulation

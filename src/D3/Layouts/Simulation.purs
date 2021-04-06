@@ -25,51 +25,45 @@ defaultConfigSimulation = {
     , velocityDecay: 0.4
 }
 
--- this is the row that gets added ot your Model's nodes when initialized by D3
-type D3SimulationNode r = { x :: Number
-                          , y :: Number
-                          , group :: Number
-                          , vx :: Number
-                          , vy :: Number
-                          , index :: Number
-                          | r } -- extra node information from model
-
--- | express the additions that D3 makes in terms of rows for clarity and DRY
--- after the GraphLink type has been bound in D3 it is changed to the following
-type D3SimulationLink r l = { id :: ID
-                          , source :: D3SimulationNode r
-                          , target :: D3SimulationNode r
-                          , value :: Number
-                          | l } -- extra link information from model
-
 -- | Force Layout core types
 type ID = Int -- TODO this needs to be polymorphic eventually
-type Link = forall r. { id :: ID, source :: ID, target :: ID | r }
-type Node = forall r i. { id :: i | r }
-type IdFn = Link -> ID
+type D3ForceLink_ r l = { 
+    source :: D3ForceNode_ r
+  , target :: D3ForceNode_ r
+  | l
+}
+type D3ForceNode_ r = { 
+    id    :: ID
+  , index :: Number
+  , x     :: Number
+  , y     :: Number
+  , vx    :: Number
+  , vy    :: Number
+  | r
+}
 newtype ForceName = ForceName String
 data Force = Force ForceName ForceType
 data ForceType =
     ForceMany
   | ForceCenter Number Number
-  -- | ForceLink (Array Link) IdFn
+  -- | ForceLink (Array Link) (Link -> ID)
   | ForceCollide Number
   | ForceX Number
   | ForceY Number
   | ForceRadial Number Number
   | Custom
 
-type SimulationRecord_ = { 
+type SimulationRecord_ r l = { 
     label  :: String
   , config :: SimulationConfig_
-  , nodes  :: Array Node
-  , links  :: Array Link
+  , nodes  :: Array (D3ForceNode_ r)
+  , links  :: Array (D3ForceLink_ r l)
   , forces :: Array Force
   , tick   :: Unit -> Unit -- could be Effect Unit
-  , drag   :: Simulation -> Unit -- could be Effect Unit
+  , drag   :: Simulation r l -> Unit -- could be Effect Unit
 }
 
-newtype Simulation = Simulation SimulationRecord_
+newtype Simulation r l = Simulation (SimulationRecord_ r l)
 type TickMap :: forall k. k -> Type
 type TickMap model = Map String (Array Chainable)
 data DragBehavior = DefaultDrag String String -- only one implementation rn and implemented on _ side 
@@ -174,8 +168,8 @@ foreign import data D3Simulation_ :: Type
 foreign import initSimulation_            :: SimulationConfig_ -> D3Simulation_
 foreign import startSimulation_           :: D3Simulation_ -> Unit
 foreign import stopSimulation_            :: D3Simulation_ -> Unit
-foreign import putNodesInSimulation_      :: D3Simulation_ -> Array Node -> D3Simulation_
-foreign import putLinksInSimulation_      :: D3Simulation_ -> Array Link -> D3Simulation_
+foreign import putNodesInSimulation_      :: forall r.   D3Simulation_ -> Array (D3ForceNode_ r) -> D3Simulation_
+foreign import putLinksInSimulation_      :: forall r l. D3Simulation_ -> Array (D3ForceLink_ r l) -> D3Simulation_
 
 -- TODO this all has to change completely to work within Tagless 
 foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass
