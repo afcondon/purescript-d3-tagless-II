@@ -10,12 +10,12 @@ exports.initSimulation_ = config => {
 //  :: Simulation -> Array NativeNode -> Array NativeNode
 exports.putNodesInSimulation_ = simulation => nodes => { 
   simulation.nodes(nodes)
-  return nodes
+  return simulation;
 }
 //  :: Simulation -> Array NativeLink -> Array NativeLink
 exports.putLinksInSimulation_ = simulation => links => { 
   simulation.force("links", d3.forceLink(links).id(d => d.id))
-  return links
+  return simulation;
 }
 // :: NativeSelection -> Number -> Unit
 exports.setAlphaTarget_ = simulation => target => simulation.alphaTarget(target)
