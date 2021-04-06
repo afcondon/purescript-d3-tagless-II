@@ -1,8 +1,9 @@
 module D3.Layouts.Simulation where
 
-import D3.Selection (Chainable, D3Attr, D3Selection_)
+import D3.Selection (Chainable, D3Attr, D3Data_, D3Selection_)
 import Data.Map (Map)
 import Prelude (Unit)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- import D3.Base.Attributes (Attr)
 -- import D3.Base.Selection (Label)
@@ -67,6 +68,26 @@ newtype Simulation r l = Simulation (SimulationRecord_ r l)
 type TickMap :: forall k. k -> Type
 type TickMap model = Map String (Array Chainable)
 data DragBehavior = DefaultDrag String String -- only one implementation rn and implemented on _ side 
+
+-- TODO this is a completely dirty workaround hiding a side-effect inside the projection function
+-- TODO and is only being done as a stop-gap to see if the resulting shape of the DSL is attractive / intuitive
+-- TODO and should be revisited. It is hoped this can have a nice solution using extension of tagless i/f 
+selectForceNodes :: forall model model'. D3Simulation_ -> (model -> model') -> (model -> D3Data_)
+selectForceNodes simulation projection = \model -> do
+  let nodes = projection model
+      -- the projection function must produce simulation-able nodes
+      _     = putNodesInSimulation_ simulation (unsafeCoerce nodes) 
+      -- but it must also coerce the resulting nodes to be opaque D3Data_ expected by other parts of DSL
+  unsafeCoerce nodes 
+
+selectForceLinks :: forall model model'. D3Simulation_ -> (model -> model') -> (model -> D3Data_)
+selectForceLinks simulation projection = \model -> do
+  let links = projection model
+      -- the projection function must produce simulation-able links
+      _     = putNodesInSimulation_ simulation (unsafeCoerce links) 
+      -- but it must also coerce the resulting links to be opaque D3Data_ expected by other parts of DSL
+  unsafeCoerce links 
+
 
 {-
 -- |                   FORCE LAYOUT (SIMULATION) interpreter

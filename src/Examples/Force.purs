@@ -44,12 +44,6 @@ drawGraph = do
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
   let graph      = readGraphFromFileContents forceJSON
   
-  -- this stuff might be stateful, will have to check if model is being changed by being put in simulation,
-  -- assume it is for now, better if it wasn't tho
-  let s   = initSimulation_ defaultConfigSimulation
-      s'  = putNodesInSimulation_ s graph.nodes
-      s'' = putLinksInSimulation_ s' graph.links
-
   liftEffect $ runD3M (enter widthHeight) (makeD3State' { links: graph.links, nodes: graph.nodes }) *> pure unit
 
   pure unit
@@ -83,12 +77,13 @@ enter (Tuple width height) = do
   nodes <- appendTo svg "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   (D3State state) <- get
+  let s   = initSimulation_ defaultConfigSimulation
 
   linkJoinSelection_ <- join state.model $ Join {
       element   : Line
     , key       : DatumIsKey
     , hook      : SelectionName "links-group"
-    , projection: makeProjection (\model -> model.links)
+    , projection: (selectForceLinks s) (\model -> model.links) -- NB!!!! side-effects links into sim
     , behaviour : enterOnly [ strokeWidth linkWidth ]
   }
 
@@ -96,9 +91,10 @@ enter (Tuple width height) = do
       element   : Circle
     , key       : DatumIsKey
     , hook      : SelectionName "nodes-group"
-    , projection: makeProjection (\model -> model.nodes)
+    , projection: (selectForceNodes s) (\model -> model.nodes) -- NB!!!! side-effects nodes into sim
     , behaviour : enterOnly [ radius 5.0, fill colorByGroup ]
   }
+
   pure svg
   
 

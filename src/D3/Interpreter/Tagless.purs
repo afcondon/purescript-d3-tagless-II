@@ -25,6 +25,9 @@ derive newtype instance monadD3M       :: Monad                      (D3M model)
 derive newtype instance monadStateD3M  :: MonadState (D3State model) (D3M model)
 derive newtype instance monadEffD3M    :: MonadEffect                (D3M model)
 
+-- TODO see whether it can be useful to extend the interpreter here, for different visualization types
+-- in particular, it could be good to have Simulation do it's join function by putting nodes / links
+-- into both DOM and Simulation for example (and current implementation is gross and wrong)
 class (Monad m) <= D3Tagless m where
   hook     :: Selector                            -> m D3Selection_
   appendTo :: D3Selection_   -> String -> D3_Node -> m D3Selection_
