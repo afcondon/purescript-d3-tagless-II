@@ -86,35 +86,27 @@ enter (Tuple width height) = do
   (D3State state) <- get
   let simulation = initSimulation state.model (\model -> model.nodes) (\model -> model.links)
 
-  maybeLinks_ <- join state.model $ Join {
+  maybeLinks_ <- join state.model $ JoinSimulation {
       element   : Line
     , key       : DatumIsKey
     , hook      : SelectionName "links-group"
     , projection: makeProjection (\model -> model.links)
-    , behaviour : enterOnly [ strokeWidth linkWidth ]
+    , behaviour : [ strokeWidth linkWidth ]
+    , onTick    : linkTick
     -- would like to have the tick function for this selection in here
   }
 
-  maybeNodes_ <- join state.model $ Join {
+  maybeNodes_ <- join state.model $ JoinSimulation {
       element   : Circle
     , key       : DatumIsKey
     , hook      : SelectionName "nodes-group"
     , projection: makeProjection (\model -> model.nodes)
-    , behaviour : enterOnly [ radius 5.0, fill colorByGroup ]
+    , behaviour : [ radius 5.0, fill colorByGroup ]
+    , onTick    : nodeTick
     -- would like to have the tick function for this selection in here
   }
-
-  let _ = case maybeLinks_, maybeNodes_ of
-            (Just links_), (Just nodes_) -> 
-              simulation `onTick_` (\sn -> do
-                              let _ = trace { tick: "linkTick" } \_ -> unit
-                              let _ = foldl applyChainable links_ linkTick
-                              let _ = trace { tick: "nodeTick" } \_ -> unit
-                              let _ = foldl applyChainable nodes_ nodeTick
-                              sn)
-            _, _ -> simulation -- TODO let's really make an effort to make this work by extending Join to JoinSim
           
-      _ = startSimulation_ simulation
+  let _ = startSimulation_ simulation
 
   pure svg
 

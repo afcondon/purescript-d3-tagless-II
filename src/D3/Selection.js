@@ -1,6 +1,6 @@
 exports.emptyD3Data_ = null
 
-const debug = false;
+const debug = true;
 
 // d3SelectAll_ :: Selector -> D3Selection
 exports.d3SelectAllInDOM_ = selector => { // NB not USING selection but want it cause called from inside State Monad

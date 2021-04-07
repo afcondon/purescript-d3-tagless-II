@@ -96,7 +96,7 @@ update :: ∀ m. Bind m => MonadState (D3State (Array Char)) m => D3Tagless m =>
 update transition = do
   (D3State state) <- get  
 
-  joinSelection_ <- join state.model $ Join {
+  joinSelection_ <- join state.model $ JoinGeneral {
       element   : Text
     , key       : DatumIsKey
     , hook      : SelectionName "letter-group"

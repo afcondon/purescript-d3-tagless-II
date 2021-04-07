@@ -53,6 +53,35 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
       Nothing          -> pure Nothing
       (Just hook) -> do
         let 
+          initialS = d3SelectionSelectAll_ (show j.element) hook
+          enterS   = case j.key of
+                        DatumIsKey -> d3Data_      model j.projection initialS 
+                        (KeyF fn)  -> d3DataKeyFn_ model j.projection fn initialS 
+          enterS'  = d3EnterAndAppend_ (show j.element) enterS
+          enterS'' = foldl applyChainable enterS  j.behaviour
+        pure $ Just enterS'
+
+  join model (JoinSimulation j) = do
+    (D3State state) <- get 
+    case lookup j.hook state.namedSelections of
+      Nothing          -> pure Nothing
+      (Just hook) -> do
+        let 
+          initialS = d3SelectionSelectAll_ (show j.element) hook
+          enterS  = case j.key of
+                        DatumIsKey -> d3Data_      model j.projection initialS 
+                        (KeyF fn)  -> d3DataKeyFn_ model j.projection fn initialS 
+          enterS'  = d3EnterAndAppend_ (show j.element) enterS
+          enterS'' = foldl applyChainable enterS  j.behaviour
+          finalS   = foldl applyChainable enterS'' j.onTick
+        pure $ Just finalS
+
+  join model (JoinGeneral j) = do
+    (D3State state) <- get 
+    case lookup j.hook state.namedSelections of
+      Nothing          -> pure Nothing
+      (Just hook) -> do
+        let 
           -- (model :: D3Data_) = j.projection state.model -- TODO but in fact, it's the projection that we coerce
           initialS = d3SelectionSelectAll_ (show j.element) hook
 
@@ -68,6 +97,8 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
           _        = foldl applyChainable exitS   j.behaviour.exit
           _        = foldl applyChainable updateS j.behaviour.update
 
+          -- _ = foldl applyChainable updateS j.onTick
+
         pure $ Just updateS
 
 setSelection :: ∀ m model. Bind m => MonadState (D3State model) m => 
@@ -77,7 +108,8 @@ setSelection name selection_ = do
     pure selection_
 
 applyChainable :: D3Selection_ -> Chainable -> D3Selection_
-applyChainable selection_ (AttrT (Attribute label attr)) = spy "d3SetAttr" $ d3SetAttr_ label (unbox attr) selection_
+applyChainable selection_ (AttrT (Attribute label attr)) = -- spy "d3SetAttr" $ 
+  d3SetAttr_ label (unbox attr) selection_
 -- NB only protection against non-text attribute for Text field is in the helper function
 applyChainable selection_ (TextT (Attribute label attr)) = d3SetText_ (unbox attr) selection_ 
 -- NB this remove call will have no effect on elements with active or pending transitions

@@ -100,32 +100,29 @@ svgAttributes = [
 ]
 
 -- | instructions for entering the links of the radial tree
-enterLinks :: EnterUpdateExit
-enterLinks =
-  enterOnly [ strokeWidth 1.5
-            , strokeColor "#555"
-            , strokeOpacity 0.4
-            , fill "none"
-            , radialLink (\d -> d.x) (\d -> d.y)
-            ] 
+enterLinks :: Array Chainable
+enterLinks = [ strokeWidth 1.5
+              , strokeColor "#555"
+              , strokeOpacity 0.4
+              , fill "none"
+              , radialLink (\d -> d.x) (\d -> d.y)
+              ] 
 
 -- | instructions for entering the nodes of the radial tree
-enterNodes :: EnterUpdateExit
-enterNodes = 
-  enterOnly [ transform transformations
-            , fill (\d -> if hasChildren_ d then "#555" else "#999")
-            , radius 2.5
-            ]
+enterNodes :: Array Chainable
+enterNodes =  [ transform transformations
+              , fill (\d -> if hasChildren_ d then "#555" else "#999")
+              , radius 2.5
+              ]
 
 -- | instructions for entering the labels of the radial tree
-enterLabels :: EnterUpdateExit
-enterLabels =
-  enterOnly [ transform labelTransformations
-            , dy 0.31
-            , x          labelOffset
-            , textAnchor textOffset
-            , text       labelName
-            ]
+enterLabels :: Array Chainable
+enterLabels = [ transform labelTransformations
+              , dy 0.31
+              , x          labelOffset
+              , textAnchor textOffset
+              , text       labelName
+              ]
 
 -- this is the extra row info that is part of a Datum beyond the D3Tree minimum
 type TreeNodeExtra = { name :: String }

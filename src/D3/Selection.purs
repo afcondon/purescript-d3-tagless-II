@@ -60,13 +60,16 @@ data Keys = KeyF KeyFunction_ | DatumIsKey
 type Projection = forall model. (model -> D3Data_)
 makeProjection :: forall model model'. (model -> model') -> (model -> D3Data_)
 makeProjection = unsafeCoerce
-data Join model = Join {
-    element    :: Element           -- what we're going to insert in the DOM
+type JoinParams model r = 
+  { element    :: Element           -- what we're going to insert in the DOM
   , key        :: Keys              -- how D3 is going to identify data so that 
   , hook       :: SelectionName     -- pending a better system we'll look up the selection using a newtype for string
-  , projection :: model -> D3Data_  -- the join might operate on some subset or transformation of the data
-  , behaviour  :: EnterUpdateExit   -- what we're going to do for each set (enter, exit, update) each refresh of data
-}
+  , projection :: model -> D3Data_  -- the join might operate on some subset or transformation of the data}
+  | r
+  }
+data Join model = Join           (JoinParams model (behaviour :: Array Chainable))
+                | JoinGeneral    (JoinParams model (behaviour :: EnterUpdateExit)) -- what we're going to do for each set (enter, exit, update) each refresh of data
+                | JoinSimulation (JoinParams model (behaviour :: Array Chainable, onTick :: Array Chainable))
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
 derive instance ordSelectionName :: Ord SelectionName
