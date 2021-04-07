@@ -1,18 +1,16 @@
 module D3.Interpreter.Tagless where
 
-import D3.Selection (Chainable(..), D3Data_, D3Selection, D3Selection_, D3State(..), D3_Node(..), Join(..), Keys(..), SelectionName(..), Selector, d3AddTransition, d3Append_, d3DataKeyFn_, d3Data_, d3EnterAndAppend_, d3Exit_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, makeD3State')
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, bind, discard, liftA1, pure, show, ($))
-
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
+import D3.Selection (Chainable(..), D3Selection_, D3State(..), D3_Node(..), Join(..), Keys(..), SelectionName(..), Selector, d3AddTransition, d3Append_, d3DataKeyFn_, d3Data_, d3EnterAndAppend_, d3Exit_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, makeD3State')
 import Data.Foldable (foldl)
 import Data.Map (insert, lookup)
 import Data.Maybe (Maybe(..))
-import Data.Maybe.Last (Last(..))
 import Data.Tuple (Tuple, fst, snd)
+import Debug (spy)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
-import Unsafe.Coerce (unsafeCoerce)
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, bind, discard, liftA1, pure, show, ($))
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
 newtype D3M model a = D3M (StateT (D3State model) Effect a) 
@@ -79,7 +77,7 @@ setSelection name selection_ = do
     pure selection_
 
 applyChainable :: D3Selection_ -> Chainable -> D3Selection_
-applyChainable selection_ (AttrT (Attribute label attr)) = d3SetAttr_ label (unbox attr) selection_
+applyChainable selection_ (AttrT (Attribute label attr)) = spy "d3SetAttr" $ d3SetAttr_ label (unbox attr) selection_
 -- NB only protection against non-text attribute for Text field is in the helper function
 applyChainable selection_ (TextT (Attribute label attr)) = d3SetText_ (unbox attr) selection_ 
 -- NB this remove call will have no effect on elements with active or pending transitions

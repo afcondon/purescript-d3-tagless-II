@@ -11,11 +11,12 @@ import D3.Attributes.Instances (Datum)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, applyChainable, hook, join, runD3M)
 import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, D3Simulation_, DragBehavior(..), Force(..), ForceName(..), ForceType(..), defaultConfigSimulation, initSimulation_, onTick_, putForcesInSimulation, setLinks_, setNodes_, startSimulation_)
 import D3.Selection (Chainable, D3Selection, D3Selection_, D3State(..), Element(..), Join(..), Keys(..), SelectionName(..), enterOnly, makeD3State', makeProjection, node)
+import Data.Array (foldl)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import Debug (spy)
+import Debug (spy, trace)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -77,7 +78,7 @@ enter (Tuple width height) = do
   nodes <- appendTo svg "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   (D3State state) <- get
-  let s   = initSimulation state.model (\model -> model.nodes) (\model -> model.links)
+  let simulation = initSimulation state.model (\model -> model.nodes) (\model -> model.links)
 
   maybeLinks_ <- join state.model $ Join {
       element   : Line
@@ -99,42 +100,67 @@ enter (Tuple width height) = do
 
   let _ = case maybeLinks_, maybeNodes_ of
             (Just links_), (Just nodes_) -> 
-              s `onTick_` (\sn -> do
-                              let _ = (applyChainable links_) <$> linkTick
-                                  _ = (applyChainable nodes_) <$> nodeTick
-                                  _ = spy "Tick function: " sn
+              simulation `onTick_` (\sn -> do
+                              -- let _ = trace { tick: "linkTick" } \_ -> unit
+                              let _ = foldl applyChainable links_ linkTick
+                              -- let _ = trace { tick: "nodeTick" } \_ -> unit
+                              let _ = foldl applyChainable nodes_ nodeTick
                               sn)
-            _, _ -> s -- TODO let's really make an effort to make this work by extending Join to JoinSim
+            _, _ -> simulation -- TODO let's really make an effort to make this work by extending Join to JoinSim
           
-      _ = startSimulation_ s
+      _ = startSimulation_ simulation
 
   pure svg
 
 linkTick :: Array Chainable
 linkTick = 
-  [ x1 (\d -> (datumIsGraphLink d).source.x)
-  , y1 (\d -> (datumIsGraphLink d).source.y)
-  , x2 (\d -> (datumIsGraphLink d).target.x)
-  , y2 (\d -> (datumIsGraphLink d).target.y) ]
+  [ x1 setX1
+  , y1 setY1
+  , x2 setX2
+  , y2 setY2 ]
 
 nodeTick :: Array Chainable
 nodeTick =
-  [ cx (\d -> (datumIsGraphNode d).x)
-  , cy (\d -> (datumIsGraphNode d).y) ]
+  [ cx setCx
+  , cy setCy ]
+
+setX1 :: Datum -> Number
+setX1 datum = d.source.x
+  where
+    d = datumIsGraphLink datum
+setY1 :: Datum -> Number
+setY1 datum = d.source.y
+  where
+    d = datumIsGraphLink datum
+setX2 :: Datum -> Number
+setX2 datum = d.target.x
+  where
+    d = datumIsGraphLink datum
+setY2 :: Datum -> Number
+setY2 datum = d.target.x
+  where
+    d = datumIsGraphLink datum
+setCx :: Datum -> Number
+setCx datum = d.x
+  where
+    d = spy "setCx: " $ datumIsGraphNode datum
+setCy :: Datum -> Number
+setCy datum = d.x
+  where
+    d = datumIsGraphNode datum
 
 -- | definition of the particular Simulation that we are going to run
--- initSimulation :: forall model. model -> (model -> D3Data_) -> (model -> D3Data_) -> D3Simulation_
-initSimulation :: forall t61 t70 t75. t61 -> (t61 -> t70) -> (t61 -> t75) -> D3Simulation_
+initSimulation :: forall model node link. model -> (model -> node) -> (model -> link) -> D3Simulation_
 initSimulation model nodeProjection linkProjection = do
-  let nodes      =  nodeProjection model
-      links      =  linkProjection model
+  let nodes_     = unsafeCoerce $ nodeProjection model
+      links_     = unsafeCoerce $ linkProjection model
       simulation = initSimulation_ defaultConfigSimulation
       -- the projection functions for the join are not sufficient for the simulation
       -- of course, the makeProjection is an unsafeCoerce anyway so it's a moot point
       -- TODO revisit whole area when functionally complete and try for a type-safe expression of both
-      _          = simulation `setNodes_` (unsafeCoerce nodes)
-      _          = simulation `setLinks_` (unsafeCoerce links)
-      _          = simulation `putForcesInSimulation` [ Force (ForceName "charge") ForceMany, centerForce 800.0 900.0 ]
+      _ = simulation `setNodes_` nodes_
+      _ = simulation `setLinks_` links_
+      _ = simulation `putForcesInSimulation` [ Force (ForceName "charge") ForceMany, centerForce 800.0 900.0 ]
   simulation
 
 centerForce :: Number -> Number -> Force

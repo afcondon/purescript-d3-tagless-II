@@ -1,6 +1,6 @@
 exports.emptyD3Data_ = null
 
-const debug = true;
+const debug = false;
 
 // d3SelectAll_ :: Selector -> D3Selection
 exports.d3SelectAllInDOM_ = selector => { // NB not USING selection but want it cause called from inside State Monad
@@ -68,7 +68,9 @@ exports.d3DataKeyFn_ = data => projection => keyFunction => selection => {
 }
 // d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit 
 exports.d3SetAttr_ = name => value => selection => {
-  if (debug) {(`\t${selection}.attr(${name}, ${value})`);}
+  if (debug) {
+    console.log(`\t${selection}.attr(${name}, ${value})`);
+  }
   return selection.attr(name, value);
 }
 

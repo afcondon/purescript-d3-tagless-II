@@ -1,14 +1,20 @@
+var debug = true;
+
 //            SIMULATION functions
 exports.initSimulation_ = config => {
-  return d3.forceSimulation()
-            .alpha(config.alpha) // default is 1
-            .alphaTarget(config.alphaTarget) // default is 0
-            .alphaMin(config.alphaMin) // default is 0.0001
-            .alphaDecay(config.alphaDecay) // default is 0.0228
-            .velocityDecay(config.velocityDecay) // default is 0.4
+  const simulation = 
+  d3.forceSimulation()
+  .alpha(config.alpha) // default is 1
+  .alphaTarget(config.alphaTarget) // default is 0
+  .alphaMin(config.alphaMin) // default is 0.0001
+  .alphaDecay(config.alphaDecay) // default is 0.0228
+  .velocityDecay(config.velocityDecay) // default is 0.4
+  if(debug){ console.log(`initSimulation${simulation}`)}
+  return simulation;
 }
 //  :: Simulation -> Array NativeNode -> Array NativeNode
 exports.setNodes_ = simulation => nodes => { 
+  if(debug){ console.log(`${simulation}.nodes(${nodes})`)}
   simulation.nodes(nodes)
   return simulation;
 }
@@ -24,14 +30,13 @@ exports.startSimulation_ = simulation => simulation.restart()
 //  :: NativeSelection -> Unit
 exports.stopSimulation_ = simulation => simulation.stop()
 
-// var tickAttrArray = [] // TODO probably want API to reset this too, but defer til adding named tick functions
-// exports.addAttrFnToTick_ = selection => pursAttr => {
-//   tickAttrArray.push({ selection: selection, attr: pursAttr.value0, fn: pursAttr.value1 })
-// } 
-// assumes we've already put all the things we want to happen into the tickAttrArray
+// simulation.on("tick", () => {
 exports.onTick_ = simulation => tickFn => {
-  return simulation.on("tick", tickFn);
+  // if(debug){ console.log(`${simulation}.onTick(${tickFn})`)}
+  return simulation.on("tick", () => tickFn());
 }
+
+
 // default drag function, useful in probably most simulations
 exports.attachDefaultDragBehavior_ = selection => simulation => {
   
