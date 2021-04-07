@@ -22,7 +22,9 @@ fill = AttrT <<< Attribute "fill" <<< toAttr
 
 -- TODO this definitely needs to be Number-with-unit here
 viewBox :: Number -> Number -> Number -> Number -> Chainable
-viewBox xo yo w h = AttrT <<< Attribute "viewbox" $ toAttr [ xo, yo, w, h ]
+viewBox xo yo w h = AttrT <<< Attribute "viewBox" $ toAttr vb
+  where
+    vb = intercalate " " $ show <$> [ xo, yo, w, h ]
 
 fontFamily :: ∀ a. ToAttr String a => a -> Chainable
 fontFamily = AttrT <<< Attribute "font-family" <<< toAttr

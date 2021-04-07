@@ -96,7 +96,7 @@ svgAttributes :: Array Chainable
 svgAttributes = [
     width 1000.0
   , height 1000.0
-  , viewBox 0.0 0.0 1000.0 1000.0
+  , viewBox (-500.0) (-500.0) 2000.0 2000.0
 ]
 
 -- | instructions for entering the links of the radial tree

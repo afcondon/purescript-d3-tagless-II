@@ -53,7 +53,7 @@ drawGraph = do
   let graph      = readGraphFromFileContents forceJSON
   
   -- liftEffect $ runD3M (enter widthHeight) (makeD3State' { links: graph.links, nodes: graph.nodes }) *> pure unit
-  liftEffect $ runD3M (enter widthHeight) (makeD3State' dummyGraph ) *> pure unit
+  liftEffect $ runD3M (enter widthHeight) (makeD3State' graph) *> pure unit
 
   pure unit
 
@@ -77,9 +77,11 @@ linkWidth datum = sqrt d.value
 
 -- | recipe for this force layout graph
 enter :: forall m. Bind m => D3Tagless m => MonadState (D3State Model) m => Tuple Number Number -> m D3Selection_ -- going to actually be a simulation right? 
-enter (Tuple width height) = do
+enter (Tuple w h) = do
   root  <- hook "div#force"
-  svg   <- appendTo root "svg-tree" (node Svg [ viewBox 0.0 0.0 width height ] )
+  let cx = negate $ w / 2.0
+      cy = negate $ h / 2.0
+  svg   <- appendTo root "svg-tree" (node Svg [ width w, height h, viewBox cx cy w h ] )
   links <- appendTo svg "links-group" (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodes <- appendTo svg "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
@@ -93,7 +95,6 @@ enter (Tuple width height) = do
     , projection: makeProjection (\model -> model.links)
     , behaviour : [ strokeWidth linkWidth ]
     , onTick    : linkTick
-    -- would like to have the tick function for this selection in here
   }
 
   maybeNodes_ <- join state.model $ JoinSimulation {
@@ -103,7 +104,6 @@ enter (Tuple width height) = do
     , projection: makeProjection (\model -> model.nodes)
     , behaviour : [ radius 5.0, fill colorByGroup ]
     , onTick    : nodeTick
-    -- would like to have the tick function for this selection in here
   }
           
   let _ = startSimulation_ simulation
@@ -141,7 +141,7 @@ setY2 datum = d.target.x
 setCx :: Datum -> Number
 setCx datum = d.x
   where
-    d = spy "setCx: " $ datumIsGraphNode datum
+    d = datumIsGraphNode datum
 setCy :: Datum -> Number
 setCy datum = d.x
   where
