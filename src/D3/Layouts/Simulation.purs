@@ -1,6 +1,6 @@
 module D3.Layouts.Simulation where
 
-import D3.Selection (Chainable, D3Attr, D3Data_, D3Selection, D3Selection_)
+import D3.Selection (Chainable, D3Selection_, D3Simulation_)
 import Data.Map (Map)
 import Prelude (Unit, unit, (<$>))
 import Unsafe.Coerce (unsafeCoerce)
@@ -99,7 +99,6 @@ interpretDrag (DefaultDrag selectionName simulationName) = do
 
 -- | foreign types associated with Force Layout Simulation
 -- TODO structures here carried over from previous interpreter - review and refactor
-foreign import data D3Simulation_ :: Type
 
 foreign import initSimulation_  :: forall r.   Array (D3ForceNode_ r) -> SimulationConfig_ -> D3Simulation_
 foreign import setNodes_        :: forall r.   D3Simulation_ -> Array (D3ForceNode_ r)     -> D3Simulation_
@@ -110,7 +109,7 @@ foreign import stopSimulation_  :: D3Simulation_ -> Unit
 -- TODO this all has to change completely to work within Tagless 
 -- foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass
 -- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr -> Unit
-foreign import onTick_                    :: D3Simulation_ -> (D3Simulation_ -> D3Simulation_) -> D3Simulation_
+foreign import onTick_                    :: D3Simulation_ -> (Unit -> Unit) -> Unit
 foreign import attachDefaultDragBehavior_ :: D3Selection_ -> D3Selection_ -> Unit
 foreign import setAlphaTarget_            :: D3Selection_ -> Number -> Unit
 

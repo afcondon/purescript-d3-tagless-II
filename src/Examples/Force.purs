@@ -1,7 +1,7 @@
 module D3.Examples.Force where
 
-import D3.Attributes.Sugar
-import Prelude
+import D3.Attributes.Sugar (classed, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, width, x1, x2, y1, y2)
+import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (*>), (/), (<$>))
 
 import Affjax (Error)
 import Affjax as AJAX
@@ -9,14 +9,12 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, applyChainable, hook, join, runD3M)
-import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, D3Simulation_, DragBehavior(..), Force(..), ForceName(..), ForceType(..), defaultConfigSimulation, initSimulation_, onTick_, putForcesInSimulation, setLinks_, setNodes_, startSimulation_)
-import D3.Selection (Chainable, D3Selection, D3Selection_, D3State(..), Element(..), Join(..), Keys(..), SelectionName(..), enterOnly, makeD3State', makeProjection, node)
-import Data.Array (foldl)
+import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, DragBehavior(..), Force(..), ForceName(..), ForceType(..), defaultConfigSimulation, initSimulation_, putForcesInSimulation, setLinks_, startSimulation_)
+import D3.Selection (Chainable, D3Selection_, D3Simulation_, D3State(..), Element(..), Join(..), Keys(..), SelectionName(..), makeD3State', makeProjection, node)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
-import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import Debug (spy, trace)
+import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -79,6 +77,8 @@ enter (Tuple w h) = do
     , hook      : SelectionName "links-group"
     , projection: makeProjection (\model -> model.links)
     , behaviour : [ strokeWidth linkWidth ]
+    -- extras for simulation elements
+    , simulation
     , onTick    : (\_ -> do
                     let _ = (applyChainable links_) <$> linkTick
                         _ = spy "Tick function: " simulation
@@ -91,6 +91,8 @@ enter (Tuple w h) = do
     , hook      : SelectionName "nodes-group"
     , projection: makeProjection (\model -> model.nodes)
     , behaviour : [ radius 5.0, fill colorByGroup ]
+    -- extras for simulation elements
+    , simulation
     , onTick    : (\_ -> do
                     let _ = (applyChainable nodes_) <$> nodeTick
                         _ = spy "Tick function: " simulation

@@ -24,6 +24,7 @@ instance showElement :: Show Element where
 -- (Opaque) foreign types generated for (ie unsafeCoerce), or by (ie returned selections), D3 
 foreign import data D3Data_       :: Type 
 foreign import data D3Selection_  :: Type
+foreign import data D3Simulation_ :: Type -- has to be declared here to avoid cycle with Simulation.purs
 foreign import data D3Transition_ :: Type -- not clear yet if we need to distinguish from Selection
 foreign import data D3DomNode     :: Type -- not yet used but may be needed, ex. in callbacks
 foreign import data D3This        :: Type -- not yet used but may be needed, ex. in callbacks
@@ -69,7 +70,9 @@ type JoinParams model r =
   }
 data Join model = Join           (JoinParams model (behaviour :: Array Chainable))
                 | JoinGeneral    (JoinParams model (behaviour :: EnterUpdateExit)) -- what we're going to do for each set (enter, exit, update) each refresh of data
-                | JoinSimulation (JoinParams model (behaviour :: Array Chainable, onTick :: (Unit -> Unit)))
+                | JoinSimulation (JoinParams model (behaviour :: Array Chainable
+                                                   , simulation :: D3Simulation_
+                                                   ,  onTick :: (Unit -> Unit)))
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
 derive instance ordSelectionName :: Ord SelectionName

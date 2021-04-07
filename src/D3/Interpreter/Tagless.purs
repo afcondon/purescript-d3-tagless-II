@@ -74,7 +74,7 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
                         (KeyF fn)  -> d3DataKeyFn_ model j.projection fn initialS 
           enterS   = d3EnterAndAppend_ (show j.element) dataS
           enterS'  = foldl applyChainable enterS  j.behaviour
-          finalS   = j.onTick
+          finalS   = onTick_ j.simulation j.onTick
  
         pure $ Just dataS
 
