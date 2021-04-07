@@ -33,16 +33,19 @@ getWindowWidthHeight = do
   height <- innerHeight win
   pure $ Tuple (toNumber width) (toNumber height)
 
+foreign import readJSONJS :: String -> Model -- TODO no error handling at all here RN
+
 readGraphFromFileContents :: forall r. Either Error { body ∷ String | r } -> Model
 readGraphFromFileContents (Right { body } ) = readJSONJS body
 readGraphFromFileContents (Left err)        = { links: [], nodes: [] }
 
-dummyGraph :: Model
-dummyGraph = unsafeCoerce { 
-  -- TODO because of the coerce we are able to set id even tho it is a field in D3Node_ which seems wrong
-               links: [ { source: "foo", target: "bar", value: 12.0 } ]
-             , nodes: [ { id: "foo", group: 1.0 }, { id: "bar", group: 1.0 }, { id: "baz", group: 2.0 }]
-             }
+
+-- this is the model used by this particular "chart" (ie force layout simulation)
+type NodeExtension = (group :: Number) -- any extra fields beyond what's required of all ForceLayout nodes
+type LinkExtension = (value :: Number) -- empty row, this simulation doesn't yet have extra stuff in the links
+type GraphNode = D3ForceNode_ NodeExtension
+type GraphLink = D3ForceLink_ NodeExtension LinkExtension
+type Model = { links :: Array GraphLink, nodes :: Array GraphNode }
 
 drawGraph :: Aff Unit
 drawGraph = do
@@ -57,24 +60,6 @@ drawGraph = do
 
   pure unit
 
--- this is the model used by this particular "chart" (ie force layout simulation)
-type NodeExtension = (group :: Number) -- any extra fields beyond what's required of all ForceLayout nodes
-type LinkExtension = (value :: Number) -- empty row, this simulation doesn't yet have extra stuff in the links
-type GraphNode = D3ForceNode_ NodeExtension
-type GraphLink = D3ForceLink_ NodeExtension LinkExtension
-type Model = { links :: Array GraphLink, nodes :: Array GraphNode }
-
-
-colorByGroup :: Datum -> String
-colorByGroup datum = d3SchemeCategory10JS d.group
-  where
-    d = datumIsGraphNode datum
-
-linkWidth :: Datum -> Number
-linkWidth datum = sqrt d.value
-  where
-    d = datumIsGraphLink datum
-
 -- | recipe for this force layout graph
 enter :: forall m. Bind m => D3Tagless m => MonadState (D3State Model) m => Tuple Number Number -> m D3Selection_ -- going to actually be a simulation right? 
 enter (Tuple w h) = do
@@ -82,8 +67,8 @@ enter (Tuple w h) = do
   let cx = negate $ w / 2.0
       cy = negate $ h / 2.0
   svg   <- appendTo root "svg-tree" (node Svg [ width w, height h, viewBox cx cy w h ] )
-  links <- appendTo svg "links-group" (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
-  nodes <- appendTo svg "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
+  links_ <- appendTo svg "links-group" (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
+  nodes_ <- appendTo svg "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   (D3State state) <- get
   let simulation = initSimulation state.model (\model -> model.nodes) (\model -> model.links)
@@ -94,7 +79,10 @@ enter (Tuple w h) = do
     , hook      : SelectionName "links-group"
     , projection: makeProjection (\model -> model.links)
     , behaviour : [ strokeWidth linkWidth ]
-    , onTick    : linkTick
+    , onTick    : (\_ -> do
+                    let _ = (applyChainable links_) <$> linkTick
+                        _ = spy "Tick function: " simulation
+                    unit)
   }
 
   maybeNodes_ <- join state.model $ JoinSimulation {
@@ -103,12 +91,34 @@ enter (Tuple w h) = do
     , hook      : SelectionName "nodes-group"
     , projection: makeProjection (\model -> model.nodes)
     , behaviour : [ radius 5.0, fill colorByGroup ]
-    , onTick    : nodeTick
+    , onTick    : (\_ -> do
+                    let _ = (applyChainable nodes_) <$> nodeTick
+                        _ = spy "Tick function: " simulation
+                    unit)
   }
           
   let _ = startSimulation_ simulation
 
   pure svg
+
+-- this is boilerplate but...typed attribute setters facilitate typeclass based conversions
+-- we give the chart our Model type but behind the scenes it is mutated by D3 and additionally
+-- which projection of the "Model" is active in each Join varies so we can't have both strong
+-- static type representations AND lightweight syntax with JS compatible lambdas (i think)
+datumIsGraphLink :: Datum -> GraphLink
+datumIsGraphLink = unsafeCoerce
+datumIsGraphNode :: Datum -> GraphNode
+datumIsGraphNode = unsafeCoerce
+
+colorByGroup :: Datum -> String
+colorByGroup datum = d3SchemeCategory10JS d.group
+  where
+    d = datumIsGraphNode datum
+
+linkWidth :: Datum -> Number
+linkWidth datum = sqrt d.value
+  where
+    d = datumIsGraphLink datum
 
 linkTick :: Array Chainable
 linkTick = 
@@ -153,11 +163,9 @@ initSimulation model nodeProjection linkProjection = do
   let nodes_     = unsafeCoerce $ nodeProjection model
       links_     = unsafeCoerce $ linkProjection model
       simulation = initSimulation_ nodes_ defaultConfigSimulation
-      -- the projection functions for the join are not sufficient for the simulation
-      -- of course, the makeProjection is an unsafeCoerce anyway so it's a moot point
-      -- TODO revisit whole area when functionally complete and try for a type-safe expression of both
       _ = simulation `setLinks_` links_
-      _ = simulation `putForcesInSimulation` [ Force (ForceName "charge") ForceMany, centerForce 800.0 900.0 ]
+      -- _ = simulation `putForcesInSimulation` [ Force (ForceName "charge") ForceMany, centerForce 800.0 900.0 ]
+      _ = simulation `putForcesInSimulation` [ centerForce 800.0 900.0 ]
   simulation
 
 centerForce :: Number -> Number -> Force
@@ -170,25 +178,7 @@ myDrag = DefaultDrag "node" "simulation"
 makeModel :: Array GraphLink -> Array GraphNode -> Model
 makeModel links nodes = { links, nodes }
 
--- we give the chart our Model type but behind the scenes it is mutated by D3 and additionally
--- which projection of the "Model" is active in each Join varies so we can't have both strong
--- static type representations AND lightweight syntax with JS compatible lambdas
-datumIsGraphLink :: Datum -> GraphLink
-datumIsGraphLink = unsafeCoerce
-datumIsGraphNode :: Datum -> GraphNode
-datumIsGraphNode = unsafeCoerce
 
-
--- drag = 
---   d3Drag "node" simulation {
---       start: dragstarted
---     , drag:  dragged
---     , end:   dragended
---   }
-
--- attachTickMap :: (Unit -> Unit) -> Simulation -> Unit
--- attachTickMap tick simulation = 
-
-type Scale = Number -> String
-foreign import readJSONJS :: String -> Model -- TODO no error handling at all here RN
+-- TODO next lines belong in dedicated Scales module
+type Scale = Number -> String 
 foreign import d3SchemeCategory10JS :: Scale -- not modelling the scale / domain distinction yet

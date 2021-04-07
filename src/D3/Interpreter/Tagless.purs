@@ -2,6 +2,7 @@ module D3.Interpreter.Tagless where
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
+import D3.Layouts.Simulation (onTick_)
 import D3.Selection (Chainable(..), D3Selection_, D3State(..), D3_Node(..), Join(..), Keys(..), SelectionName(..), Selector, d3AddTransition, d3Append_, d3DataKeyFn_, d3Data_, d3EnterAndAppend_, d3Exit_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, makeD3State')
 import Data.Foldable (foldl)
 import Data.Map (insert, lookup)
@@ -10,7 +11,7 @@ import Data.Tuple (Tuple, fst, snd)
 import Debug (spy)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, bind, discard, liftA1, pure, show, ($))
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, bind, discard, liftA1, pure, show, (<$>), ($))
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
 newtype D3M model a = D3M (StateT (D3State model) Effect a) 
@@ -50,7 +51,7 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
   join model (Join j) = do
     (D3State state) <- get 
     case lookup j.hook state.namedSelections of
-      Nothing          -> pure Nothing
+      Nothing     -> pure Nothing
       (Just hook) -> do
         let 
           selectS = d3SelectionSelectAll_ (show j.element) hook
@@ -64,7 +65,7 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
   join model (JoinSimulation j) = do
     (D3State state) <- get 
     case lookup j.hook state.namedSelections of
-      Nothing          -> pure Nothing
+      Nothing     -> pure Nothing
       (Just hook) -> do
         let 
           initialS = d3SelectionSelectAll_ (show j.element) hook
@@ -73,30 +74,26 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
                         (KeyF fn)  -> d3DataKeyFn_ model j.projection fn initialS 
           enterS   = d3EnterAndAppend_ (show j.element) dataS
           enterS'  = foldl applyChainable enterS  j.behaviour
-          finalS   = foldl applyChainable enterS' j.onTick
+          finalS   = j.onTick
+ 
         pure $ Just dataS
 
   join model (JoinGeneral j) = do
     (D3State state) <- get 
     case lookup j.hook state.namedSelections of
-      Nothing          -> pure Nothing
+      Nothing     -> pure Nothing
       (Just hook) -> do
         let 
           -- (model :: D3Data_) = j.projection state.model -- TODO but in fact, it's the projection that we coerce
           selectS = d3SelectionSelectAll_ (show j.element) hook
-
           dataS  = case j.key of
                     DatumIsKey -> d3Data_      model j.projection selectS 
                     (KeyF fn)  -> d3DataKeyFn_ model j.projection fn selectS 
-
           enterS = d3EnterAndAppend_ (show j.element) dataS
-
           exitS  = d3Exit_ dataS
-
           _        = foldl applyChainable enterS  j.behaviour.enter
           _        = foldl applyChainable exitS   j.behaviour.exit
-          _        = foldl applyChainable dataS j.behaviour.update
-
+          _        = foldl applyChainable dataS   j.behaviour.update
         pure $ Just dataS
 
 setSelection :: ∀ m model. Bind m => MonadState (D3State model) m => 
