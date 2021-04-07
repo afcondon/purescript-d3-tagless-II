@@ -101,11 +101,11 @@ interpretDrag (DefaultDrag selectionName simulationName) = do
 -- TODO structures here carried over from previous interpreter - review and refactor
 foreign import data D3Simulation_ :: Type
 
-foreign import initSimulation_  :: SimulationConfig_ -> D3Simulation_
+foreign import initSimulation_  :: forall r.   Array (D3ForceNode_ r) -> SimulationConfig_ -> D3Simulation_
+foreign import setNodes_        :: forall r.   D3Simulation_ -> Array (D3ForceNode_ r)     -> D3Simulation_
+foreign import setLinks_        :: forall r l. D3Simulation_ -> Array (D3ForceLink_ r l)   -> D3Simulation_
 foreign import startSimulation_ :: D3Simulation_ -> Unit
 foreign import stopSimulation_  :: D3Simulation_ -> Unit
-foreign import setNodes_        :: forall r.   D3Simulation_ -> Array (D3ForceNode_ r) -> D3Simulation_
-foreign import setLinks_        :: forall r l. D3Simulation_ -> Array (D3ForceLink_ r l) -> D3Simulation_
 
 -- TODO this all has to change completely to work within Tagless 
 -- foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass

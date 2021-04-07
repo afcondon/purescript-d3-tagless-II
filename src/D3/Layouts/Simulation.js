@@ -1,9 +1,9 @@
 var debug = true;
 
 //            SIMULATION functions
-exports.initSimulation_ = config => {
+exports.initSimulation_ = nodes => config => {
   const simulation = 
-  d3.forceSimulation()
+  d3.forceSimulation(nodes)
   .alpha(config.alpha) // default is 1
   .alphaTarget(config.alphaTarget) // default is 0
   .alphaMin(config.alphaMin) // default is 0.0001

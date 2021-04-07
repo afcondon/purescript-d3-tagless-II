@@ -37,6 +37,13 @@ readGraphFromFileContents :: forall r. Either Error { body ∷ String | r } -> M
 readGraphFromFileContents (Right { body } ) = readJSONJS body
 readGraphFromFileContents (Left err)        = { links: [], nodes: [] }
 
+dummyGraph :: Model
+dummyGraph = unsafeCoerce { 
+  -- TODO because of the coerce we are able to set id even tho it is a field in D3Node_ which seems wrong
+               links: [ { source: "foo", target: "bar", value: 12.0 } ]
+             , nodes: [ { id: "foo", group: 1.0 }, { id: "bar", group: 1.0 }, { id: "baz", group: 2.0 }]
+             }
+
 drawGraph :: Aff Unit
 drawGraph = do
   log "Force layout example"
@@ -45,11 +52,10 @@ drawGraph = do
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
   let graph      = readGraphFromFileContents forceJSON
   
-  liftEffect $ runD3M (enter widthHeight) (makeD3State' { links: graph.links, nodes: graph.nodes }) *> pure unit
+  -- liftEffect $ runD3M (enter widthHeight) (makeD3State' { links: graph.links, nodes: graph.nodes }) *> pure unit
+  liftEffect $ runD3M (enter widthHeight) (makeD3State' dummyGraph ) *> pure unit
 
   pure unit
-
-
 
 -- this is the model used by this particular "chart" (ie force layout simulation)
 type NodeExtension = (group :: Number) -- any extra fields beyond what's required of all ForceLayout nodes
@@ -101,9 +107,9 @@ enter (Tuple width height) = do
   let _ = case maybeLinks_, maybeNodes_ of
             (Just links_), (Just nodes_) -> 
               simulation `onTick_` (\sn -> do
-                              -- let _ = trace { tick: "linkTick" } \_ -> unit
+                              let _ = trace { tick: "linkTick" } \_ -> unit
                               let _ = foldl applyChainable links_ linkTick
-                              -- let _ = trace { tick: "nodeTick" } \_ -> unit
+                              let _ = trace { tick: "nodeTick" } \_ -> unit
                               let _ = foldl applyChainable nodes_ nodeTick
                               sn)
             _, _ -> simulation -- TODO let's really make an effort to make this work by extending Join to JoinSim
@@ -154,11 +160,10 @@ initSimulation :: forall model node link. model -> (model -> node) -> (model -> 
 initSimulation model nodeProjection linkProjection = do
   let nodes_     = unsafeCoerce $ nodeProjection model
       links_     = unsafeCoerce $ linkProjection model
-      simulation = initSimulation_ defaultConfigSimulation
+      simulation = initSimulation_ nodes_ defaultConfigSimulation
       -- the projection functions for the join are not sufficient for the simulation
       -- of course, the makeProjection is an unsafeCoerce anyway so it's a moot point
       -- TODO revisit whole area when functionally complete and try for a type-safe expression of both
-      _ = simulation `setNodes_` nodes_
       _ = simulation `setLinks_` links_
       _ = simulation `putForcesInSimulation` [ Force (ForceName "charge") ForceMany, centerForce 800.0 900.0 ]
   simulation
