@@ -62,7 +62,7 @@ exports.d3Data_ = data => projection => selection => {
   return selection.data(projection(data), d => d );
 }
 // d3Data_ :: D3Data -> KeyFunction -> D3Selection -> D3Selection
-exports.d3DataKeyFn_ = data => projection => keyFunction => selection => {
+exports.d3KeyFunction_ = data => projection => keyFunction => selection => {
   if (debug) {console.log(`\td3Data: ${selection}.data(${data}, ${keyFunction})`);}
   return selection.data(projection(data), keyFunction);
 }

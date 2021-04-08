@@ -65,36 +65,36 @@ enter (Tuple w h) = do
   let cx = negate $ w / 2.0
       cy = negate $ h / 2.0
   svg   <- appendTo root "svg-tree" (node Svg [ width w, height h, viewBox cx cy w h ] )
-  links_ <- appendTo svg "links-group" (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
-  nodes_ <- appendTo svg "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
+  linksGroup <- appendTo svg "links-group" (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
+  nodesGroup <- appendTo svg "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   (D3State state) <- get
   let simulation = initSimulation state.model (\model -> model.nodes) (\model -> model.links)
 
   maybeLinks_ <- join state.model $ JoinSimulation {
       element   : Line
-    , key       : DatumIsKey
+    , key       : DatumIsUnique
     , hook      : SelectionName "links-group"
     , projection: makeProjection (\model -> model.links)
     , behaviour : [ strokeWidth linkWidth ]
     -- extras for simulation elements
     , simulation
-    , onTick    : (\_ -> do
-                    let _ = (applyChainable links_) <$> linkTick
+    , onTick    : (\link_ _ -> do
+                    let _ = (applyChainable link_) <$> linkTick
                         _ = spy "Tick function: " simulation
                     unit)
   }
 
   maybeNodes_ <- join state.model $ JoinSimulation {
       element   : Circle
-    , key       : DatumIsKey
+    , key       : DatumIsUnique
     , hook      : SelectionName "nodes-group"
     , projection: makeProjection (\model -> model.nodes)
     , behaviour : [ radius 5.0, fill colorByGroup ]
     -- extras for simulation elements
     , simulation
-    , onTick    : (\_ -> do
-                    let _ = (applyChainable nodes_) <$> nodeTick
+    , onTick    : (\node_ _ -> do
+                    let _ = (applyChainable node_) <$> nodeTick
                         _ = spy "Tick function: " simulation
                     unit)
   }

@@ -38,7 +38,7 @@ foreign import d3Exit_               :: D3Selection_ -> D3Selection_
 foreign import d3RemoveSelection_    :: D3Selection_ -> D3Selection_
 
 foreign import d3Data_               :: forall model. model -> (model -> D3Data_) -> D3Selection_ -> D3Selection_
-foreign import d3DataKeyFn_          :: forall model. model -> (model -> D3Data_)   -> KeyFunction_ -> D3Selection_ -> D3Selection_
+foreign import d3KeyFunction_        :: forall model. model -> (model -> D3Data_)   -> ComputeKeyunction_ -> D3Selection_ -> D3Selection_
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
@@ -55,12 +55,16 @@ foreign import emptyD3Data_ :: D3Data_ -- probably just null, could this be mono
 type D3Group      = Array D3DomNode
 
 type D3Selection  = Last D3Selection_
-type KeyFunction_ = Datum -> Index
-data Keys = KeyF KeyFunction_ | DatumIsKey
+type ComputeKeyunction_ = Datum -> Index
+data Keys = ComputeKey ComputeKeyunction_ | DatumIsUnique
 -- TODO hide the "unsafeCoerce/makeProjection" in a smart constructor
 type Projection = forall model. (model -> D3Data_)
+identityProjection :: Projection
+identityProjection model = unsafeCoerce (\d -> d)
+
 makeProjection :: forall model model'. (model -> model') -> (model -> D3Data_)
 makeProjection = unsafeCoerce
+
 type JoinParams model r = 
   { element    :: Element           -- what we're going to insert in the DOM
   , key        :: Keys              -- how D3 is going to identify data so that 
@@ -72,7 +76,7 @@ data Join model = Join           (JoinParams model (behaviour :: Array Chainable
                 | JoinGeneral    (JoinParams model (behaviour :: EnterUpdateExit)) -- what we're going to do for each set (enter, exit, update) each refresh of data
                 | JoinSimulation (JoinParams model (behaviour :: Array Chainable
                                                    , simulation :: D3Simulation_
-                                                   ,  onTick :: (Unit -> Unit)))
+                                                   , onTick :: (D3Selection_ -> Unit -> Unit)))
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
 derive instance ordSelectionName :: Ord SelectionName

@@ -3,7 +3,7 @@ module D3.Interpreter.Tagless where
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Layouts.Simulation (onTick_)
-import D3.Selection (Chainable(..), D3Selection_, D3State(..), D3_Node(..), Join(..), Keys(..), SelectionName(..), Selector, d3AddTransition, d3Append_, d3DataKeyFn_, d3Data_, d3EnterAndAppend_, d3Exit_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, makeD3State')
+import D3.Selection (Chainable(..), D3Selection_, D3State(..), D3_Node(..), Join(..), Keys(..), SelectionName(..), Selector, d3AddTransition, d3Append_, d3KeyFunction_, d3Data_, d3EnterAndAppend_, d3Exit_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, makeD3State')
 import Data.Foldable (foldl)
 import Data.Map (insert, lookup)
 import Data.Maybe (Maybe(..))
@@ -56,8 +56,8 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
         let 
           selectS = d3SelectionSelectAll_ (show j.element) hook
           dataS  = case j.key of
-                      DatumIsKey -> d3Data_      model j.projection selectS 
-                      (KeyF fn)  -> d3DataKeyFn_ model j.projection fn selectS 
+                      DatumIsUnique    -> d3Data_        model j.projection    selectS 
+                      (ComputeKey fn)  -> d3KeyFunction_ model j.projection fn selectS 
           enterS  = d3EnterAndAppend_ (show j.element) dataS
           enterS' = foldl applyChainable enterS  j.behaviour
         pure $ Just enterS'
@@ -70,11 +70,11 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
         let 
           initialS = d3SelectionSelectAll_ (show j.element) hook
           dataS    = case j.key of
-                        DatumIsKey -> d3Data_      model j.projection initialS 
-                        (KeyF fn)  -> d3DataKeyFn_ model j.projection fn initialS 
+                        DatumIsUnique    -> d3Data_        model j.projection    initialS 
+                        (ComputeKey fn)  -> d3KeyFunction_ model j.projection fn initialS 
           enterS   = d3EnterAndAppend_ (show j.element) dataS
           enterS'  = foldl applyChainable enterS  j.behaviour
-          finalS   = onTick_ j.simulation j.onTick
+          finalS   = onTick_ j.simulation (j.onTick dataS)
  
         pure $ Just dataS
 
@@ -87,8 +87,8 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
           -- (model :: D3Data_) = j.projection state.model -- TODO but in fact, it's the projection that we coerce
           selectS = d3SelectionSelectAll_ (show j.element) hook
           dataS  = case j.key of
-                    DatumIsKey -> d3Data_      model j.projection selectS 
-                    (KeyF fn)  -> d3DataKeyFn_ model j.projection fn selectS 
+                    DatumIsUnique    -> d3Data_        model j.projection    selectS 
+                    (ComputeKey fn)  -> d3KeyFunction_ model j.projection fn selectS 
           enterS = d3EnterAndAppend_ (show j.element) dataS
           exitS  = d3Exit_ dataS
           _        = foldl applyChainable enterS  j.behaviour.enter
