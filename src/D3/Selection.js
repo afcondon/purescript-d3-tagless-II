@@ -68,7 +68,7 @@ exports.d3KeyFunction_ = data => projection => keyFunction => selection => {
 }
 // d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit 
 exports.d3SetAttr_ = name => value => selection => {
-  if (true) {
+  if (debug) {
     console.log(`\t${selection}.attr(${name}, ${value})`);
   }
   return selection.attr(name, value);

@@ -62,14 +62,12 @@ drawGraph = do
 enter :: forall m. Bind m => D3Tagless m => MonadState (D3State Model) m => Tuple Number Number -> m D3Selection_ -- going to actually be a simulation right? 
 enter (Tuple w h) = do
   root  <- hook "div#force"
-  let cx = negate $ w / 2.0
-      cy = negate $ h / 2.0
-  svg   <- appendTo root "svg-tree" (node Svg [ width w, height h, viewBox cx cy w h ] )
+  svg   <- appendTo root "svg-tree" (node Svg [ width w, height h, viewBox 0.0 0.0 w h ] )
   linksGroup <- appendTo svg "links-group" (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- appendTo svg "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   (D3State state) <- get
-  let simulation = initSimulation state.model (\model -> model.nodes) (\model -> model.links)
+  let simulation = initSimulation (makeCenterForce w h) state.model (\model -> model.nodes) (\model -> model.links)
 
   maybeLinks_ <- join state.model $ JoinSimulation {
       element   : Line
@@ -79,10 +77,9 @@ enter (Tuple w h) = do
     , behaviour : [ strokeWidth linkWidth ]
     -- extras for simulation elements
     , simulation
-    , onTick    : (\link_ _ -> do
-                    let _ = (applyChainable link_) <$> linkTick
-                        _ = spy "Tick function: " simulation
-                    unit)
+    , onTick    : (\link_ _ -> do 
+                                let _ = (applyChainable link_) <$> linkTick
+                                unit)
   }
 
   maybeNodes_ <- join state.model $ JoinSimulation {
@@ -95,7 +92,6 @@ enter (Tuple w h) = do
     , simulation
     , onTick    : (\node_ _ -> do
                     let _ = (applyChainable node_) <$> nodeTick
-                        _ = spy "Tick function: " simulation
                     unit)
   }
           
@@ -147,7 +143,7 @@ setX2 datum = d.target.x
   where
     d = datumIsGraphLink datum
 setY2 :: Datum -> Number
-setY2 datum = d.target.x
+setY2 datum = d.target.y
   where
     d = datumIsGraphLink datum
 setCx :: Datum -> Number
@@ -155,23 +151,23 @@ setCx datum = d.x
   where
     d = datumIsGraphNode datum
 setCy :: Datum -> Number
-setCy datum = d.x
+setCy datum = d.y
   where
     d = datumIsGraphNode datum
 
 -- | definition of the particular Simulation that we are going to run
-initSimulation :: forall model node link. model -> (model -> node) -> (model -> link) -> D3Simulation_
-initSimulation model nodeProjection linkProjection = do
+initSimulation :: forall model node link. Force -> model -> (model -> node) -> (model -> link) -> D3Simulation_
+initSimulation centerForce model nodeProjection linkProjection = do
   let nodes_     = unsafeCoerce $ nodeProjection model
       links_     = unsafeCoerce $ linkProjection model
       simulation = initSimulation_ nodes_ defaultConfigSimulation
       _ = simulation `setLinks_` links_
       -- _ = simulation `putForcesInSimulation` [ Force (ForceName "charge") ForceMany, centerForce 800.0 900.0 ]
-      _ = simulation `putForcesInSimulation` [ centerForce 800.0 900.0 ]
+      _ = simulation `putForcesInSimulation` [ Force (ForceName "charge") ForceMany, centerForce ]
   simulation
 
-centerForce :: Number -> Number -> Force
-centerForce width height = Force (ForceName "center") $ ForceCenter (width / 2.0) (height / 2.0)
+makeCenterForce :: Number -> Number -> Force
+makeCenterForce width height = Force (ForceName "center") $ ForceCenter (width / 2.0) (height / 2.0)
 
 -- | utility functions and boilerplate
 myDrag :: DragBehavior

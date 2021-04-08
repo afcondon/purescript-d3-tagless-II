@@ -113,10 +113,10 @@ foreign import onTick_                    :: D3Simulation_ -> (Unit -> Unit) -> 
 foreign import attachDefaultDragBehavior_ :: D3Selection_ -> D3Selection_ -> Unit
 foreign import setAlphaTarget_            :: D3Selection_ -> Number -> Unit
 
--- 
-foreign import forceMany_                 :: D3Simulation_ -> String -> D3Simulation_
-foreign import forceCenter_               :: D3Simulation_ -> String -> Number -> Number -> D3Simulation_
-foreign import forceCollide_              :: D3Simulation_ -> String -> Number -> D3Simulation_
-foreign import forceX_                    :: D3Simulation_ -> String -> Number -> D3Simulation_
-foreign import forceY_                    :: D3Simulation_ -> String -> Number -> D3Simulation_
-foreign import forceRadial_               :: D3Simulation_ -> String -> Number -> Number -> D3Simulation_
+-- implementations / wrappers for the Force ADT
+foreign import forceMany_    :: D3Simulation_ -> String                     -> D3Simulation_
+foreign import forceCenter_  :: D3Simulation_ -> String -> Number -> Number -> D3Simulation_
+foreign import forceRadial_  :: D3Simulation_ -> String -> Number -> Number -> D3Simulation_
+foreign import forceCollide_ :: D3Simulation_ -> String -> Number           -> D3Simulation_
+foreign import forceX_       :: D3Simulation_ -> String -> Number           -> D3Simulation_
+foreign import forceY_       :: D3Simulation_ -> String -> Number           -> D3Simulation_
