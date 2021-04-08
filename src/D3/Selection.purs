@@ -75,8 +75,8 @@ type JoinParams model r =
 data Join model = Join           (JoinParams model (behaviour :: Array Chainable))
                 | JoinGeneral    (JoinParams model (behaviour :: EnterUpdateExit)) -- what we're going to do for each set (enter, exit, update) each refresh of data
                 | JoinSimulation (JoinParams model (behaviour :: Array Chainable
-                                                   , simulation :: D3Simulation_
-                                                   , onTick :: (D3Selection_ -> Unit -> Unit)))
+                                                   , onTick   :: Array Chainable
+                                                   , simulation :: D3Simulation_)) -- simulation joins are a bit different
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
 derive instance ordSelectionName :: Ord SelectionName

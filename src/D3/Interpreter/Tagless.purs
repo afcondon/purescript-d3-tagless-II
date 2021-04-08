@@ -11,7 +11,7 @@ import Data.Tuple (Tuple, fst, snd)
 import Debug (spy)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, bind, discard, liftA1, pure, show, (<$>), ($))
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, bind, discard, liftA1, pure, show, unit, ($), (<$>))
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
 newtype D3M model a = D3M (StateT (D3State model) Effect a) 
@@ -63,6 +63,11 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
         pure $ Just enterS'
 
   join model (JoinSimulation j) = do
+    let makeTick :: Array Chainable -> D3Selection_ -> Unit -> Unit
+        makeTick attributes selection_ _ = do
+          let _ = (applyChainable selection_) <$> attributes
+          unit
+
     (D3State state) <- get 
     case lookup j.hook state.namedSelections of
       Nothing     -> pure Nothing
@@ -74,7 +79,7 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
                         (ComputeKey fn)  -> d3KeyFunction_ model j.projection fn initialS 
           enterS   = d3EnterAndAppend_ (show j.element) dataS
           enterS'  = foldl applyChainable enterS  j.behaviour
-          finalS   = onTick_ j.simulation (j.onTick enterS)
+          finalS   = onTick_ j.simulation (makeTick j.onTick enterS)
  
         pure $ Just dataS
 

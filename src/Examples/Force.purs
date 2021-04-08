@@ -31,7 +31,8 @@ getWindowWidthHeight = do
   height <- innerHeight win
   pure $ Tuple (toNumber width) (toNumber height)
 
-foreign import readJSONJS :: String -> Model -- TODO no error handling at all here RN
+-- TODO no error handling at all here RN (OTOH - performant!!)
+foreign import readJSONJS :: String -> Model 
 
 readGraphFromFileContents :: forall r. Either Error { body ∷ String | r } -> Model
 readGraphFromFileContents (Right { body } ) = readJSONJS body
@@ -49,14 +50,11 @@ drawGraph :: Aff Unit
 drawGraph = do
   log "Force layout example"
   widthHeight <- liftEffect getWindowWidthHeight
-
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
   let graph      = readGraphFromFileContents forceJSON
   
-  -- liftEffect $ runD3M (enter widthHeight) (makeD3State' { links: graph.links, nodes: graph.nodes }) *> pure unit
-  liftEffect $ runD3M (enter widthHeight) (makeD3State' graph) *> pure unit
-
-  pure unit
+  liftEffect $ runD3M (enter widthHeight) (makeD3State' graph)
+    *> pure unit
 
 -- | recipe for this force layout graph
 enter :: forall m. Bind m => D3Tagless m => MonadState (D3State Model) m => Tuple Number Number -> m D3Selection_ -- going to actually be a simulation right? 
@@ -77,9 +75,10 @@ enter (Tuple w h) = do
     , behaviour : [ strokeWidth linkWidth ]
     -- extras for simulation elements
     , simulation
-    , onTick    : (\link_ _ -> do 
-                                let _ = (applyChainable link_) <$> linkTick
-                                unit)
+    , onTick: [ x1 setX1
+              , y1 setY1
+              , x2 setX2
+              , y2 setY2 ]
   }
 
   maybeNodes_ <- join state.model $ JoinSimulation {
@@ -90,9 +89,7 @@ enter (Tuple w h) = do
     , behaviour : [ radius 5.0, fill colorByGroup ]
     -- extras for simulation elements
     , simulation
-    , onTick    : (\node_ _ -> do
-                    let _ = (applyChainable node_) <$> nodeTick
-                    unit)
+    , onTick: [ cx setCx, cy setCy ]
   }
           
   let _ = startSimulation_ simulation
@@ -118,22 +115,10 @@ linkWidth datum = sqrt d.value
   where
     d = datumIsGraphLink datum
 
-linkTick :: Array Chainable
-linkTick = 
-  [ x1 setX1
-  , y1 setY1
-  , x2 setX2
-  , y2 setY2 ]
-
-nodeTick :: Array Chainable
-nodeTick =
-  [ cx setCx
-  , cy setCy ]
-
 setX1 :: Datum -> Number
 setX1 datum = d.source.x
   where
-    d = datumIsGraphLink datum
+    d = spy "setX1" $ datumIsGraphLink datum
 setY1 :: Datum -> Number
 setY1 datum = d.source.y
   where
@@ -161,9 +146,8 @@ initSimulation centerForce model nodeProjection linkProjection = do
   let nodes_     = unsafeCoerce $ nodeProjection model
       links_     = unsafeCoerce $ linkProjection model
       simulation = initSimulation_ nodes_ defaultConfigSimulation
-      _ = simulation `setLinks_` links_
-      -- _ = simulation `putForcesInSimulation` [ Force (ForceName "charge") ForceMany, centerForce 800.0 900.0 ]
       _ = simulation `putForcesInSimulation` [ Force (ForceName "charge") ForceMany, centerForce ]
+      _ = simulation `setLinks_` links_
   simulation
 
 makeCenterForce :: Number -> Number -> Force
