@@ -31,9 +31,9 @@ exports.startSimulation_ = simulation => simulation.restart()
 exports.stopSimulation_ = simulation => simulation.stop()
 
 // simulation.on("tick", () => {
-exports.onTick_ = simulation => tickFn => {
+exports.onTick_ = simulation => name => tickFn => {
   // if(debug){ console.log(`${simulation}.onTick(${tickFn})`)}
-  return simulation.on("tick", () => tickFn());
+  return simulation.on("tick."+name, () => tickFn());
 }
 
 

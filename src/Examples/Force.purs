@@ -75,6 +75,7 @@ enter (Tuple w h) = do
     , behaviour : [ strokeWidth linkWidth ]
     -- extras for simulation elements
     , simulation
+    , tickName: "links"
     , onTick: [ x1 setX1
               , y1 setY1
               , x2 setX2
@@ -89,6 +90,7 @@ enter (Tuple w h) = do
     , behaviour : [ radius 5.0, fill colorByGroup ]
     -- extras for simulation elements
     , simulation
+    , tickName: "nodes"
     , onTick: [ cx setCx, cy setCy ]
   }
           

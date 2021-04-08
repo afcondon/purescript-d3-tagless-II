@@ -109,7 +109,7 @@ foreign import stopSimulation_  :: D3Simulation_ -> Unit
 -- TODO this all has to change completely to work within Tagless 
 -- foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass
 -- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr -> Unit
-foreign import onTick_                    :: D3Simulation_ -> (Unit -> Unit) -> Unit
+foreign import onTick_                    :: D3Simulation_ -> String -> (Unit -> Unit) -> Unit
 foreign import attachDefaultDragBehavior_ :: D3Selection_ -> D3Selection_ -> Unit
 foreign import setAlphaTarget_            :: D3Selection_ -> Number -> Unit
 
