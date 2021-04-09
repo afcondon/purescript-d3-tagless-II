@@ -1,8 +1,9 @@
 module D3.Layouts.Simulation where
 
-import D3.Selection (Chainable, D3Selection_, D3Simulation_)
+import Prelude
+
+import D3.Selection (Chainable, D3Selection_, D3Simulation_, DragBehavior)
 import Data.Map (Map)
-import Prelude (Unit, unit, (<$>))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- import D3.Base.Attributes (Attr)
@@ -27,7 +28,7 @@ defaultConfigSimulation = {
 }
 
 -- | Force Layout core types
-type ID = Int -- TODO this needs to be polymorphic eventually
+type ID = Int -- TODO this needs to be polymorphic eventually, doesn't it?
 type D3ForceLink_ r l = { 
     source :: D3ForceNode_ r
   , target :: D3ForceNode_ r
@@ -61,13 +62,22 @@ type SimulationRecord_ r l = {
   , links  :: Array (D3ForceLink_ r l)
   , forces :: Array Force
   , tick   :: Unit -> Unit -- could be Effect Unit
-  , drag   :: Simulation r l -> Unit -- could be Effect Unit
+  , drag   :: DragBehavior -- TODO make strongly typed wrt actual Model used
 }
 
 newtype Simulation r l = Simulation (SimulationRecord_ r l)
-type TickMap :: forall k. k -> Type
-type TickMap model = Map String (Array Chainable)
-data DragBehavior = DefaultDrag String String -- only one implementation rn and implemented on _ side 
+
+initSimulation :: forall model node link. Array Force -> model -> (model -> node) -> (model -> link) -> D3Simulation_
+initSimulation forces model nodeProjection linkProjection = do
+  let nodes_     = unsafeCoerce $ nodeProjection model
+      links_     = unsafeCoerce $ linkProjection model
+      simulation = initSimulation_ nodes_ defaultConfigSimulation
+      _          = simulation `putForcesInSimulation` forces
+      _          = simulation `setLinks_` links_
+  simulation
+
+makeCenterForce :: Number -> Number -> Force
+makeCenterForce width height = Force (ForceName "center") $ ForceCenter (width / 2.0) (height / 2.0)
 
 putForcesInSimulation :: D3Simulation_ -> Array Force -> D3Simulation_
 putForcesInSimulation simulation forces = do
@@ -86,17 +96,6 @@ putForcesInSimulation simulation forces = do
     _ = addForce <$> forces
   simulation
 
-{-
-interpretDrag :: forall model. DragBehavior -> D3 model Unit 
-interpretDrag (DefaultDrag selectionName simulationName) = do
-  (Context model scope) <- get
-  let selection  = lookup selectionName scope
-  let simulation = lookup simulationName scope
-  pure $ case selection, simulation of
-          (Just sel), (Just sim) -> attachDefaultDragBehavior_ sel sim
-          _, _ -> unit
--}
-
 -- | foreign types associated with Force Layout Simulation
 -- TODO structures here carried over from previous interpreter - review and refactor
 
@@ -110,7 +109,7 @@ foreign import stopSimulation_  :: D3Simulation_ -> Unit
 -- foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass
 -- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr -> Unit
 foreign import onTick_                    :: D3Simulation_ -> String -> (Unit -> Unit) -> Unit
-foreign import attachDefaultDragBehavior_ :: D3Selection_ -> D3Selection_ -> Unit
+foreign import defaultSimulationDrag_     :: D3Selection_ -> D3Simulation_ -> Unit
 foreign import setAlphaTarget_            :: D3Selection_ -> Number -> Unit
 
 -- implementations / wrappers for the Force ADT

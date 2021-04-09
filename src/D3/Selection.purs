@@ -65,6 +65,8 @@ identityProjection model = unsafeCoerce (\d -> d)
 makeProjection :: forall model model'. (model -> model') -> (model -> D3Data_)
 makeProjection = unsafeCoerce
 
+data DragBehavior = DefaultDrag | NoDrag | CustomDrag (D3Selection_ -> Unit)
+
 type JoinParams model r = 
   { element    :: Element           -- what we're going to insert in the DOM
   , key        :: Keys              -- how D3 is going to identify data so that 
@@ -77,6 +79,7 @@ data Join model = Join           (JoinParams model (behaviour :: Array Chainable
                 | JoinSimulation (JoinParams model (behaviour :: Array Chainable
                                                    , onTick   :: Array Chainable
                                                    , tickName :: String
+                                                   , onDrag   :: DragBehavior
                                                    , simulation :: D3Simulation_)) -- simulation joins are a bit different
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName

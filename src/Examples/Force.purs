@@ -1,25 +1,25 @@
 module D3.Examples.Force where
 
-import D3.Attributes.Sugar (classed, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, width, x1, x2, y1, y2)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (*>), (/), (<$>))
+import D3.Layouts.Simulation
 
 import Affjax (Error)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
-import D3.Interpreter.Tagless (class D3Tagless, appendTo, applyChainable, hook, join, runD3M)
-import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, DragBehavior(..), Force(..), ForceName(..), ForceType(..), defaultConfigSimulation, initSimulation_, putForcesInSimulation, setLinks_, startSimulation_)
-import D3.Selection (Chainable, D3Selection_, D3Simulation_, D3State(..), Element(..), Join(..), Keys(..), SelectionName(..), makeD3State', makeProjection, node)
+import D3.Attributes.Sugar (classed, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, width, x1, x2, y1, y2)
+import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
+import D3.Scales (d3SchemeCategory10_)
+import D3.Selection (D3Selection_, D3Simulation_, D3State(..), DragBehavior(..), Element(..), Join(..), Keys(..), SelectionName(..), makeD3State', makeProjection, node)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
-import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (sqrt)
+import Prelude (class Bind, Unit, bind, discard, pure, unit, ($), (*>))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.HTML (window)
 import Web.HTML.Window (innerHeight, innerWidth)
@@ -65,7 +65,9 @@ enter (Tuple w h) = do
   nodesGroup <- appendTo svg "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   (D3State state) <- get
-  let simulation = initSimulation (makeCenterForce w h) state.model (\model -> model.nodes) (\model -> model.links)
+  let forces     = [ makeCenterForce w h
+                   , Force (ForceName "charge") ForceMany ]
+      simulation_ = initSimulation forces state.model (\model -> model.nodes) (\model -> model.links)
 
   maybeLinks_ <- join state.model $ JoinSimulation {
       element   : Line
@@ -73,13 +75,10 @@ enter (Tuple w h) = do
     , hook      : SelectionName "links-group"
     , projection: makeProjection (\model -> model.links)
     , behaviour : [ strokeWidth linkWidth ]
-    -- extras for simulation elements
-    , simulation
-    , tickName: "links"
-    , onTick: [ x1 setX1
-              , y1 setY1
-              , x2 setX2
-              , y2 setY2 ]
+    , simulation: simulation_ -- extras for simulation elements from here
+    , tickName  : "links"
+    , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
+    , onDrag    : NoDrag
   }
 
   maybeNodes_ <- join state.model $ JoinSimulation {
@@ -88,13 +87,13 @@ enter (Tuple w h) = do
     , hook      : SelectionName "nodes-group"
     , projection: makeProjection (\model -> model.nodes)
     , behaviour : [ radius 5.0, fill colorByGroup ]
-    -- extras for simulation elements
-    , simulation
-    , tickName: "nodes"
-    , onTick: [ cx setCx, cy setCy ]
+    , simulation: simulation_  -- extras for simulation elements from here
+    , tickName  : "nodes"
+    , onTick    : [ cx setCx, cy setCy ]
+    , onDrag    : DefaultDrag
   }
           
-  let _ = startSimulation_ simulation
+  let _ = startSimulation_ simulation_
 
   pure svg
 
@@ -108,7 +107,7 @@ datumIsGraphNode :: Datum -> GraphNode
 datumIsGraphNode = unsafeCoerce
 
 colorByGroup :: Datum -> String
-colorByGroup datum = d3SchemeCategory10JS d.group
+colorByGroup datum = d3SchemeCategory10_ d.group
   where
     d = datumIsGraphNode datum
 
@@ -120,7 +119,7 @@ linkWidth datum = sqrt d.value
 setX1 :: Datum -> Number
 setX1 datum = d.source.x
   where
-    d = spy "setX1" $ datumIsGraphLink datum
+    d = datumIsGraphLink datum
 setY1 :: Datum -> Number
 setY1 datum = d.source.y
   where
@@ -141,28 +140,3 @@ setCy :: Datum -> Number
 setCy datum = d.y
   where
     d = datumIsGraphNode datum
-
--- | definition of the particular Simulation that we are going to run
-initSimulation :: forall model node link. Force -> model -> (model -> node) -> (model -> link) -> D3Simulation_
-initSimulation centerForce model nodeProjection linkProjection = do
-  let nodes_     = unsafeCoerce $ nodeProjection model
-      links_     = unsafeCoerce $ linkProjection model
-      simulation = initSimulation_ nodes_ defaultConfigSimulation
-      _ = simulation `putForcesInSimulation` [ Force (ForceName "charge") ForceMany, centerForce ]
-      _ = simulation `setLinks_` links_
-  simulation
-
-makeCenterForce :: Number -> Number -> Force
-makeCenterForce width height = Force (ForceName "center") $ ForceCenter (width / 2.0) (height / 2.0)
-
--- | utility functions and boilerplate
-myDrag :: DragBehavior
-myDrag = DefaultDrag "node" "simulation"
-
-makeModel :: Array GraphLink -> Array GraphNode -> Model
-makeModel links nodes = { links, nodes }
-
-
--- TODO next lines belong in dedicated Scales module
-type Scale = Number -> String 
-foreign import d3SchemeCategory10JS :: Scale -- not modelling the scale / domain distinction yet

@@ -1,9 +1,10 @@
 module D3.Interpreter.Tagless where
 
+import D3.Layouts.Simulation
+
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
-import D3.Layouts.Simulation (onTick_)
-import D3.Selection (Chainable(..), D3Selection_, D3State(..), D3_Node(..), Join(..), Keys(..), SelectionName(..), Selector, d3AddTransition, d3Append_, d3KeyFunction_, d3Data_, d3EnterAndAppend_, d3Exit_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, makeD3State')
+import D3.Selection (Chainable(..), D3Selection_, D3State(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), SelectionName(..), Selector, d3AddTransition, d3Append_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, makeD3State')
 import Data.Foldable (foldl)
 import Data.Map (insert, lookup)
 import Data.Maybe (Maybe(..))
@@ -78,8 +79,11 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
                         DatumIsUnique    -> d3Data_        model j.projection    initialS 
                         (ComputeKey fn)  -> d3KeyFunction_ model j.projection fn initialS 
           enterS   = d3EnterAndAppend_ (show j.element) dataS
-          enterS'  = foldl applyChainable enterS  j.behaviour
-          finalS   = onTick_ j.simulation j.tickName (makeTick j.onTick enterS)
+          _        = foldl applyChainable enterS  j.behaviour
+          _        = onTick_ j.simulation j.tickName (makeTick j.onTick enterS)
+          _        = case j.onDrag of
+                       DefaultDrag -> defaultSimulationDrag_ enterS j.simulation
+                       _ -> unit
  
         pure $ Just dataS
 
