@@ -7,6 +7,7 @@ import Data.Map (Map, empty)
 import Data.Maybe.Last (Last)
 import Effect.Aff (Milliseconds)
 import Unsafe.Coerce (unsafeCoerce)
+import Web.Event.Internal.Types (Event)
 
 
 type Selector = String 
@@ -141,3 +142,24 @@ type EnterUpdateExit = {
 
 enterOnly :: Array Chainable -> EnterUpdateExit
 enterOnly as = { enter: as, update: [], exit: [] }
+
+
+-- stuff related to zoom functionality
+type ZoomConfig = {
+    extent      :: ZoomExtent
+  , scaleExtent :: ScaleExtent
+  , zoom        :: Chainable
+  , qualifier   :: String -- zoom.foo
+}
+type Point = { x :: Number, y :: Number }
+data ScaleExtent = ScaleExtent Int Int
+data ZoomExtent = DefaultZoomExtent | ZoomExtent { topLeft :: Point, bottomRight :: Point }
+data ZoomType = ZoomStart | ZoomEnd | ZoomZoom
+foreign import data ZoomBehavior_ :: Type  -- the zoom behavior, ie result of call to d3.zoom()
+data ZoomTransform = ZoomTransform { k :: Number, tx :: Number, ty :: Number }
+type ZoomEvent = {
+    target      :: ZoomBehavior_
+  , type        :: ZoomType
+  , transform   :: ZoomTransform
+  , sourceEvent :: Event
+}
