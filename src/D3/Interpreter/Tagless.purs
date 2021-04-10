@@ -2,17 +2,14 @@ module D3.Interpreter.Tagless where
 
 import D3.Layouts.Simulation
 
-import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
+import Control.Monad.State (class MonadState, StateT, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
-import D3.Selection (Chainable(..), D3Selection_, D3State(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), SelectionName(..), Selector, d3AddTransition, d3Append_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, makeD3State')
+import D3.Selection (Chainable(..), D3Selection_, D3State, D3_Node(..), DragBehavior(..), Join(..), Keys(..), Selector, d3AddTransition, d3Append_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, makeD3State')
 import Data.Foldable (foldl)
-import Data.Map (insert, lookup)
-import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple, fst, snd)
-import Debug (spy)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, bind, discard, liftA1, pure, show, unit, ($), (<$>))
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, liftA1, pure, show, unit, ($), (<$>))
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
 newtype D3M model a = D3M (StateT (D3State model) Effect a) 
@@ -29,9 +26,9 @@ derive newtype instance monadEffD3M    :: MonadEffect                (D3M model)
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
 -- into both DOM and Simulation for example (and current implementation is gross and wrong)
 class (Monad m) <= D3Tagless m where
-  hook     :: Selector                            -> m D3Selection_
-  appendTo :: D3Selection_   -> String -> D3_Node -> m D3Selection_
-  join     :: ∀ model. model -> Join model        -> m D3Selection_
+  hook     :: Selector                     -> m D3Selection_
+  appendTo :: D3Selection_   -> D3_Node    -> m D3Selection_
+  join     :: ∀ model. model -> Join model -> m D3Selection_
 
 runD3M :: ∀ a model. D3M model a -> (D3State model) -> Effect (Tuple a (D3State model))
 runD3M (D3M state) = runStateT state
@@ -43,11 +40,11 @@ d3Run :: ∀ a model. model -> D3M model a -> Effect a
 d3Run model (D3M state) = liftA1 fst $ runStateT state makeD3State'
 
 instance d3TaglessD3M :: D3Tagless (D3M model) where
-  hook selector = setSelection (SelectionName "root") $ d3SelectAllInDOM_ selector 
+  hook selector = pure $ d3SelectAllInDOM_ selector 
 
-  appendTo selection_ name (D3_Node element attributes) = do
+  appendTo selection_ (D3_Node element attributes) = do
     let appended_ = d3Append_ (show element) selection_
-    setSelection (SelectionName name) $ foldl applyChainable appended_ attributes     
+    pure $ foldl applyChainable appended_ attributes     
 
   join model (Join j) = do
     let 
@@ -90,12 +87,6 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
       _        = foldl applyChainable exitS   j.behaviour.exit
       _        = foldl applyChainable dataS   j.behaviour.update
     pure dataS
-
-setSelection :: ∀ m model. Bind m => MonadState (D3State model) m => 
-  SelectionName -> D3Selection_ -> m D3Selection_
-setSelection name selection_ = do
-    modify_ (\(D3State d) -> D3State d { namedSelections=insert name selection_ d.namedSelections }) 
-    pure selection_
 
 applyChainable :: D3Selection_ -> Chainable -> D3Selection_
 applyChainable selection_ (AttrT (Attribute label attr)) = -- spy "d3SetAttr" $ 

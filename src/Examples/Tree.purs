@@ -138,12 +138,12 @@ makeModel width json = { json, d3Tree, config }
 enter :: forall m. Bind m => D3Tagless m => MonadState (D3State (Model String)) m => 
   Model String -> m D3Selection_
 enter model = do
-  root   <- hook "div#tree"
-  svg    <- appendTo root "svg-tree"    (node Svg svgAttributes)
-  container <- appendTo svg "container" (node Group [ classed "container" ])
-  links  <- appendTo container "links-group"  (node Group [ classed "links"])
-  nodes  <- appendTo container "nodes-group"  (node Group [ classed "nodes"])
-  labels <- appendTo container "labels-group" (node Group [ classed "labels"])
+  root      <- hook "div#tree"
+  svg       <- root      `appendTo` (node Svg svgAttributes)
+  container <- svg       `appendTo` (node Group [ classed "container" ])
+  links     <- container `appendTo` (node Group [ classed "links"])
+  nodes     <- container `appendTo` (node Group [ classed "nodes"])
+  labels    <- container `appendTo` (node Group [ classed "labels"])
 
   linkJoinSelection_ <- join model $ Join {
       element   : Path

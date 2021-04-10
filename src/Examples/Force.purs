@@ -61,20 +61,22 @@ enter :: forall m. Bind m => D3Tagless m => MonadState (D3State Model) m =>
   Tuple Number Number -> Model -> m D3Selection_ -- going to actually be a simulation right? 
 enter (Tuple w h) model = do
   root  <- hook "div#force"
-  svg   <- appendTo root "svg-tree" (node Svg [ width w, height h, viewBox 0.0 0.0 w h ] )
-  container <- appendTo svg "container" (node Group [ classed "container" ])
-  linksGroup <- appendTo container "links-group" (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
-  nodesGroup <- appendTo container "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
+  svg        <- root      `appendTo` (node Svg [ width w, height h, viewBox 0.0 0.0 w h ] )
+  container  <- svg       `appendTo` (node Group [ classed "container" ])
+  linksGroup <- container `appendTo` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
+  nodesGroup <- container `appendTo` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
-  let forces     = [ makeCenterForce w h
-                   , Force (ForceName "charge") ForceMany ]
-      simulation_ = initSimulation forces model (\model -> model.nodes) (\model -> model.links)
+  let forces      = [ makeCenterForce w h
+                    , Force (ForceName "charge") ForceMany ]
+      getNodes    = (\model -> model.nodes)
+      getLinks    = (\model -> model.links)
+      simulation_ = initSimulation forces model getNodes getLinks
 
   links <- join model $ JoinSimulation {
       element   : Line
     , key       : DatumIsUnique
     , hook      : linksGroup
-    , projection: makeProjection (\model -> model.links)
+    , projection: makeProjection getLinks
     , behaviour : [ strokeWidth linkWidth ]
     , simulation: simulation_ -- extras for simulation elements from here
     , tickName  : "links"
@@ -86,7 +88,7 @@ enter (Tuple w h) model = do
       element   : Circle
     , key       : DatumIsUnique
     , hook      : nodesGroup
-    , projection: makeProjection (\model -> model.nodes)
+    , projection: makeProjection getNodes
     , behaviour : [ radius 5.0, fill colorByGroup ]
     , simulation: simulation_  -- extras for simulation elements from here
     , tickName  : "nodes"
