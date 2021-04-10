@@ -1,15 +1,14 @@
 module D3.Examples.Tree where
 
-import D3.Attributes.Sugar (classed, dy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x)
-import D3.Layouts.Tree (D3TreeNode, Model, TreeJson, d3HierarchyDescendants_, d3HierarchyLinks_, d3Hierarchy_, d3InitTree_, hasChildren_, radialLink, radialTreeConfig, readJSONJS_)
-
 import Affjax (Error, printError)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
+import D3.Attributes.Sugar (classed, dy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
-import D3.Selection (Chainable, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), enterOnly, makeD3State', makeProjection, node)
+import D3.Layouts.Tree (D3TreeNode, Model, TreeJson, d3HierarchyDescendants_, d3HierarchyLinks_, d3Hierarchy_, d3InitTree_, hasChildren_, radialLink, radialTreeConfig, readJSONJS_)
+import D3.Selection (Chainable, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), attachZoom, enterOnly, makeD3State', makeProjection, node)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -101,11 +100,11 @@ svgAttributes = [
 
 -- | instructions for entering the links of the radial tree
 enterLinks :: Array Chainable
-enterLinks = [ strokeWidth 1.5
-              , strokeColor "#555"
+enterLinks = [  strokeWidth   1.5
+              , strokeColor   "#555"
               , strokeOpacity 0.4
-              , fill "none"
-              , radialLink (\d -> d.x) (\d -> d.y)
+              , fill          "none"
+              , radialLink    _.x _.y
               ] 
 
 -- | instructions for entering the nodes of the radial tree
@@ -117,8 +116,8 @@ enterNodes =  [ transform transformations
 
 -- | instructions for entering the labels of the radial tree
 enterLabels :: Array Chainable
-enterLabels = [ transform labelTransformations
-              , dy 0.31
+enterLabels = [ transform  labelTransformations
+              , dy         0.31
               , x          labelOffset
               , textAnchor textOffset
               , text       labelName
@@ -140,9 +139,10 @@ enter :: forall m. Bind m => D3Tagless m => MonadState (D3State (Model String)) 
 enter = do
   root   <- hook "div#tree"
   svg    <- appendTo root "svg-tree"    (node Svg svgAttributes)
-  links  <- appendTo svg "links-group"  (node Group [ classed "links"])
-  nodes  <- appendTo svg "nodes-group"  (node Group [ classed "nodes"])
-  labels <- appendTo svg "labels-group" (node Group [ classed "labels"])
+  container <- appendTo svg "container" (node Group [ classed "container"])
+  links  <- appendTo container "links-group"  (node Group [ classed "links"])
+  nodes  <- appendTo container "nodes-group"  (node Group [ classed "nodes"])
+  labels <- appendTo container "labels-group" (node Group [ classed "labels"])
 
   (D3State state) <- get
 
@@ -170,6 +170,26 @@ enter = do
     , behaviour : enterLabels
   }
 
+  let width = 2000.0
+  let height = 1000.0 -- pass these in
+
+      _ = attachZoom container  
+                    { extent     : ZoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
+                    , scaleExtent: ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
+                    , qualifier  : "tree"
+                    }
+
   pure svg
+
+
+  -- svg.call(d3.zoom()
+  --     .extent([[0, 0], [width, height]])
+  --     .scaleExtent([1, 8])
+  --     .on("zoom", zoomed));
+
+  -- function zoomed({transform}) {
+  --   g.attr("transform", transform);
+  -- }
+
 
 

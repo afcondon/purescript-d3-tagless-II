@@ -148,18 +148,50 @@ enterOnly as = { enter: as, update: [], exit: [] }
 type ZoomConfig = {
     extent      :: ZoomExtent
   , scaleExtent :: ScaleExtent
-  , zoom        :: Chainable
   , qualifier   :: String -- zoom.foo
 }
-type Point = { x :: Number, y :: Number }
-data ScaleExtent = ScaleExtent Int Int
-data ZoomExtent = DefaultZoomExtent | ZoomExtent { topLeft :: Point, bottomRight :: Point }
-data ZoomType = ZoomStart | ZoomEnd | ZoomZoom
-foreign import data ZoomBehavior_ :: Type  -- the zoom behavior, ie result of call to d3.zoom()
+type ZoomConfig_ = {
+    extent      :: { topLeft :: Array Number, bottomRight :: Array Number }
+  , scaleExtent :: Array Int
+  , qualifier   :: String
+}
+type ZoomConfigDefault_ = {
+    scaleExtent :: Array Int
+  , qualifier   :: String
+}
+foreign import data ZoomBehavior_ :: Type  -- the zoom behavior, provided to Event Handler
+data ScaleExtent   = ScaleExtent Int Int
+data ZoomExtent    = DefaultZoomExtent | ZoomExtent { top :: Number, left :: Number, bottom :: Number, right :: Number }
+data ZoomType      = ZoomStart | ZoomEnd | ZoomZoom
 data ZoomTransform = ZoomTransform { k :: Number, tx :: Number, ty :: Number }
-type ZoomEvent = {
+type ZoomEvent     = {
     target      :: ZoomBehavior_
   , type        :: ZoomType
   , transform   :: ZoomTransform
   , sourceEvent :: Event
 }
+
+foreign import d3AttachZoom_              :: D3Selection_ -> ZoomConfig_        -> D3Selection_
+foreign import d3AttachZoomDefaultExtent_ :: D3Selection_ -> ZoomConfigDefault_ -> D3Selection_
+
+attachZoom :: D3Selection_ -> ZoomConfig -> D3Selection_
+attachZoom selection config = do
+  let 
+    (ScaleExtent smallest largest) = config.scaleExtent
+  
+  -- sticking to the rules of no ADT's on the JS side we case on the ZoomExtent here
+  case config.extent of
+    DefaultZoomExtent -> 
+      d3AttachZoomDefaultExtent_ selection {
+        scaleExtent: [ smallest, largest ]
+      , qualifier  : config.qualifier
+      } 
+
+    (ZoomExtent ze)   -> do
+      let topLeft     = [ ze.left, ze.top ]     -- x0, y0
+          bottomRight = [ ze.right, ze.bottom ] -- x1, y1
+      d3AttachZoom_ selection { 
+        extent     : { topLeft, bottomRight }
+      , scaleExtent: [ smallest, largest ]
+      , qualifier  : config.qualifier
+      }

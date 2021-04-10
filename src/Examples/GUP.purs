@@ -43,13 +43,10 @@ runGeneralUpdatePattern = do
     _          <- liftEffect $ runD3M (update transition) (setData newletters state)
     delay (Milliseconds 2300.0)
 
--- simple attributes don't use data, no hassle
 svgAttributes :: Array Chainable
 svgAttributes = [ -- TODO remove totally meaningless attributes only here to demo, fix viewbox width etc too
-    strokeColor "green"
-  , strokeOpacity 0.75
-  , width 1000.0
-  , height 1000.0
+    width   1000.0
+  , height  1000.0
   , viewBox (-500.0) (-500.0) 1000.0 1000.0
 ]
 
@@ -69,11 +66,11 @@ textFromDatum = singleton <<< datumIsChar
 enterUpdateExit :: Chainable -> EnterUpdateExit
 enterUpdateExit transition =
   { enter:  
-    [ classed "enter"
-    , fill "green"
-    , x offsetXByIndex
-    , y 0.0
-    , text textFromDatum
+    [ classed  "enter"
+    , fill     "green"
+    , x        offsetXByIndex
+    , y        0.0
+    , text     textFromDatum
     , fontSize 48.0
     ]  <> 
     (transition `with` [ y 200.0 ] )

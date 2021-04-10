@@ -76,8 +76,34 @@ exports.d3SetAttr_ = name => value => selection => {
 
 // d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit 
 exports.d3SetText_ = value => selection => {
-  if (debug) {(`\t${selection}.text(${value})`);}
+  if (debug) { console.log(`\t${selection}.text(${value})`);}
   return selection.text(value);
 }
 
+// foreign import attachZoom :: D3Selection_ -> ZoomConfigDefault_ -> D3Selection_
+exports.d3AttachZoomDefaultExtent_ = selection => config => { 
+  if (debug) { console.log(`\t${selection}.call(zoom ${config})`) }
+  function zoomed(transform) {
+    selection.attr("transform", transform);
+  }
+  // "If extent is not specified, returns the current extent accessor, which
+  // defaults to [[0, 0], [width, height]] where width is the client width of the
+  // element and height is its client height; for SVG elements, the nearest
+  // ancestor SVG element’s viewBox, or width and height attributes, are used.""
+  return selection.call(d3.zoom() 
+                  .extent() // no parameter, default is used
+                  .scaleExtent([config.scaleExtent])
+                  .on(`zoom.${config.qualifier}`, zoomed));
+}
 
+// foreign import attachZoom :: D3Selection_ -> ZoomConfig_ -> D3Selection_
+exports.d3AttachZoom_ = selection => config => { 
+  if (debug) { console.log(`\t${selection}.call(zoom ${config})`) }
+  function zoomed(transform) { // TODO try arrow function below instead
+    selection.attr("transform", transform);
+  }
+  return selection.call(d3.zoom()
+                          .extent(config.extent.topLeft, config.extent.bottomRight)
+                          .scaleExtent([config.scaleEnt])
+                          .on(`zoom.${config.qualifier}`, zoomed));
+}
