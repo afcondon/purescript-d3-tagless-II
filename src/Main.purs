@@ -9,8 +9,8 @@ import Prelude (Unit, pure, unit, bind)
 
 main :: Effect Unit
 main = launchAff_  do
-  -- _ <- forkAff GUP.runGeneralUpdatePattern
+  _ <- forkAff GUP.runGeneralUpdatePattern
   _ <-         Tree.drawTree
-  -- _ <- forkAff Graph.drawGraph
+  _ <- forkAff Graph.drawGraph
 
   pure unit

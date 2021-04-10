@@ -10,7 +10,7 @@ import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, width, x1, x2, y1, y2)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
 import D3.Scales (d3SchemeCategory10_)
-import D3.Selection (D3Selection_, D3Simulation_, D3State(..), DragBehavior(..), Element(..), Join(..), Keys(..), SelectionName(..), makeD3State', makeProjection, node)
+import D3.Selection (D3Selection_, D3Simulation_, D3State(..), DragBehavior(..), Element(..), Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), attachZoom, makeD3State', makeProjection, node)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -61,8 +61,9 @@ enter :: forall m. Bind m => D3Tagless m => MonadState (D3State Model) m => Tupl
 enter (Tuple w h) = do
   root  <- hook "div#force"
   svg   <- appendTo root "svg-tree" (node Svg [ width w, height h, viewBox 0.0 0.0 w h ] )
-  linksGroup <- appendTo svg "links-group" (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
-  nodesGroup <- appendTo svg "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
+  container <- appendTo svg "container" (node Group [ classed "container" ])
+  linksGroup <- appendTo container "links-group" (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
+  nodesGroup <- appendTo container "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   (D3State state) <- get
   let forces     = [ makeCenterForce w h
@@ -92,7 +93,13 @@ enter (Tuple w h) = do
     , onTick    : [ cx setCx, cy setCy ]
     , onDrag    : DefaultDrag
   }
-          
+  
+  let _ = attachZoom container  
+            { extent     : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+            , scaleExtent: ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
+            , qualifier  : "tree"
+            }
+
   let _ = startSimulation_ simulation_
 
   pure svg

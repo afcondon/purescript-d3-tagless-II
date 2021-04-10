@@ -139,7 +139,7 @@ enter :: forall m. Bind m => D3Tagless m => MonadState (D3State (Model String)) 
 enter = do
   root   <- hook "div#tree"
   svg    <- appendTo root "svg-tree"    (node Svg svgAttributes)
-  container <- appendTo svg "container" (node Group [ classed "container"])
+  container <- appendTo svg "container" (node Group [ classed "container" ])
   links  <- appendTo container "links-group"  (node Group [ classed "links"])
   nodes  <- appendTo container "nodes-group"  (node Group [ classed "nodes"])
   labels <- appendTo container "labels-group" (node Group [ classed "labels"])
@@ -171,7 +171,7 @@ enter = do
   }
 
   let width = 2000.0
-  let height = 1000.0 -- pass these in
+  let height = 1000.0 -- TODO pass these in or look up correct values
 
       _ = attachZoom container  
                     { extent     : ZoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
