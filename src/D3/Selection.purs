@@ -86,21 +86,17 @@ newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
 derive instance ordSelectionName :: Ord SelectionName
 data D3State model = D3State {
-    model            :: model
-  , active           :: D3Selection
+    active           :: D3Selection
   , namedSelections  :: Map SelectionName D3Selection_
   , namedTransitions :: Map SelectionName D3Selection_
   , namedJoins       :: Map SelectionName (Join model)
 }
 
-makeD3State' :: ∀ model. model -> D3State model
-makeD3State' model = D3State { model, active: mempty, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
+makeD3State' :: ∀ model. D3State model
+makeD3State' = D3State { active: mempty, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
 
-makeD3State :: ∀ model. model -> D3Selection -> D3State model
-makeD3State model selection = D3State { model, active: selection, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
-
-setData :: ∀ model. model -> D3State model -> D3State model
-setData model (D3State state) = D3State state { model=model}
+makeD3State :: ∀ model. D3Selection -> D3State model
+makeD3State selection = D3State { active: selection, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
 
 data D3_Node = D3_Node Element (Array Chainable)
 
@@ -149,6 +145,24 @@ type ZoomConfig = {
     extent      :: ZoomExtent
   , scaleExtent :: ScaleExtent
   , qualifier   :: String -- zoom.foo
+  -- this is the full list of values and their defaults
+-- filter = defaultFilter,
+-- extent = defaultExtent,
+-- constrain = defaultConstrain,
+-- wheelDelta = defaultWheelDelta,
+-- touchable = defaultTouchable,
+-- scaleExtent = [0, Infinity],
+-- translateExtent = [[-Infinity, -Infinity], [Infinity, Infinity]],
+-- duration = 250,
+-- interpolate = interpolateZoom,
+-- listeners = dispatch("start", "zoom", "end"),
+-- touchstarting,
+-- touchfirst,
+-- touchending,
+-- touchDelay = 500,
+-- wheelDelay = 150,
+-- clickDistance2 = 0,
+-- tapDistance = 10;
 }
 type ZoomConfig_ = {
     extent      :: Array (Array Number)

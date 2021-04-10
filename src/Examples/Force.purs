@@ -53,24 +53,24 @@ drawGraph = do
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
   let graph      = readGraphFromFileContents forceJSON
   
-  liftEffect $ runD3M (enter widthHeight) (makeD3State' graph)
+  liftEffect $ runD3M (enter widthHeight graph) makeD3State'
     *> pure unit
 
 -- | recipe for this force layout graph
-enter :: forall m. Bind m => D3Tagless m => MonadState (D3State Model) m => Tuple Number Number -> m D3Selection_ -- going to actually be a simulation right? 
-enter (Tuple w h) = do
+enter :: forall m. Bind m => D3Tagless m => MonadState (D3State Model) m => 
+  Tuple Number Number -> Model -> m D3Selection_ -- going to actually be a simulation right? 
+enter (Tuple w h) model = do
   root  <- hook "div#force"
   svg   <- appendTo root "svg-tree" (node Svg [ width w, height h, viewBox 0.0 0.0 w h ] )
   container <- appendTo svg "container" (node Group [ classed "container" ])
   linksGroup <- appendTo container "links-group" (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- appendTo container "nodes-group" (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
-  (D3State state) <- get
   let forces     = [ makeCenterForce w h
                    , Force (ForceName "charge") ForceMany ]
-      simulation_ = initSimulation forces state.model (\model -> model.nodes) (\model -> model.links)
+      simulation_ = initSimulation forces model (\model -> model.nodes) (\model -> model.links)
 
-  maybeLinks_ <- join state.model $ JoinSimulation {
+  maybeLinks_ <- join model $ JoinSimulation {
       element   : Line
     , key       : DatumIsUnique
     , hook      : SelectionName "links-group"
@@ -82,7 +82,7 @@ enter (Tuple w h) = do
     , onDrag    : NoDrag
   }
 
-  maybeNodes_ <- join state.model $ JoinSimulation {
+  maybeNodes_ <- join model $ JoinSimulation {
       element   : Circle
     , key       : DatumIsUnique
     , hook      : SelectionName "nodes-group"

@@ -5,7 +5,7 @@ import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum, Index, datumIsChar, indexIsNumber)
 import D3.Attributes.Sugar (classed, fill, fontSize, height, remove, strokeColor, strokeOpacity, text, transitionWithDuration, viewBox, width, with, x, y)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
-import D3.Selection (Chainable, D3Selection_, D3State(..), D3_Node(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), identityProjection, makeD3State', node, node_, setData)
+import D3.Selection (Chainable, D3Selection_, D3State(..), D3_Node(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), identityProjection, makeD3State', node, node_)
 import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (singleton, toCharArray)
@@ -37,10 +37,10 @@ runGeneralUpdatePattern = do
   log "General Update Pattern example"
   let transition = transitionWithDuration $ Milliseconds 2000.0
   letters      <- liftEffect $ getLetters
-  state        <- liftEffect $ liftA1 snd $ runD3M enter (makeD3State' letters)
+  state        <- liftEffect $ liftA1 snd $ runD3M enter makeD3State'
   forever $ do
     newletters <- liftEffect $ getLetters
-    _          <- liftEffect $ runD3M (update transition) (setData newletters state)
+    _          <- liftEffect $ runD3M (update transition newletters) state
     delay (Milliseconds 2300.0)
 
 svgAttributes :: Array Chainable
@@ -88,11 +88,10 @@ enter = do
   appendTo svg "letter-group" $ node_ Group
   -- TODO return the update function with the selections pre-loaded and do away with the SelectionName altogether
 
-update :: ∀ m. Bind m => MonadState (D3State (Array Char)) m => D3Tagless m => Chainable -> m (Maybe D3Selection_)
-update transition = do
-  (D3State state) <- get  
-
-  joinSelection_ <- join state.model $ JoinGeneral {
+update :: ∀ m. Bind m => MonadState (D3State (Array Char)) m => D3Tagless m => 
+  Chainable -> Array Char -> m (Maybe D3Selection_)
+update transition model = do
+  joinSelection_ <- join model $ JoinGeneral {
       element   : Text
     , key       : DatumIsUnique
     , hook      : SelectionName "letter-group"

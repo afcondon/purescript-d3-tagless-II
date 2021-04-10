@@ -37,10 +37,10 @@ runD3M :: ∀ a model. D3M model a -> (D3State model) -> Effect (Tuple a (D3Stat
 runD3M (D3M state) = runStateT state
 
 d3State :: ∀ a model. model -> D3M model a -> Effect (D3State model)
-d3State model (D3M state) = liftA1 snd $ runStateT state (makeD3State' model)
+d3State model (D3M state) = liftA1 snd $ runStateT state makeD3State'
 
 d3Run :: ∀ a model. model -> D3M model a -> Effect a
-d3Run model (D3M state) = liftA1 fst $ runStateT state (makeD3State' model)
+d3Run model (D3M state) = liftA1 fst $ runStateT state makeD3State'
 
 instance d3TaglessD3M :: D3Tagless (D3M model) where
   hook selector = setSelection (SelectionName "root") $ d3SelectAllInDOM_ selector 

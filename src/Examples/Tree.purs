@@ -42,7 +42,7 @@ drawTree = do
 
   case readTreeFromFileContents widthHeight treeJSON of
     (Left error)      -> liftEffect $ log $ printError error
-    (Right treeModel) -> liftEffect $ runD3M enter (makeD3State' treeModel) *> pure unit
+    (Right treeModel) -> liftEffect $ runD3M (enter treeModel) makeD3State' *> pure unit
 
 
 
@@ -135,8 +135,9 @@ makeModel width json = { json, d3Tree, config }
     d3Tree           = d3InitTree_ config hierarchicalData
 
 -- | recipe for a radial tree
-enter :: forall m. Bind m => D3Tagless m => MonadState (D3State (Model String)) m => m D3Selection_
-enter = do
+enter :: forall m. Bind m => D3Tagless m => MonadState (D3State (Model String)) m => 
+  Model String -> m D3Selection_
+enter model = do
   root   <- hook "div#tree"
   svg    <- appendTo root "svg-tree"    (node Svg svgAttributes)
   container <- appendTo svg "container" (node Group [ classed "container" ])
@@ -144,9 +145,7 @@ enter = do
   nodes  <- appendTo container "nodes-group"  (node Group [ classed "nodes"])
   labels <- appendTo container "labels-group" (node Group [ classed "labels"])
 
-  (D3State state) <- get
-
-  linkJoinSelection_ <- join state.model $ Join {
+  linkJoinSelection_ <- join model $ Join {
       element   : Path
     , key       : DatumIsUnique
     , hook      : SelectionName "links-group"
@@ -154,7 +153,7 @@ enter = do
     , behaviour : enterLinks
   }
 
-  nodeJoinSelection_ <- join state.model $ Join {
+  nodeJoinSelection_ <- join model $ Join {
       element   : Circle
     , key       : DatumIsUnique
     , hook      : SelectionName "nodes-group"
@@ -162,7 +161,7 @@ enter = do
     , behaviour : enterNodes
   }
 
-  labelJoinSelection_ <- join state.model $ Join {
+  labelJoinSelection_ <- join model $ Join {
       element   : Text
     , key       : DatumIsUnique
     , hook      : SelectionName "labels-group"
@@ -173,7 +172,7 @@ enter = do
   let width = 2000.0
   let height = 1000.0 -- TODO pass these in or look up correct values
 
-      _ = attachZoom container  
+  let _ = attachZoom container  
                     { extent     : ZoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
                     , scaleExtent: ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
                     , qualifier  : "tree"
