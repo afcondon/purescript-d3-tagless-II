@@ -151,7 +151,7 @@ type ZoomConfig = {
   , qualifier   :: String -- zoom.foo
 }
 type ZoomConfig_ = {
-    extent      :: { topLeft :: Array Number, bottomRight :: Array Number }
+    extent      :: Array (Array Number)
   , scaleExtent :: Array Int
   , qualifier   :: String
 }
@@ -161,7 +161,9 @@ type ZoomConfigDefault_ = {
 }
 foreign import data ZoomBehavior_ :: Type  -- the zoom behavior, provided to Event Handler
 data ScaleExtent   = ScaleExtent Int Int
-data ZoomExtent    = DefaultZoomExtent | ZoomExtent { top :: Number, left :: Number, bottom :: Number, right :: Number }
+data ZoomExtent    = DefaultZoomExtent 
+                   | ZoomExtent { top :: Number, left :: Number, bottom :: Number, right :: Number }
+                  --  | ExtentFunction (Datum -> Array (Array Number))
 data ZoomType      = ZoomStart | ZoomEnd | ZoomZoom
 data ZoomTransform = ZoomTransform { k :: Number, tx :: Number, ty :: Number }
 type ZoomEvent     = {
@@ -188,10 +190,10 @@ attachZoom selection config = do
       } 
 
     (ZoomExtent ze)   -> do
-      let topLeft     = [ ze.left, ze.top ]     -- x0, y0
-          bottomRight = [ ze.right, ze.bottom ] -- x1, y1
       d3AttachZoom_ selection { 
-        extent     : { topLeft, bottomRight }
+        extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
       , scaleExtent: [ smallest, largest ]
       , qualifier  : config.qualifier
       }
+
+    --  (ExtentFunction f) -> selection -- TODO write this case
