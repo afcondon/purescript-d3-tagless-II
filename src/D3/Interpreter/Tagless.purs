@@ -50,18 +50,14 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
     setSelection (SelectionName name) $ foldl applyChainable appended_ attributes     
 
   join model (Join j) = do
-    (D3State state) <- get 
-    case lookup j.hook state.namedSelections of
-      Nothing     -> pure Nothing
-      (Just hook) -> do
-        let 
-          selectS = d3SelectionSelectAll_ (show j.element) hook
-          dataS  = case j.key of
-                      DatumIsUnique    -> d3Data_        model j.projection    selectS 
-                      (ComputeKey fn)  -> d3KeyFunction_ model j.projection fn selectS 
-          enterS  = d3EnterAndAppend_ (show j.element) dataS
-          enterS' = foldl applyChainable enterS  j.behaviour
-        pure $ Just enterS'
+    let 
+      selectS = d3SelectionSelectAll_ (show j.element) j.hook
+      dataS   = case j.key of
+                  DatumIsUnique    -> d3Data_        model j.projection    selectS 
+                  (ComputeKey fn)  -> d3KeyFunction_ model j.projection fn selectS 
+      enterS  = d3EnterAndAppend_ (show j.element) dataS
+      enterS' = foldl applyChainable enterS  j.behaviour
+    pure $ Just enterS'
 
   join model (JoinSimulation j) = do
     let makeTick :: Array Chainable -> D3Selection_ -> Unit -> Unit
@@ -69,41 +65,31 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
           let _ = (applyChainable selection_) <$> attributes
           unit
 
-    (D3State state) <- get 
-    case lookup j.hook state.namedSelections of
-      Nothing     -> pure Nothing
-      (Just hook) -> do
-        let 
-          initialS = d3SelectionSelectAll_ (show j.element) hook
-          dataS    = case j.key of
-                        DatumIsUnique    -> d3Data_        model j.projection    initialS 
-                        (ComputeKey fn)  -> d3KeyFunction_ model j.projection fn initialS 
-          enterS   = d3EnterAndAppend_ (show j.element) dataS
-          _        = foldl applyChainable enterS  j.behaviour
-          _        = onTick_ j.simulation j.tickName (makeTick j.onTick enterS)
-          _        = case j.onDrag of
-                       DefaultDrag -> defaultSimulationDrag_ enterS j.simulation
-                       _ -> unit
- 
-        pure $ Just dataS
+    let 
+      initialS = d3SelectionSelectAll_ (show j.element) j.hook
+      dataS    = case j.key of
+                    DatumIsUnique    -> d3Data_        model j.projection    initialS 
+                    (ComputeKey fn)  -> d3KeyFunction_ model j.projection fn initialS 
+      enterS   = d3EnterAndAppend_ (show j.element) dataS
+      _        = foldl applyChainable enterS  j.behaviour
+      _        = onTick_ j.simulation j.tickName (makeTick j.onTick enterS)
+      _        = case j.onDrag of
+                    DefaultDrag -> defaultSimulationDrag_ enterS j.simulation
+                    _ -> unit
+    pure $ Just dataS
 
   join model (JoinGeneral j) = do
-    (D3State state) <- get 
-    case lookup j.hook state.namedSelections of
-      Nothing     -> pure Nothing
-      (Just hook) -> do
-        let 
-          -- (model :: D3Data_) = j.projection state.model -- TODO but in fact, it's the projection that we coerce
-          selectS = d3SelectionSelectAll_ (show j.element) hook
-          dataS  = case j.key of
-                    DatumIsUnique    -> d3Data_        model j.projection    selectS 
-                    (ComputeKey fn)  -> d3KeyFunction_ model j.projection fn selectS 
-          enterS = d3EnterAndAppend_ (show j.element) dataS
-          exitS  = d3Exit_ dataS
-          _        = foldl applyChainable enterS  j.behaviour.enter
-          _        = foldl applyChainable exitS   j.behaviour.exit
-          _        = foldl applyChainable dataS   j.behaviour.update
-        pure $ Just dataS
+    let
+      selectS = d3SelectionSelectAll_ (show j.element) j.hook
+      dataS  = case j.key of
+                DatumIsUnique    -> d3Data_        model j.projection    selectS 
+                (ComputeKey fn)  -> d3KeyFunction_ model j.projection fn selectS 
+      enterS = d3EnterAndAppend_ (show j.element) dataS
+      exitS  = d3Exit_ dataS
+      _        = foldl applyChainable enterS  j.behaviour.enter
+      _        = foldl applyChainable exitS   j.behaviour.exit
+      _        = foldl applyChainable dataS   j.behaviour.update
+    pure $ Just dataS
 
 setSelection :: ∀ m model. Bind m => MonadState (D3State model) m => 
   SelectionName -> D3Selection_ -> m D3Selection_

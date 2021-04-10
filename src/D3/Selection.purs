@@ -71,7 +71,7 @@ data DragBehavior = DefaultDrag | NoDrag | CustomDrag (D3Selection_ -> Unit)
 type JoinParams model r = 
   { element    :: Element           -- what we're going to insert in the DOM
   , key        :: Keys              -- how D3 is going to identify data so that 
-  , hook       :: SelectionName     -- pending a better system we'll look up the selection using a newtype for string
+  , hook       :: D3Selection_
   , projection :: model -> D3Data_  -- the join might operate on some subset or transformation of the data}
   | r
   }

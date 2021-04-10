@@ -10,7 +10,7 @@ import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (singleton, toCharArray)
 import Data.Traversable (sequence)
-import Data.Tuple (snd)
+import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), delay)
 import Effect.Class (liftEffect)
@@ -36,11 +36,11 @@ runGeneralUpdatePattern :: Aff Unit
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
   let transition = transitionWithDuration $ Milliseconds 2000.0
-  letters      <- liftEffect $ getLetters
-  state        <- liftEffect $ liftA1 snd $ runD3M enter makeD3State'
+  letters               <- liftEffect $ getLetters
+  (Tuple updateFn state) <- liftEffect $ runD3M enter makeD3State'
   forever $ do
     newletters <- liftEffect $ getLetters
-    _          <- liftEffect $ runD3M (update transition newletters) state
+    _          <- liftEffect $ runD3M (updateFn transition newletters) state
     delay (Milliseconds 2300.0)
 
 svgAttributes :: Array Chainable
@@ -80,23 +80,22 @@ enterUpdateExit transition =
   , exit:   [ classed "exit",   fill "brown" ] <> (transition `with` [ y 400.0, remove ])
   }
 
--- modelData is probably already in stateT but doesn't need to be until we hit a join
-enter :: ∀ m. (D3Tagless m) => m D3Selection_ 
+enter :: ∀ m. MonadState (D3State (Array Char)) m => D3Tagless m => m (Chainable -> Array Char -> m (Maybe D3Selection_)) 
 enter = do 
-  root <- hook "div#gup"
-  svg  <- appendTo root "svg-gup" $ node Svg svgAttributes
-  appendTo svg "letter-group" $ node_ Group
-  -- TODO return the update function with the selections pre-loaded and do away with the SelectionName altogether
+  root    <- hook "div#gup"
+  svg     <- appendTo root "svg-gup" $ node Svg svgAttributes
+  letterS <- appendTo svg "letter-group" $ node_ Group
+  pure $ update letterS
 
-update :: ∀ m. Bind m => MonadState (D3State (Array Char)) m => D3Tagless m => 
-  Chainable -> Array Char -> m (Maybe D3Selection_)
-update transition model = do
+-- update :: ∀ m. Bind m => MonadState (D3State (Array Char)) m => D3Tagless m => 
+--   D3Selection_ -> Chainable -> Array Char -> m (Maybe D3Selection_)
+update :: forall t67 t73. Bind t67 => D3Tagless t67 => D3Selection_ -> Chainable -> t73 -> t67 (Maybe D3Selection_)
+update selection transition model = do
   joinSelection_ <- join model $ JoinGeneral {
       element   : Text
     , key       : DatumIsUnique
-    , hook      : SelectionName "letter-group"
+    , hook      : selection
     , projection: unsafeCoerce -- identityProjection
     , behaviour : enterUpdateExit transition
   }
-
   pure joinSelection_

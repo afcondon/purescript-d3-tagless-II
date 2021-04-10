@@ -73,7 +73,7 @@ enter (Tuple w h) model = do
   maybeLinks_ <- join model $ JoinSimulation {
       element   : Line
     , key       : DatumIsUnique
-    , hook      : SelectionName "links-group"
+    , hook      : linksGroup
     , projection: makeProjection (\model -> model.links)
     , behaviour : [ strokeWidth linkWidth ]
     , simulation: simulation_ -- extras for simulation elements from here
@@ -85,7 +85,7 @@ enter (Tuple w h) model = do
   maybeNodes_ <- join model $ JoinSimulation {
       element   : Circle
     , key       : DatumIsUnique
-    , hook      : SelectionName "nodes-group"
+    , hook      : nodesGroup
     , projection: makeProjection (\model -> model.nodes)
     , behaviour : [ radius 5.0, fill colorByGroup ]
     , simulation: simulation_  -- extras for simulation elements from here
