@@ -70,7 +70,7 @@ enter (Tuple w h) model = do
                    , Force (ForceName "charge") ForceMany ]
       simulation_ = initSimulation forces model (\model -> model.nodes) (\model -> model.links)
 
-  maybeLinks_ <- join model $ JoinSimulation {
+  links <- join model $ JoinSimulation {
       element   : Line
     , key       : DatumIsUnique
     , hook      : linksGroup
@@ -82,7 +82,7 @@ enter (Tuple w h) model = do
     , onDrag    : NoDrag
   }
 
-  maybeNodes_ <- join model $ JoinSimulation {
+  nodes <- join model $ JoinSimulation {
       element   : Circle
     , key       : DatumIsUnique
     , hook      : nodesGroup

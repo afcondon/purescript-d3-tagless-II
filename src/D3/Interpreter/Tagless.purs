@@ -31,7 +31,7 @@ derive newtype instance monadEffD3M    :: MonadEffect                (D3M model)
 class (Monad m) <= D3Tagless m where
   hook     :: Selector                            -> m D3Selection_
   appendTo :: D3Selection_   -> String -> D3_Node -> m D3Selection_
-  join     :: ∀ model. model -> Join model        -> m (Maybe D3Selection_)
+  join     :: ∀ model. model -> Join model        -> m D3Selection_
 
 runD3M :: ∀ a model. D3M model a -> (D3State model) -> Effect (Tuple a (D3State model))
 runD3M (D3M state) = runStateT state
@@ -57,7 +57,7 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
                   (ComputeKey fn)  -> d3KeyFunction_ model j.projection fn selectS 
       enterS  = d3EnterAndAppend_ (show j.element) dataS
       enterS' = foldl applyChainable enterS  j.behaviour
-    pure $ Just enterS'
+    pure enterS'
 
   join model (JoinSimulation j) = do
     let makeTick :: Array Chainable -> D3Selection_ -> Unit -> Unit
@@ -76,7 +76,7 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
       _        = case j.onDrag of
                     DefaultDrag -> defaultSimulationDrag_ enterS j.simulation
                     _ -> unit
-    pure $ Just dataS
+    pure dataS
 
   join model (JoinGeneral j) = do
     let
@@ -89,7 +89,7 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
       _        = foldl applyChainable enterS  j.behaviour.enter
       _        = foldl applyChainable exitS   j.behaviour.exit
       _        = foldl applyChainable dataS   j.behaviour.update
-    pure $ Just dataS
+    pure dataS
 
 setSelection :: ∀ m model. Bind m => MonadState (D3State model) m => 
   SelectionName -> D3Selection_ -> m D3Selection_

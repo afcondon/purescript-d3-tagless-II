@@ -80,7 +80,7 @@ enterUpdateExit transition =
   , exit:   [ classed "exit",   fill "brown" ] <> (transition `with` [ y 400.0, remove ])
   }
 
-enter :: ∀ m. MonadState (D3State (Array Char)) m => D3Tagless m => m (Chainable -> Array Char -> m (Maybe D3Selection_)) 
+enter :: ∀ m. MonadState (D3State (Array Char)) m => D3Tagless m => m (Chainable -> Array Char -> m D3Selection_) 
 enter = do 
   root    <- hook "div#gup"
   svg     <- appendTo root "svg-gup" $ node Svg svgAttributes
@@ -89,7 +89,7 @@ enter = do
 
 -- update :: ∀ m. Bind m => MonadState (D3State (Array Char)) m => D3Tagless m => 
 --   D3Selection_ -> Chainable -> Array Char -> m (Maybe D3Selection_)
-update :: forall t67 t73. Bind t67 => D3Tagless t67 => D3Selection_ -> Chainable -> t73 -> t67 (Maybe D3Selection_)
+update :: forall t67 t73. Bind t67 => D3Tagless t67 => D3Selection_ -> Chainable -> t73 -> t67 D3Selection_
 update selection transition model = do
   joinSelection_ <- join model $ JoinGeneral {
       element   : Text
