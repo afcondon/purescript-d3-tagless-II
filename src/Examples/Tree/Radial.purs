@@ -1,4 +1,4 @@
-module D3.Examples.Tree where
+module D3.Examples.Tree.Radial where
 
 import Affjax (Error, printError)
 import Affjax as AJAX
@@ -7,8 +7,8 @@ import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, dy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
-import D3.Layouts.Tree (D3TreeNode, Model, TreeJson, d3HierarchyDescendants_, d3HierarchyLinks_, d3Hierarchy_, d3InitTree_, hasChildren_, radialLink, radialTreeConfig, readJSONJS_)
-import D3.Selection (Chainable, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), attachZoom, enterOnly, makeD3State', makeProjection, node)
+import D3.Layouts.Tree (D3TreeNode, Model, TreeJson, d3HierarchyDescendants_, d3HierarchyLinks_, d3Hierarchy_, d3InitTree, d3InitTree_, hasChildren_, radialLink, radialTreeConfig, readJSONJS_)
+import D3.Selection (Chainable, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), attachZoom, enterOnly, makeD3State', makeProjection, node, zoomExtent, zoomRange)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -17,7 +17,7 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (pi)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (*>), (-), (/), (<), (<>), (==), (>=))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, (&&), ($), (*), (*>), (-), (/), (<), (<>), (==), (>=))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.HTML (window)
 import Web.HTML.Window (innerHeight, innerWidth)
@@ -42,7 +42,7 @@ drawTree = do
 
   case readTreeFromFileContents widthHeight treeJSON of
     (Left error)      -> liftEffect $ log $ printError error
-    (Right treeModel) -> liftEffect $ runD3M (enter treeModel) makeD3State' *> pure unit
+    (Right treeModel) -> liftEffect $ runD3M (enter widthHeight treeModel) makeD3State' *> pure unit
 
 
 
@@ -68,27 +68,13 @@ labelTransformations = [ rotateCommon, translate, rotateText2 ]
 datumIsTreeNode :: Datum -> TreeNode
 datumIsTreeNode = unsafeCoerce
 
-unwrapInnerDatum :: Datum -> TreeNodeExtra
-unwrapInnerDatum d = (unsafeCoerce d)."data"
-
-labelOffset :: Datum -> Number
-labelOffset d = do
-  let node = datumIsTreeNode d
-  if (node.x < pi) == hasChildren_ d
-  then 6.0
-  else (-6.0)
+nodeIsOnRHS :: Datum -> Boolean
+nodeIsOnRHS d = node.x < pi
+  where node = datumIsTreeNode d
 
 labelName :: Datum -> String
-labelName d = do
-  let node = unwrapInnerDatum d
-  node.name
-
-textOffset :: Datum -> String
-textOffset d = do
-  let node = datumIsTreeNode d
-  if (node.x < pi) == hasChildren_ d
-  then "start"
-  else "end"
+labelName d = node."data".name
+  where node = datumIsTreeNode d
 
 -- | Script components, attributes, transformations etc
 svgAttributes :: Array Chainable
@@ -118,8 +104,8 @@ enterNodes =  [ transform transformations
 enterLabels :: Array Chainable
 enterLabels = [ transform  labelTransformations
               , dy         0.31
-              , x          labelOffset
-              , textAnchor textOffset
+              , x          (\d -> if (hasChildren_ d == nodeIsOnRHS d) then 6.0 else (-6.0))
+              , textAnchor (\d -> if (hasChildren_ d == nodeIsOnRHS d) then "start" else "end")
               , text       labelName
               ]
 
@@ -132,12 +118,12 @@ makeModel width json = { json, d3Tree, config }
   where
     config           = radialTreeConfig width
     hierarchicalData = d3Hierarchy_ json
-    d3Tree           = d3InitTree_ config hierarchicalData
+    d3Tree           = d3InitTree config hierarchicalData
 
 -- | recipe for a radial tree
 enter :: forall m. Bind m => D3Tagless m => MonadState (D3State (Model String)) m => 
-  Model String -> m D3Selection_
-enter model = do
+  Tuple Number Number -> Model String -> m D3Selection_
+enter (Tuple width height) model = do
   root      <- hook "div#tree"
   svg       <- root      `appendTo` (node Svg svgAttributes)
   container <- svg       `appendTo` (node Group [ classed "container" ])
@@ -169,13 +155,10 @@ enter model = do
     , behaviour : enterLabels
   }
 
-  let width = 2000.0
-  let height = 1000.0 -- TODO pass these in or look up correct values
-
   let _ = attachZoom container  
-                    { extent     : ZoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
-                    , scaleExtent: ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
-                    , qualifier  : "tree"
+                    { extent    : zoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
+                    , scale     : 1 `zoomRange` 8 
+                    , qualifier : "tree"
                     }
 
   pure svg

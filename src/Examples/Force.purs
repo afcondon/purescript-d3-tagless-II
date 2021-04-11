@@ -97,9 +97,9 @@ enter (Tuple w h) model = do
   }
   
   let _ = attachZoom container  
-            { extent     : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-            , scaleExtent: ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
-            , qualifier  : "tree"
+            { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+            , scale     : ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
+            , qualifier : "tree"
             }
 
   let _ = startSimulation_ simulation_

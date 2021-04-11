@@ -7,23 +7,27 @@ import Prelude (($), (*), (/))
 import Unsafe.Coerce (unsafeCoerce)
 
 data Tree a = Node a (Array (Tree a))
-type TreeConfig :: forall k. k -> Type
-type TreeConfig a = {
-    size       :: Array Number
-  , separation :: Datum -> Datum -> Int
-}
 
-radialTreeConfig :: forall a. Number -> TreeConfig a
-radialTreeConfig width = 
+data TreeConfig = RadialTree { size       :: Array Number, separation :: Datum -> Datum -> Int }
+                | HorizontalTree { }
+
+foreign import data TreeConfig_ :: Type
+
+radialTreeConfig :: Number -> TreeConfig
+radialTreeConfig width = RadialTree
   { size      : [2.0 * pi, width / 2.0]
   , separation: radialSeparationJS_
   }
+
+horizontalTreeConfig :: Number -> TreeConfig
+horizontalTreeConfig width = HorizontalTree
+  { }
 
 type Model :: forall k. k -> Type
 type Model a = {
       json   :: TreeJson
     , d3Tree :: D3Tree
-    , config :: TreeConfig a
+    , config :: TreeConfig
 }
 
 type D3TreeNode d = {
@@ -47,6 +51,10 @@ radialLink angleFn radius_Fn = do
   let radialFn = d3LinkRadial_ (unsafeCoerce angleFn) (unsafeCoerce radius_Fn)
   AttrT $ Attribute "d" $ toAttr radialFn
 
+d3InitTree :: TreeConfig -> D3Hierarchical -> D3Tree
+d3InitTree (RadialTree config) = d3InitTree_ (unsafeCoerce config)
+d3InitTree (HorizontalTree config) = d3InitTree_ (unsafeCoerce config)
+
 -- | foreign functions needed for tree layouts
 -- TODO structures here carried over from previous interpreter - review and refactor
 -- do the decode on the Purescript side unless files are ginormous, this is just for prototyping
@@ -61,7 +69,7 @@ foreign import data TreeJson            :: Type
 foreign import radialSeparationJS_      :: Datum -> Datum -> Int
 foreign import readJSONJS_              :: String -> TreeJson -- TODO no error handling at all here RN
 foreign import d3Hierarchy_             :: TreeJson -> D3Hierarchical
-foreign import d3InitTree_              :: forall a. TreeConfig a -> D3Hierarchical -> D3Tree 
+foreign import d3InitTree_              :: TreeConfig_ -> D3Hierarchical -> D3Tree 
 foreign import hasChildren_             :: Datum -> Boolean
 foreign import d3LinkRadial_            :: (Datum -> Number) -> (Datum -> Number) -> (Datum -> String)
 

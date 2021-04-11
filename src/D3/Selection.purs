@@ -142,9 +142,9 @@ enterOnly as = { enter: as, update: [], exit: [] }
 
 -- stuff related to zoom functionality
 type ZoomConfig = {
-    extent      :: ZoomExtent
-  , scaleExtent :: ScaleExtent
-  , qualifier   :: String -- zoom.foo
+    extent    :: ZoomExtent
+  , scale     :: ScaleExtent
+  , qualifier :: String -- zoom.foo
   -- this is the full list of values and their defaults
 -- filter = defaultFilter,
 -- extent = defaultExtent,
@@ -175,6 +175,8 @@ type ZoomConfigDefault_ = {
 }
 foreign import data ZoomBehavior_ :: Type  -- the zoom behavior, provided to Event Handler
 data ScaleExtent   = ScaleExtent Int Int
+zoomRange = ScaleExtent
+zoomExtent = ZoomExtent
 data ZoomExtent    = DefaultZoomExtent 
                    | ZoomExtent { top :: Number, left :: Number, bottom :: Number, right :: Number }
                   --  | ExtentFunction (Datum -> Array (Array Number))
@@ -193,7 +195,7 @@ foreign import d3AttachZoomDefaultExtent_ :: D3Selection_ -> ZoomConfigDefault_ 
 attachZoom :: D3Selection_ -> ZoomConfig -> D3Selection_
 attachZoom selection config = do
   let 
-    (ScaleExtent smallest largest) = config.scaleExtent
+    (ScaleExtent smallest largest) = config.scale
   
   -- sticking to the rules of no ADT's on the JS side we case on the ZoomExtent here
   case config.extent of
