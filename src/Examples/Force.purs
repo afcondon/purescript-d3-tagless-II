@@ -26,8 +26,8 @@ import Web.HTML.Window (innerHeight, innerWidth)
 
 getWindowWidthHeight :: Effect (Tuple Number Number)
 getWindowWidthHeight = do
-  win <- window
-  width <- innerWidth win
+  win    <- window
+  width  <- innerWidth win
   height <- innerHeight win
   pure $ Tuple (toNumber width) (toNumber height)
 
@@ -51,7 +51,7 @@ drawGraph = do
   log "Force layout example"
   widthHeight <- liftEffect getWindowWidthHeight
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
-  let graph      = readGraphFromFileContents forceJSON
+  let graph = readGraphFromFileContents forceJSON
   
   liftEffect $ runD3M (enter widthHeight graph) makeD3State'
     *> pure unit
