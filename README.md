@@ -3,6 +3,10 @@ Tagless final style interpreter / wrapper for D3 in PureScript, latest of many r
 
 Proper readme to come, see readmes for my repos with previous attempts for context
 
+Collaborators very welcome.
+
+`>>>>>` FEEL FREE TO CONTACT ME FOR AN INTRO TO THE REPO AND IDEAS IN IT `<<<<<<`
+
 # state of this repo
 
 400-ish lines of interpreter code and a  minimal example showing that this interpreter is capable of implementing 
