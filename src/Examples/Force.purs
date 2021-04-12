@@ -7,7 +7,7 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
-import D3.Attributes.Sugar (classed, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, width, x1, x2, y1, y2)
+import D3.Attributes.Sugar (classed, cursor, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, width, x1, x2, y1, y2)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
 import D3.Scales (d3SchemeCategory10_)
 import D3.Selection (D3Selection_, D3Simulation_, D3State(..), DragBehavior(..), Element(..), Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), attachZoom, makeD3State', makeProjection, node)
@@ -60,16 +60,15 @@ drawGraph = do
 enter :: forall m. Bind m => D3Tagless m => MonadState (D3State Model) m => 
   Tuple Number Number -> Model -> m D3Selection_ -- going to actually be a simulation right? 
 enter (Tuple w h) model = do
-  root  <- hook "div#force"
-  svg        <- root      `appendTo` (node Svg [ width w, height h, viewBox 0.0 0.0 w h ] )
-  container  <- svg       `appendTo` (node Group [ classed "container" ])
-  linksGroup <- container `appendTo` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
-  nodesGroup <- container `appendTo` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
+  root       <- hook "div#force"
+  svg        <- root `appendTo` (node Svg   [ width w, height h, viewBox 0.0 0.0 w h ] )
+  linksGroup <- svg  `appendTo` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
+  nodesGroup <- svg  `appendTo` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   let forces      = [ makeCenterForce w h
                     , Force (ForceName "charge") ForceMany ]
       getNodes    = (\model -> model.nodes)
-      getLinks    = (\model -> model.links)
+      getLinks    = (\model -> model.links) -- TODO this adds ForceLinks...should be explicit in Force List
       simulation_ = initSimulation forces model getNodes getLinks
 
   links <- join model $ JoinSimulation {
@@ -78,7 +77,7 @@ enter (Tuple w h) model = do
     , hook      : linksGroup
     , projection: makeProjection getLinks
     , behaviour : [ strokeWidth linkWidth ]
-    , simulation: simulation_ -- extras for simulation elements from here
+    , simulation: simulation_ -- following config fields are extras for simulation
     , tickName  : "links"
     , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
     , onDrag    : NoDrag
@@ -90,17 +89,16 @@ enter (Tuple w h) model = do
     , hook      : nodesGroup
     , projection: makeProjection getNodes
     , behaviour : [ radius 5.0, fill colorByGroup ]
-    , simulation: simulation_  -- extras for simulation elements from here
+    , simulation: simulation_  -- following config fields are extras for simulation
     , tickName  : "nodes"
     , onTick    : [ cx setCx, cy setCy ]
     , onDrag    : DefaultDrag
   }
   
-  let _ = attachZoom container  
-            { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-            , scale     : ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
-            , qualifier : "tree"
-            }
+  let _ = svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+                            , scale     : ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
+                            , qualifier : "tree"
+                            }
 
   let _ = startSimulation_ simulation_
 
