@@ -7,7 +7,8 @@ import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, dy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
-import D3.Layouts.Tree (D3TreeNode, Model, TreeJson, d3HierarchyDescendants_, d3HierarchyLinks_, d3Hierarchy_, d3InitTree, d3InitTree_, hasChildren_, radialLink, radialTreeConfig, readJSONJS_)
+import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, d3InitTree, hasChildren_, hierarchy_, radialLink, radialTreeConfig, readJSON_)
+import D3.Layouts.Hierarchical as H
 import D3.Selection (Chainable, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), attachZoom, enterOnly, makeD3State', makeProjection, node, zoomExtent, zoomRange)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
@@ -30,8 +31,8 @@ getWindowWidthHeight = do
   height <- innerHeight win
   pure $ Tuple (toNumber width) (toNumber height)
 
-readTreeFromFileContents :: forall r. Tuple Number Number -> Either Error { body ∷ String | r } -> Either Error (Model String)
-readTreeFromFileContents (Tuple width _) (Right { body } ) = Right $ makeModel width (readJSONJS_ body)
+readTreeFromFileContents :: forall r v. Tuple Number Number -> Either Error { body ∷ String | r } -> Either Error (Model String v)
+readTreeFromFileContents (Tuple width _) (Right { body } ) = Right $ makeModel width (readJSON_ body)
 readTreeFromFileContents _               (Left error)      = Left error
 
 drawTree :: Aff Unit
@@ -49,38 +50,39 @@ drawTree = do
 -- three little transform functions to build up the transforms on nodes and labels
 rotate :: Number -> String
 rotate x       = show $ (x * 180.0 / pi - 90.0)
-rotateCommon :: forall a. D3TreeNode a -> String
-rotateCommon d = "rotate(" <> rotate d.x <> ")"
-rotateText2 :: forall a. D3TreeNode a -> String
-rotateText2 d  = "rotate(" <> if d.x >= pi 
-                              then "180" <> ")" 
-                              else "0" <> ")"
+rotateCommon :: forall d v. D3HierarchicalNode d v -> String
+rotateCommon (D3HierarchicalNode d) = "rotate(" <> rotate d.x <> ")"
+rotateText2 :: forall d v. D3HierarchicalNode d v -> String
+rotateText2 (D3HierarchicalNode d) = -- TODO replace with nodeIsOnRHS 
+  "rotate(" <> if d.x >= pi 
+  then "180" <> ")" 
+  else "0" <> ")"
 -- same translation for both text and node
-translate :: forall a. D3TreeNode a -> String
-translate d = "translate(" <> show d.y <> ",0)"
+translate :: forall d v. D3HierarchicalNode d v -> String
+translate (D3HierarchicalNode d) = "translate(" <> show d.y <> ",0)"
 
-transformations :: forall a. Array (D3TreeNode a -> String)
+transformations :: forall d v. Array (D3HierarchicalNode d v -> String)
 transformations = [ rotateCommon, translate ]
 
-labelTransformations :: forall a. Array (D3TreeNode a -> String)
+labelTransformations :: forall d v. Array (D3HierarchicalNode d v -> String)
 labelTransformations = [ rotateCommon, translate, rotateText2 ]
 
-datumIsTreeNode :: Datum -> TreeNode
+datumIsTreeNode :: forall d v. Datum -> D3HierarchicalNode d v
 datumIsTreeNode = unsafeCoerce
 
 nodeIsOnRHS :: Datum -> Boolean
 nodeIsOnRHS d = node.x < pi
-  where node = datumIsTreeNode d
+  where (D3HierarchicalNode node) = datumIsTreeNode d
 
 labelName :: Datum -> String
 labelName d = node."data".name
-  where node = datumIsTreeNode d
+  where (D3HierarchicalNode node) = datumIsTreeNode d
 
 -- | Script components, attributes, transformations etc
 svgAttributes :: Array Chainable
 svgAttributes = [
-    width 1000.0
-  , height 1000.0
+    width   1000.0
+  , height  1000.0
   , viewBox (-500.0) (-500.0) 2000.0 2000.0
 ]
 
@@ -111,18 +113,18 @@ enterLabels = [ transform  labelTransformations
 
 -- this is the extra row info that is part of a Datum beyond the D3Tree minimum
 type TreeNodeExtra = { name :: String }
-type TreeNode = D3TreeNode TreeNodeExtra 
+type TreeNode v = D3HierarchicalNode TreeNodeExtra v -- v is the value calculated in the tree, ie for sum, count etc
 
-makeModel :: Number -> TreeJson -> Model TreeNodeExtra
-makeModel width json = { json, d3Tree, config }
+makeModel :: forall v. Number -> TreeJson_ -> Model TreeNodeExtra v
+makeModel width json = { json, root, config }
   where
-    config           = radialTreeConfig width
-    hierarchicalData = d3Hierarchy_ json
-    d3Tree           = d3InitTree config hierarchicalData
+    config = radialTreeConfig width
+    root' = hierarchy_ json
+    root  = unsafeCoerce $ d3InitTree config root'
 
 -- | recipe for a radial tree
-enter :: forall m. Bind m => D3Tagless m => MonadState (D3State (Model String)) m => 
-  Tuple Number Number -> Model String -> m D3Selection_
+enter :: forall m v. Bind m => D3Tagless m => MonadState (D3State (Model String v)) m => 
+  Tuple Number Number -> Model String v -> m D3Selection_
 enter (Tuple width height) model = do
   root      <- hook "div#tree"
   svg       <- root      `appendTo` (node Svg svgAttributes)
@@ -135,15 +137,19 @@ enter (Tuple width height) model = do
       element   : Path
     , key       : DatumIsUnique
     , hook      : links
-    , projection: makeProjection (\model -> d3HierarchyLinks_ model.d3Tree)
+    , projection: makeProjection (\model -> H.links_ model.root)
     , behaviour : enterLinks
   }
-
+-- TODO this separation of labels and circles comes from original radial tree example
+-- however, other trees have the label and circle grouped, which seems better to me anyway
+-- and it means only one join to do it, but then two appends after the join
+-- this is a different pattern and it's worth exploring both
+-- now that we no longer have Maybe Selection from the join, should be easy to do this
   nodeJoinSelection_ <- join model $ Join {
       element   : Circle
     , key       : DatumIsUnique
     , hook      : nodes
-    , projection: makeProjection (\model -> d3HierarchyDescendants_ model.d3Tree)
+    , projection: makeProjection (\model -> H.descendants_ model.root)
     , behaviour : enterNodes
   }
 
@@ -151,7 +157,7 @@ enter (Tuple width height) model = do
       element   : Text
     , key       : DatumIsUnique
     , hook      : labels
-    , projection: makeProjection (\model -> d3HierarchyDescendants_ model.d3Tree)
+    , projection: makeProjection (\model -> H.descendants_ model.root)
     , behaviour : enterLabels
   }
 

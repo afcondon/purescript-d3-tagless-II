@@ -75,12 +75,12 @@ type JoinParams model r =
   , projection :: model -> D3Data_  -- the join might operate on some subset or transformation of the data}
   | r
   }
-data Join model = Join           (JoinParams model (behaviour :: Array Chainable))
-                | JoinGeneral    (JoinParams model (behaviour :: EnterUpdateExit)) -- what we're going to do for each set (enter, exit, update) each refresh of data
-                | JoinSimulation (JoinParams model (behaviour :: Array Chainable
-                                                   , onTick   :: Array Chainable
-                                                   , tickName :: String
-                                                   , onDrag   :: DragBehavior
+data Join model = Join           (JoinParams model (behaviour   :: Array Chainable))
+                | JoinGeneral    (JoinParams model (behaviour   :: EnterUpdateExit)) -- what we're going to do for each set (enter, exit, update) each refresh of data
+                | JoinSimulation (JoinParams model (behaviour   :: Array Chainable
+                                                   , onTick     :: Array Chainable
+                                                   , tickName   :: String
+                                                   , onDrag     :: DragBehavior
                                                    , simulation :: D3Simulation_)) -- simulation joins are a bit different
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
