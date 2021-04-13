@@ -80,6 +80,9 @@ text = TextT <<< Attribute "text" <<< toAttr
 classed :: ∀ a. ToAttr String a => a -> Chainable
 classed = AttrT <<< Attribute "class" <<< toAttr
 
+cursor :: ∀ a. ToAttr String a => a -> Chainable
+cursor = AttrT <<< Attribute "cursor" <<< toAttr
+
 
 -- helpers for transitions 
 
