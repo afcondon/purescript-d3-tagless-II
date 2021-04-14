@@ -3,15 +3,25 @@ module D3.Layouts.Hierarchical.Types where
 import D3.Attributes.Instances (Datum)
 import Data.Nullable (Nullable)
 
-data Tree a = Node a (Array (Tree a))
-
--- TODO allow custom separations etc, either thru config with nulls or API
-data TreeConfig = RadialTree     { size :: Array Number, separation :: Datum -> Datum -> Int }
-                | HorizontalTree { width :: Number, height :: Number }
-
-foreign import data TreeConfig_ :: Type
+foreign import data TreeConfig_         :: Type
 foreign import data TreeJson_           :: Type
 foreign import data D3HierarchicalNode_ :: Type
+
+data Tree a = Node a (Array (Tree a))
+
+data TreeConfig = RadialTree     RadialTreeConfig
+                | HorizontalTree HorizontalTreeConfig
+
+type RadialTreeConfig     = { size :: Array Number, separation :: Datum -> Datum -> Int }
+
+-- bundle up the things that would be "in scope" for a D3 script rendering a Horizontal tree
+type HorizontalTreeConfig = {
+    root   :: D3HierarchicalNode_
+  , rootDx :: Number
+  , rootDy :: Number
+  , x0     :: Number
+  , x1     :: Number
+} -- TODO put in proxy fields here to carry the type allowing safe coerce of root etc
 
 -- TODO need to define a model here that works for all hierarchic layouts, this has its origins in Radial tree only
 type Model :: forall d v. d -> v -> Type
@@ -22,13 +32,22 @@ type Model d v = {
     , config :: TreeConfig
 }
 
-newtype D3HierarchicalNode a b = D3HierarchicalNode { -- the PureScript rep of opaque type D3HierarchicalNode_
-    "data"   :: a -- the data that is passed in to the tree
+-- the PureScript rep of opaque type D3HierarchicalNode_
+-- we can safely cast any D3HierarchicalNode_ to this if we know the types d and v
+-- there might be some way, passing proxies around, to enforce that constraint?
+newtype D3HierarchicalNode d v = D3HierarchicalNode { -- (newtype to avoid cycles in types)
+    "data"   :: d -- the data that is passed in to the tree
   , depth    :: Int
   , height   :: Int
-  , parent   :: Nullable (D3HierarchicalNode a b)
-  , children :: Array (D3HierarchicalNode a b)
-  , value    :: b -- set by some function passed to node.value() or by node.count()
+  , parent   :: Nullable (D3HierarchicalNode d v)
+  , children :: Array (D3HierarchicalNode d v)
+  , value    :: v -- set by some function passed to node.value() or by node.count()
   , x        :: Number
   , y        :: Number
 }
+
+-- accessors for fields of D3HierarchicalNode
+foreign import hNodeDepth_  :: D3HierarchicalNode_ -> Number
+foreign import hNodeHeight_ :: D3HierarchicalNode_ -> Number
+foreign import hNodeX_      :: D3HierarchicalNode_ -> Number
+foreign import hNodeY_      :: D3HierarchicalNode_ -> Number

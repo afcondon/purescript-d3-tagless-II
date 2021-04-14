@@ -1,31 +1,18 @@
 module D3.Layouts.Hierarchical(
-    d3InitTree
-  , hasChildren_, hierarchy_, nodeSize_, readJSON_, links_, descendants_
+    hasChildren_, hierarchy_, nodeSize_, readJSON_, links_, descendants_
   , module D3.Layouts.Hierarchical.Types
   , module D3.Layouts.Hierarchical.HorizontalTree
   , module D3.Layouts.Hierarchical.RadialTree
 ) where
 
-import D3.Layouts.Hierarchical.Types
-
 import D3.Attributes.Instances (Datum)
-import D3.Layouts.Hierarchical.HorizontalTree
-import D3.Layouts.Hierarchical.RadialTree
+import D3.Layouts.Hierarchical.HorizontalTree (horizontalLink, horizontalTreeX0X1, horizontalTreeX0X1_, initHorizontalTree, initHorizontalTree_, linkHorizontal_)
+import D3.Layouts.Hierarchical.RadialTree (initRadialTree_, radialLink, radialTreeConfig)
+import D3.Layouts.Hierarchical.Types (D3HierarchicalNode(..), D3HierarchicalNode_, HorizontalTreeConfig, Model, RadialTreeConfig, Tree(..), TreeConfig(..), TreeConfig_, TreeJson_, hNodeDepth_, hNodeHeight_, hNodeX_, hNodeY_)
 import D3.Selection (D3Data_)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
 import Prelude (($))
-import Unsafe.Coerce (unsafeCoerce)
-
-
-d3InitTree :: forall d v. TreeConfig -> D3HierarchicalNode_ -> D3HierarchicalNode d v
-d3InitTree (RadialTree config)     = do
-  let root = initRadialTree_ (unsafeCoerce config)
-  unsafeCoerce root -- force the result to conform to our record 
-
-d3InitTree (HorizontalTree config) = do
-  let root = initHorizontalTree_ (unsafeCoerce config)
-  unsafeCoerce root
 
 find :: D3HierarchicalNode_ -> (Datum -> Boolean) -> Maybe D3HierarchicalNode_
 find tree filter = toMaybe $ find_ tree filter

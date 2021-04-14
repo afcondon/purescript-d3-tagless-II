@@ -1,5 +1,5 @@
-// foreign import d3InitTree               :: forall a. TreeConfig a -> D3Hierarchical -> D3HierarchicalNode_ 
-exports.initHorizontalTree_ = config => data => d3.tree()(data)
+// foreign import d3InitTree:: forall a. D3Hierarchical -> Array Number -> D3HierarchicalNode_ 
+exports.initHorizontalTree_ = root => rootDxDy => d3.tree().nodeSize(rootDxDy)(root)
 
 // foreign import d3LinkHorizontal_        :: Unit -> (Datum -> String)
 exports.linkHorizontal_ = (d) => d3.linkHorizontal(d)

@@ -5,12 +5,12 @@ import D3.Attributes.Sugar
 import Affjax (Error, printError)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, get)
+import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Datum)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
-import D3.Layouts.Hierarchical (D3HierarchicalNode(..), D3HierarchicalNode_, TreeConfig, TreeJson_, d3InitTree, hasChildren_, hierarchy_, horizontalLink, horizontalTreeConfig, horizontalTreeX0X1, linkHorizontal_, nodeSize_, readJSON_)
+import D3.Layouts.Hierarchical 
 import D3.Layouts.Hierarchical as H
-import D3.Selection (Chainable, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), attachZoom, enterOnly, makeD3State', makeProjection, node)
+import D3.Selection (Chainable, D3Selection_, D3State, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), attachZoom, makeD3State', makeProjection, node)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -18,8 +18,7 @@ import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Math (pi)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (*>), (+), (-), (/), (<), (<>), (==), (>=))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (*>), (+), (-), (/), (<>))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.HTML (window)
 import Web.HTML.Window (innerHeight, innerWidth)
@@ -62,21 +61,22 @@ getX d = node.x
   where (D3HierarchicalNode node) = datumIsTreeNode d
 
 -- | Script components, attributes, transformations etc
-svgHeight :: Number -> Number -> Number -> Number
-svgHeight x1 x0 rootDx = (x1 - x0 + (rootDx * 2.0))
+svgHeight :: HorizontalTreeConfig -> Number
+svgHeight config = (config.x1 - config.x0 + (config.rootDx * 2.0))
 
 svgAttributes :: Number -> Number -> Array Chainable
 svgAttributes width heightSVG = [ viewBox 0.0 0.0 width heightSVG ]
 
 -- translateContainer :: forall d v. x0 :: Number -> H.D3HierarchicalNode d v -> String
-translateContainer rootDx rootDy x0 _ = 
-  "translate(" <> show (rootDy / 3.0) <> "," <> show (rootDx - x0) <> ")"
+translateContainer :: HorizontalTreeConfig -> String
+translateContainer config = 
+  "translate(" <> show (config.rootDy / 3.0) <> "," <> show (config.rootDx - config.x0) <> ")"
 
-containerAttributes :: Number -> Number -> Number -> Array Chainable
-containerAttributes rootDx rootDy x0 = [
+containerAttributes :: HorizontalTreeConfig -> Array Chainable
+containerAttributes config = [
     fontFamily "sans-serif"
   , fontSize   10.0
-  , transform [ translateContainer rootDx rootDy x0 ]
+  , transform [ translateContainer config.rootDx config.rootDy config.x0 ]
 ]
 
 -- | instructions for entering the links of the radial tree
@@ -113,28 +113,18 @@ makeModel :: forall v. Tuple Number Number -> TreeJson_
       , json :: TreeJson_
       , root :: D3HierarchicalNode_
       }
-makeModel (Tuple width height) json = { json, root: root3, config }
+makeModel widthHeight json = { json, root: config.root, config }
   where
-    config = horizontalTreeConfig width height
     root1  = hierarchy_ json
-    (D3HierarchicalNode root2)   = d3InitTree config root1 -- d3.tree()
-    rootDy = width / (toNumber (root2.height + 1))
-    root3 = nodeSize_ (unsafeCoerce root2) [rootDx, rootDy] -- root.nodeSize([rootDx, rootDy])
-    x1x0 = horizontalTreeX0X1 root3
-    root = root3
-
-rootDx :: Number
-rootDx = 10.0
+    config = initHorizontalTree widthHeight root1
 
 -- | recipe for a radial tree
 enter :: forall m v. Bind m => D3Tagless m => MonadState (D3State (H.Model String v)) m => 
-  Tuple Number Number -> H.Model String v -> m D3Selection_
-enter (Tuple width height) model = do
-  let { x0, x1 } = horizontalTreeX0X1 model.root -- these are needed for viewBox and translation of container
-
+  HorizontalTreeConfig -> H.Model String v -> m D3Selection_
+enter config model = do
   root      <- hook "div#tree"
-  svg       <- root      `appendTo` (node Svg (svgAttributes width (svgHeight x1 x0 rootDx )))
-  container <- svg       `appendTo` (node Group (containerAttributes rootDx 666.6 x0))
+  svg       <- root      `appendTo` (node Svg (svgAttributes width (svgHeight config)))
+  container <- svg       `appendTo` (node Group (containerAttributes config))
   links     <- container `appendTo` (node Group [ classed "links"])
   nodes     <- container `appendTo` (node Group [ classed "nodes"])
   labels    <- container `appendTo` (node Group [ classed "labels"])
