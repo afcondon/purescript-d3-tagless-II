@@ -1,22 +1,21 @@
 module D3.Layouts.Hierarchical.HorizontalTree where
 
 import D3.Attributes.Instances (Attribute(..), Datum, toAttr)
-import D3.Layouts.Hierarchical.Types (D3HierarchicalNode_, HorizontalTreeConfig, hNodeHeight_)
+import D3.Layouts.Hierarchical.Types (D3HierarchicalNode_, TreeConfig(..), hNodeHeight_)
 import D3.Selection (Chainable(..))
 import Data.Array ((!!))
 import Data.Maybe (fromMaybe)
-import Data.Tuple (Tuple(..))
 import Prelude (($), (+), (/))
 
 -- this function is given an initialized hierarchy root and some config info
-initHorizontalTree :: Tuple Number Number -> D3HierarchicalNode_ -> HorizontalTreeConfig
-initHorizontalTree (Tuple width height) root = do
+initHorizontalTree :: Number -> Number -> D3HierarchicalNode_ -> TreeConfig
+initHorizontalTree width height root = do
   let rootDx = 10.0
       rootHeight = hNodeHeight_ root
       rootDy = width / (height + 1.0)
       tree   = initHorizontalTree_ root [rootDx, rootDy]
       { x0, x1 }  = horizontalTreeX0X1 tree 
-  { root, rootDx, rootDy, x0, x1 }
+  HorizontalTree { rootDx, rootDy, x0, x1 }
 
 horizontalLink :: Chainable
 horizontalLink = AttrT $ Attribute "d" $ toAttr linkHorizontal_

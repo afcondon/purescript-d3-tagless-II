@@ -1,14 +1,14 @@
 module D3.Examples.Tree.Horizontal where
 
 import D3.Attributes.Sugar
+import D3.Layouts.Hierarchical
 
 import Affjax (Error, printError)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Datum)
-import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
-import D3.Layouts.Hierarchical 
+import D3.Interpreter.Tagless (class D3Tagless, appendTo, attach, join, runD3M)
 import D3.Layouts.Hierarchical as H
 import D3.Selection (Chainable, D3Selection_, D3State, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), attachZoom, makeD3State', makeProjection, node)
 import Data.Either (Either(..))
@@ -43,7 +43,7 @@ drawTree = do
 
   case readTreeFromFileContents widthHeight treeJSON of
     (Left error)      -> liftEffect $ log $ printError error
-    (Right treeModel) -> liftEffect $ runD3M (enter widthHeight treeModel) makeD3State' *> pure unit
+    (Right treeModel) -> liftEffect $ runD3M (enter treeModel) makeD3State' *> pure unit
 
 datumIsTreeNode :: forall d v. Datum -> D3HierarchicalNode d v
 datumIsTreeNode = unsafeCoerce
@@ -62,21 +62,21 @@ getX d = node.x
 
 -- | Script components, attributes, transformations etc
 svgHeight :: HorizontalTreeConfig -> Number
-svgHeight config = (config.x1 - config.x0 + (config.rootDx * 2.0))
+svgHeight config = config.x1 - config.x0 + (config.rootDx * 2.0)
 
 svgAttributes :: Number -> Number -> Array Chainable
 svgAttributes width heightSVG = [ viewBox 0.0 0.0 width heightSVG ]
 
 -- translateContainer :: forall d v. x0 :: Number -> H.D3HierarchicalNode d v -> String
-translateContainer :: HorizontalTreeConfig -> String
-translateContainer config = 
+translateContainer :: HorizontalTreeConfig -> (Datum -> String)
+translateContainer config = \d -> 
   "translate(" <> show (config.rootDy / 3.0) <> "," <> show (config.rootDx - config.x0) <> ")"
 
 containerAttributes :: HorizontalTreeConfig -> Array Chainable
 containerAttributes config = [
     fontFamily "sans-serif"
   , fontSize   10.0
-  , transform [ translateContainer config.rootDx config.rootDy config.x0 ]
+  , transform [ translateContainer config ]
 ]
 
 -- | instructions for entering the links of the radial tree
@@ -108,22 +108,25 @@ enterLabels = [ dy         0.31
 
 -- this is the extra data that is part of a Datum beyond the D3HierarchicalNode_ minimum
 type TreeNodeExtra = { name :: String }
-makeModel :: forall v. Tuple Number Number -> TreeJson_
-   -> { config :: TreeConfig
-      , json :: TreeJson_
-      , root :: D3HierarchicalNode_
-      }
-makeModel widthHeight json = { json, root: config.root, config }
+makeModel :: forall d v. Tuple Number Number -> TreeJson_ -> Model d v
+makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig }
   where
-    root1  = hierarchy_ json
-    config = initHorizontalTree widthHeight root1
+    root_      = hierarchy_ json
+    treeConfig = initHorizontalTree width height root_
+    svgConfig  = { width, height }
+    root       = D3HierarchicalNode (unsafeCoerce root_)
 
 -- | recipe for a radial tree
 enter :: forall m v. Bind m => D3Tagless m => MonadState (D3State (H.Model String v)) m => 
-  HorizontalTreeConfig -> H.Model String v -> m D3Selection_
-enter config model = do
-  root      <- hook "div#tree"
-  svg       <- root      `appendTo` (node Svg (svgAttributes width (svgHeight config)))
+  H.Model String v -> m D3Selection_
+enter model = do
+  -- TODO inherently gross to case, fix model and or enter function
+  let config = case model.treeConfig of
+                  (HorizontalTree c) -> c
+                  _ -> { rootDx: 0.0, rootDy: 0.0, x0: 0.0, x1: 0.0 }
+      viewbox = svgAttributes model.svgConfig.width (svgHeight config)
+  root      <- attach "div#tree"
+  svg       <- root      `appendTo` (node Svg viewbox)
   container <- svg       `appendTo` (node Group (containerAttributes config))
   links     <- container `appendTo` (node Group [ classed "links"])
   nodes     <- container `appendTo` (node Group [ classed "nodes"])
@@ -133,7 +136,7 @@ enter config model = do
       element   : Path
     , key       : DatumIsUnique
     , hook      : links
-    , projection: makeProjection (\model -> H.links_ model.root)
+    , projection: makeProjection (\model -> H.links_ model.root_)
     , behaviour : enterLinks
   }
 
@@ -141,7 +144,7 @@ enter config model = do
       element   : Circle
     , key       : DatumIsUnique
     , hook      : nodes
-    , projection: makeProjection (\model -> H.descendants_ model.root)
+    , projection: makeProjection (\model -> H.descendants_ model.root_)
     , behaviour : enterNodes
   }
 
@@ -149,12 +152,12 @@ enter config model = do
       element   : Text
     , key       : DatumIsUnique
     , hook      : labels
-    , projection: makeProjection (\model -> H.descendants_ model.root)
+    , projection: makeProjection (\model -> H.descendants_ model.root_)
     , behaviour : enterLabels
   }
 
   let _ = attachZoom container  
-                    { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
+                    { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: model.svgConfig.height, right: model.svgConfig.width }
                     , scale     : ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
                     , qualifier : "tree"
                     }

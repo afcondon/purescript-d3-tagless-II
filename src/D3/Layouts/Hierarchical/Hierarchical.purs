@@ -7,8 +7,8 @@ module D3.Layouts.Hierarchical(
 
 import D3.Attributes.Instances (Datum)
 import D3.Layouts.Hierarchical.HorizontalTree (horizontalLink, horizontalTreeX0X1, horizontalTreeX0X1_, initHorizontalTree, initHorizontalTree_, linkHorizontal_)
-import D3.Layouts.Hierarchical.RadialTree (initRadialTree_, radialLink, radialTreeConfig)
-import D3.Layouts.Hierarchical.Types (D3HierarchicalNode(..), D3HierarchicalNode_, HorizontalTreeConfig, Model, RadialTreeConfig, Tree(..), TreeConfig(..), TreeConfig_, TreeJson_, hNodeDepth_, hNodeHeight_, hNodeX_, hNodeY_)
+import D3.Layouts.Hierarchical.RadialTree (initRadialTree, radialLink)
+import D3.Layouts.Hierarchical.Types (D3HierarchicalNode(..), D3HierarchicalNode_, HorizontalTreeConfig, Model, RadialTreeConfig, Tree(..), TreeConfig(..), TreeJson_, hNodeDepth_, hNodeHeight_, hNodeX_, hNodeY_)
 import D3.Selection (D3Data_)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)

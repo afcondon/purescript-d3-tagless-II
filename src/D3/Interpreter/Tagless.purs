@@ -12,6 +12,8 @@ import Effect.Class (class MonadEffect)
 import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, liftA1, pure, show, unit, ($), (<$>))
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
+-- also not really making a ton of use of StateT, but it is good to have a 
+-- place to stash D3's global state such as named transitions etc
 newtype D3M model a = D3M (StateT (D3State model) Effect a) 
 
 derive newtype instance functorD3M     :: Functor                    (D3M model)
@@ -26,7 +28,7 @@ derive newtype instance monadEffD3M    :: MonadEffect                (D3M model)
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
 -- into both DOM and Simulation for example (and current implementation is gross and wrong)
 class (Monad m) <= D3Tagless m where
-  hook     :: Selector                     -> m D3Selection_
+  attach   :: Selector                     -> m D3Selection_
   appendTo :: D3Selection_   -> D3_Node    -> m D3Selection_
   join     :: ∀ model. model -> Join model -> m D3Selection_
 
@@ -40,7 +42,7 @@ d3Run :: ∀ a model. model -> D3M model a -> Effect a
 d3Run model (D3M state) = liftA1 fst $ runStateT state makeD3State'
 
 instance d3TaglessD3M :: D3Tagless (D3M model) where
-  hook selector = pure $ d3SelectAllInDOM_ selector 
+  attach selector = pure $ d3SelectAllInDOM_ selector 
 
   appendTo selection_ (D3_Node element attributes) = do
     let appended_ = d3Append_ (show element) selection_

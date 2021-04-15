@@ -3,13 +3,13 @@ module D3.Examples.Tree.Radial where
 import Affjax (Error, printError)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, get)
+import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, dy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x)
-import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
-import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, d3InitTree, hasChildren_, hierarchy_, radialLink, radialTreeConfig, readJSON_)
+import D3.Interpreter.Tagless (class D3Tagless, appendTo, attach, join, runD3M)
+import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, hasChildren_, hierarchy_, initRadialTree, radialLink, readJSON_)
 import D3.Layouts.Hierarchical as H
-import D3.Selection (Chainable, D3Selection_, D3State(..), Element(..), EnterUpdateExit, Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), attachZoom, enterOnly, makeD3State', makeProjection, node, zoomExtent, zoomRange)
+import D3.Selection (Chainable, D3Selection_, D3State, Element(..), Join(..), Keys(..), attachZoom, makeD3State', makeProjection, node, zoomExtent, zoomRange)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -18,7 +18,7 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (pi)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, (&&), ($), (*), (*>), (-), (/), (<), (<>), (==), (>=))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (*>), (-), (/), (<), (<>), (==), (>=))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.HTML (window)
 import Web.HTML.Window (innerHeight, innerWidth)
@@ -31,9 +31,9 @@ getWindowWidthHeight = do
   height <- innerHeight win
   pure $ Tuple (toNumber width) (toNumber height)
 
-readTreeFromFileContents :: forall r v. Tuple Number Number -> Either Error { body ∷ String | r } -> Either Error (Model String v)
-readTreeFromFileContents (Tuple width _) (Right { body } ) = Right $ makeModel width (readJSON_ body)
-readTreeFromFileContents _               (Left error)      = Left error
+readTreeFromFileContents :: forall r d v. Tuple Number Number -> Either Error { body ∷ String | r } -> Either Error (Model d v)
+readTreeFromFileContents widthHeight (Right { body } ) = Right $ makeModel widthHeight (readJSON_ body)
+readTreeFromFileContents _           (Left error)      = Left error
 
 drawTree :: Aff Unit
 drawTree = do
@@ -115,18 +115,19 @@ enterLabels = [ transform  labelTransformations
 type TreeNodeExtra = { name :: String }
 type TreeNode v = D3HierarchicalNode TreeNodeExtra v -- v is the value calculated in the tree, ie for sum, count etc
 
-makeModel :: forall v. Number -> TreeJson_ -> Model TreeNodeExtra v
-makeModel width json = { json, root, config }
+makeModel :: forall d v. Tuple Number Number -> TreeJson_ -> Model d v
+makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig }
   where
-    config = radialTreeConfig width
-    root' = hierarchy_ json
-    root  = unsafeCoerce $ d3InitTree config root'
+    root_      = hierarchy_ json
+    treeConfig = initRadialTree width root_
+    svgConfig  = { width, height }
+    root       = D3HierarchicalNode (unsafeCoerce root_)
 
 -- | recipe for a radial tree
 enter :: forall m v. Bind m => D3Tagless m => MonadState (D3State (Model String v)) m => 
   Tuple Number Number -> Model String v -> m D3Selection_
 enter (Tuple width height) model = do
-  root      <- hook "div#tree"
+  root      <- attach "div#tree"
   svg       <- root      `appendTo` (node Svg svgAttributes)
   container <- svg       `appendTo` (node Group [ classed "container" ])
   links     <- container `appendTo` (node Group [ classed "links"])
@@ -137,7 +138,7 @@ enter (Tuple width height) model = do
       element   : Path
     , key       : DatumIsUnique
     , hook      : links
-    , projection: makeProjection (\model -> H.links_ model.root)
+    , projection: makeProjection (\model -> H.links_ model.root_)
     , behaviour : enterLinks
   }
 -- TODO this separation of labels and circles comes from original radial tree example
@@ -149,7 +150,7 @@ enter (Tuple width height) model = do
       element   : Circle
     , key       : DatumIsUnique
     , hook      : nodes
-    , projection: makeProjection (\model -> H.descendants_ model.root)
+    , projection: makeProjection (\model -> H.descendants_ model.root_)
     , behaviour : enterNodes
   }
 
@@ -157,7 +158,7 @@ enter (Tuple width height) model = do
       element   : Text
     , key       : DatumIsUnique
     , hook      : labels
-    , projection: makeProjection (\model -> H.descendants_ model.root)
+    , projection: makeProjection (\model -> H.descendants_ model.root_)
     , behaviour : enterLabels
   }
 

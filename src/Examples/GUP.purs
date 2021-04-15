@@ -4,7 +4,7 @@ import Control.Monad.Rec.Class (forever)
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum, Index, datumIsChar, indexIsNumber)
 import D3.Attributes.Sugar (classed, fill, fontSize, height, remove, strokeColor, strokeOpacity, text, transitionWithDuration, viewBox, width, with, x, y)
-import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
+import D3.Interpreter.Tagless (class D3Tagless, appendTo, attach, join, runD3M)
 import D3.Selection (Chainable, D3Selection_, D3State(..), D3_Node(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), identityProjection, makeD3State', node, node_)
 import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
@@ -82,7 +82,7 @@ enterUpdateExit transition =
 
 enter :: ∀ m. MonadState (D3State (Array Char)) m => D3Tagless m => m (Chainable -> Array Char -> m D3Selection_) 
 enter = do 
-  root    <- hook "div#gup"
+  root    <- attach "div#gup"
   svg     <- appendTo root $ node Svg svgAttributes
   letterS <- appendTo svg $ node_ Group
   pure $ update letterS

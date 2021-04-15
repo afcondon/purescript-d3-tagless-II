@@ -3,7 +3,6 @@ module D3.Layouts.Hierarchical.Types where
 import D3.Attributes.Instances (Datum)
 import Data.Nullable (Nullable)
 
-foreign import data TreeConfig_         :: Type
 foreign import data TreeJson_           :: Type
 foreign import data D3HierarchicalNode_ :: Type
 
@@ -12,24 +11,30 @@ data Tree a = Node a (Array (Tree a))
 data TreeConfig = RadialTree     RadialTreeConfig
                 | HorizontalTree HorizontalTreeConfig
 
-type RadialTreeConfig     = { size :: Array Number, separation :: Datum -> Datum -> Int }
+-- bundles up the things that would be "in scope" for a D3 script rendering a Radial tree
+type RadialTreeConfig = { 
+    size       :: Array Number
+  , separation :: Datum -> Datum -> Int
+  }
 
--- bundle up the things that would be "in scope" for a D3 script rendering a Horizontal tree
+-- bundles up the things that would be "in scope" for a D3 script rendering a Horizontal tree
 type HorizontalTreeConfig = {
-    root   :: D3HierarchicalNode_
-  , rootDx :: Number
+    rootDx :: Number
   , rootDy :: Number
   , x0     :: Number
   , x1     :: Number
-} -- TODO put in proxy fields here to carry the type allowing safe coerce of root etc
+}
 
+-- TODO put in proxy fields here to carry the type allowing safe coerce of root etc
 -- TODO need to define a model here that works for all hierarchic layouts, this has its origins in Radial tree only
-type Model :: forall d v. d -> v -> Type
 -- d is the type of the datum and v is the type of computed value, ie for summing etc
+-- type Model :: forall d v. d -> v -> Type
 type Model d v = {
-      json   :: TreeJson_
-    , root   :: D3HierarchicalNode_
-    , config :: TreeConfig
+      json       :: TreeJson_
+    , root       :: D3HierarchicalNode d v
+    , root_      :: D3HierarchicalNode_
+    , treeConfig :: TreeConfig
+    , svgConfig  :: { width :: Number, height :: Number }
 }
 
 -- the PureScript rep of opaque type D3HierarchicalNode_

@@ -8,7 +8,7 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, cursor, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, width, x1, x2, y1, y2)
-import D3.Interpreter.Tagless (class D3Tagless, appendTo, hook, join, runD3M)
+import D3.Interpreter.Tagless (class D3Tagless, appendTo, attach, join, runD3M)
 import D3.Scales (d3SchemeCategory10_)
 import D3.Selection (D3Selection_, D3Simulation_, D3State(..), DragBehavior(..), Element(..), Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), attachZoom, makeD3State', makeProjection, node)
 import Data.Either (Either(..))
@@ -60,7 +60,7 @@ drawGraph = do
 enter :: forall m. Bind m => D3Tagless m => MonadState (D3State Model) m => 
   Tuple Number Number -> Model -> m D3Selection_ -- going to actually be a simulation right? 
 enter (Tuple w h) model = do
-  root       <- hook "div#force"
+  root       <- attach "div#force"
   svg        <- root `appendTo` (node Svg   [ width w, height h, viewBox 0.0 0.0 w h ] )
   linksGroup <- svg  `appendTo` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `appendTo` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
