@@ -36,7 +36,7 @@ runGeneralUpdatePattern :: Aff Unit
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
   let transition = transitionWithDuration $ Milliseconds 2000.0
-  letters               <- liftEffect $ getLetters
+  letters                <- liftEffect $ getLetters
   (Tuple updateFn state) <- liftEffect $ runD3M enter makeD3State'
   forever $ do
     newletters <- liftEffect $ getLetters
@@ -67,7 +67,7 @@ enterUpdateExit :: Chainable -> EnterUpdateExit
 enterUpdateExit transition =
   { enter:  
     [ classed  "enter"
-    , fill     "green"
+    , fill     "green" -- TODO use PureScript color types
     , x        offsetXByIndex
     , y        0.0
     , text     textFromDatum
@@ -83,8 +83,8 @@ enterUpdateExit transition =
 enter :: ∀ m. MonadState (D3State (Array Char)) m => D3Tagless m => m (Chainable -> Array Char -> m D3Selection_) 
 enter = do 
   root    <- attach "div#gup"
-  svg     <- appendTo root $ node Svg svgAttributes
-  letterS <- appendTo svg $ node_ Group
+  svg     <- appendTo root $ node Svg svgAttributes -- TODO attributes first a la hologen
+  letterS <- appendTo svg  $ node_ Group
   pure $ update letterS
 
 update :: forall m. Bind m => D3Tagless m => D3Selection_ -> Chainable -> Array Char -> m D3Selection_
@@ -93,7 +93,7 @@ update selection transition model = do
       element   : Text
     , key       : DatumIsUnique
     , hook      : selection
-    , projection: unsafeCoerce -- identityProjection
+    , projection: unsafeCoerce -- TODO ADT to hide this under IdentityProjection
     , behaviour : enterUpdateExit transition
   }
   pure joinSelection_

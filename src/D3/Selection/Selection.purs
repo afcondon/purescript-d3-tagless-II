@@ -39,7 +39,7 @@ foreign import d3Exit_               :: D3Selection_ -> D3Selection_
 foreign import d3RemoveSelection_    :: D3Selection_ -> D3Selection_
 
 foreign import d3Data_               :: forall model. model -> (model -> D3Data_) -> D3Selection_ -> D3Selection_
-foreign import d3KeyFunction_        :: forall model. model -> (model -> D3Data_)   -> ComputeKeyunction_ -> D3Selection_ -> D3Selection_
+foreign import d3KeyFunction_        :: forall model. model -> (model -> D3Data_)   -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
@@ -56,8 +56,8 @@ foreign import emptyD3Data_ :: D3Data_ -- probably just null, could this be mono
 type D3Group      = Array D3DomNode
 
 type D3Selection  = Last D3Selection_
-type ComputeKeyunction_ = Datum -> Index
-data Keys = ComputeKey ComputeKeyunction_ | DatumIsUnique
+type ComputeKeyFunction_ = Datum -> Index
+data Keys = ComputeKey ComputeKeyFunction_ | DatumIsUnique
 -- TODO hide the "unsafeCoerce/makeProjection" in a smart constructor
 type Projection = forall model. (model -> D3Data_)
 identityProjection :: Projection

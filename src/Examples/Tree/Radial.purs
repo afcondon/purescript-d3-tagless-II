@@ -127,8 +127,8 @@ makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig
 enter :: forall m v. Bind m => D3Tagless m => MonadState (D3State (Model String v)) m => 
   Tuple Number Number -> Model String v -> m D3Selection_
 enter (Tuple width height) model = do
-  root      <- attach "div#tree"
-  svg       <- root      `appendTo` (node Svg svgAttributes)
+  root      <- attach "div#rtree"
+  svg       <- root      `appendTo` (node Svg   svgAttributes)
   container <- svg       `appendTo` (node Group [ classed "container" ])
   links     <- container `appendTo` (node Group [ classed "links"])
   nodes     <- container `appendTo` (node Group [ classed "nodes"])

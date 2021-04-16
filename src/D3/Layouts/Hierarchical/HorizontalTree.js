@@ -2,7 +2,7 @@
 exports.initHorizontalTree_ = root => rootDxDy => d3.tree().nodeSize(rootDxDy)(root)
 
 // foreign import d3LinkHorizontal_        :: Unit -> (Datum -> String)
-exports.linkHorizontal_ = (d) => d3.linkHorizontal(d)
+exports.linkHorizontal_ = () => d3.linkHorizontal().x(d => d.y).y(d => d.x)
 
 exports.horizontalTreeX0X1_ = root => {
   let x0 = Infinity;

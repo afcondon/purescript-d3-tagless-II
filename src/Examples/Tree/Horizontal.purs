@@ -125,7 +125,7 @@ enter model = do
                   (HorizontalTree c) -> c
                   _ -> { rootDx: 0.0, rootDy: 0.0, x0: 0.0, x1: 0.0 }
       viewbox = svgAttributes model.svgConfig.width (svgHeight config)
-  root      <- attach "div#tree"
+  root      <- attach "div#htree"
   svg       <- root      `appendTo` (node Svg viewbox)
   container <- svg       `appendTo` (node Group (containerAttributes config))
   links     <- container `appendTo` (node Group [ classed "links"])

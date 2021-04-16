@@ -28,6 +28,6 @@ horizontalTreeX0X1 d = do
   { x0, x1 }
 
 foreign import initHorizontalTree_ :: D3HierarchicalNode_ -> Array Number -> D3HierarchicalNode_ -- effectful function on hierarchy
-foreign import linkHorizontal_     :: (Datum -> String)
+foreign import linkHorizontal_     :: (Datum -> String) 
 foreign import horizontalTreeX0X1_ :: D3HierarchicalNode_ -> Array Number
   
