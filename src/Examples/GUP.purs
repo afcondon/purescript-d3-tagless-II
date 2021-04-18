@@ -1,9 +1,10 @@
 module D3.Examples.GUP where
 
+import D3.Attributes.Sugar
+
 import Control.Monad.Rec.Class (forever)
 import Control.Monad.State (class MonadState, get)
-import D3.Attributes.Instances (Datum, Index, datumIsChar, indexIsNumber)
-import D3.Attributes.Sugar (classed, fill, fontSize, height, remove, strokeColor, strokeOpacity, text, transitionWithDuration, viewBox, width, with, x, y)
+import D3.Attributes.Instances (Datum, Index, NWU(..), UnitType(..), datumIsChar, indexIsNumber)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, attach, join, runD3M)
 import D3.Selection (Chainable, D3Selection_, D3State(..), D3_Node(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), identityProjection, makeD3State', node, node_)
 import Data.Array (catMaybes)
@@ -70,6 +71,7 @@ enterUpdateExit transition =
     , fill     "green" -- TODO use PureScript color types
     , x        offsetXByIndex
     , y        0.0
+    -- , yu (NWU { i: 0, u: Px })
     , text     textFromDatum
     , fontSize 48.0
     ]  <> 

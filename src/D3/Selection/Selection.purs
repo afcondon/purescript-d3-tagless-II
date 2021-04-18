@@ -2,7 +2,7 @@ module D3.Selection where
 
 import Prelude hiding (append,join)
 
-import D3.Attributes.Instances (Attribute, Datum, Index)
+import D3.Attributes.Instances (Attribute, Datum, Index, UnitType)
 import Data.Map (Map, empty)
 import Data.Maybe.Last (Last)
 import Effect.Aff (Milliseconds)
@@ -127,6 +127,7 @@ data Chainable =  AttrT Attribute
                 | TransitionT (Array Chainable) Transition -- the array is set situationally
                 | RemoveT
   -- other candidates for this ADT include
+                -- | WithUnit Attribute UnitType
                 -- | On
                 -- | Merge
                 

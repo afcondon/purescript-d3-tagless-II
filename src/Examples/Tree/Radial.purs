@@ -169,5 +169,3 @@ enter (Tuple width height) model = do
                     }
 
   pure svg
-
-

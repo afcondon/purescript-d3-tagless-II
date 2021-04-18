@@ -13,11 +13,22 @@ type Label = String
 
 -- TODO find a way to get units back in without making DSL hideous
 data UnitType = Px | Pt | Em | Rem | Percent
+instance showUnitType :: Show UnitType where
+  show Px = "px"
+  show Pt = "pt"
+  show Em = "em"
+  show Rem = "rem"
+  show Percent = "%"
+
+newtype NWU = NWU { i :: Int, u :: UnitType} -- scope here for adding show function to remove constraints elsewhere
+instance showNWU :: Show NWU where
+  show (NWU n) = show n.i <> show n.u
 
 data Attribute = Attribute Label Attr
 
 data Attr = StringAttr (Attrib String)
           | NumberAttr (Attrib Number)
+          | NWUAttr (Attrib NWU)
           | ArrayAttr (Attrib (Array Number))
 
 unbox :: ∀ a. Attr -> a
@@ -31,9 +42,14 @@ unbox =
     (NumberAttr (Fn a))     -> unsafeCoerce a
     (NumberAttr (FnI a))    -> unsafeCoerce a
 
+    (NWUAttr (Static a)) -> unsafeCoerce "NWU-static" -- a
+    (NWUAttr (Fn a))     -> unsafeCoerce (\d -> "NWU-lambda") -- a
+    (NWUAttr (FnI a))    -> unsafeCoerce $ mkFn2 (\d i -> "NWU-di") -- a
+
     (ArrayAttr (Static a))  -> unsafeCoerce a
     (ArrayAttr (Fn a))      -> unsafeCoerce a
     (ArrayAttr (FnI a))     -> unsafeCoerce a
+
 
 unboxText :: ∀ a. Attrib String -> a
 unboxText = 
@@ -56,6 +72,9 @@ class ToAttr to from | from -> to  where
 
 -- Boilerplate, boilerplate, boilerplate...
 -- Might be a better way to do these.
+
+instance toAttrNWU :: ToAttr NWU NWU where
+  toAttr = NWUAttr <<< Static
 
 instance toAttrString :: ToAttr String String where
   toAttr = StringAttr <<< Static

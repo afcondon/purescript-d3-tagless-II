@@ -2,7 +2,7 @@ module D3.Attributes.Sugar where
 
 import Prelude
 
-import D3.Attributes.Instances (class ToAttr, Attr(..), Attrib(..), Attribute(..), Datum, toAttr)
+import D3.Attributes.Instances 
 import D3.Selection (Chainable(..), EasingFunction(..), Transition)
 import Data.Array (intercalate, (:))
 import Effect.Aff (Milliseconds(..))
@@ -49,6 +49,9 @@ x = AttrT <<< Attribute "x" <<< toAttr
 
 y :: ∀ a. ToAttr Number a => a -> Chainable
 y = AttrT <<< Attribute "y" <<< toAttr
+
+yu :: ∀ a. ToAttr NWU a => a -> Chainable
+yu = AttrT <<< Attribute "y" <<< toAttr
 
 x1 :: ∀ a. ToAttr Number a => a -> Chainable
 x1 = AttrT <<< Attribute "x1" <<< toAttr
