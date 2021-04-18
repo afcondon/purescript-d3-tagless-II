@@ -87,15 +87,11 @@ enter = do
   root    <- attach "div#gup"
   svg     <- appendTo root $ node Svg svgAttributes -- TODO attributes first a la hologen
   letterS <- appendTo svg  $ node_ Group
-  pure $ update letterS
-
-update :: forall m. Bind m => D3Tagless m => D3Selection_ -> Chainable -> Array Char -> m D3Selection_
-update selection transition model = do
-  joinSelection_ <- join model $ JoinGeneral {
-      element   : Text
-    , key       : DatumIsUnique
-    , hook      : selection
-    , projection: unsafeCoerce -- TODO ADT to hide this under IdentityProjection
-    , behaviour : enterUpdateExit transition
-  }
-  pure joinSelection_
+  pure $ \transition model -> 
+              join model $ JoinGeneral {
+                  element   : Text
+                , key       : DatumIsUnique
+                , hook      : letterS
+                , projection: unsafeCoerce -- TODO ADT to hide this under IdentityProjection
+                , behaviour : enterUpdateExit transition
+              }
