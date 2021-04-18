@@ -84,18 +84,6 @@ data Join d = Join           (JoinParams d (behaviour   :: Array Chainable))
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
 derive instance ordSelectionName :: Ord SelectionName
--- data D3State model = D3State {
---     active           :: D3Selection
---   , namedSelections  :: Map SelectionName D3Selection_
---   , namedTransitions :: Map SelectionName D3Selection_
---   , namedJoins       :: Map SelectionName (Join model)
--- }
-
--- makeD3State' :: ∀ model. D3State model
--- makeD3State' = D3State { active: mempty, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
-
--- makeD3State :: ∀ model. D3Selection -> D3State model
--- makeD3State selection = D3State { active: selection, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
 
 data D3_Node = D3_Node Element (Array Chainable)
 

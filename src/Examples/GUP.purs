@@ -4,21 +4,20 @@ import D3.Attributes.Sugar
 
 import Control.Monad.Rec.Class (forever)
 import Control.Monad.State (class MonadState, get)
-import D3.Attributes.Instances (Datum, Index, NWU(..), UnitType(..), datumIsChar, indexIsNumber)
-import D3.Interpreter.Tagless (class D3Tagless, appendTo, attach, join, runD3M)
-import D3.Selection (Chainable, D3Selection_, D3_Node(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), identityProjection, node, node_)
+import D3.Attributes.Instances (Datum, Index, datumIsChar, indexIsNumber)
+import D3.Interpreter.Tagless (class D3Tagless, appendTo, attach, runD3M, (<+>))
+import D3.Selection (Chainable, D3Selection_, Element(..), EnterUpdateExit, Join(..), Keys(..), node, node_)
 import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (singleton, toCharArray)
 import Data.Traversable (sequence)
-import Data.Tuple (Tuple(..), fst, snd)
+import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff, Milliseconds(..), delay)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Random (random)
-import Prelude (class Bind, Unit, bind, discard, liftA1, negate, pure, ($), (*), (+), (<$>), (<<<), (<>), (>))
-import Unsafe.Coerce (unsafeCoerce)
+import Prelude (Unit, bind, discard, negate, pure, ($), (*), (+), (<$>), (<<<), (<>), (>))
 
 
 getLetters :: Effect (Array Char)
@@ -92,30 +91,9 @@ enter = do
   pure $ \transition -> do
               letters <- get 
               -- we don't have to apply a projection in this case cause the data is already array
-              join letterS (JoinGeneral {
+              letterS <+> JoinGeneral {
                   element   : Text
                 , key       : DatumIsUnique
                 , "data"    : letters
                 , behaviour : enterUpdateExit transition
-              } :: Join Char)
-
-
---  appendMany Text `using` ((projection model) <#> selection) DatumIsUnique (enterUpdateExit transition) 
- 
--- appendMany Element `at` selection `usingData` (projection model) 
-
--- enterS = appendMany someArray <$> selection <*> Text <*> DatumIsUnit <*> (enterUpdateExit transition)
-
-
---   Join <$> letterS (AppendMany <$> Text <*> DatumIsUnique <*> (enterUpdateExit transition))
-
--- map :: (a -> b) -> Join s a -> Join s b
--- apply :: Join (a -> b) -> Join s a -> Join s b
--- pure :: a -> Join s a
-
--- newtype Form i a =
---   Form (i -> { ui :: (i -> Effect Unit) -> UI, result :: a })
-
--- Functor    : map   :: (a -> b) -> Form i a -> Form i b
--- Apply      : apply :: Form i (a -> b) -> Form i a -> Form i b
--- Applicative: pure  :: a -> Form i a.
+              }

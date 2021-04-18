@@ -16,31 +16,28 @@ import Effect.Class (class MonadEffect)
 -- also not really making a ton of use of StateT, but it is good to have a 
 -- place to stash D3's global state such as named transitions etc
 newtype D3M model a = D3M (StateT model Effect a) 
+-- TODO don't really need a State instance now, could be ReaderT, however, state might make a comeback so leaving for now
 
-derive newtype instance functorD3M     :: Functor                  (D3M model)
-derive newtype instance applyD3M       :: Apply                    (D3M model)
-derive newtype instance applicativeD3M :: Applicative              (D3M model)
-derive newtype instance bindD3M        :: Bind                     (D3M model)
-derive newtype instance monadD3M       :: Monad                    (D3M model)
-derive newtype instance monadStateD3M  :: MonadState model (D3M model)
-derive newtype instance monadEffD3M    :: MonadEffect              (D3M model)
+derive newtype instance functorD3M     :: Functor           (D3M model)
+derive newtype instance applyD3M       :: Apply             (D3M model)
+derive newtype instance applicativeD3M :: Applicative       (D3M model)
+derive newtype instance bindD3M        :: Bind              (D3M model)
+derive newtype instance monadD3M       :: Monad             (D3M model)
+derive newtype instance monadStateD3M  :: MonadState  model (D3M model) 
+derive newtype instance monadEffD3M    :: MonadEffect       (D3M model)
 
 -- TODO see whether it can be useful to extend the interpreter here, for different visualization types
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
 -- into both DOM and Simulation for example (and current implementation is gross and wrong)
 class (Monad m) <= D3Tagless m where
-  attach   :: Selector     -> m D3Selection_
-  appendTo :: D3Selection_ -> D3_Node -> m D3Selection_
-  join     :: ∀ a. D3Selection_ -> Join a -> m D3Selection_ -- but every join must be an array of something
+  attach   :: Selector                     -> m D3Selection_
+  appendTo :: D3Selection_      -> D3_Node -> m D3Selection_
+  join     :: ∀ a. D3Selection_ -> Join a  -> m D3Selection_
+
+infix 4 join as <+>
 
 runD3M :: ∀ a model. D3M model a -> model -> Effect (Tuple a model)
 runD3M (D3M state) = runStateT state
-
--- d3State :: ∀ a model. model -> D3M model a -> Effect (D3State model)
--- d3State model (D3M state) = liftA1 snd $ runStateT state makeD3State'
-
-d3Run :: ∀ a model. model -> D3M model a -> Effect a
-d3Run model (D3M state) = liftA1 fst $ runStateT state model
 
 instance d3TaglessD3M :: D3Tagless (D3M model) where
   attach selector = pure $ d3SelectAllInDOM_ selector 
