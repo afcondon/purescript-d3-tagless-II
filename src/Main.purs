@@ -12,7 +12,7 @@ main :: Effect Unit
 main = launchAff_  do
   _ <- forkAff GUP.runGeneralUpdatePattern
   _ <-         RadialTree.drawTree
-  _ <-         HorizontalTree.drawTree
+  -- _ <-         HorizontalTree.drawTree
   _ <- forkAff Graph.drawGraph
 
   pure unit

@@ -6,11 +6,11 @@ import D3.Layouts.Hierarchical
 import Affjax (Error, printError)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState)
+import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, attach, join, runD3M)
 import D3.Layouts.Hierarchical as H
-import D3.Selection (Chainable, D3Selection_, D3State, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), attachZoom, makeD3State', makeProjection, node)
+import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), attachZoom, makeProjection, node)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -43,7 +43,7 @@ drawTree = do
 
   case readTreeFromFileContents widthHeight treeJSON of
     (Left error)      -> liftEffect $ log $ printError error
-    (Right treeModel) -> liftEffect $ runD3M (enter treeModel) makeD3State' *> pure unit
+    (Right treeModel) -> liftEffect $ runD3M enter treeModel *> pure unit
 
 datumIsTreeNode :: forall d v. Datum -> D3HierarchicalNode d v
 datumIsTreeNode = unsafeCoerce
@@ -116,11 +116,11 @@ makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig
     svgConfig  = { width, height }
     root       = D3HierarchicalNode (unsafeCoerce root_)
 
--- | recipe for a radial tree
-enter :: forall m v. Bind m => D3Tagless m => MonadState (D3State (H.Model String v)) m => 
-  H.Model String v -> m D3Selection_
-enter model = do
+-- | recipe for a horizontal tree
+enter :: forall m v. Bind m => D3Tagless m => MonadState (H.Model String v) m => m D3Selection_
+enter = do
   -- TODO inherently gross to case, fix model and or enter function
+  model <- get
   let config = case model.treeConfig of
                   (HorizontalTree c) -> c
                   _ -> { rootDx: 0.0, rootDy: 0.0, x0: 0.0, x1: 0.0 }
@@ -132,27 +132,24 @@ enter model = do
   nodes     <- container `appendTo` (node Group [ classed "nodes"])
   labels    <- container `appendTo` (node Group [ classed "labels"])
 
-  linkJoinSelection_ <- join model $ Join {
+  linkJoinSelection_ <- join links $ Join {
       element   : Path
     , key       : DatumIsUnique
-    , hook      : links
-    , projection: makeProjection (\model -> H.links_ model.root_)
+    , "data"    : H.links_ model.root_
     , behaviour : enterLinks
   }
 
-  nodeJoinSelection_ <- join model $ Join {
+  nodeJoinSelection_ <- join nodes $ Join {
       element   : Circle
     , key       : DatumIsUnique
-    , hook      : nodes
-    , projection: makeProjection (\model -> H.descendants_ model.root_)
+    , "data"    : H.descendants_ model.root_
     , behaviour : enterNodes
   }
 
-  labelJoinSelection_ <- join model $ Join {
+  labelJoinSelection_ <- join labels $ Join {
       element   : Text
     , key       : DatumIsUnique
-    , hook      : labels
-    , projection: makeProjection (\model -> H.descendants_ model.root_)
+    , "data"    : H.descendants_ model.root_
     , behaviour : enterLabels
   }
 

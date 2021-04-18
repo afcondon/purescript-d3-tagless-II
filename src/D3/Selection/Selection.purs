@@ -38,8 +38,8 @@ foreign import d3Append_             :: String      -> D3Selection_ -> D3Selecti
 foreign import d3Exit_               :: D3Selection_ -> D3Selection_
 foreign import d3RemoveSelection_    :: D3Selection_ -> D3Selection_
 
-foreign import d3Data_               :: forall model. model -> (model -> D3Data_) -> D3Selection_ -> D3Selection_
-foreign import d3KeyFunction_        :: forall model. model -> (model -> D3Data_)   -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
+foreign import d3Data_               :: forall d. Array d -> D3Selection_ -> D3Selection_
+foreign import d3KeyFunction_        :: forall d. Array d -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
@@ -68,35 +68,34 @@ makeProjection = unsafeCoerce
 
 data DragBehavior = DefaultDrag | NoDrag | CustomDrag (D3Selection_ -> Unit)
 
-type JoinParams model r = 
-  { element    :: Element           -- what we're going to insert in the DOM
-  , key        :: Keys              -- how D3 is going to identify data so that 
-  , hook       :: D3Selection_      -- the existing D3 selection that we are joining the data to
-  , projection :: model -> D3Data_  -- the join might operate on some subset or transformation of the data}
+type JoinParams d r = 
+  { element    :: Element -- what we're going to insert in the DOM
+  , key        :: Keys    -- how D3 is going to identify data so that 
+  , "data"     :: Array d -- the data we're actually joining at this point
   | r
   }
-data Join model = Join           (JoinParams model (behaviour   :: Array Chainable))
-                | JoinGeneral    (JoinParams model (behaviour   :: EnterUpdateExit)) -- what we're going to do for each set (enter, exit, update) each refresh of data
-                | JoinSimulation (JoinParams model (behaviour   :: Array Chainable
-                                                   , onTick     :: Array Chainable
-                                                   , tickName   :: String
-                                                   , onDrag     :: DragBehavior
-                                                   , simulation :: D3Simulation_)) -- simulation joins are a bit different
+data Join d = Join           (JoinParams d (behaviour   :: Array Chainable))
+            | JoinGeneral    (JoinParams d (behaviour   :: EnterUpdateExit)) -- what we're going to do for each set (enter, exit, update) each refresh of data
+            | JoinSimulation (JoinParams d (behaviour   :: Array Chainable
+                                          , onTick     :: Array Chainable
+                                          , tickName   :: String
+                                          , onDrag     :: DragBehavior
+                                          , simulation :: D3Simulation_)) -- simulation joins are a bit different
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
 derive instance ordSelectionName :: Ord SelectionName
-data D3State model = D3State {
-    active           :: D3Selection
-  , namedSelections  :: Map SelectionName D3Selection_
-  , namedTransitions :: Map SelectionName D3Selection_
-  , namedJoins       :: Map SelectionName (Join model)
-}
+-- data D3State model = D3State {
+--     active           :: D3Selection
+--   , namedSelections  :: Map SelectionName D3Selection_
+--   , namedTransitions :: Map SelectionName D3Selection_
+--   , namedJoins       :: Map SelectionName (Join model)
+-- }
 
-makeD3State' :: ∀ model. D3State model
-makeD3State' = D3State { active: mempty, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
+-- makeD3State' :: ∀ model. D3State model
+-- makeD3State' = D3State { active: mempty, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
 
-makeD3State :: ∀ model. D3Selection -> D3State model
-makeD3State selection = D3State { active: selection, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
+-- makeD3State :: ∀ model. D3Selection -> D3State model
+-- makeD3State selection = D3State { active: selection, namedSelections: empty, namedTransitions: empty, namedJoins: empty }
 
 data D3_Node = D3_Node Element (Array Chainable)
 

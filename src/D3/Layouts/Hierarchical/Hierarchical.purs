@@ -39,11 +39,11 @@ foreign import hasChildren_             :: Datum -> Boolean -- really only works
 -- TODO implement more of this as needed
 foreign import nodeSize_ :: D3HierarchicalNode_ -> Array Number -> D3HierarchicalNode_ -- TODO "returns this tree layout" is that node or tree config?
 -- foreign import ancestors_   :: D3HierarchicalNode_ -> D3Data_
-foreign import descendants_ :: D3HierarchicalNode_ -> D3Data_
+foreign import descendants_ :: D3HierarchicalNode_ -> Array D3Data_
 -- foreign import leaves_      :: D3HierarchicalNode_ -> Array D3HierarchicalNode_
 foreign import find_        :: D3HierarchicalNode_ -> (Datum -> Boolean) -> Nullable D3HierarchicalNode_
 -- foreign import path_        :: D3HierarchicalNode_ -> D3HierarchicalNode_ -> Array D3HierarchicalNode_
-foreign import links_       :: D3HierarchicalNode_ -> D3Data_ -- TODO this is actually Array Nodes
+foreign import links_       :: D3HierarchicalNode_ -> Array D3Data_ -- TODO this is actually Array Nodes
 -- foreign import sum_ :: D3HierarchicalNode_ -> (Datum -> Number) -> D3HierarchicalNode_ -- alters the tree!!!!
 -- from docs:  <<if you only want leaf nodes to have internal value, then return zero for any node with children. 
 -- For example, as an alternative to node.count:

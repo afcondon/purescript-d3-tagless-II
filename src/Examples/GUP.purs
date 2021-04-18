@@ -6,7 +6,7 @@ import Control.Monad.Rec.Class (forever)
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum, Index, NWU(..), UnitType(..), datumIsChar, indexIsNumber)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, attach, join, runD3M)
-import D3.Selection (Chainable, D3Selection_, D3State(..), D3_Node(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), identityProjection, makeD3State', node, node_)
+import D3.Selection (Chainable, D3Selection_, D3_Node(..), Element(..), EnterUpdateExit, Join(..), Keys(..), SelectionName(..), identityProjection, node, node_)
 import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (singleton, toCharArray)
@@ -37,11 +37,10 @@ runGeneralUpdatePattern :: Aff Unit
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
   let transition = transitionWithDuration $ Milliseconds 2000.0
-  letters                <- liftEffect $ getLetters
-  (Tuple updateFn state) <- liftEffect $ runD3M enter makeD3State'
+  (Tuple update state) <- liftEffect $ runD3M enter []
   forever $ do
     newletters <- liftEffect $ getLetters
-    _          <- liftEffect $ runD3M (updateFn transition newletters) state
+    _          <- liftEffect $ runD3M (update transition) newletters
     delay (Milliseconds 2300.0)
 
 svgAttributes :: Array Chainable
@@ -82,16 +81,41 @@ enterUpdateExit transition =
   , exit:   [ classed "exit",   fill "brown" ] <> (transition `with` [ y 400.0, remove ])
   }
 
-enter :: ∀ m. MonadState (D3State (Array Char)) m => D3Tagless m => m (Chainable -> Array Char -> m D3Selection_) 
+enter :: forall m. 
+  MonadState (Array Char) m => 
+  D3Tagless m => 
+  m (Chainable -> m D3Selection_)
 enter = do 
   root    <- attach "div#gup"
   svg     <- appendTo root $ node Svg svgAttributes -- TODO attributes first a la hologen
   letterS <- appendTo svg  $ node_ Group
-  pure $ \transition model -> 
-              join model $ JoinGeneral {
+  pure $ \transition -> do
+              letters <- get 
+              -- we don't have to apply a projection in this case cause the data is already array
+              join letterS (JoinGeneral {
                   element   : Text
                 , key       : DatumIsUnique
-                , hook      : letterS
-                , projection: unsafeCoerce -- TODO ADT to hide this under IdentityProjection
+                , "data"    : letters
                 , behaviour : enterUpdateExit transition
-              }
+              } :: Join Char)
+
+
+--  appendMany Text `using` ((projection model) <#> selection) DatumIsUnique (enterUpdateExit transition) 
+ 
+-- appendMany Element `at` selection `usingData` (projection model) 
+
+-- enterS = appendMany someArray <$> selection <*> Text <*> DatumIsUnit <*> (enterUpdateExit transition)
+
+
+--   Join <$> letterS (AppendMany <$> Text <*> DatumIsUnique <*> (enterUpdateExit transition))
+
+-- map :: (a -> b) -> Join s a -> Join s b
+-- apply :: Join (a -> b) -> Join s a -> Join s b
+-- pure :: a -> Join s a
+
+-- newtype Form i a =
+--   Form (i -> { ui :: (i -> Effect Unit) -> UI, result :: a })
+
+-- Functor    : map   :: (a -> b) -> Form i a -> Form i b
+-- Apply      : apply :: Form i (a -> b) -> Form i a -> Form i b
+-- Applicative: pure  :: a -> Form i a.

@@ -57,9 +57,9 @@ exports.d3Append_ = element => selection => {
   return selection.append(element);
 }
 // d3Data_ :: D3Data -> D3Selection -> D3Selection
-exports.d3Data_ = data => projection => selection => {
+exports.d3Data_ = data => selection => {
   if (debug) {console.log(`\td3Data: ${selection}.data(${data})`);}
-  return selection.data(projection(data), d => d );
+  return selection.data(data, d => d );
 }
 // d3Data_ :: D3Data -> KeyFunction -> D3Selection -> D3Selection
 exports.d3KeyFunction_ = data => projection => keyFunction => selection => {

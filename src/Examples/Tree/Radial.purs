@@ -3,13 +3,13 @@ module D3.Examples.Tree.Radial where
 import Affjax (Error, printError)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState)
+import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, dy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x)
 import D3.Interpreter.Tagless (class D3Tagless, appendTo, attach, join, runD3M)
 import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, hasChildren_, hierarchy_, initRadialTree, radialLink, readJSON_)
 import D3.Layouts.Hierarchical as H
-import D3.Selection (Chainable, D3Selection_, D3State, Element(..), Join(..), Keys(..), attachZoom, makeD3State', makeProjection, node, zoomExtent, zoomRange)
+import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), attachZoom, makeProjection, node, zoomExtent, zoomRange)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -43,7 +43,7 @@ drawTree = do
 
   case readTreeFromFileContents widthHeight treeJSON of
     (Left error)      -> liftEffect $ log $ printError error
-    (Right treeModel) -> liftEffect $ runD3M (enter widthHeight treeModel) makeD3State' *> pure unit
+    (Right treeModel) -> liftEffect $ runD3M (enter widthHeight) treeModel *> pure unit
 
 
 
@@ -124,9 +124,10 @@ makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig
     root       = D3HierarchicalNode (unsafeCoerce root_)
 
 -- | recipe for a radial tree
-enter :: forall m v. Bind m => D3Tagless m => MonadState (D3State (Model String v)) m => 
-  Tuple Number Number -> Model String v -> m D3Selection_
-enter (Tuple width height) model = do
+enter :: forall m v. Bind m => D3Tagless m => MonadState (Model String v) m => 
+  Tuple Number Number -> m D3Selection_
+enter (Tuple width height) = do
+  model     <- get
   root      <- attach "div#rtree"
   svg       <- root      `appendTo` (node Svg   svgAttributes)
   container <- svg       `appendTo` (node Group [ classed "container" ])
@@ -134,11 +135,10 @@ enter (Tuple width height) model = do
   nodes     <- container `appendTo` (node Group [ classed "nodes"])
   labels    <- container `appendTo` (node Group [ classed "labels"])
 
-  linkJoinSelection_ <- join model $ Join {
+  linkJoinSelection_ <- join links $ Join {
       element   : Path
     , key       : DatumIsUnique
-    , hook      : links
-    , projection: makeProjection (\model -> H.links_ model.root_)
+    , "data"    : H.links_ model.root_
     , behaviour : enterLinks
   }
 -- TODO this separation of labels and circles comes from original radial tree example
@@ -146,19 +146,17 @@ enter (Tuple width height) model = do
 -- and it means only one join to do it, but then two appends after the join
 -- this is a different pattern and it's worth exploring both
 -- now that we no longer have Maybe Selection from the join, should be easy to do this
-  nodeJoinSelection_ <- join model $ Join {
+  nodeJoinSelection_ <- join nodes $ Join {
       element   : Circle
     , key       : DatumIsUnique
-    , hook      : nodes
-    , projection: makeProjection (\model -> H.descendants_ model.root_)
+    , "data"    : H.descendants_ model.root_
     , behaviour : enterNodes
   }
 
-  labelJoinSelection_ <- join model $ Join {
+  labelJoinSelection_ <- join labels $ Join {
       element   : Text
     , key       : DatumIsUnique
-    , hook      : labels
-    , projection: makeProjection (\model -> H.descendants_ model.root_)
+    , "data"    : H.descendants_ model.root_
     , behaviour : enterLabels
   }
 

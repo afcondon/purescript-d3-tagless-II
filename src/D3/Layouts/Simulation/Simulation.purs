@@ -67,10 +67,10 @@ type SimulationRecord_ r l = {
 
 newtype Simulation r l = Simulation (SimulationRecord_ r l)
 
-initSimulation :: forall model node link. Array Force -> model -> (model -> node) -> (model -> link) -> D3Simulation_
-initSimulation forces model nodeProjection linkProjection = do
-  let nodes_     = unsafeCoerce $ nodeProjection model
-      links_     = unsafeCoerce $ linkProjection model
+initSimulation :: forall model node link. Array Force -> model -> Array node -> Array link -> D3Simulation_
+initSimulation forces model nodes links = do
+  let nodes_ = unsafeCoerce nodes
+      links_ = unsafeCoerce links
       simulation = initSimulation_ nodes_ defaultConfigSimulation
       _          = simulation `putForcesInSimulation` forces
       _          = simulation `setLinks_` links_
