@@ -8,9 +8,9 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, cursor, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, width, x1, x2, y1, y2)
-import D3.Interpreter.Tagless (class D3Tagless, append, attach, join, runD3M)
+import D3.Interpreter.Tagless (class D3Tagless, D3M(..), append, attach, join, attachZoom, runD3M)
 import D3.Scales (d3SchemeCategory10_)
-import D3.Selection (D3Selection_, D3Simulation_, DragBehavior(..), Element(..), Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), attachZoom, makeProjection, node)
+import D3.Selection (D3Selection_, D3Simulation_, DragBehavior(..), Element(..), Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), makeProjection, node)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -36,7 +36,7 @@ foreign import readJSONJS :: String -> Model
 
 readGraphFromFileContents :: forall r. Either Error { body ∷ String | r } -> Model
 readGraphFromFileContents (Right { body } ) = readJSONJS body
-readGraphFromFileContents (Left err)        = { links: [], nodes: [] }
+readGraphFromFileContents (Left err)        = { links: [], nodes: [] } -- TODO exceptions dodged using empty Model
 
 
 -- this is the model used by this particular "chart" (ie force layout simulation)
@@ -53,16 +53,17 @@ drawGraph = do
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
   let graph = readGraphFromFileContents forceJSON
   
-  liftEffect $ runD3M (enter widthHeight graph)
-    *> pure unit
+  -- providing the type guidance to the compiler in the result here selects the appropriate interpreter
+  (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (enter widthHeight graph)
+  pure unit
 
 -- | recipe for this force layout graph
-enter :: forall m link node r. 
+enter :: forall m link node selection r. 
   Bind m => 
-  D3Tagless m => 
+  D3Tagless selection m => 
   Tuple Number Number ->
   { links :: Array link, nodes :: Array node | r } -> 
-  m D3Selection_ -- TODO going to actually be a simulation_ eventually, right? 
+  m selection -- TODO is it right to return selection_ instead of simulation_? does it matter? 
 enter (Tuple w h) model = do
   root       <- attach "div#force"
   svg        <- root `append` (node Svg   [ width w, height h, viewBox 0.0 0.0 w h ] )
@@ -95,7 +96,7 @@ enter (Tuple w h) model = do
     , onDrag    : DefaultDrag
   }
   
-  let _ = svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+  svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                             , scale     : ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
                             , qualifier : "tree"
                             }

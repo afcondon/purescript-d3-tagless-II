@@ -86,6 +86,9 @@ derive instance ordSelectionName :: Ord SelectionName
 
 data D3_Node = D3_Node Element (Array Chainable)
 
+instance showD3_Node :: Show D3_Node where
+  show (D3_Node e cs) = "D3Node: " <> show e
+
 -- sugar for appending with no attributes
 node :: Element -> (Array Chainable) -> D3_Node
 node e a = D3_Node e a
@@ -185,25 +188,3 @@ zoomExtent :: { bottom :: Number
               , top :: Number
               } -> ZoomExtent
 zoomExtent = ZoomExtent
-
-attachZoom :: D3Selection_ -> ZoomConfig -> D3Selection_
-attachZoom selection config = do
-  let 
-    (ScaleExtent smallest largest) = config.scale
-  
-  -- sticking to the rules of no ADT's on the JS side we case on the ZoomExtent here
-  case config.extent of
-    DefaultZoomExtent -> 
-      d3AttachZoomDefaultExtent_ selection {
-        scaleExtent: [ smallest, largest ]
-      , qualifier  : config.qualifier
-      } 
-
-    (ZoomExtent ze)   -> do
-      d3AttachZoom_ selection { 
-        extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
-      , scaleExtent: [ smallest, largest ]
-      , qualifier  : config.qualifier
-      }
-
-    --  (ExtentFunction f) -> selection -- TODO write this case

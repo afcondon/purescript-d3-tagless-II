@@ -10,36 +10,39 @@ import Data.Foldable (foldl)
 import Data.Tuple (Tuple)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, pure, show, unit, ($), (<$>))
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, pure, show, unit, ($), (<>), (<$>))
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
 -- also not really making a ton of use of StateT, but it is good to have a 
 -- place to stash D3's global state such as named transitions etc
-newtype D3M a = D3M (StateT Unit Effect a) 
+newtype D3M :: forall k. k -> Type -> Type
+newtype D3M selection a = D3M (StateT Unit Effect a) 
 -- TODO don't really need a State instance now, could be ReaderT, however, state might make a comeback so leaving for now
 
-derive newtype instance functorD3M     :: Functor           D3M
-derive newtype instance applyD3M       :: Apply             D3M
-derive newtype instance applicativeD3M :: Applicative       D3M
-derive newtype instance bindD3M        :: Bind              D3M
-derive newtype instance monadD3M       :: Monad             D3M
-derive newtype instance monadStateD3M  :: MonadState  Unit  D3M 
-derive newtype instance monadEffD3M    :: MonadEffect       D3M
+derive newtype instance functorD3M     :: Functor           (D3M selection)
+derive newtype instance applyD3M       :: Apply             (D3M selection)
+derive newtype instance applicativeD3M :: Applicative       (D3M selection)
+derive newtype instance bindD3M        :: Bind              (D3M selection)
+derive newtype instance monadD3M       :: Monad             (D3M selection)
+derive newtype instance monadStateD3M  :: MonadState  Unit  (D3M selection) 
+derive newtype instance monadEffD3M    :: MonadEffect       (D3M selection)
 
 -- TODO see whether it can be useful to extend the interpreter here, for different visualization types
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
 -- into both DOM and Simulation for example (and current implementation is gross and wrong)
-class (Monad m) <= D3Tagless m where
-  attach :: Selector                     -> m D3Selection_
-  append :: D3Selection_      -> D3_Node -> m D3Selection_
-  join   :: ∀ a. D3Selection_ -> Join a  -> m D3Selection_
+class (Monad m) <= D3Tagless selection m where
+  attach :: Selector                  -> m selection
+  append :: selection      -> D3_Node -> m selection
+  join   :: ∀ a. selection -> Join a  -> m selection
+
+  attachZoom :: selection -> ZoomConfig -> m selection
 
 infix 4 join as <+>
 
-runD3M :: forall a. D3M a -> Effect (Tuple a Unit)
+runD3M :: forall a. D3M D3Selection_ a -> Effect (Tuple a Unit)
 runD3M (D3M state) = runStateT state unit
 
-instance d3TaglessD3M :: D3Tagless D3M where
+instance d3TaglessD3M :: D3Tagless D3Selection_ (D3M D3Selection_) where
   attach selector = pure $ d3SelectAllInDOM_ selector 
 
   append selection_ (D3_Node element attributes) = do
@@ -88,6 +91,28 @@ instance d3TaglessD3M :: D3Tagless D3M where
       _        = foldl applyChainable dataS   j.behaviour.update
     pure dataS
 
+  attachZoom selection config = do
+    let 
+      (ScaleExtent smallest largest) = config.scale
+    
+    -- sticking to the rules of no ADT's on the JS side we case on the ZoomExtent here
+    pure $ 
+      case config.extent of
+        DefaultZoomExtent -> 
+          d3AttachZoomDefaultExtent_ selection {
+            scaleExtent: [ smallest, largest ]
+          , qualifier  : config.qualifier
+          } 
+
+        (ZoomExtent ze)   -> do
+          d3AttachZoom_ selection { 
+            extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
+          , scaleExtent: [ smallest, largest ]
+          , qualifier  : config.qualifier
+          }
+        -- TODO write casae for: (ExtentFunction f) -> selection
+
+
 applyChainable :: D3Selection_ -> Chainable -> D3Selection_
 applyChainable selection_ (AttrT (Attribute label attr)) = -- spy "d3SetAttr" $ 
   d3SetAttr_ label (unbox attr) selection_
@@ -112,5 +137,11 @@ derive newtype instance applicativeD3PrinterM :: Applicative       D3PrinterM
 derive newtype instance bindD3PrinterM        :: Bind              D3PrinterM
 derive newtype instance monadD3PrinterM       :: Monad             D3PrinterM
 derive newtype instance monadStateD3PrinterM  :: MonadState String D3PrinterM 
-derive newtype instance monadEffD3PrinterM    :: MonadEffect       D3PrinterM
 
+instance d3Tagless :: D3Tagless String D3PrinterM where
+  attach selector       = pure $ "attaching to " <> selector <> " in DOM"
+  append selection node = pure $ "appending " <> show node <> " to " <> selection
+  join selection (Join j)           = pure $ "entering a " <> show j.element <> " for each datum" 
+  join selection (JoinGeneral j)    = pure $ "entering a " <> show j.element <> " for each datum" 
+  join selection (JoinSimulation j) = pure $ "entering a " <> show j.element <> " for each datum" 
+  attachZoom selection zoomConfig = pure $ "attaching a zoom handler to " <> selection

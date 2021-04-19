@@ -7,10 +7,10 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
-import D3.Interpreter.Tagless (class D3Tagless, append, attach, (<+>), runD3M)
+import D3.Interpreter.Tagless (class D3Tagless, append, attach, attachZoom, (<+>), runD3M)
 import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, hasChildren_, hierarchy_, initRadialTree, radialLink, readJSON_)
 import D3.Layouts.Hierarchical as H
-import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), attachZoom, makeProjection, node, zoomExtent, zoomRange)
+import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), makeProjection, node, zoomExtent, zoomRange)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -100,7 +100,7 @@ makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig
     root       = D3HierarchicalNode (unsafeCoerce root_)
 
 -- | recipe for a radial tree
-enter :: forall m v. Bind m => D3Tagless m =>
+enter :: forall m v. Bind m => D3Tagless D3Selection_ m =>
   Tuple Number Number -> (Model String v) -> m D3Selection_
 enter (Tuple width height) model = do
   root      <- attach "div#rtree"
@@ -142,11 +142,11 @@ enter (Tuple width height) model = do
                   ]
   }
 
-  let _ = attachZoom container  
+  svgZ <- attachZoom container  
                     { extent    : zoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
                     , scale     : 1 `zoomRange` 8 
                     , qualifier : "tree"
                     }
 
-  pure svg
+  pure svgZ
 

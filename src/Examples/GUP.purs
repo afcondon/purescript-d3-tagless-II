@@ -60,7 +60,7 @@ offsetXByIndex d i = offset + ((indexIsNumber i) * factor)
 textFromDatum :: Datum -> String
 textFromDatum = singleton <<< datumIsChar
 
-enter :: forall m. D3Tagless m => m ((Array Char) -> m D3Selection_)
+enter :: forall m. D3Tagless D3Selection_ m => m ((Array Char) -> m D3Selection_)
 enter = do 
   root        <- attach "div#gup"
   svg         <- append root $ node Svg svgAttributes -- TODO attributes first a la hologen

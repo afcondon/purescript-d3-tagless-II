@@ -8,9 +8,9 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
-import D3.Interpreter.Tagless (class D3Tagless, append, attach, join, runD3M)
+import D3.Interpreter.Tagless (class D3Tagless, append, attach, join, attachZoom, runD3M)
 import D3.Layouts.Hierarchical as H
-import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), attachZoom, makeProjection, node)
+import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), makeProjection, node)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -43,7 +43,9 @@ drawTree = do
 
   case readTreeFromFileContents widthHeight treeJSON of
     (Left error)      -> liftEffect $ log $ printError error
-    (Right treeModel) -> liftEffect $ runD3M (enter treeModel) *> pure unit
+    (Right treeModel) -> do
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (enter treeModel)
+      pure unit
 
 datumIsTreeNode :: forall d v. Datum -> D3HierarchicalNode d v
 datumIsTreeNode = unsafeCoerce
@@ -117,7 +119,7 @@ makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig
     root       = D3HierarchicalNode (unsafeCoerce root_)
 
 -- | recipe for a horizontal tree
-enter :: forall m v. Bind m => D3Tagless m => H.Model String v -> m D3Selection_
+enter :: forall m v selection. Bind m => D3Tagless selection m => H.Model String v -> m selection
 enter model = do
   -- TODO inherently gross to case, fix model and or enter function
   let config = case model.treeConfig of
@@ -152,7 +154,7 @@ enter model = do
     , behaviour : enterLabels
   }
 
-  let _ = attachZoom container  
+  svgZ <- attachZoom container  
                     { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: model.svgConfig.height, right: model.svgConfig.width }
                     , scale     : ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
                     , qualifier : "tree"
