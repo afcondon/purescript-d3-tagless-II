@@ -5,8 +5,8 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
-import D3.Attributes.Sugar (classed, dy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x)
-import D3.Interpreter.Tagless (class D3Tagless, appendTo, attach, join, runD3M)
+import D3.Attributes.Sugar
+import D3.Interpreter.Tagless (class D3Tagless, append, attach, (<+>), runD3M)
 import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, hasChildren_, hierarchy_, initRadialTree, radialLink, readJSON_)
 import D3.Layouts.Hierarchical as H
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), attachZoom, makeProjection, node, zoomExtent, zoomRange)
@@ -43,7 +43,7 @@ drawTree = do
 
   case readTreeFromFileContents widthHeight treeJSON of
     (Left error)      -> liftEffect $ log $ printError error
-    (Right treeModel) -> liftEffect $ runD3M (enter widthHeight) treeModel *> pure unit
+    (Right treeModel) -> liftEffect $ runD3M (enter widthHeight treeModel) treeModel *> pure unit
 
 
 
@@ -86,31 +86,6 @@ svgAttributes = [
   , viewBox (-500.0) (-500.0) 2000.0 2000.0
 ]
 
--- | instructions for entering the links of the radial tree
-enterLinks :: Array Chainable
-enterLinks = [  strokeWidth   1.5
-              , strokeColor   "#555"
-              , strokeOpacity 0.4
-              , fill          "none"
-              , radialLink    _.x _.y
-              ] 
-
--- | instructions for entering the nodes of the radial tree
-enterNodes :: Array Chainable
-enterNodes =  [ transform transformations
-              , fill (\d -> if hasChildren_ d then "#555" else "#999")
-              , radius 2.5
-              ]
-
--- | instructions for entering the labels of the radial tree
-enterLabels :: Array Chainable
-enterLabels = [ transform  labelTransformations
-              , dy         0.31
-              , x          (\d -> if (hasChildren_ d == nodeIsOnRHS d) then 6.0 else (-6.0))
-              , textAnchor (\d -> if (hasChildren_ d == nodeIsOnRHS d) then "start" else "end")
-              , text       labelName
-              ]
-
 -- this is the extra row info that is part of a Datum beyond the D3Tree minimum
 type TreeNodeExtra = { name :: String }
 type TreeNode v = D3HierarchicalNode TreeNodeExtra v -- v is the value calculated in the tree, ie for sum, count etc
@@ -125,39 +100,45 @@ makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig
 
 -- | recipe for a radial tree
 enter :: forall m v. Bind m => D3Tagless m => MonadState (Model String v) m => 
-  Tuple Number Number -> m D3Selection_
-enter (Tuple width height) = do
-  model     <- get
+  Tuple Number Number -> (Model String v) -> m D3Selection_
+enter (Tuple width height) model = do
   root      <- attach "div#rtree"
-  svg       <- root      `appendTo` (node Svg   svgAttributes)
-  container <- svg       `appendTo` (node Group [ classed "container" ])
-  links     <- container `appendTo` (node Group [ classed "links"])
-  nodes     <- container `appendTo` (node Group [ classed "nodes"])
-  labels    <- container `appendTo` (node Group [ classed "labels"])
+  svg       <- root      `append` (node Svg   svgAttributes)
+  container <- svg       `append` (node Group [ classed "container" ])
+  links     <- container `append` (node Group [ classed "links"])
+  nodes     <- container `append` (node Group [ classed "nodes"])
+  labels    <- container `append` (node Group [ classed "labels"])
 
-  linkJoinSelection_ <- join links $ Join {
+  linkJoinSelection_ <- links <+> Join { 
       element   : Path
-    , key       : DatumIsUnique
+    , key       : UseDatumAsKey
     , "data"    : H.links_ model.root_
-    , behaviour : enterLinks
+    , behaviour : [ strokeWidth   1.5
+                  , strokeColor   "#555"
+                  , strokeOpacity 0.4
+                  , fill          "none"
+                  , radialLink    _.x _.y
+                  ] 
   }
--- TODO this separation of labels and circles comes from original radial tree example
--- however, other trees have the label and circle grouped, which seems better to me anyway
--- and it means only one join to do it, but then two appends after the join
--- this is a different pattern and it's worth exploring both
--- now that we no longer have Maybe Selection from the join, should be easy to do this
-  nodeJoinSelection_ <- join nodes $ Join {
+  nodeJoinSelection_ <- nodes <+> Join {
       element   : Circle
-    , key       : DatumIsUnique
+    , key       : UseDatumAsKey
     , "data"    : H.descendants_ model.root_
-    , behaviour : enterNodes
+    , behaviour : [ transform transformations
+                  , fill (\d -> if hasChildren_ d then "#555" else "#999")
+                  , radius 2.5
+                  ]
   }
-
-  labelJoinSelection_ <- join labels $ Join {
+  labelJoinSelection_ <- labels <+> Join {
       element   : Text
-    , key       : DatumIsUnique
+    , key       : UseDatumAsKey
     , "data"    : H.descendants_ model.root_
-    , behaviour : enterLabels
+    , behaviour : [ transform  labelTransformations
+                  , dy         0.31
+                  , x          (\d -> if (hasChildren_ d == nodeIsOnRHS d) then 6.0 else (-6.0))
+                  , textAnchor (\d -> if (hasChildren_ d == nodeIsOnRHS d) then "start" else "end")
+                  , text       labelName
+                  ]
   }
 
   let _ = attachZoom container  
@@ -167,3 +148,4 @@ enter (Tuple width height) = do
                     }
 
   pure svg
+

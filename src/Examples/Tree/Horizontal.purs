@@ -8,7 +8,7 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
-import D3.Interpreter.Tagless (class D3Tagless, appendTo, attach, join, runD3M)
+import D3.Interpreter.Tagless (class D3Tagless, append, attach, join, runD3M)
 import D3.Layouts.Hierarchical as H
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), attachZoom, makeProjection, node)
 import Data.Either (Either(..))
@@ -126,29 +126,29 @@ enter = do
                   _ -> { rootDx: 0.0, rootDy: 0.0, x0: 0.0, x1: 0.0 }
       viewbox = svgAttributes model.svgConfig.width (svgHeight config)
   root      <- attach "div#htree"
-  svg       <- root      `appendTo` (node Svg viewbox)
-  container <- svg       `appendTo` (node Group (containerAttributes config))
-  links     <- container `appendTo` (node Group [ classed "links"])
-  nodes     <- container `appendTo` (node Group [ classed "nodes"])
-  labels    <- container `appendTo` (node Group [ classed "labels"])
+  svg       <- root      `append` (node Svg viewbox)
+  container <- svg       `append` (node Group (containerAttributes config))
+  links     <- container `append` (node Group [ classed "links"])
+  nodes     <- container `append` (node Group [ classed "nodes"])
+  labels    <- container `append` (node Group [ classed "labels"])
 
   linkJoinSelection_ <- join links $ Join {
       element   : Path
-    , key       : DatumIsUnique
+    , key       : UseDatumAsKey
     , "data"    : H.links_ model.root_
     , behaviour : enterLinks
   }
 
   nodeJoinSelection_ <- join nodes $ Join {
       element   : Circle
-    , key       : DatumIsUnique
+    , key       : UseDatumAsKey
     , "data"    : H.descendants_ model.root_
     , behaviour : enterNodes
   }
 
   labelJoinSelection_ <- join labels $ Join {
       element   : Text
-    , key       : DatumIsUnique
+    , key       : UseDatumAsKey
     , "data"    : H.descendants_ model.root_
     , behaviour : enterLabels
   }

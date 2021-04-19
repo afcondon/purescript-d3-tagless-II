@@ -57,7 +57,7 @@ type D3Group      = Array D3DomNode
 
 type D3Selection  = Last D3Selection_
 type ComputeKeyFunction_ = Datum -> Index
-data Keys = ComputeKey ComputeKeyFunction_ | DatumIsUnique
+data Keys = ComputeKey ComputeKeyFunction_ | UseDatumAsKey
 -- TODO hide the "unsafeCoerce/makeProjection" in a smart constructor
 type Projection = forall model. (model -> D3Data_)
 identityProjection :: Projection

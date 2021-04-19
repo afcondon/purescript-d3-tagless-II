@@ -30,9 +30,9 @@ derive newtype instance monadEffD3M    :: MonadEffect       (D3M model)
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
 -- into both DOM and Simulation for example (and current implementation is gross and wrong)
 class (Monad m) <= D3Tagless m where
-  attach   :: Selector                     -> m D3Selection_
-  appendTo :: D3Selection_      -> D3_Node -> m D3Selection_
-  join     :: ∀ a. D3Selection_ -> Join a  -> m D3Selection_
+  attach :: Selector                     -> m D3Selection_
+  append :: D3Selection_      -> D3_Node -> m D3Selection_
+  join   :: ∀ a. D3Selection_ -> Join a  -> m D3Selection_
 
 infix 4 join as <+>
 
@@ -42,7 +42,7 @@ runD3M (D3M state) = runStateT state
 instance d3TaglessD3M :: D3Tagless (D3M model) where
   attach selector = pure $ d3SelectAllInDOM_ selector 
 
-  appendTo selection_ (D3_Node element attributes) = do
+  append selection_ (D3_Node element attributes) = do
     let appended_ = d3Append_ (show element) selection_
     pure $ foldl applyChainable appended_ attributes    
 
@@ -50,7 +50,7 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
     let 
       selectS = d3SelectionSelectAll_ (show j.element) selection
       dataS   = case j.key of
-                  DatumIsUnique    -> d3Data_        j.data    selectS 
+                  UseDatumAsKey    -> d3Data_        j.data    selectS 
                   (ComputeKey fn)  -> d3KeyFunction_ j.data fn selectS 
       enterS  = d3EnterAndAppend_ (show j.element) dataS
       enterS' = foldl applyChainable enterS j.behaviour
@@ -65,7 +65,7 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
     let 
       initialS = d3SelectionSelectAll_ (show j.element) selection
       dataS    = case j.key of
-                    DatumIsUnique    -> d3Data_        j.data    initialS 
+                    UseDatumAsKey    -> d3Data_        j.data    initialS 
                     (ComputeKey fn)  -> d3KeyFunction_ j.data fn initialS 
       enterS   = d3EnterAndAppend_ (show j.element) dataS
       _        = foldl applyChainable enterS  j.behaviour
@@ -79,7 +79,7 @@ instance d3TaglessD3M :: D3Tagless (D3M model) where
     let
       selectS = d3SelectionSelectAll_ (show j.element) selection
       dataS  = case j.key of
-                DatumIsUnique    -> d3Data_        j.data    selectS 
+                UseDatumAsKey    -> d3Data_        j.data    selectS 
                 (ComputeKey fn)  -> d3KeyFunction_ j.data fn selectS 
       enterS = d3EnterAndAppend_ (show j.element) dataS
       exitS  = d3Exit_ dataS

@@ -8,7 +8,7 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, cursor, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, width, x1, x2, y1, y2)
-import D3.Interpreter.Tagless (class D3Tagless, appendTo, attach, join, runD3M)
+import D3.Interpreter.Tagless (class D3Tagless, append, attach, join, runD3M)
 import D3.Scales (d3SchemeCategory10_)
 import D3.Selection (D3Selection_, D3Simulation_, DragBehavior(..), Element(..), Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), attachZoom, makeProjection, node)
 import Data.Either (Either(..))
@@ -53,7 +53,7 @@ drawGraph = do
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
   let graph = readGraphFromFileContents forceJSON
   
-  liftEffect $ runD3M (enter widthHeight) graph
+  liftEffect $ runD3M (enter widthHeight graph) graph
     *> pure unit
 
 -- | recipe for this force layout graph
@@ -61,13 +61,13 @@ enter :: forall m link node r.
   Bind m => 
   D3Tagless m => 
   MonadState { links :: Array link, nodes :: Array node | r } m => 
-  Tuple Number Number -> m D3Selection_ -- going to actually be a simulation right? 
-enter (Tuple w h) = do
-  model      <- get -- this gets the input model but actually we're going to act on a transformed version of that
+  Tuple Number Number -> { links :: Array link, nodes :: Array node | r } -> 
+  m D3Selection_ -- TODO going to actually be a simulation_ eventually, right? 
+enter (Tuple w h) model = do
   root       <- attach "div#force"
-  svg        <- root `appendTo` (node Svg   [ width w, height h, viewBox 0.0 0.0 w h ] )
-  linksGroup <- svg  `appendTo` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
-  nodesGroup <- svg  `appendTo` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
+  svg        <- root `append` (node Svg   [ width w, height h, viewBox 0.0 0.0 w h ] )
+  linksGroup <- svg  `append` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
+  nodesGroup <- svg  `append` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   let forces      = [ makeCenterForce w h
                     , Force (ForceName "charge") ForceMany ]
@@ -75,7 +75,7 @@ enter (Tuple w h) = do
 
   links <- join linksGroup $ JoinSimulation {
       element   : Line
-    , key       : DatumIsUnique
+    , key       : UseDatumAsKey
     , "data"    : model.links
     , behaviour : [ strokeWidth linkWidth ]
     , simulation: simulation_ -- following config fields are extras for simulation
@@ -86,7 +86,7 @@ enter (Tuple w h) = do
 
   nodes <- join nodesGroup $ JoinSimulation {
       element   : Circle
-    , key       : DatumIsUnique
+    , key       : UseDatumAsKey
     , "data"    : model.nodes
     , behaviour : [ radius 5.0, fill colorByGroup ]
     , simulation: simulation_  -- following config fields are extras for simulation

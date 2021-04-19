@@ -102,10 +102,13 @@ namedTransition name = TransitionT [] $ defaultTransition { name = name }
 transitionWithDuration :: Milliseconds -> Chainable -- this can be mempty for monoid
 transitionWithDuration duration = TransitionT [] defaultTransition { duration = duration }
 
-with :: Chainable -> Array Chainable -> Array Chainable
-with (TransitionT [] t) chain = [ TransitionT chain t ]
-with (TransitionT existingChain t) newChain = [ TransitionT (existingChain <> newChain) t ]
-with otherChainable chain = otherChainable:chain
+andThen :: forall a. Semigroup a => a -> a -> a
+andThen = append
+
+to :: Chainable -> Array Chainable -> Array Chainable
+to (TransitionT [] t) chain = [ TransitionT chain t ]
+to (TransitionT existingChain t) newChain = [ TransitionT (existingChain <> newChain) t ]
+to otherChainable chain = otherChainable:chain
 
 remove :: Chainable
 remove = RemoveT
