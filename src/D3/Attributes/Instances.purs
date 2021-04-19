@@ -2,7 +2,7 @@ module D3.Attributes.Instances where
 
 import Prelude
 
-import Data.Function.Uncurried (Fn2, mkFn2, runFn2)
+import Data.Function.Uncurried (Fn2, mkFn2)
 import Unsafe.Coerce (unsafeCoerce)
 
 

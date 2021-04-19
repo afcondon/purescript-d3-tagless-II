@@ -1,11 +1,12 @@
 module D3.Examples.Tree.Radial where
 
+import D3.Attributes.Sugar
+
 import Affjax (Error, printError)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
-import D3.Attributes.Sugar
 import D3.Interpreter.Tagless (class D3Tagless, append, attach, (<+>), runD3M)
 import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, hasChildren_, hierarchy_, initRadialTree, radialLink, readJSON_)
 import D3.Layouts.Hierarchical as H
@@ -43,7 +44,7 @@ drawTree = do
 
   case readTreeFromFileContents widthHeight treeJSON of
     (Left error)      -> liftEffect $ log $ printError error
-    (Right treeModel) -> liftEffect $ runD3M (enter widthHeight treeModel) treeModel *> pure unit
+    (Right treeModel) -> liftEffect $ runD3M (enter widthHeight treeModel) *> pure unit
 
 
 
@@ -99,7 +100,7 @@ makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig
     root       = D3HierarchicalNode (unsafeCoerce root_)
 
 -- | recipe for a radial tree
-enter :: forall m v. Bind m => D3Tagless m => MonadState (Model String v) m => 
+enter :: forall m v. Bind m => D3Tagless m =>
   Tuple Number Number -> (Model String v) -> m D3Selection_
 enter (Tuple width height) model = do
   root      <- attach "div#rtree"

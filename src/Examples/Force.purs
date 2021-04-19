@@ -53,15 +53,15 @@ drawGraph = do
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
   let graph = readGraphFromFileContents forceJSON
   
-  liftEffect $ runD3M (enter widthHeight graph) graph
+  liftEffect $ runD3M (enter widthHeight graph)
     *> pure unit
 
 -- | recipe for this force layout graph
 enter :: forall m link node r. 
   Bind m => 
   D3Tagless m => 
-  MonadState { links :: Array link, nodes :: Array node | r } m => 
-  Tuple Number Number -> { links :: Array link, nodes :: Array node | r } -> 
+  Tuple Number Number ->
+  { links :: Array link, nodes :: Array node | r } -> 
   m D3Selection_ -- TODO going to actually be a simulation_ eventually, right? 
 enter (Tuple w h) model = do
   root       <- attach "div#force"

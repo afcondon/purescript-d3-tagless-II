@@ -2,8 +2,7 @@ module D3.Selection where
 
 import Prelude hiding (append,join)
 
-import D3.Attributes.Instances (Attribute, Datum, Index, UnitType)
-import Data.Map (Map, empty)
+import D3.Attributes.Instances (Attribute, Datum, Index)
 import Data.Maybe.Last (Last)
 import Effect.Aff (Milliseconds)
 import Unsafe.Coerce (unsafeCoerce)
@@ -163,8 +162,6 @@ type ZoomConfigDefault_ = {
 }
 foreign import data ZoomBehavior_ :: Type  -- the zoom behavior, provided to Event Handler
 data ScaleExtent   = ScaleExtent Int Int
-zoomRange = ScaleExtent
-zoomExtent = ZoomExtent
 data ZoomExtent    = DefaultZoomExtent 
                    | ZoomExtent { top :: Number, left :: Number, bottom :: Number, right :: Number }
                   --  | ExtentFunction (Datum -> Array (Array Number))
@@ -176,9 +173,18 @@ type ZoomEvent     = {
   , transform   :: ZoomTransform
   , sourceEvent :: Event
 }
-
 foreign import d3AttachZoom_              :: D3Selection_ -> ZoomConfig_        -> D3Selection_
 foreign import d3AttachZoomDefaultExtent_ :: D3Selection_ -> ZoomConfigDefault_ -> D3Selection_
+
+zoomRange :: Int -> Int -> ScaleExtent
+zoomRange = ScaleExtent
+
+zoomExtent :: { bottom :: Number
+              , left :: Number
+              , right :: Number
+              , top :: Number
+              } -> ZoomExtent
+zoomExtent = ZoomExtent
 
 attachZoom :: D3Selection_ -> ZoomConfig -> D3Selection_
 attachZoom selection config = do

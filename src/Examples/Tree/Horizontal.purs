@@ -43,7 +43,7 @@ drawTree = do
 
   case readTreeFromFileContents widthHeight treeJSON of
     (Left error)      -> liftEffect $ log $ printError error
-    (Right treeModel) -> liftEffect $ runD3M enter treeModel *> pure unit
+    (Right treeModel) -> liftEffect $ runD3M (enter treeModel) *> pure unit
 
 datumIsTreeNode :: forall d v. Datum -> D3HierarchicalNode d v
 datumIsTreeNode = unsafeCoerce
@@ -117,10 +117,9 @@ makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig
     root       = D3HierarchicalNode (unsafeCoerce root_)
 
 -- | recipe for a horizontal tree
-enter :: forall m v. Bind m => D3Tagless m => MonadState (H.Model String v) m => m D3Selection_
-enter = do
+enter :: forall m v. Bind m => D3Tagless m => H.Model String v -> m D3Selection_
+enter model = do
   -- TODO inherently gross to case, fix model and or enter function
-  model <- get
   let config = case model.treeConfig of
                   (HorizontalTree c) -> c
                   _ -> { rootDx: 0.0, rootDy: 0.0, x0: 0.0, x1: 0.0 }

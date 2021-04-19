@@ -3,10 +3,9 @@ module D3.Examples.GUP where
 import D3.Attributes.Sugar
 
 import Control.Monad.Rec.Class (forever)
-import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum, Index, datumIsChar, indexIsNumber)
 import D3.Interpreter.Tagless (class D3Tagless, append, attach, runD3M, (<+>))
-import D3.Selection (Chainable, D3Selection_, Element(..), EnterUpdateExit, Join(..), Keys(..), node, node_)
+import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), node, node_)
 import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (singleton, toCharArray)
@@ -17,7 +16,7 @@ import Effect.Aff (Aff, Milliseconds(..), delay)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Random (random)
-import Prelude (class Semigroup, Unit, bind, discard, negate, pure, ($), (*), (+), (<$>), (<<<), (<>), (>))
+import Prelude (Unit, bind, discard, negate, pure, ($), (*), (+), (<$>), (<<<), (>))
 
 
 getLetters :: Effect (Array Char)
@@ -35,10 +34,10 @@ getLetters = do
 runGeneralUpdatePattern :: Aff Unit
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
-  (Tuple update _) <- liftEffect $ runD3M enter []
+  (Tuple update _) <- liftEffect $ runD3M enter
   forever $ do
     newletters <- liftEffect $ getLetters
-    _          <- liftEffect $ runD3M (update newletters) newletters
+    _          <- liftEffect $ runD3M (update newletters)
     delay (Milliseconds 2300.0) -- NB this has to be a smidge longer than any transitions in the update!
 
 svgAttributes :: Array Chainable
@@ -61,7 +60,7 @@ offsetXByIndex d i = offset + ((indexIsNumber i) * factor)
 textFromDatum :: Datum -> String
 textFromDatum = singleton <<< datumIsChar
 
-enter :: forall m. MonadState (Array Char) m => D3Tagless m => m ((Array Char) -> m D3Selection_)
+enter :: forall m. D3Tagless m => m ((Array Char) -> m D3Selection_)
 enter = do 
   root        <- attach "div#gup"
   svg         <- append root $ node Svg svgAttributes -- TODO attributes first a la hologen
