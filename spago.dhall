@@ -13,6 +13,7 @@ You can edit this file as you like.
   , "either"
   , "foldable-traversable"
   , "functions"
+  , "identity"
   , "integers"
   , "math"
   , "maybe"

@@ -46,9 +46,9 @@ foreign import data D3Attr :: Type
 -- NB D3 returns the selection after setting an Attr but we will only capture Selections that are 
 -- meaningfully different _as_ selections, we're not chaining them in the same way
 -- foreign import d3GetAttr_ :: String -> D3Selection -> ???? -- solve the ???? as needed later
-foreign import d3AddTransition :: D3Selection_ -> Transition -> D3Selection_ -- this is the PS transition record
-foreign import d3SetAttr_      :: String      -> D3Attr -> D3Selection_ -> D3Selection_
-foreign import d3SetText_      :: D3Attr      -> D3Selection_ -> D3Selection_
+foreign import d3AddTransition_ :: D3Selection_ -> Transition -> D3Selection_ -- this is the PS transition record
+foreign import d3SetAttr_       :: String      -> D3Attr -> D3Selection_ -> D3Selection_
+foreign import d3SetText_       :: D3Attr      -> D3Selection_ -> D3Selection_
 
 foreign import emptyD3Data_ :: D3Data_ -- probably just null, could this be monoid too??? ie Last (Maybe D3Data_)
 
@@ -188,3 +188,19 @@ zoomExtent :: { bottom :: Number
               , top :: Number
               } -> ZoomExtent
 zoomExtent = ZoomExtent
+
+
+-- show functions that are used for the string version of the interpreter and also for debugging inside Selection.js
+foreign import showSelectAllInDOM_          :: forall selection. Selector -> String -> selection
+foreign import showSelectAll_               :: forall selection. Selector -> String -> selection -> selection
+foreign import showEnterAndAppend_          :: forall selection. Element -> selection -> selection
+foreign import showExit_                    :: forall selection. selection -> selection
+foreign import showAddTransition_           :: forall selection. selection -> Transition -> selection 
+foreign import showRemoveSelection_         :: forall selection. selection -> selection
+foreign import showAppend_                  :: forall selection. Element -> selection -> selection
+foreign import showKeyFunction_             :: forall selection d. Array d -> ComputeKeyFunction_ -> selection -> selection
+foreign import showData_                    :: forall selection d. Array d -> selection -> selection
+foreign import showSetAttr_                 :: forall selection. String -> D3Attr -> selection -> selection
+foreign import showSetText_                 :: forall selection. D3Attr -> selection -> selection
+foreign import showAttachZoomDefaultExtent_ :: forall selection. selection -> ZoomConfigDefault_ -> selection
+foreign import showAttachZoom_              :: forall selection. selection -> ZoomConfig_ -> selection

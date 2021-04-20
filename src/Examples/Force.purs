@@ -8,12 +8,12 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, cursor, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, width, x1, x2, y1, y2)
-import D3.Interpreter.Tagless (class D3Tagless, D3M(..), append, attach, join, attachZoom, runD3M)
+import D3.Interpreter.Tagless (class D3Tagless, D3M(..), append, attach, attachZoom, join, runD3M, runPrinter)
 import D3.Scales (d3SchemeCategory10_)
 import D3.Selection (D3Selection_, D3Simulation_, DragBehavior(..), Element(..), Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), makeProjection, node)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
-import Data.Tuple (Tuple(..))
+import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -53,8 +53,12 @@ drawGraph = do
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
   let graph = readGraphFromFileContents forceJSON
   
-  -- providing the type guidance to the compiler in the result here selects the appropriate interpreter
+  -- type qualification necessary here because we're discarding the result of enter
   (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (enter widthHeight graph)
+  -- in contrast, string version of interpreter doesn't need qualification here because we use result
+  printedScript <- liftEffect $ runPrinter (enter widthHeight graph) "Force Layout Script"
+  log $ snd printedScript
+  log $ fst printedScript
   pure unit
 
 -- | recipe for this force layout graph
@@ -103,7 +107,7 @@ enter (Tuple w h) model = do
 
   let _ = startSimulation_ simulation_
 
-  pure svg
+  pure svg'
 
 -- this is boilerplate but...typed attribute setters facilitate typeclass based conversions
 -- we give the chart our Model type but behind the scenes it is mutated by D3 and additionally

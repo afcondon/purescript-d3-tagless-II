@@ -28,8 +28,8 @@ data Attribute = Attribute Label Attr
 
 data Attr = StringAttr (Attrib String)
           | NumberAttr (Attrib Number)
-          | NWUAttr (Attrib NWU)
-          | ArrayAttr (Attrib (Array Number))
+          | NWUAttr    (Attrib NWU)
+          | ArrayAttr  (Attrib (Array Number))
 
 unbox :: ∀ a. Attr -> a
 unbox = 
@@ -42,9 +42,9 @@ unbox =
     (NumberAttr (Fn a))     -> unsafeCoerce a
     (NumberAttr (FnI a))    -> unsafeCoerce a
 
-    (NWUAttr (Static a)) -> unsafeCoerce "NWU-static" -- a
-    (NWUAttr (Fn a))     -> unsafeCoerce (\d -> "NWU-lambda") -- a
-    (NWUAttr (FnI a))    -> unsafeCoerce $ mkFn2 (\d i -> "NWU-di") -- a
+    (NWUAttr (Static a))    -> unsafeCoerce "NWU-static" -- a
+    (NWUAttr (Fn a))        -> unsafeCoerce (\d -> "NWU-lambda") -- a
+    (NWUAttr (FnI a))       -> unsafeCoerce $ mkFn2 (\d i -> "NWU-di") -- a
 
     (ArrayAttr (Static a))  -> unsafeCoerce a
     (ArrayAttr (Fn a))      -> unsafeCoerce a
