@@ -1,25 +1,25 @@
 module D3.Examples.Tree.Radial where
 
-import D3.Attributes.Sugar (classed, dy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x)
-
 import Affjax (Error, printError)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (Datum)
+import D3.Attributes.Sugar (classed, dy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x)
 import D3.Interpreter (class D3Tagless, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
+import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, hasChildren_, hierarchy_, initRadialTree, radialLink, readJSON_)
 import D3.Layouts.Hierarchical as H
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), node, zoomExtent, zoomRange)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
-import Data.Tuple (Tuple(..))
+import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (pi)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (*>), (-), (/), (<), (<>), (==), (>=))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (-), (/), (<), (<>), (==), (>=))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.HTML (window)
 import Web.HTML.Window (innerHeight, innerWidth)
@@ -44,7 +44,12 @@ drawTree = do
 
   case readTreeFromFileContents widthHeight treeJSON of
     (Left error)      -> liftEffect $ log $ printError error
-    (Right treeModel) -> liftEffect $ runD3M (enter widthHeight treeModel) *> pure unit
+    (Right treeModel) -> liftEffect do
+      (_ :: Tuple D3Selection_ Unit) <- runD3M (enter widthHeight treeModel)
+      printedScript <- runPrinter (enter widthHeight treeModel) "Radial Tree Script"
+      log $ snd printedScript
+      log $ fst printedScript
+      pure unit
 
 
 
@@ -100,8 +105,10 @@ makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig
     root       = D3HierarchicalNode (unsafeCoerce root_)
 
 -- | recipe for a radial tree
-enter :: forall m v. Bind m => D3Tagless D3Selection_ m =>
-  Tuple Number Number -> (Model String v) -> m D3Selection_
+enter :: forall m v selection. 
+  Bind m => 
+  D3Tagless selection m =>
+  Tuple Number Number -> (Model String v) -> m selection
 enter (Tuple width height) model = do
   root      <- attach "div#rtree"
   svg       <- root      `append` (node Svg   svgAttributes)

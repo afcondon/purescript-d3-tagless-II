@@ -33,12 +33,19 @@ instance d3Tagless :: D3Tagless String D3PrinterM where
     modify_ (\s -> s <> "\nappending "    <> show element <> " to " <> selection <> "\n" <> attributeString)
     pure "append"
   join selection (Join j) = do
+    let attributeString = foldl applyChainableString selection j.behaviour
     modify_ (\s -> s <> "\nentering a "   <> show j.element <> " for each datum" )
     pure "join"
   join selection (JoinGeneral j) = do
-    modify_ (\s -> s <> "\nentering a "   <> show j.element <> " for each datum" )
+    let enterAttributes  = foldl applyChainableString selection j.behaviour.enter
+        exitAttributes   = foldl applyChainableString selection j.behaviour.exit
+        updateAttributes = foldl applyChainableString selection j.behaviour.update
+    modify_ (\s -> s <> "\n\tenter behaviour: " <> enterAttributes)
+    modify_ (\s -> s <> "\n\tupdate behaviour: " <> updateAttributes)
+    modify_ (\s -> s <> "\n\texit behaviour: " <> exitAttributes)
     pure "join"
   join selection (JoinSimulation j) = do
+    let attributeString = foldl applyChainableString selection j.behaviour
     modify_ (\s -> s <> "\nentering a "   <> show j.element <> " for each datum" )
     pure "join"
   attachZoom selection zoomConfig = do
