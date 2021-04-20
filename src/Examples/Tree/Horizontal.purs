@@ -1,16 +1,16 @@
 module D3.Examples.Tree.Horizontal where
 
-import D3.Attributes.Sugar
-import D3.Layouts.Hierarchical
+import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
+import D3.Layouts.Hierarchical (D3HierarchicalNode(..), HorizontalTreeConfig, Model, TreeConfig(..), TreeJson_, hasChildren_, hierarchy_, horizontalLink, initHorizontalTree, readJSON_)
 
 import Affjax (Error, printError)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
-import D3.Interpreter.Tagless (class D3Tagless, append, attach, join, attachZoom, runD3M)
+import D3.Interpreter (class D3Tagless, append, attach, attachZoom, (<+>))
+import D3.Interpreter.D3 (runD3M)
 import D3.Layouts.Hierarchical as H
-import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), makeProjection, node)
+import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), node)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -18,7 +18,7 @@ import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (*>), (+), (-), (/), (<>))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.HTML (window)
 import Web.HTML.Window (innerHeight, innerWidth)
@@ -133,21 +133,21 @@ enter model = do
   nodes     <- container `append` (node Group [ classed "nodes"])
   labels    <- container `append` (node Group [ classed "labels"])
 
-  linkJoinSelection_ <- join links $ Join {
+  linkJoinSelection_ <- links <+> Join {
       element   : Path
     , key       : UseDatumAsKey
     , "data"    : H.links_ model.root_
     , behaviour : enterLinks
   }
 
-  nodeJoinSelection_ <- join nodes $ Join {
+  nodeJoinSelection_ <- nodes <+> Join {
       element   : Circle
     , key       : UseDatumAsKey
     , "data"    : H.descendants_ model.root_
     , behaviour : enterNodes
   }
 
-  labelJoinSelection_ <- join labels $ Join {
+  labelJoinSelection_ <- labels <+> Join {
       element   : Text
     , key       : UseDatumAsKey
     , "data"    : H.descendants_ model.root_

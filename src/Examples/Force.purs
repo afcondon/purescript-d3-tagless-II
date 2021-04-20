@@ -8,7 +8,9 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, cursor, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, width, x1, x2, y1, y2)
-import D3.Interpreter.Tagless (class D3Tagless, D3M(..), append, attach, attachZoom, join, runD3M, runPrinter)
+import D3.Interpreter
+import D3.Interpreter.D3
+import D3.Interpreter.String
 import D3.Scales (d3SchemeCategory10_)
 import D3.Selection (D3Selection_, D3Simulation_, DragBehavior(..), Element(..), Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), makeProjection, node)
 import Data.Either (Either(..))

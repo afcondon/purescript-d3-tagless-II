@@ -1,16 +1,15 @@
-module D3.Interpreter.Tagless where
+module D3.Interpreter.D3 where
 
-import D3.Selection
-import Prelude
-
-import Control.Monad.State (class MonadState, State, StateT, get, modify, modify_, put, runStateT)
+import Control.Monad.State (class MonadState, StateT, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
+import D3.Interpreter (class D3Tagless)
 import D3.Layouts.Simulation (defaultSimulationDrag_, onTick_)
+import D3.Selection (Chainable(..), D3Selection_, D3_Node(..), DragBehavior(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_)
 import Data.Foldable (foldl)
-import Data.Identity (Identity)
 import Data.Tuple (Tuple)
 import Effect (Effect)
-import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Class (class MonadEffect)
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, pure, show, unit, ($), (<$>))
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
 -- also not really making a ton of use of StateT, but it is good to have a 
@@ -26,18 +25,6 @@ derive newtype instance bindD3M        :: Bind              (D3M selection)
 derive newtype instance monadD3M       :: Monad             (D3M selection)
 derive newtype instance monadStateD3M  :: MonadState  Unit  (D3M selection) 
 derive newtype instance monadEffD3M    :: MonadEffect       (D3M selection)
-
--- TODO see whether it can be useful to extend the interpreter here, for different visualization types
--- in particular, it could be good to have Simulation do it's join function by putting nodes / links
--- into both DOM and Simulation for example (and current implementation is gross and wrong)
-class (Monad m) <= D3Tagless selection m where
-  attach :: Selector                  -> m selection
-  append :: selection      -> D3_Node -> m selection
-  join   :: ∀ a. selection -> Join a  -> m selection
-
-  attachZoom :: selection -> ZoomConfig -> m selection
-
-infix 4 join as <+>
 
 runD3M :: forall a. D3M D3Selection_  a-> Effect (Tuple a Unit)
 runD3M (D3M state) = runStateT state unit
@@ -128,48 +115,4 @@ applyChainableD3 selection_ (TransitionT chain transition) = do
   let tHandler = d3AddTransition_ selection_ transition
       _        = foldl applyChainableD3 tHandler chain
   selection_ -- NB we return selection, not transition
-
-newtype D3PrinterM a = D3PrinterM (StateT String Effect a) -- TODO s/Effect/Identity
-
-runPrinter :: D3PrinterM String -> String -> Effect (Tuple String String) -- TODO s/Effect/Identity
-runPrinter (D3PrinterM state) initialString = runStateT state initialString
-
-derive newtype instance functorD3PrinterM     :: Functor           D3PrinterM
-derive newtype instance applyD3PrinterM       :: Apply             D3PrinterM
-derive newtype instance applicativeD3PrinterM :: Applicative       D3PrinterM
-derive newtype instance bindD3PrinterM        :: Bind              D3PrinterM
-derive newtype instance monadD3PrinterM       :: Monad             D3PrinterM
-derive newtype instance monadStateD3PrinterM  :: MonadState String D3PrinterM 
-derive newtype instance monadEffD3PrinterM    :: MonadEffect       D3PrinterM
-
-instance d3Tagless :: D3Tagless String D3PrinterM where
-  attach selector = do
-    modify_ (\s -> s <> "\nattaching to " <> selector <> " in DOM" )
-    pure "attach"
-  append selection node = do
-    modify_ (\s -> s <> "\nappending "    <> show node <> " to " <> selection)
-    pure "append"
-  join selection (Join j) = do
-    modify_ (\s -> s <> "\nentering a "   <> show j.element <> " for each datum" )
-    pure "join"
-  join selection (JoinGeneral j) = do
-    modify_ (\s -> s <> "\nentering a "   <> show j.element <> " for each datum" )
-    pure "join"
-  join selection (JoinSimulation j) = do
-    modify_ (\s -> s <> "\nentering a "   <> show j.element <> " for each datum" )
-    pure "join"
-  attachZoom selection zoomConfig = do
-    modify_ (\s -> s <> "\nattaching a zoom handler to " <> selection)
-    pure "attachZoom"
-
-
-applyChainableString :: String -> Chainable -> String
-applyChainableString selection  = 
-  case _ of 
-    (AttrT (Attribute label attr)) -> showSetAttr_ label (unbox attr) selection
-    (TextT (Attribute label attr)) -> showSetText_ (unbox attr) selection 
-    RemoveT                        -> showRemoveSelection_ selection
-    (TransitionT chain transition) -> do 
-      let tString = showAddTransition_ selection transition
-      foldl applyChainableString tString chain
 

@@ -4,7 +4,8 @@ import D3.Attributes.Sugar
 
 import Control.Monad.Rec.Class (forever)
 import D3.Attributes.Instances (Datum, Index, datumIsChar, indexIsNumber)
-import D3.Interpreter.Tagless (class D3Tagless, append, attach, runD3M, (<+>))
+import D3.Interpreter (class D3Tagless, append, attach, (<+>))
+import D3.Interpreter.D3 (runD3M)
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), node, node_)
 import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
