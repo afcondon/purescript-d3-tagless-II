@@ -13,7 +13,7 @@ class (Monad m) <= D3Tagless selection m where
   append :: selection      -> D3_Node -> m selection
   join   :: ∀ a. selection -> Join a  -> m selection
 
-  attachZoom :: selection -> ZoomConfig -> m selection
+  attachZoom :: selection -> ZoomConfig -> m selection -- this could very well be an extension of the monad
 
 infix 4 join as <+>
 
