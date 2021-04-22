@@ -16,7 +16,7 @@ type NodeID = Int
 data MetaTreeNode = 
     Empty
   | AttachNode String
-  | AppendNode D3_Node
+  | AppendNode Element
   -- TODO if datum type can be peeled off the Join type, just store the Join directly
   | JoinSimpleNode     NodeID Element Keys (Array Chainable)
   | JoinGeneralNode    NodeID Element Keys EnterUpdateExit
@@ -48,16 +48,21 @@ derive newtype instance monadEffD3MetaTreeM    :: MonadEffect         D3MetaTree
 insertInScriptTree :: ScriptTree -> MetaTreeNode -> ScriptTree
 insertInScriptTree (ScriptTree id nodeMap) newNode = ScriptTree (id + 1) (insert id newNode nodeMap)
 
+insertAttributeInScriptTree :: ScriptTree -> Chainable -> ScriptTree
+insertAttributeInScriptTree (ScriptTree id nodeMap) attr = ScriptTree (id + 1) (insert id (AttrNode attr) nodeMap)
+
 instance d3Tagless :: D3InterpreterM NodeID D3MetaTreeM where
   attach selector = do
     (ScriptTree id _) <- get
     modify_ (\s -> insertInScriptTree s (AttachNode selector))
     pure (id + 1)
 
-  append selection node = do
+  append selection (D3_Node element attributes) = do
     (ScriptTree id _) <- get
-    modify_ (\s -> insertInScriptTree s (AppendNode node))
-    pure (id + 1)
+    modify_ (\s -> insertInScriptTree s (AppendNode element))
+    modify_ (\s -> foldl insertAttributeInScriptTree s attributes)
+    (ScriptTree nextId _) <- get
+    pure nextId
 
   join selection theJoin = do
     (ScriptTree id _) <- get
