@@ -21,9 +21,11 @@ data MetaTreeNode =
   | JoinSimpleNode     NodeID Element Keys (Array Chainable)
   | JoinGeneralNode    NodeID Element Keys EnterUpdateExit
   | JoinSimulationNode NodeID Element Keys (Array Chainable)
+  -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
   | ZoomNode ZoomConfig
-  | AttrNode Chainable
+  | AttrNode Chainable -- actually only Attr and Text
   | TransitionNode Transition
+  | RemoveNode
 
 type MetaTree = Map NodeID MetaTreeNode
 data ScriptTree = ScriptTree Int MetaTree
@@ -37,19 +39,27 @@ initialMetaTree = ScriptTree 0 empty
 runMetaTree :: D3MetaTreeM NodeID -> Effect (Tuple NodeID ScriptTree)
 runMetaTree (D3MetaTreeM state) = runStateT state initialMetaTree
 
-derive newtype instance functorD3MetaTreeM     :: Functor             D3MetaTreeM
-derive newtype instance applyD3MetaTreeM       :: Apply               D3MetaTreeM
-derive newtype instance applicativeD3MetaTreeM :: Applicative         D3MetaTreeM
-derive newtype instance bindD3MetaTreeM        :: Bind                D3MetaTreeM
-derive newtype instance monadD3MetaTreeM       :: Monad               D3MetaTreeM
+derive newtype instance functorD3MetaTreeM     :: Functor               D3MetaTreeM
+derive newtype instance applyD3MetaTreeM       :: Apply                 D3MetaTreeM
+derive newtype instance applicativeD3MetaTreeM :: Applicative           D3MetaTreeM
+derive newtype instance bindD3MetaTreeM        :: Bind                  D3MetaTreeM
+derive newtype instance monadD3MetaTreeM       :: Monad                 D3MetaTreeM
 derive newtype instance monadStateD3MetaTreeM  :: MonadState ScriptTree D3MetaTreeM 
-derive newtype instance monadEffD3MetaTreeM    :: MonadEffect         D3MetaTreeM
+derive newtype instance monadEffD3MetaTreeM    :: MonadEffect           D3MetaTreeM
 
 insertInScriptTree :: ScriptTree -> MetaTreeNode -> ScriptTree
+insertInScriptTree (ScriptTree id nodeMap) newNode@(TransitionNode transition) = ScriptTree (id + 1) (insert id newNode nodeMap)
 insertInScriptTree (ScriptTree id nodeMap) newNode = ScriptTree (id + 1) (insert id newNode nodeMap)
 
 insertAttributeInScriptTree :: ScriptTree -> Chainable -> ScriptTree
-insertAttributeInScriptTree (ScriptTree id nodeMap) attr = ScriptTree (id + 1) (insert id (AttrNode attr) nodeMap)
+insertAttributeInScriptTree (ScriptTree id nodeMap) = 
+  case _ of -- the transition attribute is an exception, it can have further (Array Chainable)
+    attr@(AttrT _) -> ScriptTree (id + 1) (insert id (AttrNode attr) nodeMap)
+    text@(TextT _) -> ScriptTree (id + 1) (insert id (AttrNode text) nodeMap)
+    RemoveT        -> ScriptTree (id + 1) (insert id RemoveNode nodeMap)
+    transition@(TransitionT chain config) ->
+      insertInScriptTree (ScriptTree id nodeMap) (TransitionNode config) -- TODO recurse on the chain part
+
 
 instance d3Tagless :: D3InterpreterM NodeID D3MetaTreeM where
   attach selector = do
