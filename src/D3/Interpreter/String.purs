@@ -1,6 +1,6 @@
 module D3.Interpreter.String where
 
-import D3.Interpreter (class D3Tagless)
+import D3.Interpreter (class D3InterpreterM)
 import D3.Selection (Chainable(..), D3_Node(..), Join(..), showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
 import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, discard, pure, show, (<>))
 
@@ -24,7 +24,7 @@ derive newtype instance monadD3PrinterM       :: Monad             D3PrinterM
 derive newtype instance monadStateD3PrinterM  :: MonadState String D3PrinterM 
 derive newtype instance monadEffD3PrinterM    :: MonadEffect       D3PrinterM
 
-instance d3Tagless :: D3Tagless String D3PrinterM where
+instance d3Tagless :: D3InterpreterM String D3PrinterM where
   attach selector = do
     modify_ (\s -> s <> "\nattaching to " <> selector <> " in DOM" )
     pure "attach"

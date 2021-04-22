@@ -2,7 +2,7 @@ module D3.Interpreter.D3 where
 
 import Control.Monad.State (class MonadState, StateT, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
-import D3.Interpreter (class D3Tagless)
+import D3.Interpreter (class D3InterpreterM)
 import D3.Layouts.Simulation (defaultSimulationDrag_, onTick_)
 import D3.Selection (Chainable(..), D3Selection_, D3_Node(..), DragBehavior(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_)
 import Data.Foldable (foldl)
@@ -29,7 +29,7 @@ derive newtype instance monadEffD3M    :: MonadEffect       (D3M selection)
 runD3M :: forall a. D3M D3Selection_  a-> Effect (Tuple a Unit)
 runD3M (D3M state) = runStateT state unit
 
-instance d3TaglessD3M :: D3Tagless D3Selection_ (D3M D3Selection_) where
+instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
   attach selector = pure $ d3SelectAllInDOM_ selector 
 
   append selection_ (D3_Node element attributes) = do

@@ -67,18 +67,19 @@ makeProjection = unsafeCoerce
 
 data DragBehavior = DefaultDrag | NoDrag | CustomDrag (D3Selection_ -> Unit)
 
-type JoinParams d r = 
+type JoinParams d r = -- the 
   { element    :: Element -- what we're going to insert in the DOM
   , key        :: Keys    -- how D3 is going to identify data so that 
   , "data"     :: Array d -- the data we're actually joining at this point
   | r
   }
+-- TODO the type parameter d here is an impediment to the meta interpreter, possible rethink ?
 data Join d = Join           (JoinParams d (behaviour   :: Array Chainable))
             | JoinGeneral    (JoinParams d (behaviour   :: EnterUpdateExit)) -- what we're going to do for each set (enter, exit, update) each refresh of data
             | JoinSimulation (JoinParams d (behaviour   :: Array Chainable
                                           , onTick     :: Array Chainable
                                           , tickName   :: String
-                                          , onDrag     :: DragBehavior
+                                          , onDrag     :: DragBehavior -- TODO suspect this should be added to language like Zoom is
                                           , simulation :: D3Simulation_)) -- simulation joins are a bit different
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName

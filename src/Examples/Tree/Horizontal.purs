@@ -7,7 +7,7 @@ import Affjax (Error, printError)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (Datum)
-import D3.Interpreter (class D3Tagless, append, attach, attachZoom, (<+>))
+import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Layouts.Hierarchical as H
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), node)
@@ -119,7 +119,7 @@ makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig
     root       = D3HierarchicalNode (unsafeCoerce root_)
 
 -- | recipe for a horizontal tree
-enter :: forall m v selection. Bind m => D3Tagless selection m => H.Model String v -> m selection
+enter :: forall m v selection. Bind m => D3InterpreterM selection m => H.Model String v -> m selection
 enter model = do
   -- TODO inherently gross to case, fix model and or enter function
   let config = case model.treeConfig of

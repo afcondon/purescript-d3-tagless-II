@@ -5,15 +5,18 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, dy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x)
-import D3.Interpreter (class D3Tagless, append, attach, attachZoom, (<+>))
+import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
+import D3.Interpreter.MetaTree (MetaTreeNode, ScriptTree(..), runMetaTree)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, hasChildren_, hierarchy_, initRadialTree, radialLink, readJSON_)
 import D3.Layouts.Hierarchical as H
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), node, zoomExtent, zoomRange)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
+import Data.Map (toUnfoldable)
 import Data.Tuple (Tuple(..), fst, snd)
+import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -46,9 +49,13 @@ drawTree = do
     (Left error)      -> liftEffect $ log $ printError error
     (Right treeModel) -> liftEffect do
       (_ :: Tuple D3Selection_ Unit) <- runD3M (enter widthHeight treeModel)
-      printedScript <- runPrinter (enter widthHeight treeModel) "Radial Tree Script"
+      printedScript <- runPrinter  (enter widthHeight treeModel) "Radial Tree Script"
+      metaScript    <- runMetaTree (enter widthHeight treeModel)
       log $ snd printedScript
       log $ fst printedScript
+      let (ScriptTree _ treeMap) = snd metaScript
+          (_ :: Array (Tuple Int MetaTreeNode)) = spy "script map" $ toUnfoldable treeMap
+      log $ "Number of nodes in script: " <> (show $ fst metaScript)
       pure unit
 
 
@@ -107,7 +114,7 @@ makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig
 -- | recipe for a radial tree
 enter :: forall m v selection. 
   Bind m => 
-  D3Tagless selection m =>
+  D3InterpreterM selection m =>
   Tuple Number Number -> (Model String v) -> m selection
 enter (Tuple width height) model = do
   root      <- attach "div#rtree"

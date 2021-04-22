@@ -66,7 +66,7 @@ drawGraph = do
 -- | recipe for this force layout graph
 enter :: forall m link node selection r. 
   Bind m => 
-  D3Tagless selection m => 
+  D3InterpreterM selection m => 
   Tuple Number Number ->
   { links :: Array link, nodes :: Array node | r } -> 
   m selection -- TODO is it right to return selection_ instead of simulation_? does it matter? 

@@ -4,7 +4,7 @@ import D3.Attributes.Sugar
 
 import Control.Monad.Rec.Class (forever)
 import D3.Attributes.Instances (Datum, Index, datumIsChar, indexIsNumber)
-import D3.Interpreter (class D3Tagless, append, attach, (<+>))
+import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), node, node_)
 import Data.Array (catMaybes)
@@ -61,7 +61,7 @@ offsetXByIndex d i = offset + ((indexIsNumber i) * factor)
 textFromDatum :: Datum -> String
 textFromDatum = singleton <<< datumIsChar
 
-enter :: forall m. D3Tagless D3Selection_ m => m ((Array Char) -> m D3Selection_)
+enter :: forall m. D3InterpreterM D3Selection_ m => m ((Array Char) -> m D3Selection_)
 enter = do 
   root        <- attach "div#gup"
   svg         <- append root $ node Svg svgAttributes -- TODO attributes first a la hologen
