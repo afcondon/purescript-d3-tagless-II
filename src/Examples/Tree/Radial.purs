@@ -53,8 +53,9 @@ drawTree = do
       metaScript    <- runMetaTree (enter widthHeight treeModel)
       log $ snd printedScript
       log $ fst printedScript
-      let (ScriptTree _ treeMap) = snd metaScript
+      let (ScriptTree _ treeMap links) = snd metaScript
           (_ :: Array (Tuple Int MetaTreeNode)) = spy "script map" $ toUnfoldable treeMap
+          (_ :: Array (Tuple Int Int)) = spy "link map" $ links
       log $ "Number of nodes in script: " <> (show $ fst metaScript)
       pure unit
 

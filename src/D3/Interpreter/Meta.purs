@@ -7,10 +7,10 @@ import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Layouts.Hierarchical (Tree(..))
 import D3.Selection (Chainable(..), D3_Node(..), Element, EnterUpdateExit, Join(..), Keys, ZoomConfig, Transition, showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
-import Data.Array (foldl)
+import Data.Array (foldl, (:))
 import Data.Map (Map, empty, insert)
 import Data.Traversable (traverse)
-import Data.Tuple (Tuple)
+import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 
@@ -30,12 +30,12 @@ data MetaTreeNode =
   | RemoveNode
 
 type MetaTree = Map NodeID MetaTreeNode
-data ScriptTree = ScriptTree Int MetaTree
+data ScriptTree = ScriptTree Int MetaTree (Array (Tuple NodeID NodeID))
 
 newtype D3MetaTreeM a = D3MetaTreeM (StateT ScriptTree Effect a)
 
 initialMetaTree :: ScriptTree
-initialMetaTree = ScriptTree 0 empty 
+initialMetaTree = ScriptTree 0 empty []
 
 -- runMetaTree :: D3MetaTreeM MetaTree -> Effect (Tuple MetaTree MetaTree) 
 runMetaTree :: D3MetaTreeM NodeID -> Effect (Tuple NodeID ScriptTree)
@@ -49,49 +49,60 @@ derive newtype instance monadD3MetaTreeM       :: Monad                 D3MetaTr
 derive newtype instance monadStateD3MetaTreeM  :: MonadState ScriptTree D3MetaTreeM 
 derive newtype instance monadEffD3MetaTreeM    :: MonadEffect           D3MetaTreeM
 
-insertInScriptTree :: MetaTreeNode -> D3MetaTreeM NodeID
+insertInScriptTree :: NodeID -> MetaTreeNode -> D3MetaTreeM Unit
 -- returns the number of the next node
-insertInScriptTree transition@(TransitionNode chain config) = do
-  (ScriptTree id nodeMap) <- get
-  modify_ (\s -> ScriptTree (id + 1) (insert id transition nodeMap))
-  _ <- traverse insertAttributeInScriptTree chain
-  (ScriptTree nextId _) <- get
-  pure nextId
-insertInScriptTree newNode = do
-  (ScriptTree id nodeMap) <- get
-  modify_ (\s -> ScriptTree (id + 1) (insert id newNode nodeMap))
-  (ScriptTree nextId _) <- get
-  pure (id + 1)
+insertInScriptTree parentID transition@(TransitionNode chain config) = do
+  (ScriptTree id nodeMap links) <- get
+  modify_ (\s -> ScriptTree (id + 1) (insert id transition nodeMap) ((Tuple parentID (id+1)) : links))
+  _ <- traverse (insertAttributeInScriptTree parentID) chain
+  pure unit
 
-insertAttributeInScriptTree :: Chainable -> D3MetaTreeM NodeID
-insertAttributeInScriptTree = 
+insertInScriptTree parentID newNode = do
+  (ScriptTree id nodeMap links) <- get
+  modify_ (\s -> ScriptTree (id + 1) (insert id newNode nodeMap) ((Tuple parentID (id+1)) : links))
+  pure unit
+
+insertAttributeInScriptTree :: NodeID -> Chainable -> D3MetaTreeM Unit
+insertAttributeInScriptTree parentID = 
   case _ of 
       -- simple attributes are just nodes
-      attr@(AttrT _) -> insertInScriptTree (AttrNode attr)
-      text@(TextT _) -> insertInScriptTree (AttrNode text)
-      RemoveT        -> insertInScriptTree RemoveNode
+      attr@(AttrT _) -> insertInScriptTree parentID (AttrNode attr)
+      text@(TextT _) -> insertInScriptTree parentID (AttrNode text)
+      RemoveT        -> insertInScriptTree parentID RemoveNode
 -- the transition attribute is an exception, it can have further (Array Chainable)
       transition@(TransitionT chain config) ->
-        insertInScriptTree (TransitionNode chain config)
+        insertInScriptTree parentID (TransitionNode chain config)
   
 
 
 instance d3Tagless :: D3InterpreterM NodeID D3MetaTreeM where
-  attach selector = insertInScriptTree (AttachNode selector)
+  attach selector = do
+    insertInScriptTree 0 (AttachNode selector) -- TODO this could actually be a multiple insert
+    pure 1
 
-  append selection (D3_Node element attributes) = do
-    _ <- insertInScriptTree (AppendNode element)
-    _ <- traverse insertAttributeInScriptTree attributes
-    (ScriptTree nextId _) <- get
-    pure nextId
+  append nodeID (D3_Node element attributes) = do
+    insertInScriptTree nodeID (AppendNode element)
+    (ScriptTree id _ _) <- get
+    _ <- traverse (insertAttributeInScriptTree id) attributes
+    pure id -- this is the id of the AppendNode itself
 
-  join selection =
-    case _ of
-      (Join j)           -> insertInScriptTree (JoinSimpleNode     j.element j.key j.behaviour)
-      (JoinGeneral j)    -> insertInScriptTree (JoinGeneralNode    j.element j.key j.behaviour)
-      (JoinSimulation j) -> insertInScriptTree (JoinSimulationNode j.element j.key j.behaviour)
+  join nodeID (Join j)          = do
+    (ScriptTree id _ _) <- get
+    insertInScriptTree nodeID (JoinSimpleNode j.element j.key j.behaviour)
+    pure id
+  join nodeID (JoinGeneral j)   = do
+    (ScriptTree id _ _) <- get
+    insertInScriptTree nodeID (JoinGeneralNode j.element j.key j.behaviour)
+    pure id
+  join nodeID (JoinSimulation j)= do
+    (ScriptTree id _ _) <- get
+    insertInScriptTree nodeID (JoinSimulationNode j.element j.key j.behaviour)
+    pure id
 
-  attachZoom selection zoomConfig = pure 666 -- insertInScriptTree (ZoomNode zoomConfig)
+  attachZoom nodeID zoomConfig = do
+    (ScriptTree id _ _) <- get
+    insertInScriptTree nodeID (ZoomNode zoomConfig)
+    pure id
 
 
 applyChainableString :: String -> Chainable -> String
