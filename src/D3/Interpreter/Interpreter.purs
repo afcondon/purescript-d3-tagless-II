@@ -9,11 +9,12 @@ import Prelude (class Monad)
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
 -- into both DOM and Simulation for example (and current implementation is gross and wrong)
 class (Monad m) <= D3InterpreterM selection m where
-  attach :: Selector                  -> m selection
-  append :: selection      -> D3_Node -> m selection
-  join   :: ∀ a. selection -> Join a  -> m selection
+  attach :: Selector                         -> m selection
+  append :: selection          -> D3_Node    -> m selection
+  join   :: ∀ datum. selection -> Join datum -> m selection
 
-  attachZoom :: selection -> ZoomConfig -> m selection -- this could very well be an extension of the monad
+  -- TODO this could very well be an extension of the monad, see also Drag
+  attachZoom :: selection -> ZoomConfig -> m selection 
 
 infix 4 join as <+>
 

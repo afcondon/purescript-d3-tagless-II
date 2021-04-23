@@ -1,5 +1,5 @@
 module D3.Layouts.Hierarchical(
-    hasChildren_, hierarchy_, nodeSize_, readJSON_, links_, descendants_
+    hasChildren_, hierarchyFromJSON_, nodeSize_, readJSON_, links_, descendants_
   , module D3.Layouts.Hierarchical.Types
   , module D3.Layouts.Hierarchical.HorizontalTree
   , module D3.Layouts.Hierarchical.RadialTree
@@ -30,7 +30,7 @@ foreign import data D3Hierarchical_     :: Type
 
 foreign import readJSON_                :: String -> TreeJson_ -- TODO no error handling at all here RN
 
-foreign import hierarchy_               :: TreeJson_ -> D3HierarchicalNode_
+foreign import hierarchyFromJSON_       :: TreeJson_ -> D3HierarchicalNode_
 -- next some functions to make attributes, types are a bit sloppy here
 -- TODO tighten this up
 foreign import hasChildren_             :: Datum -> Boolean -- really only works on Datum when it's a D3HierarchicalNode_

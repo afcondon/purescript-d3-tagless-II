@@ -7,9 +7,9 @@ import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, dy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
-import D3.Interpreter.MetaTree (MetaTreeNode, ScriptTree(..), runMetaTree)
+import D3.Interpreter.MetaTree (MetaTreeNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, hasChildren_, hierarchy_, initRadialTree, radialLink, readJSON_)
+import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, hasChildren_, hierarchyFromJSON_, initRadialTree, radialLink, readJSON_)
 import D3.Layouts.Hierarchical as H
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), node, zoomExtent, zoomRange)
 import Data.Either (Either(..))
@@ -48,7 +48,6 @@ drawTree = do
   case readTreeFromFileContents widthHeight treeJSON of
     (Left error)      -> liftEffect $ log $ printError error
     (Right treeModel) -> liftEffect do
-      (_ :: Tuple D3Selection_ Unit) <- runD3M (enter widthHeight treeModel)
       printedScript <- runPrinter  (enter widthHeight treeModel) "Radial Tree Script"
       metaScript    <- runMetaTree (enter widthHeight treeModel)
       log $ snd printedScript
@@ -56,7 +55,11 @@ drawTree = do
       let (ScriptTree _ treeMap links) = snd metaScript
           (_ :: Array (Tuple Int MetaTreeNode)) = spy "script map" $ toUnfoldable treeMap
           (_ :: Array (Tuple Int Int)) = spy "link map" $ links
-      log $ "Number of nodes in script: " <> (show $ fst metaScript)
+          treeified = spy "script tree" $ snd metaScript
+          metaModel = makeModel widthHeight $ scriptTreeToJSON treeified
+  
+      
+      (_ :: Tuple D3Selection_ Unit) <- runD3M (enter widthHeight metaModel)
       pure unit
 
 
@@ -107,7 +110,7 @@ type TreeNode v = D3HierarchicalNode TreeNodeExtra v -- v is the value calculate
 makeModel :: forall d v. Tuple Number Number -> TreeJson_ -> Model d v
 makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig }
   where
-    root_      = hierarchy_ json
+    root_      = hierarchyFromJSON_ json
     treeConfig = initRadialTree width root_
     svgConfig  = { width, height }
     root       = D3HierarchicalNode (unsafeCoerce root_)

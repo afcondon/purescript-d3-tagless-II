@@ -4,7 +4,7 @@ exports.readJSON_ = filecontents => JSON.parse(filecontents)
 // foreign import d3Hierarchy              :: TreeJson -> D3Hierarchical
 // NB this chain of functions may not be appropriate in all cases, dates back to when only radial tree was wrapped
 // TODO replace with a configurable hierarchy function in PS and direct calls to hierarchy, sort etc as appropriate
-exports.hierarchy_ = json => d3.hierarchy(json).sort((a, b) => d3.ascending(a.data.name, b.data.name))
+exports.hierarchyFromJSON_ = json => d3.hierarchy(json).sort((a, b) => d3.ascending(a.data.name, b.data.name))
 
 // foreign import hasChildren              :: Datum -> Boolean
 exports.hasChildren_ = d => !d.children

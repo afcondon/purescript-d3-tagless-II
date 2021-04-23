@@ -5,12 +5,13 @@ import Prelude
 import Control.Monad.State (class MonadState, StateT, State, get, modify_, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Interpreter (class D3InterpreterM)
-import D3.Layouts.Hierarchical (Tree(..))
+import D3.Layouts.Hierarchical (D3HierarchicalNode_, Tree(..), TreeJson_, hierarchyFromJSON_)
 import D3.Selection (Chainable(..), D3_Node(..), Element, EnterUpdateExit, Join(..), Keys, ZoomConfig, Transition, showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
-import Data.Array (foldl, (:))
-import Data.Map (Map, empty, insert)
+import Data.Array (filter, foldl, (:))
+import Data.Map (Map, empty, insert, lookup)
+import Data.Maybe (fromMaybe)
 import Data.Traversable (traverse)
-import Data.Tuple (Tuple(..))
+import Data.Tuple (Tuple(..), snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 
@@ -29,10 +30,37 @@ data MetaTreeNode =
   | TransitionNode (Array Chainable) Transition
   | RemoveNode
 
-type MetaTree = Map NodeID MetaTreeNode
-data ScriptTree = ScriptTree Int MetaTree (Array (Tuple NodeID NodeID))
+instance showMetaTreeNode :: Show MetaTreeNode where -- super primitive implementation to get started
+  show Empty                      = "Empty"
+  show RemoveNode                 = "RemoveNode"
+  show (AttachNode _)             = "AttachNode"
+  show (AppendNode _)             = "AppendNode"
+  show (JoinSimpleNode _ _ _)     = "JoinSimpleNode"
+  show (JoinGeneralNode _ _ _)    = "JoinGeneralNode"
+  show (JoinSimulationNode _ _ _) = "JoinSimulationNode"
+  show (ZoomNode _)               = "ZoomNode"
+  show (AttrNode _)               = "AttrNode"
+  show (TransitionNode _ _)       = "TransitionNode"
+
+type MetaTreeMap = Map NodeID MetaTreeNode
+data ScriptTree = ScriptTree Int MetaTreeMap (Array (Tuple NodeID NodeID))
 
 newtype D3MetaTreeM a = D3MetaTreeM (StateT ScriptTree Effect a)
+
+-- this is the type that we will give to JS, prune out the empty child arrays and then pass to d3.hierarchy
+newtype MetaTreeNode_ = MetaTreeNode { name :: String, children :: Array MetaTreeNode_ }
+
+scriptTreeToJSON :: ScriptTree ->  TreeJson_
+scriptTreeToJSON (ScriptTree _ nodeMap links) = pruneEmptyChildren $ go 0
+  where
+    go :: NodeID -> MetaTreeNode_
+    go id = do
+      let children = snd <$> filter (\(Tuple parentID nodeID) -> parentID == id) links
+          nodeName = show $ fromMaybe Empty $ lookup id nodeMap
+      MetaTreeNode { name: nodeName, children: go <$> children }
+
+foreign import pruneEmptyChildren :: MetaTreeNode_ -> TreeJson_
+
 
 initialMetaTree :: ScriptTree
 initialMetaTree = ScriptTree 0 empty []

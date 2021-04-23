@@ -1,7 +1,7 @@
 module D3.Examples.Tree.Horizontal where
 
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
-import D3.Layouts.Hierarchical (D3HierarchicalNode(..), HorizontalTreeConfig, Model, TreeConfig(..), TreeJson_, hasChildren_, hierarchy_, horizontalLink, initHorizontalTree, readJSON_)
+import D3.Layouts.Hierarchical (D3HierarchicalNode(..), HorizontalTreeConfig, Model, TreeConfig(..), TreeJson_, hasChildren_, hierarchyFromJSON_, horizontalLink, initHorizontalTree, readJSON_)
 
 import Affjax (Error, printError)
 import Affjax as AJAX
@@ -113,7 +113,7 @@ type TreeNodeExtra = { name :: String }
 makeModel :: forall d v. Tuple Number Number -> TreeJson_ -> Model d v
 makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig }
   where
-    root_      = hierarchy_ json
+    root_      = hierarchyFromJSON_ json
     treeConfig = initHorizontalTree width height root_
     svgConfig  = { width, height }
     root       = D3HierarchicalNode (unsafeCoerce root_)
