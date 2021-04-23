@@ -39,28 +39,42 @@ readTreeFromFileContents :: forall r d v. Tuple Number Number -> Either Error { 
 readTreeFromFileContents widthHeight (Right { body } ) = Right $ makeModel widthHeight (readJSON_ body)
 readTreeFromFileContents _           (Left error)      = Left error
 
-drawTree :: Aff Unit
-drawTree = do
-  log "Radial tree example"
+getTreeViaAJAX :: forall d v. Aff (Either Error (Model d v))
+getTreeViaAJAX = do
+  widthHeight   <- liftEffect getWindowWidthHeight
+  treeJSON      <- AJAX.get ResponseFormat.string "http://localhost:1234/flare-2.json"
+  pure $ readTreeFromFileContents widthHeight treeJSON
+
+getMetaTree :: forall d v. Aff (Either Error (Model d v))
+getMetaTree = do
+  log "Getting meta-tree for radial tree example"
   widthHeight   <- liftEffect getWindowWidthHeight
   treeJSON      <- AJAX.get ResponseFormat.string "http://localhost:1234/flare-2.json"
 
   case readTreeFromFileContents widthHeight treeJSON of
-    (Left error)      -> liftEffect $ log $ printError error
-    (Right treeModel) -> liftEffect do
-      printedScript <- runPrinter  (enter widthHeight treeModel) "Radial Tree Script"
-      metaScript    <- runMetaTree (enter widthHeight treeModel)
-      log $ snd printedScript
-      log $ fst printedScript
+    (Left error)      -> pure $ Left error
+    (Right treeModel) -> do
+      metaScript <- liftEffect $ runMetaTree (enter widthHeight treeModel)
       let (ScriptTree _ treeMap links) = snd metaScript
           (_ :: Array (Tuple Int MetaTreeNode)) = spy "script map" $ toUnfoldable treeMap
-          (_ :: Array (Tuple Int Int)) = spy "link map" $ links
-          treeified = spy "script tree" $ snd metaScript
-          metaModel = makeModel widthHeight $ scriptTreeToJSON treeified
-  
-      
-      (_ :: Tuple D3Selection_ Unit) <- runD3M (enter widthHeight metaModel)
-      pure unit
+          (_ :: Array (Tuple Int Int))          = spy "link map" $ links
+          treeified                             = spy "script tree" $ snd metaScript
+      pure $ Right $ makeModel widthHeight $ scriptTreeToJSON treeified
+
+printTree :: forall v. Model String v -> Aff Unit
+printTree treeModel = liftEffect $ do
+  log "Radial tree example"
+  widthHeight <- getWindowWidthHeight
+  printedScript <- runPrinter  (enter widthHeight treeModel) "Radial Tree Script"
+  log $ snd printedScript
+  log $ fst printedScript
+  pure unit
+
+drawTree :: forall v. Model String v -> Aff Unit
+drawTree treeModel = liftEffect $ do
+  widthHeight <- getWindowWidthHeight
+  (_ :: Tuple D3Selection_ Unit) <- runD3M (enter widthHeight treeModel)
+  pure unit
 
 
 
