@@ -14,6 +14,7 @@ import D3.Layouts.Hierarchical as H
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), node)
 import Data.Either (Either(..))
 import Data.Tuple (Tuple, fst, snd)
+import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
@@ -54,12 +55,11 @@ getX d = node.x
 
 -- | Script components, attributes, transformations etc
 svgHeight :: HorizontalTreeConfig -> Number
-svgHeight config = config.x1 - config.x0 + (config.rootDx * 2.0)
+svgHeight config = config.x1 - config.x0 + config.rootDx * 2.0
 
 svgAttributes :: Number -> Number -> Array Chainable
 svgAttributes width heightSVG = [ viewBox 0.0 0.0 width heightSVG ]
 
--- translateContainer :: forall d v. x0 :: Number -> H.D3HierarchicalNode d v -> String
 translateContainer :: HorizontalTreeConfig -> (Datum -> String)
 translateContainer config = \d -> 
   "translate(" <> show (config.rootDy / 3.0) <> "," <> show (config.rootDx - config.x0) <> ")"
@@ -86,7 +86,7 @@ enter :: forall m v selection. Bind m => D3InterpreterM selection m => H.Model S
 enter model = do
   -- TODO inherently gross to case, fix model and or enter function
   let config = case model.treeConfig of
-                  (HorizontalTree c) -> c
+                  (HorizontalTree c) -> spy "Horizontal tree config: " c
                   _ -> { rootDx: 0.0, rootDy: 0.0, x0: 0.0, x1: 0.0 }
       viewbox = svgAttributes model.svgConfig.width (svgHeight config)
   root      <- attach "div#htree"
@@ -94,13 +94,12 @@ enter model = do
   container <- svg       `append` (node Group (containerAttributes config))
   links     <- container `append` (node Group [ classed "links"])
   nodes     <- container `append` (node Group [ classed "nodes"])
-  labels    <- container `append` (node Group [ classed "labels"])
 
   theLinks_ <- links <+> Join {
       element   : Path
     , key       : UseDatumAsKey
     , "data"    : H.links_ model.root_
-    , behaviour : [  strokeWidth   1.5
+    , behaviour : [ strokeWidth   1.5
                   , strokeColor   "#555"
                   , strokeOpacity 0.4
                   , fill          "none"
