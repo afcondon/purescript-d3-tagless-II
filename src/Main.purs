@@ -31,8 +31,8 @@ main = launchAff_  do
   treeJSON <- getTreeViaAJAX "http://localhost:1234/flare-2.json"
   -- draw a radial tree using the flare data
   sequence_ $ rmap drawUsingRadialLayout treeJSON
-  sequence_ $ rmap drawUsingHorizontalLayout treeJSON
+  -- sequence_ $ rmap drawUsingHorizontalLayout treeJSON
   -- extract the structure of the radial tree "D3 script" and draw a radial tree of this "meta" tree
-  -- sequence_ $ rmap drawMetaTree treeJSON
+  sequence_ $ rmap drawMetaTree treeJSON
 
   pure unit
