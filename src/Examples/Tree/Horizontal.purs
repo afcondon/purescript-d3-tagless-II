@@ -115,14 +115,15 @@ enter model = do
   }
 
   theNodes <- nodeJoin_ `append` 
-                (node Circle  [ fill (\d -> if hasChildren_ d then "#555" else "#999")
-                              , radius 2.5
+                (node Circle  [ fill (\d -> if hasChildren_ d then "#999" else "#555")
+                              , radius 12.0
+                              , strokeColor "white"
                               ])
 
   theLabels <- nodeJoin_ `append`
                 (node Text  [ dy         0.31
-                            , x          (\d -> if hasChildren_ d then (-6.0) else 6.0)
-                            , textAnchor (\d -> if hasChildren_ d then "end" else "start")
+                            , x          (\d -> if hasChildren_ d then 16.0 else (-6.0))
+                            , textAnchor (\d -> if hasChildren_ d then "start" else "end")
                             , text       labelName
                             ])
 

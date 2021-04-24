@@ -8,8 +8,9 @@ foreign import data D3HierarchicalNode_ :: Type
 
 data Tree a = Node a (Array (Tree a))
 
-data TreeConfig = RadialTree     RadialTreeConfig
-                | HorizontalTree HorizontalTreeConfig
+data TreeConfig = RadialTree        RadialTreeConfig
+                | HorizontalTree    HorizontalTreeConfig
+                | HorizontalCluster HorizontalClusterConfig
 
 -- bundles up the things that would be "in scope" for a D3 script rendering a Radial tree
 type RadialTreeConfig = { 
@@ -23,6 +24,12 @@ type HorizontalTreeConfig = {
   , rootDy :: Number
   , x0     :: Number
   , x1     :: Number
+}
+
+-- bundles up the things that would be "in scope" for a D3 script rendering a Horizontal tree
+type HorizontalClusterConfig = {
+    rootDx :: Number
+  , rootDy :: Number
 }
 
 -- TODO put in proxy fields here to carry the type allowing safe coerce of root etc

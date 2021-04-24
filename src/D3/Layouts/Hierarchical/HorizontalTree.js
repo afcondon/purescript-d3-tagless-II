@@ -1,6 +1,8 @@
 // foreign import d3InitTree:: forall a. D3Hierarchical -> Array Number -> D3HierarchicalNode_ 
 exports.initHorizontalTree_ = root => rootDxDy => d3.tree().nodeSize(rootDxDy)(root)
 
+// TODO expose nodeSize and separation separately and in the overall hierarchy module
+
 // foreign import d3LinkHorizontal_        :: Datum -> String
 // TODO this should be expressable in PureScript, not buried here in the FFI
 exports.linkHorizontal_ = d3.linkHorizontal().x(d => d.y).y(d => d.x)
@@ -15,3 +17,12 @@ exports.horizontalTreeX0X1_ = root => {
   });
   return { x0: x0, x1: x1 };
 }
+
+exports.initHorizontalCluster_ = root => rootDxDy => d3.cluster().nodeSize(rootDxDy)(root)
+exports.linkHorizontalCluster_ = d => {`
+  M${d.target.y}, ${d.target.x}
+  C${d.source.y + root.dy / 2},${d.target.x}
+   ${d.source.y + root.dy / 2},${d.source.x}
+   ${d.source.y},${d.source.x}
+`}
+
