@@ -19,12 +19,8 @@ main = launchAff_  do
 
   _ <- case treeJSON of
           (Left error) -> pure unit
-          (Right json) -> RadialTree.drawTree =<< makeModel initRadialTree json
-
-  json <- RadialTree.getMetaTreeJSON
-  let fuux = spy "json: " json
-  model <- makeModel initRadialTree json
-  let quux = spy "model: " model
-  baz <- RadialTree.drawTree model 
+          (Right json) -> do
+                RadialTree.drawTree =<< makeModel initRadialTree json
+                RadialTree.drawTree =<< makeModel initRadialTree =<< RadialTree.getMetaTreeJSON =<< makeModel initRadialTree json
 
   pure unit

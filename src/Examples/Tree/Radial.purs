@@ -6,9 +6,8 @@ import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.MetaTree (MetaTreeNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, getWindowWidthHeight, hasChildren_, initRadialTree, makeModel, radialLink)
+import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, getWindowWidthHeight, hasChildren_, radialLink)
 import D3.Layouts.Hierarchical as H
-import D3.Layouts.Hierarchical.Types (nullModel_)
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), node, zoomExtent, zoomRange)
 import Data.Map (toUnfoldable)
 import Data.Tuple (Tuple(..), fst, snd)
@@ -20,13 +19,10 @@ import Math (pi)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (-), (/), (<), (<>), (==), (>=))
 import Unsafe.Coerce (unsafeCoerce)
 
-getMetaTreeJSON :: forall v. Aff TreeJson_
-getMetaTreeJSON = do
+getMetaTreeJSON :: forall v. Model String v -> Aff TreeJson_
+getMetaTreeJSON model = do
   log "Getting meta-tree for radial tree example"
-  let -- these values are just placeholders - no data is used in producing metaTree
-      model       = nullModel_ "dummy" 0
-      widthHeight = Tuple 0.0 0.0
-  metaScript <- liftEffect $ runMetaTree (enter widthHeight model) -- no need for actual data in metaTree
+  metaScript <- liftEffect $ runMetaTree (enter (Tuple 0.0 0.0) model) -- no need for actual widthHeight in metaTree
   let (ScriptTree _ treeMap links) = snd metaScript
       (_ :: Array (Tuple Int MetaTreeNode)) = spy "script map" $ toUnfoldable treeMap
       (_ :: Array (Tuple Int Int))          = spy "link map" $ links
