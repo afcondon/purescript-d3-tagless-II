@@ -5,11 +5,12 @@ import D3.Layouts.Hierarchical.Types (D3HierarchicalNode_, TreeConfig(..), hNode
 import D3.Selection (Chainable(..))
 import Data.Array ((!!))
 import Data.Maybe (fromMaybe)
+import Data.Tuple (Tuple(..))
 import Prelude (($), (+), (/))
 
 -- this function is given an initialized hierarchy root and some config info
-initHorizontalTree :: Number -> Number -> D3HierarchicalNode_ -> TreeConfig
-initHorizontalTree width height root = do
+initHorizontalTree :: Tuple Number Number -> D3HierarchicalNode_ -> TreeConfig
+initHorizontalTree (Tuple width height) root = do
   let rootDx = 10.0
       rootHeight = hNodeHeight_ root
       rootDy = width / (height + 1.0)

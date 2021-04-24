@@ -1,51 +1,41 @@
 module D3.Examples.Tree.Horizontal where
 
-import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
-import D3.Layouts.Hierarchical (D3HierarchicalNode(..), HorizontalTreeConfig, Model, TreeConfig(..), TreeJson_, hasChildren_, hierarchyFromJSON_, horizontalLink, initHorizontalTree, readJSON_)
+import D3.Layouts.Hierarchical
 
-import Affjax (Error, printError)
+import Affjax (printError)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (Datum)
+import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
+import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical as H
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), node)
 import Data.Either (Either(..))
-import Data.Int (toNumber)
-import Data.Tuple (Tuple(..))
-import Effect (Effect)
+import Data.Tuple (Tuple, fst, snd)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>))
 import Unsafe.Coerce (unsafeCoerce)
-import Web.HTML (window)
-import Web.HTML.Window (innerHeight, innerWidth)
 
+-- TODO this can be made generic if parameterized with the "enter" function which is the D3 script
+printTree :: forall v. Model String v -> Aff Unit
+printTree treeModel = liftEffect $ do
+  log "Horizontal tree example"
+  widthHeight <- getWindowWidthHeight
+  printedScript <- runPrinter  (enter treeModel) "Horizontal Tree Script"
+  log $ snd printedScript
+  log $ fst printedScript
+  pure unit
 
-getWindowWidthHeight :: Effect (Tuple Number Number)
-getWindowWidthHeight = do
-  win <- window
-  width <- innerWidth win
-  height <- innerHeight win
-  pure $ Tuple (toNumber width) (toNumber height)
+drawTree :: forall v. Model String v -> Aff Unit
+drawTree treeModel = liftEffect $ do
+  widthHeight <- getWindowWidthHeight
+  (_ :: Tuple D3Selection_ Unit) <- runD3M (enter treeModel)
+  pure unit
 
-readTreeFromFileContents :: forall r v. Tuple Number Number -> Either Error { body ∷ String | r } -> Either Error (H.Model String v)
-readTreeFromFileContents widthHeight (Right { body } ) = Right $ makeModel widthHeight (readJSON_ body)
-readTreeFromFileContents _               (Left error)      = Left error
-
-drawTree :: Aff Unit
-drawTree = do
-  log "Radial tree example"
-  widthHeight   <- liftEffect getWindowWidthHeight
-  treeJSON      <- AJAX.get ResponseFormat.string "http://localhost:1234/flare-2.json"
-
-  case readTreeFromFileContents widthHeight treeJSON of
-    (Left error)      -> liftEffect $ log $ printError error
-    (Right treeModel) -> do
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (enter treeModel)
-      pure unit
 
 datumIsTreeNode :: forall d v. Datum -> D3HierarchicalNode d v
 datumIsTreeNode = unsafeCoerce
@@ -110,13 +100,6 @@ enterLabels = [ dy         0.31
 
 -- this is the extra data that is part of a Datum beyond the D3HierarchicalNode_ minimum
 type TreeNodeExtra = { name :: String }
-makeModel :: forall d v. Tuple Number Number -> TreeJson_ -> Model d v
-makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig }
-  where
-    root_      = hierarchyFromJSON_ json
-    treeConfig = initHorizontalTree width height root_
-    svgConfig  = { width, height }
-    root       = D3HierarchicalNode (unsafeCoerce root_)
 
 -- | recipe for a horizontal tree
 enter :: forall m v selection. Bind m => D3InterpreterM selection m => H.Model String v -> m selection

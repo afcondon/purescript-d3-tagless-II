@@ -9,3 +9,6 @@ exports.hNodeX_ = node => node.x;
 
 // hNodeY_      :: D3HierarchicalNode_ -> Number
 exports.hNodeY_ = node => node.y;
+
+// nullModel_ :: forall d v. d -> v -> Model d v
+exports.nullModel_ = d => v => { return { root_: null } }; 

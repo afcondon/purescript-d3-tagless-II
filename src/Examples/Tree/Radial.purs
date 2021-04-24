@@ -1,66 +1,39 @@
 module D3.Examples.Tree.Radial where
 
-import Affjax (Error, printError)
-import Affjax as AJAX
-import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, dy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.MetaTree (MetaTreeNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, hasChildren_, hierarchyFromJSON_, initRadialTree, radialLink, readJSON_)
+import D3.Layouts.Hierarchical (D3HierarchicalNode(..), Model, TreeJson_, getWindowWidthHeight, hasChildren_, initRadialTree, makeModel, radialLink)
 import D3.Layouts.Hierarchical as H
+import D3.Layouts.Hierarchical.Types (nullModel_)
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), node, zoomExtent, zoomRange)
-import Data.Either (Either(..))
-import Data.Int (toNumber)
 import Data.Map (toUnfoldable)
 import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy)
-import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (pi)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (-), (/), (<), (<>), (==), (>=))
 import Unsafe.Coerce (unsafeCoerce)
-import Web.HTML (window)
-import Web.HTML.Window (innerHeight, innerWidth)
 
-
-getWindowWidthHeight :: Effect (Tuple Number Number)
-getWindowWidthHeight = do
-  win <- window
-  width <- innerWidth win
-  height <- innerHeight win
-  pure $ Tuple (toNumber width) (toNumber height)
-
-readTreeFromFileContents :: forall r d v. Tuple Number Number -> Either Error { body ∷ String | r } -> Either Error (Model d v)
-readTreeFromFileContents widthHeight (Right { body } ) = Right $ makeModel widthHeight (readJSON_ body)
-readTreeFromFileContents _           (Left error)      = Left error
-
-getTreeViaAJAX :: forall d v. Aff (Either Error (Model d v))
-getTreeViaAJAX = do
-  widthHeight   <- liftEffect getWindowWidthHeight
-  treeJSON      <- AJAX.get ResponseFormat.string "http://localhost:1234/flare-2.json"
-  pure $ readTreeFromFileContents widthHeight treeJSON
-
-getMetaTree :: forall d v. Aff (Either Error (Model d v))
-getMetaTree = do
+getMetaTreeJSON :: forall v. Aff TreeJson_
+getMetaTreeJSON = do
   log "Getting meta-tree for radial tree example"
-  widthHeight   <- liftEffect getWindowWidthHeight
-  treeJSON      <- AJAX.get ResponseFormat.string "http://localhost:1234/flare-2.json"
+  let -- these values are just placeholders - no data is used in producing metaTree
+      model       = nullModel_ "dummy" 0
+      widthHeight = Tuple 0.0 0.0
+  metaScript <- liftEffect $ runMetaTree (enter widthHeight model) -- no need for actual data in metaTree
+  let (ScriptTree _ treeMap links) = snd metaScript
+      (_ :: Array (Tuple Int MetaTreeNode)) = spy "script map" $ toUnfoldable treeMap
+      (_ :: Array (Tuple Int Int))          = spy "link map" $ links
+      treeified                             = spy "script tree" $ snd metaScript
+  pure $ scriptTreeToJSON treeified
 
-  case readTreeFromFileContents widthHeight treeJSON of
-    (Left error)      -> pure $ Left error
-    (Right treeModel) -> do
-      metaScript <- liftEffect $ runMetaTree (enter widthHeight treeModel)
-      let (ScriptTree _ treeMap links) = snd metaScript
-          (_ :: Array (Tuple Int MetaTreeNode)) = spy "script map" $ toUnfoldable treeMap
-          (_ :: Array (Tuple Int Int))          = spy "link map" $ links
-          treeified                             = spy "script tree" $ snd metaScript
-      pure $ Right $ makeModel widthHeight $ scriptTreeToJSON treeified
-
+-- TODO this can be made generic if parameterized with the "enter" function which is the D3 script
 printTree :: forall v. Model String v -> Aff Unit
 printTree treeModel = liftEffect $ do
   log "Radial tree example"
@@ -120,14 +93,6 @@ svgAttributes = [
 -- this is the extra row info that is part of a Datum beyond the D3Tree minimum
 type TreeNodeExtra = { name :: String }
 type TreeNode v = D3HierarchicalNode TreeNodeExtra v -- v is the value calculated in the tree, ie for sum, count etc
-
-makeModel :: forall d v. Tuple Number Number -> TreeJson_ -> Model d v
-makeModel (Tuple width height) json = { json, root, root_, treeConfig, svgConfig }
-  where
-    root_      = hierarchyFromJSON_ json
-    treeConfig = initRadialTree width root_
-    svgConfig  = { width, height }
-    root       = D3HierarchicalNode (unsafeCoerce root_)
 
 -- | recipe for a radial tree
 enter :: forall m v selection. 

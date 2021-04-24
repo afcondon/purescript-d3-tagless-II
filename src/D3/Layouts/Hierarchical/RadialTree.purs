@@ -3,15 +3,17 @@ module D3.Layouts.Hierarchical.RadialTree(
   , initRadialTree
 ) where
 
+import D3.Layouts.Hierarchical.Types
+
 import D3.Attributes.Instances (Attribute(..), Datum, toAttr)
-import D3.Layouts.Hierarchical.Types 
 import D3.Selection (Chainable(..))
+import Data.Tuple (Tuple(..))
 import Math (pi)
 import Prelude (($), (*), (/))
 import Unsafe.Coerce (unsafeCoerce)
 
-initRadialTree :: Number -> D3HierarchicalNode_ -> TreeConfig-- effectful function on hierarchy
-initRadialTree width root = do
+initRadialTree :: Tuple Number Number -> D3HierarchicalNode_ -> TreeConfig-- effectful function on hierarchy
+initRadialTree (Tuple width _) root = do
   let config =  { size : [2.0 * pi, width / 2.0]
                 , separation: radialSeparationJS_
                 }

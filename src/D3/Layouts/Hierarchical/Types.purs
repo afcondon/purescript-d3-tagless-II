@@ -37,6 +37,9 @@ type Model d v = {
     , svgConfig  :: { width :: Number, height :: Number }
 }
 
+-- TODO hide this away completely, it's only used to feed into vis to make metatree where data is not used
+foreign import nullModel_ :: forall d v. d -> v -> Model d v
+
 -- the PureScript rep of opaque type D3HierarchicalNode_
 -- we can safely cast any D3HierarchicalNode_ to this if we know the types d and v
 -- there might be some way, passing proxies around, to enforce that constraint?

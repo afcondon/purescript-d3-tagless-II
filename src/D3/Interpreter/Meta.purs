@@ -61,7 +61,6 @@ scriptTreeToJSON (ScriptTree _ nodeMap links) = pruneEmptyChildren $ go 0
 
 foreign import pruneEmptyChildren :: MetaTreeNode_ -> TreeJson_
 
-
 initialMetaTree :: ScriptTree
 initialMetaTree = ScriptTree 0 empty []
 

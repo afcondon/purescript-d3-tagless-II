@@ -1,21 +1,64 @@
 module D3.Layouts.Hierarchical(
-    hasChildren_, hierarchyFromJSON_, nodeSize_, readJSON_, links_, descendants_
+    hasChildren_, hierarchyFromJSON_, nodeSize_, readJSON_, links_, descendants_, makeModel
+  , getWindowWidthHeight, getTreeViaAJAX
   , module D3.Layouts.Hierarchical.Types
   , module D3.Layouts.Hierarchical.HorizontalTree
   , module D3.Layouts.Hierarchical.RadialTree
 ) where
 
+import Prelude
+
+import Affjax (Error, URL)
+import Affjax as AJAX
+import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (Datum)
 import D3.Layouts.Hierarchical.HorizontalTree (horizontalLink, horizontalTreeX0X1, horizontalTreeX0X1_, initHorizontalTree, initHorizontalTree_, linkHorizontal_)
 import D3.Layouts.Hierarchical.RadialTree (initRadialTree, radialLink)
 import D3.Layouts.Hierarchical.Types (D3HierarchicalNode(..), D3HierarchicalNode_, HorizontalTreeConfig, Model, RadialTreeConfig, Tree(..), TreeConfig(..), TreeJson_, hNodeDepth_, hNodeHeight_, hNodeX_, hNodeY_)
 import D3.Selection (D3Data_)
+import Data.Bifunctor (rmap)
+import Data.Either (Either)
+import Data.Int (toNumber)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
-import Prelude (($))
+import Data.Tuple (Tuple(..), fst, snd)
+import Effect (Effect)
+import Effect.Aff (Aff)
+import Effect.Class (class MonadEffect, liftEffect)
+import Unsafe.Coerce (unsafeCoerce)
+import Web.HTML (window)
+import Web.HTML.Window (innerHeight, innerWidth)
 
 find :: D3HierarchicalNode_ -> (Datum -> Boolean) -> Maybe D3HierarchicalNode_
 find tree filter = toMaybe $ find_ tree filter
+
+getWindowWidthHeight :: Effect (Tuple Number Number)
+getWindowWidthHeight = do
+  win    <- window
+  width  <- innerWidth win
+  height <- innerHeight win
+  pure $ Tuple (toNumber width) (toNumber height)
+
+getTreeViaAJAX :: URL -> Aff (Either Error TreeJson_)
+getTreeViaAJAX url = do
+  result <-AJAX.get ResponseFormat.string url
+  pure $ rmap (\{body} -> readJSON_ body) result
+
+makeModel :: forall d v.
+  Bind Aff => 
+  MonadEffect Aff => 
+  (Tuple Number Number -> D3HierarchicalNode_ -> TreeConfig) ->
+  TreeJson_ -> 
+  Aff (Model d v)
+makeModel initFn json = do
+  widthHeight <- liftEffect $ getWindowWidthHeight
+  let 
+    root_      = hierarchyFromJSON_ json
+    treeConfig = initFn widthHeight root_
+    svgConfig  = { width: fst widthHeight, height: snd widthHeight }
+    root       = D3HierarchicalNode (unsafeCoerce root_)
+  pure $ { json, root, root_, treeConfig, svgConfig }
+
 
 -- | foreign functions needed for tree layouts
 -- TODO structures here carried over from previous interpreter - review and refactor
