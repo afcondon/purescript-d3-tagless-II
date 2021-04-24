@@ -6,7 +6,7 @@ import Affjax (printError)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (Datum)
-import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
+import D3.Attributes.Sugar (classed, cx, cy, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
@@ -71,32 +71,12 @@ containerAttributes config = [
   , transform [ translateContainer config ]
 ]
 
--- | instructions for entering the links of the radial tree
-enterLinks :: Array Chainable
-enterLinks = [  strokeWidth   1.5
-              , strokeColor   "#555"
-              , strokeOpacity 0.4
-              , fill          "none"
-              , horizontalLink
-              , x getY -- swap x and y for horizontal tree
-              , y getX -- swap y and x for horizontal tree
-              ] 
+-- translation for <g> containing the label (Text) and node (Circle)
+translateNode :: forall d v. D3HierarchicalNode d v -> String
+translateNode (D3HierarchicalNode d) = "translate(" <> show d.y <> "," <> show d.x <>")"
 
--- | instructions for entering the nodes of the radial tree
-enterNodes :: Array Chainable
-enterNodes =  [ fill (\d -> if hasChildren_ d then "#555" else "#999")
-              , radius 2.5
-              , x getY -- swap x and y for horizontal tree
-              , y getX -- swap y and x for horizontal tree
-              ]
-
--- | instructions for entering the labels of the radial tree
-enterLabels :: Array Chainable
-enterLabels = [ dy         0.31
-              , x          (\d -> if hasChildren_ d then (-6.0) else 6.0)
-              , textAnchor (\d -> if hasChildren_ d then "end" else "start")
-              , text       labelName
-              ]
+transformations :: forall d v. Array (D3HierarchicalNode d v -> String)
+transformations = [ translateNode ]
 
 -- this is the extra data that is part of a Datum beyond the D3HierarchicalNode_ minimum
 type TreeNodeExtra = { name :: String }
@@ -116,26 +96,36 @@ enter model = do
   nodes     <- container `append` (node Group [ classed "nodes"])
   labels    <- container `append` (node Group [ classed "labels"])
 
-  linkJoinSelection_ <- links <+> Join {
+  theLinks_ <- links <+> Join {
       element   : Path
     , key       : UseDatumAsKey
     , "data"    : H.links_ model.root_
-    , behaviour : enterLinks
+    , behaviour : [  strokeWidth   1.5
+                  , strokeColor   "#555"
+                  , strokeOpacity 0.4
+                  , fill          "none"
+                  , horizontalLink
+                  ]
   }
 
-  nodeJoinSelection_ <- nodes <+> Join {
-      element   : Circle
+  nodeJoin_ <- nodes <+> Join {
+      element   : Group
     , key       : UseDatumAsKey
     , "data"    : H.descendants_ model.root_
-    , behaviour : enterNodes
+    , behaviour : [ transform transformations ]
   }
 
-  labelJoinSelection_ <- labels <+> Join {
-      element   : Text
-    , key       : UseDatumAsKey
-    , "data"    : H.descendants_ model.root_
-    , behaviour : enterLabels
-  }
+  theNodes <- nodeJoin_ `append` 
+                (node Circle  [ fill (\d -> if hasChildren_ d then "#555" else "#999")
+                              , radius 2.5
+                              ])
+
+  theLabels <- nodeJoin_ `append`
+                (node Text  [ dy         0.31
+                            , x          (\d -> if hasChildren_ d then (-6.0) else 6.0)
+                            , textAnchor (\d -> if hasChildren_ d then "end" else "start")
+                            , text       labelName
+                            ])
 
   svgZ <- attachZoom container  
                     { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: model.svgConfig.height, right: model.svgConfig.width }

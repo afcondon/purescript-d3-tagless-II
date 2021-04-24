@@ -1,8 +1,9 @@
 // foreign import d3InitTree:: forall a. D3Hierarchical -> Array Number -> D3HierarchicalNode_ 
 exports.initHorizontalTree_ = root => rootDxDy => d3.tree().nodeSize(rootDxDy)(root)
 
-// foreign import d3LinkHorizontal_        :: Unit -> (Datum -> String)
-exports.linkHorizontal_ = () => d3.linkHorizontal().x(d => d.y).y(d => d.x)
+// foreign import d3LinkHorizontal_        :: Datum -> String
+// TODO this should be expressable in PureScript, not buried here in the FFI
+exports.linkHorizontal_ = d3.linkHorizontal().x(d => d.y).y(d => d.x)
 
 exports.horizontalTreeX0X1_ = root => {
   let x0 = Infinity;
