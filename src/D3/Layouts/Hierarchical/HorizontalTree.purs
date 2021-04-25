@@ -27,19 +27,3 @@ foreign import initHorizontalTree_ :: D3HierarchicalNode_ -> Array Number -> D3H
 foreign import linkHorizontal_     :: (Datum -> String) 
 foreign import horizontalTreeX0X1_ :: D3HierarchicalNode_ -> { x0 :: Number, x1 :: Number }
   
--- this function is given an initialized hierarchy root and some config info
-initHorizontalCluster :: Tuple Number Number -> D3HierarchicalNode_ -> TreeConfig
-initHorizontalCluster (Tuple width height) root = do
-  let rootDx = 10.0
-      rootHeight = spy "horizontal tree root height: " $ hNodeHeight_ root
-      rootDy = spy "root.dy: " $ width / (rootHeight + 1.0)
-      tree   = initHorizontalCluster_ root [rootDx, rootDy]
-  HorizontalCluster { rootDx, rootDy }
-
-horizontalClusterLink :: Chainable
-horizontalClusterLink = AttrT $ Attribute "d" $ toAttr linkHorizontalCluster_
-
-
-
-foreign import linkHorizontalCluster_ :: (Datum -> String) 
-foreign import initHorizontalCluster_ :: D3HierarchicalNode_ -> Array Number -> D3HierarchicalNode_ -- effectful function on hierarchy

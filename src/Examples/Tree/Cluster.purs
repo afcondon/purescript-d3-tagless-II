@@ -1,4 +1,4 @@
-module D3.Examples.Tree.Horizontal where
+module D3.Examples.Tree.Cluster where
 
 import D3.Layouts.Hierarchical
 
@@ -8,13 +8,13 @@ import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical as H
-import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), node)
+import D3.Selection (D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), node)
 import Data.Tuple (Tuple, fst, snd)
 import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (<>))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- TODO this can be made generic if parameterized with the "enter" function which is the D3 script
@@ -33,7 +33,6 @@ drawTree treeModel = liftEffect $ do
   (_ :: Tuple D3Selection_ Unit) <- runD3M (enter treeModel)
   pure unit
 
-
 datumIsTreeNode :: forall d v. Datum -> D3HierarchicalNode d v
 datumIsTreeNode = unsafeCoerce
 
@@ -49,23 +48,7 @@ getX :: Datum -> Number
 getX d = node.x
   where (D3HierarchicalNode node) = datumIsTreeNode d
 
--- | Script components, attributes, transformations etc
-svgHeight :: HorizontalTreeConfig -> Number
-svgHeight config = config.x1 - config.x0 + config.rootDx * 2.0
-
-svgAttributes :: Number -> Number -> Array Chainable
-svgAttributes width heightSVG = [ viewBox 0.0 0.0 width heightSVG ]
-
-translateContainer :: HorizontalTreeConfig -> (Datum -> String)
-translateContainer config = \d -> 
-  "translate(" <> show (config.rootDy / 3.0) <> "," <> show (config.rootDx - config.x0) <> ")"
-
-containerAttributes :: HorizontalTreeConfig -> Array Chainable
-containerAttributes config = [
-    fontFamily "sans-serif"
-  , fontSize   10.0
-  , transform [ translateContainer config ]
-]
+-- | Script components, attributes, transformations etc, different for TidyTree and Cluster
 
 -- translation for <g> containing the label (Text) and node (Circle)
 translateNode :: forall d v. D3HierarchicalNode d v -> String
@@ -80,14 +63,14 @@ type TreeNodeExtra = { name :: String }
 -- | recipe for a horizontal tree
 enter :: forall m v selection. Bind m => D3InterpreterM selection m => H.Model String v -> m selection
 enter model = do
-  -- TODO inherently gross to case, fix model and or enter function
   let config = case model.treeConfig of
-                  (HorizontalTree c) -> spy "Horizontal tree config: " c
-                  _ -> { rootDx: 0.0, rootDy: 0.0, x0: 0.0, x1: 0.0 }
-      viewbox = svgAttributes model.svgConfig.width (svgHeight config)
+                  (HorizontalCluster c) -> spy "Horizontal tree config: " c
+                  _ -> { rootDx: 0.0, rootDy: 0.0 }
+      viewbox = [ viewBox 0.0 0.0 model.svgConfig.width config.rootDy ]
   root      <- attach "div#htree"
   svg       <- root      `append` (node Svg viewbox)
-  container <- svg       `append` (node Group (containerAttributes config))
+  container <- svg       `append` (node Group [ fontFamily "sans-serif"
+                                              , fontSize   10.0 ] )
   links     <- container `append` (node Group [ classed "links"])
   nodes     <- container `append` (node Group [ classed "nodes"])
 

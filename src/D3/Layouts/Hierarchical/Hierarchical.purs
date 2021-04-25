@@ -3,6 +3,7 @@ module D3.Layouts.Hierarchical(
   , getWindowWidthHeight, getTreeViaAJAX
   , module D3.Layouts.Hierarchical.Types
   , module D3.Layouts.Hierarchical.HorizontalTree
+  , module D3.Layouts.Hierarchical.HorizontalCluster
   , module D3.Layouts.Hierarchical.RadialTree
 ) where
 
@@ -13,6 +14,7 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (Datum)
 import D3.Layouts.Hierarchical.HorizontalTree (horizontalLink, initHorizontalTree)
+import D3.Layouts.Hierarchical.HorizontalCluster (horizontalClusterLink, initHorizontalCluster)
 import D3.Layouts.Hierarchical.RadialTree (initRadialTree, radialLink)
 import D3.Layouts.Hierarchical.Types (D3HierarchicalNode(..), D3HierarchicalNode_, HorizontalTreeConfig, Model, RadialTreeConfig, Tree(..), TreeConfig(..), TreeJson_, hNodeDepth_, hNodeHeight_, hNodeX_, hNodeY_)
 import D3.Selection (D3Data_)
