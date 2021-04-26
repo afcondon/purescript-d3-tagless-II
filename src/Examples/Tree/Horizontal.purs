@@ -9,7 +9,7 @@ import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical as H
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), node)
-import Data.Tuple (Tuple, fst, snd)
+import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -22,7 +22,7 @@ printTree :: forall v. Model String v -> Aff Unit
 printTree treeModel = liftEffect $ do
   log "Horizontal tree example"
   widthHeight <- getWindowWidthHeight
-  printedScript <- runPrinter  (enter treeModel) "Horizontal Tree Script"
+  printedScript <- runPrinter  (enter widthHeight treeModel) "Horizontal Tree Script"
   log $ snd printedScript
   log $ fst printedScript
   pure unit
@@ -30,7 +30,7 @@ printTree treeModel = liftEffect $ do
 drawTree :: forall v. Model String v -> Aff Unit
 drawTree treeModel = liftEffect $ do
   widthHeight <- getWindowWidthHeight
-  (_ :: Tuple D3Selection_ Unit) <- runD3M (enter treeModel)
+  (_ :: Tuple D3Selection_ Unit) <- runD3M (enter widthHeight treeModel)
   pure unit
 
 
@@ -50,22 +50,15 @@ getX d = node.x
   where (D3HierarchicalNode node) = datumIsTreeNode d
 
 -- | Script components, attributes, transformations etc
-svgHeight :: HorizontalTreeConfig -> Number
-svgHeight config = config.x1 - config.x0 + config.rootDx * 2.0
+svgHeight :: Number -> Number -> Number -> Number
+svgHeight xMin xMax xOffset = xMax - xMin + xOffset * 2.0
 
 svgAttributes :: Number -> Number -> Array Chainable
 svgAttributes width heightSVG = [ viewBox 0.0 0.0 width heightSVG ]
 
-translateContainer :: HorizontalTreeConfig -> (Datum -> String)
-translateContainer config = \d -> 
-  "translate(" <> show (config.rootDy / 3.0) <> "," <> show (config.rootDx - config.x0) <> ")"
-
-containerAttributes :: HorizontalTreeConfig -> Array Chainable
-containerAttributes config = [
-    fontFamily "sans-serif"
-  , fontSize   10.0
-  , transform [ translateContainer config ]
-]
+translateContainer :: Number -> Number -> Number -> (Datum -> String)
+translateContainer xOffset yOffset xMin = \d -> 
+  "translate(" <> show (yOffset / 3.0) <> "," <> show (xOffset - xMin) <> ")"
 
 -- translation for <g> containing the label (Text) and node (Circle)
 translateNode :: forall d v. D3HierarchicalNode d v -> String
@@ -78,16 +71,19 @@ transformations = [ translateNode ]
 type TreeNodeExtra = { name :: String }
 
 -- | recipe for a horizontal tree
-enter :: forall m v selection. Bind m => D3InterpreterM selection m => H.Model String v -> m selection
-enter model = do
-  -- TODO inherently gross to case, fix model and or enter function
-  let config = case model.treeConfig of
-                  (HorizontalTree c) -> spy "Horizontal tree config: " c
-                  _ -> { rootDx: 0.0, rootDy: 0.0, x0: 0.0, x1: 0.0 }
-      viewbox = svgAttributes model.svgConfig.width (svgHeight config)
+enter :: forall m v selection. Bind m => D3InterpreterM selection m => 
+  Tuple Number Number -> H.Model String v -> m selection
+enter (Tuple width height) model = do
+  let xOffset = 10.0
+      yOffset = width / ((hNodeHeight_ model.root_) + 1.0)
+      { xMin, xMax, yMin, yMax } = treeMinMax_ model.root_
+      viewbox = svgAttributes model.svgConfig.width (svgHeight xMin xMax xOffset)
   root      <- attach "div#htree"
   svg       <- root      `append` (node Svg viewbox)
-  container <- svg       `append` (node Group (containerAttributes config))
+  container <- svg       `append` (node Group [ fontFamily "sans-serif"
+                                              , fontSize   10.0
+                                              , transform [ translateContainer xOffset yOffset xMin ]
+                                              ])
   links     <- container `append` (node Group [ classed "links"])
   nodes     <- container `append` (node Group [ classed "nodes"])
 

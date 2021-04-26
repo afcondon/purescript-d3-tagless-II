@@ -8,29 +8,32 @@ foreign import data D3HierarchicalNode_ :: Type
 
 data Tree a = Node a (Array (Tree a))
 
-data TreeConfig = RadialTree        RadialTreeConfig
-                | HorizontalTree    HorizontalTreeConfig
-                | HorizontalCluster HorizontalClusterConfig
+data TreeType   = TidyTree | Dendrogram
+data TreeLayout = Radial | Horizontal | Vertical
 
--- bundles up the things that would be "in scope" for a D3 script rendering a Radial tree
-type RadialTreeConfig = { 
-    size       :: Array Number
-  , separation :: Datum -> Datum -> Int
-  }
+-- data TreeConfig = RadialTree  RadialTreeConfig
+--                 | TidyTree    TidyTreeConfig
+--                 | ClusterTree ClusterTreeConfig
 
--- bundles up the things that would be "in scope" for a D3 script rendering a Horizontal tree
-type HorizontalTreeConfig = {
-    rootDx :: Number
-  , rootDy :: Number
-  , x0     :: Number
-  , x1     :: Number
-}
+-- -- bundles up the things that would be "in scope" for a D3 script rendering a Radial tree
+-- type RadialTreeConfig = { 
+--     size       :: Array Number
+--   , separation :: Datum -> Datum -> Int
+--   }
 
--- bundles up the things that would be "in scope" for a D3 script rendering a Horizontal tree
-type HorizontalClusterConfig = {
-    rootDx :: Number
-  , rootDy :: Number
-}
+-- -- bundles up the things that would be "in scope" for a D3 script rendering a Horizontal tree
+-- type TidyTreeConfig = {
+--     rootDx :: Number
+--   , rootDy :: Number
+--   , x0     :: Number
+--   , x1     :: Number
+-- }
+
+-- -- bundles up the things that would be "in scope" for a D3 script rendering a Horizontal tree
+-- type ClusterTreeConfig = {
+--     rootDx :: Number
+--   , rootDy :: Number
+-- }
 
 -- TODO put in proxy fields here to carry the type allowing safe coerce of root etc
 -- TODO need to define a model here that works for all hierarchic layouts, this has its origins in Radial tree only
@@ -40,7 +43,8 @@ type Model d v = {
       json       :: TreeJson_
     , root       :: D3HierarchicalNode d v
     , root_      :: D3HierarchicalNode_
-    , treeConfig :: TreeConfig
+    , treeType   :: TreeType
+    , treeLayout :: TreeLayout
     , svgConfig  :: { width :: Number, height :: Number }
 }
 
