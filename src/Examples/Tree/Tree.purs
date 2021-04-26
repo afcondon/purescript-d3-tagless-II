@@ -1,4 +1,4 @@
-module D3.Examples.Tree.Horizontal where
+module D3.Examples.Tree where
 
 import D3.Layouts.Hierarchical
 
@@ -8,13 +8,14 @@ import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical as H
-import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), node)
+import D3.Layouts.Hierarchical.Types (TreeLayout(..), TreeType(..))
+import D3.Selection (D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), node)
 import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (+), (<>), (/))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- TODO this can be made generic if parameterized with the "enter" function which is the D3 script
@@ -33,7 +34,6 @@ drawTree treeModel = liftEffect $ do
   (_ :: Tuple D3Selection_ Unit) <- runD3M (enter widthHeight treeModel)
   pure unit
 
-
 datumIsTreeNode :: forall d v. Datum -> D3HierarchicalNode d v
 datumIsTreeNode = unsafeCoerce
 
@@ -41,24 +41,15 @@ labelName :: Datum -> String
 labelName d = node."data".name
   where (D3HierarchicalNode node) = datumIsTreeNode d
 
-getY :: Datum -> Number
-getY d = node.y
-  where (D3HierarchicalNode node) = datumIsTreeNode d
+-- getY :: Datum -> Number
+-- getY d = node.y
+--   where (D3HierarchicalNode node) = datumIsTreeNode d
 
-getX :: Datum -> Number
-getX d = node.x
-  where (D3HierarchicalNode node) = datumIsTreeNode d
+-- getX :: Datum -> Number
+-- getX d = node.x
+--   where (D3HierarchicalNode node) = datumIsTreeNode d
 
--- | Script components, attributes, transformations etc
-svgHeight :: Number -> Number -> Number -> Number
-svgHeight xMin xMax xOffset = xMax - xMin + xOffset * 2.0
-
-svgAttributes :: Number -> Number -> Array Chainable
-svgAttributes width heightSVG = [ viewBox 0.0 0.0 width heightSVG ]
-
-translateContainer :: Number -> Number -> Number -> (Datum -> String)
-translateContainer xOffset yOffset xMin = \d -> 
-  "translate(" <> show (yOffset / 3.0) <> "," <> show (xOffset - xMin) <> ")"
+-- | Script components, attributes, transformations etc, different for TidyTree and Cluster
 
 -- translation for <g> containing the label (Text) and node (Circle)
 translateNode :: forall d v. D3HierarchicalNode d v -> String
@@ -70,19 +61,44 @@ transformations = [ translateNode ]
 -- this is the extra data that is part of a Datum beyond the D3HierarchicalNode_ minimum
 type TreeNodeExtra = { name :: String }
 
--- | recipe for a horizontal tree
+-- the goal is to make this work for (at least) the 6 combos of Layout & Type
+-- (and parameterizable to boot)
 enter :: forall m v selection. Bind m => D3InterpreterM selection m => 
   Tuple Number Number -> H.Model String v -> m selection
 enter (Tuple width height) model = do
   let xOffset = 10.0
-      yOffset = width / ((hNodeHeight_ model.root_) + 1.0)
-      { xMin, xMax, yMin, yMax } = treeMinMax_ model.root_
-      viewbox = svgAttributes model.svgConfig.width (svgHeight xMin xMax xOffset)
+      treeHeight = hNodeHeight_ model.root_
+      yOffset = width / (treeHeight + 1.0)
+      -- now all the layout specific things
+      -- TODO couldn't we hide this with typeclasses? i think we could....
+      treeLayout =
+        case model.treeType of
+          Dendrogram -> initCluster_ unit
+          TidyTree   -> initTree_ unit
+
+      treeLayout' = 
+        case model.treeLayout of
+          Horizontal -> treeLayout `treeSetNodeSize_` [xOffset, yOffset]
+          Vertical   -> treeLayout `treeSetNodeSize_` [xOffset, yOffset]
+          Radial     -> (treeLayout `treeSetSize_`     [width, height])
+                                    `treeSetSeparation_` radialSeparation
+      linkPath = 
+        case model.treeType, model.treeLayout of
+          Dendrogram, Horizontal -> horizontalClusterLink yOffset
+          Dendrogram, Vertical   -> horizontalClusterLink yOffset-- TODO obviously wrong
+          Dendrogram, Radial     -> radialLink _.x _.y
+
+          TidyTree, Horizontal  -> horizontalLink
+          TidyTree, Vertical    -> horizontalLink -- TODO obviously wrong
+          TidyTree, Radial      -> radialLink _.x _.y
+
+
+      tree = treeLayout' `treeSetRoot_` model.root_
+      viewbox = [ viewBox 0.0 0.0 width yOffset ]
   root      <- attach "div#htree"
   svg       <- root      `append` (node Svg viewbox)
   container <- svg       `append` (node Group [ fontFamily "sans-serif"
-                                              , fontSize   10.0
-                                              , transform [ translateContainer xOffset yOffset xMin ]
+                                              , fontSize   10.0 
                                               ])
   links     <- container `append` (node Group [ classed "links"])
   nodes     <- container `append` (node Group [ classed "nodes"])
@@ -95,7 +111,7 @@ enter (Tuple width height) model = do
                   , strokeColor   "#555"
                   , strokeOpacity 0.4
                   , fill          "none"
-                  , horizontalLink
+                  , linkPath
                   ]
   }
 
@@ -103,7 +119,7 @@ enter (Tuple width height) model = do
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : H.descendants_ model.root_
-    , behaviour : [ transform transformations ]
+    , behaviour : [ transform transformations ] -- TODO this is 
   }
 
   theNodes <- nodeJoin_ `append` 
