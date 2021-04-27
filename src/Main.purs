@@ -13,18 +13,9 @@ import Data.Foldable (sequence_)
 import Effect (Effect)
 import Effect.Aff (Aff, forkAff, launchAff_)
 
-drawUsingRadialLayout :: TreeJson_ -> Aff Unit
-drawUsingRadialLayout json = Radial.drawTree =<< makeModel TidyTree Radial json
-
-drawUsingHorizontalLayout :: TreeJson_ -> Aff Unit
-drawUsingHorizontalLayout json = Tree.drawTree =<< makeModel TidyTree Horizontal json
-
-drawUsingClusterLayout :: TreeJson_ -> Aff Unit
-drawUsingClusterLayout json = Tree.drawTree =<< makeModel Dendrogram Horizontal json
-
 drawMetaTree :: TreeJson_ -> Aff Unit
-drawMetaTree json = Tree.drawTree =<< makeModel TidyTree Horizontal =<< Radial.getMetaTreeJSON =<< makeModel TidyTree Radial json
-
+drawMetaTree json =
+  Tree.drawTree =<< makeModel TidyTree Horizontal =<< Radial.getMetaTreeJSON =<< makeModel TidyTree Radial json
 
 main :: Effect Unit
 main = launchAff_  do
@@ -33,10 +24,16 @@ main = launchAff_  do
 
   -- fetch an example model for the tree examples, the canonical flare dependency json in this case
   treeJSON <- getTreeViaAJAX "http://localhost:1234/flare-2.json"
-  -- draw a radial tree using the flare data
-  -- sequence_ $ rmap drawUsingRadialLayout treeJSON
-  sequence_ $ rmap drawUsingHorizontalLayout treeJSON
-  sequence_ $ rmap drawUsingClusterLayout treeJSON
+
+  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Radial json) treeJSON
+  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Radial json) treeJSON
+
+  sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Horizontal json) treeJSON
+  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Horizontal json) treeJSON
+
+  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Vertical json) treeJSON
+  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Vertical json) treeJSON
+
   -- extract the structure of the radial tree "D3 script" and draw a radial tree of this "meta" tree
   -- sequence_ $ rmap drawMetaTree treeJSON
 
