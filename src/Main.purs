@@ -4,8 +4,7 @@ import Prelude
 
 import D3.Examples.Force as Graph
 import D3.Examples.GUP (runGeneralUpdatePattern) as GUP
-import D3.Examples.Tree.Cluster as Cluster
-import D3.Examples.Tree.Horizontal as Tidy
+import D3.Examples.Tree as Tree
 import D3.Examples.Tree.Radial as Radial
 import D3.Layouts.Hierarchical (TreeJson_, getTreeViaAJAX, makeModel)
 import D3.Layouts.Hierarchical.Types (TreeLayout(..), TreeType(..))
@@ -18,13 +17,13 @@ drawUsingRadialLayout :: TreeJson_ -> Aff Unit
 drawUsingRadialLayout json = Radial.drawTree =<< makeModel TidyTree Radial json
 
 drawUsingHorizontalLayout :: TreeJson_ -> Aff Unit
-drawUsingHorizontalLayout json = Cluster.drawTree =<< makeModel TidyTree Horizontal json
+drawUsingHorizontalLayout json = Tree.drawTree =<< makeModel TidyTree Horizontal json
 
 drawUsingClusterLayout :: TreeJson_ -> Aff Unit
-drawUsingClusterLayout json = Cluster.drawTree =<< makeModel Dendrogram Horizontal json
+drawUsingClusterLayout json = Tree.drawTree =<< makeModel Dendrogram Horizontal json
 
 drawMetaTree :: TreeJson_ -> Aff Unit
-drawMetaTree json = Tidy.drawTree =<< makeModel TidyTree Horizontal =<< Radial.getMetaTreeJSON =<< makeModel TidyTree Radial json
+drawMetaTree json = Tree.drawTree =<< makeModel TidyTree Horizontal =<< Radial.getMetaTreeJSON =<< makeModel TidyTree Radial json
 
 
 main :: Effect Unit
