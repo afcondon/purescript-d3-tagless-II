@@ -47,12 +47,12 @@ exports.linkHorizontal_ = d3.linkHorizontal().x(d => d.y).y(d => d.x)
 exports.linkVertical_   = d3.linkHorizontal().x(d => d.x).y(d => d.y)
 
 // TODO this link function is actually the horizontal variant
-exports.linkClusterHorizontal_ = yOffset => d => {`
-  M${d.target.y}, ${d.target.x}
-  C${d.source.y + yOffset / 2},${d.target.x}
+exports.linkClusterHorizontal_ = yOffset => d => 
+  `M${d.target.y}, ${d.target.x}
+   C${d.source.y + yOffset / 2},${d.target.x}
    ${d.source.y + yOffset / 2},${d.source.x}
-   ${d.source.y},${d.source.x}
-`}
+   ${d.source.y},${d.source.x}`
+
 
 // foreign import d3LinkRadial_            :: (Datum -> Number) -> (Datum -> Number) -> (Datum -> String)
 exports.linkRadial_ = angleFn => radiusFn => d3.linkRadial().angle(angleFn).radius(radiusFn);

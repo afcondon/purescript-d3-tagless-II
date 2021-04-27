@@ -123,7 +123,7 @@ horizontalLink = AttrT $ Attribute "d" $ toAttr linkHorizontal_
 
 foreign import linkVertical_     :: (Datum -> String) 
 verticalLink :: Chainable
-verticalLink = AttrT $ Attribute "d" $ toAttr linkHorizontal_
+verticalLink = AttrT $ Attribute "d" $ toAttr linkVertical_
 
 foreign import linkClusterHorizontal_ :: Number -> (Datum -> String) 
 horizontalClusterLink :: Number -> Chainable

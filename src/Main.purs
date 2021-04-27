@@ -28,8 +28,8 @@ main = launchAff_  do
   -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Radial json) treeJSON
   -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Radial json) treeJSON
 
-  sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Horizontal json) treeJSON
-  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Horizontal json) treeJSON
+  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Horizontal json) treeJSON
+  sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Horizontal json) treeJSON
 
   -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Vertical json) treeJSON
   -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Vertical json) treeJSON

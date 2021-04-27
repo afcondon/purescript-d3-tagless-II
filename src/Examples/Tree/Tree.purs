@@ -22,7 +22,7 @@ import Unsafe.Coerce (unsafeCoerce)
 -- | it's parameterized rather heavily using the ScriptConfig record so that it can draw
 -- | six variations (TODO) of [Radial, Horizontal, Vertical] * [Dendrogram, TidyTree] 
 treeScript :: forall m v selection. Bind m => D3InterpreterM selection m => 
-  ScriptConfig String v -> H.Model String v -> m selection
+  ScriptConfig -> H.Model String v -> m selection
 treeScript config model = do
   root      <- attach config.selector
   svg       <- root      `append` (node Svg config.viewbox)
@@ -48,7 +48,8 @@ treeScript config model = do
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : H.descendants_ model.root_
-    , behaviour : [ transform config.transformations ] -- TODO this is still hardwired for Horizontal tree
+    -- there could be other stylistic stuff here but the transform is key structuring component
+    , behaviour : config.nodeTransform 
   }
 
   theNodes <- nodeJoin_ `append` 
@@ -109,19 +110,16 @@ labelName d = node."data".name
 reflectXY :: forall d v. D3HierarchicalNode d v -> String
 reflectXY (D3HierarchicalNode d) = "translate(" <> show d.y <> "," <> show d.x <>")"
 
--- transformations :: forall d v. Array (D3HierarchicalNode d v -> String)
--- transformations = [ reflectXY ]
-
 -- this is the extra data that is part of a Datum beyond the D3HierarchicalNode_ minimum
 type TreeNodeExtra = { name :: String }
 
-type ScriptConfig d v = { 
-    linkPath  :: Chainable
-  , selector  :: Selector
-  , offset    :: { x :: Number, y :: Number }
-  , tree      :: D3HierarchicalNode_
-  , viewbox   :: Array Chainable
-  , transformations :: Array (D3HierarchicalNode d v -> String)
+type ScriptConfig = { 
+    linkPath      :: Chainable
+  , selector      :: Selector
+  , offset        :: { x :: Number, y :: Number }
+  , tree          :: D3HierarchicalNode_
+  , viewbox       :: Array Chainable
+  , nodeTransform :: Array Chainable
 }
 -- | configure function which enables treeScript to be run for different layouts
 -- NB radial, vertical not yet working AND cluster not doing links 
@@ -130,7 +128,7 @@ configureAndRunScript :: forall m v selection.
   D3InterpreterM selection m => 
   Tuple Number Number -> H.Model String v -> m selection
 configureAndRunScript (Tuple width height ) model = 
-  treeScript { offset, selector, viewbox, tree, linkPath, transformations } model
+  treeScript { offset, selector, viewbox, tree, linkPath, nodeTransform } model
   where
     offset = { x: 10.0, y: width / ((hNodeHeight_ model.root_) + 1.0)}
 
@@ -171,15 +169,16 @@ configureAndRunScript (Tuple width height ) model =
         TidyTree, Vertical    -> "div#vtree"
         TidyTree, Radial      -> "div#rtree"
 
-    transformations = 
+    nodeTransform =
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> [ reflectXY ]
-        Dendrogram, Vertical   -> []
+        Dendrogram, Horizontal -> [ transform [ reflectXY ] ]
+        Dendrogram, Vertical   -> [] -- no transform required for vertical case
         Dendrogram, Radial     -> []
 
-        TidyTree, Horizontal  -> [ reflectXY ]
-        TidyTree, Vertical    -> []
+        TidyTree, Horizontal  -> [ transform [ reflectXY ] ]
+        TidyTree, Vertical    -> []  -- no transform required for vertical case
         TidyTree, Radial      -> []
+
 
 
 
