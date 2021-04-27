@@ -49,9 +49,11 @@ drawTree treeModel = liftEffect $ do
 
 -- three little transform functions to build up the transforms on nodes and labels
 rotate :: Number -> String
-rotate x       = show $ (x * 180.0 / pi - 90.0)
+rotate x = show $ (x * 180.0 / pi - 90.0)
+
 rotateCommon :: forall d v. D3HierarchicalNode d v -> String
 rotateCommon (D3HierarchicalNode d) = "rotate(" <> rotate d.x <> ")"
+
 rotateText2 :: forall d v. D3HierarchicalNode d v -> String
 rotateText2 (D3HierarchicalNode d) = -- TODO replace with nodeIsOnRHS 
   "rotate(" <> if d.x >= pi 

@@ -49,7 +49,7 @@ treeScript config model = do
     , key       : UseDatumAsKey
     , "data"    : H.descendants_ model.root_
     -- there could be other stylistic stuff here but the transform is key structuring component
-    , behaviour : config.nodeTransform 
+    , behaviour : config.nodeTransform -- <- the key positioning calculation for the tree!!!
   }
 
   theNodes <- nodeJoin_ `append` 
@@ -105,11 +105,6 @@ labelName :: Datum -> String
 labelName d = node."data".name
   where (D3HierarchicalNode node) = datumIsTreeNode d
 
--- translation for the <g> containing the label (Text) and node (Circle)
--- TODO move to Tree library
-reflectXY :: forall d v. D3HierarchicalNode d v -> String
-reflectXY (D3HierarchicalNode d) = "translate(" <> show d.y <> "," <> show d.x <>")"
-
 -- this is the extra data that is part of a Datum beyond the D3HierarchicalNode_ minimum
 type TreeNodeExtra = { name :: String }
 
@@ -130,7 +125,16 @@ configureAndRunScript :: forall m v selection.
 configureAndRunScript (Tuple width height ) model = 
   treeScript { offset, selector, viewbox, tree, linkPath, nodeTransform } model
   where
-    offset = { x: 10.0, y: width / ((hNodeHeight_ model.root_) + 1.0)}
+    offset = 
+      case model.treeType, model.treeLayout of
+        Dendrogram, Horizontal -> { x: 10.0, y: width / ((hNodeHeight_ model.root_) + 1.0)}
+        Dendrogram, Vertical   -> { x: width / 2.0, y: 10.0 }
+        Dendrogram, Radial     -> { x: 0.0, y: 0.0}
+
+        TidyTree, Horizontal   -> { x: 0.0, y: 0.0}
+        TidyTree, Vertical     -> { x: 0.0, y: 0.0}
+        TidyTree, Radial       -> { x: 0.0, y: 0.0}
+
 
     layout = 
       case model.treeType of
@@ -147,17 +151,25 @@ configureAndRunScript (Tuple width height ) model =
       layout' `treeSetRoot_` model.root_
 
     viewbox =
-      [ viewBox 0.0 0.0 width offset.y ]
+      case model.treeType, model.treeLayout of
+        Dendrogram, Horizontal -> [ viewBox 0.0 0.0 width offset.y ]
+        Dendrogram, Vertical   -> [ viewBox 0.0 0.0 width height ]
+        Dendrogram, Radial     -> [ viewBox (-width/2.0) (-height/2.0) width height ]
+
+        TidyTree, Horizontal   -> [ viewBox 0.0 0.0 width height ]
+        TidyTree, Vertical     -> [ viewBox 0.0 0.0 width height ]
+        TidyTree, Radial       -> [ viewBox (-width/2.0) (-height/2.0) width height ]
+
       
     linkPath =
       case model.treeType, model.treeLayout of
         Dendrogram, Horizontal -> horizontalClusterLink offset.y
-        Dendrogram, Vertical   -> horizontalClusterLink offset.y -- TODO obviously wrong
+        Dendrogram, Vertical   -> verticalClusterLink   offset.x 
         Dendrogram, Radial     -> radialLink _.x _.y
 
-        TidyTree, Horizontal  -> horizontalLink
-        TidyTree, Vertical    -> horizontalLink -- TODO obviously wrong
-        TidyTree, Radial      -> radialLink _.x _.y
+        TidyTree, Horizontal   -> horizontalLink
+        TidyTree, Vertical     -> verticalLink
+        TidyTree, Radial       -> radialLink _.x _.y
 
     selector =
       case model.treeType, model.treeLayout of
@@ -165,19 +177,19 @@ configureAndRunScript (Tuple width height ) model =
         Dendrogram, Vertical   -> "div#vdendro"
         Dendrogram, Radial     -> "div#rdendro"
 
-        TidyTree, Horizontal  -> "div#htree"
-        TidyTree, Vertical    -> "div#vtree"
-        TidyTree, Radial      -> "div#rtree"
+        TidyTree, Horizontal   -> "div#htree"
+        TidyTree, Vertical     -> "div#vtree"
+        TidyTree, Radial       -> "div#rtree"
 
     nodeTransform =
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> [ transform [ reflectXY ] ]
-        Dendrogram, Vertical   -> [] -- no transform required for vertical case
+        Dendrogram, Horizontal -> [ transform [ positionXYreflected ] ]
+        Dendrogram, Vertical   -> [ transform [ positionXY ] ]
         Dendrogram, Radial     -> []
 
-        TidyTree, Horizontal  -> [ transform [ reflectXY ] ]
-        TidyTree, Vertical    -> []  -- no transform required for vertical case
-        TidyTree, Radial      -> []
+        TidyTree, Horizontal   -> [ transform [ positionXYreflected ] ]
+        TidyTree, Vertical     -> [ transform [ positionXY ] ]  -- no transform required for vertical case
+        TidyTree, Radial       -> []
 
 
 

@@ -2,8 +2,8 @@ module D3.Layouts.Hierarchical(
     hasChildren_, hierarchyFromJSON_, readJSON_, links_, descendants_, makeModel
   , getWindowWidthHeight, getTreeViaAJAX, initTree_, initCluster_
   , treeSetRoot_, treeSetNodeSize_, treeSetSeparation_, treeMinMax_, treeSetSize_
-  , defaultSeparation, radialSeparation
-  , horizontalLink, radialLink, verticalLink, horizontalClusterLink
+  , defaultSeparation, radialSeparation, positionXY, positionXYreflected
+  , horizontalLink, radialLink, verticalLink, horizontalClusterLink, verticalClusterLink
   , D3TreeLike_
   , module D3.Layouts.Hierarchical.Types
 ) where
@@ -112,6 +112,7 @@ foreign import treeSetSeparation_ :: D3TreeLike_ -> (Fn2 D3HierarchicalNode_ D3H
 -- OTOH if it can be nicely written here, so much the better as custom separation and all _is_ necessary
 defaultSeparation :: Fn2 D3HierarchicalNode_ D3HierarchicalNode_ Number
 defaultSeparation = mkFn2 (\a b -> if (sharesParent a b) then 1.0 else 2.0)
+
 radialSeparation :: Fn2 D3HierarchicalNode_ D3HierarchicalNode_ Number 
 radialSeparation  = mkFn2 (\a b -> (if (sharesParent a b) then 1.0 else 2.0) / (hNodeDepth_ a))
 
@@ -129,9 +130,18 @@ foreign import linkClusterHorizontal_ :: Number -> (Datum -> String)
 horizontalClusterLink :: Number -> Chainable
 horizontalClusterLink yOffset = AttrT $ Attribute "d" $ toAttr (linkClusterHorizontal_ yOffset)
 
+foreign import linkClusterVertical_ :: Number -> (Datum -> String) 
+verticalClusterLink :: Number -> Chainable
+verticalClusterLink xOffset = AttrT $ Attribute "d" $ toAttr (linkClusterVertical_ xOffset)
+
 foreign import linkRadial_         :: (Datum -> Number) -> (Datum -> Number) -> (Datum -> String)
 radialLink :: forall a b. (a -> Number) -> (b -> Number) -> Chainable
 radialLink angleFn radius_Fn = do
   let radialFn = linkRadial_ (unsafeCoerce angleFn) (unsafeCoerce radius_Fn)
   AttrT $ Attribute "d" $ toAttr radialFn
 
+positionXYreflected :: forall d v. D3HierarchicalNode d v -> String
+positionXYreflected (D3HierarchicalNode d) = "translate(" <> show d.y <> "," <> show d.x <>")"
+
+positionXY :: forall d v. D3HierarchicalNode d v -> String
+positionXY (D3HierarchicalNode d) = "translate(" <> show d.y <> "," <> show d.x <>")"
