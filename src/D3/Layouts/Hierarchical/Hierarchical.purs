@@ -92,6 +92,7 @@ foreign import links_           :: D3HierarchicalNode_ -> Array D3Data_ -- TODO 
 -- TODO there's very likely some confusion here with foreign types D3TreeLike_ and D3HierarchicalNode_
 foreign import initTree_        :: Unit -> D3TreeLike_
 foreign import initCluster_     :: Unit -> D3TreeLike_
+foreign import initRadial_      :: Unit -> D3TreeLike_
 foreign import treeSetRoot_     :: D3TreeLike_ -> D3HierarchicalNode_ -> D3HierarchicalNode_
 foreign import treeSetSize_     :: D3TreeLike_ -> Array Number -> D3TreeLike_
 foreign import treeSetNodeSize_ :: D3TreeLike_ -> Array Number -> D3TreeLike_

@@ -19,6 +19,8 @@ exports.find_ = tree => filter => tree.find(filter)
 
 // foreign import initTree_ :: Unit -> D3TreeLike_
 exports.initTree_ = () => d3.tree()
+// foreign import initRadial :: Unit -> D3TreeLike_
+exports.initRadial_ = () => d3.tree()
 // foreign import initTree_ :: Unit -> D3TreeLike_
 exports.initCluster_ = () => d3.cluster()
 // foreign import treeSetRoot_ :: D3TreeLike_ -> D3HierarchicalNode_ -> D3HierarchicalNode_

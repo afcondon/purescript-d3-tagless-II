@@ -27,7 +27,7 @@ treeScript :: forall m v selection. Bind m => D3InterpreterM selection m =>
   ScriptConfig -> H.Model String v -> m selection
 treeScript config model = do
   root      <- attach config.selector
-  svg       <- root      `append` (node_ Svg ) -- config.viewbox)
+  svg       <- root      `append` (node Svg config.viewbox)
   container <- svg       `append` (node Group [ fontFamily "sans-serif"
                                               , fontSize   10.0
                                               ])
@@ -143,28 +143,28 @@ configureAndRunScript (Tuple width height ) model =
         TidyTree, Radial       -> { interChild: 0.0,  interLevel: 0.0} -- not sure this is used in radial case
 
     layout = 
-      case model.treeType of
-        Dendrogram -> initCluster_ unit
-        TidyTree   -> initTree_ unit
-
-    layout' = 
-      case model.treeLayout of
-        Horizontal -> layout `treeSetNodeSize_` [ spacing.interLevel, spacing.interChild ]
-        Vertical   -> layout `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-        Radial     -> (layout `treeSetSize_`    [ width / 4.0, svgHeight / 2.0 ]) `treeSetSeparation_` radialSeparation
+      case model.treeType, model.treeLayout of
+        Dendrogram, Horizontal -> (initCluster_ unit)   `treeSetNodeSize_` [ spacing.interLevel, spacing.interChild ]
+        Dendrogram, Vertical   -> (initCluster_ unit)   `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
+        Dendrogram, Radial     -> ((initCluster_ unit)  `treeSetSize_`     [ 2.0 * pi, (svgWidth / 2.0) ]) -- note that in radial case doesn't seem to be initialized by d3.cluster
+                                                        `treeSetSeparation_` radialSeparation
+        TidyTree  , Horizontal -> (initTree_ unit)      `treeSetNodeSize_` [ spacing.interLevel, spacing.interChild ]
+        TidyTree  , Vertical   -> (initTree_ unit)      `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
+        TidyTree  , Radial     -> ((initTree_ unit)     `treeSetSize_`     [ 2.0 * pi, svgHeight / 2.0 ])
+                                                        `treeSetSeparation_` radialSeparation
 
     tree =
-      layout' `treeSetRoot_` model.root_
+      layout `treeSetRoot_` model.root_
 
     viewbox =
       case model.treeType, model.treeLayout of
         Dendrogram, Horizontal -> [ viewBox 0.0 0.0 width (xMax - xMin + spacing.interLevel * 2.0) ]
         Dendrogram, Vertical   -> [ viewBox 0.0 0.0 width (xMax - xMin + spacing.interLevel * 2.0) ]
-        Dendrogram, Radial     -> [ viewBox (-width/2.0) (-height/2.0) width height ]
+        Dendrogram, Radial     -> [ viewBox (-svgWidth/2.0) (-svgHeight/2.0) svgWidth svgHeight ]
 
         TidyTree  , Horizontal -> [ viewBox 0.0 0.0 width (xMax - xMin + spacing.interLevel * 2.0) ]
         TidyTree  , Vertical   -> [ viewBox 0.0 0.0 width (xMax - xMin + spacing.interLevel * 2.0) ]
-        TidyTree  , Radial     -> [ viewBox (-width/2.0) (-height/2.0) width height ]
+        TidyTree  , Radial     -> [ viewBox (-svgWidth/2.0) (-svgHeight/2.0) svgWidth svgHeight ]
 
       
     linkPath =
