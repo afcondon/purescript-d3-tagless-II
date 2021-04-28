@@ -72,11 +72,11 @@ enter :: forall m link node selection r.
   m selection -- TODO is it right to return selection_ instead of simulation_? does it matter? 
 enter (Tuple w h) model = do
   root       <- attach "div#force"
-  svg        <- root `append` (node Svg   [ width w, height h, viewBox 0.0 0.0 w h ] )
+  svg        <- root `append` (node Svg   [ viewBox 0.0 0.0 1000.0 1000.0 ] )
   linksGroup <- svg  `append` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
-  let forces      = [ makeCenterForce w h
+  let forces      = [ makeCenterForce 500.0 500.0
                     , Force (ForceName "charge") ForceMany ]
       simulation_ = initSimulation forces model model.nodes model.links
 
@@ -102,7 +102,7 @@ enter (Tuple w h) model = do
     , onDrag    : DefaultDrag
   }
   
-  svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+  svg' <- svg `attachZoom`  { extent   : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                             , scale     : ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
                             , qualifier : "tree"
                             }

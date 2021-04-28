@@ -43,9 +43,7 @@ runGeneralUpdatePattern = do
 
 svgAttributes :: Array Chainable
 svgAttributes = [ -- TODO remove totally meaningless attributes only here to demo, fix viewbox width etc too
-    width   1000.0
-  , height  1000.0
-  , viewBox (-500.0) (-500.0) 1000.0 1000.0
+  viewBox 0.0 0.0 1000.0 1000.0
 ]
 
 -- attributes that use (\d -> <something>) or (\d i -> <something>) need type hints
@@ -55,7 +53,7 @@ type Model = Array Char
 offsetXByIndex :: Datum -> Index -> Number
 offsetXByIndex d i = offset + ((indexIsNumber i) * factor)
   where
-    offset = 500.0
+    offset = 50.0
     factor = 48.0
 
 textFromDatum :: Datum -> String

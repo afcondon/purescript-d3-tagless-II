@@ -9,6 +9,7 @@ import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical as H
 import D3.Layouts.Hierarchical.Types (TreeLayout(..), TreeType(..))
+import D3.Scales (d3SchemeCategory10_)
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), Selector, node)
 import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy)
@@ -37,7 +38,7 @@ treeScript config model = do
     , key       : UseDatumAsKey
     , "data"    : H.links_ model.root_
     , behaviour : [ strokeWidth   1.5
-                  , strokeColor   "#555"
+                  , strokeColor   config.color
                   , strokeOpacity 0.4
                   , fill          "none"
                   , config.linkPath
@@ -115,6 +116,7 @@ type ScriptConfig = {
   , tree          :: D3HierarchicalNode_
   , viewbox       :: Array Chainable
   , nodeTransform :: Array Chainable
+  , color         :: String
 }
 -- | configure function which enables treeScript to be run for different layouts
 -- NB radial, vertical not yet working AND cluster not doing links 
@@ -123,7 +125,7 @@ configureAndRunScript :: forall m v selection.
   D3InterpreterM selection m => 
   Tuple Number Number -> H.Model String v -> m selection
 configureAndRunScript (Tuple width height ) model = 
-  treeScript { offset, selector, viewbox, tree, linkPath, nodeTransform } model
+  treeScript { offset, selector, viewbox, tree, linkPath, nodeTransform, color } model
   where
     offset = 
       case model.treeType, model.treeLayout of
@@ -190,6 +192,16 @@ configureAndRunScript (Tuple width height ) model =
         TidyTree, Horizontal   -> [ transform [ positionXYreflected ] ]
         TidyTree, Vertical     -> [ transform [ positionXY ] ]  -- no transform required for vertical case
         TidyTree, Radial       -> []
+
+    color =
+      case model.treeType, model.treeLayout of
+        Dendrogram, Horizontal -> d3SchemeCategory10_ 1.0
+        Dendrogram, Vertical   -> d3SchemeCategory10_ 2.0
+        Dendrogram, Radial     -> d3SchemeCategory10_ 3.0
+
+        TidyTree, Horizontal   -> d3SchemeCategory10_ 4.0
+        TidyTree, Vertical     -> d3SchemeCategory10_ 5.0
+        TidyTree, Radial       -> d3SchemeCategory10_ 6.0
 
 
 

@@ -11,23 +11,33 @@
     svg {
       overflow: visible;
     }
-    div#gup, div#tree, div#force {
-      position: absolute;
-      top: 0;
-      left: 0;
+    body {
+      display: grid;
+      grid-gap: 10px;
+      grid-template-columns: repeat(4, 1fr);
+    }
+    div {
+      background-color: beige;
+    }
+    h2 {
+      font-family: sans-serif;
+      color: darkseagreen;
+      margin: 0;
+      font-size: 80pt;
+      opacity: 0.5;
     }
   </style>
   <title>Document</title>
 </head>
 <body>
-  <div id="gup"></div>
-  <div id="htree"></div>
-  <div id="vtree"></div>
-  <div id="rtree"></div>
-  <div id="hdendro"></div>
-  <div id="vdendro"></div>
-  <div id="rdendro"></div>
-  <div id="force"></div>
+  <div id="htree"><h2>htree</h2></div>
+  <div id="vtree"><h2>vtree</h2></div>
+  <div id="rtree"><h2>rtree</h2></div>
+  <div id="hdendro"><h2>hdendro</h2></div>
+  <div id="vdendro"><h2>vdendro</h2></div>
+  <div id="rdendro"><h2>rdendro</h2></div>
+  <div id="gup"><h2>gup</h2></div>
+  <div id="force"><h2>force</h2></div>
   <script src="./bundle.js"></script>
 </body>
 </html>
