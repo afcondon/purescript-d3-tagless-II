@@ -18,5 +18,6 @@ class (Monad m) <= D3InterpreterM selection m where
 
 infix 4 join as <+>
 
-
-
+-- TODO things that are not handled by this (deliberately) ultra-simple grammar so far:
+-- 1) say you wanted to attach to "div#hook" and then select an _already existing_ <h1> in it and apply Attrs to that h1
+-- 2)...

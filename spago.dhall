@@ -14,7 +14,6 @@ You can edit this file as you like.
   , "either"
   , "foldable-traversable"
   , "functions"
-  , "identity"
   , "integers"
   , "math"
   , "maybe"
@@ -28,7 +27,6 @@ You can edit this file as you like.
   , "transformers"
   , "tuples"
   , "unsafe-coerce"
-  , "variant"
   , "web-events"
   , "web-html"
   ]

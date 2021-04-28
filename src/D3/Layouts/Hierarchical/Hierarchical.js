@@ -1,8 +1,7 @@
 // foreign import readJSONJS               :: String -> TreeJson -- TODO no error handling at all here RN
 exports.readJSON_ = filecontents => JSON.parse(filecontents)
 
-// foreign import d3Hierarchy              :: TreeJson -> D3Hierarchical
-// NB this chain of functions may not be appropriate in all cases, dates back to when only radial tree was wrapped
+
 // TODO replace with a configurable hierarchy function in PS and direct calls to hierarchy, sort etc as appropriate
 exports.hierarchyFromJSON_ = json => d3.hierarchy(json).sort((a, b) => d3.ascending(a.data.name, b.data.name))
 
@@ -46,16 +45,16 @@ exports.treeMinMax_ = root => {
 exports.linkHorizontal_ = d3.linkHorizontal().x(d => d.y).y(d => d.x)
 exports.linkVertical_   = d3.linkHorizontal().x(d => d.x).y(d => d.y)
 
-exports.linkClusterHorizontal_ = yOffset => d => 
+exports.linkClusterHorizontal_ = levelSpacing => d => 
   `M${d.target.y}, ${d.target.x}
-   C${d.source.y + yOffset / 2},${d.target.x}
-   ${d.source.y + yOffset / 2},${d.source.x}
+   C${d.source.y + levelSpacing / 2},${d.target.x}
+   ${d.source.y + levelSpacing / 2},${d.source.x}
    ${d.source.y},${d.source.x}`
 
-exports.linkClusterVertical_ = yOffset => d => 
+exports.linkClusterVertical_ = levelSpacing => d => 
   `M${d.target.y}, ${d.target.x}
-   C${d.source.y + yOffset / 2},${d.target.x}
-   ${d.source.y + yOffset / 2},${d.source.x}
+   C${d.source.y + levelSpacing / 2},${d.target.x}
+   ${d.source.y + levelSpacing / 2},${d.source.x}
    ${d.source.y},${d.source.x}`
   
 

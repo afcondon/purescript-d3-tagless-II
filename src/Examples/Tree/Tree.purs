@@ -10,13 +10,14 @@ import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical as H
 import D3.Layouts.Hierarchical.Types (TreeLayout(..), TreeType(..))
 import D3.Scales (d3SchemeCategory10_)
-import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), Selector, node)
+import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), Selector, ZoomExtent(..), node, node_)
 import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (+), (<>), (/))
+import Math (pi)
+import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (+), (-), (*), (<>), (/))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | this is the eDSL script that renders tree layouts
@@ -26,7 +27,7 @@ treeScript :: forall m v selection. Bind m => D3InterpreterM selection m =>
   ScriptConfig -> H.Model String v -> m selection
 treeScript config model = do
   root      <- attach config.selector
-  svg       <- root      `append` (node Svg config.viewbox)
+  svg       <- root      `append` (node_ Svg ) -- config.viewbox)
   container <- svg       `append` (node Group [ fontFamily "sans-serif"
                                               , fontSize   10.0
                                               ])
@@ -64,10 +65,11 @@ treeScript config model = do
                             , x          (\d -> if hasChildren_ d then 6.0 else (-6.0))
                             , textAnchor (\d -> if hasChildren_ d then "start" else "end")
                             , text       labelName
+                            , fill config.color
                             ])
 
-  svgZ <- attachZoom container  
-                    { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: model.svgConfig.height, right: model.svgConfig.width }
+  svgZ <- container `attachZoom`   
+                    { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: 500.0, right: 500.0 }
                     , scale     : ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
                     , qualifier : "tree"
                     }
@@ -112,31 +114,33 @@ type TreeNodeExtra = { name :: String }
 type ScriptConfig = { 
     linkPath      :: Chainable
   , selector      :: Selector
-  , offset        :: { x :: Number, y :: Number }
+  , spacing       :: { interChild :: Number, interLevel :: Number }
   , tree          :: D3HierarchicalNode_
   , viewbox       :: Array Chainable
   , nodeTransform :: Array Chainable
   , color         :: String
 }
--- | configure function which enables treeScript to be run for different layouts
--- NB radial, vertical not yet working AND cluster not doing links 
+-- | configure function which enables treeScript to be run for different layouts - WIP
 configureAndRunScript :: forall m v selection. 
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number -> H.Model String v -> m selection
 configureAndRunScript (Tuple width height ) model = 
-  treeScript { offset, selector, viewbox, tree, linkPath, nodeTransform, color } model
+  treeScript { spacing, selector, viewbox, tree, linkPath, nodeTransform, color } model
   where
-    offset = 
+    svgWidth                   = 650.0 
+    svgHeight                  = 650.0 
+    numberOfLevels             = (hNodeHeight_ model.root_) + 1.0
+    { xMin, xMax, yMin, yMax } = treeMinMax_ model.root_ -- not used in all layouts but we'll calculate it anyway
+    spacing = 
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> { x: 10.0, y: width / ((hNodeHeight_ model.root_) + 1.0)}
-        Dendrogram, Vertical   -> { x: width / 2.0, y: 10.0 }
-        Dendrogram, Radial     -> { x: 0.0, y: 0.0}
+        Dendrogram, Horizontal -> { interChild: 10.0, interLevel: svgWidth / numberOfLevels }
+        Dendrogram, Vertical   -> { interChild: 10.0, interLevel: svgHeight / numberOfLevels }
+        Dendrogram, Radial     -> { interChild: 0.0,  interLevel: 0.0} -- not sure this is used in radial case
 
-        TidyTree, Horizontal   -> { x: 0.0, y: 0.0}
-        TidyTree, Vertical     -> { x: 0.0, y: 0.0}
-        TidyTree, Radial       -> { x: 0.0, y: 0.0}
-
+        TidyTree, Horizontal   -> { interChild: 10.0, interLevel: svgWidth / numberOfLevels }
+        TidyTree, Vertical     -> { interChild: 10.0, interLevel: svgHeight / numberOfLevels}
+        TidyTree, Radial       -> { interChild: 0.0,  interLevel: 0.0} -- not sure this is used in radial case
 
     layout = 
       case model.treeType of
@@ -145,28 +149,28 @@ configureAndRunScript (Tuple width height ) model =
 
     layout' = 
       case model.treeLayout of
-        Horizontal -> layout `treeSetNodeSize_` [ offset.x, offset.y ]
-        Vertical   -> layout `treeSetNodeSize_` [ offset.x, offset.y ]
-        Radial     -> (layout `treeSetSize_`    [width,   height]) `treeSetSeparation_` radialSeparation
+        Horizontal -> layout `treeSetNodeSize_` [ spacing.interLevel, spacing.interChild ]
+        Vertical   -> layout `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
+        Radial     -> (layout `treeSetSize_`    [ width / 4.0, svgHeight / 2.0 ]) `treeSetSeparation_` radialSeparation
 
     tree =
       layout' `treeSetRoot_` model.root_
 
     viewbox =
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> [ viewBox 0.0 0.0 width offset.y ]
-        Dendrogram, Vertical   -> [ viewBox 0.0 0.0 width height ]
+        Dendrogram, Horizontal -> [ viewBox 0.0 0.0 width (xMax - xMin + spacing.interLevel * 2.0) ]
+        Dendrogram, Vertical   -> [ viewBox 0.0 0.0 width (xMax - xMin + spacing.interLevel * 2.0) ]
         Dendrogram, Radial     -> [ viewBox (-width/2.0) (-height/2.0) width height ]
 
-        TidyTree, Horizontal   -> [ viewBox 0.0 0.0 width height ]
-        TidyTree, Vertical     -> [ viewBox 0.0 0.0 width height ]
-        TidyTree, Radial       -> [ viewBox (-width/2.0) (-height/2.0) width height ]
+        TidyTree  , Horizontal -> [ viewBox 0.0 0.0 width (xMax - xMin + spacing.interLevel * 2.0) ]
+        TidyTree  , Vertical   -> [ viewBox 0.0 0.0 width (xMax - xMin + spacing.interLevel * 2.0) ]
+        TidyTree  , Radial     -> [ viewBox (-width/2.0) (-height/2.0) width height ]
 
       
     linkPath =
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> horizontalClusterLink offset.y
-        Dendrogram, Vertical   -> verticalClusterLink   offset.x 
+        Dendrogram, Horizontal -> horizontalClusterLink spacing.interLevel
+        Dendrogram, Vertical   -> verticalClusterLink   spacing.interLevel 
         Dendrogram, Radial     -> radialLink _.x _.y
 
         TidyTree, Horizontal   -> horizontalLink
@@ -185,13 +189,13 @@ configureAndRunScript (Tuple width height ) model =
 
     nodeTransform =
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> [ transform [ positionXYreflected ] ]
+        Dendrogram, Horizontal -> [ transform [ positionXY ] ]
         Dendrogram, Vertical   -> [ transform [ positionXY ] ]
-        Dendrogram, Radial     -> []
+        Dendrogram, Radial     -> [ transform [ radialRotateCommon, radialTranslate ] ]
 
-        TidyTree, Horizontal   -> [ transform [ positionXYreflected ] ]
-        TidyTree, Vertical     -> [ transform [ positionXY ] ]  -- no transform required for vertical case
-        TidyTree, Radial       -> []
+        TidyTree, Horizontal   -> [ transform [ positionXY ] ]
+        TidyTree, Vertical     -> [ transform [ positionXY ] ]
+        TidyTree, Radial       -> [ transform [ radialRotateCommon, radialTranslate ] ]
 
     color =
       case model.treeType, model.treeLayout of
@@ -207,3 +211,11 @@ configureAndRunScript (Tuple width height ) model =
 
 
 
+radialRotate :: Number -> String
+radialRotate x = show $ (x * 180.0 / pi - 90.0)
+
+radialRotateCommon :: forall d v. D3HierarchicalNode d v -> String
+radialRotateCommon (D3HierarchicalNode d) = "rotate(" <> radialRotate d.x <> ")"
+
+radialTranslate :: forall d v. D3HierarchicalNode d v -> String
+radialTranslate (D3HierarchicalNode d) = "translate(" <> show d.y <> ",0)"

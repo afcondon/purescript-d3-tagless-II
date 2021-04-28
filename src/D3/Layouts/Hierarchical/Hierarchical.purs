@@ -53,10 +53,11 @@ makeModel :: forall d v.
   TreeJson_ -> 
   Aff (Model d v)
 makeModel treeType treeLayout json = do
-  widthHeight <- liftEffect $ getWindowWidthHeight
+  -- widthHeight <- liftEffect $ getWindowWidthHeight
   let 
     root_      = hierarchyFromJSON_ json
-    svgConfig  = { width: fst widthHeight, height: snd widthHeight }
+    -- svgConfig  = { width: fst widthHeight, height: snd widthHeight }
+    svgConfig  = { width: 650.0, height: 650.0 }
     root       = D3HierarchicalNode (unsafeCoerce root_)
   pure $ { json, root, root_, treeType, treeLayout, svgConfig }
 
