@@ -150,7 +150,7 @@ configureAndRunScript (Tuple width height ) model =
         Dendrogram, Vertical   -> (initCluster_ unit)   `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
         Dendrogram, Radial     -> ((initCluster_ unit)  `treeSetSize_`     [ 2.0 * pi, (svgWidth / 2.0) - 100.0 ]) -- note that in radial case doesn't seem to be initialized by d3.cluster
                                                         `treeSetSeparation_` radialSeparation
-        TidyTree  , Horizontal -> (initTree_ unit)      `treeSetNodeSize_` [ spacing.interLevel, spacing.interChild ]
+        TidyTree  , Horizontal -> (initTree_ unit)      `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
         TidyTree  , Vertical   -> (initTree_ unit)      `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
         TidyTree  , Radial     -> ((initTree_ unit)     `treeSetSize_`     [ 2.0 * pi, (svgHeight / 2.0) - 50.0 ])
                                                         `treeSetSeparation_` radialSeparation
@@ -159,15 +159,17 @@ configureAndRunScript (Tuple width height ) model =
       layout `treeSetRoot_` model.root_
 
     { xMin, xMax, yMin, yMax } = trace { treeType: model.treeType, layout: model.treeLayout } \_ -> spy "MinMax" $ treeMinMax_ laidOutRoot_
+    xExtent = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
+    yExtent = yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
 
     viewbox =
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> [ viewBox (-10.0) ((svgHeight - ((-xMin) + xMax)) / 2.0) ((yMax - yMin + 10.0)) (xMax - xMin)  ]
-        Dendrogram, Vertical   -> [ viewBox 0.0 0.0 width (xMax - xMin + spacing.interLevel * 2.0) ]
+        Dendrogram, Horizontal -> [ viewBox (-10.0) (svgHeight - xExtent / 2.0) yExtent xExtent ] -- x and y are reversed in horizontal layouts
+        Dendrogram, Vertical   -> [ viewBox xMin 0.0 xExtent yExtent ]
         Dendrogram, Radial     -> [ viewBox (-svgWidth/2.0) (-svgHeight/2.0) svgWidth svgHeight ]
 
-        TidyTree  , Horizontal -> [ viewBox 0.0 0.0 width (xMax - xMin + spacing.interLevel * 2.0) ]
-        TidyTree  , Vertical   -> [ viewBox 0.0 0.0 width (xMax - xMin + spacing.interLevel * 2.0) ]
+        TidyTree  , Horizontal -> [ viewBox (-10.0) (svgHeight - xExtent / 2.0) yExtent xExtent ] -- x and y are reversed in horizontal layouts
+        TidyTree  , Vertical   -> [ viewBox xMin 0.0 xExtent yExtent ]
         TidyTree  , Radial     -> [ viewBox (-svgWidth/2.0) (-svgHeight/2.0) svgWidth svgHeight ]
 
       
@@ -193,11 +195,11 @@ configureAndRunScript (Tuple width height ) model =
 
     nodeTransform =
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> [ transform [ positionXY ] ]
+        Dendrogram, Horizontal -> [ transform [ positionXYreflected ] ]
         Dendrogram, Vertical   -> [ transform [ positionXY ] ]
         Dendrogram, Radial     -> [ transform [ radialRotateCommon, radialTranslate ] ]
 
-        TidyTree, Horizontal   -> [ transform [ positionXY ] ]
+        TidyTree, Horizontal   -> [ transform [ positionXYreflected ] ]
         TidyTree, Vertical     -> [ transform [ positionXY ] ]
         TidyTree, Radial       -> [ transform [ radialRotateCommon, radialTranslate ] ]
 

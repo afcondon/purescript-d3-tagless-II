@@ -45,7 +45,7 @@ exports.treeMinMax_ = root => {
 }
 
 exports.linkHorizontal_ = d3.linkHorizontal().x(d => d.y).y(d => d.x)
-exports.linkVertical_   = d3.linkHorizontal().x(d => d.x).y(d => d.y)
+exports.linkVertical_   = d3.linkVertical().x(d => d.x).y(d => d.y)
 
 exports.linkClusterHorizontal_ = levelSpacing => d => 
   `M${d.target.y}, ${d.target.x}
@@ -55,8 +55,8 @@ exports.linkClusterHorizontal_ = levelSpacing => d =>
 
 exports.linkClusterVertical_ = levelSpacing => d => 
   `M${d.target.x}, ${d.target.y}
-   C${d.source.x + levelSpacing / 2},${d.target.y}
-   ${d.source.x + levelSpacing / 2},${d.source.y}
+   C${d.target.x}, ${d.source.y + levelSpacing / 2}
+   ${d.source.x},${d.source.y + levelSpacing / 2}
    ${d.source.x},${d.source.y}`
   
 

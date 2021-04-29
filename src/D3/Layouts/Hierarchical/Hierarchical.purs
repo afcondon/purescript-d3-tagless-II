@@ -146,6 +146,6 @@ positionXYreflected :: forall d v. D3HierarchicalNode d v -> String
 positionXYreflected (D3HierarchicalNode d) = "translate(" <> show d.y <> "," <> show d.x <>")"
 
 positionXY :: forall d v. D3HierarchicalNode d v -> String
-positionXY (D3HierarchicalNode d) = "translate(" <> show d.y <> "," <> show d.x <>")"
+positionXY (D3HierarchicalNode d) = "translate(" <> show d.x <> "," <> show d.y <>")"
 
 foreign import autoBox_ :: Datum -> Array Number
