@@ -14,8 +14,11 @@
     body {
       display: grid;
       grid-gap: 10px;
-      grid-template-columns: repeat(3, 1fr);
-      grid-template-rows: repeat(3, 50vh);
+      grid-template-areas:
+               "gup force rtree"
+               "htree vtree vtree"
+               "htree vdendro vdendro"
+               "hdendro rdendro .";
     }
     div {
       background-color: beige;
@@ -28,6 +31,32 @@
       font-size: 80pt;
       opacity: 0.5;
       position: absolute;
+    }
+    div#htree {
+      grid-area: htree;
+    }
+    div#hdendro {
+      grid-area: hdendro;
+    }
+    div#rdendro {
+      grid-area: rdendro;
+    }
+    div#rtree {
+      grid-area: rtree;
+    }
+    div#vdendro {
+      height: 25vh;
+      grid-area: vdendro;
+    }
+    div#vtree {
+      height: 25vh;
+      grid-area: vtree;
+    }
+    div#gup {
+      grid-area: gup;
+    }
+    div#force {
+      grid-area: force;
     }
   </style>
   <title>Document</title>
@@ -44,3 +73,9 @@
   <script src="./bundle.js"></script>
 </body>
 </html>
+
+
+
+
+
+
