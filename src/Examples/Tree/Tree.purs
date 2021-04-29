@@ -12,7 +12,7 @@ import D3.Layouts.Hierarchical.Types (TreeLayout(..), TreeType(..))
 import D3.Scales (d3SchemeCategory10_)
 import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), Selector, ZoomExtent(..), node, node_)
 import Data.Tuple (Tuple(..), fst, snd)
-import Debug (spy)
+import Debug (spy, trace)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
@@ -126,13 +126,15 @@ configureAndRunScript :: forall m v selection.
   D3InterpreterM selection m => 
   Tuple Number Number -> H.Model String v -> m selection
 configureAndRunScript (Tuple width height ) model = 
-  treeScript { spacing, selector, viewbox, tree, linkPath, nodeTransform, color } model
+  treeScript { spacing, selector, viewbox, tree: laidOutRoot_, linkPath, nodeTransform, color } model
   where
-    svgWidth                   = 650.0 
-    svgHeight                  = 650.0 
-    numberOfLevels             = (hNodeHeight_ model.root_) + 1.0
-    { xMin, xMax, yMin, yMax } = treeMinMax_ model.root_ -- not used in all layouts but we'll calculate it anyway
-    spacing = 
+    columns                    = 3.0  -- 3 columns, set in the grid CSS in index.html
+    gap                        = 10.0 -- 10px set in the grid CSS in index.html
+    svgWidth                   = spy "svgWidth" $ ((width - ((columns - 1.0) * gap)) / columns)
+    svgHeight                  = spy "svgHeight" $ height / 2.0 -- 2 rows
+
+    numberOfLevels             = spy "number of Levels in tree: " $ (hNodeHeight_ model.root_) + 1.0
+    spacing = spy "spacing: " $ 
       case model.treeType, model.treeLayout of
         Dendrogram, Horizontal -> { interChild: 10.0, interLevel: svgWidth / numberOfLevels }
         Dendrogram, Vertical   -> { interChild: 10.0, interLevel: svgHeight / numberOfLevels }
@@ -144,21 +146,23 @@ configureAndRunScript (Tuple width height ) model =
 
     layout = 
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> (initCluster_ unit)   `treeSetNodeSize_` [ spacing.interLevel, spacing.interChild ]
+        Dendrogram, Horizontal -> (initCluster_ unit)   `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
         Dendrogram, Vertical   -> (initCluster_ unit)   `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-        Dendrogram, Radial     -> ((initCluster_ unit)  `treeSetSize_`     [ 2.0 * pi, (svgWidth / 2.0) ]) -- note that in radial case doesn't seem to be initialized by d3.cluster
+        Dendrogram, Radial     -> ((initCluster_ unit)  `treeSetSize_`     [ 2.0 * pi, (svgWidth / 2.0) - 100.0 ]) -- note that in radial case doesn't seem to be initialized by d3.cluster
                                                         `treeSetSeparation_` radialSeparation
         TidyTree  , Horizontal -> (initTree_ unit)      `treeSetNodeSize_` [ spacing.interLevel, spacing.interChild ]
         TidyTree  , Vertical   -> (initTree_ unit)      `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-        TidyTree  , Radial     -> ((initTree_ unit)     `treeSetSize_`     [ 2.0 * pi, svgHeight / 2.0 ])
+        TidyTree  , Radial     -> ((initTree_ unit)     `treeSetSize_`     [ 2.0 * pi, (svgHeight / 2.0) - 50.0 ])
                                                         `treeSetSeparation_` radialSeparation
 
-    tree =
+    laidOutRoot_ =
       layout `treeSetRoot_` model.root_
+
+    { xMin, xMax, yMin, yMax } = trace { treeType: model.treeType, layout: model.treeLayout } \_ -> spy "MinMax" $ treeMinMax_ laidOutRoot_
 
     viewbox =
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> [ viewBox 0.0 0.0 width (xMax - xMin + spacing.interLevel * 2.0) ]
+        Dendrogram, Horizontal -> [ viewBox (-10.0) ((svgHeight - ((-xMin) + xMax)) / 2.0) ((yMax - yMin + 10.0)) (xMax - xMin)  ]
         Dendrogram, Vertical   -> [ viewBox 0.0 0.0 width (xMax - xMin + spacing.interLevel * 2.0) ]
         Dendrogram, Radial     -> [ viewBox (-svgWidth/2.0) (-svgHeight/2.0) svgWidth svgHeight ]
 
@@ -197,15 +201,15 @@ configureAndRunScript (Tuple width height ) model =
         TidyTree, Vertical     -> [ transform [ positionXY ] ]
         TidyTree, Radial       -> [ transform [ radialRotateCommon, radialTranslate ] ]
 
-    color =
+    color = d3SchemeCategory10_ $
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> d3SchemeCategory10_ 1.0
-        Dendrogram, Vertical   -> d3SchemeCategory10_ 2.0
-        Dendrogram, Radial     -> d3SchemeCategory10_ 3.0
+        Dendrogram, Horizontal -> 1.0
+        Dendrogram, Vertical   -> 2.0
+        Dendrogram, Radial     -> 3.0
 
-        TidyTree, Horizontal   -> d3SchemeCategory10_ 4.0
-        TidyTree, Vertical     -> d3SchemeCategory10_ 5.0
-        TidyTree, Radial       -> d3SchemeCategory10_ 6.0
+        TidyTree, Horizontal   -> 4.0
+        TidyTree, Vertical     -> 5.0
+        TidyTree, Radial       -> 6.0
 
 
 

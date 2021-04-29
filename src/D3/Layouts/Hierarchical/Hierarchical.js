@@ -54,10 +54,10 @@ exports.linkClusterHorizontal_ = levelSpacing => d =>
    ${d.source.y},${d.source.x}`
 
 exports.linkClusterVertical_ = levelSpacing => d => 
-  `M${d.target.y}, ${d.target.x}
-   C${d.source.y + levelSpacing / 2},${d.target.x}
-   ${d.source.y + levelSpacing / 2},${d.source.x}
-   ${d.source.y},${d.source.x}`
+  `M${d.target.x}, ${d.target.y}
+   C${d.source.x + levelSpacing / 2},${d.target.y}
+   ${d.source.x + levelSpacing / 2},${d.source.y}
+   ${d.source.x},${d.source.y}`
   
 
 // foreign import d3LinkRadial_            :: (Datum -> Number) -> (Datum -> Number) -> (Datum -> String)
@@ -68,3 +68,11 @@ exports.treeSetSeparation_ = tree => separationFn => tree.separation(separationF
 
 // foreign import shareParent :: D3HierarchicalNode_ -> D3HierarchicalNode_ -> Boolean
 exports.sharesParent = a => b => (a.parent == b.parent)
+
+// foreign import autoBox_ :: Datum -> Array Number
+exports.autoBox_ = () => {
+  document.body.appendChild(this);
+  const {x, y, width, height} = this.getBBox();
+  document.body.removeChild(this);
+  return [x, y, width, height];
+}

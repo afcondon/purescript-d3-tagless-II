@@ -1,10 +1,12 @@
 module D3.Attributes.Sugar where
 
+import D3.Attributes.Instances
 import Prelude
 
-import D3.Attributes.Instances 
+import D3.Layouts.Hierarchical (autoBox_)
 import D3.Selection (Chainable(..), EasingFunction(..), Transition)
 import Data.Array (intercalate, (:))
+import Debug (spy)
 import Effect.Aff (Milliseconds(..))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -24,7 +26,12 @@ fill = AttrT <<< Attribute "fill" <<< toAttr
 viewBox :: Number -> Number -> Number -> Number -> Chainable
 viewBox xo yo w h = AttrT <<< Attribute "viewBox" $ toAttr vb
   where
-    vb = intercalate " " $ show <$> [ xo, yo, w, h ]
+    vb = spy "Viewbox: " $ intercalate " " $ show <$> [ xo, yo, w, h ]
+
+autoBox :: Chainable
+autoBox = AttrT <<< Attribute "viewBox" $ toAttr vb
+  where
+    vb = \d -> intercalate " " $ show <$> (autoBox_ d)
 
 fontFamily :: ∀ a. ToAttr String a => a -> Chainable
 fontFamily = AttrT <<< Attribute "font-family" <<< toAttr

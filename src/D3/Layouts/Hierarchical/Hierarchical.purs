@@ -1,6 +1,6 @@
 module D3.Layouts.Hierarchical(
     hasChildren_, hierarchyFromJSON_, readJSON_, links_, descendants_, makeModel
-  , getWindowWidthHeight, getTreeViaAJAX, initTree_, initCluster_
+  , getWindowWidthHeight, getTreeViaAJAX, initTree_, initCluster_, autoBox_
   , treeSetRoot_, treeSetNodeSize_, treeSetSeparation_, treeMinMax_, treeSetSize_
   , defaultSeparation, radialSeparation, positionXY, positionXYreflected
   , horizontalLink, radialLink, verticalLink, horizontalClusterLink, verticalClusterLink
@@ -147,3 +147,5 @@ positionXYreflected (D3HierarchicalNode d) = "translate(" <> show d.y <> "," <> 
 
 positionXY :: forall d v. D3HierarchicalNode d v -> String
 positionXY (D3HierarchicalNode d) = "translate(" <> show d.y <> "," <> show d.x <>")"
+
+foreign import autoBox_ :: Datum -> Array Number
