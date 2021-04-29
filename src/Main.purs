@@ -4,8 +4,7 @@ import Prelude
 
 import D3.Examples.Force as Graph
 import D3.Examples.GUP (runGeneralUpdatePattern) as GUP
-import D3.Examples.Tree as Tree
-import D3.Examples.Tree.Radial as Radial
+import D3.Examples.Tree.Configure as Tree
 import D3.Layouts.Hierarchical (TreeJson_, getTreeViaAJAX, makeModel)
 import D3.Layouts.Hierarchical.Types (TreeLayout(..), TreeType(..))
 import Data.Bifunctor (rmap)
@@ -15,7 +14,7 @@ import Effect.Aff (Aff, forkAff, launchAff_)
 
 drawMetaTree :: TreeJson_ -> Aff Unit
 drawMetaTree json =
-  Tree.drawTree =<< makeModel TidyTree Horizontal =<< Radial.getMetaTreeJSON =<< makeModel TidyTree Radial json
+  Tree.drawTree =<< makeModel TidyTree Horizontal =<< Tree.getMetaTreeJSON =<< makeModel TidyTree Radial json
 
 main :: Effect Unit
 main = launchAff_  do

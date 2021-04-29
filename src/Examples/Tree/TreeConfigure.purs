@@ -1,16 +1,20 @@
-module D3.Examples.Tree where
+module D3.Examples.Tree.Configure where
 
 import D3.Layouts.Hierarchical
 
 import D3.Attributes.Instances (Datum)
-import D3.Attributes.Sugar (backgroundColor, classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x)
-import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
+import D3.Attributes.Sugar (transform, viewBox)
+import D3.Examples.Tree.Script (treeScript)
+import D3.Examples.Tree.Types (datumIsTreeNode)
+import D3.Interpreter (class D3InterpreterM)
 import D3.Interpreter.D3 (runD3M)
+import D3.Interpreter.MetaTree (MetaTreeNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical as H
 import D3.Layouts.Hierarchical.Types (TreeLayout(..), TreeType(..))
 import D3.Scales (d3SchemeCategory10_)
-import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), ScaleExtent(..), Selector, ZoomExtent(..), node, node_)
+import D3.Selection (D3Selection_)
+import Data.Map (toUnfoldable)
 import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy, trace)
 import Effect.Aff (Aff)
@@ -18,77 +22,30 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (pi)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, (>=), (==), ($), (+), (<), (-), (*), (<>), (/))
-import Unsafe.Coerce (unsafeCoerce)
-
--- | this is the eDSL script that renders tree layouts
--- | it's parameterized rather heavily using the ScriptConfig record so that it can draw
--- | six variations (TODO) of [Radial, Horizontal, Vertical] * [Dendrogram, TidyTree] 
-treeScript :: forall m v selection. Bind m => D3InterpreterM selection m => 
-  ScriptConfig -> H.Model String v -> m selection
-treeScript config model = do
-  root      <- attach config.selector
-  svg       <- root      `append` (node Svg config.viewbox)
-  container <- svg       `append` (node Group [ fontFamily "sans-serif"
-                                              , fontSize   10.0
-                                              , backgroundColor "beige"
-                                              ])
-  links     <- container `append` (node Group [ classed "links"])
-  nodes     <- container `append` (node Group [ classed "nodes"])
-
-  theLinks_ <- links <+> Join {
-      element   : Path
-    , key       : UseDatumAsKey
-    , "data"    : H.links_ model.root_
-    , behaviour : [ strokeWidth   1.5
-                  , strokeColor   config.color
-                  , strokeOpacity 0.4
-                  , fill          "none"
-                  , config.linkPath
-                  ]
-  }
-
-  nodeJoin_ <- nodes <+> Join {
-      element   : Group
-    , key       : UseDatumAsKey
-    , "data"    : H.descendants_ model.root_
-    -- there could be other stylistic stuff here but the transform is key structuring component
-    , behaviour : config.nodeTransform -- <- the key positioning calculation for the tree!!!
-  }
-
-  theNodes <- nodeJoin_ `append` 
-                (node Circle  [ fill (\d -> if hasChildren_ d then "#999" else "#555")
-                              , radius 2.5
-                              , strokeColor "white"
-                              ])
-
-  theLabels <- nodeJoin_ `append`
-                (node Text  [ dy         0.31
-                            , x          (\d -> if config.textDirection d then 6.0 else (-6.0))
-                            , textAnchor (\d -> if config.textDirection d then "start" else "end")
-                            , text       labelName
-                            , fill config.color
-                            ])
-
-  svgZ <- container `attachZoom`   
-                    { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: 500.0, right: 500.0 }
-                    , scale     : ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
-                    , qualifier : "tree"
-                    }
-
-  pure svg
-
 
 -- TODO move this to a library, it really only needs the params for runPrinter to be completely generic
 -- | Evaluate the tree drawing script in the "printer" monad which will render it as a string
 -- | rather than drawing SVG or Canvas. In principle this could be basis for compiling to JS D3 script
 printTree :: forall v. Model String v -> Aff Unit
 printTree treeModel = liftEffect $ do
-  log "Horizontal tree example"
+  log "Tree example"
   widthHeight <- getWindowWidthHeight
-  printedScript <- runPrinter  (configureAndRunScript widthHeight treeModel) "Horizontal Tree Script"
+  printedScript <- runPrinter  (configureAndRunScript widthHeight treeModel) "Tree Script"
   log $ snd printedScript
   log $ fst printedScript
   pure unit
+
+
+getMetaTreeJSON :: forall v. Model String v -> Aff TreeJson_
+getMetaTreeJSON treeModel = liftEffect $ do
+  log "Getting meta-tree for radial tree example"
+  widthHeight <- getWindowWidthHeight
+  metaScript <- runMetaTree (configureAndRunScript widthHeight treeModel) -- no need for actual widthHeight in metaTree
+  let (ScriptTree _ treeMap links) = snd metaScript
+      (_ :: Array (Tuple Int MetaTreeNode)) = spy "script map" $ toUnfoldable treeMap
+      (_ :: Array (Tuple Int Int))          = spy "link map" $ links
+      treeified                             = spy "script tree" $ snd metaScript
+  pure $ scriptTreeToJSON treeified
 
 -- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
 -- | TODO specialize runD3M so that this function isn't necessary
@@ -98,30 +55,7 @@ drawTree treeModel = liftEffect $ do
   (_ :: Tuple D3Selection_ Unit) <- runD3M (configureAndRunScript widthHeight treeModel)
   pure unit
 
--- | Coercion function to recover the structure that was given to D3, it's an unsafeCoerce but the types
--- | give some protection
-datumIsTreeNode :: forall d v. Datum -> D3HierarchicalNode d v
-datumIsTreeNode = unsafeCoerce
 
--- | Coercion function to recover the "extra" data that lives within the generic structure that was given to D3, 
--- | it's an unsafeCoerce but the types give some protection
-labelName :: Datum -> String
-labelName d = node."data".name
-  where (D3HierarchicalNode node) = datumIsTreeNode d
-
--- this is the extra data that is part of a Datum beyond the D3HierarchicalNode_ minimum
-type TreeNodeExtra = { name :: String }
-
-type ScriptConfig = { 
-    linkPath      :: Chainable
-  , selector      :: Selector
-  , spacing       :: { interChild :: Number, interLevel :: Number }
-  , tree          :: D3HierarchicalNode_
-  , viewbox       :: Array Chainable
-  , nodeTransform :: Array Chainable
-  , color         :: String
-  , textDirection :: Datum -> Boolean -- think it might be better to just provide the attrs??
-}
 -- | configure function which enables treeScript to be run for different layouts - WIP
 configureAndRunScript :: forall m v selection. 
   Bind m => 
@@ -220,10 +154,8 @@ configureAndRunScript (Tuple width height ) model =
       then \d -> hasChildren_ d == nodeIsOnRHS d
       else hasChildren_
 
-
-
-
-
+-- | some small functions that are used to parameterize the differing tree layouts
+-- | these are passed in to the Script as part of the configuration
 radialRotate :: Number -> String
 radialRotate x = show $ (x * 180.0 / pi - 90.0)
 
