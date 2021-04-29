@@ -3,7 +3,7 @@ module D3.Examples.Tree where
 import D3.Layouts.Hierarchical
 
 import D3.Attributes.Instances (Datum)
-import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x)
+import D3.Attributes.Sugar (backgroundColor, classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
@@ -17,7 +17,7 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (pi)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (+), (-), (*), (<>), (/))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, (>=), (==), ($), (+), (<), (-), (*), (<>), (/))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | this is the eDSL script that renders tree layouts
@@ -30,6 +30,7 @@ treeScript config model = do
   svg       <- root      `append` (node Svg config.viewbox)
   container <- svg       `append` (node Group [ fontFamily "sans-serif"
                                               , fontSize   10.0
+                                              , backgroundColor "beige"
                                               ])
   links     <- container `append` (node Group [ classed "links"])
   nodes     <- container `append` (node Group [ classed "nodes"])
@@ -62,8 +63,8 @@ treeScript config model = do
 
   theLabels <- nodeJoin_ `append`
                 (node Text  [ dy         0.31
-                            , x          (\d -> if hasChildren_ d then 6.0 else (-6.0))
-                            , textAnchor (\d -> if hasChildren_ d then "start" else "end")
+                            , x          (\d -> if config.textDirection d then 6.0 else (-6.0))
+                            , textAnchor (\d -> if config.textDirection d then "start" else "end")
                             , text       labelName
                             , fill config.color
                             ])
@@ -119,6 +120,7 @@ type ScriptConfig = {
   , viewbox       :: Array Chainable
   , nodeTransform :: Array Chainable
   , color         :: String
+  , textDirection :: Datum -> Boolean -- think it might be better to just provide the attrs??
 }
 -- | configure function which enables treeScript to be run for different layouts - WIP
 configureAndRunScript :: forall m v selection. 
@@ -126,7 +128,7 @@ configureAndRunScript :: forall m v selection.
   D3InterpreterM selection m => 
   Tuple Number Number -> H.Model String v -> m selection
 configureAndRunScript (Tuple width height ) model = 
-  treeScript { spacing, selector, viewbox, tree: laidOutRoot_, linkPath, nodeTransform, color } model
+  treeScript { spacing, selector, viewbox, tree: laidOutRoot_, linkPath, nodeTransform, color, textDirection } model
   where
     columns                    = 3.0  -- 3 columns, set in the grid CSS in index.html
     gap                        = 10.0 -- 10px set in the grid CSS in index.html
@@ -197,11 +199,11 @@ configureAndRunScript (Tuple width height ) model =
       case model.treeType, model.treeLayout of
         Dendrogram, Horizontal -> [ transform [ positionXYreflected ] ]
         Dendrogram, Vertical   -> [ transform [ positionXY ] ]
-        Dendrogram, Radial     -> [ transform [ radialRotateCommon, radialTranslate ] ]
+        Dendrogram, Radial     -> [ transform [ radialRotateCommon, radialTranslate, rotateRadialLabels ] ]
 
         TidyTree, Horizontal   -> [ transform [ positionXYreflected ] ]
         TidyTree, Vertical     -> [ transform [ positionXY ] ]
-        TidyTree, Radial       -> [ transform [ radialRotateCommon, radialTranslate ] ]
+        TidyTree, Radial       -> [ transform [ radialRotateCommon, radialTranslate, rotateRadialLabels ] ]
 
     color = d3SchemeCategory10_ $
       case model.treeType, model.treeLayout of
@@ -212,6 +214,11 @@ configureAndRunScript (Tuple width height ) model =
         TidyTree, Horizontal   -> 4.0
         TidyTree, Vertical     -> 5.0
         TidyTree, Radial       -> 6.0
+
+    textDirection = 
+      if model.treeLayout == Radial
+      then \d -> hasChildren_ d == nodeIsOnRHS d
+      else hasChildren_
 
 
 
@@ -225,3 +232,13 @@ radialRotateCommon (D3HierarchicalNode d) = "rotate(" <> radialRotate d.x <> ")"
 
 radialTranslate :: forall d v. D3HierarchicalNode d v -> String
 radialTranslate (D3HierarchicalNode d) = "translate(" <> show d.y <> ",0)"
+
+rotateRadialLabels :: forall d v. D3HierarchicalNode d v -> String
+rotateRadialLabels (D3HierarchicalNode d) = -- TODO replace with nodeIsOnRHS 
+  "rotate(" <> if d.x >= pi 
+  then "180" <> ")" 
+  else "0" <> ")"
+
+nodeIsOnRHS :: Datum -> Boolean
+nodeIsOnRHS d = node.x < pi
+  where (D3HierarchicalNode node) = datumIsTreeNode d

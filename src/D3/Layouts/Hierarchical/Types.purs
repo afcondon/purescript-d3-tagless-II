@@ -1,5 +1,7 @@
 module D3.Layouts.Hierarchical.Types where
 
+import Prelude
+
 import D3.Attributes.Instances (Datum)
 import Data.Nullable (Nullable)
 
@@ -9,7 +11,9 @@ foreign import data D3HierarchicalNode_ :: Type
 data Tree a = Node a (Array (Tree a))
 
 data TreeType   = TidyTree | Dendrogram
+derive instance eqTreeType :: Eq TreeType
 data TreeLayout = Radial | Horizontal | Vertical
+derive instance eqTreeLayout :: Eq TreeLayout
 
 -- data TreeConfig = RadialTree  RadialTreeConfig
 --                 | TidyTree    TidyTreeConfig

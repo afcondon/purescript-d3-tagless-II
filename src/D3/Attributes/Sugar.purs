@@ -10,6 +10,9 @@ import Debug (spy)
 import Effect.Aff (Milliseconds(..))
 import Unsafe.Coerce (unsafeCoerce)
 
+backgroundColor :: ∀ a. ToAttr String a => a -> Chainable
+backgroundColor = AttrT <<< Attribute "background-color" <<< toAttr
+
 strokeColor :: ∀ a. ToAttr String a => a -> Chainable
 strokeColor = AttrT <<< Attribute "stroke" <<< toAttr
 
