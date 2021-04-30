@@ -1,0 +1,736 @@
+{
+    "web-storage": {
+        "depends": [
+            "effect",
+            "maybe",
+            "nullable",
+            "prelude",
+            "unsafe-coerce",
+            "web-events",
+            "web-storage"
+        ]
+    },
+    "newtype": {
+        "depends": [
+            "prelude",
+            "safe-coerce"
+        ]
+    },
+    "exceptions": {
+        "depends": [
+            "effect",
+            "either",
+            "exceptions",
+            "maybe",
+            "prelude"
+        ]
+    },
+    "control": {
+        "depends": [
+            "control",
+            "newtype",
+            "prelude"
+        ]
+    },
+    "arraybuffer-types": {
+        "depends": []
+    },
+    "console": {
+        "depends": [
+            "console",
+            "effect",
+            "prelude"
+        ]
+    },
+    "either": {
+        "depends": [
+            "control",
+            "either",
+            "invariant",
+            "maybe",
+            "prelude"
+        ]
+    },
+    "effect": {
+        "depends": [
+            "effect",
+            "prelude"
+        ]
+    },
+    "ordered-collections": {
+        "depends": [
+            "arrays",
+            "control",
+            "foldable-traversable",
+            "gen",
+            "lists",
+            "maybe",
+            "newtype",
+            "ordered-collections",
+            "partial",
+            "prelude",
+            "st",
+            "tailrec",
+            "tuples",
+            "unfoldable"
+        ]
+    },
+    "web-events": {
+        "depends": [
+            "datetime",
+            "effect",
+            "enums",
+            "functions",
+            "maybe",
+            "newtype",
+            "nullable",
+            "prelude",
+            "unsafe-coerce",
+            "web-events"
+        ]
+    },
+    "arrays": {
+        "depends": [
+            "arrays",
+            "bifunctors",
+            "control",
+            "foldable-traversable",
+            "maybe",
+            "nonempty",
+            "partial",
+            "prelude",
+            "st",
+            "tailrec",
+            "tuples",
+            "unfoldable",
+            "unsafe-coerce"
+        ]
+    },
+    "maybe": {
+        "depends": [
+            "control",
+            "invariant",
+            "maybe",
+            "newtype",
+            "prelude"
+        ]
+    },
+    "profunctor": {
+        "depends": [
+            "control",
+            "distributive",
+            "either",
+            "exists",
+            "invariant",
+            "newtype",
+            "prelude",
+            "profunctor",
+            "tuples"
+        ]
+    },
+    "media-types": {
+        "depends": [
+            "media-types",
+            "newtype",
+            "prelude"
+        ]
+    },
+    "form-urlencoded": {
+        "depends": [
+            "foldable-traversable",
+            "js-uri",
+            "maybe",
+            "newtype",
+            "prelude",
+            "strings",
+            "tuples"
+        ]
+    },
+    "type-equality": {
+        "depends": []
+    },
+    "unfoldable": {
+        "depends": [
+            "foldable-traversable",
+            "maybe",
+            "partial",
+            "prelude",
+            "tuples",
+            "unfoldable"
+        ]
+    },
+    "invariant": {
+        "depends": [
+            "control",
+            "prelude"
+        ]
+    },
+    "web-html": {
+        "depends": [
+            "effect",
+            "enums",
+            "foreign",
+            "functions",
+            "js-date",
+            "maybe",
+            "media-types",
+            "newtype",
+            "nullable",
+            "prelude",
+            "unsafe-coerce",
+            "web-dom",
+            "web-events",
+            "web-file",
+            "web-html",
+            "web-storage"
+        ]
+    },
+    "exists": {
+        "depends": [
+            "unsafe-coerce"
+        ]
+    },
+    "distributive": {
+        "depends": [
+            "identity",
+            "newtype",
+            "prelude",
+            "tuples",
+            "type-equality"
+        ]
+    },
+    "argonaut-core": {
+        "depends": [
+            "argonaut-core",
+            "arrays",
+            "control",
+            "either",
+            "foreign-object",
+            "functions",
+            "gen",
+            "maybe",
+            "nonempty",
+            "prelude",
+            "strings",
+            "tailrec"
+        ]
+    },
+    "lazy": {
+        "depends": [
+            "control",
+            "foldable-traversable",
+            "invariant",
+            "prelude"
+        ]
+    },
+    "now": {
+        "depends": [
+            "datetime",
+            "effect",
+            "prelude"
+        ]
+    },
+    "foreign-object": {
+        "depends": [
+            "arrays",
+            "foldable-traversable",
+            "foreign-object",
+            "functions",
+            "gen",
+            "lists",
+            "maybe",
+            "prelude",
+            "st",
+            "tailrec",
+            "tuples",
+            "typelevel-prelude",
+            "unfoldable",
+            "unsafe-coerce"
+        ]
+    },
+    "foldable-traversable": {
+        "depends": [
+            "bifunctors",
+            "const",
+            "control",
+            "either",
+            "foldable-traversable",
+            "functors",
+            "identity",
+            "maybe",
+            "newtype",
+            "orders",
+            "prelude",
+            "tuples"
+        ]
+    },
+    "debug": {
+        "depends": [
+            "functions",
+            "prelude"
+        ]
+    },
+    "aff": {
+        "depends": [
+            "aff",
+            "control",
+            "datetime",
+            "effect",
+            "either",
+            "exceptions",
+            "functions",
+            "newtype",
+            "parallel",
+            "partial",
+            "prelude",
+            "tailrec",
+            "transformers",
+            "unsafe-coerce"
+        ]
+    },
+    "typelevel-prelude": {
+        "depends": [
+            "prelude",
+            "type-equality",
+            "typelevel-prelude"
+        ]
+    },
+    "functors": {
+        "depends": [
+            "bifunctors",
+            "const",
+            "contravariant",
+            "control",
+            "distributive",
+            "either",
+            "functors",
+            "invariant",
+            "maybe",
+            "newtype",
+            "prelude",
+            "profunctor",
+            "tuples",
+            "unsafe-coerce"
+        ]
+    },
+    "my-project": {
+        "depends": [
+            "aff",
+            "affjax",
+            "arrays",
+            "bifunctors",
+            "console",
+            "debug",
+            "effect",
+            "either",
+            "foldable-traversable",
+            "functions",
+            "integers",
+            "math",
+            "maybe",
+            "my-project",
+            "nullable",
+            "ordered-collections",
+            "prelude",
+            "random",
+            "strings",
+            "tailrec",
+            "transformers",
+            "tuples",
+            "unsafe-coerce",
+            "web-events",
+            "web-html"
+        ]
+    },
+    "tailrec": {
+        "depends": [
+            "bifunctors",
+            "effect",
+            "either",
+            "identity",
+            "maybe",
+            "partial",
+            "prelude",
+            "refs"
+        ]
+    },
+    "gen": {
+        "depends": [
+            "either",
+            "foldable-traversable",
+            "gen",
+            "identity",
+            "maybe",
+            "newtype",
+            "nonempty",
+            "prelude",
+            "tailrec",
+            "tuples",
+            "unfoldable"
+        ]
+    },
+    "web-xhr": {
+        "depends": [
+            "arraybuffer-types",
+            "datetime",
+            "effect",
+            "either",
+            "enums",
+            "foreign",
+            "http-methods",
+            "maybe",
+            "media-types",
+            "newtype",
+            "nullable",
+            "prelude",
+            "unsafe-coerce",
+            "web-dom",
+            "web-events",
+            "web-file",
+            "web-html",
+            "web-xhr"
+        ]
+    },
+    "prelude": {
+        "depends": [
+            "prelude"
+        ]
+    },
+    "bifunctors": {
+        "depends": [
+            "bifunctors",
+            "const",
+            "either",
+            "newtype",
+            "prelude",
+            "tuples"
+        ]
+    },
+    "st": {
+        "depends": [
+            "effect",
+            "partial",
+            "prelude",
+            "st",
+            "tailrec",
+            "unsafe-coerce"
+        ]
+    },
+    "affjax": {
+        "depends": [
+            "aff",
+            "affjax",
+            "argonaut-core",
+            "arraybuffer-types",
+            "arrays",
+            "control",
+            "datetime",
+            "either",
+            "exceptions",
+            "foldable-traversable",
+            "foreign",
+            "form-urlencoded",
+            "functions",
+            "http-methods",
+            "lists",
+            "maybe",
+            "media-types",
+            "newtype",
+            "nullable",
+            "prelude",
+            "transformers",
+            "web-dom",
+            "web-file",
+            "web-xhr"
+        ]
+    },
+    "unsafe-coerce": {
+        "depends": []
+    },
+    "refs": {
+        "depends": [
+            "effect",
+            "prelude"
+        ]
+    },
+    "nonempty": {
+        "depends": [
+            "control",
+            "foldable-traversable",
+            "maybe",
+            "prelude",
+            "tuples",
+            "unfoldable"
+        ]
+    },
+    "js-uri": {
+        "depends": [
+            "functions",
+            "maybe",
+            "prelude"
+        ]
+    },
+    "contravariant": {
+        "depends": [
+            "const",
+            "contravariant",
+            "either",
+            "newtype",
+            "prelude",
+            "tuples"
+        ]
+    },
+    "integers": {
+        "depends": [
+            "integers",
+            "math",
+            "maybe",
+            "numbers",
+            "prelude"
+        ]
+    },
+    "orders": {
+        "depends": [
+            "newtype",
+            "prelude"
+        ]
+    },
+    "const": {
+        "depends": [
+            "invariant",
+            "newtype",
+            "prelude"
+        ]
+    },
+    "js-date": {
+        "depends": [
+            "datetime",
+            "effect",
+            "enums",
+            "foreign",
+            "functions",
+            "integers",
+            "maybe",
+            "prelude"
+        ]
+    },
+    "numbers": {
+        "depends": [
+            "functions",
+            "math",
+            "maybe",
+            "prelude"
+        ]
+    },
+    "math": {
+        "depends": []
+    },
+    "enums": {
+        "depends": [
+            "control",
+            "either",
+            "enums",
+            "gen",
+            "maybe",
+            "newtype",
+            "nonempty",
+            "partial",
+            "prelude",
+            "tuples",
+            "unfoldable"
+        ]
+    },
+    "transformers": {
+        "depends": [
+            "control",
+            "distributive",
+            "effect",
+            "either",
+            "exceptions",
+            "foldable-traversable",
+            "identity",
+            "lazy",
+            "maybe",
+            "newtype",
+            "prelude",
+            "tailrec",
+            "transformers",
+            "tuples",
+            "unfoldable"
+        ]
+    },
+    "random": {
+        "depends": [
+            "effect",
+            "integers",
+            "prelude"
+        ]
+    },
+    "tuples": {
+        "depends": [
+            "control",
+            "invariant",
+            "prelude",
+            "tuples"
+        ]
+    },
+    "parallel": {
+        "depends": [
+            "control",
+            "effect",
+            "either",
+            "foldable-traversable",
+            "functors",
+            "maybe",
+            "newtype",
+            "parallel",
+            "prelude",
+            "profunctor",
+            "refs",
+            "transformers"
+        ]
+    },
+    "partial": {
+        "depends": [
+            "partial"
+        ]
+    },
+    "web-file": {
+        "depends": [
+            "datetime",
+            "effect",
+            "enums",
+            "foreign",
+            "integers",
+            "math",
+            "maybe",
+            "media-types",
+            "nullable",
+            "partial",
+            "prelude",
+            "tuples",
+            "unfoldable",
+            "unsafe-coerce",
+            "web-events",
+            "web-file"
+        ]
+    },
+    "web-dom": {
+        "depends": [
+            "effect",
+            "enums",
+            "maybe",
+            "newtype",
+            "nullable",
+            "prelude",
+            "unsafe-coerce",
+            "web-dom",
+            "web-events"
+        ]
+    },
+    "identity": {
+        "depends": [
+            "control",
+            "invariant",
+            "newtype",
+            "prelude"
+        ]
+    },
+    "strings": {
+        "depends": [
+            "arrays",
+            "control",
+            "either",
+            "enums",
+            "foldable-traversable",
+            "gen",
+            "integers",
+            "maybe",
+            "newtype",
+            "nonempty",
+            "partial",
+            "prelude",
+            "strings",
+            "tailrec",
+            "tuples",
+            "unfoldable",
+            "unsafe-coerce"
+        ]
+    },
+    "foreign": {
+        "depends": [
+            "either",
+            "foreign",
+            "functions",
+            "integers",
+            "lists",
+            "maybe",
+            "prelude",
+            "strings",
+            "transformers",
+            "unsafe-coerce"
+        ]
+    },
+    "nullable": {
+        "depends": [
+            "functions",
+            "maybe",
+            "prelude"
+        ]
+    },
+    "datetime": {
+        "depends": [
+            "bifunctors",
+            "control",
+            "datetime",
+            "either",
+            "enums",
+            "foldable-traversable",
+            "functions",
+            "gen",
+            "integers",
+            "lists",
+            "math",
+            "maybe",
+            "newtype",
+            "ordered-collections",
+            "partial",
+            "prelude",
+            "tuples"
+        ]
+    },
+    "functions": {
+        "depends": [
+            "prelude"
+        ]
+    },
+    "http-methods": {
+        "depends": [
+            "either",
+            "prelude",
+            "strings"
+        ]
+    },
+    "safe-coerce": {
+        "depends": [
+            "unsafe-coerce"
+        ]
+    },
+    "lists": {
+        "depends": [
+            "bifunctors",
+            "control",
+            "foldable-traversable",
+            "lazy",
+            "lists",
+            "maybe",
+            "newtype",
+            "nonempty",
+            "partial",
+            "prelude",
+            "tailrec",
+            "tuples",
+            "unfoldable"
+        ]
+    }
+}

@@ -1,4 +1,4 @@
-module D3.Examples.Force where
+module D3.Examples.Simulation.LesMiserables where
 
 import D3.Layouts.Simulation
 
