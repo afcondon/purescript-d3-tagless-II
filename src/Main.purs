@@ -3,6 +3,7 @@ module Main where
 import Prelude
 
 import D3.Examples.Simulation.LesMiserables as Graph
+import D3.Examples.Simulation.SpagoPackages as Spago
 import D3.Examples.GUP (runGeneralUpdatePattern) as GUP
 import D3.Examples.Tree.Configure as Tree
 import D3.Layouts.Hierarchical (TreeJson_, getTreeViaAJAX, makeModel)
@@ -20,6 +21,7 @@ main :: Effect Unit
 main = launchAff_  do
   _        <- forkAff GUP.runGeneralUpdatePattern
   _        <- forkAff Graph.drawGraph
+  _        <- forkAff Spago.drawGraph
 
   -- fetch an example model for the tree examples, the canonical flare dependency json in this case
   treeJSON <- getTreeViaAJAX "http://localhost:1234/flare-2.json"

@@ -42,8 +42,8 @@ runGeneralUpdatePattern = do
     delay (Milliseconds 2300.0) -- NB this has to be a smidge longer than any transitions in the update!
 
 svgAttributes :: Array Chainable
-svgAttributes = [ -- TODO remove totally meaningless attributes only here to demo, fix viewbox width etc too
-  viewBox 0.0 0.0 1000.0 1000.0
+svgAttributes = [ 
+  viewBox 0.0 0.0 650.0 650.0
 ]
 
 -- attributes that use (\d -> <something>) or (\d i -> <something>) need type hints
@@ -51,7 +51,7 @@ svgAttributes = [ -- TODO remove totally meaningless attributes only here to dem
 type Model = Array Char
 
 offsetXByIndex :: Datum -> Index -> Number
-offsetXByIndex d i = offset + ((indexIsNumber i) * factor)
+offsetXByIndex datum i = offset + ((indexIsNumber i) * factor)
   where
     offset = 50.0
     factor = 48.0

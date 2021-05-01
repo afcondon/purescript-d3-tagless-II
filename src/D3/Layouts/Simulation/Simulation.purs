@@ -28,14 +28,13 @@ defaultConfigSimulation = {
 }
 
 -- | Force Layout core types
-type ID = Int -- TODO this needs to be polymorphic eventually, doesn't it?
-type D3ForceLink_ r l = { 
-    source :: D3ForceNode_ r
-  , target :: D3ForceNode_ r
+type D3ForceLink_ id r l = { 
+    source :: D3ForceNode_ id r
+  , target :: D3ForceNode_ id r
   | l
 }
-type D3ForceNode_ r = { 
-    id    :: ID
+type D3ForceNode_ id r = { 
+    id    :: id
   , index :: Number
   , x     :: Number
   , y     :: Number
@@ -55,17 +54,17 @@ data ForceType =
   | ForceRadial Number Number
   | Custom
 
-type SimulationRecord_ r l = { 
+type SimulationRecord_ id r l = { 
     label  :: String
   , config :: SimulationConfig_
-  , nodes  :: Array (D3ForceNode_ r)
-  , links  :: Array (D3ForceLink_ r l)
+  , nodes  :: Array (D3ForceNode_ id r)
+  , links  :: Array (D3ForceLink_ id r l)
   , forces :: Array Force
   , tick   :: Unit -> Unit -- could be Effect Unit
   , drag   :: DragBehavior -- TODO make strongly typed wrt actual Model used
 }
 
-newtype Simulation r l = Simulation (SimulationRecord_ r l)
+newtype Simulation id r l = Simulation (SimulationRecord_ id r l)
 
 initSimulation :: forall model node link. Array Force -> model -> Array node -> Array link -> D3Simulation_
 initSimulation forces model nodes links = do
@@ -99,9 +98,9 @@ putForcesInSimulation simulation forces = do
 -- | foreign types associated with Force Layout Simulation
 -- TODO structures here carried over from previous interpreter - review and refactor
 
-foreign import initSimulation_  :: forall r.   Array (D3ForceNode_ r) -> SimulationConfig_ -> D3Simulation_
-foreign import setNodes_        :: forall r.   D3Simulation_ -> Array (D3ForceNode_ r)     -> D3Simulation_
-foreign import setLinks_        :: forall r l. D3Simulation_ -> Array (D3ForceLink_ r l)   -> D3Simulation_
+foreign import initSimulation_  :: forall id r.   Array (D3ForceNode_ id r) -> SimulationConfig_ -> D3Simulation_
+foreign import setNodes_        :: forall id r.   D3Simulation_ -> Array (D3ForceNode_ id r)     -> D3Simulation_
+foreign import setLinks_        :: forall id r l. D3Simulation_ -> Array (D3ForceLink_ id r l)   -> D3Simulation_
 foreign import startSimulation_ :: D3Simulation_ -> Unit
 foreign import stopSimulation_  :: D3Simulation_ -> Unit
 

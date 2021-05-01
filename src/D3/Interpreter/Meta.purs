@@ -71,7 +71,7 @@ runMetaTree (D3MetaTreeM state) = runStateT state initialMetaTree
 derive newtype instance functorD3MetaTreeM     :: Functor               D3MetaTreeM
 derive newtype instance applyD3MetaTreeM       :: Apply                 D3MetaTreeM
 derive newtype instance applicativeD3MetaTreeM :: Applicative           D3MetaTreeM
-derive newtype instance bindD3MetaTreeM        :: Bind                  D3MetaTreeM
+derive newtype instance bindD3MetaTreeM        :: Bind                  D3MetaTreeM 
 derive newtype instance monadD3MetaTreeM       :: Monad                 D3MetaTreeM
 derive newtype instance monadStateD3MetaTreeM  :: MonadState ScriptTree D3MetaTreeM 
 derive newtype instance monadEffD3MetaTreeM    :: MonadEffect           D3MetaTreeM

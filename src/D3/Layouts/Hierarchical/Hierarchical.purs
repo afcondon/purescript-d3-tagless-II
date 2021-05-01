@@ -1,6 +1,6 @@
 module D3.Layouts.Hierarchical(
     hasChildren_, hierarchyFromJSON_, readJSON_, links_, descendants_, makeModel
-  , getWindowWidthHeight, getTreeViaAJAX, initTree_, initCluster_, autoBox_
+  , getTreeViaAJAX, initTree_, initCluster_, autoBox_
   , treeSetRoot_, treeSetNodeSize_, treeSetSeparation_, treeMinMax_, treeSetSize_
   , defaultSeparation, radialSeparation, positionXY, positionXYreflected
   , horizontalLink, radialLink, verticalLink, horizontalClusterLink, verticalClusterLink
@@ -19,26 +19,14 @@ import D3.Selection (Chainable(..), D3Data_)
 import Data.Bifunctor (rmap)
 import Data.Either (Either)
 import Data.Function.Uncurried (Fn2, mkFn2)
-import Data.Int (toNumber)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
-import Data.Tuple (Tuple(..), fst, snd)
-import Effect (Effect)
 import Effect.Aff (Aff)
-import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Class (class MonadEffect)
 import Unsafe.Coerce (unsafeCoerce)
-import Web.HTML (window)
-import Web.HTML.Window (innerHeight, innerWidth)
 
 find :: D3HierarchicalNode_ -> (Datum -> Boolean) -> Maybe D3HierarchicalNode_
 find tree filter = toMaybe $ find_ tree filter
-
-getWindowWidthHeight :: Effect (Tuple Number Number)
-getWindowWidthHeight = do
-  win    <- window
-  width  <- innerWidth win
-  height <- innerHeight win
-  pure $ Tuple (toNumber width) (toNumber height)
 
 getTreeViaAJAX :: URL -> Aff (Either Error TreeJson_)
 getTreeViaAJAX url = do
@@ -53,7 +41,6 @@ makeModel :: forall d v.
   TreeJson_ -> 
   Aff (Model d v)
 makeModel treeType treeLayout json = do
-  -- widthHeight <- liftEffect $ getWindowWidthHeight
   let 
     root_      = hierarchyFromJSON_ json
     -- svgConfig  = { width: fst widthHeight, height: snd widthHeight }

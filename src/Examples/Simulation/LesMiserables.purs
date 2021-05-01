@@ -1,51 +1,34 @@
 module D3.Examples.Simulation.LesMiserables where
 
-import D3.Layouts.Simulation
-
 import Affjax (Error)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Instances (Datum)
-import D3.Attributes.Sugar (classed, cursor, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, width, x1, x2, y1, y2)
-import D3.Interpreter
-import D3.Interpreter.D3
-import D3.Interpreter.String
-import D3.Scales (d3SchemeCategory10_)
-import D3.Selection (D3Selection_, D3Simulation_, DragBehavior(..), Element(..), Join(..), Keys(..), ScaleExtent(..), SelectionName(..), ZoomExtent(..), makeProjection, node)
+import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
+import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
+import D3.Interpreter.D3 (runD3M)
+import D3.Interpreter.String (runPrinter)
+import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce, startSimulation_)
+import D3.Scales (d3SchemeCategory10N_)
+import D3.Selection (D3Selection_, DragBehavior(..), Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), node)
 import Data.Either (Either(..))
-import Data.Int (toNumber)
 import Data.Tuple (Tuple(..), fst, snd)
-import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (sqrt)
-import Prelude (class Bind, Unit, bind, discard, pure, unit, ($), (*>))
+import Prelude (class Bind, Unit, bind, discard, pure, unit, ($))
 import Unsafe.Coerce (unsafeCoerce)
-import Web.HTML (window)
-import Web.HTML.Window (innerHeight, innerWidth)
-
-getWindowWidthHeight :: Effect (Tuple Number Number)
-getWindowWidthHeight = do
-  win    <- window
-  width  <- innerWidth win
-  height <- innerHeight win
-  pure $ Tuple (toNumber width) (toNumber height)
-
--- TODO no error handling at all here RN (OTOH - performant!!)
-foreign import readJSONJS :: String -> Model 
-
-readGraphFromFileContents :: forall r. Either Error { body ∷ String | r } -> Model
-readGraphFromFileContents (Right { body } ) = readJSONJS body
-readGraphFromFileContents (Left err)        = { links: [], nodes: [] } -- TODO exceptions dodged using empty Model
-
 
 -- this is the model used by this particular "chart" (ie force layout simulation)
+-- *********************************************************************************************************************
+-- NOTA BENE - these types are a _lie_ as stated in that the Nodes / Links are mutable and are changed when you put them
+-- into the simulation, the types given here represent their form AFTER D3 has mutated them
+-- *********************************************************************************************************************
 type NodeExtension = (group :: Number) -- any extra fields beyond what's required of all ForceLayout nodes
 type LinkExtension = (value :: Number) -- empty row, this simulation doesn't yet have extra stuff in the links
-type GraphNode = D3ForceNode_ NodeExtension
-type GraphLink = D3ForceLink_ NodeExtension LinkExtension
+type GraphNode = D3ForceNode_ Int NodeExtension
+type GraphLink = D3ForceLink_ Int NodeExtension LinkExtension
 type Model = { links :: Array GraphLink, nodes :: Array GraphNode }
 
 drawGraph :: Aff Unit
@@ -62,6 +45,15 @@ drawGraph = do
   log $ snd printedScript
   log $ fst printedScript
   pure unit
+
+-- TODO no error handling at all here RN (OTOH - performant!!)
+foreign import readJSONJS :: String -> Model 
+
+readGraphFromFileContents :: forall r. Either Error { body ∷ String | r } -> Model
+readGraphFromFileContents (Right { body } ) = readJSONJS body
+readGraphFromFileContents (Left err)        = { links: [], nodes: [] } -- TODO exceptions dodged using empty Model
+
+
 
 -- | recipe for this force layout graph
 enter :: forall m link node selection r. 
@@ -121,7 +113,7 @@ datumIsGraphNode :: Datum -> GraphNode
 datumIsGraphNode = unsafeCoerce
 
 colorByGroup :: Datum -> String
-colorByGroup datum = d3SchemeCategory10_ d.group
+colorByGroup datum = d3SchemeCategory10N_ d.group
   where
     d = datumIsGraphNode datum
 

@@ -6,9 +6,14 @@ import Prelude
 import D3.Layouts.Hierarchical (autoBox_)
 import D3.Selection (Chainable(..), EasingFunction(..), Transition)
 import Data.Array (intercalate, (:))
+import Data.Int (toNumber)
+import Data.Tuple (Tuple(..))
 import Debug (spy)
+import Effect (Effect)
 import Effect.Aff (Milliseconds(..))
 import Unsafe.Coerce (unsafeCoerce)
+import Web.HTML (window)
+import Web.HTML.Window (innerHeight, innerWidth)
 
 backgroundColor :: ∀ a. ToAttr String a => a -> Chainable
 backgroundColor = AttrT <<< Attribute "background-color" <<< toAttr
@@ -149,3 +154,11 @@ transform = transform' <<< assembleTransforms
 -- what we know the Datum will actually be (ie D3TreeNode for example) then we have some limited type checking
 assembleTransforms :: ∀ a. Array (a -> String) -> (Datum -> String)
 assembleTransforms fs = unsafeCoerce (\d -> intercalate " " $ flap fs d)
+
+-- TODO this is nothing to do with Attributes - needs to go to a "Utilities" module 
+getWindowWidthHeight :: Effect (Tuple Number Number)
+getWindowWidthHeight = do
+  win <- window
+  w <- innerWidth win
+  h <- innerHeight win
+  pure $ Tuple (toNumber w) (toNumber h)

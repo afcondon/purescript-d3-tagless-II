@@ -17,12 +17,12 @@ import Prelude (class Bind, bind, negate, pure)
 treeScript :: forall m v selection. Bind m => D3InterpreterM selection m => 
   ScriptConfig -> H.Model String v -> m selection
 treeScript config model = do
-  root      <- attach config.selector
-  svg       <- root      `append` (node Svg config.viewbox)
-  container <- svg       `append` (node Group [ fontFamily "sans-serif"
-                                              , fontSize   10.0
-                                              , backgroundColor "beige"
-                                              ])
+  root      <- attach config.selector                           -- this does this
+  svg       <- root `append` (node Svg config.viewbox)          -- this does that 
+  container <- svg  `append` (node Group [ fontFamily      "sans-serif"
+                                         , fontSize        10.0 -- some bullshit
+                                         , backgroundColor "beige"
+                                         ])
   links     <- container `append` (node Group [ classed "links"])
   nodes     <- container `append` (node Group [ classed "nodes"])
 
@@ -47,17 +47,17 @@ treeScript config model = do
   }
 
   theNodes <- nodeJoin_ `append` 
-                (node Circle  [ fill (\d -> if hasChildren_ d then "#999" else "#555")
-                              , radius 2.5
+                (node Circle  [ fill         (\datum -> if hasChildren_ datum then "#999" else "#555")
+                              , radius       2.5
                               , strokeColor "white"
                               ])
 
   theLabels <- nodeJoin_ `append`
                 (node Text  [ dy         0.31
-                            , x          (\d -> if config.textDirection d then 6.0 else (-6.0))
-                            , textAnchor (\d -> if config.textDirection d then "start" else "end")
+                            , x          (\datum -> if config.textDirection datum then 6.0 else (-6.0))
+                            , textAnchor (\datum -> if config.textDirection datum then "start" else "end")
                             , text       labelName
-                            , fill config.color
+                            , fill       config.color
                             ])
 
   svgZ <- container `attachZoom`   

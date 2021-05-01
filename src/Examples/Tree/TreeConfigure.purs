@@ -3,7 +3,7 @@ module D3.Examples.Tree.Configure where
 import D3.Layouts.Hierarchical
 
 import D3.Attributes.Instances (Datum)
-import D3.Attributes.Sugar (transform, viewBox)
+import D3.Attributes.Sugar (getWindowWidthHeight, transform, viewBox)
 import D3.Examples.Tree.Script (treeScript)
 import D3.Examples.Tree.Types (datumIsTreeNode)
 import D3.Interpreter (class D3InterpreterM)
@@ -12,7 +12,7 @@ import D3.Interpreter.MetaTree (MetaTreeNode, ScriptTree(..), runMetaTree, scrip
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical as H
 import D3.Layouts.Hierarchical.Types (TreeLayout(..), TreeType(..))
-import D3.Scales (d3SchemeCategory10_)
+import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (D3Selection_)
 import Data.Map (toUnfoldable)
 import Data.Tuple (Tuple(..), fst, snd)
@@ -139,7 +139,7 @@ configureAndRunScript (Tuple width height ) model =
         TidyTree, Vertical     -> [ transform [ positionXY ] ]
         TidyTree, Radial       -> [ transform [ radialRotateCommon, radialTranslate, rotateRadialLabels ] ]
 
-    color = d3SchemeCategory10_ $
+    color = d3SchemeCategory10N_ $
       case model.treeType, model.treeLayout of
         Dendrogram, Horizontal -> 1.0
         Dendrogram, Vertical   -> 2.0
