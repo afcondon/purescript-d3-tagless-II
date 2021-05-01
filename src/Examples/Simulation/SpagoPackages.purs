@@ -2,42 +2,34 @@ module D3.Examples.Simulation.SpagoPackages where
 
 import Prelude
 
-import Affjax (Error, URL)
+import Affjax (URL)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
-import D3.Examples.Simulation.LesMiserables (GraphLink)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce, startSimulation_)
 import D3.Scales (d3SchemeCategory10S_)
 import D3.Selection (D3Selection_, DragBehavior(..), Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), node)
-import Data.Array (foldl, (!!))
-import Data.Array (fromFoldable) as A
+import Data.Array (catMaybes, foldl, (!!), (:))
 import Data.Either (Either(..))
-import Data.Int (toNumber)
 import Data.Map as M
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..), fst, snd)
-import Data.Tuple.Nested (tuple2)
 import Debug (spy, trace)
-import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Math (sqrt)
 import Unsafe.Coerce (unsafeCoerce)
-import Web.HTML (window)
-import Web.HTML.Window (innerHeight, innerWidth)
 
 -- *********************************************************************************************************************
 -- NOTA BENE - these types are a _lie_ as stated in that the Nodes / Links are mutable and are changed when you put them
 -- into the simulation, the types given here represent their form AFTER D3 has mutated them
 -- *********************************************************************************************************************
-type NodeExtension = ( path :: String, package :: String, moduleOrPackage :: String )
+type NodeExtension = ( path :: String, package :: Maybe String, moduleOrPackage :: String )
 type LinkExtension = ( moduleOrPackage :: String )
 type GraphNode_ = D3ForceNode_ String NodeExtension
 type GraphLink_ = D3ForceLink_ String NodeExtension LinkExtension
@@ -68,36 +60,48 @@ makeModel { packages, modules, lsDeps } = do
     makeLink :: String -> Tuple String String -> { source :: String, target :: String, moduleOrPackage :: String }
     makeLink moduleOrPackage (Tuple source target) = { source, target, moduleOrPackage }
 
+    makeModuleToPackageLink :: forall r. { id :: String, package :: Maybe String | r } -> Maybe { source :: String, target :: String, moduleOrPackage :: String }
+    makeModuleToPackageLink { id, package: Just p } = Just { source: id, target: p, moduleOrPackage: "both"}
+    makeModuleToPackageLink { id, package: Nothing } = Nothing
+
     foldDepends :: forall r. Array (Tuple String String) -> { key :: String, depends :: Array String | r } -> Array (Tuple String String)
     foldDepends b a = ((Tuple a.key) <$> a.depends) <> b
 
-    makeNodeFromModule :: Module -> { id :: String, path :: String, package :: String, moduleOrPackage :: String }
+    makeNodeFromModule :: Module -> { id :: String, path :: String, package :: Maybe String, moduleOrPackage :: String }
     makeNodeFromModule m = { id: m.key, path: m.path, package: getPackage m.path, moduleOrPackage: "module" }
 
-    makeNodeFromPackage :: Package -> { id :: String, path :: String, package :: String, moduleOrPackage :: String }
-    makeNodeFromPackage m = { id: m.key, path, package: m.key, moduleOrPackage: "package" } -- TODO package field here is bogus
+    makeNodeFromPackage :: Package -> { id :: String, path :: String, package :: Maybe String, moduleOrPackage :: String }
+    makeNodeFromPackage m = { id: m.key, path, package: Just m.key, moduleOrPackage: "package" } -- TODO package field here is bogus
       where
         path = case M.lookup m.key depsMap of
                 Nothing -> "error path not found for package key: " <> m.key
                 (Just { repo }) -> repo 
 
-    getPackage :: String -> String
+    getPackage :: String -> Maybe String
     getPackage path = do
       let pieces = split (Pattern "/") path
-      case pieces !! 1 of
-        Nothing -> "error package not read correctly from path"
-        (Just package) -> package
+      root    <- pieces !! 0
+      case root of
+        ".spago" -> pieces !! 1
+        "src"    -> pure "local"
+        _        -> Nothing
 
     moduleLinks = (makeLink "module")   <$> (foldl foldDepends [] modules)             
     moduleNodes = makeNodeFromModule    <$> modules
 
     packageLinks = (makeLink "package") <$> (foldl foldDepends [] packages)
-    packageNodes = makeNodeFromPackage  <$> packages
+    packageNodes = makeNodeFromPackage  <$> ( [{ key: "local", depends: [] }, { key: "psci-support", depends: [] }] <> packages)
+
+    modulePackageLinks = catMaybes $ makeModuleToPackageLink <$> moduleNodes
 
     links :: Array GraphLink_
-    links = makeGraphLinks_ (packageLinks <> moduleLinks)
+    links = makeGraphLinks_ (packageLinks <> moduleLinks <> modulePackageLinks)
+    -- links = makeGraphLinks_ packageLinks
+    -- links = makeGraphLinks_ moduleLinks
     nodes :: Array GraphNode_ 
     nodes = makeGraphNodes_ (packageNodes <> moduleNodes) 
+    -- nodes = makeGraphNodes_ packageNodes
+    -- nodes = makeGraphNodes_ moduleNodes
   
   { links, nodes }
 
@@ -127,11 +131,11 @@ enter :: forall m link node selection r.
   m selection -- TODO is it right to return selection_ instead of simulation_? does it matter? 
 enter (Tuple w h) model = do
   root       <- attach "div#spago"
-  svg        <- root `append` (node Svg   [ viewBox 0.0 0.0 1000.0 1000.0 ] )
+  svg        <- root `append` (node Svg   [ viewBox 0.0 0.0 650.0 650.0 ] )
   linksGroup <- svg  `append` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
-  let forces      = [ makeCenterForce 500.0 500.0
+  let forces      = [ makeCenterForce 325.0 325.0
                     , Force (ForceName "charge") ForceMany ]
       simulation_ = initSimulation forces model model.nodes model.links
 
@@ -150,7 +154,7 @@ enter (Tuple w h) model = do
       element   : Circle
     , key       : UseDatumAsKey
     , "data"    : model.nodes
-    , behaviour : [ radius 5.0, fill colorByGroup ]
+    , behaviour : [ radius (\d -> if (datumIsGraphNode_ d).moduleOrPackage == "module" then 5.0 else 10.0), fill colorByGroup ]
     , simulation: simulation_  -- following config fields are extras for simulation
     , tickName  : "nodes"
     , onTick    : [ cx setCx, cy setCy ]
@@ -176,7 +180,7 @@ datumIsGraphNode_ :: Datum -> GraphNode_
 datumIsGraphNode_ = unsafeCoerce
 
 colorByGroup :: Datum -> String
-colorByGroup datum = d3SchemeCategory10S_ d.package
+colorByGroup datum = d3SchemeCategory10S_ (fromMaybe "unknown" d.package)
   where
     d = datumIsGraphNode_ datum
 

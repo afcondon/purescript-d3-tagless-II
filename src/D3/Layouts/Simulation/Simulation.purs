@@ -76,7 +76,7 @@ initSimulation forces model nodes links = do
   simulation
 
 makeCenterForce :: Number -> Number -> Force
-makeCenterForce width height = Force (ForceName "center") $ ForceCenter (width / 2.0) (height / 2.0)
+makeCenterForce cx cy = Force (ForceName "center") $ ForceCenter cx cy
 
 putForcesInSimulation :: D3Simulation_ -> Array Force -> D3Simulation_
 putForcesInSimulation simulation forces = do
