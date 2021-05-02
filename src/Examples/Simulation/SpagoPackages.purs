@@ -1,6 +1,6 @@
 module D3.Examples.Simulation.SpagoPackages where
 
-import Prelude
+import Prelude hiding (append, join)
 
 import Affjax (URL)
 import Affjax as AJAX
@@ -12,8 +12,9 @@ import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce, startSimulation_)
 import D3.Scales (d3SchemeCategory10S_)
-import D3.Selection (D3Selection_, DragBehavior(..), Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), node)
-import Data.Array (catMaybes, foldl, (!!), (:))
+import D3.Selection (D3Selection_, DragBehavior(..), Element(..), Join(..), Keys(..), node)
+import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
+import Data.Array (catMaybes, foldl, (!!))
 import Data.Either (Either(..))
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)

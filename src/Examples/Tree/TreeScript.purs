@@ -6,7 +6,8 @@ import D3.Attributes.Sugar (backgroundColor, classed, dy, fill, fontFamily, font
 import D3.Examples.Tree.Types (ScriptConfig, labelName)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Layouts.Hierarchical as H
-import D3.Selection (Element(..), Join(..), Keys(..), ScaleExtent(..), ZoomExtent(..), node)
+import D3.Selection (Element(..), Join(..), Keys(..), node)
+import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Prelude (class Bind, bind, negate, pure)
 
 -- | The eDSL script that renders tree layouts

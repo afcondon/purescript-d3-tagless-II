@@ -2,11 +2,12 @@ module D3.Interpreter.MetaTree where
 
 import Prelude
 
-import Control.Monad.State (class MonadState, StateT, State, get, modify_, runStateT)
+import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Interpreter (class D3InterpreterM)
-import D3.Layouts.Hierarchical (D3HierarchicalNode_, Tree(..), TreeJson_, hierarchyFromJSON_)
-import D3.Selection (Chainable(..), D3_Node(..), Element, EnterUpdateExit, Join(..), Keys, ZoomConfig, Transition, showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
+import D3.Layouts.Hierarchical (TreeJson_)
+import D3.Selection (Chainable(..), D3_Node(..), Element, EnterUpdateExit, Join(..), Keys, Transition, showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
+import D3.Zoom (ZoomConfig)
 import Data.Array (filter, foldl, (:))
 import Data.Map (Map, empty, insert, lookup)
 import Data.Maybe (fromMaybe)
