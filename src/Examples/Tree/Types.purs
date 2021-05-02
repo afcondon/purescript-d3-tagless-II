@@ -18,6 +18,7 @@ type ScriptConfig = {
   , nodeTransform :: Array Chainable
   , color         :: String
   , textDirection :: Datum -> Boolean
+  , svg           :: { width :: Number, height :: Number }
 }
 
 -- | Coercion function to recover the structure that was given to D3, it's an unsafeCoerce but the types

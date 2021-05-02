@@ -62,33 +62,33 @@ configureAndRunScript :: forall m v selection.
   D3InterpreterM selection m => 
   Tuple Number Number -> H.Model String v -> m selection
 configureAndRunScript (Tuple width height ) model = 
-  treeScript { spacing, selector, viewbox, tree: laidOutRoot_, linkPath, nodeTransform, color, textDirection } model
+  treeScript { spacing, selector, viewbox, tree: laidOutRoot_, linkPath, nodeTransform, color, textDirection, svg } model
   where
-    columns                    = 3.0  -- 3 columns, set in the grid CSS in index.html
-    gap                        = 10.0 -- 10px set in the grid CSS in index.html
-    svgWidth                   = spy "svgWidth" $ ((width - ((columns - 1.0) * gap)) / columns)
-    svgHeight                  = spy "svgHeight" $ height / 2.0 -- 2 rows
+    columns = 3.0  -- 3 columns, set in the grid CSS in index.html
+    gap     = 10.0 -- 10px set in the grid CSS in index.html
+    svg     = { width : spy "svg.width" $ ((width - ((columns - 1.0) * gap)) / columns)
+              , height: spy "svg.height" $ height / 2.0 } -- 2 rows
 
-    numberOfLevels             = spy "number of Levels in tree: " $ (hNodeHeight_ model.root_) + 1.0
+    numberOfLevels = spy "number of Levels in tree: " $ (hNodeHeight_ model.root_) + 1.0
     spacing = spy "spacing: " $ 
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> { interChild: 10.0, interLevel: svgWidth / numberOfLevels }
-        Dendrogram, Vertical   -> { interChild: 10.0, interLevel: svgHeight / numberOfLevels }
+        Dendrogram, Horizontal -> { interChild: 10.0, interLevel: svg.width / numberOfLevels }
+        Dendrogram, Vertical   -> { interChild: 10.0, interLevel: svg.height / numberOfLevels }
         Dendrogram, Radial     -> { interChild: 0.0,  interLevel: 0.0} -- not sure this is used in radial case
 
-        TidyTree, Horizontal   -> { interChild: 10.0, interLevel: svgWidth / numberOfLevels }
-        TidyTree, Vertical     -> { interChild: 10.0, interLevel: svgHeight / numberOfLevels}
+        TidyTree, Horizontal   -> { interChild: 10.0, interLevel: svg.width / numberOfLevels }
+        TidyTree, Vertical     -> { interChild: 10.0, interLevel: svg.height / numberOfLevels}
         TidyTree, Radial       -> { interChild: 0.0,  interLevel: 0.0} -- not sure this is used in radial case
 
     layout = 
       case model.treeType, model.treeLayout of
         Dendrogram, Horizontal -> (initCluster_ unit)   `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
         Dendrogram, Vertical   -> (initCluster_ unit)   `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-        Dendrogram, Radial     -> ((initCluster_ unit)  `treeSetSize_`     [ 2.0 * pi, (svgWidth / 2.0) - 100.0 ]) -- note that in radial case doesn't seem to be initialized by d3.cluster
+        Dendrogram, Radial     -> ((initCluster_ unit)  `treeSetSize_`     [ 2.0 * pi, (svg.width / 2.0) - 100.0 ]) -- note that in radial case doesn't seem to be initialized by d3.cluster
                                                         `treeSetSeparation_` radialSeparation
         TidyTree  , Horizontal -> (initTree_ unit)      `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
         TidyTree  , Vertical   -> (initTree_ unit)      `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-        TidyTree  , Radial     -> ((initTree_ unit)     `treeSetSize_`     [ 2.0 * pi, (svgHeight / 2.0) - 50.0 ])
+        TidyTree  , Radial     -> ((initTree_ unit)     `treeSetSize_`     [ 2.0 * pi, (svg.height / 2.0) - 50.0 ])
                                                         `treeSetSeparation_` radialSeparation
 
     laidOutRoot_ =
@@ -100,13 +100,13 @@ configureAndRunScript (Tuple width height ) model =
 
     viewbox =
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> [ viewBox (-10.0) (svgHeight - xExtent / 2.0) yExtent xExtent ] -- x and y are reversed in horizontal layouts
+        Dendrogram, Horizontal -> [ viewBox (-10.0) (svg.height - xExtent / 2.0) yExtent xExtent ] -- x and y are reversed in horizontal layouts
         Dendrogram, Vertical   -> [ viewBox xMin 0.0 xExtent yExtent ]
-        Dendrogram, Radial     -> [ viewBox (-svgWidth/2.0) (-svgHeight/2.0) svgWidth svgHeight ]
+        Dendrogram, Radial     -> [ viewBox (-svg.width/2.0) (-svg.height/2.0) svg.width svg.height ]
 
-        TidyTree  , Horizontal -> [ viewBox (-10.0) (svgHeight - xExtent / 2.0) yExtent xExtent ] -- x and y are reversed in horizontal layouts
+        TidyTree  , Horizontal -> [ viewBox (-10.0) (svg.height - xExtent / 2.0) yExtent xExtent ] -- x and y are reversed in horizontal layouts
         TidyTree  , Vertical   -> [ viewBox xMin 0.0 xExtent yExtent ]
-        TidyTree  , Radial     -> [ viewBox (-svgWidth/2.0) (-svgHeight/2.0) svgWidth svgHeight ]
+        TidyTree  , Radial     -> [ viewBox (-svg.width/2.0) (-svg.height/2.0) svg.width svg.height ]
 
       
     linkPath =

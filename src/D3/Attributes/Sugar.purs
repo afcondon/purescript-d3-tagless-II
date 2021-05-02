@@ -59,6 +59,12 @@ width = AttrT <<< Attribute "width" <<< toAttr
 height :: ∀ a. ToAttr Number a => a -> Chainable
 height = AttrT <<< Attribute "height" <<< toAttr
 
+width100 :: Chainable
+width100 = AttrT <<< Attribute "width" $ toAttr "100%"
+
+height100 :: Chainable
+height100 = AttrT <<< Attribute "height" $ toAttr "100%"
+
 x :: ∀ a. ToAttr Number a => a -> Chainable
 x = AttrT <<< Attribute "x" <<< toAttr
 
