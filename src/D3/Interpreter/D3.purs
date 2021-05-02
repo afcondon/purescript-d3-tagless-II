@@ -7,8 +7,9 @@ import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Layouts.Simulation (defaultSimulationDrag_, onTick_)
 import D3.Selection (Chainable(..), D3Selection_, D3_Node(..), DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), d3AddTransition_, d3Append_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, defaultDrag_, disableDrag_)
-import D3.Zoom (ScaleExtent(..), ZoomExtent(..), d3AttachZoomDefaultExtent_, d3AttachZoom_)
+import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..), d3AttachZoomDefaultExtent_, d3AttachZoom_)
 import Data.Foldable (foldl)
+import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
@@ -83,6 +84,10 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
   attachZoom selection config = do
     let 
       (ScaleExtent smallest largest) = config.scale
+      target = 
+        case config.target of
+          SelfTarget                   -> selection
+          (ZoomTarget targetSelection) -> targetSelection
     
     -- sticking to the rules of no ADT's on the JS side we case on the ZoomExtent here
     pure $ 
@@ -91,6 +96,7 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
           d3AttachZoomDefaultExtent_ selection {
             scaleExtent: [ smallest, largest ]
           , qualifier  : config.qualifier
+          , target
           } 
 
         (ZoomExtent ze)   -> do
@@ -98,6 +104,7 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
             extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
           , scaleExtent: [ smallest, largest ]
           , qualifier  : config.qualifier
+          , target
           }
         -- TODO write casae for: (ExtentFunction f) -> selection
 

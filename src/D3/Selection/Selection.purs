@@ -10,7 +10,7 @@ import Unsafe.Coerce (unsafeCoerce)
 
 type Selector = String 
 
-data Element = Div | Svg | Circle | Line | Group | Text | Path
+data Element = Div | Svg | Circle | Line | Group | Text | Path | Rect
 instance showElement :: Show Element where
   show Div    = "div"
   show Svg    = "svg"
@@ -19,6 +19,7 @@ instance showElement :: Show Element where
   show Group  = "g"
   show Text   = "text"
   show Path   = "path"
+  show Rect   = "rect"
   
 -- (Opaque) foreign types generated for (ie unsafeCoerce), or by (ie returned selections), D3 
 foreign import data D3Data_       :: Type 

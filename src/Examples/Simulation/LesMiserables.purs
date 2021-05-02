@@ -11,8 +11,9 @@ import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce, startSimulation_)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (D3Selection_, DragBehavior(..), Element(..), Join(..), Keys(..), SimulationDrag(..), node)
-import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
+import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
 import Data.Either (Either(..))
+import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -98,6 +99,7 @@ enter (Tuple w h) model = do
   svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                             , scale     : ScaleExtent 1 4 -- wonder if ScaleExtent ctor could be range operator `..`
                             , qualifier : "tree"
+                            , target    : SelfTarget
                             }
 
   let _ = startSimulation_ simulation_

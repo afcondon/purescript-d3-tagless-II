@@ -2,9 +2,9 @@ const debug = false;
 
 // foreign import attachZoom :: D3Selection_ -> ZoomConfigDefault_ -> D3Selection_
 exports.d3AttachZoomDefaultExtent_ = selection => config => { 
-  if (debug) { showAttachZoomDefaultExtent_(selection)(config); }
+  if (debug) { showAttachZoomDefaultExtent_(config.target)(config); }
   function zoomed({transform}) {
-    selection.attr("transform", transform);
+    (config.target).attr("transform", transform);
   }
   // "If extent is not specified, returns the current extent accessor, which
   // defaults to [[0, 0], [width, height]] where width is the client width of the
@@ -18,9 +18,9 @@ exports.d3AttachZoomDefaultExtent_ = selection => config => {
                 
 // foreign import attachZoom :: D3Selection_ -> ZoomConfig_ -> D3Selection_
 exports.d3AttachZoom_ = selection => config => { 
-  if (debug) { showAttachZoom_(selection)(config) }
+  if (debug) { showAttachZoom_(config.target)(config) }
   function zoomed({transform}) { // TODO try arrow function below instead
-    selection.attr("transform", transform);
+    (config.target).attr("transform", transform);
   }
   return selection.call(d3.zoom()
                           .extent(config.extent)

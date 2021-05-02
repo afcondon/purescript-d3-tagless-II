@@ -15,8 +15,8 @@ class (Monad m) <= D3InterpreterM selection m where
   join   :: ∀ datum. selection -> Join datum -> m selection
 
   -- TODO this could very well be an extension of the monad, see also Drag
-  attachZoom :: selection -> ZoomConfig      -> m selection 
-  onDrag     :: selection -> DragBehavior    -> m selection 
+  attachZoom :: selection -> ZoomConfig selection -> m selection 
+  onDrag     :: selection -> DragBehavior         -> m selection 
 
 infix 4 join as <+>
 

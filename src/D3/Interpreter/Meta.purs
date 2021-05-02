@@ -26,7 +26,7 @@ data MetaTreeNode =
   | JoinGeneralNode    Element Keys EnterUpdateExit
   | JoinSimulationNode Element Keys (Array Chainable)
   -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
-  | ZoomNode ZoomConfig
+  | ZoomNode (ZoomConfig NodeID)
   | DragNode DragBehavior -- TODO make chainable
   | AttrNode Chainable -- actually only Attr and Text
   | TransitionNode (Array Chainable) Transition

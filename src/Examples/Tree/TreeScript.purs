@@ -2,12 +2,13 @@ module D3.Examples.Tree.Script where
 
 import D3.Layouts.Hierarchical
 
-import D3.Attributes.Sugar (backgroundColor, classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, x)
+import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, width, x)
 import D3.Examples.Tree.Types (ScriptConfig, labelName)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Layouts.Hierarchical as H
 import D3.Selection (Element(..), Join(..), Keys(..), node)
-import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
+import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
+import Data.Maybe (Maybe(..))
 import Prelude (class Bind, bind, negate, pure)
 
 -- | The eDSL script that renders tree layouts
@@ -18,16 +19,16 @@ import Prelude (class Bind, bind, negate, pure)
 treeScript :: forall m v selection. Bind m => D3InterpreterM selection m => 
   ScriptConfig -> H.Model String v -> m selection
 treeScript config model = do
-  root      <- attach config.selector                           -- this does this
-  svg       <- root `append` (node Svg config.viewbox)          -- this does that 
-  container <- svg  `append` (node Group [ fontFamily      "sans-serif"
-                                         , fontSize        10.0 -- some bullshit
-                                         , backgroundColor "beige"
+  root       <- attach config.selector                           
+  svg        <- root `append` (node Svg config.viewbox)          
+  container  <- svg  `append` (node Group [ fontFamily      "sans-serif"
+                                         , fontSize        10.0
                                          ])
-  links     <- container `append` (node Group [ classed "links"])
-  nodes     <- container `append` (node Group [ classed "nodes"])
+  background <- container `append` (node Rect [ width 200.0, height 200.0, fill "red" ])
+  links      <- container `append` (node Group [ classed "links"])
+  nodes      <- container `append` (node Group [ classed "nodes"])
 
-  theLinks_ <- links <+> Join {
+  theLinks_  <- links <+> Join {
       element   : Path
     , key       : UseDatumAsKey
     , "data"    : H.links_ model.root_
@@ -39,7 +40,7 @@ treeScript config model = do
                   ]
   }
 
-  nodeJoin_ <- nodes <+> Join {
+  nodeJoin_  <- nodes <+> Join {
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : H.descendants_ model.root_
@@ -61,11 +62,13 @@ treeScript config model = do
                             , fill       config.color
                             ])
 
-  svgZ <- container `attachZoom`   
-                    { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: 500.0, right: 500.0 }
-                    , scale     : ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
-                    , qualifier : "tree"
-                    }
+  _ <- background `attachZoom`
+          { 
+            extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: 500.0, right: 500.0 }
+          , scale     : ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
+          , qualifier : "tree"
+          , target    : ZoomTarget container
+          }
 
   pure svg
 

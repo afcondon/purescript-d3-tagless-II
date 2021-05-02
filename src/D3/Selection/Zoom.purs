@@ -4,10 +4,12 @@ import D3.Selection (D3Selection_)
 import Web.Event.Internal.Types (Event)
 
 -- stuff related to zoom functionality
-type ZoomConfig = {
+data ZoomTarget selection = ZoomTarget selection | SelfTarget
+type ZoomConfig selection = {
     extent    :: ZoomExtent
   , scale     :: ScaleExtent
   , qualifier :: String -- zoom.foo
+  , target    :: ZoomTarget selection -- not a Maybe, more like ZoomTarget | SelfTarget
   -- this is the full list of values and their defaults
 -- filter = defaultFilter,
 -- extent = defaultExtent,
@@ -31,10 +33,12 @@ type ZoomConfig_ = {
     extent      :: Array (Array Number)
   , scaleExtent :: Array Int
   , qualifier   :: String
+  , target      :: D3Selection_
 }
 type ZoomConfigDefault_ = {
     scaleExtent :: Array Int
   , qualifier   :: String
+  , target      :: D3Selection_
 }
 foreign import data ZoomBehavior_ :: Type  -- the zoom behavior, provided to Event Handler
 data ScaleExtent   = ScaleExtent Int Int
