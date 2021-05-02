@@ -6,8 +6,8 @@ import Affjax (URL)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (Datum)
-import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
-import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
+import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, opacity, radius, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, x1, x2, y1, y2)
+import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce, startSimulation_)
@@ -117,20 +117,20 @@ drawGraph = do
   case convertFilesToModel <$> moduleJSON <*> packageJSON <*> lsdepJSON of
     (Left error) -> log "error" -- $ ?_ error
     (Right graph) -> do
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (enter widthHeight graph)
-      printedScript <- liftEffect $ runPrinter (enter widthHeight graph) "Force Layout Script"
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph)
+      printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph) "Force Layout Script"
       log $ snd printedScript
       log $ fst printedScript
       pure unit
 
 -- | recipe for this force layout graph
-enter :: forall m link node selection r. 
+graphScript :: forall m link node selection r. 
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
   { links :: Array link, nodes :: Array node | r } -> 
   m selection -- TODO is it right to return selection_ instead of simulation_? does it matter? 
-enter (Tuple w h) model = do
+graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
   svg        <- root `append` (node Svg   [ viewBox 0.0 0.0 650.0 650.0 ] )
   linksGroup <- svg  `append` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
@@ -140,7 +140,7 @@ enter (Tuple w h) model = do
                     , Force (ForceName "charge") ForceMany ]
       simulation_ = initSimulation forces model model.nodes model.links
 
-  links <- join linksGroup $ JoinSimulation {
+  links <- linksGroup <+> JoinSimulation {
       element   : Line
     , key       : UseDatumAsKey
     , "data"    : model.links
@@ -151,16 +151,19 @@ enter (Tuple w h) model = do
     , onDrag    : SimulationDrag NoDrag
   }
 
-  nodes <- join nodesGroup $ JoinSimulation {
-      element   : Circle
+  nodes <- nodesGroup <+> JoinSimulation {
+      element   : Group
     , key       : UseDatumAsKey
     , "data"    : model.nodes
-    , behaviour : [ radius (\d -> if (datumIsGraphNode_ d).moduleOrPackage == "module" then 5.0 else 10.0), fill colorByGroup ]
+    , behaviour : [ transform' translateNode ]
     , simulation: simulation_  -- following config fields are extras for simulation
     , tickName  : "nodes"
-    , onTick    : [ cx setCx, cy setCy ]
+    , onTick    : [ transform' translateNode  ]
     , onDrag    : SimulationDrag DefaultDrag
   }
+
+  circle <- nodes `append` (node Circle [ radius (\d -> if (datumIsGraphNode_ d).moduleOrPackage == "module" then 5.0 else 10.0), fill colorByGroup ]) 
+  labels <- nodes `append` (node Text [ classed "label", opacity 0.0, text (\d -> (datumIsGraphNode_ d).id)]) 
   
   svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                             , scale     : ScaleExtent 1 4 -- wonder if ScaleExtent ctor could be range operator `..`
@@ -180,6 +183,11 @@ datumIsGraphLink_ :: Datum -> GraphLink_
 datumIsGraphLink_ = unsafeCoerce
 datumIsGraphNode_ :: Datum -> GraphNode_
 datumIsGraphNode_ = unsafeCoerce
+
+translateNode :: Datum -> String
+translateNode datum = "translate(" <> show d.x <> "," <> show d.y <> ")"
+  where d = datumIsGraphNode_ datum
+
 
 colorByGroup :: Datum -> String
 colorByGroup datum = d3SchemeCategory10S_ (fromMaybe "unknown" d.package)

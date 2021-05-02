@@ -24,6 +24,9 @@ strokeColor = AttrT <<< Attribute "stroke" <<< toAttr
 strokeOpacity :: ∀ a. ToAttr Number a => a -> Chainable
 strokeOpacity = AttrT <<< Attribute "stroke-opacity" <<< toAttr
 
+opacity :: ∀ a. ToAttr Number a => a -> Chainable
+opacity = AttrT <<< Attribute "opacity" <<< toAttr
+
 strokeWidth :: ∀ a. ToAttr Number a => a -> Chainable
 strokeWidth = AttrT <<< Attribute "stroke-width" <<< toAttr
 
