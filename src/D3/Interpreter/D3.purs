@@ -1,16 +1,17 @@
 module D3.Interpreter.D3 where
 
+import Prelude
+
 import Control.Monad.State (class MonadState, StateT, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Layouts.Simulation (defaultSimulationDrag_, onTick_)
-import D3.Selection (Chainable(..), D3Selection_, D3_Node(..), DragBehavior(..), Join(..), Keys(..), d3AddTransition_, d3Append_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_)
+import D3.Selection (Chainable(..), D3Selection_, D3_Node(..), DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), d3AddTransition_, d3Append_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, defaultDrag_, disableDrag_)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), d3AttachZoomDefaultExtent_, d3AttachZoom_)
 import Data.Foldable (foldl)
 import Data.Tuple (Tuple)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, pure, show, unit, ($), (<$>))
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
 -- also not really making a ton of use of StateT, but it is good to have a 
@@ -62,9 +63,9 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
       _        = foldl applyChainableD3 enterS  j.behaviour
       _        = onTick_ j.simulation j.tickName (makeTick j.onTick enterS)
       _        = case j.onDrag of
-                    DefaultDrag -> defaultSimulationDrag_ enterS j.simulation
+                    (SimulationDrag DefaultDrag) -> defaultSimulationDrag_ enterS j.simulation
                     _ -> unit
-    pure dataS
+    pure enterS
 
   join selection (JoinGeneral j) = do
     let
@@ -77,7 +78,7 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
       _        = foldl applyChainableD3 enterS  j.behaviour.enter
       _        = foldl applyChainableD3 exitS   j.behaviour.exit
       _        = foldl applyChainableD3 dataS   j.behaviour.update
-    pure dataS
+    pure enterS
 
   attachZoom selection config = do
     let 
@@ -100,6 +101,11 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
           }
         -- TODO write casae for: (ExtentFunction f) -> selection
 
+  onDrag selection dragtype = do
+    case dragtype of 
+      DefaultDrag     -> pure $ defaultDrag_ selection 
+      NoDrag          -> pure $ disableDrag_ selection 
+      (CustomDrag fn) -> pure $ defaultDrag_ selection -- TODO 
 
 applyChainableD3 :: D3Selection_ -> Chainable -> D3Selection_
 applyChainableD3 selection_ (AttrT (Attribute label attr)) = -- spy "d3SetAttr" $ 

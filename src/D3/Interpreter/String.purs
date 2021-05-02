@@ -1,15 +1,14 @@
 module D3.Interpreter.String where
 
-import D3.Interpreter (class D3InterpreterM)
-import D3.Selection (Chainable(..), D3_Node(..), Join(..), showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, discard, pure, show, (<>))
-
 import Control.Monad.State (class MonadState, StateT, modify_, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
+import D3.Interpreter (class D3InterpreterM)
+import D3.Selection (Chainable(..), D3_Node(..), Join(..), showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
 import Data.Array (foldl)
 import Data.Tuple (Tuple)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, discard, pure, show, (<>))
 
 newtype D3PrinterM a = D3PrinterM (StateT String Effect a) -- TODO s/Effect/Identity
 
@@ -51,6 +50,9 @@ instance d3Tagless :: D3InterpreterM String D3PrinterM where
   attachZoom selection zoomConfig = do
     modify_ (\s -> s <> "\nattaching a zoom handler to " <> selection)
     pure "attachZoom"
+  onDrag selection behavior = do
+    modify_ (\s -> s <> "\nadding drag behavior to " <> selection)
+    pure "addDrag"
 
 
 applyChainableString :: String -> Chainable -> String

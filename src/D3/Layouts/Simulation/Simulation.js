@@ -36,8 +36,7 @@ exports.onTick_ = simulation => name => tickFn => {
   return simulation.on("tick."+name, () => tickFn());
 }
 
-
-// default drag function, useful in probably most simulations
+// default drag function for simulations, restarts simulation while dragging
 exports.defaultSimulationDrag_ = selection => simulation => {
   
   var drag = function(simulation) {

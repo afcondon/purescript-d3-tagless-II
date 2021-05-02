@@ -64,22 +64,31 @@ identityProjection model = unsafeCoerce (\d -> d)
 makeProjection :: forall model model'. (model -> model') -> (model -> D3Data_)
 makeProjection = unsafeCoerce
 
-data DragBehavior = DefaultDrag | NoDrag | CustomDrag (D3Selection_ -> Unit)
+data DragBehavior = 
+    DefaultDrag
+  | NoDrag
+  | CustomDrag (D3Selection_ -> Unit)
+
+data SimulationDrag = SimulationDrag DragBehavior
+
+foreign import defaultDrag_ :: D3Selection_ -> D3Selection_
+foreign import disableDrag_ :: D3Selection_ -> D3Selection_
 
 type JoinParams d r = -- the 
   { element    :: Element -- what we're going to insert in the DOM
   , key        :: Keys    -- how D3 is going to identify data so that 
   , "data"     :: Array d -- the data we're actually joining at this point
-  | r
+ 
+| r
   }
 -- TODO the type parameter d here is an impediment to the meta interpreter, possible rethink ?
 data Join d = Join           (JoinParams d (behaviour   :: Array Chainable))
             | JoinGeneral    (JoinParams d (behaviour   :: EnterUpdateExit)) -- what we're going to do for each set (enter, exit, update) each refresh of data
             | JoinSimulation (JoinParams d (behaviour   :: Array Chainable
-                                          , onTick     :: Array Chainable
-                                          , tickName   :: String
-                                          , onDrag     :: DragBehavior -- TODO suspect this should be added to language like Zoom is
-                                          , simulation :: D3Simulation_)) -- simulation joins are a bit different
+                                          , onTick      :: Array Chainable
+                                          , tickName    :: String
+                                          , onDrag      :: SimulationDrag
+                                          , simulation  :: D3Simulation_)) -- simulation joins are a bit different
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
 derive instance ordSelectionName :: Ord SelectionName

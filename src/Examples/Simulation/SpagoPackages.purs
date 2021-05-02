@@ -1,6 +1,6 @@
 module D3.Examples.Simulation.SpagoPackages where
 
-import Prelude hiding (append, join)
+import Prelude hiding (append,join)
 
 import Affjax (URL)
 import Affjax as AJAX
@@ -12,7 +12,7 @@ import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce, startSimulation_)
 import D3.Scales (d3SchemeCategory10S_)
-import D3.Selection (D3Selection_, DragBehavior(..), Element(..), Join(..), Keys(..), node)
+import D3.Selection (D3Selection_, DragBehavior(..), Element(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Array (catMaybes, foldl, (!!))
 import Data.Either (Either(..))
@@ -148,7 +148,7 @@ enter (Tuple w h) model = do
     , simulation: simulation_ -- following config fields are extras for simulation
     , tickName  : "links"
     , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
-    , onDrag    : NoDrag
+    , onDrag    : SimulationDrag NoDrag
   }
 
   nodes <- join nodesGroup $ JoinSimulation {
@@ -159,7 +159,7 @@ enter (Tuple w h) model = do
     , simulation: simulation_  -- following config fields are extras for simulation
     , tickName  : "nodes"
     , onTick    : [ cx setCx, cy setCy ]
-    , onDrag    : DefaultDrag
+    , onDrag    : SimulationDrag DefaultDrag
   }
   
   svg' <- svg `attachZoom`  { extent   : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }

@@ -6,7 +6,7 @@ import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Layouts.Hierarchical (TreeJson_)
-import D3.Selection (Chainable(..), D3_Node(..), Element, EnterUpdateExit, Join(..), Keys, Transition, showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
+import D3.Selection (Chainable(..), D3_Node(..), DragBehavior, Element, EnterUpdateExit, Join(..), Keys, Transition, showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
 import D3.Zoom (ZoomConfig)
 import Data.Array (filter, foldl, (:))
 import Data.Map (Map, empty, insert, lookup)
@@ -27,6 +27,7 @@ data MetaTreeNode =
   | JoinSimulationNode Element Keys (Array Chainable)
   -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
   | ZoomNode ZoomConfig
+  | DragNode DragBehavior -- TODO make chainable
   | AttrNode Chainable -- actually only Attr and Text
   | TransitionNode (Array Chainable) Transition
   | RemoveNode
@@ -40,6 +41,7 @@ instance showMetaTreeNode :: Show MetaTreeNode where -- super primitive implemen
   show (JoinGeneralNode _ _ _)    = "JoinGeneralNode"
   show (JoinSimulationNode _ _ _) = "JoinSimulationNode"
   show (ZoomNode _)               = "ZoomNode"
+  show (DragNode _)               = "DragNode"
   show (AttrNode _)               = "AttrNode"
   show (TransitionNode _ _)       = "TransitionNode"
 
@@ -130,6 +132,11 @@ instance d3Tagless :: D3InterpreterM NodeID D3MetaTreeM where
   attachZoom nodeID zoomConfig = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (ZoomNode zoomConfig)
+    pure id
+
+  onDrag nodeID behavior = do
+    (ScriptTree id _ _) <- get
+    insertInScriptTree nodeID (DragNode behavior)
     pure id
 
 

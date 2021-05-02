@@ -2,8 +2,7 @@ module D3.Layouts.Simulation where
 
 import Prelude
 
-import D3.Selection (Chainable, D3Selection_, D3Simulation_, DragBehavior)
-import Data.Map (Map)
+import D3.Selection (D3Selection_, D3Simulation_, DragBehavior)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- import D3.Base.Attributes (Attr)
@@ -107,9 +106,9 @@ foreign import stopSimulation_  :: D3Simulation_ -> Unit
 -- TODO this all has to change completely to work within Tagless 
 -- foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass
 -- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr -> Unit
-foreign import onTick_                    :: D3Simulation_ -> String -> (Unit -> Unit) -> Unit
-foreign import defaultSimulationDrag_     :: D3Selection_ -> D3Simulation_ -> Unit
-foreign import setAlphaTarget_            :: D3Selection_ -> Number -> Unit
+foreign import onTick_                :: D3Simulation_ -> String -> (Unit -> Unit) -> Unit
+foreign import defaultSimulationDrag_ :: D3Selection_ -> D3Simulation_ -> Unit
+foreign import setAlphaTarget_        :: D3Selection_ -> Number -> Unit
 
 -- implementations / wrappers for the Force ADT
 foreign import forceMany_    :: D3Simulation_ -> String                     -> D3Simulation_
