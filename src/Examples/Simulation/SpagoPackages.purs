@@ -155,7 +155,7 @@ graphScript (Tuple w h) model = do
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : model.nodes
-    , behaviour : [ classed "node" transform' translateNode ]
+    , behaviour : [ classed "node", transform' translateNode ]
     , simulation: simulation_  -- following config fields are extras for simulation
     , tickName  : "nodes"
     , onTick    : [ transform' translateNode  ]

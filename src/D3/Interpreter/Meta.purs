@@ -6,7 +6,7 @@ import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Layouts.Hierarchical (TreeJson_)
-import D3.Selection (Chainable(..), D3_Node(..), DragBehavior, Element, EnterUpdateExit, Join(..), Keys, Transition, showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
+import D3.Selection (Chainable(..), D3_Node(..), DragBehavior, Element, EnterUpdateExit, Join(..), Keys, MouseEvent, Transition, showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
 import D3.Zoom (ZoomConfig)
 import Data.Array (filter, foldl, (:))
 import Data.Map (Map, empty, insert, lookup)
@@ -29,6 +29,7 @@ data MetaTreeNode =
   | ZoomNode (ZoomConfig NodeID)
   | DragNode DragBehavior -- TODO make chainable
   | AttrNode Chainable -- actually only Attr and Text
+  | OnEventNode MouseEvent
   | TransitionNode (Array Chainable) Transition
   | RemoveNode
 
@@ -43,6 +44,7 @@ instance showMetaTreeNode :: Show MetaTreeNode where -- super primitive implemen
   show (ZoomNode _)               = "ZoomNode"
   show (DragNode _)               = "DragNode"
   show (AttrNode _)               = "AttrNode"
+  show (OnEventNode _)            = "OnEventNode"
   show (TransitionNode _ _)       = "TransitionNode"
 
 type MetaTreeMap = Map NodeID MetaTreeNode
@@ -98,6 +100,7 @@ insertAttributeInScriptTree parentID =
       -- simple attributes are just nodes
       attr@(AttrT _) -> insertInScriptTree parentID (AttrNode attr)
       text@(TextT _) -> insertInScriptTree parentID (AttrNode text)
+      (On event listener) -> insertInScriptTree parentID (OnEventNode event)
       RemoveT        -> insertInScriptTree parentID RemoveNode
 -- the transition attribute is an exception, it can have further (Array Chainable)
       transition@(TransitionT chain config) ->
@@ -140,13 +143,13 @@ instance d3Tagless :: D3InterpreterM NodeID D3MetaTreeM where
     pure id
 
 
-applyChainableString :: String -> Chainable -> String
-applyChainableString selection  = 
-  case _ of 
-    (AttrT (Attribute label attr)) -> showSetAttr_ label (unbox attr) selection
-    (TextT (Attribute label attr)) -> showSetText_ (unbox attr) selection  -- TODO unboxText surely?
-    RemoveT                        -> showRemoveSelection_ selection
-    (TransitionT chain transition) -> do 
-      let tString = showAddTransition_ selection transition
-      foldl applyChainableString tString chain
+-- applyChainableString :: String -> Chainable -> String
+-- applyChainableString selection  = 
+--   case _ of 
+--     (AttrT (Attribute label attr)) -> showSetAttr_ label (unbox attr) selection
+--     (TextT (Attribute label attr)) -> showSetText_ (unbox attr) selection  -- TODO unboxText surely?
+--     RemoveT                        -> showRemoveSelection_ selection
+--     (TransitionT chain transition) -> do 
+--       let tString = showAddTransition_ selection transition
+--       foldl applyChainableString tString chain
 

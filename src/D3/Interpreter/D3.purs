@@ -129,4 +129,7 @@ applyChainableD3 selection_ (TransitionT chain transition) = do
   let tHandler = d3AddTransition_ selection_ transition
       _        = foldl applyChainableD3 tHandler chain
   selection_ -- NB we return selection, not transition
+applyChainableD3 selection_ (On event attributes) = do
+-- here's where we'll set the handler
+  selection_
 

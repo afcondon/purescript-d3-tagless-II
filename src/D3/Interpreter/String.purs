@@ -64,4 +64,6 @@ applyChainableString selection  =
     (TransitionT chain transition) -> do 
       let tString = showAddTransition_ selection transition
       foldl applyChainableString tString chain
+    (On event attributes) -> do
+      show "event handler for " <> show event <> " has been set"
 

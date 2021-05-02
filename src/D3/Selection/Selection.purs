@@ -6,6 +6,7 @@ import D3.Attributes.Instances (Attribute, Datum, Index)
 import Data.Maybe.Last (Last)
 import Effect.Aff (Milliseconds)
 import Unsafe.Coerce (unsafeCoerce)
+import Web.Event.Internal.Types (Event)
 
 
 type Selector = String 
@@ -121,13 +122,22 @@ type Transition = { name     :: String
                   , easing   :: EasingFunction
 }
 
+-- TODO we could / should also allow keyboard and other events, all this on long finger for now
+data MouseEvent = MouseEnter | MouseLeave | Click | MouseDown | MouseUp 
+instance showMouseEvent :: Show MouseEvent where
+  show MouseEnter = "MouseEnter"
+  show MouseLeave = "MouseLeave"
+  show Click      = "Click"
+  show MouseDown  = "MouseDown"
+  show MouseUp    = "MouseUp"
+
 data Chainable =  AttrT Attribute
                 | TextT Attribute -- we can't narrow it to String here but helper function will do that
                 | TransitionT (Array Chainable) Transition -- the array is set situationally
                 | RemoveT
+                | On MouseEvent (Array Chainable)
   -- other candidates for this ADT include
                 -- | WithUnit Attribute UnitType
-                -- | On
                 -- | Merge
                 
 type EnterUpdateExit = {
