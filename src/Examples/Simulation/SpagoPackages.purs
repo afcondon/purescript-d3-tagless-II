@@ -6,7 +6,7 @@ import Affjax (URL)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (Datum)
-import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, opacity, radius, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, x1, x2, y1, y2)
+import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, opacity, radius, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
@@ -134,7 +134,7 @@ graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
   svg        <- root `append` (node Svg   [ viewBox 0.0 0.0 650.0 650.0 ] )
   linksGroup <- svg  `append` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
-  nodesGroup <- svg  `append` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
+  nodesGroup <- svg  `append` (node Group [ classed "node" ])
 
   let forces      = [ makeCenterForce 325.0 325.0
                     , Force (ForceName "charge") ForceMany ]
@@ -155,15 +155,17 @@ graphScript (Tuple w h) model = do
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : model.nodes
-    , behaviour : [ transform' translateNode ]
+    , behaviour : [ classed "node" transform' translateNode ]
     , simulation: simulation_  -- following config fields are extras for simulation
     , tickName  : "nodes"
     , onTick    : [ transform' translateNode  ]
     , onDrag    : SimulationDrag DefaultDrag
   }
 
-  circle <- nodes `append` (node Circle [ radius (\d -> if (datumIsGraphNode_ d).moduleOrPackage == "module" then 5.0 else 10.0), fill colorByGroup ]) 
-  labels <- nodes `append` (node Text [ classed "label", opacity 0.0, text (\d -> (datumIsGraphNode_ d).id)]) 
+  circle  <- nodes `append` (node Circle [ radius (\d -> if (datumIsGraphNode_ d).moduleOrPackage == "module" then 5.0 else 10.0)
+                                         , fill colorByGroup ]) 
+  labels' <- nodes `append` (node Text [ classed "label hidden", fill "white", x 1.0, y 1.0, text (\d -> (datumIsGraphNode_ d).id)]) 
+  labels  <- nodes `append` (node Text [ classed "label hidden", fill "black", text (\d -> (datumIsGraphNode_ d).id)]) 
   
   svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                             , scale     : ScaleExtent 1 4 -- wonder if ScaleExtent ctor could be range operator `..`
