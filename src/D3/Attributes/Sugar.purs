@@ -4,7 +4,7 @@ import D3.Attributes.Instances
 import Prelude
 
 import D3.Layouts.Hierarchical (autoBox_)
-import D3.Selection (Chainable(..), EasingFunction(..), MouseEvent, Transition)
+import D3.Selection (Chainable(..), EasingFunction(..), Transition)
 import Data.Array (intercalate, (:))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -16,103 +16,102 @@ import Web.HTML (window)
 import Web.HTML.Window (innerHeight, innerWidth)
 
 backgroundColor :: ∀ a. ToAttr String a => a -> Chainable
-backgroundColor = AttrT <<< Attribute "background-color" <<< toAttr
+backgroundColor = AttrT <<< ToAttribute "background-color" <<< toAttr
 
 strokeColor :: ∀ a. ToAttr String a => a -> Chainable
-strokeColor = AttrT <<< Attribute "stroke" <<< toAttr
+strokeColor = AttrT <<< ToAttribute "stroke" <<< toAttr
 
 strokeOpacity :: ∀ a. ToAttr Number a => a -> Chainable
-strokeOpacity = AttrT <<< Attribute "stroke-opacity" <<< toAttr
+strokeOpacity = AttrT <<< ToAttribute "stroke-opacity" <<< toAttr
 
 opacity :: ∀ a. ToAttr Number a => a -> Chainable
-opacity = AttrT <<< Attribute "opacity" <<< toAttr
+opacity = AttrT <<< ToAttribute "opacity" <<< toAttr
 
 strokeWidth :: ∀ a. ToAttr Number a => a -> Chainable
-strokeWidth = AttrT <<< Attribute "stroke-width" <<< toAttr
+strokeWidth = AttrT <<< ToAttribute "stroke-width" <<< toAttr
 
 fill :: ∀ a. ToAttr String a => a -> Chainable
-fill = AttrT <<< Attribute "fill" <<< toAttr
+fill = AttrT <<< ToAttribute "fill" <<< toAttr
 
 -- TODO this definitely needs to be Number-with-unit here
 viewBox :: Number -> Number -> Number -> Number -> Chainable
-viewBox xo yo w h = AttrT <<< Attribute "viewBox" $ toAttr vb
+viewBox xo yo w h = AttrT <<< ToAttribute "viewBox" $ toAttr vb
   where
     vb = spy "Viewbox: " $ intercalate " " $ show <$> [ xo, yo, w, h ]
 
 autoBox :: Chainable
-autoBox = AttrT <<< Attribute "viewBox" $ toAttr vb
+autoBox = AttrT <<< ToAttribute "viewBox" $ toAttr vb
   where
     vb = \d -> intercalate " " $ show <$> (autoBox_ d)
 
 fontFamily :: ∀ a. ToAttr String a => a -> Chainable
-fontFamily = AttrT <<< Attribute "font-family" <<< toAttr
+fontFamily = AttrT <<< ToAttribute "font-family" <<< toAttr
 
 textAnchor :: ∀ a. ToAttr String a => a -> Chainable
-textAnchor = AttrT <<< Attribute "text-anchor" <<< toAttr
+textAnchor = AttrT <<< ToAttribute "text-anchor" <<< toAttr
 
 radius :: ∀ a. ToAttr Number a => a -> Chainable
-radius = AttrT <<< Attribute "r" <<< toAttr
+radius = AttrT <<< ToAttribute "r" <<< toAttr
 
 fontSize :: ∀ a. ToAttr Number a => a -> Chainable
-fontSize = AttrT <<< Attribute "font-size" <<< toAttr
+fontSize = AttrT <<< ToAttribute "font-size" <<< toAttr
 
 width :: ∀ a. ToAttr Number a => a -> Chainable
-width = AttrT <<< Attribute "width" <<< toAttr
+width = AttrT <<< ToAttribute "width" <<< toAttr
 
 height :: ∀ a. ToAttr Number a => a -> Chainable
-height = AttrT <<< Attribute "height" <<< toAttr
+height = AttrT <<< ToAttribute "height" <<< toAttr
 
 width100 :: Chainable
-width100 = AttrT <<< Attribute "width" $ toAttr "100%"
+width100 = AttrT <<< ToAttribute "width" $ toAttr "100%"
 
 height100 :: Chainable
-height100 = AttrT <<< Attribute "height" $ toAttr "100%"
+height100 = AttrT <<< ToAttribute "height" $ toAttr "100%"
 
 x :: ∀ a. ToAttr Number a => a -> Chainable
-x = AttrT <<< Attribute "x" <<< toAttr
+x = AttrT <<< ToAttribute "x" <<< toAttr
 
 y :: ∀ a. ToAttr Number a => a -> Chainable
-y = AttrT <<< Attribute "y" <<< toAttr
+y = AttrT <<< ToAttribute "y" <<< toAttr
 
 yu :: ∀ a. ToAttr NWU a => a -> Chainable
-yu = AttrT <<< Attribute "y" <<< toAttr
+yu = AttrT <<< ToAttribute "y" <<< toAttr
 
 x1 :: ∀ a. ToAttr Number a => a -> Chainable
-x1 = AttrT <<< Attribute "x1" <<< toAttr
+x1 = AttrT <<< ToAttribute "x1" <<< toAttr
 
 y1 :: ∀ a. ToAttr Number a => a -> Chainable
-y1 = AttrT <<< Attribute "y1" <<< toAttr
+y1 = AttrT <<< ToAttribute "y1" <<< toAttr
 
 x2 :: ∀ a. ToAttr Number a => a -> Chainable
-x2 = AttrT <<< Attribute "x2" <<< toAttr
+x2 = AttrT <<< ToAttribute "x2" <<< toAttr
 
 y2 :: ∀ a. ToAttr Number a => a -> Chainable
-y2 = AttrT <<< Attribute "y2" <<< toAttr
+y2 = AttrT <<< ToAttribute "y2" <<< toAttr
 
 dx :: ∀ a. ToAttr Number a => a -> Chainable
-dx = AttrT <<< Attribute "dx" <<< toAttr
+dx = AttrT <<< ToAttribute "dx" <<< toAttr
 
 dy :: ∀ a. ToAttr Number a => a -> Chainable
-dy = AttrT <<< Attribute "dy" <<< toAttr
+dy = AttrT <<< ToAttribute "dy" <<< toAttr
 
 cx :: ∀ a. ToAttr Number a => a -> Chainable
-cx = AttrT <<< Attribute "cx" <<< toAttr
+cx = AttrT <<< ToAttribute "cx" <<< toAttr
 
 cy :: ∀ a. ToAttr Number a => a -> Chainable
-cy = AttrT <<< Attribute "cy" <<< toAttr
+cy = AttrT <<< ToAttribute "cy" <<< toAttr
 
 text :: ∀ a. ToAttr String a => a -> Chainable
-text = TextT <<< Attribute "text" <<< toAttr
+text = TextT <<< ToAttribute "text" <<< toAttr
 
 classed :: ∀ a. ToAttr String a => a -> Chainable
-classed = AttrT <<< Attribute "class" <<< toAttr
+classed = AttrT <<< ToAttribute "class" <<< toAttr
 
 cursor :: ∀ a. ToAttr String a => a -> Chainable
-cursor = AttrT <<< Attribute "cursor" <<< toAttr
+cursor = AttrT <<< ToAttribute "cursor" <<< toAttr
 
-on :: MouseEvent -> Array Chainable -> Chainable
-on mouseEvent chain = On mouseEvent chain
-
+on :: MouseEvent -> Listener_ -> Chainable
+on = OnT
 
 -- helpers for transitions 
 
@@ -150,12 +149,12 @@ instance showLineJoin :: Show LineJoin where
   show Round     = "round"
 
 strokeLineJoin :: LineJoin -> Chainable
-strokeLineJoin = AttrT <<< Attribute "stroke-linejoin" <<< toAttr <<< show
+strokeLineJoin = AttrT <<< ToAttribute "stroke-linejoin" <<< toAttr <<< show
 
 -- helpers for transitions, a sequence of functions but expressed as text in the DOM
 -- TODO don't export transform'
 transform' :: (Datum -> String) -> Chainable
-transform' = AttrT <<< Attribute "transform" <<< StringAttr <<< Fn
+transform' = AttrT <<< ToAttribute "transform" <<< StringAttr <<< Fn
 
 -- make a single (Datum -> String) function out of the array (ie sequence) of functions provided
 transform :: forall a. Array (a -> String) -> Chainable

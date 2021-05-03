@@ -2,7 +2,6 @@ module D3.Layouts.Hierarchical.Types where
 
 import Prelude
 
-import D3.Attributes.Instances (Datum)
 import Data.Nullable (Nullable)
 
 foreign import data TreeJson_           :: Type

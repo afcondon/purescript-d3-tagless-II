@@ -5,14 +5,14 @@ import Prelude hiding (append,join)
 import Affjax (URL)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import D3.Attributes.Instances (Datum)
+import D3.Attributes.Instances (Datum, MouseEvent(..))
 import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, on, opacity, radius, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce, startSimulation_)
 import D3.Scales (d3SchemeCategory10S_)
-import D3.Selection (D3Selection_, DragBehavior(..), Element(..), Join(..), Keys(..), MouseEvent(..), SimulationDrag(..), node)
+import D3.Selection (D3Selection_, DragBehavior(..), Element(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
 import Data.Array (catMaybes, foldl, (!!))
 import Data.Either (Either(..))
@@ -164,7 +164,10 @@ graphScript (Tuple w h) model = do
 
   circle  <- nodes `append` (node Circle [ radius (\d -> if (datumIsGraphNode_ d).moduleOrPackage == "module" then 5.0 else 10.0)
                                          , fill colorByGroup
-                                         , on MouseEnter [ fill "none" ] ]) 
+                                         , on MouseEnter (\e d t -> spy "mouse enter" $ unit) 
+                                         , on MouseLeave (\e d t -> spy "mouse leave" $ unit)
+                                         , on MouseClick (\e d t -> spy "click callback" $ unit)
+                                         ]) 
   labels' <- nodes `append` (node Text [ classed "label", fill "white", x 1.0, y 1.0, text (\d -> (datumIsGraphNode_ d).id)]) 
   labels  <- nodes `append` (node Text [ classed "label", fill "black", text (\d -> (datumIsGraphNode_ d).id)]) 
   

@@ -3,7 +3,7 @@ module D3.Interpreter.String where
 import Control.Monad.State (class MonadState, StateT, modify_, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Interpreter (class D3InterpreterM)
-import D3.Selection (Chainable(..), D3_Node(..), Join(..), showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
+import D3.Selection
 import Data.Array (foldl)
 import Data.Tuple (Tuple)
 import Effect (Effect)
@@ -58,12 +58,12 @@ instance d3Tagless :: D3InterpreterM String D3PrinterM where
 applyChainableString :: String -> Chainable -> String
 applyChainableString selection  = 
   case _ of 
-    (AttrT (Attribute label attr)) -> showSetAttr_ label (unbox attr) selection
-    (TextT (Attribute label attr)) -> showSetText_ (unbox attr) selection  -- TODO unboxText surely?
+    (AttrT (ToAttribute label attr)) -> showSetAttr_ label (unbox attr) selection
+    (TextT (ToAttribute label attr)) -> showSetText_ (unbox attr) selection  -- TODO unboxText surely?
     RemoveT                        -> showRemoveSelection_ selection
     (TransitionT chain transition) -> do 
       let tString = showAddTransition_ selection transition
       foldl applyChainableString tString chain
-    (On event attributes) -> do
+    (OnT event listener) -> do
       show "event handler for " <> show event <> " has been set"
 

@@ -4,7 +4,7 @@ import D3.Selection
 import Prelude
 
 import Control.Monad.State (class MonadState, StateT, runStateT)
-import D3.Attributes.Instances (Attribute(..), unbox)
+import D3.Attributes.Instances (Attribute(..), MouseEvent(..), unbox)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Layouts.Simulation (defaultSimulationDrag_, onTick_)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..), d3AttachZoomDefaultExtent_, d3AttachZoom_)
@@ -116,10 +116,10 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
       (CustomDrag fn) -> pure $ defaultDrag_ selection -- TODO 
 
 applyChainableD3 :: D3Selection_ -> Chainable -> D3Selection_
-applyChainableD3 selection_ (AttrT (Attribute label attr)) = -- spy "d3SetAttr" $ 
+applyChainableD3 selection_ (AttrT (ToAttribute label attr)) = -- spy "d3SetAttr" $ 
   d3SetAttr_ label (unbox attr) selection_
 -- NB only protection against non-text attribute for Text field is in the helper function
-applyChainableD3 selection_ (TextT (Attribute label attr)) = d3SetText_ (unbox attr) selection_ 
+applyChainableD3 selection_ (TextT (ToAttribute label attr)) = d3SetText_ (unbox attr) selection_ 
 -- NB this remove call will have no effect on elements with active or pending transitions
 -- and this gives rise to very counter-intuitive misbehaviour as subsequent enters clash with 
 -- elements that should have been removed
@@ -130,11 +130,4 @@ applyChainableD3 selection_ (TransitionT chain transition) = do
   let tHandler = d3AddTransition_ selection_ transition
       _        = foldl applyChainableD3 tHandler chain
   selection_ -- NB we return selection, not transition
-applyChainableD3 selection_ (On event attributes) = do
--- here's where we'll set the handler
-  case event of
-    MouseEnter -> selectionOn_ selection_ (show MouseEnter) (\_ -> spy "MouseEnter" $ unit)
-    MouseLeave -> selectionOn_ selection_ (show MouseLeave)  (\_ -> spy "MouseLeave" $ unit)
-    Click      -> selectionOn_ selection_ (show Click)  (\_ -> spy "Click" $ unit)
-    MouseDown  -> selectionOn_ selection_ (show MouseDown)  (\_ -> spy "MouseDown" $ unit)
-    MouseUp    -> selectionOn_ selection_ (show MouseUp)  (\_ -> spy "MouseUp" $ unit)
+applyChainableD3 selection_ (OnT event listener) = selectionOn_ selection_ (show event) listener

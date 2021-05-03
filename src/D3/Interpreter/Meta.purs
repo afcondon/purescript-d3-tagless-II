@@ -3,10 +3,10 @@ module D3.Interpreter.MetaTree where
 import Prelude
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
-import D3.Attributes.Instances (Attribute(..), unbox)
+import D3.Attributes.Instances (Attribute(..), MouseEvent, unbox)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Layouts.Hierarchical (TreeJson_)
-import D3.Selection (Chainable(..), D3_Node(..), DragBehavior, Element, EnterUpdateExit, Join(..), Keys, MouseEvent, Transition, showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
+import D3.Selection (Chainable(..), D3_Node(..), DragBehavior, Element, EnterUpdateExit, Join(..), Keys, Transition, showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
 import D3.Zoom (ZoomConfig)
 import Data.Array (filter, foldl, (:))
 import Data.Map (Map, empty, insert, lookup)
@@ -98,10 +98,10 @@ insertAttributeInScriptTree :: NodeID -> Chainable -> D3MetaTreeM Unit
 insertAttributeInScriptTree parentID = 
   case _ of 
       -- simple attributes are just nodes
-      attr@(AttrT _) -> insertInScriptTree parentID (AttrNode attr)
-      text@(TextT _) -> insertInScriptTree parentID (AttrNode text)
-      (On event listener) -> insertInScriptTree parentID (OnEventNode event)
-      RemoveT        -> insertInScriptTree parentID RemoveNode
+      attr@(AttrT _)       -> insertInScriptTree parentID (AttrNode attr)
+      text@(TextT _)       -> insertInScriptTree parentID (AttrNode text)
+      (OnT event listener) -> insertInScriptTree parentID (OnEventNode event)
+      RemoveT              -> insertInScriptTree parentID RemoveNode
 -- the transition attribute is an exception, it can have further (Array Chainable)
       transition@(TransitionT chain config) ->
         insertInScriptTree parentID (TransitionNode chain config)

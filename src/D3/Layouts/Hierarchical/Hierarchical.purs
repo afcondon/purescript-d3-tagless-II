@@ -109,25 +109,25 @@ foreign import sharesParent :: D3HierarchicalNode_ -> D3HierarchicalNode_ -> Boo
 
 foreign import linkHorizontal_     :: (Datum -> String) 
 horizontalLink :: Chainable
-horizontalLink = AttrT $ Attribute "d" $ toAttr linkHorizontal_
+horizontalLink = AttrT $ ToAttribute "d" $ toAttr linkHorizontal_
 
 foreign import linkVertical_     :: (Datum -> String) 
 verticalLink :: Chainable
-verticalLink = AttrT $ Attribute "d" $ toAttr linkVertical_
+verticalLink = AttrT $ ToAttribute "d" $ toAttr linkVertical_
 
 foreign import linkClusterHorizontal_ :: Number -> (Datum -> String) 
 horizontalClusterLink :: Number -> Chainable
-horizontalClusterLink yOffset = AttrT $ Attribute "d" $ toAttr (linkClusterHorizontal_ yOffset)
+horizontalClusterLink yOffset = AttrT $ ToAttribute "d" $ toAttr (linkClusterHorizontal_ yOffset)
 
 foreign import linkClusterVertical_ :: Number -> (Datum -> String) 
 verticalClusterLink :: Number -> Chainable
-verticalClusterLink xOffset = AttrT $ Attribute "d" $ toAttr (linkClusterVertical_ xOffset)
+verticalClusterLink xOffset = AttrT $ ToAttribute "d" $ toAttr (linkClusterVertical_ xOffset)
 
 foreign import linkRadial_         :: (Datum -> Number) -> (Datum -> Number) -> (Datum -> String)
 radialLink :: forall a b. (a -> Number) -> (b -> Number) -> Chainable
 radialLink angleFn radius_Fn = do
   let radialFn = linkRadial_ (unsafeCoerce angleFn) (unsafeCoerce radius_Fn)
-  AttrT $ Attribute "d" $ toAttr radialFn
+  AttrT $ ToAttribute "d" $ toAttr radialFn
 
 positionXYreflected :: forall d v. D3HierarchicalNode d v -> String
 positionXYreflected (D3HierarchicalNode d) = "translate(" <> show d.y <> "," <> show d.x <>")"

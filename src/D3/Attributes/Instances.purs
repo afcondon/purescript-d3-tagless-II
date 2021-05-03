@@ -4,12 +4,16 @@ import Prelude
 
 import Data.Function.Uncurried (Fn2, mkFn2)
 import Unsafe.Coerce (unsafeCoerce)
+import Web.Event.Internal.Types (Event)
 
 
 foreign import data Datum :: Type
 foreign import data Index :: Type
+foreign import data This_ :: Type
 
-type Label = String
+type IndexedLambda a = Fn2 Datum Index a
+type Listener_       = (Event -> Datum -> This_ -> Unit) 
+type Label           = String
 
 -- TODO find a way to get units back in without making DSL hideous
 data UnitType = Px | Pt | Em | Rem | Percent
@@ -20,16 +24,32 @@ instance showUnitType :: Show UnitType where
   show Rem = "rem"
   show Percent = "%"
 
+-- TODO we could / should also allow keyboard and other events, all this on long finger for now
+data MouseEvent = MouseEnter | MouseLeave | MouseClick | MouseDown | MouseUp 
+instance showMouseEvent :: Show MouseEvent where
+  show MouseEnter = "mouseenter"
+  show MouseLeave = "mouseleave"
+  show MouseClick = "click"
+  show MouseDown  = "mousedown"
+  show MouseUp    = "mouseup"
+
 newtype NWU = NWU { i :: Int, u :: UnitType} -- scope here for adding show function to remove constraints elsewhere
 instance showNWU :: Show NWU where
   show (NWU n) = show n.i <> show n.u
 
-data Attribute = Attribute Label Attr
+data AttrBuilder a =
+    Static a
+  | Fn (Datum -> a)
+  | FnI (IndexedLambda a)
 
-data Attr = StringAttr (Attrib String)
-          | NumberAttr (Attrib Number)
-          | NWUAttr    (Attrib NWU)
-          | ArrayAttr  (Attrib (Array Number))
+data Attr = 
+    StringAttr (AttrBuilder String)
+  | NumberAttr (AttrBuilder Number)
+  | NWUAttr    (AttrBuilder NWU)
+  | ArrayAttr  (AttrBuilder (Array Number))
+
+data Attribute = ToAttribute Label Attr
+
 
 unbox :: ∀ a. Attr -> a
 unbox = 
@@ -51,19 +71,12 @@ unbox =
     (ArrayAttr (FnI a))     -> unsafeCoerce a
 
 
-unboxText :: ∀ a. Attrib String -> a
+unboxText :: ∀ a. AttrBuilder String -> a
 unboxText = 
   case _ of
-    (Static a) -> unsafeCoerce a
-    (Fn a)     -> unsafeCoerce a
-    (FnI a)    -> unsafeCoerce a
-
-type IndexedLambda a = Fn2 Datum Index a
-
-data Attrib a = Static a
-              | Fn (Datum -> a)
-              | FnI (IndexedLambda a)
-
+    (Static a)   -> unsafeCoerce a
+    (Fn a)       -> unsafeCoerce a
+    (FnI a)      -> unsafeCoerce a
 
 -- Kind annotation to avoid "fun" with polykinds.
 class ToAttr :: Type -> Type -> Constraint
@@ -102,7 +115,6 @@ instance toAttrArrayFn :: ToAttr (Array Number) (Datum -> Array Number) where
 
 instance toAttrArrayFnI :: ToAttr (Array Number) (Datum -> Index -> Array Number) where
   toAttr = ArrayAttr <<< FnI <<< mkFn2
-
 
 -- common coercions
 datumIsChar :: Datum -> Char
