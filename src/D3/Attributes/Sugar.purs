@@ -6,6 +6,7 @@ import Prelude
 import D3.Layouts.Hierarchical (autoBox_)
 import D3.Selection (Chainable(..), EasingFunction(..), Transition)
 import Data.Array (intercalate, (:))
+import Data.Function.Uncurried (mkFn3)
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
 import Debug (spy)
@@ -110,8 +111,8 @@ classed = AttrT <<< ToAttribute "class" <<< toAttr
 cursor :: ∀ a. ToAttr String a => a -> Chainable
 cursor = AttrT <<< ToAttribute "cursor" <<< toAttr
 
-on :: MouseEvent -> Listener_ -> Chainable
-on = OnT
+on :: MouseEvent -> Listener -> Chainable
+on event listener = OnT event (mkFn3 listener)
 
 -- helpers for transitions 
 

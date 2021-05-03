@@ -175,7 +175,7 @@ exports.disableDrag_ = selection => {
 }
 
 exports.selectionOn_ = selection => event => callback => {
-  selection.on("mouseenter", e => { console.log(`mouseenter!!! ${e}`);} )
-  // selection.on(event, callback);
+  // selection.on("mouseenter", e => { console.log(`mouseenter!!! ${e}`);} )
+  selection.on(event, callback);
   return selection; // seems that D3's selection.on doesn't return the selection, oddly
 }

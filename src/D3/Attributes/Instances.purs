@@ -2,7 +2,7 @@ module D3.Attributes.Instances where
 
 import Prelude
 
-import Data.Function.Uncurried (Fn2, mkFn2)
+import Data.Function.Uncurried (Fn2, Fn3, mkFn2)
 import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
 
@@ -12,7 +12,8 @@ foreign import data Index :: Type
 foreign import data This_ :: Type
 
 type IndexedLambda a = Fn2 Datum Index a
-type Listener_       = (Event -> Datum -> This_ -> Unit) 
+type Listener        = (Event -> Datum -> This_ -> Unit) 
+type Listener_       = Fn3 Event Datum This_ Unit 
 type Label           = String
 
 -- TODO find a way to get units back in without making DSL hideous

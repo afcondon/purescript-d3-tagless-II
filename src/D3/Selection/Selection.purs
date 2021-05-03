@@ -2,7 +2,7 @@ module D3.Selection where
 
 import Prelude hiding (append,join)
 
-import D3.Attributes.Instances (Attribute, Datum, Index, MouseEvent, Listener_)
+import D3.Attributes.Instances (Attribute, Datum, Index, Listener_, MouseEvent, Listener)
 import Data.Maybe.Last (Last)
 import Effect.Aff (Milliseconds)
 import Unsafe.Coerce (unsafeCoerce)
