@@ -125,11 +125,11 @@ type Transition = { name     :: String
 -- TODO we could / should also allow keyboard and other events, all this on long finger for now
 data MouseEvent = MouseEnter | MouseLeave | Click | MouseDown | MouseUp 
 instance showMouseEvent :: Show MouseEvent where
-  show MouseEnter = "MouseEnter"
-  show MouseLeave = "MouseLeave"
-  show Click      = "Click"
-  show MouseDown  = "MouseDown"
-  show MouseUp    = "MouseUp"
+  show MouseEnter = "mouseenter"
+  show MouseLeave = "mouseleave"
+  show Click      = "click"
+  show MouseDown  = "mousedown"
+  show MouseUp    = "mouseup"
 
 data Chainable =  AttrT Attribute
                 | TextT Attribute -- we can't narrow it to String here but helper function will do that
@@ -150,14 +150,15 @@ enterOnly :: Array Chainable -> EnterUpdateExit
 enterOnly as = { enter: as, update: [], exit: [] }
 
 -- show functions that are used for the string version of the interpreter and also for debugging inside Selection.js
-foreign import showSelectAllInDOM_          :: forall selection. Selector -> String -> selection
-foreign import showSelectAll_               :: forall selection. Selector -> String -> selection -> selection
-foreign import showEnterAndAppend_          :: forall selection. Element -> selection -> selection
-foreign import showExit_                    :: forall selection. selection -> selection
-foreign import showAddTransition_           :: forall selection. selection -> Transition -> selection 
-foreign import showRemoveSelection_         :: forall selection. selection -> selection
-foreign import showAppend_                  :: forall selection. Element -> selection -> selection
-foreign import showKeyFunction_             :: forall selection d. Array d -> ComputeKeyFunction_ -> selection -> selection
-foreign import showData_                    :: forall selection d. Array d -> selection -> selection
-foreign import showSetAttr_                 :: forall selection. String -> D3Attr -> selection -> selection
-foreign import showSetText_                 :: forall selection. D3Attr -> selection -> selection
+foreign import showSelectAllInDOM_  :: forall selection. Selector -> String -> selection
+foreign import showSelectAll_       :: forall selection. Selector -> String -> selection -> selection
+foreign import showEnterAndAppend_  :: forall selection. Element -> selection -> selection
+foreign import showExit_            :: forall selection. selection -> selection
+foreign import showAddTransition_   :: forall selection. selection -> Transition -> selection 
+foreign import showRemoveSelection_ :: forall selection. selection -> selection
+foreign import showAppend_          :: forall selection. Element -> selection -> selection
+foreign import showKeyFunction_     :: forall selection d. Array d -> ComputeKeyFunction_ -> selection -> selection
+foreign import showData_            :: forall selection d. Array d -> selection -> selection
+foreign import showSetAttr_         :: forall selection. String -> D3Attr -> selection -> selection
+foreign import showSetText_         :: forall selection. D3Attr -> selection -> selection
+foreign import selectionOn_         :: forall selection callback. selection -> String -> callback -> selection  

@@ -4,7 +4,7 @@ import D3.Attributes.Instances
 import Prelude
 
 import D3.Layouts.Hierarchical (autoBox_)
-import D3.Selection (Chainable(..), EasingFunction(..), Transition)
+import D3.Selection (Chainable(..), EasingFunction(..), MouseEvent, Transition)
 import Data.Array (intercalate, (:))
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
@@ -109,6 +109,9 @@ classed = AttrT <<< Attribute "class" <<< toAttr
 
 cursor :: ∀ a. ToAttr String a => a -> Chainable
 cursor = AttrT <<< Attribute "cursor" <<< toAttr
+
+on :: MouseEvent -> Array Chainable -> Chainable
+on mouseEvent chain = On mouseEvent chain
 
 
 -- helpers for transitions 

@@ -173,3 +173,7 @@ exports.defaultDrag_ = selection => {
 exports.disableDrag_ = selection => {
   return selection.on(".drag", null)
 }
+
+exports.selectionOn_ = selection => event => callback => {
+  selection.on(event, callback);
+}

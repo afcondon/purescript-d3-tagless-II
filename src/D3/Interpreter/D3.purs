@@ -1,16 +1,17 @@
 module D3.Interpreter.D3 where
 
+import D3.Selection
 import Prelude
 
 import Control.Monad.State (class MonadState, StateT, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Layouts.Simulation (defaultSimulationDrag_, onTick_)
-import D3.Selection (Chainable(..), D3Selection_, D3_Node(..), DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), d3AddTransition_, d3Append_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, defaultDrag_, disableDrag_)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..), d3AttachZoomDefaultExtent_, d3AttachZoom_)
 import Data.Foldable (foldl)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple)
+import Debug (spy)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 
@@ -131,5 +132,9 @@ applyChainableD3 selection_ (TransitionT chain transition) = do
   selection_ -- NB we return selection, not transition
 applyChainableD3 selection_ (On event attributes) = do
 -- here's where we'll set the handler
-  selection_
-
+  case event of
+    MouseEnter -> selectionOn_ selection_ (show MouseEnter) (\_ -> spy "MouseEnter" $ unit)
+    MouseLeave -> selectionOn_ selection_ (show MouseLeave)  (\_ -> spy "MouseLeave" $ unit)
+    Click      -> selectionOn_ selection_ (show Click)  (\_ -> spy "Click" $ unit)
+    MouseDown  -> selectionOn_ selection_ (show MouseDown)  (\_ -> spy "MouseDown" $ unit)
+    MouseUp    -> selectionOn_ selection_ (show MouseUp)  (\_ -> spy "MouseUp" $ unit)
