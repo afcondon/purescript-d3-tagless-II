@@ -10,7 +10,7 @@ import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, on, opa
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce, startSimulation_)
+import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce, startSimulation_, stopSimulation_)
 import D3.Scales (d3SchemeCategory10S_)
 import D3.Selection (D3Selection_, DragBehavior(..), Element(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
@@ -164,8 +164,8 @@ graphScript (Tuple w h) model = do
 
   circle  <- nodes `append` (node Circle [ radius (\d -> if (datumIsGraphNode_ d).moduleOrPackage == "module" then 5.0 else 10.0)
                                          , fill colorByGroup
-                                         , on MouseEnter (\e d t -> spy "mouse enter" $ unit) 
-                                         , on MouseLeave (\e d t -> spy "mouse leave" $ unit)
+                                         , on MouseEnter (\e d t -> stopSimulation_ simulation_) 
+                                         , on MouseLeave (\e d t -> startSimulation_ simulation_)
                                          , on MouseClick (\e d t -> spy "click callback" $ unit)
                                          ]) 
   labels' <- nodes `append` (node Text [ classed "label", fill "white", x 1.0, y 1.0, text (\d -> (datumIsGraphNode_ d).id)]) 
