@@ -63,9 +63,15 @@
     }
 
     div#spago svg g.node text { font: bold 18px sans-serif; text-anchor: middle; }
-    div#spago svg g.node text { visibility: hidden }
-    div#spago svg g.node text.visible { visibility: visible; }
-    div#spago svg g.node circle { stroke: white; stroke-width: 1.5px;}
+    div#spago svg g.node text { visibility: hidden ;}
+    div#spago svg.spotlight g.node circle { opacity: 0.5 ;}
+    div#spago svg g.node.source text { visibility: visible; }
+    div#spago svg g.node.target text { visibility: visible; }
+    div#spago svg g.node.spotlight text { visibility: visible; }
+    div#spago svg g.node circle { stroke: white; stroke-width: 1.5px; opacity: 1;}
+    div#spago svg g.node.source circle { opacity: 0.75; stroke: red;}
+    div#spago svg g.node.target circle { opacity: 0.75; stroke: blue;}
+    div#spago svg g.node.spotlight circle { opacity: 1; stroke-width: 3px;}
   </style>
   <title>Document</title>
 </head>
