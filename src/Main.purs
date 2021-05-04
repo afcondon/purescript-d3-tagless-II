@@ -21,7 +21,7 @@ main :: Effect Unit
 main = launchAff_  do
   _        <- forkAff GUP.runGeneralUpdatePattern
   _        <- forkAff Graph.drawGraph
-  _        <- forkAff Spago.drawGraph
+  -- _        <- forkAff Spago.drawGraph
 
   -- fetch an example model for the tree examples, the canonical flare dependency json in this case
   treeJSON <- getTreeViaAJAX "http://localhost:1234/flare-2.json"

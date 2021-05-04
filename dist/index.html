@@ -18,10 +18,11 @@
       display: grid;
       grid-gap: 10px;
       grid-template-areas:
-               "gup spago rtree"
+               "gup force rtree"
                "htree vtree vtree"
                "htree vdendro vdendro"
-               "hdendro rdendro force";
+               "hdendro rdendro ."
+               "spago spago spago";
     }
     div {
       background-color: beige;
@@ -62,7 +63,12 @@
       grid-area: force;
     }
 
-    div#spago svg g.node text { font: bold 18px sans-serif; text-anchor: middle; }
+    div#spago {
+      height: 100vh;
+      grid-area: spago;
+    }
+
+    div#spago svg g.node text { font: 12px sans-serif; text-anchor: middle; }
     div#spago svg g.node text { visibility: hidden ;}
     div#spago svg.spotlight g.node circle { opacity: 0.5 ;}
     div#spago svg g.node.source text { visibility: visible; }
