@@ -29,7 +29,7 @@ import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, (>=),
 printTree :: forall v. Model String v -> Aff Unit
 printTree treeModel = liftEffect $ do
   log "Tree example"
-  widthHeight <- getWindowWidthHeight
+  widthHeight   <- getWindowWidthHeight
   printedScript <- runPrinter  (configureAndRunScript widthHeight treeModel) "Tree Script"
   log $ snd printedScript
   log $ fst printedScript

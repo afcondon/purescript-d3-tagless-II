@@ -24,11 +24,6 @@ treeScript config model = do
   container  <- svg  `append` (node Group [ fontFamily      "sans-serif"
                                           , fontSize        10.0
                                           ])
-  -- background <- container `append` (node Rect [ width config.svg.width
-  --                                             , height config.svg.height
-  --                                             , x (-config.svg.width / 2.0)
-  --                                             , y (-config.svg.width / 2.0)
-  --                                             , fill "red" ])
   links      <- container `append` (node Group [ classed "links"])
   nodes      <- container `append` (node Group [ classed "nodes"])
 
@@ -65,15 +60,7 @@ treeScript config model = do
                             , text       labelName
                             , fill       config.color
                             ])
-
-  -- _ <- background `attachZoom`
-  --         { 
-  --           extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: 500.0, right: 500.0 }
-  --         , scale     : ScaleExtent 1 8 -- wonder if ScaleExtent ctor could be range operator `..`
-  --         , qualifier : "tree"
-  --         , target    : ZoomTarget container
-  --         }
-
+                            
   pure svg
 
 
