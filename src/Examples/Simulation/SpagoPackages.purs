@@ -14,7 +14,7 @@ import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, Force(..), ForceName(.
 import D3.Scales (d3SchemeCategory10S_)
 import D3.Selection (D3Selection_, DragBehavior(..), Element(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
-import Data.Array (catMaybes, foldl, (!!))
+import Data.Array (catMaybes, filter, foldl, (:), (!!))
 import Data.Either (Either(..))
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -30,7 +30,7 @@ import Unsafe.Coerce (unsafeCoerce)
 -- NOTA BENE - these types are a _lie_ as stated in that the Nodes / Links are mutable and are changed when you put them
 -- into the simulation, the types given here represent their form AFTER D3 has mutated them
 -- *********************************************************************************************************************
-type NodeExtension = ( path :: String, package :: Maybe String, moduleOrPackage :: String )
+type NodeExtension = ( path :: String, depends :: Array String, package :: Maybe String, moduleOrPackage :: String )
 type LinkExtension = ( moduleOrPackage :: String )
 type GraphNode_ = D3ForceNode_ String NodeExtension
 type GraphLink_ = D3ForceLink_ String NodeExtension LinkExtension
@@ -51,6 +51,16 @@ type PreModel = { packages :: Array Package, modules :: Array Module, lsDeps :: 
 convertFilesToModel :: forall r. { body :: String | r } -> { body :: String | r } -> { body :: String | r } -> Model
 convertFilesToModel moduleJSON packageJSON lsdepJSON = 
   makeModel $ readModelData_ moduleJSON.body packageJSON.body lsdepJSON.body
+
+highlightNeighborhood :: Model -> String -> Unit
+highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
+  where
+    sources = foldl (\acc l -> if l.target.id == nodeId then l.source.id:acc else acc) [] links
+    targets = foldl (\acc l -> if l.source.id == nodeId then l.target.id:acc else acc) [] links
+
+foreign import markAsSpotlit_   :: String -> Array String -> Array String -> Unit
+foreign import removeSpotlight_ :: String -> Array String -> Array String -> Unit
+
 
 makeModel :: PreModel -> Model
 makeModel { packages, modules, lsDeps } = do
@@ -133,8 +143,8 @@ graphScript :: forall m link node selection r.
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
   svg        <- root `append` (node Svg   [ viewBox 0.0 0.0 650.0 650.0 ] )
-  linksGroup <- svg  `append` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
-  nodesGroup <- svg  `append` (node Group [ classed "node" ])
+  linksGroup <- svg  `append` (node Group [ classed "links", strokeColor "#999", strokeOpacity 0.6 ])
+  nodesGroup <- svg  `append` (node Group [ classed "nodes" ])
 
   let forces      = [ makeCenterForce 325.0 325.0
                     , Force (ForceName "charge") ForceMany ]
@@ -155,7 +165,7 @@ graphScript (Tuple w h) model = do
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : model.nodes
-    , behaviour : [ classed "node", transform' translateNode ]
+    , behaviour : [ classed "node visible", transform' translateNode ]
     , simulation: simulation_  -- following config fields are extras for simulation
     , tickName  : "nodes"
     , onTick    : [ transform' translateNode  ]
@@ -166,7 +176,7 @@ graphScript (Tuple w h) model = do
                                          , fill colorByGroup
                                          , on MouseEnter (\e d t -> stopSimulation_ simulation_) 
                                          , on MouseLeave (\e d t -> startSimulation_ simulation_)
-                                         , on MouseClick (\e d t -> spy "click callback" $ unit)
+                                         , on MouseClick (\e d t -> highlightNeighborhood (unsafeCoerce model) (datumIsGraphNode_ d).id)
                                          ]) 
   labels' <- nodes `append` (node Text [ classed "label", fill "white", x 1.0, y 1.0, text (\d -> (datumIsGraphNode_ d).id)]) 
   labels  <- nodes `append` (node Text [ classed "label", fill "black", text (\d -> (datumIsGraphNode_ d).id)]) 
