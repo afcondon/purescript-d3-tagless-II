@@ -47,21 +47,21 @@ instance showMetaTreeNode :: Show MetaTreeNode where -- super primitive implemen
   show (OnEventNode _)            = "OnEvent"
   show (TransitionNode _ _)       = "Transition"
 
-showAsSymbol :: MetaTreeNode -> { name :: String, symbol :: String, param1 :: String, param2 :: String }
+showAsSymbol :: MetaTreeNode -> { name :: String, symbol :: String, param1 :: String,              param2 :: String }
 showAsSymbol = 
   case _ of
-    Empty                      ->  { name: "Empty"         , symbol: ""    , param1: "", param2: "" }
-    RemoveNode                 ->  { name: "Remove"        , symbol: "x"   , param1: "", param2: "" }
-    (AttachNode s)             ->  { name: "Attach"        , symbol: "a"   , param1: "", param2: "" }
+    Empty                      ->  { name: "Empty"         , symbol: ""    , param1: "",           param2: "" }
+    RemoveNode                 ->  { name: "Remove"        , symbol: "x"   , param1: "",           param2: "" }
+    (AttachNode s)             ->  { name: "Attach"        , symbol: "a"   , param1: "",           param2: "" }
     (AppendNode e)             ->  { name: "Append"        , symbol: "+"   , param1: tag $ show e, param2: "" }
     (JoinSimpleNode e _ _)     ->  { name: "JoinSimple"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
-    (JoinGeneralNode e _ _)    ->  { name: "JoinGeneral"   , symbol: "<+>" , param1: "", param2: "" }
-    (JoinSimulationNode e _ _) ->  { name: "JoinSimulation", symbol: "<+>" , param1: "", param2: "" }
-    (ZoomNode _)               ->  { name: "Zoom"          , symbol: "z"   , param1: "", param2: "" }
-    (DragNode _)               ->  { name: "Drag"          , symbol: "drag", param1: "", param2: "" }
-    (AttrNode c)               ->  { name: "Attr"          , symbol: "attr", param1: show c, param2: "" }
-    (OnEventNode _)            ->  { name: "OnEvent"       , symbol: "on"  , param1: "", param2: "" }
-    (TransitionNode _ _)       ->  { name: "Transition"    , symbol: "T"   , param1: "", param2: "" }
+    (JoinGeneralNode e _ _)    ->  { name: "JoinGeneral"   , symbol: "<+>" , param1: "",           param2: "" }
+    (JoinSimulationNode e _ _) ->  { name: "JoinSimulation", symbol: "<+>" , param1: "",           param2: "" }
+    (ZoomNode _)               ->  { name: "Zoom"          , symbol: "z"   , param1: "",           param2: "" }
+    (DragNode _)               ->  { name: "Drag"          , symbol: "drag", param1: "",           param2: "" }
+    (AttrNode c)               ->  { name: "Attr"          , symbol: "attr", param1: show c,       param2: "" }
+    (OnEventNode _)            ->  { name: "OnEvent"       , symbol: "on"  , param1: "",           param2: "" }
+    (TransitionNode _ _)       ->  { name: "Transition"    , symbol: "T"   , param1: "",           param2: "" }
 
 tag :: String -> String
 tag s = "<" <> s <> ">"
