@@ -51,6 +51,9 @@ data Attr =
 
 data Attribute = ToAttribute Label Attr
 
+attrLabel :: Attribute -> String
+attrLabel (ToAttribute label _) = label
+
 
 unbox :: ∀ a. Attr -> a
 unbox = 

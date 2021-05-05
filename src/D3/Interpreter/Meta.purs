@@ -35,17 +35,36 @@ data MetaTreeNode =
 
 instance showMetaTreeNode :: Show MetaTreeNode where -- super primitive implementation to get started
   show Empty                      = "Empty"
-  show RemoveNode                 = "RemoveNode"
-  show (AttachNode _)             = "AttachNode"
-  show (AppendNode _)             = "AppendNode"
-  show (JoinSimpleNode _ _ _)     = "JoinSimpleNode"
-  show (JoinGeneralNode _ _ _)    = "JoinGeneralNode"
-  show (JoinSimulationNode _ _ _) = "JoinSimulationNode"
-  show (ZoomNode _)               = "ZoomNode"
-  show (DragNode _)               = "DragNode"
-  show (AttrNode _)               = "AttrNode"
-  show (OnEventNode _)            = "OnEventNode"
-  show (TransitionNode _ _)       = "TransitionNode"
+  show RemoveNode                 = "Remove"
+  show (AttachNode _)             = "Attach"
+  show (AppendNode _)             = "Append"
+  show (JoinSimpleNode _ _ _)     = "JoinSimple"
+  show (JoinGeneralNode _ _ _)    = "JoinGeneral"
+  show (JoinSimulationNode _ _ _) = "JoinSimulation"
+  show (ZoomNode _)               = "Zoom"
+  show (DragNode _)               = "Drag"
+  show (AttrNode _)               = "Attr"
+  show (OnEventNode _)            = "OnEvent"
+  show (TransitionNode _ _)       = "Transition"
+
+showAsSymbol :: MetaTreeNode -> { name :: String, symbol :: String, param1 :: String, param2 :: String }
+showAsSymbol = 
+  case _ of
+    Empty                      ->  { name: "Empty"         , symbol: ""    , param1: "", param2: "" }
+    RemoveNode                 ->  { name: "Remove"        , symbol: "x"   , param1: "", param2: "" }
+    (AttachNode s)             ->  { name: "Attach"        , symbol: "a"   , param1: "", param2: "" }
+    (AppendNode e)             ->  { name: "Append"        , symbol: "+"   , param1: tag $ show e, param2: "" }
+    (JoinSimpleNode e _ _)     ->  { name: "JoinSimple"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
+    (JoinGeneralNode e _ _)    ->  { name: "JoinGeneral"   , symbol: "<+>" , param1: "", param2: "" }
+    (JoinSimulationNode e _ _) ->  { name: "JoinSimulation", symbol: "<+>" , param1: "", param2: "" }
+    (ZoomNode _)               ->  { name: "Zoom"          , symbol: "z"   , param1: "", param2: "" }
+    (DragNode _)               ->  { name: "Drag"          , symbol: "drag", param1: "", param2: "" }
+    (AttrNode c)               ->  { name: "Attr"          , symbol: "attr", param1: show c, param2: "" }
+    (OnEventNode _)            ->  { name: "OnEvent"       , symbol: "on"  , param1: "", param2: "" }
+    (TransitionNode _ _)       ->  { name: "Transition"    , symbol: "T"   , param1: "", param2: "" }
+
+tag :: String -> String
+tag s = "<" <> s <> ">"
 
 type MetaTreeMap = Map NodeID MetaTreeNode
 data ScriptTree = ScriptTree Int MetaTreeMap (Array (Tuple NodeID NodeID))
@@ -53,7 +72,13 @@ data ScriptTree = ScriptTree Int MetaTreeMap (Array (Tuple NodeID NodeID))
 newtype D3MetaTreeM a = D3MetaTreeM (StateT ScriptTree Effect a)
 
 -- this is the type that we will give to JS, prune out the empty child arrays and then pass to d3.hierarchy
-newtype MetaTreeNode_ = MetaTreeNode { name :: String, children :: Array MetaTreeNode_ }
+newtype MetaTreeNode_ = MetaTreeNode { 
+    name :: String
+  , symbol :: String
+  , children :: Array MetaTreeNode_ 
+  , param1 :: String
+  , param2 :: String
+}
 
 scriptTreeToJSON :: ScriptTree ->  TreeJson_
 scriptTreeToJSON (ScriptTree _ nodeMap links) = pruneEmptyChildren $ go 0
@@ -61,8 +86,11 @@ scriptTreeToJSON (ScriptTree _ nodeMap links) = pruneEmptyChildren $ go 0
     go :: NodeID -> MetaTreeNode_
     go id = do
       let children = snd <$> filter (\(Tuple parentID nodeID) -> parentID == id) links
-          nodeName = show $ fromMaybe Empty $ lookup id nodeMap
-      MetaTreeNode { name: nodeName, children: go <$> children }
+
+          { name, symbol, param1, param2 }
+                   = showAsSymbol $ fromMaybe Empty $ lookup id nodeMap
+
+      MetaTreeNode { name, symbol, param1, param2, children: go <$> children }
 
 foreign import pruneEmptyChildren :: MetaTreeNode_ -> TreeJson_
 

@@ -2,7 +2,7 @@ module D3.Selection where
 
 import Prelude hiding (append,join)
 
-import D3.Attributes.Instances (Attribute, Datum, Index, Listener_, MouseEvent, Listener)
+import D3.Attributes.Instances (Attribute, Datum, Index, Listener, Listener_, MouseEvent, attrLabel)
 import Data.Maybe.Last (Last)
 import Effect.Aff (Milliseconds)
 import Unsafe.Coerce (unsafeCoerce)
@@ -152,3 +152,11 @@ foreign import showData_            :: forall selection d. Array d -> selection 
 foreign import showSetAttr_         :: forall selection. String -> D3Attr -> selection -> selection
 foreign import showSetText_         :: forall selection. D3Attr -> selection -> selection
 foreign import selectionOn_         :: forall selection callback. selection -> String -> callback -> selection  
+
+
+instance showChainable :: Show Chainable where
+  show (AttrT attr)      = attrLabel attr
+  show (TextT _)         = "text"
+  show (TransitionT _ _) = ""
+  show RemoveT           = ""
+  show (OnT event _)     = show event

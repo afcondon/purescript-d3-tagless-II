@@ -94,7 +94,7 @@ configureAndRunScript (Tuple width height ) model =
     laidOutRoot_ =
       layout `treeSetRoot_` model.root_
 
-    { xMin, xMax, yMin, yMax } = trace { treeType: model.treeType, layout: model.treeLayout } \_ -> spy "MinMax" $ treeMinMax_ laidOutRoot_
+    { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
     xExtent = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
     yExtent = yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
 
