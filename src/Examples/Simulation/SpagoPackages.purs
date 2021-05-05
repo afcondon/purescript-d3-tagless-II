@@ -154,7 +154,7 @@ graphScript (Tuple w h) model = do
       element   : Line
     , key       : UseDatumAsKey
     , "data"    : model.links
-    , behaviour : [ strokeWidth 1.0 ]
+    , behaviour : [ strokeWidth 1.0 ] -- default invisible in CSS unless marked "visible"
     , simulation: simulation_ -- following config fields are extras for simulation
     , tickName  : "links"
     , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
