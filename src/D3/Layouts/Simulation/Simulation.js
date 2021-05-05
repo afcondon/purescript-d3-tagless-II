@@ -74,7 +74,9 @@ exports.forceCenter_ = simulation => label => cx => cy => simulation.force(label
 // :: Simulation -> Unit
 // exports.forceLinks = simulation => label => simulation.x()
 // :: Simulation -> Number -> Unit
-exports.forceCollide_ = simulation => label => radius => simulation.force(label, d3.forceCollide(radius))
+exports.forceCollideFixed_ = simulation => label => radius => simulation.force(label, d3.forceCollide(radius))
+// :: Simulation -> Number -> Unit
+exports.forceCollideFn_ = simulation => label => radiusFn => simulation.force(label, d3.forceCollide(radiusFn))
 // :: Simulation -> Number -> Unit
 exports.forceX_ = simulation => label => cx => simulation.force(label, d3.forceX(cx))
 // :: Simulation -> Number -> Unit

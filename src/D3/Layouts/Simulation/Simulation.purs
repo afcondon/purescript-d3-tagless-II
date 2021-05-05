@@ -2,6 +2,7 @@ module D3.Layouts.Simulation where
 
 import Prelude
 
+import D3.Attributes.Instances (Datum)
 import D3.Selection (D3Selection_, D3Simulation_, DragBehavior)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -47,7 +48,8 @@ data ForceType =
     ForceMany
   | ForceCenter Number Number
   -- | ForceLink (Array Link) (Link -> ID)
-  | ForceCollide Number
+  | ForceCollideFixed Number
+  | ForceCollide (Datum -> Number)
   | ForceX Number
   | ForceY Number
   | ForceRadial Number Number
@@ -83,14 +85,15 @@ putForcesInSimulation simulation forces = do
     addForce :: Force -> D3Simulation_
     addForce =
       case _ of
-        (Force (ForceName label) ForceMany)                 -> forceMany_ simulation label 
-        (Force (ForceName label) (ForceCenter cx cy))       -> forceCenter_ simulation label cx cy
-        -- (Force (ForceLink links idFn)) -> forceLinks
-        (Force (ForceName label) (ForceCollide radius_))    -> forceCollide_ simulation label radius_
-        (Force (ForceName label) (ForceX x))                -> forceX_ simulation label x
-        (Force (ForceName label) (ForceY y))                -> forceY_ simulation label y
-        (Force (ForceName label) (ForceRadial cx cy))       -> forceRadial_ simulation label cx cy
-        (Force (ForceName label) Custom)                    -> simulation -- do this later as needed
+        (Force (ForceName label) ForceMany)                  -> forceMany_ simulation label 
+        (Force (ForceName label) (ForceCenter cx cy))        -> forceCenter_ simulation label cx cy
+        -- (Force (ForceLink links idFn))                    -> forceLinks
+        (Force (ForceName label) (ForceCollideFixed radius_))-> forceCollideFixed_ simulation label radius_
+        (Force (ForceName label) (ForceCollide radiusFn))    -> forceCollideFn_ simulation label radiusFn
+        (Force (ForceName label) (ForceX x))                 -> forceX_ simulation label x
+        (Force (ForceName label) (ForceY y))                 -> forceY_ simulation label y
+        (Force (ForceName label) (ForceRadial cx cy))        -> forceRadial_ simulation label cx cy
+        (Force (ForceName label) Custom)                     -> simulation -- do this later as needed
     _ = addForce <$> forces
   simulation
 
@@ -111,9 +114,10 @@ foreign import defaultSimulationDrag_ :: D3Selection_ -> D3Simulation_ -> Unit
 foreign import setAlphaTarget_        :: D3Selection_ -> Number -> Unit
 
 -- implementations / wrappers for the Force ADT
-foreign import forceMany_    :: D3Simulation_ -> String                     -> D3Simulation_
-foreign import forceCenter_  :: D3Simulation_ -> String -> Number -> Number -> D3Simulation_
-foreign import forceRadial_  :: D3Simulation_ -> String -> Number -> Number -> D3Simulation_
-foreign import forceCollide_ :: D3Simulation_ -> String -> Number           -> D3Simulation_
-foreign import forceX_       :: D3Simulation_ -> String -> Number           -> D3Simulation_
-foreign import forceY_       :: D3Simulation_ -> String -> Number           -> D3Simulation_
+foreign import forceMany_         :: D3Simulation_ -> String                      -> D3Simulation_
+foreign import forceCenter_       :: D3Simulation_ -> String -> Number -> Number  -> D3Simulation_
+foreign import forceRadial_       :: D3Simulation_ -> String -> Number -> Number  -> D3Simulation_
+foreign import forceCollideFixed_ :: D3Simulation_ -> String -> Number            -> D3Simulation_
+foreign import forceCollideFn_    :: D3Simulation_ -> String -> (Datum -> Number) -> D3Simulation_
+foreign import forceX_            :: D3Simulation_ -> String -> Number            -> D3Simulation_
+foreign import forceY_            :: D3Simulation_ -> String -> Number            -> D3Simulation_

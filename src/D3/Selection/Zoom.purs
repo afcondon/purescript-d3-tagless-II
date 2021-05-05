@@ -31,17 +31,17 @@ type ZoomConfig selection = {
 }
 type ZoomConfig_ = {
     extent      :: Array (Array Number)
-  , scaleExtent :: Array Int
+  , scaleExtent :: Array Number
   , qualifier   :: String
   , target      :: D3Selection_
 }
 type ZoomConfigDefault_ = {
-    scaleExtent :: Array Int
+    scaleExtent :: Array Number
   , qualifier   :: String
   , target      :: D3Selection_
 }
 foreign import data ZoomBehavior_ :: Type  -- the zoom behavior, provided to Event Handler
-data ScaleExtent   = ScaleExtent Int Int
+data ScaleExtent   = ScaleExtent Number Number
 data ZoomExtent    = DefaultZoomExtent 
                    | ZoomExtent { top :: Number, left :: Number, bottom :: Number, right :: Number }
                   --  | ExtentFunction (Datum -> Array (Array Number))
@@ -56,7 +56,7 @@ type ZoomEvent     = {
 foreign import d3AttachZoom_              :: D3Selection_ -> ZoomConfig_        -> D3Selection_
 foreign import d3AttachZoomDefaultExtent_ :: D3Selection_ -> ZoomConfigDefault_ -> D3Selection_
 
-zoomRange :: Int -> Int -> ScaleExtent
+zoomRange :: Number -> Number -> ScaleExtent
 zoomRange = ScaleExtent
 
 zoomExtent :: { bottom :: Number

@@ -18,11 +18,11 @@
       display: grid;
       grid-gap: 10px;
       grid-template-areas:
+               "spago spago spago"
                "gup force rtree"
                "htree vtree vtree"
                "htree vdendro vdendro"
-               "hdendro rdendro ."
-               "spago spago spago";
+               "hdendro rdendro .";
     }
     div {
       background-color: beige;
@@ -69,16 +69,23 @@
     }
 
     div#spago svg g.links line { visibility: hidden; }
-    div#spago svg g.node text { font: 12px sans-serif; text-anchor: middle; }
-    div#spago svg g.node text { visibility: hidden ;}
-    div#spago svg.spotlight g.node circle { opacity: 0.5 ;}
-    div#spago svg g.node.source text { visibility: visible; }
-    div#spago svg g.node.target text { visibility: visible; }
-    div#spago svg g.node.spotlight text { visibility: visible; }
-    div#spago svg g.node circle { stroke: white; stroke-width: 1.5px; opacity: 1;}
-    div#spago svg g.node.source circle { opacity: 0.75; stroke: red;}
-    div#spago svg g.node.target circle { opacity: 0.75; stroke: blue;}
-    div#spago svg g.node.spotlight circle { opacity: 1; stroke-width: 3px;}
+    div#spago svg g.links line.package { visibility: visible; }
+    div#spago svg g.nodes text { font: 12px sans-serif; text-anchor: middle; }
+    div#spago svg g.nodes g.module text { visibility: hidden; fill: black}
+    div#spago svg g.nodes g.module:hover text { visibility: visible; fill: black}
+    div#spago svg g.nodes g.package text { fill: white; }
+    div#spago svg g.nodes g.module circle { stroke: white; stroke-width: 1.5px; opacity: 1;}
+    div#spago svg g.nodes g.package circle { stroke: black; stroke-width: 3px; opacity: 1;}
+    div#spago svg.spotlight g.nodes circle { opacity: 0.5 ;}
+    div#spago svg g.nodes g.source text { visibility: visible; }
+    div#spago svg g.nodes g.target text { visibility: visible; }
+    div#spago svg g.nodes g.spotlight text { visibility: visible; }
+    div#spago svg g.nodes g.source circle { opacity: 0.85; stroke: red;}
+    div#spago svg g.nodes g.target circle { opacity: 0.85; stroke: blue;}
+    div#spago svg g.nodes g.package.spotlight text { visibility: visible; }
+    div#spago svg g.nodes g.package.source circle { opacity: 0.85; stroke-width: 5px; stroke: red;}
+    div#spago svg g.nodes g.package.target circle { opacity: 0.85; stroke-width: 5px; stroke: blue;}
+    div#spago svg g.nodes g.spotlight circle { opacity: 1; stroke-width: 3px;}
   </style>
   <title>Document</title>
 </head>

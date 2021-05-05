@@ -97,7 +97,7 @@ enter (Tuple w h) model = do
   }
   
   svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-                            , scale     : ScaleExtent 1 4 -- wonder if ScaleExtent ctor could be range operator `..`
+                            , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
                             , qualifier : "tree"
                             , target    : SelfTarget
                             }

@@ -46,7 +46,7 @@ exports.makeGraphNodes_ = (nodes) => nodes
 //  markAsSpotlit_ :: String -> Unit
 exports.markAsSpotlit_ = id => sources => targets => {
   const svg = d3.select("div#spago svg")
-  const selection = svg.selectAll("g.nodes g.node")
+  const selection = svg.selectAll("g.nodes g")
 
   const spotlitNode = selection.filter((d,i) => d.id == id)
   const sourceNodes = selection.filter((d,i) => targets.includes(d.id))

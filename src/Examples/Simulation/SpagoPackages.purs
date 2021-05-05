@@ -61,7 +61,6 @@ highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
 foreign import markAsSpotlit_   :: String -> Array String -> Array String -> Unit
 foreign import removeSpotlight_ :: String -> Array String -> Array String -> Unit
 
-
 makeModel :: PreModel -> Model
 makeModel { packages, modules, lsDeps } = do
   let
@@ -142,19 +141,20 @@ graphScript :: forall m link node selection r.
   m selection -- TODO is it right to return selection_ instead of simulation_? does it matter? 
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
-  svg        <- root `append` (node Svg   [ viewBox 0.0 0.0 650.0 650.0 ] )
+  svg        <- root `append` (node Svg   [ viewBox 0.0 0.0 w h ] )
   linksGroup <- svg  `append` (node Group [ classed "links", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group [ classed "nodes" ])
 
-  let forces      = [ makeCenterForce 325.0 325.0
-                    , Force (ForceName "charge") ForceMany ]
+  let forces      = [ makeCenterForce (w / 2.0) (h / 2.0)
+                    , Force (ForceName "charge")  ForceMany
+                    , Force (ForceName "collide") (ForceCollide (\d -> chooseRadiusFn d) ) ]
       simulation_ = initSimulation forces model model.nodes model.links
 
   links <- linksGroup <+> JoinSimulation {
       element   : Line
     , key       : UseDatumAsKey
     , "data"    : model.links
-    , behaviour : [ strokeWidth 1.0 ] -- default invisible in CSS unless marked "visible"
+    , behaviour : [ classed linkClass ] -- default invisible in CSS unless marked "visible"
     , simulation: simulation_ -- following config fields are extras for simulation
     , tickName  : "links"
     , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
@@ -165,24 +165,23 @@ graphScript (Tuple w h) model = do
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : model.nodes
-    , behaviour : [ classed "node visible", transform' translateNode ]
+    , behaviour : [ classed nodeClass, transform' translateNode ]
     , simulation: simulation_  -- following config fields are extras for simulation
     , tickName  : "nodes"
     , onTick    : [ transform' translateNode  ]
     , onDrag    : SimulationDrag DefaultDrag
   }
 
-  circle  <- nodes `append` (node Circle [ radius (\d -> if (datumIsGraphNode_ d).moduleOrPackage == "module" then 5.0 else 10.0)
+  circle  <- nodes `append` (node Circle [ radius chooseRadius 
                                          , fill colorByGroup
                                          , on MouseEnter (\e d t -> stopSimulation_ simulation_) 
                                          , on MouseLeave (\e d t -> startSimulation_ simulation_)
                                          , on MouseClick (\e d t -> highlightNeighborhood (unsafeCoerce model) (datumIsGraphNode_ d).id)
                                          ]) 
-  labels' <- nodes `append` (node Text [ classed "label", fill "white", x 1.0, y 1.0, text (\d -> (datumIsGraphNode_ d).id)]) 
-  labels  <- nodes `append` (node Text [ classed "label", fill "black", text (\d -> (datumIsGraphNode_ d).id)]) 
+  labels' <- nodes `append` (node Text [ classed "label",  x 0.2, y 0.2, text (\d -> (datumIsGraphNode_ d).id)]) 
   
   svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-                            , scale     : ScaleExtent 1 4 -- wonder if ScaleExtent ctor could be range operator `..`
+                            , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
                             , qualifier : "tree"
                             , target    : SelfTarget
                             }
@@ -199,6 +198,36 @@ datumIsGraphLink_ :: Datum -> GraphLink_
 datumIsGraphLink_ = unsafeCoerce
 datumIsGraphNode_ :: Datum -> GraphNode_
 datumIsGraphNode_ = unsafeCoerce
+
+moduleRadius = 5.0 :: Number 
+packageRadius = 50.0 :: Number
+packageForceRadius = 50.0 :: Number
+
+chooseRadius :: Datum -> Number
+chooseRadius datum = do
+  let d = datumIsGraphNode_ datum
+  case d.moduleOrPackage of
+    "module" -> moduleRadius
+    "package" -> packageRadius
+    _ -> 10.0
+
+chooseRadiusFn :: Datum -> Number
+chooseRadiusFn datum = do
+  let d = datumIsGraphNode_ datum
+  case d.moduleOrPackage of
+    "module" -> moduleRadius
+    "package" -> packageRadius + packageForceRadius
+    _ -> 10.0
+
+nodeClass :: Datum -> String
+nodeClass datum = do
+  let d = datumIsGraphNode_ datum
+  d.moduleOrPackage
+
+linkClass :: Datum -> String
+linkClass datum = do
+  let d = datumIsGraphLink_ datum
+  d.moduleOrPackage
 
 translateNode :: Datum -> String
 translateNode datum = "translate(" <> show d.x <> "," <> show d.y <> ")"
