@@ -2,18 +2,17 @@ module D3.Examples.Tree.Configure where
 
 import D3.Layouts.Hierarchical
 
-import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (getWindowWidthHeight, transform, viewBox)
+import D3.Data.Types (D3HierarchicalNode(..), D3Selection_, Datum_, Model, TreeJson_, TreeLayout(..), TreeType(..))
 import D3.Examples.Tree.Script (treeScript)
 import D3.Examples.Tree.Types (datumIsTreeNode)
+import D3.FFI (hNodeHeight_, hasChildren_, initCluster_, initTree_, treeMinMax_, treeSetNodeSize_, treeSetRoot_, treeSetSeparation_, treeSetSize_)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.MetaTree (MetaTreeNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical as H
-import D3.Layouts.Hierarchical.Types (TreeLayout(..), TreeType(..))
 import D3.Scales (d3SchemeCategory10N_)
-import D3.Selection (D3Selection_)
 import Data.Map (toUnfoldable)
 import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy, trace)
@@ -60,7 +59,7 @@ drawTree treeModel = liftEffect $ do
 configureAndRunScript :: forall m v selection. 
   Bind m => 
   D3InterpreterM selection m => 
-  Tuple Number Number -> H.Model String v -> m selection
+  Tuple Number Number -> Model String v -> m selection
 configureAndRunScript (Tuple width height ) model = 
   treeScript { spacing, selector, viewbox, tree: laidOutRoot_, linkPath, nodeTransform, color, textDirection, svg } model
   where
@@ -171,6 +170,6 @@ rotateRadialLabels (D3HierarchicalNode d) = -- TODO replace with nodeIsOnRHS
   then "180" <> ")" 
   else "0" <> ")"
 
-nodeIsOnRHS :: Datum -> Boolean
+nodeIsOnRHS :: Datum_ -> Boolean
 nodeIsOnRHS d = node.x < pi
   where (D3HierarchicalNode node) = datumIsTreeNode d

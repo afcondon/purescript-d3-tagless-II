@@ -3,10 +3,11 @@ module D3.Examples.GUP where
 import D3.Attributes.Sugar
 
 import Control.Monad.Rec.Class (forever)
-import D3.Attributes.Instances (Datum, Index, datumIsChar, indexIsNumber)
+import D3.Attributes.Instances (datumIsChar, indexIsNumber)
+import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Interpreter.D3 (runD3M)
-import D3.Selection (Chainable, D3Selection_, Element(..), Join(..), Keys(..), node, node_)
+import D3.Selection (Chainable, Join(..), Keys(..), node, node_)
 import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (singleton, toCharArray)
@@ -50,13 +51,13 @@ svgAttributes = [
 -- and coercion functions
 type Model = Array Char
 
-offsetXByIndex :: Datum -> Index -> Number
+offsetXByIndex :: Datum_ -> Index_ -> Number
 offsetXByIndex datum i = offset + ((indexIsNumber i) * factor)
   where
     offset = 50.0
     factor = 48.0
 
-textFromDatum :: Datum -> String
+textFromDatum :: Datum_ -> String
 textFromDatum = singleton <<< datumIsChar
 
 enter :: forall m. D3InterpreterM D3Selection_ m => m ((Array Char) -> m D3Selection_)

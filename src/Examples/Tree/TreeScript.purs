@@ -1,15 +1,17 @@
 module D3.Examples.Tree.Script where
 
+import D3.Attributes.Sugar
 import D3.Layouts.Hierarchical
+import Prelude
 
-import D3.Attributes.Sugar 
+import D3.Data.Types (Element(..), Model)
 import D3.Examples.Tree.Types (ScriptConfig, labelName)
+import D3.FFI (descendants_, hasChildren_, links_)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Layouts.Hierarchical as H
-import D3.Selection (Element(..), Join(..), Keys(..), node)
+import D3.Selection (Join(..), Keys(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
 import Data.Maybe (Maybe(..))
-import Prelude 
 
 -- | The eDSL script that renders tree layouts
 -- | it has been parameterized rather heavily using the ScriptConfig record so that it can draw
@@ -17,7 +19,7 @@ import Prelude
 -- | NB there would be nothing wrong, per se, with individual examples, this just shows 
 -- | some more composability, at the price of some direct legibility
 treeScript :: forall m v selection. Bind m => D3InterpreterM selection m => 
-  ScriptConfig -> H.Model String v -> m selection
+  ScriptConfig -> Model String v -> m selection
 treeScript config model = do
   root       <- attach config.selector                           
   svg        <- root `append` (node Svg config.viewbox)          
@@ -30,7 +32,7 @@ treeScript config model = do
   theLinks_  <- links <+> Join {
       element   : Path
     , key       : UseDatumAsKey
-    , "data"    : H.links_ model.root_
+    , "data"    : links_ model.root_
     , behaviour : [ strokeWidth   1.5
                   , strokeColor   config.color
                   , strokeOpacity 0.4
@@ -42,7 +44,7 @@ treeScript config model = do
   nodeJoin_  <- nodes <+> Join {
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : H.descendants_ model.root_
+    , "data"    : descendants_ model.root_
     -- there could be other stylistic stuff here but the transform is key structuring component
     , behaviour : config.nodeTransform -- <- the key positioning calculation for the tree!!!
   }

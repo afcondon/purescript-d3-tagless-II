@@ -1,14 +1,15 @@
 module D3.Examples.Tree.Meta where
 
-import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
+import D3.Data.Types (D3Selection_, Datum_, Element(..), Model)
 import D3.Examples.Tree.Types (labelName)
+import D3.FFI (descendants_, hNodeHeight_, initTree_, links_, treeMinMax_, treeSetNodeSize_, treeSetRoot_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.MetaTree (MetaTreeNode, MetaTreeNode_(..))
-import D3.Layouts.Hierarchical (Model, hNodeHeight_, hasChildren_, initTree_, positionXY, treeMinMax_, treeSetNodeSize_, treeSetRoot_, verticalLink)
+import D3.Layouts.Hierarchical (positionXY, verticalLink)
 import D3.Layouts.Hierarchical as H
-import D3.Selection (D3Selection_, Element(..), Join(..), Keys(..), node)
+import D3.Selection (Join(..), Keys(..), node)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -29,7 +30,7 @@ drawTree treeModel = liftEffect $ do
 -- | NB there would be nothing wrong, per se, with individual examples, this just shows 
 -- | some more composability, at the price of some direct legibility
 treeScript :: forall m v selection. Bind m => D3InterpreterM selection m => 
-  Tuple Number Number -> H.Model String v -> m selection
+  Tuple Number Number -> Model String v -> m selection
 treeScript (Tuple width height) model = do
   let 
     -- configure dimensions
@@ -58,7 +59,7 @@ treeScript (Tuple width height) model = do
   theLinks_  <- links <+> Join {
       element   : Path
     , key       : UseDatumAsKey
-    , "data"    : H.links_ model.root_
+    , "data"    : links_ model.root_
     , behaviour : [ strokeWidth   1.5
                   , strokeColor   "black"
                   , strokeOpacity 0.4
@@ -70,7 +71,7 @@ treeScript (Tuple width height) model = do
   nodeJoin_  <- nodes <+> Join {
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : H.descendants_ model.root_
+    , "data"    : descendants_ model.root_
     -- there could be other stylistic stuff here but the transform is key structuring component
     , behaviour : [ transform [ positionXY ] ]
   }
@@ -104,11 +105,11 @@ treeScript (Tuple width height) model = do
 
 -- | Coercion function to recover the "extra" data that lives within the generic structure that was given to D3, 
 -- | it's an unsafeCoerce but the types give some protection
-symbol :: Datum -> String
+symbol :: Datum_ -> String
 symbol d = node."data".symbol
   where node = unsafeCoerce d
 
-param1 :: Datum -> String
+param1 :: Datum_ -> String
 param1 d = node."data".param1
   where node = unsafeCoerce d
 

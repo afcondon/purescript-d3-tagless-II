@@ -1,6 +1,6 @@
 module D3.Zoom where
 
-import D3.Selection (D3Selection_)
+import D3.FFI (ZoomBehavior_)
 import Web.Event.Internal.Types (Event)
 
 -- stuff related to zoom functionality
@@ -29,22 +29,10 @@ type ZoomConfig selection = {
 -- clickDistance2 = 0,
 -- tapDistance = 10;
 }
-type ZoomConfig_ = {
-    extent      :: Array (Array Number)
-  , scaleExtent :: Array Number
-  , qualifier   :: String
-  , target      :: D3Selection_
-}
-type ZoomConfigDefault_ = {
-    scaleExtent :: Array Number
-  , qualifier   :: String
-  , target      :: D3Selection_
-}
-foreign import data ZoomBehavior_ :: Type  -- the zoom behavior, provided to Event Handler
 data ScaleExtent   = ScaleExtent Number Number
 data ZoomExtent    = DefaultZoomExtent 
                    | ZoomExtent { top :: Number, left :: Number, bottom :: Number, right :: Number }
-                  --  | ExtentFunction (Datum -> Array (Array Number))
+                  --  | ExtentFunction (Datum_ -> Array (Array Number))
 data ZoomType      = ZoomStart | ZoomEnd | ZoomZoom
 data ZoomTransform = ZoomTransform { k :: Number, tx :: Number, ty :: Number }
 type ZoomEvent     = {
@@ -53,8 +41,6 @@ type ZoomEvent     = {
   , transform   :: ZoomTransform
   , sourceEvent :: Event
 }
-foreign import d3AttachZoom_              :: D3Selection_ -> ZoomConfig_        -> D3Selection_
-foreign import d3AttachZoomDefaultExtent_ :: D3Selection_ -> ZoomConfigDefault_ -> D3Selection_
 
 zoomRange :: Number -> Number -> ScaleExtent
 zoomRange = ScaleExtent
@@ -65,6 +51,3 @@ zoomExtent :: { bottom :: Number
               , top :: Number
               } -> ZoomExtent
 zoomExtent = ZoomExtent
-
-foreign import showAttachZoomDefaultExtent_ :: forall selection. selection -> ZoomConfigDefault_ -> selection
-foreign import showAttachZoom_              :: forall selection. selection -> ZoomConfig_ -> selection

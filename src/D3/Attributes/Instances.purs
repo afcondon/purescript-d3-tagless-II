@@ -5,34 +5,13 @@ import Prelude
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2)
 import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
+import D3.Data.Types
 
 
-foreign import data Datum :: Type
-foreign import data Index :: Type
-foreign import data This_ :: Type
-
-type IndexedLambda a = Fn2 Datum Index a
-type Listener        = (Event -> Datum -> This_ -> Unit) 
-type Listener_       = Fn3 Event Datum This_ Unit 
+type IndexedLambda a = Fn2 Datum_ Index_ a
+type Listener        = (Event -> Datum_ -> D3This_ -> Unit) 
+type Listener_       = Fn3 Event Datum_ D3This_ Unit 
 type Label           = String
-
--- TODO find a way to get units back in without making DSL hideous
-data UnitType = Px | Pt | Em | Rem | Percent
-instance showUnitType :: Show UnitType where
-  show Px = "px"
-  show Pt = "pt"
-  show Em = "em"
-  show Rem = "rem"
-  show Percent = "%"
-
--- TODO we could / should also allow keyboard and other events, all this on long finger for now
-data MouseEvent = MouseEnter | MouseLeave | MouseClick | MouseDown | MouseUp 
-instance showMouseEvent :: Show MouseEvent where
-  show MouseEnter = "mouseenter"
-  show MouseLeave = "mouseleave"
-  show MouseClick = "click"
-  show MouseDown  = "mousedown"
-  show MouseUp    = "mouseup"
 
 newtype NWU = NWU { i :: Int, u :: UnitType} -- scope here for adding show function to remove constraints elsewhere
 instance showNWU :: Show NWU where
@@ -40,7 +19,7 @@ instance showNWU :: Show NWU where
 
 data AttrBuilder a =
     Static a
-  | Fn (Datum -> a)
+  | Fn (Datum_ -> a)
   | FnI (IndexedLambda a)
 
 data Attr = 
@@ -96,42 +75,42 @@ instance toAttrNWU :: ToAttr NWU NWU where
 instance toAttrString :: ToAttr String String where
   toAttr = StringAttr <<< Static
 
-instance toAttrStringFn :: ToAttr String (Datum -> String) where
+instance toAttrStringFn :: ToAttr String (Datum_ -> String) where
   toAttr = StringAttr <<< Fn
 
-instance toAttrStringFnI :: ToAttr String (Datum -> Index -> String) where
+instance toAttrStringFnI :: ToAttr String (Datum_ -> Index_ -> String) where
   toAttr = StringAttr <<< FnI <<< mkFn2
 
 instance toAttrNumber :: ToAttr Number Number where
   toAttr = NumberAttr <<< Static
 
-instance toAttrNumberFn :: ToAttr Number (Datum -> Number) where
+instance toAttrNumberFn :: ToAttr Number (Datum_ -> Number) where
   toAttr = NumberAttr <<< Fn
 
-instance toAttrNumberFnI :: ToAttr Number (Datum -> Index -> Number) where
+instance toAttrNumberFnI :: ToAttr Number (Datum_ -> Index_ -> Number) where
   toAttr = NumberAttr <<< FnI <<< mkFn2
 
 instance toAttrArray :: ToAttr (Array Number) (Array Number) where
   toAttr = ArrayAttr <<< Static
 
-instance toAttrArrayFn :: ToAttr (Array Number) (Datum -> Array Number) where
+instance toAttrArrayFn :: ToAttr (Array Number) (Datum_ -> Array Number) where
   toAttr = ArrayAttr <<< Fn
 
-instance toAttrArrayFnI :: ToAttr (Array Number) (Datum -> Index -> Array Number) where
+instance toAttrArrayFnI :: ToAttr (Array Number) (Datum_ -> Index_ -> Array Number) where
   toAttr = ArrayAttr <<< FnI <<< mkFn2
 
 -- common coercions
-datumIsChar :: Datum -> Char
+datumIsChar :: Datum_ -> Char
 datumIsChar = unsafeCoerce
 
-datumIsNumber :: Datum -> Number
+datumIsNumber :: Datum_ -> Number
 datumIsNumber = unsafeCoerce
 
-datumIsString :: Datum -> String
+datumIsString :: Datum_ -> String
 datumIsString = unsafeCoerce
 
-indexIsNumber :: Index -> Number
+indexIsNumber :: Index_ -> Number
 indexIsNumber = unsafeCoerce
 
-indexIsString :: Index -> String
+indexIsString :: Index_ -> String
 indexIsString = unsafeCoerce

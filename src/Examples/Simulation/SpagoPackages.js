@@ -72,3 +72,22 @@ exports.removeSpotlight_ = id => sources => targets => {
   sourceNodes.classed("node", false)
   targetNodes.classed("node", false)
 }
+
+// pinNode_ :: Number -> Number -> GraphNode_ -> Unit
+exports.pinNode_ = fx => fy => node => {
+  node.fx = fx;
+  node.fy = fy;
+  delete node.vx; // which would otherwise result in this being positioned AND fixed
+}
+
+// unpinNode_ :: GraphNode_ -> Unit
+exports.unpinNode_ = node => {
+  delete node.fx;
+  delete node.fy;
+}
+
+exports.nanNodes_ = nodes => {
+  for (let index = 0; index < nodes.length; index++) {
+    nodes[index].vx = NaN;
+  }
+}

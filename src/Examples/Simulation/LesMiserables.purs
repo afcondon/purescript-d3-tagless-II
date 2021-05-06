@@ -3,14 +3,15 @@ module D3.Examples.Simulation.LesMiserables where
 import Affjax (Error)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import D3.Attributes.Instances (Datum)
 import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
+import D3.Data.Types (D3Selection_, Datum_, Element(..))
+import D3.FFI (D3ForceLink_, D3ForceNode_, startSimulation_)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce, startSimulation_)
+import D3.Layouts.Simulation (Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce)
 import D3.Scales (d3SchemeCategory10N_)
-import D3.Selection (D3Selection_, DragBehavior(..), Element(..), Join(..), Keys(..), SimulationDrag(..), node)
+import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
@@ -110,42 +111,42 @@ enter (Tuple w h) model = do
 -- we give the chart our Model type but behind the scenes it is mutated by D3 and additionally
 -- which projection of the "Model" is active in each Join varies so we can't have both strong
 -- static type representations AND lightweight syntax with JS compatible lambdas (i think)
-datumIsGraphLink :: Datum -> GraphLink
+datumIsGraphLink :: Datum_ -> GraphLink
 datumIsGraphLink = unsafeCoerce
-datumIsGraphNode :: Datum -> GraphNode
+datumIsGraphNode :: Datum_ -> GraphNode
 datumIsGraphNode = unsafeCoerce
 
-colorByGroup :: Datum -> String
+colorByGroup :: Datum_ -> String
 colorByGroup datum = d3SchemeCategory10N_ d.group
   where
     d = datumIsGraphNode datum
 
-linkWidth :: Datum -> Number
+linkWidth :: Datum_ -> Number
 linkWidth datum = sqrt d.value
   where
     d = datumIsGraphLink datum
 
-setX1 :: Datum -> Number
+setX1 :: Datum_ -> Number
 setX1 datum = d.source.x
   where
     d = datumIsGraphLink datum
-setY1 :: Datum -> Number
+setY1 :: Datum_ -> Number
 setY1 datum = d.source.y
   where
     d = datumIsGraphLink datum
-setX2 :: Datum -> Number
+setX2 :: Datum_ -> Number
 setX2 datum = d.target.x
   where
     d = datumIsGraphLink datum
-setY2 :: Datum -> Number
+setY2 :: Datum_ -> Number
 setY2 datum = d.target.y
   where
     d = datumIsGraphLink datum
-setCx :: Datum -> Number
+setCx :: Datum_ -> Number
 setCx datum = d.x
   where
     d = datumIsGraphNode datum
-setCy :: Datum -> Number
+setCy :: Datum_ -> Number
 setCy datum = d.y
   where
     d = datumIsGraphNode datum

@@ -3,8 +3,9 @@ module D3.Attributes.Sugar where
 import D3.Attributes.Instances
 import Prelude
 
-import D3.Layouts.Hierarchical (autoBox_)
-import D3.Selection (Chainable(..), EasingFunction(..), Transition)
+import D3.Data.Types (Datum_, EasingFunction(..), MouseEvent, Transition)
+import D3.FFI (autoBox_)
+import D3.Selection (Chainable(..))
 import Data.Array (intercalate, (:))
 import Data.Function.Uncurried (mkFn3)
 import Data.Int (toNumber)
@@ -154,17 +155,17 @@ strokeLineJoin = AttrT <<< ToAttribute "stroke-linejoin" <<< toAttr <<< show
 
 -- helpers for transitions, a sequence of functions but expressed as text in the DOM
 -- TODO don't export transform'
-transform' :: (Datum -> String) -> Chainable
+transform' :: (Datum_ -> String) -> Chainable
 transform' = AttrT <<< ToAttribute "transform" <<< StringAttr <<< Fn
 
--- make a single (Datum -> String) function out of the array (ie sequence) of functions provided
+-- make a single (Datum_ -> String) function out of the array (ie sequence) of functions provided
 transform :: forall a. Array (a -> String) -> Chainable
 transform = transform' <<< assembleTransforms
 
--- we take a stack of (Datum -> String) functions and produce just one
+-- we take a stack of (Datum_ -> String) functions and produce just one
 -- we can't know here in the library code if this is safe but if the transforms themselves are written in terms of 
--- what we know the Datum will actually be (ie D3TreeNode for example) then we have some limited type checking
-assembleTransforms :: ∀ a. Array (a -> String) -> (Datum -> String)
+-- what we know the Datum_ will actually be (ie D3TreeNode for example) then we have some limited type checking
+assembleTransforms :: ∀ a. Array (a -> String) -> (Datum_ -> String)
 assembleTransforms fs = unsafeCoerce (\d -> intercalate " " $ flap fs d)
 
 -- TODO this is nothing to do with Attributes - needs to go to a "Utilities" module 

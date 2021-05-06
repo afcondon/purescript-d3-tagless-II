@@ -5,16 +5,17 @@ import Prelude hiding (append,join)
 import Affjax (URL)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import D3.Attributes.Instances (Datum, MouseEvent(..))
 import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, on, opacity, radius, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, x, x1, x2, y, y1, y2)
+import D3.Data.Types (D3Selection_, Datum_, Element(..), MouseEvent(..))
+import D3.FFI (D3ForceLink_, D3ForceNode_, startSimulation_, stopSimulation_)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Simulation (D3ForceLink_, D3ForceNode_, Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce, startSimulation_, stopSimulation_)
+import D3.Layouts.Simulation (Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce)
 import D3.Scales (d3SchemeCategory10S_)
-import D3.Selection (D3Selection_, DragBehavior(..), Element(..), Join(..), Keys(..), SimulationDrag(..), node)
+import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
-import Data.Array (catMaybes, filter, foldl, (:), (!!))
+import Data.Array (catMaybes, filter, find, foldl, (!!), (:))
 import Data.Either (Either(..))
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -105,7 +106,7 @@ makeModel { packages, modules, lsDeps } = do
     modulePackageLinks = catMaybes $ makeModuleToPackageLink <$> moduleNodes
 
     links :: Array GraphLink_
-    links = makeGraphLinks_ (packageLinks <> moduleLinks <> modulePackageLinks)
+    links = makeGraphLinks_ $ moduleLinks <> modulePackageLinks -- (packageLinks <> moduleLinks <> modulePackageLinks)
     -- links = makeGraphLinks_ packageLinks
     -- links = makeGraphLinks_ moduleLinks
     nodes :: Array GraphNode_ 
@@ -141,12 +142,11 @@ graphScript :: forall m link node selection r.
   m selection -- TODO is it right to return selection_ instead of simulation_? does it matter? 
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
-  svg        <- root `append` (node Svg   [ viewBox 0.0 0.0 w h ] )
+  svg        <- root `append` (node Svg   [ viewBox (-w / 2.0) (-h / 2.0) w h ] )
   linksGroup <- svg  `append` (node Group [ classed "links", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group [ classed "nodes" ])
 
-  let forces      = [ makeCenterForce (w / 2.0) (h / 2.0)
-                    , Force (ForceName "charge")  ForceMany
+  let forces      = [ Force (ForceName "charge")  ForceMany
                     , Force (ForceName "collide") (ForceCollide (\d -> chooseRadiusFn d) ) ]
       simulation_ = initSimulation forces model model.nodes model.links
 
@@ -185,25 +185,37 @@ graphScript (Tuple w h) model = do
                             , qualifier : "tree"
                             , target    : SelfTarget
                             }
-
-  let _ = startSimulation_ simulation_
+  let
+    -- _ = nanNodes_ $ unsafeCoerce model.nodes
+    _ = pinNode model.nodes "Main" 0.0 0.0
+    _ = startSimulation_ simulation_
 
   pure svg'
+
+-- TODO move to FFI
+foreign import pinNode_   :: Number -> Number -> GraphNode_ -> Unit
+foreign import unpinNode_ :: GraphNode_ -> Unit
+foreign import nanNodes_ :: Array GraphNode_ -> Unit
+pinNode :: forall node. Array node -> String -> Number -> Number -> Unit
+pinNode nodes nodeName fx fy = unit
+  where
+    _ = (pinNode_ fx fy) <$> find (\node -> node.id == nodeName) (unsafeCoerce nodes)
 
 -- this is boilerplate but...typed attribute setters facilitate typeclass based conversions
 -- we give the chart our Model type but behind the scenes it is mutated by D3 and additionally
 -- which projection of the "Model" is active in each Join varies so we can't have both strong
 -- static type representations AND lightweight syntax with JS compatible lambdas (i think)
-datumIsGraphLink_ :: Datum -> GraphLink_
+-- TODO move coerce for well defined (ie shared) types to FFI, try to use Row machinery to eliminate need for this or tighten up the type safety
+datumIsGraphLink_ :: Datum_ -> GraphLink_
 datumIsGraphLink_ = unsafeCoerce
-datumIsGraphNode_ :: Datum -> GraphNode_
+datumIsGraphNode_ :: Datum_ -> GraphNode_
 datumIsGraphNode_ = unsafeCoerce
 
 moduleRadius = 5.0 :: Number 
 packageRadius = 50.0 :: Number
 packageForceRadius = 50.0 :: Number
 
-chooseRadius :: Datum -> Number
+chooseRadius :: Datum_ -> Number
 chooseRadius datum = do
   let d = datumIsGraphNode_ datum
   case d.moduleOrPackage of
@@ -211,7 +223,7 @@ chooseRadius datum = do
     "package" -> packageRadius
     _ -> 10.0
 
-chooseRadiusFn :: Datum -> Number
+chooseRadiusFn :: Datum_ -> Number
 chooseRadiusFn datum = do
   let d = datumIsGraphNode_ datum
   case d.moduleOrPackage of
@@ -219,47 +231,47 @@ chooseRadiusFn datum = do
     "package" -> packageRadius + packageForceRadius
     _ -> 10.0
 
-nodeClass :: Datum -> String
+nodeClass :: Datum_ -> String
 nodeClass datum = do
   let d = datumIsGraphNode_ datum
   d.moduleOrPackage
 
-linkClass :: Datum -> String
+linkClass :: Datum_ -> String
 linkClass datum = do
   let d = datumIsGraphLink_ datum
   d.moduleOrPackage
 
-translateNode :: Datum -> String
+translateNode :: Datum_ -> String
 translateNode datum = "translate(" <> show d.x <> "," <> show d.y <> ")"
   where d = datumIsGraphNode_ datum
 
 
-colorByGroup :: Datum -> String
+colorByGroup :: Datum_ -> String
 colorByGroup datum = d3SchemeCategory10S_ (fromMaybe "unknown" d.package)
   where
     d = datumIsGraphNode_ datum
 
-setX1 :: Datum -> Number
+setX1 :: Datum_ -> Number
 setX1 datum = d.source.x
   where
     d = datumIsGraphLink_ datum
-setY1 :: Datum -> Number
+setY1 :: Datum_ -> Number
 setY1 datum = d.source.y
   where
     d = datumIsGraphLink_ datum
-setX2 :: Datum -> Number
+setX2 :: Datum_ -> Number
 setX2 datum = d.target.x
   where
     d = datumIsGraphLink_ datum
-setY2 :: Datum -> Number
+setY2 :: Datum_ -> Number
 setY2 datum = d.target.y
   where
     d = datumIsGraphLink_ datum
-setCx :: Datum -> Number
+setCx :: Datum_ -> Number
 setCx datum = d.x
   where
     d = datumIsGraphNode_ datum
-setCy :: Datum -> Number
+setCy :: Datum_ -> Number
 setCy datum = d.y
   where
     d = datumIsGraphNode_ datum

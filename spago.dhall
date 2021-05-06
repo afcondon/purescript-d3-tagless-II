@@ -9,6 +9,7 @@ You can edit this file as you like.
   , "arrays"
   , "bifunctors"
   , "console"
+  , "datetime"
   , "debug"
   , "effect"
   , "either"

@@ -1,22 +1,16 @@
 module D3.Layouts.Simulation where
 
+import D3.Data.Types
 import Prelude
 
-import D3.Attributes.Instances (Datum)
-import D3.Selection (D3Selection_, D3Simulation_, DragBehavior)
+import D3.FFI (D3ForceLink_, D3ForceNode_, SimulationConfig_, forceCenter_, forceCollideFixed_, forceCollideFn_, forceMany_, forceRadial_, forceX_, forceY_, initSimulation_, setLinks_)
+import D3.Selection (DragBehavior)
+import Data.Maybe (Maybe)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- import D3.Base.Attributes (Attr)
 -- import D3.Base.Selection (Label)
 
--- | a record to initialize / configure simulations
-type SimulationConfig_ = { 
-      alpha         :: Number
-    , alphaTarget   :: Number
-    , alphaMin      :: Number
-    , alphaDecay    :: Number
-    , velocityDecay :: Number
-}
 
 defaultConfigSimulation :: SimulationConfig_
 defaultConfigSimulation = { 
@@ -27,29 +21,15 @@ defaultConfigSimulation = {
     , velocityDecay: 0.4
 }
 
--- | Force Layout core types
-type D3ForceLink_ id r l = { 
-    source :: D3ForceNode_ id r
-  , target :: D3ForceNode_ id r
-  | l
-}
-type D3ForceNode_ id r = { 
-    id    :: id
-  , index :: Number
-  , x     :: Number
-  , y     :: Number
-  , vx    :: Number
-  , vy    :: Number
-  | r
-}
 newtype ForceName = ForceName String
 data Force = Force ForceName ForceType
 data ForceType =
-    ForceMany
+    ForceMany -- { strength :: Maybe Number, theta :: Maybe Number, distanceMin :: Maybe Number, distanceMax :: Maybe Number } -- TODO these are all, like attributes, possibly static or functions
   | ForceCenter Number Number
+  -- TODO bring back the force link below, in addition to, or replacing the insertion of the links in the simulation init
   -- | ForceLink (Array Link) (Link -> ID)
   | ForceCollideFixed Number
-  | ForceCollide (Datum -> Number)
+  | ForceCollide (Datum_ -> Number)
   | ForceX Number
   | ForceY Number
   | ForceRadial Number Number
@@ -97,27 +77,3 @@ putForcesInSimulation simulation forces = do
     _ = addForce <$> forces
   simulation
 
--- | foreign types associated with Force Layout Simulation
--- TODO structures here carried over from previous interpreter - review and refactor
-
-foreign import initSimulation_  :: forall id r.   Array (D3ForceNode_ id r) -> SimulationConfig_ -> D3Simulation_
-foreign import setNodes_        :: forall id r.   D3Simulation_ -> Array (D3ForceNode_ id r)     -> D3Simulation_
-foreign import setLinks_        :: forall id r l. D3Simulation_ -> Array (D3ForceLink_ id r l)   -> D3Simulation_
-foreign import startSimulation_ :: D3Simulation_ -> Unit
-foreign import stopSimulation_  :: D3Simulation_ -> Unit
-
--- TODO this all has to change completely to work within Tagless 
--- foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass
--- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr -> Unit
-foreign import onTick_                :: D3Simulation_ -> String -> (Unit -> Unit) -> Unit
-foreign import defaultSimulationDrag_ :: D3Selection_ -> D3Simulation_ -> Unit
-foreign import setAlphaTarget_        :: D3Selection_ -> Number -> Unit
-
--- implementations / wrappers for the Force ADT
-foreign import forceMany_         :: D3Simulation_ -> String                      -> D3Simulation_
-foreign import forceCenter_       :: D3Simulation_ -> String -> Number -> Number  -> D3Simulation_
-foreign import forceRadial_       :: D3Simulation_ -> String -> Number -> Number  -> D3Simulation_
-foreign import forceCollideFixed_ :: D3Simulation_ -> String -> Number            -> D3Simulation_
-foreign import forceCollideFn_    :: D3Simulation_ -> String -> (Datum -> Number) -> D3Simulation_
-foreign import forceX_            :: D3Simulation_ -> String -> Number            -> D3Simulation_
-foreign import forceY_            :: D3Simulation_ -> String -> Number            -> D3Simulation_

@@ -4,10 +4,11 @@ import D3.Selection
 import Prelude
 
 import Control.Monad.State (class MonadState, StateT, runStateT)
-import D3.Attributes.Instances (Attribute(..), MouseEvent(..), unbox)
+import D3.Attributes.Instances (Attribute(..), unbox)
+import D3.Data.Types 
+import D3.FFI 
 import D3.Interpreter (class D3InterpreterM)
-import D3.Layouts.Simulation (defaultSimulationDrag_, onTick_)
-import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..), d3AttachZoomDefaultExtent_, d3AttachZoom_)
+import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
 import Data.Foldable (foldl)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple)

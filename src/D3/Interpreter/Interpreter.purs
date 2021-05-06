@@ -1,6 +1,7 @@
 module D3.Interpreter where
 
-import D3.Selection (D3_Node, DragBehavior, Join, Selector)
+import D3.Data.Types (Selector)
+import D3.Selection (D3_Node, DragBehavior, Join)
 import D3.Zoom (ZoomConfig)
 import Prelude (class Monad)
 
