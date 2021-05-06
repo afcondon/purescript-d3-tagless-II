@@ -4,11 +4,14 @@ module D3.FFI where
 -- TODO break this up into files corresponding to modules in D3js itself 
 -- TODO move the type definitions for HierarchicalNode_ and SimulationNode_ etc to D3.Data.Native
 
-import Prelude (Unit)
+import Prelude
 
+import Affjax (URL)
+import D3.Data.Types (D3Data_, D3HierarchicalNode_, D3Selection_, D3Simulation_, Datum_, Element, Index_, Selector, Transition, TreeJson_, ZoomConfigDefault_, ZoomConfig_)
+import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
 import Data.Nullable (Nullable)
-import D3.Data.Types (D3Data_, D3HierarchicalNode_, D3Selection_, D3Simulation_, Datum_, Element, Index_, Selector, Transition, TreeJson_, ZoomConfigDefault_, ZoomConfig_)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js zoom module       *********************************************
@@ -98,12 +101,25 @@ type SimulationConfig_ = {
     , velocityDecay :: Number
 }
 
+type GraphModel_ link node = { links :: Array link, nodes :: Array node }
+foreign import makeGraphLinks_ :: forall r id node link. Array { source :: id, target :: id | r } -> Array (D3ForceLink_ id node link)
+foreign import makeGraphNodes_ :: forall r id node. Array { id :: id | r }                        -> Array (D3ForceNode_ id node)
 
 foreign import initSimulation_  :: forall id r.   Array (D3ForceNode_ id r) -> SimulationConfig_ -> D3Simulation_
 foreign import setNodes_        :: forall id r.   D3Simulation_ -> Array (D3ForceNode_ id r)     -> D3Simulation_
 foreign import setLinks_        :: forall id r l. D3Simulation_ -> Array (D3ForceLink_ id r l)   -> D3Simulation_
 foreign import startSimulation_ :: D3Simulation_ -> Unit
 foreign import stopSimulation_  :: D3Simulation_ -> Unit
+
+-- TODO move to FFI
+foreign import pinNode_   :: forall id node. Number -> Number -> D3ForceNode_ id node -> Unit
+foreign import unpinNode_ :: forall id node. D3ForceNode_ id node -> Unit
+foreign import nanNodes_ :: forall id node. Array (D3ForceNode_ id node) -> Unit
+pinNodeWithID :: forall node. Array node -> String -> Number -> Number -> Unit
+pinNodeWithID nodes nodeName fx fy = unit
+  where
+    _ = (pinNode_ fx fy) <$> find (\node -> node.id == nodeName) (unsafeCoerce nodes)
+
 
 -- TODO this all has to change completely to work within Tagless 
 -- foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass

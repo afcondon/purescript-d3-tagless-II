@@ -1,13 +1,13 @@
 module D3.Examples.Tree.Script where
 
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, x)
-import Prelude (class Bind, bind, negate, pure)
-
+import D3.Data.Tree (labelName)
 import D3.Data.Types (Element(..), TreeModel)
-import D3.Examples.Tree.Types (ScriptConfig, labelName)
+import D3.Examples.Tree.Types (ScriptConfig)
 import D3.FFI (descendants_, hasChildren_, links_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Selection (Join(..), Keys(..), node)
+import Prelude (class Bind, bind, negate, pure)
 
 -- | The eDSL script that renders tree layouts
 -- | it has been parameterized rather heavily using the ScriptConfig record so that it can draw

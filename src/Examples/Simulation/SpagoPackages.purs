@@ -6,8 +6,9 @@ import Affjax (URL)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, text, transform', viewBox, x, x1, x2, y, y1, y2)
+import D3.Data.File.Spago (SpagoGraphLink_, SpagoGraphNode_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), MouseEvent(..))
-import D3.FFI (D3ForceLink_, D3ForceNode_, startSimulation_, stopSimulation_)
+import D3.FFI (D3ForceLink_, D3ForceNode_, GraphModel_, pinNodeWithID, startSimulation_, stopSimulation_)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
@@ -27,33 +28,8 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Unsafe.Coerce (unsafeCoerce)
 
--- *********************************************************************************************************************
--- NOTA BENE - these types are a _lie_ as stated in that the Nodes / Links are mutable and are changed when you put them
--- into the simulation, the types given here represent their form AFTER D3 has mutated them
--- *********************************************************************************************************************
-type NodeExtension = ( path :: String, depends :: Array String, package :: Maybe String, moduleOrPackage :: String )
-type LinkExtension = ( moduleOrPackage :: String )
-type GraphNode_ = D3ForceNode_ String NodeExtension
-type GraphLink_ = D3ForceLink_ String NodeExtension LinkExtension
-type Model = { links :: Array GraphLink_, nodes :: Array GraphNode_ }
 
--- this is what we can get back from the JS FFI which decodes the output of Spago for us
-type Module  = { key :: String, depends :: Array String, path :: String }
-type Package = { key :: String, depends :: Array String }
-type LsDep   = { packageName :: String, version :: String, repo :: { tag :: String, contents :: URL } }
-
-foreign import makeGraphLinks_ :: forall r id. Array { source :: id, target :: id | r } -> Array GraphLink_
-foreign import makeGraphNodes_ :: forall r id. Array { id :: id | r }                   -> Array GraphNode_
--- TODO no error handling at all here RN (OTOH - performant!!)
-foreign import readModelData_ :: String -> String -> String -> PreModel
-
-type PreModel = { packages :: Array Package, modules :: Array Module, lsDeps :: Array LsDep } 
-
-convertFilesToModel :: forall r. { body :: String | r } -> { body :: String | r } -> { body :: String | r } -> Model
-convertFilesToModel moduleJSON packageJSON lsdepJSON = 
-  makeModel $ readModelData_ moduleJSON.body packageJSON.body lsdepJSON.body
-
-highlightNeighborhood :: Model -> String -> Unit
+highlightNeighborhood :: GraphModel_ SpagoGraphLink_ SpagoGraphNode_ -> String -> Unit
 highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
   where
     sources = foldl (\acc l -> if l.target.id == nodeId then l.source.id:acc else acc) [] links
@@ -62,61 +38,6 @@ highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
 foreign import markAsSpotlit_   :: String -> Array String -> Array String -> Unit
 foreign import removeSpotlight_ :: String -> Array String -> Array String -> Unit
 
-makeModel :: PreModel -> Model
-makeModel { packages, modules, lsDeps } = do
-  let
-    depsMap :: M.Map String { version :: String, repo :: String }
-    depsMap = M.fromFoldable $ spy "depsMap" $ (\d -> trace { depsMapFn: d } \_ -> Tuple d.packageName { version: d.version, repo: d.repo.contents } ) <$> lsDeps
-
-    makeLink :: String -> Tuple String String -> { source :: String, target :: String, moduleOrPackage :: String }
-    makeLink moduleOrPackage (Tuple source target) = { source, target, moduleOrPackage }
-
-    makeModuleToPackageLink :: forall r. { id :: String, package :: Maybe String | r } -> Maybe { source :: String, target :: String, moduleOrPackage :: String }
-    makeModuleToPackageLink { id, package: Just p } = Just { source: id, target: p, moduleOrPackage: "both"}
-    makeModuleToPackageLink { id, package: Nothing } = Nothing
-
-    foldDepends :: forall r. Array (Tuple String String) -> { key :: String, depends :: Array String | r } -> Array (Tuple String String)
-    foldDepends b a = ((Tuple a.key) <$> a.depends) <> b
-
-    makeNodeFromModule :: Module -> { id :: String, path :: String, package :: Maybe String, moduleOrPackage :: String }
-    makeNodeFromModule m = { id: m.key, path: m.path, package: getPackage m.path, moduleOrPackage: "module" }
-
-    makeNodeFromPackage :: Package -> { id :: String, path :: String, package :: Maybe String, moduleOrPackage :: String }
-    makeNodeFromPackage m = { id: m.key, path, package: Just m.key, moduleOrPackage: "package" } -- TODO package field here is bogus
-      where
-        path = case M.lookup m.key depsMap of
-                Nothing -> "error path not found for package key: " <> m.key
-                (Just { repo }) -> repo 
-
-    getPackage :: String -> Maybe String
-    getPackage path = do
-      let pieces = split (Pattern "/") path
-      root    <- pieces !! 0
-      case root of
-        ".spago" -> pieces !! 1
-        "src"    -> pure "local"
-        _        -> Nothing
-
-    moduleLinks = (makeLink "module")   <$> (foldl foldDepends [] modules)             
-    moduleNodes = makeNodeFromModule    <$> modules
-
-    packageLinks = (makeLink "package") <$> (foldl foldDepends [] packages)
-    packageNodes = makeNodeFromPackage  <$> ( [{ key: "local", depends: [] }, { key: "psci-support", depends: [] }] <> packages)
-
-    modulePackageLinks = catMaybes $ makeModuleToPackageLink <$> moduleNodes
-
-    links :: Array GraphLink_
-    links = makeGraphLinks_ $ moduleLinks <> modulePackageLinks -- (packageLinks <> moduleLinks <> modulePackageLinks)
-    -- links = makeGraphLinks_ packageLinks
-    -- links = makeGraphLinks_ moduleLinks
-    nodes :: Array GraphNode_ 
-    nodes = makeGraphNodes_ (packageNodes <> moduleNodes) 
-    -- nodes = makeGraphNodes_ packageNodes
-    -- nodes = makeGraphNodes_ moduleNodes
-  
-  { links, nodes }
-
-
 drawGraph :: Aff Unit
 drawGraph = do
   log "Force layout example"
@@ -124,7 +45,7 @@ drawGraph = do
   moduleJSON  <- AJAX.get ResponseFormat.string "http://localhost:1234/modules.json"
   packageJSON <- AJAX.get ResponseFormat.string "http://localhost:1234/packages.json"
   lsdepJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/lsdeps.jsonlines"
-  case convertFilesToModel <$> moduleJSON <*> packageJSON <*> lsdepJSON of
+  case convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON of
     (Left error) -> log "error" -- $ ?_ error
     (Right graph) -> do
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph)
@@ -187,30 +108,17 @@ graphScript (Tuple w h) model = do
                             }
   let
     -- _ = nanNodes_ $ unsafeCoerce model.nodes
-    _ = pinNode model.nodes "Main" 0.0 0.0
+    _ = pinNodeWithID model.nodes "Main" 0.0 0.0
     _ = startSimulation_ simulation_
 
   pure svg'
 
--- TODO move to FFI
-foreign import pinNode_   :: Number -> Number -> GraphNode_ -> Unit
-foreign import unpinNode_ :: GraphNode_ -> Unit
-foreign import nanNodes_ :: Array GraphNode_ -> Unit
-pinNode :: forall node. Array node -> String -> Number -> Number -> Unit
-pinNode nodes nodeName fx fy = unit
-  where
-    _ = (pinNode_ fx fy) <$> find (\node -> node.id == nodeName) (unsafeCoerce nodes)
 
 -- this is boilerplate but...typed attribute setters facilitate typeclass based conversions
 -- we give the chart our Model type but behind the scenes it is mutated by D3 and additionally
 -- which projection of the "Model" is active in each Join varies so we can't have both strong
 -- static type representations AND lightweight syntax with JS compatible lambdas (i think)
 -- TODO move coerce for well defined (ie shared) types to FFI, try to use Row machinery to eliminate need for this or tighten up the type safety
-datumIsGraphLink_ :: Datum_ -> GraphLink_
-datumIsGraphLink_ = unsafeCoerce
-datumIsGraphNode_ :: Datum_ -> GraphNode_
-datumIsGraphNode_ = unsafeCoerce
-
 moduleRadius = 5.0 :: Number 
 packageRadius = 50.0 :: Number
 packageForceRadius = 50.0 :: Number

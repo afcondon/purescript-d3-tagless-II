@@ -308,6 +308,30 @@ exports.forceY_ = simulation => label => cy => simulation.force(label, d3.forceY
 // :: Simulation -> Number -> Number -> Unit
 exports.forceRadial_ = simulation => label => cx => cy => simulation.force(label, d3.forceRadial(cx, cy))
 
+// these are both essentially just unsafeCoerce
+// makeGraphLinks_ :: forall r id. Array { source :: id, target :: id | r } -> Array GraphLink_
+exports.makeGraphLinks_ = (links) => links
+// makeGraphNodes_ :: forall r id. Array { id :: id | r }                   -> Array GraphNode_
+exports.makeGraphNodes_ = (nodes) => nodes
+
+// pinNode_ :: Number -> Number -> GraphNode_ -> Unit
+exports.pinNode_ = fx => fy => node => {
+  node.fx = fx;
+  node.fy = fy;
+  delete node.vx; // which would otherwise result in this being positioned AND fixed
+}
+
+// unpinNode_ :: GraphNode_ -> Unit
+exports.unpinNode_ = node => {
+  delete node.fx;
+  delete node.fy;
+}
+
+exports.nanNodes_ = nodes => {
+  for (let index = 0; index < nodes.length; index++) {
+    nodes[index].vx = NaN;
+  }
+}
 
 // *****************************************************************************************************************
 // ************************** functions from d3js Hierarchy module         *****************************************
@@ -368,8 +392,7 @@ exports.linkClusterVertical_ = levelSpacing => d =>
    C${d.target.x}, ${d.source.y + levelSpacing / 2}
    ${d.source.x},${d.source.y + levelSpacing / 2}
    ${d.source.x},${d.source.y}`
-  
-
+      
 // foreign import d3LinkRadial_            :: (Datum_ -> Number) -> (Datum_ -> Number) -> (Datum_ -> String)
 exports.linkRadial_ = angleFn => radiusFn => d3.linkRadial().angle(angleFn).radius(radiusFn);
 

@@ -6,10 +6,6 @@ import D3.FFI (D3ForceLink_, D3ForceNode_, SimulationConfig_, forceCenter_, forc
 import D3.Selection (DragBehavior)
 import Unsafe.Coerce (unsafeCoerce)
 
--- import D3.Base.Attributes (Attr)
--- import D3.Base.Selection (Label)
-
-
 defaultConfigSimulation :: SimulationConfig_
 defaultConfigSimulation = { 
       alpha        : 1.0

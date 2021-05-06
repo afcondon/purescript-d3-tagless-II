@@ -2,7 +2,9 @@ module D3.Data.Tree where
 
 import Prelude
 
+import D3.Data.Foreign (Datum_)
 import Data.Nullable (Nullable)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- these definitions have to be here to avoid cycle (and probably all type defs should in fact be here)
 foreign import data TreeJson_           :: Type
@@ -12,11 +14,13 @@ data Tree a = Node a (Array (Tree a))
 
 data TreeType   = TidyTree | Dendrogram
 derive instance eqTreeType :: Eq TreeType
+
 data TreeLayout = Radial | Horizontal | Vertical
 derive instance eqTreeLayout :: Eq TreeLayout
 
 -- TODO put in proxy fields here to carry the type allowing safe coerce of root etc
 -- TODO need to define a model here that works for all hierarchic layouts, this has its origins in Radial tree only
+
 -- d is the type of the datum and v is the type of computed value, ie for summing etc
 -- type Model :: forall d v. d -> v -> Type
 type TreeModel d v = {
@@ -42,3 +46,13 @@ newtype D3HierarchicalNode d v = D3HierarchicalNode { -- (newtype to avoid cycle
   , y        :: Number
 }
 
+-- | Coercion function to recover the structure that was given to D3, it's an unsafeCoerce but the types
+-- | give some protection
+datumIsTreeNode :: forall d v. Datum_ -> D3HierarchicalNode d v
+datumIsTreeNode = unsafeCoerce
+
+-- | Coercion function to recover the "extra" data that lives within the generic structure that was given to D3, 
+-- | it's an unsafeCoerce but the types give some protection
+labelName :: Datum_ -> String
+labelName d = node."data".name
+  where (D3HierarchicalNode node) = datumIsTreeNode d
