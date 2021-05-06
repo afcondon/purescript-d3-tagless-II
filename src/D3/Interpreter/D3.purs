@@ -1,18 +1,15 @@
 module D3.Interpreter.D3 where
 
-import D3.Selection
-import Prelude
-
+import D3.Selection (Chainable(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), SimulationDrag(..))
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, pure, show, unit, ($), (<$>))
 import Control.Monad.State (class MonadState, StateT, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
-import D3.Data.Types 
-import D3.FFI 
+import D3.Data.Types (D3Selection_) 
+import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, defaultDrag_, defaultSimulationDrag_, disableDrag_, onTick_, selectionOn_) 
 import D3.Interpreter (class D3InterpreterM)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
 import Data.Foldable (foldl)
-import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple)
-import Debug (spy)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 

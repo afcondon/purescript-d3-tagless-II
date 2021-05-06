@@ -50,6 +50,10 @@ foreign import data D3This_       :: Type -- not yet used but may be needed, ex.
 type D3Group_ = Array D3DomNode_
 
 -- Model types
+-- these definitions have to be here to avoid cycle (and probably all type defs should in fact be here)
+foreign import data TreeJson_           :: Type
+foreign import data D3HierarchicalNode_ :: Type
+
 data Tree a = Node a (Array (Tree a))
 
 data TreeType   = TidyTree | Dendrogram
@@ -61,7 +65,7 @@ derive instance eqTreeLayout :: Eq TreeLayout
 -- TODO need to define a model here that works for all hierarchic layouts, this has its origins in Radial tree only
 -- d is the type of the datum and v is the type of computed value, ie for summing etc
 -- type Model :: forall d v. d -> v -> Type
-type Model d v = {
+type TreeModel d v = {
       json       :: TreeJson_
     , root       :: D3HierarchicalNode d v
     , root_      :: D3HierarchicalNode_
@@ -84,9 +88,6 @@ newtype D3HierarchicalNode d v = D3HierarchicalNode { -- (newtype to avoid cycle
   , y        :: Number
 }
 
--- these definitions have to be here to avoid cycle (and probably all type defs should in fact be here)
-foreign import data TreeJson_           :: Type
-foreign import data D3HierarchicalNode_ :: Type
 
 
 -- Transition types

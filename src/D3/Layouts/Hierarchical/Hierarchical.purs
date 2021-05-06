@@ -1,7 +1,7 @@
 module D3.Layouts.Hierarchical where
 
-import D3.Data.Types
-import Prelude
+import D3.Data.Types (D3HierarchicalNode(..), D3HierarchicalNode_, Datum_, TreeJson_, TreeLayout, TreeModel, TreeType)
+import Prelude (class Bind, bind, pure, show, ($), (/), (<>))
 
 import Affjax (Error, URL)
 import Affjax as AJAX
@@ -13,7 +13,7 @@ import Data.Bifunctor (rmap)
 import Data.Either (Either)
 import Data.Function.Uncurried (Fn2, mkFn2)
 import Data.Maybe (Maybe)
-import Data.Nullable (Nullable, toMaybe)
+import Data.Nullable (toMaybe)
 import Effect.Aff (Aff)
 import Effect.Class (class MonadEffect)
 import Unsafe.Coerce (unsafeCoerce)
@@ -32,7 +32,7 @@ makeModel :: forall d v.
   TreeType -> 
   TreeLayout ->
   TreeJson_ -> 
-  Aff (Model d v)
+  Aff (TreeModel d v)
 makeModel treeType treeLayout json = do
   let 
     root_      = hierarchyFromJSON_ json

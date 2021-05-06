@@ -1,14 +1,11 @@
 module D3.Examples.Tree.Meta where
 
-import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
-import D3.Data.Types (D3Selection_, Datum_, Element(..), Model)
-import D3.Examples.Tree.Types (labelName)
+import D3.Attributes.Sugar (classed, fill, fontFamily, fontSize, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
+import D3.Data.Types (D3Selection_, Datum_, Element(..), TreeModel)
 import D3.FFI (descendants_, hNodeHeight_, initTree_, links_, treeMinMax_, treeSetNodeSize_, treeSetRoot_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Interpreter.D3 (runD3M)
-import D3.Interpreter.MetaTree (MetaTreeNode, MetaTreeNode_(..))
 import D3.Layouts.Hierarchical (positionXY, verticalLink)
-import D3.Layouts.Hierarchical as H
 import D3.Selection (Join(..), Keys(..), node)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
@@ -18,7 +15,7 @@ import Unsafe.Coerce (unsafeCoerce)
 
 -- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
 -- | TODO specialize runD3M so that this function isn't necessary
-drawTree :: forall v. Model String v -> Aff Unit
+drawTree :: forall v. TreeModel String v -> Aff Unit
 drawTree treeModel = liftEffect $ do
   widthHeight <- getWindowWidthHeight
   (_ :: Tuple D3Selection_ Unit) <- runD3M (treeScript widthHeight treeModel)
@@ -30,7 +27,7 @@ drawTree treeModel = liftEffect $ do
 -- | NB there would be nothing wrong, per se, with individual examples, this just shows 
 -- | some more composability, at the price of some direct legibility
 treeScript :: forall m v selection. Bind m => D3InterpreterM selection m => 
-  Tuple Number Number -> Model String v -> m selection
+  Tuple Number Number -> TreeModel String v -> m selection
 treeScript (Tuple width height) model = do
   let 
     -- configure dimensions
@@ -83,7 +80,7 @@ treeScript (Tuple width height) model = do
                               , strokeWidth 3.0
                               ])
 
-  theLabels <- nodeJoin_ `append`
+  labelsWhite <- nodeJoin_ `append`
                 (node Text  [ x          0.0
                             , y          3.0
                             , textAnchor "middle"
@@ -91,7 +88,7 @@ treeScript (Tuple width height) model = do
                             , fill       "white"
                             ])
                             
-  theLabels <- nodeJoin_ `append`
+  labelsGray <- nodeJoin_ `append`
                 (node Text  [ x          22.0
                             , y          3.0
                             , textAnchor "start"

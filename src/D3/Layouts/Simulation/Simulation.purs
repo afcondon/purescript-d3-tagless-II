@@ -1,11 +1,9 @@
 module D3.Layouts.Simulation where
 
-import D3.Data.Types
-import Prelude
-
+import D3.Data.Types (D3Simulation_, Datum_)
+import Prelude (Unit, ($), (<$>))
 import D3.FFI (D3ForceLink_, D3ForceNode_, SimulationConfig_, forceCenter_, forceCollideFixed_, forceCollideFn_, forceMany_, forceRadial_, forceX_, forceY_, initSimulation_, setLinks_)
 import D3.Selection (DragBehavior)
-import Data.Maybe (Maybe)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- import D3.Base.Attributes (Attr)

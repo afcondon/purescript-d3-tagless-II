@@ -1,12 +1,10 @@
 module D3.Selection where
 
-import D3.Attributes.Instances
-import D3.FFI
-import Prelude hiding (append,join)
-
-import D3.Data.Types
+import D3.Attributes.Instances (Attribute, Listener_, attrLabel)
+import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Element, MouseEvent, Transition)
+import D3.FFI (ComputeKeyFunction_)
 import Data.Maybe.Last (Last)
-import Effect.Aff (Milliseconds)
+import Prelude (class Eq, class Ord, class Show, Unit, show, (<>))
 import Unsafe.Coerce (unsafeCoerce)
 
 type D3Selection  = Last D3Selection_

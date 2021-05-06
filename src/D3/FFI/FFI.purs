@@ -4,15 +4,11 @@ module D3.FFI where
 -- TODO break this up into files corresponding to modules in D3js itself 
 -- TODO move the type definitions for HierarchicalNode_ and SimulationNode_ etc to D3.Data.Native
 
-import Prelude
+import Prelude (Unit)
 
 import Data.Function.Uncurried (Fn2)
 import Data.Nullable (Nullable)
-import D3.Data.Types
-
--- | *********************************************************************************************************************
--- | ***************************   FFI signatures for D3js Hierarchy module  *********************************************
--- | *********************************************************************************************************************
+import D3.Data.Types (D3Data_, D3HierarchicalNode_, D3Selection_, D3Simulation_, Datum_, Element, Index_, Selector, Transition, TreeJson_, ZoomConfigDefault_, ZoomConfig_)
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js zoom module       *********************************************

@@ -1,17 +1,13 @@
 module D3.Examples.Tree.Script where
 
-import D3.Attributes.Sugar
-import D3.Layouts.Hierarchical
-import Prelude
+import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, x)
+import Prelude (class Bind, bind, negate, pure)
 
-import D3.Data.Types (Element(..), Model)
+import D3.Data.Types (Element(..), TreeModel)
 import D3.Examples.Tree.Types (ScriptConfig, labelName)
 import D3.FFI (descendants_, hasChildren_, links_)
-import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
-import D3.Layouts.Hierarchical as H
+import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Selection (Join(..), Keys(..), node)
-import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
-import Data.Maybe (Maybe(..))
 
 -- | The eDSL script that renders tree layouts
 -- | it has been parameterized rather heavily using the ScriptConfig record so that it can draw
@@ -19,7 +15,7 @@ import Data.Maybe (Maybe(..))
 -- | NB there would be nothing wrong, per se, with individual examples, this just shows 
 -- | some more composability, at the price of some direct legibility
 treeScript :: forall m v selection. Bind m => D3InterpreterM selection m => 
-  ScriptConfig -> Model String v -> m selection
+  ScriptConfig -> TreeModel String v -> m selection
 treeScript config model = do
   root       <- attach config.selector                           
   svg        <- root `append` (node Svg config.viewbox)          

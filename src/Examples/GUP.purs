@@ -1,7 +1,6 @@
 module D3.Examples.GUP where
 
 import D3.Attributes.Sugar
-
 import Control.Monad.Rec.Class (forever)
 import D3.Attributes.Instances (datumIsChar, indexIsNumber)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_)
@@ -18,7 +17,7 @@ import Effect.Aff (Aff, Milliseconds(..), delay)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Random (random)
-import Prelude (Unit, bind, discard, negate, pure, ($), (*), (+), (<$>), (<<<), (>))
+import Prelude (Unit, bind, discard, pure, ($), (*), (+), (<$>), (<<<), (>))
 
 
 getLetters :: Effect (Array Char)

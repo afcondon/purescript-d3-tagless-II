@@ -3,7 +3,7 @@ module D3.Examples.Tree.Configure where
 import D3.Layouts.Hierarchical
 
 import D3.Attributes.Sugar (getWindowWidthHeight, transform, viewBox)
-import D3.Data.Types (D3HierarchicalNode(..), D3Selection_, Datum_, Model, TreeJson_, TreeLayout(..), TreeType(..))
+import D3.Data.Types (D3HierarchicalNode(..), D3Selection_, Datum_, TreeModel, TreeJson_, TreeLayout(..), TreeType(..))
 import D3.Examples.Tree.Script (treeScript)
 import D3.Examples.Tree.Types (datumIsTreeNode)
 import D3.FFI (hNodeHeight_, hasChildren_, initCluster_, initTree_, treeMinMax_, treeSetNodeSize_, treeSetRoot_, treeSetSeparation_, treeSetSize_)
@@ -11,11 +11,10 @@ import D3.Interpreter (class D3InterpreterM)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.MetaTree (MetaTreeNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Hierarchical as H
 import D3.Scales (d3SchemeCategory10N_)
 import Data.Map (toUnfoldable)
 import Data.Tuple (Tuple(..), fst, snd)
-import Debug (spy, trace)
+import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
@@ -25,7 +24,7 @@ import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, (>=),
 -- TODO move this to a library, it really only needs the params for runPrinter to be completely generic
 -- | Evaluate the tree drawing script in the "printer" monad which will render it as a string
 -- | rather than drawing SVG or Canvas. In principle this could be basis for compiling to JS D3 script
-printTree :: forall v. Model String v -> Aff Unit
+printTree :: forall v.TreeModel String v -> Aff Unit
 printTree treeModel = liftEffect $ do
   log "Tree example"
   widthHeight   <- getWindowWidthHeight
@@ -35,7 +34,7 @@ printTree treeModel = liftEffect $ do
   pure unit
 
 
-getMetaTreeJSON :: forall v. Model String v -> Aff TreeJson_
+getMetaTreeJSON :: forall v.TreeModel String v -> Aff TreeJson_
 getMetaTreeJSON treeModel = liftEffect $ do
   log "Getting meta-tree for radial tree example"
   widthHeight <- getWindowWidthHeight
@@ -48,7 +47,7 @@ getMetaTreeJSON treeModel = liftEffect $ do
 
 -- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
 -- | TODO specialize runD3M so that this function isn't necessary
-drawTree :: forall v. Model String v -> Aff Unit
+drawTree :: forall v.TreeModel String v -> Aff Unit
 drawTree treeModel = liftEffect $ do
   widthHeight <- getWindowWidthHeight
   (_ :: Tuple D3Selection_ Unit) <- runD3M (configureAndRunScript widthHeight treeModel)
@@ -59,17 +58,17 @@ drawTree treeModel = liftEffect $ do
 configureAndRunScript :: forall m v selection. 
   Bind m => 
   D3InterpreterM selection m => 
-  Tuple Number Number -> Model String v -> m selection
+  Tuple Number Number ->TreeModel String v -> m selection
 configureAndRunScript (Tuple width height ) model = 
   treeScript { spacing, selector, viewbox, tree: laidOutRoot_, linkPath, nodeTransform, color, textDirection, svg } model
   where
     columns = 3.0  -- 3 columns, set in the grid CSS in index.html
     gap     = 10.0 -- 10px set in the grid CSS in index.html
-    svg     = { width : spy "svg.width" $ ((width - ((columns - 1.0) * gap)) / columns)
-              , height: spy "svg.height" $ height / 2.0 } -- 2 rows
+    svg     = { width : ((width - ((columns - 1.0) * gap)) / columns)
+              , height: height / 2.0 } -- 2 rows
 
-    numberOfLevels = spy "number of Levels in tree: " $ (hNodeHeight_ model.root_) + 1.0
-    spacing = spy "spacing: " $ 
+    numberOfLevels = (hNodeHeight_ model.root_) + 1.0
+    spacing =
       case model.treeType, model.treeLayout of
         Dendrogram, Horizontal -> { interChild: 10.0, interLevel: svg.width / numberOfLevels }
         Dendrogram, Vertical   -> { interChild: 10.0, interLevel: svg.height / numberOfLevels }
