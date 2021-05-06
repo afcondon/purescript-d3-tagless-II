@@ -2,13 +2,12 @@ module D3.Examples.Simulation.SpagoPackages where
 
 import Prelude hiding (append,join)
 
-import Affjax (URL)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.File.Spago (SpagoGraphLink_, SpagoGraphNode_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), MouseEvent(..))
-import D3.FFI (D3ForceLink_, D3ForceNode_, GraphModel_, pinNodeWithID, startSimulation_, stopSimulation_)
+import D3.FFI (GraphModel_, pinNodeWithID, startSimulation_, stopSimulation_)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
@@ -16,13 +15,10 @@ import D3.Layouts.Simulation (Force(..), ForceName(..), ForceType(..), initSimul
 import D3.Scales (d3SchemeCategory10S_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
-import Data.Array (catMaybes, find, foldl, (!!), (:))
+import Data.Array (foldl, (:))
 import Data.Either (Either(..))
-import Data.Map as M
-import Data.Maybe (Maybe(..), fromMaybe)
-import Data.String (Pattern(..), split)
+import Data.Maybe (fromMaybe)
 import Data.Tuple (Tuple(..), fst, snd)
-import Debug (spy, trace)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)

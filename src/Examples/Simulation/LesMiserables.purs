@@ -4,6 +4,7 @@ import Affjax (Error)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
+import D3.Data.File.LesMiserables (datumIsLesMisGraphLink_, datumIsLesMisGraphNode_, readGraphFromFileContents)
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.FFI (D3ForceLink_, D3ForceNode_, startSimulation_)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
@@ -27,11 +28,6 @@ import Unsafe.Coerce (unsafeCoerce)
 -- NOTA BENE - these types are a _lie_ as stated in that the Nodes / Links are mutable and are changed when you put them
 -- into the simulation, the types given here represent their form AFTER D3 has mutated them
 -- *********************************************************************************************************************
-type NodeExtension = (group :: Number) -- any extra fields beyond what's required of all ForceLayout nodes
-type LinkExtension = (value :: Number) -- empty row, this simulation doesn't yet have extra stuff in the links
-type GraphNode = D3ForceNode_ Int NodeExtension
-type GraphLink = D3ForceLink_ Int NodeExtension LinkExtension
-type Model = { links :: Array GraphLink, nodes :: Array GraphNode }
 
 drawGraph :: Aff Unit
 drawGraph = do
@@ -41,30 +37,22 @@ drawGraph = do
   let graph = readGraphFromFileContents forceJSON
   
   -- type qualification necessary here because we're discarding the result of enter
-  (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (enter widthHeight graph)
+  (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph)
   -- in contrast, string version of interpreter doesn't need qualification here because we use result
-  printedScript <- liftEffect $ runPrinter (enter widthHeight graph) "Force Layout Script"
+  printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph) "Force Layout Script"
   log $ snd printedScript
   log $ fst printedScript
   pure unit
 
--- TODO no error handling at all here RN (OTOH - performant!!)
-foreign import readJSONJS :: String -> Model 
-
-readGraphFromFileContents :: forall r. Either Error { body ∷ String | r } -> Model
-readGraphFromFileContents (Right { body } ) = readJSONJS body
-readGraphFromFileContents (Left err)        = { links: [], nodes: [] } -- TODO exceptions dodged using empty Model
-
-
 
 -- | recipe for this force layout graph
-enter :: forall m link node selection r. 
+graphScript :: forall m link node selection r. 
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
   { links :: Array link, nodes :: Array node | r } -> 
   m selection -- TODO is it right to return selection_ instead of simulation_? does it matter? 
-enter (Tuple w h) model = do
+graphScript (Tuple w h) model = do
   root       <- attach "div#force"
   svg        <- root `append` (node Svg   [ viewBox 0.0 0.0 1000.0 1000.0 ] )
   linksGroup <- svg  `append` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
@@ -110,42 +98,38 @@ enter (Tuple w h) model = do
 -- we give the chart our Model type but behind the scenes it is mutated by D3 and additionally
 -- which projection of the "Model" is active in each Join varies so we can't have both strong
 -- static type representations AND lightweight syntax with JS compatible lambdas (i think)
-datumIsGraphLink :: Datum_ -> GraphLink
-datumIsGraphLink = unsafeCoerce
-datumIsGraphNode :: Datum_ -> GraphNode
-datumIsGraphNode = unsafeCoerce
 
 colorByGroup :: Datum_ -> String
 colorByGroup datum = d3SchemeCategory10N_ d.group
   where
-    d = datumIsGraphNode datum
+    d = datumIsLesMisGraphNode_ datum
 
 linkWidth :: Datum_ -> Number
 linkWidth datum = sqrt d.value
   where
-    d = datumIsGraphLink datum
+    d = datumIsLesMisGraphLink_ datum
 
 setX1 :: Datum_ -> Number
 setX1 datum = d.source.x
   where
-    d = datumIsGraphLink datum
+    d = datumIsLesMisGraphLink_ datum
 setY1 :: Datum_ -> Number
 setY1 datum = d.source.y
   where
-    d = datumIsGraphLink datum
+    d = datumIsLesMisGraphLink_ datum
 setX2 :: Datum_ -> Number
 setX2 datum = d.target.x
   where
-    d = datumIsGraphLink datum
+    d = datumIsLesMisGraphLink_ datum
 setY2 :: Datum_ -> Number
 setY2 datum = d.target.y
   where
-    d = datumIsGraphLink datum
+    d = datumIsLesMisGraphLink_ datum
 setCx :: Datum_ -> Number
 setCx datum = d.x
   where
-    d = datumIsGraphNode datum
+    d = datumIsLesMisGraphNode_ datum
 setCy :: Datum_ -> Number
 setCy datum = d.y
   where
-    d = datumIsGraphNode datum
+    d = datumIsLesMisGraphNode_ datum
