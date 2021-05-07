@@ -5,7 +5,7 @@ import Prelude hiding (append,join)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, text, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.File.Spago (SpagoGraphLink_, SpagoGraphNode_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_)
+import D3.Data.File.Spago (NodeID, NodeType(..), SpagoGraphLink_, SpagoGraphNode_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), MouseEvent(..))
 import D3.FFI (GraphModel_, pinNodeWithID, startSimulation_, stopSimulation_)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
@@ -25,14 +25,14 @@ import Effect.Class.Console (log)
 import Unsafe.Coerce (unsafeCoerce)
 
 
-highlightNeighborhood :: GraphModel_ SpagoGraphLink_ SpagoGraphNode_ -> String -> Unit
+highlightNeighborhood :: GraphModel_ SpagoGraphLink_ SpagoGraphNode_ -> NodeID -> Unit
 highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
   where
     sources = foldl (\acc l -> if l.target.id == nodeId then l.source.id:acc else acc) [] links
     targets = foldl (\acc l -> if l.source.id == nodeId then l.target.id:acc else acc) [] links
 
-foreign import markAsSpotlit_   :: String -> Array String -> Array String -> Unit
-foreign import removeSpotlight_ :: String -> Array String -> Array String -> Unit
+foreign import markAsSpotlit_   :: NodeID -> Array NodeID -> Array NodeID -> Unit
+foreign import removeSpotlight_ :: NodeID -> Array NodeID -> Array NodeID -> Unit
 
 drawGraph :: Aff Unit
 drawGraph = do
@@ -95,7 +95,7 @@ graphScript (Tuple w h) model = do
                                          , on MouseLeave (\e d t -> startSimulation_ simulation_)
                                          , on MouseClick (\e d t -> highlightNeighborhood (unsafeCoerce model) (datumIsGraphNode_ d).id)
                                          ]) 
-  labels' <- nodes `append` (node Text [ classed "label",  x 0.2, y 0.2, text (\d -> (datumIsGraphNode_ d).id)]) 
+  labels' <- nodes `append` (node Text [ classed "label",  x 0.2, y 0.2, text (\d -> (datumIsGraphNode_ d).name)]) 
   
   svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                             , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
@@ -123,27 +123,25 @@ chooseRadius :: Datum_ -> Number
 chooseRadius datum = do
   let d = datumIsGraphNode_ datum
   case d.moduleOrPackage of
-    "module" -> moduleRadius
-    "package" -> packageRadius
-    _ -> 10.0
+    IsModule   -> moduleRadius
+    IsPackage -> packageRadius
 
 chooseRadiusFn :: Datum_ -> Number
 chooseRadiusFn datum = do
   let d = datumIsGraphNode_ datum
   case d.moduleOrPackage of
-    "module" -> moduleRadius
-    "package" -> packageRadius + packageForceRadius
-    _ -> 10.0
+    IsModule  -> moduleRadius
+    IsPackage -> packageRadius + packageForceRadius
 
 nodeClass :: Datum_ -> String
 nodeClass datum = do
   let d = datumIsGraphNode_ datum
-  d.moduleOrPackage
+  show d.moduleOrPackage
 
 linkClass :: Datum_ -> String
 linkClass datum = do
   let d = datumIsGraphLink_ datum
-  d.moduleOrPackage
+  show d.moduleOrPackage
 
 translateNode :: Datum_ -> String
 translateNode datum = "translate(" <> show d.x <> "," <> show d.y <> ")"

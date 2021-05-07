@@ -2,10 +2,10 @@ module D3.Attributes.Instances where
 
 import Prelude
 
+import D3.Data.Types (D3This_, Datum_, Index_, UnitType)
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2)
 import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
-import D3.Data.Types (D3This_, Datum_, Index_, UnitType)
 
 
 type IndexedLambda a = Fn2 Datum_ Index_ a
