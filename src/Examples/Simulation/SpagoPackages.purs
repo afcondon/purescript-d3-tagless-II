@@ -5,7 +5,7 @@ import Prelude hiding (append,join)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, text, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.File.Spago (NodeID, NodeType(..), SpagoGraphLink_, SpagoGraphNode_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_)
+import D3.Data.File.Spago (NodeID, NodeType(..), SpagoCookedModel, SpagoGraphNode_, SpagoGraphLink_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableTree)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), MouseEvent(..))
 import D3.FFI (GraphModel_, pinNodeWithID, startSimulation_, stopSimulation_)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
@@ -15,10 +15,12 @@ import D3.Layouts.Simulation (Force(..), ForceName(..), ForceType(..), initSimul
 import D3.Scales (d3SchemeCategory10S_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
-import Data.Array (foldl, (:))
+import Data.Array (elem, filter, foldl, length, sort, (:))
 import Data.Either (Either(..))
-import Data.Maybe (fromMaybe)
+import Data.Map (Map)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..), fst, snd)
+import Debug (spy, trace)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
@@ -44,11 +46,27 @@ drawGraph = do
   case convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON of
     (Left error) -> log "error" -- $ ?_ error
     (Right graph) -> do
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph)
-      printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph) "Force Layout Script"
+      let graph' = onlyReachables graph
+
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph')
+      printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph') "Force Layout Script"
       log $ snd printedScript
       log $ fst printedScript
       pure unit
+
+onlyReachables :: SpagoCookedModel -> SpagoCookedModel
+onlyReachables graph = do
+  case (flip getReachableTree graph.graph) <$> (findGraphNodeIdFromName graph "Main") of
+    Nothing -> graph -- no change
+    (Just r) -> do
+      let links = filter (linkPredicate (sort r.reachableNodes)) graph.links
+          nodes = filter (\n -> (n.id     `elem` r.reachableNodes)) graph.nodes
+          _ = trace { fn: "onlyReachables", noOfLinksBefore: length graph.links, noOfLinksAfter: length links, noOfNodesBefore: length graph.nodes, noOfNodesAfter: length nodes } \_ -> unit
+      graph { links = links, nodes = nodes }
+
+linkPredicate :: Array NodeID -> SpagoGraphLink_ -> Boolean -- it's not yet converted to 
+linkPredicate reachables l = ((unsafeCoerce l.source) `elem` reachables) && -- FIXME this coerce is because the type is a lie, not cooked yet. see how JS poisons everything?
+                             ((unsafeCoerce l.target) `elem` reachables)
 
 -- | recipe for this force layout graph
 graphScript :: forall m link node selection r. 
@@ -56,7 +74,7 @@ graphScript :: forall m link node selection r.
   D3InterpreterM selection m => 
   Tuple Number Number ->
   { links :: Array link, nodes :: Array node | r } -> 
-  m selection -- TODO is it right to return selection_ instead of simulation_? does it matter? 
+  m selection -- TODO is it right to return selection_ instead of simulation_? think it would vary by script but Tuple selection simulation would also work as a pattern
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
   svg        <- root `append` (node Svg   [ viewBox (-w / 2.0) (-h / 2.0) w h ] )

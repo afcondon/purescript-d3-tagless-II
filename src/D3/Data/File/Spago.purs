@@ -6,7 +6,9 @@ import Prelude
 import Affjax (URL)
 import D3.Data.Foreign (Datum_)
 import D3.FFI (D3ForceLink_, D3ForceNode_, GraphModel_, makeGraphLinks_, makeGraphNodes_)
-import Data.Graph (Graph, fromMap, outEdges)
+import Data.Array as A
+import Data.Graph (Graph, children, fromMap, isCyclic, outEdges)
+import Data.Graph as G
 import Data.List as L
 import Data.Map (lookup)
 import Data.Map as M
@@ -51,25 +53,27 @@ type SpagoGraphLink_ = D3ForceLink_ NodeID NodeExtension LinkExtension
 
 type SpagoNode       = { id :: NodeID, name :: String, path :: String, package :: Maybe Int, moduleOrPackage :: NodeType, depends :: Array NodeID }
 type SpagoLink       = { source :: NodeID, target :: NodeID, moduleOrPackage :: LinkType }
-type SpagoRawModel   = { links :: Array SpagoLink, nodes :: Array SpagoNode, root :: Maybe NodeID }
+type SpagoRawModel   = { links :: Array SpagoLink, nodes :: Array SpagoNode, name2IdMap :: M.Map String NodeID }
+type SpagoCookedModel = { links :: Array SpagoGraphLink_, nodes :: Array SpagoGraphNode_, graph :: SpagoGraph, name2IdMap :: M.Map String NodeID }
 
 datumIsGraphLink_ :: Datum_ -> SpagoGraphLink_
 datumIsGraphLink_ = unsafeCoerce
 datumIsGraphNode_ :: Datum_ -> SpagoGraphNode_
 datumIsGraphNode_ = unsafeCoerce
 
-convertFilesToGraphModel :: forall r. { body :: String | r } -> { body :: String | r } -> { body :: String | r } -> GraphModel_ SpagoGraphLink_ SpagoGraphNode_
+convertFilesToGraphModel :: forall r. { body :: String | r } -> { body :: String | r } -> { body :: String | r } -> SpagoCookedModel
 convertFilesToGraphModel moduleJSON packageJSON lsdepJSON = 
   makeSpagoGraphModel $ readSpagoDataJSON_ moduleJSON.body packageJSON.body lsdepJSON.body
 
 foreign import readSpagoDataJSON_ :: String -> String -> String -> SpagoDataJSON_
 
-makeSpagoGraphModel :: SpagoDataJSON_ -> GraphModel_ SpagoGraphLink_ SpagoGraphNode_
+makeSpagoGraphModel :: SpagoDataJSON_ -> SpagoCookedModel
 makeSpagoGraphModel json = do
   let
     raw = makeSpagoGraphModel' json
+
     links :: Array SpagoGraphLink_
-    links = makeGraphLinks_ $ raw.links
+    links = makeGraphLinks_ raw.links
 
     nodes :: Array SpagoGraphNode_ 
     nodes = makeGraphNodes_ raw.nodes
@@ -77,20 +81,23 @@ makeSpagoGraphModel json = do
     graph :: Graph NodeID SpagoNode
     graph = makeGraph raw.nodes
 
-    rootConnected = spy "outEdges: " $ outEdges <$> raw.root <*> (Just graph)
+    -- reachables = 
+    --   case (flip getReachableTree graph) <$> raw.root of
+    --     Nothing -> []
+    --     (Just r) -> spy "reachable nodes" $ r.reachableNodes
   
-  { links, nodes }
+  { links, nodes, graph, name2IdMap: raw.name2IdMap }
 
 makeSpagoGraphModel' :: SpagoDataJSON_ -> SpagoRawModel
 makeSpagoGraphModel' { packages, modules, lsDeps } = do
   let
-    idMap :: M.Map String Int
+    idMap :: M.Map String NodeID
     idMap = M.fromFoldableWith (\v1 v2 -> spy "key collision!!!!: " v1) $ zip names ids
       where
         names = (_.key <$> modules) <> (_.key <$> packages)
         ids   = 1 `range` (length names)
 
-    getId :: String -> Int
+    getId :: String -> NodeID
     getId s = fromMaybe 0 (M.lookup s idMap)
 
     depsMap :: M.Map String { version :: String, repo :: String }
@@ -139,7 +146,7 @@ makeSpagoGraphModel' { packages, modules, lsDeps } = do
 
   { links: moduleLinks <> packageLinks <> modulePackageLinks
   , nodes: moduleNodes <> packageNodes
-  , root: M.lookup "Main" idMap }
+  , name2IdMap: idMap }
 
 makeGraph :: Array SpagoNode -> SpagoGraph
 makeGraph nodes = do
@@ -150,3 +157,47 @@ makeGraph nodes = do
       where
         depends = S.fromFoldable node.depends
   fromMap graphMap
+
+type GraphSearchRecord = {
+    reachableNodes :: Array NodeID
+  , openPaths      :: Array Path
+  , closedPaths    :: Array Path
+}
+
+type Path = Array NodeID
+type Deps = Array NodeID
+
+getReachableTree :: NodeID -> SpagoGraph -> GraphSearchRecord
+getReachableTree id graph = go { reachableNodes: [], openPaths: [[id]], closedPaths: [] }
+  where
+    go :: GraphSearchRecord -> GraphSearchRecord
+    go gsr@{ openPaths: [] } = gsr -- bottom out when all open paths are consumed
+    go gsr = do
+      case processNextOpenPath gsr of
+        Nothing     -> gsr -- bottom out but....possibly some exceptions to be looked at here
+        (Just gsr') -> go gsr'
+
+    processNextOpenPath :: GraphSearchRecord -> Maybe GraphSearchRecord
+    processNextOpenPath gsr = do
+      -- let _ = spy "open paths: " gsr.openPaths
+      x         <- uncons gsr.openPaths
+      firstID   <- head x.head -- NB we're pushing onto the path, cause head is easier than tail
+      firstNode <- G.lookup firstID graph
+      -- let _ = spy "working on this node now: " firstNode
+
+      let newDeps = -- spy "newDeps: " $ 
+            filter (\d -> not $ A.elem d gsr.reachableNodes) firstNode.depends
+          newOpenPaths = -- spy "newOpenPaths: " $
+            (\d -> d : x.head) <$> newDeps -- ie [ab] with deps [bc] -> [abc, abd]
+
+      if null newOpenPaths
+        -- dropping the open path we just processed and transferring it to the list of closedPaths
+        then Just $ gsr { openPaths   = x.tail                 
+                        , closedPaths = x.head : gsr.closedPaths}
+        -- dropping the open path we just processed BUT adding extension(s) to it
+        else Just $ gsr { openPaths      = x.tail <> newOpenPaths 
+                        , reachableNodes = gsr.reachableNodes <> newDeps }
+
+
+findGraphNodeIdFromName :: SpagoCookedModel -> String -> Maybe NodeID
+findGraphNodeIdFromName graph name = M.lookup name graph.name2IdMap
