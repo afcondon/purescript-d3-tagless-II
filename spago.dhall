@@ -15,7 +15,7 @@ You can edit this file as you like.
   , "either"
   , "foldable-traversable"
   , "functions"
-  , "graphs"
+  , "graphs" -- NB overridden with  colehaus-graphs
   , "integers"
   , "lists"
   , "math"

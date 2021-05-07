@@ -11,6 +11,7 @@ import Data.List as L
 import Data.Map (lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Set as S
 import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..))
 import Debug (spy)
@@ -50,7 +51,7 @@ type SpagoGraphLink_ = D3ForceLink_ NodeID NodeExtension LinkExtension
 
 type SpagoNode       = { id :: NodeID, name :: String, path :: String, package :: Maybe Int, moduleOrPackage :: NodeType, depends :: Array NodeID }
 type SpagoLink       = { source :: NodeID, target :: NodeID, moduleOrPackage :: LinkType }
-type SpagoRawModel   = { links :: Array SpagoLink, nodes :: Array SpagoNode }
+type SpagoRawModel   = { links :: Array SpagoLink, nodes :: Array SpagoNode, root :: Maybe NodeID }
 
 datumIsGraphLink_ :: Datum_ -> SpagoGraphLink_
 datumIsGraphLink_ = unsafeCoerce
@@ -76,7 +77,7 @@ makeSpagoGraphModel json = do
     graph :: Graph NodeID SpagoNode
     graph = makeGraph raw.nodes
 
-    -- rootConnected = spy "outEdges: " $ outEdges graph
+    rootConnected = spy "outEdges: " $ outEdges <$> raw.root <*> (Just graph)
   
   { links, nodes }
 
@@ -84,7 +85,7 @@ makeSpagoGraphModel' :: SpagoDataJSON_ -> SpagoRawModel
 makeSpagoGraphModel' { packages, modules, lsDeps } = do
   let
     idMap :: M.Map String Int
-    idMap = M.fromFoldableWith (\v1 v2 -> spy "collision!!!!: " v1) $ zip (spy "names: " $ names) (spy "ids: " $ ids)
+    idMap = M.fromFoldableWith (\v1 v2 -> spy "key collision!!!!: " v1) $ zip names ids
       where
         names = (_.key <$> modules) <> (_.key <$> packages)
         ids   = 1 `range` (length names)
@@ -122,12 +123,11 @@ makeSpagoGraphModel' { packages, modules, lsDeps } = do
     getPackage path = do
       let pieces = split (Pattern "/") path
       root    <- pieces !! 0
-      spy "package is: " $
-        if root == ".spago" 
-        then do 
-          package <- pieces !! 1
-          M.lookup package idMap
-        else Nothing
+      if root == ".spago" 
+      then do 
+        package <- pieces !! 1
+        M.lookup package idMap
+      else Nothing
 
     moduleLinks = (makeLink M2M)       <$> (foldl foldDepends [] modules)             
     moduleNodes = makeNodeFromModule   <$> modules
@@ -138,18 +138,15 @@ makeSpagoGraphModel' { packages, modules, lsDeps } = do
     modulePackageLinks = catMaybes $ makeModuleToPackageLink <$> moduleNodes
 
   { links: moduleLinks <> packageLinks <> modulePackageLinks
-  , nodes: moduleNodes <> packageNodes }
+  , nodes: moduleNodes <> packageNodes
+  , root: M.lookup "Main" idMap }
 
 makeGraph :: Array SpagoNode -> SpagoGraph
 makeGraph nodes = do
   let
     graphMap = foldl addNode M.empty nodes
-    addNode :: M.Map NodeID (Tuple SpagoNode (L.List NodeID)) -> SpagoNode -> M.Map NodeID (Tuple SpagoNode (L.List NodeID))
+    addNode :: M.Map NodeID (Tuple SpagoNode (S.Set NodeID)) -> SpagoNode -> M.Map NodeID (Tuple SpagoNode (S.Set NodeID))
     addNode acc node = M.insert node.id (Tuple node depends) acc
       where
-        depends :: L.List NodeID 
-        depends = L.fromFoldable node.depends
+        depends = S.fromFoldable node.depends
   fromMap graphMap
--- fromMap :: forall k v. Map k (Tuple v (List k)) -> Graph k v
--- fromMap :: forall k v. Map String (Tuple SpagoNode (List String)) -> Graph String v
--- Map String (SpagoNode /\ List String)
