@@ -15,7 +15,7 @@ import D3.Layouts.Simulation (Force(..), ForceName(..), ForceType(..), initSimul
 import D3.Scales (d3SchemeCategory10S_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
-import Data.Array (concatMap, cons, elem, filter, foldl, fromFoldable, length, sort)
+import Data.Array (concatMap, cons, elem, filter, foldl, fromFoldable, length, reverse, sort)
 import Data.Either (Either(..))
 import Data.List (List(..), (:))
 import Data.List as L
@@ -49,7 +49,7 @@ drawGraph = do
   case convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON of
     (Left error)  -> log "error converting spago json file inputs"
     (Right graph) -> do
-      let graph' = onlyReachables graph
+      let graph' = treeReduction graph
 
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph')
       printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph') "Force Layout Script"
@@ -57,21 +57,19 @@ drawGraph = do
       log $ fst printedScript
       pure unit
 
-onlyReachables :: SpagoCookedModel -> SpagoCookedModel
-onlyReachables graph = do
+treeReduction :: SpagoCookedModel -> SpagoCookedModel
+treeReduction graph = do
   case (flip getReachableTree graph.graph) <$> (findGraphNodeIdFromName graph "Main") of
     Nothing -> graph -- no change
     (Just r) -> do
-      let -- links = filter (linkPredicate (sort r.reachableNodes)) graph.links
-          treelinks = makeTreeLinks (pathsAsLists r.closedPaths) -- FIXME tuples are not enough information, need to combine with existing link info to get D3ForceLink_ 
-          -- nodes = filter (\n -> (n.id `elem` r.reachableNodes)) graph.nodes
-          _ = trace { fn: "onlyReachables", noOfLinksBefore: length graph.links, noOfLinksAfter: length treelinks, noOfNodesBefore: length graph.nodes } \_ -> unit
-      graph { links = graph.links -- TODO temporary until the tree filtering code is complete
-            , nodes = graph.nodes }
+      let treelinks = spy "treelinks" $ makeTreeLinks (pathsAsLists r.closedPaths)
+          isTreeLink :: SpagoGraphLink_ -> Boolean -- it's not yet converted to 
+          isTreeLink l = (Tuple l.sourceID l.targetID) `elem` treelinks
+          links     = filter isTreeLink graph.links
+          nodes     = filter (\n -> (n.id `elem` r.reachableNodes)) graph.nodes
+          _         = trace { fn: "treeReduction", noOfLinksBefore: length graph.links, noOfLinksAfter: length links, noOfNodesBefore: length graph.nodes } \_ -> unit
+      graph { links = links, nodes = graph.nodes }
 
--- linkPredicate :: Array NodeID -> SpagoGraphLink_ -> Boolean -- it's not yet converted to 
--- linkPredicate reachables l = (l.sourceID `elem` reachables) && 
---                              (l.targetID `elem` reachables)
 
 path2Tuples :: L.List (Tuple NodeID NodeID) -> L.List NodeID -> L.List (Tuple NodeID NodeID)
 path2Tuples acc Nil     = acc
@@ -79,14 +77,13 @@ path2Tuples acc (x:Nil) = acc
 path2Tuples acc (s:t:tail) = path2Tuples ((Tuple s t):acc) (t:tail)
 
 pathsAsLists :: Array (Array NodeID) -> L.List (L.List NodeID)
-pathsAsLists paths = L.fromFoldable (L.fromFoldable <$> paths) -- because pattern matching lists is so much nicer for path2Tuples
+pathsAsLists paths = L.fromFoldable ((L.fromFoldable <<< reverse) <$> paths) -- because pattern matching lists is so much nicer for path2Tuples
 
-makeTreeLinks :: L.List (L.List NodeID) -> Array { sourceID :: NodeID, targetID :: NodeID }
+makeTreeLinks :: L.List (L.List NodeID) -> Array (Tuple NodeID NodeID)
 makeTreeLinks closedPaths = do
   let
     linkTuples = (L.foldl path2Tuples Nil) closedPaths
-    treelinks  = (\(Tuple s t) -> { sourceID: s, targetID: t }) <$> (fromFoldable $ S.fromFoldable linkTuples) -- removes the duplicates while building  
-  treelinks 
+  fromFoldable $ S.fromFoldable linkTuples -- removes the duplicates while building  
 
 -- | recipe for this force layout graph
 graphScript :: forall m link node selection r. 
