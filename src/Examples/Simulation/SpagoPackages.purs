@@ -6,16 +6,17 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.File.Spago (NodeExtension, NodeID, NodeType(..), Path, SpagoCookedModel, SpagoGraphLink_, SpagoGraphNode_, LinkExtension, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableTree)
-import D3.Data.Types (D3Selection_, Datum_, Element(..), MouseEvent(..))
+import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..))
 import D3.FFI (GraphModel_, D3ForceLink_, pinNodeWithID, startSimulation_, stopSimulation_)
+import D3.FFI.Config (defaultForceCollideConfig, defaultForceManyConfig, defaultForceRadialConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Simulation (Force(..), ForceName(..), ForceType(..), initSimulation)
+import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
 import D3.Scales (d3SchemeCategory10S_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
-import Data.Array (concatMap, cons, elem, filter, foldl, fromFoldable, length, reverse, sort)
+import Data.Array (concatMap, cons, elem, filter, foldl, fromFoldable, length, partition, reverse, sort)
 import Data.Either (Either(..))
 import Data.List (List(..), (:))
 import Data.List as L
@@ -62,13 +63,21 @@ treeReduction graph = do
   case (flip getReachableTree graph.graph) <$> (findGraphNodeIdFromName graph "Main") of
     Nothing -> graph -- no change
     (Just r) -> do
-      let treelinks = spy "treelinks" $ makeTreeLinks (pathsAsLists r.closedPaths)
+      let onlyTreelinks = spy "onlyTreelinks" $ makeTreeLinks (pathsAsLists r.closedPaths)
           isTreeLink :: SpagoGraphLink_ -> Boolean -- it's not yet converted to 
-          isTreeLink l = (Tuple l.sourceID l.targetID) `elem` treelinks
-          links     = filter isTreeLink graph.links
-          nodes     = filter (\n -> (n.id `elem` r.reachableNodes)) graph.nodes
-          _         = trace { fn: "treeReduction", noOfLinksBefore: length graph.links, noOfLinksAfter: length links, noOfNodesBefore: length graph.nodes } \_ -> unit
-      graph { links = links, nodes = graph.nodes }
+          isTreeLink l = (Tuple l.sourceID l.targetID) `elem` onlyTreelinks
+
+          treelinks    = partition isTreeLink graph.links
+          treenodes    = partition (\n -> (n.id `elem` r.reachableNodes) || 
+                                           n.name == "Main") -- FIXME not "Main" but "whatever we gave as root of tree"
+                                   graph.nodes
+          _            = trace { fn: "treeReduction"
+                               , noOfLinksBefore: length graph.links
+                               , noOfLinksAfter: length treelinks.yes
+                               , noOfNodesBefore: length graph.nodes
+                               , noOfNodesAfter: length treenodes.yes
+                               } \_ -> unit
+      graph { links = treelinks.yes, nodes = treenodes.yes }
 
 
 path2Tuples :: L.List (Tuple NodeID NodeID) -> L.List NodeID -> L.List (Tuple NodeID NodeID)
@@ -98,8 +107,12 @@ graphScript (Tuple w h) model = do
   linksGroup <- svg  `append` (node Group [ classed "links", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group [ classed "nodes" ])
 
-  let forces      = [ Force (ForceName "charge")  ForceMany
-                    , Force (ForceName "collide") (ForceCollide (\d -> chooseRadiusFn d) ) ]
+  let forces      = [ Force $ ForceManyBody    $ defaultForceManyConfig   "charge"
+                    , Force $ ForceCollide     $ defaultForceCollideConfig "collide" (\d -> chooseRadiusFn d)
+                    , Force $ ForceX           $ defaultForceXConfig "x"
+                    , Force $ ForceY           $ defaultForceYConfig "y"
+                    , Force $ ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
+                    ]
       simulation_ = initSimulation forces model model.nodes model.links
 
   links <- linksGroup <+> JoinSimulation {
@@ -161,8 +174,8 @@ chooseRadius datum = do
     IsModule   -> moduleRadius
     IsPackage -> packageRadius
 
-chooseRadiusFn :: Datum_ -> Number
-chooseRadiusFn datum = do
+chooseRadiusFn :: Datum_ -> Index_ -> Number
+chooseRadiusFn datum index = do
   let d = datumIsGraphNode_ datum
   case d.moduleOrPackage of
     IsModule  -> moduleRadius

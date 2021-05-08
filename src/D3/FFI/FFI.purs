@@ -8,6 +8,7 @@ import Prelude
 
 import Affjax (URL)
 import D3.Data.Types (D3Data_, D3HierarchicalNode_, D3Selection_, D3Simulation_, Datum_, Element, Index_, Selector, Transition, TreeJson_, ZoomConfigDefault_, ZoomConfig_)
+import D3.FFI.Config 
 import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
 import Data.Nullable (Nullable)
@@ -92,15 +93,6 @@ type D3ForceNode_ id r = {
   | r
 }
 
--- | a record to initialize / configure simulations
-type SimulationConfig_ = { 
-      alpha         :: Number
-    , alphaTarget   :: Number
-    , alphaMin      :: Number
-    , alphaDecay    :: Number
-    , velocityDecay :: Number
-}
-
 type GraphModel_ link node = { links :: Array link, nodes :: Array node }
 foreign import makeGraphLinks_ :: forall r id node link. Array { sourceID :: id, targetID :: id | r } -> Array (D3ForceLink_ id node link)
 foreign import makeGraphNodes_ :: forall r id node. Array { id :: id | r }                        -> Array (D3ForceNode_ id node)
@@ -129,13 +121,14 @@ foreign import defaultSimulationDrag_ :: D3Selection_ -> D3Simulation_ -> Unit
 foreign import setAlphaTarget_        :: D3Selection_ -> Number -> Unit
 
 -- implementations / wrappers for the Force ADT
-foreign import forceMany_         :: D3Simulation_ -> String                      -> D3Simulation_
-foreign import forceCenter_       :: D3Simulation_ -> String -> Number -> Number  -> D3Simulation_
-foreign import forceRadial_       :: D3Simulation_ -> String -> Number -> Number  -> D3Simulation_
-foreign import forceCollideFixed_ :: D3Simulation_ -> String -> Number            -> D3Simulation_
-foreign import forceCollideFn_    :: D3Simulation_ -> String -> (Datum_ -> Number) -> D3Simulation_
-foreign import forceX_            :: D3Simulation_ -> String -> Number            -> D3Simulation_
-foreign import forceY_            :: D3Simulation_ -> String -> Number            -> D3Simulation_
+foreign import forceCenter_       :: D3Simulation_ -> ForceCenterConfig_       -> D3Simulation_
+foreign import forceCollideFixed_ :: D3Simulation_ -> ForceCollideFixedConfig_ -> D3Simulation_
+foreign import forceCollideFn_    :: D3Simulation_ -> ForceCollideConfig_      -> D3Simulation_
+foreign import forceMany_         :: D3Simulation_ -> ForceManyConfig_         -> D3Simulation_
+foreign import forceRadial_       :: D3Simulation_ -> ForceRadialConfig_       -> D3Simulation_
+foreign import forceRadialFixed_  :: D3Simulation_ -> ForceRadialFixedConfig_  -> D3Simulation_
+foreign import forceX_            :: D3Simulation_ -> ForceXConfig_            -> D3Simulation_
+foreign import forceY_            :: D3Simulation_ -> ForceYConfig_            -> D3Simulation_
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js Hierarchy module  *********************************************

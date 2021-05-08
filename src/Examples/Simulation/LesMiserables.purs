@@ -1,5 +1,7 @@
 module D3.Examples.Simulation.LesMiserables where
 
+import D3.Layouts.Simulation
+
 import Affjax (Error)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
@@ -7,10 +9,10 @@ import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, radius,
 import D3.Data.File.LesMiserables (datumIsLesMisGraphLink_, datumIsLesMisGraphNode_, readGraphFromFileContents)
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.FFI (D3ForceLink_, D3ForceNode_, startSimulation_)
+import D3.FFI.Config (defaultForceCenterConfig, defaultForceManyConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Simulation (Force(..), ForceName(..), ForceType(..), initSimulation, makeCenterForce)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
@@ -20,7 +22,7 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (sqrt)
-import Prelude (class Bind, Unit, bind, discard, pure, unit, ($))
+import Prelude (class Bind, Unit, bind, discard, pure, unit, negate, ($))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- this is the model used by this particular "chart" (ie force layout simulation)
@@ -58,8 +60,8 @@ graphScript (Tuple w h) model = do
   linksGroup <- svg  `append` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
-  let forces      = [ makeCenterForce 500.0 500.0
-                    , Force (ForceName "charge") ForceMany ]
+  let forces      = [ Force $ ForceCenter { name: "center", cx: 500.0, cy: 500.0 }
+                    , Force $ ForceManyBody (defaultForceManyConfig "charge") ]
       simulation_ = initSimulation forces model model.nodes model.links
 
   links <- join linksGroup $ JoinSimulation {

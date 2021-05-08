@@ -145,7 +145,7 @@ getRawGraphModel { packages, modules, lsDeps } = do
     modulePackageLinks = catMaybes $ makeModuleToPackageLink <$> moduleNodes
 
   { links: moduleLinks <> packageLinks <> modulePackageLinks
-  , nodes: moduleNodes <> packageNodes
+  , nodes: moduleNodes -- <> packageNodes
   , name2IdMap: idMap }
 
 makeGraph :: Array SpagoNode -> SpagoGraph

@@ -291,22 +291,27 @@ exports.defaultSimulationDrag_ = selection => simulation => {
 }
 
 //            FORCE functions 
-// :: Simulation -> Unit
-exports.forceMany_ = simulation => label => simulation.force(label, d3.forceManyBody().strength(-30))
-// :: Simulation -> Number -> Number -> Unit
-exports.forceCenter_ = simulation => label => cx => cy => simulation.force(label, d3.forceCenter(cx,cy))
-// :: Simulation -> Unit
-// exports.forceLinks = simulation => label => simulation.x()
-// :: Simulation -> Number -> Unit
-exports.forceCollideFixed_ = simulation => label => radius => simulation.force(label, d3.forceCollide(radius))
-// :: Simulation -> Number -> Unit
-exports.forceCollideFn_ = simulation => label => radiusFn => simulation.force(label, d3.forceCollide(radiusFn))
-// :: Simulation -> Number -> Unit
-exports.forceX_ = simulation => label => cx => simulation.force(label, d3.forceX(cx))
-// :: Simulation -> Number -> Unit
-exports.forceY_ = simulation => label => cy => simulation.force(label, d3.forceY(cy))
-// :: Simulation -> Number -> Number -> Unit
-exports.forceRadial_ = simulation => label => cx => cy => simulation.force(label, d3.forceRadial(cx, cy))
+
+// forceCenter_       :: D3Simulation_ -> ForceCenterConfig_       -> D3Simulation_
+exports.forceCenter_ = simulation => config => simulation.force(config.name, d3.forceCenter(config.cx,config.cy))
+// forceCollideFixed_ :: D3Simulation_ -> ForceCollideFixedConfig_ -> D3Simulation_
+exports.forceCollideFixed_ = simulation => config => simulation.force(config.name, d3.forceCollide(config.radius))
+// forceCollideFn_    :: D3Simulation_ -> ForceCollideConfig_      -> D3Simulation_
+exports.forceCollideFn_ = simulation => config => simulation.force(config.name, d3.forceCollide(config.radius))
+// forceMany_         :: D3Simulation_ -> ForceManyConfig_         -> D3Simulation_
+exports.forceMany_ = simulation => config => simulation.force(config.name, d3.forceManyBody().strength(config.strength))
+// forceRadial_       :: D3Simulation_ -> ForceRadialConfig_       -> D3Simulation_
+exports.forceRadial_ = simulation => config => simulation.force(config.name, d3.forceRadial(config.radius, config.cx, config.cy).strength(config.strength))
+// forceRadialFixed_  :: D3Simulation_ -> ForceRadialFixedConfig_  -> D3Simulation_
+exports.forceRadialFixed_ = simulation => config => {
+  simulation.force(config.name, d3.forceRadial(config.radius, config.cx, config.cy).strength(config.strength))
+}
+// forceX_            :: D3Simulation_ -> ForceXConfig_            -> D3Simulation_
+exports.forceX_ = simulation => config => simulation.force(config.name, d3.forceX(config.x).strength(config.strength))
+// forceY_            :: D3Simulation_ -> ForceYConfig_            -> D3Simulation_
+exports.forceY_ = simulation => config => simulation.force(config.name, d3.forceY(config.y).strength(config.strength))
+
+// exports.forceLinks = simulation => config => simulation.x().strength(config.strength)
 
 // these are both essentially just unsafeCoerce
 // in the case of the links tho', the source and target would change type so we protect the PureScript with a defensive copy
