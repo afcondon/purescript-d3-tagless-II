@@ -5,9 +5,9 @@ import Prelude hiding (append,join)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, text, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.File.Spago (NodeID, NodeType(..), SpagoCookedModel, SpagoGraphNode_, SpagoGraphLink_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableTree)
+import D3.Data.File.Spago (NodeExtension, NodeID, NodeType(..), Path, SpagoCookedModel, SpagoGraphLink_, SpagoGraphNode_, LinkExtension, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableTree)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), MouseEvent(..))
-import D3.FFI (GraphModel_, pinNodeWithID, startSimulation_, stopSimulation_)
+import D3.FFI (GraphModel_, D3ForceLink_, pinNodeWithID, startSimulation_, stopSimulation_)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
@@ -15,10 +15,13 @@ import D3.Layouts.Simulation (Force(..), ForceName(..), ForceType(..), initSimul
 import D3.Scales (d3SchemeCategory10S_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
-import Data.Array (elem, filter, foldl, length, sort, (:))
+import Data.Array (concatMap, cons, elem, filter, foldl, fromFoldable, length, sort)
 import Data.Either (Either(..))
+import Data.List (List(..), (:))
+import Data.List as L
 import Data.Map (Map)
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Set as S
 import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy, trace)
 import Effect.Aff (Aff)
@@ -30,8 +33,8 @@ import Unsafe.Coerce (unsafeCoerce)
 highlightNeighborhood :: GraphModel_ SpagoGraphLink_ SpagoGraphNode_ -> NodeID -> Unit
 highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
   where
-    sources = foldl (\acc l -> if l.target.id == nodeId then l.source.id:acc else acc) [] links
-    targets = foldl (\acc l -> if l.source.id == nodeId then l.target.id:acc else acc) [] links
+    sources = foldl (\acc l -> if l.target.id == nodeId then (cons l.source.id acc) else acc) [] links
+    targets = foldl (\acc l -> if l.source.id == nodeId then (cons l.target.id acc) else acc) [] links
 
 foreign import markAsSpotlit_   :: NodeID -> Array NodeID -> Array NodeID -> Unit
 foreign import removeSpotlight_ :: NodeID -> Array NodeID -> Array NodeID -> Unit
@@ -59,14 +62,31 @@ onlyReachables graph = do
   case (flip getReachableTree graph.graph) <$> (findGraphNodeIdFromName graph "Main") of
     Nothing -> graph -- no change
     (Just r) -> do
-      let links = filter (linkPredicate (sort r.reachableNodes)) graph.links
-          nodes = filter (\n -> (n.id `elem` r.reachableNodes)) graph.nodes
-          _ = trace { fn: "onlyReachables", noOfLinksBefore: length graph.links, noOfLinksAfter: length links, noOfNodesBefore: length graph.nodes, noOfNodesAfter: length nodes } \_ -> unit
-      graph { links = links, nodes = nodes }
+      let -- links = filter (linkPredicate (sort r.reachableNodes)) graph.links
+          treelinks = makeTreeLinks (pathsAsLists r.closedPaths) -- FIXME tuples are not enough information, need to combine with existing link info to get D3ForceLink_ 
+          -- nodes = filter (\n -> (n.id `elem` r.reachableNodes)) graph.nodes
+          _ = trace { fn: "onlyReachables", noOfLinksBefore: length graph.links, noOfLinksAfter: length treelinks, noOfNodesBefore: length graph.nodes } \_ -> unit
+      graph { links = graph.links -- TODO temporary until the tree filtering code is complete
+            , nodes = graph.nodes }
 
-linkPredicate :: Array NodeID -> SpagoGraphLink_ -> Boolean -- it's not yet converted to 
-linkPredicate reachables l = (l.sourceID `elem` reachables) && -- FIXME this coerce is because the type is a lie, links not cooked yet. see how mutation poisons everything?
-                             (l.targetID `elem` reachables)
+-- linkPredicate :: Array NodeID -> SpagoGraphLink_ -> Boolean -- it's not yet converted to 
+-- linkPredicate reachables l = (l.sourceID `elem` reachables) && 
+--                              (l.targetID `elem` reachables)
+
+path2Tuples :: L.List (Tuple NodeID NodeID) -> L.List NodeID -> L.List (Tuple NodeID NodeID)
+path2Tuples acc Nil     = acc
+path2Tuples acc (x:Nil) = acc
+path2Tuples acc (s:t:tail) = path2Tuples ((Tuple s t):acc) (t:tail)
+
+pathsAsLists :: Array (Array NodeID) -> L.List (L.List NodeID)
+pathsAsLists paths = L.fromFoldable (L.fromFoldable <$> paths) -- because pattern matching lists is so much nicer for path2Tuples
+
+makeTreeLinks :: L.List (L.List NodeID) -> Array { sourceID :: NodeID, targetID :: NodeID }
+makeTreeLinks closedPaths = do
+  let
+    linkTuples = (L.foldl path2Tuples Nil) closedPaths
+    treelinks  = (\(Tuple s t) -> { sourceID: s, targetID: t }) <$> (fromFoldable $ S.fromFoldable linkTuples) -- removes the duplicates while building  
+  treelinks 
 
 -- | recipe for this force layout graph
 graphScript :: forall m link node selection r. 
