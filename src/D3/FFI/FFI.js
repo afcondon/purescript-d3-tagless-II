@@ -309,8 +309,17 @@ exports.forceY_ = simulation => label => cy => simulation.force(label, d3.forceY
 exports.forceRadial_ = simulation => label => cx => cy => simulation.force(label, d3.forceRadial(cx, cy))
 
 // these are both essentially just unsafeCoerce
+// in the case of the links tho', the source and target would change type so we protect the PureScript with a defensive copy
+// in the case of the nodes, it's strictly additive, so we can just bless the coercion
 // makeGraphLinks_ :: forall r id. Array { source :: id, target :: id | r } -> Array GraphLink_
-exports.makeGraphLinks_ = (links) => links
+exports.makeGraphLinks_ = (links) => { 
+  for (let index = 0; index < links.length; index++) {
+    const link = links[index];
+    link.source = link.sourceID;
+    link.target = link.targetID;
+  };
+  return links;
+}
 // makeGraphNodes_ :: forall r id. Array { id :: id | r }                   -> Array GraphNode_
 exports.makeGraphNodes_ = (nodes) => nodes
 

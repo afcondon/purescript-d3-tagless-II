@@ -44,7 +44,7 @@ drawGraph = do
   packageJSON <- AJAX.get ResponseFormat.string "http://localhost:1234/packages.json"
   lsdepJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/lsdeps.jsonlines"
   case convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON of
-    (Left error) -> log "error" -- $ ?_ error
+    (Left error)  -> log "error converting spago json file inputs"
     (Right graph) -> do
       let graph' = onlyReachables graph
 
@@ -60,13 +60,13 @@ onlyReachables graph = do
     Nothing -> graph -- no change
     (Just r) -> do
       let links = filter (linkPredicate (sort r.reachableNodes)) graph.links
-          nodes = filter (\n -> (n.id     `elem` r.reachableNodes)) graph.nodes
+          nodes = filter (\n -> (n.id `elem` r.reachableNodes)) graph.nodes
           _ = trace { fn: "onlyReachables", noOfLinksBefore: length graph.links, noOfLinksAfter: length links, noOfNodesBefore: length graph.nodes, noOfNodesAfter: length nodes } \_ -> unit
       graph { links = links, nodes = nodes }
 
 linkPredicate :: Array NodeID -> SpagoGraphLink_ -> Boolean -- it's not yet converted to 
-linkPredicate reachables l = ((unsafeCoerce l.source) `elem` reachables) && -- FIXME this coerce is because the type is a lie, not cooked yet. see how JS poisons everything?
-                             ((unsafeCoerce l.target) `elem` reachables)
+linkPredicate reachables l = (l.sourceID `elem` reachables) && -- FIXME this coerce is because the type is a lie, links not cooked yet. see how mutation poisons everything?
+                             (l.targetID `elem` reachables)
 
 -- | recipe for this force layout graph
 graphScript :: forall m link node selection r. 

@@ -102,7 +102,7 @@ type SimulationConfig_ = {
 }
 
 type GraphModel_ link node = { links :: Array link, nodes :: Array node }
-foreign import makeGraphLinks_ :: forall r id node link. Array { source :: id, target :: id | r } -> Array (D3ForceLink_ id node link)
+foreign import makeGraphLinks_ :: forall r id node link. Array { sourceID :: id, targetID :: id | r } -> Array (D3ForceLink_ id node link)
 foreign import makeGraphNodes_ :: forall r id node. Array { id :: id | r }                        -> Array (D3ForceNode_ id node)
 
 foreign import initSimulation_  :: forall id r.   Array (D3ForceNode_ id r) -> SimulationConfig_ -> D3Simulation_
