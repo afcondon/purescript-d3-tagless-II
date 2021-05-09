@@ -6,8 +6,8 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.File.Spago (GraphSearchRecord, LinkExtension, NodeExtension, NodeID, NodeType(..), Path, SpagoCookedModel, SpagoGraphNode_, SpagoGraphLink_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
-import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..))
-import D3.FFI (GraphModel_, D3ForceLink_, pinNodeWithID, startSimulation_, stopSimulation_)
+import D3.Data.Types (D3HierarchicalNode(..), D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), makeD3TreeJSONFromTreeID)
+import D3.FFI (D3ForceLink_, GraphModel_, hierarchyFromJSON_, pinNodeWithID, startSimulation_, stopSimulation_)
 import D3.FFI.Config (defaultForceCollideConfig, defaultForceManyConfig, defaultForceRadialConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
@@ -57,6 +57,7 @@ drawGraph = do
     (Right graph) -> do
       let graph' = treeReduction graph
 
+
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph')
       printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph') "Force Layout Script"
       log $ snd printedScript
@@ -76,7 +77,10 @@ treeReduction graph = do
           treenodes    = partition (\n -> (n.id `elem` r.reachableNodes) || 
                                            n.name == "Main") -- FIXME not "Main" but "whatever we gave as root of tree"
                                    graph.nodes
-          tree    = buildTree "Main" graph treelinks.yes
+          idTree    = buildTree "Main" graph treelinks.yes
+          jsontree = spy "supposedly JSON tree: " $makeD3TreeJSONFromTreeID <$> idTree
+          rootTree = spy "supposedly hierarchy from JSON tree: " $ hierarchyFromJSON_ <$> jsontree
+          rootH    = D3HierarchicalNode (unsafeCoerce rootTree)
 
           _            = trace { fn: "treeReduction"
                                , noOfLinksBefore: length graph.links
@@ -84,7 +88,7 @@ treeReduction graph = do
                                , noOfNodesBefore: length graph.nodes
                                , noOfNodesAfter: length treenodes.yes
                                } \_ -> unit
-      graph { links = treelinks.yes, nodes = treenodes.yes, tree = Nothing }
+      graph { links = treelinks.yes, nodes = treenodes.yes, tree = idTree }
 
 
 buildTree :: String -> SpagoCookedModel -> Array SpagoGraphLink_ -> Maybe (Tree NodeID)
@@ -94,37 +98,10 @@ buildTree rootName model treelinks = do
     linksWhoseSourceIs id = L.fromFoldable $ (_.targetID) <$> (filter (\l -> l.sourceID == id) treelinks)
 
     go :: NodeID -> Tree NodeID
-    go childID = spy "new tree node: " $ Node childID (go <$> linksWhoseSourceIs childID)
+    go childID = Node childID (go <$> linksWhoseSourceIs childID)
 
   rootID <- M.lookup rootName model.name2IdMap
   Just $ Node rootID (go <$> (linksWhoseSourceIs rootID))
-
--- buildTree :: String -> SpagoCookedModel -> GraphSearchRecord -> Maybe (Tree NodeID)
--- buildTree rootName model gsr = do
---   let
---     onlyReachableDeps :: Array String -> L.List NodeID -- FIXME, types are wrong here, cooked nodes have depends :: Array NodeID
---     onlyReachableDeps depends = L.filter (\id -> id `elem` gsr.reachableNodes) dependsListIDs 
---       where
---         dependIDs :: Array NodeID
---         dependIDs = unsafeCoerce depends
---         dependsListIDs :: L.List NodeID
---         dependsListIDs = L.fromFoldable dependIDs
-      
-
---     go :: NodeID -> Tree NodeID
---     go childID = Node childID (go <$> (fromMaybe Nil children))
---       where
---         _ = spy "entering go again: " childID
---         children :: Maybe (L.List NodeID)
---         children = do
---           thisNode <- find (\d -> d.id == childID) model.nodes
---           let _ = spy "this node is: " thisNode.name
---           pure $ onlyReachableDeps thisNode.depends
-    
---   rootID   <- M.lookup rootName model.name2IdMap
---   rootNode <- find (\d -> d.id == rootID) model.nodes
---   Just $ Node rootID (go <$> (onlyReachableDeps rootNode.depends))
-
 
 path2Tuples :: L.List (Tuple NodeID NodeID) -> L.List NodeID -> L.List (Tuple NodeID NodeID)
 path2Tuples acc Nil     = acc
