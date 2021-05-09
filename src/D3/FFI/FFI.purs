@@ -110,7 +110,7 @@ foreign import nanNodes_ :: forall id node. Array (D3ForceNode_ id node) -> Unit
 pinNodeWithID :: forall node. Array node -> String -> Number -> Number -> Unit
 pinNodeWithID nodes nodeName fx fy = unit
   where
-    _ = (pinNode_ fx fy) <$> find (\node -> node.id == nodeName) (unsafeCoerce nodes)
+    _ = (pinNode_ fx fy) <$> find (\node -> node.name == nodeName) (unsafeCoerce nodes)
 
 
 -- TODO this all has to change completely to work within Tagless 

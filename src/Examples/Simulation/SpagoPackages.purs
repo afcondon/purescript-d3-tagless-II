@@ -112,8 +112,8 @@ graphScript (Tuple w h) model = do
 
   let forces      = [ Force $ ForceManyBody    $ defaultForceManyConfig   "charge"
                     , Force $ ForceCollide     $ defaultForceCollideConfig "collide" (\d -> chooseRadiusFn d)
-                    , Force $ ForceX           $ defaultForceXConfig "x"
-                    , Force $ ForceY           $ defaultForceYConfig "y"
+                    -- , Force $ ForceX           $ defaultForceXConfig "x"
+                    -- , Force $ ForceY           $ defaultForceYConfig "y"
                     , Force $ ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
                     ]
       simulation_ = initSimulation forces model model.nodes model.links

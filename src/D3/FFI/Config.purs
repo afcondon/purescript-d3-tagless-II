@@ -4,6 +4,7 @@ import Prelude
 
 import D3.Data.Foreign (Datum_, Index_)
 import Data.Number (infinity)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- | a record to initialize / configure simulations
 type SimulationConfig_ = { 
@@ -37,6 +38,10 @@ defaultForceRadialFixedConfig name radius = { name, strength: 0.1, radius, cx: 0
 
 defaultForceRadialConfig :: String -> (Datum_ -> Index_ -> Number) -> ForceRadialConfig_
 defaultForceRadialConfig name radius = { name, strength: 0.1, radius, cx: 0.0, cy: 0.0 }
+
+defaultForceLinkConfig :: String -> ForceLinkConfig_
+defaultForceLinkConfig name = { name, strength: 1.0, distance: (\d i -> 30.0), iterations: 1.0, id: (\d i -> (unsafeCoerce d).index) }
+
 
 defaultConfigSimulation :: SimulationConfig_
 defaultConfigSimulation = { 
@@ -90,7 +95,7 @@ type ForceYConfig_ = {
 type ForceRadialFixedConfig_ = {
     name        :: String
   , radius      :: Number
-  , strength    :: Number
+  , strength    :: Number -- TODO this needs to be Attr style polymorph too
   , cx          :: Number
   , cy          :: Number
 }
@@ -98,7 +103,15 @@ type ForceRadialFixedConfig_ = {
 type ForceRadialConfig_ = {
     name        :: String
   , radius      :: (Datum_ -> Index_ -> Number)
-  , strength    :: Number -- TODO check this might need to be Attr style polymorph too
+  , strength    :: Number -- TODO this needs to be Attr style polymorph too
   , cx          :: Number
   , cy          :: Number
+}
+
+type ForceLinkConfig_ = {
+    name        :: String
+  , strength    :: Number -- TODO this needs to be Attr style polymorph too
+  , distance    :: (Datum_ -> Index_ -> Number)
+  , iterations  :: Number
+  , id          :: (Datum_ -> Index_ -> Number)
 }
