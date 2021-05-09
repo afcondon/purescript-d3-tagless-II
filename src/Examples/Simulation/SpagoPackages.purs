@@ -6,7 +6,7 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.File.Spago (LinkExtension, NodeExtension, NodeID, NodeType(..), Path, SpagoCookedModel, SpagoGraphLink_, SpagoGraphNode_, GraphSearchRecord, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
-import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), Tree)
+import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..))
 import D3.FFI (GraphModel_, D3ForceLink_, pinNodeWithID, startSimulation_, stopSimulation_)
 import D3.FFI.Config (defaultForceCollideConfig, defaultForceManyConfig, defaultForceRadialConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
@@ -91,7 +91,7 @@ treeReduction graph = do
 --   rootNode    <- find (\d -> d.id == rootID) model.nodes
 --   rootDepends <- sequence $ (\n -> M.lookup n model.name2IdMap) <$> rootNode.depends
 --   let filteredDepends = filter (\id -> id `elem` gsr.reachableNodes) rootDepends
-  Nothing
+  -- Nothing
 
 
 path2Tuples :: L.List (Tuple NodeID NodeID) -> L.List NodeID -> L.List (Tuple NodeID NodeID)

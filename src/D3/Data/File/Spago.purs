@@ -2,7 +2,7 @@ module D3.Data.File.Spago where
 
 import Affjax (URL)
 import D3.Data.Foreign (Datum_)
-import D3.Data.Tree (Tree(..))
+import Data.Tree (Tree(..))
 import D3.FFI (D3ForceLink_, D3ForceNode_, makeGraphLinks_, makeGraphNodes_)
 import Data.Array (catMaybes, filter, foldl, head, length, null, range, uncons, zip, (!!), (:))
 import Data.Array as A
