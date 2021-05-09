@@ -5,7 +5,7 @@ import Prelude hiding (append,join)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, text, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.File.Spago (LinkExtension, NodeExtension, NodeID, NodeType(..), Path, SpagoCookedModel, SpagoGraphLink_, SpagoGraphNode_, GraphSearchRecord, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
+import D3.Data.File.Spago (GraphSearchRecord, LinkExtension, NodeExtension, NodeType(..), Path, SpagoCookedModel, SpagoGraphLink_, SpagoGraphNode_, NodeID, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..))
 import D3.FFI (GraphModel_, D3ForceLink_, pinNodeWithID, startSimulation_, stopSimulation_)
 import D3.FFI.Config (defaultForceCollideConfig, defaultForceManyConfig, defaultForceRadialConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
@@ -25,8 +25,9 @@ import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set as S
 import Data.Traversable (sequence)
+import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..), fst, snd)
-import Debug (spy, trace)
+import Debug (debugger, spy, trace)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
@@ -75,7 +76,7 @@ treeReduction graph = do
           treenodes    = partition (\n -> (n.id `elem` r.reachableNodes) || 
                                            n.name == "Main") -- FIXME not "Main" but "whatever we gave as root of tree"
                                    graph.nodes
-          -- tree = buildTree "Main" graph r
+          tree    = debugger \_ -> buildTree "Main" graph r
 
           _            = trace { fn: "treeReduction"
                                , noOfLinksBefore: length graph.links
@@ -85,13 +86,31 @@ treeReduction graph = do
                                } \_ -> unit
       graph { links = treelinks.yes, nodes = treenodes.yes, tree = Nothing }
 
--- buildTree :: String -> SpagoCookedModel -> GraphSearchRecord -> Maybe (Tree SpagoGraphNode_)
--- buildTree rootName model gsr = do
---   rootID      <- M.lookup rootName model.name2IdMap
---   rootNode    <- find (\d -> d.id == rootID) model.nodes
---   rootDepends <- sequence $ (\n -> M.lookup n model.name2IdMap) <$> rootNode.depends
---   let filteredDepends = filter (\id -> id `elem` gsr.reachableNodes) rootDepends
-  -- Nothing
+buildTree :: String -> SpagoCookedModel -> GraphSearchRecord -> Maybe (Tree NodeID)
+buildTree rootName model gsr = do
+  let
+    onlyReachableDeps :: Array String -> L.List NodeID -- FIXME, types are wrong here, cooked nodes have depends :: Array NodeID
+    onlyReachableDeps depends = L.filter (\id -> id `elem` gsr.reachableNodes) dependsListIDs 
+      where
+        dependIDs :: Array NodeID
+        dependIDs = unsafeCoerce depends
+        dependsListIDs :: L.List NodeID
+        dependsListIDs = L.fromFoldable dependIDs
+      
+
+    go :: NodeID -> Tree NodeID
+    go childID = Node childID (go <$> (fromMaybe Nil children))
+      where
+        _ = spy "entering go again: " childID
+        children :: Maybe (L.List NodeID)
+        children = do
+          thisNode <- find (\d -> d.id == childID) model.nodes
+          let _ = spy "this node is: " thisNode.name
+          pure $ onlyReachableDeps thisNode.depends
+    
+  rootID   <- M.lookup rootName model.name2IdMap
+  rootNode <- find (\d -> d.id == rootID) model.nodes
+  Just $ Node rootID (go <$> (onlyReachableDeps rootNode.depends))
 
 
 path2Tuples :: L.List (Tuple NodeID NodeID) -> L.List NodeID -> L.List (Tuple NodeID NodeID)
