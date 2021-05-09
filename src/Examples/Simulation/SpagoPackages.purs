@@ -7,11 +7,12 @@ import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.File.Spago (GraphSearchRecord, LinkExtension, NodeExtension, NodeID, NodeType(..), Path, SpagoCookedModel, SpagoGraphNode_, SpagoGraphLink_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
 import D3.Data.Types (D3HierarchicalNode(..), D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), makeD3TreeJSONFromTreeID)
-import D3.FFI (D3ForceLink_, GraphModel_, hierarchyFromJSON_, pinNodeWithID, startSimulation_, stopSimulation_)
+import D3.FFI (D3ForceLink_, GraphModel_, hierarchyFromJSON_, initTree_, pinNodeWithID, startSimulation_, stopSimulation_, treeMinMax_, treeSetRoot_, treeSetSeparation_, treeSetSize_)
 import D3.FFI.Config (defaultForceCollideConfig, defaultForceManyConfig, defaultForceRadialConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
+import D3.Layouts.Hierarchical (radialSeparation)
 import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
 import D3.Scales (d3SchemeCategory10S_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
@@ -32,6 +33,7 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (log, pow, sqrt) as Math
+import Math (pi)
 import Unsafe.Coerce (unsafeCoerce)
 
 
@@ -80,7 +82,11 @@ treeReduction graph = do
           idTree    = buildTree "Main" graph treelinks.yes
           jsontree = spy "supposedly JSON tree: " $makeD3TreeJSONFromTreeID <$> idTree
           rootTree = spy "supposedly hierarchy from JSON tree: " $ hierarchyFromJSON_ <$> jsontree
-          rootH    = D3HierarchicalNode (unsafeCoerce rootTree)
+          -- rootH    = D3HierarchicalNode (unsafeCoerce rootTree)
+          layout = ((initTree_ unit) `treeSetSize_` [ 2.0 * pi, 500.0 ]) `treeSetSeparation_` radialSeparation
+          laidOutRoot_ = spy "supposedly laidout tree" $ (treeSetRoot_ layout) <$> rootTree
+
+          -- { xMin, xMax, yMin, yMax } = treeMinMax_ <$> laidOutRoot_
 
           _            = trace { fn: "treeReduction"
                                , noOfLinksBefore: length graph.links
