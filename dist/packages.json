@@ -320,16 +320,20 @@
             "arrays",
             "bifunctors",
             "console",
+            "datetime",
             "debug",
             "effect",
             "either",
             "foldable-traversable",
             "functions",
+            "graphs",
             "integers",
+            "lists",
             "math",
             "maybe",
             "my-project",
             "nullable",
+            "numbers",
             "ordered-collections",
             "prelude",
             "random",
@@ -414,6 +418,19 @@
             "st",
             "tailrec",
             "unsafe-coerce"
+        ]
+    },
+    "graphs": {
+        "depends": [
+            "arrays",
+            "bifunctors",
+            "catenable-lists",
+            "foldable-traversable",
+            "lists",
+            "maybe",
+            "ordered-collections",
+            "prelude",
+            "tuples"
         ]
     },
     "affjax": {
@@ -593,6 +610,18 @@
     "partial": {
         "depends": [
             "partial"
+        ]
+    },
+    "catenable-lists": {
+        "depends": [
+            "catenable-lists",
+            "control",
+            "foldable-traversable",
+            "lists",
+            "maybe",
+            "prelude",
+            "tuples",
+            "unfoldable"
         ]
     },
     "web-file": {

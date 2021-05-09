@@ -70,10 +70,10 @@
         "path": "src/D3/Interpreter/Meta.purs",
         "depends": [
             "Control.Monad.State",
-            "D3.Attributes.Instances",
+            "D3.Data.Types",
             "D3.Interpreter",
-            "D3.Layouts.Hierarchical",
             "D3.Selection",
+            "D3.Zoom",
             "Data.Array",
             "Data.Map",
             "Data.Maybe",
@@ -233,6 +233,16 @@
             "Data.Traversable",
             "Effect.Class",
             "Prelude"
+        ]
+    },
+    "D3.Data.File.LesMiserables": {
+        "path": "src/D3/Data/File/LesMiserables.purs",
+        "depends": [
+            "Affjax",
+            "D3.Data.Foreign",
+            "D3.FFI",
+            "Data.Either",
+            "Unsafe.Coerce"
         ]
     },
     "Data.Char.Gen": {
@@ -468,10 +478,8 @@
     "D3.Examples.Tree.Types": {
         "path": "src/Examples/Tree/Types.purs",
         "depends": [
-            "D3.Attributes.Instances",
-            "D3.Layouts.Hierarchical",
-            "D3.Selection",
-            "Unsafe.Coerce"
+            "D3.Data.Types",
+            "D3.Selection"
         ]
     },
     "Web.HTML.HTMLHyperlinkElementUtils": {
@@ -562,6 +570,33 @@
             "Prelude"
         ]
     },
+    "D3.Examples.Simulation.LesMiserables": {
+        "path": "src/Examples/Simulation/LesMiserables.purs",
+        "depends": [
+            "Affjax",
+            "Affjax.ResponseFormat",
+            "D3.Attributes.Sugar",
+            "D3.Data.File.LesMiserables",
+            "D3.Data.Types",
+            "D3.FFI",
+            "D3.FFI.Config",
+            "D3.Interpreter",
+            "D3.Interpreter.D3",
+            "D3.Interpreter.String",
+            "D3.Layouts.Simulation",
+            "D3.Scales",
+            "D3.Selection",
+            "D3.Zoom",
+            "Data.Either",
+            "Data.Tuple",
+            "Effect.Aff",
+            "Effect.Class",
+            "Effect.Class.Console",
+            "Math",
+            "Prelude",
+            "Unsafe.Coerce"
+        ]
+    },
     "Type.Data.Row": {
         "path": ".spago/prelude/v5.0.0/src/Type/Data/Row.purs",
         "depends": []
@@ -590,6 +625,39 @@
     "Safe.Coerce": {
         "path": ".spago/safe-coerce/v1.0.0/src/Safe/Coerce.purs",
         "depends": [
+            "Unsafe.Coerce"
+        ]
+    },
+    "D3.Examples.Simulation.SpagoPackages": {
+        "path": "src/Examples/Simulation/SpagoPackages.purs",
+        "depends": [
+            "Affjax",
+            "Affjax.ResponseFormat",
+            "D3.Attributes.Sugar",
+            "D3.Data.File.Spago",
+            "D3.Data.Types",
+            "D3.FFI",
+            "D3.FFI.Config",
+            "D3.Interpreter",
+            "D3.Interpreter.D3",
+            "D3.Interpreter.String",
+            "D3.Layouts.Simulation",
+            "D3.Scales",
+            "D3.Selection",
+            "D3.Zoom",
+            "Data.Array",
+            "Data.Either",
+            "Data.List",
+            "Data.Map",
+            "Data.Maybe",
+            "Data.Set",
+            "Data.Tuple",
+            "Debug",
+            "Effect.Aff",
+            "Effect.Class",
+            "Effect.Class.Console",
+            "Math",
+            "Prelude",
             "Unsafe.Coerce"
         ]
     },
@@ -699,6 +767,7 @@
         "depends": [
             "Control.Monad.State",
             "D3.Attributes.Instances",
+            "D3.FFI",
             "D3.Interpreter",
             "D3.Selection",
             "Data.Array",
@@ -724,6 +793,25 @@
             "Web.Event.EventTarget",
             "Web.HTML.HTMLElement",
             "Web.Internal.FFI"
+        ]
+    },
+    "Data.CatList": {
+        "path": ".spago/catenable-lists/v6.0.0/src/Data/CatList.purs",
+        "depends": [
+            "Control.Alt",
+            "Control.Alternative",
+            "Control.MonadPlus",
+            "Control.MonadZero",
+            "Control.Plus",
+            "Data.CatQueue",
+            "Data.Foldable",
+            "Data.List",
+            "Data.Maybe",
+            "Data.Traversable",
+            "Data.Tuple",
+            "Data.Unfoldable",
+            "Data.Unfoldable1",
+            "Prelude"
         ]
     },
     "Effect.Exception.Unsafe": {
@@ -770,14 +858,6 @@
             "Data.Traversable",
             "Data.TraversableWithIndex",
             "Data.Unfoldable1",
-            "Prelude"
-        ]
-    },
-    "D3.Layouts.Hierarchical.Types": {
-        "path": "src/D3/Layouts/Hierarchical/Types.purs",
-        "depends": [
-            "D3.Attributes.Instances",
-            "Data.Nullable",
             "Prelude"
         ]
     },
@@ -1075,6 +1155,25 @@
             "Prelude"
         ]
     },
+    "D3.Data.File.Spago": {
+        "path": "src/D3/Data/File/Spago.purs",
+        "depends": [
+            "Affjax",
+            "D3.Data.Foreign",
+            "D3.FFI",
+            "Data.Array",
+            "Data.Graph",
+            "Data.List",
+            "Data.Map",
+            "Data.Maybe",
+            "Data.Set",
+            "Data.String",
+            "Data.Tuple",
+            "Debug",
+            "Prelude",
+            "Unsafe.Coerce"
+        ]
+    },
     "Foreign.Object": {
         "path": ".spago/foreign-object/v3.0.0/src/Foreign/Object.purs",
         "depends": [
@@ -1200,6 +1299,19 @@
         "depends": [
             "Data.Profunctor",
             "Prelude"
+        ]
+    },
+    "D3.FFI": {
+        "path": "src/D3/FFI/FFI.purs",
+        "depends": [
+            "Affjax",
+            "D3.Data.Types",
+            "D3.FFI.Config",
+            "Data.Array",
+            "Data.Function.Uncurried",
+            "Data.Nullable",
+            "Prelude",
+            "Unsafe.Coerce"
         ]
     },
     "Web.HTML.Common": {
@@ -1440,9 +1552,11 @@
         "depends": [
             "Control.Monad.State",
             "D3.Attributes.Instances",
+            "D3.Data.Types",
+            "D3.FFI",
             "D3.Interpreter",
-            "D3.Layouts.Simulation",
             "D3.Selection",
+            "D3.Zoom",
             "Data.Foldable",
             "Data.Tuple",
             "Effect",
@@ -1502,6 +1616,13 @@
             "Data.Identity",
             "Data.Newtype",
             "Prelude"
+        ]
+    },
+    "D3.Data.Transition": {
+        "path": "src/D3/Data/Transition.purs",
+        "depends": [
+            "D3.Data.Foreign",
+            "Data.Time.Duration"
         ]
     },
     "Control.Monad.ST.Internal": {
@@ -1704,9 +1825,11 @@
         "path": "src/Examples/Tree/TreeScript.purs",
         "depends": [
             "D3.Attributes.Sugar",
+            "D3.Data.Tree",
+            "D3.Data.Types",
             "D3.Examples.Tree.Types",
+            "D3.FFI",
             "D3.Interpreter",
-            "D3.Layouts.Hierarchical",
             "D3.Selection",
             "Prelude"
         ]
@@ -1724,11 +1847,13 @@
     "Main": {
         "path": "src/Main.purs",
         "depends": [
-            "D3.Examples.Force",
+            "D3.Data.Types",
             "D3.Examples.GUP",
+            "D3.Examples.Simulation.LesMiserables",
+            "D3.Examples.Simulation.SpagoPackages",
             "D3.Examples.Tree.Configure",
+            "D3.Examples.Tree.Meta",
             "D3.Layouts.Hierarchical",
-            "D3.Layouts.Hierarchical.Types",
             "Data.Bifunctor",
             "Data.Foldable",
             "Effect",
@@ -1933,6 +2058,13 @@
     "Type.Equality": {
         "path": ".spago/type-equality/v4.0.0/src/Type/Equality.purs",
         "depends": []
+    },
+    "D3.Zoom": {
+        "path": "src/D3/Selection/Zoom.purs",
+        "depends": [
+            "D3.FFI",
+            "Web.Event.Internal.Types"
+        ]
     },
     "Foreign.Index": {
         "path": ".spago/foreign/v6.0.0/src/Foreign/Index.purs",
@@ -2231,11 +2363,11 @@
         "path": "src/D3/Selection/Selection.purs",
         "depends": [
             "D3.Attributes.Instances",
+            "D3.Data.Types",
+            "D3.FFI",
             "Data.Maybe.Last",
-            "Effect.Aff",
             "Prelude",
-            "Unsafe.Coerce",
-            "Web.Event.Internal.Types"
+            "Unsafe.Coerce"
         ]
     },
     "Data.List.Types": {
@@ -2336,32 +2468,22 @@
             "Prelude"
         ]
     },
-    "D3.Examples.Force": {
-        "path": "src/Examples/Force.purs",
+    "Data.CatQueue": {
+        "path": ".spago/catenable-lists/v6.0.0/src/Data/CatQueue.purs",
         "depends": [
-            "Affjax",
-            "Affjax.ResponseFormat",
-            "Control.Monad.State",
-            "D3.Attributes.Instances",
-            "D3.Attributes.Sugar",
-            "D3.Interpreter",
-            "D3.Interpreter.D3",
-            "D3.Interpreter.String",
-            "D3.Layouts.Simulation",
-            "D3.Scales",
-            "D3.Selection",
-            "Data.Either",
-            "Data.Int",
+            "Control.Alt",
+            "Control.Alternative",
+            "Control.Apply",
+            "Control.MonadPlus",
+            "Control.MonadZero",
+            "Control.Plus",
+            "Data.Foldable",
+            "Data.List",
+            "Data.Maybe",
+            "Data.Traversable",
             "Data.Tuple",
-            "Effect",
-            "Effect.Aff",
-            "Effect.Class",
-            "Effect.Class.Console",
-            "Math",
-            "Prelude",
-            "Unsafe.Coerce",
-            "Web.HTML",
-            "Web.HTML.Window"
+            "Data.Unfoldable",
+            "Prelude"
         ]
     },
     "Control.Monad.Except": {
@@ -2394,7 +2516,9 @@
     "D3.Interpreter": {
         "path": "src/D3/Interpreter/Interpreter.purs",
         "depends": [
+            "D3.Data.Types",
             "D3.Selection",
+            "D3.Zoom",
             "Prelude"
         ]
     },
@@ -2524,6 +2648,15 @@
             "Prelude"
         ]
     },
+    "D3.FFI.Config": {
+        "path": "src/D3/FFI/Config.purs",
+        "depends": [
+            "D3.Data.Foreign",
+            "Data.Number",
+            "Prelude",
+            "Unsafe.Coerce"
+        ]
+    },
     "Web.HTML.HTMLQuoteElement": {
         "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLQuoteElement.purs",
         "depends": [
@@ -2591,18 +2724,17 @@
     "D3.Examples.Tree.Configure": {
         "path": "src/Examples/Tree/TreeConfigure.purs",
         "depends": [
-            "D3.Attributes.Instances",
             "D3.Attributes.Sugar",
+            "D3.Data.Tree",
+            "D3.Data.Types",
             "D3.Examples.Tree.Script",
-            "D3.Examples.Tree.Types",
+            "D3.FFI",
             "D3.Interpreter",
             "D3.Interpreter.D3",
             "D3.Interpreter.MetaTree",
             "D3.Interpreter.String",
             "D3.Layouts.Hierarchical",
-            "D3.Layouts.Hierarchical.Types",
             "D3.Scales",
-            "D3.Selection",
             "Data.Map",
             "Data.Tuple",
             "Debug",
@@ -2737,6 +2869,16 @@
             "Data.Eq",
             "Data.Ring",
             "Data.Semiring"
+        ]
+    },
+    "D3.Data.Types": {
+        "path": "src/D3/Data/Types.purs",
+        "depends": [
+            "D3.Data.Foreign",
+            "D3.Data.Transition",
+            "D3.Data.Tree",
+            "D3.Data.Zoom",
+            "Prelude"
         ]
     },
     "Web.HTML.Event.TrackEvent": {
@@ -3012,22 +3154,18 @@
             "Affjax",
             "Affjax.ResponseFormat",
             "D3.Attributes.Instances",
-            "D3.Layouts.Hierarchical.Types",
+            "D3.Data.Types",
+            "D3.FFI",
             "D3.Selection",
             "Data.Bifunctor",
             "Data.Either",
             "Data.Function.Uncurried",
-            "Data.Int",
             "Data.Maybe",
             "Data.Nullable",
-            "Data.Tuple",
-            "Effect",
             "Effect.Aff",
             "Effect.Class",
             "Prelude",
-            "Unsafe.Coerce",
-            "Web.HTML",
-            "Web.HTML.Window"
+            "Unsafe.Coerce"
         ]
     },
     "Web.HTML.Event.PageTransitionEvent": {
@@ -3106,13 +3244,20 @@
         "path": "src/D3/Attributes/Sugar.purs",
         "depends": [
             "D3.Attributes.Instances",
-            "D3.Layouts.Hierarchical",
+            "D3.Data.Types",
+            "D3.FFI",
             "D3.Selection",
             "Data.Array",
+            "Data.Function.Uncurried",
+            "Data.Int",
+            "Data.Tuple",
             "Debug",
+            "Effect",
             "Effect.Aff",
             "Prelude",
-            "Unsafe.Coerce"
+            "Unsafe.Coerce",
+            "Web.HTML",
+            "Web.HTML.Window"
         ]
     },
     "Web.HTML.HTMLIFrameElement": {
@@ -3204,6 +3349,21 @@
             "Data.Eq",
             "Data.HeytingAlgebra",
             "Data.Ord",
+            "Prelude"
+        ]
+    },
+    "Data.Graph": {
+        "path": ".spago/graphs/c4a3189e39579102b8be3cff9bcde63a9d4ef322/src/Data/Graph.purs",
+        "depends": [
+            "Data.Array",
+            "Data.Bifunctor",
+            "Data.CatList",
+            "Data.Foldable",
+            "Data.List",
+            "Data.Map",
+            "Data.Maybe",
+            "Data.Set",
+            "Data.Tuple",
             "Prelude"
         ]
     },
@@ -3377,9 +3537,11 @@
     "D3.Attributes.Instances": {
         "path": "src/D3/Attributes/Instances.purs",
         "depends": [
+            "D3.Data.Types",
             "Data.Function.Uncurried",
             "Prelude",
-            "Unsafe.Coerce"
+            "Unsafe.Coerce",
+            "Web.Event.Internal.Types"
         ]
     },
     "Web.HTML.HTMLMediaElement": {
@@ -3469,8 +3631,10 @@
     "D3.Layouts.Simulation": {
         "path": "src/D3/Layouts/Simulation/Simulation.purs",
         "depends": [
+            "D3.Data.Types",
+            "D3.FFI",
+            "D3.FFI.Config",
             "D3.Selection",
-            "Data.Map",
             "Prelude",
             "Unsafe.Coerce"
         ]
@@ -3802,6 +3966,12 @@
             "Web.Event.EventTarget",
             "Web.HTML.HTMLElement",
             "Web.Internal.FFI"
+        ]
+    },
+    "D3.Data.Zoom": {
+        "path": "src/D3/Data/Zoom.purs",
+        "depends": [
+            "D3.Data.Foreign"
         ]
     },
     "Data.Functor.Coproduct": {
@@ -4570,6 +4740,7 @@
             "Control.Monad.Rec.Class",
             "D3.Attributes.Instances",
             "D3.Attributes.Sugar",
+            "D3.Data.Types",
             "D3.Interpreter",
             "D3.Interpreter.D3",
             "D3.Selection",
@@ -4813,6 +4984,23 @@
             "Web.Internal.FFI"
         ]
     },
+    "D3.Examples.Tree.Meta": {
+        "path": "src/Examples/Tree/Meta.purs",
+        "depends": [
+            "D3.Attributes.Sugar",
+            "D3.Data.Types",
+            "D3.FFI",
+            "D3.Interpreter",
+            "D3.Interpreter.D3",
+            "D3.Layouts.Hierarchical",
+            "D3.Selection",
+            "Data.Tuple",
+            "Effect.Aff",
+            "Effect.Class",
+            "Prelude",
+            "Unsafe.Coerce"
+        ]
+    },
     "Web.HTML.HTMLScriptElement": {
         "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLScriptElement.purs",
         "depends": [
@@ -4936,6 +5124,15 @@
             "Prelude"
         ]
     },
+    "D3.Data.Tree": {
+        "path": "src/D3/Data/Tree.purs",
+        "depends": [
+            "D3.Data.Foreign",
+            "Data.Nullable",
+            "Prelude",
+            "Unsafe.Coerce"
+        ]
+    },
     "Data.FormURLEncoded": {
         "path": ".spago/form-urlencoded/v6.0.1/src/Data/FormURLEncoded.purs",
         "depends": [
@@ -4948,6 +5145,10 @@
             "JSURI",
             "Prelude"
         ]
+    },
+    "D3.Data.Foreign": {
+        "path": "src/D3/Data/Foreign.purs",
+        "depends": []
     },
     "Web.XHR.ResponseType": {
         "path": ".spago/web-xhr/v4.0.0/src/Web/XHR/ResponseType.purs",
