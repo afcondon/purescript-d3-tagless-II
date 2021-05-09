@@ -29,7 +29,7 @@ import Debug (spy, trace)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
-import Math (log) as Math
+import Math (log, pow, sqrt) as Math
 import Unsafe.Coerce (unsafeCoerce)
 
 
@@ -112,8 +112,8 @@ graphScript (Tuple w h) model = do
 
   let forces      = [ Force $ ForceManyBody    $ defaultForceManyConfig   "charge"
                     , Force $ ForceCollide     $ defaultForceCollideConfig "collide" (\d -> chooseRadiusFn d)
-                    -- , Force $ ForceX           $ defaultForceXConfig "x"
-                    -- , Force $ ForceY           $ defaultForceYConfig "y"
+                    , Force $ ForceX           $ defaultForceXConfig "x"
+                    , Force $ ForceY           $ defaultForceYConfig "y"
                     , Force $ ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
                     ]
       simulation_ = initSimulation forces model model.nodes model.links
@@ -175,7 +175,7 @@ chooseRadius locMap datum = do
   let d = datumIsGraphNode_ datum
   case d.moduleOrPackage of
     -- IsModule   -> moduleRadius
-    IsModule   -> 2.0 * (Math.log $ fromMaybe 10.0 $ M.lookup d.path locMap)
+    IsModule   -> Math.sqrt (fromMaybe 10.0 $ M.lookup d.path locMap)
     IsPackage -> packageRadius
 
 chooseRadiusFn :: Datum_ -> Index_ -> Number
