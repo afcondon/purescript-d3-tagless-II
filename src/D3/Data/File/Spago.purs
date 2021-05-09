@@ -1,31 +1,31 @@
 module D3.Data.File.Spago where
 
-import Data.Array
-import Prelude
-
 import Affjax (URL)
 import D3.Data.Foreign (Datum_)
-import D3.FFI (D3ForceLink_, D3ForceNode_, GraphModel_, makeGraphLinks_, makeGraphNodes_)
+import D3.Data.Tree (Tree(..))
+import D3.FFI (D3ForceLink_, D3ForceNode_, makeGraphLinks_, makeGraphNodes_)
+import Data.Array (catMaybes, filter, foldl, head, length, null, range, uncons, zip, (!!), (:))
 import Data.Array as A
-import Data.Graph (Graph, children, fromMap, isCyclic, outEdges)
+import Data.Graph (Graph, fromMap)
 import Data.Graph as G
-import Data.List as L
-import Data.Map (lookup)
+import Data.List (List(..))
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set as S
 import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..))
 import Debug (spy)
+import Prelude (class Show, bind, not, ($), (<$>), (<>), (==))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- TODO This is all specific to the Spago output, so break out into file handling modules later
-type SpagoModule  = { key :: String, depends :: Array String, path :: String }
-type SpagoPackage = { key :: String, depends :: Array String }
-type SpagoLsDep   = { packageName :: String, version :: String, repo :: { tag :: String, contents :: URL } }
+type SpagoModuleJSON  = { key :: String, depends :: Array String, path :: String }
+type SpagoPackageJSON = { key :: String, depends :: Array String }
+type SpagoLsDepJSON   = { packageName :: String, version :: String, repo :: { tag :: String, contents :: URL } }
+type SpagoLOCJSON     = { loc :: Number, path :: String }
 
 -- TODO no error handling at all here RN (OTOH - performant!!)
-type SpagoDataJSON_ = { packages :: Array SpagoPackage, modules :: Array SpagoModule, lsDeps :: Array SpagoLsDep, loc :: Array SpagoLOC } 
+type SpagoDataJSON_ = { packages :: Array SpagoPackageJSON, modules :: Array SpagoModuleJSON, lsDeps :: Array SpagoLsDepJSON, loc :: Array SpagoLOCJSON } 
 
 
 -- *********************************************************************************************************************
@@ -51,11 +51,11 @@ type SpagoGraph      = Graph NodeID SpagoNode
 type SpagoGraphNode_ = D3ForceNode_ NodeID NodeExtension
 type SpagoGraphLink_ = D3ForceLink_ NodeID NodeExtension LinkExtension
 
-type SpagoLOC        = { loc :: Number, path :: String }
-type SpagoNode       = { id :: NodeID, name :: String, path :: String, package :: Maybe Int, moduleOrPackage :: NodeType, depends :: Array NodeID }
-type SpagoLink       = { sourceID :: NodeID, targetID :: NodeID, moduleOrPackage :: LinkType }
-type SpagoRawModel   = { links :: Array SpagoLink, nodes :: Array SpagoNode, name2IdMap :: M.Map String NodeID }
-type SpagoCookedModel = { links :: Array SpagoGraphLink_, nodes :: Array SpagoGraphNode_, graph :: SpagoGraph, name2IdMap :: M.Map String NodeID, loc :: M.Map String Number }
+type SpagoNode        = { id :: NodeID, name :: String, path :: String, package :: Maybe Int, moduleOrPackage :: NodeType, depends :: Array NodeID }
+type SpagoLink        = { sourceID :: NodeID, targetID :: NodeID, moduleOrPackage :: LinkType }
+
+type SpagoRawModel    = { links :: Array SpagoLink, nodes :: Array SpagoNode, name2IdMap :: M.Map String NodeID }
+type SpagoCookedModel = { links :: Array SpagoGraphLink_, nodes :: Array SpagoGraphNode_, graph :: SpagoGraph, name2IdMap :: M.Map String NodeID, loc :: M.Map String Number, tree :: Maybe (Tree NodeID) }
 
 datumIsGraphLink_ :: Datum_ -> SpagoGraphLink_
 datumIsGraphLink_ = unsafeCoerce
@@ -67,7 +67,7 @@ convertFilesToGraphModel :: forall r.
   { body :: String | r } -> 
   { body :: String | r } -> 
   { body :: String | r } -> SpagoCookedModel
-convertFilesToGraphModel moduleJSON packageJSON lsdepJSON locJSON= 
+convertFilesToGraphModel moduleJSON packageJSON lsdepJSON locJSON = 
   makeSpagoGraphModel $ readSpagoDataJSON_ moduleJSON.body packageJSON.body lsdepJSON.body locJSON.body
 
 foreign import readSpagoDataJSON_ :: String -> String -> String -> String -> SpagoDataJSON_
@@ -90,11 +90,11 @@ makeSpagoGraphModel json = do
     loc = M.fromFoldable $ (\o -> Tuple o.path o.loc) <$> json.loc
 
     -- reachables = 
-    --   case (flip getReachableTree graph) <$> raw.root of
+    --   case (flip getReachableNodes graph) <$> raw.root of
     --     Nothing -> []
     --     (Just r) -> spy "reachable nodes" $ r.reachableNodes
   
-  { links, nodes, graph, name2IdMap: raw.name2IdMap, loc }
+  { links, nodes, graph, name2IdMap: raw.name2IdMap, loc, tree: Nothing }
 
 getRawGraphModel :: SpagoDataJSON_ -> SpagoRawModel
 getRawGraphModel { packages, modules, lsDeps } = do
@@ -124,11 +124,11 @@ getRawGraphModel { packages, modules, lsDeps } = do
             makeTuple :: String -> Tuple NodeID NodeID
             makeTuple s = Tuple id (getId s)   
 
-    makeNodeFromModule :: SpagoModule -> SpagoNode
-    makeNodeFromModule m = { id: getId m.key, name: m.key, path: m.path, package: getPackage m.path, moduleOrPackage: IsModule, depends: getId <$> m.depends } -- FIXME lookup the m.depends list for ids
+    makeNodeFromModuleJSON :: SpagoModuleJSON -> SpagoNode
+    makeNodeFromModuleJSON m = { id: getId m.key, name: m.key, path: m.path, package: getPackage m.path, moduleOrPackage: IsModule, depends: getId <$> m.depends } -- FIXME lookup the m.depends list for ids
 
-    makeNodeFromPackage :: SpagoPackage -> SpagoNode
-    makeNodeFromPackage m = { id: getId m.key, name: m.key, path, package: M.lookup m.key idMap, moduleOrPackage: IsPackage, depends: getId <$> m.depends } -- FIXME id, package and depends all need lookups
+    makeNodeFromPackageJSON :: SpagoPackageJSON -> SpagoNode
+    makeNodeFromPackageJSON m = { id: getId m.key, name: m.key, path, package: M.lookup m.key idMap, moduleOrPackage: IsPackage, depends: getId <$> m.depends } -- FIXME id, package and depends all need lookups
       where
         path = case M.lookup m.key depsMap of
                 Nothing -> "error path not found for package key: " <> m.key
@@ -145,10 +145,10 @@ getRawGraphModel { packages, modules, lsDeps } = do
       else Nothing
 
     moduleLinks = (makeLink M2M)       <$> (foldl foldDepends [] modules)             
-    moduleNodes = makeNodeFromModule   <$> modules
+    moduleNodes = makeNodeFromModuleJSON   <$> modules
 
     packageLinks = (makeLink P2P)      <$> (foldl foldDepends [] packages)
-    packageNodes = makeNodeFromPackage <$> packages
+    packageNodes = makeNodeFromPackageJSON <$> packages
 
     modulePackageLinks = catMaybes $ makeModuleToPackageLink <$> moduleNodes
 
@@ -170,13 +170,14 @@ type GraphSearchRecord = {
     reachableNodes :: Array NodeID
   , openPaths      :: Array Path
   , closedPaths    :: Array Path
+  , dependencyTree :: Maybe (Tree NodeID)
 }
 
 type Path = Array NodeID
 type Deps = Array NodeID
 
-getReachableTree :: NodeID -> SpagoGraph -> GraphSearchRecord
-getReachableTree id graph = go { reachableNodes: [], openPaths: [[id]], closedPaths: [] }
+getReachableNodes :: NodeID -> SpagoGraph -> GraphSearchRecord
+getReachableNodes id graph = go { reachableNodes: [], openPaths: [[id]], closedPaths: [], dependencyTree: Nothing }
   where
     go :: GraphSearchRecord -> GraphSearchRecord
     go gsr@{ openPaths: [] } = gsr -- bottom out when all open paths are consumed
@@ -199,10 +200,10 @@ getReachableTree id graph = go { reachableNodes: [], openPaths: [[id]], closedPa
             (\d -> d : x.head) <$> newDeps -- ie [ab] with deps [bc] -> [abc, abd]
 
       if null newOpenPaths
-        -- dropping the open path we just processed and transferring it to the list of closedPaths
+        -- moving the open path we just processed to the list of closedPaths
         then Just $ gsr { openPaths   = x.tail                 
                         , closedPaths = x.head : gsr.closedPaths}
-        -- dropping the open path we just processed BUT adding extension(s) to it
+        -- replace this open path with it's extension(s)
         else Just $ gsr { openPaths      = x.tail <> newOpenPaths 
                         , reachableNodes = gsr.reachableNodes <> newDeps }
 

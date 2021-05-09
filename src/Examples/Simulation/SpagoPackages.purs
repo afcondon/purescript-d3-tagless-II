@@ -5,8 +5,8 @@ import Prelude hiding (append,join)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, text, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.File.Spago (NodeExtension, NodeID, NodeType(..), Path, SpagoCookedModel, SpagoGraphLink_, SpagoGraphNode_, LinkExtension, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableTree)
-import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..))
+import D3.Data.File.Spago (LinkExtension, NodeExtension, NodeID, NodeType(..), Path, SpagoCookedModel, SpagoGraphLink_, SpagoGraphNode_, GraphSearchRecord, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
+import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), Tree)
 import D3.FFI (GraphModel_, D3ForceLink_, pinNodeWithID, startSimulation_, stopSimulation_)
 import D3.FFI.Config (defaultForceCollideConfig, defaultForceManyConfig, defaultForceRadialConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
@@ -16,7 +16,7 @@ import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
 import D3.Scales (d3SchemeCategory10S_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
-import Data.Array (concatMap, cons, elem, filter, foldl, fromFoldable, length, partition, reverse, sort)
+import Data.Array (concatMap, cons, elem, filter, find, foldl, fromFoldable, length, partition, reverse, sort)
 import Data.Either (Either(..))
 import Data.List (List(..), (:))
 import Data.List as L
@@ -24,6 +24,7 @@ import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set as S
+import Data.Traversable (sequence)
 import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy, trace)
 import Effect.Aff (Aff)
@@ -63,7 +64,7 @@ drawGraph = do
 
 treeReduction :: SpagoCookedModel -> SpagoCookedModel
 treeReduction graph = do
-  case (flip getReachableTree graph.graph) <$> (findGraphNodeIdFromName graph "Main") of
+  case (flip getReachableNodes graph.graph) <$> (findGraphNodeIdFromName graph "Main") of
     Nothing -> graph -- no change
     (Just r) -> do
       let onlyTreelinks = spy "onlyTreelinks" $ makeTreeLinks (pathsAsLists r.closedPaths)
@@ -74,13 +75,23 @@ treeReduction graph = do
           treenodes    = partition (\n -> (n.id `elem` r.reachableNodes) || 
                                            n.name == "Main") -- FIXME not "Main" but "whatever we gave as root of tree"
                                    graph.nodes
+          -- tree = buildTree "Main" graph r
+
           _            = trace { fn: "treeReduction"
                                , noOfLinksBefore: length graph.links
                                , noOfLinksAfter: length treelinks.yes
                                , noOfNodesBefore: length graph.nodes
                                , noOfNodesAfter: length treenodes.yes
                                } \_ -> unit
-      graph { links = treelinks.yes, nodes = treenodes.yes }
+      graph { links = treelinks.yes, nodes = treenodes.yes, tree = Nothing }
+
+-- buildTree :: String -> SpagoCookedModel -> GraphSearchRecord -> Maybe (Tree SpagoGraphNode_)
+-- buildTree rootName model gsr = do
+--   rootID      <- M.lookup rootName model.name2IdMap
+--   rootNode    <- find (\d -> d.id == rootID) model.nodes
+--   rootDepends <- sequence $ (\n -> M.lookup n model.name2IdMap) <$> rootNode.depends
+--   let filteredDepends = filter (\id -> id `elem` gsr.reachableNodes) rootDepends
+  Nothing
 
 
 path2Tuples :: L.List (Tuple NodeID NodeID) -> L.List NodeID -> L.List (Tuple NodeID NodeID)
