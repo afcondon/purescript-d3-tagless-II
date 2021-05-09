@@ -1,9 +1,10 @@
-exports.readSpagoDataJSON_ = modulesBody => packagesBody => lsdepsBody => {
+exports.readSpagoDataJSON_ = modulesBody => packagesBody => lsdepsBody => locBody => {
   const modules  = decodeModulesFile(modulesBody);
   const packages = decodePackagesFile(packagesBody);
   const lsDeps   = decodeLsDepsFile(lsdepsBody);
+  const loc      = decodeLOCFile(locBody);
 
-  return { modules, packages, lsDeps }
+  return { modules, packages, lsDeps, loc }
 }
 
 // module has key, path & depends
@@ -21,6 +22,13 @@ const decodePackagesFile = function (filecontents) {
 
   return packages;
 }
+
+// package has key and depends
+const decodeLOCFile = function (filecontents) {
+  const json = JSON.parse(filecontents)
+  return json.loc;
+}
+
 // lsdep has key === packageName, version, repo { tag, contents }
 const decodeLsDepsFile = function (filecontents) {
   const jsonlines = splitIntoLines(filecontents)

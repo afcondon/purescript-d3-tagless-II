@@ -25,7 +25,7 @@ type SpagoPackage = { key :: String, depends :: Array String }
 type SpagoLsDep   = { packageName :: String, version :: String, repo :: { tag :: String, contents :: URL } }
 
 -- TODO no error handling at all here RN (OTOH - performant!!)
-type SpagoDataJSON_ = { packages :: Array SpagoPackage, modules :: Array SpagoModule, lsDeps :: Array SpagoLsDep } 
+type SpagoDataJSON_ = { packages :: Array SpagoPackage, modules :: Array SpagoModule, lsDeps :: Array SpagoLsDep, loc :: Array SpagoLOC } 
 
 
 -- *********************************************************************************************************************
@@ -51,21 +51,26 @@ type SpagoGraph      = Graph NodeID SpagoNode
 type SpagoGraphNode_ = D3ForceNode_ NodeID NodeExtension
 type SpagoGraphLink_ = D3ForceLink_ NodeID NodeExtension LinkExtension
 
+type SpagoLOC        = { loc :: Number, path :: String }
 type SpagoNode       = { id :: NodeID, name :: String, path :: String, package :: Maybe Int, moduleOrPackage :: NodeType, depends :: Array NodeID }
 type SpagoLink       = { sourceID :: NodeID, targetID :: NodeID, moduleOrPackage :: LinkType }
 type SpagoRawModel   = { links :: Array SpagoLink, nodes :: Array SpagoNode, name2IdMap :: M.Map String NodeID }
-type SpagoCookedModel = { links :: Array SpagoGraphLink_, nodes :: Array SpagoGraphNode_, graph :: SpagoGraph, name2IdMap :: M.Map String NodeID }
+type SpagoCookedModel = { links :: Array SpagoGraphLink_, nodes :: Array SpagoGraphNode_, graph :: SpagoGraph, name2IdMap :: M.Map String NodeID, loc :: M.Map String Number }
 
 datumIsGraphLink_ :: Datum_ -> SpagoGraphLink_
 datumIsGraphLink_ = unsafeCoerce
 datumIsGraphNode_ :: Datum_ -> SpagoGraphNode_
 datumIsGraphNode_ = unsafeCoerce
 
-convertFilesToGraphModel :: forall r. { body :: String | r } -> { body :: String | r } -> { body :: String | r } -> SpagoCookedModel
-convertFilesToGraphModel moduleJSON packageJSON lsdepJSON = 
-  makeSpagoGraphModel $ readSpagoDataJSON_ moduleJSON.body packageJSON.body lsdepJSON.body
+convertFilesToGraphModel :: forall r. 
+  { body :: String | r } -> 
+  { body :: String | r } -> 
+  { body :: String | r } -> 
+  { body :: String | r } -> SpagoCookedModel
+convertFilesToGraphModel moduleJSON packageJSON lsdepJSON locJSON= 
+  makeSpagoGraphModel $ readSpagoDataJSON_ moduleJSON.body packageJSON.body lsdepJSON.body locJSON.body
 
-foreign import readSpagoDataJSON_ :: String -> String -> String -> SpagoDataJSON_
+foreign import readSpagoDataJSON_ :: String -> String -> String -> String -> SpagoDataJSON_
 
 makeSpagoGraphModel :: SpagoDataJSON_ -> SpagoCookedModel
 makeSpagoGraphModel json = do
@@ -81,12 +86,15 @@ makeSpagoGraphModel json = do
     graph :: Graph NodeID SpagoNode
     graph = makeGraph raw.nodes
 
+    loc :: M.Map String Number
+    loc = M.fromFoldable $ (\o -> Tuple o.path o.loc) <$> json.loc
+
     -- reachables = 
     --   case (flip getReachableTree graph) <$> raw.root of
     --     Nothing -> []
     --     (Just r) -> spy "reachable nodes" $ r.reachableNodes
   
-  { links, nodes, graph, name2IdMap: raw.name2IdMap }
+  { links, nodes, graph, name2IdMap: raw.name2IdMap, loc }
 
 getRawGraphModel :: SpagoDataJSON_ -> SpagoRawModel
 getRawGraphModel { packages, modules, lsDeps } = do

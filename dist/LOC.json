@@ -1,0 +1,2284 @@
+{
+  "loc": [
+    {
+      "loc": "406",
+      "path": ".spago/aff/v6.0.0/src/Effect/Aff.purs"
+    },
+    {
+      "loc": "44",
+      "path": ".spago/aff/v6.0.0/src/Effect/Aff/Class.purs"
+    },
+    {
+      "loc": "53",
+      "path": ".spago/aff/v6.0.0/src/Effect/Aff/Compat.purs"
+    },
+    {
+      "loc": "63",
+      "path": ".spago/aff/v6.0.0/test/Test/Bench.purs"
+    },
+    {
+      "loc": "783",
+      "path": ".spago/aff/v6.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "287",
+      "path": ".spago/affjax/v12.0.0/src/Affjax.purs"
+    },
+    {
+      "loc": "49",
+      "path": ".spago/affjax/v12.0.0/src/Affjax/RequestBody.purs"
+    },
+    {
+      "loc": "29",
+      "path": ".spago/affjax/v12.0.0/src/Affjax/RequestHeader.purs"
+    },
+    {
+      "loc": "56",
+      "path": ".spago/affjax/v12.0.0/src/Affjax/ResponseFormat.purs"
+    },
+    {
+      "loc": "17",
+      "path": ".spago/affjax/v12.0.0/src/Affjax/ResponseHeader.purs"
+    },
+    {
+      "loc": "13",
+      "path": ".spago/affjax/v12.0.0/src/Affjax/StatusCode.purs"
+    },
+    {
+      "loc": "33",
+      "path": ".spago/affjax/v12.0.0/test/DocExamples.purs"
+    },
+    {
+      "loc": "109",
+      "path": ".spago/affjax/v12.0.0/test/Main.purs"
+    },
+    {
+      "loc": "259",
+      "path": ".spago/argonaut-core/v6.0.0/src/Data/Argonaut/Core.purs"
+    },
+    {
+      "loc": "50",
+      "path": ".spago/argonaut-core/v6.0.0/src/Data/Argonaut/Gen.purs"
+    },
+    {
+      "loc": "12",
+      "path": ".spago/argonaut-core/v6.0.0/src/Data/Argonaut/Parser.purs"
+    },
+    {
+      "loc": "149",
+      "path": ".spago/argonaut-core/v6.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "38",
+      "path": ".spago/arraybuffer-types/v3.0.0/src/Data/ArrayBuffer/Types.purs"
+    },
+    {
+      "loc": "28",
+      "path": ".spago/arrays/v6.0.0/bench/Data/Array.purs"
+    },
+    {
+      "loc": "13",
+      "path": ".spago/arrays/v6.0.0/bench/Main.purs"
+    },
+    {
+      "loc": "1291",
+      "path": ".spago/arrays/v6.0.0/src/Data/Array.purs"
+    },
+    {
+      "loc": "559",
+      "path": ".spago/arrays/v6.0.0/src/Data/Array/NonEmpty.purs"
+    },
+    {
+      "loc": "83",
+      "path": ".spago/arrays/v6.0.0/src/Data/Array/NonEmpty/Internal.purs"
+    },
+    {
+      "loc": "35",
+      "path": ".spago/arrays/v6.0.0/src/Data/Array/Partial.purs"
+    },
+    {
+      "loc": "213",
+      "path": ".spago/arrays/v6.0.0/src/Data/Array/ST.purs"
+    },
+    {
+      "loc": "80",
+      "path": ".spago/arrays/v6.0.0/src/Data/Array/ST/Iterator.purs"
+    },
+    {
+      "loc": "40",
+      "path": ".spago/arrays/v6.0.0/src/Data/Array/ST/Partial.purs"
+    },
+    {
+      "loc": "492",
+      "path": ".spago/arrays/v6.0.0/test/Test/Data/Array.purs"
+    },
+    {
+      "loc": "404",
+      "path": ".spago/arrays/v6.0.0/test/Test/Data/Array/NonEmpty.purs"
+    },
+    {
+      "loc": "26",
+      "path": ".spago/arrays/v6.0.0/test/Test/Data/Array/Partial.purs"
+    },
+    {
+      "loc": "294",
+      "path": ".spago/arrays/v6.0.0/test/Test/Data/Array/ST.purs"
+    },
+    {
+      "loc": "25",
+      "path": ".spago/arrays/v6.0.0/test/Test/Data/Array/ST/Partial.purs"
+    },
+    {
+      "loc": "17",
+      "path": ".spago/arrays/v6.0.0/test/Test/Data/UndefinedOr.purs"
+    },
+    {
+      "loc": "18",
+      "path": ".spago/arrays/v6.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "12",
+      "path": ".spago/bifunctors/v5.0.0/src/Control/Biapplicative.purs"
+    },
+    {
+      "loc": "59",
+      "path": ".spago/bifunctors/v5.0.0/src/Control/Biapply.purs"
+    },
+    {
+      "loc": "40",
+      "path": ".spago/bifunctors/v5.0.0/src/Data/Bifunctor.purs"
+    },
+    {
+      "loc": "31",
+      "path": ".spago/bifunctors/v5.0.0/src/Data/Bifunctor/Join.purs"
+    },
+    {
+      "loc": "163",
+      "path": ".spago/catenable-lists/v6.0.0/benchmarks/src/Benchmark.purs"
+    },
+    {
+      "loc": "212",
+      "path": ".spago/catenable-lists/v6.0.0/src/Data/CatList.purs"
+    },
+    {
+      "loc": "196",
+      "path": ".spago/catenable-lists/v6.0.0/src/Data/CatQueue.purs"
+    },
+    {
+      "loc": "73",
+      "path": ".spago/catenable-lists/v6.0.0/test/Test/Data/CatList.purs"
+    },
+    {
+      "loc": "87",
+      "path": ".spago/catenable-lists/v6.0.0/test/Test/Data/CatQueue.purs"
+    },
+    {
+      "loc": "18",
+      "path": ".spago/catenable-lists/v6.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "43",
+      "path": ".spago/console/v5.0.0/src/Effect/Class/Console.purs"
+    },
+    {
+      "loc": "58",
+      "path": ".spago/console/v5.0.0/src/Effect/Console.purs"
+    },
+    {
+      "loc": "63",
+      "path": ".spago/const/v5.0.0/src/Data/Const.purs"
+    },
+    {
+      "loc": "25",
+      "path": ".spago/contravariant/v5.0.0/src/Data/Comparison.purs"
+    },
+    {
+      "loc": "29",
+      "path": ".spago/contravariant/v5.0.0/src/Data/Decidable.purs"
+    },
+    {
+      "loc": "42",
+      "path": ".spago/contravariant/v5.0.0/src/Data/Decide.purs"
+    },
+    {
+      "loc": "46",
+      "path": ".spago/contravariant/v5.0.0/src/Data/Divide.purs"
+    },
+    {
+      "loc": "25",
+      "path": ".spago/contravariant/v5.0.0/src/Data/Divisible.purs"
+    },
+    {
+      "loc": "31",
+      "path": ".spago/contravariant/v5.0.0/src/Data/Equivalence.purs"
+    },
+    {
+      "loc": "35",
+      "path": ".spago/contravariant/v5.0.0/src/Data/Functor/Contravariant.purs"
+    },
+    {
+      "loc": "22",
+      "path": ".spago/contravariant/v5.0.0/src/Data/Op.purs"
+    },
+    {
+      "loc": "18",
+      "path": ".spago/contravariant/v5.0.0/src/Data/Predicate.purs"
+    },
+    {
+      "loc": "42",
+      "path": ".spago/control/v5.0.0/src/Control/Alt.purs"
+    },
+    {
+      "loc": "50",
+      "path": ".spago/control/v5.0.0/src/Control/Alternative.purs"
+    },
+    {
+      "loc": "21",
+      "path": ".spago/control/v5.0.0/src/Control/Comonad.purs"
+    },
+    {
+      "loc": "59",
+      "path": ".spago/control/v5.0.0/src/Control/Extend.purs"
+    },
+    {
+      "loc": "25",
+      "path": ".spago/control/v5.0.0/src/Control/Lazy.purs"
+    },
+    {
+      "loc": "34",
+      "path": ".spago/control/v5.0.0/src/Control/MonadPlus.purs"
+    },
+    {
+      "loc": "48",
+      "path": ".spago/control/v5.0.0/src/Control/MonadZero.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/control/v5.0.0/src/Control/Plus.purs"
+    },
+    {
+      "loc": "60",
+      "path": ".spago/control/v5.0.0/src/Data/Monoid/Alternate.purs"
+    },
+    {
+      "loc": "19",
+      "path": ".spago/control/v5.0.0/test/Test/Control/Lazy.purs"
+    },
+    {
+      "loc": "9",
+      "path": ".spago/control/v5.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "148",
+      "path": ".spago/datetime/v5.0.0/src/Data/Date.purs"
+    },
+    {
+      "loc": "191",
+      "path": ".spago/datetime/v5.0.0/src/Data/Date/Component.purs"
+    },
+    {
+      "loc": "25",
+      "path": ".spago/datetime/v5.0.0/src/Data/Date/Component/Gen.purs"
+    },
+    {
+      "loc": "24",
+      "path": ".spago/datetime/v5.0.0/src/Data/Date/Gen.purs"
+    },
+    {
+      "loc": "99",
+      "path": ".spago/datetime/v5.0.0/src/Data/DateTime.purs"
+    },
+    {
+      "loc": "16",
+      "path": ".spago/datetime/v5.0.0/src/Data/DateTime/Gen.purs"
+    },
+    {
+      "loc": "76",
+      "path": ".spago/datetime/v5.0.0/src/Data/DateTime/Instant.purs"
+    },
+    {
+      "loc": "115",
+      "path": ".spago/datetime/v5.0.0/src/Data/Interval.purs"
+    },
+    {
+      "loc": "73",
+      "path": ".spago/datetime/v5.0.0/src/Data/Interval/Duration.purs"
+    },
+    {
+      "loc": "97",
+      "path": ".spago/datetime/v5.0.0/src/Data/Interval/Duration/Iso.purs"
+    },
+    {
+      "loc": "123",
+      "path": ".spago/datetime/v5.0.0/src/Data/Time.purs"
+    },
+    {
+      "loc": "128",
+      "path": ".spago/datetime/v5.0.0/src/Data/Time/Component.purs"
+    },
+    {
+      "loc": "21",
+      "path": ".spago/datetime/v5.0.0/src/Data/Time/Component/Gen.purs"
+    },
+    {
+      "loc": "119",
+      "path": ".spago/datetime/v5.0.0/src/Data/Time/Duration.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/datetime/v5.0.0/src/Data/Time/Duration/Gen.purs"
+    },
+    {
+      "loc": "13",
+      "path": ".spago/datetime/v5.0.0/src/Data/Time/Gen.purs"
+    },
+    {
+      "loc": "203",
+      "path": ".spago/datetime/v5.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "70",
+      "path": ".spago/debug/v5.0.0/src/Debug.purs"
+    },
+    {
+      "loc": "38",
+      "path": ".spago/debug/v5.0.0/test/Main.purs"
+    },
+    {
+      "loc": "67",
+      "path": ".spago/distributive/v5.0.0/src/Data/Distributive.purs"
+    },
+    {
+      "loc": "72",
+      "path": ".spago/effect/v3.0.0/src/Effect.purs"
+    },
+    {
+      "loc": "19",
+      "path": ".spago/effect/v3.0.0/src/Effect/Class.purs"
+    },
+    {
+      "loc": "286",
+      "path": ".spago/effect/v3.0.0/src/Effect/Uncurried.purs"
+    },
+    {
+      "loc": "8",
+      "path": ".spago/effect/v3.0.0/src/Effect/Unsafe.purs"
+    },
+    {
+      "loc": "284",
+      "path": ".spago/either/v5.0.0/src/Data/Either.purs"
+    },
+    {
+      "loc": "23",
+      "path": ".spago/either/v5.0.0/src/Data/Either/Inject.purs"
+    },
+    {
+      "loc": "278",
+      "path": ".spago/either/v5.0.0/src/Data/Either/Nested.purs"
+    },
+    {
+      "loc": "66",
+      "path": ".spago/either/v5.0.0/test/Main.purs"
+    },
+    {
+      "loc": "321",
+      "path": ".spago/enums/v5.0.0/src/Data/Enum.purs"
+    },
+    {
+      "loc": "18",
+      "path": ".spago/enums/v5.0.0/src/Data/Enum/Gen.purs"
+    },
+    {
+      "loc": "118",
+      "path": ".spago/enums/v5.0.0/src/Data/Enum/Generic.purs"
+    },
+    {
+      "loc": "12",
+      "path": ".spago/enums/v5.0.0/test/Main.purs"
+    },
+    {
+      "loc": "196",
+      "path": ".spago/enums/v5.0.0/test/Test/Data/Enum.purs"
+    },
+    {
+      "loc": "150",
+      "path": ".spago/enums/v5.0.0/test/Test/Data/Enum/Generic.purs"
+    },
+    {
+      "loc": "101",
+      "path": ".spago/exceptions/v5.0.0/src/Effect/Exception.purs"
+    },
+    {
+      "loc": "14",
+      "path": ".spago/exceptions/v5.0.0/src/Effect/Exception/Unsafe.purs"
+    },
+    {
+      "loc": "57",
+      "path": ".spago/exists/v5.0.0/src/Data/Exists.purs"
+    },
+    {
+      "loc": "29",
+      "path": ".spago/exists/v5.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "198",
+      "path": ".spago/foldable-traversable/v5.0.0/src/Data/Bifoldable.purs"
+    },
+    {
+      "loc": "136",
+      "path": ".spago/foldable-traversable/v5.0.0/src/Data/Bitraversable.purs"
+    },
+    {
+      "loc": "471",
+      "path": ".spago/foldable-traversable/v5.0.0/src/Data/Foldable.purs"
+    },
+    {
+      "loc": "370",
+      "path": ".spago/foldable-traversable/v5.0.0/src/Data/FoldableWithIndex.purs"
+    },
+    {
+      "loc": "93",
+      "path": ".spago/foldable-traversable/v5.0.0/src/Data/FunctorWithIndex.purs"
+    },
+    {
+      "loc": "184",
+      "path": ".spago/foldable-traversable/v5.0.0/src/Data/Semigroup/Foldable.purs"
+    },
+    {
+      "loc": "72",
+      "path": ".spago/foldable-traversable/v5.0.0/src/Data/Semigroup/Traversable.purs"
+    },
+    {
+      "loc": "257",
+      "path": ".spago/foldable-traversable/v5.0.0/src/Data/Traversable.purs"
+    },
+    {
+      "loc": "5",
+      "path": ".spago/foldable-traversable/v5.0.0/src/Data/Traversable/Accum.purs"
+    },
+    {
+      "loc": "44",
+      "path": ".spago/foldable-traversable/v5.0.0/src/Data/Traversable/Accum/Internal.purs"
+    },
+    {
+      "loc": "213",
+      "path": ".spago/foldable-traversable/v5.0.0/src/Data/TraversableWithIndex.purs"
+    },
+    {
+      "loc": "563",
+      "path": ".spago/foldable-traversable/v5.0.0/test/Main.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/foreign-object/v3.0.0/bench/Bench/Foreign/Object.purs"
+    },
+    {
+      "loc": "13",
+      "path": ".spago/foreign-object/v3.0.0/bench/Bench/Main.purs"
+    },
+    {
+      "loc": "308",
+      "path": ".spago/foreign-object/v3.0.0/src/Foreign/Object.purs"
+    },
+    {
+      "loc": "23",
+      "path": ".spago/foreign-object/v3.0.0/src/Foreign/Object/Gen.purs"
+    },
+    {
+      "loc": "42",
+      "path": ".spago/foreign-object/v3.0.0/src/Foreign/Object/ST.purs"
+    },
+    {
+      "loc": "10",
+      "path": ".spago/foreign-object/v3.0.0/src/Foreign/Object/ST/Unsafe.purs"
+    },
+    {
+      "loc": "10",
+      "path": ".spago/foreign-object/v3.0.0/src/Foreign/Object/Unsafe.purs"
+    },
+    {
+      "loc": "280",
+      "path": ".spago/foreign-object/v3.0.0/test/Test/Foreign/Object.purs"
+    },
+    {
+      "loc": "48",
+      "path": ".spago/foreign-object/v3.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/foreign/v6.0.0/examples/Applicative.purs"
+    },
+    {
+      "loc": "17",
+      "path": ".spago/foreign/v6.0.0/examples/Arrays.purs"
+    },
+    {
+      "loc": "45",
+      "path": ".spago/foreign/v6.0.0/examples/Complex.purs"
+    },
+    {
+      "loc": "21",
+      "path": ".spago/foreign/v6.0.0/examples/MaybeNullable.purs"
+    },
+    {
+      "loc": "36",
+      "path": ".spago/foreign/v6.0.0/examples/Nested.purs"
+    },
+    {
+      "loc": "23",
+      "path": ".spago/foreign/v6.0.0/examples/Objects.purs"
+    },
+    {
+      "loc": "44",
+      "path": ".spago/foreign/v6.0.0/examples/ParseErrors.purs"
+    },
+    {
+      "loc": "20",
+      "path": ".spago/foreign/v6.0.0/examples/SimpleTypes.purs"
+    },
+    {
+      "loc": "58",
+      "path": ".spago/foreign/v6.0.0/examples/Union.purs"
+    },
+    {
+      "loc": "12",
+      "path": ".spago/foreign/v6.0.0/examples/Util/Value.purs"
+    },
+    {
+      "loc": "173",
+      "path": ".spago/foreign/v6.0.0/src/Foreign.purs"
+    },
+    {
+      "loc": "84",
+      "path": ".spago/foreign/v6.0.0/src/Foreign/Index.purs"
+    },
+    {
+      "loc": "20",
+      "path": ".spago/foreign/v6.0.0/src/Foreign/Keys.purs"
+    },
+    {
+      "loc": "48",
+      "path": ".spago/form-urlencoded/v6.0.1/src/Data/FormURLEncoded.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/form-urlencoded/v6.0.1/test/Main.purs"
+    },
+    {
+      "loc": "124",
+      "path": ".spago/functions/v5.0.0/src/Data/Function/Uncurried.purs"
+    },
+    {
+      "loc": "58",
+      "path": ".spago/functors/v4.1.0/src/Data/Functor/App.purs"
+    },
+    {
+      "loc": "44",
+      "path": ".spago/functors/v4.1.0/src/Data/Functor/Clown.purs"
+    },
+    {
+      "loc": "58",
+      "path": ".spago/functors/v4.1.0/src/Data/Functor/Compose.purs"
+    },
+    {
+      "loc": "76",
+      "path": ".spago/functors/v4.1.0/src/Data/Functor/Coproduct.purs"
+    },
+    {
+      "loc": "24",
+      "path": ".spago/functors/v4.1.0/src/Data/Functor/Coproduct/Inject.purs"
+    },
+    {
+      "loc": "273",
+      "path": ".spago/functors/v4.1.0/src/Data/Functor/Coproduct/Nested.purs"
+    },
+    {
+      "loc": "66",
+      "path": ".spago/functors/v4.1.0/src/Data/Functor/Costar.purs"
+    },
+    {
+      "loc": "44",
+      "path": ".spago/functors/v4.1.0/src/Data/Functor/Flip.purs"
+    },
+    {
+      "loc": "60",
+      "path": ".spago/functors/v4.1.0/src/Data/Functor/Joker.purs"
+    },
+    {
+      "loc": "60",
+      "path": ".spago/functors/v4.1.0/src/Data/Functor/Product.purs"
+    },
+    {
+      "loc": "112",
+      "path": ".spago/functors/v4.1.0/src/Data/Functor/Product/Nested.purs"
+    },
+    {
+      "loc": "40",
+      "path": ".spago/functors/v4.1.0/src/Data/Functor/Product2.purs"
+    },
+    {
+      "loc": "43",
+      "path": ".spago/functors/v4.1.0/test/Main.purs"
+    },
+    {
+      "loc": "132",
+      "path": ".spago/gen/v3.0.0/src/Control/Monad/Gen.purs"
+    },
+    {
+      "loc": "29",
+      "path": ".spago/gen/v3.0.0/src/Control/Monad/Gen/Class.purs"
+    },
+    {
+      "loc": "67",
+      "path": ".spago/gen/v3.0.0/src/Control/Monad/Gen/Common.purs"
+    },
+    {
+      "loc": "66",
+      "path": ".spago/gen/v3.0.0/test/Frequency.purs"
+    },
+    {
+      "loc": "108",
+      "path": ".spago/gen/v3.0.0/test/Main.purs"
+    },
+    {
+      "loc": "273",
+      "path": ".spago/graphs/c4a3189e39579102b8be3cff9bcde63a9d4ef322/src/Data/Graph.purs"
+    },
+    {
+      "loc": "132",
+      "path": ".spago/graphs/c4a3189e39579102b8be3cff9bcde63a9d4ef322/test/Main.purs"
+    },
+    {
+      "loc": "100",
+      "path": ".spago/http-methods/v5.0.0/src/Data/HTTP/Method.purs"
+    },
+    {
+      "loc": "72",
+      "path": ".spago/identity/v5.0.0/src/Data/Identity.purs"
+    },
+    {
+      "loc": "251",
+      "path": ".spago/integers/v5.0.0/src/Data/Int.purs"
+    },
+    {
+      "loc": "37",
+      "path": ".spago/integers/v5.0.0/src/Data/Int/Bits.purs"
+    },
+    {
+      "loc": "183",
+      "path": ".spago/integers/v5.0.0/test/Test/Data/Int.purs"
+    },
+    {
+      "loc": "10",
+      "path": ".spago/integers/v5.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "57",
+      "path": ".spago/invariant/v5.0.0/src/Data/Functor/Invariant.purs"
+    },
+    {
+      "loc": "272",
+      "path": ".spago/js-date/v7.0.0/src/Data/JSDate.purs"
+    },
+    {
+      "loc": "97",
+      "path": ".spago/js-date/v7.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "89",
+      "path": ".spago/js-uri/v2.0.0/src/JSURI.purs"
+    },
+    {
+      "loc": "18",
+      "path": ".spago/js-uri/v2.0.0/test/Main.purs"
+    },
+    {
+      "loc": "142",
+      "path": ".spago/lazy/v5.0.0/src/Data/Lazy.purs"
+    },
+    {
+      "loc": "31",
+      "path": ".spago/lists/v6.0.0/bench/Bench/Data/List.purs"
+    },
+    {
+      "loc": "13",
+      "path": ".spago/lists/v6.0.0/bench/Main.purs"
+    },
+    {
+      "loc": "842",
+      "path": ".spago/lists/v6.0.0/src/Data/List.purs"
+    },
+    {
+      "loc": "63",
+      "path": ".spago/lists/v6.0.0/src/Data/List/Internal.purs"
+    },
+    {
+      "loc": "780",
+      "path": ".spago/lists/v6.0.0/src/Data/List/Lazy.purs"
+    },
+    {
+      "loc": "83",
+      "path": ".spago/lists/v6.0.0/src/Data/List/Lazy/NonEmpty.purs"
+    },
+    {
+      "loc": "298",
+      "path": ".spago/lists/v6.0.0/src/Data/List/Lazy/Types.purs"
+    },
+    {
+      "loc": "321",
+      "path": ".spago/lists/v6.0.0/src/Data/List/NonEmpty.purs"
+    },
+    {
+      "loc": "30",
+      "path": ".spago/lists/v6.0.0/src/Data/List/Partial.purs"
+    },
+    {
+      "loc": "267",
+      "path": ".spago/lists/v6.0.0/src/Data/List/Types.purs"
+    },
+    {
+      "loc": "66",
+      "path": ".spago/lists/v6.0.0/src/Data/List/ZipList.purs"
+    },
+    {
+      "loc": "427",
+      "path": ".spago/lists/v6.0.0/test/Test/Data/List.purs"
+    },
+    {
+      "loc": "473",
+      "path": ".spago/lists/v6.0.0/test/Test/Data/List/Lazy.purs"
+    },
+    {
+      "loc": "298",
+      "path": ".spago/lists/v6.0.0/test/Test/Data/List/NonEmpty.purs"
+    },
+    {
+      "loc": "41",
+      "path": ".spago/lists/v6.0.0/test/Test/Data/List/Partial.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/lists/v6.0.0/test/Test/Data/List/ZipList.purs"
+    },
+    {
+      "loc": "19",
+      "path": ".spago/lists/v6.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "100",
+      "path": ".spago/math/v3.0.0/src/Math.purs"
+    },
+    {
+      "loc": "305",
+      "path": ".spago/maybe/v5.0.0/src/Data/Maybe.purs"
+    },
+    {
+      "loc": "67",
+      "path": ".spago/maybe/v5.0.0/src/Data/Maybe/First.purs"
+    },
+    {
+      "loc": "67",
+      "path": ".spago/maybe/v5.0.0/src/Data/Maybe/Last.purs"
+    },
+    {
+      "loc": "18",
+      "path": ".spago/media-types/v5.0.0/src/Data/MediaType.purs"
+    },
+    {
+      "loc": "59",
+      "path": ".spago/media-types/v5.0.0/src/Data/MediaType/Common.purs"
+    },
+    {
+      "loc": "304",
+      "path": ".spago/newtype/v4.0.0/src/Data/Newtype.purs"
+    },
+    {
+      "loc": "169",
+      "path": ".spago/nonempty/v6.0.0/src/Data/NonEmpty.purs"
+    },
+    {
+      "loc": "29",
+      "path": ".spago/nonempty/v6.0.0/test/Main.purs"
+    },
+    {
+      "loc": "34",
+      "path": ".spago/now/v5.0.0/src/Effect/Now.purs"
+    },
+    {
+      "loc": "11",
+      "path": ".spago/now/v5.0.0/test/Main.purs"
+    },
+    {
+      "loc": "11",
+      "path": ".spago/nullable/v5.0.0/examples/Main.purs"
+    },
+    {
+      "loc": "24",
+      "path": ".spago/nullable/v5.0.0/examples/QuickStart.purs"
+    },
+    {
+      "loc": "79",
+      "path": ".spago/nullable/v5.0.0/src/Data/Nullable.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/nullable/v5.0.0/test/Main.purs"
+    },
+    {
+      "loc": "55",
+      "path": ".spago/numbers/v8.0.0/src/Data/Number.purs"
+    },
+    {
+      "loc": "96",
+      "path": ".spago/numbers/v8.0.0/src/Data/Number/Approximate.purs"
+    },
+    {
+      "loc": "76",
+      "path": ".spago/numbers/v8.0.0/src/Data/Number/Format.purs"
+    },
+    {
+      "loc": "290",
+      "path": ".spago/numbers/v8.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "55",
+      "path": ".spago/ordered-collections/v2.0.0/bench/Bench/Data/Map.purs"
+    },
+    {
+      "loc": "13",
+      "path": ".spago/ordered-collections/v2.0.0/bench/Bench/Main.purs"
+    },
+    {
+      "loc": "65",
+      "path": ".spago/ordered-collections/v2.0.0/src/Data/Map.purs"
+    },
+    {
+      "loc": "24",
+      "path": ".spago/ordered-collections/v2.0.0/src/Data/Map/Gen.purs"
+    },
+    {
+      "loc": "710",
+      "path": ".spago/ordered-collections/v2.0.0/src/Data/Map/Internal.purs"
+    },
+    {
+      "loc": "208",
+      "path": ".spago/ordered-collections/v2.0.0/src/Data/Set.purs"
+    },
+    {
+      "loc": "163",
+      "path": ".spago/ordered-collections/v2.0.0/src/Data/Set/NonEmpty.purs"
+    },
+    {
+      "loc": "427",
+      "path": ".spago/ordered-collections/v2.0.0/test/Test/Data/Map.purs"
+    },
+    {
+      "loc": "33",
+      "path": ".spago/ordered-collections/v2.0.0/test/Test/Data/Set.purs"
+    },
+    {
+      "loc": "16",
+      "path": ".spago/ordered-collections/v2.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "26",
+      "path": ".spago/orders/v5.0.0/src/Data/Ord/Down.purs"
+    },
+    {
+      "loc": "29",
+      "path": ".spago/orders/v5.0.0/src/Data/Ord/Max.purs"
+    },
+    {
+      "loc": "29",
+      "path": ".spago/orders/v5.0.0/src/Data/Ord/Min.purs"
+    },
+    {
+      "loc": "36",
+      "path": ".spago/orders/v5.0.0/test/Main.purs"
+    },
+    {
+      "loc": "86",
+      "path": ".spago/parallel/v5.0.0/src/Control/Parallel.purs"
+    },
+    {
+      "loc": "122",
+      "path": ".spago/parallel/v5.0.0/src/Control/Parallel/Class.purs"
+    },
+    {
+      "loc": "31",
+      "path": ".spago/parallel/v5.0.0/test/Main.purs"
+    },
+    {
+      "loc": "15",
+      "path": ".spago/partial/v3.0.0/src/Partial.purs"
+    },
+    {
+      "loc": "24",
+      "path": ".spago/partial/v3.0.0/src/Partial/Unsafe.purs"
+    },
+    {
+      "loc": "14",
+      "path": ".spago/partial/v3.0.0/test/Main.purs"
+    },
+    {
+      "loc": "68",
+      "path": ".spago/prelude/v5.0.0/src/Control/Applicative.purs"
+    },
+    {
+      "loc": "97",
+      "path": ".spago/prelude/v5.0.0/src/Control/Apply.purs"
+    },
+    {
+      "loc": "150",
+      "path": ".spago/prelude/v5.0.0/src/Control/Bind.purs"
+    },
+    {
+      "loc": "21",
+      "path": ".spago/prelude/v5.0.0/src/Control/Category.purs"
+    },
+    {
+      "loc": "86",
+      "path": ".spago/prelude/v5.0.0/src/Control/Monad.purs"
+    },
+    {
+      "loc": "25",
+      "path": ".spago/prelude/v5.0.0/src/Control/Semigroupoid.purs"
+    },
+    {
+      "loc": "10",
+      "path": ".spago/prelude/v5.0.0/src/Data/Boolean.purs"
+    },
+    {
+      "loc": "45",
+      "path": ".spago/prelude/v5.0.0/src/Data/BooleanAlgebra.purs"
+    },
+    {
+      "loc": "113",
+      "path": ".spago/prelude/v5.0.0/src/Data/Bounded.purs"
+    },
+    {
+      "loc": "56",
+      "path": ".spago/prelude/v5.0.0/src/Data/Bounded/Generic.purs"
+    },
+    {
+      "loc": "46",
+      "path": ".spago/prelude/v5.0.0/src/Data/CommutativeRing.purs"
+    },
+    {
+      "loc": "55",
+      "path": ".spago/prelude/v5.0.0/src/Data/DivisionRing.purs"
+    },
+    {
+      "loc": "114",
+      "path": ".spago/prelude/v5.0.0/src/Data/Eq.purs"
+    },
+    {
+      "loc": "35",
+      "path": ".spago/prelude/v5.0.0/src/Data/Eq/Generic.purs"
+    },
+    {
+      "loc": "98",
+      "path": ".spago/prelude/v5.0.0/src/Data/EuclideanRing.purs"
+    },
+    {
+      "loc": "41",
+      "path": ".spago/prelude/v5.0.0/src/Data/Field.purs"
+    },
+    {
+      "loc": "113",
+      "path": ".spago/prelude/v5.0.0/src/Data/Function.purs"
+    },
+    {
+      "loc": "100",
+      "path": ".spago/prelude/v5.0.0/src/Data/Functor.purs"
+    },
+    {
+      "loc": "61",
+      "path": ".spago/prelude/v5.0.0/src/Data/Generic/Rep.purs"
+    },
+    {
+      "loc": "174",
+      "path": ".spago/prelude/v5.0.0/src/Data/HeytingAlgebra.purs"
+    },
+    {
+      "loc": "69",
+      "path": ".spago/prelude/v5.0.0/src/Data/HeytingAlgebra/Generic.purs"
+    },
+    {
+      "loc": "119",
+      "path": ".spago/prelude/v5.0.0/src/Data/Monoid.purs"
+    },
+    {
+      "loc": "44",
+      "path": ".spago/prelude/v5.0.0/src/Data/Monoid/Additive.purs"
+    },
+    {
+      "loc": "51",
+      "path": ".spago/prelude/v5.0.0/src/Data/Monoid/Conj.purs"
+    },
+    {
+      "loc": "51",
+      "path": ".spago/prelude/v5.0.0/src/Data/Monoid/Disj.purs"
+    },
+    {
+      "loc": "44",
+      "path": ".spago/prelude/v5.0.0/src/Data/Monoid/Dual.purs"
+    },
+    {
+      "loc": "30",
+      "path": ".spago/prelude/v5.0.0/src/Data/Monoid/Endo.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/prelude/v5.0.0/src/Data/Monoid/Generic.purs"
+    },
+    {
+      "loc": "44",
+      "path": ".spago/prelude/v5.0.0/src/Data/Monoid/Multiplicative.purs"
+    },
+    {
+      "loc": "20",
+      "path": ".spago/prelude/v5.0.0/src/Data/NaturalTransformation.purs"
+    },
+    {
+      "loc": "254",
+      "path": ".spago/prelude/v5.0.0/src/Data/Ord.purs"
+    },
+    {
+      "loc": "39",
+      "path": ".spago/prelude/v5.0.0/src/Data/Ord/Generic.purs"
+    },
+    {
+      "loc": "36",
+      "path": ".spago/prelude/v5.0.0/src/Data/Ordering.purs"
+    },
+    {
+      "loc": "80",
+      "path": ".spago/prelude/v5.0.0/src/Data/Ring.purs"
+    },
+    {
+      "loc": "23",
+      "path": ".spago/prelude/v5.0.0/src/Data/Ring/Generic.purs"
+    },
+    {
+      "loc": "87",
+      "path": ".spago/prelude/v5.0.0/src/Data/Semigroup.purs"
+    },
+    {
+      "loc": "40",
+      "path": ".spago/prelude/v5.0.0/src/Data/Semigroup/First.purs"
+    },
+    {
+      "loc": "31",
+      "path": ".spago/prelude/v5.0.0/src/Data/Semigroup/Generic.purs"
+    },
+    {
+      "loc": "40",
+      "path": ".spago/prelude/v5.0.0/src/Data/Semigroup/Last.purs"
+    },
+    {
+      "loc": "142",
+      "path": ".spago/prelude/v5.0.0/src/Data/Semiring.purs"
+    },
+    {
+      "loc": "50",
+      "path": ".spago/prelude/v5.0.0/src/Data/Semiring/Generic.purs"
+    },
+    {
+      "loc": "81",
+      "path": ".spago/prelude/v5.0.0/src/Data/Show.purs"
+    },
+    {
+      "loc": "53",
+      "path": ".spago/prelude/v5.0.0/src/Data/Show/Generic.purs"
+    },
+    {
+      "loc": "34",
+      "path": ".spago/prelude/v5.0.0/src/Data/Symbol.purs"
+    },
+    {
+      "loc": "19",
+      "path": ".spago/prelude/v5.0.0/src/Data/Unit.purs"
+    },
+    {
+      "loc": "39",
+      "path": ".spago/prelude/v5.0.0/src/Data/Void.purs"
+    },
+    {
+      "loc": "58",
+      "path": ".spago/prelude/v5.0.0/src/Prelude.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/prelude/v5.0.0/src/Record/Unsafe.purs"
+    },
+    {
+      "loc": "22",
+      "path": ".spago/prelude/v5.0.0/src/Type/Data/Row.purs"
+    },
+    {
+      "loc": "8",
+      "path": ".spago/prelude/v5.0.0/src/Type/Data/RowList.purs"
+    },
+    {
+      "loc": "62",
+      "path": ".spago/prelude/v5.0.0/src/Type/Proxy.purs"
+    },
+    {
+      "loc": "196",
+      "path": ".spago/prelude/v5.0.0/test/Data/Generic/Rep.purs"
+    },
+    {
+      "loc": "153",
+      "path": ".spago/prelude/v5.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "10",
+      "path": ".spago/prelude/v5.0.0/test/Test/Utils.purs"
+    },
+    {
+      "loc": "44",
+      "path": ".spago/profunctor/v5.0.0/src/Data/Profunctor.purs"
+    },
+    {
+      "loc": "86",
+      "path": ".spago/profunctor/v5.0.0/src/Data/Profunctor/Choice.purs"
+    },
+    {
+      "loc": "12",
+      "path": ".spago/profunctor/v5.0.0/src/Data/Profunctor/Closed.purs"
+    },
+    {
+      "loc": "9",
+      "path": ".spago/profunctor/v5.0.0/src/Data/Profunctor/Cochoice.purs"
+    },
+    {
+      "loc": "9",
+      "path": ".spago/profunctor/v5.0.0/src/Data/Profunctor/Costrong.purs"
+    },
+    {
+      "loc": "28",
+      "path": ".spago/profunctor/v5.0.0/src/Data/Profunctor/Join.purs"
+    },
+    {
+      "loc": "39",
+      "path": ".spago/profunctor/v5.0.0/src/Data/Profunctor/Split.purs"
+    },
+    {
+      "loc": "83",
+      "path": ".spago/profunctor/v5.0.0/src/Data/Profunctor/Star.purs"
+    },
+    {
+      "loc": "83",
+      "path": ".spago/profunctor/v5.0.0/src/Data/Profunctor/Strong.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/psci-support/v5.0.0/src/PSCI/Support.purs"
+    },
+    {
+      "loc": "16",
+      "path": ".spago/psci-support/v5.0.0/test/Main.purs"
+    },
+    {
+      "loc": "45",
+      "path": ".spago/random/v5.0.0/src/Effect/Random.purs"
+    },
+    {
+      "loc": "242",
+      "path": ".spago/record/v3.0.0/src/Record.purs"
+    },
+    {
+      "loc": "156",
+      "path": ".spago/record/v3.0.0/src/Record/Builder.purs"
+    },
+    {
+      "loc": "8",
+      "path": ".spago/record/v3.0.0/src/Record/Unsafe/Union.purs"
+    },
+    {
+      "loc": "31",
+      "path": ".spago/record/v3.0.0/test/Examples.purs"
+    },
+    {
+      "loc": "68",
+      "path": ".spago/record/v3.0.0/test/Main.purs"
+    },
+    {
+      "loc": "70",
+      "path": ".spago/refs/v5.0.0/src/Effect/Ref.purs"
+    },
+    {
+      "loc": "54",
+      "path": ".spago/refs/v5.0.0/test/Main.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/safe-coerce/v1.0.0/src/Safe/Coerce.purs"
+    },
+    {
+      "loc": "13",
+      "path": ".spago/safe-coerce/v1.0.0/test/Main.purs"
+    },
+    {
+      "loc": "3",
+      "path": ".spago/st/v5.0.0/src/Control/Monad/ST.purs"
+    },
+    {
+      "loc": "17",
+      "path": ".spago/st/v5.0.0/src/Control/Monad/ST/Class.purs"
+    },
+    {
+      "loc": "18",
+      "path": ".spago/st/v5.0.0/src/Control/Monad/ST/Global.purs"
+    },
+    {
+      "loc": "129",
+      "path": ".spago/st/v5.0.0/src/Control/Monad/ST/Internal.purs"
+    },
+    {
+      "loc": "3",
+      "path": ".spago/st/v5.0.0/src/Control/Monad/ST/Ref.purs"
+    },
+    {
+      "loc": "21",
+      "path": ".spago/st/v5.0.0/test/Main.purs"
+    },
+    {
+      "loc": "57",
+      "path": ".spago/strings/v5.0.0/bench/Main.purs"
+    },
+    {
+      "loc": "16",
+      "path": ".spago/strings/v5.0.0/src/Data/Char.purs"
+    },
+    {
+      "loc": "35",
+      "path": ".spago/strings/v5.0.0/src/Data/Char/Gen.purs"
+    },
+    {
+      "loc": "10",
+      "path": ".spago/strings/v5.0.0/src/Data/String.purs"
+    },
+    {
+      "loc": "22",
+      "path": ".spago/strings/v5.0.0/src/Data/String/CaseInsensitive.purs"
+    },
+    {
+      "loc": "436",
+      "path": ".spago/strings/v5.0.0/src/Data/String/CodePoints.purs"
+    },
+    {
+      "loc": "345",
+      "path": ".spago/strings/v5.0.0/src/Data/String/CodeUnits.purs"
+    },
+    {
+      "loc": "96",
+      "path": ".spago/strings/v5.0.0/src/Data/String/Common.purs"
+    },
+    {
+      "loc": "43",
+      "path": ".spago/strings/v5.0.0/src/Data/String/Gen.purs"
+    },
+    {
+      "loc": "9",
+      "path": ".spago/strings/v5.0.0/src/Data/String/NonEmpty.purs"
+    },
+    {
+      "loc": "22",
+      "path": ".spago/strings/v5.0.0/src/Data/String/NonEmpty/CaseInsensitive.purs"
+    },
+    {
+      "loc": "138",
+      "path": ".spago/strings/v5.0.0/src/Data/String/NonEmpty/CodePoints.purs"
+    },
+    {
+      "loc": "308",
+      "path": ".spago/strings/v5.0.0/src/Data/String/NonEmpty/CodeUnits.purs"
+    },
+    {
+      "loc": "231",
+      "path": ".spago/strings/v5.0.0/src/Data/String/NonEmpty/Internal.purs"
+    },
+    {
+      "loc": "33",
+      "path": ".spago/strings/v5.0.0/src/Data/String/Pattern.purs"
+    },
+    {
+      "loc": "131",
+      "path": ".spago/strings/v5.0.0/src/Data/String/Regex.purs"
+    },
+    {
+      "loc": "133",
+      "path": ".spago/strings/v5.0.0/src/Data/String/Regex/Flags.purs"
+    },
+    {
+      "loc": "14",
+      "path": ".spago/strings/v5.0.0/src/Data/String/Regex/Unsafe.purs"
+    },
+    {
+      "loc": "15",
+      "path": ".spago/strings/v5.0.0/src/Data/String/Unsafe.purs"
+    },
+    {
+      "loc": "133",
+      "path": ".spago/strings/v5.0.0/test/Test/Data/String.purs"
+    },
+    {
+      "loc": "22",
+      "path": ".spago/strings/v5.0.0/test/Test/Data/String/CaseInsensitive.purs"
+    },
+    {
+      "loc": "653",
+      "path": ".spago/strings/v5.0.0/test/Test/Data/String/CodePoints.purs"
+    },
+    {
+      "loc": "512",
+      "path": ".spago/strings/v5.0.0/test/Test/Data/String/CodeUnits.purs"
+    },
+    {
+      "loc": "220",
+      "path": ".spago/strings/v5.0.0/test/Test/Data/String/NonEmpty.purs"
+    },
+    {
+      "loc": "450",
+      "path": ".spago/strings/v5.0.0/test/Test/Data/String/NonEmpty/CodeUnits.purs"
+    },
+    {
+      "loc": "61",
+      "path": ".spago/strings/v5.0.0/test/Test/Data/String/Regex.purs"
+    },
+    {
+      "loc": "26",
+      "path": ".spago/strings/v5.0.0/test/Test/Data/String/Unsafe.purs"
+    },
+    {
+      "loc": "33",
+      "path": ".spago/strings/v5.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "157",
+      "path": ".spago/tailrec/v5.0.0/src/Control/Monad/Rec/Class.purs"
+    },
+    {
+      "loc": "81",
+      "path": ".spago/tailrec/v5.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "40",
+      "path": ".spago/transformers/v5.0.0/src/Control/Comonad/Env.purs"
+    },
+    {
+      "loc": "46",
+      "path": ".spago/transformers/v5.0.0/src/Control/Comonad/Env/Class.purs"
+    },
+    {
+      "loc": "57",
+      "path": ".spago/transformers/v5.0.0/src/Control/Comonad/Env/Trans.purs"
+    },
+    {
+      "loc": "30",
+      "path": ".spago/transformers/v5.0.0/src/Control/Comonad/Store.purs"
+    },
+    {
+      "loc": "64",
+      "path": ".spago/transformers/v5.0.0/src/Control/Comonad/Store/Class.purs"
+    },
+    {
+      "loc": "38",
+      "path": ".spago/transformers/v5.0.0/src/Control/Comonad/Store/Trans.purs"
+    },
+    {
+      "loc": "29",
+      "path": ".spago/transformers/v5.0.0/src/Control/Comonad/Traced.purs"
+    },
+    {
+      "loc": "49",
+      "path": ".spago/transformers/v5.0.0/src/Control/Comonad/Traced/Class.purs"
+    },
+    {
+      "loc": "36",
+      "path": ".spago/transformers/v5.0.0/src/Control/Comonad/Traced/Trans.purs"
+    },
+    {
+      "loc": "23",
+      "path": ".spago/transformers/v5.0.0/src/Control/Comonad/Trans/Class.purs"
+    },
+    {
+      "loc": "37",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Cont.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Cont/Class.purs"
+    },
+    {
+      "loc": "77",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Cont/Trans.purs"
+    },
+    {
+      "loc": "104",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Error/Class.purs"
+    },
+    {
+      "loc": "47",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Except.purs"
+    },
+    {
+      "loc": "146",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Except/Trans.purs"
+    },
+    {
+      "loc": "71",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Identity/Trans.purs"
+    },
+    {
+      "loc": "330",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/List/Trans.purs"
+    },
+    {
+      "loc": "131",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Maybe/Trans.purs"
+    },
+    {
+      "loc": "54",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/RWS.purs"
+    },
+    {
+      "loc": "140",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/RWS/Trans.purs"
+    },
+    {
+      "loc": "34",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Reader.purs"
+    },
+    {
+      "loc": "42",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Reader/Class.purs"
+    },
+    {
+      "loc": "124",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Reader/Trans.purs"
+    },
+    {
+      "loc": "45",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/State.purs"
+    },
+    {
+      "loc": "45",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/State/Class.purs"
+    },
+    {
+      "loc": "147",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/State/Trans.purs"
+    },
+    {
+      "loc": "23",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Trans/Class.purs"
+    },
+    {
+      "loc": "40",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Writer.purs"
+    },
+    {
+      "loc": "51",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Writer/Class.purs"
+    },
+    {
+      "loc": "135",
+      "path": ".spago/transformers/v5.0.0/src/Control/Monad/Writer/Trans.purs"
+    },
+    {
+      "loc": "17",
+      "path": ".spago/transformers/v5.0.0/test/Example/Cont.purs"
+    },
+    {
+      "loc": "34",
+      "path": ".spago/transformers/v5.0.0/test/Example/List.purs"
+    },
+    {
+      "loc": "46",
+      "path": ".spago/transformers/v5.0.0/test/Example/RWS.purs"
+    },
+    {
+      "loc": "14",
+      "path": ".spago/transformers/v5.0.0/test/Example/Reader.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/transformers/v5.0.0/test/Example/State.purs"
+    },
+    {
+      "loc": "43",
+      "path": ".spago/transformers/v5.0.0/test/Example/StateEff.purs"
+    },
+    {
+      "loc": "19",
+      "path": ".spago/transformers/v5.0.0/test/Example/Writer.purs"
+    },
+    {
+      "loc": "22",
+      "path": ".spago/transformers/v5.0.0/test/Test/Main.purs"
+    },
+    {
+      "loc": "135",
+      "path": ".spago/tuples/v6.0.0/src/Data/Tuple.purs"
+    },
+    {
+      "loc": "294",
+      "path": ".spago/tuples/v6.0.0/src/Data/Tuple/Nested.purs"
+    },
+    {
+      "loc": "35",
+      "path": ".spago/type-equality/v4.0.0/src/Type/Equality.purs"
+    },
+    {
+      "loc": "20",
+      "path": ".spago/type-equality/v4.0.0/test/Main.purs"
+    },
+    {
+      "loc": "72",
+      "path": ".spago/typelevel-prelude/v6.0.0/src/Type/Data/Boolean.purs"
+    },
+    {
+      "loc": "75",
+      "path": ".spago/typelevel-prelude/v6.0.0/src/Type/Data/Ordering.purs"
+    },
+    {
+      "loc": "35",
+      "path": ".spago/typelevel-prelude/v6.0.0/src/Type/Data/Symbol.purs"
+    },
+    {
+      "loc": "28",
+      "path": ".spago/typelevel-prelude/v6.0.0/src/Type/Function.purs"
+    },
+    {
+      "loc": "17",
+      "path": ".spago/typelevel-prelude/v6.0.0/src/Type/Prelude.purs"
+    },
+    {
+      "loc": "24",
+      "path": ".spago/typelevel-prelude/v6.0.0/src/Type/Row.purs"
+    },
+    {
+      "loc": "23",
+      "path": ".spago/typelevel-prelude/v6.0.0/src/Type/Row/Homogeneous.purs"
+    },
+    {
+      "loc": "84",
+      "path": ".spago/typelevel-prelude/v6.0.0/src/Type/RowList.purs"
+    },
+    {
+      "loc": "103",
+      "path": ".spago/unfoldable/v5.0.0/src/Data/Unfoldable.purs"
+    },
+    {
+      "loc": "113",
+      "path": ".spago/unfoldable/v5.0.0/src/Data/Unfoldable1.purs"
+    },
+    {
+      "loc": "68",
+      "path": ".spago/unfoldable/v5.0.0/test/Main.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/unsafe-coerce/v5.0.0/src/Unsafe/Coerce.purs"
+    },
+    {
+      "loc": "30",
+      "path": ".spago/unsafe-coerce/v5.0.0/test/Main.purs"
+    },
+    {
+      "loc": "355",
+      "path": ".spago/variant/v7.0.2/src/Data/Functor/Variant.purs"
+    },
+    {
+      "loc": "424",
+      "path": ".spago/variant/v7.0.2/src/Data/Variant.purs"
+    },
+    {
+      "loc": "276",
+      "path": ".spago/variant/v7.0.2/src/Data/Variant/Internal.purs"
+    },
+    {
+      "loc": "14",
+      "path": ".spago/variant/v7.0.2/test/Main.purs"
+    },
+    {
+      "loc": "137",
+      "path": ".spago/variant/v7.0.2/test/Variant.purs"
+    },
+    {
+      "loc": "64",
+      "path": ".spago/variant/v7.0.2/test/VariantEnums.purs"
+    },
+    {
+      "loc": "122",
+      "path": ".spago/variant/v7.0.2/test/VariantF.purs"
+    },
+    {
+      "loc": "19",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/CharacterData.purs"
+    },
+    {
+      "loc": "10",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/ChildNode.purs"
+    },
+    {
+      "loc": "42",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/Comment.purs"
+    },
+    {
+      "loc": "32",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/DOMTokenList.purs"
+    },
+    {
+      "loc": "122",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/Document.purs"
+    },
+    {
+      "loc": "42",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/DocumentFragment.purs"
+    },
+    {
+      "loc": "32",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/DocumentType.purs"
+    },
+    {
+      "loc": "166",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/Element.purs"
+    },
+    {
+      "loc": "35",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/HTMLCollection.purs"
+    },
+    {
+      "loc": "7",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/Internal/Types.purs"
+    },
+    {
+      "loc": "46",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/MutationObserver.purs"
+    },
+    {
+      "loc": "70",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/MutationRecord.purs"
+    },
+    {
+      "loc": "189",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/Node.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/NodeList.purs"
+    },
+    {
+      "loc": "80",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/NodeType.purs"
+    },
+    {
+      "loc": "26",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/NonDocumentTypeChildNode.purs"
+    },
+    {
+      "loc": "20",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/NonElementParentNode.purs"
+    },
+    {
+      "loc": "56",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/ParentNode.purs"
+    },
+    {
+      "loc": "45",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/ProcessingInstruction.purs"
+    },
+    {
+      "loc": "35",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/ShadowRoot.purs"
+    },
+    {
+      "loc": "47",
+      "path": ".spago/web-dom/v5.0.0/src/Web/DOM/Text.purs"
+    },
+    {
+      "loc": "14",
+      "path": ".spago/web-events/v3.0.0/src/Web/Event/CustomEvent.purs"
+    },
+    {
+      "loc": "81",
+      "path": ".spago/web-events/v3.0.0/src/Web/Event/Event.purs"
+    },
+    {
+      "loc": "44",
+      "path": ".spago/web-events/v3.0.0/src/Web/Event/EventPhase.purs"
+    },
+    {
+      "loc": "54",
+      "path": ".spago/web-events/v3.0.0/src/Web/Event/EventTarget.purs"
+    },
+    {
+      "loc": "7",
+      "path": ".spago/web-events/v3.0.0/src/Web/Event/Internal/Types.purs"
+    },
+    {
+      "loc": "17",
+      "path": ".spago/web-events/v3.0.0/src/Web/Internal/FFI.purs"
+    },
+    {
+      "loc": "85",
+      "path": ".spago/web-file/v3.0.0/src/Web/File/Blob.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/web-file/v3.0.0/src/Web/File/File.purs"
+    },
+    {
+      "loc": "29",
+      "path": ".spago/web-file/v3.0.0/src/Web/File/FileList.purs"
+    },
+    {
+      "loc": "54",
+      "path": ".spago/web-file/v3.0.0/src/Web/File/FileReader.purs"
+    },
+    {
+      "loc": "46",
+      "path": ".spago/web-file/v3.0.0/src/Web/File/FileReader/ReadyState.purs"
+    },
+    {
+      "loc": "17",
+      "path": ".spago/web-file/v3.0.0/src/Web/File/URL.purs"
+    },
+    {
+      "loc": "77",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML.purs"
+    },
+    {
+      "loc": "30",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Common.purs"
+    },
+    {
+      "loc": "21",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/BeforeUnloadEvent.purs"
+    },
+    {
+      "loc": "6",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/BeforeUnloadEvent/EventTypes.purs"
+    },
+    {
+      "loc": "85",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/DataTransfer.purs"
+    },
+    {
+      "loc": "17",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/DragEvent.purs"
+    },
+    {
+      "loc": "27",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/DragEvent/EventTypes.purs"
+    },
+    {
+      "loc": "22",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/ErrorEvent.purs"
+    },
+    {
+      "loc": "102",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/EventTypes.purs"
+    },
+    {
+      "loc": "18",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/HashChangeEvent.purs"
+    },
+    {
+      "loc": "6",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/HashChangeEvent/EventTypes.purs"
+    },
+    {
+      "loc": "16",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/PageTransitionEvent.purs"
+    },
+    {
+      "loc": "9",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/PageTransitionEvent/EventTypes.purs"
+    },
+    {
+      "loc": "17",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/PopStateEvent.purs"
+    },
+    {
+      "loc": "6",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/PopStateEvent/EventTypes.purs"
+    },
+    {
+      "loc": "16",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/TrackEvent.purs"
+    },
+    {
+      "loc": "9",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Event/TrackEvent/EventTypes.purs"
+    },
+    {
+      "loc": "82",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLAnchorElement.purs"
+    },
+    {
+      "loc": "81",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLAreaElement.purs"
+    },
+    {
+      "loc": "85",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLAudioElement.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLBRElement.purs"
+    },
+    {
+      "loc": "61",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLBaseElement.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLBodyElement.purs"
+    },
+    {
+      "loc": "152",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLButtonElement.purs"
+    },
+    {
+      "loc": "69",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLCanvasElement.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLDListElement.purs"
+    },
+    {
+      "loc": "58",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLDataElement.purs"
+    },
+    {
+      "loc": "57",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLDataListElement.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLDivElement.purs"
+    },
+    {
+      "loc": "100",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLDocument.purs"
+    },
+    {
+      "loc": "31",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLDocument/ReadyState.purs"
+    },
+    {
+      "loc": "155",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLElement.purs"
+    },
+    {
+      "loc": "67",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLEmbedElement.purs"
+    },
+    {
+      "loc": "115",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLFieldSetElement.purs"
+    },
+    {
+      "loc": "93",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLFormElement.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLHRElement.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLHeadElement.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLHeadingElement.purs"
+    },
+    {
+      "loc": "39",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLHyperlinkElementUtils.purs"
+    },
+    {
+      "loc": "112",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLIFrameElement.purs"
+    },
+    {
+      "loc": "179",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLImageElement.purs"
+    },
+    {
+      "loc": "32",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLImageElement/CORSMode.purs"
+    },
+    {
+      "loc": "36",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLImageElement/DecodingHint.purs"
+    },
+    {
+      "loc": "33",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLImageElement/Laziness.purs"
+    },
+    {
+      "loc": "339",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLInputElement.purs"
+    },
+    {
+      "loc": "131",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLKeygenElement.purs"
+    },
+    {
+      "loc": "58",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLLIElement.purs"
+    },
+    {
+      "loc": "91",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLLabelElement.purs"
+    },
+    {
+      "loc": "80",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLLegendElement.purs"
+    },
+    {
+      "loc": "86",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLLinkElement.purs"
+    },
+    {
+      "loc": "63",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLMapElement.purs"
+    },
+    {
+      "loc": "204",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLMediaElement.purs"
+    },
+    {
+      "loc": "32",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLMediaElement/CanPlayType.purs"
+    },
+    {
+      "loc": "50",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLMediaElement/NetworkState.purs"
+    },
+    {
+      "loc": "54",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLMediaElement/ReadyState.purs"
+    },
+    {
+      "loc": "64",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLMetaElement.purs"
+    },
+    {
+      "loc": "76",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLMeterElement.purs"
+    },
+    {
+      "loc": "60",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLModElement.purs"
+    },
+    {
+      "loc": "64",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLOListElement.purs"
+    },
+    {
+      "loc": "142",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLObjectElement.purs"
+    },
+    {
+      "loc": "61",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLOptGroupElement.purs"
+    },
+    {
+      "loc": "114",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLOptionElement.purs"
+    },
+    {
+      "loc": "122",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLOutputElement.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLParagraphElement.purs"
+    },
+    {
+      "loc": "60",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLParamElement.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLPreElement.purs"
+    },
+    {
+      "loc": "65",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLProgressElement.purs"
+    },
+    {
+      "loc": "57",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLQuoteElement.purs"
+    },
+    {
+      "loc": "75",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLScriptElement.purs"
+    },
+    {
+      "loc": "163",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLSelectElement.purs"
+    },
+    {
+      "loc": "65",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLSourceElement.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLSpanElement.purs"
+    },
+    {
+      "loc": "60",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLStyleElement.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTableCaptionElement.purs"
+    },
+    {
+      "loc": "64",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTableCellElement.purs"
+    },
+    {
+      "loc": "57",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTableColElement.purs"
+    },
+    {
+      "loc": "59",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTableDataCellElement.purs"
+    },
+    {
+      "loc": "149",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTableElement.purs"
+    },
+    {
+      "loc": "67",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTableHeaderCellElement.purs"
+    },
+    {
+      "loc": "93",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTableRowElement.purs"
+    },
+    {
+      "loc": "88",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTableSectionElement.purs"
+    },
+    {
+      "loc": "56",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTemplateElement.purs"
+    },
+    {
+      "loc": "217",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTextAreaElement.purs"
+    },
+    {
+      "loc": "57",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTimeElement.purs"
+    },
+    {
+      "loc": "58",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTitleElement.purs"
+    },
+    {
+      "loc": "108",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTrackElement.purs"
+    },
+    {
+      "loc": "50",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLTrackElement/ReadyState.purs"
+    },
+    {
+      "loc": "52",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLUListElement.purs"
+    },
+    {
+      "loc": "74",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLVideoElement.purs"
+    },
+    {
+      "loc": "31",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/History.purs"
+    },
+    {
+      "loc": "61",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Location.purs"
+    },
+    {
+      "loc": "10",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Navigator.purs"
+    },
+    {
+      "loc": "36",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/SelectionMode.purs"
+    },
+    {
+      "loc": "54",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/ValidityState.purs"
+    },
+    {
+      "loc": "151",
+      "path": ".spago/web-html/v3.0.1/src/Web/HTML/Window.purs"
+    },
+    {
+      "loc": "49",
+      "path": ".spago/web-storage/v4.0.0/src/Web/Storage/Event/StorageEvent.purs"
+    },
+    {
+      "loc": "70",
+      "path": ".spago/web-storage/v4.0.0/src/Web/Storage/Storage.purs"
+    },
+    {
+      "loc": "24",
+      "path": ".spago/web-xhr/v4.0.0/src/Web/XHR/EventTypes.purs"
+    },
+    {
+      "loc": "83",
+      "path": ".spago/web-xhr/v4.0.0/src/Web/XHR/FormData.purs"
+    },
+    {
+      "loc": "20",
+      "path": ".spago/web-xhr/v4.0.0/src/Web/XHR/ProgressEvent.purs"
+    },
+    {
+      "loc": "46",
+      "path": ".spago/web-xhr/v4.0.0/src/Web/XHR/ReadyState.purs"
+    },
+    {
+      "loc": "28",
+      "path": ".spago/web-xhr/v4.0.0/src/Web/XHR/ResponseType.purs"
+    },
+    {
+      "loc": "173",
+      "path": ".spago/web-xhr/v4.0.0/src/Web/XHR/XMLHttpRequest.purs"
+    },
+    {
+      "loc": "9",
+      "path": ".spago/web-xhr/v4.0.0/src/Web/XHR/XMLHttpRequestUpload.purs"
+    },
+    {
+      "loc": "116",
+      "path": " src/D3/Attributes/Instances.purs"
+    },
+    {
+      "loc": "176",
+      "path": " src/D3/Attributes/Sugar.purs"
+    },
+    {
+      "loc": "26",
+      "path": " src/D3/Data/File/LesMiserables.purs"
+    },
+    {
+      "loc": "202",
+      "path": " src/D3/Data/File/Spago.purs"
+    },
+    {
+      "loc": "11",
+      "path": " src/D3/Data/Foreign.purs"
+    },
+    {
+      "loc": "20",
+      "path": " src/D3/Data/Transition.purs"
+    },
+    {
+      "loc": "58",
+      "path": " src/D3/Data/Tree.purs"
+    },
+    {
+      "loc": "47",
+      "path": " src/D3/Data/Types.purs"
+    },
+    {
+      "loc": "16",
+      "path": " src/D3/Data/Zoom.purs"
+    },
+    {
+      "loc": "103",
+      "path": " src/D3/FFI/Config.purs"
+    },
+    {
+      "loc": "191",
+      "path": " src/D3/FFI/FFI.purs"
+    },
+    {
+      "loc": "131",
+      "path": " src/D3/Interpreter/D3.purs"
+    },
+    {
+      "loc": "26",
+      "path": " src/D3/Interpreter/Interpreter.purs"
+    },
+    {
+      "loc": "181",
+      "path": " src/D3/Interpreter/Meta.purs"
+    },
+    {
+      "loc": "71",
+      "path": " src/D3/Interpreter/String.purs"
+    },
+    {
+      "loc": "77",
+      "path": " src/D3/Layouts/Hierarchical/Hierarchical.purs"
+    },
+    {
+      "loc": "75",
+      "path": " src/D3/Layouts/Simulation/Simulation.purs"
+    },
+    {
+      "loc": "13",
+      "path": " src/D3/Scales/Scales.purs"
+    },
+    {
+      "loc": "82",
+      "path": " src/D3/Selection/Selection.purs"
+    },
+    {
+      "loc": "53",
+      "path": " src/D3/Selection/Zoom.purs"
+    },
+    {
+      "loc": "89",
+      "path": " src/Examples/GUP.purs"
+    },
+    {
+      "loc": "137",
+      "path": " src/Examples/Simulation/LesMiserables.purs"
+    },
+    {
+      "loc": "227",
+      "path": " src/Examples/Simulation/SpagoPackages.purs"
+    },
+    {
+      "loc": "112",
+      "path": " src/Examples/Tree/Meta.purs"
+    },
+    {
+      "loc": "174",
+      "path": " src/Examples/Tree/TreeConfigure.purs"
+    },
+    {
+      "loc": "64",
+      "path": " src/Examples/Tree/TreeScript.purs"
+    },
+    {
+      "loc": "17",
+      "path": " src/Examples/Tree/Types.purs"
+    },
+    {
+      "loc": "42",
+      "path": " src/Main.purs"
+    }
+  ]
+}

@@ -21,6 +21,7 @@ import Data.Either (Either(..))
 import Data.List (List(..), (:))
 import Data.List as L
 import Data.Map (Map)
+import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set as S
 import Data.Tuple (Tuple(..), fst, snd)
@@ -28,6 +29,7 @@ import Debug (spy, trace)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
+import Math (log) as Math
 import Unsafe.Coerce (unsafeCoerce)
 
 
@@ -47,7 +49,8 @@ drawGraph = do
   moduleJSON  <- AJAX.get ResponseFormat.string "http://localhost:1234/modules.json"
   packageJSON <- AJAX.get ResponseFormat.string "http://localhost:1234/packages.json"
   lsdepJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/lsdeps.jsonlines"
-  case convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON of
+  locJSON     <- AJAX.get ResponseFormat.string "http://localhost:1234/loc.json"
+  case convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON <*> locJSON of
     (Left error)  -> log "error converting spago json file inputs"
     (Right graph) -> do
       let graph' = treeReduction graph
@@ -99,7 +102,7 @@ graphScript :: forall m link node selection r.
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
-  { links :: Array link, nodes :: Array node | r } -> 
+  { links :: Array link, nodes :: Array node, loc :: M.Map String Number | r } -> 
   m selection -- TODO is it right to return selection_ instead of simulation_? think it would vary by script but Tuple selection simulation would also work as a pattern
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
@@ -137,7 +140,7 @@ graphScript (Tuple w h) model = do
     , onDrag    : SimulationDrag DefaultDrag
   }
 
-  circle  <- nodes `append` (node Circle [ radius chooseRadius 
+  circle  <- nodes `append` (node Circle [ radius (chooseRadius model.loc) 
                                          , fill colorByGroup
                                          , on MouseEnter (\e d t -> stopSimulation_ simulation_) 
                                          , on MouseLeave (\e d t -> startSimulation_ simulation_)
@@ -167,11 +170,12 @@ moduleRadius = 5.0 :: Number
 packageRadius = 50.0 :: Number
 packageForceRadius = 50.0 :: Number
 
-chooseRadius :: Datum_ -> Number
-chooseRadius datum = do
+chooseRadius :: Map String Number -> Datum_ -> Number
+chooseRadius locMap datum = do
   let d = datumIsGraphNode_ datum
   case d.moduleOrPackage of
-    IsModule   -> moduleRadius
+    -- IsModule   -> moduleRadius
+    IsModule   -> 2.0 * (Math.log $ fromMaybe 10.0 $ M.lookup d.path locMap)
     IsPackage -> packageRadius
 
 chooseRadiusFn :: Datum_ -> Index_ -> Number
