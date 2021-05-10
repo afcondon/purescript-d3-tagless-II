@@ -3,7 +3,7 @@ module D3.Data.Types(
   , module D3.Data.Transition
   , module D3.Data.Zoom
   , module D3.Data.Foreign
-  , Selector
+  , Selector, PointXY
   , Element(..), UnitType(..), MouseEvent(..)
 ) where
 
@@ -44,4 +44,4 @@ instance showMouseEvent :: Show MouseEvent where
   show MouseDown  = "mousedown"
   show MouseUp    = "mouseup"
 
-
+type PointXY = { x :: Number, y :: Number }

@@ -36,6 +36,7 @@ type TreeModel d v = {
 -- the PureScript rep of opaque type D3HierarchicalNode_
 -- we can safely cast any D3HierarchicalNode_ to this if we know the types d and v
 -- there might be some way, passing proxies around, to enforce that constraint?
+-- TODO make this a row type similar to the handling of GraphNode_ and GraphLink_, formalize this pattern
 newtype D3HierarchicalNode d v = D3HierarchicalNode { -- (newtype to avoid cycles in types)
     "data"   :: d -- the data that is passed in to the tree
   , depth    :: Int
@@ -69,4 +70,4 @@ makeD3TreeJSONFromTreeID =
     (Node id children) -> idTreeParent_ id (makeD3TreeJSONFromTreeID <$> (A.fromFoldable children))
 
 foreign import idTreeLeaf_   :: forall id. id -> TreeJson_
-foreign import idTreeParent_ :: forall id. id -> Array TreeJson_ -> TreeJson_ 
+foreign import idTreeParent_ :: forall id. id -> Array TreeJson_ -> TreeJson_

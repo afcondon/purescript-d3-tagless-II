@@ -2,7 +2,8 @@ module D3.Data.File.Spago where
 
 import Affjax (URL)
 import D3.Data.Foreign (Datum_)
-import Data.Tree (Tree(..))
+import D3.Data.Tree (D3HierarchicalNode_)
+import D3.Data.Types (PointXY)
 import D3.FFI (D3ForceLink_, D3ForceNode_, makeGraphLinks_, makeGraphNodes_)
 import Data.Array (catMaybes, filter, foldl, head, length, null, range, uncons, zip, (!!), (:))
 import Data.Array as A
@@ -13,6 +14,7 @@ import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set as S
 import Data.String (Pattern(..), split)
+import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..))
 import Debug (spy)
 import Prelude (class Show, bind, not, ($), (<$>), (<>), (==))
@@ -32,8 +34,19 @@ type SpagoDataJSON_ = { packages :: Array SpagoPackageJSON, modules :: Array Spa
 -- NOTA BENE - these types are a _lie_ as stated in that the Nodes / Links are mutable and are changed when you put them
 -- into the simulation, the types given here represent their form AFTER D3 has mutated them
 -- *********************************************************************************************************************
-type NodeExtension   = ( name :: String, path :: String, depends :: Array String, package :: Maybe String, moduleOrPackage :: NodeType )
-type LinkExtension   = ( sourceID :: NodeID, targetID :: NodeID, moduleOrPackage :: LinkType )
+type NodeExtension   = ( 
+    name :: String
+  , path :: String
+  , depends :: Array String
+  , package :: Maybe String
+  , moduleOrPackage :: NodeType
+)
+
+type LinkExtension   = ( 
+    sourceID :: NodeID
+  , targetID :: NodeID
+  , moduleOrPackage :: LinkType
+)
 
 -- | local type synonyms for the node and link NATIVE types
 type NodeID          = Int
@@ -47,15 +60,41 @@ instance showLinkType :: Show LinkType where
   show P2P = "P2P"
   show M2P = "M2P"
   show P2M = "P2M"
+
 type SpagoGraph      = Graph NodeID SpagoNode
 type SpagoGraphNode_ = D3ForceNode_ NodeID NodeExtension
 type SpagoGraphLink_ = D3ForceLink_ NodeID NodeExtension LinkExtension
 
-type SpagoNode        = { id :: NodeID, name :: String, path :: String, package :: Maybe Int, moduleOrPackage :: NodeType, depends :: Array NodeID }
-type SpagoLink        = { sourceID :: NodeID, targetID :: NodeID, moduleOrPackage :: LinkType }
+type SpagoNode        = { 
+    id :: NodeID
+  , name :: String
+  , path :: String
+  , package :: Maybe Int
+  , moduleOrPackage :: NodeType
+  , depends :: Array NodeID
+}
 
-type SpagoRawModel    = { links :: Array SpagoLink, nodes :: Array SpagoNode, name2IdMap :: M.Map String NodeID }
-type SpagoCookedModel = { links :: Array SpagoGraphLink_, nodes :: Array SpagoGraphNode_, graph :: SpagoGraph, name2IdMap :: M.Map String NodeID, loc :: M.Map String Number, tree :: Maybe (Tree NodeID) }
+type SpagoLink        = { 
+    sourceID :: NodeID
+  , targetID :: NodeID
+  , moduleOrPackage :: LinkType
+}
+
+type SpagoRawModel    = { 
+    links :: Array SpagoLink
+  , nodes :: Array SpagoNode
+  , name2IdMap :: M.Map String NodeID
+}
+
+type SpagoCookedModel = { 
+    links      :: Array SpagoGraphLink_
+  , nodes      :: Array SpagoGraphNode_
+  , graph      :: SpagoGraph
+  , name2IdMap :: M.Map String NodeID
+  , loc        :: M.Map String Number
+  , positions  :: Maybe (M.Map NodeID PointXY)
+  , treeRoot_  :: Maybe D3HierarchicalNode_
+}
 
 datumIsGraphLink_ :: Datum_ -> SpagoGraphLink_
 datumIsGraphLink_ = unsafeCoerce
@@ -89,12 +128,7 @@ makeSpagoGraphModel json = do
     loc :: M.Map String Number
     loc = M.fromFoldable $ (\o -> Tuple o.path o.loc) <$> json.loc
 
-    -- reachables = 
-    --   case (flip getReachableNodes graph) <$> raw.root of
-    --     Nothing -> []
-    --     (Just r) -> spy "reachable nodes" $ r.reachableNodes
-  
-  { links, nodes, graph, name2IdMap: raw.name2IdMap, loc, tree: Nothing }
+  { links, nodes, graph, name2IdMap: raw.name2IdMap, loc, positions: Nothing, treeRoot_: Nothing }
 
 getRawGraphModel :: SpagoDataJSON_ -> SpagoRawModel
 getRawGraphModel { packages, modules, lsDeps } = do

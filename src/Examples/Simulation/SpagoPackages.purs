@@ -5,9 +5,9 @@ import Prelude hiding (append,join)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, text, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.File.Spago (GraphSearchRecord, LinkExtension, NodeExtension, NodeID, NodeType(..), Path, SpagoCookedModel, SpagoGraphNode_, SpagoGraphLink_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
-import D3.Data.Types (D3HierarchicalNode(..), D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), makeD3TreeJSONFromTreeID)
-import D3.FFI (D3ForceLink_, GraphModel_, hierarchyFromJSON_, initTree_, pinNodeWithID, startSimulation_, stopSimulation_, treeMinMax_, treeSetRoot_, treeSetSeparation_, treeSetSize_)
+import D3.Data.File.Spago (GraphSearchRecord, LinkExtension, NodeExtension, NodeID, NodeType(..), Path, SpagoCookedModel, SpagoGraphLink_, SpagoGraphNode_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
+import D3.Data.Types (D3HierarchicalNode(..), D3HierarchicalNode_, D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, makeD3TreeJSONFromTreeID)
+import D3.FFI (D3ForceLink_, GraphModel_, descendants_, hierarchyFromJSON_, initTree_, pinNode, pinNodeWithID, startSimulation_, stopSimulation_, treeMinMax_, treeSetRoot_, treeSetSeparation_, treeSetSize_)
 import D3.FFI.Config (defaultForceCollideConfig, defaultForceManyConfig, defaultForceRadialConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
@@ -21,9 +21,10 @@ import Data.Array (concatMap, cons, elem, filter, find, foldl, fromFoldable, len
 import Data.Either (Either(..))
 import Data.List (List(..), (:))
 import Data.List as L
-import Data.Map (Map)
+import Data.Map (Map, empty)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Nullable (Nullable)
 import Data.Set as S
 import Data.Traversable (sequence)
 import Data.Tree (Tree(..))
@@ -59,7 +60,6 @@ drawGraph = do
     (Right graph) -> do
       let graph' = treeReduction graph
 
-
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph')
       printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph') "Force Layout Script"
       log $ snd printedScript
@@ -79,12 +79,14 @@ treeReduction graph = do
           treenodes    = partition (\n -> (n.id `elem` r.reachableNodes) || 
                                            n.name == "Main") -- FIXME not "Main" but "whatever we gave as root of tree"
                                    graph.nodes
-          idTree    = buildTree "Main" graph treelinks.yes
-          jsontree = spy "supposedly JSON tree: " $makeD3TreeJSONFromTreeID <$> idTree
-          rootTree = spy "supposedly hierarchy from JSON tree: " $ hierarchyFromJSON_ <$> jsontree
-          -- rootH    = D3HierarchicalNode (unsafeCoerce rootTree)
-          layout = ((initTree_ unit) `treeSetSize_` [ 2.0 * pi, 500.0 ]) `treeSetSeparation_` radialSeparation
-          laidOutRoot_ = spy "supposedly laidout tree" $ (treeSetRoot_ layout) <$> rootTree
+
+          idTree          = buildTree "Main" graph treelinks.yes
+          jsontree        = makeD3TreeJSONFromTreeID <$> idTree
+          rootTree        = hierarchyFromJSON_ <$> jsontree
+          layout          = ((initTree_ unit) `treeSetSize_` [ 2.0 * pi, 500.0 ]) `treeSetSeparation_` radialSeparation
+          laidOutRoot_    = (treeSetRoot_ layout) <$> rootTree
+          positionMap     = getPositionMap laidOutRoot_
+          positionedNodes = fromMaybe treenodes.yes $ setNodePositions treenodes.yes positionMap -- FIXME ugly code
 
           -- { xMin, xMax, yMin, yMax } = treeMinMax_ <$> laidOutRoot_
 
@@ -94,8 +96,36 @@ treeReduction graph = do
                                , noOfNodesBefore: length graph.nodes
                                , noOfNodesAfter: length treenodes.yes
                                } \_ -> unit
-      graph { links = treelinks.yes, nodes = treenodes.yes, tree = idTree }
+      graph { links = treelinks.yes, nodes = positionedNodes, treeRoot_ = laidOutRoot_, positions = positionMap }
 
+setNodePositions :: Array SpagoGraphNode_ -> Maybe (M.Map NodeID PointXY) -> Maybe (Array SpagoGraphNode_)
+setNodePositions nodes maybeMap = do
+  positionMap <- maybeMap
+  let updateXY :: SpagoGraphNode_ -> SpagoGraphNode_
+      updateXY node = 
+        case M.lookup node.id positionMap of
+          Nothing -> node
+          (Just p) -> pinNode node p -- node { x = p.x, y = p.y }
+  Just $ updateXY <$> nodes
+
+
+-- TODO there's a clue in the name of this newtype
+-- see TODO for D3HierarchicalNode d v, needs to be a row type
+newtype EgregiousHackTODO = EgregiousHackTODO {
+    "data"   :: { name :: Int }
+  , depth    :: Int
+  , height   :: Int
+  , parent   :: Nullable EgregiousHackTODO
+  , children :: Array EgregiousHackTODO
+  , x        :: Number
+  , y        :: Number
+}
+getPositionMap :: Maybe D3HierarchicalNode_ -> Maybe (Map NodeID PointXY)
+getPositionMap hierarchy = do
+  root <- hierarchy
+  let (nodes :: Array EgregiousHackTODO) = unsafeCoerce $ descendants_ root
+      foldFn acc (EgregiousHackTODO n) = M.insert (n."data".name) { x: n.x, y: n.y } acc
+  Just $ foldl foldFn empty nodes
 
 buildTree :: String -> SpagoCookedModel -> Array SpagoGraphLink_ -> Maybe (Tree NodeID)
 buildTree rootName model treelinks = do
@@ -128,7 +158,10 @@ graphScript :: forall m link node selection r.
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
-  { links :: Array link, nodes :: Array node, loc :: M.Map String Number | r } -> 
+  { links :: Array link
+  , nodes :: Array node
+  , loc :: M.Map String Number
+  , positions :: Maybe (M.Map NodeID PointXY) | r } -> 
   m selection -- TODO is it right to return selection_ instead of simulation_? think it would vary by script but Tuple selection simulation would also work as a pattern
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
@@ -136,10 +169,10 @@ graphScript (Tuple w h) model = do
   linksGroup <- svg  `append` (node Group [ classed "links", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group [ classed "nodes" ])
 
-  let forces      = [ Force $ ForceManyBody    $ defaultForceManyConfig   "charge"
-                    , Force $ ForceCollide     $ defaultForceCollideConfig "collide" (\d -> chooseRadiusFn d)
-                    , Force $ ForceX           $ defaultForceXConfig "x"
-                    , Force $ ForceY           $ defaultForceYConfig "y"
+  let forces      = [ Force $ ForceManyBody    $ defaultForceManyConfig        "charge"
+                    , Force $ ForceCollide     $ defaultForceCollideConfig     "collide" (\d -> chooseRadiusFn d)
+                    , Force $ ForceX           $ defaultForceXConfig           "x"
+                    , Force $ ForceY           $ defaultForceYConfig           "y"
                     , Force $ ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
                     ]
       simulation_ = initSimulation forces model model.nodes model.links

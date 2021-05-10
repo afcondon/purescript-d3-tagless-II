@@ -58,7 +58,7 @@ drawTree treeModel = liftEffect $ do
 configureAndRunScript :: forall m v selection. 
   Bind m => 
   D3InterpreterM selection m => 
-  Tuple Number Number ->TreeModel String v -> m selection
+  Tuple Number Number -> TreeModel String v -> m selection
 configureAndRunScript (Tuple width height ) model = 
   treeScript { spacing, selector, viewbox, tree: laidOutRoot_, linkPath, nodeTransform, color, textDirection, svg } model
   where

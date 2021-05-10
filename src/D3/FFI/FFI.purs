@@ -4,11 +4,11 @@ module D3.FFI where
 -- TODO break this up into files corresponding to modules in D3js itself 
 -- TODO move the type definitions for HierarchicalNode_ and SimulationNode_ etc to D3.Data.Native
 
+import D3.FFI.Config
 import Prelude
 
 import Affjax (URL)
-import D3.Data.Types (D3Data_, D3HierarchicalNode_, D3Selection_, D3Simulation_, Datum_, Element, Index_, Selector, Transition, TreeJson_, ZoomConfigDefault_, ZoomConfig_)
-import D3.FFI.Config 
+import D3.Data.Types (D3Data_, D3HierarchicalNode_, D3Selection_, D3Simulation_, Datum_, Element, Index_, Selector, Transition, TreeJson_, ZoomConfigDefault_, ZoomConfig_, PointXY)
 import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
 import Data.Nullable (Nullable)
@@ -103,10 +103,16 @@ foreign import setLinks_        :: forall id r l. D3Simulation_ -> Array (D3Forc
 foreign import startSimulation_ :: D3Simulation_ -> Unit
 foreign import stopSimulation_  :: D3Simulation_ -> Unit
 
--- TODO move to FFI
 foreign import pinNode_   :: forall id node. Number -> Number -> D3ForceNode_ id node -> Unit
 foreign import unpinNode_ :: forall id node. D3ForceNode_ id node -> Unit
 foreign import nanNodes_ :: forall id node. Array (D3ForceNode_ id node) -> Unit
+
+-- NB mutating function
+pinNode :: forall id node. D3ForceNode_ id node -> PointXY -> D3ForceNode_ id node
+pinNode node p = do
+  let _ = pinNode_ p.x p.y node
+  node -- NB mutated value, fx / fy have been set
+
 pinNodeWithID :: forall node. Array node -> String -> Number -> Number -> Unit
 pinNodeWithID nodes nodeName fx fy = unit
   where
@@ -148,7 +154,7 @@ foreign import hierarchyFromJSON_       :: TreeJson_ -> D3HierarchicalNode_
 foreign import hasChildren_             :: Datum_ -> Boolean -- really only works on Datum_ when it's a D3HierarchicalNode_
 
 -- the full API for hierarchical nodes:
-foreign import descendants_     :: D3HierarchicalNode_ -> Array D3Data_
+foreign import descendants_     :: D3HierarchicalNode_ -> Array D3HierarchicalNode_ -- TODO check this signature
 foreign import find_            :: D3HierarchicalNode_ -> (Datum_ -> Boolean) -> Nullable D3HierarchicalNode_
 foreign import links_           :: D3HierarchicalNode_ -> Array D3Data_ -- TODO this is actually Array Nodes
 -- TODO implement the following as well
