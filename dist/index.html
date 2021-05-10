@@ -19,10 +19,10 @@
       grid-gap: 10px;
       grid-template-areas:
                "spago spago spago"
-               "gup force rtree"
+               "gup force spagotree"
                "htree vtree vtree"
                "htree vdendro vdendro"
-               "hdendro rdendro .";
+               "hdendro rdendro rtree";
     }
     div {
       background-color: beige;
@@ -63,6 +63,9 @@
       grid-area: force;
     }
 
+    div#spagotree {
+      grid-area: spagotree;
+    }
     div#spago {
       height: 100vh;
       grid-area: spago;
@@ -99,6 +102,7 @@
   <div id="gup"><h2>gup</h2></div>
   <div id="force"><h2>force</h2></div>
   <div id="spago"><h2>spago</h2></div>
+  <div id="spagotree"><h2>spago</h2></div>
   <div id="meta">
     <h2>meta</h2>
   </div>

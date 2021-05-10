@@ -1,18 +1,18 @@
 module D3.Examples.Simulation.SpagoPackages where
 
+import D3.Attributes.Sugar
 import Prelude hiding (append,join)
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.File.Spago (GraphSearchRecord, LinkExtension, NodeExtension, NodeID, NodeType(..), Path, SpagoCookedModel, SpagoGraphLink_, SpagoGraphNode_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
-import D3.Data.Types (D3HierarchicalNode(..), D3HierarchicalNode_, D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, makeD3TreeJSONFromTreeID)
-import D3.FFI (D3ForceLink_, GraphModel_, descendants_, hierarchyFromJSON_, initTree_, pinNode, pinNodeWithID, startSimulation_, stopSimulation_, treeMinMax_, treeSetRoot_, treeSetSeparation_, treeSetSize_)
+import D3.Data.Types (D3HierarchicalNode(..), D3HierarchicalNode_, D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, TreeModel, datumIsTreeNode, labelName, makeD3TreeJSONFromTreeID)
+import D3.FFI (D3ForceLink_, GraphModel_, descendants_, hNodeHeight_, hasChildren_, hierarchyFromJSON_, initTree_, links_, pinNode, pinNodeWithID, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize_, treeSetRoot_, treeSetSeparation_, treeSetSize_)
 import D3.FFI.Config (defaultForceCenterConfig, defaultForceCollideConfig, defaultForceManyConfig, defaultForceRadialConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Hierarchical (radialSeparation)
+import D3.Layouts.Hierarchical (positionXY, radialLink, radialSeparation, verticalLink)
 import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
 import D3.Scales (d3SchemeCategory10S_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
@@ -61,6 +61,9 @@ drawGraph = do
       let graph' = treeReduction graph
 
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph')
+
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (spagoTreeScript widthHeight graph'.treeRoot_)
+       
       printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph') "Force Layout Script"
       log $ snd printedScript
       log $ fst printedScript
@@ -125,7 +128,7 @@ setNodePositionsRadial nodes maybeMap = do
 -- TODO there's a clue in the name of this newtype
 -- see TODO for D3HierarchicalNode d v, needs to be a row type
 newtype EgregiousHackTODO = EgregiousHackTODO {
-    "data"   :: { name :: Int }
+    "data"   :: { name :: Int, package :: String }
   , depth    :: Int
   , height   :: Int
   , parent   :: Nullable EgregiousHackTODO
@@ -137,8 +140,8 @@ getPositionMap :: Maybe D3HierarchicalNode_ -> Maybe (Map NodeID PointXY)
 getPositionMap hierarchy = do
   root <- hierarchy
   let (nodes :: Array EgregiousHackTODO) = unsafeCoerce $ descendants_ root
-      foldFn acc (EgregiousHackTODO n) = M.insert (n."data".name) { x: n.x, y: n.y } acc
-  Just $ foldl foldFn empty nodes
+      foldFn acc (EgregiousHackTODO n) = M.insert (n."data".name) { x: n.x, y: n.y, package: n."data".package } acc
+  Just $ unsafeCoerce $ foldl foldFn empty nodes
 
 buildTree :: String -> SpagoCookedModel -> Array SpagoGraphLink_ -> Maybe (Tree NodeID)
 buildTree rootName model treelinks = do
@@ -302,3 +305,97 @@ setCy :: Datum_ -> Number
 setCy datum = d.y
   where
     d = datumIsGraphNode_ datum
+
+
+
+-- | **************************************************************************************************************
+-- | draw the spago graph - only the tree part - as a radial tree
+-- | **************************************************************************************************************
+
+
+spagoTreeScript :: forall m v selection. Bind m => D3InterpreterM selection m => 
+  Tuple Number Number -> Maybe D3HierarchicalNode_ -> m selection
+spagoTreeScript (Tuple width height) Nothing = do
+  attach "div#spagotree"            -- FIXME this is bogus but saves messing about with the Maybe root_ in the drawGraph script               
+
+spagoTreeScript (Tuple width height) (Just root_) = do
+  let 
+    -- configure dimensions
+    columns                    = 3.0  -- 3 columns, set in the grid CSS in index.html
+    gap                        = 10.0 -- 10px set in the grid CSS in index.html
+    svgWH                      = { width : ((width - ((columns - 1.0) * gap)) / columns)
+                                 , height: height / 2.0 } -- 2 rows
+    numberOfLevels             = (hNodeHeight_ root_) + 1.0
+    spacing                    = { interChild: 120.0, interLevel: svgWH.height / numberOfLevels}
+    layoutFn                   = (initTree_ unit) `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
+    laidOutRoot_               = layoutFn `treeSetRoot_` root_
+    { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
+    xExtent                    = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
+    yExtent                    = yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
+
+
+  -- "script"
+  root       <- attach "div#spagotree"                           
+  svg        <- root `append` (node Svg  [ viewBox (-svgWH.width / 2.0) (-20.0) svgWH.width svgWH.height ] )          
+  container  <- svg  `append` (node Group [ fontFamily      "sans-serif"
+                                          , fontSize        18.0
+                                          ])
+  links      <- container `append` (node Group [ classed "links"])
+  nodes      <- container `append` (node Group [ classed "nodes"])
+
+  theLinks_  <- links <+> Join {
+      element   : Path
+    , key       : UseDatumAsKey
+    , "data"    : links_ root_
+    , behaviour : [ strokeWidth   1.5
+                  , strokeColor   "black"
+                  , strokeOpacity 0.4
+                  , fill          "none"
+                  , radialLink _.x _.y
+                  ]
+  }
+
+  nodeJoin_  <- nodes <+> Join {
+      element   : Group
+    , key       : UseDatumAsKey
+    , "data"    : descendants_ root_
+    -- there could be other stylistic stuff here but the transform is key structuring component
+    , behaviour : [ transform [ radialRotateCommon, radialTreeTranslate, rotateRadialLabels ] ]
+  }
+
+  theNodes <- nodeJoin_ `append` 
+                (node Circle  [ fill         "red"
+                              , radius       2.5
+                              , strokeColor "white"
+                              ])
+
+  theLabels <- nodeJoin_ `append`
+                (node Text  [ dy         0.31
+                            , x          (\datum -> if textDirection datum then 6.0 else (-6.0))
+                            , textAnchor (\datum -> if textDirection datum then "start" else "end")
+                            , text       labelName
+                            , fill       "#555"
+                            ])
+                            
+  pure svg
+
+radialRotate :: Number -> String
+radialRotate x = show $ (x * 180.0 / pi - 90.0)
+
+radialRotateCommon :: forall d v. D3HierarchicalNode d v -> String
+radialRotateCommon (D3HierarchicalNode d) = "rotate(" <> radialRotate d.x <> ")"
+
+radialTreeTranslate :: forall d v. D3HierarchicalNode d v -> String
+radialTreeTranslate (D3HierarchicalNode d) = "translate(" <> show d.y <> ",0)"
+
+rotateRadialLabels :: forall d v. D3HierarchicalNode d v -> String
+rotateRadialLabels (D3HierarchicalNode d) = -- TODO replace with nodeIsOnRHS 
+  "rotate(" <> if d.x >= pi 
+  then "180" <> ")" 
+  else "0" <> ")"
+
+nodeIsOnRHS :: Datum_ -> Boolean
+nodeIsOnRHS d = node.x < pi
+  where (D3HierarchicalNode node) = datumIsTreeNode d
+
+textDirection = \d -> hasChildren_ d == nodeIsOnRHS d
