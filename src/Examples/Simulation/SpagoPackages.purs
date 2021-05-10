@@ -8,7 +8,7 @@ import D3.Attributes.Sugar (classed, fill, getWindowWidthHeight, on, radius, str
 import D3.Data.File.Spago (GraphSearchRecord, LinkExtension, NodeExtension, NodeID, NodeType(..), Path, SpagoCookedModel, SpagoGraphLink_, SpagoGraphNode_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
 import D3.Data.Types (D3HierarchicalNode(..), D3HierarchicalNode_, D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, makeD3TreeJSONFromTreeID)
 import D3.FFI (D3ForceLink_, GraphModel_, descendants_, hierarchyFromJSON_, initTree_, pinNode, pinNodeWithID, startSimulation_, stopSimulation_, treeMinMax_, treeSetRoot_, treeSetSeparation_, treeSetSize_)
-import D3.FFI.Config (defaultForceCollideConfig, defaultForceManyConfig, defaultForceRadialConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
+import D3.FFI.Config (defaultForceCenterConfig, defaultForceCollideConfig, defaultForceManyConfig, defaultForceRadialConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
@@ -33,8 +33,8 @@ import Debug (debugger, spy, trace)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
+import Math (cos, pi, sin)
 import Math (log, pow, sqrt) as Math
-import Math (pi)
 import Unsafe.Coerce (unsafeCoerce)
 
 
@@ -86,7 +86,7 @@ treeReduction graph = do
           layout          = ((initTree_ unit) `treeSetSize_` [ 2.0 * pi, 500.0 ]) `treeSetSeparation_` radialSeparation
           laidOutRoot_    = (treeSetRoot_ layout) <$> rootTree
           positionMap     = getPositionMap laidOutRoot_
-          positionedNodes = fromMaybe treenodes.yes $ setNodePositions treenodes.yes positionMap -- FIXME ugly code
+          positionedNodes = fromMaybe treenodes.yes $ setNodePositionsRadial treenodes.yes positionMap -- FIXME ugly code
 
           -- { xMin, xMax, yMin, yMax } = treeMinMax_ <$> laidOutRoot_
 
@@ -98,14 +98,27 @@ treeReduction graph = do
                                } \_ -> unit
       graph { links = treelinks.yes, nodes = positionedNodes, treeRoot_ = laidOutRoot_, positions = positionMap }
 
-setNodePositions :: Array SpagoGraphNode_ -> Maybe (M.Map NodeID PointXY) -> Maybe (Array SpagoGraphNode_)
-setNodePositions nodes maybeMap = do
+-- for radial positioning we treat x as angle and y as radius
+radialTranslate :: PointXY -> PointXY
+radialTranslate p = 
+  let angle  = p.x
+      radius = p.y
+      x = radius * cos angle
+      y = radius * sin angle
+  in { x, y }
+
+setNodePositionsRadial :: Array SpagoGraphNode_ -> Maybe (M.Map NodeID PointXY) -> Maybe (Array SpagoGraphNode_)
+setNodePositionsRadial nodes maybeMap = do
   positionMap <- maybeMap
   let updateXY :: SpagoGraphNode_ -> SpagoGraphNode_
       updateXY node = 
         case M.lookup node.id positionMap of
           Nothing -> node
-          (Just p) -> pinNode node p -- node { x = p.x, y = p.y }
+          -- (Just p) -> node { x = p.x, y = p.y }
+          -- (Just p) -> pinNode node (radialTranslate p)
+          (Just p) -> 
+            let { x,y } = radialTranslate p
+            in node { x = x, y = y }
   Just $ updateXY <$> nodes
 
 
@@ -169,11 +182,12 @@ graphScript (Tuple w h) model = do
   linksGroup <- svg  `append` (node Group [ classed "links", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group [ classed "nodes" ])
 
-  let forces      = [ Force $ ForceManyBody    $ defaultForceManyConfig        "charge"
-                    , Force $ ForceCollide     $ defaultForceCollideConfig     "collide" (\d -> chooseRadiusFn d)
-                    , Force $ ForceX           $ defaultForceXConfig           "x"
-                    , Force $ ForceY           $ defaultForceYConfig           "y"
-                    , Force $ ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
+  let forces      = [ Force $ ForceManyBody    $ (defaultForceManyConfig "charge") { strength = -100.0 }
+                    , Force $ ForceCollide     $  defaultForceCollideConfig "collide" (\d -> chooseRadiusFn d)
+                    , Force $ ForceX           $ (defaultForceXConfig "x") { strength = 0.05 }
+                    , Force $ ForceY           $ (defaultForceYConfig "y") { strength = 0.05 }
+                    , Force $ ForceCenter      $ (defaultForceCenterConfig "center") { strength = -1.0 }
+                    -- , Force $ ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
                     ]
       simulation_ = initSimulation forces model model.nodes model.links
 

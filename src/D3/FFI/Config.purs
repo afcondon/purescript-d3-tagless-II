@@ -19,7 +19,7 @@ defaultForceManyConfig :: String -> ForceManyConfig_
 defaultForceManyConfig name = { name, strength: (-30.0), theta: 0.9, distanceMin: 1.0, distanceMax: infinity}
 
 defaultForceCenterConfig :: String -> ForceCenterConfig_
-defaultForceCenterConfig name = { name, cx: 0.0, cy: 0.0 }
+defaultForceCenterConfig name = { name, cx: 0.0, cy: 0.0, strength: 1.0 }
 
 defaultForceCollideFixedConfig :: String -> ForceCollideFixedConfig_
 defaultForceCollideFixedConfig name = { name, radius: 1.0, strength: 1.0, iterations: 1.0 }
@@ -62,6 +62,7 @@ type ForceManyConfig_ = {
 
 type ForceCenterConfig_ = {
     name        :: String
+  , strength    :: Number
   , cx          :: Number
   , cy          :: Number
 }

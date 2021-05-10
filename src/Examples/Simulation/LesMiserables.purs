@@ -60,7 +60,7 @@ graphScript (Tuple w h) model = do
   linksGroup <- svg  `append` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
-  let forces      = [ Force $ ForceCenter { name: "center", cx: 500.0, cy: 500.0 }
+  let forces      = [ Force $ ForceCenter { name: "center", cx: 500.0, cy: 500.0, strength: 1.0 }
                     , Force $ ForceManyBody (defaultForceManyConfig "charge") ]
       simulation_ = initSimulation forces model model.nodes model.links
 
