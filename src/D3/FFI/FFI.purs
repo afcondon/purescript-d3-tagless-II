@@ -8,7 +8,7 @@ import D3.FFI.Config
 import Prelude
 
 import Affjax (URL)
-import D3.Data.Types (D3Data_, D3HierarchicalNode_, D3Selection_, D3Simulation_, Datum_, Element, Index_, Selector, Transition, TreeJson_, ZoomConfigDefault_, ZoomConfig_, PointXY)
+import D3.Data.Types (D3Data_, D3HierarchicalNode_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, TreeJson_, ZoomConfigDefault_, ZoomConfig_)
 import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
 import Data.Nullable (Nullable)
@@ -149,6 +149,10 @@ foreign import data D3SortComparator_   :: Type -- a number such that n < 0 => a
 foreign import data D3Hierarchical_     :: Type
 
 foreign import hierarchyFromJSON_       :: TreeJson_ -> D3HierarchicalNode_
+foreign import treeSortForCirclePack_   :: D3HierarchicalNode_ -> D3HierarchicalNode_
+foreign import treeSortForTreeMap_      :: D3HierarchicalNode_ -> D3HierarchicalNode_
+foreign import treeSortForTree_         :: D3HierarchicalNode_ -> D3HierarchicalNode_
+
 -- next some functions to make attributes, types are a bit sloppy here
 -- TODO tighten this up
 foreign import hasChildren_             :: Datum_ -> Boolean -- really only works on Datum_ when it's a D3HierarchicalNode_

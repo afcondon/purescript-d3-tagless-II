@@ -21,11 +21,7 @@ drawTree treeModel = liftEffect $ do
   (_ :: Tuple D3Selection_ Unit) <- runD3M (treeScript widthHeight treeModel)
   pure unit
 
--- | The eDSL script that renders tree layouts
--- | it has been parameterized rather heavily using the ScriptConfig record so that it can draw
--- | all six variations of [Radial, Horizontal, Vertical] * [Dendrogram, TidyTree] 
--- | NB there would be nothing wrong, per se, with individual examples, this just shows 
--- | some more composability, at the price of some direct legibility
+-- | "script" to produce the documentation-style rendering of another script's structure
 treeScript :: forall m v selection. Bind m => D3InterpreterM selection m => 
   Tuple Number Number -> TreeModel String v -> m selection
 treeScript (Tuple width height) model = do

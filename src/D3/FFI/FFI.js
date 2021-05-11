@@ -351,7 +351,17 @@ exports.nanNodes_ = nodes => {
 // ************************** functions from d3js Hierarchy module         *****************************************
 // *****************************************************************************************************************
 // TODO replace with a configurable hierarchy function in PS and direct calls to hierarchy, sort etc as appropriate
-exports.hierarchyFromJSON_ = json => d3.hierarchy(json).sort((a, b) => d3.ascending(a.data.name, b.data.name))
+exports.hierarchyFromJSON_ = json => d3.hierarchy(json)
+//.sort((a, b) => d3.ascending(a.data.name, b.data.name))
+exports.treeSortForCirclePack_ = root => root
+                                        .sum(function(d) { return d.value; })
+                                        .sort(function(a, b) { return b.value - a.value; });
+
+exports.treeSortForTreeMap_ = root => root.sum(function(d) { return d.value; })
+                                          .sort(function(a, b) { return b.height - a.height || b.value - a.value; }); 
+                                          
+exports.treeSortForTree_ = root => root.sum(function(d) { return d.value; })
+                                       .sort(function(a, b) { return b.height - a.height || a.id.localeCompare(b.id); })
 
 // foreign import hasChildren              :: Datum_ -> Boolean
 exports.hasChildren_ = d => !d.children
