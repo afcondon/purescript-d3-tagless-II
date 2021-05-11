@@ -6,6 +6,7 @@ import D3.Data.Types (Element, MouseEvent, Transition, TreeJson_)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Selection (Chainable(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), Keys)
 import D3.Zoom (ZoomConfig)
+import D3.Node
 import Data.Array (filter, (:))
 import Data.Map (Map, empty, insert, lookup)
 import Data.Maybe (fromMaybe)
@@ -14,7 +15,6 @@ import Data.Tuple (Tuple(..), snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 
-type NodeID = Int
 data MetaTreeNode = 
     Empty
   | AttachNode String

@@ -51,21 +51,27 @@ type D3_Hierarchy_Node_Rect d   = D3_Hierarchy_Node d ( x0 :: Number, y0 :: Numb
 -- on "tick"
 -- on "end"
 -- | ***************************************************************************************************
+type NodeID = Int
 
 type D3_Simulation_Node d = { -- at present no extensions to simulation nodes
-    index :: Int
+    index :: NodeID
   , x     :: Number, y :: Number
   , vx    :: Number, vy :: Number
   , fx    :: Nullable Number, fy :: Nullable Number
   , "data" :: d
 }
 
-type D3_Simulation_Link d r = { -- d is the type of the source and target, initially Int, from node.index but then replaced with type of D3_Simulation_Node_<something>
-    source :: d
-  , target :: d
+type D3_Simulation_LinkID r = { -- d is the type of the source and target, initially Int, from node.index but then replaced with type of D3_Simulation_Node_<something>
+    source :: NodeID
+  , target :: NodeID
   | r
 }
 
+type D3_Simulation_Link d r = { -- d is the type of the source and target, initially Int, from node.index but then replaced with type of D3_Simulation_Node_<something>
+    source :: (D3_Simulation_Node d)
+  , target :: (D3_Simulation_Node d)
+  | r
+}
 
 -- TODO add more of these fundamental node / link types for Sankey and Chord diagrams at least
 

@@ -1,4 +1,4 @@
-exports.readSpagoDataJSON_ = modulesBody => packagesBody => lsdepsBody => locBody => {
+exports.readSpago_Raw_JSON_ = modulesBody => packagesBody => lsdepsBody => locBody => {
   const modules  = decodeModulesFile(modulesBody);
   const packages = decodePackagesFile(packagesBody);
   const lsDeps   = decodeLsDepsFile(lsdepsBody);

@@ -3,6 +3,7 @@ module D3.FFI.Config where
 import Prelude
 
 import D3.Data.Foreign (Datum_, Index_)
+import D3.Node (D3_Simulation_LinkID)
 import Data.Number (infinity)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -39,8 +40,10 @@ defaultForceRadialFixedConfig name radius = { name, strength: 0.1, radius, cx: 0
 defaultForceRadialConfig :: String -> (Datum_ -> Index_ -> Number) -> ForceRadialConfig_
 defaultForceRadialConfig name radius = { name, strength: 0.1, radius, cx: 0.0, cy: 0.0 }
 
-defaultForceLinkConfig :: String -> ForceLinkConfig_
-defaultForceLinkConfig name = { name, strength: 1.0, distance: (\d i -> 30.0), iterations: 1.0, id: (\d i -> (unsafeCoerce d).index) }
+-- TODO seems like we are forced to ignore the type parameter for the link here or else pollute all the force types
+defaultForceLinkConfig :: forall r. String -> Array (D3_Simulation_LinkID r) -> ForceLinkConfig_
+defaultForceLinkConfig name links = { name, links: unsafeCoerce links, strength: 1.0, distance: (\d i -> 30.0), iterations: 1.0, id: (\d i -> (unsafeCoerce d).index) }
+  
 
 
 defaultConfigSimulation :: SimulationConfig_
@@ -115,4 +118,5 @@ type ForceLinkConfig_ = {
   , distance    :: (Datum_ -> Index_ -> Number)
   , iterations  :: Number
   , id          :: (Datum_ -> Index_ -> Number)
+  , links       :: forall r. Array (D3_Simulation_LinkID r)
 }

@@ -3,19 +3,20 @@ module D3.Layouts.Simulation where
 import D3.FFI.Config
 
 import D3.Data.Types (D3Simulation_)
-import D3.FFI (D3ForceLink_, D3ForceNode_, forceCenter_, forceCollideFixed_, forceCollideFn_, forceMany_, forceRadialFixed_, forceRadial_, forceX_, forceY_, initSimulation_, setLinks_)
+import D3.FFI (forceCenter_, forceCollideFixed_, forceCollideFn_, forceLink_, forceMany_, forceRadialFixed_, forceRadial_, forceX_, forceY_, getLinks_, getNodes_, initSimulation_, setLinks_)
+import D3.Node (D3_Simulation_Link, D3_Simulation_Node, D3_Simulation_LinkID)
 import D3.Selection (DragBehavior)
 import Prelude (Unit, (<$>))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | see bottom of file for all config defaults 
-newtype Simulation id r l = Simulation (SimulationRecord_ id r l)
+newtype Simulation id r l = Simulation (SimulationRecord_ r l)
 
-type SimulationRecord_ id r l = { 
+type SimulationRecord_ d r = {  -- 'd' is the type of the "data" field in each node, 'r' is the additional row-types in the link
     label  :: String
   , config :: SimulationConfig_
-  , nodes  :: Array (D3ForceNode_ id r)
-  , links  :: Array (D3ForceLink_ id r l)
+  , nodes  :: Array (D3_Simulation_Node d)
+  , links  :: Array (D3_Simulation_Link d r)
   , forces :: Array Force
   , tick   :: Unit -> Unit -- could be Effect Unit
   , drag   :: DragBehavior -- TODO make strongly typed wrt actual Model used
@@ -31,18 +32,23 @@ data ForceType =
   | ForceY            ForceYConfig_
   | ForceRadialFixed  ForceRadialFixedConfig_
   | ForceRadial       ForceRadialConfig_
+  | ForceLink         ForceLinkConfig_
   | Custom
-  -- TODO bring back the force link below, in addition to, or replacing the insertion of the links in the simulation init
-  -- | ForceLink (Array Link) (Link -> ID)
   
-initSimulation :: forall model node link. Array Force -> model -> Array node -> Array link -> D3Simulation_
-initSimulation forces model nodes links = do
-  let nodes_ = unsafeCoerce nodes
-      links_ = unsafeCoerce links
-      simulation = initSimulation_ nodes_ defaultConfigSimulation
-      _          = simulation `putForcesInSimulation` forces
-      _          = simulation `setLinks_` links_
-  simulation
+initSimulation :: forall nodedata linkdata. 
+  Array Force ->
+  Array nodedata ->
+  SimulationConfig_ ->
+  { simulation :: D3Simulation_, nodes :: Array (D3_Simulation_Node nodedata), links :: Array (D3_Simulation_Link nodedata linkdata) }
+initSimulation forces nodeData config = do
+  let 
+      nodes            = (\d -> { "data": d } ) <$> nodeData -- put the data into the sim node, possibly set index here??
+      simulation       = initSimulation_ nodes config
+      _                = simulation `putForcesInSimulation` forces -- links if any go here
+      initializedNodes = getNodes_ simulation
+      initializedLinks = getLinks_ simulation -- TODO must be Maybe, might not be links
+
+  { simulation, nodes: initializedNodes, links: initializedLinks }
 
 putForcesInSimulation :: D3Simulation_ -> Array Force -> D3Simulation_
 putForcesInSimulation simulation forces = do
@@ -67,6 +73,8 @@ putForcesInSimulation simulation forces = do
           forceRadialFixed_ simulation config
         (Force (ForceRadial config)) ->
           forceRadial_ simulation config
+        (Force (ForceLink config)) ->
+          forceLink_ simulation config
 
         (Force Custom) -> simulation -- do this later as needed
     _ = addForce <$> forces

@@ -6,13 +6,14 @@ import Affjax (Error)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
-import D3.Data.File.LesMiserables (datumIsLesMisGraphLink_, datumIsLesMisGraphNode_, readGraphFromFileContents)
+import D3.Data.File.LesMiserables (LesMisLinkData, LesMisNodeData, datumIsLesMisGraphLink_, datumIsLesMisGraphNode_, readGraphFromFileContents)
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
-import D3.FFI (D3ForceLink_, D3ForceNode_, startSimulation_)
-import D3.FFI.Config (defaultForceCenterConfig, defaultForceManyConfig)
+import D3.FFI (startSimulation_)
+import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceLinkConfig, defaultForceManyConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
+import D3.Node (D3_Simulation_LinkID, D3_Simulation_Node)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
@@ -48,11 +49,11 @@ drawGraph = do
 
 
 -- | recipe for this force layout graph
-graphScript :: forall m link node selection r. 
+graphScript :: forall m r selection. 
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
-  { links :: Array link, nodes :: Array node | r } -> 
+  { links :: Array (D3_Simulation_LinkID LesMisLinkData), nodes :: Array (D3_Simulation_Node LesMisNodeData) | r } -> 
   m selection -- TODO is it right to return selection_ instead of simulation_? does it matter? 
 graphScript (Tuple w h) model = do
   root       <- attach "div#force"
@@ -61,15 +62,17 @@ graphScript (Tuple w h) model = do
   nodesGroup <- svg  `append` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   let forces      = [ Force $ ForceCenter { name: "center", cx: 500.0, cy: 500.0, strength: 1.0 }
-                    , Force $ ForceManyBody (defaultForceManyConfig "charge") ]
-      simulation_ = initSimulation forces model model.nodes model.links
+                    , Force $ ForceManyBody (defaultForceManyConfig "charge")
+                    , Force $ ForceLink     (defaultForceLinkConfig "links" model.links)
+                    ]
+      { simulation, nodes, links } = initSimulation forces model.nodes defaultConfigSimulation
 
   links <- join linksGroup $ JoinSimulation {
       element   : Line
     , key       : UseDatumAsKey
-    , "data"    : model.links
+    , "data"    : links
     , behaviour : [ strokeWidth linkWidth ]
-    , simulation: simulation_ -- following config fields are extras for simulation
+    , simulation: simulation -- following config fields are extras for simulation
     , tickName  : "links"
     , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
     , onDrag    : SimulationDrag NoDrag
@@ -78,9 +81,9 @@ graphScript (Tuple w h) model = do
   nodes <- join nodesGroup $ JoinSimulation {
       element   : Circle
     , key       : UseDatumAsKey
-    , "data"    : model.nodes
+    , "data"    : nodes
     , behaviour : [ radius 5.0, fill colorByGroup ]
-    , simulation: simulation_  -- following config fields are extras for simulation
+    , simulation: simulation  -- following config fields are extras for simulation
     , tickName  : "nodes"
     , onTick    : [ cx setCx, cy setCy ]
     , onDrag    : SimulationDrag DefaultDrag
@@ -92,7 +95,7 @@ graphScript (Tuple w h) model = do
                             , target    : SelfTarget
                             }
 
-  let _ = startSimulation_ simulation_
+  let _ = startSimulation_ simulation
 
   pure svg'
 
@@ -102,7 +105,7 @@ graphScript (Tuple w h) model = do
 -- static type representations AND lightweight syntax with JS compatible lambdas (i think)
 
 colorByGroup :: Datum_ -> String
-colorByGroup datum = d3SchemeCategory10N_ d.group
+colorByGroup datum = d3SchemeCategory10N_ d.data.group
   where
     d = datumIsLesMisGraphNode_ datum
 

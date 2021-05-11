@@ -3,20 +3,22 @@ module D3.Examples.Simulation.SpagoPackages where
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.File.Spago (NodeID, NodeType(..), SpagoCookedModel, SpagoGraphLink_, SpagoGraphNode_, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
+import D3.Data.File.Spago (NodeType(..), SpagoGraphNode_, SpagoModel, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
 import D3.Data.Types (D3HierarchicalNode(..), D3HierarchicalNode_, D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, datumIsTreeNode, labelName, makeD3TreeJSONFromTreeID)
 import D3.FFI (GraphModel_, descendants_, hNodeHeight_, hasChildren_, hierarchyFromJSON_, initTree_, links_, pinNodeWithID, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize_, treeSetRoot_, treeSetSeparation_, treeSetSize_, treeSortForTree_)
-import D3.FFI.Config (defaultForceCenterConfig, defaultForceCollideConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
+import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical (radialLink, radialSeparation)
 import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
-import D3.Scales (d3SchemeCategory10S_)
+import D3.Node (D3_Simulation_Link, D3_Simulation_Node, NodeID, D3_Simulation_LinkID)
+import D3.Scales (d3SchemeCategory10N_, d3SchemeCategory10S_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
 import Data.Array (cons, elem, filter, foldl, fromFoldable, length, partition, reverse)
 import Data.Either (Either(..))
+import Data.Int (fromNumber, toNumber)
 import Data.List (List(..), (:))
 import Data.List as L
 import Data.Map (Map, empty)
@@ -36,11 +38,11 @@ import Prelude (class Bind, Unit, bind, discard, flip, negate, pure, show, unit,
 import Unsafe.Coerce (unsafeCoerce)
 
 
-highlightNeighborhood :: GraphModel_ SpagoGraphLink_ SpagoGraphNode_ -> NodeID -> Unit
+highlightNeighborhood :: forall d r. GraphModel_ (D3_Simulation_Link d r) (D3_Simulation_Node d) -> NodeID -> Unit
 highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
   where
-    sources = foldl (\acc l -> if l.target.id == nodeId then (cons l.source.id acc) else acc) [] links
-    targets = foldl (\acc l -> if l.source.id == nodeId then (cons l.target.id acc) else acc) [] links
+    sources = foldl (\acc l -> if l.target.index == nodeId then (cons l.source.index acc) else acc) [] links
+    targets = foldl (\acc l -> if l.source.index == nodeId then (cons l.target.index acc) else acc) [] links
 
 foreign import markAsSpotlit_   :: NodeID -> Array NodeID -> Array NodeID -> Unit
 foreign import removeSpotlight_ :: NodeID -> Array NodeID -> Array NodeID -> Unit
@@ -67,14 +69,14 @@ drawGraph = do
       log $ fst printedScript
       pure unit
 
-treeReduction :: SpagoCookedModel -> SpagoCookedModel
+treeReduction :: SpagoModel -> SpagoModel
 treeReduction graph = do
   case (flip getReachableNodes graph.graph) <$> (findGraphNodeIdFromName graph "Main") of
     Nothing -> graph -- no change
     (Just r) -> do
       let onlyTreelinks = spy "onlyTreelinks" $ makeTreeLinks (pathsAsLists r.closedPaths)
-          isTreeLink :: SpagoGraphLink_ -> Boolean -- it's not yet converted to 
-          isTreeLink l = (Tuple l.sourceID l.targetID) `elem` onlyTreelinks
+          isTreeLink :: D3_Simulation_LinkID -> Boolean -- it's not yet converted to 
+          isTreeLink l = (Tuple l.source l.target) `elem` onlyTreelinks
 
           treelinks    = partition isTreeLink graph.links
           treenodes    = partition (\n -> (n.id `elem` r.reachableNodes) || 
@@ -115,7 +117,7 @@ setNodePositionsRadial nodes maybeMap = do
   positionMap <- maybeMap
   let updateXY :: SpagoGraphNode_ -> SpagoGraphNode_
       updateXY node = 
-        case M.lookup node.id positionMap of
+        case M.lookup node.data.id positionMap of
           Nothing -> node
           -- (Just p) -> node { x = p.x, y = p.y }
           -- (Just p) -> pinNode node (radialTranslate p)
@@ -144,11 +146,11 @@ getPositionMap hierarchy = do
       foldFn acc (EgregiousHackTODO n) = M.insert (n."data".name) { x: n.x, y: n.y } acc
   Just $ foldl foldFn empty nodes
 
-buildTree :: String -> SpagoCookedModel -> Array SpagoGraphLink_ -> Maybe (Tree NodeID)
+buildTree :: String -> SpagoModel -> Array D3_Simulation_LinkID -> Maybe (Tree NodeID)
 buildTree rootName model treelinks = do
   let 
     linksWhoseSourceIs :: NodeID -> L.List NodeID
-    linksWhoseSourceIs id = L.fromFoldable $ (_.targetID) <$> (filter (\l -> l.sourceID == id) treelinks)
+    linksWhoseSourceIs id = L.fromFoldable $ (_.target) <$> (filter (\l -> l.source == id) treelinks)
 
     go :: NodeID -> Tree NodeID
     go childID = Node childID (go <$> linksWhoseSourceIs childID)
@@ -171,14 +173,11 @@ makeTreeLinks closedPaths = do
   fromFoldable $ S.fromFoldable linkTuples -- removes the duplicates while building  
 
 -- | recipe for this force layout graph
-graphScript :: forall m link node selection r. 
+graphScript :: forall m selection. 
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
-  { links :: Array link
-  , nodes :: Array node
-  , loc :: M.Map String Number
-  , positions :: Maybe (M.Map NodeID PointXY) | r } -> 
+  SpagoModel -> 
   m selection -- TODO is it right to return selection_ instead of simulation_? think it would vary by script but Tuple selection simulation would also work as a pattern
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
@@ -191,16 +190,17 @@ graphScript (Tuple w h) model = do
                     , Force $ ForceX           $ (defaultForceXConfig "x") { strength = 0.05 }
                     , Force $ ForceY           $ (defaultForceYConfig "y") { strength = 0.05 }
                     , Force $ ForceCenter      $ (defaultForceCenterConfig "center") { strength = -1.0 }
+                    -- , Force $ ForceLink        $ (defaultForceLinkConfig "links" model.links)
                     -- , Force $ ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
                     ]
-      simulation_ = initSimulation forces model model.nodes model.links
+      { simulation, nodes, links } = initSimulation forces model.nodes defaultConfigSimulation
 
   links <- linksGroup <+> JoinSimulation {
       element   : Line
     , key       : UseDatumAsKey
-    , "data"    : model.links
+    , "data"    : links
     , behaviour : [ classed linkClass ] -- default invisible in CSS unless marked "visible"
-    , simulation: simulation_ -- following config fields are extras for simulation
+    , simulation: simulation
     , tickName  : "links"
     , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
     , onDrag    : SimulationDrag NoDrag
@@ -209,9 +209,9 @@ graphScript (Tuple w h) model = do
   nodes <- nodesGroup <+> JoinSimulation {
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : model.nodes
+    , "data"    : nodes
     , behaviour : [ classed nodeClass, transform' translateNode ]
-    , simulation: simulation_  -- following config fields are extras for simulation
+    , simulation: simulation
     , tickName  : "nodes"
     , onTick    : [ transform' translateNode  ]
     , onDrag    : SimulationDrag DefaultDrag
@@ -219,11 +219,11 @@ graphScript (Tuple w h) model = do
 
   circle  <- nodes `append` (node Circle [ radius (chooseRadius model.loc) 
                                          , fill colorByGroup
-                                         , on MouseEnter (\e d t -> stopSimulation_ simulation_) 
-                                         , on MouseLeave (\e d t -> startSimulation_ simulation_)
-                                         , on MouseClick (\e d t -> highlightNeighborhood (unsafeCoerce model) (datumIsGraphNode_ d).id)
+                                         , on MouseEnter (\e d t -> stopSimulation_ simulation) 
+                                         , on MouseLeave (\e d t -> startSimulation_ simulation)
+                                         , on MouseClick (\e d t -> highlightNeighborhood (unsafeCoerce model) (datumIsGraphNode_ d).index)
                                          ]) 
-  labels' <- nodes `append` (node Text [ classed "label",  x 0.2, y 0.2, text (\d -> (datumIsGraphNode_ d).name)]) 
+  labels' <- nodes `append` (node Text [ classed "label",  x 0.2, y 0.2, text (\d -> (datumIsGraphNode_ d).data.name)]) 
   
   svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                             , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
@@ -232,8 +232,8 @@ graphScript (Tuple w h) model = do
                             }
   let
     -- _ = nanNodes_ $ unsafeCoerce model.nodes
-    _ = pinNodeWithID model.nodes "Main" 0.0 0.0
-    _ = startSimulation_ simulation_
+    _ = pinNodeWithID nodes (\n -> n.data.name == "Main") 0.0 0.0
+    _ = startSimulation_ simulation
 
   pure svg'
 
@@ -250,22 +250,22 @@ packageForceRadius = 50.0 :: Number
 chooseRadius :: Map String Number -> Datum_ -> Number
 chooseRadius locMap datum = do
   let d = datumIsGraphNode_ datum
-  case d.moduleOrPackage of
+  case d.data.moduleOrPackage of
     -- IsModule   -> moduleRadius
-    IsModule   -> Math.sqrt (fromMaybe 10.0 $ M.lookup d.path locMap)
+    IsModule   -> Math.sqrt (fromMaybe 10.0 $ M.lookup d.data.path locMap)
     IsPackage -> packageRadius
 
 chooseRadiusFn :: Datum_ -> Index_ -> Number
 chooseRadiusFn datum index = do
   let d = datumIsGraphNode_ datum
-  case d.moduleOrPackage of
+  case d.data.moduleOrPackage of
     IsModule  -> moduleRadius
     IsPackage -> packageRadius + packageForceRadius
 
 nodeClass :: Datum_ -> String
 nodeClass datum = do
   let d = datumIsGraphNode_ datum
-  show d.moduleOrPackage
+  show d.data.moduleOrPackage
 
 linkClass :: Datum_ -> String
 linkClass datum = do
@@ -278,7 +278,7 @@ translateNode datum = "translate(" <> show d.x <> "," <> show d.y <> ")"
 
 
 colorByGroup :: Datum_ -> String
-colorByGroup datum = d3SchemeCategory10S_ (fromMaybe "unknown" d.package)
+colorByGroup datum = d3SchemeCategory10N_ (toNumber $ fromMaybe 0 d.data.package)
   where
     d = datumIsGraphNode_ datum
 
@@ -314,7 +314,7 @@ setCy datum = d.y
 -- | **************************************************************************************************************
 
 
-spagoTreeScript :: forall m v selection. Bind m => D3InterpreterM selection m => 
+spagoTreeScript :: forall m selection. Bind m => D3InterpreterM selection m => 
   Tuple Number Number -> Maybe D3HierarchicalNode_ -> m selection
 spagoTreeScript (Tuple width height) Nothing = do
   attach "div#spagotree"            -- FIXME this is bogus but saves messing about with the Maybe root_ in the drawGraph script               

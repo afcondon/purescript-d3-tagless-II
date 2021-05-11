@@ -9,6 +9,7 @@ import Prelude
 
 import Affjax (URL)
 import D3.Data.Types (D3Data_, D3HierarchicalNode_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, TreeJson_, ZoomConfigDefault_, ZoomConfig_)
+import D3.Node (D3_Simulation_LinkID, D3_Simulation_Node, D3_Simulation_Link)
 import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
 import Data.Nullable (Nullable)
@@ -75,48 +76,31 @@ foreign import selectionOn_         :: forall selection callback. selection -> S
 -- | ***************************   FFI signatures for D3js Simulation module  *********************************************
 -- | *********************************************************************************************************************
 -- | foreign types associated with Force Layout Simulation
--- TODO structures here carried over from previous interpreter - review and refactor
--- | Force Layout core types
-type D3ForceLink_ id r l = { 
-    source :: D3ForceNode_ id r
-  , target :: D3ForceNode_ id r
-  | l
-}
-
-type D3ForceNode_ id r = { 
-    id    :: id
-  , index :: Number
-  , x     :: Number
-  , y     :: Number
-  , vx    :: Number
-  , vy    :: Number
-  | r
-}
 
 type GraphModel_ link node = { links :: Array link, nodes :: Array node }
-foreign import makeGraphLinks_ :: forall r id node link. Array { sourceID :: id, targetID :: id | r } -> Array (D3ForceLink_ id node link)
-foreign import makeGraphNodes_ :: forall r id node. Array { id :: id | r }                        -> Array (D3ForceNode_ id node)
 
-foreign import initSimulation_  :: forall id r.   Array (D3ForceNode_ id r) -> SimulationConfig_ -> D3Simulation_
-foreign import setNodes_        :: forall id r.   D3Simulation_ -> Array (D3ForceNode_ id r)     -> D3Simulation_
-foreign import setLinks_        :: forall id r l. D3Simulation_ -> Array (D3ForceLink_ id r l)   -> D3Simulation_
+foreign import initSimulation_  :: forall d.   Array { "data" :: d } -> SimulationConfig_ -> D3Simulation_
+foreign import getNodes_        :: forall d.   D3Simulation_ -> Array (D3_Simulation_Node d)
+foreign import getLinks_        :: forall d r. D3Simulation_ -> Array (D3_Simulation_Link d r)
+foreign import setNodes_        :: forall d.   D3Simulation_ -> Array (D3_Simulation_Node d)     -> D3Simulation_
+foreign import setLinks_        :: forall r.   D3Simulation_ -> Array (D3_Simulation_LinkID r)     -> D3Simulation_
 foreign import startSimulation_ :: D3Simulation_ -> Unit
 foreign import stopSimulation_  :: D3Simulation_ -> Unit
 
-foreign import pinNode_   :: forall id node. Number -> Number -> D3ForceNode_ id node -> Unit
-foreign import unpinNode_ :: forall id node. D3ForceNode_ id node -> Unit
-foreign import nanNodes_ :: forall id node. Array (D3ForceNode_ id node) -> Unit
+foreign import pinNode_   :: forall id d. Number -> Number -> D3_Simulation_Node d -> Unit
+foreign import unpinNode_ :: forall id d. D3_Simulation_Node d -> Unit
+foreign import nanNodes_  :: forall id d.  Array (D3_Simulation_Node d) -> Unit
 
 -- NB mutating function
-pinNode :: forall id node. D3ForceNode_ id node -> PointXY -> D3ForceNode_ id node
+pinNode :: forall id d. D3_Simulation_Node d -> PointXY -> D3_Simulation_Node d
 pinNode node p = do
   let _ = pinNode_ p.x p.y node
   node -- NB mutated value, fx / fy have been set
 
-pinNodeWithID :: forall node. Array node -> String -> Number -> Number -> Unit
-pinNodeWithID nodes nodeName fx fy = unit
+pinNodeWithID :: forall d. Array (D3_Simulation_Node d) -> ((D3_Simulation_Node d) -> Boolean) -> Number -> Number -> Unit
+pinNodeWithID nodes predicate fx fy = unit
   where
-    _ = (pinNode_ fx fy) <$> find (\node -> node.name == nodeName) (unsafeCoerce nodes)
+    _ = (pinNode_ fx fy) <$> find predicate (unsafeCoerce nodes)
 
 
 -- TODO this all has to change completely to work within Tagless 
@@ -133,6 +117,7 @@ foreign import forceCollideFn_    :: D3Simulation_ -> ForceCollideConfig_      -
 foreign import forceMany_         :: D3Simulation_ -> ForceManyConfig_         -> D3Simulation_
 foreign import forceRadial_       :: D3Simulation_ -> ForceRadialConfig_       -> D3Simulation_
 foreign import forceRadialFixed_  :: D3Simulation_ -> ForceRadialFixedConfig_  -> D3Simulation_
+foreign import forceLink_         :: D3Simulation_ -> ForceLinkConfig_         -> D3Simulation_
 foreign import forceX_            :: D3Simulation_ -> ForceXConfig_            -> D3Simulation_
 foreign import forceY_            :: D3Simulation_ -> ForceYConfig_            -> D3Simulation_
 

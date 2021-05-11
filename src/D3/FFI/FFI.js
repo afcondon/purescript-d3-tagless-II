@@ -243,10 +243,15 @@ exports.setNodes_ = simulation => nodes => {
   return simulation;
 }
 //  :: Simulation -> Array NativeLink -> Array NativeLink
-exports.setLinks_ = simulation => links => { 
-  simulation.force("links", d3.forceLink(links).id(d => d.id))
+exports.setLinks_ = simulation => links => { // NB see also forceLink below
+  simulation.force("links", d3.forceLink(links).id(d => d.data.id))
   return simulation;
 }
+// getLinks_        :: forall d r. D3Simulation_ -> Array (D3_Simulation_Link d r)
+exports.getLinks_ = simulation => simulation.links()
+// setNodes_        :: forall d.   D3Simulation_ -> Array (D3_Simulation_Node d)     -> D3Simulation_
+exports.getNodes_ = simulation => simulation.nodes()
+
 // :: NativeSelection -> Number -> Unit
 exports.setAlphaTarget_ = simulation => target => simulation.alphaTarget(target)
 //  :: NativeSelection -> Unit
@@ -311,22 +316,7 @@ exports.forceX_ = simulation => config => simulation.force(config.name, d3.force
 // forceY_            :: D3Simulation_ -> ForceYConfig_            -> D3Simulation_
 exports.forceY_ = simulation => config => simulation.force(config.name, d3.forceY(config.y).strength(config.strength))
 
-// exports.forceLinks = simulation => config => simulation.x().strength(config.strength)
-
-// these are both essentially just unsafeCoerce
-// in the case of the links tho', the source and target would change type so we protect the PureScript with a defensive copy
-// in the case of the nodes, it's strictly additive, so we can just bless the coercion
-// makeGraphLinks_ :: forall r id. Array { source :: id, target :: id | r } -> Array GraphLink_
-exports.makeGraphLinks_ = (links) => { 
-  for (let index = 0; index < links.length; index++) {
-    const link = links[index];
-    link.source = link.sourceID;
-    link.target = link.targetID;
-  };
-  return links;
-}
-// makeGraphNodes_ :: forall r id. Array { id :: id | r }                   -> Array GraphNode_
-exports.makeGraphNodes_ = (nodes) => nodes
+exports.forceLink_ = simulation => links => config => simulation.links(links).strength(config.strength) // TODO static, fn, fnI
 
 // pinNode_ :: Number -> Number -> GraphNode_ -> Unit
 exports.pinNode_ = fx => fy => node => {
