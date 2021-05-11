@@ -1,3 +1,4 @@
+[TaglessD3.pdf](https://github.com/afcondon/purescript-d3-tagless-II/files/6461448/TaglessD3.pdf)
 # purescript-d3-tagless-II
 Tagless final style interpreter / wrapper for D3 in PureScript, latest of many re-writes
 
