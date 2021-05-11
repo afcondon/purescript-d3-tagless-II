@@ -1,4 +1,5 @@
 [TaglessD3.pdf](https://github.com/afcondon/purescript-d3-tagless-II/files/6461448/TaglessD3.pdf)
+
 # purescript-d3-tagless-II
 Tagless final style interpreter / wrapper for D3 in PureScript, latest of many re-writes
 
@@ -33,4 +34,3 @@ The three examples have been chosen to show three very different patterns of usa
   * demo some hover effects for graph neighborhoods
   * write a proper README!!!
   
-[TaglessD3.pdf](https://github.com/afcondon/purescript-d3-tagless-II/files/6409007/TaglessD3.pdf)
