@@ -4,15 +4,17 @@ module D3.FFI where
 -- TODO break this up into files corresponding to modules in D3js itself 
 -- TODO move the type definitions for HierarchicalNode_ and SimulationNode_ etc to D3.Data.Native
 
+import D3.Data.Types
 import D3.FFI.Config
+import D3.Node
 import Prelude
 
 import Affjax (URL)
-import D3.Data.Types (D3Data_, D3HierarchicalNode_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, TreeJson_, ZoomConfigDefault_, ZoomConfig_)
-import D3.Node (D3_Simulation_LinkID, D3_Simulation_Node, D3_Simulation_Link)
 import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
+import Data.Maybe (fromMaybe)
 import Data.Nullable (Nullable)
+import Data.Tuple (Tuple(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | *********************************************************************************************************************
@@ -97,10 +99,8 @@ pinNode node p = do
   let _ = pinNode_ p.x p.y node
   node -- NB mutated value, fx / fy have been set
 
-pinNodeWithID :: forall d. Array (D3_Simulation_Node d) -> ((D3_Simulation_Node d) -> Boolean) -> Number -> Number -> Unit
-pinNodeWithID nodes predicate fx fy = unit
-  where
-    _ = (pinNode_ fx fy) <$> find predicate (unsafeCoerce nodes)
+pinNodeMatchingPredicate :: forall d. Array (D3_Simulation_Node d) -> ((D3_Simulation_Node d) -> Boolean) -> Number -> Number -> Unit
+pinNodeMatchingPredicate nodes predicate fx fy = fromMaybe unit $ (pinNode_ fx fy) <$> (find predicate nodes)
 
 
 -- TODO this all has to change completely to work within Tagless 
@@ -133,33 +133,37 @@ foreign import data D3TreeLike_         :: Type -- covers both trees and cluster
 foreign import data D3SortComparator_   :: Type -- a number such that n < 0 => a > b, n > 0 => b > a, n == 0 undef'd
 foreign import data D3Hierarchical_     :: Type
 
-foreign import hierarchyFromJSON_       :: TreeJson_ -> D3HierarchicalNode_
-foreign import treeSortForCirclePack_   :: D3HierarchicalNode_ -> D3HierarchicalNode_
-foreign import treeSortForTreeMap_      :: D3HierarchicalNode_ -> D3HierarchicalNode_
-foreign import treeSortForTree_         :: D3HierarchicalNode_ -> D3HierarchicalNode_
+foreign import hierarchyFromJSON_       :: forall d. TreeJson_ d -> D3_Hierarchy_Node_XY d
+foreign import treeSortForCirclePack_   :: forall d. D3_Hierarchy_Node_Circle d -> D3_Hierarchy_Node_Circle d
+foreign import treeSortForTreeMap_      :: forall d. D3_Hierarchy_Node_Rect d -> D3_Hierarchy_Node_Rect d
+foreign import treeSortForTree_         :: forall d. D3_Hierarchy_Node_XY d -> D3_Hierarchy_Node_XY d
 
 -- next some functions to make attributes, types are a bit sloppy here
 -- TODO tighten this up
 foreign import hasChildren_             :: Datum_ -> Boolean -- really only works on Datum_ when it's a D3HierarchicalNode_
 
 -- the full API for hierarchical nodes:
-foreign import descendants_     :: D3HierarchicalNode_ -> Array D3HierarchicalNode_ -- TODO check this signature
-foreign import find_            :: D3HierarchicalNode_ -> (Datum_ -> Boolean) -> Nullable D3HierarchicalNode_
-foreign import links_           :: D3HierarchicalNode_ -> Array D3Data_ -- TODO this is actually Array Nodes
+foreign import descendants_     :: forall d r. D3_Hierarchy_Node d r -> Array (D3_Hierarchy_Node d r)
+foreign import find_            :: forall d r. D3_Hierarchy_Node d r -> (Datum_ -> Boolean) -> Nullable (D3_Hierarchy_Node d r)
+foreign import links_           :: forall d r. D3_Hierarchy_Node d r -> Array (D3_Hierarchy_Link d r)
 -- TODO implement the following as well
 -- foreign import ancestors_    :: D3HierarchicalNode_ -> D3Data_
 -- foreign import leaves_       :: D3HierarchicalNode_ -> Array D3HierarchicalNode_
 -- foreign import path_         :: D3HierarchicalNode_ -> D3HierarchicalNode_ -> Array D3HierarchicalNode_
 
--- TODO there's very likely some confusion here with foreign types D3TreeLike_ and D3HierarchicalNode_
-foreign import initTree_        :: Unit -> D3TreeLike_
-foreign import initCluster_     :: Unit -> D3TreeLike_
-foreign import initRadial_      :: Unit -> D3TreeLike_
-foreign import treeSetRoot_     :: D3TreeLike_ -> D3HierarchicalNode_ -> D3HierarchicalNode_
-foreign import treeSetSize_     :: D3TreeLike_ -> Array Number -> D3TreeLike_
-foreign import treeSetNodeSize_ :: D3TreeLike_ -> Array Number -> D3TreeLike_
-foreign import treeMinMax_      :: D3HierarchicalNode_ -> { xMin :: Number, xMax :: Number, yMin :: Number, yMax :: Number }
-foreign import treeSetSeparation_ :: D3TreeLike_ -> (Fn2 D3HierarchicalNode_ D3HierarchicalNode_ Number) -> D3TreeLike_
+getLayout :: forall d. TreeType -> TreeLayoutFn_
+getLayout layout = do
+  case layout of
+    TidyTree   -> getTreeLayoutFn_ unit
+    Dendrogram -> getClusterLayoutFn_ unit
+
+foreign import getTreeLayoutFn_    :: forall d. Unit -> TreeLayoutFn_
+foreign import getClusterLayoutFn_ :: forall d. Unit -> TreeLayoutFn_
+
+foreign import treeSetSize_     :: TreeLayoutFn_ -> Array Number -> TreeLayoutFn_
+foreign import treeSetNodeSize_ :: TreeLayoutFn_ -> Array Number -> TreeLayoutFn_
+foreign import treeSetSeparation_ :: forall d. TreeLayoutFn_ -> (Fn2 (D3_Hierarchy_Node_ d) (D3_Hierarchy_Node_ d) Number) -> TreeLayoutFn_
+foreign import treeMinMax_      :: forall d. D3_Hierarchy_Node_XY d -> { xMin :: Number, xMax :: Number, yMin :: Number, yMax :: Number }
 -- foreign import sum_          :: D3HierarchicalNode_ -> (Datum_ -> Number) -> D3HierarchicalNode_ -- alters the tree!!!!
 -- from docs:  <<if you only want leaf nodes to have internal value, then return zero for any node with children. 
 -- For example, as an alternative to node.count:
@@ -170,7 +174,7 @@ foreign import treeSetSeparation_ :: D3TreeLike_ -> (Fn2 D3HierarchicalNode_ D3H
 -- foreign import eachAfter_ 
 -- foreign import eachBefore_
 -- foreign import deepCopy_ -- copies (sub)tree but shares data with clone !!!
-foreign import sharesParent_ :: D3HierarchicalNode_ -> D3HierarchicalNode_ -> Boolean
+foreign import sharesParent_ :: forall d. (D3_Hierarchy_Node_ d) -> (D3_Hierarchy_Node_ d) -> Boolean
 
 foreign import linkHorizontal_     :: (Datum_ -> String) 
 foreign import linkVertical_     :: (Datum_ -> String) 
@@ -180,7 +184,8 @@ foreign import linkRadial_         :: (Datum_ -> Number) -> (Datum_ -> Number) -
 foreign import autoBox_ :: Datum_ -> Array Number
 
 -- accessors for fields of D3HierarchicalNode
-foreign import hNodeDepth_  :: D3HierarchicalNode_ -> Number
-foreign import hNodeHeight_ :: D3HierarchicalNode_ -> Number
-foreign import hNodeX_      :: D3HierarchicalNode_ -> Number
-foreign import hNodeY_      :: D3HierarchicalNode_ -> Number
+-- REVIEW maybe accessors aren't needed if you can ensure type safety
+foreign import hNodeDepth_  :: forall d. D3_Hierarchy_Node_ d -> Number
+foreign import hNodeHeight_ :: forall d. D3_Hierarchy_Node_ d -> Number
+foreign import hNodeX_      :: forall d. D3_Hierarchy_Node_XY d -> Number
+foreign import hNodeY_      :: forall d. D3_Hierarchy_Node_XY d -> Number

@@ -2,7 +2,6 @@ module D3.Data.File.Spago where
 
 import Affjax (URL)
 import D3.Data.Foreign (Datum_)
-import D3.Data.Tree (D3HierarchicalNode_)
 import D3.Data.Types (PointXY)
 import D3.Node (D3_Hierarchy_Node, D3_Simulation_Link, D3_Simulation_Node, NodeID, D3_Simulation_LinkID)
 import Data.Array (catMaybes, filter, foldl, head, length, null, range, uncons, zip, (!!), (:))
@@ -78,6 +77,8 @@ datumIsGraphLink_ :: Datum_ -> SpagoGraphLinkObj_
 datumIsGraphLink_ = unsafeCoerce
 datumIsGraphNode_ :: Datum_ -> SpagoGraphNode_
 datumIsGraphNode_ = unsafeCoerce
+datumIsGraphNodeData_ :: Datum_ -> SpagoNodeData
+datumIsGraphNodeData_ d = (unsafeCoerce d)."data"
 
 convertFilesToGraphModel :: forall r. 
   { body :: String | r } -> 
@@ -182,6 +183,7 @@ type GraphSearchRecord = {
 type Path = Array NodeID
 type Deps = Array NodeID
 
+-- TODO make this generic / independent of the SpagoGraph datatypes and extract
 getReachableNodes :: NodeID -> SpagoGraph -> GraphSearchRecord
 getReachableNodes id graph = go { reachableNodes: [], openPaths: [[id]], closedPaths: [], dependencyTree: Nothing }
   where

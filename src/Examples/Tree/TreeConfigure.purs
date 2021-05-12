@@ -1,16 +1,15 @@
 module D3.Examples.Tree.Configure where
 
-import D3.Layouts.Hierarchical
-
 import D3.Attributes.Sugar (getWindowWidthHeight, transform, viewBox)
 import D3.Data.Tree (datumIsTreeNode)
 import D3.Data.Types (D3HierarchicalNode(..), D3Selection_, Datum_, TreeModel, TreeJson_, TreeLayout(..), TreeType(..))
 import D3.Examples.Tree.Script (treeScript)
-import D3.FFI (hNodeHeight_, hasChildren_, initCluster_, initTree_, treeMinMax_, treeSetNodeSize_, treeSetRoot_, treeSetSeparation_, treeSetSize_)
+import D3.FFI (hNodeHeight_, hasChildren_, initCluster_, initTree_, treeMinMax_, treeSetNodeSize, treeSetRoot_, treeSetSeparation_, treeSetSize)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.MetaTree (MetaTreeNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
 import D3.Interpreter.String (runPrinter)
+import D3.Layouts.Hierarchical (positionXY)
 import D3.Scales (d3SchemeCategory10N_)
 import Data.Map (toUnfoldable)
 import Data.Tuple (Tuple(..), fst, snd)

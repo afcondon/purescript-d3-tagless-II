@@ -61,12 +61,15 @@ type D3_Simulation_Node d = { -- at present no extensions to simulation nodes
   , "data" :: d
 }
 
+-- TODO unify Hierarchy_Link and Simulation_Link types
+type D3_Hierarchy_LinkID r = D3_Simulation_LinkID r
 type D3_Simulation_LinkID r = { -- d is the type of the source and target, initially Int, from node.index but then replaced with type of D3_Simulation_Node_<something>
     source :: NodeID
   , target :: NodeID
   | r
 }
 
+type D3_Hierarchy_Link d r = D3_Simulation_Link d r
 type D3_Simulation_Link d r = { -- d is the type of the source and target, initially Int, from node.index but then replaced with type of D3_Simulation_Node_<something>
     source :: (D3_Simulation_Node d)
   , target :: (D3_Simulation_Node d)

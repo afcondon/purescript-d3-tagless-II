@@ -365,14 +365,13 @@ exports.descendants_ = tree => tree.descendants()
 // foreign import find_        :: D3HierarchicalNode_ -> (Datum_ -> Boolean) -> Nullable D3HierarchicalNode_
 exports.find_ = tree => filter => tree.find(filter)
 
+// getTreeLayoutFn_    :: Unit -> TreeLayoutFn
+exports.getTreeLayoutFn_ = () => d3.tree()
+// getClusterLayoutFn_ :: Unit -> TreeLayoutFn
+exports.getClusterLayoutFn_ = () => d3.cluster()
+
 // foreign import initTree_ :: Unit -> D3TreeLike_
-exports.initTree_ = () => d3.tree()
-// foreign import initRadial :: Unit -> D3TreeLike_
-exports.initRadial_ = () => d3.tree()
 // foreign import initTree_ :: Unit -> D3TreeLike_
-exports.initCluster_ = () => d3.cluster()
-// foreign import treeSetRoot_ :: D3TreeLike_ -> D3HierarchicalNode_ -> D3HierarchicalNode_
-exports.treeSetRoot_ = tree => root => tree(root)
 // foreign import treeSetNodeSize_ :: D3TreeLike_ -> Array Number -> D3TreeLike_
 exports.treeSetNodeSize_ = tree => widthHeight => tree.nodeSize(widthHeight) 
 // foreign import treeSetSize_     :: D3TreeLike_ -> Array Number -> D3TreeLike_

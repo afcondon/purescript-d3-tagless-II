@@ -71,14 +71,14 @@ newtype D3MetaTreeM a = D3MetaTreeM (StateT ScriptTree Effect a)
 
 -- this is the type that we will give to JS, prune out the empty child arrays and then pass to d3.hierarchy
 newtype MetaTreeNode_ = MetaTreeNode { 
-    name :: String
-  , symbol :: String
+    name     :: String
+  , symbol   :: String
   , children :: Array MetaTreeNode_ 
-  , param1 :: String
-  , param2 :: String
+  , param1   :: String
+  , param2   :: String
 }
 
-scriptTreeToJSON :: ScriptTree ->  TreeJson_
+scriptTreeToJSON :: ScriptTree -> TreeJson_ MetaTreeNode_
 scriptTreeToJSON (ScriptTree _ nodeMap links) = pruneEmptyChildren $ go 0
   where
     go :: NodeID -> MetaTreeNode_
@@ -90,7 +90,7 @@ scriptTreeToJSON (ScriptTree _ nodeMap links) = pruneEmptyChildren $ go 0
 
       MetaTreeNode { name, symbol, param1, param2, children: go <$> children }
 
-foreign import pruneEmptyChildren :: MetaTreeNode_ -> TreeJson_
+foreign import pruneEmptyChildren :: forall d. MetaTreeNode_ -> TreeJson_ d
 
 initialMetaTree :: ScriptTree
 initialMetaTree = ScriptTree 0 empty []

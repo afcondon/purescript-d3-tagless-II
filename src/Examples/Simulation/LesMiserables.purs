@@ -53,7 +53,7 @@ graphScript :: forall m r selection.
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
-  { links :: Array (D3_Simulation_LinkID LesMisLinkData), nodes :: Array (D3_Simulation_Node LesMisNodeData) | r } -> 
+  { links :: Array (D3_Simulation_LinkID LesMisLinkData), nodes :: Array LesMisNodeData | r } -> 
   m selection
 graphScript (Tuple w h) model = do
   root       <- attach "div#force"
