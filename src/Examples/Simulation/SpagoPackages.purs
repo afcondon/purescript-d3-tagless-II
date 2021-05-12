@@ -190,7 +190,7 @@ graphScript (Tuple w h) model = do
                     , Force $ ForceX           $ (defaultForceXConfig "x") { strength = 0.05 }
                     , Force $ ForceY           $ (defaultForceYConfig "y") { strength = 0.05 }
                     , Force $ ForceCenter      $ (defaultForceCenterConfig "center") { strength = -1.0 }
-                    -- , Force $ ForceLink        $ (defaultForceLinkConfig "links" model.links)
+                    , Force $ ForceLink        $ (defaultForceLinkConfig "links" model.links)
                     -- , Force $ ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
                     ]
       { simulation, nodes, links } = initSimulation forces model.nodes defaultConfigSimulation

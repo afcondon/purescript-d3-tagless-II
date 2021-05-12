@@ -54,17 +54,17 @@ graphScript :: forall m r selection.
   D3InterpreterM selection m => 
   Tuple Number Number ->
   { links :: Array (D3_Simulation_LinkID LesMisLinkData), nodes :: Array (D3_Simulation_Node LesMisNodeData) | r } -> 
-  m selection -- TODO is it right to return selection_ instead of simulation_? does it matter? 
+  m selection
 graphScript (Tuple w h) model = do
   root       <- attach "div#force"
   svg        <- root `append` (node Svg   [ viewBox 0.0 0.0 1000.0 1000.0 ] )
   linksGroup <- svg  `append` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
-  let forces      = [ Force $ ForceCenter { name: "center", cx: 500.0, cy: 500.0, strength: 1.0 }
-                    , Force $ ForceManyBody (defaultForceManyConfig "charge")
-                    , Force $ ForceLink     (defaultForceLinkConfig "links" model.links)
-                    ]
+  let forces =  [ Force $ ForceCenter { name: "center", cx: 500.0, cy: 500.0, strength: 1.0 }
+                , Force $ ForceManyBody (defaultForceManyConfig "charge")
+                , Force $ ForceLink     (defaultForceLinkConfig "links" model.links)
+                ]
       { simulation, nodes, links } = initSimulation forces model.nodes defaultConfigSimulation
 
   links <- join linksGroup $ JoinSimulation {
