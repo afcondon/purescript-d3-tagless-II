@@ -1,18 +1,18 @@
 module D3.Examples.Simulation.LesMiserables where
 
-import D3.Layouts.Simulation
+import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
-import D3.Data.File.LesMiserables (LesMisLinkData, LesMisNodeData, datumIsLesMisGraphLink_, datumIsLesMisGraphNode_, readGraphFromFileContents)
+import D3.Data.File.LesMiserables (LesMisLinkData, LesMisNodeData, datumIsLesMisGraphNode_, readGraphFromFileContents)
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.FFI (startSimulation_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceLinkConfig, defaultForceManyConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Node (D3_Simulation_LinkID)
+import D3.Node (D3_LinkID, datumHasXY, datumLinkWithXY, datumValue) 
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
@@ -50,7 +50,7 @@ graphScript :: forall m r selection.
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
-  { links :: Array (D3_Simulation_LinkID LesMisLinkData), nodes :: Array LesMisNodeData | r } -> 
+  { links :: Array (D3_LinkID LesMisLinkData), nodes :: Array LesMisNodeData | r } -> 
   m selection
 graphScript (Tuple w h) model = do
   root       <- attach "div#force"
@@ -107,31 +107,31 @@ colorByGroup datum = d3SchemeCategory10N_ d.data.group
     d = datumIsLesMisGraphNode_ datum
 
 linkWidth :: Datum_ -> Number
-linkWidth datum = sqrt d.value
+linkWidth datum = sqrt v
   where
-    d = datumIsLesMisGraphLink_ datum
+    v = datumValue datum
 
 setX1 :: Datum_ -> Number
 setX1 datum = d.source.x
   where
-    d = datumIsLesMisGraphLink_ datum
+    d = datumLinkWithXY datum
 setY1 :: Datum_ -> Number
 setY1 datum = d.source.y
   where
-    d = datumIsLesMisGraphLink_ datum
+    d = datumLinkWithXY datum
 setX2 :: Datum_ -> Number
 setX2 datum = d.target.x
   where
-    d = datumIsLesMisGraphLink_ datum
+    d = datumLinkWithXY datum
 setY2 :: Datum_ -> Number
 setY2 datum = d.target.y
   where
-    d = datumIsLesMisGraphLink_ datum
+    d = datumLinkWithXY datum
 setCx :: Datum_ -> Number
 setCx datum = d.x
   where
-    d = datumIsLesMisGraphNode_ datum
+    d = datumHasXY datum
 setCy :: Datum_ -> Number
 setCy datum = d.y
   where
-    d = datumIsLesMisGraphNode_ datum
+    d = datumHasXY datum

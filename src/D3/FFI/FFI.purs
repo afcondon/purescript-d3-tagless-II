@@ -6,7 +6,7 @@ module D3.FFI where
 
 import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, TreeJson_, TreeLayoutFn_, TreeType(..), ZoomConfigDefault_, ZoomConfig_)
 import D3.FFI.Config (ForceCenterConfig_, ForceCollideConfig_, ForceCollideFixedConfig_, ForceLinkConfig_, ForceManyConfig_, ForceRadialConfig_, ForceRadialFixedConfig_, ForceXConfig_, ForceYConfig_, SimulationConfig_)
-import D3.Node (D3_Hierarchy_Link, D3_Hierarchy_Node, D3_Hierarchy_Node_, D3_Hierarchy_Node_Circle, D3_Hierarchy_Node_Rect, D3_Hierarchy_Node_XY, D3_Simulation_Link, D3_Simulation_LinkID, D3_Simulation_Node)
+import D3.Node 
 import Prelude (Unit, unit, ($), (<$>), (<<<))
 
 import Data.Array (find)
@@ -81,9 +81,9 @@ type GraphModel_ link node = { links :: Array link, nodes :: Array node }
 
 foreign import initSimulation_  :: forall d.   Array { "data" :: d } -> SimulationConfig_ -> D3Simulation_
 foreign import getNodes_        :: forall d.   D3Simulation_ -> Array (D3_Simulation_Node d)
-foreign import getLinks_        :: forall d r. D3Simulation_ -> Array (D3_Simulation_Link d r)
+foreign import getLinks_        :: forall d r. D3Simulation_ -> Array (D3_Link d r)
 foreign import setNodes_        :: forall d.   D3Simulation_ -> Array (D3_Simulation_Node d)     -> D3Simulation_
-foreign import setLinks_        :: forall r.   D3Simulation_ -> Array (D3_Simulation_LinkID r)     -> D3Simulation_
+foreign import setLinks_        :: forall r.   D3Simulation_ -> Array (D3_LinkID r)     -> D3Simulation_
 foreign import startSimulation_ :: D3Simulation_ -> Unit
 foreign import stopSimulation_  :: D3Simulation_ -> Unit
 
@@ -143,7 +143,7 @@ foreign import hasChildren_             :: Datum_ -> Boolean -- really only work
 -- the full API for hierarchical nodes:
 foreign import descendants_     :: forall d r. D3_Hierarchy_Node d r -> Array (D3_Hierarchy_Node d r)
 foreign import find_            :: forall d r. D3_Hierarchy_Node d r -> (Datum_ -> Boolean) -> Nullable (D3_Hierarchy_Node d r)
-foreign import links_           :: forall d r. D3_Hierarchy_Node d r -> Array (D3_Hierarchy_Link d r)
+foreign import links_           :: forall d r. D3_Hierarchy_Node d r -> Array (D3_Link d r)
 
 descendants_XY   :: forall d. D3_Hierarchy_Node_XY d -> Array (D3_Hierarchy_Node_XY d)
 descendants_XY = descendants_ <<< unsafeCoerce

@@ -32,7 +32,7 @@ instance traversableTree :: Traversable Tree where
 
 -- | map over the tree which updates tree's own data incorporating data from updated children
 treeMapDeep ::  ∀ a b. (a -> List b -> b) -> Tree a -> Tree b
-treeMapDeep f (Node node children) = Node (f node newChildData) newChildren
+treeMapDeep f (Node node' children) = Node (f node' newChildData) newChildren
   where newChildren     = (treeMapDeep f) <$> children
         runData (Node d _) = d
         newChildData    = runData <$> newChildren

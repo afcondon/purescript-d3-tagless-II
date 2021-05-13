@@ -48,15 +48,13 @@ type SpagoNodeData = {
   , y               :: Number -- needed because pos set (as tree) BEFORE data put into Simulation
 }
 
-type SpagoLink          = ( moduleOrPackage :: LinkType )
-
--- | local type synonyms for the node and link NATIVE types
 data NodeType           = IsModule | IsPackage
 data LinkType           = M2M | P2P | M2P | P2M
 
-type SpagoGraphNode_    = D3_Simulation_Node SpagoNodeData
-type SpagoGraphLinkID_  = D3_Simulation_LinkID SpagoLink               -- this is the link before swapping IDs for obj refs
-type SpagoGraphLinkObj_ = D3_Simulation_Link SpagoGraphNode_ SpagoLink -- this is the link after swapping IDs for obj refs
+type SpagoGraphNode_    = D3_Simulation_Node        SpagoNodeData
+
+type SpagoGraphLinkID_  = D3_LinkID                 ( moduleOrPackage :: LinkType ) -- this is the link before swapping IDs for obj refs
+type SpagoGraphLinkObj_ = D3_Link   SpagoGraphNode_ ( moduleOrPackage :: LinkType ) -- this is the link after swapping IDs for obj refs
 
 type SpagoJSONData    = { 
     links      :: Array SpagoGraphLinkID_
@@ -100,7 +98,10 @@ makeSpagoGraphModel json = do
     { nodes, links, name2IdMap } = getGraphJSONData json
     loc = M.fromFoldable $ (\o -> Tuple o.path o.loc) <$> json.loc
 
-  { links, nodes, name2IdMap, loc
+  { links
+  , nodes
+  , name2IdMap
+  , loc
   , graph    : makeGraph nodes
   , positions: M.empty
   , tree     : Nothing
@@ -136,26 +137,26 @@ getGraphJSONData { packages, modules, lsDeps } = do
 
     makeNodeFromModuleJSON :: SpagoModuleJSON -> SpagoNodeData
     makeNodeFromModuleJSON m = 
-      { id: getId m.key
-      , name: m.key
-      , path: m.path
-      , package: getPackage m.path
-      , moduleOrPackage: IsModule
-      , depends: getId <$> m.depends
-      , x: 0.0 -- don't have any position info yet
-      , y: 0.0 -- don't have any position info yet
+      { id                  : getId m.key
+      , name                : m.key
+      , path                : m.path
+      , package             : getPackage m.path
+      , moduleOrPackage     : IsModule
+      , depends             : getId <$> m.depends
+      , x                   : 0.0 -- don't have any position info yet
+      , y                   : 0.0 -- don't have any position info yet
       } -- FIXME lookup the m.depends list for ids
 
     makeNodeFromPackageJSON :: SpagoPackageJSON -> SpagoNodeData
     makeNodeFromPackageJSON m = 
-      { id: getId m.key
-      , name: m.key
+      { id                  : getId m.key
+      , name                : m.key
       , path
-      , package: M.lookup m.key idMap
-      , moduleOrPackage: IsPackage
-      , depends: getId <$> m.depends
-      , x: 0.0 -- don't have any position info yet
-      , y: 0.0 -- don't have any position info yet
+      , package             : M.lookup m.key idMap
+      , moduleOrPackage     : IsPackage
+      , depends             : getId <$> m.depends
+      , x                   : 0.0 -- don't have any position info yet
+      , y                   : 0.0 -- don't have any position info yet
       } -- FIXME id, package and depends all need lookups
       where
         path = case M.lookup m.key depsMap of
@@ -172,10 +173,10 @@ getGraphJSONData { packages, modules, lsDeps } = do
         M.lookup package idMap
       else Nothing
 
-    moduleLinks = (makeLink M2M)       <$> (foldl foldDepends [] modules)             
-    moduleNodes = makeNodeFromModuleJSON   <$> modules
+    moduleLinks  = (makeLink M2M) <$> (foldl foldDepends [] modules)             
+    packageLinks = (makeLink P2P) <$> (foldl foldDepends [] packages)
 
-    packageLinks = (makeLink P2P)      <$> (foldl foldDepends [] packages)
+    moduleNodes  = makeNodeFromModuleJSON  <$> modules
     packageNodes = makeNodeFromPackageJSON <$> packages
 
     modulePackageLinks = catMaybes $ makeModuleToPackageLink <$> moduleNodes

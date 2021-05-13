@@ -1,6 +1,19 @@
 module D3.Node where
 
-import Data.Nullable (Nullable)
+import Prelude
+
+import Data.Maybe (fromMaybe)
+import Data.Nullable (Nullable, toMaybe)
+import Unsafe.Coerce (unsafeCoerce)
+
+datumLinkWithXY :: forall datum. datum -> { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number }  }
+datumLinkWithXY = unsafeCoerce
+
+datumHasXY :: forall datum. datum -> { x :: Number, y :: Number }
+datumHasXY = unsafeCoerce
+
+datumValue :: forall datum. datum -> Number
+datumValue d = fromMaybe 0.0 $ toMaybe $ (unsafeCoerce d).value
 
 -- | ***************************************************************************************************
 -- | *********************************  D3 hierarchy node
@@ -19,12 +32,12 @@ import Data.Nullable (Nullable)
 
 newtype D3_Hierarchy_Node d r = D3_Hierarchy_Node { -- must be newtype because of parent and children references
     id       :: NodeID
+  , "data"   :: d
   , depth    :: Int
   , height   :: Int
   , parent   :: Nullable (D3_Hierarchy_Node d r)
   , children :: Array (D3_Hierarchy_Node d r)
   , value    :: Nullable Number -- non-negative
-  , "data"   :: d
   | r
 }
 -- layout algos add fields to the node...
@@ -64,19 +77,15 @@ type D3_Simulation_Node d = { -- at present no extensions to simulation nodes
 }
 
 -- TODO unify Hierarchy_Link and Simulation_Link types
-type D3_Hierarchy_LinkID r = D3_Simulation_LinkID r
-type D3_Simulation_LinkID r = { -- d is the type of the source and target, initially Int, from node.index but then replaced with type of D3_Simulation_Node_<something>
-    source :: NodeID
-  , target :: NodeID
+type D3_Link l r = { 
+-- l is the type of the source and target, initially Int, 
+-- from node.index but then replaced with type of D3_Simulation_Node_<something>
+-- r is whatever other information is added to the link
+    source :: l
+  , target :: l
   | r
 }
-
-type D3_Hierarchy_Link d r = D3_Simulation_Link d r
-type D3_Simulation_Link d r = { -- d is the type of the source and target, initially Int, from node.index but then replaced with type of D3_Simulation_Node_<something>
-    source :: (D3_Simulation_Node d)
-  , target :: (D3_Simulation_Node d)
-  | r
-}
+type D3_LinkID r = D3_Link NodeID r
 
 -- TODO add more of these fundamental node / link types for Sankey and Chord diagrams at least
 

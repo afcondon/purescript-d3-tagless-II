@@ -13,7 +13,7 @@ import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical (radialLink, radialSeparation)
 import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
-import D3.Node (D3_Hierarchy_Node(..), D3_Simulation_Link, D3_Simulation_LinkID, D3_Simulation_Node, NodeID, D3_Hierarchy_Node_XY)
+import D3.Node 
 import D3.Scales (d3SchemeCategory10N_, d3SchemeCategory10S_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
@@ -39,7 +39,7 @@ import Prelude (class Bind, Unit, bind, discard, flip, negate, pure, show, unit,
 import Unsafe.Coerce (unsafeCoerce)
 
 
-highlightNeighborhood :: forall d r. GraphModel_ (D3_Simulation_Link d r) (D3_Simulation_Node d) -> NodeID -> Unit
+highlightNeighborhood :: forall d r. GraphModel_ (D3_Link (D3_Simulation_Node d) r) (D3_Simulation_Node d) -> NodeID -> Unit
 highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
   where
     sources = foldl (\acc l -> if l.target.index == nodeId then (cons l.source.index acc) else acc) [] links
@@ -114,7 +114,7 @@ setNodePositionsRadial nodes positionMap = do
 getPositionMap :: forall d. D3_Hierarchy_Node_XY d -> Map NodeID PointXY
 getPositionMap root = foldl (\acc (D3_Hierarchy_Node n) -> M.insert n.id { x: n.x, y: n.y } acc) empty (descendants_XY root)
 
-buildTree :: forall r. NodeID -> SpagoModel -> Array (D3_Simulation_LinkID r) -> Tree NodeID
+buildTree :: forall r. NodeID -> SpagoModel -> Array (D3_LinkID r) -> Tree NodeID
 buildTree rootID model treelinks = do
   let 
     linksWhoseSourceIs :: NodeID -> L.List NodeID
