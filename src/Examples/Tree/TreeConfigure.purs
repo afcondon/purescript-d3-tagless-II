@@ -1,15 +1,16 @@
 module D3.Examples.Tree.Configure where
 
+import D3.FFI
+
 import D3.Attributes.Sugar (getWindowWidthHeight, transform, viewBox)
-import D3.Data.Tree (datumIsTreeNode)
-import D3.Data.Types (D3HierarchicalNode(..), D3Selection_, Datum_, TreeModel, TreeJson_, TreeLayout(..), TreeType(..))
+import D3.Data.Types (D3Selection_, Datum_, TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Examples.Tree.Script (treeScript)
-import D3.FFI (hNodeHeight_, hasChildren_, initCluster_, initTree_, treeMinMax_, treeSetNodeSize, treeSetRoot_, treeSetSeparation_, treeSetSize)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.MetaTree (MetaTreeNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Hierarchical (positionXY)
+import D3.Layouts.Hierarchical (horizontalClusterLink, horizontalLink, positionXY, positionXYreflected, radialLink, radialSeparation, verticalClusterLink, verticalLink)
+import D3.Node (D3_Hierarchy_Node(..), D3_Hierarchy_Node_XY)
 import D3.Scales (d3SchemeCategory10N_)
 import Data.Map (toUnfoldable)
 import Data.Tuple (Tuple(..), fst, snd)
@@ -19,11 +20,12 @@ import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (pi)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, (>=), (==), ($), (+), (<), (-), (*), (<>), (/))
+import Unsafe.Coerce (unsafeCoerce)
 
 -- TODO move this to a library, it really only needs the params for runPrinter to be completely generic
 -- | Evaluate the tree drawing script in the "printer" monad which will render it as a string
 -- | rather than drawing SVG or Canvas. In principle this could be basis for compiling to JS D3 script
-printTree :: forall v.TreeModel String v -> Aff Unit
+printTree :: TreeModel String -> Aff Unit
 printTree treeModel = liftEffect $ do
   log "Tree example"
   widthHeight   <- getWindowWidthHeight
@@ -33,7 +35,7 @@ printTree treeModel = liftEffect $ do
   pure unit
 
 
-getMetaTreeJSON :: forall v.TreeModel String v -> Aff TreeJson_
+getMetaTreeJSON :: TreeModel String -> Aff TreeJson_
 getMetaTreeJSON treeModel = liftEffect $ do
   log "Getting meta-tree for radial tree example"
   widthHeight <- getWindowWidthHeight
@@ -46,7 +48,7 @@ getMetaTreeJSON treeModel = liftEffect $ do
 
 -- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
 -- | TODO specialize runD3M so that this function isn't necessary
-drawTree :: forall v.TreeModel String v -> Aff Unit
+drawTree :: TreeModel String -> Aff Unit
 drawTree treeModel = liftEffect $ do
   widthHeight <- getWindowWidthHeight
   (_ :: Tuple D3Selection_ Unit) <- runD3M (configureAndRunScript widthHeight treeModel)
@@ -54,10 +56,10 @@ drawTree treeModel = liftEffect $ do
 
 
 -- | configure function which enables treeScript to be run for different layouts - WIP
-configureAndRunScript :: forall m v selection. 
+configureAndRunScript :: forall m selection. 
   Bind m => 
   D3InterpreterM selection m => 
-  Tuple Number Number -> TreeModel String v -> m selection
+  Tuple Number Number -> TreeModel String -> m selection
 configureAndRunScript (Tuple width height ) model = 
   treeScript { spacing, selector, viewbox, tree: laidOutRoot_, linkPath, nodeTransform, color, textDirection, svg } model
   where
@@ -66,7 +68,7 @@ configureAndRunScript (Tuple width height ) model =
     svg     = { width : ((width - ((columns - 1.0) * gap)) / columns)
               , height: height / 2.0 } -- 2 rows
 
-    numberOfLevels = (hNodeHeight_ model.root_) + 1.0
+    numberOfLevels = (hNodeHeight_ model.root) + 1.0
     spacing =
       case model.treeType, model.treeLayout of
         Dendrogram, Horizontal -> { interChild: 10.0, interLevel: svg.width / numberOfLevels }
@@ -79,17 +81,17 @@ configureAndRunScript (Tuple width height ) model =
 
     layout = 
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> (initCluster_ unit)   `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-        Dendrogram, Vertical   -> (initCluster_ unit)   `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-        Dendrogram, Radial     -> ((initCluster_ unit)  `treeSetSize_`     [ 2.0 * pi, (svg.width / 2.0) - 100.0 ]) -- note that in radial case doesn't seem to be initialized by d3.cluster
-                                                        `treeSetSeparation_` radialSeparation
-        TidyTree  , Horizontal -> (initTree_ unit)      `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-        TidyTree  , Vertical   -> (initTree_ unit)      `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-        TidyTree  , Radial     -> ((initTree_ unit)     `treeSetSize_`     [ 2.0 * pi, (svg.height / 2.0) - 50.0 ])
-                                                        `treeSetSeparation_` radialSeparation
+        Dendrogram, Horizontal -> (getLayout Dendrogram)   `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
+        Dendrogram, Vertical   -> (getLayout Dendrogram)   `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
+        Dendrogram, Radial     -> ((getLayout Dendrogram)  `treeSetSize_`     [ 2.0 * pi, (svg.width / 2.0) - 100.0 ]) -- note that in radial case doesn't seem to be initialized by d3.cluster
+                                                           `treeSetSeparation_` radialSeparation
+        TidyTree  , Horizontal -> (getLayout TidyTree)      `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
+        TidyTree  , Vertical   -> (getLayout TidyTree)      `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
+        TidyTree  , Radial     -> ((getLayout TidyTree)     `treeSetSize_`     [ 2.0 * pi, (svg.height / 2.0) - 50.0 ])
+                                                            `treeSetSeparation_` radialSeparation
 
     laidOutRoot_ =
-      layout `treeSetRoot_` model.root_
+      layout `runLayoutFn_` model.root
 
     { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
     xExtent = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
@@ -156,18 +158,21 @@ configureAndRunScript (Tuple width height ) model =
 radialRotate :: Number -> String
 radialRotate x = show $ (x * 180.0 / pi - 90.0)
 
-radialRotateCommon :: forall d v. D3HierarchicalNode d v -> String
-radialRotateCommon (D3HierarchicalNode d) = "rotate(" <> radialRotate d.x <> ")"
+radialRotateCommon :: forall d. D3_Hierarchy_Node_XY d -> String
+radialRotateCommon (D3_Hierarchy_Node d) = "rotate(" <> radialRotate d.x <> ")"
 
-radialTranslate :: forall d v. D3HierarchicalNode d v -> String
-radialTranslate (D3HierarchicalNode d) = "translate(" <> show d.y <> ",0)"
+radialTranslate :: forall d. D3_Hierarchy_Node_XY d -> String
+radialTranslate (D3_Hierarchy_Node d) = "translate(" <> show d.y <> ",0)"
 
-rotateRadialLabels :: forall d v. D3HierarchicalNode d v -> String
-rotateRadialLabels (D3HierarchicalNode d) = -- TODO replace with nodeIsOnRHS 
+rotateRadialLabels :: forall d. D3_Hierarchy_Node_XY d -> String
+rotateRadialLabels (D3_Hierarchy_Node d) = -- TODO replace with nodeIsOnRHS 
   "rotate(" <> if d.x >= pi 
   then "180" <> ")" 
   else "0" <> ")"
 
 nodeIsOnRHS :: Datum_ -> Boolean
 nodeIsOnRHS d = node.x < pi
-  where (D3HierarchicalNode node) = datumIsTreeNode d
+  where (D3_Hierarchy_Node node) = datumIsTreeNode d
+
+datumIsTreeNode :: forall d. Datum_ -> D3_Hierarchy_Node_XY d
+datumIsTreeNode = unsafeCoerce

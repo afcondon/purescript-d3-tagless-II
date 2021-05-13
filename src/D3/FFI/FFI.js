@@ -370,6 +370,7 @@ exports.getTreeLayoutFn_ = () => d3.tree()
 // getClusterLayoutFn_ :: Unit -> TreeLayoutFn
 exports.getClusterLayoutFn_ = () => d3.cluster()
 
+exports.runLayoutFn_ = layout => root => layout(root)
 // foreign import initTree_ :: Unit -> D3TreeLike_
 // foreign import initTree_ :: Unit -> D3TreeLike_
 // foreign import treeSetNodeSize_ :: D3TreeLike_ -> Array Number -> D3TreeLike_

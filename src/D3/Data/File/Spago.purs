@@ -1,9 +1,10 @@
 module D3.Data.File.Spago where
 
+import D3.Node
+
 import Affjax (URL)
 import D3.Data.Foreign (Datum_)
 import D3.Data.Types (PointXY)
-import D3.Node (D3_Hierarchy_Node, D3_Simulation_Link, D3_Simulation_Node, NodeID, D3_Simulation_LinkID)
 import Data.Array (catMaybes, filter, foldl, head, length, null, range, uncons, zip, (!!), (:))
 import Data.Array as A
 import Data.Graph (Graph, fromMap)
@@ -38,12 +39,14 @@ type Spago_Raw_JSON_ = {
 -- into the simulation, the types given here represent their form AFTER D3 has mutated them
 -- *********************************************************************************************************************
 type SpagoNodeData = { 
-    name :: String
-  , id   :: NodeID
-  , path :: String
-  , depends :: Array NodeID
-  , package :: Maybe NodeID
+    name            :: String
+  , id              :: NodeID
+  , path            :: String
+  , depends         :: Array NodeID
+  , package         :: Maybe NodeID
   , moduleOrPackage :: NodeType
+  , x               :: Number -- needed because pos set (as tree) BEFORE data put into Simulation
+  , y               :: Number -- needed because pos set (as tree) BEFORE data put into Simulation
 }
 
 type SpagoLink          = ( moduleOrPackage :: LinkType )
@@ -52,7 +55,6 @@ type SpagoLink          = ( moduleOrPackage :: LinkType )
 data NodeType           = IsModule | IsPackage
 data LinkType           = M2M | P2P | M2P | P2M
 
-type SpagoGraph         = Graph NodeID SpagoNodeData
 type SpagoGraphNode_    = D3_Simulation_Node SpagoNodeData
 type SpagoGraphLinkID_  = D3_Simulation_LinkID SpagoLink               -- this is the link before swapping IDs for obj refs
 type SpagoGraphLinkObj_ = D3_Simulation_Link SpagoGraphNode_ SpagoLink -- this is the link after swapping IDs for obj refs
@@ -63,14 +65,16 @@ type SpagoJSONData    = {
   , name2IdMap :: M.Map String NodeID
 }
 
+type TreeWithRoot = Tuple NodeID (D3_Hierarchy_Node_XY NodeID)
+
 type SpagoModel = { 
     links      :: Array SpagoGraphLinkID_ -- each ID will get swizzled for a SpagoGraphLinkObj_ when simulation initialized
-  , nodes      :: Array SpagoNodeData -- will get embedded in D3Simulation_Node when simulation initialized
-  , graph      :: SpagoGraph
+  , nodes      :: Array SpagoNodeData     -- will get embedded in D3Simulation_Node when simulation initialized
+  , graph      :: Graph NodeID SpagoNodeData
   , name2IdMap :: M.Map String NodeID
   , loc        :: M.Map String Number
-  , positions  :: Maybe (M.Map NodeID PointXY)
-  , tree       :: Maybe (Tuple NodeID (D3_Hierarchy_Node NodeID ()))
+  , positions  :: M.Map NodeID PointXY
+  , tree       :: Maybe TreeWithRoot
 }
 
 datumIsGraphLink_ :: Datum_ -> SpagoGraphLinkObj_
@@ -98,9 +102,10 @@ makeSpagoGraphModel json = do
     loc = M.fromFoldable $ (\o -> Tuple o.path o.loc) <$> json.loc
 
   { links, nodes, name2IdMap, loc
-  , graph: makeGraph nodes
-  , positions: Nothing
-  , tree: Nothing }
+  , graph    : makeGraph nodes
+  , positions: M.empty
+  , tree     : Nothing
+  }
 
 getGraphJSONData :: Spago_Raw_JSON_ -> SpagoJSONData
 getGraphJSONData { packages, modules, lsDeps } = do
@@ -131,10 +136,28 @@ getGraphJSONData { packages, modules, lsDeps } = do
             makeTuple s = Tuple id (getId s)   
 
     makeNodeFromModuleJSON :: SpagoModuleJSON -> SpagoNodeData
-    makeNodeFromModuleJSON m = { id: getId m.key, name: m.key, path: m.path, package: getPackage m.path, moduleOrPackage: IsModule, depends: getId <$> m.depends } -- FIXME lookup the m.depends list for ids
+    makeNodeFromModuleJSON m = 
+      { id: getId m.key
+      , name: m.key
+      , path: m.path
+      , package: getPackage m.path
+      , moduleOrPackage: IsModule
+      , depends: getId <$> m.depends
+      , x: 0.0 -- don't have any position info yet
+      , y: 0.0 -- don't have any position info yet
+      } -- FIXME lookup the m.depends list for ids
 
     makeNodeFromPackageJSON :: SpagoPackageJSON -> SpagoNodeData
-    makeNodeFromPackageJSON m = { id: getId m.key, name: m.key, path, package: M.lookup m.key idMap, moduleOrPackage: IsPackage, depends: getId <$> m.depends } -- FIXME id, package and depends all need lookups
+    makeNodeFromPackageJSON m = 
+      { id: getId m.key
+      , name: m.key
+      , path
+      , package: M.lookup m.key idMap
+      , moduleOrPackage: IsPackage
+      , depends: getId <$> m.depends
+      , x: 0.0 -- don't have any position info yet
+      , y: 0.0 -- don't have any position info yet
+      } -- FIXME id, package and depends all need lookups
       where
         path = case M.lookup m.key depsMap of
                 Nothing -> "error path not found for package key: " <> m.key
@@ -162,7 +185,7 @@ getGraphJSONData { packages, modules, lsDeps } = do
   , nodes: moduleNodes -- <> packageNodes
   , name2IdMap: idMap }
 
-makeGraph :: Array SpagoNodeData -> SpagoGraph
+makeGraph :: Array SpagoNodeData -> Graph NodeID SpagoNodeData
 makeGraph nodes = do
   let
     graphMap = foldl addNode M.empty nodes
@@ -174,7 +197,7 @@ makeGraph nodes = do
   fromMap graphMap
 
 type GraphSearchRecord = {
-    reachableNodes :: Array NodeID
+    nodes          :: Array NodeID
   , openPaths      :: Array Path
   , closedPaths    :: Array Path
   , dependencyTree :: Maybe (Tree NodeID)
@@ -184,36 +207,36 @@ type Path = Array NodeID
 type Deps = Array NodeID
 
 -- TODO make this generic / independent of the SpagoGraph datatypes and extract
-getReachableNodes :: NodeID -> SpagoGraph -> GraphSearchRecord
-getReachableNodes id graph = go { reachableNodes: [], openPaths: [[id]], closedPaths: [], dependencyTree: Nothing }
+getReachableNodes :: NodeID -> Graph NodeID SpagoNodeData -> GraphSearchRecord
+getReachableNodes id graph = go { nodes: [], openPaths: [[id]], closedPaths: [], dependencyTree: Nothing }
   where
     go :: GraphSearchRecord -> GraphSearchRecord
-    go gsr@{ openPaths: [] } = gsr -- bottom out when all open paths are consumed
-    go gsr = do
-      case processNextOpenPath gsr of
-        Nothing     -> gsr -- bottom out but....possibly some exceptions to be looked at here
-        (Just gsr') -> go gsr'
+    go searchRecord@{ openPaths: [] } = searchRecord -- bottom out when all open paths are consumed
+    go searchRecord = do
+      case processNextOpenPath searchRecord of
+        Nothing     -> searchRecord -- bottom out but....possibly some exceptions to be looked at here
+        (Just searchRecord') -> go searchRecord'
 
     processNextOpenPath :: GraphSearchRecord -> Maybe GraphSearchRecord
-    processNextOpenPath gsr = do
-      -- let _ = spy "open paths: " gsr.openPaths
-      x         <- uncons gsr.openPaths
+    processNextOpenPath searchRecord = do
+      -- let _ = spy "open paths: " searchRecord.openPaths
+      x         <- uncons searchRecord.openPaths
       firstID   <- head x.head -- NB we're pushing onto the path, cause head is easier than tail
       firstNode <- G.lookup firstID graph
       -- let _ = spy "working on this node now: " firstNode
 
       let newDeps = -- spy "newDeps: " $ 
-            filter (\d -> not $ A.elem d gsr.reachableNodes) firstNode.depends
+            filter (\d -> not $ A.elem d searchRecord.nodes) firstNode.depends
           newOpenPaths = -- spy "newOpenPaths: " $
             (\d -> d : x.head) <$> newDeps -- ie [ab] with deps [bc] -> [abc, abd]
 
       if null newOpenPaths
         -- moving the open path we just processed to the list of closedPaths
-        then Just $ gsr { openPaths   = x.tail                 
-                        , closedPaths = x.head : gsr.closedPaths}
+        then Just $ searchRecord { openPaths   = x.tail                 
+                                 , closedPaths = x.head : searchRecord.closedPaths}
         -- replace this open path with it's extension(s)
-        else Just $ gsr { openPaths      = x.tail <> newOpenPaths 
-                        , reachableNodes = gsr.reachableNodes <> newDeps }
+        else Just $ searchRecord { openPaths = x.tail <> newOpenPaths 
+                                 , nodes     = searchRecord.nodes <> newDeps }
 
 
 findGraphNodeIdFromName :: SpagoModel -> String -> Maybe NodeID

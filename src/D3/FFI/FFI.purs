@@ -133,7 +133,7 @@ foreign import data D3TreeLike_         :: Type -- covers both trees and cluster
 foreign import data D3SortComparator_   :: Type -- a number such that n < 0 => a > b, n > 0 => b > a, n == 0 undef'd
 foreign import data D3Hierarchical_     :: Type
 
-foreign import hierarchyFromJSON_       :: forall d. TreeJson_ d -> D3_Hierarchy_Node_XY d
+foreign import hierarchyFromJSON_       :: forall d. TreeJson_ -> D3_Hierarchy_Node_ d
 foreign import treeSortForCirclePack_   :: forall d. D3_Hierarchy_Node_Circle d -> D3_Hierarchy_Node_Circle d
 foreign import treeSortForTreeMap_      :: forall d. D3_Hierarchy_Node_Rect d -> D3_Hierarchy_Node_Rect d
 foreign import treeSortForTree_         :: forall d. D3_Hierarchy_Node_XY d -> D3_Hierarchy_Node_XY d
@@ -146,6 +146,11 @@ foreign import hasChildren_             :: Datum_ -> Boolean -- really only work
 foreign import descendants_     :: forall d r. D3_Hierarchy_Node d r -> Array (D3_Hierarchy_Node d r)
 foreign import find_            :: forall d r. D3_Hierarchy_Node d r -> (Datum_ -> Boolean) -> Nullable (D3_Hierarchy_Node d r)
 foreign import links_           :: forall d r. D3_Hierarchy_Node d r -> Array (D3_Hierarchy_Link d r)
+
+descendants_XY   :: forall d. D3_Hierarchy_Node_XY d -> Array (D3_Hierarchy_Node_XY d)
+descendants_XY = descendants_ <<< unsafeCoerce
+find_XY :: forall d. D3_Hierarchy_Node_XY d -> (Datum_ -> Boolean) -> Nullable (D3_Hierarchy_Node_XY d)
+find_XY = find_ <<< unsafeCoerce
 -- TODO implement the following as well
 -- foreign import ancestors_    :: D3HierarchicalNode_ -> D3Data_
 -- foreign import leaves_       :: D3HierarchicalNode_ -> Array D3HierarchicalNode_
@@ -157,35 +162,36 @@ getLayout layout = do
     TidyTree   -> getTreeLayoutFn_ unit
     Dendrogram -> getClusterLayoutFn_ unit
 
-foreign import getTreeLayoutFn_    :: forall d. Unit -> TreeLayoutFn_
-foreign import getClusterLayoutFn_ :: forall d. Unit -> TreeLayoutFn_
+foreign import getTreeLayoutFn_       :: forall d. Unit -> TreeLayoutFn_
+foreign import getClusterLayoutFn_    :: forall d. Unit -> TreeLayoutFn_
 
-foreign import treeSetSize_     :: TreeLayoutFn_ -> Array Number -> TreeLayoutFn_
-foreign import treeSetNodeSize_ :: TreeLayoutFn_ -> Array Number -> TreeLayoutFn_
-foreign import treeSetSeparation_ :: forall d. TreeLayoutFn_ -> (Fn2 (D3_Hierarchy_Node_ d) (D3_Hierarchy_Node_ d) Number) -> TreeLayoutFn_
-foreign import treeMinMax_      :: forall d. D3_Hierarchy_Node_XY d -> { xMin :: Number, xMax :: Number, yMin :: Number, yMax :: Number }
--- foreign import sum_          :: D3HierarchicalNode_ -> (Datum_ -> Number) -> D3HierarchicalNode_ -- alters the tree!!!!
+foreign import runLayoutFn_           :: forall d r. TreeLayoutFn_ -> D3_Hierarchy_Node d r -> D3_Hierarchy_Node_XY d
+foreign import treeSetSize_           :: TreeLayoutFn_ -> Array Number -> TreeLayoutFn_
+foreign import treeSetNodeSize_       :: TreeLayoutFn_ -> Array Number -> TreeLayoutFn_
+foreign import treeSetSeparation_     :: forall d. TreeLayoutFn_ -> (Fn2 (D3_Hierarchy_Node_ d) (D3_Hierarchy_Node_ d) Number) -> TreeLayoutFn_
+foreign import treeMinMax_            :: forall d. D3_Hierarchy_Node_XY d -> { xMin :: Number, xMax :: Number, yMin :: Number, yMax :: Number }
+-- foreign import sum_                :: D3HierarchicalNode_ -> (Datum_ -> Number) -> D3HierarchicalNode_ -- alters the tree!!!!
 -- from docs:  <<if you only want leaf nodes to have internal value, then return zero for any node with children. 
 -- For example, as an alternative to node.count:
 --        root.sum(function(d) { return d.value ? 1 : 0; });
--- foreign import count_ :: D3HierarchicalNode_ -> D3HierarchicalNode_ -- NB alters the tree!!!
--- foreign import sort_ :: D3HierarchicalNode_ -> (D3HierarchicalNode_ -> D3HierarchicalNode_ -> D3SortComparator_)
+-- foreign import count_              :: D3HierarchicalNode_ -> D3HierarchicalNode_ -- NB alters the tree!!!
+-- foreign import sort_               :: D3HierarchicalNode_ -> (D3HierarchicalNode_ -> D3HierarchicalNode_ -> D3SortComparator_)
 -- foreign import each_ -- breadth first traversal
 -- foreign import eachAfter_ 
 -- foreign import eachBefore_
 -- foreign import deepCopy_ -- copies (sub)tree but shares data with clone !!!
-foreign import sharesParent_ :: forall d. (D3_Hierarchy_Node_ d) -> (D3_Hierarchy_Node_ d) -> Boolean
+foreign import sharesParent_          :: forall d r. (D3_Hierarchy_Node d r) -> (D3_Hierarchy_Node d r) -> Boolean
 
-foreign import linkHorizontal_     :: (Datum_ -> String) 
-foreign import linkVertical_     :: (Datum_ -> String) 
+foreign import linkHorizontal_        :: (Datum_ -> String) 
+foreign import linkVertical_          :: (Datum_ -> String) 
 foreign import linkClusterHorizontal_ :: Number -> (Datum_ -> String) 
-foreign import linkClusterVertical_ :: Number -> (Datum_ -> String) 
-foreign import linkRadial_         :: (Datum_ -> Number) -> (Datum_ -> Number) -> (Datum_ -> String)
-foreign import autoBox_ :: Datum_ -> Array Number
+foreign import linkClusterVertical_   :: Number -> (Datum_ -> String) 
+foreign import linkRadial_            :: (Datum_ -> Number) -> (Datum_ -> Number) -> (Datum_ -> String)
+foreign import autoBox_               :: Datum_ -> Array Number
 
--- accessors for fields of D3HierarchicalNode
+-- accessors for fields of D3HierarchicalNode, only valid if layout has been done, hence the _XY version of node
 -- REVIEW maybe accessors aren't needed if you can ensure type safety
-foreign import hNodeDepth_  :: forall d. D3_Hierarchy_Node_ d -> Number
-foreign import hNodeHeight_ :: forall d. D3_Hierarchy_Node_ d -> Number
+foreign import hNodeDepth_  :: forall d r. D3_Hierarchy_Node d r -> Number
+foreign import hNodeHeight_ :: forall d r. D3_Hierarchy_Node d r -> Number
 foreign import hNodeX_      :: forall d. D3_Hierarchy_Node_XY d -> Number
 foreign import hNodeY_      :: forall d. D3_Hierarchy_Node_XY d -> Number

@@ -1,11 +1,12 @@
 module D3.Examples.Simulation.SpagoPackages where
 
+import D3.FFI
+
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.File.Spago (NodeType(..), SpagoGraphNode_, SpagoModel, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNode_, datumIsGraphNodeData_, findGraphNodeIdFromName, getReachableNodes)
-import D3.Data.Types (D3HierarchicalNode(..), D3HierarchicalNode_, D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, TreeType(..), datumIsTreeNode, labelName, makeD3TreeJSONFromTreeID)
-import D3.FFI (GraphModel_, descendants_, hNodeHeight_, hasChildren_, hierarchyFromJSON_, initTree_, links_, nanNodes_, pinNodeMatchingPredicate, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize, treeSetRoot_, treeSetSeparation_, treeSetSize, treeSortForTree_)
+import D3.Data.File.Spago (NodeType(..), SpagoGraphNode_, SpagoModel, SpagoNodeData, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNodeData_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
+import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
@@ -58,7 +59,8 @@ drawGraph = do
   case convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON <*> locJSON of
     (Left error)  -> log "error converting spago json file inputs"
     (Right graph) -> do
-      let graph' = treeReduction graph
+      let rootID = findGraphNodeIdFromName graph "Main"
+          graph' = fromMaybe graph $ (treeReduction graph) rootID -- NB no tree if we don't find Main module id
 
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph')
 
@@ -69,40 +71,24 @@ drawGraph = do
       log $ fst printedScript
       pure unit
 
--- TODO make this generic and extract from Spago example
-treeReduction :: SpagoModel -> SpagoModel
-treeReduction graph = do
-  case (flip getReachableNodes graph.graph) <$> (findGraphNodeIdFromName graph "Main") of
-    Nothing -> graph -- no change
-    (Just r) -> do
-      let onlyTreelinks = spy "onlyTreelinks" $ makeTreeLinks (pathsAsLists r.closedPaths)
-          isTreeLink :: D3_Simulation_LinkID -> Boolean -- it's not yet converted to 
-          isTreeLink l = (Tuple l.source l.target) `elem` onlyTreelinks
+-- TODO make this generic and extract from Spago example to library
+treeReduction :: SpagoModel -> NodeID -> SpagoModel
+treeReduction model rootID = do
+  let reachable       = getReachableNodes rootID model.graph
+      onlyTreelinks   = makeTreeLinks (pathsAsLists reachable.closedPaths)
+      treelinks       = partition (\l -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
+      treenodes       = partition (\n -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
+      layout          = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 1000.0 ]) `treeSetSeparation_` radialSeparation
+      idTree          = buildTree rootID model treelinks.yes
+      jsontree        = makeD3TreeJSONFromTreeID idTree
+      rootTree        = hierarchyFromJSON_       jsontree
+  -- sortedTree       = treeSortForTree_      rootTree
+      laidOutRoot_    = (runLayoutFn_ layout)    rootTree -- sortedTree
+      positionMap     = getPositionMap           laidOutRoot_
+      positionedNodes = setNodePositionsRadial   treenodes.yes positionMap
+      tree            = Tuple rootID laidOutRoot_
 
-          treelinks    = partition isTreeLink graph.links
-          treenodes    = partition (\n -> (n.id `elem` r.reachableNodes) || 
-                                           n.name == "Main") -- FIXME not "Main" but "whatever we gave as root of tree"
-                                   graph.nodes
-
-          layout          =  ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 1000.0 ]) `treeSetSeparation_` radialSeparation
-
-          idTree          = buildTree "Main" graph treelinks.yes
-          jsontree        = makeD3TreeJSONFromTreeID <$> idTree
-          rootTree        = hierarchyFromJSON_ <$> jsontree
-          -- sortedTree      = treeSortForTree_ <$> rootTree
-          laidOutRoot_    = (treeSetRoot_ layout) <$> rootTree -- sortedTree
-          positionMap     = getPositionMap laidOutRoot_
-          positionedNodes = fromMaybe treenodes.yes $ setNodePositionsRadial treenodes.yes positionMap -- FIXME ugly code
-
-          -- { xMin, xMax, yMin, yMax } = treeMinMax_ <$> laidOutRoot_
-
-          _            = trace { fn: "treeReduction"
-                               , noOfLinksBefore: length graph.links
-                               , noOfLinksAfter: length treelinks.yes
-                               , noOfNodesBefore: length graph.nodes
-                               , noOfNodesAfter: length treenodes.yes
-                               } \_ -> unit
-      graph { links = treelinks.yes, nodes = positionedNodes, treeRoot_ = laidOutRoot_, positions = positionMap }
+  pure $ model { links = treelinks.yes, nodes = positionedNodes, tree = Just tree, positions = positionMap }
 
 -- for radial positioning we treat x as angle and y as radius
 radialTranslate :: PointXY -> PointXY
@@ -113,29 +99,23 @@ radialTranslate p =
       y = radius * sin angle
   in { x, y }
 
-setNodePositionsRadial :: Array SpagoGraphNode_ -> Maybe (M.Map NodeID PointXY) -> Maybe (Array SpagoGraphNode_)
-setNodePositionsRadial nodes maybeMap = do
-  positionMap <- maybeMap
-  let updateXY :: SpagoGraphNode_ -> SpagoGraphNode_
+setNodePositionsRadial :: Array SpagoNodeData -> M.Map NodeID PointXY -> Array SpagoNodeData
+setNodePositionsRadial nodes positionMap = do
+  let updateXY :: SpagoNodeData -> SpagoNodeData
       updateXY node = 
-        case M.lookup node.data.id positionMap of
+        case M.lookup node.id positionMap of
           Nothing -> node
-          -- (Just p) -> node { x = p.x, y = p.y }
-          -- (Just p) -> pinNode node (radialTranslate p)
           (Just p) -> 
             let { x,y } = radialTranslate p
             in node { x = x, y = y }
-  Just $ updateXY <$> nodes
+  updateXY <$> nodes
 
 
-getPositionMap :: D3HierarchicalNode_ -> Map NodeID PointXY
-getPositionMap root = do
-  let nodes = descendants_ root
-      foldFn acc n = M.insert (n."data".name) { x: n.x, y: n.y } acc
-  foldl foldFn empty nodes
+getPositionMap :: forall d. D3_Hierarchy_Node_XY d -> Map NodeID PointXY
+getPositionMap root = foldl (\acc (D3_Hierarchy_Node n) -> M.insert n.id { x: n.x, y: n.y } acc) empty (descendants_XY root)
 
-buildTree :: String -> SpagoModel -> Array D3_Simulation_LinkID -> Maybe (Tree NodeID)
-buildTree rootName model treelinks = do
+buildTree :: forall r. NodeID -> SpagoModel -> Array (D3_Simulation_LinkID r) -> Tree NodeID
+buildTree rootID model treelinks = do
   let 
     linksWhoseSourceIs :: NodeID -> L.List NodeID
     linksWhoseSourceIs id = L.fromFoldable $ (_.target) <$> (filter (\l -> l.source == id) treelinks)
@@ -143,8 +123,7 @@ buildTree rootName model treelinks = do
     go :: NodeID -> Tree NodeID
     go childID = Node childID (go <$> linksWhoseSourceIs childID)
 
-  rootID <- M.lookup rootName model.name2IdMap
-  Just $ Node rootID (go <$> (linksWhoseSourceIs rootID))
+  Node rootID (go <$> (linksWhoseSourceIs rootID))
 
 path2Tuples :: L.List (Tuple NodeID NodeID) -> L.List NodeID -> L.List (Tuple NodeID NodeID)
 path2Tuples acc Nil     = acc
@@ -161,12 +140,12 @@ makeTreeLinks closedPaths = do
   fromFoldable $ S.fromFoldable linkTuples -- removes the duplicates while building  
 
 -- | recipe for this force layout graph
--- graphScript :: forall m selection. 
---   Bind m => 
---   D3InterpreterM selection m => 
---   Tuple Number Number ->
---   SpagoModel -> 
---   m selection -- TODO is it right to return selection_ instead of simulation_? think it would vary by script but Tuple selection simulation would also work as a pattern
+graphScript :: forall m selection. 
+  Bind m => 
+  D3InterpreterM selection m => 
+  Tuple Number Number ->
+  SpagoModel -> 
+  m selection -- TODO is it right to return selection_ instead of simulation_? think it would vary by script but Tuple selection simulation would also work as a pattern
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
   svg        <- root `append` (node Svg   [ viewBox (-w / 2.0) (-h / 2.0) w h ] )
@@ -183,7 +162,7 @@ graphScript (Tuple w h) model = do
                     ]
       { simulation, nodes, links } = initSimulation forces model.nodes defaultConfigSimulation
 
-  links <- linksGroup <+> JoinSimulation {
+  linksSelection <- linksGroup <+> JoinSimulation {
       element   : Line
     , key       : UseDatumAsKey
     , "data"    : links
@@ -194,7 +173,7 @@ graphScript (Tuple w h) model = do
     , onDrag    : SimulationDrag NoDrag
   }
 
-  nodes <- nodesGroup <+> JoinSimulation {
+  nodesSelection <- nodesGroup <+> JoinSimulation {
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : nodes
@@ -205,13 +184,13 @@ graphScript (Tuple w h) model = do
     , onDrag    : SimulationDrag DefaultDrag
   }
 
-  circle  <- nodes `append` (node Circle [ radius (chooseRadius model.loc) 
-                                         , fill colorByGroup
-                                         , on MouseEnter (\e d t -> stopSimulation_ simulation) 
-                                         , on MouseLeave (\e d t -> startSimulation_ simulation)
-                                         , on MouseClick (\e d t -> highlightNeighborhood (unsafeCoerce model) (datumIsGraphNode_ d).index)
-                                         ]) 
-  labels' <- nodes `append` (node Text [ classed "label",  x 0.2, y 0.2, text (\d -> (datumIsGraphNode_ d).data.name)]) 
+  circle  <- nodesSelection `append` (node Circle [ radius (chooseRadius model.loc) 
+                                                  , fill colorByGroup
+                                                  , on MouseEnter (\e d t -> stopSimulation_ simulation) 
+                                                  , on MouseLeave (\e d t -> startSimulation_ simulation)
+                                                  , on MouseClick (\e d t -> highlightNeighborhood (unsafeCoerce model) (datumIsGraphNode_ d).index)
+                                                  ]) 
+  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y 0.2, text (\d -> (datumIsGraphNode_ d).data.name)]) 
   
   svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                             , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
@@ -300,9 +279,9 @@ setCy datum = d.y
 -- | draw the spago graph - only the tree part - as a radial tree
 -- | **************************************************************************************************************
 
-
-spagoTreeScript :: forall m selection. Bind m => D3InterpreterM selection m => 
-  Tuple Number Number -> Maybe D3HierarchicalNode_ -> m selection
+-- TODO forall d should be explicit, this script requires certain data structures, fix sig to specify
+spagoTreeScript :: forall m d selection. Bind m => D3InterpreterM selection m => 
+  Tuple Number Number -> Maybe (D3_Hierarchy_Node_XY d) -> m selection
 spagoTreeScript (Tuple width height) Nothing = do
   attach "div#spagotree"            -- FIXME this is bogus but saves messing about with the Maybe root_ in the drawGraph script               
 
@@ -315,8 +294,8 @@ spagoTreeScript (Tuple width height) (Just root_) = do
                                  , height: height / 2.0 } -- 2 rows
     numberOfLevels             = (hNodeHeight_ root_) + 1.0
     spacing                    = { interChild: 120.0, interLevel: svgWH.height / numberOfLevels}
-    layoutFn                   = (initTree_ unit) `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-    laidOutRoot_               = layoutFn `treeSetRoot_` root_
+    layoutFn                   = (getLayout TidyTree) `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
+    laidOutRoot_               = layoutFn `runLayoutFn_` root_
     { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
     xExtent                    = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
     yExtent                    = yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
@@ -370,21 +349,25 @@ spagoTreeScript (Tuple width height) (Just root_) = do
 radialRotate :: Number -> String
 radialRotate x = show $ (x * 180.0 / pi - 90.0)
 
-radialRotateCommon :: forall d v. D3_Hierarchy_Node_XY -> String
+radialRotateCommon :: forall d v. D3_Hierarchy_Node_XY d -> String
 radialRotateCommon (D3_Hierarchy_Node d) = "rotate(" <> radialRotate d.x <> ")"
 
-radialTreeTranslate :: forall d v. D3_Hierarchy_Node_XY -> String
+radialTreeTranslate :: forall d v. D3_Hierarchy_Node_XY d -> String
 radialTreeTranslate (D3_Hierarchy_Node d) = "translate(" <> show d.y <> ",0)"
 
-rotateRadialLabels :: forall d v. D3_Hierarchy_Node_XY -> String
+rotateRadialLabels :: forall d v. D3_Hierarchy_Node_XY d-> String
 rotateRadialLabels (D3_Hierarchy_Node d) = -- TODO replace with nodeIsOnRHS 
   "rotate(" <> if d.x >= pi 
   then "180" <> ")" 
   else "0" <> ")"
 
-nodeIsOnRHS :: Datum_ -> Boolean
+nodeIsOnRHS :: forall d. Datum_ -> Boolean
 nodeIsOnRHS d = node.x < pi
-  where (D3_Hierarchy_Node node) = datumIsTreeNode d
+  where ((D3_Hierarchy_Node node) :: D3_Hierarchy_Node_XY d) = unsafeCoerce d
 
 textDirection :: Datum_ -> Boolean
 textDirection = \d -> hasChildren_ d == nodeIsOnRHS d
+
+labelName :: Datum_ -> String
+labelName d = node."data".label
+  where node = unsafeCoerce d

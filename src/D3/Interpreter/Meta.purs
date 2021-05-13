@@ -78,7 +78,7 @@ newtype MetaTreeNode_ = MetaTreeNode {
   , param2   :: String
 }
 
-scriptTreeToJSON :: ScriptTree -> TreeJson_ MetaTreeNode_
+scriptTreeToJSON :: ScriptTree -> TreeJson_
 scriptTreeToJSON (ScriptTree _ nodeMap links) = pruneEmptyChildren $ go 0
   where
     go :: NodeID -> MetaTreeNode_
@@ -90,7 +90,7 @@ scriptTreeToJSON (ScriptTree _ nodeMap links) = pruneEmptyChildren $ go 0
 
       MetaTreeNode { name, symbol, param1, param2, children: go <$> children }
 
-foreign import pruneEmptyChildren :: forall d. MetaTreeNode_ -> TreeJson_ d
+foreign import pruneEmptyChildren :: MetaTreeNode_ -> TreeJson_
 
 initialMetaTree :: ScriptTree
 initialMetaTree = ScriptTree 0 empty []

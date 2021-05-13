@@ -20,7 +20,8 @@ import Data.Nullable (Nullable)
 -- | ***************************************************************************************************
 
 newtype D3_Hierarchy_Node d r = D3_Hierarchy_Node { -- must be newtype because of parent and children references
-    depth    :: Int
+    id       :: NodeID
+  , depth    :: Int
   , height   :: Int
   , parent   :: Nullable (D3_Hierarchy_Node d r)
   , children :: Array (D3_Hierarchy_Node d r)
@@ -54,11 +55,14 @@ type D3_Hierarchy_Node_Rect d   = D3_Hierarchy_Node d ( x0 :: Number, y0 :: Numb
 type NodeID = Int
 
 type D3_Simulation_Node d = { -- at present no extensions to simulation nodes
-    index :: NodeID
-  , x     :: Number, y :: Number
-  , vx    :: Number, vy :: Number
-  , fx    :: Nullable Number, fy :: Nullable Number
+    index  :: NodeID
   , "data" :: d
+  , x      :: Number
+  , y      :: Number
+  , vx     :: Number
+  , vy     :: Number
+  , fx     :: Nullable Number
+  , fy     :: Nullable Number
 }
 
 -- TODO unify Hierarchy_Link and Simulation_Link types

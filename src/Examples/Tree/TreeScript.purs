@@ -7,7 +7,8 @@ import D3.FFI (descendants_, hasChildren_, links_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Node (D3_Hierarchy_Node_)
 import D3.Selection (Join(..), Keys(..), node)
-import Prelude (class Bind, bind, negate, pure)
+import Data.Maybe (fromMaybe)
+import Prelude 
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | The eDSL script that renders tree layouts
@@ -15,8 +16,8 @@ import Unsafe.Coerce (unsafeCoerce)
 -- | all six variations of [Radial, Horizontal, Vertical] * [Dendrogram, TidyTree] 
 -- | NB there would be nothing wrong, per se, with individual examples, this just shows 
 -- | some more composability, at the price of some direct legibility
-treeScript :: forall m v selection. Bind m => D3InterpreterM selection m => 
-  ScriptConfig -> TreeModel String v -> m selection
+treeScript :: forall m d selection. Bind m => D3InterpreterM selection m => 
+  ScriptConfig d -> TreeModel d -> m selection
 treeScript config model = do
   root       <- attach config.selector                           
   svg        <- root `append` (node Svg config.viewbox)          
@@ -29,7 +30,7 @@ treeScript config model = do
   theLinks_  <- links <+> Join {
       element   : Path
     , key       : UseDatumAsKey
-    , "data"    : links_ model.root_
+    , "data"    : fromMaybe [] $ links_ <$> model.root_ -- TODO this is very ugly can't be allowed to stand
     , behaviour : [ strokeWidth   1.5
                   , strokeColor   config.color
                   , strokeOpacity 0.4
@@ -41,7 +42,7 @@ treeScript config model = do
   nodeJoin_  <- nodes <+> Join {
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : descendants_ model.root_
+    , "data"    : fromMaybe [] $ descendants_ <$> model.root_ -- TODO this is very ugly can't be allowed to stand
     -- there could be other stylistic stuff here but the transform is key structuring component
     , behaviour : config.nodeTransform -- <- the key positioning calculation for the tree!!!
   }
@@ -65,7 +66,7 @@ treeScript config model = do
 -- datumIsTreeNode :: forall d v. Datum_ -> D3_Hierarchy_Node_ d v
 -- datumIsTreeNode = unsafeCoerce
 
-labelName :: forall r. Datum_ -> String
+labelName :: Datum_ -> String
 labelName d = node."data".name
-  where (node :: D3_Hierarchy_Node_ { name :: String | r }) = unsafeCoerce d
+  where node = unsafeCoerce d
 
