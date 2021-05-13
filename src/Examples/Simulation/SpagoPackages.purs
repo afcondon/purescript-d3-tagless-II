@@ -13,7 +13,7 @@ import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical (radialLink, radialSeparation)
 import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
-import D3.Node (D3_Hierarchy_Node(..), D3_Hierarchy_Node_XY, D3_Simulation_Link, D3_Simulation_LinkID, D3_Simulation_Node, NodeID)
+import D3.Node (D3_Hierarchy_Node(..), D3_Simulation_Link, D3_Simulation_LinkID, D3_Simulation_Node, NodeID, D3_Hierarchy_Node_XY)
 import D3.Scales (d3SchemeCategory10N_, d3SchemeCategory10S_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
@@ -349,21 +349,24 @@ spagoTreeScript (Tuple width height) (Just root_) = do
 radialRotate :: Number -> String
 radialRotate x = show $ (x * 180.0 / pi - 90.0)
 
-radialRotateCommon :: forall d v. D3_Hierarchy_Node_XY d -> String
+radialRotateCommon :: forall d. D3_Hierarchy_Node_XY d -> String
 radialRotateCommon (D3_Hierarchy_Node d) = "rotate(" <> radialRotate d.x <> ")"
 
-radialTreeTranslate :: forall d v. D3_Hierarchy_Node_XY d -> String
+radialTreeTranslate :: forall d. D3_Hierarchy_Node_XY d -> String
 radialTreeTranslate (D3_Hierarchy_Node d) = "translate(" <> show d.y <> ",0)"
 
-rotateRadialLabels :: forall d v. D3_Hierarchy_Node_XY d-> String
+rotateRadialLabels :: forall d. D3_Hierarchy_Node_XY d-> String
 rotateRadialLabels (D3_Hierarchy_Node d) = -- TODO replace with nodeIsOnRHS 
   "rotate(" <> if d.x >= pi 
   then "180" <> ")" 
   else "0" <> ")"
 
-nodeIsOnRHS :: forall d. Datum_ -> Boolean
-nodeIsOnRHS d = node.x < pi
-  where ((D3_Hierarchy_Node node) :: D3_Hierarchy_Node_XY d) = unsafeCoerce d
+nodeIsOnRHS :: Datum_ -> Boolean
+nodeIsOnRHS d = n.x < pi
+  where
+    node :: forall datum. D3_Hierarchy_Node_XY datum
+    node = unsafeCoerce d
+    (D3_Hierarchy_Node n) = node
 
 textDirection :: Datum_ -> Boolean
 textDirection = \d -> hasChildren_ d == nodeIsOnRHS d

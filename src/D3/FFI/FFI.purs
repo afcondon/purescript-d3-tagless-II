@@ -4,17 +4,15 @@ module D3.FFI where
 -- TODO break this up into files corresponding to modules in D3js itself 
 -- TODO move the type definitions for HierarchicalNode_ and SimulationNode_ etc to D3.Data.Native
 
-import D3.Data.Types
-import D3.FFI.Config
-import D3.Node
-import Prelude
+import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, TreeJson_, TreeLayoutFn_, TreeType(..), ZoomConfigDefault_, ZoomConfig_)
+import D3.FFI.Config (ForceCenterConfig_, ForceCollideConfig_, ForceCollideFixedConfig_, ForceLinkConfig_, ForceManyConfig_, ForceRadialConfig_, ForceRadialFixedConfig_, ForceXConfig_, ForceYConfig_, SimulationConfig_)
+import D3.Node (D3_Hierarchy_Link, D3_Hierarchy_Node, D3_Hierarchy_Node_, D3_Hierarchy_Node_Circle, D3_Hierarchy_Node_Rect, D3_Hierarchy_Node_XY, D3_Simulation_Link, D3_Simulation_LinkID, D3_Simulation_Node)
+import Prelude (Unit, unit, ($), (<$>), (<<<))
 
-import Affjax (URL)
 import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
 import Data.Maybe (fromMaybe)
 import Data.Nullable (Nullable)
-import Data.Tuple (Tuple(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | *********************************************************************************************************************
@@ -89,12 +87,12 @@ foreign import setLinks_        :: forall r.   D3Simulation_ -> Array (D3_Simula
 foreign import startSimulation_ :: D3Simulation_ -> Unit
 foreign import stopSimulation_  :: D3Simulation_ -> Unit
 
-foreign import pinNode_   :: forall id d. Number -> Number -> D3_Simulation_Node d -> Unit
-foreign import unpinNode_ :: forall id d. D3_Simulation_Node d -> Unit
-foreign import nanNodes_  :: forall id d.  Array (D3_Simulation_Node d) -> Unit
+foreign import pinNode_   :: forall d. Number -> Number -> D3_Simulation_Node d -> Unit
+foreign import unpinNode_ :: forall d. D3_Simulation_Node d -> Unit
+foreign import nanNodes_  :: forall d.  Array (D3_Simulation_Node d) -> Unit
 
 -- NB mutating function
-pinNode :: forall id d. D3_Simulation_Node d -> PointXY -> D3_Simulation_Node d
+pinNode :: forall d. D3_Simulation_Node d -> PointXY -> D3_Simulation_Node d
 pinNode node p = do
   let _ = pinNode_ p.x p.y node
   node -- NB mutated value, fx / fy have been set
@@ -156,14 +154,14 @@ find_XY = find_ <<< unsafeCoerce
 -- foreign import leaves_       :: D3HierarchicalNode_ -> Array D3HierarchicalNode_
 -- foreign import path_         :: D3HierarchicalNode_ -> D3HierarchicalNode_ -> Array D3HierarchicalNode_
 
-getLayout :: forall d. TreeType -> TreeLayoutFn_
+getLayout :: TreeType -> TreeLayoutFn_
 getLayout layout = do
   case layout of
     TidyTree   -> getTreeLayoutFn_ unit
     Dendrogram -> getClusterLayoutFn_ unit
 
-foreign import getTreeLayoutFn_       :: forall d. Unit -> TreeLayoutFn_
-foreign import getClusterLayoutFn_    :: forall d. Unit -> TreeLayoutFn_
+foreign import getTreeLayoutFn_       :: Unit -> TreeLayoutFn_
+foreign import getClusterLayoutFn_    :: Unit -> TreeLayoutFn_
 
 foreign import runLayoutFn_           :: forall d r. TreeLayoutFn_ -> D3_Hierarchy_Node d r -> D3_Hierarchy_Node_XY d
 foreign import treeSetSize_           :: TreeLayoutFn_ -> Array Number -> TreeLayoutFn_

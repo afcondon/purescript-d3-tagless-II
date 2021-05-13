@@ -1,7 +1,5 @@
 module D3.Node where
 
-import Prelude
-
 import Data.Nullable (Nullable)
 
 -- | ***************************************************************************************************

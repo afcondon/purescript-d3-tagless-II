@@ -3,13 +3,13 @@ module D3.Layouts.Simulation where
 import D3.FFI.Config
 
 import D3.Data.Types (D3Simulation_)
-import D3.FFI (forceCenter_, forceCollideFixed_, forceCollideFn_, forceLink_, forceMany_, forceRadialFixed_, forceRadial_, forceX_, forceY_, getLinks_, getNodes_, initSimulation_, setLinks_)
-import D3.Node (D3_Simulation_Link, D3_Simulation_Node, D3_Simulation_LinkID)
+import D3.FFI (forceCenter_, forceCollideFixed_, forceCollideFn_, forceLink_, forceMany_, forceRadialFixed_, forceRadial_, forceX_, forceY_, getLinks_, getNodes_, initSimulation_)
+import D3.Node (D3_Simulation_Link, D3_Simulation_Node)
 import D3.Selection (DragBehavior)
 import Prelude (Unit, (<$>))
-import Unsafe.Coerce (unsafeCoerce)
 
 -- | see bottom of file for all config defaults 
+newtype Simulation :: forall k. k -> Type -> Row Type -> Type
 newtype Simulation id r l = Simulation (SimulationRecord_ r l)
 
 type SimulationRecord_ d r = {  -- 'd' is the type of the "data" field in each node, 'r' is the additional row-types in the link

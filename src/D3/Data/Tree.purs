@@ -2,14 +2,11 @@ module D3.Data.Tree where
 
 import Prelude
 
-import D3.Data.Foreign (Datum_)
-import D3.Node (D3_Hierarchy_Node(..), D3_Hierarchy_Node_XY, D3_Hierarchy_Node_)
+import D3.Node (D3_Hierarchy_Node_, D3_Hierarchy_Node_XY)
 import Data.Array as A
 import Data.List (List(..))
 import Data.Maybe (Maybe)
-import Data.Nullable (Nullable)
 import Data.Tree (Tree(..))
-import Unsafe.Coerce (unsafeCoerce)
 
 -- these definitions have to be here to avoid cycle (and probably all type defs should in fact be here)
 foreign import data TreeJson_ :: Type

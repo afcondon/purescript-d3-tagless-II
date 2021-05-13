@@ -9,12 +9,11 @@ import Data.Array (catMaybes, filter, foldl, head, length, null, range, uncons, 
 import Data.Array as A
 import Data.Graph (Graph, fromMap)
 import Data.Graph as G
-import Data.List (List(..))
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set as S
 import Data.String (Pattern(..), split)
-import Data.Tree (Tree(..))
+import Data.Tree (Tree)
 import Data.Tuple (Tuple(..))
 import Debug (spy)
 import Prelude (class Show, bind, not, ($), (<$>), (<>), (==))

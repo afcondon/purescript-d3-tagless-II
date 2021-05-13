@@ -5,10 +5,9 @@ import D3.Data.Types (Datum_, Element(..), TreeModel)
 import D3.Examples.Tree.Types (ScriptConfig)
 import D3.FFI (descendants_, hasChildren_, links_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
-import D3.Node (D3_Hierarchy_Node_)
 import D3.Selection (Join(..), Keys(..), node)
 import Data.Maybe (fromMaybe)
-import Prelude 
+import Prelude hiding (join, append)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | The eDSL script that renders tree layouts

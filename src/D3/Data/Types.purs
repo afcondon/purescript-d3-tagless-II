@@ -7,11 +7,11 @@ module D3.Data.Types(
   , Element(..), UnitType(..), MouseEvent(..)
 ) where
 
-import D3.Data.Foreign
-import D3.Data.Transition
-import D3.Data.Tree
-import D3.Data.Zoom
-import Prelude
+import D3.Data.Foreign (D3Data_, D3DomNode_, D3Selection_, D3Simulation_, D3This_, D3Transition_, Datum_, Index_)
+import D3.Data.Transition (D3EasingFn, D3Group_, EasingFunction(..), EasingTime, Transition)
+import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeLayoutFn_, TreeModel, TreeType(..), idTreeLeaf_, idTreeParent_, makeD3TreeJSONFromTreeID)
+import D3.Data.Zoom (ZoomConfigDefault_, ZoomConfig_)
+import Prelude (class Show)
 
 type Selector = String 
 

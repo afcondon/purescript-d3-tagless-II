@@ -1,6 +1,6 @@
 module D3.Examples.Tree.Meta where
 
-import D3.FFI
+import D3.FFI (descendants_, getLayout, hNodeHeight_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
 
 import D3.Attributes.Sugar (classed, fill, fontFamily, fontSize, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), TreeModel, TreeType(..))
@@ -12,7 +12,7 @@ import Data.Maybe (fromMaybe)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Prelude 
+import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (*), (+), (-), (/), (<$>)) 
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
@@ -24,7 +24,7 @@ drawTree treeModel = liftEffect $ do
   pure unit
 
 -- | "script" to produce the documentation-style rendering of another script's structure
-treeScript :: forall m v selection. Bind m => D3InterpreterM selection m => 
+treeScript :: forall m selection. Bind m => D3InterpreterM selection m => 
   Tuple Number Number -> TreeModel String -> m selection
 treeScript (Tuple width height) model = do
   let 

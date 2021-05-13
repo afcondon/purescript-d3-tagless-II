@@ -2,29 +2,26 @@ module D3.Examples.Simulation.LesMiserables where
 
 import D3.Layouts.Simulation
 
-import Affjax (Error)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
 import D3.Data.File.LesMiserables (LesMisLinkData, LesMisNodeData, datumIsLesMisGraphLink_, datumIsLesMisGraphNode_, readGraphFromFileContents)
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.FFI (startSimulation_)
-import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceLinkConfig, defaultForceManyConfig)
+import D3.FFI.Config (defaultConfigSimulation, defaultForceLinkConfig, defaultForceManyConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Node (D3_Simulation_LinkID, D3_Simulation_Node)
+import D3.Node (D3_Simulation_LinkID)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
-import Data.Either (Either(..))
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (sqrt)
-import Prelude (class Bind, Unit, bind, discard, pure, unit, negate, ($))
-import Unsafe.Coerce (unsafeCoerce)
+import Prelude (class Bind, Unit, bind, discard, pure, unit, ($))
 
 -- this is the model used by this particular "chart" (ie force layout simulation)
 -- *********************************************************************************************************************

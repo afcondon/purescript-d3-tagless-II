@@ -2,7 +2,7 @@ module D3.Data.File.LesMiserables where
 
 import Affjax (Error)
 import D3.Data.Foreign (Datum_)
-import D3.Node (D3_Hierarchy_Node, D3_Simulation_Link, D3_Simulation_Node, NodeID, D3_Simulation_LinkID)
+import D3.Node (D3_Simulation_Link, D3_Simulation_LinkID, D3_Simulation_Node)
 import Data.Either (Either(..))
 import Unsafe.Coerce (unsafeCoerce)
 
