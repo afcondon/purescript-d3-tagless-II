@@ -59,12 +59,15 @@ drawGraph = do
   case convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON <*> locJSON of
     (Left error)  -> log "error converting spago json file inputs"
     (Right graph) -> do
-      let rootID = findGraphNodeIdFromName graph "Main"
-          graph' = fromMaybe graph $ (treeReduction graph) rootID -- NB no tree if we don't find Main module id
+      let graph' = 
+            case findGraphNodeIdFromName graph "Main" of
+              Nothing       -> graph -- couldn't find root of tree so just skip this
+              (Just rootID) -> treeReduction graph rootID
 
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph')
 
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (spagoTreeScript widthHeight graph'.treeRoot_)
+
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (spagoTreeScript widthHeight graph'.tree)
        
       printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph') "Force Layout Script"
       log $ snd printedScript
@@ -74,21 +77,21 @@ drawGraph = do
 -- TODO make this generic and extract from Spago example to library
 treeReduction :: SpagoModel -> NodeID -> SpagoModel
 treeReduction model rootID = do
-  let reachable       = getReachableNodes rootID model.graph
-      onlyTreelinks   = makeTreeLinks (pathsAsLists reachable.closedPaths)
-      treelinks       = partition (\l -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
-      treenodes       = partition (\n -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
-      layout          = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 1000.0 ]) `treeSetSeparation_` radialSeparation
-      idTree          = buildTree rootID model treelinks.yes
-      jsontree        = makeD3TreeJSONFromTreeID idTree
-      rootTree        = hierarchyFromJSON_       jsontree
-  -- sortedTree       = treeSortForTree_      rootTree
-      laidOutRoot_    = (runLayoutFn_ layout)    rootTree -- sortedTree
-      positionMap     = getPositionMap           laidOutRoot_
-      positionedNodes = setNodePositionsRadial   treenodes.yes positionMap
-      tree            = Tuple rootID laidOutRoot_
+      let reachable       = getReachableNodes rootID model.graph
+          onlyTreelinks   = makeTreeLinks (pathsAsLists reachable.closedPaths)
+          treelinks       = partition (\l -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
+          treenodes       = partition (\n -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
+          layout          = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 1000.0 ]) `treeSetSeparation_` radialSeparation
+          idTree          = buildTree rootID model treelinks.yes
+          jsontree        = makeD3TreeJSONFromTreeID idTree
+          rootTree        = hierarchyFromJSON_       jsontree
+      -- sortedTree       = treeSortForTree_      rootTree
+          laidOutRoot_    = (runLayoutFn_ layout)    rootTree -- sortedTree
+          positionMap     = getPositionMap           laidOutRoot_
+          positionedNodes = setNodePositionsRadial   treenodes.yes positionMap
+          tree            = Tuple rootID laidOutRoot_
 
-  pure $ model { links = treelinks.yes, nodes = positionedNodes, tree = Just tree, positions = positionMap }
+      model { links = treelinks.yes, nodes = positionedNodes, tree = Just tree, positions = positionMap }
 
 -- for radial positioning we treat x as angle and y as radius
 radialTranslate :: PointXY -> PointXY
@@ -281,11 +284,11 @@ setCy datum = d.y
 
 -- TODO forall d should be explicit, this script requires certain data structures, fix sig to specify
 spagoTreeScript :: forall m d selection. Bind m => D3InterpreterM selection m => 
-  Tuple Number Number -> Maybe (D3_Hierarchy_Node_XY d) -> m selection
+  Tuple Number Number -> Maybe (Tuple NodeID (D3_Hierarchy_Node_XY d)) -> m selection
 spagoTreeScript (Tuple width height) Nothing = do
   attach "div#spagotree"            -- FIXME this is bogus but saves messing about with the Maybe root_ in the drawGraph script               
 
-spagoTreeScript (Tuple width height) (Just root_) = do
+spagoTreeScript (Tuple width height) (Just (Tuple _ root_)) = do
   let 
     -- configure dimensions
     columns                    = 3.0  -- 3 columns, set in the grid CSS in index.html
