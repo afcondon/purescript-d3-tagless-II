@@ -79,7 +79,7 @@ foreign import selectionOn_         :: forall selection callback. selection -> S
 
 type GraphModel_ link node = { links :: Array link, nodes :: Array node }
 
-foreign import initSimulation_  :: forall d.   Array { "data" :: d } -> SimulationConfig_ -> D3Simulation_
+foreign import initSimulation_  :: forall d.   Array d -> SimulationConfig_ -> D3Simulation_
 foreign import getNodes_        :: forall d.   D3Simulation_ -> Array (D3_Simulation_Node d)
 foreign import getLinks_        :: forall d r. D3Simulation_ -> Array (D3_Link d r)
 foreign import setNodes_        :: forall d.   D3Simulation_ -> Array (D3_Simulation_Node d)     -> D3Simulation_

@@ -1,11 +1,11 @@
 module D3.Examples.Simulation.SpagoPackages where
 
-import D3.FFI
+import D3.FFI (GraphModel_, descendants_, descendants_XY, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, links_, nanNodes_, pinNodeMatchingPredicate, runLayoutFn_, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.File.Spago (NodeType(..), SpagoGraphNode_, SpagoModel, SpagoNodeData, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNodeData_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
+import D3.Data.File.Spago (NodeType(..), SpagoModel, SpagoNodeData, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNodeData_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
@@ -13,29 +13,27 @@ import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical (radialLink, radialSeparation)
 import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
-import D3.Node 
-import D3.Scales (d3SchemeCategory10N_, d3SchemeCategory10S_)
+import D3.Node (D3_Hierarchy_Node(..), D3_Hierarchy_Node_XY, D3_Link, D3_LinkID, D3_Simulation_Node, NodeID) 
+import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
-import Data.Array (cons, elem, filter, foldl, fromFoldable, length, partition, reverse)
+import Data.Array (cons, elem, filter, foldl, fromFoldable, partition, reverse)
 import Data.Either (Either(..))
-import Data.Int (fromNumber, toNumber)
+import Data.Int (toNumber)
 import Data.List (List(..), (:))
 import Data.List as L
 import Data.Map (Map, empty)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Nullable (Nullable)
 import Data.Set as S
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..), fst, snd)
-import Debug (spy, trace)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (cos, pi, sin)
 import Math (sqrt) as Math
-import Prelude (class Bind, Unit, bind, discard, flip, negate, pure, show, unit, ($), (*), (+), (-), (/), (<), (<$>), (<*>), (<<<), (<>), (==), (>=), (||))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (+), (-), (/), (<), (<$>), (<*>), (<<<), (<>), (==), (>=), (||))
 import Unsafe.Coerce (unsafeCoerce)
 
 
@@ -65,8 +63,6 @@ drawGraph = do
               (Just rootID) -> treeReduction graph rootID
 
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph')
-
-
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (spagoTreeScript widthHeight graph'.tree)
        
       printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph') "Force Layout Script"
@@ -160,15 +156,15 @@ graphScript (Tuple w h) model = do
                     , Force $ ForceX           $ (defaultForceXConfig "x") { strength = 0.05 }
                     , Force $ ForceY           $ (defaultForceYConfig "y") { strength = 0.05 }
                     , Force $ ForceCenter      $ (defaultForceCenterConfig "center") { strength = -1.0 }
-                    , Force $ ForceLink        $ (defaultForceLinkConfig "links" model.links)
+                    , Force $ ForceLink        $ (defaultForceLinkConfig "links" model.links (\d i -> d.id))
                     -- , Force $ ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
                     ]
-      { simulation, nodes, links } = initSimulation forces model.nodes defaultConfigSimulation
+      { simulation, nodes } = initSimulation forces model.nodes defaultConfigSimulation
 
   linksSelection <- linksGroup <+> JoinSimulation {
       element   : Line
     , key       : UseDatumAsKey
-    , "data"    : links
+    , "data"    : model.links
     , behaviour : [ classed linkClass ] -- default invisible in CSS unless marked "visible"
     , simulation: simulation
     , tickName  : "links"

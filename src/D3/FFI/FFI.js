@@ -315,8 +315,8 @@ exports.forceRadialFixed_ = simulation => config => {
 exports.forceX_ = simulation => config => simulation.force(config.name, d3.forceX(config.x).strength(config.strength))
 // forceY_            :: D3Simulation_ -> ForceYConfig_            -> D3Simulation_
 exports.forceY_ = simulation => config => simulation.force(config.name, d3.forceY(config.y).strength(config.strength))
-
-exports.forceLink_ = simulation => links => config => simulation.links(links).strength(config.strength) // TODO static, fn, fnI
+// forceLink_         :: D3Simulation_ -> ForceLinkConfig_         -> D3Simulation_
+exports.forceLink_ = simulation => config => simulation.force(config.name, d3.forceLink(config.links).id(d => d.id).strength(config.strength)) 
 
 // pinNode_ :: Number -> Number -> GraphNode_ -> Unit
 exports.pinNode_ = fx => fy => node => {

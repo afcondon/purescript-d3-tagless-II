@@ -60,7 +60,7 @@ graphScript (Tuple w h) model = do
 
   let forces =  [ Force $ ForceCenter { name: "center", cx: 500.0, cy: 500.0, strength: 1.0 }
                 , Force $ ForceManyBody (defaultForceManyConfig "charge")
-                , Force $ ForceLink     (defaultForceLinkConfig "links" model.links)
+                , Force $ ForceLink     (defaultForceLinkConfig "links" model.links (\d i -> d.id))
                 ]
       { simulation, nodes, links } = initSimulation forces model.nodes defaultConfigSimulation
 
