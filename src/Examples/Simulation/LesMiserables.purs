@@ -1,7 +1,5 @@
 module D3.Examples.Simulation.LesMiserables where
 
-import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
-
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
@@ -12,16 +10,19 @@ import D3.FFI.Config (defaultConfigSimulation, defaultForceLinkConfig, defaultFo
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Node (D3_LinkID, datumHasXY, datumLinkWithXY, datumValue) 
+import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
+import D3.Node (D3_LinkID, datumHasXY, datumLinkWithXY, datumValue)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
 import Data.Tuple (Tuple(..), fst, snd)
+import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (sqrt)
 import Prelude (class Bind, Unit, bind, discard, pure, unit, ($))
+import Unsafe.Coerce (unsafeCoerce)
 
 -- this is the model used by this particular "chart" (ie force layout simulation)
 -- *********************************************************************************************************************
@@ -67,7 +68,7 @@ graphScript (Tuple w h) model = do
   links <- join linksGroup $ JoinSimulation {
       element   : Line
     , key       : UseDatumAsKey
-    , "data"    : links
+    , "data"    : model.links
     , behaviour : [ strokeWidth linkWidth ]
     , simulation: simulation -- following config fields are extras for simulation
     , tickName  : "links"
@@ -102,14 +103,16 @@ graphScript (Tuple w h) model = do
 -- static type representations AND lightweight syntax with JS compatible lambdas (i think)
 
 colorByGroup :: Datum_ -> String
-colorByGroup datum = d3SchemeCategory10N_ d.data.group
+colorByGroup datum = d3SchemeCategory10N_ d.group
   where
-    d = datumIsLesMisGraphNode_ datum
+    -- d = datumIsLesMisGraphNode_ datum
+    d = unsafeCoerce datum
 
 linkWidth :: Datum_ -> Number
 linkWidth datum = sqrt v
   where
     v = datumValue datum
+    -- d = unsafeCoerce $ spy "linkWidth datum" datum
 
 setX1 :: Datum_ -> Number
 setX1 datum = d.source.x

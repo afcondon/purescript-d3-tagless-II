@@ -20,7 +20,7 @@ drawMetaTree json =
 
 main :: Effect Unit
 main = launchAff_  do
-  _        <- forkAff Spago.drawGraph
+  -- _        <- forkAff Spago.drawGraph
 
   -- _        <- forkAff GUP.runGeneralUpdatePattern
   _        <- forkAff Graph.drawGraph
