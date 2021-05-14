@@ -34,19 +34,18 @@ data ForceType =
   | ForceLink         ForceLinkConfig_
   | Custom
   
-initSimulation :: forall nodedata linkdata. 
+initSimulation :: forall nodedata. 
   Array Force ->
   Array nodedata ->
   SimulationConfig_ ->
-  { simulation :: D3Simulation_, nodes :: Array (D3_Simulation_Node nodedata), links :: Array (D3_Link nodedata linkdata) }
+  { simulation :: D3Simulation_, nodes :: Array (D3_Simulation_Node nodedata) }
 initSimulation forces nodeData config = do
   let 
-      simulation       = (flip putForcesInSimulation) forces $ initSimulation_ nodeData config
-      initializedNodes = getNodes_ simulation
-      initializedLinks = []
-      -- initializedLinks = getLinks_ simulation -- TODO must be Maybe, might not be links, but also - how do you get the links out of the simulation?
+      simulation       = initSimulation_ nodeData config
+      simulation'      = putForcesInSimulation simulation forces 
+      initializedNodes = getNodes_ simulation'
 
-  { simulation, nodes: initializedNodes, links: initializedLinks }
+  { simulation: simulation', nodes: initializedNodes }
 
 putForcesInSimulation :: D3Simulation_ -> Array Force -> D3Simulation_
 putForcesInSimulation simulation forces = do

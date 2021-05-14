@@ -226,13 +226,12 @@ exports.selectionOn_ = selection => event => callback => {
 
 //            SIMULATION functions
 exports.initSimulation_ = nodes => config => {
-  const simulation = 
-  d3.forceSimulation(nodes)
-  .alpha(config.alpha) // default is 1
-  .alphaTarget(config.alphaTarget) // default is 0
-  .alphaMin(config.alphaMin) // default is 0.0001
-  .alphaDecay(config.alphaDecay) // default is 0.0228
-  .velocityDecay(config.velocityDecay) // default is 0.4
+  const simulation = d3.forceSimulation(nodes)
+                        .alpha(config.alpha)                 // default is 1
+                        .alphaTarget(config.alphaTarget)     // default is 0
+                        .alphaMin(config.alphaMin)           // default is 0.0001
+                        .alphaDecay(config.alphaDecay)       // default is 0.0228
+                        .velocityDecay(config.velocityDecay) // default is 0.4
   if(debug){ console.log(`initSimulation${simulation}`)}
   return simulation;
 }

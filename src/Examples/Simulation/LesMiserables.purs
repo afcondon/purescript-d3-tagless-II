@@ -63,14 +63,15 @@ graphScript (Tuple w h) model = do
                 , Force $ ForceManyBody (defaultForceManyConfig "charge")
                 , Force $ ForceLink     (defaultForceLinkConfig "links" model.links (\d i -> d.id))
                 ]
-      { simulation, nodes, links } = initSimulation forces model.nodes defaultConfigSimulation
+      simulation = initSimulation forces model.nodes defaultConfigSimulation
 
   links <- join linksGroup $ JoinSimulation {
       element   : Line
     , key       : UseDatumAsKey
-    , "data"    : model.links
+    , "data"    : model.links -- NB the links are still just { source :: NodeID, target :: NodeID, value :: Number } at this point
     , behaviour : [ strokeWidth linkWidth ]
-    , simulation: simulation -- following config fields are extras for simulation
+    , simulation: simulation.simulation -- following config fields are extras for JoinSimulation
+
     , tickName  : "links"
     , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
     , onDrag    : SimulationDrag NoDrag
@@ -79,9 +80,10 @@ graphScript (Tuple w h) model = do
   nodes <- join nodesGroup $ JoinSimulation {
       element   : Circle
     , key       : UseDatumAsKey
-    , "data"    : nodes
+    , "data"    : simulation.nodes
     , behaviour : [ radius 5.0, fill colorByGroup ]
-    , simulation: simulation  -- following config fields are extras for simulation
+    , simulation: simulation.simulation  -- following config fields are extras for JoinSimulation
+
     , tickName  : "nodes"
     , onTick    : [ cx setCx, cy setCy ]
     , onDrag    : SimulationDrag DefaultDrag
@@ -93,7 +95,7 @@ graphScript (Tuple w h) model = do
                             , target    : SelfTarget
                             }
 
-  let _ = startSimulation_ simulation
+  let _ = startSimulation_ simulation.simulation
 
   pure svg'
 
