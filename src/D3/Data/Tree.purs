@@ -20,7 +20,6 @@ derive instance eqTreeLayout :: Eq TreeLayout
 type TreeModel d = {
       json         :: TreeJson_                      -- data from file
     , root         :: D3_Hierarchy_Node_ d           -- tree after initialization by d3.hierarchy
-    , root_        :: Maybe (D3_Hierarchy_Node_XY d) -- tree after passing thru a layout algorithm
     , treeType     :: TreeType
     , treeLayout   :: TreeLayout
     , treeLayoutFn :: TreeLayoutFn_

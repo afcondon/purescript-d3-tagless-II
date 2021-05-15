@@ -1,13 +1,14 @@
 module D3.Examples.Tree.Script where
 
+import Prelude hiding (join,append)
+
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, x)
 import D3.Data.Types (Datum_, Element(..), TreeModel)
 import D3.Examples.Tree.Types (ScriptConfig)
-import D3.FFI (descendants_, hasChildren_, links_)
+import D3.FFI (descendants_, descendants_XY, hasChildren_, links_, links_XY)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Selection (Join(..), Keys(..), node)
 import Data.Maybe (fromMaybe)
-import Prelude hiding (join, append)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | The eDSL script that renders tree layouts
@@ -16,20 +17,20 @@ import Unsafe.Coerce (unsafeCoerce)
 -- | NB there would be nothing wrong, per se, with individual examples, this just shows 
 -- | some more composability, at the price of some direct legibility
 treeScript :: forall m d selection. Bind m => D3InterpreterM selection m => 
-  ScriptConfig d -> TreeModel d -> m selection
-treeScript config model = do
+  ScriptConfig d -> m selection
+treeScript config = do
   root       <- attach config.selector                           
   svg        <- root `append` (node Svg config.viewbox)          
   container  <- svg  `append` (node Group [ fontFamily      "sans-serif"
                                           , fontSize        10.0
                                           ])
-  links      <- container `append` (node Group [ classed "links"])
-  nodes      <- container `append` (node Group [ classed "nodes"])
+  links      <- container `append` (node Group [ classed "links"] )
+  nodes      <- container `append` (node Group [ classed "nodes"] )
 
   theLinks_  <- links <+> Join {
       element   : Path
     , key       : UseDatumAsKey
-    , "data"    : fromMaybe [] $ links_ <$> model.root_ -- TODO this is very ugly can't be allowed to stand
+    , "data"    : links_XY <$> config.tree
     , behaviour : [ strokeWidth   1.5
                   , strokeColor   config.color
                   , strokeOpacity 0.4
@@ -41,7 +42,7 @@ treeScript config model = do
   nodeJoin_  <- nodes <+> Join {
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : fromMaybe [] $ descendants_ <$> model.root_ -- TODO this is very ugly can't be allowed to stand
+    , "data"    : descendants_XY <$> config.tree
     -- there could be other stylistic stuff here but the transform is key structuring component
     , behaviour : config.nodeTransform -- <- the key positioning calculation for the tree!!!
   }

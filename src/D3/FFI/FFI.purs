@@ -4,15 +4,15 @@ module D3.FFI where
 -- TODO break this up into files corresponding to modules in D3js itself 
 -- TODO move the type definitions for HierarchicalNode_ and SimulationNode_ etc to D3.Data.Native
 
+import D3.Node
+
 import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, TreeJson_, TreeLayoutFn_, TreeType(..), ZoomConfigDefault_, ZoomConfig_)
 import D3.FFI.Config (ForceCenterConfig_, ForceCollideConfig_, ForceCollideFixedConfig_, ForceLinkConfig_, ForceManyConfig_, ForceRadialConfig_, ForceRadialFixedConfig_, ForceXConfig_, ForceYConfig_, SimulationConfig_)
-import D3.Node 
-import Prelude (Unit, unit, ($), (<$>), (<<<))
-
 import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
 import Data.Maybe (fromMaybe)
 import Data.Nullable (Nullable)
+import Prelude (Unit, unit, ($), (<$>), (<<<))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | *********************************************************************************************************************
@@ -143,8 +143,10 @@ foreign import hasChildren_             :: Datum_ -> Boolean -- really only work
 -- the full API for hierarchical nodes:
 foreign import descendants_     :: forall d r. D3_Hierarchy_Node d r -> Array (D3_Hierarchy_Node d r)
 foreign import find_            :: forall d r. D3_Hierarchy_Node d r -> (Datum_ -> Boolean) -> Nullable (D3_Hierarchy_Node d r)
-foreign import links_           :: forall d r. D3_Hierarchy_Node d r -> Array (D3_Link d r)
+foreign import links_           :: forall d r1 r2. D3_Hierarchy_Node d r1 -> Array (D3_Link d r2)
 
+links_XY         :: forall d r. D3_Hierarchy_Node_XY d -> Array (D3_Link d r)
+links_XY = links_ <<< unsafeCoerce
 descendants_XY   :: forall d. D3_Hierarchy_Node_XY d -> Array (D3_Hierarchy_Node_XY d)
 descendants_XY = descendants_ <<< unsafeCoerce
 find_XY :: forall d. D3_Hierarchy_Node_XY d -> (Datum_ -> Boolean) -> Nullable (D3_Hierarchy_Node_XY d)

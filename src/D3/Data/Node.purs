@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Maybe (fromMaybe)
 import Data.Nullable (Nullable, toMaybe)
+import Prim.Row (class Union)
 import Unsafe.Coerce (unsafeCoerce)
 
 datumLinkWithXY :: forall datum. datum -> { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number }  }
@@ -30,7 +31,7 @@ datumValue d = fromMaybe 0.0 $ toMaybe $ (unsafeCoerce d).value
 --    iterators and maps - each, eachAfter, eachBefore, copy
 -- | ***************************************************************************************************
 
-newtype D3_Hierarchy_Node d r = D3_Hierarchy_Node { -- must be newtype because of parent and children references
+newtype D3_Hierarchy_Node d = D3_Hierarchy_Node ( -- must be newtype because of parent and children references
     id       :: NodeID
   , "data"   :: d
   , depth    :: Int
@@ -38,16 +39,14 @@ newtype D3_Hierarchy_Node d r = D3_Hierarchy_Node { -- must be newtype because o
   , parent   :: Nullable (D3_Hierarchy_Node d r)
   , children :: Array (D3_Hierarchy_Node d r)
   , value    :: Nullable Number -- non-negative
-  | r
-}
--- layout algos add fields to the node...
-type D3_Hierarchy_Node_ d       = D3_Hierarchy_Node d ()
+)
+type D3_XY = ( x :: Number, y :: Number)
 -- tree layouts add simple x y
-type D3_Hierarchy_Node_XY d     = D3_Hierarchy_Node d ( x :: Number, y :: Number )
--- circle-packing adds x y and radius
-type D3_Hierarchy_Node_Circle d = D3_Hierarchy_Node d ( x :: Number, y :: Number, r :: Number )
--- treemap and partitions add a rectangle where x0,y0 is TopLeft and x1y1 is BottomRight
-type D3_Hierarchy_Node_Rect d   = D3_Hierarchy_Node d ( x0 :: Number, y0 :: Number, x1 :: Number, y1 :: Number )
+type D3_Hierarchy_Node_XY d = Union D3_XY (D3_Hierarchy_Node d)
+-- -- circle-packing adds x y and radius
+-- type D3_Hierarchy_Node_Circle d = D3_Hierarchy_Node d ( x :: Number, y :: Number, r :: Number )
+-- -- treemap and partitions add a rectangle where x0,y0 is TopLeft and x1y1 is BottomRight
+-- type D3_Hierarchy_Node_Rect d   = D3_Hierarchy_Node d ( x0 :: Number, y0 :: Number, x1 :: Number, y1 :: Number )
 
 -- | ***************************************************************************************************
 -- | *********************************  D3 simulation node
@@ -67,16 +66,16 @@ type NodeID = Int
 
 type D3_Simulation_Node d = { -- at present no extensions to simulation nodes
     index  :: NodeID
-  , "data" :: d
+  , "data" :: d -- this is not true, 
   , x      :: Number
   , y      :: Number
   , vx     :: Number
   , vy     :: Number
   , fx     :: Nullable Number
   , fy     :: Nullable Number
+-- | d  -- this is what actually happens
 }
 
--- TODO unify Hierarchy_Link and Simulation_Link types
 type D3_Link l r = { 
 -- l is the type of the source and target, initially Int, 
 -- from node.index but then replaced with type of D3_Simulation_Node_<something>

@@ -61,7 +61,7 @@ configureAndRunScript :: forall m selection.
   D3InterpreterM selection m => 
   Tuple Number Number -> TreeModel String -> m selection
 configureAndRunScript (Tuple width height ) model = 
-  treeScript { spacing, selector, viewbox, tree: laidOutRoot_, linkPath, nodeTransform, color, textDirection, svg } model
+  treeScript { spacing, selector, viewbox, tree: laidOutRoot_, linkPath, nodeTransform, color, textDirection, svg }
   where
     columns = 3.0  -- 3 columns, set in the grid CSS in index.html
     gap     = 10.0 -- 10px set in the grid CSS in index.html
@@ -81,17 +81,14 @@ configureAndRunScript (Tuple width height ) model =
 
     layout = 
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> (getLayout Dendrogram)   `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-        Dendrogram, Vertical   -> (getLayout Dendrogram)   `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-        Dendrogram, Radial     -> ((getLayout Dendrogram)  `treeSetSize_`     [ 2.0 * pi, (svg.width / 2.0) - 100.0 ]) -- note that in radial case doesn't seem to be initialized by d3.cluster
+        _         , Radial -> ((getLayout model.treeType)  `treeSetSize_`       [ 2.0 * pi, (svg.width / 2.0) - 100.0 ]) 
                                                            `treeSetSeparation_` radialSeparation
-        TidyTree  , Horizontal -> (getLayout TidyTree)      `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-        TidyTree  , Vertical   -> (getLayout TidyTree)      `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-        TidyTree  , Radial     -> ((getLayout TidyTree)     `treeSetSize_`     [ 2.0 * pi, (svg.height / 2.0) - 50.0 ])
-                                                            `treeSetSeparation_` radialSeparation
+                                                           
+        Dendrogram, _      -> (getLayout Dendrogram)   `treeSetNodeSize_`   [ spacing.interChild, spacing.interLevel ]
+        TidyTree  , _      -> (getLayout TidyTree)     `treeSetNodeSize_`   [ spacing.interChild, spacing.interLevel ]
 
-    laidOutRoot_ =
-      layout `runLayoutFn_` model.root
+    laidOutRoot_ :: forall d. D3_Hierarchy_Node_XY d
+    laidOutRoot_ = layout `runLayoutFn_` model.root
 
     { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
     xExtent = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250

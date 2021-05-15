@@ -25,10 +25,10 @@ main = launchAff_  do
   -- _        <- forkAff GUP.runGeneralUpdatePattern
   _        <- forkAff Graph.drawGraph
 
-  -- -- -- fetch an example model for the tree examples, the canonical flare dependency json in this case
-  -- treeJSON <- getTreeViaAJAX "http://localhost:1234/flare-2.json"
+  -- -- fetch an example model for the tree examples, the canonical flare dependency json in this case
+  treeJSON <- getTreeViaAJAX "http://localhost:1234/flare-2.json"
 
-  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Horizontal json) treeJSON
+  sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Horizontal json) treeJSON
   -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Vertical json)   treeJSON
   -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Radial json)     treeJSON
   -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Horizontal json)   treeJSON
