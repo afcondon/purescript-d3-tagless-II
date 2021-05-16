@@ -1,11 +1,9 @@
 module D3.Data.Tree where
 
-import Prelude
+import Prelude (class Eq, (<$>))
 
-import D3.Node (D3_Hierarchy_Node_, D3_Hierarchy_Node_XY)
 import Data.Array as A
 import Data.List (List(..))
-import Data.Maybe (Maybe)
 import Data.Tree (Tree(..))
 
 -- these definitions have to be here to avoid cycle (and probably all type defs should in fact be here)
@@ -17,9 +15,9 @@ derive instance eqTreeType :: Eq TreeType
 data TreeLayout = Radial | Horizontal | Vertical
 derive instance eqTreeLayout :: Eq TreeLayout
 
-type TreeModel d = {
+type TreeModel = {
       json         :: TreeJson_                      -- data from file
-    , root         :: D3_Hierarchy_Node_ d           -- tree after initialization by d3.hierarchy
+    -- , root         :: D3_TreeNode d           -- tree after initialization by d3.hierarchy
     , treeType     :: TreeType
     , treeLayout   :: TreeLayout
     , treeLayoutFn :: TreeLayoutFn_

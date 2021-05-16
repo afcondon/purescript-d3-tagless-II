@@ -1,19 +1,20 @@
 module D3.Examples.Simulation.SpagoPackages where
 
-import D3.FFI (GraphModel_, descendants_, descendants_XY, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, links_, nanNodes_, pinNodeMatchingPredicate, runLayoutFn_, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
+import D3.Data.File.Spago
+import D3.Node
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.File.Spago (NodeType(..), SpagoModel, SpagoNodeData, convertFilesToGraphModel, datumIsGraphLink_, datumIsGraphNodeData_, datumIsGraphNode_, findGraphNodeIdFromName, getReachableNodes)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, TreeType(..), makeD3TreeJSONFromTreeID)
+import D3.Examples.Tree.Configure (datumIsTreeNode)
+import D3.FFI (GraphModel_, descendants_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, links_, nanNodes_, pinNodeMatchingPredicate, runLayoutFn_, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical (radialLink, radialSeparation)
 import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
-import D3.Node (D3_Hierarchy_Node(..), D3_Hierarchy_Node_XY, D3_Link, D3_LinkID, D3_Simulation_Node, NodeID) 
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
@@ -35,9 +36,10 @@ import Math (cos, pi, sin)
 import Math (sqrt) as Math
 import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (+), (-), (/), (<), (<$>), (<*>), (<<<), (<>), (==), (>=), (||))
 import Unsafe.Coerce (unsafeCoerce)
+import Type.Row (type (+))
 
 
-highlightNeighborhood :: forall d r. GraphModel_ (D3_Link (D3_Simulation_Node d) r) (D3_Simulation_Node d) -> NodeID -> Unit
+-- highlightNeighborhood :: forall d r. GraphModel_ (D3_Link (D3_Simulation_Node d) r) (D3_Simulation_Node d) -> NodeID -> Unit
 highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
   where
     sources = foldl (\acc l -> if l.target.index == nodeId then (cons l.source.index acc) else acc) [] links
@@ -98,22 +100,21 @@ radialTranslate p =
       y = radius * sin angle
   in { x, y }
 
-setNodePositionsRadial :: Array SpagoNodeData -> M.Map NodeID PointXY -> Array SpagoNodeData
+setNodePositionsRadial :: Array SpagoSimNode -> M.Map NodeID PointXY -> Array SpagoSimNode
 setNodePositionsRadial nodes positionMap = do
-  let updateXY :: SpagoNodeData -> SpagoNodeData
-      updateXY node = 
+  let updateXY :: SpagoSimNode -> SpagoSimNode
+      updateXY (D3SimNode node) = 
         case M.lookup node.id positionMap of
-          Nothing -> node
+          Nothing -> (D3SimNode node)
           (Just p) -> 
             let { x,y } = radialTranslate p
-            in node { x = x, y = y }
+            in D3SimNode $ node { x = x, y = y }
   updateXY <$> nodes
 
+getPositionMap :: SpagoTreeNode -> Map NodeID PointXY
+getPositionMap root = foldl (\acc n -> M.insert n.id { x: n.x, y: n.y } acc) empty (descendants_ root)
 
-getPositionMap :: forall d. D3_Hierarchy_Node_XY d -> Map NodeID PointXY
-getPositionMap root = foldl (\acc (D3_Hierarchy_Node n) -> M.insert n.id { x: n.x, y: n.y } acc) empty (descendants_XY root)
-
-buildTree :: forall r. NodeID -> SpagoModel -> Array (D3_LinkID r) -> Tree NodeID
+buildTree :: forall r. NodeID -> SpagoModel -> Array (D3_Link NodeID r) -> Tree NodeID
 buildTree rootID model treelinks = do
   let 
     linksWhoseSourceIs :: NodeID -> L.List NodeID
@@ -187,9 +188,9 @@ graphScript (Tuple w h) model = do
                                                   , fill colorByGroup
                                                   , on MouseEnter (\e d t -> stopSimulation_ simulation) 
                                                   , on MouseLeave (\e d t -> startSimulation_ simulation)
-                                                  , on MouseClick (\e d t -> highlightNeighborhood (unsafeCoerce model) (datumIsGraphNode_ d).index)
+                                                  , on MouseClick (\e d t -> highlightNeighborhood (unsafeCoerce model) (datumIsSpagoSimNode d).index)
                                                   ]) 
-  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y 0.2, text (\d -> (datumIsGraphNode_ d).data.name)]) 
+  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y 0.2, text (\d -> (datumIsSpagoSimNode d).data.name)]) 
   
   svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                             , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
@@ -214,7 +215,7 @@ packageForceRadius = 50.0 :: Number
 
 chooseRadius :: Map String Number -> Datum_ -> Number
 chooseRadius locMap datum = do
-  let d = datumIsGraphNode_ datum
+  let d = datumIsSpagoSimNode datum
   case d.data.moduleOrPackage of
     -- IsModule   -> moduleRadius
     IsModule   -> Math.sqrt (fromMaybe 10.0 $ M.lookup d.data.path locMap)
@@ -222,55 +223,45 @@ chooseRadius locMap datum = do
 
 chooseRadiusFn :: Datum_ -> Index_ -> Number
 chooseRadiusFn datum index = do
-  let d = datumIsGraphNode_ datum
+  let d = datumIsSpagoSimNode datum
   case d.data.moduleOrPackage of
     IsModule  -> moduleRadius
     IsPackage -> packageRadius + packageForceRadius
 
 nodeClass :: Datum_ -> String
 nodeClass datum = do
-  let d = datumIsGraphNode_ datum
-  show d.data.moduleOrPackage
+  let (D3SimNode d) = datumIsSpagoSimNode datum
+  show d.nodetype
 
 linkClass :: Datum_ -> String
 linkClass datum = do
-  let d = datumIsGraphLink_ datum
-  show d.moduleOrPackage
+  let (D3_Link d) = datumIsSpagoLink datum
+  show d.linktype
 
 translateNode :: Datum_ -> String
-translateNode datum = "translate(" <> show d.x <> "," <> show d.y <> ")"
-  where d = datumIsGraphNode_ datum
-
+translateNode datum = "translate(" <> show x <> "," <> show y <> ")"
+  where 
+    d = datumIsGraphNode datum
+    (x :: Number) = (unsafeCoerce datum).x
+    (y :: Number) = (unsafeCoerce datum).y
 
 colorByGroup :: Datum_ -> String
 colorByGroup datum = d3SchemeCategory10N_ (toNumber $ fromMaybe 0 d.package)
   where
-    d = datumIsGraphNodeData_ datum
+    d = datumIsSpagoSimNode datum
 
 setX1 :: Datum_ -> Number
-setX1 datum = d.source.x
-  where
-    d = datumIsGraphLink_ datum
+setX1 = getSourceX
 setY1 :: Datum_ -> Number
-setY1 datum = d.source.y
-  where
-    d = datumIsGraphLink_ datum
+setY1 = getSourceY
 setX2 :: Datum_ -> Number
-setX2 datum = d.target.x
-  where
-    d = datumIsGraphLink_ datum
+setX2 = getTargetX
 setY2 :: Datum_ -> Number
-setY2 datum = d.target.y
-  where
-    d = datumIsGraphLink_ datum
+setY2 = getTargetY
 setCx :: Datum_ -> Number
-setCx datum = d.x
-  where
-    d = datumIsGraphNode_ datum
+setCx = getNodeX
 setCy :: Datum_ -> Number
-setCy datum = d.y
-  where
-    d = datumIsGraphNode_ datum
+setCy = getNodeY
 
 
 
@@ -280,21 +271,21 @@ setCy datum = d.y
 
 -- TODO forall d should be explicit, this script requires certain data structures, fix sig to specify
 spagoTreeScript :: forall m d selection. Bind m => D3InterpreterM selection m => 
-  Tuple Number Number -> Maybe (Tuple NodeID (D3_Hierarchy_Node_XY d)) -> m selection
+  Tuple Number Number -> Maybe SpagoTreeNode -> m selection
 spagoTreeScript (Tuple width height) Nothing = do
-  attach "div#spagotree"            -- FIXME this is bogus but saves messing about with the Maybe root_ in the drawGraph script               
+  attach "div#spagotree"            -- FIXME this is bogus but saves messing about with the Maybe tree in the drawGraph script               
 
-spagoTreeScript (Tuple width height) (Just (Tuple _ root_)) = do
+spagoTreeScript (Tuple width height) (Just tree) = do
   let 
     -- configure dimensions
     columns                    = 3.0  -- 3 columns, set in the grid CSS in index.html
     gap                        = 10.0 -- 10px set in the grid CSS in index.html
     svgWH                      = { width : ((width - ((columns - 1.0) * gap)) / columns)
                                  , height: height / 2.0 } -- 2 rows
-    numberOfLevels             = (hNodeHeight_ root_) + 1.0
+    numberOfLevels             = (hNodeHeight_ tree) + 1.0
     spacing                    = { interChild: 120.0, interLevel: svgWH.height / numberOfLevels}
     layoutFn                   = (getLayout TidyTree) `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-    laidOutRoot_               = layoutFn `runLayoutFn_` root_
+    laidOutRoot_               = layoutFn `runLayoutFn_` tree
     { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
     xExtent                    = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
     yExtent                    = yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
@@ -312,7 +303,7 @@ spagoTreeScript (Tuple width height) (Just (Tuple _ root_)) = do
   theLinks_  <- links <+> Join {
       element   : Path
     , key       : UseDatumAsKey
-    , "data"    : links_ root_
+    , "data"    : links_ tree
     , behaviour : [ strokeWidth   1.5
                   , strokeColor   "black"
                   , strokeOpacity 0.4
@@ -324,7 +315,7 @@ spagoTreeScript (Tuple width height) (Just (Tuple _ root_)) = do
   nodeJoin_  <- nodes <+> Join {
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : descendants_ root_
+    , "data"    : descendants_ tree
     -- there could be other stylistic stuff here but the transform is key structuring component
     , behaviour : [ transform [ radialRotateCommon, radialTreeTranslate, rotateRadialLabels ] ]
   }
@@ -348,24 +339,21 @@ spagoTreeScript (Tuple width height) (Just (Tuple _ root_)) = do
 radialRotate :: Number -> String
 radialRotate x = show $ (x * 180.0 / pi - 90.0)
 
-radialRotateCommon :: forall d. D3_Hierarchy_Node_XY d -> String
-radialRotateCommon (D3_Hierarchy_Node d) = "rotate(" <> radialRotate d.x <> ")"
+radialRotateCommon :: forall r. D3_TreeNode (D3_XY + r) -> String
+radialRotateCommon (D3TreeNode d) = "rotate(" <> radialRotate d.x <> ")"
 
-radialTreeTranslate :: forall d. D3_Hierarchy_Node_XY d -> String
-radialTreeTranslate (D3_Hierarchy_Node d) = "translate(" <> show d.y <> ",0)"
+radialTreeTranslate :: forall r. D3_TreeNode (D3_XY + r) -> String
+radialTreeTranslate (D3TreeNode d) = "translate(" <> show d.y <> ",0)"
 
-rotateRadialLabels :: forall d. D3_Hierarchy_Node_XY d-> String
-rotateRadialLabels (D3_Hierarchy_Node d) = -- TODO replace with nodeIsOnRHS 
+rotateRadialLabels :: forall r. D3_TreeNode (D3_XY + r) -> String
+rotateRadialLabels (D3TreeNode d) = -- TODO replace with nodeIsOnRHS 
   "rotate(" <> if d.x >= pi 
   then "180" <> ")" 
   else "0" <> ")"
 
 nodeIsOnRHS :: Datum_ -> Boolean
-nodeIsOnRHS d = n.x < pi
-  where
-    node :: forall datum. D3_Hierarchy_Node_XY datum
-    node = unsafeCoerce d
-    (D3_Hierarchy_Node n) = node
+nodeIsOnRHS d = node.x < pi
+  where (D3TreeNode node) = datumIsTreeNode d
 
 textDirection :: Datum_ -> Boolean
 textDirection = \d -> hasChildren_ d == nodeIsOnRHS d

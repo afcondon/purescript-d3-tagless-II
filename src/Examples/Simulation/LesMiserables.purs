@@ -1,9 +1,11 @@
 module D3.Examples.Simulation.LesMiserables where
 
+import D3.Data.File.LesMiserables
+import D3.Node
+
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
-import D3.Data.File.LesMiserables (LesMisLinkData, LesMisNodeData, datumIsLesMisGraphNode_, readGraphFromFileContents)
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.FFI (startSimulation_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceLinkConfig, defaultForceManyConfig)
@@ -11,7 +13,6 @@ import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
-import D3.Node (D3_LinkID, datumHasXY, datumLinkWithXY, datumValue)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
@@ -47,11 +48,11 @@ drawGraph = do
 
 
 -- | recipe for this force layout graph
-graphScript :: forall m r selection. 
+graphScript :: forall linkdata  m r selection. 
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
-  { links :: Array (D3_LinkID LesMisLinkData), nodes :: Array LesMisNodeData | r } -> 
+  { links :: Array (D3_Link NodeID linkdata), nodes :: Array LesMisNodeData | r } -> 
   m selection
 graphScript (Tuple w h) model = do
   root       <- attach "div#force"
@@ -73,7 +74,7 @@ graphScript (Tuple w h) model = do
     , simulation: simulation.simulation -- following config fields are extras for JoinSimulation
 
     , tickName  : "links"
-    , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
+    , onTick    : [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ]
     , onDrag    : SimulationDrag NoDrag
   }
 
@@ -85,7 +86,7 @@ graphScript (Tuple w h) model = do
     , simulation: simulation.simulation  -- following config fields are extras for JoinSimulation
 
     , tickName  : "nodes"
-    , onTick    : [ cx setCx, cy setCy ]
+    , onTick    : [ cx getNodeX, cy getNodeY ]
     , onDrag    : SimulationDrag DefaultDrag
   }
   
@@ -113,30 +114,6 @@ colorByGroup datum = d3SchemeCategory10N_ d.group
 linkWidth :: Datum_ -> Number
 linkWidth datum = sqrt v
   where
-    v = datumValue datum
+    v = (unsafeCoerce datum).value -- TODO rewrite more specific coercion of type safety cannot be achieved
     -- d = unsafeCoerce $ spy "linkWidth datum" datum
 
-setX1 :: Datum_ -> Number
-setX1 datum = d.source.x
-  where
-    d = datumLinkWithXY datum
-setY1 :: Datum_ -> Number
-setY1 datum = d.source.y
-  where
-    d = datumLinkWithXY datum
-setX2 :: Datum_ -> Number
-setX2 datum = d.target.x
-  where
-    d = datumLinkWithXY datum
-setY2 :: Datum_ -> Number
-setY2 datum = d.target.y
-  where
-    d = datumLinkWithXY datum
-setCx :: Datum_ -> Number
-setCx datum = d.x
-  where
-    d = datumHasXY datum
-setCy :: Datum_ -> Number
-setCy datum = d.y
-  where
-    d = datumHasXY datum

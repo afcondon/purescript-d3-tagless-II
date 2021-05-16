@@ -1,20 +1,79 @@
 module D3.Node where
 
-import Prelude
-
-import Data.Maybe (fromMaybe)
-import Data.Nullable (Nullable, toMaybe)
-import Prim.Row (class Union)
+import D3.Data.Foreign (Datum_)
+import Data.Nullable (Nullable)
+import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
-datumLinkWithXY :: forall datum. datum -> { source :: { x :: Number, y :: Number }, target :: { x :: Number, y :: Number }  }
-datumLinkWithXY = unsafeCoerce
+type NodeID = Int
+-- a link specialized to a particular type of object
+newtype D3_Link l row = D3_Link {
+    source :: l
+  , target :: l
+  | row
+}
 
-datumHasXY :: forall datum. datum -> { x :: Number, y :: Number }
-datumHasXY = unsafeCoerce
+-- newtype D3_Link row = D3_Link { | row }
+-- type D3_LinkID  row = ( source :: NodeID, target :: NodeID | row )
+-- type D3LinkRow  row = D3_Link ( D3_LinkID + row )
 
-datumValue :: forall datum. datum -> Number
-datumValue d = fromMaybe 0.0 $ toMaybe $ (unsafeCoerce d).value
+-- simulation nodes have an index and default link mapping is to this index
+type D3_Indexed row = ( index :: NodeID | row )
+-- often we want to create a unique `id` from some other field(s) of data object
+type D3_ID      row = ( id    :: NodeID | row )
+-- nodes of many types have or are given an x,y position 
+type D3_XY      row = ( x :: Number, y :: Number | row )
+-- VxyFxy are the fields that are acted upon by forces in the simulation
+type D3_VxyFxy  row = ( vx :: Number
+                      , vy :: Number
+                      , fx :: Nullable Number
+                      , fy :: Nullable Number | row )
+
+
+-- depth, height and possible value are common to all tree layouts (tidy tree, dendrogram, treemap, circlepack etc)
+type D3_TreeRow row = ( depth :: Int, height :: Int, value:: Nullable Number                     | row )
+-- Radius, Rect are fields that are used in circlepack and treemap layouts respectively
+type D3_Radius  row = ( r :: Number                                                              | row )
+type D3_Rect    row = ( x0 :: Number, y0 :: Number, x1 :: Number, y1 :: Number                   | row )
+
+newtype D3_TreeNode row = D3TreeNode {
+    parent   :: Nullable (D3_TreeNode row )
+  , children :: Array    (D3_TreeNode row )
+  | row
+}
+type D3TreeRow row       = D3_TreeNode ( D3_ID + D3_XY + D3_TreeRow + row )
+type D3CirclePackRow row = D3_TreeNode ( D3_ID + D3_XY + D3_Radius + D3_TreeRow + row )
+type D3TreeMapRow row    = D3_TreeNode ( D3_ID + D3_Rect + D3_TreeRow + row )
+
+newtype D3_SimulationNode row = D3SimNode { | row }
+type    D3SimulationRow   row = D3_SimulationNode ( D3_Indexed + D3_XY + D3_VxyFxy + row )
+
+-- when you give data to d3.hierarchy the original object contents are present under the `data` field of the new hierarchical objects 
+type EmbeddedData :: forall k. k -> Row k -> Row k
+type EmbeddedData d row= ( "data" :: d | row )
+
+
+-- | coercions for the common cases
+getSourceX :: Datum_ -> Number
+getSourceX datum = (unsafeCoerce datum).source.x
+
+getSourceY :: Datum_ -> Number
+getSourceY datum = (unsafeCoerce datum).source.y
+
+getTargetX :: Datum_ -> Number
+getTargetX datum = (unsafeCoerce datum).target.x
+
+getTargetY :: Datum_ -> Number
+getTargetY datum = (unsafeCoerce datum).target.y
+
+getNodeX :: Datum_ -> Number
+getNodeX datum = (unsafeCoerce datum).x
+
+getNodeY :: Datum_ -> Number
+getNodeY datum = (unsafeCoerce datum).y
+-- ============================================================================================================================
+-- THIS IS THE OLD CONTENTS OF NODE MODULE BELOW, ALL SLATED FOR REMOVAL WHEN THE ABOVE IS COMPLETE
+-- ============================================================================================================================
 
 -- | ***************************************************************************************************
 -- | *********************************  D3 hierarchy node
@@ -31,23 +90,6 @@ datumValue d = fromMaybe 0.0 $ toMaybe $ (unsafeCoerce d).value
 --    iterators and maps - each, eachAfter, eachBefore, copy
 -- | ***************************************************************************************************
 
-newtype D3_Hierarchy_Node d = D3_Hierarchy_Node ( -- must be newtype because of parent and children references
-    id       :: NodeID
-  , "data"   :: d
-  , depth    :: Int
-  , height   :: Int
-  , parent   :: Nullable (D3_Hierarchy_Node d r)
-  , children :: Array (D3_Hierarchy_Node d r)
-  , value    :: Nullable Number -- non-negative
-)
-type D3_XY = ( x :: Number, y :: Number)
--- tree layouts add simple x y
-type D3_Hierarchy_Node_XY d = Union D3_XY (D3_Hierarchy_Node d)
--- -- circle-packing adds x y and radius
--- type D3_Hierarchy_Node_Circle d = D3_Hierarchy_Node d ( x :: Number, y :: Number, r :: Number )
--- -- treemap and partitions add a rectangle where x0,y0 is TopLeft and x1y1 is BottomRight
--- type D3_Hierarchy_Node_Rect d   = D3_Hierarchy_Node d ( x0 :: Number, y0 :: Number, x1 :: Number, y1 :: Number )
-
 -- | ***************************************************************************************************
 -- | *********************************  D3 simulation node
 -- | D3 methods on D3_Simulation_Node
@@ -62,29 +104,6 @@ type D3_Hierarchy_Node_XY d = Union D3_XY (D3_Hierarchy_Node d)
 -- on "tick"
 -- on "end"
 -- | ***************************************************************************************************
-type NodeID = Int
-
-type D3_Simulation_Node d = { -- at present no extensions to simulation nodes
-    index  :: NodeID
-  , "data" :: d -- this is not true, 
-  , x      :: Number
-  , y      :: Number
-  , vx     :: Number
-  , vy     :: Number
-  , fx     :: Nullable Number
-  , fy     :: Nullable Number
--- | d  -- this is what actually happens
-}
-
-type D3_Link l r = { 
--- l is the type of the source and target, initially Int, 
--- from node.index but then replaced with type of D3_Simulation_Node_<something>
--- r is whatever other information is added to the link
-    source :: l
-  , target :: l
-  | r
-}
-type D3_LinkID r = D3_Link NodeID r
 
 -- TODO add more of these fundamental node / link types for Sankey and Chord diagrams at least
 

@@ -15,7 +15,7 @@ import Data.Tuple (Tuple(..), snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 
-data MetaTreeNode = 
+data D3GrammarNode = 
     Empty
   | AttachNode String
   | AppendNode Element
@@ -31,7 +31,7 @@ data MetaTreeNode =
   | TransitionNode (Array Chainable) Transition
   | RemoveNode
 
-instance showMetaTreeNode :: Show MetaTreeNode where -- super primitive implementation to get started
+instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implementation to get started
   show Empty                      = "Empty"
   show RemoveNode                 = "Remove"
   show (AttachNode _)             = "Attach"
@@ -45,7 +45,7 @@ instance showMetaTreeNode :: Show MetaTreeNode where -- super primitive implemen
   show (OnEventNode _)            = "OnEvent"
   show (TransitionNode _ _)       = "Transition"
 
-showAsSymbol :: MetaTreeNode -> { name :: String, symbol :: String, param1 :: String,              param2 :: String }
+showAsSymbol :: D3GrammarNode -> { name :: String, symbol :: String, param1 :: String,              param2 :: String }
 showAsSymbol = 
   case _ of
     Empty                      ->  { name: "Empty"         , symbol: ""    , param1: "",           param2: "" }
@@ -64,16 +64,16 @@ showAsSymbol =
 tag :: String -> String
 tag s = "<" <> s <> ">"
 
-type MetaTreeMap = Map NodeID MetaTreeNode
+type MetaTreeMap = Map NodeID D3GrammarNode
 data ScriptTree = ScriptTree Int MetaTreeMap (Array (Tuple NodeID NodeID))
 
 newtype D3MetaTreeM a = D3MetaTreeM (StateT ScriptTree Effect a)
 
 -- this is the type that we will give to JS, prune out the empty child arrays and then pass to d3.hierarchy
-newtype MetaTreeNode_ = MetaTreeNode { 
+newtype D3GrammarNode_ = D3GrammarNode { 
     name     :: String
   , symbol   :: String
-  , children :: Array MetaTreeNode_ 
+  , children :: Array D3GrammarNode_ 
   , param1   :: String
   , param2   :: String
 }
@@ -81,16 +81,16 @@ newtype MetaTreeNode_ = MetaTreeNode {
 scriptTreeToJSON :: ScriptTree -> TreeJson_
 scriptTreeToJSON (ScriptTree _ nodeMap links) = pruneEmptyChildren $ go 0
   where
-    go :: NodeID -> MetaTreeNode_
+    go :: NodeID -> D3GrammarNode_
     go id = do
       let children = snd <$> filter (\(Tuple parentID nodeID) -> parentID == id) links
 
           { name, symbol, param1, param2 }
                    = showAsSymbol $ fromMaybe Empty $ lookup id nodeMap
 
-      MetaTreeNode { name, symbol, param1, param2, children: go <$> children }
+      D3GrammarNode { name, symbol, param1, param2, children: go <$> children }
 
-foreign import pruneEmptyChildren :: MetaTreeNode_ -> TreeJson_
+foreign import pruneEmptyChildren :: D3GrammarNode_ -> TreeJson_
 
 initialMetaTree :: ScriptTree
 initialMetaTree = ScriptTree 0 empty []
@@ -107,7 +107,7 @@ derive newtype instance monadD3MetaTreeM       :: Monad                 D3MetaTr
 derive newtype instance monadStateD3MetaTreeM  :: MonadState ScriptTree D3MetaTreeM 
 derive newtype instance monadEffD3MetaTreeM    :: MonadEffect           D3MetaTreeM
 
-insertInScriptTree :: NodeID -> MetaTreeNode -> D3MetaTreeM Unit
+insertInScriptTree :: NodeID -> D3GrammarNode -> D3MetaTreeM Unit
 -- returns the number of the next node
 insertInScriptTree parentID transition@(TransitionNode chain config) = do
   (ScriptTree id nodeMap links) <- get

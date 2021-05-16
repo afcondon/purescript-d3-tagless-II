@@ -1,7 +1,7 @@
 module D3.FFI.Config where
 
 import D3.Data.Foreign (Datum_, Index_)
-import D3.Node (D3_LinkID)
+import D3.Node
 import Data.Number (infinity)
 import Prelude (negate)
 import Unsafe.Coerce (unsafeCoerce)
@@ -43,7 +43,7 @@ defaultForceRadialConfig name radius = { name, strength: 0.1, radius, cx: 0.0, c
 defaultForceLinkConfigEmpty :: forall d. String -> (d -> Index_ -> Number) -> ForceLinkConfig_
 defaultForceLinkConfigEmpty name id = { name, links: [], strength: 1.0, distance: (\d i -> 30.0), iterations: 1.0, id: unsafeCoerce id }
 
-defaultForceLinkConfig :: forall d r. String -> Array (D3_LinkID r) -> (d -> Index_ -> Number) -> ForceLinkConfig_
+defaultForceLinkConfig :: forall d r. String -> Array (D3_Link NodeID r) -> (d -> Index_ -> Number) -> ForceLinkConfig_
 defaultForceLinkConfig name links id = { name, links: unsafeCoerce links, strength: 1.0, distance: (\d i -> 30.0), iterations: 1.0, id: unsafeCoerce id }
   
 
@@ -120,5 +120,5 @@ type ForceLinkConfig_ = {
   , distance    :: (Datum_ -> Index_ -> Number)
   , iterations  :: Number
   , id          :: (Datum_ -> Index_ -> Number)
-  , links       :: forall r. Array (D3_LinkID r)
+  , links       :: forall r. Array (D3_Link NodeID r)
 }

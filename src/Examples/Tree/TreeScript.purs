@@ -1,25 +1,48 @@
 module D3.Examples.Tree.Script where
 
-import Prelude hiding (join,append)
+import D3.Node (D3SimulationRow, D3TreeRow, D3_Link, EmbeddedData, NodeID)
+import Prelude (class Bind, bind, negate, pure)
 
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, x)
-import D3.Data.Types (Datum_, Element(..), TreeModel)
-import D3.Examples.Tree.Types (ScriptConfig)
-import D3.FFI (descendants_, descendants_XY, hasChildren_, links_, links_XY)
+import D3.Data.Types (Datum_, Element(..), Selector)
+import D3.FFI (descendants_, hasChildren_, links_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
-import D3.Selection (Join(..), Keys(..), node)
-import Data.Maybe (fromMaybe)
+import D3.Selection (Chainable, Join(..), Keys(..), node)
 import Unsafe.Coerce (unsafeCoerce)
+import Type.Row (type (+))
+
+-- Model data types specialized with inital data
+type FlareNodeRow row = ( name :: String | row )
+type FlareNodeData    = { | FlareNodeRow () }
+
+type FlareTreeNode    = D3TreeRow       (EmbeddedData FlareNodeData + ())
+type FlareSimNode     = D3SimulationRow (             FlareNodeRow  + ())
+
+type FlareLinkData = ( value :: Number )
+type FlareModel    = { links :: Array (D3_Link NodeID FlareLinkData)
+                      , nodes :: Array FlareNodeData }
+
+-- a record that packages up all the customizations that are needed to render the 6 variations on Tree
+type ScriptConfig = { 
+    linkPath      :: Chainable
+  , selector      :: Selector
+  , spacing       :: { interChild :: Number, interLevel :: Number }
+  , viewbox       :: Array Chainable
+  , nodeTransform :: Array Chainable
+  , color         :: String
+  , textDirection :: Datum_ -> Boolean
+  , svg           :: { width :: Number, height :: Number }
+}
 
 -- | The eDSL script that renders tree layouts
 -- | it has been parameterized rather heavily using the ScriptConfig record so that it can draw
 -- | all six variations of [Radial, Horizontal, Vertical] * [Dendrogram, TidyTree] 
 -- | NB there would be nothing wrong, per se, with individual examples, this just shows 
 -- | some more composability, at the price of some direct legibility
-treeScript :: forall m d selection. Bind m => D3InterpreterM selection m => 
-  ScriptConfig d -> m selection
-treeScript config = do
-  root       <- attach config.selector                           
+treeScript :: forall m selection. Bind m => D3InterpreterM selection m => 
+  ScriptConfig -> FlareTreeNode ->  m selection
+treeScript config tree = do
+  root       <- attach config.selector   
   svg        <- root `append` (node Svg config.viewbox)          
   container  <- svg  `append` (node Group [ fontFamily      "sans-serif"
                                           , fontSize        10.0
@@ -30,7 +53,7 @@ treeScript config = do
   theLinks_  <- links <+> Join {
       element   : Path
     , key       : UseDatumAsKey
-    , "data"    : links_XY <$> config.tree
+    , "data"    : links_ tree
     , behaviour : [ strokeWidth   1.5
                   , strokeColor   config.color
                   , strokeOpacity 0.4
@@ -42,7 +65,7 @@ treeScript config = do
   nodeJoin_  <- nodes <+> Join {
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : descendants_XY <$> config.tree
+    , "data"    : descendants_ tree
     -- there could be other stylistic stuff here but the transform is key structuring component
     , behaviour : config.nodeTransform -- <- the key positioning calculation for the tree!!!
   }

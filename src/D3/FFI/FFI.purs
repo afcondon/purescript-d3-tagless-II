@@ -12,8 +12,7 @@ import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
 import Data.Maybe (fromMaybe)
 import Data.Nullable (Nullable)
-import Prelude (Unit, unit, ($), (<$>), (<<<))
-import Unsafe.Coerce (unsafeCoerce)
+import Prelude (Unit, unit, ($), (<$>))
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js zoom module       *********************************************
@@ -80,24 +79,24 @@ foreign import selectionOn_         :: forall selection callback. selection -> S
 type GraphModel_ link node = { links :: Array link, nodes :: Array node }
 
 foreign import initSimulation_  :: forall d.   Array d -> SimulationConfig_ -> D3Simulation_
-foreign import getNodes_        :: forall d.   D3Simulation_ -> Array (D3_Simulation_Node d)
+foreign import getNodes_        :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
 foreign import getLinks_        :: forall d r. D3Simulation_ -> Array (D3_Link d r)
-foreign import setNodes_        :: forall d.   D3Simulation_ -> Array (D3_Simulation_Node d)     -> D3Simulation_
-foreign import setLinks_        :: forall r.   D3Simulation_ -> Array (D3_LinkID r)     -> D3Simulation_
+foreign import setNodes_        :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)     -> D3Simulation_
+foreign import setLinks_        :: forall r.   D3Simulation_ -> Array (D3_Link NodeID r)     -> D3Simulation_
 foreign import startSimulation_ :: D3Simulation_ -> Unit
 foreign import stopSimulation_  :: D3Simulation_ -> Unit
 
-foreign import pinNode_   :: forall d. Number -> Number -> D3_Simulation_Node d -> Unit
-foreign import unpinNode_ :: forall d. D3_Simulation_Node d -> Unit
-foreign import nanNodes_  :: forall d.  Array (D3_Simulation_Node d) -> Unit
+foreign import pinNode_   :: forall d. Number -> Number -> D3_SimulationNode d -> Unit
+foreign import unpinNode_ :: forall d. D3_SimulationNode d -> Unit
+foreign import nanNodes_  :: forall d.  Array (D3_SimulationNode d) -> Unit
 
 -- NB mutating function
-pinNode :: forall d. D3_Simulation_Node d -> PointXY -> D3_Simulation_Node d
+pinNode :: forall d. D3_SimulationNode d -> PointXY -> D3_SimulationNode d
 pinNode node p = do
   let _ = pinNode_ p.x p.y node
   node -- NB mutated value, fx / fy have been set
 
-pinNodeMatchingPredicate :: forall d. Array (D3_Simulation_Node d) -> ((D3_Simulation_Node d) -> Boolean) -> Number -> Number -> Unit
+pinNodeMatchingPredicate :: forall d. Array (D3_SimulationNode d) -> ((D3_SimulationNode d) -> Boolean) -> Number -> Number -> Unit
 pinNodeMatchingPredicate nodes predicate fx fy = fromMaybe unit $ (pinNode_ fx fy) <$> (find predicate nodes)
 
 
@@ -131,26 +130,21 @@ foreign import data D3TreeLike_         :: Type -- covers both trees and cluster
 foreign import data D3SortComparator_   :: Type -- a number such that n < 0 => a > b, n > 0 => b > a, n == 0 undef'd
 foreign import data D3Hierarchical_     :: Type
 
-foreign import hierarchyFromJSON_       :: forall d. TreeJson_ -> D3_Hierarchy_Node_ d
-foreign import treeSortForCirclePack_   :: forall d. D3_Hierarchy_Node_Circle d -> D3_Hierarchy_Node_Circle d
-foreign import treeSortForTreeMap_      :: forall d. D3_Hierarchy_Node_Rect d -> D3_Hierarchy_Node_Rect d
-foreign import treeSortForTree_         :: forall d. D3_Hierarchy_Node_XY d -> D3_Hierarchy_Node_XY d
+foreign import hierarchyFromJSON_       :: forall d. TreeJson_ -> D3_TreeNode d
+-- TODO now that these different hierarchy rows are composed at type level, polymorphic functions should be written
+foreign import treeSortForCirclePack_   :: forall d. D3CirclePackRow d -> D3CirclePackRow d
+foreign import treeSortForTreeMap_      :: forall d. D3TreeMapRow d -> D3TreeMapRow d
+foreign import treeSortForTree_         :: forall d. D3_TreeNode d -> D3_TreeNode d
 
 -- next some functions to make attributes, types are a bit sloppy here
 -- TODO tighten this up
 foreign import hasChildren_             :: Datum_ -> Boolean -- really only works on Datum_ when it's a D3HierarchicalNode_
 
 -- the full API for hierarchical nodes:
-foreign import descendants_     :: forall d r. D3_Hierarchy_Node d r -> Array (D3_Hierarchy_Node d r)
-foreign import find_            :: forall d r. D3_Hierarchy_Node d r -> (Datum_ -> Boolean) -> Nullable (D3_Hierarchy_Node d r)
-foreign import links_           :: forall d r1 r2. D3_Hierarchy_Node d r1 -> Array (D3_Link d r2)
+foreign import descendants_     :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
+foreign import find_            :: forall r. D3_TreeNode r -> (Datum_ -> Boolean) -> Nullable (D3_TreeNode r)
+foreign import links_           :: forall d r1 r2. D3_TreeNode r1 -> Array (D3_Link d r2)
 
-links_XY         :: forall d r. D3_Hierarchy_Node_XY d -> Array (D3_Link d r)
-links_XY = links_ <<< unsafeCoerce
-descendants_XY   :: forall d. D3_Hierarchy_Node_XY d -> Array (D3_Hierarchy_Node_XY d)
-descendants_XY = descendants_ <<< unsafeCoerce
-find_XY :: forall d. D3_Hierarchy_Node_XY d -> (Datum_ -> Boolean) -> Nullable (D3_Hierarchy_Node_XY d)
-find_XY = find_ <<< unsafeCoerce
 -- TODO implement the following as well
 -- foreign import ancestors_    :: D3HierarchicalNode_ -> D3Data_
 -- foreign import leaves_       :: D3HierarchicalNode_ -> Array D3HierarchicalNode_
@@ -165,11 +159,11 @@ getLayout layout = do
 foreign import getTreeLayoutFn_       :: Unit -> TreeLayoutFn_
 foreign import getClusterLayoutFn_    :: Unit -> TreeLayoutFn_
 
-foreign import runLayoutFn_           :: forall d r. TreeLayoutFn_ -> D3_Hierarchy_Node d r -> D3_Hierarchy_Node_XY d
+foreign import runLayoutFn_           :: forall r. TreeLayoutFn_ -> D3_TreeNode r -> D3_TreeNode r
 foreign import treeSetSize_           :: TreeLayoutFn_ -> Array Number -> TreeLayoutFn_
 foreign import treeSetNodeSize_       :: TreeLayoutFn_ -> Array Number -> TreeLayoutFn_
-foreign import treeSetSeparation_     :: forall d. TreeLayoutFn_ -> (Fn2 (D3_Hierarchy_Node_ d) (D3_Hierarchy_Node_ d) Number) -> TreeLayoutFn_
-foreign import treeMinMax_            :: forall d. D3_Hierarchy_Node_XY d -> { xMin :: Number, xMax :: Number, yMin :: Number, yMax :: Number }
+foreign import treeSetSeparation_     :: forall d. TreeLayoutFn_ -> (Fn2 (D3_TreeNode d) (D3_TreeNode d) Number) -> TreeLayoutFn_
+foreign import treeMinMax_            :: forall d. D3_TreeNode d -> { xMin :: Number, xMax :: Number, yMin :: Number, yMax :: Number }
 -- foreign import sum_                :: D3HierarchicalNode_ -> (Datum_ -> Number) -> D3HierarchicalNode_ -- alters the tree!!!!
 -- from docs:  <<if you only want leaf nodes to have internal value, then return zero for any node with children. 
 -- For example, as an alternative to node.count:
@@ -180,7 +174,7 @@ foreign import treeMinMax_            :: forall d. D3_Hierarchy_Node_XY d -> { x
 -- foreign import eachAfter_ 
 -- foreign import eachBefore_
 -- foreign import deepCopy_ -- copies (sub)tree but shares data with clone !!!
-foreign import sharesParent_          :: forall d r. (D3_Hierarchy_Node d r) -> (D3_Hierarchy_Node d r) -> Boolean
+foreign import sharesParent_          :: forall r. (D3_TreeNode r) -> (D3_TreeNode r) -> Boolean
 
 foreign import linkHorizontal_        :: (Datum_ -> String) 
 foreign import linkVertical_          :: (Datum_ -> String) 
@@ -191,7 +185,7 @@ foreign import autoBox_               :: Datum_ -> Array Number
 
 -- accessors for fields of D3HierarchicalNode, only valid if layout has been done, hence the _XY version of node
 -- REVIEW maybe accessors aren't needed if you can ensure type safety
-foreign import hNodeDepth_  :: forall d r. D3_Hierarchy_Node d r -> Number
-foreign import hNodeHeight_ :: forall d r. D3_Hierarchy_Node d r -> Number
-foreign import hNodeX_      :: forall d. D3_Hierarchy_Node_XY d -> Number
-foreign import hNodeY_      :: forall d. D3_Hierarchy_Node_XY d -> Number
+foreign import hNodeDepth_  :: forall r. D3_TreeNode r -> Number
+foreign import hNodeHeight_ :: forall r. D3_TreeNode r -> Number
+foreign import hNodeX_      :: forall r. D3_TreeNode r -> Number
+foreign import hNodeY_      :: forall r. D3_TreeNode r -> Number
