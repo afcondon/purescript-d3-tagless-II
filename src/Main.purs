@@ -20,7 +20,7 @@ import Effect.Aff (Aff, forkAff, launchAff_)
 
 main :: Effect Unit
 main = launchAff_  do
-  -- _        <- forkAff Spago.drawGraph
+  _        <- forkAff Spago.drawGraph
 
   _        <- forkAff GUP.runGeneralUpdatePattern
   _        <- forkAff Graph.drawGraph
