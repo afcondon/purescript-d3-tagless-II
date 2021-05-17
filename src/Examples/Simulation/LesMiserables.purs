@@ -1,7 +1,7 @@
 module D3.Examples.Simulation.LesMiserables where
 
-import D3.Data.File.LesMiserables
-import D3.Node
+import D3.Data.File.LesMiserables (LesMisNodeData, readGraphFromFileContents)
+import D3.Node (D3_Link, NodeID, getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
@@ -17,7 +17,6 @@ import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
 import Data.Tuple (Tuple(..), fst, snd)
-import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)

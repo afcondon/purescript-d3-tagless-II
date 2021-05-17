@@ -1,14 +1,14 @@
 module D3.Examples.Simulation.SpagoPackages where
 
-import D3.Data.File.Spago
-import D3.Node
+import D3.Data.File.Spago (NodeType(..), SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, findGraphNodeIdFromName, getIndexFromSpagoSimNode, getNameFromSpagoSimNode, getReachableNodes, setXY)
+import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), D3_XY, NodeID, getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Examples.Tree.Configure (datumIsTreeNode)
-import D3.FFI (GraphModel_, descendants_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, links_, nanNodes_, pinNodeMatchingPredicate, runLayoutFn_, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
+import D3.FFI (descendants_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, links_, nanNodes_, pinNodeMatchingPredicate, runLayoutFn_, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
@@ -26,7 +26,6 @@ import Data.List as L
 import Data.Map (Map, empty)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Nullable (Nullable, null)
 import Data.Set as S
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..), fst, snd)
@@ -41,6 +40,19 @@ import Unsafe.Coerce (unsafeCoerce)
 
 
 -- highlightNeighborhood :: forall d r. GraphModel_ (D3_Link (D3_Simulation_Node d) r) (D3_Simulation_Node d) -> NodeID -> Unit
+highlightNeighborhood :: forall t276 t295 t299 t301.
+  { links :: Array
+               { source :: { index :: Int
+                           | t299
+                           }
+               , target :: { index :: Int
+                           | t295
+                           }
+               | t301
+               }
+  | t276
+  }
+  -> Int -> Unit
 highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
   where
     sources = foldl (\acc l -> if l.target.index == nodeId then (cons l.source.index acc) else acc) [] links
@@ -66,7 +78,7 @@ drawGraph = do
               (Just rootID) -> treeReduction graph rootID
 
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph')
-      -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (spagoTreeScript widthHeight graph'.tree)
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (spagoTreeScript widthHeight graph'.tree)
        
       printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph') "Force Layout Script"
       log $ snd printedScript
@@ -118,7 +130,7 @@ getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.id { x: n.x, y: n
 buildTree :: forall r. NodeID -> SpagoModel -> Array (D3_Link NodeID r) -> Tree NodeID
 buildTree rootID model treelinks = do
   let 
-    unwrap :: forall r. D3_Link NodeID r -> { source :: NodeID, target :: NodeID | r }
+    unwrap :: D3_Link NodeID r -> { source :: NodeID, target :: NodeID | r }
     unwrap (D3_Link d) = d
     linksWhoseSourceIs :: NodeID -> L.List NodeID
     linksWhoseSourceIs id = L.fromFoldable $ (_.target) <$> (filter (\l -> l.source == id) (unwrap <$> treelinks))
@@ -273,12 +285,12 @@ setCy = getNodeY
 -- | **************************************************************************************************************
 
 -- TODO forall d should be explicit, this script requires certain data structures, fix sig to specify
-spagoTreeScript :: forall m d selection. Bind m => D3InterpreterM selection m => 
-  Tuple Number Number -> Maybe SpagoTreeNode -> m selection
+spagoTreeScript :: forall m selection. Bind m => D3InterpreterM selection m => 
+  Tuple Number Number -> Maybe (Tuple NodeID SpagoTreeNode) -> m selection
 spagoTreeScript (Tuple width height) Nothing = do
   attach "div#spagotree"            -- FIXME this is bogus but saves messing about with the Maybe tree in the drawGraph script               
 
-spagoTreeScript (Tuple width height) (Just tree) = do
+spagoTreeScript (Tuple width height) (Just (Tuple rootID tree)) = do
   let 
     -- configure dimensions
     columns                    = 3.0  -- 3 columns, set in the grid CSS in index.html

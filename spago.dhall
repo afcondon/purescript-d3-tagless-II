@@ -30,6 +30,7 @@ You can edit this file as you like.
   , "tailrec"
   , "transformers"
   , "tuples"
+  , "typelevel-prelude"
   , "unsafe-coerce"
   , "web-events"
   , "web-html"
