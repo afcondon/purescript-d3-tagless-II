@@ -10,6 +10,7 @@ import Data.Graph (Graph, fromMap)
 import Data.Graph as G
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Nullable (Nullable, null) as N
 import Data.Set as S
 import Data.String (Pattern(..), split)
 import Data.Tree (Tree)
@@ -59,14 +60,20 @@ type SpagoLinkData    = ( linktype :: LinkType )
 type SpagoGraphLinkID = D3_Link NodeID SpagoLinkData
 
 type SpagoModel = { 
-    links      :: Array SpagoGraphLinkID -- each ID will get swizzled for a SpagoGraphLinkObj_ when simulation initialized
-  , nodes      :: Array SpagoNodeData     -- will get embedded in D3Simulation_Node when simulation initialized
+    links      :: Array SpagoGraphLinkID  -- each ID will get swizzled for a SpagoGraphLinkObj_ when simulation initialized
+  , nodes      :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
   , graph      :: Graph NodeID SpagoNodeData
   , name2IdMap :: M.Map String NodeID
   , loc        :: M.Map String Number
   , positions  :: M.Map NodeID PointXY
   , tree       :: Maybe (Tuple NodeID SpagoTreeNode)
 }
+
+setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
+setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
+
+upgradeSpagoNodeData :: SpagoNodeData -> SpagoSimNode
+upgradeSpagoNodeData node = D3SimNode { depends: node.depends, id: node.id, name: node.name, nodetype: node.nodetype, package: node.package, path: node.path, index: node.id, fx: (N.null :: N.Nullable Number), fy: (N.null :: N.Nullable Number), vx: 0.0, vy: 0.0, x: 0.0, y: 0.0}
 
 datumIsSpagoSimNode :: Datum_ -> SpagoSimNode
 datumIsSpagoSimNode = unsafeCoerce
@@ -76,6 +83,16 @@ datumIsSpagoLink = unsafeCoerce
 
 datumIsGraphNode :: Datum_ -> SpagoSimNode
 datumIsGraphNode = unsafeCoerce
+
+getIndexFromSpagoSimNode :: Datum_ -> Int
+getIndexFromSpagoSimNode datum = d.index
+  where
+    (D3SimNode d) = unsafeCoerce datum
+
+getNameFromSpagoSimNode :: Datum_ -> String
+getNameFromSpagoSimNode datum = d.name
+  where
+    (D3SimNode d) = unsafeCoerce datum
 
 convertFilesToGraphModel :: forall r. 
   { body :: String | r } -> 
@@ -95,7 +112,7 @@ makeSpagoGraphModel json = do
     loc = M.fromFoldable $ (\o -> Tuple o.path o.loc) <$> json.loc
 
   { links
-  , nodes
+  , nodes    : upgradeSpagoNodeData <$> nodes
   , name2IdMap
   , loc
   , graph    : makeGraph nodes

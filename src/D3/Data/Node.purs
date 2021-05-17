@@ -1,6 +1,7 @@
 module D3.Node where
 
 import D3.Data.Foreign (Datum_)
+import Data.Newtype (class Newtype)
 import Data.Nullable (Nullable)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)

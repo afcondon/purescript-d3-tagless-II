@@ -26,6 +26,7 @@ import Data.List as L
 import Data.Map (Map, empty)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Nullable (Nullable, null)
 import Data.Set as S
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..), fst, snd)
@@ -35,8 +36,8 @@ import Effect.Class.Console (log)
 import Math (cos, pi, sin)
 import Math (sqrt) as Math
 import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (+), (-), (/), (<), (<$>), (<*>), (<<<), (<>), (==), (>=), (||))
-import Unsafe.Coerce (unsafeCoerce)
 import Type.Row (type (+))
+import Unsafe.Coerce (unsafeCoerce)
 
 
 -- highlightNeighborhood :: forall d r. GraphModel_ (D3_Link (D3_Simulation_Node d) r) (D3_Simulation_Node d) -> NodeID -> Unit
@@ -65,7 +66,7 @@ drawGraph = do
               (Just rootID) -> treeReduction graph rootID
 
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph')
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (spagoTreeScript widthHeight graph'.tree)
+      -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (spagoTreeScript widthHeight graph'.tree)
        
       printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph') "Force Layout Script"
       log $ snd printedScript
@@ -76,9 +77,9 @@ drawGraph = do
 treeReduction :: SpagoModel -> NodeID -> SpagoModel
 treeReduction model rootID = do
       let reachable       = getReachableNodes rootID model.graph
-          onlyTreelinks   = makeTreeLinks (pathsAsLists reachable.closedPaths)
-          treelinks       = partition (\l -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
-          treenodes       = partition (\n -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
+          onlyTreelinks   = makeTreeLinks (pathsAsLists reachable.closedDepPaths)
+          treelinks       = partition (\(D3_Link l) -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
+          treenodes       = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
           layout          = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 1000.0 ]) `treeSetSeparation_` radialSeparation
           idTree          = buildTree rootID model treelinks.yes
           jsontree        = makeD3TreeJSONFromTreeID idTree
@@ -102,23 +103,25 @@ radialTranslate p =
 
 setNodePositionsRadial :: Array SpagoSimNode -> M.Map NodeID PointXY -> Array SpagoSimNode
 setNodePositionsRadial nodes positionMap = do
-  let updateXY :: SpagoSimNode -> SpagoSimNode
-      updateXY (D3SimNode node) = 
-        case M.lookup node.id positionMap of
-          Nothing -> (D3SimNode node)
-          (Just p) -> 
-            let { x,y } = radialTranslate p
-            in D3SimNode $ node { x = x, y = y }
+  let 
+    updateXY (D3SimNode node) = do
+      case M.lookup node.id positionMap of
+        Nothing -> D3SimNode node
+        (Just p) -> 
+          let { x,y } = radialTranslate p
+          in (D3SimNode node) `setXY` { x, y }
   updateXY <$> nodes
 
 getPositionMap :: SpagoTreeNode -> Map NodeID PointXY
-getPositionMap root = foldl (\acc n -> M.insert n.id { x: n.x, y: n.y } acc) empty (descendants_ root)
+getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.id { x: n.x, y: n.y } acc) empty (descendants_ root)
 
 buildTree :: forall r. NodeID -> SpagoModel -> Array (D3_Link NodeID r) -> Tree NodeID
 buildTree rootID model treelinks = do
   let 
+    unwrap :: forall r. D3_Link NodeID r -> { source :: NodeID, target :: NodeID | r }
+    unwrap (D3_Link d) = d
     linksWhoseSourceIs :: NodeID -> L.List NodeID
-    linksWhoseSourceIs id = L.fromFoldable $ (_.target) <$> (filter (\l -> l.source == id) treelinks)
+    linksWhoseSourceIs id = L.fromFoldable $ (_.target) <$> (filter (\l -> l.source == id) (unwrap <$> treelinks))
 
     go :: NodeID -> Tree NodeID
     go childID = Node childID (go <$> linksWhoseSourceIs childID)
@@ -188,9 +191,9 @@ graphScript (Tuple w h) model = do
                                                   , fill colorByGroup
                                                   , on MouseEnter (\e d t -> stopSimulation_ simulation) 
                                                   , on MouseLeave (\e d t -> startSimulation_ simulation)
-                                                  , on MouseClick (\e d t -> highlightNeighborhood (unsafeCoerce model) (datumIsSpagoSimNode d).index)
+                                                  , on MouseClick (\e d t -> highlightNeighborhood (unsafeCoerce model) (getIndexFromSpagoSimNode d))
                                                   ]) 
-  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y 0.2, text (\d -> (datumIsSpagoSimNode d).data.name)]) 
+  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y 0.2, text getNameFromSpagoSimNode]) 
   
   svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                             , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
@@ -199,7 +202,7 @@ graphScript (Tuple w h) model = do
                             }
   let
     _ = nanNodes_ $ unsafeCoerce model.nodes
-    _ = pinNodeMatchingPredicate nodes (\n -> n.data.name == "Main") 0.0 0.0
+    _ = pinNodeMatchingPredicate nodes (\(D3SimNode n) -> n.name == "Main") 0.0 0.0
     _ = startSimulation_ simulation
 
   pure svg'
@@ -215,16 +218,16 @@ packageForceRadius = 50.0 :: Number
 
 chooseRadius :: Map String Number -> Datum_ -> Number
 chooseRadius locMap datum = do
-  let d = datumIsSpagoSimNode datum
-  case d.data.moduleOrPackage of
+  let (D3SimNode d) = datumIsSpagoSimNode datum
+  case d.nodetype of
     -- IsModule   -> moduleRadius
-    IsModule   -> Math.sqrt (fromMaybe 10.0 $ M.lookup d.data.path locMap)
+    IsModule   -> Math.sqrt (fromMaybe 10.0 $ M.lookup d.path locMap)
     IsPackage -> packageRadius
 
 chooseRadiusFn :: Datum_ -> Index_ -> Number
 chooseRadiusFn datum index = do
-  let d = datumIsSpagoSimNode datum
-  case d.data.moduleOrPackage of
+  let (D3SimNode d) = datumIsSpagoSimNode datum
+  case d.nodetype of
     IsModule  -> moduleRadius
     IsPackage -> packageRadius + packageForceRadius
 
@@ -248,7 +251,7 @@ translateNode datum = "translate(" <> show x <> "," <> show y <> ")"
 colorByGroup :: Datum_ -> String
 colorByGroup datum = d3SchemeCategory10N_ (toNumber $ fromMaybe 0 d.package)
   where
-    d = datumIsSpagoSimNode datum
+    (D3SimNode d) = unsafeCoerce datum
 
 setX1 :: Datum_ -> Number
 setX1 = getSourceX
