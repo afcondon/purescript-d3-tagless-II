@@ -22,6 +22,9 @@ newtype D3_Link l row = D3_Link {
 type D3_Indexed row = ( index :: NodeID | row )
 -- often we want to create a unique `id` from some other field(s) of data object
 type D3_ID      row = ( id    :: NodeID | row )
+-- field to track whether node has TREE children, ie Parent or Leaf
+-- NB the node may still have GRAPH "children" / depends which have been pruned to get a tree
+type D3_Leaf    row = ( isLeaf :: Boolean | row )
 -- nodes of many types have or are given an x,y position 
 type D3_XY      row = ( x :: Number, y :: Number | row )
 -- VxyFxy are the fields that are acted upon by forces in the simulation
@@ -42,7 +45,7 @@ newtype D3_TreeNode row = D3TreeNode {
   , children :: Array    (D3_TreeNode row )
   | row
 }
-type D3TreeRow row       = D3_TreeNode ( D3_ID + D3_XY + D3_TreeRow + row )
+type D3TreeRow row       = D3_TreeNode ( D3_ID + D3_XY + D3_TreeRow + D3_Leaf + row )
 type D3CirclePackRow row = D3_TreeNode ( D3_ID + D3_XY + D3_Radius + D3_TreeRow + row )
 type D3TreeMapRow row    = D3_TreeNode ( D3_ID + D3_Rect + D3_TreeRow + row )
 

@@ -64,8 +64,7 @@ foreign import removeSpotlight_ :: NodeID -> Array NodeID -> Array NodeID -> Uni
 drawGraph :: Aff Unit
 drawGraph = do
   log "Force layout example"
-  widthHeight <- liftEffect getWindowWidthHeight
-  let _ =  spy "wh: " $ widthHeight
+  (Tuple width height) <- liftEffect getWindowWidthHeight
   moduleJSON  <- AJAX.get ResponseFormat.string "http://localhost:1234/modules.json"
   packageJSON <- AJAX.get ResponseFormat.string "http://localhost:1234/packages.json"
   lsdepJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/lsdeps.jsonlines"
@@ -78,10 +77,10 @@ drawGraph = do
               Nothing       -> graph -- couldn't find root of tree so just skip this
               (Just rootID) -> treeReduction graph rootID
 
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph')
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (spagoTreeScript widthHeight graph'.tree)
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (spagoTreeScript (Tuple (width/2.0) height) graph'.tree)
        
-      printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph') "Force Layout Script"
+      printedScript <- liftEffect $ runPrinter (graphScript (Tuple width height) graph') "Force Layout Script"
       log $ snd printedScript
       log $ fst printedScript
       pure unit
@@ -93,7 +92,7 @@ treeReduction model rootID = do
           onlyTreelinks   = makeTreeLinks (pathsAsLists reachable.closedDepPaths)
           treelinks       = partition (\(D3_Link l) -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
           treenodes       = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
-          layout          = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 1000.0 ]) `treeSetSeparation_` radialSeparation
+          layout          = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
           idTree          = buildTree rootID model treelinks.yes
           jsontree        = makeD3TreeJSONFromTreeID idTree model.id2NameMap
           rootTree        = hierarchyFromJSON_       jsontree
@@ -115,19 +114,19 @@ radialTranslate p =
       y = radius * sin angle
   in { x, y }
 
-setNodePositionsRadial :: Array SpagoSimNode -> M.Map NodeID PointXY -> Array SpagoSimNode
+setNodePositionsRadial :: Array SpagoSimNode -> M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean } -> Array SpagoSimNode
 setNodePositionsRadial nodes positionMap = do
   let 
     updateXY (D3SimNode node) = do
       case M.lookup node.id positionMap of
         Nothing -> D3SimNode node
         (Just p) -> 
-          let { x,y } = radialTranslate p
-          in (D3SimNode node) `setXY` { x, y }
+          let { x,y } = radialTranslate { x: p.x, y: p.y }
+          in (D3SimNode node) `setXY` { x, y, isLeaf: p.isLeaf }
   updateXY <$> nodes
 
-getPositionMap :: SpagoTreeNode -> Map NodeID PointXY
-getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y } acc) empty (descendants_ root)
+getPositionMap :: SpagoTreeNode -> Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
+getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isLeaf: (unsafeCoerce n).data.isLeaf } acc) empty (descendants_ root) -- TODO coerce here is pure hackery
 
 buildTree :: forall r. NodeID -> SpagoModel -> Array (D3_Link NodeID r) -> Tree NodeID
 buildTree rootID model treelinks = do
@@ -179,7 +178,7 @@ graphScript (Tuple w h) model = do
                     -- , Force $ ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
                     ]
       { simulation, nodes } = initSimulation forces model.nodes defaultConfigSimulation
-      _ = pinNodeMatchingPredicate nodes (\(D3SimNode n) -> n.name == "Main") 0.0 0.0
+      -- _ = pinNodeMatchingPredicate nodes (\(D3SimNode n) -> n.name == "Main") 0.0 0.0
       -- _ = stopSimulation_ simulation
 
   linksSelection <- linksGroup <+> JoinSimulation {
@@ -300,7 +299,8 @@ spagoTreeScript (Tuple width height) (Just (Tuple rootID tree)) = do
                                  , height: height / rows }
     numberOfLevels             = (hNodeHeight_ tree) + 1.0
     spacing                    = { interChild: 120.0, interLevel: height / numberOfLevels}
-    layoutFn                   = (getLayout TidyTree) `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
+    layoutFn                   = ((getLayout TidyTree) `treeSetSize_`       [ 2.0 * pi, (width / 2.0) ]) 
+                                                       `treeSetSeparation_` radialSeparation
     laidOutRoot_               = layoutFn `runLayoutFn_` tree
     { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
     xExtent                    = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250

@@ -31,6 +31,7 @@ lesMisTreeNode :: LesMisTreeNode
 lesMisTreeNode = D3TreeNode { 
     parent  : null
   , children: []
+  , isLeaf  : true
   , id      : 0
   , depth   : 0
   , height  : 0

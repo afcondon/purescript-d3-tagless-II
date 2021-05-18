@@ -354,9 +354,9 @@ exports.treeSortForTree_ = root => root.sum(function(d) { return d.value; })
 // TODO id is not a string in the case of the spago example, this needs review anyway, generally won't be a string, instead some other field will be used
 exports.treeSortForTree_Spago = root => root.sum(function(d) { return d.value; })
                                             .sort(function(a, b) { 
-                                              console.log(`comparing ${a.data.name}, height ${a.height} with ${b.data.name} height ${b.height}`);
+                                              // console.log(`comparing ${a.data.name}, height ${a.height} with ${b.data.name} height ${b.height}`);
                                               const result = b.height - a.height || a.data.name.localeCompare(b.data.name);
-                                              console.log(`result: ${result}`);
+                                              // console.log(`result: ${result}`);
                                               return result; })
 
 // foreign import hasChildren              :: Datum_ -> Boolean

@@ -11,6 +11,7 @@ import Data.Graph as G
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (Nullable, null) as N
+import Data.Nullable (notNull)
 import Data.Set as S
 import Data.String (Pattern(..), split)
 import Data.Tree (Tree)
@@ -51,6 +52,7 @@ type SpagoNodeRow row = (
   , package  :: Maybe NodeID
   , nodetype :: NodeType
   , name     :: String
+  , fixed    :: String
   | row )
 type SpagoNodeData    = { | SpagoNodeRow () }
 
@@ -67,15 +69,28 @@ type SpagoModel = {
   , name2IdMap :: M.Map String NodeID
   , id2NameMap :: M.Map NodeID String
   , loc        :: M.Map String Number
-  , positions  :: M.Map NodeID PointXY
+  , positions  :: M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
   , tree       :: Maybe (Tuple NodeID SpagoTreeNode)
 }
 
-setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
-setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
+setXY :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
+setXY (D3SimNode node) { x, y, isLeaf: true }  = D3SimNode (node { x = x, y = y, fixed = "no" })
+setXY (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { fx = notNull x, fy = notNull y, fixed = "yes" })
 
 upgradeSpagoNodeData :: SpagoNodeData -> SpagoSimNode
-upgradeSpagoNodeData node = D3SimNode { depends: node.depends, id: node.id, name: node.name, nodetype: node.nodetype, package: node.package, path: node.path, index: node.id, fx: (N.null :: N.Nullable Number), fy: (N.null :: N.Nullable Number), vx: 0.0, vy: 0.0, x: 0.0, y: 0.0}
+upgradeSpagoNodeData node = D3SimNode { 
+    depends: node.depends
+  , id: node.id
+  , name: node.name
+  , nodetype: node.nodetype
+  , package: node.package
+  , path: node.path
+  , index: node.id
+  , fixed: "no"
+  , fx: (N.null :: N.Nullable Number)
+  , fy: (N.null :: N.Nullable Number)
+  , vx: 0.0, vy: 0.0, x: 0.0, y: 0.0
+  }
 
 datumIsSpagoSimNode :: Datum_ -> SpagoSimNode
 datumIsSpagoSimNode = unsafeCoerce
@@ -161,6 +176,7 @@ getGraphJSONData { packages, modules, lsDeps } = do
       , package  : getPackage m.path
       , nodetype : IsModule
       , depends  : getId <$> m.depends
+      , fixed    : "no"
       } -- FIXME lookup the m.depends list for ids
 
     makeNodeFromPackageJSON :: SpagoPackageJSON -> SpagoNodeData
@@ -171,6 +187,7 @@ getGraphJSONData { packages, modules, lsDeps } = do
       , package  : M.lookup m.key idMap
       , nodetype : IsPackage
       , depends  : getId <$> m.depends
+      , fixed    : "no"
       } -- FIXME id, package and depends all need lookups
       where
         path = case M.lookup m.key depsMap of
