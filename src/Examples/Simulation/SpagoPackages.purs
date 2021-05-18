@@ -1,20 +1,19 @@
 module D3.Examples.Simulation.SpagoPackages where
 
-import D3.Data.File.Spago (NodeType(..), SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, findGraphNodeIdFromName, getIndexFromSpagoSimNode, getNameFromSpagoSimNode, getReachableNodes, setXY)
-import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), D3_XY, NodeID, getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
-
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, transform', viewBox, x, x1, x2, y, y1, y2)
+import D3.Data.File.Spago (NodeType(..), SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, findGraphNodeIdFromName, getIndexFromSpagoSimNode, getNameFromSpagoSimNode, getReachableNodes, setXY)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Examples.Tree.Configure (datumIsTreeNode)
-import D3.FFI (descendants_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, links_, nanNodes_, pinNodeMatchingPredicate, runLayoutFn_, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
+import D3.FFI (descendants_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, links_, nanNodes_, pinNodeMatchingPredicate, runLayoutFn_, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_, treeSortForTree_, treeSortForTree_Spago)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical (radialLink, radialSeparation)
 import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
+import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), D3_XY, NodeID, getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
@@ -23,12 +22,13 @@ import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.List (List(..), (:))
 import Data.List as L
-import Data.Map (Map, empty)
+import Data.Map (Map, empty, toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set as S
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..), fst, snd)
+import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
@@ -94,11 +94,12 @@ treeReduction model rootID = do
           treenodes       = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
           layout          = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 1000.0 ]) `treeSetSeparation_` radialSeparation
           idTree          = buildTree rootID model treelinks.yes
-          jsontree        = makeD3TreeJSONFromTreeID idTree
+          jsontree        = makeD3TreeJSONFromTreeID idTree model.id2NameMap
           rootTree        = hierarchyFromJSON_       jsontree
-      -- sortedTree       = treeSortForTree_      rootTree
-          laidOutRoot_    = (runLayoutFn_ layout)    rootTree -- sortedTree
+          sortedTree      = treeSortForTree_Spago    rootTree
+          laidOutRoot_    = (runLayoutFn_ layout)    sortedTree
           positionMap     = getPositionMap           laidOutRoot_
+          (takealook :: Array (Tuple NodeID PointXY))       = spy "positionMap" $ toUnfoldable positionMap
           positionedNodes = setNodePositionsRadial   treenodes.yes positionMap
           tree            = Tuple rootID laidOutRoot_
 
@@ -125,7 +126,7 @@ setNodePositionsRadial nodes positionMap = do
   updateXY <$> nodes
 
 getPositionMap :: SpagoTreeNode -> Map NodeID PointXY
-getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.id { x: n.x, y: n.y } acc) empty (descendants_ root)
+getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y } acc) empty (spy "descendants_ " $ descendants_ root)
 
 buildTree :: forall r. NodeID -> SpagoModel -> Array (D3_Link NodeID r) -> Tree NodeID
 buildTree rootID model treelinks = do
@@ -172,10 +173,12 @@ graphScript (Tuple w h) model = do
                     , Force $ ForceX           $ (defaultForceXConfig "x") { strength = 0.05 }
                     , Force $ ForceY           $ (defaultForceYConfig "y") { strength = 0.05 }
                     , Force $ ForceCenter      $ (defaultForceCenterConfig "center") { strength = -1.0 }
-                    , Force $ ForceLink        $ (defaultForceLinkConfig "links" model.links (\d i -> d.id))
+                    , Force $ ForceLink        $ (defaultForceLinkConfig "links" model.links (\d -> d.id))
                     -- , Force $ ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
                     ]
       { simulation, nodes } = initSimulation forces model.nodes defaultConfigSimulation
+      _ = pinNodeMatchingPredicate nodes (\(D3SimNode n) -> n.name == "Main") 0.0 0.0
+      _ = stopSimulation_ simulation
 
   linksSelection <- linksGroup <+> JoinSimulation {
       element   : Line
@@ -184,7 +187,7 @@ graphScript (Tuple w h) model = do
     , behaviour : [ classed linkClass ] -- default invisible in CSS unless marked "visible"
     , simulation: simulation
     , tickName  : "links"
-    , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
+    , onTick    : [] -- [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
     , onDrag    : SimulationDrag NoDrag
   }
 
@@ -212,11 +215,6 @@ graphScript (Tuple w h) model = do
                             , qualifier : "tree"
                             , target    : SelfTarget
                             }
-  let
-    _ = nanNodes_ $ unsafeCoerce model.nodes
-    _ = pinNodeMatchingPredicate nodes (\(D3SimNode n) -> n.name == "Main") 0.0 0.0
-    _ = startSimulation_ simulation
-
   pure svg'
 
 -- this is boilerplate but...typed attribute setters facilitate typeclass based conversions
@@ -374,5 +372,5 @@ textDirection :: Datum_ -> Boolean
 textDirection = \d -> hasChildren_ d == nodeIsOnRHS d
 
 labelName :: Datum_ -> String
-labelName d = node."data".label
+labelName d = node."data".name
   where node = unsafeCoerce d

@@ -1,10 +1,12 @@
 module D3.Data.Tree where
 
-import Prelude (class Eq, (<$>))
-
+import D3.Node (NodeID)
 import Data.Array as A
 import Data.List (List(..))
+import Data.Map as M
+import Data.Maybe (fromMaybe)
 import Data.Tree (Tree(..))
+import Prelude (class Eq, (<$>), ($))
 
 -- these definitions have to be here to avoid cycle (and probably all type defs should in fact be here)
 foreign import data TreeJson_ :: Type
@@ -27,13 +29,19 @@ type TreeModel = {
 foreign import data TreeLayoutFn_ :: Type
 
 -- | this function is to be used when you have a Tree ID, ie the id is already present for D3
--- | assumes there's no other information in the tree, so you likely just want a tree that can be laid out
+-- | so you likely just want a tree that can be laid out
 -- | in order to get the (x,y), height, depth etc that are initialized by a D3 tree layout
-makeD3TreeJSONFromTreeID :: forall id. Tree id -> TreeJson_
-makeD3TreeJSONFromTreeID = 
-  case _ of
-    (Node id Nil) -> idTreeLeaf_ id
-    (Node id children) -> idTreeParent_ id (makeD3TreeJSONFromTreeID <$> (A.fromFoldable children))
+-- | it does copy the name over because actually that is going to be needed for sorting in order
+-- | to make a tidy tree (radial in our spago example)
+makeD3TreeJSONFromTreeID :: Tree NodeID -> M.Map NodeID String -> TreeJson_
+makeD3TreeJSONFromTreeID root namesMap = go root
+  where 
+    go (Node id children)      = 
+      let name = fromMaybe "" $ M.lookup id namesMap
+      in case children of
+        Nil -> idTreeLeaf_ id name
+        _   -> idTreeParent_ id name (go <$> (A.fromFoldable children))
 
-foreign import idTreeLeaf_   :: forall id. id -> TreeJson_
-foreign import idTreeParent_ :: forall id. id -> Array TreeJson_ -> TreeJson_
+foreign import idTreeLeaf_   :: forall id. id -> String -> TreeJson_
+foreign import idTreeParent_ :: forall id. id -> String -> Array TreeJson_ -> TreeJson_
+

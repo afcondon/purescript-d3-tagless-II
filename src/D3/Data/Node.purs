@@ -2,6 +2,7 @@ module D3.Node where
 
 import D3.Data.Foreign (Datum_)
 import Data.Nullable (Nullable)
+import Debug (spy, trace)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -55,7 +56,7 @@ type EmbeddedData d row= ( "data" :: d | row )
 
 -- | coercions for the common cases
 getSourceX :: Datum_ -> Number
-getSourceX datum = (unsafeCoerce datum).source.x
+getSourceX datum = trace { getSourceX: datum } \_ -> (unsafeCoerce datum).source.x
 
 getSourceY :: Datum_ -> Number
 getSourceY datum = (unsafeCoerce datum).source.y
@@ -71,6 +72,9 @@ getNodeX datum = (unsafeCoerce datum).x
 
 getNodeY :: Datum_ -> Number
 getNodeY datum = (unsafeCoerce datum).y
+
+getID :: Datum_ -> Number
+getID datum = (unsafeCoerce datum).id
 -- ============================================================================================================================
 -- THIS IS THE OLD CONTENTS OF NODE MODULE BELOW, ALL SLATED FOR REMOVAL WHEN THE ABOVE IS COMPLETE
 -- ============================================================================================================================

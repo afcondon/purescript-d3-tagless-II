@@ -135,6 +135,7 @@ foreign import hierarchyFromJSON_       :: forall d. TreeJson_ -> D3_TreeNode d
 foreign import treeSortForCirclePack_   :: forall d. D3CirclePackRow d -> D3CirclePackRow d
 foreign import treeSortForTreeMap_      :: forall d. D3TreeMapRow d -> D3TreeMapRow d
 foreign import treeSortForTree_         :: forall d. D3_TreeNode d -> D3_TreeNode d
+foreign import treeSortForTree_Spago    :: forall d. D3_TreeNode d -> D3_TreeNode d
 
 -- next some functions to make attributes, types are a bit sloppy here
 -- TODO tighten this up

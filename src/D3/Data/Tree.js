@@ -1,2 +1,2 @@
-exports.idTreeLeaf_ = id => { return { name: id }}
-exports.idTreeParent_ = id => children => { return { name: id, children: children } }
+exports.idTreeLeaf_ = id => name => { return { name: name, id: id }}
+exports.idTreeParent_ = id => name => children => { return { name: name, id: id, children: children } }

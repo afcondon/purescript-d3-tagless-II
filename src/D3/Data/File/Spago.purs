@@ -37,6 +37,7 @@ type Spago_Cooked_JSON    = {
     links      :: Array SpagoGraphLinkID
   , nodes      :: Array SpagoNodeData
   , name2IdMap :: M.Map String NodeID
+  , id2NameMap :: M.Map NodeID String
 }
 
 -- Model data types specialized with inital data
@@ -64,6 +65,7 @@ type SpagoModel = {
   , nodes      :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
   , graph      :: Graph NodeID SpagoNodeData
   , name2IdMap :: M.Map String NodeID
+  , id2NameMap :: M.Map NodeID String
   , loc        :: M.Map String Number
   , positions  :: M.Map NodeID PointXY
   , tree       :: Maybe (Tuple NodeID SpagoTreeNode)
@@ -108,12 +110,13 @@ foreign import readSpago_Raw_JSON_ :: String -> String -> String -> String -> Sp
 makeSpagoGraphModel :: Spago_Raw_JSON_ -> SpagoModel
 makeSpagoGraphModel json = do
   let
-    { nodes, links, name2IdMap } = getGraphJSONData json
+    { nodes, links, name2IdMap, id2NameMap } = getGraphJSONData json
     loc = M.fromFoldable $ (\o -> Tuple o.path o.loc) <$> json.loc
 
   { links
   , nodes    : upgradeSpagoNodeData <$> nodes
   , name2IdMap
+  , id2NameMap
   , loc
   , graph    : makeGraph nodes
   , positions: M.empty
@@ -123,11 +126,13 @@ makeSpagoGraphModel json = do
 getGraphJSONData :: Spago_Raw_JSON_ -> Spago_Cooked_JSON
 getGraphJSONData { packages, modules, lsDeps } = do
   let
+    names = (_.key <$> modules) <> (_.key <$> packages)
+    ids   = 1 `range` (length names)
     idMap :: M.Map String NodeID
     idMap = M.fromFoldableWith (\v1 v2 -> spy "key collision!!!!: " v1) $ zip names ids
-      where
-        names = (_.key <$> modules) <> (_.key <$> packages)
-        ids   = 1 `range` (length names)
+
+    nameMap :: M.Map NodeID String
+    nameMap = M.fromFoldable $ zip ids names
 
     getId :: String -> NodeID
     getId s = fromMaybe 0 (M.lookup s idMap)
@@ -190,9 +195,10 @@ getGraphJSONData { packages, modules, lsDeps } = do
 
     modulePackageLinks = catMaybes $ makeModuleToPackageLink <$> moduleNodes
 
-  { links: moduleLinks <> packageLinks <> modulePackageLinks
-  , nodes: moduleNodes -- <> packageNodes
-  , name2IdMap: idMap }
+  { links     : moduleLinks <> packageLinks <> modulePackageLinks
+  , nodes     : moduleNodes -- <> packageNodes
+  , name2IdMap: idMap
+  , id2NameMap: nameMap }
 
 makeGraph :: Array SpagoNodeData -> Graph NodeID SpagoNodeData
 makeGraph nodes = do
