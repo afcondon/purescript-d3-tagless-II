@@ -7,14 +7,12 @@ import D3.Data.Types (D3Selection_, Datum_, Element(..), TreeModel, TreeType(..)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Interpreter.D3 (runD3M)
-import D3.Interpreter.MetaTree (D3GrammarNode)
 import D3.Layouts.Hierarchical (positionXY, verticalLink)
 import D3.Selection (Join(..), Keys(..), node)
-import Data.Maybe (fromMaybe)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (*), (+), (-), (/), (<$>))
+import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (*), (+), (-), (/))
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -83,7 +81,7 @@ treeScript (Tuple width height) tree = do
   nodeJoin_  <- nodes <+> Join {
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : descendants_ <$> tree
+    , "data"    : descendants_ tree
     -- there could be other stylistic stuff here but the transform is key structuring component
     , behaviour : [ transform [ positionXY ] ]
   }
