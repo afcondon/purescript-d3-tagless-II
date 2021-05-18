@@ -38,7 +38,7 @@ fill = AttrT <<< ToAttribute "fill" <<< toAttr
 viewBox :: Number -> Number -> Number -> Number -> Chainable
 viewBox xo yo w h = AttrT <<< ToAttribute "viewBox" $ toAttr vb
   where
-    vb = spy "Viewbox: " $ intercalate " " $ show <$> [ xo, yo, w, h ]
+    vb = intercalate " " $ show <$> [ xo, yo, w, h ]
 
 autoBox :: Chainable
 autoBox = AttrT <<< ToAttribute "viewBox" $ toAttr vb

@@ -234,15 +234,13 @@ getReachableNodes id graph = go { nodes: [], openDepPaths: [[id]], closedDepPath
 
     processNextOpenDepPath :: GraphSearchRecord -> Maybe GraphSearchRecord
     processNextOpenDepPath searchRecord = do
-      -- let _ = spy "open paths: " searchRecord.openDepPaths
       x         <- uncons searchRecord.openDepPaths
       firstID   <- head x.head -- NB we're pushing onto the path, cause head is easier than tail
       firstNode <- G.lookup firstID graph
-      -- let _ = spy "working on this node now: " firstNode
 
-      let newDeps = -- spy "newDeps: " $ 
+      let newDeps = 
             filter (\d -> not $ A.elem d searchRecord.nodes) firstNode.depends
-          newOpenDepPaths = -- spy "newOpenDepPaths: " $
+          newOpenDepPaths = 
             (\d -> d : x.head) <$> newDeps -- ie [ab] with deps [bc] -> [abc, abd]
 
       if null newOpenDepPaths

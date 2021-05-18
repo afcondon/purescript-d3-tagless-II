@@ -41,9 +41,9 @@ getMetaTreeJSON treeModel = liftEffect $ do
   widthHeight <- getWindowWidthHeight
   metaScript <- runMetaTree (configureAndRunScript widthHeight treeModel) -- no need for actual widthHeight in metaTree
   let (ScriptTree _ treeMap links) = snd metaScript
-      (_ :: Array (Tuple Int D3GrammarNode)) = spy "script map" $ toUnfoldable treeMap
-      (_ :: Array (Tuple Int Int))          = spy "link map" $ links
-      treeified                             = spy "script tree" $ snd metaScript
+      (_ :: Array (Tuple Int D3GrammarNode)) = toUnfoldable treeMap
+      (_ :: Array (Tuple Int Int))          = links
+      treeified                             = snd metaScript
   pure $ scriptTreeToJSON treeified
 
 -- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG

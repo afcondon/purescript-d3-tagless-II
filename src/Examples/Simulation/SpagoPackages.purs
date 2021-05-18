@@ -99,7 +99,6 @@ treeReduction model rootID = do
           sortedTree      = treeSortForTree_Spago    rootTree
           laidOutRoot_    = (runLayoutFn_ layout)    sortedTree
           positionMap     = getPositionMap           laidOutRoot_
-          (takealook :: Array (Tuple NodeID PointXY))       = spy "positionMap" $ toUnfoldable positionMap
           positionedNodes = setNodePositionsRadial   treenodes.yes positionMap
           tree            = Tuple rootID laidOutRoot_
 
@@ -126,7 +125,7 @@ setNodePositionsRadial nodes positionMap = do
   updateXY <$> nodes
 
 getPositionMap :: SpagoTreeNode -> Map NodeID PointXY
-getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y } acc) empty (spy "descendants_ " $ descendants_ root)
+getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y } acc) empty (descendants_ root)
 
 buildTree :: forall r. NodeID -> SpagoModel -> Array (D3_Link NodeID r) -> Tree NodeID
 buildTree rootID model treelinks = do
@@ -178,7 +177,7 @@ graphScript (Tuple w h) model = do
                     ]
       { simulation, nodes } = initSimulation forces model.nodes defaultConfigSimulation
       _ = pinNodeMatchingPredicate nodes (\(D3SimNode n) -> n.name == "Main") 0.0 0.0
-      _ = stopSimulation_ simulation
+      -- _ = stopSimulation_ simulation
 
   linksSelection <- linksGroup <+> JoinSimulation {
       element   : Line
@@ -187,7 +186,7 @@ graphScript (Tuple w h) model = do
     , behaviour : [ classed linkClass ] -- default invisible in CSS unless marked "visible"
     , simulation: simulation
     , tickName  : "links"
-    , onTick    : [] -- [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
+    , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
     , onDrag    : SimulationDrag NoDrag
   }
 

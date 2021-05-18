@@ -114,7 +114,7 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
       (CustomDrag fn) -> pure $ defaultDrag_ selection -- TODO 
 
 applyChainableD3 :: D3Selection_ -> Chainable -> D3Selection_
-applyChainableD3 selection_ (AttrT (ToAttribute label attr)) = -- spy "d3SetAttr" $ 
+applyChainableD3 selection_ (AttrT (ToAttribute label attr)) = 
   d3SetAttr_ label (unbox attr) selection_
 -- NB only protection against non-text attribute for Text field is in the helper function
 applyChainableD3 selection_ (TextT (ToAttribute label attr)) = d3SetText_ (unbox attr) selection_ 

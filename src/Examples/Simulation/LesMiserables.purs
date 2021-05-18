@@ -107,12 +107,11 @@ graphScript (Tuple w h) model = do
 colorByGroup :: Datum_ -> String
 colorByGroup datum = d3SchemeCategory10N_ d.group
   where
-    -- d = datumIsLesMisGraphNode_ datum
     d = unsafeCoerce datum
 
 linkWidth :: Datum_ -> Number
 linkWidth datum = sqrt v
   where
-    v = (unsafeCoerce datum).value -- TODO rewrite more specific coercion of type safety cannot be achieved
+    v = (unsafeCoerce datum).value -- TODO rewrite more specific coercion if type safety cannot be achieved
     -- d = unsafeCoerce $ spy "linkWidth datum" datum
 

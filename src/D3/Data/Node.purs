@@ -56,7 +56,7 @@ type EmbeddedData d row= ( "data" :: d | row )
 
 -- | coercions for the common cases
 getSourceX :: Datum_ -> Number
-getSourceX datum = trace { getSourceX: datum } \_ -> (unsafeCoerce datum).source.x
+getSourceX datum = (unsafeCoerce datum).source.x
 
 getSourceY :: Datum_ -> Number
 getSourceY datum = (unsafeCoerce datum).source.y
