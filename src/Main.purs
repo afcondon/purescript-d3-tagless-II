@@ -14,9 +14,9 @@ import Data.Foldable (sequence_)
 import Effect (Effect)
 import Effect.Aff (Aff, forkAff, launchAff_)
 
--- drawMetaTree :: TreeJson_ -> Aff Unit
--- drawMetaTree json =
---   MetaTree.drawTree =<< makeModel TidyTree Vertical =<< Tree.getMetaTreeJSON =<< makeModel TidyTree Radial json
+drawMetaTree :: TreeJson_ -> Aff Unit
+drawMetaTree json =
+  MetaTree.drawTree =<< makeModel TidyTree Vertical =<< Tree.getMetaTreeJSON =<< makeModel TidyTree Radial json
 
 main :: Effect Unit
 main = launchAff_  do
@@ -38,6 +38,6 @@ main = launchAff_  do
   sequence_ $ rmap (\json -> Tree.printTree =<< makeModel TidyTree Radial json)       treeJSON
 
   -- -- extract the structure of the radial tree "D3 script" and draw a radial tree of this "meta" tree
-  -- sequence_ $ rmap drawMetaTree treeJSON
+  sequence_ $ rmap drawMetaTree treeJSON
 
   pure unit

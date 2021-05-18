@@ -18,104 +18,105 @@ import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (*), (+), (-), 
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
--- -- Model data types specialized with inital data
--- type MetaTreeNodeRow row = ( name :: String, symbol :: String, param1 :: String, param2 :: String | row )
--- type MetaTreeNodeData    = { | MetaTreeNodeRow () }
--- type MetaTreeNode        = D3TreeRow (EmbeddedData MetaTreeNodeData + ())
--- -- type MetaTreeSimNode = D3SimulationRow ( MetaTreeNodeRow  + ())
+-- Model data types specialized with inital data
+type MetaTreeNodeRow row = ( name :: String, symbol :: String, param1 :: String, param2 :: String | row )
+type MetaTreeNodeData    = { | MetaTreeNodeRow () }
+type MetaTreeNode        = D3TreeRow (EmbeddedData MetaTreeNodeData + ())
+-- type MetaTreeSimNode = D3SimulationRow ( MetaTreeNodeRow  + ())
 
 
--- -- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
--- -- | TODO specialize runD3M so that this function isn't necessary
--- drawTree :: TreeModel -> Aff Unit
--- drawTree treeModel = liftEffect $ do
---   widthHeight <- getWindowWidthHeight
---   (_ :: Tuple D3Selection_ Unit) <- runD3M (treeScript widthHeight treeModel)
---   pure unit
+-- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
+-- | TODO specialize runD3M so that this function isn't necessary
+drawTree :: TreeModel -> Aff Unit
+drawTree treeModel = liftEffect $ do
+  widthHeight <- getWindowWidthHeight
+  (_ :: Tuple D3Selection_ Unit) <- runD3M (treeScript widthHeight treeModel)
+  pure unit
 
--- -- | "script" to produce the documentation-style rendering of another script's structure
--- treeScript :: forall m selection. Bind m => D3InterpreterM selection m => 
---   Tuple Number Number -> TreeModel -> m selection
--- treeScript (Tuple width height) treeModel = do
---   let 
---     -- configure dimensions
---     tree                       = hierarchyFromJSON_ treeModel.json
---     columns                    = 3.0  -- 3 columns, set in the grid CSS in index.html
---     gap                        = 10.0 -- 10px set in the grid CSS in index.html
---     svgWH                      = { width : ((width - ((columns - 1.0) * gap)) / columns)
---                                  , height: height / 2.0 } -- 2 rows
---     numberOfLevels             = (hNodeHeight_ tree) + 1.0
---     spacing                    = { interChild: 120.0, interLevel: svgWH.height / numberOfLevels}
---     layoutFn                   = (getLayout TidyTree) `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
---     laidOutRoot_               = layoutFn `runLayoutFn_` tree
---     { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
---     xExtent                    = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
---     yExtent                    = yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
+-- | "script" to produce the documentation-ready rendering of another script's structure
+-- | (could also be the basis for graphical editor of scripts / trees)
+treeScript :: forall m selection. Bind m => D3InterpreterM selection m => 
+  Tuple Number Number -> TreeModel -> m selection
+treeScript (Tuple width height) treeModel = do
+  let 
+    -- configure dimensions
+    tree                       = hierarchyFromJSON_ treeModel.json
+    columns                    = 3.0  -- 3 columns, set in the grid CSS in index.html
+    gap                        = 10.0 -- 10px set in the grid CSS in index.html
+    svgWH                      = { width : ((width - ((columns - 1.0) * gap)) / columns)
+                                 , height: height / 2.0 } -- 2 rows
+    numberOfLevels             = (hNodeHeight_ tree) + 1.0
+    spacing                    = { interChild: 120.0, interLevel: svgWH.height / numberOfLevels}
+    layoutFn                   = (getLayout TidyTree) `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
+    laidOutRoot_               = layoutFn `runLayoutFn_` tree
+    { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
+    xExtent                    = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
+    yExtent                    = yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
 
 
---   -- "script"
---   root       <- attach "div#meta"                           
---   svg        <- root `append` (node Svg  [ viewBox (-svgWH.width / 2.0) (-20.0) svgWH.width svgWH.height ] )          
---   container  <- svg  `append` (node Group [ fontFamily      "sans-serif"
---                                           , fontSize        18.0
---                                           ])
---   links      <- container `append` (node Group [ classed "links"])
---   nodes      <- container `append` (node Group [ classed "nodes"])
+  -- "script"
+  root       <- attach "div#meta"                           
+  svg        <- root `append` (node Svg  [ viewBox (-svgWH.width / 2.0) (-20.0) svgWH.width svgWH.height ] )          
+  container  <- svg  `append` (node Group [ fontFamily      "sans-serif"
+                                          , fontSize        18.0
+                                          ])
+  links      <- container `append` (node Group [ classed "links"])
+  nodes      <- container `append` (node Group [ classed "nodes"])
 
---   theLinks_  <- links <+> Join {
---       element   : Path
---     , key       : UseDatumAsKey
---     , "data"    : links_ laidOutRoot_
---     , behaviour : [ strokeWidth   1.5
---                   , strokeColor   "black"
---                   , strokeOpacity 0.4
---                   , fill          "none"
---                   , verticalLink
---                   ]
---   }
+  theLinks_  <- links <+> Join {
+      element   : Path
+    , key       : UseDatumAsKey
+    , "data"    : links_ laidOutRoot_
+    , behaviour : [ strokeWidth   1.5
+                  , strokeColor   "black"
+                  , strokeOpacity 0.4
+                  , fill          "none"
+                  , verticalLink
+                  ]
+  }
 
---   nodeJoin_  <- nodes <+> Join {
---       element   : Group
---     , key       : UseDatumAsKey
---     , "data"    : fromMaybe [] $ descendants_ <$> laidOutRoot_
---     -- there could be other stylistic stuff here but the transform is key structuring component
---     , behaviour : [ transform [ positionXY ] ]
---   }
+  nodeJoin_  <- nodes <+> Join {
+      element   : Group
+    , key       : UseDatumAsKey
+    , "data"    : fromMaybe [] $ descendants_ <$> laidOutRoot_
+    -- there could be other stylistic stuff here but the transform is key structuring component
+    , behaviour : [ transform [ positionXY ] ]
+  }
 
---   theNodes <- nodeJoin_ `append` 
---                 (node Circle  [ fill         "blue"
---                               , radius       20.0
---                               , strokeColor "white"
---                               , strokeWidth 3.0
---                               ])
+  theNodes <- nodeJoin_ `append` 
+                (node Circle  [ fill         "blue"
+                              , radius       20.0
+                              , strokeColor "white"
+                              , strokeWidth 3.0
+                              ])
 
---   labelsWhite <- nodeJoin_ `append`
---                 (node Text  [ x          0.0
---                             , y          3.0
---                             , textAnchor "middle"
---                             , text       symbol
---                             , fill       "white"
---                             ])
+  labelsWhite <- nodeJoin_ `append`
+                (node Text  [ x          0.0
+                            , y          3.0
+                            , textAnchor "middle"
+                            , text       symbol
+                            , fill       "white"
+                            ])
                             
---   labelsGray <- nodeJoin_ `append`
---                 (node Text  [ x          22.0
---                             , y          3.0
---                             , textAnchor "start"
---                             , text       param1
---                             , fill       "gray"
---                             ])
+  labelsGray <- nodeJoin_ `append`
+                (node Text  [ x          22.0
+                            , y          3.0
+                            , textAnchor "start"
+                            , text       param1
+                            , fill       "gray"
+                            ])
                             
---   pure svg
+  pure svg
 
 
 
--- -- | Coercion function to recover the "extra" data that lives within the generic structure that was given to D3, 
--- -- | it's an unsafeCoerce but the types give some protection
--- symbol :: Datum_ -> String
--- symbol d = node."data".symbol
---   where node = unsafeCoerce d
+-- | Coercion function to recover the "extra" data that lives within the generic structure that was given to D3, 
+-- | it's an unsafeCoerce but the types give some protection
+symbol :: Datum_ -> String
+symbol d = node."data".symbol
+  where node = unsafeCoerce d
 
--- param1 :: Datum_ -> String
--- param1 d = node."data".param1
---   where node = unsafeCoerce d
+param1 :: Datum_ -> String
+param1 d = node."data".param1
+  where node = unsafeCoerce d
 
