@@ -309,7 +309,7 @@ spagoTreeScript (Tuple width height) (Just (Tuple rootID tree)) = do
 
   -- "script"
   root       <- attach "div#spagotree"                           
-  svg        <- root `append` (node Svg  [ viewBox (-svgWH.width / 2.0) (-svgWH.height / 2.0) (svgWH.width * 2.0) (svgWH.height * 2.0) ] )          
+  svg        <- root `append` (node Svg  [ viewBox (-width / 2.0) (-height / 2.0) width height ] )          
   container  <- svg  `append` (node Group [ fontFamily      "sans-serif"
                                           , fontSize        18.0
                                           ])

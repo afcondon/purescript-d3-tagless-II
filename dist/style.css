@@ -8,7 +8,7 @@ div#force {
 body {
   display: grid;
   grid-gap: 10px;
-  grid-template-areas: "spago . spagotree" "gup force ." "htree vtree vtree" "htree vdendro vdendro" "hdendro rdendro rtree";
+  grid-template-areas: "spago spago spago" "spagotree gup force" "htree vtree vtree" "htree vdendro vdendro" "hdendro rdendro rtree";
 }
 div {
   background-color: beige;
@@ -49,13 +49,10 @@ div#force {
   grid-area: force;
 }
 div#spagotree {
-  height: 100vh;
-  width: 50vw;
   grid-area: spagotree;
 }
 div#spago {
   height: 100vh;
-  width: 50vw;
   grid-area: spago;
 }
 /* div#spago svg g.links line { visibility: hidden; } */
@@ -70,6 +67,11 @@ div#spago svg g.nodes g.module text {
   visibility: hidden;
   fill: black;
 }
+div#spago svg g.nodes g.module circle {
+  stroke: white;
+  stroke-width: 1.5px;
+  opacity: 1;
+}
 div#spago svg g.nodes g.module:hover text {
   visibility: visible;
   fill: black;
@@ -77,29 +79,28 @@ div#spago svg g.nodes g.module:hover text {
 div#spago svg g.nodes g.package text {
   fill: white;
 }
-div#spago svg g.nodes g.module circle {
-  stroke: white;
-  stroke-width: 1.5px;
-  opacity: 1;
-}
 div#spago svg g.nodes g.package circle {
   stroke: black;
   stroke-width: 3px;
   opacity: 1;
 }
-div#spago svg g.nodes g.source text {
-  visibility: visible;
-}
-div#spago svg g.nodes g.target text {
-  visibility: visible;
-}
 div#spago svg g.nodes g.spotlight text {
+  visibility: visible;
+}
+div#spago svg g.nodes g.spotlight circle {
+  opacity: 1;
+  stroke-width: 3px;
+}
+div#spago svg g.nodes g.source text {
   visibility: visible;
 }
 div#spago svg g.nodes g.source circle {
   opacity: 0.85;
   stroke-width: 10px;
   stroke: white;
+}
+div#spago svg g.nodes g.target text {
+  visibility: visible;
 }
 div#spago svg g.nodes g.target circle {
   opacity: 0.85;
@@ -118,11 +119,4 @@ div#spago svg g.nodes g.package.target circle {
   opacity: 0.85;
   stroke-width: 5px;
   stroke: blue;
-}
-div#spago svg g.nodes g.spotlight circle {
-  opacity: 1;
-  stroke-width: 3px;
-}
-div#spago svg spotlight g.nodes circle {
-  opacity: 0.5;
 }
