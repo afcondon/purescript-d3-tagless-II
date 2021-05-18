@@ -6,7 +6,7 @@ import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, getWindowWi
 import D3.Data.File.Spago (NodeType(..), SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, findGraphNodeIdFromName, getIndexFromSpagoSimNode, getNameFromSpagoSimNode, getReachableNodes, setXY)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Examples.Tree.Configure (datumIsTreeNode)
-import D3.FFI (descendants_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, links_, nanNodes_, pinNodeMatchingPredicate, runLayoutFn_, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_, treeSortForTree_, treeSortForTree_Spago)
+import D3.FFI (descendants_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, links_, pinNodeMatchingPredicate, runLayoutFn_, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
@@ -22,13 +22,12 @@ import Data.Either (Either(..))
 import Data.Int (toNumber)
 import Data.List (List(..), (:))
 import Data.List as L
-import Data.Map (Map, empty, toUnfoldable)
+import Data.Map (Map, empty)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set as S
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..), fst, snd)
-import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
