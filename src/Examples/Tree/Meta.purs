@@ -19,10 +19,15 @@ import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- Model data types specialized with inital data
-type MetaTreeNodeRow row = ( name :: String, symbol :: String, param1 :: String, param2 :: String | row )
-type MetaTreeNodeData    = { | MetaTreeNodeRow () }
-type MetaTreeNode        = D3TreeRow (EmbeddedData MetaTreeNodeData + ())
--- type MetaTreeSimNode = D3SimulationRow ( MetaTreeNodeRow  + ())
+type MetaTreeNodeRow row = ( 
+    name   :: String
+  , symbol :: String
+  , param1 :: String
+  , param2 :: String 
+  | row )
+type MetaTreeNodeData = { | MetaTreeNodeRow () }
+
+type MetaTreeNode     = D3TreeRow (EmbeddedData MetaTreeNodeData + ())
 
 
 -- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
@@ -30,17 +35,17 @@ type MetaTreeNode        = D3TreeRow (EmbeddedData MetaTreeNodeData + ())
 drawTree :: TreeModel -> Aff Unit
 drawTree treeModel = liftEffect $ do
   widthHeight <- getWindowWidthHeight
-  (_ :: Tuple D3Selection_ Unit) <- runD3M (treeScript widthHeight treeModel)
+  let tree = hierarchyFromJSON_ treeModel.json
+  (_ :: Tuple D3Selection_ Unit) <- runD3M (treeScript widthHeight tree)
   pure unit
 
 -- | "script" to produce the documentation-ready rendering of another script's structure
 -- | (could also be the basis for graphical editor of scripts / trees)
 treeScript :: forall m selection. Bind m => D3InterpreterM selection m => 
-  Tuple Number Number -> TreeModel -> m selection
-treeScript (Tuple width height) treeModel = do
+  Tuple Number Number -> MetaTreeNode -> m selection
+treeScript (Tuple width height) tree = do
   let 
     -- configure dimensions
-    tree                       = hierarchyFromJSON_ treeModel.json
     columns                    = 3.0  -- 3 columns, set in the grid CSS in index.html
     gap                        = 10.0 -- 10px set in the grid CSS in index.html
     svgWH                      = { width : ((width - ((columns - 1.0) * gap)) / columns)
@@ -66,7 +71,7 @@ treeScript (Tuple width height) treeModel = do
   theLinks_  <- links <+> Join {
       element   : Path
     , key       : UseDatumAsKey
-    , "data"    : links_ laidOutRoot_
+    , "data"    : links_ tree
     , behaviour : [ strokeWidth   1.5
                   , strokeColor   "black"
                   , strokeOpacity 0.4
@@ -78,7 +83,7 @@ treeScript (Tuple width height) treeModel = do
   nodeJoin_  <- nodes <+> Join {
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : fromMaybe [] $ descendants_ <$> laidOutRoot_
+    , "data"    : descendants_ <$> tree
     -- there could be other stylistic stuff here but the transform is key structuring component
     , behaviour : [ transform [ positionXY ] ]
   }
