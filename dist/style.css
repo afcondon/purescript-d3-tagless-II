@@ -8,7 +8,7 @@ div#force {
 body {
   display: grid;
   grid-gap: 10px;
-  grid-template-areas: "spago spago spago" "spagotree gup force" "htree vtree vtree" "htree vdendro vdendro" "hdendro rdendro rtree";
+  grid-template-areas: 'spago spago spago' 'spagotree gup force' 'htree vtree vtree' 'htree vdendro vdendro' 'hdendro rdendro rtree';
 }
 div {
   background-color: beige;
@@ -56,6 +56,15 @@ div#spago {
   grid-area: spago;
 }
 /* div#spago svg g.links line { visibility: hidden; } */
+div#spago svg.spotlight g.module {
+  opacity: 0.2;
+}
+div#spago svg.spotlight g.module.source {
+  opacity: 1;
+}
+div#spago svg.spotlight g.module.target {
+  opacity: 1;
+}
 div#spago svg g.links line.package {
   visibility: visible;
 }

@@ -57,6 +57,10 @@ highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
   where
     sources = foldl (\acc l -> if l.target.index == nodeId then (cons l.source.index acc) else acc) [] links
     targets = foldl (\acc l -> if l.source.index == nodeId then (cons l.target.index acc) else acc) [] links
+unhighlightNeighborhood { links } nodeId = removeSpotlight_ nodeId sources targets
+  where
+    sources = foldl (\acc l -> if l.target.index == nodeId then (cons l.source.index acc) else acc) [] links
+    targets = foldl (\acc l -> if l.source.index == nodeId then (cons l.target.index acc) else acc) [] links
 
 foreign import markAsSpotlit_   :: NodeID -> Array NodeID -> Array NodeID -> Unit
 foreign import removeSpotlight_ :: NodeID -> Array NodeID -> Array NodeID -> Unit
@@ -205,9 +209,10 @@ graphScript (Tuple w h) model = do
 
   circle  <- nodesSelection `append` (node Circle [ radius (chooseRadius model.loc) 
                                                   , fill colorByGroup
-                                                  , on MouseEnter (\e d t -> stopSimulation_ simulation) 
-                                                  , on MouseLeave (\e d t -> startSimulation_ simulation)
-                                                  , on MouseClick (\e d t -> highlightNeighborhood (unsafeCoerce model) (getIndexFromSpagoSimNode d))
+                                                  -- , on MouseEnter (\e d t -> stopSimulation_ simulation) 
+                                                  -- , on MouseLeave (\e d t -> startSimulation_ simulation)
+                                                  , on MouseEnter (\e d t -> highlightNeighborhood (unsafeCoerce model) (getIndexFromSpagoSimNode d))
+                                                  , on MouseLeave (\e d t -> unhighlightNeighborhood (unsafeCoerce model) (getIndexFromSpagoSimNode d))
                                                   ]) 
   labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y 0.2, text getNameFromSpagoSimNode]) 
   

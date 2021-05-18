@@ -25,8 +25,8 @@ exports.removeSpotlight_ = id => sources => targets => {
   const targetNodes = selection.filter((d,i) => sources.includes(d.id))
 
   svg.classed("spotlight", false)
-  spotlitNode.classed("node", false)
-  sourceNodes.classed("node", false)
-  targetNodes.classed("node", false)
+  spotlitNode.classed("spotlight", false)
+  sourceNodes.classed("source", false)
+  targetNodes.classed("target", false)
 }
 

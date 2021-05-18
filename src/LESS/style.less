@@ -1,18 +1,19 @@
 div {
   overflow: scroll;
 }
-div#gup, div#force {
+div#gup,
+div#force {
   overflow: hidden;
 }
 body {
   display: grid;
   grid-gap: 10px;
   grid-template-areas:
-           "spago spago spago"
-           "spagotree gup force"
-           "htree vtree vtree"
-           "htree vdendro vdendro"
-           "hdendro rdendro rtree";
+    'spago spago spago'
+    'spagotree gup force'
+    'htree vtree vtree'
+    'htree vdendro vdendro'
+    'hdendro rdendro rtree';
 }
 div {
   background-color: beige;
@@ -62,33 +63,94 @@ div#spago {
 }
 
 /* div#spago svg g.links line { visibility: hidden; } */
-div#spago svg { 
-  g.links line.package { visibility: visible; }
-  g.nodes { 
-    text { font: 12px sans-serif; text-anchor: middle; }
+div#spago {
+  svg.spotlight {
     g.module {
-      text { visibility: hidden; fill: black}
-      circle { stroke: white; stroke-width: 1.5px; opacity: 1;}
+      opacity: 0.2;
     }
-    g.module:hover text { visibility: visible; fill: black}
-    g.package {
-      text { fill: white; }
-      circle { stroke: black; stroke-width: 3px; opacity: 1;}
+    g.module.source {
+      opacity: 1;
     }
-    g.spotlight { 
-      text { visibility: visible; }
-      circle { opacity: 1; stroke-width: 3px;}
+    g.module.target {
+      opacity: 1;
     }
-    g.source {
-      text { visibility: visible; }
-      circle { opacity: 0.85; stroke-width: 10px; stroke: white;}
+  }
+  svg {
+    g.links line.package {
+      visibility: visible;
     }
-    g.target {
-      text { visibility: visible; }
-      circle { opacity: 0.85; stroke-width: 10px; stroke: wheat;}
+    g.nodes {
+      text {
+        font: 12px sans-serif;
+        text-anchor: middle;
+      }
+      g.module {
+        text {
+          visibility: hidden;
+          fill: black;
+        }
+        circle {
+          stroke: white;
+          stroke-width: 1.5px;
+          opacity: 1;
+        }
+      }
+      g.module:hover text {
+        visibility: visible;
+        fill: black;
+      }
+      g.package {
+        text {
+          fill: white;
+        }
+        circle {
+          stroke: black;
+          stroke-width: 3px;
+          opacity: 1;
+        }
+      }
+      g.spotlight {
+        text {
+          visibility: visible;
+        }
+        circle {
+          opacity: 1;
+          stroke-width: 3px;
+        }
+      }
+      g.source {
+        text {
+          visibility: visible;
+        }
+        circle {
+          opacity: 0.85;
+          stroke-width: 10px;
+          stroke: white;
+        }
+      }
+      g.target {
+        text {
+          visibility: visible;
+        }
+        circle {
+          opacity: 0.85;
+          stroke-width: 10px;
+          stroke: wheat;
+        }
+      }
+      g.package.spotlight text {
+        visibility: visible;
+      }
+      g.package.source circle {
+        opacity: 0.85;
+        stroke-width: 5px;
+        stroke: red;
+      }
+      g.package.target circle {
+        opacity: 0.85;
+        stroke-width: 5px;
+        stroke: blue;
+      }
     }
-    g.package.spotlight text { visibility: visible; }
-    g.package.source circle { opacity: 0.85; stroke-width: 5px; stroke: red;}
-    g.package.target circle { opacity: 0.85; stroke-width: 5px; stroke: blue;}
   }
 }
