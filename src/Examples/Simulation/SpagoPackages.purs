@@ -28,6 +28,7 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set as S
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..), fst, snd)
+import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
@@ -64,6 +65,7 @@ drawGraph :: Aff Unit
 drawGraph = do
   log "Force layout example"
   widthHeight <- liftEffect getWindowWidthHeight
+  let _ =  spy "wh: " $ widthHeight
   moduleJSON  <- AJAX.get ResponseFormat.string "http://localhost:1234/modules.json"
   packageJSON <- AJAX.get ResponseFormat.string "http://localhost:1234/packages.json"
   lsdepJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/lsdeps.jsonlines"
@@ -163,6 +165,7 @@ graphScript :: forall m selection.
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
   svg        <- root `append` (node Svg   [ viewBox (-w / 2.0) (-h / 2.0) w h ] )
+  centerDot  <- svg `append` (node Circle [ radius 20.0, fill "black", x (-w / 2.0), y (-h / 2.0) ])
   linksGroup <- svg  `append` (node Group [ classed "links", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group [ classed "nodes" ])
 
@@ -289,12 +292,13 @@ spagoTreeScript (Tuple width height) Nothing = do
 spagoTreeScript (Tuple width height) (Just (Tuple rootID tree)) = do
   let 
     -- configure dimensions
-    columns                    = 3.0  -- 3 columns, set in the grid CSS in index.html
+    columns                    = 2.0  -- 3 columns, set in the grid CSS in index.html
+    rows                       = 1.0
     gap                        = 10.0 -- 10px set in the grid CSS in index.html
     svgWH                      = { width : ((width - ((columns - 1.0) * gap)) / columns)
-                                 , height: height / 2.0 } -- 2 rows
+                                 , height: height / rows }
     numberOfLevels             = (hNodeHeight_ tree) + 1.0
-    spacing                    = { interChild: 120.0, interLevel: svgWH.height / numberOfLevels}
+    spacing                    = { interChild: 120.0, interLevel: height / numberOfLevels}
     layoutFn                   = (getLayout TidyTree) `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
     laidOutRoot_               = layoutFn `runLayoutFn_` tree
     { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
@@ -333,7 +337,7 @@ spagoTreeScript (Tuple width height) (Just (Tuple rootID tree)) = do
 
   theNodes <- nodeJoin_ `append` 
                 (node Circle  [ fill         "red"
-                              , radius       2.5
+                              , radius       10.0
                               , strokeColor "white"
                               ])
 
