@@ -196,7 +196,7 @@ getGraphJSONData { packages, modules, lsDeps } = do
     modulePackageLinks = catMaybes $ makeModuleToPackageLink <$> moduleNodes
 
   { links     : moduleLinks <> packageLinks <> modulePackageLinks
-  , nodes     : moduleNodes -- <> packageNodes
+  , nodes     : moduleNodes <> packageNodes
   , name2IdMap: idMap
   , id2NameMap: nameMap }
 

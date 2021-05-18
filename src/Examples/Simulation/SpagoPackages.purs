@@ -101,9 +101,10 @@ treeReduction model rootID = do
           laidOutRoot_    = (runLayoutFn_ layout)    sortedTree
           positionMap     = getPositionMap           laidOutRoot_
           positionedNodes = setNodePositionsRadial   treenodes.yes positionMap
+          unpositionedNodes = treenodes.no
           tree            = Tuple rootID laidOutRoot_
 
-      model { links = treelinks.yes, nodes = positionedNodes, tree = Just tree, positions = positionMap }
+      model { links = treelinks.yes, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, positions = positionMap }
 
 -- for radial positioning we treat x as angle and y as radius
 radialTranslate :: PointXY -> PointXY
@@ -165,7 +166,7 @@ graphScript :: forall m selection.
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
   svg        <- root `append` (node Svg   [ viewBox (-w / 2.0) (-h / 2.0) w h ] )
-  centerDot  <- svg `append` (node Circle [ radius 20.0, fill "black", x (-w / 2.0), y (-h / 2.0) ])
+  centerDot  <- svg  `append` (node Circle [ radius 20.0, fill "red", x (w / 2.0), y h ])
   linksGroup <- svg  `append` (node Group [ classed "links", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group [ classed "nodes" ])
 
