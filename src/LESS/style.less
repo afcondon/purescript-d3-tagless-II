@@ -78,9 +78,9 @@ div#spago {
     }
   }
   svg {
-    g.links line.package {
-      visibility: visible;
-    }
+    g.links line { opacity: 0.5; }
+    g.links line.source { opacity: 0.8; stroke: red; stroke-width: 2px;}
+    g.links line.target { opacity: 0.8; stroke: blue; stroke-width: 2px;}
     g.nodes {
       text {
         font: 12px sans-serif;

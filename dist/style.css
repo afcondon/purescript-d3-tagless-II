@@ -68,8 +68,18 @@ div#spago svg.spotlight g.module.target,
 div#spago svg.spotlight g.module.spotlight {
   opacity: 1;
 }
-div#spago svg g.links line.package {
-  visibility: visible;
+div#spago svg g.links line {
+  opacity: 0.5;
+}
+div#spago svg g.links line.source {
+  opacity: 0.8;
+  stroke: red;
+  stroke-width: 2px;
+}
+div#spago svg g.links line.target {
+  opacity: 0.8;
+  stroke: blue;
+  stroke-width: 2px;
 }
 div#spago svg g.nodes text {
   font: 12px sans-serif;

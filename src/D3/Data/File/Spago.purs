@@ -104,8 +104,8 @@ datumIsSpagoLink = unsafeCoerce
 datumIsGraphNode :: Datum_ -> SpagoSimNode
 datumIsGraphNode = unsafeCoerce
 
-getIndexFromSpagoSimNode :: Datum_ -> Int
-getIndexFromSpagoSimNode datum = d.index
+getIdFromSpagoSimNode :: Datum_ -> Int
+getIdFromSpagoSimNode datum = d.id
   where
     (D3SimNode d) = unsafeCoerce datum
 

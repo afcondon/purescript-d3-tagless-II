@@ -3,7 +3,7 @@ module D3.Examples.Simulation.SpagoPackages where
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.File.Spago (NodeType(..), SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, findGraphNodeIdFromName, getIndexFromSpagoSimNode, getNameFromSpagoSimNode, getReachableNodes, setXY)
+import D3.Data.File.Spago (NodeType(..), SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, findGraphNodeIdFromName, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getReachableNodes, setXY)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Examples.Tree.Configure (datumIsTreeNode)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, links_, runLayoutFn_, treeMinMax_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
@@ -40,38 +40,15 @@ import Unsafe.Coerce (unsafeCoerce)
 
 -- | no sigs on these because they're currently called using unsafeCoerce to account for the fact that the link IDs
 -- | have been swizzled for their underlying objects
-highlightNeighborhood :: forall t190 t211 t214.
-  { links :: Array
-               (D3_Link
-                  { index :: Int
-                  | t214
-                  }
-                  t211
-               )
-  | t190
-  }
-  -> Int -> Unit
 highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
   where
-    sources = foldl (\acc (D3_Link l) -> if l.target.index == nodeId then (cons l.source.index acc) else acc) [] links
-    targets = foldl (\acc (D3_Link l) -> if l.source.index == nodeId then (cons l.target.index acc) else acc) [] links
-unhighlightNeighborhood :: forall t5 t24 t26 t28 t30.
-  Eq t26 => { links :: Array
-                         { source :: { index :: t26
-                                     | t28
-                                     }
-                         , target :: { index :: t26
-                                     | t24
-                                     }
-                         | t30
-                         }
-            | t5
-            }
-            -> t26 -> Unit
+    sources = foldl (\acc (D3_Link l) -> if l.target.id == nodeId then (cons l.source.id acc) else acc) [] links
+    targets = foldl (\acc (D3_Link l) -> if l.source.id == nodeId then (cons l.target.id acc) else acc) [] links
+
 unhighlightNeighborhood { links } nodeId = removeSpotlight_ unit
   where
-    sources = foldl (\acc l -> if l.target.index == nodeId then (cons l.source.index acc) else acc) [] links
-    targets = foldl (\acc l -> if l.source.index == nodeId then (cons l.target.index acc) else acc) [] links
+    sources = foldl (\acc l -> if l.target.id == nodeId then (cons l.source.id acc) else acc) [] links
+    targets = foldl (\acc l -> if l.source.id == nodeId then (cons l.target.id acc) else acc) [] links
 
 foreign import markAsSpotlit_   :: NodeID -> Array NodeID -> Array NodeID -> Unit
 foreign import removeSpotlight_ :: Unit -> Unit
@@ -184,7 +161,7 @@ graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
   svg        <- root `append` (node Svg   [ viewBox (-w / 2.0) (-h / 2.0) w h ] )
   centerDot  <- svg  `append` (node Circle [ radius 20.0, fill "red", x (w / 2.0), y h ])
-  linksGroup <- svg  `append` (node Group [ classed "links", strokeColor "#999", strokeOpacity 0.6 ])
+  linksGroup <- svg  `append` (node Group [ classed "links", strokeColor "#999" ])
   nodesGroup <- svg  `append` (node Group [ classed "nodes" ])
 
   let forces      = [ Force $ ForceManyBody    $ (defaultForceManyConfig "charge") { strength = -100.0 }
@@ -225,8 +202,8 @@ graphScript (Tuple w h) model = do
                                                   , fill (colorByGroup model.id2PackageIDMap)
                                                   -- , on MouseEnter (\e d t -> stopSimulation_ simulation) 
                                                   -- , on MouseLeave (\e d t -> startSimulation_ simulation)
-                                                  , on MouseEnter (\e d t -> highlightNeighborhood (unsafeCoerce model) (getIndexFromSpagoSimNode d))
-                                                  , on MouseLeave (\e d t -> unhighlightNeighborhood (unsafeCoerce model) (getIndexFromSpagoSimNode d))
+                                                  , on MouseEnter (\e d t -> highlightNeighborhood (unsafeCoerce model) (getIdFromSpagoSimNode d))
+                                                  , on MouseLeave (\e d t -> unhighlightNeighborhood (unsafeCoerce model) (getIdFromSpagoSimNode d))
                                                   ]) 
   labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y (positionLabel model.path2LOCMap), text getNameFromSpagoSimNode]) 
   
