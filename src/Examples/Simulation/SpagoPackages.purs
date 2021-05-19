@@ -3,10 +3,10 @@ module D3.Examples.Simulation.SpagoPackages where
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.File.Spago (NodeType(..), SpagoGraphLinkID, SpagoModel, SpagoSimNode, SpagoTreeNode, SpagoGraphLinkObj, convertFilesToGraphModel, datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, findGraphNodeIdFromName, getIndexFromSpagoSimNode, getNameFromSpagoSimNode, getReachableNodes, setXY)
+import D3.Data.File.Spago (NodeType(..), SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, findGraphNodeIdFromName, getIndexFromSpagoSimNode, getNameFromSpagoSimNode, getReachableNodes, setXY)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Examples.Tree.Configure (datumIsTreeNode)
-import D3.FFI (descendants_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, links_, pinNodeMatchingPredicate, runLayoutFn_, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
+import D3.FFI (descendants_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, links_, runLayoutFn_, treeMinMax_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Interpreter.D3 (runD3M)
@@ -25,25 +25,49 @@ import Data.List as L
 import Data.Map (Map, empty)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Number (nan)
 import Data.Set as S
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..), fst, snd)
-import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (cos, pi, sin)
 import Math (sqrt) as Math
-import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (+), (-), (/), (<), (<$>), (<*>), (<<<), (<>), (==), (>=), (||))
+import Prelude (class Bind, class Eq, Unit, bind, discard, negate, pure, show, unit, ($), (*), (+), (-), (/), (<), (<$>), (<*>), (<<<), (<>), (==), (>=), (||))
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | no sigs on these because they're currently called using unsafeCoerce to account for the fact that the link IDs
 -- | have been swizzled for their underlying objects
+highlightNeighborhood :: forall t190 t211 t214.
+  { links :: Array
+               (D3_Link
+                  { index :: Int
+                  | t214
+                  }
+                  t211
+               )
+  | t190
+  }
+  -> Int -> Unit
 highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
   where
     sources = foldl (\acc (D3_Link l) -> if l.target.index == nodeId then (cons l.source.index acc) else acc) [] links
     targets = foldl (\acc (D3_Link l) -> if l.source.index == nodeId then (cons l.target.index acc) else acc) [] links
+unhighlightNeighborhood :: forall t5 t24 t26 t28 t30.
+  Eq t26 => { links :: Array
+                         { source :: { index :: t26
+                                     | t28
+                                     }
+                         , target :: { index :: t26
+                                     | t24
+                                     }
+                         | t30
+                         }
+            | t5
+            }
+            -> t26 -> Unit
 unhighlightNeighborhood { links } nodeId = removeSpotlight_ unit
   where
     sources = foldl (\acc l -> if l.target.index == nodeId then (cons l.source.index acc) else acc) [] links
@@ -91,7 +115,7 @@ treeReduction model rootID = do
           laidOutRoot_    = (runLayoutFn_ layout)    sortedTree
           positionMap     = getPositionMap           laidOutRoot_
           positionedNodes = setNodePositionsRadial   treenodes.yes positionMap
-          unpositionedNodes = treenodes.no
+          unpositionedNodes = setForPhyllotaxis  <$> treenodes.no
           tree            = Tuple rootID laidOutRoot_
 
       model { links = treelinks.yes, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, positions = positionMap }
@@ -115,6 +139,9 @@ setNodePositionsRadial nodes positionMap = do
           let { x,y } = radialTranslate { x: p.x, y: p.y }
           in (D3SimNode node) `setXY` { x, y, isLeaf: p.isLeaf }
   updateXY <$> nodes
+
+setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode
+setForPhyllotaxis (D3SimNode d) = D3SimNode $ d { x = nan }
 
 getPositionMap :: SpagoTreeNode -> Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
 getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isLeaf: (unsafeCoerce n).data.isLeaf } acc) empty (descendants_ root) -- TODO coerce here is pure hackery

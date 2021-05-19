@@ -88,7 +88,7 @@ foreign import stopSimulation_  :: D3Simulation_ -> Unit
 
 foreign import pinNode_   :: forall d. Number -> Number -> D3_SimulationNode d -> Unit
 foreign import unpinNode_ :: forall d. D3_SimulationNode d -> Unit
-foreign import nanNodes_  :: forall d.  Array (D3_SimulationNode d) -> Unit
+
 
 -- NB mutating function
 pinNode :: forall d. D3_SimulationNode d -> PointXY -> D3_SimulationNode d

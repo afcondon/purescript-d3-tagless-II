@@ -10,7 +10,8 @@ body {
   grid-gap: 10px;
   grid-template-areas:
     'spago spago spago'
-    'spagotree gup force'
+    '. spagotree .'
+    'meta gup force'
     'htree vtree vtree'
     'htree vdendro vdendro'
     'hdendro rdendro rtree';
@@ -58,8 +59,12 @@ div#spagotree {
   grid-area: spagotree;
 }
 div#spago {
+  width: 100vw;
   height: 100vh;
   grid-area: spago;
+}
+div#meta {
+  grid-area: meta;
 }
 
 /* div#spago svg g.links line { visibility: hidden; } */
