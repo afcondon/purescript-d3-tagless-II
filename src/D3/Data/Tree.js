@@ -1,2 +1,13 @@
-exports.idTreeLeaf_ = id => name => { return { name: name, id: id, isLeaf: true }}
-exports.idTreeParent_ = id => name => children => { return { name: name, id: id, children: children, isLeaf: false } }
+exports.idTreeLeaf_ = obj => {
+  const treeObj = Object.assign({}, obj)
+  treeObj.isLeaf = true
+  return treeObj
+}
+exports.idTreeParent_ = obj => children => {
+  const treeObj = Object.assign({}, obj)
+  treeObj.isLeaf = false
+  treeObj.children = children
+  return treeObj
+}
+
+exports.emptyTreeJson_ = {}

@@ -59,10 +59,9 @@ div#spago {
 div#spago svg.spotlight g.module {
   opacity: 0.2;
 }
-div#spago svg.spotlight g.module.source {
-  opacity: 1;
-}
-div#spago svg.spotlight g.module.target {
+div#spago svg.spotlight g.module.source,
+div#spago svg.spotlight g.module.target,
+div#spago svg.spotlight g.module.spotlight {
   opacity: 1;
 }
 div#spago svg g.links line.package {
@@ -98,7 +97,8 @@ div#spago svg g.nodes g.spotlight text {
 }
 div#spago svg g.nodes g.spotlight circle {
   opacity: 1;
-  stroke-width: 3px;
+  stroke-width: 10px;
+  stroke: blueviolet;
 }
 div#spago svg g.nodes g.source text {
   visibility: visible;
@@ -114,7 +114,7 @@ div#spago svg g.nodes g.target text {
 div#spago svg g.nodes g.target circle {
   opacity: 0.85;
   stroke-width: 10px;
-  stroke: wheat;
+  stroke: black;
 }
 div#spago svg g.nodes g.package.spotlight text {
   visibility: visible;

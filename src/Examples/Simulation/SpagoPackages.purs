@@ -3,7 +3,7 @@ module D3.Examples.Simulation.SpagoPackages where
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, getWindowWidthHeight, on, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.File.Spago (NodeType(..), SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, findGraphNodeIdFromName, getIndexFromSpagoSimNode, getNameFromSpagoSimNode, getReachableNodes, setXY)
+import D3.Data.File.Spago (NodeType(..), SpagoGraphLinkID, SpagoModel, SpagoSimNode, SpagoTreeNode, SpagoGraphLinkObj, convertFilesToGraphModel, datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, findGraphNodeIdFromName, getIndexFromSpagoSimNode, getNameFromSpagoSimNode, getReachableNodes, setXY)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), PointXY, TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Examples.Tree.Configure (datumIsTreeNode)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, links_, pinNodeMatchingPredicate, runLayoutFn_, startSimulation_, stopSimulation_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
@@ -38,32 +38,19 @@ import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), 
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
-
--- highlightNeighborhood :: forall d r. GraphModel_ (D3_Link (D3_Simulation_Node d) r) (D3_Simulation_Node d) -> NodeID -> Unit
-highlightNeighborhood :: forall t276 t295 t299 t301.
-  { links :: Array
-               { source :: { index :: Int
-                           | t299
-                           }
-               , target :: { index :: Int
-                           | t295
-                           }
-               | t301
-               }
-  | t276
-  }
-  -> Int -> Unit
+-- | no sigs on these because they're currently called using unsafeCoerce to account for the fact that the link IDs
+-- | have been swizzled for their underlying objects
 highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
   where
-    sources = foldl (\acc l -> if l.target.index == nodeId then (cons l.source.index acc) else acc) [] links
-    targets = foldl (\acc l -> if l.source.index == nodeId then (cons l.target.index acc) else acc) [] links
-unhighlightNeighborhood { links } nodeId = removeSpotlight_ nodeId sources targets
+    sources = foldl (\acc (D3_Link l) -> if l.target.index == nodeId then (cons l.source.index acc) else acc) [] links
+    targets = foldl (\acc (D3_Link l) -> if l.source.index == nodeId then (cons l.target.index acc) else acc) [] links
+unhighlightNeighborhood { links } nodeId = removeSpotlight_ unit
   where
     sources = foldl (\acc l -> if l.target.index == nodeId then (cons l.source.index acc) else acc) [] links
     targets = foldl (\acc l -> if l.source.index == nodeId then (cons l.target.index acc) else acc) [] links
 
 foreign import markAsSpotlit_   :: NodeID -> Array NodeID -> Array NodeID -> Unit
-foreign import removeSpotlight_ :: NodeID -> Array NodeID -> Array NodeID -> Unit
+foreign import removeSpotlight_ :: Unit -> Unit
 
 drawGraph :: Aff Unit
 drawGraph = do
@@ -82,7 +69,7 @@ drawGraph = do
               (Just rootID) -> treeReduction graph rootID
 
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (spagoTreeScript (Tuple (width/2.0) height) graph'.tree)
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (spagoTreeScript (Tuple (width/2.0) height) graph')
        
       printedScript <- liftEffect $ runPrinter (graphScript (Tuple width height) graph') "Force Layout Script"
       log $ snd printedScript
@@ -98,7 +85,7 @@ treeReduction model rootID = do
           treenodes       = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
           layout          = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
           idTree          = buildTree rootID model treelinks.yes
-          jsontree        = makeD3TreeJSONFromTreeID idTree model.id2NameMap
+          jsontree        = makeD3TreeJSONFromTreeID idTree model.id2NodeMap
           rootTree        = hierarchyFromJSON_       jsontree
           sortedTree      = treeSortForTree_Spago    rootTree
           laidOutRoot_    = (runLayoutFn_ layout)    sortedTree
@@ -207,14 +194,14 @@ graphScript (Tuple w h) model = do
     , onDrag    : SimulationDrag DefaultDrag
   }
 
-  circle  <- nodesSelection `append` (node Circle [ radius (chooseRadius model.loc) 
-                                                  , fill colorByGroup
+  circle  <- nodesSelection `append` (node Circle [ radius (chooseRadius model.path2LOCMap) 
+                                                  , fill (colorByGroup model.id2PackageIDMap)
                                                   -- , on MouseEnter (\e d t -> stopSimulation_ simulation) 
                                                   -- , on MouseLeave (\e d t -> startSimulation_ simulation)
                                                   , on MouseEnter (\e d t -> highlightNeighborhood (unsafeCoerce model) (getIndexFromSpagoSimNode d))
                                                   , on MouseLeave (\e d t -> unhighlightNeighborhood (unsafeCoerce model) (getIndexFromSpagoSimNode d))
                                                   ]) 
-  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y 0.2, text getNameFromSpagoSimNode]) 
+  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y (positionLabel model.path2LOCMap), text getNameFromSpagoSimNode]) 
   
   svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                             , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
@@ -236,9 +223,22 @@ chooseRadius :: Map String Number -> Datum_ -> Number
 chooseRadius locMap datum = do
   let (D3SimNode d) = datumIsSpagoSimNode datum
   case d.nodetype of
-    -- IsModule   -> moduleRadius
     IsModule   -> Math.sqrt (fromMaybe 10.0 $ M.lookup d.path locMap)
     IsPackage -> packageRadius
+
+chooseRadiusTree :: Map String Number -> Datum_ -> Number
+chooseRadiusTree locMap datum = do
+  let (D3SimNode d) = unsafeCoerce datum -- TODO unsafe because despite all the row types this still cashes out to a simnode not a treenode here which must be fixed
+  case d.data.nodetype of
+    IsModule   -> Math.sqrt (fromMaybe 10.0 $ M.lookup d.data.path locMap)
+    IsPackage -> packageRadius
+
+positionLabel :: Map String Number -> Datum_ -> Number
+positionLabel locMap datum = do
+  let (D3SimNode d) = datumIsSpagoSimNode datum
+  case d.nodetype of
+    IsModule -> negate $ Math.sqrt (fromMaybe 10.0 $ M.lookup d.path locMap)
+    IsPackage -> 0.0
 
 chooseRadiusFn :: Datum_ -> Index_ -> Number
 chooseRadiusFn datum index = do
@@ -264,10 +264,17 @@ translateNode datum = "translate(" <> show x <> "," <> show y <> ")"
     (x :: Number) = (unsafeCoerce datum).x
     (y :: Number) = (unsafeCoerce datum).y
 
-colorByGroup :: Datum_ -> String
-colorByGroup datum = d3SchemeCategory10N_ (toNumber $ fromMaybe 0 d.package)
+colorByGroup :: M.Map NodeID NodeID -> Datum_ -> String
+colorByGroup packageMap datum = d3SchemeCategory10N_ (toNumber $ fromMaybe 0 packageID)
   where
     (D3SimNode d) = unsafeCoerce datum
+    packageID     = M.lookup d.id packageMap
+
+colorByGroupTree :: M.Map NodeID NodeID -> Datum_ -> String
+colorByGroupTree packageMap datum = d3SchemeCategory10N_ (toNumber $ fromMaybe 0 packageID)
+  where
+    (D3SimNode d) = unsafeCoerce datum
+    packageID     = M.lookup d.data.id packageMap
 
 setX1 :: Datum_ -> Number
 setX1 = getSourceX
@@ -290,11 +297,11 @@ setCy = getNodeY
 
 -- TODO forall d should be explicit, this script requires certain data structures, fix sig to specify
 spagoTreeScript :: forall m selection. Bind m => D3InterpreterM selection m => 
-  Tuple Number Number -> Maybe (Tuple NodeID SpagoTreeNode) -> m selection
-spagoTreeScript (Tuple width height) Nothing = do
-  attach "div#spagotree"            -- FIXME this is bogus but saves messing about with the Maybe tree in the drawGraph script               
+  Tuple Number Number -> SpagoModel -> m selection
+spagoTreeScript _ model@{ tree: Nothing } = do
+  attach "div#spagotree"            -- FIXME this is bogus but saves messing about with the Maybe tree in the drawGraph script for now            
 
-spagoTreeScript (Tuple width height) (Just (Tuple rootID tree)) = do
+spagoTreeScript (Tuple width height) model@{ tree: Just (Tuple _ theTree)} = do
   let 
     -- configure dimensions
     columns                    = 2.0  -- 3 columns, set in the grid CSS in index.html
@@ -302,11 +309,11 @@ spagoTreeScript (Tuple width height) (Just (Tuple rootID tree)) = do
     gap                        = 10.0 -- 10px set in the grid CSS in index.html
     svgWH                      = { width : ((width - ((columns - 1.0) * gap)) / columns)
                                  , height: height / rows }
-    numberOfLevels             = (hNodeHeight_ tree) + 1.0
+    numberOfLevels             = (hNodeHeight_ theTree) + 1.0
     spacing                    = { interChild: 120.0, interLevel: height / numberOfLevels}
-    layoutFn                   = ((getLayout TidyTree) `treeSetSize_`       [ 2.0 * pi, (width / 2.0) ]) 
+    layoutFn                   = ((getLayout TidyTree) `treeSetSize_`       [ 2.0 * pi, width ]) 
                                                        `treeSetSeparation_` radialSeparation
-    laidOutRoot_               = layoutFn `runLayoutFn_` tree
+    laidOutRoot_               = layoutFn `runLayoutFn_` theTree
     { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
     xExtent                    = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
     yExtent                    = yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
@@ -324,7 +331,7 @@ spagoTreeScript (Tuple width height) (Just (Tuple rootID tree)) = do
   theLinks_  <- links <+> Join {
       element   : Path
     , key       : UseDatumAsKey
-    , "data"    : links_ tree
+    , "data"    : links_ theTree
     , behaviour : [ strokeWidth   1.5
                   , strokeColor   "black"
                   , strokeOpacity 0.4
@@ -336,14 +343,14 @@ spagoTreeScript (Tuple width height) (Just (Tuple rootID tree)) = do
   nodeJoin_  <- nodes <+> Join {
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : descendants_ tree
+    , "data"    : descendants_ theTree
     -- there could be other stylistic stuff here but the transform is key structuring component
     , behaviour : [ transform [ radialRotateCommon, radialTreeTranslate, rotateRadialLabels ] ]
   }
 
   theNodes <- nodeJoin_ `append` 
-                (node Circle  [ fill         "red"
-                              , radius       10.0
+                (node Circle  [ fill         (colorByGroupTree model.id2PackageIDMap)
+                              , radius       (chooseRadiusTree model.path2LOCMap)
                               , strokeColor "white"
                               ])
 

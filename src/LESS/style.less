@@ -68,10 +68,7 @@ div#spago {
     g.module {
       opacity: 0.2;
     }
-    g.module.source {
-      opacity: 1;
-    }
-    g.module.target {
+    g.module.source, g.module.target, g.module.spotlight {
       opacity: 1;
     }
   }
@@ -115,7 +112,8 @@ div#spago {
         }
         circle {
           opacity: 1;
-          stroke-width: 3px;
+          stroke-width: 10px;
+          stroke: blueviolet
         }
       }
       g.source {
@@ -135,7 +133,7 @@ div#spago {
         circle {
           opacity: 0.85;
           stroke-width: 10px;
-          stroke: wheat;
+          stroke: black;
         }
       }
       g.package.spotlight text {

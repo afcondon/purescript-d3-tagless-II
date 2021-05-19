@@ -17,7 +17,7 @@ import Data.String (Pattern(..), split)
 import Data.Tree (Tree)
 import Data.Tuple (Tuple(..))
 import Debug (spy)
-import Prelude (class Show, bind, not, ($), (<$>), (<>), (==))
+import Prelude (class Show, bind, not, pure, ($), (<$>), (<>), (==))
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -29,16 +29,18 @@ type SpagoLOCJSON     = { loc :: Number, path :: String }
 
 -- TODO no error handling at all here RN (OTOH - performant!!)
 type Spago_Raw_JSON_ = { 
-    packages :: Array SpagoPackageJSON
-  , modules  :: Array SpagoModuleJSON
-  , lsDeps   :: Array SpagoLsDepJSON
-  , loc      :: Array SpagoLOCJSON } 
+    packages        :: Array SpagoPackageJSON
+  , modules         :: Array SpagoModuleJSON
+  , lsDeps          :: Array SpagoLsDepJSON
+  , loc             :: Array SpagoLOCJSON } 
 
 type Spago_Cooked_JSON    = { 
-    links      :: Array SpagoGraphLinkID
-  , nodes      :: Array SpagoNodeData
-  , name2IdMap :: M.Map String NodeID
-  , id2NameMap :: M.Map NodeID String
+    links           :: Array SpagoGraphLinkID
+  , nodes           :: Array SpagoNodeData
+  , name2IdMap      :: M.Map String NodeID
+  , id2NameMap      :: M.Map NodeID String
+  , id2NodeMap      :: M.Map NodeID SpagoNodeData
+  , id2PackageIDMap :: M.Map NodeID NodeID
 }
 
 -- Model data types specialized with inital data
@@ -49,7 +51,6 @@ type SpagoNodeRow row = (
     id       :: NodeID
   , path     :: String
   , depends  :: Array NodeID
-  , package  :: Maybe NodeID
   , nodetype :: NodeType
   , name     :: String
   , fixed    :: String
@@ -61,16 +62,19 @@ type SpagoSimNode     = D3SimulationRow (             SpagoNodeRow  + ())
 
 type SpagoLinkData    = ( linktype :: LinkType )
 type SpagoGraphLinkID = D3_Link NodeID SpagoLinkData
+type SpagoGraphLinkObj = D3_Link SpagoNodeData SpagoLinkData
 
 type SpagoModel = { 
-    links      :: Array SpagoGraphLinkID  -- each ID will get swizzled for a SpagoGraphLinkObj_ when simulation initialized
-  , nodes      :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
-  , graph      :: Graph NodeID SpagoNodeData
-  , name2IdMap :: M.Map String NodeID
-  , id2NameMap :: M.Map NodeID String
-  , loc        :: M.Map String Number
-  , positions  :: M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
-  , tree       :: Maybe (Tuple NodeID SpagoTreeNode)
+    links           :: Array SpagoGraphLinkID  -- each ID will get swizzled for a SpagoGraphLinkObj_ when simulation initialized
+  , nodes           :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
+  , graph           :: Graph NodeID SpagoNodeData
+  , name2IdMap      :: M.Map String NodeID
+  , id2NameMap      :: M.Map NodeID String
+  , id2NodeMap      :: M.Map NodeID SpagoNodeData
+  , id2PackageIDMap :: M.Map NodeID NodeID
+  , path2LOCMap     :: M.Map String Number
+  , positions       :: M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
+  , tree            :: Maybe (Tuple NodeID SpagoTreeNode)
 }
 
 setXY :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
@@ -83,7 +87,6 @@ upgradeSpagoNodeData node = D3SimNode {
   , id: node.id
   , name: node.name
   , nodetype: node.nodetype
-  , package: node.package
   , path: node.path
   , index: node.id
   , fixed: "no"
@@ -125,14 +128,16 @@ foreign import readSpago_Raw_JSON_ :: String -> String -> String -> String -> Sp
 makeSpagoGraphModel :: Spago_Raw_JSON_ -> SpagoModel
 makeSpagoGraphModel json = do
   let
-    { nodes, links, name2IdMap, id2NameMap } = getGraphJSONData json
-    loc = M.fromFoldable $ (\o -> Tuple o.path o.loc) <$> json.loc
+    { nodes, links, name2IdMap, id2NameMap, id2NodeMap, id2PackageIDMap } = getGraphJSONData json
+    path2LOCMap = M.fromFoldable $ (\o -> Tuple o.path o.loc) <$> json.loc
 
   { links
   , nodes    : upgradeSpagoNodeData <$> nodes
   , name2IdMap
   , id2NameMap
-  , loc
+  , id2NodeMap
+  , id2PackageIDMap
+  , path2LOCMap
   , graph    : makeGraph nodes
   , positions: M.empty
   , tree     : Nothing
@@ -143,14 +148,28 @@ getGraphJSONData { packages, modules, lsDeps } = do
   let
     names = (_.key <$> modules) <> (_.key <$> packages)
     ids   = 1 `range` (length names)
-    idMap :: M.Map String NodeID
-    idMap = M.fromFoldableWith (\v1 v2 -> spy "key collision!!!!: " v1) $ zip names ids
 
-    nameMap :: M.Map NodeID String
-    nameMap = M.fromFoldable $ zip ids names
+    name2IdMap :: M.Map String NodeID
+    name2IdMap = M.fromFoldableWith (\v1 v2 -> spy "key collision!!!!: " v1) $ zip names ids
+
+    id2NodeMap :: M.Map NodeID SpagoNodeData
+    id2NodeMap = M.fromFoldableWith (\v1 v2 -> spy "key collision!!!!: " v1) $ zip ids nodes
+
+    id2NameMap :: M.Map NodeID String
+    id2NameMap = M.fromFoldable $ zip ids names
+
+    id2PackageIDMap :: M.Map NodeID NodeID
+    id2PackageIDMap = M.fromFoldable $ catMaybes $ id2Package <$> nodes
+      where
+        id2Package :: SpagoNodeData -> Maybe (Tuple NodeID NodeID)
+        id2Package node = do
+          packageID <- case node.nodetype of
+                        IsModule  -> getPackage node.path
+                        IsPackage -> Just node.id
+          pure $ Tuple node.id packageID
 
     getId :: String -> NodeID
-    getId s = fromMaybe 0 (M.lookup s idMap)
+    getId s = fromMaybe 0 (M.lookup s name2IdMap)
 
     depsMap :: M.Map String { version :: String, repo :: String }
     depsMap = M.fromFoldable $ (\d -> Tuple d.packageName { version: d.version, repo: d.repo.contents } ) <$> lsDeps
@@ -158,9 +177,10 @@ getGraphJSONData { packages, modules, lsDeps } = do
     makeLink :: LinkType -> Tuple NodeID NodeID -> SpagoGraphLinkID
     makeLink linktype (Tuple source target) = D3_Link { source, target, linktype }
 
-    makeModuleToPackageLink :: forall r. { id :: NodeID, package :: Maybe NodeID | r } -> Maybe SpagoGraphLinkID
-    makeModuleToPackageLink { id, package: Just packageID }  = Just $ D3_Link { source: id, target: packageID, linktype: M2P } 
-    makeModuleToPackageLink { id, package: Nothing } = Nothing
+    makeModuleToPackageLink :: forall r. { id :: NodeID | r } -> Maybe SpagoGraphLinkID
+    makeModuleToPackageLink { id }  = do
+      packageID <- M.lookup id id2PackageIDMap 
+      Just $ D3_Link { source: id, target: packageID, linktype: M2P } 
 
     foldDepends :: forall r. Array (Tuple NodeID NodeID) -> { key :: String, depends :: Array String | r } -> Array (Tuple NodeID NodeID)
     foldDepends b a = (makeTuple <$> a.depends) <> b    
@@ -173,7 +193,6 @@ getGraphJSONData { packages, modules, lsDeps } = do
       { id       : getId m.key
       , name     : m.key
       , path     : m.path
-      , package  : getPackage m.path
       , nodetype : IsModule
       , depends  : getId <$> m.depends
       , fixed    : "no"
@@ -184,7 +203,6 @@ getGraphJSONData { packages, modules, lsDeps } = do
       { id       : getId m.key
       , name     : m.key
       , path
-      , package  : M.lookup m.key idMap
       , nodetype : IsPackage
       , depends  : getId <$> m.depends
       , fixed    : "no"
@@ -201,21 +219,20 @@ getGraphJSONData { packages, modules, lsDeps } = do
       if root == ".spago" 
       then do 
         package <- pieces !! 1
-        M.lookup package idMap
+        M.lookup package name2IdMap
       else Nothing
 
-    moduleLinks  = (makeLink M2M) <$> (foldl foldDepends [] modules)             
-    packageLinks = (makeLink P2P) <$> (foldl foldDepends [] packages)
+    moduleLinks        = (makeLink M2M) <$> (foldl foldDepends [] modules)             
+    packageLinks       = (makeLink P2P) <$> (foldl foldDepends [] packages)
 
-    moduleNodes  = makeNodeFromModuleJSON  <$> modules
-    packageNodes = makeNodeFromPackageJSON <$> packages
+    packageNodes       = makeNodeFromPackageJSON <$> packages
+    moduleNodes        = makeNodeFromModuleJSON  <$> modules
 
     modulePackageLinks = catMaybes $ makeModuleToPackageLink <$> moduleNodes
+    nodes              = moduleNodes <> packageNodes
+    links              = moduleLinks <> packageLinks <> modulePackageLinks
 
-  { links     : moduleLinks <> packageLinks <> modulePackageLinks
-  , nodes     : moduleNodes <> packageNodes
-  , name2IdMap: idMap
-  , id2NameMap: nameMap }
+  { links, nodes, name2IdMap, id2NameMap, id2NodeMap, id2PackageIDMap }
 
 makeGraph :: Array SpagoNodeData -> Graph NodeID SpagoNodeData
 makeGraph nodes = do

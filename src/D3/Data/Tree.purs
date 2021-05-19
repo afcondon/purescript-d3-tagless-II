@@ -4,12 +4,13 @@ import D3.Node (NodeID)
 import Data.Array as A
 import Data.List (List(..))
 import Data.Map as M
-import Data.Maybe (fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tree (Tree(..))
 import Prelude (class Eq, (<$>), ($))
 
 -- these definitions have to be here to avoid cycle (and probably all type defs should in fact be here)
 foreign import data TreeJson_ :: Type
+foreign import emptyTreeJson_ :: TreeJson_
 
 data TreeType   = TidyTree | Dendrogram
 derive instance eqTreeType :: Eq TreeType
@@ -33,15 +34,16 @@ foreign import data TreeLayoutFn_ :: Type
 -- | in order to get the (x,y), height, depth etc that are initialized by a D3 tree layout
 -- | it does copy the name over because actually that is going to be needed for sorting in order
 -- | to make a tidy tree (radial in our spago example)
-makeD3TreeJSONFromTreeID :: Tree NodeID -> M.Map NodeID String -> TreeJson_
-makeD3TreeJSONFromTreeID root namesMap = go root
+makeD3TreeJSONFromTreeID :: forall d. Tree NodeID -> M.Map NodeID d -> TreeJson_
+makeD3TreeJSONFromTreeID root nodesMap = go root
   where 
     go (Node id children)      = 
-      let name = fromMaybe "" $ M.lookup id namesMap
-      in case children of
-        Nil -> idTreeLeaf_ id name
-        _   -> idTreeParent_ id name (go <$> (A.fromFoldable children))
+      case M.lookup id nodesMap of
+        Nothing    -> emptyTreeJson_ -- TODO think of a more principled way to handle this
+        (Just obj) -> case children of
+                        Nil -> idTreeLeaf_ obj
+                        _   -> idTreeParent_ obj (go <$> (A.fromFoldable children))
 
-foreign import idTreeLeaf_   :: forall id. id -> String -> TreeJson_
-foreign import idTreeParent_ :: forall id. id -> String -> Array TreeJson_ -> TreeJson_
+foreign import idTreeLeaf_   :: forall id d. d -> TreeJson_
+foreign import idTreeParent_ :: forall id d. d -> Array TreeJson_ -> TreeJson_
 
