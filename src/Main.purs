@@ -2,7 +2,7 @@ module Main where
 
 import Prelude (Unit, bind, discard, pure, unit, ($), (=<<))
 
-import D3.Examples.Simulation.LesMiserables as Graph
+import D3.Examples.LesMiserables as Graph
 import D3.Examples.Simulation.SpagoPackages as Spago
 import D3.Examples.GUP (runGeneralUpdatePattern) as GUP
 import D3.Examples.Tree.Configure as Tree

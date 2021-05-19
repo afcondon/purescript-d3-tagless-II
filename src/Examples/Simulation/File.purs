@@ -1,4 +1,4 @@
-module D3.Data.File.LesMiserables where
+module D3.Examples.LesMiserables.File where
 
 import D3.Node
 

@@ -1,6 +1,6 @@
-module D3.Examples.Simulation.LesMiserables where
+module D3.Examples.LesMiserables where
 
-import D3.Data.File.LesMiserables (LesMisNodeData, readGraphFromFileContents)
+import D3.Examples.LesMiserables.File (LesMisNodeData, readGraphFromFileContents)
 import D3.Node (D3_Link, NodeID, getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
 
 import Affjax as AJAX
