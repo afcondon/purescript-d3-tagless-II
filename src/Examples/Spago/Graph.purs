@@ -1,19 +1,19 @@
 module D3.Examples.Spago.Graph where
 
 import D3.Attributes.Sugar (classed, fill, on, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode) 
-import D3.Data.Types (Element(..), MouseEvent(..))
+import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
+import D3.Examples.Spago.Attributes (chooseRadius, chooseRadiusFn, colorByGroup, linkClass, nodeClass, positionLabel, setX1, setX2, setY1, setY2, translateNode)
+import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
 import D3.Node (D3_Link(..), NodeID)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
-import Data.Array (cons, foldl)
+import Data.Array (cons, filter, foldl)
 import Data.Tuple (Tuple(..))
-import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (/), (==))
+import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (<$>), (/), (<>), (==))
 import Unsafe.Coerce (unsafeCoerce)
-import D3.Examples.Spago.Attributes (chooseRadius, chooseRadiusFn, colorByGroup, linkClass, nodeClass, positionLabel, setX1, setX2, setY1, setY2, translateNode)
 
 -- | recipe for this force layout graph
 graphScript :: forall m selection. 
@@ -31,8 +31,8 @@ graphScript (Tuple w h) model = do
 
   let forces      = [ Force $ ForceManyBody    $ (defaultForceManyConfig "charge") { strength = -100.0 }
                     , Force $ ForceCollide     $  defaultForceCollideConfig "collide" (\d -> chooseRadiusFn d)
-                    , Force $ ForceX           $ (defaultForceXConfig "x") { strength = 0.05 }
-                    , Force $ ForceY           $ (defaultForceYConfig "y") { strength = 0.05 }
+                    , Force $ ForceX           $ (defaultForceXConfig "x") { strength = 0.1 }
+                    , Force $ ForceY           $ (defaultForceYConfig "y") { strength = 0.1 }
                     , Force $ ForceCenter      $ (defaultForceCenterConfig "center") { strength = -1.0 }
                     , Force $ ForceLink        $ (defaultForceLinkConfig "links" model.links (\d -> d.id))
                     -- , Force $ ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
@@ -67,8 +67,8 @@ graphScript (Tuple w h) model = do
                                                   , fill (colorByGroup model.maps.id_2_Package)
                                                   -- , on MouseEnter (\e d t -> stopSimulation_ simulation) 
                                                   -- , on MouseLeave (\e d t -> startSimulation_ simulation)
-                                                  , on MouseEnter (\e d t -> highlightNeighborhood (unsafeCoerce model) (getIdFromSpagoSimNode d))
-                                                  , on MouseLeave (\e d t -> unhighlightNeighborhood (unsafeCoerce model) (getIdFromSpagoSimNode d))
+                                                  , on MouseEnter (\e d t -> highlightNeighborhood simulation linksGroup (unsafeCoerce model) (getIdFromSpagoSimNode d))
+                                                  , on MouseLeave (\e d t -> unhighlightNeighborhood unit)
                                                   ]) 
   labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y (positionLabel model.maps.path_2_LOC), text getNameFromSpagoSimNode]) 
   
@@ -82,15 +82,15 @@ graphScript (Tuple w h) model = do
 
 -- | no sigs on these because they're currently called using unsafeCoerce to account for the fact that the link IDs
 -- | have been swizzled for their underlying objects
-highlightNeighborhood { links } nodeId = markAsSpotlit_ nodeId sources targets
+highlightNeighborhood simulation linkselection { links, prunedTreeLinks } nodeId = markAsSpotlit_ nodeId simulation linkselection (sourceLinks <> targetLinks) sources targets
   where
-    sources = foldl (\acc (D3_Link l) -> if l.target.id == nodeId then (cons l.source.id acc) else acc) [] links
-    targets = foldl (\acc (D3_Link l) -> if l.source.id == nodeId then (cons l.target.id acc) else acc) [] links
+    allLinks = links <> prunedTreeLinks
+    sourceLinks = filter (\(D3_Link l) -> l.target.id == nodeId) allLinks
+    targetLinks = filter (\(D3_Link l) -> l.source.id == nodeId) allLinks
+    sources = (\(D3_Link l) -> l.source.id) <$> sourceLinks
+    targets = (\(D3_Link l) -> l.target.id) <$> targetLinks
 
-unhighlightNeighborhood { links } nodeId = removeSpotlight_ unit
-  where
-    sources = foldl (\acc l -> if l.target.id == nodeId then (cons l.source.id acc) else acc) [] links
-    targets = foldl (\acc l -> if l.source.id == nodeId then (cons l.target.id acc) else acc) [] links
+unhighlightNeighborhood = removeSpotlight_ -- we're caching all the selections on the JS side, simply reversing what we've done in highlight
 
-foreign import markAsSpotlit_   :: NodeID -> Array NodeID -> Array NodeID -> Unit
+foreign import markAsSpotlit_   :: forall link selection. NodeID -> D3Simulation_ -> selection -> Array link -> Array NodeID -> Array NodeID -> Unit
 foreign import removeSpotlight_ :: Unit -> Unit

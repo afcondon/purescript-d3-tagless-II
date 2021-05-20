@@ -6,7 +6,7 @@ import D3.Data.Graph (getReachableNodes)
 import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Data.Types (D3Selection_, PointXY)
 import D3.Examples.Spago.Graph (graphScript)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, findGraphNodeIdFromName, setXY)
+import D3.Examples.Spago.Model (LinkType(..), SpagoGraphLinkID, SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, findGraphNodeIdFromName, setXY)
 import D3.Examples.Spago.Tree (treeScript)
 import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
 import D3.Interpreter.D3 (runD3M)
@@ -45,7 +45,7 @@ drawGraph = do
     (Right graph) -> do
       let graph' = 
             case findGraphNodeIdFromName graph "Main" of
-              Nothing       -> graph -- couldn't find root of tree so just skip this
+              Nothing       -> graph -- if we couldn't find root of tree just skip tree reduction
               (Just rootID) -> treeReduction graph rootID
 
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
@@ -61,6 +61,7 @@ treeReduction :: SpagoModel -> NodeID -> SpagoModel
 treeReduction model rootID  = do
       let reachable         = getReachableNodes rootID model.graph
           onlyTreelinks     = makeTreeLinks (pathsAsLists reachable.closedDepPaths)
+          prunedTreeLinks   = (\(Tuple source target) -> D3_Link { source, target, linktype: M2M_Graph }) <$> reachable.redundantLinks
           treelinks         = partition (\(D3_Link l) -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
           treenodes         = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
           layout            = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
@@ -74,7 +75,7 @@ treeReduction model rootID  = do
           unpositionedNodes = setForPhyllotaxis  <$> treenodes.no
           tree              = Tuple rootID laidOutRoot_
 
-      model { links = treelinks.yes, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, maps { id_2_XYLeaf = positionMap } }
+      model { links = treelinks.yes, prunedTreeLinks = prunedTreeLinks, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, maps { id_2_XYLeaf = positionMap } }
 
 -- for radial positioning we treat x as angle and y as radius
 radialTranslate :: PointXY -> PointXY
@@ -93,7 +94,8 @@ setNodePositionsRadial nodes positionMap = do
         Nothing -> D3SimNode node
         (Just p) -> 
           let { x,y } = radialTranslate { x: p.x, y: p.y }
-          in (D3SimNode node) `setXY` { x, y, isLeaf: p.isLeaf }
+          -- in (D3SimNode node) `setXY` { x, y, isLeaf: p.isLeaf } -- only pin parents
+          in (D3SimNode node) `setXY` { x, y, isLeaf: false }
   updateXY <$> nodes
 
 setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode
@@ -128,4 +130,4 @@ makeTreeLinks :: L.List (L.List NodeID) -> Array (Tuple NodeID NodeID)
 makeTreeLinks closedPaths = do
   let
     linkTuples = (L.foldl path2Tuples Nil) closedPaths
-  fromFoldable $ S.fromFoldable linkTuples -- removes the duplicates while building  
+  fromFoldable $ S.fromFoldable linkTuples -- removes the duplicates while building, but if we nubbed instead we could get count also

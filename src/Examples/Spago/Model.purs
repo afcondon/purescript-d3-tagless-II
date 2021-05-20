@@ -1,25 +1,20 @@
 module D3.Examples.Spago.Model where
 
-import D3.Examples.Spago.Files
-import D3.Node
-import D3.Data.Graph
+import D3.Examples.Spago.Files (SpagoModuleJSON, SpagoPackageJSON, Spago_Raw_JSON_, readSpago_Raw_JSON_)
+import D3.Node (D3SimulationRow, D3TreeRow, D3_Link(..), D3_SimulationNode(..), EmbeddedData, NodeID)
 
-import Affjax (URL)
-import D3.Data.Types (Datum_, PointXY)
-import Data.Array (catMaybes, filter, foldl, head, length, null, range, uncons, zip, (!!), (:))
-import Data.Array as A
+import D3.Data.Types (Datum_)
+import Data.Array (catMaybes, foldl, length, range, zip, (!!))
 import Data.Graph (Graph, fromMap)
-import Data.Graph as G
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (Nullable, null) as N
 import Data.Nullable (notNull)
 import Data.Set as S
 import Data.String (Pattern(..), split)
-import Data.Tree (Tree)
 import Data.Tuple (Tuple(..))
 import Debug (spy)
-import Prelude (class Eq, class Show, bind, not, pure, ($), (<$>), (<>), (==))
+import Prelude (class Eq, class Show, bind, pure, ($), (<$>), (<>), (==))
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -27,20 +22,20 @@ moduleRadius = 5.0 :: Number
 packageRadius = 50.0 :: Number
 packageForceRadius = 50.0 :: Number
 
-
 type Spago_Cooked_JSON    = { 
-    links           :: Array SpagoGraphLinkID
-  , nodes           :: Array SpagoNodeData
-  , name_2_ID      :: M.Map String NodeID
-  , id_2_Name      :: M.Map NodeID String
-  , id_2_Node      :: M.Map NodeID SpagoNodeData
+    links        :: Array SpagoGraphLinkID
+  , nodes        :: Array SpagoNodeData
+  , name_2_ID    :: M.Map String NodeID
+  , id_2_Name    :: M.Map NodeID String
+  , id_2_Node    :: M.Map NodeID SpagoNodeData
   , id_2_Package :: M.Map NodeID NodeID
 }
 
 -- Model data types specialized with inital data
-data NodeType = IsModule | IsPackage
-data LinkType = M2M | P2P | M2P | P2M
-data Pinned   = Pinned | Floating -- might be more categories here, "pinned connectd", "pinned unused" whatever...
+data NodeType        = IsModule | IsPackage
+data PackageRelation = InPackage | OutPackage
+data LinkType        = M2M_Tree | M2M_Graph | P2P | M2P PackageRelation
+data Pinned          = Pinned | Floating -- might be more categories here, "pinned connectd", "pinned unused" whatever...
 
 type Deps = Array NodeID
 
@@ -61,12 +56,13 @@ type SpagoNodeData    = { | SpagoNodeRow () }
 type SpagoTreeNode    = D3TreeRow       (EmbeddedData SpagoNodeData + ())
 type SpagoSimNode     = D3SimulationRow (             SpagoNodeRow  + ())
 
-type SpagoLinkData    = ( linktype :: LinkType )
-type SpagoGraphLinkID = D3_Link NodeID SpagoLinkData
+type SpagoLinkData     = ( linktype :: LinkType )
+type SpagoGraphLinkID  = D3_Link NodeID SpagoLinkData
 type SpagoGraphLinkObj = D3_Link SpagoNodeData SpagoLinkData
 
 type SpagoModel = { 
     links           :: Array SpagoGraphLinkID  -- each ID will get swizzled for a SpagoGraphLinkObj_ when simulation initialized
+  , prunedTreeLinks :: Array SpagoGraphLinkID  -- there are so many of these that we only use them when hovering enabled
   , nodes           :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
   , graph           :: Graph NodeID SpagoNodeData
   , tree            :: Maybe (Tuple NodeID SpagoTreeNode)
@@ -133,8 +129,9 @@ makeSpagoGraphModel json = do
 
   { links
   , nodes    : upgradeSpagoNodeData <$> nodes
-  , tree     : Nothing
   , graph    : makeGraph nodes
+  , tree     : Nothing  -- not present in the JSON, has to be calculated, if possible
+  , prunedTreeLinks: [] -- not present in the JSON, has to be calculated, if possible
   , maps     : { name_2_ID
                , id_2_Name
                , id_2_Node
@@ -181,7 +178,7 @@ getGraphJSONData { packages, modules, lsDeps } = do
     makeModuleToPackageLink :: forall r. { id :: NodeID | r } -> Maybe SpagoGraphLinkID
     makeModuleToPackageLink { id }  = do
       packageID <- M.lookup id id_2_Package 
-      Just $ D3_Link { source: id, target: packageID, linktype: M2P } 
+      Just $ D3_Link { source: id, target: packageID, linktype: M2P OutPackage } -- TODO not checking if it's InPackage at all at all
 
     foldDepends :: forall r. Array (Tuple NodeID NodeID) -> { key :: String, depends :: Array String | r } -> Array (Tuple NodeID NodeID)
     foldDepends b a = (makeTuple <$> a.depends) <> b    
@@ -189,17 +186,18 @@ getGraphJSONData { packages, modules, lsDeps } = do
             makeTuple :: String -> Tuple NodeID NodeID
             makeTuple s = Tuple id (getId s)  
 
-    initialDepends depends =  { full: (getId <$> depends)
-                              , tree: [], inPackage: [], outPackage: [] } 
-
     makeNodeFromModuleJSON :: SpagoModuleJSON -> SpagoNodeData
     makeNodeFromModuleJSON m = 
       { id       : getId m.key
       , name     : m.key
       , path     : m.path
       , nodetype : IsModule
-      , depends  : initialDepends m.depends 
       , pinned   : Floating
+      , depends  :  { full: (getId <$> m.depends)
+                    , tree: []
+                    , inPackage: []
+                    , outPackage: []
+                    }  
       } -- FIXME lookup the m.depends list for ids
 
     makeNodeFromPackageJSON :: SpagoPackageJSON -> SpagoNodeData
@@ -208,8 +206,12 @@ getGraphJSONData { packages, modules, lsDeps } = do
       , name     : m.key
       , path
       , nodetype : IsPackage
-      , depends  : initialDepends m.depends
       , pinned   : Floating
+      , depends  :  { full: (getId <$> m.depends)
+                    , tree: []
+                    , inPackage: []
+                    , outPackage: []
+                    } 
       } -- FIXME id, package and depends all need lookups
       where
         path = case M.lookup m.key depsMap of
@@ -226,7 +228,7 @@ getGraphJSONData { packages, modules, lsDeps } = do
         M.lookup package name_2_ID
       else Nothing
 
-    moduleLinks        = (makeLink M2M) <$> (foldl foldDepends [] modules)             
+    moduleLinks        = (makeLink M2M_Graph) <$> (foldl foldDepends [] modules)             
     packageLinks       = (makeLink P2P) <$> (foldl foldDepends [] packages)
 
     packageNodes       = makeNodeFromPackageJSON <$> packages
@@ -261,9 +263,10 @@ instance showNodeType :: Show NodeType where
   show IsModule = "module"
   show IsPackage = "package"
 instance showLinkType :: Show LinkType where
-  show M2M = "M2M"
+  show M2M_Tree  = "M2M-Tree"
+  show M2M_Graph = "M2M-Graph"
   show P2P = "P2P"
-  show M2P = "M2P"
-  show P2M = "P2M"
+  show (M2P InPackage) = "in-package dependency"
+  show (M2P OutPackage) = "out-package dependency"
 
 derive instance eqPinned :: Eq Pinned

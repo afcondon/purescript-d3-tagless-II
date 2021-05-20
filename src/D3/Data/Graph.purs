@@ -1,13 +1,13 @@
 module D3.Data.Graph where
 
-import Prelude (bind, not, ($), (<$>), (<>))
-
 import D3.Node (NodeID)
-import Data.Array (filter, elem, head, null, uncons, (:)) 
+import Data.Array (elem, filter, head, null, partition, uncons, (:))
 import Data.Graph (Graph)
 import Data.Graph as G
 import Data.Maybe (Maybe(..))
 import Data.Tree (Tree)
+import Data.Tuple (Tuple(..))
+import Prelude (bind, not, ($), (<$>), (<>))
 
 type DepPath = Array NodeID
 type GraphSearchRecord = {
@@ -15,15 +15,11 @@ type GraphSearchRecord = {
   , openDepPaths   :: Array DepPath
   , closedDepPaths :: Array DepPath
   , dependencyTree :: Maybe (Tree NodeID)
+  , redundantLinks :: Array (Tuple NodeID NodeID)
 }
 
-getReachableNodes :: forall r1 r2. NodeID -> Graph Int { depends :: { full :: Array NodeID | r1 } | r2 }
-  -> { closedDepPaths :: Array (Array NodeID)
-    , dependencyTree  :: Maybe (Tree NodeID)
-    , nodes           :: Array NodeID
-    , openDepPaths    :: Array (Array NodeID)
-    }
-getReachableNodes id graph = go { nodes: [], openDepPaths: [[id]], closedDepPaths: [], dependencyTree: Nothing }
+getReachableNodes :: forall r1 r2. NodeID -> Graph Int { depends :: { full :: Array NodeID | r1 } | r2 } ->  GraphSearchRecord
+getReachableNodes id graph = go { nodes: [], openDepPaths: [[id]], closedDepPaths: [], redundantLinks: [], dependencyTree: Nothing }
   where
     go :: GraphSearchRecord -> GraphSearchRecord
     go searchRecord@{ openDepPaths: [] } = searchRecord -- bottom out when all open paths are consumed
@@ -39,15 +35,19 @@ getReachableNodes id graph = go { nodes: [], openDepPaths: [[id]], closedDepPath
       firstNode <- G.lookup firstID graph
 
       let newDeps = 
-            filter (\d -> not $ elem d searchRecord.nodes) firstNode.depends.full
+            partition (\d -> not $ elem d searchRecord.nodes) firstNode.depends.full
           newOpenDepPaths = 
-            (\d -> d : x.head) <$> newDeps -- ie [ab] with deps [bc] -> [abc, abd]
+            (\d -> d : x.head) <$> newDeps.yes -- ie [ab] with deps [bc] -> [abc, abd]
+          prunedLinks =
+            (\d -> Tuple firstID d) <$> newDeps.no -- these are the links that we dropped to make tree
 
       if null newOpenDepPaths
         -- moving the open path we just processed to the list of closedDepPaths
         then Just $ searchRecord { openDepPaths   = x.tail                 
-                                 , closedDepPaths = x.head : searchRecord.closedDepPaths}
+                                 , closedDepPaths = x.head : searchRecord.closedDepPaths
+                                 , redundantLinks = searchRecord.redundantLinks <> prunedLinks }
         -- replace this open path with it's extension(s)
         else Just $ searchRecord { openDepPaths = x.tail <> newOpenDepPaths 
-                                 , nodes     = searchRecord.nodes <> newDeps }
+                                 , nodes     = searchRecord.nodes <> newDeps.yes
+                                 , redundantLinks = searchRecord.redundantLinks <> prunedLinks }
 
