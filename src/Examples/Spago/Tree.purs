@@ -1,27 +1,18 @@
 module D3.Examples.Spago.Tree where
 
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x)
-import D3.Examples.Spago.Model 
-import D3.Data.Types (Datum_, Element(..))
+import D3.Examples.Spago.Model (SpagoModel) 
+import D3.Data.Types (Element(..))
 import D3.Data.Tree (TreeType(..))
-import D3.Examples.Tree.Configure (datumIsTreeNode)
-import D3.FFI (descendants_, getLayout, hNodeHeight_, hasChildren_, links_, runLayoutFn_, treeMinMax_, treeSetSeparation_, treeSetSize_)
+import D3.FFI (descendants_, getLayout, hNodeHeight_, links_, runLayoutFn_, treeMinMax_, treeSetSeparation_, treeSetSize_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Layouts.Hierarchical (radialLink, radialSeparation)
-import D3.Node (D3_SimulationNode(..), D3_TreeNode(..), D3_XY, NodeID)
-import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Join(..), Keys(..), node)
-import Data.Int (toNumber)
-import Data.Map (Map)
-import Data.Map as M
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Math (pi)
-import Math (sqrt) as Math
-import Prelude (class Bind, bind, negate, pure, show, ($), (*), (+), (-), (/), (<), (<>), (==), (>=))
-import Type.Row (type (+))
-import Unsafe.Coerce (unsafeCoerce)
-
+import Prelude (class Bind, bind, negate, pure, (*), (+), (-), (/))
+import D3.Examples.Spago.Attributes (chooseRadiusTree, colorByGroupTree, labelName, radialRotateCommon, radialTreeTranslate, rotateRadialLabels, textDirection)
 
 -- | **************************************************************************************************************
 -- | draw the spago graph - only the tree part - as a radial tree
@@ -81,8 +72,8 @@ treeScript (Tuple width height) model@{ tree: Just (Tuple _ theTree)} = do
   }
 
   theNodes <- nodeJoin_ `append` 
-                (node Circle  [ fill         (colorByGroupTree model.id2PackageIDMap)
-                              , radius       (chooseRadiusTree model.path2LOCMap)
+                (node Circle  [ fill         (colorByGroupTree model.maps.id_2_Package)
+                              , radius       (chooseRadiusTree model.maps.path_2_LOC)
                               , strokeColor "white"
                               ])
 
@@ -96,42 +87,4 @@ treeScript (Tuple width height) model@{ tree: Just (Tuple _ theTree)} = do
                             
   pure svg
 
-radialRotate :: Number -> String
-radialRotate x = show $ (x * 180.0 / pi - 90.0)
-
-radialRotateCommon :: forall r. D3_TreeNode (D3_XY + r) -> String
-radialRotateCommon (D3TreeNode d) = "rotate(" <> radialRotate d.x <> ")"
-
-radialTreeTranslate :: forall r. D3_TreeNode (D3_XY + r) -> String
-radialTreeTranslate (D3TreeNode d) = "translate(" <> show d.y <> ",0)"
-
-rotateRadialLabels :: forall r. D3_TreeNode (D3_XY + r) -> String
-rotateRadialLabels (D3TreeNode d) = -- TODO replace with nodeIsOnRHS 
-  "rotate(" <> if d.x >= pi 
-  then "180" <> ")" 
-  else "0" <> ")"
-
-nodeIsOnRHS :: Datum_ -> Boolean
-nodeIsOnRHS d = node.x < pi
-  where (D3TreeNode node) = datumIsTreeNode d
-
-textDirection :: Datum_ -> Boolean
-textDirection = \d -> hasChildren_ d == nodeIsOnRHS d
-
-labelName :: Datum_ -> String
-labelName d = node."data".name
-  where node = unsafeCoerce d
-
-colorByGroupTree :: M.Map NodeID NodeID -> Datum_ -> String
-colorByGroupTree packageMap datum = d3SchemeCategory10N_ (toNumber $ fromMaybe 0 packageID)
-  where
-    (D3SimNode d) = unsafeCoerce datum
-    packageID     = M.lookup d.data.id packageMap
-
-chooseRadiusTree :: Map String Number -> Datum_ -> Number
-chooseRadiusTree locMap datum = do
-  let (D3SimNode d) = unsafeCoerce datum -- TODO unsafe because despite all the row types this still cashes out to a simnode not a treenode here which must be fixed
-  case d.data.nodetype of
-    IsModule   -> Math.sqrt (fromMaybe 10.0 $ M.lookup d.data.path locMap)
-    IsPackage -> packageRadius
 

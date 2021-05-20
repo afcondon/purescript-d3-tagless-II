@@ -1,7 +1,8 @@
 module D3.Examples.Spago.Model where
 
-import D3.Node
 import D3.Examples.Spago.Files
+import D3.Node
+import D3.Data.Graph
 
 import Affjax (URL)
 import D3.Data.Types (Datum_, PointXY)
@@ -18,7 +19,7 @@ import Data.String (Pattern(..), split)
 import Data.Tree (Tree)
 import Data.Tuple (Tuple(..))
 import Debug (spy)
-import Prelude (class Show, bind, not, pure, ($), (<$>), (<>), (==))
+import Prelude (class Eq, class Show, bind, not, pure, ($), (<$>), (<>), (==))
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -30,23 +31,30 @@ packageForceRadius = 50.0 :: Number
 type Spago_Cooked_JSON    = { 
     links           :: Array SpagoGraphLinkID
   , nodes           :: Array SpagoNodeData
-  , name2IdMap      :: M.Map String NodeID
-  , id2NameMap      :: M.Map NodeID String
-  , id2NodeMap      :: M.Map NodeID SpagoNodeData
-  , id2PackageIDMap :: M.Map NodeID NodeID
+  , name_2_ID      :: M.Map String NodeID
+  , id_2_Name      :: M.Map NodeID String
+  , id_2_Node      :: M.Map NodeID SpagoNodeData
+  , id_2_Package :: M.Map NodeID NodeID
 }
 
 -- Model data types specialized with inital data
-data NodeType           = IsModule | IsPackage
-data LinkType           = M2M | P2P | M2P | P2M
+data NodeType = IsModule | IsPackage
+data LinkType = M2M | P2P | M2P | P2M
+data Pinned   = Pinned | Floating -- might be more categories here, "pinned connectd", "pinned unused" whatever...
+
+type Deps = Array NodeID
 
 type SpagoNodeRow row = ( 
     id       :: NodeID
   , path     :: String
-  , depends  :: Array NodeID
+  , depends  :: { full       :: Deps
+                , tree       :: Deps
+                , inPackage  :: Deps
+                , outPackage :: Deps
+                }
   , nodetype :: NodeType
   , name     :: String
-  , fixed    :: String
+  , pinned   :: Pinned
   | row )
 type SpagoNodeData    = { | SpagoNodeRow () }
 
@@ -61,18 +69,19 @@ type SpagoModel = {
     links           :: Array SpagoGraphLinkID  -- each ID will get swizzled for a SpagoGraphLinkObj_ when simulation initialized
   , nodes           :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
   , graph           :: Graph NodeID SpagoNodeData
-  , name2IdMap      :: M.Map String NodeID
-  , id2NameMap      :: M.Map NodeID String
-  , id2NodeMap      :: M.Map NodeID SpagoNodeData
-  , id2PackageIDMap :: M.Map NodeID NodeID
-  , path2LOCMap     :: M.Map String Number
-  , positions       :: M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
   , tree            :: Maybe (Tuple NodeID SpagoTreeNode)
+  , maps            :: { name_2_ID    :: M.Map String NodeID
+                       , id_2_Name    :: M.Map NodeID String
+                       , id_2_Node    :: M.Map NodeID SpagoNodeData
+                       , id_2_Package :: M.Map NodeID NodeID
+                       , path_2_LOC   :: M.Map String Number
+                       , id_2_XYLeaf  :: M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
+                       }
 }
 
 setXY :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
-setXY (D3SimNode node) { x, y, isLeaf: true }  = D3SimNode (node { x = x, y = y, fixed = "no" })
-setXY (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { fx = notNull x, fy = notNull y, fixed = "yes" })
+setXY (D3SimNode node) { x, y, isLeaf: true }  = D3SimNode (node { x = x, y = y, pinned = Floating })
+setXY (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { fx = notNull x, fy = notNull y, pinned = Pinned })
 
 upgradeSpagoNodeData :: SpagoNodeData -> SpagoSimNode
 upgradeSpagoNodeData node = D3SimNode { 
@@ -82,7 +91,7 @@ upgradeSpagoNodeData node = D3SimNode {
   , nodetype: node.nodetype
   , path: node.path
   , index: node.id
-  , fixed: "no"
+  , pinned: Floating
   , fx: (N.null :: N.Nullable Number)
   , fy: (N.null :: N.Nullable Number)
   , vx: 0.0, vy: 0.0, x: 0.0, y: 0.0
@@ -119,19 +128,20 @@ convertFilesToGraphModel moduleJSON packageJSON lsdepJSON locJSON =
 makeSpagoGraphModel :: Spago_Raw_JSON_ -> SpagoModel
 makeSpagoGraphModel json = do
   let
-    { nodes, links, name2IdMap, id2NameMap, id2NodeMap, id2PackageIDMap } = getGraphJSONData json
-    path2LOCMap = M.fromFoldable $ (\o -> Tuple o.path o.loc) <$> json.loc
+    { nodes, links, name_2_ID, id_2_Name, id_2_Node, id_2_Package } = getGraphJSONData json
+    path_2_LOC = M.fromFoldable $ (\o -> Tuple o.path o.loc) <$> json.loc
 
   { links
   , nodes    : upgradeSpagoNodeData <$> nodes
-  , name2IdMap
-  , id2NameMap
-  , id2NodeMap
-  , id2PackageIDMap
-  , path2LOCMap
-  , graph    : makeGraph nodes
-  , positions: M.empty
   , tree     : Nothing
+  , graph    : makeGraph nodes
+  , maps     : { name_2_ID
+               , id_2_Name
+               , id_2_Node
+               , id_2_Package
+               , path_2_LOC
+               , id_2_XYLeaf: M.empty
+               }
   }
 
 getGraphJSONData :: Spago_Raw_JSON_ -> Spago_Cooked_JSON
@@ -140,17 +150,17 @@ getGraphJSONData { packages, modules, lsDeps } = do
     names = (_.key <$> modules) <> (_.key <$> packages)
     ids   = 1 `range` (length names)
 
-    name2IdMap :: M.Map String NodeID
-    name2IdMap = M.fromFoldableWith (\v1 v2 -> spy "key collision!!!!: " v1) $ zip names ids
+    name_2_ID :: M.Map String NodeID
+    name_2_ID = M.fromFoldableWith (\v1 v2 -> spy "key collision!!!!: " v1) $ zip names ids
 
-    id2NodeMap :: M.Map NodeID SpagoNodeData
-    id2NodeMap = M.fromFoldableWith (\v1 v2 -> spy "key collision!!!!: " v1) $ zip ids nodes
+    id_2_Node :: M.Map NodeID SpagoNodeData
+    id_2_Node = M.fromFoldableWith (\v1 v2 -> spy "key collision!!!!: " v1) $ zip ids nodes
 
-    id2NameMap :: M.Map NodeID String
-    id2NameMap = M.fromFoldable $ zip ids names
+    id_2_Name :: M.Map NodeID String
+    id_2_Name = M.fromFoldable $ zip ids names
 
-    id2PackageIDMap :: M.Map NodeID NodeID
-    id2PackageIDMap = M.fromFoldable $ catMaybes $ id2Package <$> nodes
+    id_2_Package :: M.Map NodeID NodeID
+    id_2_Package = M.fromFoldable $ catMaybes $ id2Package <$> nodes
       where
         id2Package :: SpagoNodeData -> Maybe (Tuple NodeID NodeID)
         id2Package node = do
@@ -160,7 +170,7 @@ getGraphJSONData { packages, modules, lsDeps } = do
           pure $ Tuple node.id packageID
 
     getId :: String -> NodeID
-    getId s = fromMaybe 0 (M.lookup s name2IdMap)
+    getId s = fromMaybe 0 (M.lookup s name_2_ID)
 
     depsMap :: M.Map String { version :: String, repo :: String }
     depsMap = M.fromFoldable $ (\d -> Tuple d.packageName { version: d.version, repo: d.repo.contents } ) <$> lsDeps
@@ -170,14 +180,17 @@ getGraphJSONData { packages, modules, lsDeps } = do
 
     makeModuleToPackageLink :: forall r. { id :: NodeID | r } -> Maybe SpagoGraphLinkID
     makeModuleToPackageLink { id }  = do
-      packageID <- M.lookup id id2PackageIDMap 
+      packageID <- M.lookup id id_2_Package 
       Just $ D3_Link { source: id, target: packageID, linktype: M2P } 
 
     foldDepends :: forall r. Array (Tuple NodeID NodeID) -> { key :: String, depends :: Array String | r } -> Array (Tuple NodeID NodeID)
     foldDepends b a = (makeTuple <$> a.depends) <> b    
       where id = getId a.key 
             makeTuple :: String -> Tuple NodeID NodeID
-            makeTuple s = Tuple id (getId s)   
+            makeTuple s = Tuple id (getId s)  
+
+    initialDepends depends =  { full: (getId <$> depends)
+                              , tree: [], inPackage: [], outPackage: [] } 
 
     makeNodeFromModuleJSON :: SpagoModuleJSON -> SpagoNodeData
     makeNodeFromModuleJSON m = 
@@ -185,8 +198,8 @@ getGraphJSONData { packages, modules, lsDeps } = do
       , name     : m.key
       , path     : m.path
       , nodetype : IsModule
-      , depends  : getId <$> m.depends
-      , fixed    : "no"
+      , depends  : initialDepends m.depends 
+      , pinned   : Floating
       } -- FIXME lookup the m.depends list for ids
 
     makeNodeFromPackageJSON :: SpagoPackageJSON -> SpagoNodeData
@@ -195,8 +208,8 @@ getGraphJSONData { packages, modules, lsDeps } = do
       , name     : m.key
       , path
       , nodetype : IsPackage
-      , depends  : getId <$> m.depends
-      , fixed    : "no"
+      , depends  : initialDepends m.depends
+      , pinned   : Floating
       } -- FIXME id, package and depends all need lookups
       where
         path = case M.lookup m.key depsMap of
@@ -210,7 +223,7 @@ getGraphJSONData { packages, modules, lsDeps } = do
       if root == ".spago" 
       then do 
         package <- pieces !! 1
-        M.lookup package name2IdMap
+        M.lookup package name_2_ID
       else Nothing
 
     moduleLinks        = (makeLink M2M) <$> (foldl foldDepends [] modules)             
@@ -223,7 +236,7 @@ getGraphJSONData { packages, modules, lsDeps } = do
     nodes              = moduleNodes <> packageNodes
     links              = moduleLinks <> packageLinks <> modulePackageLinks
 
-  { links, nodes, name2IdMap, id2NameMap, id2NodeMap, id2PackageIDMap }
+  { links, nodes, name_2_ID, id_2_Name, id_2_Node, id_2_Package }
 
 makeGraph :: Array SpagoNodeData -> Graph NodeID SpagoNodeData
 makeGraph nodes = do
@@ -233,52 +246,13 @@ makeGraph nodes = do
     addNode acc node = M.insert node.id (Tuple node depends) acc
       where
         depends :: S.Set Int
-        depends = S.fromFoldable node.depends
+        depends = S.fromFoldable node.depends.full
   fromMap graphMap
 
 
-type DepPath = Array NodeID
--- type Deps = Array NodeID
-type GraphSearchRecord = {
-    nodes          :: Array NodeID
-  , openDepPaths   :: Array DepPath
-  , closedDepPaths :: Array DepPath
-  , dependencyTree :: Maybe (Tree NodeID)
-}
-
--- TODO make this generic / independent of the SpagoGraph datatypes and extract
-getReachableNodes :: NodeID -> Graph NodeID SpagoNodeData -> GraphSearchRecord
-getReachableNodes id graph = go { nodes: [], openDepPaths: [[id]], closedDepPaths: [], dependencyTree: Nothing }
-  where
-    go :: GraphSearchRecord -> GraphSearchRecord
-    go searchRecord@{ openDepPaths: [] } = searchRecord -- bottom out when all open paths are consumed
-    go searchRecord = do
-      case processNextOpenDepPath searchRecord of
-        Nothing     -> searchRecord -- bottom out but....possibly some exceptions to be looked at here
-        (Just searchRecord') -> go searchRecord'
-
-    processNextOpenDepPath :: GraphSearchRecord -> Maybe GraphSearchRecord
-    processNextOpenDepPath searchRecord = do
-      x         <- uncons searchRecord.openDepPaths
-      firstID   <- head x.head -- NB we're pushing onto the path, cause head is easier than tail
-      firstNode <- G.lookup firstID graph
-
-      let newDeps = 
-            filter (\d -> not $ A.elem d searchRecord.nodes) firstNode.depends
-          newOpenDepPaths = 
-            (\d -> d : x.head) <$> newDeps -- ie [ab] with deps [bc] -> [abc, abd]
-
-      if null newOpenDepPaths
-        -- moving the open path we just processed to the list of closedDepPaths
-        then Just $ searchRecord { openDepPaths   = x.tail                 
-                                 , closedDepPaths = x.head : searchRecord.closedDepPaths}
-        -- replace this open path with it's extension(s)
-        else Just $ searchRecord { openDepPaths = x.tail <> newOpenDepPaths 
-                                 , nodes     = searchRecord.nodes <> newDeps }
-
 
 findGraphNodeIdFromName :: SpagoModel -> String -> Maybe NodeID
-findGraphNodeIdFromName graph name = M.lookup name graph.name2IdMap
+findGraphNodeIdFromName graph name = M.lookup name graph.maps.name_2_ID
 
 
 
@@ -291,3 +265,5 @@ instance showLinkType :: Show LinkType where
   show P2P = "P2P"
   show M2P = "M2P"
   show P2M = "P2M"
+
+derive instance eqPinned :: Eq Pinned

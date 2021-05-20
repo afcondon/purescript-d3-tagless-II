@@ -2,11 +2,11 @@ module D3.Examples.Spago where
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Utility (getWindowWidthHeight)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, findGraphNodeIdFromName, getReachableNodes, setXY)
-import D3.Data.Types (D3Selection_, PointXY)
+import D3.Data.Graph (getReachableNodes)
 import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
+import D3.Data.Types (D3Selection_, PointXY)
 import D3.Examples.Spago.Graph (graphScript)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, findGraphNodeIdFromName, setXY)
 import D3.Examples.Spago.Tree (treeScript)
 import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
 import D3.Interpreter.D3 (runD3M)
@@ -30,6 +30,7 @@ import Effect.Class.Console (log)
 import Math (cos, pi, sin)
 import Prelude (Unit, bind, discard, pure, unit, ($), (*), (/), (<$>), (<*>), (<<<), (<>), (==), (||))
 import Unsafe.Coerce (unsafeCoerce)
+import Utility (getWindowWidthHeight)
 
 drawGraph :: Aff Unit
 drawGraph = do
@@ -64,7 +65,7 @@ treeReduction model rootID  = do
           treenodes         = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
           layout            = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
           idTree            = buildTree rootID model treelinks.yes
-          jsontree          = makeD3TreeJSONFromTreeID idTree model.id2NodeMap
+          jsontree          = makeD3TreeJSONFromTreeID idTree model.maps.id_2_Node
           rootTree          = hierarchyFromJSON_       jsontree
           sortedTree        = treeSortForTree_Spago    rootTree
           laidOutRoot_      = (runLayoutFn_ layout)    sortedTree
@@ -73,7 +74,7 @@ treeReduction model rootID  = do
           unpositionedNodes = setForPhyllotaxis  <$> treenodes.no
           tree              = Tuple rootID laidOutRoot_
 
-      model { links = treelinks.yes, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, positions = positionMap }
+      model { links = treelinks.yes, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, maps { id_2_XYLeaf = positionMap } }
 
 -- for radial positioning we treat x as angle and y as radius
 radialTranslate :: PointXY -> PointXY
