@@ -68,7 +68,7 @@ graphScript (Tuple w h) model = do
                                                   -- , on MouseEnter (\e d t -> stopSimulation_ simulation) 
                                                   -- , on MouseLeave (\e d t -> startSimulation_ simulation)
                                                   , on MouseEnter (\e d t -> highlightNeighborhood simulation linksGroup (unsafeCoerce model) (getIdFromSpagoSimNode d))
-                                                  , on MouseLeave (\e d t -> unhighlightNeighborhood unit)
+                                                  , on MouseLeave (\e d t -> unhighlightNeighborhood linksGroup (unsafeCoerce model))
                                                   ]) 
   labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y (positionLabel model.maps.path_2_LOC), text getNameFromSpagoSimNode]) 
   
@@ -90,7 +90,7 @@ highlightNeighborhood simulation linkselection { links, prunedTreeLinks } nodeId
     sources = (\(D3_Link l) -> l.source.id) <$> sourceLinks
     targets = (\(D3_Link l) -> l.target.id) <$> targetLinks
 
-unhighlightNeighborhood = removeSpotlight_ -- we're caching all the selections on the JS side, simply reversing what we've done in highlight
+unhighlightNeighborhood linkselection { links } = removeSpotlight_ linkselection links -- we're caching all the selections on the JS side, simply reversing what we've done in highlight
 
 foreign import markAsSpotlit_   :: forall link selection. NodeID -> D3Simulation_ -> selection -> Array link -> Array NodeID -> Array NodeID -> Unit
-foreign import removeSpotlight_ :: Unit -> Unit
+foreign import removeSpotlight_ :: forall link selection. selection ->  Array link -> Unit
