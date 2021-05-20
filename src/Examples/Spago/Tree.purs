@@ -1,7 +1,7 @@
 module D3.Examples.Spago.Tree where
 
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x)
-import D3.Examples.Spago.File 
+import D3.Examples.Spago.Model 
 import D3.Data.Types (Datum_, Element(..))
 import D3.Data.Tree (TreeType(..))
 import D3.Examples.Tree.Configure (datumIsTreeNode)

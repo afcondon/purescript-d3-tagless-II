@@ -1,6 +1,7 @@
-module D3.Examples.Spago.File where
+module D3.Examples.Spago.Model where
 
 import D3.Node
+import D3.Examples.Spago.Files
 
 import Affjax (URL)
 import D3.Data.Types (Datum_, PointXY)
@@ -25,19 +26,6 @@ moduleRadius = 5.0 :: Number
 packageRadius = 50.0 :: Number
 packageForceRadius = 50.0 :: Number
 
-
--- TODO This is all specific to the Spago output, so break out into file handling modules later
-type SpagoModuleJSON  = { key :: String, depends :: Array String, path :: String }
-type SpagoPackageJSON = { key :: String, depends :: Array String }
-type SpagoLsDepJSON   = { packageName :: String, version :: String, repo :: { tag :: String, contents :: URL } }
-type SpagoLOCJSON     = { loc :: Number, path :: String }
-
--- TODO no error handling at all here RN (OTOH - performant!!)
-type Spago_Raw_JSON_ = { 
-    packages        :: Array SpagoPackageJSON
-  , modules         :: Array SpagoModuleJSON
-  , lsDeps          :: Array SpagoLsDepJSON
-  , loc             :: Array SpagoLOCJSON } 
 
 type Spago_Cooked_JSON    = { 
     links           :: Array SpagoGraphLinkID
@@ -127,8 +115,6 @@ convertFilesToGraphModel :: forall r.
 convertFilesToGraphModel moduleJSON packageJSON lsdepJSON locJSON = 
   makeSpagoGraphModel $ readSpago_Raw_JSON_ moduleJSON.body packageJSON.body lsdepJSON.body locJSON.body
 
--- TODO use a generic, per-file read for this, and lose the FFI file here
-foreign import readSpago_Raw_JSON_ :: String -> String -> String -> String -> Spago_Raw_JSON_
 
 makeSpagoGraphModel :: Spago_Raw_JSON_ -> SpagoModel
 makeSpagoGraphModel json = do

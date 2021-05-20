@@ -1,7 +1,7 @@
 module D3.Examples.Spago.Graph where
 
 import D3.Attributes.Sugar (classed, fill, on, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Examples.Spago.File 
+import D3.Examples.Spago.Model 
 import D3.Data.Types (Datum_, Element(..), Index_, MouseEvent(..))
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
