@@ -8,7 +8,6 @@ import Effect (Effect)
 import Web.HTML (window)
 import Web.HTML.Window (innerHeight, innerWidth)
 
--- TODO this is nothing to do with Attributes - needs to go to a "Utilities" module 
 getWindowWidthHeight :: Effect (Tuple Number Number)
 getWindowWidthHeight = do
   win <- window

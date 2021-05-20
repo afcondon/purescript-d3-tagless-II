@@ -345,7 +345,6 @@ exports.treeSortForTreeMap_ = root => root.sum(function(d) { return d.value; })
                                           
 exports.treeSortForTree_ = root => root.sum(function(d) { return d.value; })
                                        .sort(function(a, b) { return b.height - a.height || a.id.localeCompare(b.id); })
-// TODO id is not a string in the case of the spago example, this needs review anyway, generally won't be a string, instead some other field will be used
 exports.treeSortForTree_Spago = root => root.sum(function(d) { return d.value; })
                                             .sort(function(a, b) { 
                                               // console.log(`comparing ${a.data.name}, height ${a.height} with ${b.data.name} height ${b.height}`);
@@ -361,6 +360,9 @@ exports.links_ = tree => tree.links()
 
 // foreign import d3HierarchyDescendants :: D3Tree -> SubModel
 exports.descendants_ = tree => tree.descendants()
+exports.ancestors_ = tree => tree.ancestors()
+exports.leaves_ = tree => tree.leaves()
+exports.path_ = from => to => tree.path(from, to)
 
 // foreign import find_        :: D3HierarchicalNode_ -> (Datum_ -> Boolean) -> Nullable D3HierarchicalNode_
 exports.find_ = tree => filter => tree.find(filter)

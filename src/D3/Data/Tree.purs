@@ -4,12 +4,10 @@ import D3.Node (NodeID)
 import Data.Array as A
 import Data.List (List(..))
 import Data.Map as M
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Data.Tree (Tree(..))
-import Prelude (class Eq, (<$>), ($))
+import Prelude (class Eq, (<$>))
 
--- TODO can this move to Node.purs ??
--- these definitions have to be here to avoid cycle (and probably all type defs should in fact be here)
 foreign import data TreeJson_ :: Type
 foreign import emptyTreeJson_ :: TreeJson_
 

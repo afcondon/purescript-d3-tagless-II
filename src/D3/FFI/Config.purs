@@ -6,6 +6,7 @@ import Data.Number (infinity)
 import Prelude (negate)
 import Unsafe.Coerce (unsafeCoerce)
 
+ -- TODO many of the configuration values be Attr style polymorph treatment too - this is bare minimum to support current demos
 -- | a record to initialize / configure simulations
 type SimulationConfig_ = { 
       alpha         :: Number
@@ -101,7 +102,7 @@ type ForceYConfig_ = {
 type ForceRadialFixedConfig_ = {
     name        :: String
   , radius      :: Number
-  , strength    :: Number -- TODO this needs to be Attr style polymorph too
+  , strength    :: Number
   , cx          :: Number
   , cy          :: Number
 }
@@ -109,14 +110,14 @@ type ForceRadialFixedConfig_ = {
 type ForceRadialConfig_ = {
     name        :: String
   , radius      :: (Datum_ -> Index_ -> Number)
-  , strength    :: Number -- TODO this needs to be Attr style polymorph too
+  , strength    :: Number
   , cx          :: Number
   , cy          :: Number
 }
 
 type ForceLinkConfig_ = {
     name        :: String
-  , strength    :: Number -- TODO this needs to be Attr style polymorph too
+  , strength    :: Number
   , distance    :: (Datum_ -> Index_ -> Number)
   , iterations  :: Number
   , id          :: (Datum_ -> Index_ -> Number)

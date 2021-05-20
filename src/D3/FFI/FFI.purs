@@ -1,9 +1,7 @@
 module D3.FFI where
 
 -- brings together ALL of the wrapped D3js functions and FFI / native types
--- TODO break this up into files corresponding to modules in D3js itself 
--- TODO move the type definitions for HierarchicalNode_ and SimulationNode_ etc to D3.Data.Native
-
+-- probably should break it up again when it's more feature complete (ie to match D3 modules). Maybe.
 import D3.Node
 
 import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
@@ -139,18 +137,15 @@ foreign import treeSortForTree_         :: forall d. D3_TreeNode d -> D3_TreeNod
 foreign import treeSortForTree_Spago    :: forall d. D3_TreeNode d -> D3_TreeNode d
 
 -- next some functions to make attributes, types are a bit sloppy here
--- TODO tighten this up
-foreign import hasChildren_             :: Datum_ -> Boolean -- really only works on Datum_ when it's a D3HierarchicalNode_
+foreign import hasChildren_             :: Datum_ -> Boolean -- really only meaningful when Datum_ when is a D3HierarchicalNode_
 
 -- the full API for hierarchical nodes:
 foreign import descendants_     :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
 foreign import find_            :: forall r. D3_TreeNode r -> (Datum_ -> Boolean) -> Nullable (D3_TreeNode r)
 foreign import links_           :: forall d r1 r2. D3_TreeNode r1 -> Array (D3_Link d r2)
-
--- TODO implement the following as well
--- foreign import ancestors_    :: D3HierarchicalNode_ -> D3Data_
--- foreign import leaves_       :: D3HierarchicalNode_ -> Array D3HierarchicalNode_
--- foreign import path_         :: D3HierarchicalNode_ -> D3HierarchicalNode_ -> Array D3HierarchicalNode_
+foreign import ancestors_       :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
+foreign import leaves_          :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
+foreign import path_            :: forall r. D3_TreeNode r -> D3_TreeNode r -> Array (D3_TreeNode r)
 
 getLayout :: TreeType -> TreeLayoutFn_
 getLayout layout = do
