@@ -115,7 +115,7 @@ insertInScriptTree :: NodeID -> D3GrammarNode -> D3MetaTreeM Unit
 insertInScriptTree parentID transition@(TransitionNode chain config) = do
   (ScriptTree id nodeMap links) <- get
   modify_ (\s -> ScriptTree (id + 1) (insert id transition nodeMap) ((Tuple parentID (id+1)) : links))
-  _ <- traverse (insertAttributeInScriptTree parentID) chain
+  -- _ <- traverse (insertAttributeInScriptTree parentID) chain
   pure unit
 
 insertInScriptTree parentID newNode = do
@@ -145,7 +145,7 @@ instance d3Tagless :: D3InterpreterM NodeID D3MetaTreeM where
   append nodeID (D3_Node element attributes) = do
     insertInScriptTree nodeID (AppendNode element)
     (ScriptTree id _ _) <- get
-    _ <- traverse (insertAttributeInScriptTree id) attributes
+    -- _ <- traverse (insertAttributeInScriptTree id) attributes
     pure id -- this is the id of the AppendNode itself
 
   join nodeID (Join j)          = do
