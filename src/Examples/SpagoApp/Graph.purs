@@ -26,7 +26,7 @@ graphScript :: forall m selection.
   D3InterpreterM selection m => 
   Tuple Number Number ->
   SpagoModel -> 
-  m selection -- TODO is it right to return selection_ instead of simulation_? think it would vary by script but Tuple selection simulation would also work as a pattern
+  m selection
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
   svg        <- root `append` (node Svg   [ viewBox (-w / 2.0) (-h / 2.0) w h ] )

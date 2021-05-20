@@ -62,21 +62,21 @@ drawGraph = do
 
 -- TODO make this generic and extract from Spago example to library
 treeReduction :: SpagoModel -> NodeID -> SpagoModel
-treeReduction model rootID = do
-      let reachable       = getReachableNodes rootID model.graph
-          onlyTreelinks   = makeTreeLinks (pathsAsLists reachable.closedDepPaths)
-          treelinks       = partition (\(D3_Link l) -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
-          treenodes       = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
-          layout          = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
-          idTree          = buildTree rootID model treelinks.yes
-          jsontree        = makeD3TreeJSONFromTreeID idTree model.id2NodeMap
-          rootTree        = hierarchyFromJSON_       jsontree
-          sortedTree      = treeSortForTree_Spago    rootTree
-          laidOutRoot_    = (runLayoutFn_ layout)    sortedTree
-          positionMap     = getPositionMap           laidOutRoot_
-          positionedNodes = setNodePositionsRadial   treenodes.yes positionMap
+treeReduction model rootID  = do
+      let reachable         = getReachableNodes rootID model.graph
+          onlyTreelinks     = makeTreeLinks (pathsAsLists reachable.closedDepPaths)
+          treelinks         = partition (\(D3_Link l) -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
+          treenodes         = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
+          layout            = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
+          idTree            = buildTree rootID model treelinks.yes
+          jsontree          = makeD3TreeJSONFromTreeID idTree model.id2NodeMap
+          rootTree          = hierarchyFromJSON_       jsontree
+          sortedTree        = treeSortForTree_Spago    rootTree
+          laidOutRoot_      = (runLayoutFn_ layout)    sortedTree
+          positionMap       = getPositionMap           laidOutRoot_
+          positionedNodes   = setNodePositionsRadial   treenodes.yes positionMap
           unpositionedNodes = setForPhyllotaxis  <$> treenodes.no
-          tree            = Tuple rootID laidOutRoot_
+          tree              = Tuple rootID laidOutRoot_
 
       model { links = treelinks.yes, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, positions = positionMap }
 
@@ -104,7 +104,8 @@ setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode
 setForPhyllotaxis (D3SimNode d) = D3SimNode $ d { x = nan }
 
 getPositionMap :: SpagoTreeNode -> Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
-getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isLeaf: (unsafeCoerce n).data.isLeaf } acc) empty (descendants_ root) -- TODO coerce here is pure hackery
+-- TODO coerce here is pure hackery because reference swizzling not properly modeled in type system
+getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isLeaf: (unsafeCoerce n).data.isLeaf } acc) empty (descendants_ root) 
 
 buildTree :: forall r. NodeID -> SpagoModel -> Array (D3_Link NodeID r) -> Tree NodeID
 buildTree rootID model treelinks = do

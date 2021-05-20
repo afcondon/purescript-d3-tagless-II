@@ -62,7 +62,7 @@ textFromDatum = singleton <<< datumIsChar
 enter :: forall m. D3InterpreterM D3Selection_ m => m ((Array Char) -> m D3Selection_)
 enter = do 
   root        <- attach "div#gup"
-  svg         <- append root $ node Svg svgAttributes -- TODO attributes first a la hologen
+  svg         <- append root $ node Svg svgAttributes -- REVIEW attributes first a la halogen? but this looks better
   letterGroup <- append svg  $ node_ Group            -- the container for the Join
   let transition = transitionWithDuration $ Milliseconds 2000.0
   pure $ \letters -> -- we don't have to do anything to this 'cause the data is already Array Char

@@ -114,5 +114,4 @@ linkWidth :: Datum_ -> Number
 linkWidth datum = sqrt v
   where
     v = (unsafeCoerce datum).value -- TODO rewrite more specific coercion if type safety cannot be achieved
-    -- d = unsafeCoerce $ spy "linkWidth datum" datum
 
