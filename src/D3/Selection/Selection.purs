@@ -1,21 +1,13 @@
 module D3.Selection where
 
 import D3.Attributes.Instances (Attribute, Listener_, attrLabel)
-import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Element, MouseEvent, Transition)
+import D3.Data.Types (D3Selection_, D3Simulation_, Element, MouseEvent, Transition)
 import D3.FFI (ComputeKeyFunction_)
 import Data.Maybe.Last (Last)
 import Prelude (class Eq, class Ord, class Show, Unit, show, (<>))
-import Unsafe.Coerce (unsafeCoerce)
 
 type D3Selection  = Last D3Selection_
 data Keys = ComputeKey ComputeKeyFunction_ | UseDatumAsKey
--- TODO hide the "unsafeCoerce/makeProjection" in a smart constructor
-type Projection = forall model. (model -> D3Data_)
-identityProjection :: Projection
-identityProjection model = unsafeCoerce (\d -> d)
-
-makeProjection :: forall model model'. (model -> model') -> (model -> D3Data_)
-makeProjection = unsafeCoerce
 
 data DragBehavior = 
     DefaultDrag

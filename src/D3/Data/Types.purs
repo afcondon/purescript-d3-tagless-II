@@ -66,6 +66,7 @@ data EasingFunction =
   | EasingFactory (Datum_ -> Int -> D3Group_ -> D3This_ -> D3EasingFn)
 
 -- Zoom types
+-- TODO some Attr polymorphism needed here too
 type ZoomConfig_ = {
     extent      :: Array (Array Number)
   , scaleExtent :: Array Number

@@ -17,6 +17,7 @@ import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, Unit, bind, discard, pure, show, unit, ($), (+), (<$>), (<>), (==))
 
+-- TODO fix interpreter build up of AST, not correct currently as attrs become children (just look at example in browser to see problem)
 data D3GrammarNode = 
     Empty
   | AttachNode String

@@ -12,9 +12,10 @@ import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, discard, pure, show, (<>))
 
-newtype D3PrinterM a = D3PrinterM (StateT String Effect a) -- TODO s/Effect/Identity
+-- TODO s/Effect/Identity
+newtype D3PrinterM a = D3PrinterM (StateT String Effect a)
 
-runPrinter :: D3PrinterM String -> String -> Effect (Tuple String String) -- TODO s/Effect/Identity
+runPrinter :: D3PrinterM String -> String -> Effect (Tuple String String)
 runPrinter (D3PrinterM state) initialString = runStateT state initialString
 
 derive newtype instance functorD3PrinterM     :: Functor           D3PrinterM
@@ -61,7 +62,7 @@ applyChainableString :: String -> Chainable -> String
 applyChainableString selection  = 
   case _ of 
     (AttrT (ToAttribute label attr)) -> showSetAttr_ label (unbox attr) selection
-    (TextT (ToAttribute label attr)) -> showSetText_ (unbox attr) selection  -- TODO unboxText surely?
+    (TextT (ToAttribute label text)) -> showSetText_ (unbox text) selection
     RemoveT                        -> showRemoveSelection_ selection
     (TransitionT chain transition) -> do 
       let tString = showAddTransition_ selection transition

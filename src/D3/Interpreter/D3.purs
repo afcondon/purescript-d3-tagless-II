@@ -105,13 +105,12 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
           , qualifier  : config.qualifier
           , target
           }
-        -- TODO write casae for: (ExtentFunction f) -> selection
 
   onDrag selection dragtype = do
     case dragtype of 
       DefaultDrag     -> pure $ defaultDrag_ selection 
       NoDrag          -> pure $ disableDrag_ selection 
-      (CustomDrag fn) -> pure $ defaultDrag_ selection -- TODO 
+      (CustomDrag fn) -> pure $ defaultDrag_ selection -- TODO no custom drag implemented yet
 
 applyChainableD3 :: D3Selection_ -> Chainable -> D3Selection_
 applyChainableD3 selection_ (AttrT (ToAttribute label attr)) = 
