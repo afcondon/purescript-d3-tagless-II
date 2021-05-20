@@ -1,302 +1,241 @@
-module D3.Data.File.Spago where
+module D3.Examples.Spago where
 
-import D3.Node
-
-import Affjax (URL)
-import D3.Data.Types (Datum_, PointXY)
-import Data.Array (catMaybes, filter, foldl, head, length, null, range, uncons, zip, (!!), (:))
-import Data.Array as A
-import Data.Graph (Graph, fromMap)
-import Data.Graph as G
+import Affjax as AJAX
+import Affjax.ResponseFormat as ResponseFormat
+import Utility (getWindowWidthHeight)
+import D3.Examples.Spago.File (NodeType(..), SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, findGraphNodeIdFromName, getReachableNodes, setXY)
+import D3.Data.Types (D3Selection_, Datum_, Index_, PointXY)
+import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
+import D3.Examples.Spago.Graph (graphScript)
+import D3.Examples.Spago.Tree (treeScript)
+import D3.Examples.Tree.Configure (datumIsTreeNode)
+import D3.FFI (descendants_, getLayout, hasChildren_, hierarchyFromJSON_, runLayoutFn_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
+import D3.Interpreter.D3 (runD3M)
+import D3.Interpreter.String (runPrinter)
+import D3.Layouts.Hierarchical (radialSeparation)
+import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), D3_XY, NodeID, getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
+import D3.Scales (d3SchemeCategory10N_)
+import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
+import Data.Either (Either(..))
+import Data.Int (toNumber)
+import Data.List (List(..), (:))
+import Data.List as L
+import Data.Map (Map, empty)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Nullable (Nullable, null) as N
-import Data.Nullable (notNull)
+import Data.Number (nan)
 import Data.Set as S
-import Data.String (Pattern(..), split)
-import Data.Tree (Tree)
-import Data.Tuple (Tuple(..))
-import Debug (spy)
-import Prelude (class Show, bind, not, pure, ($), (<$>), (<>), (==))
+import Data.Tree (Tree(..))
+import Data.Tuple (Tuple(..), fst, snd)
+import Effect.Aff (Aff)
+import Effect.Class (liftEffect)
+import Effect.Class.Console (log)
+import Math (cos, pi, sin)
+import Math (sqrt) as Math
+import Prelude (Unit, bind, discard, negate, pure, show, unit, ($), (*), (+), (-), (/), (<), (<$>), (<*>), (<<<), (<>), (==), (>=), (||))
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
--- TODO This is all specific to the Spago output, so break out into file handling modules later
-type SpagoModuleJSON  = { key :: String, depends :: Array String, path :: String }
-type SpagoPackageJSON = { key :: String, depends :: Array String }
-type SpagoLsDepJSON   = { packageName :: String, version :: String, repo :: { tag :: String, contents :: URL } }
-type SpagoLOCJSON     = { loc :: Number, path :: String }
+drawGraph :: Aff Unit
+drawGraph = do
+  log "Force layout example"
+  (Tuple width height) <- liftEffect getWindowWidthHeight
+  moduleJSON  <- AJAX.get ResponseFormat.string "http://localhost:1234/modules.json"
+  packageJSON <- AJAX.get ResponseFormat.string "http://localhost:1234/packages.json"
+  lsdepJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/lsdeps.jsonlines"
+  locJSON     <- AJAX.get ResponseFormat.string "http://localhost:1234/loc.json"
+  case convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON <*> locJSON of
+    (Left error)  -> log "error converting spago json file inputs"
+    (Right graph) -> do
+      let graph' = 
+            case findGraphNodeIdFromName graph "Main" of
+              Nothing       -> graph -- couldn't find root of tree so just skip this
+              (Just rootID) -> treeReduction graph rootID
 
--- TODO no error handling at all here RN (OTOH - performant!!)
-type Spago_Raw_JSON_ = { 
-    packages        :: Array SpagoPackageJSON
-  , modules         :: Array SpagoModuleJSON
-  , lsDeps          :: Array SpagoLsDepJSON
-  , loc             :: Array SpagoLOCJSON } 
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (treeScript (Tuple (width/2.0) height) graph')
+       
+      printedScript <- liftEffect $ runPrinter (graphScript (Tuple width height) graph') "Force Layout Script"
+      log $ snd printedScript
+      log $ fst printedScript
+      pure unit
 
-type Spago_Cooked_JSON    = { 
-    links           :: Array SpagoGraphLinkID
-  , nodes           :: Array SpagoNodeData
-  , name2IdMap      :: M.Map String NodeID
-  , id2NameMap      :: M.Map NodeID String
-  , id2NodeMap      :: M.Map NodeID SpagoNodeData
-  , id2PackageIDMap :: M.Map NodeID NodeID
-}
+-- TODO make this generic and extract from Spago example to library
+treeReduction :: SpagoModel -> NodeID -> SpagoModel
+treeReduction model rootID = do
+      let reachable       = getReachableNodes rootID model.graph
+          onlyTreelinks   = makeTreeLinks (pathsAsLists reachable.closedDepPaths)
+          treelinks       = partition (\(D3_Link l) -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
+          treenodes       = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
+          layout          = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
+          idTree          = buildTree rootID model treelinks.yes
+          jsontree        = makeD3TreeJSONFromTreeID idTree model.id2NodeMap
+          rootTree        = hierarchyFromJSON_       jsontree
+          sortedTree      = treeSortForTree_Spago    rootTree
+          laidOutRoot_    = (runLayoutFn_ layout)    sortedTree
+          positionMap     = getPositionMap           laidOutRoot_
+          positionedNodes = setNodePositionsRadial   treenodes.yes positionMap
+          unpositionedNodes = setForPhyllotaxis  <$> treenodes.no
+          tree            = Tuple rootID laidOutRoot_
 
--- Model data types specialized with inital data
-data NodeType           = IsModule | IsPackage
-data LinkType           = M2M | P2P | M2P | P2M
+      model { links = treelinks.yes, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, positions = positionMap }
 
-type SpagoNodeRow row = ( 
-    id       :: NodeID
-  , path     :: String
-  , depends  :: Array NodeID
-  , nodetype :: NodeType
-  , name     :: String
-  , fixed    :: String
-  | row )
-type SpagoNodeData    = { | SpagoNodeRow () }
+-- for radial positioning we treat x as angle and y as radius
+radialTranslate :: PointXY -> PointXY
+radialTranslate p = 
+  let angle  = p.x
+      radius = p.y
+      x = radius * cos angle
+      y = radius * sin angle
+  in { x, y }
 
-type SpagoTreeNode    = D3TreeRow       (EmbeddedData SpagoNodeData + ())
-type SpagoSimNode     = D3SimulationRow (             SpagoNodeRow  + ())
+setNodePositionsRadial :: Array SpagoSimNode -> M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean } -> Array SpagoSimNode
+setNodePositionsRadial nodes positionMap = do
+  let 
+    updateXY (D3SimNode node) = do
+      case M.lookup node.id positionMap of
+        Nothing -> D3SimNode node
+        (Just p) -> 
+          let { x,y } = radialTranslate { x: p.x, y: p.y }
+          in (D3SimNode node) `setXY` { x, y, isLeaf: p.isLeaf }
+  updateXY <$> nodes
 
-type SpagoLinkData    = ( linktype :: LinkType )
-type SpagoGraphLinkID = D3_Link NodeID SpagoLinkData
-type SpagoGraphLinkObj = D3_Link SpagoNodeData SpagoLinkData
+setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode
+setForPhyllotaxis (D3SimNode d) = D3SimNode $ d { x = nan }
 
-type SpagoModel = { 
-    links           :: Array SpagoGraphLinkID  -- each ID will get swizzled for a SpagoGraphLinkObj_ when simulation initialized
-  , nodes           :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
-  , graph           :: Graph NodeID SpagoNodeData
-  , name2IdMap      :: M.Map String NodeID
-  , id2NameMap      :: M.Map NodeID String
-  , id2NodeMap      :: M.Map NodeID SpagoNodeData
-  , id2PackageIDMap :: M.Map NodeID NodeID
-  , path2LOCMap     :: M.Map String Number
-  , positions       :: M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
-  , tree            :: Maybe (Tuple NodeID SpagoTreeNode)
-}
+getPositionMap :: SpagoTreeNode -> Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
+getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isLeaf: (unsafeCoerce n).data.isLeaf } acc) empty (descendants_ root) -- TODO coerce here is pure hackery
 
-setXY :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
-setXY (D3SimNode node) { x, y, isLeaf: true }  = D3SimNode (node { x = x, y = y, fixed = "no" })
-setXY (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { fx = notNull x, fy = notNull y, fixed = "yes" })
+buildTree :: forall r. NodeID -> SpagoModel -> Array (D3_Link NodeID r) -> Tree NodeID
+buildTree rootID model treelinks = do
+  let 
+    unwrap :: D3_Link NodeID r -> { source :: NodeID, target :: NodeID | r }
+    unwrap (D3_Link d) = d
+    linksWhoseSourceIs :: NodeID -> L.List NodeID
+    linksWhoseSourceIs id = L.fromFoldable $ (_.target) <$> (filter (\l -> l.source == id) (unwrap <$> treelinks))
 
-upgradeSpagoNodeData :: SpagoNodeData -> SpagoSimNode
-upgradeSpagoNodeData node = D3SimNode { 
-    depends: node.depends
-  , id: node.id
-  , name: node.name
-  , nodetype: node.nodetype
-  , path: node.path
-  , index: node.id
-  , fixed: "no"
-  , fx: (N.null :: N.Nullable Number)
-  , fy: (N.null :: N.Nullable Number)
-  , vx: 0.0, vy: 0.0, x: 0.0, y: 0.0
-  }
+    go :: NodeID -> Tree NodeID
+    go childID = Node childID (go <$> linksWhoseSourceIs childID)
 
-datumIsSpagoSimNode :: Datum_ -> SpagoSimNode
-datumIsSpagoSimNode = unsafeCoerce
+  Node rootID (go <$> (linksWhoseSourceIs rootID))
 
-datumIsSpagoLink :: Datum_ -> D3_Link SpagoNodeData SpagoLinkData
-datumIsSpagoLink = unsafeCoerce
+path2Tuples :: L.List (Tuple NodeID NodeID) -> L.List NodeID -> L.List (Tuple NodeID NodeID)
+path2Tuples acc Nil     = acc
+path2Tuples acc (x:Nil) = acc
+path2Tuples acc (s:t:tail) = path2Tuples ((Tuple s t):acc) (t:tail)
 
-datumIsGraphNode :: Datum_ -> SpagoSimNode
-datumIsGraphNode = unsafeCoerce
+pathsAsLists :: Array (Array NodeID) -> L.List (L.List NodeID)
+pathsAsLists paths = L.fromFoldable ((L.fromFoldable <<< reverse) <$> paths) -- because pattern matching lists is so much nicer for path2Tuples
 
-getIdFromSpagoSimNode :: Datum_ -> Int
-getIdFromSpagoSimNode datum = d.id
+makeTreeLinks :: L.List (L.List NodeID) -> Array (Tuple NodeID NodeID)
+makeTreeLinks closedPaths = do
+  let
+    linkTuples = (L.foldl path2Tuples Nil) closedPaths
+  fromFoldable $ S.fromFoldable linkTuples -- removes the duplicates while building  
+
+
+-- this is boilerplate but...typed attribute setters facilitate typeclass based conversions
+-- we give the chart our Model type but behind the scenes it is mutated by D3 and additionally
+-- which projection of the "Model" is active in each Join varies so we can't have both strong
+-- static type representations AND lightweight syntax with JS compatible lambdas (i think)
+-- TODO move coerce for well defined (ie shared) types to FFI, try to use Row machinery to eliminate need for this or tighten up the type safety
+moduleRadius = 5.0 :: Number 
+packageRadius = 50.0 :: Number
+packageForceRadius = 50.0 :: Number
+
+chooseRadius :: Map String Number -> Datum_ -> Number
+chooseRadius locMap datum = do
+  let (D3SimNode d) = datumIsSpagoSimNode datum
+  case d.nodetype of
+    IsModule   -> Math.sqrt (fromMaybe 10.0 $ M.lookup d.path locMap)
+    IsPackage -> packageRadius
+
+chooseRadiusTree :: Map String Number -> Datum_ -> Number
+chooseRadiusTree locMap datum = do
+  let (D3SimNode d) = unsafeCoerce datum -- TODO unsafe because despite all the row types this still cashes out to a simnode not a treenode here which must be fixed
+  case d.data.nodetype of
+    IsModule   -> Math.sqrt (fromMaybe 10.0 $ M.lookup d.data.path locMap)
+    IsPackage -> packageRadius
+
+positionLabel :: Map String Number -> Datum_ -> Number
+positionLabel locMap datum = do
+  let (D3SimNode d) = datumIsSpagoSimNode datum
+  case d.nodetype of
+    IsModule -> negate $ Math.sqrt (fromMaybe 10.0 $ M.lookup d.path locMap)
+    IsPackage -> 0.0
+
+chooseRadiusFn :: Datum_ -> Index_ -> Number
+chooseRadiusFn datum index = do
+  let (D3SimNode d) = datumIsSpagoSimNode datum
+  case d.nodetype of
+    IsModule  -> moduleRadius
+    IsPackage -> packageRadius + packageForceRadius
+
+nodeClass :: Datum_ -> String
+nodeClass datum = do
+  let (D3SimNode d) = datumIsSpagoSimNode datum
+  show d.nodetype
+
+linkClass :: Datum_ -> String
+linkClass datum = do
+  let (D3_Link d) = datumIsSpagoLink datum
+  show d.linktype
+
+translateNode :: Datum_ -> String
+translateNode datum = "translate(" <> show x <> "," <> show y <> ")"
+  where 
+    d = datumIsGraphNode datum
+    (x :: Number) = (unsafeCoerce datum).x
+    (y :: Number) = (unsafeCoerce datum).y
+
+colorByGroup :: M.Map NodeID NodeID -> Datum_ -> String
+colorByGroup packageMap datum = d3SchemeCategory10N_ (toNumber $ fromMaybe 0 packageID)
   where
     (D3SimNode d) = unsafeCoerce datum
+    packageID     = M.lookup d.id packageMap
 
-getNameFromSpagoSimNode :: Datum_ -> String
-getNameFromSpagoSimNode datum = d.name
+colorByGroupTree :: M.Map NodeID NodeID -> Datum_ -> String
+colorByGroupTree packageMap datum = d3SchemeCategory10N_ (toNumber $ fromMaybe 0 packageID)
   where
     (D3SimNode d) = unsafeCoerce datum
+    packageID     = M.lookup d.data.id packageMap
 
-convertFilesToGraphModel :: forall r. 
-  { body :: String | r } -> 
-  { body :: String | r } -> 
-  { body :: String | r } -> 
-  { body :: String | r } -> SpagoModel
-convertFilesToGraphModel moduleJSON packageJSON lsdepJSON locJSON = 
-  makeSpagoGraphModel $ readSpago_Raw_JSON_ moduleJSON.body packageJSON.body lsdepJSON.body locJSON.body
-
--- TODO use a generic, per-file read for this, and lose the FFI file here
-foreign import readSpago_Raw_JSON_ :: String -> String -> String -> String -> Spago_Raw_JSON_
-
-makeSpagoGraphModel :: Spago_Raw_JSON_ -> SpagoModel
-makeSpagoGraphModel json = do
-  let
-    { nodes, links, name2IdMap, id2NameMap, id2NodeMap, id2PackageIDMap } = getGraphJSONData json
-    path2LOCMap = M.fromFoldable $ (\o -> Tuple o.path o.loc) <$> json.loc
-
-  { links
-  , nodes    : upgradeSpagoNodeData <$> nodes
-  , name2IdMap
-  , id2NameMap
-  , id2NodeMap
-  , id2PackageIDMap
-  , path2LOCMap
-  , graph    : makeGraph nodes
-  , positions: M.empty
-  , tree     : Nothing
-  }
-
-getGraphJSONData :: Spago_Raw_JSON_ -> Spago_Cooked_JSON
-getGraphJSONData { packages, modules, lsDeps } = do
-  let
-    names = (_.key <$> modules) <> (_.key <$> packages)
-    ids   = 1 `range` (length names)
-
-    name2IdMap :: M.Map String NodeID
-    name2IdMap = M.fromFoldableWith (\v1 v2 -> spy "key collision!!!!: " v1) $ zip names ids
-
-    id2NodeMap :: M.Map NodeID SpagoNodeData
-    id2NodeMap = M.fromFoldableWith (\v1 v2 -> spy "key collision!!!!: " v1) $ zip ids nodes
-
-    id2NameMap :: M.Map NodeID String
-    id2NameMap = M.fromFoldable $ zip ids names
-
-    id2PackageIDMap :: M.Map NodeID NodeID
-    id2PackageIDMap = M.fromFoldable $ catMaybes $ id2Package <$> nodes
-      where
-        id2Package :: SpagoNodeData -> Maybe (Tuple NodeID NodeID)
-        id2Package node = do
-          packageID <- case node.nodetype of
-                        IsModule  -> getPackage node.path
-                        IsPackage -> Just node.id
-          pure $ Tuple node.id packageID
-
-    getId :: String -> NodeID
-    getId s = fromMaybe 0 (M.lookup s name2IdMap)
-
-    depsMap :: M.Map String { version :: String, repo :: String }
-    depsMap = M.fromFoldable $ (\d -> Tuple d.packageName { version: d.version, repo: d.repo.contents } ) <$> lsDeps
-
-    makeLink :: LinkType -> Tuple NodeID NodeID -> SpagoGraphLinkID
-    makeLink linktype (Tuple source target) = D3_Link { source, target, linktype }
-
-    makeModuleToPackageLink :: forall r. { id :: NodeID | r } -> Maybe SpagoGraphLinkID
-    makeModuleToPackageLink { id }  = do
-      packageID <- M.lookup id id2PackageIDMap 
-      Just $ D3_Link { source: id, target: packageID, linktype: M2P } 
-
-    foldDepends :: forall r. Array (Tuple NodeID NodeID) -> { key :: String, depends :: Array String | r } -> Array (Tuple NodeID NodeID)
-    foldDepends b a = (makeTuple <$> a.depends) <> b    
-      where id = getId a.key 
-            makeTuple :: String -> Tuple NodeID NodeID
-            makeTuple s = Tuple id (getId s)   
-
-    makeNodeFromModuleJSON :: SpagoModuleJSON -> SpagoNodeData
-    makeNodeFromModuleJSON m = 
-      { id       : getId m.key
-      , name     : m.key
-      , path     : m.path
-      , nodetype : IsModule
-      , depends  : getId <$> m.depends
-      , fixed    : "no"
-      } -- FIXME lookup the m.depends list for ids
-
-    makeNodeFromPackageJSON :: SpagoPackageJSON -> SpagoNodeData
-    makeNodeFromPackageJSON m = 
-      { id       : getId m.key
-      , name     : m.key
-      , path
-      , nodetype : IsPackage
-      , depends  : getId <$> m.depends
-      , fixed    : "no"
-      } -- FIXME id, package and depends all need lookups
-      where
-        path = case M.lookup m.key depsMap of
-                Nothing -> "error path not found for package key: " <> m.key
-                (Just { repo }) -> repo 
-
-    getPackage :: String -> Maybe NodeID
-    getPackage path = do
-      let pieces = split (Pattern "/") path
-      root    <- pieces !! 0
-      if root == ".spago" 
-      then do 
-        package <- pieces !! 1
-        M.lookup package name2IdMap
-      else Nothing
-
-    moduleLinks        = (makeLink M2M) <$> (foldl foldDepends [] modules)             
-    packageLinks       = (makeLink P2P) <$> (foldl foldDepends [] packages)
-
-    packageNodes       = makeNodeFromPackageJSON <$> packages
-    moduleNodes        = makeNodeFromModuleJSON  <$> modules
-
-    modulePackageLinks = catMaybes $ makeModuleToPackageLink <$> moduleNodes
-    nodes              = moduleNodes <> packageNodes
-    links              = moduleLinks <> packageLinks <> modulePackageLinks
-
-  { links, nodes, name2IdMap, id2NameMap, id2NodeMap, id2PackageIDMap }
-
-makeGraph :: Array SpagoNodeData -> Graph NodeID SpagoNodeData
-makeGraph nodes = do
-  let
-    graphMap = foldl addNode M.empty nodes
-    addNode :: M.Map NodeID (Tuple SpagoNodeData (S.Set NodeID)) -> SpagoNodeData -> M.Map NodeID (Tuple SpagoNodeData (S.Set NodeID))
-    addNode acc node = M.insert node.id (Tuple node depends) acc
-      where
-        depends :: S.Set Int
-        depends = S.fromFoldable node.depends
-  fromMap graphMap
+setX1 :: Datum_ -> Number
+setX1 = getSourceX
+setY1 :: Datum_ -> Number
+setY1 = getSourceY
+setX2 :: Datum_ -> Number
+setX2 = getTargetX
+setY2 :: Datum_ -> Number
+setY2 = getTargetY
+setCx :: Datum_ -> Number
+setCx = getNodeX
+setCy :: Datum_ -> Number
+setCy = getNodeY
 
 
-type DepPath = Array NodeID
--- type Deps = Array NodeID
-type GraphSearchRecord = {
-    nodes          :: Array NodeID
-  , openDepPaths   :: Array DepPath
-  , closedDepPaths :: Array DepPath
-  , dependencyTree :: Maybe (Tree NodeID)
-}
+radialRotate :: Number -> String
+radialRotate x = show $ (x * 180.0 / pi - 90.0)
 
--- TODO make this generic / independent of the SpagoGraph datatypes and extract
-getReachableNodes :: NodeID -> Graph NodeID SpagoNodeData -> GraphSearchRecord
-getReachableNodes id graph = go { nodes: [], openDepPaths: [[id]], closedDepPaths: [], dependencyTree: Nothing }
-  where
-    go :: GraphSearchRecord -> GraphSearchRecord
-    go searchRecord@{ openDepPaths: [] } = searchRecord -- bottom out when all open paths are consumed
-    go searchRecord = do
-      case processNextOpenDepPath searchRecord of
-        Nothing     -> searchRecord -- bottom out but....possibly some exceptions to be looked at here
-        (Just searchRecord') -> go searchRecord'
+radialRotateCommon :: forall r. D3_TreeNode (D3_XY + r) -> String
+radialRotateCommon (D3TreeNode d) = "rotate(" <> radialRotate d.x <> ")"
 
-    processNextOpenDepPath :: GraphSearchRecord -> Maybe GraphSearchRecord
-    processNextOpenDepPath searchRecord = do
-      x         <- uncons searchRecord.openDepPaths
-      firstID   <- head x.head -- NB we're pushing onto the path, cause head is easier than tail
-      firstNode <- G.lookup firstID graph
+radialTreeTranslate :: forall r. D3_TreeNode (D3_XY + r) -> String
+radialTreeTranslate (D3TreeNode d) = "translate(" <> show d.y <> ",0)"
 
-      let newDeps = 
-            filter (\d -> not $ A.elem d searchRecord.nodes) firstNode.depends
-          newOpenDepPaths = 
-            (\d -> d : x.head) <$> newDeps -- ie [ab] with deps [bc] -> [abc, abd]
+rotateRadialLabels :: forall r. D3_TreeNode (D3_XY + r) -> String
+rotateRadialLabels (D3TreeNode d) = -- TODO replace with nodeIsOnRHS 
+  "rotate(" <> if d.x >= pi 
+  then "180" <> ")" 
+  else "0" <> ")"
 
-      if null newOpenDepPaths
-        -- moving the open path we just processed to the list of closedDepPaths
-        then Just $ searchRecord { openDepPaths   = x.tail                 
-                                 , closedDepPaths = x.head : searchRecord.closedDepPaths}
-        -- replace this open path with it's extension(s)
-        else Just $ searchRecord { openDepPaths = x.tail <> newOpenDepPaths 
-                                 , nodes     = searchRecord.nodes <> newDeps }
+nodeIsOnRHS :: Datum_ -> Boolean
+nodeIsOnRHS d = node.x < pi
+  where (D3TreeNode node) = datumIsTreeNode d
 
+textDirection :: Datum_ -> Boolean
+textDirection = \d -> hasChildren_ d == nodeIsOnRHS d
 
-findGraphNodeIdFromName :: SpagoModel -> String -> Maybe NodeID
-findGraphNodeIdFromName graph name = M.lookup name graph.name2IdMap
-
-
-
--- | boilerplate
-instance showNodeType :: Show NodeType where
-  show IsModule = "module"
-  show IsPackage = "package"
-instance showLinkType :: Show LinkType where
-  show M2M = "M2M"
-  show P2P = "P2P"
-  show M2P = "M2P"
-  show P2M = "P2M"
+labelName :: Datum_ -> String
+labelName d = node."data".name
+  where node = unsafeCoerce d

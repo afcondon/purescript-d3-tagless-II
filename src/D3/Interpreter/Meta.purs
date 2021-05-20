@@ -1,12 +1,13 @@
 module D3.Interpreter.MetaTree where
 
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, Unit, bind, discard, pure, show, unit, ($), (+), (<$>), (<>), (==))
+import D3.Node
+
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
-import D3.Data.Types (Element, MouseEvent, Transition, TreeJson_)
+import D3.Data.Tree (TreeJson_)
+import D3.Data.Types (Element, MouseEvent, Transition)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Selection (Chainable(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), Keys)
 import D3.Zoom (ZoomConfig)
-import D3.Node
 import Data.Array (filter, (:))
 import Data.Map (Map, empty, insert, lookup)
 import Data.Maybe (fromMaybe)
@@ -14,6 +15,7 @@ import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, Unit, bind, discard, pure, show, unit, ($), (+), (<$>), (<>), (==))
 
 data D3GrammarNode = 
     Empty

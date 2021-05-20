@@ -4,8 +4,9 @@ import D3.Examples.LesMiserables.File (LesMisNodeData, readGraphFromFileContents
 import D3.Node (D3_Link, NodeID, getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
 
 import Affjax as AJAX
+import Utility
 import Affjax.ResponseFormat as ResponseFormat
-import D3.Attributes.Sugar (classed, cx, cy, fill, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
+import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.FFI (startSimulation_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceLinkConfig, defaultForceManyConfig)

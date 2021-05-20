@@ -1,11 +1,18 @@
 module D3.Node where
 
-import D3.Data.Foreign (Datum_)
+import D3.Data.Types (Datum_)
 import Data.Nullable (Nullable)
 import Debug (spy, trace)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
+-- ============================================================================================================================
+-- | Types for working with D3 Trees and Graphs, to try to smooth the moving between them. 
+-- | D3 Simulation/graph data is EXTENDED ROW whereas Tree/Hierarchy data has the original object EMBEDDED as { data: <object> }
+-- | Work-in-progress
+-- ============================================================================================================================
+
+-- TODO bring some consistency to the naming of rows, newtypes, data constructors etc. This is a mess at the moment
 type NodeID = Int
 -- a link specialized to a particular type of object
 newtype D3_Link l row = D3_Link {

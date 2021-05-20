@@ -1,7 +1,9 @@
 module D3.Examples.Tree.Configure where
 
-import D3.Attributes.Sugar (getWindowWidthHeight, transform, viewBox)
-import D3.Data.Types (D3Selection_, Datum_, TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
+import Utility
+import D3.Attributes.Sugar (transform, viewBox)
+import D3.Data.Types (D3Selection_, Datum_)
+import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Examples.Tree.Script (FlareTreeNode, treeScript)
 import D3.FFI (getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
 import D3.Interpreter (class D3InterpreterM)

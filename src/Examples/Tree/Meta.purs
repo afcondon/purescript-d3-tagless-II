@@ -2,8 +2,10 @@ module D3.Examples.Tree.Meta where
 
 import D3.Node
 
-import D3.Attributes.Sugar (classed, fill, fontFamily, fontSize, getWindowWidthHeight, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
-import D3.Data.Types (D3Selection_, Datum_, Element(..), TreeModel, TreeType(..))
+import Utility (getWindowWidthHeight)
+import D3.Attributes.Sugar (classed, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
+import D3.Data.Types (D3Selection_, Datum_, Element(..))
+import D3.Data.Tree (TreeModel, TreeType(..))
 import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Interpreter.D3 (runD3M)

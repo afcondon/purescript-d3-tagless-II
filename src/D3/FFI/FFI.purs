@@ -6,7 +6,8 @@ module D3.FFI where
 
 import D3.Node
 
-import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, TreeJson_, TreeLayoutFn_, TreeType(..), ZoomConfigDefault_, ZoomConfig_)
+import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
+import D3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
 import D3.FFI.Config (ForceCenterConfig_, ForceCollideConfig_, ForceCollideFixedConfig_, ForceLinkConfig_, ForceManyConfig_, ForceRadialConfig_, ForceRadialFixedConfig_, ForceXConfig_, ForceYConfig_, SimulationConfig_)
 import Data.Array (find)
 import Data.Function.Uncurried (Fn2)

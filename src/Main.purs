@@ -2,13 +2,13 @@ module Main where
 
 import Prelude (Unit, bind, discard, pure, unit, ($), (=<<))
 
-import D3.Examples.LesMiserables as Graph
-import D3.Examples.Simulation.SpagoPackages as Spago
+import D3.Examples.LesMiserables as LesMis
+import D3.Examples.Spago as Spago
 import D3.Examples.GUP (runGeneralUpdatePattern) as GUP
 import D3.Examples.Tree.Configure as Tree
 import D3.Examples.Tree.Meta as MetaTree
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
-import D3.Data.Types (TreeJson_, TreeLayout(..), TreeType(..))
+import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..))
 import Data.Bifunctor (rmap)
 import Data.Foldable (sequence_)
 import Effect (Effect)
@@ -23,7 +23,7 @@ main = launchAff_  do
   _        <- forkAff Spago.drawGraph
 
   _        <- forkAff GUP.runGeneralUpdatePattern
-  _        <- forkAff Graph.drawGraph
+  _        <- forkAff LesMis.drawGraph
 
   -- -- fetch an example model for the tree examples, the canonical flare dependency json in this case
   treeJSON <- getTreeViaAJAX "http://localhost:1234/flare-2.json"

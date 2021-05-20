@@ -6,7 +6,8 @@ import Affjax (Error, URL)
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (Attribute(..), toAttr)
-import D3.Data.Types (Datum_, TreeJson_, TreeLayout, TreeModel, TreeType)
+import D3.Data.Tree (TreeJson_, TreeLayout, TreeModel, TreeType)
+import D3.Data.Types (Datum_)
 import D3.FFI (find_, getLayout, hNodeDepth_, linkClusterHorizontal_, linkClusterVertical_, linkHorizontal_, linkRadial_, linkVertical_, sharesParent_)
 import D3.Selection (Chainable(..))
 import Data.Bifunctor (rmap)

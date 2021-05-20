@@ -8,6 +8,7 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tree (Tree(..))
 import Prelude (class Eq, (<$>), ($))
 
+-- TODO can this move to Node.purs ??
 -- these definitions have to be here to avoid cycle (and probably all type defs should in fact be here)
 foreign import data TreeJson_ :: Type
 foreign import emptyTreeJson_ :: TreeJson_
@@ -20,7 +21,6 @@ derive instance eqTreeLayout :: Eq TreeLayout
 
 type TreeModel = {
       json         :: TreeJson_                      -- data from file
-    -- , root         :: D3_TreeNode d           -- tree after initialization by d3.hierarchy
     , treeType     :: TreeType
     , treeLayout   :: TreeLayout
     , treeLayoutFn :: TreeLayoutFn_
@@ -44,6 +44,6 @@ makeD3TreeJSONFromTreeID root nodesMap = go root
                         Nil -> idTreeLeaf_ obj
                         _   -> idTreeParent_ obj (go <$> (A.fromFoldable children))
 
-foreign import idTreeLeaf_   :: forall id d. d -> TreeJson_
-foreign import idTreeParent_ :: forall id d. d -> Array TreeJson_ -> TreeJson_
+foreign import idTreeLeaf_   :: forall d. d -> TreeJson_
+foreign import idTreeParent_ :: forall d. d -> Array TreeJson_ -> TreeJson_
 

@@ -1,6 +1,6 @@
 module D3.FFI.Config where
 
-import D3.Data.Foreign (Datum_, Index_)
+import D3.Data.Types (Datum_, Index_)
 import D3.Node
 import Data.Number (infinity)
 import Prelude (negate)

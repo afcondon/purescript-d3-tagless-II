@@ -1,17 +1,19 @@
-module D3.Data.Types(
-    module D3.Data.Tree
-  , module D3.Data.Transition
-  , module D3.Data.Zoom
-  , module D3.Data.Foreign
-  , Selector, PointXY
-  , Element(..), UnitType(..), MouseEvent(..)
-) where
+module D3.Data.Types where
 
-import D3.Data.Foreign (D3Data_, D3DomNode_, D3Selection_, D3Simulation_, D3This_, D3Transition_, Datum_, Index_)
-import D3.Data.Transition (D3EasingFn, D3Group_, EasingFunction(..), EasingTime, Transition)
-import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeLayoutFn_, TreeModel, TreeType(..), idTreeLeaf_, idTreeParent_, makeD3TreeJSONFromTreeID)
-import D3.Data.Zoom (ZoomConfigDefault_, ZoomConfig_)
+-- import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeLayoutFn_, TreeModel, TreeType(..), idTreeLeaf_, idTreeParent_, makeD3TreeJSONFromTreeID)
+
+import Data.Time.Duration (Milliseconds)
 import Prelude (class Show)
+
+foreign import data Datum_ :: Type
+foreign import data Index_ :: Type
+
+foreign import data D3Data_       :: Type 
+foreign import data D3Selection_  :: Type
+foreign import data D3Simulation_ :: Type -- has to be declared here to avoid cycle with Simulation.purs
+foreign import data D3Transition_ :: Type -- not clear yet if we need to distinguish from Selection
+foreign import data D3This_       :: Type -- not yet used but may be needed, ex. in callbacks
+foreign import data D3DomNode_    :: Type
 
 type Selector = String 
 
@@ -45,3 +47,33 @@ instance showMouseEvent :: Show MouseEvent where
   show MouseUp    = "mouseup"
 
 type PointXY = { x :: Number, y :: Number }
+
+-- | Transition definitions
+-- TODO make this a Newtype and give it monoid instance
+type Transition = { name     :: String
+                  , delay    :: Milliseconds-- can also be a function, ie (\d -> f d)
+                  , duration :: Milliseconds -- can also be a function, ie (\d -> f d)
+                  , easing   :: EasingFunction
+}
+type D3Group_ = Array D3DomNode_
+
+
+type EasingTime = Number
+type D3EasingFn = EasingTime -> EasingTime -- easing function maps 0-1 to 0-1 in some way with 0 -> 0, 1 -> 1
+data EasingFunction = 
+    DefaultCubic
+  | EasingFunction D3EasingFn
+  | EasingFactory (Datum_ -> Int -> D3Group_ -> D3This_ -> D3EasingFn)
+
+-- Zoom types
+type ZoomConfig_ = {
+    extent      :: Array (Array Number)
+  , scaleExtent :: Array Number
+  , qualifier   :: String
+  , target      :: D3Selection_
+}
+type ZoomConfigDefault_ = {
+    scaleExtent :: Array Number
+  , qualifier   :: String
+  , target      :: D3Selection_
+}
