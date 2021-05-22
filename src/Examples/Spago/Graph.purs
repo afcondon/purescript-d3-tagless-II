@@ -66,7 +66,7 @@ graphScript (Tuple w h) model = do
   circle  <- nodesSelection `append` (node Circle [ radius (chooseRadius model.maps.path_2_LOC) 
                                                   , fill (colorByGroup model.maps.id_2_Package)
                                                   -- , on MouseEnter (\e d t -> stopSimulation_ simulation) 
-                                                  -- , on MouseLeave (\e d t -> startSimulation_ simulation)
+                                                  , on MouseClick (\e d t -> toggleSimulation_ simulation)
                                                   , on MouseEnter (\e d t -> highlightNeighborhood simulation linksGroup (unsafeCoerce model) (getIdFromSpagoSimNode d))
                                                   , on MouseLeave (\e d t -> unhighlightNeighborhood linksGroup (unsafeCoerce model))
                                                   ]) 
@@ -94,3 +94,4 @@ unhighlightNeighborhood linkselection { links } = removeSpotlight_ linkselection
 
 foreign import markAsSpotlit_   :: forall link selection. NodeID -> D3Simulation_ -> selection -> Array link -> Array NodeID -> Array NodeID -> Unit
 foreign import removeSpotlight_ :: forall link selection. selection ->  Array link -> Unit
+foreign import toggleSimulation_ :: D3Simulation_ -> Unit

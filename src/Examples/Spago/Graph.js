@@ -5,6 +5,17 @@ var sourceNodes;
 var targetNodes;
 var highlightLinks;
 var nodeSelection;
+var running = false;
+
+exports.toggleSimulation_ = simulation => {
+  if (running) {
+    simulation.restart()
+    running = true;
+  } else {
+    simulation.stop()
+    running = false;
+  }
+}
 
 //  markAsSpotlit_ :: String -> Unit
 exports.markAsSpotlit_ = id => simulation => selection => filterlinks => sources => targets => {
@@ -22,11 +33,11 @@ exports.markAsSpotlit_ = id => simulation => selection => filterlinks => sources
   // Update and restart the simulation.
   // simulation.nodes(nodes);
   simulation.stop()
-  simulation.force("links").links(filterlinks);
+  // simulation.force("links").links(filterlinks);
   simulation.force("collide",
     d3
       .forceCollide()
-      .radius(d => d.id == id ? 100 : 50 )
+      .radius(d => (sources.includes(d.id) || targets.includes(d.id)) ? 70 : 10 )
       .iterations(5)
   )
   spotlitNode = nodeSelection.filter((d,i) => d.id == id)
