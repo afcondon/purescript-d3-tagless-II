@@ -1,28 +1,29 @@
 module D3.Examples.LesMiserables where
 
-import D3.Examples.LesMiserables.File (LesMisNodeData, readGraphFromFileContents)
-import D3.Node (D3_Link, NodeID, getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
+import Utility
 
 import Affjax as AJAX
-import Utility
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
-import D3.FFI (startSimulation_)
+import D3.Examples.LesMiserables.File (LesMisModel, readGraphFromFileContents)
+import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, setNodes_, startSimulation_, stopSimulation_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceLinkConfig, defaultForceManyConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
+import D3.Layouts.Simulation (Force(..), createForce, putForcesInSimulation)
+import D3.Node (getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
+import Data.Array (cons)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (sqrt)
-import Prelude (class Bind, Unit, bind, discard, pure, unit, ($))
+import Prelude (class Bind, Unit, bind, discard, pure, unit, ($), (<$>))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- this is the model used by this particular "chart" (ie force layout simulation)
@@ -46,13 +47,18 @@ drawGraph = do
   log $ fst printedScript
   pure unit
 
+lesMisForces :: Array D3ForceHandle_
+lesMisForces = createForce <$>
+    [ ForceCenter { name: "center", cx: 500.0, cy: 500.0, strength: 1.0 }
+    , ForceManyBody (defaultForceManyConfig "charge")
+    ]
 
 -- | recipe for this force layout graph
 graphScript :: forall linkdata  m r selection. 
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
-  { links :: Array (D3_Link NodeID linkdata), nodes :: Array LesMisNodeData | r } -> 
+  LesMisModel -> 
   m selection
 graphScript (Tuple w h) model = do
   root       <- attach "div#force"
@@ -60,30 +66,35 @@ graphScript (Tuple w h) model = do
   linksGroup <- svg  `append` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
-  let forces =  [ Force $ ForceCenter { name: "center", cx: 500.0, cy: 500.0, strength: 1.0 }
-                , Force $ ForceManyBody (defaultForceManyConfig "charge")
-                , Force $ ForceLink     (defaultForceLinkConfig "links" model.links (\d i -> d.id))
-                ]
-      simulation = initSimulation forces model.nodes defaultConfigSimulation
+  let simulation = initSimulation_ unit
+      _          = simulation `configSimulation_` defaultConfigSimulation
+      _          = stopSimulation_ simulation
 
-  links <- join linksGroup $ JoinSimulation {
+      linkForce  = createForce $ ForceLink $ defaultForceLinkConfig "links" model.links (\d i -> d.id)
+      _          = simulation `putForcesInSimulation` (cons linkForce lesMisForces)
+
+      nodes      = simulation `setNodes_` model.nodes
+      links      = getLinks_ linkForce
+
+
+  _ <- join linksGroup $ JoinSimulation {
       element   : Line
     , key       : UseDatumAsKey
-    , "data"    : model.links -- NB the links are still just { source :: NodeID, target :: NodeID, value :: Number } at this point
+    , "data"    : links -- NB the links are still just { source :: NodeID, target :: NodeID, value :: Number } at this point
     , behaviour : [ strokeWidth linkWidth ]
-    , simulation: simulation.simulation -- following config fields are extras for JoinSimulation
+    , simulation: simulation
 
     , tickName  : "links"
     , onTick    : [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ]
     , onDrag    : SimulationDrag NoDrag
   }
 
-  nodes <- join nodesGroup $ JoinSimulation {
+  _ <- join nodesGroup $ JoinSimulation {
       element   : Circle
     , key       : UseDatumAsKey
-    , "data"    : simulation.nodes
+    , "data"    : nodes
     , behaviour : [ radius 5.0, fill colorByGroup ]
-    , simulation: simulation.simulation  -- following config fields are extras for JoinSimulation
+    , simulation: simulation
 
     , tickName  : "nodes"
     , onTick    : [ cx getNodeX, cy getNodeY ]
@@ -96,7 +107,7 @@ graphScript (Tuple w h) model = do
                             , target    : SelfTarget
                             }
 
-  let _ = startSimulation_ simulation.simulation
+  let _ = startSimulation_ simulation
 
   pure svg'
 

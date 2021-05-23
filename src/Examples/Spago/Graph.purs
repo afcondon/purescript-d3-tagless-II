@@ -1,26 +1,38 @@
 module D3.Examples.Spago.Graph where
 
 import D3.Attributes.Sugar (classed, fill, on, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
+import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (chooseRadius, chooseRadiusFn, colorByGroup, linkClass, nodeClass, positionLabel, setX1, setX2, setY1, setY2, translateNode)
 import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode)
+import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, setNodes_, stopSimulation_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
-import D3.Layouts.Simulation (Force(..), ForceType(..), initSimulation)
+import D3.Layouts.Simulation (Force(..), createForce, putForcesInSimulation)
 import D3.Node (D3_Link(..), NodeID)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
-import Data.Array (cons, filter, foldl)
+import Data.Array (cons, filter)
 import Data.Tuple (Tuple(..))
-import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (<$>), (/), (<>), (==))
+import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (/), (<$>), (<>), (==))
 import Unsafe.Coerce (unsafeCoerce)
 
+spagoForces :: Array D3ForceHandle_
+spagoForces = createForce <$> 
+  [ ForceManyBody    $ (defaultForceManyConfig "charge")   { strength = -100.0 }
+  , ForceX           $ (defaultForceXConfig "x")           { strength = 0.1 }
+  , ForceY           $ (defaultForceYConfig "y")           { strength = 0.1 }
+  , ForceCenter      $ (defaultForceCenterConfig "center") { strength = -1.0 }
+  , ForceCollide     $  defaultForceCollideConfig "collide"        (\d -> chooseRadiusFn d)
+  -- , ForceLink        $ (defaultForceLinkConfig "links" model.links (\d -> d.id))
+  -- , ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
+  ]
+      
 -- | recipe for this force layout graph
 graphScript :: forall m selection. 
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
-  SpagoModel -> 
+  SpagoModel ->
   m selection
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
@@ -29,22 +41,22 @@ graphScript (Tuple w h) model = do
   linksGroup <- svg  `append` (node Group [ classed "links", strokeColor "#999" ])
   nodesGroup <- svg  `append` (node Group [ classed "nodes" ])
 
-  let forces      = [ Force $ ForceManyBody    $ (defaultForceManyConfig "charge") { strength = -100.0 }
-                    , Force $ ForceCollide     $  defaultForceCollideConfig "collide" (\d -> chooseRadiusFn d)
-                    , Force $ ForceX           $ (defaultForceXConfig "x") { strength = 0.1 }
-                    , Force $ ForceY           $ (defaultForceYConfig "y") { strength = 0.1 }
-                    , Force $ ForceCenter      $ (defaultForceCenterConfig "center") { strength = -1.0 }
-                    , Force $ ForceLink        $ (defaultForceLinkConfig "links" model.links (\d -> d.id))
-                    -- , Force $ ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
-                    ]
-      { simulation, nodes } = initSimulation forces model.nodes defaultConfigSimulation
+  let simulation = initSimulation_ unit
+      _          = simulation `configSimulation_` defaultConfigSimulation
+      _          = stopSimulation_ simulation
+
+      linkForce  = createForce $ ForceLink (defaultForceLinkConfig "links" model.links (\d -> d.id))
+      _          = simulation `putForcesInSimulation` (cons linkForce spagoForces)
+
+      nodes      = simulation `setNodes_` model.nodes
+      links      = getLinks_ linkForce
       -- _ = pinNodeMatchingPredicate nodes (\(D3SimNode n) -> n.name == "Main") 0.0 0.0
       -- _ = stopSimulation_ simulation
 
   linksSelection <- linksGroup <+> JoinSimulation {
       element   : Line
     , key       : UseDatumAsKey
-    , "data"    : model.links
+    , "data"    : links
     , behaviour : [ classed linkClass ] -- default invisible in CSS unless marked "visible"
     , simulation: simulation
     , tickName  : "links"
@@ -82,6 +94,7 @@ graphScript (Tuple w h) model = do
 
 -- | no sigs on these because they're currently called using unsafeCoerce to account for the fact that the link IDs
 -- | have been swizzled for their underlying objects
+
 highlightNeighborhood simulation linkselection { links, prunedTreeLinks } nodeId = markAsSpotlit_ nodeId simulation linkselection (sourceLinks <> targetLinks) sources targets
   where
     allLinks = links <> prunedTreeLinks

@@ -225,8 +225,8 @@ exports.selectionOn_ = selection => event => callback => {
 // *****************************************************************************************************************
 
 //            SIMULATION functions
-exports.initSimulation_ = nodes => config => {
-  const simulation = d3.forceSimulation(nodes)
+exports.initSimulation_ = config => {
+  const simulation =  d3.forceSimulation()
                         .alpha(config.alpha)                 // default is 1
                         .alphaTarget(config.alphaTarget)     // default is 0
                         .alphaMin(config.alphaMin)           // default is 0.0001
@@ -235,20 +235,29 @@ exports.initSimulation_ = nodes => config => {
   if(debug){ console.log(`initSimulation${simulation}`)}
   return simulation;
 }
+exports.configSimulation_ = simulation => config => {
+  simulation
+    .alpha(config.alpha)                 // default is 1
+    .alphaTarget(config.alphaTarget)     // default is 0
+    .alphaMin(config.alphaMin)           // default is 0.0001
+    .alphaDecay(config.alphaDecay)       // default is 0.0228
+    .velocityDecay(config.velocityDecay) // default is 0.4
+  if(debug){ console.log(`configSimulation${simulation}${config}`)}
+  return simulation;
+}
 //  :: Simulation -> Array NativeNode -> Array NativeNode
 exports.setNodes_ = simulation => nodes => { 
   if(debug){ console.log(`${simulation}.nodes(${nodes})`)}
   simulation.nodes(nodes)
-  return simulation;
+  return simulation.nodes();
 }
-//  :: Simulation -> Array NativeLink -> Array NativeLink
-exports.setLinks_ = simulation => links => { // NB see also forceLink below
-  simulation.force("links", d3.forceLink(links).id(d => d.data.id))
-  return simulation;
-}
-// getLinks_        :: forall d r. D3Simulation_ -> Array (D3_Simulation_Link d r)
-exports.getLinks_ = simulation => simulation.links()
-// setNodes_        :: forall d.   D3Simulation_ -> Array (D3_Simulation_Node d)     -> D3Simulation_
+//  :: Simulation -> Array NativeLink -> ???
+exports.makeLinksForce_ = config => d3.forceLink(config.links).id(d => d.id).strength(config.strength);
+// removeForceByName_  :: D3Simulation_ -> String -> D3Simulation_
+exports.removeForceByName_ = simulation => name => simulation.force(name, null)
+// links_        :: forall d r. ForceHandle_ -> Array (D3_Simulation_Link d r)
+exports.getLinks_ = linkForce => linkForce.links()
+// setNodes_        :: forall d.   D3Simulation_ -> Array (D3_Simulation_Node d)     -> Array (D3_Simulation_Node d)
 exports.getNodes_ = simulation => simulation.nodes()
 
 // :: NativeSelection -> Number -> Unit
@@ -294,29 +303,29 @@ exports.defaultSimulationDrag_ = selection => simulation => {
   selection.call(drag(simulation))
 }
 
-//            FORCE functions 
+//          constructors for FORCE handlers 
 
-// forceCenter_       :: D3Simulation_ -> ForceCenterConfig_       -> D3Simulation_
-exports.forceCenter_ = simulation => config => simulation.force(config.name, d3.forceCenter(config.cx,config.cy))
-// forceCollideFixed_ :: D3Simulation_ -> ForceCollideFixedConfig_ -> D3Simulation_
-exports.forceCollideFixed_ = simulation => config => simulation.force(config.name, d3.forceCollide(config.radius))
-// forceCollideFn_    :: D3Simulation_ -> ForceCollideConfig_      -> D3Simulation_
-exports.forceCollideFn_ = simulation => config => simulation.force(config.name, d3.forceCollide(config.radius))
-// forceMany_         :: D3Simulation_ -> ForceManyConfig_         -> D3Simulation_
-exports.forceMany_ = simulation => config => simulation.force(config.name, d3.forceManyBody().strength(config.strength))
-// forceRadial_       :: D3Simulation_ -> ForceRadialConfig_       -> D3Simulation_
-exports.forceRadial_ = simulation => config => simulation.force(config.name, d3.forceRadial(config.radius, config.cx, config.cy).strength(config.strength))
-// forceRadialFixed_  :: D3Simulation_ -> ForceRadialFixedConfig_  -> D3Simulation_
-exports.forceRadialFixed_ = simulation => config => {
-  simulation.force(config.name, d3.forceRadial(config.radius, config.cx, config.cy).strength(config.strength))
-}
-// forceX_            :: D3Simulation_ -> ForceXConfig_            -> D3Simulation_
-exports.forceX_ = simulation => config => simulation.force(config.name, d3.forceX(config.x).strength(config.strength))
-// forceY_            :: D3Simulation_ -> ForceYConfig_            -> D3Simulation_
-exports.forceY_ = simulation => config => simulation.force(config.name, d3.forceY(config.y).strength(config.strength))
-// forceLink_         :: D3Simulation_ -> ForceLinkConfig_         -> D3Simulation_
-exports.forceLink_ = simulation => config => simulation.force(config.name, d3.forceLink(config.links).id(d => d.id).strength(config.strength)) 
-
+// forceCenter_       :: ForceCenterConfig_       -> D3ForceHandle_
+exports.forceCenter_ = config => d3.forceCenter(config.cx,config.cy)
+// forceCollideFixed_ :: ForceCollideFixedConfig_ -> D3ForceHandle_
+exports.forceCollideFixed_ = config => d3.forceCollide(config.radius)
+// forceCollideFn_    :: ForceCollideConfig_      -> D3ForceHandle_
+exports.forceCollideFn_ = config => d3.forceCollide(config.radius)
+// forceMany_         :: ForceManyConfig_         -> D3ForceHandle_
+exports.forceMany_ = config => d3.forceManyBody().strength(config.strength)
+// forceRadial_       :: ForceRadialConfig_       -> D3ForceHandle_
+exports.forceRadial_ = config => d3.forceRadial(config.radius, config.cx, config.cy).strength(config.strength)
+// forceRadialFixed_  :: ForceRadialFixedConfig_  -> D3ForceHandle_
+exports.forceRadialFixed_ = config => d3.forceRadial(config.radius, config.cx, config.cy).strength(config.strength)
+// forceX_            :: ForceXConfig_            -> D3ForceHandle_
+exports.forceX_ = config => d3.forceX(config.x).strength(config.strength)
+// forceY_            :: ForceYConfig_            -> D3ForceHandle_
+exports.forceY_ = config => d3.forceY(config.y).strength(config.strength)
+// forceLink_         :: ForceLinkConfig_         -> D3ForceHandle_
+exports.forceLink_ = config => d3.forceLink(config.links).id(d => d.id)
+// putForcesInSimulation_ :: D3Simulation_ -> Array Force -> D3Simulation_
+exports.putForcesInSimulation_ = simulation => forces => 
+  forces.forEach(force => simulation.force(force.name, force)); // TODO does force have name????
 // pinNode_ :: Number -> Number -> GraphNode_ -> Unit
 exports.pinNode_ = fx => fy => node => {
   node.fx = fx;

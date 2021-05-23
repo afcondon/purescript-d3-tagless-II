@@ -2,11 +2,12 @@ module D3.FFI where
 
 -- brings together ALL of the wrapped D3js functions and FFI / native types
 -- probably should break it up again when it's more feature complete (ie to match D3 modules). Maybe.
+
 import D3.Node
 
-import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
 import D3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
-import D3.FFI.Config (ForceCenterConfig_, ForceCollideConfig_, ForceCollideFixedConfig_, ForceLinkConfig_, ForceManyConfig_, ForceRadialConfig_, ForceRadialFixedConfig_, ForceXConfig_, ForceYConfig_, SimulationConfig_)
+import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
+import D3.FFI.Config (ForceCenterConfig_, ForceCollideConfig_, ForceCollideFixedConfig_, ForceManyConfig_, ForceRadialConfig_, ForceRadialFixedConfig_, ForceXConfig_, ForceYConfig_, SimulationConfig_, ForceLinkConfig_)
 import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
 import Data.Maybe (fromMaybe)
@@ -77,13 +78,21 @@ foreign import selectionOn_         :: forall selection callback. selection -> S
 
 type GraphModel_ link node = { links :: Array link, nodes :: Array node }
 
-foreign import initSimulation_  :: forall d.   Array d -> SimulationConfig_ -> D3Simulation_
-foreign import getNodes_        :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
-foreign import getLinks_        :: forall d r. D3Simulation_ -> Array (D3_Link d r)
-foreign import setNodes_        :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)     -> D3Simulation_
-foreign import setLinks_        :: forall r.   D3Simulation_ -> Array (D3_Link NodeID r)     -> D3Simulation_
-foreign import startSimulation_ :: D3Simulation_ -> Unit
-foreign import stopSimulation_  :: D3Simulation_ -> Unit
+foreign import initSimulation_         :: Unit                                 -> D3Simulation_
+foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_   -> D3Simulation_
+
+foreign import getNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
+foreign import setNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)
+
+foreign import data D3ForceHandle_ :: Type
+
+foreign import removeForceByName_  :: D3Simulation_ -> String -> D3Simulation_
+
+foreign import getLinks_               :: forall d r. D3ForceHandle_ -> Array (D3_Link d r)
+foreign import makeLinksForce_         :: D3Simulation_ -> ForceLinkConfig_ -> D3ForceHandle_
+
+foreign import startSimulation_        :: D3Simulation_ -> Unit
+foreign import stopSimulation_         :: D3Simulation_ -> Unit
 
 foreign import pinNode_   :: forall d. Number -> Number -> D3_SimulationNode d -> Unit
 foreign import unpinNode_ :: forall d. D3_SimulationNode d -> Unit
@@ -107,16 +116,17 @@ foreign import defaultSimulationDrag_ :: D3Selection_ -> D3Simulation_ -> Unit
 foreign import setAlphaTarget_        :: D3Selection_ -> Number -> Unit
 
 -- implementations / wrappers for the Force ADT
-foreign import forceCenter_       :: D3Simulation_ -> ForceCenterConfig_       -> D3Simulation_
-foreign import forceCollideFixed_ :: D3Simulation_ -> ForceCollideFixedConfig_ -> D3Simulation_
-foreign import forceCollideFn_    :: D3Simulation_ -> ForceCollideConfig_      -> D3Simulation_
-foreign import forceMany_         :: D3Simulation_ -> ForceManyConfig_         -> D3Simulation_
-foreign import forceRadial_       :: D3Simulation_ -> ForceRadialConfig_       -> D3Simulation_
-foreign import forceRadialFixed_  :: D3Simulation_ -> ForceRadialFixedConfig_  -> D3Simulation_
-foreign import forceLink_         :: D3Simulation_ -> ForceLinkConfig_         -> D3Simulation_
-foreign import forceX_            :: D3Simulation_ -> ForceXConfig_            -> D3Simulation_
-foreign import forceY_            :: D3Simulation_ -> ForceYConfig_            -> D3Simulation_
+foreign import forceCenter_       :: ForceCenterConfig_       -> D3ForceHandle_
+foreign import forceCollideFixed_ :: ForceCollideFixedConfig_ -> D3ForceHandle_
+foreign import forceCollideFn_    :: ForceCollideConfig_      -> D3ForceHandle_
+foreign import forceMany_         :: ForceManyConfig_         -> D3ForceHandle_
+foreign import forceRadial_       :: ForceRadialConfig_       -> D3ForceHandle_
+foreign import forceRadialFixed_  :: ForceRadialFixedConfig_  -> D3ForceHandle_
+foreign import forceX_            :: ForceXConfig_            -> D3ForceHandle_
+foreign import forceY_            :: ForceYConfig_            -> D3ForceHandle_
+foreign import forceLink_         :: ForceLinkConfig_         -> D3ForceHandle_
 
+foreign import putForcesInSimulation_ :: D3Simulation_ -> Array D3ForceHandle_ -> D3Simulation_
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js Hierarchy module  *********************************************
 -- | *********************************************************************************************************************

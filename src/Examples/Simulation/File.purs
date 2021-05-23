@@ -25,7 +25,7 @@ type LesMisSimNode     = D3SimulationRow (             LesMisNodeRow  + ())
 
 type LesMisLinkData = ( value :: Number )
 type LesMisModel    = { links :: Array (D3_Link NodeID LesMisLinkData)
-                      , nodes :: Array LesMisNodeData }
+                      , nodes :: Array LesMisSimNode }
 
 lesMisTreeNode :: LesMisTreeNode
 lesMisTreeNode = D3TreeNode { 
