@@ -58,10 +58,6 @@ createForce =
       forceRadial_ config
     (ForceLink config) ->
       forceLink_ config
-    -- Custom) ->  -- do this later a needed
-
-putForcesInSimulation :: D3Simulation_ -> Array D3ForceHandle_ -> D3Simulation_
-putForcesInSimulation simulation forceHandles = do
-  putForcesInSimulation_ simulation forceHandles
+    -- Custom) ->  -- do this later as needed
 
 

@@ -4,10 +4,10 @@ import D3.Attributes.Sugar (classed, fill, on, radius, strokeColor, text, transf
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (chooseRadius, chooseRadiusFn, colorByGroup, linkClass, nodeClass, positionLabel, setX1, setX2, setY1, setY2, translateNode)
 import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode)
-import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, setNodes_, stopSimulation_)
+import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setNodes_, stopSimulation_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
-import D3.Layouts.Simulation (Force(..), createForce, putForcesInSimulation)
+import D3.Layouts.Simulation (Force(..), createForce)
 import D3.Node (D3_Link(..), NodeID)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
@@ -36,27 +36,25 @@ graphScript :: forall m selection.
   m selection
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
-  svg        <- root `append` (node Svg   [ viewBox (-w / 2.0) (-h / 2.0) w h ] )
+  svg        <- root `append` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h ] )
   centerDot  <- svg  `append` (node Circle [ radius 20.0, fill "red", x (w / 2.0), y h ])
-  linksGroup <- svg  `append` (node Group [ classed "links", strokeColor "#999" ])
-  nodesGroup <- svg  `append` (node Group [ classed "nodes" ])
+  linksGroup <- svg  `append` (node Group  [ classed "links", strokeColor "#999" ])
+  nodesGroup <- svg  `append` (node Group  [ classed "nodes" ])
 
   let simulation = initSimulation_ unit
       _          = simulation `configSimulation_` defaultConfigSimulation
-      _          = stopSimulation_ simulation
+      nodes      = simulation `setNodes_` model.nodes
+      -- TODO because nodes have to be put in before links, there's a required ordering here, better to make it impossible to make an error with that
 
       linkForce  = createForce $ ForceLink (defaultForceLinkConfig "links" model.links (\d -> d.id))
-      _          = simulation `putForcesInSimulation` (cons linkForce spagoForces)
+      _          = simulation `putForcesInSimulation_` (cons linkForce spagoForces)
 
-      nodes      = simulation `setNodes_` model.nodes
-      links      = getLinks_ linkForce
-      -- _ = pinNodeMatchingPredicate nodes (\(D3SimNode n) -> n.name == "Main") 0.0 0.0
-      -- _ = stopSimulation_ simulation
+      -- links      = getLinks_ linkForce
 
   linksSelection <- linksGroup <+> JoinSimulation {
       element   : Line
     , key       : UseDatumAsKey
-    , "data"    : links
+    , "data"    : model.links
     , behaviour : [ classed linkClass ] -- default invisible in CSS unless marked "visible"
     , simulation: simulation
     , tickName  : "links"

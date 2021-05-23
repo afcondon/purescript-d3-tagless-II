@@ -88,6 +88,7 @@ foreign import data D3ForceHandle_ :: Type
 
 foreign import removeForceByName_  :: D3Simulation_ -> String -> D3Simulation_
 
+foreign import setLinks_               :: forall d r. D3ForceHandle_ -> Array (D3_Link d r) -> (Datum_ -> Index_ -> Number) -> Array (D3_Link NodeID r)
 foreign import getLinks_               :: forall d r. D3ForceHandle_ -> Array (D3_Link d r)
 foreign import makeLinksForce_         :: D3Simulation_ -> ForceLinkConfig_ -> D3ForceHandle_
 

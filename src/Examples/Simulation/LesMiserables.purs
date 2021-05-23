@@ -4,15 +4,15 @@ import Utility
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
+import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.LesMiserables.File (LesMisModel, readGraphFromFileContents)
-import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, setNodes_, startSimulation_, stopSimulation_)
-import D3.FFI.Config (defaultConfigSimulation, defaultForceLinkConfig, defaultForceManyConfig)
+import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, startSimulation_, stopSimulation_)
+import D3.FFI.Config (defaultConfigSimulation, defaultForceLinkConfig, defaultForceLinkConfigEmpty, defaultForceManyConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Simulation (Force(..), createForce, putForcesInSimulation)
+import D3.Layouts.Simulation (Force(..), createForce)
 import D3.Node (getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
@@ -23,7 +23,7 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (sqrt)
-import Prelude (class Bind, Unit, bind, discard, pure, unit, ($), (<$>))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, (/), ($), (<$>))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- this is the model used by this particular "chart" (ie force layout simulation)
@@ -62,25 +62,22 @@ graphScript :: forall linkdata  m r selection.
   m selection
 graphScript (Tuple w h) model = do
   root       <- attach "div#force"
-  svg        <- root `append` (node Svg   [ viewBox 0.0 0.0 1000.0 1000.0 ] )
-  linksGroup <- svg  `append` (node Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
-  nodesGroup <- svg  `append` (node Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
+  svg        <- root `append` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h ] )
+  centerDot  <- svg  `append` (node Circle [ radius 20.0, fill "red", x (w / 2.0), y h ])
+  linksGroup <- svg  `append` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
+  nodesGroup <- svg  `append` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   let simulation = initSimulation_ unit
       _          = simulation `configSimulation_` defaultConfigSimulation
-      _          = stopSimulation_ simulation
-
-      linkForce  = createForce $ ForceLink $ defaultForceLinkConfig "links" model.links (\d i -> d.id)
-      _          = simulation `putForcesInSimulation` (cons linkForce lesMisForces)
-
-      nodes      = simulation `setNodes_` model.nodes
-      links      = getLinks_ linkForce
-
+      linkForce  = createForce $ ForceLink $ defaultForceLinkConfigEmpty "links" (\d -> d.id)
+      _          = simulation `putForcesInSimulation_` (cons linkForce lesMisForces)
+      nodes      = simulation `setNodes_` model.nodes 
+      links      = linkForce `setLinks_` model.links
 
   _ <- join linksGroup $ JoinSimulation {
       element   : Line
     , key       : UseDatumAsKey
-    , "data"    : links -- NB the links are still just { source :: NodeID, target :: NodeID, value :: Number } at this point
+    , "data"    : model.links -- NB the links are still just { source :: NodeID, target :: NodeID, value :: Number } at this point
     , behaviour : [ strokeWidth linkWidth ]
     , simulation: simulation
 
