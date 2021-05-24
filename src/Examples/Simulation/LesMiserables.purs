@@ -54,7 +54,7 @@ lesMisForces = createForce <$>
     ]
 
 -- | recipe for this force layout graph
-graphScript :: forall linkdata  m r selection. 
+graphScript :: forall  m selection. 
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
@@ -68,11 +68,10 @@ graphScript (Tuple w h) model = do
   nodesGroup <- svg  `append` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   let simulation = initSimulation_ unit
-      -- _          = simulation `configSimulation_` defaultConfigSimulation
-      -- linkForce  = createForce $ ForceLink $ defaultForceLinkConfigEmpty "links" (\d -> d.id)
-      -- _          = simulation `putForcesInSimulation_` (cons linkForce lesMisForces)
+      _          = simulation `configSimulation_` defaultConfigSimulation
       nodes      = simulation `setNodes_` model.nodes 
-      -- links      = linkForce `setLinks_` model.links
+      _          = simulation `putForcesInSimulation_` lesMisForces
+      linkForce  = setLinks_ simulation model.links (\d i -> d.id)
 
   _ <- join linksGroup $ JoinSimulation {
       element   : Line
@@ -103,8 +102,6 @@ graphScript (Tuple w h) model = do
                             , qualifier : "tree"
                             , target    : SelfTarget
                             }
-
-  let _ = startSimulation_ simulation
 
   pure svg'
 

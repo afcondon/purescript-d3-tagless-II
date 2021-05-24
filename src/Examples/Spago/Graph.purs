@@ -8,7 +8,7 @@ import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, pu
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Layouts.Simulation (Force(..), createForce)
-import D3.Node (D3_Link(..), NodeID)
+import D3.Node (D3_Link(..), NodeID, getSourceX, getSourceY, getTargetX, getTargetY)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
 import Data.Array (cons, filter)
@@ -45,7 +45,7 @@ graphScript (Tuple w h) model = do
       _          = simulation `configSimulation_` defaultConfigSimulation
       nodes      = simulation `setNodes_` model.nodes
       _          = simulation `putForcesInSimulation_` spagoForces
-      linkForce  = setLinks_ simulation model.links (\d i -> d.id)
+      _          = setLinks_ simulation model.links (\d i -> d.id)
 
   linksSelection <- linksGroup <+> JoinSimulation {
       element   : Line
@@ -54,7 +54,7 @@ graphScript (Tuple w h) model = do
     , behaviour : [ classed linkClass ] -- default invisible in CSS unless marked "visible"
     , simulation: simulation
     , tickName  : "links"
-    , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ] -- is this tick function working on links that are removed and then added back 
+    , onTick    : [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ] -- is this tick function working on links that are removed and then added back 
     , onDrag    : SimulationDrag NoDrag
   }
 

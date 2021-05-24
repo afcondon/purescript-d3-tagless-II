@@ -23,7 +23,7 @@ main = launchAff_  do
   _        <- forkAff Spago.drawGraph
 
   -- _        <- forkAff GUP.runGeneralUpdatePattern
-  -- _        <- forkAff LesMis.drawGraph
+  _        <- forkAff LesMis.drawGraph
 
   -- -- -- fetch an example model for the tree examples, the canonical flare dependency json in this case
   -- treeJSON <- getTreeViaAJAX "http://localhost:1234/flare-2.json"
