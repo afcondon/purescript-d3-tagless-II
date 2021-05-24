@@ -68,11 +68,11 @@ graphScript (Tuple w h) model = do
   nodesGroup <- svg  `append` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   let simulation = initSimulation_ unit
-      _          = simulation `configSimulation_` defaultConfigSimulation
-      linkForce  = createForce $ ForceLink $ defaultForceLinkConfigEmpty "links" (\d -> d.id)
-      _          = simulation `putForcesInSimulation_` (cons linkForce lesMisForces)
+      -- _          = simulation `configSimulation_` defaultConfigSimulation
+      -- linkForce  = createForce $ ForceLink $ defaultForceLinkConfigEmpty "links" (\d -> d.id)
+      -- _          = simulation `putForcesInSimulation_` (cons linkForce lesMisForces)
       nodes      = simulation `setNodes_` model.nodes 
-      links      = linkForce `setLinks_` model.links
+      -- links      = linkForce `setLinks_` model.links
 
   _ <- join linksGroup $ JoinSimulation {
       element   : Line

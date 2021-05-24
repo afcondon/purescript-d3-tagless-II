@@ -61,7 +61,7 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
                     (ComputeKey fn)  -> d3KeyFunction_ j.data fn initialS 
       enterS   = d3EnterAndAppend_ (show j.element) dataS
       _        = foldl applyChainableD3 enterS  j.behaviour
-      _        = onTick_ j.simulation j.tickName (makeTick j.onTick enterS)
+      _        = onTick_ j.simulation j.tickName (makeTick j.onTick enterS) -- NB on tick function per selection in DSL, in JS you can share them. functionally it's the same tho
       _        = case j.onDrag of
                     (SimulationDrag DefaultDrag) -> defaultSimulationDrag_ enterS j.simulation
                     _ -> unit

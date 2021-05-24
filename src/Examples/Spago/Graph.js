@@ -57,25 +57,33 @@ exports.markAsSpotlit_ = id => simulation => selection => filterlinks => sources
   }
   spotlitNode.classed("node spotlight", true).raise()
   
-  highlightLinks.classed("source",true)
+  highlightLinks.classed("source",true) // not distinguishing source and target RN
 
   simulation.restart();
 }
 
 //  markAsSpotlit_ :: String -> Unit
-exports.removeSpotlight_ = selection => links => {
+exports.removeSpotlight_ = simulation => selection => links => {
   for (const element of nodeSelection) {
     element.__data__.fx = element.__data__._fx
     element.__data__.fy = element.__data__._fy
   }
 
-  var restorationLinks = selection.selectAll("line");
+  links =
+    selection.selectAll("line")
+           .data(links, d => d.index)
+           .join(
+              enter => enter.append("line").classed("retained", true),
+              update => update.classed("re-entered", true),
+              exit => exit.remove()
+            )
 
-  // Apply the general update pattern to the links.
-  restorationLinks = restorationLinks.data(links, d => d.index);
-  restorationLinks.exit().remove(); // links that were only in "pruned links" will go away again
-  restorationLinks = restorationLinks.enter().append("line").merge(restorationLinks);
-  
+  simulation.on("tick.links", () => {
+    links.attr("x1", d => d.source.x)
+         .attr("y1", d => d.source.y)
+         .attr("x2", d => d.target.x)
+         .attr("y2", d => d.target.y)
+  });
   svg.classed("spotlight", false)
   spotlitNode.classed("spotlight", false)
   sourceNodes.classed("source", false)

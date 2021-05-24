@@ -4,7 +4,7 @@ import D3.Attributes.Sugar (classed, fill, on, radius, strokeColor, text, transf
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (chooseRadius, chooseRadiusFn, colorByGroup, linkClass, nodeClass, positionLabel, setX1, setX2, setY1, setY2, translateNode)
 import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode)
-import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setNodes_, stopSimulation_)
+import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, stopSimulation_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Layouts.Simulation (Force(..), createForce)
@@ -44,12 +44,8 @@ graphScript (Tuple w h) model = do
   let simulation = initSimulation_ unit
       _          = simulation `configSimulation_` defaultConfigSimulation
       nodes      = simulation `setNodes_` model.nodes
-      -- TODO because nodes have to be put in before links, there's a required ordering here, better to make it impossible to make an error with that
-
-      linkForce  = createForce $ ForceLink (defaultForceLinkConfig "links" model.links (\d -> d.id))
-      _          = simulation `putForcesInSimulation_` (cons linkForce spagoForces)
-
-      -- links      = getLinks_ linkForce
+      _          = simulation `putForcesInSimulation_` spagoForces
+      linkForce  = setLinks_ simulation model.links (\d i -> d.id)
 
   linksSelection <- linksGroup <+> JoinSimulation {
       element   : Line
@@ -58,7 +54,7 @@ graphScript (Tuple w h) model = do
     , behaviour : [ classed linkClass ] -- default invisible in CSS unless marked "visible"
     , simulation: simulation
     , tickName  : "links"
-    , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ]
+    , onTick    : [ x1 setX1, y1 setY1, x2 setX2, y2 setY2 ] -- is this tick function working on links that are removed and then added back 
     , onDrag    : SimulationDrag NoDrag
   }
 
@@ -78,7 +74,7 @@ graphScript (Tuple w h) model = do
                                                   -- , on MouseEnter (\e d t -> stopSimulation_ simulation) 
                                                   , on MouseClick (\e d t -> toggleSimulation_ simulation)
                                                   , on MouseEnter (\e d t -> highlightNeighborhood simulation linksGroup (unsafeCoerce model) (getIdFromSpagoSimNode d))
-                                                  , on MouseLeave (\e d t -> unhighlightNeighborhood linksGroup (unsafeCoerce model))
+                                                  , on MouseLeave (\e d t -> unhighlightNeighborhood simulation linksGroup (unsafeCoerce model))
                                                   ]) 
   labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y (positionLabel model.maps.path_2_LOC), text getNameFromSpagoSimNode]) 
   
@@ -101,8 +97,8 @@ highlightNeighborhood simulation linkselection { links, prunedTreeLinks } nodeId
     sources = (\(D3_Link l) -> l.source.id) <$> sourceLinks
     targets = (\(D3_Link l) -> l.target.id) <$> targetLinks
 
-unhighlightNeighborhood linkselection { links } = removeSpotlight_ linkselection links -- we're caching all the selections on the JS side, simply reversing what we've done in highlight
+unhighlightNeighborhood simulation linkselection { links } = removeSpotlight_ simulation linkselection links -- we're caching all the selections on the JS side, simply reversing what we've done in highlight
 
 foreign import markAsSpotlit_   :: forall link selection. NodeID -> D3Simulation_ -> selection -> Array link -> Array NodeID -> Array NodeID -> Unit
-foreign import removeSpotlight_ :: forall link selection. selection ->  Array link -> Unit
+foreign import removeSpotlight_ :: forall link selection.           D3Simulation_ -> selection -> Array link -> Unit
 foreign import toggleSimulation_ :: D3Simulation_ -> Unit

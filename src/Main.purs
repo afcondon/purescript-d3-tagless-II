@@ -22,22 +22,22 @@ main :: Effect Unit
 main = launchAff_  do
   _        <- forkAff Spago.drawGraph
 
-  _        <- forkAff GUP.runGeneralUpdatePattern
-  _        <- forkAff LesMis.drawGraph
+  -- _        <- forkAff GUP.runGeneralUpdatePattern
+  -- _        <- forkAff LesMis.drawGraph
 
-  -- -- fetch an example model for the tree examples, the canonical flare dependency json in this case
-  treeJSON <- getTreeViaAJAX "http://localhost:1234/flare-2.json"
+  -- -- -- fetch an example model for the tree examples, the canonical flare dependency json in this case
+  -- treeJSON <- getTreeViaAJAX "http://localhost:1234/flare-2.json"
 
-  sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Horizontal json) treeJSON
-  sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Vertical json)   treeJSON
-  sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Radial json)     treeJSON
-  sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Horizontal json)   treeJSON
-  sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Vertical json)     treeJSON
-  sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Radial json)       treeJSON
+  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Horizontal json) treeJSON
+  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Vertical json)   treeJSON
+  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Radial json)     treeJSON
+  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Horizontal json)   treeJSON
+  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Vertical json)     treeJSON
+  -- sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel TidyTree Radial json)       treeJSON
 
-  sequence_ $ rmap (\json -> Tree.printTree =<< makeModel TidyTree Radial json)       treeJSON
+  -- sequence_ $ rmap (\json -> Tree.printTree =<< makeModel TidyTree Radial json)       treeJSON
 
-  -- -- extract the structure of the radial tree "D3 script" and draw a radial tree of this "meta" tree
-  sequence_ $ rmap drawMetaTree treeJSON
+  -- -- -- extract the structure of the radial tree "D3 script" and draw a radial tree of this "meta" tree
+  -- sequence_ $ rmap drawMetaTree treeJSON
 
   pure unit
