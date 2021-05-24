@@ -71,7 +71,7 @@ graphScript (Tuple w h) model = do
       _          = simulation `configSimulation_` defaultConfigSimulation
       nodes      = simulation `setNodes_` model.nodes 
       _          = simulation `putForcesInSimulation_` lesMisForces
-      linkForce  = setLinks_ simulation model.links (\d i -> d.id)
+      _          = setLinks_ simulation model.links (\d i -> d.id)
 
   _ <- join linksGroup $ JoinSimulation {
       element   : Line
@@ -97,13 +97,13 @@ graphScript (Tuple w h) model = do
     , onDrag    : SimulationDrag DefaultDrag
   }
   
-  svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+  _ <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                             , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
                             , qualifier : "tree"
                             , target    : SelfTarget
                             }
 
-  pure svg'
+  pure svg
 
 -- this is boilerplate but...typed attribute setters facilitate typeclass based conversions
 -- we give the chart our Model type but behind the scenes it is mutated by D3 and additionally

@@ -251,8 +251,8 @@ exports.setNodes_ = simulation => nodes => {
   simulation.nodes(nodes)
   return simulation.nodes();
 }
-exports.setLinks_ = simulation => links => { // NB see also forceLink below
-  const linkForce = d3.forceLink(links).id(d => d.id)
+exports.setLinks_ = simulation => links => idFn => { // NB see also forceLink below
+  const linkForce = d3.forceLink(links).id((d,i) => idFn(d)(i))
   simulation.force("links", linkForce)
   return linkForce;
 }
