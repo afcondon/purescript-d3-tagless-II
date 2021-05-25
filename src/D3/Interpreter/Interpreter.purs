@@ -1,7 +1,7 @@
 module D3.Interpreter where
 
 import D3.Data.Types (Selector)
-import D3.Selection (D3_Node, DragBehavior, Join)
+import D3.Selection (D3_Node, DragBehavior, Join, TickBehavior)
 import D3.Zoom (ZoomConfig)
 import Prelude (class Monad)
 
@@ -17,7 +17,8 @@ class (Monad m) <= D3InterpreterM selection m where
 
   -- TODO this could very well be an extension of the monad, see also Drag
   attachZoom :: selection -> ZoomConfig selection -> m selection 
-  onDrag     :: selection -> DragBehavior         -> m selection 
+  onTick     :: selection -> TickBehavior -> m selection
+  onDrag     :: selection -> DragBehavior -> m selection 
 
 infix 4 join as <+>
 

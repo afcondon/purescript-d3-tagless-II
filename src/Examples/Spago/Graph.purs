@@ -6,7 +6,7 @@ import D3.Examples.Spago.Attributes (chooseRadius, chooseRadiusFn, colorByGroup,
 import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode)
 import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, stopSimulation_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
-import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
+import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, onTick, (<+>))
 import D3.Layouts.Simulation (Force(..), createForce)
 import D3.Node (D3_Link(..), NodeID, getSourceX, getSourceY, getTargetX, getTargetY)
 import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
@@ -46,27 +46,21 @@ graphScript (Tuple w h) model = do
       _          = simulation `putForcesInSimulation_` spagoForces
       _          = setLinks_ simulation model.links (\d i -> d.id)
 
-  linksSelection <- linksGroup <+> JoinSimulation {
+  linksSelection <- linksGroup <+> Join {
       element   : Line
     , key       : UseDatumAsKey
     , "data"    : model.links
     , behaviour : [ classed linkClass ] -- default invisible in CSS unless marked "visible"
-    , simulation: simulation
-    , tickName  : "links"
-    , onTick    : [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ] -- is this tick function working on links that are removed and then added back 
-    , onDrag    : SimulationDrag NoDrag
   }
-
-  nodesSelection <- nodesGroup <+> JoinSimulation {
+  nodesSelection <- nodesGroup <+> Join {
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : nodes
     , behaviour : [ classed nodeClass, transform' translateNode ]
-    , simulation: simulation
-    , tickName  : "nodes"
-    , onTick    : [ transform' translateNode  ]
-    , onDrag    : SimulationDrag DefaultDrag
   }
+  _ <- linksSelection `onTick` { name: "links", simulation, chain: [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ]}
+  _ <- nodesSelection `onTick` { name: "nodes", simulation, chain: [ classed nodeClass, transform' translateNode ]}
+
 
   circle  <- nodesSelection `append` (node Circle [ radius (chooseRadius model.maps.path_2_LOC) 
                                                   , fill (colorByGroup model.maps.id_2_Package)

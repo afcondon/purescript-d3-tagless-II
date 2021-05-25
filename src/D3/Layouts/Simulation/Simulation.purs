@@ -3,7 +3,7 @@ module D3.Layouts.Simulation where
 import D3.Node
 
 import D3.Data.Types (D3Simulation_)
-import D3.FFI (D3ForceHandle_, forceCenter_, forceCollideFixed_, forceCollideFn_, forceLink_, forceMany_, forceRadialFixed_, forceRadial_, forceX_, forceY_, putForcesInSimulation_)
+import D3.FFI (D3ForceHandle_, forceCenter_, forceCollideFixed_, forceCollideFn_, forceLink_, forceMany_, forceRadialFixed_, forceRadial_, forceX_, forceY_)
 import D3.FFI.Config (ForceCenterConfig_, ForceCollideConfig_, ForceCollideFixedConfig_, ForceLinkConfig_, ForceManyConfig_, ForceRadialConfig_, ForceRadialFixedConfig_, ForceXConfig_, ForceYConfig_, SimulationConfig_)
 import D3.Selection (DragBehavior)
 import Data.Maybe (Maybe)
@@ -59,5 +59,3 @@ createForce =
     (ForceLink config) ->
       forceLink_ config
     -- Custom) ->  -- do this later as needed
-
-

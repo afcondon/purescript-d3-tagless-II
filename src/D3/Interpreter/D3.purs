@@ -1,17 +1,17 @@
 module D3.Interpreter.D3 where
 
-import D3.Selection (Chainable(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), SimulationDrag(..))
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, pure, show, unit, ($), (<$>))
 import Control.Monad.State (class MonadState, StateT, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
-import D3.Data.Types (D3Selection_) 
-import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, defaultDrag_, defaultSimulationDrag_, disableDrag_, onTick_, selectionOn_) 
+import D3.Data.Types (D3Selection_)
+import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, defaultDrag_, defaultSimulationDrag_, disableDrag_, onTick_, selectionOn_)
 import D3.Interpreter (class D3InterpreterM)
+import D3.Selection (Chainable(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), TickBehavior(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
 import Data.Foldable (foldl)
 import Data.Tuple (Tuple)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, pure, show, unit, ($), (<$>))
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
 -- also not really making a ton of use of StateT, but it is good to have a 
@@ -36,7 +36,15 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
 
   append selection_ (D3_Node element attributes) = do
     let appended_ = d3Append_ (show element) selection_
-    pure $ foldl applyChainableD3 appended_ attributes    
+    pure $ foldl applyChainableD3 appended_ attributes   
+
+  onTick selection tick = do
+    let makeTick :: Array Chainable -> D3Selection_ -> Unit -> Unit
+        makeTick attributes selection_ _ = do
+          let _ = (applyChainableD3 selection_) <$> attributes
+          unit
+        _ = onTick_ tick.simulation tick.name (makeTick tick.chain selection)
+    pure selection 
 
   join selection (Join j) = do
     let 
@@ -48,24 +56,24 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
       enterS' = foldl applyChainableD3 enterS j.behaviour
     pure enterS'
 
-  join selection (JoinSimulation j) = do
-    let makeTick :: Array Chainable -> D3Selection_ -> Unit -> Unit
-        makeTick attributes selection_ _ = do
-          let _ = (applyChainableD3 selection_) <$> attributes
-          unit
+  -- join selection (JoinSimulation j) = do
+  --   let makeTick :: Array Chainable -> D3Selection_ -> Unit -> Unit
+  --       makeTick attributes selection_ _ = do
+  --         let _ = (applyChainableD3 selection_) <$> attributes
+  --         unit
 
-    let 
-      initialS = d3SelectionSelectAll_ (show j.element) selection
-      dataS    = case j.key of
-                    UseDatumAsKey    -> d3Data_        j.data    initialS 
-                    (ComputeKey fn)  -> d3KeyFunction_ j.data fn initialS 
-      enterS   = d3EnterAndAppend_ (show j.element) dataS
-      _        = foldl applyChainableD3 enterS  j.behaviour
-      _        = onTick_ j.simulation j.tickName (makeTick j.onTick enterS) -- NB on tick function per selection in DSL, in JS you can share them. functionally it's the same tho
-      _        = case j.onDrag of
-                    (SimulationDrag DefaultDrag) -> defaultSimulationDrag_ enterS j.simulation
-                    _ -> unit
-    pure enterS
+  --   let 
+  --     initialS = d3SelectionSelectAll_ (show j.element) selection
+  --     dataS    = case j.key of
+  --                   UseDatumAsKey    -> d3Data_        j.data    initialS 
+  --                   (ComputeKey fn)  -> d3KeyFunction_ j.data fn initialS 
+  --     enterS   = d3EnterAndAppend_ (show j.element) dataS
+  --     _        = foldl applyChainableD3 enterS  j.behaviour
+  --     _        = onTick_ j.simulation j.tickName (makeTick j.onTick enterS) -- NB on tick function per selection in DSL, in JS you can share them. functionally it's the same tho
+  --     _        = case j.onDrag of
+  --                   (SimulationDrag DefaultDrag) -> defaultSimulationDrag_ enterS j.simulation
+  --                   _ -> unit
+  --   pure enterS
 
   join selection (JoinGeneral j) = do
     let

@@ -9,7 +9,7 @@ import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.LesMiserables.File (LesMisModel, readGraphFromFileContents)
 import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, startSimulation_, stopSimulation_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceLinkConfig, defaultForceLinkConfigEmpty, defaultForceManyConfig)
-import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join)
+import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join, onTick)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Simulation (Force(..), createForce)
@@ -76,30 +76,22 @@ graphScript widthheight model = do
       _          = simulation `putForcesInSimulation_` lesMisForces
       _          = setLinks_ simulation model.links (\d i -> d.id)
 
-  _ <- join linksGroup $ JoinSimulation {
+  linksSelection <- join linksGroup $ Join {
       element   : Line
     , key       : UseDatumAsKey
     , "data"    : model.links -- NB the links are still just { source :: NodeID, target :: NodeID, value :: Number } at this point
     , behaviour : [ strokeWidth linkWidth ]
-    , simulation: simulation
-
-    , tickName  : "links"
-    , onTick    : [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ]
-    , onDrag    : SimulationDrag NoDrag
   }
 
-  _ <- join nodesGroup $ JoinSimulation {
+  nodesSelection <- join nodesGroup $ Join {
       element   : Circle
     , key       : UseDatumAsKey
     , "data"    : nodes
     , behaviour : [ radius 5.0, fill colorByGroup ]
-    , simulation: simulation
-
-    , tickName  : "nodes"
-    , onTick    : [ cx getNodeX, cy getNodeY ]
-    , onDrag    : SimulationDrag DefaultDrag
   }
-  
+  _ <- linksSelection `onTick` { name: "links", simulation, chain: [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ]}
+  _ <- nodesSelection `onTick` { name: "nodes", simulation, chain: [ cx getNodeX, cy getNodeY  ]}
+
   _ <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
                             , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
                             , qualifier : "tree"

@@ -5,8 +5,8 @@ import D3.Node
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
 import D3.Data.Types (Element, MouseEvent, Transition)
-import D3.Interpreter (class D3InterpreterM)
-import D3.Selection (Chainable(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), Keys)
+import D3.Interpreter (class D3InterpreterM, onTick)
+import D3.Selection (Chainable(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), Keys, TickBehavior)
 import D3.Zoom (ZoomConfig)
 import Data.Array (filter, (:))
 import Data.Map (Map, empty, insert, lookup)
@@ -29,6 +29,7 @@ data D3GrammarNode =
   -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
   | ZoomNode (ZoomConfig NodeID)
   | DragNode DragBehavior -- TODO make chainable
+  | TickNode TickBehavior -- TODO make chainable
   | AttrNode Chainable -- actually only Attr and Text
   | OnEventNode MouseEvent
   | TransitionNode (Array Chainable) Transition
@@ -44,6 +45,7 @@ instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implem
   show (JoinSimulationNode _ _ _) = "JoinSimulation"
   show (ZoomNode _)               = "Zoom"
   show (DragNode _)               = "Drag"
+  show (TickNode _)               = "Tick"
   show (AttrNode _)               = "Attr"
   show (OnEventNode _)            = "OnEvent"
   show (TransitionNode _ _)       = "Transition"
@@ -60,6 +62,7 @@ showAsSymbol =
     (JoinSimulationNode e _ _) ->  { name: "JoinSimulation", symbol: "<+>" , param1: "",           param2: "" }
     (ZoomNode _)               ->  { name: "Zoom"          , symbol: "z"   , param1: "",           param2: "" }
     (DragNode _)               ->  { name: "Drag"          , symbol: "drag", param1: "",           param2: "" }
+    (TickNode _)               ->  { name: "Tick"          , symbol: "tick", param1: "",           param2: "" }
     (AttrNode c)               ->  { name: "Attr"          , symbol: "attr", param1: show c,       param2: "" }
     (OnEventNode _)            ->  { name: "OnEvent"       , symbol: "on"  , param1: "",           param2: "" }
     (TransitionNode _ _)       ->  { name: "Transition"    , symbol: "T"   , param1: "",           param2: "" }
@@ -156,10 +159,6 @@ instance d3Tagless :: D3InterpreterM NodeID D3MetaTreeM where
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (JoinGeneralNode j.element j.key j.behaviour)
     pure id
-  join nodeID (JoinSimulation j)= do
-    (ScriptTree id _ _) <- get
-    insertInScriptTree nodeID (JoinSimulationNode j.element j.key j.behaviour)
-    pure id
 
   attachZoom nodeID zoomConfig = do
     (ScriptTree id _ _) <- get
@@ -169,6 +168,11 @@ instance d3Tagless :: D3InterpreterM NodeID D3MetaTreeM where
   onDrag nodeID behavior = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (DragNode behavior)
+    pure id
+
+  onTick nodeID tick = do
+    (ScriptTree id _ _) <- get
+    insertInScriptTree nodeID (TickNode tick) 
     pure id
 
 

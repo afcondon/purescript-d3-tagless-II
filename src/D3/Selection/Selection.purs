@@ -27,11 +27,10 @@ type JoinParams d r = -- the
 -- TODO the type parameter d here is an impediment to the meta interpreter, possible rethink ?
 data Join d = Join           (JoinParams d (behaviour   :: Array Chainable))
             | JoinGeneral    (JoinParams d (behaviour   :: EnterUpdateExit)) -- what we're going to do for each set (enter, exit, update) each refresh of data
-            | JoinSimulation (JoinParams d (behaviour   :: Array Chainable
-                                          , onTick      :: Array Chainable
-                                          , tickName    :: String
-                                          , onDrag      :: SimulationDrag
-                                          , simulation  :: D3Simulation_)) -- simulation joins are a bit different
+
+-- TODO presumably the D3Simulation_ is type parameter to allow for 
+type TickBehavior = { chain :: Array Chainable, name :: String, simulation  :: D3Simulation_}
+
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
 derive instance ordSelectionName :: Ord SelectionName

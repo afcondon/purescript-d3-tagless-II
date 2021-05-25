@@ -46,16 +46,15 @@ instance d3Tagless :: D3InterpreterM String D3PrinterM where
     modify_ (\s -> s <> "\n\tupdate behaviour: " <> updateAttributes)
     modify_ (\s -> s <> "\n\texit behaviour: " <> exitAttributes)
     pure "join"
-  join selection (JoinSimulation j) = do
-    let attributeString = foldl applyChainableString selection j.behaviour
-    modify_ (\s -> s <> "\nentering a "   <> show j.element <> " for each datum" )
-    pure "join"
   attachZoom selection zoomConfig = do
     modify_ (\s -> s <> "\nattaching a zoom handler to " <> selection)
     pure "attachZoom"
   onDrag selection behavior = do
     modify_ (\s -> s <> "\nadding drag behavior to " <> selection)
     pure "addDrag"
+  onTick selection behavior = do
+    modify_ (\s -> s <> "\nadding tick behavior to " <> selection)
+    pure "addTick"
 
 
 applyChainableString :: String -> Chainable -> String
