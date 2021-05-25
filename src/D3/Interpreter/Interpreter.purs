@@ -2,10 +2,7 @@ module D3.Interpreter where
 
 import D3.Data.Types (Selector)
 import D3.Selection (D3_Node, Behavior, Join)
-import D3.Zoom (ZoomConfig)
 import Prelude (class Monad)
-
-
 
 -- TODO see whether it can be useful to extend the interpreter here, for different visualization types
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
@@ -14,9 +11,6 @@ class (Monad m) <= D3InterpreterM selection m where
   attach :: Selector                         -> m selection
   append :: selection          -> D3_Node    -> m selection
   join   :: ∀ datum. selection -> Join datum -> m selection
-
-  -- TODO this could very well be an extension of the monad, see also Drag
-  attachZoom :: selection -> ZoomConfig selection -> m selection 
   on         :: selection -> Behavior -> m selection
 
 infix 4 join as <+>

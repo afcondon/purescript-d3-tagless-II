@@ -70,11 +70,11 @@ data EasingFunction =
 type ZoomConfig_ = {
     extent      :: Array (Array Number)
   , scaleExtent :: Array Number
-  , qualifier   :: String
+  , name   :: String
   , target      :: D3Selection_
 }
 type ZoomConfigDefault_ = {
     scaleExtent :: Array Number
-  , qualifier   :: String
+  , name   :: String
   , target      :: D3Selection_
 }

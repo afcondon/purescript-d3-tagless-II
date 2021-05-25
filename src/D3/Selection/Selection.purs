@@ -3,6 +3,7 @@ module D3.Selection where
 import D3.Attributes.Instances (Attribute, Listener_, attrLabel)
 import D3.Data.Types (D3Selection_, D3Simulation_, Element, MouseEvent, Transition)
 import D3.FFI (ComputeKeyFunction_)
+import D3.Zoom (ZoomConfig)
 import Data.Maybe.Last (Last)
 import Prelude (class Eq, class Ord, class Show, Unit, show, (<>))
 
@@ -16,7 +17,7 @@ data DragBehavior =
 
 data Behavior = Tick { chain :: Array Chainable, name :: String, simulation  :: D3Simulation_}
               | Drag DragBehavior
-      -- TODO | Zoom ZoomBehavior
+              | Zoom ZoomConfig 
 
 type JoinParams d r = -- the 
   { element    :: Element -- what we're going to insert in the DOM

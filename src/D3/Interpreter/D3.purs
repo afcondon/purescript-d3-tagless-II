@@ -6,7 +6,7 @@ import D3.Data.Types (D3Selection_)
 import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, defaultDrag_, defaultSimulationDrag_, disableDrag_, onTick_, selectionOn_)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Selection (Behavior(..), Chainable(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..))
-import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
+import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Foldable (foldl)
 import Data.Tuple (Tuple)
 import Effect (Effect)
@@ -38,20 +38,6 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
     let appended_ = d3Append_ (show element) selection_
     pure $ foldl applyChainableD3 appended_ attributes   
 
-  on selection (Tick tick) = do
-    let makeTick :: Array Chainable -> D3Selection_ -> Unit -> Unit
-        makeTick attributes selection_ _ = do
-          let _ = (applyChainableD3 selection_) <$> attributes
-          unit
-        _ = onTick_ tick.simulation tick.name (makeTick tick.chain selection)
-    pure selection 
-  
-  on selection (Drag drag) = do
-    case drag of 
-      DefaultDrag     -> pure $ defaultDrag_ selection 
-      NoDrag          -> pure $ disableDrag_ selection 
-      (CustomDrag fn) -> pure $ defaultDrag_ selection -- TODO no custom drag implemented yet
-
   join selection (Join j) = do
     let 
       selectS = d3SelectionSelectAll_ (show j.element) selection
@@ -75,21 +61,34 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
       _      = foldl applyChainableD3 dataS   j.behaviour.update
     pure enterS
 
-  attachZoom selection config = do
+  on selection (Tick tick) = do
+    let makeTick :: Array Chainable -> D3Selection_ -> Unit -> Unit
+        makeTick attributes selection_ _ = do
+          let _ = (applyChainableD3 selection_) <$> attributes
+          unit
+        _ = onTick_ tick.simulation tick.name (makeTick tick.chain selection)
+    pure selection 
+  
+  on selection (Drag drag) = do
+    case drag of 
+      DefaultDrag     -> pure $ defaultDrag_ selection 
+      NoDrag          -> pure $ disableDrag_ selection 
+      (CustomDrag fn) -> pure $ defaultDrag_ selection -- TODO no custom drag implemented yet
+
+  on selection (Zoom config) = do
     let 
       (ScaleExtent smallest largest) = config.scale
-      target = 
-        case config.target of
-          SelfTarget                   -> selection
-          (ZoomTarget targetSelection) -> targetSelection
-    
+      target = selection
+      -- TODO recover the ability to "direct" the zoom to element other than the one receiving the event
+      -- ie for controllers, containers etc
+
     -- sticking to the rules of no ADT's on the JS side we case on the ZoomExtent here
     pure $ 
       case config.extent of
         DefaultZoomExtent -> 
           d3AttachZoomDefaultExtent_ selection {
             scaleExtent: [ smallest, largest ]
-          , qualifier  : config.qualifier
+          , name  : config.name
           , target
           } 
 
@@ -97,7 +96,7 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
           d3AttachZoom_ selection { 
             extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
           , scaleExtent: [ smallest, largest ]
-          , qualifier  : config.qualifier
+          , name  : config.name
           , target
           }
 

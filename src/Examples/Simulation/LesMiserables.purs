@@ -9,14 +9,14 @@ import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.LesMiserables.File (LesMisModel, readGraphFromFileContents)
 import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, startSimulation_, stopSimulation_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceLinkConfig, defaultForceLinkConfigEmpty, defaultForceManyConfig)
-import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, join, on)
+import D3.Interpreter (class D3InterpreterM, append, attach, join, on)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Simulation (Force(..), createForce)
 import D3.Node (getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
-import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
+import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Array (cons)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Aff (Aff)
@@ -93,11 +93,10 @@ graphScript widthheight model = do
   _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ cx getNodeX, cy getNodeY  ]}
   _ <- nodesSelection `on` Drag DefaultDrag
 
-  _ <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
-                          , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
-                          , qualifier : "tree"
-                          , target    : SelfTarget
-                          }
+  _ <- svg `on`  Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
+                      , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
+                      , name : "LesMis"
+                      }
 
   pure svg
 

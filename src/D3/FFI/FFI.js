@@ -15,7 +15,7 @@ exports.d3AttachZoomDefaultExtent_ = selection => config => {
   // ancestor SVG element’s viewBox, or width and height attributes, are used.""
   return selection.call(d3.zoom() 
                   .scaleExtent(config.scaleExtent)
-                  .on(`zoom.${config.qualifier}`, zoomed));
+                  .on(`zoom.${config.name}`, zoomed));
                   // .on("zoom", zoomed));
                 }
                 
@@ -28,7 +28,7 @@ exports.d3AttachZoom_ = selection => config => {
   return selection.call(d3.zoom()
                           .extent(config.extent)
                           .scaleExtent(config.scaleExtent)
-                          .on(`zoom.${config.qualifier}`, zoomed));
+                          .on(`zoom.${config.name}`, zoomed));
                           // .on("zoom", zoomed));
 }
 

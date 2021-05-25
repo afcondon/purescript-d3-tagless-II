@@ -6,11 +6,11 @@ import D3.Examples.Spago.Attributes (chooseRadius, chooseRadiusFn, colorByGroup,
 import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode)
 import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, stopSimulation_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
-import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, on, (<+>))
+import D3.Interpreter (class D3InterpreterM, append, attach, on, (<+>))
 import D3.Layouts.Simulation (Force(..), createForce)
 import D3.Node (D3_Link(..), NodeID, getSourceX, getSourceY, getTargetX, getTargetY)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
-import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
+import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Array (cons, filter)
 import Data.Tuple (Tuple(..))
 import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (/), (<$>), (<>), (==))
@@ -72,11 +72,10 @@ graphScript (Tuple w h) model = do
                                                   ]) 
   labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y (positionLabel model.maps.path_2_LOC), text getNameFromSpagoSimNode]) 
   
-  svg' <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-                            , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
-                            , qualifier : "tree"
-                            , target    : SelfTarget
-                            }
+  svg' <- svg `on` Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+                        , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
+                        , name : "spago"
+                        }
   pure svg'
 
 

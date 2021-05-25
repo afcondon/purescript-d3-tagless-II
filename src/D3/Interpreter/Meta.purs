@@ -25,9 +25,7 @@ data D3GrammarNode =
   -- TODO if datum type can be peeled off the Join type, just store the Join directly
   | JoinSimpleNode     Element Keys (Array Chainable)
   | JoinGeneralNode    Element Keys EnterUpdateExit
-  | JoinSimulationNode Element Keys (Array Chainable)
   -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
-  | ZoomNode (ZoomConfig NodeID)
   | OnNode Behavior -- TODO make chainable
   | AttrNode Chainable -- actually only Attr and Text
   | OnEventNode MouseEvent
@@ -41,13 +39,13 @@ instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implem
   show (AppendNode _)             = "Append"
   show (JoinSimpleNode _ _ _)     = "JoinSimple"
   show (JoinGeneralNode _ _ _)    = "JoinGeneral"
-  show (JoinSimulationNode _ _ _) = "JoinSimulation"
-  show (ZoomNode _)               = "Zoom"
-  show (OnNode (Drag _))          = "Drag"
-  show (OnNode (Tick _))           = "Tick"
   show (AttrNode _)               = "Attr"
   show (OnEventNode _)            = "OnEvent"
   show (TransitionNode _ _)       = "Transition"
+
+  show (OnNode (Zoom _))          = "Zoom"
+  show (OnNode (Drag _))          = "Drag"
+  show (OnNode (Tick _))          = "Tick"
 
 showAsSymbol :: D3GrammarNode -> { name :: String, symbol :: String, param1 :: String,              param2 :: String }
 showAsSymbol = 
@@ -58,8 +56,7 @@ showAsSymbol =
     (AppendNode e)             ->  { name: "Append"        , symbol: "+"   , param1: tag $ show e, param2: "" }
     (JoinSimpleNode e _ _)     ->  { name: "JoinSimple"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
     (JoinGeneralNode e _ _)    ->  { name: "JoinGeneral"   , symbol: "<+>" , param1: "",           param2: "" }
-    (JoinSimulationNode e _ _) ->  { name: "JoinSimulation", symbol: "<+>" , param1: "",           param2: "" }
-    (ZoomNode _)               ->  { name: "Zoom"          , symbol: "z"   , param1: "",           param2: "" }
+    (OnNode (Zoom _))          ->  { name: "Zoom"          , symbol: "z"   , param1: "",           param2: "" }
     (OnNode (Drag _))          ->  { name: "Drag"          , symbol: "drag", param1: "",           param2: "" }
     (OnNode (Tick _))          ->  { name: "Tick"          , symbol: "tick", param1: "",           param2: "" }
     (AttrNode c)               ->  { name: "Attr"          , symbol: "attr", param1: show c,       param2: "" }
@@ -157,11 +154,6 @@ instance d3Tagless :: D3InterpreterM NodeID D3MetaTreeM where
   join nodeID (JoinGeneral j)   = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (JoinGeneralNode j.element j.key j.behaviour)
-    pure id
-
-  attachZoom nodeID zoomConfig = do
-    (ScriptTree id _ _) <- get
-    insertInScriptTree nodeID (ZoomNode zoomConfig)
     pure id
 
   on nodeID behavior = do
