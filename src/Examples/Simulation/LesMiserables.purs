@@ -60,10 +60,13 @@ graphScript :: forall  m selection.
   Tuple Number Number ->
   LesMisModel -> 
   m selection
-graphScript (Tuple w h) model = do
+graphScript widthheight model = do
+  let columns = 3.0
+      width   = (fst widthheight) / columns
+      height  = (snd widthheight) / columns
   root       <- attach "div#force"
-  svg        <- root `append` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h ] )
-  centerDot  <- svg  `append` (node Circle [ radius 20.0, fill "red", x (w / 2.0), y h ])
+  svg        <- root `append` (node Svg    [ viewBox (-width / 2.0) (-height / 2.0) width height ] )
+  centerDot  <- svg  `append` (node Circle [ radius 20.0, fill "red", x (width / 2.0), y (height / 2.0) ])
   linksGroup <- svg  `append` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
@@ -97,7 +100,7 @@ graphScript (Tuple w h) model = do
     , onDrag    : SimulationDrag DefaultDrag
   }
   
-  _ <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+  _ <- svg `attachZoom`  { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
                             , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
                             , qualifier : "tree"
                             , target    : SelfTarget

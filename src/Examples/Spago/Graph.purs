@@ -5,7 +5,7 @@ import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (chooseRadius, chooseRadiusFn, colorByGroup, linkClass, nodeClass, positionLabel, setX1, setX2, setY1, setY2, translateNode)
 import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode)
 import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, stopSimulation_)
-import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceXConfig, defaultForceYConfig)
+import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, (<+>))
 import D3.Layouts.Simulation (Force(..), createForce)
 import D3.Node (D3_Link(..), NodeID, getSourceX, getSourceY, getTargetX, getTargetY)
@@ -23,8 +23,7 @@ spagoForces = createForce <$>
   , ForceY           $ (defaultForceYConfig "y")           { strength = 0.1 }
   , ForceCenter      $ (defaultForceCenterConfig "center") { strength = -1.0 }
   , ForceCollide     $  defaultForceCollideConfig "collide"        (\d -> chooseRadiusFn d)
-  -- , ForceLink        $ (defaultForceLinkConfig "links" model.links (\d -> d.id))
-  -- , ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 500.0
+  , ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 800.0
   ]
       
 -- | recipe for this force layout graph

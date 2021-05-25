@@ -14,6 +14,7 @@ import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical (radialSeparation)
 import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), NodeID)
 import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
+import Data.Bifunctor (bimap)
 import Data.Either (Either(..))
 import Data.List (List(..), (:))
 import Data.List as L
@@ -34,12 +35,14 @@ import Utility (getWindowWidthHeight)
 
 drawGraph :: Aff Unit
 drawGraph = do
-  log "Force layout example"
-  (Tuple width height) <- liftEffect getWindowWidthHeight
+  log "Spago module / package example"
   moduleJSON  <- AJAX.get ResponseFormat.string "http://localhost:1234/modules.json"
   packageJSON <- AJAX.get ResponseFormat.string "http://localhost:1234/packages.json"
   lsdepJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/lsdeps.jsonlines"
   locJSON     <- AJAX.get ResponseFormat.string "http://localhost:1234/loc.json"
+
+  (Tuple width height) <- liftEffect getWindowWidthHeight
+
   case convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON <*> locJSON of
     (Left error)  -> log "error converting spago json file inputs"
     (Right graph) -> do
@@ -49,11 +52,11 @@ drawGraph = do
               (Just rootID) -> treeReduction graph rootID
 
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (treeScript (Tuple (width/2.0) height) graph')
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (treeScript (Tuple (width/3.0) height) graph')
        
       printedScript <- liftEffect $ runPrinter (graphScript (Tuple width height) graph') "Force Layout Script"
-      log $ snd printedScript
       log $ fst printedScript
+
       pure unit
 
 -- TODO make this generic and extract from Spago example to library
