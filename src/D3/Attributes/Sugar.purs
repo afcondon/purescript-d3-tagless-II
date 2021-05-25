@@ -111,8 +111,8 @@ classed = AttrT <<< ToAttribute "class" <<< toAttr
 cursor :: ∀ a. ToAttr String a => a -> Chainable
 cursor = AttrT <<< ToAttribute "cursor" <<< toAttr
 
-on :: MouseEvent -> Listener -> Chainable
-on event listener = OnT event (mkFn3 listener)
+onMouseEvent :: MouseEvent -> Listener -> Chainable
+onMouseEvent event listener = OnT event (mkFn3 listener)
 
 -- helpers for transitions 
 

@@ -49,10 +49,10 @@ instance d3Tagless :: D3InterpreterM String D3PrinterM where
   attachZoom selection zoomConfig = do
     modify_ (\s -> s <> "\nattaching a zoom handler to " <> selection)
     pure "attachZoom"
-  onDrag selection behavior = do
+  on selection (Drag drag) = do
     modify_ (\s -> s <> "\nadding drag behavior to " <> selection)
     pure "addDrag"
-  onTick selection behavior = do
+  on selection (Tick tick) = do
     modify_ (\s -> s <> "\nadding tick behavior to " <> selection)
     pure "addTick"
 

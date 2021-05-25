@@ -1,15 +1,15 @@
 module D3.Examples.Spago.Graph where
 
-import D3.Attributes.Sugar (classed, fill, on, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
+import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (chooseRadius, chooseRadiusFn, colorByGroup, linkClass, nodeClass, positionLabel, setX1, setX2, setY1, setY2, translateNode)
 import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode)
 import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, stopSimulation_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
-import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, onTick, (<+>))
+import D3.Interpreter (class D3InterpreterM, append, attach, attachZoom, on, (<+>))
 import D3.Layouts.Simulation (Force(..), createForce)
 import D3.Node (D3_Link(..), NodeID, getSourceX, getSourceY, getTargetX, getTargetY)
-import D3.Selection (DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), node)
+import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
 import Data.Array (cons, filter)
 import Data.Tuple (Tuple(..))
@@ -58,16 +58,17 @@ graphScript (Tuple w h) model = do
     , "data"    : nodes
     , behaviour : [ classed nodeClass, transform' translateNode ]
   }
-  _ <- linksSelection `onTick` { name: "links", simulation, chain: [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ]}
-  _ <- nodesSelection `onTick` { name: "nodes", simulation, chain: [ classed nodeClass, transform' translateNode ]}
+  _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ]}
+  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ classed nodeClass, transform' translateNode ]}
+  _ <- nodesSelection `on` Drag DefaultDrag
 
 
   circle  <- nodesSelection `append` (node Circle [ radius (chooseRadius model.maps.path_2_LOC) 
                                                   , fill (colorByGroup model.maps.id_2_Package)
                                                   -- , on MouseEnter (\e d t -> stopSimulation_ simulation) 
-                                                  , on MouseClick (\e d t -> toggleSimulation_ simulation)
-                                                  , on MouseEnter (\e d t -> highlightNeighborhood simulation linksGroup (unsafeCoerce model) (getIdFromSpagoSimNode d))
-                                                  , on MouseLeave (\e d t -> unhighlightNeighborhood simulation linksGroup (unsafeCoerce model))
+                                                  , onMouseEvent MouseClick (\e d t -> toggleSimulation_ simulation)
+                                                  , onMouseEvent MouseEnter (\e d t -> highlightNeighborhood simulation linksGroup (unsafeCoerce model) (getIdFromSpagoSimNode d))
+                                                  , onMouseEvent MouseLeave (\e d t -> unhighlightNeighborhood simulation linksGroup (unsafeCoerce model))
                                                   ]) 
   labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y (positionLabel model.maps.path_2_LOC), text getNameFromSpagoSimNode]) 
   

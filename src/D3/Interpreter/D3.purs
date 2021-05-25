@@ -5,13 +5,13 @@ import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Data.Types (D3Selection_)
 import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, defaultDrag_, defaultSimulationDrag_, disableDrag_, onTick_, selectionOn_)
 import D3.Interpreter (class D3InterpreterM)
-import D3.Selection (Chainable(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), SimulationDrag(..), TickBehavior(..))
+import D3.Selection (Behavior(..), Chainable(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..), ZoomTarget(..))
 import Data.Foldable (foldl)
 import Data.Tuple (Tuple)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, pure, show, unit, ($), (<$>))
+import Prelude 
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
 -- also not really making a ton of use of StateT, but it is good to have a 
@@ -38,13 +38,19 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
     let appended_ = d3Append_ (show element) selection_
     pure $ foldl applyChainableD3 appended_ attributes   
 
-  onTick selection tick = do
+  on selection (Tick tick) = do
     let makeTick :: Array Chainable -> D3Selection_ -> Unit -> Unit
         makeTick attributes selection_ _ = do
           let _ = (applyChainableD3 selection_) <$> attributes
           unit
         _ = onTick_ tick.simulation tick.name (makeTick tick.chain selection)
     pure selection 
+  
+  on selection (Drag drag) = do
+    case drag of 
+      DefaultDrag     -> pure $ defaultDrag_ selection 
+      NoDrag          -> pure $ disableDrag_ selection 
+      (CustomDrag fn) -> pure $ defaultDrag_ selection -- TODO no custom drag implemented yet
 
   join selection (Join j) = do
     let 
@@ -56,25 +62,6 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
       enterS' = foldl applyChainableD3 enterS j.behaviour
     pure enterS'
 
-  -- join selection (JoinSimulation j) = do
-  --   let makeTick :: Array Chainable -> D3Selection_ -> Unit -> Unit
-  --       makeTick attributes selection_ _ = do
-  --         let _ = (applyChainableD3 selection_) <$> attributes
-  --         unit
-
-  --   let 
-  --     initialS = d3SelectionSelectAll_ (show j.element) selection
-  --     dataS    = case j.key of
-  --                   UseDatumAsKey    -> d3Data_        j.data    initialS 
-  --                   (ComputeKey fn)  -> d3KeyFunction_ j.data fn initialS 
-  --     enterS   = d3EnterAndAppend_ (show j.element) dataS
-  --     _        = foldl applyChainableD3 enterS  j.behaviour
-  --     _        = onTick_ j.simulation j.tickName (makeTick j.onTick enterS) -- NB on tick function per selection in DSL, in JS you can share them. functionally it's the same tho
-  --     _        = case j.onDrag of
-  --                   (SimulationDrag DefaultDrag) -> defaultSimulationDrag_ enterS j.simulation
-  --                   _ -> unit
-  --   pure enterS
-
   join selection (JoinGeneral j) = do
     let
       selectS = d3SelectionSelectAll_ (show j.element) selection
@@ -83,9 +70,9 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
                 (ComputeKey fn)  -> d3KeyFunction_ j.data fn selectS 
       enterS = d3EnterAndAppend_ (show j.element) dataS
       exitS  = d3Exit_ dataS
-      _        = foldl applyChainableD3 enterS  j.behaviour.enter
-      _        = foldl applyChainableD3 exitS   j.behaviour.exit
-      _        = foldl applyChainableD3 dataS   j.behaviour.update
+      _      = foldl applyChainableD3 enterS  j.behaviour.enter
+      _      = foldl applyChainableD3 exitS   j.behaviour.exit
+      _      = foldl applyChainableD3 dataS   j.behaviour.update
     pure enterS
 
   attachZoom selection config = do
@@ -114,11 +101,6 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
           , target
           }
 
-  onDrag selection dragtype = do
-    case dragtype of 
-      DefaultDrag     -> pure $ defaultDrag_ selection 
-      NoDrag          -> pure $ disableDrag_ selection 
-      (CustomDrag fn) -> pure $ defaultDrag_ selection -- TODO no custom drag implemented yet
 
 applyChainableD3 :: D3Selection_ -> Chainable -> D3Selection_
 applyChainableD3 selection_ (AttrT (ToAttribute label attr)) = 
