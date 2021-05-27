@@ -7,7 +7,7 @@ import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Data.Types (D3Selection_, PointXY)
 import D3.Examples.Spago.Files (LinkType(..))
 import D3.Examples.Spago.Graph (graphScript)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, findGraphNodeIdFromName, setXY)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, setXY)
 import D3.Examples.Spago.Tree (treeScript)
 import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
 import D3.Interpreter.D3 (runD3M)
@@ -48,12 +48,12 @@ drawGraph = do
     (Left error)  -> log "error converting spago json file inputs"
     (Right graph) -> do
       let graph' = 
-            case findGraphNodeIdFromName graph "Main" of
+            case M.lookup "Main" graph.maps.name2ID  of 
               Nothing       -> graph -- if we couldn't find root of tree just skip tree reduction
               (Just rootID) -> treeReduction graph rootID
 
       (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (treeScript (Tuple (width/3.0) height) graph')
+      -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (treeScript (Tuple (width/3.0) height) graph')
        
       printedScript <- liftEffect $ runPrinter (graphScript (Tuple width height) graph') "Force Layout Script"
       log $ fst printedScript

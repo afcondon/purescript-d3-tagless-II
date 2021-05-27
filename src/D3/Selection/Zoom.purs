@@ -8,7 +8,7 @@ type ZoomConfig = {
     extent :: ZoomExtent
   , scale  :: ScaleExtent
   , name   :: String -- zoom.foo
-  -- this is the full list of values and their defaults
+-- this is the full list of values and their defaults
 -- filter = defaultFilter,
 -- extent = defaultExtent,
 -- constrain = defaultConstrain,

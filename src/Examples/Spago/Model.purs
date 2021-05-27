@@ -55,17 +55,18 @@ setXY (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { fx = notNull 
 
 upgradeSpagoNodeData :: SpagoNodeData -> SpagoSimNode
 upgradeSpagoNodeData node = D3SimNode { 
-    depends: node.depends
-  , id: node.id
-  , name: node.name
-  , nodetype: node.nodetype
-  , package: node.package
-  , index: node.id
-  , pinned: Floating
-  , loc: node.loc
-  , fx: (N.null :: N.Nullable Number)
-  , fy: (N.null :: N.Nullable Number)
-  , vx: 0.0, vy: 0.0, x: 0.0, y: 0.0
+    depends    : node.depends
+  , id         : node.id
+  , name       : node.name
+  , nodetype   : node.nodetype
+  , packageID  : node.packageID
+  , packageName: node.packageName
+  , index      : node.id
+  , pinned     : Floating
+  , loc        : node.loc
+  , fx         : (N.null :: N.Nullable Number)
+  , fy         : (N.null :: N.Nullable Number)
+  , vx         : 0.0, vy: 0.0, x: 0.0, y: 0.0
   }
 
 datumIsSpagoSimNode :: Datum_ -> SpagoSimNode
@@ -132,7 +133,4 @@ makeGraph nodes = do
   fromMap graphMap
 
 
-
-findGraphNodeIdFromName :: SpagoModel -> String -> Maybe NodeID
-findGraphNodeIdFromName graph name = M.lookup name graph.maps.name2ID
 

@@ -83,11 +83,12 @@ type SpagoNodeRow row = (
                 , outPackage :: Deps
                 , contains   :: Deps -- in case of package, modules; in case of modules, codepoints? (not implemented)
                 }
-  , nodetype :: NodeType
-  , name     :: String
-  , pinned   :: Pinned
-  , loc      :: Number
-  , package  :: NodeID
+  , nodetype    :: NodeType
+  , name        :: String
+  , pinned      :: Pinned
+  , loc         :: Number
+  , packageName :: String
+  , packageID   :: NodeID
   | row )
 type SpagoNodeData    = { | SpagoNodeRow () }
 
@@ -150,7 +151,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
 
     -- | Now we have everything needed to make the Model: Modules + package + LOC, Packages + contains + loc
     names = (_.key <$> modules) <> (_.key <$> packages)
-    ids   = 1 `range` (length names)
+    ids   = 0 `range` ((length names) - 1 ) -- we need a zero-based index for the nodes in D3, so our id's start at 0
 
     -- | NB discards duplicates but should be impossible that there are any
     name2ID :: M.Map String NodeID
@@ -164,7 +165,8 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       let id = getId m.key
       { id       : id
       , name     : m.key
-      , package  : getId m.package
+      , packageID: getId m.package
+      , packageName: m.package
       , loc      : m.loc
       , nodetype : IsModule m.path
       , pinned   : Floating
@@ -184,18 +186,19 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       let id  = getId p.key
           repo = fromMaybe { version: "not found", repo: "not found" } $ M.lookup p.key depsMap
 
-      { id       : id
-      , name     : p.key
-      , nodetype : IsPackage (PackageInfo repo)
-      , pinned   : Floating
-      , package  : id -- package belongs to itself
-      , loc      : p.loc 
-      , depends  :  { full: (getId <$> p.depends)  -- NB these are Package depends
-                    , tree: []
-                    , inPackage: []
-                    , outPackage: []
-                    , contains: (getId <$> p.contains)
-                    } 
+      { id         : id
+      , name       : p.key
+      , nodetype   : IsPackage (PackageInfo repo)
+      , pinned     : Floating
+      , packageID  : id -- package belongs to itself
+      , packageName: p.key
+      , loc        : p.loc 
+      , depends    :  { full: (getId <$> p.depends)  -- NB these are Package depends
+                      , tree: []
+                      , inPackage: []
+                      , outPackage: []
+                      , contains: (getId <$> p.contains)
+                      } 
       }
 
     moduleNodes        = makeNodeFromModuleJSONPL  <$> modulesPL
@@ -214,7 +217,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     packageLinks = (makeLink P2P)       <$> (foldl foldDepends [] packages)
 
     makeModuleToPackageLink :: SpagoNodeData -> SpagoGraphLinkID
-    makeModuleToPackageLink m = D3_Link { source: m.id, target: m.package, linktype: M2P InPackage }
+    makeModuleToPackageLink m = D3_Link { source: m.id, target: m.packageID, linktype: M2P InPackage }
 
     modulePackageLinks = makeModuleToPackageLink <$> moduleNodes
     
@@ -223,7 +226,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
 
   { links
   , nodes
-  , name2ID   : M.empty
+  , name2ID
   , id2Name   : M.empty
   , id2Node   : M.empty
   , id2Package: M.empty

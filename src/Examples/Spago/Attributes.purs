@@ -27,7 +27,7 @@ positionLabel datum = do
 nodeClass :: Datum_ -> String
 nodeClass datum = do
   let (D3SimNode d) = datumIsSpagoSimNode datum
-  show d.nodetype
+  show d.nodetype <> " " <> d.packageName <> " " <> d.name
 
 linkClass :: Datum_ -> String
 linkClass datum = do

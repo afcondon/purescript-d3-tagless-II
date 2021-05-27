@@ -83,11 +83,11 @@ graphScript (Tuple w h) model = do
 -- TODO remove need for unsafeCoerce on the model that's passed here
 highlightNeighborhood simulation linkselection { links, prunedTreeLinks } nodeId = markAsSpotlit_ nodeId simulation linkselection (sourceLinks <> targetLinks) sources targets
   where
-    allLinks = links <> prunedTreeLinks
+    allLinks    = links <> prunedTreeLinks
     sourceLinks = filter (\(D3_Link l) -> l.target.id == nodeId) allLinks
     targetLinks = filter (\(D3_Link l) -> l.source.id == nodeId) allLinks
-    sources = (\(D3_Link l) -> l.source.id) <$> sourceLinks
-    targets = (\(D3_Link l) -> l.target.id) <$> targetLinks
+    sources     = (\(D3_Link l) -> l.source.id) <$> sourceLinks
+    targets     = (\(D3_Link l) -> l.target.id) <$> targetLinks
 
 unhighlightNeighborhood simulation linkselection { links } = removeSpotlight_ simulation linkselection links -- we're caching all the selections on the JS side, simply reversing what we've done in highlight
 
