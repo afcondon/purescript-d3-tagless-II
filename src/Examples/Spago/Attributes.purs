@@ -41,11 +41,10 @@ translateNode datum = "translate(" <> show x <> "," <> show y <> ")"
     (x :: Number) = (unsafeCoerce datum).x
     (y :: Number) = (unsafeCoerce datum).y
 
-colorByGroup :: M.Map NodeID NodeID -> Datum_ -> String
-colorByGroup packageMap datum = d3SchemeCategory10N_ (toNumber $ fromMaybe 0 packageID)
+colorByGroup :: Datum_ -> String
+colorByGroup datum = d3SchemeCategory10N_ d.packageID
   where
     (D3SimNode d) = unsafeCoerce datum
-    packageID     = M.lookup d.id packageMap
 
 
 setX1 :: Datum_ -> Number

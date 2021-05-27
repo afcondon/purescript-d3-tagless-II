@@ -26,6 +26,7 @@ import Data.Number (nan)
 import Data.Set as S
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..), fst, snd)
+import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
@@ -69,7 +70,7 @@ treeReduction model rootID  = do
           treelinks         = partition (\(D3_Link l) -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
           treenodes         = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
           layout            = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
-          idTree            = buildTree rootID model treelinks.yes
+          idTree            = buildTree rootID treelinks.yes
           jsontree          = makeD3TreeJSONFromTreeID idTree model.maps.id2Node
           rootTree          = hierarchyFromJSON_       jsontree
           sortedTree        = treeSortForTree_Spago    rootTree
@@ -107,10 +108,10 @@ setForPhyllotaxis (D3SimNode d) = D3SimNode $ d { x = nan }
 
 getPositionMap :: SpagoTreeNode -> Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
 -- TODO coerce here is pure hackery because reference swizzling not properly modeled in type system
-getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isLeaf: (unsafeCoerce n).data.isLeaf } acc) empty (descendants_ root) 
+getPositionMap root = foldl (\acc (D3TreeNode n) -> spy "positioning a node" $ M.insert n.data.id { x: n.x, y: n.y, isLeaf: (unsafeCoerce n).data.isLeaf } acc) empty (spy "descendants: " $ descendants_ root) 
 
-buildTree :: forall r. NodeID -> SpagoModel -> Array (D3_Link NodeID r) -> Tree NodeID
-buildTree rootID model treelinks = do
+buildTree :: forall r. NodeID -> Array (D3_Link NodeID r) -> Tree NodeID
+buildTree rootID treelinks = do
   let 
     unwrap :: D3_Link NodeID r -> { source :: NodeID, target :: NodeID | r }
     unwrap (D3_Link d) = d

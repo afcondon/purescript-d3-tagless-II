@@ -224,11 +224,13 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     nodes = moduleNodes <> packageNodes
     links = moduleLinks <> packageLinks <> modulePackageLinks
 
+    id2Node = M.fromFoldable $ (\node -> Tuple node.id node) <$> nodes
+
   { links
   , nodes
   , name2ID
   , id2Name   : M.empty
-  , id2Node   : M.empty
+  , id2Node
   , id2Package: M.empty
   , id2LOC    : M.empty
   }

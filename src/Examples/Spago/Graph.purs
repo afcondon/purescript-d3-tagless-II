@@ -60,7 +60,7 @@ graphScript (Tuple w h) model = do
   }
 
   circle  <- nodesSelection `append` (node Circle [ radius getRadiusFromSpagoSimNode
-                                                  , fill (colorByGroup model.maps.id2Package)
+                                                  , fill colorByGroup
                                                   -- , on MouseEnter (\e d t -> stopSimulation_ simulation) 
                                                   , onMouseEvent MouseClick (\e d t -> startSimulation_ simulation)
                                                   , onMouseEvent MouseEnter (\e d t -> highlightNeighborhood simulation linksGroup (unsafeCoerce model) (getIdFromSpagoSimNode d))
