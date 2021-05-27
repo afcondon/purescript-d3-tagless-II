@@ -2,9 +2,9 @@ module D3.Examples.Spago.Graph where
 
 import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
-import D3.Examples.Spago.Attributes (chooseRadius, chooseRadiusFn, colorByGroup, linkClass, nodeClass, positionLabel, setX1, setX2, setY1, setY2, translateNode)
-import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode)
-import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, stopSimulation_)
+import D3.Examples.Spago.Attributes (colorByGroup, linkClass, nodeClass, positionLabel, setX1, setX2, setY1, setY2, translateNode)
+import D3.Examples.Spago.Model (SpagoModel, datumIsSpagoSimNode, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getRadiusFromSpagoSimNode)
+import D3.FFI (D3ForceHandle_, configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, startSimulation_, stopSimulation_)
 import D3.FFI.Config (defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceLinkConfig, defaultForceManyConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, on, (<+>))
 import D3.Layouts.Simulation (Force(..), createForce)
@@ -22,7 +22,7 @@ spagoForces = createForce <$>
   , ForceX           $ (defaultForceXConfig "x")           { strength = 0.1 }
   , ForceY           $ (defaultForceYConfig "y")           { strength = 0.1 }
   , ForceCenter      $ (defaultForceCenterConfig "center") { strength = -1.0 }
-  , ForceCollide     $  defaultForceCollideConfig "collide"        (\d -> chooseRadiusFn d)
+  , ForceCollide     $  defaultForceCollideConfig "collide"   getRadiusFromSpagoSimNode
   , ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 800.0
   ]
       
@@ -58,30 +58,29 @@ graphScript (Tuple w h) model = do
     , "data"    : nodes
     , behaviour : [ classed nodeClass, transform' translateNode ]
   }
-  _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ]}
-  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ classed nodeClass, transform' translateNode ]}
-  _ <- nodesSelection `on` Drag DefaultDrag
 
-
-  circle  <- nodesSelection `append` (node Circle [ radius (chooseRadius model.maps.path_2_LOC) 
-                                                  , fill (colorByGroup model.maps.id_2_Package)
+  circle  <- nodesSelection `append` (node Circle [ radius getRadiusFromSpagoSimNode
+                                                  , fill (colorByGroup model.maps.id2Package)
                                                   -- , on MouseEnter (\e d t -> stopSimulation_ simulation) 
-                                                  , onMouseEvent MouseClick (\e d t -> toggleSimulation_ simulation)
+                                                  , onMouseEvent MouseClick (\e d t -> startSimulation_ simulation)
                                                   , onMouseEvent MouseEnter (\e d t -> highlightNeighborhood simulation linksGroup (unsafeCoerce model) (getIdFromSpagoSimNode d))
                                                   , onMouseEvent MouseLeave (\e d t -> unhighlightNeighborhood simulation linksGroup (unsafeCoerce model))
                                                   ]) 
-  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y (positionLabel model.maps.path_2_LOC), text getNameFromSpagoSimNode]) 
+  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y positionLabel, text getNameFromSpagoSimNode]) 
   
-  svg' <- svg `on` Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-                        , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
-                        , name : "spago"
-                        }
-  pure svg'
+  _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ]}
+  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ classed nodeClass, transform' translateNode ]}
+  _ <- nodesSelection `on` Drag DefaultDrag
+  _ <- svg `on` Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+                     , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
+                     , name : "spago"
+                     }
+  pure svg
 
 
 -- | no sigs on these because they're currently called using unsafeCoerce to account for the fact that the link IDs
 -- | have been swizzled for their underlying objects
-
+-- TODO remove need for unsafeCoerce on the model that's passed here
 highlightNeighborhood simulation linkselection { links, prunedTreeLinks } nodeId = markAsSpotlit_ nodeId simulation linkselection (sourceLinks <> targetLinks) sources targets
   where
     allLinks = links <> prunedTreeLinks
@@ -95,3 +94,5 @@ unhighlightNeighborhood simulation linkselection { links } = removeSpotlight_ si
 foreign import markAsSpotlit_   :: forall link selection. NodeID -> D3Simulation_ -> selection -> Array link -> Array NodeID -> Array NodeID -> Unit
 foreign import removeSpotlight_ :: forall link selection.           D3Simulation_ -> selection -> Array link -> Unit
 foreign import toggleSimulation_ :: D3Simulation_ -> Unit
+foreign import unfixElementsNode :: forall element. element -> Unit -- TODO not a forall, actually a DOM element
+foreign import refixElementsNode :: forall element. element -> Unit

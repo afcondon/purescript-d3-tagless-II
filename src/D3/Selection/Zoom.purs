@@ -5,9 +5,9 @@ import Web.Event.Internal.Types (Event)
 
 -- stuff related to zoom functionality
 type ZoomConfig = {
-    extent    :: ZoomExtent
-  , scale     :: ScaleExtent
-  , name :: String -- zoom.foo
+    extent :: ZoomExtent
+  , scale  :: ScaleExtent
+  , name   :: String -- zoom.foo
   -- this is the full list of values and their defaults
 -- filter = defaultFilter,
 -- extent = defaultExtent,

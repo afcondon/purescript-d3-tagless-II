@@ -82,13 +82,13 @@ graphScript widthheight model = do
     , "data"    : model.links -- NB the links are still just { source :: NodeID, target :: NodeID, value :: Number } at this point
     , behaviour : [ strokeWidth linkWidth ]
   }
-
   nodesSelection <- join nodesGroup $ Join {
       element   : Circle
     , key       : UseDatumAsKey
     , "data"    : nodes
     , behaviour : [ radius 5.0, fill colorByGroup ]
   }
+
   _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ]}
   _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ cx getNodeX, cy getNodeY  ]}
   _ <- nodesSelection `on` Drag DefaultDrag

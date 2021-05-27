@@ -1,9 +1,8 @@
 module D3.Examples.Spago.Attributes where
 
-import D3.Examples.Spago.Model (NodeType(..), datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, moduleRadius, packageForceRadius, packageRadius)
-import Prelude (negate, show, ($), (*), (+), (-), (/), (<), (<>), (==), (>=))
-
-import D3.Data.Types (Datum_, Index_)
+import D3.Data.Types (Datum_)
+import D3.Examples.Spago.Files (NodeType(..))
+import D3.Examples.Spago.Model (datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, packageRadius)
 import D3.Examples.Tree.Configure (datumIsTreeNode)
 import D3.FFI (hasChildren_)
 import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), D3_XY, NodeID, getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
@@ -14,30 +13,16 @@ import Data.Map as M
 import Data.Maybe (fromMaybe)
 import Math (pi)
 import Math (sqrt) as Math
+import Prelude (negate, show, ($), (*), (-), (/), (<), (<>), (==), (>=))
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
-
-chooseRadius :: Map String Number -> Datum_ -> Number
-chooseRadius locMap datum = do
+positionLabel :: Datum_ -> Number
+positionLabel datum = do
   let (D3SimNode d) = datumIsSpagoSimNode datum
   case d.nodetype of
-    IsModule   -> Math.sqrt (fromMaybe 10.0 $ M.lookup d.path locMap)
-    IsPackage -> packageRadius
-
-positionLabel :: Map String Number -> Datum_ -> Number
-positionLabel locMap datum = do
-  let (D3SimNode d) = datumIsSpagoSimNode datum
-  case d.nodetype of
-    IsModule -> negate $ Math.sqrt (fromMaybe 10.0 $ M.lookup d.path locMap)
-    IsPackage -> 0.0
-
-chooseRadiusFn :: Datum_ -> Index_ -> Number
-chooseRadiusFn datum index = do
-  let (D3SimNode d) = datumIsSpagoSimNode datum
-  case d.nodetype of
-    IsModule  -> moduleRadius
-    IsPackage -> packageRadius + packageForceRadius
+    (IsModule _)  -> negate d.loc
+    (IsPackage _) -> 0.0
 
 nodeClass :: Datum_ -> String
 nodeClass datum = do
@@ -110,9 +95,9 @@ colorByGroupTree packageMap datum = d3SchemeCategory10N_ (toNumber $ fromMaybe 0
     (D3SimNode d) = unsafeCoerce datum
     packageID     = M.lookup d.data.id packageMap
 
-chooseRadiusTree :: Map String Number -> Datum_ -> Number
-chooseRadiusTree locMap datum = do
+chooseRadiusTree :: Datum_ -> Number
+chooseRadiusTree datum = do
   let (D3SimNode d) = unsafeCoerce datum -- TODO unsafe because despite all the row types this still cashes out to a simnode not a treenode here which must be fixed
   case d.data.nodetype of
-    IsModule   -> Math.sqrt (fromMaybe 10.0 $ M.lookup d.data.path locMap)
-    IsPackage -> packageRadius
+    (IsModule _)  -> Math.sqrt d.data.loc
+    (IsPackage _) -> packageRadius

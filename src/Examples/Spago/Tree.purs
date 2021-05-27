@@ -72,8 +72,8 @@ treeScript (Tuple width height) model@{ tree: Just (Tuple _ theTree)} = do
   }
 
   theNodes <- nodeJoin_ `append` 
-                (node Circle  [ fill         (colorByGroupTree model.maps.id_2_Package)
-                              , radius       (chooseRadiusTree model.maps.path_2_LOC)
+                (node Circle  [ fill         (colorByGroupTree model.maps.id2Package)
+                              , radius       chooseRadiusTree
                               , strokeColor "white"
                               ])
 

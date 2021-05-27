@@ -5,8 +5,9 @@ import Affjax.ResponseFormat as ResponseFormat
 import D3.Data.Graph (getReachableNodes)
 import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Data.Types (D3Selection_, PointXY)
+import D3.Examples.Spago.Files (LinkType(..))
 import D3.Examples.Spago.Graph (graphScript)
-import D3.Examples.Spago.Model (LinkType(..), SpagoGraphLinkID, SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, findGraphNodeIdFromName, setXY)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, findGraphNodeIdFromName, setXY)
 import D3.Examples.Spago.Tree (treeScript)
 import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
 import D3.Interpreter.D3 (runD3M)
@@ -69,7 +70,7 @@ treeReduction model rootID  = do
           treenodes         = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
           layout            = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
           idTree            = buildTree rootID model treelinks.yes
-          jsontree          = makeD3TreeJSONFromTreeID idTree model.maps.id_2_Node
+          jsontree          = makeD3TreeJSONFromTreeID idTree model.maps.id2Node
           rootTree          = hierarchyFromJSON_       jsontree
           sortedTree        = treeSortForTree_Spago    rootTree
           laidOutRoot_      = (runLayoutFn_ layout)    sortedTree
@@ -78,7 +79,7 @@ treeReduction model rootID  = do
           unpositionedNodes = setForPhyllotaxis  <$> treenodes.no
           tree              = Tuple rootID laidOutRoot_
 
-      model { links = treelinks.yes, prunedTreeLinks = prunedTreeLinks, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, maps { id_2_XYLeaf = positionMap } }
+      model { links = treelinks.yes, prunedTreeLinks = prunedTreeLinks, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, maps { id2XYLeaf = positionMap } }
 
 -- for radial positioning we treat x as angle and y as radius
 radialTranslate :: PointXY -> PointXY

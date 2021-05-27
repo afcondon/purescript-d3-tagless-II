@@ -11,7 +11,7 @@ class (Monad m) <= D3InterpreterM selection m where
   attach :: Selector                         -> m selection
   append :: selection          -> D3_Node    -> m selection
   join   :: ∀ datum. selection -> Join datum -> m selection
-  on         :: selection -> Behavior -> m selection
+  on     ::          selection -> Behavior   -> m selection
 
 infix 4 join as <+>
 
