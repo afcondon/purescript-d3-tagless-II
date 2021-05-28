@@ -330,9 +330,11 @@ exports.forceX_ = config => d3.forceX(config.x).strength(config.strength)
 exports.forceY_ = config => d3.forceY(config.y).strength(config.strength)
 // forceLink_         :: ForceLinkConfig_         -> D3ForceHandle_
 exports.forceLink_ = config => d3.forceLink(config.links).id(d => d.id)
+// forceCustom_       :: forall r. { name :: String, force :: Unit -> D3ForceHandle_ | r } -> D3ForceHandle_
+exports.forceCustom_ = config => config.force()
 // putForcesInSimulation_ :: D3Simulation_ -> Array Force -> D3Simulation_
 exports.putForcesInSimulation_ = simulation => forces => 
-  forces.forEach(force => simulation.force(force.name, force)); // TODO does force have name????
+  forces.forEach(force => simulation.force(force.name, force)); 
 // pinNode_ :: Number -> Number -> GraphNode_ -> Unit
 exports.pinNode_ = fx => fy => node => {
   node.fx = fx;

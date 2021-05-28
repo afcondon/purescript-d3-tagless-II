@@ -5,6 +5,7 @@ import Affjax.ResponseFormat as ResponseFormat
 import D3.Data.Graph (getReachableNodes)
 import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Data.Types (D3Selection_, PointXY)
+import D3.Examples.Spago.Clusters (clusterScript)
 import D3.Examples.Spago.Files (LinkType(..))
 import D3.Examples.Spago.Graph (graphScript)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, setXY)
@@ -53,7 +54,8 @@ drawGraph = do
               Nothing       -> graph -- if we couldn't find root of tree just skip tree reduction
               (Just rootID) -> treeReduction graph rootID
 
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (clusterScript (Tuple width height) graph)
+      -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
       -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (treeScript (Tuple (width/3.0) height) graph')
        
       printedScript <- liftEffect $ runPrinter (graphScript (Tuple width height) graph') "Force Layout Script"

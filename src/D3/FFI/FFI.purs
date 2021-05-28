@@ -7,7 +7,7 @@ import D3.Node
 
 import D3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
 import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
-import D3.FFI.Config (ForceCenterConfig_, ForceCollideConfig_, ForceCollideFixedConfig_, ForceManyConfig_, ForceRadialConfig_, ForceRadialFixedConfig_, ForceXConfig_, ForceYConfig_, SimulationConfig_, ForceLinkConfig_)
+import D3.FFI.Config 
 import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
 import Data.Maybe (fromMaybe)
@@ -84,7 +84,6 @@ foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_   -
 foreign import getNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
 foreign import setNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)
 
-foreign import data D3ForceHandle_ :: Type
 
 foreign import removeForceByName_  :: D3Simulation_ -> String -> D3Simulation_
 
@@ -124,6 +123,7 @@ foreign import forceRadialFixed_  :: ForceRadialFixedConfig_  -> D3ForceHandle_
 foreign import forceX_            :: ForceXConfig_            -> D3ForceHandle_
 foreign import forceY_            :: ForceYConfig_            -> D3ForceHandle_
 foreign import forceLink_         :: ForceLinkConfig_         -> D3ForceHandle_
+foreign import forceCustom_       :: forall r. { name :: String | r } -> D3ForceHandle_
 
 foreign import putForcesInSimulation_ :: D3Simulation_ -> Array D3ForceHandle_ -> D3Simulation_
 -- | *********************************************************************************************************************

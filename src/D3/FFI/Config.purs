@@ -1,10 +1,13 @@
 module D3.FFI.Config where
 
-import D3.Data.Types (Datum_, Index_)
 import D3.Node
+
+import D3.Data.Types (Datum_, Index_)
 import Data.Number (infinity)
-import Prelude (negate)
+import Prelude (Unit, negate)
 import Unsafe.Coerce (unsafeCoerce)
+
+foreign import data D3ForceHandle_ :: Type
 
  -- TODO many of the configuration values be Attr style polymorph treatment too - this is bare minimum to support current demos
 -- | a record to initialize / configure simulations
@@ -122,4 +125,10 @@ type ForceLinkConfig_ = {
   , iterations  :: Number
   , id          :: (Datum_ -> Index_ -> Number)
   , links       :: forall r. Array (D3_Link NodeID r)
+}
+
+newtype CustomForceConfig row = CustomForceConfig { 
+    name  :: String
+  , force :: (forall r. CustomForceConfig r) -> D3ForceHandle_
+  | row
 }

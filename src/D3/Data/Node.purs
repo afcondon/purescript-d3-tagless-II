@@ -34,11 +34,13 @@ type D3_ID      row = ( id    :: NodeID | row )
 type D3_Leaf    row = ( isLeaf :: Boolean | row )
 -- nodes of many types have or are given an x,y position 
 type D3_XY      row = ( x :: Number, y :: Number | row )
--- VxyFxy are the fields that are acted upon by forces in the simulation
+-- the fields that are acted upon by forces in the simulation
 type D3_VxyFxy  row = ( vx :: Number
                       , vy :: Number
                       , fx :: Nullable Number
                       , fy :: Nullable Number | row )
+-- focus points for custom forces (such as clustering)
+type D3_FocusXY row = ( cluster :: Int, focusX :: Number, focusY :: Number | row )                  
 
 
 -- depth, height and possible value are common to all tree layouts (tidy tree, dendrogram, treemap, circlepack etc)
@@ -52,9 +54,9 @@ newtype D3_TreeNode row = D3TreeNode {
   , children :: Array    (D3_TreeNode row )
   | row
 }
-type D3TreeRow row       = D3_TreeNode ( D3_ID + D3_XY + D3_TreeRow + D3_Leaf + row )
-type D3CirclePackRow row = D3_TreeNode ( D3_ID + D3_XY + D3_Radius + D3_TreeRow + row )
-type D3TreeMapRow row    = D3_TreeNode ( D3_ID + D3_Rect + D3_TreeRow + row )
+type D3TreeRow row       = D3_TreeNode ( D3_ID + D3_TreeRow + D3_XY   + D3_Leaf   + row )
+type D3CirclePackRow row = D3_TreeNode ( D3_ID + D3_TreeRow + D3_XY   + D3_Radius + row )
+type D3TreeMapRow row    = D3_TreeNode ( D3_ID + D3_TreeRow + D3_Rect             + row )
 
 newtype D3_SimulationNode row = D3SimNode { | row }
 type    D3SimulationRow   row = D3_SimulationNode ( D3_Indexed + D3_XY + D3_VxyFxy + row )
@@ -85,9 +87,6 @@ getNodeY datum = (unsafeCoerce datum).y
 
 getID :: Datum_ -> Number
 getID datum = (unsafeCoerce datum).id
--- ============================================================================================================================
--- THIS IS THE OLD CONTENTS OF NODE MODULE BELOW, ALL SLATED FOR REMOVAL WHEN THE ABOVE IS COMPLETE
--- ============================================================================================================================
 
 -- | ***************************************************************************************************
 -- | *********************************  D3 hierarchy node
