@@ -6,7 +6,7 @@ import D3.Attributes.Instances (datumIsChar, indexIsNumber)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Interpreter.D3 (runD3M)
-import D3.Selection (Chainable, Join(..), Keys(..), node, node_)
+import D3.Selection (ChainableS, Join(..), Keys(..), node, node_)
 import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (singleton, toCharArray)
@@ -41,7 +41,7 @@ runGeneralUpdatePattern = do
     _          <- liftEffect $ runD3M (update newletters)
     delay (Milliseconds 2300.0) -- NB this has to be a smidge longer than any transitions in the update!
 
-svgAttributes :: Array Chainable
+svgAttributes :: Array ChainableS
 svgAttributes = [ 
   viewBox 0.0 0.0 650.0 650.0
 ]

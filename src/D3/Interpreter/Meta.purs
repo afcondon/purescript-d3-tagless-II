@@ -6,7 +6,7 @@ import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
 import D3.Data.Types (Element, MouseEvent, Transition)
 import D3.Interpreter (class D3InterpreterM)
-import D3.Selection (Behavior(..), Chainable(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), Keys)
+import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), Keys)
 import D3.Zoom (ZoomConfig)
 import Data.Array (filter, (:))
 import Data.Map (Map, empty, insert, lookup)
@@ -23,13 +23,13 @@ data D3GrammarNode =
   | AttachNode String
   | AppendNode Element
   -- TODO if datum type can be peeled off the Join type, just store the Join directly
-  | JoinSimpleNode     Element Keys (Array Chainable)
+  | JoinSimpleNode     Element Keys (Array ChainableS)
   | JoinGeneralNode    Element Keys EnterUpdateExit
   -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
   | OnNode Behavior -- TODO make chainable
-  | AttrNode Chainable -- actually only Attr and Text
+  | AttrNode ChainableS -- actually only Attr and Text
   | OnEventNode MouseEvent
-  | TransitionNode (Array Chainable) Transition
+  | TransitionNode (Array ChainableS) Transition
   | RemoveNode
 
 instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implementation to get started
@@ -122,7 +122,7 @@ insertInScriptTree parentID newNode = do
   modify_ (\s -> ScriptTree (id + 1) (insert id newNode nodeMap) ((Tuple parentID (id+1)) : links))
   pure unit
 
-insertAttributeInScriptTree :: NodeID -> Chainable -> D3MetaTreeM Unit
+insertAttributeInScriptTree :: NodeID -> ChainableS -> D3MetaTreeM Unit
 insertAttributeInScriptTree parentID = 
   case _ of 
       -- simple attributes are just nodes
@@ -130,14 +130,14 @@ insertAttributeInScriptTree parentID =
       text@(TextT _)       -> insertInScriptTree parentID (AttrNode text)
 
       RemoveT              -> insertInScriptTree parentID RemoveNode
-      
-      -- the transition attribute is an exception, it can have further (Array Chainable)
+
+      -- the transition attribute is an exception, it can have further (Array ChainableS)
       transition@(TransitionT chain config) ->
         insertInScriptTree parentID (TransitionNode chain config)
 
       (OnT event listener) -> insertInScriptTree parentID (OnEventNode event)
 
-      attr@(ForceT _)       -> insertInScriptTree parentID (AttrNode attr) -- TODO specialize for Force attributes if needed
+      -- attr@(ForceT _)       -> insertInScriptTree parentID (AttrNode attr) -- TODO specialize for Force attributes if needed
   
 
 
@@ -166,13 +166,13 @@ instance d3Tagless :: D3InterpreterM NodeID D3MetaTreeM where
     insertInScriptTree nodeID (OnNode behavior) 
     pure id
 
--- applyChainableString :: String -> Chainable -> String
--- applyChainableString selection  = 
+-- applyChainableSString :: String -> ChainableS -> String
+-- applyChainableSString selection  = 
 --   case _ of 
 --     (AttrT (Attribute label attr)) -> showSetAttr_ label (unbox attr) selection
 --     (TextT (Attribute label attr)) -> showSetText_ (unbox attr) selection  -- TODO unboxText surely?
 --     RemoveT                        -> showRemoveSelection_ selection
 --     (TransitionT chain transition) -> do 
 --       let tString = showAddTransition_ selection transition
---       foldl applyChainableString tString chain
+--       foldl applyChainableSString tString chain
 

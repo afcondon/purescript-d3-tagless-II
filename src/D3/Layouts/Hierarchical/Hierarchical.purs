@@ -9,7 +9,7 @@ import D3.Attributes.Instances (Attribute(..), toAttr)
 import D3.Data.Tree (TreeJson_, TreeLayout, TreeModel, TreeType)
 import D3.Data.Types (Datum_)
 import D3.FFI (find_, getLayout, hNodeDepth_, linkClusterHorizontal_, linkClusterVertical_, linkHorizontal_, linkRadial_, linkVertical_, sharesParent_)
-import D3.Selection (Chainable(..))
+import D3.Selection (ChainableS(..))
 import Data.Bifunctor (rmap)
 import Data.Either (Either)
 import Data.Function.Uncurried (Fn2, mkFn2)
@@ -57,19 +57,19 @@ radialSeparation  = mkFn2 (\a b -> if (sharesParent_ a b)
                                    then 1.0 
                                    else 2.0 / (hNodeDepth_ a))
 
-horizontalLink :: Chainable
+horizontalLink :: ChainableS
 horizontalLink = AttrT $ ToAttribute "d" $ toAttr linkHorizontal_
 
-verticalLink :: Chainable
+verticalLink :: ChainableS
 verticalLink = AttrT $ ToAttribute "d" $ toAttr linkVertical_
 
-horizontalClusterLink :: Number -> Chainable
+horizontalClusterLink :: Number -> ChainableS
 horizontalClusterLink yOffset = AttrT $ ToAttribute "d" $ toAttr (linkClusterHorizontal_ yOffset)
 
-verticalClusterLink :: Number -> Chainable
+verticalClusterLink :: Number -> ChainableS
 verticalClusterLink xOffset = AttrT $ ToAttribute "d" $ toAttr (linkClusterVertical_ xOffset)
 
-radialLink :: forall a b. (a -> Number) -> (b -> Number) -> Chainable
+radialLink :: forall a b. (a -> Number) -> (b -> Number) -> ChainableS
 radialLink angleFn radius_Fn = do
   let radialFn = linkRadial_ (unsafeCoerce angleFn) (unsafeCoerce radius_Fn)
   AttrT $ ToAttribute "d" $ toAttr radialFn

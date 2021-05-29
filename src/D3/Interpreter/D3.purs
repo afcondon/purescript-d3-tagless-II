@@ -5,7 +5,7 @@ import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Data.Types (D3Selection_)
 import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, defaultDrag_, defaultSimulationDrag_, disableDrag_, onTick_, selectionOn_)
 import D3.Interpreter (class D3InterpreterM)
-import D3.Selection (Behavior(..), Chainable(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..))
+import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Foldable (foldl)
 import Data.Tuple (Tuple)
@@ -36,7 +36,7 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
 
   append selection_ (D3_Node element attributes) = do
     let appended_ = d3Append_ (show element) selection_
-    pure $ foldl applyChainableD3 appended_ attributes   
+    pure $ foldl applyChainableSD3 appended_ attributes   
 
   join selection (Join j) = do
     let 
@@ -45,7 +45,7 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
                   UseDatumAsKey    -> d3Data_        j.data    selectS 
                   (ComputeKey fn)  -> d3KeyFunction_ j.data fn selectS 
       enterS  = d3EnterAndAppend_ (show j.element) dataS
-      enterS' = foldl applyChainableD3 enterS j.behaviour
+      enterS' = foldl applyChainableSD3 enterS j.behaviour
     pure enterS'
 
   join selection (JoinGeneral j) = do
@@ -56,15 +56,15 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
                 (ComputeKey fn)  -> d3KeyFunction_ j.data fn selectS 
       enterS = d3EnterAndAppend_ (show j.element) dataS
       exitS  = d3Exit_ dataS
-      _      = foldl applyChainableD3 enterS  j.behaviour.enter
-      _      = foldl applyChainableD3 exitS   j.behaviour.exit
-      _      = foldl applyChainableD3 dataS   j.behaviour.update
+      _      = foldl applyChainableSD3 enterS  j.behaviour.enter
+      _      = foldl applyChainableSD3 exitS   j.behaviour.exit
+      _      = foldl applyChainableSD3 dataS   j.behaviour.update
     pure enterS
 
   on selection (Tick tick) = do
-    let makeTick :: Array Chainable -> D3Selection_ -> Unit -> Unit
+    let makeTick :: Array ChainableS -> D3Selection_ -> Unit -> Unit
         makeTick attributes selection_ _ = do
-          let _ = (applyChainableD3 selection_) <$> attributes
+          let _ = (applyChainableSD3 selection_) <$> attributes
           unit
         _ = onTick_ tick.simulation tick.name (makeTick tick.chain selection)
     pure selection 
@@ -101,24 +101,24 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
           }
 
 
-applyChainableD3 :: D3Selection_ -> Chainable -> D3Selection_
-applyChainableD3 selection_ (AttrT (ToAttribute label attr)) = 
+applyChainableSD3 :: D3Selection_ -> ChainableS -> D3Selection_
+applyChainableSD3 selection_ (AttrT (ToAttribute label attr)) = 
   d3SetAttr_ label (unbox attr) selection_
 -- NB only protection against non-text attribute for Text field is in the helper function
-applyChainableD3 selection_ (TextT (ToAttribute label attr)) = d3SetText_ (unbox attr) selection_ 
+applyChainableSD3 selection_ (TextT (ToAttribute label attr)) = d3SetText_ (unbox attr) selection_ 
 -- NB this remove call will have no effect on elements with active or pending transitions
 -- and this gives rise to very counter-intuitive misbehaviour as subsequent enters clash with 
 -- elements that should have been removed
-applyChainableD3 selection_ RemoveT = d3RemoveSelection_ selection_ -- "selection" here will often be a "transition"
+applyChainableSD3 selection_ RemoveT = d3RemoveSelection_ selection_ -- "selection" here will often be a "transition"
 -- for transition in D3 we must use .call(selection, transition) so that chain continues
 -- in this interpreter it's enought to just return the selection instead of the transition
-applyChainableD3 selection_ (TransitionT chain transition) = do
+applyChainableSD3 selection_ (TransitionT chain transition) = do
   let tHandler = d3AddTransition_ selection_ transition
-      _        = foldl applyChainableD3 tHandler chain
+      _        = foldl applyChainableSD3 tHandler chain
   selection_ -- NB we return selection, not transition
 -- for Forces in simulation which also can be static or dynamic:
--- TODO seems like this actually needs to factor out to be applyChainableSimulation and applyChainableSelection
-applyChainableD3 selection_ (ForceT (ToAttribute label attr)) = 
-  d3SetAttr_ label (unbox attr) selection_
-applyChainableD3 selection_ (OnT event listener) = selectionOn_ selection_ (show event) listener
+-- TODO seems like this actually needs to factor out to be applyChainableSSimulation and applyChainableSSelection
+-- applyChainableSD3 selection_ (ForceT (ToAttribute label attr)) = 
+--   d3SetAttr_ label (unbox attr) selection_
+applyChainableSD3 selection_ (OnT event listener) = selectionOn_ selection_ (show event) listener
 

@@ -4,7 +4,7 @@ import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), Attribu
 import Prelude (class Semigroup, class Show, append, bind, flap, pure, show, ($), (<$>), (<<<), (<>))
 import D3.Data.Types (Datum_, EasingFunction(..), MouseEvent, Transition)
 import D3.FFI (autoBox_)
-import D3.Selection (Chainable(..))
+import D3.Selection (ChainableS(..))
 import Data.Array (intercalate, (:))
 import Data.Function.Uncurried (mkFn3)
 import Data.Int (toNumber)
@@ -16,113 +16,113 @@ import Unsafe.Coerce (unsafeCoerce)
 import Web.HTML (window)
 import Web.HTML.Window (innerHeight, innerWidth)
 
-backgroundColor :: ∀ a. ToAttr String a => a -> Chainable
+backgroundColor :: ∀ a. ToAttr String a => a -> ChainableS
 backgroundColor = AttrT <<< ToAttribute "background-color" <<< toAttr
 
-strokeColor :: ∀ a. ToAttr String a => a -> Chainable
+strokeColor :: ∀ a. ToAttr String a => a -> ChainableS
 strokeColor = AttrT <<< ToAttribute "stroke" <<< toAttr
 
-strokeOpacity :: ∀ a. ToAttr Number a => a -> Chainable
+strokeOpacity :: ∀ a. ToAttr Number a => a -> ChainableS
 strokeOpacity = AttrT <<< ToAttribute "stroke-opacity" <<< toAttr
 
-opacity :: ∀ a. ToAttr Number a => a -> Chainable
+opacity :: ∀ a. ToAttr Number a => a -> ChainableS
 opacity = AttrT <<< ToAttribute "opacity" <<< toAttr
 
-strokeWidth :: ∀ a. ToAttr Number a => a -> Chainable
+strokeWidth :: ∀ a. ToAttr Number a => a -> ChainableS
 strokeWidth = AttrT <<< ToAttribute "stroke-width" <<< toAttr
 
-fill :: ∀ a. ToAttr String a => a -> Chainable
+fill :: ∀ a. ToAttr String a => a -> ChainableS
 fill = AttrT <<< ToAttribute "fill" <<< toAttr
 
 -- TODO this definitely needs to be Number-with-unit here
-viewBox :: Number -> Number -> Number -> Number -> Chainable
+viewBox :: Number -> Number -> Number -> Number -> ChainableS
 viewBox xo yo w h = AttrT <<< ToAttribute "viewBox" $ toAttr vb
   where
     vb = intercalate " " $ show <$> [ xo, yo, w, h ]
 
-autoBox :: Chainable
+autoBox :: ChainableS
 autoBox = AttrT <<< ToAttribute "viewBox" $ toAttr vb
   where
     vb = \d -> intercalate " " $ show <$> (autoBox_ d)
 
-fontFamily :: ∀ a. ToAttr String a => a -> Chainable
+fontFamily :: ∀ a. ToAttr String a => a -> ChainableS
 fontFamily = AttrT <<< ToAttribute "font-family" <<< toAttr
 
-textAnchor :: ∀ a. ToAttr String a => a -> Chainable
+textAnchor :: ∀ a. ToAttr String a => a -> ChainableS
 textAnchor = AttrT <<< ToAttribute "text-anchor" <<< toAttr
 
-radius :: ∀ a. ToAttr Number a => a -> Chainable
+radius :: ∀ a. ToAttr Number a => a -> ChainableS
 radius = AttrT <<< ToAttribute "r" <<< toAttr
 
-fontSize :: ∀ a. ToAttr Number a => a -> Chainable
+fontSize :: ∀ a. ToAttr Number a => a -> ChainableS
 fontSize = AttrT <<< ToAttribute "font-size" <<< toAttr
 
-width :: ∀ a. ToAttr Number a => a -> Chainable
+width :: ∀ a. ToAttr Number a => a -> ChainableS
 width = AttrT <<< ToAttribute "width" <<< toAttr
 
-height :: ∀ a. ToAttr Number a => a -> Chainable
+height :: ∀ a. ToAttr Number a => a -> ChainableS
 height = AttrT <<< ToAttribute "height" <<< toAttr
 
-width100 :: Chainable
+width100 :: ChainableS
 width100 = AttrT <<< ToAttribute "width" $ toAttr "100%"
 
-height100 :: Chainable
+height100 :: ChainableS
 height100 = AttrT <<< ToAttribute "height" $ toAttr "100%"
 
-x :: ∀ a. ToAttr Number a => a -> Chainable
+x :: ∀ a. ToAttr Number a => a -> ChainableS
 x = AttrT <<< ToAttribute "x" <<< toAttr
 
-y :: ∀ a. ToAttr Number a => a -> Chainable
+y :: ∀ a. ToAttr Number a => a -> ChainableS
 y = AttrT <<< ToAttribute "y" <<< toAttr
 
-yu :: ∀ a. ToAttr NWU a => a -> Chainable
+yu :: ∀ a. ToAttr NWU a => a -> ChainableS
 yu = AttrT <<< ToAttribute "y" <<< toAttr
 
-x1 :: ∀ a. ToAttr Number a => a -> Chainable
+x1 :: ∀ a. ToAttr Number a => a -> ChainableS
 x1 = AttrT <<< ToAttribute "x1" <<< toAttr
 
-y1 :: ∀ a. ToAttr Number a => a -> Chainable
+y1 :: ∀ a. ToAttr Number a => a -> ChainableS
 y1 = AttrT <<< ToAttribute "y1" <<< toAttr
 
-x2 :: ∀ a. ToAttr Number a => a -> Chainable
+x2 :: ∀ a. ToAttr Number a => a -> ChainableS
 x2 = AttrT <<< ToAttribute "x2" <<< toAttr
 
-y2 :: ∀ a. ToAttr Number a => a -> Chainable
+y2 :: ∀ a. ToAttr Number a => a -> ChainableS
 y2 = AttrT <<< ToAttribute "y2" <<< toAttr
 
-dx :: ∀ a. ToAttr Number a => a -> Chainable
+dx :: ∀ a. ToAttr Number a => a -> ChainableS
 dx = AttrT <<< ToAttribute "dx" <<< toAttr
 
-dy :: ∀ a. ToAttr Number a => a -> Chainable
+dy :: ∀ a. ToAttr Number a => a -> ChainableS
 dy = AttrT <<< ToAttribute "dy" <<< toAttr
 
-cx :: ∀ a. ToAttr Number a => a -> Chainable
+cx :: ∀ a. ToAttr Number a => a -> ChainableS
 cx = AttrT <<< ToAttribute "cx" <<< toAttr
 
-cy :: ∀ a. ToAttr Number a => a -> Chainable
+cy :: ∀ a. ToAttr Number a => a -> ChainableS
 cy = AttrT <<< ToAttribute "cy" <<< toAttr
 
-text :: ∀ a. ToAttr String a => a -> Chainable
+text :: ∀ a. ToAttr String a => a -> ChainableS
 text = TextT <<< ToAttribute "text" <<< toAttr
 
-classed :: ∀ a. ToAttr String a => a -> Chainable
+classed :: ∀ a. ToAttr String a => a -> ChainableS
 classed = AttrT <<< ToAttribute "class" <<< toAttr
 
-cursor :: ∀ a. ToAttr String a => a -> Chainable
+cursor :: ∀ a. ToAttr String a => a -> ChainableS
 cursor = AttrT <<< ToAttribute "cursor" <<< toAttr
 
-onMouseEvent :: MouseEvent -> Listener -> Chainable
+onMouseEvent :: MouseEvent -> Listener -> ChainableS
 onMouseEvent event listener = OnT event (mkFn3 listener)
 
 -- helpers for Forces
 
-originX :: ∀ a. ToAttr Number a => a -> Chainable
+originX :: ∀ a. ToAttr Number a => a -> ChainableS
 originX = AttrT <<< ToAttribute "originX" <<< toAttr
 
-originY :: ∀ a. ToAttr Number a => a -> Chainable
+originY :: ∀ a. ToAttr Number a => a -> ChainableS
 originY = AttrT <<< ToAttribute "originY" <<< toAttr
 
-strength :: ∀ a. ToAttr Number a => a -> Chainable
+strength :: ∀ a. ToAttr Number a => a -> ChainableS
 strength = AttrT <<< ToAttribute "strength" <<< toAttr
 
 
@@ -133,24 +133,24 @@ defaultTransition :: Transition
 defaultTransition = { name: "", delay: Milliseconds 0.0, duration: Milliseconds 0.0, easing: DefaultCubic }
 
 -- always make this empty because the other chainable things compose at the use-point
-transition :: Transition -> Chainable
+transition :: Transition -> ChainableS
 transition t = TransitionT [] t
 
-namedTransition :: String -> Chainable
+namedTransition :: String -> ChainableS
 namedTransition name = TransitionT [] $ defaultTransition { name = name } 
 
-transitionWithDuration :: Milliseconds -> Chainable -- this can be mempty for monoid
+transitionWithDuration :: Milliseconds -> ChainableS -- this can be mempty for monoid
 transitionWithDuration duration = TransitionT [] defaultTransition { duration = duration }
 
 andThen :: forall a. Semigroup a => a -> a -> a
 andThen = append
 
-to :: Chainable -> Array Chainable -> Array Chainable
+to :: ChainableS -> Array ChainableS -> Array ChainableS
 to (TransitionT [] t) chain = [ TransitionT chain t ]
 to (TransitionT existingChain t) newChain = [ TransitionT (existingChain <> newChain) t ]
-to otherChainable chain = otherChainable:chain
+to otherChainableS chain = otherChainableS:chain
 
-remove :: Chainable
+remove :: ChainableS
 remove = RemoveT
 
 
@@ -162,16 +162,16 @@ instance showLineJoin :: Show LineJoin where
   show MiterClip = "miter-clip"
   show Round     = "round"
 
-strokeLineJoin :: LineJoin -> Chainable
+strokeLineJoin :: LineJoin -> ChainableS
 strokeLineJoin = AttrT <<< ToAttribute "stroke-linejoin" <<< toAttr <<< show
 
 -- helpers for transitions, a sequence of functions but expressed as text in the DOM
 -- TODO don't export transform'
-transform' :: (Datum_ -> String) -> Chainable
+transform' :: (Datum_ -> String) -> ChainableS
 transform' = AttrT <<< ToAttribute "transform" <<< StringAttr <<< Fn
 
 -- make a single (Datum_ -> String) function out of the array (ie sequence) of functions provided
-transform :: forall a. Array (a -> String) -> Chainable
+transform :: forall a. Array (a -> String) -> ChainableS
 transform = transform' <<< assembleTransforms
 
 -- we take a stack of (Datum_ -> String) functions and produce just one

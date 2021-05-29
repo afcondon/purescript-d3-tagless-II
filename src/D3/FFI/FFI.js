@@ -314,16 +314,12 @@ exports.defaultSimulationDrag_ = selection => simulation => {
 
 // forceCenter_       :: ForceCenterConfig_       -> D3ForceHandle_
 exports.forceCenter_ = config => d3.forceCenter(config.cx,config.cy)
-// forceCollideFixed_ :: ForceCollideFixedConfig_ -> D3ForceHandle_
-exports.forceCollideFixed_ = config => d3.forceCollide(config.radius)
 // forceCollideFn_    :: ForceCollideConfig_      -> D3ForceHandle_
 exports.forceCollideFn_ = config => d3.forceCollide(config.radius)
 // forceMany_         :: ForceManyConfig_         -> D3ForceHandle_
 exports.forceMany_ = config => d3.forceManyBody().strength(config.strength)
 // forceRadial_       :: ForceRadialConfig_       -> D3ForceHandle_
 exports.forceRadial_ = config => d3.forceRadial(config.radius, config.cx, config.cy).strength(config.strength)
-// forceRadialFixed_  :: ForceRadialFixedConfig_  -> D3ForceHandle_
-exports.forceRadialFixed_ = config => d3.forceRadial(config.radius, config.cx, config.cy).strength(config.strength)
 // forceX_            :: ForceXConfig_            -> D3ForceHandle_
 exports.forceX_ = config => d3.forceX(config.x).strength(config.strength)
 // forceY_            :: ForceYConfig_            -> D3ForceHandle_

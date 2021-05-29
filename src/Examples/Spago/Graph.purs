@@ -5,7 +5,7 @@ import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (colorByGroup, linkClass, nodeClass, positionLabel, translateNode)
 import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getRadiusFromSpagoSimNode)
 import D3.FFI (configSimulation_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, startSimulation_)
-import D3.FFI.Config (D3ForceHandle_, defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceManyConfig, defaultForceRadialFixedConfig, defaultForceXConfig, defaultForceYConfig)
+import D3.Simulation.Config (D3ForceHandle_, defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceManyConfig, defaultForceRadialConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, on, (<+>))
 import D3.Layouts.Simulation (Force(..), createForce)
 import D3.Node (D3_Link(..), NodeID, getSourceX, getSourceY, getTargetX, getTargetY)
@@ -18,12 +18,12 @@ import Unsafe.Coerce (unsafeCoerce)
 
 spagoForces :: Array D3ForceHandle_
 spagoForces = createForce <$> 
-  [ ForceManyBody    $ (defaultForceManyConfig "charge")   { strength = -100.0 }
-  , ForceX           $ (defaultForceXConfig "x")           { strength = 0.1 }
-  , ForceY           $ (defaultForceYConfig "y")           { strength = 0.1 }
-  , ForceCenter      $ (defaultForceCenterConfig "center") { strength = -1.0 }
-  , ForceCollide     $  defaultForceCollideConfig "collide"   getRadiusFromSpagoSimNode
-  , ForceRadialFixed $ defaultForceRadialFixedConfig "radial" 800.0
+  [ ForceManyBody $ (defaultForceManyConfig "charge")    { strength = -100.0 }
+  , ForceX        $ (defaultForceXConfig "x")            { strength = 0.1 }
+  , ForceY        $ (defaultForceYConfig "y")            { strength = 0.1 }
+  , ForceCenter   $ (defaultForceCenterConfig  "center") { strength = -1.0 }
+  , ForceCollide  $  defaultForceCollideConfig "collide" getRadiusFromSpagoSimNode
+  , ForceRadial   $  defaultForceRadialConfig  "radial" 800.0
   ]
       
 -- | recipe for this force layout graph

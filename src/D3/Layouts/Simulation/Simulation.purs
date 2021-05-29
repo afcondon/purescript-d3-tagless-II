@@ -2,9 +2,10 @@ module D3.Layouts.Simulation where
 
 import D3.Node
 
+import D3.Attributes.Instances (Attribute)
 import D3.Data.Types (D3Simulation_)
-import D3.FFI (forceCenter_, forceCollideFixed_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadialFixed_, forceRadial_, forceX_, forceY_)
-import D3.FFI.Config (CustomForceConfig_, D3ForceHandle_, ForceCenterConfig_, ForceCollideConfig_, ForceCollideFixedConfig_, ForceLinkConfig_, ForceManyConfig_, ForceRadialConfig_, ForceRadialFixedConfig_, ForceXConfig_, ForceYConfig_, SimulationConfig_)
+import D3.FFI (forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_)
+import D3.Simulation.Config 
 import D3.Selection (DragBehavior)
 import Data.Maybe (Maybe)
 import Prelude (Unit)
@@ -26,11 +27,9 @@ type SimulationManager d l = (
 data Force =
     ForceManyBody     ForceManyConfig_
   | ForceCenter       ForceCenterConfig_
-  | ForceCollideFixed ForceCollideFixedConfig_
   | ForceCollide      ForceCollideConfig_
   | ForceX            ForceXConfig_
   | ForceY            ForceYConfig_
-  | ForceRadialFixed  ForceRadialFixedConfig_
   | ForceRadial       ForceRadialConfig_
   | ForceLink         ForceLinkConfig_
   | CustomForce       CustomForceConfig_
@@ -42,16 +41,12 @@ createForce =
       forceMany_ config 
     (ForceCenter config) ->
       forceCenter_ config
-    (ForceCollideFixed config) ->
-      forceCollideFixed_ config
     (ForceCollide config) ->
       forceCollideFn_ config
     (ForceX config) ->
       forceX_ config
     (ForceY config) ->
       forceY_ config
-    (ForceRadialFixed config) ->
-      forceRadialFixed_ config
     (ForceRadial config) ->
       forceRadial_ config
     (ForceLink config) ->

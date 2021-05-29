@@ -31,17 +31,17 @@ instance d3Tagless :: D3InterpreterM String D3PrinterM where
     modify_ (\s -> s <> "\nattaching to " <> selector <> " in DOM" )
     pure "attach"
   append selection (D3_Node element attributes) = do
-    let attributeString = foldl applyChainableString selection attributes
+    let attributeString = foldl applyChainableSString selection attributes
     modify_ (\s -> s <> "\nappending "    <> show element <> " to " <> selection <> "\n" <> attributeString)
     pure "append"
   join selection (Join j) = do
-    let attributeString = foldl applyChainableString selection j.behaviour
+    let attributeString = foldl applyChainableSString selection j.behaviour
     modify_ (\s -> s <> "\nentering a "   <> show j.element <> " for each datum" )
     pure "join"
   join selection (JoinGeneral j) = do
-    let enterAttributes  = foldl applyChainableString selection j.behaviour.enter
-        exitAttributes   = foldl applyChainableString selection j.behaviour.exit
-        updateAttributes = foldl applyChainableString selection j.behaviour.update
+    let enterAttributes  = foldl applyChainableSString selection j.behaviour.enter
+        exitAttributes   = foldl applyChainableSString selection j.behaviour.exit
+        updateAttributes = foldl applyChainableSString selection j.behaviour.update
     modify_ (\s -> s <> "\n\tenter behaviour: " <> enterAttributes)
     modify_ (\s -> s <> "\n\tupdate behaviour: " <> updateAttributes)
     modify_ (\s -> s <> "\n\texit behaviour: " <> exitAttributes)
@@ -57,16 +57,16 @@ instance d3Tagless :: D3InterpreterM String D3PrinterM where
     pure "addTick"
 
 
-applyChainableString :: String -> Chainable -> String
-applyChainableString selection  = 
+applyChainableSString :: String -> ChainableS -> String
+applyChainableSString selection  = 
   case _ of 
     (AttrT (ToAttribute label attr)) -> showSetAttr_ label (unbox attr) selection
     (TextT (ToAttribute label text)) -> showSetText_ (unbox text) selection
     RemoveT                        -> showRemoveSelection_ selection
     (TransitionT chain transition) -> do 
       let tString = showAddTransition_ selection transition
-      foldl applyChainableString tString chain
-    (ForceT (ToAttribute label attr)) -> showSetAttr_ label (unbox attr) selection -- might need custom one for forces
+      foldl applyChainableSString tString chain
+    -- (ForceT (ToAttribute label attr)) -> showSetAttr_ label (unbox attr) selection -- might need custom one for forces
     (OnT event listener) -> do
       show "event handler for " <> show event <> " has been set"
 

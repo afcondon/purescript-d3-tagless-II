@@ -7,7 +7,7 @@ import D3.Node
 
 import D3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
 import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
-import D3.FFI.Config 
+import D3.Simulation.Config 
 import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
 import Data.Maybe (fromMaybe)
@@ -115,11 +115,9 @@ foreign import setAlphaTarget_        :: D3Selection_ -> Number -> Unit
 
 -- implementations / wrappers for the Force ADT
 foreign import forceCenter_       :: ForceCenterConfig_       -> D3ForceHandle_
-foreign import forceCollideFixed_ :: ForceCollideFixedConfig_ -> D3ForceHandle_
 foreign import forceCollideFn_    :: ForceCollideConfig_      -> D3ForceHandle_
 foreign import forceMany_         :: ForceManyConfig_         -> D3ForceHandle_
 foreign import forceRadial_       :: ForceRadialConfig_       -> D3ForceHandle_
-foreign import forceRadialFixed_  :: ForceRadialFixedConfig_  -> D3ForceHandle_
 foreign import forceX_            :: ForceXConfig_            -> D3ForceHandle_
 foreign import forceY_            :: ForceYConfig_            -> D3ForceHandle_
 foreign import forceLink_         :: ForceLinkConfig_         -> D3ForceHandle_

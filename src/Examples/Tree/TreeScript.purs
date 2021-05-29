@@ -7,7 +7,7 @@ import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, str
 import D3.Data.Types (Datum_, Element(..), Selector)
 import D3.FFI (descendants_, hasChildren_, links_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
-import D3.Selection (Chainable, Join(..), Keys(..), node)
+import D3.Selection (ChainableS, Join(..), Keys(..), node)
 import Unsafe.Coerce (unsafeCoerce)
 import Type.Row (type (+))
 
@@ -24,11 +24,11 @@ type FlareModel    = { links :: Array (D3_Link NodeID FlareLinkData)
 
 -- a record that packages up all the customizations that are needed to render the 6 variations on Tree
 type ScriptConfig = { 
-    linkPath      :: Chainable
+    linkPath      :: ChainableS
   , selector      :: Selector
   , spacing       :: { interChild :: Number, interLevel :: Number }
-  , viewbox       :: Array Chainable
-  , nodeTransform :: Array Chainable
+  , viewbox       :: Array ChainableS
+  , nodeTransform :: Array ChainableS
   , color         :: String
   , textDirection :: Datum_ -> Boolean
   , svg           :: { width :: Number, height :: Number }
