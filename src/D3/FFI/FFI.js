@@ -330,8 +330,14 @@ exports.forceX_ = config => d3.forceX(config.x).strength(config.strength)
 exports.forceY_ = config => d3.forceY(config.y).strength(config.strength)
 // forceLink_         :: ForceLinkConfig_         -> D3ForceHandle_
 exports.forceLink_ = config => d3.forceLink(config.links).id(d => d.id)
-// forceCustom_       :: forall r. { name :: String, force :: Unit -> D3ForceHandle_ | r } -> D3ForceHandle_
+// forceCustom_       :: CustomForceConfig_       -> D3ForceHandle_
 exports.forceCustom_ = config => config.force()
+// makeCustomForceConfig_ :: forall a. a -> (a -> D3ForceHandle_) -> CustomForceConfig_
+exports.makeCustomForceConfig_ = config => initFn => {
+  config.force = initFn;
+  return config;
+}
+
 // putForcesInSimulation_ :: D3Simulation_ -> Array Force -> D3Simulation_
 exports.putForcesInSimulation_ = simulation => forces => 
   forces.forEach(force => simulation.force(force.name, force)); 

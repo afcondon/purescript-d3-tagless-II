@@ -127,8 +127,5 @@ type ForceLinkConfig_ = {
   , links       :: forall r. Array (D3_Link NodeID r)
 }
 
-newtype CustomForceConfig row = CustomForceConfig { 
-    name  :: String
-  , force :: (forall r. CustomForceConfig r) -> D3ForceHandle_
-  | row
-}
+foreign import data CustomForceConfig_ :: Type
+

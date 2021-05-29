@@ -1,46 +1,34 @@
 module D3.Examples.Spago.Clusters where
 
-import D3.Attributes.Sugar (classed, fill, radius, transform', viewBox, x, y)
+import D3.Attributes.Sugar (classed, cx, cy, fill, radius, transform', viewBox, x, y)
 import D3.Data.Types (Element(..))
-import D3.Examples.Spago.Attributes (colorByGroup, nodeClass, translateNode)
+import D3.Examples.Spago.Attributes (colorByGroup, datumDotRadius, nodeClass, translateNode)
 import D3.Examples.Spago.Model (SpagoModel, getRadiusFromSpagoSimNode)
-import D3.FFI (configSimulation_, initSimulation_, putForcesInSimulation_, setNodes_)
-import D3.FFI.Config (CustomForceConfig(..), D3ForceHandle_, defaultConfigSimulation, defaultForceXConfig, defaultForceYConfig)
+import D3.FFI (configSimulation_, initSimulation_, makeCustomForceConfig_, putForcesInSimulation_, setNodes_)
+import D3.FFI.Config (CustomForceConfig_, D3ForceHandle_, defaultConfigSimulation, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, on, (<+>))
 import D3.Layouts.Simulation (Force(..), createForce)
+import D3.Node (getNodeX, getNodeY)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Tuple (Tuple(..))
-import Prelude (class Bind, bind, negate, pure, unit, ($), (/), (<$>))
+import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (/), (<$>))
 
-type ClusterForceConfigOpenRow = ( radius :: Number, strength :: Number, clusterPadding :: Number )
-type ClusterForceConfig = CustomForceConfig ClusterForceConfigOpenRow
+foreign import forceClusterCollision :: Unit -> D3ForceHandle_
 
-defaultClusterForceConfig :: String -> CustomForceConfig ClusterForceConfigOpenRow
-defaultClusterForceConfig name = 
-  CustomForceConfig { 
-      name
-    , force         : forceClusterCollision_
-    , radius        : 1.0
-    , strength      : 0.8
-    , clusterPadding: 10.0
-  } 
-
-foreign import forceClusterCollision_ :: ClusterForceConfig -> D3ForceHandle_
-
-myCustomForce :: CustomForceConfig ClusterForceConfigOpenRow
-myCustomForce = CustomForceConfig { 
+myCustomForceConfig :: CustomForceConfig_ 
+myCustomForceConfig = makeCustomForceConfig_ { 
                       name          : "cluster"
-                    , force         : forceClusterCollision_
                     , radius        : 1.0
                     , strength      : 0.8
                     , clusterPadding: 10.0
-                  } 
+                  } forceClusterCollision
+                  
 spagoForces :: Array D3ForceHandle_
 spagoForces = createForce <$> 
-  [ CustomForce { name: "cluster" }
-  , ForceX      $ (defaultForceXConfig "x") { strength = 0.1 }
-  , ForceY      $ (defaultForceYConfig "y") { strength = 0.1 }
+  [ CustomForce myCustomForceConfig
+  , ForceX      $ (defaultForceXConfig "x") { strength = 0.2 }
+  , ForceY      $ (defaultForceYConfig "y") { strength = 0.2 }
   ]
       
 -- | recipe for this force layout graph
@@ -61,18 +49,18 @@ clusterScript (Tuple w h) model = do
       nodes      = simulation `setNodes_` model.nodes
       _          = simulation `putForcesInSimulation_` spagoForces
 
-  nodesSelection <- nodesGroup <+> Join {
+  nodesSelection <- nodesGroup <+> Join { -- we're putting a group in with an eye to transitions to other layouts
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : nodes
-    , behaviour : [ classed nodeClass, transform' translateNode ]
+    , behaviour : [ classed nodeClass ]
   }
 
-  circle  <- nodesSelection `append` (node Circle [ radius getRadiusFromSpagoSimNode
+  circle  <- nodesSelection `append` (node Circle [ radius datumDotRadius
                                                   , fill colorByGroup
                                                   ]) 
   
-  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ classed nodeClass, transform' translateNode ]}
+  _ <- circle `on` Tick { name: "nodes", simulation, chain: [ cx getNodeX, cy getNodeY ]}
   _ <- nodesSelection `on` Drag DefaultDrag
   _ <- svg `on` Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                      , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`

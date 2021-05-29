@@ -110,7 +110,7 @@ setForPhyllotaxis (D3SimNode d) = D3SimNode $ d { x = nan }
 
 getPositionMap :: SpagoTreeNode -> Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
 -- TODO coerce here is pure hackery because reference swizzling not properly modeled in type system
-getPositionMap root = foldl (\acc (D3TreeNode n) -> spy "positioning a node" $ M.insert n.data.id { x: n.x, y: n.y, isLeaf: (unsafeCoerce n).data.isLeaf } acc) empty (spy "descendants: " $ descendants_ root) 
+getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isLeaf: (unsafeCoerce n).data.isLeaf } acc) empty (descendants_ root) 
 
 buildTree :: forall r. NodeID -> Array (D3_Link NodeID r) -> Tree NodeID
 buildTree rootID treelinks = do

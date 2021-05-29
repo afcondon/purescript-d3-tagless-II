@@ -3,7 +3,7 @@ module D3.Examples.Spago.Model where
 import D3.Examples.Spago.Files
 
 import D3.Data.Types (Datum_, Index_)
-import D3.Node (D3SimulationRow, D3TreeRow, D3_Link(..), D3_SimulationNode(..), EmbeddedData, NodeID, D3_FocusXY)
+import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Link(..), D3_SimulationNode(..), EmbeddedData, NodeID, D3_Radius)
 import Data.Array (catMaybes, cons, foldl, length, range, zip, (!!), (:))
 import Data.Foldable (sum)
 import Data.Generic.Rep (Sum)
@@ -31,7 +31,7 @@ packageForceRadius = 50.0 :: Number
 
 
 type SpagoTreeNode    = D3TreeRow       (EmbeddedData SpagoNodeData + ())
-type SpagoSimNode     = D3SimulationRow (             SpagoNodeRow  + D3_FocusXY + ()) -- note we've woven in focusXY so that we can cluster the nodes
+type SpagoSimNode     = D3SimulationRow (             SpagoNodeRow  + D3_FocusXY + D3_Radius + ()) -- note we've woven in focusXY so that we can cluster the nodes
 
 type SpagoGraphLinkObj = D3_Link SpagoNodeData SpagoLinkData 
 
@@ -74,6 +74,7 @@ upgradeSpagoNodeData node = D3SimNode {
   , vy         : 0.0
   , x          : 0.0
   , y          : 0.0
+  , r          : sqrt node.loc
   }
 
 datumIsSpagoSimNode :: Datum_ -> SpagoSimNode

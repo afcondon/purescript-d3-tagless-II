@@ -123,7 +123,10 @@ foreign import forceRadialFixed_  :: ForceRadialFixedConfig_  -> D3ForceHandle_
 foreign import forceX_            :: ForceXConfig_            -> D3ForceHandle_
 foreign import forceY_            :: ForceYConfig_            -> D3ForceHandle_
 foreign import forceLink_         :: ForceLinkConfig_         -> D3ForceHandle_
-foreign import forceCustom_       :: forall r. { name :: String | r } -> D3ForceHandle_
+foreign import forceCustom_       :: CustomForceConfig_       -> D3ForceHandle_
+
+foreign import makeCustomForceConfig_ :: forall a. a -> (Unit -> D3ForceHandle_) -> CustomForceConfig_
+
 
 foreign import putForcesInSimulation_ :: D3Simulation_ -> Array D3ForceHandle_ -> D3Simulation_
 -- | *********************************************************************************************************************

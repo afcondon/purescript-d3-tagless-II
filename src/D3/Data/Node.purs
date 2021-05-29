@@ -52,14 +52,14 @@ type D3_Rect    row = ( x0 :: Number, y0 :: Number, x1 :: Number, y1 :: Number  
 newtype D3_TreeNode row = D3TreeNode {
     parent   :: Nullable (D3_TreeNode row )
   , children :: Array    (D3_TreeNode row )
-  | row
+  | row -- into the row here goes all the model specific data
 }
 type D3TreeRow row       = D3_TreeNode ( D3_ID + D3_TreeRow + D3_XY   + D3_Leaf   + row )
 type D3CirclePackRow row = D3_TreeNode ( D3_ID + D3_TreeRow + D3_XY   + D3_Radius + row )
 type D3TreeMapRow row    = D3_TreeNode ( D3_ID + D3_TreeRow + D3_Rect             + row )
 
 newtype D3_SimulationNode row = D3SimNode { | row }
-type    D3SimulationRow   row = D3_SimulationNode ( D3_Indexed + D3_XY + D3_VxyFxy + row )
+type    D3SimulationRow   row = D3_SimulationNode ( D3_Indexed + D3_XY + D3_VxyFxy + row ) -- into 'row' goes all the model specific data
 
 -- when you give data to d3.hierarchy the original object contents are present under the `data` field of the new hierarchical objects 
 type EmbeddedData :: forall k. k -> Row k -> Row k

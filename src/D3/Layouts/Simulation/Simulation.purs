@@ -4,7 +4,7 @@ import D3.Node
 
 import D3.Data.Types (D3Simulation_)
 import D3.FFI (forceCenter_, forceCollideFixed_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadialFixed_, forceRadial_, forceX_, forceY_)
-import D3.FFI.Config (CustomForceConfig(..), D3ForceHandle_, ForceCenterConfig_, ForceCollideConfig_, ForceCollideFixedConfig_, ForceLinkConfig_, ForceManyConfig_, ForceRadialConfig_, ForceRadialFixedConfig_, ForceXConfig_, ForceYConfig_, SimulationConfig_)
+import D3.FFI.Config (CustomForceConfig_, D3ForceHandle_, ForceCenterConfig_, ForceCollideConfig_, ForceCollideFixedConfig_, ForceLinkConfig_, ForceManyConfig_, ForceRadialConfig_, ForceRadialFixedConfig_, ForceXConfig_, ForceYConfig_, SimulationConfig_)
 import D3.Selection (DragBehavior)
 import Data.Maybe (Maybe)
 import Prelude (Unit)
@@ -33,7 +33,7 @@ data Force =
   | ForceRadialFixed  ForceRadialFixedConfig_
   | ForceRadial       ForceRadialConfig_
   | ForceLink         ForceLinkConfig_
-  | CustomForce       (forall r. { name :: String | r })
+  | CustomForce       CustomForceConfig_
 
 createForce :: Force -> D3ForceHandle_
 createForce = 

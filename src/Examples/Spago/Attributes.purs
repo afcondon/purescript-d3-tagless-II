@@ -46,6 +46,11 @@ colorByGroup datum = d3SchemeCategory10N_ d.packageID
   where
     (D3SimNode d) = unsafeCoerce datum
 
+datumDotRadius :: Datum_ -> Number
+datumDotRadius datum = d.r
+  where
+    (D3SimNode d) = unsafeCoerce datum
+
 
 setX1 :: Datum_ -> Number
 setX1 = getSourceX
