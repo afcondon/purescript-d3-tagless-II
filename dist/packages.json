@@ -341,6 +341,7 @@
             "tailrec",
             "transformers",
             "tuples",
+            "typelevel-prelude",
             "unsafe-coerce",
             "web-events",
             "web-html"

@@ -1,6 +1,138 @@
 {
   "loc": [
     {
+      "loc": 116,
+      "path": "src/D3/Attributes/Instances.purs"
+    },
+    {
+      "loc": 16,
+      "path": "src/D3/Attributes/Sugar.purs"
+    },
+    {
+      "loc": 53,
+      "path": "src/D3/Data/Graph.purs"
+    },
+    {
+      "loc": 130,
+      "path": "src/D3/Data/Node.purs"
+    },
+    {
+      "loc": 47,
+      "path": "src/D3/Data/Tree.purs"
+    },
+    {
+      "loc": 80,
+      "path": "src/D3/Data/Types.purs"
+    },
+    {
+      "loc": 16,
+      "path": "src/D3/Data/Utility.purs"
+    },
+    {
+      "loc": 131,
+      "path": "src/D3/FFI/Config.purs"
+    },
+    {
+      "loc": 20,
+      "path": "src/D3/FFI/FFI.purs"
+    },
+    {
+      "loc": 119,
+      "path": "src/D3/Interpreter/D3.purs"
+    },
+    {
+      "loc": 20,
+      "path": "src/D3/Interpreter/Interpreter.purs"
+    },
+    {
+      "loc": 17,
+      "path": "src/D3/Interpreter/Meta.purs"
+    },
+    {
+      "loc": 71,
+      "path": "src/D3/Interpreter/String.purs"
+    },
+    {
+      "loc": 82,
+      "path": "src/D3/Layouts/Hierarchical/Hierarchical.purs"
+    },
+    {
+      "loc": 61,
+      "path": "src/D3/Layouts/Simulation/Simulation.purs"
+    },
+    {
+      "loc": 13,
+      "path": "src/D3/Scales/Scales.purs"
+    },
+    {
+      "loc": 73,
+      "path": "src/D3/Selection/Selection.purs"
+    },
+    {
+      "loc": 51,
+      "path": "src/D3/Selection/Zoom.purs"
+    },
+    {
+      "loc": 82,
+      "path": "src/Data/Tree.purs"
+    },
+    {
+      "loc": 89,
+      "path": "src/Examples/GUP.purs"
+    },
+    {
+      "loc": 53,
+      "path": "src/Examples/Simulation/File.purs"
+    },
+    {
+      "loc": 117,
+      "path": "src/Examples/Simulation/LesMiserables.purs"
+    },
+    {
+      "loc": 107,
+      "path": "src/Examples/Spago/Attributes.purs"
+    },
+    {
+      "loc": 70,
+      "path": "src/Examples/Spago/Clusters.purs"
+    },
+    {
+      "loc": 25,
+      "path": "src/Examples/Spago/Files.purs"
+    },
+    {
+      "loc": 97,
+      "path": "src/Examples/Spago/Graph.purs"
+    },
+    {
+      "loc": 144,
+      "path": "src/Examples/Spago/Model.purs"
+    },
+    {
+      "loc": 140,
+      "path": "src/Examples/Spago/Spago.purs"
+    },
+    {
+      "loc": 90,
+      "path": "src/Examples/Spago/Tree.purs"
+    },
+    {
+      "loc": 127,
+      "path": "src/Examples/Tree/Meta.purs"
+    },
+    {
+      "loc": 17,
+      "path": "src/Examples/Tree/TreeConfigure.purs"
+    },
+    {
+      "loc": 95,
+      "path": "src/Examples/Tree/TreeScript.purs"
+    },
+    {
+      "loc": 43,
+      "path": "src/Main.purs"
+    },
+    {
       "loc": 406,
       "path": ".spago/aff/v6.0.0/src/Effect/Aff.purs"
     },

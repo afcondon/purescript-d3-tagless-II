@@ -1,4 +1,24 @@
 {
+    "D3.Examples.Spago.Graph": {
+        "path": "src/Examples/Spago/Graph.purs",
+        "depends": [
+            "D3.Attributes.Sugar",
+            "D3.Data.Types",
+            "D3.Examples.Spago.Attributes",
+            "D3.Examples.Spago.Model",
+            "D3.FFI",
+            "D3.FFI.Config",
+            "D3.Interpreter",
+            "D3.Layouts.Simulation",
+            "D3.Node",
+            "D3.Selection",
+            "D3.Zoom",
+            "Data.Array",
+            "Data.Tuple",
+            "Prelude",
+            "Unsafe.Coerce"
+        ]
+    },
     "Data.BooleanAlgebra": {
         "path": ".spago/prelude/v5.0.0/src/Data/BooleanAlgebra.purs",
         "depends": [
@@ -70,8 +90,10 @@
         "path": "src/D3/Interpreter/Meta.purs",
         "depends": [
             "Control.Monad.State",
+            "D3.Data.Tree",
             "D3.Data.Types",
             "D3.Interpreter",
+            "D3.Node",
             "D3.Selection",
             "D3.Zoom",
             "Data.Array",
@@ -233,16 +255,6 @@
             "Data.Traversable",
             "Effect.Class",
             "Prelude"
-        ]
-    },
-    "D3.Data.File.LesMiserables": {
-        "path": "src/D3/Data/File/LesMiserables.purs",
-        "depends": [
-            "Affjax",
-            "D3.Data.Foreign",
-            "D3.FFI",
-            "Data.Either",
-            "Unsafe.Coerce"
         ]
     },
     "Data.Char.Gen": {
@@ -475,13 +487,6 @@
             "Web.DOM.Node"
         ]
     },
-    "D3.Examples.Tree.Types": {
-        "path": "src/Examples/Tree/Types.purs",
-        "depends": [
-            "D3.Data.Types",
-            "D3.Selection"
-        ]
-    },
     "Web.HTML.HTMLHyperlinkElementUtils": {
         "path": ".spago/web-html/v3.0.1/src/Web/HTML/HTMLHyperlinkElementUtils.purs",
         "depends": [
@@ -570,33 +575,6 @@
             "Prelude"
         ]
     },
-    "D3.Examples.Simulation.LesMiserables": {
-        "path": "src/Examples/Simulation/LesMiserables.purs",
-        "depends": [
-            "Affjax",
-            "Affjax.ResponseFormat",
-            "D3.Attributes.Sugar",
-            "D3.Data.File.LesMiserables",
-            "D3.Data.Types",
-            "D3.FFI",
-            "D3.FFI.Config",
-            "D3.Interpreter",
-            "D3.Interpreter.D3",
-            "D3.Interpreter.String",
-            "D3.Layouts.Simulation",
-            "D3.Scales",
-            "D3.Selection",
-            "D3.Zoom",
-            "Data.Either",
-            "Data.Tuple",
-            "Effect.Aff",
-            "Effect.Class",
-            "Effect.Class.Console",
-            "Math",
-            "Prelude",
-            "Unsafe.Coerce"
-        ]
-    },
     "Type.Data.Row": {
         "path": ".spago/prelude/v5.0.0/src/Type/Data/Row.purs",
         "depends": []
@@ -625,39 +603,6 @@
     "Safe.Coerce": {
         "path": ".spago/safe-coerce/v1.0.0/src/Safe/Coerce.purs",
         "depends": [
-            "Unsafe.Coerce"
-        ]
-    },
-    "D3.Examples.Simulation.SpagoPackages": {
-        "path": "src/Examples/Simulation/SpagoPackages.purs",
-        "depends": [
-            "Affjax",
-            "Affjax.ResponseFormat",
-            "D3.Attributes.Sugar",
-            "D3.Data.File.Spago",
-            "D3.Data.Types",
-            "D3.FFI",
-            "D3.FFI.Config",
-            "D3.Interpreter",
-            "D3.Interpreter.D3",
-            "D3.Interpreter.String",
-            "D3.Layouts.Simulation",
-            "D3.Scales",
-            "D3.Selection",
-            "D3.Zoom",
-            "Data.Array",
-            "Data.Either",
-            "Data.List",
-            "Data.Map",
-            "Data.Maybe",
-            "Data.Set",
-            "Data.Tuple",
-            "Debug",
-            "Effect.Aff",
-            "Effect.Class",
-            "Effect.Class.Console",
-            "Math",
-            "Prelude",
             "Unsafe.Coerce"
         ]
     },
@@ -1155,25 +1100,6 @@
             "Prelude"
         ]
     },
-    "D3.Data.File.Spago": {
-        "path": "src/D3/Data/File/Spago.purs",
-        "depends": [
-            "Affjax",
-            "D3.Data.Foreign",
-            "D3.FFI",
-            "Data.Array",
-            "Data.Graph",
-            "Data.List",
-            "Data.Map",
-            "Data.Maybe",
-            "Data.Set",
-            "Data.String",
-            "Data.Tuple",
-            "Debug",
-            "Prelude",
-            "Unsafe.Coerce"
-        ]
-    },
     "Foreign.Object": {
         "path": ".spago/foreign-object/v3.0.0/src/Foreign/Object.purs",
         "depends": [
@@ -1304,14 +1230,15 @@
     "D3.FFI": {
         "path": "src/D3/FFI/FFI.purs",
         "depends": [
-            "Affjax",
+            "D3.Data.Tree",
             "D3.Data.Types",
             "D3.FFI.Config",
+            "D3.Node",
             "Data.Array",
             "Data.Function.Uncurried",
+            "Data.Maybe",
             "Data.Nullable",
-            "Prelude",
-            "Unsafe.Coerce"
+            "Prelude"
         ]
     },
     "Web.HTML.Common": {
@@ -1374,6 +1301,17 @@
             "Web.HTML.HTMLElement",
             "Web.HTML.HTMLMediaElement",
             "Web.Internal.FFI"
+        ]
+    },
+    "Utility": {
+        "path": "src/D3/Data/Utility.purs",
+        "depends": [
+            "Data.Int",
+            "Data.Tuple",
+            "Effect",
+            "Prelude",
+            "Web.HTML",
+            "Web.HTML.Window"
         ]
     },
     "Control.Monad.RWS": {
@@ -1482,6 +1420,16 @@
             "Control.Monad.Writer.Trans",
             "Effect.Aff",
             "Effect.Class",
+            "Prelude"
+        ]
+    },
+    "Data.Tree": {
+        "path": "src/Data/Tree.purs",
+        "depends": [
+            "Data.Foldable",
+            "Data.List",
+            "Data.Maybe",
+            "Data.Traversable",
             "Prelude"
         ]
     },
@@ -1616,13 +1564,6 @@
             "Data.Identity",
             "Data.Newtype",
             "Prelude"
-        ]
-    },
-    "D3.Data.Transition": {
-        "path": "src/D3/Data/Transition.purs",
-        "depends": [
-            "D3.Data.Foreign",
-            "Data.Time.Duration"
         ]
     },
     "Control.Monad.ST.Internal": {
@@ -1825,13 +1766,14 @@
         "path": "src/Examples/Tree/TreeScript.purs",
         "depends": [
             "D3.Attributes.Sugar",
-            "D3.Data.Tree",
             "D3.Data.Types",
-            "D3.Examples.Tree.Types",
             "D3.FFI",
             "D3.Interpreter",
+            "D3.Node",
             "D3.Selection",
-            "Prelude"
+            "Prelude",
+            "Type.Row",
+            "Unsafe.Coerce"
         ]
     },
     "Data.Const": {
@@ -1847,10 +1789,10 @@
     "Main": {
         "path": "src/Main.purs",
         "depends": [
-            "D3.Data.Types",
+            "D3.Data.Tree",
             "D3.Examples.GUP",
-            "D3.Examples.Simulation.LesMiserables",
-            "D3.Examples.Simulation.SpagoPackages",
+            "D3.Examples.LesMiserables",
+            "D3.Examples.Spago",
             "D3.Examples.Tree.Configure",
             "D3.Examples.Tree.Meta",
             "D3.Layouts.Hierarchical",
@@ -2219,6 +2161,24 @@
             "Unsafe.Coerce"
         ]
     },
+    "D3.Examples.Spago.Tree": {
+        "path": "src/Examples/Spago/Tree.purs",
+        "depends": [
+            "D3.Attributes.Sugar",
+            "D3.Data.Tree",
+            "D3.Data.Types",
+            "D3.Examples.Spago.Attributes",
+            "D3.Examples.Spago.Model",
+            "D3.FFI",
+            "D3.Interpreter",
+            "D3.Layouts.Hierarchical",
+            "D3.Selection",
+            "Data.Maybe",
+            "Data.Tuple",
+            "Math",
+            "Prelude"
+        ]
+    },
     "Data.Profunctor.Star": {
         "path": ".spago/profunctor/v5.0.0/src/Data/Profunctor/Star.purs",
         "depends": [
@@ -2268,6 +2228,44 @@
         "depends": [
             "Data.Maybe",
             "Prelude"
+        ]
+    },
+    "D3.Examples.Spago": {
+        "path": "src/Examples/Spago/Spago.purs",
+        "depends": [
+            "Affjax",
+            "Affjax.ResponseFormat",
+            "D3.Data.Graph",
+            "D3.Data.Tree",
+            "D3.Data.Types",
+            "D3.Examples.Spago.Clusters",
+            "D3.Examples.Spago.Files",
+            "D3.Examples.Spago.Graph",
+            "D3.Examples.Spago.Model",
+            "D3.Examples.Spago.Tree",
+            "D3.FFI",
+            "D3.Interpreter.D3",
+            "D3.Interpreter.String",
+            "D3.Layouts.Hierarchical",
+            "D3.Node",
+            "Data.Array",
+            "Data.Bifunctor",
+            "Data.Either",
+            "Data.List",
+            "Data.Map",
+            "Data.Maybe",
+            "Data.Number",
+            "Data.Set",
+            "Data.Tree",
+            "Data.Tuple",
+            "Debug",
+            "Effect.Aff",
+            "Effect.Class",
+            "Effect.Class.Console",
+            "Math",
+            "Prelude",
+            "Unsafe.Coerce",
+            "Utility"
         ]
     },
     "Type.RowList": {
@@ -2365,9 +2363,9 @@
             "D3.Attributes.Instances",
             "D3.Data.Types",
             "D3.FFI",
+            "D3.Zoom",
             "Data.Maybe.Last",
-            "Prelude",
-            "Unsafe.Coerce"
+            "Prelude"
         ]
     },
     "Data.List.Types": {
@@ -2468,6 +2466,16 @@
             "Prelude"
         ]
     },
+    "D3.Node": {
+        "path": "src/D3/Data/Node.purs",
+        "depends": [
+            "D3.Data.Types",
+            "Data.Nullable",
+            "Debug",
+            "Type.Row",
+            "Unsafe.Coerce"
+        ]
+    },
     "Data.CatQueue": {
         "path": ".spago/catenable-lists/v6.0.0/src/Data/CatQueue.purs",
         "depends": [
@@ -2518,7 +2526,6 @@
         "depends": [
             "D3.Data.Types",
             "D3.Selection",
-            "D3.Zoom",
             "Prelude"
         ]
     },
@@ -2651,7 +2658,8 @@
     "D3.FFI.Config": {
         "path": "src/D3/FFI/Config.purs",
         "depends": [
-            "D3.Data.Foreign",
+            "D3.Data.Types",
+            "D3.Node",
             "Data.Number",
             "Prelude",
             "Unsafe.Coerce"
@@ -2734,15 +2742,18 @@
             "D3.Interpreter.MetaTree",
             "D3.Interpreter.String",
             "D3.Layouts.Hierarchical",
+            "D3.Node",
             "D3.Scales",
             "Data.Map",
             "Data.Tuple",
-            "Debug",
             "Effect.Aff",
             "Effect.Class",
             "Effect.Class.Console",
             "Math",
-            "Prelude"
+            "Prelude",
+            "Type.Row",
+            "Unsafe.Coerce",
+            "Utility"
         ]
     },
     "Data.Set": {
@@ -2874,10 +2885,7 @@
     "D3.Data.Types": {
         "path": "src/D3/Data/Types.purs",
         "depends": [
-            "D3.Data.Foreign",
-            "D3.Data.Transition",
-            "D3.Data.Tree",
-            "D3.Data.Zoom",
+            "Data.Time.Duration",
             "Prelude"
         ]
     },
@@ -2888,6 +2896,25 @@
             "Unsafe.Coerce",
             "Web.Event.Event",
             "Web.Internal.FFI"
+        ]
+    },
+    "D3.Examples.Spago.Attributes": {
+        "path": "src/Examples/Spago/Attributes.purs",
+        "depends": [
+            "D3.Data.Types",
+            "D3.Examples.Spago.Files",
+            "D3.Examples.Spago.Model",
+            "D3.Examples.Tree.Configure",
+            "D3.FFI",
+            "D3.Node",
+            "D3.Scales",
+            "Data.Int",
+            "Data.Map",
+            "Data.Maybe",
+            "Math",
+            "Prelude",
+            "Type.Row",
+            "Unsafe.Coerce"
         ]
     },
     "Data.Semigroup.Last": {
@@ -2994,6 +3021,29 @@
             "Prelude"
         ]
     },
+    "D3.Examples.Spago.Model": {
+        "path": "src/Examples/Spago/Model.purs",
+        "depends": [
+            "D3.Data.Types",
+            "D3.Examples.Spago.Files",
+            "D3.Node",
+            "Data.Array",
+            "Data.Foldable",
+            "Data.Generic.Rep",
+            "Data.Graph",
+            "Data.Map",
+            "Data.Maybe",
+            "Data.Nullable",
+            "Data.Set",
+            "Data.String",
+            "Data.Tuple",
+            "Debug",
+            "Math",
+            "Prelude",
+            "Type.Row",
+            "Unsafe.Coerce"
+        ]
+    },
     "Prelude": {
         "path": ".spago/prelude/v5.0.0/src/Prelude.purs",
         "depends": [
@@ -3024,6 +3074,16 @@
             "Data.Show",
             "Data.Unit",
             "Data.Void"
+        ]
+    },
+    "D3.Examples.LesMiserables.File": {
+        "path": "src/Examples/Simulation/File.purs",
+        "depends": [
+            "Affjax",
+            "D3.Node",
+            "Data.Either",
+            "Data.Nullable",
+            "Type.Row"
         ]
     },
     "Effect.Class": {
@@ -3154,8 +3214,10 @@
             "Affjax",
             "Affjax.ResponseFormat",
             "D3.Attributes.Instances",
+            "D3.Data.Tree",
             "D3.Data.Types",
             "D3.FFI",
+            "D3.Node",
             "D3.Selection",
             "Data.Bifunctor",
             "Data.Either",
@@ -3165,7 +3227,37 @@
             "Effect.Aff",
             "Effect.Class",
             "Prelude",
+            "Type.Row",
             "Unsafe.Coerce"
+        ]
+    },
+    "D3.Examples.LesMiserables": {
+        "path": "src/Examples/Simulation/LesMiserables.purs",
+        "depends": [
+            "Affjax",
+            "Affjax.ResponseFormat",
+            "D3.Attributes.Sugar",
+            "D3.Data.Types",
+            "D3.Examples.LesMiserables.File",
+            "D3.FFI",
+            "D3.FFI.Config",
+            "D3.Interpreter",
+            "D3.Interpreter.D3",
+            "D3.Interpreter.String",
+            "D3.Layouts.Simulation",
+            "D3.Node",
+            "D3.Scales",
+            "D3.Selection",
+            "D3.Zoom",
+            "Data.Array",
+            "Data.Tuple",
+            "Effect.Aff",
+            "Effect.Class",
+            "Effect.Class.Console",
+            "Math",
+            "Prelude",
+            "Unsafe.Coerce",
+            "Utility"
         ]
     },
     "Web.HTML.Event.PageTransitionEvent": {
@@ -3603,6 +3695,22 @@
             "Prelude"
         ]
     },
+    "D3.Examples.Spago.Files": {
+        "path": "src/Examples/Spago/Files.purs",
+        "depends": [
+            "Affjax",
+            "D3.Node",
+            "Data.Array",
+            "Data.Array.NonEmpty",
+            "Data.Foldable",
+            "Data.Map",
+            "Data.Maybe",
+            "Data.String",
+            "Data.Tuple",
+            "Debug",
+            "Prelude"
+        ]
+    },
     "Affjax.RequestBody": {
         "path": ".spago/affjax/v12.0.0/src/Affjax/RequestBody.purs",
         "depends": [
@@ -3634,9 +3742,10 @@
             "D3.Data.Types",
             "D3.FFI",
             "D3.FFI.Config",
+            "D3.Node",
             "D3.Selection",
-            "Prelude",
-            "Unsafe.Coerce"
+            "Data.Maybe",
+            "Prelude"
         ]
     },
     "Web.HTML.HTMLImageElement.DecodingHint": {
@@ -3966,12 +4075,6 @@
             "Web.Event.EventTarget",
             "Web.HTML.HTMLElement",
             "Web.Internal.FFI"
-        ]
-    },
-    "D3.Data.Zoom": {
-        "path": "src/D3/Data/Zoom.purs",
-        "depends": [
-            "D3.Data.Foreign"
         ]
     },
     "Data.Functor.Coproduct": {
@@ -4421,6 +4524,18 @@
             "Data.Equivalence",
             "Data.Op",
             "Data.Predicate",
+            "Prelude"
+        ]
+    },
+    "D3.Data.Graph": {
+        "path": "src/D3/Data/Graph.purs",
+        "depends": [
+            "D3.Node",
+            "Data.Array",
+            "Data.Graph",
+            "Data.Maybe",
+            "Data.Tree",
+            "Data.Tuple",
             "Prelude"
         ]
     },
@@ -4921,6 +5036,24 @@
             "Prelude"
         ]
     },
+    "D3.Examples.Spago.Clusters": {
+        "path": "src/Examples/Spago/Clusters.purs",
+        "depends": [
+            "D3.Attributes.Sugar",
+            "D3.Data.Types",
+            "D3.Examples.Spago.Attributes",
+            "D3.Examples.Spago.Model",
+            "D3.FFI",
+            "D3.FFI.Config",
+            "D3.Interpreter",
+            "D3.Layouts.Simulation",
+            "D3.Node",
+            "D3.Selection",
+            "D3.Zoom",
+            "Data.Tuple",
+            "Prelude"
+        ]
+    },
     "Data.FoldableWithIndex": {
         "path": ".spago/foldable-traversable/v5.0.0/src/Data/FoldableWithIndex.purs",
         "depends": [
@@ -4988,17 +5121,21 @@
         "path": "src/Examples/Tree/Meta.purs",
         "depends": [
             "D3.Attributes.Sugar",
+            "D3.Data.Tree",
             "D3.Data.Types",
             "D3.FFI",
             "D3.Interpreter",
             "D3.Interpreter.D3",
             "D3.Layouts.Hierarchical",
+            "D3.Node",
             "D3.Selection",
             "Data.Tuple",
             "Effect.Aff",
             "Effect.Class",
             "Prelude",
-            "Unsafe.Coerce"
+            "Type.Row",
+            "Unsafe.Coerce",
+            "Utility"
         ]
     },
     "Web.HTML.HTMLScriptElement": {
@@ -5127,10 +5264,13 @@
     "D3.Data.Tree": {
         "path": "src/D3/Data/Tree.purs",
         "depends": [
-            "D3.Data.Foreign",
-            "Data.Nullable",
-            "Prelude",
-            "Unsafe.Coerce"
+            "D3.Node",
+            "Data.Array",
+            "Data.List",
+            "Data.Map",
+            "Data.Maybe",
+            "Data.Tree",
+            "Prelude"
         ]
     },
     "Data.FormURLEncoded": {
@@ -5145,10 +5285,6 @@
             "JSURI",
             "Prelude"
         ]
-    },
-    "D3.Data.Foreign": {
-        "path": "src/D3/Data/Foreign.purs",
-        "depends": []
     },
     "Web.XHR.ResponseType": {
         "path": ".spago/web-xhr/v4.0.0/src/Web/XHR/ResponseType.purs",
