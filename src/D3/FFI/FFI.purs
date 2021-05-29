@@ -114,14 +114,14 @@ foreign import defaultSimulationDrag_ :: D3Selection_ -> D3Simulation_ -> Unit
 foreign import setAlphaTarget_        :: D3Selection_ -> Number -> Unit
 
 -- implementations / wrappers for the Force ADT
-foreign import forceCenter_       :: ForceCenterConfig_       -> D3ForceHandle_
-foreign import forceCollideFn_    :: ForceCollideConfig_      -> D3ForceHandle_
-foreign import forceMany_         :: ForceManyConfig_         -> D3ForceHandle_
-foreign import forceRadial_       :: ForceRadialConfig_       -> D3ForceHandle_
-foreign import forceX_            :: ForceXConfig_            -> D3ForceHandle_
-foreign import forceY_            :: ForceYConfig_            -> D3ForceHandle_
-foreign import forceLink_         :: ForceLinkConfig_         -> D3ForceHandle_
-foreign import forceCustom_       :: CustomForceConfig_       -> D3ForceHandle_
+foreign import forceCenter_       :: Unit -> D3ForceHandle_
+foreign import forceCollideFn_    :: Unit -> D3ForceHandle_
+foreign import forceMany_         :: Unit -> D3ForceHandle_
+foreign import forceRadial_       :: Unit -> D3ForceHandle_
+foreign import forceX_            :: Unit -> D3ForceHandle_
+foreign import forceY_            :: Unit -> D3ForceHandle_
+foreign import forceLink_         :: Unit -> D3ForceHandle_
+foreign import forceCustom_       :: Unit -> D3ForceHandle_
 
 foreign import makeCustomForceConfig_ :: forall a. a -> (Unit -> D3ForceHandle_) -> CustomForceConfig_
 

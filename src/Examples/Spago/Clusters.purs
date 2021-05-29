@@ -5,30 +5,25 @@ import D3.Data.Types (Element(..))
 import D3.Examples.Spago.Attributes (colorByGroup, datumDotRadius, nodeClass, translateNode)
 import D3.Examples.Spago.Model (SpagoModel, getRadiusFromSpagoSimNode)
 import D3.FFI (configSimulation_, initSimulation_, makeCustomForceConfig_, putForcesInSimulation_, setNodes_)
-import D3.Simulation.Config (CustomForceConfig_, D3ForceHandle_, defaultConfigSimulation, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, on, (<+>))
 import D3.Layouts.Simulation (Force(..), createForce)
 import D3.Node (getNodeX, getNodeY)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
+import D3.Simulation.Config (ChainableF, CustomForceConfig_, D3ForceHandle_, defaultConfigSimulation, defaultForceXConfig, defaultForceYConfig, strength)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Tuple (Tuple(..))
 import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (/), (<$>))
 
 foreign import forceClusterCollision :: Unit -> D3ForceHandle_
 
-myCustomForceConfig :: CustomForceConfig_ 
-myCustomForceConfig = makeCustomForceConfig_ { 
-                      name          : "cluster"
-                    , radius        : 1.0
-                    , strength      : 0.8
-                    , clusterPadding: 10.0
-                  } forceClusterCollision
+-- myCustomForceConfig :: Array ChainableF 
+-- myCustomForceConfig = [ radius 1.0, strength 0.8, clusterPadding: 10.0 ] forceClusterCollision
                   
 spagoForces :: Array D3ForceHandle_
 spagoForces = createForce <$> 
-  [ CustomForce myCustomForceConfig
-  , ForceX      $ (defaultForceXConfig "x") { strength = 0.2 }
-  , ForceY      $ (defaultForceYConfig "y") { strength = 0.2 }
+  [ CustomForce "cluster" [] -- TODO need to bring in the forceFunction somehow
+  , ForceX      "x" [ strength 0.2 ]
+  , ForceY      "y" [ strength 0.2 ]
   ]
       
 -- | recipe for this force layout graph

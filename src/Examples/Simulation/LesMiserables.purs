@@ -8,7 +8,7 @@ import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOp
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.LesMiserables.File (LesMisModel, readGraphFromFileContents)
 import D3.FFI (configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, startSimulation_, stopSimulation_)
-import D3.Simulation.Config (D3ForceHandle_, defaultConfigSimulation, defaultForceLinkConfig, defaultForceLinkConfigEmpty, defaultForceManyConfig)
+import D3.Simulation.Config 
 import D3.Interpreter (class D3InterpreterM, append, attach, join, on)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
@@ -49,8 +49,8 @@ drawGraph = do
 
 lesMisForces :: Array D3ForceHandle_
 lesMisForces = createForce <$>
-    [ ForceCenter { name: "center", cx: 500.0, cy: 500.0, strength: 1.0 }
-    , ForceManyBody (defaultForceManyConfig "charge")
+    [ ForceCenter "center" [] -- [ cx: 500.0, cy: 500.0, strength: 1.0 }
+    , ForceManyBody "charge" []
     ]
 
 -- | recipe for this force layout graph

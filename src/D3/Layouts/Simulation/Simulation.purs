@@ -8,7 +8,7 @@ import D3.FFI (forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMan
 import D3.Simulation.Config 
 import D3.Selection (DragBehavior)
 import Data.Maybe (Maybe)
-import Prelude (Unit)
+import Prelude (Unit, unit)
 
 type SimulationManager d l = (  
 -- 'd' is the type of the "data" field in each node
@@ -25,32 +25,32 @@ type SimulationManager d l = (
 )
 
 data Force =
-    ForceManyBody     ForceManyConfig_
-  | ForceCenter       ForceCenterConfig_
-  | ForceCollide      ForceCollideConfig_
-  | ForceX            ForceXConfig_
-  | ForceY            ForceYConfig_
-  | ForceRadial       ForceRadialConfig_
-  | ForceLink         ForceLinkConfig_
-  | CustomForce       CustomForceConfig_
+    ForceManyBody     String (Array ChainableF)
+  | ForceCenter       String (Array ChainableF)
+  | ForceCollide      String (Array ChainableF)
+  | ForceX            String (Array ChainableF)
+  | ForceY            String (Array ChainableF)
+  | ForceRadial       String (Array ChainableF)
+  | ForceLink         String (Array ChainableF) (forall r. Array (D3_Link NodeID r))
+  | CustomForce       String (Array ChainableF)
 
 createForce :: Force -> D3ForceHandle_
 createForce = 
   case _ of
-    (ForceManyBody config) ->
-      forceMany_ config 
-    (ForceCenter config) ->
-      forceCenter_ config
-    (ForceCollide config) ->
-      forceCollideFn_ config
-    (ForceX config) ->
-      forceX_ config
-    (ForceY config) ->
-      forceY_ config
-    (ForceRadial config) ->
-      forceRadial_ config
-    (ForceLink config) ->
-      forceLink_ config
+    (ForceManyBody name attributes) ->
+      forceMany_ unit 
+    (ForceCenter name attributes) ->
+      forceCenter_ unit
+    (ForceCollide name attributes) ->
+      forceCollideFn_ unit
+    (ForceX name attributes) ->
+      forceX_ unit
+    (ForceY name attributes) ->
+      forceY_ unit
+    (ForceRadial name attributes) ->
+      forceRadial_ unit
+    (ForceLink name attributes links) ->
+      forceLink_ unit
        
-    (CustomForce config) -> 
-      forceCustom_ config
+    (CustomForce name attributes) -> 
+      forceCustom_ unit

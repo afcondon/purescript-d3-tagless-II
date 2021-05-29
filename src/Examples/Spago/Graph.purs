@@ -1,15 +1,17 @@
 module D3.Examples.Spago.Graph where
 
+import D3.Simulation.Config
+
 import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (colorByGroup, linkClass, nodeClass, positionLabel, translateNode)
 import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getRadiusFromSpagoSimNode)
 import D3.FFI (configSimulation_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, startSimulation_)
-import D3.Simulation.Config (D3ForceHandle_, defaultConfigSimulation, defaultForceCenterConfig, defaultForceCollideConfig, defaultForceManyConfig, defaultForceRadialConfig, defaultForceXConfig, defaultForceYConfig)
 import D3.Interpreter (class D3InterpreterM, append, attach, on, (<+>))
 import D3.Layouts.Simulation (Force(..), createForce)
 import D3.Node (D3_Link(..), NodeID, getSourceX, getSourceY, getTargetX, getTargetY)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
+import D3.Simulation.Config as F
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Array (filter)
 import Data.Tuple (Tuple(..))
@@ -18,12 +20,12 @@ import Unsafe.Coerce (unsafeCoerce)
 
 spagoForces :: Array D3ForceHandle_
 spagoForces = createForce <$> 
-  [ ForceManyBody $ (defaultForceManyConfig "charge")    { strength = -100.0 }
-  , ForceX        $ (defaultForceXConfig "x")            { strength = 0.1 }
-  , ForceY        $ (defaultForceYConfig "y")            { strength = 0.1 }
-  , ForceCenter   $ (defaultForceCenterConfig  "center") { strength = -1.0 }
-  , ForceCollide  $  defaultForceCollideConfig "collide" getRadiusFromSpagoSimNode
-  , ForceRadial   $  defaultForceRadialConfig  "radial" 800.0
+  [ ForceManyBody "charge"  [ strength (-100.0) ]
+  , ForceX        "x"       [ strength 0.1 ]
+  , ForceY        "y"       [ strength 0.1 ]
+  , ForceCenter   "center"  [ strength (-1.0) ]
+  , ForceCollide  "collide" [ F.radius getRadiusFromSpagoSimNode ]
+  , ForceRadial   "radial"  [ F.radius 800.0 ]
   ]
       
 -- | recipe for this force layout graph
