@@ -128,11 +128,16 @@ insertAttributeInScriptTree parentID =
       -- simple attributes are just nodes
       attr@(AttrT _)       -> insertInScriptTree parentID (AttrNode attr)
       text@(TextT _)       -> insertInScriptTree parentID (AttrNode text)
-      (OnT event listener) -> insertInScriptTree parentID (OnEventNode event)
+
       RemoveT              -> insertInScriptTree parentID RemoveNode
--- the transition attribute is an exception, it can have further (Array Chainable)
+      
+      -- the transition attribute is an exception, it can have further (Array Chainable)
       transition@(TransitionT chain config) ->
         insertInScriptTree parentID (TransitionNode chain config)
+
+      (OnT event listener) -> insertInScriptTree parentID (OnEventNode event)
+
+      attr@(ForceT _)       -> insertInScriptTree parentID (AttrNode attr) -- TODO specialize for Force attributes if needed
   
 
 

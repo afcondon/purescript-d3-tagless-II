@@ -114,6 +114,19 @@ cursor = AttrT <<< ToAttribute "cursor" <<< toAttr
 onMouseEvent :: MouseEvent -> Listener -> Chainable
 onMouseEvent event listener = OnT event (mkFn3 listener)
 
+-- helpers for Forces
+
+originX :: ∀ a. ToAttr Number a => a -> Chainable
+originX = AttrT <<< ToAttribute "originX" <<< toAttr
+
+originY :: ∀ a. ToAttr Number a => a -> Chainable
+originY = AttrT <<< ToAttribute "originY" <<< toAttr
+
+strength :: ∀ a. ToAttr Number a => a -> Chainable
+strength = AttrT <<< ToAttribute "strength" <<< toAttr
+
+
+
 -- helpers for transitions 
 
 defaultTransition :: Transition

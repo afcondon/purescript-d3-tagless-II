@@ -52,7 +52,9 @@ data Chainable =  AttrT Attribute
                 | TextT Attribute -- we can't narrow it to String here but helper function will do that
                 | TransitionT (Array Chainable) Transition -- the array is set situationally
                 | RemoveT
+                | ForceT Attribute
                 | OnT MouseEvent Listener_
+
   -- other candidates for this ADT include
                 -- | WithUnit Attribute UnitType
                 -- | Merge
@@ -67,8 +69,9 @@ enterOnly :: Array Chainable -> EnterUpdateExit
 enterOnly as = { enter: as, update: [], exit: [] }
 
 instance showChainable :: Show Chainable where
-  show (AttrT attr)      = attrLabel attr
-  show (TextT _)         = "text"
-  show (TransitionT _ _) = ""
-  show RemoveT           = ""
+  show (AttrT attr)      = "chainable: attr " <> attrLabel attr
+  show (TextT _)         = "chainable: text"
+  show (TransitionT _ _) = "chainable: transition"
+  show RemoveT           = "chainable: remove"
+  show (ForceT _)        = "chainable: force attr"
   show (OnT event _)     = show event

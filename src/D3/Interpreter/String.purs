@@ -3,7 +3,7 @@ module D3.Interpreter.String where
 import D3.Selection
 
 import Control.Monad.State (class MonadState, StateT, modify_, runStateT)
-import D3.Attributes.Instances (Attribute(..), unbox)
+import D3.Attributes.Instances (class ToAttr, Attribute(..), unbox)
 import D3.FFI (showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
 import D3.Interpreter (class D3InterpreterM)
 import Data.Array (foldl)
@@ -66,6 +66,7 @@ applyChainableString selection  =
     (TransitionT chain transition) -> do 
       let tString = showAddTransition_ selection transition
       foldl applyChainableString tString chain
+    (ForceT (ToAttribute label attr)) -> showSetAttr_ label (unbox attr) selection -- might need custom one for forces
     (OnT event listener) -> do
       show "event handler for " <> show event <> " has been set"
 

@@ -116,4 +116,9 @@ applyChainableD3 selection_ (TransitionT chain transition) = do
   let tHandler = d3AddTransition_ selection_ transition
       _        = foldl applyChainableD3 tHandler chain
   selection_ -- NB we return selection, not transition
+-- for Forces in simulation which also can be static or dynamic:
+-- TODO seems like this actually needs to factor out to be applyChainableSimulation and applyChainableSelection
+applyChainableD3 selection_ (ForceT (ToAttribute label attr)) = 
+  d3SetAttr_ label (unbox attr) selection_
 applyChainableD3 selection_ (OnT event listener) = selectionOn_ selection_ (show event) listener
+
