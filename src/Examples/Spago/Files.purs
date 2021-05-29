@@ -12,6 +12,7 @@ import Data.Map as M
 import Data.Maybe (fromMaybe, Maybe(..))
 import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..), fst, snd)
+import Debug (spy, trace)
 
 -- | move to utility file
 compareFst a b = compare (fst a) (fst b)
@@ -100,7 +101,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     addLOCInfo :: ModuleJSONP -> ModuleJSONPL
     addLOCInfo { key, depends, path, package } = { key, depends, path, package, loc: linecount }
       where
-        linecount = fromMaybe 0.0 $ M.lookup path path2LOC
+        linecount = fromMaybe 10.0 $ M.lookup path path2LOC
 
     addPackageInfo :: ModuleJSON -> ModuleJSONP
     addPackageInfo { key, depends, path } = { key, depends, path, package }
@@ -119,15 +120,15 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     modulesPL = (addLOCInfo <<< addPackageInfo) <$> modules
 
     -- the tuples are basis for Map moduleName packageName
-    modulePackageTuples = (\m -> Tuple m.package m.key) <$> modulesPL
+    modulePackageTuples = (\m -> Tuple m.key m.package) <$> modulesPL
     mapNamesToModules :: M.Map String ModuleJSONPL
     mapNamesToModules   = M.fromFoldable $ (\m -> Tuple m.key m) <$> modulesPL
 
     packageContains :: Array (Tuple String (Array String))
     packageContains = chunk <$> (            -- [ (p1, [m1,m4]), (p2, [m2,m3]), (p3, [m5]) ]
-                        groupBy equalSnd   $ -- [ [(m1,p1), (m4,p1)], [(m2,p2), (m3,p2)], [(m5,p3)] ]
-                        sortBy  compareSnd $ -- [ (m1,p1), (m4,p1), (m2,p2), (m3,p2), (m5,p3) ]
-                        modulePackageTuples  -- [ (m1,p1),(m2,p2),(m3,p2),(m4,p1),(m5,p3)]
+                      groupBy equalSnd   $ -- [ [(m1,p1), (m4,p1)], [(m2,p2), (m3,p2)], [(m5,p3)] ]
+                      sortBy  compareSnd $ -- [ (m1,p1), (m4,p1), (m2,p2), (m3,p2), (m5,p3) ]
+                      modulePackageTuples  -- [ (m1,p1),(m2,p2),(m3,p2),(m4,p1),(m5,p3)]
                       )
 
     packageLOC :: Array (Tuple String Number)
