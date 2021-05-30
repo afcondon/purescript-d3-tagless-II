@@ -321,9 +321,9 @@ exports.forceMany_ = () => d3.forceManyBody()
 // forceRadial_       :: ForceRadialConfig_       -> D3ForceHandle_
 exports.forceRadial_ = () => d3.forceRadial()
 // forceX_            :: ForceXConfig_            -> D3ForceHandle_
-exports.forceX_ = () => d3.forceX()
+exports.forceX_ = () => d3.forceX().x(d => d.cluster * 100)
 // forceY_            :: ForceYConfig_            -> D3ForceHandle_
-exports.forceY_ = () => d3.forceY()
+exports.forceY_ = () => d3.forceY().y(d => d.cluster * 10)
 // forceLink_         :: ForceLinkConfig_         -> D3ForceHandle_
 exports.forceLink_ = links => d3.forceLink(links)
 // forceCustom_       :: CustomForceConfig_       -> D3ForceHandle_

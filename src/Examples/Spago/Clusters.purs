@@ -1,7 +1,7 @@
 module D3.Examples.Spago.Clusters where
 
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, viewBox, x, y)
-import D3.Data.Types (Element(..))
+import D3.Data.Types (Datum_, Element(..))
 import D3.Examples.Spago.Attributes (colorByGroup, datumDotRadius, nodeClass)
 import D3.Examples.Spago.Model (SpagoModel, chooseFocusFromSpagoSimNodeX, chooseFocusFromSpagoSimNodeY, getRadiusFromSpagoSimNode, gridifyByCluster, gridifyByNodeID, pinIfPackage)
 import D3.FFI (configSimulation_, initSimulation_, setNodes_)
@@ -14,18 +14,29 @@ import D3.Simulation.Config as F
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Tuple (Tuple(..))
 import Prelude (class Bind, Unit, bind, negate, pure, unit, (<$>), (/))
+import Unsafe.Coerce (unsafeCoerce)
 
 foreign import forceClusterCollision :: Unit -> D3ForceHandle_
 
 -- myCustomForceConfig :: Array ChainableF 
 -- myCustomForceConfig = [ radius 1.0, strength 0.8, clusterPadding: 10.0 ] forceClusterCollision
-                  
+
+fixed500 :: Datum_ -> Number
+fixed500 d = 500.0
+
+fixed200 :: Datum_ -> Number
+fixed200 datum = d.nodeId
+  where
+    d = (unsafeCoerce datum)
+
 spagoForces :: Array Force
 spagoForces =  
   [-- Force "cluster" CustomForce  []
-    Force "x"       ForceX       [ strength 0.2, F.x chooseFocusFromSpagoSimNodeX ]
-  , Force "y"       ForceY       [ strength 0.2, F.y chooseFocusFromSpagoSimNodeY ]
-  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius getRadiusFromSpagoSimNode, F.iterations 1.0 ]
+    -- Force "x"       ForceX        [ F.strength 0.2, F.x fixed500 ]
+    -- Force "y"       ForceY        [ F.strength 0.2, F.y fixed200 ]
+  --   Force "x"       ForceX        [ F.strength 0.2, F.x chooseFocusFromSpagoSimNodeX ]
+  -- , Force "y"       ForceY        [ F.strength 0.2, F.y chooseFocusFromSpagoSimNodeY ]
+   Force "collide" ForceCollide  [ F.strength 1.0, F.radius getRadiusFromSpagoSimNode, F.iterations 1.0 ]
   ]
       
 -- | recipe for this force layout graph
