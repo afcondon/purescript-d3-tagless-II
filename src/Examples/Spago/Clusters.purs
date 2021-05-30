@@ -34,9 +34,9 @@ spagoForces =
   [-- Force "cluster" CustomForce  []
     -- Force "x"       ForceX        [ F.strength 0.2, F.x fixed500 ]
     -- Force "y"       ForceY        [ F.strength 0.2, F.y fixed200 ]
-  --   Force "x"       ForceX        [ F.strength 0.2, F.x chooseFocusFromSpagoSimNodeX ]
-  -- , Force "y"       ForceY        [ F.strength 0.2, F.y chooseFocusFromSpagoSimNodeY ]
-   Force "collide" ForceCollide  [ F.strength 1.0, F.radius getRadiusFromSpagoSimNode, F.iterations 1.0 ]
+    Force "x"       ForceX        [ F.strength 0.2, F.x chooseFocusFromSpagoSimNodeX ]
+  , Force "y"       ForceY        [ F.strength 0.2, F.y chooseFocusFromSpagoSimNodeY ]
+  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius 10.0, F.iterations 1.0 ]
   ]
       
 -- | recipe for this force layout graph

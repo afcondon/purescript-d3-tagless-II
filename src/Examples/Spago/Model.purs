@@ -147,21 +147,30 @@ getIdFromSpagoSimNode datum = d.id
     (D3SimNode d) = unsafeCoerce datum
 
 getRadiusFromSpagoSimNode :: Datum_ -> Number
-getRadiusFromSpagoSimNode datum = Math.sqrt d.loc
+getRadiusFromSpagoSimNode datum = d.radius
   where
     (D3SimNode d) = unsafeCoerce datum
+
+cluster2Point :: Int -> PointXY
+cluster2Point v = 
+  offsetXY { x: (-800.0), y: (-5000.0) } $
+  scalePoint 180.0 100.0 $
+  numberToGridPoint 10 v
+
 
 chooseFocusFromSpagoSimNodeX :: Datum_ -> Number
 chooseFocusFromSpagoSimNodeX datum = x 
   where
     (D3SimNode d) = unsafeCoerce datum
-    { x } = numberToGridPoint 10 d.cluster
+    { x } = spy "choosing focusX from cluster: " $ 
+            cluster2Point d.cluster
 
 chooseFocusFromSpagoSimNodeY :: Datum_ -> Number
 chooseFocusFromSpagoSimNodeY datum = y 
   where
     (D3SimNode d) = unsafeCoerce datum
-    { y } = numberToGridPoint 10 d.cluster
+    { y } = spy "choosing focusX from cluster: " $ 
+            cluster2Point d.cluster
 
 getNameFromSpagoSimNode :: Datum_ -> String
 getNameFromSpagoSimNode datum = d.name
