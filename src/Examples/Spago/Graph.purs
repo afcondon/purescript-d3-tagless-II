@@ -1,31 +1,31 @@
 module D3.Examples.Spago.Graph where
 
-import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_, startSimulation_)
-import D3.Simulation.Config (defaultConfigSimulation, strength)
-
 import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (colorByGroup, linkClass, nodeClass, positionLabel, translateNode)
 import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getRadiusFromSpagoSimNode)
+import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_, startSimulation_)
 import D3.Interpreter (class D3InterpreterM, append, attach, on, (<+>))
 import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
 import D3.Node (D3_Link(..), NodeID, getSourceX, getSourceY, getTargetX, getTargetY)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
+import D3.Simulation.Config (defaultConfigSimulation)
 import D3.Simulation.Config as F
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Array (filter)
+import Data.Number (infinity)
 import Data.Tuple (Tuple(..))
 import Prelude (class Bind, Unit, bind, negate, pure, unit, (/), (<$>), (<>), (==))
 import Unsafe.Coerce (unsafeCoerce)
 
 spagoForces :: Array Force
 spagoForces =  
-  [ Force "charge"  ForceManyBody [ strength (-100.0) ]
-  , Force "x"       ForceX        [ strength 0.1 ]
-  , Force "y"       ForceY        [ strength 0.1 ]
-  , Force "center"  ForceCenter   [ strength (-1.0) ]
-  , Force "collide" ForceCollide  [ F.radius getRadiusFromSpagoSimNode ]
-  , Force "radial"  ForceRadial   [ F.radius 800.0 ]
+  [ Force "charge"  ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
+  , Force "x"       ForceX        [ F.strength 0.1, F.x 0.0 ]
+  , Force "y"       ForceY        [ F.strength 0.1, F.y 0.0 ]
+  , Force "center"  ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
+  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius getRadiusFromSpagoSimNode, F.iterations 1.0 ]
+  , Force "radial"  ForceRadial   [ F.strength 0.1, F.x 0.0, F.y 0.0, F.radius 800.0 ]
   ]
       
 -- | recipe for this force layout graph

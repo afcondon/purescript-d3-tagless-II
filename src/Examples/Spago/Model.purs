@@ -91,8 +91,8 @@ getIdFromSpagoSimNode datum = d.id
   where
     (D3SimNode d) = unsafeCoerce datum
 
-getRadiusFromSpagoSimNode :: Datum_ -> Index_ -> Number
-getRadiusFromSpagoSimNode datum i = Math.sqrt d.loc
+getRadiusFromSpagoSimNode :: Datum_ -> Number
+getRadiusFromSpagoSimNode datum = Math.sqrt d.loc
   where
     (D3SimNode d) = unsafeCoerce datum
 

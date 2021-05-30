@@ -54,8 +54,8 @@ drawGraph = do
               Nothing       -> graph -- if we couldn't find root of tree just skip tree reduction
               (Just rootID) -> treeReduction graph rootID
 
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (clusterScript (Tuple width height) graph)
-      -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
+      -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (clusterScript (Tuple width height) graph)
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
       -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (treeScript (Tuple (width/3.0) height) graph')
        
       printedScript <- liftEffect $ runPrinter (graphScript (Tuple width height) graph') "Force Layout Script"
