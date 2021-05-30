@@ -58,13 +58,19 @@ type Spago_Raw_JSON_ = {
 foreign import readSpago_Raw_JSON_ :: String -> String -> String -> String -> Spago_Raw_JSON_
 
 type Spago_Cooked_JSON    = { 
-    links      :: Array SpagoGraphLinkID
-  , nodes      :: Array SpagoNodeData
-  , name2ID    :: M.Map String NodeID
-  , id2Name    :: M.Map NodeID String
-  , id2Node    :: M.Map NodeID SpagoNodeData
-  , id2Package :: M.Map NodeID NodeID
-  , id2LOC     :: M.Map NodeID Number
+    links              :: Array SpagoGraphLinkID
+  , nodes              :: Array SpagoNodeData
+  , moduleNodes        :: Array SpagoNodeData
+  , packageNodes       :: Array SpagoNodeData
+  , moduleLinks        :: Array SpagoGraphLinkID
+  , packageLinks       :: Array SpagoGraphLinkID
+  , modulePackageLinks :: Array SpagoGraphLinkID
+  , sourceLinksMap     :: M.Map NodeID (Array NodeID)
+  , name2ID            :: M.Map String NodeID
+  , id2Name            :: M.Map NodeID String
+  , id2Node            :: M.Map NodeID SpagoNodeData
+  , id2Package         :: M.Map NodeID NodeID
+  , id2LOC             :: M.Map NodeID Number
 }
 
 data PackageRelation = InPackage | OutPackage
@@ -79,7 +85,8 @@ type SpagoLinkData     = ( linktype :: LinkType )
 type SpagoGraphLinkID  = D3_Link NodeID SpagoLinkData
 type SpagoNodeRow row = ( 
     id       :: NodeID
-  , depends  :: { full       :: Deps
+  , links    :: { targets    :: Deps -- the nodes on which this nodes depends
+                , sources    :: Deps -- the nodes which depend on this node
                 , tree       :: Deps
                 , inPackage  :: Deps
                 , outPackage :: Deps
@@ -166,19 +173,20 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     makeNodeFromModuleJSONPL :: ModuleJSONPL -> SpagoNodeData
     makeNodeFromModuleJSONPL m = do
       let id = getId m.key
-      { id       : id
-      , name     : m.key
-      , containerID: getId m.package
+      { id           : id
+      , name         : m.key
+      , containerID  : getId m.package
       , containerName: m.package
-      , loc      : m.loc
-      , nodetype : IsModule m.path
-      , pinned   : Floating
-      , depends  :  { full: (getId <$> m.depends) -- NB these are Module depends
-                    , tree: []
-                    , inPackage: []
-                    , outPackage: []
-                    , contains: [] -- we're not looking inside packages yet
-                    } 
+      , loc          : m.loc
+      , nodetype     : IsModule m.path
+      , pinned       : Floating
+      , links        :  { targets: (getId <$> m.depends) -- NB these are Module depends
+                        , sources   : []  -- these can be filled in later?
+                        , tree      : []
+                        , inPackage : []
+                        , outPackage: []
+                        , contains  : [] -- we're not looking inside packages yet
+                        } 
       , containsMany : false 
       } 
 
@@ -197,12 +205,13 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       , containerID  : id -- package belongs to itself
       , containerName: p.key
       , loc          : p.loc 
-      , depends      :  { full: (getId <$> p.depends)  -- NB these are Package depends
-                      , tree: []
-                      , inPackage: []
-                      , outPackage: []
-                      , contains: (getId <$> p.contains)
-                      } 
+      , links        :  { targets: (getId <$> p.depends)  -- NB these are Package depends
+                        , sources: []
+                        , tree: []
+                        , inPackage: []
+                        , outPackage: []
+                        , contains: (getId <$> p.contains)
+                        } 
       , containsMany : (length p.contains) > 1 -- we won't try to cluster contents of single module packages
       }
 
@@ -226,16 +235,30 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
 
     modulePackageLinks = makeModuleToPackageLink <$> moduleNodes
     
-    nodes = moduleNodes --  <> packageNodes
+    nodes = moduleNodes <> packageNodes
     links = moduleLinks <> packageLinks <> modulePackageLinks
 
     id2Node = M.fromFoldable $ (\node -> Tuple node.id node) <$> nodes
 
+    getSourceLinks :: SpagoNodeData -> Tuple NodeID (Array NodeID)
+    getSourceLinks { id } = Tuple id sources
+      where
+        sources = foldl (\acc (D3_Link l) -> if id == l.target then (l.source:acc) else acc ) [] links
+
+    -- | we make a map so that we can look up the links.sources in each node
+    sourceLinksMap = M.fromFoldable $ getSourceLinks <$> nodes
+
   { links
   , nodes
+  , moduleNodes
+  , packageNodes
+  , moduleLinks
+  , packageLinks
+  , modulePackageLinks
+  , sourceLinksMap
   , name2ID
-  , id2Name   : M.empty
   , id2Node
+  , id2Name   : M.empty
   , id2Package: M.empty
   , id2LOC    : M.empty
   }

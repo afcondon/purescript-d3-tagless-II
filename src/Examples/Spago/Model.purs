@@ -53,7 +53,7 @@ type SpagoModel = {
 
 upgradeSpagoNodeData :: SpagoNodeData -> SpagoSimNode
 upgradeSpagoNodeData node = D3SimNode { 
-    depends      : node.depends
+    links      : node.links
   , id           : node.id
   , name         : node.name
   , nodetype     : node.nodetype
@@ -162,15 +162,13 @@ chooseFocusFromSpagoSimNodeX :: Datum_ -> Number
 chooseFocusFromSpagoSimNodeX datum = x 
   where
     (D3SimNode d) = unsafeCoerce datum
-    { x } = spy "choosing focusX from cluster: " $ 
-            cluster2Point d.cluster
+    { x } = cluster2Point d.cluster
 
 chooseFocusFromSpagoSimNodeY :: Datum_ -> Number
 chooseFocusFromSpagoSimNodeY datum = y 
   where
     (D3SimNode d) = unsafeCoerce datum
-    { y } = spy "choosing focusX from cluster: " $ 
-            cluster2Point d.cluster
+    { y } = cluster2Point d.cluster
 
 getNameFromSpagoSimNode :: Datum_ -> String
 getNameFromSpagoSimNode datum = d.name
@@ -213,7 +211,7 @@ makeGraph nodes = do
     addNode acc node = M.insert node.id (Tuple node depends) acc
       where
         depends :: S.Set Int
-        depends = S.fromFoldable node.depends.full
+        depends = S.fromFoldable node.links.targets
   fromMap graphMap
 
 

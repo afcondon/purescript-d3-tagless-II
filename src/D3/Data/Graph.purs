@@ -18,7 +18,7 @@ type GraphSearchRecord = {
   , redundantLinks :: Array (Tuple NodeID NodeID)
 }
 
-getReachableNodes :: forall r1 r2. NodeID -> Graph Int { depends :: { full :: Array NodeID | r1 } | r2 } ->  GraphSearchRecord
+getReachableNodes :: forall r1 r2. NodeID -> Graph Int { links :: { targets :: Array NodeID | r1 } | r2 } ->  GraphSearchRecord
 getReachableNodes id graph = go { nodes: [], openDepPaths: [[id]], closedDepPaths: [], redundantLinks: [], dependencyTree: Nothing }
   where
     go :: GraphSearchRecord -> GraphSearchRecord
@@ -35,7 +35,7 @@ getReachableNodes id graph = go { nodes: [], openDepPaths: [[id]], closedDepPath
       firstNode <- G.lookup firstID graph
 
       let newDeps = 
-            partition (\d -> not $ elem d searchRecord.nodes) firstNode.depends.full
+            partition (\d -> not $ elem d searchRecord.nodes) firstNode.links.targets
           newOpenDepPaths = 
             (\d -> d : x.head) <$> newDeps.yes -- ie [ab] with deps [bc] -> [abc, abd]
           prunedLinks =

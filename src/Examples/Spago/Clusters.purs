@@ -1,9 +1,10 @@
 module D3.Examples.Spago.Clusters where
 
-import D3.Attributes.Sugar (classed, cx, cy, fill, radius, viewBox, x, y)
-import D3.Data.Types (Datum_, Element(..))
+import D3.Attributes.Sugar (classed, cx, cy, fill, onMouseEvent, radius, text, viewBox, x, y)
+import D3.Data.Types (Datum_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (colorByGroup, datumDotRadius, nodeClass)
-import D3.Examples.Spago.Model (SpagoModel, chooseFocusFromSpagoSimNodeX, chooseFocusFromSpagoSimNodeY, getRadiusFromSpagoSimNode, gridifyByCluster, gridifyByNodeID, pinIfPackage)
+import D3.Examples.Spago.Graph (highlightNeighborhood)
+import D3.Examples.Spago.Model (SpagoModel, chooseFocusFromSpagoSimNodeX, chooseFocusFromSpagoSimNodeY, getNameFromSpagoSimNode, getRadiusFromSpagoSimNode, gridifyByCluster, gridifyByNodeID, pinIfPackage)
 import D3.FFI (configSimulation_, initSimulation_, setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, on, (<+>))
 import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
@@ -31,10 +32,7 @@ fixed200 datum = d.nodeId
 
 spagoForces :: Array Force
 spagoForces =  
-  [-- Force "cluster" CustomForce  []
-    -- Force "x"       ForceX        [ F.strength 0.2, F.x fixed500 ]
-    -- Force "y"       ForceY        [ F.strength 0.2, F.y fixed200 ]
-    Force "x"       ForceX        [ F.strength 0.2, F.x chooseFocusFromSpagoSimNodeX ]
+  [ Force "x"       ForceX        [ F.strength 0.2, F.x chooseFocusFromSpagoSimNodeX ]
   , Force "y"       ForceY        [ F.strength 0.2, F.y chooseFocusFromSpagoSimNodeY ]
   , Force "collide" ForceCollide  [ F.strength 1.0, F.radius 10.0, F.iterations 1.0 ]
   ]
@@ -64,12 +62,14 @@ clusterScript (Tuple w h) model = do
     , "data"    : nodes
     , behaviour : [ classed nodeClass ]
   }
-
-  circle  <- nodesSelection `append` (node Circle [ radius datumDotRadius
-                                                  , fill colorByGroup
-                                                  ]) 
+  circle  <- nodesSelection `append` (node Circle [ radius datumDotRadius, fill colorByGroup
+                                                  -- , onMouseEvent MouseEnter (\e d t -> highlightNeighborhood simulation linksGroup (unsafeCoerce model) (getIdFromSpagoSimNode d))
+                                                  -- , onMouseEvent MouseLeave (\e d t -> unhighlightNeighborhood simulation linksGroup (unsafeCoerce model))
+                                      ]) 
+  labels' <- nodesSelection `append` (node Text [ classed "label", text getNameFromSpagoSimNode ]) 
   
   _ <- circle `on` Tick { name: "nodes", simulation, chain: [ cx getNodeX, cy getNodeY ]}
+  _ <- labels' `on` Tick { name: "labels", simulation, chain: [ x getNodeX, y getNodeY ]}
   _ <- nodesSelection `on` Drag DefaultDrag
   _ <- svg `on` Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                      , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
