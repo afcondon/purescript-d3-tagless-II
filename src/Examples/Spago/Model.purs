@@ -1,13 +1,15 @@
 module D3.Examples.Spago.Model where
 
 import D3.Examples.Spago.Files
+import Prelude
 
-import D3.Data.Types (Datum_, Index_)
-import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Link(..), D3_SimulationNode(..), EmbeddedData, NodeID, D3_Radius)
+import D3.Data.Types (Datum_, Index_, PointXY)
+import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Link(..), D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
 import Data.Array (catMaybes, cons, foldl, length, range, zip, (!!), (:))
 import Data.Foldable (sum)
 import Data.Generic.Rep (Sum)
 import Data.Graph (Graph, fromMap)
+import Data.Int (toNumber)
 import Data.Map (toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -16,10 +18,9 @@ import Data.Nullable (notNull)
 import Data.Set as S
 import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..))
-import Debug (spy)
-import Math (sqrt)
+import Debug (spy, trace)
+import Math (sqrt, (%))
 import Math as Math
-import Prelude (class Eq, class Show, append, bind, mempty, pure, show, ($), (*), (+), (<$>), (<>), (==))
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -50,32 +51,76 @@ type SpagoModel = {
                        }
 }
 
-setXY :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
-setXY (D3SimNode node) { x, y, isLeaf: true }  = D3SimNode (node { x = x, y = y, pinned = Floating })
-setXY (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { fx = notNull x, fy = notNull y, pinned = Pinned })
-
 upgradeSpagoNodeData :: SpagoNodeData -> SpagoSimNode
 upgradeSpagoNodeData node = D3SimNode { 
-    depends    : node.depends
-  , id         : node.id
-  , name       : node.name
-  , nodetype   : node.nodetype
-  , packageID  : node.packageID
-  , packageName: node.packageName
-  , index      : node.id
-  , pinned     : Floating
-  , loc        : node.loc
-  , cluster    : node.packageID
-  , focusX     : 0.0
-  , focusY     : 0.0
-  , fx         : (N.null :: N.Nullable Number)
-  , fy         : (N.null :: N.Nullable Number)
-  , vx         : 0.0
-  , vy         : 0.0
-  , x          : 0.0
-  , y          : 0.0
-  , r          : sqrt node.loc
+    depends      : node.depends
+  , id           : node.id
+  , name         : node.name
+  , nodetype     : node.nodetype
+  , containerID  : node.containerID
+  , containerName: node.containerName
+  , containsMany : node.containsMany
+  , cluster      : node.containerID -- TODO cluster all the single module packages together
+  , index        : node.id
+  , pinned       : Floating
+  , loc          : node.loc
+  , focusX       : 0.0
+  , focusY       : 0.0
+  , fx           : (N.null :: N.Nullable Number)
+  , fy           : (N.null :: N.Nullable Number)
+  , vx           : 0.0
+  , vy           : 0.0
+  , x            : 0.0
+  , y            : 0.0
+  , r            : sqrt node.loc
   }
+
+numberToGridPoint :: Int -> Int -> PointXY
+numberToGridPoint columns i = do
+  let
+    c = toNumber columns
+    d = toNumber i
+    x = (d % c)
+    y = Math.floor (d / c)
+  { x, y }
+
+scalePoint :: Number -> PointXY -> PointXY
+scalePoint factor xy = { x: xy.x * factor, y: xy.y * factor }
+
+offsetXY :: PointXY -> PointXY -> PointXY
+offsetXY offset xy = { x: xy.x + offset.x, y: xy.y + offset.y }
+
+offsetX :: Number -> PointXY -> PointXY
+offsetX xOffset xy = xy { x = xy.x + xOffset }
+
+offsetY :: Number -> PointXY -> PointXY
+offsetY yOffset xy = xy { y = xy.y + yOffset }
+
+pinNode :: SpagoSimNode -> PointXY -> SpagoSimNode
+pinNode (D3SimNode node) xy = D3SimNode (node { fx = notNull xy.x, fy = notNull xy.y } )
+
+pinIfPackage :: SpagoSimNode -> SpagoSimNode
+pinIfPackage n@(D3SimNode node) = do
+  case node.nodetype of
+    (IsModule _)  -> D3SimNode node
+    (IsPackage _) -> do
+      let xy = offsetXY { x: (-500.0), y: (-500.0) } $
+               scalePoint 30.0 $
+               numberToGridPoint 10 node.cluster
+          _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
+      pinNode n xy
+
+gridifyByNodeID :: SpagoSimNode -> SpagoSimNode
+gridifyByNodeID n@(D3SimNode node) = do
+  let xy = offsetXY { x: (-500.0), y: (-500.0) } $
+            scalePoint 100.0 $
+            numberToGridPoint 10 node.id
+      _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
+  pinNode n xy
+
+setXYExceptLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
+setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = D3SimNode node
+setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { fx = notNull x, fy = notNull y, pinned = Pinned })
 
 datumIsSpagoSimNode :: Datum_ -> SpagoSimNode
 datumIsSpagoSimNode = unsafeCoerce
@@ -95,6 +140,18 @@ getRadiusFromSpagoSimNode :: Datum_ -> Number
 getRadiusFromSpagoSimNode datum = Math.sqrt d.loc
   where
     (D3SimNode d) = unsafeCoerce datum
+
+chooseFocusFromSpagoSimNodeX :: Datum_ -> Number
+chooseFocusFromSpagoSimNodeX datum = x 
+  where
+    (D3SimNode d) = unsafeCoerce datum
+    { x } = numberToGridPoint 10 d.cluster
+
+chooseFocusFromSpagoSimNodeY :: Datum_ -> Number
+chooseFocusFromSpagoSimNodeY datum = y 
+  where
+    (D3SimNode d) = unsafeCoerce datum
+    { y } = numberToGridPoint 10 d.cluster
 
 getNameFromSpagoSimNode :: Datum_ -> String
 getNameFromSpagoSimNode datum = d.name

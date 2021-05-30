@@ -8,7 +8,7 @@ import D3.Data.Types (D3Selection_, PointXY)
 import D3.Examples.Spago.Clusters (clusterScript)
 import D3.Examples.Spago.Files (LinkType(..))
 import D3.Examples.Spago.Graph (graphScript)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, setXY)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, setXYExceptLeaves)
 import D3.Examples.Spago.Tree (treeScript)
 import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
 import D3.Interpreter.D3 (runD3M)
@@ -54,8 +54,8 @@ drawGraph = do
               Nothing       -> graph -- if we couldn't find root of tree just skip tree reduction
               (Just rootID) -> treeReduction graph rootID
 
-      -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (clusterScript (Tuple width height) graph)
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (clusterScript (Tuple width height) graph)
+      -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
       -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (treeScript (Tuple (width/3.0) height) graph')
        
       printedScript <- liftEffect $ runPrinter (graphScript (Tuple width height) graph') "Force Layout Script"
@@ -101,8 +101,8 @@ setNodePositionsRadial nodes positionMap = do
         Nothing -> D3SimNode node
         (Just p) -> 
           let { x,y } = radialTranslate { x: p.x, y: p.y }
-          -- in (D3SimNode node) `setXY` { x, y, isLeaf: p.isLeaf } -- only pin parents
-          in (D3SimNode node) `setXY` { x, y, isLeaf: false }
+          -- in (D3SimNode node) `setXYExceptLeaves` { x, y, isLeaf: p.isLeaf } -- only pin parents
+          in (D3SimNode node) `setXYExceptLeaves` { x, y, isLeaf: false }
   updateXY <$> nodes
 
 setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode

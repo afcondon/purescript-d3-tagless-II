@@ -27,7 +27,7 @@ positionLabel datum = do
 nodeClass :: Datum_ -> String
 nodeClass datum = do
   let (D3SimNode d) = datumIsSpagoSimNode datum
-  show d.nodetype <> " " <> d.packageName <> " " <> d.name
+  show d.nodetype <> " " <> d.containerName <> " " <> d.name
 
 linkClass :: Datum_ -> String
 linkClass datum = do
@@ -42,7 +42,7 @@ translateNode datum = "translate(" <> show x <> "," <> show y <> ")"
     (y :: Number) = (unsafeCoerce datum).y
 
 colorByGroup :: Datum_ -> String
-colorByGroup datum = d3SchemeCategory10N_ d.packageID
+colorByGroup datum = d3SchemeCategory10N_ d.cluster
   where
     (D3SimNode d) = unsafeCoerce datum
 
