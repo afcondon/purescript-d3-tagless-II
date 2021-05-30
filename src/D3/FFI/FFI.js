@@ -313,30 +313,49 @@ exports.defaultSimulationDrag_ = selection => simulation => {
 //          constructors for FORCE handlers 
 
 // forceCenter_       :: ForceCenterConfig_       -> D3ForceHandle_
-exports.forceCenter_ = config => d3.forceCenter(config.cx,config.cy)
+exports.forceCenter_ = () => d3.forceCenter()
 // forceCollideFn_    :: ForceCollideConfig_      -> D3ForceHandle_
-exports.forceCollideFn_ = config => d3.forceCollide(config.radius)
+exports.forceCollideFn_ = () => d3.forceCollide()
 // forceMany_         :: ForceManyConfig_         -> D3ForceHandle_
-exports.forceMany_ = config => d3.forceManyBody().strength(config.strength)
+exports.forceMany_ = () => d3.forceManyBody()
 // forceRadial_       :: ForceRadialConfig_       -> D3ForceHandle_
-exports.forceRadial_ = config => d3.forceRadial(config.radius, config.cx, config.cy).strength(config.strength)
+exports.forceRadial_ = () => d3.forceRadial()
 // forceX_            :: ForceXConfig_            -> D3ForceHandle_
-exports.forceX_ = config => d3.forceX(config.x).strength(config.strength)
+exports.forceX_ = () => d3.forceX()
 // forceY_            :: ForceYConfig_            -> D3ForceHandle_
-exports.forceY_ = config => d3.forceY(config.y).strength(config.strength)
+exports.forceY_ = () => d3.forceY()
 // forceLink_         :: ForceLinkConfig_         -> D3ForceHandle_
-exports.forceLink_ = config => d3.forceLink(config.links).id(d => d.id)
+exports.forceLink_ = links => d3.forceLink(links)
 // forceCustom_       :: CustomForceConfig_       -> D3ForceHandle_
-exports.forceCustom_ = config => config.force()
-// makeCustomForceConfig_ :: forall a. a -> (a -> D3ForceHandle_) -> CustomForceConfig_
-exports.makeCustomForceConfig_ = config => initFn => {
-  config.force = initFn;
-  return config;
+exports.forceCustom_ = forceFn => forceFn()
+
+// setForceRadius_      :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+exports.setForceRadius_ = force => attr => force.radius(attr)
+// setForceStrength_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+exports.setForceStrength_ = force => attr => force.strength(attr)
+// setForceCx_          :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+exports.setForceCx_ = force => attr => force.cx(attr)
+// setForceCy_          :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+exports.setForceCy_ = force => attr => force.cy(attr)
+// setForceTheta_       :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+exports.setForceTheta_ = force => attr => force.theta(attr)
+// setForceDistanceMin_ :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+exports.setForceDistanceMin_ = force => attr => force.distanceMin(attr)
+// setForceDistanceMax_ :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+exports.setForceDistanceMax_ = force => attr => force.distanceMax(attr)
+// setForceIterations_  :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+exports.setForceIterations_ = force => attr => force.iterations(attr)
+// setForceX_           :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+exports.setForceX_ = force => attr => force.x(attr)
+// setForceY_           :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+exports.setForceY_ = force => attr => force.y(attr)
+// setForceDistance_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+exports.setForceDistance_ = force => attr => force.distance(attr)
+// putForceInSimulation_ :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
+exports.putForceInSimulation_ = simulation => label => force => {
+  simulation.force(label, force);
 }
 
-// putForcesInSimulation_ :: D3Simulation_ -> Array Force -> D3Simulation_
-exports.putForcesInSimulation_ = simulation => forces => 
-  forces.forEach(force => simulation.force(force.name, force)); 
 // pinNode_ :: Number -> Number -> GraphNode_ -> Unit
 exports.pinNode_ = fx => fy => node => {
   node.fx = fx;

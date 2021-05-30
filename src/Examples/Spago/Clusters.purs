@@ -1,29 +1,29 @@
 module D3.Examples.Spago.Clusters where
 
-import D3.Attributes.Sugar (classed, cx, cy, fill, radius, transform', viewBox, x, y)
+import D3.Attributes.Sugar (classed, cx, cy, fill, radius, viewBox, x, y)
 import D3.Data.Types (Element(..))
-import D3.Examples.Spago.Attributes (colorByGroup, datumDotRadius, nodeClass, translateNode)
-import D3.Examples.Spago.Model (SpagoModel, getRadiusFromSpagoSimNode)
-import D3.FFI (configSimulation_, initSimulation_, makeCustomForceConfig_, putForcesInSimulation_, setNodes_)
+import D3.Examples.Spago.Attributes (colorByGroup, datumDotRadius, nodeClass)
+import D3.Examples.Spago.Model (SpagoModel)
+import D3.FFI (configSimulation_, initSimulation_, setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, on, (<+>))
-import D3.Layouts.Simulation (Force(..), createForce)
+import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
 import D3.Node (getNodeX, getNodeY)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
-import D3.Simulation.Config (ChainableF, CustomForceConfig_, D3ForceHandle_, defaultConfigSimulation, defaultForceXConfig, defaultForceYConfig, strength)
+import D3.Simulation.Config (D3ForceHandle_, defaultConfigSimulation, strength)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Tuple (Tuple(..))
-import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (/), (<$>))
+import Prelude (class Bind, Unit, bind, negate, pure, unit, (/))
 
 foreign import forceClusterCollision :: Unit -> D3ForceHandle_
 
 -- myCustomForceConfig :: Array ChainableF 
 -- myCustomForceConfig = [ radius 1.0, strength 0.8, clusterPadding: 10.0 ] forceClusterCollision
                   
-spagoForces :: Array D3ForceHandle_
-spagoForces = createForce <$> 
-  [ CustomForce "cluster" [] -- TODO need to bring in the forceFunction somehow
-  , ForceX      "x" [ strength 0.2 ]
-  , ForceY      "y" [ strength 0.2 ]
+spagoForces :: Array Force
+spagoForces =  
+  [ Force "cluster" CustomForce  []
+  , Force "x"       ForceX       [ strength 0.2 ]
+  , Force "y"       ForceY       [ strength 0.2 ]
   ]
       
 -- | recipe for this force layout graph
@@ -42,7 +42,7 @@ clusterScript (Tuple w h) model = do
   let simulation = initSimulation_ unit
       _          = simulation `configSimulation_` defaultConfigSimulation
       nodes      = simulation `setNodes_` model.nodes
-      _          = simulation `putForcesInSimulation_` spagoForces
+      _          = simulation `putEachForceInSimulation` spagoForces
 
   nodesSelection <- nodesGroup <+> Join { -- we're putting a group in with an eye to transitions to other layouts
       element   : Group

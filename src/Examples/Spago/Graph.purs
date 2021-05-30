@@ -1,31 +1,31 @@
 module D3.Examples.Spago.Graph where
 
-import D3.Simulation.Config
+import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_, startSimulation_)
+import D3.Simulation.Config (defaultConfigSimulation, strength)
 
 import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (colorByGroup, linkClass, nodeClass, positionLabel, translateNode)
 import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getRadiusFromSpagoSimNode)
-import D3.FFI (configSimulation_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, startSimulation_)
 import D3.Interpreter (class D3InterpreterM, append, attach, on, (<+>))
-import D3.Layouts.Simulation (Force(..), createForce)
+import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
 import D3.Node (D3_Link(..), NodeID, getSourceX, getSourceY, getTargetX, getTargetY)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config as F
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Array (filter)
 import Data.Tuple (Tuple(..))
-import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (/), (<$>), (<>), (==))
+import Prelude (class Bind, Unit, bind, negate, pure, unit, (/), (<$>), (<>), (==))
 import Unsafe.Coerce (unsafeCoerce)
 
-spagoForces :: Array D3ForceHandle_
-spagoForces = createForce <$> 
-  [ ForceManyBody "charge"  [ strength (-100.0) ]
-  , ForceX        "x"       [ strength 0.1 ]
-  , ForceY        "y"       [ strength 0.1 ]
-  , ForceCenter   "center"  [ strength (-1.0) ]
-  , ForceCollide  "collide" [ F.radius getRadiusFromSpagoSimNode ]
-  , ForceRadial   "radial"  [ F.radius 800.0 ]
+spagoForces :: Array Force
+spagoForces =  
+  [ Force "charge"  ForceManyBody [ strength (-100.0) ]
+  , Force "x"       ForceX        [ strength 0.1 ]
+  , Force "y"       ForceY        [ strength 0.1 ]
+  , Force "center"  ForceCenter   [ strength (-1.0) ]
+  , Force "collide" ForceCollide  [ F.radius getRadiusFromSpagoSimNode ]
+  , Force "radial"  ForceRadial   [ F.radius 800.0 ]
   ]
       
 -- | recipe for this force layout graph
@@ -45,7 +45,7 @@ graphScript (Tuple w h) model = do
   let simulation = initSimulation_ unit
       _          = simulation `configSimulation_` defaultConfigSimulation
       nodes      = simulation `setNodes_` model.nodes
-      _          = simulation `putForcesInSimulation_` spagoForces
+      _          = simulation `putEachForceInSimulation` spagoForces
       _          = setLinks_ simulation model.links (\d i -> d.id)
 
   linksSelection <- linksGroup <+> Join {

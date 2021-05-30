@@ -1,17 +1,19 @@
 module D3.Interpreter.D3 where
 
+import Prelude
+
 import Control.Monad.State (class MonadState, StateT, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Data.Types (D3Selection_)
 import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, defaultDrag_, defaultSimulationDrag_, disableDrag_, onTick_, selectionOn_)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..))
+import D3.Simulation.Config (ChainableF(..), D3ForceHandle_)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Foldable (foldl)
 import Data.Tuple (Tuple)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
-import Prelude 
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
 -- also not really making a ton of use of StateT, but it is good to have a 
@@ -122,3 +124,6 @@ applyChainableSD3 selection_ (TransitionT chain transition) = do
 --   d3SetAttr_ label (unbox attr) selection_
 applyChainableSD3 selection_ (OnT event listener) = selectionOn_ selection_ (show event) listener
 
+-- applyChainableFD3 :: D3ForceHandle_ -> ChainableF -> D3ForceHandle_
+-- applyChainableFD3 force_ (ForceT (ToAttribute label attr)) = 
+--   d3SetForceAttr_ label (unbox attr) force_

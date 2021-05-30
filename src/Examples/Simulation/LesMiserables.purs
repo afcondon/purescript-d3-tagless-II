@@ -1,29 +1,29 @@
 module D3.Examples.LesMiserables where
 
-import Utility
+import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
+import D3.Simulation.Config (defaultConfigSimulation)
+import Utility (getWindowWidthHeight)
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.LesMiserables.File (LesMisModel, readGraphFromFileContents)
-import D3.FFI (configSimulation_, getLinks_, initSimulation_, putForcesInSimulation_, setLinks_, setNodes_, startSimulation_, stopSimulation_)
-import D3.Simulation.Config 
 import D3.Interpreter (class D3InterpreterM, append, attach, join, on)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Simulation (Force(..), createForce)
+import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
 import D3.Node (getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
+import D3.Simulation.Config as F
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import Data.Array (cons)
-import Data.Tuple (Tuple(..), fst, snd)
+import Data.Tuple (Tuple, fst, snd)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (sqrt)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, (/), ($), (<$>))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- this is the model used by this particular "chart" (ie force layout simulation)
@@ -47,10 +47,10 @@ drawGraph = do
   log $ fst printedScript
   pure unit
 
-lesMisForces :: Array D3ForceHandle_
-lesMisForces = createForce <$>
-    [ ForceCenter "center" [] -- [ cx: 500.0, cy: 500.0, strength: 1.0 }
-    , ForceManyBody "charge" []
+lesMisForces :: Array Force
+lesMisForces = 
+    [ Force "center" ForceCenter  [ F.cx 500.0, F.cy 500.0, F.strength 1.0 ]
+    , Force "charge" ForceManyBody  []
     ]
 
 -- | recipe for this force layout graph
@@ -73,7 +73,7 @@ graphScript widthheight model = do
   let simulation = initSimulation_ unit
       _          = simulation `configSimulation_` defaultConfigSimulation
       nodes      = simulation `setNodes_` model.nodes 
-      _          = simulation `putForcesInSimulation_` lesMisForces
+      _          = simulation `putEachForceInSimulation` lesMisForces
       _          = setLinks_ simulation model.links (\d i -> d.id)
 
   linksSelection <- join linksGroup $ Join {

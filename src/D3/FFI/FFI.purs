@@ -120,13 +120,22 @@ foreign import forceMany_         :: Unit -> D3ForceHandle_
 foreign import forceRadial_       :: Unit -> D3ForceHandle_
 foreign import forceX_            :: Unit -> D3ForceHandle_
 foreign import forceY_            :: Unit -> D3ForceHandle_
-foreign import forceLink_         :: Unit -> D3ForceHandle_
+foreign import forceLink_         :: forall r. Array (D3_Link NodeID r) -> D3ForceHandle_
 foreign import forceCustom_       :: Unit -> D3ForceHandle_
 
-foreign import makeCustomForceConfig_ :: forall a. a -> (Unit -> D3ForceHandle_) -> CustomForceConfig_
+foreign import setForceRadius_      :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+foreign import setForceStrength_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+foreign import setForceCx_          :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+foreign import setForceCy_          :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+foreign import setForceTheta_       :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+foreign import setForceDistanceMin_ :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+foreign import setForceDistanceMax_ :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+foreign import setForceIterations_  :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+foreign import setForceX_           :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+foreign import setForceY_           :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+foreign import setForceDistance_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
 
-
-foreign import putForcesInSimulation_ :: D3Simulation_ -> Array D3ForceHandle_ -> D3Simulation_
+foreign import putForceInSimulation_ :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js Hierarchy module  *********************************************
 -- | *********************************************************************************************************************

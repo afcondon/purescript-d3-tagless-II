@@ -17,35 +17,35 @@ data ChainableF = ForceT Attribute
               -- | RemoveT
               -- | OnT MouseEvent Listener_
     
-defaultForceRadialConfig       :: String -> (Datum_ -> Index_ -> Number) -> Array ChainableF
-defaultForceRadialConfig name r =  
-    [ forceName name, radius r, strength 0.1, cx 0.0, cy 0.0 ]
+defaultForceRadialConfig       :: (Datum_ -> Index_ -> Number) -> Array ChainableF
+defaultForceRadialConfig r =  
+    [ radius r, strength 0.1, cx 0.0, cy 0.0 ]
 
-defaultForceManyConfig         :: String -> Array ChainableF
-defaultForceManyConfig name = 
-  [ forceName name, strength (-30.0), theta 0.9, distanceMin 1.0, distanceMax infinity ]
+defaultForceManyConfig         :: Array ChainableF
+defaultForceManyConfig = 
+  [ strength (-30.0), theta 0.9, distanceMin 1.0, distanceMax infinity ]
 
-defaultForceCenterConfig       :: String -> Array ChainableF
-defaultForceCenterConfig name = 
-  [ forceName name, cx 0.0, cy 0.0, strength 1.0 ]
+defaultForceCenterConfig       :: Array ChainableF
+defaultForceCenterConfig = 
+  [ cx 0.0, cy 0.0, strength 1.0 ]
 
 
-defaultForceCollideConfig      :: String -> (Datum_ -> Index_ -> Number) -> Array ChainableF
-defaultForceCollideConfig name r = 
-  [ forceName name, radius r, strength 1.0, iterations 1.0 ]
+defaultForceCollideConfig      :: (Datum_ -> Index_ -> Number) -> Array ChainableF
+defaultForceCollideConfig r = 
+  [ radius r, strength 1.0, iterations 1.0 ]
 
-defaultForceXConfig            :: String -> Array ChainableF
-defaultForceXConfig name = 
-  [ forceName name, strength 0.1, x 0.0 ]
+defaultForceXConfig            :: Array ChainableF
+defaultForceXConfig = 
+  [ strength 0.1, x 0.0 ]
 
-defaultForceYConfig            :: String -> Array ChainableF
-defaultForceYConfig name = 
-  [ forceName name, strength 0.1, y 0.0 ]
+defaultForceYConfig            :: Array ChainableF
+defaultForceYConfig = 
+  [ strength 0.1, y 0.0 ]
 
 -- TODO links will need to be separate since they are not a chainable / attr type thing
-defaultForceLinkConfig         :: forall d. String -> (d -> Index_ -> Number) -> Array ChainableF
-defaultForceLinkConfig name id = 
-  [ forceName name, strength 1.0, distance 30.0, iterations 1.0, index defaultIndex  ]
+defaultForceLinkConfig         :: forall d. (d -> Index_ -> Number) -> Array ChainableF
+defaultForceLinkConfig id = 
+  [ strength 1.0, distance 30.0, iterations 1.0, index defaultIndex  ]
   
 -- | a record to initialize / configure simulations
 type SimulationConfig_ = { 
@@ -71,9 +71,6 @@ defaultConfigSimulation = {
 -- | ==================================================================================================
 -- | ========================= sugar for the various attributes of forces =============================
 -- | ==================================================================================================
-forceName :: ∀ a. ToAttr String a => a -> ChainableF
-forceName = ForceT <<< ToAttribute "name" <<< toAttr
-
 radius :: ∀ a. ToAttr Number a => a -> ChainableF
 radius = ForceT <<< ToAttribute "radius" <<< toAttr
 
@@ -109,6 +106,10 @@ distance = ForceT <<< ToAttribute "distance" <<< toAttr
 
 index :: ∀ a. ToAttr Number a => a -> ChainableF -- TODO in fact this would be an Int correctly
 index = ForceT <<< ToAttribute "distance" <<< toAttr
+
+-- | ==================================================================================================
+-- | ========================= sugar for the index setter function        =============================
+-- | ==================================================================================================
 
 defaultIndex :: Datum_ -> Index_ -> Number
 defaultIndex datum = d.index
