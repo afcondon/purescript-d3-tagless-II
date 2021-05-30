@@ -49,7 +49,7 @@ drawGraph = do
 
 lesMisForces :: Array Force
 lesMisForces = 
-    [ Force "center" ForceCenter  [ F.cx 500.0, F.cy 500.0, F.strength 1.0 ]
+    [ Force "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
     , Force "charge" ForceManyBody  []
     ]
 
@@ -62,11 +62,12 @@ graphScript :: forall  m selection.
   m selection
 graphScript widthheight model = do
   let columns = 3.0
+      rows    = 2.0
       width   = (fst widthheight) / columns
-      height  = (snd widthheight) / columns
+      height  = (snd widthheight) / rows
   root       <- attach "div#force"
   svg        <- root `append` (node Svg    [ viewBox (-width / 2.0) (-height / 2.0) width height ] )
-  centerDot  <- svg  `append` (node Circle [ radius 20.0, fill "red", x (width / 2.0), y (height / 2.0) ])
+  centerDot  <- svg  `append` (node Circle [ radius 20.0, fill "red", cx 0.0, cy 0.0 ])
   linksGroup <- svg  `append` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 

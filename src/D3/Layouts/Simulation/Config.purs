@@ -19,7 +19,7 @@ data ChainableF = ForceT Attribute
     
 defaultForceRadialConfig       :: (Datum_ -> Index_ -> Number) -> Array ChainableF
 defaultForceRadialConfig r =  
-    [ radius r, strength 0.1, cx 0.0, cy 0.0 ]
+    [ radius r, strength 0.1, x 0.0, y 0.0 ]
 
 defaultForceManyConfig         :: Array ChainableF
 defaultForceManyConfig = 
@@ -27,7 +27,7 @@ defaultForceManyConfig =
 
 defaultForceCenterConfig       :: Array ChainableF
 defaultForceCenterConfig = 
-  [ cx 0.0, cy 0.0, strength 1.0 ]
+  [ x 0.0, y 0.0, strength 1.0 ]
 
 
 defaultForceCollideConfig      :: (Datum_ -> Index_ -> Number) -> Array ChainableF
@@ -77,11 +77,11 @@ radius = ForceT <<< ToAttribute "radius" <<< toAttr
 strength :: ∀ a. ToAttr Number a => a -> ChainableF
 strength = ForceT <<< ToAttribute "strength" <<< toAttr
 
-cx :: ∀ a. ToAttr Number a => a -> ChainableF
-cx = ForceT <<< ToAttribute "cx" <<< toAttr
+-- cx :: ∀ a. ToAttr Number a => a -> ChainableF
+-- cx = ForceT <<< ToAttribute "cx" <<< toAttr
 
-cy :: ∀ a. ToAttr Number a => a -> ChainableF
-cy = ForceT <<< ToAttribute "cy" <<< toAttr
+-- cy :: ∀ a. ToAttr Number a => a -> ChainableF
+-- cy = ForceT <<< ToAttribute "cy" <<< toAttr
 
 theta :: ∀ a. ToAttr Number a => a -> ChainableF
 theta = ForceT <<< ToAttribute "theta" <<< toAttr

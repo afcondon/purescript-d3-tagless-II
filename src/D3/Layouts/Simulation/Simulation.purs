@@ -55,8 +55,8 @@ setForceAttr force_ (ToAttribute label attr) = do
   case label of
     "radius"      -> setForceRadius_      force_ (unbox attr) -- valid 
     "strength"    -> setForceStrength_    force_ (unbox attr)
-    "cx"          -> setForceCx_          force_ (unbox attr)
-    "cy"          -> setForceCy_          force_ (unbox attr)
+    -- "cx"          -> setForceCx_          force_ (unbox attr)
+    -- "cy"          -> setForceCy_          force_ (unbox attr)
     "theta"       -> setForceTheta_       force_ (unbox attr)
     "distanceMin" -> setForceDistanceMin_ force_ (unbox attr)
     "distanceMax" -> setForceDistanceMax_ force_ (unbox attr)
