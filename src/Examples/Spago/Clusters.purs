@@ -3,7 +3,7 @@ module D3.Examples.Spago.Clusters where
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, viewBox, x, y)
 import D3.Data.Types (Element(..))
 import D3.Examples.Spago.Attributes (colorByGroup, datumDotRadius, nodeClass)
-import D3.Examples.Spago.Model (SpagoModel, chooseFocusFromSpagoSimNodeX, chooseFocusFromSpagoSimNodeY, getRadiusFromSpagoSimNode, gridifyByNodeID, pinIfPackage)
+import D3.Examples.Spago.Model (SpagoModel, chooseFocusFromSpagoSimNodeX, chooseFocusFromSpagoSimNodeY, getRadiusFromSpagoSimNode, gridifyByCluster, gridifyByNodeID, pinIfPackage)
 import D3.FFI (configSimulation_, initSimulation_, setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, on, (<+>))
 import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
@@ -43,7 +43,8 @@ clusterScript (Tuple w h) model = do
 
   let simulation = initSimulation_ unit
       _          = simulation `configSimulation_` defaultConfigSimulation
-      nodes      = simulation `setNodes_` (gridifyByNodeID <$> model.nodes)
+      -- nodes      = simulation `setNodes_` (gridifyByCluster <$> model.nodes)
+      nodes      = simulation `setNodes_` (pinIfPackage <$> model.nodes)
       _          = simulation `putEachForceInSimulation` spagoForces
 
   nodesSelection <- nodesGroup <+> Join { -- we're putting a group in with an eye to transitions to other layouts

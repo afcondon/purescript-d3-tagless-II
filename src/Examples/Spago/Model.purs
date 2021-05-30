@@ -84,8 +84,8 @@ numberToGridPoint columns i = do
     y = Math.floor (d / c)
   { x, y }
 
-scalePoint :: Number -> PointXY -> PointXY
-scalePoint factor xy = { x: xy.x * factor, y: xy.y * factor }
+scalePoint :: Number -> Number -> PointXY -> PointXY
+scalePoint xFactor yFactor xy = { x: xy.x * xFactor, y: xy.y * yFactor }
 
 offsetXY :: PointXY -> PointXY -> PointXY
 offsetXY offset xy = { x: xy.x + offset.x, y: xy.y + offset.y }
@@ -101,22 +101,32 @@ pinNode (D3SimNode node) xy = D3SimNode (node { fx = notNull xy.x, fy = notNull 
 
 pinIfPackage :: SpagoSimNode -> SpagoSimNode
 pinIfPackage n@(D3SimNode node) = do
+  let xy = offsetXY { x: (-900.0), y: (-5000.0) } $
+            scalePoint 180.0 100.0 $
+            numberToGridPoint 10 node.cluster
+      -- _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
   case node.nodetype of
-    (IsModule _)  -> D3SimNode node
-    (IsPackage _) -> do
-      let xy = offsetXY { x: (-500.0), y: (-500.0) } $
-               scalePoint 30.0 $
-               numberToGridPoint 10 node.cluster
-          _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
-      pinNode n xy
+    (IsModule _)  -> setXY   n xy -- only setting intial position of module
+    (IsPackage _) -> pinNode n xy -- but fixing the position of packages
 
 gridifyByNodeID :: SpagoSimNode -> SpagoSimNode
 gridifyByNodeID n@(D3SimNode node) = do
-  let xy = offsetXY { x: (-500.0), y: (-500.0) } $
-            scalePoint 100.0 $
+  let xy = offsetXY { x: (-1000.0), y: (-500.0) } $
+            scalePoint 100.0 20.0 $
             numberToGridPoint 10 node.id
       _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
   pinNode n xy
+
+gridifyByCluster :: SpagoSimNode -> SpagoSimNode
+gridifyByCluster n@(D3SimNode node) = do
+  let xy = offsetXY { x: (-800.0), y: (-5000.0) } $
+           scalePoint 180.0 100.0 $
+           numberToGridPoint 10 node.cluster
+      _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
+  pinNode n xy
+
+setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
+setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
 
 setXYExceptLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
 setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = D3SimNode node
