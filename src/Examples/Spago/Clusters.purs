@@ -3,7 +3,7 @@ module D3.Examples.Spago.Clusters where
 import D3.Attributes.Sugar (classed, cx, cy, fill, lower, onMouseEvent, radius, text, viewBox, x, y)
 import D3.Data.Types (D3Simulation_, Datum_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (colorByGroup, datumDotRadius, nodeClass)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, chooseFocusFromSpagoSimNodeX, chooseFocusFromSpagoSimNodeY, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getNodetypeFromSimNode, pinIfPackage)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, chooseFocusFromClusterX, chooseFocusFromClusterY, chooseFocusFromTreeX, chooseFocusFromTreeY, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getNodetypeFromSimNode, pinIfPackage)
 import D3.FFI (configSimulation_, d3FilterSelection_, initSimulation_, setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, filter, modify, on, (<+>))
 import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
@@ -28,10 +28,17 @@ fromRadius :: Datum_ -> Number
 fromRadius datum = if containerIsSelf d then 10.0 else d'.r
   where d@(D3SimNode d') = (unsafeCoerce datum)
 
-spagoForces :: Array Force
-spagoForces =  
-  [ Force "x"       ForceX        [ F.strength 0.2, F.x chooseFocusFromSpagoSimNodeX ]
-  , Force "y"       ForceY        [ F.strength 0.2, F.y chooseFocusFromSpagoSimNodeY ]
+spagoForcesA :: Array Force
+spagoForcesA =  
+  [ Force "x"       ForceX        [ F.strength 0.2, F.x chooseFocusFromClusterX ]
+  , Force "y"       ForceY        [ F.strength 0.2, F.y chooseFocusFromClusterY ]
+  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius fromRadius, F.iterations 1.0 ]
+  ]
+
+spagoForcesB :: Array Force
+spagoForcesB =  
+  [ Force "x"       ForceX        [ F.strength 0.2, F.x chooseFocusFromTreeX ]
+  , Force "y"       ForceY        [ F.strength 0.2, F.y chooseFocusFromTreeY ]
   , Force "collide" ForceCollide  [ F.strength 1.0, F.radius fromRadius, F.iterations 1.0 ]
   ]
       
@@ -41,7 +48,7 @@ clusterScript :: forall m selection.
   D3InterpreterM selection m => 
   Tuple Number Number ->
   SpagoModel ->
-  m selection
+  m { selection :: selection, simulation :: D3Simulation_ }
 clusterScript (Tuple w h) model = do
   root       <- attach "div#spago"
   svg        <- root `append` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h
@@ -51,7 +58,7 @@ clusterScript (Tuple w h) model = do
   let simulation = initSimulation_ unit
       _          = simulation `configSimulation_` defaultConfigSimulation
       nodes      = simulation `setNodes_` (pinIfPackage <$> model.nodes)
-      _          = simulation `putEachForceInSimulation` spagoForces
+      _          = simulation `putEachForceInSimulation` spagoForcesA
 
   nodesSelection <- nodesGroup <+> Join { -- we're putting a group in with an eye to transitions to other layouts
       element   : Group
@@ -74,7 +81,7 @@ clusterScript (Tuple w h) model = do
                      , scale  : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
                      , name   : "spago"
                      }
-  pure svg
+  pure { selection: svg, simulation }
 
 foreign import spotlightNeighbours_ :: D3Simulation_ -> NodeID -> String -> Unit
 foreign import unSpotlightNeighbours_ :: D3Simulation_ -> NodeID -> Unit

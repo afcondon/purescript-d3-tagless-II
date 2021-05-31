@@ -4,8 +4,8 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Data.Graph (getReachableNodes)
 import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
-import D3.Data.Types (D3Selection_, PointXY)
-import D3.Examples.Spago.Clusters (clusterScript)
+import D3.Data.Types (D3Selection_, D3Simulation_, PointXY)
+import D3.Examples.Spago.Clusters (clusterScript, spagoForcesA, spagoForcesB)
 import D3.Examples.Spago.Files (LinkType(..))
 import D3.Examples.Spago.Graph (graphScript)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, setXYExceptLeaves)
@@ -14,6 +14,7 @@ import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, treeSe
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical (radialSeparation)
+import D3.Layouts.Simulation (putEachForceInSimulation)
 import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), NodeID)
 import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
 import Data.Bifunctor (bimap)
@@ -28,7 +29,7 @@ import Data.Set as S
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy)
-import Effect.Aff (Aff)
+import Effect.Aff (Aff, Milliseconds(..), delay)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (cos, pi, sin)
@@ -54,7 +55,12 @@ drawGraph = do
               Nothing       -> graph -- if we couldn't find root of tree just skip tree reduction
               (Just rootID) -> treeReduction graph rootID
 
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (clusterScript (Tuple width height) graph)
+      ((Tuple {simulation} _) :: Tuple { selection :: D3Selection_, simulation :: D3Simulation_ } Unit) <- liftEffect $ runD3M (clusterScript (Tuple width height) graph')
+
+      _ <- delay (Milliseconds 2000.0)
+      let _ = putEachForceInSimulation simulation spagoForcesB
+      _ <- delay (Milliseconds 2000.0)
+      let _ = putEachForceInSimulation simulation spagoForcesA
       -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
       -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (treeScript (Tuple (width/3.0) height) graph')
        

@@ -14,7 +14,7 @@ import Data.Map (toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (Nullable, null) as N
-import Data.Nullable (notNull)
+import Data.Nullable (notNull, null, toMaybe)
 import Data.Set as S
 import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..))
@@ -68,6 +68,8 @@ upgradeSpagoNodeData sourcesMap node = D3SimNode {
   , focusY       : 0.0
   , fx           : (N.null :: N.Nullable Number)
   , fy           : (N.null :: N.Nullable Number)
+  , treeX        : (N.null :: N.Nullable Number)
+  , treeY        : (N.null :: N.Nullable Number)
   , vx           : 0.0
   , vy           : 0.0
   , x            : 0.0
@@ -130,7 +132,7 @@ setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
 
 setXYExceptLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
 setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = D3SimNode node
-setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { fx = notNull x, fy = notNull y, pinned = Pinned })
+setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { treeX = notNull x, treeY = notNull y, pinned = Forced })
 
 datumIsSpagoSimNode :: Datum_ -> SpagoSimNode
 datumIsSpagoSimNode = unsafeCoerce
@@ -163,17 +165,34 @@ cluster2Point v =
   numberToGridPoint 10 v
 
 
-chooseFocusFromSpagoSimNodeX :: Datum_ -> Number
-chooseFocusFromSpagoSimNodeX datum = x 
+chooseFocusFromClusterX :: Datum_ -> Number
+chooseFocusFromClusterX datum = x 
   where
     (D3SimNode d) = unsafeCoerce datum
     { x } = cluster2Point d.cluster
 
-chooseFocusFromSpagoSimNodeY :: Datum_ -> Number
-chooseFocusFromSpagoSimNodeY datum = y 
+chooseFocusFromClusterY :: Datum_ -> Number
+chooseFocusFromClusterY datum = y 
   where
     (D3SimNode d) = unsafeCoerce datum
     { y } = cluster2Point d.cluster
+
+chooseFocusFromTreeX :: Datum_ -> Number
+chooseFocusFromTreeX datum = x' 
+  where
+    (D3SimNode d) = unsafeCoerce datum
+    x' = case toMaybe d.treeX of
+            Nothing -> (\{x,y} -> x) $ cluster2Point d.cluster
+            (Just x) -> x
+              
+chooseFocusFromTreeY :: Datum_ -> Number
+chooseFocusFromTreeY datum = y' 
+  where
+    (D3SimNode d) = unsafeCoerce datum
+    y' = case toMaybe d.treeY of
+            Nothing -> (\{x,y} -> y) $ cluster2Point d.cluster
+            (Just y) -> y
+              
 
 getNameFromSpagoSimNode :: Datum_ -> String
 getNameFromSpagoSimNode datum = d.name

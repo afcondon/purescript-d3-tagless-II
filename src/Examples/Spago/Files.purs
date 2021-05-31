@@ -10,6 +10,7 @@ import Data.Array.NonEmpty as NA
 import Data.Foldable (sum)
 import Data.Map as M
 import Data.Maybe (fromMaybe, Maybe(..))
+import Data.Nullable (Nullable, null)
 import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy, trace)
@@ -78,7 +79,7 @@ data LinkType        = M2M_Tree | M2M_Graph | P2P | M2P PackageRelation
 data PackageInfo     = PackageInfo { version :: String, repo :: String }
 type ModulePath      = String
 data NodeType        = IsModule ModulePath | IsPackage PackageInfo
-data Pinned          = Pinned | Floating -- might be more categories here, "pinned connectd", "pinned unused" whatever...
+data Pinned          = Pinned | Floating | Forced -- might be more categories here, "pinned connectd", "pinned unused" whatever...
 type Deps            = Array NodeID
 
 type SpagoLinkData     = ( linktype :: LinkType )
@@ -99,6 +100,8 @@ type SpagoNodeRow row = (
   , containsMany  :: Boolean
   , containerName :: String
   , containerID   :: NodeID
+  , treeX         :: Nullable Number
+  , treeY         :: Nullable Number
   | row )
 type SpagoNodeData    = { | SpagoNodeRow () }
 
@@ -189,6 +192,8 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
                         , contains  : [] -- we're not looking inside packages yet
                         } 
       , containsMany : false 
+      , treeX        : null
+      , treeY        : null
       } 
 
     depsMap :: M.Map String { version :: String, repo :: String }
@@ -214,6 +219,8 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
                         , contains: (getId <$> p.contains)
                         } 
       , containsMany : (length p.contains) > 1 -- we won't try to cluster contents of single module packages
+      , treeX        : null
+      , treeY        : null
       }
 
     moduleNodes        = makeNodeFromModuleJSONPL  <$> modulesPL
