@@ -36,6 +36,8 @@ foreign import d3Append_             :: String      -> D3Selection_ -> D3Selecti
 foreign import d3Exit_               :: D3Selection_ -> D3Selection_
 foreign import d3RemoveSelection_    :: D3Selection_ -> D3Selection_
 
+foreign import d3FilterSelection_    :: D3Selection_ -> Selector   -> D3Selection_
+
 foreign import d3Data_               :: forall d. Array d -> D3Selection_ -> D3Selection_
 
 type ComputeKeyFunction_ = Datum_ -> Index_

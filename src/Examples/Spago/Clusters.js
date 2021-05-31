@@ -1,3 +1,71 @@
+let spotlitSelection
+let spotlitNode
+let sourcesSelection
+let targetSelection
+let spotlitID
+
+// spotLightNeighbours :: D3Simulation_ -> NodeID -> Unit
+exports.spotlightNeighbours_ = simulation => id => nodetype => {
+  if (nodetype === "package") {
+    return
+  }
+  // else
+  spotlitID = id
+  simulation.stop()
+  svg = d3.select('div#spago svg')
+  nodeSelection = svg.selectAll('g.nodes g')
+  spotlitSelection = nodeSelection.filter((d, i) => d.id == id)
+
+  spotlitNode = spotlitSelection.node()
+  spotlitNode.__data__.fx = spotlitNode.__data__.x
+  spotlitNode.__data__.fy = spotlitNode.__data__.y
+  const targets = spotlitNode.__data__.links.targets
+  const sources = spotlitNode.__data__.links.sources
+
+  sourcesSelection = nodeSelection.filter((d, i) => sources.includes(d.id))
+  targetSelection = nodeSelection.filter((d, i) => targets.includes(d.id))
+
+  svg.classed('spotlight', true)
+  sourcesSelection.classed('source', true)
+  targetSelection.classed('target', true)
+  spotlitSelection.classed('spotlight', true)
+  spotlitSelection.classed('source target', false)
+
+  simulation.force(
+    'collide',
+    d3
+      .forceCollide()
+      .radius(d =>
+        sources.includes(d.id) || targets.includes(d.id) ? d.r * 4 : d.r
+      )
+  )
+  simulation.alpha(1).restart()
+}
+// unSpotlightNeighbours :: D3Simulation_ -> Unit
+exports.unSpotlightNeighbours_ = simulation => id => {
+  if (spotlitID !== id) {
+    console.log(`ERROR: tried to unspotlight node ${id} but it is ${spotlitID} which was spotlit before!!`);
+    return; // defend against somehow tryin to unspotlight before a spotlight has happened or to unspotlight something different from what was spotlit
+  }
+  simulation.stop()
+  svg.classed('spotlight', false)
+  spotlitNode.__data__.fx = null
+  spotlitNode.__data__.fy = null
+  spotlitSelection.classed('spotlight', false)
+  sourcesSelection.classed('source', false)
+  targetSelection.classed('target', false)
+  // move the radii back to what they were before
+  simulation.force(
+    'collide',
+    d3.forceCollide().radius(d => d.r)
+  )
+  simulation.restart()
+}
+
+// ============================================================================================================
+// custom force stuff for putting padding between clusters, not used at present (custom forces need refactor)
+// ============================================================================================================
+
 // designed to be usable directly inside the custom force, config ignored for now
 // exports.forceClusterCollision_ = (config) => {
 //   const force = config.force()

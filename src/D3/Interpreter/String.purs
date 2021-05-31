@@ -34,6 +34,9 @@ instance d3Tagless :: D3InterpreterM String D3PrinterM where
     let attributeString = foldl applyChainableSString selection attributes
     modify_ (\s -> s <> "\nappending "    <> show element <> " to " <> selection <> "\n" <> attributeString)
     pure "append"
+  filter selection selector = do
+    modify_ (\s -> s <> "\nfiltering selection using " <> show selector)
+    pure "filter"
   join selection (Join j) = do
     let attributeString = foldl applyChainableSString selection j.behaviour
     modify_ (\s -> s <> "\nentering a "   <> show j.element <> " for each datum" )

@@ -111,6 +111,9 @@ exports.d3RemoveSelection_ = selection => {
   }
   return selection.remove()
 }
+// d3FilterSelection_    :: D3Selection_ -> Selector   -> D3Selection_
+exports.d3FilterSelection_ = selection => selector => selection.filter(selector)
+
 // d3Append_ :: String -> D3Selection -> D3Selection
 exports.d3Append_ = element => selection => {
   if (debug) {

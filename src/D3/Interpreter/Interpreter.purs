@@ -10,6 +10,7 @@ import Prelude (class Monad)
 class (Monad m) <= D3InterpreterM selection m where
   attach :: Selector                         -> m selection
   append :: selection          -> D3_Node    -> m selection
+  filter :: selection          -> Selector   -> m selection
   join   :: ∀ datum. selection -> Join datum -> m selection
   on     ::          selection -> Behavior   -> m selection
 

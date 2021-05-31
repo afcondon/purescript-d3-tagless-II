@@ -100,6 +100,7 @@ div#spago {
       g.module:hover text {
         visibility: visible;
         fill: black;
+        opacity: 0.8;
       }
       g.package {
         text {
@@ -117,8 +118,8 @@ div#spago {
         }
         circle {
           opacity: 1;
-          stroke-width: 10px;
-          stroke: blueviolet
+          stroke-width: 5px;
+          stroke: white
         }
       }
       g.source {
@@ -137,7 +138,7 @@ div#spago {
         }
         circle {
           opacity: 0.85;
-          stroke-width: 10px;
+          stroke-width: 5px;
           stroke: black;
         }
       }
@@ -146,14 +147,20 @@ div#spago {
       }
       g.package.source circle {
         opacity: 0.85;
-        stroke-width: 5px;
+        stroke-width: 2px;
         stroke: red;
       }
       g.package.target circle {
         opacity: 0.85;
-        stroke-width: 5px;
+        stroke-width: 2px;
         stroke: blue;
       }
     }
   }
+}
+
+div#spago svg.cluster g.nodes {
+  g.package circle { visibility: hidden; }
+  g.package text { visibility: visible; fill: black; font-size: 24px; opacity: 0.5; text-anchor: start;}
+  g.module.source text, g.module.target text { fill: white; }
 }

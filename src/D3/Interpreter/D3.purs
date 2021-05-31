@@ -5,7 +5,7 @@ import Prelude
 import Control.Monad.State (class MonadState, StateT, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
 import D3.Data.Types (D3Selection_)
-import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, defaultDrag_, defaultSimulationDrag_, disableDrag_, onTick_, selectionOn_)
+import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetText_, defaultDrag_, defaultSimulationDrag_, disableDrag_, onTick_, selectionOn_)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..))
 import D3.Simulation.Config (ChainableF(..), D3ForceHandle_)
@@ -39,6 +39,8 @@ instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
   append selection_ (D3_Node element attributes) = do
     let appended_ = d3Append_ (show element) selection_
     pure $ foldl applyChainableSD3 appended_ attributes   
+
+  filter selection_ selector = pure $ d3FilterSelection_ selection_ selector
 
   join selection (Join j) = do
     let 

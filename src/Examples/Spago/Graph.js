@@ -43,7 +43,7 @@ exports.markAsSpotlit_ = id => simulation => selection => filterlinks => sources
   simulation.force("collide",
     d3
       .forceCollide()
-      .radius(d => (sources.includes(d.id) || targets.includes(d.id)) ? (d.radius * 2) : d.radius )
+      .radius(d => (sources.includes(d.id) || targets.includes(d.id)) ? (d.r * 2) : d.r )
   )
   spotlitNode = nodeSelection.filter((d,i) => d.id == id)
   sourceNodes = nodeSelection.filter((d,i) => targets.includes(d.id))
@@ -73,7 +73,7 @@ exports.removeSpotlight_ = simulation => selection => links => {
     exports.refixElementsNode(element)
   }
   // move the radii back to what they were before
-  simulation.force("collide", d3.forceCollide().radius(d => d.radius ) )
+  simulation.force("collide", d3.forceCollide().radius(d => d.r ) )
   
   svg.classed("spotlight", false)
   spotlitNode.classed("spotlight", false)

@@ -51,9 +51,9 @@ type SpagoModel = {
                        }
 }
 
-upgradeSpagoNodeData :: SpagoNodeData -> SpagoSimNode
-upgradeSpagoNodeData node = D3SimNode { 
-    links      : node.links
+upgradeSpagoNodeData :: M.Map NodeID (Array NodeID) -> SpagoNodeData -> SpagoSimNode
+upgradeSpagoNodeData sourcesMap node = D3SimNode { 
+    links        : node.links { sources = fromMaybe [] $ M.lookup node.id sourcesMap }
   , id           : node.id
   , name         : node.name
   , nodetype     : node.nodetype
@@ -146,6 +146,11 @@ getIdFromSpagoSimNode datum = d.id
   where
     (D3SimNode d) = unsafeCoerce datum
 
+getNodetypeFromSimNode :: Datum_ -> String
+getNodetypeFromSimNode datum = show (d.nodetype :: NodeType)
+  where
+    (D3SimNode d) = unsafeCoerce datum
+
 getRadiusFromSpagoSimNode :: Datum_ -> Number
 getRadiusFromSpagoSimNode datum = d.radius
   where
@@ -186,11 +191,11 @@ convertFilesToGraphModel moduleJSON packageJSON lsdepJSON locJSON =
 
 makeSpagoGraphModel :: Spago_Raw_JSON_ -> SpagoModel
 makeSpagoGraphModel json = do
-  let { nodes, links, name2ID, id2Name, id2Node, id2Package, id2LOC } 
+  let { nodes, links, name2ID, id2Name, id2Node, id2Package, id2LOC, sourceLinksMap } 
         = getGraphJSONData json
 
   { links
-  , nodes    : upgradeSpagoNodeData <$> nodes
+  , nodes    : (upgradeSpagoNodeData sourceLinksMap) <$> nodes
   , graph    : makeGraph nodes
   , tree     : Nothing  -- not present in the JSON, has to be calculated, if possible
   , prunedTreeLinks: [] -- not present in the JSON, has to be calculated, if possible

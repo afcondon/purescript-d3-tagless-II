@@ -121,9 +121,10 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
           let pieces = split (Pattern "/") path
           root          <- pieces !! 0
           packageString <- pieces !! 1
-          if root == ".spago" 
-          then Just packageString
-          else Nothing
+          case root of
+            ".spago" -> Just packageString
+            "src"    -> Just "Project Source"
+            _ -> Nothing
 
     modulesPL :: Array ModuleJSONPL
     modulesPL = (addLOCInfo <<< addPackageInfo) <$> modules
