@@ -1,7 +1,7 @@
 module D3.Selection where
 
 import D3.Attributes.Instances (Attribute, Listener_, attrLabel)
-import D3.Data.Types (D3Selection_, D3Simulation_, Element, MouseEvent, Transition)
+import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Element, MouseEvent, Transition)
 import D3.FFI (ComputeKeyFunction_)
 import D3.Zoom (ZoomConfig)
 import Data.Maybe.Last (Last)
@@ -47,7 +47,7 @@ node e a = D3_Node e a
 node_ :: Element -> D3_Node
 node_ e = D3_Node e []
 
-data OrderingAttribute = Order | Sort (forall a. a -> a -> Int) | Raise | Lower
+data OrderingAttribute = Order | Sort (Datum_ -> Datum_ -> Int) | Raise | Lower
 
 data ChainableS =  
     AttrT Attribute

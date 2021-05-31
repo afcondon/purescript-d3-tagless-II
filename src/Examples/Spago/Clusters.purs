@@ -1,6 +1,6 @@
 module D3.Examples.Spago.Clusters where
 
-import D3.Attributes.Sugar (classed, cx, cy, fill, onMouseEvent, radius, text, viewBox, x, y)
+import D3.Attributes.Sugar (classed, cx, cy, fill, lower, onMouseEvent, radius, text, viewBox, x, y)
 import D3.Data.Types (D3Simulation_, Datum_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (colorByGroup, datumDotRadius, nodeClass)
 import D3.Examples.Spago.Model (SpagoModel, chooseFocusFromSpagoSimNodeX, chooseFocusFromSpagoSimNodeY, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getNodetypeFromSimNode, pinIfPackage)
@@ -70,7 +70,7 @@ clusterScript (Tuple w h) model = do
   labels' <- nodesSelection `append` (node Text [ classed "label", text getNameFromSpagoSimNode ])
 
   packagesOnly <- filter nodesSelection "g.nodes g.package"
-  _ <- packagesOnly `modify` [ classed "XXXX" ]
+  _ <- packagesOnly `modify` [ lower ]
   
   _ <- circle         `on` Tick { name: "nodes",  simulation, chain: [ cx getNodeX, cy getNodeY ]}
   _ <- labels'        `on` Tick { name: "labels", simulation, chain: [ x getNodeX, y getNodeY ]}

@@ -1,10 +1,9 @@
 module D3.Attributes.Sugar where
 
 import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), Attribute(..), Listener, NWU, toAttr)
-import Prelude (class Semigroup, class Show, append, bind, flap, pure, show, ($), (<$>), (<<<), (<>))
 import D3.Data.Types (Datum_, EasingFunction(..), MouseEvent, Transition)
 import D3.FFI (autoBox_)
-import D3.Selection (ChainableS(..))
+import D3.Selection (ChainableS(..), OrderingAttribute(..))
 import Data.Array (intercalate, (:))
 import Data.Function.Uncurried (mkFn3)
 import Data.Int (toNumber)
@@ -12,6 +11,7 @@ import Data.Tuple (Tuple(..))
 import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Milliseconds(..))
+import Prelude (class Semigroup, class Show, append, bind, flap, pure, show, ($), (<$>), (<<<), (<>))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.HTML (window)
 import Web.HTML.Window (innerHeight, innerWidth)
@@ -180,3 +180,14 @@ transform = transform' <<< assembleTransforms
 -- what we know the Datum_ will actually be (ie D3TreeNode for example) then we have some limited type checking
 assembleTransforms :: ∀ a. Array (a -> String) -> (Datum_ -> String)
 assembleTransforms fs = unsafeCoerce (\d -> intercalate " " $ flap fs d)
+
+
+-- helpers for Ordering type attributes
+lower :: ChainableS
+lower = OrderingT Lower
+raise :: ChainableS
+raise = OrderingT Raise
+order :: ChainableS
+order = OrderingT Order
+sortSelection :: (Datum_ -> Datum_ -> Int) -> ChainableS
+sortSelection compare = OrderingT (Sort compare)
