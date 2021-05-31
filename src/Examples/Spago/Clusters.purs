@@ -5,7 +5,7 @@ import D3.Data.Types (D3Simulation_, Datum_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (colorByGroup, datumDotRadius, nodeClass)
 import D3.Examples.Spago.Model (SpagoModel, chooseFocusFromSpagoSimNodeX, chooseFocusFromSpagoSimNodeY, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getNodetypeFromSimNode, pinIfPackage)
 import D3.FFI (configSimulation_, d3FilterSelection_, initSimulation_, setNodes_)
-import D3.Interpreter (class D3InterpreterM, append, attach, filter, on, (<+>))
+import D3.Interpreter (class D3InterpreterM, append, attach, filter, modify, on, (<+>))
 import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
 import D3.Node (NodeID, getNodeX, getNodeY)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
@@ -70,6 +70,7 @@ clusterScript (Tuple w h) model = do
   labels' <- nodesSelection `append` (node Text [ classed "label", text getNameFromSpagoSimNode ])
 
   packagesOnly <- filter nodesSelection "g.nodes g.package"
+  _ <- packagesOnly `modify` [ classed "XXXX" ]
   
   _ <- circle         `on` Tick { name: "nodes",  simulation, chain: [ cx getNodeX, cy getNodeY ]}
   _ <- labels'        `on` Tick { name: "labels", simulation, chain: [ x getNodeX, y getNodeY ]}

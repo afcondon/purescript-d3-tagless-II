@@ -23,6 +23,7 @@ data D3GrammarNode =
   | AttachNode String
   | AppendNode Element
   | FilterNode String
+  | ModifyNode (Array ChainableS)
   -- TODO if datum type can be peeled off the Join type, just store the Join directly
   | JoinSimpleNode     Element Keys (Array ChainableS)
   | JoinGeneralNode    Element Keys EnterUpdateExit
@@ -39,6 +40,7 @@ instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implem
   show (AttachNode _)             = "Attach"
   show (AppendNode _)             = "Append"
   show (FilterNode _)             = "Filter"
+  show (ModifyNode _)             = "Modify"
   show (JoinSimpleNode _ _ _)     = "JoinSimple"
   show (JoinGeneralNode _ _ _)    = "JoinGeneral"
   show (AttrNode _)               = "Attr"
@@ -57,6 +59,7 @@ showAsSymbol =
     (AttachNode s)             ->  { name: "Attach"        , symbol: "a"   , param1: "",           param2: "" }
     (AppendNode e)             ->  { name: "Append"        , symbol: "+"   , param1: tag $ show e, param2: "" }
     (FilterNode s)             ->  { name: "Filter"        , symbol: "/"   , param1: tag s,        param2: "" }
+    (ModifyNode as)            ->  { name: "Modify"        , symbol: "->"  , param1: "",           param2: "" }
     (JoinSimpleNode e _ _)     ->  { name: "JoinSimple"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
     (JoinGeneralNode e _ _)    ->  { name: "JoinGeneral"   , symbol: "<+>" , param1: "",           param2: "" }
     (OnNode (Zoom _))          ->  { name: "Zoom"          , symbol: "z"   , param1: "",           param2: "" }
@@ -157,6 +160,11 @@ instance d3Tagless :: D3InterpreterM NodeID D3MetaTreeM where
 
   filter nodeID selector = do
     insertInScriptTree nodeID (FilterNode selector)
+    (ScriptTree id _ _) <- get
+    pure id
+
+  modify nodeID attributes = do
+    insertInScriptTree nodeID (ModifyNode attributes)
     (ScriptTree id _ _) <- get
     pure id
 
