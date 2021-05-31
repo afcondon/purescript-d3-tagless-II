@@ -47,13 +47,21 @@ node e a = D3_Node e a
 node_ :: Element -> D3_Node
 node_ e = D3_Node e []
 
+data OrderingAttribute = Order | Sort (forall a. a -> a -> Int) | Raise | Lower
 
-data ChainableS =  AttrT Attribute
-                | TextT Attribute -- we can't narrow it to String here but helper function will do that
-                | TransitionT (Array ChainableS) Transition -- the array is set situationally
-                | RemoveT
-                -- | ForceT Attribute
-                | OnT MouseEvent Listener_
+data ChainableS =  
+    AttrT Attribute
+  | TextT Attribute -- we can't narrow it to String here but helper function will do that
+  | HTMLT Attribute -- we can't narrow it to String here but helper function will do that
+  | PropertyT Attribute -- this might motivate adding a Boolean flavor of Attribute, eg for checkbox "checked"
+
+  | OrderingT OrderingAttribute
+
+  | TransitionT (Array ChainableS) Transition -- the array is set situationally
+
+  | RemoveT
+
+  | OnT MouseEvent Listener_
 
   -- other candidates for this ADT include
                 -- | WithUnit Attribute UnitType
@@ -71,7 +79,21 @@ enterOnly as = { enter: as, update: [], exit: [] }
 instance showChainableS :: Show ChainableS where
   show (AttrT attr)      = "chainable: attr " <> attrLabel attr
   show (TextT _)         = "chainable: text"
+  show (HTMLT attr)      = "chainable: html" <> attrLabel attr
+  show (PropertyT attr)  = "chainable: property" <> attrLabel attr
+
   show (TransitionT _ _) = "chainable: transition"
+
   show RemoveT           = "chainable: remove"
   -- show (ForceT _)        = "chainable: force attr"
   show (OnT event _)     = show event
+
+  show (OrderingT attr)  = "chainable: ordering" <> show attr
+
+
+instance showOrderingAttribute :: Show OrderingAttribute where
+  show Order    = "Order"
+  show Raise    = "Raise"
+  show Lower    = "Lower"
+  show (Sort _) = "Sort"
+

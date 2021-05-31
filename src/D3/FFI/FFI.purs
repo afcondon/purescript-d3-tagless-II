@@ -4,10 +4,10 @@ module D3.FFI where
 -- probably should break it up again when it's more feature complete (ie to match D3 modules). Maybe.
 
 import D3.Node
+import D3.Simulation.Config
 
 import D3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
 import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
-import D3.Simulation.Config 
 import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
 import Data.Maybe (fromMaybe)
@@ -37,6 +37,10 @@ foreign import d3Exit_               :: D3Selection_ -> D3Selection_
 foreign import d3RemoveSelection_    :: D3Selection_ -> D3Selection_
 
 foreign import d3FilterSelection_    :: D3Selection_ -> Selector   -> D3Selection_
+foreign import d3OrderSelection_     :: D3Selection_ -> D3Selection_
+foreign import d3RaiseSelection_     :: D3Selection_ -> D3Selection_
+foreign import d3LowerSelection_     :: D3Selection_ -> D3Selection_
+foreign import d3SortSelection_      :: forall d. D3Selection_ -> (d -> d -> Int) -> D3Selection_
 
 foreign import d3Data_               :: forall d. Array d -> D3Selection_ -> D3Selection_
 
@@ -50,8 +54,11 @@ foreign import data D3Attr :: Type
 -- meaningfully different _as_ selections, we're not chaining them in the same way
 -- foreign import d3GetAttr_ :: String -> D3Selection -> ???? -- solve the ???? as needed later
 foreign import d3AddTransition_ :: D3Selection_ -> Transition -> D3Selection_ -- this is the PS transition record
-foreign import d3SetAttr_       :: String      -> D3Attr -> D3Selection_ -> D3Selection_
-foreign import d3SetText_       :: D3Attr      -> D3Selection_ -> D3Selection_
+
+foreign import d3SetAttr_       :: String -> D3Attr -> D3Selection_ -> D3Selection_
+foreign import d3SetText_       :: D3Attr -> D3Selection_ -> D3Selection_
+foreign import d3SetProperty_   :: D3Attr -> D3Selection_ -> D3Selection_
+foreign import d3SetHTML_       :: D3Attr -> D3Selection_ -> D3Selection_
 
 foreign import emptyD3Data_ :: D3Data_ -- probably just null, could this be monoid too??? ie Last (Maybe D3Data_)
 
@@ -70,6 +77,9 @@ foreign import showKeyFunction_     :: forall selection d. Array d -> ComputeKey
 foreign import showData_            :: forall selection d. Array d -> selection -> selection
 foreign import showSetAttr_         :: forall selection. String -> D3Attr -> selection -> selection
 foreign import showSetText_         :: forall selection. D3Attr -> selection -> selection
+foreign import showSetHTML_         :: forall selection. D3Attr -> selection -> selection
+foreign import showSetProperty_     :: forall selection. D3Attr -> selection -> selection
+foreign import showSetOrdering_     :: forall selection. String -> selection -> selection
 foreign import selectionOn_         :: forall selection callback. selection -> String -> callback -> selection  
 
 

@@ -114,6 +114,16 @@ exports.d3RemoveSelection_ = selection => {
 // d3FilterSelection_    :: D3Selection_ -> Selector   -> D3Selection_
 exports.d3FilterSelection_ = selection => selector => selection.filter(selector)
 
+// d3OrderSelection_     :: D3Selection_ -> D3Selection_
+exports.d3OrderSelection_ = selection => selection.order()
+// d3RaiseSelection_     :: D3Selection_ -> D3Selection_
+exports.d3RaiseSelection_ = selection => selection.raise()
+// d3LowerSelection_     :: D3Selection_ -> D3Selection_
+exports.d3LowerSelection_ = selection => selection.lower()
+// d3SortSelection_      :: forall d. D3Selection_ -> (d -> d -> Int) -> D3Selection_
+exports.d3SortSelection_ = selection => compare => selection.sort(compare)
+
+
 // d3Append_ :: String -> D3Selection -> D3Selection
 exports.d3Append_ = element => selection => {
   if (debug) {
@@ -149,6 +159,21 @@ exports.d3SetText_ = value => selection => {
   }
   return selection.text(value)
 }
+// d3SetProperty_   :: D3Attr -> D3Selection_ -> D3Selection_
+exports.d3SetProperty_ = value => selection => {
+  if (debug) {
+    showSetProperty_(value, selection)
+  }
+  return selection.property(value)
+}
+// d3SetHTML_       :: D3Attr -> D3Selection_ -> D3Selection_
+exports.d3SetHTML_ = value => selection => {
+  if (debug) {
+    showSetHTML_(value, selection)
+  }
+  return selection.html(value)
+}
+
 
 exports.showSelectAllInDOM_ = selector => {
   return `\td3SelectAllInDOM: ${selector}`
@@ -195,6 +220,15 @@ exports.showSetAttr_ = name => value => selection => {
 }
 exports.showSetText_ = value => selection => {
   return `\t${selection}.text(${value})`
+}
+exports.showSetHTML_ = value => selection => {
+  return `\t${selection}.html(${value})`
+}
+exports.showSetProperty_ = value => selection => {
+  return `\t${selection}.property(${value})`
+}
+exports.showSetOrdering_ = ordering => selection => {
+  return `\t${selection}.${ordering}()`
 }
 exports.defaultDrag_ = selection => {
   var drag = function () {

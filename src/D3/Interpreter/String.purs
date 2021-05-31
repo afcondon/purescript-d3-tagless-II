@@ -4,7 +4,7 @@ import D3.Selection
 
 import Control.Monad.State (class MonadState, StateT, modify_, runStateT)
 import D3.Attributes.Instances (class ToAttr, Attribute(..), unbox)
-import D3.FFI (showAddTransition_, showRemoveSelection_, showSetAttr_, showSetText_)
+import D3.FFI (showAddTransition_, showRemoveSelection_, showSetAttr_, showSetHTML_, showSetOrdering_, showSetProperty_, showSetText_)
 import D3.Interpreter (class D3InterpreterM)
 import Data.Array (foldl)
 import Data.Tuple (Tuple)
@@ -67,13 +67,20 @@ instance d3Tagless :: D3InterpreterM String D3PrinterM where
 applyChainableSString :: String -> ChainableS -> String
 applyChainableSString selection  = 
   case _ of 
-    (AttrT (ToAttribute label attr)) -> showSetAttr_ label (unbox attr) selection
-    (TextT (ToAttribute label text)) -> showSetText_ (unbox text) selection
-    RemoveT                        -> showRemoveSelection_ selection
+    (AttrT (ToAttribute label attr))     -> showSetAttr_ label (unbox attr) selection
+    (TextT (ToAttribute label text))     -> showSetText_       (unbox text) selection
+    (PropertyT (ToAttribute label text)) -> showSetProperty_   (unbox text) selection
+    (HTMLT (ToAttribute label text))     -> showSetHTML_       (unbox text) selection
+
+    RemoveT       -> showRemoveSelection_ selection
+
+    (OrderingT o) -> showSetOrdering_ (show o) selection
+
     (TransitionT chain transition) -> do 
       let tString = showAddTransition_ selection transition
       foldl applyChainableSString tString chain
     -- (ForceT (ToAttribute label attr)) -> showSetAttr_ label (unbox attr) selection -- might need custom one for forces
+
     (OnT event listener) -> do
       show "event handler for " <> show event <> " has been set"
 

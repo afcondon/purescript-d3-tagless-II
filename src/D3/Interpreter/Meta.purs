@@ -6,7 +6,7 @@ import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
 import D3.Data.Types (Element, MouseEvent, Transition)
 import D3.Interpreter (class D3InterpreterM)
-import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), Keys)
+import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), Keys, OrderingAttribute(..))
 import D3.Zoom (ZoomConfig)
 import Data.Array (filter, (:))
 import Data.Map (Map, empty, insert, lookup)
@@ -30,6 +30,7 @@ data D3GrammarNode =
   -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
   | OnNode Behavior -- TODO make chainable
   | AttrNode ChainableS -- actually only Attr and Text
+  | OrderNode String
   | OnEventNode MouseEvent
   | TransitionNode (Array ChainableS) Transition
   | RemoveNode
@@ -44,6 +45,7 @@ instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implem
   show (JoinSimpleNode _ _ _)     = "JoinSimple"
   show (JoinGeneralNode _ _ _)    = "JoinGeneral"
   show (AttrNode _)               = "Attr"
+  show (OrderNode _)              = "Order"
   show (OnEventNode _)            = "OnEvent"
   show (TransitionNode _ _)       = "Transition"
 
@@ -66,6 +68,7 @@ showAsSymbol =
     (OnNode (Drag _))          ->  { name: "Drag"          , symbol: "drag", param1: "",           param2: "" }
     (OnNode (Tick _))          ->  { name: "Tick"          , symbol: "tick", param1: "",           param2: "" }
     (AttrNode c)               ->  { name: "Attr"          , symbol: "attr", param1: show c,       param2: "" }
+    (OrderNode c)              ->  { name: "Order"         , symbol: "order", param1: show c,       param2: "" }
     (OnEventNode _)            ->  { name: "OnEvent"       , symbol: "on"  , param1: "",           param2: "" }
     (TransitionNode _ _)       ->  { name: "Transition"    , symbol: "T"   , param1: "",           param2: "" }
 
@@ -134,8 +137,17 @@ insertAttributeInScriptTree parentID =
       -- simple attributes are just nodes
       attr@(AttrT _)       -> insertInScriptTree parentID (AttrNode attr)
       text@(TextT _)       -> insertInScriptTree parentID (AttrNode text)
+      text@(PropertyT _)   -> insertInScriptTree parentID (AttrNode text)
+      text@(HTMLT _)       -> insertInScriptTree parentID (AttrNode text)
 
       RemoveT              -> insertInScriptTree parentID RemoveNode
+
+      (OrderingT o) ->
+        case o of
+          Order    -> insertInScriptTree parentID (OrderNode "order")
+          (Sort _) -> insertInScriptTree parentID (OrderNode "sort")
+          Raise    -> insertInScriptTree parentID (OrderNode "raise")
+          Lower    -> insertInScriptTree parentID (OrderNode "lower")
 
       -- the transition attribute is an exception, it can have further (Array ChainableS)
       transition@(TransitionT chain config) ->
