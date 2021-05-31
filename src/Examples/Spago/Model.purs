@@ -102,8 +102,8 @@ pinNode (D3SimNode node) xy = D3SimNode (node { fx = notNull xy.x, fy = notNull 
 pinIfPackage :: SpagoSimNode -> SpagoSimNode
 pinIfPackage n@(D3SimNode node) = do
   let xy = offsetXY { x: (-900.0), y: (-5000.0) } $
-            scalePoint 180.0 100.0 $
-            numberToGridPoint 10 node.cluster
+           scalePoint 180.0 100.0 $
+           numberToGridPoint 10 node.cluster
       -- _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
   case node.nodetype of
     (IsModule _)  -> setXY   n xy -- only setting intial position of module
@@ -112,9 +112,9 @@ pinIfPackage n@(D3SimNode node) = do
 gridifyByNodeID :: SpagoSimNode -> SpagoSimNode
 gridifyByNodeID n@(D3SimNode node) = do
   let xy = offsetXY { x: (-1000.0), y: (-500.0) } $
-            scalePoint 100.0 20.0 $
-            numberToGridPoint 10 node.id
-      _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
+           scalePoint 100.0 20.0 $
+           numberToGridPoint 10 node.id
+      _ =  trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
   pinNode n xy
 
 gridifyByCluster :: SpagoSimNode -> SpagoSimNode

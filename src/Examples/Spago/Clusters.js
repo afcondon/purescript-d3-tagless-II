@@ -36,7 +36,7 @@ exports.spotlightNeighbours_ = simulation => id => nodetype => {
     d3
       .forceCollide()
       .radius(d =>
-        sources.includes(d.id) || targets.includes(d.id) ? d.r * 4 : d.r
+        sources.includes(d.id) || targets.includes(d.id) ? d.r * 4 : (d.id === d.containerID) ? 10.0 : d.r
       )
   )
   simulation.alpha(1).restart()
@@ -57,7 +57,7 @@ exports.unSpotlightNeighbours_ = simulation => id => {
   // move the radii back to what they were before
   simulation.force(
     'collide',
-    d3.forceCollide().radius(d => d.r)
+    d3.forceCollide().radius(d => (d.id === d.containerID) ? 10.0 : d.r)
   )
   simulation.restart()
 }

@@ -3,17 +3,17 @@ module D3.Examples.Spago.Clusters where
 import D3.Attributes.Sugar (classed, cx, cy, fill, lower, onMouseEvent, radius, text, viewBox, x, y)
 import D3.Data.Types (D3Simulation_, Datum_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (colorByGroup, datumDotRadius, nodeClass)
-import D3.Examples.Spago.Model (SpagoModel, chooseFocusFromSpagoSimNodeX, chooseFocusFromSpagoSimNodeY, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getNodetypeFromSimNode, pinIfPackage)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, chooseFocusFromSpagoSimNodeX, chooseFocusFromSpagoSimNodeY, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getNodetypeFromSimNode, pinIfPackage)
 import D3.FFI (configSimulation_, d3FilterSelection_, initSimulation_, setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, filter, modify, on, (<+>))
 import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
-import D3.Node (NodeID, getNodeX, getNodeY)
+import D3.Node (D3_SimulationNode(..), NodeID, getNodeX, getNodeY)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (D3ForceHandle_, defaultConfigSimulation)
 import D3.Simulation.Config as F
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Tuple (Tuple(..))
-import Prelude (class Bind, Unit, bind, negate, pure, show, unit, (/), (<$>))
+import Prelude (class Bind, Unit, bind, negate, pure, show, unit, (==), (/), (<$>))
 import Unsafe.Coerce (unsafeCoerce)
 
 foreign import forceClusterCollision :: Unit -> D3ForceHandle_
@@ -21,17 +21,12 @@ foreign import forceClusterCollision :: Unit -> D3ForceHandle_
 -- myCustomForceConfig :: Array ChainableF 
 -- myCustomForceConfig = [ radius 1.0, strength 0.8, clusterPadding: 10.0 ] forceClusterCollision
 
-fixed500 :: Datum_ -> Number
-fixed500 d = 500.0
-
-fixed200 :: Datum_ -> Number
-fixed200 datum = d.nodeId
-  where
-    d = (unsafeCoerce datum)
+containerIsSelf :: SpagoSimNode -> Boolean
+containerIsSelf (D3SimNode d) = d.id == d.containerID
 
 fromRadius :: Datum_ -> Number
-fromRadius datum = d.r
-  where d = (unsafeCoerce datum)
+fromRadius datum = if containerIsSelf d then 10.0 else d'.r
+  where d@(D3SimNode d') = (unsafeCoerce datum)
 
 spagoForces :: Array Force
 spagoForces =  

@@ -22,7 +22,7 @@ main :: Effect Unit
 main = launchAff_  do
   _        <- forkAff Spago.drawGraph
   
-{-
+-- {-
   _        <- forkAff LesMis.drawGraph
 
   _        <- forkAff GUP.runGeneralUpdatePattern
@@ -41,6 +41,6 @@ main = launchAff_  do
 
   -- extract the structure of the radial tree "D3 script" and draw a radial tree of this "meta" tree
   sequence_ $ rmap drawMetaTree treeJSON
--}
+-- -}
 
   pure unit
