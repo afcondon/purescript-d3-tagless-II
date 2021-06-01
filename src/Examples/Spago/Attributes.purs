@@ -2,68 +2,19 @@ module D3.Examples.Spago.Attributes where
 
 import D3.Data.Types (Datum_)
 import D3.Examples.Spago.Files (NodeType(..))
-import D3.Examples.Spago.Model (datumIsGraphNode, datumIsSpagoLink, datumIsSpagoSimNode, packageRadius)
+import D3.Examples.Spago.Model (packageRadius)
 import D3.Examples.Tree.Configure (datumIsTreeNode)
 import D3.FFI (hasChildren_)
-import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), D3_XY, NodeID, getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
+import D3.Node (D3_SimulationNode(..), D3_TreeNode(..), D3_XY, NodeID)
 import D3.Scales (d3SchemeCategory10N_)
 import Data.Int (toNumber)
-import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (fromMaybe)
 import Math (pi)
 import Math (sqrt) as Math
-import Prelude (negate, show, ($), (*), (-), (/), (<), (<>), (==), (>=))
+import Prelude (show, ($), (*), (-), (/), (<), (<>), (==), (>=))
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
-
-positionLabel :: Datum_ -> Number
-positionLabel datum = do
-  let (D3SimNode d) = datumIsSpagoSimNode datum
-  case d.nodetype of
-    (IsModule _)  -> negate d.loc
-    (IsPackage _) -> 0.0
-
-nodeClass :: Datum_ -> String
-nodeClass datum = do
-  let (D3SimNode d) = datumIsSpagoSimNode datum
-  show d.nodetype <> " " <> d.containerName <> " " <> d.name
-
-linkClass :: Datum_ -> String
-linkClass datum = do
-  let (D3_Link d) = datumIsSpagoLink datum
-  show d.linktype
-
-translateNode :: Datum_ -> String
-translateNode datum = "translate(" <> show x <> "," <> show y <> ")"
-  where 
-    d = datumIsGraphNode datum
-    (x :: Number) = (unsafeCoerce datum).x
-    (y :: Number) = (unsafeCoerce datum).y
-
-colorByGroup :: Datum_ -> String
-colorByGroup datum = d3SchemeCategory10N_ d.cluster
-  where
-    (D3SimNode d) = unsafeCoerce datum
-
-datumDotRadius :: Datum_ -> Number
-datumDotRadius datum = d.r
-  where
-    (D3SimNode d) = unsafeCoerce datum
-
-
-setX1 :: Datum_ -> Number
-setX1 = getSourceX
-setY1 :: Datum_ -> Number
-setY1 = getSourceY
-setX2 :: Datum_ -> Number
-setX2 = getTargetX
-setY2 :: Datum_ -> Number
-setY2 = getTargetY
-setCx :: Datum_ -> Number
-setCx = getNodeX
-setCy :: Datum_ -> Number
-setCy = getNodeY
 
 -- these ones came from the TreeScript
 

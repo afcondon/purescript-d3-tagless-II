@@ -2,9 +2,11 @@ module D3.Examples.Spago.Files where
 
 import Data.Array
 import Prelude
+import Type.Row
 
 import Affjax (URL)
-import D3.Node (D3_Link(..), NodeID)
+import D3.Data.Types (Datum_)
+import D3.Node (D3_FocusXY, D3_Indexed, D3_Link(..), D3_SimulationNode(..), D3_VxyFxy, D3_XY, NodeID, D3_Radius)
 import Data.Array.NonEmpty (NonEmptyArray)
 import Data.Array.NonEmpty as NA
 import Data.Foldable (sum)
@@ -15,6 +17,7 @@ import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..), fst, snd)
 import Debug (spy, trace)
 import Prim.Boolean (False)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- | move to utility file
 compareFst a b = compare (fst a) (fst b)
@@ -83,7 +86,9 @@ data Pinned          = Pinned | Floating | Forced -- might be more categories he
 type Deps            = Array NodeID
 
 type SpagoLinkData     = ( linktype :: LinkType )
-type SpagoGraphLinkID  = D3_Link NodeID SpagoLinkData
+type SpagoGraphLinkID  = D3_Link NodeID          SpagoLinkData
+type SpagoGraphLinkObj =  { source :: SpagoDataRecord, target :: SpagoDataRecord | SpagoLinkData }
+
 type SpagoNodeRow row = ( 
     id       :: NodeID
   , links    :: { targets    :: Deps -- the nodes on which this nodes depends
@@ -105,6 +110,16 @@ type SpagoNodeRow row = (
   | row )
 type SpagoNodeData    = { | SpagoNodeRow () }
 
+type SpagoDataRecord = Record (D3_Indexed + D3_XY + D3_VxyFxy + SpagoNodeRow  + D3_FocusXY + D3_Radius + ())
+unboxD3SimNode :: Datum_ -> SpagoDataRecord
+unboxD3SimNode datum = do
+  let (D3SimNode d) = unsafeCoerce datum
+  d
+  
+unboxD3SimLink :: Datum_ -> SpagoGraphLinkObj
+unboxD3SimLink datum = do
+  let (D3_Link l) = unsafeCoerce datum
+  l
 
 getGraphJSONData :: Spago_Raw_JSON_ -> Spago_Cooked_JSON
 getGraphJSONData { packages, modules, lsDeps, loc } = do
@@ -126,7 +141,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
           packageString <- pieces !! 1
           case root of
             ".spago" -> Just packageString
-            "src"    -> Just "Project Source"
+            "src"    -> Just "my-project" -- TODO this name comes from the packages.json via the spago.dhall file
             _ -> Nothing
 
     modulesPL :: Array ModuleJSONPL

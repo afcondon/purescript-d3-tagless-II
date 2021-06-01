@@ -47,6 +47,10 @@ instance showMouseEvent :: Show MouseEvent where
   show MouseUp    = "mouseup"
 
 type PointXY = { x :: Number, y :: Number }
+chooseX :: PointXY -> Number
+chooseX { x } = x
+chooseY :: PointXY -> Number
+chooseY { y } = y
 
 -- | Transition definitions
 -- TODO make this a Newtype and give it monoid instance

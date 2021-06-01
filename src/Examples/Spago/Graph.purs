@@ -2,8 +2,8 @@ module D3.Examples.Spago.Graph where
 
 import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
-import D3.Examples.Spago.Attributes (colorByGroup, linkClass, nodeClass, positionLabel, translateNode)
-import D3.Examples.Spago.Model (SpagoModel, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getRadiusFromSpagoSimNode)
+import D3.Examples.Spago.Attributes
+import D3.Examples.Spago.Model 
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_, startSimulation_)
 import D3.Interpreter (class D3InterpreterM, append, attach, on, (<+>))
 import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
@@ -24,7 +24,7 @@ spagoForces =
   , Force "x"       ForceX        [ F.strength 0.1, F.x 0.0 ]
   , Force "y"       ForceY        [ F.strength 0.1, F.y 0.0 ]
   , Force "center"  ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
-  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius getRadiusFromSpagoSimNode, F.iterations 1.0 ]
+  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius datum.collideRadius, F.iterations 1.0 ]
   , Force "radial"  ForceRadial   [ F.strength 0.1, F.x 0.0, F.y 0.0, F.radius 800.0 ]
   ]
       
@@ -37,8 +37,8 @@ graphScript :: forall m selection.
   m selection
 graphScript (Tuple w h) model = do
   root       <- attach "div#spago"
-  svg        <- root `append` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h ] )
-  centerDot  <- svg  `append` (node Circle [ radius 20.0, fill "red", x (w / 2.0), y h ])
+  svg        <- root `append` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h 
+                                           , classed "graph"] )
   linksGroup <- svg  `append` (node Group  [ classed "links", strokeColor "#999" ])
   nodesGroup <- svg  `append` (node Group  [ classed "nodes" ])
 
@@ -52,26 +52,26 @@ graphScript (Tuple w h) model = do
       element   : Line
     , key       : UseDatumAsKey
     , "data"    : model.links
-    , behaviour : [ classed linkClass ] -- default invisible in CSS unless marked "visible"
+    , behaviour : [ classed link.linkClass ] -- default invisible in CSS unless marked "visible"
   }
   nodesSelection <- nodesGroup <+> Join {
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : nodes
-    , behaviour : [ classed nodeClass, transform' translateNode ]
+    , behaviour : [ classed datum.nodeClass, transform' datum.translateNode ]
   }
 
-  circle  <- nodesSelection `append` (node Circle [ radius getRadiusFromSpagoSimNode
-                                                  , fill colorByGroup
+  circle  <- nodesSelection `append` (node Circle [ radius datum.radius
+                                                  , fill datum.colorByGroup
                                                   -- , on MouseEnter (\e d t -> stopSimulation_ simulation) 
                                                   , onMouseEvent MouseClick (\e d t -> startSimulation_ simulation)
-                                                  , onMouseEvent MouseEnter (\e d t -> highlightNeighborhood simulation linksGroup (unsafeCoerce model) (getIdFromSpagoSimNode d))
+                                                  , onMouseEvent MouseEnter (\e d t -> highlightNeighborhood simulation linksGroup (unsafeCoerce model) (datum.id d))
                                                   , onMouseEvent MouseLeave (\e d t -> unhighlightNeighborhood simulation linksGroup (unsafeCoerce model))
                                                   ]) 
-  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y positionLabel, text getNameFromSpagoSimNode]) 
+  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y datum.positionLabel, text datum.name]) 
   
   _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ]}
-  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ classed nodeClass, transform' translateNode ]}
+  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ classed datum.nodeClass, transform' datum.translateNode ]}
   _ <- nodesSelection `on` Drag DefaultDrag
   _ <- svg `on` Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                      , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`

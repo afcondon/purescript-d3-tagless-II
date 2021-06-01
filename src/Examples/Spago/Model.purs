@@ -3,8 +3,10 @@ module D3.Examples.Spago.Model where
 import D3.Examples.Spago.Files
 import Prelude
 
-import D3.Data.Types (Datum_, Index_, PointXY)
-import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Link(..), D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
+import D3.Attributes.Sugar (x)
+import D3.Data.Types (Datum_, Index_, PointXY, chooseX, chooseY)
+import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Indexed, D3_Link(..), D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID, getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
+import D3.Scales (d3SchemeCategory10N_)
 import Data.Array (catMaybes, cons, foldl, length, range, zip, (!!), (:))
 import Data.Foldable (sum)
 import Data.Generic.Rep (Sum)
@@ -13,8 +15,8 @@ import Data.Int (toNumber)
 import Data.Map (toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Nullable (Nullable, notNull, null, toMaybe)
 import Data.Nullable (Nullable, null) as N
-import Data.Nullable (notNull, null, toMaybe)
 import Data.Set as S
 import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..))
@@ -24,17 +26,75 @@ import Math as Math
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
-moduleRadius = 5.0 :: Number 
-packageRadius = 50.0 :: Number
+moduleRadius       =  5.0 :: Number 
+packageRadius      = 50.0 :: Number
 packageForceRadius = 50.0 :: Number
 
+link = {
+    source: (\d -> (unboxD3SimLink d).source)
+  , target: (\d -> (unboxD3SimLink d).target)
+  , linkClass: (\d -> show (unboxD3SimLink d).linktype)
+}
+
+cluster2Point :: Int -> PointXY
+cluster2Point v = 
+  offsetXY { x: (-800.0), y: (-5000.0) } $
+  scalePoint 180.0 100.0 $
+  numberToGridPoint 10 v
+
+tree2Point :: Nullable Number -> Nullable Number -> Maybe PointXY
+tree2Point x' y' = do
+  x <- toMaybe x'
+  y <- toMaybe y'
+  Just { x, y } 
+
+-- | all the coercions in one place
+datum = {
+-- direct accessors to fields of the datum (BOILERPLATE)
+    radius        : (\d -> (unboxD3SimNode d).r)
+  , id            : (\d -> (unboxD3SimNode d).id)
+  , loc           : (\d -> (unboxD3SimNode d).loc)
+  , containerID   : (\d -> (unboxD3SimNode d).containerID)
+  , containerName : (\d -> (unboxD3SimNode d).containerName)
+  , name          : (\d -> (unboxD3SimNode d).name)
+  , x             : (\d -> (unboxD3SimNode d).x)
+  , y             : (\d -> (unboxD3SimNode d).y)
+  , treeX         : (\d -> (unboxD3SimNode d).treeX)
+  , treeY         : (\d -> (unboxD3SimNode d).treeY)
+  , nodetype      : (\d -> (unboxD3SimNode d).nodetype)
+  , cluster       : (\d -> (unboxD3SimNode d).cluster)
+
+  , clusterPoint  : (\d -> cluster2Point (unboxD3SimNode d).cluster)
+  , clusterPointX : (\d -> chooseX $ datum.clusterPoint d)
+  , clusterPointY : (\d -> chooseY $ datum.clusterPoint d)
+  , treePoint     : (\d -> fromMaybe (datum.clusterPoint d) (tree2Point (datum.treeX d) (datum.treeY d)))
+  , treePointX    : (\d -> chooseX $ datum.treePoint d)
+  , treePointY    : (\d -> chooseY $ datum.treePoint d)
+
+-- more complicated calculations (CONVENIENCE)
+  , positionLabel:
+    (\d -> case datum.nodetype d of
+            (IsModule _)  -> negate $ datum.loc d
+            (IsPackage _) -> 0.0
+    )
+  , collideRadius:
+      (\d -> 
+        if datum.id d == datum.containerID d
+        then 10.0
+        else datum.radius d
+      )
+  , nodeClass:
+      (\d -> show (datum.nodetype d) <> " " <> (datum.containerName d) <> " " <> (datum.name d))
+  , colorByGroup:
+      (\d -> d3SchemeCategory10N_ (toNumber $ datum.cluster d))
+  , translateNode:
+      (\d -> "translate(" <> show (datum.x d) <> "," <> show (datum.y d) <> ")")
+}
+
+              
 -- Model data types specialized with inital data
-
-
 type SpagoTreeNode    = D3TreeRow       (EmbeddedData SpagoNodeData + ())
 type SpagoSimNode     = D3SimulationRow (             SpagoNodeRow  + D3_FocusXY + D3_Radius + ()) -- note we've woven in focusXY so that we can cluster the nodes
-
-type SpagoGraphLinkObj = D3_Link SpagoNodeData SpagoLinkData 
 
 type SpagoModel = { 
     links           :: Array SpagoGraphLinkID  -- each ID will get swizzled for a SpagoGraphLinkObj_ when simulation initialized
@@ -134,70 +194,7 @@ setXYExceptLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boole
 setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = D3SimNode node
 setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { treeX = notNull x, treeY = notNull y, pinned = Forced })
 
-datumIsSpagoSimNode :: Datum_ -> SpagoSimNode
-datumIsSpagoSimNode = unsafeCoerce
 
-datumIsSpagoLink :: Datum_ -> D3_Link SpagoNodeData SpagoLinkData
-datumIsSpagoLink = unsafeCoerce
-
-datumIsGraphNode :: Datum_ -> SpagoSimNode
-datumIsGraphNode = unsafeCoerce
-
-getIdFromSpagoSimNode :: Datum_ -> Int
-getIdFromSpagoSimNode datum = d.id
-  where
-    (D3SimNode d) = unsafeCoerce datum
-
-getNodetypeFromSimNode :: Datum_ -> String
-getNodetypeFromSimNode datum = show (d.nodetype :: NodeType)
-  where
-    (D3SimNode d) = unsafeCoerce datum
-
-getRadiusFromSpagoSimNode :: Datum_ -> Number
-getRadiusFromSpagoSimNode datum = d.radius
-  where
-    (D3SimNode d) = unsafeCoerce datum
-
-cluster2Point :: Int -> PointXY
-cluster2Point v = 
-  offsetXY { x: (-800.0), y: (-5000.0) } $
-  scalePoint 180.0 100.0 $
-  numberToGridPoint 10 v
-
-
-chooseFocusFromClusterX :: Datum_ -> Number
-chooseFocusFromClusterX datum = x 
-  where
-    (D3SimNode d) = unsafeCoerce datum
-    { x } = cluster2Point d.cluster
-
-chooseFocusFromClusterY :: Datum_ -> Number
-chooseFocusFromClusterY datum = y 
-  where
-    (D3SimNode d) = unsafeCoerce datum
-    { y } = cluster2Point d.cluster
-
-chooseFocusFromTreeX :: Datum_ -> Number
-chooseFocusFromTreeX datum = x' 
-  where
-    (D3SimNode d) = unsafeCoerce datum
-    x' = case toMaybe d.treeX of
-            Nothing -> (\{x,y} -> x) $ cluster2Point d.cluster
-            (Just x) -> x
-              
-chooseFocusFromTreeY :: Datum_ -> Number
-chooseFocusFromTreeY datum = y' 
-  where
-    (D3SimNode d) = unsafeCoerce datum
-    y' = case toMaybe d.treeY of
-            Nothing -> (\{x,y} -> y) $ cluster2Point d.cluster
-            (Just y) -> y
-              
-
-getNameFromSpagoSimNode :: Datum_ -> String
-getNameFromSpagoSimNode datum = d.name
-  where
-    (D3SimNode d) = unsafeCoerce datum
 
 convertFilesToGraphModel :: forall r. 
   { body :: String | r } -> 
