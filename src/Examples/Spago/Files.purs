@@ -103,6 +103,7 @@ type SpagoNodeRow row = (
   , name        :: String
   , pinned      :: Pinned
   , loc         :: Number
+  , connected   :: Boolean
   , containsMany  :: Boolean
   , containerName :: String
   , containerID   :: NodeID
@@ -207,6 +208,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
                         , outPackage: []
                         , contains  : [] -- we're not looking inside packages yet
                         } 
+      , connected    : false -- this is shorthand for "connected to Main by a dependency tree", essentially it's treeNodes.no
       , containsMany : false 
       , treeX        : null
       , treeY        : null
@@ -234,6 +236,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
                         , outPackage: []
                         , contains: (getId <$> p.contains)
                         } 
+      , connected    : true -- unless something has gone very wrong we shouldn't have any unconnected _packages_ (only modules)
       , containsMany : (length p.contains) > 1 -- we won't try to cluster contents of single module packages
       , treeX        : null
       , treeY        : null

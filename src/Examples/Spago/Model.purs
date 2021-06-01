@@ -1,6 +1,6 @@
 module D3.Examples.Spago.Model where
 
-import D3.Data.Types (Datum_, PointXY, chooseX, chooseY)
+import D3.Data.Types (D3Simulation_, Datum_, PointXY, chooseX, chooseY)
 import D3.Examples.Spago.Files (NodeType(..), Pinned(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_, unboxD3SimLink, unboxD3SimNode)
 import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_)
@@ -16,75 +16,14 @@ import Data.Tuple (Tuple(..))
 import Debug (trace)
 import Math (sqrt, (%))
 import Math as Math
-import Prelude (bind, negate, show, unit, ($), (*), (+), (/), (<$>), (<>), (==))
+import Prelude (Unit, bind, negate, show, unit, ($), (*), (+), (/), (<$>), (<>), (==))
 import Type.Row (type (+))
+import Web.Event.Internal.Types (Event)
 
 moduleRadius       =  5.0 :: Number 
 packageRadius      = 50.0 :: Number
 packageForceRadius = 50.0 :: Number
 
-link :: { linkClass :: Datum_ -> String
-, source :: Datum_
-            -> { cluster :: Int
-               , containerID :: Int
-               , containerName :: String
-               , containsMany :: Boolean
-               , focusX :: Number
-               , focusY :: Number
-               , fx :: Nullable Number
-               , fy :: Nullable Number
-               , id :: Int
-               , index :: Int
-               , links :: { contains :: Array Int
-                          , inPackage :: Array Int
-                          , outPackage :: Array Int
-                          , sources :: Array Int
-                          , targets :: Array Int
-                          , tree :: Array Int
-                          }
-               , loc :: Number
-               , name :: String
-               , nodetype :: NodeType
-               , pinned :: Pinned
-               , r :: Number
-               , treeX :: Nullable Number
-               , treeY :: Nullable Number
-               , vx :: Number
-               , vy :: Number
-               , x :: Number
-               , y :: Number
-               }
-, target :: Datum_
-            -> { cluster :: Int
-               , containerID :: Int
-               , containerName :: String
-               , containsMany :: Boolean
-               , focusX :: Number
-               , focusY :: Number
-               , fx :: Nullable Number
-               , fy :: Nullable Number
-               , id :: Int
-               , index :: Int
-               , links :: { contains :: Array Int
-                          , inPackage :: Array Int
-                          , outPackage :: Array Int
-                          , sources :: Array Int
-                          , targets :: Array Int
-                          , tree :: Array Int
-                          }
-               , loc :: Number
-               , name :: String
-               , nodetype :: NodeType
-               , pinned :: Pinned
-               , r :: Number
-               , treeX :: Nullable Number
-               , treeY :: Nullable Number
-               , vx :: Number
-               , vy :: Number
-               , x :: Number
-               , y :: Number
-               }
-}
 link = {
     source: (\d -> (unboxD3SimLink d).source)
   , target: (\d -> (unboxD3SimLink d).target)
@@ -104,36 +43,6 @@ tree2Point x' y' = do
   Just { x, y } 
 
 -- | all the coercions in one place
-datum :: { cluster :: Datum_ -> Int
-, clusterPoint :: Datum_
-                  -> { x :: Number
-                     , y :: Number
-                     }
-, clusterPointX :: Datum_ -> Number
-, clusterPointY :: Datum_ -> Number
-, collideRadius :: Datum_ -> Number
-, colorByGroup :: Datum_ -> String
-, containerID :: Datum_ -> Int
-, containerName :: Datum_ -> String
-, id :: Datum_ -> Int
-, loc :: Datum_ -> Number
-, name :: Datum_ -> String
-, nodeClass :: Datum_ -> String
-, nodetype :: Datum_ -> NodeType
-, positionLabel :: Datum_ -> Number
-, radius :: Datum_ -> Number
-, translateNode :: Datum_ -> String
-, treePoint :: Datum_
-               -> { x :: Number
-                  , y :: Number
-                  }
-, treePointX :: Datum_ -> Number
-, treePointY :: Datum_ -> Number
-, treeX :: Datum_ -> Nullable Number
-, treeY :: Datum_ -> Nullable Number
-, x :: Datum_ -> Number
-, y :: Datum_ -> Number
-}
 datum = {
 -- direct accessors to fields of the datum (BOILERPLATE)
     radius        : (\d -> (unboxD3SimNode d).r)
@@ -148,6 +57,8 @@ datum = {
   , treeY         : (\d -> (unboxD3SimNode d).treeY)
   , nodetype      : (\d -> (unboxD3SimNode d).nodetype)
   , cluster       : (\d -> (unboxD3SimNode d).cluster)
+  , links         : (\d -> (unboxD3SimNode d).links)
+  , connected     : (\d -> (unboxD3SimNode d).connected)
 
   , clusterPoint  : (\d -> cluster2Point (unboxD3SimNode d).cluster)
   , clusterPointX : (\d -> chooseX $ datum.clusterPoint d)
@@ -174,6 +85,17 @@ datum = {
       (\d -> d3SchemeCategory10N_ (toNumber $ datum.cluster d))
   , translateNode:
       (\d -> "translate(" <> show (datum.x d) <> "," <> show (datum.y d) <> ")")
+-- accessors to provide different force settings for different cohorts, quite possible that this should go thru a similar but different route from `datum`
+  , onlyPackages:
+      (\d -> case datum.nodetype d of
+              (IsModule _)  -> 0.0 -- we don't want modules to respond to this force at all
+              (IsPackage _) -> 0.5)
+  , onlyUnused:
+      (\d -> case datum.nodetype d of
+              (IsModule _)  -> if datum.connected d 
+                               then 0.0 
+                               else 0.8  -- this should put the only unused modules in a different orbit from the packages
+              (IsPackage _) -> 0.0)
 }
 
               
@@ -204,6 +126,7 @@ upgradeSpagoNodeData sourcesMap node = D3SimNode {
   , nodetype     : node.nodetype
   , containerID  : node.containerID
   , containerName: node.containerName
+  , connected    : node.connected
   , containsMany : node.containsMany
   , cluster      : node.containerID -- TODO cluster all the single module packages together
   , index        : node.id
@@ -276,8 +199,8 @@ setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
 setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
 
 setXYExceptLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
-setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = D3SimNode node
-setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { treeX = notNull x, treeY = notNull y, pinned = Forced })
+setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = D3SimNode node { connected = true }
+setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { treeX = notNull x, treeY = notNull y, connected = true, pinned = Forced })
 
 
 
@@ -322,3 +245,11 @@ makeGraph nodes = do
 
 
 
+toggleSpotlight :: Event -> D3Simulation_ -> Datum_ -> Unit
+toggleSpotlight event simulation d = toggleSpotlight_ event simulation nodeID nodeType
+  where
+    nodeID   = datum.id d
+    nodeType = show $ datum.nodetype d
+
+foreign import toggleSpotlight_ :: Event -> D3Simulation_ -> NodeID -> String -> Unit
+foreign import cancelSpotlight_ :: D3Simulation_ -> Unit

@@ -145,24 +145,24 @@ div#spago svg g.nodes g.package.target circle {
   stroke-width: 2px;
   stroke: blue;
 }
-div#spago svg.cluster g.nodes g.package circle {
+div#spago svg g.nodes g.package circle {
   visibility: hidden;
 }
-div#spago svg.cluster g.nodes g.package text {
+div#spago svg g.nodes g.package text {
   visibility: visible;
   fill: black;
   font-size: 24px;
   opacity: 0.5;
   text-anchor: start;
 }
-div#spago svg.cluster g.nodes g.module.source text,
-div#spago svg.cluster g.nodes g.module.target text {
+div#spago svg g.nodes g.module.source text,
+div#spago svg g.nodes g.module.target text {
   fill: gray;
 }
-div#spago svg.cluster.spotlight g.nodes g.package text {
+div#spago svg.spotlight g.nodes g.package text {
   opacity: 0.2;
 }
-div#spago svg.cluster.spotlight g.nodes g.module.source text,
-div#spago svg.cluster.spotlight g.nodes g.module.target text {
+div#spago svg.spotlight g.nodes g.module.source text,
+div#spago svg.spotlight g.nodes g.module.target text {
   fill: gray;
 }

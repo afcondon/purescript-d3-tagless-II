@@ -54,7 +54,7 @@ graphScript :: forall  m selection.
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
-  LesMisModel -> 
+  LesMisRawModel -> 
   m selection
 graphScript widthheight model = do
   let columns = 3.0

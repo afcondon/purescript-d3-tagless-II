@@ -12,19 +12,19 @@ import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Math (pi)
 import Prelude (class Bind, bind, negate, pure, (*), (+), (-), (/))
-import D3.Examples.Spago.Attributes (chooseRadiusTree, colorByGroupTree, labelName, radialRotateCommon, radialTreeTranslate, rotateRadialLabels, textDirection)
+import D3.Examples.Spago.Attributes 
 
 -- | **************************************************************************************************************
 -- | draw the spago graph - only the tree part - as a radial tree
 -- | **************************************************************************************************************
 
 -- TODO forall d should be explicit, this script requires certain data structures, fix sig to specify
-treeScript :: forall m selection. Bind m => D3InterpreterM selection m => 
+script :: forall m selection. Bind m => D3InterpreterM selection m => 
   Tuple Number Number -> SpagoModel -> m selection
-treeScript _ model@{ tree: Nothing } = do
+script _ model@{ tree: Nothing } = do
   attach "div#spagotree"            -- FIXME this is bogus but saves messing about with the Maybe tree in the drawGraph script for now            
 
-treeScript (Tuple width height) model@{ tree: Just (Tuple _ theTree)} = do
+script (Tuple width height) model@{ tree: Just (Tuple _ theTree)} = do
   let 
     -- configure dimensions
     columns                    = 2.0  -- 3 columns, set in the grid CSS in index.html

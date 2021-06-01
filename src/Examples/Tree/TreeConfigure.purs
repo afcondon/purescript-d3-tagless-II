@@ -4,7 +4,8 @@ import Utility
 import D3.Attributes.Sugar (transform, viewBox)
 import D3.Data.Types (D3Selection_, Datum_)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
-import D3.Examples.Tree.Script (FlareTreeNode, treeScript)
+import D3.Examples.Tree.Script (FlareTreeNode)
+import D3.Examples.Tree.Script (script) as Tree
 import D3.FFI (getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Interpreter.D3 (runD3M)
@@ -56,13 +57,13 @@ drawTree treeModel = liftEffect $ do
   pure unit
 
 
--- | configure function which enables treeScript to be run for different layouts - WIP
+-- | configure function which enables Tree.script to be run for different layouts - WIP
 configureAndRunScript :: forall m selection. 
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number -> TreeModel -> m selection
 configureAndRunScript (Tuple width height ) model = 
-  treeScript { spacing, selector, viewbox, linkPath, nodeTransform, color, textDirection, svg } laidOutRoot_
+  Tree.script { spacing, selector, viewbox, linkPath, nodeTransform, color, textDirection, svg } laidOutRoot_
   where
     columns = 3.0  -- 3 columns, set in the grid CSS in index.html
     gap     = 10.0 -- 10px set in the grid CSS in index.html

@@ -16,7 +16,8 @@ import Prelude (show, ($), (*), (-), (/), (<), (<>), (==), (>=))
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
--- these ones came from the TreeScript
+-- TODO replace all these with the pattern used for datum/link in the Model file
+-- single coercion and unboxing function matched with custom record of accessor functions
 
 radialRotate :: Number -> String
 radialRotate x = show $ (x * 180.0 / pi - 90.0)

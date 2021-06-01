@@ -39,9 +39,9 @@ type ScriptConfig = {
 -- | all six variations of [Radial, Horizontal, Vertical] * [Dendrogram, TidyTree] 
 -- | NB there would be nothing wrong, per se, with individual examples, this just shows 
 -- | some more composability, at the price of some direct legibility
-treeScript :: forall m selection. Bind m => D3InterpreterM selection m => 
+script :: forall m selection. Bind m => D3InterpreterM selection m => 
   ScriptConfig -> FlareTreeNode ->  m selection
-treeScript config tree = do
+script config tree = do
   root       <- attach config.selector   
   svg        <- root `append` (node Svg config.viewbox)          
   container  <- svg  `append` (node Group [ fontFamily      "sans-serif"

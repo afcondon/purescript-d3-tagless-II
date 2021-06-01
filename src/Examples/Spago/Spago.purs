@@ -5,19 +5,17 @@ import Affjax.ResponseFormat as ResponseFormat
 import D3.Data.Graph (getReachableNodes)
 import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Data.Types (D3Selection_, D3Simulation_, PointXY)
-import D3.Examples.Spago.Clusters (clusterScript, spagoForcesA, spagoForcesB)
+import D3.Examples.Spago.Clusters as Cluster
 import D3.Examples.Spago.Files (LinkType(..))
-import D3.Examples.Spago.Graph (graphScript)
+import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, setXYExceptLeaves)
-import D3.Examples.Spago.Tree (treeScript)
-import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, setAlphaTarget_, setAlpha_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
+import D3.Examples.Spago.Tree as Tree
+import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, setAlpha_, stopSimulation_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
 import D3.Interpreter.D3 (runD3M)
-import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical (radialSeparation)
 import D3.Layouts.Simulation (putEachForceInSimulation)
 import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), NodeID)
 import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
-import Data.Bifunctor (bimap)
 import Data.Either (Either(..))
 import Data.List (List(..), (:))
 import Data.List as L
@@ -27,13 +25,12 @@ import Data.Maybe (Maybe(..))
 import Data.Number (nan)
 import Data.Set as S
 import Data.Tree (Tree(..))
-import Data.Tuple (Tuple(..), fst, snd)
-import Debug (spy)
+import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff, Milliseconds(..), delay)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (cos, pi, sin)
-import Prelude (Unit, bind, discard, pure, unit, ($), (*), (/), (<$>), (<*>), (<<<), (<>), (==), (||))
+import Prelude (Unit, bind, discard, pure, unit, ($), (*), (<$>), (/), (<*>), (<<<), (<>), (==), (||))
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
@@ -55,20 +52,28 @@ drawGraph = do
               Nothing       -> graph -- if we couldn't find root of tree just skip tree reduction
               (Just rootID) -> treeReduction graph rootID
 
-      ((Tuple {simulation} _) :: Tuple { selection :: D3Selection_, simulation :: D3Simulation_ } Unit) <- liftEffect $ runD3M (clusterScript (Tuple width height) graph')
+      -- TODO this type information uglies up the code a lot, find a better way
+      ((Tuple {simulation} _) :: Tuple { selection :: D3Selection_, simulation :: D3Simulation_ } Unit) <- liftEffect $ runD3M (Cluster.script (Tuple width height) graph')
 
       _ <- delay (Milliseconds 4000.0)
-      let _ = putEachForceInSimulation simulation spagoForcesB
+      let _ = putEachForceInSimulation simulation Cluster.forcesB
       let _ = setAlpha_ simulation 0.3
       
       _ <- delay (Milliseconds 5000.0)
-      let _ = putEachForceInSimulation simulation spagoForcesA
+      let _ = putEachForceInSimulation simulation Cluster.initialForces
       let _ = setAlpha_ simulation 1.0
-      -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
-      -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (treeScript (Tuple (width/3.0) height) graph')
+      -- ((Tuple {simulation} _) :: Tuple { selection :: D3Selection_, simulation :: D3Simulation_ } Unit) <- liftEffect $ runD3M (Graph.script (Tuple width height) graph')
+      -- _ <- delay (Milliseconds 1000.0)
+      -- let _ = putEachForceInSimulation simulation ([Graph.packageOnlyRadialForce] <> [Graph.unusedModuleOnlyRadialForce] <> Graph.initialForces)
+      -- let _ = setAlpha_ simulation 0.3
+
+      -- _ <- delay (Milliseconds 1000.0)
+      -- let _ = stopSimulation_ simulation
+
+      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (Tree.script (Tuple (width/3.0) height) graph')
        
-      printedScript <- liftEffect $ runPrinter (graphScript (Tuple width height) graph') "Force Layout Script"
-      log $ fst printedScript
+      -- printedScript <- liftEffect $ runPrinter (graphScript (Tuple width height) graph') "Force Layout Script"
+      -- log $ fst printedScript
 
       pure unit
 
