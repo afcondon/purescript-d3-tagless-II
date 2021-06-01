@@ -350,6 +350,17 @@ exports.getNodes_ = simulation => simulation.nodes()
 
 // :: NativeSelection -> Number -> Unit
 exports.setAlphaTarget_ = simulation => target => simulation.alphaTarget(target)
+// setAlpha_              :: D3Simulation_ -> Number -> Unit
+exports.setAlpha_ = simulation => alpha => simulation.alpha(alpha)
+// setAlphaMin_           :: D3Simulation_ -> Number -> Unit
+exports.setAlphaMin_ = simulation => alphaMin => simulation.alphaMin(alphaMin)
+// setAlphaDecay_         :: D3Simulation_ -> Number -> Unit
+exports.setAlphaDecay_ = simulation => alphaDecay => simulation.alphaDecay(alphaDecay)
+// setAlphaTarget_        :: D3Simulation_ -> Number -> Unit
+exports.setAlphaTarget_ = simulation => alphaTarget => simulation.alphaTarget(alphaTarget)
+// setVelocityDecay_      :: D3Simulation_ -> Number -> Unit
+exports.setVelocityDecay_ = simulation => velocityDecay => simulation.velocityDecay(velocityDecay)
+
 //  :: NativeSelection -> Unit
 exports.startSimulation_ = simulation => simulation.restart()
 //  :: NativeSelection -> Unit

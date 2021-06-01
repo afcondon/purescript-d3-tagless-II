@@ -10,7 +10,7 @@ import D3.Examples.Spago.Files (LinkType(..))
 import D3.Examples.Spago.Graph (graphScript)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, setXYExceptLeaves)
 import D3.Examples.Spago.Tree (treeScript)
-import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
+import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, setAlphaTarget_, setAlpha_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical (radialSeparation)
@@ -57,10 +57,13 @@ drawGraph = do
 
       ((Tuple {simulation} _) :: Tuple { selection :: D3Selection_, simulation :: D3Simulation_ } Unit) <- liftEffect $ runD3M (clusterScript (Tuple width height) graph')
 
-      _ <- delay (Milliseconds 2000.0)
+      _ <- delay (Milliseconds 4000.0)
       let _ = putEachForceInSimulation simulation spagoForcesB
-      _ <- delay (Milliseconds 2000.0)
+      let _ = setAlpha_ simulation 0.3
+      
+      _ <- delay (Milliseconds 5000.0)
       let _ = putEachForceInSimulation simulation spagoForcesA
+      let _ = setAlpha_ simulation 1.0
       -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript (Tuple width height) graph')
       -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (treeScript (Tuple (width/3.0) height) graph')
        

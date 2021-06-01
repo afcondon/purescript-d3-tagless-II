@@ -123,7 +123,11 @@ pinNodeMatchingPredicate nodes predicate fx fy = fromMaybe unit $ (pinNode_ fx f
 -- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr -> Unit
 foreign import onTick_                :: D3Simulation_ -> String -> (Unit -> Unit) -> Unit
 foreign import defaultSimulationDrag_ :: D3Selection_ -> D3Simulation_ -> Unit
-foreign import setAlphaTarget_        :: D3Selection_ -> Number -> Unit
+foreign import setAlpha_              :: D3Simulation_ -> Number -> Unit
+foreign import setAlphaMin_           :: D3Simulation_ -> Number -> Unit
+foreign import setAlphaDecay_         :: D3Simulation_ -> Number -> Unit
+foreign import setAlphaTarget_        :: D3Simulation_ -> Number -> Unit
+foreign import setVelocityDecay_      :: D3Simulation_ -> Number -> Unit
 
 -- implementations / wrappers for the Force ADT
 foreign import forceCenter_       :: Unit -> D3ForceHandle_
