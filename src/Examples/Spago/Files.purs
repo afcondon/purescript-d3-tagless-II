@@ -1,12 +1,9 @@
 module D3.Examples.Spago.Files where
 
-import Data.Array
-import Prelude
-import Type.Row
-
 import Affjax (URL)
 import D3.Data.Types (Datum_)
 import D3.Node (D3_FocusXY, D3_Indexed, D3_Link(..), D3_SimulationNode(..), D3_VxyFxy, D3_XY, NodeID, D3_Radius)
+import Data.Array (catMaybes, foldl, groupBy, length, range, sortBy, zip, (!!), (:))
 import Data.Array.NonEmpty (NonEmptyArray)
 import Data.Array.NonEmpty as NA
 import Data.Foldable (sum)
@@ -15,14 +12,18 @@ import Data.Maybe (fromMaybe, Maybe(..))
 import Data.Nullable (Nullable, null)
 import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..), fst, snd)
-import Debug (spy, trace)
-import Prim.Boolean (False)
+import Prelude (class Eq, class Ord, class Show, Ordering, bind, compare, eq, ($), (-), (<$>), (<<<), (<>), (==), (>))
+import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | move to utility file
+compareFst :: forall a b x. Ord a => Tuple a b -> Tuple a x -> Ordering
 compareFst a b = compare (fst a) (fst b)
+compareSnd :: forall a b x. Ord b => Tuple a b -> Tuple x b -> Ordering
 compareSnd a b = compare (snd a) (snd b)
+equalFst :: forall a b x. Eq a => Tuple a b -> Tuple a x -> Boolean
 equalFst   a b = eq (fst a) (fst b)
+equalSnd :: forall a b x. Eq b => Tuple a b -> Tuple x b -> Boolean
 equalSnd   a b = eq (snd a) (snd b)
 -- | chunk is a utility function that's easier to show than tell:
 -- | example input  [ [(m1,p1), (m4,p1)], [(m2,p2), (m3,p2)], [(m5,p3)] ] 

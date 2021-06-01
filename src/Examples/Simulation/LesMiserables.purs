@@ -3,18 +3,15 @@ module D3.Examples.LesMiserables where
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
 import D3.Simulation.Config (defaultConfigSimulation)
 import Utility (getWindowWidthHeight)
-
+import D3.Examples.LesMiserables.File
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.Types (D3Selection_, Datum_, Element(..))
-import D3.Examples.LesMiserables.File (LesMisModel, readGraphFromFileContents)
+import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
+import D3.Data.Types (D3Selection_, Element(..))
 import D3.Interpreter (class D3InterpreterM, append, attach, join, on)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
-import D3.Node (getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
-import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config as F
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -23,8 +20,7 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (sqrt)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/))
-import Unsafe.Coerce (unsafeCoerce)
+import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, (<<<), ($), (/))
 
 -- this is the model used by this particular "chart" (ie force layout simulation)
 -- *********************************************************************************************************************
@@ -81,17 +77,21 @@ graphScript widthheight model = do
       element   : Line
     , key       : UseDatumAsKey
     , "data"    : model.links -- NB the links are still just { source :: NodeID, target :: NodeID, value :: Number } at this point
-    , behaviour : [ strokeWidth linkWidth ]
+    , behaviour : [ strokeWidth (sqrt <<< link.value) ]
   }
   nodesSelection <- join nodesGroup $ Join {
       element   : Circle
     , key       : UseDatumAsKey
     , "data"    : nodes
-    , behaviour : [ radius 5.0, fill colorByGroup ]
+    , behaviour : [ radius 5.0, fill datum.colorByGroup ]
   }
 
-  _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ]}
-  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ cx getNodeX, cy getNodeY  ]}
+  _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 (_.x <<< link.source)
+                                                                    , y1 (_.y <<< link.source)
+                                                                    , x2 (_.x <<< link.target)
+                                                                    , y2 (_.y <<< link.target)
+                                                                    ]}
+  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ cx datum.x, cy datum.y  ]}
   _ <- nodesSelection `on` Drag DefaultDrag
 
   _ <- svg `on`  Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
@@ -100,19 +100,3 @@ graphScript widthheight model = do
                       }
 
   pure svg
-
--- this is boilerplate but...typed attribute setters facilitate typeclass based conversions
--- we give the chart our Model type but behind the scenes it is mutated by D3 and additionally
--- which projection of the "Model" is active in each Join varies so we can't have both strong
--- static type representations AND lightweight syntax with JS compatible lambdas (i think)
-
-colorByGroup :: Datum_ -> String
-colorByGroup datum = d3SchemeCategory10N_ d.group
-  where
-    d = unsafeCoerce datum
-
-linkWidth :: Datum_ -> Number
-linkWidth datum = sqrt v
-  where
-    v = (unsafeCoerce datum).value -- TODO rewrite more specific coercion if type safety cannot be achieved
-

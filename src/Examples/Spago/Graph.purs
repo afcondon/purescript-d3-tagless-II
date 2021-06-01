@@ -2,12 +2,11 @@ module D3.Examples.Spago.Graph where
 
 import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
-import D3.Examples.Spago.Attributes
-import D3.Examples.Spago.Model 
+import D3.Examples.Spago.Model (SpagoModel, datum, link) 
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_, startSimulation_)
 import D3.Interpreter (class D3InterpreterM, append, attach, on, (<+>))
 import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
-import D3.Node (D3_Link(..), NodeID, getSourceX, getSourceY, getTargetX, getTargetY)
+import D3.Node (D3_Link(..), NodeID)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (defaultConfigSimulation)
 import D3.Simulation.Config as F
@@ -15,7 +14,7 @@ import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Array (filter)
 import Data.Number (infinity)
 import Data.Tuple (Tuple(..))
-import Prelude (class Bind, Unit, bind, negate, pure, unit, (/), (<$>), (<>), (==))
+import Prelude (class Bind, Unit, bind, negate, pure, unit, (/), (<<<), (<$>), (<>), (==))
 import Unsafe.Coerce (unsafeCoerce)
 
 spagoForces :: Array Force
@@ -70,7 +69,11 @@ graphScript (Tuple w h) model = do
                                                   ]) 
   labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y datum.positionLabel, text datum.name]) 
   
-  _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 getSourceX, y1 getSourceY, x2 getTargetX, y2 getTargetY ]}
+  _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 (_.x <<< link.source)
+                                                                    , y1 (_.y <<< link.source)
+                                                                    , x2 (_.x <<< link.target)
+                                                                    , y2 (_.y <<< link.target)
+                                                                    ]}
   _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ classed datum.nodeClass, transform' datum.translateNode ]}
   _ <- nodesSelection `on` Drag DefaultDrag
   _ <- svg `on` Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }

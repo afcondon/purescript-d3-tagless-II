@@ -1,10 +1,7 @@
 module D3.Node where
 
-import D3.Data.Types (Datum_)
 import Data.Nullable (Nullable)
-import Debug (spy, trace)
 import Type.Row (type (+))
-import Unsafe.Coerce (unsafeCoerce)
 
 -- ============================================================================================================================
 -- | Types for working with D3 Trees and Graphs, to try to smooth the moving between them. 
@@ -65,28 +62,6 @@ type    D3SimulationRow   row = D3_SimulationNode ( D3_Indexed + D3_XY + D3_VxyF
 type EmbeddedData :: forall k. k -> Row k -> Row k
 type EmbeddedData d row= ( "data" :: d | row )
 
-
--- | coercions for the common cases
-getSourceX :: Datum_ -> Number
-getSourceX datum = (unsafeCoerce datum).source.x
-
-getSourceY :: Datum_ -> Number
-getSourceY datum = (unsafeCoerce datum).source.y
-
-getTargetX :: Datum_ -> Number
-getTargetX datum = (unsafeCoerce datum).target.x
-
-getTargetY :: Datum_ -> Number
-getTargetY datum = (unsafeCoerce datum).target.y
-
-getNodeX :: Datum_ -> Number
-getNodeX datum = (unsafeCoerce datum).x
-
-getNodeY :: Datum_ -> Number
-getNodeY datum = (unsafeCoerce datum).y
-
-getID :: Datum_ -> Number
-getID datum = (unsafeCoerce datum).id
 
 -- | ***************************************************************************************************
 -- | *********************************  D3 hierarchy node

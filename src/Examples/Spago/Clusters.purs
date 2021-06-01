@@ -7,7 +7,7 @@ import D3.Examples.Spago.Model
 import D3.FFI (configSimulation_, initSimulation_, setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, filter, modify, on, (<+>))
 import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
-import D3.Node (NodeID, getNodeX, getNodeY)
+import D3.Node (NodeID)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (D3ForceHandle_, defaultConfigSimulation)
 import D3.Simulation.Config as F
@@ -66,8 +66,8 @@ clusterScript (Tuple w h) model = do
   packagesOnly <- filter nodesSelection "g.nodes g.package"
   _ <- packagesOnly `modify` [ lower ]
   
-  _ <- circle         `on` Tick { name: "nodes",  simulation, chain: [ cx getNodeX, cy getNodeY ]}
-  _ <- labels'        `on` Tick { name: "labels", simulation, chain: [ x getNodeX, y getNodeY ]}
+  _ <- circle         `on` Tick { name: "nodes",  simulation, chain: [ cx datum.x, cy datum.y ]}
+  _ <- labels'        `on` Tick { name: "labels", simulation, chain: [ x datum.x, y datum.y ]}
   _ <- nodesSelection `on` Drag DefaultDrag
   _ <- svg `modify` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation) ]
   _ <- svg `on` Zoom { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }

@@ -1,35 +1,90 @@
 module D3.Examples.Spago.Model where
 
-import D3.Examples.Spago.Files
-import Prelude
-
-import D3.Attributes.Sugar (x)
-import D3.Data.Types (Datum_, Index_, PointXY, chooseX, chooseY)
-import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Indexed, D3_Link(..), D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID, getNodeX, getNodeY, getSourceX, getSourceY, getTargetX, getTargetY)
+import D3.Data.Types (Datum_, PointXY, chooseX, chooseY)
+import D3.Examples.Spago.Files (NodeType(..), Pinned(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_, unboxD3SimLink, unboxD3SimNode)
+import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_)
-import Data.Array (catMaybes, cons, foldl, length, range, zip, (!!), (:))
-import Data.Foldable (sum)
-import Data.Generic.Rep (Sum)
+import Data.Array (foldl)
 import Data.Graph (Graph, fromMap)
 import Data.Int (toNumber)
-import Data.Map (toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Nullable (Nullable, notNull, null, toMaybe)
+import Data.Nullable (Nullable, notNull, toMaybe)
 import Data.Nullable (Nullable, null) as N
 import Data.Set as S
-import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..))
-import Debug (spy, trace)
+import Debug (trace)
 import Math (sqrt, (%))
 import Math as Math
+import Prelude (bind, negate, show, unit, ($), (*), (+), (/), (<$>), (<>), (==))
 import Type.Row (type (+))
-import Unsafe.Coerce (unsafeCoerce)
 
 moduleRadius       =  5.0 :: Number 
 packageRadius      = 50.0 :: Number
 packageForceRadius = 50.0 :: Number
 
+link :: { linkClass :: Datum_ -> String
+, source :: Datum_
+            -> { cluster :: Int
+               , containerID :: Int
+               , containerName :: String
+               , containsMany :: Boolean
+               , focusX :: Number
+               , focusY :: Number
+               , fx :: Nullable Number
+               , fy :: Nullable Number
+               , id :: Int
+               , index :: Int
+               , links :: { contains :: Array Int
+                          , inPackage :: Array Int
+                          , outPackage :: Array Int
+                          , sources :: Array Int
+                          , targets :: Array Int
+                          , tree :: Array Int
+                          }
+               , loc :: Number
+               , name :: String
+               , nodetype :: NodeType
+               , pinned :: Pinned
+               , r :: Number
+               , treeX :: Nullable Number
+               , treeY :: Nullable Number
+               , vx :: Number
+               , vy :: Number
+               , x :: Number
+               , y :: Number
+               }
+, target :: Datum_
+            -> { cluster :: Int
+               , containerID :: Int
+               , containerName :: String
+               , containsMany :: Boolean
+               , focusX :: Number
+               , focusY :: Number
+               , fx :: Nullable Number
+               , fy :: Nullable Number
+               , id :: Int
+               , index :: Int
+               , links :: { contains :: Array Int
+                          , inPackage :: Array Int
+                          , outPackage :: Array Int
+                          , sources :: Array Int
+                          , targets :: Array Int
+                          , tree :: Array Int
+                          }
+               , loc :: Number
+               , name :: String
+               , nodetype :: NodeType
+               , pinned :: Pinned
+               , r :: Number
+               , treeX :: Nullable Number
+               , treeY :: Nullable Number
+               , vx :: Number
+               , vy :: Number
+               , x :: Number
+               , y :: Number
+               }
+}
 link = {
     source: (\d -> (unboxD3SimLink d).source)
   , target: (\d -> (unboxD3SimLink d).target)
@@ -49,6 +104,36 @@ tree2Point x' y' = do
   Just { x, y } 
 
 -- | all the coercions in one place
+datum :: { cluster :: Datum_ -> Int
+, clusterPoint :: Datum_
+                  -> { x :: Number
+                     , y :: Number
+                     }
+, clusterPointX :: Datum_ -> Number
+, clusterPointY :: Datum_ -> Number
+, collideRadius :: Datum_ -> Number
+, colorByGroup :: Datum_ -> String
+, containerID :: Datum_ -> Int
+, containerName :: Datum_ -> String
+, id :: Datum_ -> Int
+, loc :: Datum_ -> Number
+, name :: Datum_ -> String
+, nodeClass :: Datum_ -> String
+, nodetype :: Datum_ -> NodeType
+, positionLabel :: Datum_ -> Number
+, radius :: Datum_ -> Number
+, translateNode :: Datum_ -> String
+, treePoint :: Datum_
+               -> { x :: Number
+                  , y :: Number
+                  }
+, treePointX :: Datum_ -> Number
+, treePointY :: Datum_ -> Number
+, treeX :: Datum_ -> Nullable Number
+, treeY :: Datum_ -> Nullable Number
+, x :: Datum_ -> Number
+, y :: Datum_ -> Number
+}
 datum = {
 -- direct accessors to fields of the datum (BOILERPLATE)
     radius        : (\d -> (unboxD3SimNode d).r)
