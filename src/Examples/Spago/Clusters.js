@@ -3,13 +3,36 @@ let spotlitNode
 let sourcesSelection
 let targetSelection
 let spotlitID
+let spotlit = false;
 
-// spotLightNeighbours :: D3Simulation_ -> NodeID -> Unit
-exports.spotlightNeighbours_ = simulation => id => nodetype => {
+exports.cancelSpotlight_ = simulation => {
+  console.log("cancelling spotlight");
+  if (spotlit) {
+    unSpotlightNeighbours_ (simulation)
+  }
+}
+
+exports.toggleSpotlight_ = event => simulation => id => nodetype => {
+  event.stopPropagation()
+  if ((spotlit && id !== spotlitID)) {
+    console.log(`changing spotlight from ${spotlitID} to ${id}`);
+    unSpotlightNeighbours_(simulation)
+    spotlightNeighbours_(simulation, id, nodetype)
+  } else if (spotlit && id === spotlitID) {
+    console.log(`cancelling spotlight on ${spotlitID}`);
+    unSpotlightNeighbours_(simulation)
+  } else {
+    console.log(`setting a spotlight on ${id}`);
+    spotlightNeighbours_(simulation, id, nodetype)
+  }
+}
+
+spotlightNeighbours_ = (simulation, id, nodetype) => {
   if (nodetype === "package") {
     return
   }
   // else
+  spotlit   = true; 
   spotlitID = id
   simulation.stop()
   svg = d3.select('div#spago svg')
@@ -41,12 +64,7 @@ exports.spotlightNeighbours_ = simulation => id => nodetype => {
   )
   simulation.alpha(1).restart()
 }
-// unSpotlightNeighbours :: D3Simulation_ -> Unit
-exports.unSpotlightNeighbours_ = simulation => id => {
-  if (spotlitID !== id) {
-    console.log(`ERROR: tried to unspotlight node ${id} but it is ${spotlitID} which was spotlit before!!`);
-    return; // defend against somehow tryin to unspotlight before a spotlight has happened or to unspotlight something different from what was spotlit
-  }
+unSpotlightNeighbours_ = (simulation) => {
   simulation.stop()
   svg.classed('spotlight', false)
   spotlitNode.__data__.fx = null
@@ -60,6 +78,7 @@ exports.unSpotlightNeighbours_ = simulation => id => {
     d3.forceCollide().radius(d => (d.id === d.containerID) ? 10.0 : d.r)
   )
   simulation.restart()
+  spotlit = false
 }
 
 // ============================================================================================================

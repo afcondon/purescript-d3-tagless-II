@@ -3,6 +3,7 @@ module D3.Examples.Spago.Clusters where
 import D3.Attributes.Sugar (classed, cx, cy, fill, lower, onMouseEvent, radius, text, viewBox, x, y)
 import D3.Data.Types (D3Simulation_, Datum_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Attributes (colorByGroup, datumDotRadius, nodeClass)
+import D3.Examples.Spago.Files (NodeType)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, chooseFocusFromClusterX, chooseFocusFromClusterY, chooseFocusFromTreeX, chooseFocusFromTreeY, getIdFromSpagoSimNode, getNameFromSpagoSimNode, getNodetypeFromSimNode, pinIfPackage)
 import D3.FFI (configSimulation_, d3FilterSelection_, initSimulation_, setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, filter, modify, on, (<+>))
@@ -13,8 +14,9 @@ import D3.Simulation.Config (D3ForceHandle_, defaultConfigSimulation)
 import D3.Simulation.Config as F
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Tuple (Tuple(..))
-import Prelude (class Bind, Unit, bind, negate, pure, show, unit, (==), (/), (<$>))
+import Prelude (class Bind, Unit, bind, negate, pure, show, unit, (==), ($), (/), (<$>))
 import Unsafe.Coerce (unsafeCoerce)
+import Web.Event.Internal.Types (Event)
 
 foreign import forceClusterCollision :: Unit -> D3ForceHandle_
 
@@ -65,8 +67,7 @@ clusterScript (Tuple w h) model = do
     , key       : UseDatumAsKey
     , "data"    : nodes
     , behaviour : [ classed nodeClass
-                  , onMouseEvent MouseEnter (\e d t -> spotlightNeighbours_ simulation (getIdFromSpagoSimNode d) (getNodetypeFromSimNode d)) 
-                  , onMouseEvent MouseLeave (\e d t -> unSpotlightNeighbours_ simulation (getIdFromSpagoSimNode d)) ]
+                  , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation d) ]
   }
   circle  <- nodesSelection `append` (node Circle [ radius datumDotRadius, fill colorByGroup ]) 
   labels' <- nodesSelection `append` (node Text [ classed "label", text getNameFromSpagoSimNode ])
@@ -77,11 +78,19 @@ clusterScript (Tuple w h) model = do
   _ <- circle         `on` Tick { name: "nodes",  simulation, chain: [ cx getNodeX, cy getNodeY ]}
   _ <- labels'        `on` Tick { name: "labels", simulation, chain: [ x getNodeX, y getNodeY ]}
   _ <- nodesSelection `on` Drag DefaultDrag
+  _ <- svg `modify` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation) ]
   _ <- svg `on` Zoom { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                      , scale  : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
                      , name   : "spago"
                      }
   pure { selection: svg, simulation }
 
-foreign import spotlightNeighbours_ :: D3Simulation_ -> NodeID -> String -> Unit
-foreign import unSpotlightNeighbours_ :: D3Simulation_ -> NodeID -> Unit
+toggleSpotlight :: Event -> D3Simulation_ -> Datum_ -> Unit
+toggleSpotlight event simulation datum = toggleSpotlight_ event simulation nodeID nodeType
+  where
+    (D3SimNode d) = unsafeCoerce datum
+    nodeID   = d.id
+    nodeType = show (d.nodetype :: NodeType)
+
+foreign import toggleSpotlight_ :: Event -> D3Simulation_ -> NodeID -> String -> Unit
+foreign import cancelSpotlight_ :: D3Simulation_ -> Unit

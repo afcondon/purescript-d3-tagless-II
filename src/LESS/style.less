@@ -119,7 +119,8 @@ div#spago {
         circle {
           opacity: 1;
           stroke-width: 5px;
-          stroke: white
+          stroke-dasharray: 4 1;
+          stroke: black
         }
       }
       g.source {
@@ -128,8 +129,8 @@ div#spago {
         }
         circle {
           opacity: 0.85;
-          stroke-width: 10px;
-          stroke: white;
+          stroke-width: 3px;
+          stroke: black;
         }
       }
       g.target {
@@ -138,8 +139,8 @@ div#spago {
         }
         circle {
           opacity: 0.85;
-          stroke-width: 5px;
-          stroke: black;
+          stroke-width: 3px;
+          stroke: darkgray;
         }
       }
       g.package.spotlight text {
@@ -162,5 +163,10 @@ div#spago {
 div#spago svg.cluster g.nodes {
   g.package circle { visibility: hidden; }
   g.package text { visibility: visible; fill: black; font-size: 24px; opacity: 0.5; text-anchor: start;}
-  g.module.source text, g.module.target text { fill: white; }
+  g.module.source text, g.module.target text { fill: gray; }
+}
+div#spago svg.cluster.spotlight g.nodes {
+  g.package text { opacity: 0.2; }
+  g.module.source text,
+  g.module.target text { fill: gray; }
 }
