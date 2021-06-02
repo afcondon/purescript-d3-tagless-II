@@ -89,6 +89,7 @@ type Deps            = Array NodeID
 type SpagoLinkData     = ( linktype :: LinkType )
 type SpagoGraphLinkID  = D3_Link NodeID          SpagoLinkData
 type SpagoGraphLinkObj =  { source :: SpagoDataRecord, target :: SpagoDataRecord | SpagoLinkData }
+type SpagoTreeObj      = D3_TreeNode (D3_ID + D3_TreeRow + D3_XY   + D3_Leaf + D3_Radius  + (EmbeddedData { | SpagoNodeRow () }) + () )
 
 type SpagoNodeRow row = ( 
     id       :: NodeID
@@ -216,7 +217,7 @@ unboxD3TreeNode :: Datum_
      , y :: Number
      }
 unboxD3TreeNode datum = do
-  let (t' :: D3_TreeNode (D3_ID + D3_TreeRow + D3_XY   + D3_Leaf + D3_Radius  + (EmbeddedData { | SpagoNodeRow () }) + () ) )  = unsafeCoerce datum
+  let (t' :: SpagoTreeObj )  = unsafeCoerce datum
       (D3TreeNode t) = t'
   t
 

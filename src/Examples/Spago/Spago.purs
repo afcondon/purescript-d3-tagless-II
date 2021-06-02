@@ -8,7 +8,7 @@ import D3.Data.Types (D3Selection_, D3Simulation_, PointXY)
 import D3.Examples.Spago.Clusters as Cluster
 import D3.Examples.Spago.Files (LinkType(..))
 import D3.Examples.Spago.Graph as Graph
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, setXYExceptLeaves)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, setXYExceptLeaves, tree_datum_)
 import D3.Examples.Spago.Tree as Tree
 import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, setAlpha_, stopSimulation_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
 import D3.Interpreter.D3 (runD3M)
@@ -123,7 +123,9 @@ setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode
 setForPhyllotaxis (D3SimNode d) = D3SimNode $ d { x = nan }
 
 getPositionMap :: SpagoTreeNode -> Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
--- TODO coerce here is pure hackery because reference swizzling not properly modeled in type system
+-- TODO coerce here is because the transformation done by hierarchyFromJSON_ is not yet modelled in the type system
+-- ideally you'd want to be able to do a (slightly) more principled cast as shown in commented out line below
+-- getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isLeaf: (tree_datum_.isLeaf n) } acc) empty (descendants_ root) 
 getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isLeaf: (unsafeCoerce n).data.isLeaf } acc) empty (descendants_ root) 
 
 buildTree :: forall r. NodeID -> Array (D3_Link NodeID r) -> Tree NodeID

@@ -110,11 +110,11 @@ configureAndRunScript (Tuple width height ) model =
       case model.treeType, model.treeLayout of
         Dendrogram, Horizontal -> horizontalClusterLink spacing.interLevel
         Dendrogram, Vertical   -> verticalClusterLink   spacing.interLevel 
-        Dendrogram, Radial     -> radialLink _.x _.y
+        Dendrogram, Radial     -> radialLink tree_datum_.x tree_datum_.y
 
         TidyTree, Horizontal   -> horizontalLink
         TidyTree, Vertical     -> verticalLink
-        TidyTree, Radial       -> radialLink _.x _.y
+        TidyTree, Radial       -> radialLink tree_datum_.x tree_datum_.y
 
     selector =
       case model.treeType, model.treeLayout of

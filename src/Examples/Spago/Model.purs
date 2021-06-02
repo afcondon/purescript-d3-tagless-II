@@ -30,6 +30,7 @@ packageForceRadius = 50.0 :: Number
 tree_datum_ = {
     x           : (\d -> (unboxD3TreeNode d).x)
   , y           : (\d -> (unboxD3TreeNode d).y)
+  , isLeaf      : (\d -> (unboxD3TreeNode d).isLeaf)
   , containerID : (\d -> (unboxD3TreeNode d).data.containerID)
   , name        : (\d -> (unboxD3TreeNode d).data.name)
   , loc         : (\d -> (unboxD3TreeNode d).data.loc)

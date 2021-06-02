@@ -26,7 +26,6 @@ foreign import showAttachZoom_              :: forall selection. selection -> Zo
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for Selection & Transition  ********************************************
 -- | *********************************************************************************************************************
--- (Opaque) foreign types generated for (ie unsafeCoerce), or by (ie returned selections), D3 
 
 foreign import d3SelectAllInDOM_     :: Selector    -> D3Selection_ -- NB passed D3Selection is IGNORED
 foreign import d3SelectionSelectAll_ :: Selector    -> D3Selection_ -> D3Selection_
@@ -175,6 +174,7 @@ foreign import treeSortForTree_Spago    :: forall d. D3_TreeNode d -> D3_TreeNod
 foreign import hasChildren_             :: Datum_ -> Boolean -- really only meaningful when Datum_ when is a D3HierarchicalNode_
 
 -- the full API for hierarchical nodes:
+-- TODO these should all be operating on cooked tree type, however that is to be done
 foreign import descendants_     :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
 foreign import find_            :: forall r. D3_TreeNode r -> (Datum_ -> Boolean) -> Nullable (D3_TreeNode r)
 foreign import links_           :: forall d r1 r2. D3_TreeNode r1 -> Array (D3_Link d r2)

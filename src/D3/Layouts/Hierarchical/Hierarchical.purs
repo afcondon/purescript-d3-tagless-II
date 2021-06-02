@@ -17,9 +17,7 @@ import Data.Maybe (Maybe)
 import Data.Nullable (toMaybe)
 import Effect.Aff (Aff)
 import Effect.Class (class MonadEffect)
-import Prelude (class Bind, bind, pure, show, ($), (/), (<>))
-import Type.Row (type (+))
-import Unsafe.Coerce (unsafeCoerce)
+import Prelude (class Bind, bind, pure, ($), (/))
 
 find :: forall d. D3_TreeNode d -> (Datum_ -> Boolean) -> Maybe (D3_TreeNode d)
 find tree filter = toMaybe $ find_ tree filter
@@ -69,9 +67,9 @@ horizontalClusterLink yOffset = AttrT $ ToAttribute "d" $ toAttr (linkClusterHor
 verticalClusterLink :: Number -> ChainableS
 verticalClusterLink xOffset = AttrT $ ToAttribute "d" $ toAttr (linkClusterVertical_ xOffset)
 
-radialLink :: forall a b. (a -> Number) -> (b -> Number) -> ChainableS
+radialLink :: (Datum_ -> Number) -> (Datum_ -> Number) -> ChainableS
 radialLink angleFn radius_Fn = do
-  let radialFn = linkRadial_ (unsafeCoerce angleFn) (unsafeCoerce radius_Fn)
+  let radialFn = linkRadial_ angleFn radius_Fn
   AttrT $ ToAttribute "d" $ toAttr radialFn
 
 

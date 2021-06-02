@@ -60,7 +60,7 @@ script (Tuple width height) model@{ tree: Just (Tuple _ theTree)} = do
                   , strokeColor   "black"
                   , strokeOpacity 0.4
                   , fill          "none"
-                  , radialLink _.x _.y
+                  , radialLink tree_datum_.x tree_datum_.y
                   ]
   }
 
