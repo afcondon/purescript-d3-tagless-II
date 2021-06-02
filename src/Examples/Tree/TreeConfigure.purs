@@ -6,7 +6,7 @@ import D3.Attributes.Sugar (transform, viewBox)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_)
 import D3.Examples.Spago.Model (tree_datum_)
-import D3.Examples.Tree.Script (FlareTreeNode)
+import D3.Examples.Tree.Model (FlareTreeNode)
 import D3.Examples.Tree.Script (script) as Tree
 import D3.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
 import D3.Interpreter (class D3InterpreterM)

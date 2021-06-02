@@ -1,53 +1,20 @@
-module D3.Examples.Tree.Meta where
-
-import D3.Node (D3TreeRow, D3_ID, D3_Link, D3_TreeNode(..), D3_TreeRow, D3_XY, EmbeddedData, NodeID)
-import Prelude (class Bind, Unit, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>))
+module D3.Examples.MetaTree where
 
 import D3.Attributes.Sugar (classed, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
 import D3.Data.Tree (TreeModel, TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
+import D3.Examples.MetaTree.Model (MetaTreeNode)
+import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Layouts.Hierarchical (verticalLink)
 import D3.Selection (Join(..), Keys(..), node)
-import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Type.Row (type (+))
-import Unsafe.Coerce (unsafeCoerce)
+import Prelude (class Bind, Unit, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>))
 import Utility (getWindowWidthHeight)
-
--- Model data types specialized with inital data
-type MetaTreeNodeRow row = ( 
-    name   :: String
-  , symbol :: String
-  , param1 :: String
-  , param2 :: String 
-  | row )
-type MetaTreeNodeData = { | MetaTreeNodeRow () }
-
-type MetaTreeNode     = D3TreeRow (EmbeddedData MetaTreeNodeData + ())
-
-type MetaTreeLinkData  = ( example :: Number )
-type MetaTreeSimRecord = Record (MetaTreeNodeRow  + ()) 
-type MetaTreeLinkObj   =  { source :: MetaTreeSimRecord, target :: MetaTreeSimRecord | MetaTreeLinkData }
-
-type MetaTreeRawModel = { 
-    links :: Array (D3_Link NodeID MetaTreeLinkData)
-  , nodes :: Array MetaTreeNodeData
-}
-
-type MetaTreeCookedModel = { 
-    links :: Array (D3_Link NodeID MetaTreeLinkData)
-  , nodes :: Array MetaTreeNodeData
-}
-
-unboxD3TreeNode datum = do
-  let (t' :: D3_TreeNode (D3_ID + D3_TreeRow + D3_XY + (EmbeddedData { | MetaTreeNodeRow () }) + () ) )  = unsafeCoerce datum
-      (D3TreeNode t) = t'
-  t
 
 datum_ :: { 
   param1     :: Datum_ -> String

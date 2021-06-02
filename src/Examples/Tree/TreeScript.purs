@@ -3,81 +3,28 @@ module D3.Examples.Tree.Script where
 import Prelude
 
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, x)
-import D3.Data.Tree (TreeLayout(..), TreeType)
+import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (Datum_, Element(..), Selector)
+import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
+import D3.Examples.Tree.Model (FlareTreeNode)
 import D3.FFI (descendants_, hasChildren_, links_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
-import D3.Node (D3SimulationRow, D3TreeRow, D3_ID, D3_Link(..), D3_TreeNode(..), D3_TreeRow, D3_XY, EmbeddedData, NodeID)
 import D3.Selection (ChainableS, Join(..), Keys(..), node)
 import Data.Nullable (Nullable)
 import Math (pi)
-import Type.Row (type (+))
-import Unsafe.Coerce (unsafeCoerce)
 
--- Model data types specialized with inital data
-type FlareNodeRow row = ( name :: String | row )
-type FlareNodeData    = { | FlareNodeRow () }
-
-type FlareTreeNode    = D3TreeRow       (EmbeddedData FlareNodeData + ())
-type FlareSimNode     = D3SimulationRow (             FlareNodeRow  + ())
-
-type FlareLinkData  = ( value :: Number )
-type FlareSimRecord = Record (FlareNodeRow  + ()) 
-type FlareLinkObj   =  { source :: FlareSimRecord, target :: FlareSimRecord | FlareLinkData }
-
-type FlareRawModel = { 
-    links :: Array (D3_Link NodeID FlareLinkData)
-  , nodes :: Array FlareNodeData
-}
-
-type FlareCookedModel = { 
-    links :: Array (D3_Link NodeID FlareLinkData)
-  , nodes :: Array FlareNodeData
-}
-
-unboxD3SimLink :: Datum_ -> FlareLinkObj
-unboxD3SimLink datum = do
-  let (D3_Link l) = unsafeCoerce datum
-  l
-
-unboxD3TreeNode :: Datum_ -> { children :: Array
-                     (D3_TreeNode
-                        ( data :: { name :: String
-                                  }
-                        , depth :: Int
-                        , height :: Int
-                        , id :: Int
-                        , value :: Nullable Number
-                        , x :: Number
-                        , y :: Number
-                        )
-                     )
-     , data :: { name :: String
-               }
-     , depth :: Int
-     , height :: Int
-     , id :: Int
-     , parent :: Nullable
-                   (D3_TreeNode
-                      ( data :: { name :: String
-                                }
-                      , depth :: Int
-                      , height :: Int
-                      , id :: Int
-                      , value :: Nullable Number
-                      , x :: Number
-                      , y :: Number
-                      )
-                   )
-     , value :: Nullable Number
-     , x :: Number
-     , y :: Number
-     }
-unboxD3TreeNode datum = do
-  let (t' :: D3_TreeNode (D3_ID + D3_TreeRow + D3_XY + (EmbeddedData { | FlareNodeRow () }) + () ) )  = unsafeCoerce datum
-      (D3TreeNode t) = t'
-  t
-
+datum_ :: 
+  { depth :: Datum_ -> Int
+  , hasChildren :: Datum_ -> Boolean
+  , height :: Datum_ -> Int
+  , id :: Datum_ -> Int
+  , name :: Datum_ -> String
+  , textAnchor :: TreeLayout -> Datum_ -> String
+  , textX :: TreeLayout -> Datum_ -> Number
+  , value :: Datum_ -> Nullable Number
+  , x :: Datum_ -> Number
+  , y :: Datum_ -> Number
+  }
 datum_ = {
 -- simple accessors first
     depth : (\d -> (unboxD3TreeNode d).depth)
@@ -88,10 +35,9 @@ datum_ = {
   , y     : (\d -> (unboxD3TreeNode d).y)
 -- now accessors that use the embedded "data" object within the Tree node
   , name   : (\d -> (unboxD3TreeNode d).data.name)
-  , "type" : (\t d -> t)
-  , layout : (\l d -> l)
 -- now more semanticly complicated accessors
   , hasChildren: (\d -> hasChildren_ d) -- this particular one has to be done by FFI
+-- TODO these next two should be rewritten to use some sort of choice operator
   , textAnchor : (\l d -> case l of
                             Radial ->
                               if (hasChildren_ d) == (datum_.x d < pi)
