@@ -1,14 +1,13 @@
 module D3.Examples.LesMiserables.File where
 
-import D3.Node
-import Prelude
-
 import Affjax (Error)
 import D3.Data.Types (Datum_)
+import D3.Node (D3SimulationRow, D3TreeRow, D3_ID, D3_Indexed, D3_Leaf, D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_)
 import Data.Either (Either(..))
 import Data.Int (toNumber)
-import Data.Nullable (Nullable, null, notNull)
+import Data.Nullable (Nullable)
+import Prelude (($))
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -42,7 +41,7 @@ type LesMisSimRecord   = Record (D3_Indexed + D3_XY + D3_VxyFxy + LesMisNodeRow 
 -- now a definition for that same row if it is embedded instead in a D3 Hierarchical structure, in which case
 -- our extra data is available in the "datum" as an embedded object at the field "data"
 type LesMisTreeNode    = D3TreeRow (EmbeddedData { | LesMisNodeRow () } + ())
-type LesMisTreeRecord  = Record    (D3_ID + D3_TreeRow + D3_XY   + D3_Leaf + EmbeddedData { | LesMisNodeRow () } + ())
+-- type LesMisTreeRecord  = Record    (D3_ID + D3_TreeRow + D3_XY   + D3_Leaf + EmbeddedData { | LesMisNodeRow () } + ())
 
 -- first the "extra / model-specific" data in the links
 type LesMisLinkData = ( value :: Number )
@@ -59,18 +58,101 @@ unboxD3SimLink datum = do
   let (D3_Link l) = unsafeCoerce datum
   l
 
-unboxD3TreeNode :: Datum_ -> LesMisTreeRecord
+unboxD3TreeNode :: Datum_
+  -> { children :: Array
+                     (D3_TreeNode
+                        ( data :: { group :: Int
+                                  }
+                        , depth :: Int
+                        , height :: Int
+                        , id :: Int
+                        , isLeaf :: Boolean
+                        , value :: Nullable Number
+                        , x :: Number
+                        , y :: Number
+                        )
+                     )
+     , data :: { group :: Int
+               }
+     , depth :: Int
+     , height :: Int
+     , id :: Int
+     , isLeaf :: Boolean
+     , parent :: Nullable
+                   (D3_TreeNode
+                      ( data :: { group :: Int
+                                }
+                      , depth :: Int
+                      , height :: Int
+                      , id :: Int
+                      , isLeaf :: Boolean
+                      , value :: Nullable Number
+                      , x :: Number
+                      , y :: Number
+                      )
+                   )
+     , value :: Nullable Number
+     , x :: Number
+     , y :: Number
+     }
 unboxD3TreeNode datum = do
-  let (D3TreeNode t) = unsafeCoerce datum
+  let (t' :: D3_TreeNode (D3_ID + D3_TreeRow + D3_XY   + D3_Leaf + (EmbeddedData { | LesMisNodeRow () }) + () ) )  = unsafeCoerce datum
+      (D3TreeNode t) = t'
   t
 
-link = {
+datum_tree_ :: { depth :: Datum_ -> Int
+, height :: Datum_ -> Int
+, id :: Datum_ -> Int
+, isLeaf :: Datum_ -> Boolean
+, value :: Datum_ -> Nullable Number
+, x :: Datum_ -> Number
+, y :: Datum_ -> Number
+}
+datum_tree_ = {
+    depth : (\d -> (unboxD3TreeNode d).depth)
+  , height: (\d -> (unboxD3TreeNode d).height)
+  , id    : (\d -> (unboxD3TreeNode d).id)
+  , isLeaf: (\d -> (unboxD3TreeNode d).isLeaf)
+  , value : (\d -> (unboxD3TreeNode d).value)
+  , x     : (\d -> (unboxD3TreeNode d).x)
+  , y     : (\d -> (unboxD3TreeNode d).y)
+}
+
+link_ :: { source :: Datum_
+            -> { fx :: Nullable Number
+               , fy :: Nullable Number
+               , group :: Int
+               , index :: Int
+               , vx :: Number
+               , vy :: Number
+               , x :: Number
+               , y :: Number
+               }
+, target :: Datum_
+            -> { fx :: Nullable Number
+               , fy :: Nullable Number
+               , group :: Int
+               , index :: Int
+               , vx :: Number
+               , vy :: Number
+               , x :: Number
+               , y :: Number
+               }
+, value :: Datum_ -> Number
+}
+link_ = {
     source: (\d -> (unboxD3SimLink d).source)
   , target: (\d -> (unboxD3SimLink d).target)
   , value:  (\d -> (unboxD3SimLink d).value)
 }
 
-datum = {
+datum_ :: { colorByGroup :: Datum_ -> String
+, group :: Datum_ -> Int
+, index :: Datum_ -> Int
+, x :: Datum_ -> Number
+, y :: Datum_ -> Number
+}
+datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
     index : (\d -> (unboxD3SimNode d).index)
   , x     : (\d -> (unboxD3SimNode d).x)
@@ -78,31 +160,5 @@ datum = {
   , group : (\d -> (unboxD3SimNode d).group)
 
   , colorByGroup:
-      (\d -> d3SchemeCategory10N_ (toNumber $ datum.group d))
-}
-
-lesMisTreeNode :: LesMisTreeNode
-lesMisTreeNode = D3TreeNode { 
-    parent  : null
-  , children: []
-  , isLeaf  : true
-  , id      : 0
-  , depth   : 0
-  , height  : 0
-  , value   : notNull 10.0
-  , x       : 0.0
-  , y       : 0.0
-  , "data"  : { group: 2 }
-}
-
-lesMisSimNode :: LesMisSimNode
-lesMisSimNode = D3SimNode { 
-    index : 0
-  , x     : 0.0
-  , y     : 0.0
-  , vx    : 0.0
-  , vy    : 0.0
-  , fx    : (null :: Nullable Number)
-  , fy    : (null :: Nullable Number)
-  , group : 2
+      (\d -> d3SchemeCategory10N_ (toNumber $ datum_.group d))
 }

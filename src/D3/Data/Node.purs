@@ -46,7 +46,7 @@ type D3_TreeRow row = ( depth :: Int, height :: Int, value:: Nullable Number    
 type D3_Radius  row = ( r :: Number                                                              | row )
 type D3_Rect    row = ( x0 :: Number, y0 :: Number, x1 :: Number, y1 :: Number                   | row )
 
-newtype D3_TreeNode row = D3TreeNode {
+newtype D3_TreeNode row = D3TreeNode { -- TODO this needs to be a row so that it can be built into, for example, LesMisTreeRecord and similar
     parent   :: Nullable (D3_TreeNode row )
   , children :: Array    (D3_TreeNode row )
   | row -- into the row here goes all the model specific data

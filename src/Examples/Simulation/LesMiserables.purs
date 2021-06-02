@@ -1,32 +1,27 @@
 module D3.Examples.LesMiserables where
 
-import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
-import D3.Simulation.Config (defaultConfigSimulation)
-import Utility (getWindowWidthHeight)
 import D3.Examples.LesMiserables.File
+
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, Element(..))
+import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, join, on)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
+import D3.Simulation.Config (defaultConfigSimulation)
 import D3.Simulation.Config as F
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import Data.Tuple (Tuple, fst, snd)
+import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (sqrt)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, (<<<), ($), (/))
-
--- this is the model used by this particular "chart" (ie force layout simulation)
--- *********************************************************************************************************************
--- NOTA BENE - these types are a _lie_ as stated in that the Nodes / Links are mutable and are changed when you put them
--- into the simulation, the types given here represent their form AFTER D3 has mutated them
--- *********************************************************************************************************************
+import Utility (getWindowWidthHeight)
 
 drawGraph :: Aff Unit
 drawGraph = do
@@ -35,12 +30,11 @@ drawGraph = do
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
   let graph = readGraphFromFileContents forceJSON
   
-  -- type qualification necessary here because we're discarding the result of enter
   (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph)
-  -- in contrast, string version of interpreter doesn't need qualification here because we use result
-  printedScript <- liftEffect $ runPrinter (graphScript widthHeight graph) "Force Layout Script"
-  log $ snd printedScript
-  log $ fst printedScript
+
+  (Tuple selection result) <- liftEffect $ runPrinter (graphScript widthHeight graph) "Force Layout Script"
+  log $ result
+  log $ selection
   pure unit
 
 lesMisForces :: Array Force
@@ -77,21 +71,21 @@ graphScript widthheight model = do
       element   : Line
     , key       : UseDatumAsKey
     , "data"    : model.links -- NB the links are still just { source :: NodeID, target :: NodeID, value :: Number } at this point
-    , behaviour : [ strokeWidth (sqrt <<< link.value) ]
+    , behaviour : [ strokeWidth (sqrt <<< link_.value) ]
   }
   nodesSelection <- join nodesGroup $ Join {
       element   : Circle
     , key       : UseDatumAsKey
     , "data"    : nodes
-    , behaviour : [ radius 5.0, fill datum.colorByGroup ]
+    , behaviour : [ radius 5.0, fill datum_.colorByGroup ]
   }
 
-  _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 (_.x <<< link.source)
-                                                                    , y1 (_.y <<< link.source)
-                                                                    , x2 (_.x <<< link.target)
-                                                                    , y2 (_.y <<< link.target)
+  _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 (_.x <<< link_.source)
+                                                                    , y1 (_.y <<< link_.source)
+                                                                    , x2 (_.x <<< link_.target)
+                                                                    , y2 (_.y <<< link_.target)
                                                                     ]}
-  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ cx datum.x, cy datum.y  ]}
+  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ cx datum_.x, cy datum_.y  ]}
   _ <- nodesSelection `on` Drag DefaultDrag
 
   _ <- svg `on`  Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
