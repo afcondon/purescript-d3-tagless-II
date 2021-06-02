@@ -1,20 +1,16 @@
 module D3.Examples.Spago.Files where
 
 import Affjax (URL)
-import D3.Data.Types (Datum_)
-import D3.Node (D3_FocusXY, D3_ID, D3_Indexed, D3_Leaf, D3_Link(..), D3_Radius, D3_SimulationNode(..), D3_TreeNode(..), D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
+import D3.Node (D3_FocusXY, D3_ID, D3_Indexed, D3_Leaf, D3_Link(..), D3_Radius, D3_TreeNode, D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import Data.Array (catMaybes, foldl, groupBy, length, range, sortBy, zip, (!!), (:))
-import Data.Array.NonEmpty (NonEmptyArray)
-import Data.Array.NonEmpty as NA
 import Data.Foldable (sum)
 import Data.Map as M
 import Data.Maybe (fromMaybe, Maybe(..))
 import Data.Nullable (Nullable, null)
 import Data.String (Pattern(..), split)
-import Data.Tuple (Tuple(..), fst, snd)
-import Prelude (class Eq, class Ord, class Show, Ordering, bind, compare, eq, ($), (-), (<$>), (<<<), (<>), (==), (>))
+import Data.Tuple (Tuple(..))
+import Prelude (class Eq, class Show, bind, ($), (-), (<$>), (<<<), (<>), (==), (>))
 import Type.Row (type (+))
-import Unsafe.Coerce (unsafeCoerce)
 import Utility (chunk, compareSnd, equalSnd)
 
 type ModuleRow row  = ( key :: String, depends :: Array String, path :: String | row )
@@ -96,113 +92,6 @@ type SpagoNodeRow row = (
 type SpagoNodeData    = { | SpagoNodeRow () }
 
 type SpagoDataRecord = Record (D3_Indexed + D3_XY + D3_VxyFxy + SpagoNodeRow  + D3_FocusXY + D3_Radius + ())
-unboxD3SimNode :: Datum_ -> SpagoDataRecord
-unboxD3SimNode datum = do
-  let (D3SimNode d) = unsafeCoerce datum
-  d
-  
-unboxD3SimLink :: Datum_ -> SpagoGraphLinkObj
-unboxD3SimLink datum = do
-  let (D3_Link l) = unsafeCoerce datum
-  l
-
-
-unboxD3TreeNode :: Datum_
-  -> { children :: Array
-                     (D3_TreeNode
-                        ( data :: { connected :: Boolean
-                                  , containerID :: Int
-                                  , containerName :: String
-                                  , containsMany :: Boolean
-                                  , id :: Int
-                                  , links :: { contains :: Array Int
-                                             , inPackage :: Array Int
-                                             , outPackage :: Array Int
-                                             , sources :: Array Int
-                                             , targets :: Array Int
-                                             , tree :: Array Int
-                                             }
-                                  , loc :: Number
-                                  , name :: String
-                                  , nodetype :: NodeType
-                                  , pinned :: Pinned
-                                  , treeX :: Nullable Number
-                                  , treeY :: Nullable Number
-                                  }
-                        , depth :: Int
-                        , height :: Int
-                        , id :: Int
-                        , isLeaf :: Boolean
-                        , r :: Number
-                        , value :: Nullable Number
-                        , x :: Number
-                        , y :: Number
-                        )
-                     )
-     , data :: { connected :: Boolean
-               , containerID :: Int
-               , containerName :: String
-               , containsMany :: Boolean
-               , id :: Int
-               , links :: { contains :: Array Int
-                          , inPackage :: Array Int
-                          , outPackage :: Array Int
-                          , sources :: Array Int
-                          , targets :: Array Int
-                          , tree :: Array Int
-                          }
-               , loc :: Number
-               , name :: String
-               , nodetype :: NodeType
-               , pinned :: Pinned
-               , treeX :: Nullable Number
-               , treeY :: Nullable Number
-               }
-     , depth :: Int
-     , height :: Int
-     , id :: Int
-     , isLeaf :: Boolean
-     , parent :: Nullable
-                   (D3_TreeNode
-                      ( data :: { connected :: Boolean
-                                , containerID :: Int
-                                , containerName :: String
-                                , containsMany :: Boolean
-                                , id :: Int
-                                , links :: { contains :: Array Int
-                                           , inPackage :: Array Int
-                                           , outPackage :: Array Int
-                                           , sources :: Array Int
-                                           , targets :: Array Int
-                                           , tree :: Array Int
-                                           }
-                                , loc :: Number
-                                , name :: String
-                                , nodetype :: NodeType
-                                , pinned :: Pinned
-                                , treeX :: Nullable Number
-                                , treeY :: Nullable Number
-                                }
-                      , depth :: Int
-                      , height :: Int
-                      , id :: Int
-                      , isLeaf :: Boolean
-                      , r :: Number
-                      , value :: Nullable Number
-                      , x :: Number
-                      , y :: Number
-                      )
-                   )
-     , r :: Number
-     , value :: Nullable Number
-     , x :: Number
-     , y :: Number
-     }
-unboxD3TreeNode datum = do
-  let (t' :: SpagoTreeObj )  = unsafeCoerce datum
-      (D3TreeNode t) = t'
-  t
-
 
 
 getGraphJSONData :: Spago_Raw_JSON_ -> Spago_Cooked_JSON

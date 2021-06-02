@@ -4,7 +4,8 @@ import Prelude
 
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, PointXY, chooseX, chooseY)
-import D3.Examples.Spago.Files (NodeType(..), Pinned(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_, unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
+import D3.Examples.Spago.Files (NodeType(..), Pinned(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
+import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
 import D3.FFI (hasChildren_)
 import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_)
