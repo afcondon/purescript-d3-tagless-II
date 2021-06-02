@@ -1,6 +1,5 @@
 module D3.Examples.Spago.Tree where
 
-import D3.Examples.Spago.Attributes
 import Prelude
 
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x)
