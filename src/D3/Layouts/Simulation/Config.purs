@@ -4,7 +4,6 @@ import D3.Attributes.Instances (class ToAttr, Attribute(..), toAttr)
 import D3.Data.Types (Datum_, Index_)
 import Data.Number (infinity)
 import Prelude (negate, (<<<))
-import Unsafe.Coerce (unsafeCoerce)
 
 foreign import data D3ForceHandle_     :: Type
 foreign import data CustomForceConfig_ :: Type
@@ -29,7 +28,6 @@ defaultForceCenterConfig       :: Array ChainableF
 defaultForceCenterConfig = 
   [ x 0.0, y 0.0, strength 1.0 ]
 
-
 defaultForceCollideConfig      :: (Datum_ -> Index_ -> Number) -> Array ChainableF
 defaultForceCollideConfig r = 
   [ radius r, strength 1.0, iterations 1.0 ]
@@ -41,11 +39,6 @@ defaultForceXConfig =
 defaultForceYConfig            :: Array ChainableF
 defaultForceYConfig = 
   [ strength 0.1, y 0.0 ]
-
--- TODO links will need to be separate since they are not a chainable / attr type thing
-defaultForceLinkConfig         :: forall d. (d -> Index_ -> Number) -> Array ChainableF
-defaultForceLinkConfig id = 
-  [ strength 1.0, distance 30.0, iterations 1.0, index defaultIndex  ]
   
 -- | a record to initialize / configure simulations
 type SimulationConfig_ = { 
@@ -55,8 +48,6 @@ type SimulationConfig_ = {
     , alphaDecay    :: Number
     , velocityDecay :: Number
 }
-
-
 
 defaultConfigSimulation :: SimulationConfig_
 defaultConfigSimulation = { 
@@ -106,14 +97,5 @@ distance = ForceT <<< ToAttribute "distance" <<< toAttr
 
 index :: ∀ a. ToAttr Number a => a -> ChainableF -- TODO in fact this would be an Int correctly
 index = ForceT <<< ToAttribute "distance" <<< toAttr
-
--- | ==================================================================================================
--- | ========================= sugar for the index setter function        =============================
--- | ==================================================================================================
-
-defaultIndex :: Datum_ -> Index_ -> Number
-defaultIndex datum = d.index
-  where
-    d = (unsafeCoerce datum)
 
 

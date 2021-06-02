@@ -58,6 +58,8 @@ unboxD3SimLink datum = do
   let (D3_Link l) = unsafeCoerce datum
   l
 
+-- this ginormous signature arises from the recursive definition of the tree, same reason it has to be a newtype
+-- rather than a type alias. however, the signature here is auto-generated and is not needed
 unboxD3TreeNode :: Datum_
   -> { children :: Array
                      (D3_TreeNode
@@ -100,7 +102,8 @@ unboxD3TreeNode datum = do
       (D3TreeNode t) = t'
   t
 
-datum_tree_ :: { depth :: Datum_ -> Int
+datum_tree_ :: { 
+  depth :: Datum_ -> Int
 , height :: Datum_ -> Int
 , id :: Datum_ -> Int
 , isLeaf :: Datum_ -> Boolean

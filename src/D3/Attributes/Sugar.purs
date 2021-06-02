@@ -172,13 +172,13 @@ transform' :: (Datum_ -> String) -> ChainableS
 transform' = AttrT <<< ToAttribute "transform" <<< StringAttr <<< Fn
 
 -- make a single (Datum_ -> String) function out of the array (ie sequence) of functions provided
-transform :: forall a. Array (a -> String) -> ChainableS
+transform :: Array (Datum_ -> String) -> ChainableS
 transform = transform' <<< assembleTransforms
 
 -- we take a stack of (Datum_ -> String) functions and produce just one
 -- we can't know here in the library code if this is safe but if the transforms themselves are written in terms of 
 -- what we know the Datum_ will actually be (ie D3TreeNode for example) then we have some limited type checking
-assembleTransforms :: ∀ a. Array (a -> String) -> (Datum_ -> String)
+assembleTransforms :: Array (Datum_ -> String) -> (Datum_ -> String)
 assembleTransforms fs = unsafeCoerce (\d -> intercalate " " $ flap fs d)
 
 

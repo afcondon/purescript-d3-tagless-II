@@ -2,7 +2,7 @@ module D3.Examples.Spago.Graph where
 
 import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
-import D3.Examples.Spago.Model (SpagoModel, cancelSpotlight_, datum, link, toggleSpotlight)
+import D3.Examples.Spago.Model (SpagoModel, cancelSpotlight_, datum_, link_, toggleSpotlight)
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, modify, on, (<+>))
 import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
@@ -20,14 +20,14 @@ initialForces =
   , Force "x"       ForceX        [ F.strength 0.1, F.x 0.0 ]
   , Force "y"       ForceY        [ F.strength 0.1, F.y 0.0 ]
   , Force "center"  ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
-  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius datum.collideRadius, F.iterations 1.0 ]
+  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
   ]
 
 packageOnlyRadialForce :: Force
-packageOnlyRadialForce = Force "packageOrbit"  ForceRadial   [ F.strength datum.onlyPackages, F.x 0.0, F.y 0.0, F.radius 1000.0 ]
+packageOnlyRadialForce = Force "packageOrbit"  ForceRadial   [ F.strength datum_.onlyPackages, F.x 0.0, F.y 0.0, F.radius 1000.0 ]
 
 unusedModuleOnlyRadialForce :: Force
-unusedModuleOnlyRadialForce = Force "unusedModuleOrbit"  ForceRadial   [ F.strength datum.onlyUnused, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+unusedModuleOnlyRadialForce = Force "unusedModuleOrbit"  ForceRadial   [ F.strength datum_.onlyUnused, F.x 0.0, F.y 0.0, F.radius 600.0 ]
       
 -- | recipe for this force layout graph
 script :: forall m selection. 
@@ -53,28 +53,28 @@ script (Tuple w h) model = do
       element   : Line
     , key       : UseDatumAsKey
     , "data"    : model.links
-    , behaviour : [ classed link.linkClass ] -- default invisible in CSS unless marked "visible"
+    , behaviour : [ classed link_.linkClass ] -- default invisible in CSS unless marked "visible"
   }
   nodesSelection <- nodesGroup <+> Join {
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : nodes
-    , behaviour : [ classed datum.nodeClass
-                  , transform' datum.translateNode
+    , behaviour : [ classed datum_.nodeClass
+                  , transform' datum_.translateNode
                   , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation d) ]
   }
 
-  circle  <- nodesSelection `append` (node Circle [ radius datum.radius
-                                                  , fill datum.colorByGroup
+  circle  <- nodesSelection `append` (node Circle [ radius datum_.radius
+                                                  , fill datum_.colorByGroup
                                                   ]) 
-  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y datum.positionLabel, text datum.name]) 
+  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y datum_.positionLabel, text datum_.name]) 
   
-  _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 (_.x <<< link.source)
-                                                                    , y1 (_.y <<< link.source)
-                                                                    , x2 (_.x <<< link.target)
-                                                                    , y2 (_.y <<< link.target)
+  _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 (_.x <<< link_.source)
+                                                                    , y1 (_.y <<< link_.source)
+                                                                    , x2 (_.x <<< link_.target)
+                                                                    , y2 (_.y <<< link_.target)
                                                                     ]}
-  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ classed datum.nodeClass, transform' datum.translateNode ]}
+  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ classed datum_.nodeClass, transform' datum_.translateNode ]}
   _ <- nodesSelection `on` Drag DefaultDrag
   _ <- svg `modify` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation) ]
   _ <- svg `on` Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }

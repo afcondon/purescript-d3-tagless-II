@@ -1,18 +1,19 @@
 module D3.Examples.Tree.Configure where
 
 import Utility
+
 import D3.Attributes.Sugar (transform, viewBox)
-import D3.Data.Types (D3Selection_, Datum_)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
+import D3.Data.Types (D3Selection_, Datum_)
+import D3.Examples.Spago.Model (tree_datum_)
 import D3.Examples.Tree.Script (FlareTreeNode)
 import D3.Examples.Tree.Script (script) as Tree
-import D3.FFI (getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
+import D3.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.MetaTree (D3GrammarNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Hierarchical (horizontalClusterLink, horizontalLink, positionXY, positionXYreflected, radialLink, radialSeparation, verticalClusterLink, verticalLink)
-import D3.Node (D3_TreeNode(..), D3_XY)
+import D3.Layouts.Hierarchical (horizontalClusterLink, horizontalLink, radialLink, radialSeparation, verticalClusterLink, verticalLink)
 import D3.Scales (d3SchemeCategory10N_)
 import Data.Map (toUnfoldable)
 import Data.Tuple (Tuple(..), fst, snd)
@@ -20,9 +21,7 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (pi)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, (>=), (==), ($), (+), (<), (-), (*), (<>), (/))
-import Type.Row (type (+))
-import Unsafe.Coerce (unsafeCoerce)
+import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>), (==))
 
 -- TODO move this to a library, it really only needs the params for runPrinter to be completely generic
 -- | Evaluate the tree drawing script in the "printer" monad which will render it as a string
@@ -63,7 +62,7 @@ configureAndRunScript :: forall m selection.
   D3InterpreterM selection m => 
   Tuple Number Number -> TreeModel -> m selection
 configureAndRunScript (Tuple width height ) model = 
-  Tree.script { spacing, selector, viewbox, linkPath, nodeTransform, color, textDirection, svg } laidOutRoot_
+  Tree.script { spacing, selector, viewbox, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_
   where
     columns = 3.0  -- 3 columns, set in the grid CSS in index.html
     gap     = 10.0 -- 10px set in the grid CSS in index.html
@@ -147,31 +146,25 @@ configureAndRunScript (Tuple width height ) model =
         TidyTree, Vertical     -> 5.0
         TidyTree, Radial       -> 6.0
 
-    textDirection = 
-      if model.treeLayout == Radial
-      then \d -> hasChildren_ d == nodeIsOnRHS d
-      else hasChildren_
-
--- | some small functions that are used to parameterize the differing tree layouts
--- | these are passed in to the Script as part of the configuration
 radialRotate :: Number -> String
 radialRotate x = show $ (x * 180.0 / pi - 90.0)
 
-radialRotateCommon :: forall r. D3_TreeNode (D3_XY + r) -> String
-radialRotateCommon (D3TreeNode d) = "rotate(" <> radialRotate d.x <> ")"
+radialRotateCommon :: Datum_ -> String
+radialRotateCommon d = "rotate(" <> radialRotate (tree_datum_.x d) <> ")"
 
-radialTranslate :: forall r. D3_TreeNode (D3_XY + r) -> String
-radialTranslate (D3TreeNode d) = "translate(" <> show d.y <> ",0)"
+radialTranslate :: Datum_ -> String
+radialTranslate d = "translate(" <> show (tree_datum_.y d) <> ",0)"
 
-rotateRadialLabels :: forall r. D3_TreeNode (D3_XY + r) -> String
-rotateRadialLabels (D3TreeNode d) = -- TODO replace with nodeIsOnRHS 
-  "rotate(" <> if d.x >= pi 
-  then "180" <> ")" 
-  else "0" <> ")"
+rotateRadialLabels :: Datum_ -> String
+rotateRadialLabels d = -- TODO replace with nodeIsOnRHS 
+  "rotate(" <> 
+    (if (tree_datum_.onRHS Radial d) 
+    then "180"
+    else "0")
+    <> ")"
 
-nodeIsOnRHS :: Datum_ -> Boolean
-nodeIsOnRHS d = node.x < pi
-  where (D3TreeNode node) = datumIsTreeNode d
+positionXYreflected :: Datum_ -> String  
+positionXYreflected d = "translate(" <> show (tree_datum_.y d) <> "," <> show (tree_datum_.x d) <>")"
 
-datumIsTreeNode :: forall d. Datum_ -> D3_TreeNode d
-datumIsTreeNode = unsafeCoerce
+positionXY :: Datum_ -> String  
+positionXY d = "translate(" <> show (tree_datum_.x d) <> "," <> show (tree_datum_.y d) <>")"

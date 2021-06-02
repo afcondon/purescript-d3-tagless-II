@@ -21,16 +21,16 @@ foreign import forceClusterCollision :: Unit -> D3ForceHandle_
 
 initialForces :: Array Force
 initialForces =  
-  [ Force "x"       ForceX        [ F.strength 0.2, F.x datum.clusterPointX ]
-  , Force "y"       ForceY        [ F.strength 0.2, F.y datum.clusterPointY ]
-  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius datum.collideRadius, F.iterations 1.0 ]
+  [ Force "x"       ForceX        [ F.strength 0.2, F.x datum_.clusterPointX ]
+  , Force "y"       ForceY        [ F.strength 0.2, F.y datum_.clusterPointY ]
+  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
   ]
 
 forcesB :: Array Force
 forcesB =  
-  [ Force "x"       ForceX        [ F.strength 0.2, F.x datum.treePointX ]
-  , Force "y"       ForceY        [ F.strength 0.2, F.y datum.treePointY ]
-  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius datum.collideRadius, F.iterations 1.0 ]
+  [ Force "x"       ForceX        [ F.strength 0.2, F.x datum_.treePointX ]
+  , Force "y"       ForceY        [ F.strength 0.2, F.y datum_.treePointY ]
+  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
   ]
       
 -- | recipe for this force layout graph
@@ -55,17 +55,17 @@ script (Tuple w h) model = do
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : nodes
-    , behaviour : [ classed datum.nodeClass
+    , behaviour : [ classed datum_.nodeClass
                   , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation d) ]
   }
-  circle  <- nodesSelection `append` (node Circle [ radius datum.radius, fill datum.colorByGroup ]) 
-  labels' <- nodesSelection `append` (node Text [ classed "label", text datum.name ])
+  circle  <- nodesSelection `append` (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
+  labels' <- nodesSelection `append` (node Text [ classed "label", text datum_.name ])
 
   packagesOnly <- filter nodesSelection "g.nodes g.package"
   _ <- packagesOnly `modify` [ lower ]
   
-  _ <- circle         `on` Tick { name: "nodes",  simulation, chain: [ cx datum.x, cy datum.y ]}
-  _ <- labels'        `on` Tick { name: "labels", simulation, chain: [ x datum.x, y datum.y ]}
+  _ <- circle         `on` Tick { name: "nodes",  simulation, chain: [ cx datum_.x, cy datum_.y ]}
+  _ <- labels'        `on` Tick { name: "labels", simulation, chain: [ x datum_.x, y datum_.y ]}
   _ <- nodesSelection `on` Drag DefaultDrag
   _ <- svg `modify` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation) ]
   _ <- svg `on` Zoom { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }

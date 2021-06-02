@@ -1,18 +1,19 @@
 module D3.Examples.Spago.Tree where
 
+import D3.Examples.Spago.Attributes
+import Prelude
+
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x)
-import D3.Examples.Spago.Model (SpagoModel) 
-import D3.Data.Types (Element(..))
-import D3.Data.Tree (TreeType(..))
+import D3.Data.Tree (TreeLayout(..), TreeType(..))
+import D3.Data.Types (Datum_, Element(..))
+import D3.Examples.Spago.Model (SpagoModel, tree_datum_)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, links_, runLayoutFn_, treeMinMax_, treeSetSeparation_, treeSetSize_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Layouts.Hierarchical (radialLink, radialSeparation)
 import D3.Selection (Join(..), Keys(..), node)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import Math (pi)
-import Prelude (class Bind, bind, negate, pure, (*), (+), (-), (/))
-import D3.Examples.Spago.Attributes 
+import Math (pi, sqrt)
 
 -- | **************************************************************************************************************
 -- | draw the spago graph - only the tree part - as a radial tree
@@ -63,7 +64,7 @@ script (Tuple width height) model@{ tree: Just (Tuple _ theTree)} = do
                   ]
   }
 
-  nodeJoin_  <- nodes <+> Join {
+  theNodes  <- nodes <+> Join {
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : descendants_ theTree
@@ -71,20 +72,35 @@ script (Tuple width height) model@{ tree: Just (Tuple _ theTree)} = do
     , behaviour : [ transform [ radialRotateCommon, radialTreeTranslate, rotateRadialLabels ] ]
   }
 
-  theNodes <- nodeJoin_ `append` 
-                (node Circle  [ fill         (colorByGroupTree model.maps.id2Package)
-                              , radius       chooseRadiusTree
-                              , strokeColor "white"
-                              ])
+  _ <- theNodes `append` (node Circle [ fill         tree_datum_.colorByGroup 
+                                      , radius       (sqrt <<< tree_datum_.loc)
+                                      , strokeColor "white"
+                                      ])
 
-  theLabels <- nodeJoin_ `append`
-                (node Text  [ dy         0.31
-                            , x          (\datum -> if textDirection datum then 6.0 else (-6.0))
-                            , textAnchor (\datum -> if textDirection datum then "start" else "end")
-                            , text       labelName
-                            , fill       "#555"
-                            ])
-                            
+  _ <- theNodes `append` (node Text [ dy         0.31
+                                    , x          (tree_datum_.textX Radial)
+                                    , textAnchor (tree_datum_.textAnchor Radial)
+                                    , text       tree_datum_.name
+                                    , fill       "#555"
+                                    ])
+                                      
   pure svg
 
 
+
+radialRotate :: Number -> String
+radialRotate x = show $ (x * 180.0 / pi - 90.0)
+
+radialRotateCommon :: Datum_ -> String
+radialRotateCommon d = "rotate(" <> radialRotate (tree_datum_.x d) <> ")"
+
+radialTreeTranslate :: Datum_ -> String
+radialTreeTranslate d = "translate(" <> show (tree_datum_.y d) <> ",0)"
+
+rotateRadialLabels :: Datum_ -> String
+rotateRadialLabels d = -- TODO replace with nodeIsOnRHS 
+  "rotate(" <> 
+    (if (tree_datum_.onRHS Radial d) 
+    then "180"
+    else "0")
+    <> ")"

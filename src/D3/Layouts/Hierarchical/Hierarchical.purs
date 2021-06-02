@@ -74,9 +74,5 @@ radialLink angleFn radius_Fn = do
   let radialFn = linkRadial_ (unsafeCoerce angleFn) (unsafeCoerce radius_Fn)
   AttrT $ ToAttribute "d" $ toAttr radialFn
 
-positionXYreflected :: forall r. D3_TreeNode (D3_XY + r) -> String  
-positionXYreflected (D3TreeNode d) = "translate(" <> show d.y <> "," <> show d.x <>")"
 
-positionXY :: forall r. D3_TreeNode (D3_XY + r) -> String  
-positionXY (D3TreeNode d) = "translate(" <> show d.x <> "," <> show d.y <>")"
 

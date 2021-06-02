@@ -1,7 +1,11 @@
 module D3.Examples.Spago.Model where
 
+import Prelude
+
+import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, PointXY, chooseX, chooseY)
-import D3.Examples.Spago.Files (NodeType(..), Pinned(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_, unboxD3SimLink, unboxD3SimNode)
+import D3.Examples.Spago.Files (NodeType(..), Pinned(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_, unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
+import D3.FFI (hasChildren_)
 import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_)
 import Data.Array (foldl)
@@ -14,9 +18,8 @@ import Data.Nullable (Nullable, null) as N
 import Data.Set as S
 import Data.Tuple (Tuple(..))
 import Debug (trace)
-import Math (sqrt, (%))
+import Math (pi, sqrt, (%))
 import Math as Math
-import Prelude (Unit, bind, negate, show, unit, ($), (*), (+), (/), (<$>), (<>), (==))
 import Type.Row (type (+))
 import Web.Event.Internal.Types (Event)
 
@@ -24,7 +27,40 @@ moduleRadius       =  5.0 :: Number
 packageRadius      = 50.0 :: Number
 packageForceRadius = 50.0 :: Number
 
-link = {
+tree_datum_ = {
+    x           : (\d -> (unboxD3TreeNode d).x)
+  , y           : (\d -> (unboxD3TreeNode d).y)
+  , containerID : (\d -> (unboxD3TreeNode d).data.containerID)
+  , name        : (\d -> (unboxD3TreeNode d).data.name)
+  , loc         : (\d -> (unboxD3TreeNode d).data.loc)
+  , colorByGroup: (\d -> d3SchemeCategory10N_ (toNumber $ tree_datum_.containerID d))
+  , textAnchor  : (\l d -> case l of
+                            Radial ->
+                              if (hasChildren_ d) == (datum_.x d < pi)
+                              then "start"
+                              else "end"
+                            _ -> 
+                              if (hasChildren_ d)
+                              then "start"
+                              else "end"
+                        )
+  , textX       : (\l d -> case l of
+                      Radial ->
+                        if (hasChildren_ d) == (datum_.x d < pi) -- d.x < pi => node is on the RHS of Radial tree
+                        then 6.0
+                        else (-6.0)
+                      _ -> 
+                        if (hasChildren_ d)
+                        then 6.0
+                        else (-6.0)
+                  )
+  , onRHS       : (\l d -> if l == Radial && (datum_.x d >= pi)
+                        then true
+                        else false
+                  )
+}
+
+link_ = {
     source: (\d -> (unboxD3SimLink d).source)
   , target: (\d -> (unboxD3SimLink d).target)
   , linkClass: (\d -> show (unboxD3SimLink d).linktype)
@@ -43,7 +79,7 @@ tree2Point x' y' = do
   Just { x, y } 
 
 -- | all the coercions in one place
-datum = {
+datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
     radius        : (\d -> (unboxD3SimNode d).r)
   , id            : (\d -> (unboxD3SimNode d).id)
@@ -61,38 +97,38 @@ datum = {
   , connected     : (\d -> (unboxD3SimNode d).connected)
 
   , clusterPoint  : (\d -> cluster2Point (unboxD3SimNode d).cluster)
-  , clusterPointX : (\d -> chooseX $ datum.clusterPoint d)
-  , clusterPointY : (\d -> chooseY $ datum.clusterPoint d)
-  , treePoint     : (\d -> fromMaybe (datum.clusterPoint d) (tree2Point (datum.treeX d) (datum.treeY d)))
-  , treePointX    : (\d -> chooseX $ datum.treePoint d)
-  , treePointY    : (\d -> chooseY $ datum.treePoint d)
+  , clusterPointX : (\d -> chooseX $ datum_.clusterPoint d)
+  , clusterPointY : (\d -> chooseY $ datum_.clusterPoint d)
+  , treePoint     : (\d -> fromMaybe (datum_.clusterPoint d) (tree2Point (datum_.treeX d) (datum_.treeY d)))
+  , treePointX    : (\d -> chooseX $ datum_.treePoint d)
+  , treePointY    : (\d -> chooseY $ datum_.treePoint d)
 
 -- more complicated calculations (CONVENIENCE)
   , positionLabel:
-    (\d -> case datum.nodetype d of
-            (IsModule _)  -> negate $ datum.loc d
+    (\d -> case datum_.nodetype d of
+            (IsModule _)  -> negate $ datum_.loc d
             (IsPackage _) -> 0.0
     )
   , collideRadius:
       (\d -> 
-        if datum.id d == datum.containerID d
+        if datum_.id d == datum_.containerID d
         then 10.0
-        else datum.radius d
+        else datum_.radius d
       )
   , nodeClass:
-      (\d -> show (datum.nodetype d) <> " " <> (datum.containerName d) <> " " <> (datum.name d))
+      (\d -> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d))
   , colorByGroup:
-      (\d -> d3SchemeCategory10N_ (toNumber $ datum.cluster d))
+      (\d -> d3SchemeCategory10N_ (toNumber $ datum_.cluster d))
   , translateNode:
-      (\d -> "translate(" <> show (datum.x d) <> "," <> show (datum.y d) <> ")")
+      (\d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <> ")")
 -- accessors to provide different force settings for different cohorts, quite possible that this should go thru a similar but different route from `datum`
   , onlyPackages:
-      (\d -> case datum.nodetype d of
+      (\d -> case datum_.nodetype d of
               (IsModule _)  -> 0.0 -- we don't want modules to respond to this force at all
               (IsPackage _) -> 0.5)
   , onlyUnused:
-      (\d -> case datum.nodetype d of
-              (IsModule _)  -> if datum.connected d 
+      (\d -> case datum_.nodetype d of
+              (IsModule _)  -> if datum_.connected d 
                                then 0.0 
                                else 0.8  -- this should put the only unused modules in a different orbit from the packages
               (IsPackage _) -> 0.0)
@@ -248,8 +284,8 @@ makeGraph nodes = do
 toggleSpotlight :: Event -> D3Simulation_ -> Datum_ -> Unit
 toggleSpotlight event simulation d = toggleSpotlight_ event simulation nodeID nodeType
   where
-    nodeID   = datum.id d
-    nodeType = show $ datum.nodetype d
+    nodeID   = datum_.id d
+    nodeType = show $ datum_.nodetype d
 
 foreign import toggleSpotlight_ :: Event -> D3Simulation_ -> NodeID -> String -> Unit
 foreign import cancelSpotlight_ :: D3Simulation_ -> Unit

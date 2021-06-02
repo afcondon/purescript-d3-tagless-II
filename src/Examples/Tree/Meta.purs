@@ -1,22 +1,23 @@
 module D3.Examples.Tree.Meta where
 
-import D3.Node
+import D3.Node (D3TreeRow, D3_ID, D3_Link, D3_TreeNode(..), D3_TreeRow, D3_XY, EmbeddedData, NodeID)
+import Prelude (class Bind, Unit, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>))
 
-import Utility (getWindowWidthHeight)
 import D3.Attributes.Sugar (classed, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
-import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Data.Tree (TreeModel, TreeType(..))
+import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Interpreter.D3 (runD3M)
-import D3.Layouts.Hierarchical (positionXY, verticalLink)
+import D3.Layouts.Hierarchical (verticalLink)
 import D3.Selection (Join(..), Keys(..), node)
+import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Prelude (class Bind, Unit, bind, negate, pure, unit, ($), (*), (+), (-), (/))
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
+import Utility (getWindowWidthHeight)
 
 -- Model data types specialized with inital data
 type MetaTreeNodeRow row = ( 
@@ -29,6 +30,40 @@ type MetaTreeNodeData = { | MetaTreeNodeRow () }
 
 type MetaTreeNode     = D3TreeRow (EmbeddedData MetaTreeNodeData + ())
 
+type MetaTreeLinkData  = ( example :: Number )
+type MetaTreeSimRecord = Record (MetaTreeNodeRow  + ()) 
+type MetaTreeLinkObj   =  { source :: MetaTreeSimRecord, target :: MetaTreeSimRecord | MetaTreeLinkData }
+
+type MetaTreeRawModel = { 
+    links :: Array (D3_Link NodeID MetaTreeLinkData)
+  , nodes :: Array MetaTreeNodeData
+}
+
+type MetaTreeCookedModel = { 
+    links :: Array (D3_Link NodeID MetaTreeLinkData)
+  , nodes :: Array MetaTreeNodeData
+}
+
+unboxD3TreeNode datum = do
+  let (t' :: D3_TreeNode (D3_ID + D3_TreeRow + D3_XY + (EmbeddedData { | MetaTreeNodeRow () }) + () ) )  = unsafeCoerce datum
+      (D3TreeNode t) = t'
+  t
+
+datum_ :: { 
+  param1     :: Datum_ -> String
+, positionXY :: Datum_ -> String
+, symbol     :: Datum_ -> String
+, x          :: Datum_ -> Number
+, y          :: Datum_ -> Number
+}
+datum_ = {
+    x     : (\d -> (unboxD3TreeNode d).x)
+  , y     : (\d -> (unboxD3TreeNode d).y)
+-- now the fields which are in the original data object, embedded in this tree object
+  , symbol: (\d -> (unboxD3TreeNode d).data.symbol)
+  , param1: (\d -> (unboxD3TreeNode d).data.param1)
+  , positionXY: (\d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <>")")
+}
 
 -- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
 -- | TODO specialize runD3M so that this function isn't necessary
@@ -85,7 +120,7 @@ treeScript (Tuple width height) tree = do
     , key       : UseDatumAsKey
     , "data"    : descendants_ tree
     -- there could be other stylistic stuff here but the transform is key structuring component
-    , behaviour : [ transform [ positionXY ] ]
+    , behaviour : [ transform [ datum_.positionXY ] ]
   }
 
   theNodes <- nodeJoin_ `append` 
@@ -99,7 +134,7 @@ treeScript (Tuple width height) tree = do
                 (node Text  [ x          0.0
                             , y          3.0
                             , textAnchor "middle"
-                            , text       symbol
+                            , text       datum_.symbol
                             , fill       "white"
                             ])
                             
@@ -107,21 +142,9 @@ treeScript (Tuple width height) tree = do
                 (node Text  [ x          22.0
                             , y          3.0
                             , textAnchor "start"
-                            , text       param1
+                            , text       datum_.param1
                             , fill       "gray"
                             ])
                             
   pure svg
-
-
-
--- | Coercion function to recover the "extra" data that lives within the generic structure that was given to D3, 
--- | it's an unsafeCoerce but the types give some protection
-symbol :: Datum_ -> String
-symbol d = node."data".symbol
-  where node = unsafeCoerce d
-
-param1 :: Datum_ -> String
-param1 d = node."data".param1
-  where node = unsafeCoerce d
 
