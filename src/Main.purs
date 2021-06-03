@@ -15,6 +15,7 @@ import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(Tuple))
 import Effect (Effect)
 import Effect.Aff (Aff, forkAff, launchAff, launchAff_)
+import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
 import Foreign.Object as Object
 import Halogen.Aff as HA
@@ -57,7 +58,7 @@ ddi = do
   pure unit
 
 
-stories :: forall m. Stories m
+stories :: forall m. (MonadAff m) => Stories m
 stories = Object.fromFoldable
   [ Tuple "" $ proxy ExpIndex.component
   , Tuple "D3" $ proxy D3GUP.component
@@ -74,4 +75,3 @@ main = HA.runHalogenAff do
     { stories
     , logo: Just logo
     }
-  forkAff GUP.runGeneralUpdatePattern
