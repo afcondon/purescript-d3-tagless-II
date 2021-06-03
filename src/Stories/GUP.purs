@@ -31,15 +31,8 @@ component = H.mkComponent
   render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div
-      [ HP.id_ "root", HP.classes [ HH.ClassName "GUP" ] ]
-      [ HH.input
-          [ HP.placeholder "Name" ]
-      , HH.button
-          [ HP.classes [ HH.ClassName "btn-primary" ]
-          , HP.type_ HP.ButtonSubmit
-          ]
-          [ HH.text "Submit" ]
-      ]
+      [ HP.id "GUP" ]
+      []
 
 
 handleAction
