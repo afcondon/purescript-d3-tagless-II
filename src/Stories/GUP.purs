@@ -57,7 +57,7 @@ component = H.mkComponent
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction StartGUP = do
-    fiber <- H.liftAff $ forkAff GUP.runGeneralUpdatePattern
+    fiber <- H.liftAff $ GUP.runGeneralUpdatePattern
     H.modify_ (\state -> state { value = true, computation = Just fiber })
 handleAction StopGUP = do
     computation <- H.gets _.computation

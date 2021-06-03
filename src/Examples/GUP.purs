@@ -1,6 +1,7 @@
 module D3.Examples.GUP where
 
 import D3.Attributes.Sugar
+
 import Control.Monad.Rec.Class (forever)
 import D3.Attributes.Instances (datumIsChar, indexIsNumber)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_)
@@ -13,13 +14,25 @@ import Data.String.CodeUnits (singleton, toCharArray)
 import Data.Traversable (sequence)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
-import Effect.Aff (Aff, Milliseconds(..), delay)
+import Effect.Aff (Aff, Fiber, Milliseconds(..), delay, forkAff)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Effect.Random (random)
-import Prelude (Unit, bind, discard, pure, ($), (*), (+), (<$>), (<<<), (>))
+import Prelude (Unit, bind, discard, pure, unit, ($), (*), (+), (<$>), (<<<), (>))
 
+runGeneralUpdatePattern :: forall t112. Aff (Fiber t112)
+runGeneralUpdatePattern = do
+  log "General Update Pattern example"
+  (Tuple update _) <- liftEffect $ runD3M script
+  fiber <- forkAff $
+    forever $ do
+      newletters <- liftEffect $ getLetters
+      _          <- liftEffect $ runD3M (update newletters)
+      log "GUP renew"
+      delay (Milliseconds 2300.0) -- NB this has to be a smidge longer than any transitions in the update!
+  pure fiber
 
+-- | choose a string of random letters (no duplicates), ordered alphabetically
 getLetters :: Effect (Array Char)
 getLetters = do
   let 
@@ -32,42 +45,24 @@ getLetters = do
   choices <- sequence $ coinToss <$> letters
   pure $ catMaybes choices
 
-runGeneralUpdatePattern :: Aff Unit
-runGeneralUpdatePattern = do
-  log "General Update Pattern example"
-  (Tuple update _) <- liftEffect $ runD3M enter
-  log "GUP enter completed"
-  forever $ do
-    newletters <- liftEffect $ getLetters
-    _          <- liftEffect $ runD3M (update newletters)
-    log "GUP renew"
-    delay (Milliseconds 2300.0) -- NB this has to be a smidge longer than any transitions in the update!
-
-svgAttributes :: Array ChainableS
-svgAttributes = [ 
-  viewBox 0.0 0.0 650.0 650.0
-]
-
--- attributes that use (\d -> <something>) or (\d i -> <something>) need type hints
--- and coercion functions
+-- | ====================================================================================
+-- | Simple as can be example of the more complex Join which allows for new data to be
+-- | entered, existing data to be updated and disappearing data to be removed
+-- | ====================================================================================
 type Model = Array Char
 
+-- | this could be inlined but we use it in two places:
+-- | on first entry and then as an end point of update transition
 offsetXByIndex :: Datum_ -> Index_ -> Number
-offsetXByIndex datum i = offset + ((indexIsNumber i) * factor)
-  where
-    offset = 50.0
-    factor = 48.0
+offsetXByIndex datum i = 50.0 + ((indexIsNumber i) * 48.0)
 
-textFromDatum :: Datum_ -> String
-textFromDatum = singleton <<< datumIsChar
-
-enter :: forall m. D3InterpreterM D3Selection_ m => m ((Array Char) -> m D3Selection_)
-enter = do 
+script :: forall m. D3InterpreterM D3Selection_ m => m ((Array Char) -> m D3Selection_)
+script = do 
   root        <- attach "div#gup"
-  svg         <- append root $ node Svg svgAttributes -- REVIEW attributes first a la halogen? but this looks better
-  letterGroup <- append svg  $ node_ Group            -- the container for the Join
+  svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0 ]
+  letterGroup <- append svg  $ node_ Group
   let transition = transitionWithDuration $ Milliseconds 2000.0
-  pure $ \letters -> -- we don't have to do anything to this 'cause the data is already Array Char
+  pure $ \letters -> -- since Model is simply Array Char it can be used directly in the Join
     do 
       letterGroup <+> JoinGeneral {
           element   : Text
@@ -75,17 +70,24 @@ enter = do
         , "data"    : letters
         , behaviour : { 
             enter: [ classed  "enter"
-                    , fill     "green"                -- TODO use PureScript color types
+                    , fill     "green"
                     , x        offsetXByIndex
                     , y        0.0
                     -- , yu (NWU { i: 0, u: Px })
-                    , text     textFromDatum
+                    , text     (singleton <<< datumIsChar)
                     , fontSize 48.0
-                    ]  `andThen` (transition `to` [ y 200.0 ]) 
+                    ]  
+                    `andThen` (transition `to` [ y 200.0 ]) 
 
-          , update: [ classed "update", fill "gray", y 200.0 ] `andThen` (transition `to` [ x offsetXByIndex ] ) 
+          , update: [ classed "update"
+                    , fill "gray"
+                    , y 200.0 ] 
+                    `andThen` (transition `to` [ x offsetXByIndex ] ) 
 
-          , exit:   [ classed "exit",   fill "brown" ] `andThen` (transition `to` [ y 400.0, remove ])
+          , exit:   [ classed "exit"
+                    , fill "brown"
+                    ] 
+                    `andThen` (transition `to` [ y 400.0, remove ])
           }
       }
 
