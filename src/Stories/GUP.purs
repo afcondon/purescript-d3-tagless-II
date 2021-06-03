@@ -2,6 +2,7 @@ module Stories.GUP where
 
 import Prelude
 
+import Control.Monad.Rec.Class (forever)
 import Control.Monad.State (class MonadState, gets)
 import D3.Examples.GUP as GUP
 import Data.Const (Const)
@@ -28,7 +29,11 @@ instance showStatus :: Show Status where
   show Running = "GUP is running"
   show Paused  = "GUP is paused"
   
-type State = { value :: Status, computation :: Maybe (Fiber Unit) }
+type State = { 
+    value  :: Status
+  , fiber  :: Maybe (Fiber Unit)
+  , update :: Maybe (Unit -> Aff Unit)
+}
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
 component = H.mkComponent
@@ -40,7 +45,7 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { value: NotInitialized, computation: Nothing }
+  initialState = { value: NotInitialized, fiber: Nothing, update: Nothing }
 
   render :: State -> H.ComponentHTML Action () m
   render state =
@@ -75,23 +80,28 @@ component = H.mkComponent
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction StartGUP = do
-    fiber <- H.liftAff $ GUP.runGeneralUpdatePattern
-    H.modify_ (\state -> state { value = Running, computation = Just fiber })
+    update <- GUP.runGeneralUpdatePattern
+    fiber <- H.liftAff $ forever (update unit)
+    H.modify_ (\state -> state { value = Running, fiber = Just fiber, update = Just update })
 
 handleAction PauseGUP = do
-    computation <- H.gets _.computation
-    _ <- case computation of
+    fiber <- H.gets _.fiber
+    _ <- case fiber of
             Nothing      -> pure unit
             (Just fiber) -> H.liftAff $ killFiber (error "Just had to cancel") fiber
-    H.modify_ (\state -> state { value = Paused, computation = Nothing })
+    H.modify_ (\state -> state { value = Paused, fiber = Nothing })
 
 handleAction RestartGUP = do
--- we should restart it here
-    H.modify_ (\state -> state { value = Running, computation = Nothing })
+    update <- H.gets _.update
+    case update of
+      Nothing -> pure unit
+      (Just update) -> do
+        fiber <- H.liftAff $ forever (update unit)
+        H.modify_ (\state -> state { value = Running, fiber = Just fiber })
 
 handleAction KillGUP = do
-    computation <- H.gets _.computation
-    _ <- case computation of
+    fiber <- H.gets _.fiber
+    _ <- case fiber of
             Nothing      -> pure unit
             (Just fiber) -> H.liftAff $ killFiber (error "Just had to cancel") fiber
-    H.modify_ (\state -> state { value = NotInitialized, computation = Nothing })
+    H.modify_ (\state -> state { value = NotInitialized, fiber = Nothing, update = Nothing })

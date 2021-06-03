@@ -15,22 +15,24 @@ import Data.Traversable (sequence)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff, Fiber, Milliseconds(..), delay, forkAff)
-import Effect.Class (liftEffect)
+import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
 import Effect.Random (random)
-import Prelude (Unit, bind, discard, pure, unit, ($), (*), (+), (<$>), (<<<), (>))
+import Prelude (class Bind, Unit, bind, discard, pure, unit, ($), (*), (+), (<$>), (<<<), (>))
 
-runGeneralUpdatePattern :: forall t112. Aff (Fiber t112)
+runGeneralUpdatePattern :: forall m. Bind m => MonadEffect m => m (Unit -> Aff Unit)
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
   (Tuple update _) <- liftEffect $ runD3M script
-  fiber <- forkAff $
-    forever $ do
+  -- now we return a function that the component can run whenever it likes
+  -- (but NB if it runs more often than every 2000 milliseconds there will be big problems)
+  pure $ 
+    (\_ -> do
       newletters <- liftEffect $ getLetters
       _          <- liftEffect $ runD3M (update newletters)
       log "GUP renew"
-      delay (Milliseconds 2300.0) -- NB this has to be a smidge longer than any transitions in the update!
-  pure fiber
+-- TODO i think delay logically belongs in the component not the script? but it is dependent on the transition length...hmmm
+      delay (Milliseconds 2300.0)) -- NB this has to be a smidge longer than any transitions in the update!
 
 -- | choose a string of random letters (no duplicates), ordered alphabetically
 getLetters :: Effect (Array Char)
