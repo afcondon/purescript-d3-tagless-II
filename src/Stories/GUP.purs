@@ -2,11 +2,13 @@ module Stories.GUP where
 
 import Prelude
 
-import Control.Monad.State (class MonadState)
+import Control.Monad.State (class MonadState, gets)
 import D3.Examples.GUP as GUP
 import Data.Const (Const)
-import Effect.Aff (forkAff)
+import Data.Maybe (Maybe(..))
+import Effect.Aff (Aff, Fiber, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Exception (error)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -18,7 +20,7 @@ data Action
   = StartGUP
   | StopGUP
 
-type State = { value :: Boolean }
+type State = { value :: Boolean, computation :: Maybe (Fiber Unit) }
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
 component = H.mkComponent
@@ -30,14 +32,14 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { value: false }
+  initialState = { value: false, computation: Nothing }
 
   render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div
       [ HP.id "gup" ]
       [ HH.h3_
-          [ HH.text "A counter" ]
+          [ HH.text "General Update Pattern" ]
       , HH.div_
           [ HH.button
               [ HE.onClick $ const StartGUP ]
@@ -55,7 +57,11 @@ component = H.mkComponent
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction StartGUP = do
-    _ <- H.liftAff $ forkAff GUP.runGeneralUpdatePattern
-    H.modify_ (\state -> state { value = true })
+    fiber <- H.liftAff $ forkAff GUP.runGeneralUpdatePattern
+    H.modify_ (\state -> state { value = true, computation = Just fiber })
 handleAction StopGUP = do
-    H.modify_ (\state -> state { value = false })
+    computation <- H.gets _.computation
+    _ <- case computation of
+            Nothing      -> pure unit
+            (Just fiber) -> H.liftAff $ killFiber (error "Just had to cancel") fiber
+    H.modify_ (\state -> state { value = false, computation = Nothing })
