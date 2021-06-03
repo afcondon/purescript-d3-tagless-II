@@ -16,6 +16,7 @@ import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.Storybook (Stories, runStorybook, proxy)
 import Stories.Count as ExpCount
+import Stories.LesMis as LesMis
 import Stories.GUP as D3GUP
 import Stories.Index as ExpIndex
 import Stories.Input as ExpInput
@@ -54,7 +55,8 @@ ddi = do
 stories :: forall m. (MonadAff m) => Stories m
 stories = Object.fromFoldable
   [ Tuple "" $ proxy ExpIndex.component
-  , Tuple "D3" $ proxy D3GUP.component
+  , Tuple "GUP" $ proxy D3GUP.component
+  , Tuple "LesMis" $ proxy LesMis.component
   , Tuple "count" $ proxy ExpCount.component
   , Tuple "Form|input" $ proxy ExpInput.component
   ]

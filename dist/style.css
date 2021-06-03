@@ -68,3 +68,26 @@ body {
   padding: 2rem;
   overflow: auto;
 }
+div#d3story {
+  display: grid;
+  grid-gap: 2px;
+  grid-template-areas: 'controls code' 'blurb code' 'd3   code';
+}
+div#d3story div {
+  background-color: beige;
+}
+div#d3story div#blurb {
+  grid-area: blurb;
+  padding: 10em;
+}
+div#d3story div#code {
+  grid-area: code;
+  font-family: monospace;
+}
+div#d3story div#gup {
+  grid-area: d3;
+  height: 50vh;
+}
+div#d3story div#controls {
+  grid-area: controls;
+}

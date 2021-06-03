@@ -5,14 +5,10 @@ import D3.Attributes.Sugar
 import D3.Attributes.Instances (datumIsChar, indexIsNumber)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
-import D3.Interpreter.D3 (runD3M)
-import D3.Selection (Join(..), Keys(..), node, node_)
+import D3.Selection (ChainableS, Join(..), Keys(..), node, node_)
 import Data.String.CodeUnits (singleton)
-import Data.Tuple (Tuple(..))
-import Effect.Aff (Aff, Milliseconds(..))
-import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Class.Console (log)
-import Prelude (class Bind, Unit, bind, discard, pure, unit, ($), (*), (*>), (+), (<<<))
+import Effect.Aff (Milliseconds(..))
+import Prelude (bind, pure, ($), (*), (+), (<<<))
 
 -- | ====================================================================================
 -- | Simple-as-can-be example of the more complex Join which allows for new data to be
@@ -22,24 +18,25 @@ type Model = Array Char
 
 script :: forall m. D3InterpreterM D3Selection_ m => m ((Array Char) -> m D3Selection_)
 script = do 
-  root        <- attach "div#gup"
-  svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0 ]
-  letterGroup <- append svg  $ node_ Group
-
   let 
+    transition :: ChainableS
     transition = transitionWithDuration $ Milliseconds 2000.0
     -- new entries enter at this position, updating entries need to transition to it on each update
     xFromIndex :: Datum_ -> Index_ -> Number
     xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0)
 
-  pure $ \letters -> -- since Model is simply Array Char it can be used directly in the Join
+  root        <- attach "div#gup"
+  svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0 ]
+  letterGroup <- append svg  $ node_ Group
+
+  pure $ \letters -> 
     do 
       letterGroup <+> JoinGeneral {
           element   : Text
         , key       : UseDatumAsKey
         , "data"    : letters
         , behaviour : { 
-            enter: [ classed  "enter"
+            enter:  [ classed  "enter"
                     , fill     "green"
                     , x        xFromIndex
                     , y        0.0
@@ -51,7 +48,8 @@ script = do
 
           , update: [ classed "update"
                     , fill "gray"
-                    , y 200.0 ] 
+                    , y 200.0
+                    ] 
                     `andThen` (transition `to` [ x xFromIndex ] ) 
 
           , exit:   [ classed "exit"
