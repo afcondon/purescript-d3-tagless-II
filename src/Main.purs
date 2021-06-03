@@ -74,4 +74,4 @@ main = HA.runHalogenAff do
     { stories
     , logo: Just logo
     }
-  forkAff ddi
+  forkAff GUP.runGeneralUpdatePattern

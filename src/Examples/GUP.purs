@@ -36,9 +36,11 @@ runGeneralUpdatePattern :: Aff Unit
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
   (Tuple update _) <- liftEffect $ runD3M enter
+  log "GUP enter completed"
   forever $ do
     newletters <- liftEffect $ getLetters
     _          <- liftEffect $ runD3M (update newletters)
+    log "GUP renew"
     delay (Milliseconds 2300.0) -- NB this has to be a smidge longer than any transitions in the update!
 
 svgAttributes :: Array ChainableS

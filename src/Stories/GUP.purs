@@ -31,7 +31,7 @@ component = H.mkComponent
   render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div
-      [ HP.id "GUP" ]
+      [ HP.id "gup" ]
       []
 
 
