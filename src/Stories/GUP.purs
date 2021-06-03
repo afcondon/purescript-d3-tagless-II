@@ -1,4 +1,4 @@
-module Stories.Count where
+module Stories.GUP where
 
 import Prelude
 
@@ -31,22 +31,16 @@ component = H.mkComponent
   render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div
-      [ HP.classes [ HH.ClassName "Foo" ]]
-      [ HH.h3_
-          [ HH.text "A counter" ]
-      , HH.div_
-          [ HH.button
-              [ HE.onClick $ const Increase ]
-              [ HH.text "+" ]
+      [ HP.id_ "root", HP.classes [ HH.ClassName "GUP" ] ]
+      [ HH.input
+          [ HP.placeholder "Name" ]
+      , HH.button
+          [ HP.classes [ HH.ClassName "btn-primary" ]
+          , HP.type_ HP.ButtonSubmit
           ]
-      , HH.div_
-          [ HH.text $ show state.value ]
-      , HH.div_
-          [ HH.button
-              [ HE.onClick $ const Decrease ]
-              [ HH.text "-" ]
-          ]
+          [ HH.text "Submit" ]
       ]
+
 
 handleAction
   :: forall m

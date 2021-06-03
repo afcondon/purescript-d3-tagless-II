@@ -18,7 +18,7 @@ render :: forall m. State -> H.ComponentHTML Void () m
 render state =
   HH.div_
   [ HH.h3_
-    [ HH.text "This is a customized index page" ]
+    [ HH.text "PureScript DSL for Data Driven Interfaces" ]
   , HH.p_
     [ HH.text "See "
     , HH.a
