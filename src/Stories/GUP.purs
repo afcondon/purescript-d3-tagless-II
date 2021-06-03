@@ -1,40 +1,41 @@
 module Stories.GUP where
 
-import Prelude 
+import Prelude
 
 import Control.Monad.Rec.Class (forever)
 import Control.Monad.State (class MonadState)
 import D3.Examples.GUP as GUP
+import D3.Interpreter.D3 (runD3M)
 import Data.Array (catMaybes)
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence)
+import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Aff (Aff, Fiber, Milliseconds(..), delay, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (class MonadEffect)
+import Effect.Class.Console (log)
 import Effect.Exception (error)
 import Effect.Random (random)
-import Halogen (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import D3.Interpreter.D3 (runD3M)
-import Data.Tuple (Tuple(..))
-import Effect.Class (class MonadEffect)
-import Effect.Class.Console (log)
 
 type Query :: forall k. k -> Type
 type Query = Const Void
 
 data Action
-  = StartGUP
+  = Initialize
   | RestartGUP
   | PauseGUP
-  | KillGUP
+  | Finalize
 
 data Status = NotInitialized | Running | Paused
+derive instance eqStatus :: Eq Status
+
 instance showStatus :: Show Status where
   show NotInitialized = "Not yet initialized"
   show Running = "GUP is running"
@@ -51,7 +52,9 @@ component = H.mkComponent
   { initialState: const initialState
   , render
   , eval: H.mkEval $ H.defaultEval
-    { handleAction = handleAction }
+    { handleAction = handleAction
+    , initialize = Just Initialize
+    , finalize   = Just Finalize }
   }
   where
 
@@ -68,37 +71,27 @@ component = H.mkComponent
           [ HH.text $ show state.value ]
       , HH.div_
           [ HH.button
-              [ HE.onClick $ const StartGUP ]
-              [ HH.text "Start" ]
+            [ HE.onClick $ const PauseGUP ]
+            [ HH.text "Pause" ]
           ]
       , HH.div_
           [ HH.button
-              [ HE.onClick $ const PauseGUP ]
-              [ HH.text "Pause" ]
-          ]
-      , HH.div_
-          [ HH.button
-              [ HE.onClick $ const RestartGUP ]
-              [ HH.text "Restart" ]
-          ]
-      , HH.div_
-          [ HH.button
-              [ HE.onClick $ const KillGUP ]
-              [ HH.text "Remove" ]
+            [ HE.onClick $ const RestartGUP ]
+            [ HH.text "Restart" ]
           ]
       ]
 
 runGeneralUpdatePattern :: forall m. Bind m => MonadEffect m => m (Array Char -> Aff Unit)
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
-  (Tuple update _) <- liftEffect $ runD3M GUP.script
+  (Tuple update _) <- H.liftEffect $ runD3M GUP.script
   -- the script sets up the SVG and returns a function that the component can run whenever it likes
   -- (but NB if it runs more often than every 2000 milliseconds there will be big problems)
-  pure (\letters -> liftEffect $ runD3M (update letters) *> pure unit )
+  pure (\letters -> H.liftEffect $ runD3M (update letters) *> pure unit )
 
 runUpdate :: (Array Char -> Aff Unit) -> Aff Unit
 runUpdate update = do
-  letters <- liftEffect $ getLetters
+  letters <- H.liftEffect $ getLetters
   update letters
   delay (Milliseconds 2300.0)
   where
@@ -118,7 +111,7 @@ runUpdate update = do
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
-handleAction StartGUP = do
+handleAction Initialize = do
     updateFn <- runGeneralUpdatePattern
 
     fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
@@ -133,16 +126,20 @@ handleAction PauseGUP = do
     H.modify_ (\state -> state { value = Paused, fiber = Nothing })
 
 handleAction RestartGUP = do
-    update <- H.gets _.update
-    case update of
-      Nothing -> pure unit
-      (Just updateFn) -> do
-        fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
-        H.modify_ (\state -> state { value = Running, fiber = Just fiber })
+    { value, update } <- H.get
+    if value /= Paused
+    then pure unit
+    else 
+      case update of
+        Nothing -> pure unit
+        (Just updateFn) -> do
+          fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
+          H.modify_ (\state -> state { value = Running, fiber = Just fiber })
 
-handleAction KillGUP = do
+handleAction Finalize = do
     fiber <- H.gets _.fiber
     _ <- case fiber of
             Nothing      -> pure unit
             (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
+    -- is it necessary to remove the component from the DOM? don't think it is
     H.modify_ (\state -> state { value = NotInitialized, fiber = Nothing, update = Nothing })

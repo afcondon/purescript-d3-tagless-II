@@ -3,19 +3,14 @@ module Main where
 import Prelude
 
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..))
-import D3.Examples.LesMiserables as LesMis
 import D3.Examples.MetaTree as MetaTree
-import D3.Examples.Spago as Spago
 import D3.Examples.Tree.Configure as Tree
-import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
-import Data.Bifunctor (rmap)
-import Data.Foldable (sequence_)
+import D3.Layouts.Hierarchical (makeModel)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(Tuple))
 import Effect (Effect)
-import Effect.Aff (Aff, forkAff, launchAff, launchAff_)
+import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class.Console (log)
 import Foreign.Object as Object
 import Halogen.Aff as HA
 import Halogen.HTML as HH
