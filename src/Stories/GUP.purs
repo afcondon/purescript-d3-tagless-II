@@ -18,9 +18,17 @@ type Query = Const Void
 
 data Action
   = StartGUP
-  | StopGUP
+  | RestartGUP
+  | PauseGUP
+  | KillGUP
 
-type State = { value :: Boolean, computation :: Maybe (Fiber Unit) }
+data Status = NotInitialized | Running | Paused
+instance showStatus :: Show Status where
+  show NotInitialized = "Not yet initialized"
+  show Running = "GUP is running"
+  show Paused  = "GUP is paused"
+  
+type State = { value :: Status, computation :: Maybe (Fiber Unit) }
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
 component = H.mkComponent
@@ -32,7 +40,7 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { value: false, computation: Nothing }
+  initialState = { value: NotInitialized, computation: Nothing }
 
   render :: State -> H.ComponentHTML Action () m
   render state =
@@ -41,16 +49,26 @@ component = H.mkComponent
       [ HH.h3_
           [ HH.text "General Update Pattern" ]
       , HH.div_
-          [ HH.button
-              [ HE.onClick $ const StartGUP ]
-              [ HH.text "GO" ]
-          ]
-      , HH.div_
           [ HH.text $ show state.value ]
       , HH.div_
           [ HH.button
-              [ HE.onClick $ const StopGUP ]
-              [ HH.text "STOP" ]
+              [ HE.onClick $ const StartGUP ]
+              [ HH.text "Start" ]
+          ]
+      , HH.div_
+          [ HH.button
+              [ HE.onClick $ const PauseGUP ]
+              [ HH.text "Pause" ]
+          ]
+      , HH.div_
+          [ HH.button
+              [ HE.onClick $ const RestartGUP ]
+              [ HH.text "Restart" ]
+          ]
+      , HH.div_
+          [ HH.button
+              [ HE.onClick $ const KillGUP ]
+              [ HH.text "Remove" ]
           ]
       ]
 
@@ -58,10 +76,22 @@ handleAction :: forall m. Bind m => MonadAff m => MonadState State m =>
   Action -> m Unit
 handleAction StartGUP = do
     fiber <- H.liftAff $ GUP.runGeneralUpdatePattern
-    H.modify_ (\state -> state { value = true, computation = Just fiber })
-handleAction StopGUP = do
+    H.modify_ (\state -> state { value = Running, computation = Just fiber })
+
+handleAction PauseGUP = do
     computation <- H.gets _.computation
     _ <- case computation of
             Nothing      -> pure unit
             (Just fiber) -> H.liftAff $ killFiber (error "Just had to cancel") fiber
-    H.modify_ (\state -> state { value = false, computation = Nothing })
+    H.modify_ (\state -> state { value = Paused, computation = Nothing })
+
+handleAction RestartGUP = do
+-- we should restart it here
+    H.modify_ (\state -> state { value = Running, computation = Nothing })
+
+handleAction KillGUP = do
+    computation <- H.gets _.computation
+    _ <- case computation of
+            Nothing      -> pure unit
+            (Just fiber) -> H.liftAff $ killFiber (error "Just had to cancel") fiber
+    H.modify_ (\state -> state { value = NotInitialized, computation = Nothing })
