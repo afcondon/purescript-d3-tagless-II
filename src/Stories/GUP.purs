@@ -1,20 +1,31 @@
 module Stories.GUP where
 
-import Prelude
+import Prelude 
 
 import Control.Monad.Rec.Class (forever)
-import Control.Monad.State (class MonadState, gets)
+import Control.Monad.State (class MonadState)
 import D3.Examples.GUP as GUP
+import Data.Array (catMaybes)
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
+import Data.String.CodeUnits (toCharArray)
+import Data.Traversable (sequence)
+import Effect (Effect)
 import Effect.Aff (Aff, Fiber, Milliseconds(..), delay, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Exception (error)
+import Effect.Random (random)
+import Halogen (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import D3.Interpreter.D3 (runD3M)
+import Data.Tuple (Tuple(..))
+import Effect.Class (class MonadEffect)
+import Effect.Class.Console (log)
 
+type Query :: forall k. k -> Type
 type Query = Const Void
 
 data Action
@@ -32,7 +43,7 @@ instance showStatus :: Show Status where
 type State = { 
     value  :: Status
   , fiber  :: Maybe (Fiber Unit)
-  , update :: Maybe (Unit -> Aff Unit)
+  , update :: Maybe (Array Char -> Aff Unit)
 }
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
@@ -77,17 +88,40 @@ component = H.mkComponent
           ]
       ]
 
-runUpdate :: (Unit -> Aff Unit) -> Aff Unit
+runGeneralUpdatePattern :: forall m. Bind m => MonadEffect m => m (Array Char -> Aff Unit)
+runGeneralUpdatePattern = do
+  log "General Update Pattern example"
+  (Tuple update _) <- liftEffect $ runD3M GUP.script
+  -- the script sets up the SVG and returns a function that the component can run whenever it likes
+  -- (but NB if it runs more often than every 2000 milliseconds there will be big problems)
+  pure (\letters -> liftEffect $ runD3M (update letters) *> pure unit )
+
+runUpdate :: (Array Char -> Aff Unit) -> Aff Unit
 runUpdate update = do
+  letters <- liftEffect $ getLetters
+  update letters
   delay (Milliseconds 2300.0)
-  update unit
+  where
+    -- | choose a string of random letters (no duplicates), ordered alphabetically
+    getLetters :: Effect (Array Char)
+    getLetters = do
+      let 
+        letters = toCharArray "abcdefghijklmnopqrstuvwxyz"
+        coinToss :: Char -> Effect (Maybe Char)
+        coinToss c = do
+          n <- random
+          pure $ if n > 0.6 then Just c else Nothing
+      
+      choices <- sequence $ coinToss <$> letters
+      pure $ catMaybes choices
+
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction StartGUP = do
-    updateFn <- GUP.runGeneralUpdatePattern
+    updateFn <- runGeneralUpdatePattern
 
-    fiber <- H.liftAff $ forkAff $ forever (runUpdate updateFn)
+    fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
 
     H.modify_ (\state -> state { value = Running, fiber = Just fiber, update = Just updateFn })
 
@@ -103,7 +137,7 @@ handleAction RestartGUP = do
     case update of
       Nothing -> pure unit
       (Just updateFn) -> do
-        fiber <- H.liftAff $ forkAff $ forever (runUpdate updateFn)
+        fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
         H.modify_ (\state -> state { value = Running, fiber = Just fiber })
 
 handleAction KillGUP = do

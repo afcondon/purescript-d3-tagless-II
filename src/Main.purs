@@ -3,7 +3,6 @@ module Main where
 import Prelude
 
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..))
-import D3.Examples.GUP (runGeneralUpdatePattern) as GUP
 import D3.Examples.LesMiserables as LesMis
 import D3.Examples.MetaTree as MetaTree
 import D3.Examples.Spago as Spago
@@ -32,7 +31,6 @@ drawMetaTree json =
 
 ddi :: Aff Unit
 ddi = do
-  _        <- forkAff GUP.runGeneralUpdatePattern
 {-
   _        <- forkAff Spago.drawGraph
   
@@ -67,7 +65,7 @@ stories = Object.fromFoldable
   ]
 
 logo :: HH.PlainHTML
-logo = HH.text "PureScript Data Driven Interfaces"
+logo = HH.text "Data Driven Interfaces in PureScript"
 
 main :: Effect Unit
 main = HA.runHalogenAff do
