@@ -7,7 +7,7 @@ import Control.Monad.State (class MonadState, gets)
 import D3.Examples.GUP as GUP
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
-import Effect.Aff (Aff, Fiber, forkAff, killFiber)
+import Effect.Aff (Aff, Fiber, Milliseconds(..), delay, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Exception (error)
 import Halogen as H
@@ -77,31 +77,38 @@ component = H.mkComponent
           ]
       ]
 
+runUpdate :: (Unit -> Aff Unit) -> Aff Unit
+runUpdate update = do
+  delay (Milliseconds 2300.0)
+  update unit
+
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction StartGUP = do
-    update <- GUP.runGeneralUpdatePattern
-    fiber <- H.liftAff $ forever (update unit)
-    H.modify_ (\state -> state { value = Running, fiber = Just fiber, update = Just update })
+    updateFn <- GUP.runGeneralUpdatePattern
+
+    fiber <- H.liftAff $ forkAff $ forever (runUpdate updateFn)
+
+    H.modify_ (\state -> state { value = Running, fiber = Just fiber, update = Just updateFn })
 
 handleAction PauseGUP = do
     fiber <- H.gets _.fiber
     _ <- case fiber of
             Nothing      -> pure unit
-            (Just fiber) -> H.liftAff $ killFiber (error "Just had to cancel") fiber
+            (Just fiber) -> H.liftAff $ killFiber (error "Cancel fiber to suspend computation") fiber
     H.modify_ (\state -> state { value = Paused, fiber = Nothing })
 
 handleAction RestartGUP = do
     update <- H.gets _.update
     case update of
       Nothing -> pure unit
-      (Just update) -> do
-        fiber <- H.liftAff $ forever (update unit)
+      (Just updateFn) -> do
+        fiber <- H.liftAff $ forkAff $ forever (runUpdate updateFn)
         H.modify_ (\state -> state { value = Running, fiber = Just fiber })
 
 handleAction KillGUP = do
     fiber <- H.gets _.fiber
     _ <- case fiber of
             Nothing      -> pure unit
-            (Just fiber) -> H.liftAff $ killFiber (error "Just had to cancel") fiber
+            (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
     H.modify_ (\state -> state { value = NotInitialized, fiber = Nothing, update = Nothing })

@@ -26,14 +26,12 @@ runGeneralUpdatePattern = do
   (Tuple update _) <- liftEffect $ runD3M script
   -- now we return a function that the component can run whenever it likes
   -- (but NB if it runs more often than every 2000 milliseconds there will be big problems)
-  pure $ 
+  pure 
     (\_ -> do
       newletters <- liftEffect $ getLetters
       _          <- liftEffect $ runD3M (update newletters)
       log "GUP renew"
--- TODO i think delay logically belongs in the component not the script? but it is dependent on the transition length...hmmm
-      delay (Milliseconds 2300.0)) -- NB this has to be a smidge longer than any transitions in the update!
-
+    )
 -- | choose a string of random letters (no duplicates), ordered alphabetically
 getLetters :: Effect (Array Char)
 getLetters = do
