@@ -39,9 +39,7 @@ component = H.mkComponent
   render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div [ HP.id "d3story"]
-      [ HH.div
-        [ HP.id "controls" ]
-        [ HH.h1_ [ HH.text "Force Layout Simulation" ]]
+      [ HH.div [ HP.id "banner" ] [ HH.h1_ [ HH.text "Force Layout Simulation" ] ]
 
       , HH.div [ HP.id "blurb" ]
 
@@ -68,7 +66,8 @@ component = H.mkComponent
             occaecat sint esse nostrud. Duis velit nostrud ullamco cillum cillum Lorem
             cupidatat irure."""
   
-  ]
+          -- , HH.div [ HP.id "controls" ]  [ HH.text "(no control options for this example" ]
+          ]
 
       , HH.div [ HP.id "code" ]
           [ HH.text
@@ -119,7 +118,7 @@ script = do
           ]
 
       , HH.div -- the div where the d3 script will appear
-          [ HP.id "force" ]
+          [ HP.id "force", HP.classes [ HH.ClassName "viz" ] ]
           []
       ]
 

@@ -107,7 +107,6 @@ graphScript widthheight model = do
       height  = (snd widthheight) / rows
   root       <- attach "div#force"
   svg        <- root `append` (node Svg    [ viewBox (-width / 2.0) (-height / 2.0) width height ] )
-  centerDot  <- svg  `append` (node Circle [ radius 20.0, fill "red", cx 0.0, cy 0.0 ])
   linksGroup <- svg  `append` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
@@ -142,5 +141,4 @@ graphScript widthheight model = do
                       , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
                       , name : "LesMis"
                       }
-
   pure svg

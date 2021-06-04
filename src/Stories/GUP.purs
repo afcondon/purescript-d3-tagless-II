@@ -64,22 +64,8 @@ component = H.mkComponent
   render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div [ HP.id "d3story"]
-      [ HH.div
-        [ HP.id "controls" ]
-        [ HH.h1_ [ HH.text "General Update Pattern" ]
-        , HH.div_
-            [ HH.text $ show state.value ]
-        , HH.div_
-            [ HH.button
-              [ HE.onClick $ const PauseGUP ]
-              [ HH.text "Pause" ]
-            ]
-        , HH.div_
-            [ HH.button
-              [ HE.onClick $ const RestartGUP ]
-              [ HH.text "Restart" ]
-            ]
-        ]
+      [ HH.div [ HP.id "banner" ] [ HH.h1_ [ HH.text "General Update Pattern" ] ]
+
 
       , HH.div [ HP.id "blurb" ]
 
@@ -89,14 +75,17 @@ component = H.mkComponent
             Commodo cillum minim nisi laborum eiusmod veniam ullamco id ex fugiat eu anim.
             Irure est aute laborum duis. Lorem dolore id sunt incididunt ut ea. Nostrud
             enim officia nisi anim consequat cupidatat consectetur consequat ex excepteur.
-            Lorem nisi in reprehenderit ex adipisicing magna elit aute sunt. Cillum non
-            Lorem minim duis culpa ullamco aute ex minim. Mollit anim in nisi tempor enim
+            Lorem nisi in reprehenderit ex adipisicing magna elit aute sunt. 
+            
+            Cillum non Lorem minim duis culpa ullamco aute ex minim. Mollit anim in nisi tempor enim
             exercitation dolore. Veniam consequat minim nostrud amet duis dolore tempor
             voluptate quis culpa. Laborum dolor pariatur ut est cupidatat elit deserunt
             occaecat tempor aliquip anim. Velit irure ea voluptate ipsum ex exercitation
             dolore voluptate reprehenderit sit anim sunt. Anim fugiat ad ut qui cillum
             tempor occaecat et deserunt nostrud non ipsum. Id non qui mollit culpa elit
-            cillum ipsum excepteur adipisicing qui. Incididunt adipisicing sit incididunt
+            cillum ipsum excepteur adipisicing qui. 
+            
+            Incididunt adipisicing sit incididunt
             consequat minim id do exercitation cupidatat est sunt mollit. Anim ut ullamco
             enim culpa. Adipisicing ad non esse laboris anim consequat ut velit esse
             consequat tempor. Commodo magna esse ullamco ipsum et ipsum minim dolore esse
@@ -104,7 +93,22 @@ component = H.mkComponent
             occaecat sint esse nostrud. Duis velit nostrud ullamco cillum cillum Lorem
             cupidatat irure."""
   
-  ]
+          , HH.div [ HP.id "controls" ]  
+              [
+                HH.div_
+                [ HH.text $ show state.value ]
+            , HH.div_
+                [ HH.button
+                  [ HE.onClick $ const PauseGUP ]
+                  [ HH.text "Pause" ]
+                ]
+            , HH.div_
+                [ HH.button
+                  [ HE.onClick $ const RestartGUP ]
+                  [ HH.text "Restart" ]
+                ]
+            ]
+          ]
 
       , HH.div [ HP.id "code" ]
           [ HH.text
@@ -155,7 +159,7 @@ script = do
           ]
 
       , HH.div -- the div where the d3 script will appear
-          [ HP.id "gup" ]
+          [ HP.id "gup", HP.classes [ HH.ClassName "viz" ] ]
           []
       ]
 

@@ -9,7 +9,7 @@ body {
   grid-template-areas:
     "logo main"
     "nav main";
-  grid-template-columns: 20rem 1fr;
+  grid-template-columns: 10rem 1fr;
   grid-template-rows: 4rem 1fr;
 }
 
@@ -65,6 +65,5 @@ body {
 
 .Storybook-main {
   grid-area: main;
-  padding: 2rem;
-  overflow: auto;
+  overflow: hidden;
 }
