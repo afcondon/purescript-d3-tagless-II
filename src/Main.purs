@@ -18,6 +18,7 @@ import Halogen.Storybook (Stories, runStorybook, proxy)
 import Stories.Count as ExpCount
 import Stories.LesMis as LesMis
 import Stories.GUP as D3GUP
+import Stories.Trees as Trees
 import Stories.Index as ExpIndex
 import Stories.Input as ExpInput
 
@@ -28,13 +29,13 @@ drawMetaTree json =
 ddi :: Aff Unit
 ddi = do
 {-
+  treeJSON <- getTreeViaAJAX "http://localhost:1234/flare-2.json"
   _        <- forkAff Spago.drawGraph
   
   _        <- forkAff LesMis.drawGraph
 
 
   -- fetch an example model for the tree examples, the canonical flare dependency json in this case
-  treeJSON <- getTreeViaAJAX "http://localhost:1234/flare-2.json"
 
   sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Horizontal json) treeJSON
   sequence_ $ rmap (\json -> Tree.drawTree =<< makeModel Dendrogram Vertical json)   treeJSON
@@ -57,6 +58,7 @@ stories = Object.fromFoldable
   [ Tuple "" $ proxy ExpIndex.component
   , Tuple "GUP" $ proxy D3GUP.component
   , Tuple "LesMis" $ proxy LesMis.component
+  , Tuple "Trees" $ proxy Trees.component
   , Tuple "count" $ proxy ExpCount.component
   , Tuple "Form|input" $ proxy ExpInput.component
   ]

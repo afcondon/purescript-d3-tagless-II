@@ -6,16 +6,23 @@ import Data.List (List(..))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Tree (Tree(..))
-import Prelude (class Eq, (<$>))
+import Prelude (class Eq, class Show, (<$>))
 
 foreign import data TreeJson_ :: Type
 foreign import emptyTreeJson_ :: TreeJson_
 
 data TreeType   = TidyTree | Dendrogram
 derive instance eqTreeType :: Eq TreeType
+instance showTreeType :: Show TreeType where
+  show TidyTree = "Tidy Tree"
+  show Dendrogram = "Dendrogram"
 
 data TreeLayout = Radial | Horizontal | Vertical
 derive instance eqTreeLayout :: Eq TreeLayout
+instance showTreeLayout :: Show TreeLayout where
+  show Radial = "Radial"
+  show Horizontal = "Horizontal"
+  show Vertical = "Vertical"
 
 type TreeModel = {
       json         :: TreeJson_                      -- data from file
