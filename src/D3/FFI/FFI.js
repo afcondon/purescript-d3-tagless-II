@@ -602,3 +602,9 @@ exports.hNodeX_ = node => node.x
 
 // hNodeY_      :: D3HierarchicalNode_ -> Number
 exports.hNodeY_ = node => node.y
+
+
+// removeTheSVG_ :: String -> Unit
+exports.removeTheSVG_ = selector => {
+  d3.selectAll(selector).select('svg').remove()
+}

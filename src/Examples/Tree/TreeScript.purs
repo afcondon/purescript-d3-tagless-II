@@ -121,6 +121,5 @@ script config tree = do
                             , textAnchor (datum_.textAnchor config.layout)
                             , text       datum_.name
                             , fill       config.color
-                            ])
-                            
+                            ])               
   pure svg

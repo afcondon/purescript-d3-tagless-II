@@ -8,7 +8,7 @@ import D3.Data.Types (D3Selection_, Datum_)
 import D3.Examples.Spago.Model (tree_datum_)
 import D3.Examples.Tree.Model (FlareTreeNode)
 import D3.Examples.Tree.Script (script) as Tree
-import D3.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
+import D3.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, removeTheSVG_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.MetaTree (D3GrammarNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
@@ -64,6 +64,7 @@ configureAndRunScript :: forall m selection.
 configureAndRunScript (Tuple width height ) model = 
   Tree.script { spacing, selector: "div#trees", viewbox, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_
   where
+    extremelyTemporaryHack = removeTheSVG_ "div#trees"
     columns = 3.0  -- 3 columns, set in the grid CSS in index.html
     gap     = 10.0 -- 10px set in the grid CSS in index.html
     svg     = { width : ((width - ((columns - 1.0) * gap)) / columns)

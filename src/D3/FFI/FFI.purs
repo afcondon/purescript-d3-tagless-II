@@ -221,3 +221,8 @@ foreign import hNodeDepth_  :: forall r. D3_TreeNode r -> Number
 foreign import hNodeHeight_ :: forall r. D3_TreeNode r -> Number
 foreign import hNodeX_      :: forall r. D3_TreeNode r -> Number
 foreign import hNodeY_      :: forall r. D3_TreeNode r -> Number
+
+
+-- NASTY HACK to defer re-factoring the Trees example to be re-using the svg each time
+-- instead we provide a function to blow away the svg if one is present
+foreign import removeTheSVG_ :: String -> Unit
