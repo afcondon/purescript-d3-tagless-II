@@ -3,9 +3,9 @@ module Stories.Trees where
 import Prelude
 
 import Affjax (Error)
-import Control.Monad.State (class MonadState, gets)
-import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..))
-import D3.Examples.MetaTree as Tree
+import Control.Monad.State (class MonadState, get, put)
+import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..), TreeModel)
+import D3.Examples.Tree.Configure as Tree
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
 import Data.Const (Const)
 import Data.Either (Either(..)) as E
@@ -23,9 +23,7 @@ data Action
   = Initialize
   | Layout TreeLayout TreeType
   
-type State = { tree   :: Maybe TreeJson_
-             , type   :: TreeType
-             , layout :: TreeLayout } 
+type State = Maybe TreeModel
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
 component = H.mkComponent
@@ -38,11 +36,15 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { tree: Nothing, type: TidyTree, layout: Horizontal }
+  initialState = Nothing
+
+  showState :: Maybe TreeModel -> String
+  showState Nothing = "There is no model yet"
+  showState (Just model) = show model.treeType <> " " <> show model.treeLayout
 
   render :: State -> H.ComponentHTML Action () m
-  render state =
-    HH.div [ HP.id "d3story"]
+  render state =  
+      HH.div [ HP.id "d3story"]
       [ HH.div [ HP.id "banner" ] [ HH.h1_ [ HH.text "Tree layouts" ] ]
 
       , HH.div [ HP.id "blurb" ]
@@ -71,7 +73,7 @@ component = H.mkComponent
             cupidatat irure."""
   
           , HH.div [ HP.id "controls" ]  
-              [ HH.div_ [ HH.text $ show state.type <> " " <> show state.layout ]
+              [ HH.div_ [ HH.text $ showState state ]
               , HH.div_ [ HH.button [ HE.onClick $ const (Layout Radial TidyTree) ] [ HH.text "Radial TidyTree" ] ]
               , HH.div_ [ HH.button [ HE.onClick $ const (Layout Radial Dendrogram) ] [ HH.text "Radial Dendrogram" ] ]
               , HH.div_ [ HH.button [ HE.onClick $ const (Layout Horizontal TidyTree) ] [ HH.text "Horizontal TidyTree" ] ]
@@ -130,25 +132,29 @@ script = do
           ]
 
       , HH.div -- the div where the d3 script will appear
-          [ HP.id "force", HP.classes [ HH.ClassName "viz" ] ]
+          [ HP.id "trees", HP.classes [ HH.ClassName "viz" ] ]
           []
       ]
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction Initialize = do
-  (treeJSON :: E.Either Error TreeJson_) <- H.liftAff $ getTreeViaAJAX "http://localhost:1234/flare-2.json"
+  treeJSON <- H.liftAff $ getTreeViaAJAX "http://localhost:1234/flare-2.json"
+
   case treeJSON of
     (E.Left err) -> pure unit
-    (E.Right tree) -> do
-      _ <- H.liftAff $ (\json -> Tree.drawTree =<< makeModel Dendrogram Horizontal json) tree
-      H.modify_ (\state -> state { tree = Just tree })
+    (E.Right (tree :: TreeJson_)) -> do
+      model <- H.liftAff $ makeModel Dendrogram Horizontal tree
+      _     <- H.liftAff $ Tree.drawTree model
+      H.modify_ (\_ -> Just model)
       pure unit
+  pure unit
 
 handleAction (Layout layout treetype) = do
-  tree <- gets _.tree
-  case tree of
+  (model :: Maybe TreeModel) <- get
+  case model of
     Nothing -> pure unit
-    (Just json) -> do
-      _ <- H.liftAff $ (\json -> Tree.drawTree =<< makeModel treetype layout json) json
-      H.modify_ (\state -> state { layout = layout, type = treetype})
+    (Just model) -> do
+      let updated = model { treeLayout = layout, treeType = treetype }
+      _ <- H.liftAff $ Tree.drawTree updated
+      put $ Just updated
