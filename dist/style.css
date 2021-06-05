@@ -79,15 +79,6 @@ div#d3story div#blurb {
   grid-area: blurb;
   padding: 10em;
 }
-div#d3story div#code {
-  grid-area: code;
-  font-family: monospace;
-  height: 100vh;
-}
-div#d3story div.viz {
-  grid-area: d3;
-  height: 60vh;
-}
 div#d3story div#controls {
   display: flex;
   justify-content: left;
@@ -108,4 +99,29 @@ div#d3story div#banner {
   opacity: 0.7;
   grid-area: banner;
   text-align: center;
+}
+div#d3story div#code {
+  font-family: monospace;
+}
+div#d3story div#code {
+  grid-area: code;
+  font-family: monospace;
+  height: 100vh;
+  padding: 10em;
+  width: 30vh;
+}
+div#d3story div.viz {
+  grid-area: d3;
+  height: 60vh;
+}
+div#d3story.Horizontal div#trees.viz {
+  grid-area: code;
+  height: 100vh;
+  width: 30vh;
+  padding: 10em;
+}
+div#d3story.Horizontal div#code {
+  grid-area: d3;
+  height: 60vh;
+  width: auto;
 }

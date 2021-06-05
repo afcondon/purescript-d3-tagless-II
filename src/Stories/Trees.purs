@@ -9,7 +9,7 @@ import D3.Examples.Tree.Configure as Tree
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
 import Data.Const (Const)
 import Data.Either (Either(..)) as E
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
@@ -44,7 +44,7 @@ component = H.mkComponent
 
   render :: State -> H.ComponentHTML Action () m
   render state =  
-      HH.div [ HP.id "d3story"]
+      HH.div [ HP.id "d3story", HP.classes [ HH.ClassName $ fromMaybe "" $ ((show <<< _.treeLayout) <$> state)]]
       [ HH.div [ HP.id "banner" ] [ HH.h1_ [ HH.text "Tree layouts" ] ]
 
       , HH.div [ HP.id "blurb" ]
