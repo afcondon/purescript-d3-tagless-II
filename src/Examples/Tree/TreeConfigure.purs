@@ -62,9 +62,9 @@ configureAndRunScript :: forall m selection.
   D3InterpreterM selection m => 
   Tuple Number Number -> TreeModel -> m selection
 configureAndRunScript (Tuple width height ) model = 
-  Tree.script { spacing, selector: "div#trees", viewbox, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_
+  Tree.script { spacing, selector: "div#tree", viewbox, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_
   where
-    extremelyTemporaryHack = removeTheSVG_ "div#trees"
+    extremelyTemporaryHack = removeTheSVG_ "div#tree"
     columns = 3.0  -- 3 columns, set in the grid CSS in index.html
     gap     = 10.0 -- 10px set in the grid CSS in index.html
     svg     = { width : ((width - ((columns - 1.0) * gap)) / columns)

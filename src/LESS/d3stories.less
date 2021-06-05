@@ -1,18 +1,27 @@
 div#d3story {
-  div {
-    background-color: beige;
-  }
   display: grid;
-  grid-gap: 2px;
-  grid-template-areas:
-    'banner code'
-    'blurb  code'
-    'svg    code';
+  gap: 2px;
+
+  div#banner {
+    font-family: sans-serif;
+    color: darkred;
+    opacity: 0.7;
+    text-align: center;
+    background-color: aliceblue;
+  }
+  div#code {
+    background-color: azure;
+    font-family: monospace;
+  }
   div#blurb {
-    grid-area: blurb;
-    padding: 10em;
+    background-color: bisque;
+  }
+  div#blurb div,
+  div#code div {
+    padding: 5em;
   }
   div#controls {
+    background-color: gainsboro;
     display: flex;
     justify-content: left;
     flex-direction: row;
@@ -26,50 +35,59 @@ div#d3story {
       margin: 0 1em;
     }
   }
+}
+
+div#d3story.gup,
+div#d3story.force,
+div#d3story.trees.Radial,
+div#d3story.trees.Vertical {
+  grid-template-areas: 
+    'banner banner'
+    'controls code'
+    'blurb code'
+    'svg code';
+
   div#banner {
-    font-family: sans-serif;
-    color: darkred;
-    opacity: 0.7;
     grid-area: banner;
-    text-align: center;
-    height: 5vh;
   }
   div#code {
-    height: 100vh;
     grid-area: code;
-    font-family: monospace;
-    padding: 10em;
-    width: 30vh;
+    width: 25vw;
   }
-  div.svg {
+  div#blurb {
+    grid-area: blurb;
+  }
+  div#gup,
+  div#force
+  div#tree {
     grid-area: svg;
-    height: 60vh;
+    height: 50vh;
   }
-}
-div#d3story.trees.Vertical {
-  grid-template-areas:
-    'banner code'
-    'blurb  code'
-    'svg    code';
+  div#controls {
+    grid-area: controls;
+  }
 }
 div#d3story.trees.Horizontal {
-  grid-template-areas:
-    'banner banner svg'
-    'blurb  code   svg'
-    'blurb  code   svg';
-  div.svg {
-    height: 100vh;
+  grid-template-areas: 
+    'banner banner banner'
+    'controls controls svg'
+    'blurb code svg';
+
+  div#banner {
+    grid-area: banner;
   }
   div#code {
-    height: 60vh;
+    grid-area: code;
   }
-}
-div#d3story.trees.Radial {
-  grid-template-areas:
-    'banner banner banner'
-    'blurb  svg    svg'
-    'code   svg    svg';
-  div.svg {
-    height: 90vh;
+  div#blurb {
+    grid-area: blurb;
+  }
+  div#tree {
+    grid-area: svg;
+    width: 25vw;
+  }
+  div#controls {
+    grid-area: controls;
+    height: min-content;
   }
 }
