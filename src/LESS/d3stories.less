@@ -4,10 +4,10 @@ div#d3story {
   }
   display: grid;
   grid-gap: 2px;
-  grid-template-areas: 
+  grid-template-areas:
     'banner code'
-    'blurb code'
-    'd3   code';
+    'blurb  code'
+    'svg    code';
   div#blurb {
     grid-area: blurb;
     padding: 10em;
@@ -21,7 +21,7 @@ div#d3story {
     width: min-content;
     margin: 1em auto;
     padding: 1em 2em;
-    button { 
+    button {
       padding: 0.2em 1em;
       margin: 0 1em;
     }
@@ -32,34 +32,44 @@ div#d3story {
     opacity: 0.7;
     grid-area: banner;
     text-align: center;
+    height: 5vh;
   }
   div#code {
-    font-family: monospace;
-  }
-}
-div#d3story {
-  div#code {
+    height: 100vh;
     grid-area: code;
     font-family: monospace;
-    height: 100vh;
     padding: 10em;
     width: 30vh;
   }
-  div.viz {
-    grid-area: d3;
-    height: 60vh
-  }
-}
-div#d3story.Horizontal {
-  div#trees.viz {
-    grid-area: code;
-    height: 100vh;
-    width: 30vh;
-    padding: 10em;
-  }
-  div#code {
-    grid-area: d3;
+  div.svg {
+    grid-area: svg;
     height: 60vh;
-    width: auto;
+  }
+}
+div#d3story.trees.Vertical {
+  grid-template-areas:
+    'banner code'
+    'blurb  code'
+    'svg    code';
+}
+div#d3story.trees.Horizontal {
+  grid-template-areas:
+    'banner banner svg'
+    'blurb  code   svg'
+    'blurb  code   svg';
+  div.svg {
+    height: 100vh;
+  }
+  div#code {
+    height: 60vh;
+  }
+}
+div#d3story.trees.Radial {
+  grid-template-areas:
+    'banner banner banner'
+    'blurb  svg    svg'
+    'code   svg    svg';
+  div.svg {
+    height: 90vh;
   }
 }

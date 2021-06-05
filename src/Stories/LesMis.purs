@@ -118,7 +118,7 @@ script = do
           ]
 
       , HH.div -- the div where the d3 script will appear
-          [ HP.id "force", HP.classes [ HH.ClassName "viz" ] ]
+          [ HP.id "force", HP.classes [ HH.ClassName "svg" ] ]
           []
       ]
 

@@ -70,7 +70,7 @@ body {
 div#d3story {
   display: grid;
   grid-gap: 2px;
-  grid-template-areas: 'banner code' 'blurb code' 'd3   code';
+  grid-template-areas: 'banner code' 'blurb  code' 'svg    code';
 }
 div#d3story div {
   background-color: beige;
@@ -99,29 +99,34 @@ div#d3story div#banner {
   opacity: 0.7;
   grid-area: banner;
   text-align: center;
+  height: 5vh;
 }
 div#d3story div#code {
-  font-family: monospace;
-}
-div#d3story div#code {
+  height: 100vh;
   grid-area: code;
   font-family: monospace;
-  height: 100vh;
   padding: 10em;
   width: 30vh;
 }
-div#d3story div.viz {
-  grid-area: d3;
+div#d3story div.svg {
+  grid-area: svg;
   height: 60vh;
 }
-div#d3story.Horizontal div#trees.viz {
-  grid-area: code;
+div#d3story.trees.Vertical {
+  grid-template-areas: 'banner code' 'blurb  code' 'svg    code';
+}
+div#d3story.trees.Horizontal {
+  grid-template-areas: 'banner banner svg' 'blurb  code   svg' 'blurb  code   svg';
+}
+div#d3story.trees.Horizontal div.svg {
   height: 100vh;
-  width: 30vh;
-  padding: 10em;
 }
-div#d3story.Horizontal div#code {
-  grid-area: d3;
+div#d3story.trees.Horizontal div#code {
   height: 60vh;
-  width: auto;
+}
+div#d3story.trees.Radial {
+  grid-template-areas: 'banner banner banner' 'blurb  svg    svg' 'code   svg    svg';
+}
+div#d3story.trees.Radial div.svg {
+  height: 90vh;
 }

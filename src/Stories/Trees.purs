@@ -7,6 +7,7 @@ import Control.Monad.State (class MonadState, get, put)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..), TreeModel)
 import D3.Examples.Tree.Configure as Tree
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
+import Data.Array (catMaybes)
 import Data.Const (Const)
 import Data.Either (Either(..)) as E
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -42,10 +43,15 @@ component = H.mkComponent
   showState Nothing = "There is no model yet"
   showState (Just model) = show model.treeType <> " " <> show model.treeLayout
 
+  treeClasses :: State -> Array HH.ClassName
+  treeClasses model = do
+    let classStrings = catMaybes [ Just "trees", (show <<< _.treeLayout) <$> model]
+    HH.ClassName <$> classStrings
+
   render :: State -> H.ComponentHTML Action () m
   render state =  
-      HH.div [ HP.id "d3story", HP.classes [ HH.ClassName $ fromMaybe "" $ ((show <<< _.treeLayout) <$> state)]]
-      [ HH.div [ HP.id "banner" ] [ HH.h1_ [ HH.text "Tree layouts" ] ]
+      HH.div [ HP.id "d3story", HP.classes $ treeClasses state ]
+      [ HH.div [ HP.id "banner" ] [ HH.h1_ [ HH.text $ "Tree layout: " <> showState state ] ] 
 
       , HH.div [ HP.id "blurb" ]
 
@@ -73,8 +79,7 @@ component = H.mkComponent
             cupidatat irure."""
   
           , HH.div [ HP.id "controls" ]  
-              [ HH.div_ [ HH.text $ showState state ]
-              , HH.div_ [ HH.button [ HE.onClick $ const (Layout Radial TidyTree) ] [ HH.text "Radial TidyTree" ] ]
+              [ HH.div_ [ HH.button [ HE.onClick $ const (Layout Radial TidyTree) ] [ HH.text "Radial TidyTree" ] ]
               , HH.div_ [ HH.button [ HE.onClick $ const (Layout Radial Dendrogram) ] [ HH.text "Radial Dendrogram" ] ]
               , HH.div_ [ HH.button [ HE.onClick $ const (Layout Horizontal TidyTree) ] [ HH.text "Horizontal TidyTree" ] ]
               , HH.div_ [ HH.button [ HE.onClick $ const (Layout Horizontal Dendrogram) ] [ HH.text "Horizontal Dendrogram" ] ]
@@ -132,7 +137,7 @@ script = do
           ]
 
       , HH.div -- the div where the d3 script will appear
-          [ HP.id "trees", HP.classes [ HH.ClassName "viz" ] ]
+          [ HP.id "trees", HP.classes [ HH.ClassName "svg" ] ]
           []
       ]
 
