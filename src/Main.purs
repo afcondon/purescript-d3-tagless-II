@@ -59,8 +59,6 @@ stories = Object.fromFoldable
   , Tuple "GUP" $ proxy D3GUP.component
   , Tuple "LesMis" $ proxy LesMis.component
   , Tuple "Trees" $ proxy Trees.component
-  , Tuple "count" $ proxy ExpCount.component
-  , Tuple "Form|input" $ proxy ExpInput.component
   ]
 
 logo :: HH.PlainHTML

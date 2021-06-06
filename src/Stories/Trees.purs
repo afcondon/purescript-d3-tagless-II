@@ -4,7 +4,7 @@ import Prelude
 
 import Affjax (Error)
 import Control.Monad.State (class MonadState, get, put)
-import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..), TreeModel)
+import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Examples.Tree.Configure as Tree
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
 import Data.Array (catMaybes)
@@ -48,30 +48,40 @@ component = H.mkComponent
     let classStrings = catMaybes [ Just "trees", (show <<< _.treeLayout) <$> model]
     HH.ClassName <$> classStrings
   
-  controls = 
-    [ HH.div_ [ HH.button [ HE.onClick $ const (Layout Radial TidyTree) ] [ HH.text "Radial TidyTree" ] ]
-    , HH.div_ [ HH.button [ HE.onClick $ const (Layout Radial Dendrogram) ] [ HH.text "Radial Dendrogram" ] ]
-    , HH.div_ [ HH.button [ HE.onClick $ const (Layout Horizontal TidyTree) ] [ HH.text "Horizontal TidyTree" ] ]
-    , HH.div_ [ HH.button [ HE.onClick $ const (Layout Horizontal Dendrogram) ] [ HH.text "Horizontal Dendrogram" ] ]
-    , HH.div_ [ HH.button [ HE.onClick $ const (Layout Vertical TidyTree) ] [ HH.text "Vertical TidyTree" ] ]
-    , HH.div_ [ HH.button [ HE.onClick $ const (Layout Vertical Dendrogram) ] [ HH.text "Vertical Dendrogram" ] ]
+  controls model = do
+    let
+      active = showState model
+    [ layoutButton active Vertical TidyTree
+    , layoutButton active Vertical Dendrogram
+    , layoutButton active Radial TidyTree
+    , layoutButton active Radial Dendrogram
+    , layoutButton active Horizontal TidyTree
+    , layoutButton active Horizontal Dendrogram
     ]
+
+  layoutButton active layout treetype = HH.div [buttonClass] [ HH.button [ HE.onClick $ const (Layout layout treetype) ] [ HH.text $ show layout <> " " <> show treetype ] ]
+    where
+      buttonClass = 
+        HP.classes [ HH.ClassName $
+                      if active == show treetype <> " " <> show layout
+                      then "active"
+                      else "inactive" 
+                  ]
 
   render :: State -> H.ComponentHTML Action () m
   render state =  
       HH.div [ HP.id "d3story", HP.classes $ treeClasses state ]
       [ HH.div [ HP.id "banner" ] 
-        [ HH.h1_ [ HH.text $ "Tree layout" ]
-        , HH.h3_ [ HH.text $ showState state ] 
-        ] 
-
-      , HH.div [ HP.id "controls"] controls
-
-      , HH.div [ HP.id "blurb" ] [ HH.div [ HP.id "inner-blurb" ] [ HH.text blurbtext ]]
-
-      , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext]]
+        [ HH.h1_ [ HH.text $ "Tree layout" ] ] 
 
       , HH.div [ HP.id "tree" ] [] -- the div where the d3 script will appear
+
+      , HH.div [ HP.id "blurb" ] 
+        [ HH.div [ HP.id "inner-blurb" ] [ HH.text blurbtext ] 
+        , HH.div [ HP.id "controls" ] (controls state)
+        ]
+
+      , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext]]
       ]
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
@@ -82,7 +92,7 @@ handleAction Initialize = do
   case treeJSON of
     (E.Left err) -> pure unit
     (E.Right (tree :: TreeJson_)) -> do
-      model <- H.liftAff $ makeModel Dendrogram Horizontal tree
+      model <- H.liftAff $ makeModel TidyTree Vertical tree
       _     <- H.liftAff $ Tree.drawTree model
       H.modify_ (\_ -> Just model)
       pure unit

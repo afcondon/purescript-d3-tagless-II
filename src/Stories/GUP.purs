@@ -65,9 +65,12 @@ component = H.mkComponent
   render state =
     HH.div [ HP.id "d3story", HP.classes [ HH.ClassName "gup" ] ]
       [ HH.div [ HP.id "banner" ] [ HH.h1_ [ HH.text "General Update Pattern" ] ]
-      , HH.div [ HP.id "controls" ] (controls state)
-      , HH.div [ HP.id "blurb" ] [ HH.div [ HP.id "inner-blurb" ]  [ HH.text blurbtext ]
+      
+      , HH.div [ HP.id "blurb" ]
+          [ HH.div [ HP.id "inner-blurb" ]  [ HH.text blurbtext ]
+          , HH.div [ HP.id "controls" ] (controls state)
           ]
+          
       , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext] ]
       , HH.div [ HP.id "gup" ] [] -- the div svg will appear
       ]

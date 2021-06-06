@@ -16,8 +16,8 @@ div#d3story {
   div#blurb {
     background-color: bisque;
   }
-  div#blurb div,
-  div#code div {
+  div#blurb div#inner-blurb,
+  div#code div#inner-code {
     padding: 5em;
   }
   div#controls {
@@ -28,22 +28,24 @@ div#d3story {
     border: dotted orange;
     border-radius: 1em;
     width: min-content;
-    margin: 1em auto;
+    margin: 1em;
     padding: 1em 2em;
     button {
       padding: 0.2em 1em;
       margin: 0 1em;
+    }
+    div.active button {
+      background-color: coral;
+      color: blanchedalmond;
     }
   }
 }
 
 div#d3story.gup,
 div#d3story.force,
-div#d3story.trees.Radial,
 div#d3story.trees.Vertical {
   grid-template-areas: 
     'banner banner'
-    'controls code'
     'blurb code'
     'svg code';
 
@@ -67,27 +69,54 @@ div#d3story.trees.Vertical {
     grid-area: controls;
   }
 }
-div#d3story.trees.Horizontal {
-  grid-template-areas: 
-    'banner banner banner'
-    'controls controls svg'
-    'blurb code svg';
+div#d3story.trees.Radial {
+  display: grid;
+  gap: 2px;
+  grid-template-columns: [col] min-content [col] auto [col] 25vw  ;
+  grid-template-rows: [row] min-content [row] 6em [row] auto [row] ;
 
   div#banner {
-    grid-area: banner;
+    grid-column: col 1 / span 3;
+    grid-row: row ;
   }
   div#code {
-    grid-area: code;
+		grid-column: col 3;
+		grid-row: row 2 / span 2 ;
   }
   div#blurb {
-    grid-area: blurb;
+    opacity: 0.9;
+    border-radius: 1em;
+    margin: 1em;
+		grid-column: col 1 ;
+		grid-row: row 2 / span 1 ;
+    height: fit-content;
   }
   div#tree {
-    grid-area: svg;
-    width: 25vw;
+    grid-column: col 1 / span 2;
+    grid-row: row 2 / span 2;
   }
-  div#controls {
-    grid-area: controls;
-    height: min-content;
+}
+
+div#d3story.trees.Horizontal {
+  display: grid;
+  gap: 2px;
+  grid-template-columns: [col] 25vw [col] auto [col] auto  ;
+  grid-template-rows: [row] min-content [row] 6em [row] auto [row] ;
+
+  div#banner {
+    grid-column: col 1 / span 3;
+    grid-row: row ;
+  }
+  div#code {
+		grid-column: col 3;
+		grid-row: row 2 / span 2 ;
+  }
+  div#blurb {
+		grid-column: col 2 ;
+		grid-row: row 2 / span 2 ;
+  }
+  div#tree {
+    grid-column: col 1 / span 1;
+    grid-row: row 2 / span 2;
   }
 }
