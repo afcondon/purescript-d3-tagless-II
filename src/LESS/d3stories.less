@@ -97,7 +97,8 @@ div#d3story.trees.Radial {
   }
 }
 
-div#d3story.trees.Horizontal {
+div#d3story.trees.Horizontal,
+div#d3story.metatree {
   display: grid;
   gap: 2px;
   grid-template-columns: [col] 25vw [col] auto [col] auto  ;
@@ -115,7 +116,8 @@ div#d3story.trees.Horizontal {
 		grid-column: col 2 ;
 		grid-row: row 2 / span 2 ;
   }
-  div#tree {
+  div#tree,
+  div#meta {
     grid-column: col 1 / span 1;
     grid-row: row 2 / span 2;
   }

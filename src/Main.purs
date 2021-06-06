@@ -19,8 +19,8 @@ import Stories.Count as ExpCount
 import Stories.LesMis as LesMis
 import Stories.GUP as D3GUP
 import Stories.Trees as Trees
+import Stories.MetaTree as MetaTree
 import Stories.Index as ExpIndex
-import Stories.Input as ExpInput
 
 drawMetaTree :: TreeJson_ -> Aff Unit
 drawMetaTree json =
@@ -59,6 +59,7 @@ stories = Object.fromFoldable
   , Tuple "GUP" $ proxy D3GUP.component
   , Tuple "LesMis" $ proxy LesMis.component
   , Tuple "Trees" $ proxy Trees.component
+  , Tuple "Meta-Tree" $ proxy MetaTree.component
   ]
 
 logo :: HH.PlainHTML
