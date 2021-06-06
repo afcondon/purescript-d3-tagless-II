@@ -16,11 +16,12 @@ import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.Storybook (Stories, runStorybook, proxy)
 import Stories.Count as ExpCount
-import Stories.LesMis as LesMis
 import Stories.GUP as D3GUP
-import Stories.Trees as Trees
-import Stories.MetaTree as MetaTree
 import Stories.Index as ExpIndex
+import Stories.LesMis as LesMis
+import Stories.MetaTree as MetaTree
+import Stories.PrintTree as PrintTree
+import Stories.Trees as Trees
 
 drawMetaTree :: TreeJson_ -> Aff Unit
 drawMetaTree json =
@@ -60,6 +61,7 @@ stories = Object.fromFoldable
   , Tuple "LesMis" $ proxy LesMis.component
   , Tuple "Trees" $ proxy Trees.component
   , Tuple "Meta-Tree" $ proxy MetaTree.component
+  , Tuple "Print-Tree" $ proxy PrintTree.component
   ]
 
 logo :: HH.PlainHTML

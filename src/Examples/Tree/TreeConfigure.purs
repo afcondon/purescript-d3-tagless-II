@@ -16,29 +16,24 @@ import D3.Interpreter.String (runPrinter)
 import D3.Layouts.Hierarchical (horizontalClusterLink, horizontalLink, radialLink, radialSeparation, verticalClusterLink, verticalLink)
 import D3.Scales (d3SchemeCategory10N_)
 import Data.Map (toUnfoldable)
-import Data.Tuple (Tuple(..), fst, snd)
+import Data.Tuple (Tuple(..), snd)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Effect.Class.Console (log)
 import Math (pi)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>), (==))
+import Prelude (class Bind, Unit, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>), (==))
 
 -- TODO move this to a library, it really only needs the params for runPrinter to be completely generic
 -- | Evaluate the tree drawing script in the "printer" monad which will render it as a string
 -- | rather than drawing SVG or Canvas. In principle this could be basis for compiling to JS D3 script
-printTree :: TreeModel -> Aff Unit
-printTree treeModel = liftEffect $ do
-  log "Tree example"
+getPrintTree :: TreeModel -> Aff String
+getPrintTree treeModel = liftEffect $ do
   widthHeight   <- getWindowWidthHeight
   printedScript <- runPrinter  (configureAndRunScript widthHeight treeModel) "Tree Script"
-  log $ snd printedScript
-  log $ fst printedScript
-  pure unit
+  pure $ snd printedScript
 
 
 getMetaTreeJSON :: TreeModel -> Aff TreeJson_
 getMetaTreeJSON treeModel = liftEffect $ do
-  log "Getting meta-tree for radial tree example"
   widthHeight <- getWindowWidthHeight
   metaScript <- runMetaTree (configureAndRunScript widthHeight treeModel) -- no need for actual widthHeight in metaTree
   let (ScriptTree _ treeMap links) = snd metaScript

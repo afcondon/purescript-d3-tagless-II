@@ -170,6 +170,7 @@ div#d3story.trees.Radial div#tree {
   grid-row: row 2 / span 2;
 }
 div#d3story.trees.Horizontal,
+div#d3story.printtree,
 div#d3story.metatree {
   display: grid;
   gap: 2px;
@@ -177,23 +178,28 @@ div#d3story.metatree {
   grid-template-rows: [row] min-content [row] 6em [row] auto [row];
 }
 div#d3story.trees.Horizontal div#banner,
+div#d3story.printtree div#banner,
 div#d3story.metatree div#banner {
   grid-column: col 1 / span 3;
   grid-row: row ;
 }
 div#d3story.trees.Horizontal div#code,
+div#d3story.printtree div#code,
 div#d3story.metatree div#code {
   grid-column: col 3;
   grid-row: row 2 / span 2;
 }
 div#d3story.trees.Horizontal div#blurb,
+div#d3story.printtree div#blurb,
 div#d3story.metatree div#blurb {
   grid-column: col 2 ;
   grid-row: row 2 / span 2;
 }
 div#d3story.trees.Horizontal div#tree,
+div#d3story.printtree div#tree,
 div#d3story.metatree div#tree,
 div#d3story.trees.Horizontal div#meta,
+div#d3story.printtree div#meta,
 div#d3story.metatree div#meta {
   grid-column: col 1 / span 1;
   grid-row: row 2 / span 2;
