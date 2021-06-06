@@ -55,13 +55,13 @@ drawGraph = do
       -- TODO this type information uglies up the code a lot, find a better way
       ((Tuple {simulation} _) :: Tuple { selection :: D3Selection_, simulation :: D3Simulation_ } Unit) <- liftEffect $ runD3M (Cluster.script (Tuple width height) graph')
 
-      _ <- delay (Milliseconds 4000.0)
-      let _ = putEachForceInSimulation simulation Cluster.forcesB
-      let _ = setAlpha_ simulation 0.3
+      -- _ <- delay (Milliseconds 4000.0)
+      -- let _ = putEachForceInSimulation simulation Cluster.forcesB
+      -- let _ = setAlpha_ simulation 0.3
       
-      _ <- delay (Milliseconds 5000.0)
-      let _ = putEachForceInSimulation simulation Cluster.initialForces
-      let _ = setAlpha_ simulation 1.0
+      -- _ <- delay (Milliseconds 5000.0)
+      -- let _ = putEachForceInSimulation simulation Cluster.initialForces
+      -- let _ = setAlpha_ simulation 1.0
       -- ((Tuple {simulation} _) :: Tuple { selection :: D3Selection_, simulation :: D3Simulation_ } Unit) <- liftEffect $ runD3M (Graph.script (Tuple width height) graph')
       -- _ <- delay (Milliseconds 1000.0)
       -- let _ = putEachForceInSimulation simulation ([Graph.packageOnlyRadialForce] <> [Graph.unusedModuleOnlyRadialForce] <> Graph.initialForces)
@@ -70,7 +70,7 @@ drawGraph = do
       -- _ <- delay (Milliseconds 1000.0)
       -- let _ = stopSimulation_ simulation
 
-      (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (Tree.script (Tuple (width/3.0) height) graph')
+      -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (Tree.script (Tuple (width/3.0) height) graph')
        
       -- printedScript <- liftEffect $ runPrinter (graphScript (Tuple width height) graph') "Force Layout Script"
       -- log $ fst printedScript
