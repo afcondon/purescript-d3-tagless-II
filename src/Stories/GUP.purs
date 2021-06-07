@@ -23,6 +23,9 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Ocelot.Block.Button as Button
+import Ocelot.Block.Format as Format
+import Ocelot.HTML.Properties (css)
 
 type Query :: forall k. k -> Type
 type Query = Const Void
@@ -75,19 +78,32 @@ component = H.mkComponent
       ]
 
 controls state =
-  [ HH.div_ [ HH.text $ show state.value ]
-  , HH.div_
-      [ HH.button
-        [ HE.onClick $ const PauseGUP ]
+  -- [ HH.div_ [ HH.text $ show state.value ]
+  -- , HH.div_
+  --     [ HH.button
+  --       [ HE.onClick $ const PauseGUP ]
+  --       [ HH.text "Pause" ]
+  --     ]
+  -- , HH.div_
+  --     [ HH.button
+  --       [ HE.onClick $ const RestartGUP ]
+  --       [ HH.text "Restart" ]
+  --     ]
+  -- ]
+      
+  [ HH.div
+    [ css "mb-6" ]
+    [ Format.caption_
+      [ HH.text $ show state.value ]
+    , Button.buttonGroup_
+      [ Button.buttonLeft_
         [ HH.text "Pause" ]
-      ]
-  , HH.div_
-      [ HH.button
-        [ HE.onClick $ const RestartGUP ]
+      , Button.buttonRight_
         [ HH.text "Restart" ]
       ]
+    ]
   ]
-      
+
 
 runGeneralUpdatePattern :: forall m. Bind m => MonadEffect m => m (Array Char -> Aff Unit)
 runGeneralUpdatePattern = do

@@ -104,10 +104,85 @@ in  upstream
       }
 -------------------------------
 -}
-let upstream =
-      https://github.com/purescript/package-sets/releases/download/psc-0.14.0-20210318/packages.dhall sha256:98bbacd65191cef354ecbafa1610be13e183ee130491ab9c0ef6e3d606f781b5
+let graphs =
+  { repo = "https://github.com/colehaus/purescript-graphs.git"
+  , version = "c4a3189e39579102b8be3cff9bcde63a9d4ef322"
+  , dependencies = [ "ordered-collections", "catenable-lists" ]
+  }  
+let ocelot = {
+    repo = "https://github.com/citizennet/purescript-ocelot.git"
+  , version = "345307d496dee6f6ac32850bf1db9a301810072f"
+  , dependencies = 
+  [ "aff-promise"
+    , "affjax"
+    , "argonaut"
+    , "bigints"
+    , "console"
+    , "debug"
+    , "effect"
+    , "email-validate"
+    , "formatters"
+    , "fuzzy"
+    , "halogen"
+    , "halogen-renderless"
+    , "halogen-select"
+    , "halogen-storybook"
+    , "halogen-svg-elems"
+    , "html-parser-halogen"
+    , "js-timers"
+    , "js-uri"
+    , "numbers"
+    , "psci-support"
+    , "read"
+    , "remotedata"
+    , "svg-parser"
+    , "svg-parser-halogen"
+    , "test-unit"
+    , "variant"
+    ]
+}
+  
+let halogen-renderless =
+      { dependencies = [ "prelude", "control" ]
+      , repo =
+          "https://github.com/purescript-deprecated/purescript-halogen-renderless"
+      , version = "v0.0.4"
+      }
 
-in  upstream
-  with graphs.repo = "https://github.com/colehaus/purescript-graphs.git"
-  with graphs.version = "c4a3189e39579102b8be3cff9bcde63a9d4ef322"
+let html-parser-halogen =
+      { dependencies = [ "string-parsers", "halogen" ]
+      , repo =
+          "https://github.com/rnons/purescript-html-parser-halogen.git"
+      , version = "v1.0.0-rc.2"
+      }
+
+let svg-parser =
+      { dependencies = [ "prelude", "string-parsers" ]
+      , repo =
+          "https://github.com/citizennet/purescript-svg-parser.git"
+      , version = "v2.0.0"
+      }
+
+let svg-parser-halogen =
+      { dependencies = [ "svg-parser", "halogen" ]
+      , repo =
+          "https://github.com/rnons/purescript-svg-parser-halogen.git"
+      , version = "v2.0.0-rc.1"
+      }
+
+let overrides = {=}
+
+let additions =
+      { graphs
+      , ocelot
+      , halogen-renderless
+      , html-parser-halogen
+      , svg-parser
+      , svg-parser-halogen
+      }
+
+let upstream =
+      https://github.com/purescript/package-sets/releases/download/psc-0.14.0-20210409/packages.dhall sha256:e81c2f2ce790c0e0d79869d22f7a37d16caeb5bd81cfda71d46c58f6199fd33f
+
+in  upstream // overrides // additions
 
