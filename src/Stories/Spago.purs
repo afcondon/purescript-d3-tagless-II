@@ -41,9 +41,9 @@ component = H.mkComponent
   render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div [ HP.id "d3story", HP.classes [ HH.ClassName "force" ] ]
-      [ HH.div [ HP.id "banner" ] [ HH.h1_ [ HH.text "Source navigator using data from Spago / purs" ] ]
+      [ HH.div [ HP.id "blurb" ]  [ HH.h1_ [ HH.text "Source navigator using data from Spago / purs" ]
+                                           , HH.div [ HP.id "inner-blurb" ] [ HH.text blurbtext ] ]
       -- , HH.div [ HP.id "controls" ] controls
-      , HH.div [ HP.id "blurb" ]  [ HH.div [ HP.id "inner-blurb" ] [ HH.text blurbtext ] ]
       , HH.div [ HP.id "code" ]   [ HH.div [ HP.id "inner-code" ]  [ HH.text codetext] ]
       , HH.div [ HP.id "spago" ] [] -- the div where the d3 SVG will appear
       ]

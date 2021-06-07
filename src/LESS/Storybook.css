@@ -10,14 +10,14 @@ body {
     "logo main"
     "nav main";
   grid-template-columns: 10rem 1fr;
-  grid-template-rows: 4rem 1fr;
+  grid-template-rows: 10rem 1fr;
 }
 
 .Storybook-logo {
   grid-area: logo;
   display: flex;
   align-items: center;
-  padding-left: 2rem;
+  /* padding-left: 2rem; */
   text-decoration: none;
   background-color: #fafafa;
   color: #282828;

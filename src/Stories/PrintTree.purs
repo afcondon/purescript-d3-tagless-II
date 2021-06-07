@@ -43,13 +43,11 @@ component = H.mkComponent
   render :: State -> H.ComponentHTML Action () m
   render state =  
       HH.div [ HP.id "d3story", HP.classes [ HH.ClassName "printtree" ] ]
-      [ HH.div [ HP.id "banner" ] 
-        [ HH.h1_ [ HH.text $ "Print Tree: using a string producing interpreter instead of D3" ] ] 
-
-      , HH.div [ HP.id "printtree" ] [ HH.text state ] -- the div where the d3 script will appear
+      [ HH.div [ HP.id "printtree" ] [ HH.text state ] -- the div where the d3 script will appear
 
       , HH.div [ HP.id "blurb" ] 
-        [ HH.div [ HP.id "inner-blurb" ] [ HH.text blurbtext ] 
+        [ HH.h1_ [ HH.text $ "Print Tree: using a string producing interpreter instead of D3" ]
+        , HH.div [ HP.id "inner-blurb" ] [ HH.text blurbtext ] 
         ]
 
       , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext]]

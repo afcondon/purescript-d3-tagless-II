@@ -13,13 +13,14 @@ import Effect.Aff.Class (class MonadAff)
 import Foreign.Object as Object
 import Halogen.Aff as HA
 import Halogen.HTML as HH
+import Halogen.HTML.Properties as HP
 import Halogen.Storybook (Stories, runStorybook, proxy)
 import Stories.GUP as D3GUP
 import Stories.LesMis as LesMis
 import Stories.MetaTree as MetaTree
 import Stories.PrintTree as PrintTree
-import Stories.Trees as Trees
 import Stories.Spago as Spago
+import Stories.Trees as Trees
 
 
 stories :: forall m. (MonadAff m) => Stories m
@@ -34,7 +35,11 @@ stories = Object.fromFoldable
   ]
 
 logo :: HH.PlainHTML
-logo = HH.text "Data Driven Interfaces in PureScript"
+logo = HH.img
+            [ HP.class_ $ HH.ClassName "logo"
+            , HP.src "PSD3-logo.png"
+            ]
+        
 
 main :: Effect Unit
 main = HA.runHalogenAff do

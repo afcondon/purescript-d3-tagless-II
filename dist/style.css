@@ -10,14 +10,14 @@ body {
     "logo main"
     "nav main";
   grid-template-columns: 10rem 1fr;
-  grid-template-rows: 4rem 1fr;
+  grid-template-rows: 10rem 1fr;
 }
 
 .Storybook-logo {
   grid-area: logo;
   display: flex;
   align-items: center;
-  padding-left: 2rem;
+  /* padding-left: 2rem; */
   text-decoration: none;
   background-color: #fafafa;
   color: #282828;
@@ -70,13 +70,7 @@ body {
 div#d3story {
   display: grid;
   gap: 2px;
-}
-div#d3story div#banner {
-  font-family: sans-serif;
-  color: darkred;
-  opacity: 0.7;
-  text-align: center;
-  background-color: aliceblue;
+  margin-top: 5vh;
 }
 div#d3story div#code {
   background-color: azure;
@@ -84,6 +78,12 @@ div#d3story div#code {
 }
 div#d3story div#blurb {
   background-color: bisque;
+}
+div#d3story div#blurb h1 {
+  font-family: sans-serif;
+  color: darkred;
+  opacity: 0.7;
+  text-align: center;
 }
 div#d3story div#blurb div#inner-blurb,
 div#d3story div#code div#inner-code {
@@ -111,18 +111,14 @@ div#d3story div#controls div.active button {
 div#d3story.gup,
 div#d3story.force,
 div#d3story.trees.Vertical {
-  grid-template-areas: 'banner banner' 'blurb code' 'svg code';
-}
-div#d3story.gup div#banner,
-div#d3story.force div#banner,
-div#d3story.trees.Vertical div#banner {
-  grid-area: banner;
+  grid-template-areas: 'blurb code' 'svg code';
 }
 div#d3story.gup div#code,
 div#d3story.force div#code,
 div#d3story.trees.Vertical div#code {
   grid-area: code;
   width: 25vw;
+  height: 95vh;
 }
 div#d3story.gup div#blurb,
 div#d3story.force div#blurb,
@@ -149,25 +145,21 @@ div#d3story.trees.Radial {
   grid-template-columns: [col] min-content [col] auto [col] 25vw;
   grid-template-rows: [row] min-content [row] 6em [row] auto [row];
 }
-div#d3story.trees.Radial div#banner {
-  grid-column: col 1 / span 3;
-  grid-row: row ;
-}
 div#d3story.trees.Radial div#code {
   grid-column: col 3;
-  grid-row: row 2 / span 2;
+  grid-row: row 1 / span 2;
 }
 div#d3story.trees.Radial div#blurb {
   opacity: 0.9;
   border-radius: 1em;
   margin: 1em;
   grid-column: col 1 ;
-  grid-row: row 2 / span 1;
+  grid-row: row 1 / span 1;
   height: fit-content;
 }
 div#d3story.trees.Radial div#tree {
   grid-column: col 1 / span 2;
-  grid-row: row 2 / span 2;
+  grid-row: row 1 / span 2;
 }
 div#d3story.trees.Horizontal,
 div#d3story.printtree,
@@ -175,25 +167,20 @@ div#d3story.metatree {
   display: grid;
   gap: 2px;
   grid-template-columns: [col] 25vw [col] auto [col] auto  ;
-  grid-template-rows: [row] min-content [row] 6em [row] auto [row];
-}
-div#d3story.trees.Horizontal div#banner,
-div#d3story.printtree div#banner,
-div#d3story.metatree div#banner {
-  grid-column: col 1 / span 3;
-  grid-row: row ;
+  grid-template-rows: [row] 6em [row] auto [row] ;
 }
 div#d3story.trees.Horizontal div#code,
 div#d3story.printtree div#code,
 div#d3story.metatree div#code {
   grid-column: col 3;
-  grid-row: row 2 / span 2;
+  grid-row: row 1 / span 2;
+  height: 95vh;
 }
 div#d3story.trees.Horizontal div#blurb,
 div#d3story.printtree div#blurb,
 div#d3story.metatree div#blurb {
   grid-column: col 2 ;
-  grid-row: row 2 / span 2;
+  grid-row: row 1 / span 2;
 }
 div#d3story.trees.Horizontal div#tree,
 div#d3story.printtree div#tree,
@@ -202,7 +189,7 @@ div#d3story.trees.Horizontal div#meta,
 div#d3story.printtree div#meta,
 div#d3story.metatree div#meta {
   grid-column: col 1 / span 1;
-  grid-row: row 2 / span 2;
+  grid-row: row 1 / span 2;
 }
 div#d3story.spago svg {
   height: 100vh;
@@ -314,4 +301,9 @@ div#spago svg.spotlight g.nodes g.package text {
 div#spago svg.spotlight g.nodes g.module.source text,
 div#spago svg.spotlight g.nodes g.module.target text {
   fill: gray;
+}
+div.Storybook .Storybook-logo img {
+  height: 9rem;
+  width: 9rem;
+  margin: 1rem auto;
 }
