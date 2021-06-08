@@ -23,7 +23,9 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Ocelot.Backdrop as Backdrop
 import Ocelot.Block.Button as Button
+import Ocelot.Documentation as Documentation
 import Ocelot.Block.Format as Format
 import Ocelot.HTML.Properties (css)
 
@@ -69,8 +71,10 @@ component = H.mkComponent
     HH.div [ HP.id "d3story", HP.classes [ HH.ClassName "gup" ] ]
       [ HH.div [ HP.id "blurb" ]
           [ HH.h1_ [ HH.text "General Update Pattern" ]
-          , HH.div [ HP.id "inner-blurb" ]  [ HH.text blurbtext ]
-          , HH.div [ HP.id "controls" ] (controls state)
+          , HH.div [ HP.id "inner-blurb" ]  
+              [ HH.text blurbtext 
+              , controls state
+              ]
           ]
           
       , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext] ]
@@ -78,28 +82,25 @@ component = H.mkComponent
       ]
 
 controls state =
-  -- [ HH.div_ [ HH.text $ show state.value ]
-  -- , HH.div_
-  --     [ HH.button
-  --       [ HE.onClick $ const PauseGUP ]
-  --       [ HH.text "Pause" ]
-  --     ]
-  -- , HH.div_
-  --     [ HH.button
-  --       [ HE.onClick $ const RestartGUP ]
-  --       [ HH.text "Restart" ]
-  --     ]
-  -- ]
-      
-  [ HH.div
-    [ css "mb-6" ]
-    [ Format.caption_
-      [ HH.text $ show state.value ]
-    , Button.buttonGroup_
-      [ Button.buttonLeft_
-        [ HH.text "Pause" ]
-      , Button.buttonRight_
-        [ HH.text "Restart" ]
+  Documentation.customBlock_
+    { header: "Controls"
+    , subheader: "(actions take effect on next transition, not immediately)"
+    }
+  [ Backdrop.backdrop_
+    [ Backdrop.content_
+      [ HH.div
+        [ css "mb-6" ]
+        [ Format.caption_
+          [ HH.text $ show state.value ]
+        , Button.buttonGroup_
+          [ Button.buttonLeft
+            [ HE.onClick $ const PauseGUP ]
+            [ HH.text "Pause" ]
+          , Button.buttonRight
+            [ HE.onClick $ const RestartGUP ]
+            [ HH.text "Restart" ]
+          ]
+        ]
       ]
     ]
   ]

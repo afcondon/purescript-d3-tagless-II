@@ -16,13 +16,22 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Ocelot.Backdrop as Backdrop
+import Ocelot.Block.Button as Button
+import Ocelot.Block.Card as Card
+import Ocelot.Block.FormField as FormField
+import Ocelot.Block.Format as Format
+import Ocelot.Block.Radio as Radio
+import Ocelot.Documentation as Documentation
+import Ocelot.HTML.Properties (css)
 
 type Query :: forall k. k -> Type
 type Query = Const Void
 
 data Action
   = Initialize
-  | Layout TreeLayout TreeType
+  | SetLayout TreeLayout
+  | SetType TreeType
   
 type State = Maybe TreeModel
 
@@ -48,25 +57,65 @@ component = H.mkComponent
     let classStrings = catMaybes [ Just "trees", (show <<< _.treeLayout) <$> model]
     HH.ClassName <$> classStrings
   
-  controls model = do
-    let
-      active = showState model
-    [ layoutButton active Vertical TidyTree
-    , layoutButton active Vertical Dendrogram
-    , layoutButton active Radial TidyTree
-    , layoutButton active Radial Dendrogram
-    , layoutButton active Horizontal TidyTree
-    , layoutButton active Horizontal Dendrogram
-    ]
-
-  layoutButton active layout treetype = HH.div [buttonClass] [ HH.button [ HE.onClick $ const (Layout layout treetype) ] [ HH.text $ show layout <> " " <> show treetype ] ]
-    where
-      buttonClass = 
-        HP.classes [ HH.ClassName $
-                      if active == show treetype <> " " <> show layout
-                      then "active"
-                      else "inactive" 
-                  ]
+  controlsRadio model =
+    Card.card
+      [ css "flex-1" ]
+      [ HH.div
+          [ css "flex-1" ]
+          [ HH.h3
+            [ HP.classes Format.captionClasses ]
+            [ HH.text "Layout controls" ]
+          , FormField.fieldset_
+            { label: HH.text "Tree orientation"
+            , inputId: "radio-horizontal"
+            , helpText: []
+            , error: []
+            }
+            [ HH.div
+              [ css "flex" ]
+              [ Radio.radio
+                [ css "pr-6" ]
+                [ HP.name "preview"
+                , HP.checked true
+                , HE.onClick $ const (SetLayout Vertical)
+                ]
+                [ HH.text "Vertical" ]
+              , Radio.radio
+                [ css "pr-6" ]
+                [ HP.name "preview"
+                , HE.onClick $ const (SetLayout Horizontal) ]
+                [ HH.text "Horizontal" ]
+              , Radio.radio
+                [ css "pr-6" ]
+                [ HP.name "preview"
+                , HE.onClick $ const (SetLayout Radial) ]
+                [ HH.text "Radial" ]
+              ]
+            ]
+          , FormField.fieldset_
+            { label: HH.text "Tree topology"
+            , inputId: "radio-horizontal"
+            , helpText: []
+            , error: []
+            }
+            [ HH.div
+              [ css "flex" ]
+              [ Radio.radio
+                [ css "pr-6" ]
+                [ HP.name "preview"
+                , HP.checked true
+                , HE.onClick $ const (SetType TidyTree)
+                ]
+                [ HH.text "TidyTree" ]
+              , Radio.radio
+                [ css "pr-6" ]
+                [ HP.name "preview"
+                , HE.onClick $ const (SetType Dendrogram) ]
+                [ HH.text "Dendrogram" ]
+              ]
+            ]
+          ]
+      ]
 
   render :: State -> H.ComponentHTML Action () m
   render state =  
@@ -76,7 +125,7 @@ component = H.mkComponent
       , HH.div [ HP.id "blurb" ] 
         [ HH.div [ HP.id "inner-blurb" ] [ HH.h1_ [ HH.text $ "Tree layout" ]
                                          , HH.text blurbtext ] 
-        , HH.div [ HP.id "controls" ] (controls state)
+        , controlsRadio state
         ]
 
       , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext]]
@@ -96,12 +145,21 @@ handleAction Initialize = do
       pure unit
   pure unit
 
-handleAction (Layout layout treetype) = do
+handleAction (SetLayout layout) = do
   (model :: Maybe TreeModel) <- get
   case model of
     Nothing -> pure unit
     (Just model) -> do
-      let updated = model { treeLayout = layout, treeType = treetype }
+      let updated = model { treeLayout = layout }
+      _ <- H.liftAff $ Tree.drawTree updated
+      put $ Just updated
+
+handleAction (SetType  treetype) = do
+  (model :: Maybe TreeModel) <- get
+  case model of
+    Nothing -> pure unit
+    (Just model) -> do
+      let updated = model { treeType = treetype }
       _ <- H.liftAff $ Tree.drawTree updated
       put $ Just updated
 

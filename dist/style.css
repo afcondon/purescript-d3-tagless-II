@@ -50386,25 +50386,6 @@ div#d3story div#blurb div#inner-blurb,
 div#d3story div#code div#inner-code {
   padding: 5em;
 }
-div#d3story div#controls {
-  background-color: gainsboro;
-  display: flex;
-  justify-content: left;
-  flex-direction: row;
-  border: dotted orange;
-  border-radius: 1em;
-  width: min-content;
-  margin: 1em;
-  padding: 1em 2em;
-}
-div#d3story div#controls button {
-  padding: 0.2em 1em;
-  margin: 0 1em;
-}
-div#d3story div#controls div.active button {
-  background-color: coral;
-  color: blanchedalmond;
-}
 div#d3story.gup,
 div#d3story.force,
 div#d3story.trees.Vertical {
@@ -50434,7 +50415,8 @@ div#d3story.trees.Vertical div#force div#tree {
 div#d3story.gup div#controls,
 div#d3story.force div#controls,
 div#d3story.trees.Vertical div#controls {
-  grid-area: controls;
+  width: min-content;
+  margin: 0 auto;
 }
 div#d3story.trees.Radial {
   display: grid;

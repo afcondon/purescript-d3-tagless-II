@@ -20,25 +20,6 @@ div#d3story {
   div#code div#inner-code {
     padding: 5em;
   }
-  div#controls {
-    background-color: gainsboro;
-    display: flex;
-    justify-content: left;
-    flex-direction: row;
-    border: dotted orange;
-    border-radius: 1em;
-    width: min-content;
-    margin: 1em;
-    padding: 1em 2em;
-    button {
-      padding: 0.2em 1em;
-      margin: 0 1em;
-    }
-    div.active button {
-      background-color: coral;
-      color: blanchedalmond;
-    }
-  }
 }
 
 div#d3story.gup,
@@ -63,7 +44,8 @@ div#d3story.trees.Vertical {
     height: 50vh;
   }
   div#controls {
-    grid-area: controls;
+    width: min-content;
+    margin: 0 auto;
   }
 }
 div#d3story.trees.Radial {

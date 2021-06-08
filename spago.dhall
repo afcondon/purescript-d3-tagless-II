@@ -12,6 +12,7 @@ You can edit this file as you like.
   , "const"
   , "datetime"
   , "debug"
+  , "dom-indexed"
   , "effect"
   , "either"
   , "exceptions"

@@ -2,13 +2,9 @@ module Main where
 
 import Prelude
 
-import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..))
-import D3.Examples.Tree.Configure as Tree
-import D3.Layouts.Hierarchical (makeModel)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(Tuple))
 import Effect (Effect)
-import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Foreign.Object as Object
 import Halogen.Aff as HA
