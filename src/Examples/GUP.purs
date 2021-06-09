@@ -16,8 +16,8 @@ import Prelude (bind, pure, ($), (*), (+), (<<<))
 -- | ====================================================================================
 type Model = Array Char
 
-script :: forall m. D3InterpreterM D3Selection_ m => m ((Array Char) -> m D3Selection_)
-script = do 
+script :: forall m. D3InterpreterM D3Selection_ m => D3Selection_ -> m ((Array Char) -> m D3Selection_)
+script svg = do 
   let 
     transition :: ChainableS
     transition = transitionWithDuration $ Milliseconds 2000.0
@@ -25,8 +25,8 @@ script = do
     xFromIndex :: Datum_ -> Index_ -> Number
     xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0)
 
-  root        <- attach "div#gup"
-  svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0 ]
+  -- root        <- attach "div#d3story"
+  -- svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg" ]
   letterGroup <- append svg  $ node_ Group
 
   pure $ \letters -> 

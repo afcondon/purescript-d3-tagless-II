@@ -119,7 +119,7 @@ component = H.mkComponent
 
   render :: State -> H.ComponentHTML Action () m
   render state =  
-      HH.div [ HP.id "d3story", HP.classes $ treeClasses state ]
+      HH.div [ HP.id "d3story-overlay", HP.classes $ treeClasses state ]
       [ HH.div [ HP.id "tree" ] [] -- the div where the d3 script will appear
 
       , HH.div [ HP.id "blurb" ] 

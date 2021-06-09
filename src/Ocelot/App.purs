@@ -111,16 +111,7 @@ app =
   renderContainer state =
     HH.div
     [ HP.class_ $ HH.ClassName "md:ml-80" ]
-    [ HH.div
-      [ HP.class_ $ HH.ClassName "fixed w-full" ]
-      [ HH.div
-        [ HP.class_ $ HH.ClassName "pin-t bg-white md:hidden relative border-b border-grey-light h-12 py-8 flex items-center" ]
-        [ HH.a
-          [ HP.class_ $ HH.ClassName "mx-auto inline-flex items-center"
-          , HP.href "" ]
-          [ HH.text "CitizenNet UI Guide" ]
-        ]
-      ]
+    [ HH.div [ HP.id "d3story", HP.class_ $ HH.ClassName "fixed w-full" ] [] -- this is the hook for the D3 svg(s)
     , HH.div
       [ HP.class_ $ HH.ClassName "p-12 w-full container mx-auto" ]
       [ renderSlot state ]
@@ -167,7 +158,6 @@ app =
             [ HP.class_ $ HH.ClassName "mr-2"
             , HP.src "PSD3-logo.png"
             ]
-          -- , HH.text "Ocelot"
           ]
         ]
       , HH.nav

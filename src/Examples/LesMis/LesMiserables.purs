@@ -105,7 +105,7 @@ graphScript widthheight model = do
       rows    = 2.0
       width   = (fst widthheight) / columns
       height  = (snd widthheight) / rows
-  root       <- attach "div#force"
+  root       <- attach "div#d3story"
   svg        <- root `append` (node Svg    [ viewBox (-width / 2.0) (-height / 2.0) width height ] )
   linksGroup <- svg  `append` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])

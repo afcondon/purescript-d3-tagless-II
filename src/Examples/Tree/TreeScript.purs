@@ -65,7 +65,6 @@ datum_ = {
 type ScriptConfig = { 
     layout        :: TreeLayout
   , linkPath      :: ChainableS
-  , selector      :: Selector
   , spacing       :: { interChild :: Number, interLevel :: Number }
   , viewbox       :: Array ChainableS
   , nodeTransform :: Array ChainableS
@@ -81,8 +80,8 @@ type ScriptConfig = {
 script :: forall m selection. Bind m => D3InterpreterM selection m => 
   ScriptConfig -> FlareTreeNode ->  m selection
 script config tree = do
-  root       <- attach config.selector   
-  svg        <- root `append` (node Svg config.viewbox)          
+  root       <- attach "div#d3story"  
+  svg        <- root `append` (node Svg (config.viewbox <> [ classed "tree"]))          
   container  <- svg  `append` (node Group [ fontFamily      "sans-serif"
                                           , fontSize        10.0
                                           ])

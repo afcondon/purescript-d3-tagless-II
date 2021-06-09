@@ -41,7 +41,7 @@ script :: forall m selection.
   SpagoModel ->
   m { selection :: selection, simulation :: D3Simulation_ }
 script (Tuple w h) model = do
-  root       <- attach "div#spago"
+  root       <- attach "div#d3story"
   svg        <- root `append` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h
                                            , classed "cluster" ] )
   nodesGroup <- svg  `append` (node Group  [ classed "nodes" ])

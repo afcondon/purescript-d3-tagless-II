@@ -40,12 +40,12 @@ component = H.mkComponent
 
   render :: State -> H.ComponentHTML Action () m
   render state =
-    HH.div [ HP.id "d3story", HP.classes [ HH.ClassName "force" ] ]
+    HH.div [ HP.id "d3story-overlay", HP.classes [ HH.ClassName "force" ] ]
       [ HH.div [ HP.id "blurb" ]  [ HH.h1_ [ HH.text "Force Layout Simulation" ] 
                                   , HH.div [ HP.id "inner-blurb" ] [ HH.text blurbtext ] ]
       -- , HH.div [ HP.id "controls" ] controls
       , HH.div [ HP.id "code" ]   [ HH.div [ HP.id "inner-code" ]  [ HH.text codetext] ]
-      , HH.div [ HP.id "force" ] [] -- the div where the d3 SVG will appear
+      -- , HH.div [ HP.id "force" ] [] -- the div where the d3 SVG will appear
       ]
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 

@@ -1,11 +1,15 @@
 module Stories.GUP where
 
-import Prelude
+import Prelude hiding (append)
 
 import Control.Monad.Rec.Class (forever)
 import Control.Monad.State (class MonadState)
+import D3.Attributes.Sugar (classed, viewBox)
+import D3.Data.Types (D3Selection_, Element(..))
 import D3.Examples.GUP as GUP
+import D3.Interpreter (class D3InterpreterM, append, attach)
 import D3.Interpreter.D3 (runD3M)
+import D3.Selection (node)
 import Data.Array (catMaybes)
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
@@ -25,8 +29,8 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Ocelot.Backdrop as Backdrop
 import Ocelot.Block.Button as Button
-import Ocelot.Documentation as Documentation
 import Ocelot.Block.Format as Format
+import Ocelot.Documentation as Documentation
 import Ocelot.HTML.Properties (css)
 
 type Query :: forall k. k -> Type
@@ -68,7 +72,7 @@ component = H.mkComponent
 
   render :: State -> H.ComponentHTML Action () m
   render state =
-    HH.div [ HP.id "d3story", HP.classes [ HH.ClassName "gup" ] ]
+    HH.div [ HP.id "d3story-overlay", HP.classes [ HH.ClassName "gup" ] ]
       [ HH.div [ HP.id "blurb" ]
           [ HH.h1_ [ HH.text "General Update Pattern" ]
           , HH.div [ HP.id "inner-blurb" ]  
@@ -78,7 +82,6 @@ component = H.mkComponent
           ]
           
       , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext] ]
-      , HH.div [ HP.id "gup" ] [] -- the div svg will appear
       ]
 
 controls state =
@@ -105,11 +108,17 @@ controls state =
     ]
   ]
 
+getSVG :: forall m. D3InterpreterM D3Selection_ m => String -> m D3Selection_
+getSVG rootSelector = do
+  root        <- attach rootSelector
+  svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg" ]
+  pure svg
 
 runGeneralUpdatePattern :: forall m. Bind m => MonadEffect m => m (Array Char -> Aff Unit)
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
-  (Tuple update _) <- H.liftEffect $ runD3M GUP.script
+  (Tuple svg _) <- H.liftEffect $ runD3M $ getSVG "div#d3story"
+  (Tuple update _) <- H.liftEffect $ runD3M (GUP.script svg)
   -- the script sets up the SVG and returns a function that the component can run whenever it likes
   -- (but NB if it runs more often than every 2000 milliseconds there will be big problems)
   pure (\letters -> H.liftEffect $ runD3M (update letters) *> pure unit )
