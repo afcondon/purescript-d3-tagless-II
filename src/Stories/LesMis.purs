@@ -4,6 +4,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState)
 import D3.Examples.LesMiserables as LesMis
+import D3.Interpreter.D3 (d3Run, removeExistingSVG)
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Fiber, forkAff, killFiber)
@@ -51,7 +52,9 @@ component = H.mkComponent
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction Initialize = do
-    fiber <- H.liftAff $ forkAff $ LesMis.drawGraph
+    detached <- H.liftEffect $ d3Run $ removeExistingSVG "div#d3story"
+
+    fiber <- H.liftAff $ forkAff $ LesMis.drawGraph "div#d3story"
 
     H.modify_ (\state -> state { fiber = Just fiber })
 

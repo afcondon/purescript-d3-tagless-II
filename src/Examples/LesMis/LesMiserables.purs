@@ -5,7 +5,7 @@ import D3.Examples.LesMiserables.Types
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
-import D3.Data.Types (D3Selection_, Datum_, Element(..))
+import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
@@ -73,18 +73,18 @@ datum_ = {
       (\d -> d3SchemeCategory10N_ (toNumber $ datum_.group d))
 }
 
-drawGraph :: Aff Unit
-drawGraph = do
+drawGraph :: Selector -> Aff Unit
+drawGraph selector = do
   log "Force layout example"
   widthHeight <- liftEffect getWindowWidthHeight
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
   let graph = readGraphFromFileContents forceJSON
   
-  (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph)
+  (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph selector)
 
-  (Tuple selection result) <- liftEffect $ runPrinter (graphScript widthHeight graph) "Force Layout Script"
-  log $ result
-  log $ selection
+  -- (Tuple selection result) <- liftEffect $ runPrinter (graphScript widthHeight graph selector) "Force Layout Script"
+  -- log $ result
+  -- log $ selection
   pure unit
 
 lesMisForces :: Array Force
@@ -99,14 +99,16 @@ graphScript :: forall  m selection.
   D3InterpreterM selection m => 
   Tuple Number Number ->
   LesMisRawModel -> 
+  Selector -> 
   m selection
-graphScript widthheight model = do
+graphScript widthheight model selector = do
   let columns = 3.0
       rows    = 2.0
       width   = (fst widthheight) / columns
       height  = (snd widthheight) / rows
-  root       <- attach "div#d3story"
-  svg        <- root `append` (node Svg    [ viewBox (-width / 2.0) (-height / 2.0) width height ] )
+  root       <- attach selector
+  svg        <- root `append` (node Svg    [ viewBox (-width / 2.0) (-height / 2.0) width height
+                                           , classed "lesmis" ] )
   linksGroup <- svg  `append` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 

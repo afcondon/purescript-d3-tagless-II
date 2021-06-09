@@ -6,6 +6,7 @@ import Affjax (Error)
 import Control.Monad.State (class MonadState, get, put)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Examples.Tree.Configure as Tree
+import D3.Interpreter.D3 (d3Run, removeExistingSVG)
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
 import Data.Array (catMaybes)
 import Data.Const (Const)
@@ -131,36 +132,44 @@ component = H.mkComponent
       , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext]]
       ]
 
+selector = "div#d3story" -- TODO redo how all this svg nonsense is handled
+
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction Initialize = do
+  detached <- H.liftEffect $ d3Run $ removeExistingSVG selector
+
   treeJSON <- H.liftAff $ getTreeViaAJAX "http://localhost:1234/flare-2.json"
 
   case treeJSON of
     (E.Left err) -> pure unit
     (E.Right (tree :: TreeJson_)) -> do
       model <- H.liftAff $ makeModel TidyTree Vertical tree
-      _     <- H.liftAff $ Tree.drawTree model
+      _     <- H.liftAff $ Tree.drawTree model selector
       H.modify_ (\_ -> Just model)
       pure unit
   pure unit
 
 handleAction (SetLayout layout) = do
+  detached <- H.liftEffect $ d3Run $ removeExistingSVG selector
+
   (model :: Maybe TreeModel) <- get
   case model of
     Nothing -> pure unit
     (Just model) -> do
       let updated = model { treeLayout = layout }
-      _ <- H.liftAff $ Tree.drawTree updated
+      _ <- H.liftAff $ Tree.drawTree updated selector
       put $ Just updated
 
 handleAction (SetType  treetype) = do
+  detached <- H.liftEffect $ d3Run $ removeExistingSVG selector
+
   (model :: Maybe TreeModel) <- get
   case model of
     Nothing -> pure unit
     (Just model) -> do
       let updated = model { treeType = treetype }
-      _ <- H.liftAff $ Tree.drawTree updated
+      _ <- H.liftAff $ Tree.drawTree updated selector
       put $ Just updated
 
 

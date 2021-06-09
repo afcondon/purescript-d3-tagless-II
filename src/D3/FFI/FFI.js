@@ -54,36 +54,52 @@ exports.showAttachZoom_ = selection => config => {
 // *****************************************************************************************************************
 exports.emptyD3Data_ = null
 
-// d3SelectAll_ :: Selector -> D3Selection
+// d3SelectAll_ :: Selector -> D3Selection_
 exports.d3SelectAllInDOM_ = selector => {
-  // NB not USING selection but want it cause called from inside State Monad
   if (debug) {
     showSelectAllInDOM_(selector)
   }
   return d3.selectAll(selector)
 }
-// d3SelectAll_ :: Selector -> D3Selection
+// d3SelectFirstInDOM_ :: Selector -> D3Selection_
+exports.d3SelectFirstInDOM_ = selector => {
+  if (debug) {
+    showSelectAllInDOM_(selector)
+  }
+  return d3.select(selector)
+}
+// d3SelectAll_ :: Selector -> D3Selection_
 exports.d3SelectionSelectAll_ = selector => selection => {
   if (debug) {
     showSelectionSelectAll_(selector)(selection)
   }
   return selection.selectAll(selector)
 }
-// d3Enter_ :: D3Selection -> D3Selection
+// d3SelectionIsEmpty_   :: D3Selection_ -> Boolean
+exports.d3SelectionIsEmpty_ = selection => selection.empty()
+
+// d3Select_ :: Selector -> D3Selection_
+exports.d3SelectionSelect_ = selector => selection => {
+  if (debug) {
+    showSelectionSelect_(selector)(selection)
+  }
+  return selection.select(selector)
+}
+// d3Enter_ :: D3Selection_ -> D3Selection_
 exports.d3EnterAndAppend_ = element => selection => {
   if (debug) {
     showEnterAndAppend_(element)(selection)
   }
   return selection.enter().append(element)
 }
-// d3Exit_ :: D3Selection -> D3Selection
+// d3Exit_ :: D3Selection_ -> D3Selection_
 exports.d3Exit_ = selection => {
   if (debug) {
     showExit_(selection)
   }
   return selection.exit()
 }
-// d3AddTransition :: D3Selection -> D3Selection
+// d3AddTransition :: D3Selection_ -> D3Selection_
 exports.d3AddTransition_ = selection => transition => {
   var handle
   if (debug) {
@@ -104,7 +120,7 @@ exports.d3AddTransition_ = selection => transition => {
   return handle
 }
 
-// d3RemoveSelection_ :: D3Selection -> D3Selection
+// d3RemoveSelection_ :: D3Selection_ -> D3Selection_
 exports.d3RemoveSelection_ = selection => {
   if (debug) {
     showRemoveSelection_(selection)
@@ -124,21 +140,21 @@ exports.d3LowerSelection_ = selection => selection.lower()
 exports.d3SortSelection_ = selection => compare => selection.sort(compare)
 
 
-// d3Append_ :: String -> D3Selection -> D3Selection
+// d3Append_ :: String -> D3Selection_ -> D3Selection_
 exports.d3Append_ = element => selection => {
   if (debug) {
     showAppend_(element)(selection)
   }
   return selection.append(element)
 }
-// d3Data_ :: D3Data -> D3Selection -> D3Selection
+// d3Data_ :: D3Data -> D3Selection_ -> D3Selection_
 exports.d3Data_ = data => selection => {
   if (debug) {
     showData_(data)(selection)
   }
   return selection.data(data, d => d)
 }
-// d3Data_ :: D3Data -> KeyFunction -> D3Selection -> D3Selection
+// d3Data_ :: D3Data -> KeyFunction -> D3Selection_ -> D3Selection_
 exports.d3KeyFunction_ = data => keyFunction => selection => {
   if (debug) {
     showKeyFunction_(data)(keyFunction)(selection)
@@ -602,9 +618,3 @@ exports.hNodeX_ = node => node.x
 
 // hNodeY_      :: D3HierarchicalNode_ -> Number
 exports.hNodeY_ = node => node.y
-
-
-// removeTheSVG_ :: String -> Unit
-exports.removeTheSVG_ = selector => {
-  d3.selectAll(selector).select('svg').remove()
-}

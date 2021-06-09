@@ -4,11 +4,11 @@ import Utility
 
 import D3.Attributes.Sugar (transform, viewBox)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
-import D3.Data.Types (D3Selection_, Datum_)
+import D3.Data.Types (D3Selection_, Datum_, Selector)
 import D3.Examples.Spago.Model (tree_datum_)
 import D3.Examples.Tree.Model (FlareTreeNode)
 import D3.Examples.Tree.Script (script) as Tree
-import D3.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, removeTheSVG_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
+import D3.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
 import D3.Interpreter (class D3InterpreterM)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.MetaTree (D3GrammarNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
@@ -28,14 +28,14 @@ import Prelude (class Bind, Unit, bind, negate, pure, show, unit, ($), (*), (+),
 getPrintTree :: TreeModel -> Aff String
 getPrintTree treeModel = liftEffect $ do
   widthHeight   <- getWindowWidthHeight
-  printedScript <- runPrinter  (configureAndRunScript widthHeight treeModel) "Tree Script"
+  printedScript <- runPrinter  (configureAndRunScript widthHeight treeModel "not used") "Tree Script"
   pure $ snd printedScript
 
 
 getMetaTreeJSON :: TreeModel -> Aff TreeJson_
 getMetaTreeJSON treeModel = liftEffect $ do
   widthHeight <- getWindowWidthHeight
-  metaScript <- runMetaTree (configureAndRunScript widthHeight treeModel) -- no need for actual widthHeight in metaTree
+  metaScript <- runMetaTree (configureAndRunScript widthHeight treeModel "not used") -- no need for actual widthHeight in metaTree
   let (ScriptTree _ treeMap links) = snd metaScript
       (_ :: Array (Tuple Int D3GrammarNode)) = toUnfoldable treeMap
       (_ :: Array (Tuple Int Int))          = links
@@ -44,10 +44,10 @@ getMetaTreeJSON treeModel = liftEffect $ do
 
 -- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
 -- | TODO specialize runD3M so that this function isn't necessary
-drawTree :: TreeModel -> Aff Unit
-drawTree treeModel = liftEffect $ do
+drawTree :: TreeModel -> Selector -> Aff Unit
+drawTree treeModel selector = liftEffect $ do
   widthHeight <- getWindowWidthHeight
-  (_ :: Tuple D3Selection_ Unit) <- runD3M (configureAndRunScript widthHeight treeModel)
+  (_ :: Tuple D3Selection_ Unit) <- runD3M (configureAndRunScript widthHeight treeModel selector)
   pure unit
 
 
@@ -55,11 +55,10 @@ drawTree treeModel = liftEffect $ do
 configureAndRunScript :: forall m selection. 
   Bind m => 
   D3InterpreterM selection m => 
-  Tuple Number Number -> TreeModel -> m selection
-configureAndRunScript (Tuple width height ) model = 
-  Tree.script { spacing, viewbox, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_
+  Tuple Number Number -> TreeModel -> Selector -> m selection
+configureAndRunScript (Tuple width height ) model selector = 
+  Tree.script { spacing, viewbox, selector, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_
   where
-    extremelyTemporaryHack = removeTheSVG_ "div#tree"
     columns = 3.0  -- 3 columns, set in the grid CSS in index.html
     gap     = 10.0 -- 10px set in the grid CSS in index.html
     svg     = { width : ((width - ((columns - 1.0) * gap)) / columns)

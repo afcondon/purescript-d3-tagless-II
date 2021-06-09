@@ -3,7 +3,7 @@ module D3.Examples.GUP where
 import D3.Attributes.Sugar
 
 import D3.Attributes.Instances (datumIsChar, indexIsNumber)
-import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_)
+import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
 import D3.Selection (ChainableS, Join(..), Keys(..), node, node_)
 import Data.String.CodeUnits (singleton)
@@ -16,8 +16,8 @@ import Prelude (bind, pure, ($), (*), (+), (<<<))
 -- | ====================================================================================
 type Model = Array Char
 
-script :: forall m. D3InterpreterM D3Selection_ m => D3Selection_ -> m ((Array Char) -> m D3Selection_)
-script svg = do 
+script :: forall m. D3InterpreterM D3Selection_ m => Selector -> m ((Array Char) -> m D3Selection_)
+script selector = do 
   let 
     transition :: ChainableS
     transition = transitionWithDuration $ Milliseconds 2000.0
@@ -25,8 +25,8 @@ script svg = do
     xFromIndex :: Datum_ -> Index_ -> Number
     xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0)
 
-  -- root        <- attach "div#d3story"
-  -- svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg" ]
+  root        <- attach selector
+  svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ]
   letterGroup <- append svg  $ node_ Group
 
   pure $ \letters -> 

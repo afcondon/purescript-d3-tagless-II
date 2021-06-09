@@ -27,12 +27,20 @@ foreign import showAttachZoom_              :: forall selection. selection -> Zo
 -- | ***************************   FFI signatures for Selection & Transition  ********************************************
 -- | *********************************************************************************************************************
 
-foreign import d3SelectAllInDOM_     :: Selector    -> D3Selection_ -- NB passed D3Selection is IGNORED
+foreign import d3SelectAllInDOM_     :: Selector    -> D3Selection_
+foreign import d3SelectFirstInDOM_   :: Selector    -> D3Selection_
 foreign import d3SelectionSelectAll_ :: Selector    -> D3Selection_ -> D3Selection_
+foreign import d3SelectionSelect_    :: Selector    -> D3Selection_ -> D3Selection_
+foreign import d3SelectionIsEmpty_   :: D3Selection_ -> Boolean
 foreign import d3EnterAndAppend_     :: String      -> D3Selection_ -> D3Selection_
 foreign import d3Append_             :: String      -> D3Selection_ -> D3Selection_
 
 foreign import d3Exit_               :: D3Selection_ -> D3Selection_
+
+-- Removes the selected elements from the document. Returns this selection (the
+-- removed elements) which are now detached from the DOM. There is not currently a
+-- dedicated API to add removed elements back to the document; however, you can
+-- pass a function to selection.append or selection.insert to re-add elements.
 foreign import d3RemoveSelection_    :: D3Selection_ -> D3Selection_
 
 foreign import d3FilterSelection_    :: D3Selection_ -> Selector   -> D3Selection_
@@ -221,8 +229,3 @@ foreign import hNodeDepth_  :: forall r. D3_TreeNode r -> Number
 foreign import hNodeHeight_ :: forall r. D3_TreeNode r -> Number
 foreign import hNodeX_      :: forall r. D3_TreeNode r -> Number
 foreign import hNodeY_      :: forall r. D3_TreeNode r -> Number
-
-
--- NASTY HACK to defer re-factoring the Trees example to be re-using the svg each time
--- instead we provide a function to blow away the svg if one is present
-foreign import removeTheSVG_ :: String -> Unit

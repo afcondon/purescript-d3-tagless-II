@@ -4,6 +4,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState)
 import D3.Examples.Spago as Spago
+import D3.Interpreter.D3 (d3Run, removeExistingSVG)
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Fiber, forkAff, killFiber)
@@ -48,9 +49,13 @@ component = H.mkComponent
       , HH.div [ HP.id "spago" ] [] -- the div where the d3 SVG will appear
       ]
 
+selector = "div#d3story" -- TODO redo how all this svg nonsense is handled
+
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction Initialize = do
+    detached <- H.liftEffect $ d3Run $ removeExistingSVG selector
+
     fiber <- H.liftAff $ forkAff $ Spago.drawGraph
 
     H.modify_ (\state -> state { fiber = Just fiber })

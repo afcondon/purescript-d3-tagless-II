@@ -7,15 +7,16 @@ import Control.Monad.State (class MonadState)
 import D3.Attributes.Sugar (classed, viewBox)
 import D3.Data.Types (D3Selection_, Element(..))
 import D3.Examples.GUP as GUP
+import D3.FFI (d3RemoveSelection_, d3SelectionIsEmpty_, d3SelectionSelect_)
 import D3.Interpreter (class D3InterpreterM, append, attach)
-import D3.Interpreter.D3 (runD3M)
+import D3.Interpreter.D3 (d3Run, removeExistingSVG, runD3M)
 import D3.Selection (node)
 import Data.Array (catMaybes)
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence)
-import Data.Tuple (Tuple(..))
+import Data.Tuple (Tuple(..), fst)
 import Effect (Effect)
 import Effect.Aff (Aff, Fiber, Milliseconds(..), delay, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
@@ -108,17 +109,11 @@ controls state =
     ]
   ]
 
-getSVG :: forall m. D3InterpreterM D3Selection_ m => String -> m D3Selection_
-getSVG rootSelector = do
-  root        <- attach rootSelector
-  svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg" ]
-  pure svg
-
 runGeneralUpdatePattern :: forall m. Bind m => MonadEffect m => m (Array Char -> Aff Unit)
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
-  (Tuple svg _) <- H.liftEffect $ runD3M $ getSVG "div#d3story"
-  (Tuple update _) <- H.liftEffect $ runD3M (GUP.script svg)
+  detached <- H.liftEffect $ d3Run $ removeExistingSVG "div#d3story"
+  update   <- H.liftEffect $ d3Run $ GUP.script "div#d3story"
   -- the script sets up the SVG and returns a function that the component can run whenever it likes
   -- (but NB if it runs more often than every 2000 milliseconds there will be big problems)
   pure (\letters -> H.liftEffect $ runD3M (update letters) *> pure unit )

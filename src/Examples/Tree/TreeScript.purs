@@ -64,6 +64,7 @@ datum_ = {
 -- a record that packages up all the customizations that are needed to render the 6 variations on Tree
 type ScriptConfig = { 
     layout        :: TreeLayout
+  , selector      :: Selector
   , linkPath      :: ChainableS
   , spacing       :: { interChild :: Number, interLevel :: Number }
   , viewbox       :: Array ChainableS
@@ -80,7 +81,7 @@ type ScriptConfig = {
 script :: forall m selection. Bind m => D3InterpreterM selection m => 
   ScriptConfig -> FlareTreeNode ->  m selection
 script config tree = do
-  root       <- attach "div#d3story"  
+  root       <- attach config.selector  
   svg        <- root `append` (node Svg (config.viewbox <> [ classed "tree"]))          
   container  <- svg  `append` (node Group [ fontFamily      "sans-serif"
                                           , fontSize        10.0

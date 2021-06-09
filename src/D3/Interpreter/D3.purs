@@ -1,17 +1,18 @@
 module D3.Interpreter.D3 where
 
-import Prelude
+import Prelude hiding (append)
 
 import Control.Monad.State (class MonadState, StateT, runStateT)
 import D3.Attributes.Instances (Attribute(..), unbox)
-import D3.Data.Types (D3Selection_)
-import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3LowerSelection_, d3OrderSelection_, d3RaiseSelection_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SetAttr_, d3SetHTML_, d3SetProperty_, d3SetText_, d3SortSelection_, defaultDrag_, defaultSimulationDrag_, disableDrag_, onTick_, selectionOn_)
-import D3.Interpreter (class D3InterpreterM, modify)
-import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), OrderingAttribute(..))
+import D3.Attributes.Sugar (classed, viewBox)
+import D3.Data.Types (D3Selection_, Element(..))
+import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3LowerSelection_, d3OrderSelection_, d3RaiseSelection_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectFirstInDOM_, d3SelectionIsEmpty_, d3SelectionSelectAll_, d3SelectionSelect_, d3SetAttr_, d3SetHTML_, d3SetProperty_, d3SetText_, d3SortSelection_, defaultDrag_, defaultSimulationDrag_, disableDrag_, onTick_, selectionOn_)
+import D3.Interpreter (class D3InterpreterM, append, attach, modify)
+import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), OrderingAttribute(..), node)
 import D3.Simulation.Config (ChainableF(..), D3ForceHandle_)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Foldable (foldl)
-import Data.Tuple (Tuple)
+import Data.Tuple (Tuple, fst)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 
@@ -32,6 +33,10 @@ derive newtype instance monadEffD3M    :: MonadEffect       (D3M selection)
 
 runD3M :: forall a. D3M D3Selection_  a-> Effect (Tuple a Unit)
 runD3M (D3M state) = runStateT state unit
+
+d3Run :: forall a. D3M D3Selection_ a -> Effect a
+d3Run (D3M state) = liftA1 fst $ runStateT state unit
+
 
 instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
   attach selector = pure $ d3SelectAllInDOM_ selector 
@@ -121,7 +126,10 @@ applyChainableSD3 selection_ (HTMLT (ToAttribute label attr))     = d3SetHTML_  
 -- and this gives rise to very counter-intuitive misbehaviour as subsequent enters clash with 
 -- elements that should have been removed
 -- also NB "selection" here will often be a "transition" but this distinction won't matter (i think)
-applyChainableSD3 selection_ RemoveT = d3RemoveSelection_ selection_ 
+-- TODO remove is not like other chainables, in fact it's not chainable since it returns unit
+applyChainableSD3 selection_ RemoveT = do
+  let _ = d3RemoveSelection_ selection_ 
+  selection_
 
 -- for transition in D3 we must use .call(selection, transition) so that chain continues
 -- in this interpreter it's enought to just return the selection instead of the transition
@@ -138,3 +146,17 @@ applyChainableSD3 selection_ (OrderingT oAttr) =
     (Sort compare) -> d3SortSelection_ selection_ compare
     Raise          -> d3RaiseSelection_ selection_
     Lower          -> d3LowerSelection_ selection_
+
+
+-- TODO reuse existing SVG if it's the right one
+removeExistingSVG :: forall m. D3InterpreterM D3Selection_ m => String -> m Unit
+removeExistingSVG rootSelector = do
+  let
+    root     = d3SelectFirstInDOM_ rootSelector
+    -- check for an svg element under the given root
+    previous = d3SelectionSelect_ (rootSelector <> " svg") root
+    detached =
+      case d3SelectionIsEmpty_ previous of -- 
+        true  -> previous
+        false -> d3RemoveSelection_ previous 
+  pure unit
