@@ -113,7 +113,7 @@ app =
     [ HP.class_ $ HH.ClassName "md:ml-80" ]
     [ HH.div [ HP.id "d3story", HP.class_ $ HH.ClassName "fixed w-full" ] [] -- this is the hook for the D3 svg(s)
     , HH.div
-      [ HP.class_ $ HH.ClassName "p-12 w-full container mx-auto" ]
+      [ HP.id "d3story-overlay", HP.class_ $ HH.ClassName "grid grid-cols-3 gap-10 w-full container mx-auto " ]
       [ renderSlot state ]
     ]
 

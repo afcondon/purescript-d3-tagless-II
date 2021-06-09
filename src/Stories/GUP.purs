@@ -30,6 +30,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Ocelot.Backdrop as Backdrop
 import Ocelot.Block.Button as Button
+import Ocelot.Block.Card as Card
 import Ocelot.Block.Format as Format
 import Ocelot.Documentation as Documentation
 import Ocelot.HTML.Properties (css)
@@ -73,16 +74,19 @@ component = H.mkComponent
 
   render :: State -> H.ComponentHTML Action () m
   render state =
-    HH.div [ HP.id "d3story-overlay", HP.classes [ HH.ClassName "gup" ] ]
-      [ HH.div [ HP.id "blurb" ]
+    HH.div [ HP.class_ $ HH.ClassName "gup" ]
+      [ HH.div [ HP.id "blurb", HP.class_ $ HH.ClassName "p-6 mx-auto" ]
           [ HH.h1_ [ HH.text "General Update Pattern" ]
           , HH.div [ HP.id "inner-blurb" ]  
               [ HH.text blurbtext 
               , controls state
               ]
           ]
-          
-      , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext] ]
+      , Card.card_
+          [ Format.contentHeading_
+            [ HH.text "Code" ]
+          , HH.pre_ [ HH.code_ [ HH.text codetext] ]
+          ]  
       ]
 
 controls state =
