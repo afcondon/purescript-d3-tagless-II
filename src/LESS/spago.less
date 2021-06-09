@@ -1,6 +1,15 @@
-
 /* div#spago svg g.links line { visibility: hidden; } */
-div#spago {
+div#d3story {
+  svg g.nodes {
+    g.package circle { visibility: hidden; }
+    g.package text { visibility: visible; fill: black; font-size: 24px; opacity: 0.5; text-anchor: start;}
+    g.module.source text, g.module.target text { fill: gray; }
+  }
+  svg.spotlight g.nodes {
+    g.package text { opacity: 0.2; }
+    g.module.source text,
+    g.module.target text { fill: gray; }
+  }
   svg.spotlight {
     g.module {
       opacity: 0.2;
@@ -33,16 +42,6 @@ div#spago {
         visibility: visible;
         fill: black;
         opacity: 0.8;
-      }
-      g.package {
-        text {
-          fill: white;
-        }
-        circle {
-          stroke: black;
-          stroke-width: 3px;
-          opacity: 1;
-        }
       }
       g.spotlight {
         text {
@@ -90,15 +89,4 @@ div#spago {
       }
     }
   }
-}
-
-div#spago svg g.nodes {
-  g.package circle { visibility: hidden; }
-  g.package text { visibility: visible; fill: black; font-size: 24px; opacity: 0.5; text-anchor: start;}
-  g.module.source text, g.module.target text { fill: gray; }
-}
-div#spago svg.spotlight g.nodes {
-  g.package text { opacity: 0.2; }
-  g.module.source text,
-  g.module.target text { fill: gray; }
 }
