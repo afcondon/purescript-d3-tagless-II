@@ -52,9 +52,9 @@ component = H.mkComponent
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction Initialize = do
-    detached <- H.liftEffect $ d3Run $ removeExistingSVG "div#d3story"
+    detached <- H.liftEffect $ d3Run $ removeExistingSVG "div.d3story"
 
-    fiber <- H.liftAff $ forkAff $ LesMis.drawGraph "div#d3story"
+    fiber <- H.liftAff $ forkAff $ LesMis.drawGraph "div.d3story"
 
     H.modify_ (\state -> state { fiber = Just fiber })
 

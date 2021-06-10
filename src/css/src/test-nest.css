@@ -1,0 +1,80 @@
+div.d3story {
+  & svg {
+    &.spotlight {
+      & g.package text {
+        opacity: 0.2;
+      }
+      & g.module {
+        opacity: 0.2;
+        &.source,
+        &.target,
+        &.spotlight {
+          opacity: 1;
+          & text {
+            fill: gray;
+          }
+        }
+      }
+    }
+    & g.links line {
+      opacity: 0.5;
+      &.source {
+        opacity: 0.8;
+        stroke: red;
+        stroke-width: 2px;
+      }
+      &.target {
+        opacity: 0.8;
+        stroke: blue;
+        stroke-width: 2px;
+      }
+    }
+
+    & g.nodes {
+      & text {
+        font: 12px sans-serif;
+        text-anchor: middle;
+      }
+      & g.module {
+        & text {
+          visibility: hidden;
+        }
+        & circle {
+          stroke: white;
+          stroke-width: 1.5px;
+          opacity: 1;
+        }
+        &:hover {
+          & text {
+            visibility: visible;
+            fill: black;
+            opacity: 0.8;
+          }
+        }
+      }
+      & g.package {
+        & circle {
+          visibility: hidden;
+        }
+        & text {
+          visibility: visible;
+          fill: black;
+          font-size: 24px;
+          opacity: 0.5;
+          text-anchor: middle;
+        }
+      }
+      & g.spotlight {
+        & text {
+          visibility: visible;
+        }
+        & circle {
+          opacity: 1;
+          stroke-width: 5px;
+          stroke-dasharray: 4 1;
+          stroke: black;
+        }
+      }
+    }
+  }
+}

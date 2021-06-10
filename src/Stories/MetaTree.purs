@@ -58,7 +58,7 @@ drawMetaTree :: TreeJson_ -> Aff Unit
 drawMetaTree json =
   MetaTree.drawTree =<< makeModel TidyTree Vertical =<< Tree.getMetaTreeJSON =<< makeModel TidyTree Radial json
 
-selector = "div#d3story" -- TODO redo how all this svg nonsense is handled
+selector = "div.d3story" -- TODO redo how all this svg nonsense is handled
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit

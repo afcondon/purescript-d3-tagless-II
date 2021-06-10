@@ -49,7 +49,7 @@ component = H.mkComponent
       , HH.div [ HP.id "spago" ] [] -- the div where the d3 SVG will appear
       ]
 
-selector = "div#d3story" -- TODO redo how all this svg nonsense is handled
+selector = "div.d3story" -- TODO redo how all this svg nonsense is handled
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
