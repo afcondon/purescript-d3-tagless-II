@@ -132,7 +132,8 @@ app =
       ( HH.ClassName <$>
         [ "hidden"
         , "fixed"
-        , "pin-y"
+        , "top-0"
+        , "bottom-0"
         , "pin-l"
         , "overflow-y-auto"
         , "md:overflow-visible"
