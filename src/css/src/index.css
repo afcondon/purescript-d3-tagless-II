@@ -1,4 +1,9 @@
 @import "test-nest.css";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "ocelot-1.css";
+@import "fonts.css";
+@import "icons.css";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+@import "ocelot-2.css";
+@import "test-apply.css";

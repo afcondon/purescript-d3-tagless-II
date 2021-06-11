@@ -1,0 +1,341 @@
+/* Import preflight before any of our CSS so we can override it. */
+@tailwind preflight;
+
+html, body { @apply .gotham; @apply .leading-normal; font-size: 12px; @apply .text-black-20; }
+button, input, optgroup, select, textarea { @apply .leading-normal; }
+
+/* Temp overrides */
+
+* {
+  font-size: inherit;
+}
+h3 {
+  text-transform: unset;
+}
+fieldset legend {
+  position: unset;
+  top: 0;
+}
+legend {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  border: unset;
+  text-transform: inherit;
+}
+label {
+  display: inherit;
+  margin-bottom: unset;
+}
+th {
+  text-align: inherit;
+}
+dt {
+  margin-bottom: 0;
+}
+
+/* CitizenNet core CSS ... */
+
+@import "fonts.css";
+@import "icons.css";
+
+/* Import utilities after our CSS to avoid overwriting them. */
+@tailwind utilities;
+
+/* cn utilities */
+:root {
+  --scale: 1;
+  --rotate: 0deg;
+  --bounce: .3,.3,.7,1.4;
+}
+
+.container { max-width: 1200px; }
+
+.clearfix::before,
+.clearfix::after {
+  content: "";
+  display: table;
+}
+
+.flex-2 { flex: 2 }
+.flex-3 { flex: 3 }
+
+.transform { transform: scale(var(--scale)) rotate(var(--rotate)); }
+.transition-1\/8 { transition: all 0.125s ease; }
+.transition-1\/4 { transition: all 0.25s ease; }
+.transition-1\/4-in { transition: all 0.25s ease-in; }
+.transition-1\/4-out { transition: all 0.25s ease-out; }
+.transition-1\/4-bounce { transition: all 0.25s cubic-bezier(var(--bounce)); }
+.transition-1\/2-out { transition: all 0.5s ease-out; }
+.transition-1-out { transition: all 1s ease-out; }
+.cc-blue-88 { caret-color: config('colors.blue-88'); }
+.gotham { font-family: "Gotham SSm A", "Gotham SSm B", sans-serif; }
+.no-content { content: ''; }
+.no-outline { outline: none !important; }
+.offscreen { @apply .fixed; left: -9999%; top: -9999%; z-index: -9999; }
+.scale-0 { @apply .transform; --scale: 0; }
+.scale-1 { @apply .transform; --scale: 1; }
+.content-box { box-sizing: content-box; }
+.order-start { order: -1; }
+.rotate-315 { @apply .transform; --rotate: 315deg; }
+.pin-t-full { top: 100%; }
+.pin-r-full { right: 100%; }
+.pin-b-full { bottom: 100%; }
+.pin-l-full { left: 100%; }
+.-pin-b-40 { bottom: -10rem; }
+
+/* variant & pseudo utilities
+ *
+ * going forward, custom selectors should follow the following order:
+ *
+ * interactive variants: active, focus, hover
+ * property variants: checked, disabled
+ * negated variants all go in place of the variant they're negating: !variant
+ * pseudo elements: before | after
+ * neighbor selectors: sibling
+ *
+ * a few examples:
+ * !active:!focus:hover:checked:!disabled:neighbor:after:border-blue
+ * checked:!disabled:neighbor:hover:after:border-blue
+ * focus:!checked:sibling:hover:!checked:before:border-blue
+ *
+ * */
+
+/* radio - todo: move to block */
+.\!disabled\:sibling\:bg-white:not(:disabled) ~ * { @apply .bg-white; }
+.disabled\:sibling\:bg-grey-95:disabled ~ * { @apply .bg-grey-95; }
+.checked\:sibling\:before\:opacity-100:checked ~ *:before { @apply .opacity-100; }
+.checked\:sibling\:before\:scale-1:checked ~ *:before { @apply .scale-1; }
+.checked\:\!disabled\:sibling\:border-blue-88:checked:not(:disabled) ~ * { @apply .border-blue-88; }
+.focus\:sibling\:border-blue-88:focus ~ * { @apply .border-blue-88; }
+.\!checked\:sibling\:before\:opacity-0:not(:checked) ~ *:before { @apply .opacity-0; }
+.\!checked\:sibling\:before\:scale-0:not(:checked) ~ *:before { @apply .scale-0; }
+.\!focus\:hover\:\!checked\:\!disabled\:sibling\:border-grey-70:not(:focus):hover:not(:checked):not(:disabled) ~ * { @apply .border-grey-70; }
+.focus\:sibling\:shadow:focus ~ * { @apply .shadow; }
+.checked\:\!disabled\:sibling\:before\:bg-blue-88:checked:not(:disabled) ~ *:before { @apply .bg-blue-88; }
+.checked\:disabled\:sibling\:before\:bg-grey-80:checked:disabled ~ *:before { @apply .bg-grey-80; }
+.checked\:disabled\:sibling\:border-grey-80:checked:disabled ~ * { @apply .border-grey-80; }
+
+/* toggle button styles */
+.checked\:neighbor\:bg-grey-50:checked + * { @apply .bg-grey-50; }
+.checked\:neighbor\:text-white:checked + * { @apply .text-white; }
+.checked\:neighbor\:border-grey-50:checked + * { @apply .border-grey-50; }
+
+.\!checked\:neighbor\:hover\:bg-grey-80:not(:checked) + :hover { @apply .bg-grey-80; }
+.\!checked\:neighbor\:hover\:text-black-10:not(:checked) + :hover { @apply .text-black-10; }
+
+/* added for datepicker */
+.before\:scale-0:before { @apply .scale-0; }
+.before\:scale-1:before { @apply .scale-1; }
+
+.strike-through {
+	position: relative;
+}
+
+.strike-through::before {
+	position: absolute;
+	content: "";
+	left: 0;
+	top: 50%;
+	right: 0;
+	border-top: 1px solid;
+	border-color: inherit;
+	-webkit-transform: rotate(-5deg);
+	-moz-transform: rotate(-5deg);
+	-ms-transform: rotate(-5deg);
+	-o-transform: rotate(-5deg);
+	transform: rotate(-5deg);
+}
+
+/* legacy variant & pseudo utilities */
+.before\:absolute:before { @apply .absolute; }
+.before\:transition-1\/4:before { @apply .transition-1/4; }
+.before\:transition-1\/4-bounce:before { @apply .transition-1/4-bounce; }
+.before\:bg-blue-88:before { @apply .bg-blue-88; }
+.before\:bg-white:before { @apply .bg-white; }
+.before\:h-full:before { @apply .h-full; }
+.before\:w-full:before { @apply .w-full; }
+.before\:no-content:before { @apply .no-content; }
+.before\:rounded-full:before { @apply .rounded-full; }
+.before\:shadow:before { @apply .shadow; }
+.after\:absolute:after { @apply .absolute; }
+.after\:transition-1\/4:after { @apply .transition-1/4; }
+.after\:transition-1\/4-bounce:after { @apply .transition-1/4-bounce; }
+.after\:w-full:after { @apply .w-full; }
+.after\:h-2:after { @apply .h-2; }
+.after\:border-l-2:after { @apply .border-l-2; }
+.after\:border-b-2:after { @apply .border-b-2; }
+.after\:border-white:after { @apply .border-white; }
+.after\:no-content:after { @apply .no-content; }
+.after\:rotate-315:after { @apply .rotate-315; }
+.after\:shadow:after { @apply .shadow; }
+.checked\:sibling\:pl-5:checked ~ * { @apply .pl-5; }
+.\!checked\:sibling\:pr-5:not(:checked) ~ * { @apply .pr-5; }
+.checked\:sibling\:after\:opacity-100:checked ~ *:after { @apply .opacity-100; }
+.checked\:sibling\:after\:scale-1:checked ~ *:after { @apply .scale-1; }
+.checked\:sibling\:bg-blue-88:checked ~ * { @apply .bg-blue-88; }
+.\!checked\:sibling\:bg-grey-80:not(:checked) ~ * { @apply .bg-grey-80; }
+.\!checked\:sibling\:border-grey-70-a40:not(:checked) ~ * { @apply .border-grey-70-a40; }
+.checked\:sibling\:border-blue-88:checked ~ * { @apply .border-blue-88; }
+.checked\:\!disabled\:sibling\:border-blue-88:checked:not(:disabled) ~ * { @apply .border-blue-88; }
+.checked\:sibling\:bg-blue-88:checked ~ * { @apply .bg-blue-88; }
+.focus\:no-outline:focus { @apply .no-outline !important; }
+.\!checked\:sibling\:after\:opacity-0:not(:checked) ~ *:after { @apply .opacity-0; }
+.\!checked\:sibling\:after\:scale-0:not(:checked) ~ *:after { @apply .scale-0; }
+.disabled\:bg-grey-95:disabled { @apply .bg-grey-95; }
+.disabled\:text-grey-70:disabled { @apply .text-grey-70; }
+.\!disabled\:sibling\:bg-white:not(:disabled) ~ * { @apply .bg-white; }
+.disabled\:sibling\:bg-grey-95:disabled ~ * { @apply .bg-grey-95; }
+.\!focus\:\!disabled\:hover\:border-grey-70:hover:not(:focus):not(:disabled) { @apply .border-grey-70; }
+.group:hover .group-hover\:\!focus\:\!disabled\:border-grey-70:not(:focus):not(:disabled) { @apply .border-grey-70; }
+.group:hover .group-hover\:\!focus\:\!disabled\:sibling\:border-grey-70:not(:focus):not(:disabled) ~ * { @apply .border-grey-70; }
+.focus\:next\:text-blue-88:focus + * { @apply .text-blue-88; }
+.\!active\:border-b:not(:active) { @apply .border-b; }
+.active\:border-t:active { @apply .border-t; }
+.disabled\:opacity-50:disabled { @apply .opacity-50; }
+.disabled\:cursor-default:disabled { @apply .cursor-default; }
+.\!disabled\:cursor-pointer:not(:disabled) { @apply .cursor-pointer; }
+.hover\:\!disabled\:bg-grey-50-a30:hover:not(:disabled) { @apply .bg-grey-50-a30; }
+.hover\:\!disabled\:bg-grey-70-a40:hover:not(:disabled) { @apply .bg-grey-70-a40; }
+.hover\:\!disabled\:bg-blue-82:hover:not(:disabled) { @apply .bg-blue-82; }
+.sibling\:bg-grey-95 ~ * { @apply .bg-grey-95; }
+.sibling\:text-grey-50 ~ * { @apply .text-grey-50; }
+
+/* Animation Styles */
+.slide-down { animation: yslide 0.1s ease-out 1; }
+
+
+@keyframes yslide {
+  0% { transform: translateY(-50px); }
+  100% { transform: translateY(0); }
+}
+
+.fade-in { animation: fade 0.1s ease-out 1; }
+
+@keyframes fade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* Styles for range sliders */
+input[type=range] {
+  -webkit-appearance: none;
+  background: transparent;
+  width: 100%;
+}
+input[type=range]:focus {
+  outline: none;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 3px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: none;
+  background: rgba(102,113,128,0.3);
+  border-radius: 1.3px;
+  border: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  border: 2px solid #F0F1F2;
+  height: 20px;
+  width: 20px;
+  border-radius: 20px;
+  background: #00BBE0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -8.5px;
+}
+input[type=range]:focus::-webkit-slider-runnable-track {
+  background: rgba(102,113,128,0.3);
+}
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 3px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: none;
+  background: rgba(102,113,128,0.3);
+  border-radius: 1.3px;
+  border: none;
+}
+input[type=range]::-moz-range-thumb {
+  border: 2px solid #F0F1F2;
+  height: 20px;
+  width: 20px;
+  border-radius: 20px;
+  background: #00BBE0;
+  cursor: pointer;
+}
+input[type=range]::-ms-track {
+  width: 100%;
+  height: 3px;
+  cursor: pointer;
+  animate: 0.2s;
+  box-shadow: none;
+  background: rgba(102,113,128,0.3);
+  border-radius: 1.3px;
+  border: none;
+}
+input[type=range]::-ms-thumb {
+  border: 2px solid #F0F1F2;
+  height: 20px;
+  width: 20px;
+  border-radius: 20px;
+  background: #00BBE0;
+  cursor: pointer;
+}
+
+
+/* Loading Spinner Styles */
+.loader {
+  position: relative;
+  margin: 0 auto;
+}
+.loader::before {
+  content: '';
+  display: block;
+  padding-top: 100%;
+}
+
+.circular {
+  animation: rotate 2s linear infinite;
+  height: 100%;
+  transform-origin: center center;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  stroke: currentColor;
+}
+
+.path {
+  stroke-dasharray: 1, 200;
+  stroke-dashoffset: 0;
+  animation: dash 1.5s ease-in-out infinite;
+  stroke-linecap: round;
+}
+
+@keyframes rotate {
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -35px;
+  }
+  100% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -124px;
+  }
+}

@@ -1,0 +1,3 @@
+ 3330  twpurs gen-available-classes src --css ../dist/index.css
+
+ 3332  twpurs gen-css --src src --classes src/tailwind-classes.txt --css dist/index.css --out foo.css

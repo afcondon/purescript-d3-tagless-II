@@ -1,0 +1,33 @@
+/* html, body { @apply gotham; @apply leading-normal; font-size: 12px; @apply .text-black-20; } */
+html, body { @apply gotham; @apply leading-normal; font-size: 12px; @apply text-black-20; }
+button, input, optgroup, select, textarea { @apply leading-normal; }
+
+/* Temp overrides */
+
+* {
+  font-size: inherit;
+}
+h3 {
+  text-transform: unset;
+}
+fieldset legend {
+  position: unset;
+  top: 0;
+}
+legend {
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  border: unset;
+  text-transform: inherit;
+}
+label {
+  display: inherit;
+  margin-bottom: unset;
+}
+th {
+  text-align: inherit;
+}
+dt {
+  margin-bottom: 0;
+}
