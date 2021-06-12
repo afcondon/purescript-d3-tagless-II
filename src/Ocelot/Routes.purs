@@ -9,6 +9,7 @@ import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Halogen as H
 import UIGuide.App (Group(..), proxy)
+import UIGuide.Component.Modals as Modals
 import Stories.GUP as D3GUP
 import Stories.LesMis as LesMis
 import Stories.MetaTree as MetaTree
@@ -38,7 +39,12 @@ routes = fromFoldable
     , component: proxy D3GUP.component
     , group: Examples
     }
-  , Tuple "lesmis"
+    , Tuple "modals"
+    { anchor: "Modals"
+    , component: proxy Modals.component
+    , group: Examples
+    }
+    , Tuple "lesmis"
     { anchor: "LesMis"
     , component: proxy LesMis.component
     , group: Examples

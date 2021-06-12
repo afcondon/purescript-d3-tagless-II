@@ -28,11 +28,11 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Ocelot.Backdrop as Backdrop
+import UIGuide.Block.Backdrop as Backdrop
 import Ocelot.Block.Button as Button
 import Ocelot.Block.Card as Card
 import Ocelot.Block.Format as Format
-import Ocelot.Documentation as Documentation
+import UIGuide.Block.Documentation as Documentation
 import Ocelot.HTML.Properties (css)
 
 type Query :: forall k. k -> Type
@@ -74,8 +74,8 @@ component = H.mkComponent
 
   render :: State -> H.ComponentHTML Action () m
   render state =
-    HH.div [ HP.class_ $ HH.ClassName "gup" ]
-      [ HH.div [ HP.id "blurb", HP.class_ $ HH.ClassName "p-6 mx-auto" ]
+    HH.div [ HP.class_ $ HH.ClassName "absolute inset-y-0 left-0 w-16 bg-white bg-opacity-95 gup" ]
+      [ HH.div [ HP.id "blurb" ]
           [ HH.h1_ [ HH.text "General Update Pattern" ]
           , HH.div [ HP.id "inner-blurb" ]  
               [ HH.text blurbtext 

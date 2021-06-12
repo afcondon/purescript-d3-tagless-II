@@ -31,7 +31,7 @@ import Ocelot.Block.Format as Format
 import Partial.Unsafe as Partial.Unsafe
 import Routing.Hash (hashes)
 import Type.Proxy (Proxy(..))
-import Ocelot.Backdrop as Backdrop
+import UIGuide.Block.Backdrop as Backdrop
 import Web.HTML.HTMLElement (HTMLElement)
 
 data Query a = RouteChange String a
@@ -111,7 +111,7 @@ app =
   renderContainer state =
     HH.div
     [ HP.class_ $ HH.ClassName "md:ml-80" ]
-    [ HH.div [ HP.class_ $ HH.ClassName "d3story fixed w-full" ] [] -- this is the hook for the D3 svg(s)
+    [ HH.div [ HP.class_ $ HH.ClassName "d3story absolute inset-0 -z-10 w-full" ] [] -- this is the hook for the D3 svg(s)
     , HH.div
       [ HP.id "d3story-overlay", HP.class_ $ HH.ClassName "grid grid-cols-3 gap-10 w-full container mx-auto " ]
       [ renderSlot state ]
@@ -134,7 +134,7 @@ app =
         , "fixed"
         , "top-0"
         , "bottom-0"
-        , "pin-l"
+        , "left-0"
         , "overflow-y-auto"
         , "md:overflow-visible"
         , "scrolling-touch"
@@ -143,8 +143,8 @@ app =
         , "md:w-full"
         , "md:max-w-xs"
         , "flex-none"
-        -- , "border-r-2"
-        -- , "border-grey-light"
+        , "border-r-2"
+        , "border-grey-light"
         , "md:flex"
         , "flex-col"
         ]

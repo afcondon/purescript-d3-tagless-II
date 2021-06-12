@@ -1,4 +1,4 @@
-module Ocelot.Backdrop where -- from ui-guide in Ocelot
+module UIGuide.Block.Backdrop where -- from ui-guide in Ocelot
 
 import Prelude
 

@@ -43,6 +43,13 @@ You can edit this file as you like.
   , "unsafe-coerce"
   , "web-events"
   , "web-html"
+  , "argonaut"
+  , "foreign-object"
+  , "fuzzy"
+  , "js-timers"
+  , "newtype"
+  , "remotedata"
+  , "web-uievents"
   ]
 , packages = ./packages.dhall
 , sources = [ "src/**/*.purs", "test/**/*.purs" ]

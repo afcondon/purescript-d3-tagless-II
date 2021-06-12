@@ -17,13 +17,13 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Ocelot.Backdrop as Backdrop
+import UIGuide.Block.Backdrop as Backdrop
 import Ocelot.Block.Button as Button
 import Ocelot.Block.Card as Card
 import Ocelot.Block.FormField as FormField
 import Ocelot.Block.Format as Format
 import Ocelot.Block.Radio as Radio
-import Ocelot.Documentation as Documentation
+import UIGuide.Block.Documentation as Documentation
 import Ocelot.HTML.Properties (css)
 
 type Query :: forall k. k -> Type

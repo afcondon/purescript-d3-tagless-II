@@ -1,4 +1,4 @@
-module Ocelot.Documentation where
+module UIGuide.Block.Documentation where
 
 import Prelude
 
