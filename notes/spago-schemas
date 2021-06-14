@@ -1,0 +1,16 @@
+
+create table module (module varchar(128) primary key, path varchar(128) not null);
+
+create table module_dependency (module varchar(128) REFERENCES module(module),
+                          dependent varchar(128) REFERENCES module(module),
+                          PRIMARY KEY (module,dependent)
+                          );
+
+create table package (package varchar(128) primary key);
+
+create table package_dependency (package varchar(128) REFERENCES package(package),
+                        dependent varchar(128) REFERENCES package(package),
+                        PRIMARY KEY (package,dependent)
+                        );
+
+create table package_version (package varchar(128) primary key REFERENCES package(package), version varchar(128) not null); 
