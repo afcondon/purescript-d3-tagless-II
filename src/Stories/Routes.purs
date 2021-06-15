@@ -1,4 +1,4 @@
-module UIGuide.App.Routes
+module D3Tagless.App.Routes
   ( routes, groups )
 where
 
@@ -8,7 +8,7 @@ import Data.Map (Map, fromFoldable)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Halogen as H
-import UIGuide.App (Group(..), proxy)
+import D3Tagless.App (Group(..), proxy)
 import UIGuide.Component.Modals as Modals
 import Stories.GUP as D3GUP
 import Stories.LesMis as LesMis

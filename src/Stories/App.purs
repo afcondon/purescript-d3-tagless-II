@@ -3,7 +3,7 @@
 -- https://github.com/rnons/purescript-halogen-storybook/
 -- to fit with our UI guide branding needs
 
-module UIGuide.App
+module D3Tagless.App
   ( Stories
   , StoryQuery
   , Page(..)

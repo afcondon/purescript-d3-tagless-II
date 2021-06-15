@@ -4,14 +4,15 @@
   "private": true,
   "scripts": {
     "build": "spago build --path 'src/**/*.purs' --path 'OcelotTW2/src/**/*.purs' --path 'OcelotTW2/ui-guide/Blocks/**/*.purs' --path 'OcelotTW2/ui-guide/Components/**/*.purs' --path 'OcelotTW2/ui-guide/Utilities/**/*.purs'",
-    "bundle": "spago bundle-app --main Main --to dist/bundle.js",
-    "build-css": "postcss css/src/index.css -o dist/cn-tailwind.css"
+    "bundle": "spago bundle-app --path 'src/**/*.purs' --path 'OcelotTW2/src/**/*.purs' --path 'OcelotTW2/ui-guide/Blocks/**/*.purs' --path 'OcelotTW2/ui-guide/Components/**/*.purs' --path 'OcelotTW2/ui-guide/Utilities/**/*.purs' --to dist/bundle.js",
+    "build-css": "cd src/css; postcss src/index.css -o ../../dist/bundle.css"
   },
   "devDependencies": {
     "autoprefixer": "^10.2.6",
     "cssnano": "^5.0.6",
     "postcss-cli": "^8.3.1",
     "postcss-import": "^14.0.2",
+    "postcss-nesting": "^8.0.1",
     "tailwindcss": "^2.1.4"
   },
   "dependencies": {

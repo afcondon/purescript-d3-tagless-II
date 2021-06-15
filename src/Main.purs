@@ -4,8 +4,8 @@ import Prelude
 
 import Effect (Effect)
 import Halogen.Aff as HA
-import UIGuide.App (runStorybook)
-import UIGuide.App.Routes (routes, groups)
+import D3Tagless.App (runStorybook)
+import D3Tagless.App.Routes (routes, groups)
 
 main :: Effect Unit
 main = HA.runHalogenAff do
