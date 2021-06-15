@@ -1,0 +1,22 @@
+{
+  "name": "purescript-ocelot",
+  "version": "0.30.0",
+  "private": true,
+  "scripts": {
+    "build": "spago build --path 'ui-guide/**/*.purs' --path 'src/**/*.purs'",
+    "bundle": "spago bundle-app --main Main --to dist/bundle.js",
+    "build-css": "postcss css/src/index.css -o dist/cn-tailwind.css"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.2.6",
+    "cssnano": "^5.0.6",
+    "postcss-cli": "^8.3.1",
+    "postcss-import": "^14.0.2",
+    "tailwindcss": "^2.1.4"
+  },
+  "dependencies": {
+    "purescript": "0.14.2",
+    "spago": "^0.20.3",
+    "yarn": "^1.22.10"
+  }
+}

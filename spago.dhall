@@ -28,7 +28,6 @@ You can edit this file as you like.
   , "maybe"
   , "nullable"
   , "numbers"
-  , "ocelot"
   , "ordered-collections"
   , "partial"
   , "prelude"
