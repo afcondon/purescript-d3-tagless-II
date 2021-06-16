@@ -35,6 +35,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Ocelot.Block.Button as Button
 import Ocelot.Block.Format as Format
+import Ocelot.Block.FormField as FormField
 import Ocelot.HTML.Properties (css)
 import Stories.Tailwind.Styles as Tailwind
 import UIGuide.Block.Backdrop as Backdrop
@@ -115,14 +116,21 @@ component = H.mkComponent
               ]
           ]
       , Card.card_
-          [ Expandable.heading []
-              [ Format.subHeading_ [ HH.text "Code" ]
-              , Toggle.toggle
-                  [ HP.checked
-                    $ Expandable.toBoolean state.code
-                  , HE.onChange \_ -> ToggleCard _code
-                  ]
+          [ Format.subHeading_ 
+            [ HH.text "Code" ]
+          , FormField.field_
+            { label: HH.text "Show code panel"
+            , helpText: []
+            , error: []
+            , inputId: "show-code"
+            }
+            [ Toggle.toggle
+              [ HP.id_ "show-code"
+              , HP.checked
+                $ Expandable.toBoolean state.code
+              , HE.onChange \_ -> ToggleCard _code
               ]
+            ]
           , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
           ]  
       ]
