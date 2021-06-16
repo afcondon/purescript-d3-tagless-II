@@ -11,8 +11,13 @@ import D3.FFI (d3RemoveSelection_, d3SelectionIsEmpty_, d3SelectionSelect_)
 import D3.Interpreter (class D3InterpreterM, append, attach)
 import D3.Interpreter.D3 (d3Run, removeExistingSVG, runD3M)
 import D3.Selection (node)
+import D3Tagless.Block.Card as Card
+import D3Tagless.Block.Toggle as Toggle
+import D3Tagless.Block.Expandable as Expandable
 import Data.Array (catMaybes)
 import Data.Const (Const)
+import Data.Lens (Lens', over)
+import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence)
@@ -28,13 +33,13 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import UIGuide.Block.Backdrop as Backdrop
 import Ocelot.Block.Button as Button
-import D3Tagless.Block.Card as Card
 import Ocelot.Block.Format as Format
-import UIGuide.Block.Documentation as Documentation
 import Ocelot.HTML.Properties (css)
 import Stories.Tailwind.Styles as Tailwind
+import UIGuide.Block.Backdrop as Backdrop
+import UIGuide.Block.Documentation as Documentation
+import Type.Proxy (Proxy(..))
 
 type Query :: forall k. k -> Type
 type Query = Const Void
@@ -44,6 +49,7 @@ data Action
   | RestartGUP
   | PauseGUP
   | Finalize
+  | ToggleCard (Lens' State Expandable.Status)
 
 data Status = NotInitialized | Running | Paused
 derive instance eqStatus :: Eq Status
@@ -57,7 +63,15 @@ type State = {
     value  :: Status
   , fiber  :: Maybe (Fiber Unit)
   , update :: Maybe (Array Char -> Aff Unit)
+  , blurb :: Expandable.Status
+  , code  :: Expandable.Status
 }
+
+_blurb :: Lens' State Expandable.Status
+_blurb = prop (Proxy :: Proxy "blurb")
+
+_code :: Lens' State Expandable.Status
+_code = prop (Proxy :: Proxy "code")
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
 component = H.mkComponent
@@ -71,7 +85,13 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { value: NotInitialized, fiber: Nothing, update: Nothing }
+  initialState = { 
+      value: NotInitialized
+    , fiber: Nothing
+    , update: Nothing
+    , blurb: Expandable.Expanded
+    , code: Expandable.Collapsed
+  }
 
   render :: State -> H.ComponentHTML Action () m
   render state =
@@ -95,8 +115,15 @@ component = H.mkComponent
               ]
           ]
       , Card.card_
-          [ Format.contentHeading_ [ HH.text "Code" ]
-          , HH.pre_ [ HH.code_ [ HH.text codetext] ]
+          [ Expandable.heading []
+              [ Format.subHeading_ [ HH.text "Code" ]
+              , Toggle.toggle
+                  [ HP.checked
+                    $ Expandable.toBoolean state.code
+                  , HE.onChange \_ -> ToggleCard _code
+                  ]
+              ]
+          , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
           ]  
       ]
 
@@ -131,21 +158,26 @@ runUpdate update = do
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
-handleAction Initialize = do
+handleAction = case _ of
+  ToggleCard lens -> do
+    st <- H.get
+    H.put (over lens not st)
+
+  Initialize -> do
     updateFn <- runGeneralUpdatePattern
 
     fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
 
     H.modify_ (\state -> state { value = Running, fiber = Just fiber, update = Just updateFn })
 
-handleAction PauseGUP = do
+  PauseGUP -> do
     fiber <- H.gets _.fiber
     _ <- case fiber of
             Nothing      -> pure unit
             (Just fiber) -> H.liftAff $ killFiber (error "Cancel fiber to suspend computation") fiber
     H.modify_ (\state -> state { value = Paused, fiber = Nothing })
 
-handleAction RestartGUP = do
+  RestartGUP -> do
     { value, update } <- H.get
     if value /= Paused
     then pure unit
@@ -156,7 +188,7 @@ handleAction RestartGUP = do
           fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
           H.modify_ (\state -> state { value = Running, fiber = Just fiber })
 
-handleAction Finalize = do
+  Finalize -> do
     fiber <- H.gets _.fiber
     _ <- case fiber of
             Nothing      -> pure unit
