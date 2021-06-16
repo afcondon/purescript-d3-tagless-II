@@ -1075,6 +1075,81 @@ dt {
   padding-right: 1rem;
 }
 
+.redbox {
+  --tw-bg-opacity: 1;
+  background-color: rgba(255, 84, 113, var(--tw-bg-opacity));
+  --tw-bg-opacity: 0.95;
+  display: flex;
+  padding: 2rem;
+  left: 0;
+  width: 100%;
+}
+
+.storygrid {
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .storygrid {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .storygrid {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .storygrid {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .storygrid {
+    max-width: 1280px;
+  }
+}
+
+@media (min-width: 1536px) {
+  .storygrid {
+    max-width: 1536px;
+  }
+}
+
+.storygrid {
+  display: grid;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+  gap: 2.5rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 1200px;
+}
+
+.story-sidebar {
+  --tw-border-opacity: 1;
+  border-color: rgba(249, 250, 251, var(--tw-border-opacity));
+  border-right-width: 2px;
+  display: none;
+  flex-direction: column;
+  flex: none;
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0
+}
+
+@media (min-width: 768px) {
+  .story-sidebar {
+    display: flex;
+    max-width: 20rem;
+    overflow: visible;
+  }
+}
+
 .space-y-0 > :not([hidden]) ~ :not([hidden]) {
   --tw-space-y-reverse: 0;
   margin-top: calc(0px * calc(1 - var(--tw-space-y-reverse)));

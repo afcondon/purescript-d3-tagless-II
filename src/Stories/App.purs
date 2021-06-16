@@ -33,6 +33,7 @@ import Routing.Hash (hashes)
 import Type.Proxy (Proxy(..))
 import UIGuide.Block.Backdrop as Backdrop
 import Web.HTML.HTMLElement (HTMLElement)
+import Stories.Tailwind.Styles as Tailwind
 
 data Query a = RouteChange String a
 type Action = Unit
@@ -112,9 +113,7 @@ app =
     HH.div
     [ HP.class_ $ HH.ClassName "md:ml-80" ]
     [ HH.div [ HP.class_ $ HH.ClassName "d3story absolute inset-0 -z-10 w-full" ] [] -- this is the hook for the D3 svg(s)
-    , HH.div
-      [ HP.id "d3story-overlay", HP.class_ $ HH.ClassName "grid grid-cols-3 gap-10 w-full container mx-auto " ]
-      [ renderSlot state ]
+    , renderSlot state
     ]
 
   renderSlot :: State m -> HTML m
@@ -126,41 +125,13 @@ app =
 
   renderSidebar :: State m -> HTML m
   renderSidebar state =
-    Backdrop.backdrop
-    [ HP.id_ "sidebar"
-    , HP.classes
-      ( HH.ClassName <$>
-        [ "hidden"
-        , "fixed"
-        , "top-0"
-        , "bottom-0"
-        , "left-0"
-        , "overflow-y-auto"
-        , "md:overflow-visible"
-        , "scrolling-touch"
-        , "md:scrolling-auto"
-        , "w-4/5"
-        , "md:w-full"
-        , "md:max-w-xs"
-        , "flex-none"
-        , "border-r-2"
-        , "border-grey-light"
-        , "md:flex"
-        , "flex-col"
-        ]
-      )
-    ]
+    Backdrop.backdrop [ Tailwind.apply "story-sidebar" ]
     [ HH.div
-      [ HP.class_ $ HH.ClassName "flex-1 p-6 overflow-y-auto" ]
-      [ HH.header_
-        [ Format.heading
-          [ HP.class_ $ HH.ClassName "flex" ]
-          [ HH.img
-            [ HP.class_ $ HH.ClassName "mr-2"
-            , HP.src "PSD3-logo.png"
-            ]
+      [ HP.class_ $ HH.ClassName "flex-1 p-2 overflow-y-auto" ]
+      [ HH.img
+          [ HP.class_ $ HH.ClassName "w-24 mb-8 p-2 bg-white"
+          , HP.src "PSD3-logo.png"
           ]
-        ]
       , HH.nav
         [ HP.class_ $ HH.ClassName "text-base overflow-y-auto" ]
         (renderGroups state)

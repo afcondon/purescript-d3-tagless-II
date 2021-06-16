@@ -30,10 +30,11 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import UIGuide.Block.Backdrop as Backdrop
 import Ocelot.Block.Button as Button
-import Ocelot.Block.Card as Card
+import D3Tagless.Block.Card as Card
 import Ocelot.Block.Format as Format
 import UIGuide.Block.Documentation as Documentation
 import Ocelot.HTML.Properties (css)
+import Stories.Tailwind.Styles as Tailwind
 
 type Query :: forall k. k -> Type
 type Query = Const Void
@@ -74,44 +75,30 @@ component = H.mkComponent
 
   render :: State -> H.ComponentHTML Action () m
   render state =
-    HH.div [ HP.class_ $ HH.ClassName "absolute inset-y-0 left-0 w-16 bg-white bg-opacity-95 gup" ]
-      [ HH.div [ HP.id "blurb" ]
-          [ HH.h1_ [ HH.text "General Update Pattern" ]
-          , HH.div [ HP.id "inner-blurb" ]  
+    HH.div [ Tailwind.apply "storygrid" ]
+      [ Card.card_
+          [ Format.contentHeading_ [ HH.text "General Update Pattern" ]
+          , Card.card_ 
               [ HH.text blurbtext 
-              , controls state
+              , Card.card_ 
+                  [ Format.caption_
+                    [ HH.text $ show state.value ]
+                  , Button.buttonGroup_
+                    [ Button.buttonLeft
+                      [ HE.onClick $ const PauseGUP ]
+                      [ HH.text "Pause" ]
+                    , Button.buttonRight
+                      [ HE.onClick $ const RestartGUP ]
+                      [ HH.text "Restart" ]
+                    ]
+                  ]
               ]
           ]
       , Card.card_
-          [ Format.contentHeading_
-            [ HH.text "Code" ]
+          [ Format.contentHeading_ [ HH.text "Code" ]
           , HH.pre_ [ HH.code_ [ HH.text codetext] ]
           ]  
       ]
-
-controls state =
-  Documentation.customBlock_
-    { header: "Controls"
-    , subheader: "(actions take effect on next transition, not immediately)"
-    }
-  [ Backdrop.backdrop_
-    [ Backdrop.content_
-      [ HH.div
-        [ css "mb-6" ]
-        [ Format.caption_
-          [ HH.text $ show state.value ]
-        , Button.buttonGroup_
-          [ Button.buttonLeft
-            [ HE.onClick $ const PauseGUP ]
-            [ HH.text "Pause" ]
-          , Button.buttonRight
-            [ HE.onClick $ const RestartGUP ]
-            [ HH.text "Restart" ]
-          ]
-        ]
-      ]
-    ]
-  ]
 
 runGeneralUpdatePattern :: forall m. Bind m => MonadEffect m => m (Array Char -> Aff Unit)
 runGeneralUpdatePattern = do
