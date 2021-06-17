@@ -6,16 +6,16 @@
     @apply hidden top-0 bottom-0 left-0 overflow-y-auto bg-blue-500 border-gray-50 flex-none border-r-2 md:overflow-visible md:max-w-xs md:flex flex-col;
   }
   .story-container {
-    @apply grid h-screen w-full;
+    @apply flex flex-row gap-8 h-screen w-full bg-gray-100;
   }
   .story-panel {
-    @apply flex flex-col bg-blue-50;
+    @apply flex flex-col bg-green;
   }
   .story-panel-card {
-    @apply p-6 m-6 shadow-md;
+    @apply overflow-hidden min-w-min p-2 m-2 bg-white shadow-md;
   }
   .svg-container {
-    @apply col-start-2 bg-white;
+    @apply flex-grow bg-white;
   }
 }
 

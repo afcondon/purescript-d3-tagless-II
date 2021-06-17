@@ -98,9 +98,8 @@ component = H.mkComponent
   render state =
     HH.div [ Tailwind.apply "story-container" ]
       [ HH.div [ Tailwind.apply "story-panel"]
-        [ Format.contentHeading_ [ HH.text "General Update Pattern" ]
-        , Card.card 
-            [ Tailwind.apply "story-panel-card"] 
+        [   Card.card 
+            [ Tailwind.apply "story-controls"] 
             [ Format.caption_
               [ HH.text $ show state.value ]
             , Button.buttonGroup_
@@ -111,16 +110,12 @@ component = H.mkComponent
                 [ HE.onClick $ const RestartGUP ]
                 [ HH.text "Restart" ]
               ]
-            ]
-        , Card.card 
-            [ Tailwind.apply "story-panel-card"]
-            [ Format.subHeading_ [ HH.text "About" ]
             , FormField.field_
-              { label: HH.text "Expand"
-              , helpText: []
-              , error: []
-              , inputId: "show-blurb"
-              }
+                { label: HH.text "About"
+                , helpText: []
+                , error: []
+                , inputId: "show-blurb"
+                }
               [ Toggle.toggle
                 [ HP.id_ "show-blurb"
                 , HP.checked
@@ -128,13 +123,8 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _blurb
                 ]
               ]
-            , Expandable.content_ state.blurb [ HH.pre_ [ HH.code_ [ HH.text blurbtext ] ] ]
-            ]  
-        , Card.card 
-            [ Tailwind.apply "story-panel-card"]
-            [ Format.subHeading_ [ HH.text "Code" ]
             , FormField.field_
-              { label: HH.text "Show code panel"
+              { label: HH.text "Code"
               , helpText: []
               , error: []
               , inputId: "show-code"
@@ -146,7 +136,18 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
-            , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
+            ]
+        ]
+      , HH.div [ Tailwind.apply "story-panel" ] 
+        [ Card.card 
+            [ Tailwind.apply "story-panel-card"]
+            [ Expandable.content_ state.blurb [ HH.text blurbtext ]
+            ]  
+        ]
+      , HH.div [ Tailwind.apply "story-panel" ] 
+        [ Card.card 
+            [ Tailwind.apply "story-panel-card"]
+            [ Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
             ]  
           ]
       , HH.div [ Tailwind.apply "svg-container" ] []

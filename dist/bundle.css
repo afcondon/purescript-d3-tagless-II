@@ -1095,21 +1095,31 @@ dt {
 }
 
 .story-container {
-  display: grid;
+  --tw-bg-opacity: 1;
+  background-color: rgba(243, 244, 246, var(--tw-bg-opacity));
+  display: flex;
+  flex-direction: row;
   height: 100vh;
   width: 100%;
+  gap: 2rem;
 }
 
 .story-panel {
   --tw-bg-opacity: 1;
-  background-color: rgba(239, 246, 255, var(--tw-bg-opacity));
+  background-color: rgba(102, 199, 175, var(--tw-bg-opacity));
   display: flex;
   flex-direction: column;
 }
 
 .story-panel-card {
-  margin: 1.5rem;
-  padding: 1.5rem;
+  --tw-bg-opacity: 1;
+  background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
+  margin: 0.5rem;
+  min-width: -webkit-min-content;
+  min-width: -moz-min-content;
+  min-width: min-content;
+  overflow: hidden;
+  padding: 0.5rem;
   --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
@@ -1117,7 +1127,7 @@ dt {
 .svg-container {
   --tw-bg-opacity: 1;
   background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
-  grid-column-start: 2;
+  flex-grow: 1;
 }
 
 .space-y-0 > :not([hidden]) ~ :not([hidden]) {
