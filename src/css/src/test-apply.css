@@ -1,15 +1,28 @@
 @layer components {
-  .btn-blue {
-    @apply py-2 px-4 bg-white;
-  }
-  .redbox {
-    @apply left-0 p-8 w-full bg-red bg-opacity-95 flex;
-  }
-  .storygrid {
-    @apply grid grid-cols-3 gap-10 w-full container mx-auto;
+  .app-container {
+    @apply w-screen h-screen flex flex-row;
   }
   .story-sidebar {
-    @apply hidden fixed top-0 bottom-0 left-0 overflow-y-auto border-gray-50 flex-none border-r-2 
-           md:overflow-visible md:max-w-xs md:flex flex-col
+    @apply hidden top-0 bottom-0 left-0 overflow-y-auto bg-blue-500 border-gray-50 flex-none border-r-2 md:overflow-visible md:max-w-xs md:flex flex-col;
   }
+  .story-container {
+    @apply grid h-screen w-full;
+  }
+  .story-panel {
+    @apply flex flex-col bg-blue-50;
+  }
+  .story-panel-card {
+    @apply p-6 m-6 shadow-md;
+  }
+  .svg-container {
+    @apply col-start-2 bg-white;
+  }
+}
+
+div.story-container {
+  grid-template-columns: minmax(min-content, 1fr) minmax(500px, 3fr);
+  background-color: beige;
+}
+div.story-panel-card {
+  width: fit-content;
 }

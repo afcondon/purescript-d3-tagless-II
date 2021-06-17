@@ -85,8 +85,9 @@ contentClasses status_ = contentSharedClasses <>
     Collapsed -> HH.ClassName <$>
       [ "max-h-0"
       , "opacity-0"
+      , "w-0" -- TODO this should be a parameter, and actually all classes here should be @apply's
       , "overflow-hidden"
-      , "transition-1/4-in"
+      , "transition-1/2-in"
       ]
     Expanded -> HH.ClassName <$>
       [ "max-h-full"

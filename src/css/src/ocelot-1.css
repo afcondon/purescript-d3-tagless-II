@@ -1,4 +1,3 @@
-/* html, body { @apply gotham; @apply leading-normal; font-size: 12px; @apply .text-black-20; } */
 html, body { @apply gotham; @apply leading-normal; font-size: 12px; @apply text-black-20; }
 button, input, optgroup, select, textarea { @apply leading-normal; }
 

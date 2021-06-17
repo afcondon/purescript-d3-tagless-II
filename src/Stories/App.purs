@@ -101,19 +101,10 @@ app =
   render :: State m -> HTML m
   render state =
     HH.body_
-    [ HH.div
-      [ HP.class_ $ HH.ClassName "min-h-screen" ]
+    [ HH.div [ Tailwind.apply "app-container" ]
       [ renderSidebar state
-      , renderContainer state
+      , renderSlot state
       ]
-    ]
-
-  renderContainer :: State m -> HTML m
-  renderContainer state =
-    HH.div
-    [ HP.class_ $ HH.ClassName "md:ml-80" ]
-    [ HH.div [ HP.class_ $ HH.ClassName "d3story absolute inset-0 -z-10 w-full" ] [] -- this is the hook for the D3 svg(s)
-    , renderSlot state
     ]
 
   renderSlot :: State m -> HTML m

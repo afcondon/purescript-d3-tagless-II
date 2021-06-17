@@ -96,50 +96,68 @@ component = H.mkComponent
 
   render :: State -> H.ComponentHTML Action () m
   render state =
-    HH.div [ Tailwind.apply "storygrid" ]
-      [ Card.card_
-          [ Format.contentHeading_ [ HH.text "General Update Pattern" ]
-          , Card.card_ 
-              [ HH.text blurbtext 
-              , Card.card_ 
-                  [ Format.caption_
-                    [ HH.text $ show state.value ]
-                  , Button.buttonGroup_
-                    [ Button.buttonLeft
-                      [ HE.onClick $ const PauseGUP ]
-                      [ HH.text "Pause" ]
-                    , Button.buttonRight
-                      [ HE.onClick $ const RestartGUP ]
-                      [ HH.text "Restart" ]
-                    ]
-                  ]
-              ]
-          ]
-      , Card.card_
-          [ Format.subHeading_ 
-            [ HH.text "Code" ]
-          , FormField.field_
-            { label: HH.text "Show code panel"
-            , helpText: []
-            , error: []
-            , inputId: "show-code"
-            }
-            [ Toggle.toggle
-              [ HP.id_ "show-code"
-              , HP.checked
-                $ Expandable.toBoolean state.code
-              , HE.onChange \_ -> ToggleCard _code
+    HH.div [ Tailwind.apply "story-container" ]
+      [ HH.div [ Tailwind.apply "story-panel"]
+        [ Format.contentHeading_ [ HH.text "General Update Pattern" ]
+        , Card.card 
+            [ Tailwind.apply "story-panel-card"] 
+            [ Format.caption_
+              [ HH.text $ show state.value ]
+            , Button.buttonGroup_
+              [ Button.buttonLeft
+                [ HE.onClick $ const PauseGUP ]
+                [ HH.text "Pause" ]
+              , Button.buttonRight
+                [ HE.onClick $ const RestartGUP ]
+                [ HH.text "Restart" ]
               ]
             ]
-          , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
-          ]  
+        , Card.card 
+            [ Tailwind.apply "story-panel-card"]
+            [ Format.subHeading_ [ HH.text "About" ]
+            , FormField.field_
+              { label: HH.text "Expand"
+              , helpText: []
+              , error: []
+              , inputId: "show-blurb"
+              }
+              [ Toggle.toggle
+                [ HP.id_ "show-blurb"
+                , HP.checked
+                  $ Expandable.toBoolean state.blurb
+                , HE.onChange \_ -> ToggleCard _blurb
+                ]
+              ]
+            , Expandable.content_ state.blurb [ HH.pre_ [ HH.code_ [ HH.text blurbtext ] ] ]
+            ]  
+        , Card.card 
+            [ Tailwind.apply "story-panel-card"]
+            [ Format.subHeading_ [ HH.text "Code" ]
+            , FormField.field_
+              { label: HH.text "Show code panel"
+              , helpText: []
+              , error: []
+              , inputId: "show-code"
+              }
+              [ Toggle.toggle
+                [ HP.id_ "show-code"
+                , HP.checked
+                  $ Expandable.toBoolean state.code
+                , HE.onChange \_ -> ToggleCard _code
+                ]
+              ]
+            , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
+            ]  
+          ]
+      , HH.div [ Tailwind.apply "svg-container" ] []
       ]
+        
 
 runGeneralUpdatePattern :: forall m. Bind m => MonadEffect m => m (Array Char -> Aff Unit)
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
-  detached <- H.liftEffect $ d3Run $ removeExistingSVG "div.d3story"
-  update   <- H.liftEffect $ d3Run $ GUP.script "div.d3story"
+  detached <- H.liftEffect $ d3Run $ removeExistingSVG "div.svg-container"
+  update   <- H.liftEffect $ d3Run $ GUP.script "div.svg-container"
   -- the script sets up the SVG and returns a function that the component can run whenever it likes
   -- (but NB if it runs more often than every 2000 milliseconds there will be big problems)
   pure (\letters -> H.liftEffect $ runD3M (update letters) *> pure unit )

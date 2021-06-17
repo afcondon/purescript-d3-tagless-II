@@ -42,7 +42,7 @@ script selector = do
                     , y        0.0
                     -- , yu (NWU { i: 0, u: Px })
                     , text     (singleton <<< datumIsChar)
-                    , fontSize 48.0
+                    , fontSize 96.0
                     ]  
                     `andThen` (transition `to` [ y 200.0 ]) 
 

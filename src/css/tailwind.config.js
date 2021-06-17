@@ -2,6 +2,13 @@ module.exports = {
   purge: [],
   darkMode: false, // or 'media' or 'class'
   theme: {
+    screens: {
+      sm: '480px',
+      md: '768px',
+      lg: '976px',
+      xl: '1440px',
+      xxl: '2000px',
+    },
     extend: {
       colors: {
         'black-10': '#00091A',
@@ -48,9 +55,6 @@ module.exports = {
         '90': '22.5rem',
         '120': '30rem',
         '160': '40rem',
-      },
-      maxWidth: {
-        '6xl': '110rem'
       },
       zIndex: {
         '60': '60',
