@@ -56,9 +56,9 @@ data Status = NotInitialized | Running | Paused
 derive instance eqStatus :: Eq Status
 
 instance showStatus :: Show Status where
-  show NotInitialized = "Not yet initialized"
-  show Running = "GUP is running"
-  show Paused  = "GUP is paused"
+  show NotInitialized = "Not initialized"
+  show Running = "Running"
+  show Paused  = "Paused"
   
 type State = { 
     value  :: Status
@@ -97,20 +97,18 @@ component = H.mkComponent
   render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div [ Tailwind.apply "story-container" ]
-      [ HH.div -- [ Tailwind.apply "story-panel"]
+      [ HH.div
             [ Tailwind.apply "story-panel-controls"] 
-            [ Format.caption_
-              [ HH.text $ show state.value ]
-            , Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
+            [ Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
               [ Button.buttonVertical
                 [ HE.onClick $ const PauseGUP ]
-                [ HH.text "Pause" ]
+                [ HH.text $ show state.value ]
               , Button.buttonVertical
                 [ HE.onClick $ const RestartGUP ]
                 [ HH.text "Restart" ]
               ]
             ]
-      , HH.div -- [ Tailwind.apply "story-panel" ] 
+      , HH.div
             [ Tailwind.apply "story-panel-about"]
             [ FormField.field_
               { label: HH.text "About"
@@ -127,7 +125,7 @@ component = H.mkComponent
               ]
             , Expandable.content_ state.blurb [ HH.text blurbtext ]
             ]  
-      , HH.div -- [ Tailwind.apply "story-panel" ] 
+      , HH.div
             [ Tailwind.apply "story-panel-code"]
             [ FormField.field_
                 { label: HH.text "Code"

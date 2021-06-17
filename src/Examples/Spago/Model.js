@@ -35,7 +35,7 @@ spotlightNeighbours_ = (simulation, id, nodetype) => {
   spotlit   = true; 
   spotlitID = id
   simulation.stop()
-  svg = d3.select('div.d3story svg')
+  svg = d3.select('div.svg-container svg')
   nodeSelection = svg.selectAll('g.nodes g')
   spotlitSelection = nodeSelection.filter((d, i) => d.id == id)
 

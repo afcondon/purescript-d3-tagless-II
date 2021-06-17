@@ -8,6 +8,9 @@ import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Examples.Tree.Configure as Tree
 import D3.Interpreter.D3 (d3Run, removeExistingSVG)
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
+import D3Tagless.Block.Card as Card
+import D3Tagless.Block.Toggle as Toggle
+import D3Tagless.Block.Expandable as Expandable
 import Data.Array (catMaybes)
 import Data.Const (Const)
 import Data.Either (Either(..)) as E
@@ -18,13 +21,18 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import UIGuide.Block.Backdrop as Backdrop
-import Ocelot.Block.Button as Button
-import Ocelot.Block.Card as Card
+import D3Tagless.Block.Button as Button
 import Ocelot.Block.FormField as FormField
 import Ocelot.Block.Format as Format
 import Ocelot.Block.Radio as Radio
 import UIGuide.Block.Documentation as Documentation
 import Ocelot.HTML.Properties (css)
+import Stories.Tailwind.Styles as Tailwind
+import UIGuide.Block.Backdrop as Backdrop
+import UIGuide.Block.Documentation as Documentation
+import Type.Proxy (Proxy(..))
+import Data.Lens (Lens', over)
+import Data.Lens.Record (prop)
 
 type Query :: forall k. k -> Type
 type Query = Const Void
@@ -33,8 +41,19 @@ data Action
   = Initialize
   | SetLayout TreeLayout
   | SetType TreeType
-  
-type State = Maybe TreeModel
+  | ToggleCard (Lens' State Expandable.Status)
+
+type State = { 
+    tree :: Maybe TreeModel
+  , blurb :: Expandable.Status
+  , code  :: Expandable.Status
+}
+
+_blurb :: Lens' State Expandable.Status
+_blurb = prop (Proxy :: Proxy "blurb")
+
+_code :: Lens' State Expandable.Status
+_code = prop (Proxy :: Proxy "code")
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
 component = H.mkComponent
@@ -47,7 +66,11 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = Nothing
+  initialState = { 
+      tree: Nothing
+    , blurb: Expandable.Collapsed
+    , code: Expandable.Collapsed
+  }
 
   showState :: Maybe TreeModel -> String
   showState Nothing = "There is no model yet"
@@ -55,122 +78,165 @@ component = H.mkComponent
 
   treeClasses :: State -> Array HH.ClassName
   treeClasses model = do
-    let classStrings = catMaybes [ Just "trees", (show <<< _.treeLayout) <$> model]
+    let classStrings = catMaybes [ Just "trees", (show <<< _.treeLayout) <$> model.tree]
     HH.ClassName <$> classStrings
   
   controlsRadio model =
-    Card.card
+    HH.div
       [ css "flex-1" ]
-      [ HH.div
-          [ css "flex-1" ]
-          [ HH.h3
-            [ HP.classes Format.captionClasses ]
-            [ HH.text "Layout controls" ]
-          , FormField.fieldset_
-            { label: HH.text "Tree orientation"
-            , inputId: "radio-horizontal"
-            , helpText: []
-            , error: []
-            }
-            [ HH.div
-              [ css "flex" ]
-              [ Radio.radio
-                [ css "pr-6" ]
-                [ HP.name "preview"
-                , HP.checked true
-                , HE.onClick $ const (SetLayout Vertical)
-                ]
-                [ HH.text "Vertical" ]
-              , Radio.radio
-                [ css "pr-6" ]
-                [ HP.name "preview"
-                , HE.onClick $ const (SetLayout Horizontal) ]
-                [ HH.text "Horizontal" ]
-              , Radio.radio
-                [ css "pr-6" ]
-                [ HP.name "preview"
-                , HE.onClick $ const (SetLayout Radial) ]
-                [ HH.text "Radial" ]
-              ]
+      [ HH.h3
+        [ HP.classes Format.captionClasses ]
+        [ HH.text "Layout controls" ]
+      , FormField.fieldset_
+        { label: HH.text "Tree orientation"
+        , inputId: "radio-horizontal"
+        , helpText: []
+        , error: []
+        }
+        [ HH.div
+          [ css "flex" ]
+          [ Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "preview"
+            , HP.checked true
+            , HE.onClick $ const (SetLayout Vertical)
             ]
-          , FormField.fieldset_
-            { label: HH.text "Tree topology"
-            , inputId: "radio-horizontal"
-            , helpText: []
-            , error: []
-            }
-            [ HH.div
-              [ css "flex" ]
-              [ Radio.radio
-                [ css "pr-6" ]
-                [ HP.name "preview"
-                , HP.checked true
-                , HE.onClick $ const (SetType TidyTree)
-                ]
-                [ HH.text "TidyTree" ]
-              , Radio.radio
-                [ css "pr-6" ]
-                [ HP.name "preview"
-                , HE.onClick $ const (SetType Dendrogram) ]
-                [ HH.text "Dendrogram" ]
-              ]
-            ]
+            [ HH.text "Vertical" ]
+          , Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "preview"
+            , HE.onClick $ const (SetLayout Horizontal) ]
+            [ HH.text "Horizontal" ]
+          , Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "preview"
+            , HE.onClick $ const (SetLayout Radial) ]
+            [ HH.text "Radial" ]
           ]
+        ]
+      , FormField.fieldset_
+        { label: HH.text "Tree topology"
+        , inputId: "radio-horizontal"
+        , helpText: []
+        , error: []
+        }
+        [ HH.div
+          [ css "flex" ]
+          [ Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "preview"
+            , HP.checked true
+            , HE.onClick $ const (SetType TidyTree)
+            ]
+            [ HH.text "TidyTree" ]
+          , Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "preview"
+            , HE.onClick $ const (SetType Dendrogram) ]
+            [ HH.text "Dendrogram" ]
+          ]
+        ]
       ]
 
   render :: State -> H.ComponentHTML Action () m
-  render state =  
-      HH.div [ HP.id "d3story-overlay", HP.classes $ treeClasses state ]
-      [ HH.div [ HP.id "tree" ] [] -- the div where the d3 script will appear
-
-      , HH.div [ HP.id "blurb" ] 
-        [ HH.div [ HP.id "inner-blurb" ] [ HH.h1_ [ HH.text $ "Tree layout" ]
-                                         , HH.text blurbtext ] 
-        , controlsRadio state
-        ]
-
-      , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext]]
+  render state =
+    HH.div [ Tailwind.apply "story-container" ]
+      [ HH.div [ Tailwind.apply "story-panel-controls"] 
+          [ controlsRadio state.tree ]
+      , HH.div
+            [ Tailwind.apply "story-panel-about"]
+            [ FormField.field_
+              { label: HH.text "About"
+              , helpText: []
+              , error: []
+              , inputId: "show-blurb"
+              }
+              [ Toggle.toggle
+                [ HP.id_ "show-blurb"
+                , HP.checked
+                  $ Expandable.toBoolean state.blurb
+                , HE.onChange \_ -> ToggleCard _blurb
+                ]
+              ]
+            , Expandable.content_ state.blurb [ HH.text blurbtext ]
+            ]  
+      , HH.div
+            [ Tailwind.apply "story-panel-code"]
+            [ FormField.field_
+                { label: HH.text "Code"
+                , helpText: []
+                , error: []
+                , inputId: "show-code"
+                }
+              [ Toggle.toggle
+                [ HP.id_ "show-code"
+                , HP.checked
+                  $ Expandable.toBoolean state.code
+                , HE.onChange \_ -> ToggleCard _code
+                ]
+              ]
+            , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
+            ]  
+      , HH.div [ Tailwind.apply "svg-container" ] []
       ]
+  -- render :: State -> H.ComponentHTML Action () m
+  -- render state =  
+  --     HH.div [ HP.id "d3story-overlay", HP.classes $ treeClasses state ]
+  --     [ HH.div [ HP.id "tree" ] [] -- the div where the d3 script will appear
 
-selector = "div.d3story" -- TODO redo how all this svg nonsense is handled
+  --     , HH.div [ HP.id "blurb" ] 
+  --       [ HH.div [ HP.id "inner-blurb" ] [ HH.h1_ [ HH.text $ "Tree layout" ]
+  --                                        , HH.text blurbtext ] 
+  --       , controlsRadio state
+  --       ]
+
+  --     , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext]]
+  --     ]
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
-handleAction Initialize = do
-  detached <- H.liftEffect $ d3Run $ removeExistingSVG selector
+handleAction = case _ of
+  ToggleCard lens -> do
+    st <- H.get
+    H.put (over lens not st)
 
-  treeJSON <- H.liftAff $ getTreeViaAJAX "http://localhost:1234/flare-2.json"
+  Initialize -> do
+    detached <- H.liftEffect $ d3Run $ removeExistingSVG "div.svg-container"
 
-  case treeJSON of
-    (E.Left err) -> pure unit
-    (E.Right (tree :: TreeJson_)) -> do
-      model <- H.liftAff $ makeModel TidyTree Vertical tree
-      _     <- H.liftAff $ Tree.drawTree model selector
-      H.modify_ (\_ -> Just model)
-      pure unit
-  pure unit
+    treeJSON <- H.liftAff $ getTreeViaAJAX "http://localhost:1234/flare-2.json"
 
-handleAction (SetLayout layout) = do
-  detached <- H.liftEffect $ d3Run $ removeExistingSVG selector
+    case treeJSON of
+      (E.Left err) -> pure unit
+      (E.Right (treeJSON :: TreeJson_)) -> do
+        model <- H.liftAff $ makeModel TidyTree Vertical treeJSON
+        _     <- H.liftAff $ Tree.drawTree model "div.svg-container"
+        H.modify_ (\st -> st { tree = Just model } )
+        pure unit
+    pure unit
 
-  (model :: Maybe TreeModel) <- get
-  case model of
-    Nothing -> pure unit
-    (Just model) -> do
-      let updated = model { treeLayout = layout }
-      _ <- H.liftAff $ Tree.drawTree updated selector
-      put $ Just updated
+  (SetLayout layout) -> do
+    detached <- H.liftEffect $ d3Run $ removeExistingSVG "div.svg-container"
 
-handleAction (SetType  treetype) = do
-  detached <- H.liftEffect $ d3Run $ removeExistingSVG selector
+    { tree } <- get
+    case tree of
+      Nothing -> pure unit
+      (Just tree) -> do
+        let updated = tree { treeLayout = layout }
+        _ <- H.liftAff $ Tree.drawTree updated "div.svg-container"
+        H.modify_ (\st -> st { tree = Just updated } )
+        pure unit
 
-  (model :: Maybe TreeModel) <- get
-  case model of
-    Nothing -> pure unit
-    (Just model) -> do
-      let updated = model { treeType = treetype }
-      _ <- H.liftAff $ Tree.drawTree updated selector
-      put $ Just updated
+  (SetType  treetype) -> do
+    detached <- H.liftEffect $ d3Run $ removeExistingSVG "div.svg-container"
+
+    { tree } <- get
+    case tree of
+      Nothing -> pure unit
+      (Just tree) -> do
+        let updated = tree { treeType = treetype }
+        _ <- H.liftAff $ Tree.drawTree updated "div.svg-container"
+        H.modify_ (\st -> st { tree = Just updated } )
+        pure unit
 
 
 codetext :: String

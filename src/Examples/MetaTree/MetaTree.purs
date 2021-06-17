@@ -62,7 +62,7 @@ treeScript (Tuple width height) tree = do
 
 
   -- "script"
-  root       <- attach "div.d3story"                           
+  root       <- attach ".svg-container"                           
   svg        <- root `append` (node Svg  [ viewBox (-svgWH.width / 2.0) (-20.0) svgWH.width svgWH.height
                                          , classed "metatree" ] )
   container  <- svg  `append` (node Group [ fontFamily      "sans-serif"

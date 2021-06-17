@@ -39,11 +39,6 @@ routes = fromFoldable
     , component: proxy D3GUP.component
     , group: Examples
     }
-    , Tuple "modals"
-    { anchor: "Modals"
-    , component: proxy Modals.component
-    , group: Examples
-    }
     , Tuple "lesmis"
     { anchor: "LesMis"
     , component: proxy LesMis.component

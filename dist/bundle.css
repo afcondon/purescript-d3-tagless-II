@@ -1,64 +1,64 @@
 
-      div.d3story svg.spotlight g.package text {
+      div.svg-container svg.spotlight g.package text {
         opacity: 0.2;
       }
 
-div.d3story svg.spotlight g.module {
+div.svg-container svg.spotlight g.module {
         opacity: 0.2
       }
 
-div.d3story svg.spotlight g.module.source,
-        div.d3story svg.spotlight g.module.target,
-        div.d3story svg.spotlight g.module.spotlight {
+div.svg-container svg.spotlight g.module.source,
+        div.svg-container svg.spotlight g.module.target,
+        div.svg-container svg.spotlight g.module.spotlight {
           opacity: 1
         }
 
-div.d3story svg.spotlight g.module.source text, div.d3story svg.spotlight g.module.target text, div.d3story svg.spotlight g.module.spotlight text {
+div.svg-container svg.spotlight g.module.source text, div.svg-container svg.spotlight g.module.target text, div.svg-container svg.spotlight g.module.spotlight text {
             fill: gray;
           }
 
-div.d3story svg g.links line {
+div.svg-container svg g.links line {
       opacity: 0.5
     }
 
-div.d3story svg g.links line.source {
+div.svg-container svg g.links line.source {
         opacity: 0.8;
         stroke: red;
         stroke-width: 2px;
       }
 
-div.d3story svg g.links line.target {
+div.svg-container svg g.links line.target {
         opacity: 0.8;
         stroke: blue;
         stroke-width: 2px;
       }
 
-div.d3story svg g.nodes text {
+div.svg-container svg g.nodes text {
         font: 12px sans-serif;
         text-anchor: middle;
       }
 
-div.d3story svg g.nodes g.module text {
+div.svg-container svg g.nodes g.module text {
           visibility: hidden;
         }
 
-div.d3story svg g.nodes g.module circle {
+div.svg-container svg g.nodes g.module circle {
           stroke: white;
           stroke-width: 1.5px;
           opacity: 1;
         }
 
-div.d3story svg g.nodes g.module:hover text {
+div.svg-container svg g.nodes g.module:hover text {
             visibility: visible;
             fill: black;
             opacity: 0.8;
           }
 
-div.d3story svg g.nodes g.package circle {
+div.svg-container svg g.nodes g.package circle {
           visibility: hidden;
         }
 
-div.d3story svg g.nodes g.package text {
+div.svg-container svg g.nodes g.package text {
           visibility: visible;
           fill: black;
           font-size: 24px;
@@ -66,11 +66,11 @@ div.d3story svg g.nodes g.package text {
           text-anchor: middle;
         }
 
-div.d3story svg g.nodes g.spotlight text {
+div.svg-container svg g.nodes g.spotlight text {
           visibility: visible;
         }
 
-div.d3story svg g.nodes g.spotlight circle {
+div.svg-container svg g.nodes g.spotlight circle {
           opacity: 1;
           stroke-width: 5px;
           stroke-dasharray: 4 1;

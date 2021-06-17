@@ -1,4 +1,4 @@
-div.d3story {
+div.svg-container {
   & svg {
     &.spotlight {
       & g.package text {

@@ -22,7 +22,7 @@ import Math (pi, sqrt)
 script :: forall m selection. Bind m => D3InterpreterM selection m => 
   Tuple Number Number -> SpagoModel -> m selection
 script _ model@{ tree: Nothing } = do
-  attach "div.d3story" 
+  attach "div.svgContainer" 
 
 script (Tuple width height) model@{ tree: Just (Tuple _ theTree)} = do
   let 

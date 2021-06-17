@@ -19,14 +19,39 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Stories.Tailwind.Styles as Tailwind
+import Ocelot.Block.FormField as FormField
+import D3Tagless.Block.Toggle as Toggle
+import D3Tagless.Block.Expandable as Expandable
+import Halogen.HTML.Events as HE
+import D3Tagless.Block.Toggle as Toggle
+import Data.Lens (Lens', over)
+import Data.Lens.Record (prop)
+import Type.Proxy (Proxy(..))
 
 type Query :: forall k. k -> Type
 type Query = Const Void
 
 data Action
   = Initialize
+  | ToggleCard (Lens' State Expandable.Status)
   
-type State = String
+type State = { 
+    tree :: String
+  , blurb :: Expandable.Status
+  , code  :: Expandable.Status
+  , print :: Expandable.Status
+}
+
+_blurb :: Lens' State Expandable.Status
+_blurb = prop (Proxy :: Proxy "blurb")
+
+_code :: Lens' State Expandable.Status
+_code = prop (Proxy :: Proxy "code")
+  
+_print :: Lens' State Expandable.Status
+_print = prop (Proxy :: Proxy "print")
+  
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
 component = H.mkComponent
@@ -39,37 +64,98 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = ""
+  initialState = { tree: "", blurb: Expandable.Collapsed, code: Expandable.Collapsed, print: Expandable.Expanded  } 
   
+  -- render :: State -> H.ComponentHTML Action () m
+  -- render state =  
+  --     HH.div [ HP.id "d3story-overlay", HP.classes [ HH.ClassName "printtree" ] ]
+  --     [ HH.div [ HP.id "printtree" ] [ HH.text state ] -- the div where the d3 script will appear
+
+  --     , HH.div [ HP.id "blurb" ] 
+  --       [ HH.h1_ [ HH.text $ "Print Tree: using a string producing interpreter instead of D3" ]
+  --       , HH.div [ HP.id "inner-blurb" ] [ HH.text blurbtext ] 
+  --       ]
+
+  --     , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext]]
+  --     ]
   render :: State -> H.ComponentHTML Action () m
-  render state =  
-      HH.div [ HP.id "d3story-overlay", HP.classes [ HH.ClassName "printtree" ] ]
-      [ HH.div [ HP.id "printtree" ] [ HH.text state ] -- the div where the d3 script will appear
-
-      , HH.div [ HP.id "blurb" ] 
-        [ HH.h1_ [ HH.text $ "Print Tree: using a string producing interpreter instead of D3" ]
-        , HH.div [ HP.id "inner-blurb" ] [ HH.text blurbtext ] 
-        ]
-
-      , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext]]
+  render state =
+    HH.div [ Tailwind.apply "story-container" ]
+      [ HH.div 
+        [ Tailwind.apply "story-panel-controls"] 
+        [ HH.text "Les Mis" ]
+      , HH.div
+            [ Tailwind.apply "story-panel-about"]
+            [ FormField.field_
+              { label: HH.text "About"
+              , helpText: []
+              , error: []
+              , inputId: "show-blurb"
+              }
+              [ Toggle.toggle
+                [ HP.id_ "show-blurb"
+                , HP.checked
+                  $ Expandable.toBoolean state.blurb
+                , HE.onChange \_ -> ToggleCard _blurb
+                ]
+              ]
+            , Expandable.content_ state.blurb [ HH.text blurbtext ]
+            ]  
+      , HH.div
+            [ Tailwind.apply "story-panel-code"]
+            [ FormField.field_
+                { label: HH.text "Code"
+                , helpText: []
+                , error: []
+                , inputId: "show-code"
+                }
+              [ Toggle.toggle
+                [ HP.id_ "show-code"
+                , HP.checked
+                  $ Expandable.toBoolean state.code
+                , HE.onChange \_ -> ToggleCard _code
+                ]
+              ]
+            , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
+            ]  
+      , HH.div
+            [ Tailwind.apply "story-panel-code"]
+            [ FormField.field_
+                { label: HH.text "Output"
+                , helpText: []
+                , error: []
+                , inputId: "show-print"
+                }
+              [ Toggle.toggle
+                [ HP.id_ "show-print"
+                , HP.checked
+                  $ Expandable.toBoolean state.print
+                , HE.onChange \_ -> ToggleCard _print
+                ]
+              ]
+            , Expandable.content_ state.print [ HH.code_ [ HH.text $ show state.tree ] ]
+            ]  
       ]
-
-selector = "div.d3story" -- TODO redo how all this svg nonsense is handled
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
-handleAction Initialize = do
-  detached <- H.liftEffect $ d3Run $ removeExistingSVG selector
+handleAction = case _ of
+  ToggleCard lens -> do
+    st <- H.get
+    H.put (over lens not st)
 
-  treeJSON <- H.liftAff $ getTreeViaAJAX "http://localhost:1234/flare-2.json"
+  Initialize -> do
+    detached <- H.liftEffect $ d3Run $ removeExistingSVG "div.svg-container"
 
-  case treeJSON of
-    (E.Left err) -> pure unit
-    (E.Right (tree :: TreeJson_)) -> do
-      textRep     <- H.liftAff $ Tree.getPrintTree =<< makeModel TidyTree Radial tree
-      H.modify_ (\_ -> textRep)
-      pure unit
-  pure unit
+    treeJSON <- H.liftAff $ getTreeViaAJAX "http://localhost:1234/flare-2.json"
+
+    case treeJSON of
+      (E.Left err) -> pure unit
+      (E.Right (tree :: TreeJson_)) -> do
+        textRep     <- H.liftAff $ Tree.getPrintTree =<< makeModel TidyTree Radial tree
+        H.modify_ (\st -> st { tree = textRep } )
+        pure unit
+    pure unit
 
 codetext :: String
 codetext = 

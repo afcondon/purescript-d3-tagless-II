@@ -13,6 +13,7 @@ import Effect.Exception (error)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import Stories.Tailwind.Styles as Tailwind
 
 type Query :: forall k. k -> Type
 type Query = Const Void
@@ -21,7 +22,9 @@ data Action
   = Initialize
   | Finalize
   
-type State = { fiber  :: Maybe (Fiber Unit) }
+type State = { 
+    fiber  :: Maybe (Fiber Unit)
+}
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
 component = H.mkComponent
@@ -41,80 +44,40 @@ component = H.mkComponent
 
   render :: State -> H.ComponentHTML Action () m
   render state =
-    HH.div [ HP.id "d3story-overlay", HP.classes [ HH.ClassName "force" ] ]
-      [ HH.div [ HP.id "blurb" ]  [ HH.h1_ [ HH.text "Source navigator using data from Spago / purs" ]
-                                           , HH.div [ HP.id "inner-blurb" ] [ HH.text blurbtext ] ]
-      -- , HH.div [ HP.id "controls" ] controls
-      , HH.div [ HP.id "code" ]   [ HH.div [ HP.id "inner-code" ]  [ HH.text codetext] ]
-      , HH.div [ HP.id "spago" ] [] -- the div where the d3 SVG will appear
+    HH.div [ Tailwind.apply "story-container" ]
+      [ HH.div [ Tailwind.apply "story-panel-about"] 
+          [ HH.text "Spago"
+          , HH.text blurbtext 
+          ]
+      , HH.div [ Tailwind.apply "svg-container" ] []
       ]
 
-selector = "div.d3story" -- TODO redo how all this svg nonsense is handled
+  -- render :: State -> H.ComponentHTML Action () m
+  -- render state =
+  --   HH.div [ HP.id "d3story-overlay", HP.classes [ HH.ClassName "force" ] ]
+  --     [ HH.div [ HP.id "blurb" ]  [ HH.h1_ [ HH.text "Source navigator using data from Spago / purs" ]
+  --                                          , HH.div [ HP.id "inner-blurb" ] [ HH.text blurbtext ] ]
+  --     , HH.div [ Tailwind.apply "svg-container" ] []
+  --     ]
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
-handleAction Initialize = do
-    detached <- H.liftEffect $ d3Run $ removeExistingSVG selector
+handleAction = case _ of
+  Initialize -> do
+      detached <- H.liftEffect $ d3Run $ removeExistingSVG "div.svg-container"
 
-    fiber <- H.liftAff $ forkAff $ Spago.drawGraph
+      fiber <- H.liftAff $ forkAff $ Spago.drawGraph
 
-    H.modify_ (\state -> state { fiber = Just fiber })
+      H.modify_ (\state -> state { fiber = Just fiber })
 
-handleAction Finalize = do
-    fiber <- H.gets _.fiber
-    _ <- case fiber of
-            Nothing      -> pure unit
-            (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
-    H.modify_ (\state -> state { fiber = Nothing })
-
-
-
+  Finalize -> do
+      fiber <- H.gets _.fiber
+      _ <- case fiber of
+              Nothing      -> pure unit
+              (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
+      H.modify_ (\state -> state { fiber = Nothing })
 
 
-codetext :: String
-codetext = 
-  """script :: forall m. D3InterpreterM D3Selection_ m => m ((Array Char) -> m D3Selection_)
-  script = do 
-    let 
-      transition :: ChainableS
-      transition = transitionWithDuration $ Milliseconds 2000.0
-      -- new entries enter at this position, updating entries need to transition to it on each update
-      xFromIndex :: Datum_ -> Index_ -> Number
-      xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0)
-
-    root        <- attach "div#gup"
-    svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0 ]
-    letterGroup <- append svg  $ node_ Group
-
-    pure $ \letters -> 
-      do 
-        letterGroup <+> JoinGeneral {
-            element   : Text
-          , key       : UseDatumAsKey
-          , "data"    : letters
-          , behaviour : { 
-              enter:  [ classed  "enter"
-                      , fill     "green"
-                      , x        xFromIndex
-                      , y        0.0
-                      -- , yu (NWU { i: 0, u: Px })
-                      , text     (singleton <<< datumIsChar)
-                      , fontSize 48.0
-                      ]  
-                      `andThen` (transition `to` [ y 200.0 ]) 
-
-            , update: [ classed "update"
-                      , fill "gray"
-                      , y 200.0
-                      ] 
-                      `andThen` (transition `to` [ x xFromIndex ] ) 
-
-            , exit:   [ classed "exit"
-                      , fill "brown"
-                      ] 
-                      `andThen` (transition `to` [ y 400.0, remove ])
-            }
-        }"""
 
 blurbtext :: String
 blurbtext = 
