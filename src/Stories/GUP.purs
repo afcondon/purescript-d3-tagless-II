@@ -33,7 +33,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Ocelot.Block.Button as Button
+import D3Tagless.Block.Button as Button
 import Ocelot.Block.Format as Format
 import Ocelot.Block.FormField as FormField
 import Ocelot.HTML.Properties (css)
@@ -90,32 +90,34 @@ component = H.mkComponent
       value: NotInitialized
     , fiber: Nothing
     , update: Nothing
-    , blurb: Expandable.Expanded
+    , blurb: Expandable.Collapsed
     , code: Expandable.Collapsed
   }
 
   render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div [ Tailwind.apply "story-container" ]
-      [ HH.div [ Tailwind.apply "story-panel"]
-        [   Card.card 
-            [ Tailwind.apply "story-controls"] 
+      [ HH.div -- [ Tailwind.apply "story-panel"]
+            [ Tailwind.apply "story-panel-controls"] 
             [ Format.caption_
               [ HH.text $ show state.value ]
-            , Button.buttonGroup_
-              [ Button.buttonLeft
+            , Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
+              [ Button.buttonVertical
                 [ HE.onClick $ const PauseGUP ]
                 [ HH.text "Pause" ]
-              , Button.buttonRight
+              , Button.buttonVertical
                 [ HE.onClick $ const RestartGUP ]
                 [ HH.text "Restart" ]
               ]
-            , FormField.field_
-                { label: HH.text "About"
-                , helpText: []
-                , error: []
-                , inputId: "show-blurb"
-                }
+            ]
+      , HH.div -- [ Tailwind.apply "story-panel" ] 
+            [ Tailwind.apply "story-panel-about"]
+            [ FormField.field_
+              { label: HH.text "About"
+              , helpText: []
+              , error: []
+              , inputId: "show-blurb"
+              }
               [ Toggle.toggle
                 [ HP.id_ "show-blurb"
                 , HP.checked
@@ -123,12 +125,16 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _blurb
                 ]
               ]
-            , FormField.field_
-              { label: HH.text "Code"
-              , helpText: []
-              , error: []
-              , inputId: "show-code"
-              }
+            , Expandable.content_ state.blurb [ HH.text blurbtext ]
+            ]  
+      , HH.div -- [ Tailwind.apply "story-panel" ] 
+            [ Tailwind.apply "story-panel-code"]
+            [ FormField.field_
+                { label: HH.text "Code"
+                , helpText: []
+                , error: []
+                , inputId: "show-code"
+                }
               [ Toggle.toggle
                 [ HP.id_ "show-code"
                 , HP.checked
@@ -136,20 +142,8 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
-            ]
-        ]
-      , HH.div [ Tailwind.apply "story-panel" ] 
-        [ Card.card 
-            [ Tailwind.apply "story-panel-card"]
-            [ Expandable.content_ state.blurb [ HH.text blurbtext ]
+            , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
             ]  
-        ]
-      , HH.div [ Tailwind.apply "story-panel" ] 
-        [ Card.card 
-            [ Tailwind.apply "story-panel-card"]
-            [ Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
-            ]  
-          ]
       , HH.div [ Tailwind.apply "svg-container" ] []
       ]
         

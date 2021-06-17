@@ -6,13 +6,19 @@
     @apply hidden top-0 bottom-0 left-0 overflow-y-auto bg-blue-500 border-gray-50 flex-none border-r-2 md:overflow-visible md:max-w-xs md:flex flex-col;
   }
   .story-container {
-    @apply flex flex-row gap-8 h-screen w-full bg-gray-100;
+    @apply flex flex-row gap-2 h-screen w-full bg-gray-100;
   }
   .story-panel {
-    @apply flex flex-col bg-green;
+    @apply flex flex-col;
   }
-  .story-panel-card {
-    @apply overflow-hidden min-w-min p-2 m-2 bg-white shadow-md;
+  .story-panel-controls {
+    @apply overflow-hidden h-screen min-w-min p-2 bg-white shadow-md;
+  }
+  .story-panel-about {
+    @apply overflow-hidden h-screen max-w-prose p-2 bg-white shadow-md;
+  }
+  .story-panel-code {
+    @apply overflow-hidden h-screen min-w-min p-2 bg-white shadow-md;
   }
   .svg-container {
     @apply flex-grow bg-white;
@@ -20,9 +26,5 @@
 }
 
 div.story-container {
-  grid-template-columns: minmax(min-content, 1fr) minmax(500px, 3fr);
   background-color: beige;
-}
-div.story-panel-card {
-  width: fit-content;
 }
