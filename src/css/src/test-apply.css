@@ -12,7 +12,7 @@
     @apply flex flex-col;
   } */
   .story-panel-controls {
-    @apply flex flex-col overflow-hidden h-screen min-w-min p-2 bg-white shadow-md;
+    @apply flex flex-col overflow-hidden h-screen min-w-min p-2 mb-0 bg-white shadow-md;
   }
   .story-panel-about {
     @apply flex flex-col overflow-hidden h-screen max-w-prose p-2 bg-white shadow-md;

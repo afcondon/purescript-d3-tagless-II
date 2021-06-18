@@ -14,6 +14,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Stories.Tailwind.Styles as Tailwind
+import D3Tagless.Block.Card as Card
 
 type Query :: forall k. k -> Type
 type Query = Const Void
@@ -44,21 +45,13 @@ component = H.mkComponent
 
   render :: State -> H.ComponentHTML Action () m
   render state =
-    HH.div [ Tailwind.apply "story-container" ]
+    HH.div [ Tailwind.apply "story-container spago" ]
       [ HH.div [ Tailwind.apply "story-panel-about"] 
           [ HH.text "Spago"
-          , HH.text blurbtext 
+          , Card.card_ [ HH.text blurbtext ]
           ]
       , HH.div [ Tailwind.apply "svg-container" ] []
       ]
-
-  -- render :: State -> H.ComponentHTML Action () m
-  -- render state =
-  --   HH.div [ HP.id "d3story-overlay", HP.classes [ HH.ClassName "force" ] ]
-  --     [ HH.div [ HP.id "blurb" ]  [ HH.h1_ [ HH.text "Source navigator using data from Spago / purs" ]
-  --                                          , HH.div [ HP.id "inner-blurb" ] [ HH.text blurbtext ] ]
-  --     , HH.div [ Tailwind.apply "svg-container" ] []
-  --     ]
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit

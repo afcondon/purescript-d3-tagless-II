@@ -20,7 +20,7 @@ import Data.Tuple (Tuple(..), snd)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Math (pi)
-import Prelude (class Bind, Unit, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>), (==))
+import Prelude (class Bind, Unit, bind, negate, pure, show, unit, max, ($), (*), (+), (-), (/), (<>), (==))
 
 -- TODO move this to a library, it really only needs the params for runPrinter to be completely generic
 -- | Evaluate the tree drawing script in the "printer" monad which will render it as a string
@@ -59,10 +59,7 @@ configureAndRunScript :: forall m selection.
 configureAndRunScript (Tuple width height ) model selector = 
   Tree.script { spacing, viewbox, selector, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_
   where
-    columns = 3.0  -- 3 columns, set in the grid CSS in index.html
-    gap     = 10.0 -- 10px set in the grid CSS in index.html
-    svg     = { width : ((width - ((columns - 1.0) * gap)) / columns)
-              , height: height / 2.0 } -- 2 rows
+    svg     = { width: width * 0.8, height: height * 0.8 }
 
     root    = hierarchyFromJSON_ model.json
     numberOfLevels = (hNodeHeight_ root) + 1.0
@@ -89,16 +86,17 @@ configureAndRunScript (Tuple width height ) model selector =
     { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
     xExtent = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
     yExtent = yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
+    maxExtent = max xExtent yExtent
 
     viewbox =
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> [ viewBox (-10.0) (svg.height - xExtent / 2.0) yExtent xExtent ] -- x and y are reversed in horizontal layouts
-        Dendrogram, Vertical   -> [ viewBox xMin 0.0 xExtent yExtent ]
-        Dendrogram, Radial     -> [ viewBox (-svg.width/2.0) (-svg.height/2.0) svg.width svg.height ]
+        Dendrogram, Horizontal -> [ viewBox (-10.0) (svg.height / 2.0) maxExtent maxExtent ] -- x and y are reversed in horizontal layouts
+        Dendrogram, Vertical   -> [ viewBox xMin 0.0 maxExtent maxExtent ]
+        Dendrogram, Radial     -> [ viewBox (-svg.width/2.0) (-svg.height/2.0) maxExtent maxExtent ]
 
-        TidyTree  , Horizontal -> [ viewBox (-10.0) (svg.height - xExtent / 2.0) yExtent xExtent ] -- x and y are reversed in horizontal layouts
-        TidyTree  , Vertical   -> [ viewBox xMin 0.0 xExtent yExtent ]
-        TidyTree  , Radial     -> [ viewBox (-svg.width/2.0) (-svg.height/2.0) svg.width svg.height ]
+        TidyTree  , Horizontal -> [ viewBox (-10.0) (svg.height / 2.0) maxExtent maxExtent ] -- x and y are reversed in horizontal layouts
+        TidyTree  , Vertical   -> [ viewBox xMin 0.0 maxExtent maxExtent ]
+        TidyTree  , Radial     -> [ viewBox (-svg.width/2.0) (-svg.height/2.0) maxExtent maxExtent ]
 
       
     linkPath =

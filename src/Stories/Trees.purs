@@ -84,32 +84,29 @@ component = H.mkComponent
   controlsRadio model =
     HH.div
       [ css "flex-1" ]
-      [ HH.h3
-        [ HP.classes Format.captionClasses ]
-        [ HH.text "Layout controls" ]
-      , FormField.fieldset_
+      [ FormField.fieldset_
         { label: HH.text "Tree orientation"
-        , inputId: "radio-horizontal"
+        , inputId: "radio-vertical"
         , helpText: []
         , error: []
         }
         [ HH.div
-          [ css "flex" ]
+          [ css "flex-1" ]
           [ Radio.radio
             [ css "pr-6" ]
-            [ HP.name "preview"
+            [ HP.name "tree-layout"
             , HP.checked true
             , HE.onClick $ const (SetLayout Vertical)
             ]
             [ HH.text "Vertical" ]
           , Radio.radio
             [ css "pr-6" ]
-            [ HP.name "preview"
+            [ HP.name "tree-layout"
             , HE.onClick $ const (SetLayout Horizontal) ]
             [ HH.text "Horizontal" ]
           , Radio.radio
             [ css "pr-6" ]
-            [ HP.name "preview"
+            [ HP.name "tree-layout"
             , HE.onClick $ const (SetLayout Radial) ]
             [ HH.text "Radial" ]
           ]
@@ -121,17 +118,17 @@ component = H.mkComponent
         , error: []
         }
         [ HH.div
-          [ css "flex" ]
+          [ css "flex-1" ]
           [ Radio.radio
             [ css "pr-6" ]
-            [ HP.name "preview"
+            [ HP.name "tree-type"
             , HP.checked true
             , HE.onClick $ const (SetType TidyTree)
             ]
             [ HH.text "TidyTree" ]
           , Radio.radio
             [ css "pr-6" ]
-            [ HP.name "preview"
+            [ HP.name "tree-type"
             , HE.onClick $ const (SetType Dendrogram) ]
             [ HH.text "Dendrogram" ]
           ]
@@ -142,7 +139,7 @@ component = H.mkComponent
   render state =
     HH.div [ Tailwind.apply "story-container" ]
       [ HH.div [ Tailwind.apply "story-panel-controls"] 
-          [ controlsRadio state.tree ]
+          [ controlsRadio state ]
       , HH.div
             [ Tailwind.apply "story-panel-about"]
             [ FormField.field_
@@ -179,19 +176,6 @@ component = H.mkComponent
             ]  
       , HH.div [ Tailwind.apply "svg-container" ] []
       ]
-  -- render :: State -> H.ComponentHTML Action () m
-  -- render state =  
-  --     HH.div [ HP.id "d3story-overlay", HP.classes $ treeClasses state ]
-  --     [ HH.div [ HP.id "tree" ] [] -- the div where the d3 script will appear
-
-  --     , HH.div [ HP.id "blurb" ] 
-  --       [ HH.div [ HP.id "inner-blurb" ] [ HH.h1_ [ HH.text $ "Tree layout" ]
-  --                                        , HH.text blurbtext ] 
-  --       , controlsRadio state
-  --       ]
-
-  --     , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext]]
-  --     ]
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit

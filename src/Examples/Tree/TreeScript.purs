@@ -118,7 +118,7 @@ script config tree = do
   theLabels <- nodeJoin_ `append`
                 (node Text  [ dy         0.31
                             , x          (datum_.textX config.layout)
-                            , textAnchor (datum_.textAnchor config.layout)
+                            , textAnchor (\d -> datum_.textAnchor config.layout d)
                             , text       datum_.name
                             , fill       config.color
                             ])               

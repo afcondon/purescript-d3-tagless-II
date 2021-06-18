@@ -14,7 +14,7 @@ import D3.Selection (node)
 import D3Tagless.Block.Card as Card
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Block.Expandable as Expandable
-import Data.Array (catMaybes)
+import Data.Array (catMaybes, singleton)
 import Data.Const (Const)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
@@ -35,7 +35,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import D3Tagless.Block.Button as Button
 import Ocelot.Block.Format as Format
-import Ocelot.Block.FormField as FormField
+import D3Tagless.Block.FormField as FormField
 import Ocelot.HTML.Properties (css)
 import Stories.Tailwind.Styles as Tailwind
 import UIGuide.Block.Backdrop as Backdrop
@@ -123,7 +123,7 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _blurb
                 ]
               ]
-            , Expandable.content_ state.blurb [ HH.text blurbtext ]
+            , Expandable.content_ state.blurb blurbtext
             ]  
       , HH.div
             [ Tailwind.apply "story-panel-code"]
@@ -262,25 +262,28 @@ codetext =
             }
         }"""
 
-blurbtext :: String
-blurbtext = 
-  """Id sint laboris reprehenderit officia anim nisi consectetur voluptate enim.
-  Commodo cillum minim nisi laborum eiusmod veniam ullamco id ex fugiat eu anim.
-  Irure est aute laborum duis. Lorem dolore id sunt incididunt ut ea. Nostrud
-  enim officia nisi anim consequat cupidatat consectetur consequat ex excepteur.
-  Lorem nisi in reprehenderit ex adipisicing magna elit aute sunt. Cillum non
-  Lorem minim duis culpa ullamco aute ex minim. Mollit anim in nisi tempor enim
-  exercitation dolore. Veniam consequat minim nostrud amet duis dolore tempor
-  voluptate quis culpa. Laborum dolor pariatur ut est cupidatat elit deserunt
-  occaecat tempor aliquip anim. 
-  
-  Velit irure ea voluptate ipsum ex exercitation
-  dolore voluptate reprehenderit sit anim sunt. Anim fugiat ad ut qui cillum
-  tempor occaecat et deserunt nostrud non ipsum. Id non qui mollit culpa elit
-  cillum ipsum excepteur adipisicing qui. Incididunt adipisicing sit incididunt
-  consequat minim id do exercitation cupidatat est sunt mollit. Anim ut ullamco
-  enim culpa. Adipisicing ad non esse laboris anim consequat ut velit esse
-  consequat tempor. Commodo magna esse ullamco ipsum et ipsum minim dolore esse
-  veniam ea commodo labore. Nulla deserunt id ad anim anim proident labore
-  occaecat sint esse nostrud. Duis velit nostrud ullamco cillum cillum Lorem
-  cupidatat irure."""
+blurbtext = (HH.p [ HP.classes [ HH.ClassName "m-2" ] ]) <$> ((singleton <<< HH.text) <$> texts)
+  where 
+    texts = [
+  """This deceptively simple example shows off an aspect of screen-based data
+visualization that has no analogue in paper visualizations: the ability to
+specify how updates to the data should be represented.""",
+
+"""In this example, some letters of the alphabet are presented and then constantly
+updated. When a letter enters at first, it falls in from the top and it is
+green. If its still present in the next set of letters it stays on the screen,
+but it turns gray and moves to an alphabetically correct new position. And if
+its not present in the new data, it turns red and falls out before
+disappearing.""",
+
+"""In a more meaningful example, ie with some data that you actually care about,
+this helps give continuity, as the eye can track an individual letter thru its
+arrival, update and exit phases. Even if this tracking isn't interesting in
+itself, it can lessen the fatigue of looking at updated data and it conveys a
+sense of how much the data has changed.""",
+
+"""This example is called "General Update Pattern" in D3.js, hence the name of
+this example. You can see in the code panel how the "data join" contains three
+separate specifications, each with their own *transition*."""
+
+]
