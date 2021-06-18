@@ -273,33 +273,6 @@ exports.defaultDrag_ = selection => {
   selection.call(drag())
 }
 
-exports.defaultDrag_ = selection => {
-  var drag = function () {
-    function dragstarted (event, d) {
-      d.fx = d.x
-      d.fy = d.y
-    }
-
-    function dragged (event, d) {
-      d.fx = event.x
-      d.fy = event.y
-    }
-
-    function dragended (event, d) {
-      d.fx = null
-      d.fy = null
-    }
-
-    return d3
-      .drag()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended)
-  }
-
-  selection.call(drag())
-}
-
 exports.disableDrag_ = selection => {
   return selection.on('.drag', null)
 }
