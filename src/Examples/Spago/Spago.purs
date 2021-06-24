@@ -16,7 +16,7 @@ import D3.Layouts.Hierarchical (radialSeparation)
 import D3.Layouts.Simulation (putEachForceInSimulation)
 import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), NodeID)
 import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
-import Data.Either (Either(..))
+import Data.Either (Either(..), hush)
 import Data.List (List(..), (:))
 import Data.List as L
 import Data.Map (Map, empty)
@@ -25,49 +25,51 @@ import Data.Maybe (Maybe(..))
 import Data.Number (nan)
 import Data.Set as S
 import Data.Tree (Tree(..))
-import Data.Tuple (Tuple(..))
+import Data.Tuple (Tuple(..), fst)
 import Effect.Aff (Aff, Milliseconds(..), delay)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Math (cos, pi, sin)
-import Prelude (Unit, bind, discard, pure, unit, ($), (*), (<$>), (/), (<*>), (<<<), (<>), (==), (||))
+import Prelude (Unit, bind, discard, liftA1, pure, unit, ($), (*), (/), (<$>), (<*>), (<<<), (<>), (==), (||))
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
-drawGraph :: Aff Unit
-drawGraph = do
-  log "Spago module / package example"
-  moduleJSON  <- AJAX.get ResponseFormat.string "http://localhost:1234/modules.json"
-  packageJSON <- AJAX.get ResponseFormat.string "http://localhost:1234/packages.json"
-  lsdepJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/lsdeps.jsonlines"
-  locJSON     <- AJAX.get ResponseFormat.string "http://localhost:1234/loc.json"
+getModel :: Aff (Maybe SpagoModel)
+getModel = do
+    moduleJSON  <- AJAX.get ResponseFormat.string "http://localhost:1234/modules.json"
+    packageJSON <- AJAX.get ResponseFormat.string "http://localhost:1234/packages.json"
+    lsdepJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/lsdeps.jsonlines"
+    locJSON     <- AJAX.get ResponseFormat.string "http://localhost:1234/loc.json"
+    pure $ 
+      hush $ 
+      convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON <*> locJSON
 
-  (Tuple width height) <- liftEffect getWindowWidthHeight
 
-  case convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON <*> locJSON of
-    (Left error)  -> log "error converting spago json file inputs"
-    (Right graph) -> do
-      let graph' = 
-            case M.lookup "Main" graph.maps.name2ID  of 
-              Nothing       -> graph -- if we couldn't find root of tree just skip tree reduction
-              (Just rootID) -> treeReduction graph rootID
+drawGraph :: D3Simulation_ -> SpagoModel -> Aff Unit
+drawGraph simulation graph = do
+  widthHeight <- liftEffect getWindowWidthHeight
+  let graph' = 
+          case M.lookup "Main" graph.maps.name2ID  of 
+            Nothing       -> graph -- if we couldn't find root of tree just skip tree reduction
+            (Just rootID) -> treeReduction graph rootID
 
-      -- TODO this type information uglies up the code a lot, find a better way
-      ((Tuple {simulation} _) :: Tuple { selection :: D3Selection_, simulation :: D3Simulation_ } Unit) <- liftEffect $ runD3M (Cluster.script (Tuple width height) graph')
+  (svg :: D3Selection_) <- liftEffect $ liftA1 fst $ runD3M (Cluster.script widthHeight simulation graph')
+  pure unit
+
 
       -- _ <- delay (Milliseconds 4000.0)
       -- let _ = putEachForceInSimulation simulation Cluster.forcesB
       -- let _ = setAlpha_ simulation 0.3
       
-      -- _ <- delay (Milliseconds 5000.0)
-      -- let _ = putEachForceInSimulation simulation Cluster.initialForces
-      -- let _ = setAlpha_ simulation 1.0
-      -- ((Tuple {simulation} _) :: Tuple { selection :: D3Selection_, simulation :: D3Simulation_ } Unit) <- liftEffect $ runD3M (Graph.script (Tuple width height) graph')
       -- _ <- delay (Milliseconds 1000.0)
+      -- ((Tuple {simulation} _) :: Tuple { selection :: D3Selection_, simulation :: D3Simulation_ } Unit) 
+      --     <- liftEffect $ runD3M (Graph.script (Tuple width height) graph')
+
+      -- _ <- delay (Milliseconds 4000.0)
       -- let _ = putEachForceInSimulation simulation ([Graph.packageOnlyRadialForce] <> [Graph.unusedModuleOnlyRadialForce] <> Graph.initialForces)
       -- let _ = setAlpha_ simulation 0.3
 
-      -- _ <- delay (Milliseconds 1000.0)
+      -- _ <- delay (Milliseconds 3000.0)
       -- let _ = stopSimulation_ simulation
 
       -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (Tree.script (Tuple (width/3.0) height) graph')
@@ -75,7 +77,6 @@ drawGraph = do
       -- printedScript <- liftEffect $ runPrinter (graphScript (Tuple width height) graph') "Force Layout Script"
       -- log $ fst printedScript
 
-      pure unit
 
 -- TODO make this generic and extract from Spago example to library
 treeReduction :: SpagoModel -> NodeID -> SpagoModel

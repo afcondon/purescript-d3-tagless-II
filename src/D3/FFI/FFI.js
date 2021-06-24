@@ -246,31 +246,26 @@ exports.showSetProperty_ = value => selection => {
 exports.showSetOrdering_ = ordering => selection => {
   return `\t${selection}.${ordering}()`
 }
-exports.defaultDrag_ = selection => {
-  var drag = function () {
-    function dragstarted (event, d) {
-      d.fx = d.x
-      d.fy = d.y
-    }
+exports.defaultDrag_ = selection => selection.call(drag)
 
-    function dragged (event, d) {
-      d.fx = event.x
-      d.fy = event.y
-    }
+const drag = function () {
 
-    function dragended (event, d) {
-      d.fx = null
-      d.fy = null
-    }
-
-    return d3
-      .drag()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended)
+  function dragstarted() {
+    d3.select(this).attr("stroke", "black");
   }
 
-  selection.call(drag())
+  function dragged(event, d) {
+    d3.select(this).raise().attr("cx", d.x = event.x).attr("cy", d.y = event.y);
+  }
+
+  function dragended() {
+    d3.select(this).attr("stroke", null);
+  }
+
+  return d3.drag()
+      .on("start", dragstarted)
+      .on("drag", dragged)
+      .on("end", dragended);
 }
 
 exports.disableDrag_ = selection => {

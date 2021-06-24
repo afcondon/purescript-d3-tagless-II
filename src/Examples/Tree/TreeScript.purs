@@ -14,16 +14,16 @@ import Data.Nullable (Nullable)
 import Math (pi)
 
 datum_ :: 
-  { depth :: Datum_ -> Int
+  { depth       :: Datum_ -> Int
   , hasChildren :: Datum_ -> Boolean
-  , height :: Datum_ -> Int
-  , id :: Datum_ -> Int
-  , name :: Datum_ -> String
-  , textAnchor :: TreeLayout -> Datum_ -> String
-  , textX :: TreeLayout -> Datum_ -> Number
-  , value :: Datum_ -> Nullable Number
-  , x :: Datum_ -> Number
-  , y :: Datum_ -> Number
+  , height      :: Datum_ -> Int
+  , id          :: Datum_ -> Int
+  , name        :: Datum_ -> String
+  , textAnchor  :: TreeLayout -> Datum_ -> String
+  , textX       :: TreeLayout -> Datum_ -> Number
+  , value       :: Datum_ -> Nullable Number
+  , x           :: Datum_ -> Number
+  , y           :: Datum_ -> Number
   }
 datum_ = {
 -- simple accessors first
@@ -118,7 +118,7 @@ script config tree = do
   theLabels <- nodeJoin_ `append`
                 (node Text  [ dy         0.31
                             , x          (datum_.textX config.layout)
-                            , textAnchor (\d -> datum_.textAnchor config.layout d)
+                            , textAnchor (datum_.textAnchor config.layout)
                             , text       datum_.name
                             , fill       config.color
                             ])               

@@ -3,28 +3,43 @@ module Stories.Spago where
 import Prelude
 
 import Control.Monad.State (class MonadState)
+import D3.Data.Types (D3Selection_, D3Simulation_)
 import D3.Examples.Spago as Spago
+import D3.Examples.Spago.Clusters as Cluster
+import D3.Examples.Spago.Graph as Graph
+import D3.Examples.Spago.Model (SpagoModel)
+import D3.FFI (initSimulation_, setAlpha_, stopSimulation_)
 import D3.Interpreter.D3 (d3Run, removeExistingSVG)
+import D3.Layouts.Simulation (putEachForceInSimulation)
+import D3Tagless.Block.Card as Card
+import D3Tagless.Block.FormField as FormField
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
-import Effect.Aff (Fiber, forkAff, killFiber)
+import Effect.Aff (Aff, Fiber, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Exception (error)
 import Halogen as H
 import Halogen.HTML as HH
+import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Ocelot.Block.Radio as Radio
+import Ocelot.HTML.Properties (css)
 import Stories.Tailwind.Styles as Tailwind
-import D3Tagless.Block.Card as Card
 
 type Query :: forall k. k -> Type
 type Query = Const Void
 
+data PackageForce = PackageRing | PackageGrid | PackageFree
+data ModuleForce = ClusterPackage | ForceTree
 data Action
   = Initialize
   | Finalize
+  | SetPackageForce PackageForce
+  | SetModuleForce ModuleForce
   
 type State = { 
     fiber  :: Maybe (Fiber Unit)
+  , simulation :: Maybe D3Simulation_
 }
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
@@ -39,37 +54,143 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { fiber: Nothing }
+  initialState = { fiber: Nothing, simulation: Nothing }
 
-  controls = [] -- placeholder for controls for theta, alpha etc
+  controls =
+    HH.div
+      [ css "flex-1" ]
+      [ FormField.fieldset_
+        { label: HH.text "Packages"
+        , inputId: "radio-vertical"
+        , helpText: []
+        , error: []
+        }
+        [ HH.div
+          [ css "flex-1" ]
+          [ Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "package-force"
+            , HP.checked true
+            , HE.onClick $ const (SetPackageForce PackageRing)
+            ]
+            [ HH.text "Vertical" ]
+          , Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "package-force"
+            , HE.onClick $ const (SetPackageForce PackageGrid) ]
+            [ HH.text "Horizontal" ]
+          , Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "package-force"
+            , HE.onClick $ const (SetPackageForce PackageFree) ]
+            [ HH.text "Radial" ]
+          ]
+        ]
+      , FormField.fieldset_
+        { label: HH.text "Module"
+        , inputId: "radio-vertical"
+        , helpText: []
+        , error: []
+        }
+        [ HH.div
+          [ css "flex-1" ]
+          [ Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "module-force"
+            , HP.checked true
+            , HE.onClick $ const (SetModuleForce ClusterPackage)
+            ]
+            [ HH.text "Package layout" ]
+          , Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "module-force"
+            , HE.onClick $ const (SetModuleForce ForceTree) ]
+            [ HH.text "Tree layout" ]
+          ]
+        ]
+      ]
 
   render :: State -> H.ComponentHTML Action () m
   render state =
-    HH.div [ Tailwind.apply "story-container spago" ]
-      [ HH.div [ Tailwind.apply "story-panel-about"] 
-          [ HH.text "Spago"
-          , Card.card_ [ HH.text blurbtext ]
-          ]
-      , HH.div [ Tailwind.apply "svg-container" ] []
-      ]
+    HH.div
+        [ Tailwind.apply "story-container spago" ]
+        [ HH.div
+            [ Tailwind.apply "story-panel-about" ]
+            [ HH.text "Spago"
+            , Card.card_ [ controls ]
+            , Card.card_ [ HH.text blurbtext ]
+            ]
+        , HH.div
+            [ Tailwind.apply "svg-container" ]
+            [ ]
+        ]
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
   Initialize -> do
-      detached <- H.liftEffect $ d3Run $ removeExistingSVG "div.svg-container"
+    (detached :: D3Selection_) <- H.liftEffect $ d3Run $ removeExistingSVG "div.svg-container"
 
-      fiber <- H.liftAff $ forkAff $ Spago.drawGraph
+    (model :: Maybe SpagoModel) <- H.liftAff Spago.getModel
 
-      H.modify_ (\state -> state { fiber = Just fiber })
+    -- pure unit
+    case model of
+          Nothing -> pure unit
+          (Just graph) ->
+            do
+              -- we'll have to create the simulation in a fiber HERE and give that to the cluster script
+              -- lot of re-factoring to do on this
+              let simulation = initSimulation_ unit
+              fiber <- H.liftAff $ forkAff $ Spago.drawGraph simulation graph
+              H.modify_ (\_ -> { fiber: Just fiber, simulation: Just simulation })
+              pure unit
 
   Finalize -> do
       fiber <- H.gets _.fiber
       _ <- case fiber of
               Nothing      -> pure unit
               (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
-      H.modify_ (\state -> state { fiber = Nothing })
+      H.modify_ (\state -> state { fiber = Nothing, simulation = Nothing })
+  
+  SetPackageForce packageForce -> do
+    mebbeSim <- H.gets _.simulation
+    let forces = case packageForce of
+          PackageRing -> engageRadialForces
+          PackageGrid -> engageGridForces
+          PackageFree -> setup3
+    case mebbeSim of
+      Nothing -> pure unit
+      Just simulation -> H.liftAff $ forces simulation
 
+  SetModuleForce _ -> do
+    -- mebbeSim <- H.gets _.simulation
+    -- _ <- case mebbeSim of
+    --         Nothing -> pure unit
+    --         Just simulation -> H.liftAff $ Spago.setup1 simulation
+    pure unit
+
+
+engageGridForces :: D3Simulation_ -> Aff Unit
+engageGridForces simulation = do
+  let _ = putEachForceInSimulation simulation Cluster.forcesB
+  let _ = setAlpha_ simulation 0.3
+  pure unit
+
+engageRadialForces :: D3Simulation_ -> Aff Unit
+engageRadialForces simulation = do
+  let _ = putEachForceInSimulation simulation 
+            ([Graph.packageOnlyRadialForce, 
+              Graph.unusedModuleOnlyRadialForce ] 
+              <>
+              Graph.initialForces
+            )
+  let _ = setAlpha_ simulation 0.3
+  pure unit
+
+setup3 :: D3Simulation_ -> Aff Unit
+setup3 simulation = do
+  let _ = stopSimulation_ simulation
+  pure unit
 
 
 blurbtext :: String
@@ -94,3 +215,4 @@ blurbtext =
   veniam ea commodo labore. Nulla deserunt id ad anim anim proident labore
   occaecat sint esse nostrud. Duis velit nostrud ullamco cillum cillum Lorem
   cupidatat irure."""
+

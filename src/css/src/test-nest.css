@@ -1,8 +1,8 @@
 div.svg-container svg.gup {
   & text { font-size: 48px; font-family: monospace; }
 }
-div.svg-container.spago {
-  & svg {
+div.svg-container {
+  & svg.cluster {
     &.spotlight {
       & g.package text {
         opacity: 0.2;

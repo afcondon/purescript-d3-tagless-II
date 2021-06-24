@@ -1,9 +1,10 @@
 module D3.Examples.Spago.Clusters where
 
 
+import D3.Examples.Spago.Model
+
 import D3.Attributes.Sugar (classed, cx, cy, fill, lower, onMouseEvent, radius, text, viewBox, x, y)
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
-import D3.Examples.Spago.Model
 import D3.FFI (configSimulation_, initSimulation_, setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, filter, modify, on, (<+>))
 import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
@@ -38,16 +39,16 @@ script :: forall m selection.
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
+  D3Simulation_ ->
   SpagoModel ->
-  m { selection :: selection, simulation :: D3Simulation_ }
-script (Tuple w h) model = do
+  m selection
+script (Tuple w h) simulation model = do
   root       <- attach "div.svg-container"
   svg        <- root `append` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h
                                            , classed "d3svg cluster" ] )
   nodesGroup <- svg  `append` (node Group  [ classed "nodes" ])
 
-  let simulation = initSimulation_ unit
-      _          = simulation `configSimulation_` defaultConfigSimulation
+  let _          = simulation `configSimulation_` defaultConfigSimulation
       nodes      = simulation `setNodes_` (pinIfPackage <$> model.nodes)
       _          = simulation `putEachForceInSimulation` initialForces
 
@@ -72,4 +73,4 @@ script (Tuple w h) model = do
                      , scale  : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
                      , name   : "spago"
                      }
-  pure { selection: svg, simulation }
+  pure svg

@@ -2,34 +2,26 @@ module Stories.Trees where
 
 import Prelude
 
-import Affjax (Error)
-import Control.Monad.State (class MonadState, get, put)
+import Control.Monad.State (class MonadState, get)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Examples.Tree.Configure as Tree
 import D3.Interpreter.D3 (d3Run, removeExistingSVG)
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
-import D3Tagless.Block.Card as Card
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Block.Expandable as Expandable
 import Data.Array (catMaybes)
 import Data.Const (Const)
 import Data.Either (Either(..)) as E
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import UIGuide.Block.Backdrop as Backdrop
-import D3Tagless.Block.Button as Button
 import Ocelot.Block.FormField as FormField
-import Ocelot.Block.Format as Format
 import Ocelot.Block.Radio as Radio
-import UIGuide.Block.Documentation as Documentation
 import Ocelot.HTML.Properties (css)
 import Stories.Tailwind.Styles as Tailwind
-import UIGuide.Block.Backdrop as Backdrop
-import UIGuide.Block.Documentation as Documentation
 import Type.Proxy (Proxy(..))
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
@@ -81,7 +73,7 @@ component = H.mkComponent
     let classStrings = catMaybes [ Just "trees", (show <<< _.treeLayout) <$> model.tree]
     HH.ClassName <$> classStrings
   
-  controlsRadio model =
+  controlsRadio =
     HH.div
       [ css "flex-1" ]
       [ FormField.fieldset_
@@ -113,7 +105,7 @@ component = H.mkComponent
         ]
       , FormField.fieldset_
         { label: HH.text "Tree topology"
-        , inputId: "radio-horizontal"
+        , inputId: "radio-vertical"
         , helpText: []
         , error: []
         }
@@ -139,7 +131,7 @@ component = H.mkComponent
   render state =
     HH.div [ Tailwind.apply "story-container" ]
       [ HH.div [ Tailwind.apply "story-panel-controls"] 
-          [ controlsRadio state ]
+          [ controlsRadio ]
       , HH.div
             [ Tailwind.apply "story-panel-about"]
             [ FormField.field_

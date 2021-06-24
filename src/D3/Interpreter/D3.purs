@@ -149,14 +149,12 @@ applyChainableSD3 selection_ (OrderingT oAttr) =
 
 
 -- TODO reuse existing SVG if it's the right one
-removeExistingSVG :: forall m. D3InterpreterM D3Selection_ m => String -> m Unit
+removeExistingSVG :: forall m. D3InterpreterM D3Selection_ m => String -> m D3Selection_
 removeExistingSVG rootSelector = do
   let
     root     = d3SelectFirstInDOM_ rootSelector
     -- check for an svg element under the given root
     previous = d3SelectionSelect_ (rootSelector <> " svg") root
-    detached =
-      case d3SelectionIsEmpty_ previous of -- 
-        true  -> previous
-        false -> d3RemoveSelection_ previous 
-  pure unit
+  pure $ case d3SelectionIsEmpty_ previous of -- 
+          true  -> previous
+          false -> d3RemoveSelection_ previous 
