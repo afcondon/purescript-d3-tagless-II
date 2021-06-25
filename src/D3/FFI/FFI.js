@@ -427,6 +427,10 @@ exports.setForceX_ = force => attr => force.x(attr)
 exports.setForceY_ = force => attr => force.y(attr)
 // setForceDistance_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
 exports.setForceDistance_ = force => attr => force.distance(attr)
+// setAsNullForceInSimulation_ :: D3Simulation_ -> String -> D3Simulation_
+exports.setAsNullForceInSimulation_ = simulation => label => {
+  simulation.force(label, null)
+}
 // putForceInSimulation_ :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
 exports.putForceInSimulation_ = simulation => label => force => {
   simulation.force(label, force)

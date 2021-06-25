@@ -4,12 +4,12 @@ You can edit this file as you like.
 -}
 { name = "my-project"
 , dependencies =
-  [ "aff-promise"
-  , "aff"
+  [ "aff"
+  , "aff-promise"
   , "affjax"
+  , "argonaut"
   , "argonaut-codecs"
   , "argonaut-core"
-  , "argonaut"
   , "arrays"
   , "avar"
   , "bifunctors"
@@ -30,13 +30,13 @@ You can edit this file as you like.
   , "functions"
   , "fuzzy"
   , "graphs"
+  , "halogen"
   , "halogen-renderless"
   , "halogen-select"
   , "halogen-storybook"
   , "halogen-subscriptions"
   , "halogen-svg-elems"
   , "halogen-vdom"
-  , "halogen"
   , "html-parser-halogen"
   , "integers"
   , "js-timers"
@@ -50,6 +50,7 @@ You can edit this file as you like.
   , "nullable"
   , "numbers"
   , "ordered-collections"
+  , "parallel"
   , "partial"
   , "prelude"
   , "profunctor-lenses"
@@ -76,5 +77,12 @@ You can edit this file as you like.
   , "web-uievents"
   ]
 , packages = ./packages.dhall
-, sources = [ "src/**/*.purs", "test/**/*.purs" ]
+, sources =
+  [ "src/**/*.purs"
+  , "OcelotTW2/src/**/*.purs"
+  , "OcelotTW2/ui-guide/Blocks/**/*.purs"
+  , "OcelotTW2/ui-guide/Components/**/*.purs"
+  , "OcelotTW2/ui-guide/Utilities/**/*.purs"
+  , "test/**/*.purs"
+  ]
 }

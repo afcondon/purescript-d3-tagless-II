@@ -1,5 +1,6 @@
 module Stories.Spago where
 
+import D3.Examples.Spago.Model
 import Prelude
 
 import Control.Monad.State (class MonadState)
@@ -7,14 +8,15 @@ import D3.Data.Types (D3Selection_, D3Simulation_)
 import D3.Examples.Spago as Spago
 import D3.Examples.Spago.Clusters as Cluster
 import D3.Examples.Spago.Graph as Graph
-import D3.Examples.Spago.Model (SpagoModel)
 import D3.FFI (initSimulation_, setAlpha_, stopSimulation_)
 import D3.Interpreter.D3 (d3Run, removeExistingSVG)
-import D3.Layouts.Simulation (putEachForceInSimulation)
+import D3.Layouts.Simulation (Force(..), ForceType(..), SimulationManager, createSimulationManager, putEachForceInSimulation)
+import D3.Simulation.Config as F
 import D3Tagless.Block.Card as Card
 import D3Tagless.Block.FormField as FormField
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
+import Data.Number (infinity)
 import Effect.Aff (Aff, Fiber, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Exception (error)
@@ -39,7 +41,7 @@ data Action
   
 type State = { 
     fiber  :: Maybe (Fiber Unit)
-  , simulation :: Maybe D3Simulation_
+  , simulation :: SimulationManager
 }
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
@@ -54,7 +56,7 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { fiber: Nothing, simulation: Nothing }
+  initialState = { fiber: Nothing, simulation: createSimulationManager }
 
   controls =
     HH.div
@@ -138,11 +140,11 @@ handleAction = case _ of
           Nothing -> pure unit
           (Just graph) ->
             do
-              -- we'll have to create the simulation in a fiber HERE and give that to the cluster script
-              -- lot of re-factoring to do on this
-              let simulation = initSimulation_ unit
-              fiber <- H.liftAff $ forkAff $ Spago.drawGraph simulation graph
-              H.modify_ (\_ -> { fiber: Just fiber, simulation: Just simulation })
+              -- TODO properly think out / design relationship between fiber and simulation
+              simulation <- H.gets _.simulation
+              let _ = simulation.simulation `putEachForceInSimulation` clusterInitialForces
+              fiber <- H.liftAff $ forkAff $ Spago.drawGraph simulation.simulation graph
+              H.modify_ (\s -> s { fiber = Just fiber })
               pure unit
 
   Finalize -> do
@@ -150,17 +152,15 @@ handleAction = case _ of
       _ <- case fiber of
               Nothing      -> pure unit
               (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
-      H.modify_ (\state -> state { fiber = Nothing, simulation = Nothing })
+      H.modify_ (\state -> state { fiber = Nothing })
   
   SetPackageForce packageForce -> do
-    mebbeSim <- H.gets _.simulation
+    simulation <- H.gets _.simulation
     let forces = case packageForce of
           PackageRing -> engageRadialForces
           PackageGrid -> engageGridForces
           PackageFree -> setup3
-    case mebbeSim of
-      Nothing -> pure unit
-      Just simulation -> H.liftAff $ forces simulation
+    H.liftAff $ forces simulation.simulation
 
   SetModuleForce _ -> do
     -- mebbeSim <- H.gets _.simulation
@@ -169,10 +169,34 @@ handleAction = case _ of
     --         Just simulation -> H.liftAff $ Spago.setup1 simulation
     pure unit
 
+clusterInitialForces :: Array Force
+clusterInitialForces =  
+  [ Force "x"       ForceX        [ F.strength 0.2, F.x datum_.clusterPointX ]
+  , Force "y"       ForceY        [ F.strength 0.2, F.y datum_.clusterPointY ]
+  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
+  ]
+
+clusterForcesB :: Array Force
+clusterForcesB =  
+  [ Force "x"       ForceX        [ F.strength 0.2, F.x datum_.treePointX ]
+  , Force "y"       ForceY        [ F.strength 0.2, F.y datum_.treePointY ]
+  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
+  ]
+      
+
+graphInitialForces :: Array Force
+graphInitialForces =  
+  [ Force "charge"  ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
+  , Force "x"       ForceX        [ F.strength 0.1, F.x 0.0 ]
+  , Force "y"       ForceY        [ F.strength 0.1, F.y 0.0 ]
+  , Force "center"  ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
+  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
+  ]
+
 
 engageGridForces :: D3Simulation_ -> Aff Unit
 engageGridForces simulation = do
-  let _ = putEachForceInSimulation simulation Cluster.forcesB
+  let _ = putEachForceInSimulation simulation clusterForcesB
   let _ = setAlpha_ simulation 0.3
   pure unit
 
@@ -182,7 +206,7 @@ engageRadialForces simulation = do
             ([Graph.packageOnlyRadialForce, 
               Graph.unusedModuleOnlyRadialForce ] 
               <>
-              Graph.initialForces
+              graphInitialForces
             )
   let _ = setAlpha_ simulation 0.3
   pure unit

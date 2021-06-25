@@ -14,14 +14,6 @@ import Data.Number (infinity)
 import Data.Tuple (Tuple(..))
 import Prelude (class Bind, bind, negate, pure, unit, (/), (<<<))
 
-initialForces :: Array Force
-initialForces =  
-  [ Force "charge"  ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
-  , Force "x"       ForceX        [ F.strength 0.1, F.x 0.0 ]
-  , Force "y"       ForceY        [ F.strength 0.1, F.y 0.0 ]
-  , Force "center"  ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
-  , Force "collide" ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
-  ]
 
 packageOnlyRadialForce :: Force
 packageOnlyRadialForce = Force "packageOrbit"  ForceRadial   [ F.strength datum_.onlyPackages, F.x 0.0, F.y 0.0, F.radius 1000.0 ]
@@ -46,7 +38,7 @@ script (Tuple w h) model = do
   let simulation = initSimulation_ unit
       _          = simulation `configSimulation_` defaultConfigSimulation
       nodes      = simulation `setNodes_` model.nodes
-      _          = simulation `putEachForceInSimulation` initialForces
+      -- _          = simulation `putEachForceInSimulation` initialForces
       _          = setLinks_ simulation model.links (\d i -> d.id)
 
   linksSelection <- linksGroup <+> Join {
