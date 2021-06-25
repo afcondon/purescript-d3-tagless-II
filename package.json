@@ -3,8 +3,8 @@
   "version": "0.30.0",
   "private": true,
   "scripts": {
-    "build": "spago build --path 'src/**/*.purs' --path 'OcelotTW2/src/**/*.purs' --path 'OcelotTW2/ui-guide/Blocks/**/*.purs' --path 'OcelotTW2/ui-guide/Components/**/*.purs' --path 'OcelotTW2/ui-guide/Utilities/**/*.purs'",
-    "bundle": "spago bundle-app --path 'src/**/*.purs' --path 'OcelotTW2/src/**/*.purs' --path 'OcelotTW2/ui-guide/Blocks/**/*.purs' --path 'OcelotTW2/ui-guide/Components/**/*.purs' --path 'OcelotTW2/ui-guide/Utilities/**/*.purs' --to dist/bundle.js",
+    "build": "spago build",
+    "bundle": "spago bundle-app --to dist/bundle.js",
     "build-css": "cd src/css; postcss src/index.css -o ../../dist/bundle.css"
   },
   "devDependencies": {

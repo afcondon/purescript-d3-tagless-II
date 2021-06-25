@@ -325,7 +325,7 @@ exports.setLinks_ = simulation => links => idFn => {
 //  :: Simulation -> Array NativeLink -> ???
 // exports.makeLinksForce_ = config => d3.forceLink(config.links).id(d => d.id).strength(config.strength);
 // removeForceByName_  :: D3Simulation_ -> String -> D3Simulation_
-exports.removeForceByName_ = simulation => name => simulation.force(name, null)
+// exports.removeForceByName_ = simulation => name => simulation.force(name, null)
 // setLinks_ :: ForceHandle -> Array (D3_Simulation_Link d r) ->
 // links_        :: forall d r. ForceHandle_ -> Array (D3_Simulation_Link d r)
 exports.getLinks_ = linkForce => linkForce.links()
@@ -433,6 +433,7 @@ exports.setAsNullForceInSimulation_ = simulation => label => {
 }
 // putForceInSimulation_ :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
 exports.putForceInSimulation_ = simulation => label => force => {
+  console.log(`Putting ${label} force in the simulation`);
   simulation.force(label, force)
 }
 

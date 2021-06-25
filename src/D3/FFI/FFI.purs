@@ -103,8 +103,8 @@ foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_   -
 foreign import getNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
 foreign import setNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)
 
-
-foreign import removeForceByName_  :: D3Simulation_ -> String -> D3Simulation_
+-- removing forces should be done by simulation manager and doesn't need more indirection
+-- foreign import removeForceByName_  :: D3Simulation_ -> String -> D3Simulation_
 
 foreign import setLinks_               :: forall d r datum. D3Simulation_ -> Array (D3_Link d r) -> (datum -> Index_ -> Number) -> D3ForceHandle_
 foreign import getLinks_               :: forall d r. D3ForceHandle_ -> Array (D3_Link d r)

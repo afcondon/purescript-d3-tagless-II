@@ -4,19 +4,14 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Data.Graph (getReachableNodes)
 import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
-import D3.Data.Types (D3Selection_, D3Simulation_, PointXY)
-import D3.Examples.Spago.Clusters as Cluster
+import D3.Data.Types (PointXY)
 import D3.Examples.Spago.Files (LinkType(..))
-import D3.Examples.Spago.Graph as Graph
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, setXYExceptLeaves, tree_datum_)
-import D3.Examples.Spago.Tree as Tree
-import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, setAlpha_, stopSimulation_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
-import D3.Interpreter.D3 (runD3M)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, setXYExceptLeaves)
+import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
 import D3.Layouts.Hierarchical (radialSeparation)
-import D3.Layouts.Simulation (putEachForceInSimulation)
 import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), NodeID)
 import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
-import Data.Either (Either(..), hush)
+import Data.Either (hush)
 import Data.List (List(..), (:))
 import Data.List as L
 import Data.Map (Map, empty)
@@ -25,36 +20,11 @@ import Data.Maybe (Maybe(..))
 import Data.Number (nan)
 import Data.Set as S
 import Data.Tree (Tree(..))
-import Data.Tuple (Tuple(..), fst)
-import Effect.Aff (Aff, Milliseconds(..), delay)
-import Effect.Class (liftEffect)
-import Effect.Class.Console (log)
+import Data.Tuple (Tuple(..))
+import Effect.Aff (Aff)
 import Math (cos, pi, sin)
-import Prelude (Unit, bind, discard, liftA1, pure, unit, ($), (*), (/), (<$>), (<*>), (<<<), (<>), (==), (||))
+import Prelude (bind, pure, ($), (*), (<$>), (<*>), (<<<), (<>), (==), (||))
 import Unsafe.Coerce (unsafeCoerce)
-import Utility (getWindowWidthHeight)
-
-getModel :: Aff (Maybe SpagoModel)
-getModel = do
-    moduleJSON  <- AJAX.get ResponseFormat.string "http://localhost:1234/modules.json"
-    packageJSON <- AJAX.get ResponseFormat.string "http://localhost:1234/packages.json"
-    lsdepJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/lsdeps.jsonlines"
-    locJSON     <- AJAX.get ResponseFormat.string "http://localhost:1234/loc.json"
-    pure $ 
-      hush $ 
-      convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON <*> locJSON
-
-
-drawGraph :: D3Simulation_ -> SpagoModel -> Aff Unit
-drawGraph simulation graph = do
-  widthHeight <- liftEffect getWindowWidthHeight
-  let graph' = 
-          case M.lookup "Main" graph.maps.name2ID  of 
-            Nothing       -> graph -- if we couldn't find root of tree just skip tree reduction
-            (Just rootID) -> treeReduction graph rootID
-
-  (svg :: D3Selection_) <- liftEffect $ liftA1 fst $ runD3M (Cluster.script widthHeight simulation graph')
-  pure unit
 
 
       -- _ <- delay (Milliseconds 4000.0)

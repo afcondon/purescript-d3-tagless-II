@@ -5,22 +5,13 @@ import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (SpagoModel, cancelSpotlight_, datum_, link_, toggleSpotlight)
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, modify, on, (<+>))
-import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (defaultConfigSimulation)
-import D3.Simulation.Config as F
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import Data.Number (infinity)
 import Data.Tuple (Tuple(..))
 import Prelude (class Bind, bind, negate, pure, unit, (/), (<<<))
 
 
-packageOnlyRadialForce :: Force
-packageOnlyRadialForce = Force "packageOrbit"  ForceRadial   [ F.strength datum_.onlyPackages, F.x 0.0, F.y 0.0, F.radius 1000.0 ]
-
-unusedModuleOnlyRadialForce :: Force
-unusedModuleOnlyRadialForce = Force "unusedModuleOrbit"  ForceRadial   [ F.strength datum_.onlyUnused, F.x 0.0, F.y 0.0, F.radius 600.0 ]
-      
 -- | recipe for this force layout graph
 script :: forall m selection. 
   Bind m => 

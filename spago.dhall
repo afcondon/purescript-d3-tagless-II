@@ -79,10 +79,6 @@ You can edit this file as you like.
 , packages = ./packages.dhall
 , sources =
   [ "src/**/*.purs"
-  , "OcelotTW2/src/**/*.purs"
-  , "OcelotTW2/ui-guide/Blocks/**/*.purs"
-  , "OcelotTW2/ui-guide/Components/**/*.purs"
-  , "OcelotTW2/ui-guide/Utilities/**/*.purs"
   , "test/**/*.purs"
   ]
 }

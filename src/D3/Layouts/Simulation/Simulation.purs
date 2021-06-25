@@ -27,6 +27,7 @@ import Data.Tuple (Tuple(..))
 --   , drag       :: DragBehavior -- TODO make strongly typed wrt actual Model used
 -- )
 data ForceStatus = ForceActive | ForceDisabled
+derive instance eqForceStatus :: Eq ForceStatus
 data SimForce = SimForce ForceStatus D3ForceHandle_
 
 disableSimForce :: SimForce -> SimForce
@@ -41,12 +42,12 @@ type SimulationManager = {
     simulation :: D3Simulation_
   , config     :: SimulationConfig_
   , running    :: Boolean
-  , forces     :: M.Map String SimForce
+  , forces     :: M.Map Label SimForce
 }
 
 createSimulationManager :: SimulationManager 
 createSimulationManager = { 
-    simulation: initSimulation_ unit
+    simulation: (initSimulation_ unit) `configSimulation_` defaultConfigSimulation  
   , config: defaultConfigSimulation
   , running: true
   , forces: M.empty
@@ -62,27 +63,23 @@ stop s = do
   let _ = stopSimulation_  s.simulation
   s { running = false }
 
-setForces :: Array (Tuple String D3ForceHandle_) -> SimulationManager -> SimulationManager
-setForces forces s = do
-  let
-    _ = removeAllForces s
-  addForces forces s
+setForces :: Array Force -> SimulationManager -> SimulationManager
+setForces forces s = addForces forces (removeAllForces s) 
 
+addForces :: Array Force -> SimulationManager -> SimulationManager
+addForces forces s = do
+  let _ = (addForce s) <$> forces -- TODO make SimulationManager Semigroup and fold instead
+  s
 
-addForces :: Array (Tuple String D3ForceHandle_) -> SimulationManager -> SimulationManager
-addForces tuples s = do
+addForce :: SimulationManager -> Force -> SimulationManager
+addForce s (Force label forceStatus forceType attrs) = do
   -- addForce and tag in D3 first
-  let f1 (Tuple tag force) = putForceInSimulation_ s.simulation tag force
-      f2 (Tuple tag force) = Tuple tag (SimForce ForceActive force)
-      _           = f1 <$> tuples
-      forceTuples = f2 <$> tuples
-  s { forces = M.fromFoldable forceTuples }
-
-addForce :: String -> D3ForceHandle_ -> SimulationManager -> SimulationManager
-addForce tag force s = do
-  -- addForce and tag in D3 first
-  let _ = putForceInSimulation_ s.simulation tag force
-  s { forces = M.insert tag (SimForce ForceActive force) s.forces  }
+  let handle_ = createForce forceType
+      _       = (\(ForceT a) -> setForceAttr handle_ a) <$> attrs
+      _       = if forceStatus == ForceActive
+                then putForceInSimulation_ s.simulation label handle_
+                else s.simulation
+  s { forces = M.insert label (SimForce forceStatus handle_) s.forces  }
 
 removeAllForces :: SimulationManager -> SimulationManager
 removeAllForces s = do
@@ -107,7 +104,7 @@ reenableForce tag s = do
     Nothing                           -> s -- REVIEW exception? force is not reenabled because it doesn't exist
     (Just (SimForce ForceActive _))   -> s -- REVIEW exception? force was already active
 
-data Force = Force Label ForceType (Array ChainableF)
+data Force = Force Label ForceStatus ForceType (Array ChainableF)
 
 data ForceType = 
     ForceManyBody                                  -- strength, theta, distanceMax, distanceMin
@@ -129,7 +126,8 @@ createForce = case _ of
   ForceX             -> forceX_         unit
   ForceY             -> forceY_         unit
   ForceRadial        -> forceRadial_    unit
-  (ForceLink links)  -> forceLink_   links
+
+  (ForceLink links)  -> forceLink_      links
   (CustomForce)      -> forceCustom_    unit
 
 -- TODO at present there is no type checking on what forces have which attrs settable, see comment above
@@ -150,14 +148,4 @@ setForceAttr force_ (ToAttribute label attr) = do
     _ -> force_ -- no other force attributes accepted
 
 
-addSingleForce :: D3Simulation_ -> Force -> D3Simulation_
-addSingleForce simulation (Force label forcetype attrs) = do
-  let handle_ = createForce forcetype
-      _       = (\(ForceT a) -> setForceAttr handle_ a) <$> attrs
-  putForceInSimulation_ simulation label handle_
-
-putEachForceInSimulation :: D3Simulation_ -> Array Force -> D3Simulation_
-putEachForceInSimulation simulation forces = do
-  let _ = (addSingleForce simulation) <$> forces
-  simulation
   

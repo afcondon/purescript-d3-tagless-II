@@ -12,7 +12,7 @@ import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, join, on)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Simulation (Force(..), ForceType(..), putEachForceInSimulation)
+import D3.Layouts.Simulation (Force(..), ForceStatus(..), ForceType(..))
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (defaultConfigSimulation)
@@ -89,8 +89,8 @@ drawGraph selector = do
 
 lesMisForces :: Array Force
 lesMisForces = 
-    [ Force "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-    , Force "charge" ForceManyBody  []
+    [ Force "center" ForceActive ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+    , Force "charge" ForceActive ForceManyBody  []
     ]
 
 -- | recipe for this force layout graph
@@ -115,7 +115,8 @@ graphScript widthheight model selector = do
   let simulation = initSimulation_ unit
       _          = simulation `configSimulation_` defaultConfigSimulation
       nodes      = simulation `setNodes_` model.nodes 
-      _          = simulation `putEachForceInSimulation` lesMisForces
+      -- TODO following line commented out pending re-factor for SimulationManager stuff
+      -- _          = simulation `putEachForceInSimulation` lesMisForces
       _          = setLinks_ simulation model.links (\d i -> d.id)
 
   linksSelection <- join linksGroup $ Join {
