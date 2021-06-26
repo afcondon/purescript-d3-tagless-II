@@ -13,14 +13,16 @@ import D3.Examples.Spago.Clusters as Cluster
 import D3.Examples.Spago.Graph as Graph
 import D3.FFI (initSimulation_, setAlpha_, stopSimulation_)
 import D3.Interpreter.D3 (d3Run, removeExistingSVG, runD3M)
-import D3.Layouts.Simulation (Force(..), ForceStatus(..), ForceType(..), SimulationManager, addForce, addForces, createSimulationManager, disableForce)
+import D3.Layouts.Simulation (Force(..), ForceStatus(..), ForceType(..), SimulationManager, addForce, addForces, createSimulationManager, disableForce, showForces)
 import D3.Simulation.Config as F
 import D3Tagless.Block.Card as Card
 import D3Tagless.Block.FormField as FormField
+import Data.Array (intercalate)
 import Data.Const (Const)
 import Data.Either (hush)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Data.Newtype (unwrap)
 import Data.Number (infinity)
 import Data.Tuple (fst)
 import Effect.Aff (Aff, Fiber, forkAff, killFiber)
@@ -129,6 +131,7 @@ component = H.mkComponent
             [ HH.text "Spago"
             , Card.card_ [ controls ]
             , Card.card_ [ HH.text blurbtext ]
+            , Card.card_ [ HH.text $ showForces state.simulation ]
             ]
         , HH.div
             [ Tailwind.apply "svg-container" ]
@@ -167,6 +170,7 @@ handleAction = case _ of
               PackageRing -> addForce simulation packageOnlyRadialForce 
               PackageGrid -> addForce simulation unusedModuleOnlyRadialForce
               PackageFree -> disableForce "packageOrbit" simulation
+    H.modify_ (\state -> state { simulation = simulation })
     pure unit
 
   SetModuleForce _ -> do
@@ -229,29 +233,6 @@ packageOnlyRadialForce = Force "packageOrbit"  ForceActive ForceRadial   [ F.str
 unusedModuleOnlyRadialForce :: Force
 unusedModuleOnlyRadialForce = Force "unusedModuleOrbit" ForceActive ForceRadial   [ F.strength datum_.onlyUnused, F.x 0.0, F.y 0.0, F.radius 600.0 ]
       
-
--- engageGridForces :: D3Simulation_ -> Aff Unit
--- engageGridForces simulation = do
---   let _ = addForces treeForces simulation 
---   let _ = setAlpha_ simulation 0.3
---   pure unit
-
--- engageRadialForces :: D3Simulation_ -> Aff Unit
--- engageRadialForces simulation = do
---   let _ = addForces  
---             ([packageOnlyRadialForce, 
---               unusedModuleOnlyRadialForce ] 
---               <>
---               centeringForces
---             ) simulation
---   let _ = setAlpha_ simulation 0.3
---   pure unit
-
--- setup3 :: D3Simulation_ -> Aff Unit
--- setup3 simulation = do
---   let _ = stopSimulation_ simulation
---   pure unit
-
 
 blurbtext :: String
 blurbtext = 

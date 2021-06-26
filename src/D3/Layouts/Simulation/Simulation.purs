@@ -7,27 +7,19 @@ import D3.Attributes.Instances (Attribute(..), Label, unbox)
 import D3.Data.Types (D3Simulation_)
 import D3.Node (D3_Link, NodeID)
 import D3.Simulation.Config (ChainableF(..), D3ForceHandle_, SimulationConfig_, defaultConfigSimulation)
+import Data.Array (intercalate)
 import Data.List (List)
-import Data.Map (Map, empty, fromFoldable, insert, lookup, update) as M
+import Data.Map (Map, empty, fromFoldable, insert, lookup, toUnfoldable, update) as M
 import Data.Map.Internal (keys) as M
 import Data.Maybe (Maybe(..))
+import Data.Newtype (class Newtype, wrap, unwrap)
 import Data.Tuple (Tuple(..))
 
--- type SimulationManager d l = (  
--- -- 'd' is the type of the "data" field in each node
--- -- 'l' is the additional row-types in the link
---     label      :: String
---   , simulation :: Maybe D3Simulation_
---   , config     :: SimulationConfig_
---   , nodes      :: Array (D3SimulationRow d)
---   , idLinks    :: Array (D3_Link NodeID l)
---   , objLinks   :: Array (D3_Link (D3SimulationRow d) l)
---   , forces     :: Array D3ForceHandle_
---   , tick       :: Unit -> Unit -- could be Effect Unit??
---   , drag       :: DragBehavior -- TODO make strongly typed wrt actual Model used
--- )
 data ForceStatus = ForceActive | ForceDisabled
 derive instance eqForceStatus :: Eq ForceStatus
+instance showForceStatus :: Show ForceStatus where
+  show ForceActive = "active"
+  show ForceDisabled = "inactive"
 data SimForce = SimForce ForceStatus D3ForceHandle_
 
 disableSimForce :: SimForce -> SimForce
@@ -38,15 +30,25 @@ toggleSimForce (SimForce ForceActive f) = SimForce ForceDisabled f
 toggleSimForce (SimForce ForceDisabled f) = SimForce ForceActive f
 
 
-type SimulationManager = {
+newtype SimulationManager = SimulationManager {
     simulation :: D3Simulation_
   , config     :: SimulationConfig_
   , running    :: Boolean
   , forces     :: M.Map Label SimForce
 }
+derive instance newtypeSimulationManager :: Newtype SimulationManager _
+
+instance showSimForce :: Show SimForce where
+  show (SimForce status _) = show status
+
+showForces :: SimulationManager -> String
+showForces s = do
+  let sim = unwrap s
+      forces = sim.forces
+  intercalate "\n" $ (\(Tuple label force) -> show label <> " " <> show force) <$> (M.toUnfoldable forces)
 
 createSimulationManager :: SimulationManager 
-createSimulationManager = { 
+createSimulationManager = wrap { 
     simulation: (initSimulation_ unit) `configSimulation_` defaultConfigSimulation  
   , config: defaultConfigSimulation
   , running: true
@@ -55,51 +57,58 @@ createSimulationManager = {
 
 start :: SimulationManager -> SimulationManager
 start s = do
-  let _ = startSimulation_  s.simulation
-  s { running = true }
+  let sim = unwrap s
+      _ = startSimulation_  sim.simulation
+  wrap sim { running = true }
 
 stop :: SimulationManager -> SimulationManager
 stop s = do
-  let _ = stopSimulation_  s.simulation
-  s { running = false }
+  let sim = unwrap s
+      _ = stopSimulation_  sim.simulation
+  wrap sim { running = false }
 
 setForces :: Array Force -> SimulationManager -> SimulationManager
 setForces forces s = addForces forces (removeAllForces s) 
 
 addForces :: Array Force -> SimulationManager -> SimulationManager
 addForces forces s = do
-  let _ = (addForce s) <$> forces -- TODO make SimulationManager Semigroup and fold instead
+  -- TODO make SimulationManager Semigroup and fold instead
+  -- foldl (\sm f -> addForce sm f) s forces
   s
 
 addForce :: SimulationManager -> Force -> SimulationManager
 addForce s (Force label forceStatus forceType attrs) = do
   -- addForce and tag in D3 first
-  let handle_ = createForce forceType
+  let sim = unwrap s
+      handle_ = createForce forceType
       _       = (\(ForceT a) -> setForceAttr handle_ a) <$> attrs
       _       = if forceStatus == ForceActive
-                then putForceInSimulation_ s.simulation label handle_
-                else s.simulation
-  s { forces = M.insert label (SimForce forceStatus handle_) s.forces  }
+                then putForceInSimulation_ sim.simulation label handle_
+                else sim.simulation
+  wrap sim { forces = M.insert label (SimForce forceStatus handle_) sim.forces  }
 
 removeAllForces :: SimulationManager -> SimulationManager
 removeAllForces s = do
   let 
-    _ = (setAsNullForceInSimulation_ s.simulation) <$> (M.keys s.forces)
-  s { forces = (M.empty :: M.Map String SimForce) }
+    sim = unwrap s
+    _ = (setAsNullForceInSimulation_ sim.simulation) <$> (M.keys sim.forces)
+  wrap sim { forces = (M.empty :: M.Map String SimForce) }
 
 disableForce :: String -> SimulationManager -> SimulationManager
 disableForce tag s = do
-  case M.lookup tag s.forces of
+  let sim = unwrap s
+  case M.lookup tag sim.forces of
     Nothing  -> s
     (Just f) -> do
-      let _ = setAsNullForceInSimulation_ s.simulation tag
-      s { forces = M.insert tag (disableSimForce f) s.forces }
+      let _ = setAsNullForceInSimulation_ sim.simulation tag
+      wrap sim { forces = M.insert tag (disableSimForce f) sim.forces }
 
 reenableForce :: String -> SimulationManager -> SimulationManager
 reenableForce tag s = do
-  case M.lookup tag s.forces of
+  let sim = unwrap s
+  case M.lookup tag sim.forces of
     (Just (SimForce ForceDisabled f)) -> do
-      s { forces = M.insert tag (SimForce ForceActive f) s.forces }
+      wrap sim { forces = M.insert tag (SimForce ForceActive f) sim.forces }
 
     Nothing                           -> s -- REVIEW exception? force is not reenabled because it doesn't exist
     (Just (SimForce ForceActive _))   -> s -- REVIEW exception? force was already active

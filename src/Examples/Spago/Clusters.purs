@@ -11,6 +11,7 @@ import D3.Layouts.Simulation (SimulationManager)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (D3ForceHandle_)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
+import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Prelude (class Bind, Unit, bind, negate, pure, (/), (<$>))
 
@@ -29,7 +30,7 @@ script :: forall m selection.
   SpagoModel ->
   m selection
 script (Tuple w h) s model = do
-  let simulation = s.simulation
+  let simulation = (unwrap s).simulation
   root       <- attach "div.svg-container"
   svg        <- root `append` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h
                                            , classed "d3svg cluster" ] )
