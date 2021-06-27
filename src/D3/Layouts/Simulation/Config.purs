@@ -2,6 +2,7 @@ module D3.Simulation.Config where
 
 import D3.Attributes.Instances (class ToAttr, Attribute(..), toAttr)
 import D3.Data.Types (Datum_, Index_)
+import Data.Newtype (class Newtype)
 import Data.Number (infinity)
 import Prelude (negate, (<<<))
 
@@ -9,12 +10,13 @@ foreign import data D3ForceHandle_     :: Type
 foreign import data CustomForceConfig_ :: Type
 
 -- not sure if there needs to be a separate type for force attributes, maybe not, but we'll start assuming so
-data ChainableF = ForceT Attribute
+newtype ChainableF = ForceT Attribute
     -- following are used in ChainableS but probably not here on Forces...delete when sure
               -- | TextT Attribute
               -- | TransitionT (Array ChainableS) Transition
               -- | RemoveT
               -- | OnT MouseEvent Listener_
+derive instance Newtype ChainableF _
     
 defaultForceRadialConfig       :: (Datum_ -> Index_ -> Number) -> Array ChainableF
 defaultForceRadialConfig r =  

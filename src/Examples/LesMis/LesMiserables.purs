@@ -12,7 +12,7 @@ import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, join, on)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Simulation (Force(..), ForceStatus(..), ForceType(..))
+import D3.Layouts.Simulation (Force(..), ForceStatus(..), ForceType(..), createForce)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (defaultConfigSimulation)
@@ -89,8 +89,8 @@ drawGraph selector = do
 
 lesMisForces :: Array Force
 lesMisForces = 
-    [ Force "center" ForceActive ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-    , Force "charge" ForceActive ForceManyBody  []
+    [ createForce "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+    , createForce "charge" ForceManyBody  []
     ]
 
 -- | recipe for this force layout graph

@@ -13,7 +13,7 @@ import D3.Examples.Spago.Clusters as Cluster
 import D3.Examples.Spago.Graph as Graph
 import D3.FFI (initSimulation_, setAlpha_, stopSimulation_)
 import D3.Interpreter.D3 (d3Run, removeExistingSVG, runD3M)
-import D3.Layouts.Simulation (Force(..), ForceStatus(..), ForceType(..), SimulationManager, addForce, addForces, createSimulationManager, disableForce, showForces)
+import D3.Layouts.Simulation (Force(..), ForceStatus(..), ForceType(..), SimulationManager, addForce, addForces, createForce, createSimulationManager, disableByLabelMany, disableByLabels, disableForce, showForces)
 import D3.Simulation.Config as F
 import D3Tagless.Block.Card as Card
 import D3Tagless.Block.FormField as FormField
@@ -34,6 +34,12 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Ocelot.Block.Radio as Radio
+import Ocelot.Block.Table as Table
+import Ocelot.Block.Button as Button
+import Ocelot.Block.Checkbox as Checkbox
+import Ocelot.Block.Icon as Icon
+import UIGuide.Block.Documentation as Documentation
+import UIGuide.Block.Backdrop as Backdrop
 import Ocelot.HTML.Properties (css)
 import Stories.Tailwind.Styles as Tailwind
 import Utility (getWindowWidthHeight)
@@ -130,8 +136,11 @@ component = H.mkComponent
             [ Tailwind.apply "story-panel-about" ]
             [ HH.text "Spago"
             , Card.card_ [ controls ]
-            , Card.card_ [ HH.text blurbtext ]
             , Card.card_ [ HH.text $ showForces state.simulation ]
+            , Card.card_ [ HH.text $ show $ M.size (unwrap state.simulation).forces ]
+            , Card.card_ [ HH.text $ show $ (unwrap state.simulation).running ]
+            , renderTable state
+            , Card.card_ [ HH.text blurbtext ]
             ]
         , HH.div
             [ Tailwind.apply "svg-container" ]
@@ -152,9 +161,9 @@ handleAction = case _ of
           (Just graph) -> do
             -- TODO properly think out / design relationship between fiber and simulation
             simulation  <- H.gets _.simulation
-            let _ = addForces (clusterForce <> collideForce) simulation 
+            let updatedSimulation = addForces (clusterForce <> collideForce) simulation 
             fiber <- H.liftAff $ forkAff $ drawGraph simulation graph
-            H.modify_ (\s -> s { fiber = Just fiber })
+            H.modify_ (\s -> s { fiber = Just fiber, simulation = updatedSimulation })
             pure unit
 
   Finalize -> do
@@ -169,7 +178,7 @@ handleAction = case _ of
     let _ = case packageForce of
               PackageRing -> addForce simulation packageOnlyRadialForce 
               PackageGrid -> addForce simulation unusedModuleOnlyRadialForce
-              PackageFree -> disableForce "packageOrbit" simulation
+              PackageFree -> disableByLabelMany ["packageOrbit"] simulation
     H.modify_ (\state -> state { simulation = simulation })
     pure unit
 
@@ -204,34 +213,34 @@ drawGraph simulation graph = do
 
 clusterForce :: Array Force
 clusterForce =  
-  [ Force "x" ForceActive ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
-  , Force "y" ForceActive ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
+  [ createForce "x" ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
+  , createForce "y" ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
   ]
 
 collideForce :: Array Force
-collideForce = [ Force "collide" ForceActive ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ] ]
+collideForce = [ createForce "collide" ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ] ]
 
 manyBodyForce :: Array Force
-manyBodyForce = [ Force "charge" ForceActive ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ] ]
+manyBodyForce = [ createForce "charge" ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ] ]
 
 treeForces :: Array Force
 treeForces =  
-  [ Force "x" ForceActive ForceX [ F.strength 0.2, F.x datum_.treePointX ]
-  , Force "y" ForceActive ForceY [ F.strength 0.2, F.y datum_.treePointY ]
+  [ createForce "x" ForceX [ F.strength 0.2, F.x datum_.treePointX ]
+  , createForce "y" ForceY [ F.strength 0.2, F.y datum_.treePointY ]
   ]
       
 centeringForces :: Array Force
 centeringForces =  
-  [ Force "x"      ForceActive ForceX        [ F.strength 0.1, F.x 0.0 ]
-  , Force "y"      ForceActive ForceY        [ F.strength 0.1, F.y 0.0 ]
-  , Force "center" ForceActive ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
+  [ createForce "x"      ForceX        [ F.strength 0.1, F.x 0.0 ]
+  , createForce "y"      ForceY        [ F.strength 0.1, F.y 0.0 ]
+  , createForce "center" ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
   ]
 
 packageOnlyRadialForce :: Force
-packageOnlyRadialForce = Force "packageOrbit"  ForceActive ForceRadial   [ F.strength datum_.onlyPackages, F.x 0.0, F.y 0.0, F.radius 1000.0 ]
+packageOnlyRadialForce = createForce "packageOrbit"  ForceRadial   [ F.strength datum_.onlyPackages, F.x 0.0, F.y 0.0, F.radius 1000.0 ]
 
 unusedModuleOnlyRadialForce :: Force
-unusedModuleOnlyRadialForce = Force "unusedModuleOrbit" ForceActive ForceRadial   [ F.strength datum_.onlyUnused, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+unusedModuleOnlyRadialForce = createForce "unusedModuleOrbit" ForceRadial   [ F.strength datum_.onlyUnused, F.x 0.0, F.y 0.0, F.radius 600.0 ]
       
 
 blurbtext :: String
@@ -257,3 +266,86 @@ blurbtext =
   occaecat sint esse nostrud. Duis velit nostrud ullamco cillum cillum Lorem
   cupidatat irure."""
 
+renderTable :: forall m. State -> H.ComponentHTML Action () m
+renderTable state  =
+  HH.div_
+  [ Documentation.block_
+    { header: "Table"
+    , subheader: "Tabular Data"
+    }
+    [ Backdrop.backdrop_
+      [ HH.div_
+        [ renderTable
+        ]
+      ]
+    ]
+  ]
+  where
+  renderTable =
+    Table.table_ $
+      [ renderHeader
+      ]
+      <> renderBody
+
+  renderHeader =
+    Table.row_
+      [ Table.header  [ css "w-10" ] [ HH.text "" ]
+      , Table.header_ [ HH.text "Icon" ]
+      , Table.header  [ css "w-2/3 text-left" ] [ HH.text "Description" ]
+      , Table.header_ [ HH.text "" ]
+      ]
+
+  renderBody =
+    Table.row_ <$> ( renderData <$> tableData )
+
+  renderData :: ∀ p i. TestData p i -> Array (HH.HTML p i)
+  renderData { name, icon } =
+    [ Table.cell_ [ Checkbox.checkbox_ [] [] ]
+    , Table.cell  [ css "text-2xl" ] [ icon ]
+    , Table.cell  [ css "text-left" ] [ HH.text name ]
+    , Table.cell  [ css "text-right" ] [ Button.button_ [ HH.text "Do Nothing" ] ]
+    ]
+
+type TestData p i = { name :: String, icon :: HH.HTML p i }
+
+tableData :: ∀ p i. Array (TestData p i)
+tableData =
+  [ { name: "This is what a back arrow looks like"
+    , icon: Icon.back_
+    }
+  , { name: "This is what a refresh arrow looks like"
+    , icon: Icon.refresh_
+    }
+  , { name: "This is what a settings cog looks like"
+    , icon: Icon.settings_
+    }
+  , { name: "This is what a share button looks like"
+    , icon: Icon.share_
+    }
+  , { name: "This is what an error badge looks like"
+    , icon: Icon.error [ css "text-red" ]
+    }
+  , { name: "This is what a tip bulb looks like"
+    , icon: Icon.tip [ css "text-yellow" ]
+    }
+  , { name: "This is what an info badge looks like"
+    , icon: Icon.info [ css "text-blue" ]
+    }
+  , { name: "This is what a success badge looks like"
+    , icon: Icon.success [ css "text-green" ]
+    }
+  , { name: "This is what the Facebook icon looks like"
+    , icon: Icon.facebook [ css "text-fb-blue" ]
+    }
+  , { name: "This is what the Instagram icon looks like"
+    , icon: Icon.instagram [ css "text-ig-brown" ]
+    }
+  , { name: "This is what the Twitter icon looks like"
+    , icon: Icon.twitter [ css "text-tw-blue" ]
+    }
+  , { name: "This is what a progress bar with a top caption looks like"
+    , icon: HH.div_
+        [ HH.p [ css "text-sm pb-2" ] [ HH.text "60% of campaign spent" ]
+        ]
+    }
+  ]
