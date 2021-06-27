@@ -1117,7 +1117,6 @@ dt {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  margin-bottom: 0;
   min-width: -webkit-min-content;
   min-width: -moz-min-content;
   min-width: min-content;
@@ -1135,6 +1134,7 @@ dt {
   height: 100vh;
   max-width: 65ch;
   overflow: hidden;
+  overflow: scroll;
   padding: 0.5rem;
   --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);

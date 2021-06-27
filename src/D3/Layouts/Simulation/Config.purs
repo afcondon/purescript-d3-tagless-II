@@ -49,6 +49,7 @@ type SimulationConfig_ = {
     , alphaMin      :: Number
     , alphaDecay    :: Number
     , velocityDecay :: Number
+    , running       :: Boolean
 }
 
 defaultConfigSimulation :: SimulationConfig_
@@ -58,6 +59,7 @@ defaultConfigSimulation = {
     , alphaMin     : 0.0001
     , alphaDecay   : 0.0228
     , velocityDecay: 0.4
+    , running      : true
 }
 
 

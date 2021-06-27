@@ -54,7 +54,6 @@ toggleForce (Force l s t cs h_) = Force l (toggleForceStatus s) t cs h_
 newtype SimulationManager = SimulationManager {
     simulation :: D3Simulation_
   , config     :: SimulationConfig_
-  , running    :: Boolean
   , forces     :: M.Map Label Force
 }
 derive instance Newtype SimulationManager _
@@ -72,19 +71,19 @@ createSimulationManager :: SimulationManager
 createSimulationManager = wrap { 
     simulation: (initSimulation_ unit) `configSimulation_` defaultConfigSimulation  
   , config: defaultConfigSimulation
-  , running: true
   , forces: M.empty
 }
 
 start :: SimulationManager -> SimulationManager
 start (SimulationManager sim) = do
   let _ = startSimulation_  sim.simulation
-  wrap sim { running = true }
+      _ = setAlpha_ sim.simulation 0.5
+  wrap sim { config { running = true } }
 
 stop :: SimulationManager -> SimulationManager
 stop (SimulationManager sim) = do
   let _ = stopSimulation_  sim.simulation
-  wrap sim { running = false }
+  wrap sim { config { running = false } }
 
 setForces :: Array Force -> SimulationManager -> SimulationManager
 setForces forces = addForces forces <<< removeAllForces
@@ -145,6 +144,65 @@ data ForceType =
   | ForceLink (forall r. Array (D3_Link NodeID r)) -- strength, id, distance, iterations, links
                                                    -- TODO need something to hold extra custom force config, perhaps?
   | CustomForce                                    -- ???
+
+instance Show ForceType where
+  show ForceManyBody = "ForceManyBody"
+  show ForceCenter   = "ForceCenter"
+  show ForceCollide  = "ForceCollide"
+  show ForceX        = "ForceX"
+  show ForceY        = "ForceY"
+  show ForceRadial   = "ForceRadial"
+  show (ForceLink _) = "ForceLink"
+  show CustomForce   = "CustomForce"
+
+showSimulationRunning :: SimulationManager -> String
+showSimulationRunning (SimulationManager s) =
+  if s.config.running
+  then "Running"
+  else "Paused"
+
+forceDescription :: ForceType -> String
+forceDescription = case _ of
+  ForceManyBody -> 
+
+    """The many-body (or n-body) force applies mutually amongst all nodes. It can
+    be used to simulate gravity (attraction) if the strength is positive, or
+    electrostatic charge (repulsion) if the strength is negative."""
+      
+  ForceCenter   ->
+    
+    """The centering force translates nodes uniformly so that the mean position
+    of all nodes (the center of mass if all nodes have equal weight) is at the
+    given position ⟨x,y⟩. """
+  
+  ForceCollide  ->
+
+    """The collision force treats nodes as circles with a given radius, rather
+    than points, and prevents nodes from overlapping."""
+
+  ForceX        ->
+
+    """The x-positioning force pushes nodes towards a desired position along the
+    horizontal with a configurable strength."""
+
+  ForceY        ->
+
+    """The y-positioning force pushes nodes towards a desired position along the
+    vertical with a configurable strength."""
+
+  ForceRadial   ->
+
+    """The radial force pushes nodes towards the closest point on a given circle."""
+
+  (ForceLink _) ->
+
+    """The link force pushes linked nodes together or apart according to the
+    desired link distance. The strength of the force is proportional to the
+    difference between the linked nodes’ distance and the target distance,
+    similar to a spring force."""
+
+  CustomForce   -> ""
+
 
 -- TODO this needs to move to the D3 interpreter, with some parallel impls for String, Meta etc
 createForce_ :: ForceType -> D3ForceHandle_

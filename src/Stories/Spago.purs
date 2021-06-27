@@ -13,18 +13,19 @@ import D3.Examples.Spago.Clusters as Cluster
 import D3.Examples.Spago.Graph as Graph
 import D3.FFI (initSimulation_, setAlpha_, stopSimulation_)
 import D3.Interpreter.D3 (d3Run, removeExistingSVG, runD3M)
-import D3.Layouts.Simulation (Force(..), ForceStatus(..), ForceType(..), SimulationManager, addForce, addForces, createForce, createSimulationManager, disableByLabelMany, disableByLabels, disableForce, showForces)
+import D3.Layouts.Simulation (Force(..), ForceStatus(..), ForceType(..), SimulationManager, addForce, addForces, createForce, createSimulationManager, disableByLabelMany, disableByLabels, disableForce, forceDescription, showForces, showSimulationRunning)
 import D3.Simulation.Config as F
 import D3Tagless.Block.Card as Card
 import D3Tagless.Block.FormField as FormField
-import Data.Array (intercalate)
+import Data.Array (intercalate, (:))
 import Data.Const (Const)
 import Data.Either (hush)
+import Data.Map (toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Number (infinity)
-import Data.Tuple (fst)
+import Data.Tuple (fst, snd)
 import Effect.Aff (Aff, Fiber, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Exception (error)
@@ -33,15 +34,15 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Ocelot.Block.Radio as Radio
-import Ocelot.Block.Table as Table
 import Ocelot.Block.Button as Button
 import Ocelot.Block.Checkbox as Checkbox
 import Ocelot.Block.Icon as Icon
-import UIGuide.Block.Documentation as Documentation
-import UIGuide.Block.Backdrop as Backdrop
+import Ocelot.Block.Radio as Radio
+import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Tailwind.Styles as Tailwind
+import UIGuide.Block.Backdrop as Backdrop
+import UIGuide.Block.Documentation as Documentation
 import Utility (getWindowWidthHeight)
 
 type Query :: forall k. k -> Type
@@ -74,7 +75,7 @@ component = H.mkComponent
   initialState :: State
   initialState = { fiber: Nothing, simulation: createSimulationManager }
 
-  controls =
+  renderSimControls _ =
     HH.div
       [ css "flex-1" ]
       [ FormField.fieldset_
@@ -134,13 +135,10 @@ component = H.mkComponent
         [ Tailwind.apply "story-container spago" ]
         [ HH.div
             [ Tailwind.apply "story-panel-about" ]
-            [ HH.text "Spago"
-            , Card.card_ [ controls ]
-            , Card.card_ [ HH.text $ showForces state.simulation ]
-            , Card.card_ [ HH.text $ show $ M.size (unwrap state.simulation).forces ]
-            , Card.card_ [ HH.text $ show $ (unwrap state.simulation).running ]
-            , renderTable state
-            , Card.card_ [ HH.text blurbtext ]
+            [ renderSimControls state.simulation
+            , renderTableForces state.simulation
+            , renderTableElements state.simulation
+            , Card.card_ [ blurbtext ]
             ]
         , HH.div
             [ Tailwind.apply "svg-container" ]
@@ -243,39 +241,50 @@ unusedModuleOnlyRadialForce :: Force
 unusedModuleOnlyRadialForce = createForce "unusedModuleOrbit" ForceRadial   [ F.strength datum_.onlyUnused, F.x 0.0, F.y 0.0, F.radius 600.0 ]
       
 
-blurbtext :: String
-blurbtext = 
-  """Id sint laboris reprehenderit officia anim nisi consectetur voluptate enim.
-  Commodo cillum minim nisi laborum eiusmod veniam ullamco id ex fugiat eu anim.
-  Irure est aute laborum duis. Lorem dolore id sunt incididunt ut ea. Nostrud
-  enim officia nisi anim consequat cupidatat consectetur consequat ex excepteur.
-  Lorem nisi in reprehenderit ex adipisicing magna elit aute sunt. Cillum non
-  Lorem minim duis culpa ullamco aute ex minim. Mollit anim in nisi tempor enim
-  exercitation dolore. Veniam consequat minim nostrud amet duis dolore tempor
-  voluptate quis culpa. Laborum dolor pariatur ut est cupidatat elit deserunt
-  occaecat tempor aliquip anim. 
-  
-  Velit irure ea voluptate ipsum ex exercitation
-  dolore voluptate reprehenderit sit anim sunt. Anim fugiat ad ut qui cillum
-  tempor occaecat et deserunt nostrud non ipsum. Id non qui mollit culpa elit
-  cillum ipsum excepteur adipisicing qui. Incididunt adipisicing sit incididunt
-  consequat minim id do exercitation cupidatat est sunt mollit. Anim ut ullamco
-  enim culpa. Adipisicing ad non esse laboris anim consequat ut velit esse
-  consequat tempor. Commodo magna esse ullamco ipsum et ipsum minim dolore esse
-  veniam ea commodo labore. Nulla deserunt id ad anim anim proident labore
-  occaecat sint esse nostrud. Duis velit nostrud ullamco cillum cillum Lorem
-  cupidatat irure."""
+blurbtext :: forall p i. HH.HTML p i
+blurbtext = HH.div_ (title : paras)
+  where
+    title        = HH.h2 [ HP.classes titleClasses ] [ HH.text "About this Example"]
+    titleClasses = HH.ClassName <$> [ "font-bold text-2xl" ]
 
-renderTable :: forall m. State -> H.ComponentHTML Action () m
-renderTable state  =
+    paras       = (HH.p [ HP.classes paraClasses ]) <$> paraTexts
+    paraClasses = HH.ClassName <$> [ "m-4 " ]
+    paraTexts   = map (\s -> [ HH.text s ] ) [
+
+        """This example synthesizes a complex dependency graph from the optional JSON
+        graph outputs of the PureScript compiler, together with the package
+        dependencies from Spago and adds simple line-count per module to give an
+        idea of the size of each one."""
+
+      , """With this dataset, operated on by the physics simulation engine, we can
+      explore different aspects of the project dependencies. The layout can be
+      entirely driven by forces and relationships or partially or totally laid-out
+      using algorithms."""
+
+      , """For example, a dependency tree starting at the Main module can be laid-out as
+      a radial tree and either fixed in that position or allowed to move under the
+      influences of other forces.""" 
+
+      , """Un-connected modules (which are only present because something in their
+      package has been required) can be hidden or clustered separately."""
+
+      , """Modules can be clustered on their packages and the packages can be positioned
+      on a simple grid or arranged in a circle by a radial force that applies only
+      to them."""
+
+      , """Clicking on a module highlights it and its immediate dependents and
+      dependencies. Clicking outside the highlighted module undoes the
+      highlighting."""
+    ]
+
+renderTableForces :: forall m. SimulationManager -> H.ComponentHTML Action () m
+renderTableForces simulation  =
   HH.div_
-  [ Documentation.block_
-    { header: "Table"
-    , subheader: "Tabular Data"
-    }
+  [ HH.div_
     [ Backdrop.backdrop_
       [ HH.div_
-        [ renderTable
+        [ HH.h2_ [ HH.text "Control which forces are acting"]
+        , renderTable
         ]
       ]
     ]
@@ -289,63 +298,73 @@ renderTable state  =
 
   renderHeader =
     Table.row_
-      [ Table.header  [ css "w-10" ] [ HH.text "" ]
-      , Table.header_ [ HH.text "Icon" ]
-      , Table.header  [ css "w-2/3 text-left" ] [ HH.text "Description" ]
-      , Table.header_ [ HH.text "" ]
+      [ Table.header  [ css "w-10" ] [ HH.text "Active" ]
+      , Table.header  [ css "w-2/3 text-left" ] [ HH.text "Details" ]
+      , Table.header  [ css "w-2/3 text-left" ] [ HH.text "Acting on..." ]
       ]
+  
+  tableData =
+    snd <$> 
+    (toUnfoldable $
+    (unwrap simulation).forces)
 
   renderBody =
     Table.row_ <$> ( renderData <$> tableData )
 
-  renderData :: ∀ p i. TestData p i -> Array (HH.HTML p i)
-  renderData { name, icon } =
+  renderData :: ∀ p i. Force -> Array (HH.HTML p i)
+  renderData (Force l s t cs h_) =
     [ Table.cell_ [ Checkbox.checkbox_ [] [] ]
-    , Table.cell  [ css "text-2xl" ] [ icon ]
-    , Table.cell  [ css "text-left" ] [ HH.text name ]
-    , Table.cell  [ css "text-right" ] [ Button.button_ [ HH.text "Do Nothing" ] ]
+    , Table.cell  [ css "text-left" ]
+      [ HH.div_ [
+          HH.text l
+        , HH.text $ show t -- use forceDescription t for more detailed explanation
+        ]
+      ]
+    , Table.cell  [ css "text-left" ] [ HH.text "modules" ]
     ]
 
-type TestData p i = { name :: String, icon :: HH.HTML p i }
-
-tableData :: ∀ p i. Array (TestData p i)
-tableData =
-  [ { name: "This is what a back arrow looks like"
-    , icon: Icon.back_
-    }
-  , { name: "This is what a refresh arrow looks like"
-    , icon: Icon.refresh_
-    }
-  , { name: "This is what a settings cog looks like"
-    , icon: Icon.settings_
-    }
-  , { name: "This is what a share button looks like"
-    , icon: Icon.share_
-    }
-  , { name: "This is what an error badge looks like"
-    , icon: Icon.error [ css "text-red" ]
-    }
-  , { name: "This is what a tip bulb looks like"
-    , icon: Icon.tip [ css "text-yellow" ]
-    }
-  , { name: "This is what an info badge looks like"
-    , icon: Icon.info [ css "text-blue" ]
-    }
-  , { name: "This is what a success badge looks like"
-    , icon: Icon.success [ css "text-green" ]
-    }
-  , { name: "This is what the Facebook icon looks like"
-    , icon: Icon.facebook [ css "text-fb-blue" ]
-    }
-  , { name: "This is what the Instagram icon looks like"
-    , icon: Icon.instagram [ css "text-ig-brown" ]
-    }
-  , { name: "This is what the Twitter icon looks like"
-    , icon: Icon.twitter [ css "text-tw-blue" ]
-    }
-  , { name: "This is what a progress bar with a top caption looks like"
-    , icon: HH.div_
-        [ HH.p [ css "text-sm pb-2" ] [ HH.text "60% of campaign spent" ]
+renderTableElements :: forall m. SimulationManager -> H.ComponentHTML Action () m
+renderTableElements simulation  =
+  HH.div_
+  [ HH.div_
+    [ Backdrop.backdrop_
+      [ HH.div_
+        [ HH.h2_ [ HH.text "Control which data groupings are shown"]
+        , renderTable
         ]
-    }
+      ]
+    ]
   ]
+  where
+  renderTable =
+    Table.table_ $
+      [ renderHeader
+      ]
+      <> renderBody
+
+  renderHeader =
+    Table.row_
+      [ Table.header  [ css "w-10" ] [ HH.text "Active" ]
+      , Table.header  [ css "w-2/3 text-left" ] [ HH.text "Details" ]
+      , Table.header  [ css "w-2/3 text-left" ] [ HH.text "Acting on..." ]
+      ]
+  
+  tableData =
+    snd <$> 
+    (toUnfoldable $
+    (unwrap simulation).forces)
+
+  renderBody =
+    Table.row_ <$> ( renderData <$> tableData )
+
+  renderData :: ∀ p i. Force -> Array (HH.HTML p i)
+  renderData (Force l s t cs h_) =
+    [ Table.cell_ [ Checkbox.checkbox_ [] [] ]
+    , Table.cell  [ css "text-left" ]
+      [ HH.div_ [
+          HH.text l
+        , HH.text $ show t -- use forceDescription t for more detailed explanation
+        ]
+      ]
+    , Table.cell  [ css "text-left" ] [ HH.text "modules" ]
+    ]
