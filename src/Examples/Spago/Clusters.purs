@@ -36,7 +36,7 @@ script (Tuple w h) s model = do
                                            , classed "d3svg cluster" ] )
   nodesGroup <- svg  `append` (node Group  [ classed "nodes" ])
 
-  let nodes      = simulation `setNodes_` (pinIfPackage <$> model.nodes)
+  let nodes      = simulation `setNodes_` model.nodes
 
   nodesSelection <- nodesGroup <+> Join { -- we're putting a group in with an eye to transitions to other layouts
       element   : Group

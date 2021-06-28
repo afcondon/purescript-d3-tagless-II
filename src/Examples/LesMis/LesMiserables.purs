@@ -112,8 +112,7 @@ graphScript widthheight model selector = do
   linksGroup <- svg  `append` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `append` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
-  let simulation = initSimulation_ unit
-      _          = simulation `configSimulation_` defaultConfigSimulation
+  let simulation = initSimulation_ defaultConfigSimulation
       nodes      = simulation `setNodes_` model.nodes 
       -- TODO following line commented out pending re-factor for SimulationManager stuff
       -- _          = simulation `putEachForceInSimulation` lesMisForces

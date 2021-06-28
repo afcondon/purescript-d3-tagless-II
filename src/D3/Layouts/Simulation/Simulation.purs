@@ -4,7 +4,7 @@ import D3.FFI
 import Prelude
 
 import D3.Attributes.Instances (Attribute(..), Label, unbox)
-import D3.Data.Types (D3Simulation_)
+import D3.Data.Types (D3Simulation_, Datum_, PointXY)
 import D3.Node (D3_Link, NodeID)
 import D3.Simulation.Config (ChainableF(..), D3ForceHandle_, SimulationConfig_, defaultConfigSimulation)
 import Data.Array (elem, foldl, intercalate, uncons, (:))
@@ -69,15 +69,45 @@ showForces (SimulationManager sim) = do
 
 createSimulationManager :: SimulationManager 
 createSimulationManager = wrap { 
-    simulation: (initSimulation_ unit) `configSimulation_` defaultConfigSimulation  
+    simulation: initSimulation_ defaultConfigSimulation  
   , config: defaultConfigSimulation
   , forces: M.empty
 }
 
+setAlpha :: Number ->  SimulationManager -> SimulationManager
+setAlpha v (SimulationManager sim) = do
+  let _ = setAlpha_ sim.simulation v
+  wrap sim { config { alpha = v }}
+
+setAlphaTarget :: Number ->  SimulationManager -> SimulationManager
+setAlphaTarget v (SimulationManager sim) = do
+  let _ = setAlphaTarget_ sim.simulation v
+  wrap sim { config { alphaTarget = v }}
+
+setAlphaMin :: Number ->  SimulationManager -> SimulationManager
+setAlphaMin v (SimulationManager sim) = do
+  let _ = setAlphaMin_ sim.simulation v
+  wrap sim { config { alphaMin = v }}
+
+setAlphaDecay :: Number ->  SimulationManager -> SimulationManager
+setAlphaDecay v (SimulationManager sim) = do
+  let _ = setAlphaDecay_ sim.simulation v
+  wrap sim { config { alphaDecay = v }}
+
+setVelocityDecay :: Number ->  SimulationManager -> SimulationManager
+setVelocityDecay v (SimulationManager sim) = do
+  let _ = setVelocityDecay_ sim.simulation v
+  wrap sim { config { velocityDecay = v }}
+
+setRunning :: Boolean ->  SimulationManager -> SimulationManager
+setRunning true = start
+setRunning false = stop
+
+
 start :: SimulationManager -> SimulationManager
 start (SimulationManager sim) = do
   let _ = startSimulation_  sim.simulation
-      _ = setAlpha_ sim.simulation 0.5
+      _ = setAlpha_ sim.simulation 1.0
   wrap sim { config { running = true } }
 
 stop :: SimulationManager -> SimulationManager
@@ -142,18 +172,24 @@ data ForceType =
   | ForceY                                         -- strength, y
   | ForceRadial                                    -- strength, radius, x, y
   | ForceLink (forall r. Array (D3_Link NodeID r)) -- strength, id, distance, iterations, links
+  | ForceFixPositionXY (Datum_ -> PointXY) -- function is static, provided to constructor
+  | ForceFixPositionX  (Datum_ -> Number)
+  | ForceFixPositionY  (Datum_ -> Number)
                                                    -- TODO need something to hold extra custom force config, perhaps?
   | CustomForce                                    -- ???
 
 instance Show ForceType where
-  show ForceManyBody = "ForceManyBody"
-  show ForceCenter   = "ForceCenter"
-  show ForceCollide  = "ForceCollide"
-  show ForceX        = "ForceX"
-  show ForceY        = "ForceY"
-  show ForceRadial   = "ForceRadial"
-  show (ForceLink _) = "ForceLink"
-  show CustomForce   = "CustomForce"
+  show ForceManyBody           = "ForceManyBody"
+  show ForceCenter             = "ForceCenter"
+  show ForceCollide            = "ForceCollide"
+  show ForceX                  = "ForceX"
+  show ForceY                  = "ForceY"
+  show ForceRadial             = "ForceRadial"
+  show (ForceFixPositionXY xy) = "ForceFixPositionXY"
+  show (ForceFixPositionX x)   = "ForceFixPositionX"
+  show (ForceFixPositionY y)   = "ForceFixPositionY"
+  show (ForceLink _)           = "ForceLink"
+  show CustomForce             = "CustomForce"
 
 showSimulationRunning :: SimulationManager -> String
 showSimulationRunning (SimulationManager s) =
@@ -194,6 +230,18 @@ forceDescription = case _ of
 
     """The radial force pushes nodes towards the closest point on a given circle."""
 
+  (ForceFixPositionXY xy) ->
+
+    """This \"force\" is really an over-ride for the force simulation, fixing the node at a particular point"""
+
+  (ForceFixPositionX x) ->
+
+    """This \"force\" is really an over-ride for the force simulation, fixing the node at a particular X dimension"""
+
+  (ForceFixPositionY y) ->
+
+    """This \"force\" is really an over-ride for the force simulation, fixing the node at a particular Y dimension"""
+
   (ForceLink _) ->
 
     """The link force pushes linked nodes together or apart according to the
@@ -207,15 +255,19 @@ forceDescription = case _ of
 -- TODO this needs to move to the D3 interpreter, with some parallel impls for String, Meta etc
 createForce_ :: ForceType -> D3ForceHandle_
 createForce_ = case _ of
-  ForceManyBody      -> forceMany_      unit 
-  ForceCenter        -> forceCenter_    unit
-  ForceCollide       -> forceCollideFn_ unit
-  ForceX             -> forceX_         unit
-  ForceY             -> forceY_         unit
-  ForceRadial        -> forceRadial_    unit
+  ForceManyBody             -> forceMany_      unit 
+  ForceCenter               -> forceCenter_    unit
+  ForceCollide              -> forceCollideFn_ unit
+  ForceX                    -> forceX_         unit
+  ForceY                    -> forceY_         unit
+  ForceRadial               -> forceRadial_    unit
 
-  (ForceLink links)  -> forceLink_      links
-  (CustomForce)      -> forceCustom_    unit
+  (ForceLink links)         -> forceLink_      links
+  (CustomForce)             -> forceCustom_    unit
+  -- NB there is actually no "force", in D3 terms, behind the fixed "forces", hence the dummy handle that is returned
+  (ForceFixPositionXY xy)   -> dummyForceHandle_ 
+  (ForceFixPositionX x)     -> dummyForceHandle_
+  (ForceFixPositionY y)     -> dummyForceHandle_
 
 -- TODO at present there is no type checking on what forces have which attrs settable, see comment above
 setForceAttr :: D3ForceHandle_ -> Attribute -> D3ForceHandle_

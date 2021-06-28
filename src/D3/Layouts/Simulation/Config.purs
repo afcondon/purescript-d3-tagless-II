@@ -43,6 +43,7 @@ defaultForceYConfig =
   [ strength 0.1, y 0.0 ]
   
 -- | a record to initialize / configure simulations
+data SimConfig = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number | Running Boolean
 type SimulationConfig_ = { 
       alpha         :: Number
     , alphaTarget   :: Number
@@ -95,6 +96,12 @@ x = ForceT <<< ToAttribute "x" <<< toAttr
 
 y :: ∀ a. ToAttr Number a => a -> ChainableF
 y = ForceT <<< ToAttribute "y" <<< toAttr
+
+fx :: ∀ a. ToAttr Number a => a -> ChainableF
+fx = ForceT <<< ToAttribute "fx" <<< toAttr
+
+fy :: ∀ a. ToAttr Number a => a -> ChainableF
+fy = ForceT <<< ToAttribute "fy" <<< toAttr
 
 distance :: ∀ a. ToAttr Number a => a -> ChainableF
 distance = ForceT <<< ToAttribute "distance" <<< toAttr

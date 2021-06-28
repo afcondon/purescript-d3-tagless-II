@@ -26,8 +26,7 @@ script (Tuple w h) model = do
   linksGroup <- svg  `append` (node Group  [ classed "links", strokeColor "#999" ])
   nodesGroup <- svg  `append` (node Group  [ classed "nodes" ])
 
-  let simulation = initSimulation_ unit
-      _          = simulation `configSimulation_` defaultConfigSimulation
+  let simulation = initSimulation_ defaultConfigSimulation
       nodes      = simulation `setNodes_` model.nodes
       -- _          = simulation `putEachForceInSimulation` initialForces
       _          = setLinks_ simulation model.links (\d i -> d.id)

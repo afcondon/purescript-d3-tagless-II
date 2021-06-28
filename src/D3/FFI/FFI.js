@@ -190,7 +190,8 @@ exports.d3SetHTML_ = value => selection => {
   return selection.html(value)
 }
 
-
+// TODO all these show statements are getting pruned out in DCE and causing crash at runtime if you have debug enabled
+// so either have to backtrack on the extraction to functions or find a way to avoid them being pruned
 exports.showSelectAllInDOM_ = selector => {
   return `\td3SelectAllInDOM: ${selector}`
 }
@@ -282,7 +283,7 @@ exports.selectionOn_ = selection => event => callback => {
 // *****************************************************************************************************************
 
 //            SIMULATION functions
-exports.initSimulation_ = config => {
+exports.initSimulation_ = config => { // TODO bug not passed
   const simulation = d3
     .forceSimulation()
     .alpha(config.alpha) // default is 1
@@ -427,6 +428,8 @@ exports.setForceX_ = force => attr => force.x(attr)
 exports.setForceY_ = force => attr => force.y(attr)
 // setForceDistance_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
 exports.setForceDistance_ = force => attr => force.distance(attr)
+// dummyForceHandle_  :: D3ForceHandle_ -- used for fixed "forces", is null under the hood
+exports.dummyForceHandle_ = null
 // setAsNullForceInSimulation_ :: D3Simulation_ -> String -> D3Simulation_
 exports.setAsNullForceInSimulation_ = simulation => label => {
   simulation.force(label, null)

@@ -1,29 +1,27 @@
 module Stories.Spago where
 
-import D3.Examples.Spago.Model
 import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState)
-import D3.Data.Types (D3Selection_, D3Simulation_)
+import D3.Attributes.Instances (Label)
+import D3.Data.Types (D3Selection_, Selector)
 import D3.Examples.Spago (treeReduction)
-import D3.Examples.Spago as Spago
 import D3.Examples.Spago.Clusters as Cluster
-import D3.Examples.Spago.Graph as Graph
-import D3.FFI (initSimulation_, setAlpha_, stopSimulation_)
+import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.Interpreter.D3 (d3Run, removeExistingSVG, runD3M)
-import D3.Layouts.Simulation (Force(..), ForceStatus(..), ForceType(..), SimulationManager, addForce, addForces, createForce, createSimulationManager, disableByLabelMany, disableByLabels, disableForce, forceDescription, showForces, showSimulationRunning)
+import D3.Layouts.Simulation (Force(..), ForceType(..), SimulationManager(..), addForce, addForces, createForce, createSimulationManager, disableByLabelMany, setAlpha)
+import D3.Simulation.Config (SimConfig(..))
 import D3.Simulation.Config as F
 import D3Tagless.Block.Card as Card
-import D3Tagless.Block.FormField as FormField
-import Data.Array (intercalate, (:))
+import Data.Array ((:))
 import Data.Const (Const)
 import Data.Either (hush)
 import Data.Map (toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Newtype (unwrap)
+import Data.Newtype (unwrap, wrap)
 import Data.Number (infinity)
 import Data.Tuple (fst, snd)
 import Effect.Aff (Aff, Fiber, forkAff, killFiber)
@@ -36,13 +34,10 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Ocelot.Block.Button as Button
 import Ocelot.Block.Checkbox as Checkbox
-import Ocelot.Block.Icon as Icon
-import Ocelot.Block.Radio as Radio
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Tailwind.Styles as Tailwind
 import UIGuide.Block.Backdrop as Backdrop
-import UIGuide.Block.Documentation as Documentation
 import Utility (getWindowWidthHeight)
 
 type Query :: forall k. k -> Type
@@ -55,10 +50,12 @@ data Action
   | Finalize
   | SetPackageForce PackageForce
   | SetModuleForce ModuleForce
+  | ChangeSimConfig SimConfig
   
 type State = { 
     fiber  :: Maybe (Fiber Unit)
   , simulation :: SimulationManager
+  , groupings :: M.Map Label Selector
 }
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
@@ -73,60 +70,23 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { fiber: Nothing, simulation: createSimulationManager }
+  initialState = { fiber: Nothing, simulation: createSimulationManager, groupings: M.empty }
 
   renderSimControls _ =
     HH.div
-      [ css "flex-1" ]
-      [ FormField.fieldset_
-        { label: HH.text "Packages"
-        , inputId: "radio-vertical"
-        , helpText: []
-        , error: []
-        }
-        [ HH.div
-          [ css "flex-1" ]
-          [ Radio.radio
-            [ css "pr-6" ]
-            [ HP.name "package-force"
-            , HP.checked true
-            , HE.onClick $ const (SetPackageForce PackageRing)
-            ]
-            [ HH.text "Vertical" ]
-          , Radio.radio
-            [ css "pr-6" ]
-            [ HP.name "package-force"
-            , HE.onClick $ const (SetPackageForce PackageGrid) ]
-            [ HH.text "Horizontal" ]
-          , Radio.radio
-            [ css "pr-6" ]
-            [ HP.name "package-force"
-            , HE.onClick $ const (SetPackageForce PackageFree) ]
-            [ HH.text "Radial" ]
+      [ HP.classes [ HH.ClassName "m-6" ]]
+      [ HH.h3_
+          [ HH.text "Simulation controls" ]
+      , HH.div_
+          [ Button.button
+              [ HE.onClick $ const (ChangeSimConfig (Running false)) ]
+              [ HH.text "PackageGrid" ]
           ]
-        ]
-      , FormField.fieldset_
-        { label: HH.text "Module"
-        , inputId: "radio-vertical"
-        , helpText: []
-        , error: []
-        }
-        [ HH.div
-          [ css "flex-1" ]
-          [ Radio.radio
-            [ css "pr-6" ]
-            [ HP.name "module-force"
-            , HP.checked true
-            , HE.onClick $ const (SetModuleForce ClusterPackage)
-            ]
-            [ HH.text "Package layout" ]
-          , Radio.radio
-            [ css "pr-6" ]
-            [ HP.name "module-force"
-            , HE.onClick $ const (SetModuleForce ForceTree) ]
-            [ HH.text "Tree layout" ]
+      , HH.div_
+          [ Button.button
+              [ HE.onClick $ const (ChangeSimConfig (Running true)) ]
+              [ HH.text "PackageRing" ]
           ]
-        ]
       ]
 
   render :: State -> H.ComponentHTML Action () m
@@ -174,14 +134,30 @@ handleAction = case _ of
   SetPackageForce packageForce -> do
     simulation <- H.gets _.simulation
     let _ = case packageForce of
-              PackageRing -> addForce simulation packageOnlyRadialForce 
-              PackageGrid -> addForce simulation unusedModuleOnlyRadialForce
+              PackageRing -> do
+                let _ = addForce simulation packageOnlyRadialForce 
+                setAlpha 1.0 simulation
+              PackageGrid -> do
+                let _ = addForce simulation unusedModuleOnlyRadialForce
+                setAlpha 1.0 simulation
               PackageFree -> disableByLabelMany ["packageOrbit"] simulation
     H.modify_ (\state -> state { simulation = simulation })
     pure unit
 
   SetModuleForce _ -> do
     pure unit
+
+  ChangeSimConfig c -> do
+    (SimulationManager sim) <- H.gets _.simulation
+    let updated = 
+          case c of
+            (Alpha v)         -> sim { config { alpha = v  } }
+            (AlphaTarget v)   -> sim { config { alphaTarget = v  } } 
+            (AlphaMin v)      -> sim { config { alphaMin = v  } } 
+            (AlphaDecay v)    -> sim { config { alphaDecay = v  } } 
+            (VelocityDecay v) -> sim { config { velocityDecay = v  } } 
+            (Running v)       -> sim { config { running = v  } } 
+    H.modify_ (\state -> state { simulation = wrap updated })
 
 
 -- getModel will try to build a model from files and to derive a dependency tree from Main
@@ -235,10 +211,23 @@ centeringForces =
   ]
 
 packageOnlyRadialForce :: Force
-packageOnlyRadialForce = createForce "packageOrbit"  ForceRadial   [ F.strength datum_.onlyPackages, F.x 0.0, F.y 0.0, F.radius 1000.0 ]
+packageOnlyRadialForce = createForce "packageOrbit"  ForceRadial   [ strengthFunction, F.x 0.0, F.y 0.0, F.radius 1000.0 ]
+  where
+    strengthFunction =
+      F.strength (\d -> if datum_.isPackage d then 0.8 else 0.0)
+
+packageOnlyFixToGridForce :: Force
+packageOnlyFixToGridForce = do
+  let gridXY d = offsetXY { x: (-1000.0), y: (-500.0) } $
+                 scalePoint 100.0 20.0 $
+                 numberToGridPoint 10 (datum_.id d)
+  createForce "packageGrid" (ForceFixPositionXY gridXY) [ ]
 
 unusedModuleOnlyRadialForce :: Force
-unusedModuleOnlyRadialForce = createForce "unusedModuleOrbit" ForceRadial   [ F.strength datum_.onlyUnused, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+unusedModuleOnlyRadialForce = createForce "unusedModuleOrbit" ForceRadial   [ strengthFunction, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+  where
+    strengthFunction =
+      F.strength (\d -> if datum_.isUnusedModule d then 0.8 else 0.0)
       
 
 blurbtext :: forall p i. HH.HTML p i

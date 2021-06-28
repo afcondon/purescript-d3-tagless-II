@@ -81,6 +81,48 @@ tree2Point x' y' = do
   Just { x, y } 
 
 -- | all the coercions in one place
+datum_ :: { cluster :: Datum_ -> Int
+, clusterPoint :: Datum_
+                  -> { x :: Number
+                     , y :: Number
+                     }
+, clusterPointX :: Datum_ -> Number
+, clusterPointY :: Datum_ -> Number
+, collideRadius :: Datum_ -> Number
+, colorByGroup :: Datum_ -> String
+, connected :: Datum_ -> Boolean
+, containerID :: Datum_ -> Int
+, containerName :: Datum_ -> String
+, id :: Datum_ -> Int
+, isModule :: Datum_ -> Boolean
+, isPackage :: Datum_ -> Boolean
+, isUnusedModule :: Datum_ -> Boolean
+, links :: Datum_
+           -> { contains :: Array Int
+              , inPackage :: Array Int
+              , outPackage :: Array Int
+              , sources :: Array Int
+              , targets :: Array Int
+              , tree :: Array Int
+              }
+, loc :: Datum_ -> Number
+, name :: Datum_ -> String
+, nodeClass :: Datum_ -> String
+, nodetype :: Datum_ -> NodeType
+, positionLabel :: Datum_ -> Number
+, radius :: Datum_ -> Number
+, translateNode :: Datum_ -> String
+, treePoint :: Datum_
+               -> { x :: Number
+                  , y :: Number
+                  }
+, treePointX :: Datum_ -> Number
+, treePointY :: Datum_ -> Number
+, treeX :: Datum_ -> Nullable Number
+, treeY :: Datum_ -> Nullable Number
+, x :: Datum_ -> Number
+, y :: Datum_ -> Number
+}
 datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
     radius        : (\d -> (unboxD3SimNode d).r)
@@ -109,7 +151,7 @@ datum_ = {
   , positionLabel:
     (\d -> case datum_.nodetype d of
             (IsModule _)  -> negate $ datum_.loc d
-            (IsPackage _) -> 0.0
+            (IsPackage _) -> 0.0 -- TODO move the magic numbers out by making the filter / groupFn available
     )
   , collideRadius:
       (\d -> 
@@ -123,17 +165,23 @@ datum_ = {
       (\d -> d3SchemeCategory10N_ (toNumber $ datum_.cluster d))
   , translateNode:
       (\d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <> ")")
+      
 -- accessors to provide different force settings for different cohorts, quite possible that this should go thru a similar but different route from `datum`
-  , onlyPackages:
+  , isPackage:
       (\d -> case datum_.nodetype d of
-              (IsModule _)  -> 0.0 -- we don't want modules to respond to this force at all
-              (IsPackage _) -> 0.5)
-  , onlyUnused:
+              (IsModule _) -> true
+              (IsPackage _) -> false)
+  , isModule:
       (\d -> case datum_.nodetype d of
+              (IsModule _) -> false
+              (IsPackage _) -> true)
+  , isUnusedModule:
+      (\d -> case datum_.nodetype d of
+              (IsPackage _) -> false
               (IsModule _)  -> if datum_.connected d 
-                               then 0.0 
-                               else 0.8  -- this should put the only unused modules in a different orbit from the packages
-              (IsPackage _) -> 0.0)
+                               then false
+                               else true  -- this should put the only unused modules in a different orbit from the packages
+              )
 }
 
               
@@ -207,31 +255,31 @@ offsetY yOffset xy = xy { y = xy.y + yOffset }
 pinNode :: SpagoSimNode -> PointXY -> SpagoSimNode
 pinNode (D3SimNode node) xy = D3SimNode (node { fx = notNull xy.x, fy = notNull xy.y } )
 
-pinIfPackage :: SpagoSimNode -> SpagoSimNode
-pinIfPackage n@(D3SimNode node) = do
-  let xy = offsetXY { x: (-900.0), y: (-5000.0) } $
-           scalePoint 180.0 100.0 $
-           numberToGridPoint 10 node.cluster
-      -- _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
-  case node.nodetype of
-    (IsModule _)  -> setXY   n xy -- only setting intial position of module
-    (IsPackage _) -> pinNode n xy -- but fixing the position of packages
+-- pinIfPackage :: SpagoSimNode -> SpagoSimNode
+-- pinIfPackage n@(D3SimNode node) = do
+--   let xy = offsetXY { x: (-900.0), y: (-5000.0) } $
+--            scalePoint 180.0 100.0 $
+--            numberToGridPoint 10 node.cluster
+--       -- _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
+--   case node.nodetype of
+--     (IsModule _)  -> setXY   n xy -- only setting intial position of module
+--     (IsPackage _) -> pinNode n xy -- but fixing the position of packages
 
-gridifyByNodeID :: SpagoSimNode -> SpagoSimNode
-gridifyByNodeID n@(D3SimNode node) = do
-  let xy = offsetXY { x: (-1000.0), y: (-500.0) } $
-           scalePoint 100.0 20.0 $
-           numberToGridPoint 10 node.id
-      _ =  trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
-  pinNode n xy
+-- gridifyByNodeID :: SpagoSimNode -> SpagoSimNode
+-- gridifyByNodeID n@(D3SimNode node) = do
+--   let xy = offsetXY { x: (-1000.0), y: (-500.0) } $
+--            scalePoint 100.0 20.0 $
+--            numberToGridPoint 10 node.id
+--       _ =  trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
+--   pinNode n xy
 
-gridifyByCluster :: SpagoSimNode -> SpagoSimNode
-gridifyByCluster n@(D3SimNode node) = do
-  let xy = offsetXY { x: (-800.0), y: (-5000.0) } $
-           scalePoint 180.0 100.0 $
-           numberToGridPoint 10 node.cluster
-      _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
-  pinNode n xy
+-- gridifyByCluster :: SpagoSimNode -> SpagoSimNode
+-- gridifyByCluster n@(D3SimNode node) = do
+--   let xy = offsetXY { x: (-800.0), y: (-5000.0) } $
+--            scalePoint 180.0 100.0 $
+--            numberToGridPoint 10 node.cluster
+--       _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
+--   pinNode n xy
 
 setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
 setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })

@@ -97,7 +97,7 @@ foreign import selectionOn_         :: forall selection callback. selection -> S
 
 type GraphModel_ link node = { links :: Array link, nodes :: Array node }
 
-foreign import initSimulation_         :: Unit                                 -> D3Simulation_
+foreign import initSimulation_         ::                  SimulationConfig_ -> D3Simulation_
 foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_   -> D3Simulation_
 
 foreign import getNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
@@ -145,6 +145,7 @@ foreign import forceX_            :: Unit -> D3ForceHandle_
 foreign import forceY_            :: Unit -> D3ForceHandle_
 foreign import forceLink_         :: forall r. Array (D3_Link NodeID r) -> D3ForceHandle_
 foreign import forceCustom_       :: Unit -> D3ForceHandle_
+foreign import dummyForceHandle_  :: D3ForceHandle_ -- used for fixed "forces", is null under the hood
 
 foreign import setForceRadius_      :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
 foreign import setForceStrength_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_

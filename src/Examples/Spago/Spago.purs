@@ -26,28 +26,6 @@ import Math (cos, pi, sin)
 import Prelude (bind, pure, ($), (*), (<$>), (<*>), (<<<), (<>), (==), (||))
 import Unsafe.Coerce (unsafeCoerce)
 
-
-      -- _ <- delay (Milliseconds 4000.0)
-      -- let _ = putEachForceInSimulation simulation Cluster.forcesB
-      -- let _ = setAlpha_ simulation 0.3
-      
-      -- _ <- delay (Milliseconds 1000.0)
-      -- ((Tuple {simulation} _) :: Tuple { selection :: D3Selection_, simulation :: D3Simulation_ } Unit) 
-      --     <- liftEffect $ runD3M (Graph.script (Tuple width height) graph')
-
-      -- _ <- delay (Milliseconds 4000.0)
-      -- let _ = putEachForceInSimulation simulation ([Graph.packageOnlyRadialForce] <> [Graph.unusedModuleOnlyRadialForce] <> Graph.initialForces)
-      -- let _ = setAlpha_ simulation 0.3
-
-      -- _ <- delay (Milliseconds 3000.0)
-      -- let _ = stopSimulation_ simulation
-
-      -- (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (Tree.script (Tuple (width/3.0) height) graph')
-       
-      -- printedScript <- liftEffect $ runPrinter (graphScript (Tuple width height) graph') "Force Layout Script"
-      -- log $ fst printedScript
-
-
 -- TODO make this generic and extract from Spago example to library
 treeReduction :: SpagoModel -> NodeID -> SpagoModel
 treeReduction model rootID  = do
