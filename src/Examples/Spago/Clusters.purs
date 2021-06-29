@@ -27,7 +27,7 @@ script :: forall m sim selection.
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
-  SimulationM sim ->
+  SimulationM sim -> -- TODO will need to have simulation _capability_ in the interpreter monad
   SpagoModel ->
   m selection
 script (Tuple w h) simulation model = do
@@ -36,7 +36,8 @@ script (Tuple w h) simulation model = do
                                            , classed "d3svg cluster" ] )
   nodesGroup <- svg  `append` (node Group  [ classed "nodes" ])
 
-  nodes <- setNodes model.nodes simulation
+  let nodes = do
+    setNodes model.nodes simulation
 
   nodesSelection <- nodesGroup <+> Join { -- we're putting a group in with an eye to transitions to other layouts
       element   : Group

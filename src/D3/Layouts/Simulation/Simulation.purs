@@ -17,10 +17,29 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype, wrap, unwrap)
 import Data.Tuple (Tuple(..))
 
+class (Monad m) <= SimulationM m where
+  -- management of forces
+  removeAllForces      ::                m Unit
+  loadForces           :: Array Force -> m Unit
+  addForces            :: Array Force -> m Unit
+  disableForcesByLabel :: Array Label -> m Unit
+  enableForcesByLabel  :: Array Label -> m Unit
+  -- config
+  setAlpha             :: Number      -> m Unit
+  setAlphaTarget       :: Number      -> m Unit
+  setAlphaMin          :: Number      -> m Unit
+  setAlphaDecay        :: Number      -> m Unit
+  setVelocityDecay     :: Number      -> m Unit
+  -- control
+  run                  ::                m Unit
+  stop                 ::                m Unit
+  -- utility
+  showForces           ::                    m String
+  -- management of data (nodes and links)
+  setNodes :: Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
+  -- setLinks
 
-newtype SimulationM a = SimulationM (State SimulationR a)
-
-type SimulationR = {
+type SimulationState = {
     simulation    :: D3Simulation_
   , alpha         :: Number
   , alphaTarget   :: Number
@@ -30,13 +49,6 @@ type SimulationR = {
   , running       :: Boolean
   , forces        :: M.Map Label Force
 }
-
-derive newtype instance functorSimulationM     :: Functor           SimulationM
-derive newtype instance applySimulationM       :: Apply             SimulationM
-derive newtype instance applicativeSimulationM :: Applicative       SimulationM
-derive newtype instance bindSimulationM        :: Bind              SimulationM
-derive newtype instance monadSimulationM       :: Monad             SimulationM
-derive newtype instance monadStateSimulationM  :: MonadState  SimulationR  SimulationM 
 
 data ForceStatus = ForceActive | ForceDisabled
 derive instance eqForceStatus :: Eq ForceStatus
