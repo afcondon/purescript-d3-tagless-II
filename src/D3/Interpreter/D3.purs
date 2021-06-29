@@ -8,6 +8,7 @@ import D3.Attributes.Sugar (classed, viewBox)
 import D3.Data.Types (D3Selection_, Element(..))
 import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3LowerSelection_, d3OrderSelection_, d3RaiseSelection_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectFirstInDOM_, d3SelectionIsEmpty_, d3SelectionSelectAll_, d3SelectionSelect_, d3SetAttr_, d3SetHTML_, d3SetProperty_, d3SetText_, d3SortSelection_, defaultDrag_, defaultSimulationDrag_, disableDrag_, onTick_, selectionOn_)
 import D3.Interpreter (class D3InterpreterM, append, attach, modify)
+import D3.Layouts.Simulation (SimulationM, SimulationR)
 import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), OrderingAttribute(..), node)
 import D3.Simulation.Config (ChainableF(..), D3ForceHandle_)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -17,28 +18,33 @@ import Effect (Effect)
 import Effect.Class (class MonadEffect)
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
--- also not really making a ton of use of StateT, but it is good to have a 
--- place to stash D3's global state such as named transitions etc
-newtype D3M :: forall k. k -> Type -> Type
-newtype D3M selection a = D3M (StateT Unit Effect a) 
--- TODO don't really need a State instance now, could be ReaderT, however, state might make a comeback so leaving for now
 
-derive newtype instance functorD3M     :: Functor           (D3M selection)
-derive newtype instance applyD3M       :: Apply             (D3M selection)
-derive newtype instance applicativeD3M :: Applicative       (D3M selection)
-derive newtype instance bindD3M        :: Bind              (D3M selection)
-derive newtype instance monadD3M       :: Monad             (D3M selection)
-derive newtype instance monadStateD3M  :: MonadState  Unit  (D3M selection) 
-derive newtype instance monadEffD3M    :: MonadEffect       (D3M selection)
+-- newtype D3M :: forall k. k -> Type -> Type
+newtype D3M state selection a = D3M (StateT state Effect a) 
 
-runD3M :: forall a. D3M D3Selection_  a-> Effect (Tuple a Unit)
+derive newtype instance functorD3M     :: Functor           (D3M state selection)
+derive newtype instance applyD3M       :: Apply             (D3M state selection)
+derive newtype instance applicativeD3M :: Applicative       (D3M state selection)
+derive newtype instance bindD3M        :: Bind              (D3M state selection)
+derive newtype instance monadD3M       :: Monad             (D3M state selection)
+derive newtype instance monadStateD3M  :: MonadState  Unit  (D3M Unit selection) 
+derive newtype instance monadStateD3MSimulation  :: MonadState SimulationR (D3M SimulationR selection) 
+derive newtype instance monadEffD3M    :: MonadEffect       (D3M state selection)
+
+runD3M :: forall a. D3M Unit D3Selection_ a -> Effect (Tuple a Unit)
 runD3M (D3M state) = runStateT state unit
 
-d3Run :: forall a. D3M D3Selection_ a -> Effect a
+d3Run :: forall a. D3M Unit D3Selection_ a -> Effect a
 d3Run (D3M state) = liftA1 fst $ runStateT state unit
 
+-- runD3M :: forall a st. D3M st D3Selection_ a -> Effect (Tuple a Unit)
+-- runD3M (D3M state) = runStateT state unit
 
-instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M D3Selection_) where
+-- d3Run :: forall a st. D3M st D3Selection_ a -> Effect a
+-- d3Run (D3M state) = liftA1 fst $ runStateT state unit
+
+
+instance d3TaglessD3M :: D3InterpreterM D3Selection_ (D3M Unit D3Selection_) where
   attach selector = pure $ d3SelectAllInDOM_ selector 
 
   append selection_ (D3_Node element attributes) = do

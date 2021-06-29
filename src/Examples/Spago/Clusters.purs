@@ -3,11 +3,12 @@ module D3.Examples.Spago.Clusters where
 
 import D3.Examples.Spago.Model
 
+import Control.Monad.State (evalState)
 import D3.Attributes.Sugar (classed, cx, cy, fill, lower, onMouseEvent, radius, text, viewBox, x, y)
 import D3.Data.Types (Element(..), MouseEvent(..))
 import D3.FFI (setNodes_)
 import D3.Interpreter (class D3InterpreterM, append, attach, filter, modify, on, (<+>))
-import D3.Layouts.Simulation (SimulationManager)
+import D3.Layouts.Simulation (SimulationM, setNodes)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (D3ForceHandle_)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -22,21 +23,20 @@ foreign import forceClusterCollision :: Unit -> D3ForceHandle_
 
 
 -- | recipe for this force layout graph
-script :: forall m selection. 
+script :: forall m sim selection. 
   Bind m => 
   D3InterpreterM selection m => 
   Tuple Number Number ->
-  SimulationManager ->
+  SimulationM sim ->
   SpagoModel ->
   m selection
-script (Tuple w h) s model = do
-  let simulation = (unwrap s).simulation
+script (Tuple w h) simulation model = do
   root       <- attach "div.svg-container"
   svg        <- root `append` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h
                                            , classed "d3svg cluster" ] )
   nodesGroup <- svg  `append` (node Group  [ classed "nodes" ])
 
-  let nodes      = simulation `setNodes_` model.nodes
+  nodes <- setNodes model.nodes simulation
 
   nodesSelection <- nodesGroup <+> Join { -- we're putting a group in with an eye to transitions to other layouts
       element   : Group

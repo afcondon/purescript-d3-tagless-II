@@ -12,7 +12,7 @@ import D3.Examples.Spago.Clusters as Cluster
 import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.FFI (initSimulation_)
 import D3.Interpreter.D3 (d3Run, removeExistingSVG, runD3M)
-import D3.Layouts.Simulation (Force(..), ForceType(..), SimulationManager(..), addForce, addForces, createForce, createSimulationManager, disableByLabelMany, enableForce, loadForces, setAlpha)
+import D3.Layouts.Simulation (Force(..), ForceType(..), SimulationM(..), addForce, addForces, createForce, createSimulationM, disableByLabelMany, enableByLabels, enableForce, loadForces, setAlpha)
 import D3.Simulation.Config (SimConfig(..), defaultConfigSimulation)
 import D3.Simulation.Config as F
 import D3Tagless.Block.Card as Card
@@ -55,7 +55,7 @@ data Action
   
 type State = { 
     fiber  :: Maybe (Fiber Unit)
-  , simulation :: SimulationManager
+  , simulation :: SimulationM
   , groupings :: M.Map Label Selector
 }
 
@@ -71,7 +71,7 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { fiber: Nothing, simulation: createSimulationManager, groupings: M.empty }
+  initialState = { fiber: Nothing, simulation: createSimulationM, groupings: M.empty }
 
   renderSimControls _ =
     HH.div
@@ -146,7 +146,7 @@ handleAction = case _ of
     simulation <- H.gets _.simulation
     let _ = case packageForce of
               PackageRing -> do -- TODO just toggle the force and rewarm the simulation
-                let _ = addForce simulation (enableForce packageOnlyRadialForce) 
+                let _ = enableByLabels "packageGrid" simulation
                 setAlpha 1.0 simulation
               PackageGrid -> do
                 let _ = addForce simulation (enableForce packageOnlyFixToGridForce)
@@ -159,7 +159,7 @@ handleAction = case _ of
     pure unit
 
   ChangeSimConfig c -> do
-    (SimulationManager sim) <- H.gets _.simulation
+    (SimulationM sim) <- H.gets _.simulation
     let updated = 
           case c of
             (Alpha v)         -> sim { config { alpha = v  } }
@@ -189,7 +189,7 @@ addTreeToModel rootName maybeModel = do
   rootID <- M.lookup rootName model.maps.name2ID
   pure $ treeReduction model rootID
 
-drawGraph :: SimulationManager -> SpagoModel -> Aff Unit
+drawGraph :: SimulationM -> SpagoModel -> Aff Unit
 drawGraph simulation graph = do
   widthHeight <- liftEffect getWindowWidthHeight
   (svg :: D3Selection_) <- liftEffect $ liftA1 fst $ runD3M (Cluster.script widthHeight simulation graph)
@@ -299,7 +299,7 @@ blurbtext = HH.div_ (title : paras)
       highlighting."""
     ]
 
-renderTableForces :: forall m. SimulationManager -> H.ComponentHTML Action () m
+renderTableForces :: forall m. SimulationM -> H.ComponentHTML Action () m
 renderTableForces simulation  =
   HH.div_
   [ HH.div_
@@ -345,7 +345,7 @@ renderTableForces simulation  =
     , Table.cell  [ css "text-left" ] [ HH.text "modules" ]
     ]
 
-renderTableElements :: forall m. SimulationManager -> H.ComponentHTML Action () m
+renderTableElements :: forall m. SimulationM -> H.ComponentHTML Action () m
 renderTableElements simulation  =
   HH.div_
   [ HH.div_

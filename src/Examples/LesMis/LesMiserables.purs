@@ -114,7 +114,7 @@ graphScript widthheight model selector = do
 
   let simulation = initSimulation_ defaultConfigSimulation
       nodes      = simulation `setNodes_` model.nodes 
-      -- TODO following line commented out pending re-factor for SimulationManager stuff
+      -- TODO following line commented out pending re-factor for SimulationM stuff
       -- _          = simulation `putEachForceInSimulation` lesMisForces
       _          = setLinks_ simulation model.links (\d i -> d.id)
 
