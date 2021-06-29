@@ -160,6 +160,9 @@ foreign import setForceY_           :: D3ForceHandle_ -> D3Attr -> D3ForceHandle
 foreign import setForceDistance_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
 
 foreign import putForceInSimulation_ :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
+foreign import applyFixForceInSimulationXY_ :: D3Simulation_ -> String -> (Datum_ -> PointXY) -> D3Simulation_ 
+foreign import applyFixForceInSimulationX_  :: D3Simulation_ -> String -> (Datum_ -> Number)  -> D3Simulation_ 
+foreign import applyFixForceInSimulationY_  :: D3Simulation_ -> String -> (Datum_ -> Number)  -> D3Simulation_ 
 foreign import setAsNullForceInSimulation_ :: D3Simulation_ -> String -> D3Simulation_
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js Hierarchy module  *********************************************

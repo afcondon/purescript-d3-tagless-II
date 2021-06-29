@@ -10,9 +10,10 @@ import D3.Data.Types (D3Selection_, Selector)
 import D3.Examples.Spago (treeReduction)
 import D3.Examples.Spago.Clusters as Cluster
 import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
+import D3.FFI (initSimulation_)
 import D3.Interpreter.D3 (d3Run, removeExistingSVG, runD3M)
-import D3.Layouts.Simulation (Force(..), ForceType(..), SimulationManager(..), addForce, addForces, createForce, createSimulationManager, disableByLabelMany, setAlpha)
-import D3.Simulation.Config (SimConfig(..))
+import D3.Layouts.Simulation (Force(..), ForceType(..), SimulationManager(..), addForce, addForces, createForce, createSimulationManager, disableByLabelMany, enableForce, loadForces, setAlpha)
+import D3.Simulation.Config (SimConfig(..), defaultConfigSimulation)
 import D3.Simulation.Config as F
 import D3Tagless.Block.Card as Card
 import Data.Array ((:))
@@ -80,11 +81,21 @@ component = H.mkComponent
       , HH.div_
           [ Button.button
               [ HE.onClick $ const (ChangeSimConfig (Running false)) ]
-              [ HH.text "PackageGrid" ]
+              [ HH.text "Stop" ]
           ]
       , HH.div_
           [ Button.button
               [ HE.onClick $ const (ChangeSimConfig (Running true)) ]
+              [ HH.text "Start" ]
+          ]
+      , HH.div_
+          [ Button.button
+              [ HE.onClick $ const (SetPackageForce PackageGrid) ]
+              [ HH.text "PackageGrid" ]
+          ]
+      , HH.div_
+          [ Button.button
+              [ HE.onClick $ const (SetPackageForce PackageRing) ]
               [ HH.text "PackageRing" ]
           ]
       ]
@@ -118,8 +129,8 @@ handleAction = case _ of
           Nothing -> pure unit
           (Just graph) -> do
             -- TODO properly think out / design relationship between fiber and simulation
-            simulation  <- H.gets _.simulation
-            let updatedSimulation = addForces (clusterForce <> collideForce) simulation 
+            simulation <- H.gets _.simulation
+            let updatedSimulation = loadForces initialForces simulation 
             fiber <- H.liftAff $ forkAff $ drawGraph simulation graph
             H.modify_ (\s -> s { fiber = Just fiber, simulation = updatedSimulation })
             pure unit
@@ -134,13 +145,13 @@ handleAction = case _ of
   SetPackageForce packageForce -> do
     simulation <- H.gets _.simulation
     let _ = case packageForce of
-              PackageRing -> do
-                let _ = addForce simulation packageOnlyRadialForce 
+              PackageRing -> do -- TODO just toggle the force and rewarm the simulation
+                let _ = addForce simulation (enableForce packageOnlyRadialForce) 
                 setAlpha 1.0 simulation
               PackageGrid -> do
-                let _ = addForce simulation unusedModuleOnlyRadialForce
+                let _ = addForce simulation (enableForce packageOnlyFixToGridForce)
                 setAlpha 1.0 simulation
-              PackageFree -> disableByLabelMany ["packageOrbit"] simulation
+              PackageFree -> disableByLabelMany ["packageOrbit", "packageGrid"] simulation
     H.modify_ (\state -> state { simulation = simulation })
     pure unit
 
@@ -184,31 +195,50 @@ drawGraph simulation graph = do
   (svg :: D3Selection_) <- liftEffect $ liftA1 fst $ runD3M (Cluster.script widthHeight simulation graph)
   pure unit
 
+-- | ============================================
+-- | FORCES
+-- | ============================================
 
-clusterForce :: Array Force
-clusterForce =  
-  [ createForce "x" ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
-  , createForce "y" ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
-  ]
+initialForces :: Array Force
+initialForces = [
+    enableForce collideForce
+  , enableForce manyBodyForce
+  , enableForce centeringForceX
+  , enableForce centeringForceY
+  , enableForce centeringForceCenter
+  , clusterForceX
+  , clusterForceY
+  , packageOnlyRadialForce
+  , packageOnlyFixToGridForce
+  , unusedModuleOnlyRadialForce
+]
 
-collideForce :: Array Force
-collideForce = [ createForce "collide" ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ] ]
+clusterForceX :: Force
+clusterForceX = createForce "x" ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
 
-manyBodyForce :: Array Force
-manyBodyForce = [ createForce "charge" ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ] ]
+clusterForceY :: Force
+clusterForceY = createForce "y" ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
 
-treeForces :: Array Force
-treeForces =  
-  [ createForce "x" ForceX [ F.strength 0.2, F.x datum_.treePointX ]
-  , createForce "y" ForceY [ F.strength 0.2, F.y datum_.treePointY ]
-  ]
+collideForce :: Force
+collideForce = createForce "collide" ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
+
+manyBodyForce :: Force
+manyBodyForce = createForce "charge" ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
+
+treeForceX :: Force
+treeForceX = createForce "x" ForceX [ F.strength 0.2, F.x datum_.treePointX ]
+
+treeForceY :: Force
+treeForceY = createForce "y" ForceY [ F.strength 0.2, F.y datum_.treePointY ]
       
-centeringForces :: Array Force
-centeringForces =  
-  [ createForce "x"      ForceX        [ F.strength 0.1, F.x 0.0 ]
-  , createForce "y"      ForceY        [ F.strength 0.1, F.y 0.0 ]
-  , createForce "center" ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
-  ]
+centeringForceX :: Force
+centeringForceX = createForce "x" ForceX [ F.strength 0.1, F.x 0.0 ]
+
+centeringForceY :: Force
+centeringForceY = createForce "y" ForceY [ F.strength 0.1, F.y 0.0 ]
+
+centeringForceCenter :: Force
+centeringForceCenter = createForce "center" ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
 
 packageOnlyRadialForce :: Force
 packageOnlyRadialForce = createForce "packageOrbit"  ForceRadial   [ strengthFunction, F.x 0.0, F.y 0.0, F.radius 1000.0 ]
@@ -229,6 +259,9 @@ unusedModuleOnlyRadialForce = createForce "unusedModuleOrbit" ForceRadial   [ st
     strengthFunction =
       F.strength (\d -> if datum_.isUnusedModule d then 0.8 else 0.0)
       
+-- | ============================================
+-- | HTML
+-- | ============================================
 
 blurbtext :: forall p i. HH.HTML p i
 blurbtext = HH.div_ (title : paras)

@@ -115,8 +115,8 @@ stop (SimulationManager sim) = do
   let _ = stopSimulation_  sim.simulation
   wrap sim { config { running = false } }
 
-setForces :: Array Force -> SimulationManager -> SimulationManager
-setForces forces = addForces forces <<< removeAllForces
+loadForces :: Array Force -> SimulationManager -> SimulationManager
+loadForces forces sim = addForces forces $ removeAllForces sim
 
 addForces :: Array Force -> SimulationManager -> SimulationManager
 addForces fs sim = 
@@ -129,9 +129,29 @@ addForce (SimulationManager sim) force@(Force l s t attrs h_) = do
   -- addForce and label in D3 first
   let _ = (\a -> setForceAttr h_ (unwrap a)) <$> attrs
       s' = if s == ForceActive
-           then putForceInSimulation_ sim.simulation l h_
-           else sim.simulation
+           then putForceInSimulation sim.simulation force
+           else sim.simulation -- if the force isn't active then we just keep it in map, with label is key
   wrap sim { forces = M.insert l force sim.forces, simulation = s'  }
+
+putForceInSimulation :: D3Simulation_ -> Force -> D3Simulation_
+putForceInSimulation simulation (Force l s t attrs h_) = do
+  case t of
+    ForceManyBody -> putForceInSimulation_ simulation l h_
+    ForceCenter   -> putForceInSimulation_ simulation l h_
+    ForceCollide  -> putForceInSimulation_ simulation l h_
+    ForceX        -> putForceInSimulation_ simulation l h_
+    ForceY        -> putForceInSimulation_ simulation l h_
+    ForceRadial   -> putForceInSimulation_ simulation l h_
+
+    (ForceLink _) -> putForceInSimulation_ simulation l h_
+
+    (ForceFixPositionXY f) -> applyFixForceInSimulationXY_ simulation l f
+    (ForceFixPositionX f)  -> applyFixForceInSimulationX_ simulation l f
+    (ForceFixPositionY f)  -> applyFixForceInSimulationY_ simulation l f
+
+    CustomForce   -> putForceInSimulation_ simulation l h_ -- TODO not implemented or even designed yet
+
+
 
 enableByLabelMany :: Array Label -> SimulationManager -> SimulationManager
 enableByLabelMany labels (SimulationManager sim) = do

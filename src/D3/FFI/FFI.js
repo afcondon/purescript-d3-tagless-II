@@ -434,6 +434,23 @@ exports.dummyForceHandle_ = null
 exports.setAsNullForceInSimulation_ = simulation => label => {
   simulation.force(label, null)
 }
+// applyFixForceInSimulationXY_ :: D3Simulation_ -> String -> (Datum_ -> PointXY) -> D3Simulation_ 
+exports.applyFixForceInSimulationXY_ = simulation => label => f => {
+  // get nodes from simulation
+  // set each node's fx,fy using f function
+  console.log(`fix force ${label} fixing position of nodes using function ${f}`);
+}
+// applyFixForceInSimulationX_  :: D3Simulation_ -> String -> (Datum_ -> Number)  -> D3Simulation_ 
+exports.applyFixForceInSimulationX_ = simulation => label => f => {
+  // get nodes from simulation
+  // set each node's fx,fy using f function
+}
+// applyFixForceInSimulationY_  :: D3Simulation_ -> String -> (Datum_ -> Number)  -> D3Simulation_ 
+exports.applyFixForceInSimulationY_ = simulation => label => f => {
+  // get nodes from simulation
+  // set each node's fx,fy using f function
+}
+
 // putForceInSimulation_ :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
 exports.putForceInSimulation_ = simulation => label => force => {
   console.log(`Putting ${label} force in the simulation`);
