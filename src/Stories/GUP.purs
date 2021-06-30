@@ -8,7 +8,7 @@ import D3.Attributes.Sugar (classed, viewBox)
 import D3.Data.Types (D3Selection_, Element(..))
 import D3.Examples.GUP as GUP
 import D3.FFI (d3RemoveSelection_, d3SelectionIsEmpty_, d3SelectionSelect_)
-import D3.Interpreter (class D3InterpreterM, append, attach)
+import D3.Interpreter (class D3SelectionM, append, attach)
 import D3.Interpreter.D3 (d3Run, removeExistingSVG, runD3M)
 import D3.Selection (node)
 import D3Tagless.Block.Card as Card
@@ -219,7 +219,7 @@ handleAction = case _ of
 
 codetext :: String
 codetext = 
-  """script :: forall m. D3InterpreterM D3Selection_ m => m ((Array Char) -> m D3Selection_)
+  """script :: forall m. D3SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
   script = do 
     let 
       transition :: ChainableS

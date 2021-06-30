@@ -1,13 +1,16 @@
 module D3.Interpreter where
 
+import D3.Attributes.Instances (Label)
 import D3.Data.Types (Selector)
+import D3.Simulation.Forces (Force)
+import D3.Node (D3_SimulationNode)
 import D3.Selection (Behavior, ChainableS, D3_Node, Join)
-import Prelude (class Monad)
+import Prelude (class Monad, Unit)
 
 -- TODO see whether it can be useful to extend the interpreter here, for different visualization types
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
 -- into both DOM and Simulation for example (and current implementation is gross and wrong)
-class (Monad m) <= D3InterpreterM selection m where
+class (Monad m) <= D3SelectionM selection m where
   attach :: Selector                          -> m selection
   append :: selection -> D3_Node              -> m selection
   filter :: selection -> Selector             -> m selection
@@ -21,3 +24,25 @@ infix 4 join as <+>
 -- TODO things that are not handled by this (deliberately) ultra-simple grammar so far:
 -- 1) say you wanted to attach to "div#hook" and then select an _already existing_ <h1> in it and apply Attrs to that h1
 -- 2)...
+
+class (Monad m) <= D3SimulationM m where
+  -- management of forces
+  removeAllForces      ::                m Unit
+  loadForces           :: Array Force -> m Unit
+  addForces            :: Array Force -> m Unit
+  addForce             :: Force       -> m Unit
+  disableForcesByLabel :: Array Label -> m Unit
+  enableForcesByLabel  :: Array Label -> m Unit
+  -- config
+  setAlpha             :: Number      -> m Unit
+  setAlphaTarget       :: Number      -> m Unit
+  setAlphaMin          :: Number      -> m Unit
+  setAlphaDecay        :: Number      -> m Unit
+  setVelocityDecay     :: Number      -> m Unit
+  -- control
+  run                  :: m Unit
+  stop                 :: m Unit
+  -- utility
+  showForces           :: m String
+  -- management of data (nodes and links)
+  setNodes :: forall d. Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))

@@ -12,7 +12,7 @@ import D3.Examples.Spago.Clusters as Cluster
 import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.FFI (initSimulation_)
 import D3.Interpreter.D3 (d3Run, removeExistingSVG, runD3M)
-import D3.Layouts.Simulation (Force(..), ForceType(..), SimulationM(..), addForce, addForces, createForce, createSimulationM, disableByLabelMany, enableByLabels, enableForce, loadForces, setAlpha)
+import D3.Simulation.Forces (Force(..), ForceType(..), SimulationM(..), addForce, addForces, createForce, createSimulationM, disableByLabelMany, enableByLabels, enableForce, loadForces, setAlpha)
 import D3.Simulation.Config (SimConfig(..), defaultConfigSimulation)
 import D3.Simulation.Config as F
 import D3Tagless.Block.Card as Card

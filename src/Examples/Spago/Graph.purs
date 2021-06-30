@@ -4,7 +4,7 @@ import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, te
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (SpagoModel, cancelSpotlight_, datum_, link_, toggleSpotlight)
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
-import D3.Interpreter (class D3InterpreterM, append, attach, modify, on, (<+>))
+import D3.Interpreter (class D3SelectionM, append, attach, modify, on, (<+>))
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (defaultConfigSimulation)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -15,7 +15,7 @@ import Prelude (class Bind, bind, negate, pure, unit, (/), (<<<))
 -- | recipe for this force layout graph
 script :: forall m selection. 
   Bind m => 
-  D3InterpreterM selection m => 
+  D3SelectionM selection m => 
   Tuple Number Number ->
   SpagoModel ->
   m { selection :: selection, simulation :: D3Simulation_ }

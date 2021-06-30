@@ -4,7 +4,7 @@ import D3.Attributes.Sugar
 
 import D3.Attributes.Instances (datumIsChar, indexIsNumber)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
-import D3.Interpreter (class D3InterpreterM, append, attach, (<+>))
+import D3.Interpreter (class D3SelectionM, append, attach, (<+>))
 import D3.Selection (ChainableS, Join(..), Keys(..), node, node_)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))
@@ -16,7 +16,7 @@ import Prelude (bind, pure, ($), (*), (+), (<<<))
 -- | ====================================================================================
 type Model = Array Char
 
-script :: forall m. D3InterpreterM D3Selection_ m => Selector -> m ((Array Char) -> m D3Selection_)
+script :: forall m. D3SelectionM D3Selection_ m => Selector -> m ((Array Char) -> m D3Selection_)
 script selector = do 
   let 
     transition :: ChainableS

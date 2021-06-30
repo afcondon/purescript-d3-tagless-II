@@ -7,8 +7,8 @@ import Control.Monad.State (evalState)
 import D3.Attributes.Sugar (classed, cx, cy, fill, lower, onMouseEvent, radius, text, viewBox, x, y)
 import D3.Data.Types (Element(..), MouseEvent(..))
 import D3.FFI (setNodes_)
-import D3.Interpreter (class D3InterpreterM, append, attach, filter, modify, on, (<+>))
-import D3.Layouts.Simulation (SimulationM, setNodes)
+import D3.Interpreter (class D3SelectionM, append, attach, filter, modify, on, (<+>))
+import D3.Simulation.Forces (SimulationM, setNodes)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (D3ForceHandle_)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -25,7 +25,7 @@ foreign import forceClusterCollision :: Unit -> D3ForceHandle_
 -- | recipe for this force layout graph
 script :: forall m sim selection. 
   Bind m => 
-  D3InterpreterM selection m => 
+  D3SelectionM selection m => 
   Tuple Number Number ->
   SimulationM sim -> -- TODO will need to have simulation _capability_ in the interpreter monad
   SpagoModel ->

@@ -1,54 +1,12 @@
-module D3.Layouts.Simulation where
+module D3.Simulation.Forces where
 
-import D3.FFI
+import D3.FFI (applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_)
 import Prelude
 
-import Control.Monad.State (class MonadState, State, get, gets, modify, modify_)
 import D3.Attributes.Instances (Attribute(..), Label, unbox)
 import D3.Data.Types (D3Simulation_, Datum_, PointXY)
-import D3.Node (D3_Link, D3_SimulationNode, NodeID)
-import D3.Simulation.Config (ChainableF(..), D3ForceHandle_, SimulationConfig_, defaultConfigSimulation)
-import Data.Array (elem, foldM, foldl, intercalate, uncons, (:))
-import Data.Foldable (traverse_)
-import Data.List (List)
-import Data.Map (Map, empty, fromFoldable, insert, lookup, toUnfoldable, update) as M
-import Data.Map.Internal (keys) as M
-import Data.Maybe (Maybe(..))
-import Data.Newtype (class Newtype, wrap, unwrap)
-import Data.Tuple (Tuple(..))
-
-class (Monad m) <= SimulationM m where
-  -- management of forces
-  removeAllForces      ::                m Unit
-  loadForces           :: Array Force -> m Unit
-  addForces            :: Array Force -> m Unit
-  disableForcesByLabel :: Array Label -> m Unit
-  enableForcesByLabel  :: Array Label -> m Unit
-  -- config
-  setAlpha             :: Number      -> m Unit
-  setAlphaTarget       :: Number      -> m Unit
-  setAlphaMin          :: Number      -> m Unit
-  setAlphaDecay        :: Number      -> m Unit
-  setVelocityDecay     :: Number      -> m Unit
-  -- control
-  run                  ::                m Unit
-  stop                 ::                m Unit
-  -- utility
-  showForces           ::                    m String
-  -- management of data (nodes and links)
-  setNodes :: Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
-  -- setLinks
-
-type SimulationState = {
-    simulation    :: D3Simulation_
-  , alpha         :: Number
-  , alphaTarget   :: Number
-  , alphaMin      :: Number
-  , alphaDecay    :: Number
-  , velocityDecay :: Number
-  , running       :: Boolean
-  , forces        :: M.Map Label Force
-}
+import D3.Node (D3_Link, NodeID)
+import D3.Simulation.Config (ChainableF, D3ForceHandle_)
 
 data ForceStatus = ForceActive | ForceDisabled
 derive instance eqForceStatus :: Eq ForceStatus
@@ -90,97 +48,6 @@ toggleForce (Force l s t cs h_) = Force l (toggleForceStatus s) t cs h_
 instance Show Force where
   show (Force label status t cs h) = "Force: " <> label <> " " <> show status 
 
-showForces :: SimulationM String
-showForces = do
-  sim <- get
-  let forceTuples = M.toUnfoldable sim.forces
-      showTuple (Tuple label force) = show label <> " " <> show force
-  pure $ intercalate "\n" $ showTuple <$> forceTuples
-
-initialSimulationState =
-   {  simulation   : initSimulation_ defaultConfigSimulation  
-    , alpha        : defaultConfigSimulation.alpha
-    , alphaTarget  : defaultConfigSimulation.alphaTarget
-    , alphaMin     : defaultConfigSimulation.alphaMin
-    , alphaDecay   : defaultConfigSimulation.alphaDecay
-    , velocityDecay: defaultConfigSimulation.velocityDecay
-    , running      : defaultConfigSimulation.running
-    , forces: M.empty
-  }
-
-
-setAlpha :: Number ->  SimulationM Unit
-setAlpha v = do
-  sim <- get
-  let _ = setAlpha_ sim.simulation v
-  modify_ (\s -> s { alpha = v } )
-
-setAlphaTarget :: Number ->  SimulationM Unit
-setAlphaTarget v = do
-  sim <- get
-  let _ = setAlphaTarget_ sim.simulation v
-  modify_  (\s -> s { alphaTarget = v })
-
-setAlphaMin :: Number ->  SimulationM Unit
-setAlphaMin v = do
-  sim <- get
-  let _ = setAlphaMin_ sim.simulation v
-  modify_  (\s -> s { alphaMin = v })
-
-setAlphaDecay :: Number ->  SimulationM Unit
-setAlphaDecay v = do
-  sim <- get
-  let _ = setAlphaDecay_ sim.simulation v
-  modify_  (\s -> s { alphaDecay = v })
-
-setVelocityDecay :: Number ->  SimulationM Unit
-setVelocityDecay v = do
-  sim <- get
-  let _ = setVelocityDecay_ sim.simulation v
-  modify_  (\s -> s { velocityDecay = v })
-
-setRunning :: Boolean ->  SimulationM Unit
-setRunning true = start
-setRunning false = stop
-
--- foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)
-setNodes :: forall d. Array (D3_SimulationNode d) -> SimulationM (Array (D3_SimulationNode d)) -- nodes come back modified
-setNodes nodes = do
-  sim <- get
-  pure (sim.simulation `setNodes_` nodes)
-
-start :: SimulationM Unit
-start = do
-  sim <- get
-  let _ = startSimulation_  sim.simulation
-      _ = setAlpha_ sim.simulation 1.0
-  modify_ (\s -> s { running = true } )
-
-stop :: SimulationM Unit
-stop = do
-  sim <- get
-  let _ = stopSimulation_ sim.simulation
-  modify_ (\s -> s { running = false } )
-
-loadForces :: Array Force -> SimulationM Unit
-loadForces forces = do
-  removeAllForces
-  traverse_ addForce forces 
-
-addForces :: Array Force -> SimulationM Unit
-addForces forces = traverse_ addForce forces
-
-addForce :: Force -> SimulationM Unit
-addForce force@(Force l status t attrs h_) = do
-  -- TODO this should be a traverse_ eventually
-  let _ = (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
-  sim <- get
-  let _ = if status == ForceActive
-          then putForceInSimulation force sim.simulation
-          else sim.simulation
-  -- if the force isn't active then we just keep it in map, with label as key
-  modify_ $ (\sim -> sim { forces = M.insert l force sim.forces })
-
 putForceInSimulation :: Force -> D3Simulation_ -> D3Simulation_
 putForceInSimulation (Force l s t attrs h_) simulation_ =
   case t of
@@ -198,42 +65,6 @@ putForceInSimulation (Force l s t attrs h_) simulation_ =
     (ForceFixPositionY f)  -> applyFixForceInSimulationY_ simulation_ l f
 
     CustomForce   -> putForceInSimulation_ simulation_ l h_ -- TODO not implemented or even designed yet
-
-
-
-enableByLabelMany :: Array Label -> SimulationM Unit
-enableByLabelMany labels = do
-  sim <- get
-  let updatedForces = (enableByLabels sim.simulation labels) <$> sim.forces
-  modify_ (\s -> s { forces = updatedForces } )
-
-disableByLabelMany :: Array Label -> SimulationM Unit
-disableByLabelMany labels = do
-  sim <- get
-  let updatedForces = (disableByLabels sim.simulation labels) <$> sim.forces
-  modify_ (\s -> s { forces = updatedForces } )
-
-removeAllForces :: SimulationM Unit
-removeAllForces = do
-  sim <- get
-  let _ = (setAsNullForceInSimulation_ sim.simulation) <$> (M.keys sim.forces)
-  modify_ (\s -> s { forces = (M.empty :: M.Map Label Force) } )
-
-disableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
-disableByLabels simulation labels force@(Force label _ t cs h_) =
-  if label `elem` labels
-  then do
-    let _ = setAsNullForceInSimulation_ simulation label
-    Force label ForceDisabled t cs h_
-  else force
-
-enableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
-enableByLabels simulation labels force@(Force label _ t cs h_) = 
-  if label `elem` labels
-  then do
-    let _ = putForceInSimulation_ simulation label h_
-    Force label ForceActive t cs h_
-  else force
 
 data ForceType = 
     ForceManyBody                                  -- strength, theta, distanceMax, distanceMin
@@ -262,11 +93,6 @@ instance Show ForceType where
   show (ForceLink _)           = "ForceLink"
   show CustomForce             = "CustomForce"
 
-showSimulationRunning :: SimulationM String
-showSimulationRunning = do
-  gets (\s -> if s.running
-              then "Running"
-              else "Paused")
 
 forceDescription :: ForceType -> String
 forceDescription = case _ of

@@ -5,7 +5,7 @@ import D3.Node
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
 import D3.Data.Types (Element, MouseEvent, Transition)
-import D3.Interpreter (class D3InterpreterM)
+import D3.Interpreter (class D3SelectionM)
 import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), Keys, OrderingAttribute(..))
 import D3.Zoom (ZoomConfig)
 import Data.Array (filter, (:))
@@ -159,7 +159,7 @@ insertAttributeInScriptTree parentID =
   
 
 
-instance d3Tagless :: D3InterpreterM NodeID D3MetaTreeM where
+instance d3Tagless :: D3SelectionM NodeID D3MetaTreeM where
   attach selector = do
     insertInScriptTree 0 (AttachNode selector) -- TODO this could actually be a multiple insert
     pure 1

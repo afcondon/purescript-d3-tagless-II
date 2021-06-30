@@ -9,10 +9,10 @@ import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
-import D3.Interpreter (class D3InterpreterM, append, attach, join, on)
+import D3.Interpreter (class D3SelectionM, append, attach, join, on)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.String (runPrinter)
-import D3.Layouts.Simulation (Force(..), ForceStatus(..), ForceType(..), createForce)
+import D3.Simulation.Forces (Force(..), ForceStatus(..), ForceType(..), createForce)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (defaultConfigSimulation)
@@ -96,7 +96,7 @@ lesMisForces =
 -- | recipe for this force layout graph
 graphScript :: forall  m selection. 
   Bind m => 
-  D3InterpreterM selection m => 
+  D3SelectionM selection m => 
   Tuple Number Number ->
   LesMisRawModel -> 
   Selector -> 

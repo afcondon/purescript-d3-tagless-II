@@ -132,7 +132,7 @@ handleAction = case _ of
 
 codetext :: String
 codetext = 
-  """script :: forall m. D3InterpreterM D3Selection_ m => m ((Array Char) -> m D3Selection_)
+  """script :: forall m. D3SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
   script = do 
     let 
       transition :: ChainableS
