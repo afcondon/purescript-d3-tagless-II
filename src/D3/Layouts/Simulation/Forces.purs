@@ -1,12 +1,13 @@
 module D3.Simulation.Forces where
 
-import D3.FFI (applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_)
 import Prelude
 
 import D3.Attributes.Instances (Attribute(..), Label, unbox)
 import D3.Data.Types (D3Simulation_, Datum_, PointXY)
+import D3.FFI (applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_)
 import D3.Node (D3_Link, NodeID)
 import D3.Simulation.Config (ChainableF, D3ForceHandle_)
+import Data.Array (elem)
 
 data ForceStatus = ForceActive | ForceDisabled
 derive instance eqForceStatus :: Eq ForceStatus
@@ -44,6 +45,21 @@ toggleForce :: Force -> Force
 toggleForce (Force l s t cs h_) = Force l (toggleForceStatus s) t cs h_
 -- TODO but in fact when we toggle "Active" maybe we want to get a handle from D3 for it if it didn't have one? 
 
+disableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
+disableByLabels simulation labels force@(Force label _ t cs h_) =
+  if label `elem` labels
+  then do
+    let _ = setAsNullForceInSimulation_ simulation label
+    Force label ForceDisabled t cs h_
+  else force
+
+enableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
+enableByLabels simulation labels force@(Force label _ t cs h_) = 
+  if label `elem` labels
+  then do
+    let _ = putForceInSimulation_ simulation label h_
+    Force label ForceActive t cs h_
+  else force
 
 instance Show Force where
   show (Force label status t cs h) = "Force: " <> label <> " " <> show status 

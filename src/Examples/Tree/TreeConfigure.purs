@@ -9,7 +9,7 @@ import D3.Examples.Spago.Model (tree_datum_)
 import D3.Examples.Tree.Model (FlareTreeNode)
 import D3.Examples.Tree.Script (script) as Tree
 import D3.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
-import D3.Interpreter (class D3SelectionM)
+import D3.Interpreter (class SelectionM)
 import D3.Interpreter.D3 (runD3M)
 import D3.Interpreter.MetaTree (D3GrammarNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
 import D3.Interpreter.String (runPrinter)
@@ -54,7 +54,7 @@ drawTree treeModel selector = liftEffect $ do
 -- | configure function which enables Tree.script to be run for different layouts - WIP
 configureAndRunScript :: forall m selection. 
   Bind m => 
-  D3SelectionM selection m => 
+  SelectionM selection m => 
   Tuple Number Number -> TreeModel -> Selector -> m selection
 configureAndRunScript (Tuple width height ) model selector = 
   Tree.script { spacing, viewbox, selector, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_

@@ -5,7 +5,7 @@ import D3.Node
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
 import D3.Data.Types (Element, MouseEvent, Transition)
-import D3.Interpreter (class D3SelectionM)
+import D3.Interpreter (class SelectionM)
 import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), Keys, OrderingAttribute(..))
 import D3.Zoom (ZoomConfig)
 import Data.Array (filter, (:))
@@ -51,7 +51,6 @@ instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implem
 
   show (OnNode (Zoom _))          = "Zoom"
   show (OnNode (Drag _))          = "Drag"
-  show (OnNode (Tick _))          = "Tick"
 
 showAsSymbol :: D3GrammarNode -> { name :: String, symbol :: String, param1 :: String,              param2 :: String }
 showAsSymbol = 
@@ -66,7 +65,6 @@ showAsSymbol =
     (JoinGeneralNode e _ _)    ->  { name: "JoinGeneral"   , symbol: "<+>" , param1: "",           param2: "" }
     (OnNode (Zoom _))          ->  { name: "Zoom"          , symbol: "z"   , param1: "",           param2: "" }
     (OnNode (Drag _))          ->  { name: "Drag"          , symbol: "drag", param1: "",           param2: "" }
-    (OnNode (Tick _))          ->  { name: "Tick"          , symbol: "tick", param1: "",           param2: "" }
     (AttrNode c)               ->  { name: "Attr"          , symbol: "attr", param1: show c,       param2: "" }
     (OrderNode c)              ->  { name: "Order"         , symbol: "order", param1: show c,       param2: "" }
     (OnEventNode _)            ->  { name: "OnEvent"       , symbol: "on"  , param1: "",           param2: "" }
@@ -159,7 +157,7 @@ insertAttributeInScriptTree parentID =
   
 
 
-instance d3Tagless :: D3SelectionM NodeID D3MetaTreeM where
+instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
   attach selector = do
     insertInScriptTree 0 (AttachNode selector) -- TODO this could actually be a multiple insert
     pure 1

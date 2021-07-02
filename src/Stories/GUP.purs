@@ -8,8 +8,8 @@ import D3.Attributes.Sugar (classed, viewBox)
 import D3.Data.Types (D3Selection_, Element(..))
 import D3.Examples.GUP as GUP
 import D3.FFI (d3RemoveSelection_, d3SelectionIsEmpty_, d3SelectionSelect_)
-import D3.Interpreter (class D3SelectionM, append, attach)
-import D3.Interpreter.D3 (d3Run, removeExistingSVG, runD3M)
+import D3.Interpreter (class SelectionM, append, attach)
+import D3.Interpreter.D3 (eval_D3M, removeExistingSVG, runD3M)
 import D3.Selection (node)
 import D3Tagless.Block.Card as Card
 import D3Tagless.Block.Toggle as Toggle
@@ -149,8 +149,8 @@ component = H.mkComponent
 runGeneralUpdatePattern :: forall m. Bind m => MonadEffect m => m (Array Char -> Aff Unit)
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
-  detached <- H.liftEffect $ d3Run $ removeExistingSVG "div.svg-container"
-  update   <- H.liftEffect $ d3Run $ GUP.script "div.svg-container"
+  detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
+  update   <- H.liftEffect $ eval_D3M $ GUP.script "div.svg-container"
   -- the script sets up the SVG and returns a function that the component can run whenever it likes
   -- (but NB if it runs more often than every 2000 milliseconds there will be big problems)
   pure (\letters -> H.liftEffect $ runD3M (update letters) *> pure unit )
@@ -219,7 +219,7 @@ handleAction = case _ of
 
 codetext :: String
 codetext = 
-  """script :: forall m. D3SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
+  """script :: forall m. SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
   script = do 
     let 
       transition :: ChainableS

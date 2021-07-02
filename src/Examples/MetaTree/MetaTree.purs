@@ -6,7 +6,7 @@ import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.MetaTree.Model (MetaTreeNode)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
-import D3.Interpreter (class D3SelectionM, append, attach, (<+>))
+import D3.Interpreter (class SelectionM, append, attach, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Layouts.Hierarchical (verticalLink)
 import D3.Selection (Join(..), Keys(..), node)
@@ -43,7 +43,7 @@ drawTree treeModel = liftEffect $ do
 
 -- | "script" to produce the documentation-ready rendering of another script's structure
 -- | (could also be the basis for graphical editor of scripts / trees)
-treeScript :: forall m selection. Bind m => D3SelectionM selection m => 
+treeScript :: forall m selection. Bind m => SelectionM selection m => 
   Tuple Number Number -> MetaTreeNode -> m selection
 treeScript (Tuple width height) tree = do
   let 

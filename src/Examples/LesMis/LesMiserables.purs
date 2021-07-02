@@ -4,28 +4,29 @@ import D3.Examples.LesMiserables.Types
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
+import Control.Monad.List.Trans (Step)
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
-import D3.Interpreter (class D3SelectionM, append, attach, join, on)
-import D3.Interpreter.D3 (runD3M)
+import D3.Interpreter (class SelectionM, class SimulationM, Step(..), append, attach, createTickFunction, join, on, setNodes)
+import D3.Interpreter.D3 (SimulationState_, initialSimulationState, run_D3M_Simulation)
 import D3.Interpreter.String (runPrinter)
-import D3.Simulation.Forces (Force(..), ForceStatus(..), ForceType(..), createForce)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (defaultConfigSimulation)
 import D3.Simulation.Config as F
+import D3.Simulation.Forces (Force(..), ForceStatus(..), ForceType(..), createForce)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Aff (Aff)
-import Effect.Class (liftEffect)
+import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
 import Math (sqrt)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, (<<<), ($), (/))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
 import Utility (getWindowWidthHeight)
 
 link_ :: { source :: Datum_
@@ -76,11 +77,10 @@ datum_ = {
 drawGraph :: Selector -> Aff Unit
 drawGraph selector = do
   log "Force layout example"
-  widthHeight <- liftEffect getWindowWidthHeight
   forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
   let graph = readGraphFromFileContents forceJSON
   
-  (_ :: Tuple D3Selection_ Unit) <- liftEffect $ runD3M (graphScript widthHeight graph selector)
+  (_ :: Tuple D3Selection_ SimulationState_) <- liftEffect $ run_D3M_Simulation initialSimulationState (graphScript graph selector)
 
   -- (Tuple selection result) <- liftEffect $ runPrinter (graphScript widthHeight graph selector) "Force Layout Script"
   -- log $ result
@@ -96,16 +96,18 @@ lesMisForces =
 -- | recipe for this force layout graph
 graphScript :: forall  m selection. 
   Bind m => 
-  D3SelectionM selection m => 
-  Tuple Number Number ->
+  MonadEffect m =>
+  SelectionM selection m => 
+  SimulationM m =>
   LesMisRawModel -> 
   Selector -> 
   m selection
-graphScript widthheight model selector = do
+graphScript model selector = do
+  (Tuple w h) <- liftEffect getWindowWidthHeight
   let columns = 3.0
       rows    = 2.0
-      width   = (fst widthheight) / columns
-      height  = (snd widthheight) / rows
+      width   = w / columns
+      height  = h / rows
   root       <- attach selector
   svg        <- root `append` (node Svg    [ viewBox (-width / 2.0) (-height / 2.0) width height
                                            , classed "lesmis" ] )
@@ -113,10 +115,11 @@ graphScript widthheight model selector = do
   nodesGroup <- svg  `append` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   let simulation = initSimulation_ defaultConfigSimulation
-      nodes      = simulation `setNodes_` model.nodes 
+  
+  nodes <- setNodes model.nodes 
       -- TODO following line commented out pending re-factor for SimulationM stuff
       -- _          = simulation `putEachForceInSimulation` lesMisForces
-      _          = setLinks_ simulation model.links (\d i -> d.id)
+      -- _          = setLinks_ simulation model.links (\d i -> d.id)
 
   linksSelection <- join linksGroup $ Join {
       element   : Line
@@ -131,12 +134,12 @@ graphScript widthheight model selector = do
     , behaviour : [ radius 5.0, fill datum_.colorByGroup ]
   }
 
-  _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 (_.x <<< link_.source)
-                                                                    , y1 (_.y <<< link_.source)
-                                                                    , x2 (_.x <<< link_.target)
-                                                                    , y2 (_.y <<< link_.target)
-                                                                    ]}
-  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ cx datum_.x, cy datum_.y  ]}
+  createTickFunction $ Step "nodes" nodesSelection [ cx datum_.x, cy datum_.y  ]
+  createTickFunction $ Step "links" linksSelection [ x1 (_.x <<< link_.source)
+                                                    , y1 (_.y <<< link_.source)
+                                                    , x2 (_.x <<< link_.target)
+                                                    , y2 (_.y <<< link_.target)
+                                                    ]
   _ <- nodesSelection `on` Drag DefaultDrag
 
   _ <- svg `on`  Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }

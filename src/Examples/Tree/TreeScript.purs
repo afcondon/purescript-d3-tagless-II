@@ -8,7 +8,7 @@ import D3.Data.Types (Datum_, Element(..), Selector)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.Examples.Tree.Model (FlareTreeNode)
 import D3.FFI (descendants_, hasChildren_, links_)
-import D3.Interpreter (class D3SelectionM, append, attach, (<+>))
+import D3.Interpreter (class SelectionM, append, attach, (<+>))
 import D3.Selection (ChainableS, Join(..), Keys(..), node)
 import Data.Nullable (Nullable)
 import Math (pi)
@@ -78,7 +78,7 @@ type ScriptConfig = {
 -- | all six variations of [Radial, Horizontal, Vertical] * [Dendrogram, TidyTree] 
 -- | NB there would be nothing wrong, per se, with individual examples, this just shows 
 -- | some more composability, at the price of some direct legibility
-script :: forall m selection. Bind m => D3SelectionM selection m => 
+script :: forall m selection. Bind m => SelectionM selection m => 
   ScriptConfig -> FlareTreeNode ->  m selection
 script config tree = do
   root       <- attach config.selector  

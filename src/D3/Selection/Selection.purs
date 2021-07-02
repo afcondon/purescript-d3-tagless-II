@@ -15,8 +15,7 @@ data DragBehavior =
   | NoDrag
   | CustomDrag (D3Selection_ -> Unit)
 
-data Behavior = Tick { chain :: Array ChainableS, name :: String, simulation  :: D3Simulation_}
-              | Drag DragBehavior
+data Behavior = Drag DragBehavior
               | Zoom ZoomConfig 
 
 type JoinParams d r = -- the 

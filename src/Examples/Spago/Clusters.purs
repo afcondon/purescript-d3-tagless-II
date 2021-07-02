@@ -3,48 +3,50 @@ module D3.Examples.Spago.Clusters where
 
 import D3.Examples.Spago.Model
 
-import Control.Monad.State (evalState)
+import Control.Monad.State (evalState, get)
 import D3.Attributes.Sugar (classed, cx, cy, fill, lower, onMouseEvent, radius, text, viewBox, x, y)
-import D3.Data.Types (Element(..), MouseEvent(..))
+import D3.Data.Types (D3Selection_, Element(..), MouseEvent(..))
 import D3.FFI (setNodes_)
-import D3.Interpreter (class D3SelectionM, append, attach, filter, modify, on, (<+>))
-import D3.Simulation.Forces (SimulationM, setNodes)
+import D3.Interpreter (class SelectionM, class SimulationM, Step(..), append, attach, createTickFunction, filter, modify, on, setNodes, (<+>))
+import D3.Interpreter.D3 (SimulationState_(..))
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (D3ForceHandle_)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
-import Prelude (class Bind, Unit, bind, negate, pure, (/), (<$>))
+import Effect.Class (class MonadEffect, liftEffect)
+import Prelude (class Bind, Unit, bind, discard, negate, pure, ($), (/), (<$>))
+import Utility (getWindowWidthHeight)
 
-foreign import forceClusterCollision :: Unit -> D3ForceHandle_
 
 -- myCustomForceConfig :: Array ChainableF 
 -- myCustomForceConfig = [ radius 1.0, strength 0.8, clusterPadding: 10.0 ] forceClusterCollision
+foreign import forceClusterCollision :: Unit -> D3ForceHandle_
 
 
 -- | recipe for this force layout graph
-script :: forall m sim selection. 
-  Bind m => 
-  D3SelectionM selection m => 
-  Tuple Number Number ->
-  SimulationM sim -> -- TODO will need to have simulation _capability_ in the interpreter monad
+script :: forall m selection. 
+  Bind m =>
+  MonadEffect m =>
+  SelectionM selection m =>
+  SimulationM m =>
   SpagoModel ->
   m selection
-script (Tuple w h) simulation model = do
+script model = do
+  (Tuple w h) <- liftEffect getWindowWidthHeight
   root       <- attach "div.svg-container"
   svg        <- root `append` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h
                                            , classed "d3svg cluster" ] )
   nodesGroup <- svg  `append` (node Group  [ classed "nodes" ])
 
-  let nodes = do
-    setNodes model.nodes simulation
+  nodes     <- setNodes model.nodes
 
   nodesSelection <- nodesGroup <+> Join { -- we're putting a group in with an eye to transitions to other layouts
       element   : Group
     , key       : UseDatumAsKey
     , "data"    : nodes
-    , behaviour : [ classed datum_.nodeClass
-                  , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation d) ]
+    , behaviour : [ classed datum_.nodeClass ]
+                  --, onMouseEvent MouseClick (\e d t -> toggleSpotlight e sim.simulation d) ]
   }
   circle  <- nodesSelection `append` (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
   labels' <- nodesSelection `append` (node Text [ classed "label", text datum_.name ])
@@ -52,10 +54,11 @@ script (Tuple w h) simulation model = do
   packagesOnly <- filter nodesSelection "g.nodes g.package"
   _ <- packagesOnly `modify` [ lower ]
   
-  _ <- circle         `on` Tick { name: "nodes",  simulation, chain: [ cx datum_.x, cy datum_.y ]}
-  _ <- labels'        `on` Tick { name: "labels", simulation, chain: [ x datum_.x, y datum_.y ]}
+  createTickFunction $ Step "nodes"  circle  [ cx datum_.x, cy datum_.y ]
+  createTickFunction $ Step "labels" labels' [ x datum_.x, y datum_.y ] -- TODO is x -> x, y -> y a No-Op ?
+
   _ <- nodesSelection `on` Drag DefaultDrag
-  _ <- svg `modify` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation) ]
+  -- _ <- svg `modify` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ sim.simulation) ]
   _ <- svg `on` Zoom { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                      , scale  : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
                      , name   : "spago"

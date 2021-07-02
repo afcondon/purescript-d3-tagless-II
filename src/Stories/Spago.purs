@@ -1,18 +1,19 @@
 module Stories.Spago where
 
+import D3.Simulation.Forces
 import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState)
+import Control.Monad.State (class MonadState, execState, runState)
 import D3.Attributes.Instances (Label)
-import D3.Data.Types (D3Selection_, Selector)
+import D3.Data.Types (D3Selection_, D3Simulation_, Selector)
 import D3.Examples.Spago (treeReduction)
 import D3.Examples.Spago.Clusters as Cluster
 import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.FFI (initSimulation_)
-import D3.Interpreter.D3 (d3Run, removeExistingSVG, runD3M)
-import D3.Simulation.Forces (Force(..), ForceType(..), SimulationM(..), addForce, addForces, createForce, createSimulationM, disableByLabelMany, enableByLabels, enableForce, loadForces, setAlpha)
+import D3.Interpreter (class SelectionM, class SimulationM)
+import D3.Interpreter.D3 (SimulationState_(..), eval_D3M, eval_D3M_Simulation, exec_D3M_Simulation, initialSimulationState, removeExistingSVG, runD3M, run_D3M_Simulation, simulationAddForce, simulationDisableForcesByLabel, simulationEnableForcesByLabel, simulationLoadForces, simulationSetAlpha, simulationSetAlphaDecay, simulationSetAlphaMin, simulationSetAlphaTarget, simulationSetVelocityDecay, simulationStart, simulationStop)
 import D3.Simulation.Config (SimConfig(..), defaultConfigSimulation)
 import D3.Simulation.Config as F
 import D3Tagless.Block.Card as Card
@@ -24,9 +25,10 @@ import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap, wrap)
 import Data.Number (infinity)
-import Data.Tuple (fst, snd)
+import Data.Tuple (Tuple(..), fst, snd)
 import Effect.Aff (Aff, Fiber, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (class MonadEffect)
 import Effect.Exception (error)
 import Halogen (liftEffect)
 import Halogen as H
@@ -55,9 +57,9 @@ data Action
   
 type State = { 
     fiber  :: Maybe (Fiber Unit)
-  , simulation :: SimulationM
+  , simulation :: SimulationState_
   , groupings :: M.Map Label Selector
-}
+} 
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
 component = H.mkComponent
@@ -71,7 +73,7 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { fiber: Nothing, simulation: createSimulationM, groupings: M.empty }
+  initialState = { fiber: Nothing, simulation: initialSimulationState, groupings: M.empty }
 
   renderSimControls _ =
     HH.div
@@ -120,7 +122,7 @@ handleAction :: forall m. Bind m => MonadAff m => MonadState State m =>
   Action -> m Unit
 handleAction = case _ of
   Initialize -> do
-    (detached :: D3Selection_) <- H.liftEffect $ d3Run $ removeExistingSVG "div.svg-container"
+    (detached :: D3Selection_) <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
 
     (model :: Maybe SpagoModel) <- H.liftAff getModel
 
@@ -128,12 +130,14 @@ handleAction = case _ of
     case model of
           Nothing -> pure unit
           (Just graph) -> do
-            -- TODO properly think out / design relationship between fiber and simulation
             simulation <- H.gets _.simulation
-            let updatedSimulation = loadForces initialForces simulation 
-            fiber <- H.liftAff $ forkAff $ drawGraph simulation graph
-            H.modify_ (\s -> s { fiber = Just fiber, simulation = updatedSimulation })
+            let simulation' = execState (simulationLoadForces initialForces) simulation 
+            -- TODO properly think out / design relationship between fiber and simulation
+            (Tuple svg simulation'' :: Tuple D3Selection_ SimulationState_) 
+                  <- H.liftEffect $ run_D3M_Simulation simulation' (Cluster.script graph)
+            H.modify_ (\s -> s { fiber = Nothing, simulation = simulation'' })
             pure unit
+
 
   Finalize -> do
       fiber <- H.gets _.fiber
@@ -144,32 +148,34 @@ handleAction = case _ of
   
   SetPackageForce packageForce -> do
     simulation <- H.gets _.simulation
-    let _ = case packageForce of
-              PackageRing -> do -- TODO just toggle the force and rewarm the simulation
-                let _ = enableByLabels "packageGrid" simulation
-                setAlpha 1.0 simulation
-              PackageGrid -> do
-                let _ = addForce simulation (enableForce packageOnlyFixToGridForce)
-                setAlpha 1.0 simulation
-              PackageFree -> disableByLabelMany ["packageOrbit", "packageGrid"] simulation
-    H.modify_ (\state -> state { simulation = simulation })
-    pure unit
+    let updatedSimulation = 
+          case packageForce of
+            PackageRing -> execState (simulationEnableForcesByLabel ["packageGrid"]) simulation
+            PackageGrid -> execState (simulationAddForce (enableForce packageOnlyFixToGridForce)) simulation
+            PackageFree -> execState (simulationDisableForcesByLabel ["packageOrbit", "packageGrid"]) simulation
+    H.modify_ (\state -> state { simulation = updatedSimulation })
 
   SetModuleForce _ -> do
     pure unit
 
   ChangeSimConfig c -> do
-    (SimulationM sim) <- H.gets _.simulation
-    let updated = 
+    simulation <- H.gets _.simulation
+    let updatedSimulation = 
           case c of
-            (Alpha v)         -> sim { config { alpha = v  } }
-            (AlphaTarget v)   -> sim { config { alphaTarget = v  } } 
-            (AlphaMin v)      -> sim { config { alphaMin = v  } } 
-            (AlphaDecay v)    -> sim { config { alphaDecay = v  } } 
-            (VelocityDecay v) -> sim { config { velocityDecay = v  } } 
-            (Running v)       -> sim { config { running = v  } } 
-    H.modify_ (\state -> state { simulation = wrap updated })
+            (Alpha v)         -> execState (simulationSetAlpha v) simulation
+            (AlphaTarget v)   -> execState (simulationSetAlphaTarget v) simulation
+            (AlphaMin v)      -> execState (simulationSetAlphaMin v) simulation
+            (AlphaDecay v)    -> execState (simulationSetAlphaDecay v) simulation
+            (VelocityDecay v) -> execState (simulationSetVelocityDecay v) simulation
+            (Running true)    -> execState simulationStart simulation
+            (Running false)   -> execState simulationStop simulation
+    H.modify_ (\state -> state { simulation = updatedSimulation })
 
+
+-- drawGraph :: SimulationState_ -> SpagoModel -> Aff Unit
+-- drawGraph simulation graph = do
+--   (svg :: Tuple D3Selection_ SimulationState_) <- liftEffect $ runD3M_Simulation simulation (Cluster.script graph)
+--   pure unit
 
 -- getModel will try to build a model from files and to derive a dependency tree from Main
 -- the dependency tree will contain all nodes reachable from Main but NOT all links
@@ -189,11 +195,6 @@ addTreeToModel rootName maybeModel = do
   rootID <- M.lookup rootName model.maps.name2ID
   pure $ treeReduction model rootID
 
-drawGraph :: SimulationM -> SpagoModel -> Aff Unit
-drawGraph simulation graph = do
-  widthHeight <- liftEffect getWindowWidthHeight
-  (svg :: D3Selection_) <- liftEffect $ liftA1 fst $ runD3M (Cluster.script widthHeight simulation graph)
-  pure unit
 
 -- | ============================================
 -- | FORCES
@@ -299,8 +300,8 @@ blurbtext = HH.div_ (title : paras)
       highlighting."""
     ]
 
-renderTableForces :: forall m. SimulationM -> H.ComponentHTML Action () m
-renderTableForces simulation  =
+renderTableForces :: forall m. SimulationState_ -> H.ComponentHTML Action () m
+renderTableForces (SS_ simulation)  =
   HH.div_
   [ HH.div_
     [ Backdrop.backdrop_
@@ -325,10 +326,8 @@ renderTableForces simulation  =
       , Table.header  [ css "w-2/3 text-left" ] [ HH.text "Acting on..." ]
       ]
   
-  tableData =
-    snd <$> 
-    (toUnfoldable $
-    (unwrap simulation).forces)
+  tableData = snd <$> 
+              (toUnfoldable $ simulation.forces)
 
   renderBody =
     Table.row_ <$> ( renderData <$> tableData )
@@ -345,8 +344,8 @@ renderTableForces simulation  =
     , Table.cell  [ css "text-left" ] [ HH.text "modules" ]
     ]
 
-renderTableElements :: forall m. SimulationM -> H.ComponentHTML Action () m
-renderTableElements simulation  =
+renderTableElements :: forall m. SimulationState_ -> H.ComponentHTML Action () m
+renderTableElements (SS_ simulation)  =
   HH.div_
   [ HH.div_
     [ Backdrop.backdrop_
@@ -374,7 +373,7 @@ renderTableElements simulation  =
   tableData =
     snd <$> 
     (toUnfoldable $
-    (unwrap simulation).forces)
+    simulation.forces)
 
   renderBody =
     Table.row_ <$> ( renderData <$> tableData )

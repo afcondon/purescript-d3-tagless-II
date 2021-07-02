@@ -7,7 +7,7 @@ import D3.Data.Tree (TreeLayout(..), TreeType(..))
 import D3.Data.Types (Datum_, Element(..))
 import D3.Examples.Spago.Model (SpagoModel, tree_datum_)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, links_, runLayoutFn_, treeMinMax_, treeSetSeparation_, treeSetSize_)
-import D3.Interpreter (class D3SelectionM, append, attach, (<+>))
+import D3.Interpreter (class SelectionM, append, attach, (<+>))
 import D3.Layouts.Hierarchical (radialLink, radialSeparation)
 import D3.Selection (Join(..), Keys(..), node)
 import Data.Maybe (Maybe(..))
@@ -19,7 +19,7 @@ import Math (pi, sqrt)
 -- | **************************************************************************************************************
 
 -- TODO forall d should be explicit, this script requires certain data structures, fix sig to specify
-script :: forall m selection. Bind m => D3SelectionM selection m => 
+script :: forall m selection. Bind m => SelectionM selection m => 
   Tuple Number Number -> SpagoModel -> m selection
 script _ model@{ tree: Nothing } = do
   attach "div.svgContainer" 

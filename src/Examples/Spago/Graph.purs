@@ -4,18 +4,19 @@ import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, te
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (SpagoModel, cancelSpotlight_, datum_, link_, toggleSpotlight)
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
-import D3.Interpreter (class D3SelectionM, append, attach, modify, on, (<+>))
+import D3.Interpreter (class SelectionM, class SimulationM, Step(..), append, attach, createTickFunction, modify, on, (<+>))
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (defaultConfigSimulation)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Tuple (Tuple(..))
-import Prelude (class Bind, bind, negate, pure, unit, (/), (<<<))
+import Prelude (class Bind, bind, negate, pure, unit, discard, ($), (/), (<<<))
 
 
 -- | recipe for this force layout graph
 script :: forall m selection. 
   Bind m => 
-  D3SelectionM selection m => 
+  SelectionM selection m =>
+  SimulationM m =>
   Tuple Number Number ->
   SpagoModel ->
   m { selection :: selection, simulation :: D3Simulation_ }
@@ -42,8 +43,8 @@ script (Tuple w h) model = do
     , key       : UseDatumAsKey
     , "data"    : nodes
     , behaviour : [ classed datum_.nodeClass
-                  , transform' datum_.translateNode
-                  , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation d) ]
+                  , transform' datum_.translateNode ]
+                  -- , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation d) ]
   }
 
   circle  <- nodesSelection `append` (node Circle [ radius datum_.radius
@@ -51,12 +52,12 @@ script (Tuple w h) model = do
                                                   ]) 
   labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y datum_.positionLabel, text datum_.name]) 
   
-  _ <- linksSelection `on` Tick { name: "links", simulation, chain: [ x1 (_.x <<< link_.source)
-                                                                    , y1 (_.y <<< link_.source)
-                                                                    , x2 (_.x <<< link_.target)
-                                                                    , y2 (_.y <<< link_.target)
-                                                                    ]}
-  _ <- nodesSelection `on` Tick { name: "nodes", simulation, chain: [ classed datum_.nodeClass, transform' datum_.translateNode ]}
+  createTickFunction $ Step "nodes" nodesSelection  [ classed datum_.nodeClass, transform' datum_.translateNode ]
+  createTickFunction $ Step "links" linksSelection [ x1 (_.x <<< link_.source)
+                                                    , y1 (_.y <<< link_.source)
+                                                    , x2 (_.x <<< link_.target)
+                                                    , y2 (_.y <<< link_.target)
+                                                    ]
   _ <- nodesSelection `on` Drag DefaultDrag
   _ <- svg `modify` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation) ]
   _ <- svg `on` Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }

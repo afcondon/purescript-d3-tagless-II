@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState)
 import D3.Examples.LesMiserables as LesMis
-import D3.Interpreter.D3 (d3Run, removeExistingSVG)
+import D3.Interpreter.D3 (eval_D3M, removeExistingSVG)
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Fiber, forkAff, killFiber)
@@ -114,7 +114,7 @@ handleAction = case _ of
     H.put (over lens not st)
 
   Initialize -> do
-    detached <- H.liftEffect $ d3Run   $ removeExistingSVG "div.svg-container"
+    detached <- H.liftEffect $ eval_D3M   $ removeExistingSVG "div.svg-container"
     fiber    <- H.liftAff    $ forkAff $ LesMis.drawGraph  "div.svg-container"
 
     H.modify_ (\state -> state { fiber = Just fiber })
@@ -132,7 +132,7 @@ handleAction = case _ of
 
 codetext :: String
 codetext = 
-  """script :: forall m. D3SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
+  """script :: forall m. SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
   script = do 
     let 
       transition :: ChainableS

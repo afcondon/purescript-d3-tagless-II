@@ -7,7 +7,7 @@ import Control.Monad.State (class MonadState, get, put)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Examples.MetaTree as MetaTree
 import D3.Examples.Tree.Configure as Tree
-import D3.Interpreter.D3 (d3Run, removeExistingSVG)
+import D3.Interpreter.D3 (eval_D3M, removeExistingSVG)
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
 import Data.Array (catMaybes)
 import Data.Const (Const)
@@ -145,7 +145,7 @@ handleAction = case _ of
     H.put (over lens not st)
 
   Initialize -> do
-    detached <- H.liftEffect $ d3Run $ removeExistingSVG "div.svg-container"
+    detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
 
     treeJSON <- H.liftAff $ getTreeViaAJAX "http://localhost:1234/flare-2.json"
 
@@ -159,7 +159,7 @@ handleAction = case _ of
 
 codetext :: String
 codetext = 
-  """script :: forall m. D3SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
+  """script :: forall m. SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
   script = do 
     let 
       transition :: ChainableS

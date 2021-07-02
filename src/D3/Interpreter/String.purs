@@ -5,7 +5,7 @@ import D3.Selection
 import Control.Monad.State (class MonadState, StateT, modify_, runStateT)
 import D3.Attributes.Instances (class ToAttr, Attribute(..), unbox)
 import D3.FFI (showAddTransition_, showRemoveSelection_, showSetAttr_, showSetHTML_, showSetOrdering_, showSetProperty_, showSetText_)
-import D3.Interpreter (class D3SelectionM)
+import D3.Interpreter (class SelectionM)
 import Data.Array (foldl)
 import Data.Tuple (Tuple)
 import Effect (Effect)
@@ -26,7 +26,7 @@ derive newtype instance monadD3PrinterM       :: Monad             D3PrinterM
 derive newtype instance monadStateD3PrinterM  :: MonadState String D3PrinterM 
 derive newtype instance monadEffD3PrinterM    :: MonadEffect       D3PrinterM
 
-instance d3Tagless :: D3SelectionM String D3PrinterM where
+instance d3Tagless :: SelectionM String D3PrinterM where
   attach selector = do
     modify_ (\s -> s <> "\nattaching to " <> selector <> " in DOM" )
     pure "attach"
@@ -59,9 +59,6 @@ instance d3Tagless :: D3SelectionM String D3PrinterM where
   on selection (Zoom zoom) = do
     modify_ (\s -> s <> "\nadding drag behavior to " <> selection)
     pure "addZoom"
-  on selection (Tick tick) = do
-    modify_ (\s -> s <> "\nadding tick behavior to " <> selection)
-    pure "addTick"
 
 
 applyChainableSString :: String -> ChainableS -> String

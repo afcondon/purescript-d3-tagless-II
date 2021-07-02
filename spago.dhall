@@ -38,6 +38,7 @@ You can edit this file as you like.
   , "halogen-svg-elems"
   , "halogen-vdom"
   , "html-parser-halogen"
+  , "identity"
   , "integers"
   , "js-timers"
   , "js-uri"
@@ -77,8 +78,5 @@ You can edit this file as you like.
   , "web-uievents"
   ]
 , packages = ./packages.dhall
-, sources =
-  [ "src/**/*.purs"
-  , "test/**/*.purs"
-  ]
+, sources = [ "src/**/*.purs", "test/**/*.purs" ]
 }
