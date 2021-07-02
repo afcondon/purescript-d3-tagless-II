@@ -4,7 +4,7 @@ import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, te
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (SpagoModel, cancelSpotlight_, datum_, link_, toggleSpotlight)
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
-import D3.Interpreter (class SelectionM, class SimulationM, Step(..), append, attach, createTickFunction, modify, on, (<+>))
+import D3.Interpreter (class SelectionM, class SimulationM, Step(..), appendElement, attach, createTickFunction, modifySelection, on, (<+>))
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (defaultConfigSimulation)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -22,10 +22,10 @@ script :: forall m selection.
   m { selection :: selection, simulation :: D3Simulation_ }
 script (Tuple w h) model = do
   root       <- attach "div.svg-container"
-  svg        <- root `append` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h 
+  svg        <- root `appendElement` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h 
                                            , classed "graph"] )
-  linksGroup <- svg  `append` (node Group  [ classed "links", strokeColor "#999" ])
-  nodesGroup <- svg  `append` (node Group  [ classed "nodes" ])
+  linksGroup <- svg  `appendElement` (node Group  [ classed "links", strokeColor "#999" ])
+  nodesGroup <- svg  `appendElement` (node Group  [ classed "nodes" ])
 
   let simulation = initSimulation_ defaultConfigSimulation
       nodes      = simulation `setNodes_` model.nodes
@@ -47,10 +47,10 @@ script (Tuple w h) model = do
                   -- , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation d) ]
   }
 
-  circle  <- nodesSelection `append` (node Circle [ radius datum_.radius
+  circle  <- nodesSelection `appendElement` (node Circle [ radius datum_.radius
                                                   , fill datum_.colorByGroup
                                                   ]) 
-  labels' <- nodesSelection `append` (node Text [ classed "label",  x 0.2, y datum_.positionLabel, text datum_.name]) 
+  labels' <- nodesSelection `appendElement` (node Text [ classed "label",  x 0.2, y datum_.positionLabel, text datum_.name]) 
   
   createTickFunction $ Step "nodes" nodesSelection  [ classed datum_.nodeClass, transform' datum_.translateNode ]
   createTickFunction $ Step "links" linksSelection [ x1 (_.x <<< link_.source)
@@ -59,7 +59,7 @@ script (Tuple w h) model = do
                                                     , y2 (_.y <<< link_.target)
                                                     ]
   _ <- nodesSelection `on` Drag DefaultDrag
-  _ <- svg `modify` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation) ]
+  _ <- svg `modifySelection` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation) ]
   _ <- svg `on` Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                      , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
                      , name : "spago"

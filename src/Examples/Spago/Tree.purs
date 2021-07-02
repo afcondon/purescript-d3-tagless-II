@@ -7,7 +7,7 @@ import D3.Data.Tree (TreeLayout(..), TreeType(..))
 import D3.Data.Types (Datum_, Element(..))
 import D3.Examples.Spago.Model (SpagoModel, tree_datum_)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, links_, runLayoutFn_, treeMinMax_, treeSetSeparation_, treeSetSize_)
-import D3.Interpreter (class SelectionM, append, attach, (<+>))
+import D3.Interpreter (class SelectionM, appendElement, attach, (<+>))
 import D3.Layouts.Hierarchical (radialLink, radialSeparation)
 import D3.Selection (Join(..), Keys(..), node)
 import Data.Maybe (Maybe(..))
@@ -44,12 +44,12 @@ script (Tuple width height) model@{ tree: Just (Tuple _ theTree)} = do
 
   -- "script"
   root       <- attach "div.d3story"                           
-  svg        <- root `append` (node Svg  [ viewBox (-width / 2.0) (-height / 2.0) width height ] )          
-  container  <- svg  `append` (node Group [ fontFamily      "sans-serif"
+  svg        <- root `appendElement` (node Svg  [ viewBox (-width / 2.0) (-height / 2.0) width height ] )          
+  container  <- svg  `appendElement` (node Group [ fontFamily      "sans-serif"
                                           , fontSize        18.0
                                           ])
-  links      <- container `append` (node Group [ classed "links"])
-  nodes      <- container `append` (node Group [ classed "nodes"])
+  links      <- container `appendElement` (node Group [ classed "links"])
+  nodes      <- container `appendElement` (node Group [ classed "nodes"])
 
   theLinks_  <- links <+> Join {
       element   : Path
@@ -71,12 +71,12 @@ script (Tuple width height) model@{ tree: Just (Tuple _ theTree)} = do
     , behaviour : [ transform [ radialRotateCommon, radialTreeTranslate, rotateRadialLabels ] ]
   }
 
-  _ <- theNodes `append` (node Circle [ fill         tree_datum_.colorByGroup 
+  _ <- theNodes `appendElement` (node Circle [ fill         tree_datum_.colorByGroup 
                                       , radius       (sqrt <<< tree_datum_.loc)
                                       , strokeColor "white"
                                       ])
 
-  _ <- theNodes `append` (node Text [ dy         0.31
+  _ <- theNodes `appendElement` (node Text [ dy         0.31
                                     , x          (tree_datum_.textX Radial)
                                     , textAnchor (tree_datum_.textAnchor Radial)
                                     , text       tree_datum_.name

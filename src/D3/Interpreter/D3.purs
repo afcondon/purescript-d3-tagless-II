@@ -86,13 +86,16 @@ exec_D3M_Simulation simulation (D3M state_T) = liftA1 snd $ runStateT state_T si
 instance d3TaglessD3M :: SelectionM D3Selection_ (D3M state D3Selection_) where
   attach selector = pure $ d3SelectAllInDOM_ selector 
 
-  append selection_ (D3_Node element attributes) = do
+  appendElement selection_ (D3_Node element attributes) = do
     let appended_ = d3Append_ (show element) selection_
-    modify appended_ attributes   
+    modifySelection appended_ attributes -- this modify is NOT stateT modify
+    pure appended_
 
-  filter selection_ selector = pure $ d3FilterSelection_ selection_ selector
+  filterSelection selection_ selector = pure $ d3FilterSelection_ selection_ selector
 
-  modify selection_ attributes = pure $ foldl applyChainableSD3 selection_ attributes
+  modifySelection selection_ attributes = do
+    let _ = foldl applyChainableSD3 selection_ attributes
+    pure unit
 
   join selection (Join j) = do
     let 
@@ -118,10 +121,11 @@ instance d3TaglessD3M :: SelectionM D3Selection_ (D3M state D3Selection_) where
     pure enterS
   
   on selection (Drag drag) = do
-    case drag of 
-      DefaultDrag     -> pure $ defaultDrag_ selection 
-      NoDrag          -> pure $ disableDrag_ selection 
-      (CustomDrag fn) -> pure $ defaultDrag_ selection -- TODO no custom drag implemented yet
+    let _ = case drag of 
+              DefaultDrag     -> defaultDrag_ selection 
+              NoDrag          -> disableDrag_ selection
+              (CustomDrag fn) -> defaultDrag_ selection -- TODO no custom drag implemented yet
+    pure unit
 
   on selection (Zoom config) = do
     let 
@@ -131,22 +135,22 @@ instance d3TaglessD3M :: SelectionM D3Selection_ (D3M state D3Selection_) where
       -- ie for controllers, containers etc
 
     -- sticking to the rules of no ADT's on the JS side we case on the ZoomExtent here
-    pure $ 
-      case config.extent of
-        DefaultZoomExtent -> 
-          d3AttachZoomDefaultExtent_ selection {
-            scaleExtent: [ smallest, largest ]
-          , name  : config.name
-          , target
-          } 
+      _ = case config.extent of
+            DefaultZoomExtent -> 
+              d3AttachZoomDefaultExtent_ selection {
+                scaleExtent: [ smallest, largest ]
+              , name  : config.name
+              , target
+              } 
 
-        (ZoomExtent ze)   -> do
-          d3AttachZoom_ selection { 
-            extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
-          , scaleExtent: [ smallest, largest ]
-          , name  : config.name
-          , target
-          }
+            (ZoomExtent ze)   -> do
+              d3AttachZoom_ selection { 
+                extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
+              , scaleExtent: [ smallest, largest ]
+              , name  : config.name
+              , target
+              }
+    pure unit
 
 
 applyChainableSD3 :: D3Selection_ -> ChainableS -> D3Selection_

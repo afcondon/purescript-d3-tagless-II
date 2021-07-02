@@ -8,7 +8,7 @@ import D3.Data.Types (Datum_, Element(..), Selector)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.Examples.Tree.Model (FlareTreeNode)
 import D3.FFI (descendants_, hasChildren_, links_)
-import D3.Interpreter (class SelectionM, append, attach, (<+>))
+import D3.Interpreter (class SelectionM, appendElement, attach, (<+>))
 import D3.Selection (ChainableS, Join(..), Keys(..), node)
 import Data.Nullable (Nullable)
 import Math (pi)
@@ -82,12 +82,12 @@ script :: forall m selection. Bind m => SelectionM selection m =>
   ScriptConfig -> FlareTreeNode ->  m selection
 script config tree = do
   root       <- attach config.selector  
-  svg        <- root `append` (node Svg (config.viewbox <> [ classed "tree"]))          
-  container  <- svg  `append` (node Group [ fontFamily      "sans-serif"
+  svg        <- root `appendElement` (node Svg (config.viewbox <> [ classed "tree"]))          
+  container  <- svg  `appendElement` (node Group [ fontFamily      "sans-serif"
                                           , fontSize        10.0
                                           ])
-  links      <- container `append` (node Group [ classed "links"] )
-  nodes      <- container `append` (node Group [ classed "nodes"] )
+  links      <- container `appendElement` (node Group [ classed "links"] )
+  nodes      <- container `appendElement` (node Group [ classed "nodes"] )
 
   theLinks_  <- links <+> Join {
       element   : Path
@@ -109,13 +109,13 @@ script config tree = do
     , behaviour : config.nodeTransform -- <- the key positioning calculation for the tree!!!
   }
 
-  theNodes <- nodeJoin_ `append` 
+  theNodes <- nodeJoin_ `appendElement` 
                 (node Circle  [ fill         (\d -> if datum_.hasChildren d then "#999" else "#555")
                               , radius       2.5
                               , strokeColor "white"
                               ])
 
-  theLabels <- nodeJoin_ `append`
+  theLabels <- nodeJoin_ `appendElement`
                 (node Text  [ dy         0.31
                             , x          (datum_.textX config.layout)
                             , textAnchor (datum_.textAnchor config.layout)

@@ -10,7 +10,7 @@ import Data.Array (foldl)
 import Data.Tuple (Tuple)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, discard, pure, show, (<>))
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, discard, pure, show, unit, (<>))
 
 -- TODO s/Effect/Identity
 newtype D3PrinterM a = D3PrinterM (StateT String Effect a)
@@ -30,17 +30,21 @@ instance d3Tagless :: SelectionM String D3PrinterM where
   attach selector = do
     modify_ (\s -> s <> "\nattaching to " <> selector <> " in DOM" )
     pure "attach"
-  append selection (D3_Node element attributes) = do
+
+  appendElement selection (D3_Node element attributes) = do
     let attributeString = foldl applyChainableSString selection attributes
     modify_ (\s -> s <> "\nappending "    <> show element <> " to " <> selection <> "\n" <> attributeString)
     pure "append"
-  filter selection selector = do
+
+  filterSelection selection selector = do
     modify_ (\s -> s <> "\nfiltering selection using " <> show selector)
     pure "filter"
-  modify selection attributes = do
+
+  modifySelection selection attributes = do
     let attributeString = foldl applyChainableSString selection attributes
     modify_ (\s -> s <> "\nmodifying " <> selection <> "\n" <> attributeString)
-    pure "modify"
+    pure unit
+
   join selection (Join j) = do
     let attributeString = foldl applyChainableSString selection j.behaviour
     modify_ (\s -> s <> "\nentering a "   <> show j.element <> " for each datum" )
@@ -53,12 +57,13 @@ instance d3Tagless :: SelectionM String D3PrinterM where
     modify_ (\s -> s <> "\n\tupdate behaviour: " <> updateAttributes)
     modify_ (\s -> s <> "\n\texit behaviour: " <> exitAttributes)
     pure "join"
+      
   on selection (Drag drag) = do
     modify_ (\s -> s <> "\nadding drag behavior to " <> selection)
-    pure "addDrag"
+    pure unit
   on selection (Zoom zoom) = do
     modify_ (\s -> s <> "\nadding drag behavior to " <> selection)
-    pure "addZoom"
+    pure unit
 
 
 applyChainableSString :: String -> ChainableS -> String

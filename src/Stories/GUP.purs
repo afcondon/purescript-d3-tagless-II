@@ -1,6 +1,6 @@
 module Stories.GUP where
 
-import Prelude hiding (append)
+import Prelude
 
 import Control.Monad.Rec.Class (forever)
 import Control.Monad.State (class MonadState)
@@ -8,7 +8,7 @@ import D3.Attributes.Sugar (classed, viewBox)
 import D3.Data.Types (D3Selection_, Element(..))
 import D3.Examples.GUP as GUP
 import D3.FFI (d3RemoveSelection_, d3SelectionIsEmpty_, d3SelectionSelect_)
-import D3.Interpreter (class SelectionM, append, attach)
+import D3.Interpreter (class SelectionM, appendElement, attach)
 import D3.Interpreter.D3 (eval_D3M, removeExistingSVG, runD3M)
 import D3.Selection (node)
 import D3Tagless.Block.Card as Card
@@ -229,8 +229,8 @@ codetext =
       xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0)
 
     root        <- attach "div#gup"
-    svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0 ]
-    letterGroup <- append svg  $ node_ Group
+    svg         <- appendElement root $ node Svg [ viewBox 0.0 0.0 650.0 650.0 ]
+    letterGroup <- appendElement svg  $ node_ Group
 
     pure $ \letters -> 
       do 

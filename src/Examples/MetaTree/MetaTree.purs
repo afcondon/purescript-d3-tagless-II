@@ -6,7 +6,7 @@ import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.MetaTree.Model (MetaTreeNode)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
-import D3.Interpreter (class SelectionM, append, attach, (<+>))
+import D3.Interpreter (class SelectionM, appendElement, attach, (<+>))
 import D3.Interpreter.D3 (runD3M)
 import D3.Layouts.Hierarchical (verticalLink)
 import D3.Selection (Join(..), Keys(..), node)
@@ -63,13 +63,13 @@ treeScript (Tuple width height) tree = do
 
   -- "script"
   root       <- attach ".svg-container"                           
-  svg        <- root `append` (node Svg  [ viewBox (-svgWH.width / 2.0) (-20.0) svgWH.width svgWH.height
+  svg        <- root `appendElement` (node Svg  [ viewBox (-svgWH.width / 2.0) (-20.0) svgWH.width svgWH.height
                                          , classed "metatree" ] )
-  container  <- svg  `append` (node Group [ fontFamily      "sans-serif"
+  container  <- svg  `appendElement` (node Group [ fontFamily      "sans-serif"
                                           , fontSize        18.0
                                           ])
-  links      <- container `append` (node Group [ classed "links"])
-  nodes      <- container `append` (node Group [ classed "nodes"])
+  links      <- container `appendElement` (node Group [ classed "links"])
+  nodes      <- container `appendElement` (node Group [ classed "nodes"])
 
   theLinks_  <- links <+> Join {
       element   : Path
@@ -91,14 +91,14 @@ treeScript (Tuple width height) tree = do
     , behaviour : [ transform [ datum_.positionXY ] ]
   }
 
-  theNodes <- nodeJoin_ `append` 
+  theNodes <- nodeJoin_ `appendElement` 
                 (node Circle  [ fill         "blue"
                               , radius       20.0
                               , strokeColor "white"
                               , strokeWidth 3.0
                               ])
 
-  labelsWhite <- nodeJoin_ `append`
+  labelsWhite <- nodeJoin_ `appendElement`
                 (node Text  [ x          0.0
                             , y          3.0
                             , textAnchor "middle"
@@ -106,7 +106,7 @@ treeScript (Tuple width height) tree = do
                             , fill       "white"
                             ])
                             
-  labelsGray <- nodeJoin_ `append`
+  labelsGray <- nodeJoin_ `appendElement`
                 (node Text  [ x          22.0
                             , y          3.0
                             , textAnchor "start"

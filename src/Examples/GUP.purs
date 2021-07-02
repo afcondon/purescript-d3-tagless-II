@@ -4,7 +4,7 @@ import D3.Attributes.Sugar
 
 import D3.Attributes.Instances (datumIsChar, indexIsNumber)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
-import D3.Interpreter (class SelectionM, append, attach, (<+>))
+import D3.Interpreter (class SelectionM, appendElement, attach, (<+>))
 import D3.Selection (ChainableS, Join(..), Keys(..), node, node_)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))
@@ -26,8 +26,8 @@ script selector = do
     xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0)
 
   root        <- attach selector
-  svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ]
-  letterGroup <- append svg  $ node_ Group
+  svg         <- appendElement root $ node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ]
+  letterGroup <- appendElement svg  $ node_ Group
 
   pure $ \letters -> 
     do 

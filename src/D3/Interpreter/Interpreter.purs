@@ -12,11 +12,13 @@ import Prelude (class Monad, Unit)
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
 -- into both DOM and Simulation for example (and current implementation is gross and wrong)
 class (Monad m) <= SelectionM selection m where
-  attach :: Selector                          -> m selection
-  append :: selection -> D3_Node              -> m selection
-  filter :: selection -> Selector             -> m selection
-  modify :: selection -> Array (ChainableS)   -> m selection
-  on     :: selection -> Behavior             -> m selection
+  attach :: Selector -> m selection
+
+  appendElement :: selection -> D3_Node                -> m selection
+  filterSelection :: selection -> Selector             -> m selection
+  modifySelection :: selection -> Array (ChainableS)   -> m Unit
+  
+  on     :: selection -> Behavior -> m Unit
 
   join   :: ∀ datum.  selection -> Join datum -> m selection
 

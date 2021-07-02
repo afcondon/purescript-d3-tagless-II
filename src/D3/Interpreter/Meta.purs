@@ -5,7 +5,7 @@ import D3.Node
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
 import D3.Data.Types (Element, MouseEvent, Transition)
-import D3.Interpreter (class SelectionM)
+import D3.Interpreter (class SelectionM, appendElement)
 import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), Keys, OrderingAttribute(..))
 import D3.Zoom (ZoomConfig)
 import Data.Array (filter, (:))
@@ -162,21 +162,20 @@ instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
     insertInScriptTree 0 (AttachNode selector) -- TODO this could actually be a multiple insert
     pure 1
 
-  append nodeID (D3_Node element attributes) = do
+  appendElement nodeID (D3_Node element attributes) = do
     insertInScriptTree nodeID (AppendNode element)
     (ScriptTree id _ _) <- get
     -- _ <- traverse (insertAttributeInScriptTree id) attributes
     pure id -- this is the id of the AppendNode itself
 
-  filter nodeID selector = do
+  filterSelection nodeID selector = do
     insertInScriptTree nodeID (FilterNode selector)
     (ScriptTree id _ _) <- get
     pure id
 
-  modify nodeID attributes = do
+  modifySelection nodeID attributes = do
     insertInScriptTree nodeID (ModifyNode attributes)
-    (ScriptTree id _ _) <- get
-    pure id
+    pure unit
 
   join nodeID (Join j)          = do
     (ScriptTree id _ _) <- get
@@ -188,9 +187,8 @@ instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
     pure id
 
   on nodeID behavior = do
-    (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (OnNode behavior) 
-    pure id
+    pure unit
 
 -- applyChainableSString :: String -> ChainableS -> String
 -- applyChainableSString selection  = 

@@ -10,7 +10,7 @@ import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
-import D3.Interpreter (class SelectionM, class SimulationM, Step(..), append, attach, createTickFunction, join, on, setNodes)
+import D3.Interpreter (class SelectionM, class SimulationM, Step(..), appendElement, attach, createTickFunction, join, on, setNodes)
 import D3.Interpreter.D3 (SimulationState_, initialSimulationState, run_D3M_Simulation)
 import D3.Interpreter.String (runPrinter)
 import D3.Scales (d3SchemeCategory10N_)
@@ -109,10 +109,10 @@ graphScript model selector = do
       width   = w / columns
       height  = h / rows
   root       <- attach selector
-  svg        <- root `append` (node Svg    [ viewBox (-width / 2.0) (-height / 2.0) width height
+  svg        <- root `appendElement` (node Svg    [ viewBox (-width / 2.0) (-height / 2.0) width height
                                            , classed "lesmis" ] )
-  linksGroup <- svg  `append` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
-  nodesGroup <- svg  `append` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
+  linksGroup <- svg  `appendElement` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
+  nodesGroup <- svg  `appendElement` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
 
   let simulation = initSimulation_ defaultConfigSimulation
   
