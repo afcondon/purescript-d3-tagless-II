@@ -43,7 +43,6 @@ defaultForceYConfig =
   [ strength 0.1, y 0.0 ]
   
 -- | a record to initialize / configure simulations
-data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number
 type SimulationConfig_ = { 
       alpha         :: Number
     , alphaTarget   :: Number
@@ -62,7 +61,6 @@ defaultConfigSimulation = {
     , velocityDecay: 0.4
     , running      : true
 }
-
 
 -- | ==================================================================================================
 -- | ========================= sugar for the various attributes of forces =============================

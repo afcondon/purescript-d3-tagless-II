@@ -5,8 +5,8 @@ import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Selector)
 import D3.Node (D3_Link, D3_SimulationNode)
 import D3.Selection (Behavior, ChainableS, D3_Node, Join)
-import D3.Simulation.Config (SimVariable(..))
-import D3.Simulation.Forces (Force)
+import D3.Simulation.Forces (Force, SimVariable(..))
+import Effect.Aff.Class (class MonadAff)
 import Prelude (class Monad, Unit)
 
 -- TODO see whether it can be useful to extend the interpreter here, for different visualization types
@@ -30,7 +30,7 @@ infix 4 join as <+>
 -- 2)...
 
 -- REVIEW this might need to be parameterized with the selection type too, so that the two capabilities match
-class (Monad m) <= SimulationM m where
+class (Monad m, MonadAff m) <= SimulationM m where
   -- control
   start :: m Unit
   stop  :: m Unit
@@ -44,8 +44,10 @@ class (Monad m) <= SimulationM m where
   enableForcesByLabel  :: Array Label -> m Unit
   -- management of data (nodes and links)
   -- TODO parameterize out the D3_ part of SimulationNode
-  setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
-  setLinks :: forall d r. Array (D3_Link d r)         -> m (Array (D3_Link d r))
+  setNodes :: forall d.   Array (D3_SimulationNode d) -> m Unit
+  setLinks :: forall d r. Array (D3_Link d r)         -> m Unit
+  -- setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
+  -- setLinks :: forall d r. Array (D3_Link d r)         -> m (Array (D3_Link d r))
   -- tick functions
   addTickFunction    :: forall selection. Label -> Step selection -> m Unit 
   removeTickFunction ::                   Label                   -> m Unit 

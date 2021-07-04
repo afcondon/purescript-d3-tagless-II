@@ -5,7 +5,7 @@ import Prelude
 import D3.Attributes.Instances (Attribute(..), Label, unbox)
 import D3.Data.Types (D3Simulation_, Datum_, PointXY)
 import D3.FFI (applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_)
-import D3.Node (D3_Link, NodeID)
+import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Simulation.Config (ChainableF, D3ForceHandle_)
 import Data.Array (elem)
 
@@ -27,6 +27,21 @@ getLabel (Force l _ _ _ _) = l
 getHandle :: Force -> D3ForceHandle_
 getHandle (Force l s t cs h_) = h_
 
+data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number
+
+data SimCommand d l =
+    Start
+  | Stop
+  | RemoveAllForcesSim
+  | SetConfigVariable    SimVariable
+  | LoadForces           (Array Force)
+  | AddForce             Force
+  | DisableForcesByLabel (Array Label)
+  | EnableForcesByLabel  (Array Label)
+  | SetNodes             (Array d)
+  | SetLinks             (Array l)
+  -- | AddTickFunction Label (Step selection)
+  | RemoveTickFunction    Label
 
 -- TODO we won't export the constructor here when we close exports
 data Force = Force Label ForceStatus ForceType (Array ChainableF) D3ForceHandle_

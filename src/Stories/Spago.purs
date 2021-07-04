@@ -42,6 +42,7 @@ import Ocelot.Block.Button as Button
 import Ocelot.Block.Checkbox as Checkbox
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
+import SimulationBusListener (startSimulationFiber)
 import Stories.Tailwind.Styles as Tailwind
 import UIGuide.Block.Backdrop as Backdrop
 import Utility (getWindowWidthHeight)
@@ -61,9 +62,9 @@ data Action
   | Start
   
 type State = { 
-    fiber  :: Maybe (Fiber Unit)
+    simulationFiber :: Maybe (Fiber Unit)
+  , simulationBus   :: Bus.BusRW ()
   , simulation :: SimulationState_
-  -- , simulationBus :: Bus.BusRW Int
   , groupings :: M.Map Label Selector
 }
 
@@ -132,7 +133,8 @@ handleAction = case _ of
     (model :: Maybe SpagoModel) <- H.liftAff getModel
     simulationBus               <- Bus.make
     simulation                  <- H.gets _.simulation
-    fiber                       <- H.liftAff $ forkAff $ drawGraph simulation graph
+    -- fiber                       <- H.liftAff $ forkAff $ drawGraph simulation graph
+    fiber                       <- H.liftAff $ forkAff $ startSimulationFiber simulationBus
 
     case model of
           Nothing -> pure unit

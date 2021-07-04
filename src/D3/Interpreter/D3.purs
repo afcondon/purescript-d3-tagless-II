@@ -10,8 +10,8 @@ import D3.Attributes.Sugar (classed, viewBox)
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..))
 import D3.Node (D3_Link, D3_SimulationNode)
 import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), OrderingAttribute(..), node)
-import D3.Simulation.Config (ChainableF(..), D3ForceHandle_, SimVariable(..), defaultConfigSimulation)
-import D3.Simulation.Forces (Force(..), ForceStatus(..), disableByLabels, enableByLabels, putForceInSimulation, setForceAttr)
+import D3.Simulation.Config (ChainableF(..), D3ForceHandle_, defaultConfigSimulation)
+import D3.Simulation.Forces (Force(..), ForceStatus(..), SimCommand(..), SimVariable(..), disableByLabels, enableByLabels, putForceInSimulation, setForceAttr)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Array (intercalate, null)
 import Data.Array as A
@@ -21,7 +21,11 @@ import Data.Map as M
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
+import Effect.Aff (Aff)
+import Effect.Aff.Bus as Bus
+import Effect.Aff.Class (liftAff)
 import Effect.Class (class MonadEffect)
+import Type.Equality (class TypeEquals)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
@@ -203,69 +207,126 @@ removeExistingSVG rootSelector = do
 -- | ====================================================
 -- | Simulation instance (capability) for the D3 interpreter
 -- | ====================================================
-instance simulationD3M :: SimulationM (D3M SimulationState_ D3Selection_) where
-  removeAllForces = do
-    sim <- get
-    let (Identity tuple) = runStateT simulationRemoveAllForces sim
-    pure unit
+-- instance simulationD3M :: SimulationM (D3M SimulationState_ D3Selection_) where
+--   removeAllForces = do
+--     sim <- get
+--     let (Identity tuple) = runStateT simulationRemoveAllForces sim
+--     pure unit
 
-  loadForces forces = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationLoadForces forces) sim
-    pure unit
+--   loadForces forces = do
+--     sim <- get
+--     let (Identity tuple) = runStateT (simulationLoadForces forces) sim
+--     pure unit
   
-  addForce force = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationAddForce force) sim
-    pure unit
+--   addForce force = do
+--     sim <- get
+--     let (Identity tuple) = runStateT (simulationAddForce force) sim
+--     pure unit
 
-  disableForcesByLabel labels = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationDisableForcesByLabel labels) sim
-    pure unit
+--   disableForcesByLabel labels = do
+--     sim <- get
+--     let (Identity tuple) = runStateT (simulationDisableForcesByLabel labels) sim
+--     pure unit
 
-  enableForcesByLabel labels  = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationEnableForcesByLabel labels) sim
-    pure unit
+--   enableForcesByLabel labels  = do
+--     sim <- get
+--     let (Identity tuple) = runStateT (simulationEnableForcesByLabel labels) sim
+--     pure unit
     
-  setConfigVariable v = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationSetVariable v) sim
-    pure unit
+--   setConfigVariable v = do
+--     sim <- get
+--     let (Identity tuple) = runStateT (simulationSetVariable v) sim
+--     pure unit
 
+--   start = do
+--     sim <- get
+--     let (Identity tuple) = runStateT simulationStart sim
+--     pure unit
+
+--   stop = do
+--     sim <- get
+--     let (Identity tuple) = runStateT simulationStop sim
+--     pure unit
+
+--   setNodes nodes = do
+--     sim <- get
+--     let (Identity tuple) = runStateT (simulationSetNodes nodes) sim
+--     -- pure $ fst tuple
+--     pure unit
+
+--   setLinks links = do
+--     sim <- get
+--     let (Identity tuple) = runStateT (simulationSetLinks links) sim
+--     -- pure $ fst tuple
+--     pure unit
+
+--   addTickFunction label (Step selection chain) = do
+--     (SS_ sim) <- get
+--     let makeTick _ = do
+--           -- TODO this coerce is forced upon us here due to forall selection in SimulationM
+--           let _ = (applyChainableSD3 (unsafeCoerce selection)) <$> chain
+--           unit
+--     pure $ onTick_ sim.simulation label makeTick
+
+--   removeTickFunction label = do
+--     (SS_ sim) <- get
+--     -- TODO delete the tick function from the state
+--     pure $ disableTick_ sim.simulation label
+
+
+-- | ====================================================
+-- | Simulation instance (capability) for the D3 interpreter
+-- | ====================================================
+instance simulationD3MB :: TypeEquals s (Bus.BusRW Int) => SimulationM (D3M s D3Selection_) where
   start = do
-    sim <- get
-    let (Identity tuple) = runStateT simulationStart sim
+    simBus  <- get
+    liftAff $ Bus.write Start simBus
     pure unit
 
   stop = do
-    sim <- get
-    let (Identity tuple) = runStateT simulationStop sim
+    simBus <- get
+    pure unit
+
+  removeAllForces = do
+    simBus <- get
+    pure unit
+
+  loadForces forces = do
+    simBus <- get
+    pure unit
+  
+  addForce force = do
+    simBus <- get
+    pure unit
+
+  disableForcesByLabel labels = do
+    simBus <- get
+    pure unit
+
+  enableForcesByLabel labels  = do
+    simBus <- get
+    pure unit
+    
+  setConfigVariable v = do
+    simBus <- get
     pure unit
 
   setNodes nodes = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationSetNodes nodes) sim
-    pure $ fst tuple
+    simBus <- get
+    pure unit
 
   setLinks links = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationSetLinks links) sim
-    pure $ fst tuple
+    simBus <- get
+    pure unit
 
   addTickFunction label (Step selection chain) = do
-    (SS_ sim) <- get
-    let makeTick _ = do
-          -- TODO this coerce is forced upon us here due to forall selection in SimulationM
-          let _ = (applyChainableSD3 (unsafeCoerce selection)) <$> chain
-          unit
-    pure $ onTick_ sim.simulation label makeTick
+    simBus <- get
+    pure unit
 
   removeTickFunction label = do
-    (SS_ sim) <- get
-    -- TODO delete the tick function from the state
-    pure $ disableTick_ sim.simulation label
+    simBus <- get
+    -- -- TODO delete the tick function from the state
+    pure unit
 
 -- | Underlying functions which allow us to make monadic updates from OUTSIDE of a script
 -- | allowing control of the simulation outside of the drawing phase which runs in D3M
