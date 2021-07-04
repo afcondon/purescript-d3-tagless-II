@@ -4,16 +4,16 @@ import D3.FFI
 import D3.Interpreter
 import Prelude hiding (append)
 
-import Control.Monad.State (class MonadState, State, StateT, get, modify_, runStateT)
+import Control.Monad.State (class MonadState, State, StateT, evalStateT, get, modify_, runStateT)
 import D3.Attributes.Instances (Attribute(..), Label, unbox)
 import D3.Attributes.Sugar (classed, viewBox)
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..))
-import D3.Node (D3_SimulationNode)
+import D3.Node (D3_Link, D3_SimulationNode)
 import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), OrderingAttribute(..), node)
-import D3.Simulation.Config (ChainableF(..), D3ForceHandle_, defaultConfigSimulation)
+import D3.Simulation.Config (ChainableF(..), D3ForceHandle_, SimVariable(..), defaultConfigSimulation)
 import D3.Simulation.Forces (Force(..), ForceStatus(..), disableByLabels, enableByLabels, putForceInSimulation, setForceAttr)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import Data.Array (intercalate)
+import Data.Array (intercalate, null)
 import Data.Array as A
 import Data.Foldable (foldl, traverse_)
 import Data.Identity (Identity(..))
@@ -50,7 +50,7 @@ data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
     simulation    :: D3Simulation_
   , running       :: Boolean
   , forces        :: M.Map Label Force
-  , ticks         :: M.Map Label (Array ChainableS)
+  , ticks         :: M.Map Label (Step D3Selection_)
 
   , alpha         :: Number
   , alphaTarget   :: Number
@@ -229,29 +229,9 @@ instance simulationD3M :: SimulationM (D3M SimulationState_ D3Selection_) where
     let (Identity tuple) = runStateT (simulationEnableForcesByLabel labels) sim
     pure unit
     
-  setAlpha v = do
+  setConfigVariable v = do
     sim <- get
-    let (Identity tuple) = runStateT (simulationSetAlpha v) sim
-    pure unit
-
-  setAlphaTarget v = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationSetAlphaTarget v) sim
-    pure unit
-
-  setAlphaMin v = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationSetAlphaMin v) sim
-    pure unit
-
-  setAlphaDecay v = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationSetAlphaDecay v) sim
-    pure unit
-
-  setVelocityDecay v = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationSetVelocityDecay v) sim
+    let (Identity tuple) = runStateT (simulationSetVariable v) sim
     pure unit
 
   start = do
@@ -269,13 +249,23 @@ instance simulationD3M :: SimulationM (D3M SimulationState_ D3Selection_) where
     let (Identity tuple) = runStateT (simulationSetNodes nodes) sim
     pure $ fst tuple
 
-  createTickFunction (Step label selection chain) = do
+  setLinks links = do
+    sim <- get
+    let (Identity tuple) = runStateT (simulationSetLinks links) sim
+    pure $ fst tuple
+
+  addTickFunction label (Step selection chain) = do
     (SS_ sim) <- get
     let makeTick _ = do
           -- TODO this coerce is forced upon us here due to forall selection in SimulationM
           let _ = (applyChainableSD3 (unsafeCoerce selection)) <$> chain
           unit
     pure $ onTick_ sim.simulation label makeTick
+
+  removeTickFunction label = do
+    (SS_ sim) <- get
+    -- TODO delete the tick function from the state
+    pure $ disableTick_ sim.simulation label
 
 -- | Underlying functions which allow us to make monadic updates from OUTSIDE of a script
 -- | allowing control of the simulation outside of the drawing phase which runs in D3M
@@ -313,35 +303,26 @@ simulationEnableForcesByLabel labels  = do
   let updatedForces = (enableByLabels sim.simulation labels) <$> sim.forces
   modify_ (\s -> SS_ sim { forces = updatedForces } )
   
-simulationSetAlpha :: Number -> State SimulationState_ Unit
-simulationSetAlpha v = do
+simulationSetVariable :: SimVariable -> State SimulationState_ Unit
+simulationSetVariable v = do
   (SS_ sim) <- get
-  let _ = setAlpha_ sim.simulation v
-  modify_ (\s -> SS_ sim { alpha = v } )
-
-simulationSetAlphaTarget :: Number -> State SimulationState_ Unit
-simulationSetAlphaTarget v = do
-  (SS_ sim) <- get
-  let _ = setAlphaTarget_ sim.simulation v
-  modify_  (\s -> SS_ sim { alphaTarget = v })
-
-simulationSetAlphaMin :: Number -> State SimulationState_ Unit
-simulationSetAlphaMin v = do
-  (SS_ sim) <- get
-  let _ = setAlphaMin_ sim.simulation v
-  modify_  (\s -> SS_ sim { alphaMin = v })
-
-simulationSetAlphaDecay :: Number -> State SimulationState_ Unit
-simulationSetAlphaDecay v = do
-  (SS_ sim) <- get
-  let _ = setAlphaDecay_ sim.simulation v
-  modify_  (\s -> SS_ sim { alphaDecay = v })
-
-simulationSetVelocityDecay :: Number -> State SimulationState_ Unit
-simulationSetVelocityDecay v = do
-  (SS_ sim) <- get
-  let _ = setVelocityDecay_ sim.simulation v
-  modify_  (\s -> SS_ sim { velocityDecay = v })
+  let sim' = case v of
+            (Alpha n)         -> do
+              let _ = setAlpha_ sim.simulation n
+              sim { alpha = n }
+            (AlphaTarget n)   -> do
+              let _ = setAlphaTarget_ sim.simulation n
+              sim { alphaTarget = n }
+            (AlphaMin n)      -> do
+              let _ = setAlphaMin_ sim.simulation n
+              sim { alphaMin = n }
+            (AlphaDecay n)    -> do
+              let _ = setAlphaDecay_ sim.simulation n
+              sim { alphaDecay = n }
+            (VelocityDecay n) -> do
+              let _ = setVelocityDecay_ sim.simulation n
+              sim { velocityDecay = n }
+  modify_ (\s -> SS_ sim' )
 
 simulationStart :: State SimulationState_ Unit
 simulationStart = do
@@ -366,13 +347,22 @@ simulationShowForces = do
 simulationSetNodes :: forall d. Array (D3_SimulationNode d) -> State SimulationState_ (Array (D3_SimulationNode d))
 simulationSetNodes nodes = do
   (SS_ sim) <- get
-  pure (sim.simulation `setNodes_` nodes)
+  let _ = sim.simulation `setNodes_` nodes
+  pure nodes -- TODO return the modified nodes instead (need to explicitly model these transformations)
 
-simulationCreateTickFunction :: forall selection. Step selection -> State SimulationState_ Unit
-simulationCreateTickFunction (Step label selection chain) = do
+simulationSetLinks :: forall d r. Array (D3_Link d r) -> State SimulationState_ (Array (D3_Link d r))
+simulationSetLinks links = do
+  (SS_ sim) <- get
+  let _ = setLinks_ sim.simulation links (\d i -> d.id)
+  pure links -- TODO return the modified links, ie where indexes are replaced with object (references)
+
+simulationCreateTickFunction :: forall selection. Label -> Step selection -> State SimulationState_ Unit
+simulationCreateTickFunction label tick@(Step selection chain) = do
   (SS_ sim) <- get
   let makeTick _ = do
         -- TODO this coerce is forced upon us here due to forall selection in SimulationM
+        -- going to have to parameterize simulation with selection or hide the type dep somehow
         let _ = (applyChainableSD3 (unsafeCoerce selection)) <$> chain
         unit
+  modify_ $ (\s -> SS_ sim { ticks = M.insert label (unsafeCoerce tick) sim.ticks })
   pure $ onTick_ sim.simulation label makeTick

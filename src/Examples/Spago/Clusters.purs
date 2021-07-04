@@ -7,7 +7,7 @@ import Control.Monad.State (evalState, get)
 import D3.Attributes.Sugar (classed, cx, cy, fill, lower, onMouseEvent, radius, text, viewBox, x, y)
 import D3.Data.Types (D3Selection_, Element(..), MouseEvent(..))
 import D3.FFI (setNodes_)
-import D3.Interpreter (class SelectionM, class SimulationM, Step(..), appendElement, attach, createTickFunction, filterSelection, modifySelection, on, setNodes, (<+>))
+import D3.Interpreter (class SelectionM, class SimulationM, Step(..), appendElement, attach, addTickFunction, filterSelection, modifySelection, on, setNodes, (<+>))
 import D3.Interpreter.D3 (SimulationState_(..))
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (D3ForceHandle_)
@@ -35,8 +35,8 @@ script :: forall m selection.
 script model = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   root       <- attach "div.svg-container"
-  svg        <- root `appendElement` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h
-                                           , classed "d3svg cluster" ] )
+  svg        <- root `appendElement` (node Svg [ viewBox (-w / 2.0) (-h / 2.0) w h
+                                               , classed "d3svg cluster" ] )
   nodesGroup <- svg  `appendElement` (node Group  [ classed "nodes" ])
 
   nodes     <- setNodes model.nodes
@@ -54,8 +54,8 @@ script model = do
   packagesOnly <- filterSelection nodesSelection "g.nodes g.package"
   _ <- packagesOnly `modifySelection` [ lower ]
   
-  createTickFunction $ Step "nodes"  circle  [ cx datum_.x, cy datum_.y ]
-  createTickFunction $ Step "labels" labels' [ x datum_.x, y datum_.y ] -- TODO is x -> x, y -> y a No-Op ?
+  addTickFunction "nodes"  $ Step  circle  [ cx datum_.x, cy datum_.y ]
+  addTickFunction "labels" $ Step labels' [ x datum_.x, y datum_.y ] -- TODO is x -> x, y -> y really just a No-Op ?
 
   _ <- nodesSelection `on` Drag DefaultDrag
   -- _ <- svg `modifySelection` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ sim.simulation) ]

@@ -356,6 +356,11 @@ exports.onTick_ = simulation => name => tickFn => {
   // if(debug){ console.log(`${simulation}.onTick(${tickFn})`)}
   return simulation.on('tick.' + name, () => tickFn())
 }
+//  disableTick_ :: D3Simulation_ -> String -> Unit
+exports.disableTick_ = simulation => name => {
+  return simulation.on('tick.' + name, () => null)
+}
+
 
 // default drag function for simulations, restarts simulation while dragging
 exports.defaultSimulationDrag_ = selection => simulation => {

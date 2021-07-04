@@ -10,7 +10,7 @@ import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
-import D3.Interpreter (class SelectionM, class SimulationM, Step(..), appendElement, attach, createTickFunction, join, on, setNodes)
+import D3.Interpreter (class SelectionM, class SimulationM, Step(..), addTickFunction, appendElement, attach, join, on, setLinks, setNodes)
 import D3.Interpreter.D3 (SimulationState_, initialSimulationState, run_D3M_Simulation)
 import D3.Interpreter.String (runPrinter)
 import D3.Scales (d3SchemeCategory10N_)
@@ -104,22 +104,14 @@ graphScript :: forall  m selection.
   m selection
 graphScript model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
-  let columns = 3.0
-      rows    = 2.0
-      width   = w / columns
-      height  = h / rows
   root       <- attach selector
-  svg        <- root `appendElement` (node Svg    [ viewBox (-width / 2.0) (-height / 2.0) width height
-                                           , classed "lesmis" ] )
+  svg        <- root `appendElement` (node Svg [ viewBox (-w / 2.0) (-h / 2.0) w h
+                                               , classed "lesmis" ] )
   linksGroup <- svg  `appendElement` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `appendElement` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
-
-  let simulation = initSimulation_ defaultConfigSimulation
   
   nodes <- setNodes model.nodes 
-      -- TODO following line commented out pending re-factor for SimulationM stuff
-      -- _          = simulation `putEachForceInSimulation` lesMisForces
-      -- _          = setLinks_ simulation model.links (\d i -> d.id)
+  links <- setLinks model.links
 
   linksSelection <- join linksGroup $ Join {
       element   : Line
@@ -134,15 +126,15 @@ graphScript model selector = do
     , behaviour : [ radius 5.0, fill datum_.colorByGroup ]
   }
 
-  createTickFunction $ Step "nodes" nodesSelection [ cx datum_.x, cy datum_.y  ]
-  createTickFunction $ Step "links" linksSelection [ x1 (_.x <<< link_.source)
-                                                    , y1 (_.y <<< link_.source)
-                                                    , x2 (_.x <<< link_.target)
-                                                    , y2 (_.y <<< link_.target)
-                                                    ]
+  addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y  ]
+  addTickFunction "links" $ Step linksSelection [ x1 (_.x <<< link_.source)
+                                                , y1 (_.y <<< link_.source)
+                                                , x2 (_.x <<< link_.target)
+                                                , y2 (_.y <<< link_.target)
+                                                ]
   _ <- nodesSelection `on` Drag DefaultDrag
 
-  _ <- svg `on`  Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: height, right: width }
+  _ <- svg `on`  Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                       , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
                       , name : "LesMis"
                       }

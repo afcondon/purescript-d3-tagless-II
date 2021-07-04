@@ -43,7 +43,7 @@ defaultForceYConfig =
   [ strength 0.1, y 0.0 ]
   
 -- | a record to initialize / configure simulations
-data SimConfig = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number | Running Boolean
+data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number
 type SimulationConfig_ = { 
       alpha         :: Number
     , alphaTarget   :: Number

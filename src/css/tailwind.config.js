@@ -13,7 +13,7 @@ module.exports = {
       colors: {
         'black-10': '#00091A',
         'black-20': '#242A33',
-        'black-modal-a90': 'rgba(0,9,26,0.9);',
+        'black-modal-a90': 'rgba(0,9,26,0.9)',
         'grey-50': '#5C6573',
         'grey-50-a20': 'rgba(102,113,128,0.2)',
         'grey-50-a30': 'rgba(102,113,128,0.3)',

@@ -1,5 +1,6 @@
 module Stories.Spago where
 
+import D3.Interpreter.D3
 import D3.Simulation.Forces
 import Prelude
 
@@ -10,26 +11,28 @@ import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Selector)
 import D3.Examples.Spago (treeReduction)
 import D3.Examples.Spago.Clusters as Cluster
+import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.FFI (initSimulation_)
 import D3.Interpreter (class SelectionM, class SimulationM)
-import D3.Interpreter.D3 (SimulationState_(..), eval_D3M, eval_D3M_Simulation, exec_D3M_Simulation, initialSimulationState, removeExistingSVG, runD3M, run_D3M_Simulation, simulationAddForce, simulationDisableForcesByLabel, simulationEnableForcesByLabel, simulationLoadForces, simulationSetAlpha, simulationSetAlphaDecay, simulationSetAlphaMin, simulationSetAlphaTarget, simulationSetVelocityDecay, simulationStart, simulationStop)
-import D3.Simulation.Config (SimConfig(..), defaultConfigSimulation)
+import D3.Simulation.Config (SimVariable, SimulationConfig_, defaultConfigSimulation)
 import D3.Simulation.Config as F
 import D3Tagless.Block.Card as Card
 import Data.Array ((:))
 import Data.Const (Const)
-import Data.Either (hush)
+import Data.Either (Either(..), hush)
 import Data.Map (toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap, wrap)
 import Data.Number (infinity)
 import Data.Tuple (Tuple(..), fst, snd)
-import Effect.Aff (Aff, Fiber, forkAff, killFiber)
+import Effect.Aff (Aff, Fiber, Milliseconds(..), attempt, delay, forkAff, joinFiber, killFiber, throwError)
+import Effect.Aff.Bus as Bus
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect)
 import Effect.Exception (error)
+import Effect.Ref as Ref
 import Halogen (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
@@ -53,13 +56,16 @@ data Action
   | Finalize
   | SetPackageForce PackageForce
   | SetModuleForce ModuleForce
-  | ChangeSimConfig SimConfig
+  | ChangeSimConfig SimVariable
+  | Stop
+  | Start
   
 type State = { 
     fiber  :: Maybe (Fiber Unit)
   , simulation :: SimulationState_
+  -- , simulationBus :: Bus.BusRW Int
   , groupings :: M.Map Label Selector
-} 
+}
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
 component = H.mkComponent
@@ -82,12 +88,12 @@ component = H.mkComponent
           [ HH.text "Simulation controls" ]
       , HH.div_
           [ Button.button
-              [ HE.onClick $ const (ChangeSimConfig (Running false)) ]
+              [ HE.onClick $ const Stop ]
               [ HH.text "Stop" ]
           ]
       , HH.div_
           [ Button.button
-              [ HE.onClick $ const (ChangeSimConfig (Running true)) ]
+              [ HE.onClick $ const Start ]
               [ HH.text "Start" ]
           ]
       , HH.div_
@@ -122,19 +128,19 @@ handleAction :: forall m. Bind m => MonadAff m => MonadState State m =>
   Action -> m Unit
 handleAction = case _ of
   Initialize -> do
-    (detached :: D3Selection_) <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
-
+    (detached :: D3Selection_)  <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
     (model :: Maybe SpagoModel) <- H.liftAff getModel
+    simulationBus               <- Bus.make
+    simulation                  <- H.gets _.simulation
+    fiber                       <- H.liftAff $ forkAff $ drawGraph simulation graph
 
-    -- pure unit
     case model of
           Nothing -> pure unit
           (Just graph) -> do
-            simulation <- H.gets _.simulation
             let simulation' = execState (simulationLoadForces initialForces) simulation 
             -- TODO properly think out / design relationship between fiber and simulation
             (Tuple svg simulation'' :: Tuple D3Selection_ SimulationState_) 
-                  <- H.liftEffect $ run_D3M_Simulation simulation' (Cluster.script graph)
+                  <- H.liftEffect $ run_D3M_Simulation simulation' (Graph.script graph)
             H.modify_ (\s -> s { fiber = Nothing, simulation = simulation'' })
             pure unit
 
@@ -167,8 +173,16 @@ handleAction = case _ of
             (AlphaMin v)      -> execState (simulationSetAlphaMin v) simulation
             (AlphaDecay v)    -> execState (simulationSetAlphaDecay v) simulation
             (VelocityDecay v) -> execState (simulationSetVelocityDecay v) simulation
-            (Running true)    -> execState simulationStart simulation
-            (Running false)   -> execState simulationStop simulation
+    H.modify_ (\state -> state { simulation = updatedSimulation })
+
+  Start -> do
+    simulation <- H.gets _.simulation
+    let updatedSimulation = execState simulationStart simulation
+    H.modify_ (\state -> state { simulation = updatedSimulation })
+
+  Stop -> do
+    simulation <- H.gets _.simulation
+    let updatedSimulation = execState simulationStop simulation
     H.modify_ (\state -> state { simulation = updatedSimulation })
 
 

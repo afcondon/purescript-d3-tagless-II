@@ -4,23 +4,26 @@ import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, te
 import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (SpagoModel, cancelSpotlight_, datum_, link_, toggleSpotlight)
 import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
-import D3.Interpreter (class SelectionM, class SimulationM, Step(..), appendElement, attach, createTickFunction, modifySelection, on, (<+>))
+import D3.Interpreter (class SelectionM, class SimulationM, Step(..), appendElement, attach, addTickFunction, modifySelection, on, (<+>))
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config (defaultConfigSimulation)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Tuple (Tuple(..))
+import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, bind, negate, pure, unit, discard, ($), (/), (<<<))
+import Utility (getWindowWidthHeight)
 
 
 -- | recipe for this force layout graph
 script :: forall m selection. 
   Bind m => 
+  MonadEffect m =>
   SelectionM selection m =>
   SimulationM m =>
-  Tuple Number Number ->
   SpagoModel ->
-  m { selection :: selection, simulation :: D3Simulation_ }
-script (Tuple w h) model = do
+  m selection
+script model = do
+  (Tuple w h) <- liftEffect getWindowWidthHeight
   root       <- attach "div.svg-container"
   svg        <- root `appendElement` (node Svg    [ viewBox (-w / 2.0) (-h / 2.0) w h 
                                            , classed "graph"] )
@@ -52,12 +55,12 @@ script (Tuple w h) model = do
                                                   ]) 
   labels' <- nodesSelection `appendElement` (node Text [ classed "label",  x 0.2, y datum_.positionLabel, text datum_.name]) 
   
-  createTickFunction $ Step "nodes" nodesSelection  [ classed datum_.nodeClass, transform' datum_.translateNode ]
-  createTickFunction $ Step "links" linksSelection [ x1 (_.x <<< link_.source)
-                                                    , y1 (_.y <<< link_.source)
-                                                    , x2 (_.x <<< link_.target)
-                                                    , y2 (_.y <<< link_.target)
-                                                    ]
+  addTickFunction "nodes" $ Step nodesSelection  [ classed datum_.nodeClass, transform' datum_.translateNode ]
+  addTickFunction "links" $ Step linksSelection [ x1 (_.x <<< link_.source)
+                                                , y1 (_.y <<< link_.source)
+                                                , x2 (_.x <<< link_.target)
+                                                , y2 (_.y <<< link_.target)
+                                                ]
   _ <- nodesSelection `on` Drag DefaultDrag
   _ <- svg `modifySelection` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation) ]
   _ <- svg `on` Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
@@ -65,4 +68,4 @@ script (Tuple w h) model = do
                      , name : "spago"
                      }
 
-  pure { selection: svg, simulation }
+  pure svg

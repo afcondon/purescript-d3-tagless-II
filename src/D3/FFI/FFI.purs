@@ -129,6 +129,7 @@ pinNodeMatchingPredicate nodes predicate fx fy = fromMaybe unit $ (pinNode_ fx f
 -- foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass
 -- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr -> Unit
 foreign import onTick_                :: D3Simulation_ -> String -> (Unit -> Unit) -> Unit
+foreign import disableTick_           :: D3Simulation_ -> String -> Unit
 foreign import defaultSimulationDrag_ :: D3Selection_ -> D3Simulation_ -> Unit
 foreign import setAlpha_              :: D3Simulation_ -> Number -> Unit
 foreign import setAlphaMin_           :: D3Simulation_ -> Number -> Unit

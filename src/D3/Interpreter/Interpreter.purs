@@ -3,8 +3,9 @@ module D3.Interpreter where
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Selector)
-import D3.Node (D3_SimulationNode)
+import D3.Node (D3_Link, D3_SimulationNode)
 import D3.Selection (Behavior, ChainableS, D3_Node, Join)
+import D3.Simulation.Config (SimVariable(..))
 import D3.Simulation.Forces (Force)
 import Prelude (class Monad, Unit)
 
@@ -30,26 +31,24 @@ infix 4 join as <+>
 
 -- REVIEW this might need to be parameterized with the selection type too, so that the two capabilities match
 class (Monad m) <= SimulationM m where
+  -- control
+  start :: m Unit
+  stop  :: m Unit
+  -- config
+  setConfigVariable    :: SimVariable -> m Unit
   -- management of forces
   removeAllForces      ::                m Unit
   loadForces           :: Array Force -> m Unit
   addForce             :: Force       -> m Unit
   disableForcesByLabel :: Array Label -> m Unit
   enableForcesByLabel  :: Array Label -> m Unit
-  -- config
-  setAlpha             :: Number      -> m Unit
-  setAlphaTarget       :: Number      -> m Unit
-  setAlphaMin          :: Number      -> m Unit
-  setAlphaDecay        :: Number      -> m Unit
-  setVelocityDecay     :: Number      -> m Unit
-  -- control
-  start      :: m Unit
-  stop       :: m Unit
   -- management of data (nodes and links)
   -- TODO parameterize out the D3_ part of SimulationNode
-  setNodes :: forall d. Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
+  setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
+  setLinks :: forall d r. Array (D3_Link d r)         -> m (Array (D3_Link d r))
   -- tick functions
-  createTickFunction :: forall selection. Step selection -> m Unit 
+  addTickFunction    :: forall selection. Label -> Step selection -> m Unit 
+  removeTickFunction ::                   Label                   -> m Unit 
 
-data Step selection = Step Label selection (Array ChainableS)
+data Step selection = Step selection (Array ChainableS)
 
