@@ -1,27 +1,24 @@
 module D3.Examples.LesMiserables where
 
-import D3.Examples.LesMiserables.Types
+import D3.Examples.LesMiserables.Types (LesMisRawModel)
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.List.Trans (Step)
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
-import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
-import D3.Interpreter (class SelectionM, class SimulationM, Step(..), addTickFunction, appendElement, attach, join, on, setLinks, setNodes)
-import D3.Interpreter.D3 (SimulationState_, initialSimulationState, run_D3M_Simulation)
-import D3.Interpreter.String (runPrinter)
+import D3Tagless.Interpreter (class SelectionM, class SimulationM, addTickFunction, appendElement, attach, join, on, setLinks, setNodes)
+import D3Tagless.Interpreter.D3 (run_D3M_Simulation)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
-import D3.Simulation.Config (defaultConfigSimulation)
 import D3.Simulation.Config as F
-import D3.Simulation.Forces (Force(..), ForceStatus(..), ForceType(..), createForce)
+import D3.Simulation.Forces (createForce)
+import D3.Simulation.Types (Force, ForceType(..), SimulationState_, Step(..), initialSimulationState)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
-import Data.Tuple (Tuple(..), fst, snd)
+import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)

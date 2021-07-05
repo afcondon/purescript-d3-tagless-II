@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState)
 import D3.Examples.LesMiserables as LesMis
-import D3.Interpreter.D3 (eval_D3M, removeExistingSVG)
+import D3Tagless.Interpreter.D3 (eval_D3M, removeExistingSVG)
 import Data.Const (Const)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Fiber, forkAff, killFiber)

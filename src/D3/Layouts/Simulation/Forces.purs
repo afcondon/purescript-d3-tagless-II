@@ -3,17 +3,11 @@ module D3.Simulation.Forces where
 import Prelude
 
 import D3.Attributes.Instances (Attribute(..), Label, unbox)
-import D3.Data.Types (D3Simulation_, Datum_, PointXY)
-import D3.FFI (applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_)
-import D3.Node (D3_Link, D3_SimulationNode, NodeID)
-import D3.Simulation.Config (ChainableF, D3ForceHandle_)
+import D3.Data.Types (D3Simulation_)
+import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_)
+import D3.Simulation.Types (ChainableF, Force(..), ForceStatus(..), ForceType(..))
 import Data.Array (elem)
 
-data ForceStatus = ForceActive | ForceDisabled
-derive instance eqForceStatus :: Eq ForceStatus
-instance showForceStatus :: Show ForceStatus where
-  show ForceActive = "active"
-  show ForceDisabled = "inactive"
 
 toggleForceStatus :: ForceStatus -> ForceStatus
 toggleForceStatus =
@@ -26,25 +20,6 @@ getLabel (Force l _ _ _ _) = l
 
 getHandle :: Force -> D3ForceHandle_
 getHandle (Force l s t cs h_) = h_
-
-data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number
-
-data SimCommand =
-    Start
-  | Stop
-  | RemoveAllForcesSim
-  | SetConfigVariable    SimVariable
-  | LoadForces           (Array Force)
-  | AddForce             Force
-  | DisableForcesByLabel (Array Label)
-  | EnableForcesByLabel  (Array Label)
-  -- | SetNodes             (Array d)
-  -- | SetLinks             (Array l)
-  -- | AddTickFunction Label (Step selection)
-  | RemoveTickFunction    Label
-
--- TODO we won't export the constructor here when we close exports
-data Force = Force Label ForceStatus ForceType (Array ChainableF) D3ForceHandle_
 
 createForce :: Label -> ForceType -> Array ChainableF -> Force
 createForce l t cs = Force l ForceDisabled t cs (createForce_ t)
@@ -76,9 +51,6 @@ enableByLabels simulation labels force@(Force label _ t cs h_) =
     Force label ForceActive t cs h_
   else force
 
-instance Show Force where
-  show (Force label status t cs h) = "Force: " <> label <> " " <> show status 
-
 putForceInSimulation :: Force -> D3Simulation_ -> D3Simulation_
 putForceInSimulation (Force l s t attrs h_) simulation_ =
   case t of
@@ -97,32 +69,6 @@ putForceInSimulation (Force l s t attrs h_) simulation_ =
 
     CustomForce   -> putForceInSimulation_ simulation_ l h_ -- TODO not implemented or even designed yet
 
-data ForceType = 
-    ForceManyBody                                  -- strength, theta, distanceMax, distanceMin
-  | ForceCenter                                    -- strength, x, y
-  | ForceCollide                                   -- strength, radius, iterations
-  | ForceX                                         -- strength, x
-  | ForceY                                         -- strength, y
-  | ForceRadial                                    -- strength, radius, x, y
-  | ForceLink (forall r. Array (D3_Link NodeID r)) -- strength, id, distance, iterations, links
-  | ForceFixPositionXY (Datum_ -> PointXY) -- function is static, provided to constructor
-  | ForceFixPositionX  (Datum_ -> Number)
-  | ForceFixPositionY  (Datum_ -> Number)
-                                                   -- TODO need something to hold extra custom force config, perhaps?
-  | CustomForce                                    -- ???
-
-instance Show ForceType where
-  show ForceManyBody           = "ForceManyBody"
-  show ForceCenter             = "ForceCenter"
-  show ForceCollide            = "ForceCollide"
-  show ForceX                  = "ForceX"
-  show ForceY                  = "ForceY"
-  show ForceRadial             = "ForceRadial"
-  show (ForceFixPositionXY xy) = "ForceFixPositionXY"
-  show (ForceFixPositionX x)   = "ForceFixPositionX"
-  show (ForceFixPositionY y)   = "ForceFixPositionY"
-  show (ForceLink _)           = "ForceLink"
-  show CustomForce             = "CustomForce"
 
 
 forceDescription :: ForceType -> String

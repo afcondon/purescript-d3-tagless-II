@@ -1,20 +1,18 @@
-module D3.Interpreter.D3Bus where
+module D3Tagless.Interpreter.D3 where
 
-import D3.FFI
-import D3.Interpreter
-import Prelude hiding (append)
+import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3LowerSelection_, d3OrderSelection_, d3RaiseSelection_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectFirstInDOM_, d3SelectionIsEmpty_, d3SelectionSelectAll_, d3SelectionSelect_, d3SetAttr_, d3SetHTML_, d3SetProperty_, d3SetText_, d3SortSelection_, defaultDrag_, disableDrag_, disableTick_, onTick_, selectionOn_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
+import D3Tagless.Interpreter (class SelectionM, class SimulationM, modifySelection)
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, bind, discard, liftA1, pure, show, unit, ($), (<$>), (<>), (==))
 
-import Control.Monad.Reader (class MonadAsk, ReaderT, ask, asks)
-import Control.Monad.State (class MonadState, State, StateT, evalStateT, get, modify_, runStateT)
+import Control.Monad.State (class MonadState, State, StateT, get, modify_, runStateT)
 import D3.Attributes.Instances (Attribute(..), Label, unbox)
-import D3.Attributes.Sugar (classed, viewBox)
-import D3.Data.Types (D3Selection_, D3Simulation_, Element(..))
+import D3.Data.Types (D3Selection_)
 import D3.Node (D3_Link, D3_SimulationNode)
-import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), OrderingAttribute(..), node)
-import D3.Simulation.Config (ChainableF(..), D3ForceHandle_, defaultConfigSimulation)
-import D3.Simulation.Forces (Force(..), ForceStatus(..), SimCommand(..), SimVariable(..), disableByLabels, enableByLabels, putForceInSimulation, setForceAttr)
+import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), OrderingAttribute(..))
+import D3.Simulation.Forces (disableByLabels, enableByLabels, putForceInSimulation, setForceAttr)
+import D3.Simulation.Types (Force(..), ForceStatus(..), SimVariable(..), SimulationState_(..), Step(..)) 
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import Data.Array (intercalate, null)
+import Data.Array (intercalate)
 import Data.Array as A
 import Data.Foldable (foldl, traverse_)
 import Data.Identity (Identity(..))
@@ -22,16 +20,13 @@ import Data.Map as M
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
-import Effect.Aff (Aff)
-import Effect.Aff.Bus as Bus
-import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect)
-import Type.Equality (class TypeEquals, from)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
 
 -- newtype D3M :: forall k. k -> Type -> Type
+newtype D3M :: forall k. Type -> k -> Type -> Type
 newtype D3M state selection a = D3M (StateT state Effect a) 
 
 derive newtype instance functorD3M     :: Functor           (D3M state selection)
@@ -50,31 +45,6 @@ eval_D3M (D3M state_T) = liftA1 fst $ runStateT state_T unit
 
 exec_D3M :: forall a. D3M Unit D3Selection_ a -> Effect Unit
 exec_D3M (D3M state_T) = liftA1 snd $ runStateT state_T unit
-
-data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
-    simulation    :: D3Simulation_
-  , running       :: Boolean
-  , forces        :: M.Map Label Force
-  , ticks         :: M.Map Label (Step D3Selection_)
-
-  , alpha         :: Number
-  , alphaTarget   :: Number
-  , alphaMin      :: Number
-  , alphaDecay    :: Number
-  , velocityDecay :: Number
-}
-
-initialSimulationState = SS_
-   {  simulation   : initSimulation_ defaultConfigSimulation  
-    , alpha        : defaultConfigSimulation.alpha
-    , alphaTarget  : defaultConfigSimulation.alphaTarget
-    , alphaMin     : defaultConfigSimulation.alphaMin
-    , alphaDecay   : defaultConfigSimulation.alphaDecay
-    , velocityDecay: defaultConfigSimulation.velocityDecay
-    , running      : defaultConfigSimulation.running
-    , forces       : M.empty
-    , ticks        : M.empty
-  }
 
 run_D3M_Simulation :: forall a. SimulationState_ -> D3M SimulationState_ D3Selection_ a -> Effect (Tuple a SimulationState_)
 run_D3M_Simulation simulation (D3M state_T) = runStateT state_T simulation
@@ -208,138 +178,71 @@ removeExistingSVG rootSelector = do
 -- | ====================================================
 -- | Simulation instance (capability) for the D3 interpreter
 -- | ====================================================
--- instance simulationD3M :: SimulationM (D3M SimulationState_ D3Selection_) where
---   removeAllForces = do
---     sim <- get
---     let (Identity tuple) = runStateT simulationRemoveAllForces sim
---     pure unit
-
---   loadForces forces = do
---     sim <- get
---     let (Identity tuple) = runStateT (simulationLoadForces forces) sim
---     pure unit
-  
---   addForce force = do
---     sim <- get
---     let (Identity tuple) = runStateT (simulationAddForce force) sim
---     pure unit
-
---   disableForcesByLabel labels = do
---     sim <- get
---     let (Identity tuple) = runStateT (simulationDisableForcesByLabel labels) sim
---     pure unit
-
---   enableForcesByLabel labels  = do
---     sim <- get
---     let (Identity tuple) = runStateT (simulationEnableForcesByLabel labels) sim
---     pure unit
-    
---   setConfigVariable v = do
---     sim <- get
---     let (Identity tuple) = runStateT (simulationSetVariable v) sim
---     pure unit
-
---   start = do
---     sim <- get
---     let (Identity tuple) = runStateT simulationStart sim
---     pure unit
-
---   stop = do
---     sim <- get
---     let (Identity tuple) = runStateT simulationStop sim
---     pure unit
-
---   setNodes nodes = do
---     sim <- get
---     let (Identity tuple) = runStateT (simulationSetNodes nodes) sim
---     -- pure $ fst tuple
---     pure unit
-
---   setLinks links = do
---     sim <- get
---     let (Identity tuple) = runStateT (simulationSetLinks links) sim
---     -- pure $ fst tuple
---     pure unit
-
---   addTickFunction label (Step selection chain) = do
---     (SS_ sim) <- get
---     let makeTick _ = do
---           -- TODO this coerce is forced upon us here due to forall selection in SimulationM
---           let _ = (applyChainableSD3 (unsafeCoerce selection)) <$> chain
---           unit
---     pure $ onTick_ sim.simulation label makeTick
-
---   removeTickFunction label = do
---     (SS_ sim) <- get
---     -- TODO delete the tick function from the state
---     pure $ disableTick_ sim.simulation label
-newtype D3MB selection a = D3MB (ReaderT (Bus.BusRW SimCommand) Effect a)
-
-derive newtype instance functorD3MB     :: Functor           (D3MB selection)
-derive newtype instance applyD3MB       :: Apply             (D3MB selection)
-derive newtype instance applicativeD3MB :: Applicative       (D3MB selection)
-derive newtype instance bindD3MB        :: Bind              (D3MB selection)
-derive newtype instance monadD3MB       :: Monad             (D3MB selection)
--- derive newtype instance monadStateD3MB  :: MonadState  (Bus.BusRW SimCommand) (D3MB selection) 
-derive newtype instance monadEffD3MB    :: MonadEffect       (D3MB selection)
--- derive newtype instance monadAffD3MB    :: MonadAff          (D3MB selection)
-
-instance monadAskD3MB :: TypeEquals e (Bus.BusRW SimCommand) => MonadAsk e (D3MB selection) where
-  ask = D3MB $ asks from
-
--- | ====================================================
--- | Simulation instance (capability) for the D3 interpreter
--- | ====================================================
-instance simulationD3MB :: SimulationM (D3MB D3Selection_) where
-  start = do
-    simBus  <- ask
-    -- liftAff $ Bus.write Start simBus
-    pure unit
-
-  stop = do
-    simBus <- ask
-    pure unit
-
+instance simulationD3M :: SimulationM (D3M SimulationState_ D3Selection_) where
   removeAllForces = do
-    simBus <- ask
+    sim <- get
+    let (Identity tuple) = runStateT simulationRemoveAllForces sim
     pure unit
 
   loadForces forces = do
-    simBus <- ask
+    sim <- get
+    let (Identity tuple) = runStateT (simulationLoadForces forces) sim
     pure unit
   
   addForce force = do
-    simBus <- ask
+    sim <- get
+    let (Identity tuple) = runStateT (simulationAddForce force) sim
     pure unit
 
   disableForcesByLabel labels = do
-    simBus <- ask
+    sim <- get
+    let (Identity tuple) = runStateT (simulationDisableForcesByLabel labels) sim
     pure unit
 
   enableForcesByLabel labels  = do
-    simBus <- ask
+    sim <- get
+    let (Identity tuple) = runStateT (simulationEnableForcesByLabel labels) sim
     pure unit
     
   setConfigVariable v = do
-    simBus <- ask
+    sim <- get
+    let (Identity tuple) = runStateT (simulationSetVariable v) sim
+    pure unit
+
+  start = do
+    sim <- get
+    let (Identity tuple) = runStateT simulationStart sim
+    pure unit
+
+  stop = do
+    sim <- get
+    let (Identity tuple) = runStateT simulationStop sim
     pure unit
 
   setNodes nodes = do
-    simBus <- ask
+    sim <- get
+    let (Identity tuple) = runStateT (simulationSetNodes nodes) sim
+    -- pure $ fst tuple
     pure unit
 
   setLinks links = do
-    simBus <- ask
+    sim <- get
+    let (Identity tuple) = runStateT (simulationSetLinks links) sim
+    -- pure $ fst tuple
     pure unit
 
   addTickFunction label (Step selection chain) = do
-    simBus <- ask
-    pure unit
+    (SS_ sim) <- get
+    let makeTick _ = do
+          -- TODO this coerce is forced upon us here due to forall selection in SimulationM
+          let _ = (applyChainableSD3 (unsafeCoerce selection)) <$> chain
+          unit
+    pure $ onTick_ sim.simulation label makeTick
 
   removeTickFunction label = do
-    simBus <- ask
-    -- -- TODO delete the tick function from the state
-    pure unit
+    (SS_ sim) <- get
+    -- TODO delete the tick function from the state
+    pure $ disableTick_ sim.simulation label
 
 -- | Underlying functions which allow us to make monadic updates from OUTSIDE of a script
 -- | allowing control of the simulation outside of the drawing phase which runs in D3M

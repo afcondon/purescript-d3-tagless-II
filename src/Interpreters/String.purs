@@ -1,11 +1,11 @@
-module D3.Interpreter.String where
+module D3Tagless.Interpreter.String where
 
 import D3.Selection
 
 import Control.Monad.State (class MonadState, StateT, modify_, runStateT)
 import D3.Attributes.Instances (class ToAttr, Attribute(..), unbox)
 import D3.FFI (showAddTransition_, showRemoveSelection_, showSetAttr_, showSetHTML_, showSetOrdering_, showSetProperty_, showSetText_)
-import D3.Interpreter (class SelectionM)
+import D3Tagless.Interpreter (class SelectionM)
 import Data.Array (foldl)
 import Data.Tuple (Tuple)
 import Effect (Effect)

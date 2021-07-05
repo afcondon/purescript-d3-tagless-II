@@ -1,11 +1,11 @@
-module D3.Interpreter.MetaTree where
+module D3Tagless.Interpreter.MetaTree where
 
 import D3.Node
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
 import D3.Data.Types (Element, MouseEvent, Transition)
-import D3.Interpreter (class SelectionM, appendElement)
+import D3Tagless.Interpreter (class SelectionM, appendElement)
 import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), Keys, OrderingAttribute(..))
 import D3.Zoom (ZoomConfig)
 import Data.Array (filter, (:))

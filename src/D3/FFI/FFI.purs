@@ -4,7 +4,6 @@ module D3.FFI where
 -- probably should break it up again when it's more feature complete (ie to match D3 modules). Maybe.
 
 import D3.Node
-import D3.Simulation.Config
 
 import D3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
 import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
@@ -96,6 +95,18 @@ foreign import selectionOn_         :: forall selection callback. selection -> S
 -- | foreign types associated with Force Layout Simulation
 
 type GraphModel_ link node = { links :: Array link, nodes :: Array node }
+foreign import data D3ForceHandle_     :: Type
+foreign import data CustomForceConfig_ :: Type
+
+-- | a record to initialize / configure simulations
+type SimulationConfig_ = { 
+      alpha         :: Number
+    , alphaTarget   :: Number
+    , alphaMin      :: Number
+    , alphaDecay    :: Number
+    , velocityDecay :: Number
+    , running       :: Boolean
+}
 
 foreign import initSimulation_         ::                  SimulationConfig_ -> D3Simulation_
 foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_   -> D3Simulation_

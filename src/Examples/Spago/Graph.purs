@@ -1,16 +1,16 @@
 module D3.Examples.Spago.Graph where
 
 import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.Types (D3Simulation_, Element(..), MouseEvent(..))
-import D3.Examples.Spago.Model (SpagoModel, cancelSpotlight_, datum_, link_, toggleSpotlight)
-import D3.FFI (configSimulation_, initSimulation_, setLinks_, setNodes_)
-import D3.Interpreter (class SelectionM, class SimulationM, Step(..), appendElement, attach, addTickFunction, modifySelection, on, (<+>))
+import D3.Data.Types (Element(..), MouseEvent(..))
+import D3.Examples.Spago.Model (SpagoModel, cancelSpotlight_, datum_, link_)
+import D3.FFI (initSimulation_, setLinks_, setNodes_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
-import D3.Simulation.Config (defaultConfigSimulation)
+import D3.Simulation.Types (Step(..), defaultConfigSimulation)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
+import D3Tagless.Interpreter (class SelectionM, class SimulationM, appendElement, attach, addTickFunction, modifySelection, on, (<+>))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
-import Prelude (class Bind, bind, negate, pure, unit, discard, ($), (/), (<<<))
+import Prelude (class Bind, bind, discard, negate, pure, ($), (/), (<<<))
 import Utility (getWindowWidthHeight)
 
 

@@ -5,7 +5,7 @@ import Prelude
 import Control.Monad.State (class MonadState, get)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Examples.Tree.Configure as Tree
-import D3.Interpreter.D3 (eval_D3M, removeExistingSVG)
+import D3Tagless.Interpreter.D3 (eval_D3M, removeExistingSVG)
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Block.Expandable as Expandable

@@ -1,21 +1,18 @@
 module D3.Examples.Spago.Clusters where
 
 
-import D3.Examples.Spago.Model
+import D3.Examples.Spago.Model (SpagoModel, datum_)
+import D3.Simulation.Types (Step(..))
 
-import Control.Monad.State (evalState, get)
-import D3.Attributes.Sugar (classed, cx, cy, fill, lower, onMouseEvent, radius, text, viewBox, x, y)
-import D3.Data.Types (D3Selection_, Element(..), MouseEvent(..))
-import D3.FFI (setNodes_)
-import D3.Interpreter (class SelectionM, class SimulationM, Step(..), appendElement, attach, addTickFunction, filterSelection, modifySelection, on, setNodes, (<+>))
-import D3.Interpreter.D3 (SimulationState_(..))
+import D3.Attributes.Sugar (classed, cx, cy, fill, lower, radius, text, viewBox, x, y)
+import D3.Data.Types (Element(..))
+import D3.FFI (D3ForceHandle_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
-import D3.Simulation.Config (D3ForceHandle_)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import Data.Newtype (unwrap)
+import D3Tagless.Interpreter (class SelectionM, class SimulationM, appendElement, attach, addTickFunction, filterSelection, modifySelection, on, setNodes, (<+>))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, ($), (/), (<$>))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, ($), (/))
 import Utility (getWindowWidthHeight)
 
 

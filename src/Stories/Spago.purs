@@ -1,39 +1,30 @@
 module Stories.Spago where
 
-import D3.Interpreter.D3
-import D3.Simulation.Forces
+import D3Tagless.Interpreter.D3 (eval_D3M, removeExistingSVG)
+import D3.Simulation.Forces (createForce, enableForce)
 import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, execState, runState)
-import D3.Attributes.Instances (Label)
-import D3.Data.Types (D3Selection_, D3Simulation_, Selector)
+import Control.Monad.State (class MonadState)
+import D3.Data.Types (D3Selection_)
 import D3.Examples.Spago (treeReduction)
-import D3.Examples.Spago.Clusters as Cluster
-import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
-import D3.FFI (initSimulation_)
-import D3.Interpreter (class SelectionM, class SimulationM)
-import D3.Simulation.Config (SimulationConfig_, defaultConfigSimulation)
 import D3.Simulation.Config as F
+import D3.Simulation.Types (Force(..), ForceType(..), SimCommand, SimVariable, SimulationState_(..))
 import D3Tagless.Block.Card as Card
 import Data.Array ((:))
 import Data.Const (Const)
-import Data.Either (Either(..), hush)
+import Data.Either (hush)
 import Data.Map (toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Newtype (unwrap, wrap)
 import Data.Number (infinity)
-import Data.Tuple (Tuple(..), fst, snd)
-import Effect.Aff (Aff, Fiber, Milliseconds(..), attempt, delay, forkAff, joinFiber, killFiber, throwError)
+import Data.Tuple (snd)
+import Effect.Aff (Aff, Fiber, killFiber)
 import Effect.Aff.Bus as Bus
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class (class MonadEffect)
 import Effect.Exception (error)
-import Effect.Ref as Ref
-import Halogen (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -42,10 +33,8 @@ import Ocelot.Block.Button as Button
 import Ocelot.Block.Checkbox as Checkbox
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
-import SimulationBusListener (startSimulationFiber)
 import Stories.Tailwind.Styles as Tailwind
 import UIGuide.Block.Backdrop as Backdrop
-import Utility (getWindowWidthHeight)
 
 type Query :: forall k. k -> Type
 type Query = Const Void
@@ -144,7 +133,7 @@ handleAction = case _ of
     --               <- H.liftEffect $ run_D3M_Simulation simulation' (Graph.script graph)
     --         H.modify_ (\s -> s { fiber = Nothing, simulation = simulation'' })
     --         pure unit
-    H.modify_ (\s -> s { fiber = Nothing })
+    H.modify_ (\s -> s { fiber = Nothing, bus = Just simulationBus })
     pure unit
 
 

@@ -1,12 +1,10 @@
-module D3.Interpreter where
+module D3Tagless.Interpreter where
 
-import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Label)
-import D3.Data.Types (D3Selection_, Selector)
+import D3.Data.Types (Selector)
 import D3.Node (D3_Link, D3_SimulationNode)
 import D3.Selection (Behavior, ChainableS, D3_Node, Join)
-import D3.Simulation.Forces (Force, SimVariable(..))
-import Effect.Aff.Class (class MonadAff)
+import D3.Simulation.Types (Force, SimVariable, Step)
 import Prelude (class Monad, Unit)
 
 -- TODO see whether it can be useful to extend the interpreter here, for different visualization types
@@ -52,5 +50,4 @@ class (Monad m) <= SimulationM m where
   addTickFunction    :: forall selection. Label -> Step selection -> m Unit 
   removeTickFunction ::                   Label                   -> m Unit 
 
-data Step selection = Step selection (Array ChainableS)
 
