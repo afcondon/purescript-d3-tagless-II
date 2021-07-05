@@ -1,7 +1,5 @@
 module Stories.Spago where
 
-import D3Tagless.Interpreter.D3 (eval_D3M, removeExistingSVG)
-import D3.Simulation.Forces (createForce, enableForce)
 import Prelude
 
 import Affjax as AJAX
@@ -9,10 +7,13 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState)
 import D3.Data.Types (D3Selection_)
 import D3.Examples.Spago (treeReduction)
-import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
+import D3.Examples.Spago.Files (SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.Simulation.Config as F
-import D3.Simulation.Types (Force(..), ForceType(..), SimCommand, SimVariable, SimulationState_(..))
+import D3.Simulation.Forces (createForce, enableForce)
+import D3.Simulation.Types (Force(..), ForceType(..), SimBusCommand, SimVariable, SimulationState_(..))
 import D3Tagless.Block.Card as Card
+import D3Tagless.Interpreter.D3 (eval_D3M, removeExistingSVG)
 import Data.Array ((:))
 import Data.Const (Const)
 import Data.Either (hush)
@@ -52,7 +53,7 @@ data Action
   
 type State = {
     fiber :: Maybe (Fiber Unit)
-  , bus   :: Maybe (Bus.BusRW SimCommand)
+  , bus   :: Maybe (Bus.BusRW (SimBusCommand D3Selection_))
 }
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m

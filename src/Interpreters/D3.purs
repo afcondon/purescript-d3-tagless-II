@@ -1,26 +1,20 @@
 module D3Tagless.Interpreter.D3 where
 
-import D3.FFI (d3AddTransition_, d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3LowerSelection_, d3OrderSelection_, d3RaiseSelection_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectFirstInDOM_, d3SelectionIsEmpty_, d3SelectionSelectAll_, d3SelectionSelect_, d3SetAttr_, d3SetHTML_, d3SetProperty_, d3SetText_, d3SortSelection_, defaultDrag_, disableDrag_, disableTick_, onTick_, selectionOn_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
-import D3Tagless.Interpreter (class SelectionM, class SimulationM, modifySelection)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, bind, discard, liftA1, pure, show, unit, ($), (<$>), (<>), (==))
+import D3.Simulation.Functions
 
-import Control.Monad.State (class MonadState, State, StateT, get, modify_, runStateT)
-import D3.Attributes.Instances (Attribute(..), Label, unbox)
+import Control.Monad.State (class MonadState, StateT, get, runStateT)
 import D3.Data.Types (D3Selection_)
-import D3.Node (D3_Link, D3_SimulationNode)
-import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), OrderingAttribute(..))
-import D3.Simulation.Forces (disableByLabels, enableByLabels, putForceInSimulation, setForceAttr)
-import D3.Simulation.Types (Force(..), ForceStatus(..), SimVariable(..), SimulationState_(..), Step(..)) 
+import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectFirstInDOM_, d3SelectionIsEmpty_, d3SelectionSelectAll_, d3SelectionSelect_, defaultDrag_, disableDrag_, disableTick_, onTick_)
+import D3.Selection (Behavior(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), applyChainableSD3)
+import D3.Simulation.Types (SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import Data.Array (intercalate)
-import Data.Array as A
-import Data.Foldable (foldl, traverse_)
+import D3Tagless.Interpreter (class SelectionM, class SimulationM, modifySelection)
+import Data.Foldable (foldl)
 import Data.Identity (Identity(..))
-import Data.Map as M
-import Data.Newtype (unwrap)
-import Data.Tuple (Tuple(..), fst, snd)
+import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, bind, discard, liftA1, pure, show, unit, ($), (<$>), (<>))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
@@ -128,42 +122,6 @@ instance d3TaglessD3M :: SelectionM D3Selection_ (D3M state D3Selection_) where
     pure unit
 
 
-applyChainableSD3 :: D3Selection_ -> ChainableS -> D3Selection_
-applyChainableSD3 selection_ (AttrT (ToAttribute label attr)) = 
-  d3SetAttr_ label (unbox attr) selection_
-
--- NB only protection against non-text attribute for Text field is in the helper function
--- and similarly for Property and HTML
-applyChainableSD3 selection_ (TextT (ToAttribute label attr))     = d3SetText_     (unbox attr) selection_ 
-applyChainableSD3 selection_ (PropertyT (ToAttribute label attr)) = d3SetProperty_ (unbox attr) selection_ 
-applyChainableSD3 selection_ (HTMLT (ToAttribute label attr))     = d3SetHTML_     (unbox attr) selection_ 
-
--- NB this remove call will have no effect on elements with active or pending transitions
--- and this gives rise to very counter-intuitive misbehaviour as subsequent enters clash with 
--- elements that should have been removed
--- also NB "selection" here will often be a "transition" but this distinction won't matter (i think)
--- TODO remove is not like other chainables, in fact it's not chainable since it returns unit
-applyChainableSD3 selection_ RemoveT = do
-  let _ = d3RemoveSelection_ selection_ 
-  selection_
-
--- for transition in D3 we must use .call(selection, transition) so that chain continues
--- in this interpreter it's enought to just return the selection instead of the transition
-applyChainableSD3 selection_ (TransitionT chain transition) = do
-  let tHandler = d3AddTransition_ selection_ transition
-      _        = foldl applyChainableSD3 tHandler chain
-  selection_ -- NB we return selection, not transition
-
-applyChainableSD3 selection_ (OnT event listener) = selectionOn_ selection_ (show event) listener
-
-applyChainableSD3 selection_ (OrderingT oAttr) =
-  case oAttr of
-    Order          -> d3OrderSelection_ selection_
-    (Sort compare) -> d3SortSelection_ selection_ compare
-    Raise          -> d3RaiseSelection_ selection_
-    Lower          -> d3LowerSelection_ selection_
-
-
 -- TODO reuse existing SVG if it's the right one
 removeExistingSVG :: forall m. SelectionM D3Selection_ m => String -> m D3Selection_
 removeExistingSVG rootSelector = do
@@ -244,102 +202,3 @@ instance simulationD3M :: SimulationM (D3M SimulationState_ D3Selection_) where
     -- TODO delete the tick function from the state
     pure $ disableTick_ sim.simulation label
 
--- | Underlying functions which allow us to make monadic updates from OUTSIDE of a script
--- | allowing control of the simulation outside of the drawing phase which runs in D3M
-simulationLoadForces :: Array Force -> State SimulationState_ Unit
-simulationLoadForces forces = do
-  simulationRemoveAllForces
-  traverse_ simulationAddForce forces
-
-simulationRemoveAllForces :: State SimulationState_ Unit
-simulationRemoveAllForces = do
-    (SS_ sim) <- get
-    let _ = (setAsNullForceInSimulation_ sim.simulation) <$> (A.fromFoldable $ M.keys sim.forces)
-    modify_ (\(SS_ s) -> SS_ s { forces = (M.empty :: M.Map Label Force) } )
-
-simulationAddForce :: Force -> State SimulationState_ Unit
-simulationAddForce force@(Force l status t attrs h_) = do
-    -- TODO this should be a traverse_ eventually
-    let _ = (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
-    (SS_ sim) <- get
-    let _ = if status == ForceActive
-            then putForceInSimulation force sim.simulation
-            else sim.simulation
-    -- if the force isn't active then we just keep it in map, with label as key
-    modify_ $ (\s -> SS_ sim { forces = M.insert l force sim.forces })
-
-simulationDisableForcesByLabel :: Array Label -> State SimulationState_ Unit
-simulationDisableForcesByLabel labels = do
-  (SS_ sim) <- get
-  let updatedForces = (disableByLabels sim.simulation labels) <$> sim.forces
-  modify_ (\s -> SS_ sim { forces = updatedForces } )
-
-simulationEnableForcesByLabel :: Array Label  -> State SimulationState_ Unit
-simulationEnableForcesByLabel labels  = do
-  (SS_ sim) <- get
-  let updatedForces = (enableByLabels sim.simulation labels) <$> sim.forces
-  modify_ (\s -> SS_ sim { forces = updatedForces } )
-  
-simulationSetVariable :: SimVariable -> State SimulationState_ Unit
-simulationSetVariable v = do
-  (SS_ sim) <- get
-  let sim' = case v of
-            (Alpha n)         -> do
-              let _ = setAlpha_ sim.simulation n
-              sim { alpha = n }
-            (AlphaTarget n)   -> do
-              let _ = setAlphaTarget_ sim.simulation n
-              sim { alphaTarget = n }
-            (AlphaMin n)      -> do
-              let _ = setAlphaMin_ sim.simulation n
-              sim { alphaMin = n }
-            (AlphaDecay n)    -> do
-              let _ = setAlphaDecay_ sim.simulation n
-              sim { alphaDecay = n }
-            (VelocityDecay n) -> do
-              let _ = setVelocityDecay_ sim.simulation n
-              sim { velocityDecay = n }
-  modify_ (\s -> SS_ sim' )
-
-simulationStart :: State SimulationState_ Unit
-simulationStart = do
-  (SS_ sim) <- get
-  let _ = startSimulation_  sim.simulation
-      _ = setAlpha_ sim.simulation 1.0
-  modify_ (\s -> SS_ sim { running = true, alpha = 1.0 } )
-
-simulationStop :: State SimulationState_ Unit
-simulationStop = do
-  (SS_ sim) <- get
-  let _ = stopSimulation_ sim.simulation
-  modify_ (\s -> SS_ sim { running = false } )
-
-simulationShowForces :: State SimulationState_ String
-simulationShowForces = do
-  (SS_ sim) <- get
-  let forceTuples = M.toUnfoldable sim.forces
-      showTuple (Tuple label force) = show label <> " " <> show force
-  pure $ intercalate "\n" $ showTuple <$> forceTuples
-
-simulationSetNodes :: forall d. Array (D3_SimulationNode d) -> State SimulationState_ (Array (D3_SimulationNode d))
-simulationSetNodes nodes = do
-  (SS_ sim) <- get
-  let _ = sim.simulation `setNodes_` nodes
-  pure nodes -- TODO return the modified nodes instead (need to explicitly model these transformations)
-
-simulationSetLinks :: forall d r. Array (D3_Link d r) -> State SimulationState_ (Array (D3_Link d r))
-simulationSetLinks links = do
-  (SS_ sim) <- get
-  let _ = setLinks_ sim.simulation links (\d i -> d.id)
-  pure links -- TODO return the modified links, ie where indexes are replaced with object (references)
-
-simulationCreateTickFunction :: forall selection. Label -> Step selection -> State SimulationState_ Unit
-simulationCreateTickFunction label tick@(Step selection chain) = do
-  (SS_ sim) <- get
-  let makeTick _ = do
-        -- TODO this coerce is forced upon us here due to forall selection in SimulationM
-        -- going to have to parameterize simulation with selection or hide the type dep somehow
-        let _ = (applyChainableSD3 (unsafeCoerce selection)) <$> chain
-        unit
-  modify_ $ (\s -> SS_ sim { ticks = M.insert label (unsafeCoerce tick) sim.ticks })
-  pure $ onTick_ sim.simulation label makeTick

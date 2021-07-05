@@ -1,9 +1,11 @@
 module D3.Selection where
 
-import D3.Attributes.Instances (Attribute, Listener_, attrLabel)
-import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Element, MouseEvent, Transition)
-import D3.FFI (ComputeKeyFunction_)
+import D3.FFI
+
+import D3.Attributes.Instances (Attribute(..), Listener_, attrLabel, unbox)
+import D3.Data.Types (D3Selection_, Datum_, Element, MouseEvent, Transition)
 import D3.Zoom (ZoomConfig)
+import Data.Array (foldl)
 import Data.Maybe.Last (Last)
 import Prelude (class Eq, class Ord, class Show, Unit, show, (<>))
 
@@ -96,3 +98,38 @@ instance showOrderingAttribute :: Show OrderingAttribute where
   show Lower    = "Lower"
   show (Sort _) = "Sort"
 
+
+applyChainableSD3 :: D3Selection_ -> ChainableS -> D3Selection_
+applyChainableSD3 selection_ (AttrT (ToAttribute label attr)) = 
+  d3SetAttr_ label (unbox attr) selection_
+
+-- NB only protection against non-text attribute for Text field is in the helper function
+-- and similarly for Property and HTML
+applyChainableSD3 selection_ (TextT (ToAttribute label attr))     = d3SetText_    (unbox attr) selection_ 
+applyChainableSD3 selection_ (PropertyT (ToAttribute label attr)) = d3SetProperty_ (unbox attr) selection_ 
+applyChainableSD3 selection_ (HTMLT (ToAttribute label attr))     = d3SetHTML_     (unbox attr) selection_ 
+
+-- NB this remove call will have no effect on elements with active or pending transitions
+-- and this gives rise to very counter-intuitive misbehaviour as subsequent enters clash with 
+-- elements that should have been removed
+-- also NB "selection" here will often be a "transition" but this distinction won't matter (i think)
+-- TODO remove is not like other chainables, in fact it's not chainable since it returns unit
+applyChainableSD3 selection_ RemoveT = do
+  let _ = d3RemoveSelection_ selection_ 
+  selection_
+
+-- for transition in D3 we must use .call(selection, transition) so that chain continues
+-- in this interpreter it's enought to just return the selection instead of the transition
+applyChainableSD3 selection_ (TransitionT chain transition) = do
+  let tHandler = d3AddTransition_ selection_ transition
+      _        = foldl applyChainableSD3 tHandler chain
+  selection_ -- NB we return selection, not transition
+
+applyChainableSD3 selection_ (OnT event listener) = selectionOn_ selection_ (show event) listener
+
+applyChainableSD3 selection_ (OrderingT oAttr) =
+  case oAttr of
+    Order          -> d3OrderSelection_ selection_
+    (Sort compare) -> d3SortSelection_ selection_ compare
+    Raise          -> d3RaiseSelection_ selection_
+    Lower          -> d3LowerSelection_ selection_

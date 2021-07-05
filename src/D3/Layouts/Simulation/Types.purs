@@ -4,8 +4,10 @@ import Prelude
 
 import D3.Attributes.Instances (Attribute, Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, PointXY)
+import D3.Examples.Spago.Files (SpagoGraphLinkID)
+import D3.Examples.Spago.Model (SpagoSimNode)
 import D3.FFI (D3ForceHandle_, SimulationConfig_, initSimulation_)
-import D3.Node (D3_Link, NodeID)
+import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (ChainableS)
 import Data.Map as M
 import Data.Newtype (class Newtype)
@@ -14,18 +16,18 @@ data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDe
 
 data Step selection = Step selection (Array ChainableS)
 
-data SimCommand =
+data SimBusCommand selection =
     Start
   | Stop
-  | RemoveAllForcesSim
-  | SetConfigVariable    SimVariable
-  | LoadForces           (Array Force)
-  | AddForce             Force
-  | DisableForcesByLabel (Array Label)
-  | EnableForcesByLabel  (Array Label)
-  -- | SetNodes             (Array d)
-  -- | SetLinks             (Array l)
-  -- | AddTickFunction Label (Step selection)
+  | RemoveAllForces
+  | SetConfigVariable     SimVariable
+  | LoadForces            (Array Force)
+  | AddForce              Force
+  | DisableForcesByLabel  (Array Label)
+  | EnableForcesByLabel   (Array Label)
+  | SetNodes              (Array SpagoSimNode)
+  | SetLinks              (Array SpagoGraphLinkID)
+  | AddTickFunction Label (Step selection)
   | RemoveTickFunction    Label
 
 -- TODO we won't export the constructor here when we close exports
