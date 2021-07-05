@@ -29,7 +29,7 @@ getHandle (Force l s t cs h_) = h_
 
 data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number
 
-data SimCommand d l =
+data SimCommand =
     Start
   | Stop
   | RemoveAllForcesSim
@@ -38,8 +38,8 @@ data SimCommand d l =
   | AddForce             Force
   | DisableForcesByLabel (Array Label)
   | EnableForcesByLabel  (Array Label)
-  | SetNodes             (Array d)
-  | SetLinks             (Array l)
+  -- | SetNodes             (Array d)
+  -- | SetLinks             (Array l)
   -- | AddTickFunction Label (Step selection)
   | RemoveTickFunction    Label
 

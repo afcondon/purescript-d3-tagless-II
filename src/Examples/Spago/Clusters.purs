@@ -39,12 +39,12 @@ script model = do
                                                , classed "d3svg cluster" ] )
   nodesGroup <- svg  `appendElement` (node Group  [ classed "nodes" ])
 
-  nodes     <- setNodes model.nodes
+  setNodes model.nodes
 
   nodesSelection <- nodesGroup <+> Join { -- we're putting a group in with an eye to transitions to other layouts
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : nodes
+    , "data"    : model.nodes -- TODO this is not the in-simulation nodes, setNodes temporarily returning unit only
     , behaviour : [ classed datum_.nodeClass ]
                   --, onMouseEvent MouseClick (\e d t -> toggleSpotlight e sim.simulation d) ]
   }

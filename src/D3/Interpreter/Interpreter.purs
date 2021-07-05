@@ -30,7 +30,7 @@ infix 4 join as <+>
 -- 2)...
 
 -- REVIEW this might need to be parameterized with the selection type too, so that the two capabilities match
-class (Monad m, MonadAff m) <= SimulationM m where
+class (Monad m) <= SimulationM m where
   -- control
   start :: m Unit
   stop  :: m Unit

@@ -15,7 +15,7 @@ import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.FFI (initSimulation_)
 import D3.Interpreter (class SelectionM, class SimulationM)
-import D3.Simulation.Config (SimVariable, SimulationConfig_, defaultConfigSimulation)
+import D3.Simulation.Config (SimulationConfig_, defaultConfigSimulation)
 import D3.Simulation.Config as F
 import D3Tagless.Block.Card as Card
 import Data.Array ((:))
@@ -61,11 +61,9 @@ data Action
   | Stop
   | Start
   
-type State = { 
-    simulationFiber :: Maybe (Fiber Unit)
-  , simulationBus   :: Bus.BusRW ()
-  , simulation :: SimulationState_
-  , groupings :: M.Map Label Selector
+type State = {
+    fiber :: Maybe (Fiber Unit)
+  , bus   :: Maybe (Bus.BusRW SimCommand)
 }
 
 component :: forall m. MonadAff m => H.Component Query Unit Void m
@@ -80,7 +78,7 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { fiber: Nothing, simulation: initialSimulationState, groupings: M.empty }
+  initialState = { fiber: Nothing, bus: Nothing }
 
   renderSimControls _ =
     HH.div
@@ -115,10 +113,11 @@ component = H.mkComponent
         [ Tailwind.apply "story-container spago" ]
         [ HH.div
             [ Tailwind.apply "story-panel-about" ]
-            [ renderSimControls state.simulation
-            , renderTableForces state.simulation
-            , renderTableElements state.simulation
-            , Card.card_ [ blurbtext ]
+            -- [ renderSimControls state.simulation
+            -- , renderTableForces state.simulation
+            -- , renderTableElements state.simulation
+            -- , Card.card_ [ blurbtext ]
+            [ Card.card_ [ blurbtext ]
             ]
         , HH.div
             [ Tailwind.apply "svg-container" ]
@@ -132,19 +131,21 @@ handleAction = case _ of
     (detached :: D3Selection_)  <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
     (model :: Maybe SpagoModel) <- H.liftAff getModel
     simulationBus               <- Bus.make
-    simulation                  <- H.gets _.simulation
+    -- simulation                  <- H.gets _.simulation
     -- fiber                       <- H.liftAff $ forkAff $ drawGraph simulation graph
-    fiber                       <- H.liftAff $ forkAff $ startSimulationFiber simulationBus
+    -- fiber                       <- H.liftAff $ forkAff $ startSimulationFiber simulationBus
 
-    case model of
-          Nothing -> pure unit
-          (Just graph) -> do
-            let simulation' = execState (simulationLoadForces initialForces) simulation 
-            -- TODO properly think out / design relationship between fiber and simulation
-            (Tuple svg simulation'' :: Tuple D3Selection_ SimulationState_) 
-                  <- H.liftEffect $ run_D3M_Simulation simulation' (Graph.script graph)
-            H.modify_ (\s -> s { fiber = Nothing, simulation = simulation'' })
-            pure unit
+    -- case model of
+    --       Nothing -> pure unit
+    --       (Just graph) -> do
+    --         let simulation' = execState (simulationLoadForces initialForces) simulation 
+    --         -- TODO properly think out / design relationship between fiber and simulation
+    --         (Tuple svg simulation'' :: Tuple D3Selection_ SimulationState_) 
+    --               <- H.liftEffect $ run_D3M_Simulation simulation' (Graph.script graph)
+    --         H.modify_ (\s -> s { fiber = Nothing, simulation = simulation'' })
+    --         pure unit
+    H.modify_ (\s -> s { fiber = Nothing })
+    pure unit
 
 
   Finalize -> do
@@ -155,38 +156,35 @@ handleAction = case _ of
       H.modify_ (\state -> state { fiber = Nothing })
   
   SetPackageForce packageForce -> do
-    simulation <- H.gets _.simulation
-    let updatedSimulation = 
-          case packageForce of
-            PackageRing -> execState (simulationEnableForcesByLabel ["packageGrid"]) simulation
-            PackageGrid -> execState (simulationAddForce (enableForce packageOnlyFixToGridForce)) simulation
-            PackageFree -> execState (simulationDisableForcesByLabel ["packageOrbit", "packageGrid"]) simulation
-    H.modify_ (\state -> state { simulation = updatedSimulation })
+    -- simulation <- H.gets _.simulation
+    -- let updatedSimulation = 
+    --       case packageForce of
+    --         PackageRing -> execState (simulationEnableForcesByLabel ["packageGrid"]) simulation
+    --         PackageGrid -> execState (simulationAddForce (enableForce packageOnlyFixToGridForce)) simulation
+    --         PackageFree -> execState (simulationDisableForcesByLabel ["packageOrbit", "packageGrid"]) simulation
+    -- H.modify_ (\state -> state { simulation = updatedSimulation })
+    pure unit
 
   SetModuleForce _ -> do
     pure unit
 
   ChangeSimConfig c -> do
-    simulation <- H.gets _.simulation
-    let updatedSimulation = 
-          case c of
-            (Alpha v)         -> execState (simulationSetAlpha v) simulation
-            (AlphaTarget v)   -> execState (simulationSetAlphaTarget v) simulation
-            (AlphaMin v)      -> execState (simulationSetAlphaMin v) simulation
-            (AlphaDecay v)    -> execState (simulationSetAlphaDecay v) simulation
-            (VelocityDecay v) -> execState (simulationSetVelocityDecay v) simulation
-    H.modify_ (\state -> state { simulation = updatedSimulation })
+    -- simulation <- H.gets _.simulation
+    -- let updatedSimulation = execState (simulationSetVariable c) simulation
+    -- H.modify_ (\state -> state { simulation = updatedSimulation })
+    pure unit
 
   Start -> do
-    simulation <- H.gets _.simulation
-    let updatedSimulation = execState simulationStart simulation
-    H.modify_ (\state -> state { simulation = updatedSimulation })
+    -- simulation <- H.gets _.simulation
+    -- let updatedSimulation = execState simulationStart simulation
+    -- H.modify_ (\state -> state { simulation = updatedSimulation })
+    pure unit
 
   Stop -> do
-    simulation <- H.gets _.simulation
-    let updatedSimulation = execState simulationStop simulation
-    H.modify_ (\state -> state { simulation = updatedSimulation })
-
+    -- simulation <- H.gets _.simulation
+    -- let updatedSimulation = execState simulationStop simulation
+    -- H.modify_ (\state -> state { simulation = updatedSimulation })
+    pure unit
 
 -- drawGraph :: SimulationState_ -> SpagoModel -> Aff Unit
 -- drawGraph simulation graph = do

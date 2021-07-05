@@ -3,19 +3,20 @@ module D3Tagless.App.Routes
 where
 
 import Prelude
+
+import D3Tagless.App (Group(..), proxy)
 import Data.Const (Const)
 import Data.Map (Map, fromFoldable)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Halogen as H
-import D3Tagless.App (Group(..), proxy)
-import UIGuide.Component.Modals as Modals
 import Stories.GUP as D3GUP
 import Stories.LesMis as LesMis
 import Stories.MetaTree as MetaTree
 import Stories.PrintTree as PrintTree
 import Stories.Spago as Spago
 import Stories.Trees as Trees
+import UIGuide.Component.Modals as Modals
 
 ----------
 -- Routes
@@ -23,6 +24,7 @@ import Stories.Trees as Trees
 groups :: Array Group
 groups =
   [ Examples
+  , AltInterpreters
   , Application
   ]
 
@@ -52,12 +54,12 @@ routes = fromFoldable
   , Tuple "metatree"
     { anchor: "Meta Trees"
     , component: proxy MetaTree.component
-    , group: Examples
+    , group: AltInterpreters
     }
   , Tuple "printtree"
     { anchor: "Print Tree"
     , component: proxy PrintTree.component
-    , group: Examples
+    , group: AltInterpreters
     }
   , Tuple "spago"
     { anchor: "Spago"

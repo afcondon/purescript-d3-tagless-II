@@ -110,8 +110,8 @@ graphScript model selector = do
   linksGroup <- svg  `appendElement` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `appendElement` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
   
-  nodes <- setNodes model.nodes 
-  links <- setLinks model.links
+  setNodes model.nodes 
+  setLinks model.links
 
   linksSelection <- join linksGroup $ Join {
       element   : Line
@@ -122,7 +122,7 @@ graphScript model selector = do
   nodesSelection <- join nodesGroup $ Join {
       element   : Circle
     , key       : UseDatumAsKey
-    , "data"    : nodes
+    , "data"    : model.nodes -- TODO this is NOT the in-model nodes, setNodes temporarily returns unit only
     , behaviour : [ radius 5.0, fill datum_.colorByGroup ]
   }
 

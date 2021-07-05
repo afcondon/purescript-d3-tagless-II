@@ -56,13 +56,15 @@ type Page m =
 
 data Group
   = Examples
+  | AltInterpreters
   | Application
 
 derive instance eqGroup :: Eq Group
 derive instance ordGroup :: Ord Group
 instance showGroup :: Show Group where
-  show Examples = "Examples"
-  show Application = "Application"
+  show Examples        = "Examples"
+  show Application     = "Application"
+  show AltInterpreters = "Alternative interpreters"
 
 type HTML m = H.ComponentHTML Action Slots m
 
