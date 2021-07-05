@@ -6,12 +6,12 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState)
 import D3.Data.Types (D3Selection_)
-import D3.Examples.Spago (treeReduction)
+import D3.Examples.Spago (startSimulationFiber, treeReduction)
 import D3.Examples.Spago.Files (SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
-import D3.Simulation.Types (Force(..), ForceType(..), SimBusCommand, SimVariable, SimulationState_(..))
+import D3.Simulation.Types (Force(..), ForceType(..), SimBusCommand(..), SimVariable, SimulationState_(..))
 import D3Tagless.Block.Card as Card
 import D3Tagless.Interpreter.D3 (eval_D3M, removeExistingSVG)
 import Data.Array ((:))
@@ -22,7 +22,8 @@ import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
 import Data.Tuple (snd)
-import Effect.Aff (Aff, Fiber, killFiber)
+import Debug (trace)
+import Effect.Aff (Aff, Fiber, forkAff, killFiber)
 import Effect.Aff.Bus as Bus
 import Effect.Aff.Class (class MonadAff)
 import Effect.Exception (error)
@@ -48,8 +49,8 @@ data Action
   | SetPackageForce PackageForce
   | SetModuleForce ModuleForce
   | ChangeSimConfig SimVariable
-  | Stop
-  | Start
+  | StopSim
+  | StartSim
   
 type State = {
     fiber :: Maybe (Fiber Unit)
@@ -70,19 +71,19 @@ component = H.mkComponent
   initialState :: State
   initialState = { fiber: Nothing, bus: Nothing }
 
-  renderSimControls _ =
+  renderSimControls =
     HH.div
       [ HP.classes [ HH.ClassName "m-6" ]]
       [ HH.h3_
           [ HH.text "Simulation controls" ]
       , HH.div_
           [ Button.button
-              [ HE.onClick $ const Stop ]
+              [ HE.onClick $ const StopSim ]
               [ HH.text "Stop" ]
           ]
       , HH.div_
           [ Button.button
-              [ HE.onClick $ const Start ]
+              [ HE.onClick $ const StartSim ]
               [ HH.text "Start" ]
           ]
       , HH.div_
@@ -103,11 +104,12 @@ component = H.mkComponent
         [ Tailwind.apply "story-container spago" ]
         [ HH.div
             [ Tailwind.apply "story-panel-about" ]
-            -- [ renderSimControls state.simulation
+            -- [ 
             -- , renderTableForces state.simulation
             -- , renderTableElements state.simulation
             -- , Card.card_ [ blurbtext ]
-            [ Card.card_ [ blurbtext ]
+            [ renderSimControls
+            , Card.card_ [ blurbtext ]
             ]
         , HH.div
             [ Tailwind.apply "svg-container" ]
@@ -123,7 +125,7 @@ handleAction = case _ of
     simulationBus               <- Bus.make
     -- simulation                  <- H.gets _.simulation
     -- fiber                       <- H.liftAff $ forkAff $ drawGraph simulation graph
-    -- fiber                       <- H.liftAff $ forkAff $ startSimulationFiber simulationBus
+    fiber                       <- H.liftAff $ forkAff $ startSimulationFiber simulationBus
 
     -- case model of
     --       Nothing -> pure unit
@@ -132,9 +134,7 @@ handleAction = case _ of
     --         -- TODO properly think out / design relationship between fiber and simulation
     --         (Tuple svg simulation'' :: Tuple D3Selection_ SimulationState_) 
     --               <- H.liftEffect $ run_D3M_Simulation simulation' (Graph.script graph)
-    --         H.modify_ (\s -> s { fiber = Nothing, simulation = simulation'' })
-    --         pure unit
-    H.modify_ (\s -> s { fiber = Nothing, bus = Just simulationBus })
+    H.modify_ (\s -> s { fiber = Just fiber, bus = Just simulationBus })
     pure unit
 
 
@@ -146,7 +146,11 @@ handleAction = case _ of
       H.modify_ (\state -> state { fiber = Nothing })
   
   SetPackageForce packageForce -> do
-    -- simulation <- H.gets _.simulation
+    maybeBus <- H.gets _.bus
+    _ <- pure $ case maybeBus of
+              Nothing -> trace { setPackageForce: "Nothing branch" } \_ -> pure unit
+              (Just simbus) -> trace { setPackageForce: "Just branch" } \_ -> Bus.write Start simbus
+    -- (Bus.write Start) <$> maybeBus 
     -- let updatedSimulation = 
     --       case packageForce of
     --         PackageRing -> execState (simulationEnableForcesByLabel ["packageGrid"]) simulation
@@ -164,13 +168,13 @@ handleAction = case _ of
     -- H.modify_ (\state -> state { simulation = updatedSimulation })
     pure unit
 
-  Start -> do
+  StartSim -> do
     -- simulation <- H.gets _.simulation
     -- let updatedSimulation = execState simulationStart simulation
     -- H.modify_ (\state -> state { simulation = updatedSimulation })
     pure unit
 
-  Stop -> do
+  StopSim -> do
     -- simulation <- H.gets _.simulation
     -- let updatedSimulation = execState simulationStop simulation
     -- H.modify_ (\state -> state { simulation = updatedSimulation })
