@@ -1,103 +1,115 @@
-module D3Tagless.Interpreter.D3Bus where
+module D3Tagless.D3Bus where
 
 import Control.Monad.Reader (class MonadAsk, ReaderT, ask, asks)
+import Control.Monad.State (class MonadState, StateT, get, runStateT)
 import D3.Data.Types (D3Selection_)
 import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectFirstInDOM_, d3SelectionIsEmpty_, d3SelectionSelectAll_, d3SelectionSelect_, defaultDrag_, disableDrag_)
 import D3.Selection (Behavior(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), applyChainableSD3)
 import D3.Simulation.Types (SimBusCommand(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Interpreter (class SelectionM, class SimulationM, modifySelection)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, modifySelection)
 import Data.Foldable (foldl)
+import Data.Tuple (Tuple, fst, snd)
+import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Aff.Bus as Bus
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, bind, discard, pure, show, unit, ($), (<>))
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, bind, discard, liftA1, pure, show, unit, ($), (<>))
 import Type.Equality (class TypeEquals, from)
 
-newtype D3MB selection a = D3MB (ReaderT (Bus.BusRW (SimBusCommand selection)) Aff a)
+-- | D3MB is a monad for running D3 scripts that use a Simulation engine over a Bus, allowing sharing of one simulation with many scripts
+
+type SimBus selection = (Bus.BusRW (SimBusCommand selection)) 
+newtype D3MB selection a = D3MB (StateT (SimBus selection) Aff a)
 
 derive newtype instance functorD3MB     :: Functor           (D3MB selection)
 derive newtype instance applyD3MB       :: Apply             (D3MB selection)
 derive newtype instance applicativeD3MB :: Applicative       (D3MB selection)
 derive newtype instance bindD3MB        :: Bind              (D3MB selection)
 derive newtype instance monadD3MB       :: Monad             (D3MB selection)
--- derive newtype instance monadStateD3MB  :: MonadState  (Bus.BusRW SimBusCommand) (D3MB selection) 
 derive newtype instance monadEffD3MB    :: MonadEffect       (D3MB selection)
 derive newtype instance monadAffD3MB    :: MonadAff          (D3MB selection)
+derive newtype instance monadStateD3MB  :: MonadState  (SimBus selection) (D3MB selection) 
 
-instance monadAskD3MB :: TypeEquals e (Bus.BusRW (SimBusCommand selection)) => MonadAsk e (D3MB selection) where
-  ask = D3MB $ asks from
+run_D3MB_Simulation :: forall a. SimBus D3Selection_ -> D3MB D3Selection_ a -> Aff (Tuple a (SimBus D3Selection_))
+run_D3MB_Simulation bus (D3MB state_T) = runStateT state_T bus
+
+eval_D3MB_Simulation :: forall a. SimBus D3Selection_ -> D3MB D3Selection_ a -> Aff a
+eval_D3MB_Simulation bus (D3MB state_T) = liftA1 fst $ runStateT state_T bus
+
+exec_D3MB_Simulation :: forall a. SimBus D3Selection_ -> D3MB D3Selection_ a -> Aff (SimBus D3Selection_)
+exec_D3MB_Simulation bus (D3MB state_T) = liftA1 snd $ runStateT state_T bus
 
 -- | ====================================================
 -- | Simulation instance (capability) for the D3 interpreter
 -- | ====================================================
-instance simulationD3MB :: SimulationM (D3MB D3Selection_) where
+instance simulationCapabilityD3MB :: SimulationM (D3MB D3Selection_) where
   start = do
-    simBus  <- ask
+    simBus  <- get
     liftAff $ Bus.write Start simBus
     pure unit
 
   stop = do
-    simBus <- ask
+    simBus <- get
     liftAff $ Bus.write Stop simBus
     pure unit
 
   removeAllForces = do
-    simBus <- ask
+    simBus <- get
     liftAff $ Bus.write RemoveAllForces simBus
     pure unit
 
   loadForces forces = do
-    simBus <- ask
+    simBus <- get
     liftAff $ Bus.write (LoadForces forces) simBus
     pure unit
   
   addForce force = do
-    simBus <- ask
+    simBus <- get
     liftAff $ Bus.write (AddForce force) simBus
     pure unit
 
   disableForcesByLabel labels = do
-    simBus <- ask
+    simBus <- get
     liftAff $ Bus.write (DisableForcesByLabel labels) simBus
     pure unit
 
   enableForcesByLabel labels  = do
-    simBus <- ask
+    simBus <- get
     liftAff $ Bus.write (EnableForcesByLabel labels) simBus
     pure unit
     
   setConfigVariable c = do
-    simBus <- ask
+    simBus <- get
     liftAff $ Bus.write (SetConfigVariable c) simBus
     pure unit
 
   setNodes nodes = do
-    simBus <- ask
+    simBus <- get
     -- liftAff $ Bus.write (SetNodes nodes) simBus
     pure unit
 
   setLinks links = do
-    simBus <- ask
+    simBus <- get
     -- liftAff $ Bus.write (SetLinks links) simBus
     pure unit
 
   addTickFunction label (Step selection chain) = do
-    simBus <- ask
+    simBus <- get
     pure unit
 
   removeTickFunction label = do
-    simBus <- ask
+    simBus <- get
     liftAff $ Bus.write (RemoveTickFunction label) simBus
     pure unit
 
 
   -- | ====================================================
--- | Selection instance (capability) for the D3 interpreter
--- | THIS IS THE EXACT SAME AS THE NON-BUS VERSION, BUT NO ORPHAN INSTANCES SO IT LIVES HERE
+-- | Selection instance (capability) for the D3 interpreter that uses bus to talk to simulation
+-- | THIS IS THE EXACT SAME CODE AS THE NON-BUS VERSION, BUT NO ORPHAN INSTANCES SO IT LIVES HERE
 -- | ====================================================
-instance d3TaglessD3MB :: SelectionM D3Selection_ (D3MB D3Selection_) where
+instance selectionCapabilityD3MB :: SelectionM D3Selection_ (D3MB D3Selection_) where
   attach selector = pure $ d3SelectAllInDOM_ selector 
 
   appendElement selection_ (D3_Node element attributes) = do

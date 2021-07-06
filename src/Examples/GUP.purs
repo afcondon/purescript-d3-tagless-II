@@ -4,7 +4,7 @@ import D3.Attributes.Sugar
 
 import D3.Attributes.Instances (datumIsChar, indexIsNumber)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
-import D3Tagless.Interpreter (class SelectionM, appendElement, attach, (<+>))
+import D3Tagless.Capabilities (class SelectionM, appendElement, attach, (<+>))
 import D3.Selection (ChainableS, Join(..), Keys(..), node, node_)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))

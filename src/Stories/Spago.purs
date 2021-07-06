@@ -8,12 +8,14 @@ import Control.Monad.State (class MonadState, get, gets)
 import D3.Data.Types (D3Selection_)
 import D3.Examples.Spago (startSimulationFiber, treeReduction)
 import D3.Examples.Spago.Files (SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow)
+import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Types (Force(..), ForceType(..), SimBusCommand(..), SimVariable, SimulationState_(..))
 import D3Tagless.Block.Card as Card
-import D3Tagless.Interpreter.D3 (eval_D3M, removeExistingSVG)
+import D3Tagless.D3 (eval_D3M, removeExistingSVG)
+import D3Tagless.D3Bus (eval_D3MB_Simulation, run_D3MB_Simulation)
 import Data.Array ((:))
 import Data.Const (Const)
 import Data.Either (hush)
@@ -37,6 +39,7 @@ import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Tailwind.Styles as Tailwind
 import UIGuide.Block.Backdrop as Backdrop
+import Unsafe.Coerce (unsafeCoerce)
 
 type Query :: forall k. k -> Type
 type Query = Const Void
@@ -119,21 +122,16 @@ handleAction :: forall m. Bind m => MonadAff m => MonadState State m =>
   Action -> m Unit
 handleAction = case _ of
   Initialize -> do
-    (detached :: D3Selection_)  <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
-    (model :: Maybe SpagoModel) <- H.liftAff getModel
     simulationBus               <- Bus.make
     fiber                       <- H.liftAff $ forkAff $ startSimulationFiber simulationBus
     H.modify_ (\s -> s { fiber = Just fiber, bus = Just simulationBus })
-
     busSend $ LoadForces initialForces
     
-    -- case model of
-    --       Nothing -> pure unit
-    --       (Just graph) -> do
-    --         let simulation' = execState (simulationLoadForces initialForces) simulation 
-    --         -- TODO properly think out / design relationship between fiber and simulation
-    --         (Tuple svg simulation'' :: Tuple D3Selection_ SimulationState_) 
-    --               <- H.liftEffect $ run_D3M_Simulation simulation' (Graph.script graph)
+    -- (detached :: D3Selection_)  <- eval_D3MB_Simulation simulationBus $ removeExistingSVG "div.svg-container"
+    (model :: Maybe SpagoModel) <- H.liftAff getModel
+    (_ :: D3Selection_) <- H.liftAff $ case model of
+            Nothing      -> pure $ unsafeCoerce unit -- TODO just temporary, pull out the script runner to fn that returns unit
+            (Just graph) -> eval_D3MB_Simulation simulationBus (Graph.script graph)
     pure unit
 
 

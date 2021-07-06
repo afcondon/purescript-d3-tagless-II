@@ -1,4 +1,4 @@
-module D3Tagless.Interpreter.D3 where
+module D3Tagless.D3 where
 
 import D3.Simulation.Functions
 
@@ -8,7 +8,7 @@ import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3
 import D3.Selection (Behavior(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), applyChainableSD3)
 import D3.Simulation.Types (SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Interpreter (class SelectionM, class SimulationM, modifySelection)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, modifySelection)
 import Data.Foldable (foldl)
 import Data.Identity (Identity(..))
 import Data.Tuple (Tuple, fst, snd)

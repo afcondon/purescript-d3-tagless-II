@@ -1,4 +1,4 @@
-module D3Tagless.Interpreter where
+module D3Tagless.Capabilities where
 
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (Selector)

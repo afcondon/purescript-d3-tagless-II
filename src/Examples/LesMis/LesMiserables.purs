@@ -8,8 +8,8 @@ import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOp
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
-import D3Tagless.Interpreter (class SelectionM, class SimulationM, addTickFunction, appendElement, attach, join, on, setLinks, setNodes)
-import D3Tagless.Interpreter.D3 (run_D3M_Simulation)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, appendElement, attach, join, on, setLinks, setNodes)
+import D3Tagless.D3 (run_D3M_Simulation)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config as F
