@@ -1,19 +1,16 @@
 module D3.Examples.Spago where
 
-import Affjax as AJAX
-import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.Rec.Class (forever)
 import D3.Data.Graph (getReachableNodes)
 import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Data.Types (D3Selection_, PointXY)
 import D3.Examples.Spago.Files (LinkType(..))
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, convertFilesToGraphModel, setXYExceptLeaves)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, setXYExceptLeaves)
 import D3.FFI (descendants_, getLayout, hierarchyFromJSON_, runLayoutFn_, treeSetSeparation_, treeSetSize_, treeSortForTree_Spago)
 import D3.Layouts.Hierarchical (radialSeparation)
 import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), NodeID)
 import D3.Simulation.Types (SimBusCommand(..))
 import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
-import Data.Either (hush)
 import Data.List (List(..), (:))
 import Data.List as L
 import Data.Map (Map, empty)
@@ -26,21 +23,30 @@ import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Aff.Bus as Bus
 import Effect.Class (liftEffect)
-import Effect.Class.Console (log)
+import Effect.Class.Console (log, logShow)
 import Math (cos, pi, sin)
-import Prelude (Unit, bind, discard, pure, unit, ($), (*), (<$>), (<*>), (<<<), (<>), (==), (||))
-import SimulationBusListener (startSimulationFiber)
+import Prelude (Unit, bind, discard, pure, show, unit, ($), (*), (<$>), (<<<), (<>), (==), (||))
 import Unsafe.Coerce (unsafeCoerce)
 
 startSimulationFiber :: Bus.BusRW (SimBusCommand D3Selection_) -> Aff Unit
 startSimulationFiber bus = do
   forever do
-    liftEffect $ log "waiting for someone to write to me"
+    -- liftEffect $ log "waiting for someone to write to me"
     action <- Bus.read bus
     case action of
-      Start -> log "just what i was waiting for"
-      _     -> log "not yet started"
-    liftEffect $ log "received an action"
+      Start -> logShow action
+      Stop -> logShow action
+      RemoveAllForces -> logShow action
+      (SetConfigVariable c) -> logShow action
+      (LoadForces _) -> logShow action
+      (AddForce _) -> logShow action
+      (DisableForcesByLabel _) -> logShow action
+      (EnableForcesByLabel _) -> logShow action
+      (SetNodes _) -> logShow action
+      (SetLinks _) -> logShow action
+      (AddTickFunction _ _) -> logShow action
+      (RemoveTickFunction _) -> logShow action
+    -- liftEffect $ log "received an action "<> show action
     pure unit
 
 -- TODO make this generic and extract from Spago example to library

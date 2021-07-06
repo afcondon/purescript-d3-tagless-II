@@ -30,6 +30,27 @@ data SimBusCommand selection =
   | AddTickFunction Label (Step selection)
   | RemoveTickFunction    Label
 
+instance showSimVariable :: Show SimVariable where
+  show (Alpha n) = "Alpha: " <> show n
+  show (AlphaTarget n) = "AlphaTarget: " <> show n
+  show (AlphaMin n) = "AlphaMin: " <> show n
+  show (AlphaDecay n) = "AlphaDecay: " <> show n
+  show (VelocityDecay n) = "VelocityDecay: " <> show n
+
+instance showSimCommand :: Show (SimBusCommand D3Selection_) where
+  show Start                      = "Start"
+  show Stop                       = "Stop"
+  show RemoveAllForces            = "RemoveAllForces"
+  show (SetConfigVariable c)      = "(SetConfigVariable" <> " " <> show c <> ")"
+  show (LoadForces _)             = "(LoadForces _)"
+  show (AddForce _)               = "(AddForce _)"
+  show (DisableForcesByLabel _)   = "(DisableForcesByLabel _)"
+  show (EnableForcesByLabel _)    = "(EnableForcesByLabel _)"
+  show (SetNodes _)               = "(SetNodes _)"
+  show (SetLinks _)               = "(SetLinks _)"
+  show (AddTickFunction _ _)      = "(AddTickFunction _ _)"
+  show (RemoveTickFunction _)     = "(RemoveTickFunction _)"
+
 -- TODO we won't export the constructor here when we close exports
 data Force = Force Label ForceStatus ForceType (Array ChainableF) D3ForceHandle_
 

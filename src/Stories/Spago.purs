@@ -4,7 +4,7 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState)
+import Control.Monad.State (class MonadState, get, gets)
 import D3.Data.Types (D3Selection_)
 import D3.Examples.Spago (startSimulationFiber, treeReduction)
 import D3.Examples.Spago.Files (SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow)
@@ -107,7 +107,6 @@ component = H.mkComponent
             -- [ 
             -- , renderTableForces state.simulation
             -- , renderTableElements state.simulation
-            -- , Card.card_ [ blurbtext ]
             [ renderSimControls
             , Card.card_ [ blurbtext ]
             ]
@@ -123,10 +122,11 @@ handleAction = case _ of
     (detached :: D3Selection_)  <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
     (model :: Maybe SpagoModel) <- H.liftAff getModel
     simulationBus               <- Bus.make
-    -- simulation                  <- H.gets _.simulation
-    -- fiber                       <- H.liftAff $ forkAff $ drawGraph simulation graph
     fiber                       <- H.liftAff $ forkAff $ startSimulationFiber simulationBus
+    H.modify_ (\s -> s { fiber = Just fiber, bus = Just simulationBus })
 
+    busSend $ LoadForces initialForces
+    
     -- case model of
     --       Nothing -> pure unit
     --       (Just graph) -> do
@@ -134,7 +134,6 @@ handleAction = case _ of
     --         -- TODO properly think out / design relationship between fiber and simulation
     --         (Tuple svg simulation'' :: Tuple D3Selection_ SimulationState_) 
     --               <- H.liftEffect $ run_D3M_Simulation simulation' (Graph.script graph)
-    H.modify_ (\s -> s { fiber = Just fiber, bus = Just simulationBus })
     pure unit
 
 
@@ -145,40 +144,34 @@ handleAction = case _ of
               (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
       H.modify_ (\state -> state { fiber = Nothing })
   
-  SetPackageForce packageForce -> do
-    maybeBus <- H.gets _.bus
-    _ <- liftAff $ case maybeBus of
-              Nothing -> trace { setPackageForce: "Nothing branch" } \_ -> pure unit
-              (Just simbus) -> trace { setPackageForce: "Just branch" } \_ -> Bus.write Start simbus
-    -- (Bus.write Start) <$> maybeBus 
-    -- let updatedSimulation = 
-    --       case packageForce of
-    --         PackageRing -> execState (simulationEnableForcesByLabel ["packageGrid"]) simulation
-    --         PackageGrid -> execState (simulationAddForce (enableForce packageOnlyFixToGridForce)) simulation
-    --         PackageFree -> execState (simulationDisableForcesByLabel ["packageOrbit", "packageGrid"]) simulation
-    -- H.modify_ (\state -> state { simulation = updatedSimulation })
-    pure unit
+  SetPackageForce packageForce ->
+    case packageForce of
+      PackageRing -> busSend Start
+      PackageGrid -> busSend Stop
+      PackageFree -> busSend RemoveAllForces
 
-  SetModuleForce _ -> do
-    pure unit
+  SetModuleForce moduleForce ->
+    case moduleForce of
+      ClusterPackage -> busSend Start
+      ForceTree      -> busSend Stop
 
-  ChangeSimConfig c -> do
-    -- simulation <- H.gets _.simulation
-    -- let updatedSimulation = execState (simulationSetVariable c) simulation
-    -- H.modify_ (\state -> state { simulation = updatedSimulation })
-    pure unit
+  ChangeSimConfig c -> busSend $ SetConfigVariable c
 
-  StartSim -> do
-    -- simulation <- H.gets _.simulation
-    -- let updatedSimulation = execState simulationStart simulation
-    -- H.modify_ (\state -> state { simulation = updatedSimulation })
-    pure unit
+  StartSim -> busSend Start
 
-  StopSim -> do
-    -- simulation <- H.gets _.simulation
-    -- let updatedSimulation = execState simulationStop simulation
-    -- H.modify_ (\state -> state { simulation = updatedSimulation })
-    pure unit
+  StopSim -> busSend Stop
+
+busSend :: forall m.
+  Bind m => 
+  MonadState State m => 
+  MonadAff m => 
+  SimBusCommand D3Selection_ -> m Unit
+busSend message = do
+  maybeBus <- gets _.bus
+  _ <- liftAff $ case maybeBus of
+                  Nothing -> pure unit
+                  (Just bus) -> Bus.write message bus
+  pure unit
 
 -- drawGraph :: SimulationState_ -> SpagoModel -> Aff Unit
 -- drawGraph simulation graph = do
