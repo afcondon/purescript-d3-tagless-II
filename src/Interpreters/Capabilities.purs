@@ -42,11 +42,8 @@ class (Monad m) <= SimulationM m where
   enableForcesByLabel  :: Array Label -> m Unit
   -- management of data (nodes and links)
   -- TODO parameterize out the D3_ part of SimulationNode
-  setNodes :: forall d.   Array (D3_SimulationNode d) -> m Unit
+  setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
   setLinks :: forall d r. Array (D3_Link d r)         -> m Unit
-  -- setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
-  -- setLinks :: forall d r. Array (D3_Link d r)         -> m (Array (D3_Link d r))
-  -- tick functions
   addTickFunction    :: forall selection. Label -> Step selection -> m Unit 
   removeTickFunction ::                   Label                   -> m Unit 
 

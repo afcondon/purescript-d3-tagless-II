@@ -30,10 +30,8 @@ script model = do
                                            , classed "graph"] )
   linksGroup <- svg  `appendElement` (node Group  [ classed "links", strokeColor "#999" ])
   nodesGroup <- svg  `appendElement` (node Group  [ classed "nodes" ])
-
-  let simulation = initSimulation_ defaultConfigSimulation
   
-  setNodes model.nodes
+  inSimulationNodes <- setNodes model.nodes
   setLinks model.links
 
   linksSelection <- linksGroup <+> Join {
@@ -45,15 +43,13 @@ script model = do
   nodesSelection <- nodesGroup <+> Join {
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : model.nodes -- TODO not modified by simulation
+    , "data"    : inSimulationNodes
     , behaviour : [ classed datum_.nodeClass
                   , transform' datum_.translateNode ]
                   -- , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation d) ]
   }
 
-  circle  <- nodesSelection `appendElement` (node Circle [ radius datum_.radius
-                                                  , fill datum_.colorByGroup
-                                                  ]) 
+  circle  <- nodesSelection `appendElement` (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
   labels' <- nodesSelection `appendElement` (node Text [ classed "label",  x 0.2, y datum_.positionLabel, text datum_.name]) 
   
   addTickFunction "nodes" $ Step nodesSelection  [ classed datum_.nodeClass, transform' datum_.translateNode ]
@@ -63,7 +59,8 @@ script model = do
                                                 , y2 (_.y <<< link_.target)
                                                 ]
   _ <- nodesSelection `on` Drag DefaultDrag
-  _ <- svg `modifySelection` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation) ]
+  -- TODO this callback for the mouseclick needs access to the simulation
+  -- _ <- svg `modifySelection` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation) ]
   _ <- svg `on` Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                      , scale     : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
                      , name : "spago"

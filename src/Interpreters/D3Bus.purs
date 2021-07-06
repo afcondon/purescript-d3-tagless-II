@@ -17,6 +17,7 @@ import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect)
 import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, bind, discard, liftA1, pure, show, unit, ($), (<>))
 import Type.Equality (class TypeEquals, from)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- | D3MB is a monad for running D3 scripts that use a Simulation engine over a Bus, allowing sharing of one simulation with many scripts
 
@@ -87,13 +88,18 @@ instance simulationCapabilityD3MB :: SimulationM (D3MB D3Selection_) where
 
   setNodes nodes = do
     simBus <- get
-    liftAff $ Bus.write (EnableForcesByLabel []) simBus
-    -- liftAff $ Bus.write (SetNodes nodes) simBus
-    pure unit
+    liftAff $ Bus.write (SetNodes (unsafeCoerce nodes)) simBus
+    response <- liftAff $ Bus.read simBus
+    -- so, the idea is that we get back the modified nodes with the simulation stuff in them
+    -- this is necessary if we are to use those fields in the D3 "script"!!!
+    case response of
+      (SetNodes updatedNodes) -> pure updatedNodes
+      _ -> pure nodes -- TODO obviously this should throw exception
 
   setLinks links = do
     simBus <- get
-    -- liftAff $ Bus.write (SetLinks links) simBus
+    -- liftAff $ Bus.write (SetLinks ?links) simBus
+    -- let updatedLinks = Bus.read
     pure unit
 
   addTickFunction label (Step selection chain) = do

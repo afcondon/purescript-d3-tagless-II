@@ -180,8 +180,7 @@ instance simulationD3M :: SimulationM (D3M SimulationState_ D3Selection_) where
   setNodes nodes = do
     sim <- get
     let (Identity tuple) = runStateT (simulationSetNodes nodes) sim
-    -- pure $ fst tuple
-    pure unit
+    pure $ fst tuple
 
   setLinks links = do
     sim <- get

@@ -25,8 +25,8 @@ data SimBusCommand selection =
   | AddForce              Force
   | DisableForcesByLabel  (Array Label)
   | EnableForcesByLabel   (Array Label)
-  | SetNodes              (Array SpagoSimNode)
-  | SetLinks              (Array SpagoGraphLinkID)
+  | SetNodes              (forall d. Array (D3_SimulationNode d))
+  | SetLinks              (forall d r. Array (D3_Link d r))
   | AddTickFunction Label (Step selection)
   | RemoveTickFunction    Label
 
