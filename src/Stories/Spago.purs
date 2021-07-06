@@ -25,7 +25,7 @@ import Data.Tuple (snd)
 import Debug (trace)
 import Effect.Aff (Aff, Fiber, forkAff, killFiber)
 import Effect.Aff.Bus as Bus
-import Effect.Aff.Class (class MonadAff)
+import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Exception (error)
 import Halogen as H
 import Halogen.HTML as HH
@@ -147,7 +147,7 @@ handleAction = case _ of
   
   SetPackageForce packageForce -> do
     maybeBus <- H.gets _.bus
-    _ <- pure $ case maybeBus of
+    _ <- liftAff $ case maybeBus of
               Nothing -> trace { setPackageForce: "Nothing branch" } \_ -> pure unit
               (Just simbus) -> trace { setPackageForce: "Just branch" } \_ -> Bus.write Start simbus
     -- (Bus.write Start) <$> maybeBus 
