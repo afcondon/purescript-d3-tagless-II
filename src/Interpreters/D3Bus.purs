@@ -87,6 +87,7 @@ instance simulationCapabilityD3MB :: SimulationM (D3MB D3Selection_) where
 
   setNodes nodes = do
     simBus <- get
+    liftAff $ Bus.write (EnableForcesByLabel []) simBus
     -- liftAff $ Bus.write (SetNodes nodes) simBus
     pure unit
 

@@ -8,6 +8,7 @@ import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Types (Step(..), defaultConfigSimulation)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, appendElement, attach, addTickFunction, modifySelection, on, (<+>))
+import D3Tagless.Capabilities (setLinks, setNodes)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, bind, discard, negate, pure, ($), (/), (<<<))
@@ -31,9 +32,9 @@ script model = do
   nodesGroup <- svg  `appendElement` (node Group  [ classed "nodes" ])
 
   let simulation = initSimulation_ defaultConfigSimulation
-      nodes      = simulation `setNodes_` model.nodes
-      -- _          = simulation `putEachForceInSimulation` initialForces
-      _          = setLinks_ simulation model.links (\d i -> d.id)
+  
+  setNodes model.nodes
+  setLinks model.links
 
   linksSelection <- linksGroup <+> Join {
       element   : Line
@@ -44,7 +45,7 @@ script model = do
   nodesSelection <- nodesGroup <+> Join {
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : nodes
+    , "data"    : model.nodes -- TODO not modified by simulation
     , behaviour : [ classed datum_.nodeClass
                   , transform' datum_.translateNode ]
                   -- , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation d) ]
