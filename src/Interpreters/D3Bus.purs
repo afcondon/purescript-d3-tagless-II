@@ -98,9 +98,9 @@ instance simulationCapabilityD3MB :: SimulationM (D3MB D3Selection_) where
 
   setLinks links = do
     simBus <- get
-    -- liftAff $ Bus.write (SetLinks ?links) simBus
+    -- liftAff $ Bus.write (SetLinks links) simBus
     -- let updatedLinks = Bus.read
-    pure unit
+    pure links
 
   addTickFunction label (Step selection chain) = do
     simBus <- get

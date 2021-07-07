@@ -12,6 +12,7 @@ import D3Tagless.Capabilities (class SelectionM, class SimulationM, modifySelect
 import Data.Foldable (foldl)
 import Data.Identity (Identity(..))
 import Data.Tuple (Tuple, fst, snd)
+import Debug (spy)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, bind, discard, liftA1, pure, show, unit, ($), (<$>), (<>))
@@ -130,8 +131,8 @@ removeExistingSVG rootSelector = do
     -- check for an svg element under the given root
     previous = d3SelectionSelect_ (rootSelector <> " svg") root
   pure $ case d3SelectionIsEmpty_ previous of -- 
-          true  -> previous
-          false -> d3RemoveSelection_ previous 
+          true  -> spy "no previous SVG to remove" previous
+          false -> spy "removed previous SVG" $ d3RemoveSelection_ previous 
 
 -- | ====================================================
 -- | Simulation instance (capability) for the D3 interpreter
@@ -185,8 +186,7 @@ instance simulationD3M :: SimulationM (D3M SimulationState_ D3Selection_) where
   setLinks links = do
     sim <- get
     let (Identity tuple) = runStateT (simulationSetLinks links) sim
-    -- pure $ fst tuple
-    pure unit
+    pure $ fst tuple
 
   addTickFunction label (Step selection chain) = do
     (SS_ sim) <- get

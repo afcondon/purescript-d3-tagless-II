@@ -41,11 +41,11 @@ routes = fromFoldable
     , component: proxy D3GUP.component
     , group: Examples
     }
-    -- , Tuple "lesmis"
-    -- { anchor: "LesMis"
-    -- , component: proxy LesMis.component
-    -- , group: Examples
-    -- }
+    , Tuple "lesmis"
+    { anchor: "LesMis"
+    , component: proxy LesMis.component
+    , group: Examples
+    }
   -- , Tuple "trees"
   --   { anchor: "Trees"
   --   , component: proxy Trees.component
@@ -61,9 +61,9 @@ routes = fromFoldable
   --   , component: proxy PrintTree.component
   --   , group: AltInterpreters
   --   }
-  , Tuple "spago"
-    { anchor: "Spago"
-    , component: proxy Spago.component
-    , group: Application
-    }
+  -- , Tuple "spago"
+  --   { anchor: "Spago"
+  --   , component: proxy Spago.component
+  --   , group: Application
+  --   }
   ]

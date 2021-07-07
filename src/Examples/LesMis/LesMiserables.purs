@@ -1,21 +1,20 @@
 module D3.Examples.LesMiserables where
 
-import D3.Examples.LesMiserables.Types (LesMisRawModel)
-
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, appendElement, attach, join, on, setLinks, setNodes)
-import D3Tagless.D3 (run_D3M_Simulation)
+import D3.Examples.LesMiserables.Types (LesMisRawModel)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce)
 import D3.Simulation.Types (Force, ForceType(..), SimulationState_, Step(..), initialSimulationState)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, appendElement, attach, join, on, setLinks, setNodes)
+import D3Tagless.D3 (run_D3M_Simulation)
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..))
@@ -71,34 +70,15 @@ datum_ = {
       (\d -> d3SchemeCategory10N_ (toNumber $ datum_.group d))
 }
 
-drawGraph :: Selector -> Aff Unit
-drawGraph selector = do
-  log "Force layout example"
-  forceJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
-  let graph = readGraphFromFileContents forceJSON
-  
-  (_ :: Tuple D3Selection_ SimulationState_) <- liftEffect $ run_D3M_Simulation initialSimulationState (graphScript graph selector)
-
-  -- (Tuple selection result) <- liftEffect $ runPrinter (graphScript widthHeight graph selector) "Force Layout Script"
-  -- log $ result
-  -- log $ selection
-  pure unit
-
-lesMisForces :: Array Force
-lesMisForces = 
-    [ createForce "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-    , createForce "charge" ForceManyBody  []
-    ]
-
 -- | recipe for this force layout graph
-graphScript :: forall  m selection. 
+graphScript :: forall  m. 
   Bind m => 
   MonadEffect m =>
-  SelectionM selection m => 
+  SelectionM D3Selection_ m => 
   SimulationM m =>
   LesMisRawModel -> 
   Selector -> 
-  m selection
+  m D3Selection_
 graphScript model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   root       <- attach selector
@@ -108,7 +88,7 @@ graphScript model selector = do
   nodesGroup <- svg  `appendElement` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
   
   simulationNodes <- setNodes model.nodes 
-  setLinks model.links
+  simulationLinks <- setLinks model.links
 
   linksSelection <- join linksGroup $ Join {
       element   : Line

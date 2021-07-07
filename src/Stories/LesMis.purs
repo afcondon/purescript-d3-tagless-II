@@ -1,26 +1,38 @@
 module Stories.LesMis where
 
+import D3Tagless.D3
 import Prelude
 
-import Control.Monad.State (class MonadState)
+import Affjax as AJAX
+import Affjax.ResponseFormat as ResponseFormat
+import Control.Monad.State (class MonadState, StateT, runStateT)
+import D3.Data.Types (D3Selection_, Selector)
 import D3.Examples.LesMiserables as LesMis
-import D3Tagless.D3 (eval_D3M, removeExistingSVG)
-import Data.Const (Const)
-import Data.Maybe (Maybe(..))
-import Effect.Aff (Fiber, forkAff, killFiber)
-import Effect.Aff.Class (class MonadAff)
-import Effect.Exception (error)
-import Halogen as H
-import Halogen.HTML as HH
-import Halogen.HTML.Properties as HP
-import Stories.Tailwind.Styles as Tailwind
-import Ocelot.Block.FormField as FormField
-import D3Tagless.Block.Toggle as Toggle
+import D3.Examples.LesMiserables.File (readGraphFromFileContents)
+import D3.Examples.LesMiserables.Types (LesMisRawModel)
+import D3.Simulation.Config as F
+import D3.Simulation.Forces (createForce)
+import D3.Simulation.Types (Force, ForceType(..), SimulationState_, initialSimulationState)
 import D3Tagless.Block.Expandable as Expandable
-import Halogen.HTML.Events as HE
 import D3Tagless.Block.Toggle as Toggle
+import D3Tagless.Capabilities (class SimulationM)
+import Data.Const (Const)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
+import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
+import Debug (spy)
+import Effect.Aff (Aff, Fiber, forkAff, killFiber)
+import Effect.Aff.Class (class MonadAff)
+import Effect.Class.Console (log)
+import Effect.Exception (error)
+import Halogen (liftEffect)
+import Halogen as H
+import Halogen.HTML as HH
+import Halogen.HTML.Events as HE
+import Halogen.HTML.Properties as HP
+import Ocelot.Block.FormField as FormField
+import Stories.Tailwind.Styles as Tailwind
 import Type.Proxy (Proxy(..))
 
 type Query :: forall k. k -> Type
@@ -32,7 +44,7 @@ data Action
   | ToggleCard (Lens' State Expandable.Status)
 
 type State = { 
-    fiber :: Maybe (Fiber Unit)
+    fiber :: Maybe (Fiber D3Selection_)
   , blurb :: Expandable.Status
   , code  :: Expandable.Status
 }
@@ -114,20 +126,29 @@ handleAction = case _ of
     H.put (over lens not st)
 
   Initialize -> do
-    detached <- H.liftEffect $ eval_D3M   $ removeExistingSVG "div.svg-container"
-    fiber    <- H.liftAff    $ forkAff $ LesMis.drawGraph  "div.svg-container"
+    forceJSON   <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
+    let graph = readGraphFromFileContents forceJSON
 
+    fiber <- H.liftAff $ 
+             forkAff $ 
+             liftEffect $ 
+             eval_D3M_Simulation initialSimulationState (LesMis.graphScript graph "div.svg-container")
+             
     H.modify_ (\state -> state { fiber = Just fiber })
+
 
   Finalize -> do
     fiber <- H.gets _.fiber
     _ <- case fiber of
-            Nothing      -> pure unit
-            (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
+            Nothing      -> spy "no fiber to kill in finalize" $ pure unit
+            (Just fiber) -> spy "killing fiber as part of finalizing" $ H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
     H.modify_ (\state -> state { fiber = Nothing })
 
-
-
+lesMisForces :: Array Force
+lesMisForces = 
+    [ createForce "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+    , createForce "charge" ForceManyBody  []
+    ]
 
 
 codetext :: String

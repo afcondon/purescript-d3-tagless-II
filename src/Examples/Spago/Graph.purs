@@ -31,19 +31,19 @@ script model = do
   linksGroup <- svg  `appendElement` (node Group  [ classed "links", strokeColor "#999" ])
   nodesGroup <- svg  `appendElement` (node Group  [ classed "nodes" ])
   
-  inSimulationNodes <- setNodes model.nodes
-  setLinks model.links
+  nodesInSimulation <- setNodes model.nodes
+  linksInSimulation <- setLinks model.links
 
   linksSelection <- linksGroup <+> Join {
       element   : Line
     , key       : UseDatumAsKey
-    , "data"    : model.links
+    , "data"    : linksInSimulation
     , behaviour : [ classed link_.linkClass ] -- default invisible in CSS unless marked "visible"
   }
   nodesSelection <- nodesGroup <+> Join {
       element   : Group
     , key       : UseDatumAsKey
-    , "data"    : inSimulationNodes
+    , "data"    : nodesInSimulation
     , behaviour : [ classed datum_.nodeClass
                   , transform' datum_.translateNode ]
                   -- , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation d) ]

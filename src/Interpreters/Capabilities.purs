@@ -27,7 +27,7 @@ infix 4 join as <+>
 -- 1) say you wanted to attach to "div#hook" and then select an _already existing_ <h1> in it and apply Attrs to that h1
 -- 2)...
 
--- REVIEW this might need to be parameterized with the selection type too, so that the two capabilities match
+-- REVIEW this might need to be parameterized with the selection type too, so that the two capabilities match, but how?
 class (Monad m) <= SimulationM m where
   -- control
   start :: m Unit
@@ -41,9 +41,9 @@ class (Monad m) <= SimulationM m where
   disableForcesByLabel :: Array Label -> m Unit
   enableForcesByLabel  :: Array Label -> m Unit
   -- management of data (nodes and links)
-  -- TODO parameterize out the D3_ part of SimulationNode
+  -- TODO parameterize out the D3_ part of SimulationNode - could we make all this opaque?
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
-  setLinks :: forall d r. Array (D3_Link d r)         -> m Unit
+  setLinks :: forall d r. Array (D3_Link d r)         -> m (Array (D3_Link d r))
   addTickFunction    :: forall selection. Label -> Step selection -> m Unit 
   removeTickFunction ::                   Label                   -> m Unit 
 

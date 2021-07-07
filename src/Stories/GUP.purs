@@ -149,7 +149,7 @@ component = H.mkComponent
 runGeneralUpdatePattern :: forall m. Bind m => MonadEffect m => m (Array Char -> Aff Unit)
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
-  detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
+  -- detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
   update   <- H.liftEffect $ eval_D3M $ GUP.script "div.svg-container"
   -- the script sets up the SVG and returns a function that the component can run whenever it likes
   -- (but NB if it runs more often than every 2000 milliseconds there will be big problems)
