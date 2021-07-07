@@ -144,8 +144,8 @@ handleAction = case _ of
   
   SetPackageForce packageForce ->
     case packageForce of
-      PackageRing -> busSend Start
-      PackageGrid -> busSend Stop
+      PackageGrid -> busSend (AddForce packageOnlyFixToGridForce)
+      PackageRing -> busSend (AddForce packageOnlyRadialForce)
       PackageFree -> busSend RemoveAllForces
 
   SetModuleForce moduleForce ->

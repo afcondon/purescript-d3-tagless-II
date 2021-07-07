@@ -94,7 +94,7 @@ instance simulationCapabilityD3MB :: SimulationM (D3MB D3Selection_) where
     -- this is necessary if we are to use those fields in the D3 "script"!!!
     case response of
       (SetNodes updatedNodes) -> pure updatedNodes
-      _ -> pure nodes -- TODO obviously this should throw exception
+      _ -> pure nodes -- TODO obviously this should throw exception, it's nodes or nothing!
 
   setLinks links = do
     simBus <- get

@@ -41,26 +41,26 @@ routes = fromFoldable
     , component: proxy D3GUP.component
     , group: Examples
     }
-    , Tuple "lesmis"
-    { anchor: "LesMis"
-    , component: proxy LesMis.component
-    , group: Examples
-    }
-  , Tuple "trees"
-    { anchor: "Trees"
-    , component: proxy Trees.component
-    , group: Examples
-    }
-  , Tuple "metatree"
-    { anchor: "Meta Trees"
-    , component: proxy MetaTree.component
-    , group: AltInterpreters
-    }
-  , Tuple "printtree"
-    { anchor: "Print Tree"
-    , component: proxy PrintTree.component
-    , group: AltInterpreters
-    }
+    -- , Tuple "lesmis"
+    -- { anchor: "LesMis"
+    -- , component: proxy LesMis.component
+    -- , group: Examples
+    -- }
+  -- , Tuple "trees"
+  --   { anchor: "Trees"
+  --   , component: proxy Trees.component
+  --   , group: Examples
+  --   }
+  -- , Tuple "metatree"
+  --   { anchor: "Meta Trees"
+  --   , component: proxy MetaTree.component
+  --   , group: AltInterpreters
+  --   }
+  -- , Tuple "printtree"
+  --   { anchor: "Print Tree"
+  --   , component: proxy PrintTree.component
+  --   , group: AltInterpreters
+  --   }
   , Tuple "spago"
     { anchor: "Spago"
     , component: proxy Spago.component
