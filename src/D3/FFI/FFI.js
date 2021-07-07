@@ -291,7 +291,7 @@ exports.initSimulation_ = config => { // TODO bug not passed
     .alphaMin(config.alphaMin) // default is 0.0001
     .alphaDecay(config.alphaDecay) // default is 0.0228
     .velocityDecay(config.velocityDecay) // default is 0.4
-  if (debug) {
+  if (true) {
     console.log(`initSimulation${simulation}`)
   }
   return simulation

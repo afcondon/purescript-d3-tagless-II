@@ -5,13 +5,14 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, StateT, runStateT)
+import Control.Monad.State (class MonadState, StateT, execState, runState, runStateT)
 import D3.Data.Types (D3Selection_, Selector)
 import D3.Examples.LesMiserables as LesMis
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.Examples.LesMiserables.Types (LesMisRawModel)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce)
+import D3.Simulation.Functions (simulationLoadForces)
 import D3.Simulation.Types (Force, ForceType(..), SimulationState_, initialSimulationState)
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
@@ -128,11 +129,14 @@ handleAction = case _ of
   Initialize -> do
     forceJSON   <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
     let graph = readGraphFromFileContents forceJSON
+        simulation :: SimulationState_
+        simulation = initialSimulationState
+        (Tuple _ updatedSimulation) = runState (pure simulation) (simulationLoadForces lesMisForces)
 
     fiber <- H.liftAff $ 
              forkAff $ 
              liftEffect $ 
-             eval_D3M_Simulation initialSimulationState (LesMis.graphScript graph "div.svg-container")
+             eval_D3M_Simulation simulation (LesMis.graphScript graph "div.svg-container")
              
     H.modify_ (\state -> state { fiber = Just fiber })
 

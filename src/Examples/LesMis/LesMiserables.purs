@@ -71,6 +71,7 @@ datum_ = {
 }
 
 -- | recipe for this force layout graph
+-- TODO it's too hard to make this polymorphic for `selection` - it's possible but aa PITA, instances need fixing
 graphScript :: forall  m. 
   Bind m => 
   MonadEffect m =>
@@ -89,7 +90,7 @@ graphScript model selector = do
   
   simulationNodes <- setNodes model.nodes 
   simulationLinks <- setLinks model.links
-
+  
   linksSelection <- join linksGroup $ Join {
       element   : Line
     , key       : UseDatumAsKey
