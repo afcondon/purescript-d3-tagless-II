@@ -1,27 +1,34 @@
 module Stories.LesMis where
 
-import D3Tagless.D3
+import D3.Simulation.Functions
+import D3Tagless.Instance.Simulation
 import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, StateT, execState, runState, runStateT)
+import Control.Monad.State (class MonadState, StateT, execState, execStateT, get, gets, modify, modify_, runState, runStateT)
+import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Selector)
 import D3.Examples.LesMiserables as LesMis
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.Examples.LesMiserables.Types (LesMisRawModel)
+import D3.FFI (setAsNullForceInSimulation_)
 import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce)
-import D3.Simulation.Functions (simulationLoadForces)
-import D3.Simulation.Types (Force, ForceType(..), SimulationState_, initialSimulationState)
+import D3.Simulation.Forces (createForce, enableForce, putForceInSimulation, setForceAttr)
+import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimulationState_(..), initialSimulationState)
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Capabilities (class SimulationM)
+import D3Tagless.Utility (removeExistingSVG)
+import Data.Array as A
 import Data.Const (Const)
+import Data.Foldable (traverse_)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
+import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Tuple (Tuple(..))
+import Data.Newtype (unwrap)
+import Data.Tuple (Tuple(..), snd)
 import Debug (spy)
 import Effect.Aff (Aff, Fiber, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
@@ -45,7 +52,7 @@ data Action
   | ToggleCard (Lens' State Expandable.Status)
 
 type State = { 
-    fiber :: Maybe (Fiber D3Selection_)
+    simulation :: SimulationState_
   , blurb :: Expandable.Status
   , code  :: Expandable.Status
 }
@@ -69,7 +76,7 @@ component = H.mkComponent
 
   initialState :: State
   initialState = { 
-      fiber: Nothing
+      simulation: initialSimulationState
     , blurb: Expandable.Collapsed
     , code: Expandable.Collapsed
   }
@@ -119,41 +126,46 @@ component = H.mkComponent
       , HH.div [ Tailwind.apply "svg-container" ] []
       ]
 
-handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
+runLesMisScript :: forall m a row. 
+  (MonadState State m) => 
+  MonadAff m => 
+  { simulation :: SimulationState_ | row } -> LesMisRawModel -> m { simulation :: SimulationState_ | row }
+runLesMisScript state graph = do
+  let simulation = state.simulation
+  _ <- liftEffect $ exec_D3M_Simulation simulation (LesMis.graphScript graph ("div.svg-container" :: Selector D3Selection_))
+  pure state
+  -- modify (\s -> state { simulation = foo })
+
+
+handleAction :: forall m. 
+  Bind m => 
+  MonadAff m => 
+  MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
+
   ToggleCard lens -> do
-    st <- H.get
-    H.put (over lens not st)
+    cardState <- H.get
+    H.put (over lens not cardState)
 
   Initialize -> do
-    forceJSON   <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
-    let graph = readGraphFromFileContents forceJSON
-        simulation :: SimulationState_
-        simulation = initialSimulationState
-        (Tuple _ updatedSimulation) = runState (pure simulation) (simulationLoadForces lesMisForces)
+    response <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
+    let graph = readGraphFromFileContents response
 
-    fiber <- H.liftAff $ 
-             forkAff $ 
-             liftEffect $ 
-             eval_D3M_Simulation simulation (LesMis.graphScript graph "div.svg-container")
-             
-    H.modify_ (\state -> state { fiber = Just fiber })
+    _ <- ?foo $ simulationLoadForces lesMisForces -- this runs because component state is compatible with sig
 
+-- now we need to evaluate the "script" but using the component state as the state for the monad 
+    -- runLesMisScript (LesMis.graphScript graph ("div.svg-container" :: Selector D3Selection_)) 
 
-  Finalize -> do
-    fiber <- H.gets _.fiber
-    _ <- case fiber of
-            Nothing      -> spy "no fiber to kill in finalize" $ pure unit
-            (Just fiber) -> spy "killing fiber as part of finalizing" $ H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
-    H.modify_ (\state -> state { fiber = Nothing })
+    pure unit   
+
+  Finalize -> pure unit
 
 lesMisForces :: Array Force
-lesMisForces = 
+lesMisForces = enableForce <$>
     [ createForce "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
     , createForce "charge" ForceManyBody  []
     ]
-
 
 codetext :: String
 codetext = 

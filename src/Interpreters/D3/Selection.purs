@@ -1,22 +1,17 @@
-module D3Tagless.D3 where
+module D3Tagless.Instance.Selection where
 
-import D3.Simulation.Functions
 
-import Control.Monad.State (class MonadState, StateT, get, runStateT)
+import Control.Monad.State (class MonadState, StateT, runStateT)
 import D3.Data.Types (D3Selection_)
-import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectFirstInDOM_, d3SelectionIsEmpty_, d3SelectionSelectAll_, d3SelectionSelect_, defaultDrag_, disableDrag_, disableTick_, onTick_)
+import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3SelectAllInDOM_, d3SelectionSelectAll_, defaultDrag_, disableDrag_)
 import D3.Selection (Behavior(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), applyChainableSD3)
-import D3.Simulation.Types (SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, modifySelection)
+import D3Tagless.Capabilities (class SelectionM, modifySelection)
 import Data.Foldable (foldl)
-import Data.Identity (Identity(..))
 import Data.Tuple (Tuple, fst, snd)
-import Debug (spy)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, bind, discard, liftA1, pure, show, unit, ($), (<$>), (<>))
-import Unsafe.Coerce (unsafeCoerce)
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, Unit, discard, liftA1, pure, show, unit, ($))
 
 -- not actually using Effect in foreign fns to keep sigs simple (for now)
 
@@ -32,6 +27,7 @@ derive newtype instance monadD3M       :: Monad             (D3M state selection
 derive newtype instance monadStateD3M  :: MonadState  state (D3M state selection) 
 derive newtype instance monadEffD3M    :: MonadEffect       (D3M state selection)
 
+
 runD3M :: forall a. D3M Unit D3Selection_ a -> Effect (Tuple a Unit)
 runD3M (D3M state_T) = runStateT state_T unit
 
@@ -40,15 +36,6 @@ eval_D3M (D3M state_T) = liftA1 fst $ runStateT state_T unit
 
 exec_D3M :: forall a. D3M Unit D3Selection_ a -> Effect Unit
 exec_D3M (D3M state_T) = liftA1 snd $ runStateT state_T unit
-
-run_D3M_Simulation :: forall a. SimulationState_ -> D3M SimulationState_ D3Selection_ a -> Effect (Tuple a SimulationState_)
-run_D3M_Simulation simulation (D3M state_T) = runStateT state_T simulation
-
-eval_D3M_Simulation :: forall a. SimulationState_ -> D3M SimulationState_ D3Selection_ a -> Effect a
-eval_D3M_Simulation simulation (D3M state_T) = liftA1 fst $ runStateT state_T simulation
-
-exec_D3M_Simulation :: forall a. SimulationState_ -> D3M SimulationState_ D3Selection_ a -> Effect SimulationState_
-exec_D3M_Simulation simulation (D3M state_T) = liftA1 snd $ runStateT state_T simulation
 
 -- | ====================================================
 -- | Selection instance (capability) for the D3 interpreter
@@ -121,83 +108,3 @@ instance d3TaglessD3M :: SelectionM D3Selection_ (D3M state D3Selection_) where
               , target
               }
     pure unit
-
-
--- TODO reuse existing SVG if it's the right one
-removeExistingSVG :: forall m. SelectionM D3Selection_ m => String -> m D3Selection_
-removeExistingSVG rootSelector = do
-  let
-    root     = d3SelectFirstInDOM_ rootSelector
-    -- check for an svg element under the given root
-    previous = d3SelectionSelect_ (rootSelector <> " svg") root
-  pure $ case d3SelectionIsEmpty_ previous of -- 
-          true  -> spy "no previous SVG to remove" previous
-          false -> spy "removed previous SVG" $ d3RemoveSelection_ previous 
-
--- | ====================================================
--- | Simulation instance (capability) for the D3 interpreter
--- | ====================================================
-instance simulationD3M :: SimulationM (D3M SimulationState_ D3Selection_) where
-  removeAllForces = do
-    sim <- get
-    let (Identity tuple) = runStateT simulationRemoveAllForces sim
-    pure unit
-
-  loadForces forces = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationLoadForces forces) sim
-    pure unit
-  
-  addForce force = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationAddForce force) sim
-    pure unit
-
-  disableForcesByLabel labels = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationDisableForcesByLabel labels) sim
-    pure unit
-
-  enableForcesByLabel labels  = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationEnableForcesByLabel labels) sim
-    pure unit
-    
-  setConfigVariable v = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationSetVariable v) sim
-    pure unit
-
-  start = do
-    sim <- get
-    let (Identity tuple) = runStateT simulationStart sim
-    pure unit
-
-  stop = do
-    sim <- get
-    let (Identity tuple) = runStateT simulationStop sim
-    pure unit
-
-  setNodes nodes = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationSetNodes nodes) sim
-    pure $ fst tuple
-
-  setLinks links = do
-    sim <- get
-    let (Identity tuple) = runStateT (simulationSetLinks links) sim
-    pure $ fst tuple
-
-  addTickFunction label (Step selection chain) = do
-    (SS_ sim) <- get
-    let makeTick _ = do
-          -- TODO this coerce is forced upon us here due to forall selection in SimulationM
-          let _ = (applyChainableSD3 (unsafeCoerce selection)) <$> chain
-          unit
-    pure $ onTick_ sim.simulation label makeTick
-
-  removeTickFunction label = do
-    (SS_ sim) <- get
-    -- TODO delete the tick function from the state
-    pure $ disableTick_ sim.simulation label
-

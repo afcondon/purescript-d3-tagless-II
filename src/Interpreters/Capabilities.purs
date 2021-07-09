@@ -11,11 +11,11 @@ import Prelude (class Monad, Unit)
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
 -- into both DOM and Simulation for example (and current implementation is gross and wrong)
 class (Monad m) <= SelectionM selection m where
-  attach :: Selector -> m selection
+  attach :: Selector selection -> m selection
 
-  appendElement :: selection -> D3_Node                -> m selection
-  filterSelection :: selection -> Selector             -> m selection
-  modifySelection :: selection -> Array (ChainableS)   -> m Unit
+  appendElement :: selection -> D3_Node              -> m selection
+  filterSelection :: selection -> Selector selection -> m selection
+  modifySelection :: selection -> Array (ChainableS) -> m Unit
   
   on     :: selection -> Behavior -> m Unit
 
@@ -27,8 +27,7 @@ infix 4 join as <+>
 -- 1) say you wanted to attach to "div#hook" and then select an _already existing_ <h1> in it and apply Attrs to that h1
 -- 2)...
 
--- REVIEW this might need to be parameterized with the selection type too, so that the two capabilities match, but how?
-class (Monad m) <= SimulationM m where
+class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> selection where
   -- control
   start :: m Unit
   stop  :: m Unit
@@ -44,7 +43,7 @@ class (Monad m) <= SimulationM m where
   -- TODO parameterize out the D3_ part of SimulationNode - could we make all this opaque?
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
   setLinks :: forall d r. Array (D3_Link d r)         -> m (Array (D3_Link d r))
-  addTickFunction    :: forall selection. Label -> Step selection -> m Unit 
-  removeTickFunction ::                   Label                   -> m Unit 
+  addTickFunction    :: Label -> Step selection -> m Unit 
+  removeTickFunction :: Label                   -> m Unit 
 
 

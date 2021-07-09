@@ -9,7 +9,8 @@ import D3.Data.Types (D3Selection_, Element(..))
 import D3.Examples.GUP as GUP
 import D3.FFI (d3RemoveSelection_, d3SelectionIsEmpty_, d3SelectionSelect_)
 import D3Tagless.Capabilities (class SelectionM, appendElement, attach)
-import D3Tagless.D3 (eval_D3M, removeExistingSVG, runD3M)
+import D3Tagless.Instance.Selection (eval_D3M, runD3M)
+import D3Tagless.Utility (removeExistingSVG)
 import D3.Selection (node)
 import D3Tagless.Block.Card as Card
 import D3Tagless.Block.Toggle as Toggle

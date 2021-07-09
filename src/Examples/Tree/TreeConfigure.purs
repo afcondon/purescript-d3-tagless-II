@@ -10,7 +10,7 @@ import D3.Examples.Tree.Model (FlareTreeNode)
 import D3.Examples.Tree.Script (script) as Tree
 import D3.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
 import D3Tagless.Capabilities (class SelectionM)
-import D3Tagless.D3 (runD3M)
+import D3Tagless.Instance.Selection (runD3M)
 import D3Tagless.Capabilities.MetaTree (D3GrammarNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
 import D3Tagless.Capabilities.String (runPrinter)
 import D3.Layouts.Hierarchical (horizontalClusterLink, horizontalLink, radialLink, radialSeparation, verticalClusterLink, verticalLink)
@@ -44,7 +44,7 @@ getMetaTreeJSON treeModel = liftEffect $ do
 
 -- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
 -- | TODO specialize runD3M so that this function isn't necessary
-drawTree :: TreeModel -> Selector -> Aff Unit
+drawTree :: forall selection. TreeModel -> Selector selection -> Aff Unit
 drawTree treeModel selector = liftEffect $ do
   widthHeight <- getWindowWidthHeight
   (_ :: Tuple D3Selection_ Unit) <- runD3M (configureAndRunScript widthHeight treeModel selector)
@@ -55,7 +55,7 @@ drawTree treeModel selector = liftEffect $ do
 configureAndRunScript :: forall m selection. 
   Bind m => 
   SelectionM selection m => 
-  Tuple Number Number -> TreeModel -> Selector -> m selection
+  Tuple Number Number -> TreeModel -> Selector selection -> m selection
 configureAndRunScript (Tuple width height ) model selector = 
   Tree.script { spacing, viewbox, selector, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_
   where

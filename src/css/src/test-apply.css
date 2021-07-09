@@ -15,12 +15,12 @@
     @apply flex flex-col overflow-hidden h-screen min-w-min p-2 bg-white shadow-md;
   }
   .story-panel-about {
-    @apply flex flex-col overflow-hidden h-screen max-w-prose p-2 bg-white shadow-md overflow-scroll;
+    @apply flex flex-col overflow-y-scroll h-screen max-w-prose p-2 bg-white shadow-md;
   }
   .story-panel-code {
     @apply flex flex-col overflow-hidden h-screen min-w-min p-2 bg-white shadow-md;
   }
   .svg-container {
-    @apply flex-grow bg-white;
+    @apply flex-grow bg-white overflow-hidden;
   }
 }

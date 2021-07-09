@@ -7,7 +7,8 @@ import Control.Monad.State (class MonadState, get, put)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Examples.MetaTree as MetaTree
 import D3.Examples.Tree.Configure as Tree
-import D3Tagless.D3 (eval_D3M, removeExistingSVG)
+import D3Tagless.Utility (removeExistingSVG)
+import D3Tagless.Instance.Selection (eval_D3M)
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
 import Data.Array (catMaybes)
 import Data.Const (Const)

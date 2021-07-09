@@ -26,7 +26,7 @@ script :: forall m selection.
   Bind m =>
   MonadEffect m =>
   SelectionM selection m =>
-  SimulationM m =>
+  SimulationM selection m =>
   SpagoModel ->
   m selection
 script model = do

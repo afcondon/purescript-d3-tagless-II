@@ -14,8 +14,9 @@ import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Types (Force(..), ForceType(..), SimBusCommand(..), SimVariable, SimulationState_(..))
 import D3Tagless.Block.Card as Card
-import D3Tagless.D3 (eval_D3M, removeExistingSVG)
-import D3Tagless.D3Bus (eval_D3MB_Simulation, run_D3MB_Simulation)
+import D3Tagless.Utility (removeExistingSVG)
+import D3Tagless.Instance.Simulation
+import D3Tagless.Instance.Bus (eval_D3MB_Simulation, run_D3MB_Simulation)
 import Data.Array ((:))
 import Data.Const (Const)
 import Data.Either (hush)

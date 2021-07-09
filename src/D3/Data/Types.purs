@@ -15,7 +15,8 @@ foreign import data D3Transition_ :: Type -- not clear yet if we need to disting
 foreign import data D3This_       :: Type -- not yet used but may be needed, ex. in callbacks
 foreign import data D3DomNode_    :: Type
 
-type Selector = String 
+type Selector :: forall k. k -> Type
+type Selector selection = String 
 
 data Element = Div | Svg | Circle | Line | Group | Text | Path | Rect
 instance showElement :: Show Element where

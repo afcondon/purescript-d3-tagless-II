@@ -1,4 +1,4 @@
-module D3Tagless.D3Bus where
+module D3Tagless.Instance.Bus where
 
 import Control.Monad.Reader (class MonadAsk, ReaderT, ask, asks)
 import Control.Monad.State (class MonadState, StateT, get, runStateT)
@@ -45,7 +45,7 @@ exec_D3MB_Simulation bus (D3MB state_T) = liftA1 snd $ runStateT state_T bus
 -- | ====================================================
 -- | Simulation instance (capability) for the D3 interpreter
 -- | ====================================================
-instance simulationCapabilityD3MB :: SimulationM (D3MB D3Selection_) where
+instance simulationCapabilityD3MB :: SimulationM D3Selection_ (D3MB D3Selection_) where
   start = do
     simBus  <- get
     liftAff $ Bus.write Start simBus

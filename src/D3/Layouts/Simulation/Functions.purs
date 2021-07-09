@@ -1,119 +1,141 @@
 module D3.Simulation.Functions where
 
-import Control.Monad.State (State, get, modify_)
-import D3.FFI (onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
-import D3.Simulation.Forces (disableByLabels, enableByLabels, putForceInSimulation, setForceAttr)
-import D3.Simulation.Types (Force(..), ForceStatus(..), SimVariable(..), SimulationState_(..), Step(..))
-import Data.Newtype (unwrap)
 import Prelude
 
+import Control.Monad.State (class MonadState, State, get, gets, modify_)
 import D3.Attributes.Instances (Label)
+import D3.FFI (onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
 import D3.Node (D3_Link, D3_SimulationNode)
 import D3.Selection (applyChainableSD3)
+import D3.Simulation.Forces (disableByLabels, enableByLabels, putForceInSimulation, setForceAttr)
+import D3.Simulation.Types (Force(..), ForceStatus(..), SimVariable(..), SimulationState_(..), Step(..))
 import Data.Array (intercalate)
 import Data.Array as A
 import Data.Foldable (traverse_)
 import Data.Map as M
+import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
+import Debug (spy)
+import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | Underlying functions which allow us to make monadic updates from OUTSIDE of a script
 -- | allowing control of the simulation outside of the drawing phase which runs in D3M
-simulationLoadForces :: Array Force -> State SimulationState_ Unit
+setForcesEmpty :: SimulationState_ -> SimulationState_
+setForcesEmpty (SS_ ss_) = SS_ $ ss_ { forces = M.empty }
+
+setForces :: M.Map Label Force -> SimulationState_ -> SimulationState_
+setForces forces (SS_ ss_) = SS_ $ ss_ { forces = forces }
+
+insertForce :: Force -> SimulationState_ -> SimulationState_
+insertForce force@(Force l status t attrs h_) (SS_ ss_) = SS_ $ ss_ { forces = M.insert l force ss_.forces }
+
+reheatSimulation :: SimulationState_ -> SimulationState_
+reheatSimulation (SS_ ss_) = SS_ $ ss_ { running = true, alpha = 1.0 }
+
+stopSimulation :: SimulationState_ -> SimulationState_
+stopSimulation (SS_ ss_) = SS_ $ ss_ { running = false }
+
+-- type SimulationStateRow row = ( simulation :: SimulationState_ | row )
+
+simulationLoadForces :: forall m row. (MonadState SimulationState_ m) => Array Force -> m Unit
 simulationLoadForces forces = do
   simulationRemoveAllForces
   traverse_ simulationAddForce forces
+  pure unit
 
-simulationRemoveAllForces :: State SimulationState_ Unit
+simulationRemoveAllForces :: forall m row. (MonadState SimulationState_ m) => m Unit
 simulationRemoveAllForces = do
-    (SS_ sim) <- get
-    let _ = (setAsNullForceInSimulation_ sim.simulation) <$> (A.fromFoldable $ M.keys sim.forces)
-    modify_ (\(SS_ s) -> SS_ s { forces = (M.empty :: M.Map Label Force) } )
+  (SS_ ss_) <- get
+  let _ = (setAsNullForceInSimulation_ ss_.simulation_) <$> (A.fromFoldable $ M.keys ss_.forces)
+  modify_ (\_ -> SS_ $ ss_ { forces = M.empty })
 
-simulationAddForce :: Force -> State SimulationState_ Unit
+simulationAddForce :: forall m row. (MonadState SimulationState_ m) => Force -> m Unit
 simulationAddForce force@(Force l status t attrs h_) = do
-    -- TODO this should be a traverse_ eventually
-    let _ = (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
-    (SS_ sim) <- get
-    let _ = if status == ForceActive
-            then putForceInSimulation force sim.simulation
-            else sim.simulation
-    -- if the force isn't active then we just keep it in map, with label as key
-    modify_ $ (\s -> SS_ sim { forces = M.insert l force sim.forces })
+  let _ = (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
+  (SS_ ss_) <- get
+  let _ = if status == ForceActive
+          then putForceInSimulation force ss_.simulation_
+          else ss_.simulation_
+  -- if the force isn't active then we just keep it in map, with label as key
+  modify_ (\_ -> SS_ $ ss_ { forces = M.insert l force ss_.forces })
 
-simulationDisableForcesByLabel :: Array Label -> State SimulationState_ Unit
+simulationDisableForcesByLabel :: forall m row. (MonadState SimulationState_ m) => Array Label -> m Unit
 simulationDisableForcesByLabel labels = do
-  (SS_ sim) <- get
-  let updatedForces = (disableByLabels sim.simulation labels) <$> sim.forces
-  modify_ (\s -> SS_ sim { forces = updatedForces } )
+  (SS_ ss_) <- get
+  let updatedForces = (disableByLabels ss_.simulation_ labels) <$> ss_.forces
+  modify_ (\_ -> SS_ $ ss_ { forces = updatedForces })
 
-simulationEnableForcesByLabel :: Array Label  -> State SimulationState_ Unit
+simulationEnableForcesByLabel :: forall m row. (MonadState SimulationState_ m) => Array Label  -> m Unit
 simulationEnableForcesByLabel labels  = do
-  (SS_ sim) <- get
-  let updatedForces = (enableByLabels sim.simulation labels) <$> sim.forces
-  modify_ (\s -> SS_ sim { forces = updatedForces } )
+  (SS_ ss_) <- get
+  let updatedForces = (enableByLabels ss_.simulation_ labels) <$> ss_.forces
+  modify_ (\_ -> SS_ $ ss_ { forces = updatedForces })
   
-simulationSetVariable :: SimVariable -> State SimulationState_ Unit
+simulationSetVariable :: forall m row. (MonadState SimulationState_ m) => SimVariable -> m Unit
 simulationSetVariable v = do
-  (SS_ sim) <- get
-  let sim' = case v of
-            (Alpha n)         -> do
-              let _ = setAlpha_ sim.simulation n
-              sim { alpha = n }
-            (AlphaTarget n)   -> do
-              let _ = setAlphaTarget_ sim.simulation n
-              sim { alphaTarget = n }
-            (AlphaMin n)      -> do
-              let _ = setAlphaMin_ sim.simulation n
-              sim { alphaMin = n }
-            (AlphaDecay n)    -> do
-              let _ = setAlphaDecay_ sim.simulation n
-              sim { alphaDecay = n }
-            (VelocityDecay n) -> do
-              let _ = setVelocityDecay_ sim.simulation n
-              sim { velocityDecay = n }
-  modify_ (\s -> SS_ sim' )
+  (SS_ ss_) <- get
+  let update = case v of
+                (Alpha n)         -> do
+                  let _ = setAlpha_ ss_.simulation_ n
+                  SS_ $ ss_ { alpha = n }
+                (AlphaTarget n)   -> do
+                  let _ = setAlphaTarget_ ss_.simulation_ n
+                  SS_ $ ss_ { alphaTarget = n }
+                (AlphaMin n)      -> do
+                  let _ = setAlphaMin_ ss_.simulation_ n
+                  SS_ $ ss_ { alphaMin = n }
+                (AlphaDecay n)    -> do
+                  let _ = setAlphaDecay_ ss_.simulation_ n
+                  SS_ $ ss_ { alphaDecay = n }
+                (VelocityDecay n) -> do
+                  let _ = setVelocityDecay_ ss_.simulation_ n
+                  SS_ $ ss_ { velocityDecay = n }
+  modify_ (\_ -> update)
 
-simulationStart :: State SimulationState_ Unit
+simulationStart :: forall m row. (MonadState SimulationState_ m) => m Unit
 simulationStart = do
-  (SS_ sim) <- get
-  let _ = startSimulation_  sim.simulation
-      _ = setAlpha_ sim.simulation 1.0
-  modify_ (\s -> SS_ sim { running = true, alpha = 1.0 } )
+  (SS_ ss_) <- get
+  let _ = startSimulation_ ss_.simulation_
+      _ = setAlpha_ ss_.simulation_ 1.0
+  modify_ (\_ -> SS_ $ ss_ { running = true, alpha = 1.0 } )
 
-simulationStop :: State SimulationState_ Unit
+simulationStop :: forall m row. (MonadState SimulationState_ m) => m Unit
 simulationStop = do
-  (SS_ sim) <- get
-  let _ = stopSimulation_ sim.simulation
-  modify_ (\s -> SS_ sim { running = false } )
+  (SS_ ss_) <- get
+  let _ = stopSimulation_ ss_.simulation_
+  modify_ (\_ -> SS_ $ ss_ { running = false } )
 
-simulationShowForces :: State SimulationState_ String
+simulationShowForces :: forall m row. (MonadState SimulationState_ m) => m String
 simulationShowForces = do
-  (SS_ sim) <- get
-  let forceTuples = M.toUnfoldable sim.forces
+  (SS_ ss_) <- get
+  let forceTuples = M.toUnfoldable ss_.forces
       showTuple (Tuple label force) = show label <> " " <> show force
   pure $ intercalate "\n" $ showTuple <$> forceTuples
 
-simulationSetNodes :: forall d. Array (D3_SimulationNode d) -> State SimulationState_ (Array (D3_SimulationNode d))
+simulationSetNodes :: forall m row d. (MonadState SimulationState_ m) => 
+  Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
 simulationSetNodes nodes = do
-  (SS_ sim) <- get
-  let _ = sim.simulation `setNodes_` nodes
+  (SS_ ss_) <- get
+  let _ = ss_.simulation_ `setNodes_` nodes
   pure nodes -- TODO return the modified nodes instead (need to explicitly model these transformations)
 
-simulationSetLinks :: forall d r. Array (D3_Link d r) -> State SimulationState_ (Array (D3_Link d r))
+simulationSetLinks :: forall m row d r. (MonadState SimulationState_ m) => 
+  Array (D3_Link d r) -> m (Array (D3_Link d r))
 simulationSetLinks links = do
-  (SS_ sim) <- get
-  let _ = setLinks_ sim.simulation links (\d i -> d.id)
+  (SS_ ss_) <- get
+  let _ = setLinks_ ss_.simulation_ links (\d i -> d.id)
   pure links -- TODO return the modified links, ie where indexes are replaced with object (references)
 
 simulationCreateTickFunction :: forall selection. Label -> Step selection -> State SimulationState_ Unit
 simulationCreateTickFunction label tick@(Step selection chain) = do
-  (SS_ sim) <- get
+  (SS_ ss_) <- get
   let makeTick _ = do
         -- TODO this coerce is forced upon us here due to forall selection in SimulationM
         -- going to have to parameterize simulation with selection or hide the type dep somehow
         let _ = (applyChainableSD3 (unsafeCoerce selection)) <$> chain
         unit
-  modify_ $ (\s -> SS_ sim { ticks = M.insert label (unsafeCoerce tick) sim.ticks })
-  pure $ onTick_ sim.simulation label makeTick
+      updatedTicks = M.insert label (unsafeCoerce tick) ss_.ticks
+      _ = onTick_ ss_.simulation_ label makeTick
+  modify_ $ (\_ -> SS_ $ ss_ { ticks = updatedTicks } )
   

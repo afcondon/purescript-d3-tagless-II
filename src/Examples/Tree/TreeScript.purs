@@ -64,7 +64,7 @@ datum_ = {
 -- a record that packages up all the customizations that are needed to render the 6 variations on Tree
 type ScriptConfig = { 
     layout        :: TreeLayout
-  , selector      :: Selector
+  , selector      :: Selector String
   , linkPath      :: ChainableS
   , spacing       :: { interChild :: Number, interLevel :: Number }
   , viewbox       :: Array ChainableS

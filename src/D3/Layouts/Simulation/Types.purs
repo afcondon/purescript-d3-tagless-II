@@ -100,7 +100,7 @@ instance Show ForceType where
   show CustomForce             = "CustomForce"
 
 data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
-    simulation    :: D3Simulation_
+    simulation_   :: D3Simulation_
   , running       :: Boolean
   , forces        :: M.Map Label Force
   , ticks         :: M.Map Label (Step D3Selection_)
@@ -114,7 +114,7 @@ data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
 
 initialSimulationState :: SimulationState_
 initialSimulationState = SS_
-   {  simulation   : initSimulation_ defaultConfigSimulation  
+   {  simulation_  : initSimulation_ defaultConfigSimulation  
     , alpha        : defaultConfigSimulation.alpha
     , alphaTarget  : defaultConfigSimulation.alphaTarget
     , alphaMin     : defaultConfigSimulation.alphaMin

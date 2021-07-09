@@ -16,7 +16,7 @@ import Prelude (bind, pure, ($), (*), (+), (<<<))
 -- | ====================================================================================
 type Model = Array Char
 
-script :: forall m. SelectionM D3Selection_ m => Selector -> m ((Array Char) -> m D3Selection_)
+script :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
 script selector = do 
   let 
     transition :: ChainableS

@@ -26,10 +26,10 @@ foreign import showAttachZoom_              :: forall selection. selection -> Zo
 -- | ***************************   FFI signatures for Selection & Transition  ********************************************
 -- | *********************************************************************************************************************
 
-foreign import d3SelectAllInDOM_     :: Selector    -> D3Selection_
-foreign import d3SelectFirstInDOM_   :: Selector    -> D3Selection_
-foreign import d3SelectionSelectAll_ :: Selector    -> D3Selection_ -> D3Selection_
-foreign import d3SelectionSelect_    :: Selector    -> D3Selection_ -> D3Selection_
+foreign import d3SelectAllInDOM_     :: Selector D3Selection_ -> D3Selection_
+foreign import d3SelectFirstInDOM_   :: Selector D3Selection_    -> D3Selection_
+foreign import d3SelectionSelectAll_ :: Selector D3Selection_    -> D3Selection_ -> D3Selection_
+foreign import d3SelectionSelect_    :: Selector D3Selection_    -> D3Selection_ -> D3Selection_
 foreign import d3SelectionIsEmpty_   :: D3Selection_ -> Boolean
 foreign import d3EnterAndAppend_     :: String      -> D3Selection_ -> D3Selection_
 foreign import d3Append_             :: String      -> D3Selection_ -> D3Selection_
@@ -42,7 +42,7 @@ foreign import d3Exit_               :: D3Selection_ -> D3Selection_
 -- pass a function to selection.append or selection.insert to re-add elements.
 foreign import d3RemoveSelection_    :: D3Selection_ -> D3Selection_
 
-foreign import d3FilterSelection_    :: D3Selection_ -> Selector   -> D3Selection_
+foreign import d3FilterSelection_    :: D3Selection_ -> Selector D3Selection_   -> D3Selection_
 foreign import d3OrderSelection_     :: D3Selection_ -> D3Selection_
 foreign import d3RaiseSelection_     :: D3Selection_ -> D3Selection_
 foreign import d3LowerSelection_     :: D3Selection_ -> D3Selection_
@@ -72,8 +72,8 @@ foreign import defaultDrag_ :: D3Selection_ -> D3Selection_
 foreign import disableDrag_ :: D3Selection_ -> D3Selection_
 
 -- show functions that are used for the string version of the interpreter and also for debugging inside Selection.js
-foreign import showSelectAllInDOM_  :: forall selection. Selector -> String -> selection
-foreign import showSelectAll_       :: forall selection. Selector -> String -> selection -> selection
+foreign import showSelectAllInDOM_  :: forall selection. Selector D3Selection_ -> String -> selection
+foreign import showSelectAll_       :: forall selection. Selector D3Selection_ -> String -> selection -> selection
 foreign import showEnterAndAppend_  :: forall selection. Element -> selection -> selection
 foreign import showExit_            :: forall selection. selection -> selection
 foreign import showAddTransition_   :: forall selection. selection -> Transition -> selection 

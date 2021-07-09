@@ -14,11 +14,12 @@ import D3.Simulation.Forces (createForce)
 import D3.Simulation.Types (Force, ForceType(..), SimulationState_, Step(..), initialSimulationState)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, appendElement, attach, join, on, setLinks, setNodes)
-import D3Tagless.D3 (run_D3M_Simulation)
+import D3Tagless.Instance.Simulation (run_D3M_Simulation)
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
+import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Class.Console (log)
 import Math (sqrt)
@@ -71,18 +72,14 @@ datum_ = {
 }
 
 -- | recipe for this force layout graph
--- TODO it's too hard to make this polymorphic for `selection` - it's possible but aa PITA, instances need fixing
 graphScript :: forall  m. 
   Bind m => 
   MonadEffect m =>
-  SelectionM D3Selection_ m => 
-  SimulationM m =>
-  LesMisRawModel -> 
-  Selector -> 
-  m D3Selection_
+  SimulationM D3Selection_ m =>
+  LesMisRawModel -> Selector D3Selection_ -> m Unit
 graphScript model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
-  root       <- attach selector
+  (root :: D3Selection_) <- attach selector
   svg        <- root `appendElement` (node Svg [ viewBox (-w / 2.0) (-h / 2.0) w h
                                                , classed "lesmis" ] )
   linksGroup <- svg  `appendElement` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
@@ -94,7 +91,7 @@ graphScript model selector = do
   linksSelection <- join linksGroup $ Join {
       element   : Line
     , key       : UseDatumAsKey
-    , "data"    : model.links -- NB the links are still just { source :: NodeID, target :: NodeID, value :: Number } at this point
+    , "data"    : simulationLinks
     , behaviour : [ strokeWidth (sqrt <<< link_.value) ]
   }
   nodesSelection <- join nodesGroup $ Join {
@@ -110,10 +107,10 @@ graphScript model selector = do
                                                 , x2 (_.x <<< link_.target)
                                                 , y2 (_.y <<< link_.target)
                                                 ]
-  _ <- nodesSelection `on` Drag DefaultDrag
+  -- _ <- nodesSelection `on` Drag DefaultDrag
 
   _ <- svg `on`  Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                       , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
                       , name : "LesMis"
                       }
-  pure svg
+  pure unit -- svg
