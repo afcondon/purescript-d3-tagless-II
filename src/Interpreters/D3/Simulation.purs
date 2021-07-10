@@ -20,30 +20,31 @@ import Unsafe.Coerce (unsafeCoerce)
 -- | ====================================================
 -- | Simulation instance (capability) for the D3 interpreter
 -- | ====================================================
-newtype D3SimM selection a = D3SimM (StateT SimulationState_ Effect a) 
+newtype D3SimM :: forall k. Row Type -> k -> Type -> Type
+newtype D3SimM row selection a = D3SimM (StateT { simulationState :: SimulationState_ | row } Effect a) 
 
-run_D3M_Simulation :: forall a. SimulationState_ -> D3SimM D3Selection_ a -> Effect (Tuple a SimulationState_)
+run_D3M_Simulation :: forall a row. { simulationState :: SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect (Tuple a ({ simulationState :: SimulationState_ | row }))
 run_D3M_Simulation simulation (D3SimM state_T) = runStateT state_T simulation
 
-eval_D3M_Simulation :: forall a. SimulationState_ -> D3SimM D3Selection_ a -> Effect a
-eval_D3M_Simulation simulation (D3SimM state_T) = liftA1 fst $ runStateT state_T simulation
+-- eval_D3M_Simulation :: forall a. SimulationState_ -> D3SimM D3Selection_ a -> Effect a
+-- eval_D3M_Simulation simulation (D3SimM state_T) = liftA1 fst $ runStateT state_T simulation
 
-exec_D3M_Simulation :: forall a. SimulationState_ -> D3SimM D3Selection_ a -> Effect SimulationState_
-exec_D3M_Simulation simulation (D3SimM state_T) = liftA1 snd $ runStateT state_T simulation
+-- exec_D3M_Simulation :: forall a. SimulationState_ -> D3SimM D3Selection_ a -> Effect SimulationState_
+-- exec_D3M_Simulation simulation (D3SimM state_T) = liftA1 snd $ runStateT state_T simulation
 
-derive newtype instance functorD3SimM     :: Functor           (D3SimM selection)
-derive newtype instance applyD3SimM       :: Apply             (D3SimM selection)
-derive newtype instance applicativeD3SimM :: Applicative       (D3SimM selection)
-derive newtype instance bindD3SimM        :: Bind              (D3SimM selection)
-derive newtype instance monadD3SimM       :: Monad             (D3SimM selection)
-derive newtype instance monadEffD3SimM    :: MonadEffect       (D3SimM selection)
+derive newtype instance functorD3SimM     :: Functor           (D3SimM row selection)
+derive newtype instance applyD3SimM       :: Apply             (D3SimM row selection)
+derive newtype instance applicativeD3SimM :: Applicative       (D3SimM row selection)
+derive newtype instance bindD3SimM        :: Bind              (D3SimM row selection)
+derive newtype instance monadD3SimM       :: Monad             (D3SimM row selection)
+derive newtype instance monadEffD3SimM    :: MonadEffect       (D3SimM row selection)
 
-derive newtype instance monadStateD3SimM  :: MonadState  SimulationState_ (D3SimM selection) 
+derive newtype instance monadStateD3SimM  :: MonadState  { simulationState :: SimulationState_ | row } (D3SimM row selection) 
 
-instance showD3SimM :: Show (D3SimM D3Selection_ a) where
+instance showD3SimM :: Show (D3SimM row D3Selection_ a) where
   show x = "D3SimM"
 
-instance simulationD3M :: SimulationM D3Selection_ (D3SimM D3Selection_) where
+instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   start                       = simulationStart
   stop                        = simulationStop
 
@@ -59,7 +60,7 @@ instance simulationD3M :: SimulationM D3Selection_ (D3SimM D3Selection_) where
   setLinks links              = simulationSetLinks links
 
   addTickFunction label (Step selection chain) = do
-    (SS_ ss_) <- get
+    (SS_ ss_) <- gets _.simulationState
     let makeTick _ = do
           -- TODO this coerce is forced upon us here due to forall selection in SimulationM
           let _ = (applyChainableSD3 (unsafeCoerce selection)) <$> chain
@@ -68,7 +69,7 @@ instance simulationD3M :: SimulationM D3Selection_ (D3SimM D3Selection_) where
     pure unit
 
   removeTickFunction label = do
-    (SS_ ss_) <- get
+    (SS_ ss_) <- gets _.simulationState
     -- TODO delete the tick function from the state
     let _ = disableTick_ ss_.simulation_ label
     pure unit
@@ -77,7 +78,7 @@ instance simulationD3M :: SimulationM D3Selection_ (D3SimM D3Selection_) where
 -- | ====================================================
 -- | Selection instance (capability) for the D3 interpreter
 -- | ====================================================
-instance d3TaglessD3SimM :: SelectionM D3Selection_ (D3SimM D3Selection_) where
+instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
   attach selector = pure $ d3SelectAllInDOM_ selector 
 
   appendElement selection_ (D3_Node element attributes) = do

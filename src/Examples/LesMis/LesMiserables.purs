@@ -2,6 +2,7 @@ module D3.Examples.LesMiserables where
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
+import Control.Monad.State (class MonadState)
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
@@ -11,10 +12,10 @@ import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce)
+import D3.Simulation.Functions (simulationCreateTickFunction, simulationSetLinks, simulationSetNodes)
 import D3.Simulation.Types (Force, ForceType(..), SimulationState_, Step(..), initialSimulationState)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, appendElement, attach, join, on, setLinks, setNodes)
-import D3Tagless.Instance.Simulation (run_D3M_Simulation)
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..))
@@ -72,9 +73,10 @@ datum_ = {
 }
 
 -- | recipe for this force layout graph
-graphScript :: forall  m. 
+graphScript :: forall row m. 
   Bind m => 
   MonadEffect m =>
+  MonadState { simulationState :: SimulationState_ | row } m => 
   SimulationM D3Selection_ m =>
   LesMisRawModel -> Selector D3Selection_ -> m Unit
 graphScript model selector = do
@@ -85,7 +87,7 @@ graphScript model selector = do
   linksGroup <- svg  `appendElement` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  `appendElement` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
   
-  simulationNodes <- setNodes model.nodes 
+  simulationNodes <- setNodes model.nodes
   simulationLinks <- setLinks model.links
   
   linksSelection <- join linksGroup $ Join {

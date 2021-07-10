@@ -6,7 +6,7 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, StateT, execState, execStateT, get, gets, modify, modify_, runState, runStateT)
+import Control.Monad.State (class MonadState, StateT, execState, execStateT, get, gets, modify, modify_, put, runState, runStateT)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Selector)
 import D3.Examples.LesMiserables as LesMis
@@ -18,7 +18,8 @@ import D3.Simulation.Forces (createForce, enableForce, putForceInSimulation, set
 import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimulationState_(..), initialSimulationState)
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Capabilities (class SimulationM)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, loadForces)
+import D3Tagless.Instance.Bus (run_D3MB_Simulation)
 import D3Tagless.Utility (removeExistingSVG)
 import Data.Array as A
 import Data.Const (Const)
@@ -30,6 +31,7 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..), snd)
 import Debug (spy)
+import Effect (Effect)
 import Effect.Aff (Aff, Fiber, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
@@ -52,9 +54,9 @@ data Action
   | ToggleCard (Lens' State Expandable.Status)
 
 type State = { 
-    simulation :: SimulationState_
-  , blurb :: Expandable.Status
-  , code  :: Expandable.Status
+    simulationState :: SimulationState_
+  , blurb           :: Expandable.Status
+  , code            :: Expandable.Status
 }
 
 _blurb :: Lens' State Expandable.Status
@@ -63,7 +65,10 @@ _blurb = prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
-component :: forall m. MonadAff m => H.Component Query Unit Void m
+component :: forall m. 
+  -- SelectionM D3Selection_ m =>
+  MonadAff m => 
+  H.Component Query Unit Void m
 component = H.mkComponent
   { initialState: const initialState
   , render
@@ -76,7 +81,7 @@ component = H.mkComponent
 
   initialState :: State
   initialState = { 
-      simulation: initialSimulationState
+      simulationState: initialSimulationState
     , blurb: Expandable.Collapsed
     , code: Expandable.Collapsed
   }
@@ -126,21 +131,10 @@ component = H.mkComponent
       , HH.div [ Tailwind.apply "svg-container" ] []
       ]
 
-runLesMisScript :: forall m a row. 
-  (MonadState State m) => 
-  MonadAff m => 
-  { simulation :: SimulationState_ | row } -> LesMisRawModel -> m { simulation :: SimulationState_ | row }
-runLesMisScript state graph = do
-  let simulation = state.simulation
-  _ <- liftEffect $ exec_D3M_Simulation simulation (LesMis.graphScript graph ("div.svg-container" :: Selector D3Selection_))
-  pure state
-  -- modify (\s -> state { simulation = foo })
-
-
 handleAction :: forall m. 
   Bind m => 
   MonadAff m => 
-  MonadState State m => 
+  MonadState State m =>
   Action -> m Unit
 handleAction = case _ of
 
@@ -152,10 +146,10 @@ handleAction = case _ of
     response <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
     let graph = readGraphFromFileContents response
 
-    _ <- ?foo $ simulationLoadForces lesMisForces -- this runs because component state is compatible with sig
-
--- now we need to evaluate the "script" but using the component state as the state for the monad 
-    -- runLesMisScript (LesMis.graphScript graph ("div.svg-container" :: Selector D3Selection_)) 
+    state <- H.get
+    (Tuple _ state') <- liftEffect $ run_D3M_Simulation state (loadForces lesMisForces)
+    (Tuple _ state'') <- liftEffect $ run_D3M_Simulation state' (LesMis.graphScript graph "div.svg-container")
+    put state''
 
     pure unit   
 
