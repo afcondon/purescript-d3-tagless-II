@@ -2,7 +2,6 @@ module Main where
 
 import Prelude
 
-import D3Tagless.Block.Expandable as Expandable
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff.Class (class MonadAff)
@@ -12,6 +11,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
+import Ocelot.Block.Format as Format
 import Stories.GUP as GUP
 import Stories.Tailwind.Styles as Tailwind
 import Type.Proxy (Proxy(..))
@@ -22,15 +22,28 @@ main = HA.runHalogenAff do
   body <- HA.awaitBody
   runUI parent unit body
 
-type Slots = ( gup    :: forall q. H.Slot q Void Unit
-             , button :: forall q. H.Slot q Void Int )
+type Slots = ( gup    :: forall q. H.Slot q Void Unit )
+            --  , button :: forall q. H.Slot q Void Int )
 
 _gup    = Proxy :: Proxy "gup"
-_button = Proxy :: Proxy "button"
+-- _button = Proxy :: Proxy "button"
 
-type ParentState = String
+type ParentState = ExampleType
 
-data ParentAction = Initialize | ShowGUP | ShowTrees | ShowLesMis | ShowMetaTree | ShowPrinter | ShowSpago
+data ExampleType = None | ExampleGUP | ExampleTrees | ExampleLesMis | ExampleMetaTree | ExamplePrinter | ExampleSpago
+derive instance Eq ExampleType
+instance showExampleType :: Show ExampleType where
+  show = case _ of
+    None -> "No example selected"
+    ExampleGUP      -> "GUP"
+    ExampleTrees    -> "Trees"
+    ExampleLesMis   -> "LesMis"
+    ExampleMetaTree -> "MetaTree"
+    ExamplePrinter  -> "Printer"
+    ExampleSpago    -> "Spago"   
+
+data ParentAction = Initialize | Example ExampleType
+
 
 parent :: forall query input output m. (MonadAff m) => H.Component query input output m
 parent =
@@ -43,15 +56,14 @@ parent =
     }
   where
   initialState :: input -> ParentState
-  initialState _ = "empty"
+  initialState _ = ExampleGUP
 
   render :: ParentState -> H.ComponentHTML ParentAction Slots m
   render state = 
     HH.body_ 
       [ HH.div [ Tailwind.apply "app-container" ]
                [ renderSidebar state
-               , HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
-               , HH.div_ [ HH.slot_ _button 0    button        { label: "button value" } ]
+               , renderExample state
                ]
       ] 
 
@@ -66,37 +78,48 @@ parent =
           ]
       , HH.nav
         [ HP.class_ $ HH.ClassName "text-base overflow-y-auto" ]
-        [ ]
+        [ renderNavGroup state ]
       ]
     ]
 
+  renderNavGroup :: ParentState -> H.ComponentHTML ParentAction Slots m
+  renderNavGroup state = 
+    HH.div
+    [ HP.class_ $ HH.ClassName "text-base overflow-y-auto" ]
+    [ Format.caption_ [ HH.text "Group name" ]
+    , HH.ul [ HP.class_ $ HH.ClassName "list-reset" ] 
+            ((renderExampleNav state) <$> 
+              [ ExampleGUP, ExampleTrees, ExampleMetaTree, ExamplePrinter, ExampleLesMis, ExampleSpago ])
+    ]
+
+  renderExampleNav :: ParentState -> ExampleType -> H.ComponentHTML ParentAction Slots m
+  renderExampleNav current example =
+    HH.li
+      [ HP.class_ $ HH.ClassName "mb-3" ]
+      [ HH.a 
+        [ HP.classes $
+          Format.linkClasses <> 
+            (if current == example then [ HH.ClassName "font-medium"] else [] )
+        , HE.onClick (const $ Example example)
+        ]
+        [ HH.text (show example) ]
+      ]
+
+
+  renderExample :: ParentState -> H.ComponentHTML ParentAction Slots m
+  renderExample = 
+    case _ of
+      None -> HH.div_ [ HH.text "No example has been selected" ]
+      ExampleGUP      -> HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
+      ExampleTrees    -> HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
+      ExampleLesMis   -> HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
+      ExampleMetaTree -> HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
+      ExamplePrinter  -> HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
+      ExampleSpago    -> HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
+
+
   handleAction :: ParentAction -> H.HalogenM ParentState ParentAction Slots output m Unit
   handleAction = case _ of
-    Initialize   -> H.modify_ \state -> "A gallery of D3 examples"
-    ShowGUP      -> H.modify_ \state -> "GUP"
-    ShowTrees    -> H.modify_ \state -> "Trees"
-    ShowLesMis   -> H.modify_ \state -> "LesMis"
-    ShowMetaTree -> H.modify_ \state -> "MetaTree"
-    ShowPrinter  -> H.modify_ \state -> "Printer"
-    ShowSpago    -> H.modify_ \state -> "Spago"
-      
+    Initialize   -> H.modify_ \_ -> None
+    (Example ex) -> H.modify_ \_ -> ex
 
--- Now we turn to our child component, the button.
-
-type ButtonInput = { label :: String }
-
-type ButtonState = { label :: String }
-
-button :: forall query output m. H.Component query ButtonInput output m
-button =
-  H.mkComponent
-    { initialState
-    , render
-    , eval: H.mkEval H.defaultEval
-    }
-  where
-  initialState :: ButtonInput -> ButtonState
-  initialState { label } = { label }
-
-  render :: forall action. ButtonState -> H.ComponentHTML action () m
-  render { label } = HH.button_ [ HH.text label ]
