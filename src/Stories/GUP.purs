@@ -43,30 +43,26 @@ import UIGuide.Block.Backdrop as Backdrop
 import UIGuide.Block.Documentation as Documentation
 import Type.Proxy (Proxy(..))
 
-type Query :: forall k. k -> Type
-type Query = Const Void
-
 data Action
   = Initialize
-  | RestartGUP
-  | PauseGUP
+  | SetStatus Status
   | Finalize
   | ToggleCard (Lens' State Expandable.Status)
 
-data Status = NotInitialized | Running | Paused
+
+data Status = Running | Paused
 derive instance eqStatus :: Eq Status
 
 instance showStatus :: Show Status where
-  show NotInitialized = "Not initialized"
   show Running = "Running"
   show Paused  = "Paused"
   
 type State = { 
-    value  :: Status
-  , fiber  :: Maybe (Fiber Unit)
-  , update :: Maybe (Array Char -> Aff Unit)
-  , blurb :: Expandable.Status
-  , code  :: Expandable.Status
+    status  :: Status
+  , fiber   :: Maybe (Fiber Unit)
+  , update  :: Maybe (Array Char -> Aff Unit)
+  , blurb   :: Expandable.Status
+  , code    :: Expandable.Status
 }
 
 _blurb :: Lens' State Expandable.Status
@@ -75,24 +71,25 @@ _blurb = prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
-component :: forall m. MonadAff m => H.Component Query Unit Void m
+component :: forall query output m. MonadAff m => H.Component query Status output m
 component = H.mkComponent
   { initialState: const initialState
   , render
   , eval: H.mkEval $ H.defaultEval
     { handleAction = handleAction
     , initialize = Just Initialize
-    , finalize   = Just Finalize }
+    , finalize   = Just Finalize
+    , receive    = Just <<< SetStatus }
   }
   where
 
   initialState :: State
   initialState = { 
-      value: NotInitialized
-    , fiber: Nothing
+      status: Paused
+    , fiber:  Nothing
     , update: Nothing
-    , blurb: Expandable.Collapsed
-    , code: Expandable.Collapsed
+    , blurb:  Expandable.Collapsed
+    , code:   Expandable.Collapsed
   }
 
   render :: State -> H.ComponentHTML Action () m
@@ -102,11 +99,8 @@ component = H.mkComponent
             [ Tailwind.apply "story-panel-controls"] 
             [ Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
               [ Button.buttonVertical
-                [ HE.onClick $ const PauseGUP ]
-                [ HH.text $ show state.value ]
-              , Button.buttonVertical
-                [ HE.onClick $ const RestartGUP ]
-                [ HH.text "Restart" ]
+                [ HE.onClick $ if state.status == Running then const (SetStatus Paused) else const (SetStatus Running) ]
+                [ HH.text $ show state.status ]
               ]
             ]
       , HH.div
@@ -188,25 +182,13 @@ handleAction = case _ of
 
     fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
 
-    H.modify_ (\state -> state { value = Running, fiber = Just fiber, update = Just updateFn })
+    H.modify_ (\state -> state { status = Running, fiber = Just fiber, update = Just updateFn })
 
-  PauseGUP -> do
-    fiber <- H.gets _.fiber
-    _ <- case fiber of
-            Nothing      -> pure unit
-            (Just fiber) -> H.liftAff $ killFiber (error "Cancel fiber to suspend computation") fiber
-    H.modify_ (\state -> state { value = Paused, fiber = Nothing })
-
-  RestartGUP -> do
-    { value, update } <- H.get
-    if value /= Paused
-    then pure unit
-    else 
-      case update of
-        Nothing -> pure unit
-        (Just updateFn) -> do
-          fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
-          H.modify_ (\state -> state { value = Running, fiber = Just fiber })
+  SetStatus status -> do
+    currentStatus <- H.gets _.status
+    case currentStatus of
+      Running -> pauseUpdating
+      otherwise -> startUpdating
 
   Finalize -> do
     fiber <- H.gets _.fiber
@@ -214,8 +196,36 @@ handleAction = case _ of
             Nothing      -> pure unit
             (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
     -- is it necessary to remove the component from the DOM? don't think it is
-    H.modify_ (\state -> state { value = NotInitialized, fiber = Nothing, update = Nothing })
+    H.modify_ (\state -> state { status = Paused, fiber = Nothing, update = Nothing })
 
+
+pauseUpdating :: forall m.
+  Bind m => 
+  MonadState State m =>
+  MonadAff m => 
+  m Unit
+pauseUpdating = do
+  maybeFiber <- H.gets _.fiber
+  _ <- case maybeFiber of
+          Nothing      -> pure unit
+          (Just fiber) -> H.liftAff $ killFiber (error "Cancel fiber to suspend computation") fiber
+  H.modify_ (\state -> state { status = Paused, fiber = Nothing })
+
+startUpdating :: forall m.
+  Bind m => 
+  MonadState State m =>
+  MonadAff m => 
+  m Unit
+startUpdating = do
+  { status, update } <- H.get
+  if status /= Paused
+  then pure unit
+  else 
+    case update of
+      Nothing -> pure unit
+      (Just updateFn) -> do
+        fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
+        H.modify_ (\state -> state { status = Running, fiber = Just fiber })
 
 
 codetext :: String

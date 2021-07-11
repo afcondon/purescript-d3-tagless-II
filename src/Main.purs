@@ -2,46 +2,60 @@ module Main where
 
 import Prelude
 
+import D3Tagless.Block.Expandable as Expandable
+import Data.Maybe (Maybe(..))
 import Effect (Effect)
+import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
+import Stories.GUP as GUP
 import Stories.Tailwind.Styles as Tailwind
+import Type.Proxy (Proxy(..))
 import UIGuide.Block.Backdrop (backdrop) as Backdrop
 
 main :: Effect Unit
 main = HA.runHalogenAff do
   body <- HA.awaitBody
-  runUI component unit body
+  runUI parent unit body
 
-data Action = ShowGUP | ShowTrees | ShowLesMis | ShowMetaTree | ShowPrinter | ShowSpago
+type Slots = ( gup    :: forall q. H.Slot q Void Unit
+             , button :: forall q. H.Slot q Void Int )
 
-type State = String
+_gup    = Proxy :: Proxy "gup"
+_button = Proxy :: Proxy "button"
 
-component :: forall query input output m. H.Component query input output m
-component =
+type ParentState = String
+
+data ParentAction = Initialize | ShowGUP | ShowTrees | ShowLesMis | ShowMetaTree | ShowPrinter | ShowSpago
+
+parent :: forall query input output m. (MonadAff m) => H.Component query input output m
+parent =
   H.mkComponent
     { initialState
     , render
-    , eval: H.mkEval $ H.defaultEval { handleAction = handleAction }
+    , eval: H.mkEval $ H.defaultEval 
+        { handleAction = handleAction
+        , initialize   = Just Initialize }
     }
   where
-  initialState :: forall input. input -> State
+  initialState :: input -> ParentState
   initialState _ = "empty"
 
-  render :: State -> H.ComponentHTML Action () m
-  render state =
-    HH.body_
-    [ HH.div [ Tailwind.apply "app-container" ]
-      [ renderSidebar state
-      , renderSlot state -- render whichever route is active in the slot
-      ]
-    ]
+  render :: ParentState -> H.ComponentHTML ParentAction Slots m
+  render state = 
+    HH.body_ 
+      [ HH.div [ Tailwind.apply "app-container" ]
+               [ renderSidebar state
+               , HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
+               , HH.div_ [ HH.slot_ _button 0    button        { label: "button value" } ]
+               ]
+      ] 
 
-  renderSidebar :: State -> H.ComponentHTML Action () m
+  renderSidebar :: ParentState -> H.ComponentHTML ParentAction Slots m
   renderSidebar state =
     Backdrop.backdrop [ Tailwind.apply "story-sidebar" ]
     [ HH.div
@@ -56,12 +70,9 @@ component =
       ]
     ]
 
-  renderSlot :: State -> H.ComponentHTML Action () m
-  renderSlot state =
-    HH.div_ [ HH.text state ]
-
-  handleAction :: Action -> H.HalogenM State Action () output m Unit
+  handleAction :: ParentAction -> H.HalogenM ParentState ParentAction Slots output m Unit
   handleAction = case _ of
+    Initialize   -> H.modify_ \state -> "A gallery of D3 examples"
     ShowGUP      -> H.modify_ \state -> "GUP"
     ShowTrees    -> H.modify_ \state -> "Trees"
     ShowLesMis   -> H.modify_ \state -> "LesMis"
@@ -69,3 +80,23 @@ component =
     ShowPrinter  -> H.modify_ \state -> "Printer"
     ShowSpago    -> H.modify_ \state -> "Spago"
       
+
+-- Now we turn to our child component, the button.
+
+type ButtonInput = { label :: String }
+
+type ButtonState = { label :: String }
+
+button :: forall query output m. H.Component query ButtonInput output m
+button =
+  H.mkComponent
+    { initialState
+    , render
+    , eval: H.mkEval H.defaultEval
+    }
+  where
+  initialState :: ButtonInput -> ButtonState
+  initialState { label } = { label }
+
+  render :: forall action. ButtonState -> H.ComponentHTML action () m
+  render { label } = HH.button_ [ HH.text label ]

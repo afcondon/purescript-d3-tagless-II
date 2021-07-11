@@ -34,7 +34,6 @@ You can edit this file as you like.
   , "halogen"
   , "halogen-renderless"
   , "halogen-select"
-  , "halogen-storybook"
   , "halogen-subscriptions"
   , "halogen-svg-elems"
   , "halogen-vdom"

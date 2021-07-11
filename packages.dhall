@@ -109,38 +109,6 @@ let graphs =
   , version = "c4a3189e39579102b8be3cff9bcde63a9d4ef322"
   , dependencies = [ "ordered-collections", "catenable-lists" ]
   }  
-let ocelot = {
-    repo = "https://github.com/citizennet/purescript-ocelot.git"
-  , version = "345307d496dee6f6ac32850bf1db9a301810072f"
-  , dependencies = 
-  [ "aff-promise"
-    , "affjax"
-    , "argonaut"
-    , "bigints"
-    , "console"
-    , "debug"
-    , "effect"
-    , "email-validate"
-    , "formatters"
-    , "fuzzy"
-    , "halogen"
-    , "halogen-renderless"
-    , "halogen-select"
-    , "halogen-storybook"
-    , "halogen-svg-elems"
-    , "html-parser-halogen"
-    , "js-timers"
-    , "js-uri"
-    , "numbers"
-    , "psci-support"
-    , "read"
-    , "remotedata"
-    , "svg-parser"
-    , "svg-parser-halogen"
-    , "test-unit"
-    , "variant"
-    ]
-}
   
 let halogen-renderless =
       { dependencies = [ "prelude", "control" ]
@@ -174,7 +142,6 @@ let overrides = {=}
 
 let additions =
       { graphs
-      , ocelot
       , halogen-renderless
       , html-parser-halogen
       , svg-parser
