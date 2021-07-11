@@ -59,16 +59,16 @@ parent =
   initialState _ = ExampleGUP
 
   render :: ParentState -> H.ComponentHTML ParentAction Slots m
-  render state = 
+  render currentExample = 
     HH.body_ 
       [ HH.div [ Tailwind.apply "app-container" ]
-               [ renderSidebar state
-               , renderExample state
+               [ renderSidebar currentExample
+               , renderExample currentExample
                ]
       ] 
 
   renderSidebar :: ParentState -> H.ComponentHTML ParentAction Slots m
-  renderSidebar state =
+  renderSidebar currentExample =
     Backdrop.backdrop [ Tailwind.apply "story-sidebar" ]
     [ HH.div
       [ HP.class_ $ HH.ClassName "flex-1 p-2 overflow-y-auto" ]
@@ -78,17 +78,17 @@ parent =
           ]
       , HH.nav
         [ HP.class_ $ HH.ClassName "text-base overflow-y-auto" ]
-        [ renderNavGroup state ]
+        [ renderNavGroup currentExample ]
       ]
     ]
 
   renderNavGroup :: ParentState -> H.ComponentHTML ParentAction Slots m
-  renderNavGroup state = 
+  renderNavGroup currentExample = 
     HH.div
     [ HP.class_ $ HH.ClassName "text-base overflow-y-auto" ]
     [ Format.caption_ [ HH.text "Group name" ]
     , HH.ul [ HP.class_ $ HH.ClassName "list-reset" ] 
-            ((renderExampleNav state) <$> 
+            ((renderExampleNav currentExample) <$> 
               [ ExampleGUP, ExampleTrees, ExampleMetaTree, ExamplePrinter, ExampleLesMis, ExampleSpago ])
     ]
 
@@ -110,12 +110,12 @@ parent =
   renderExample = 
     case _ of
       None -> HH.div_ [ HH.text "No example has been selected" ]
-      ExampleGUP      -> HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
-      ExampleTrees    -> HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
-      ExampleLesMis   -> HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
-      ExampleMetaTree -> HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
-      ExamplePrinter  -> HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
-      ExampleSpago    -> HH.div_ [ HH.slot_ _gup    unit GUP.component GUP.Paused ]
+      ExampleGUP      -> HH.slot_ _gup    unit GUP.component GUP.Paused
+      ExampleTrees    -> HH.slot_ _gup    unit GUP.component GUP.Paused
+      ExampleLesMis   -> HH.slot_ _gup    unit GUP.component GUP.Paused
+      ExampleMetaTree -> HH.slot_ _gup    unit GUP.component GUP.Paused
+      ExamplePrinter  -> HH.slot_ _gup    unit GUP.component GUP.Paused
+      ExampleSpago    -> HH.slot_ _gup    unit GUP.component GUP.Paused
 
 
   handleAction :: ParentAction -> H.HalogenM ParentState ParentAction Slots output m Unit

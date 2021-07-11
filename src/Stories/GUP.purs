@@ -4,25 +4,16 @@ import Prelude
 
 import Control.Monad.Rec.Class (forever)
 import Control.Monad.State (class MonadState)
-import D3.Attributes.Sugar (classed, viewBox)
-import D3.Data.Types (D3Selection_, Element(..))
 import D3.Examples.GUP as GUP
-import D3.FFI (d3RemoveSelection_, d3SelectionIsEmpty_, d3SelectionSelect_)
-import D3Tagless.Capabilities (class SelectionM, appendElement, attach)
 import D3Tagless.Instance.Selection (eval_D3M, runD3M)
-import D3Tagless.Utility (removeExistingSVG)
-import D3.Selection (node)
-import D3Tagless.Block.Card as Card
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Block.Expandable as Expandable
 import Data.Array (catMaybes, singleton)
-import Data.Const (Const)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence)
-import Data.Tuple (Tuple(..), fst)
 import Effect (Effect)
 import Effect.Aff (Aff, Fiber, Milliseconds(..), delay, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
@@ -35,12 +26,8 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import D3Tagless.Block.Button as Button
-import Ocelot.Block.Format as Format
 import D3Tagless.Block.FormField as FormField
-import Ocelot.HTML.Properties (css)
 import Stories.Tailwind.Styles as Tailwind
-import UIGuide.Block.Backdrop as Backdrop
-import UIGuide.Block.Documentation as Documentation
 import Type.Proxy (Proxy(..))
 
 data Action
@@ -273,6 +260,7 @@ codetext =
             }
         }"""
 
+blurbtext :: forall t235 t236. Array (HTML t235 t236)
 blurbtext = (HH.p [ HP.classes [ HH.ClassName "m-2" ] ]) <$> ((singleton <<< HH.text) <$> texts)
   where 
     texts = [
