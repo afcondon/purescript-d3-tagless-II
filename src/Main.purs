@@ -2,6 +2,7 @@ module Main where
 
 import Prelude
 
+import D3.Simulation.Types (initialSimulationState)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff.Class (class MonadAff)
@@ -13,7 +14,13 @@ import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 import Ocelot.Block.Format as Format
 import Stories.GUP as GUP
+import Stories.GUP as GUP
+import Stories.LesMis as LesMis
+import Stories.MetaTree as MetaTree
+import Stories.PrintTree as PrintTree
+import Stories.Spago as Spago
 import Stories.Tailwind.Styles as Tailwind
+import Stories.Trees as Trees
 import Type.Proxy (Proxy(..))
 import UIGuide.Block.Backdrop (backdrop) as Backdrop
 
@@ -22,11 +29,20 @@ main = HA.runHalogenAff do
   body <- HA.awaitBody
   runUI parent unit body
 
-type Slots = ( gup    :: forall q. H.Slot q Void Unit )
-            --  , button :: forall q. H.Slot q Void Int )
+type Slots = ( gup       :: forall q. H.Slot q Void Unit 
+             , trees     :: forall q. H.Slot q Void Unit
+             , metatree  :: forall q. H.Slot q Void Unit
+             , printtree :: forall q. H.Slot q Void Unit
+             , lesmis    :: forall q. H.Slot q Void Unit
+             , spago     :: forall q. H.Slot q Void Unit
+             )
 
-_gup    = Proxy :: Proxy "gup"
--- _button = Proxy :: Proxy "button"
+_gup       = Proxy :: Proxy "gup"
+_trees     = Proxy :: Proxy "trees"
+_metatree  = Proxy :: Proxy "metatree"
+_printtree = Proxy :: Proxy "printtree"
+_lesmis    = Proxy :: Proxy "lesmis"
+_spago     = Proxy :: Proxy "spago"
 
 type ParentState = ExampleType
 
@@ -110,12 +126,13 @@ parent =
   renderExample = 
     case _ of
       None -> HH.div_ [ HH.text "No example has been selected" ]
-      ExampleGUP      -> HH.slot_ _gup    unit GUP.component GUP.Paused
-      ExampleTrees    -> HH.slot_ _gup    unit GUP.component GUP.Paused
-      ExampleLesMis   -> HH.slot_ _gup    unit GUP.component GUP.Paused
-      ExampleMetaTree -> HH.slot_ _gup    unit GUP.component GUP.Paused
-      ExamplePrinter  -> HH.slot_ _gup    unit GUP.component GUP.Paused
-      ExampleSpago    -> HH.slot_ _gup    unit GUP.component GUP.Paused
+      ExampleGUP      -> HH.slot_ _gup       unit GUP.component GUP.Paused
+      ExampleTrees    -> HH.slot_ _trees     unit Trees.component unit 
+      ExampleMetaTree -> HH.slot_ _metatree  unit MetaTree.component unit 
+      ExamplePrinter  -> HH.slot_ _printtree unit PrintTree.component unit 
+      ExampleLesMis   -> HH.slot_ _lesmis    unit LesMis.component initialSimulationState
+      ExampleSpago    -> HH.slot_ _spago     unit Spago.component unit 
+      -- _ -> HH.div_ [ HH.text "That example is currently not available" ]
 
 
   handleAction :: ParentAction -> H.HalogenM ParentState ParentAction Slots output m Unit

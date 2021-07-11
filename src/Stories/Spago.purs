@@ -4,28 +4,23 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, get, gets)
+import Control.Monad.State (class MonadState, gets)
 import D3.Data.Types (D3Selection_)
 import D3.Examples.Spago (startSimulationFiber, treeReduction)
-import D3.Examples.Spago.Files (SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow)
 import D3.Examples.Spago.Graph as Graph
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
+import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Types (Force(..), ForceType(..), SimBusCommand(..), SimVariable, SimulationState_(..))
 import D3Tagless.Block.Card as Card
-import D3Tagless.Utility (removeExistingSVG)
-import D3Tagless.Instance.Simulation
-import D3Tagless.Instance.Bus (eval_D3MB_Simulation, run_D3MB_Simulation)
+import D3Tagless.Instance.Bus (eval_D3MB_Simulation)
 import Data.Array ((:))
-import Data.Const (Const)
 import Data.Either (hush)
 import Data.Map (toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
 import Data.Tuple (snd)
-import Debug (trace)
 import Effect.Aff (Aff, Fiber, forkAff, killFiber)
 import Effect.Aff.Bus as Bus
 import Effect.Aff.Class (class MonadAff, liftAff)
@@ -41,9 +36,6 @@ import Ocelot.HTML.Properties (css)
 import Stories.Tailwind.Styles as Tailwind
 import UIGuide.Block.Backdrop as Backdrop
 import Unsafe.Coerce (unsafeCoerce)
-
-type Query :: forall k. k -> Type
-type Query = Const Void
 
 data PackageForce = PackageRing | PackageGrid | PackageFree
 data ModuleForce = ClusterPackage | ForceTree
@@ -61,7 +53,7 @@ type State = {
   , bus   :: Maybe (Bus.BusRW (SimBusCommand D3Selection_))
 }
 
-component :: forall m. MonadAff m => H.Component Query Unit Void m
+component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
   { initialState: const initialState
   , render

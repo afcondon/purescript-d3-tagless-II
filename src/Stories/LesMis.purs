@@ -1,41 +1,23 @@
 module Stories.LesMis where
 
-import D3.Simulation.Functions
-import D3Tagless.Instance.Simulation
 import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, StateT, execState, execStateT, get, gets, modify, modify_, put, runState, runStateT)
-import D3.Attributes.Instances (Label)
-import D3.Data.Types (D3Selection_, Selector)
+import Control.Monad.State (class MonadState, put)
 import D3.Examples.LesMiserables as LesMis
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
-import D3.Examples.LesMiserables.Types (LesMisRawModel)
-import D3.FFI (initSimulation_, setAsNullForceInSimulation_)
 import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce, enableForce, putForceInSimulation, setForceAttr)
-import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimulationState_(..), initialSimulationState)
+import D3.Simulation.Forces (createForce, enableForce)
+import D3.Simulation.Types (Force, ForceType(..), SimulationState_)
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, loadForces)
-import D3Tagless.Instance.Bus (run_D3MB_Simulation)
-import D3Tagless.Utility (removeExistingSVG)
-import Data.Array as A
-import Data.Const (Const)
-import Data.Foldable (traverse_)
+import D3Tagless.Capabilities (loadForces)
+import D3Tagless.Instance.Simulation (exec_D3M_Simulation)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
-import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Newtype (unwrap)
-import Data.Tuple (Tuple(..), snd)
-import Debug (spy)
-import Effect (Effect)
-import Effect.Aff (Aff, Fiber, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class.Console (log)
-import Effect.Exception (error)
 import Halogen (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
@@ -44,9 +26,6 @@ import Halogen.HTML.Properties as HP
 import Ocelot.Block.FormField as FormField
 import Stories.Tailwind.Styles as Tailwind
 import Type.Proxy (Proxy(..))
-
-type Query :: forall k. k -> Type
-type Query = Const Void
 
 data Action
   = Initialize
@@ -67,9 +46,9 @@ _blurb = prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
-component :: forall m. 
+component :: forall query output m. 
   MonadAff m => 
-  H.Component Query Input Void m
+  H.Component query Input output m
 component = H.mkComponent
   { initialState
   , render
@@ -149,7 +128,7 @@ handleAction = case _ of
     state <- H.get
     state' <- liftEffect $ exec_D3M_Simulation state (loadForces lesMisForces)
     state'' <- liftEffect $ exec_D3M_Simulation state' (LesMis.graphScript graph "div.svg-container")
-    -- put state''
+    put state''
 
     pure unit   
 

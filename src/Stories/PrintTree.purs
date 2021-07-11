@@ -2,19 +2,14 @@ module Stories.PrintTree where
 
 import Prelude
 
-import Affjax (Error)
-import Control.Monad.State (class MonadState, get, put)
-import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
-import D3.Examples.MetaTree as MetaTree
+import Control.Monad.State (class MonadState)
+import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..))
 import D3.Examples.Tree.Configure as Tree
 import D3Tagless.Utility (removeExistingSVG)
 import D3Tagless.Instance.Selection (eval_D3M)
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
-import Data.Array (catMaybes)
-import Data.Const (Const)
 import Data.Either (Either(..)) as E
-import Data.Maybe (Maybe(..), fromMaybe)
-import Effect.Aff (Aff)
+import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
@@ -24,14 +19,9 @@ import Stories.Tailwind.Styles as Tailwind
 import Ocelot.Block.FormField as FormField
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Block.Expandable as Expandable
-import Halogen.HTML.Events as HE
-import D3Tagless.Block.Toggle as Toggle
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
 import Type.Proxy (Proxy(..))
-
-type Query :: forall k. k -> Type
-type Query = Const Void
 
 data Action
   = Initialize
@@ -54,7 +44,7 @@ _print :: Lens' State Expandable.Status
 _print = prop (Proxy :: Proxy "print")
   
 
-component :: forall m. MonadAff m => H.Component Query Unit Void m
+component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
   { initialState: const initialState
   , render

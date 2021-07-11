@@ -2,18 +2,15 @@ module Stories.MetaTree where
 
 import Prelude
 
-import Affjax (Error)
-import Control.Monad.State (class MonadState, get, put)
+import Control.Monad.State (class MonadState)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Examples.MetaTree as MetaTree
 import D3.Examples.Tree.Configure as Tree
 import D3Tagless.Instance.Selection (eval_D3M)
 import D3Tagless.Utility (removeExistingSVG)
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
-import Data.Array (catMaybes)
-import Data.Const (Const)
 import Data.Either (Either(..)) as E
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
@@ -27,9 +24,6 @@ import D3Tagless.Block.Toggle as Toggle
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
 import Type.Proxy (Proxy(..))
-
-type Query :: forall k. k -> Type
-type Query = Const Void
 
 data Action
   = Initialize
@@ -47,7 +41,7 @@ _blurb = prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
-component :: forall m. MonadAff m => H.Component Query Unit Void m
+component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
   { initialState: const initialState
   , render
@@ -121,6 +115,7 @@ drawMetaTree :: TreeJson_ -> Aff Unit
 drawMetaTree json =
   MetaTree.drawTree =<< makeModel TidyTree Vertical =<< Tree.getMetaTreeJSON =<< makeModel TidyTree Radial json
 
+selector :: String
 selector = "div.d3story" -- TODO redo how all this svg nonsense is handled
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 

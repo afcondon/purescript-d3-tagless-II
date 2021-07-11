@@ -27,9 +27,6 @@ import Type.Proxy (Proxy(..))
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
 
-type Query :: forall k. k -> Type
-type Query = Const Void
-
 data Action
   = Initialize
   | SetLayout TreeLayout
@@ -48,7 +45,7 @@ _blurb = prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
-component :: forall m. MonadAff m => H.Component Query Unit Void m
+component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
   { initialState: const initialState
   , render

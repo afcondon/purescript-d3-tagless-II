@@ -260,7 +260,7 @@ codetext =
             }
         }"""
 
-blurbtext :: forall t235 t236. Array (HTML t235 t236)
+blurbtext :: forall t235 t236. Array (HH.HTML t235 t236)
 blurbtext = (HH.p [ HP.classes [ HH.ClassName "m-2" ] ]) <$> ((singleton <<< HH.text) <$> texts)
   where 
     texts = [
