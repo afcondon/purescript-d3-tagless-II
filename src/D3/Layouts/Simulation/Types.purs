@@ -11,6 +11,7 @@ import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (ChainableS)
 import Data.Map as M
 import Data.Newtype (class Newtype)
+import Debug (trace)
 
 data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number
 
@@ -124,6 +125,8 @@ initialSimulationState = SS_
     , forces       : M.empty
     , ticks        : M.empty
   }
+  where
+    _ = trace { simulation: "initialized" } \_ -> unit
 
 defaultConfigSimulation :: SimulationConfig_
 defaultConfigSimulation = { 

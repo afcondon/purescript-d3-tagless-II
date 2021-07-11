@@ -12,7 +12,7 @@ import D3.Data.Types (D3Selection_, Selector)
 import D3.Examples.LesMiserables as LesMis
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.Examples.LesMiserables.Types (LesMisRawModel)
-import D3.FFI (setAsNullForceInSimulation_)
+import D3.FFI (initSimulation_, setAsNullForceInSimulation_)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce, putForceInSimulation, setForceAttr)
 import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimulationState_(..), initialSimulationState)
@@ -53,6 +53,8 @@ data Action
   | Finalize
   | ToggleCard (Lens' State Expandable.Status)
 
+type Input = SimulationState_
+
 type State = { 
     simulationState :: SimulationState_
   , blurb           :: Expandable.Status
@@ -66,11 +68,10 @@ _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
 component :: forall m. 
-  -- SelectionM D3Selection_ m =>
   MonadAff m => 
-  H.Component Query Unit Void m
+  H.Component Query Input Void m
 component = H.mkComponent
-  { initialState: const initialState
+  { initialState
   , render
   , eval: H.mkEval $ H.defaultEval
     { handleAction = handleAction
@@ -78,13 +79,12 @@ component = H.mkComponent
     , finalize   = Just Finalize }
   }
   where
-
-  initialState :: State
-  initialState = { 
-      simulationState: initialSimulationState
-    , blurb: Expandable.Collapsed
-    , code: Expandable.Collapsed
-  }
+  initialState :: Input -> State
+  initialState simulation = { 
+        simulationState: simulation
+      , blurb: Expandable.Collapsed
+      , code: Expandable.Collapsed
+    }
 
   controls = [] -- placeholder for controls for theta, alpha etc
     
@@ -147,9 +147,9 @@ handleAction = case _ of
     let graph = readGraphFromFileContents response
 
     state <- H.get
-    (Tuple _ state') <- liftEffect $ run_D3M_Simulation state (loadForces lesMisForces)
-    (Tuple _ state'') <- liftEffect $ run_D3M_Simulation state' (LesMis.graphScript graph "div.svg-container")
-    put state''
+    state' <- liftEffect $ exec_D3M_Simulation state (loadForces lesMisForces)
+    state'' <- liftEffect $ exec_D3M_Simulation state' (LesMis.graphScript graph "div.svg-container")
+    -- put state''
 
     pure unit   
 

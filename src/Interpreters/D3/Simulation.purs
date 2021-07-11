@@ -26,11 +26,11 @@ newtype D3SimM row selection a = D3SimM (StateT { simulationState :: SimulationS
 run_D3M_Simulation :: forall a row. { simulationState :: SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect (Tuple a ({ simulationState :: SimulationState_ | row }))
 run_D3M_Simulation simulation (D3SimM state_T) = runStateT state_T simulation
 
--- eval_D3M_Simulation :: forall a. SimulationState_ -> D3SimM D3Selection_ a -> Effect a
--- eval_D3M_Simulation simulation (D3SimM state_T) = liftA1 fst $ runStateT state_T simulation
+exec_D3M_Simulation :: forall a row. { simulationState :: SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect { simulationState :: SimulationState_ | row }
+exec_D3M_Simulation simulation (D3SimM state_T) = liftA1 snd $ runStateT state_T simulation
 
--- exec_D3M_Simulation :: forall a. SimulationState_ -> D3SimM D3Selection_ a -> Effect SimulationState_
--- exec_D3M_Simulation simulation (D3SimM state_T) = liftA1 snd $ runStateT state_T simulation
+eval_D3M_Simulation :: forall a row. { simulationState :: SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect a
+eval_D3M_Simulation simulation (D3SimM state_T) = liftA1 fst $ runStateT state_T simulation
 
 derive newtype instance functorD3SimM     :: Functor           (D3SimM row selection)
 derive newtype instance applyD3SimM       :: Apply             (D3SimM row selection)

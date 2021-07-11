@@ -2,21 +2,17 @@ module D3Tagless.App.Routes
   ( routes, groups )
 where
 
-import Prelude
 
 import D3Tagless.App (Group(..), proxy)
-import Data.Const (Const)
+import D3Tagless.App.Routes.Types (RouteConfig(..))
 import Data.Map (Map, fromFoldable)
 import Data.Tuple (Tuple(..))
-import Effect.Aff (Aff)
-import Halogen as H
 import Stories.GUP as D3GUP
 import Stories.LesMis as LesMis
 import Stories.MetaTree as MetaTree
 import Stories.PrintTree as PrintTree
 import Stories.Spago as Spago
 import Stories.Trees as Trees
-import UIGuide.Component.Modals as Modals
 
 ----------
 -- Routes
@@ -28,42 +24,36 @@ groups =
   , Application
   ]
 
-type RouteConfig =
-  { anchor :: String
-  , component :: H.Component (Const Void) Unit Void Aff
-  , group :: Group
-  }
-
 routes :: Map String RouteConfig
 routes = fromFoldable
-  [ Tuple "gup"
-    { anchor: "GUP"
-    , component: proxy D3GUP.component
-    , group: Examples
-    }
-    , Tuple "lesmis"
-    { anchor: "LesMis"
-    , component: proxy LesMis.component
-    , group: Examples
-    }
-  -- , Tuple "trees"
-  --   { anchor: "Trees"
-  --   , component: proxy Trees.component
-  --   , group: Examples
-  --   }
-  -- , Tuple "metatree"
-  --   { anchor: "Meta Trees"
-  --   , component: proxy MetaTree.component
-  --   , group: AltInterpreters
-  --   }
-  -- , Tuple "printtree"
-  --   { anchor: "Print Tree"
-  --   , component: proxy PrintTree.component
-  --   , group: AltInterpreters
-  --   }
-  -- , Tuple "spago"
-  --   { anchor: "Spago"
-  --   , component: proxy Spago.component
-  --   , group: Application
-  --   }
+  [ Tuple "gup" (SimpleRoute
+                { anchor: "GUP"
+                , component: proxy D3GUP.component
+                , group: Examples
+                })
+  , Tuple "trees" (SimpleRoute
+                { anchor: "Trees"
+                , component: proxy Trees.component
+                , group: Examples
+                })
+  , Tuple "metatree" (SimpleRoute
+                { anchor: "Meta Trees"
+                , component: proxy MetaTree.component
+                , group: AltInterpreters
+                })
+  , Tuple "printtree" (SimpleRoute
+                { anchor: "Print Tree"
+                , component: proxy PrintTree.component
+                , group: AltInterpreters
+                })
+  , Tuple "lesmis" (SimulationRoute     -- NB 
+                { anchor: "LesMis"
+                , component: proxy LesMis.component
+                , group: Examples
+                })
+  , Tuple "spago" (SimpleRoute
+                { anchor: "Spago"
+                , component: proxy Spago.component
+                , group: Application
+                })
   ]

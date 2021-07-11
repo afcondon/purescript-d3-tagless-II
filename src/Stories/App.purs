@@ -7,13 +7,13 @@ module D3Tagless.App
   ( Stories
   , StoryQuery
   , Page(..)
-  , Group(..)
   , runStorybook
   , module Halogen.Storybook.Proxy
   ) where
 
 import Prelude
 
+import D3Tagless.App.Routes.Types (Group, RouteConfig(..), getAnchor, getGroup)
 import Data.Const (Const)
 import Data.Functor (mapFlipped)
 import Data.Map as M
@@ -21,6 +21,7 @@ import Data.Maybe (Maybe(..))
 import Data.Maybe as Data.Maybe
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff, launchAff_)
+import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -30,10 +31,10 @@ import JSURI as JSURI
 import Ocelot.Block.Format as Format
 import Partial.Unsafe as Partial.Unsafe
 import Routing.Hash (hashes)
+import Stories.Tailwind.Styles as Tailwind
 import Type.Proxy (Proxy(..))
 import UIGuide.Block.Backdrop as Backdrop
 import Web.HTML.HTMLElement (HTMLElement)
-import Stories.Tailwind.Styles as Tailwind
 
 data Query a = RouteChange String a
 type Action = Unit
@@ -48,23 +49,7 @@ type StoryQuery = Const Void
 
 type Stories m = M.Map String (Page m)
 
-type Page m =
-  { anchor :: String
-  , component :: H.Component StoryQuery Unit Void m
-  , group :: Group
-  }
-
-data Group
-  = Examples
-  | AltInterpreters
-  | Application
-
-derive instance eqGroup :: Eq Group
-derive instance ordGroup :: Ord Group
-instance showGroup :: Show Group where
-  show Examples        = "Examples"
-  show Application     = "Application"
-  show AltInterpreters = "Alternative interpreters"
+type Page m = RouteConfig
 
 type HTML m = H.ComponentHTML Action Slots m
 
@@ -112,7 +97,8 @@ app =
   renderSlot :: State m -> HTML m
   renderSlot state =
     case M.lookup state.route state.stories of
-      Just { component } -> HH.slot _child state.route component unit absurd
+      Just (SimpleRoute { component })     -> HH.slot _child state.route component unit absurd
+      -- Just (SimulationRoute { component }) -> HH.slot _child state.route component unit absurd
       -- TODO: Fill in a home page HTML renderer
       _ -> HH.div_ []
 
@@ -144,7 +130,7 @@ app =
   renderGroup :: String -> Stories m -> HTML m
   renderGroup route stories =
     HH.ul [ HP.class_ $ HH.ClassName "list-reset" ] $
-      mapFlipped (M.toUnfoldable stories) $ \(Tuple href { anchor }) ->
+      mapFlipped (M.toUnfoldable stories) $ \(Tuple href config) ->
         HH.li
         [ HP.class_ $ HH.ClassName "mb-3" ]
         [ HH.a
@@ -153,7 +139,7 @@ app =
             ( if href == route then [ HH.ClassName "font-medium" ] else [] )
           , HP.href $ "#" <> unsafeEncodeURI href
           ]
-          [ HH.text anchor ]
+          [ HH.text (getAnchor config) ]
         ]
 
 
@@ -166,7 +152,7 @@ app =
 -- Helpers
 
 partitionByGroup :: ∀ m. Group -> Stories m -> Tuple Group (Stories m)
-partitionByGroup g = Tuple g <<< M.filter (\{ group } -> group == g)
+partitionByGroup g = Tuple g <<< M.filter (\r -> getGroup r == g)
 
 unsafeEncodeURI :: String -> String
 unsafeEncodeURI x = Partial.Unsafe.unsafePartial (Data.Maybe.fromJust (JSURI.encodeURIComponent x))
