@@ -9,10 +9,12 @@ import D3.Examples.LesMiserables as LesMis
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
-import D3.Simulation.Types (Force, ForceType(..), SimulationState_)
+import D3.Simulation.Functions (simulationStart)
+import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), SimulationState_)
+import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Capabilities (loadForces)
+import D3Tagless.Capabilities (loadForces, setConfigVariable)
 import D3Tagless.Instance.Simulation (exec_D3M_Simulation)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
@@ -32,6 +34,10 @@ data Action
   = Initialize
   | Finalize
   | ToggleCard (Lens' State Expandable.Status)
+  | Forces1
+  | Forces2
+  | Freeze
+  | Reheat
 
 type Input = SimulationState_
 
@@ -68,14 +74,33 @@ component = H.mkComponent
       , code: Expandable.Collapsed
     }
 
-  controls = [] -- placeholder for controls for theta, alpha etc
+  controls = 
+    [ HH.div
+      [ Tailwind.apply "story-panel-controls"] 
+      [ Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
+        [ Button.buttonVertical
+          [ HE.onClick (const Forces2) ]
+          [ HH.text "Mix it up!" ]
+        , Button.buttonVertical
+          [ HE.onClick (const Forces1) ]
+          [ HH.text "Original forces" ]
+        , Button.buttonVertical
+          [ HE.onClick (const Freeze) ]
+          [ HH.text "Freeze" ]
+        , Button.buttonVertical
+          [ HE.onClick (const Reheat) ]
+          [ HH.text "Reheat!" ]
+        ]
+      ]
+    ]
+
     
   render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div [ Tailwind.apply "story-container" ]
       [ HH.div -- [ Tailwind.apply "story-panel"]
         [ Tailwind.apply "story-panel-controls"] 
-        [ HH.text "Les Mis" ]
+        controls
       , HH.div -- [ Tailwind.apply "story-panel" ] 
             [ Tailwind.apply "story-panel-about"]
             [ FormField.field_
@@ -132,16 +157,41 @@ handleAction = case _ of
     state' <- liftEffect $ exec_D3M_Simulation state (loadForces lesMisForces)
     state'' <- liftEffect $ exec_D3M_Simulation state' (LesMis.graphScript graph "div.svg-container")
     put state''
-
     pure unit   
 
   Finalize -> pure unit
+
+  Forces1 -> do
+    state <- H.get
+    state' <- liftEffect $ exec_D3M_Simulation state (loadForces lesMisForces)
+    put state'
+    pure unit
+
+  Forces2 -> do
+    state <- H.get
+    state' <- liftEffect $ exec_D3M_Simulation state (loadForces lesMisForces2)
+    put state'
+    pure unit
+
+  Freeze -> do
+    state <- H.get
+    state' <- liftEffect $ exec_D3M_Simulation state (setConfigVariable $ Alpha 0.0)
+    put state'
+    pure unit
+
+  Reheat -> simulationStart
 
 lesMisForces :: Array Force
 lesMisForces = enableForce <$>
     [ createForce "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
     , createForce "many body" ForceManyBody  []
     , createForce "collision" ForceCollide  []
+    ]
+
+lesMisForces2 :: Array Force
+lesMisForces2 = enableForce <$>
+    [ createForce "many body" ForceManyBody  []
+    , createForce "collision" ForceCollide  [ F.radius 20.0]
     ]
 
 codetext :: String
