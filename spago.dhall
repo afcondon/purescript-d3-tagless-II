@@ -32,6 +32,7 @@ You can edit this file as you like.
   , "fuzzy"
   , "graphs"
   , "halogen"
+  , "halogen-hooks"
   , "halogen-renderless"
   , "halogen-select"
   , "halogen-subscriptions"

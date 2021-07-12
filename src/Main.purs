@@ -6,14 +6,15 @@ import D3.Simulation.Types (initialSimulationState)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Halogen.Hooks as Hooks
 import Halogen.VDom.Driver (runUI)
 import Ocelot.Block.Format as Format
-import Stories.GUP as GUP
 import Stories.GUP as GUP
 import Stories.LesMis as LesMis
 import Stories.MetaTree as MetaTree
@@ -23,11 +24,33 @@ import Stories.Tailwind.Styles as Tailwind
 import Stories.Trees as Trees
 import Type.Proxy (Proxy(..))
 import UIGuide.Block.Backdrop (backdrop) as Backdrop
+import Web.HTML as HTML
+import Web.HTML.HTMLDocument as HTMLDocument
+import Web.HTML.Window as Window
 
 main :: Effect Unit
 main = HA.runHalogenAff do
   body <- HA.awaitBody
   runUI parent unit body
+
+-- main :: Effect Unit
+-- main =
+--   HA.runHalogenAff do
+--     body <- HA.awaitBody
+--     void $ runUI hookComponent Nothing body
+
+-- hookComponent
+--   :: forall unusedQuery unusedInput unusedOutput m
+--    . MonadEffect m
+--   => H.Component unusedQuery unusedInput unusedOutput m
+-- hookComponent = Hooks.component \_ _ -> Hooks.do
+--   Hooks.useLifecycleEffect do
+--     liftEffect $ HTML.window >>= Window.document >>= HTMLDocument.setTitle "Hello"
+--     pure Nothing
+--   Hooks.pure $
+--     HH.text "Hello!"
+
+
 
 type Slots = ( gup       :: forall q. H.Slot q Void Unit 
              , trees     :: forall q. H.Slot q Void Unit
