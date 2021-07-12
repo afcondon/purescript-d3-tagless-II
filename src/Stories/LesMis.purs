@@ -17,6 +17,7 @@ import D3Tagless.Instance.Simulation (exec_D3M_Simulation)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
+import Effect.Aff (Fiber)
 import Effect.Aff.Class (class MonadAff)
 import Halogen (liftEffect)
 import Halogen as H
@@ -36,6 +37,7 @@ type Input = SimulationState_
 
 type State = { 
     simulationState :: SimulationState_
+  , maybeFiber      :: Maybe (Fiber Unit) -- except it really isn't this simple, need the handle back from the simulation
   , blurb           :: Expandable.Status
   , code            :: Expandable.Status
 }
@@ -61,6 +63,7 @@ component = H.mkComponent
   initialState :: Input -> State
   initialState simulation = { 
         simulationState: simulation
+      , maybeFiber: Nothing
       , blurb: Expandable.Collapsed
       , code: Expandable.Collapsed
     }

@@ -113,6 +113,9 @@ data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
   , velocityDecay :: Number
 }
 
+-- need (perhaps) to put the simulation running in a fiber but get the simulation handle out via an AVar or something?
+-- this presupposes that the reason the simulation runs so slowly is something to do with event loops and get be solved
+-- with a thread, this is not at all certain
 initialSimulationState :: SimulationState_
 initialSimulationState = SS_
    {  simulation_  : initSimulation_ defaultConfigSimulation  
