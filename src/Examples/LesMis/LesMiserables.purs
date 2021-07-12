@@ -13,9 +13,9 @@ import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce)
 import D3.Simulation.Functions (simulationCreateTickFunction, simulationSetLinks, simulationSetNodes)
-import D3.Simulation.Types (Force, ForceType(..), SimulationState_, Step(..), initialSimulationState)
+import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), SimulationState_, Step(..), initialSimulationState)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, appendElement, attach, join, on, setLinks, setNodes)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, appendElement, attach, defaultLinkTick, defaultNodeTick, join, on, setConfigVariable, setLinks, setNodes, start)
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..))
@@ -103,16 +103,26 @@ graphScript model selector = do
     , behaviour : [ radius 5.0, fill datum_.colorByGroup ]
   }
 
-  addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y  ]
-  addTickFunction "links" $ Step linksSelection [ x1 (_.x <<< link_.source)
-                                                , y1 (_.y <<< link_.source)
-                                                , x2 (_.x <<< link_.target)
-                                                , y2 (_.y <<< link_.target)
-                                                ]
-  -- _ <- nodesSelection `on` Drag DefaultDrag
+  defaultNodeTick "nodes" nodesSelection 
+  defaultLinkTick "links" linksSelection
+  -- TODO looks like the more general form of specifying tick function here in the DSL is unacceptably slow
+  -- addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y  ]
+  -- addTickFunction "links" $ Step linksSelection [ x1 (_.x <<< link_.source)
+  --                                               , y1 (_.y <<< link_.source)
+  --                                               , x2 (_.x <<< link_.target)
+  --                                               , y2 (_.y <<< link_.target)
+  --                                               ]
+  _ <- nodesSelection `on` Drag DefaultDrag
 
   _ <- svg `on`  Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                       , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
                       , name : "LesMis"
                       }
+  start
+  setConfigVariable $ Alpha 1.0
+  setConfigVariable $ AlphaTarget 0.0
+  setConfigVariable $ AlphaMin 0.0001
+  setConfigVariable $ AlphaDecay 0.0228
+  setConfigVariable $ VelocityDecay 0.4
+
   pure unit -- svg

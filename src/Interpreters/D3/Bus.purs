@@ -1,11 +1,11 @@
 module D3Tagless.Instance.Bus where
 
 import Control.Monad.Reader (class MonadAsk, ReaderT, ask, asks)
-import Control.Monad.State (class MonadState, StateT, get, runStateT)
+import Control.Monad.State (class MonadState, StateT, get, gets, runStateT)
 import D3.Data.Types (D3Selection_)
 import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3RemoveSelection_, d3SelectAllInDOM_, d3SelectFirstInDOM_, d3SelectionIsEmpty_, d3SelectionSelectAll_, d3SelectionSelect_, defaultDrag_, disableDrag_)
 import D3.Selection (Behavior(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), applyChainableSD3)
-import D3.Simulation.Types (SimBusCommand(..), Step(..))
+import D3.Simulation.Types (SimBusCommand(..), SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, modifySelection)
 import Data.Foldable (foldl)
@@ -111,6 +111,11 @@ instance simulationCapabilityD3MB :: SimulationM D3Selection_ (D3MB D3Selection_
     liftAff $ Bus.write (RemoveTickFunction label) simBus
     pure unit
 
+  defaultNodeTick label selection = do
+    pure unit
+
+  defaultLinkTick label selection = do
+    pure unit
 
   -- | ====================================================
 -- | Selection instance (capability) for the D3 interpreter that uses bus to talk to simulation

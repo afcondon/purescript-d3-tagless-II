@@ -313,12 +313,14 @@ exports.setNodes_ = simulation => nodes => {
   if (debug) {
     console.log(`${simulation}.nodes(${nodes})`)
   }
+  console.log('setting nodes in simulation');
   simulation.nodes(nodes)
   return simulation.nodes()
 }
 exports.setLinks_ = simulation => links => idFn => {
   // NB see also forceLink below
   const linkForce = d3.forceLink(links).id((d, i) => idFn(d)(i))
+  console.log('setting link force in simulation');
   simulation.force('links', linkForce)
   return linkForce
 }
@@ -359,6 +361,22 @@ exports.onTick_ = simulation => name => tickFn => {
 //  disableTick_ :: D3Simulation_ -> String -> Unit
 exports.disableTick_ = simulation => name => {
   return simulation.on('tick.' + name, () => null)
+}
+// defaultNodeTick_       :: String -> D3Simulation_ -> D3Selection_ -> Unit
+exports.defaultNodeTick_ = label => simulation => nodeSelection => {
+  simulation.on('tick.' + label, () => {
+    nodeSelection.attr('cx', d => d.x)
+                 .attr('cy', d => d.y )
+  })
+}
+// defaultLinkTick_       :: String -> D3Simulation_ -> D3Selection_ -> Unit
+exports.defaultLinkTick_ = label => simulation => linkSelection => {
+  simulation.on('tick.' + label, () => {
+    linkSelection.attr("x1", d => d.source.x)
+                 .attr("y1", d => d.source.y)
+                 .attr("x2", d => d.target.x)
+                 .attr("y2", d => d.target.y);
+  })
 }
 
 

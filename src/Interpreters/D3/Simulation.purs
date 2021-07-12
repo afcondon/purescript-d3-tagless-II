@@ -4,11 +4,11 @@ import D3.Simulation.Functions
 
 import Control.Monad.State (class MonadState, StateT, get, gets, runStateT)
 import D3.Data.Types (D3Selection_, D3Simulation_)
-import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3SelectAllInDOM_, d3SelectionSelectAll_, defaultDrag_, disableDrag_, disableTick_, onTick_)
+import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3SelectAllInDOM_, d3SelectionSelectAll_, defaultDrag_, defaultLinkTick_, defaultNodeTick_, disableDrag_, disableTick_, onTick_)
 import D3.Selection (Behavior(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), applyChainableSD3)
 import D3.Simulation.Types (SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, modifySelection)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, defaultNodeTick, modifySelection)
 import D3Tagless.Instance.Selection (D3M(..))
 import Data.Foldable (foldl)
 import Data.Tuple (Tuple, fst, snd)
@@ -72,6 +72,16 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     (SS_ ss_) <- gets _.simulationState
     -- TODO delete the tick function from the state
     let _ = disableTick_ ss_.simulation_ label
+    pure unit
+
+  defaultNodeTick label selection = do
+    (SS_ ss_) <- gets _.simulationState
+    let _ = defaultNodeTick_ label ss_.simulation_ selection
+    pure unit
+
+  defaultLinkTick label selection = do
+    (SS_ ss_) <- gets _.simulationState
+    let _ = defaultLinkTick_ label ss_.simulation_ selection
     pure unit
 
 

@@ -43,7 +43,10 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- TODO parameterize out the D3_ part of SimulationNode - could we make all this opaque?
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
   setLinks :: forall d r. Array (D3_Link d r)         -> m (Array (D3_Link d r))
+  -- adding functions that occur on every tick of the simulation clock
   addTickFunction    :: Label -> Step selection -> m Unit 
-  removeTickFunction :: Label                   -> m Unit 
+  removeTickFunction :: Label                   -> m Unit
+  defaultNodeTick    :: Label -> selection -> m Unit
+  defaultLinkTick    :: Label ->  selection -> m Unit
 
 

@@ -140,7 +140,8 @@ handleAction = case _ of
 lesMisForces :: Array Force
 lesMisForces = enableForce <$>
     [ createForce "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-    , createForce "charge" ForceManyBody  []
+    , createForce "many body" ForceManyBody  []
+    , createForce "collision" ForceCollide  []
     ]
 
 codetext :: String
