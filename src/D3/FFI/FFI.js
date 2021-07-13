@@ -356,7 +356,10 @@ exports.stopSimulation_ = simulation => simulation.stop()
 // simulation.on("tick", () => {
 exports.onTick_ = simulation => name => tickFn => {
   // if(debug){ console.log(`${simulation}.onTick(${tickFn})`)}
-  return simulation.on('tick.' + name, () => tickFn())
+  return simulation.on('tick.' + name, () => {
+    // console.log(`calling the tick function tick.${name}`);
+    tickFn()
+  })
 }
 //  disableTick_ :: D3Simulation_ -> String -> Unit
 exports.disableTick_ = simulation => name => {

@@ -2,19 +2,18 @@ module D3Tagless.Instance.Simulation where
 
 import D3.Simulation.Functions
 
-import Control.Monad.State (class MonadState, StateT, get, gets, runStateT)
-import D3.Data.Types (D3Selection_, D3Simulation_)
+import Control.Monad.State (class MonadState, StateT, get, gets, modify_, runStateT)
+import D3.Data.Types (D3Selection_)
 import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3SelectAllInDOM_, d3SelectionSelectAll_, defaultDrag_, defaultLinkTick_, defaultNodeTick_, disableDrag_, disableTick_, onTick_)
 import D3.Selection (Behavior(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), applyChainableSD3)
 import D3.Simulation.Types (SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, defaultNodeTick, modifySelection)
-import D3Tagless.Instance.Selection (D3M(..))
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, modifySelection)
 import Data.Foldable (foldl)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
-import Effect.Class (class MonadEffect)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, bind, discard, liftA1, pure, show, unit, ($), (<$>))
+import Effect.Class (class MonadEffect, liftEffect)
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, Unit, bind, discard, liftA1, pure, show, unit, ($), (<$>))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | ====================================================
@@ -31,6 +30,16 @@ exec_D3M_Simulation simulation (D3SimM state_T) = liftA1 snd $ runStateT state_T
 
 eval_D3M_Simulation :: forall a row. { simulationState :: SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect a
 eval_D3M_Simulation simulation (D3SimM state_T) = liftA1 fst $ runStateT state_T simulation
+
+runEffectSimulation :: forall m a row.
+  Bind m =>
+  MonadState { simulationState :: SimulationState_ | row } m =>
+  MonadEffect m =>
+  D3SimM row D3Selection_ a -> m Unit
+runEffectSimulation state_T = do
+    state <- get
+    state' <- liftEffect $ exec_D3M_Simulation state state_T
+    modify_ (\_ -> state')
 
 derive newtype instance functorD3SimM     :: Functor           (D3SimM row selection)
 derive newtype instance applyD3SimM       :: Apply             (D3SimM row selection)
@@ -53,12 +62,16 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   removeAllForces             = simulationRemoveAllForces
   loadForces forces           = simulationLoadForces forces  
   addForce force              = simulationAddForce force
-  disableForcesByLabel labels = simulationDisableForcesByLabel labels
-  enableForcesByLabel labels  = simulationEnableForcesByLabel labels
+  setForcesByLabel { enable, disable } = do
+    simulationDisableForcesByLabel disable
+    simulationEnableForcesByLabel  enable
 
   setNodes nodes              = simulationSetNodes nodes
   setLinks links              = simulationSetLinks links
 
+  addTickFunction label (StepTransformFFI selection function) = do
+    -- TODO this would be the more efficient but less attractive route to defining a Tick function
+    pure unit
   addTickFunction label (Step selection chain) = do
     (SS_ ss_) <- gets _.simulationState
     let makeTick _ = do

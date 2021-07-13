@@ -27,6 +27,10 @@ infix 4 join as <+>
 -- 1) say you wanted to attach to "div#hook" and then select an _already existing_ <h1> in it and apply Attrs to that h1
 -- 2)...
 
+-- | These data types are to prevent "boolean blindness" when choosing forces to enable and disable
+
+type ForceConfigLists = { enable :: Array Label, disable :: Array Label }
+
 class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> selection where
   -- control
   start :: m Unit
@@ -37,8 +41,8 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   removeAllForces      ::                m Unit
   loadForces           :: Array Force -> m Unit
   addForce             :: Force       -> m Unit
-  disableForcesByLabel :: Array Label -> m Unit
-  enableForcesByLabel  :: Array Label -> m Unit
+  setForcesByLabel     :: ForceConfigLists -> m Unit
+
   -- management of data (nodes and links)
   -- TODO parameterize out the D3_ part of SimulationNode - could we make all this opaque?
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))

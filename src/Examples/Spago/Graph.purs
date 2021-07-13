@@ -6,7 +6,7 @@ import D3.Examples.Spago.Model (SpagoModel, datum_, link_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, appendElement, attach, on, setLinks, setNodes, (<+>))
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, appendElement, attach, defaultLinkTick, on, setLinks, setNodes, (<+>))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, bind, discard, negate, pure, ($), (/), (<<<))
@@ -50,12 +50,13 @@ script model = do
   circle  <- nodesSelection `appendElement` (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
   labels' <- nodesSelection `appendElement` (node Text [ classed "label",  x 0.2, y datum_.positionLabel, text datum_.name]) 
   
-  addTickFunction "nodes" $ Step nodesSelection  [ classed datum_.nodeClass, transform' datum_.translateNode ]
-  addTickFunction "links" $ Step linksSelection [ x1 (_.x <<< link_.source)
-                                                , y1 (_.y <<< link_.source)
-                                                , x2 (_.x <<< link_.target)
-                                                , y2 (_.y <<< link_.target)
-                                                ]
+  addTickFunction "nodes" $ Step nodesSelection  [ transform' datum_.translateNode ]
+  defaultLinkTick "links" linksSelection
+  -- addTickFunction "links" $ Step linksSelection [ x1 (_.x <<< link_.source)
+  --                                               , y1 (_.y <<< link_.source)
+  --                                               , x2 (_.x <<< link_.target)
+  --                                               , y2 (_.y <<< link_.target)
+  --                                               ]
   _ <- nodesSelection `on` Drag DefaultDrag
   -- TODO this callback for the mouseclick needs access to the simulation
   -- _ <- svg `modifySelection` [ onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation) ]

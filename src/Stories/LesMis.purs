@@ -15,7 +15,7 @@ import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Capabilities (loadForces, setConfigVariable)
-import D3Tagless.Instance.Simulation (exec_D3M_Simulation)
+import D3Tagless.Instance.Simulation (exec_D3M_Simulation, runEffectSimulation)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
@@ -43,7 +43,6 @@ type Input = SimulationState_
 
 type State = { 
     simulationState :: SimulationState_
-  , maybeFiber      :: Maybe (Fiber Unit) -- except it really isn't this simple, need the handle back from the simulation
   , blurb           :: Expandable.Status
   , code            :: Expandable.Status
 }
@@ -69,7 +68,6 @@ component = H.mkComponent
   initialState :: Input -> State
   initialState simulation = { 
         simulationState: simulation
-      , maybeFiber: Nothing
       , blurb: Expandable.Collapsed
       , code: Expandable.Collapsed
     }
@@ -153,33 +151,15 @@ handleAction = case _ of
     response <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
     let graph = readGraphFromFileContents response
 
-    state <- H.get
-    state' <- liftEffect $ exec_D3M_Simulation state (loadForces lesMisForces)
-    state'' <- liftEffect $ exec_D3M_Simulation state' (LesMis.graphScript graph "div.svg-container")
-    put state''
-    pure unit   
+    runEffectSimulation (loadForces lesMisForces)
+    runEffectSimulation (LesMis.graphScript graph "div.svg-container")
 
   Finalize -> pure unit
 
-  Forces1 -> do
-    state <- H.get
-    state' <- liftEffect $ exec_D3M_Simulation state (loadForces lesMisForces)
-    put state'
-    pure unit
-
-  Forces2 -> do
-    state <- H.get
-    state' <- liftEffect $ exec_D3M_Simulation state (loadForces lesMisForces2)
-    put state'
-    pure unit
-
-  Freeze -> do
-    state <- H.get
-    state' <- liftEffect $ exec_D3M_Simulation state (setConfigVariable $ Alpha 0.0)
-    put state'
-    pure unit
-
-  Reheat -> simulationStart
+  Forces1 -> runEffectSimulation (loadForces lesMisForces)
+  Forces2 -> runEffectSimulation (loadForces lesMisForces2)
+  Freeze  -> runEffectSimulation (setConfigVariable $ Alpha 0.0)
+  Reheat  -> simulationStart
 
 lesMisForces :: Array Force
 lesMisForces = enableForce <$>

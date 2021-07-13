@@ -4,16 +4,18 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, gets)
+import Control.Monad.State (class MonadState, modify_, put)
 import D3.Data.Types (D3Selection_)
-import D3.Examples.Spago (startSimulationFiber, treeReduction)
+import D3.Examples.Spago (treeReduction)
 import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
-import D3.Simulation.Types (Force(..), ForceType(..), SimBusCommand(..), SimVariable, SimulationState_(..))
+import D3.Simulation.Functions (simulationStart)
+import D3.Simulation.Types (Force(..), ForceType(..), SimVariable(..), SimulationState_(..))
 import D3Tagless.Block.Card as Card
-import D3Tagless.Instance.Bus (eval_D3MB_Simulation)
+import D3Tagless.Capabilities (addForce, loadForces, removeAllForces, setConfigVariable, setForcesByLabel)
+import D3Tagless.Instance.Simulation (D3SimM, exec_D3M_Simulation, runEffectSimulation)
 import Data.Array ((:))
 import Data.Either (hush)
 import Data.Map (toUnfoldable)
@@ -21,10 +23,10 @@ import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
 import Data.Tuple (snd)
-import Effect.Aff (Aff, Fiber, forkAff, killFiber)
-import Effect.Aff.Bus as Bus
-import Effect.Aff.Class (class MonadAff, liftAff)
-import Effect.Exception (error)
+import Effect.Aff (Aff)
+import Effect.Aff.Class (class MonadAff)
+import Effect.Class (class MonadEffect)
+import Halogen (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -47,15 +49,16 @@ data Action
   | ChangeSimConfig SimVariable
   | StopSim
   | StartSim
+
+type Input = SimulationState_
   
 type State = {
-    fiber :: Maybe (Fiber Unit)
-  , bus   :: Maybe (Bus.BusRW (SimBusCommand D3Selection_))
+    simulationState :: SimulationState_
 }
 
-component :: forall query output m. MonadAff m => H.Component query Unit output m
+component :: forall query output m. MonadAff m => H.Component query Input output m
 component = H.mkComponent
-  { initialState: const initialState
+  { initialState
   , render
   , eval: H.mkEval $ H.defaultEval
     { handleAction = handleAction
@@ -64,8 +67,8 @@ component = H.mkComponent
   }
   where
 
-  initialState :: State
-  initialState = { fiber: Nothing, bus: Nothing }
+  initialState :: Input -> State
+  initialState simulation = { simulationState: simulation }
 
   renderSimControls =
     HH.div
@@ -92,6 +95,11 @@ component = H.mkComponent
               [ HE.onClick $ const (SetPackageForce PackageRing) ]
               [ HH.text "PackageRing" ]
           ]
+      , HH.div_
+          [ Button.button
+              [ HE.onClick $ const (SetPackageForce PackageFree) ]
+              [ HH.text "PackageFree" ]
+          ]
       ]
 
   render :: State -> H.ComponentHTML Action () m
@@ -114,60 +122,29 @@ component = H.mkComponent
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
-  Initialize -> do
-    simulationBus               <- Bus.make
-    fiber                       <- H.liftAff $ forkAff $ startSimulationFiber simulationBus
-    H.modify_ (\s -> s { fiber = Just fiber, bus = Just simulationBus })
-    busSend $ LoadForces initialForces
-    
+  Initialize -> do    
+    state <- H.get
     -- (detached :: D3Selection_)  <- eval_D3MB_Simulation simulationBus $ removeExistingSVG "div.svg-container"
     (model :: Maybe SpagoModel) <- H.liftAff getModel
-    (_ :: D3Selection_) <- H.liftAff $ case model of
-            Nothing      -> pure $ unsafeCoerce unit -- TODO just temporary, pull out the script runner to fn that returns unit
-            (Just graph) -> eval_D3MB_Simulation simulationBus (Graph.script graph)
-    pure unit
+    case model of
+      Nothing      -> pure $ unsafeCoerce unit -- TODO just temporary, pull out the script runner to fn that returns unit
+      (Just graph) -> runEffectSimulation (Graph.script graph)
+    runEffectSimulation (loadForces initialForces)
 
-
-  Finalize -> do
-      fiber <- H.gets _.fiber
-      _ <- case fiber of
-              Nothing      -> pure unit
-              (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
-      H.modify_ (\state -> state { fiber = Nothing })
+  Finalize -> pure unit
   
-  SetPackageForce packageForce ->
-    case packageForce of
-      PackageGrid -> busSend (AddForce packageOnlyFixToGridForce)
-      PackageRing -> busSend (AddForce packageOnlyRadialForce)
-      PackageFree -> busSend RemoveAllForces
+  SetPackageForce PackageGrid -> runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid" ], disable: ["packageOrbit"] }
+  SetPackageForce PackageRing -> runEffectSimulation $ setForcesByLabel  { enable: [ "packageOrbit" ], disable: ["packageGrid"] }
+  SetPackageForce PackageFree -> runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["packageOrbig", "packageGrid"] }
 
-  SetModuleForce moduleForce ->
-    case moduleForce of
-      ClusterPackage -> busSend Start
-      ForceTree      -> busSend Stop
+  SetModuleForce moduleForce -> pure unit
 
-  ChangeSimConfig c -> busSend $ SetConfigVariable c
+  ChangeSimConfig c -> pure unit -- SetConfigVariable c
 
-  StartSim -> busSend Start
+  StartSim -> simulationStart
 
-  StopSim -> busSend Stop
+  StopSim -> runEffectSimulation (setConfigVariable $ Alpha 0.0)
 
-busSend :: forall m.
-  Bind m => 
-  MonadState State m => 
-  MonadAff m => 
-  SimBusCommand D3Selection_ -> m Unit
-busSend message = do
-  maybeBus <- gets _.bus
-  _ <- liftAff $ case maybeBus of
-                  Nothing -> pure unit
-                  (Just bus) -> Bus.write message bus
-  pure unit
-
--- drawGraph :: SimulationState_ -> SpagoModel -> Aff Unit
--- drawGraph simulation graph = do
---   (svg :: Tuple D3Selection_ SimulationState_) <- liftEffect $ runD3M_Simulation simulation (Cluster.script graph)
---   pure unit
 
 -- getModel will try to build a model from files and to derive a dependency tree from Main
 -- the dependency tree will contain all nodes reachable from Main but NOT all links

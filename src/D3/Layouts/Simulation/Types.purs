@@ -15,7 +15,7 @@ import Debug (trace)
 
 data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number
 
-data Step selection = Step selection (Array ChainableS)
+data Step selection = Step selection (Array ChainableS) | StepTransformFFI selection (Datum_ -> String)
 
 data SimBusCommand selection =
     Start
@@ -32,10 +32,10 @@ data SimBusCommand selection =
   | RemoveTickFunction    Label
 
 instance showSimVariable :: Show SimVariable where
-  show (Alpha n) = "Alpha: " <> show n
-  show (AlphaTarget n) = "AlphaTarget: " <> show n
-  show (AlphaMin n) = "AlphaMin: " <> show n
-  show (AlphaDecay n) = "AlphaDecay: " <> show n
+  show (Alpha n)         = "Alpha: " <> show n
+  show (AlphaTarget n)   = "AlphaTarget: " <> show n
+  show (AlphaMin n)      = "AlphaMin: " <> show n
+  show (AlphaDecay n)    = "AlphaDecay: " <> show n
   show (VelocityDecay n) = "VelocityDecay: " <> show n
 
 instance showSimCommand :: Show (SimBusCommand D3Selection_) where

@@ -157,6 +157,7 @@ simulationSetLinks links = do
 simulationCreateTickFunction :: forall selection row m. 
   (MonadState { simulationState :: SimulationState_ | row } m) =>
   Label -> Step selection -> m Unit
+simulationCreateTickFunction label tick@(StepTransformFFI selection fn) = pure unit
 simulationCreateTickFunction label tick@(Step selection chain) = do
   { simulationState: SS_ ss_} <- get
   let makeTick _ = do
