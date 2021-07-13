@@ -133,9 +133,15 @@ handleAction = case _ of
 
   Finalize -> pure unit
   
-  SetPackageForce PackageGrid -> runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid" ], disable: ["packageOrbit"] }
-  SetPackageForce PackageRing -> runEffectSimulation $ setForcesByLabel  { enable: [ "packageOrbit" ], disable: ["packageGrid"] }
-  SetPackageForce PackageFree -> runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["packageOrbig", "packageGrid"] }
+  SetPackageForce PackageGrid -> do
+    runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid" ], disable: ["packageOrbit"] }
+    runEffectSimulation $ setConfigVariable (Alpha 0.8)
+  SetPackageForce PackageRing -> do
+    runEffectSimulation $ setForcesByLabel  { enable: [ "packageOrbit" ], disable: ["packageGrid"] }
+    runEffectSimulation $ setConfigVariable (Alpha 0.8)
+  SetPackageForce PackageFree -> do
+    runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["packageOrbit", "packageGrid"] }
+    runEffectSimulation $ setConfigVariable (Alpha 0.8)
 
   SetModuleForce moduleForce -> pure unit
 
@@ -171,64 +177,25 @@ addTreeToModel rootName maybeModel = do
 
 initialForces :: Array Force
 initialForces = [
-    enableForce collideForce
-  , enableForce manyBodyForce
-  , enableForce centeringForceX
-  , enableForce centeringForceY
-  , enableForce centeringForceCenter
-  , clusterForceX
-  , clusterForceY
-  , packageOnlyRadialForce
-  , packageOnlyFixToGridForce
-  , unusedModuleOnlyRadialForce
+    enableForce $ createForce "collide" ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
+  , enableForce $ createForce "charge"  ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
+  , enableForce $ createForce "center"  ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
+  , enableForce $ createForce "x"       ForceX [ F.strength 0.1, F.x 0.0 ]
+  , enableForce $ createForce "y"       ForceY [ F.strength 0.1, F.y 0.0 ]
+  ,               createForce "clusterx"       ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
+  ,               createForce "clustery"       ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
+  ,               createForce "packageOrbit"   ForceRadial [ strengthFunction1, F.x 0.0, F.y 0.0, F.radius 1000.0 ]
+  ,               createForce "packageGrid"    (ForceFixPositionXY gridXY) [ ]
+  ,               createForce "unusedModuleOrbit" ForceRadial [ strengthFunction2, F.x 0.0, F.y 0.0, F.radius 600.0 ]
 ]
-
-clusterForceX :: Force
-clusterForceX = createForce "x" ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
-
-clusterForceY :: Force
-clusterForceY = createForce "y" ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
-
-collideForce :: Force
-collideForce = createForce "collide" ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
-
-manyBodyForce :: Force
-manyBodyForce = createForce "charge" ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
-
-treeForceX :: Force
-treeForceX = createForce "x" ForceX [ F.strength 0.2, F.x datum_.treePointX ]
-
-treeForceY :: Force
-treeForceY = createForce "y" ForceY [ F.strength 0.2, F.y datum_.treePointY ]
-      
-centeringForceX :: Force
-centeringForceX = createForce "x" ForceX [ F.strength 0.1, F.x 0.0 ]
-
-centeringForceY :: Force
-centeringForceY = createForce "y" ForceY [ F.strength 0.1, F.y 0.0 ]
-
-centeringForceCenter :: Force
-centeringForceCenter = createForce "center" ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
-
-packageOnlyRadialForce :: Force
-packageOnlyRadialForce = createForce "packageOrbit"  ForceRadial   [ strengthFunction, F.x 0.0, F.y 0.0, F.radius 1000.0 ]
   where
-    strengthFunction =
-      F.strength (\d -> if datum_.isPackage d then 0.8 else 0.0)
+    strengthFunction1 = F.strength (\d -> if datum_.isPackage d      then 0.8 else 0.0)
+    strengthFunction2 = F.strength (\d -> if datum_.isUnusedModule d then 0.8 else 0.0)
 
-packageOnlyFixToGridForce :: Force
-packageOnlyFixToGridForce = do
-  let gridXY d = offsetXY { x: (-1000.0), y: (-500.0) } $
-                 scalePoint 100.0 20.0 $
-                 numberToGridPoint 10 (datum_.id d)
-  createForce "packageGrid" (ForceFixPositionXY gridXY) [ ]
+    gridXY d = offsetXY { x: (-1000.0), y: (-500.0) } $
+               scalePoint 100.0 20.0 $
+               numberToGridPoint 10 (datum_.id d)
 
-unusedModuleOnlyRadialForce :: Force
-unusedModuleOnlyRadialForce = createForce "unusedModuleOrbit" ForceRadial   [ strengthFunction, F.x 0.0, F.y 0.0, F.radius 600.0 ]
-  where
-    strengthFunction =
-      F.strength (\d -> if datum_.isUnusedModule d then 0.8 else 0.0)
-      
 -- | ============================================
 -- | HTML
 -- | ============================================

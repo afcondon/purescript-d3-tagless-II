@@ -3,7 +3,7 @@ module D3.Examples.Spago.Model where
 import Prelude
 
 import D3.Data.Tree (TreeLayout(..))
-import D3.Data.Types (D3Simulation_, Datum_, PointXY, chooseX, chooseY)
+import D3.Data.Types (D3Simulation_, Datum_, PointXY)
 import D3.Examples.Spago.Files (NodeType(..), Pinned(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
 import D3.FFI (hasChildren_)
@@ -141,11 +141,11 @@ datum_ = {
   , connected     : (\d -> (unboxD3SimNode d).connected)
 
   , clusterPoint  : (\d -> cluster2Point (unboxD3SimNode d).cluster)
-  , clusterPointX : (\d -> chooseX $ datum_.clusterPoint d)
-  , clusterPointY : (\d -> chooseY $ datum_.clusterPoint d)
+  , clusterPointX : (\d -> _.x $ datum_.clusterPoint d)
+  , clusterPointY : (\d -> _.y $ datum_.clusterPoint d)
   , treePoint     : (\d -> fromMaybe (datum_.clusterPoint d) (tree2Point (datum_.treeX d) (datum_.treeY d)))
-  , treePointX    : (\d -> chooseX $ datum_.treePoint d)
-  , treePointY    : (\d -> chooseY $ datum_.treePoint d)
+  , treePointX    : (\d -> _.x $ datum_.treePoint d)
+  , treePointY    : (\d -> _.y $ datum_.treePoint d)
 
 -- more complicated calculations (CONVENIENCE)
   , positionLabel:
