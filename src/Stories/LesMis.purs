@@ -14,7 +14,7 @@ import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), SimulationSta
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Capabilities (loadForces, setConfigVariable)
+import D3Tagless.Capabilities (ForceConfigLists, loadForces, setConfigVariable, setForcesByLabel)
 import D3Tagless.Instance.Simulation (exec_D3M_Simulation, runEffectSimulation)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
@@ -34,8 +34,7 @@ data Action
   = Initialize
   | Finalize
   | ToggleCard (Lens' State Expandable.Status)
-  | Forces1
-  | Forces2
+  | ConfigureForces ForceConfigLists
   | Freeze
   | Reheat
 
@@ -77,16 +76,22 @@ component = H.mkComponent
       [ Tailwind.apply "story-panel-controls"] 
       [ Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
         [ Button.buttonVertical
-          [ HE.onClick (const Forces2) ]
-          [ HH.text "Mix it up!" ]
+          [ HE.onClick (const $ ConfigureForces { enable: ["center"], disable: [""]}) ]
+          [ HH.text "Centering" ]
         , Button.buttonVertical
-          [ HE.onClick (const Forces1) ]
-          [ HH.text "Original forces" ]
+          [ HE.onClick (const $ ConfigureForces { enable: ["many body"], disable: [""]}) ]
+          [ HH.text "Many body" ]
         , Button.buttonVertical
-          [ HE.onClick (const Freeze) ]
+          [ HE.onClick (const $ ConfigureForces { enable: ["collision"], disable: ["collision20"]}) ]
+          [ HH.text "Collision" ]
+        , Button.buttonVertical
+          [ HE.onClick (const $ ConfigureForces { enable: ["collision20"], disable: ["collision"]}) ]
+          [ HH.text "Collision 20" ]
+        , Button.buttonVertical
+          [ HE.onClick (const $ Freeze) ]
           [ HH.text "Freeze" ]
         , Button.buttonVertical
-          [ HE.onClick (const Reheat) ]
+          [ HE.onClick (const $ Reheat) ]
           [ HH.text "Reheat!" ]
         ]
       ]
@@ -156,22 +161,19 @@ handleAction = case _ of
 
   Finalize -> pure unit
 
-  Forces1 -> runEffectSimulation (loadForces lesMisForces)
-  Forces2 -> runEffectSimulation (loadForces lesMisForces2)
+  ConfigureForces enableDisable -> do
+    runEffectSimulation (setForcesByLabel enableDisable)
+    runEffectSimulation (setConfigVariable $ Alpha 0.8)
+
   Freeze  -> runEffectSimulation (setConfigVariable $ Alpha 0.0)
   Reheat  -> simulationStart
 
 lesMisForces :: Array Force
-lesMisForces = enableForce <$>
+lesMisForces = 
     [ createForce "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
     , createForce "many body" ForceManyBody  []
     , createForce "collision" ForceCollide  []
-    ]
-
-lesMisForces2 :: Array Force
-lesMisForces2 = enableForce <$>
-    [ createForce "many body" ForceManyBody  []
-    , createForce "collision" ForceCollide  [ F.radius 20.0]
+    , createForce "collision20" ForceCollide  [ F.radius 20.0]
     ]
 
 codetext :: String
