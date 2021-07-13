@@ -103,15 +103,15 @@ graphScript model selector = do
     , behaviour : [ radius 5.0, fill datum_.colorByGroup ]
   }
 
-  defaultNodeTick "nodes" nodesSelection 
-  defaultLinkTick "links" linksSelection
+  -- defaultNodeTick "nodes" nodesSelection 
+  -- defaultLinkTick "links" linksSelection
   -- TODO looks like the more general form of specifying tick function here in the DSL is unacceptably slow
-  -- addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y  ]
-  -- addTickFunction "links" $ Step linksSelection [ x1 (_.x <<< link_.source)
-  --                                               , y1 (_.y <<< link_.source)
-  --                                               , x2 (_.x <<< link_.target)
-  --                                               , y2 (_.y <<< link_.target)
-  --                                               ]
+  addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y  ]
+  addTickFunction "links" $ Step linksSelection [ x1 (_.x <<< link_.source)
+                                                , y1 (_.y <<< link_.source)
+                                                , x2 (_.x <<< link_.target)
+                                                , y2 (_.y <<< link_.target)
+                                                ]
   _ <- nodesSelection `on` Drag DefaultDrag
 
   _ <- svg `on`  Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }

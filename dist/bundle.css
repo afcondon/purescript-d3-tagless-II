@@ -2,66 +2,68 @@
   div.svg-container svg.gup text { font-size: 48px; font-family: monospace;
   }
 
-div.svg-container svg.cluster.spotlight g.package text {
+/* the svg-container's class is set by Halogen, thus controlling look of the visualization */
+
+div.svg-container.cluster svg.spotlight g.package text {
         opacity: 0.2;
       }
 
-div.svg-container svg.cluster.spotlight g.module {
+div.svg-container.cluster svg.spotlight g.module {
         opacity: 0.2
       }
 
-div.svg-container svg.cluster.spotlight g.module.source,
-        div.svg-container svg.cluster.spotlight g.module.target,
-        div.svg-container svg.cluster.spotlight g.module.spotlight {
+div.svg-container.cluster svg.spotlight g.module.source,
+        div.svg-container.cluster svg.spotlight g.module.target,
+        div.svg-container.cluster svg.spotlight g.module.spotlight {
           opacity: 1
         }
 
-div.svg-container svg.cluster.spotlight g.module.source text, div.svg-container svg.cluster.spotlight g.module.target text, div.svg-container svg.cluster.spotlight g.module.spotlight text {
+div.svg-container.cluster svg.spotlight g.module.source text, div.svg-container.cluster svg.spotlight g.module.target text, div.svg-container.cluster svg.spotlight g.module.spotlight text {
             fill: gray;
           }
 
-div.svg-container svg.cluster g.links line {
+div.svg-container.cluster svg g.links line {
       opacity: 0.5
     }
 
-div.svg-container svg.cluster g.links line.source {
+div.svg-container.cluster svg g.links line.source {
         opacity: 0.8;
         stroke: red;
         stroke-width: 2px;
       }
 
-div.svg-container svg.cluster g.links line.target {
+div.svg-container.cluster svg g.links line.target {
         opacity: 0.8;
         stroke: blue;
         stroke-width: 2px;
       }
 
-div.svg-container svg.cluster g.nodes text {
+div.svg-container.cluster svg g.nodes text {
         font: 12px sans-serif;
         text-anchor: middle;
       }
 
-div.svg-container svg.cluster g.nodes g.module text {
+div.svg-container.cluster svg g.nodes g.module text {
           visibility: hidden;
         }
 
-div.svg-container svg.cluster g.nodes g.module circle {
+div.svg-container.cluster svg g.nodes g.module circle {
           stroke: white;
           stroke-width: 1.5px;
           opacity: 1;
         }
 
-div.svg-container svg.cluster g.nodes g.module:hover text {
+div.svg-container.cluster svg g.nodes g.module:hover text {
             visibility: visible;
             fill: black;
             opacity: 0.8;
           }
 
-div.svg-container svg.cluster g.nodes g.package circle {
+div.svg-container.cluster svg g.nodes g.package circle {
           visibility: hidden;
         }
 
-div.svg-container svg.cluster g.nodes g.package text {
+div.svg-container.cluster svg g.nodes g.package text {
           visibility: visible;
           fill: black;
           font-size: 24px;
@@ -69,18 +71,18 @@ div.svg-container svg.cluster g.nodes g.package text {
           text-anchor: middle;
         }
 
-div.svg-container svg.cluster g.nodes g.spotlight text {
+div.svg-container.cluster svg g.nodes g.spotlight text {
           visibility: visible;
         }
 
-div.svg-container svg.cluster g.nodes g.spotlight circle {
+div.svg-container.cluster svg g.nodes g.spotlight circle {
           opacity: 1;
           stroke-width: 5px;
           stroke-dasharray: 4 1;
           stroke: black;
         }
 
-/*! tailwindcss v2.1.4 | MIT License | https://tailwindcss.com */
+/* ! tailwindcss v2.1.4 | MIT License | https://tailwindcss.com */
 
 /*! modern-normalize v1.1.0 | MIT License | https://github.com/sindresorhus/modern-normalize */
 

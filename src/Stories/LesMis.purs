@@ -14,7 +14,7 @@ import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), SimulationSta
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Capabilities (ForceConfigLists, loadForces, setConfigVariable, setForcesByLabel)
+import D3Tagless.Capabilities (ForceConfigLists, loadForces, removeAllForces, setConfigVariable, setForcesByLabel)
 import D3Tagless.Instance.Simulation (exec_D3M_Simulation, runEffectSimulation)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
@@ -52,6 +52,14 @@ _blurb = prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
+lesMisForces :: Array Force
+lesMisForces = 
+    [ createForce "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+    , createForce "many body" ForceManyBody  []
+    , createForce "collision" ForceCollide  [ F.radius 4.0 ]
+    , createForce "collision20" ForceCollide  [ F.radius 20.0]
+    ]
+
 component :: forall query output m. 
   MonadAff m => 
   H.Component query Input output m
@@ -83,7 +91,7 @@ component = H.mkComponent
           [ HH.text "Many body" ]
         , Button.buttonVertical
           [ HE.onClick (const $ ConfigureForces { enable: ["collision"], disable: ["collision20"]}) ]
-          [ HH.text "Collision" ]
+          [ HH.text "Collision 4" ]
         , Button.buttonVertical
           [ HE.onClick (const $ ConfigureForces { enable: ["collision20"], disable: ["collision"]}) ]
           [ HH.text "Collision 20" ]
@@ -159,7 +167,7 @@ handleAction = case _ of
     runEffectSimulation (loadForces lesMisForces)
     runEffectSimulation (LesMis.graphScript graph "div.svg-container")
 
-  Finalize -> pure unit
+  Finalize ->  runEffectSimulation removeAllForces
 
   ConfigureForces enableDisable -> do
     runEffectSimulation (setForcesByLabel enableDisable)
@@ -168,13 +176,6 @@ handleAction = case _ of
   Freeze  -> runEffectSimulation (setConfigVariable $ Alpha 0.0)
   Reheat  -> simulationStart
 
-lesMisForces :: Array Force
-lesMisForces = 
-    [ createForce "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-    , createForce "many body" ForceManyBody  []
-    , createForce "collision" ForceCollide  []
-    , createForce "collision20" ForceCollide  [ F.radius 20.0]
-    ]
 
 codetext :: String
 codetext = 

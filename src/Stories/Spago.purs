@@ -54,6 +54,7 @@ type Input = SimulationState_
   
 type State = {
     simulationState :: SimulationState_
+  , svgClass :: String -- by controlling the class that is on the svg we can completely change the look of the vis (and not have to think about this at D3 level)
 }
 
 component :: forall query output m. MonadAff m => H.Component query Input output m
@@ -68,7 +69,7 @@ component = H.mkComponent
   where
 
   initialState :: Input -> State
-  initialState simulation = { simulationState: simulation }
+  initialState simulation = { simulationState: simulation, svgClass: "cluster" }
 
   renderSimControls =
     HH.div
@@ -115,7 +116,7 @@ component = H.mkComponent
             , Card.card_ [ blurbtext ]
             ]
         , HH.div
-            [ Tailwind.apply "svg-container" ]
+            [ Tailwind.apply $ "svg-container " <> state.svgClass ]
             [ ]
         ]
 
@@ -134,13 +135,13 @@ handleAction = case _ of
   Finalize -> pure unit
   
   SetPackageForce PackageGrid -> do
-    runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid" ], disable: ["packageOrbit"] }
+    runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid", "clusterx", "clustery" ], disable: ["packageOrbit"] }
     runEffectSimulation $ setConfigVariable (Alpha 0.8)
   SetPackageForce PackageRing -> do
-    runEffectSimulation $ setForcesByLabel  { enable: [ "packageOrbit" ], disable: ["packageGrid"] }
+    runEffectSimulation $ setForcesByLabel  { enable: [ "packageOrbit" ], disable: ["packageGrid", "clusterx", "clustery" ] }
     runEffectSimulation $ setConfigVariable (Alpha 0.8)
   SetPackageForce PackageFree -> do
-    runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["packageOrbit", "packageGrid"] }
+    runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["packageOrbit", "packageGrid", "clusterx", "clustery" ] }
     runEffectSimulation $ setConfigVariable (Alpha 0.8)
 
   SetModuleForce moduleForce -> pure unit
