@@ -81,9 +81,9 @@ data ForceType =
   | ForceY                                         -- strength, y
   | ForceRadial                                    -- strength, radius, x, y
   | ForceLink (forall r. Array (D3_Link NodeID r)) -- strength, id, distance, iterations, links
-  | ForceFixPositionXY (Datum_ -> PointXY) -- function is static, provided to constructor
-  | ForceFixPositionX  (Datum_ -> Number)
-  | ForceFixPositionY  (Datum_ -> Number)
+  | ForceFixPositionXY (Datum_ -> { x :: Number, y :: Number }) (Datum_ -> Boolean) -- function is static, provided to constructor
+  | ForceFixPositionX  (Datum_ -> { x :: Number }) (Datum_ -> Boolean) 
+  | ForceFixPositionY  (Datum_ -> { y :: Number }) (Datum_ -> Boolean) 
                                                    -- TODO need something to hold extra custom force config, perhaps?
   | CustomForce                                    -- ???
 
@@ -94,9 +94,9 @@ instance Show ForceType where
   show ForceX                  = "ForceX"
   show ForceY                  = "ForceY"
   show ForceRadial             = "ForceRadial"
-  show (ForceFixPositionXY xy) = "ForceFixPositionXY"
-  show (ForceFixPositionX x)   = "ForceFixPositionX"
-  show (ForceFixPositionY y)   = "ForceFixPositionY"
+  show (ForceFixPositionXY _ _) = "ForceFixPositionXY"
+  show (ForceFixPositionX _ _)   = "ForceFixPositionX"
+  show (ForceFixPositionY _ _)   = "ForceFixPositionY"
   show (ForceLink _)           = "ForceLink"
   show CustomForce             = "CustomForce"
 

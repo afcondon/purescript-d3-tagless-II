@@ -4,9 +4,10 @@ import Prelude
 
 import D3.Attributes.Instances (Attribute(..), Label, unbox)
 import D3.Data.Types (D3Simulation_)
-import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_)
+import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_)
 import D3.Simulation.Types (ChainableF, Force(..), ForceStatus(..), ForceType(..))
 import Data.Array (elem)
+import Debug (spy)
 
 
 toggleForceStatus :: ForceStatus -> ForceStatus
@@ -39,7 +40,7 @@ disableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
 disableByLabels simulation labels force@(Force label _ t cs h_) =
   if label `elem` labels
   then do
-    let _ = setAsNullForceInSimulation_ simulation label
+    let _ = removeForceFromSimulation force simulation
     Force label ForceDisabled t cs h_
   else force
 
@@ -47,7 +48,7 @@ enableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
 enableByLabels simulation labels force@(Force label _ t cs h_) = 
   if label `elem` labels
   then do
-    let _ = putForceInSimulation_ simulation label h_
+    let _ = putForceInSimulation force simulation
     Force label ForceActive t cs h_
   else force
 
@@ -63,9 +64,28 @@ putForceInSimulation (Force l s t attrs h_) simulation_ =
 
     (ForceLink _) -> putForceInSimulation_ simulation_ l h_
 
-    (ForceFixPositionXY f) -> applyFixForceInSimulationXY_ simulation_ l f
-    (ForceFixPositionX f)  -> applyFixForceInSimulationX_ simulation_ l f
-    (ForceFixPositionY f)  -> applyFixForceInSimulationY_ simulation_ l f
+-- TODO should cache the filter from initialization
+    (ForceFixPositionXY fn filter) -> applyFixForceInSimulationXY_ simulation_ l fn filter
+    (ForceFixPositionX fn filter)  -> applyFixForceInSimulationX_ simulation_ l fn filter
+    (ForceFixPositionY fn filter)  -> applyFixForceInSimulationY_ simulation_ l fn filter
+
+    CustomForce   -> putForceInSimulation_ simulation_ l h_ -- TODO not implemented or even designed yet
+
+removeForceFromSimulation :: Force -> D3Simulation_ -> D3Simulation_
+removeForceFromSimulation (Force l s t attrs h_) simulation_ =
+  case t of
+    ForceManyBody -> setAsNullForceInSimulation_ simulation_ l
+    ForceCenter   -> setAsNullForceInSimulation_ simulation_ l
+    ForceCollide  -> setAsNullForceInSimulation_ simulation_ l
+    ForceX        -> setAsNullForceInSimulation_ simulation_ l
+    ForceY        -> setAsNullForceInSimulation_ simulation_ l
+    ForceRadial   -> setAsNullForceInSimulation_ simulation_ l
+
+    (ForceLink _) -> setAsNullForceInSimulation_ simulation_ l
+
+    (ForceFixPositionXY fn filter) -> removeFixForceXY_ simulation_ filter
+    (ForceFixPositionX fn filter)  -> removeFixForceX_ simulation_ filter
+    (ForceFixPositionY fn filter)  -> removeFixForceY_ simulation_ filter
 
     CustomForce   -> putForceInSimulation_ simulation_ l h_ -- TODO not implemented or even designed yet
 
@@ -104,15 +124,15 @@ forceDescription = case _ of
 
     """The radial force pushes nodes towards the closest point on a given circle."""
 
-  (ForceFixPositionXY xy) ->
+  (ForceFixPositionXY fn filter) ->
 
     """This \"force\" is really an over-ride for the force simulation, fixing the node at a particular point"""
 
-  (ForceFixPositionX x) ->
+  (ForceFixPositionX x filter) ->
 
     """This \"force\" is really an over-ride for the force simulation, fixing the node at a particular X dimension"""
 
-  (ForceFixPositionY y) ->
+  (ForceFixPositionY y filter) ->
 
     """This \"force\" is really an over-ride for the force simulation, fixing the node at a particular Y dimension"""
 
@@ -139,9 +159,9 @@ createForce_ = case _ of
   (ForceLink links)         -> forceLink_      links
   (CustomForce)             -> forceCustom_    unit
   -- NB there is actually no "force", in D3 terms, behind the fixed "forces", hence the dummy handle that is returned
-  (ForceFixPositionXY xy)   -> dummyForceHandle_ 
-  (ForceFixPositionX x)     -> dummyForceHandle_
-  (ForceFixPositionY y)     -> dummyForceHandle_
+  (ForceFixPositionXY _ _)  -> dummyForceHandle_ 
+  (ForceFixPositionX _ _)   -> dummyForceHandle_
+  (ForceFixPositionY _ _)   -> dummyForceHandle_
 
 -- TODO at present there is no type checking on what forces have which attrs settable, see comment above
 setForceAttr :: D3ForceHandle_ -> Attribute -> D3ForceHandle_

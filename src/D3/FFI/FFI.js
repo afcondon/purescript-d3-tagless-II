@@ -460,22 +460,63 @@ exports.dummyForceHandle_ = null
 exports.setAsNullForceInSimulation_ = simulation => label => {
   simulation.force(label, null)
 }
+exports.removeFixForceXY_ = simulation => filterFn => {
+  let nodes = simulation.nodes()
+  for (let index = 0; index < nodes.length; index++) {
+    if (filterFn(nodes[index])) { // only fix nodes that this thing applies to
+      nodes[index].fx = null;
+      nodes[index].fy = null;
+    }
+  }
+}
+exports.removeFixForceX_ = simulation => filterFn => {
+  let nodes = simulation.nodes()
+  for (let index = 0; index < nodes.length; index++) {
+    if (filterFn(nodes[index])) { // only fix nodes that this thing applies to
+      nodes[index].fx = null;
+    }
+  }
+}
+exports.removeFixForceY_ = simulation => filterFn => {
+  let nodes = simulation.nodes()
+  for (let index = 0; index < nodes.length; index++) {
+    if (filterFn(nodes[index])) { // only unfix nodes that this thing applies to
+      nodes[index].fy = null;
+    }
+  }
+}
 // applyFixForceInSimulationXY_ :: D3Simulation_ -> String -> (Datum_ -> PointXY) -> D3Simulation_ 
-exports.applyFixForceInSimulationXY_ = simulation => label => f => {
+exports.applyFixForceInSimulationXY_ = simulation => label => fn => filterFn => {
   // get nodes from simulation
   // set each node's fx,fy using f function
-  console.log(`fix force ${label} fixing position of nodes using function ${f}`);
+  let nodes = simulation.nodes()
+  for (let index = 0; index < nodes.length; index++) {
+    if (filterFn(nodes[index])) { // only fix nodes that this thing applies to
+      let gridXY = fn(nodes[index]) 
+      nodes[index].fx = gridXY.x
+      nodes[index].fy = gridXY.y;
+    }
+  }
+  // console.log(`fix force ${label} fixing position of nodes, filtered by ${filterFn} using function ${fn}`);
 }
 // applyFixForceInSimulationX_  :: D3Simulation_ -> String -> (Datum_ -> Number)  -> D3Simulation_ 
-exports.applyFixForceInSimulationX_ = simulation => label => f => {
-  // get nodes from simulation
-  // set each node's fx,fy using f function
-}
+exports.applyFixForceInSimulationX_ = simulation => label => fn => filterFn => {
+  let nodes = simulation.nodes()
+  for (let index = 0; index < nodes.length; index++) {
+    if (filterFn(nodes[index])) { // only fix nodes that this thing applies to
+      let gridXY = fn(nodes[index]) 
+      nodes[index].fx = gridXY.x
+    }
+  }}
 // applyFixForceInSimulationY_  :: D3Simulation_ -> String -> (Datum_ -> Number)  -> D3Simulation_ 
-exports.applyFixForceInSimulationY_ = simulation => label => f => {
-  // get nodes from simulation
-  // set each node's fx,fy using f function
-}
+exports.applyFixForceInSimulationY_ = simulation => label => fn => filterFn => {
+  let nodes = simulation.nodes()
+  for (let index = 0; index < nodes.length; index++) {
+    if (filterFn(nodes[index])) { // only fix nodes that this thing applies to
+      let gridXY = fn(nodes[index]) 
+      nodes[index].fy = gridXY.y;
+    }
+  }}
 
 // putForceInSimulation_ :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
 exports.putForceInSimulation_ = simulation => label => force => {
