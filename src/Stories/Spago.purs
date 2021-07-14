@@ -109,10 +109,9 @@ component = H.mkComponent
         [ Tailwind.apply "story-container spago" ]
         [ HH.div
             [ Tailwind.apply "story-panel-about" ]
-            -- [ 
-            -- , renderTableForces state.simulation
-            -- , renderTableElements state.simulation
             [ renderSimControls
+            , renderTableForces state.simulationState
+            -- , renderTableElements state.simulation
             , Card.card_ [ blurbtext ]
             ]
         , HH.div

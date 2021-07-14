@@ -169,12 +169,12 @@ datum_ = {
 -- accessors to provide different force settings for different cohorts, quite possible that this should go thru a similar but different route from `datum`
   , isPackage:
       (\d -> case datum_.nodetype d of
-              (IsModule _) -> true
-              (IsPackage _) -> false)
-  , isModule:
-      (\d -> case datum_.nodetype d of
               (IsModule _) -> false
               (IsPackage _) -> true)
+  , isModule:
+      (\d -> case datum_.nodetype d of
+              (IsModule _) -> true
+              (IsPackage _) -> false)
   , isUnusedModule:
       (\d -> case datum_.nodetype d of
               (IsPackage _) -> false
