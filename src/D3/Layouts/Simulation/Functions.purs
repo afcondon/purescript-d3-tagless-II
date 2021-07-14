@@ -143,16 +143,18 @@ simulationSetNodes :: forall m row d.
   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
 simulationSetNodes nodes = do
   { simulationState: SS_ ss_} <- get
-  let _ = ss_.simulation_ `setNodes_` nodes
-  pure nodes -- TODO return the modified nodes instead (need to explicitly model these transformations)
+  let opaqueNodes = ss_.simulation_ `setNodes_` nodes
+  modify_ (\s -> s { simulationState = (SS_ ss_ { nodes = (unsafeCoerce opaqueNodes) })})
+  pure nodes
 
 simulationSetLinks :: forall m row d r. 
   (MonadState { simulationState :: SimulationState_ | row } m) => 
   Array (D3_Link d r) -> m (Array (D3_Link d r))
 simulationSetLinks links = do
   { simulationState: SS_ ss_} <- get
-  let _ = setLinks_ ss_.simulation_ links (\d i -> d.id)
-  pure links -- TODO return the modified links, ie where indexes are replaced with object (references)
+  let opaqueLinks = setLinks_ ss_.simulation_ links (\d i -> d.id)
+  modify_ (\s -> s { simulationState = (SS_ ss_ { links = (unsafeCoerce opaqueLinks) })})
+  pure links
 
 simulationCreateTickFunction :: forall selection row m. 
   (MonadState { simulationState :: SimulationState_ | row } m) =>

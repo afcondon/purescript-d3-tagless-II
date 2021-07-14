@@ -62,7 +62,7 @@ putForceInSimulation (Force l s t attrs h_) simulation_ =
     ForceY        -> putForceInSimulation_ simulation_ l h_
     ForceRadial   -> putForceInSimulation_ simulation_ l h_
 
-    (ForceLink _) -> putForceInSimulation_ simulation_ l h_ -- TODO need a defensive copy of the links here
+    (ForceLink _) -> putForceInSimulation_ simulation_ l h_
 
 -- TODO should cache the filter from initialization
     (ForceFixPositionXY fn filter) -> applyFixForceInSimulationXY_ simulation_ l fn filter

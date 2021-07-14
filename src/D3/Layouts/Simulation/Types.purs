@@ -6,7 +6,7 @@ import D3.Attributes.Instances (Attribute, Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, PointXY)
 import D3.Examples.Spago.Files (SpagoGraphLinkID)
 import D3.Examples.Spago.Model (SpagoSimNode)
-import D3.FFI (D3ForceHandle_, SimulationConfig_, initSimulation_)
+import D3.FFI (D3ForceHandle_, OpaqueLinkType_, OpaqueNodeType_, SimulationConfig_, initSimulation_)
 import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (ChainableS)
 import Data.Map as M
@@ -106,6 +106,9 @@ data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
   , forces        :: M.Map Label Force
   , ticks         :: M.Map Label (Step D3Selection_)
 
+  , links         :: Array OpaqueLinkType_
+  , nodes         :: Array OpaqueNodeType_
+
   , alpha         :: Number
   , alphaTarget   :: Number
   , alphaMin      :: Number
@@ -119,6 +122,8 @@ data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
 initialSimulationState :: SimulationState_
 initialSimulationState = SS_
    {  simulation_  : initSimulation_ defaultConfigSimulation  
+    , nodes        : []
+    , links        : []
     , alpha        : defaultConfigSimulation.alpha
     , alphaTarget  : defaultConfigSimulation.alphaTarget
     , alphaMin     : defaultConfigSimulation.alphaMin

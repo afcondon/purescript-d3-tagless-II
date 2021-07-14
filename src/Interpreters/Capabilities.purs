@@ -45,6 +45,8 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
 
   -- management of data (nodes and links)
   -- TODO parameterize out the D3_ part of SimulationNode - could we make all this opaque?
+  -- note in the implementation we're putting the nodes and links into the SimulationState, but we
+  -- return them for the Join to use...however, they may actually be changed from what was sent...it's not tidy yet
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
   setLinks :: forall d r. Array (D3_Link d r)         -> m (Array (D3_Link d r))
   -- adding functions that occur on every tick of the simulation clock
