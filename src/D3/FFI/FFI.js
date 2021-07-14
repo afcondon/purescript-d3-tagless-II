@@ -318,11 +318,16 @@ exports.setNodes_ = simulation => nodes => {
   return simulation.nodes()
 }
 exports.setLinks_ = simulation => links => idFn => {
-  // NB see also forceLink below
   const linkForce = d3.forceLink(links).id((d, i) => idFn(d)(i))
   console.log('setting link force in simulation');
   simulation.force('links', linkForce)
   return linkForce
+}
+exports.unsetLinks_ = simulation => {
+  const linkForce = d3.forceLink([])
+  console.log('removing all links from simulation');
+  simulation.force('links', linkForce)
+  return simulation
 }
 
 //  :: Simulation -> Array NativeLink -> ???

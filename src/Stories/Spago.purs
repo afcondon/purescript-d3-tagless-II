@@ -4,7 +4,7 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, modify_, put)
+import Control.Monad.State (class MonadState, gets, modify_, put)
 import D3.Data.Types (D3Selection_)
 import D3.Examples.Spago (treeReduction)
 import D3.Examples.Spago.Graph as Graph
@@ -46,6 +46,7 @@ data Action
   | Finalize
   | SetPackageForce PackageForce
   | SetModuleForce ModuleForce
+  | ToggleLinks
   | ChangeSimConfig SimVariable
   | StopSim
   | StartSim
@@ -55,6 +56,7 @@ type Input = SimulationState_
 type State = {
     simulationState :: SimulationState_
   , svgClass :: String -- by controlling the class that is on the svg we can completely change the look of the vis (and not have to think about this at D3 level)
+  , showLinks :: Boolean
 }
 
 component :: forall query output m. MonadAff m => H.Component query Input output m
@@ -69,9 +71,9 @@ component = H.mkComponent
   where
 
   initialState :: Input -> State
-  initialState simulation = { simulationState: simulation, svgClass: "cluster" }
+  initialState simulation = { simulationState: simulation, svgClass: "cluster", showLinks: true }
 
-  renderSimControls =
+  renderSimControls state =
     HH.div
       [ HP.classes [ HH.ClassName "m-6" ]]
       [ HH.h3_
@@ -101,6 +103,11 @@ component = H.mkComponent
               [ HE.onClick $ const (SetPackageForce PackageFree) ]
               [ HH.text "PackageFree" ]
           ]
+      , HH.div_
+          [ Button.button
+              [ HE.onClick $ const ToggleLinks ]
+              [ HH.text $ if state.showLinks then "Links" else "No links" ]
+          ]
       ]
 
   render :: State -> H.ComponentHTML Action () m
@@ -109,7 +116,7 @@ component = H.mkComponent
         [ Tailwind.apply "story-container spago" ]
         [ HH.div
             [ Tailwind.apply "story-panel-about" ]
-            [ renderSimControls
+            [ renderSimControls state
             , renderTableForces state.simulationState
             -- , renderTableElements state.simulation
             , Card.card_ [ blurbtext ]
@@ -144,6 +151,13 @@ handleAction = case _ of
     runEffectSimulation $ setConfigVariable (Alpha 0.8)
 
   SetModuleForce moduleForce -> pure unit
+
+  ToggleLinks -> do
+    showLinks <- gets _.showLinks
+    if showLinks
+    then runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["links" ] }
+    else runEffectSimulation $ setForcesByLabel  { enable: ["links"], disable: [] }
+    modify_ (\s -> s { showLinks = not showLinks})
 
   ChangeSimConfig c -> pure unit -- SetConfigVariable c
 
@@ -192,8 +206,8 @@ initialForces = [
     strengthFunction1 = F.strength (\d -> if datum_.isPackage d      then 0.8 else 0.0)
     strengthFunction2 = F.strength (\d -> if datum_.isUnusedModule d then 0.8 else 0.0)
 
-    gridXY d = offsetXY { x: (-1000.0), y: (-500.0) } $
-               scalePoint 100.0 20.0 $
+    gridXY d = offsetXY { x: (-800.0), y: (-5000.0) } $
+               scalePoint 180.0 100.0 $
                numberToGridPoint 10 (datum_.id d)
     gridFilter d = datum_.isPackage d
       

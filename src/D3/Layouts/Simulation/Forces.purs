@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Attributes.Instances (Attribute(..), Label, unbox)
 import D3.Data.Types (D3Simulation_)
-import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_)
+import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
 import D3.Simulation.Types (ChainableF, Force(..), ForceStatus(..), ForceType(..))
 import Data.Array (elem)
 import Debug (spy)
@@ -62,7 +62,7 @@ putForceInSimulation (Force l s t attrs h_) simulation_ =
     ForceY        -> putForceInSimulation_ simulation_ l h_
     ForceRadial   -> putForceInSimulation_ simulation_ l h_
 
-    (ForceLink _) -> putForceInSimulation_ simulation_ l h_
+    (ForceLink _) -> putForceInSimulation_ simulation_ l h_ -- TODO need a defensive copy of the links here
 
 -- TODO should cache the filter from initialization
     (ForceFixPositionXY fn filter) -> applyFixForceInSimulationXY_ simulation_ l fn filter
@@ -81,7 +81,7 @@ removeForceFromSimulation (Force l s t attrs h_) simulation_ =
     ForceY        -> setAsNullForceInSimulation_ simulation_ l
     ForceRadial   -> setAsNullForceInSimulation_ simulation_ l
 
-    (ForceLink _) -> setAsNullForceInSimulation_ simulation_ l
+    (ForceLink _) -> unsetLinks_ simulation_
 
     (ForceFixPositionXY fn filter) -> removeFixForceXY_ simulation_ filter
     (ForceFixPositionX fn filter)  -> removeFixForceX_ simulation_ filter

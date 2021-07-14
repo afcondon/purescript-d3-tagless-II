@@ -118,6 +118,7 @@ foreign import setNodes_               :: forall d.   D3Simulation_ -> Array (D3
 -- foreign import removeForceByName_  :: D3Simulation_ -> String -> D3Simulation_
 
 foreign import setLinks_               :: forall d r datum. D3Simulation_ -> Array (D3_Link d r) -> (datum -> Index_ -> Number) -> D3ForceHandle_
+foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_
 foreign import getLinks_               :: forall d r. D3ForceHandle_ -> Array (D3_Link d r)
 
 foreign import startSimulation_        :: D3Simulation_ -> Unit
