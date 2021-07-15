@@ -39,7 +39,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   setConfigVariable    :: SimVariable -> m Unit
   -- management of forces
   removeAllForces      ::                m Unit
-  loadForces           :: Array Force -> m Unit
+  addForces            :: Array Force -> m Unit
   addForce             :: Force       -> m Unit
   setForcesByLabel     :: ForceConfigLists -> m Unit
 

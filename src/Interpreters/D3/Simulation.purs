@@ -60,7 +60,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   setConfigVariable v         = simulationSetVariable v
 
   removeAllForces             = simulationRemoveAllForces
-  loadForces forces           = simulationLoadForces forces  
+  addForces forces            = simulationAddForces forces  
   addForce force              = simulationAddForce force
   setForcesByLabel { enable, disable } = do
     simulationDisableForcesByLabel disable

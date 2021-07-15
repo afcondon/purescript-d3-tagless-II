@@ -14,7 +14,7 @@ import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationStart)
 import D3.Simulation.Types (Force(..), ForceType(..), SimVariable(..), SimulationState_(..))
 import D3Tagless.Block.Card as Card
-import D3Tagless.Capabilities (addForce, loadForces, removeAllForces, setConfigVariable, setForcesByLabel)
+import D3Tagless.Capabilities (addForce, addForces, removeAllForces, setConfigVariable, setForcesByLabel)
 import D3Tagless.Instance.Simulation (D3SimM, exec_D3M_Simulation, runEffectSimulation)
 import Data.Array ((:))
 import Data.Either (hush)
@@ -137,7 +137,7 @@ handleAction = case _ of
     case model of
       Nothing      -> pure $ unsafeCoerce unit -- TODO just temporary, pull out the script runner to fn that returns unit
       (Just graph) -> runEffectSimulation (Graph.script graph)
-    runEffectSimulation (loadForces initialForces)
+    runEffectSimulation (addForces initialForces)
 
   Finalize -> pure unit
   

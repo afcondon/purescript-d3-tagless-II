@@ -38,13 +38,10 @@ stopSimulation (SS_ ss_) = SS_ ss_ { running = false }
 
 -- type SimulationStateRow row = ( simulation :: SimulationState_ | row )
 
-simulationLoadForces :: forall m row. 
+simulationAddForces :: forall m row. 
   (MonadState { simulationState :: SimulationState_ | row } m) => 
   Array Force -> m Unit
-simulationLoadForces forces = do
-  simulationRemoveAllForces
-  traverse_ simulationAddForce forces
-  pure unit
+simulationAddForces forces = traverse_ simulationAddForce forces
 
 simulationRemoveAllForces :: forall m row. 
   (MonadState { simulationState :: SimulationState_ | row } m) => 

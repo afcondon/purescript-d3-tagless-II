@@ -14,7 +14,7 @@ import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), SimulationSta
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Capabilities (ForceConfigLists, loadForces, removeAllForces, setConfigVariable, setForcesByLabel)
+import D3Tagless.Capabilities (ForceConfigLists, addForces, removeAllForces, setConfigVariable, setForcesByLabel)
 import D3Tagless.Instance.Simulation (exec_D3M_Simulation, runEffectSimulation)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
@@ -164,7 +164,8 @@ handleAction = case _ of
     response <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
     let graph = readGraphFromFileContents response
 
-    runEffectSimulation (loadForces lesMisForces)
+    runEffectSimulation removeAllForces
+    runEffectSimulation (addForces lesMisForces)
     runEffectSimulation (LesMis.graphScript graph "div.svg-container")
 
   Finalize ->  runEffectSimulation removeAllForces
