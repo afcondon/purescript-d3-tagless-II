@@ -6,10 +6,10 @@ import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.MetaTree.Model (MetaTreeNode)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
+import D3.Layouts.Hierarchical (verticalLink)
+import D3.Selection (Join(..), node)
 import D3Tagless.Capabilities (class SelectionM, appendElement, attach, (<+>))
 import D3Tagless.Instance.Selection (runD3M)
-import D3.Layouts.Hierarchical (verticalLink)
-import D3.Selection (Join(..), Keys(..), node)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
@@ -71,25 +71,15 @@ treeScript (Tuple width height) tree = do
   links      <- container `appendElement` (node Group [ classed "links"])
   nodes      <- container `appendElement` (node Group [ classed "nodes"])
 
-  theLinks_  <- links <+> Join {
-      element   : Path
-    , key       : UseDatumAsKey
-    , "data"    : links_ tree
-    , behaviour : [ strokeWidth   1.5
-                  , strokeColor   "black"
-                  , strokeOpacity 0.4
-                  , fill          "none"
-                  , verticalLink
-                  ]
-  }
+  theLinks_  <- links <+> Join Path (links_ tree) [ strokeWidth   1.5
+                                                  , strokeColor   "black"
+                                                  , strokeOpacity 0.4
+                                                  , fill          "none"
+                                                  , verticalLink
+                                                  ]
 
-  nodeJoin_  <- nodes <+> Join {
-      element   : Group
-    , key       : UseDatumAsKey
-    , "data"    : descendants_ tree
-    -- there could be other stylistic stuff here but the transform is key structuring component
-    , behaviour : [ transform [ datum_.positionXY ] ]
-  }
+  nodeJoin_  <- nodes <+> Join Group (descendants_ tree) [ transform [ datum_.positionXY ] ]
+  
 
   theNodes <- nodeJoin_ `appendElement` 
                 (node Circle  [ fill         "blue"

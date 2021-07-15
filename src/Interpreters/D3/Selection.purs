@@ -4,7 +4,7 @@ module D3Tagless.Instance.Selection where
 import Control.Monad.State (class MonadState, StateT, runStateT)
 import D3.Data.Types (D3Selection_)
 import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3SelectAllInDOM_, d3SelectionSelectAll_, defaultDrag_, disableDrag_)
-import D3.Selection (Behavior(..), D3_Node(..), DragBehavior(..), Join(..), Keys(..), applyChainableSD3)
+import D3.Selection (Behavior(..), D3_Node(..), DragBehavior(..), Join(..), applyChainableSD3)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, modifySelection)
 import Data.Foldable (foldl)
@@ -54,27 +54,46 @@ instance d3TaglessD3M :: SelectionM D3Selection_ (D3M state D3Selection_) where
     let _ = foldl applyChainableSD3 selection_ attributes
     pure unit
 
-  join selection (Join j) = do
+  join selection (Join e ds cs) = do
     let 
-      selectS = d3SelectionSelectAll_ (show j.element) selection
-      dataS   = case j.key of
-                  UseDatumAsKey    -> d3Data_        j.data    selectS 
-                  (ComputeKey fn)  -> d3KeyFunction_ j.data fn selectS 
-      enterS  = d3EnterAndAppend_ (show j.element) dataS
-      enterS' = foldl applyChainableSD3 enterS j.behaviour
+      element = show e
+      selectS = d3SelectionSelectAll_ element selection
+      dataS   = d3Data_ ds selectS 
+      enterS  = d3EnterAndAppend_ element dataS
+      enterS' = foldl applyChainableSD3 enterS cs
     pure enterS'
 
-  join selection (JoinGeneral j) = do
+  join selection (JoinWithKeyFunction e ds cs k) = do
+    let 
+      element = show e
+      selectS = d3SelectionSelectAll_ element selection
+      dataS   = d3KeyFunction_ ds k selectS 
+      enterS  = d3EnterAndAppend_ element dataS
+      enterS' = foldl applyChainableSD3 enterS cs
+    pure enterS'
+
+  join selection (UpdateJoin e ds cs) = do
     let
-      selectS = d3SelectionSelectAll_ (show j.element) selection
-      dataS  = case j.key of
-                UseDatumAsKey    -> d3Data_        j.data    selectS 
-                (ComputeKey fn)  -> d3KeyFunction_ j.data fn selectS 
-      enterS = d3EnterAndAppend_ (show j.element) dataS
+      element = show e
+      selectS = d3SelectionSelectAll_ element selection
+      dataS  = d3Data_ ds selectS 
+      enterS = d3EnterAndAppend_ element dataS
       exitS  = d3Exit_ dataS
-      _      = foldl applyChainableSD3 enterS  j.behaviour.enter
-      _      = foldl applyChainableSD3 exitS   j.behaviour.exit
-      _      = foldl applyChainableSD3 dataS   j.behaviour.update
+      _      = foldl applyChainableSD3 enterS  cs.enter
+      _      = foldl applyChainableSD3 exitS   cs.exit
+      _      = foldl applyChainableSD3 dataS   cs.update
+    pure enterS
+  
+  join selection (UpdateJoinWithKeyFunction e ds cs k) = do
+    let
+      element = show e
+      selectS = d3SelectionSelectAll_ element selection
+      dataS  = d3KeyFunction_ ds k selectS 
+      enterS = d3EnterAndAppend_ element dataS
+      exitS  = d3Exit_ dataS
+      _      = foldl applyChainableSD3 enterS  cs.enter
+      _      = foldl applyChainableSD3 exitS   cs.exit
+      _      = foldl applyChainableSD3 dataS   cs.update
     pure enterS
   
   on selection (Drag drag) = do

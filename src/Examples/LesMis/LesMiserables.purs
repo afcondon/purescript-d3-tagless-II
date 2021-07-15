@@ -9,7 +9,7 @@ import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.Examples.LesMiserables.Types (LesMisRawModel)
 import D3.Scales (d3SchemeCategory10N_)
-import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
+import D3.Selection (Behavior(..), DragBehavior(..), Join(..), node)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce)
 import D3.Simulation.Functions (simulationCreateTickFunction, simulationSetLinks, simulationSetNodes)
@@ -90,18 +90,9 @@ graphScript model selector = do
   simulationNodes <- setNodes model.nodes
   simulationLinks <- setLinks model.links
   
-  linksSelection <- join linksGroup $ Join {
-      element   : Line
-    , key       : UseDatumAsKey
-    , "data"    : simulationLinks
-    , behaviour : [ strokeWidth (sqrt <<< link_.value) ]
-  }
-  nodesSelection <- join nodesGroup $ Join {
-      element   : Circle
-    , key       : UseDatumAsKey
-    , "data"    : simulationNodes
-    , behaviour : [ radius 5.0, fill datum_.colorByGroup ]
-  }
+  linksSelection <- linksGroup `join` Join Line simulationLinks [ strokeWidth (sqrt <<< link_.value) ]
+  nodesSelection <- nodesGroup `join` Join Circle simulationNodes [ radius 5.0, fill datum_.colorByGroup ]
+
 
   -- defaultNodeTick "nodes" nodesSelection 
   -- defaultLinkTick "links" linksSelection

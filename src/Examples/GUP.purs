@@ -5,7 +5,7 @@ import D3.Attributes.Sugar
 import D3.Attributes.Instances (datumIsChar, indexIsNumber)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 import D3Tagless.Capabilities (class SelectionM, appendElement, attach, (<+>))
-import D3.Selection (ChainableS, Join(..), Keys(..), node, node_)
+import D3.Selection (ChainableS, Join(..), node, node_)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))
 import Prelude (bind, pure, ($), (*), (+), (<<<))
@@ -31,11 +31,7 @@ script selector = do
 
   pure $ \letters -> 
     do 
-      letterGroup <+> JoinGeneral {
-          element   : Text
-        , key       : UseDatumAsKey
-        , "data"    : letters
-        , behaviour : { 
+      letterGroup <+> UpdateJoin Text letters { 
             enter:  [ classed  "enter"
                     , fill     "green"
                     , x        xFromIndex
@@ -57,5 +53,4 @@ script selector = do
                     ] 
                     `andThen` (transition `to` [ y 400.0, remove ])
           }
-      }
 

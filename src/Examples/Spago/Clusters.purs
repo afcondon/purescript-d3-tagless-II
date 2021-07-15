@@ -7,7 +7,7 @@ import D3.Simulation.Types (Step(..))
 import D3.Attributes.Sugar (classed, cx, cy, fill, lower, radius, text, viewBox, x, y)
 import D3.Data.Types (Element(..))
 import D3.FFI (D3ForceHandle_)
-import D3.Selection (Behavior(..), DragBehavior(..), Join(..), Keys(..), node)
+import D3.Selection (Behavior(..), DragBehavior(..), Join(..), node)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, appendElement, attach, addTickFunction, filterSelection, modifySelection, on, setNodes, (<+>))
 import Data.Tuple (Tuple(..))
@@ -38,20 +38,18 @@ script model = do
 
   simulationNodes <- setNodes model.nodes
 
-  nodesSelection <- nodesGroup <+> Join { -- we're putting a group in with an eye to transitions to other layouts
-      element   : Group
-    , key       : UseDatumAsKey
-    , "data"    : simulationNodes
-    , behaviour : [ classed datum_.nodeClass ]
-                  --, onMouseEvent MouseClick (\e d t -> toggleSpotlight e sim.simulation d) ]
-  }
+  nodesSelection <- nodesGroup <+> Join Group simulationNodes [ classed datum_.nodeClass ]
+     -- we're putting a group in with an eye to transitions to other layouts
+  
+  -- TODO , onMouseEvent MouseClick (\e d t -> toggleSpotlight e sim.simulation d) ]
+
   circle  <- nodesSelection `appendElement` (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
   labels' <- nodesSelection `appendElement` (node Text [ classed "label", text datum_.name ])
 
   packagesOnly <- filterSelection nodesSelection "g.nodes g.package"
   _ <- packagesOnly `modifySelection` [ lower ]
   
-  addTickFunction "nodes"  $ Step  circle  [ cx datum_.x, cy datum_.y ]
+  addTickFunction "nodes"  $ Step circle  [ cx datum_.x, cy datum_.y ]
   addTickFunction "labels" $ Step labels' [ x datum_.x, y datum_.y ] -- TODO is x -> x, y -> y really just a No-Op ?
 
   _ <- nodesSelection `on` Drag DefaultDrag

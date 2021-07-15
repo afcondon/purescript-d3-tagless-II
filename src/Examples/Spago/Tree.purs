@@ -7,9 +7,9 @@ import D3.Data.Tree (TreeLayout(..), TreeType(..))
 import D3.Data.Types (Datum_, Element(..))
 import D3.Examples.Spago.Model (SpagoModel, tree_datum_)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, links_, runLayoutFn_, treeMinMax_, treeSetSeparation_, treeSetSize_)
-import D3Tagless.Capabilities (class SelectionM, appendElement, attach, (<+>))
 import D3.Layouts.Hierarchical (radialLink, radialSeparation)
-import D3.Selection (Join(..), Keys(..), node)
+import D3.Selection (Join(..), node)
+import D3Tagless.Capabilities (class SelectionM, appendElement, attach, (<+>))
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Math (pi, sqrt)
@@ -44,33 +44,19 @@ script (Tuple width height) model@{ tree: Just (Tuple _ theTree)} = do
 
   -- "script"
   root       <- attach "div.d3story"                           
-  svg        <- root `appendElement` (node Svg  [ viewBox (-width / 2.0) (-height / 2.0) width height ] )          
-  container  <- svg  `appendElement` (node Group [ fontFamily      "sans-serif"
-                                          , fontSize        18.0
-                                          ])
+  svg        <- root `appendElement` (node Svg  
+                                           [ viewBox (-width / 2.0) (-height / 2.0) width height ] )          
+  container  <- svg  `appendElement` (node Group 
+                                           [ fontFamily      "sans-serif", fontSize        18.0])
   links      <- container `appendElement` (node Group [ classed "links"])
   nodes      <- container `appendElement` (node Group [ classed "nodes"])
 
-  theLinks_  <- links <+> Join {
-      element   : Path
-    , key       : UseDatumAsKey
-    , "data"    : links_ theTree
-    , behaviour : [ strokeWidth   1.5
-                  , strokeColor   "black"
-                  , strokeOpacity 0.4
-                  , fill          "none"
-                  , radialLink tree_datum_.x tree_datum_.y
-                  ]
-  }
+  theLinks_  <- links <+> Join Path (links_ theTree) 
+                  [ strokeWidth 1.5, strokeColor "black", strokeOpacity 0.4
+                  , fill "none", radialLink tree_datum_.x tree_datum_.y ]
 
-  theNodes  <- nodes <+> Join {
-      element   : Group
-    , key       : UseDatumAsKey
-    , "data"    : descendants_ theTree
-    -- there could be other stylistic stuff here but the transform is key structuring component
-    , behaviour : [ transform [ radialRotateCommon, radialTreeTranslate, rotateRadialLabels ] ]
-  }
-
+  theNodes  <- nodes <+> Join Group (descendants_ theTree) [ transform [ radialRotateCommon, radialTreeTranslate, rotateRadialLabels ] ]
+  
   _ <- theNodes `appendElement` (node Circle [ fill         tree_datum_.colorByGroup 
                                       , radius       (sqrt <<< tree_datum_.loc)
                                       , strokeColor "white"

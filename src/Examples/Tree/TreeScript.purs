@@ -8,8 +8,8 @@ import D3.Data.Types (Datum_, Element(..), Selector)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.Examples.Tree.Model (FlareTreeNode)
 import D3.FFI (descendants_, hasChildren_, links_)
+import D3.Selection (ChainableS, Join(..), node)
 import D3Tagless.Capabilities (class SelectionM, appendElement, attach, (<+>))
-import D3.Selection (ChainableS, Join(..), Keys(..), node)
 import Data.Nullable (Nullable)
 import Math (pi)
 
@@ -89,25 +89,12 @@ script config tree = do
   links      <- container `appendElement` (node Group [ classed "links"] )
   nodes      <- container `appendElement` (node Group [ classed "nodes"] )
 
-  theLinks_  <- links <+> Join {
-      element   : Path
-    , key       : UseDatumAsKey
-    , "data"    : links_ tree
-    , behaviour : [ strokeWidth   1.5
-                  , strokeColor   config.color
-                  , strokeOpacity 0.4
-                  , fill          "none"
-                  , config.linkPath
-                  ]
-  }
+  theLinks_  <- links <+> Join Path (links_ tree) 
+                              [ strokeWidth   1.5, strokeColor   config.color, strokeOpacity 0.4
+                              , fill "none", config.linkPath ]
 
-  nodeJoin_  <- nodes <+> Join {
-      element   : Group
-    , key       : UseDatumAsKey
-    , "data"    : descendants_ tree
-    -- there could be other stylistic stuff here but the transform is key structuring component
-    , behaviour : config.nodeTransform -- <- the key positioning calculation for the tree!!!
-  }
+
+  nodeJoin_  <- nodes <+> Join Group (descendants_ tree) config.nodeTransform
 
   theNodes <- nodeJoin_ `appendElement` 
                 (node Circle  [ fill         (\d -> if datum_.hasChildren d then "#999" else "#555")

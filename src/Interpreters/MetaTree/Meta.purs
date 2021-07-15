@@ -5,9 +5,10 @@ import D3.Node
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
 import D3.Data.Types (Element, MouseEvent, Transition)
-import D3Tagless.Capabilities (class SelectionM, appendElement)
-import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), Keys, OrderingAttribute(..))
+import D3.FFI (ComputeKeyFunction_)
+import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), OrderingAttribute(..))
 import D3.Zoom (ZoomConfig)
+import D3Tagless.Capabilities (class SelectionM, appendElement)
 import Data.Array (filter, (:))
 import Data.Map (Map, empty, insert, lookup)
 import Data.Maybe (fromMaybe)
@@ -25,8 +26,10 @@ data D3GrammarNode =
   | FilterNode String
   | ModifyNode (Array ChainableS)
   -- TODO if datum type can be peeled off the Join type, just store the Join directly
-  | JoinSimpleNode     Element Keys (Array ChainableS)
-  | JoinGeneralNode    Element Keys EnterUpdateExit
+  | JoinSimpleNode     Element (Array ChainableS)
+  | UpdateJoinNode     Element EnterUpdateExit
+  | JoinSimpleWithKeyFunctionNode Element (Array ChainableS) ComputeKeyFunction_
+  | UpdateJoinWithKeyFunctionNode Element EnterUpdateExit ComputeKeyFunction_
   -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
   | OnNode Behavior -- TODO make chainable
   | AttrNode ChainableS -- actually only Attr and Text
@@ -42,8 +45,12 @@ instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implem
   show (AppendNode _)             = "Append"
   show (FilterNode _)             = "Filter"
   show (ModifyNode _)             = "Modify"
-  show (JoinSimpleNode _ _ _)     = "JoinSimple"
-  show (JoinGeneralNode _ _ _)    = "JoinGeneral"
+
+  show (JoinSimpleNode _ _)       = "JoinSimple"
+  show (UpdateJoinNode _ _)       = "JoinGeneral"
+  show (JoinSimpleWithKeyFunctionNode _ _ _) = "JoinSimple"
+  show (UpdateJoinWithKeyFunctionNode _ _ _) = "JoinGeneral"
+
   show (AttrNode _)               = "Attr"
   show (OrderNode _)              = "Order"
   show (OnEventNode _)            = "OnEvent"
@@ -61,8 +68,10 @@ showAsSymbol =
     (AppendNode e)             ->  { name: "Append"        , symbol: "+"   , param1: tag $ show e, param2: "" }
     (FilterNode s)             ->  { name: "Filter"        , symbol: "/"   , param1: tag s,        param2: "" }
     (ModifyNode as)            ->  { name: "Modify"        , symbol: "->"  , param1: "",           param2: "" }
-    (JoinSimpleNode e _ _)     ->  { name: "JoinSimple"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
-    (JoinGeneralNode e _ _)    ->  { name: "JoinGeneral"   , symbol: "<+>" , param1: "",           param2: "" }
+    (JoinSimpleNode e _)       ->  { name: "JoinSimple"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
+    (UpdateJoinNode e _)       ->  { name: "UpdateJoin"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
+    (JoinSimpleWithKeyFunctionNode e _ _) ->  { name: "JoinSimpleK" , symbol: "<+>" , param1: tag $ show e, param2: "" }
+    (UpdateJoinWithKeyFunctionNode e _ _) ->  { name: "UpdateJoinK" , symbol: "<+>" , param1: tag $ show e, param2: "" }
     (OnNode (Zoom _))          ->  { name: "Zoom"          , symbol: "z"   , param1: "",           param2: "" }
     (OnNode (Drag _))          ->  { name: "Drag"          , symbol: "drag", param1: "",           param2: "" }
     (AttrNode c)               ->  { name: "Attr"          , symbol: "attr", param1: show c,       param2: "" }
@@ -177,13 +186,21 @@ instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
     insertInScriptTree nodeID (ModifyNode attributes)
     pure unit
 
-  join nodeID (Join j)          = do
+  join nodeID (Join e ds cs)          = do
     (ScriptTree id _ _) <- get
-    insertInScriptTree nodeID (JoinSimpleNode j.element j.key j.behaviour)
+    insertInScriptTree nodeID (JoinSimpleNode e cs)
     pure id
-  join nodeID (JoinGeneral j)   = do
+  join nodeID (UpdateJoin e ds cs)   = do
     (ScriptTree id _ _) <- get
-    insertInScriptTree nodeID (JoinGeneralNode j.element j.key j.behaviour)
+    insertInScriptTree nodeID (UpdateJoinNode e cs)
+    pure id
+  join nodeID (JoinWithKeyFunction e ds cs k)          = do
+    (ScriptTree id _ _) <- get
+    insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e cs k)
+    pure id
+  join nodeID (UpdateJoinWithKeyFunction e ds cs k)   = do
+    (ScriptTree id _ _) <- get
+    insertInScriptTree nodeID (UpdateJoinWithKeyFunctionNode e cs k)
     pure id
 
   on nodeID behavior = do
