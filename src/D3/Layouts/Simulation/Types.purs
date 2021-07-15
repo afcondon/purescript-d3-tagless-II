@@ -106,7 +106,6 @@ data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
   , forces        :: M.Map Label Force
   , ticks         :: M.Map Label (Step D3Selection_)
 
-  , links         :: Array OpaqueLinkType_
   , nodes         :: Array OpaqueNodeType_
 
   , alpha         :: Number
@@ -123,7 +122,6 @@ initialSimulationState :: SimulationState_
 initialSimulationState = SS_
    {  simulation_  : initSimulation_ defaultConfigSimulation  
     , nodes        : []
-    , links        : []
     , alpha        : defaultConfigSimulation.alpha
     , alphaTarget  : defaultConfigSimulation.alphaTarget
     , alphaMin     : defaultConfigSimulation.alphaMin

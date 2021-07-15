@@ -5,17 +5,17 @@ import Prelude
 import Control.Monad.State (class MonadState, State, get, gets, modify_)
 import D3.Attributes.Instances (Label)
 import D3.FFI (onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
-import D3.Node (D3_Link, D3_SimulationNode)
+import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (applyChainableSD3)
-import D3.Simulation.Forces (disableByLabels, enableByLabels, putForceInSimulation, setForceAttr)
-import D3.Simulation.Types (Force(..), ForceStatus(..), SimVariable(..), SimulationState_(..), Step(..))
+import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, putForceInSimulation, setForceAttr)
+import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..), Step(..))
 import Data.Array (intercalate)
 import Data.Array as A
 import Data.Foldable (traverse_)
 import Data.Map as M
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
-import Debug (spy)
+import Debug (spy, trace)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -58,13 +58,13 @@ simulationRemoveAllForces = do
 simulationAddForce :: forall m row. 
   (MonadState { simulationState :: SimulationState_ | row } m) =>
   Force -> m Unit
-simulationAddForce force@(Force l status t attrs h_) = do
+simulationAddForce force@(Force label status t attrs h_) = do
   let _ = (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
   { simulationState: SS_ ss_} <- get
   let _ = if status == ForceActive
           then putForceInSimulation force ss_.simulation_
           else ss_.simulation_
-      updatedSimulation = SS_ ss_ { forces = M.insert l force ss_.forces }
+      updatedSimulation = SS_ ss_ { forces = M.insert label force ss_.forces }
   -- if the force isn't active then we just keep it in map, with label as key
   modify_ (\s -> s { simulationState = updatedSimulation } )
 
@@ -149,12 +149,16 @@ simulationSetNodes nodes = do
 
 simulationSetLinks :: forall m row d r. 
   (MonadState { simulationState :: SimulationState_ | row } m) => 
-  Array (D3_Link d r) -> m (Array (D3_Link d r))
+  Array (D3_Link NodeID r) -> m (Array (D3_Link d r))
 simulationSetLinks links = do
   { simulationState: SS_ ss_} <- get
-  let opaqueLinks = setLinks_ ss_.simulation_ links (\d i -> d.id)
-  modify_ (\s -> s { simulationState = (SS_ ss_ { links = (unsafeCoerce opaqueLinks) })})
-  pure links
+  let linkForce   = enableForce $ createForce "links" (ForceLink (unsafeCoerce links)) [] -- TODO remove coerce 
+      _           = putForceInSimulation linkForce ss_.simulation_
+      _           = trace { linkForce: linkForce } \_ -> unit
+      updatedSimulation = SS_ ss_ { forces = M.insert "links" linkForce ss_.forces } -- // link force is ALWAYS called links
+
+  modify_ (\s -> s { simulationState = updatedSimulation })
+  pure (unsafeCoerce links) -- TODO remove coerce and model the change properly
 
 simulationCreateTickFunction :: forall selection row m. 
   (MonadState { simulationState :: SimulationState_ | row } m) =>

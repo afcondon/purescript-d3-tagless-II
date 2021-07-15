@@ -23,6 +23,7 @@ import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
 import Data.Tuple (snd)
+import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect)
@@ -154,10 +155,11 @@ handleAction = case _ of
 
   ToggleLinks -> do
     showLinks <- gets _.showLinks
-    if showLinks
-    then runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["links" ] }
-    else runEffectSimulation $ setForcesByLabel  { enable: ["links"], disable: [] }
-    modify_ (\s -> s { showLinks = not showLinks})
+    let updatedShowLinks = spy "new showLinks setting: " $ not showLinks
+    if updatedShowLinks
+    then runEffectSimulation $ setForcesByLabel  { enable: ["links"], disable: [] }
+    else runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["links" ] }
+    modify_ (\s -> s { showLinks = updatedShowLinks })
 
   ChangeSimConfig c -> pure unit -- SetConfigVariable c
 

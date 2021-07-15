@@ -7,7 +7,7 @@ import D3.Data.Types (D3Simulation_)
 import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
 import D3.Simulation.Types (ChainableF, Force(..), ForceStatus(..), ForceType(..))
 import Data.Array (elem)
-import Debug (spy)
+import Debug (spy, trace)
 
 
 toggleForceStatus :: ForceStatus -> ForceStatus
@@ -40,9 +40,9 @@ disableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
 disableByLabels simulation labels force@(Force label _ t cs h_) =
   if label `elem` labels
   then do
-    let _ = removeForceFromSimulation force simulation
+    let _ = trace { forceToRemove: label } \_ -> removeForceFromSimulation force simulation
     Force label ForceDisabled t cs h_
-  else force
+  else trace { forceKept: label } \_ -> force
 
 enableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
 enableByLabels simulation labels force@(Force label _ t cs h_) = 
