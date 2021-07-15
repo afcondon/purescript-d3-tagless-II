@@ -119,7 +119,7 @@ foreign import setNodes_               :: forall d.   D3Simulation_ -> Array (D3
 -- removing forces should be done by simulation manager and doesn't need more indirection
 -- foreign import removeForceByName_  :: D3Simulation_ -> String -> D3Simulation_
 
-foreign import setLinks_               :: forall d r datum. D3Simulation_ -> Array (D3_Link d r) -> (datum -> Index_ -> Number) -> D3ForceHandle_
+foreign import setLinks_               :: forall d r datum. D3ForceHandle_ -> Array (D3_Link d r) -> (datum -> Index_ -> Number) -> Array (D3_Link d r)
 foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_
 foreign import getLinks_               :: forall d r. D3ForceHandle_ -> Array (D3_Link d r)
 
@@ -160,7 +160,8 @@ foreign import forceMany_         :: Unit -> D3ForceHandle_
 foreign import forceRadial_       :: Unit -> D3ForceHandle_
 foreign import forceX_            :: Unit -> D3ForceHandle_
 foreign import forceY_            :: Unit -> D3ForceHandle_
-foreign import forceLink_         :: forall r. Array (D3_Link NodeID r) -> D3ForceHandle_
+-- foreign import forceLink_         :: forall r d. Array (D3_Link NodeID r) -> (Datum_ -> d) -> D3ForceHandle_ -- takes key function
+foreign import forceLink_         :: Unit -> D3ForceHandle_ -- just get a force handle and nothing else
 foreign import forceCustom_       :: Unit -> D3ForceHandle_
 foreign import dummyForceHandle_  :: D3ForceHandle_ -- used for fixed "forces", is null under the hood
 
@@ -176,14 +177,14 @@ foreign import setForceX_           :: D3ForceHandle_ -> D3Attr -> D3ForceHandle
 foreign import setForceY_           :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
 foreign import setForceDistance_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
 
-foreign import putForceInSimulation_ :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
-foreign import removeFixForceXY_ :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
-foreign import removeFixForceX_ :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
-foreign import removeFixForceY_ :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
+foreign import putForceInSimulation_        :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
+foreign import removeFixForceXY_            :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
+foreign import removeFixForceX_             :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
+foreign import removeFixForceY_             :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
 foreign import applyFixForceInSimulationXY_ :: D3Simulation_ -> String -> (Datum_ -> PointXY) -> (Datum_ -> Boolean) -> D3Simulation_ 
 foreign import applyFixForceInSimulationX_  :: D3Simulation_ -> String -> (Datum_ -> { x :: Number})  -> (Datum_ -> Boolean) -> D3Simulation_ 
 foreign import applyFixForceInSimulationY_  :: D3Simulation_ -> String -> (Datum_ -> { y :: Number})  -> (Datum_ -> Boolean) -> D3Simulation_ 
-foreign import setAsNullForceInSimulation_ :: D3Simulation_ -> String -> D3Simulation_
+foreign import setAsNullForceInSimulation_  :: D3Simulation_ -> String -> D3Simulation_
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js Hierarchy module  *********************************************
 -- | *********************************************************************************************************************

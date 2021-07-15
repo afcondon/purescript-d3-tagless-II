@@ -153,8 +153,8 @@ parent =
       ExampleTrees    -> HH.slot_ _trees     unit Trees.component unit 
       ExampleMetaTree -> HH.slot_ _metatree  unit MetaTree.component unit 
       ExamplePrinter  -> HH.slot_ _printtree unit PrintTree.component unit 
-      ExampleLesMis   -> HH.slot_ _lesmis    unit LesMis.component initialSimulationState
-      ExampleSpago    -> HH.slot_ _spago     unit Spago.component initialSimulationState 
+      ExampleLesMis   -> HH.slot_ _lesmis    unit LesMis.component (initialSimulationState 1)
+      ExampleSpago    -> HH.slot_ _spago     unit Spago.component (initialSimulationState 2) 
       -- _ -> HH.div_ [ HH.text "That example is currently not available" ]
 
 

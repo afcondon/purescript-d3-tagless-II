@@ -17,7 +17,7 @@ type LesMisCookedModel = { links :: Array LesMisGraphLinkObj
                          }
 
 -- the "extra / model-specific" data above and beyond what any D3 Tree Node is going to have:
-type LesMisNodeRow row = ( group :: Int | row ) 
+type LesMisNodeRow row = ( id :: String, group :: Int | row ) 
 -- this extra data inside a D3SimNode as used in PureScript:
 type LesMisSimNode     = D3SimulationRow ( LesMisNodeRow  + ()) 
 -- same as above but as a bare record, this is the "datum" that D3 sees and which it returns to you for attr setting:

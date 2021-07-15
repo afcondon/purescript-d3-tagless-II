@@ -67,7 +67,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     simulationEnableForcesByLabel  enable
 
   setNodes nodes              = simulationSetNodes nodes
-  setLinks links              = simulationSetLinks links
+  setLinks links keyFn        = simulationSetLinks links (unsafeCoerce keyFn)
 
   addTickFunction label (StepTransformFFI selection function) = do
     -- TODO this would be the more efficient but less attractive route to defining a Tick function

@@ -4,8 +4,9 @@ import Prelude
 
 import D3.Attributes.Instances (Attribute(..), Label, unbox)
 import D3.Data.Types (D3Simulation_)
-import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
+import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, setLinks_, unsetLinks_)
 import D3.Simulation.Types (ChainableF, Force(..), ForceStatus(..), ForceType(..))
+import D3Tagless.Capabilities (setLinks)
 import Data.Array (elem)
 import Debug (spy, trace)
 
@@ -62,7 +63,7 @@ putForceInSimulation (Force l s t attrs h_) simulation_ =
     ForceY        -> putForceInSimulation_ simulation_ l h_
     ForceRadial   -> putForceInSimulation_ simulation_ l h_
 
-    (ForceLink _) -> putForceInSimulation_ simulation_ l h_
+    ForceLink     -> simulation_ -- NB this does nothing - the link force is already / always in the simulation, links themselves must be set from Simulation monad setLinks function
 
 -- TODO should cache the filter from initialization
     (ForceFixPositionXY fn filter) -> applyFixForceInSimulationXY_ simulation_ l fn filter
@@ -81,7 +82,7 @@ removeForceFromSimulation (Force l s t attrs h_) simulation_ =
     ForceY        -> setAsNullForceInSimulation_ simulation_ l
     ForceRadial   -> setAsNullForceInSimulation_ simulation_ l
 
-    (ForceLink _) -> unsetLinks_ simulation_
+    ForceLink     -> unsetLinks_ simulation_
 
     (ForceFixPositionXY fn filter) -> removeFixForceXY_ simulation_ filter
     (ForceFixPositionX fn filter)  -> removeFixForceX_ simulation_ filter
@@ -136,7 +137,7 @@ forceDescription = case _ of
 
     """This \"force\" is really an over-ride for the force simulation, fixing the node at a particular Y dimension"""
 
-  (ForceLink _) ->
+  ForceLink ->
 
     """The link force pushes linked nodes together or apart according to the
     desired link distance. The strength of the force is proportional to the
@@ -156,7 +157,7 @@ createForce_ = case _ of
   ForceY                    -> forceY_         unit
   ForceRadial               -> forceRadial_    unit
 
-  (ForceLink links)         -> forceLink_      links
+  ForceLink                 -> forceLink_      unit -- in fact, not going to be created here, instead created on initialization of simulation (could revisit this tho)
   (CustomForce)             -> forceCustom_    unit
   -- NB there is actually no "force", in D3 terms, behind the fixed "forces", hence the dummy handle that is returned
   (ForceFixPositionXY _ _)  -> dummyForceHandle_ 

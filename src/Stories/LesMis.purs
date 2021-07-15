@@ -164,7 +164,6 @@ handleAction = case _ of
     response <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
     let graph = readGraphFromFileContents response
 
-    runEffectSimulation removeAllForces
     runEffectSimulation (addForces lesMisForces)
     runEffectSimulation (LesMis.graphScript graph "div.svg-container")
 

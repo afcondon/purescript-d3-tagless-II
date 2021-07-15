@@ -1,7 +1,7 @@
 module D3Tagless.Capabilities where
 
 import D3.Attributes.Instances (Label)
-import D3.Data.Types (Selector)
+import D3.Data.Types (Datum_, Index_, Selector)
 import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (Behavior, ChainableS, D3_Node, Join)
 import D3.Simulation.Types (Force, SimVariable, Step)
@@ -48,7 +48,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- note in the implementation we're putting the nodes and links into the SimulationState, but we
   -- return them for the Join to use...however, they may actually be changed from what was sent...it's not tidy yet
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
-  setLinks :: forall d r. Array (D3_Link NodeID r)    -> m (Array (D3_Link d r))
+  setLinks :: forall id d r. Array (D3_Link NodeID r)    -> (Datum_ -> Index_ -> id) -> m (Array (D3_Link d r)) -- we require a key function for links
   -- adding functions that occur on every tick of the simulation clock
   addTickFunction    :: Label -> Step selection -> m Unit 
   removeTickFunction :: Label                   -> m Unit

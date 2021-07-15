@@ -4,6 +4,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState, State, get, gets, modify_)
 import D3.Attributes.Instances (Label)
+import D3.Data.Types (Index_)
 import D3.FFI (onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
 import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (applyChainableSD3)
@@ -13,6 +14,7 @@ import Data.Array (intercalate)
 import Data.Array as A
 import Data.Foldable (traverse_)
 import Data.Map as M
+import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Debug (spy, trace)
@@ -144,18 +146,13 @@ simulationSetNodes nodes = do
   modify_ (\s -> s { simulationState = (SS_ ss_ { nodes = (unsafeCoerce opaqueNodes) })})
   pure nodes
 
-simulationSetLinks :: forall m row d r. 
+simulationSetLinks :: forall m row datum r. 
   (MonadState { simulationState :: SimulationState_ | row } m) => 
-  Array (D3_Link NodeID r) -> m (Array (D3_Link d r))
-simulationSetLinks links = do
+  Array (D3_Link NodeID r) -> (datum -> Index_ -> Number) -> m (Array (D3_Link datum r))
+simulationSetLinks links keyFn = do
   { simulationState: SS_ ss_} <- get
-  let linkForce   = enableForce $ createForce "links" (ForceLink (unsafeCoerce links)) [] -- TODO remove coerce 
-      _           = putForceInSimulation linkForce ss_.simulation_
-      _           = trace { linkForce: linkForce } \_ -> unit
-      updatedSimulation = SS_ ss_ { forces = M.insert "links" linkForce ss_.forces } -- // link force is ALWAYS called links
-
-  modify_ (\s -> s { simulationState = updatedSimulation })
-  pure (unsafeCoerce links) -- TODO remove coerce and model the change properly
+  let updatedLinks = setLinks_ ss_.linkForceHandle links keyFn
+  pure (unsafeCoerce updatedLinks) -- TODO notice the coerce here
 
 simulationCreateTickFunction :: forall selection row m. 
   (MonadState { simulationState :: SimulationState_ | row } m) =>

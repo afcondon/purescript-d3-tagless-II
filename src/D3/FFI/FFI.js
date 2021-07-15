@@ -317,11 +317,11 @@ exports.setNodes_ = simulation => nodes => {
   simulation.nodes(nodes)
   return simulation.nodes()
 }
-exports.setLinks_ = simulation => links => idFn => {
-  const linkForce = d3.forceLink(links).id((d, i) => idFn(d)(i))
+exports.setLinks_ = linkForce => links => idFn => {
   console.log('setting link force in simulation');
-  simulation.force('links', linkForce)
-  return linkForce
+  linkForce.id((d, i) => idFn(d)(i))
+  linkForce.links(links)
+  return links
 }
 exports.unsetLinks_ = simulation => {
   const linkForce = d3.forceLink([])
@@ -433,7 +433,7 @@ exports.forceX_ = () => d3.forceX()
 // forceY_            :: ForceYConfig_            -> D3ForceHandle_
 exports.forceY_ = () => d3.forceY()
 // forceLink_         :: ForceLinkConfig_         -> D3ForceHandle_
-exports.forceLink_ = links => d3.forceLink(links)
+exports.forceLink_ = () => d3.forceLink()
 // forceCustom_       :: CustomForceConfig_       -> D3ForceHandle_
 exports.forceCustom_ = forceFn => forceFn()
 
