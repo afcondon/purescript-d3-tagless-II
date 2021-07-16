@@ -5,9 +5,11 @@ import Prelude
 import Control.Monad.Rec.Class (forever)
 import Control.Monad.State (class MonadState)
 import D3.Examples.GUP as GUP
-import D3Tagless.Instance.Selection (eval_D3M, runD3M)
-import D3Tagless.Block.Toggle as Toggle
+import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
+import D3Tagless.Block.FormField as FormField
+import D3Tagless.Block.Toggle as Toggle
+import D3Tagless.Instance.Selection (eval_D3M, runD3M)
 import Data.Array (catMaybes, singleton)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
@@ -25,8 +27,6 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import D3Tagless.Block.Button as Button
-import D3Tagless.Block.FormField as FormField
 import Stories.Tailwind.Styles as Tailwind
 import Type.Proxy (Proxy(..))
 
@@ -132,7 +132,7 @@ runGeneralUpdatePattern :: forall m. Bind m => MonadEffect m => m (Array Char ->
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
   -- detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
-  update   <- H.liftEffect $ eval_D3M $ GUP.script "div.svg-container"
+  update   <- H.liftEffect $ eval_D3M $ GUP.script3 "div.svg-container"
   -- the script sets up the SVG and returns a function that the component can run whenever it likes
   -- (but NB if it runs more often than every 2000 milliseconds there will be big problems)
   pure (\letters -> H.liftEffect $ runD3M (update letters) *> pure unit )

@@ -6,10 +6,10 @@ import D3.Attributes.Instances (Attribute(..), Listener_, attrLabel, unbox)
 import D3.Data.Types (D3Selection_, Datum_, Element, MouseEvent, Transition)
 import D3.Zoom (ZoomConfig)
 import Data.Array (foldl)
-import Data.Maybe.Last (Last)
+-- import Data.Maybe.Last (Last)
 import Prelude (class Eq, class Ord, class Show, Unit, show, (<>))
 
-type D3Selection  = Last D3Selection_
+-- type D3Selection  = Last D3Selection_
 
 data DragBehavior = 
     DefaultDrag
@@ -18,16 +18,6 @@ data DragBehavior =
 
 data Behavior = Drag DragBehavior
               | Zoom ZoomConfig 
-
--- type JoinParams d r = -- the 
---   { element    :: Element -- what we're going to insert in the DOM
---   , key        :: Keys    -- how D3 is going to identify data so that 
---   , "data"     :: Array d -- the data we're actually joining at this point
--- | r
---   }
--- TODO the type parameter d here is an impediment to the meta interpreter, possible rethink ?
--- data Join d = Join           (JoinParams d (behaviour   :: Array ChainableS))
---             | JoinGeneral    (JoinParams d (behaviour   :: EnterUpdateExit)) -- what we're going to do for each set (enter, exit, update) each refresh of data
 
 data Join d = Join Element (Array d) (Array ChainableS)
             | UpdateJoin Element (Array d) EnterUpdateExit
