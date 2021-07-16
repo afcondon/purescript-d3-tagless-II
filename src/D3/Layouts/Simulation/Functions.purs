@@ -8,7 +8,7 @@ import D3.Data.Types (Index_)
 import D3.FFI (onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
 import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (applyChainableSD3)
-import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, putForceInSimulation, setForceAttr)
+import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, getHandle, putForceInSimulation, setForceAttr)
 import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..), Step(..))
 import Data.Array (intercalate)
 import Data.Array as A
@@ -148,10 +148,12 @@ simulationSetNodes nodes = do
 
 simulationSetLinks :: forall id m row datum r. 
   (MonadState { simulationState :: SimulationState_ | row } m) => 
-  Array (D3_Link id r) -> (datum -> Index_ -> id) -> m (Array (D3_Link datum r))
+  Array (D3_Link id r) -> (datum -> id) -> m (Array (D3_Link datum r))
 simulationSetLinks links keyFn = do
   { simulationState: SS_ ss_} <- get
-  let updatedLinks = setLinks_ ss_.linkForceHandle links keyFn
+  let newLinksForce = enableForce $ createForce "links" ForceLink []
+  let updatedLinks = setLinks_ (getHandle newLinksForce) links keyFn
+  simulationAddForce newLinksForce
   pure (unsafeCoerce updatedLinks) -- TODO notice the coerce here
 
 simulationCreateTickFunction :: forall selection row m. 

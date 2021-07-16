@@ -107,7 +107,7 @@ datum_ = {
   , treePointY    : (\d -> _.y $ datum_.treePoint d)
 
 -- the crucial index function which allows us to reference Nodes from Links in JSON
-  , indexFunction : (\d i -> (unboxD3SimNode d).id)
+  , indexFunction : (\d -> (unboxD3SimNode d).id)
 
 -- more complicated calculations (CONVENIENCE)
   , positionLabel:

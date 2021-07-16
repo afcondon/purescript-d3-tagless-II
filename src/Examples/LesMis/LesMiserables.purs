@@ -36,7 +36,7 @@ link_ = {
 datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
     index : (\d -> (unboxD3SimNode d).index)
-  , id    : (\d i -> (unboxD3SimNode d).id)
+  , id    : (\d -> (unboxD3SimNode d).id)
   , x     : (\d -> (unboxD3SimNode d).x)
   , y     : (\d -> (unboxD3SimNode d).y)
   , group : (\d -> (unboxD3SimNode d).group)

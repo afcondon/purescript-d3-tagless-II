@@ -108,7 +108,6 @@ data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
   , ticks         :: M.Map Label (Step D3Selection_)
 
   , nodes           :: Array OpaqueNodeType_
-  , linkForceHandle :: D3ForceHandle_
 
   , alpha         :: Number
   , alphaTarget   :: Number
@@ -128,13 +127,10 @@ initialSimulationState id = SS_
     , alphaDecay   : defaultConfigSimulation.alphaDecay
     , velocityDecay: defaultConfigSimulation.velocityDecay
     , running      : defaultConfigSimulation.running
-    , forces       : initialForces
-    , linkForceHandle
+    , forces       : M.empty
     , ticks        : M.empty
   }
   where
-    linkForceHandle = forceLink_ unit
-    initialForces   = M.insert "links" (Force "links" ForceDisabled ForceLink [] linkForceHandle) M.empty
     _ = trace { simulation: "initialized" } \_ -> unit
 
 defaultConfigSimulation :: SimulationConfig_

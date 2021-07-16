@@ -318,9 +318,9 @@ exports.setNodes_ = simulation => nodes => {
   return simulation.nodes()
 }
 exports.setLinks_ = linkForce => links => idFn => {
-  console.log('setting link force in simulation');
+  console.log('making link force for simulation');
   linkForce.links(links)
-  linkForce.id((d, i) => idFn(d)(i))
+  linkForce.id(idFn)
   return links
 }
 exports.unsetLinks_ = simulation => {

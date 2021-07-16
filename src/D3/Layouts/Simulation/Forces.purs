@@ -63,7 +63,7 @@ putForceInSimulation (Force l s t attrs h_) simulation_ =
     ForceY        -> putForceInSimulation_ simulation_ l h_
     ForceRadial   -> putForceInSimulation_ simulation_ l h_
 
-    ForceLink     -> simulation_ -- NB this does nothing - the link force is already / always in the simulation, links themselves must be set from Simulation monad setLinks function
+    ForceLink     -> putForceInSimulation_ simulation_ l h_ -- NB l should always be "links" effectively
 
 -- TODO should cache the filter from initialization
     (ForceFixPositionXY fn filter) -> applyFixForceInSimulationXY_ simulation_ l fn filter

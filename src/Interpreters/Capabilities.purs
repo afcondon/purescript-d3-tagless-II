@@ -52,7 +52,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
 
   -- management of data (nodes and links)
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
-  setLinks :: forall id d r. Array (D3_Link id r)    -> (Datum_ -> Index_ -> id) -> m (Array (D3_Link d r)) -- we require a key function for links
+  setLinks :: forall id d r. Array (D3_Link id r)    -> (Datum_ -> id) -> m (Array (D3_Link d r)) -- we require a key function for links
   
   -- adding functions that occur on every tick of the simulation clock
   addTickFunction    :: Label -> Step selection -> m Unit 
