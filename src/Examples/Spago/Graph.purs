@@ -31,7 +31,7 @@ script model = do
   nodesGroup  <- svg  `appendElement` (node Group  [ classed "nodes" ])
   
   nodesInSimulation <- setNodes model.nodes
-  linksInSimulation <- setLinks model.links (\d i -> datum_.id)
+  linksInSimulation <- setLinks model.links datum_.indexFunction
 
   linksSelection <- linksGroup <+> Join Line linksInSimulation [ classed link_.linkClass ] -- default invisible in CSS unless marked "visible"
   

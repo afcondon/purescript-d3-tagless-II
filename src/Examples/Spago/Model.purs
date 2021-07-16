@@ -81,48 +81,7 @@ tree2Point x' y' = do
   Just { x, y } 
 
 -- | all the coercions in one place
-datum_ :: { cluster :: Datum_ -> Int
-, clusterPoint :: Datum_
-                  -> { x :: Number
-                     , y :: Number
-                     }
-, clusterPointX :: Datum_ -> Number
-, clusterPointY :: Datum_ -> Number
-, collideRadius :: Datum_ -> Number
-, colorByGroup :: Datum_ -> String
-, connected :: Datum_ -> Boolean
-, containerID :: Datum_ -> Int
-, containerName :: Datum_ -> String
-, id :: Datum_ -> Int
-, isModule :: Datum_ -> Boolean
-, isPackage :: Datum_ -> Boolean
-, isUnusedModule :: Datum_ -> Boolean
-, links :: Datum_
-           -> { contains :: Array Int
-              , inPackage :: Array Int
-              , outPackage :: Array Int
-              , sources :: Array Int
-              , targets :: Array Int
-              , tree :: Array Int
-              }
-, loc :: Datum_ -> Number
-, name :: Datum_ -> String
-, nodeClass :: Datum_ -> String
-, nodetype :: Datum_ -> NodeType
-, positionLabel :: Datum_ -> Number
-, radius :: Datum_ -> Number
-, translateNode :: Datum_ -> String
-, treePoint :: Datum_
-               -> { x :: Number
-                  , y :: Number
-                  }
-, treePointX :: Datum_ -> Number
-, treePointY :: Datum_ -> Number
-, treeX :: Datum_ -> Nullable Number
-, treeY :: Datum_ -> Nullable Number
-, x :: Datum_ -> Number
-, y :: Datum_ -> Number
-}
+
 datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
     radius        : (\d -> (unboxD3SimNode d).r)
@@ -146,6 +105,9 @@ datum_ = {
   , treePoint     : (\d -> fromMaybe (datum_.clusterPoint d) (tree2Point (datum_.treeX d) (datum_.treeY d)))
   , treePointX    : (\d -> _.x $ datum_.treePoint d)
   , treePointY    : (\d -> _.y $ datum_.treePoint d)
+
+-- the crucial index function which allows us to reference Nodes from Links in JSON
+  , indexFunction : (\d i -> (unboxD3SimNode d).id)
 
 -- more complicated calculations (CONVENIENCE)
   , positionLabel:

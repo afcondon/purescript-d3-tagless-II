@@ -146,9 +146,9 @@ simulationSetNodes nodes = do
   modify_ (\s -> s { simulationState = (SS_ ss_ { nodes = (unsafeCoerce opaqueNodes) })})
   pure nodes
 
-simulationSetLinks :: forall m row datum r. 
+simulationSetLinks :: forall id m row datum r. 
   (MonadState { simulationState :: SimulationState_ | row } m) => 
-  Array (D3_Link NodeID r) -> (datum -> Index_ -> Number) -> m (Array (D3_Link datum r))
+  Array (D3_Link id r) -> (datum -> Index_ -> id) -> m (Array (D3_Link datum r))
 simulationSetLinks links keyFn = do
   { simulationState: SS_ ss_} <- get
   let updatedLinks = setLinks_ ss_.linkForceHandle links keyFn

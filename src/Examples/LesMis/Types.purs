@@ -8,7 +8,7 @@ import Type.Row (type (+))
 -- | ==========================================================================================
 
 -- we make the model like so, but D3 then swizzles it to the "cooked" model below
-type LesMisRawModel = { links :: Array (D3_Link NodeID LesMisLinkData) 
+type LesMisRawModel = { links :: Array (D3_Link String LesMisLinkData) -- the source and target in the links are given as "String" to match id in the node data
                       , nodes :: Array LesMisSimNode 
                       }
 -- this is what the model looks like after the NodeID references have been swizzled in the Simulation code

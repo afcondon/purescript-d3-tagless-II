@@ -36,7 +36,7 @@ link_ = {
 datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
     index : (\d -> (unboxD3SimNode d).index)
-  , id    : (\d -> (unboxD3SimNode d).id)
+  , id    : (\d i -> (unboxD3SimNode d).id)
   , x     : (\d -> (unboxD3SimNode d).x)
   , y     : (\d -> (unboxD3SimNode d).y)
   , group : (\d -> (unboxD3SimNode d).group)
@@ -61,7 +61,7 @@ graphScript model selector = do
   nodesGroup <- svg  `appendElement` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
   
   simulationNodes <- setNodes model.nodes
-  simulationLinks <- setLinks model.links (\d i -> datum_.id) -- the "links" force will already be there
+  simulationLinks <- setLinks model.links datum_.id -- the "links" force will already be there
   
   linksSelection <- linksGroup `join` Join Line simulationLinks [ strokeWidth (sqrt <<< link_.value) ]
   nodesSelection <- nodesGroup `join` Join Circle simulationNodes [ radius 5.0, fill datum_.colorByGroup ]

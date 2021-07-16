@@ -1,34 +1,33 @@
 module D3.Data.Graph where
 
-import D3.Node (NodeID)
 import Data.Array (elem, filter, head, null, partition, uncons, (:))
 import Data.Graph (Graph)
 import Data.Graph as G
 import Data.Maybe (Maybe(..))
 import Data.Tree (Tree)
 import Data.Tuple (Tuple(..))
-import Prelude (bind, not, ($), (<$>), (<>))
+import Prelude (class Ord, bind, not, ($), (<$>), (<>))
 
-type DepPath = Array NodeID
-type GraphSearchRecord = {
-    nodes          :: Array NodeID -- potentially confusingly this is just a list of nodes, not a list of dependencies
-  , openDepPaths   :: Array DepPath
-  , closedDepPaths :: Array DepPath
-  , dependencyTree :: Maybe (Tree NodeID)
-  , redundantLinks :: Array (Tuple NodeID NodeID)
+type DepPath id = Array id
+type GraphSearchRecord id = {
+    nodes          :: Array id -- potentially confusingly this is just a list of nodes, not a list of dependencies
+  , openDepPaths   :: Array (DepPath id)
+  , closedDepPaths :: Array (DepPath id)
+  , dependencyTree :: Maybe (Tree id)
+  , redundantLinks :: Array (Tuple id id)
 }
 
-getReachableNodes :: forall r1 r2. NodeID -> Graph Int { links :: { targets :: Array NodeID | r1 } | r2 } ->  GraphSearchRecord
+getReachableNodes :: forall id r1 r2. (Ord id) => id -> Graph id { links :: { targets :: Array id | r1 } | r2 } ->  GraphSearchRecord id
 getReachableNodes id graph = go { nodes: [], openDepPaths: [[id]], closedDepPaths: [], redundantLinks: [], dependencyTree: Nothing }
   where
-    go :: GraphSearchRecord -> GraphSearchRecord
+    go :: GraphSearchRecord id -> GraphSearchRecord id
     go searchRecord@{ openDepPaths: [] } = searchRecord -- bottom out when all open paths are consumed
     go searchRecord = do
       case processNextOpenDepPath searchRecord of
         Nothing     -> searchRecord -- bottom out but....possibly some exceptions to be looked at here
         (Just searchRecord') -> go searchRecord'
 
-    processNextOpenDepPath :: GraphSearchRecord -> Maybe GraphSearchRecord
+    processNextOpenDepPath :: GraphSearchRecord id -> Maybe (GraphSearchRecord id)
     processNextOpenDepPath searchRecord = do
       x         <- uncons searchRecord.openDepPaths
       firstID   <- head x.head -- NB we're pushing onto the path, cause head is easier than tail

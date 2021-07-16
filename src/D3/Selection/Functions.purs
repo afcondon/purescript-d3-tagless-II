@@ -15,7 +15,7 @@ selectionAttach selector = pure $ d3SelectAllInDOM_ selector
 selectionAppendElement :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> D3_Node -> m D3Selection_
 selectionAppendElement selection_ (D3_Node element attributes) = do
   let appended_ = d3Append_ (show element) selection_
-  selectionModifySelection appended_ attributes -- this modify is NOT stateT modify
+  selectionModifySelection appended_ attributes
   pure appended_
 
 selectionFilterSelection :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Selector D3Selection_ -> m D3Selection_
