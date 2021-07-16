@@ -6,6 +6,7 @@ import Control.Monad.State (class MonadState, StateT, get, gets, modify_, runSta
 import D3.Data.Types (D3Selection_)
 import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3SelectAllInDOM_, d3SelectionSelectAll_, defaultDrag_, defaultLinkTick_, defaultNodeTick_, disableDrag_, disableTick_, onTick_)
 import D3.Selection (Behavior(..), D3_Node(..), DragBehavior(..), Join(..), applyChainableSD3)
+import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionModifySelection, selectionOn)
 import D3.Simulation.Types (SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, modifySelection)
@@ -53,6 +54,15 @@ derive newtype instance monadStateD3SimM  :: MonadState  { simulationState :: Si
 instance showD3SimM :: Show (D3SimM row D3Selection_ a) where
   show x = "D3SimM"
 
+instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
+  attach selector    = selectionAttach selector 
+  appendElement s_   = selectionAppendElement s_
+  filterSelection s_ = selectionFilterSelection s_
+  modifySelection s_ = selectionModifySelection s_
+  join s_            = selectionJoin s_
+  on s_              = selectionOn s_
+
+
 instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   start                       = simulationStart
   stop                        = simulationStop
@@ -95,97 +105,4 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   defaultLinkTick label selection = do
     (SS_ ss_) <- gets _.simulationState
     let _ = defaultLinkTick_ label ss_.simulation_ selection
-    pure unit
-
-
--- | ====================================================
--- | Selection instance (capability) for the D3 interpreter
--- | ====================================================
--- TODO extract all the functions here so that the implementations are shared between this instance and the D3.Instance.Selection version
-instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
-  attach selector = pure $ d3SelectAllInDOM_ selector 
-
-  appendElement selection_ (D3_Node element attributes) = do
-    let appended_ = d3Append_ (show element) selection_
-    modifySelection appended_ attributes -- this modify is NOT stateT modify
-    pure appended_
-
-  filterSelection selection_ selector = pure $ d3FilterSelection_ selection_ selector
-
-  modifySelection selection_ attributes = do
-    let _ = foldl applyChainableSD3 selection_ attributes
-    pure unit
-
-  join selection (Join e ds cs) = do
-    let 
-      element = show e
-      selectS = d3SelectionSelectAll_ element selection
-      dataS   = d3Data_ ds selectS 
-      enterS  = d3EnterAndAppend_ element dataS
-      enterS' = foldl applyChainableSD3 enterS cs
-    pure enterS'
-
-  join selection (JoinWithKeyFunction e ds cs k) = do
-    let 
-      element = show e
-      selectS = d3SelectionSelectAll_ element selection
-      dataS   = d3KeyFunction_ ds k selectS 
-      enterS  = d3EnterAndAppend_ element dataS
-      enterS' = foldl applyChainableSD3 enterS cs
-    pure enterS'
-
-  join selection (UpdateJoin e ds cs) = do
-    let
-      element = show e
-      selectS = d3SelectionSelectAll_ element selection
-      dataS  = d3Data_ ds selectS 
-      enterS = d3EnterAndAppend_ element dataS
-      exitS  = d3Exit_ dataS
-      _      = foldl applyChainableSD3 enterS  cs.enter
-      _      = foldl applyChainableSD3 exitS   cs.exit
-      _      = foldl applyChainableSD3 dataS   cs.update
-    pure enterS
-  
-  join selection (UpdateJoinWithKeyFunction e ds cs k) = do
-    let
-      element = show e
-      selectS = d3SelectionSelectAll_ element selection
-      dataS  = d3KeyFunction_ ds k selectS 
-      enterS = d3EnterAndAppend_ element dataS
-      exitS  = d3Exit_ dataS
-      _      = foldl applyChainableSD3 enterS  cs.enter
-      _      = foldl applyChainableSD3 exitS   cs.exit
-      _      = foldl applyChainableSD3 dataS   cs.update
-    pure enterS
-  
-  on selection (Drag drag) = do
-    let _ = case drag of 
-              DefaultDrag     -> defaultDrag_ selection 
-              NoDrag          -> disableDrag_ selection
-              (CustomDrag fn) -> defaultDrag_ selection -- TODO no custom drag implemented yet
-    pure unit
-
-  on selection (Zoom config) = do
-    let 
-      (ScaleExtent smallest largest) = config.scale
-      target = selection
-      -- TODO recover the ability to "direct" the zoom to element other than the one receiving the event
-      -- ie for controllers, containers etc
-
-    -- sticking to the rules of no ADT's on the JS side we case on the ZoomExtent here
-      _ = case config.extent of
-            DefaultZoomExtent -> 
-              d3AttachZoomDefaultExtent_ selection {
-                scaleExtent: [ smallest, largest ]
-              , name  : config.name
-              , target
-              } 
-
-            (ZoomExtent ze)   -> do
-              d3AttachZoom_ selection { 
-                extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
-              , scaleExtent: [ smallest, largest ]
-              , name  : config.name
-              , target
-              }
     pure unit

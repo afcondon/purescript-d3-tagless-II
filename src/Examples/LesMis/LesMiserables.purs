@@ -66,10 +66,6 @@ graphScript model selector = do
   linksSelection <- linksGroup `join` Join Line simulationLinks [ strokeWidth (sqrt <<< link_.value) ]
   nodesSelection <- nodesGroup `join` Join Circle simulationNodes [ radius 5.0, fill datum_.colorByGroup ]
 
-
-  -- defaultNodeTick "nodes" nodesSelection 
-  -- defaultLinkTick "links" linksSelection
-  -- TODO looks like the more general form of specifying tick function here in the DSL is unacceptably slow
   addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y  ]
   addTickFunction "links" $ Step linksSelection [ x1 (_.x <<< link_.source)
                                                 , y1 (_.y <<< link_.source)
