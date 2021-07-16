@@ -31,7 +31,7 @@ main = HA.runHalogenAff do
   runUI parent unit body
 
 type Slots = ( index     :: forall q. H.Slot q Void Unit
-             , circle    :: forall q. H.Slot q Void Unit 
+             , circles   :: forall q. H.Slot q Void Unit 
              , gup       :: forall q. H.Slot q Void Unit 
              , trees     :: forall q. H.Slot q Void Unit
              , metatree  :: forall q. H.Slot q Void Unit
@@ -132,7 +132,7 @@ parent =
   renderExample = 
     case _ of
       None            -> HH.slot_ _index     unit Index.component unit
-      ExampleCircles  -> HH.slot_ _gup       unit Circles.component unit
+      ExampleCircles  -> HH.slot_ _circles   unit Circles.component unit
       ExampleGUP      -> HH.slot_ _gup       unit GUP.component GUP.Paused
       ExampleTrees    -> HH.slot_ _trees     unit Trees.component unit 
       ExampleMetaTree -> HH.slot_ _metatree  unit MetaTree.component unit 

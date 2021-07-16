@@ -33,9 +33,7 @@ threeLittleCircles selector = do
 
 
 -- | Passing in the data
-type Model = Array Int  -- not necessary in such a simple example, of course
-
-threeLittleCircles2 :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_
+threeLittleCircles2 :: forall m. SelectionM D3Selection_ m => Array Int -> Selector D3Selection_-> m D3Selection_
 threeLittleCircles2 circleData selector = do 
 
   let circleAttributes = [ fill "green", cx xFromIndex, cy 50.0, radius 20.0 ]
@@ -52,6 +50,8 @@ threeLittleCircles2 circleData selector = do
 
 
 -- | finally, using the data (as opposed to merely the index) in the visualization  
+type Model = Array Int  -- not necessary in such a simple example, of course
+
 getDatum :: Datum_ -> Int
 getDatum = unsafeCoerce
 

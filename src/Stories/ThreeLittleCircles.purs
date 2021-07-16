@@ -2,29 +2,20 @@ module Stories.ThreeLittleCircles where
 
 import Prelude
 
-import Control.Monad.Rec.Class (forever)
-import Control.Monad.State (class MonadState)
+import Control.Monad.State (class MonadState, modify_)
 import D3.Data.Types (D3Selection_)
-import D3.Examples.GUP as GUP
 import D3.Examples.ThreeLittleCircles as Circles
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.FormField as FormField
 import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Instance.Selection (eval_D3M, runD3M)
-import Data.Array (catMaybes, singleton)
+import D3Tagless.Instance.Selection (eval_D3M)
+import D3Tagless.Utility (removeExistingSVG)
+import Data.Array (singleton)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
-import Data.String.CodeUnits (toCharArray)
-import Data.Traversable (sequence)
-import Effect (Effect)
-import Effect.Aff (Aff, Fiber, Milliseconds(..), delay, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class (class MonadEffect)
-import Effect.Class.Console (log)
-import Effect.Exception (error)
-import Effect.Random (random)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -36,9 +27,11 @@ data Action
   = Initialize
   | Finalize
   | ToggleCard (Lens' State Expandable.Status)
+  | ToggleExample 
   
 type State = {
-    blurb   :: Expandable.Status
+    toggle  :: Boolean -- Toggle between ultra simple and merely super-simple examples
+  , blurb   :: Expandable.Status
   , code    :: Expandable.Status
 }
 
@@ -61,8 +54,9 @@ component = H.mkComponent
 
   initialState :: State
   initialState = { 
-      blurb:  Expandable.Collapsed
-    , code:   Expandable.Collapsed
+      toggle: true
+    , blurb:  Expandable.Expanded
+    , code:   Expandable.Expanded
   }
 
   render :: State -> H.ComponentHTML Action () m
@@ -70,7 +64,13 @@ component = H.mkComponent
     HH.div [ Tailwind.apply "story-container" ]
       [ HH.div
             [ Tailwind.apply "story-panel-controls"] 
-            [ ]
+            [ HH.text $ if state.toggle then "Ex 1" else "Ex 2"
+            , Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
+              [ Button.buttonVertical
+                [ HE.onClick $ const ToggleExample ]
+                [ HH.text "Toggle" ]
+              ] 
+            ]
       , HH.div
             [ Tailwind.apply "story-panel-about"]
             [ FormField.field_
@@ -86,7 +86,7 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _blurb
                 ]
               ]
-            , Expandable.content_ state.blurb blurbtext
+            , Expandable.content_ state.blurb $ if state.toggle then blurbtext1 else blurbtext2
             ]  
       , HH.div
             [ Tailwind.apply "story-panel-code"]
@@ -103,18 +103,11 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
-            , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
+            , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text $ if state.toggle then codetext1 else codetext2 ] ] ]
             ]  
       , HH.div [ Tailwind.apply "svg-container" ] []
       ]
         
-
-runThreeLittleCircles :: forall m. Bind m => MonadEffect m => m Unit
-runThreeLittleCircles = do
-  log "Three Little Circles example"
-  _ <- H.liftEffect $ eval_D3M $ Circles.threeLittleCircles3 [100, 45, 267] "div.svg-container"
-  pure unit
-
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
@@ -122,56 +115,78 @@ handleAction = case _ of
     st <- H.get
     H.put (over lens not st)
 
-  Initialize -> runThreeLittleCircles
+  Initialize -> do 
+    _ <- H.liftEffect $ eval_D3M $ Circles.threeLittleCircles "div.svg-container"
+    pure unit
+
+  ToggleExample -> do
+    toggle <- H.gets _.toggle
+    let toggle' = not toggle
+        container = "div.svg-container"
+    _ <- H.liftEffect $ eval_D3M $ removeExistingSVG container
+    _ <- H.liftEffect $ eval_D3M $ 
+          if toggle'
+          then Circles.threeLittleCircles container
+          else Circles.threeLittleCircles3 [100, 45, 267] container
+    modify_ (\s -> s { toggle = toggle' })
 
   Finalize -> pure unit
 
-codetext :: String
-codetext = 
-  """script :: forall m. SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
-  script = do 
-    let 
-      transition :: ChainableS
-      transition = transitionWithDuration $ Milliseconds 2000.0
-      -- new entries enter at this position, updating entries need to transition to it on each update
-      xFromIndex :: Datum_ -> Index_ -> Number
-      xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0)
+codetext1 :: String
+codetext1 = 
+  """-- | simple utility function used in all three of these examples
+xFromIndex :: Datum_ -> Index_ -> Number
+xFromIndex _ i = ((indexIsNumber i) * 100.0)
 
-    root        <- attach "div#gup"
-    svg         <- appendElement root $ node Svg [ viewBox 0.0 0.0 650.0 650.0 ]
-    letterGroup <- appendElement svg  $ node_ Group
+-- | Pretty much the most basic example imaginable, three ints represented by three circles
+threeLittleCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
+threeLittleCircles selector = do 
 
-    pure $ \letters -> 
-      do 
-        letterGroup <+> JoinGeneral {
-            element   : Text
-          , key       : UseDatumAsKey
-          , "data"    : letters
-          , behaviour : { 
-              enter:  [ classed  "enter"
-                      , fill     "green"
-                      , x        xFromIndex
-                      , y        0.0
-                      -- , yu (NWU { i: 0, u: Px })
-                      , text     (singleton <<< datumIsChar)
-                      , fontSize 48.0
-                      ]  
-                      `andThen` (transition `to` [ y 200.0 ]) 
+  let circleAttributes = [ fill "green", cx xFromIndex, cy 50.0, radius 20.0 ]
 
-            , update: [ classed "update"
-                      , fill "gray"
-                      , y 200.0
-                      ] 
-                      `andThen` (transition `to` [ x xFromIndex ] ) 
+  root        <- attach selector
+  svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
+  circleGroup <- svg  D3.+ (node Group [])
+  circles     <- circleGroup <+> Join Circle [32, 57, 293] circleAttributes
 
-            , exit:   [ classed "exit"
-                      , fill "brown"
-                      ] 
-                      `andThen` (transition `to` [ y 400.0, remove ])
-            }
-        }"""
+  pure circles"""
 
-blurbtext :: forall t235 t236. Array (HH.HTML t235 t236)
-blurbtext = (HH.p [ HP.classes [ HH.ClassName "m-2" ] ]) <$> ((singleton <<< HH.text) <$> texts)
+codetext2 :: String
+codetext2 = 
+  """-- | finally, using the data (as opposed to merely the index) in the visualization  
+type Model = Array Int  -- not necessary in such a simple example, of course
+
+getDatum :: Datum_ -> Int
+getDatum = unsafeCoerce
+
+datum_ :: { color :: Datum_ -> String
+, radius :: Datum_ -> Number
+}
+datum_ = {
+    radius: (\d -> Math.sqrt $ toNumber $ getDatum d)
+  , color: (\d -> d3SchemeCategory10N_ ((toNumber $ getDatum d) / 100.0))
+}
+
+threeLittleCircles3 :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_
+threeLittleCircles3 circleData selector = do 
+
+  let circleAttributes = [ fill datum_.color, cx xFromIndex, cy 50.0, radius datum_.radius ]
+
+  root        <- attach selector
+  svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
+  circleGroup <- svg  D3.+ (node Group [])
+
+  circles     <- circleGroup <+> Join Circle circleData circleAttributes
+
+  pure circles
+"""
+
+blurbtext1 :: forall t235 t236. Array (HH.HTML t235 t236)
+blurbtext1 = (HH.p [ HP.classes [ HH.ClassName "m-2" ] ]) <$> ((singleton <<< HH.text) <$> texts)
   where 
     texts = ["Simplest possible example, just to show syntax." ]
+
+blurbtext2 :: forall t235 t236. Array (HH.HTML t235 t236)
+blurbtext2 = (HH.p [ HP.classes [ HH.ClassName "m-2" ] ]) <$> ((singleton <<< HH.text) <$> texts)
+  where 
+    texts = ["This extends the super-simple model in the direction one would go for a more real-world example. It's still extremely simple, and the Model, datum_ and so on would not be necessary for such a simple example. Again, we're just showing syntax and shape of the DSL here." ]

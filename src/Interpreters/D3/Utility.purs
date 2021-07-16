@@ -14,6 +14,7 @@ removeExistingSVG rootSelector = do
     root     = d3SelectFirstInDOM_ rootSelector
     -- check for an svg element under the given root
     previous = d3SelectionSelect_ (rootSelector <> " svg") root
-  pure $ case d3SelectionIsEmpty_ previous of -- 
-          true  -> spy "no previous SVG to remove" previous
-          false -> spy "removed previous SVG" $ d3RemoveSelection_ previous 
+  pure $ 
+    case d3SelectionIsEmpty_ previous of -- 
+      true  -> spy "no previous SVG to remove" previous
+      false -> spy "removed previous SVG" $ d3RemoveSelection_ previous 
