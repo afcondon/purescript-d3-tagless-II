@@ -217,48 +217,38 @@ startUpdating = do
 
 codetext :: String
 codetext = 
-  """script :: forall m. SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
-  script = do 
-    let 
-      transition :: ChainableS
-      transition = transitionWithDuration $ Milliseconds 2000.0
-      -- new entries enter at this position, updating entries need to transition to it on each update
-      xFromIndex :: Datum_ -> Index_ -> Number
-      xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0)
+  """type Model = Array Char
 
-    root        <- attach "div#gup"
-    svg         <- appendElement root $ node Svg [ viewBox 0.0 0.0 650.0 650.0 ]
-    letterGroup <- appendElement svg  $ node_ Group
+script3 :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
+script3 selector = do 
+  root        <- attach selector
+  svg         <- root D3.+ (node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ])
+  letterGroup <- svg  D3.+ (node Group [])
 
-    pure $ \letters -> 
-      do 
-        letterGroup <+> JoinGeneral {
-            element   : Text
-          , key       : UseDatumAsKey
-          , "data"    : letters
-          , behaviour : { 
-              enter:  [ classed  "enter"
-                      , fill     "green"
-                      , x        xFromIndex
-                      , y        0.0
-                      -- , yu (NWU { i: 0, u: Px })
-                      , text     (singleton <<< datumIsChar)
-                      , fontSize 48.0
-                      ]  
-                      `andThen` (transition `to` [ y 200.0 ]) 
+  pure $ \letters -> letterGroup <+> UpdateJoin Text letters { enter, update, exit }
 
-            , update: [ classed "update"
-                      , fill "gray"
-                      , y 200.0
-                      ] 
-                      `andThen` (transition `to` [ x xFromIndex ] ) 
+  where 
+    transition :: ChainableS
+    transition = transitionWithDuration $ Milliseconds 2000.0
 
-            , exit:   [ classed "exit"
-                      , fill "brown"
-                      ] 
-                      `andThen` (transition `to` [ y 400.0, remove ])
-            }
-        }"""
+    xFromIndex :: Datum_ -> Index_ -> Number
+    xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0) -- letters enter at this position, and then must transition to new position on each update
+
+    enter = [ classed  "enter"
+            , fill     "green"
+            , x        xFromIndex
+            , y        0.0
+            -- , yu (NWU { i: 0, u: Px })
+            , text     (singleton <<< datumIsChar)
+            , fontSize 96.0 ]  
+          `andThen` (transition `to` [ y 200.0 ]) 
+
+    update =  [ classed "update", fill "gray", y 200.0 ] 
+              `andThen` (transition `to` [ x xFromIndex ] ) 
+
+    exit =  [ classed "exit", fill "brown"] 
+            `andThen` (transition `to` [ y 400.0, remove ])
+"""
 
 blurbtext :: forall t235 t236. Array (HH.HTML t235 t236)
 blurbtext = (HH.p [ HP.classes [ HH.ClassName "m-2" ] ]) <$> ((singleton <<< HH.text) <$> texts)
