@@ -124,7 +124,7 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _print
                 ]
               ]
-            , Expandable.content_ state.print [ HH.code_ [ HH.text $ show state.tree ] ]
+            , Expandable.content_ state.print [ HH.code_ [ HH.text state.tree ] ]
             ]  
       ]
 

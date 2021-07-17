@@ -75,7 +75,7 @@ component = H.mkComponent
       status: Paused
     , fiber:  Nothing
     , update: Nothing
-    , blurb:  Expandable.Collapsed
+    , blurb:  Expandable.Expanded
     , code:   Expandable.Collapsed
   }
 

@@ -31,6 +31,7 @@ link_ = {
     source: (\d -> (unboxD3SimLink d).source)
   , target: (\d -> (unboxD3SimLink d).target)
   , value:  (\d -> (unboxD3SimLink d).value)
+  , color:  (\d -> d3SchemeCategory10N_ (toNumber $ (unboxD3SimLink d).target.group))
 }
 
 datum_ = {
@@ -63,7 +64,7 @@ graphScript model selector = do
   simulationNodes <- setNodes model.nodes
   simulationLinks <- setLinks model.links datum_.id -- the "links" force will already be there
   
-  linksSelection <- linksGroup `join` Join Line simulationLinks [ strokeWidth (sqrt <<< link_.value) ]
+  linksSelection <- linksGroup `join` Join Line simulationLinks [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
   nodesSelection <- nodesGroup `join` Join Circle simulationNodes [ radius 5.0, fill datum_.colorByGroup ]
 
   addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y  ]

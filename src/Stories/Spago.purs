@@ -200,7 +200,7 @@ initialForces = [
   , enableForce $ createForce "y"       ForceY [ F.strength 0.1, F.y 0.0 ]
   ,               createForce "clusterx"       ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
   ,               createForce "clustery"       ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
-  ,               createForce "packageOrbit"   ForceRadial [ strengthFunction1, F.x 0.0, F.y 0.0, F.radius 1000.0 ]
+  ,               createForce "packageOrbit"   ForceRadial [ strengthFunction1, F.x 0.0, F.y 0.0, F.radius 600.0 ]
   ,               createForce "packageGrid"    (ForceFixPositionXY gridXY gridFilter) [ ]
   ,               createForce "unusedModuleOrbit" ForceRadial [ strengthFunction2, F.x 0.0, F.y 0.0, F.radius 600.0 ]
 ]
