@@ -4,12 +4,13 @@ import Prelude
 
 import Control.Monad.State (class MonadState, State, get, gets, modify_)
 import D3.Attributes.Instances (Label)
-import D3.Data.Types (Index_)
-import D3.FFI (onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
+import D3.Data.Types (D3Selection_, Index_)
+import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_, disableDrag_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
 import D3.Node (D3_Link, D3_SimulationNode, NodeID)
-import D3.Selection (applyChainableSD3)
+import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
 import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, getHandle, putForceInSimulation, setForceAttr)
 import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..), Step(..))
+import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Array (intercalate)
 import Data.Array as A
 import Data.Foldable (traverse_)
@@ -172,5 +173,40 @@ simulationCreateTickFunction label tick@(Step selection chain) = do
       _                 = onTick_ ss_.simulation_ label makeTick
   modify_ (\s -> s { simulationState = updatedSimulation} )
   
+-- the price of being able to treat Drag, Zoom, Click etc the same in SimulationM and SelectionM instances is some duplication here
+-- Drag has to behave differently in the simulation case
+simulationOn :: forall selection row m. 
+  (MonadState { simulationState :: SimulationState_ | row } m) =>
+   D3Selection_ -> Behavior -> m Unit
+simulationOn selection (Drag drag) = do
+  (SS_ { simulation_ }) <- gets _.simulationState
+  let _ = case drag of 
+            DefaultDrag     -> defaultSimulationDrag_ selection  simulation_
+            NoDrag          -> disableDrag_ selection
+            (CustomDrag fn) -> defaultSimulationDrag_ selection simulation_ -- TODO no custom drag implemented yet
+  pure unit
 
-  
+simulationOn selection (Zoom config) = do
+  let 
+    (ScaleExtent smallest largest) = config.scale
+    target = selection
+    -- TODO recover the ability to "direct" the zoom to element other than the one receiving the event
+    -- ie for controllers, containers etc
+
+  -- sticking to the rules of no ADT's on the JS side we case on the ZoomExtent here
+    _ = case config.extent of
+          DefaultZoomExtent -> 
+            d3AttachZoomDefaultExtent_ selection {
+              scaleExtent: [ smallest, largest ]
+            , name  : config.name
+            , target
+            } 
+
+          (ZoomExtent ze)   -> do
+            d3AttachZoom_ selection { 
+              extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
+            , scaleExtent: [ smallest, largest ]
+            , name  : config.name
+            , target
+            }
+  pure unit

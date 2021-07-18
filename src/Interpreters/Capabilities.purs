@@ -1,7 +1,7 @@
 module D3Tagless.Capabilities where
 
 import D3.Attributes.Instances (Label)
-import D3.Data.Types (Datum_, Index_, Selector)
+import D3.Data.Types (D3Simulation_, Datum_, Index_, Selector)
 import D3.Node (D3_Link, D3_SimulationNode)
 import D3.Selection (Behavior, ChainableS, D3_Node, Join)
 import D3.Simulation.Types (Force, SimVariable, Step)
@@ -59,5 +59,9 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   removeTickFunction :: Label                   -> m Unit
   defaultNodeTick    :: Label -> selection      -> m Unit
   defaultLinkTick    :: Label -> selection      -> m Unit
+
+  -- writing callbacks from JavaScript will sometimes necessitate having the simulation handle
+  -- this can't easily be solved until / unless D3 is replaced with something else
+  simulationHandle :: m D3Simulation_
 
 

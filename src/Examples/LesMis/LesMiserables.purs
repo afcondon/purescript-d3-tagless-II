@@ -15,7 +15,8 @@ import D3.Simulation.Forces (createForce)
 import D3.Simulation.Functions (simulationCreateTickFunction, simulationSetLinks, simulationSetNodes)
 import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), SimulationState_, Step(..), initialSimulationState)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, appendElement, attach, defaultLinkTick, defaultNodeTick, join, on, setConfigVariable, setLinks, setNodes, start)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, attach, addTickFunction, defaultLinkTick, defaultNodeTick, join, on, setConfigVariable, setLinks, setNodes, start)
+import D3Tagless.Capabilities as D3
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..))
@@ -27,6 +28,9 @@ import Math (sqrt)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
 import Utility (getWindowWidthHeight)
 
+-- type-safe(ish) accessors for the data that is given to D3
+-- we lose the type information in callbacks from the FFI, such as for attributes
+-- but since we know what we gave we can coerce it back to the initial type.
 link_ = {
     source: (\d -> (unboxD3SimLink d).source)
   , target: (\d -> (unboxD3SimLink d).target)
@@ -56,17 +60,23 @@ graphScript :: forall row m.
 graphScript model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   (root :: D3Selection_) <- attach selector
-  svg        <- root `appendElement` (node Svg [ viewBox (-w / 2.0) (-h / 2.0) w h
+  svg        <- root D3.+ (node Svg [ viewBox (-w / 2.0) (-h / 2.0) w h
                                                , classed "lesmis" ] )
-  linksGroup <- svg  `appendElement` (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
-  nodesGroup <- svg  `appendElement` (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
+  linksGroup <- svg  D3.+ (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
+  nodesGroup <- svg  D3.+ (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
   
+  -- in contrast to a simple SelectionM function, we have additional typeclass capabilities for simulation
+  -- which we use here to introduce the nodes and links to the simulation
   simulationNodes <- setNodes model.nodes
   simulationLinks <- setLinks model.links datum_.id -- the "links" force will already be there
   
-  linksSelection <- linksGroup `join` Join Line simulationLinks [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
-  nodesSelection <- nodesGroup `join` Join Circle simulationNodes [ radius 5.0, fill datum_.colorByGroup ]
+  -- joining the data from the model after it has been put into the simulation
+  linksSelection <- linksGroup D3.<+> Join Line   simulationLinks [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
+  nodesSelection <- nodesGroup D3.<+> Join Circle simulationNodes [ radius 5.0, fill datum_.colorByGroup ]
 
+  -- both links and nodes are updated on each step of the simulation, 
+  -- in this case it's a simple translation of underlying (x,y) data for the circle centers
+  -- tick functions have names, in this case "nodes" and "links"
   addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y  ]
   addTickFunction "links" $ Step linksSelection [ x1 (_.x <<< link_.source)
                                                 , y1 (_.y <<< link_.source)

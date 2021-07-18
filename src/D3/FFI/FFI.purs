@@ -68,7 +68,8 @@ foreign import d3SetHTML_       :: D3Attr -> D3Selection_ -> D3Selection_
 
 foreign import emptyD3Data_ :: D3Data_ -- probably just null, could this be monoid too??? ie Last (Maybe D3Data_)
 
-foreign import defaultDrag_ :: D3Selection_ -> D3Selection_
+-- foreign import defaultDrag_ :: D3Selection_ -> D3Selection_
+foreign import defaultSimulationDrag_ :: D3Selection_ -> D3Simulation_ -> D3Selection_
 foreign import disableDrag_ :: D3Selection_ -> D3Selection_
 
 -- show functions that are used for the string version of the interpreter and also for debugging inside Selection.js
@@ -146,7 +147,6 @@ foreign import onTick_                :: D3Simulation_ -> String -> (Unit -> Uni
 foreign import disableTick_           :: D3Simulation_ -> String -> Unit
 foreign import defaultNodeTick_       :: String -> D3Simulation_ -> D3Selection_ -> Unit
 foreign import defaultLinkTick_       :: String -> D3Simulation_ -> D3Selection_ -> Unit
-foreign import defaultSimulationDrag_ :: D3Selection_ -> D3Simulation_ -> Unit
 foreign import setAlpha_              :: D3Simulation_ -> Number -> Unit
 foreign import setAlphaMin_           :: D3Simulation_ -> Number -> Unit
 foreign import setAlphaDecay_         :: D3Simulation_ -> Number -> Unit

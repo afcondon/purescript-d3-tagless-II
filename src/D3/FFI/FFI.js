@@ -247,27 +247,52 @@ exports.showSetProperty_ = value => selection => {
 exports.showSetOrdering_ = ordering => selection => {
   return `\t${selection}.${ordering}()`
 }
-exports.defaultDrag_ = selection => selection.call(drag)
+exports.defaultSimulationDrag_ = selection => simulation => selection.call(simdrag(simulation))
 
-const drag = function () {
-
-  function dragstarted() {
-    d3.select(this).attr("stroke", "black");
+const simdrag = simulation => {
+  
+  function dragstarted(event) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    event.subject.fx = event.subject.x;
+    event.subject.fy = event.subject.y;
   }
-
-  function dragged(event, d) {
-    d3.select(this).raise().attr("cx", d.x = event.x).attr("cy", d.y = event.y);
+  
+  function dragged(event) {
+    event.subject.fx = event.x;
+    event.subject.fy = event.y;
   }
-
-  function dragended() {
-    d3.select(this).attr("stroke", null);
+  
+  function dragended(event) {
+    if (!event.active) simulation.alphaTarget(0);
+    event.subject.fx = null;
+    event.subject.fy = null;
   }
-
+  
   return d3.drag()
       .on("start", dragstarted)
       .on("drag", dragged)
       .on("end", dragended);
 }
+
+// const drag = function () {
+
+//   function dragstarted() {
+//     d3.select(this).attr("stroke", "black");
+//   }
+
+//   function dragged(event, d) { // TODO this would only work for circles anyway, gotta be improved
+//     d3.select(this).raise().attr("cx", d.x = event.x).attr("cy", d.y = event.y);
+//   }
+
+//   function dragended() {
+//     d3.select(this).attr("stroke", null);
+//   }
+
+//   return d3.drag()
+//       .on("start", dragstarted)
+//       .on("drag", dragged)
+//       .on("end", dragended);
+// }
 
 exports.disableDrag_ = selection => {
   return selection.on('.drag', null)

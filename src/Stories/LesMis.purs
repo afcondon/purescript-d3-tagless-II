@@ -179,68 +179,90 @@ handleAction = case _ of
 
 codetext :: String
 codetext = 
-  """script :: forall m. SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
-  script = do 
-    let 
-      transition :: ChainableS
-      transition = transitionWithDuration $ Milliseconds 2000.0
-      -- new entries enter at this position, updating entries need to transition to it on each update
-      xFromIndex :: Datum_ -> Index_ -> Number
-      xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0)
+  """
+-- type-safe(ish) accessors for the data that is given to D3
+-- we lose the type information in callbacks from the FFI, such as for attributes
+-- but since we know what we gave we can coerce it back to the initial type.
+link_ = {
+    source: (\d -> (unboxD3SimLink d).source)
+  , target: (\d -> (unboxD3SimLink d).target)
+  , value:  (\d -> (unboxD3SimLink d).value)
+  , color:  (\d -> d3SchemeCategory10N_ (toNumber $ (unboxD3SimLink d).target.group))
+}
 
-    root        <- attach "div#gup"
-    svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0 ]
-    letterGroup <- append svg  $ node_ Group
+datum_ = {
+-- direct accessors to fields of the datum (BOILERPLATE)
+    index : (\d -> (unboxD3SimNode d).index)
+  , id    : (\d -> (unboxD3SimNode d).id)
+  , x     : (\d -> (unboxD3SimNode d).x)
+  , y     : (\d -> (unboxD3SimNode d).y)
+  , group : (\d -> (unboxD3SimNode d).group)
 
-    pure $ \letters -> 
-      do 
-        letterGroup <+> JoinGeneral {
-            element   : Text
-          , key       : UseDatumAsKey
-          , "data"    : letters
-          , behaviour : { 
-              enter:  [ classed  "enter"
-                      , fill     "green"
-                      , x        xFromIndex
-                      , y        0.0
-                      -- , yu (NWU { i: 0, u: Px })
-                      , text     (singleton <<< datumIsChar)
-                      , fontSize 48.0
-                      ]  
-                      `andThen` (transition `to` [ y 200.0 ]) 
+  , colorByGroup:
+      (\d -> d3SchemeCategory10N_ (toNumber $ datum_.group d))
+}
 
-            , update: [ classed "update"
-                      , fill "gray"
-                      , y 200.0
-                      ] 
-                      `andThen` (transition `to` [ x xFromIndex ] ) 
+-- | recipe for this force layout graph
+graphScript :: forall row m. 
+  Bind m => 
+  MonadEffect m =>
+  MonadState { simulationState :: SimulationState_ | row } m => 
+  SimulationM D3Selection_ m =>
+  LesMisRawModel -> Selector D3Selection_ -> m Unit
+graphScript model selector = do
+  (Tuple w h) <- liftEffect getWindowWidthHeight
+  (root :: D3Selection_) <- attach selector
+  svg        <- root D3.+ (node Svg [ viewBox (-w / 2.0) (-h / 2.0) w h
+                                               , classed "lesmis" ] )
+  linksGroup <- svg  D3.+ (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
+  nodesGroup <- svg  D3.+ (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
+  
+  -- in contrast to a simple SelectionM function, we have additional typeclass capabilities for simulation
+  -- which we use here to introduce the nodes and links to the simulation
+  simulationNodes <- setNodes model.nodes
+  simulationLinks <- setLinks model.links datum_.id -- the "links" force will already be there
+  
+  -- joining the data from the model after it has been put into the simulation
+  linksSelection <- linksGroup D3.<+> Join Line   simulationLinks [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
+  nodesSelection <- nodesGroup D3.<+> Join Circle simulationNodes [ radius 5.0, fill datum_.colorByGroup ]
 
-            , exit:   [ classed "exit"
-                      , fill "brown"
-                      ] 
-                      `andThen` (transition `to` [ y 400.0, remove ])
-            }
-        }"""
+  -- both links and nodes are updated on each step of the simulation, 
+  -- in this case it's a simple translation of underlying (x,y) data for the circle centers
+  -- tick functions have names, in this case "nodes" and "links"
+  addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y  ]
+  addTickFunction "links" $ Step linksSelection [ x1 (_.x <<< link_.source)
+                                                , y1 (_.y <<< link_.source)
+                                                , x2 (_.x <<< link_.target)
+                                                , y2 (_.y <<< link_.target)
+                                                ]
+  _ <- nodesSelection `on` Drag DefaultDrag
+
+  _ <- svg `on`  Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+                      , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
+                      , name : "LesMis"
+                      }
+  start
+  setConfigVariable $ Alpha 1.0
+  setConfigVariable $ AlphaTarget 0.0
+  setConfigVariable $ AlphaMin 0.0001
+  setConfigVariable $ AlphaDecay 0.0228
+  setConfigVariable $ VelocityDecay 0.4
+
+  pure unit -- svg
+  """
 
 blurbtext :: String
 blurbtext = 
-  """Id sint laboris reprehenderit officia anim nisi consectetur voluptate enim.
-  Commodo cillum minim nisi laborum eiusmod veniam ullamco id ex fugiat eu anim.
-  Irure est aute laborum duis. Lorem dolore id sunt incididunt ut ea. Nostrud
-  enim officia nisi anim consequat cupidatat consectetur consequat ex excepteur.
-  Lorem nisi in reprehenderit ex adipisicing magna elit aute sunt. Cillum non
-  Lorem minim duis culpa ullamco aute ex minim. Mollit anim in nisi tempor enim
-  exercitation dolore. Veniam consequat minim nostrud amet duis dolore tempor
-  voluptate quis culpa. Laborum dolor pariatur ut est cupidatat elit deserunt
-  occaecat tempor aliquip anim. 
-  
-  Velit irure ea voluptate ipsum ex exercitation
-  dolore voluptate reprehenderit sit anim sunt. Anim fugiat ad ut qui cillum
-  tempor occaecat et deserunt nostrud non ipsum. Id non qui mollit culpa elit
-  cillum ipsum excepteur adipisicing qui. Incididunt adipisicing sit incididunt
-  consequat minim id do exercitation cupidatat est sunt mollit. Anim ut ullamco
-  enim culpa. Adipisicing ad non esse laboris anim consequat ut velit esse
-  consequat tempor. Commodo magna esse ullamco ipsum et ipsum minim dolore esse
-  veniam ea commodo labore. Nulla deserunt id ad anim anim proident labore
-  occaecat sint esse nostrud. Duis velit nostrud ullamco cillum cillum Lorem
-  cupidatat irure."""
+  """This example introduces a new capability, signalled by the SimulationM constraint on the function. This monad runs with a D3 Simulation engine in its State. This allows us to let the simulation engine do the layout, we provide the nodes and (optionally) links and configure the simulation with additional forces.
+
+From the D3 docs: 
+"This module implements a velocity Verlet numerical integrator for simulating
+physical forces on particles. The simulation is simplified: it assumes a
+constant unit time step Δt = 1 for each step, and a constant unit mass m = 1
+for all particles. As a result, a force F acting on a particle is equivalent to
+a constant acceleration a over the time interval Δt, and can be simulated
+simply by adding to the particle’s velocity, which is then added to the
+particle’s position."" 
+
+
+"""
