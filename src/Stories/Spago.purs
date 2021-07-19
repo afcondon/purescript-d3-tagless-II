@@ -12,7 +12,7 @@ import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, nu
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationStart)
-import D3.Simulation.Types (Force(..), ForceType(..), SimVariable(..), SimulationState_(..))
+import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..))
 import D3Tagless.Block.Card as Card
 import D3Tagless.Capabilities (addForce, addForces, removeAllForces, setConfigVariable, setForcesByLabel)
 import D3Tagless.Instance.Simulation (D3SimM, exec_D3M_Simulation, runEffectSimulation)
@@ -200,9 +200,9 @@ initialForces = [
   , enableForce $ createForce "y"       ForceY [ F.strength 0.1, F.y 0.0 ]
   ,               createForce "clusterx"       ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
   ,               createForce "clustery"       ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
-  ,               createForce "packageOrbit"   ForceRadial [ strengthFunction1, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+  , enableForce $ createForce "packageOrbit"   ForceRadial [ strengthFunction1, F.x 0.0, F.y 0.0, F.radius 500.0 ]
   ,               createForce "packageGrid"    (ForceFixPositionXY gridXY gridFilter) [ ]
-  ,               createForce "unusedModuleOrbit" ForceRadial [ strengthFunction2, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+  , enableForce $  createForce "unusedModuleOrbit" ForceRadial [ strengthFunction2, F.x 0.0, F.y 0.0, F.radius 600.0 ]
 ]
   where
     strengthFunction1 = F.strength (\d -> if datum_.isPackage d      then 0.8 else 0.0)
@@ -257,7 +257,8 @@ blurbtext = HH.div_ (title : paras)
 renderTableForces :: forall m. SimulationState_ -> H.ComponentHTML Action () m
 renderTableForces (SS_ simulation)  =
   HH.div_
-  [ HH.div_
+  [ HH.div
+    [ Tailwind.apply "text-sm" ]
     [ Backdrop.backdrop_
       [ HH.div_
         [ HH.h2_ [ HH.text "Control which forces are acting"]
@@ -288,7 +289,7 @@ renderTableForces (SS_ simulation)  =
 
   renderData :: ∀ p i. Force -> Array (HH.HTML p i)
   renderData (Force l s t cs h_) =
-    [ Table.cell_ [ Checkbox.checkbox_ [] [] ]
+    [ Table.cell_ [ Checkbox.checkbox_ [ HP.checked (s == ForceActive)] [] ]
     , Table.cell  [ css "text-left" ]
       [ HH.div_ [
           HH.text l
