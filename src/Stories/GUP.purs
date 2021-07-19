@@ -27,6 +27,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Stories.Prism (highlightBlockSynchronous)
 import Stories.Tailwind.Styles as Tailwind
 import Type.Proxy (Proxy(..))
 
@@ -108,7 +109,7 @@ component = H.mkComponent
             , Expandable.content_ state.blurb blurbtext
             ]  
       , HH.div
-            [ Tailwind.apply "story-panel-code"]
+            [ HP.id "code", Tailwind.apply "story-panel-code"]
             [ FormField.field_
                 { label: HH.text "Code"
                 , helpText: []
@@ -122,7 +123,12 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
-            , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
+            , Expandable.content_ state.code 
+                [ HH.pre_   
+                  [ HH.code [ HP.id "prism", Tailwind.apply "language-purescript" ] 
+                            [ HH.text codetext] ]
+                ]
+            -- , Expandable.content_ state.code [ HH.pre [ Tailwind.apply   "language-javascript" ] [ HH.code_ [ HH.text codetextJS] ] ]
             ]  
       , HH.div [ Tailwind.apply "svg-container" ] []
       ]
@@ -161,6 +167,7 @@ handleAction :: forall m. Bind m => MonadAff m => MonadState State m =>
   Action -> m Unit
 handleAction = case _ of
   ToggleCard lens -> do
+    let _ = highlightBlockSynchronous "prism"
     st <- H.get
     H.put (over lens not st)
 
@@ -249,6 +256,53 @@ script3 selector = do
     exit =  [ classed "exit", fill "brown"] 
             `andThen` (transition `to` [ y 400.0, remove ])
 """
+
+-- codetextJS :: String
+-- codetextJS = 
+--   """exports.readSpago_Raw_JSON_ = modulesBody => packagesBody => lsdepsBody => locBody => {
+--   const modules  = decodeModulesFile(modulesBody);
+--   const packages = decodePackagesFile(packagesBody);
+--   const lsDeps   = decodeLsDepsFile(lsdepsBody);
+--   const loc      = decodeLOCFile(locBody);
+
+--   return { modules, packages, lsDeps, loc }
+-- }
+
+-- // module has key, path & depends
+-- const decodeModulesFile = function (filecontents) {
+--   const json = JSON.parse(filecontents)
+--   const modules = Object.keys(json).map(key => { return { key: key, depends: json[key].depends, path: json[key].path }; })
+
+--   return modules;
+-- }
+
+-- // package has key and depends
+-- const decodePackagesFile = function (filecontents) {
+--   const json = JSON.parse(filecontents)
+--   const packages = Object.keys(json).map(key => { return { key: key, depends: json[key].depends }; })
+
+--   return packages;
+-- }
+
+-- // package has key and depends
+-- const decodeLOCFile = function (filecontents) {
+--   const json = JSON.parse(filecontents)
+--   return json.loc;
+-- }
+
+-- // lsdep has key === packageName, version, repo { tag, contents }
+-- const decodeLsDepsFile = function (filecontents) {
+--   const jsonlines = splitIntoLines(filecontents)
+--   jsonlines.length = jsonlines.length - 1
+--   var objectArray = jsonlines.map(d => JSON.parse(d))
+--   return objectArray;
+-- }
+
+-- function splitIntoLines (str) {
+--   // See http://www.unicode.org/reports/tr18/#RL1.6
+--   return str.split(/\r\n|[\n\v\f\r\u0085\u2028\u2029]/);
+-- }
+-- """
 
 blurbtext :: forall t235 t236. Array (HH.HTML t235 t236)
 blurbtext = (HH.p [ HP.classes [ HH.ClassName "m-2" ] ]) <$> ((singleton <<< HH.text) <$> texts)
