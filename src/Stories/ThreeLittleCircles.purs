@@ -21,7 +21,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Html.Renderer.Halogen as RH
 import Stories.Utilities (highlightString_)
-import Stories.Utilities as Tailwind
+import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
 
 data Action
@@ -62,9 +62,9 @@ component = H.mkComponent
 
   render :: State -> H.ComponentHTML Action () m
   render state =
-    HH.div [ Tailwind.apply "story-container" ]
+    HH.div [ Utils.tailwindClass "story-container" ]
       [ HH.div
-            [ Tailwind.apply "story-panel-controls"] 
+            [ Utils.tailwindClass "story-panel-controls"] 
             [ HH.text $ if state.toggle then "Ex 1" else "Ex 2"
             , Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
               [ Button.buttonVertical
@@ -73,7 +73,7 @@ component = H.mkComponent
               ] 
             ]
       , HH.div
-            [ Tailwind.apply "story-panel-about"]
+            [ Utils.tailwindClass "story-panel-about"]
             [ FormField.field_
               { label: HH.text "About"
               , helpText: []
@@ -90,7 +90,7 @@ component = H.mkComponent
             , Expandable.content_ state.blurb $ if state.toggle then blurbtext1 else blurbtext2
             ]  
       , HH.div
-            [ Tailwind.apply "story-panel-code"]
+            [ Utils.tailwindClass "story-panel-code"]
             [ FormField.field_
                 { label: HH.text "Code"
                 , helpText: []
@@ -110,7 +110,7 @@ component = H.mkComponent
                   [ HH.code_ [ RH.render_ $ highlightString_ $ if state.toggle then codetext1 else codetext2 ] ]
                 ]
             ]  
-      , HH.div [ Tailwind.apply "svg-container" ] []
+      , HH.div [ Utils.tailwindClass "svg-container" ] []
       ]
         
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 

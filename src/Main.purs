@@ -20,7 +20,7 @@ import Stories.LesMis as LesMis
 import Stories.MetaTree as MetaTree
 import Stories.PrintTree as PrintTree
 import Stories.Spago as Spago
-import Stories.Utilities as Tailwind
+import Stories.Utilities as Utils
 import Stories.Trees as Trees
 import Type.Proxy (Proxy(..))
 import UIGuide.Block.Backdrop (backdrop) as Backdrop
@@ -83,7 +83,7 @@ parent =
   render :: ParentState -> H.ComponentHTML ParentAction Slots m
   render currentExample = 
     HH.body_ 
-      [ HH.div [ Tailwind.apply "app-container" ]
+      [ HH.div [ Utils.tailwindClass "app-container" ]
                [ renderSidebar currentExample
                , renderExample currentExample
                ]
@@ -91,7 +91,7 @@ parent =
 
   renderSidebar :: ParentState -> H.ComponentHTML ParentAction Slots m
   renderSidebar currentExample =
-    Backdrop.backdrop [ Tailwind.apply "story-sidebar" ]
+    Backdrop.backdrop [ Utils.tailwindClass "story-sidebar" ]
     [ HH.div
       [ HP.class_ $ HH.ClassName "flex-1 p-2 overflow-y-auto" ]
       [ HH.img

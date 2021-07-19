@@ -4,8 +4,7 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, gets, modify_, put)
-import D3.Data.Types (D3Selection_)
+import Control.Monad.State (class MonadState, gets, modify_)
 import D3.Examples.Spago (treeReduction)
 import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
@@ -14,8 +13,8 @@ import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationStart)
 import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..))
 import D3Tagless.Block.Card as Card
-import D3Tagless.Capabilities (addForce, addForces, removeAllForces, setConfigVariable, setForcesByLabel)
-import D3Tagless.Instance.Simulation (D3SimM, exec_D3M_Simulation, runEffectSimulation)
+import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel)
+import D3Tagless.Instance.Simulation (runEffectSimulation)
 import Data.Array ((:))
 import Data.Either (hush)
 import Data.Map (toUnfoldable)
@@ -26,8 +25,6 @@ import Data.Tuple (snd)
 import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class (class MonadEffect)
-import Halogen (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -36,7 +33,7 @@ import Ocelot.Block.Button as Button
 import Ocelot.Block.Checkbox as Checkbox
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
-import Stories.Utilities as Tailwind
+import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -114,16 +111,16 @@ component = H.mkComponent
   render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div
-        [ Tailwind.apply "story-container spago" ]
+        [ Utils.tailwindClass "story-container spago" ]
         [ HH.div
-            [ Tailwind.apply "story-panel-about" ]
+            [ Utils.tailwindClass "story-panel-about" ]
             [ renderSimControls state
             , renderTableForces state.simulationState
             -- , renderTableElements state.simulation
             , Card.card_ [ blurbtext ]
             ]
         , HH.div
-            [ Tailwind.apply $ "svg-container " <> state.svgClass ]
+            [ Utils.tailwindClass $ "svg-container " <> state.svgClass ]
             [ ]
         ]
 
@@ -202,7 +199,7 @@ initialForces = [
   ,               createForce "clustery"       ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
   , enableForce $ createForce "packageOrbit"   ForceRadial [ strengthFunction1, F.x 0.0, F.y 0.0, F.radius 500.0 ]
   ,               createForce "packageGrid"    (ForceFixPositionXY gridXY gridFilter) [ ]
-  , enableForce $  createForce "unusedModuleOrbit" ForceRadial [ strengthFunction2, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+  , enableForce $ createForce "unusedModuleOrbit" ForceRadial [ strengthFunction2, F.x 0.0, F.y 0.0, F.radius 600.0 ]
 ]
   where
     strengthFunction1 = F.strength (\d -> if datum_.isPackage d      then 0.8 else 0.0)
@@ -258,7 +255,7 @@ renderTableForces :: forall m. SimulationState_ -> H.ComponentHTML Action () m
 renderTableForces (SS_ simulation)  =
   HH.div_
   [ HH.div
-    [ Tailwind.apply "text-sm" ]
+    [ Utils.tailwindClass "text-sm" ]
     [ Backdrop.backdrop_
       [ HH.div_
         [ HH.h2_ [ HH.text "Control which forces are acting"]
@@ -287,9 +284,12 @@ renderTableForces (SS_ simulation)  =
   renderBody =
     Table.row_ <$> ( renderData <$> tableData )
 
-  renderData :: ∀ p i. Force -> Array (HH.HTML p i)
+  -- renderData :: ∀ p i. Force -> Array (HH.HTML p i)
   renderData (Force l s t cs h_) =
-    [ Table.cell_ [ Checkbox.checkbox_ [ HP.checked (s == ForceActive)] [] ]
+    [ Table.cell_ [ Checkbox.checkbox_ 
+                  [ HP.checked (s == ForceActive)
+                  , HE.onChecked $ const ToggleLinks
+                  ] [] ]
     , Table.cell  [ css "text-left" ]
       [ HH.div_ [
           HH.text l

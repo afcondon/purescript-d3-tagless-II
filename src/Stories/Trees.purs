@@ -24,7 +24,7 @@ import Ocelot.Block.FormField as FormField
 import Ocelot.Block.Radio as Radio
 import Ocelot.HTML.Properties (css)
 import Stories.Utilities (blurbParagraphs, syntaxHighlightedCode)
-import Stories.Utilities as Tailwind
+import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
 
 data Action
@@ -127,11 +127,11 @@ component = H.mkComponent
 
   render :: State -> H.ComponentHTML Action () m
   render state =
-    HH.div [ Tailwind.apply "story-container" ]
-      [ HH.div [ Tailwind.apply "story-panel-controls"] 
+    HH.div [ Utils.tailwindClass "story-container" ]
+      [ HH.div [ Utils.tailwindClass "story-panel-controls"] 
           [ controlsRadio ]
       , HH.div
-            [ Tailwind.apply "story-panel-about"]
+            [ Utils.tailwindClass "story-panel-about"]
             [ FormField.field_
               { label: HH.text "About"
               , helpText: []
@@ -148,7 +148,7 @@ component = H.mkComponent
             , Expandable.content_ state.blurb blurbtext
             ]  
       , HH.div
-            [ Tailwind.apply "story-panel-code"]
+            [ Utils.tailwindClass "story-panel-code"]
             [ FormField.field_
                 { label: HH.text "Code"
                 , helpText: []
@@ -164,7 +164,7 @@ component = H.mkComponent
               ]
             , Expandable.content_ state.code $ syntaxHighlightedCode codetext 
             ]  
-      , HH.div [ Tailwind.apply "svg-container" ] []
+      , HH.div [ Utils.tailwindClass "svg-container" ] []
       ]
 
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 

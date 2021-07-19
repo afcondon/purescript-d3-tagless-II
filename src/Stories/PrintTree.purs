@@ -21,7 +21,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Ocelot.Block.FormField as FormField
 import Stories.Utilities (syntaxHighlightedCode)
-import Stories.Utilities as Tailwind
+import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
 
 data Action
@@ -60,12 +60,12 @@ component = H.mkComponent
   
   render :: State -> H.ComponentHTML Action () m
   render state =
-    HH.div [ Tailwind.apply "story-container" ]
+    HH.div [ Utils.tailwindClass "story-container" ]
       [ HH.div 
-        [ Tailwind.apply "story-panel-controls"] 
+        [ Utils.tailwindClass "story-panel-controls"] 
         [ HH.text "Les Mis" ]
       , HH.div
-            [ Tailwind.apply "story-panel-about"]
+            [ Utils.tailwindClass "story-panel-about"]
             [ FormField.field_
               { label: HH.text "About"
               , helpText: []
@@ -82,7 +82,7 @@ component = H.mkComponent
             , Expandable.content_ state.blurb [ HH.text blurbtext ]
             ]  
       , HH.div
-            [ Tailwind.apply "story-panel-code"]
+            [ Utils.tailwindClass "story-panel-code"]
             [ FormField.field_
                 { label: HH.text "Code"
                 , helpText: []
@@ -99,7 +99,7 @@ component = H.mkComponent
             , Expandable.content_ state.code $ syntaxHighlightedCode codetext
             ]  
       , HH.div
-            [ Tailwind.apply "story-panel-code"]
+            [ Utils.tailwindClass "story-panel-code"]
             [ FormField.field_
                 { label: HH.text "Output"
                 , helpText: []

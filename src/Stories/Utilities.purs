@@ -8,8 +8,11 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Html.Renderer.Halogen as RH
 
-apply :: forall r i. String ->  HP.IProp (class :: String | r) i
-apply = HP.class_ <<< HH.ClassName
+classed :: forall r i. String ->  HP.IProp (class :: String | r) i
+classed = HP.class_ <<< HH.ClassName
+
+tailwindClass :: forall r i. String ->  HP.IProp (class :: String | r) i
+tailwindClass = classed
 
 blurbParagraphs :: forall t16 t19 t20. Functor t16 => t16 String -> t16 (HTML t19 t20)
 blurbParagraphs texts = 
