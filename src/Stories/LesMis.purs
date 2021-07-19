@@ -4,7 +4,7 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, put)
+import Control.Monad.State (class MonadState, modify_, put)
 import D3.Examples.LesMiserables as LesMis
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.Simulation.Config as F
@@ -34,14 +34,28 @@ data Action
   = Initialize
   | Finalize
   | ToggleCard (Lens' State Expandable.Status)
-  | ConfigureForces ForceConfigLists
+  | ToggleManyBody
+  | ToggleLinks
   | Freeze
   | Reheat
 
 type Input = SimulationState_
 
+data ManyBodyParam = SmallRadius | BigRadius
+derive instance Eq ManyBodyParam
+instance Show ManyBodyParam where
+  show SmallRadius = "Compact"
+  show BigRadius   = "Expanded"
+data LinksSetting  = LinksOn | LinksOff
+derive instance Eq LinksSetting
+instance Show LinksSetting where
+  show LinksOn = "Link Force"
+  show LinksOff = "No link force"
+
 type State = { 
     simulationState :: SimulationState_
+  , manybodySetting :: ManyBodyParam
+  , linksSetting    :: LinksSetting
   , blurb           :: Expandable.Status
   , code            :: Expandable.Status
 }
@@ -54,10 +68,11 @@ _code = prop (Proxy :: Proxy "code")
 
 lesMisForces :: Array Force
 lesMisForces = 
-    [ createForce "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-    , createForce "many body" ForceManyBody  []
-    , createForce "collision" ForceCollide  [ F.radius 4.0 ]
-    , createForce "collision20" ForceCollide  [ F.radius 20.0]
+    [ enableForce $ createForce "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+    , enableForce $ createForce "many body" ForceManyBody  []
+    , enableForce $ createForce "collision" ForceCollide  [ F.radius 4.0 ]
+    ,               createForce "collision20" ForceCollide  [ F.radius 20.0] -- NB initially not enabled
+    -- links force is enabled by default!!!
     ]
 
 component :: forall query output m. 
@@ -75,26 +90,22 @@ component = H.mkComponent
   initialState :: Input -> State
   initialState simulation = { 
         simulationState: simulation
+      , manybodySetting: SmallRadius
+      , linksSetting: LinksOn
       , blurb: Expandable.Collapsed
       , code: Expandable.Collapsed
     }
 
-  controls = 
+  controls state = 
     [ HH.div
       [ Tailwind.apply "story-panel-controls"] 
       [ Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
         [ Button.buttonVertical
-          [ HE.onClick (const $ ConfigureForces { enable: ["center"], disable: [""]}) ]
-          [ HH.text "Centering" ]
+          [ HE.onClick (const $ ToggleLinks) ] -- { enable: ["links"], disable: [""]}
+          [ HH.text $ show state.linksSetting ]
         , Button.buttonVertical
-          [ HE.onClick (const $ ConfigureForces { enable: ["many body"], disable: [""]}) ]
-          [ HH.text "Many body" ]
-        , Button.buttonVertical
-          [ HE.onClick (const $ ConfigureForces { enable: ["collision"], disable: ["collision20"]}) ]
-          [ HH.text "Collision 4" ]
-        , Button.buttonVertical
-          [ HE.onClick (const $ ConfigureForces { enable: ["collision20"], disable: ["collision"]}) ]
-          [ HH.text "Collision 20" ]
+          [ HE.onClick (const $ ToggleManyBody) ]
+          [ HH.text $ show state.manybodySetting ]
         , Button.buttonVertical
           [ HE.onClick (const $ Freeze) ]
           [ HH.text "Freeze" ]
@@ -111,7 +122,7 @@ component = H.mkComponent
     HH.div [ Tailwind.apply "story-container" ]
       [ HH.div -- [ Tailwind.apply "story-panel"]
         [ Tailwind.apply "story-panel-controls"] 
-        controls
+        (controls state)
       , HH.div -- [ Tailwind.apply "story-panel" ] 
             [ Tailwind.apply "story-panel-about"]
             [ FormField.field_
@@ -169,9 +180,27 @@ handleAction = case _ of
 
   Finalize ->  runEffectSimulation removeAllForces
 
-  ConfigureForces enableDisable -> do
-    runEffectSimulation (setForcesByLabel enableDisable)
-    runEffectSimulation (setConfigVariable $ Alpha 0.8)
+  ToggleManyBody -> do
+    state <- H.get
+    let newSetting = case state.manybodySetting of
+                      SmallRadius -> BigRadius
+                      BigRadius   -> SmallRadius
+    case newSetting of
+      SmallRadius -> runEffectSimulation (setForcesByLabel { enable: ["collision"], disable: ["collision20"]} )
+      BigRadius   -> runEffectSimulation (setForcesByLabel { enable: ["collision20"], disable: ["collision"]} )
+    modify_ (\s -> s { manybodySetting = newSetting })
+    simulationStart
+
+  ToggleLinks -> do
+    state <- H.get
+    let newSetting = case state.linksSetting of
+                      LinksOn  -> LinksOff
+                      LinksOff -> LinksOn
+    case newSetting of
+      LinksOn  -> runEffectSimulation (setForcesByLabel { enable: ["links"], disable: []} )
+      LinksOff -> runEffectSimulation (setForcesByLabel { enable: [], disable: ["links"]} )
+    modify_ (\s -> s { linksSetting = newSetting })
+    simulationStart
 
   Freeze  -> runEffectSimulation (setConfigVariable $ Alpha 0.0)
   Reheat  -> simulationStart
