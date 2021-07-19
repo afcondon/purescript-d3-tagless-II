@@ -3,7 +3,6 @@ module Stories.ThreeLittleCircles where
 import Prelude
 
 import Control.Monad.State (class MonadState, modify_)
-import D3.Data.Types (D3Selection_)
 import D3.Examples.ThreeLittleCircles as Circles
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
@@ -20,7 +19,9 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Stories.Tailwind.Styles as Tailwind
+import Html.Renderer.Halogen as RH
+import Stories.Utilities (highlightString_)
+import Stories.Utilities as Tailwind
 import Type.Proxy (Proxy(..))
 
 data Action
@@ -103,7 +104,11 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
-            , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text $ if state.toggle then codetext1 else codetext2 ] ] ]
+            , Expandable.content_ state.code
+                [ HH.pre 
+                  [ HP.class_ $ HH.ClassName "language-purescript" ]  
+                  [ HH.code_ [ RH.render_ $ highlightString_ $ if state.toggle then codetext1 else codetext2 ] ]
+                ]
             ]  
       , HH.div [ Tailwind.apply "svg-container" ] []
       ]
@@ -134,7 +139,8 @@ handleAction = case _ of
 
 codetext1 :: String
 codetext1 = 
-  """-- | simple utility function used in all three of these examples
+  """
+-- | simple utility function used in all three of these examples
 xFromIndex :: Datum_ -> Index_ -> Number
 xFromIndex _ i = ((indexIsNumber i) * 100.0)
 
@@ -149,11 +155,13 @@ threeLittleCircles selector = do
   circleGroup <- svg  D3.+ (node Group [])
   circles     <- circleGroup <+> Join Circle [32, 57, 293] circleAttributes
 
-  pure circles"""
+  pure circles
+"""
 
 codetext2 :: String
 codetext2 = 
-  """-- | finally, using the data (as opposed to merely the index) in the visualization  
+  """
+-- | finally, using the data (as opposed to merely the index) in the visualization  
 type Model = Array Int  -- not necessary in such a simple example, of course
 
 getDatum :: Datum_ -> Int

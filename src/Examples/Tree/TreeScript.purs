@@ -9,7 +9,8 @@ import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.Examples.Tree.Model (FlareTreeNode)
 import D3.FFI (descendants_, hasChildren_, links_)
 import D3.Selection (ChainableS, Join(..), node)
-import D3Tagless.Capabilities (class SelectionM, appendElement, attach, (<+>))
+import D3Tagless.Capabilities (class SelectionM, attach)
+import D3Tagless.Capabilities as D3
 import Data.Nullable (Nullable)
 import Math (pi)
 
@@ -82,27 +83,25 @@ script :: forall m selection. Bind m => SelectionM selection m =>
   ScriptConfig -> FlareTreeNode ->  m selection
 script config tree = do
   root       <- attach config.selector  
-  svg        <- root `appendElement` (node Svg (config.viewbox <> [ classed "tree"]))          
-  container  <- svg  `appendElement` (node Group [ fontFamily      "sans-serif"
-                                          , fontSize        10.0
-                                          ])
-  links      <- container `appendElement` (node Group [ classed "links"] )
-  nodes      <- container `appendElement` (node Group [ classed "nodes"] )
+  svg        <- root D3.+ (node Svg (config.viewbox <> [ classed "tree"]))          
+  container  <- svg  D3.+ (node Group [ fontFamily      "sans-serif", fontSize 10.0 ])
+  links      <- container D3.+  (node Group [ classed "links"] )
+  nodes      <- container D3.+  (node Group [ classed "nodes"] )
 
-  theLinks_  <- links <+> Join Path (links_ tree) 
-                              [ strokeWidth   1.5, strokeColor   config.color, strokeOpacity 0.4
-                              , fill "none", config.linkPath ]
+  theLinks_  <- links D3.<+> Join Path (links_ tree) 
+                                       [ strokeWidth   1.5, strokeColor   config.color, strokeOpacity 0.4
+                                       , fill "none", config.linkPath ]
 
+  -- we make a group to hold the node circle and the label text
+  nodeJoin_  <- nodes D3.<+> Join Group (descendants_ tree) config.nodeTransform
 
-  nodeJoin_  <- nodes <+> Join Group (descendants_ tree) config.nodeTransform
-
-  theNodes <- nodeJoin_ `appendElement` 
+  theNodes <- nodeJoin_ D3.+  
                 (node Circle  [ fill         (\d -> if datum_.hasChildren d then "#999" else "#555")
                               , radius       2.5
                               , strokeColor "white"
                               ])
 
-  theLabels <- nodeJoin_ `appendElement`
+  theLabels <- nodeJoin_ D3.+
                 (node Text  [ dy         0.31
                             , x          (datum_.textX config.layout)
                             , textAnchor (datum_.textAnchor config.layout)

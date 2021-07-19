@@ -27,7 +27,8 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Ocelot.Block.FormField as FormField
-import Stories.Tailwind.Styles as Tailwind
+import Stories.Utilities (syntaxHighlightedCode)
+import Stories.Utilities as Tailwind
 import Type.Proxy (Proxy(..))
 
 data Action
@@ -155,7 +156,7 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
-            , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
+            , Expandable.content_ state.code $ syntaxHighlightedCode codetext 
             ]  
       , HH.div [ Tailwind.apply "svg-container" ] []
       ]
@@ -270,14 +271,8 @@ graphScript model selector = do
                       , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
                       , name : "LesMis"
                       }
-  start
-  setConfigVariable $ Alpha 1.0
-  setConfigVariable $ AlphaTarget 0.0
-  setConfigVariable $ AlphaMin 0.0001
-  setConfigVariable $ AlphaDecay 0.0228
-  setConfigVariable $ VelocityDecay 0.4
 
-  pure unit -- svg
+  pure unit
   """
 
 blurbtext :: String

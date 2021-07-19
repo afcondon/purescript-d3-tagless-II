@@ -36,7 +36,7 @@ import Ocelot.Block.Button as Button
 import Ocelot.Block.Checkbox as Checkbox
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
-import Stories.Tailwind.Styles as Tailwind
+import Stories.Utilities as Tailwind
 import UIGuide.Block.Backdrop as Backdrop
 import Unsafe.Coerce (unsafeCoerce)
 

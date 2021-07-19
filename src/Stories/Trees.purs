@@ -5,14 +5,15 @@ import Prelude
 import Control.Monad.State (class MonadState, get)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Examples.Tree.Configure as Tree
-import D3Tagless.Utility (removeExistingSVG)
-import D3Tagless.Instance.Selection (eval_D3M)
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
-import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Block.Expandable as Expandable
+import D3Tagless.Block.Toggle as Toggle
+import D3Tagless.Instance.Selection (eval_D3M)
+import D3Tagless.Utility (removeExistingSVG)
 import Data.Array (catMaybes)
-import Data.Const (Const)
 import Data.Either (Either(..)) as E
+import Data.Lens (Lens', over)
+import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
@@ -22,10 +23,9 @@ import Halogen.HTML.Properties as HP
 import Ocelot.Block.FormField as FormField
 import Ocelot.Block.Radio as Radio
 import Ocelot.HTML.Properties (css)
-import Stories.Tailwind.Styles as Tailwind
+import Stories.Utilities (blurbParagraphs, syntaxHighlightedCode)
+import Stories.Utilities as Tailwind
 import Type.Proxy (Proxy(..))
-import Data.Lens (Lens', over)
-import Data.Lens.Record (prop)
 
 data Action
   = Initialize
@@ -145,7 +145,7 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _blurb
                 ]
               ]
-            , Expandable.content_ state.blurb [ HH.text blurbtext ]
+            , Expandable.content_ state.blurb blurbtext
             ]  
       , HH.div
             [ Tailwind.apply "story-panel-code"]
@@ -162,7 +162,7 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
-            , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
+            , Expandable.content_ state.code $ syntaxHighlightedCode codetext 
             ]  
       , HH.div [ Tailwind.apply "svg-container" ] []
       ]
@@ -215,68 +215,75 @@ handleAction = case _ of
 
 codetext :: String
 codetext = 
-  """script :: forall m. SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
-  script = do 
-    let 
-      transition :: ChainableS
-      transition = transitionWithDuration $ Milliseconds 2000.0
-      -- new entries enter at this position, updating entries need to transition to it on each update
-      xFromIndex :: Datum_ -> Index_ -> Number
-      xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0)
+  """
+-- a record that packages up all the customizations that are needed to render the 6 variations on Tree
+type ScriptConfig = { 
+    layout        :: TreeLayout
+  , selector      :: Selector String
+  , linkPath      :: ChainableS
+  , spacing       :: { interChild :: Number, interLevel :: Number }
+  , viewbox       :: Array ChainableS
+  , nodeTransform :: Array ChainableS
+  , color         :: String
+  , svg           :: { width :: Number, height :: Number }
+}
 
-    root        <- attach "div#gup"
-    svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0 ]
-    letterGroup <- append svg  $ node_ Group
+-- | The eDSL script that renders tree layouts
+-- | it has been parameterized rather heavily using the ScriptConfig record so that it can draw
+-- | all six variations of [Radial, Horizontal, Vertical] * [Dendrogram, TidyTree] 
+-- | NB there would be nothing wrong, per se, with individual examples, this just shows 
+-- | some more composability, at the price of some direct legibility
+script :: forall m selection. Bind m => SelectionM selection m => 
+  ScriptConfig -> FlareTreeNode ->  m selection
+script config tree = do
+  root       <- attach config.selector  
+  svg        <- root D3.+ (node Svg (config.viewbox <> [ classed "tree"]))          
+  container  <- svg  D3.+ (node Group [ fontFamily      "sans-serif", fontSize 10.0 ])
+  links      <- container D3.+  (node Group [ classed "links"] )
+  nodes      <- container D3.+  (node Group [ classed "nodes"] )
 
-    pure $ \letters -> 
-      do 
-        letterGroup <+> JoinGeneral {
-            element   : Text
-          , key       : UseDatumAsKey
-          , "data"    : letters
-          , behaviour : { 
-              enter:  [ classed  "enter"
-                      , fill     "green"
-                      , x        xFromIndex
-                      , y        0.0
-                      -- , yu (NWU { i: 0, u: Px })
-                      , text     (singleton <<< datumIsChar)
-                      , fontSize 48.0
-                      ]  
-                      `andThen` (transition `to` [ y 200.0 ]) 
+  theLinks_  <- links D3.<+> Join Path (links_ tree) 
+                                       [ strokeWidth   1.5, strokeColor   config.color, strokeOpacity 0.4
+                                       , fill "none", config.linkPath ]
 
-            , update: [ classed "update"
-                      , fill "gray"
-                      , y 200.0
-                      ] 
-                      `andThen` (transition `to` [ x xFromIndex ] ) 
+  -- we make a group to hold the node circle and the label text
+  nodeJoin_  <- nodes D3.<+> Join Group (descendants_ tree) config.nodeTransform
 
-            , exit:   [ classed "exit"
-                      , fill "brown"
-                      ] 
-                      `andThen` (transition `to` [ y 400.0, remove ])
-            }
-        }"""
+  theNodes <- nodeJoin_ D3.+  
+                (node Circle  [ fill         (\d -> if datum_.hasChildren d then "#999" else "#555")
+                              , radius       2.5
+                              , strokeColor "white"
+                              ])
 
-blurbtext :: String
-blurbtext = 
-  """Id sint laboris reprehenderit officia anim nisi consectetur voluptate enim.
-  Commodo cillum minim nisi laborum eiusmod veniam ullamco id ex fugiat eu anim.
-  Irure est aute laborum duis. Lorem dolore id sunt incididunt ut ea. Nostrud
-  enim officia nisi anim consequat cupidatat consectetur consequat ex excepteur.
-  Lorem nisi in reprehenderit ex adipisicing magna elit aute sunt. Cillum non
-  Lorem minim duis culpa ullamco aute ex minim. Mollit anim in nisi tempor enim
-  exercitation dolore. Veniam consequat minim nostrud amet duis dolore tempor
-  voluptate quis culpa. Laborum dolor pariatur ut est cupidatat elit deserunt
-  occaecat tempor aliquip anim. 
-  
-  Velit irure ea voluptate ipsum ex exercitation
-  dolore voluptate reprehenderit sit anim sunt. Anim fugiat ad ut qui cillum
-  tempor occaecat et deserunt nostrud non ipsum. Id non qui mollit culpa elit
-  cillum ipsum excepteur adipisicing qui. Incididunt adipisicing sit incididunt
-  consequat minim id do exercitation cupidatat est sunt mollit. Anim ut ullamco
-  enim culpa. Adipisicing ad non esse laboris anim consequat ut velit esse
-  consequat tempor. Commodo magna esse ullamco ipsum et ipsum minim dolore esse
-  veniam ea commodo labore. Nulla deserunt id ad anim anim proident labore
-  occaecat sint esse nostrud. Duis velit nostrud ullamco cillum cillum Lorem
-  cupidatat irure."""
+  theLabels <- nodeJoin_ D3.+
+                (node Text  [ dy         0.31
+                            , x          (datum_.textX config.layout)
+                            , textAnchor (datum_.textAnchor config.layout)
+                            , text       datum_.name
+                            , fill       config.color
+                            ])               
+  pure svg
+  """
+
+blurbtext :: forall t235 t236. Array (HH.HTML t235 t236)
+blurbtext = blurbParagraphs [
+
+    """An abstract data type like a tree can be rendered in a number of different
+    ways including at least the 6 variations shown here, arising from a
+    combination of three layout orientations (Horizontal, Vertical and Radial)
+    and to layout types (TidyTree or Dendrogram)"""
+
+  , """Each format has it's uses, TidyTree forms are generally more compact and
+  will often be preferred."""
+
+  , """In addition to the six options shown here (which have fundamentally the
+  same structure in the DOM) there are radically different representations such
+  as Sunflowers and TreeMaps which can be used to show the same hierarchical
+  data in ways that serve different purposes or make different aspects of the
+  data salient."""
+
+  , """The code shown in this example makes use of higher order functions to
+  parameterize the drawing, thus enabling one function to encode all six
+  forms."""
+
+]

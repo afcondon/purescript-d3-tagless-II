@@ -89,11 +89,5 @@ graphScript model selector = do
                       , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
                       , name : "LesMis"
                       }
-  start
-  setConfigVariable $ Alpha 1.0
-  setConfigVariable $ AlphaTarget 0.0
-  setConfigVariable $ AlphaMin 0.0001
-  setConfigVariable $ AlphaDecay 0.0228
-  setConfigVariable $ VelocityDecay 0.4
 
-  pure unit -- svg
+  pure unit

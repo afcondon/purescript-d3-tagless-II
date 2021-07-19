@@ -5,22 +5,23 @@ import Prelude
 import Control.Monad.State (class MonadState)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..))
 import D3.Examples.Tree.Configure as Tree
-import D3Tagless.Utility (removeExistingSVG)
-import D3Tagless.Instance.Selection (eval_D3M)
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
+import D3Tagless.Block.Expandable as Expandable
+import D3Tagless.Block.Toggle as Toggle
+import D3Tagless.Instance.Selection (eval_D3M)
+import D3Tagless.Utility (removeExistingSVG)
 import Data.Either (Either(..)) as E
+import Data.Lens (Lens', over)
+import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Stories.Tailwind.Styles as Tailwind
 import Ocelot.Block.FormField as FormField
-import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Block.Expandable as Expandable
-import Data.Lens (Lens', over)
-import Data.Lens.Record (prop)
+import Stories.Utilities (syntaxHighlightedCode)
+import Stories.Utilities as Tailwind
 import Type.Proxy (Proxy(..))
 
 data Action
@@ -57,18 +58,6 @@ component = H.mkComponent
   initialState :: State
   initialState = { tree: "", blurb: Expandable.Collapsed, code: Expandable.Collapsed, print: Expandable.Expanded  } 
   
-  -- render :: State -> H.ComponentHTML Action () m
-  -- render state =  
-  --     HH.div [ HP.id "d3story-overlay", HP.classes [ HH.ClassName "printtree" ] ]
-  --     [ HH.div [ HP.id "printtree" ] [ HH.text state ] -- the div where the d3 script will appear
-
-  --     , HH.div [ HP.id "blurb" ] 
-  --       [ HH.h1_ [ HH.text $ "Print Tree: using a string producing interpreter instead of D3" ]
-  --       , HH.div [ HP.id "inner-blurb" ] [ HH.text blurbtext ] 
-  --       ]
-
-  --     , HH.div [ HP.id "code" ] [ HH.div [ HP.id "inner-code" ] [ HH.text codetext]]
-  --     ]
   render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div [ Tailwind.apply "story-container" ]
@@ -107,7 +96,7 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
-            , Expandable.content_ state.code [ HH.pre_ [ HH.code_ [ HH.text codetext] ] ]
+            , Expandable.content_ state.code $ syntaxHighlightedCode codetext
             ]  
       , HH.div
             [ Tailwind.apply "story-panel-code"]

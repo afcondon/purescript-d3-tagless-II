@@ -1150,7 +1150,7 @@ dt {
   min-width: -webkit-min-content;
   min-width: -moz-min-content;
   min-width: min-content;
-  overflow: hidden;
+  overflow-y: scroll;
   padding: 0.5rem;
   --tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);

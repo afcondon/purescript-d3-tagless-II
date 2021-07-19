@@ -20,7 +20,7 @@ import Stories.LesMis as LesMis
 import Stories.MetaTree as MetaTree
 import Stories.PrintTree as PrintTree
 import Stories.Spago as Spago
-import Stories.Tailwind.Styles as Tailwind
+import Stories.Utilities as Tailwind
 import Stories.Trees as Trees
 import Type.Proxy (Proxy(..))
 import UIGuide.Block.Backdrop (backdrop) as Backdrop

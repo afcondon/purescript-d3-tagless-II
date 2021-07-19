@@ -19,7 +19,7 @@ import JSURI as JSURI
 import Ocelot.Block.Format as Format
 import Partial.Unsafe as Partial.Unsafe
 import Routing.Hash (hashes)
-import Stories.Tailwind.Styles as Tailwind
+import Stories.Utilities as Tailwind
 import Type.Proxy (Proxy(..))
 import UIGuide.Block.Backdrop as Backdrop
 import Web.HTML.HTMLElement (HTMLElement)
