@@ -53,6 +53,7 @@ script model = do
 
   circle <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
   labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, text datum_.name]) 
+  -- labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, text datum_.namePos]) 
   
   _ <- circle `on` Drag DefaultDrag
   _ <- svg    `on` Zoom  { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }

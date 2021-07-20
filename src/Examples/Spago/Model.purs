@@ -90,6 +90,7 @@ datum_ = {
   , containerID   : (\d -> (unboxD3SimNode d).containerID)
   , containerName : (\d -> (unboxD3SimNode d).containerName)
   , name          : (\d -> (unboxD3SimNode d).name)
+  , namePos       : (\d -> "(" <> show (Math.floor $ datum_.x d) <> "," <> show (Math.floor $ datum_.y d) <> ")") -- for debugging positions
   , x             : (\d -> (unboxD3SimNode d).x)
   , y             : (\d -> (unboxD3SimNode d).y)
   , treeX         : (\d -> (unboxD3SimNode d).treeX)
