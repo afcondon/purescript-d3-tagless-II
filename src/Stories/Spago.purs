@@ -140,13 +140,13 @@ handleAction = case _ of
 
   Scene PackageGrid -> do
     runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid", "clusterx", "clustery" ], disable: ["links", "packageOrbit"] }
-    runEffectSimulation $ setConfigVariable (Alpha 0.8)
+    simulationStart
   Scene PackageGraph -> do
     runEffectSimulation $ setForcesByLabel  { enable: [ "packageOrbit" ], disable: ["packageGrid", "clusterx", "clustery" ] }
-    runEffectSimulation $ setConfigVariable (Alpha 0.8)
+    simulationStart
   Scene (ModuleTree _) -> do
     runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["packageOrbit", "packageGrid", "clusterx", "clustery" ] }
-    runEffectSimulation $ setConfigVariable (Alpha 0.8)
+    simulationStart
 
   ToggleForce label -> runEffectSimulation $ toggleForceByLabel label
 
