@@ -1,127 +1,165 @@
-/* PrismJS 1.24.1
-https://prismjs.com/download.html#themes=prism-okaidia&languages=markup+css+clike+javascript+haskell+purescript */
-/**
- * okaidia theme for JavaScript, CSS and HTML
- * Loosely based on Monokai textmate theme by http://www.monokai.nl/
- * @author ocodia
- */
+/*
 
+Name:       Base16 Atelier Forest Light
+Author:     Bram de Haan (http://atelierbram.github.io/syntax-highlighting/atelier-schemes/forest)
+
+Prism template by Bram de Haan (http://atelierbram.github.io/syntax-highlighting/prism/)
+Original Base16 color scheme by Chris Kempson (https://github.com/chriskempson/base16)
+
+*/
 code[class*="language-"],
 pre[class*="language-"] {
-	color: #f8f8f2;
-	background: none;
-	text-shadow: 0 1px rgba(0, 0, 0, 0.3);
-	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
-	font-size: 1em;
-	text-align: left;
-	white-space: pre;
-	word-spacing: normal;
-	word-break: normal;
-	word-wrap: normal;
-	line-height: 1.5;
+  font-family: Consolas, Menlo, Monaco, "Andale Mono WT", "Andale Mono", "Lucida Console", "Lucida Sans Typewriter", "DejaVu Sans Mono", "Bitstream Vera Sans Mono", "Liberation Mono", "Nimbus Mono L", "Courier New", Courier, monospace;
+  font-size: 14px;
+  line-height: 1.375;
+  direction: ltr;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  -moz-tab-size: 4;
+  -o-tab-size: 4;
+  tab-size: 4;
+  -webkit-hyphens: none;
+  -ms-hyphens: none;
+  hyphens: none;
+  background: #f1efee;
+  color: #68615e;
+}
 
-	-moz-tab-size: 4;
-	-o-tab-size: 4;
-	tab-size: 4;
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+  text-shadow: none;
+  background: #e6e2e0;
+}
 
-	-webkit-hyphens: none;
-	-moz-hyphens: none;
-	-ms-hyphens: none;
-	hyphens: none;
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+  text-shadow: none;
+  background: #e6e2e0;
 }
 
 /* Code blocks */
 pre[class*="language-"] {
-	padding: 1em;
-	margin: .5em 0;
-	overflow: auto;
-	border-radius: 0.3em;
-}
-
-:not(pre) > code[class*="language-"],
-pre[class*="language-"] {
-	background: #272822;
+  padding: 1em;
+  margin: .5em 0;
+  overflow: auto;
 }
 
 /* Inline code */
 :not(pre) > code[class*="language-"] {
-	padding: .1em;
-	border-radius: .3em;
-	white-space: normal;
+  padding: .1em;
+  border-radius: .3em;
 }
 
 .token.comment,
 .token.prolog,
 .token.doctype,
 .token.cdata {
-	color: #8292a2;
+  color: #9c9491;
 }
 
 .token.punctuation {
-	color: #f8f8f2;
+  color: #68615e;
 }
 
 .token.namespace {
-	opacity: .7;
-}
-
-.token.property,
-.token.tag,
-.token.constant,
-.token.symbol,
-.token.deleted {
-	color: #f92672;
-}
-
-.token.boolean,
-.token.number {
-	color: #ae81ff;
-}
-
-.token.selector,
-.token.attr-name,
-.token.string,
-.token.char,
-.token.builtin,
-.token.inserted {
-	color: #a6e22e;
+  opacity: .7;
 }
 
 .token.operator,
+.token.boolean,
+.token.number {
+  color: #df5320;
+}
+
+.token.property {
+  color: #c38418;
+}
+
+.token.tag {
+  color: #407ee7;
+}
+
+.token.string {
+  color: #3d97b8;
+}
+
+.token.selector {
+  color: #6666ea;
+}
+
+.token.attr-name {
+  color: #df5320;
+}
+
 .token.entity,
 .token.url,
 .language-css .token.string,
-.style .token.string,
-.token.variable,
-.token.hvariable {
-	color: #f8f8f2;
+.style .token.string {
+  color: #3d97b8;
 }
 
-.token.atrule,
 .token.attr-value,
-.token.function,
-.token.class-name {
-	color: #e6db74;
+.token.keyword,
+.token.control,
+.token.directive,
+.token.unit {
+  color: #7b9726;
 }
 
-.token.keyword {
-	color: #66d9ef;
-}
-
+.token.statement,
 .token.regex,
-.token.important {
-	color: #fd971f;
+.token.atrule {
+  color: #3d97b8;
+}
+
+.token.placeholder,
+.token.variable {
+  color: #407ee7;
+}
+
+.token.deleted {
+  text-decoration: line-through;
+}
+
+.token.inserted {
+  border-bottom: 1px dotted #1b1918;
+  text-decoration: none;
+}
+
+.token.italic {
+  font-style: italic;
 }
 
 .token.important,
 .token.bold {
-	font-weight: bold;
+  font-weight: bold;
 }
-.token.italic {
-	font-style: italic;
+
+.token.important {
+  color: #f22c40;
 }
 
 .token.entity {
-	cursor: help;
+  cursor: help;
 }
 
+pre > code.highlight {
+  outline: 0.4em solid #f22c40;
+  outline-offset: .4em;
+}
+
+.line-numbers .line-numbers-rows {
+  border-right-color: #e6e2e0 !important;
+}
+
+.line-numbers-rows > span:before {
+  color: #a8a19f !important;
+}
+
+.line-highlight {
+  background: rgba(27, 25, 24, 0.2) !important;
+  background: -webkit-linear-gradient(left, rgba(27, 25, 24, 0.2) 70%, rgba(27, 25, 24, 0)) !important;
+  background: linear-gradient(to right, rgba(27, 25, 24, 0.2) 70%, rgba(27, 25, 24, 0)) !important;
+}
