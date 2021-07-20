@@ -11,6 +11,7 @@ import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
 import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, getHandle, putForceInSimulation, setForceAttr)
 import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
+import D3Tagless.Capabilities (setForcesByLabel)
 import Data.Array (intercalate)
 import Data.Array as A
 import Data.Foldable (traverse_)
@@ -67,6 +68,16 @@ simulationAddForce force@(Force label status t attrs h_) = do
       updatedSimulation = SS_ ss_ { forces = M.insert label force ss_.forces }
   -- if the force isn't active then we just keep it in map, with label as key
   modify_ (\s -> s { simulationState = updatedSimulation } )
+
+simulationToggleForce :: forall m row. 
+  (MonadState { simulationState :: SimulationState_ | row } m) =>
+  Label -> m Unit
+simulationToggleForce label = do
+  { simulationState: SS_ ss_ } <- get
+  case M.lookup label ss_.forces of
+    Nothing -> pure unit
+    (Just (Force _ ForceActive _ _ _))   -> simulationDisableForcesByLabel [ label ]
+    (Just (Force _ ForceDisabled _ _ _)) -> simulationEnableForcesByLabel [ label ]
 
 simulationDisableForcesByLabel :: forall m row. 
   (MonadState { simulationState :: SimulationState_ | row } m) =>

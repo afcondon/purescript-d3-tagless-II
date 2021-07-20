@@ -5,6 +5,8 @@ import Prelude
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, gets, modify_)
+import D3.Attributes.Instances (Label)
+import D3.Data.Tree (TreeLayout(..))
 import D3.Examples.Spago (treeReduction)
 import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
@@ -13,7 +15,7 @@ import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationStart)
 import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..))
 import D3Tagless.Block.Card as Card
-import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel)
+import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel, toggleForceByLabel)
 import D3Tagless.Instance.Simulation (runEffectSimulation)
 import Data.Array ((:))
 import Data.Either (hush)
@@ -37,14 +39,12 @@ import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
 import Unsafe.Coerce (unsafeCoerce)
 
-data PackageForce = PackageRing | PackageGrid | PackageFree
-data ModuleForce = ClusterPackage | ForceTree
+data Scene = PackageGrid | PackageGraph | ModuleTree TreeLayout
 data Action
   = Initialize
   | Finalize
-  | SetPackageForce PackageForce
-  | SetModuleForce ModuleForce
-  | ToggleLinks
+  | Scene Scene
+  | ToggleForce Label
   | ChangeSimConfig SimVariable
   | StopSim
   | StartSim
@@ -88,23 +88,23 @@ component = H.mkComponent
           ]
       , HH.div_
           [ Button.button
-              [ HE.onClick $ const (SetPackageForce PackageGrid) ]
-              [ HH.text "PackageGrid" ]
+              [ HE.onClick $ const (Scene PackageGrid) ]
+              [ HH.text "Package Grid" ]
           ]
       , HH.div_
           [ Button.button
-              [ HE.onClick $ const (SetPackageForce PackageRing) ]
-              [ HH.text "PackageRing" ]
+              [ HE.onClick $ const (Scene PackageGraph) ]
+              [ HH.text "Package Graph" ]
           ]
       , HH.div_
           [ Button.button
-              [ HE.onClick $ const (SetPackageForce PackageFree) ]
-              [ HH.text "PackageFree" ]
+              [ HE.onClick $ const (Scene $ ModuleTree Vertical) ]
+              [ HH.text "Module Tree" ]
           ]
       , HH.div_
           [ Button.button
-              [ HE.onClick $ const ToggleLinks ]
-              [ HH.text $ if state.showLinks then "Links" else "No links" ]
+              [ HE.onClick $ const (Scene $ ModuleTree Radial) ]
+              [ HH.text "Module Tree" ]
           ]
       ]
 
@@ -137,26 +137,18 @@ handleAction = case _ of
     runEffectSimulation (addForces initialForces)
 
   Finalize -> pure unit
-  
-  SetPackageForce PackageGrid -> do
-    runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid", "clusterx", "clustery" ], disable: ["packageOrbit"] }
+
+  Scene PackageGrid -> do
+    runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid", "clusterx", "clustery" ], disable: ["links", "packageOrbit"] }
     runEffectSimulation $ setConfigVariable (Alpha 0.8)
-  SetPackageForce PackageRing -> do
+  Scene PackageGraph -> do
     runEffectSimulation $ setForcesByLabel  { enable: [ "packageOrbit" ], disable: ["packageGrid", "clusterx", "clustery" ] }
     runEffectSimulation $ setConfigVariable (Alpha 0.8)
-  SetPackageForce PackageFree -> do
+  Scene (ModuleTree _) -> do
     runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["packageOrbit", "packageGrid", "clusterx", "clustery" ] }
     runEffectSimulation $ setConfigVariable (Alpha 0.8)
 
-  SetModuleForce moduleForce -> pure unit
-
-  ToggleLinks -> do
-    showLinks <- gets _.showLinks
-    let updatedShowLinks = spy "new showLinks setting: " $ not showLinks
-    if updatedShowLinks
-    then runEffectSimulation $ setForcesByLabel  { enable: ["links"], disable: [] }
-    else runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["links" ] }
-    modify_ (\s -> s { showLinks = updatedShowLinks })
+  ToggleForce label -> runEffectSimulation $ toggleForceByLabel label
 
   ChangeSimConfig c -> pure unit -- SetConfigVariable c
 
@@ -189,19 +181,25 @@ addTreeToModel rootName maybeModel = do
 -- | ============================================
 
 initialForces :: Array Force
-initialForces = [
-    enableForce $ createForce "collide" ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
-  , enableForce $ createForce "charge"  ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
-  , enableForce $ createForce "center"  ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
-  , enableForce $ createForce "x"       ForceX [ F.strength 0.1, F.x 0.0 ]
-  , enableForce $ createForce "y"       ForceY [ F.strength 0.1, F.y 0.0 ]
-  ,               createForce "clusterx"       ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
-  ,               createForce "clustery"       ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
-  , enableForce $ createForce "packageOrbit"   ForceRadial [ strengthFunction1, F.x 0.0, F.y 0.0, F.radius 500.0 ]
-  ,               createForce "packageGrid"    (ForceFixPositionXY gridXY gridFilter) [ ]
-  , enableForce $ createForce "unusedModuleOrbit" ForceRadial [ strengthFunction2, F.x 0.0, F.y 0.0, F.radius 600.0 ]
-]
+initialForces = enabledForces <> disabledForces
   where
+    enabledForces = 
+      enableForce <$> [
+        createForce "collide"           ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
+      , createForce "charge"            ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
+      , createForce "center"            ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
+      , createForce "x"                 ForceX        [ F.strength 0.1, F.x 0.0 ]
+      , createForce "y"                 ForceY        [ F.strength 0.1, F.y 0.0 ]
+      , createForce "packageOrbit"      ForceRadial   [ strengthFunction1, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+      , createForce "unusedModuleOrbit" ForceRadial   [ strengthFunction2, F.x 0.0, F.y 0.0, F.radius 700.0 ]
+      ]
+
+    disabledForces = [
+        createForce "clusterx"       ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
+      , createForce "clustery"       ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
+      , createForce "packageGrid"    (ForceFixPositionXY gridXY gridFilter) [ ]
+      ]
+
     strengthFunction1 = F.strength (\d -> if datum_.isPackage d      then 0.8 else 0.0)
     strengthFunction2 = F.strength (\d -> if datum_.isUnusedModule d then 0.8 else 0.0)
 
@@ -285,14 +283,14 @@ renderTableForces (SS_ simulation)  =
     Table.row_ <$> ( renderData <$> tableData )
 
   -- renderData :: ∀ p i. Force -> Array (HH.HTML p i)
-  renderData (Force l s t cs h_) =
+  renderData (Force label s t cs h_) =
     [ Table.cell_ [ Checkbox.checkbox_ 
                   [ HP.checked (s == ForceActive)
-                  , HE.onChecked $ const ToggleLinks
+                  , HE.onChecked $ const (ToggleForce label)
                   ] [] ]
     , Table.cell  [ css "text-left" ]
       [ HH.div_ [
-          HH.text l
+          HH.text label
         , HH.text $ show t -- use forceDescription t for more detailed explanation
         ]
       ]

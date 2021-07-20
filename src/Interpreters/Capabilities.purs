@@ -48,6 +48,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   removeAllForces      ::                m Unit
   addForces            :: Array Force -> m Unit
   addForce             :: Force       -> m Unit
+  toggleForceByLabel   :: Label            -> m Unit
   setForcesByLabel     :: ForceConfigLists -> m Unit
 
   -- management of data (nodes and links)
