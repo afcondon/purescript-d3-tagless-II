@@ -2,7 +2,7 @@ module D3.Examples.Tree.Configure where
 
 import Utility
 
-import D3.Attributes.Sugar (transform, viewBox)
+import D3.Attributes.Sugar 
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_, Selector)
 import D3.Examples.Spago.Model (tree_datum_)
@@ -19,8 +19,9 @@ import Data.Map (toUnfoldable)
 import Data.Tuple (Tuple(..), snd)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Math (pi)
+import Math (pi, abs)
 import Prelude (class Bind, Unit, bind, negate, pure, show, unit, max, ($), (*), (+), (-), (/), (<>), (==))
+import Debug (spy)
 
 -- TODO move this to a library, it really only needs the params for runPrinter to be completely generic
 -- | Evaluate the tree drawing script in the "printer" monad which will render it as a string
@@ -59,7 +60,7 @@ configureAndRunScript :: forall m selection.
 configureAndRunScript (Tuple width height ) model selector = 
   Tree.script { spacing, viewbox, selector, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_
   where
-    svg     = { width: width * 0.8, height: height * 0.8 }
+    svg     = { width, height }
 
     root    = hierarchyFromJSON_ model.json
     numberOfLevels = (hNodeHeight_ root) + 1.0
@@ -84,19 +85,20 @@ configureAndRunScript (Tuple width height ) model selector =
     laidOutRoot_ = layout `runLayoutFn_` root
 
     { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
-    xExtent = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
-    yExtent = yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
+    xExtent = abs $ xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
+    yExtent = abs $ yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
     maxExtent = max xExtent yExtent
+    radialRadius = yMax  -- on the radial tree the y is the distance from origin, ie yMax == radius
+    radialExtent = 2.0 * radialRadius 
 
     viewbox =
       case model.treeType, model.treeLayout of
-        Dendrogram, Horizontal -> [ viewBox (-10.0) (svg.height / 2.0) maxExtent maxExtent ] -- x and y are reversed in horizontal layouts
-        Dendrogram, Vertical   -> [ viewBox xMin 0.0 maxExtent maxExtent ]
-        Dendrogram, Radial     -> [ viewBox (-svg.width/2.0) (-svg.height/2.0) maxExtent maxExtent ]
-
-        TidyTree  , Horizontal -> [ viewBox (-10.0) (svg.height / 2.0) maxExtent maxExtent ] -- x and y are reversed in horizontal layouts
-        TidyTree  , Vertical   -> [ viewBox xMin 0.0 maxExtent maxExtent ]
-        TidyTree  , Radial     -> [ viewBox (-svg.width/2.0) (-svg.height/2.0) maxExtent maxExtent ]
+        _, Vertical   -> [ viewBox xMin (-yMax * 0.1) (xExtent * 1.2) (yMax * 1.2)
+                         , preserveAspectRatio $ AspectRatio XMid YMid Meet ]
+        _, Horizontal -> [ viewBox (-xExtent * 0.1)  xMin (yMax * 1.2)   (xExtent * 1.2) --  xMin ensures that tree
+                         , preserveAspectRatio $ AspectRatio XMin YMid Meet ] -- x and y are reversed in horizontal layouts
+        _, Radial     -> [ viewBox (-radialRadius * 1.2) (-radialRadius * 1.2)  (radialExtent * 1.2)    (radialExtent * 1.2)
+                         , preserveAspectRatio $ AspectRatio XMin YMin Meet ]
 
       
     linkPath =

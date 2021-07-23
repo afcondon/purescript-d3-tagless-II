@@ -641,17 +641,20 @@ exports.treeSetNodeSize_ = tree => widthHeight => tree.nodeSize(widthHeight)
 exports.treeSetSize_ = tree => widthHeight => tree.size(widthHeight)
 
 exports.treeMinMax_ = root => {
-  let x0 = Infinity
-  let x1 = -x0
-  let y0 = Infinity
-  let y1 = -y0
+  let max_x = -(Infinity) // start max with smallest possible number
+  let min_x = Infinity    // start min with the largest possible number
+  let max_y = -(Infinity)
+  let min_y = Infinity
   root.each(d => {
-    if (d.x > x1) x1 = d.x
-    if (d.x < x0) x0 = d.x
-    if (d.y > y1) y1 = d.y // don't know if we will ever need the u versions but we'll calc anyway
-    if (d.y < y0) y0 = d.y
-  })
-  return { xMin: x0, xMax: x1, yMin: y0, yMax: y1 }
+    if (d.x > max_x) max_x = d.x // if we find a value greater than current max, that's our new maximum
+    if (d.y > max_y) max_y = d.y 
+
+    if (d.x < min_x) min_x = d.x // if we find a value less than current min, that's our new minimum
+    if (d.y < min_y) min_y = d.y 
+
+    console.log(`node ${d} (${min_x}, ${min_y}) (${max_x}, ${max_y})`);
+  })      
+  return { xMin: min_x, xMax: max_x, yMin: min_y, yMax: max_y }
 }
 
 exports.linkHorizontal_ = d3
