@@ -1,6 +1,6 @@
 module D3.Examples.MetaTree where
 
-import D3.Attributes.Sugar (classed, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, x, y)
+import D3.Attributes.Sugar 
 import D3.Data.Tree (TreeModel, TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.MetaTree.Model (MetaTreeNode)
@@ -15,6 +15,7 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Prelude (class Bind, Unit, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>))
 import Utility (getWindowWidthHeight)
+import Math
 
 datum_ :: { 
   param1     :: Datum_ -> String
@@ -45,26 +46,28 @@ drawTree treeModel = liftEffect $ do
 -- | (could also be the basis for graphical editor of scripts / trees)
 treeScript :: forall m selection. Bind m => SelectionM selection m => 
   Tuple Number Number -> MetaTreeNode -> m selection
-treeScript (Tuple width height) tree = do
+treeScript (Tuple w h) tree = do
   let 
     -- configure dimensions
-    columns                    = 3.0  -- 3 columns, set in the grid CSS in index.html
-    gap                        = 10.0 -- 10px set in the grid CSS in index.html
-    svgWH                      = { width : ((width - ((columns - 1.0) * gap)) / columns)
-                                 , height: height / 2.0 } -- 2 rows
     numberOfLevels             = (hNodeHeight_ tree) + 1.0
-    spacing                    = { interChild: 120.0, interLevel: svgWH.height / numberOfLevels}
+    spacing                    = { interChild: (w/5.0), interLevel: h / numberOfLevels}
     layoutFn                   = (getLayout TidyTree) `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
     laidOutRoot_               = layoutFn `runLayoutFn_` tree
     { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
-    xExtent                    = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
-    yExtent                    = yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
+    xExtent = abs $ xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
+    yExtent = abs $ yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
+    vtreeYOffset = (abs (h - yExtent)) / 2.0
+    vtreeXOffset = pad xMin -- the left and right sides might be different so (xExtent / 2) would not necessarily be right
+    pad n = n * 1.2
 
 
   -- "script"
   root       <- attach ".svg-container"                           
-  svg        <- root `appendElement` (node Svg  [ viewBox (-svgWH.width / 2.0) (-80.0) 800.0 800.0 -- svgWH.width svgWH.height
-                                         , classed "metatree" ] )
+  svg        <- root `appendElement` (node Svg  [ viewBox vtreeXOffset (-vtreeYOffset) (pad xExtent) (pad yExtent)
+                                                , preserveAspectRatio $ AspectRatio XMin YMid Meet 
+                                                , width w
+                                                , height h
+                                                , classed "metatree" ] )
   container  <- svg  `appendElement` (node Group [ fontFamily      "sans-serif"
                                           , fontSize        18.0
                                           ])
