@@ -2,7 +2,7 @@ module D3.Examples.Tree.Script where
 
 import Prelude
 
-import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, x)
+import D3.Attributes.Sugar 
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (Datum_, Element(..), Selector)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
@@ -83,7 +83,8 @@ script :: forall m selection. Bind m => SelectionM selection m =>
   ScriptConfig -> FlareTreeNode ->  m selection
 script config tree = do
   root       <- attach config.selector  
-  svg        <- root D3.+ (node Svg (config.viewbox <> [ classed "tree"]))          
+  svg        <- root D3.+ (node Svg (config.viewbox <> 
+                                    [ classed "tree", width config.svg.width, height config.svg.height ]))          
   container  <- svg  D3.+ (node Group [ fontFamily      "sans-serif", fontSize 10.0 ])
   links      <- container D3.+  (node Group [ classed "links"] )
   nodes      <- container D3.+  (node Group [ classed "nodes"] )

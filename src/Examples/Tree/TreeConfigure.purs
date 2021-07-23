@@ -89,13 +89,18 @@ configureAndRunScript (Tuple width height ) model selector =
     yExtent = abs $ yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
     maxExtent = max xExtent yExtent
     radialRadius = yMax  -- on the radial tree the y is the distance from origin, ie yMax == radius
-    radialExtent = 2.0 * radialRadius 
+    radialExtent       = 2.0 * radialRadius
+    pad n = n * 1.2
+    halfpad n = n * 1.1
+    vtreeYOffset = (abs (height - yExtent)) / 2.0
+    vtreeXOffset = xMin -- the left and right sides might be different so (xExtent / 2) would not necessarily be right
+    htreeYOffset = xMin
 
     viewbox =
       case model.treeType, model.treeLayout of
-        _, Vertical   -> [ viewBox xMin (-yMax * 0.1) (xExtent * 1.2) (yMax * 1.2)
+        _, Vertical   -> [ viewBox vtreeXOffset (-vtreeYOffset) (pad xExtent) (pad yExtent) -- 
                          , preserveAspectRatio $ AspectRatio XMid YMid Meet ]
-        _, Horizontal -> [ viewBox (-xExtent * 0.1)  xMin (yMax * 1.2)   (xExtent * 1.2) --  xMin ensures that tree
+        _, Horizontal -> [ viewBox (-xExtent * 0.1) (pad htreeYOffset) (pad yExtent) (pad xExtent)
                          , preserveAspectRatio $ AspectRatio XMin YMid Meet ] -- x and y are reversed in horizontal layouts
         _, Radial     -> [ viewBox (-radialRadius * 1.2) (-radialRadius * 1.2)  (radialExtent * 1.2)    (radialExtent * 1.2)
                          , preserveAspectRatio $ AspectRatio XMin YMin Meet ]
