@@ -4,9 +4,14 @@ module D3.Data.Types where
 
 import Data.Time.Duration (Milliseconds)
 import Prelude (class Show)
+import Unsafe.Coerce (unsafeCoerce)
 
 foreign import data Datum_ :: Type
 foreign import data Index_ :: Type
+index_ToInt :: Index_ -> Int
+index_ToInt = unsafeCoerce
+intToIndex_ :: Int -> Index_
+intToIndex_ = unsafeCoerce
 
 foreign import data D3Data_       :: Type 
 foreign import data D3Selection_  :: Type

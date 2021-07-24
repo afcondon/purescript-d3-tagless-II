@@ -181,9 +181,9 @@ foreign import putForceInSimulation_        :: D3Simulation_ -> String -> D3Forc
 foreign import removeFixForceXY_            :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
 foreign import removeFixForceX_             :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
 foreign import removeFixForceY_             :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
-foreign import applyFixForceInSimulationXY_ :: D3Simulation_ -> String -> (Datum_ -> PointXY) -> (Datum_ -> Boolean) -> D3Simulation_ 
-foreign import applyFixForceInSimulationX_  :: D3Simulation_ -> String -> (Datum_ -> { x :: Number})  -> (Datum_ -> Boolean) -> D3Simulation_ 
-foreign import applyFixForceInSimulationY_  :: D3Simulation_ -> String -> (Datum_ -> { y :: Number})  -> (Datum_ -> Boolean) -> D3Simulation_ 
+foreign import applyFixForceInSimulationXY_ :: D3Simulation_ -> String -> (Datum_ -> Index_ -> PointXY) -> (Datum_ -> Boolean) -> D3Simulation_ 
+foreign import applyFixForceInSimulationX_  :: D3Simulation_ -> String -> (Datum_ -> Index_ -> { x :: Number})  -> (Datum_ -> Boolean) -> D3Simulation_ 
+foreign import applyFixForceInSimulationY_  :: D3Simulation_ -> String -> (Datum_ -> Index_ -> { y :: Number})  -> (Datum_ -> Boolean) -> D3Simulation_ 
 foreign import setAsNullForceInSimulation_  :: D3Simulation_ -> String -> D3Simulation_
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js Hierarchy module  *********************************************

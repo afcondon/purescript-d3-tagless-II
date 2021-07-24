@@ -16,7 +16,7 @@
     "tailwindcss": "^2.1.4"
   },
   "dependencies": {
-    "purescript": "0.14.2",
+    "purescript": "0.14.3",
     "spago": "^0.20.3",
     "yarn": "^1.22.10"
   }

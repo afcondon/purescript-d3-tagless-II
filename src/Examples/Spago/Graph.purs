@@ -1,5 +1,6 @@
 module D3.Examples.Spago.Graph where
 
+import D3.Attributes.Instances (Label)
 import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
 import D3.Data.Types (Datum_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (SpagoModel, cancelSpotlight_, datum_, link_, toggleSpotlight)
@@ -11,6 +12,8 @@ import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, addForce, addTickFunction, appendElement, attach, defaultLinkTick, on, setLinks, setNodes, simulationHandle, start, stop, (<+>))
 import D3Tagless.Capabilities as D3
 import D3Tagless.Instance.Simulation (exec_D3M_Simulation, run_D3M_Simulation)
+import Data.Map (Map)
+import Data.Map as M
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, ($), (/), (<<<))
@@ -25,7 +28,7 @@ script :: forall m selection.
   SelectionM selection m =>
   SimulationM selection m =>
   SpagoModel ->
-  m selection
+  m { nodesGroup :: selection, linksGroup :: selection } -- return the selections necessary for updates
 script model = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   simulation_ <- simulationHandle
@@ -60,4 +63,36 @@ script model = do
                          , scale  : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
                          , name   : "spago"
                          }
-  pure svg
+  pure { linksGroup, nodesGroup }
+
+
+
+
+
+scriptUpdate :: forall m selection. 
+  Bind m => 
+  MonadEffect m =>
+  SelectionM selection m =>
+  SimulationM selection m =>
+  SpagoModel ->
+  { nodesGroup :: selection, linksGroup :: selection } ->
+  m { nodesGroup :: selection, linksGroup :: selection }
+scriptUpdate model { nodesGroup, linksGroup } = do
+  (Tuple w h) <- liftEffect getWindowWidthHeight
+  simulation_ <- simulationHandle
+
+  let enterNodes = [ classed datum_.nodeClass, transform' datum_.translateNode, onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation_ d) ]
+      enterLinks = [ classed link_.linkClass ] -- default invisible in CSS unless marked "visible"
+
+  nodesInSimulation <- setNodes model.nodes
+  nodesSelection    <- nodesGroup <+> UpdateJoin Group nodesInSimulation { enter: enterNodes, update: [], exit: [] }
+
+  linksInSimulation <- setLinks model.links datum_.indexFunction
+  linksSelection    <- linksGroup <+> UpdateJoin Line linksInSimulation { enter: enterLinks, update: [], exit: [] }
+
+  circle <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
+  labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, text datum_.name]) 
+  
+  _ <- circle `on` Drag DefaultDrag
+  
+  pure { nodesGroup, linksGroup }

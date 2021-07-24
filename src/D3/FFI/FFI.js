@@ -520,13 +520,14 @@ exports.applyFixForceInSimulationXY_ = simulation => label => fn => filterFn => 
   // get nodes from simulation
   // set each node's fx,fy using f function
   let nodes = simulation.nodes()
-  for (let index = 0; index < nodes.length; index++) {
-    if (filterFn(nodes[index])) { // only fix nodes that this thing applies to
-      let gridXY = fn(nodes[index]) 
-      nodes[index].fx = gridXY.x
-      nodes[index].fy = gridXY.y;
+  let filteredNodes = nodes.filter(filterFn)
+  for (let index = 0; index < filteredNodes.length; index++) {
+      let gridXY = fn(filteredNodes[index])(index) 
+      console.log(`FixForce applies to ${filteredNodes[index].name} at index: ${index} and put it at (${gridXY.x},${gridXY.y})`);
+      filteredNodes[index].fx = gridXY.x
+      filteredNodes[index].fy = gridXY.y;
+      filteredNodes[index].fixIndex_ = index; // in case _other_ elements need to know the cluster point of this element, because it's index is a filtered index
     }
-  }
   // console.log(`fix force ${label} fixing position of nodes, filtered by ${filterFn} using function ${fn}`);
 }
 // applyFixForceInSimulationX_  :: D3Simulation_ -> String -> (Datum_ -> Number)  -> D3Simulation_ 

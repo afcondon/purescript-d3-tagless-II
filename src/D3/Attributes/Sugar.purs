@@ -40,6 +40,31 @@ viewBox xo yo w h = AttrT <<< ToAttribute "viewBox" $ toAttr vb
   where
     vb = intercalate " " $ show <$> [ xo, yo, w, h ]
 
+-- preserveAspectRatio as an attribute only applies to viewBox
+preserveAspectRatio :: AspectRatioSpec -> ChainableS
+preserveAspectRatio = AttrT <<< ToAttribute "preserveAspectRatio" <<< toAttr <<< show
+
+data AlignAspectRatio_X = XMin | XMid | XMax
+instance Show AlignAspectRatio_X where
+  show XMin = "xMin"
+  show XMid = "xMid"
+  show XMax = "xMax"
+data AlignAspectRatio_Y = YMin | YMid | YMax
+instance Show AlignAspectRatio_Y where -- YES!!! the Y is capitalized, where the x is not!!!!
+  show YMin = "YMin"
+  show YMid = "YMid"
+  show YMax = "YMax"
+data AspectRatioPreserve = Meet | Slice | None
+instance Show AspectRatioPreserve where
+  show Meet  = "meet"
+  show Slice = "slice"
+  show None  = "none"
+data AspectRatioSpec = AspectRatio AlignAspectRatio_X AlignAspectRatio_Y AspectRatioPreserve
+
+instance Show AspectRatioSpec where
+  show (AspectRatio x y None) =  "none"
+  show (AspectRatio x y p)    =  show x <> show y <> " " <> show p
+
 autoBox :: ChainableS
 autoBox = AttrT <<< ToAttribute "viewBox" $ toAttr vb
   where

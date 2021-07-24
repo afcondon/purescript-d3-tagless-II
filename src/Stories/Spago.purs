@@ -7,9 +7,10 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, gets, modify_)
 import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout(..))
+import D3.Data.Types (index_ToInt)
 import D3.Examples.Spago (treeReduction)
 import D3.Examples.Spago.Graph as Graph
-import D3.Examples.Spago.Model (SpagoModel, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
+import D3.Examples.Spago.Model (SpagoModel, cluster2Point, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationStart)
@@ -45,6 +46,7 @@ data Action
   | Finalize
   | Scene Scene
   | ToggleForce Label
+  | ChangeStyling String
   | ChangeSimConfig SimVariable
   | StopSim
   | StartSim
@@ -106,6 +108,16 @@ component = H.mkComponent
               [ HE.onClick $ const (Scene $ ModuleTree Radial) ]
               [ HH.text "Module Tree" ]
           ]
+      , HH.div_
+          [ Button.button
+              [ HE.onClick $ const (ChangeStyling "spotlight") ]
+              [ HH.text "Style Spotlight" ]
+          ]
+      , HH.div_
+          [ Button.button
+              [ HE.onClick $ const (ChangeStyling "cluster") ]
+              [ HH.text "Style cluster" ]
+          ]
       ]
 
   render :: State -> H.ComponentHTML Action () m
@@ -139,16 +151,19 @@ handleAction = case _ of
   Finalize -> pure unit
 
   Scene PackageGrid -> do
-    runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid", "clusterx", "clustery" ], disable: ["links", "packageOrbit"] }
+    runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid", "clusterx", "clustery", "collide" ]
+                                            , disable: ["x", "y", "center", "charge", "links", "unusedModuleOrbit", "packageOrbit"] }
     simulationStart
   Scene PackageGraph -> do
-    runEffectSimulation $ setForcesByLabel  { enable: [ "packageOrbit", "links" ], disable: ["packageGrid", "clusterx", "clustery" ] }
+    runEffectSimulation $ setForcesByLabel  { enable: [ "x", "y", "center", "charge", "packageOrbit", "links" ], disable: ["packageGrid", "clusterx", "clustery" ] }
     simulationStart
   Scene (ModuleTree _) -> do
     runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["packageOrbit", "packageGrid", "clusterx", "clustery" ] }
     simulationStart
 
   ToggleForce label -> runEffectSimulation $ toggleForceByLabel label
+
+  ChangeStyling style -> modify_ (\s -> s { svgClass = style })
 
   ChangeSimConfig c -> pure unit -- SetConfigVariable c
 
@@ -203,9 +218,7 @@ initialForces = enabledForces <> disabledForces
     strengthFunction1 = F.strength (\d -> if datum_.isPackage d      then 0.8 else 0.0)
     strengthFunction2 = F.strength (\d -> if datum_.isUnusedModule d then 0.8 else 0.0)
 
-    gridXY d = offsetXY { x: (-800.0), y: (-5000.0) } $
-               scalePoint 180.0 100.0 $
-               numberToGridPoint 10 (datum_.id d)
+    gridXY _ i = cluster2Point i
     gridFilter d = datum_.isPackage d
       
 
@@ -290,8 +303,7 @@ renderTableForces (SS_ simulation)  =
                   ] [] ]
     , Table.cell  [ css "text-left" ]
       [ HH.div_ [
-          HH.text label
-        , HH.text $ show t -- use forceDescription t for more detailed explanation
+          HH.text $ label <> " " <> show t -- use forceDescription t for more detailed explanation
         ]
       ]
     , Table.cell  [ css "text-left" ] [ HH.text "modules" ]
@@ -312,8 +324,7 @@ renderTableElements (SS_ simulation)  =
   where
   renderTable =
     Table.table_ $
-      [ renderHeader
-      ]
+      [ renderHeader ]
       <> renderBody
 
   renderHeader =
@@ -336,8 +347,7 @@ renderTableElements (SS_ simulation)  =
     [ Table.cell_ [ Checkbox.checkbox_ [] [] ]
     , Table.cell  [ css "text-left" ]
       [ HH.div_ [
-          HH.text l
-        , HH.text $ show t -- use forceDescription t for more detailed explanation
+          HH.text $ show t <> ": " <> l
         ]
       ]
     , Table.cell  [ css "text-left" ] [ HH.text "modules" ]

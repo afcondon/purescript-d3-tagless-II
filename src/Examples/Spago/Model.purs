@@ -3,7 +3,7 @@ module D3.Examples.Spago.Model where
 import Prelude
 
 import D3.Data.Tree (TreeLayout(..))
-import D3.Data.Types (D3Simulation_, Datum_, PointXY)
+import D3.Data.Types (D3Simulation_, Datum_, Index_, PointXY, index_ToInt, intToIndex_)
 import D3.Examples.Spago.Files (NodeType(..), Pinned(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
 import D3.FFI (hasChildren_)
@@ -19,6 +19,7 @@ import Data.Nullable (Nullable, null) as N
 import Data.Set as S
 import Data.Tuple (Tuple(..))
 import Debug (trace)
+import Effect.Class.Console (log)
 import Math (pi, sqrt, (%))
 import Math as Math
 import Type.Row (type (+))
@@ -68,11 +69,11 @@ link_ = {
   , linkClass: (\d -> show (unboxD3SimLink d).linktype)
 }
 
-cluster2Point :: Int -> PointXY
-cluster2Point v = 
-  offsetXY { x: (-800.0), y: (-5000.0) } $
-  scalePoint 180.0 100.0 $
-  numberToGridPoint 10 v
+cluster2Point :: Index_ -> PointXY
+cluster2Point i =  
+  scalePoint 200.0 200.0 $
+  offsetXY { x: (-4.5), y: (-2.5) } $ -- center the grid on the (already centered) origin
+  numberToGridPoint 10 (index_ToInt i)
 
 tree2Point :: Nullable Number -> Nullable Number -> Maybe PointXY
 tree2Point x' y' = do
@@ -100,7 +101,7 @@ datum_ = {
   , links         : (\d -> (unboxD3SimNode d).links)
   , connected     : (\d -> (unboxD3SimNode d).connected)
 
-  , clusterPoint  : (\d -> cluster2Point (unboxD3SimNode d).cluster)
+  , clusterPoint  : (\d -> cluster2Point (intToIndex_ $ (unboxD3SimNode d).cluster - 462)) -- TODO fix this dirty hack
   , clusterPointX : (\d -> _.x $ datum_.clusterPoint d)
   , clusterPointY : (\d -> _.y $ datum_.clusterPoint d)
   , treePoint     : (\d -> fromMaybe (datum_.clusterPoint d) (tree2Point (datum_.treeX d) (datum_.treeY d)))
@@ -201,6 +202,7 @@ numberToGridPoint columns i = do
     d = toNumber i
     x = (d % c)
     y = Math.floor (d / c)
+    -- _ = trace { numberToGridPoint: i, columns, x, y } \_ -> unit
   { x, y }
 
 scalePoint :: Number -> Number -> PointXY -> PointXY
@@ -218,40 +220,12 @@ offsetY yOffset xy = xy { y = xy.y + yOffset }
 pinNode :: SpagoSimNode -> PointXY -> SpagoSimNode
 pinNode (D3SimNode node) xy = D3SimNode (node { fx = notNull xy.x, fy = notNull xy.y } )
 
--- pinIfPackage :: SpagoSimNode -> SpagoSimNode
--- pinIfPackage n@(D3SimNode node) = do
---   let xy = offsetXY { x: (-900.0), y: (-5000.0) } $
---            scalePoint 180.0 100.0 $
---            numberToGridPoint 10 node.cluster
---       -- _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
---   case node.nodetype of
---     (IsModule _)  -> setXY   n xy -- only setting intial position of module
---     (IsPackage _) -> pinNode n xy -- but fixing the position of packages
-
--- gridifyByNodeID :: SpagoSimNode -> SpagoSimNode
--- gridifyByNodeID n@(D3SimNode node) = do
---   let xy = offsetXY { x: (-1000.0), y: (-500.0) } $
---            scalePoint 100.0 20.0 $
---            numberToGridPoint 10 node.id
---       _ =  trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
---   pinNode n xy
-
--- gridifyByCluster :: SpagoSimNode -> SpagoSimNode
--- gridifyByCluster n@(D3SimNode node) = do
---   let xy = offsetXY { x: (-800.0), y: (-5000.0) } $
---            scalePoint 180.0 100.0 $
---            numberToGridPoint 10 node.cluster
---       _ = trace { pin: node.name, cluster: node.cluster, x: xy.x, y: xy.y } \_ -> unit
---   pinNode n xy
-
 setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
 setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
 
 setXYExceptLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
 setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = D3SimNode node { connected = true }
 setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { treeX = notNull x, treeY = notNull y, connected = true, pinned = Forced })
-
-
 
 convertFilesToGraphModel :: forall r. 
   { body :: String | r } -> 

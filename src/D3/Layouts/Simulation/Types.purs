@@ -3,7 +3,7 @@ module D3.Simulation.Types where
 import Prelude
 
 import D3.Attributes.Instances (Attribute, Label)
-import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, PointXY)
+import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_, PointXY)
 import D3.Examples.Spago.Files (SpagoGraphLinkID)
 import D3.Examples.Spago.Model (SpagoSimNode)
 import D3.FFI (D3ForceHandle_, OpaqueLinkType_, OpaqueNodeType_, SimulationConfig_, forceLink_, initSimulation_)
@@ -82,9 +82,9 @@ data ForceType =
   | ForceRadial                                    -- strength, radius, x, y
   -- | ForceLink (forall r. (Array (D3_Link NodeID r))) (forall d. Datum_ -> d)       -- strength, id, distance, iterations, links
   | ForceLink -- data for links can _only_ be provided when setting links in a simulation, initial links array will always be []
-  | ForceFixPositionXY (Datum_ -> { x :: Number, y :: Number }) (Datum_ -> Boolean) -- function is static, provided to constructor
-  | ForceFixPositionX  (Datum_ -> { x :: Number }) (Datum_ -> Boolean) 
-  | ForceFixPositionY  (Datum_ -> { y :: Number }) (Datum_ -> Boolean) 
+  | ForceFixPositionXY (Datum_ -> Index_ -> { x :: Number, y :: Number }) (Datum_ -> Boolean) -- function is static, provided to constructor
+  | ForceFixPositionX  (Datum_ -> Index_ -> { x :: Number }) (Datum_ -> Boolean) 
+  | ForceFixPositionY  (Datum_ -> Index_ -> { y :: Number }) (Datum_ -> Boolean) 
                                                    -- TODO need something to hold extra custom force config, perhaps?
   | CustomForce                                    -- ???
 
