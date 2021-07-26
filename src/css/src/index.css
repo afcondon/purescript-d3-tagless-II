@@ -1,4 +1,5 @@
-@import "test-nest.css";
+@import "spago-cluster.css";
+@import "spago-graph.css";
 @import "tailwindcss/base";
 @import "ocelot-1.css";
 @import "fonts.css";
@@ -6,4 +7,4 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 @import "ocelot-2.css";
-@import "test-apply.css";
+@import "composite-rules.css";

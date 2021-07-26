@@ -144,7 +144,14 @@ datum_ = {
               (IsPackage _) -> false
               (IsModule _)  -> if datum_.connected d 
                                then false
-                               else true  -- this should put the only unused modules in a different orbit from the packages
+                               else true
+              )
+  , isUsedModule:
+      (\d -> case datum_.nodetype d of
+              (IsPackage _) -> false
+              (IsModule _)  -> if datum_.connected d 
+                               then true
+                               else false
               )
 }
 

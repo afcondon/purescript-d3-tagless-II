@@ -523,7 +523,7 @@ exports.applyFixForceInSimulationXY_ = simulation => label => fn => filterFn => 
   let filteredNodes = nodes.filter(filterFn)
   for (let index = 0; index < filteredNodes.length; index++) {
       let gridXY = fn(filteredNodes[index])(index) 
-      console.log(`FixForce applies to ${filteredNodes[index].name} at index: ${index} and put it at (${gridXY.x},${gridXY.y})`);
+      // console.log(`FixForce applies to ${filteredNodes[index].name} at index: ${index} and put it at (${gridXY.x},${gridXY.y})`);
       filteredNodes[index].fx = gridXY.x
       filteredNodes[index].fy = gridXY.y;
       filteredNodes[index].fixIndex_ = index; // in case _other_ elements need to know the cluster point of this element, because it's index is a filtered index

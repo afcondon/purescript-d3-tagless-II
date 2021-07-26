@@ -41,9 +41,11 @@ disableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
 disableByLabels simulation labels force@(Force label _ t cs h_) =
   if label `elem` labels
   then do
-    let _ = trace { forceToRemove: label } \_ -> removeForceFromSimulation force simulation
+    let _ = -- trace { forceToRemove: label } \_ -> 
+            removeForceFromSimulation force simulation
     Force label ForceDisabled t cs h_
-  else trace { forceKept: label } \_ -> force
+  else -- trace { forceKept: label } \_ -> 
+       force
 
 enableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
 enableByLabels simulation labels force@(Force label _ t cs h_) = 

@@ -1,7 +1,4 @@
 
-div.svg-container svg.gup {
-  & text { font-size: 48px; font-family: monospace; }
-}
 /* the svg-container's class is set by Halogen, thus controlling look of the visualization */
 div.svg-container.cluster { 
   & svg {

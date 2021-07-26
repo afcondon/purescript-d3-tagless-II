@@ -1,7 +1,3 @@
-
-  div.svg-container svg.gup text { font-size: 48px; font-family: monospace;
-  }
-
 /* the svg-container's class is set by Halogen, thus controlling look of the visualization */
 
 div.svg-container.cluster svg.spotlight g.package text {
@@ -81,6 +77,53 @@ div.svg-container.cluster svg g.nodes g.spotlight circle {
           stroke-dasharray: 4 1;
           stroke: black;
         }
+
+/* the svg-container's class is set by Halogen, thus controlling look of the visualization */
+
+div.svg-container.graph svg g.links line {
+      visibility: hidden;
+    }
+
+div.svg-container.graph svg g.nodes text {
+        font: 12px sans-serif;
+        text-anchor: middle;
+      }
+
+div.svg-container.graph svg g.nodes g.module text {
+          visibility: hidden;
+          opacity: 0.5;
+        }
+
+div.svg-container.graph svg g.nodes g.module circle {
+          visibility: visible;
+          fill-opacity: 0.2;
+        }
+
+div.svg-container.graph svg g.nodes g.module:hover text {
+            visibility: visible;
+            fill: black;
+            opacity: 0.8;
+          }
+
+div.svg-container.graph svg g.nodes g.module:hover circle {
+            visibility: visible;
+          }
+
+div.svg-container.graph svg g.nodes g.package circle {
+          visibility: visible;
+        }
+
+div.svg-container.graph svg g.nodes g.package text {
+          visibility: hidden;
+          fill: black;
+          font-size: 24px;
+          opacity: 0.5;
+          text-anchor: middle;
+        }
+
+div.svg-container.graph svg g.nodes g.package:hover text {
+            visibility: visible;
+          }
 
 /* ! tailwindcss v2.1.4 | MIT License | https://tailwindcss.com */
 

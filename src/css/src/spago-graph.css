@@ -1,0 +1,52 @@
+/* the svg-container's class is set by Halogen, thus controlling look of the visualization */
+div.svg-container.graph { 
+  & svg {
+    & g.links line {
+      visibility: hidden;
+    }
+
+    & g.nodes {
+      & text {
+        font: 12px sans-serif;
+        text-anchor: middle;
+      }
+      & g.module {
+        & text {
+          visibility: hidden;
+          opacity: 0.5;
+        }
+        & circle {
+          visibility: visible;
+          fill-opacity: 0.2;
+        }
+        &:hover {
+          & text {
+            visibility: visible;
+            fill: black;
+            opacity: 0.8;
+          }
+          & circle {
+            visibility: visible;
+          }
+        }
+      }
+      & g.package {
+        & circle {
+          visibility: visible;
+        }
+        & text {
+          visibility: hidden;
+          fill: black;
+          font-size: 24px;
+          opacity: 0.5;
+          text-anchor: middle;
+        }
+        &:hover {
+          & text {
+            visibility: visible;
+          }
+        }
+      }
+    }
+  }
+}

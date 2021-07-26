@@ -101,22 +101,12 @@ component = H.mkComponent
       , HH.div_
           [ Button.button
               [ HE.onClick $ const (Scene $ ModuleTree Vertical) ]
-              [ HH.text "Module Tree" ]
+              [ HH.text "Vertical Tree" ]
           ]
       , HH.div_
           [ Button.button
               [ HE.onClick $ const (Scene $ ModuleTree Radial) ]
-              [ HH.text "Module Tree" ]
-          ]
-      , HH.div_
-          [ Button.button
-              [ HE.onClick $ const (ChangeStyling "spotlight") ]
-              [ HH.text "Style Spotlight" ]
-          ]
-      , HH.div_
-          [ Button.button
-              [ HE.onClick $ const (ChangeStyling "cluster") ]
-              [ HH.text "Style cluster" ]
+              [ HH.text "Radial Tree" ]
           ]
       ]
 
@@ -151,17 +141,25 @@ handleAction = case _ of
   Finalize -> pure unit
 
   Scene PackageGrid -> do
-    runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid", "clusterx", "clustery", "collide" ]
-                                            , disable: ["x", "y", "center", "charge", "links", "unusedModuleOrbit", "packageOrbit"] }
+    modify_ (\s -> s { svgClass = "cluster" })
+    runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid", "clusterx", "clustery", "collide1", "collide2" ]
+                                            , disable: ["x", "y", "center", "collide1", "charge", "links", "moduleOrbit1", "moduleOrbit2", "packageOrbit"] }
     simulationStart
+
   Scene PackageGraph -> do
-    runEffectSimulation $ setForcesByLabel  { enable: [ "x", "y", "center", "charge", "packageOrbit", "links" ], disable: ["packageGrid", "clusterx", "clustery" ] }
+    modify_ (\s -> s { svgClass = "graph" })
+    runEffectSimulation $ setForcesByLabel  { enable: [ "x", "y", "center", "charge", "moduleOrbit2", "moduleOrbit1", "links", "collide2"]
+                                            , disable: ["packageOrbit", "packageGrid", "collide1", "clusterx", "clustery" ] }
     simulationStart
+
   Scene (ModuleTree _) -> do
+    modify_ (\s -> s { svgClass = "tree" })
     runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["packageOrbit", "packageGrid", "clusterx", "clustery" ] }
     simulationStart
 
-  ToggleForce label -> runEffectSimulation $ toggleForceByLabel label
+  ToggleForce label -> do
+    runEffectSimulation $ toggleForceByLabel label
+    simulationStart
 
   ChangeStyling style -> modify_ (\s -> s { svgClass = style })
 
@@ -200,23 +198,26 @@ initialForces = enabledForces <> disabledForces
   where
     enabledForces = 
       enableForce <$> [
-        createForce "collide"           ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
-      , createForce "charge"            ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
-      , createForce "center"            ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
-      , createForce "x"                 ForceX        [ F.strength 0.1, F.x 0.0 ]
-      , createForce "y"                 ForceY        [ F.strength 0.1, F.y 0.0 ]
-      , createForce "packageOrbit"      ForceRadial   [ strengthFunction1, F.x 0.0, F.y 0.0, F.radius 600.0 ]
-      , createForce "unusedModuleOrbit" ForceRadial   [ strengthFunction2, F.x 0.0, F.y 0.0, F.radius 700.0 ]
+        createForce "collide1"     ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
+      , createForce "charge"       ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
+      , createForce "center"       ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
+      , createForce "x"            ForceX        [ F.strength 0.1, F.x 0.0 ]
+      , createForce "y"            ForceY        [ F.strength 0.1, F.y 0.0 ]
+      , createForce "packageOrbit" ForceRadial   [ F.strength onlyPackages, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+      , createForce "moduleOrbit1" ForceRadial   [ F.strength onlyUnusedModules, F.x 0.0, F.y 0.0, F.radius 700.0 ]
       ]
 
     disabledForces = [
-        createForce "clusterx"       ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
-      , createForce "clustery"       ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
-      , createForce "packageGrid"    (ForceFixPositionXY gridXY gridFilter) [ ]
+        createForce "collide2"     ForceCollide  [ F.strength 1.0, F.radius datum_.radius, F.iterations 1.0 ]
+      , createForce "clusterx"     ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
+      , createForce "clustery"     ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
+      , createForce "packageGrid"  (ForceFixPositionXY gridXY gridFilter) [ ]
+      , createForce "moduleOrbit2" ForceRadial [ F.strength onlyUsedModules, F.x 0.0, F.y 0.0, F.radius 600.0 ]
       ]
 
-    strengthFunction1 = F.strength (\d -> if datum_.isPackage d      then 0.8 else 0.0)
-    strengthFunction2 = F.strength (\d -> if datum_.isUnusedModule d then 0.8 else 0.0)
+    onlyPackages = (\d -> if datum_.isPackage d then 0.8 else 0.0)
+    onlyUsedModules = (\d -> if datum_.isUsedModule d then 0.8 else 0.0)
+    onlyUnusedModules = (\d -> if datum_.isUnusedModule d then 0.8 else 0.0)
 
     gridXY _ i = cluster2Point i
     gridFilter d = datum_.isPackage d
