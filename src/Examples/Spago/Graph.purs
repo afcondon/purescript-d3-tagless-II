@@ -44,7 +44,7 @@ script model = do
                                                                    , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation_ d) ]
 
   linksGroup        <- svg  D3.+ (node Group  [ classed "links", strokeColor "#999" ])
-  linksInSimulation <- setLinks model.links datum_.indexFunction
+  linksInSimulation <- setLinks model.links.treeLinks datum_.indexFunction
   linksSelection    <- linksGroup <+> Join Line linksInSimulation [ classed link_.linkClass ] -- default invisible in CSS unless marked "visible"
 
   addTickFunction "nodes" $ Step nodesSelection  [ transform' datum_.translateNode ]
@@ -87,7 +87,7 @@ scriptUpdate model { nodesGroup, linksGroup } = do
   nodesInSimulation <- setNodes model.nodes
   nodesSelection    <- nodesGroup <+> UpdateJoin Group nodesInSimulation { enter: enterNodes, update: [], exit: [] }
 
-  linksInSimulation <- setLinks model.links datum_.indexFunction
+  linksInSimulation <- setLinks model.links.allLinks datum_.indexFunction
   linksSelection    <- linksGroup <+> UpdateJoin Line linksInSimulation { enter: enterLinks, update: [], exit: [] }
 
   circle <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 

@@ -4,12 +4,12 @@ import Prelude
 
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, Index_, PointXY, index_ToInt, intToIndex_)
-import D3.Examples.Spago.Files (NodeType(..), Pinned(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
+import D3.Examples.Spago.Files (LinkType(..), NodeType(..), Pinned(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
 import D3.FFI (hasChildren_)
-import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
+import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Link(..), D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_)
-import Data.Array (foldl)
+import Data.Array (filter, foldl)
 import Data.Graph (Graph, fromMap)
 import Data.Int (toNumber)
 import Data.Map as M
@@ -123,6 +123,9 @@ datum_ = {
         then 10.0
         else datum_.radius d
       )
+  , collideRadiusBig:
+      (\d -> (datum_.radius d) + 30.0
+      )
   , nodeClass:
       (\d -> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d))
   , colorByGroup:
@@ -161,8 +164,12 @@ type SpagoTreeNode    = D3TreeRow       (EmbeddedData SpagoNodeData + ())
 type SpagoSimNode     = D3SimulationRow (             SpagoNodeRow  + D3_FocusXY + D3_Radius + ()) -- note we've woven in focusXY so that we can cluster the nodes
 
 type SpagoModel = { 
-    links           :: Array SpagoGraphLinkID  -- each ID will get swizzled for a SpagoGraphLinkObj_ when simulation initialized
-  , prunedTreeLinks :: Array SpagoGraphLinkID  -- there are so many of these that we only use them when hovering enabled
+    links           :: {
+        allLinks     :: Array SpagoGraphLinkID
+      , treeLinks    :: Array SpagoGraphLinkID  -- each ID will get swizzled for a SpagoGraphLinkObj_ when simulation initialized
+      , prunedLinks  :: Array SpagoGraphLinkID  -- there are so many of these that we only use them when hovering enabled
+      , packageLinks :: Array SpagoGraphLinkID
+    }
   , nodes           :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
   , graph           :: Graph NodeID SpagoNodeData
   , tree            :: Maybe (Tuple NodeID SpagoTreeNode)
@@ -248,11 +255,15 @@ makeSpagoGraphModel json = do
   let { nodes, links, name2ID, id2Name, id2Node, id2Package, id2LOC, sourceLinksMap } 
         = getGraphJSONData json
 
-  { links
+  { links : {
+      allLinks: links
+    , treeLinks: []
+    , prunedLinks: []
+    , packageLinks: filter (\(D3_Link l) -> l.linktype == P2P) links
+  }
   , nodes    : (upgradeSpagoNodeData sourceLinksMap) <$> nodes
   , graph    : makeGraph nodes
   , tree     : Nothing  -- not present in the JSON, has to be calculated, if possible
-  , prunedTreeLinks: [] -- not present in the JSON, has to be calculated, if possible
   , maps     : { name2ID
                , id2Name
                , id2Node
@@ -281,5 +292,7 @@ toggleSpotlight event simulation d = toggleSpotlight_ event simulation nodeID no
     nodeID   = datum_.id d
     nodeType = show $ datum_.nodetype d
 
+-- foreign functions to implement Spotlight, essentially because it's easier to prototype some 
+-- behaviors in D3js while deciding whether/how to express them in PureScript
 foreign import toggleSpotlight_ :: Event -> D3Simulation_ -> NodeID -> String -> Unit
 foreign import cancelSpotlight_ :: D3Simulation_ -> Unit

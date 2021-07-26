@@ -58,6 +58,9 @@ type Spago_Cooked_JSON    = {
 
 data PackageRelation = InPackage | OutPackage
 data LinkType        = M2M_Tree | M2M_Graph | P2P | M2P PackageRelation
+derive instance Eq PackageRelation
+derive instance Eq LinkType
+
 data PackageInfo     = PackageInfo { version :: String, repo :: String }
 type ModulePath      = String
 data NodeType        = IsModule ModulePath | IsPackage PackageInfo

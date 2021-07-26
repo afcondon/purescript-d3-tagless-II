@@ -80,9 +80,20 @@ div.svg-container.cluster svg g.nodes g.spotlight circle {
 
 /* the svg-container's class is set by Halogen, thus controlling look of the visualization */
 
-div.svg-container.graph svg g.links line {
-      visibility: hidden;
-    }
+div.svg-container.graph svg g.links line.M2M-Graph {
+        stroke: red;
+        visibility: hidden;
+      }
+
+div.svg-container.graph svg g.links line.P2P {
+        stroke: green;
+        visibility: visible;
+      }
+
+div.svg-container.graph svg g.links line.in-package.dependency {
+        stroke: blue;
+        visibility: hidden;
+      }
 
 div.svg-container.graph svg g.nodes text {
         font: 12px sans-serif;

@@ -8,15 +8,15 @@ import Control.Monad.State (class MonadState, gets, modify_)
 import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (index_ToInt)
-import D3.Examples.Spago (treeReduction)
 import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, cluster2Point, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
+import D3.Examples.Spago.Tree (treeReduction)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
-import D3.Simulation.Functions (simulationStart)
+import D3.Simulation.Functions (simulationSetLinks, simulationStart)
 import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..))
 import D3Tagless.Block.Card as Card
-import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel, toggleForceByLabel)
+import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel, setLinks, toggleForceByLabel)
 import D3Tagless.Instance.Simulation (runEffectSimulation)
 import Data.Array ((:))
 import Data.Either (hush)
@@ -55,8 +55,9 @@ type Input = SimulationState_
   
 type State = {
     simulationState :: SimulationState_
-  , svgClass :: String -- by controlling the class that is on the svg we can completely change the look of the vis (and not have to think about this at D3 level)
-  , showLinks :: Boolean
+  , svgClass        :: String -- by controlling the class that is on the svg we can completely change the look of the vis (and not have to think about this at D3 level)
+  , showLinks       :: Boolean
+  , model           :: Maybe SpagoModel -- the model should actually be a component, probably a hook so that it can be constructed by this component and not be a Maybe
 }
 
 component :: forall query output m. MonadAff m => H.Component query Input output m
@@ -71,7 +72,7 @@ component = H.mkComponent
   where
 
   initialState :: Input -> State
-  initialState simulation = { simulationState: simulation, svgClass: "cluster", showLinks: true }
+  initialState simulation = { simulationState: simulation, svgClass: "cluster", showLinks: true, model: Nothing }
 
   renderSimControls state =
     HH.div
@@ -135,22 +136,29 @@ handleAction = case _ of
     (model :: Maybe SpagoModel) <- H.liftAff getModel
     case model of
       Nothing      -> pure $ unsafeCoerce unit -- TODO just temporary, pull out the script runner to fn that returns unit
-      (Just graph) -> runEffectSimulation (Graph.script graph)
-    runEffectSimulation (addForces initialForces)
+      (Just graph) -> do
+        runEffectSimulation (Graph.script graph)
+        H.modify_ (\s -> s { model = Just graph })
+        runEffectSimulation (addForces initialForces)
 
   Finalize -> pure unit
 
   Scene PackageGrid -> do
     modify_ (\s -> s { svgClass = "cluster" })
     runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid", "clusterx", "clustery", "collide1", "collide2" ]
-                                            , disable: ["x", "y", "center", "collide1", "charge", "links", "moduleOrbit1", "moduleOrbit2", "packageOrbit"] }
+                                            , disable: ["x", "y", "center", "collide1", "charge2", "charge1", "links", "moduleOrbit1", "moduleOrbit2", "packageOrbit"] }
     simulationStart
 
   Scene PackageGraph -> do
     modify_ (\s -> s { svgClass = "graph" })
-    runEffectSimulation $ setForcesByLabel  { enable: [ "x", "y", "center", "charge", "moduleOrbit2", "moduleOrbit1", "links", "collide2"]
-                                            , disable: ["packageOrbit", "packageGrid", "collide1", "clusterx", "clustery" ] }
-    simulationStart
+    state <- H.get
+    case state.model of
+      Nothing -> pure unit
+      (Just graph) -> do
+        runEffectSimulation $ setLinks graph.links.packageLinks datum_.indexFunction
+        runEffectSimulation $ setForcesByLabel  { enable: [ "x", "y", "center", "charge2", "moduleOrbit2", "moduleOrbit1", "links", "collide2"]
+                                                , disable: ["charge1", "packageOrbit", "packageGrid", "collide1", "clusterx", "clustery" ] }
+        simulationStart
 
   Scene (ModuleTree _) -> do
     modify_ (\s -> s { svgClass = "tree" })
@@ -199,7 +207,7 @@ initialForces = enabledForces <> disabledForces
     enabledForces = 
       enableForce <$> [
         createForce "collide1"     ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
-      , createForce "charge"       ForceManyBody [ F.strength (-60.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
+      , createForce "charge1"      ForceManyBody [ F.strength (-30.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
       , createForce "center"       ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
       , createForce "x"            ForceX        [ F.strength 0.1, F.x 0.0 ]
       , createForce "y"            ForceY        [ F.strength 0.1, F.y 0.0 ]
@@ -208,7 +216,8 @@ initialForces = enabledForces <> disabledForces
       ]
 
     disabledForces = [
-        createForce "collide2"     ForceCollide  [ F.strength 1.0, F.radius datum_.radius, F.iterations 1.0 ]
+        createForce "collide2"     ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadiusBig, F.iterations 1.0 ]
+      , createForce "charge2"      ForceManyBody [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 100.0 ]
       , createForce "clusterx"     ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
       , createForce "clustery"     ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
       , createForce "packageGrid"  (ForceFixPositionXY gridXY gridFilter) [ ]
