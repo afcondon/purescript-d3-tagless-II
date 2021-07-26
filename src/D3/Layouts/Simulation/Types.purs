@@ -107,7 +107,8 @@ data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
   , forces        :: M.Map Label Force
   , ticks         :: M.Map Label (Step D3Selection_)
 
-  , nodes           :: Array OpaqueNodeType_
+  , nodes         :: Array OpaqueNodeType_
+  , selections    :: M.Map Label D3Selection_
 
   , alpha         :: Number
   , alphaTarget   :: Number
@@ -129,6 +130,7 @@ initialSimulationState id = SS_
     , running      : defaultConfigSimulation.running
     , forces       : M.empty
     , ticks        : M.empty
+    , selections   : M.empty
   }
   where
     _ = trace { simulation: "initialized" } \_ -> unit

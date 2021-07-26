@@ -168,6 +168,21 @@ simulationSetLinks links keyFn = do
   simulationAddForce newLinksForce
   pure (unsafeCoerce updatedLinks) -- TODO notice the coerce here
 
+simulationAddSelection :: forall m row.  -- NB not polymorphic in selection because SimulationState_ isn't
+  (MonadState { simulationState :: SimulationState_ | row } m) =>
+  Label -> D3Selection_ -> m Unit
+simulationAddSelection label selection = do
+  { simulationState: SS_ ss_} <- get
+  modify_ (\s -> s { simulationState = (SS_ ss_ { selections = M.insert label selection ss_.selections } )})
+
+simulationGetSelection :: forall m row. 
+  (MonadState { simulationState :: SimulationState_ | row } m) =>
+  Label -> m (Maybe D3Selection_)
+simulationGetSelection label = do
+  { simulationState: SS_ ss_} <- get
+  pure $ M.lookup label ss_.selections
+
+
 simulationCreateTickFunction :: forall selection row m. 
   (MonadState { simulationState :: SimulationState_ | row } m) =>
   Label -> Step selection -> m Unit

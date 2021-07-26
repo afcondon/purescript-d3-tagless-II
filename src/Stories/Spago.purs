@@ -7,7 +7,7 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, gets, modify_)
 import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout(..))
-import D3.Data.Types (index_ToInt)
+import D3.Data.Types (D3Selection_, index_ToInt)
 import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, cluster2Point, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.Examples.Spago.Tree (treeReduction)
@@ -58,6 +58,7 @@ type State = {
   , svgClass        :: String -- by controlling the class that is on the svg we can completely change the look of the vis (and not have to think about this at D3 level)
   , showLinks       :: Boolean
   , model           :: Maybe SpagoModel -- the model should actually be a component, probably a hook so that it can be constructed by this component and not be a Maybe
+  , selections      :: Array D3Selection_
 }
 
 component :: forall query output m. MonadAff m => H.Component query Input output m
@@ -72,7 +73,7 @@ component = H.mkComponent
   where
 
   initialState :: Input -> State
-  initialState simulation = { simulationState: simulation, svgClass: "cluster", showLinks: true, model: Nothing }
+  initialState simulation = { simulationState: simulation, svgClass: "cluster", showLinks: true, model: Nothing, selections: [] }
 
   renderSimControls state =
     HH.div
@@ -155,7 +156,7 @@ handleAction = case _ of
     case state.model of
       Nothing -> pure unit
       (Just graph) -> do
-        runEffectSimulation $ setLinks graph.links.packageLinks datum_.indexFunction
+        runEffectSimulation (Graph.packageLinks graph)
         runEffectSimulation $ setForcesByLabel  { enable: [ "x", "y", "center", "charge2", "moduleOrbit2", "moduleOrbit1", "links", "collide2"]
                                                 , disable: ["charge1", "packageOrbit", "packageGrid", "collide1", "clusterx", "clustery" ] }
         simulationStart

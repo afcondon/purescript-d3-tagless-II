@@ -5,6 +5,7 @@ import D3.Data.Types (D3Simulation_, Datum_, Index_, Selector)
 import D3.Node (D3_Link, D3_SimulationNode)
 import D3.Selection (Behavior, ChainableS, D3_Node, Join)
 import D3.Simulation.Types (Force, SimVariable, Step)
+import Data.Maybe (Maybe)
 import Prelude (class Monad, Unit)
 
 -- TODO see whether it can be useful to extend the interpreter here, for different visualization types
@@ -54,6 +55,10 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- management of data (nodes and links)
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
   setLinks :: forall id d r. Array (D3_Link id r)    -> (Datum_ -> id) -> m (Array (D3_Link d r)) -- we require a key function for links
+
+  -- management of selections
+  addSelection :: Label -> selection -> m Unit
+  getSelection :: Label -> m (Maybe selection)
   
   -- adding functions that occur on every tick of the simulation clock
   addTickFunction    :: Label -> Step selection -> m Unit 

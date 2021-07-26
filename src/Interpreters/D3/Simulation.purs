@@ -80,6 +80,9 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   setNodes nodes              = simulationSetNodes nodes
   setLinks links keyFn        = simulationSetLinks links (unsafeCoerce keyFn)
 
+  addSelection label selection = simulationAddSelection label selection
+  getSelection label           = simulationGetSelection label
+
   addTickFunction label (StepTransformFFI selection function) = do
     -- TODO this would be the more efficient but less attractive route to defining a Tick function
     pure unit
