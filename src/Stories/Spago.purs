@@ -146,8 +146,8 @@ handleAction = case _ of
 
   Scene PackageGrid -> do
     modify_ (\s -> s { svgClass = "cluster" })
-    runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid", "clusterx", "clustery", "collide1", "collide2" ]
-                                            , disable: ["x", "y", "center", "collide1", "charge2", "charge1", "links", "moduleOrbit1", "moduleOrbit2", "packageOrbit"] }
+    runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid", "clusterx", "clustery", "collide1" ]
+                                            , disable: ["x", "y", "center", "collide2", "charge2", "charge1", "links", "moduleOrbit1", "moduleOrbit2", "packageOrbit"] }
     simulationStart
 
   Scene PackageGraph -> do

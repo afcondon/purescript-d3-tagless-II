@@ -89,5 +89,10 @@ packageLinks model = do
     Nothing -> pure unit
     (Just linksGroup) -> do
       linksSelection <- linksGroup <+> UpdateJoin Line linksInSimulation { enter: enterLinks, update: [], exit: [ remove ] }
+      addTickFunction "links" $ Step linksSelection [ x1 (_.x <<< link_.source)
+                                                    , y1 (_.y <<< link_.source)
+                                                    , x2 (_.x <<< link_.target)
+                                                    , y2 (_.y <<< link_.target)
+                                                    ]
       addSelection "linksSelection" linksSelection
   
