@@ -8,9 +8,11 @@ import Control.Monad.State (class MonadState, gets, modify_)
 import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, index_ToInt)
+import D3.Examples.Spago.Files (NodeType(..))
 import D3.Examples.Spago.Graph as Graph
-import D3.Examples.Spago.Model (SpagoModel, cluster2Point, convertFilesToGraphModel, datum_, numberToGridPoint, offsetXY, scalePoint)
+import D3.Examples.Spago.Model (SpagoModel, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, numberToGridPoint, offsetXY, scalePoint)
 import D3.Examples.Spago.Tree (treeReduction)
+import D3.Node (D3_SimulationNode(..))
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationSetLinks, simulationStart)
@@ -18,7 +20,7 @@ import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimVariab
 import D3Tagless.Block.Card as Card
 import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel, setLinks, toggleForceByLabel)
 import D3Tagless.Instance.Simulation (runEffectSimulation)
-import Data.Array ((:))
+import Data.Array (filter, (:))
 import Data.Either (hush)
 import Data.Map (toUnfoldable)
 import Data.Map as M
@@ -155,15 +157,20 @@ handleAction = case _ of
     case state.model of
       Nothing -> pure unit
       (Just graph) -> do
-        runEffectSimulation (Graph.packageLinks graph)
-        runEffectSimulation (Graph.packageNodes graph)
+        runEffectSimulation (Graph.updateLinks graph.links.packageLinks)
+        runEffectSimulation (Graph.updateNodes (filter isPackage graph.nodes))
         runEffectSimulation $ setForcesByLabel graphForceSettings
         simulationStart
 
   Scene (ModuleTree _) -> do
     modify_ (\s -> s { svgClass = "tree" })
-    runEffectSimulation $ setForcesByLabel treeForceSettings
-    simulationStart
+    state <- H.get
+    case state.model of
+      Nothing -> pure unit
+      (Just graph) -> do
+        runEffectSimulation (Graph.updateNodes (filter isModule graph.nodes))
+        runEffectSimulation $ setForcesByLabel treeForceSettings
+        simulationStart
 
   ToggleForce label -> do
     runEffectSimulation $ toggleForceByLabel label

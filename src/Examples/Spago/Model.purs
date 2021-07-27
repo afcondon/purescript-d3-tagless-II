@@ -158,6 +158,14 @@ datum_ = {
               )
 }
 
+isPackage (D3SimNode d) =
+  case d.nodetype of
+    (IsModule _) -> false
+    (IsPackage _) -> true
+isModule (D3SimNode d) =
+  case d.nodetype of
+    (IsModule _) -> true
+    (IsPackage _) -> false
               
 -- Model data types specialized with inital data
 type SpagoTreeNode    = D3TreeRow       (EmbeddedData SpagoNodeData + ())
