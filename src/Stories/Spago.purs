@@ -156,6 +156,7 @@ handleAction = case _ of
       Nothing -> pure unit
       (Just graph) -> do
         runEffectSimulation (Graph.packageLinks graph)
+        runEffectSimulation (Graph.packageNodes graph)
         runEffectSimulation $ setForcesByLabel graphForceSettings
         simulationStart
 

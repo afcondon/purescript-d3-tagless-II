@@ -1,26 +1,22 @@
 module D3.Examples.Spago.Graph where
 
-import Control.Monad.State (class MonadState, get, modify_)
-import D3.Attributes.Instances (Label)
-import D3.Attributes.Sugar (classed, fill, onMouseEvent, radius, remove, strokeColor, text, transform', viewBox, x, x1, x2, y, y1, y2)
-import D3.Data.Types (D3Selection_, Datum_, Element(..), MouseEvent(..))
+import Control.Monad.State (class MonadState)
+import D3.Attributes.Sugar (classed, fill, height, onMouseEvent, radius, remove, strokeColor, text, transform', viewBox, width, x, x1, x2, y, y1, y2)
+import D3.Data.Types (D3Selection_, Element(..), MouseEvent(..))
+import D3.Examples.Spago.Files (NodeType(..))
 import D3.Examples.Spago.Model (SpagoModel, cancelSpotlight_, datum_, link_, toggleSpotlight)
+import D3.Node (D3_SimulationNode(..))
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), node)
-import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce, enableForce)
-import D3.Simulation.Types (ForceType(..), SimulationState_(..), Step(..))
+import D3.Simulation.Types (SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, addForce, addSelection, addTickFunction, appendElement, attach, defaultLinkTick, getSelection, on, setLinks, setNodes, simulationHandle, start, stop, (<+>))
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, addSelection, addTickFunction, attach, getSelection, on, setLinks, setNodes, simulationHandle, (<+>))
 import D3Tagless.Capabilities as D3
-import D3Tagless.Instance.Simulation (exec_D3M_Simulation, run_D3M_Simulation)
-import Data.Map (Map)
-import Data.Map as M
+import Data.Array (filter)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
 import Utility (getWindowWidthHeight)
-import Web.Event.Internal.Types (Event)
 
 
 -- | recipe for this force layout graph
@@ -38,6 +34,7 @@ script model = do
   root        <- attach "div.svg-container"
   svg         <- root D3.+ (node Svg  [ viewBox (-w / 2.0) (-h / 2.0) w h 
                                       , classed "graph"
+                                      , width w, height h
                                       , onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation_) ] )
 
   nodesGroup        <- svg  D3.+ (node Group  [ classed "nodes" ])
@@ -66,9 +63,40 @@ script model = do
                          , name   : "spago"
                          }
   addSelection "linksGroup" linksGroup
-  addSelection "linksSelection" linksSelection
+  -- addSelection "linksSelection" linksSelection
   addSelection "nodesGroup" nodesGroup
+  -- addSelection "nodesSelection" nodesSelection
   pure unit
+  
+packageNodes :: forall m row. 
+  Bind m => 
+  MonadEffect m =>
+  MonadState { simulationState :: SimulationState_ | row } m =>
+  SelectionM D3Selection_ m =>
+  SimulationM D3Selection_ m =>
+  SpagoModel ->
+  m Unit
+packageNodes model = do
+  simulation_ <- simulationHandle
+  let enterNodes = [ classed datum_.nodeClass, transform' datum_.translateNode
+                   , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation_ d) ]
+
+  nodesInSimulation <- setNodes $ filter (\(D3SimNode d) -> case d.nodetype of
+                                                              (IsModule _) -> false
+                                                              (IsPackage _) -> true)
+                                          model.nodes
+
+  (maybeNodesGroup :: Maybe D3Selection_) <- getSelection "nodesGroup"
+
+  case maybeNodesGroup of
+    Nothing -> pure unit
+    (Just nodesGroup) -> do
+      nodesSelection <- nodesGroup <+> UpdateJoin Group nodesInSimulation { enter: enterNodes, update: [], exit: [ remove ] } 
+      circle <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
+      labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, text datum_.name]) 
+
+      addTickFunction "nodes" $ Step nodesSelection  [ transform' datum_.translateNode ]
+      addSelection "nodesSelection" nodesSelection
 
 packageLinks :: forall m row. 
   Bind m => 
