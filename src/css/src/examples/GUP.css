@@ -1,0 +1,3 @@
+div.svg-container svg.gup {
+  & text { font-size: 48px; font-family: monospace; }
+}
