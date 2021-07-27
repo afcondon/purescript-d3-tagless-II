@@ -140,14 +140,13 @@ handleAction = case _ of
       (Just graph) -> do
         runEffectSimulation (Graph.script graph)
         H.modify_ (\s -> s { model = Just graph })
-        runEffectSimulation (addForces initialForces)
+        runEffectSimulation (addForces forces)
 
   Finalize -> pure unit
 
   Scene PackageGrid -> do
     modify_ (\s -> s { svgClass = "cluster" })
-    runEffectSimulation $ setForcesByLabel  { enable: [ "packageGrid", "clusterx", "clustery", "collide1" ]
-                                            , disable: ["x", "y", "center", "collide2", "charge2", "charge1", "links", "moduleOrbit1", "moduleOrbit2", "packageOrbit"] }
+    runEffectSimulation $ setForcesByLabel gridForceSettings
     simulationStart
 
   Scene PackageGraph -> do
@@ -157,13 +156,12 @@ handleAction = case _ of
       Nothing -> pure unit
       (Just graph) -> do
         runEffectSimulation (Graph.packageLinks graph)
-        runEffectSimulation $ setForcesByLabel  { enable: [ "x", "y", "center", "charge2", "moduleOrbit2", "moduleOrbit1", "links", "collide2"]
-                                                , disable: ["charge1", "packageOrbit", "packageGrid", "collide1", "clusterx", "clustery" ] }
+        runEffectSimulation $ setForcesByLabel graphForceSettings
         simulationStart
 
   Scene (ModuleTree _) -> do
     modify_ (\s -> s { svgClass = "tree" })
-    runEffectSimulation $ setForcesByLabel  { enable: [], disable: ["packageOrbit", "packageGrid", "clusterx", "clustery" ] }
+    runEffectSimulation $ setForcesByLabel treeForceSettings
     simulationStart
 
   ToggleForce label -> do
@@ -201,12 +199,13 @@ addTreeToModel rootName maybeModel = do
 -- | ============================================
 -- | FORCES
 -- | ============================================
-
-initialForces :: Array Force
-initialForces = enabledForces <> disabledForces
-  where
-    enabledForces = 
-      enableForce <$> [
+gridForceSettings = { enable: [ "packageGrid", "clusterx", "clustery", "collide1" ]
+                    , disable: ["x", "y", "center", "collide2", "charge2", "charge1", "links", "moduleOrbit1", "moduleOrbit2", "packageOrbit"] }
+graphForceSettings = { enable: [ "x", "y", "center", "charge2", "moduleOrbit2", "moduleOrbit1", "links", "collide2"]
+                     , disable: ["charge1", "packageOrbit", "packageGrid", "collide1", "clusterx", "clustery" ] }
+treeForceSettings = { enable: [], disable: ["packageOrbit", "packageGrid", "clusterx", "clustery" ] }
+forces :: Array Force
+forces = [
         createForce "collide1"     ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
       , createForce "charge1"      ForceManyBody [ F.strength (-30.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
       , createForce "center"       ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
@@ -214,17 +213,14 @@ initialForces = enabledForces <> disabledForces
       , createForce "y"            ForceY        [ F.strength 0.1, F.y 0.0 ]
       , createForce "packageOrbit" ForceRadial   [ F.strength onlyPackages, F.x 0.0, F.y 0.0, F.radius 600.0 ]
       , createForce "moduleOrbit1" ForceRadial   [ F.strength onlyUnusedModules, F.x 0.0, F.y 0.0, F.radius 700.0 ]
-      ]
-
-    disabledForces = [
-        createForce "collide2"     ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadiusBig, F.iterations 1.0 ]
+      , createForce "collide2"     ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadiusBig, F.iterations 1.0 ]
       , createForce "charge2"      ForceManyBody [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 100.0 ]
       , createForce "clusterx"     ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
       , createForce "clustery"     ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
       , createForce "packageGrid"  (ForceFixPositionXY gridXY gridFilter) [ ]
       , createForce "moduleOrbit2" ForceRadial [ F.strength onlyUsedModules, F.x 0.0, F.y 0.0, F.radius 600.0 ]
       ]
-
+  where
     onlyPackages = (\d -> if datum_.isPackage d then 0.8 else 0.0)
     onlyUsedModules = (\d -> if datum_.isUsedModule d then 0.8 else 0.0)
     onlyUnusedModules = (\d -> if datum_.isUnusedModule d then 0.8 else 0.0)
