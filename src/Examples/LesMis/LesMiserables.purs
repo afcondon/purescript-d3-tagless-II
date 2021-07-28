@@ -32,22 +32,22 @@ import Utility (getWindowWidthHeight)
 -- we lose the type information in callbacks from the FFI, such as for attributes
 -- but since we know what we gave we can coerce it back to the initial type.
 link_ = {
-    source: (\d -> (unboxD3SimLink d).source)
-  , target: (\d -> (unboxD3SimLink d).target)
-  , value:  (\d -> (unboxD3SimLink d).value)
-  , color:  (\d -> d3SchemeCategory10N_ (toNumber $ (unboxD3SimLink d).target.group))
+    source: \d -> (unboxD3SimLink d).source
+  , target: \d -> (unboxD3SimLink d).target
+  , value:  \d -> (unboxD3SimLink d).value
+  , color:  \d -> d3SchemeCategory10N_ (toNumber $ (unboxD3SimLink d).target.group)
 }
 
 datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
-    index : (\d -> (unboxD3SimNode d).index)
-  , id    : (\d -> (unboxD3SimNode d).id)
-  , x     : (\d -> (unboxD3SimNode d).x)
-  , y     : (\d -> (unboxD3SimNode d).y)
-  , group : (\d -> (unboxD3SimNode d).group)
+    index : \d -> (unboxD3SimNode d).index
+  , id    : \d -> (unboxD3SimNode d).id
+  , x     : \d -> (unboxD3SimNode d).x
+  , y     : \d -> (unboxD3SimNode d).y
+  , group : \d -> (unboxD3SimNode d).group
 
   , colorByGroup:
-      (\d -> d3SchemeCategory10N_ (toNumber $ datum_.group d))
+      \d -> d3SchemeCategory10N_ (toNumber $ datum_.group d)
 }
 
 -- | recipe for this force layout graph

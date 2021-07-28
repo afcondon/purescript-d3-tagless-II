@@ -59,8 +59,8 @@ datum_ :: { color :: Datum_ -> String
 , radius :: Datum_ -> Number
 }
 datum_ = {
-    radius: (\d -> Math.sqrt $ toNumber $ getDatum d)
-  , color: (\d -> d3SchemeCategory10N_ ((toNumber $ getDatum d) / 100.0))
+    radius: \d -> Math.sqrt $ toNumber $ getDatum d
+  , color : \d -> d3SchemeCategory10N_ ((toNumber $ getDatum d) / 100.0)
 }
 
 threeLittleCircles3 :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_

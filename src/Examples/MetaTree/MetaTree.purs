@@ -25,12 +25,12 @@ datum_ :: {
 , y          :: Datum_ -> Number
 }
 datum_ = {
-    x     : (\d -> (unboxD3TreeNode d).x)
-  , y     : (\d -> (unboxD3TreeNode d).y)
+    x     : \d -> (unboxD3TreeNode d).x
+  , y     : \d -> (unboxD3TreeNode d).y
 -- now the fields which are in the original data object, embedded in this tree object
-  , symbol: (\d -> (unboxD3TreeNode d).data.symbol)
-  , param1: (\d -> (unboxD3TreeNode d).data.param1)
-  , positionXY: (\d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <>")")
+  , symbol: \d -> (unboxD3TreeNode d).data.symbol
+  , param1: \d -> (unboxD3TreeNode d).data.param1
+  , positionXY: \d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <>")"
 }
 
 -- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG

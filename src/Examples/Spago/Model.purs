@@ -30,14 +30,14 @@ packageRadius      = 50.0 :: Number
 packageForceRadius = 50.0 :: Number
 
 tree_datum_ = {
-    x           : (\d -> (unboxD3TreeNode d).x)
-  , y           : (\d -> (unboxD3TreeNode d).y)
-  , isLeaf      : (\d -> (unboxD3TreeNode d).isLeaf)
-  , containerID : (\d -> (unboxD3TreeNode d).data.containerID)
-  , name        : (\d -> (unboxD3TreeNode d).data.name)
-  , loc         : (\d -> (unboxD3TreeNode d).data.loc)
-  , colorByGroup: (\d -> d3SchemeCategory10N_ (toNumber $ tree_datum_.containerID d))
-  , textAnchor  : (\l d -> case l of
+    x           : \d -> (unboxD3TreeNode d).x
+  , y           : \d -> (unboxD3TreeNode d).y
+  , isLeaf      : \d -> (unboxD3TreeNode d).isLeaf
+  , containerID : \d -> (unboxD3TreeNode d).data.containerID
+  , name        : \d -> (unboxD3TreeNode d).data.name
+  , loc         : \d -> (unboxD3TreeNode d).data.loc
+  , colorByGroup: \d -> d3SchemeCategory10N_ (toNumber $ tree_datum_.containerID d)
+  , textAnchor  : \l d -> case l of
                             Radial ->
                               if (hasChildren_ d) == (datum_.x d < pi)
                               then "start"
@@ -46,8 +46,8 @@ tree_datum_ = {
                               if (hasChildren_ d)
                               then "start"
                               else "end"
-                        )
-  , textX       : (\l d -> case l of
+
+  , textX       : \l d -> case l of
                       Radial ->
                         if (hasChildren_ d) == (datum_.x d < pi) -- d.x < pi => node is on the RHS of Radial tree
                         then 6.0
@@ -56,18 +56,17 @@ tree_datum_ = {
                         if (hasChildren_ d)
                         then 6.0
                         else (-6.0)
-                  )
-  , onRHS       : (\l d -> if l == Radial && (datum_.x d >= pi)
+
+  , onRHS       : \l d -> if l == Radial && (datum_.x d >= pi)
                         then true
                         else false
-                  )
 }
 
 link_ = {
-    source: (\d -> (unboxD3SimLink d).source)
-  , target: (\d -> (unboxD3SimLink d).target)
-  , linkClass: (\d -> show (unboxD3SimLink d).linktype)
-  , linkClass2: (\d -> "updated " <> show (unboxD3SimLink d).linktype)
+    source    : \d -> (unboxD3SimLink d).source
+  , target    : \d -> (unboxD3SimLink d).target
+  , linkClass : \d -> show (unboxD3SimLink d).linktype
+  , linkClass2: \d -> "updated " <> show (unboxD3SimLink d).linktype
 }
 
 cluster2Point :: Index_ -> PointXY
@@ -86,77 +85,77 @@ tree2Point x' y' = do
 
 datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
-    radius        : (\d -> (unboxD3SimNode d).r)
-  , id            : (\d -> (unboxD3SimNode d).id)
-  , loc           : (\d -> (unboxD3SimNode d).loc)
-  , containerID   : (\d -> (unboxD3SimNode d).containerID)
-  , containerName : (\d -> (unboxD3SimNode d).containerName)
-  , name          : (\d -> (unboxD3SimNode d).name)
-  , namePos       : (\d -> "(" <> show (Math.floor $ datum_.x d) <> "," <> show (Math.floor $ datum_.y d) <> ")") -- for debugging positions
-  , x             : (\d -> (unboxD3SimNode d).x)
-  , y             : (\d -> (unboxD3SimNode d).y)
-  , treeX         : (\d -> (unboxD3SimNode d).treeX)
-  , treeY         : (\d -> (unboxD3SimNode d).treeY)
-  , nodetype      : (\d -> (unboxD3SimNode d).nodetype)
-  , cluster       : (\d -> (unboxD3SimNode d).cluster)
-  , links         : (\d -> (unboxD3SimNode d).links)
-  , connected     : (\d -> (unboxD3SimNode d).connected)
+    radius        : \d -> (unboxD3SimNode d).r
+  , id            : \d -> (unboxD3SimNode d).id
+  , loc           : \d -> (unboxD3SimNode d).loc
+  , containerID   : \d -> (unboxD3SimNode d).containerID
+  , containerName : \d -> (unboxD3SimNode d).containerName
+  , name          : \d -> (unboxD3SimNode d).name
+  , namePos       : \d -> "(" <> show (Math.floor $ datum_.x d) <> "," <> show (Math.floor $ datum_.y d) <> ")" -- for debugging position
+  , x             : \d -> (unboxD3SimNode d).x
+  , y             : \d -> (unboxD3SimNode d).y
+  , treeX         : \d -> (unboxD3SimNode d).treeX
+  , treeY         : \d -> (unboxD3SimNode d).treeY
+  , nodetype      : \d -> (unboxD3SimNode d).nodetype
+  , cluster       : \d -> (unboxD3SimNode d).cluster
+  , links         : \d -> (unboxD3SimNode d).links
+  , connected     : \d -> (unboxD3SimNode d).connected
 
-  , clusterPoint  : (\d -> cluster2Point (intToIndex_ $ (unboxD3SimNode d).cluster - 462)) -- TODO fix this dirty hack
-  , clusterPointX : (\d -> _.x $ datum_.clusterPoint d)
-  , clusterPointY : (\d -> _.y $ datum_.clusterPoint d)
-  , treePoint     : (\d -> fromMaybe (datum_.clusterPoint d) (tree2Point (datum_.treeX d) (datum_.treeY d)))
-  , treePointX    : (\d -> _.x $ datum_.treePoint d)
-  , treePointY    : (\d -> _.y $ datum_.treePoint d)
+  , clusterPoint  : \d -> cluster2Point (intToIndex_ $ (unboxD3SimNode d).cluster - 462) -- TODO fix this dirty hack
+  , clusterPointX : \d -> _.x $ datum_.clusterPoint d
+  , clusterPointY : \d -> _.y $ datum_.clusterPoint d
+  , treePoint     : \d -> fromMaybe (datum_.clusterPoint d) (tree2Point (datum_.treeX d) (datum_.treeY d))
+  , treePointX    : \d -> _.x $ datum_.treePoint d
+  , treePointY    : \d -> _.y $ datum_.treePoint d
 
 -- the crucial index function which allows us to reference Nodes from Links in JSON
-  , indexFunction : (\d -> (unboxD3SimNode d).id)
+  , indexFunction : \d -> (unboxD3SimNode d).id
 
 -- more complicated calculations (CONVENIENCE)
   , positionLabel:
-    (\d -> case datum_.nodetype d of
+    \d -> case datum_.nodetype d of
             (IsModule _)  -> negate $ datum_.radius d
             (IsPackage _) -> 0.0 -- TODO move the magic numbers out by making the filter / groupFn available
-    )
+
   , collideRadius:
-      (\d -> 
+      \d -> 
         if datum_.id d == datum_.containerID d
         then 10.0
         else datum_.radius d
-      )
+
   , collideRadiusBig:
-      (\d -> (datum_.radius d) + 30.0
-      )
+      \d -> (datum_.radius d) + 30.0
+
   , nodeClass:
-      (\d -> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d))
+      \d -> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d)
   , colorByGroup:
-      (\d -> d3SchemeCategory10N_ (toNumber $ datum_.cluster d))
+      \d -> d3SchemeCategory10N_ (toNumber $ datum_.cluster d)
   , translateNode:
-      (\d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <> ")")
+      \d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <> ")"
       
 -- accessors to provide different force settings for different cohorts, quite possible that this should go thru a similar but different route from `datum`
   , isPackage:
-      (\d -> case datum_.nodetype d of
+      \d -> case datum_.nodetype d of
               (IsModule _) -> false
-              (IsPackage _) -> true)
+              (IsPackage _) -> true
   , isModule:
-      (\d -> case datum_.nodetype d of
+      \d -> case datum_.nodetype d of
               (IsModule _) -> true
-              (IsPackage _) -> false)
+              (IsPackage _) -> false
   , isUnusedModule:
-      (\d -> case datum_.nodetype d of
+      \d -> case datum_.nodetype d of
               (IsPackage _) -> false
               (IsModule _)  -> if datum_.connected d 
                                then false
                                else true
-              )
+              
   , isUsedModule:
-      (\d -> case datum_.nodetype d of
+      \d -> case datum_.nodetype d of
               (IsPackage _) -> false
               (IsModule _)  -> if datum_.connected d 
                                then true
                                else false
-              )
+              
 }
 
 isPackage (D3SimNode d) =

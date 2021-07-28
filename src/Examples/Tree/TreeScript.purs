@@ -28,16 +28,16 @@ datum_ ::
   }
 datum_ = {
 -- simple accessors first
-    depth : (\d -> (unboxD3TreeNode d).depth)
-  , height: (\d -> (unboxD3TreeNode d).height)
-  , id    : (\d -> (unboxD3TreeNode d).id)
-  , value : (\d -> (unboxD3TreeNode d).value)
-  , x     : (\d -> (unboxD3TreeNode d).x)
-  , y     : (\d -> (unboxD3TreeNode d).y)
+    depth : \d -> (unboxD3TreeNode d).depth
+  , height: \d -> (unboxD3TreeNode d).height
+  , id    : \d -> (unboxD3TreeNode d).id
+  , value : \d -> (unboxD3TreeNode d).value
+  , x     : \d -> (unboxD3TreeNode d).x
+  , y     : \d -> (unboxD3TreeNode d).y
 -- now accessors that use the embedded "data" object within the Tree node
-  , name   : (\d -> (unboxD3TreeNode d).data.name)
+  , name   : \d -> (unboxD3TreeNode d).data.name
 -- now more semanticly complicated accessors
-  , hasChildren: (\d -> hasChildren_ d) -- this particular one has to be done by FFI
+  , hasChildren: \d -> hasChildren_ d -- this particular one has to be done by FFI
 -- TODO these next two should be rewritten to use some sort of choice operator
   , textAnchor : (\l d -> case l of
                             Radial ->
