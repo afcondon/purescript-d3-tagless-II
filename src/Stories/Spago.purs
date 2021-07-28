@@ -148,8 +148,13 @@ handleAction = case _ of
 
   Scene PackageGrid -> do
     modify_ (\s -> s { svgClass = "cluster" })
-    runEffectSimulation $ setForcesByLabel gridForceSettings
-    simulationStart
+    state <- H.get
+    case state.model of
+      Nothing -> pure unit
+      (Just graph) -> do
+        runEffectSimulation (Graph.updateNodes (filter (const true) graph.nodes))
+        runEffectSimulation $ setForcesByLabel gridForceSettings
+        simulationStart
 
   Scene PackageGraph -> do
     modify_ (\s -> s { svgClass = "graph" })
@@ -157,8 +162,8 @@ handleAction = case _ of
     case state.model of
       Nothing -> pure unit
       (Just graph) -> do
-        runEffectSimulation (Graph.updateLinks graph.links.packageLinks)
         runEffectSimulation (Graph.updateNodes (filter isPackage graph.nodes))
+        runEffectSimulation (Graph.updateLinks graph.links.packageLinks)
         runEffectSimulation $ setForcesByLabel graphForceSettings
         simulationStart
 

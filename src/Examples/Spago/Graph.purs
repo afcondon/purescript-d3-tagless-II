@@ -1,7 +1,7 @@
 module D3.Examples.Spago.Graph where
 
 import Control.Monad.State (class MonadState)
-import D3.Attributes.Sugar (classed, fill, height, onMouseEvent, radius, remove, strokeColor, text, transform', viewBox, width, x, x1, x2, y, y1, y2)
+import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), classed, fill, height, onMouseEvent, preserveAspectRatio, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
 import D3.Data.Types (D3Selection_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cancelSpotlight_, datum_, link_, toggleSpotlight)
@@ -47,33 +47,33 @@ script model = do
 
   root        <- attach "div.svg-container"
   svg         <- root D3.+ (node Svg  [ viewBox (-w / 2.0) (-h / 2.0) w h 
-                                      , classed "graph"
-                                      , width w, height h
+                                      , preserveAspectRatio $ AspectRatio XMid YMid Meet 
+                                      , classed "initial"
+                                      -- , width w, height h
                                       , onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation_) ] )
 
   nodesGroup        <- svg  D3.+ (node Group  [ classed "nodes" ])
   nodesInSimulation <- setNodes model.nodes
   nodesSelection    <- nodesGroup <+> Join Group nodesInSimulation (enterNodes simulation_)
 
-  linksGroup        <- svg  D3.+ (node Group  enterLinks)
+  linksGroup        <- svg  D3.+ (node Group [ classed "links" ])
   linksInSimulation <- setLinks model.links.treeLinks datum_.indexFunction
-  linksSelection    <- linksGroup <+> Join Line linksInSimulation enterLinks
+  linksSelection    <- linksGroup <+> Join Line linksInSimulation [ classed link_.linkClass ]
 
   addTickFunction "nodes" $ Step nodesSelection nodeTick
   addTickFunction "links" $ Step linksSelection linkTick
 
   circle <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
-  labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, text datum_.name]) 
+  labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]) 
   
   _ <- circle `on` Drag DefaultDrag
   _ <- svg    `on` Zoom  { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                          , scale  : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
                          , name   : "spago"
                          }
+  -- keep the named selections that we want elsewhere for updates                       
   addSelection "linksGroup" linksGroup
-  -- addSelection "linksSelection" linksSelection
   addSelection "nodesGroup" nodesGroup
-  -- addSelection "nodesSelection" nodesSelection
   pure unit
   
 updateNodes :: forall m row. 
@@ -115,7 +115,7 @@ updateLinks links = do
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
-      linksSelection <- linksGroup <+> UpdateJoin Line linksInSimulation { enter: enterLinks, update: [], exit: [ remove ] }
+      linksSelection <- linksGroup <+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "linksSelection" linksSelection
   

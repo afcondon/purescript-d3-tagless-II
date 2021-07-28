@@ -67,6 +67,7 @@ link_ = {
     source: (\d -> (unboxD3SimLink d).source)
   , target: (\d -> (unboxD3SimLink d).target)
   , linkClass: (\d -> show (unboxD3SimLink d).linktype)
+  , linkClass2: (\d -> "updated " <> show (unboxD3SimLink d).linktype)
 }
 
 cluster2Point :: Index_ -> PointXY
@@ -114,7 +115,7 @@ datum_ = {
 -- more complicated calculations (CONVENIENCE)
   , positionLabel:
     (\d -> case datum_.nodetype d of
-            (IsModule _)  -> negate $ datum_.loc d
+            (IsModule _)  -> negate $ datum_.radius d
             (IsPackage _) -> 0.0 -- TODO move the magic numbers out by making the filter / groupFn available
     )
   , collideRadius:
