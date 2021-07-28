@@ -1,10 +1,11 @@
 module D3Tagless.Instance.Simulation where
 
 import D3.Simulation.Functions
+import Prelude
 
 import Control.Monad.State (class MonadState, StateT, get, gets, modify_, runStateT)
 import D3.Data.Types (D3Selection_)
-import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3SelectAllInDOM_, d3SelectionSelectAll_, defaultSimulationDrag_, defaultLinkTick_, defaultNodeTick_, disableDrag_, disableTick_, onTick_)
+import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3SelectAllInDOM_, d3SelectionSelectAll_, defaultLinkTick_, defaultNodeTick_, defaultSimulationDrag_, disableDrag_, disableTick_, onTick_, setPositionToNaN_)
 import D3.Selection (Behavior(..), D3_Node(..), DragBehavior(..), Join(..), applyChainableSD3)
 import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionModifySelection, selectionOn)
 import D3.Simulation.Types (SimulationState_(..), Step(..))
@@ -14,7 +15,6 @@ import Data.Foldable (foldl)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
-import Prelude 
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | ====================================================
@@ -78,6 +78,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     simulationEnableForcesByLabel  enable
 
   setNodes nodes              = simulationSetNodes nodes
+  uniformlyDistribute nodes   = pure $ setPositionToNaN_ nodes
   setLinks links keyFn        = simulationSetLinks links (unsafeCoerce keyFn)
 
   addSelection label selection = simulationAddSelection label selection

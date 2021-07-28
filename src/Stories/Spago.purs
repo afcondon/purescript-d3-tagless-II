@@ -18,7 +18,7 @@ import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationSetLinks, simulationStart, simulationStop)
 import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..))
 import D3Tagless.Block.Card as Card
-import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel, setLinks, toggleForceByLabel)
+import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel, setLinks, toggleForceByLabel, uniformlyDistribute)
 import D3Tagless.Instance.Simulation (runEffectSimulation)
 import Data.Array (filter, (:))
 import Data.Either (hush)
@@ -164,7 +164,9 @@ handleAction = case _ of
       Nothing -> pure unit
       (Just graph) -> do
         simulationStop
-        runEffectSimulation (Graph.updateNodes (filter isPackage graph.nodes))
+        let onlyPackageNodes = filter isPackage graph.nodes
+        runEffectSimulation $ uniformlyDistribute onlyPackageNodes
+        runEffectSimulation (Graph.updateNodes onlyPackageNodes)
         runEffectSimulation (Graph.updateLinks graph.links.packageLinks)
         runEffectSimulation $ setForcesByLabel graphForceSettings
         simulationStart

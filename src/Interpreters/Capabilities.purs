@@ -54,6 +54,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
 
   -- management of data (nodes and links)
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
+  uniformlyDistribute :: forall d. Array (D3_SimulationNode d) -> m Unit
   setLinks :: forall id d r. Array (D3_Link id r)    -> (Datum_ -> id) -> m (Array (D3_Link d r)) -- we require a key function for links
 
   -- management of selections

@@ -568,6 +568,14 @@ exports.unpinNode_ = node => {
   delete node.fy
 }
 
+// setPositionToNaN_ :: forall d. Array (D3_SimulationNode d) -> Unit
+exports.setPositionToNaN_ = nodes => {
+  for (let index = 0; index < nodes.length; index++) {
+    nodes[index].x = NaN;
+  }
+}
+
+
 // *****************************************************************************************************************
 // ************************** functions from d3js Hierarchy module         *****************************************
 // *****************************************************************************************************************
