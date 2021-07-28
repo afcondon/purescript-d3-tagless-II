@@ -33,15 +33,15 @@ instance traversableTree :: Traversable Tree where
 -- | map over the tree which updates tree's own data incorporating data from updated children
 treeMapDeep ::  ∀ a b. (a -> List b -> b) -> Tree a -> Tree b
 treeMapDeep f (Node node' children) = Node (f node' newChildData) newChildren
-  where newChildren     = (treeMapDeep f) <$> children
+  where newChildren        = children <#> treeMapDeep f
         runData (Node d _) = d
-        newChildData    = runData <$> newChildren
+        newChildData       = runData <$> newChildren
 
 -- | map over the child arrays in the tree without touching tree data
 treeMapOverChildren ::  ∀ a. (List (Tree a) -> List (Tree a)) -> Tree a -> Tree a
 treeMapOverChildren f (Node nd cs) = Node nd (f newCs)
   where
-    newCs = (treeMapOverChildren f) <$> cs
+    newCs = cs <#> treeMapOverChildren f
 
 hasChildren ::  ∀ a. Tree a -> Boolean
 hasChildren (Node _ Nil) = false
@@ -51,7 +51,7 @@ subTree ::  ∀ a. Tree a -> (a -> Boolean) -> Maybe (Tree a)
 subTree n@(Node d trees) pred =
   if pred d
   then Just n
-  else head $ catMaybes $ (\tree -> subTree tree pred) <$> trees
+  else head $ catMaybes $ trees <#> \tree -> subTree tree pred
 
 -- || you provide a predicate on the type in the tree and a transform on that data type
 -- || and you get back a list of the ones that matched transformed by the second function

@@ -9,7 +9,7 @@ import Data.Maybe (fromMaybe, Maybe(..))
 import Data.Nullable (Nullable, null)
 import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..))
-import Prelude (class Eq, class Show, bind, ($), (-), (<$>), (<<<), (<>), (==), (>))
+import Prelude
 import Type.Row (type (+))
 import Utility (chunk, compareSnd, equalSnd)
 
@@ -100,7 +100,9 @@ type SpagoDataRecord = Record (D3_Indexed + D3_XY + D3_VxyFxy + SpagoNodeRow  + 
 getGraphJSONData :: Spago_Raw_JSON_ -> Spago_Cooked_JSON
 getGraphJSONData { packages, modules, lsDeps, loc } = do
   let
-    path2LOC = M.fromFoldable $ (\o -> Tuple o.path o.loc) <$> loc
+    path2LOC = M.fromFoldable $ 
+               loc <#> \o -> Tuple o.path o.loc
+
     addLOCInfo :: ModuleJSONP -> ModuleJSONPL
     addLOCInfo { key, depends, path, package } = { key, depends, path, package, loc: linecount }
       where
@@ -189,7 +191,8 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       } 
 
     depsMap :: M.Map String { version :: String, repo :: String }
-    depsMap = M.fromFoldable $ (\d -> Tuple d.packageName { version: d.version, repo: d.repo.contents } ) <$> lsDeps
+    depsMap = M.fromFoldable $
+              lsDeps <#> \d -> Tuple d.packageName { version: d.version, repo: d.repo.contents }
 
     makeNodeFromPackageJSONCL :: PackageJSONCL -> SpagoNodeData
     makeNodeFromPackageJSONCL p = do
@@ -239,7 +242,8 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     nodes = moduleNodes <> packageNodes
     links = moduleLinks <> packageLinks <> modulePackageLinks
 
-    id2Node = M.fromFoldable $ (\node -> Tuple node.id node) <$> nodes
+    id2Node = M.fromFoldable $
+              nodes <#> \node -> Tuple node.id node
 
     getSourceLinks :: SpagoNodeData -> Tuple NodeID (Array NodeID)
     getSourceLinks { id } = Tuple id sources

@@ -269,7 +269,7 @@ makeSpagoGraphModel json = do
     , prunedLinks: []
     , packageLinks: filter (\(D3_Link l) -> l.linktype == P2P) links
   }
-  , nodes    : (upgradeSpagoNodeData sourceLinksMap) <$> nodes
+  , nodes    : nodes <#> upgradeSpagoNodeData sourceLinksMap
   , graph    : makeGraph nodes
   , tree     : Nothing  -- not present in the JSON, has to be calculated, if possible
   , maps     : { name2ID

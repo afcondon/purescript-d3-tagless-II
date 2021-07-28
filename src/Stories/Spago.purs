@@ -173,7 +173,7 @@ handleAction = case _ of
     case state.model of
       Nothing -> pure unit
       (Just graph) -> do
-        runEffectSimulation (Graph.updateNodes (filter isModule graph.nodes))
+        runEffectSimulation (Graph.updateNodes (filter (const false) graph.nodes))
         runEffectSimulation $ setForcesByLabel treeForceSettings
         simulationStart
 

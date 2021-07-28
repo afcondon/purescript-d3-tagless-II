@@ -14,7 +14,7 @@ import Data.Foldable (foldl)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, Unit, bind, discard, liftA1, pure, show, unit, ($), (<$>))
+import Prelude 
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | ====================================================
@@ -90,7 +90,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     (SS_ ss_) <- gets _.simulationState
     let makeTick _ = do
           -- TODO this coerce is forced upon us here due to forall selection in SimulationM
-          let _ = (applyChainableSD3 (unsafeCoerce selection)) <$> chain
+          let _ = chain <#> applyChainableSD3 (unsafeCoerce selection)
           unit
         _ = onTick_ ss_.simulation_ label makeTick
     pure unit

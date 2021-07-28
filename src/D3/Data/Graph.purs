@@ -6,7 +6,7 @@ import Data.Graph as G
 import Data.Maybe (Maybe(..))
 import Data.Tree (Tree)
 import Data.Tuple (Tuple(..))
-import Prelude (class Ord, bind, not, ($), (<$>), (<>))
+import Prelude
 
 type DepPath id = Array id
 type GraphSearchRecord id = {
@@ -33,12 +33,9 @@ getReachableNodes id graph = go { nodes: [], openDepPaths: [[id]], closedDepPath
       firstID   <- head x.head -- NB we're pushing onto the path, cause head is easier than tail
       firstNode <- G.lookup firstID graph
 
-      let newDeps = 
-            partition (\d -> not $ elem d searchRecord.nodes) firstNode.links.targets
-          newOpenDepPaths = 
-            (\d -> d : x.head) <$> newDeps.yes -- ie [ab] with deps [bc] -> [abc, abd]
-          prunedLinks =
-            (\d -> Tuple firstID d) <$> newDeps.no -- these are the links that we dropped to make tree
+      let newDeps         = partition (\d -> not $ elem d searchRecord.nodes) firstNode.links.targets
+          newOpenDepPaths = newDeps.yes <#> \d -> d : x.head -- ie [ab] with deps [bc] -> [abc, abd]
+          prunedLinks     = newDeps.no  <#> \d -> Tuple firstID d -- these are the links that we dropped to make tree
 
       if null newOpenDepPaths
         -- moving the open path we just processed to the list of closedDepPaths
