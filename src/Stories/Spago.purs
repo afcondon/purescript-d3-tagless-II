@@ -15,7 +15,7 @@ import D3.Examples.Spago.Tree (treeReduction)
 import D3.Node (D3_SimulationNode(..))
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
-import D3.Simulation.Functions (simulationSetLinks, simulationStart)
+import D3.Simulation.Functions (simulationSetLinks, simulationStart, simulationStop)
 import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..))
 import D3Tagless.Block.Card as Card
 import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel, setLinks, toggleForceByLabel)
@@ -152,6 +152,7 @@ handleAction = case _ of
     case state.model of
       Nothing -> pure unit
       (Just graph) -> do
+        simulationStop
         runEffectSimulation (Graph.updateNodes (filter (const true) graph.nodes))
         runEffectSimulation $ setForcesByLabel gridForceSettings
         simulationStart
@@ -162,6 +163,7 @@ handleAction = case _ of
     case state.model of
       Nothing -> pure unit
       (Just graph) -> do
+        simulationStop
         runEffectSimulation (Graph.updateNodes (filter isPackage graph.nodes))
         runEffectSimulation (Graph.updateLinks graph.links.packageLinks)
         runEffectSimulation $ setForcesByLabel graphForceSettings
@@ -173,7 +175,8 @@ handleAction = case _ of
     case state.model of
       Nothing -> pure unit
       (Just graph) -> do
-        runEffectSimulation (Graph.updateNodes (filter (const false) graph.nodes))
+        simulationStop
+        runEffectSimulation (Graph.updateNodes (filter isModule graph.nodes))
         runEffectSimulation $ setForcesByLabel treeForceSettings
         simulationStart
 
