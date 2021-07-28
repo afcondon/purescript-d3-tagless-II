@@ -10,7 +10,7 @@ import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationStart)
-import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), SimulationState_)
+import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), SimulationState_, allNodes)
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
@@ -69,10 +69,10 @@ _code = prop (Proxy :: Proxy "code")
 
 lesMisForces :: Array Force
 lesMisForces = 
-    [ enableForce $ createForce "center" ForceCenter  [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-    , enableForce $ createForce "many body" ForceManyBody  []
-    , enableForce $ createForce "collision" ForceCollide  [ F.radius 4.0 ]
-    ,               createForce "collision20" ForceCollide  [ F.radius 20.0] -- NB initially not enabled
+    [ enableForce $ createForce "center"      ForceCenter   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+    , enableForce $ createForce "many body"   ForceManyBody allNodes []
+    , enableForce $ createForce "collision"   ForceCollide  allNodes [ F.radius 4.0 ]
+    ,               createForce "collision20" ForceCollide  allNodes [ F.radius 20.0] -- NB initially not enabled
     -- links force is enabled by default!!!
     ]
 

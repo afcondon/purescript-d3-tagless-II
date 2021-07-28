@@ -9,7 +9,7 @@ import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_
 import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
 import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, getHandle, putForceInSimulation, setForceAttr)
-import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..), Step(..))
+import D3.Simulation.Types (Force(..), ForceFilter, ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (setForcesByLabel)
 import Data.Array (intercalate)
@@ -32,7 +32,7 @@ setForces :: M.Map Label Force -> SimulationState_ -> SimulationState_
 setForces forces (SS_ ss_) = SS_ ss_ { forces = forces }
 
 insertForce :: Force -> SimulationState_ -> SimulationState_
-insertForce force@(Force l status t attrs h_) (SS_ ss_) = SS_ ss_ { forces = M.insert l force ss_.forces }
+insertForce force@(Force l status t f attrs h_) (SS_ ss_) = SS_ ss_ { forces = M.insert l force ss_.forces }
 
 reheatSimulation :: SimulationState_ -> SimulationState_
 reheatSimulation (SS_ ss_) = SS_ ss_ { running = true, alpha = 1.0 }
@@ -59,7 +59,7 @@ simulationRemoveAllForces = do
 simulationAddForce :: forall m row. 
   (MonadState { simulationState :: SimulationState_ | row } m) =>
   Force -> m Unit
-simulationAddForce force@(Force label status t attrs h_) = do
+simulationAddForce force@(Force label status t f attrs h_) = do
   let _ = (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
   { simulationState: SS_ ss_} <- get
   let _ = if status == ForceActive
@@ -76,8 +76,8 @@ simulationToggleForce label = do
   { simulationState: SS_ ss_ } <- get
   case M.lookup label ss_.forces of
     Nothing -> pure unit
-    (Just (Force _ ForceActive _ _ _))   -> simulationDisableForcesByLabel [ label ]
-    (Just (Force _ ForceDisabled _ _ _)) -> simulationEnableForcesByLabel [ label ]
+    (Just (Force _ ForceActive _ _ _ _))   -> simulationDisableForcesByLabel [ label ]
+    (Just (Force _ ForceDisabled _ _ _ _)) -> simulationEnableForcesByLabel [ label ]
 
 simulationDisableForcesByLabel :: forall m row. 
   (MonadState { simulationState :: SimulationState_ | row } m) =>
@@ -163,7 +163,7 @@ simulationSetLinks :: forall id m row datum r.
   Array (D3_Link id r) -> (datum -> id) -> m (Array (D3_Link datum r))
 simulationSetLinks links keyFn = do
   { simulationState: SS_ ss_} <- get
-  let newLinksForce = enableForce $ createForce "links" ForceLink []
+  let newLinksForce = enableForce $ createForce "links" ForceLink Nothing [] -- links force doesn't accept ForceFilter (it kind of already is a force filter by it's nature)
   let updatedLinks = setLinks_ (getHandle newLinksForce) links keyFn
   simulationAddForce newLinksForce
   pure (unsafeCoerce updatedLinks) -- TODO notice the coerce here

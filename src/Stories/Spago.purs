@@ -16,7 +16,7 @@ import D3.Node (D3_SimulationNode(..))
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationSetLinks, simulationStart, simulationStop)
-import D3.Simulation.Types (Force(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..))
+import D3.Simulation.Types (Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..), allNodes, showForceFilter)
 import D3Tagless.Block.Card as Card
 import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel, setLinks, toggleForceByLabel, uniformlyDistribute)
 import D3Tagless.Instance.Simulation (runEffectSimulation)
@@ -224,27 +224,31 @@ graphForceSettings = { enable: [ "x", "y", "center", "charge2", "moduleOrbit2", 
 treeForceSettings = { enable: [], disable: ["packageOrbit", "packageGrid", "clusterx", "clustery" ] }
 forces :: Array Force
 forces = [
-        createForce "collide1"     ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
-      , createForce "charge1"      ForceManyBody [ F.strength (-30.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
-      , createForce "center"       ForceCenter   [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
-      , createForce "x"            ForceX        [ F.strength 0.1, F.x 0.0 ]
-      , createForce "y"            ForceY        [ F.strength 0.1, F.y 0.0 ]
-      , createForce "packageOrbit" ForceRadial   [ F.strength onlyPackages, F.x 0.0, F.y 0.0, F.radius 600.0 ]
-      , createForce "moduleOrbit1" ForceRadial   [ F.strength onlyUnusedModules, F.x 0.0, F.y 0.0, F.radius 700.0 ]
-      , createForce "collide2"     ForceCollide  [ F.strength 1.0, F.radius datum_.collideRadiusBig, F.iterations 1.0 ]
-      , createForce "charge2"      ForceManyBody [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 100.0 ]
-      , createForce "clusterx"     ForceX [ F.strength 0.2, F.x datum_.clusterPointX ]
-      , createForce "clustery"     ForceY [ F.strength 0.2, F.y datum_.clusterPointY ]
-      , createForce "packageGrid"  (ForceFixPositionXY gridXY gridFilter) [ ]
-      , createForce "moduleOrbit2" ForceRadial [ F.strength onlyUsedModules, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+        createForce "collide1"     ForceCollide  allNodes [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
+      , createForce "collide2"     ForceCollide  allNodes [ F.strength 1.0, F.radius datum_.collideRadiusBig, F.iterations 1.0 ]
+      , createForce "charge1"      ForceManyBody allNodes [ F.strength (-30.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
+      , createForce "center"       ForceCenter   allNodes [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
+      , createForce "x"            ForceX        allNodes [ F.strength 0.1, F.x 0.0 ]
+      , createForce "y"            ForceY        allNodes [ F.strength 0.1, F.y 0.0 ]
+      , createForce "charge2"      ForceManyBody allNodes [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 100.0 ]
+      , createForce "clusterx"     ForceX        allNodes [ F.strength 0.2, F.x datum_.clusterPointX ]
+      , createForce "clustery"     ForceY        allNodes [ F.strength 0.2, F.y datum_.clusterPointY ]
+
+      , createForce "packageGrid"  (ForceFixPositionXY gridXY) (Just $ FilterNodes "packages only" datum_.isPackage) [ ] 
+      , createForce "packageOrbit" ForceRadial   (Just $ FilterNodes "packages only" datum_.isPackage) 
+                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+      , createForce "moduleOrbit1" ForceRadial   (Just $ FilterNodes "unused modules only" datum_.isUnusedModule) 
+                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 700.0 ]
+      , createForce "moduleOrbit2" ForceRadial   (Just $ FilterNodes "used modules only" datum_.isUsedModule)
+                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
       ]
   where
-    onlyPackages = (\d -> if datum_.isPackage d then 0.8 else 0.0)
-    onlyUsedModules = (\d -> if datum_.isUsedModule d then 0.8 else 0.0)
-    onlyUnusedModules = (\d -> if datum_.isUnusedModule d then 0.8 else 0.0)
+    -- onlyPackages = (\d -> if datum_.isPackage d then 0.8 else 0.0)
+    -- onlyUsedModules = (\d -> if datum_.isUsedModule d then 0.8 else 0.0)
+    -- onlyUnusedModules = (\d -> if datum_.isUnusedModule d then 0.8 else 0.0)
+    -- gridFilter d = datum_.isPackage d
 
     gridXY _ i = cluster2Point i
-    gridFilter d = datum_.isPackage d
       
 
 -- | ============================================
@@ -321,7 +325,7 @@ renderTableForces (SS_ simulation)  =
     Table.row_ <$> ( renderData <$> tableData )
 
   -- renderData :: ∀ p i. Force -> Array (HH.HTML p i)
-  renderData (Force label s t cs h_) =
+  renderData (Force label s t f cs h_) =
     [ Table.cell_ [ Checkbox.checkbox_ 
                   [ HP.checked (s == ForceActive)
                   , HE.onChecked $ const (ToggleForce label)
@@ -331,7 +335,7 @@ renderTableForces (SS_ simulation)  =
           HH.text $ label <> " " <> show t -- use forceDescription t for more detailed explanation
         ]
       ]
-    , Table.cell  [ css "text-left" ] [ HH.text "modules" ]
+    , Table.cell  [ css "text-left" ] [ HH.text $ showForceFilter f ]
     ]
 
 renderTableElements :: forall m. SimulationState_ -> H.ComponentHTML Action () m
@@ -368,12 +372,12 @@ renderTableElements (SS_ simulation)  =
     Table.row_ <$> ( renderData <$> tableData )
 
   renderData :: ∀ p i. Force -> Array (HH.HTML p i)
-  renderData (Force l s t cs h_) =
+  renderData (Force l s t f cs h_) =
     [ Table.cell_ [ Checkbox.checkbox_ [] [] ]
     , Table.cell  [ css "text-left" ]
       [ HH.div_ [
           HH.text $ show t <> ": " <> l
         ]
       ]
-    , Table.cell  [ css "text-left" ] [ HH.text "modules" ]
+    , Table.cell  [ css "text-left" ] [ HH.text "elements" ]
     ]

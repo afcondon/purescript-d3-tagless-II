@@ -554,6 +554,12 @@ exports.putForceInSimulation_ = simulation => label => force => {
   console.log(`Putting ${label} force in the simulation`);
   simulation.force(label, force)
 }
+// putForceInSimulationWithFilter_ :: D3Simulation_ -> String -> (Datum_ -> Boolean) -> D3ForceHandle_ -> D3Simulation_
+exports.putForceInSimulationWithFilter_ = simulation => label => filterFn => force => {
+  console.log(`Putting ${label} force in the simulation`);
+  console.log("remember to put in the filter here"); // TODO
+  simulation.force(label, force)
+}
 
 // pinNode_ :: Number -> Number -> GraphNode_ -> Unit
 exports.pinNode_ = fx => fy => node => {

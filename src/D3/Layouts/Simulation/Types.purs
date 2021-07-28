@@ -10,26 +10,13 @@ import D3.FFI (D3ForceHandle_, OpaqueLinkType_, OpaqueNodeType_, SimulationConfi
 import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (ChainableS)
 import Data.Map as M
+import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Debug (trace)
 
 data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number
 
 data Step selection = Step selection (Array ChainableS) | StepTransformFFI selection (Datum_ -> String)
-
--- data SimBusCommand selection =
---     Start
---   | Stop
---   | RemoveAllForces
---   | SetConfigVariable     SimVariable
---   | LoadForces            (Array Force)
---   | AddForce              Force
---   | DisableForcesByLabel  (Array Label)
---   | EnableForcesByLabel   (Array Label)
---   | SetNodes              (forall d. Array (D3_SimulationNode d))
---   | SetLinks              (forall d r. Array (D3_Link d r))
---   | AddTickFunction Label (Step selection)
---   | RemoveTickFunction    Label
 
 instance showSimVariable :: Show SimVariable where
   show (Alpha n)         = "Alpha: " <> show n
@@ -38,33 +25,15 @@ instance showSimVariable :: Show SimVariable where
   show (AlphaDecay n)    = "AlphaDecay: " <> show n
   show (VelocityDecay n) = "VelocityDecay: " <> show n
 
--- instance showSimCommand :: Show (SimBusCommand D3Selection_) where
---   show Start                      = "Start"
---   show Stop                       = "Stop"
---   show RemoveAllForces            = "RemoveAllForces"
---   show (SetConfigVariable c)      = "(SetConfigVariable" <> " " <> show c <> ")"
---   show (LoadForces _)             = "(LoadForces _)"
---   show (AddForce _)               = "(AddForce _)"
---   show (DisableForcesByLabel _)   = "(DisableForcesByLabel _)"
---   show (EnableForcesByLabel _)    = "(EnableForcesByLabel _)"
---   show (SetNodes _)               = "(SetNodes _)"
---   show (SetLinks _)               = "(SetLinks _)"
---   show (AddTickFunction _ _)      = "(AddTickFunction _ _)"
---   show (RemoveTickFunction _)     = "(RemoveTickFunction _)"
-
--- TODO we won't export the constructor here when we close exports
-data Force = Force Label ForceStatus ForceType (Array ChainableF) D3ForceHandle_
+-- TODO we won't export Force constructor here when we close exports
+data Force = Force Label ForceStatus ForceType (Maybe ForceFilter) (Array ChainableF) D3ForceHandle_
 
 instance Show Force where
-  show (Force label status t cs h) = "Force: " <> label <> " " <> show status 
+  show (Force label status t (Just f) cs h) = "Force: " <> label <> " " <> show status <> " " <> show f
+  show (Force label status t (Nothing) cs h) = "Force: " <> label <> " " <> show status <> " applying to all nodes"
 
 -- not sure if there needs to be a separate type for force attributes, maybe not, but we'll start assuming so
 newtype ChainableF = ForceT Attribute
-    -- following are used in ChainableS but probably not here on Forces...delete when sure
-              -- | TextT Attribute
-              -- | TransitionT (Array ChainableS) Transition
-              -- | RemoveT
-              -- | OnT MouseEvent Listener_
 derive instance Newtype ChainableF _
 
 data ForceStatus = ForceActive | ForceDisabled
@@ -73,6 +42,14 @@ instance showForceStatus :: Show ForceStatus where
   show ForceActive = "active"
   show ForceDisabled = "inactive"
 
+allNodes = Nothing -- just some sugar so that force declarations are nicer to read, Nothing == No filter == applies to all nodes
+data ForceFilter = FilterNodes String (Datum_ -> Boolean)
+instance Show ForceFilter where
+  show (FilterNodes description _) = "applying to " <> description
+
+showForceFilter (Just (FilterNodes description _)) = "applying to " <> description
+showForceFilter Nothing = " (applies to all nodes)"
+
 data ForceType = 
     ForceManyBody                                  -- strength, theta, distanceMax, distanceMin
   | ForceCenter                                    -- strength, x, y
@@ -80,11 +57,10 @@ data ForceType =
   | ForceX                                         -- strength, x
   | ForceY                                         -- strength, y
   | ForceRadial                                    -- strength, radius, x, y
-  -- | ForceLink (forall r. (Array (D3_Link NodeID r))) (forall d. Datum_ -> d)       -- strength, id, distance, iterations, links
   | ForceLink -- data for links can _only_ be provided when setting links in a simulation, initial links array will always be []
-  | ForceFixPositionXY (Datum_ -> Index_ -> { x :: Number, y :: Number }) (Datum_ -> Boolean) -- function is static, provided to constructor
-  | ForceFixPositionX  (Datum_ -> Index_ -> { x :: Number }) (Datum_ -> Boolean) 
-  | ForceFixPositionY  (Datum_ -> Index_ -> { y :: Number }) (Datum_ -> Boolean) 
+  | ForceFixPositionXY (Datum_ -> Index_ -> { x :: Number, y :: Number }) 
+  | ForceFixPositionX  (Datum_ -> Index_ -> { x :: Number })
+  | ForceFixPositionY  (Datum_ -> Index_ -> { y :: Number })
                                                    -- TODO need something to hold extra custom force config, perhaps?
   | CustomForce                                    -- ???
 
@@ -95,9 +71,9 @@ instance Show ForceType where
   show ForceX                   = "ForceX"
   show ForceY                   = "ForceY"
   show ForceRadial              = "ForceRadial"
-  show (ForceFixPositionXY _ _) = "ForceFixPositionXY"
-  show (ForceFixPositionX _ _)  = "ForceFixPositionX"
-  show (ForceFixPositionY _ _)  = "ForceFixPositionY"
+  show (ForceFixPositionXY _) = "ForceFixPositionXY"
+  show (ForceFixPositionX _)  = "ForceFixPositionX"
+  show (ForceFixPositionY _)  = "ForceFixPositionY"
   show ForceLink                = "ForceLink"
   show CustomForce              = "CustomForce"
 
