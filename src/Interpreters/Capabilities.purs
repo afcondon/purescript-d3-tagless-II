@@ -51,6 +51,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   addForce             :: Force       -> m Unit
   toggleForceByLabel   :: Label            -> m Unit
   setForcesByLabel     :: ForceConfigLists -> m Unit
+  enableOnlyTheseForces :: Array Label -> m Unit
 
   -- management of data (nodes and links)
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))

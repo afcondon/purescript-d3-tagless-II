@@ -8,7 +8,7 @@ import D3.Data.Types (D3Selection_, Index_)
 import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_, disableDrag_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
 import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
-import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, getHandle, putForceInSimulation, setForceAttr, setForceAttrWithFilter)
+import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, enableOnlyTheseLabels, getHandle, putForceInSimulation, setForceAttr, setForceAttrWithFilter)
 import D3.Simulation.Types (Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (setForcesByLabel)
@@ -91,6 +91,16 @@ simulationDisableForcesByLabel labels = do
   let updatedForces = (disableByLabels ss_.simulation_ labels) <$> ss_.forces
       updatedSimulation = SS_ ss_ { forces = updatedForces }
   modify_ (\s -> s { simulationState = updatedSimulation })
+
+simulationEnableOnlyTheseForces :: forall m row. 
+  (MonadState { simulationState :: SimulationState_ | row } m) =>
+  Array Label -> m Unit
+simulationEnableOnlyTheseForces labels = do
+  { simulationState: SS_ ss_} <- get
+  let updatedForces = (enableOnlyTheseLabels ss_.simulation_ labels) <$> ss_.forces
+      updatedSimulation = SS_ ss_ { forces = updatedForces }
+  modify_ (\s -> s { simulationState = updatedSimulation })
+
 
 simulationEnableForcesByLabel :: forall m row. 
   (MonadState { simulationState :: SimulationState_ | row } m) =>

@@ -18,7 +18,7 @@ import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationSetLinks, simulationStart, simulationStop)
 import D3.Simulation.Types (Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..), allNodes, showForceFilter)
 import D3Tagless.Block.Card as Card
-import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel, setLinks, toggleForceByLabel, uniformlyDistribute)
+import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, setForcesByLabel, setLinks, toggleForceByLabel, uniformlyDistribute)
 import D3Tagless.Instance.Simulation (runEffectSimulation)
 import Data.Array (filter, (:))
 import Data.Either (hush)
@@ -154,7 +154,7 @@ handleAction = case _ of
       (Just graph) -> do
         simulationStop
         runEffectSimulation (Graph.updateNodes (filter (const true) graph.nodes))
-        runEffectSimulation $ setForcesByLabel gridForceSettings
+        runEffectSimulation $ enableOnlyTheseForces gridForceSettings
         simulationStart
 
   Scene PackageGraph -> do
@@ -168,7 +168,7 @@ handleAction = case _ of
         runEffectSimulation $ uniformlyDistribute onlyPackageNodes
         runEffectSimulation (Graph.updateNodes onlyPackageNodes)
         runEffectSimulation (Graph.updateLinks graph.links.packageLinks)
-        runEffectSimulation $ setForcesByLabel graphForceSettings
+        runEffectSimulation $ enableOnlyTheseForces graphForceSettings
         simulationStart
 
   Scene (ModuleTree _) -> do
@@ -183,6 +183,7 @@ handleAction = case _ of
         simulationStart
 
   ToggleForce label -> do
+    simulationStop
     runEffectSimulation $ toggleForceByLabel label
     simulationStart
 
@@ -217,10 +218,8 @@ addTreeToModel rootName maybeModel = do
 -- | ============================================
 -- | FORCES
 -- | ============================================
-gridForceSettings = { enable: [ "packageGrid", "clusterx", "clustery", "collide1" ]
-                    , disable: ["x", "y", "center", "collide2", "charge2", "charge1", "links", "moduleOrbit1", "moduleOrbit2", "packageOrbit"] }
-graphForceSettings = { enable: [ "x", "y", "center", "charge2", "moduleOrbit2", "moduleOrbit1", "links", "collide2"]
-                     , disable: ["charge1", "packageOrbit", "packageGrid", "collide1", "clusterx", "clustery" ] }
+gridForceSettings = [ "packageGrid", "clusterx", "clustery", "collide1" ]
+graphForceSettings = [ "charge2", "collide2", "packageOrbit", "x", "y" ]
 treeForceSettings = { enable: [], disable: ["packageOrbit", "packageGrid", "clusterx", "clustery" ] }
 forces :: Array Force
 forces = [
@@ -332,7 +331,7 @@ renderTableForces (SS_ simulation)  =
                   ] [] ]
     , Table.cell  [ css "text-left" ]
       [ HH.div_ [
-          HH.text $ label <> " " <> show t -- use forceDescription t for more detailed explanation
+          HH.text $ label <> "\n" <> show t -- use forceDescription t for more detailed explanation
         ]
       ]
     , Table.cell  [ css "text-left" ] [ HH.text $ showForceFilter f ]

@@ -43,11 +43,11 @@ allNodes :: forall t69. Maybe t69
 allNodes = Nothing -- just some sugar so that force declarations are nicer to read, Nothing == No filter == applies to all nodes
 data ForceFilter = FilterNodes String (Datum_ -> Boolean)
 instance Show ForceFilter where
-  show (FilterNodes description _) = "applying to " <> description
+  show (FilterNodes description _) = description
 
 showForceFilter :: Maybe ForceFilter -> String
-showForceFilter (Just (FilterNodes description _)) = "applying to " <> description
-showForceFilter Nothing = " (applies to all nodes)"
+showForceFilter (Just (FilterNodes description _)) = description
+showForceFilter Nothing = " (all nodes)"
 
 data ForceType = 
     ForceManyBody                                  -- strength, theta, distanceMax, distanceMin

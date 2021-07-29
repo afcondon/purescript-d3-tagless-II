@@ -10,7 +10,7 @@ import D3.Selection (Behavior(..), D3_Node(..), DragBehavior(..), Join(..), appl
 import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionModifySelection, selectionOn)
 import D3.Simulation.Types (SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, modifySelection, simulationHandle, toggleForceByLabel)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, enableOnlyTheseForces, modifySelection, simulationHandle, toggleForceByLabel)
 import Data.Foldable (foldl)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
@@ -76,6 +76,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   setForcesByLabel { enable, disable } = do
     simulationDisableForcesByLabel disable
     simulationEnableForcesByLabel  enable
+  enableOnlyTheseForces       = simulationEnableOnlyTheseForces
 
   setNodes nodes              = simulationSetNodes nodes
   uniformlyDistribute nodes   = pure $ setPositionToNaN_ nodes

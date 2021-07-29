@@ -61,7 +61,6 @@ unboxText =
   case _ of
     (Static a)   -> unsafeCoerce a
     (Fn a)       -> unsafeCoerce a
-
     (FnI a)      -> unsafeCoerce a
 
 -- | Instances for the 9 combinations of attributeSetters we need

@@ -96,7 +96,7 @@ updateNodes nodes = do
     (Just nodesGroup) -> do
       nodesSelection <- nodesGroup <+> UpdateJoin Group nodesInSimulation { enter: enterNodes simulation_, update: [], exit: [ remove ] } 
       circle <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
-      labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, text datum_.name]) 
+      labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor: "middle", text datum_.name]) 
 
       addTickFunction "nodes" $ Step nodesSelection nodeTick
       addSelection "nodesSelection" nodesSelection
