@@ -2,7 +2,6 @@ module D3.Examples.ThreeLittleCircles where
 
 import D3.Attributes.Sugar
 
-import D3.Attributes.Instances (indexIsNumber)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 import D3.Selection (Join(..), node)
 import D3Tagless.Capabilities ((+)) as D3
@@ -16,6 +15,10 @@ import D3.Scales (d3SchemeCategory10N_)
 -- | simple utility function used in all three of these examples
 xFromIndex :: Datum_ -> Index_ -> Number
 xFromIndex _ i = ((indexIsNumber i) * 100.0)
+  where
+    indexIsNumber :: Index_ -> Number
+    indexIsNumber = unsafeCoerce
+
 
 -- | Pretty much the most basic example imaginable, three ints represented by three circles
 threeLittleCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_

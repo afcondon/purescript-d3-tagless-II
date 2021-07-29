@@ -7,15 +7,20 @@ import Data.Function.Uncurried (Fn2, Fn3, mkFn2)
 import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
 
-
+-- | Some useful type aliases
 type IndexedLambda a = Fn2 Datum_ Index_ a
 type Listener        = (Event -> Datum_ -> D3This_ -> Unit) 
 type Listener_       = Fn3 Event Datum_ D3This_ Unit 
 type Label           = String
 
-newtype NWU = NWU { i :: Int, u :: UnitType} -- scope here for adding show function to remove constraints elsewhere
-instance showNWU :: Show NWU where
-  show (NWU n) = show n.i <> show n.u
+-- | Central feature of this module, 
+data Attribute = AttributeSetter Label Attr
+
+attributeLabel :: Attribute -> String
+attributeLabel (AttributeSetter label _) = label
+
+attributeAttr :: Attribute -> Attr
+attributeAttr (AttributeSetter _ a) = a
 
 data AttrBuilder a =
     Static a
@@ -25,17 +30,18 @@ data AttrBuilder a =
 data Attr = 
     StringAttr (AttrBuilder String)
   | NumberAttr (AttrBuilder Number)
-  | NWUAttr    (AttrBuilder NWU)
   | ArrayAttr  (AttrBuilder (Array Number))
 
-data Attribute = ToAttribute Label Attr
+-- Kind annotation to avoid "fun" with polykinds.
+class ToAttr :: Type -> Type -> Constraint
+-- | typeclass to enable polymorphic forms of the attribute setter
+class ToAttr to from | from -> to  where
+  toAttr :: from -> Attr
 
-attrLabel :: Attribute -> String
-attrLabel (ToAttribute label _) = label
-
-
-unbox :: ∀ a. Attr -> a
-unbox = 
+-- | we only unbox the attr at the point where we ship it over the FFI to JavaScript
+-- | the JavaScript API (D3) is polymorphic in this sense, can accept any of AttrBuilder forms
+unboxAttr :: ∀ a. Attr -> a
+unboxAttr = 
   case _ of
     (StringAttr (Static a)) -> unsafeCoerce a
     (StringAttr (Fn a))     -> unsafeCoerce a
@@ -45,32 +51,20 @@ unbox =
     (NumberAttr (Fn a))     -> unsafeCoerce a
     (NumberAttr (FnI a))    -> unsafeCoerce a
 
-    (NWUAttr (Static a))    -> unsafeCoerce "NWU-static" -- a
-    (NWUAttr (Fn a))        -> unsafeCoerce (\d -> "NWU-lambda") -- a
-    (NWUAttr (FnI a))       -> unsafeCoerce $ mkFn2 (\d i -> "NWU-di") -- a
-
     (ArrayAttr (Static a))  -> unsafeCoerce a
     (ArrayAttr (Fn a))      -> unsafeCoerce a
     (ArrayAttr (FnI a))     -> unsafeCoerce a
 
-
+-- | because the text attribute can only be String, it has only Static|Fn|FnI forms
 unboxText :: ∀ a. AttrBuilder String -> a
 unboxText = 
   case _ of
     (Static a)   -> unsafeCoerce a
     (Fn a)       -> unsafeCoerce a
+
     (FnI a)      -> unsafeCoerce a
-
--- Kind annotation to avoid "fun" with polykinds.
-class ToAttr :: Type -> Type -> Constraint
-class ToAttr to from | from -> to  where
-  toAttr :: from -> Attr
-
 -- Boilerplate, boilerplate, boilerplate...
 -- Might be a better way to do these.
-
-instance toAttrNWU :: ToAttr NWU NWU where
-  toAttr = NWUAttr <<< Static
 
 instance toAttrString :: ToAttr String String where
   toAttr = StringAttr <<< Static
@@ -98,19 +92,3 @@ instance toAttrArrayFn :: ToAttr (Array Number) (Datum_ -> Array Number) where
 
 instance toAttrArrayFnI :: ToAttr (Array Number) (Datum_ -> Index_ -> Array Number) where
   toAttr = ArrayAttr <<< FnI <<< mkFn2
-
--- common coercions -- TODO remove these in favor of explicit datum_ records everywhere
-datumIsChar :: Datum_ -> Char
-datumIsChar = unsafeCoerce
-
-datumIsNumber :: Datum_ -> Number
-datumIsNumber = unsafeCoerce
-
-datumIsString :: Datum_ -> String
-datumIsString = unsafeCoerce
-
-indexIsNumber :: Index_ -> Number
-indexIsNumber = unsafeCoerce
-
-indexIsString :: Index_ -> String
-indexIsString = unsafeCoerce

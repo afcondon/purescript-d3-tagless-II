@@ -1,48 +1,42 @@
 module D3.Attributes.Sugar where
 
-import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), Attribute(..), Listener, NWU, toAttr)
+import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), Attribute(..), Listener, toAttr)
 import D3.Data.Types (Datum_, EasingFunction(..), MouseEvent, Transition)
 import D3.FFI (autoBox_)
 import D3.Selection (ChainableS(..), OrderingAttribute(..))
 import Data.Array (intercalate, (:))
 import Data.Function.Uncurried (mkFn3)
-import Data.Int (toNumber)
-import Data.Tuple (Tuple(..))
-import Debug (spy)
-import Effect (Effect)
 import Effect.Aff (Milliseconds(..))
-import Prelude (class Semigroup, class Show, append, bind, flap, pure, show, ($), (<$>), (<<<), (<>))
+import Prelude (class Semigroup, class Show, append, flap, show, ($), (<$>), (<<<), (<>))
 import Unsafe.Coerce (unsafeCoerce)
-import Web.HTML (window)
-import Web.HTML.Window (innerHeight, innerWidth)
 
 backgroundColor :: ∀ a. ToAttr String a => a -> ChainableS
-backgroundColor = AttrT <<< ToAttribute "background-color" <<< toAttr
+backgroundColor = AttrT <<< AttributeSetter "background-color" <<< toAttr
 
 strokeColor :: ∀ a. ToAttr String a => a -> ChainableS
-strokeColor = AttrT <<< ToAttribute "stroke" <<< toAttr
+strokeColor = AttrT <<< AttributeSetter "stroke" <<< toAttr
 
 strokeOpacity :: ∀ a. ToAttr Number a => a -> ChainableS
-strokeOpacity = AttrT <<< ToAttribute "stroke-opacity" <<< toAttr
+strokeOpacity = AttrT <<< AttributeSetter "stroke-opacity" <<< toAttr
 
 opacity :: ∀ a. ToAttr Number a => a -> ChainableS
-opacity = AttrT <<< ToAttribute "opacity" <<< toAttr
+opacity = AttrT <<< AttributeSetter "opacity" <<< toAttr
 
 strokeWidth :: ∀ a. ToAttr Number a => a -> ChainableS
-strokeWidth = AttrT <<< ToAttribute "stroke-width" <<< toAttr
+strokeWidth = AttrT <<< AttributeSetter "stroke-width" <<< toAttr
 
 fill :: ∀ a. ToAttr String a => a -> ChainableS
-fill = AttrT <<< ToAttribute "fill" <<< toAttr
+fill = AttrT <<< AttributeSetter "fill" <<< toAttr
 
 -- TODO this definitely needs to be Number-with-unit here
 viewBox :: Number -> Number -> Number -> Number -> ChainableS
-viewBox xo yo w h = AttrT <<< ToAttribute "viewBox" $ toAttr vb
+viewBox xo yo w h = AttrT <<< AttributeSetter "viewBox" $ toAttr vb
   where
     vb = intercalate " " $ show <$> [ xo, yo, w, h ]
 
 -- preserveAspectRatio as an attribute only applies to viewBox
 preserveAspectRatio :: AspectRatioSpec -> ChainableS
-preserveAspectRatio = AttrT <<< ToAttribute "preserveAspectRatio" <<< toAttr <<< show
+preserveAspectRatio = AttrT <<< AttributeSetter "preserveAspectRatio" <<< toAttr <<< show
 
 data AlignAspectRatio_X = XMin | XMid | XMax
 instance Show AlignAspectRatio_X where
@@ -66,76 +60,76 @@ instance Show AspectRatioSpec where
   show (AspectRatio x y p)    =  show x <> show y <> " " <> show p
 
 autoBox :: ChainableS
-autoBox = AttrT <<< ToAttribute "viewBox" $ toAttr vb
+autoBox = AttrT <<< AttributeSetter "viewBox" $ toAttr vb
   where
     vb = \d -> intercalate " " $ show <$> (autoBox_ d)
 
 fontFamily :: ∀ a. ToAttr String a => a -> ChainableS
-fontFamily = AttrT <<< ToAttribute "font-family" <<< toAttr
+fontFamily = AttrT <<< AttributeSetter "font-family" <<< toAttr
 
 textAnchor :: ∀ a. ToAttr String a => a -> ChainableS
-textAnchor = AttrT <<< ToAttribute "text-anchor" <<< toAttr
+textAnchor = AttrT <<< AttributeSetter "text-anchor" <<< toAttr
 
 radius :: ∀ a. ToAttr Number a => a -> ChainableS
-radius = AttrT <<< ToAttribute "r" <<< toAttr
+radius = AttrT <<< AttributeSetter "r" <<< toAttr
 
 fontSize :: ∀ a. ToAttr Number a => a -> ChainableS
-fontSize = AttrT <<< ToAttribute "font-size" <<< toAttr
+fontSize = AttrT <<< AttributeSetter "font-size" <<< toAttr
 
 width :: ∀ a. ToAttr Number a => a -> ChainableS
-width = AttrT <<< ToAttribute "width" <<< toAttr
+width = AttrT <<< AttributeSetter "width" <<< toAttr
 
 height :: ∀ a. ToAttr Number a => a -> ChainableS
-height = AttrT <<< ToAttribute "height" <<< toAttr
+height = AttrT <<< AttributeSetter "height" <<< toAttr
 
 width100 :: ChainableS
-width100 = AttrT <<< ToAttribute "width" $ toAttr "100%"
+width100 = AttrT <<< AttributeSetter "width" $ toAttr "100%"
 
 height100 :: ChainableS
-height100 = AttrT <<< ToAttribute "height" $ toAttr "100%"
+height100 = AttrT <<< AttributeSetter "height" $ toAttr "100%"
 
 x :: ∀ a. ToAttr Number a => a -> ChainableS
-x = AttrT <<< ToAttribute "x" <<< toAttr
+x = AttrT <<< AttributeSetter "x" <<< toAttr
 
 y :: ∀ a. ToAttr Number a => a -> ChainableS
-y = AttrT <<< ToAttribute "y" <<< toAttr
+y = AttrT <<< AttributeSetter "y" <<< toAttr
 
-yu :: ∀ a. ToAttr NWU a => a -> ChainableS
-yu = AttrT <<< ToAttribute "y" <<< toAttr
+-- yu :: ∀ a. ToAttr NWU a => a -> ChainableS
+-- yu = AttrT <<< AttributeSetter "y" <<< toAttr
 
 x1 :: ∀ a. ToAttr Number a => a -> ChainableS
-x1 = AttrT <<< ToAttribute "x1" <<< toAttr
+x1 = AttrT <<< AttributeSetter "x1" <<< toAttr
 
 y1 :: ∀ a. ToAttr Number a => a -> ChainableS
-y1 = AttrT <<< ToAttribute "y1" <<< toAttr
+y1 = AttrT <<< AttributeSetter "y1" <<< toAttr
 
 x2 :: ∀ a. ToAttr Number a => a -> ChainableS
-x2 = AttrT <<< ToAttribute "x2" <<< toAttr
+x2 = AttrT <<< AttributeSetter "x2" <<< toAttr
 
 y2 :: ∀ a. ToAttr Number a => a -> ChainableS
-y2 = AttrT <<< ToAttribute "y2" <<< toAttr
+y2 = AttrT <<< AttributeSetter "y2" <<< toAttr
 
 dx :: ∀ a. ToAttr Number a => a -> ChainableS
-dx = AttrT <<< ToAttribute "dx" <<< toAttr
+dx = AttrT <<< AttributeSetter "dx" <<< toAttr
 
 dy :: ∀ a. ToAttr Number a => a -> ChainableS
-dy = AttrT <<< ToAttribute "dy" <<< toAttr
+dy = AttrT <<< AttributeSetter "dy" <<< toAttr
 
 cx :: ∀ a. ToAttr Number a => a -> ChainableS
-cx = AttrT <<< ToAttribute "cx" <<< toAttr
+cx = AttrT <<< AttributeSetter "cx" <<< toAttr
 
 cy :: ∀ a. ToAttr Number a => a -> ChainableS
-cy = AttrT <<< ToAttribute "cy" <<< toAttr
+cy = AttrT <<< AttributeSetter "cy" <<< toAttr
 
 text :: ∀ a. ToAttr String a => a -> ChainableS
-text = TextT <<< ToAttribute "text" <<< toAttr
+text = TextT <<< AttributeSetter "text" <<< toAttr
 
 -- TODO classed here has destructive semantics which D3 doesn't, because in D3 you give a Boolean to indicate whether you're adding or removing the class
 classed :: ∀ a. ToAttr String a => a -> ChainableS
-classed = AttrT <<< ToAttribute "class" <<< toAttr
+classed = AttrT <<< AttributeSetter "class" <<< toAttr
 
 cursor :: ∀ a. ToAttr String a => a -> ChainableS
-cursor = AttrT <<< ToAttribute "cursor" <<< toAttr
+cursor = AttrT <<< AttributeSetter "cursor" <<< toAttr
 
 onMouseEvent :: MouseEvent -> Listener -> ChainableS
 onMouseEvent event listener = OnT event (mkFn3 listener)
@@ -143,13 +137,13 @@ onMouseEvent event listener = OnT event (mkFn3 listener)
 -- helpers for Forces
 
 originX :: ∀ a. ToAttr Number a => a -> ChainableS
-originX = AttrT <<< ToAttribute "originX" <<< toAttr
+originX = AttrT <<< AttributeSetter "originX" <<< toAttr
 
 originY :: ∀ a. ToAttr Number a => a -> ChainableS
-originY = AttrT <<< ToAttribute "originY" <<< toAttr
+originY = AttrT <<< AttributeSetter "originY" <<< toAttr
 
 strength :: ∀ a. ToAttr Number a => a -> ChainableS
-strength = AttrT <<< ToAttribute "strength" <<< toAttr
+strength = AttrT <<< AttributeSetter "strength" <<< toAttr
 
 
 
@@ -189,12 +183,12 @@ instance showLineJoin :: Show LineJoin where
   show Round     = "round"
 
 strokeLineJoin :: LineJoin -> ChainableS
-strokeLineJoin = AttrT <<< ToAttribute "stroke-linejoin" <<< toAttr <<< show
+strokeLineJoin = AttrT <<< AttributeSetter "stroke-linejoin" <<< toAttr <<< show
 
 -- helpers for transitions, a sequence of functions but expressed as text in the DOM
 -- TODO don't export transform'
 transform' :: (Datum_ -> String) -> ChainableS
-transform' = AttrT <<< ToAttribute "transform" <<< StringAttr <<< Fn
+transform' = AttrT <<< AttributeSetter "transform" <<< StringAttr <<< Fn
 
 -- make a single (Datum_ -> String) function out of the array (ie sequence) of functions provided
 transform :: Array (Datum_ -> String) -> ChainableS

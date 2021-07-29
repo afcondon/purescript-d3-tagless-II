@@ -35,45 +35,45 @@ defaultForceYConfig =
 -- | ========================= sugar for the various attributes of forces =============================
 -- | ==================================================================================================
 radius :: ∀ a. ToAttr Number a => a -> ChainableF
-radius = ForceT <<< ToAttribute "radius" <<< toAttr
+radius = ForceT <<< AttributeSetter "radius" <<< toAttr
 
 strength :: ∀ a. ToAttr Number a => a -> ChainableF
-strength = ForceT <<< ToAttribute "strength" <<< toAttr
+strength = ForceT <<< AttributeSetter "strength" <<< toAttr
 
 -- cx :: ∀ a. ToAttr Number a => a -> ChainableF
--- cx = ForceT <<< ToAttribute "cx" <<< toAttr
+-- cx = ForceT <<< AttributeSetter "cx" <<< toAttr
 
 -- cy :: ∀ a. ToAttr Number a => a -> ChainableF
--- cy = ForceT <<< ToAttribute "cy" <<< toAttr
+-- cy = ForceT <<< AttributeSetter "cy" <<< toAttr
 
 theta :: ∀ a. ToAttr Number a => a -> ChainableF
-theta = ForceT <<< ToAttribute "theta" <<< toAttr
+theta = ForceT <<< AttributeSetter "theta" <<< toAttr
 
 distanceMin :: ∀ a. ToAttr Number a => a -> ChainableF
-distanceMin = ForceT <<< ToAttribute "distanceMin" <<< toAttr
+distanceMin = ForceT <<< AttributeSetter "distanceMin" <<< toAttr
 
 distanceMax :: ∀ a. ToAttr Number a => a -> ChainableF
-distanceMax = ForceT <<< ToAttribute "distanceMax" <<< toAttr
+distanceMax = ForceT <<< AttributeSetter "distanceMax" <<< toAttr
 
 iterations :: ∀ a. ToAttr Number a => a -> ChainableF
-iterations = ForceT <<< ToAttribute "iterations" <<< toAttr
+iterations = ForceT <<< AttributeSetter "iterations" <<< toAttr
 
 x :: ∀ a. ToAttr Number a => a -> ChainableF
-x = ForceT <<< ToAttribute "x" <<< toAttr
+x = ForceT <<< AttributeSetter "x" <<< toAttr
 
 y :: ∀ a. ToAttr Number a => a -> ChainableF
-y = ForceT <<< ToAttribute "y" <<< toAttr
+y = ForceT <<< AttributeSetter "y" <<< toAttr
 
 fx :: ∀ a. ToAttr Number a => a -> ChainableF
-fx = ForceT <<< ToAttribute "fx" <<< toAttr
+fx = ForceT <<< AttributeSetter "fx" <<< toAttr
 
 fy :: ∀ a. ToAttr Number a => a -> ChainableF
-fy = ForceT <<< ToAttribute "fy" <<< toAttr
+fy = ForceT <<< AttributeSetter "fy" <<< toAttr
 
 distance :: ∀ a. ToAttr Number a => a -> ChainableF
-distance = ForceT <<< ToAttribute "distance" <<< toAttr
+distance = ForceT <<< AttributeSetter "distance" <<< toAttr
 
 index :: ∀ a. ToAttr Number a => a -> ChainableF -- TODO in fact this would be an Int correctly
-index = ForceT <<< ToAttribute "distance" <<< toAttr
+index = ForceT <<< AttributeSetter "distance" <<< toAttr
 
 

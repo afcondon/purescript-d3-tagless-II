@@ -56,21 +56,21 @@ radialSeparation  = mkFn2 (\a b -> if (sharesParent_ a b)
                                    else 2.0 / (hNodeDepth_ a))
 
 horizontalLink :: ChainableS
-horizontalLink = AttrT $ ToAttribute "d" $ toAttr linkHorizontal_
+horizontalLink = AttrT $ AttributeSetter "d" $ toAttr linkHorizontal_
 
 verticalLink :: ChainableS
-verticalLink = AttrT $ ToAttribute "d" $ toAttr linkVertical_
+verticalLink = AttrT $ AttributeSetter "d" $ toAttr linkVertical_
 
 horizontalClusterLink :: Number -> ChainableS
-horizontalClusterLink yOffset = AttrT $ ToAttribute "d" $ toAttr (linkClusterHorizontal_ yOffset)
+horizontalClusterLink yOffset = AttrT $ AttributeSetter "d" $ toAttr (linkClusterHorizontal_ yOffset)
 
 verticalClusterLink :: Number -> ChainableS
-verticalClusterLink xOffset = AttrT $ ToAttribute "d" $ toAttr (linkClusterVertical_ xOffset)
+verticalClusterLink xOffset = AttrT $ AttributeSetter "d" $ toAttr (linkClusterVertical_ xOffset)
 
 radialLink :: (Datum_ -> Number) -> (Datum_ -> Number) -> ChainableS
 radialLink angleFn radius_Fn = do
   let radialFn = linkRadial_ angleFn radius_Fn
-  AttrT $ ToAttribute "d" $ toAttr radialFn
+  AttrT $ AttributeSetter "d" $ toAttr radialFn
 
 
 

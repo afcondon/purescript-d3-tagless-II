@@ -210,8 +210,8 @@ instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
 -- applyChainableSString :: String -> ChainableS -> String
 -- applyChainableSString selection  = 
 --   case _ of 
---     (AttrT (Attribute label attr)) -> showSetAttr_ label (unbox attr) selection
---     (TextT (Attribute label attr)) -> showSetText_ (unbox attr) selection  -- TODO unboxText surely?
+--     (AttrT (Attribute label attr)) -> showSetAttr_ label (unboxAttr attr) selection
+--     (TextT (Attribute label text)) -> showSetText_ (unboxText text) selection 
 --     RemoveT                        -> showRemoveSelection_ selection
 --     (TransitionT chain transition) -> do 
 --       let tString = showAddTransition_ selection transition

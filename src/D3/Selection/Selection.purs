@@ -2,7 +2,7 @@ module D3.Selection where
 
 import D3.FFI
 
-import D3.Attributes.Instances (Attribute(..), Listener_, attrLabel, unbox)
+import D3.Attributes.Instances (Attribute(..), Listener_, attributeLabel, unboxAttr)
 import D3.Data.Types (D3Selection_, Datum_, Element, MouseEvent, Transition)
 import D3.Zoom (ZoomConfig)
 import Data.Array (foldl)
@@ -78,10 +78,10 @@ enterOnly :: Array ChainableS -> EnterUpdateExit
 enterOnly as = { enter: as, update: [], exit: [] }
 
 instance showChainableS :: Show ChainableS where
-  show (AttrT attr)      = "chainable: attr " <> attrLabel attr
+  show (AttrT attr)      = "chainable: attr " <> attributeLabel attr
   show (TextT _)         = "chainable: text"
-  show (HTMLT attr)      = "chainable: html" <> attrLabel attr
-  show (PropertyT attr)  = "chainable: property" <> attrLabel attr
+  show (HTMLT attr)      = "chainable: html" <> attributeLabel attr
+  show (PropertyT attr)  = "chainable: property" <> attributeLabel attr
 
   show (TransitionT _ _) = "chainable: transition"
 
@@ -100,14 +100,14 @@ instance showOrderingAttribute :: Show OrderingAttribute where
 
 
 applyChainableSD3 :: D3Selection_ -> ChainableS -> D3Selection_
-applyChainableSD3 selection_ (AttrT (ToAttribute label attr)) = 
-  d3SetAttr_ label (unbox attr) selection_
+applyChainableSD3 selection_ (AttrT (AttributeSetter label attr)) = 
+  d3SetAttr_ label (unboxAttr attr) selection_
 
 -- NB only protection against non-text attribute for Text field is in the helper function
 -- and similarly for Property and HTML
-applyChainableSD3 selection_ (TextT (ToAttribute label attr))     = d3SetText_    (unbox attr) selection_ 
-applyChainableSD3 selection_ (PropertyT (ToAttribute label attr)) = d3SetProperty_ (unbox attr) selection_ 
-applyChainableSD3 selection_ (HTMLT (ToAttribute label attr))     = d3SetHTML_     (unbox attr) selection_ 
+applyChainableSD3 selection_ (TextT (AttributeSetter label attr))     = d3SetText_    (unboxAttr attr) selection_ 
+applyChainableSD3 selection_ (PropertyT (AttributeSetter label attr)) = d3SetProperty_ (unboxAttr attr) selection_ 
+applyChainableSD3 selection_ (HTMLT (AttributeSetter label attr))     = d3SetHTML_     (unboxAttr attr) selection_ 
 
 -- NB this remove call will have no effect on elements with active or pending transitions
 -- and this gives rise to very counter-intuitive misbehaviour as subsequent enters clash with 
