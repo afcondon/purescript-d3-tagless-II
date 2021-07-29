@@ -90,8 +90,9 @@ div.svg-container.graph svg g.links line.M2M-Graph {
       }
 
 div.svg-container.graph svg g.links line.P2P {
-        stroke: green;
         visibility: visible;
+        opacity: 0.3;
+        stroke-width: 2px;
       }
 
 div.svg-container.graph svg g.links line.in-package.dependency {
@@ -105,7 +106,7 @@ div.svg-container.graph svg g.nodes text {
       }
 
 div.svg-container.graph svg g.nodes g.module text {
-          visibility: hidden;
+          visibility: visible;
           opacity: 0.5;
         }
 
@@ -126,10 +127,11 @@ div.svg-container.graph svg g.nodes g.module:hover circle {
 
 div.svg-container.graph svg g.nodes g.package circle {
           visibility: visible;
+          opacity: 0.5;
         }
 
 div.svg-container.graph svg g.nodes g.package text {
-          visibility: hidden;
+          visibility: visible;
           fill: black;
           font-size: 24px;
           opacity: 0.5;
@@ -138,6 +140,7 @@ div.svg-container.graph svg g.nodes g.package text {
 
 div.svg-container.graph svg g.nodes g.package:hover text {
             visibility: visible;
+            opacity: 1;
           }
 
 /* ! tailwindcss v2.1.4 | MIT License | https://tailwindcss.com */

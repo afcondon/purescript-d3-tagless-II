@@ -60,7 +60,7 @@ script model = do
 
   linksGroup        <- svg  D3.+ (node Group [ classed "links" ])
   linksInSimulation <- setLinks model.links.treeLinks datum_.indexFunction
-  linksSelection    <- linksGroup <+> Join Line linksInSimulation [ classed link_.linkClass ]
+  linksSelection    <- linksGroup <+> Join Line linksInSimulation [ classed link_.linkClass, strokeColor link_.color ]
 
   addTickFunction "nodes" $ Step nodesSelection nodeTick
   addTickFunction "links" $ Step linksSelection linkTick
@@ -96,7 +96,7 @@ updateNodes nodes = do
     (Just nodesGroup) -> do
       nodesSelection <- nodesGroup <+> UpdateJoin Group nodesInSimulation { enter: enterNodes simulation_, update: [], exit: [ remove ] } 
       circle <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
-      labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor: "middle", text datum_.name]) 
+      labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]) 
 
       addTickFunction "nodes" $ Step nodesSelection nodeTick
       addSelection "nodesSelection" nodesSelection
@@ -117,7 +117,7 @@ updateLinks links = do
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
-      linksSelection <- linksGroup <+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
+      linksSelection <- linksGroup <+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "linksSelection" linksSelection
   

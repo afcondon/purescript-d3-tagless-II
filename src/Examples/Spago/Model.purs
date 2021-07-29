@@ -67,6 +67,7 @@ link_ = {
   , target    : \d -> (unboxD3SimLink d).target
   , linkClass : \d -> show (unboxD3SimLink d).linktype
   , linkClass2: \d -> "updated " <> show (unboxD3SimLink d).linktype
+  , color     : \d -> d3SchemeCategory10N_ (toNumber $ (unboxD3SimLink d).target.containerID)
 }
 
 cluster2Point :: Index_ -> PointXY
@@ -166,6 +167,12 @@ isModule (D3SimNode d) =
   case d.nodetype of
     (IsModule _) -> true
     (IsPackage _) -> false
+isUsedModule (D3SimNode d) =
+  case d.nodetype of
+    (IsPackage _) -> false
+    (IsModule _) -> if d.connected 
+                    then true
+                    else false
               
 -- Model data types specialized with inital data
 type SpagoTreeNode    = D3TreeRow       (EmbeddedData SpagoNodeData + ())

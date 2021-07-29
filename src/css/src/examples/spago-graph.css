@@ -7,8 +7,9 @@ div.svg-container.graph {
         visibility: hidden;
       } 
       & line.P2P {
-        stroke: green;
         visibility: visible;
+        opacity: 0.3;
+        stroke-width: 2px;
       } 
       & line.in-package.dependency {
         stroke: blue;
@@ -23,7 +24,7 @@ div.svg-container.graph {
       }
       & g.module {
         & text {
-          visibility: hidden;
+          visibility: visible;
           opacity: 0.5;
         }
         & circle {
@@ -44,9 +45,10 @@ div.svg-container.graph {
       & g.package {
         & circle {
           visibility: visible;
+          opacity: 0.5;
         }
         & text {
-          visibility: hidden;
+          visibility: visible;
           fill: black;
           font-size: 24px;
           opacity: 0.5;
@@ -55,6 +57,7 @@ div.svg-container.graph {
         &:hover {
           & text {
             visibility: visible;
+            opacity: 1;
           }
         }
       }

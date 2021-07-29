@@ -10,7 +10,7 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, index_ToInt)
 import D3.Examples.Spago.Files (NodeType(..))
 import D3.Examples.Spago.Graph as Graph
-import D3.Examples.Spago.Model (SpagoModel, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, numberToGridPoint, offsetXY, scalePoint)
+import D3.Examples.Spago.Model (SpagoModel, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, numberToGridPoint, offsetXY, scalePoint)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.Node (D3_SimulationNode(..))
 import D3.Simulation.Config as F
@@ -178,8 +178,9 @@ handleAction = case _ of
       Nothing -> pure unit
       (Just graph) -> do
         simulationStop
-        runEffectSimulation (Graph.updateNodes (filter isModule graph.nodes))
-        runEffectSimulation $ setForcesByLabel treeForceSettings
+        runEffectSimulation (Graph.updateNodes (filter isUsedModule graph.nodes))
+        runEffectSimulation (Graph.updateLinks graph.links.treeLinks)
+        runEffectSimulation $ enableOnlyTheseForces treeForceSettings
         simulationStart
 
   ToggleForce label -> do
@@ -219,8 +220,8 @@ addTreeToModel rootName maybeModel = do
 -- | FORCES
 -- | ============================================
 gridForceSettings = [ "packageGrid", "clusterx", "clustery", "collide1" ]
-graphForceSettings = [ "charge2", "collide2", "packageOrbit", "x", "y" ]
-treeForceSettings = { enable: [], disable: ["packageOrbit", "packageGrid", "clusterx", "clustery" ] }
+graphForceSettings = [ "charge1", "collide2", "packageOrbit", "x", "y" ]
+treeForceSettings = ["links", "center", "charge1", "collide1" ]
 forces :: Array Force
 forces = [
         createForce "collide1"     ForceCollide  allNodes [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
