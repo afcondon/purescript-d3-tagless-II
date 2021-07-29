@@ -2,7 +2,7 @@ module D3.Simulation.Forces where
 
 import Prelude
 
-import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), Attribute(..), Label, IndexedLambda, toAttr, unboxAttr)
+import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), Label, IndexedLambda, toAttr, unboxAttr)
 import D3.Data.Types (D3Simulation_, Datum_, Index_)
 import D3.FFI (D3Attr, D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulationWithFilter_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, setLinks_, unsetLinks_)
 import D3.Simulation.Types (ChainableF(..), Force(..), ForceFilter(..), ForceStatus(..), ForceType(..))
@@ -200,7 +200,7 @@ createForce_ = case _ of
   (ForceFixPositionY _)   -> dummyForceHandle_
 
 -- TODO at present there is no type checking on what forces have which attrs settable, see comment above
-setForceAttr :: D3ForceHandle_ -> Attribute -> D3ForceHandle_
+setForceAttr :: D3ForceHandle_ -> AttributeSetter -> D3ForceHandle_
 setForceAttr force_ (AttributeSetter label attr) = do
   case label of
     "radius"      -> setForceRadius_      force_ (unboxAttr attr) -- valid 
@@ -215,12 +215,12 @@ setForceAttr force_ (AttributeSetter label attr) = do
     _ -> force_ -- no other force attributes accepted
 
 
-setForceAttrWithFilter :: D3ForceHandle_ -> (Datum_ -> Boolean) -> Attribute -> D3ForceHandle_
+setForceAttrWithFilter :: D3ForceHandle_ -> (Datum_ -> Boolean) -> AttributeSetter -> D3ForceHandle_
 setForceAttrWithFilter force_ filter (AttributeSetter label attr) = do
   -- let attr' = unboxAttr attr
   case label of
     "radius"      -> setForceRadius_      force_ (unboxAttr attr)
-    "strength"    -> setForceStrength_    force_ (unboxAttr (strengthFiltered filter 0.0 attr)) 
+    "strength"    -> setForceStrength_    force_ (unboxAttr (attrFilter filter 0.0 attr)) 
     "theta"       -> setForceTheta_       force_ (unboxAttr attr)
     "distanceMin" -> setForceDistanceMin_ force_ (unboxAttr attr)
     "distanceMax" -> setForceDistanceMax_ force_ (unboxAttr attr)
@@ -230,9 +230,6 @@ setForceAttrWithFilter force_ filter (AttributeSetter label attr) = do
     "distance"    -> setForceDistance_    force_ (unboxAttr attr)
     _ -> force_ -- no other force attributes accepted
 
-
-strengthFiltered :: ∀ a. ToAttr Number a => (Datum_ -> Boolean) -> Number -> a -> ChainableF
-strengthFiltered filter default = ForceT <<< AttributeSetter "strength" <<< (attrFilter filter default) <<< toAttr 
 
 attrFilter :: (Datum_ -> Boolean) -> Number -> Attr -> Attr
 attrFilter filter default = do

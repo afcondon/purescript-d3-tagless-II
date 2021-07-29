@@ -2,12 +2,9 @@ module D3.Simulation.Types where
 
 import Prelude
 
-import D3.Attributes.Instances (Attribute, Label)
-import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_, PointXY)
-import D3.Examples.Spago.Files (SpagoGraphLinkID)
-import D3.Examples.Spago.Model (SpagoSimNode)
-import D3.FFI (D3ForceHandle_, OpaqueLinkType_, OpaqueNodeType_, SimulationConfig_, forceLink_, initSimulation_)
-import D3.Node (D3_Link, D3_SimulationNode, NodeID)
+import D3.Attributes.Instances (AttributeSetter, Label)
+import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_)
+import D3.FFI (D3ForceHandle_, OpaqueNodeType_, SimulationConfig_, initSimulation_)
 import D3.Selection (ChainableS)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -33,7 +30,7 @@ instance Show Force where
   show (Force label status t (Nothing) cs h) = "Force: " <> label <> " " <> show status <> " applying to all nodes"
 
 -- not sure if there needs to be a separate type for force attributes, maybe not, but we'll start assuming so
-newtype ChainableF = ForceT Attribute
+newtype ChainableF = ForceT AttributeSetter
 derive instance Newtype ChainableF _
 
 data ForceStatus = ForceActive | ForceDisabled
@@ -42,11 +39,13 @@ instance showForceStatus :: Show ForceStatus where
   show ForceActive = "active"
   show ForceDisabled = "inactive"
 
+allNodes :: forall t69. Maybe t69
 allNodes = Nothing -- just some sugar so that force declarations are nicer to read, Nothing == No filter == applies to all nodes
 data ForceFilter = FilterNodes String (Datum_ -> Boolean)
 instance Show ForceFilter where
   show (FilterNodes description _) = "applying to " <> description
 
+showForceFilter :: Maybe ForceFilter -> String
 showForceFilter (Just (FilterNodes description _)) = "applying to " <> description
 showForceFilter Nothing = " (applies to all nodes)"
 

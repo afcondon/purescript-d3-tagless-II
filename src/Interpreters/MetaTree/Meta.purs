@@ -6,13 +6,11 @@ import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
 import D3.Data.Types (Element, MouseEvent, Transition)
 import D3.FFI (ComputeKeyFunction_)
-import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), DragBehavior, EnterUpdateExit, Join(..), OrderingAttribute(..))
-import D3.Zoom (ZoomConfig)
-import D3Tagless.Capabilities (class SelectionM, appendElement)
+import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), EnterUpdateExit, Join(..), OrderingAttribute(..))
+import D3Tagless.Capabilities (class SelectionM)
 import Data.Array (filter, (:))
 import Data.Map (Map, empty, insert, lookup)
 import Data.Maybe (fromMaybe)
-import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..), snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
@@ -210,8 +208,8 @@ instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
 -- applyChainableSString :: String -> ChainableS -> String
 -- applyChainableSString selection  = 
 --   case _ of 
---     (AttrT (Attribute label attr)) -> showSetAttr_ label (unboxAttr attr) selection
---     (TextT (Attribute label text)) -> showSetText_ (unboxText text) selection 
+--     (AttrT (AttributeSetter label attr)) -> showSetAttr_ label (unboxAttr attr) selection
+--     (TextT (AttributeSetter label text)) -> showSetText_ (unboxText text) selection 
 --     RemoveT                        -> showRemoveSelection_ selection
 --     (TransitionT chain transition) -> do 
 --       let tString = showAddTransition_ selection transition

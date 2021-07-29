@@ -1,6 +1,6 @@
 module D3.Attributes.Sugar where
 
-import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), Attribute(..), Listener, toAttr)
+import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), Listener, toAttr)
 import D3.Data.Types (Datum_, EasingFunction(..), MouseEvent, Transition)
 import D3.FFI (autoBox_)
 import D3.Selection (ChainableS(..), OrderingAttribute(..))

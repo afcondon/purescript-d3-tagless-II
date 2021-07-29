@@ -2,7 +2,7 @@ module D3.Selection where
 
 import D3.FFI
 
-import D3.Attributes.Instances (Attribute(..), Listener_, attributeLabel, unboxAttr)
+import D3.Attributes.Instances (AttributeSetter(..), Listener_, attributeLabel, unboxAttr)
 import D3.Data.Types (D3Selection_, Datum_, Element, MouseEvent, Transition)
 import D3.Zoom (ZoomConfig)
 import Data.Array (foldl)
@@ -51,10 +51,10 @@ node_ e = D3_Node e []
 data OrderingAttribute = Order | Sort (Datum_ -> Datum_ -> Int) | Raise | Lower
 
 data ChainableS =  
-    AttrT Attribute
-  | TextT Attribute -- we can't narrow it to String here but helper function will do that
-  | HTMLT Attribute -- we can't narrow it to String here but helper function will do that
-  | PropertyT Attribute -- this might motivate adding a Boolean flavor of Attribute, eg for checkbox "checked"
+    AttrT AttributeSetter
+  | TextT AttributeSetter -- we can't narrow it to String here but helper function will do that
+  | HTMLT AttributeSetter -- we can't narrow it to String here but helper function will do that
+  | PropertyT AttributeSetter -- this might motivate adding a Boolean flavor of Attribute, eg for checkbox "checked"
 
   | OrderingT OrderingAttribute
 
@@ -63,10 +63,6 @@ data ChainableS =
   | RemoveT
 
   | OnT MouseEvent Listener_
-
-  -- other candidates for this ADT include
-                -- | WithUnit Attribute UnitType
-                -- | Merge
                 
 type EnterUpdateExit = {
     enter  :: Array ChainableS

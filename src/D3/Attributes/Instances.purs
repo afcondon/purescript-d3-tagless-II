@@ -14,12 +14,12 @@ type Listener_       = Fn3 Event Datum_ D3This_ Unit
 type Label           = String
 
 -- | Central feature of this module, 
-data Attribute = AttributeSetter Label Attr
+data AttributeSetter = AttributeSetter Label Attr
 
-attributeLabel :: Attribute -> String
+attributeLabel :: AttributeSetter -> String
 attributeLabel (AttributeSetter label _) = label
 
-attributeAttr :: Attribute -> Attr
+attributeAttr :: AttributeSetter -> Attr
 attributeAttr (AttributeSetter _ a) = a
 
 data AttrBuilder a =
@@ -63,32 +63,26 @@ unboxText =
     (Fn a)       -> unsafeCoerce a
 
     (FnI a)      -> unsafeCoerce a
--- Boilerplate, boilerplate, boilerplate...
--- Might be a better way to do these.
 
+-- | Instances for the 9 combinations of attributeSetters we need
+-- | ie (Static, Fn, FnI) * (String, Number, Array Number)
 instance toAttrString :: ToAttr String String where
   toAttr = StringAttr <<< Static
-
 instance toAttrStringFn :: ToAttr String (Datum_ -> String) where
   toAttr = StringAttr <<< Fn
-
 instance toAttrStringFnI :: ToAttr String (Datum_ -> Index_ -> String) where
   toAttr = StringAttr <<< FnI <<< mkFn2
 
 instance toAttrNumber :: ToAttr Number Number where
   toAttr = NumberAttr <<< Static
-
 instance toAttrNumberFn :: ToAttr Number (Datum_ -> Number) where
   toAttr = NumberAttr <<< Fn
-
 instance toAttrNumberFnI :: ToAttr Number (Datum_ -> Index_ -> Number) where
   toAttr = NumberAttr <<< FnI <<< mkFn2
 
 instance toAttrArray :: ToAttr (Array Number) (Array Number) where
   toAttr = ArrayAttr <<< Static
-
 instance toAttrArrayFn :: ToAttr (Array Number) (Datum_ -> Array Number) where
   toAttr = ArrayAttr <<< Fn
-
 instance toAttrArrayFnI :: ToAttr (Array Number) (Datum_ -> Index_ -> Array Number) where
   toAttr = ArrayAttr <<< FnI <<< mkFn2

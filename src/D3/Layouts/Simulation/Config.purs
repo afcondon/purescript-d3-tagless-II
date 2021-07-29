@@ -1,6 +1,6 @@
 module D3.Simulation.Config where
 
-import D3.Attributes.Instances (class ToAttr, Attribute(..), toAttr)
+import D3.Attributes.Instances (class ToAttr, AttributeSetter(..), toAttr)
 import D3.Data.Types (Datum_, Index_)
 import D3.Simulation.Types (ChainableF(..))
 import Data.Number (infinity)
