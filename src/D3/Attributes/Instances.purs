@@ -99,7 +99,7 @@ instance toAttrArrayFn :: ToAttr (Array Number) (Datum_ -> Array Number) where
 instance toAttrArrayFnI :: ToAttr (Array Number) (Datum_ -> Index_ -> Array Number) where
   toAttr = ArrayAttr <<< FnI <<< mkFn2
 
--- common coercions
+-- common coercions -- TODO remove these in favor of explicit datum_ records everywhere
 datumIsChar :: Datum_ -> Char
 datumIsChar = unsafeCoerce
 

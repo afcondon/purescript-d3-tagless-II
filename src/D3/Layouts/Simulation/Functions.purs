@@ -8,8 +8,8 @@ import D3.Data.Types (D3Selection_, Index_)
 import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_, disableDrag_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
 import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
-import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, getHandle, putForceInSimulation, setForceAttr)
-import D3.Simulation.Types (Force(..), ForceFilter, ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..), Step(..))
+import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, getHandle, putForceInSimulation, setForceAttr, setForceAttrWithFilter)
+import D3.Simulation.Types (Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (setForcesByLabel)
 import Data.Array (intercalate)
@@ -59,8 +59,12 @@ simulationRemoveAllForces = do
 simulationAddForce :: forall m row. 
   (MonadState { simulationState :: SimulationState_ | row } m) =>
   Force -> m Unit
-simulationAddForce force@(Force label status t f attrs h_) = do
-  let _ = (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
+simulationAddForce force@(Force label status t f attrs h_) = do 
+  -- TODO this is where the filter has to wrap the strength
+  let _ = 
+        case f of
+          Nothing       -> (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
+          (Just (FilterNodes _ filter)) -> (\a -> setForceAttrWithFilter h_ filter (unwrap a)) <$> attrs 
   { simulationState: SS_ ss_} <- get
   let _ = if status == ForceActive
           then putForceInSimulation force ss_.simulation_

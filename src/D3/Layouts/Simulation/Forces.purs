@@ -2,12 +2,13 @@ module D3.Simulation.Forces where
 
 import Prelude
 
-import D3.Attributes.Instances (Attribute(..), Label, unbox)
-import D3.Data.Types (D3Simulation_)
-import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulationWithFilter_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, setLinks_, unsetLinks_)
-import D3.Simulation.Types (ChainableF, Force(..), ForceFilter(..), ForceStatus(..), ForceType(..))
+import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), Attribute(..), Label, IndexedLambda, toAttr, unbox)
+import D3.Data.Types (D3Simulation_, Datum_, Index_)
+import D3.FFI (D3Attr, D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulationWithFilter_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, setLinks_, unsetLinks_)
+import D3.Simulation.Types (ChainableF(..), Force(..), ForceFilter(..), ForceStatus(..), ForceType(..))
 import D3Tagless.Capabilities (setLinks)
 import Data.Array (elem)
+import Data.Function.Uncurried (mkFn2, runFn2)
 import Data.Maybe (Maybe(..))
 import Debug (spy, trace)
 
@@ -214,4 +215,71 @@ setForceAttr force_ (ToAttribute label attr) = do
     _ -> force_ -- no other force attributes accepted
 
 
-  
+setForceAttrWithFilter :: D3ForceHandle_ -> (Datum_ -> Boolean) -> Attribute -> D3ForceHandle_
+setForceAttrWithFilter force_ filter (ToAttribute label attr) = do
+  -- let attr' = unbox attr
+  case label of
+    "radius"      -> setForceRadius_      force_ (unbox attr)
+    "strength"    -> setForceStrength_    force_ (unbox attr) 
+    "theta"       -> setForceTheta_       force_ (unbox attr)
+    "distanceMin" -> setForceDistanceMin_ force_ (unbox attr)
+    "distanceMax" -> setForceDistanceMax_ force_ (unbox attr)
+    "iterations"  -> setForceIterations_  force_ (unbox attr)
+    "x"           -> setForceX_           force_ (unbox attr)
+    "y"           -> setForceY_           force_ (unbox attr)
+    "distance"    -> setForceDistance_    force_ (unbox attr)
+    _ -> force_ -- no other force attributes accepted
+
+
+strengthFiltered :: ∀ a. ToAttr Number a => (Datum_ -> Boolean) -> Number -> a -> ChainableF
+strengthFiltered filter default = ForceT <<< ToAttribute "strength" <<< (attrFilter filter default) <<< toAttr 
+
+addFilterToStatic :: (Datum_ -> Boolean) -> Number -> Number -> (Datum_ -> Number)
+addFilterToStatic filter value default = \d -> if filter d then value else default
+
+addFilterToFn :: (Datum_ -> Boolean) -> (Datum_ -> Number) -> Number -> (Datum_ -> Number)
+addFilterToFn filter fn default = \d -> if filter d then fn d else default
+
+addFilterToFnI :: (Datum_ -> Index_ -> Boolean) -> IndexedLambda Number -> Number -> IndexedLambda Number
+addFilterToFnI filter fni default = mkFn2 f 
+  where
+    f d i = if filter d i then runFn2 fni d i else default
+
+attrFilter :: (Datum_ -> Boolean) -> Number -> Attr -> Attr
+attrFilter filter default = 
+  case _ of
+    (StringAttr (Static a)) -> StringAttr (Static a)
+    (StringAttr (Fn a))     -> StringAttr (Fn a)
+    (StringAttr (FnI a))    -> StringAttr (FnI a)
+
+    (NumberAttr (Static a)) -> NumberAttr (Fn (addFilterToStatic filter a default)) -- turns static setter into dynamic because of filtering
+    (NumberAttr (Fn a))     -> NumberAttr (Fn (addFilterToFn filter a default))
+    (NumberAttr (FnI a))    -> NumberAttr (FnI a) -- NB doesn't handle filtering of indexed functions at the moment
+
+    (NWUAttr (Static a))    -> NWUAttr (Static a)
+    (NWUAttr (Fn a))        -> NWUAttr (Fn a)
+    (NWUAttr (FnI a))       -> NWUAttr (FnI a)
+
+    (ArrayAttr (Static a))  -> ArrayAttr (Static a)
+    (ArrayAttr (Fn a))      -> ArrayAttr (Fn a)
+    (ArrayAttr (FnI a))     -> ArrayAttr (FnI a)
+
+-- attrFilterI :: (Datum_ -> Index_ -> Boolean) -> Number -> Attr -> Attr
+-- attrFilterI filter default = 
+--   case _ of
+--     (StringAttr (Static a)) -> StringAttr (Static a)
+--     (StringAttr (Fn a))     -> StringAttr (Fn a)
+--     (StringAttr (FnI a))    -> StringAttr (FnI a)
+
+--     (NumberAttr (Static a)) -> NumberAttr (Fn (addFilterToStatic filter a default))
+--     (NumberAttr (Fn a))     -> NumberAttr (Fn (addFilterToFn filter a default))
+--     (NumberAttr (FnI a))    -> NumberAttr (FnI (addFilterToFnI filter a default))
+
+--     (NWUAttr (Static a))    -> NWUAttr (Static a)
+--     (NWUAttr (Fn a))        -> NWUAttr (Fn a)
+--     (NWUAttr (FnI a))       -> NWUAttr (FnI a)
+
+--     (ArrayAttr (Static a))  -> ArrayAttr (Static a)
+--     (ArrayAttr (Fn a))      -> ArrayAttr (Fn a)
+--     (ArrayAttr (FnI a))     -> ArrayAttr (FnI a)
+

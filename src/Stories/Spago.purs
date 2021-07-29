@@ -235,11 +235,11 @@ forces = [
       , createForce "clustery"     ForceY        allNodes [ F.strength 0.2, F.y datum_.clusterPointY ]
 
       , createForce "packageGrid"  (ForceFixPositionXY gridXY) (Just $ FilterNodes "packages only" datum_.isPackage) [ ] 
-      , createForce "packageOrbit" ForceRadial   (Just $ FilterNodes "packages only" datum_.isPackage) 
+      , createForce "packageOrbit" ForceRadial   (filterNodes datum_.isPackage "packages only") 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
-      , createForce "moduleOrbit1" ForceRadial   (Just $ FilterNodes "unused modules only" datum_.isUnusedModule) 
+      , createForce "moduleOrbit1" ForceRadial   (filterNodes datum_.isUnusedModule "unused modules only") 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 700.0 ]
-      , createForce "moduleOrbit2" ForceRadial   (Just $ FilterNodes "used modules only" datum_.isUsedModule)
+      , createForce "moduleOrbit2" ForceRadial   (filterNodes datum_.isUsedModule "used modules only")
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
       ]
   where
@@ -249,7 +249,7 @@ forces = [
     -- gridFilter d = datum_.isPackage d
 
     gridXY _ i = cluster2Point i
-      
+    filterNodes filterFn description = Just $ FilterNodes description filterFn
 
 -- | ============================================
 -- | HTML
