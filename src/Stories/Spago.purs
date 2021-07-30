@@ -82,35 +82,31 @@ component = H.mkComponent
       [ HP.classes [ HH.ClassName "m-6" ]]
       [ HH.h3_
           [ HH.text "Simulation controls" ]
-      , HH.div_
-          [ Button.button
-              [ HE.onClick $ const StopSim ]
-              [ HH.text "Stop" ]
+      , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
+          [ Button.buttonGroup_
+            [ Button.buttonPrimaryLeft
+                [ HE.onClick $ const StopSim ]
+                [ HH.text "Stop" ]
+            , Button.buttonPrimaryRight
+                [ HE.onClick $ const StartSim ]
+                [ HH.text "Start" ]
+            ]
           ]
       , HH.div_
-          [ Button.button
-              [ HE.onClick $ const StartSim ]
-              [ HH.text "Start" ]
-          ]
-      , HH.div_
-          [ Button.button
-              [ HE.onClick $ const (Scene PackageGrid) ]
-              [ HH.text "Package Grid" ]
-          ]
-      , HH.div_
-          [ Button.button
-              [ HE.onClick $ const (Scene PackageGraph) ]
-              [ HH.text "Package Graph" ]
-          ]
-      , HH.div_
-          [ Button.button
-              [ HE.onClick $ const (Scene $ ModuleTree Vertical) ]
-              [ HH.text "Vertical Tree" ]
-          ]
-      , HH.div_
-          [ Button.button
-              [ HE.onClick $ const (Scene $ ModuleTree Radial) ]
-              [ HH.text "Radial Tree" ]
+          [ Button.buttonGroup_
+            [ Button.buttonPrimaryLeft
+                [ HE.onClick $ const (Scene PackageGrid) ]
+                [ HH.text "Package Grid" ]
+            , Button.buttonPrimaryCenter
+                [ HE.onClick $ const (Scene PackageGraph) ]
+                [ HH.text "Package Graph" ]
+            , Button.buttonPrimaryCenter
+                [ HE.onClick $ const (Scene $ ModuleTree Vertical) ]
+                [ HH.text "Vertical Tree" ]
+            , Button.buttonPrimaryRight
+                [ HE.onClick $ const (Scene $ ModuleTree Radial) ]
+                [ HH.text "Radial Tree" ]
+            ]
           ]
       ]
 
