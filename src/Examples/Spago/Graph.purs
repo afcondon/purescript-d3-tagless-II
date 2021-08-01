@@ -34,14 +34,14 @@ enterNodes simulation_ =
   , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation_ d) ]
 
 -- | recipe for this force layout graph
-script :: forall m selection. 
+setup :: forall m selection. 
   Bind m => 
   MonadEffect m =>
   SelectionM selection m =>
   SimulationM selection m =>
-  SpagoModel ->
+  -- SpagoModel ->
   m Unit
-script model = do
+setup = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   simulation_ <- simulationHandle
 
@@ -53,22 +53,21 @@ script model = do
                                       , onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation_) ] )
 
   nodesGroup        <- svg  D3.+ (node Group  [ classed "nodes" ])
-  nodesInSimulation <- setNodes model.nodes
-  let onlyPackageNodes = filter isPackage model.nodes
+  -- nodesInSimulation <- setNodes model.nodes
+  -- let onlyPackageNodes = filter isPackage model.nodes
   -- uniformlyDistribute onlyPackageNodes
-  nodesSelection    <- nodesGroup <+> Join Group nodesInSimulation (enterNodes simulation_)
+  -- nodesSelection    <- nodesGroup <+> Join Group [] []
 
   linksGroup        <- svg  D3.+ (node Group [ classed "links" ])
-  linksInSimulation <- setLinks model.links datum_.indexFunction
-  linksSelection    <- linksGroup <+> Join Line linksInSimulation [ classed link_.linkClass, strokeColor link_.color ]
+  -- linksInSimulation <- setLinks model.links datum_.indexFunction
+  -- linksSelection    <- linksGroup <+> Join Line [] []
 
-  addTickFunction "nodes" $ Step nodesSelection nodeTick
-  addTickFunction "links" $ Step linksSelection linkTick
+  -- addTickFunction "nodes" $ Step nodesSelection nodeTick
+  -- addTickFunction "links" $ Step linksSelection linkTick
 
-  circle <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
-  labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]) 
+  -- circle <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
+  -- labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]) 
   
-  _ <- circle `on` Drag DefaultDrag
   _ <- svg    `on` Zoom  { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                          , scale  : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
                          , name   : "spago"
@@ -84,11 +83,10 @@ updateNodes :: forall m row.
   MonadState { simulationState :: SimulationState_ | row } m =>
   SelectionM D3Selection_ m =>
   SimulationM D3Selection_ m =>
+  Array SpagoSimNode ->
   m Unit
-updateNodes = do
+updateNodes nodes = do
   simulation_ <- simulationHandle
-  nodes       <- getNodes
-  -- links <- getLinks
   (maybeNodesGroup :: Maybe D3Selection_) 
               <- getSelection "nodesGroup"
 
@@ -98,6 +96,7 @@ updateNodes = do
       nodesSelection <- nodesGroup <+> UpdateJoin Group nodes { enter: enterNodes simulation_, update: [], exit: [ remove ] } 
       circle <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
       labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]) 
+      _ <- circle `on` Drag DefaultDrag
 
       addTickFunction "nodes" $ Step nodesSelection nodeTick
       addSelection "nodesSelection" nodesSelection
@@ -108,9 +107,9 @@ updateLinks :: forall m row.
   MonadState { simulationState :: SimulationState_ | row } m =>
   SelectionM D3Selection_ m =>
   SimulationM D3Selection_ m =>
+  Array SpagoGraphLinkID ->
   m Unit
-updateLinks = do
-  links <- getLinks
+updateLinks links = do
   (maybeLinksGroup :: Maybe D3Selection_) 
         <- getSelection "linksGroup"
 
