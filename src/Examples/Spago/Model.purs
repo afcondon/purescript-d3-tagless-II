@@ -166,10 +166,12 @@ isPackage (D3SimNode d) =
   case d.nodetype of
     (IsModule _) -> false
     (IsPackage _) -> true
+isModule :: SpagoSimNode -> Boolean
 isModule (D3SimNode d) =
   case d.nodetype of
     (IsModule _) -> true
     (IsPackage _) -> false
+isUsedModule :: SpagoSimNode -> Boolean
 isUsedModule (D3SimNode d) =
   case d.nodetype of
     (IsPackage _) -> false

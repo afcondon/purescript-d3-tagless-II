@@ -8,7 +8,7 @@ import Control.Monad.State (class MonadState, get, gets, modify_)
 import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, index_ToInt)
-import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID, isM2M_Tree_Link, isP2P_Link)
+import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID, SpagoNodeData, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, numberToGridPoint, offsetXY, pinNodesInModel, scalePoint)
 import D3.Examples.Spago.Tree (treeReduction)
@@ -20,7 +20,7 @@ import D3.Simulation.Types (Force(..), ForceFilter(..), ForceStatus(..), ForceTy
 import D3Tagless.Block.Card as Card
 import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, setForcesByLabel, setLinks, toggleForceByLabel)
 import D3Tagless.Instance.Simulation (runEffectSimulation)
-import Data.Array (filter, (:))
+import Data.Array (filter, length, (:))
 import Data.Either (hush)
 import Data.Map (toUnfoldable)
 import Data.Map as M
@@ -44,11 +44,14 @@ import UIGuide.Block.Backdrop as Backdrop
 import Unsafe.Coerce (unsafeCoerce)
 
 data Scene = PackageGrid | PackageGraph | ModuleTree TreeLayout
+data FilterData = LinkFilter (SpagoGraphLinkID -> Boolean)
+                | NodeFilter (SpagoSimNode -> Boolean)
 data Action
   = Initialize
   | Finalize
   | Scene Scene
   | ToggleForce Label
+  | Filter FilterData
   | ChangeStyling String
   | ChangeSimConfig SimVariable
   | StopSim
@@ -59,7 +62,6 @@ type Input = SimulationState_
 type State = {
     simulationState :: SimulationState_
   , svgClass        :: String -- by controlling the class that is on the svg we can completely change the look of the vis (and not have to think about this at D3 level)
-  -- TODO these filters could be expensive in the null cases, might be better to have Either NoFilter Filter for the no-op case?
   , links           :: Array SpagoGraphLinkID
   , nodes           :: Array SpagoSimNode
   , activeForces    :: Array String
@@ -89,6 +91,18 @@ component = H.mkComponent
     , activeForces: []
   }
 
+  renderSimState state =
+    HH.div
+      [ HP.classes [ HH.ClassName "m-6" ]]
+      [ Format.caption_ [ HH.text "Simulation state" ]
+      , HH.p_
+          [ HH.text $ "class: " <> state.svgClass ] 
+      , HH.p_
+          [ HH.text $ "link count: " <> show (length state.links) ] 
+      , HH.p_
+          [ HH.text $ "node count:" <> show (length state.nodes )] 
+      ]
+
   renderSimControls state =
     HH.div
       [ HP.classes [ HH.ClassName "m-6" ]]
@@ -103,7 +117,7 @@ component = H.mkComponent
                 [ HH.text "Start" ]
             ]
           ]
-      , HH.div_
+      , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
           [ Format.caption_ [ HH.text "Scenes" ]
           , Button.buttonGroup_
             [ Button.buttonPrimaryLeft
@@ -120,6 +134,48 @@ component = H.mkComponent
                 [ HH.text "Radial Tree" ]
             ]
           ]
+      , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
+          [ Format.caption_ [ HH.text "Which nodes should be displayed?" ]
+          , Button.buttonGroup_
+            [ Button.buttonLeft
+                [ HE.onClick $ const (Filter $ NodeFilter isPackage) ]
+                [ HH.text "Packages" ]
+            , Button.buttonRight
+                [ HE.onClick $ const (Filter $ NodeFilter isUsedModule) ]
+                [ HH.text "Modules" ]
+            ]
+          ]
+      , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
+          [ Format.caption_ [ HH.text "Which links should be displayed?" ]
+          , Button.buttonGroup_
+            [ Button.buttonLeft
+                [ HE.onClick $ const (Filter $ LinkFilter isM2M_Tree_Link) ]
+                [ HH.text "Treelink" ]
+            , Button.buttonCenter
+                [ HE.onClick $ const (Filter $ LinkFilter isM2P_Link) ]
+                [ HH.text "M2P" ]
+            , Button.buttonRight
+                [ HE.onClick $ const (Filter $ LinkFilter isP2P_Link) ]
+                [ HH.text "P2P" ]
+            ]
+          ]
+      , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
+          [ Format.caption_ [ HH.text "Stylesheet" ]
+          , Button.buttonGroup_
+            [ Button.buttonLeft
+                [ HE.onClick $ const (ChangeStyling "cluster") ]
+                [ HH.text "Clusters" ]
+            , Button.buttonCenter
+                [ HE.onClick $ const (ChangeStyling "graph") ]
+                [ HH.text "Graph" ]
+            , Button.buttonCenter
+                [ HE.onClick $ const (ChangeStyling "tree") ]
+                [ HH.text "Tree" ]
+            , Button.buttonRight
+                [ HE.onClick $ const (ChangeStyling "none") ]
+                [ HH.text "None" ]
+            ]
+          ]
       ]
 
   render :: State -> H.ComponentHTML Action () m
@@ -128,7 +184,8 @@ component = H.mkComponent
         [ Utils.tailwindClass "story-container spago" ]
         [ HH.div
             [ Utils.tailwindClass "story-panel-about" ]
-            [ renderSimControls state
+            [ renderSimState state
+            , renderSimControls state
             , renderTableForces state.simulationState
             -- , renderTableElements state.simulation
             , Card.card_ [ blurbtext ]
@@ -142,15 +199,17 @@ handleAction :: forall m. Bind m => MonadAff m => MonadState State m =>
   Action -> m Unit
 handleAction = case _ of
   Initialize -> do    
-    state <- H.get
-    -- (detached :: D3Selection_)  <- eval_D3MB_Simulation simulationBus $ removeExistingSVG "div.svg-container"
     (model :: Maybe SpagoModel) <- H.liftAff getModel
     case model of
       Nothing      -> pure $ unsafeCoerce unit -- TODO just temporary, pull out the script runner to fn that returns unit
       (Just graph) -> do
-        runEffectSimulation (Graph.script graph)
+        simulationStop
+        -- runEffectSimulation (Graph.script graph)
+        runEffectSimulation $ Graph.updateNodes
+        runEffectSimulation $ Graph.updateLinks
         H.modify_ (\s -> s { model = Just graph })
         runEffectSimulation (addForces forces)
+        simulationStart
 
   Finalize -> pure unit
 
@@ -170,8 +229,8 @@ handleAction = case _ of
     filterNodes isPackage
     filterLinks isP2P_Link
     setActiveForces [ "charge1", "collide2", "packageOrbit", "x", "y" ]
-    state <- H.get
 
+    state <- H.get
     case state.model of
       Nothing -> pure unit
       (Just graph) -> do
@@ -186,6 +245,7 @@ handleAction = case _ of
     setCssEnvironment "tree"
     filterNodes isUsedModule
     filterLinks isM2M_Tree_Link
+
     state <- H.get
     case state.model of
       Nothing -> pure unit
@@ -202,6 +262,28 @@ handleAction = case _ of
     simulationStop
     runEffectSimulation $ toggleForceByLabel label
     simulationStart
+
+  Filter (LinkFilter x) -> do
+    filterLinks x
+    state <- H.get
+    case state.model of
+      Nothing -> pure unit
+      (Just graph) -> do
+        simulationStop
+        runEffectSimulation $ Graph.updateLinks
+        simulationStart
+
+  Filter (NodeFilter x) -> do
+    filterNodes x
+    state <- H.get
+    case state.model of
+      Nothing -> pure unit
+      (Just graph) -> do
+        simulationStop
+        runEffectSimulation $ Graph.updateNodes
+        simulationStart
+
+
 
   ChangeStyling style -> modify_ (\s -> s { svgClass = style })
 
