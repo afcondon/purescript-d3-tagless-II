@@ -79,8 +79,10 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   enableOnlyTheseForces       = simulationEnableOnlyTheseForces
 
   setNodes nodes              = simulationSetNodes nodes
-  uniformlyDistribute nodes   = pure $ setPositionToNaN_ nodes
+  -- uniformlyDistribute nodes   = pure $ setPositionToNaN_ nodes
   setLinks links keyFn        = simulationSetLinks links (unsafeCoerce keyFn)
+  getLinks                    = simulationGetLinks 
+  getNodes                    = simulationGetNodes
 
   addSelection label selection = simulationAddSelection label selection
   getSelection label           = simulationGetSelection label

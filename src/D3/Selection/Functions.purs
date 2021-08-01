@@ -74,7 +74,7 @@ selectionJoin selection (UpdateJoinWithKeyFunction e ds cs k) = do
 
 selectionOn :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Behavior -> m Unit
 selectionOn selection (Drag drag) = do
--- need to provide the simpler, non-simulation version here
+-- TODO need to provide the simpler, non-simulation version here
   -- let _ = case drag of 
   --           DefaultDrag     -> defaultDrag_ selection 
   --           NoDrag          -> disableDrag_ selection

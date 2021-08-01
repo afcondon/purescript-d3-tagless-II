@@ -4,13 +4,13 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, gets, modify_)
+import Control.Monad.State (class MonadState, get, gets, modify_)
 import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, index_ToInt)
-import D3.Examples.Spago.Files (NodeType(..))
+import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID, isM2M_Tree_Link, isP2P_Link)
 import D3.Examples.Spago.Graph as Graph
-import D3.Examples.Spago.Model (SpagoModel, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, numberToGridPoint, offsetXY, scalePoint)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, numberToGridPoint, offsetXY, pinNodesInModel, scalePoint)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.Node (D3_SimulationNode(..))
 import D3.Simulation.Config as F
@@ -18,7 +18,7 @@ import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationSetLinks, simulationStart, simulationStop)
 import D3.Simulation.Types (Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..), allNodes, showForceFilter)
 import D3Tagless.Block.Card as Card
-import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, setForcesByLabel, setLinks, toggleForceByLabel, uniformlyDistribute)
+import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, setForcesByLabel, setLinks, toggleForceByLabel)
 import D3Tagless.Instance.Simulation (runEffectSimulation)
 import Data.Array (filter, (:))
 import Data.Either (hush)
@@ -36,6 +36,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Ocelot.Block.Button as Button
 import Ocelot.Block.Checkbox as Checkbox
+import Ocelot.Block.Format as Format
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Utilities as Utils
@@ -58,9 +59,12 @@ type Input = SimulationState_
 type State = {
     simulationState :: SimulationState_
   , svgClass        :: String -- by controlling the class that is on the svg we can completely change the look of the vis (and not have to think about this at D3 level)
-  , showLinks       :: Boolean
-  , model           :: Maybe SpagoModel -- the model should actually be a component, probably a hook so that it can be constructed by this component and not be a Maybe
+  -- TODO these filters could be expensive in the null cases, might be better to have Either NoFilter Filter for the no-op case?
+  , links           :: Array SpagoGraphLinkID
+  , nodes           :: Array SpagoSimNode
+  , activeForces    :: Array String
   , selections      :: Array D3Selection_
+  , model           :: Maybe SpagoModel -- the model should actually be a component, probably a hook so that it can be constructed by this component and not be a Maybe
 }
 
 component :: forall query output m. MonadAff m => H.Component query Input output m
@@ -75,13 +79,20 @@ component = H.mkComponent
   where
 
   initialState :: Input -> State
-  initialState simulation = { simulationState: simulation, svgClass: "cluster", showLinks: true, model: Nothing, selections: [] }
+  initialState simulation = { 
+      simulationState: simulation
+    , svgClass: "cluster"
+    , model: Nothing
+    , links: []
+    , nodes: []
+    , selections: [] 
+    , activeForces: []
+  }
 
   renderSimControls state =
     HH.div
       [ HP.classes [ HH.ClassName "m-6" ]]
-      [ HH.h3_
-          [ HH.text "Simulation controls" ]
+      [ Format.caption_ [ HH.text "Simulation controls" ]
       , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
           [ Button.buttonGroup_
             [ Button.buttonPrimaryLeft
@@ -93,7 +104,8 @@ component = H.mkComponent
             ]
           ]
       , HH.div_
-          [ Button.buttonGroup_
+          [ Format.caption_ [ HH.text "Scenes" ]
+          , Button.buttonGroup_
             [ Button.buttonPrimaryLeft
                 [ HE.onClick $ const (Scene PackageGrid) ]
                 [ HH.text "Package Grid" ]
@@ -143,39 +155,46 @@ handleAction = case _ of
   Finalize -> pure unit
 
   Scene PackageGrid -> do
-    modify_ (\s -> s { svgClass = "cluster" })
+    setCssEnvironment "cluster"
     state <- H.get
     case state.model of
       Nothing -> pure unit
       (Just graph) -> do
         simulationStop
-        runEffectSimulation (Graph.updateNodes (filter (const true) graph.nodes))
+        runEffectSimulation Graph.updateNodes
         runEffectSimulation $ enableOnlyTheseForces gridForceSettings
         simulationStart
 
   Scene PackageGraph -> do
-    modify_ (\s -> s { svgClass = "graph" })
+    setCssEnvironment "graph"
+    filterNodes isPackage
+    filterLinks isP2P_Link
+    setActiveForces [ "charge1", "collide2", "packageOrbit", "x", "y" ]
     state <- H.get
+
     case state.model of
       Nothing -> pure unit
       (Just graph) -> do
         simulationStop
-        let onlyPackageNodes = filter isPackage graph.nodes
-        runEffectSimulation $ uniformlyDistribute onlyPackageNodes
-        runEffectSimulation (Graph.updateNodes onlyPackageNodes)
-        runEffectSimulation (Graph.updateLinks graph.links.packageLinks)
-        runEffectSimulation $ enableOnlyTheseForces graphForceSettings
+        -- runEffectSimulation $ uniformlyDistributeNodes -- TODO
+        runEffectSimulation $ Graph.updateNodes
+        runEffectSimulation $ Graph.updateLinks
+        runEffectSimulation $ enableOnlyTheseForces state.activeForces
         simulationStart
 
   Scene (ModuleTree _) -> do
-    modify_ (\s -> s { svgClass = "tree" })
+    setCssEnvironment "tree"
+    filterNodes isUsedModule
+    filterLinks isM2M_Tree_Link
     state <- H.get
     case state.model of
       Nothing -> pure unit
       (Just graph) -> do
         simulationStop
-        runEffectSimulation (Graph.updateNodes (filter isUsedModule graph.nodes))
-        runEffectSimulation (Graph.updateLinks graph.links.treeLinks)
+        -- TODO pin the Main node to the center for this (or top center for vertical tree)
+        let updatedGraph = pinNodesInModel graph (\(D3SimNode d) -> d.name == "Main") { x:0.0, y:0.0 }
+        runEffectSimulation $ Graph.updateNodes
+        runEffectSimulation $ Graph.updateLinks
         runEffectSimulation $ enableOnlyTheseForces treeForceSettings
         simulationStart
 
@@ -186,12 +205,31 @@ handleAction = case _ of
 
   ChangeStyling style -> modify_ (\s -> s { svgClass = style })
 
-  ChangeSimConfig c -> pure unit -- SetConfigVariable c
+  ChangeSimConfig c -> runEffectSimulation $ setConfigVariable c
 
   StartSim -> simulationStart
 
   StopSim -> runEffectSimulation (setConfigVariable $ Alpha 0.0)
 
+setCssEnvironment :: forall m. MonadState State m => String -> m Unit
+setCssEnvironment string = modify_ (\s -> s { svgClass = string })
+
+setActiveForces :: forall m. MonadState State m => Array String -> m Unit
+setActiveForces forces = modify_ (\s -> s { activeForces = forces })
+
+filterLinks :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
+filterLinks fn = do
+  state <- get
+  case state.model of
+    Nothing -> pure unit
+    (Just graph) -> modify_ (\s -> s { links = filter fn graph.links })
+
+filterNodes :: forall m. MonadState State m => (SpagoSimNode -> Boolean) -> m Unit
+filterNodes fn = do
+  state <- H.get
+  case state.model of
+    Nothing -> pure unit
+    (Just graph) -> modify_ (\s -> s { nodes = filter fn graph.nodes })
 
 -- getModel will try to build a model from files and to derive a dependency tree from Main
 -- the dependency tree will contain all nodes reachable from Main but NOT all links
@@ -209,14 +247,13 @@ addTreeToModel :: String -> Maybe SpagoModel -> Maybe SpagoModel
 addTreeToModel rootName maybeModel = do
   model  <- maybeModel
   rootID <- M.lookup rootName model.maps.name2ID
-  pure $ treeReduction model rootID
+  pure $ treeReduction rootID model
 
 
 -- | ============================================
 -- | FORCES
 -- | ============================================
 gridForceSettings = [ "packageGrid", "clusterx", "clustery", "collide1" ]
-graphForceSettings = [ "charge1", "collide2", "packageOrbit", "x", "y" ]
 treeForceSettings = ["links", "center", "charge1", "collide1" ]
 forces :: Array Force
 forces = [
@@ -224,18 +261,20 @@ forces = [
       , createForce "collide2"     ForceCollide  allNodes [ F.strength 1.0, F.radius datum_.collideRadiusBig, F.iterations 1.0 ]
       , createForce "charge1"      ForceManyBody allNodes [ F.strength (-30.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
       , createForce "center"       ForceCenter   allNodes [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
-      , createForce "x"            ForceX        allNodes [ F.strength 0.1, F.x 0.0 ]
-      , createForce "y"            ForceY        allNodes [ F.strength 0.1, F.y 0.0 ]
+      , createForce "x"            ForceX        allNodes [ F.strength 0.05, F.x 0.0 ]
+      , createForce "y"            ForceY        allNodes [ F.strength 0.07, F.y 0.0 ]
       , createForce "charge2"      ForceManyBody allNodes [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 100.0 ]
       , createForce "clusterx"     ForceX        allNodes [ F.strength 0.2, F.x datum_.clusterPointX ]
       , createForce "clustery"     ForceY        allNodes [ F.strength 0.2, F.y datum_.clusterPointY ]
 
       , createForce "packageGrid"  (ForceFixPositionXY gridXY) (Just $ FilterNodes "packages only" datum_.isPackage) [ ] 
-      , createForce "packageOrbit" ForceRadial   (filterNodes datum_.isPackage "packages only") 
+      , createForce "packageOrbit" ForceRadial   (selectivelyApplyForce datum_.isPackage "packages only") 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
-      , createForce "moduleOrbit1" ForceRadial   (filterNodes datum_.isUnusedModule "unused modules only") 
+      , createForce "moduleOrbit1" ForceRadial   (selectivelyApplyForce datum_.isUnusedModule "unused modules only") 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 700.0 ]
-      , createForce "moduleOrbit2" ForceRadial   (filterNodes datum_.isUsedModule "used modules only")
+      , createForce "moduleOrbit2" ForceRadial   (selectivelyApplyForce datum_.isUsedModule "used modules only")
+                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+      , createForce "moduleOrbit3" ForceRadial   (selectivelyApplyForce datum_.isUsedModule "direct deps of Main")
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
       ]
   where
@@ -245,7 +284,7 @@ forces = [
     -- gridFilter d = datum_.isPackage d
 
     gridXY _ i = cluster2Point i
-    filterNodes filterFn description = Just $ FilterNodes description filterFn
+    selectivelyApplyForce filterFn description = Just $ FilterNodes description filterFn
 
 -- | ============================================
 -- | HTML

@@ -56,9 +56,7 @@ type Spago_Cooked_JSON    = {
   , id2LOC             :: M.Map NodeID Number
 }
 
-data PackageRelation = InPackage | OutPackage
-data LinkType        = M2M_Tree | M2M_Graph | P2P | M2P PackageRelation
-derive instance Eq PackageRelation
+data LinkType        = M2M_Tree | M2M_Graph | P2P | M2P
 derive instance Eq LinkType
 
 data PackageInfo     = PackageInfo { version :: String, repo :: String }
@@ -235,7 +233,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     packageLinks = (makeLink P2P)       <$> (foldl foldDepends [] packages)
 
     makeModuleToPackageLink :: SpagoNodeData -> SpagoGraphLinkID
-    makeModuleToPackageLink m = D3_Link { source: m.id, target: m.containerID, linktype: M2P InPackage }
+    makeModuleToPackageLink m = D3_Link { source: m.id, target: m.containerID, linktype: M2P }
 
     modulePackageLinks = makeModuleToPackageLink <$> moduleNodes
     
@@ -268,6 +266,16 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
   , id2LOC    : M.empty
   }
 
+isP2P_Link :: SpagoGraphLinkID -> Boolean
+isP2P_Link (D3_Link { linktype }) = linktype == P2P
+isM2M_Graph_Link :: SpagoGraphLinkID -> Boolean
+isM2M_Graph_Link (D3_Link { linktype }) = linktype == M2M_Graph
+isM2P_Link :: SpagoGraphLinkID -> Boolean
+isM2P_Link (D3_Link { linktype }) = linktype == M2P
+isM2M_Tree_Link :: SpagoGraphLinkID -> Boolean
+isM2M_Tree_Link (D3_Link { linktype }) = linktype == M2M_Tree
+
+
 
 -- | boilerplate
 instance showNodeType :: Show NodeType where
@@ -277,7 +285,6 @@ instance showLinkType :: Show LinkType where
   show M2M_Tree  = "M2M-Tree"
   show M2M_Graph = "M2M-Graph"
   show P2P = "P2P"
-  show (M2P InPackage) = "in-package dependency"
-  show (M2P OutPackage) = "out-package dependency"
+  show M2P = "module to package dependency"
 
 derive instance eqPinned :: Eq Pinned

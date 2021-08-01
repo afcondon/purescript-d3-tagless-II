@@ -1,15 +1,15 @@
 module D3.Examples.Spago.Graph where
 
-import Control.Monad.State (class MonadState)
+import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), classed, fill, height, onMouseEvent, preserveAspectRatio, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
 import D3.Data.Types (D3Selection_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cancelSpotlight_, datum_, isPackage, link_, toggleSpotlight)
 import D3.Node (D3_SimulationNode(..))
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), node)
-import D3.Simulation.Types (SimulationState_, Step(..))
+import D3.Simulation.Types (SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, addSelection, addTickFunction, attach, getSelection, on, setLinks, setNodes, simulationHandle, uniformlyDistribute, (<+>))
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, addSelection, addTickFunction, attach, getLinks, getNodes, getSelection, on, setLinks, setNodes, simulationHandle, (<+>))
 import D3Tagless.Capabilities as D3
 import Data.Array (filter)
 import Data.Maybe (Maybe(..))
@@ -55,11 +55,11 @@ script model = do
   nodesGroup        <- svg  D3.+ (node Group  [ classed "nodes" ])
   nodesInSimulation <- setNodes model.nodes
   let onlyPackageNodes = filter isPackage model.nodes
-  uniformlyDistribute onlyPackageNodes
+  -- uniformlyDistribute onlyPackageNodes
   nodesSelection    <- nodesGroup <+> Join Group nodesInSimulation (enterNodes simulation_)
 
   linksGroup        <- svg  D3.+ (node Group [ classed "links" ])
-  linksInSimulation <- setLinks model.links.treeLinks datum_.indexFunction
+  linksInSimulation <- setLinks model.links datum_.indexFunction
   linksSelection    <- linksGroup <+> Join Line linksInSimulation [ classed link_.linkClass, strokeColor link_.color ]
 
   addTickFunction "nodes" $ Step nodesSelection nodeTick
@@ -84,17 +84,18 @@ updateNodes :: forall m row.
   MonadState { simulationState :: SimulationState_ | row } m =>
   SelectionM D3Selection_ m =>
   SimulationM D3Selection_ m =>
-  Array SpagoSimNode ->
   m Unit
-updateNodes nodes = do
-  simulation_                             <- simulationHandle
-  nodesInSimulation                       <- setNodes nodes
-  (maybeNodesGroup :: Maybe D3Selection_) <- getSelection "nodesGroup"
+updateNodes = do
+  simulation_ <- simulationHandle
+  nodes       <- getNodes
+  -- links <- getLinks
+  (maybeNodesGroup :: Maybe D3Selection_) 
+              <- getSelection "nodesGroup"
 
   case maybeNodesGroup of
     Nothing -> pure unit
     (Just nodesGroup) -> do
-      nodesSelection <- nodesGroup <+> UpdateJoin Group nodesInSimulation { enter: enterNodes simulation_, update: [], exit: [ remove ] } 
+      nodesSelection <- nodesGroup <+> UpdateJoin Group nodes { enter: enterNodes simulation_, update: [], exit: [ remove ] } 
       circle <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
       labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]) 
 
@@ -107,17 +108,18 @@ updateLinks :: forall m row.
   MonadState { simulationState :: SimulationState_ | row } m =>
   SelectionM D3Selection_ m =>
   SimulationM D3Selection_ m =>
-  Array SpagoGraphLinkID ->
   m Unit
-updateLinks links = do
-  linksInSimulation <- setLinks links datum_.indexFunction
-
-  (maybeLinksGroup :: Maybe D3Selection_) <- getSelection "linksGroup"
+updateLinks = do
+  links <- getLinks
+  (maybeLinksGroup :: Maybe D3Selection_) 
+        <- getSelection "linksGroup"
 
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
-      linksSelection <- linksGroup <+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
+      linksSelection <- linksGroup <+> UpdateJoin Line links { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "linksSelection" linksSelection
+
+  pure unit
   

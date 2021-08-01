@@ -1,11 +1,12 @@
 module D3.Examples.Spago.Tree where
 
+import D3.FFI
+
 import D3.Data.Graph (getReachableNodes)
 import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Data.Types (PointXY)
-import D3.Examples.Spago.Files (LinkType(..))
+import D3.Examples.Spago.Files (LinkType(..), isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, setXYExceptLeaves)
-import D3.FFI 
 import D3.Layouts.Hierarchical (radialSeparation)
 import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), NodeID)
 import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
@@ -23,12 +24,13 @@ import Prelude (($), (*), (<$>), (<<<), (<>), (==), (||))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- TODO make this generic and extract from Spago example to library
-treeReduction :: SpagoModel -> NodeID -> SpagoModel
-treeReduction model rootID  = do
+treeReduction :: NodeID -> SpagoModel -> SpagoModel
+treeReduction rootID model = do
       let reachable         = getReachableNodes rootID model.graph
+          onlyPackageLinks  = filter isP2P_Link model.links
           onlyTreelinks     = makeTreeLinks (pathsAsLists reachable.closedDepPaths)
           prunedTreeLinks   = (\(Tuple source target) -> D3_Link { source, target, linktype: M2M_Graph }) <$> reachable.redundantLinks
-          treelinks         = partition (\(D3_Link l) -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links.allLinks
+          treelinks         = partition (\(D3_Link l) -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
           treenodes         = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
           layout            = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
 
@@ -42,8 +44,7 @@ treeReduction model rootID  = do
           unpositionedNodes = setForPhyllotaxis  <$> treenodes.no
           tree              = Tuple rootID laidOutRoot_
 
-          packageLinks      = []
-          links = model.links { treeLinks = treelinks.yes, prunedLinks = prunedTreeLinks }
+          links = treelinks.yes <> prunedTreeLinks <> onlyPackageLinks -- now all the links should have the right type, M2M_Graph / M2M_Tree / P2P 
 
       model { links = links, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, maps { id2XYLeaf = positionMap } }
 

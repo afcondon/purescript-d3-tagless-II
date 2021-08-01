@@ -137,10 +137,6 @@ pinNode node p = do
   let _ = pinNode_ p.x p.y node
   node -- NB mutated value, fx / fy have been set
 
-pinNodeMatchingPredicate :: forall d. Array (D3_SimulationNode d) -> ((D3_SimulationNode d) -> Boolean) -> Number -> Number -> Unit
-pinNodeMatchingPredicate nodes predicate fx fy = fromMaybe unit $ (pinNode_ fx fy) <$> (find predicate nodes)
-
-
 -- TODO this all has to change completely to work within Tagless 
 -- foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass
 -- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr -> Unit

@@ -4,12 +4,12 @@ import Prelude
 
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, Index_, PointXY, index_ToInt, intToIndex_)
-import D3.Examples.Spago.Files (LinkType(..), NodeType(..), Pinned(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
+import D3.Examples.Spago.Files (LinkType(..), NodeType(..), Pinned(..), SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, SpagoGraphLinkID, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
 import D3.FFI (hasChildren_)
 import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Link(..), D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_)
-import Data.Array (filter, foldl)
+import Data.Array (filter, foldl, partition)
 import Data.Graph (Graph, fromMap)
 import Data.Int (toNumber)
 import Data.Map as M
@@ -159,6 +159,9 @@ datum_ = {
               
 }
 
+-- type LinkFilter = forall r. D3_SimulationNode r -> Boolean
+
+isPackage :: SpagoSimNode -> Boolean
 isPackage (D3SimNode d) =
   case d.nodetype of
     (IsModule _) -> false
@@ -179,12 +182,7 @@ type SpagoTreeNode    = D3TreeRow       (EmbeddedData SpagoNodeData + ())
 type SpagoSimNode     = D3SimulationRow (             SpagoNodeRow  + D3_FocusXY + D3_Radius + ()) -- note we've woven in focusXY so that we can cluster the nodes
 
 type SpagoModel = { 
-    links           :: {
-        allLinks     :: Array SpagoGraphLinkID
-      , treeLinks    :: Array SpagoGraphLinkID  -- each ID will get swizzled for a SpagoGraphLinkObj_ when simulation initialized
-      , prunedLinks  :: Array SpagoGraphLinkID  -- there are so many of these that we only use them when hovering enabled
-      , packageLinks :: Array SpagoGraphLinkID
-    }
+    links           :: Array SpagoGraphLinkID
   , nodes           :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
   , graph           :: Graph NodeID SpagoNodeData
   , tree            :: Maybe (Tuple NodeID SpagoTreeNode)
@@ -246,8 +244,8 @@ offsetX xOffset xy = xy { x = xy.x + xOffset }
 offsetY :: Number -> PointXY -> PointXY
 offsetY yOffset xy = xy { y = xy.y + yOffset }
 
-pinNode :: SpagoSimNode -> PointXY -> SpagoSimNode
-pinNode (D3SimNode node) xy = D3SimNode (node { fx = notNull xy.x, fy = notNull xy.y } )
+pinNode :: PointXY -> SpagoSimNode -> SpagoSimNode
+pinNode xy (D3SimNode node) = D3SimNode (node { fx = notNull xy.x, fy = notNull xy.y } )
 
 setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
 setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
@@ -270,12 +268,7 @@ makeSpagoGraphModel json = do
   let { nodes, links, name2ID, id2Name, id2Node, id2Package, id2LOC, sourceLinksMap } 
         = getGraphJSONData json
 
-  { links : {
-      allLinks: links
-    , treeLinks: []
-    , prunedLinks: []
-    , packageLinks: filter (\(D3_Link l) -> l.linktype == P2P) links
-  }
+  { links    : links
   , nodes    : nodes <#> upgradeSpagoNodeData sourceLinksMap
   , graph    : makeGraph nodes
   , tree     : Nothing  -- not present in the JSON, has to be calculated, if possible
@@ -311,3 +304,10 @@ toggleSpotlight event simulation d = toggleSpotlight_ event simulation nodeID no
 -- behaviors in D3js while deciding whether/how to express them in PureScript
 foreign import toggleSpotlight_ :: Event -> D3Simulation_ -> NodeID -> String -> Unit
 foreign import cancelSpotlight_ :: D3Simulation_ -> Unit
+
+-- this is going to be another side-effecting function since it will change the fx/fy of selected nodes
+pinNodesInModel :: SpagoModel -> (SpagoSimNode -> Boolean) -> PointXY -> SpagoModel
+pinNodesInModel model predicate xy = model { nodes = updatedNodes }
+  where
+    nodes = partition predicate model.nodes 
+    updatedNodes = (pinNode xy <$> nodes.yes) <> nodes.no

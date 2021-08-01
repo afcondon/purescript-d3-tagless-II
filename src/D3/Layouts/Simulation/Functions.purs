@@ -172,6 +172,13 @@ simulationSetNodes nodes = do
   modify_ (\s -> s { simulationState = (SS_ ss_ { nodes = (unsafeCoerce opaqueNodes) })})
   pure nodes
 
+simulationGetNodes :: forall m row d.
+  (MonadState { simulationState :: SimulationState_ | row } m) => 
+  m (Array (D3_SimulationNode d))
+simulationGetNodes = do
+  { simulationState: SS_ ss_} <- get
+  pure $ unsafeCoerce ss_.nodes
+
 simulationSetLinks :: forall id m row datum r. 
   (MonadState { simulationState :: SimulationState_ | row } m) => 
   Array (D3_Link id r) -> (datum -> id) -> m (Array (D3_Link datum r))
@@ -181,6 +188,13 @@ simulationSetLinks links keyFn = do
   let updatedLinks = setLinks_ (getHandle newLinksForce) links keyFn
   simulationAddForce newLinksForce
   pure (unsafeCoerce updatedLinks) -- TODO notice the coerce here
+
+simulationGetLinks :: forall m row datum r. 
+  (MonadState { simulationState :: SimulationState_ | row } m) => 
+  m (Array (D3_Link datum r))
+simulationGetLinks = do
+  { simulationState: SS_ ss_} <- get
+  pure $ unsafeCoerce ss_.links -- TODO notice the coerce here
 
 simulationAddSelection :: forall m row.  -- NB not polymorphic in selection because SimulationState_ isn't
   (MonadState { simulationState :: SimulationState_ | row } m) =>

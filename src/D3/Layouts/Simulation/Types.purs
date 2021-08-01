@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Attributes.Instances (AttributeSetter, Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_)
-import D3.FFI (D3ForceHandle_, OpaqueNodeType_, SimulationConfig_, initSimulation_)
+import D3.FFI (D3ForceHandle_, OpaqueLinkType_, OpaqueNodeType_, SimulationConfig_, initSimulation_)
 import D3.Selection (ChainableS)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -83,6 +83,7 @@ data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
   , ticks         :: M.Map Label (Step D3Selection_)
 
   , nodes         :: Array OpaqueNodeType_
+  , links         :: Array OpaqueLinkType_
   , selections    :: M.Map Label D3Selection_
 
   , alpha         :: Number
@@ -96,19 +97,22 @@ data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
 initialSimulationState :: Int -> SimulationState_
 initialSimulationState id = SS_
    {  simulation_  : initSimulation_ defaultConfigSimulation  
+    , running      : defaultConfigSimulation.running
+    , forces       : M.empty
+    , ticks        : M.empty
+
     , nodes        : []
+    , links        : []
+    , selections   : M.empty
+
     , alpha        : defaultConfigSimulation.alpha
     , alphaTarget  : defaultConfigSimulation.alphaTarget
     , alphaMin     : defaultConfigSimulation.alphaMin
     , alphaDecay   : defaultConfigSimulation.alphaDecay
     , velocityDecay: defaultConfigSimulation.velocityDecay
-    , running      : defaultConfigSimulation.running
-    , forces       : M.empty
-    , ticks        : M.empty
-    , selections   : M.empty
   }
   where
-    _ = trace { simulation: "initialized" } \_ -> unit
+    _ = trace { simulation: "initialized", engineNo: id } \_ -> unit
 
 defaultConfigSimulation :: SimulationConfig_
 defaultConfigSimulation = { 
