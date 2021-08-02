@@ -210,6 +210,8 @@ handleAction = case _ of
         simulationStop
         -- runEffectSimulation (Graph.script graph)
         runEffectSimulation Graph.setup
+        filterNodes isPackage
+        filterLinks isP2P_Link
         runEffectSimulation $ Graph.updateNodes graph.nodes
         runEffectSimulation $ Graph.updateLinks graph.links
         runEffectSimulation (addForces forces)
@@ -220,6 +222,7 @@ handleAction = case _ of
   Scene PackageGrid -> do
     setCssEnvironment "cluster"
     filterLinks isM2P_Link
+    setActiveForces gridForceSettings
     state <- H.get
     case state.model of
       Nothing -> pure unit
@@ -234,7 +237,7 @@ handleAction = case _ of
     setCssEnvironment "graph"
     filterLinks isP2P_Link
     filterNodes isPackage
-    setActiveForces [ "charge1", "collide2", "packageOrbit", "x", "y" ]
+    setActiveForces packageForceSettings
 
     state <- H.get
     case state.model of
@@ -249,6 +252,7 @@ handleAction = case _ of
 
   Scene (ModuleTree _) -> do
     setCssEnvironment "tree"
+    setActiveForces treeForceSettings
     filterNodes isUsedModule
     filterLinks isM2M_Tree_Link
 
@@ -342,6 +346,7 @@ addTreeToModel rootName maybeModel = do
 -- | ============================================
 gridForceSettings = [ "packageGrid", "clusterx", "clustery", "collide1" ]
 treeForceSettings = ["links", "center", "charge1", "collide1" ]
+packageForceSettings = [ "packageOrbit", "collide2", "charge2", "collide2", "x", "y" ]
 forces :: Array Force
 forces = [
         createForce "collide1"     ForceCollide  allNodes [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
@@ -356,7 +361,7 @@ forces = [
 
       , createForce "packageGrid"  (ForceFixPositionXY gridXY) (Just $ FilterNodes "packages only" datum_.isPackage) [ ] 
       , createForce "packageOrbit" ForceRadial   (selectivelyApplyForce datum_.isPackage "packages only") 
-                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 100.0 ]
+                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 300.0 ]
       , createForce "moduleOrbit1" ForceRadial   (selectivelyApplyForce datum_.isUnusedModule "unused modules only") 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 700.0 ]
       , createForce "moduleOrbit2" ForceRadial   (selectivelyApplyForce datum_.isUsedModule "used modules only")

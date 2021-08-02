@@ -23,18 +23,22 @@ import Math (cos, pi, sin)
 import Prelude (($), (*), (<$>), (<<<), (<>), (==), (||))
 import Unsafe.Coerce (unsafeCoerce)
 
+tupleToLink linktype (Tuple source target) = D3_Link { source, target, linktype }
+changeLinkType linktype (D3_Link l) = D3_Link l { linktype = linktype }
+
 -- TODO make this generic and extract from Spago example to library
 treeReduction :: NodeID -> SpagoModel -> SpagoModel
 treeReduction rootID model = do
       let reachable         = getReachableNodes rootID model.graph
           onlyPackageLinks  = filter isP2P_Link model.links
-          onlyTreelinks     = makeTreeLinks (pathsAsLists reachable.closedDepPaths)
-          prunedTreeLinks   = (\(Tuple source target) -> D3_Link { source, target, linktype: M2M_Graph }) <$> reachable.redundantLinks
-          treelinks         = partition (\(D3_Link l) -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
+          onlyTreelinks     = makeTreeLinkTuples (pathsAsLists reachable.closedDepPaths)
+          prunedTreeLinks   = (tupleToLink M2M_Graph ) <$> reachable.redundantLinks
+          partitionedLinks  = partition (\(D3_Link l) -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
+          treelinks         = (changeLinkType M2M_Tree) <$> partitionedLinks.yes
           treenodes         = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
           layout            = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
 
-          idTree            = buildTree rootID treelinks.yes
+          idTree            = buildTree rootID treelinks
           jsontree          = makeD3TreeJSONFromTreeID idTree model.maps.id2Node
           rootTree          = hierarchyFromJSON_       jsontree
           sortedTree        = treeSortForTree_Spago    rootTree
@@ -44,7 +48,7 @@ treeReduction rootID model = do
           unpositionedNodes = setForPhyllotaxis  <$> treenodes.no
           tree              = Tuple rootID laidOutRoot_
 
-          links = treelinks.yes <> prunedTreeLinks <> onlyPackageLinks -- now all the links should have the right type, M2M_Graph / M2M_Tree / P2P 
+          links = treelinks <> prunedTreeLinks <> onlyPackageLinks -- now all the links should have the right type, M2M_Graph / M2M_Tree / P2P 
 
       model { links = links, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, maps { id2XYLeaf = positionMap } }
 
@@ -99,8 +103,8 @@ path2Tuples acc (s:t:tail) = path2Tuples ((Tuple s t):acc) (t:tail)
 pathsAsLists :: Array (Array NodeID) -> L.List (L.List NodeID)
 pathsAsLists paths = L.fromFoldable ((L.fromFoldable <<< reverse) <$> paths) -- because pattern matching lists is so much nicer for path2Tuples
 
-makeTreeLinks :: L.List (L.List NodeID) -> Array (Tuple NodeID NodeID)
-makeTreeLinks closedPaths = do
+makeTreeLinkTuples :: L.List (L.List NodeID) -> Array (Tuple NodeID NodeID)
+makeTreeLinkTuples closedPaths = do
   let
     linkTuples = (L.foldl path2Tuples Nil) closedPaths
   fromFoldable $ S.fromFoldable linkTuples -- removes the duplicates while building, but if we nubbed instead we could get count also
