@@ -2,7 +2,7 @@ module D3.Examples.Spago.Graph where
 
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), classed, fill, height, onMouseEvent, preserveAspectRatio, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
-import D3.Data.Types (D3Selection_, Element(..), MouseEvent(..))
+import D3.Data.Types (D3Selection_, Datum_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cancelSpotlight_, datum_, isPackage, link_, toggleSpotlight)
 import D3.Node (D3_SimulationNode(..))
@@ -18,7 +18,7 @@ import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
 import Utility (getWindowWidthHeight)
 
-
+-- for this (family of) visualization(s) the position updating for links and nodes is always the same
 nodeTick = [ transform' datum_.translateNode ]
 linkTick = [ x1 (_.x <<< link_.source)
            , y1 (_.y <<< link_.source)
@@ -43,23 +43,21 @@ setup :: forall m selection.
   m Unit
 setup = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
-  simulation_ <- simulationHandle
-
+  simulation_ <- simulationHandle -- needed for click handler to stop / start simulation
   root        <- attach "div.svg-container"
   svg         <- root D3.+ (node Svg  [ viewBox (-w / 2.0) (-h / 2.0) w h 
                                       , preserveAspectRatio $ AspectRatio XMid YMid Meet 
                                       , classed "initial"
                                       -- , width w, height h
                                       , onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation_) ] )
-
-  _ <- svg    `on` Zoom  { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-                         , scale  : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
-                         , name   : "spago"
-                         }
-
-  nodesGroup        <- svg  D3.+ (node Group  [ classed "nodes" ])
+  _           <- svg `on` Zoom  { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+                                , scale  : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
+                                , name   : "spago"
+                                }
+  nodesGroup  <- svg  D3.+ (node Group  [ classed "nodes" ])
+  linksGroup  <- svg  D3.+ (node Group [ classed "links" ])
+  
   addSelection "nodesGroup" nodesGroup
-  linksGroup        <- svg  D3.+ (node Group [ classed "links" ])
   addSelection "linksGroup" linksGroup
   pure unit
   
@@ -70,19 +68,20 @@ updateNodes :: forall m row.
   SelectionM D3Selection_ m =>
   SimulationM D3Selection_ m =>
   Array SpagoSimNode ->
+  (Datum_ -> String) -> 
   m Unit
-updateNodes nodes = do
+updateNodes nodes chooseColor = do
   simulation_       <- simulationHandle
-  nodesInSimulation <- setNodes nodes
-  (maybeNodesGroup :: Maybe D3Selection_) <- getSelection "nodesGroup"
+  _                 <- setNodes nodes
+  maybeNodesGroup   <- getSelection "nodesGroup"
 
   case maybeNodesGroup of
     Nothing -> pure unit
     (Just nodesGroup) -> do
-      nodesSelection <- nodesGroup <+> UpdateJoin Group nodes { enter: enterNodes simulation_, update: [], exit: [ remove ] } 
-      circle <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
-      labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]) 
-      _ <- circle `on` Drag DefaultDrag
+      nodesSelection <- nodesGroup D3.<+> UpdateJoin Group nodes { enter: enterNodes simulation_, update: [], exit: [ remove ] } 
+      circle         <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill chooseColor ]) 
+      labels         <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]) 
+      _              <- circle `on` Drag DefaultDrag
 
       addTickFunction "nodes" $ Step nodesSelection nodeTick
       addSelection "nodesSelection" nodesSelection

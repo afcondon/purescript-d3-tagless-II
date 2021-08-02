@@ -8,7 +8,7 @@ import D3.Examples.Spago.Files (LinkType(..), NodeType(..), Pinned(..), SpagoNod
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
 import D3.FFI (hasChildren_, pinTreeNode_)
 import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Link(..), D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
-import D3.Scales (d3SchemeCategory10N_)
+import D3.Scales (d3SchemeCategory10N_, d3SchemeDiverging10N_)
 import Data.Array (filter, foldl, partition)
 import Data.Graph (Graph, fromMap)
 import Data.Int (toNumber)
@@ -131,6 +131,8 @@ datum_ = {
       \d -> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d)
   , colorByGroup:
       \d -> d3SchemeCategory10N_ (toNumber $ datum_.cluster d)
+  , colorByLevel:
+      \d -> d3SchemeDiverging10N_ (toNumber $ datum_.id d) -- we don't have level so let's test with cluster
   , translateNode:
       \d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <> ")"
       

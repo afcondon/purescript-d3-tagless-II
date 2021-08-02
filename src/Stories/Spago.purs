@@ -230,7 +230,7 @@ handleAction = case _ of
         runEffectSimulation Graph.setup
         filterNodes isPackage
         filterLinks isP2P_Link
-        runEffectSimulation $ Graph.updateNodes graph.nodes
+        runEffectSimulation $ Graph.updateNodes graph.nodes datum_.colorByGroup
         runEffectSimulation $ Graph.updateLinks graph.links
         runEffectSimulation (addForces forces)
         simulationStart
@@ -246,7 +246,7 @@ handleAction = case _ of
       Nothing -> pure unit
       (Just graph) -> do
         simulationStop
-        runEffectSimulation $ Graph.updateNodes graph.nodes -- all nodes
+        runEffectSimulation $ Graph.updateNodes graph.nodes datum_.colorByGroup -- all nodes
         runEffectSimulation $ Graph.updateLinks state.links -- filtered links
         runEffectSimulation $ enableOnlyTheseForces gridForceSettings
         simulationStart
@@ -263,7 +263,7 @@ handleAction = case _ of
       (Just graph) -> do
         simulationStop
         -- runEffectSimulation $ uniformlyDistributeNodes -- TODO
-        runEffectSimulation $ Graph.updateNodes state.nodes -- filtered to packages only
+        runEffectSimulation $ Graph.updateNodes state.nodes datum_.colorByGroup -- filtered to packages only
         runEffectSimulation $ Graph.updateLinks state.links -- filtered to only P2P
         runEffectSimulation $ enableOnlyTheseForces state.activeForces
         simulationStart
@@ -280,7 +280,7 @@ handleAction = case _ of
       (Just graph) -> do
         simulationStop
         let _ = pinTreeNode <$> state.nodes -- side-effect, because if we make _new_ nodes the links won't be pointing to them
-        runEffectSimulation $ Graph.updateNodes state.nodes
+        runEffectSimulation $ Graph.updateNodes state.nodes datum_.colorByLevel
         runEffectSimulation $ Graph.updateLinks state.links
         runEffectSimulation $ enableOnlyTheseForces treeForceSettings
         simulationStart
@@ -307,7 +307,7 @@ handleAction = case _ of
       Nothing -> pure unit
       (Just graph) -> do
         simulationStop
-        runEffectSimulation $ Graph.updateNodes state.nodes
+        runEffectSimulation $ Graph.updateNodes state.nodes datum_.colorByGroup
         simulationStart
 
 
