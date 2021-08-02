@@ -163,6 +163,23 @@ component = H.mkComponent
             ]
           ]
       , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
+          [ Format.caption_ [ HH.text "Which links should be exert force?" ]
+          , Button.buttonGroup_
+            [ Button.buttonLeft
+                [ HE.onClick $ const (Filter $ LinkFilter isM2M_Tree_Link) ]
+                [ HH.text "Treelink" ]
+            , Button.buttonCenter
+                [ HE.onClick $ const (Filter $ LinkFilter isM2M_Graph_Link) ]
+                [ HH.text "Graphlink" ]
+            , Button.buttonCenter
+                [ HE.onClick $ const (Filter $ LinkFilter isM2P_Link) ]
+                [ HH.text "M2P" ]
+            , Button.buttonRight
+                [ HE.onClick $ const (Filter $ LinkFilter isP2P_Link) ]
+                [ HH.text "P2P" ]
+            ]
+          ]
+      , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
           [ Format.caption_ [ HH.text "Stylesheet" ]
           , Button.buttonGroup_
             [ Button.buttonLeft

@@ -257,8 +257,10 @@ setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
 setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
 
 setXYExceptLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
-setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = D3SimNode node { connected = true }
-setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: false } = D3SimNode (node { treeX = notNull x, treeY = notNull y, connected = true, pinned = Forced })
+setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = 
+  D3SimNode node { treeX = (N.null :: Nullable Number), treeY = (N.null :: Nullable Number), connected = true }
+setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: false } =
+  D3SimNode (node { treeX = notNull x, treeY = notNull y, connected = true, pinned = Forced })
 
 convertFilesToGraphModel :: forall r. 
   { body :: String | r } -> 
