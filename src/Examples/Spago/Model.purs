@@ -6,7 +6,7 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, Index_, PointXY, index_ToInt, intToIndex_)
 import D3.Examples.Spago.Files (LinkType(..), NodeType(..), Pinned(..), SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, SpagoGraphLinkID, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
-import D3.FFI (hasChildren_)
+import D3.FFI (hasChildren_, pinTreeNode_)
 import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Link(..), D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_)
 import Data.Array (filter, foldl, partition)
@@ -249,9 +249,9 @@ offsetY yOffset xy = xy { y = xy.y + yOffset }
 pinNode :: PointXY -> SpagoSimNode -> SpagoSimNode
 pinNode xy (D3SimNode node) = D3SimNode (node { fx = notNull xy.x, fy = notNull xy.y } )
 
-pinTreeNodes :: SpagoSimNode -> SpagoSimNode
-pinTreeNodes (D3SimNode node@{ connected: true }) = D3SimNode (node { fx = node.treeX, fy = node.treeY } )
-pinTreeNodes n = n
+pinTreeNode :: SpagoSimNode -> Unit
+pinTreeNode node@(D3SimNode { connected: true }) = pinTreeNode_ node -- NB side-effecting function
+pinTreeNode _ = unit
 
 setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
 setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
@@ -260,7 +260,7 @@ setXYExceptLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boole
 setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = 
   D3SimNode node { treeX = (N.null :: Nullable Number), treeY = (N.null :: Nullable Number), connected = true }
 setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: false } =
-  D3SimNode (node { treeX = notNull x, treeY = notNull y, connected = true, pinned = Forced })
+  D3SimNode (node { x = x, y = y, treeX = notNull x, treeY = notNull y, connected = true, pinned = Forced })
 
 convertFilesToGraphModel :: forall r. 
   { body :: String | r } -> 

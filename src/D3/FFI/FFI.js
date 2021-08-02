@@ -567,6 +567,12 @@ exports.pinNode_ = fx => fy => node => {
   node.fy = fy
   delete node.vx // which would otherwise result in this being positioned AND fixed
 }
+// pinTreeNode_ :: forall d. D3_SimulationNode d -> Unit
+// TODO side-effecting function
+exports.pinTreeNode_ = node => {
+  node.fx = node.treeX
+  node.fy = node.treeY
+}
 
 // unpinNode_ :: GraphNode_ -> Unit
 exports.unpinNode_ = node => {

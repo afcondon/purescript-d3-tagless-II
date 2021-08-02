@@ -10,8 +10,9 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, index_ToInt)
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID, SpagoNodeData, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Graph as Graph
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, numberToGridPoint, offsetXY, pinNodesInModel, pinTreeNodes, scalePoint)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, numberToGridPoint, offsetXY, pinNodesInModel, pinTreeNode, scalePoint)
 import D3.Examples.Spago.Tree (treeReduction)
+import D3.FFI (pinTreeNode_)
 import D3.Node (D3_SimulationNode(..))
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
@@ -278,9 +279,8 @@ handleAction = case _ of
       Nothing -> pure unit
       (Just graph) -> do
         simulationStop
-        -- let updatedGraph = pinNodesInModel graph (\(D3SimNode d) -> d.name == "Main") { x:0.0, y:0.0 }
-        let pinnedTreeNodes = pinTreeNodes <$> state.nodes
-        runEffectSimulation $ Graph.updateNodes pinnedTreeNodes
+        let _ = pinTreeNode <$> state.nodes -- side-effect, because if we make _new_ nodes the links won't be pointing to them
+        runEffectSimulation $ Graph.updateNodes state.nodes
         runEffectSimulation $ Graph.updateLinks state.links
         runEffectSimulation $ enableOnlyTheseForces treeForceSettings
         simulationStart
