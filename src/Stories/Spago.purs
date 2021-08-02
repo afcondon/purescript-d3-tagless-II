@@ -225,14 +225,15 @@ handleAction = case _ of
       Nothing -> pure unit
       (Just graph) -> do
         simulationStop
-        runEffectSimulation $ Graph.updateNodes state.nodes
-        runEffectSimulation $ Graph.updateLinks state.links
+        runEffectSimulation $ Graph.updateNodes graph.nodes -- all nodes
+        runEffectSimulation $ Graph.updateLinks state.links -- filtered links
         runEffectSimulation $ enableOnlyTheseForces gridForceSettings
         simulationStart
 
   Scene PackageGraph -> do
     setCssEnvironment "graph"
     filterLinks isP2P_Link
+    filterNodes isPackage
     setActiveForces [ "charge1", "collide2", "packageOrbit", "x", "y" ]
 
     state <- H.get
@@ -241,7 +242,7 @@ handleAction = case _ of
       (Just graph) -> do
         simulationStop
         -- runEffectSimulation $ uniformlyDistributeNodes -- TODO
-        runEffectSimulation $ Graph.updateNodes graph.nodes -- no filtering, show everything
+        runEffectSimulation $ Graph.updateNodes state.nodes -- filtered to packages only
         runEffectSimulation $ Graph.updateLinks state.links -- filtered to only P2P
         runEffectSimulation $ enableOnlyTheseForces state.activeForces
         simulationStart
@@ -355,7 +356,7 @@ forces = [
 
       , createForce "packageGrid"  (ForceFixPositionXY gridXY) (Just $ FilterNodes "packages only" datum_.isPackage) [ ] 
       , createForce "packageOrbit" ForceRadial   (selectivelyApplyForce datum_.isPackage "packages only") 
-                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 100.0 ]
       , createForce "moduleOrbit1" ForceRadial   (selectivelyApplyForce datum_.isUnusedModule "unused modules only") 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 700.0 ]
       , createForce "moduleOrbit2" ForceRadial   (selectivelyApplyForce datum_.isUsedModule "used modules only")

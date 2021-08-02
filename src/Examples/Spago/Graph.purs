@@ -52,29 +52,15 @@ setup = do
                                       -- , width w, height h
                                       , onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation_) ] )
 
-  nodesGroup        <- svg  D3.+ (node Group  [ classed "nodes" ])
-  -- nodesInSimulation <- setNodes model.nodes
-  -- let onlyPackageNodes = filter isPackage model.nodes
-  -- uniformlyDistribute onlyPackageNodes
-  -- nodesSelection    <- nodesGroup <+> Join Group [] []
-
-  linksGroup        <- svg  D3.+ (node Group [ classed "links" ])
-  -- linksInSimulation <- setLinks model.links datum_.indexFunction
-  -- linksSelection    <- linksGroup <+> Join Line [] []
-
-  -- addTickFunction "nodes" $ Step nodesSelection nodeTick
-  -- addTickFunction "links" $ Step linksSelection linkTick
-
-  -- circle <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill datum_.colorByGroup ]) 
-  -- labels <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]) 
-  
   _ <- svg    `on` Zoom  { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                          , scale  : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
                          , name   : "spago"
                          }
-  -- keep the named selections that we want elsewhere for updates                       
-  addSelection "linksGroup" linksGroup
+
+  nodesGroup        <- svg  D3.+ (node Group  [ classed "nodes" ])
   addSelection "nodesGroup" nodesGroup
+  linksGroup        <- svg  D3.+ (node Group [ classed "links" ])
+  addSelection "linksGroup" linksGroup
   pure unit
   
 updateNodes :: forall m row. 
@@ -86,9 +72,9 @@ updateNodes :: forall m row.
   Array SpagoSimNode ->
   m Unit
 updateNodes nodes = do
-  simulation_ <- simulationHandle
-  (maybeNodesGroup :: Maybe D3Selection_) 
-              <- getSelection "nodesGroup"
+  simulation_       <- simulationHandle
+  nodesInSimulation <- setNodes nodes
+  (maybeNodesGroup :: Maybe D3Selection_) <- getSelection "nodesGroup"
 
   case maybeNodesGroup of
     Nothing -> pure unit
@@ -110,13 +96,13 @@ updateLinks :: forall m row.
   Array SpagoGraphLinkID ->
   m Unit
 updateLinks links = do
-  (maybeLinksGroup :: Maybe D3Selection_) 
-        <- getSelection "linksGroup"
+  linksInSimulation <- setLinks links datum_.indexFunction
+  (maybeLinksGroup :: Maybe D3Selection_) <- getSelection "linksGroup"
 
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
-      linksSelection <- linksGroup <+> UpdateJoin Line links { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
+      linksSelection <- linksGroup <+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "linksSelection" linksSelection
 
