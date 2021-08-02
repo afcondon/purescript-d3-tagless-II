@@ -69,8 +69,7 @@ setNodePositionsRadial nodes positionMap = do
         Nothing -> D3SimNode node
         (Just p) -> 
           let { x,y } = radialTranslate { x: p.x, y: p.y }
-          -- in (D3SimNode node) `setXYExceptLeaves` { x, y, isLeaf: p.isLeaf } -- only pin parents
-          in (D3SimNode node) `setXYExceptLeaves` { x, y, isLeaf: false }
+          in (D3SimNode node) `setXYExceptLeaves` { x, y, isLeaf: p.isLeaf } -- only pin parents
   updateXY <$> nodes
 
 setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode
