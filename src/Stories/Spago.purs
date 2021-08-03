@@ -13,6 +13,7 @@ import D3.Examples.Spago.Graph (graphAttrs, treeAttrs)
 import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, numberToGridPoint, offsetXY, pinNodesInModel, pinTreeNode, scalePoint)
 import D3.Examples.Spago.Tree (treeReduction)
+import D3.FFI (pinNode_, pinTreeNode_, unpinNode_)
 import D3.Node (D3_SimulationNode(..))
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
@@ -233,6 +234,7 @@ handleAction = case _ of
     filterLinks isM2P_Link
     filterNodes (const true)
     setActiveForces gridForceSettings
+    unpinNodes
 
     state <- H.get
     simulationStop
@@ -260,10 +262,10 @@ handleAction = case _ of
     setActiveForces treeForceSettings
     filterNodes isUsedModule
     filterLinks isM2M_Tree_Link
+    pinTreeNodes -- side-effect, because if we make _new_ nodes the links won't be pointing to them
 
     state <- H.get
     simulationStop
-    let _ = pinTreeNode <$> state.nodes -- side-effect, because if we make _new_ nodes the links won't be pointing to them
     runEffectSimulation $ Graph.updateNodes state.nodes treeAttrs
     runEffectSimulation $ Graph.updateLinks state.links
     runEffectSimulation $ enableOnlyTheseForces treeForceSettings
@@ -319,6 +321,18 @@ filterNodes fn = do
   case state.model of
     Nothing -> pure unit
     (Just graph) -> modify_ (\s -> s { nodes = filter fn graph.nodes })
+
+pinTreeNodes :: forall m. MonadState State m => m Unit
+pinTreeNodes = do
+  state <- H.get
+  let _ = pinTreeNode_ <$> state.nodes -- NB side-effecting on the nodes in the state so that object refs in links stay good
+  pure unit
+
+unpinNodes :: forall m. MonadState State m => m Unit
+unpinNodes = do
+  state <- H.get
+  let _ = unpinNode_ <$> state.nodes -- NB side-effecting on the nodes in the state so that object refs in links stay good
+  pure unit
 
 -- getModel will try to build a model from files and to derive a dependency tree from Main
 -- the dependency tree will contain all nodes reachable from Main but NOT all links
