@@ -132,7 +132,9 @@ datum_ = {
   , colorByGroup:
       \d -> d3SchemeCategory10N_ (toNumber $ datum_.cluster d)
   , colorByLevel:
-      \d -> d3SchemeDiverging10N_ (toNumber $ datum_.id d) -- we don't have level so let's test with cluster
+      \d -> d3SchemeDiverging10N_ (toNumber $ datum_.id d) -- we don't have level in SimNode yet so let's test with id
+  , colorByUsage:
+      \d -> if (datum_.connected d) then "red" else "blue"
   , translateNode:
       \d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <> ")"
       
@@ -257,6 +259,10 @@ pinTreeNode _ = unit
 
 setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
 setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
+
+setXYIncludingLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
+setXYIncludingLeaves (D3SimNode node) { x, y } =
+  D3SimNode (node { x = x, y = y, treeX = notNull x, treeY = notNull y, connected = true, pinned = Forced })
 
 setXYExceptLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
 setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = 

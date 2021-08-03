@@ -9,10 +9,10 @@ import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, index_ToInt)
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID, SpagoNodeData, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
+import D3.Examples.Spago.Graph (graphAttrs, treeAttrs)
 import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, numberToGridPoint, offsetXY, pinNodesInModel, pinTreeNode, scalePoint)
 import D3.Examples.Spago.Tree (treeReduction)
-import D3.FFI (pinTreeNode_)
 import D3.Node (D3_SimulationNode(..))
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
@@ -221,35 +221,25 @@ handleAction :: forall m. Bind m => MonadAff m => MonadState State m =>
 handleAction = case _ of
   Initialize -> do    
     (model :: Maybe SpagoModel) <- H.liftAff getModel
-    case model of
-      Nothing      -> pure $ unsafeCoerce unit -- TODO just temporary, pull out the script runner to fn that returns unit
-      (Just graph) -> do
-        H.modify_ (\s -> s { model = Just graph })
-        simulationStop
-        -- runEffectSimulation (Graph.script graph)
-        runEffectSimulation Graph.setup
-        filterNodes isPackage
-        filterLinks isP2P_Link
-        runEffectSimulation $ Graph.updateNodes graph.nodes datum_.colorByGroup
-        runEffectSimulation $ Graph.updateLinks graph.links
-        runEffectSimulation (addForces forces)
-        simulationStart
+    H.modify_ (\s -> s { model = model })
+    runEffectSimulation Graph.setup
+    runEffectSimulation (addForces forces)
+    handleAction $ Scene PackageGrid
 
   Finalize -> pure unit
 
   Scene PackageGrid -> do
     setCssEnvironment "cluster"
     filterLinks isM2P_Link
+    filterNodes (const true)
     setActiveForces gridForceSettings
+
     state <- H.get
-    case state.model of
-      Nothing -> pure unit
-      (Just graph) -> do
-        simulationStop
-        runEffectSimulation $ Graph.updateNodes graph.nodes datum_.colorByGroup -- all nodes
-        runEffectSimulation $ Graph.updateLinks state.links -- filtered links
-        runEffectSimulation $ enableOnlyTheseForces gridForceSettings
-        simulationStart
+    simulationStop
+    runEffectSimulation $ Graph.updateNodes state.nodes graphAttrs -- all nodes
+    runEffectSimulation $ Graph.updateLinks state.links -- filtered links
+    runEffectSimulation $ enableOnlyTheseForces gridForceSettings
+    simulationStart
 
   Scene PackageGraph -> do
     setCssEnvironment "graph"
@@ -258,15 +248,12 @@ handleAction = case _ of
     setActiveForces packageForceSettings
 
     state <- H.get
-    case state.model of
-      Nothing -> pure unit
-      (Just graph) -> do
-        simulationStop
-        -- runEffectSimulation $ uniformlyDistributeNodes -- TODO
-        runEffectSimulation $ Graph.updateNodes state.nodes datum_.colorByGroup -- filtered to packages only
-        runEffectSimulation $ Graph.updateLinks state.links -- filtered to only P2P
-        runEffectSimulation $ enableOnlyTheseForces state.activeForces
-        simulationStart
+    simulationStop
+    -- runEffectSimulation $ uniformlyDistributeNodes -- TODO
+    runEffectSimulation $ Graph.updateNodes state.nodes graphAttrs -- filtered to packages only
+    runEffectSimulation $ Graph.updateLinks state.links -- filtered to only P2P
+    runEffectSimulation $ enableOnlyTheseForces state.activeForces
+    simulationStart
 
   Scene (ModuleTree _) -> do
     setCssEnvironment "tree"
@@ -275,15 +262,12 @@ handleAction = case _ of
     filterLinks isM2M_Tree_Link
 
     state <- H.get
-    case state.model of
-      Nothing -> pure unit
-      (Just graph) -> do
-        simulationStop
-        let _ = pinTreeNode <$> state.nodes -- side-effect, because if we make _new_ nodes the links won't be pointing to them
-        runEffectSimulation $ Graph.updateNodes state.nodes datum_.colorByLevel
-        runEffectSimulation $ Graph.updateLinks state.links
-        runEffectSimulation $ enableOnlyTheseForces treeForceSettings
-        simulationStart
+    simulationStop
+    let _ = pinTreeNode <$> state.nodes -- side-effect, because if we make _new_ nodes the links won't be pointing to them
+    runEffectSimulation $ Graph.updateNodes state.nodes treeAttrs
+    runEffectSimulation $ Graph.updateLinks state.links
+    runEffectSimulation $ enableOnlyTheseForces treeForceSettings
+    simulationStart
 
   ToggleForce label -> do
     simulationStop
@@ -292,23 +276,19 @@ handleAction = case _ of
 
   Filter (LinkFilter x) -> do
     filterLinks x
+
     state <- H.get
-    case state.model of
-      Nothing -> pure unit
-      (Just graph) -> do
-        simulationStop
-        runEffectSimulation $ Graph.updateLinks state.links
-        simulationStart
+    simulationStop
+    runEffectSimulation $ Graph.updateLinks state.links
+    simulationStart
 
   Filter (NodeFilter x) -> do
     filterNodes x
+
     state <- H.get
-    case state.model of
-      Nothing -> pure unit
-      (Just graph) -> do
-        simulationStop
-        runEffectSimulation $ Graph.updateNodes state.nodes datum_.colorByGroup
-        simulationStart
+    simulationStop
+    runEffectSimulation $ Graph.updateNodes state.nodes graphAttrs -- TODO clearly now this has to be maintained in the state, cos toggling force will change attrs!
+    simulationStart
 
 
 

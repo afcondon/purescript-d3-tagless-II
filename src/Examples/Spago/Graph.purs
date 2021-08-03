@@ -6,7 +6,7 @@ import D3.Data.Types (D3Selection_, Datum_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cancelSpotlight_, datum_, isPackage, link_, toggleSpotlight)
 import D3.Node (D3_SimulationNode(..))
-import D3.Selection (Behavior(..), DragBehavior(..), Join(..), node)
+import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node)
 import D3.Simulation.Types (SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, addSelection, addTickFunction, attach, getLinks, getNodes, getSelection, on, setLinks, setNodes, simulationHandle, (<+>))
@@ -60,7 +60,15 @@ setup = do
   addSelection "nodesGroup" nodesGroup
   addSelection "linksGroup" linksGroup
   pure unit
-  
+
+-- | Some examples of pre-packaged attribute sets available to the app maker
+circleAttrs1 = [ radius datum_.radius, fill datum_.colorByGroup ]
+circleAttrs2 = [ radius 3.0, fill datum_.colorByUsage ]
+labelsAttrs1 = [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]
+labelsAttrs2 = [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]
+graphAttrs = { circle: circleAttrs1, labels: labelsAttrs1 }
+treeAttrs  = { circle: circleAttrs2, labels: labelsAttrs1 }
+
 updateNodes :: forall m row. 
   Bind m => 
   MonadEffect m =>
@@ -68,9 +76,9 @@ updateNodes :: forall m row.
   SelectionM D3Selection_ m =>
   SimulationM D3Selection_ m =>
   Array SpagoSimNode ->
-  (Datum_ -> String) -> 
+  { circle :: Array ChainableS, labels :: Array ChainableS } -> 
   m Unit
-updateNodes nodes chooseColor = do
+updateNodes nodes attrs = do
   simulation_       <- simulationHandle
   _                 <- setNodes nodes
   maybeNodesGroup   <- getSelection "nodesGroup"
@@ -79,8 +87,8 @@ updateNodes nodes chooseColor = do
     Nothing -> pure unit
     (Just nodesGroup) -> do
       nodesSelection <- nodesGroup D3.<+> UpdateJoin Group nodes { enter: enterNodes simulation_, update: [], exit: [ remove ] } 
-      circle         <- nodesSelection D3.+ (node Circle [ radius datum_.radius, fill chooseColor ]) 
-      labels         <- nodesSelection D3.+ (node Text [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]) 
+      circle         <- nodesSelection D3.+ (node Circle attrs.circle)
+      labels         <- nodesSelection D3.+ (node Text attrs.labels) 
       _              <- circle `on` Drag DefaultDrag
 
       addTickFunction "nodes" $ Step nodesSelection nodeTick
@@ -101,7 +109,7 @@ updateLinks links = do
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
-      linksSelection <- linksGroup <+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
+      linksSelection <- linksGroup D3.<+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "linksSelection" linksSelection
 

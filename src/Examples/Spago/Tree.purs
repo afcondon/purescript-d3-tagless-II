@@ -6,7 +6,7 @@ import D3.Data.Graph (getReachableNodes)
 import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Data.Types (PointXY)
 import D3.Examples.Spago.Files (LinkType(..), isP2P_Link)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, setXYExceptLeaves)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, setXYExceptLeaves, setXYIncludingLeaves)
 import D3.Layouts.Hierarchical (radialSeparation)
 import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..), NodeID)
 import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
@@ -64,12 +64,16 @@ radialTranslate p =
 setNodePositionsRadial :: Array SpagoSimNode -> M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean } -> Array SpagoSimNode
 setNodePositionsRadial nodes positionMap = do
   let 
+    pinLeaves = false
     updateXY (D3SimNode node) = do
       case M.lookup node.id positionMap of
         Nothing -> D3SimNode node
         (Just p) -> 
           let { x,y } = radialTranslate { x: p.x, y: p.y }
-          in (D3SimNode node) `setXYExceptLeaves` { x, y, isLeaf: p.isLeaf } -- only pin parents
+          in 
+            if pinLeaves
+            then (D3SimNode node) `setXYExceptLeaves`    { x, y, isLeaf: p.isLeaf } -- only pin parents
+            else (D3SimNode node) `setXYIncludingLeaves` { x, y, isLeaf: p.isLeaf } -- only pin parents
   updateXY <$> nodes
 
 setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode
