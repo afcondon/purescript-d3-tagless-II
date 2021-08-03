@@ -20,7 +20,7 @@ import Data.Set as S
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..))
 import Math (cos, pi, sin)
-import Prelude (($), (*), (<$>), (<<<), (<>), (==), (||))
+import Prelude 
 import Unsafe.Coerce (unsafeCoerce)
 
 tupleToLink linktype (Tuple source target) = D3_Link { source, target, linktype }
@@ -36,7 +36,11 @@ treeReduction rootID model = do
           partitionedLinks  = partition (\(D3_Link l) -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
           treelinks         = (changeLinkType M2M_Tree) <$> partitionedLinks.yes
           treenodes         = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
-          layout            = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
+
+          -- layout            = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
+          numberOfLevels    = (hNodeHeight_ rootTree) + 1.0
+          -- layout            = (getLayout TidyTree) `treeSetNodeSize_` [ 10.0, svg.width / numberOfLevels]
+          layout            = (getLayout TidyTree) `treeSetNodeSize_` [ 10.0, 2000.0 / numberOfLevels]
 
           idTree            = buildTree rootID treelinks
           jsontree          = makeD3TreeJSONFromTreeID idTree model.maps.id2Node
@@ -44,7 +48,8 @@ treeReduction rootID model = do
           sortedTree        = treeSortForTree_Spago    rootTree
           laidOutRoot_      = (runLayoutFn_ layout)    sortedTree
           positionMap       = getPositionMap           laidOutRoot_
-          positionedNodes   = setNodePositionsRadial   treenodes.yes positionMap
+          -- positionedNodes   = setNodeXY_ForRadialTree   treenodes.yes positionMap
+          positionedNodes   = setNodeXY_ForHorizontalTree   treenodes.yes positionMap
           unpositionedNodes = setForPhyllotaxis  <$> treenodes.no
           tree              = Tuple rootID laidOutRoot_
 
@@ -61,8 +66,8 @@ radialTranslate p =
       y = radius * sin angle
   in { x, y }
 
-setNodePositionsRadial :: Array SpagoSimNode -> M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean } -> Array SpagoSimNode
-setNodePositionsRadial nodes positionMap = do
+setNodeXY_ForRadialTree :: Array SpagoSimNode -> M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean } -> Array SpagoSimNode
+setNodeXY_ForRadialTree nodes positionMap = do
   let 
     pinLeaves = false
     updateXY (D3SimNode node) = do
@@ -72,8 +77,23 @@ setNodePositionsRadial nodes positionMap = do
           let { x,y } = radialTranslate { x: p.x, y: p.y }
           in 
             if pinLeaves
-            then (D3SimNode node) `setXYExceptLeaves`    { x, y, isLeaf: p.isLeaf } -- only pin parents
-            else (D3SimNode node) `setXYIncludingLeaves` { x, y, isLeaf: p.isLeaf } -- only pin parents
+            then (D3SimNode node) `setXYIncludingLeaves` { x, y, isLeaf: p.isLeaf } -- only pin parents
+            else (D3SimNode node) `setXYExceptLeaves`    { x, y, isLeaf: p.isLeaf } -- only pin parents
+  updateXY <$> nodes
+
+setNodeXY_ForHorizontalTree :: Array SpagoSimNode -> M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean } -> Array SpagoSimNode
+setNodeXY_ForHorizontalTree nodes positionMap = do
+  let 
+    pinLeaves = true
+    updateXY (D3SimNode node) = do
+      case M.lookup node.id positionMap of
+        Nothing -> D3SimNode node
+        (Just p) -> 
+          let { x,y } = { x: p.y, y: p.x }
+          in 
+            if pinLeaves
+            then (D3SimNode node) `setXYIncludingLeaves` { x, y, isLeaf: p.isLeaf } -- only pin parents
+            else (D3SimNode node) `setXYExceptLeaves`    { x, y, isLeaf: p.isLeaf } -- only pin parents
   updateXY <$> nodes
 
 setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode

@@ -128,7 +128,7 @@ datum_ = {
       \d -> (datum_.radius d) + 30.0
 
   , nodeClass:
-      \d -> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d)
+      \d -> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d) <> (if (datum_.connected d) then " connected" else "")
   , colorByGroup:
       \d -> d3SchemeCategory10N_ (toNumber $ datum_.cluster d)
   , colorByLevel:

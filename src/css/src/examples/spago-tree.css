@@ -30,6 +30,11 @@ div.svg-container.tree {
           visibility: visible;
           fill-opacity: 0.2;
         }
+        & circle.connected {
+          visibility: visible;
+          fill-opacity: 1;
+          fill: maroon;
+        }
         &:hover {
           & text {
             visibility: visible;
@@ -39,6 +44,13 @@ div.svg-container.tree {
           & circle {
             visibility: visible;
           }
+        }
+      }
+      & g.module.connected { /* not sure why this rule isn't visible in browser even it's overruled by attribute on node */
+        & circle {
+          visibility: visible;
+          fill-opacity: 1;
+          fill: maroon;
         }
       }
       & g.package {

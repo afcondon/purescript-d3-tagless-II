@@ -129,8 +129,8 @@ component = H.mkComponent
                 [ HE.onClick $ const (Scene PackageGraph) ]
                 [ HH.text "Package Graph" ]
             , Button.buttonPrimaryCenter
-                [ HE.onClick $ const (Scene $ ModuleTree Vertical) ]
-                [ HH.text "Vertical Tree" ]
+                [ HE.onClick $ const (Scene $ ModuleTree Horizontal) ]
+                [ HH.text "Horiz. Tree" ]
             , Button.buttonPrimaryRight
                 [ HE.onClick $ const (Scene $ ModuleTree Radial) ]
                 [ HH.text "Radial Tree" ]
@@ -142,6 +142,9 @@ component = H.mkComponent
             [ Button.buttonLeft
                 [ HE.onClick $ const (Filter $ NodeFilter isPackage) ]
                 [ HH.text "Packages" ]
+            , Button.buttonCenter
+                [ HE.onClick $ const (Filter $ NodeFilter (const true)) ]
+                [ HH.text "Both" ]
             , Button.buttonRight
                 [ HE.onClick $ const (Filter $ NodeFilter isUsedModule) ]
                 [ HH.text "Modules" ]
@@ -159,9 +162,12 @@ component = H.mkComponent
             , Button.buttonCenter
                 [ HE.onClick $ const (Filter $ LinkFilter isM2P_Link) ]
                 [ HH.text "M2P" ]
-            , Button.buttonRight
+            , Button.buttonCenter
                 [ HE.onClick $ const (Filter $ LinkFilter isP2P_Link) ]
                 [ HH.text "P2P" ]
+            , Button.buttonRight
+                [ HE.onClick $ const (Filter $ LinkFilter (const false)) ]
+                [ HH.text "none" ]
             ]
           ]
       , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
