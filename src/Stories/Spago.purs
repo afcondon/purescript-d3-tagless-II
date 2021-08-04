@@ -145,6 +145,9 @@ component = H.mkComponent
             , Button.buttonCenter
                 [ HE.onClick $ const (Filter $ NodeFilter (const true)) ]
                 [ HH.text "Both" ]
+            , Button.buttonCenter
+                [ HE.onClick $ const (Filter $ NodeFilter (const false)) ]
+                [ HH.text "Neither" ]
             , Button.buttonRight
                 [ HE.onClick $ const (Filter $ NodeFilter isUsedModule) ]
                 [ HH.text "Modules" ]

@@ -91,7 +91,7 @@ datum_ = {
   , loc           : \d -> (unboxD3SimNode d).loc
   , containerID   : \d -> (unboxD3SimNode d).containerID
   , containerName : \d -> (unboxD3SimNode d).containerName
-  , name          : \d -> (unboxD3SimNode d).name
+  , name          : \d -> (unboxD3SimNode d).name <> " " <> show (unboxD3SimNode d).id
   , namePos       : \d -> "(" <> show (Math.floor $ datum_.x d) <> "," <> show (Math.floor $ datum_.y d) <> ")" -- for debugging position
   , x             : \d -> (unboxD3SimNode d).x
   , y             : \d -> (unboxD3SimNode d).y

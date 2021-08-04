@@ -68,7 +68,7 @@ circleAttrs1 = [ radius datum_.radius, fill datum_.colorByGroup ]
 circleAttrs2 = [ radius 3.0, fill datum_.colorByUsage ]
 labelsAttrs1 = [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]
 -- TODO x and y position for label would also depend on "hasChildren"
-labelsAttrsH = [ classed "label",  x 4, y 2.0, textAnchor (tree_datum_.textAnchor Horizontal), text datum_.name]
+labelsAttrsH = [ classed "label",  x 4.0, y 2.0, textAnchor (tree_datum_.textAnchor Horizontal), text datum_.name]
 graphAttrs = { circle: circleAttrs1, labels: labelsAttrs1 }
 treeAttrs  = { circle: circleAttrs2, labels: labelsAttrsH }
 
