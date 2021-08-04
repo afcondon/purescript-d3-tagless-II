@@ -16,8 +16,8 @@ data DragBehavior =
   | NoDrag
   | CustomDrag (D3Selection_ -> Unit)
 
-data Behavior = Drag DragBehavior
-              | Zoom ZoomConfig 
+data Behavior selection = Drag DragBehavior
+                        | Zoom (ZoomConfig selection)
 
 data Join d = Join Element (Array d) (Array ChainableS)
             | UpdateJoin Element (Array d) EnterUpdateExit

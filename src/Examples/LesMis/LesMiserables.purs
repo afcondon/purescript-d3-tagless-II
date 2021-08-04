@@ -85,9 +85,10 @@ graphScript model selector = do
                                                 ]
   _ <- nodesSelection `on` Drag DefaultDrag
 
-  _ <- svg `on`  Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-                      , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
-                      , name : "LesMis"
+  _ <- svg `on`  Zoom { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+                      , scale  : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
+                      , name   : "LesMis"
+                      , target : svg
                       }
 
   pure unit

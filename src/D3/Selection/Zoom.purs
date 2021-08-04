@@ -4,10 +4,11 @@ import D3.FFI (ZoomBehavior_)
 import Web.Event.Internal.Types (Event)
 
 -- stuff related to zoom functionality
-type ZoomConfig = {
+type ZoomConfig selection = {
     extent :: ZoomExtent
   , scale  :: ScaleExtent
   , name   :: String -- zoom.foo
+  , target :: selection
 -- this is the full list of values and their defaults
 -- filter = defaultFilter,
 -- extent = defaultExtent,

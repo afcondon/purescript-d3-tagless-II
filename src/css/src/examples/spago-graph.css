@@ -1,6 +1,7 @@
 /* the svg-container's class is set by Halogen, thus controlling look of the visualization */
 div.svg-container.graph { 
   & svg {
+    background-color: white;
     & g.links {
       & line.M2M-Graph {
         stroke: red;

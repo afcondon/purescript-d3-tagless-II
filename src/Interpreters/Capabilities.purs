@@ -18,7 +18,7 @@ class (Monad m) <= SelectionM selection m where
   filterSelection :: selection -> Selector selection -> m selection
   modifySelection :: selection -> Array (ChainableS) -> m Unit
   
-  on     :: selection -> Behavior -> m Unit
+  on     :: selection -> Behavior selection -> m Unit
 
   join   :: ∀ datum.  selection -> Join datum -> m selection
 

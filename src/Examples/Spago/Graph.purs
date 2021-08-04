@@ -8,7 +8,7 @@ import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cancelSpotlight_, datum_, isPackage, link_, toggleSpotlight, tree_datum_)
 import D3.Layouts.Hierarchical (horizontalLink', radialLink, verticalLink)
 import D3.Node (D3_SimulationNode(..))
-import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node)
+import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
 import D3.Simulation.Types (SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, addSelection, addTickFunction, attach, getLinks, getNodes, getSelection, on, setLinks, setNodes, simulationHandle, (<+>))
@@ -48,16 +48,18 @@ setup = do
   simulation_ <- simulationHandle -- needed for click handler to stop / start simulation
   root        <- attach "div.svg-container"
   svg         <- root D3.+ (node Svg  [ viewBox (-w / 2.0) (-h / 2.0) w h 
-                                      , preserveAspectRatio $ AspectRatio XMid YMid Meet 
-                                      , classed "initial"
-                                      -- , width w, height h
+                                      -- , preserveAspectRatio $ AspectRatio XMid YMid Meet 
+                                      , classed "overlay"
+                                      , width w, height h
                                       , onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation_) ] )
-  _           <- svg `on` Zoom  { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-                                , scale  : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
-                                , name   : "spago"
-                                }
-  nodesGroup  <- svg  D3.+ (node Group  [ classed "nodes" ])
-  linksGroup  <- svg  D3.+ (node Group [ classed "links" ])
+  zoomable    <- svg D3.+ (node_ Group)
+  _           <- zoomable `on` Zoom  {  extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+                                      , scale  : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
+                                      , name   : "spago"
+                                      , target : svg
+                                      }
+  linksGroup  <- zoomable  D3.+ (node Group [ classed "links" ])
+  nodesGroup  <- zoomable  D3.+ (node Group [ classed "nodes" ])
   
   addSelection "nodesGroup" nodesGroup
   addSelection "linksGroup" linksGroup

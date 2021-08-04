@@ -72,7 +72,7 @@ selectionJoin selection (UpdateJoinWithKeyFunction e ds cs k) = do
   pure enterS
 
 
-selectionOn :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Behavior -> m Unit
+selectionOn :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Behavior D3Selection_ -> m Unit
 selectionOn selection (Drag drag) = do
 -- TODO need to provide the simpler, non-simulation version here
   -- let _ = case drag of 

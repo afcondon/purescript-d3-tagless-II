@@ -231,7 +231,7 @@ simulationCreateTickFunction label tick@(Step selection chain) = do
 -- Drag has to behave differently in the simulation case
 simulationOn :: forall selection row m. 
   (MonadState { simulationState :: SimulationState_ | row } m) =>
-   D3Selection_ -> Behavior -> m Unit
+   D3Selection_ -> Behavior D3Selection_ -> m Unit
 simulationOn selection (Drag drag) = do
   (SS_ { simulation_ }) <- gets _.simulationState
   let _ = case drag of 

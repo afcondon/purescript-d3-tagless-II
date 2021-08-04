@@ -29,7 +29,7 @@ data D3GrammarNode =
   | JoinSimpleWithKeyFunctionNode Element (Array ChainableS) ComputeKeyFunction_
   | UpdateJoinWithKeyFunctionNode Element EnterUpdateExit ComputeKeyFunction_
   -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
-  | OnNode Behavior -- TODO make chainable
+  | OnNode (Behavior NodeID) -- TODO make chainable
   | AttrNode ChainableS -- actually only Attr and Text
   | OrderNode String
   | OnEventNode MouseEvent

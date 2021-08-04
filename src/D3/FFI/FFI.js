@@ -40,7 +40,6 @@ exports.d3AttachZoom_ = selection => config => {
       .scaleExtent(config.scaleExtent)
       .on(`zoom.${config.name}`, zoomed)
   )
-  // .on("zoom", zoomed));
 }
 
 exports.showAttachZoomDefaultExtent_ = selection => config => {
