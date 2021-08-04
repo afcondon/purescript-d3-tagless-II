@@ -243,9 +243,6 @@ simulationOn selection (Drag drag) = do
 simulationOn selection (Zoom config) = do
   let 
     (ScaleExtent smallest largest) = config.scale
-    target = selection
-    -- TODO recover the ability to "direct" the zoom to element other than the one receiving the event
-    -- ie for controllers, containers etc
 
   -- sticking to the rules of no ADT's on the JS side we case on the ZoomExtent here
     _ = case config.extent of
@@ -253,7 +250,7 @@ simulationOn selection (Zoom config) = do
             d3AttachZoomDefaultExtent_ selection {
               scaleExtent: [ smallest, largest ]
             , name  : config.name
-            , target
+            , target: config.target
             } 
 
           (ZoomExtent ze)   -> do
@@ -261,6 +258,6 @@ simulationOn selection (Zoom config) = do
               extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
             , scaleExtent: [ smallest, largest ]
             , name  : config.name
-            , target
+            , target: config.target
             }
   pure unit

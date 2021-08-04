@@ -21,7 +21,6 @@ exports.d3AttachZoomDefaultExtent_ = selection => config => {
       .scaleExtent(config.scaleExtent)
       .on(`zoom.${config.name}`, zoomed)
   )
-  // .on("zoom", zoomed));
 }
 
 // foreign import attachZoom :: D3Selection_ -> ZoomConfig_ -> D3Selection_
@@ -29,17 +28,14 @@ exports.d3AttachZoom_ = selection => config => {
   if (debug) {
     showAttachZoom_(config.target)(config)
   }
-  function zoomed ({ transform }) {
-    // TODO try arrow function below instead
-    config.target.attr('transform', transform)
-  }
-  return selection.call(
+  selection.call(
     d3
       .zoom()
-      .extent(config.extent)
+      .extent(config.extent) // extent is [ [], [] ]
       .scaleExtent(config.scaleExtent)
-      .on(`zoom.${config.name}`, zoomed)
+      .on(`zoom.${config.name}`, (event) => { config.target.attr('transform', event.transform) })
   )
+  return selection
 }
 
 exports.showAttachZoomDefaultExtent_ = selection => config => {

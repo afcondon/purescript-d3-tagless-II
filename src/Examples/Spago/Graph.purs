@@ -1,7 +1,7 @@
 module D3.Examples.Spago.Graph where
 
 import Control.Monad.State (class MonadState, get)
-import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), classed, fill, height, onMouseEvent, preserveAspectRatio, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
+import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), classed, cursor, fill, height, onMouseEvent, preserveAspectRatio, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, Datum_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID)
@@ -51,15 +51,19 @@ setup = do
                                       -- , preserveAspectRatio $ AspectRatio XMid YMid Meet 
                                       , classed "overlay"
                                       , width w, height h
+                                      , cursor "grab"
                                       , onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation_) ] )
-  zoomable    <- svg D3.+ (node_ Group)
-  _           <- zoomable `on` Zoom  {  extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-                                      , scale  : ScaleExtent 0.2 2.0 -- wonder if ScaleExtent ctor could be range operator `..`
+  inner    <- svg D3.+ (node_ Group)
+  _        <- inner `on` Drag DefaultDrag
+  -- because the zoom event is picked up by `svg` but applied to `inner`, next line must be after previous
+  _        <- svg `on` Zoom  {  extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+                                      , scale  : ScaleExtent 0.1 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
                                       , name   : "spago"
-                                      , target : svg
+                                      , target : inner
                                       }
-  linksGroup  <- zoomable  D3.+ (node Group [ classed "links" ])
-  nodesGroup  <- zoomable  D3.+ (node Group [ classed "nodes" ])
+
+  linksGroup  <- inner  D3.+ (node Group [ classed "links" ])
+  nodesGroup  <- inner  D3.+ (node Group [ classed "nodes" ])
   
   addSelection "nodesGroup" nodesGroup
   addSelection "linksGroup" linksGroup
