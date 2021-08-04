@@ -143,6 +143,82 @@ div.svg-container.graph svg g.nodes g.package:hover text {
             opacity: 1;
           }
 
+/* the svg-container's class is set by Halogen, thus controlling look of the visualization */
+
+div.svg-container.tree svg g.links line.M2M-Graph {
+        stroke: red;
+        visibility: hidden;
+      }
+
+div.svg-container.tree svg g.links path.M2M-Tree { /* tree links are splines, not straight lines */
+        fill: none;
+        visibility: visible;
+      }
+
+div.svg-container.tree svg g.links line.P2P {
+        stroke: green;
+        visibility: visible;
+      }
+
+div.svg-container.tree svg g.links line.in-package.dependency {
+        stroke: blue;
+        visibility: hidden;
+      }
+
+div.svg-container.tree svg g.nodes text {
+        font: 12px sans-serif;
+      }
+
+div.svg-container.tree svg g.nodes g.module text {
+          opacity: 0.5;
+        }
+
+div.svg-container.tree svg g.nodes g.module circle {
+          visibility: visible;
+          fill-opacity: 0.2;
+        }
+
+div.svg-container.tree svg g.nodes g.module circle.connected {
+          visibility: visible;
+          fill-opacity: 1;
+          fill: maroon;
+        }
+
+div.svg-container.tree svg g.nodes g.module:hover text {
+            visibility: visible;
+            fill: black;
+            opacity: 0.8;
+          }
+
+div.svg-container.tree svg g.nodes g.module:hover circle {
+            visibility: visible;
+          }
+
+div.svg-container.tree svg g.nodes g.module.connected { /* not sure why this rule isn't visible in browser even it's overruled by attribute on node */
+      }
+
+div.svg-container.tree svg g.nodes g.module.connected circle {
+          visibility: visible;
+          fill-opacity: 1;
+          fill: maroon;
+        }
+
+div.svg-container.tree svg g.nodes g.package circle {
+          visibility: visible;
+        }
+
+div.svg-container.tree svg g.nodes g.package text {
+          visibility: hidden;
+          fill: black;
+          font-size: 24px;
+          opacity: 0.5;
+          text-anchor: middle;
+        }
+
+div.svg-container.tree svg g.nodes g.package:hover text {
+            visibility: visible;
+          }
+
 /* ! tailwindcss v2.1.4 | MIT License | https://tailwindcss.com */
 
 /*! modern-normalize v1.1.0 | MIT License | https://github.com/sindresorhus/modern-normalize */

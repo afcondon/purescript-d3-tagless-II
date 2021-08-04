@@ -8,7 +8,7 @@ import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (AttributeSetter(..), toAttr)
 import D3.Data.Tree (TreeJson_, TreeLayout, TreeModel, TreeType)
 import D3.Data.Types (Datum_)
-import D3.FFI (find_, getLayout, hNodeDepth_, linkClusterHorizontal_, linkClusterVertical_, linkHorizontal_, linkRadial_, linkVertical_, sharesParent_)
+import D3.FFI (find_, getLayout, hNodeDepth_, linkClusterHorizontal_, linkClusterVertical_, linkHorizontal2_, linkHorizontal_, linkRadial_, linkVertical_, sharesParent_)
 import D3.Selection (ChainableS(..))
 import Data.Bifunctor (rmap)
 import Data.Either (Either)
@@ -57,6 +57,11 @@ radialSeparation  = mkFn2 (\a b -> if (sharesParent_ a b)
 
 horizontalLink :: ChainableS
 horizontalLink = AttrT $ AttributeSetter "d" $ toAttr linkHorizontal_
+
+-- version for when the x and y point are already swapped
+-- should be default someday
+horizontalLink' :: ChainableS
+horizontalLink' = AttrT $ AttributeSetter "d" $ toAttr linkHorizontal2_
 
 verticalLink :: ChainableS
 verticalLink = AttrT $ AttributeSetter "d" $ toAttr linkVertical_

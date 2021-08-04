@@ -2,9 +2,11 @@ module D3.Examples.Spago.Graph where
 
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), classed, fill, height, onMouseEvent, preserveAspectRatio, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
+import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, Datum_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cancelSpotlight_, datum_, isPackage, link_, toggleSpotlight)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cancelSpotlight_, datum_, isPackage, link_, toggleSpotlight, tree_datum_)
+import D3.Layouts.Hierarchical (horizontalLink', radialLink, verticalLink)
 import D3.Node (D3_SimulationNode(..))
 import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node)
 import D3.Simulation.Types (SimulationState_(..), Step(..))
@@ -65,9 +67,10 @@ setup = do
 circleAttrs1 = [ radius datum_.radius, fill datum_.colorByGroup ]
 circleAttrs2 = [ radius 3.0, fill datum_.colorByUsage ]
 labelsAttrs1 = [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]
-labelsAttrs2 = [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]
+-- TODO x and y position for label would also depend on "hasChildren"
+labelsAttrsH = [ classed "label",  x 4, y 2.0, textAnchor (tree_datum_.textAnchor Horizontal), text datum_.name]
 graphAttrs = { circle: circleAttrs1, labels: labelsAttrs1 }
-treeAttrs  = { circle: circleAttrs2, labels: labelsAttrs1 }
+treeAttrs  = { circle: circleAttrs2, labels: labelsAttrsH }
 
 updateNodes :: forall m row. 
   Bind m => 
@@ -105,11 +108,39 @@ updateLinks :: forall m row.
 updateLinks links = do
   linksInSimulation <- setLinks links datum_.indexFunction
   (maybeLinksGroup :: Maybe D3Selection_) <- getSelection "linksGroup"
-
+    
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
       linksSelection <- linksGroup D3.<+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
+      addTickFunction "links" $ Step linksSelection linkTick
+      addSelection "linksSelection" linksSelection
+
+  pure unit
+  
+updateLinksTree :: forall m row. 
+  Bind m => 
+  MonadEffect m =>
+  MonadState { simulationState :: SimulationState_ | row } m =>
+  SelectionM D3Selection_ m =>
+  SimulationM D3Selection_ m =>
+  Array SpagoGraphLinkID ->
+  TreeLayout -> 
+  m Unit
+updateLinksTree links layout = do
+  linksInSimulation <- setLinks links datum_.indexFunction
+  (maybeLinksGroup :: Maybe D3Selection_) <- getSelection "linksGroup"
+
+  let linkPath =
+        case layout of
+          Horizontal -> horizontalLink'
+          Radial     -> radialLink datum_.x datum_.y
+          Vertical   -> verticalLink
+
+  case maybeLinksGroup of
+    Nothing -> pure unit
+    (Just linksGroup) -> do
+      linksSelection <- linksGroup D3.<+> UpdateJoin Path linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color, linkPath ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "linksSelection" linksSelection
 

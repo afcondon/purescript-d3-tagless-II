@@ -242,6 +242,7 @@ foreign import treeMinMax_            :: forall d. D3_TreeNode d -> { xMin :: Nu
 foreign import sharesParent_          :: forall r. (D3_TreeNode r) -> (D3_TreeNode r) -> Boolean
 
 foreign import linkHorizontal_        :: (Datum_ -> String) 
+foreign import linkHorizontal2_       :: (Datum_ -> String) 
 foreign import linkVertical_          :: (Datum_ -> String) 
 foreign import linkClusterHorizontal_ :: Number -> (Datum_ -> String) 
 foreign import linkClusterVertical_   :: Number -> (Datum_ -> String) 

@@ -6,6 +6,10 @@ div.svg-container.tree {
         stroke: red;
         visibility: hidden;
       } 
+      & path.M2M-Tree { /* tree links are splines, not straight lines */
+        fill: none;
+        visibility: visible;
+      } 
       & line.P2P {
         stroke: green;
         visibility: visible;
@@ -13,17 +17,15 @@ div.svg-container.tree {
       & line.in-package.dependency {
         stroke: blue;
         visibility: hidden;
-      } 
+      }
     }
 
     & g.nodes {
       & text {
         font: 12px sans-serif;
-        text-anchor: middle;
       }
       & g.module {
         & text {
-          visibility: hidden;
           opacity: 0.5;
         }
         & circle {

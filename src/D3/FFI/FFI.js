@@ -682,6 +682,10 @@ exports.linkHorizontal_ = d3
   .linkHorizontal()
   .x(d => d.y)
   .y(d => d.x)
+exports.linkHorizontal2_ = d3
+  .linkHorizontal()
+  .x(d => d.x)
+  .y(d => d.y)
 exports.linkVertical_ = d3
   .linkVertical()
   .x(d => d.x)

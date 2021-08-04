@@ -89,7 +89,7 @@ setNodeXY_ForHorizontalTree nodes positionMap = do
       case M.lookup node.id positionMap of
         Nothing -> D3SimNode node
         (Just p) -> 
-          let { x,y } = { x: p.y, y: p.x }
+          let { x,y } = { x: p.y - 800.0 , y: p.x } -- TODO just shifting left because origin is in center
           in 
             if pinLeaves
             then (D3SimNode node) `setXYIncludingLeaves` { x, y, isLeaf: p.isLeaf } -- only pin parents

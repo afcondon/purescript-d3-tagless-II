@@ -273,7 +273,7 @@ handleAction = case _ of
     state <- H.get
     simulationStop
     runEffectSimulation $ Graph.updateNodes state.nodes treeAttrs
-    runEffectSimulation $ Graph.updateLinks state.links
+    runEffectSimulation $ Graph.updateLinksTree state.links Horizontal
     runEffectSimulation $ enableOnlyTheseForces treeForceSettings
     simulationStart
 
