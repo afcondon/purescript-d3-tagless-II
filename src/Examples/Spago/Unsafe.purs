@@ -14,7 +14,15 @@ unboxD3SimLink :: Datum_ -> SpagoGraphLinkObj
 unboxD3SimLink datum = l
   where (D3_Link l) = unsafeCoerce datum
 
-unboxD3TreeNode :: Datum_
+-- morally, this is just the following short signature, but because of 
+-- the need for the newtype (because of the recursion in the type) we have 
+-- to accept the compiler generated monstrosity above, which is also 
+-- brittle unfortunately
+-- ======================================================================
+-- unboxD3TreeNode :: Datum_ -> SpagoDataRecord -- + Children / Parent
+-- ======================================================================
+unboxD3TreeNode :: forall t2.
+  t2
   -> { children :: Array
                      (D3_TreeNode
                         ( data :: { connected :: Boolean
@@ -22,6 +30,7 @@ unboxD3TreeNode :: Datum_
                                   , containerName :: String
                                   , containsMany :: Boolean
                                   , id :: Int
+                                  , inSim :: Boolean
                                   , links :: { contains :: Array Int
                                              , inPackage :: Array Int
                                              , outPackage :: Array Int
@@ -51,6 +60,7 @@ unboxD3TreeNode :: Datum_
                , containerName :: String
                , containsMany :: Boolean
                , id :: Int
+               , inSim :: Boolean
                , links :: { contains :: Array Int
                           , inPackage :: Array Int
                           , outPackage :: Array Int
@@ -76,6 +86,7 @@ unboxD3TreeNode :: Datum_
                                 , containerName :: String
                                 , containsMany :: Boolean
                                 , id :: Int
+                                , inSim :: Boolean
                                 , links :: { contains :: Array Int
                                            , inPackage :: Array Int
                                            , outPackage :: Array Int
@@ -105,13 +116,6 @@ unboxD3TreeNode :: Datum_
      , x :: Number
      , y :: Number
      }
--- morally, this is just the following short signature, but because of 
--- the need for the newtype (because of the recursion in the type) we have 
--- to accept the compiler generated monstrosity above, which is also 
--- brittle unfortunately
--- ======================================================================
--- unboxD3TreeNode :: Datum_ -> SpagoDataRecord -- + Children / Parent
--- ======================================================================
 unboxD3TreeNode datum =
   let 
     (t' :: SpagoTreeObj )  = unsafeCoerce datum

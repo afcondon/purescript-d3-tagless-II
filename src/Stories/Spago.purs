@@ -9,7 +9,7 @@ import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, index_ToInt)
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID, SpagoNodeData, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Graph (graphAttrs, treeAttrs)
+import D3.Examples.Spago.Graph (graphAttrs, removeNamedSelection, treeAttrs)
 import D3.Examples.Spago.Graph as Graph
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, numberToGridPoint, offsetXY, pinNodesInModel, pinTreeNode, scalePoint)
 import D3.Examples.Spago.Tree (treeReduction)
@@ -240,6 +240,7 @@ handleAction = case _ of
 
   Scene PackageGrid -> do
     setCssEnvironment "cluster"
+    runEffectSimulation $ removeNamedSelection "treelinksSelection"
     filterLinks isM2P_Link
     filterNodes (const true)
     setActiveForces gridForceSettings
@@ -276,7 +277,7 @@ handleAction = case _ of
     state <- H.get
     simulationStop
     runEffectSimulation $ Graph.updateNodes state.nodes treeAttrs
-    runEffectSimulation $ Graph.updateLinksTree state.links Horizontal
+    runEffectSimulation $ Graph.updateTreeLinks state.links Horizontal
     runEffectSimulation $ enableOnlyTheseForces treeForceSettings
     simulationStart
 

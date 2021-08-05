@@ -22,7 +22,7 @@ div.svg-container.tree {
 
     & g.nodes {
       & text {
-        font: 12px sans-serif;
+        font: 10px monospace;
       }
       & g.module {
         & text {

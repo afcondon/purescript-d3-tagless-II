@@ -11,7 +11,7 @@ import D3.Node (D3_SimulationNode(..))
 import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
 import D3.Simulation.Types (SimulationState_(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, addSelection, addTickFunction, attach, getLinks, getNodes, getSelection, on, setLinks, setNodes, simulationHandle, (<+>))
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, addSelection, addTickFunction, attach, getLinks, getNodes, getSelection, modifySelection, on, setLinks, setNodes, simulationHandle, (<+>))
 import D3Tagless.Capabilities as D3
 import Data.Array (filter)
 import Data.Maybe (Maybe(..))
@@ -120,11 +120,11 @@ updateLinks links = do
     (Just linksGroup) -> do
       linksSelection <- linksGroup D3.<+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
       addTickFunction "links" $ Step linksSelection linkTick
-      addSelection "linksSelection" linksSelection
+      addSelection "graphlinksSelection" linksSelection
 
   pure unit
   
-updateLinksTree :: forall m row. 
+updateTreeLinks :: forall m row. 
   Bind m => 
   MonadEffect m =>
   MonadState { simulationState :: SimulationState_ | row } m =>
@@ -133,22 +133,39 @@ updateLinksTree :: forall m row.
   Array SpagoGraphLinkID ->
   TreeLayout -> 
   m Unit
-updateLinksTree links layout = do
+updateTreeLinks links layout = do
   linksInSimulation <- setLinks links datum_.indexFunction
-  (maybeLinksGroup :: Maybe D3Selection_) <- getSelection "linksGroup"
 
   let linkPath =
         case layout of
-          Horizontal -> horizontalLink'
+          Horizontal -> horizontalLink' -- the ' is because current library default horizontalLink flips x&y (tree examples written that way, should be changed)
           Radial     -> radialLink datum_.x datum_.y
           Vertical   -> verticalLink
 
+  (maybeLinksGroup :: Maybe D3Selection_) <- getSelection "linksGroup"
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
       linksSelection <- linksGroup D3.<+> UpdateJoin Path linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color, linkPath ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
       addTickFunction "links" $ Step linksSelection linkTick
-      addSelection "linksSelection" linksSelection
+      addSelection "treelinksSelection" linksSelection
+
+  pure unit
+  
+removeNamedSelection :: forall m row. 
+  Bind m => 
+  MonadEffect m =>
+  MonadState { simulationState :: SimulationState_ | row } m =>
+  SelectionM D3Selection_ m =>
+  SimulationM D3Selection_ m =>
+  String -> 
+  m Unit
+removeNamedSelection name = do
+  (maybeSelection :: Maybe D3Selection_) <- getSelection name
+  case maybeSelection of
+    Nothing -> pure unit
+    (Just selection) -> do
+      modifySelection selection [ remove ]
 
   pure unit
   

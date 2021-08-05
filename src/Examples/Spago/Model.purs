@@ -6,7 +6,7 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, Index_, PointXY, index_ToInt, intToIndex_)
 import D3.Examples.Spago.Files (LinkType(..), NodeType(..), Pinned(..), SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, SpagoGraphLinkID, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
-import D3.FFI (hasChildren_, pinTreeNode_)
+import D3.FFI (hasChildren_, pinNode_, pinTreeNode_, setInSimNodeFlag, setInSimNodeFlag_)
 import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Link(..), D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_, d3SchemeDiverging10N_)
 import Data.Array (filter, foldl, partition)
@@ -205,27 +205,28 @@ upgradeSpagoNodeData :: M.Map NodeID (Array NodeID) -> SpagoNodeData -> SpagoSim
 upgradeSpagoNodeData sourcesMap node = D3SimNode { 
     links        : node.links { sources = fromMaybe [] $ M.lookup node.id sourcesMap }
   , id           : node.id
-  , name         : node.name
-  , nodetype     : node.nodetype
+  , cluster      : node.containerID -- TODO cluster all the single module packages together
+  , connected    : node.connected
   , containerID  : node.containerID
   , containerName: node.containerName
-  , connected    : node.connected
   , containsMany : node.containsMany
-  , cluster      : node.containerID -- TODO cluster all the single module packages together
-  , index        : node.id
-  , pinned       : Floating
-  , loc          : node.loc
   , focusX       : 0.0
   , focusY       : 0.0
   , fx           : (N.null :: N.Nullable Number)
   , fy           : (N.null :: N.Nullable Number)
+  , index        : node.id
+  , inSim        : true
+  , loc          : node.loc
+  , name         : node.name
+  , nodetype     : node.nodetype
+  , pinned       : Floating
+  , r            : sqrt node.loc
   , treeX        : (N.null :: N.Nullable Number)
   , treeY        : (N.null :: N.Nullable Number)
   , vx           : 0.0
   , vy           : 0.0
   , x            : 0.0
   , y            : 0.0
-  , r            : sqrt node.loc
   }
 
 numberToGridPoint :: Int -> Int -> PointXY
@@ -322,8 +323,14 @@ foreign import toggleSpotlight_ :: Event -> D3Simulation_ -> NodeID -> String ->
 foreign import cancelSpotlight_ :: D3Simulation_ -> Unit
 
 -- this is going to be another side-effecting function since it will change the fx/fy of selected nodes
-pinNodesInModel :: SpagoModel -> (SpagoSimNode -> Boolean) -> PointXY -> SpagoModel
-pinNodesInModel model predicate xy = model { nodes = updatedNodes }
+modifyNodesInPlace :: (SpagoSimNode -> SpagoSimNode) -> SpagoModel -> (SpagoSimNode -> Boolean) ->  SpagoModel
+modifyNodesInPlace fn model predicate = model { nodes = updatedNodes }
   where
     nodes = partition predicate model.nodes 
-    updatedNodes = (pinNode xy <$> nodes.yes) <> nodes.no
+    updatedNodes = (fn <$> nodes.yes) <> nodes.no
+
+markNodesToAddToSimulation :: SpagoModel -> (SpagoSimNode -> Boolean) -> SpagoModel
+markNodesToAddToSimulation = modifyNodesInPlace setInSimNodeFlag
+
+pinNodesInModel :: PointXY -> SpagoModel -> (SpagoSimNode -> Boolean) -> SpagoModel
+pinNodesInModel xy = modifyNodesInPlace (pinNode xy)

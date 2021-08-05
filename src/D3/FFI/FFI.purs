@@ -127,16 +127,27 @@ foreign import getLinks_               :: forall d r. D3ForceHandle_ -> Array (D
 foreign import startSimulation_        :: D3Simulation_ -> Unit
 foreign import stopSimulation_         :: D3Simulation_ -> Unit
 
-foreign import pinNode_   :: forall d. Number -> Number -> D3_SimulationNode d -> Unit
-foreign import pinTreeNode_ :: forall d. D3_SimulationNode d -> Unit -- side-effecting function
-foreign import unpinNode_ :: forall d. D3_SimulationNode d -> Unit
-foreign import setPositionToNaN_ :: forall d. Array (D3_SimulationNode d) -> Unit
+foreign import pinNode_              :: forall d. Number -> Number -> D3_SimulationNode d -> Unit
+foreign import setInSimNodeFlag_     :: forall d. D3_SimulationNode d -> Unit
+foreign import unsetInSimNodeFlag_   :: forall d. D3_SimulationNode d -> Unit
+foreign import pinTreeNode_          :: forall d. D3_SimulationNode d -> Unit -- side-effecting function
+foreign import unpinNode_            :: forall d. D3_SimulationNode d -> Unit
+foreign import setPositionToNaN_     :: forall d. Array (D3_SimulationNode d) -> Unit
 
 -- NB mutating function
 pinNode :: forall d. D3_SimulationNode d -> PointXY -> D3_SimulationNode d
 pinNode node p = do
   let _ = pinNode_ p.x p.y node
   node -- NB mutated value, fx / fy have been set
+-- NB mutating function
+setInSimNodeFlag :: forall d. D3_SimulationNode d -> D3_SimulationNode d
+setInSimNodeFlag node = do
+  let _ = setInSimNodeFlag_ node
+  node -- NB mutated value, inSim now true
+unsetInSimNodeFlag :: forall d. D3_SimulationNode d -> D3_SimulationNode d
+unsetInSimNodeFlag node = do
+  let _ = unsetInSimNodeFlag_ node
+  node -- NB mutated value, inSim now false
 
 -- TODO this all has to change completely to work within Tagless 
 -- foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass

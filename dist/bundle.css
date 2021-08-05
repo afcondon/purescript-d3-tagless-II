@@ -170,7 +170,7 @@ div.svg-container.tree svg g.links line.in-package.dependency {
       }
 
 div.svg-container.tree svg g.nodes text {
-        font: 12px sans-serif;
+        font: 10px monospace;
       }
 
 div.svg-container.tree svg g.nodes g.module text {

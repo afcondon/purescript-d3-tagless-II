@@ -568,6 +568,13 @@ exports.pinTreeNode_ = node => {
   node.fx = node.treeX
   node.fy = node.treeY
 }
+// TODO side-effecting function
+// setInSimNodeFlag_     :: forall d. D3_SimulationNode d -> Unit
+exports.setInSimNodeFlag_ = node => { node.inSim = true }
+
+// TODO side-effecting function
+// unsetInSimNodeFlag_   :: forall d. D3_SimulationNode d -> Unit
+exports.unsetInSimNodeFlag_ = node => { node.inSim = false }
 
 // unpinNode_ :: GraphNode_ -> Unit
 exports.unpinNode_ = node => {

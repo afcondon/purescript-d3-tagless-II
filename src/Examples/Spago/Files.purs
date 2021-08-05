@@ -65,7 +65,7 @@ data NodeType        = IsModule ModulePath | IsPackage PackageInfo
 data Pinned          = Pinned | Floating | Forced -- might be more categories here, "pinned connectd", "pinned unused" whatever...
 type Deps            = Array NodeID
 
-type SpagoLinkData     = ( linktype :: LinkType )
+type SpagoLinkData     = ( linktype :: LinkType, inSim :: Boolean )
 type SpagoGraphLinkID  = D3_Link NodeID          SpagoLinkData
 type SpagoGraphLinkObj =  { source :: SpagoDataRecord, target :: SpagoDataRecord | SpagoLinkData }
 type SpagoTreeObj      = D3_TreeNode (D3_ID + D3_TreeRow + D3_XY   + D3_Leaf + D3_Radius  + (EmbeddedData { | SpagoNodeRow () }) + () )
@@ -79,14 +79,15 @@ type SpagoNodeRow row = (
                 , outPackage :: Deps
                 , contains   :: Deps -- in case of package, modules; in case of modules, codepoints? (not implemented)
                 }
-  , nodetype    :: NodeType
-  , name        :: String
-  , pinned      :: Pinned
-  , loc         :: Number
-  , connected   :: Boolean
-  , containsMany  :: Boolean
-  , containerName :: String
+  , connected     :: Boolean
   , containerID   :: NodeID
+  , containerName :: String
+  , containsMany  :: Boolean
+  , inSim         :: Boolean -- should we put this node in the Sim? allows fine-grained control of what in
+  , loc           :: Number
+  , name          :: String
+  , nodetype      :: NodeType
+  , pinned        :: Pinned
   , treeX         :: Nullable Number
   , treeY         :: Nullable Number
   | row )
@@ -175,6 +176,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       , loc          : m.loc
       , nodetype     : IsModule m.path
       , pinned       : Floating
+      , inSim        : true
       , links        :  { targets: (getId <$> m.depends) -- NB these are Module depends
                         , sources   : []  -- these can be filled in later?
                         , tree      : []
@@ -199,6 +201,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
 
       { id           : id
       , name         : p.key
+      , inSim        : true
       , nodetype     : IsPackage (PackageInfo repo)
       , pinned       : Floating
       , containerID  : id -- package belongs to itself
@@ -221,7 +224,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     packageNodes       = makeNodeFromPackageJSONCL <$> packagesCL
 
     makeLink :: LinkType -> Tuple NodeID NodeID -> SpagoGraphLinkID
-    makeLink linktype (Tuple source target) = D3_Link { source, target, linktype }
+    makeLink linktype (Tuple source target) = D3_Link { source, target, linktype, inSim: true }
 
     foldDepends :: forall r. Array (Tuple NodeID NodeID) -> { key :: String, depends :: Array String | r } -> Array (Tuple NodeID NodeID)
     foldDepends b a = (makeTuple <$> a.depends) <> b    
@@ -233,7 +236,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     packageLinks = (makeLink P2P)       <$> (foldl foldDepends [] packages)
 
     makeModuleToPackageLink :: SpagoNodeData -> SpagoGraphLinkID
-    makeModuleToPackageLink m = D3_Link { source: m.id, target: m.containerID, linktype: M2P }
+    makeModuleToPackageLink m = D3_Link { source: m.id, target: m.containerID, linktype: M2P, inSim: true }
 
     modulePackageLinks = makeModuleToPackageLink <$> moduleNodes
     

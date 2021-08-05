@@ -23,7 +23,7 @@ import Math (cos, pi, sin)
 import Prelude 
 import Unsafe.Coerce (unsafeCoerce)
 
-tupleToLink linktype (Tuple source target) = D3_Link { source, target, linktype }
+tupleToLink linktype (Tuple source target) = D3_Link { source, target, linktype, inSim: true }
 changeLinkType linktype (D3_Link l) = D3_Link l { linktype = linktype }
 
 -- TODO make this generic and extract from Spago example to library
