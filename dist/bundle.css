@@ -94,14 +94,15 @@ div.svg-container.graph svg g.links line.M2M-Graph {
       }
 
 div.svg-container.graph svg g.links line.P2P {
-        visibility: visible;
+        visibility: hidden;
         opacity: 0.3;
         stroke-width: 2px;
       }
 
-div.svg-container.graph svg g.links line.in-package.dependency {
-        stroke: blue;
-        visibility: hidden;
+div.svg-container.graph svg g.links line.hover {
+        visibility: visible;
+        opacity: 0.3;
+        stroke-width: 2px;
       }
 
 div.svg-container.graph svg g.nodes text {
@@ -127,6 +128,7 @@ div.svg-container.graph svg g.nodes g.module:hover text {
 
 div.svg-container.graph svg g.nodes g.module:hover circle {
             visibility: visible;
+            opacity: 0.9;
           }
 
 div.svg-container.graph svg g.nodes g.package circle {

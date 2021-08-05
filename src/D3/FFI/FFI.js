@@ -560,7 +560,14 @@ exports.putForceInSimulationWithFilter_ = simulation => label => filterFn => for
 exports.pinNode_ = fx => fy => node => {
   node.fx = fx
   node.fy = fy
-  delete node.vx // which would otherwise result in this being positioned AND fixed
+}
+// pinNamedNode_ :: String -> Number -> Number -> GraphNode_ -> Unit
+exports.pinNamedNode_ = name => fx => fy => node => {
+  if (node.name === name) {
+    node.fx = fx
+    node.fy = fy
+    node.name = "WTF-------"
+  }
 }
 // pinTreeNode_ :: forall d. D3_SimulationNode d -> Unit
 // TODO side-effecting function

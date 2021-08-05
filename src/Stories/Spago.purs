@@ -11,19 +11,20 @@ import D3.Data.Types (D3Selection_, index_ToInt)
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID, SpagoNodeData, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Graph (graphAttrs, removeNamedSelection, treeAttrs)
 import D3.Examples.Spago.Graph as Graph
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, numberToGridPoint, offsetXY, pinNodesInModel, pinTreeNode, scalePoint)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, numberToGridPoint, offsetXY, pinNodesByPredicate, pinNodesInModel, pinTreeNode, scalePoint)
 import D3.Examples.Spago.Tree (treeReduction)
-import D3.FFI (pinNode_, pinTreeNode_, unpinNode_)
+import D3.FFI (pinNamedNode_, pinNode_, pinTreeNode_, unpinNode_)
 import D3.Node (D3_SimulationNode(..))
 import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce, enableForce)
+import D3.Simulation.Forces (createForce, disableByLabels, enableForce)
 import D3.Simulation.Functions (simulationSetLinks, simulationStart, simulationStop)
 import D3.Simulation.Types (Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), SimVariable(..), SimulationState_(..), allNodes, showForceFilter)
 import D3Tagless.Block.Card as Card
 import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, setForcesByLabel, setLinks, toggleForceByLabel)
-import D3Tagless.Instance.Simulation (runEffectSimulation)
-import Data.Array (filter, length, (:))
+import D3Tagless.Instance.Simulation (D3SimM, runEffectSimulation)
+import Data.Array (filter, find, length, (:))
 import Data.Either (hush)
+import Data.Int (toNumber)
 import Data.Map (toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -103,6 +104,8 @@ component = H.mkComponent
           [ HH.text $ "link count: " <> show (length state.links) ] 
       , HH.p_
           [ HH.text $ "node count:" <> show (length state.nodes )] 
+      , HH.p_
+          [ HH.text $ "forces active:" <> show state.activeForces ] 
       ]
 
   renderSimControls state =
@@ -240,7 +243,7 @@ handleAction = case _ of
 
   Scene PackageGrid -> do
     setCssEnvironment "cluster"
-    runEffectSimulation $ removeNamedSelection "treelinksSelection"
+    runEffectSimulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     filterLinks isM2P_Link
     filterNodes (const true)
     setActiveForces gridForceSettings
@@ -249,26 +252,30 @@ handleAction = case _ of
     state <- H.get
     simulationStop
     runEffectSimulation $ Graph.updateNodes state.nodes graphAttrs -- all nodes
-    runEffectSimulation $ Graph.updateLinks state.links -- filtered links
+    runEffectSimulation $ Graph.updateGraphLinks state.links -- filtered links
     runEffectSimulation $ enableOnlyTheseForces gridForceSettings
     simulationStart
 
   Scene PackageGraph -> do
     setCssEnvironment "graph"
+    runEffectSimulation $ removeNamedSelection "treelinksSelection"
     filterLinks isP2P_Link
     filterNodes isPackage
     setActiveForces packageForceSettings
+    -- runEffectSimulation $ uniformlyDistributeNodes -- TODO
 
     state <- H.get
     simulationStop
-    -- runEffectSimulation $ uniformlyDistributeNodes -- TODO
     runEffectSimulation $ Graph.updateNodes state.nodes graphAttrs -- filtered to packages only
-    runEffectSimulation $ Graph.updateLinks state.links -- filtered to only P2P
+    -- TODO following line which tries drawing links without putting them in simulation won't work until swizzling is done on PS side
+    -- runEffectSimulation $ Graph.updateGraphLinks' state.links 
+    runEffectSimulation $ Graph.updateGraphLinks state.links -- filtered to only P2P
     runEffectSimulation $ enableOnlyTheseForces state.activeForces
     simulationStart
 
   Scene (ModuleTree _) -> do
     setCssEnvironment "tree"
+    runEffectSimulation $ removeNamedSelection "graphlinksSelection"
     setActiveForces treeForceSettings
     filterNodes isUsedModule
     filterLinks isM2M_Tree_Link
@@ -291,7 +298,7 @@ handleAction = case _ of
 
     state <- H.get
     simulationStop
-    runEffectSimulation $ Graph.updateLinks state.links
+    runEffectSimulation $ Graph.updateGraphLinks state.links
     simulationStart
 
   Filter (NodeFilter x) -> do
@@ -338,6 +345,12 @@ pinTreeNodes = do
   let _ = pinTreeNode_ <$> state.nodes -- NB side-effecting on the nodes in the state so that object refs in links stay good
   pure unit
 
+centerPinNamedNode :: forall m. MonadState State m => String -> m Unit
+centerPinNamedNode name = do
+  state <- H.get
+  let _ = (pinNamedNode_ name 0.0 0.0) <$> state.nodes -- NB side-effecting on the nodes in the state so that object refs in links stay good
+  pure unit
+
 unpinNodes :: forall m. MonadState State m => m Unit
 unpinNodes = do
   state <- H.get
@@ -368,7 +381,7 @@ addTreeToModel rootName maybeModel = do
 -- | ============================================
 gridForceSettings = [ "packageGrid", "clusterx", "clustery", "collide1" ]
 treeForceSettings = ["links", "center", "charge1", "collide1" ]
-packageForceSettings = [ "packageOrbit", "collide2", "charge2", "collide2", "x", "y" ]
+packageForceSettings = [ "centerNamedNode", "center", "collide2", "charge2", "links" ]
 forces :: Array Force
 forces = [
         createForce "collide1"     ForceCollide  allNodes [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
@@ -381,7 +394,8 @@ forces = [
       , createForce "clusterx"     ForceX        allNodes [ F.strength 0.2, F.x datum_.clusterPointX ]
       , createForce "clustery"     ForceY        allNodes [ F.strength 0.2, F.y datum_.clusterPointY ]
 
-      , createForce "packageGrid"  (ForceFixPositionXY gridXY) (Just $ FilterNodes "packages only" datum_.isPackage) [ ] 
+      , createForce "packageGrid"     (ForceFixPositionXY gridXY)   (Just $ FilterNodes "packages only" datum_.isPackage) [ ] 
+      , createForce "centerNamedNode" (ForceFixPositionXY centerXY) (Just $ FilterNodes "my-project only" (\d -> (datum_.name d) == "my-project")) [ ] 
       , createForce "packageOrbit" ForceRadial   (selectivelyApplyForce datum_.isPackage "packages only") 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 300.0 ]
       , createForce "moduleOrbit1" ForceRadial   (selectivelyApplyForce datum_.isUnusedModule "unused modules only") 
@@ -392,12 +406,8 @@ forces = [
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
       ]
   where
-    -- onlyPackages = (\d -> if datum_.isPackage d then 0.8 else 0.0)
-    -- onlyUsedModules = (\d -> if datum_.isUsedModule d then 0.8 else 0.0)
-    -- onlyUnusedModules = (\d -> if datum_.isUnusedModule d then 0.8 else 0.0)
-    -- gridFilter d = datum_.isPackage d
-
     gridXY _ i = cluster2Point i
+    centerXY _ _ = { x: 0.0, y: 0.0 }
     selectivelyApplyForce filterFn description = Just $ FilterNodes description filterFn
 
 -- | ============================================

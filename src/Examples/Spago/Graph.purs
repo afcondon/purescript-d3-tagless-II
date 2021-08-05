@@ -103,7 +103,7 @@ updateNodes nodes attrs = do
       addTickFunction "nodes" $ Step nodesSelection nodeTick
       addSelection "nodesSelection" nodesSelection
 
-updateLinks :: forall m row. 
+updateGraphLinks :: forall m row. 
   Bind m => 
   MonadEffect m =>
   MonadState { simulationState :: SimulationState_ | row } m =>
@@ -111,7 +111,7 @@ updateLinks :: forall m row.
   SimulationM D3Selection_ m =>
   Array SpagoGraphLinkID ->
   m Unit
-updateLinks links = do
+updateGraphLinks links = do
   linksInSimulation <- setLinks links datum_.indexFunction
   (maybeLinksGroup :: Maybe D3Selection_) <- getSelection "linksGroup"
     
@@ -119,6 +119,26 @@ updateLinks links = do
     Nothing -> pure unit
     (Just linksGroup) -> do
       linksSelection <- linksGroup D3.<+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
+      addTickFunction "links" $ Step linksSelection linkTick
+      addSelection "graphlinksSelection" linksSelection
+
+  pure unit
+  
+updateGraphLinks' :: forall m row. 
+  Bind m => 
+  MonadEffect m =>
+  MonadState { simulationState :: SimulationState_ | row } m =>
+  SelectionM D3Selection_ m =>
+  SimulationM D3Selection_ m =>
+  Array SpagoGraphLinkID ->
+  m Unit
+updateGraphLinks' links = do
+  (maybeLinksGroup :: Maybe D3Selection_) <- getSelection "linksGroup"
+    
+  case maybeLinksGroup of
+    Nothing -> pure unit
+    (Just linksGroup) -> do
+      linksSelection <- linksGroup D3.<+> UpdateJoin Line links { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "graphlinksSelection" linksSelection
 

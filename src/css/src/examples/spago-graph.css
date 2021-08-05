@@ -8,13 +8,14 @@ div.svg-container.graph {
         visibility: hidden;
       } 
       & line.P2P {
-        visibility: visible;
+        visibility: hidden;
         opacity: 0.3;
         stroke-width: 2px;
       } 
-      & line.in-package.dependency {
-        stroke: blue;
-        visibility: hidden;
+      & line.hover {
+        visibility: visible;
+        opacity: 0.3;
+        stroke-width: 2px;
       } 
     }
 
@@ -40,6 +41,7 @@ div.svg-container.graph {
           }
           & circle {
             visibility: visible;
+            opacity: 0.9;
           }
         }
       }

@@ -70,6 +70,7 @@ link_ = {
   , color     : \d -> d3SchemeCategory10N_ (toNumber $ (unboxD3SimLink d).target.containerID)
 }
 
+-- TODO this is a ridiculously brittle and specific function to distribute package nodes on the screen, general solution needed here
 cluster2Point :: Index_ -> PointXY
 cluster2Point i =  
   scalePoint 200.0 200.0 $
@@ -91,7 +92,8 @@ datum_ = {
   , loc           : \d -> (unboxD3SimNode d).loc
   , containerID   : \d -> (unboxD3SimNode d).containerID
   , containerName : \d -> (unboxD3SimNode d).containerName
-  , name          : \d -> (unboxD3SimNode d).name <> " " <> show (unboxD3SimNode d).id
+  , name          : \d -> (unboxD3SimNode d).name
+  , nameAndID     : \d -> (unboxD3SimNode d).name <> " " <> show (unboxD3SimNode d).id
   , namePos       : \d -> "(" <> show (Math.floor $ datum_.x d) <> "," <> show (Math.floor $ datum_.y d) <> ")" -- for debugging position
   , x             : \d -> (unboxD3SimNode d).x
   , y             : \d -> (unboxD3SimNode d).y
@@ -125,7 +127,7 @@ datum_ = {
         else datum_.radius d
 
   , collideRadiusBig:
-      \d -> (datum_.radius d) + 30.0
+      \d -> (datum_.radius d) + 50.0
 
   , nodeClass:
       \d -> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d) <> (if (datum_.connected d) then " connected" else "")
@@ -139,6 +141,7 @@ datum_ = {
       \d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <> ")"
       
 -- accessors to provide different force settings for different cohorts, quite possible that this should go thru a similar but different route from `datum`
+  , isNamed: \name d -> \d -> datum_.name d == name
   , isPackage:
       \d -> case datum_.nodetype d of
               (IsModule _) -> false
@@ -323,14 +326,24 @@ foreign import toggleSpotlight_ :: Event -> D3Simulation_ -> NodeID -> String ->
 foreign import cancelSpotlight_ :: D3Simulation_ -> Unit
 
 -- this is going to be another side-effecting function since it will change the fx/fy of selected nodes
-modifyNodesInPlace :: (SpagoSimNode -> SpagoSimNode) -> SpagoModel -> (SpagoSimNode -> Boolean) ->  SpagoModel
-modifyNodesInPlace fn model predicate = model { nodes = updatedNodes }
+modifyModelNodesInPlace :: (SpagoSimNode -> SpagoSimNode) -> SpagoModel -> (SpagoSimNode -> Boolean) ->  SpagoModel
+modifyModelNodesInPlace fn model predicate = model { nodes = updatedNodes }
   where
     nodes = partition predicate model.nodes 
     updatedNodes = (fn <$> nodes.yes) <> nodes.no
 
 markNodesToAddToSimulation :: SpagoModel -> (SpagoSimNode -> Boolean) -> SpagoModel
-markNodesToAddToSimulation = modifyNodesInPlace setInSimNodeFlag
+markNodesToAddToSimulation = modifyModelNodesInPlace setInSimNodeFlag
 
 pinNodesInModel :: PointXY -> SpagoModel -> (SpagoSimNode -> Boolean) -> SpagoModel
-pinNodesInModel xy = modifyNodesInPlace (pinNode xy)
+pinNodesInModel xy = modifyModelNodesInPlace (pinNode xy)
+
+
+modifyNodesInPlace :: (SpagoSimNode -> SpagoSimNode) -> Array SpagoSimNode -> (SpagoSimNode -> Boolean) ->  Array SpagoSimNode
+modifyNodesInPlace fn nodes predicate = updatedNodes
+  where
+    nodes' = partition predicate nodes 
+    updatedNodes = (fn <$> nodes'.yes) <> nodes'.no
+
+pinNodesByPredicate :: PointXY -> Array SpagoSimNode -> (SpagoSimNode -> Boolean) -> Array SpagoSimNode
+pinNodesByPredicate xy = modifyNodesInPlace (pinNode xy)

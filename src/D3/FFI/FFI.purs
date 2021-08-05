@@ -128,6 +128,7 @@ foreign import startSimulation_        :: D3Simulation_ -> Unit
 foreign import stopSimulation_         :: D3Simulation_ -> Unit
 
 foreign import pinNode_              :: forall d. Number -> Number -> D3_SimulationNode d -> Unit
+foreign import pinNamedNode_         :: forall d. String -> Number -> Number -> D3_SimulationNode d -> Unit
 foreign import setInSimNodeFlag_     :: forall d. D3_SimulationNode d -> Unit
 foreign import unsetInSimNodeFlag_   :: forall d. D3_SimulationNode d -> Unit
 foreign import pinTreeNode_          :: forall d. D3_SimulationNode d -> Unit -- side-effecting function
