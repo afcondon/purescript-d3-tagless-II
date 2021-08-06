@@ -1,0 +1,28 @@
+{
+  "loc": [
+    {
+      "loc": 116,
+      "path": "src/Main.purs"
+    },
+    {
+      "loc": 406,
+      "path": ".spago/one/v6.0.0/src/Effect/ModuleA.purs"
+    },
+    {
+      "loc": 44,
+      "path": ".spago/one/v6.0.0/src/Effect/Aff/ModuleB.purs"
+    },
+    {
+      "loc": 287,
+      "path": ".spago/two/v12.0.0/src/ModuleC.purs"
+    },
+    {
+      "loc": 1291,
+      "path": ".spago/three/v6.0.0/src/Data/ModuleC.purs"
+    },
+    {
+      "loc": 40,
+      "path": ".spago/four/v5.0.0/src/Data/ModuleD.purs"
+    }
+  ]
+}

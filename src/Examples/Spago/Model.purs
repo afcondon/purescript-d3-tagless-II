@@ -94,6 +94,7 @@ datum_ = {
   , containerName : \d -> (unboxD3SimNode d).containerName
   , name          : \d -> (unboxD3SimNode d).name
   , nameAndID     : \d -> (unboxD3SimNode d).name <> " " <> show (unboxD3SimNode d).id
+  , indexAndID     : \d -> (unboxD3SimNode d).name <> " " <> show (unboxD3SimNode d).index <> " " <> show (unboxD3SimNode d).id
   , namePos       : \d -> "(" <> show (Math.floor $ datum_.x d) <> "," <> show (Math.floor $ datum_.y d) <> ")" -- for debugging position
   , x             : \d -> (unboxD3SimNode d).x
   , y             : \d -> (unboxD3SimNode d).y
@@ -104,7 +105,8 @@ datum_ = {
   , links         : \d -> (unboxD3SimNode d).links
   , connected     : \d -> (unboxD3SimNode d).connected
 
-  , clusterPoint  : \d -> cluster2Point (intToIndex_ $ (unboxD3SimNode d).cluster - 462) -- TODO fix this dirty hack
+  -- , clusterPoint  : \d -> cluster2Point (intToIndex_ $ (unboxD3SimNode d).cluster - 462) -- TODO fix this dirty hack
+  , clusterPoint  : \d -> cluster2Point (intToIndex_ $ (unboxD3SimNode d).cluster - 5) -- TODO fix this dirty hack (magic number for start of package ids)
   , clusterPointX : \d -> _.x $ datum_.clusterPoint d
   , clusterPointY : \d -> _.y $ datum_.clusterPoint d
   , treePoint     : \d -> fromMaybe (datum_.clusterPoint d) (tree2Point (datum_.treeX d) (datum_.treeY d))
@@ -131,6 +133,8 @@ datum_ = {
 
   , nodeClass:
       \d -> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d) <> (if (datum_.connected d) then " connected" else "")
+  , nodeClass':
+      \d -> "updated" <> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d) <> (if (datum_.connected d) then " connected" else "")
   , colorByGroup:
       \d -> d3SchemeCategory10N_ (toNumber $ datum_.cluster d)
   , colorByLevel:
@@ -167,7 +171,8 @@ datum_ = {
 }
 
 -- type LinkFilter = forall r. D3_SimulationNode r -> Boolean
-
+noFilter :: SpagoSimNode -> Boolean
+noFilter = const true
 isPackage :: SpagoSimNode -> Boolean
 isPackage (D3SimNode d) =
   case d.nodetype of

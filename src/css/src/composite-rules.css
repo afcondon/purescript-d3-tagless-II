@@ -24,3 +24,13 @@
     @apply flex-grow bg-white overflow-hidden;
   }
 }
+
+div.svg-container.cluster,
+div.svg-container.graph,
+div.svg-container.tree,
+div.svg-container.grid { 
+  & svg g.nodes g.updated text {
+        font: 14px;
+        fill: red;
+  }
+}

@@ -7,11 +7,11 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get, gets, modify_)
 import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout(..))
-import D3.Data.Types (D3Selection_, index_ToInt)
+import D3.Data.Types (D3Selection_, Index_, PointXY, index_ToInt)
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID, SpagoNodeData, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Graph (graphAttrs, removeNamedSelection, treeAttrs)
 import D3.Examples.Spago.Graph as Graph
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, numberToGridPoint, offsetXY, pinNodesByPredicate, pinNodesInModel, pinTreeNode, scalePoint)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, noFilter, numberToGridPoint, offsetXY, pinNodesByPredicate, pinNodesInModel, pinTreeNode, scalePoint)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (pinNamedNode_, pinNode_, pinTreeNode_, unpinNode_)
 import D3.Node (D3_SimulationNode(..))
@@ -30,7 +30,7 @@ import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
 import Data.Tuple (snd)
-import Debug (spy)
+import Debug (spy, trace)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
@@ -105,7 +105,7 @@ component = H.mkComponent
       , HH.p_
           [ HH.text $ "node count:" <> show (length state.nodes )] 
       , HH.p_
-          [ HH.text $ "forces active:" <> show state.activeForces ] 
+          [ HH.text $ "initial forces:" <> show state.activeForces ] 
       ]
 
   renderSimControls state =
@@ -234,10 +234,11 @@ handleAction :: forall m. Bind m => MonadAff m => MonadState State m =>
 handleAction = case _ of
   Initialize -> do    
     (model :: Maybe SpagoModel) <- H.liftAff getModel
+    let _ = trace { model: model } \_ -> unit
     H.modify_ (\s -> s { model = model })
     runEffectSimulation Graph.setup
     runEffectSimulation (addForces forces)
-    handleAction $ Scene PackageGrid
+    -- handleAction $ Scene PackageGraph
 
   Finalize -> pure unit
 
@@ -245,11 +246,12 @@ handleAction = case _ of
     setCssEnvironment "cluster"
     runEffectSimulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     filterLinks isM2P_Link
-    filterNodes (const true)
+    filterNodes noFilter
     setActiveForces gridForceSettings
     unpinNodes
 
     state <- H.get
+    let _ = trace { model: state.model } \_ -> unit
     simulationStop
     runEffectSimulation $ Graph.updateNodes state.nodes graphAttrs -- all nodes
     runEffectSimulation $ Graph.updateGraphLinks state.links -- filtered links
@@ -262,14 +264,16 @@ handleAction = case _ of
     filterLinks isP2P_Link
     filterNodes isPackage
     setActiveForces packageForceSettings
+    unpinNodes
     -- runEffectSimulation $ uniformlyDistributeNodes -- TODO
 
     state <- H.get
+    let _ = trace { model: state.model } \_ -> unit
     simulationStop
     runEffectSimulation $ Graph.updateNodes state.nodes graphAttrs -- filtered to packages only
     -- TODO following line which tries drawing links without putting them in simulation won't work until swizzling is done on PS side
     -- runEffectSimulation $ Graph.updateGraphLinks' state.links 
-    runEffectSimulation $ Graph.updateGraphLinks state.links -- filtered to only P2P
+    runEffectSimulation $ Graph.updateGraphLinks state.links -- these have been filtered to only P2P
     runEffectSimulation $ enableOnlyTheseForces state.activeForces
     simulationStart
 
@@ -282,6 +286,7 @@ handleAction = case _ of
     pinTreeNodes -- side-effect, because if we make _new_ nodes the links won't be pointing to them
 
     state <- H.get
+    let _ = trace { model: state.model } \_ -> unit
     simulationStop
     runEffectSimulation $ Graph.updateNodes state.nodes treeAttrs
     runEffectSimulation $ Graph.updateTreeLinks state.links Horizontal
@@ -361,10 +366,11 @@ unpinNodes = do
 -- the dependency tree will contain all nodes reachable from Main but NOT all links
 getModel :: Aff (Maybe SpagoModel)
 getModel = do
-  moduleJSON  <- AJAX.get ResponseFormat.string "http://localhost:1234/modules.json"
-  packageJSON <- AJAX.get ResponseFormat.string "http://localhost:1234/packages.json"
-  lsdepJSON   <- AJAX.get ResponseFormat.string "http://localhost:1234/lsdeps.jsonlines"
-  locJSON     <- AJAX.get ResponseFormat.string "http://localhost:1234/loc.json"
+  let datadir = "http://localhost:1234/spago-small/"
+  moduleJSON  <- AJAX.get ResponseFormat.string $ datadir <> "modules.json"
+  packageJSON <- AJAX.get ResponseFormat.string $ datadir <> "packages.json"
+  lsdepJSON   <- AJAX.get ResponseFormat.string $ datadir <> "lsdeps.jsonlines"
+  locJSON     <- AJAX.get ResponseFormat.string $ datadir <> "loc.json"
   let model = hush $ convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON <*> locJSON
 
   pure (addTreeToModel "Main" model) 
@@ -381,7 +387,7 @@ addTreeToModel rootName maybeModel = do
 -- | ============================================
 gridForceSettings = [ "packageGrid", "clusterx", "clustery", "collide1" ]
 treeForceSettings = ["links", "center", "charge1", "collide1" ]
-packageForceSettings = [ "centerNamedNode", "center", "collide2", "charge2", "links" ]
+packageForceSettings = [ "centerNamedNode", "center", "collide2", "charge2", "links"]
 forces :: Array Force
 forces = [
         createForce "collide1"     ForceCollide  allNodes [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]

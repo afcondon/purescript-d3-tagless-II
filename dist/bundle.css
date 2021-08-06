@@ -89,17 +89,10 @@ div.svg-container.graph svg {
   }
 
 div.svg-container.graph svg g.links line.M2M-Graph {
-        stroke: red;
         visibility: hidden;
       }
 
 div.svg-container.graph svg g.links line.P2P {
-        visibility: hidden;
-        opacity: 0.3;
-        stroke-width: 2px;
-      }
-
-div.svg-container.graph svg g.links line.hover {
         visibility: visible;
         opacity: 0.3;
         stroke-width: 2px;
@@ -116,7 +109,7 @@ div.svg-container.graph svg g.nodes g.module text {
         }
 
 div.svg-container.graph svg g.nodes g.module circle {
-          visibility: visible;
+          visibility: hidden;
           fill-opacity: 0.2;
         }
 
@@ -132,8 +125,7 @@ div.svg-container.graph svg g.nodes g.module:hover circle {
           }
 
 div.svg-container.graph svg g.nodes g.package circle {
-          visibility: visible;
-          opacity: 0.5;
+          visibility: hidden;
         }
 
 div.svg-container.graph svg g.nodes g.package text {
@@ -147,6 +139,9 @@ div.svg-container.graph svg g.nodes g.package text {
 div.svg-container.graph svg g.nodes g.package:hover text {
             visibility: visible;
             opacity: 1;
+          }
+
+div.svg-container.graph svg g.nodes g.package:hover circle { visibility: visible;
           }
 
 /* the svg-container's class is set by Halogen, thus controlling look of the visualization */
@@ -33224,6 +33219,11 @@ input[type=range]::-ms-thumb {
     stroke-dashoffset: -124px;
   }
 }
+
+div.svg-container.cluster svg g.nodes g.updated text, div.svg-container.graph svg g.nodes g.updated text, div.svg-container.tree svg g.nodes g.updated text, div.svg-container.grid svg g.nodes g.updated text {
+    font: 14px;
+    fill: red;
+  }
 
 @media (min-width: 480px) {
   .sm\:container {

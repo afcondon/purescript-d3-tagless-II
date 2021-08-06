@@ -1,0 +1,14 @@
+{
+    "package-one": {
+        "depends": [ "package-two" ]
+    },
+    "package-two": {
+        "depends": [ "package-three" ]
+    },
+    "package-three": {
+        "depends": []
+    },
+    "my-project": {
+        "depends": [ "package-one", "package-two", "package-three" ]
+    }
+}

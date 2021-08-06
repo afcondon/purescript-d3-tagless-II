@@ -4,15 +4,9 @@ div.svg-container.graph {
     background-color: white;
     & g.links {
       & line.M2M-Graph {
-        stroke: red;
         visibility: hidden;
       } 
       & line.P2P {
-        visibility: hidden;
-        opacity: 0.3;
-        stroke-width: 2px;
-      } 
-      & line.hover {
         visibility: visible;
         opacity: 0.3;
         stroke-width: 2px;
@@ -30,7 +24,7 @@ div.svg-container.graph {
           opacity: 0.5;
         }
         & circle {
-          visibility: visible;
+          visibility: hidden;
           fill-opacity: 0.2;
         }
         &:hover {
@@ -47,8 +41,7 @@ div.svg-container.graph {
       }
       & g.package {
         & circle {
-          visibility: visible;
-          opacity: 0.5;
+          visibility: hidden;
         }
         & text {
           visibility: visible;
@@ -62,6 +55,7 @@ div.svg-container.graph {
             visibility: visible;
             opacity: 1;
           }
+          & circle { visibility: visible; }
         }
       }
     }

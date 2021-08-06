@@ -1,0 +1,22 @@
+{
+    "Main": {
+        "path": "src/Main.purs",
+        "depends": [ "A", "B" ]
+    },
+    "A": {
+        "path": ".spago/package-one/A.purs",
+        "depends": [ "C" ]
+    },
+    "B": {
+        "path": ".spago/package-one/B.purs",
+        "depends": [ "C" ]
+    },
+    "C": {
+        "path": ".spago/package-two/C.purs",
+        "depends": [ "D" ]
+    },
+    "D": {
+        "path": ".spago/package-three/D.purs",
+        "depends": [ ]
+    }
+}

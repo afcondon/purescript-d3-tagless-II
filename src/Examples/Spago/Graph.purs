@@ -16,8 +16,10 @@ import D3Tagless.Capabilities as D3
 import Data.Array (filter)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
+import Debug (trace)
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
+import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
 -- for this (family of) visualization(s) the position updating for links and nodes is always the same
@@ -31,9 +33,11 @@ linkTick = [ x1 (_.x <<< link_.source)
 -- TODO this is a problem once extracted from "script", leads to undefined in D3.js
 enterLinks = [] -- [ classed link_.linkClass ] -- default invisible in CSS unless marked "visible"
 
-enterNodes simulation_ = 
+enterAttrs simulation_ = 
   [ classed datum_.nodeClass, transform' datum_.translateNode
   , onMouseEvent MouseClick (\e d t -> toggleSpotlight e simulation_ d) ]
+updateAttrs simulation_ = 
+  [ classed datum_.nodeClass, transform' datum_.translateNode ]
 
 -- | recipe for this force layout graph
 setup :: forall m selection. 
@@ -47,7 +51,7 @@ setup = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   simulation_ <- simulationHandle -- needed for click handler to stop / start simulation
   root        <- attach "div.svg-container"
-  svg         <- root D3.+ (node Svg  [ viewBox (-w / 2.0) (-h / 2.0) w h 
+  svg         <- root D3.+ (node Svg  [ viewBox (-w / 2.1) (-h / 2.05) w h 
                                       -- , preserveAspectRatio $ AspectRatio XMid YMid Meet 
                                       , classed "overlay"
                                       , width w, height h
@@ -72,7 +76,7 @@ setup = do
 -- | Some examples of pre-packaged attribute sets available to the app maker
 circleAttrs1 = [ radius datum_.radius, fill datum_.colorByGroup ]
 circleAttrs2 = [ radius 3.0, fill datum_.colorByUsage ]
-labelsAttrs1 = [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.name]
+labelsAttrs1 = [ classed "label",  x 0.2, y datum_.positionLabel, textAnchor "middle", text datum_.indexAndID]
 -- TODO x and y position for label would also depend on "hasChildren"
 labelsAttrsH = [ classed "label",  x 4.0, y 2.0, textAnchor (tree_datum_.textAnchor Horizontal), text datum_.name]
 graphAttrs = { circle: circleAttrs1, labels: labelsAttrs1 }
@@ -89,13 +93,16 @@ updateNodes :: forall m row.
   m Unit
 updateNodes nodes attrs = do
   simulation_       <- simulationHandle
-  _                 <- setNodes nodes
+  nodesInSimulation <- setNodes nodes
   maybeNodesGroup   <- getSelection "nodesGroup"
 
   case maybeNodesGroup of
     Nothing -> pure unit
     (Just nodesGroup) -> do
-      nodesSelection <- nodesGroup D3.<+> UpdateJoin Group nodes { enter: enterNodes simulation_, update: [], exit: [ remove ] } 
+      let _ = trace { updateNodes: nodesInSimulation } \_ -> unit
+      nodesSelection <- nodesGroup D3.<+> UpdateJoin Group nodesInSimulation { enter: enterAttrs simulation_
+                                                                              , update: updateAttrs simulation_
+                                                                              , exit: [ remove ] }
       circle         <- nodesSelection D3.+ (node Circle attrs.circle)
       labels         <- nodesSelection D3.+ (node Text attrs.labels) 
       _              <- circle `on` Drag DefaultDrag
@@ -118,7 +125,7 @@ updateGraphLinks links = do
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
-      linksSelection <- linksGroup D3.<+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
+      linksSelection <- linksGroup D3.<+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed "graphlinkSimUpdate" ], exit: [ remove ] }
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "graphlinksSelection" linksSelection
 
@@ -138,7 +145,7 @@ updateGraphLinks' links = do
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
-      linksSelection <- linksGroup D3.<+> UpdateJoin Line links { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
+      linksSelection <- linksGroup D3.<+> UpdateJoin Line links { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed "graphlinkUpdate" ], exit: [ remove ] }
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "graphlinksSelection" linksSelection
 
@@ -166,7 +173,7 @@ updateTreeLinks links layout = do
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
-      linksSelection <- linksGroup D3.<+> UpdateJoin Path linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color, linkPath ], update: [ classed link_.linkClass2 ], exit: [ remove ] }
+      linksSelection <- linksGroup D3.<+> UpdateJoin Path linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color, linkPath ], update: [ classed "treelinkUpdate" ], exit: [ remove ] }
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "treelinksSelection" linksSelection
 

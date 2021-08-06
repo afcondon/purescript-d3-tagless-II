@@ -147,14 +147,20 @@ exports.d3Data_ = data => selection => {
   if (debug) {
     showData_(data)(selection)
   }
-  return selection.data(data, d => d)
+  // return selection.data(data, d => d)
+  return selection.data(data, loggingIndex)
+}
+function loggingIndex(d) {
+  console.log(`joining datum with id: ${d.id}`);
+  return d;
 }
 // d3Data_ :: D3Data -> KeyFunction -> D3Selection_ -> D3Selection_
 exports.d3KeyFunction_ = data => keyFunction => selection => {
   if (debug) {
     showKeyFunction_(data)(keyFunction)(selection)
   }
-  return selection.data(data, keyFunction)
+  let result = selection.data(data, keyFunction)
+  return result
 }
 // d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit
 exports.d3SetAttr_ = name => value => selection => {
@@ -357,6 +363,18 @@ exports.unsetLinks_ = simulation => {
 // setLinks_ :: ForceHandle -> Array (D3_Simulation_Link d r) ->
 // links_        :: forall d r. ForceHandle_ -> Array (D3_Simulation_Link d r)
 exports.getLinks_ = linkForce => linkForce.links()
+// getLinksFromSimulation_ :: forall d r. D3Simulation_ -> String -> Array (D3_Link d r) -- get links from named link force in simulation
+exports.getLinksFromSimulation_ = simulation => forceName => {
+  linksForce = simulation.force(forceName)
+  if (typeof linksForce !== `undefined`) {
+    const result = linksForce.links()
+    if (typeof result !== `undefined`) {
+      return result
+    }
+  }
+  return [] // either the force wasn't found, or the force wasn't a links force
+}
+
 // setNodes_        :: forall d.   D3Simulation_ -> Array (D3_Simulation_Node d) -> Array (D3_Simulation_Node d)
 exports.getNodes_ = simulation => simulation.nodes()
 
@@ -517,11 +535,12 @@ exports.applyFixForceInSimulationXY_ = simulation => label => fn => filterFn => 
   let nodes = simulation.nodes()
   let filteredNodes = nodes.filter(filterFn)
   for (let index = 0; index < filteredNodes.length; index++) {
-      let gridXY = fn(filteredNodes[index])(index) 
-      // console.log(`FixForce applies to ${filteredNodes[index].name} at index: ${index} and put it at (${gridXY.x},${gridXY.y})`);
-      filteredNodes[index].fx = gridXY.x
-      filteredNodes[index].fy = gridXY.y;
-      filteredNodes[index].fixIndex_ = index; // in case _other_ elements need to know the cluster point of this element, because it's index is a filtered index
+      let i = index
+      let gridXY = fn(filteredNodes[i])(i) 
+      // console.log(`FixForce applies to ${filteredNodes[i].name} at i: ${i} and put it at (${gridXY.x},${gridXY.y})`);
+      filteredNodes[i].fx = gridXY.x
+      filteredNodes[i].fy = gridXY.y;
+      filteredNodes[i].fixIndex_ = i; // in case _other_ elements need to know the cluster point of this element, because it's index is a filtered index
     }
   // console.log(`fix force ${label} fixing position of nodes, filtered by ${filterFn} using function ${fn}`);
 }
@@ -566,7 +585,6 @@ exports.pinNamedNode_ = name => fx => fy => node => {
   if (node.name === name) {
     node.fx = fx
     node.fy = fy
-    node.name = "WTF-------"
   }
 }
 // pinTreeNode_ :: forall d. D3_SimulationNode d -> Unit

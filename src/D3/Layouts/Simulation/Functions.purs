@@ -5,7 +5,7 @@ import Prelude
 import Control.Monad.State (class MonadState, State, get, gets, modify_)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Index_)
-import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_, disableDrag_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
+import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getLinks_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
 import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
 import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, enableOnlyTheseLabels, getHandle, putForceInSimulation, setForceAttr, setForceAttrWithFilter)
@@ -177,7 +177,8 @@ simulationGetNodes :: forall m row d.
   m (Array (D3_SimulationNode d))
 simulationGetNodes = do
   { simulationState: SS_ ss_} <- get
-  pure $ unsafeCoerce ss_.nodes
+  let opaqueNodes = getNodes_ ss_.simulation_
+  pure $ unsafeCoerce opaqueNodes
 
 simulationSetLinks :: forall id m row datum r. 
   (MonadState { simulationState :: SimulationState_ | row } m) => 
@@ -194,7 +195,8 @@ simulationGetLinks :: forall m row datum r.
   m (Array (D3_Link datum r))
 simulationGetLinks = do
   { simulationState: SS_ ss_} <- get
-  pure $ unsafeCoerce ss_.links -- TODO notice the coerce here
+  let opaqueLinks = getLinksFromSimulation_ ss_.simulation_
+  pure $ unsafeCoerce opaqueLinks -- TODO notice the coerce here
 
 simulationAddSelection :: forall m row.  -- NB not polymorphic in selection because SimulationState_ isn't
   (MonadState { simulationState :: SimulationState_ | row } m) =>

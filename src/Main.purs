@@ -13,15 +13,15 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 import Ocelot.Block.Format as Format
-import Stories.Index as Index
-import Stories.ThreeLittleCircles as Circles
 import Stories.GUP as GUP
+import Stories.Index as Index
 import Stories.LesMis as LesMis
 import Stories.MetaTree as MetaTree
 import Stories.PrintTree as PrintTree
 import Stories.Spago as Spago
-import Stories.Utilities as Utils
+import Stories.ThreeLittleCircles as Circles
 import Stories.Trees as Trees
+import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
 import UIGuide.Block.Backdrop (backdrop) as Backdrop
 
@@ -78,7 +78,7 @@ parent =
     }
   where
   initialState :: input -> ParentState
-  initialState _ = ExampleGUP
+  initialState _ = ExampleSpago
 
   render :: ParentState -> H.ComponentHTML ParentAction Slots m
   render currentExample = 
@@ -129,16 +129,20 @@ parent =
 
 
   renderExample :: ParentState -> H.ComponentHTML ParentAction Slots m
-  renderExample = 
+  renderExample = do
+    let lesMisSimulation = initialSimulationState 1
+        spagoSimulation  = initialSimulationState 2
     case _ of
-      None            -> HH.slot_ _index     unit Index.component unit
+      None            -> HH.slot_ _index     unit Spago.component spagoSimulation -- Index.component unit
+      -- None            -> HH.slot_ _index     unit LesMis.component lesMisSimulation -- Index.component unit
+      -- None            -> HH.slot_ _index     unit Index.component unit
       ExampleCircles  -> HH.slot_ _circles   unit Circles.component unit
       ExampleGUP      -> HH.slot_ _gup       unit GUP.component GUP.Paused
       ExampleTrees    -> HH.slot_ _trees     unit Trees.component unit 
       ExampleMetaTree -> HH.slot_ _metatree  unit MetaTree.component unit 
       ExamplePrinter  -> HH.slot_ _printtree unit PrintTree.component unit 
-      ExampleLesMis   -> HH.slot_ _lesmis    unit LesMis.component (initialSimulationState 1)
-      ExampleSpago    -> HH.slot_ _spago     unit Spago.component (initialSimulationState 2) 
+      ExampleLesMis   -> HH.slot_ _lesmis    unit LesMis.component lesMisSimulation
+      ExampleSpago    -> HH.slot_ _spago     unit Spago.component spagoSimulation 
       -- _ -> HH.div_ [ HH.text "That example is currently not available" ]
 
 
