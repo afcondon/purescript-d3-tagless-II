@@ -186,7 +186,7 @@ simulationSetLinks :: forall id m row datum r.
 simulationSetLinks links keyFn = do
   { simulationState: SS_ ss_} <- get
   let newLinksForce = enableForce $ createForce "links" ForceLink Nothing [] -- links force doesn't accept ForceFilter (it kind of already is a force filter by it's nature)
-  let updatedLinks = setLinks_ (getHandle newLinksForce) links keyFn
+  let updatedLinks = setLinks_ (getHandle newLinksForce) links keyFn -- keyFn is needed to tell D3 how to swizzle the NodeIDs to get object references
   simulationAddForce newLinksForce
   pure (unsafeCoerce updatedLinks) -- TODO notice the coerce here
 

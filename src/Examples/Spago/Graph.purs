@@ -119,12 +119,13 @@ updateGraphLinks :: forall m row.
   Array SpagoGraphLinkID ->
   m Unit
 updateGraphLinks links = do
-  linksInSimulation <- setLinks links datum_.indexFunction
+  linksInSimulation <- setLinks links datum_.indexFunction -- NB this is the model-defined way of getting the index function for the NodeID -> object reference swizzling that D3 does when you set the links
   (maybeLinksGroup :: Maybe D3Selection_) <- getSelection "linksGroup"
     
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
+      -- TODO the links need valid IDs too if they are to do general update pattern, probably best to actually make them when making the model
       linksSelection <- linksGroup D3.<+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed "graphlinkSimUpdate" ], exit: [ remove ] }
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "graphlinksSelection" linksSelection

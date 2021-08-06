@@ -23,11 +23,8 @@ import Effect.Class.Console (log)
 import Math (pi, sqrt, (%))
 import Math as Math
 import Type.Row (type (+))
+import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
-
-moduleRadius       =  5.0 :: Number 
-packageRadius      = 50.0 :: Number
-packageForceRadius = 50.0 :: Number
 
 tree_datum_ = {
     x           : \d -> (unboxD3TreeNode d).x
@@ -94,7 +91,7 @@ datum_ = {
   , containerName : \d -> (unboxD3SimNode d).containerName
   , name          : \d -> (unboxD3SimNode d).name
   , nameAndID     : \d -> (unboxD3SimNode d).name <> " " <> show (unboxD3SimNode d).id
-  , indexAndID     : \d -> (unboxD3SimNode d).name <> " " <> show (unboxD3SimNode d).index <> " " <> show (unboxD3SimNode d).id
+  , indexAndID     : \d -> (unboxD3SimNode d).name <> " " <>  show (unboxD3SimNode d).id
   , namePos       : \d -> "(" <> show (Math.floor $ datum_.x d) <> "," <> show (Math.floor $ datum_.y d) <> ")" -- for debugging position
   , x             : \d -> (unboxD3SimNode d).x
   , y             : \d -> (unboxD3SimNode d).y
@@ -222,7 +219,6 @@ upgradeSpagoNodeData sourcesMap node = D3SimNode {
   , focusY       : 0.0
   , fx           : (N.null :: N.Nullable Number)
   , fy           : (N.null :: N.Nullable Number)
-  , index        : node.id
   , inSim        : true
   , loc          : node.loc
   , name         : node.name

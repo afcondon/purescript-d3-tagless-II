@@ -15,6 +15,8 @@ type NodeID = Int
 newtype D3_Link l row = D3_Link {
     source :: l
   , target :: l
+  -- TODO a D3_Link also needs to have some id field if it is to partake in Update pattern, ideally something like "nodeid-nodeid" for the ids of the source and target
+  -- TODO probably a principled way to do this would be to have nullable source and target references, sourceID and targetID and linkID and do the swizzling explicitly
   | row
 }
 
@@ -56,7 +58,7 @@ type D3CirclePackRow row = D3_TreeNode ( D3_ID + D3_TreeRow + D3_XY   + D3_Radiu
 type D3TreeMapRow row    = D3_TreeNode ( D3_ID + D3_TreeRow + D3_Rect             + row )
 
 newtype D3_SimulationNode row = D3SimNode { | row }
-type    D3SimulationRow   row = D3_SimulationNode ( D3_Indexed + D3_XY + D3_VxyFxy + row ) -- into 'row' goes all the model specific data
+type    D3SimulationRow   row = D3_SimulationNode ( D3_XY + D3_VxyFxy + row ) -- into 'row' goes all the model specific data
 
 -- when you give data to d3.hierarchy the original object contents are present under the `data` field of the new hierarchical objects 
 type EmbeddedData :: forall k. k -> Row k -> Row k

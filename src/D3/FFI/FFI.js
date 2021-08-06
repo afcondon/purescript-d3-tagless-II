@@ -147,12 +147,13 @@ exports.d3Data_ = data => selection => {
   if (debug) {
     showData_(data)(selection)
   }
+  console.log(`about to call selection.data with array of ${data.length} elements`)
   // return selection.data(data, d => d)
   return selection.data(data, loggingIndex)
 }
 function loggingIndex(d) {
-  console.log(`joining datum with id: ${d.id}`);
-  return d;
+  console.log(`joining datum ${d.name} with id: ${d.id}`);
+  return d.id;
 }
 // d3Data_ :: D3Data -> KeyFunction -> D3Selection_ -> D3Selection_
 exports.d3KeyFunction_ = data => keyFunction => selection => {
@@ -339,7 +340,7 @@ exports.setNodes_ = simulation => nodes => {
   if (debug) {
     console.log(`${simulation}.nodes(${nodes})`)
   }
-  console.log('setting nodes in simulation');
+  console.log(`setting nodes in simulation, there are ${nodes.length} nodes`);
   simulation.nodes(nodes)
   return simulation.nodes()
 }

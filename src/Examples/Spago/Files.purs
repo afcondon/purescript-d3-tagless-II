@@ -93,7 +93,7 @@ type SpagoNodeRow row = (
   | row )
 type SpagoNodeData    = { | SpagoNodeRow () }
 
-type SpagoDataRecord = Record (D3_Indexed + D3_XY + D3_VxyFxy + SpagoNodeRow  + D3_FocusXY + D3_Radius + ())
+type SpagoDataRecord = Record (D3_XY + D3_VxyFxy + SpagoNodeRow  + D3_FocusXY + D3_Radius + ()) -- took out index because Selection has to set index
 
 
 getGraphJSONData :: Spago_Raw_JSON_ -> Spago_Cooked_JSON
