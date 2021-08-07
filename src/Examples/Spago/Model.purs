@@ -6,7 +6,7 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, Index_, PointXY, index_ToInt, intToIndex_)
 import D3.Examples.Spago.Files (LinkType(..), NodeType(..), Pinned(..), SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, SpagoGraphLinkID, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
-import D3.FFI (hasChildren_, pinNode_, pinTreeNode_, setInSimNodeFlag, setInSimNodeFlag_)
+import D3.FFI (getIndexFromDatum_, hasChildren_, pinNode_, pinTreeNode_, setInSimNodeFlag, setInSimNodeFlag_)
 import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Link(..), D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_, d3SchemeDiverging10N_)
 import Data.Array (filter, foldl, partition)
@@ -91,7 +91,7 @@ datum_ = {
   , containerName : \d -> (unboxD3SimNode d).containerName
   , name          : \d -> (unboxD3SimNode d).name
   , nameAndID     : \d -> (unboxD3SimNode d).name <> " " <> show (unboxD3SimNode d).id
-  , indexAndID     : \d -> (unboxD3SimNode d).name <> " " <>  show (unboxD3SimNode d).id
+  , indexAndID     : \d -> (unboxD3SimNode d).name <> " " <> show (getIndexFromDatum_ d) <> " " <>  show (unboxD3SimNode d).id
   , namePos       : \d -> "(" <> show (Math.floor $ datum_.x d) <> "," <> show (Math.floor $ datum_.y d) <> ")" -- for debugging position
   , x             : \d -> (unboxD3SimNode d).x
   , y             : \d -> (unboxD3SimNode d).y

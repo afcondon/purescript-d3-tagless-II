@@ -49,6 +49,7 @@ foreign import d3LowerSelection_     :: D3Selection_ -> D3Selection_
 foreign import d3SortSelection_      :: forall d. D3Selection_ -> (d -> d -> Int) -> D3Selection_
 
 foreign import d3Data_               :: forall d. Array d -> D3Selection_ -> D3Selection_
+foreign import getIndexFromDatum_    :: Datum_ -> Int
 
 type ComputeKeyFunction_ = Datum_ -> Index_
 foreign import d3KeyFunction_        :: forall d. Array d -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_

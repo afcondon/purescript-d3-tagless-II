@@ -102,7 +102,8 @@ updateNodes nodes attrs = do
       let _ = trace { updateNodes: nodesInSimulation } \_ -> unit
       nodesSelection <- nodesGroup D3.<+> UpdateJoin Group nodesInSimulation { enter: enterAttrs simulation_
                                                                               , update: updateAttrs simulation_
-                                                                              , exit: [ remove ] }
+                                                                              , exit: [ classed "remove" ] }
+                                                                              -- , exit: [ remove ] }
       circle         <- nodesSelection D3.+ (node Circle attrs.circle)
       labels         <- nodesSelection D3.+ (node Text attrs.labels) 
       _              <- circle `on` Drag DefaultDrag
