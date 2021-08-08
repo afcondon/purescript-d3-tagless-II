@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Attributes.Instances (AttributeSetter, Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_)
-import D3.FFI (D3ForceHandle_, OpaqueLinkType_, OpaqueNodeType_, SimulationConfig_, initSimulation_)
+import D3.FFI (D3ForceHandle_, SimulationConfig_, initSimulation_)
 import D3.Selection (ChainableS)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -64,26 +64,26 @@ data ForceType =
   | CustomForce                                    -- ???
 
 instance Show ForceType where
-  show ForceManyBody            = "ForceManyBody"
-  show ForceCenter              = "ForceCenter"
-  show ForceCollide             = "ForceCollide"
-  show ForceX                   = "ForceX"
-  show ForceY                   = "ForceY"
-  show ForceRadial              = "ForceRadial"
+  show ForceManyBody          = "ForceManyBody"
+  show ForceCenter            = "ForceCenter"
+  show ForceCollide           = "ForceCollide"
+  show ForceX                 = "ForceX"
+  show ForceY                 = "ForceY"
+  show ForceRadial            = "ForceRadial"
   show (ForceFixPositionXY _) = "ForceFixPositionXY"
   show (ForceFixPositionX _)  = "ForceFixPositionX"
   show (ForceFixPositionY _)  = "ForceFixPositionY"
-  show ForceLink                = "ForceLink"
-  show CustomForce              = "CustomForce"
+  show ForceLink              = "ForceLink"
+  show CustomForce            = "CustomForce"
 
--- TODO move back to Simulation.purs ?
-data SimulationState_ = SS_ { 
+-- representation of all that is stateful in the D3 simulation engine
+-- not generalized because we have no other examples of simulation engines ATM
+-- perhaps it can become a more abstract interface in the future
+data D3SimulationState_ = SimState_ { 
     simulation_   :: D3Simulation_
   , forces        :: M.Map Label Force
   , ticks         :: M.Map Label (Step D3Selection_)
 
-  , nodes         :: Array OpaqueNodeType_
-  , links         :: Array OpaqueLinkType_
   , selections    :: M.Map Label D3Selection_
 
   , alpha         :: Number
@@ -93,17 +93,16 @@ data SimulationState_ = SS_ {
   , velocityDecay :: Number
 }
 
--- unused parameter is to ensure a NEW simulation is created so that, for example, two Halogen components won't _accidentally_ share one
-initialSimulationState :: Int -> SimulationState_
-initialSimulationState id = SS_
-   {  simulation_  : initSimulation_ defaultConfigSimulation  
+-- unused parameter is to ensure a NEW simulation is created so that, 
+-- for example, two Halogen components won't _accidentally_ share one
+initialSimulationState :: Int -> D3SimulationState_
+initialSimulationState id = SimState_
+   {  -- common state for all D3 Simulation
+      simulation_  : initSimulation_ defaultConfigSimulation  
     , forces       : M.empty
     , ticks        : M.empty
-
-    , nodes        : []
-    , links        : []
     , selections   : M.empty
-
+    -- parameters of the D3 simulation engine
     , alpha        : defaultConfigSimulation.alpha
     , alphaTarget  : defaultConfigSimulation.alphaTarget
     , alphaMin     : defaultConfigSimulation.alphaMin

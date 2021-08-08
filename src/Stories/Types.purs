@@ -2,7 +2,7 @@ module D3Tagless.App.Routes.Types where
 
 import Prelude
 
-import D3.Simulation.Types (SimulationState_)
+import D3.Simulation.Types (D3SimulationState_)
 import Data.Const (Const)
 import Effect.Aff (Aff)
 import Halogen as H
@@ -25,7 +25,7 @@ data RouteConfig =
                 , group :: Group
                 }
   | SimulationRoute { anchor :: String
-                    , component :: H.Component (Const Void) SimulationState_ Void Aff
+                    , component :: H.Component (Const Void) D3SimulationState_ Void Aff
                     , group :: Group
                     }
 

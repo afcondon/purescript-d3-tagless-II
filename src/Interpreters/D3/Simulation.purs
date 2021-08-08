@@ -8,7 +8,7 @@ import D3.Data.Types (D3Selection_)
 import D3.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, onTick_)
 import D3.Selection (applyChainableSD3)
 import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionModifySelection)
-import D3.Simulation.Types (SimulationState_(..), Step(..))
+import D3.Simulation.Types (D3SimulationState_(..), Step(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
@@ -19,20 +19,20 @@ import Unsafe.Coerce (unsafeCoerce)
 -- | Simulation instance (capability) for the D3 interpreter
 -- | ====================================================
 newtype D3SimM :: forall k. Row Type -> k -> Type -> Type
-newtype D3SimM row selection a = D3SimM (StateT { simulationState :: SimulationState_ | row } Effect a) 
+newtype D3SimM row selection a = D3SimM (StateT { simulationState :: D3SimulationState_ | row } Effect a) 
 
-run_D3M_Simulation :: forall a row. { simulationState :: SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect (Tuple a ({ simulationState :: SimulationState_ | row }))
+run_D3M_Simulation :: forall a row. { simulationState :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect (Tuple a ({ simulationState :: D3SimulationState_ | row }))
 run_D3M_Simulation simulation (D3SimM state_T) = runStateT state_T simulation
 
-exec_D3M_Simulation :: forall a row. { simulationState :: SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect { simulationState :: SimulationState_ | row }
+exec_D3M_Simulation :: forall a row. { simulationState :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect { simulationState :: D3SimulationState_ | row }
 exec_D3M_Simulation simulation (D3SimM state_T) = liftA1 snd $ runStateT state_T simulation
 
-eval_D3M_Simulation :: forall a row. { simulationState :: SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect a
+eval_D3M_Simulation :: forall a row. { simulationState :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect a
 eval_D3M_Simulation simulation (D3SimM state_T) = liftA1 fst $ runStateT state_T simulation
 
 runEffectSimulation :: forall m a row.
   Bind m =>
-  MonadState { simulationState :: SimulationState_ | row } m =>
+  MonadState { simulationState :: D3SimulationState_ | row } m =>
   MonadEffect m =>
   D3SimM row D3Selection_ a -> m Unit
 runEffectSimulation state_T = do
@@ -47,7 +47,7 @@ derive newtype instance bindD3SimM        :: Bind              (D3SimM row selec
 derive newtype instance monadD3SimM       :: Monad             (D3SimM row selection)
 derive newtype instance monadEffD3SimM    :: MonadEffect       (D3SimM row selection)
 
-derive newtype instance monadStateD3SimM  :: MonadState  { simulationState :: SimulationState_ | row } (D3SimM row selection) 
+derive newtype instance monadStateD3SimM  :: MonadState  { simulationState :: D3SimulationState_ | row } (D3SimM row selection) 
 
 instance showD3SimM :: Show (D3SimM row D3Selection_ a) where
   show x = "D3SimM"
@@ -90,7 +90,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     -- TODO this would be the more efficient but less attractive route to defining a Tick function
     pure unit
   addTickFunction label (Step selection chain) = do
-    (SS_ ss_) <- gets _.simulationState
+    (SimState_ ss_) <- gets _.simulationState
     let makeTick _ = do
           -- TODO this coerce is forced upon us here due to forall selection in SimulationM
           let _ = chain <#> applyChainableSD3 (unsafeCoerce selection)
@@ -99,21 +99,21 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     pure unit
 
   removeTickFunction label = do
-    (SS_ ss_) <- gets _.simulationState
+    (SimState_ ss_) <- gets _.simulationState
     -- TODO delete the tick function from the state
     let _ = disableTick_ ss_.simulation_ label
     pure unit
 
   defaultNodeTick label selection = do
-    (SS_ ss_) <- gets _.simulationState
+    (SimState_ ss_) <- gets _.simulationState
     let _ = defaultNodeTick_ label ss_.simulation_ selection
     pure unit
 
   defaultLinkTick label selection = do
-    (SS_ ss_) <- gets _.simulationState
+    (SimState_ ss_) <- gets _.simulationState
     let _ = defaultLinkTick_ label ss_.simulation_ selection
     pure unit
 
   simulationHandle = do
-    (SS_ { simulation_ }) <- gets _.simulationState
+    (SimState_ { simulation_ }) <- gets _.simulationState
     pure simulation_

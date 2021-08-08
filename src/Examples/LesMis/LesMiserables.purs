@@ -13,7 +13,7 @@ import D3.Selection (Behavior(..), DragBehavior(..), Join(..), node)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce)
 import D3.Simulation.Functions (simulationCreateTickFunction, simulationSetLinks, simulationSetNodes)
-import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), SimulationState_, Step(..), initialSimulationState)
+import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), D3SimulationState_, Step(..), initialSimulationState)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, attach, addTickFunction, defaultLinkTick, defaultNodeTick, join, on, setConfigVariable, setLinks, setNodes, start)
 import D3Tagless.Capabilities as D3
@@ -53,7 +53,7 @@ datum_ = {
 graphScript :: forall row m. 
   Bind m => 
   MonadEffect m =>
-  MonadState { simulationState :: SimulationState_ | row } m => 
+  MonadState { simulationState :: D3SimulationState_ | row } m => 
   SimulationM D3Selection_ m =>
   LesMisRawModel -> Selector D3Selection_ -> m Unit
 graphScript model selector = do

@@ -10,7 +10,7 @@ import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationStart)
-import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), SimulationState_, allNodes)
+import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), D3SimulationState_, allNodes)
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
@@ -40,7 +40,7 @@ data Action
   | Freeze
   | Reheat
 
-type Input = SimulationState_
+type Input = D3SimulationState_
 
 data ManyBodyParam = SmallRadius | BigRadius
 derive instance Eq ManyBodyParam
@@ -54,7 +54,7 @@ instance Show LinksSetting where
   show LinksOff = "No link force"
 
 type State = { 
-    simulationState :: SimulationState_
+    simulationState :: D3SimulationState_
   , manybodySetting :: ManyBodyParam
   , linksSetting    :: LinksSetting
   , blurb           :: Expandable.Status
@@ -236,7 +236,7 @@ datum_ = {
 graphScript :: forall row m. 
   Bind m => 
   MonadEffect m =>
-  MonadState { simulationState :: SimulationState_ | row } m => 
+  MonadState { simulationState :: D3SimulationState_ | row } m => 
   SimulationM D3Selection_ m =>
   LesMisRawModel -> Selector D3Selection_ -> m Unit
 graphScript model selector = do

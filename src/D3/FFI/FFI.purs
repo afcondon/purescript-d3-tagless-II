@@ -99,8 +99,6 @@ foreign import selectionOn_         :: forall selection callback. selection -> S
 type GraphModel_ link node = { links :: Array link, nodes :: Array node }
 foreign import data D3ForceHandle_     :: Type
 foreign import data CustomForceConfig_ :: Type
-foreign import data OpaqueLinkType_ :: Type
-foreign import data OpaqueNodeType_ :: Type
 
 -- | a record to initialize / configure simulations
 type SimulationConfig_ = { 
