@@ -48,11 +48,11 @@ foreign import d3RaiseSelection_     :: D3Selection_ -> D3Selection_
 foreign import d3LowerSelection_     :: D3Selection_ -> D3Selection_
 foreign import d3SortSelection_      :: forall d. D3Selection_ -> (d -> d -> Int) -> D3Selection_
 
-foreign import d3Data_               :: forall d. Array d -> D3Selection_ -> D3Selection_
 foreign import getIndexFromDatum_    :: Datum_ -> Int
 
+foreign import d3Data_               :: forall d. Array d -> D3Selection_ -> D3Selection_
 type ComputeKeyFunction_ = Datum_ -> Index_
-foreign import d3KeyFunction_        :: forall d. Array d -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
+foreign import d3DataWithKeyFunction_ :: forall d. Array d -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
@@ -109,7 +109,6 @@ type SimulationConfig_ = {
     , alphaMin      :: Number
     , alphaDecay    :: Number
     , velocityDecay :: Number
-    , running       :: Boolean
 }
 
 foreign import initSimulation_         ::                  SimulationConfig_ -> D3Simulation_

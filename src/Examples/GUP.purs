@@ -17,11 +17,16 @@ import Unsafe.Coerce (unsafeCoerce)
 -- | ====================================================================================
 type Model = Array Char
 
+-- in the interests of brevity these unsafe functions are defined here with the "script"
+-- however, in a larger program both Model and Unsafe would be their own modules
 datumIsChar :: Datum_ -> Char
 datumIsChar = unsafeCoerce
 
 indexIsNumber :: Index_ -> Number
 indexIsNumber = unsafeCoerce
+
+keyFunction :: Datum_ -> Index_
+keyFunction = unsafeCoerce
 
 
 script3 :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
@@ -30,7 +35,7 @@ script3 selector = do
   svg         <- root D3.+ (node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ])
   letterGroup <- svg  D3.+ (node Group [])
 
-  pure $ \letters -> letterGroup <+> UpdateJoin Text letters { enter, update, exit }
+  pure $ \letters -> letterGroup <+> UpdateJoinWithKeyFunction Text letters { enter, update, exit } keyFunction
 
   where 
     transition :: ChainableS

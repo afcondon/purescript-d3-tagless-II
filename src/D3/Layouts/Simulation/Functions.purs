@@ -35,10 +35,7 @@ insertForce :: Force -> SimulationState_ -> SimulationState_
 insertForce force@(Force l status t f attrs h_) (SS_ ss_) = SS_ ss_ { forces = M.insert l force ss_.forces }
 
 reheatSimulation :: SimulationState_ -> SimulationState_
-reheatSimulation (SS_ ss_) = SS_ ss_ { running = true, alpha = 1.0 }
-
-stopSimulation :: SimulationState_ -> SimulationState_
-stopSimulation (SS_ ss_) = SS_ ss_ { running = false }
+reheatSimulation (SS_ ss_) = SS_ ss_ { alpha = 1.0 }
 
 -- type SimulationStateRow row = ( simulation :: SimulationState_ | row )
 
@@ -142,7 +139,7 @@ simulationStart = do
   { simulationState: SS_ ss_} <- get
   let _ = startSimulation_ ss_.simulation_
       _ = setAlpha_ ss_.simulation_ 1.0
-      updatedSimulation = SS_ ss_ { running = true, alpha = 1.0 }
+      updatedSimulation = SS_ ss_ { alpha = 1.0 }
   modify_ (\state -> state { simulationState = updatedSimulation } )
 
 simulationStop :: forall m row. 
@@ -151,8 +148,7 @@ simulationStop :: forall m row.
 simulationStop = do
   { simulationState: SS_ ss_} <- get
   let _ = stopSimulation_ ss_.simulation_
-      updatedSimulation = SS_ ss_ { running = false }
-  modify_ (\state -> state { simulationState = updatedSimulation } )
+  pure unit
 
 simulationShowForces :: forall m row. 
   (MonadState { simulationState :: SimulationState_ | row } m) =>

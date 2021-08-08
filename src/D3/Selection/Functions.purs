@@ -2,13 +2,13 @@ module D3.Selection.Functions where
 
 import Control.Monad.State (gets)
 import D3.Data.Types (D3Selection_, Selector)
-import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3SelectAllInDOM_, d3SelectionSelectAll_, disableDrag_)
+import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3DataWithKeyFunction_, d3SelectAllInDOM_, d3SelectionSelectAll_, disableDrag_)
 import D3.Selection (Behavior(..), ChainableS, D3_Node(..), DragBehavior(..), Join(..), applyChainableSD3)
 import D3.Simulation.Types (SimulationState_(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM)
 import Data.Foldable (foldl)
-import Prelude (Unit, discard, pure, bind, show, unit, ($))
+import Prelude (Unit, bind, discard, identity, pure, show, unit, ($))
 
 
 selectionAttach :: forall m. (SelectionM D3Selection_ m) => Selector D3Selection_ -> m D3Selection_
@@ -33,7 +33,7 @@ selectionJoin selection (Join e ds cs) = do
   let 
     element = show e
     selectS = d3SelectionSelectAll_ element selection
-    dataS   = d3Data_ ds selectS 
+    dataS   = d3Data_ ds selectS
     enterS  = d3EnterAndAppend_ element dataS
     enterS' = foldl applyChainableSD3 enterS cs
   pure enterS'
@@ -42,28 +42,28 @@ selectionJoin selection (JoinWithKeyFunction e ds cs k) = do
   let 
     element = show e
     selectS = d3SelectionSelectAll_ element selection
-    dataS   = d3KeyFunction_ ds k selectS 
+    dataS   = d3DataWithKeyFunction_ ds k selectS 
     enterS  = d3EnterAndAppend_ element dataS
     enterS' = foldl applyChainableSD3 enterS cs
   pure enterS'
 
-selectionJoin selection (UpdateJoin e ds cs) = do
-  let
-    element = show e
-    selectS = d3SelectionSelectAll_ element selection
-    dataS  = d3Data_ ds selectS 
-    enterS = d3EnterAndAppend_ element dataS
-    exitS  = d3Exit_ dataS
-    _      = foldl applyChainableSD3 enterS  cs.enter
-    _      = foldl applyChainableSD3 exitS   cs.exit
-    _      = foldl applyChainableSD3 dataS   cs.update
-  pure enterS
+-- selectionJoin selection (UpdateJoin e ds cs) = do
+--   let
+--     element = show e
+--     selectS = d3SelectionSelectAll_ element selection
+--     dataS  = d3Data_ ds selectS identity
+--     enterS = d3EnterAndAppend_ element dataS
+--     exitS  = d3Exit_ dataS
+--     _      = foldl applyChainableSD3 enterS  cs.enter
+--     _      = foldl applyChainableSD3 exitS   cs.exit
+--     _      = foldl applyChainableSD3 dataS   cs.update
+--   pure enterS
 
 selectionJoin selection (UpdateJoinWithKeyFunction e ds cs k) = do
   let
     element = show e
     selectS = d3SelectionSelectAll_ element selection
-    dataS  = d3KeyFunction_ ds k selectS 
+    dataS  = d3DataWithKeyFunction_ ds k selectS 
     enterS = d3EnterAndAppend_ element dataS
     exitS  = d3Exit_ dataS
     _      = foldl applyChainableSD3 enterS  cs.enter

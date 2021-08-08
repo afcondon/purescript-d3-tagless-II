@@ -7,7 +7,7 @@ import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOp
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
-import D3.Examples.LesMiserables.Types (LesMisRawModel)
+import D3.Examples.LesMiserables.Model (LesMisRawModel)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), node)
 import D3.Simulation.Config as F
@@ -40,8 +40,7 @@ link_ = {
 
 datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
-    index : \d -> (unboxD3SimNode d).index
-  , id    : \d -> (unboxD3SimNode d).id
+    id    : \d -> (unboxD3SimNode d).id
   , x     : \d -> (unboxD3SimNode d).x
   , y     : \d -> (unboxD3SimNode d).y
   , group : \d -> (unboxD3SimNode d).group

@@ -1,17 +1,15 @@
 module D3Tagless.Instance.Simulation where
 
 import D3.Simulation.Functions
-import Prelude
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, Unit, bind, discard, liftA1, pure, unit, ($), (<#>))
 
 import Control.Monad.State (class MonadState, StateT, get, gets, modify_, runStateT)
 import D3.Data.Types (D3Selection_)
-import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3KeyFunction_, d3SelectAllInDOM_, d3SelectionSelectAll_, defaultLinkTick_, defaultNodeTick_, defaultSimulationDrag_, disableDrag_, disableTick_, onTick_, setPositionToNaN_)
-import D3.Selection (Behavior(..), D3_Node(..), DragBehavior(..), Join(..), applyChainableSD3)
-import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionModifySelection, selectionOn)
+import D3.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, onTick_)
+import D3.Selection (applyChainableSD3)
+import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionModifySelection)
 import D3.Simulation.Types (SimulationState_(..), Step(..))
-import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, enableOnlyTheseForces, modifySelection, simulationHandle, toggleForceByLabel)
-import Data.Foldable (foldl)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -59,7 +57,8 @@ instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
   appendElement s_   = selectionAppendElement s_
   filterSelection s_ = selectionFilterSelection s_
   modifySelection s_ = selectionModifySelection s_
-  join s_            = selectionJoin s_
+  join s_            = selectionJoin s_ -- maybe Join will also have to be different for simulation
+  -- NOTE that simulation on is handled differently from selectionOn
   on s_              = simulationOn s_
 
 

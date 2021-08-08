@@ -9,8 +9,8 @@ import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, Index_, PointXY, index_ToInt)
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID, SpagoNodeData, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Graph (graphAttrs, removeNamedSelection, treeAttrs)
-import D3.Examples.Spago.Graph as Graph
+import D3.Examples.Spago.Draw (graphAttrs, removeNamedSelection, treeAttrs)
+import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cluster2Point, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, noFilter, numberToGridPoint, offsetXY, pinNodesByPredicate, pinNodesInModel, pinTreeNode, scalePoint)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (pinNamedNode_, pinNode_, pinTreeNode_, unpinNode_)
@@ -386,8 +386,14 @@ addTreeToModel rootName maybeModel = do
 -- | FORCES
 -- | ============================================
 gridForceSettings = [ "packageGrid", "clusterx", "clustery", "collide1" ]
-treeForceSettings = ["links", "center", "charge1", "collide1" ]
 packageForceSettings = [ "centerNamedNode", "center", "collide2", "charge2", "links"]
+
+treeForceSettings = ["links", "center", "charge1", "collide1" ]
+      -- .force("link", d3.forceLink(links).id(d => d.id).distance(0).strength(1))
+      -- .force("charge", d3.forceManyBody().strength(-50))
+      -- .force("x", d3.forceX())
+      -- .force("y", d3.forceY());
+
 forces :: Array Force
 forces = [
         createForce "collide1"     ForceCollide  allNodes [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]

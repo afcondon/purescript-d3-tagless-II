@@ -1,10 +1,23 @@
 module D3.Examples.Spago.Unsafe where
 
-import D3.Data.Types (Datum_)
+import D3.Data.Types (Datum_, Index_)
 import D3.Examples.Spago.Files (NodeType, Pinned, SpagoDataRecord, SpagoGraphLinkObj, SpagoTreeObj)
 import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..))
 import Data.Nullable (Nullable)
 import Unsafe.Coerce (unsafeCoerce)
+import Prelude
+
+-- Placeholder key functions for update joins
+
+spagoNodeKeyFunction :: Datum_ -> Index_
+spagoNodeKeyFunction d = unsafeCoerce $ (unboxD3SimNode d).id
+spagoLinkKeyFunction :: Datum_ -> Index_
+spagoLinkKeyFunction l = unsafeCoerce $ linkID
+  where
+    sourceID = (unboxD3SimLink l).source.id
+    targetID = (unboxD3SimLink l).target.id
+    linkID = show sourceID <> "-" <> show targetID 
+ 
 
 unboxD3SimNode :: Datum_ -> SpagoDataRecord
 unboxD3SimNode datum = d

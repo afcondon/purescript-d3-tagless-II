@@ -1,4 +1,4 @@
-module D3.Examples.Spago.Graph where
+module D3.Examples.Spago.Draw where
 
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), classed, cursor, fill, height, onMouseEvent, preserveAspectRatio, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
@@ -6,6 +6,7 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, Datum_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, cancelSpotlight_, datum_, isPackage, link_, toggleSpotlight, tree_datum_)
+import D3.Examples.Spago.Unsafe (spagoLinkKeyFunction, spagoNodeKeyFunction)
 import D3.Layouts.Hierarchical (horizontalLink', radialLink, verticalLink)
 import D3.Node (D3_SimulationNode(..))
 import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
@@ -18,7 +19,7 @@ import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Debug (trace)
 import Effect.Class (class MonadEffect, liftEffect)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
+import Prelude (class Bind, Unit, bind, discard, identity, negate, pure, unit, ($), (/), (<<<))
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
@@ -93,23 +94,29 @@ updateNodes :: forall m row.
   m Unit
 updateNodes nodes attrs = do
   simulation_       <- simulationHandle
-  nodesInSimulation <- setNodes nodes
   maybeNodesGroup   <- getSelection "nodesGroup"
 
   case maybeNodesGroup of
     Nothing -> pure unit
     (Just nodesGroup) -> do
-      let _ = trace { updateNodes: nodesInSimulation } \_ -> unit
-      nodesSelection <- nodesGroup D3.<+> UpdateJoin Group nodesInSimulation { enter: enterAttrs simulation_
-                                                                              , update: updateAttrs simulation_
-                                                                              , exit: [ classed "remove" ] }
-                                                                              -- , exit: [ remove ] }
+      let _ = trace { updateNodes: nodes } \_ -> unit
+      nodesSelection <- nodesGroup D3.<+> 
+                        UpdateJoinWithKeyFunction 
+                        Group 
+                        nodes
+                        { enter: enterAttrs simulation_
+                        , update: updateAttrs simulation_
+                        , exit: [ remove ] }
+                        spagoNodeKeyFunction
+
       circle         <- nodesSelection D3.+ (node Circle attrs.circle)
       labels         <- nodesSelection D3.+ (node Text attrs.labels) 
       _              <- circle `on` Drag DefaultDrag
 
       addTickFunction "nodes" $ Step nodesSelection nodeTick
       addSelection "nodesSelection" nodesSelection
+      _ <- setNodes nodes
+      pure unit
 
 updateGraphLinks :: forall m row. 
   Bind m => 
@@ -120,16 +127,25 @@ updateGraphLinks :: forall m row.
   Array SpagoGraphLinkID ->
   m Unit
 updateGraphLinks links = do
-  linksInSimulation <- setLinks links datum_.indexFunction -- NB this is the model-defined way of getting the index function for the NodeID -> object reference swizzling that D3 does when you set the links
   (maybeLinksGroup :: Maybe D3Selection_) <- getSelection "linksGroup"
     
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
       -- TODO the links need valid IDs too if they are to do general update pattern, probably best to actually make them when making the model
-      linksSelection <- linksGroup D3.<+> UpdateJoin Line linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed "graphlinkSimUpdate" ], exit: [ remove ] }
+      linksSelection <- linksGroup D3.<+> 
+                        UpdateJoinWithKeyFunction
+                        Line
+                        links
+                        { enter: [ classed link_.linkClass, strokeColor link_.color ]
+                        , update: [ classed "graphlinkSimUpdate" ]
+                        , exit: [ remove ] }
+                        spagoLinkKeyFunction
+
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "graphlinksSelection" linksSelection
+      _ <- setLinks links datum_.indexFunction -- NB this is the model-defined way of getting the index function for the NodeID -> object reference swizzling that D3 does when you set the links
+      pure unit
 
   pure unit
   
@@ -147,7 +163,15 @@ updateGraphLinks' links = do
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
-      linksSelection <- linksGroup D3.<+> UpdateJoin Line links { enter: [ classed link_.linkClass, strokeColor link_.color ], update: [ classed "graphlinkUpdate" ], exit: [ remove ] }
+      linksSelection <- linksGroup D3.<+> 
+                        UpdateJoinWithKeyFunction
+                        Line
+                        links
+                        { enter: [ classed link_.linkClass, strokeColor link_.color ]
+                        , update: [ classed "graphlinkUpdate" ]
+                        , exit: [ remove ] }
+                        spagoLinkKeyFunction
+
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "graphlinksSelection" linksSelection
 
@@ -175,7 +199,15 @@ updateTreeLinks links layout = do
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
-      linksSelection <- linksGroup D3.<+> UpdateJoin Path linksInSimulation { enter: [ classed link_.linkClass, strokeColor link_.color, linkPath ], update: [ classed "treelinkUpdate" ], exit: [ remove ] }
+      linksSelection <- linksGroup D3.<+> 
+                        UpdateJoinWithKeyFunction
+                        Path
+                        linksInSimulation
+                        { enter: [ classed link_.linkClass, strokeColor link_.color, linkPath ]
+                        , update: [ classed "treelinkUpdate" ]
+                        , exit: [ remove ] }
+                        spagoLinkKeyFunction
+                        
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "treelinksSelection" linksSelection
 

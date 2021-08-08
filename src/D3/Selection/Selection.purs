@@ -20,18 +20,18 @@ data Behavior selection = Drag DragBehavior
                         | Zoom (ZoomConfig selection)
 
 data Join d = Join Element (Array d) (Array ChainableS)
-            | UpdateJoin Element (Array d) EnterUpdateExit
+            -- | UpdateJoin Element (Array d) EnterUpdateExit
             | JoinWithKeyFunction Element (Array d) (Array ChainableS) ComputeKeyFunction_
             | UpdateJoinWithKeyFunction Element (Array d) EnterUpdateExit ComputeKeyFunction_
 
--- TODO could do the coerce to Index_ needed by keyFunction in here so it doesn't need to be done in DSL code
-computeKeyWith :: forall d.  ComputeKeyFunction_ -> Join d -> Join d
-computeKeyWith keyFunction = 
-  case _ of
-    Join e ds cs                        -> JoinWithKeyFunction e ds cs keyFunction
-    UpdateJoin e ds cs                  -> UpdateJoinWithKeyFunction e ds cs keyFunction
-    JoinWithKeyFunction e ds cs _       -> JoinWithKeyFunction e ds cs keyFunction
-    UpdateJoinWithKeyFunction e ds cs _ -> UpdateJoinWithKeyFunction e ds cs keyFunction
+-- -- TODO could do the coerce to Index_ needed by keyFunction in here so it doesn't need to be done in DSL code
+-- computeKeyWith :: forall d.  ComputeKeyFunction_ -> Join d -> Join d
+-- computeKeyWith keyFunction = 
+--   case _ of
+--     Join e ds cs                        -> JoinWithKeyFunction e ds cs keyFunction
+--     -- UpdateJoin e ds cs                  -> UpdateJoinWithKeyFunction e ds cs keyFunction
+--     JoinWithKeyFunction e ds cs _       -> JoinWithKeyFunction e ds cs keyFunction
+--     UpdateJoinWithKeyFunction e ds cs _ -> UpdateJoinWithKeyFunction e ds cs keyFunction
 
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName

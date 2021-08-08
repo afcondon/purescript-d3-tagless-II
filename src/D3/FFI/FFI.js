@@ -144,28 +144,39 @@ exports.d3Append_ = element => selection => {
   return result
 }
 // d3Data_ :: D3Data -> D3Selection_ -> D3Selection_
-exports.d3Data_ = data => selection => { // TODO lets always use a key function here
+exports.d3Data_ = data => selection => {
   if (debug) {
     showData_(data)(selection)
+    console.log(`about to call selection.data with array of ${data.length} elements`)
   }
-  console.log(`about to call selection.data with array of ${data.length} elements`)
-  let result = selection.data(data, loggingIndex)
+  let result = selection.data(data)
   return result
 }
-function loggingIndex(d) {
-  console.log(`joining datum ${d.name} with id: ${d.id}`);
-  return d.id;
+function idComparer(a,b) { 
+  if (a.id == b.id) {
+    return 0;
+  }
+  if (a.id < b.id) {
+    return -1;
+  } else {
+    return 1;
+  }
 }
 // getIndexFromDatum_    :: Datum_ -> Int
 exports.getIndexFromDatum_ = datum => {
   return datum.index; // TODO no checks whatsoever on this, only for debugging the indices for spago demo
 }
-// d3Data_ :: D3Data -> KeyFunction -> D3Selection_ -> D3Selection_
-exports.d3KeyFunction_ = data => keyFunction => selection => {
+// d3DataWithKeyFunction_ :: D3Data -> KeyFunction -> D3Selection_ -> D3Selection_
+exports.d3DataWithKeyFunction_ = data => keyFn => selection => {
   if (debug) {
-    showKeyFunction_(data)(keyFunction)(selection)
+    showKeyFunction_(data)(keyFn)(selection)
   }
-  let result = selection.data(data, keyFunction)
+  selection.sort(idComparer)
+  let result = selection.data(data, d => {
+    let key = keyFn(d)
+    console.log(`joining datum ${d.name} with key: ${key}`);
+    return key;
+  })
   return result
 }
 // d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit

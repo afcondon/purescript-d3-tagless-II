@@ -76,9 +76,9 @@ instance Show ForceType where
   show ForceLink                = "ForceLink"
   show CustomForce              = "CustomForce"
 
-data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
+-- TODO move back to Simulation.purs ?
+data SimulationState_ = SS_ { 
     simulation_   :: D3Simulation_
-  , running       :: Boolean
   , forces        :: M.Map Label Force
   , ticks         :: M.Map Label (Step D3Selection_)
 
@@ -97,7 +97,6 @@ data SimulationState_ = SS_ { -- TODO move back to Simulation.purs ?
 initialSimulationState :: Int -> SimulationState_
 initialSimulationState id = SS_
    {  simulation_  : initSimulation_ defaultConfigSimulation  
-    , running      : defaultConfigSimulation.running
     , forces       : M.empty
     , ticks        : M.empty
 
@@ -121,5 +120,4 @@ defaultConfigSimulation = {
     , alphaMin     : 0.0001
     , alphaDecay   : 0.0228
     , velocityDecay: 0.4
-    , running      : true
 }
