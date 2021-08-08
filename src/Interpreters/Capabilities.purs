@@ -6,6 +6,7 @@ import D3.Node (D3_Link, D3_SimulationNode)
 import D3.Selection (Behavior, ChainableS, D3_Node, Join)
 import D3.Simulation.Types (Force, SimVariable, Step)
 import Data.Maybe (Maybe)
+import Data.Tuple (Tuple)
 import Prelude (class Monad, Unit)
 
 -- TODO see whether it can be useful to extend the interpreter here, for different visualization types
@@ -54,9 +55,10 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   enableOnlyTheseForces :: Array Label -> m Unit
 
   -- management of data (nodes and links)
-  setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
   -- uniformlyDistribute :: forall d. Array (D3_SimulationNode d) -> m Unit
-  setLinks :: forall id d r. Array (D3_Link id r)    -> (Datum_ -> id) -> m (Array (D3_Link d r)) -- we require a key function for links
+  setNodesAndLinks :: forall id d r. Array (D3_SimulationNode d) -> Array (D3_Link id r) -> (Datum_ -> id)
+    -> m (Tuple (Array (D3_SimulationNode d)) (Array (D3_Link (D3_SimulationNode d) r)))
+    -- NB we will always require a key function for links in a simulation setting
   
   getNodes :: forall d.   m (Array (D3_SimulationNode d))
   getLinks :: forall d r. m (Array (D3_Link d r)) -- we require a key function for links

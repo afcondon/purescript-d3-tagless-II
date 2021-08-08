@@ -15,7 +15,7 @@ import D3.Simulation.Forces (createForce)
 import D3.Simulation.Functions (simulationCreateTickFunction, simulationSetLinks, simulationSetNodes)
 import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), D3SimulationState_, Step(..), initialSimulationState)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, attach, addTickFunction, defaultLinkTick, defaultNodeTick, join, on, setConfigVariable, setLinks, setNodes, start)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, attach, defaultLinkTick, defaultNodeTick, join, on, setConfigVariable, setNodesAndLinks, start)
 import D3Tagless.Capabilities as D3
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
@@ -60,18 +60,17 @@ graphScript model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   (root :: D3Selection_) <- attach selector
   svg        <- root D3.+ (node Svg [ viewBox (-w / 2.0) (-h / 2.0) w h
-                                               , classed "lesmis" ] )
+                                    , classed "lesmis" ] )
   linksGroup <- svg  D3.+ (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  D3.+ (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
   
   -- in contrast to a simple SelectionM function, we have additional typeclass capabilities for simulation
   -- which we use here to introduce the nodes and links to the simulation
-  simulationNodes <- setNodes model.nodes
-  simulationLinks <- setLinks model.links datum_.id -- the "links" force will already be there
+  (Tuple nodes links) <- setNodesAndLinks model.nodes model.links datum_.id -- will add links force if none is present
   
   -- joining the data from the model after it has been put into the simulation
-  linksSelection <- linksGroup D3.<+> Join Line   simulationLinks [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
-  nodesSelection <- nodesGroup D3.<+> Join Circle simulationNodes [ radius 5.0, fill datum_.colorByGroup ]
+  nodesSelection <- nodesGroup D3.<+> Join Circle nodes [ radius 5.0, fill datum_.colorByGroup ]
+  linksSelection <- linksGroup D3.<+> Join Line   links [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
 
   -- both links and nodes are updated on each step of the simulation, 
   -- in this case it's a simple translation of underlying (x,y) data for the circle centers

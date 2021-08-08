@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState, State, get, gets, modify_)
 import D3.Attributes.Instances (Label)
-import D3.Data.Types (D3Selection_, Index_)
+import D3.Data.Types (D3Selection_, Datum_, Index_)
 import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getLinks_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
 import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
@@ -159,6 +159,26 @@ simulationShowForces = do
       showTuple (Tuple label force) = show label <> " " <> show force
   pure $ intercalate "\n" $ showTuple <$> forceTuples
 
+simulationSetNodesAndLinks :: 
+  forall id d obj r m row. 
+  Bind m =>
+  MonadState { simulationState :: D3SimulationState_ | row } m =>
+  Array (D3_SimulationNode d) -> Array (D3_Link id r) -> (Datum_ -> id)
+    -> m (Tuple (Array (D3_SimulationNode d)) (Array (D3_Link (D3_SimulationNode d) r)))
+simulationSetNodesAndLinks nodes links indexFn = do
+  { simulationState: SimState_ ss_} <- get
+  let opaqueNodes    = ss_.simulation_ `setNodes_` nodes
+      maybelinkForce = M.lookup "links" ss_.forces
+  case maybelinkForce of
+    Nothing -> do
+      let newLinksForce = enableForce $ createForce "links" ForceLink Nothing [] -- links force doesn't accept ForceFilter (it kind of already is a force filter by it's nature)
+      simulationAddForce newLinksForce
+      let updatedLinks = setLinks_ (getHandle newLinksForce) links indexFn -- indexFn is needed to tell D3 how to swizzle the NodeIDs to get object references
+      pure (Tuple opaqueNodes updatedLinks)
+    (Just linkForce) -> do
+      let updatedLinks = setLinks_ (getHandle linkForce) links indexFn -- indexFn is needed to tell D3 how to swizzle the NodeIDs to get object references
+      pure (Tuple opaqueNodes updatedLinks)
+
 simulationSetNodes :: forall m row d. 
   (MonadState { simulationState :: D3SimulationState_ | row } m) => 
   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
@@ -167,14 +187,6 @@ simulationSetNodes nodes = do
   let opaqueNodes = ss_.simulation_ `setNodes_` nodes
   -- modify_ (\s -> s { simulationState = (SimState_ ss_ { nodes = (unsafeCoerce opaqueNodes) })})
   pure nodes
-
-simulationGetNodes :: forall m row d.
-  (MonadState { simulationState :: D3SimulationState_ | row } m) => 
-  m (Array (D3_SimulationNode d))
-simulationGetNodes = do
-  { simulationState: SimState_ ss_} <- get
-  let opaqueNodes = getNodes_ ss_.simulation_
-  pure $ unsafeCoerce opaqueNodes
 
 simulationSetLinks :: forall id m row datum r. 
   (MonadState { simulationState :: D3SimulationState_ | row } m) => 
@@ -185,6 +197,14 @@ simulationSetLinks links keyFn = do
   let updatedLinks = setLinks_ (getHandle newLinksForce) links keyFn -- keyFn is needed to tell D3 how to swizzle the NodeIDs to get object references
   simulationAddForce newLinksForce
   pure (unsafeCoerce updatedLinks) -- TODO notice the coerce here
+
+simulationGetNodes :: forall m row d.
+  (MonadState { simulationState :: D3SimulationState_ | row } m) => 
+  m (Array (D3_SimulationNode d))
+simulationGetNodes = do
+  { simulationState: SimState_ ss_} <- get
+  let opaqueNodes = getNodes_ ss_.simulation_
+  pure $ unsafeCoerce opaqueNodes
 
 simulationGetLinks :: forall m row datum r. 
   (MonadState { simulationState :: D3SimulationState_ | row } m) => 

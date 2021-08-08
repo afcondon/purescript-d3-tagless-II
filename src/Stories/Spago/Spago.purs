@@ -6,9 +6,9 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get, modify_)
 import D3.Data.Tree (TreeLayout(..))
-import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Draw (graphAttrs, removeNamedSelection, treeAttrs)
 import D3.Examples.Spago.Draw as Graph
+import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, convertFilesToGraphModel, isPackage, isUsedModule, noFilter)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (pinNamedNode_, pinTreeNode_, unpinNode_)
@@ -24,10 +24,10 @@ import Debug (trace)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
-import Stories.Spago.State (State) 
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
-import Stories.Spago.HTML (render) 
-import Stories.Spago.Forces (forces, gridForceSettings, packageForceSettings, treeForceSettings) 
+import Stories.Spago.Forces (forces, gridForceSettings, packageForceSettings, treeForceSettings)
+import Stories.Spago.HTML (render)
+import Stories.Spago.State (State)
 
 type Input = D3SimulationState_
   
@@ -68,16 +68,15 @@ handleAction = case _ of
   Scene PackageGrid -> do
     setCssEnvironment "cluster"
     runEffectSimulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
-    filterLinks isM2P_Link
-    filterNodes noFilter
+    filterLinks isM2P_Link -- only module-to-package (ie containment) links
+    filterNodes noFilter   -- all the nodes
     setActiveForces gridForceSettings
     unpinNodes
 
     state <- H.get
     let _ = trace { action: "Scene PackageGrid", model: state.model } \_ -> unit
     simulationStop
-    runEffectSimulation $ Graph.updateNodes state.activeNodes graphAttrs -- all nodes
-    runEffectSimulation $ Graph.updateGraphLinks state.activeLinks -- filtered links
+    runEffectSimulation $ Graph.updateSimulation state.activeNodes state.activeLinks graphAttrs
     runEffectSimulation $ enableOnlyTheseForces gridForceSettings
     simulationStart
 
@@ -93,10 +92,7 @@ handleAction = case _ of
     state <- H.get
     let _ = trace { action: "Scene PackageGraph", model: state.model } \_ -> unit
     simulationStop
-    runEffectSimulation $ Graph.updateNodes state.activeNodes graphAttrs -- filtered to packages only
-    -- TODO following line which tries drawing links without putting them in simulation won't work until swizzling is done on PS side
-    -- runEffectSimulation $ Graph.updateGraphLinks' state.links 
-    runEffectSimulation $ Graph.updateGraphLinks state.activeLinks -- these have been filtered to only P2P
+    runEffectSimulation $ Graph.updateSimulation state.activeNodes state.activeLinks graphAttrs
     runEffectSimulation $ enableOnlyTheseForces state.activeForces
     simulationStart
 
@@ -111,8 +107,8 @@ handleAction = case _ of
     state <- H.get
     let _ = trace { action: "Scene ModulerTree", model: state.model } \_ -> unit
     simulationStop
-    runEffectSimulation $ Graph.updateNodes state.activeNodes treeAttrs
-    runEffectSimulation $ Graph.updateTreeLinks state.activeLinks Horizontal
+    -- runEffectSimulation $ Graph.updateSimulation state.activeNodes treeAttrs
+    -- runEffectSimulation $ Graph.updateTreeLinks state.activeLinks Horizontal
     runEffectSimulation $ enableOnlyTheseForces treeForceSettings
     simulationStart
 
@@ -126,7 +122,7 @@ handleAction = case _ of
 
     state <- H.get
     simulationStop
-    runEffectSimulation $ Graph.updateGraphLinks state.activeLinks
+    runEffectSimulation $ Graph.updateSimulation state.activeNodes state.activeLinks graphAttrs
     simulationStart
 
   Filter (NodeFilter x) -> do
@@ -134,7 +130,7 @@ handleAction = case _ of
 
     state <- H.get
     simulationStop
-    runEffectSimulation $ Graph.updateNodes state.activeNodes graphAttrs -- TODO clearly now this has to be maintained in the state, cos toggling force will change attrs!
+    runEffectSimulation $ Graph.updateSimulation state.activeNodes state.activeLinks graphAttrs
     simulationStart
 
 

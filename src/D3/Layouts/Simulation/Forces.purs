@@ -2,15 +2,13 @@ module D3.Simulation.Forces where
 
 import Prelude
 
-import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), Label, IndexedLambda, toAttr, unboxAttr)
+import D3.Attributes.Instances (Attr(..), AttrBuilder(..), AttributeSetter(..), IndexedLambda, Label, unboxAttr)
 import D3.Data.Types (D3Simulation_, Datum_, Index_)
-import D3.FFI (D3Attr, D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulationWithFilter_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, setLinks_, unsetLinks_)
-import D3.Simulation.Types (ChainableF(..), Force(..), ForceFilter(..), ForceStatus(..), ForceType(..))
-import D3Tagless.Capabilities (setLinks)
+import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulationWithFilter_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
+import D3.Simulation.Types (ChainableF, Force(..), ForceFilter(..), ForceStatus(..), ForceType(..))
 import Data.Array (elem)
 import Data.Function.Uncurried (mkFn2, runFn2)
 import Data.Maybe (Maybe(..))
-import Debug (spy, trace)
 
 
 toggleForceStatus :: ForceStatus -> ForceStatus

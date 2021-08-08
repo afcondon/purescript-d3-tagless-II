@@ -11,7 +11,7 @@ import D3.Layouts.Hierarchical (horizontalLink', radialLink, verticalLink)
 import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
 import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, addSelection, addTickFunction, attach, getSelection, modifySelection, on, setLinks, setNodes, simulationHandle)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, addSelection, addTickFunction, attach, getSelection, modifySelection, on, setNodesAndLinks, simulationHandle)
 import D3Tagless.Capabilities as D3
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
@@ -126,27 +126,30 @@ setup = do
   addSelection "linksGroup" linksGroup
   pure unit
 
-updateNodes :: forall m row. 
+updateSimulation :: forall m row. 
   Bind m => 
   MonadEffect m =>
   MonadState { simulationState :: D3SimulationState_ | row } m =>
   SelectionM D3Selection_ m =>
   SimulationM D3Selection_ m =>
   Array SpagoSimNode ->
+  Array SpagoGraphLinkID ->
   { circle :: Array ChainableS, labels :: Array ChainableS } -> 
   m Unit
-updateNodes nodes attrs = do
-  simulation_       <- simulationHandle
-  maybeNodesGroup   <- getSelection "nodesGroup"
+updateSimulation nodes links attrs = do
+  (Tuple nodes_ links_) <- setNodesAndLinks nodes links datum_.indexFunction-- this will have to do the shallow copy stuff to ensure continuity
+  simulation_           <- simulationHandle
+  maybeNodesGroup       <- getSelection "nodesGroup"
+  maybeLinksGroup       <- getSelection "linksGroup"
 
-  case maybeNodesGroup of
-    Nothing -> pure unit
-    (Just nodesGroup) -> do
-      let _ = trace { updateNodes: nodes } \_ -> unit
+  case maybeNodesGroup, maybeLinksGroup of
+    (Just nodesGroup), (Just linksGroup) -> do
+      let _ = trace { updateNodes: nodes_ } \_ -> unit
+      -- first the nodes
       nodesSelection <- nodesGroup D3.<+> 
                         UpdateJoinWithKeyFunction 
                         Group 
-                        nodes
+                        nodes_ -- these nodes have been thru the simulation 
                         { enter : enterAttrs simulation_
                         , update: updateAttrs simulation_
                         , exit  : [ remove ] 
@@ -159,9 +162,26 @@ updateNodes nodes attrs = do
 
       addTickFunction "nodes" $ Step nodesSelection nodeTick
       addSelection "nodesSelection" nodesSelection
-      _ <- setNodes nodes
+      -- now the links
+      linksSelection <- linksGroup D3.<+> 
+                  UpdateJoinWithKeyFunction
+                  Line
+                  links_ -- these nodes have been thru the simulation 
+                  { enter: [ classed link_.linkClass, strokeColor link_.color ]
+                  , update: [ classed "graphlinkSimUpdate" ]
+                  , exit: [ remove ] }
+                  spagoLinkKeyFunction
+
+      addTickFunction "links" $ Step linksSelection linkTick
+      addSelection "graphlinksSelection" linksSelection
+
       pure unit
 
+  -- TODO throw an error? or log missing selection? or avoid the maybe in some other way
+  -- maybe the { nodes, links, nodeSelection, linksSelection } could be a single piece of state?
+    _, _ -> pure unit -- one or other necessary selection was not found
+
+{-
 updateGraphLinks :: forall m row. 
   Bind m => 
   MonadEffect m =>
@@ -256,6 +276,7 @@ updateTreeLinks links layout = do
       addSelection "treelinksSelection" linksSelection
 
   pure unit
+-}
   
 removeNamedSelection :: forall m row. 
   Bind m => 

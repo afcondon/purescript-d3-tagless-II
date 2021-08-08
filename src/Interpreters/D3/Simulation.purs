@@ -61,33 +61,35 @@ instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
   -- NOTE that simulation on is handled differently from selectionOn
   on s_              = simulationOn s_
 
-
+-- TODO should each of these facets (stop/go, forces, data, selections, tick functions)
 instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
-  start                       = simulationStart
-  stop                        = simulationStop
+-- stop and go
+  start                                = simulationStart
+  stop                                 = simulationStop
+-- management of simulation variables
+  setConfigVariable v                  = simulationSetVariable v
+-- management of forces
+  addForce force                       = simulationAddForce force
+  addForces forces                     = simulationAddForces forces  
+  removeAllForces                      = simulationRemoveAllForces
+  enableOnlyTheseForces                = simulationEnableOnlyTheseForces
+  toggleForceByLabel label             = simulationToggleForce label
+  setForcesByLabel { enable, disable } = 
+    do
+      simulationDisableForcesByLabel disable
+      simulationEnableForcesByLabel  enable
+-- management of data 
+  setNodesAndLinks nodes links indexFn = simulationSetNodesAndLinks nodes links indexFn
+  getLinks                             = simulationGetLinks 
+  getNodes                             = simulationGetNodes
+-- uniformlyDistribute nodes         = pure $ setPositionToNaN_ nodes
 
-  setConfigVariable v         = simulationSetVariable v
-
-  removeAllForces             = simulationRemoveAllForces
-  addForces forces            = simulationAddForces forces  
-  addForce force              = simulationAddForce force
-  toggleForceByLabel label    = simulationToggleForce label
-  setForcesByLabel { enable, disable } = do
-    simulationDisableForcesByLabel disable
-    simulationEnableForcesByLabel  enable
-  enableOnlyTheseForces       = simulationEnableOnlyTheseForces
-
-  setNodes nodes              = simulationSetNodes nodes
-  -- uniformlyDistribute nodes   = pure $ setPositionToNaN_ nodes
-  setLinks links keyFn        = simulationSetLinks links (unsafeCoerce keyFn)
-  getLinks                    = simulationGetLinks 
-  getNodes                    = simulationGetNodes
-
-  addSelection label selection = simulationAddSelection label selection
-  getSelection label           = simulationGetSelection label
-
-  addTickFunction label (StepTransformFFI selection function) = do
+-- management of selections
+  addSelection label selection         = simulationAddSelection label selection
+  getSelection label                   = simulationGetSelection label
+-- management of tick functions, what to do with the selection on each step of simulation
     -- TODO this would be the more efficient but less attractive route to defining a Tick function
+  addTickFunction label (StepTransformFFI selection function) = do
     pure unit
   addTickFunction label (Step selection chain) = do
     (SimState_ ss_) <- gets _.simulationState
@@ -113,7 +115,9 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     (SimState_ ss_) <- gets _.simulationState
     let _ = defaultLinkTick_ label ss_.simulation_ selection
     pure unit
-
+    
+-- TODO is this really necessary tho? couldn't it be added to the tick function 
+-- get the underlying simulation handle out of the simulation (necessary for tick functions? )
   simulationHandle = do
     (SimState_ { simulation_ }) <- gets _.simulationState
     pure simulation_
