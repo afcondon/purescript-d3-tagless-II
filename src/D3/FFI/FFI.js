@@ -174,7 +174,7 @@ exports.d3DataWithKeyFunction_ = data => keyFn => selection => {
   selection.sort(idComparer)
   let result = selection.data(data, d => {
     let key = keyFn(d)
-    console.log(`joining datum ${d.name} with key: ${key}`);
+    // console.log(`joining datum ${d.name} with key: ${key}`);
     return key;
   })
   return result

@@ -57,7 +57,7 @@ handleAction :: forall m. Bind m => MonadAff m => MonadState State m =>
 handleAction = case _ of
   Initialize -> do    
     (model :: Maybe SpagoModel) <- H.liftAff getModel
-    let _ = trace { model: model } \_ -> unit
+    let _ = trace { action: "Initialize", model: model } \_ -> unit
     H.modify_ (\s -> s { model = model })
     runEffectSimulation Graph.setup
     runEffectSimulation (addForces forces)
@@ -74,7 +74,7 @@ handleAction = case _ of
     unpinNodes
 
     state <- H.get
-    let _ = trace { model: state.model } \_ -> unit
+    let _ = trace { action: "Scene PackageGrid", model: state.model } \_ -> unit
     simulationStop
     runEffectSimulation $ Graph.updateNodes state.activeNodes graphAttrs -- all nodes
     runEffectSimulation $ Graph.updateGraphLinks state.activeLinks -- filtered links
@@ -91,7 +91,7 @@ handleAction = case _ of
     -- runEffectSimulation $ uniformlyDistributeNodes -- TODO
 
     state <- H.get
-    let _ = trace { model: state.model } \_ -> unit
+    let _ = trace { action: "Scene PackageGraph", model: state.model } \_ -> unit
     simulationStop
     runEffectSimulation $ Graph.updateNodes state.activeNodes graphAttrs -- filtered to packages only
     -- TODO following line which tries drawing links without putting them in simulation won't work until swizzling is done on PS side
@@ -109,7 +109,7 @@ handleAction = case _ of
     pinTreeNodes -- side-effect, because if we make _new_ nodes the links won't be pointing to them
 
     state <- H.get
-    let _ = trace { model: state.model } \_ -> unit
+    let _ = trace { action: "Scene ModulerTree", model: state.model } \_ -> unit
     simulationStop
     runEffectSimulation $ Graph.updateNodes state.activeNodes treeAttrs
     runEffectSimulation $ Graph.updateTreeLinks state.activeLinks Horizontal
