@@ -1,11 +1,13 @@
 module D3.Examples.MetaTree where
 
-import D3.Attributes.Sugar 
+import D3.Attributes.Sugar
+import Math
+
 import D3.Data.Tree (TreeModel, TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.MetaTree.Model (MetaTreeNode)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
-import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
+import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, keyIsID, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
 import D3.Layouts.Hierarchical (verticalLink)
 import D3.Selection (Join(..), node)
 import D3Tagless.Capabilities (class SelectionM, appendElement, attach, (<+>))
@@ -15,7 +17,6 @@ import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Prelude (class Bind, Unit, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>))
 import Utility (getWindowWidthHeight)
-import Math
 
 datum_ :: { 
   param1     :: Datum_ -> String
@@ -74,14 +75,22 @@ treeScript (Tuple w h) tree = do
   links      <- container `appendElement` (node Group [ classed "links"])
   nodes      <- container `appendElement` (node Group [ classed "nodes"])
 
-  theLinks_  <- links <+> Join Path (links_ tree) [ strokeWidth   1.5
-                                                  , strokeColor   "black"
-                                                  , strokeOpacity 0.4
-                                                  , fill          "none"
-                                                  , verticalLink
-                                                  ]
+  theLinks_  <- links <+> Join
+                          Path
+                          (links_ tree)
+                          [ strokeWidth   1.5
+                          , strokeColor   "black"
+                          , strokeOpacity 0.4
+                          , fill          "none"
+                          , verticalLink
+                          ]
+                          keyIsID
 
-  nodeJoin_  <- nodes <+> Join Group (descendants_ tree) [ transform [ datum_.positionXY ] ]
+  nodeJoin_  <- nodes <+> Join
+                          Group
+                          (descendants_ tree)
+                          [ transform [ datum_.positionXY ] ]
+                          keyIsID
   
 
   theNodes <- nodeJoin_ `appendElement` 

@@ -79,7 +79,8 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
       simulationDisableForcesByLabel disable
       simulationEnableForcesByLabel  enable
 -- management of data 
-  setNodesAndLinks nodes links indexFn = simulationSetNodesAndLinks nodes links indexFn
+  prepareNodesAndLinks selection nodes links indexFn 
+    = simulationPrepareNodesAndLinks selection nodes links indexFn
   getLinks                             = simulationGetLinks 
   getNodes                             = simulationGetNodes
 -- uniformlyDistribute nodes         = pure $ setPositionToNaN_ nodes

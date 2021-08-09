@@ -12,6 +12,9 @@ import Data.Number (infinity)
 gridForceSettings :: Array String
 gridForceSettings = [ "packageGrid", "clusterx", "clustery", "collide1" ]
 
+gridForceSettings2 :: Array String
+gridForceSettings2 = [ "center", "collide2", "x", "y" ]
+
 packageForceSettings :: Array String
 packageForceSettings = [ "centerNamedNode", "center", "collide2", "charge2", "links"]
 

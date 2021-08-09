@@ -1,13 +1,13 @@
 module D3.Examples.Tree.Script where
 
+import D3.Attributes.Sugar
 import Prelude
 
-import D3.Attributes.Sugar 
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (Datum_, Element(..), Selector)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.Examples.Tree.Model (FlareTreeNode)
-import D3.FFI (descendants_, hasChildren_, links_)
+import D3.FFI (descendants_, hasChildren_, keyIsID, links_)
 import D3.Selection (ChainableS, Join(..), node)
 import D3Tagless.Capabilities (class SelectionM, attach)
 import D3Tagless.Capabilities as D3
@@ -89,12 +89,18 @@ script config tree = do
   links      <- container D3.+  (node Group [ classed "links"] )
   nodes      <- container D3.+  (node Group [ classed "nodes"] )
 
-  theLinks_  <- links D3.<+> Join Path (links_ tree) 
-                                       [ strokeWidth   1.5, strokeColor   config.color, strokeOpacity 0.4
-                                       , fill "none", config.linkPath ]
+  theLinks_  <- links D3.<+>  Join 
+                              Path (links_ tree) 
+                              [ strokeWidth   1.5, strokeColor   config.color, strokeOpacity 0.4
+                              , fill "none", config.linkPath ]
+                              keyIsID
 
   -- we make a group to hold the node circle and the label text
-  nodeJoin_  <- nodes D3.<+> Join Group (descendants_ tree) config.nodeTransform
+  nodeJoin_  <- nodes D3.<+> Join
+                             Group
+                             (descendants_ tree)
+                             config.nodeTransform
+                             keyIsID
 
   theNodes <- nodeJoin_ D3.+  
                 (node Circle  [ fill         (\d -> if datum_.hasChildren d then "#999" else "#555")

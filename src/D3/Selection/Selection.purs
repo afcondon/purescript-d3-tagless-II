@@ -19,10 +19,8 @@ data DragBehavior =
 data Behavior selection = Drag DragBehavior
                         | Zoom (ZoomConfig selection)
 
-data Join d = Join Element (Array d) (Array ChainableS)
-            -- | UpdateJoin Element (Array d) EnterUpdateExit
-            | JoinWithKeyFunction Element (Array d) (Array ChainableS) ComputeKeyFunction_
-            | UpdateJoinWithKeyFunction Element (Array d) EnterUpdateExit ComputeKeyFunction_
+data Join d = Join       Element (Array d) (Array ChainableS) ComputeKeyFunction_
+            | UpdateJoin Element (Array d) EnterUpdateExit    ComputeKeyFunction_
 
 -- -- TODO could do the coerce to Index_ needed by keyFunction in here so it doesn't need to be done in DSL code
 -- computeKeyWith :: forall d.  ComputeKeyFunction_ -> Join d -> Join d

@@ -351,6 +351,16 @@ exports.configSimulation_ = simulation => config => {
   }
   return simulation
 }
+// keyIsID :: ComputeKeyFunction
+exports.keyIsID = d => d.id
+
+// prepareSimUpdate_ :: D3Selection_ -> Array NativeNode -> Array NativeNode -> (Datum_ -> Id) -> { nodes :: Array NativeNode, links: Array NativeLinks }
+exports.prepareSimUpdate_ = nodeSelection => nodes => links => idFn => {
+  const old = new Map(nodeSelection.data().map(d => idFn(d)));
+  let updateNodes = nodes.map(d => Object.assign(old.get(idFn(d)) || {}, d));
+  let updateLinks = links.map(d => Object.assign({}, d));
+  return { nodes: updateNodes, links: updateLinks}
+}
 //  :: Simulation -> Array NativeNode -> Array NativeNode
 exports.setNodes_ = simulation => nodes => {
   if (debug) {
@@ -360,11 +370,12 @@ exports.setNodes_ = simulation => nodes => {
   simulation.nodes(nodes)
   return simulation.nodes()
 }
-exports.setLinks_ = linkForce => links => idFn => {
+// setLinks_ always creates a new links force, implicitly discarding the previous one
+exports.setLinks_ = simulation => links => idFn => {
   console.log('making link force for simulation');
-  linkForce.links(links)
-  linkForce.id(idFn)
-  return links
+  const links = simulation.force("link")
+  links.links(links).id(idFn);
+  return { links: links, force: force }
 }
 exports.unsetLinks_ = simulation => {
   const linkForce = d3.forceLink([])

@@ -184,19 +184,11 @@ instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
     insertInScriptTree nodeID (ModifyNode attributes)
     pure unit
 
-  join nodeID (Join e ds cs)          = do
-    (ScriptTree id _ _) <- get
-    insertInScriptTree nodeID (JoinSimpleNode e cs)
-    pure id
-  -- join nodeID (UpdateJoin e ds cs)   = do
-  --   (ScriptTree id _ _) <- get
-  --   insertInScriptTree nodeID (UpdateJoinNode e cs)
-  --   pure id
-  join nodeID (JoinWithKeyFunction e ds cs k)          = do
+  join nodeID (Join e ds cs k)          = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e cs k)
     pure id
-  join nodeID (UpdateJoinWithKeyFunction e ds cs k)   = do
+  join nodeID (UpdateJoin e ds cs k)   = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (UpdateJoinWithKeyFunctionNode e cs k)
     pure id

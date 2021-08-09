@@ -15,7 +15,7 @@ import D3.Simulation.Forces (createForce)
 import D3.Simulation.Functions (simulationCreateTickFunction, simulationSetLinks, simulationSetNodes)
 import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), D3SimulationState_, Step(..), initialSimulationState)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, attach, defaultLinkTick, defaultNodeTick, join, on, setConfigVariable, setNodesAndLinks, start)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, attach, defaultLinkTick, defaultNodeTick, join, on, setConfigVariable, prepareNodesAndLinks, start)
 import D3Tagless.Capabilities as D3
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
@@ -40,7 +40,7 @@ link_ = {
 
 datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
-    id    : \d -> (unboxD3SimNode d).id
+    id    : \d -> (unboxD3SimNode d).id -- NB the id in this case is a String
   , x     : \d -> (unboxD3SimNode d).x
   , y     : \d -> (unboxD3SimNode d).y
   , group : \d -> (unboxD3SimNode d).group
@@ -66,11 +66,11 @@ graphScript model selector = do
   
   -- in contrast to a simple SelectionM function, we have additional typeclass capabilities for simulation
   -- which we use here to introduce the nodes and links to the simulation
-  (Tuple nodes links) <- setNodesAndLinks model.nodes model.links datum_.id -- will add links force if none is present
+  update <- prepareNodesAndLinks nodesGroup model.nodes model.links datum_.id -- will add links force if none is present
   
   -- joining the data from the model after it has been put into the simulation
-  nodesSelection <- nodesGroup D3.<+> Join Circle nodes [ radius 5.0, fill datum_.colorByGroup ]
-  linksSelection <- linksGroup D3.<+> Join Line   links [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
+  nodesSelection <- nodesGroup D3.<+> Join Circle update.nodes [ radius 5.0, fill datum_.colorByGroup ]
+  linksSelection <- linksGroup D3.<+> Join Line   update.links [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
 
   -- both links and nodes are updated on each step of the simulation, 
   -- in this case it's a simple translation of underlying (x,y) data for the circle centers

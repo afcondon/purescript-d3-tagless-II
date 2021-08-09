@@ -12,11 +12,11 @@ import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Tree_Link, isM2P_Link, i
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, convertFilesToGraphModel, isPackage, isUsedModule, noFilter)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (pinNamedNode_, pinTreeNode_, unpinNode_)
-import D3.Simulation.Functions (simulationStart, simulationStop)
+import D3.Simulation.Functions (simulationGetNodes, simulationStart, simulationStop)
 import D3.Simulation.Types (D3SimulationState_, SimVariable(..))
 import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, toggleForceByLabel)
 import D3Tagless.Instance.Simulation (runEffectSimulation)
-import Data.Array (filter)
+import Data.Array (filter, length)
 import Data.Either (hush)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -25,7 +25,7 @@ import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
-import Stories.Spago.Forces (forces, gridForceSettings, packageForceSettings, treeForceSettings)
+import Stories.Spago.Forces (forces, gridForceSettings, gridForceSettings2, packageForceSettings, treeForceSettings)
 import Stories.Spago.HTML (render)
 import Stories.Spago.State (State)
 
@@ -70,14 +70,14 @@ handleAction = case _ of
     runEffectSimulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     filterLinks isM2P_Link -- only module-to-package (ie containment) links
     filterNodes noFilter   -- all the nodes
-    setActiveForces gridForceSettings
+    setActiveForces gridForceSettings2
     unpinNodes
 
     state <- H.get
     let _ = trace { action: "Scene PackageGrid", model: state.model } \_ -> unit
     simulationStop
     runEffectSimulation $ Graph.updateSimulation state.activeNodes state.activeLinks graphAttrs
-    runEffectSimulation $ enableOnlyTheseForces gridForceSettings
+    runEffectSimulation $ enableOnlyTheseForces state.activeForces
     simulationStart
 
   Scene PackageGraph -> do
@@ -131,6 +131,8 @@ handleAction = case _ of
     state <- H.get
     simulationStop
     runEffectSimulation $ Graph.updateSimulation state.activeNodes state.activeLinks graphAttrs
+    n <- simulationGetNodes
+    let _ = trace { numNodes: length n }
     simulationStart
 
 

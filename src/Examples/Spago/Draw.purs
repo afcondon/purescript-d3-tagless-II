@@ -7,17 +7,19 @@ import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Files (SpagoGraphLinkID)
 import D3.Examples.Spago.Model (SpagoSimNode, cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
 import D3.Examples.Spago.Unsafe (spagoLinkKeyFunction, spagoNodeKeyFunction)
+import D3.FFI (prepareSimUpdate_, setLinks_, setNodes_)
 import D3.Layouts.Hierarchical (horizontalLink', radialLink, verticalLink)
 import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
 import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, addSelection, addTickFunction, attach, getSelection, modifySelection, on, setNodesAndLinks, simulationHandle)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, addSelection, addTickFunction, attach, getSelection, modifySelection, on, prepareNodesAndLinks, simulationHandle)
 import D3Tagless.Capabilities as D3
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Debug (trace)
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
+import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
 -- for this (family of) visualization(s) the position updating for links and nodes is always the same
@@ -137,19 +139,20 @@ updateSimulation :: forall m row.
   { circle :: Array ChainableS, labels :: Array ChainableS } -> 
   m Unit
 updateSimulation nodes links attrs = do
-  (Tuple nodes_ links_) <- setNodesAndLinks nodes links datum_.indexFunction-- this will have to do the shallow copy stuff to ensure continuity
+  -- (Tuple nodes_ links_) <- setNodesAndLinks nodes links datum_.indexFunction-- this will have to do the shallow copy stuff to ensure continuity
   simulation_           <- simulationHandle
   maybeNodesGroup       <- getSelection "nodesGroup"
   maybeLinksGroup       <- getSelection "linksGroup"
 
   case maybeNodesGroup, maybeLinksGroup of
     (Just nodesGroup), (Just linksGroup) -> do
-      let _ = trace { updateNodes: nodes_ } \_ -> unit
+      let prepped = prepareSimUpdate_ nodesGroup nodes links datum_.indexFunction
+      let _ = trace { preppedNodes: prepped.nodes, preppedLinks: prepped.links  } \_ -> unit
       -- first the nodes
       nodesSelection <- nodesGroup D3.<+> 
-                        UpdateJoinWithKeyFunction 
+                        UpdateJoin
                         Group 
-                        nodes_ -- these nodes have been thru the simulation 
+                        prepped.nodes -- these nodes have been thru the simulation 
                         { enter : enterAttrs simulation_
                         , update: updateAttrs simulation_
                         , exit  : [ remove ] 
@@ -164,15 +167,17 @@ updateSimulation nodes links attrs = do
       addSelection "nodesSelection" nodesSelection
       -- now the links
       linksSelection <- linksGroup D3.<+> 
-                  UpdateJoinWithKeyFunction
+                  UpdateJoin
                   Line
-                  links_ -- these nodes have been thru the simulation 
+                  prepped.links -- these nodes have been thru the simulation 
                   { enter: [ classed link_.linkClass, strokeColor link_.color ]
                   , update: [ classed "graphlinkSimUpdate" ]
                   , exit: [ remove ] }
                   spagoLinkKeyFunction
 
       addTickFunction "links" $ Step linksSelection linkTick
+      let _ = setNodes_ simulation_ prepped.nodes
+      let _ = setLinks_ simulation_ prepped.links (unsafeCoerce $ datum_.indexFunction) -- at this point links could be a mixture of swizzled and unswizzled values
       addSelection "graphlinksSelection" linksSelection
 
       pure unit

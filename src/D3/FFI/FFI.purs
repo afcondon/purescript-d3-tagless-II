@@ -52,6 +52,7 @@ foreign import getIndexFromDatum_    :: Datum_ -> Int
 
 foreign import d3Data_               :: forall d. Array d -> D3Selection_ -> D3Selection_
 type ComputeKeyFunction_ = Datum_ -> Index_
+foreign import keyIsID :: ComputeKeyFunction_
 foreign import d3DataWithKeyFunction_ :: forall d. Array d -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
@@ -112,13 +113,25 @@ type SimulationConfig_ = {
 foreign import initSimulation_         ::                  SimulationConfig_ -> D3Simulation_
 foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_   -> D3Simulation_
 
+foreign import prepareSimUpdate_ :: 
+  forall r d datum. 
+     D3Selection_ 
+  -> Array (D3_SimulationNode d) 
+  -> Array (D3_Link NodeID r) 
+  -> (datum -> NodeID) 
+  -> { nodes :: Array (D3_SimulationNode d), links :: Array (D3_Link (D3_SimulationNode d) r) }
+
 foreign import getNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
-foreign import setNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)
+foreign import setNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Unit
 
 -- removing forces should be done by simulation manager and doesn't need more indirection
 -- foreign import removeForceByName_  :: D3Simulation_ -> String -> D3Simulation_
 
-foreign import setLinks_               :: forall id r d datum. D3ForceHandle_ -> Array (D3_Link id r) -> (datum -> id) -> Array (D3_Link (D3_SimulationNode d) r)
+foreign import setLinks_ :: 
+  forall id r datum. D3Simulation_
+  -> Array (D3_Link id r)
+  -> (datum -> id)
+  -> { links :: Array (D3_Link datum r), force :: D3ForceHandle_ }
 foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_
 foreign import getLinks_               :: forall d r. D3ForceHandle_ -> Array (D3_Link d r)
 foreign import getLinksFromSimulation_ :: forall d r. D3Simulation_ -> String -> Array (D3_Link d r) -- get links from named link force in simulation
