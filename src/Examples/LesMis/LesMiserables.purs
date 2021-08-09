@@ -8,6 +8,7 @@ import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.Examples.LesMiserables.Model (LesMisRawModel)
+import D3.FFI (keyIsID)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), node)
 import D3.Simulation.Config as F
@@ -69,8 +70,8 @@ graphScript model selector = do
   update <- prepareNodesAndLinks nodesGroup model.nodes model.links datum_.id -- will add links force if none is present
   
   -- joining the data from the model after it has been put into the simulation
-  nodesSelection <- nodesGroup D3.<+> Join Circle update.nodes [ radius 5.0, fill datum_.colorByGroup ]
-  linksSelection <- linksGroup D3.<+> Join Line   update.links [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
+  nodesSelection <- nodesGroup D3.<+> Join Circle update.nodes [ radius 5.0, fill datum_.colorByGroup ] keyIsID
+  linksSelection <- linksGroup D3.<+> Join Line   update.links [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ] keyIsID
 
   -- both links and nodes are updated on each step of the simulation, 
   -- in this case it's a simple translation of underlying (x,y) data for the circle centers

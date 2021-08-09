@@ -11,7 +11,7 @@ import Data.Array (find)
 import Data.Function.Uncurried (Fn2)
 import Data.Maybe (fromMaybe)
 import Data.Nullable (Nullable)
-import Prelude (Unit, unit, ($), (<$>))
+import Prelude (class Ord, Unit, unit, ($), (<$>))
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js zoom module       *********************************************
@@ -114,11 +114,11 @@ foreign import initSimulation_         ::                  SimulationConfig_ -> 
 foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_   -> D3Simulation_
 
 foreign import prepareSimUpdate_ :: 
-  forall r d datum. 
+  forall id r d datum. 
      D3Selection_ 
   -> Array (D3_SimulationNode d) 
-  -> Array (D3_Link NodeID r) 
-  -> (datum -> NodeID) 
+  -> Array (D3_Link id r) 
+  -> (datum -> id) 
   -> { nodes :: Array (D3_SimulationNode d), links :: Array (D3_Link (D3_SimulationNode d) r) }
 
 foreign import getNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)

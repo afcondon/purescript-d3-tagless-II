@@ -160,11 +160,11 @@ simulationShowForces = do
   pure $ intercalate "\n" $ showTuple <$> forceTuples
 
 simulationPrepareNodesAndLinks :: 
-  forall d r m row. 
+  forall id d r m row. 
   Bind m =>
   MonadState { simulationState :: D3SimulationState_ | row } m =>
   D3Selection_ -> -- the selection passed will determine which nodes.data() it attempts to merge this new data with
-  Array (D3_SimulationNode d) -> Array (D3_Link NodeID r) -> (Datum_ -> NodeID)
+  Array (D3_SimulationNode d) -> Array (D3_Link id r) -> (Datum_ -> id)
   -> m { nodes :: Array (D3_SimulationNode d), links :: Array (D3_Link (D3_SimulationNode d) r) }
 simulationPrepareNodesAndLinks selection nodes links indexFn = do
   pure $ prepareSimUpdate_ selection nodes links indexFn
