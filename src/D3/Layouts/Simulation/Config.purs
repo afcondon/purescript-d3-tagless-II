@@ -1,6 +1,6 @@
 module D3.Simulation.Config where
 
-import D3.Attributes.Instances (class ToAttr, AttributeSetter(..), toAttr)
+import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), toAttr)
 import D3.Data.Types (Datum_, Index_)
 import D3.Simulation.Types (ChainableF(..))
 import Data.Number (infinity)
@@ -76,4 +76,10 @@ distance = ForceT <<< AttributeSetter "distance" <<< toAttr
 index :: ∀ a. ToAttr Number a => a -> ChainableF -- TODO in fact this would be an Int correctly
 index = ForceT <<< AttributeSetter "distance" <<< toAttr
 
+-- these next two are for specifying how a link should swizzle its "id" to an object reference
+intKey :: (Datum_ -> Number)  -> ChainableF
+intKey = ForceT <<< AttributeSetter "keyFn" <<< NumberAttr <<< Fn
+
+stringKey :: (Datum_ -> String) -> ChainableF
+stringKey = ForceT <<< AttributeSetter "keyFn" <<< StringAttr <<< Fn
 

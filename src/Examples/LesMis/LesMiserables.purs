@@ -1,30 +1,21 @@
 module D3.Examples.LesMiserables where
 
-import Affjax as AJAX
-import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
-import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.Examples.LesMiserables.Model (LesMisRawModel)
 import D3.FFI (keyIsID)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), node)
-import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce)
-import D3.Simulation.Functions (simulationCreateTickFunction, simulationSetLinks, simulationSetNodes)
-import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), D3SimulationState_, Step(..), initialSimulationState)
+import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, attach, defaultLinkTick, defaultNodeTick, join, on, setConfigVariable, prepareNodesAndLinks, start)
+import D3Tagless.Capabilities (class SimulationM, addTickFunction, attach, on, prepareNodesAndLinks)
 import D3Tagless.Capabilities as D3
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..))
-import Effect.Aff (Aff)
-import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Class.Console (log)
 import Math (sqrt)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
 import Utility (getWindowWidthHeight)
@@ -32,6 +23,31 @@ import Utility (getWindowWidthHeight)
 -- type-safe(ish) accessors for the data that is given to D3
 -- we lose the type information in callbacks from the FFI, such as for attributes
 -- but since we know what we gave we can coerce it back to the initial type.
+link_ :: { color :: Datum_ -> String
+, source :: Datum_
+            -> { fx :: Nullable Number
+               , fy :: Nullable Number
+               , group :: Int
+               , id :: String
+               , index :: Int
+               , vx :: Number
+               , vy :: Number
+               , x :: Number
+               , y :: Number
+               }
+, target :: Datum_
+            -> { fx :: Nullable Number
+               , fy :: Nullable Number
+               , group :: Int
+               , id :: String
+               , index :: Int
+               , vx :: Number
+               , vy :: Number
+               , x :: Number
+               , y :: Number
+               }
+, value :: Datum_ -> Number
+}
 link_ = {
     source: \d -> (unboxD3SimLink d).source
   , target: \d -> (unboxD3SimLink d).target
@@ -39,6 +55,12 @@ link_ = {
   , color:  \d -> d3SchemeCategory10N_ (toNumber $ (unboxD3SimLink d).target.group)
 }
 
+datum_ :: { colorByGroup :: Datum_ -> String
+, group :: Datum_ -> Int
+, id :: Datum_ -> String
+, x :: Datum_ -> Number
+, y :: Datum_ -> Number
+}
 datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
     id    : \d -> (unboxD3SimNode d).id -- NB the id in this case is a String

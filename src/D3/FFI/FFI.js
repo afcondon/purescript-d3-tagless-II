@@ -352,14 +352,18 @@ exports.configSimulation_ = simulation => config => {
   return simulation
 }
 // keyIsID :: ComputeKeyFunction
-exports.keyIsID = d => d.id
+exports.keyIsID = d => d.id;
 
 // prepareSimUpdate_ :: D3Selection_ -> Array NativeNode -> Array NativeNode -> (Datum_ -> Id) -> { nodes :: Array NativeNode, links: Array NativeLinks }
 exports.prepareSimUpdate_ = nodeSelection => nodes => links => idFn => {
-  const old = new Map(nodeSelection.data().map(d => idFn(d)));
-  let updateNodes = nodes.map(d => Object.assign(old.get(idFn(d)) || {}, d));
-  let updateLinks = links.map(d => Object.assign({}, d));
-  return { nodes: updateNodes, links: updateLinks}
+  const oldData = nodeSelection.data()
+  if (typeof oldData === `undefined`) {
+    const old = new Map(nodeSelection.data().map(d => idFn(d)));
+    let updateNodes = nodes.map(d => Object.assign(old.get(idFn(d)) || {}, d));
+    let updateLinks = links.map(d => Object.assign({}, d));
+    return { nodes: updateNodes, links: updateLinks}
+  }
+  return { nodes: nodes, links: links }
 }
 //  :: Simulation -> Array NativeNode -> Array NativeNode
 exports.setNodes_ = simulation => nodes => {
@@ -373,7 +377,7 @@ exports.setNodes_ = simulation => nodes => {
 // setLinks_ always creates a new links force, implicitly discarding the previous one
 exports.setLinks_ = simulation => links => idFn => {
   console.log('making link force for simulation');
-  const links = simulation.force("link")
+  const links = simulation.force("links"); // REVIEW need to either completely hide the links force name or pass it in here
   links.links(links).id(idFn);
   return { links: links, force: force }
 }
@@ -394,13 +398,14 @@ exports.getLinks_ = linkForce => linkForce.links()
 // getLinksFromSimulation_ :: forall d r. D3Simulation_ -> String -> Array (D3_Link d r) -- get links from named link force in simulation
 exports.getLinksFromSimulation_ = simulation => forceName => {
   linksForce = simulation.force(forceName)
-  if (typeof linksForce !== `undefined`) {
-    const result = linksForce.links()
-    if (typeof result !== `undefined`) {
-      return result
-    }
+  if (typeof linksForce === `undefined`) {
+    return [] // either the force wasn't found, or the force wasn't a links force
   }
-  return [] // either the force wasn't found, or the force wasn't a links force
+  const result = linksForce.links()
+  if (typeof result === `undefined`) {
+    return []
+  }
+  return result
 }
 
 // setNodes_        :: forall d.   D3Simulation_ -> Array (D3_Simulation_Node d) -> Array (D3_Simulation_Node d)
@@ -525,6 +530,8 @@ exports.setForceX_ = force => attr => force.x(attr)
 exports.setForceY_ = force => attr => force.y(attr)
 // setForceDistance_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
 exports.setForceDistance_ = force => attr => force.distance(attr)
+// setLinksKeyFunction_ :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+exports.setLinksKeyFunction_ = force => attr => force.id(attr)
 // dummyForceHandle_  :: D3ForceHandle_ -- used for fixed "forces", is null under the hood
 exports.dummyForceHandle_ = null
 // setAsNullForceInSimulation_ :: D3Simulation_ -> String -> D3Simulation_

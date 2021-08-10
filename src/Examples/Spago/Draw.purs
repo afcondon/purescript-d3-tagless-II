@@ -160,7 +160,7 @@ updateSimulation nodes links attrs = do
                         spagoNodeKeyFunction
 
       circle         <- nodesSelection D3.+ (node Circle attrs.circle)
-      labels         <- nodesSelection D3.+ (node Text attrs.labels) 
+      -- labels         <- nodesSelection D3.+ (node Text attrs.labels) 
       _              <- circle `on` Drag DefaultDrag
 
       addTickFunction "nodes" $ Step nodesSelection nodeTick

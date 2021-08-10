@@ -1,11 +1,11 @@
 module D3.Simulation.Forces where
 
+import D3.FFI
 import Prelude
 
 import D3.Attributes.Instances (Attr(..), AttrBuilder(..), AttributeSetter(..), IndexedLambda, Label, unboxAttr)
 import D3.Data.Types (D3Simulation_, Datum_, Index_)
-import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceCustom_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulationWithFilter_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
-import D3.Simulation.Types (ChainableF, Force(..), ForceFilter(..), ForceStatus(..), ForceType(..))
+import D3.Simulation.Types (ChainableF, CustomForceType(..), FixForceType(..), Force(..), ForceLinksFilter(..), ForceNodesFilter(..), ForceStatus(..), LinkForceType(..), RegularForceType(..))
 import Data.Array (elem)
 import Data.Function.Uncurried (mkFn2, runFn2)
 import Data.Maybe (Maybe(..))
@@ -18,56 +18,83 @@ toggleForceStatus =
     ForceDisabled -> ForceActive
 
 getLabel :: Force -> Label
-getLabel (Force l _ _ _ _ _) = l
+getLabel (Force l _ _ _ _ _)       = l
+getLabel (LinkForce l _ _ _ _)     = l
+getLabel (FixForce l _ _ _ _ _)    = l
 
 getHandle :: Force -> D3ForceHandle_
-getHandle (Force l s t f cs h_) = h_
+getHandle (Force l s t cs f h_)    = h_
+getHandle (LinkForce l s f cs h_)  = h_
+getHandle (FixForce l s t f cs h_) = h_
 
-createForce :: Label -> ForceType -> Maybe ForceFilter -> Array ChainableF -> Force
+showType :: Force -> String
+showType = 
+  case _ of
+    (Force _ _ t _ _ _) -> show t
+    (LinkForce _ _ _ _ _) -> "linkForce"
+    (FixForce _ _ t _ _ _) -> show t
+
+isForceActive :: Force -> ForceStatus
+isForceActive = 
+  case _ of
+    (Force _ s _ _ _ _)    -> s
+    (LinkForce _ s _ _ _)  -> s
+    (FixForce _ s _ _ _ _) -> s
+
+createForce :: Label -> RegularForceType -> Maybe ForceNodesFilter -> Array ChainableF -> Force
 createForce l t f cs = Force l ForceDisabled t f cs (createForce_ t)
+
+createLinkForce :: Label -> Maybe ForceLinksFilter -> Array ChainableF -> Force
+createLinkForce l f cs = LinkForce l ForceDisabled f cs (createLinkForce_ ForceLink)
+
+createFixForce :: Label -> FixForceType -> Maybe ForceNodesFilter -> Array ChainableF -> Force
+createFixForce l t f cs = FixForce l ForceDisabled t f cs (createFixForce_ t)
 
 disableForce :: Force -> Force
 disableForce (Force l _ t f cs h) = Force l ForceDisabled t f cs h
+disableForce (LinkForce l _ f cs h) = LinkForce l ForceDisabled f cs h
+disableForce (FixForce l _ t f cs h) = FixForce l ForceDisabled t f cs h
 
 enableForce :: Force -> Force
 enableForce (Force l _ t f cs h) = Force l ForceActive t f cs h
+enableForce (LinkForce l _ f cs h) = LinkForce l ForceActive f cs h
+enableForce (FixForce l _ t f cs h) = FixForce l ForceActive t f cs h
 -- TODO but in fact when we toggle "Active" maybe we want to get a handle from D3 for it if it didn't have one? 
 
 toggleForce :: Force -> Force
 toggleForce (Force l s t f cs h_) = Force l (toggleForceStatus s) t f cs h_
+toggleForce (LinkForce l s f cs h_) = LinkForce l (toggleForceStatus s) f cs h_
+toggleForce (FixForce l s t f cs h_) = FixForce l (toggleForceStatus s) t f cs h_
 -- TODO but in fact when we toggle "Active" maybe we want to get a handle from D3 for it if it didn't have one? 
 
 disableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
-disableByLabels simulation labels force@(Force label _ t f cs h_) =
-  if label `elem` labels
+disableByLabels simulation labels force =
+  if (getLabel force) `elem` labels
   then do
-    let _ = -- trace { forceToRemove: label } \_ -> 
-            removeForceFromSimulation force simulation
-    Force label ForceDisabled t f cs h_
-  else -- trace { forceKept: label } \_ -> 
-       force
+    let _ = removeForceFromSimulation force simulation
+    disableForce force
+  else force
 
 enableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
-enableByLabels simulation labels force@(Force label _ t f cs h_) = 
-  if label `elem` labels
+enableByLabels simulation labels force = 
+  if (getLabel force) `elem` labels
   then do
     let _ = putForceInSimulation force simulation
-    Force label ForceActive t f cs h_
+    enableForce force
   else force
 
 enableOnlyTheseLabels :: D3Simulation_ -> Array Label -> Force -> Force
-enableOnlyTheseLabels simulation labels force@(Force label _ t f cs h_) = 
-  if label `elem` labels
+enableOnlyTheseLabels simulation labels force =
+  if (getLabel force) `elem` labels
   then do
     let _ = putForceInSimulation force simulation
-    Force label ForceActive t f cs h_
+    enableForce force
   else do
-    let _ = -- trace { forceToRemove: label } \_ -> 
-            removeForceFromSimulation force simulation
-    Force label ForceDisabled t f cs h_
+    let _ = removeForceFromSimulation force simulation
+    disableForce force
 
 putForceInSimulation :: Force -> D3Simulation_ -> D3Simulation_
-putForceInSimulation (Force l s t Nothing attrs h_) simulation_ =
+putForceInSimulation (Force l s t f attrs h_) simulation_ =
   case t of
     ForceManyBody -> putForceInSimulation_ simulation_ l h_
     ForceCenter   -> putForceInSimulation_ simulation_ l h_
@@ -76,32 +103,26 @@ putForceInSimulation (Force l s t Nothing attrs h_) simulation_ =
     ForceY        -> putForceInSimulation_ simulation_ l h_
     ForceRadial   -> putForceInSimulation_ simulation_ l h_
 
-    ForceLink     -> putForceInSimulation_ simulation_ l h_ -- NB l should always be "links" effectively
+putForceInSimulation (LinkForce l s Nothing attrs h_) simulation_ = 
+  putForceInSimulation_ simulation_ l h_
+putForceInSimulation (LinkForce l s (Just (FilterLinks _ filter)) attrs h_) simulation_ = 
+  putForceInSimulation_ simulation_ l h_ -- TODO actually use the filter given here
 
-    (ForceFixPositionXY fn) -> applyFixForceInSimulationXY_ simulation_ l fn (const true)
-    (ForceFixPositionX fn)  -> applyFixForceInSimulationX_ simulation_ l fn (const true)
-    (ForceFixPositionY fn)  -> applyFixForceInSimulationY_ simulation_ l fn (const true)
-
-    CustomForce   -> putForceInSimulation_ simulation_ l h_ -- TODO not implemented or even designed yet
-putForceInSimulation (Force l s t (Just (FilterNodes _ filter)) attrs h_) simulation_ =
-  case t of
-    ForceManyBody -> putForceInSimulationWithFilter_ simulation_ l filter h_
-    ForceCenter   -> putForceInSimulationWithFilter_ simulation_ l filter h_
-    ForceCollide  -> putForceInSimulationWithFilter_ simulation_ l filter h_
-    ForceX        -> putForceInSimulationWithFilter_ simulation_ l filter h_
-    ForceY        -> putForceInSimulationWithFilter_ simulation_ l filter h_
-    ForceRadial   -> putForceInSimulationWithFilter_ simulation_ l filter h_
-
-    ForceLink     -> putForceInSimulation_ simulation_ l h_ -- NB l should always be "links" effectively
-
-    (ForceFixPositionXY fn) -> applyFixForceInSimulationXY_ simulation_ l fn filter
-    (ForceFixPositionX fn)  -> applyFixForceInSimulationX_ simulation_ l fn filter
-    (ForceFixPositionY fn)  -> applyFixForceInSimulationY_ simulation_ l fn filter
-
-    CustomForce   -> putForceInSimulation_ simulation_ l h_ -- TODO not implemented or even designed yet
+putForceInSimulation (FixForce l s t filter attrs h_) simulation_ =
+  case filter of
+    Nothing -> 
+      case t of
+        (ForceFixPositionXY fn) -> applyFixForceInSimulationXY_ simulation_ l fn (const true)
+        (ForceFixPositionX fn)  -> applyFixForceInSimulationX_ simulation_ l fn (const true)
+        (ForceFixPositionY fn)  -> applyFixForceInSimulationY_ simulation_ l fn (const true)
+    (Just (FilterNodes _ filter)) ->
+      case t of
+        (ForceFixPositionXY fn) -> applyFixForceInSimulationXY_ simulation_ l fn filter
+        (ForceFixPositionX fn)  -> applyFixForceInSimulationX_ simulation_ l fn filter
+        (ForceFixPositionY fn)  -> applyFixForceInSimulationY_ simulation_ l fn filter
 
 removeForceFromSimulation :: Force -> D3Simulation_ -> D3Simulation_
-removeForceFromSimulation (Force l s t Nothing attrs h_) simulation_ =
+removeForceFromSimulation (Force l s t f attrs h_) simulation_ =
   case t of
     ForceManyBody -> setAsNullForceInSimulation_ simulation_ l
     ForceCenter   -> setAsNullForceInSimulation_ simulation_ l
@@ -110,33 +131,30 @@ removeForceFromSimulation (Force l s t Nothing attrs h_) simulation_ =
     ForceY        -> setAsNullForceInSimulation_ simulation_ l
     ForceRadial   -> setAsNullForceInSimulation_ simulation_ l
 
-    ForceLink     -> unsetLinks_ simulation_
+removeForceFromSimulation (LinkForce l s filter attrs h_) simulation_ =
+    unsetLinks_ simulation_
 
-    (ForceFixPositionXY fn) -> removeFixForceXY_ simulation_ (const true) -- if there is no filter, must apply to all
-    (ForceFixPositionX fn)  -> removeFixForceX_ simulation_ (const true) -- if there is no filter, must apply to all
-    (ForceFixPositionY fn)  -> removeFixForceY_ simulation_ (const true) -- if there is no filter, must apply to all
+removeForceFromSimulation (FixForce l s t filter attrs h_) simulation_ =
+  case filter of
+    Nothing ->
+      case t of
+        (ForceFixPositionXY fn) -> removeFixForceXY_ simulation_ (const true) -- if there is no filter, must apply to all
+        (ForceFixPositionX fn)  -> removeFixForceX_ simulation_ (const true) -- if there is no filter, must apply to all
+        (ForceFixPositionY fn)  -> removeFixForceY_ simulation_ (const true) -- if there is no filter, must apply to all
+    (Just (FilterNodes _ filter)) ->
+      case t of
+        (ForceFixPositionXY fn) -> removeFixForceXY_ simulation_ filter
+        (ForceFixPositionX fn)  -> removeFixForceX_ simulation_ filter
+        (ForceFixPositionY fn)  -> removeFixForceY_ simulation_ filter
 
-    CustomForce   -> simulation_ -- TODO not implemented or even designed yet
-removeForceFromSimulation (Force l s t (Just (FilterNodes _ filter)) attrs h_) simulation_ =
-  case t of
-    ForceManyBody -> setAsNullForceInSimulation_ simulation_ l
-    ForceCenter   -> setAsNullForceInSimulation_ simulation_ l
-    ForceCollide  -> setAsNullForceInSimulation_ simulation_ l
-    ForceX        -> setAsNullForceInSimulation_ simulation_ l
-    ForceY        -> setAsNullForceInSimulation_ simulation_ l
-    ForceRadial   -> setAsNullForceInSimulation_ simulation_ l
 
-    ForceLink     -> unsetLinks_ simulation_
+    -- CustomForce   -> simulation_ -- TODO not implemented or even designed yet
 
-    (ForceFixPositionXY fn) -> removeFixForceXY_ simulation_ filter
-    (ForceFixPositionX fn)  -> removeFixForceX_ simulation_ filter
-    (ForceFixPositionY fn)  -> removeFixForceY_ simulation_ filter
-
-    CustomForce   -> simulation_ -- TODO not implemented or even designed yet
+    -- CustomForce   -> simulation_ -- TODO not implemented or even designed yet
 
 
 
-forceDescription :: ForceType -> String
+forceDescription :: RegularForceType -> String
 forceDescription = case _ of
   ForceManyBody -> 
 
@@ -169,6 +187,8 @@ forceDescription = case _ of
 
     """The radial force pushes nodes towards the closest point on a given circle."""
 
+fixForceDescription :: FixForceType -> String
+fixForceDescription = case _ of
   (ForceFixPositionXY fn) ->
 
     """This \"force\" is really an over-ride for the force simulation, fixing the node at a particular point"""
@@ -181,6 +201,8 @@ forceDescription = case _ of
 
     """This \"force\" is really an over-ride for the force simulation, fixing the node at a particular Y dimension"""
 
+linkForceDescription :: LinkForceType -> String
+linkForceDescription = case _ of
   ForceLink ->
 
     """The link force pushes linked nodes together or apart according to the
@@ -188,11 +210,9 @@ forceDescription = case _ of
     difference between the linked nodes’ distance and the target distance,
     similar to a spring force."""
 
-  CustomForce   -> ""
-
 
 -- TODO this needs to move to the D3 interpreter, with some parallel impls for String, Meta etc
-createForce_ :: ForceType -> D3ForceHandle_
+createForce_ :: RegularForceType -> D3ForceHandle_
 createForce_ = case _ of
   ForceManyBody             -> forceMany_      unit 
   ForceCenter               -> forceCenter_    unit
@@ -201,27 +221,35 @@ createForce_ = case _ of
   ForceY                    -> forceY_         unit
   ForceRadial               -> forceRadial_    unit
 
-  ForceLink                 -> forceLink_      unit -- in fact, not going to be created here, instead created on initialization of simulation (could revisit this tho)
-  (CustomForce)             -> forceCustom_    unit
+createFixForce_ :: FixForceType -> D3ForceHandle_
+createFixForce_ = case _ of
   -- NB there is actually no "force", in D3 terms, behind the fixed "forces", hence the dummy handle that is returned
   (ForceFixPositionXY _)  -> dummyForceHandle_ 
   (ForceFixPositionX _)   -> dummyForceHandle_
   (ForceFixPositionY _)   -> dummyForceHandle_
 
+createLinkForce_ :: LinkForceType -> D3ForceHandle_
+createLinkForce_ = case _ of
+  ForceLink                 -> forceLink_      unit
+
 -- TODO at present there is no type checking on what forces have which attrs settable, see comment above
 setForceAttr :: D3ForceHandle_ -> AttributeSetter -> D3ForceHandle_
 setForceAttr force_ (AttributeSetter label attr) = do
   case label of
-    "radius"      -> setForceRadius_      force_ (unboxAttr attr) -- valid 
-    "strength"    -> setForceStrength_    force_ (unboxAttr attr) -- TODO add filter to this
+    "radius"      -> setForceRadius_      force_ (unboxAttr attr)
+    "strength"    -> setForceStrength_    force_ (unboxAttr attr)
     "theta"       -> setForceTheta_       force_ (unboxAttr attr)
+    "distance"    -> setForceDistance_    force_ (unboxAttr attr)
     "distanceMin" -> setForceDistanceMin_ force_ (unboxAttr attr)
     "distanceMax" -> setForceDistanceMax_ force_ (unboxAttr attr)
     "iterations"  -> setForceIterations_  force_ (unboxAttr attr)
     "x"           -> setForceX_           force_ (unboxAttr attr)
     "y"           -> setForceY_           force_ (unboxAttr attr)
-    "distance"    -> setForceDistance_    force_ (unboxAttr attr)
-    _ -> force_ -- no other force attributes accepted
+    -- NB key function attribute ONLY applies to links force and can ONLY be a (\d -> id) function
+    -- this is not well captured in the type system right now 
+    "keyFn"       -> setLinksKeyFunction_ force_ (unboxAttr attr) 
+    -- Finally, there no other force attributes accepted
+    _ -> force_ 
 
 
 setForceAttrWithFilter :: D3ForceHandle_ -> (Datum_ -> Boolean) -> AttributeSetter -> D3ForceHandle_

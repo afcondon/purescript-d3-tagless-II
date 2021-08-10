@@ -2,10 +2,12 @@ module Stories.Spago.Forces where
 
 import Prelude
 
+import D3.Data.Types (Datum_)
 import D3.Examples.Spago.Model (cluster2Point, datum_)
 import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce)
-import D3.Simulation.Types (Force, ForceFilter(..), ForceType(..), allNodes)
+import D3.Simulation.Forces (createFixForce, createForce, createLinkForce)
+import D3.Simulation.Types (FixForceType(..), Force, ForceNodesFilter(..), LinkForceType(..), RegularForceType(..), allNodes)
+import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
 
@@ -39,8 +41,9 @@ forces = [
       , createForce "clusterx"     ForceX        allNodes [ F.strength 0.2, F.x datum_.clusterPointX ]
       , createForce "clustery"     ForceY        allNodes [ F.strength 0.2, F.y datum_.clusterPointY ]
 
-      , createForce "packageGrid"     (ForceFixPositionXY gridXY)   (Just $ FilterNodes "packages only" datum_.isPackage) [ ] 
-      , createForce "centerNamedNode" (ForceFixPositionXY centerXY) (Just $ FilterNodes "my-project only" (\d -> (datum_.name d) == "my-project")) [ ] 
+      , createFixForce "packageGrid"     (ForceFixPositionXY gridXY)   (Just $ FilterNodes "packages only" datum_.isPackage) [ ] 
+      , createFixForce "centerNamedNode" (ForceFixPositionXY centerXY) (Just $ FilterNodes "my-project only" (\d -> (datum_.name d) == "my-project")) [ ] 
+
       , createForce "packageOrbit" ForceRadial   (selectivelyApplyForce datum_.isPackage "packages only") 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 300.0 ]
       , createForce "moduleOrbit1" ForceRadial   (selectivelyApplyForce datum_.isUnusedModule "unused modules only") 
@@ -49,9 +52,12 @@ forces = [
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
       , createForce "moduleOrbit3" ForceRadial   (selectivelyApplyForce datum_.isUsedModule "direct deps of Main")
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+
+      , createLinkForce "links" Nothing [ F.strength 1.0, F.distance 0.0, F.intKey (\d -> toNumber $ datum_.id d) ]
       ]
   where
     gridXY _ i = cluster2Point i
     centerXY _ _ = { x: 0.0, y: 0.0 }
+    selectivelyApplyForce :: (Datum_ -> Boolean) -> String -> Maybe ForceNodesFilter
     selectivelyApplyForce filterFn description = Just $ FilterNodes description filterFn
 

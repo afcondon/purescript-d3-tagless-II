@@ -50,7 +50,9 @@ treeReduction rootID model = do
           positionMap       = getPositionMap           laidOutRoot_
           -- positionedNodes   = setNodeXY_ForRadialTree   treenodes.yes positionMap
           positionedNodes   = setNodeXY_ForHorizontalTree   treenodes.yes positionMap
-          unpositionedNodes = setForPhyllotaxis  <$> treenodes.no
+          -- TODO seems we can't position for Phyllotaxis here because we need to put nodes into the DOM before putting them into simulation (to support update pattern)
+          -- unpositionedNodes = setForPhyllotaxis  <$> treenodes.no
+          unpositionedNodes = treenodes.no
           tree              = Tuple rootID laidOutRoot_
 
           links = treelinks <> prunedTreeLinks <> onlyPackageLinks -- now all the links should have the right type, M2M_Graph / M2M_Tree / P2P 

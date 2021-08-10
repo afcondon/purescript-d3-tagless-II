@@ -68,10 +68,10 @@ handleAction = case _ of
   Scene PackageGrid -> do
     setCssEnvironment "cluster"
     runEffectSimulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
-    filterLinks isM2P_Link -- only module-to-package (ie containment) links
-    filterNodes noFilter   -- all the nodes
-    setActiveForces gridForceSettings2
-    unpinNodes
+    setActiveLinks  isM2P_Link -- only module-to-package (ie containment) links
+    setActiveNodes  noFilter   -- all the nodes
+    setActiveForces gridForceSettings
+    unpinActiveNodes
 
     state <- H.get
     let _ = trace { action: "Scene PackageGrid", model: state.model } \_ -> unit
@@ -83,11 +83,11 @@ handleAction = case _ of
   Scene PackageGraph -> do
     setCssEnvironment "graph"
     runEffectSimulation $ removeNamedSelection "treelinksSelection"
-    filterLinks isP2P_Link
-    filterNodes isPackage
+    setActiveLinks isP2P_Link
+    setActiveNodes isPackage
     setActiveForces packageForceSettings
-    unpinNodes
-    -- runEffectSimulation $ uniformlyDistributeNodes -- TODO
+    unpinActiveNodes
+    -- runEffectSimulation $ uniformlyDistributeNodes -- FIXME
 
     state <- H.get
     let _ = trace { action: "Scene PackageGraph", model: state.model } \_ -> unit
@@ -100,8 +100,8 @@ handleAction = case _ of
     setCssEnvironment "tree"
     runEffectSimulation $ removeNamedSelection "graphlinksSelection"
     setActiveForces treeForceSettings
-    filterNodes isUsedModule
-    filterLinks isM2M_Tree_Link
+    setActiveNodes isUsedModule
+    setActiveLinks isM2M_Tree_Link
     pinTreeNodes -- side-effect, because if we make _new_ nodes the links won't be pointing to them
 
     state <- H.get
@@ -118,7 +118,7 @@ handleAction = case _ of
     simulationStart
 
   Filter (LinkFilter x) -> do
-    filterLinks x
+    setActiveLinks x
 
     state <- H.get
     simulationStop
@@ -126,7 +126,7 @@ handleAction = case _ of
     simulationStart
 
   Filter (NodeFilter x) -> do
-    filterNodes x
+    setActiveNodes x
 
     state <- H.get
     simulationStop
@@ -151,15 +151,15 @@ setCssEnvironment string = modify_ (\s -> s { svgClass = string })
 setActiveForces :: forall m. MonadState State m => Array String -> m Unit
 setActiveForces forces = modify_ (\s -> s { activeForces = forces })
 
-filterLinks :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
-filterLinks fn = do
+setActiveLinks :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
+setActiveLinks fn = do
   state <- get
   case state.model of
     Nothing -> pure unit
     (Just graph) -> modify_ (\s -> s { activeLinks = filter fn graph.links })
 
-filterNodes :: forall m. MonadState State m => (SpagoSimNode -> Boolean) -> m Unit
-filterNodes fn = do
+setActiveNodes :: forall m. MonadState State m => (SpagoSimNode -> Boolean) -> m Unit
+setActiveNodes fn = do
   state <- H.get
   case state.model of
     Nothing -> pure unit
@@ -177,8 +177,8 @@ centerPinNamedNode name = do
   let _ = (pinNamedNode_ name 0.0 0.0) <$> state.activeNodes -- NB side-effecting on the nodes in the state so that object refs in links stay good
   pure unit
 
-unpinNodes :: forall m. MonadState State m => m Unit
-unpinNodes = do
+unpinActiveNodes :: forall m. MonadState State m => m Unit
+unpinActiveNodes = do
   state <- H.get
   let _ = unpinNode_ <$> state.activeNodes -- NB side-effecting on the nodes in the state so that object refs in links stay good
   pure unit

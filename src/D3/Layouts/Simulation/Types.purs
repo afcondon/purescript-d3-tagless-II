@@ -23,11 +23,17 @@ instance showSimVariable :: Show SimVariable where
   show (VelocityDecay n) = "VelocityDecay: " <> show n
 
 -- TODO we won't export Force constructor here when we close exports
-data Force = Force Label ForceStatus ForceType (Maybe ForceFilter) (Array ChainableF) D3ForceHandle_
+data Force = 
+    Force     Label ForceStatus RegularForceType (Maybe ForceNodesFilter) (Array ChainableF) D3ForceHandle_
+  | LinkForce Label ForceStatus                  (Maybe ForceLinksFilter) (Array ChainableF) D3ForceHandle_
+  | FixForce  Label ForceStatus FixForceType     (Maybe ForceNodesFilter) (Array ChainableF) D3ForceHandle_
 
 instance Show Force where
-  show (Force label status t (Just f) cs h) = "Force: " <> label <> " " <> show status <> " " <> show f
-  show (Force label status t (Nothing) cs h) = "Force: " <> label <> " " <> show status <> " applying to all nodes"
+  show (Force label status t f cs h) = "Force: " <> label <> " " <> show status <> " applying to all nodes"
+  show (LinkForce label status (Just f) cs h) = "LinkForce: " <> label <> " " <> show status <> " " <> show f
+  show (LinkForce label status (Nothing) cs h) = "LinkForce: " <> label <> " " <> show status <> " applying to all nodes"
+  show (FixForce label status t (Just f) cs h) = "FixForce: " <> label <> " " <> show status <> " " <> show f
+  show (FixForce label status t (Nothing) cs h) = "FixForce: " <> label <> " " <> show status <> " applying to all nodes"
 
 -- not sure if there needs to be a separate type for force attributes, maybe not, but we'll start assuming so
 newtype ChainableF = ForceT AttributeSetter
@@ -41,40 +47,64 @@ instance showForceStatus :: Show ForceStatus where
 
 allNodes :: forall t69. Maybe t69
 allNodes = Nothing -- just some sugar so that force declarations are nicer to read, Nothing == No filter == applies to all nodes
-data ForceFilter = FilterNodes String (Datum_ -> Boolean)
-instance Show ForceFilter where
+-- with sufficiently nice types might be possible to have just one filter type which would be better
+-- but for now we have a separate one for Nodes and Links so that the predicate can be tweaked for each
+data ForceNodesFilter = FilterNodes Label (Datum_ -> Boolean)
+data ForceLinksFilter = FilterLinks Label (Datum_ -> Boolean) 
+instance Show ForceNodesFilter where
   show (FilterNodes description _) = description
+instance Show ForceLinksFilter where
+  show (FilterLinks description _) = description
 
-showForceFilter :: Maybe ForceFilter -> String
-showForceFilter (Just (FilterNodes description _)) = description
-showForceFilter Nothing = " (all nodes)"
+showForceFilter :: Force -> String
+showForceFilter =
+  case _ of
+    (Force _ _ _ f _ _)    -> showForceNodesFilter f
+    (LinkForce _ _ f _ _)  -> showForceLinksFilter f
+    (FixForce _ _ _ f _ _) -> showForceNodesFilter f
 
-data ForceType = 
-    ForceManyBody                                  -- strength, theta, distanceMax, distanceMin
-  | ForceCenter                                    -- strength, x, y
-  | ForceCollide                                   -- strength, radius, iterations
-  | ForceX                                         -- strength, x
-  | ForceY                                         -- strength, y
-  | ForceRadial                                    -- strength, radius, x, y
-  | ForceLink -- data for links can _only_ be provided when setting links in a simulation, initial links array will always be []
-  | ForceFixPositionXY (Datum_ -> Index_ -> { x :: Number, y :: Number }) 
+showForceLinksFilter :: Maybe ForceLinksFilter -> String
+showForceLinksFilter (Just (FilterLinks description _)) = description
+showForceLinksFilter Nothing = " (links are not filtered)"
+
+showForceNodesFilter :: Maybe ForceNodesFilter -> String
+showForceNodesFilter (Just (FilterNodes description _)) = description
+showForceNodesFilter Nothing = " (all nodes)"
+
+data RegularForceType = 
+    ForceManyBody -- strength, theta, distanceMax, distanceMin
+  | ForceCenter   -- strength, x, y
+  | ForceCollide  -- strength, radius, iterations
+  | ForceX        -- strength, x
+  | ForceY        -- strength, y
+  | ForceRadial   -- strength, radius, x, y
+
+data LinkForceType = 
+  -- NOTE because data for links can _only_ be provided when setting links in a simulation, initial links array will always be []
+  ForceLink     -- strength, distance, iterations, keyFn
+
+data FixForceType =
+    ForceFixPositionXY (Datum_ -> Index_ -> { x :: Number, y :: Number }) 
   | ForceFixPositionX  (Datum_ -> Index_ -> { x :: Number })
   | ForceFixPositionY  (Datum_ -> Index_ -> { y :: Number })
-                                                   -- TODO need something to hold extra custom force config, perhaps?
-  | CustomForce                                    -- ???
 
-instance Show ForceType where
+data CustomForceType = CustomForce -- TODO need something to hold extra custom force config, perhaps?
+
+instance Show RegularForceType where
   show ForceManyBody          = "ForceManyBody"
   show ForceCenter            = "ForceCenter"
   show ForceCollide           = "ForceCollide"
   show ForceX                 = "ForceX"
   show ForceY                 = "ForceY"
   show ForceRadial            = "ForceRadial"
+
+instance Show LinkForceType where
+  show ForceLink              = "ForceLink"
+
+instance Show FixForceType where
   show (ForceFixPositionXY _) = "ForceFixPositionXY"
   show (ForceFixPositionX _)  = "ForceFixPositionX"
   show (ForceFixPositionY _)  = "ForceFixPositionY"
-  show ForceLink              = "ForceLink"
-  show CustomForce            = "CustomForce"
 
 -- representation of all that is stateful in the D3 simulation engine
 -- not generalized because we have no other examples of simulation engines ATM

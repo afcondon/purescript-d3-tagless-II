@@ -10,7 +10,7 @@ import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationStart)
-import D3.Simulation.Types (Force, ForceType(..), SimVariable(..), D3SimulationState_, allNodes)
+import D3.Simulation.Types (D3SimulationState_, Force, RegularForceType(..), SimVariable(..), allNodes)
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle

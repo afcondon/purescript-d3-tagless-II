@@ -8,8 +8,8 @@ import D3.Data.Types (D3Selection_, Datum_, Index_)
 import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getLinks_, getNodes_, onTick_, prepareSimUpdate_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
 import D3.Node (D3_Link, D3_SimulationNode, NodeID)
 import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
-import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, enableOnlyTheseLabels, getHandle, putForceInSimulation, setForceAttr, setForceAttrWithFilter)
-import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), SimVariable(..), Step(..))
+import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, enableOnlyTheseLabels, getHandle, getLabel, putForceInSimulation, setForceAttr, setForceAttrWithFilter)
+import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceLinksFilter(..), ForceNodesFilter(..), ForceStatus(..), LinkForceType(..), SimVariable(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (setForcesByLabel)
 import Data.Array (intercalate)
@@ -32,7 +32,7 @@ setForces :: M.Map Label Force -> D3SimulationState_ -> D3SimulationState_
 setForces forces (SimState_ ss_) = SimState_ ss_ { forces = forces }
 
 insertForce :: Force -> D3SimulationState_ -> D3SimulationState_
-insertForce force@(Force l status t f attrs h_) (SimState_ ss_) = SimState_ ss_ { forces = M.insert l force ss_.forces }
+insertForce force (SimState_ ss_) = SimState_ ss_ { forces = M.insert (getLabel force) force ss_.forces }
 
 reheatSimulation :: D3SimulationState_ -> D3SimulationState_
 reheatSimulation (SimState_ ss_) = SimState_ ss_ { alpha = 1.0 }
@@ -57,10 +57,35 @@ simulationAddForce :: forall m row.
   (MonadState { simulationState :: D3SimulationState_ | row } m) =>
   Force -> m Unit
 simulationAddForce force@(Force label status t f attrs h_) = do 
-  -- TODO this is where the filter has to wrap the strength
   let _ = 
         case f of
-          Nothing       -> (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
+          Nothing                       -> (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
+          (Just (FilterNodes _ filter)) -> (\a -> setForceAttrWithFilter h_ filter (unwrap a)) <$> attrs 
+  { simulationState: SimState_ ss_} <- get
+  let _ = if status == ForceActive
+          then putForceInSimulation force ss_.simulation_
+          else ss_.simulation_
+      updatedSimulation = SimState_ ss_ { forces = M.insert label force ss_.forces }
+  -- if the force isn't active then we just keep it in map, with label as key
+  modify_ (\s -> s { simulationState = updatedSimulation } )
+
+simulationAddForce force@(LinkForce label status f attrs h_) = do 
+  let _ = 
+        case f of
+          Nothing                       -> (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
+          (Just (FilterLinks _ filter)) -> (\a -> setForceAttrWithFilter h_ filter (unwrap a)) <$> attrs 
+  { simulationState: SimState_ ss_} <- get
+  let _ = if status == ForceActive
+          then putForceInSimulation force ss_.simulation_
+          else ss_.simulation_
+      updatedSimulation = SimState_ ss_ { forces = M.insert label force ss_.forces }
+  -- if the force isn't active then we just keep it in map, with label as key
+  modify_ (\s -> s { simulationState = updatedSimulation } )
+
+simulationAddForce force@(FixForce label status t f attrs h_) = do 
+  let _ = 
+        case f of
+          Nothing                       -> (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
           (Just (FilterNodes _ filter)) -> (\a -> setForceAttrWithFilter h_ filter (unwrap a)) <$> attrs 
   { simulationState: SimState_ ss_} <- get
   let _ = if status == ForceActive
@@ -77,8 +102,13 @@ simulationToggleForce label = do
   { simulationState: SimState_ ss_ } <- get
   case M.lookup label ss_.forces of
     Nothing -> pure unit
-    (Just (Force _ ForceActive _ _ _ _))   -> simulationDisableForcesByLabel [ label ]
-    (Just (Force _ ForceDisabled _ _ _ _)) -> simulationEnableForcesByLabel [ label ]
+    (Just (Force _ ForceActive _ _ _ _))      -> simulationDisableForcesByLabel [ label ]
+    (Just (LinkForce _ ForceActive _ _ _))    -> simulationDisableForcesByLabel [ label ]
+    (Just (FixForce _ ForceActive _ _ _ _))   -> simulationDisableForcesByLabel [ label ]
+
+    (Just (Force _ ForceDisabled _ _ _ _))    -> simulationEnableForcesByLabel [ label ]
+    (Just (LinkForce _ ForceDisabled _ _ _))  -> simulationEnableForcesByLabel [ label ]
+    (Just (FixForce _ ForceDisabled _ _ _ _)) -> simulationEnableForcesByLabel [ label ]
 
 simulationDisableForcesByLabel :: forall m row. 
   (MonadState { simulationState :: D3SimulationState_ | row } m) =>
@@ -186,7 +216,7 @@ simulationSetLinks :: forall id m row datum r.
 simulationSetLinks links keyFn = do
   { simulationState: SimState_ ss_} <- get
   let updated = setLinks_ ss_.simulation_ links keyFn -- keyFn is needed to tell D3 how to swizzle the NodeIDs to get object references
-  simulationAddForce $ Force "link" ForceActive ForceLink Nothing [] updated.force
+  simulationAddForce $ LinkForce "link" ForceActive Nothing [] updated.force
   pure unit
 
 simulationGetNodes :: forall m row d.

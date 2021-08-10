@@ -198,6 +198,7 @@ foreign import setForceIterations_  :: D3ForceHandle_ -> D3Attr -> D3ForceHandle
 foreign import setForceX_           :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
 foreign import setForceY_           :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
 foreign import setForceDistance_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+foreign import setLinksKeyFunction_ :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
 
 foreign import putForceInSimulation_        :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
 foreign import putForceInSimulationWithFilter_ :: D3Simulation_ -> String -> (Datum_ -> Boolean) -> D3ForceHandle_ -> D3Simulation_
