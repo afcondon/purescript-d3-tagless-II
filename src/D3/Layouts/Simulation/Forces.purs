@@ -234,7 +234,7 @@ createFixForce_ = case _ of
 
 createLinkForce_ :: LinkForceType -> D3ForceHandle_
 createLinkForce_ = case _ of
-  ForceLink                 -> forceLink_      unit
+  ForceLink               -> forceLink_      unit
 
 -- TODO at present there is no type checking on what forces have which attrs settable, see comment above
 setForceAttr :: D3ForceHandle_ -> AttributeSetter -> D3ForceHandle_

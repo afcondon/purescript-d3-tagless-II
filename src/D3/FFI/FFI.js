@@ -164,7 +164,7 @@ function idComparer(a,b) {
 }
 // getIndexFromDatum_    :: Datum_ -> Int
 exports.getIndexFromDatum_ = datum => {
-  return datum.index; // TODO no checks whatsoever on this, only for debugging the indices for spago demo
+  return (typeof datum.index == `undefined`) ? "?" : datum.index
 }
 // d3DataWithKeyFunction_ :: D3Data -> KeyFunction -> D3Selection_ -> D3Selection_
 exports.d3DataWithKeyFunction_ = data => keyFn => selection => {
@@ -383,10 +383,13 @@ exports.setNodes_ = simulation => nodes => {
 // setLinks_ uses the "inside"/FFI name for the links function, outside in PureScript there could be multiple
 // different links functions but here in FFI we're going to always use the one denominated by the linksForceName string
 exports.setLinks_ = simulation => links => idFn => {
-  const linkForce = simulation.force(this.linksForceName);
+  if (links.length == 0) {
+    return; // nae links, nae bother
+  }
+  const linkForce = simulation.force(exports.linksForceName);
   if (typeof linkForce === `undefined`) {
     console.log("attempt to set links but no link force is defined: ignored");
-    return;
+    return; // nae link force, some bother
   }
   linkForce.links(links).id(idFn);
 }

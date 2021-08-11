@@ -70,8 +70,8 @@ labelsAttrs1 = [
   , x 0.2
   , y datum_.positionLabel
   , textAnchor "middle"
-  -- , text datum_.indexAndID
-  , text datum_.name
+  , text datum_.indexAndID
+  -- , text datum_.name
 ]
 
 -- TODO x and y position for label would also depend on "hasChildren", need to get "tree" data into nodes
@@ -171,7 +171,7 @@ updateSimulation nodes links attrs = do
       -- now the links
       linksSelection 
         <- linksGroup D3.<+> 
-                  UpdateJoin
+                  UpdateJoin -- REVIEW is joining a "link" fundamentally different from joining a "datum"
                   Line
                   prepped.links -- these nodes have been thru the simulation 
                   { enter: [ classed link_.linkClass, strokeColor link_.color ]
