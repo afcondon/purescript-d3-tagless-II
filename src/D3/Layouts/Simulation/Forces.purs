@@ -9,6 +9,7 @@ import D3.Simulation.Types (ChainableF, CustomForceType(..), FixForceType(..), F
 import Data.Array (elem)
 import Data.Function.Uncurried (mkFn2, runFn2)
 import Data.Maybe (Maybe(..))
+import Data.Nullable (toMaybe)
 
 
 toggleForceStatus :: ForceStatus -> ForceStatus
@@ -16,6 +17,9 @@ toggleForceStatus =
   case _ of
     ForceActive   -> ForceDisabled
     ForceDisabled -> ForceActive
+
+getLinkForceHandle :: D3Simulation_ -> Maybe D3ForceHandle_
+getLinkForceHandle simulation = toMaybe $ lookupForceByName_ simulation linksForceName
 
 getLabel :: Force -> Label
 getLabel (Force l _ _ _ _ _)       = l

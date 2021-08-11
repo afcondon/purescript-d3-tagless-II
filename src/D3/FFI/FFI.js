@@ -324,7 +324,7 @@ exports.selectionOn_ = selection => event => callback => {
 // *****************************************************************************************************************
 // ************************** functions from d3js Simulation module         *****************************************
 // *****************************************************************************************************************
-
+exports.linksForceName = "links"
 //            SIMULATION functions
 exports.initSimulation_ = config => { // TODO bug not passed
   const simulation = d3
@@ -365,6 +365,12 @@ exports.prepareSimUpdate_ = nodeSelection => nodes => links => idFn => {
   }
   return { nodes: nodes, links: links }
 }
+exports.spagoLinkKeyFunction_ = link => {
+  // REVIEW could go further and explicitly test id is number or id is string? worth it??
+  const sourceID = (typeof link.source == `object`) ? link.source.id : link.source
+  const targetID = (typeof link.target == `object`) ? link.target.id : link.target
+  return sourceID + "-" + targetID 
+}
 //  :: Simulation -> Array NativeNode -> Array NativeNode
 exports.setNodes_ = simulation => nodes => {
   if (debug) {
@@ -374,12 +380,15 @@ exports.setNodes_ = simulation => nodes => {
   simulation.nodes(nodes)
   return simulation.nodes()
 }
-// setLinks_ always creates a new links force, implicitly discarding the previous one
+// setLinks_ uses the "inside"/FFI name for the links function, outside in PureScript there could be multiple
+// different links functions but here in FFI we're going to always use the one denominated by the linksForceName string
 exports.setLinks_ = simulation => links => idFn => {
-  console.log('making link force for simulation');
-  const links = simulation.force("links"); // REVIEW need to either completely hide the links force name or pass it in here
-  links.links(links).id(idFn);
-  return { links: links, force: force }
+  const linkForce = simulation.force(this.linksForceName);
+  if (typeof linkForce === `undefined`) {
+    console.log("attempt to set links but no link force is defined: ignored");
+    return;
+  }
+  linkForce.links(links).id(idFn);
 }
 exports.unsetLinks_ = simulation => {
   const linkForce = d3.forceLink([])
@@ -538,6 +547,15 @@ exports.dummyForceHandle_ = null
 exports.setAsNullForceInSimulation_ = simulation => label => {
   simulation.force(label, null)
 }
+// lookupForceByName_ :: D3Simulation_ -> String -> Nullable D3ForceHandle_
+exports.lookupForceByName_ = simulation => name => {
+  let lookup = simulation.force(name)
+  if (typeof lookup === `undefined`) {
+    return null;
+  }
+  return lookup;
+}
+
 exports.removeFixForceXY_ = simulation => filterFn => {
   let nodes = simulation.nodes()
   for (let index = 0; index < nodes.length; index++) {

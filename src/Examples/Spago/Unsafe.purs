@@ -8,15 +8,16 @@ import Unsafe.Coerce (unsafeCoerce)
 import Prelude
 
 -- Placeholder key functions for update joins
-
+-- TODO replace with something safer!
 spagoNodeKeyFunction :: Datum_ -> Index_
 spagoNodeKeyFunction d = unsafeCoerce $ (unboxD3SimNode d).id
-spagoLinkKeyFunction :: Datum_ -> Index_
-spagoLinkKeyFunction l = unsafeCoerce $ linkID
-  where
-    sourceID = (unboxD3SimLink l).source.id
-    targetID = (unboxD3SimLink l).target.id
-    linkID = show sourceID <> "-" <> show targetID 
+
+-- spagoLinkKeyFunction :: Datum_ -> Index_
+-- spagoLinkKeyFunction l = unsafeCoerce $ linkID
+--   where 
+--     sourceID = (unboxD3SimLink l).source.id
+--     targetID = (unboxD3SimLink l).target.id
+--     linkID = show sourceID <> "-" <> show targetID
  
 
 unboxD3SimNode :: Datum_ -> SpagoDataRecord

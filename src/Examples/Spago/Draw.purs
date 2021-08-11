@@ -6,10 +6,11 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Files (SpagoGraphLinkID)
 import D3.Examples.Spago.Model (SpagoSimNode, cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
-import D3.Examples.Spago.Unsafe (spagoLinkKeyFunction, spagoNodeKeyFunction)
-import D3.FFI (prepareSimUpdate_, setLinks_, setNodes_)
+import D3.Examples.Spago.Unsafe (spagoNodeKeyFunction)
+import D3.FFI (D3ForceHandle_, prepareSimUpdate_, setLinks_, setNodes_, spagoLinkKeyFunction_)
 import D3.Layouts.Hierarchical (horizontalLink', radialLink, verticalLink)
 import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
+import D3.Simulation.Forces (getLinkForceHandle)
 import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, addSelection, addTickFunction, attach, getSelection, modifySelection, on, prepareNodesAndLinks, simulationHandle)
@@ -66,10 +67,11 @@ circleAttrs2 = [
 labelsAttrs1 :: Array ChainableS
 labelsAttrs1 = [ 
     classed "label"
-  ,  x 0.2
+  , x 0.2
   , y datum_.positionLabel
   , textAnchor "middle"
-  , text datum_.indexAndID
+  -- , text datum_.indexAndID
+  , text datum_.name
 ]
 
 -- TODO x and y position for label would also depend on "hasChildren", need to get "tree" data into nodes
@@ -149,31 +151,33 @@ updateSimulation nodes links attrs = do
       let prepped = prepareSimUpdate_ nodesGroup nodes links datum_.indexFunction
       let _ = trace { preppedNodes: prepped.nodes, preppedLinks: prepped.links  } \_ -> unit
       -- first the nodes
-      nodesSelection <- nodesGroup D3.<+> 
-                        UpdateJoin
-                        Group 
-                        prepped.nodes -- these nodes have been thru the simulation 
-                        { enter : enterAttrs simulation_
-                        , update: updateAttrs simulation_
-                        , exit  : [ remove ] 
-                        }
-                        spagoNodeKeyFunction
+      nodesSelection
+        <- nodesGroup D3.<+> 
+          UpdateJoin
+          Group 
+          prepped.nodes -- these nodes have been thru the simulation 
+          { enter : enterAttrs simulation_
+          , update: updateAttrs simulation_
+          , exit  : [ remove ] 
+          }
+          spagoNodeKeyFunction
 
       circle         <- nodesSelection D3.+ (node Circle attrs.circle)
-      -- labels         <- nodesSelection D3.+ (node Text attrs.labels) 
+      labels         <- nodesSelection D3.+ (node Text attrs.labels) 
       _              <- circle `on` Drag DefaultDrag
 
       addTickFunction "nodes" $ Step nodesSelection nodeTick
       addSelection "nodesSelection" nodesSelection
       -- now the links
-      linksSelection <- linksGroup D3.<+> 
+      linksSelection 
+        <- linksGroup D3.<+> 
                   UpdateJoin
                   Line
                   prepped.links -- these nodes have been thru the simulation 
                   { enter: [ classed link_.linkClass, strokeColor link_.color ]
                   , update: [ classed "graphlinkSimUpdate" ]
                   , exit: [ remove ] }
-                  spagoLinkKeyFunction
+                  spagoLinkKeyFunction_
 
       addTickFunction "links" $ Step linksSelection linkTick
       let _ = setNodes_ simulation_ prepped.nodes
@@ -209,7 +213,7 @@ updateGraphLinks links = do
                         { enter: [ classed link_.linkClass, strokeColor link_.color ]
                         , update: [ classed "graphlinkSimUpdate" ]
                         , exit: [ remove ] }
-                        spagoLinkKeyFunction
+                        spagoLinkKeyFunction_
 
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "graphlinksSelection" linksSelection
@@ -239,7 +243,7 @@ updateGraphLinks' links = do
                         { enter: [ classed link_.linkClass, strokeColor link_.color ]
                         , update: [ classed "graphlinkUpdate" ]
                         , exit: [ remove ] }
-                        spagoLinkKeyFunction
+                        spagoLinkKeyFunction_
 
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "graphlinksSelection" linksSelection
@@ -275,7 +279,7 @@ updateTreeLinks links layout = do
                         { enter: [ classed link_.linkClass, strokeColor link_.color, linkPath ]
                         , update: [ classed "treelinkUpdate" ]
                         , exit: [ remove ] }
-                        spagoLinkKeyFunction
+                        spagoLinkKeyFunction_
                         
       addTickFunction "links" $ Step linksSelection linkTick
       addSelection "treelinksSelection" linksSelection

@@ -211,12 +211,11 @@ simulationSetNodes nodes = do
 simulationSetLinks :: forall id m row datum r. 
   (MonadState { simulationState :: D3SimulationState_ | row } m) 
   => Array (D3_Link id r)
-  -> (datum -> id)
+  -> (datum -> id) -- keyFn is needed to tell D3 how to swizzle the NodeIDs to get object references
   -> m Unit
 simulationSetLinks links keyFn = do
   { simulationState: SimState_ ss_} <- get
-  let updated = setLinks_ ss_.simulation_ links keyFn -- keyFn is needed to tell D3 how to swizzle the NodeIDs to get object references
-  simulationAddForce $ LinkForce "link" ForceActive Nothing [] updated.force
+  let _ = setLinks_ ss_.simulation_ links keyFn 
   pure unit
 
 simulationGetNodes :: forall m row d.

@@ -96,6 +96,7 @@ foreign import selectionOn_         :: forall selection callback. selection -> S
 -- | ***************************   FFI signatures for D3js Simulation module  *********************************************
 -- | *********************************************************************************************************************
 -- | foreign types associated with Force Layout Simulation
+foreign import linksForceName :: String
 
 type GraphModel_ link node = { links :: Array link, nodes :: Array node }
 foreign import data D3ForceHandle_     :: Type
@@ -121,17 +122,22 @@ foreign import prepareSimUpdate_ ::
   -> (datum -> id) 
   -> { nodes :: Array (D3_SimulationNode d), links :: Array (D3_Link (D3_SimulationNode d) r) }
 
+-- foreign import spagoLinkKeyFunction_   :: forall d r. D3_Link d r -> String
+-- REVIEW the key function for a link is actually trickier than that for a simple datum, or at least as implemented it is
+-- REVIEW it might be worth re-considering how simple the "simplest" id generator of "sourceID-targetID" really is?
+-- REVIEW especially considering the complexity it brings elsewhere
+foreign import spagoLinkKeyFunction_   :: Datum_ -> Index_
 foreign import getNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
 foreign import setNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Unit
 
 -- removing forces should be done by simulation manager and doesn't need more indirection
 -- foreign import removeForceByName_  :: D3Simulation_ -> String -> D3Simulation_
-
 foreign import setLinks_ :: 
-  forall id r datum. D3Simulation_
+  forall id r datum.
+  D3Simulation_
   -> Array (D3_Link id r)
   -> (datum -> id)
-  -> { links :: Array (D3_Link datum r), force :: D3ForceHandle_ }
+  -> Unit
 foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_
 foreign import getLinks_               :: forall d r. D3ForceHandle_ -> Array (D3_Link d r)
 foreign import getLinksFromSimulation_ :: forall d r. D3Simulation_ -> String -> Array (D3_Link d r) -- get links from named link force in simulation
@@ -202,6 +208,7 @@ foreign import setLinksKeyFunction_ :: D3ForceHandle_ -> D3Attr -> D3ForceHandle
 
 foreign import putForceInSimulation_        :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
 foreign import putForceInSimulationWithFilter_ :: D3Simulation_ -> String -> (Datum_ -> Boolean) -> D3ForceHandle_ -> D3Simulation_
+foreign import lookupForceByName_           :: D3Simulation_ -> String -> Nullable D3ForceHandle_
 foreign import removeFixForceXY_            :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
 foreign import removeFixForceX_             :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
 foreign import removeFixForceY_             :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_

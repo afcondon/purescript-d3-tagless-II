@@ -12,6 +12,7 @@ import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Tree_Link, isM2P_Link, i
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, convertFilesToGraphModel, isPackage, isUsedModule, noFilter)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (pinNamedNode_, pinTreeNode_, unpinNode_)
+import D3.Simulation.Forces (getHandle)
 import D3.Simulation.Functions (simulationGetNodes, simulationStart, simulationStop)
 import D3.Simulation.Types (D3SimulationState_, SimVariable(..))
 import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, toggleForceByLabel)
