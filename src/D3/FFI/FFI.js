@@ -356,14 +356,18 @@ exports.keyIsID = d => d.id;
 
 // prepareSimUpdate_ :: D3Selection_ -> Array NativeNode -> Array NativeNode -> (Datum_ -> Id) -> { nodes :: Array NativeNode, links: Array NativeLinks }
 exports.prepareSimUpdate_ = nodeSelection => nodes => links => idFn => {
-  const oldData = nodeSelection.data()
-  if (typeof oldData === `undefined`) {
-    const old = new Map(nodeSelection.data().map(d => idFn(d)));
-    let updateNodes = nodes.map(d => Object.assign(old.get(idFn(d)) || {}, d));
-    let updateLinks = links.map(d => Object.assign({}, d));
-    return { nodes: updateNodes, links: updateLinks}
+  if (typeof (nodeSelection.data()) === `undefined`) {
+    return { nodes: nodes, links: links } // there is no previous selection so we have nothing to carry over
   }
-  return { nodes: nodes, links: links }
+  const old = new Map(nodeSelection.data().map(d => [idFn(d), d])); // creates a map from our chosen id to the old obj reference
+  let updateNodes = nodes.map(d => Object.assign(old.get(idFn(d)) || {}, d));
+  // TODO now for the links
+  // this needs to swizzle id for object reference if source/target is an object
+  // and it needs to be the object reference from the updateNodes
+  // lastly - shouldn't links disappear if they are not legit?
+  let updateLinks = links.map(d => Object.assign({}, d)); 
+    
+  return { nodes: updateNodes, links: updateLinks}
 }
 exports.spagoLinkKeyFunction_ = link => {
   // REVIEW could go further and explicitly test id is number or id is string? worth it??

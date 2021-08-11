@@ -9,6 +9,7 @@ import D3.Examples.Spago.Model (SpagoSimNode, cancelSpotlight_, datum_, link_, t
 import D3.Examples.Spago.Unsafe (spagoNodeKeyFunction)
 import D3.FFI (D3ForceHandle_, prepareSimUpdate_, setLinks_, setNodes_, spagoLinkKeyFunction_)
 import D3.Layouts.Hierarchical (horizontalLink', radialLink, verticalLink)
+import D3.Node (D3_Link, D3_SimulationNode)
 import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
 import D3.Simulation.Forces (getLinkForceHandle)
 import D3.Simulation.Types (D3SimulationState_, Step(..))
@@ -130,6 +131,10 @@ setup = do
   addSelection "linksGroup" linksGroup
   pure unit
 
+coerceLinks :: forall id r d. Array (D3_Link id r) -> Array (D3_Link (D3_SimulationNode d) r) 
+coerceLinks links = unsafeCoerce links
+
+
 updateSimulation :: forall m row. 
   Bind m => 
   MonadEffect m =>
@@ -146,12 +151,18 @@ updateSimulation nodes links attrs = do
   maybeNodesGroup       <- getSelection "nodesGroup"
   maybeLinksGroup       <- getSelection "linksGroup"
 
+  let nodesSelection = "nodesSelection" -- just to defend against typos in dynamic identifier
+  let linksSelection = "linksSelection" -- just to defend against typos in dynamic identifier
   case maybeNodesGroup, maybeLinksGroup of
     (Just nodesGroup), (Just linksGroup) -> do
-      let prepped = prepareSimUpdate_ nodesGroup nodes links datum_.indexFunction
+      maybePreviousNodeSelection <- getSelection "nodesSelection"
+      let prepped = 
+            case maybePreviousNodeSelection of
+                      Nothing -> { nodes, links: coerceLinks links } -- PureScript knows we haven't swizzled
+                      (Just oldNodes) -> prepareSimUpdate_ oldNodes nodes links datum_.indexFunction
       let _ = trace { preppedNodes: prepped.nodes, preppedLinks: prepped.links  } \_ -> unit
       -- first the nodes
-      nodesSelection
+      nodesSelectionHandle
         <- nodesGroup D3.<+> 
           UpdateJoin
           Group 
@@ -162,14 +173,14 @@ updateSimulation nodes links attrs = do
           }
           spagoNodeKeyFunction
 
-      circle         <- nodesSelection D3.+ (node Circle attrs.circle)
-      labels         <- nodesSelection D3.+ (node Text attrs.labels) 
+      circle         <- nodesSelectionHandle D3.+ (node Circle attrs.circle)
+      labels         <- nodesSelectionHandle D3.+ (node Text attrs.labels) 
       _              <- circle `on` Drag DefaultDrag
 
-      addTickFunction "nodes" $ Step nodesSelection nodeTick
-      addSelection "nodesSelection" nodesSelection
+      addTickFunction "nodes" $ Step nodesSelectionHandle nodeTick
+      addSelection nodesSelection nodesSelectionHandle
       -- now the links
-      linksSelection 
+      linksSelectionHandle 
         <- linksGroup D3.<+> 
                   UpdateJoin -- REVIEW is joining a "link" fundamentally different from joining a "datum"
                   Line
@@ -179,10 +190,10 @@ updateSimulation nodes links attrs = do
                   , exit: [ remove ] }
                   spagoLinkKeyFunction_
 
-      addTickFunction "links" $ Step linksSelection linkTick
+      addTickFunction "links" $ Step linksSelectionHandle linkTick
       let _ = setNodes_ simulation_ prepped.nodes
       let _ = setLinks_ simulation_ prepped.links (unsafeCoerce $ datum_.indexFunction) -- at this point links could be a mixture of swizzled and unswizzled values
-      addSelection "graphlinksSelection" linksSelection
+      addSelection linksSelection linksSelectionHandle
 
       pure unit
 
