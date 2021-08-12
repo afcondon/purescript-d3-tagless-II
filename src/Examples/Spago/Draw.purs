@@ -192,7 +192,7 @@ updateSimulation nodes links attrs = do
 
       addTickFunction "links" $ Step linksSelectionHandle linkTick
       let _ = setNodes_ simulation_ prepped.nodes
-      let _ = setLinks_ simulation_ prepped.links (unsafeCoerce $ datum_.indexFunction) -- at this point links could be a mixture of swizzled and unswizzled values
+      let _ = setLinks_ simulation_ prepped.links (unsafeCoerce $ datum_.indexFunction) -- TODO pass this indexFunction all the way down, it's not being passed ATM
       addSelection linksSelection linksSelectionHandle
 
       pure unit

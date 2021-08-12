@@ -10,7 +10,9 @@ import Prelude
 -- Placeholder key functions for update joins
 -- TODO replace with something safer!
 spagoNodeKeyFunction :: Datum_ -> Index_
-spagoNodeKeyFunction d = unsafeCoerce $ (unboxD3SimNode d).id
+spagoNodeKeyFunction d = index
+  where
+    index = unsafeCoerce $ (unboxD3SimNode d).id
 
 -- spagoLinkKeyFunction :: Datum_ -> Index_
 -- spagoLinkKeyFunction l = unsafeCoerce $ linkID

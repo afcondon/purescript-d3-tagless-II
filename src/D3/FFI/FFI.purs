@@ -189,7 +189,7 @@ foreign import forceRadial_       :: Unit -> D3ForceHandle_
 foreign import forceX_            :: Unit -> D3ForceHandle_
 foreign import forceY_            :: Unit -> D3ForceHandle_
 -- foreign import forceLink_         :: forall r d. Array (D3_Link NodeID r) -> (Datum_ -> d) -> D3ForceHandle_ -- takes key function
-foreign import forceLink_         :: Unit -> D3ForceHandle_ -- just get a force handle and nothing else
+foreign import forceLink_         :: Unit -> D3ForceHandle_ -- TODO parameterize with keyFN, essential that this is done before links actually passed to linkForce otherwise default d => index is used
 foreign import forceCustom_       :: Unit -> D3ForceHandle_
 foreign import dummyForceHandle_  :: D3ForceHandle_ -- used for fixed "forces", is null under the hood
 

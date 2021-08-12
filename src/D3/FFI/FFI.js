@@ -166,17 +166,14 @@ function idComparer(a,b) {
 exports.getIndexFromDatum_ = datum => {
   return (typeof datum.index == `undefined`) ? "?" : datum.index
 }
-// d3DataWithKeyFunction_ :: D3Data -> KeyFunction -> D3Selection_ -> D3Selection_
+// d3DataWithKeyFunction_ :: D3Data -> (Datum_ -> id) -> D3Selection_ -> D3Selection_
 exports.d3DataWithKeyFunction_ = data => keyFn => selection => {
   if (debug) {
     showKeyFunction_(data)(keyFn)(selection)
   }
-  selection.sort(idComparer)
-  let result = selection.data(data, d => {
-    let key = keyFn(d)
-    // console.log(`joining datum ${d.name} with key: ${key}`);
-    return key;
-  })
+  // TODO sort out where sorting should really go for the trees to be right - hint, it's not here
+  // selection.sort(idComparer)
+  result = selection.data(data, keyFn)
   return result
 }
 // d3SetAttr_      :: String -> D3Attr -> D3Selection -> Unit
@@ -386,16 +383,15 @@ exports.setNodes_ = simulation => nodes => {
 }
 // setLinks_ uses the "inside"/FFI name for the links function, outside in PureScript there could be multiple
 // different links functions but here in FFI we're going to always use the one denominated by the linksForceName string
-exports.setLinks_ = simulation => links => idFn => {
-  if (links.length == 0) {
-    return; // nae links, nae bother
-  }
+exports.setLinks_ = simulation => links => keyFn => {
   const linkForce = simulation.force(exports.linksForceName);
   if (typeof linkForce === `undefined`) {
+    // there is no link force, possibly we should instead make one here but then it wouldn't be visible in SimulationState so best not to
     console.log("attempt to set links but no link force is defined: ignored");
-    return; // nae link force, some bother
+    return;
   }
-  linkForce.links(links).id(idFn);
+  linkForce.id(keyFn);
+  linkForce.links(links);
 }
 exports.unsetLinks_ = simulation => {
   const linkForce = d3.forceLink([])
@@ -520,7 +516,7 @@ exports.forceX_ = () => d3.forceX()
 // forceY_            :: ForceYConfig_            -> D3ForceHandle_
 exports.forceY_ = () => d3.forceY()
 // forceLink_         :: ForceLinkConfig_         -> D3ForceHandle_
-exports.forceLink_ = () => d3.forceLink()
+exports.forceLink_ = () => d3.forceLink().id(d => d.id)
 // forceCustom_       :: CustomForceConfig_       -> D3ForceHandle_
 exports.forceCustom_ = forceFn => forceFn()
 
