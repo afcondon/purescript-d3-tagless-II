@@ -4,19 +4,19 @@
         "depends": [ "A", "B" ]
     },
     "A": {
-        "path": ".spago/package-one/A.purs",
+        "path": ".spago/p1/A.purs",
         "depends": [ "C" ]
     },
     "B": {
-        "path": ".spago/package-one/B.purs",
+        "path": ".spago/p1/B.purs",
         "depends": [ "C" ]
     },
     "C": {
-        "path": ".spago/package-two/C.purs",
+        "path": ".spago/p2/C.purs",
         "depends": [ "D" ]
     },
     "D": {
-        "path": ".spago/package-three/D.purs",
+        "path": ".spago/p3/D.purs",
         "depends": [ ]
     }
 }

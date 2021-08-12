@@ -358,6 +358,11 @@ exports.prepareSimUpdate_ = nodeSelection => nodes => links => idFn => {
   }
   const old = new Map(nodeSelection.data().map(d => [idFn(d), d])); // creates a map from our chosen id to the old obj reference
   let updateNodes = nodes.map(d => Object.assign(old.get(idFn(d)) || {}, d));
+  // REVIEW maybe the problem is that there already is an index on the nodes? perhaps stripping it off will help
+  for (let index = 0; index < updateNodes.length; index++) {
+    delete updateNodes[index].index;
+  }
+
   // TODO now for the links
   // this needs to swizzle id for object reference if source/target is an object
   // and it needs to be the object reference from the updateNodes

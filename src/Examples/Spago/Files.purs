@@ -118,7 +118,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
           packageString <- pieces !! 1
           case root of
             ".spago" -> Just packageString
-            "src"    -> Just "my-project" -- TODO this name comes from the packages.json via the spago.dhall file
+            "src"    -> Just "src" -- TODO this name comes from the packages.json via the spago.dhall file
             _ -> Nothing
 
     modulesPL :: Array ModuleJSONPL

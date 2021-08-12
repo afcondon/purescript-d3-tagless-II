@@ -42,7 +42,7 @@ forces = [
       , createForce "clustery"     ForceY        allNodes [ F.strength 0.2, F.y datum_.clusterPointY ]
 
       , createFixForce "packageGrid"     (ForceFixPositionXY gridXY)   (Just $ FilterNodes "packages only" datum_.isPackage) [ ] 
-      , createFixForce "centerNamedNode" (ForceFixPositionXY centerXY) (Just $ FilterNodes "my-project only" (\d -> (datum_.name d) == "my-project")) [ ] 
+      , createFixForce "centerNamedNode" (ForceFixPositionXY centerXY) (Just $ FilterNodes "src only" (\d -> (datum_.name d) == "src")) [ ] 
 
       , createForce "packageOrbit" ForceRadial   (selectivelyApplyForce datum_.isPackage "packages only") 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 300.0 ]

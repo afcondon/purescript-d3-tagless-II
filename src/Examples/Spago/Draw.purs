@@ -173,12 +173,6 @@ updateSimulation nodes links attrs = do
           }
           spagoNodeKeyFunction
 
-      circle         <- nodesSelectionHandle D3.+ (node Circle attrs.circle)
-      labels         <- nodesSelectionHandle D3.+ (node Text attrs.labels) 
-      _              <- circle `on` Drag DefaultDrag
-
-      addTickFunction "nodes" $ Step nodesSelectionHandle nodeTick
-      addSelection nodesSelection nodesSelectionHandle
       -- now the links
       linksSelectionHandle 
         <- linksGroup D3.<+> 
@@ -192,6 +186,11 @@ updateSimulation nodes links attrs = do
 
       addTickFunction "links" $ Step linksSelectionHandle linkTick
       let _ = setNodes_ simulation_ prepped.nodes
+      circle         <- nodesSelectionHandle D3.+ (node Circle attrs.circle)
+      labels         <- nodesSelectionHandle D3.+ (node Text attrs.labels) 
+      _              <- circle `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle
+      addTickFunction "nodes" $ Step nodesSelectionHandle nodeTick
+      addSelection nodesSelection nodesSelectionHandle
       let _ = setLinks_ simulation_ prepped.links (unsafeCoerce $ datum_.indexFunction) -- TODO pass this indexFunction all the way down, it's not being passed ATM
       addSelection linksSelection linksSelectionHandle
 
