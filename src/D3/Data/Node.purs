@@ -1,5 +1,6 @@
 module D3.Node where
 
+import Data.Newtype (class Newtype)
 import Data.Nullable (Nullable)
 import Type.Row (type (+))
 
@@ -9,56 +10,46 @@ import Type.Row (type (+))
 -- | Work-in-progress
 -- ============================================================================================================================
 
--- TODO bring some consistency to the naming of rows, newtypes, data constructors etc. This is a mess at the moment
-type NodeID = Int
--- a link specialized to a particular type of object
-newtype D3_Link l row = D3_Link {
-    source :: l
-  , target :: l
-  -- TODO a D3_Link also needs to have some id field if it is to partake in Update pattern, ideally something like "nodeid-nodeid" for the ids of the source and target
-  -- TODO probably a principled way to do this would be to have nullable source and target references, sourceID and targetID and linkID and do the swizzling explicitly
-  | row
-}
+-- ============================================================================================================================
+-- | Links
+-- ============================================================================================================================
+type NodeID = Int -- REVIEW won't always be an Int, could be a String, but why complicate the types prematurely
+-- a link specialized to a particular type of object, it can be initialized using IDs for objects of that type
+newtype D3Link         l row = D3LinkID  { source :: l, target :: l | row }
+type D3LinkDatum l row = Record ( source :: l, target :: l | row )
+newtype D3LinkSwizzled l row = D3LinkObj { source :: l, target :: l | row }
 
--- newtype D3_Link row = D3_Link { | row }
--- type D3_LinkID  row = ( source :: NodeID, target :: NodeID | row )
--- type D3LinkRow  row = D3_Link ( D3_LinkID + row )
-
--- simulation nodes have an index and default link mapping is to this index
-type D3_Indexed row = ( index :: NodeID | row )
+-- ============================================================================================================================
+-- | Standard Graph node rows
+-- ============================================================================================================================
 -- often we want to create a unique `id` from some other field(s) of data object
 type D3_ID      row = ( id    :: NodeID | row )
--- field to track whether node has TREE children, ie Parent or Leaf
--- NB the node may still have GRAPH "children" / depends which have been pruned to get a tree
-type D3_Leaf    row = ( isLeaf :: Boolean | row )
 -- nodes of many types have or are given an x,y position 
 type D3_XY      row = ( x :: Number, y :: Number | row )
 -- the fields that are acted upon by forces in the simulation
-type D3_VxyFxy  row = ( vx :: Number
-                      , vy :: Number
-                      , fx :: Nullable Number
-                      , fy :: Nullable Number | row )
+type D3_VxyFxy  row = ( vx :: Number, vy :: Number, fx :: Nullable Number, fy :: Nullable Number | row )
 -- focus points for custom forces (such as clustering)
 type D3_FocusXY row = ( cluster :: Int, focusX :: Number, focusY :: Number | row )                  
 
+-- the crucial type for building simulation-ready records with mixture of the rows above
+newtype D3_SimulationNode row = D3SimNode { | row }
 
+-- ============================================================================================================================
+-- | Standard Tree row 
+-- ============================================================================================================================
 -- depth, height and possible value are common to all tree layouts (tidy tree, dendrogram, treemap, circlepack etc)
-type D3_TreeRow row = ( depth :: Int, height :: Int, value:: Nullable Number                     | row )
+type D3_TreeRow row = ( depth :: Int, height :: Int, value:: Nullable Number   | row )
 -- Radius, Rect are fields that are used in circlepack and treemap layouts respectively
-type D3_Radius  row = ( r :: Number                                                              | row )
-type D3_Rect    row = ( x0 :: Number, y0 :: Number, x1 :: Number, y1 :: Number                   | row )
+type D3_Radius  row = ( r :: Number                                            | row )
+type D3_Rect    row = ( x0 :: Number, y0 :: Number, x1 :: Number, y1 :: Number | row )
+-- field to track whether node has TREE children, ie Parent or Leaf
+-- NB the node may still have GRAPH "children" / depends which have been pruned to get a tree
+type D3_Leaf    row = ( isLeaf :: Boolean                                      | row )
 
-newtype D3_TreeNode row = D3TreeNode { -- TODO this needs to be a row so that it can be built into, for example, LesMisTreeRecord and similar
-    parent   :: Nullable (D3_TreeNode row )
-  , children :: Array    (D3_TreeNode row )
-  | row -- into the row here goes all the model specific data
-}
+newtype D3_TreeNode row = D3TreeNode { parent :: Nullable (D3_TreeNode row ), children :: Array (D3_TreeNode row ) | row }
 type D3TreeRow row       = D3_TreeNode ( D3_ID + D3_TreeRow + D3_XY   + D3_Leaf   + row )
 type D3CirclePackRow row = D3_TreeNode ( D3_ID + D3_TreeRow + D3_XY   + D3_Radius + row )
 type D3TreeMapRow row    = D3_TreeNode ( D3_ID + D3_TreeRow + D3_Rect             + row )
-
-newtype D3_SimulationNode row = D3SimNode { | row }
-type    D3SimulationRow   row = D3_SimulationNode ( D3_XY + D3_VxyFxy + row ) -- into 'row' goes all the model specific data
 
 -- when you give data to d3.hierarchy the original object contents are present under the `data` field of the new hierarchical objects 
 type EmbeddedData :: forall k. k -> Row k -> Row k

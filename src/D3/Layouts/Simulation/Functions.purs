@@ -6,7 +6,7 @@ import Control.Monad.State (class MonadState, State, get, gets, modify_)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
 import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getLinks_, getNodes_, onTick_, prepareSimUpdate_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
-import D3.Node (D3_Link, D3_SimulationNode, NodeID)
+import D3.Node (D3Link, D3_SimulationNode, NodeID)
 import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
 import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, enableOnlyTheseLabels, getHandle, getLabel, putForceInSimulation, setForceAttr, setForceAttrWithFilter)
 import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceLinksFilter(..), ForceNodesFilter(..), ForceStatus(..), LinkForceType(..), SimVariable(..), Step(..))
@@ -194,8 +194,8 @@ simulationPrepareNodesAndLinks ::
   Bind m =>
   MonadState { simulationState :: D3SimulationState_ | row } m =>
   D3Selection_ -> -- the selection passed will determine which nodes.data() it attempts to merge this new data with
-  Array (D3_SimulationNode d) -> Array (D3_Link id r) -> (Datum_ -> id)
-  -> m { nodes :: Array (D3_SimulationNode d), links :: Array (D3_Link (D3_SimulationNode d) r) }
+  Array (D3_SimulationNode d) -> Array (D3Link id r) -> (Datum_ -> id)
+  -> m { nodes :: Array (D3_SimulationNode d), links :: Array (D3Link (D3_SimulationNode d) r) }
 simulationPrepareNodesAndLinks selection nodes links indexFn = do
   pure $ prepareSimUpdate_ selection nodes links indexFn
 
@@ -210,7 +210,7 @@ simulationSetNodes nodes = do
 
 simulationSetLinks :: forall id m row datum r. 
   (MonadState { simulationState :: D3SimulationState_ | row } m) 
-  => Array (D3_Link id r)
+  => Array (D3Link id r)
   -> (datum -> id) -- keyFn is needed to tell D3 how to swizzle the NodeIDs to get object references
   -> m Unit
 simulationSetLinks links keyFn = do
@@ -228,7 +228,7 @@ simulationGetNodes = do
 
 simulationGetLinks :: forall m row datum r. 
   (MonadState { simulationState :: D3SimulationState_ | row } m) => 
-  m (Array (D3_Link datum r))
+  m (Array (D3Link datum r))
 simulationGetLinks = do
   { simulationState: SimState_ ss_} <- get
   let opaqueLinks = getLinksFromSimulation_ ss_.simulation_

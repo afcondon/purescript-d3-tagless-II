@@ -412,7 +412,7 @@ exports.unsetLinks_ = simulation => {
 // setLinks_ :: ForceHandle -> Array (D3_Simulation_Link d r) ->
 // links_        :: forall d r. ForceHandle_ -> Array (D3_Simulation_Link d r)
 exports.getLinks_ = linkForce => linkForce.links()
-// getLinksFromSimulation_ :: forall d r. D3Simulation_ -> String -> Array (D3_Link d r) -- get links from named link force in simulation
+// getLinksFromSimulation_ :: forall d r. D3Simulation_ -> String -> Array (D3Link d r) -- get links from named link force in simulation
 exports.getLinksFromSimulation_ = simulation => forceName => {
   linksForce = simulation.force(forceName)
   if (typeof linksForce === `undefined`) {

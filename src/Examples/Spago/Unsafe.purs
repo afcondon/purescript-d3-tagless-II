@@ -1,140 +1,32 @@
 module D3.Examples.Spago.Unsafe where
 
-import D3.Data.Types (Datum_, Index_)
-import D3.Examples.Spago.Files (NodeType, Pinned, SpagoDataRecord, SpagoGraphLinkObj, SpagoTreeObj)
-import D3.Node (D3_Link(..), D3_SimulationNode(..), D3_TreeNode(..))
-import Data.Nullable (Nullable)
-import Unsafe.Coerce (unsafeCoerce)
 import Prelude
 
--- Placeholder key functions for update joins
--- TODO replace with something safer!
+import D3.Data.Types (Datum_, Index_)
+import D3.Examples.Spago.Files (NodeType, Pinned, SpagoDataRecord, SpagoGraphLinkRecord, SpagoTreeObj, SpagoLinkData)
+import D3.Node (D3Link(..), D3LinkSwizzled(..), D3_SimulationNode(..), D3_TreeNode(..), D3LinkDatum)
+import Data.Nullable (Nullable)
+import Unsafe.Coerce (unsafeCoerce)
+
 spagoNodeKeyFunction :: Datum_ -> Index_
 spagoNodeKeyFunction d = index
   where
     index = unsafeCoerce $ (unboxD3SimNode d).id
 
--- spagoLinkKeyFunction :: Datum_ -> Index_
--- spagoLinkKeyFunction l = unsafeCoerce $ linkID
---   where 
---     sourceID = (unboxD3SimLink l).source.id
---     targetID = (unboxD3SimLink l).target.id
---     linkID = show sourceID <> "-" <> show targetID
- 
-
 unboxD3SimNode :: Datum_ -> SpagoDataRecord
 unboxD3SimNode datum = d
   where (D3SimNode d) = unsafeCoerce datum
   
-unboxD3SimLink :: Datum_ -> SpagoGraphLinkObj
+unboxD3SimLink :: Datum_ -> D3LinkDatum SpagoDataRecord SpagoLinkData
 unboxD3SimLink datum = l
-  where (D3_Link l) = unsafeCoerce datum
+  where
+    (D3LinkObj l) = unsafeCoerce datum
 
--- morally, this is just the following short signature, but because of 
--- the need for the newtype (because of the recursion in the type) we have 
--- to accept the compiler generated monstrosity above, which is also 
--- brittle unfortunately
 -- ======================================================================
 -- unboxD3TreeNode :: Datum_ -> SpagoDataRecord -- + Children / Parent
 -- ======================================================================
-unboxD3TreeNode :: forall t2.
-  t2
-  -> { children :: Array
-                     (D3_TreeNode
-                        ( data :: { connected :: Boolean
-                                  , containerID :: Int
-                                  , containerName :: String
-                                  , containsMany :: Boolean
-                                  , id :: Int
-                                  , inSim :: Boolean
-                                  , links :: { contains :: Array Int
-                                             , inPackage :: Array Int
-                                             , outPackage :: Array Int
-                                             , sources :: Array Int
-                                             , targets :: Array Int
-                                             , tree :: Array Int
-                                             }
-                                  , loc :: Number
-                                  , name :: String
-                                  , nodetype :: NodeType
-                                  , pinned :: Pinned
-                                  , treeX :: Nullable Number
-                                  , treeY :: Nullable Number
-                                  }
-                        , depth :: Int
-                        , height :: Int
-                        , id :: Int
-                        , isLeaf :: Boolean
-                        , r :: Number
-                        , value :: Nullable Number
-                        , x :: Number
-                        , y :: Number
-                        )
-                     )
-     , data :: { connected :: Boolean
-               , containerID :: Int
-               , containerName :: String
-               , containsMany :: Boolean
-               , id :: Int
-               , inSim :: Boolean
-               , links :: { contains :: Array Int
-                          , inPackage :: Array Int
-                          , outPackage :: Array Int
-                          , sources :: Array Int
-                          , targets :: Array Int
-                          , tree :: Array Int
-                          }
-               , loc :: Number
-               , name :: String
-               , nodetype :: NodeType
-               , pinned :: Pinned
-               , treeX :: Nullable Number
-               , treeY :: Nullable Number
-               }
-     , depth :: Int
-     , height :: Int
-     , id :: Int
-     , isLeaf :: Boolean
-     , parent :: Nullable
-                   (D3_TreeNode
-                      ( data :: { connected :: Boolean
-                                , containerID :: Int
-                                , containerName :: String
-                                , containsMany :: Boolean
-                                , id :: Int
-                                , inSim :: Boolean
-                                , links :: { contains :: Array Int
-                                           , inPackage :: Array Int
-                                           , outPackage :: Array Int
-                                           , sources :: Array Int
-                                           , targets :: Array Int
-                                           , tree :: Array Int
-                                           }
-                                , loc :: Number
-                                , name :: String
-                                , nodetype :: NodeType
-                                , pinned :: Pinned
-                                , treeX :: Nullable Number
-                                , treeY :: Nullable Number
-                                }
-                      , depth :: Int
-                      , height :: Int
-                      , id :: Int
-                      , isLeaf :: Boolean
-                      , r :: Number
-                      , value :: Nullable Number
-                      , x :: Number
-                      , y :: Number
-                      )
-                   )
-     , r :: Number
-     , value :: Nullable Number
-     , x :: Number
-     , y :: Number
-     }
-unboxD3TreeNode datum =
-  let 
+
+unboxD3TreeNode datum = t
+  where
     (t' :: SpagoTreeObj )  = unsafeCoerce datum
     (D3TreeNode t) = t'
-  in
-    t

@@ -1,15 +1,17 @@
 module D3.Examples.Spago.Files where
 
+import Prelude
+
 import Affjax (URL)
-import D3.Node (D3_FocusXY, D3_ID, D3_Indexed, D3_Leaf, D3_Link(..), D3_Radius, D3_TreeNode, D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
+import D3.Node (D3Link(..), D3LinkSwizzled, D3_FocusXY, D3_ID, D3_Leaf, D3_Radius, D3_TreeNode, D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import Data.Array (catMaybes, foldl, groupBy, length, range, sortBy, zip, (!!), (:))
 import Data.Foldable (sum)
 import Data.Map as M
 import Data.Maybe (fromMaybe, Maybe(..))
+import Data.Newtype (class Newtype)
 import Data.Nullable (Nullable, null)
 import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..))
-import Prelude
 import Type.Row (type (+))
 import Utility (chunk, compareSnd, equalSnd)
 
@@ -65,10 +67,11 @@ data NodeType        = IsModule ModulePath | IsPackage PackageInfo
 data Pinned          = Pinned | Floating | Forced -- might be more categories here, "pinned connectd", "pinned unused" whatever...
 type Deps            = Array NodeID
 
-type SpagoLinkData     = ( linktype :: LinkType, inSim :: Boolean )
-type SpagoGraphLinkID  = D3_Link NodeID          SpagoLinkData
-type SpagoGraphLinkObj =  { source :: SpagoDataRecord, target :: SpagoDataRecord | SpagoLinkData }
-type SpagoTreeObj      = D3_TreeNode (D3_ID + D3_TreeRow + D3_XY   + D3_Leaf + D3_Radius  + (EmbeddedData { | SpagoNodeRow () }) + () )
+type SpagoLinkData        = ( linktype :: LinkType, inSim :: Boolean )
+type SpagoGraphLinkID     = D3Link NodeID SpagoLinkData
+type SpagoGraphLinkRecord = D3LinkSwizzled SpagoDataRecord SpagoLinkData 
+
+type SpagoTreeObj = D3_TreeNode (D3_ID + D3_TreeRow + D3_XY + D3_Leaf + D3_Radius  + (EmbeddedData { | SpagoNodeRow () }) + () )
 
 type SpagoNodeRow row = ( 
     id       :: NodeID
@@ -93,8 +96,7 @@ type SpagoNodeRow row = (
   | row )
 type SpagoNodeData    = { | SpagoNodeRow () }
 
-type SpagoDataRecord = Record (D3_XY + D3_VxyFxy + SpagoNodeRow  + D3_FocusXY + D3_Radius + ()) -- took out index because Selection has to set index
-
+type SpagoDataRecord = Record (D3_XY + D3_VxyFxy + SpagoNodeRow  + D3_FocusXY + D3_Radius + ())
 
 getGraphJSONData :: Spago_Raw_JSON_ -> Spago_Cooked_JSON
 getGraphJSONData { packages, modules, lsDeps, loc } = do
@@ -224,7 +226,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     packageNodes       = makeNodeFromPackageJSONCL <$> packagesCL
 
     makeLink :: LinkType -> Tuple NodeID NodeID -> SpagoGraphLinkID
-    makeLink linktype (Tuple source target) = D3_Link { source, target, linktype, inSim: true }
+    makeLink linktype (Tuple source target) = D3LinkID { source, target, linktype, inSim: true }
 
     foldDepends :: forall r. Array (Tuple NodeID NodeID) -> { key :: String, depends :: Array String | r } -> Array (Tuple NodeID NodeID)
     foldDepends b a = (makeTuple <$> a.depends) <> b    
@@ -236,7 +238,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     packageLinks = (makeLink P2P)       <$> (foldl foldDepends [] packages)
 
     makeModuleToPackageLink :: SpagoNodeData -> SpagoGraphLinkID
-    makeModuleToPackageLink m = D3_Link { source: m.id, target: m.containerID, linktype: M2P, inSim: true }
+    makeModuleToPackageLink m = D3LinkID { source: m.id, target: m.containerID, linktype: M2P, inSim: true }
 
     modulePackageLinks = makeModuleToPackageLink <$> moduleNodes
     
@@ -249,7 +251,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     getSourceLinks :: SpagoNodeData -> Tuple NodeID (Array NodeID)
     getSourceLinks { id } = Tuple id sources
       where
-        sources = foldl (\acc (D3_Link l) -> if id == l.target then (l.source:acc) else acc ) [] links
+        sources = foldl (\acc (D3LinkID l) -> if id == l.target then (l.source:acc) else acc ) [] links
 
     -- | we make a map so that we can look up the links.sources in each node
     sourceLinksMap = M.fromFoldable $ getSourceLinks <$> nodes
@@ -270,13 +272,13 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
   }
 
 isP2P_Link :: SpagoGraphLinkID -> Boolean
-isP2P_Link (D3_Link { linktype }) = linktype == P2P
+isP2P_Link (D3LinkID { linktype }) = linktype == P2P
 isM2M_Graph_Link :: SpagoGraphLinkID -> Boolean
-isM2M_Graph_Link (D3_Link { linktype }) = linktype == M2M_Graph
+isM2M_Graph_Link (D3LinkID { linktype }) = linktype == M2M_Graph
 isM2P_Link :: SpagoGraphLinkID -> Boolean
-isM2P_Link (D3_Link { linktype }) = linktype == M2P
+isM2P_Link (D3LinkID { linktype }) = linktype == M2P
 isM2M_Tree_Link :: SpagoGraphLinkID -> Boolean
-isM2M_Tree_Link (D3_Link { linktype }) = linktype == M2M_Tree
+isM2M_Tree_Link (D3LinkID { linktype }) = linktype == M2M_Tree
 
 
 

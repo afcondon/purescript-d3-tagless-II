@@ -29,7 +29,6 @@ link_ :: { color :: Datum_ -> String
                , fy :: Nullable Number
                , group :: Int
                , id :: String
-               , index :: Int
                , vx :: Number
                , vy :: Number
                , x :: Number
@@ -40,7 +39,6 @@ link_ :: { color :: Datum_ -> String
                , fy :: Nullable Number
                , group :: Int
                , id :: String
-               , index :: Int
                , vx :: Number
                , vy :: Number
                , x :: Number

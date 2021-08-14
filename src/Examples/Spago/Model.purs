@@ -4,36 +4,34 @@ import Prelude
 
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, Index_, PointXY, index_ToInt, intToIndex_)
-import D3.Examples.Spago.Files (LinkType(..), NodeType(..), Pinned(..), SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, SpagoGraphLinkID, getGraphJSONData, readSpago_Raw_JSON_)
+import D3.Examples.Spago.Files (NodeType(..), Pinned(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
-import D3.FFI (getIndexFromDatum_, hasChildren_, pinNode_, pinTreeNode_, setInSimNodeFlag, setInSimNodeFlag_)
-import D3.Node (D3SimulationRow, D3TreeRow, D3_FocusXY, D3_Link(..), D3_Radius, D3_SimulationNode(..), EmbeddedData, NodeID)
+import D3.FFI (getIndexFromDatum_, hasChildren_, pinTreeNode_, setInSimNodeFlag)
+import D3.Node (D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_, d3SchemeDiverging10N_)
-import Data.Array (filter, foldl, partition)
+import Data.Array (foldl, partition)
 import Data.Graph (Graph, fromMap)
 import Data.Int (toNumber)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Newtype (unwrap)
 import Data.Nullable (Nullable, notNull, toMaybe)
 import Data.Nullable (Nullable, null) as N
 import Data.Set as S
 import Data.Tuple (Tuple(..))
-import Debug (trace)
-import Effect.Class.Console (log)
 import Math (pi, sqrt, (%))
 import Math as Math
 import Type.Row (type (+))
-import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
 
 tree_datum_ = {
-    x           : \d -> (unboxD3TreeNode d).x
-  , y           : \d -> (unboxD3TreeNode d).y
-  , isLeaf      : \d -> (unboxD3TreeNode d).isLeaf
-  , containerID : \d -> (unboxD3TreeNode d).data.containerID
-  , name        : \d -> (unboxD3TreeNode d).data.name
-  , loc         : \d -> (unboxD3TreeNode d).data.loc
-  , colorByGroup: \d -> d3SchemeCategory10N_ (toNumber $ tree_datum_.containerID d)
+    x           : _.x                <<< unboxD3TreeNode
+  , y           : _.y                <<< unboxD3TreeNode
+  , isLeaf      : _.isLeaf           <<< unboxD3TreeNode
+  , containerID : _.data.containerID <<< unboxD3TreeNode
+  , name        : _.data.name        <<< unboxD3TreeNode
+  , loc         : _.data.loc         <<< unboxD3TreeNode
+  , colorByGroup: d3SchemeCategory10N_ <<< toNumber <<< _.data.containerID <<< unboxD3TreeNode
   , textAnchor  : \l d -> case l of
                             Radial ->
                               if (hasChildren_ d) == (datum_.x d < pi)
@@ -59,12 +57,14 @@ tree_datum_ = {
                         else false
 }
 
+
 link_ = {
-    source    : \d -> (unboxD3SimLink d).source
-  , target    : \d -> (unboxD3SimLink d).target
-  , linkClass : \d -> show (unboxD3SimLink d).linktype
-  , linkClass2: \d -> "updated " <> show (unboxD3SimLink d).linktype
-  , color     : \d -> d3SchemeCategory10N_ (toNumber $ (unboxD3SimLink d).target.containerID)
+    source    : _.source <<< unboxD3SimLink 
+  , target    : _.target <<< unboxD3SimLink
+
+  , linkClass :                          show     <<< _.linktype           <<< unboxD3SimLink
+  , linkClass2: (append "updated ")  <<< show     <<< _.linktype           <<< unboxD3SimLink
+  , color     : d3SchemeCategory10N_ <<< toNumber <<< _.target.containerID <<< unboxD3SimLink
 }
 
 -- TODO this is a ridiculously brittle and specific function to distribute package nodes on the screen, general solution needed here
@@ -81,37 +81,37 @@ tree2Point x' y' = do
   Just { x, y } 
 
 -- | all the coercions in one place
-
 datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
-    radius        : \d -> (unboxD3SimNode d).r
-  , id            : \d -> (unboxD3SimNode d).id
-  , loc           : \d -> (unboxD3SimNode d).loc
-  , containerID   : \d -> (unboxD3SimNode d).containerID
-  , containerName : \d -> (unboxD3SimNode d).containerName
-  , name          : \d -> (unboxD3SimNode d).name
-  , nameAndID     : \d -> (unboxD3SimNode d).name <> " " <> show (unboxD3SimNode d).id
-  , indexAndID     : \d -> (unboxD3SimNode d).name <> " " <> show (getIndexFromDatum_ d) <> " " <>  show (unboxD3SimNode d).id
-  , namePos       : \d -> "(" <> show (Math.floor $ datum_.x d) <> "," <> show (Math.floor $ datum_.y d) <> ")" -- for debugging position
-  , x             : \d -> (unboxD3SimNode d).x
-  , y             : \d -> (unboxD3SimNode d).y
-  , treeX         : \d -> (unboxD3SimNode d).treeX
-  , treeY         : \d -> (unboxD3SimNode d).treeY
-  , nodetype      : \d -> (unboxD3SimNode d).nodetype
-  , cluster       : \d -> (unboxD3SimNode d).cluster
-  , links         : \d -> (unboxD3SimNode d).links
-  , connected     : \d -> (unboxD3SimNode d).connected
+    radius        : _.r             <<< unboxD3SimNode
+  , id            : _.id            <<< unboxD3SimNode
+  , loc           : _.loc           <<< unboxD3SimNode
+  , containerID   : _.containerID   <<< unboxD3SimNode
+  , containerName : _.containerName <<< unboxD3SimNode
+  , name          : _.name          <<< unboxD3SimNode
+  , x             : _.x             <<< unboxD3SimNode
+  , y             : _.y             <<< unboxD3SimNode
+  , treeX         : _.treeX         <<< unboxD3SimNode
+  , treeY         : _.treeY         <<< unboxD3SimNode
+  , nodetype      : _.nodetype      <<< unboxD3SimNode
+  , cluster       : _.cluster       <<< unboxD3SimNode
+  , links         : _.links         <<< unboxD3SimNode
+  , connected     : _.connected     <<< unboxD3SimNode
 
-  -- , clusterPoint  : \d -> cluster2Point (intToIndex_ $ (unboxD3SimNode d).cluster - 462) -- TODO fix this dirty hack
+  , nameAndID     : \d -> (unboxD3SimNode d).name <> " " <> show (unboxD3SimNode d).id
+  , indexAndID    : \d -> (unboxD3SimNode d).name <> " " <> show (getIndexFromDatum_ d) <> " " <>  show (unboxD3SimNode d).id
+  , namePos       : \d -> "(" <> show (Math.floor $ datum_.x d) <> "," <> show (Math.floor $ datum_.y d) <> ")" -- for debugging position
+
   , clusterPoint  : \d -> cluster2Point (intToIndex_ $ (unboxD3SimNode d).cluster - 5) -- TODO fix this dirty hack (magic number for start of package ids)
   , clusterPointX : \d -> _.x $ datum_.clusterPoint d
   , clusterPointY : \d -> _.y $ datum_.clusterPoint d
+
   , treePoint     : \d -> fromMaybe (datum_.clusterPoint d) (tree2Point (datum_.treeX d) (datum_.treeY d))
   , treePointX    : \d -> _.x $ datum_.treePoint d
   , treePointY    : \d -> _.y $ datum_.treePoint d
 
 -- the crucial index function which allows us to reference Nodes from Links in JSON
-  , indexFunction : \d -> (unboxD3SimNode d).id
+  , indexFunction : _.id <<< unboxD3SimNode
 
 -- more complicated calculations (CONVENIENCE)
   , positionLabel:
@@ -189,21 +189,21 @@ isUsedModule (D3SimNode d) =
                     else false
               
 -- Model data types specialized with inital data
-type SpagoTreeNode    = D3TreeRow       (EmbeddedData SpagoNodeData + ())
-type SpagoSimNode     = D3SimulationRow (             SpagoNodeRow  + D3_FocusXY + D3_Radius + ()) -- note we've woven in focusXY so that we can cluster the nodes
+type SpagoTreeNode = D3TreeRow         (EmbeddedData SpagoNodeData                                  + ())
+type SpagoSimNode  = D3_SimulationNode ( SpagoNodeRow  + D3_XY + D3_VxyFxy + D3_FocusXY + D3_Radius + ()) -- note we've woven in focusXY so that we can cluster the nodes
 
 type SpagoModel = { 
-    links           :: Array SpagoGraphLinkID
-  , nodes           :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
-  , graph           :: Graph NodeID SpagoNodeData
-  , tree            :: Maybe (Tuple NodeID SpagoTreeNode)
-  , maps            :: { name2ID    :: M.Map String NodeID
-                       , id2Name    :: M.Map NodeID String
-                       , id2Node    :: M.Map NodeID SpagoNodeData
-                       , id2Package :: M.Map NodeID NodeID
-                       , id2LOC     :: M.Map NodeID Number
-                       , id2XYLeaf  :: M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
-                       }
+    links :: Array SpagoGraphLinkID
+  , nodes :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
+  , graph :: Graph NodeID SpagoNodeData
+  , tree  :: Maybe (Tuple NodeID SpagoTreeNode)
+  , maps  :: { name2ID    :: M.Map String NodeID
+             , id2Name    :: M.Map NodeID String
+             , id2Node    :: M.Map NodeID SpagoNodeData
+             , id2Package :: M.Map NodeID NodeID
+             , id2LOC     :: M.Map NodeID Number
+             , id2XYLeaf  :: M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
+             }
 }
 
 upgradeSpagoNodeData :: M.Map NodeID (Array NodeID) -> SpagoNodeData -> SpagoSimNode

@@ -2,7 +2,7 @@ module D3Tagless.Capabilities where
 
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_, Selector)
-import D3.Node (D3_Link, D3_SimulationNode, NodeID)
+import D3.Node (D3Link, D3_SimulationNode, NodeID)
 import D3.Selection (Behavior, ChainableS, D3_Node, Join)
 import D3.Simulation.Types (Force, SimVariable, Step)
 import Data.Maybe (Maybe)
@@ -60,13 +60,13 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
     forall d r id. 
     D3Selection_
     -> Array (D3_SimulationNode d)
-    -> Array (D3_Link id r)
+    -> Array (D3Link id r)
     -> (Datum_ -> id)
-    -> m { nodes :: Array (D3_SimulationNode d), links :: Array (D3_Link (D3_SimulationNode d) r) }
+    -> m { nodes :: Array (D3_SimulationNode d), links :: Array (D3Link (D3_SimulationNode d) r) }
     -- NB we will always require a key function for links in a simulation setting
   
   getNodes :: forall d.   m (Array (D3_SimulationNode d))
-  getLinks :: forall d r. m (Array (D3_Link d r)) -- we require a key function for links
+  getLinks :: forall d r. m (Array (D3Link d r)) -- we require a key function for links
 
   -- management of selections
   addSelection :: Label -> selection -> m Unit

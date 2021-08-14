@@ -118,11 +118,11 @@ foreign import prepareSimUpdate_ ::
   forall id r d datum. 
      D3Selection_ 
   -> Array (D3_SimulationNode d) 
-  -> Array (D3_Link id r) 
+  -> Array (D3Link id r) 
   -> (datum -> id) 
-  -> { nodes :: Array (D3_SimulationNode d), links :: Array (D3_Link (D3_SimulationNode d) r) }
+  -> { nodes :: Array (D3_SimulationNode d), links :: Array (D3Link (D3_SimulationNode d) r) }
 
--- foreign import spagoLinkKeyFunction_   :: forall d r. D3_Link d r -> String
+-- foreign import spagoLinkKeyFunction_   :: forall d r. D3Link d r -> String
 -- REVIEW the key function for a link is actually trickier than that for a simple datum, or at least as implemented it is
 -- REVIEW it might be worth re-considering how simple the "simplest" id generator of "sourceID-targetID" really is?
 -- REVIEW especially considering the complexity it brings elsewhere
@@ -135,12 +135,12 @@ foreign import setNodes_               :: forall d.   D3Simulation_ -> Array (D3
 foreign import setLinks_ :: 
   forall id r datum.
   D3Simulation_
-  -> Array (D3_Link id r)
+  -> Array (D3Link id r)
   -> (datum -> id)
   -> Unit
 foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_
-foreign import getLinks_               :: forall d r. D3ForceHandle_ -> Array (D3_Link d r)
-foreign import getLinksFromSimulation_ :: forall d r. D3Simulation_ -> String -> Array (D3_Link d r) -- get links from named link force in simulation
+foreign import getLinks_               :: forall d r. D3ForceHandle_ -> Array (D3Link d r)
+foreign import getLinksFromSimulation_ :: forall d r. D3Simulation_ -> String -> Array (D3Link d r) -- get links from named link force in simulation
 
 foreign import startSimulation_        :: D3Simulation_ -> Unit
 foreign import stopSimulation_         :: D3Simulation_ -> Unit
@@ -188,7 +188,7 @@ foreign import forceMany_         :: Unit -> D3ForceHandle_
 foreign import forceRadial_       :: Unit -> D3ForceHandle_
 foreign import forceX_            :: Unit -> D3ForceHandle_
 foreign import forceY_            :: Unit -> D3ForceHandle_
--- foreign import forceLink_         :: forall r d. Array (D3_Link NodeID r) -> (Datum_ -> d) -> D3ForceHandle_ -- takes key function
+-- foreign import forceLink_         :: forall r d. Array (D3Link NodeID r) -> (Datum_ -> d) -> D3ForceHandle_ -- takes key function
 foreign import forceLink_         :: Unit -> D3ForceHandle_ -- TODO parameterize with keyFN, essential that this is done before links actually passed to linkForce otherwise default d => index is used
 foreign import forceCustom_       :: Unit -> D3ForceHandle_
 foreign import dummyForceHandle_  :: D3ForceHandle_ -- used for fixed "forces", is null under the hood
@@ -242,7 +242,7 @@ foreign import hasChildren_             :: Datum_ -> Boolean -- really only mean
 -- TODO these should all be operating on cooked tree type, however that is to be done
 foreign import descendants_     :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
 foreign import find_            :: forall r. D3_TreeNode r -> (Datum_ -> Boolean) -> Nullable (D3_TreeNode r)
-foreign import links_           :: forall d r1 r2. D3_TreeNode r1 -> Array (D3_Link d r2)
+foreign import links_           :: forall d r1 r2. D3_TreeNode r1 -> Array (D3Link d r2)
 foreign import ancestors_       :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
 foreign import leaves_          :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
 foreign import path_            :: forall r. D3_TreeNode r -> D3_TreeNode r -> Array (D3_TreeNode r)

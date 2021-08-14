@@ -9,7 +9,7 @@ import D3.Examples.Spago.Model (SpagoSimNode, cancelSpotlight_, datum_, link_, t
 import D3.Examples.Spago.Unsafe (spagoNodeKeyFunction)
 import D3.FFI (D3ForceHandle_, prepareSimUpdate_, setLinks_, setNodes_, spagoLinkKeyFunction_)
 import D3.Layouts.Hierarchical (horizontalLink', radialLink, verticalLink)
-import D3.Node (D3_Link, D3_SimulationNode)
+import D3.Node (D3Link, D3_SimulationNode)
 import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
 import D3.Simulation.Forces (getLinkForceHandle)
 import D3.Simulation.Types (D3SimulationState_, Step(..))
@@ -131,7 +131,7 @@ setup = do
   addSelection "linksGroup" linksGroup
   pure unit
 
-coerceLinks :: forall id r d. Array (D3_Link id r) -> Array (D3_Link (D3_SimulationNode d) r) 
+coerceLinks :: forall id r d. Array (D3Link id r) -> Array (D3Link (D3_SimulationNode d) r) 
 coerceLinks links = unsafeCoerce links
 
 
