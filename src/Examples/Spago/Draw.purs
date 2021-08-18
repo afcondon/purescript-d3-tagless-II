@@ -4,17 +4,17 @@ import Control.Monad.State (class MonadState)
 import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
-import D3.Examples.Spago.Files (SpagoGraphLinkID)
+import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
 import D3.Examples.Spago.Model (SpagoSimNode, cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
 import D3.Examples.Spago.Unsafe (spagoNodeKeyFunction)
-import D3.FFI (D3ForceHandle_, prepareSimUpdate_, setLinks_, setNodes_, spagoLinkKeyFunction_)
+import D3.FFI (D3ForceHandle_, keyIsID, setLinks_, setNodes_)
 import D3.Layouts.Hierarchical (horizontalLink', radialLink, verticalLink)
-import D3.Node (D3Link, D3_SimulationNode)
+import D3.Node (D3Link, D3_SimulationNode, NodeID)
 import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
 import D3.Simulation.Forces (getLinkForceHandle)
 import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, addSelection, addTickFunction, attach, getSelection, modifySelection, on, prepareNodesAndLinks, simulationHandle)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, SimDataCooked, SimDataRaw, addTickFunction, attach, loadSimData, modifySelection, on, simulationHandle)
 import D3Tagless.Capabilities as D3
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
@@ -23,17 +23,6 @@ import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
-
--- for this (family of) visualization(s) the position updating for links and nodes is always the same
-nodeTick :: Array ChainableS
-nodeTick = [ transform' datum_.translateNode ]
-
-linkTick :: Array ChainableS
-linkTick = [ x1 (_.x <<< link_.source)
-           , y1 (_.y <<< link_.source)
-           , x2 (_.x <<< link_.target)
-           , y2 (_.y <<< link_.target)
-           ]
 
 -- TODO this is a problem once extracted from "script", leads to undefined in D3.js
 enterLinks :: forall t339. Array t339
@@ -103,8 +92,7 @@ setup :: forall m selection.
   MonadEffect m =>
   SelectionM selection m =>
   SimulationM selection m =>
-  -- SpagoModel ->
-  m Unit
+  m { nodes :: selection, links :: selection }
 setup = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   simulation_ <- simulationHandle -- needed for click handler to stop / start simulation
@@ -119,17 +107,17 @@ setup = do
   _        <- inner `on` Drag DefaultDrag
   -- because the zoom event is picked up by `svg` but applied to `inner` has to come after creation of `inner`
   _        <- svg `on` Zoom  {  extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-                                      , scale  : ScaleExtent 0.1 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
-                                      , name   : "spago"
-                                      , target : inner
-                                      }
+                              , scale  : ScaleExtent 0.1 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
+                              , name   : "spago"
+                              , target : inner
+                              }
 
   linksGroup  <- inner  D3.+ (node Group [ classed "links" ])
   nodesGroup  <- inner  D3.+ (node Group [ classed "nodes" ])
+  nodes <- nodesGroup D3.<+> PreJoin "g.node"
+  links <- linksGroup D3.<+> PreJoin "line.link"
   
-  addSelection "nodesGroup" nodesGroup
-  addSelection "linksGroup" linksGroup
-  pure unit
+  pure { nodes, links }
 
 coerceLinks :: forall id r d. Array (D3Link id r) -> Array (D3Link (D3_SimulationNode d) r) 
 coerceLinks links = unsafeCoerce links
@@ -141,64 +129,43 @@ updateSimulation :: forall m row.
   MonadState { simulationState :: D3SimulationState_ | row } m =>
   SelectionM D3Selection_ m =>
   SimulationM D3Selection_ m =>
-  Array SpagoSimNode ->
-  Array SpagoGraphLinkID ->
+  { nodes :: D3Selection_, links :: D3Selection_ } ->
+  Maybe (SimDataRaw D3Selection_ SpagoDataRow SpagoLinkData NodeID) ->
   { circle :: Array ChainableS, labels :: Array ChainableS } -> 
-  m Unit
-updateSimulation nodes links attrs = do
-  -- (Tuple nodes_ links_) <- setNodesAndLinks nodes links datum_.indexFunction-- this will have to do the shallow copy stuff to ensure continuity
-  simulation_           <- simulationHandle
-  maybeNodesGroup       <- getSelection "nodesGroup"
-  maybeLinksGroup       <- getSelection "linksGroup"
+  m { nodes :: D3Selection_, links :: D3Selection_ }
+updateSimulation selections Nothing _ = pure selections
+updateSimulation selections (Just simdata) attrs = do
+  simulation_ <- simulationHandle
+  simData     <- loadSimData simdata
 
-  let nodesSelection = "nodesSelection" -- just to defend against typos in dynamic identifier
-  let linksSelection = "linksSelection" -- just to defend against typos in dynamic identifier
-  case maybeNodesGroup, maybeLinksGroup of
-    (Just nodesGroup), (Just linksGroup) -> do
-      maybePreviousNodeSelection <- getSelection "nodesSelection"
-      let prepped = 
-            case maybePreviousNodeSelection of
-                      Nothing -> { nodes, links: coerceLinks links } -- PureScript knows we haven't swizzled
-                      (Just oldNodes) -> prepareSimUpdate_ oldNodes nodes links datum_.indexFunction
-      let _ = trace { preppedNodes: prepped.nodes, preppedLinks: prepped.links  } \_ -> unit
-      -- first the nodes
-      nodesSelectionHandle
-        <- nodesGroup D3.<+> 
-          UpdateJoin
-          Group 
-          prepped.nodes -- these nodes have been thru the simulation 
-          { enter : enterAttrs simulation_
-          , update: updateAttrs simulation_
-          , exit  : [ remove ] 
-          }
-          spagoNodeKeyFunction
+  -- first the nodes
+  let joinNodes = UpdateJoin Group simData.data.nodes keyIsID
+                  { enter : enterAttrs simulation_
+                  , update: updateAttrs simulation_
+                  , exit  : [ remove ] 
+                  }
+                  
+  nodesSelection <- selections.nodes D3.<+> joinNodes
+  
+  -- now the links
+  let joinLinks = UpdateJoin Line simData.data.links keyIsID
+                    { enter : [ classed link_.linkClass, strokeColor link_.color ]
+                    , update: [ classed "graphlinkSimUpdate" ]
+                    , exit  : [ remove ]
+                    }
+  linksSelection <- selections.links D3.<+> joinLinks
 
-      -- now the links
-      linksSelectionHandle 
-        <- linksGroup D3.<+> 
-                  UpdateJoin -- REVIEW is joining a "link" fundamentally different from joining a "datum"
-                  Line
-                  prepped.links -- these nodes have been thru the simulation 
-                  { enter: [ classed link_.linkClass, strokeColor link_.color ]
-                  , update: [ classed "graphlinkSimUpdate" ]
-                  , exit: [ remove ] }
-                  spagoLinkKeyFunction_
+  circle <- nodesSelection D3.+ (node Circle attrs.circle)
+  _      <- circle `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle
+  labels <- nodesSelection D3.+ (node Text attrs.labels) 
+  
+  addTickFunction "nodes" $
+    Step nodesSelection [ transform' datum_.translateNode ]
+  addTickFunction "links" $
+    Step linksSelection [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
+  
+  pure { nodes: nodesSelection, links: linksSelection } -- return the selections
 
-      addTickFunction "links" $ Step linksSelectionHandle linkTick
-      let _ = setNodes_ simulation_ prepped.nodes
-      circle         <- nodesSelectionHandle D3.+ (node Circle attrs.circle)
-      labels         <- nodesSelectionHandle D3.+ (node Text attrs.labels) 
-      _              <- circle `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle
-      addTickFunction "nodes" $ Step nodesSelectionHandle nodeTick
-      addSelection nodesSelection nodesSelectionHandle
-      let _ = setLinks_ simulation_ prepped.links (unsafeCoerce $ datum_.indexFunction) -- TODO pass this indexFunction all the way down, it's not being passed ATM
-      addSelection linksSelection linksSelectionHandle
-
-      pure unit
-
-  -- TODO throw an error? or log missing selection? or avoid the maybe in some other way
-  -- maybe the { nodes, links, nodeSelection, linksSelection } could be a single piece of state?
-    _, _ -> pure unit -- one or other necessary selection was not found
 
 {-
 updateGraphLinks :: forall m row. 
@@ -297,20 +264,20 @@ updateTreeLinks links layout = do
   pure unit
 -}
   
-removeNamedSelection :: forall m row. 
-  Bind m => 
-  MonadEffect m =>
-  MonadState { simulationState :: D3SimulationState_ | row } m =>
-  SelectionM D3Selection_ m =>
-  SimulationM D3Selection_ m =>
-  String -> 
-  m Unit
-removeNamedSelection name = do
-  (maybeSelection :: Maybe D3Selection_) <- getSelection name
-  case maybeSelection of
-    Nothing -> pure unit
-    (Just selection) -> do
-      modifySelection selection [ remove ]
+-- removeNamedSelection :: forall m row. 
+--   Bind m => 
+--   MonadEffect m =>
+--   MonadState { simulationState :: D3SimulationState_ | row } m =>
+--   SelectionM D3Selection_ m =>
+--   SimulationM D3Selection_ m =>
+--   String -> 
+--   m Unit
+-- removeNamedSelection name = do
+--   (maybeSelection :: Maybe D3Selection_) <- getSelection name
+--   case maybeSelection of
+--     Nothing -> pure unit
+--     (Just selection) -> do
+--       modifySelection selection [ remove ]
 
-  pure unit
+--   pure unit
   

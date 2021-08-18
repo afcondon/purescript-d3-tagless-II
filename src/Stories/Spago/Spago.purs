@@ -6,7 +6,7 @@ import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get, modify_)
 import D3.Data.Tree (TreeLayout(..))
-import D3.Examples.Spago.Draw (graphAttrs, removeNamedSelection, treeAttrs)
+import D3.Examples.Spago.Draw (graphAttrs, treeAttrs)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, convertFilesToGraphModel, isPackage, isUsedModule, noFilter)
@@ -14,11 +14,12 @@ import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (pinNamedNode_, pinTreeNode_, unpinNode_)
 import D3.Simulation.Forces (getHandle)
 import D3.Simulation.Functions (simulationGetNodes, simulationStart, simulationStop)
-import D3.Simulation.Types (D3SimulationState_, SimVariable(..))
+import D3.Simulation.Types (D3SimulationState_, SimVariable(..), initialSimulationState)
 import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, toggleForceByLabel)
 import D3Tagless.Instance.Simulation (runEffectSimulation)
 import Data.Array (filter, length)
 import Data.Either (hush)
+import Data.Lens (over, set)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Debug (trace)
@@ -28,13 +29,14 @@ import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forces, gridForceSettings, gridForceSettings2, packageForceSettings, treeForceSettings)
 import Stories.Spago.HTML (render)
+import Stories.Spago.Lenses (_activeForces, _class, _dataNodes, _nodeDataGet, chooseSimLInks, chooseSimNodes)
 import Stories.Spago.State (State)
 
 type Input = D3SimulationState_
   
 component :: forall query output m. MonadAff m => H.Component query Input output m
 component = H.mkComponent
-  { initialState
+  { initialState: const initialState
   , render
   , eval: H.mkEval $ H.defaultEval
     { handleAction = handleAction
@@ -43,9 +45,9 @@ component = H.mkComponent
   }
   where
 
-  initialState :: Input -> State
-  initialState simulation = { 
-      simulationState: simulation
+  initialState :: State
+  initialState = { 
+      simulationState: initialSimulationState 1 -- TODO replace number with unit when all working satisfactorily 
     , svgClass: "cluster"
     , model: Nothing
     , activeLinks: []
@@ -68,7 +70,8 @@ handleAction = case _ of
 
   Scene PackageGrid -> do
     setCssEnvironment "cluster"
-    runEffectSimulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
+    -- TODO make this removeSelection part of the Halogen State of the component
+    -- runEffectSimulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     setActiveLinks  isM2P_Link -- only module-to-package (ie containment) links
     setActiveNodes  noFilter   -- all the nodes
     setActiveForces gridForceSettings
@@ -77,13 +80,13 @@ handleAction = case _ of
     state <- H.get
     let _ = trace { action: "Scene PackageGrid", model: state.model } \_ -> unit
     simulationStop
-    runEffectSimulation $ Graph.updateSimulation state.activeNodes state.activeLinks graphAttrs
+    runEffectSimulation $ Graph.updateSimulation state.simData graphAttrs
     runEffectSimulation $ enableOnlyTheseForces state.activeForces
     simulationStart
 
   Scene PackageGraph -> do
     setCssEnvironment "graph"
-    runEffectSimulation $ removeNamedSelection "treelinksSelection"
+    -- runEffectSimulation $ removeNamedSelection "treelinksSelection"
     setActiveLinks isP2P_Link
     setActiveNodes isPackage
     setActiveForces packageForceSettings
@@ -99,7 +102,7 @@ handleAction = case _ of
 
   Scene (ModuleTree _) -> do
     setCssEnvironment "tree"
-    runEffectSimulation $ removeNamedSelection "graphlinksSelection"
+    -- runEffectSimulation $ removeNamedSelection "graphlinksSelection"
     setActiveForces treeForceSettings
     setActiveNodes isUsedModule
     setActiveLinks isM2M_Tree_Link
@@ -147,42 +150,25 @@ handleAction = case _ of
   StopSim -> runEffectSimulation (setConfigVariable $ Alpha 0.0)
 
 setCssEnvironment :: forall m. MonadState State m => String -> m Unit
-setCssEnvironment string = modify_ (\s -> s { svgClass = string })
+setCssEnvironment string = modify_ $ set _class string
 
 setActiveForces :: forall m. MonadState State m => Array String -> m Unit
-setActiveForces forces = modify_ (\s -> s { activeForces = forces })
+setActiveForces forces = modify_ $ set _activeForces forces
 
 setActiveLinks :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
-setActiveLinks fn = do
-  state <- get
-  case state.model of
-    Nothing -> pure unit
-    (Just graph) -> modify_ (\s -> s { activeLinks = filter fn graph.links })
+setActiveLinks fn = modify_ $ chooseSimLInks fn
 
 setActiveNodes :: forall m. MonadState State m => (SpagoSimNode -> Boolean) -> m Unit
-setActiveNodes fn = do
-  state <- H.get
-  case state.model of
-    Nothing -> pure unit
-    (Just graph) -> modify_ (\s -> s { activeNodes = filter fn graph.nodes })
+setActiveNodes fn = modify_ $ chooseSimNodes fn
 
 pinTreeNodes :: forall m. MonadState State m => m Unit
-pinTreeNodes = do
-  state <- H.get
-  let _ = pinTreeNode_ <$> state.activeNodes -- NB side-effecting on the nodes in the state so that object refs in links stay good
-  pure unit
+pinTreeNodes = modify_ $ over _dataNodes (pinTreeNode_ <$> _)
 
 centerPinNamedNode :: forall m. MonadState State m => String -> m Unit
-centerPinNamedNode name = do
-  state <- H.get
-  let _ = (pinNamedNode_ name 0.0 0.0) <$> state.activeNodes -- NB side-effecting on the nodes in the state so that object refs in links stay good
-  pure unit
+centerPinNamedNode name = modify_ $ over _dataNodes ((pinNamedNode_ name 0.0 0.0) <$> _)
 
 unpinActiveNodes :: forall m. MonadState State m => m Unit
-unpinActiveNodes = do
-  state <- H.get
-  let _ = unpinNode_ <$> state.activeNodes -- NB side-effecting on the nodes in the state so that object refs in links stay good
-  pure unit
+unpinActiveNodes = modify_ $ over _dataNodes (unpinNode_ <$> _)
 
 -- getModel will try to build a model from files and to derive a dependency tree from Main
 -- the dependency tree will contain all nodes reachable from Main but NOT all links

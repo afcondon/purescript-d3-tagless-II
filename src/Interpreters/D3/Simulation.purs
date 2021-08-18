@@ -1,11 +1,11 @@
 module D3Tagless.Instance.Simulation where
 
 import D3.Simulation.Functions
-import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, Unit, bind, discard, liftA1, pure, unit, ($), (<#>))
 
 import Control.Monad.State (class MonadState, StateT, get, gets, modify_, runStateT)
-import D3.Data.Types (D3Selection_)
+import D3.Data.Types (D3Selection_, Datum_, Index_)
 import D3.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, onTick_)
+import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (applyChainableSD3)
 import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionModifySelection)
 import D3.Simulation.Types (D3SimulationState_(..), Step(..))
@@ -13,6 +13,7 @@ import D3Tagless.Capabilities (class SelectionM, class SimulationM)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
+import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, Unit, bind, discard, liftA1, pure, unit, ($), (<#>))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | ====================================================
@@ -79,15 +80,15 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
       simulationDisableForcesByLabel disable
       simulationEnableForcesByLabel  enable
 -- management of data 
-  prepareNodesAndLinks selection nodes links indexFn 
-    = simulationPrepareNodesAndLinks selection nodes links indexFn
-  getLinks                             = simulationGetLinks 
-  getNodes                             = simulationGetNodes
--- uniformlyDistribute nodes         = pure $ setPositionToNaN_ nodes
+  loadSimData simData = simulationloadSimData simData
+  getLinks            = simulationGetLinks 
+  getNodes            = simulationGetNodes
+
+-- uniformlyDistribute nodes = pure $ setPositionToNaN_ nodes
 
 -- management of selections
-  addSelection label selection         = simulationAddSelection label selection
-  getSelection label                   = simulationGetSelection label
+  -- addSelection label selection         = simulationAddSelection label selection
+  -- getSelection label                   = simulationGetSelection label
 -- management of tick functions, what to do with the selection on each step of simulation
     -- TODO this would be the more efficient but less attractive route to defining a Tick function
   addTickFunction label (StepTransformFFI selection function) = do
@@ -122,3 +123,4 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   simulationHandle = do
     (SimState_ { simulation_ }) <- gets _.simulationState
     pure simulation_
+

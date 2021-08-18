@@ -53,7 +53,7 @@ forces = [
       , createForce "moduleOrbit3" ForceRadial   (selectivelyApplyForce datum_.isUsedModule "direct deps of Main")
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
 
-      , createLinkForce "links" Nothing [ F.strength 1.0, F.distance 0.0, F.intKey (\d -> toNumber $ datum_.id d) ]
+      , createLinkForce "links" Nothing [ F.strength 1.0, F.distance 0.0, F.numKey (toNumber <<< datum_.id) ]
       ]
   where
     gridXY _ i = cluster2Point i

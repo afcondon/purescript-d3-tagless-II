@@ -2,12 +2,15 @@ module D3Tagless.Capabilities where
 
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_, Selector)
-import D3.Node (D3Link, D3_SimulationNode, NodeID)
+import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode, NodeID)
 import D3.Selection (Behavior, ChainableS, D3_Node, Join)
 import D3.Simulation.Types (Force, SimVariable, Step)
+import Data.Lens (Lens')
+import Data.Lens.Record (prop)
 import Data.Maybe (Maybe)
 import Data.Tuple (Tuple)
 import Prelude (class Monad, Unit)
+import Type.Proxy (Proxy(..))
 
 -- TODO see whether it can be useful to extend the interpreter here, for different visualization types
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
@@ -21,7 +24,7 @@ class (Monad m) <= SelectionM selection m where
   
   on     :: selection -> Behavior selection -> m Unit
 
-  join   :: ∀ datum.  selection -> Join datum -> m selection
+  join   :: ∀ datum.  selection -> Join selection datum -> m selection
 
 infix 4 join as <+>
 infix 4 appendElement as +
@@ -56,21 +59,15 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
 
   -- management of data (nodes and links)
   -- uniformlyDistribute :: forall d. Array (D3_SimulationNode d) -> m Unit
-  prepareNodesAndLinks :: 
-    forall d r id. 
-    D3Selection_
-    -> Array (D3_SimulationNode d)
-    -> Array (D3Link id r)
-    -> (Datum_ -> id)
-    -> m { nodes :: Array (D3_SimulationNode d), links :: Array (D3Link (D3_SimulationNode d) r) }
-    -- NB we will always require a key function for links in a simulation setting
+
+  loadSimData :: forall d r id. SimDataRaw selection d r id -> m (SimDataCooked selection d r)
   
   getNodes :: forall d.   m (Array (D3_SimulationNode d))
-  getLinks :: forall d r. m (Array (D3Link d r)) -- we require a key function for links
+  getLinks :: forall d r. m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
 
   -- management of selections
-  addSelection :: Label -> selection -> m Unit
-  getSelection :: Label -> m (Maybe selection)
+  -- addSelection :: Label -> selection -> m Unit
+  -- getSelection :: Label -> m (Maybe selection)
   
   -- adding functions that occur on every tick of the simulation clock
   addTickFunction    :: Label -> Step selection -> m Unit 
@@ -81,5 +78,29 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- writing callbacks from JavaScript will sometimes necessitate having the simulation handle
   -- this can't easily be solved until / unless D3 is replaced with something else
   simulationHandle :: m D3Simulation_
+
+type SimDataRaw selection d r id = {
+    selections :: { 
+      nodes :: selection
+    , links :: selection
+    }
+  , "data" :: {
+      nodes :: Array (D3_SimulationNode d)
+    , links :: Array (D3Link id r) 
+    }
+  , key :: (Datum_ -> Index_)
+}
+
+type SimDataCooked selection d r = {
+    selections :: { 
+      nodes :: selection
+    , links :: selection
+    }
+  , "data" :: {
+      nodes :: Array (D3_SimulationNode d)
+    , links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) 
+    }
+  , key :: (Datum_ -> Index_)
+}
 
 

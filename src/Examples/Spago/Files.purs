@@ -95,8 +95,8 @@ type SpagoNodeRow row = (
   , treeY         :: Nullable Number
   | row )
 type SpagoNodeData    = { | SpagoNodeRow () }
-
-type SpagoDataRecord = Record (D3_XY + D3_VxyFxy + SpagoNodeRow  + D3_FocusXY + D3_Radius + ())
+type SpagoDataRow   = (D3_XY + D3_VxyFxy + SpagoNodeRow  + D3_FocusXY + D3_Radius + ())
+type SpagoDataRecord = Record SpagoDataRow
 
 getGraphJSONData :: Spago_Raw_JSON_ -> Spago_Cooked_JSON
 getGraphJSONData { packages, modules, lsDeps, loc } = do

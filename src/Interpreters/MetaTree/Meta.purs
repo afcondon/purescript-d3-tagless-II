@@ -4,7 +4,7 @@ import D3.Node
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
-import D3.Data.Types (Element, MouseEvent, Transition)
+import D3.Data.Types (Element, MouseEvent, Transition, Selector)
 import D3.FFI (ComputeKeyFunction_)
 import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), EnterUpdateExit, Join(..), OrderingAttribute(..))
 import D3Tagless.Capabilities (class SelectionM)
@@ -26,8 +26,9 @@ data D3GrammarNode =
   -- TODO if datum type can be peeled off the Join type, just store the Join directly
   | JoinSimpleNode     Element (Array ChainableS)
   | UpdateJoinNode     Element EnterUpdateExit
+  | OpenJoinNode (Selector NodeID)
   | JoinSimpleWithKeyFunctionNode Element (Array ChainableS) ComputeKeyFunction_
-  | UpdateJoinWithKeyFunctionNode Element EnterUpdateExit ComputeKeyFunction_
+  | UpdateJoinWithKeyFunctionNode Element  EnterUpdateExit ComputeKeyFunction_
   -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
   | OnNode (Behavior NodeID) -- TODO make chainable
   | AttrNode ChainableS -- actually only Attr and Text
@@ -46,6 +47,7 @@ instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implem
 
   show (JoinSimpleNode _ _)       = "JoinSimple"
   show (UpdateJoinNode _ _)       = "JoinGeneral"
+  show (OpenJoinNode s)           = "OpenJoin" <> s
   show (JoinSimpleWithKeyFunctionNode _ _ _) = "JoinSimple"
   show (UpdateJoinWithKeyFunctionNode _ _ _) = "JoinGeneral"
 
@@ -68,6 +70,7 @@ showAsSymbol =
     (ModifyNode as)            ->  { name: "Modify"        , symbol: "->"  , param1: "",           param2: "" }
     (JoinSimpleNode e _)       ->  { name: "JoinSimple"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
     (UpdateJoinNode e _)       ->  { name: "UpdateJoin"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
+    (OpenJoinNode s)           ->  { name: "UpdateJoin"    , symbol: "<+>" , param1: tag $ s, param2: "" }
     (JoinSimpleWithKeyFunctionNode e _ _) ->  { name: "JoinSimpleK" , symbol: "<+>" , param1: tag $ show e, param2: "" }
     (UpdateJoinWithKeyFunctionNode e _ _) ->  { name: "UpdateJoinK" , symbol: "<+>" , param1: tag $ show e, param2: "" }
     (OnNode (Zoom _))          ->  { name: "Zoom"          , symbol: "z"   , param1: "",           param2: "" }
@@ -184,11 +187,15 @@ instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
     insertInScriptTree nodeID (ModifyNode attributes)
     pure unit
 
-  join nodeID (Join e ds cs k)          = do
+  join nodeID (Join e ds k cs)          = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e cs k)
     pure id
-  join nodeID (UpdateJoin e ds cs k)   = do
+  join nodeID (PreJoin s)          = do
+    (ScriptTree id _ _) <- get
+    insertInScriptTree nodeID (OpenJoinNode s)
+    pure id
+  join nodeID (UpdateJoin e ds k cs)   = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (UpdateJoinWithKeyFunctionNode e cs k)
     pure id

@@ -30,7 +30,7 @@ threeLittleCircles selector = do
   root        <- attach selector
   svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
   circleGroup <- svg  D3.+ (node Group [])
-  circles     <- circleGroup <+> Join Circle [32, 57, 293] circleAttributes keyIsID
+  circles     <- circleGroup <+> Join Circle [32, 57, 293] keyIsID circleAttributes
 
   pure circles
 
@@ -46,7 +46,7 @@ threeLittleCircles2 circleData selector = do
   svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
   circleGroup <- svg  D3.+ (node Group [])
 
-  circles     <- circleGroup <+> Join Circle circleData circleAttributes keyIsID
+  circles     <- circleGroup <+> Join Circle circleData keyIsID circleAttributes
 
   pure circles
 
@@ -76,6 +76,6 @@ threeLittleCircles3 circleData selector = do
   svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
   circleGroup <- svg  D3.+ (node Group [])
 
-  circles     <- circleGroup <+> Join Circle circleData circleAttributes keyIsID
+  circles     <- circleGroup <+> Join Circle circleData keyIsID circleAttributes
 
   pure circles

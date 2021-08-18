@@ -1,17 +1,17 @@
 module D3.Simulation.Functions where
 
+import D3.Node
 import Prelude
 
 import Control.Monad.State (class MonadState, State, get, gets, modify_)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
-import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getLinks_, getNodes_, onTick_, prepareSimUpdate_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
-import D3.Node (D3Link, D3_SimulationNode, NodeID)
+import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getLinks_, getNodes_, onTick_, updateSimData_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
 import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
 import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, enableOnlyTheseLabels, getHandle, getLabel, putForceInSimulation, setForceAttr, setForceAttrWithFilter)
 import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceLinksFilter(..), ForceNodesFilter(..), ForceStatus(..), LinkForceType(..), SimVariable(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (setForcesByLabel)
+import D3Tagless.Capabilities (SimDataRaw, SimDataCooked, setForcesByLabel)
 import Data.Array (intercalate)
 import Data.Array as A
 import Data.Foldable (traverse_)
@@ -189,15 +189,14 @@ simulationShowForces = do
       showTuple (Tuple label force) = show label <> " " <> show force
   pure $ intercalate "\n" $ showTuple <$> forceTuples
 
-simulationPrepareNodesAndLinks :: 
+simulationloadSimData :: 
   forall id d r m row. 
   Bind m =>
   MonadState { simulationState :: D3SimulationState_ | row } m =>
-  D3Selection_ -> -- the selection passed will determine which nodes.data() it attempts to merge this new data with
-  Array (D3_SimulationNode d) -> Array (D3Link id r) -> (Datum_ -> id)
-  -> m { nodes :: Array (D3_SimulationNode d), links :: Array (D3Link (D3_SimulationNode d) r) }
-simulationPrepareNodesAndLinks selection nodes links indexFn = do
-  pure $ prepareSimUpdate_ selection nodes links indexFn
+  SimDataRaw D3Selection_ d r id -> m (SimDataCooked D3Selection_ d r)
+simulationloadSimData simdata = do
+  let updatedData = updateSimData_ simdata.selections simdata."data".nodes simdata."data".links simdata.key
+  pure $ simdata { "data" = updatedData }
 
 simulationSetNodes :: forall m row d. 
   (MonadState { simulationState :: D3SimulationState_ | row } m) 
@@ -208,15 +207,15 @@ simulationSetNodes nodes = do
   let _ = ss_.simulation_ `setNodes_` nodes
   pure unit
 
-simulationSetLinks :: forall id m row datum r. 
+simulationSetLinks :: forall id m row d r. 
   (MonadState { simulationState :: D3SimulationState_ | row } m) 
   => Array (D3Link id r)
-  -> (datum -> id) -- keyFn is needed to tell D3 how to swizzle the NodeIDs to get object references
-  -> m Unit
+  -> (Datum_ -> Index_) -- keyFn is needed to tell D3 how to swizzle the NodeIDs to get object references
+  -> m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
 simulationSetLinks links keyFn = do
   { simulationState: SimState_ ss_} <- get
-  let _ = setLinks_ ss_.simulation_ links keyFn 
-  pure unit
+  let swizzledLinks = setLinks_ ss_.simulation_ links keyFn 
+  pure swizzledLinks
 
 simulationGetNodes :: forall m row d.
   (MonadState { simulationState :: D3SimulationState_ | row } m) => 
@@ -226,27 +225,27 @@ simulationGetNodes = do
   let opaqueNodes = getNodes_ ss_.simulation_
   pure $ unsafeCoerce opaqueNodes
 
-simulationGetLinks :: forall m row datum r. 
+simulationGetLinks :: forall m row d r. 
   (MonadState { simulationState :: D3SimulationState_ | row } m) => 
-  m (Array (D3Link datum r))
+  m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
 simulationGetLinks = do
   { simulationState: SimState_ ss_} <- get
-  let opaqueLinks = getLinksFromSimulation_ ss_.simulation_
-  pure $ unsafeCoerce opaqueLinks -- TODO notice the coerce here
+  let links = getLinksFromSimulation_ ss_.simulation_
+  pure links
 
-simulationAddSelection :: forall m row.  -- NB not polymorphic in selection because D3SimulationState_ isn't
-  (MonadState { simulationState :: D3SimulationState_ | row } m) =>
-  Label -> D3Selection_ -> m Unit
-simulationAddSelection label selection = do
-  { simulationState: SimState_ ss_} <- get
-  modify_ (\s -> s { simulationState = (SimState_ ss_ { selections = M.insert label selection ss_.selections } )})
+-- simulationAddSelection :: forall m row.  -- NB not polymorphic in selection because D3SimulationState_ isn't
+--   (MonadState { simulationState :: D3SimulationState_ | row } m) =>
+--   Label -> D3Selection_ -> m Unit
+-- simulationAddSelection label selection = do
+--   { simulationState: SimState_ ss_} <- get
+--   modify_ (\s -> s { simulationState = (SimState_ ss_ { selections = M.insert label selection ss_.selections } )})
 
-simulationGetSelection :: forall m row. 
-  (MonadState { simulationState :: D3SimulationState_ | row } m) =>
-  Label -> m (Maybe D3Selection_)
-simulationGetSelection label = do
-  { simulationState: SimState_ ss_} <- get
-  pure $ M.lookup label ss_.selections
+-- simulationGetSelection :: forall m row. 
+--   (MonadState { simulationState :: D3SimulationState_ | row } m) =>
+--   Label -> m (Maybe D3Selection_)
+-- simulationGetSelection label = do
+--   { simulationState: SimState_ ss_} <- get
+--   pure $ M.lookup label ss_.selections
 
 
 simulationCreateTickFunction :: forall selection row m. 

@@ -28,8 +28,8 @@ selectionModifySelection selection_ attributes = do
   let _ = foldl applyChainableSD3 selection_ attributes
   pure unit
 
-selectionJoin   :: forall datum m. (SelectionM D3Selection_ m) => D3Selection_ -> Join datum -> m D3Selection_
-selectionJoin selection (Join e ds cs k) = do
+selectionJoin   :: forall datum m. (SelectionM D3Selection_ m) => D3Selection_ -> Join D3Selection_ datum -> m D3Selection_
+selectionJoin selection (Join e ds k cs) = do
   let 
     element = show e
     selectS = d3SelectionSelectAll_ element selection
@@ -38,12 +38,14 @@ selectionJoin selection (Join e ds cs k) = do
     enterS' = foldl applyChainableSD3 enterS cs
   pure enterS'
 
-selectionJoin selection (UpdateJoin e ds cs k) = do
+selectionJoin selection (PreJoin selector) = do
+  pure $ d3SelectionSelectAll_ selector selection
+
+
+selectionJoin selection (UpdateJoin e ds k cs) = do
   let
-    element = show e
-    selectS = d3SelectionSelectAll_ element selection
-    dataS  = d3DataWithKeyFunction_ ds k selectS 
-    enterS = d3EnterAndAppend_ element dataS
+    dataS  = d3DataWithKeyFunction_ ds k selection 
+    enterS = d3EnterAndAppend_ (show e) dataS
     exitS  = d3Exit_ dataS
     _      = foldl applyChainableSD3 enterS  cs.enter
     _      = foldl applyChainableSD3 exitS   cs.exit

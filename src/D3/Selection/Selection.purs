@@ -3,10 +3,9 @@ module D3.Selection where
 import D3.FFI
 
 import D3.Attributes.Instances (AttributeSetter(..), Listener_, attributeLabel, unboxAttr)
-import D3.Data.Types (D3Selection_, Datum_, Element, MouseEvent, Transition)
+import D3.Data.Types (D3Selection_, Datum_, Element, MouseEvent, Transition, Selector)
 import D3.Zoom (ZoomConfig)
 import Data.Array (foldl)
--- import Data.Maybe.Last (Last)
 import Prelude (class Eq, class Ord, class Show, Unit, show, (<>))
 
 -- type D3Selection  = Last D3Selection_
@@ -19,17 +18,15 @@ data DragBehavior =
 data Behavior selection = Drag DragBehavior
                         | Zoom (ZoomConfig selection)
 
-data Join d = Join       Element (Array d) (Array ChainableS) ComputeKeyFunction_
-            | UpdateJoin Element (Array d) EnterUpdateExit    ComputeKeyFunction_
-
--- -- TODO could do the coerce to Index_ needed by keyFunction in here so it doesn't need to be done in DSL code
--- computeKeyWith :: forall d.  ComputeKeyFunction_ -> Join d -> Join d
--- computeKeyWith keyFunction = 
---   case _ of
---     Join e ds cs                        -> JoinWithKeyFunction e ds cs keyFunction
---     -- UpdateJoin e ds cs                  -> UpdateJoinWithKeyFunction e ds cs keyFunction
---     JoinWithKeyFunction e ds cs _       -> JoinWithKeyFunction e ds cs keyFunction
---     UpdateJoinWithKeyFunction e ds cs _ -> UpdateJoinWithKeyFunction e ds cs keyFunction
+-- Join requires a type parameter to determine which interpreter to use
+data Join :: forall k. k -> Type -> Type
+data Join selection d = 
+    Join       Element (Array d) ComputeKeyFunction_ (Array ChainableS) 
+  -- PreJoin pairs with UpdateJoin to allow us to split the setup and the update functions
+  -- as is done in idiomatic D3 in JavaScript, this is necessary in order to capture the 
+  -- previously bound data so that the enter and exit selections can be computed
+  | PreJoin (Selector selection)
+  | UpdateJoin Element (Array d) ComputeKeyFunction_ EnterUpdateExit 
 
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName

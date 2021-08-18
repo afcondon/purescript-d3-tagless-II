@@ -130,19 +130,18 @@ parent =
 
   renderExample :: ParentState -> H.ComponentHTML ParentAction Slots m
   renderExample = do
-    let lesMisSimulation = initialSimulationState 1
-        spagoSimulation  = initialSimulationState 2
     case _ of
-      None            -> HH.slot_ _index     unit Spago.component spagoSimulation -- Index.component unit
-      -- None            -> HH.slot_ _index     unit LesMis.component lesMisSimulation -- Index.component unit
+    -- TODO write an index page that explains the project
       -- None            -> HH.slot_ _index     unit Index.component unit
+      None            -> HH.slot_ _index     unit Spago.component
+      -- None            -> HH.slot_ _index     unit LesMis.component lesMisSimulation
       ExampleCircles  -> HH.slot_ _circles   unit Circles.component unit
       ExampleGUP      -> HH.slot_ _gup       unit GUP.component GUP.Paused
       ExampleTrees    -> HH.slot_ _trees     unit Trees.component unit 
       ExampleMetaTree -> HH.slot_ _metatree  unit MetaTree.component unit 
       ExamplePrinter  -> HH.slot_ _printtree unit PrintTree.component unit 
-      ExampleLesMis   -> HH.slot_ _lesmis    unit LesMis.component lesMisSimulation
-      ExampleSpago    -> HH.slot_ _spago     unit Spago.component spagoSimulation 
+      ExampleLesMis   -> HH.slot_ _lesmis    unit LesMis.component
+      ExampleSpago    -> HH.slot_ _spago     unit Spago.component
       -- _ -> HH.div_ [ HH.text "That example is currently not available" ]
 
 

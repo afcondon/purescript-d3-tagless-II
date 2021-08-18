@@ -15,8 +15,8 @@ import Type.Row (type (+))
 -- ============================================================================================================================
 type NodeID = Int -- REVIEW won't always be an Int, could be a String, but why complicate the types prematurely
 -- a link specialized to a particular type of object, it can be initialized using IDs for objects of that type
+type D3LinkDatum       l row = Record    ( source :: l, target :: l | row )
 newtype D3Link         l row = D3LinkID  { source :: l, target :: l | row }
-type D3LinkDatum l row = Record ( source :: l, target :: l | row )
 newtype D3LinkSwizzled l row = D3LinkObj { source :: l, target :: l | row }
 
 -- ============================================================================================================================

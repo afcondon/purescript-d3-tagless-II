@@ -10,7 +10,7 @@ import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), node)
 import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SimulationM, addTickFunction, attach, on, prepareNodesAndLinks)
+import D3Tagless.Capabilities (class SimulationM, addTickFunction, attach, on, loadSimData)
 import D3Tagless.Capabilities as D3
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
@@ -87,11 +87,11 @@ graphScript model selector = do
   
   -- in contrast to a simple SelectionM function, we have additional typeclass capabilities for simulation
   -- which we use here to introduce the nodes and links to the simulation
-  update <- prepareNodesAndLinks nodesGroup model.nodes model.links datum_.id -- will add links force if none is present
+  simData <- loadSimData { selections: { nodes: nodesGroup, links: linksGroup}, "data": { nodes: model.nodes, links: model.links}, key: keyIsID }
   
   -- joining the data from the model after it has been put into the simulation
-  nodesSelection <- nodesGroup D3.<+> Join Circle update.nodes [ radius 5.0, fill datum_.colorByGroup ] keyIsID
-  linksSelection <- linksGroup D3.<+> Join Line   update.links [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ] keyIsID
+  nodesSelection <- nodesGroup D3.<+> Join Circle simData.data.nodes keyIsID [ radius 5.0, fill datum_.colorByGroup ] 
+  linksSelection <- linksGroup D3.<+> Join Line   simData.data.links keyIsID [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
 
   -- both links and nodes are updated on each step of the simulation, 
   -- in this case it's a simple translation of underlying (x,y) data for the circle centers

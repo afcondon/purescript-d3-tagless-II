@@ -12,6 +12,7 @@ import D3.Scales (d3SchemeCategory10N_, d3SchemeDiverging10N_)
 import Data.Array (foldl, partition)
 import Data.Graph (Graph, fromMap)
 import Data.Int (toNumber)
+import Data.Lens.Record (prop)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Newtype (unwrap)
@@ -21,8 +22,27 @@ import Data.Set as S
 import Data.Tuple (Tuple(..))
 import Math (pi, sqrt, (%))
 import Math as Math
+import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Web.Event.Internal.Types (Event)
+
+-- Model data types specialized with inital data
+type SpagoTreeNode = D3TreeRow         (EmbeddedData SpagoNodeData                                  + ())
+type SpagoSimNode  = D3_SimulationNode ( SpagoNodeRow  + D3_XY + D3_VxyFxy + D3_FocusXY + D3_Radius + ()) -- note we've woven in focusXY so that we can cluster the nodes
+
+type SpagoModel = { 
+    links :: Array SpagoGraphLinkID
+  , nodes :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
+  , graph :: Graph NodeID SpagoNodeData
+  , tree  :: Maybe (Tuple NodeID SpagoTreeNode)
+  , maps  :: { name2ID    :: M.Map String NodeID
+             , id2Name    :: M.Map NodeID String
+             , id2Node    :: M.Map NodeID SpagoNodeData
+             , id2Package :: M.Map NodeID NodeID
+             , id2LOC     :: M.Map NodeID Number
+             , id2XYLeaf  :: M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
+             }
+}
 
 tree_datum_ = {
     x           : _.x                <<< unboxD3TreeNode
@@ -188,24 +208,6 @@ isUsedModule (D3SimNode d) =
                     then true
                     else false
               
--- Model data types specialized with inital data
-type SpagoTreeNode = D3TreeRow         (EmbeddedData SpagoNodeData                                  + ())
-type SpagoSimNode  = D3_SimulationNode ( SpagoNodeRow  + D3_XY + D3_VxyFxy + D3_FocusXY + D3_Radius + ()) -- note we've woven in focusXY so that we can cluster the nodes
-
-type SpagoModel = { 
-    links :: Array SpagoGraphLinkID
-  , nodes :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
-  , graph :: Graph NodeID SpagoNodeData
-  , tree  :: Maybe (Tuple NodeID SpagoTreeNode)
-  , maps  :: { name2ID    :: M.Map String NodeID
-             , id2Name    :: M.Map NodeID String
-             , id2Node    :: M.Map NodeID SpagoNodeData
-             , id2Package :: M.Map NodeID NodeID
-             , id2LOC     :: M.Map NodeID Number
-             , id2XYLeaf  :: M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
-             }
-}
-
 upgradeSpagoNodeData :: M.Map NodeID (Array NodeID) -> SpagoNodeData -> SpagoSimNode
 upgradeSpagoNodeData sourcesMap node = D3SimNode { 
     links        : node.links { sources = fromMaybe [] $ M.lookup node.id sourcesMap }
@@ -258,9 +260,9 @@ offsetY yOffset xy = xy { y = xy.y + yOffset }
 pinNode :: PointXY -> SpagoSimNode -> SpagoSimNode
 pinNode xy (D3SimNode node) = D3SimNode (node { fx = notNull xy.x, fy = notNull xy.y } )
 
-pinTreeNode :: SpagoSimNode -> Unit
+pinTreeNode :: SpagoSimNode -> SpagoSimNode
 pinTreeNode node@(D3SimNode { connected: true }) = pinTreeNode_ node -- NB side-effecting function
-pinTreeNode _ = unit
+pinTreeNode node = node -- non-connected nodes are untouched
 
 setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
 setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })

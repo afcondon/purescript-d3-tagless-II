@@ -4,11 +4,12 @@ import Prelude
 
 import D3.Attributes.Instances (AttributeSetter, Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_)
-import D3.FFI (D3ForceHandle_, SimulationConfig_, initSimulation_)
+import D3.FFI (D3ForceHandle_, SimulationConfig_, defaultKeyFunction_, initSimulation_)
 import D3.Selection (ChainableS)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
+import Data.Nullable (Nullable, null)
 import Debug (trace)
 
 data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number
@@ -114,7 +115,9 @@ data D3SimulationState_ = SimState_ {
   , forces        :: M.Map Label Force
   , ticks         :: M.Map Label (Step D3Selection_)
 
-  , selections    :: M.Map Label D3Selection_
+  , nodes         :: Nullable D3Selection_
+  , links         :: Nullable D3Selection_
+  , keyFunction   :: (Datum_ -> Index_)
 
   , alpha         :: Number
   , alphaTarget   :: Number
@@ -128,10 +131,13 @@ data D3SimulationState_ = SimState_ {
 initialSimulationState :: Int -> D3SimulationState_
 initialSimulationState id = SimState_
    {  -- common state for all D3 Simulation
-      simulation_  : initSimulation_ defaultConfigSimulation  
+      simulation_  : initSimulation_ defaultConfigSimulation
+    , nodes        : null
+    , links        : null
+    , keyFunction  : defaultConfigSimulation.keyFunction
+
     , forces       : M.empty
     , ticks        : M.empty
-    , selections   : M.empty
     -- parameters of the D3 simulation engine
     , alpha        : defaultConfigSimulation.alpha
     , alphaTarget  : defaultConfigSimulation.alphaTarget
@@ -149,4 +155,6 @@ defaultConfigSimulation = {
     , alphaMin     : 0.0001
     , alphaDecay   : 0.0228
     , velocityDecay: 0.4
+    , keyFunction  : defaultKeyFunction_
 }
+

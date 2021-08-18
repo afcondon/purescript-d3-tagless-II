@@ -109,48 +109,49 @@ type SimulationConfig_ = {
     , alphaMin      :: Number
     , alphaDecay    :: Number
     , velocityDecay :: Number
+    , keyFunction   :: Datum_ -> Index_
 }
 
 foreign import initSimulation_         ::                  SimulationConfig_ -> D3Simulation_
 foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_   -> D3Simulation_
 
-foreign import prepareSimUpdate_ :: 
-  forall id r d datum. 
-     D3Selection_ 
+foreign import updateSimData_ :: 
+  forall id r d. 
+     { nodes :: D3Selection_, links :: D3Selection_ }
   -> Array (D3_SimulationNode d) 
   -> Array (D3Link id r) 
-  -> (datum -> id) 
-  -> { nodes :: Array (D3_SimulationNode d), links :: Array (D3Link (D3_SimulationNode d) r) }
+  -> (Datum_ -> Index_) 
+  -> { nodes :: Array (D3_SimulationNode d), links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
 
--- foreign import spagoLinkKeyFunction_   :: forall d r. D3Link d r -> String
--- REVIEW the key function for a link is actually trickier than that for a simple datum, or at least as implemented it is
--- REVIEW it might be worth re-considering how simple the "simplest" id generator of "sourceID-targetID" really is?
--- REVIEW especially considering the complexity it brings elsewhere
-foreign import spagoLinkKeyFunction_   :: Datum_ -> Index_
+foreign import getLinkID_              :: (Datum_ -> Index_) -> Datum_ -> Index_
+foreign import defaultKeyFunction_     :: Datum_ -> Index_
 foreign import getNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
 foreign import setNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Unit
 
 -- removing forces should be done by simulation manager and doesn't need more indirection
 -- foreign import removeForceByName_  :: D3Simulation_ -> String -> D3Simulation_
 foreign import setLinks_ :: 
-  forall id r datum.
+  forall id r d.
   D3Simulation_
   -> Array (D3Link id r)
-  -> (datum -> id)
-  -> Unit
+  -> (Datum_ -> Index_)
+  -> Array (D3LinkSwizzled (D3_SimulationNode d) r)
 foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_
 foreign import getLinks_               :: forall d r. D3ForceHandle_ -> Array (D3Link d r)
-foreign import getLinksFromSimulation_ :: forall d r. D3Simulation_ -> String -> Array (D3Link d r) -- get links from named link force in simulation
+foreign import getLinksFromSimulation_ :: forall d r. D3Simulation_ -> Array (D3LinkSwizzled (D3_SimulationNode d) r)
 
 foreign import startSimulation_        :: D3Simulation_ -> Unit
 foreign import stopSimulation_         :: D3Simulation_ -> Unit
 
-foreign import pinNode_              :: forall d. Number -> Number -> D3_SimulationNode d -> Unit
-foreign import pinNamedNode_         :: forall d. String -> Number -> Number -> D3_SimulationNode d -> Unit
 foreign import setInSimNodeFlag_     :: forall d. D3_SimulationNode d -> Unit
 foreign import unsetInSimNodeFlag_   :: forall d. D3_SimulationNode d -> Unit
-foreign import pinTreeNode_          :: forall d. D3_SimulationNode d -> Unit -- side-effecting function
-foreign import unpinNode_            :: forall d. D3_SimulationNode d -> Unit
+
+-- following functions modify the node and return it
+-- TODO fix all the FFI returns for these!!!
+foreign import pinNode_              :: forall d. Number -> Number -> D3_SimulationNode d -> D3_SimulationNode d
+foreign import pinNamedNode_         :: forall d. String -> Number -> Number -> D3_SimulationNode d -> D3_SimulationNode d
+foreign import pinTreeNode_          :: forall d. D3_SimulationNode d -> D3_SimulationNode d -- modifies fx/fy
+foreign import unpinNode_            :: forall d. D3_SimulationNode d -> D3_SimulationNode d -- deletes fx/fy if present
 foreign import setPositionToNaN_     :: forall d. Array (D3_SimulationNode d) -> Unit
 
 -- NB mutating function

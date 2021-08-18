@@ -73,7 +73,8 @@ lesMisForces =
     , enableForce $ createForce "many body"   ForceManyBody allNodes []
     , enableForce $ createForce "collision"   ForceCollide  allNodes [ F.radius 4.0 ]
     ,               createForce "collision20" ForceCollide  allNodes [ F.radius 20.0] -- NB initially not enabled
-    -- links force is enabled by default!!!
+    -- TODO explicitly add links with the appropriate keyFn to initialize it
+    -- , enableForce $ createForce "links"
     ]
 
 component :: forall query output m. 
@@ -176,8 +177,8 @@ handleAction = case _ of
     response <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
     let graph = readGraphFromFileContents response
 
-    runEffectSimulation (addForces lesMisForces)
-    runEffectSimulation (LesMis.graphScript graph "div.svg-container")
+    runEffectSimulation $ addForces lesMisForces
+    runEffectSimulation $ LesMis.graphScript graph "div.svg-container"
 
   Finalize ->  runEffectSimulation removeAllForces
 
@@ -187,8 +188,8 @@ handleAction = case _ of
                       SmallRadius -> BigRadius
                       BigRadius   -> SmallRadius
     case newSetting of
-      SmallRadius -> runEffectSimulation (setForcesByLabel { enable: ["collision"], disable: ["collision20"]} )
-      BigRadius   -> runEffectSimulation (setForcesByLabel { enable: ["collision20"], disable: ["collision"]} )
+      SmallRadius -> runEffectSimulation $ setForcesByLabel { enable: ["collision"], disable: ["collision20"]} 
+      BigRadius   -> runEffectSimulation $ setForcesByLabel { enable: ["collision20"], disable: ["collision"]} 
     modify_ (\s -> s { manybodySetting = newSetting })
     simulationStart
 
@@ -198,12 +199,12 @@ handleAction = case _ of
                       LinksOn  -> LinksOff
                       LinksOff -> LinksOn
     case newSetting of
-      LinksOn  -> runEffectSimulation (setForcesByLabel { enable: ["links"], disable: []} )
-      LinksOff -> runEffectSimulation (setForcesByLabel { enable: [], disable: ["links"]} )
+      LinksOn  -> runEffectSimulation $ setForcesByLabel { enable: ["links"], disable: []} 
+      LinksOff -> runEffectSimulation $ setForcesByLabel { enable: [], disable: ["links"]} 
     modify_ (\s -> s { linksSetting = newSetting })
     simulationStart
 
-  Freeze  -> runEffectSimulation (setConfigVariable $ Alpha 0.0)
+  Freeze  -> runEffectSimulation $ setConfigVariable $ Alpha 0.0
   Reheat  -> simulationStart
 
 

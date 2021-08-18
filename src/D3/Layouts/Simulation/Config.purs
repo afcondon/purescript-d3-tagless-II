@@ -77,8 +77,8 @@ index :: ∀ a. ToAttr Number a => a -> ChainableF -- TODO in fact this would be
 index = ForceT <<< AttributeSetter "distance" <<< toAttr
 
 -- these next two are for specifying how a link should swizzle its "id" to an object reference
-intKey :: (Datum_ -> Number)  -> ChainableF
-intKey = ForceT <<< AttributeSetter "keyFn" <<< NumberAttr <<< Fn
+numKey :: (Datum_ -> Number)  -> ChainableF
+numKey = ForceT <<< AttributeSetter "keyFn" <<< NumberAttr <<< Fn
 
 stringKey :: (Datum_ -> String) -> ChainableF
 stringKey = ForceT <<< AttributeSetter "keyFn" <<< StringAttr <<< Fn

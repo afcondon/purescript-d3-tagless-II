@@ -22,6 +22,7 @@ import Ocelot.Block.Format as Format
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
+import Stories.Spago.Lenses (_countDataLinks, _countDataNodes)
 import Stories.Spago.State (State)
 import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
@@ -34,9 +35,9 @@ renderSimState state =
     , HH.p_
         [ HH.text $ "class: " <> state.svgClass ] 
     , HH.p_
-        [ HH.text $ "link count: " <> show (length state.activeLinks) ] 
+        [ HH.text $ "link count: " <> show (_countDataLinks state) ] 
     , HH.p_
-        [ HH.text $ "node count:" <> show (length state.activeNodes )] 
+        [ HH.text $ "node count:" <> show (_countDataNodes state)] 
     , HH.p_
         [ HH.text $ "initial forces:" <> show state.activeForces ] 
     ]

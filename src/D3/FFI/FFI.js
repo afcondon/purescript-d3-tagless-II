@@ -323,9 +323,10 @@ exports.selectionOn_ = selection => event => callback => {
 // *****************************************************************************************************************
 exports.linksForceName = "links"
 //            SIMULATION functions
-exports.initSimulation_ = config => { // TODO bug not passed
+exports.initSimulation_ = config => {
   const simulation = d3
-    .forceSimulation()
+    .forceSimulation([])
+    .force('link', d3.forceLink([]).id(config.keyFunction))
     .alpha(config.alpha) // default is 1
     .alphaTarget(config.alphaTarget) // default is 0
     .alphaMin(config.alphaMin) // default is 0.0001
@@ -351,30 +352,21 @@ exports.configSimulation_ = simulation => config => {
 // keyIsID :: ComputeKeyFunction
 exports.keyIsID = d => d.id;
 
-// prepareSimUpdate_ :: D3Selection_ -> Array NativeNode -> Array NativeNode -> (Datum_ -> Id) -> { nodes :: Array NativeNode, links: Array NativeLinks }
-exports.prepareSimUpdate_ = nodeSelection => nodes => links => idFn => {
-  if (typeof (nodeSelection.data()) === `undefined`) {
-    return { nodes: nodes, links: links } // there is no previous selection so we have nothing to carry over
-  }
-  const old = new Map(nodeSelection.data().map(d => [idFn(d), d])); // creates a map from our chosen id to the old obj reference
-  let updateNodes = nodes.map(d => Object.assign(old.get(idFn(d)) || {}, d));
-  // REVIEW maybe the problem is that there already is an index on the nodes? perhaps stripping it off will help
-  for (let index = 0; index < updateNodes.length; index++) {
-    delete updateNodes[index].index;
-  }
-
-  // TODO now for the links
-  // this needs to swizzle id for object reference if source/target is an object
-  // and it needs to be the object reference from the updateNodes
-  // lastly - shouldn't links disappear if they are not legit?
-  let updateLinks = links.map(d => Object.assign({}, d)); 
+// updateSimData_ :: D3Selection_ -> Array NativeNode -> Array NativeNode -> (Datum_ -> Id) -> { nodes :: Array NativeNode, links: Array NativeLinks }
+exports.updateSimData_ = selections => nodes => links => keyFn => {
+  // const old = new Map(nodeSelection.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
+  // let updateNodes = nodes.map(d => Object.assign(old.get(keyFn(d)) || {}, d));
+  // let updateLinks = links.map(d => Object.assign({}, d)); 
     
   return { nodes: updateNodes, links: updateLinks}
 }
-exports.spagoLinkKeyFunction_ = link => {
-  // REVIEW could go further and explicitly test id is number or id is string? worth it??
-  const sourceID = (typeof link.source == `object`) ? link.source.id : link.source
-  const targetID = (typeof link.target == `object`) ? link.target.id : link.target
+// defaultKeyFunction_     :: Datum_ -> Index_
+exports.defaultKeyFunction_ = d => d.id
+// this will work on both swizzled and unswizzled links
+// TODO check if it is really necessary later
+exports.getLinkID_ = keyFn => link => {
+  const sourceID = (typeof link.source == `object`) ? keyFn(link.source) : link.source
+  const targetID = (typeof link.target == `object`) ? keyFn(link.target) : link.target
   return sourceID + "-" + targetID 
 }
 //  :: Simulation -> Array NativeNode -> Array NativeNode

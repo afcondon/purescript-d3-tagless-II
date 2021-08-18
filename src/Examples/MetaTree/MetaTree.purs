@@ -75,22 +75,15 @@ treeScript (Tuple w h) tree = do
   links      <- container `appendElement` (node Group [ classed "links"])
   nodes      <- container `appendElement` (node Group [ classed "nodes"])
 
-  theLinks_  <- links <+> Join
-                          Path
-                          (links_ tree)
+  theLinks_  <- links <+> Join Path (links_ tree) keyIsID
                           [ strokeWidth   1.5
                           , strokeColor   "black"
                           , strokeOpacity 0.4
                           , fill          "none"
                           , verticalLink
                           ]
-                          keyIsID
 
-  nodeJoin_  <- nodes <+> Join
-                          Group
-                          (descendants_ tree)
-                          [ transform [ datum_.positionXY ] ]
-                          keyIsID
+  nodeJoin_  <- nodes <+> Join Group (descendants_ tree) keyIsID [ transform [ datum_.positionXY ] ]
   
 
   theNodes <- nodeJoin_ `appendElement` 
