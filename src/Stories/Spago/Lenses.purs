@@ -22,8 +22,8 @@ import Type.Proxy (Proxy(..))
 chooseSimNodes :: (SpagoSimNode -> Boolean) -> State -> Maybe (Array SpagoSimNode)
 chooseSimNodes fn state = filter fn <$> preview _modelNodes state
 
-chooseSimLInks :: (SpagoGraphLinkID -> Boolean) -> State -> Maybe (Array SpagoGraphLinkID)
-chooseSimLInks fn state = filter fn <$> preview _modelLinks state
+chooseSimLinks :: (SpagoGraphLinkID -> Boolean) -> State -> Maybe (Array SpagoGraphLinkID)
+chooseSimLinks fn state = filter fn <$> preview _modelLinks state
 
 
 -- COMPOSITIONs of optics 

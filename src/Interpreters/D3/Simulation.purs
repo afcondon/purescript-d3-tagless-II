@@ -10,7 +10,7 @@ import D3.Selection (applyChainableSD3)
 import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionModifySelection)
 import D3.Simulation.Types (D3SimulationState_(..), Step(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM)
-import Data.Tuple (Tuple, fst, snd)
+import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, Unit, bind, discard, liftA1, pure, unit, ($), (<#>))
@@ -40,6 +40,17 @@ runEffectSimulation state_T = do
     state <- get
     state' <- liftEffect $ exec_D3M_Simulation state state_T
     modify_ (\_ -> state')
+
+evalEffectSimulation :: forall m a row.
+  Bind m =>
+  MonadState { simulationState :: D3SimulationState_ | row } m =>
+  MonadEffect m =>
+  D3SimM row D3Selection_ a -> m a
+evalEffectSimulation state_T = do
+    state <- get
+    (Tuple a state') <- liftEffect $ run_D3M_Simulation state state_T
+    modify_ (\_ -> state')
+    pure a
 
 derive newtype instance functorD3SimM     :: Functor           (D3SimM row selection)
 derive newtype instance applyD3SimM       :: Apply             (D3SimM row selection)

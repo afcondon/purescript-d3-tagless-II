@@ -4,24 +4,22 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, modify_, put)
+import Control.Monad.State (class MonadState, modify_)
 import D3.Examples.LesMiserables as LesMis
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationStart)
-import D3.Simulation.Types (D3SimulationState_, Force, RegularForceType(..), SimVariable(..), allNodes)
+import D3.Simulation.Types (D3SimulationState_, Force, RegularForceType(..), SimVariable(..), allNodes, initialSimulationState)
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Capabilities (ForceConfigLists, addForces, removeAllForces, setConfigVariable, setForcesByLabel)
-import D3Tagless.Instance.Simulation (exec_D3M_Simulation, runEffectSimulation)
+import D3Tagless.Capabilities (addForces, removeAllForces, setConfigVariable, setForcesByLabel)
+import D3Tagless.Instance.Simulation (runEffectSimulation)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
-import Effect.Aff (Fiber)
 import Effect.Aff.Class (class MonadAff)
-import Halogen (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -40,8 +38,6 @@ data Action
   | Freeze
   | Reheat
 
-type Input = D3SimulationState_
-
 data ManyBodyParam = SmallRadius | BigRadius
 derive instance Eq ManyBodyParam
 instance Show ManyBodyParam where
@@ -59,6 +55,7 @@ type State = {
   , linksSetting    :: LinksSetting
   , blurb           :: Expandable.Status
   , code            :: Expandable.Status
+  , forces          :: Array Force
 }
 
 _blurb :: Lens' State Expandable.Status
@@ -67,21 +64,11 @@ _blurb = prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
-lesMisForces :: Array Force
-lesMisForces = 
-    [ enableForce $ createForce "center"      ForceCenter   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-    , enableForce $ createForce "many body"   ForceManyBody allNodes []
-    , enableForce $ createForce "collision"   ForceCollide  allNodes [ F.radius 4.0 ]
-    ,               createForce "collision20" ForceCollide  allNodes [ F.radius 20.0] -- NB initially not enabled
-    -- TODO explicitly add links with the appropriate keyFn to initialize it
-    -- , enableForce $ createForce "links"
-    ]
-
 component :: forall query output m. 
   MonadAff m => 
-  H.Component query Input output m
+  H.Component query Unit output m
 component = H.mkComponent
-  { initialState
+  { initialState: const initialState
   , render
   , eval: H.mkEval $ H.defaultEval
     { handleAction = handleAction
@@ -89,13 +76,19 @@ component = H.mkComponent
     , finalize   = Just Finalize }
   }
   where
-  initialState :: Input -> State
-  initialState simulation = { 
-        simulationState: simulation
+  initialState :: State
+  initialState = { 
+        simulationState: initialSimulationState 2
       , manybodySetting: SmallRadius
       , linksSetting: LinksOn
       , blurb: Expandable.Collapsed
       , code: Expandable.Collapsed
+      , forces: [ 
+          enableForce $ createForce "center"      ForceCenter   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+        , enableForce $ createForce "many body"   ForceManyBody allNodes []
+        , enableForce $ createForce "collision"   ForceCollide  allNodes [ F.radius 4.0 ]
+        ,               createForce "collision20" ForceCollide  allNodes [ F.radius 20.0] -- NB initially not enabled
+        ]
     }
 
   controls state = 
@@ -119,7 +112,7 @@ component = H.mkComponent
     ]
 
     
-  render :: State -> H.ComponentHTML Action () m
+  -- render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div [ Utils.tailwindClass "story-container" ]
       [ HH.div -- [ Utils.tailwindClass "story-panel"]
@@ -134,7 +127,7 @@ component = H.mkComponent
               , inputId: "show-blurb"
               }
               [ Toggle.toggle
-                [ HP.id_ "show-blurb"
+                [ HP.id "show-blurb"
                 , HP.checked
                   $ Expandable.toBoolean state.blurb
                 , HE.onChange \_ -> ToggleCard _blurb
@@ -151,7 +144,7 @@ component = H.mkComponent
                 , inputId: "show-code"
                 }
               [ Toggle.toggle
-                [ HP.id_ "show-code"
+                [ HP.id "show-code"
                 , HP.checked
                   $ Expandable.toBoolean state.code
                 , HE.onChange \_ -> ToggleCard _code
@@ -177,7 +170,8 @@ handleAction = case _ of
     response <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
     let graph = readGraphFromFileContents response
 
-    runEffectSimulation $ addForces lesMisForces
+    state <- H.get
+    runEffectSimulation $ addForces state.forces
     runEffectSimulation $ LesMis.graphScript graph "div.svg-container"
 
   Finalize ->  runEffectSimulation removeAllForces

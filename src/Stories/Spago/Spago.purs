@@ -4,20 +4,18 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, get, modify_)
-import D3.Data.Tree (TreeLayout(..))
-import D3.Examples.Spago.Draw (graphAttrs, treeAttrs)
+import Control.Monad.State (class MonadState, modify_)
+import D3.Examples.Spago.Draw (graphAttrs)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, convertFilesToGraphModel, isPackage, isUsedModule, noFilter)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (pinNamedNode_, pinTreeNode_, unpinNode_)
-import D3.Simulation.Forces (getHandle)
 import D3.Simulation.Functions (simulationGetNodes, simulationStart, simulationStop)
-import D3.Simulation.Types (D3SimulationState_, SimVariable(..), initialSimulationState)
+import D3.Simulation.Types (SimVariable(..), initialSimulationState)
 import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, toggleForceByLabel)
-import D3Tagless.Instance.Simulation (runEffectSimulation)
-import Data.Array (filter, length)
+import D3Tagless.Instance.Simulation (evalEffectSimulation, runEffectSimulation)
+import Data.Array (length)
 import Data.Either (hush)
 import Data.Lens (over, set)
 import Data.Map as M
@@ -27,14 +25,12 @@ import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
-import Stories.Spago.Forces (forces, gridForceSettings, gridForceSettings2, packageForceSettings, treeForceSettings)
+import Stories.Spago.Forces (forces, gridForceSettings, packageForceSettings, treeForceSettings)
 import Stories.Spago.HTML (render)
-import Stories.Spago.Lenses (_activeForces, _class, _dataNodes, _nodeDataGet, chooseSimLInks, chooseSimNodes)
+import Stories.Spago.Lenses (_activeForces, _class, _nodesForSim)
 import Stories.Spago.State (State)
-
-type Input = D3SimulationState_
   
-component :: forall query output m. MonadAff m => H.Component query Input output m
+component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
   { initialState: const initialState
   , render
@@ -50,8 +46,8 @@ component = H.mkComponent
       simulationState: initialSimulationState 1 -- TODO replace number with unit when all working satisfactorily 
     , svgClass: "cluster"
     , model: Nothing
-    , activeLinks: []
-    , activeNodes: []
+    , simDataRaw: Nothing
+    , simDataCooked: Nothing
     , activeForces: []
   }
 
@@ -59,10 +55,10 @@ handleAction :: forall m. Bind m => MonadAff m => MonadState State m =>
   Action -> m Unit
 handleAction = case _ of
   Initialize -> do    
-    (model :: Maybe SpagoModel) <- H.liftAff getModel
-    let _ = trace { action: "Initialize", model: model } \_ -> unit
-    H.modify_ (\s -> s { model = model })
-    runEffectSimulation Graph.setup
+    (maybeModel :: Maybe SpagoModel) <- H.liftAff getModel
+    let _ = trace { action: "Initialize", model: maybeModel } \_ -> unit
+    H.modify_ (\s -> s { model = maybeModel })
+    _ <- evalEffectSimulation Graph.setup
     runEffectSimulation (addForces forces)
     -- handleAction $ Scene PackageGraph
 
@@ -78,9 +74,8 @@ handleAction = case _ of
     unpinActiveNodes
 
     state <- H.get
-    let _ = trace { action: "Scene PackageGrid", model: state.model } \_ -> unit
     simulationStop
-    runEffectSimulation $ Graph.updateSimulation state.simData graphAttrs
+    runEffectSimulation $ Graph.updateSimulation state.simDataRaw graphAttrs
     runEffectSimulation $ enableOnlyTheseForces state.activeForces
     simulationStart
 
@@ -96,7 +91,7 @@ handleAction = case _ of
     state <- H.get
     let _ = trace { action: "Scene PackageGraph", model: state.model } \_ -> unit
     simulationStop
-    runEffectSimulation $ Graph.updateSimulation state.activeNodes state.activeLinks graphAttrs
+    runEffectSimulation $ Graph.updateSimulation state.simDataRaw graphAttrs
     runEffectSimulation $ enableOnlyTheseForces state.activeForces
     simulationStart
 
@@ -126,7 +121,7 @@ handleAction = case _ of
 
     state <- H.get
     simulationStop
-    runEffectSimulation $ Graph.updateSimulation state.activeNodes state.activeLinks graphAttrs
+    runEffectSimulation $ Graph.updateSimulation state.simDataRaw graphAttrs
     simulationStart
 
   Filter (NodeFilter x) -> do
@@ -134,7 +129,7 @@ handleAction = case _ of
 
     state <- H.get
     simulationStop
-    runEffectSimulation $ Graph.updateSimulation state.activeNodes state.activeLinks graphAttrs
+    runEffectSimulation $ Graph.updateSimulation state.simDataRaw graphAttrs
     n <- simulationGetNodes
     let _ = trace { numNodes: length n }
     simulationStart
@@ -156,19 +151,19 @@ setActiveForces :: forall m. MonadState State m => Array String -> m Unit
 setActiveForces forces = modify_ $ set _activeForces forces
 
 setActiveLinks :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
-setActiveLinks fn = modify_ $ chooseSimLInks fn
+setActiveLinks fn = pure unit -- modify_ $ chooseSimLinks fn
 
 setActiveNodes :: forall m. MonadState State m => (SpagoSimNode -> Boolean) -> m Unit
-setActiveNodes fn = modify_ $ chooseSimNodes fn
+setActiveNodes fn = pure unit -- modify_ $ chooseSimNodes fn
 
 pinTreeNodes :: forall m. MonadState State m => m Unit
-pinTreeNodes = modify_ $ over _dataNodes (pinTreeNode_ <$> _)
+pinTreeNodes = modify_ $ over _nodesForSim (pinTreeNode_ <$> _)
 
 centerPinNamedNode :: forall m. MonadState State m => String -> m Unit
-centerPinNamedNode name = modify_ $ over _dataNodes ((pinNamedNode_ name 0.0 0.0) <$> _)
+centerPinNamedNode name = modify_ $ over _nodesForSim ((pinNamedNode_ name 0.0 0.0) <$> _)
 
 unpinActiveNodes :: forall m. MonadState State m => m Unit
-unpinActiveNodes = modify_ $ over _dataNodes (unpinNode_ <$> _)
+unpinActiveNodes = modify_ $ over _nodesForSim (unpinNode_ <$> _)
 
 -- getModel will try to build a model from files and to derive a dependency tree from Main
 -- the dependency tree will contain all nodes reachable from Main but NOT all links

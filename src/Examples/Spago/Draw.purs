@@ -16,11 +16,14 @@ import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, SimDataCooked, SimDataRaw, addTickFunction, attach, loadSimData, modifySelection, on, simulationHandle)
 import D3Tagless.Capabilities as D3
+import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
+import Data.String (toUpper)
 import Data.Tuple (Tuple(..))
 import Debug (trace)
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
+import Stories.Spago.Lenses (_activeForces, _class)
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
@@ -87,12 +90,13 @@ treeAttrs  = {
 }
 
 -- | recipe for this force layout graph
-setup :: forall m selection. 
+setup :: forall m selection row. 
   Bind m => 
   MonadEffect m =>
+  MonadState { simulationState :: D3SimulationState_, svgClass :: String | row } m =>
   SelectionM selection m =>
   SimulationM selection m =>
-  m { nodes :: selection, links :: selection }
+  m selection
 setup = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   simulation_ <- simulationHandle -- needed for click handler to stop / start simulation
@@ -117,7 +121,8 @@ setup = do
   nodes <- nodesGroup D3.<+> PreJoin "g.node"
   links <- linksGroup D3.<+> PreJoin "line.link"
   
-  pure { nodes, links }
+  modifying _class toUpper
+  pure root
 
 coerceLinks :: forall id r d. Array (D3Link id r) -> Array (D3Link (D3_SimulationNode d) r) 
 coerceLinks links = unsafeCoerce links
@@ -129,12 +134,11 @@ updateSimulation :: forall m row.
   MonadState { simulationState :: D3SimulationState_ | row } m =>
   SelectionM D3Selection_ m =>
   SimulationM D3Selection_ m =>
-  { nodes :: D3Selection_, links :: D3Selection_ } ->
   Maybe (SimDataRaw D3Selection_ SpagoDataRow SpagoLinkData NodeID) ->
   { circle :: Array ChainableS, labels :: Array ChainableS } -> 
-  m { nodes :: D3Selection_, links :: D3Selection_ }
-updateSimulation selections Nothing _ = pure selections
-updateSimulation selections (Just simdata) attrs = do
+  m Unit
+updateSimulation Nothing _ = pure unit
+updateSimulation (Just simdata) attrs = do
   simulation_ <- simulationHandle
   simData     <- loadSimData simdata
 
@@ -145,7 +149,7 @@ updateSimulation selections (Just simdata) attrs = do
                   , exit  : [ remove ] 
                   }
                   
-  nodesSelection <- selections.nodes D3.<+> joinNodes
+  nodesSelection <- simData.selections.nodes D3.<+> joinNodes
   
   -- now the links
   let joinLinks = UpdateJoin Line simData.data.links keyIsID
@@ -153,7 +157,7 @@ updateSimulation selections (Just simdata) attrs = do
                     , update: [ classed "graphlinkSimUpdate" ]
                     , exit  : [ remove ]
                     }
-  linksSelection <- selections.links D3.<+> joinLinks
+  linksSelection <- simData.selections.links D3.<+> joinLinks
 
   circle <- nodesSelection D3.+ (node Circle attrs.circle)
   _      <- circle `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle
@@ -164,7 +168,8 @@ updateSimulation selections (Just simdata) attrs = do
   addTickFunction "links" $
     Step linksSelection [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
   
-  pure { nodes: nodesSelection, links: linksSelection } -- return the selections
+  -- modifying { nodes: nodesSelection, links: linksSelection } -- return the selections
+  pure unit
 
 
 {-

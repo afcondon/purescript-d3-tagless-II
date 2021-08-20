@@ -133,15 +133,15 @@ parent =
     case _ of
     -- TODO write an index page that explains the project
       -- None            -> HH.slot_ _index     unit Index.component unit
-      None            -> HH.slot_ _index     unit Spago.component
-      -- None            -> HH.slot_ _index     unit LesMis.component lesMisSimulation
+      None            -> HH.slot_ _index     unit Spago.component unit
+      -- None            -> HH.slot_ _index     unit LesMis.component unit
       ExampleCircles  -> HH.slot_ _circles   unit Circles.component unit
       ExampleGUP      -> HH.slot_ _gup       unit GUP.component GUP.Paused
       ExampleTrees    -> HH.slot_ _trees     unit Trees.component unit 
       ExampleMetaTree -> HH.slot_ _metatree  unit MetaTree.component unit 
       ExamplePrinter  -> HH.slot_ _printtree unit PrintTree.component unit 
-      ExampleLesMis   -> HH.slot_ _lesmis    unit LesMis.component
-      ExampleSpago    -> HH.slot_ _spago     unit Spago.component
+      ExampleLesMis   -> HH.slot_ _lesmis    unit LesMis.component unit
+      ExampleSpago    -> HH.slot_ _spago     unit Spago.component unit
       -- _ -> HH.div_ [ HH.text "That example is currently not available" ]
 
 
