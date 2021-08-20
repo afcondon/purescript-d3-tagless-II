@@ -2,11 +2,11 @@ module D3.Simulation.Functions where
 
 import D3.Node
 import Prelude
+import D3.FFI 
 
 import Control.Monad.State (class MonadState, State, get, gets, modify_)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
-import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getLinks_, getNodes_, onTick_, updateSimData_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
 import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
 import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, enableOnlyTheseLabels, getHandle, getLabel, putForceInSimulation, setForceAttr, setForceAttrWithFilter)
 import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceLinksFilter(..), ForceNodesFilter(..), ForceStatus(..), LinkForceType(..), SimVariable(..), Step(..))
@@ -189,33 +189,18 @@ simulationShowForces = do
       showTuple (Tuple label force) = show label <> " " <> show force
   pure $ intercalate "\n" $ showTuple <$> forceTuples
 
-simulationloadSimData :: 
+simulationloadSimData :: -- TODO distinguish load from update here
   forall id d r m row. 
   Bind m =>
   MonadState { simulationState :: D3SimulationState_ | row } m =>
   SimDataRaw D3Selection_ d r id -> m (SimDataCooked D3Selection_ d r)
-simulationloadSimData simdata = do
-  let updatedData = updateSimData_ simdata.selections simdata."data".nodes simdata."data".links simdata.key
-  pure $ simdata { "data" = updatedData }
-
-simulationSetNodes :: forall m row d. 
-  (MonadState { simulationState :: D3SimulationState_ | row } m) 
-  => Array (D3_SimulationNode d) 
-  -> m Unit
-simulationSetNodes nodes = do
+simulationloadSimData rawData = do
   { simulationState: SimState_ ss_} <- get
-  let _ = ss_.simulation_ `setNodes_` nodes
-  pure unit
-
-simulationSetLinks :: forall id m row d r. 
-  (MonadState { simulationState :: D3SimulationState_ | row } m) 
-  => Array (D3Link id r)
-  -> (Datum_ -> Index_) -- keyFn is needed to tell D3 how to swizzle the NodeIDs to get object references
-  -> m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
-simulationSetLinks links keyFn = do
-  { simulationState: SimState_ ss_} <- get
-  let swizzledLinks = setLinks_ ss_.simulation_ links keyFn 
-  pure swizzledLinks
+  -- this next line should be unnecessary since it will be handled by the PreJoin / JoinUpdate stuff
+  -- let cookedData = d3UpdateNodesAndLinks_ rawData.selections rawData."data".nodes rawData."data".links rawData.key
+      _ = setNodes_ ss_.simulation_ cookedData.nodes
+      _ = setLinks_ ss_.simulation_ cookedData.links
+  pure $ rawData { "data" = cookedData }
 
 simulationGetNodes :: forall m row d.
   (MonadState { simulationState :: D3SimulationState_ | row } m) => 

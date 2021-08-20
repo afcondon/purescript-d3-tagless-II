@@ -352,18 +352,18 @@ exports.configSimulation_ = simulation => config => {
 // keyIsID :: ComputeKeyFunction
 exports.keyIsID = d => d.id;
 
-// updateSimData_ :: D3Selection_ -> Array NativeNode -> Array NativeNode -> (Datum_ -> Id) -> { nodes :: Array NativeNode, links: Array NativeLinks }
-exports.updateSimData_ = selections => nodes => links => keyFn => {
-  // const old = new Map(nodeSelection.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
-  // let updateNodes = nodes.map(d => Object.assign(old.get(keyFn(d)) || {}, d));
-  // let updateLinks = links.map(d => Object.assign({}, d)); 
-    
-  return { nodes: updateNodes, links: updateLinks}
-}
+// d3UpdateNodesAndLinks_ :: D3Selection_ -> Array NativeNode -> Array NativeNode -> (Datum_ -> Id) -> { nodes :: Array NativeNode, links: Array NativeLinks }
+// exports.d3UpdateNodesAndLinks_ = selections => nodes => links => keyFn => {
+//   const old = new Map(selections.nodes.nodes().data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
+//   let updateNodes = nodes.map(d => Object.assign(old.get(keyFn(d)) || {}, d));
+//   let updateLinks = links.map(d => Object.assign({}, d));  
+//   return { nodes: updateNodes, links: updateLinks}
+// }
+
 // defaultKeyFunction_     :: Datum_ -> Index_
 exports.defaultKeyFunction_ = d => d.id
 // this will work on both swizzled and unswizzled links
-// TODO check if it is really necessary later
+// TODO check if that is really necessary later
 exports.getLinkID_ = keyFn => link => {
   const sourceID = (typeof link.source == `object`) ? keyFn(link.source) : link.source
   const targetID = (typeof link.target == `object`) ? keyFn(link.target) : link.target
@@ -380,14 +380,13 @@ exports.setNodes_ = simulation => nodes => {
 }
 // setLinks_ uses the "inside"/FFI name for the links function, outside in PureScript there could be multiple
 // different links functions but here in FFI we're going to always use the one denominated by the linksForceName string
-exports.setLinks_ = simulation => links => keyFn => {
+exports.setLinks_ = simulation => links => {
   const linkForce = simulation.force(exports.linksForceName);
   if (typeof linkForce === `undefined`) {
     // there is no link force, possibly we should instead make one here but then it wouldn't be visible in SimulationState so best not to
     console.log("attempt to set links but no link force is defined: ignored");
     return;
   }
-  linkForce.id(keyFn);
   linkForce.links(links);
 }
 exports.unsetLinks_ = simulation => {

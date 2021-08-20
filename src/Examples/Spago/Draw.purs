@@ -1,6 +1,6 @@
 module D3.Examples.Spago.Draw where
 
-import Control.Monad.State (class MonadState)
+import Control.Monad.State (class MonadState, State)
 import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
@@ -22,8 +22,9 @@ import Data.String (toUpper)
 import Data.Tuple (Tuple(..))
 import Debug (trace)
 import Effect.Class (class MonadEffect, liftEffect)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
-import Stories.Spago.Lenses (_activeForces, _class)
+import Prelude (class Bind, Unit, bind, const, discard, negate, pure, unit, ($), (/), (<<<))
+import Stories.Spago.Lenses (_activeForces, _class, _linkSelection, _nodeSelection)
+import Stories.Spago.State (State) as Spago
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
@@ -90,13 +91,8 @@ treeAttrs  = {
 }
 
 -- | recipe for this force layout graph
-setup :: forall m selection row. 
-  Bind m => 
-  MonadEffect m =>
-  MonadState { simulationState :: D3SimulationState_, svgClass :: String | row } m =>
-  SelectionM selection m =>
-  SimulationM selection m =>
-  m selection
+setup :: forall m t19.
+  Bind m => MonadEffect m => SimulationM t19 m => SelectionM D3Selection_ m => MonadState Spago.State m => m Unit
 setup = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   simulation_ <- simulationHandle -- needed for click handler to stop / start simulation
@@ -116,13 +112,15 @@ setup = do
                               , target : inner
                               }
 
-  linksGroup  <- inner  D3.+ (node Group [ classed "links" ])
-  nodesGroup  <- inner  D3.+ (node Group [ classed "nodes" ])
-  nodes <- nodesGroup D3.<+> PreJoin "g.node"
-  links <- linksGroup D3.<+> PreJoin "line.link"
+  nodesGroup <- inner      D3.+   (node Group [ classed "nodes" ])
+  nodes      <- nodesGroup D3.<+> PreJoin "g.node"
+
+  linksGroup <- inner      D3.+   (node Group [ classed "links" ])
+  links      <- linksGroup D3.<+> PreJoin "line.link"
   
-  modifying _class toUpper
-  pure root
+  -- modifying _class toUpper     -- the POC for lens on MonadState
+  modifying _nodeSelection (const nodes)
+  modifying _linkSelection (const links)
 
 coerceLinks :: forall id r d. Array (D3Link id r) -> Array (D3Link (D3_SimulationNode d) r) 
 coerceLinks links = unsafeCoerce links

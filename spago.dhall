@@ -55,6 +55,7 @@ You can edit this file as you like.
   , "parallel"
   , "partial"
   , "prelude"
+  , "profunctor"
   , "profunctor-lenses"
   , "psci-support"
   , "random"

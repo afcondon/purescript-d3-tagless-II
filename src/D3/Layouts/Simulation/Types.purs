@@ -117,7 +117,7 @@ data D3SimulationState_ = SimState_ {
 
   , nodes         :: Nullable D3Selection_
   , links         :: Nullable D3Selection_
-  , keyFunction   :: (Datum_ -> Index_)
+  , key           :: (Datum_ -> Index_)
 
   , alpha         :: Number
   , alphaTarget   :: Number
@@ -134,7 +134,7 @@ initialSimulationState id = SimState_
       simulation_  : initSimulation_ defaultConfigSimulation
     , nodes        : null
     , links        : null
-    , keyFunction  : defaultConfigSimulation.keyFunction
+    , key          : defaultConfigSimulation.key
 
     , forces       : M.empty
     , ticks        : M.empty
@@ -155,6 +155,6 @@ defaultConfigSimulation = {
     , alphaMin     : 0.0001
     , alphaDecay   : 0.0228
     , velocityDecay: 0.4
-    , keyFunction  : defaultKeyFunction_
+    , key          : defaultKeyFunction_
 }
 

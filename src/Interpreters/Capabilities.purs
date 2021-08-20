@@ -88,7 +88,6 @@ type SimDataRaw selection d r id = {
       nodes :: Array (D3_SimulationNode d)
     , links :: Array (D3Link id r) 
     }
-  , key :: (Datum_ -> Index_)
 }
 
 type SimDataCooked selection d r = {
@@ -100,7 +99,6 @@ type SimDataCooked selection d r = {
       nodes :: Array (D3_SimulationNode d)
     , links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) 
     }
-  , key :: (Datum_ -> Index_)
 }
 
 

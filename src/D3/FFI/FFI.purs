@@ -109,33 +109,26 @@ type SimulationConfig_ = {
     , alphaMin      :: Number
     , alphaDecay    :: Number
     , velocityDecay :: Number
-    , keyFunction   :: Datum_ -> Index_
+    , key           :: Datum_ -> Index_
 }
 
 foreign import initSimulation_         ::                  SimulationConfig_ -> D3Simulation_
 foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_   -> D3Simulation_
 
-foreign import updateSimData_ :: 
-  forall id r d. 
-     { nodes :: D3Selection_, links :: D3Selection_ }
-  -> Array (D3_SimulationNode d) 
-  -> Array (D3Link id r) 
-  -> (Datum_ -> Index_) 
-  -> { nodes :: Array (D3_SimulationNode d), links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
+-- foreign import d3UpdateNodesAndLinks_ :: 
+--   forall id r d. 
+--      { nodes :: D3Selection_, links :: D3Selection_ }
+--   -> Array (D3_SimulationNode d) 
+--   -> Array (D3Link id r) 
+--   -> (Datum_ -> Index_) 
+--   -> { nodes :: Array (D3_SimulationNode d), links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
 
 foreign import getLinkID_              :: (Datum_ -> Index_) -> Datum_ -> Index_
 foreign import defaultKeyFunction_     :: Datum_ -> Index_
 foreign import getNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
 foreign import setNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Unit
-
--- removing forces should be done by simulation manager and doesn't need more indirection
--- foreign import removeForceByName_  :: D3Simulation_ -> String -> D3Simulation_
-foreign import setLinks_ :: 
-  forall id r d.
-  D3Simulation_
-  -> Array (D3Link id r)
-  -> (Datum_ -> Index_)
-  -> Array (D3LinkSwizzled (D3_SimulationNode d) r)
+-- setLinks_ requires swizzled nodes
+foreign import setLinks_               :: forall r d. D3Simulation_ -> Array (D3LinkSwizzled (D3_SimulationNode d) r) -> Unit
 foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_
 foreign import getLinks_               :: forall d r. D3ForceHandle_ -> Array (D3Link d r)
 foreign import getLinksFromSimulation_ :: forall d r. D3Simulation_ -> Array (D3LinkSwizzled (D3_SimulationNode d) r)

@@ -87,11 +87,11 @@ graphScript model selector = do
   
   -- in contrast to a simple SelectionM function, we have additional typeclass capabilities for simulation
   -- which we use here to introduce the nodes and links to the simulation
-  simData <- loadSimData { selections: { nodes: nodesGroup, links: linksGroup}, "data": { nodes: model.nodes, links: model.links}, key: keyIsID }
+  cookedData <- loadSimData { selections: { nodes: nodesGroup, links: linksGroup}, "data": { nodes: model.nodes, links: model.links} }
   
   -- joining the data from the model after it has been put into the simulation
-  nodesSelection <- nodesGroup D3.<+> Join Circle simData.data.nodes keyIsID [ radius 5.0, fill datum_.colorByGroup ] 
-  linksSelection <- linksGroup D3.<+> Join Line   simData.data.links keyIsID [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
+  nodesSelection <- nodesGroup D3.<+> Join Circle cookedData.data.nodes keyIsID [ radius 5.0, fill datum_.colorByGroup ] 
+  linksSelection <- linksGroup D3.<+> Join Line   cookedData.data.links keyIsID [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
 
   -- both links and nodes are updated on each step of the simulation, 
   -- in this case it's a simple translation of underlying (x,y) data for the circle centers
