@@ -88,8 +88,8 @@ graphScript model selector = do
   
   -- in contrast to a simple SelectionM function, we have additional typeclass capabilities for simulation
   -- which we use here to introduce the nodes and links to the simulation
-  setNodes model.nodes keyIsID
-  setLinks model.links keyIsID
+  setNodes model.nodes
+  setLinks model.links
 
   cookedNodes <- getNodes
   cookedLinks <- getLinks

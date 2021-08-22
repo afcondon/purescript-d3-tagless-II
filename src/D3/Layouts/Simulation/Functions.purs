@@ -191,28 +191,28 @@ simulationUpdateData ::
 simulationUpdateData rawdata key = do
   handle <- use (_d3Simulation <<< _handle)
   let 
-      _ = setNodes_ handle rawdata.nodes key
-      _ = setLinks_ handle rawdata.links key
+      _ = setNodes_ handle rawdata.nodes
+      _ = setLinks_ handle rawdata.links
   pure unit
 
 simulationSetNodes :: 
   forall d row m.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
-  Array (D3_SimulationNode d) -> (Datum_ -> Index_) -> m Unit
-simulationSetNodes nodes key = do
+  Array (D3_SimulationNode d) -> m Unit
+simulationSetNodes nodes = do
   handle <- use (_d3Simulation <<< _handle)
-  let _ = setNodes_ handle nodes key
+  let _ = setNodes_ handle nodes
   pure unit
 
 simulationSetLinks :: 
   forall id r row m.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
-  Array (D3Link id r) -> (Datum_ -> Index_) -> m Unit
-simulationSetLinks links key = do
+  Array (D3Link id r) -> m Unit
+simulationSetLinks links = do
   handle <- use (_d3Simulation <<< _handle)
-  let _ = setLinks_ handle links key
+  let _ = setLinks_ handle links
   pure unit
 
 simulationGetNodes :: forall m row d.

@@ -122,8 +122,8 @@ foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_ -> 
 --   -> (Datum_ -> Index_) 
 --   -> { nodes :: Array (D3_SimulationNode d), links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
 foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
-foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> (Datum_ -> Index_) -> Array (D3_SimulationNode d)
-foreign import setLinks_ :: forall r d id. D3Simulation_ -> Array (D3Link id r) -> (Datum_ -> Index_) -> Array (D3LinkSwizzled (D3_SimulationNode d) r)
+foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)
+foreign import setLinks_ :: forall r d id. D3Simulation_ -> Array (D3Link id r) -> Array (D3LinkSwizzled (D3_SimulationNode d) r)
 foreign import getLinks_ :: forall d r. D3ForceHandle_ -> Array (D3Link d r)
 
 foreign import getLinkID_              :: (Datum_ -> Index_) -> Datum_ -> Index_

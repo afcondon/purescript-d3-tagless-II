@@ -60,8 +60,8 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- management of data (nodes and links)
   updateData :: forall d r id. RawData d r id -> (Datum_ -> Index_) -> m Unit
   
-  setNodes :: forall d.    Array (D3_SimulationNode d) -> (Datum_ -> Index_) -> m Unit
-  setLinks :: forall r id. Array (D3Link id r)        ->  (Datum_ -> Index_) -> m Unit
+  setNodes :: forall d.    Array (D3_SimulationNode d) -> m Unit
+  setLinks :: forall r id. Array (D3Link id r)         -> m Unit
 
   getNodes :: forall d.   m (Array (D3_SimulationNode d))
   getLinks :: forall d r. m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
@@ -87,16 +87,3 @@ type Staging selection d r id = {
     }
   , rawdata :: RawData d r id
 }
-
--- type SimDataCooked selection d r = {
---     selections :: { 
---       nodes :: selection
---     , links :: selection
---     }
---   , "data" :: {
---       nodes :: Array (D3_SimulationNode d)
---     , links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) 
---     }
--- }
-
-

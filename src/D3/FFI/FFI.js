@@ -370,7 +370,7 @@ exports.getLinkID_ = keyFn => link => {
   return sourceID + "-" + targetID 
 }
 //  :: Simulation -> Array NativeNode -> Array NativeNode
-exports.setNodes_ = simulation => nodes => keyFn => {
+exports.setNodes_ = simulation => nodes => {
   if (debug) {
     console.log(`${simulation}.nodes(${nodes})`)
   }
@@ -380,7 +380,7 @@ exports.setNodes_ = simulation => nodes => keyFn => {
 }
 // setLinks_ uses the "inside"/FFI name for the links function, outside in PureScript there could be multiple
 // different links functions but here in FFI we're going to always use the one denominated by the linksForceName string
-exports.setLinks_ = simulation => links => keyFn => {
+exports.setLinks_ = simulation => links => {
   const linkForce = simulation.force(exports.linksForceName);
   if (typeof linkForce === `undefined`) {
     // TODO this is definitely wrong
