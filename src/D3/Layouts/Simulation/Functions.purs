@@ -182,16 +182,17 @@ simulationShowForces = do
   pure $ intercalate "\n" $ showTuple <$> forceTuples
 
 simulationUpdateData ::
-  forall id d r m row selection. 
+  forall id d r m row. 
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
   RawData d r id -> 
+  (Datum_ -> Index_) ->
   m Unit
-simulationUpdateData rawdata = do
+simulationUpdateData rawdata key = do
   handle <- use (_d3Simulation <<< _handle)
   let 
-      _ = setNodes_ handle rawdata.nodes
-      _ = setLinks_ handle rawdata.links
+      _ = setNodes_ handle rawdata.nodes key
+      _ = setLinks_ handle rawdata.links key
   pure unit
 
 simulationSetNodes :: 

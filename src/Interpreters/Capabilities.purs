@@ -58,7 +58,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   enableOnlyTheseForces :: Array Label -> m Unit
 
   -- management of data (nodes and links)
-  updateData :: forall d r id. RawData d r id -> m Unit
+  updateData :: forall d r id. RawData d r id -> (Datum_ -> Index_) -> m Unit
   
   setNodes :: forall d.    Array (D3_SimulationNode d) -> (Datum_ -> Index_) -> m Unit
   setLinks :: forall r id. Array (D3Link id r)        ->  (Datum_ -> Index_) -> m Unit

@@ -323,10 +323,10 @@ exports.selectionOn_ = selection => event => callback => {
 // *****************************************************************************************************************
 exports.linksForceName = "links"
 //            SIMULATION functions
-exports.initSimulation_ = config => {
+exports.initSimulation_ = config => keyFn => { 
   const simulation = d3
     .forceSimulation([])
-    .force('link', d3.forceLink([]).id(config.keyFunction))
+    .force('link', d3.forceLink([]).id(keyFn))
     .alpha(config.alpha) // default is 1
     .alphaTarget(config.alphaTarget) // default is 0
     .alphaMin(config.alphaMin) // default is 0.0001
@@ -370,7 +370,7 @@ exports.getLinkID_ = keyFn => link => {
   return sourceID + "-" + targetID 
 }
 //  :: Simulation -> Array NativeNode -> Array NativeNode
-exports.setNodes_ = simulation => nodes => {
+exports.setNodes_ = simulation => nodes => keyFn => {
   if (debug) {
     console.log(`${simulation}.nodes(${nodes})`)
   }
@@ -380,7 +380,7 @@ exports.setNodes_ = simulation => nodes => {
 }
 // setLinks_ uses the "inside"/FFI name for the links function, outside in PureScript there could be multiple
 // different links functions but here in FFI we're going to always use the one denominated by the linksForceName string
-exports.setLinks_ = simulation => links => {
+exports.setLinks_ = simulation => links => keyFn => {
   const linkForce = simulation.force(exports.linksForceName);
   if (typeof linkForce === `undefined`) {
     // TODO this is definitely wrong

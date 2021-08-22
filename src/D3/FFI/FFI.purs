@@ -111,8 +111,8 @@ type SimulationConfig_ = {
     , velocityDecay :: Number
 }
 
-foreign import initSimulation_         ::                  SimulationConfig_ -> D3Simulation_
-foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_   -> D3Simulation_
+foreign import initSimulation_         ::                  SimulationConfig_ -> (Datum_ -> Index_) -> D3Simulation_
+foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_ -> D3Simulation_
 
 -- foreign import d3UpdateNodesAndLinks_ :: 
 --   forall id r d. 

@@ -95,7 +95,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
       simulationDisableForcesByLabel disable
       simulationEnableForcesByLabel  enable
 -- management of data 
-  updateData rawdata = simulationUpdateData rawdata
+  updateData rawdata key = simulationUpdateData rawdata key
   setNodes           = simulationSetNodes
   setLinks           = simulationSetLinks 
   getNodes           = simulationGetNodes

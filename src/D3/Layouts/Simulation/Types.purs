@@ -202,7 +202,7 @@ instance Show FixForceType where
 initialSimulationState :: Int -> D3SimulationState_
 initialSimulationState id = SimState_
    {  -- common state for all D3 Simulation
-      handle_  : initSimulation_ defaultConfigSimulation
+      handle_  : initSimulation_ defaultConfigSimulation defaultKeyFunction_
     , selections : {
         nodes: null
       , links: null

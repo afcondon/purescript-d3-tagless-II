@@ -132,7 +132,7 @@ updateSimulation :: forall m row d r id.
   m Unit
 updateSimulation staging attrs = do
   simulation_ <- simulationHandle
-  updateData staging.rawdata
+  updateData staging.rawdata keyIsID
   nodes       <- getNodes
   links       <- getLinks
 
