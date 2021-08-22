@@ -4,8 +4,8 @@ import D3.Attributes.Sugar
 
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 import D3.Selection (ChainableS, Join(..), node)
-import D3Tagless.Capabilities ((+)) as D3
-import D3Tagless.Capabilities (class SelectionM, attach, (<+>))
+import D3Tagless.Capabilities ((+), (<+>)) as D3
+import D3Tagless.Capabilities (class SelectionM, attach)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))
 import Prelude (bind, pure, ($), (*), (+), (<<<))
@@ -34,8 +34,9 @@ script3 selector = do
   root        <- attach selector
   svg         <- root D3.+ (node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ])
   letterGroup <- svg  D3.+ (node Group [])
+  letterGroupEnter <- letterGroup  D3.<+> PreJoin "text"
 
-  pure $ \letters -> letterGroup <+> UpdateJoin Text letters keyFunction { enter, update, exit }
+  pure $ \letters -> letterGroupEnter D3.<+> UpdateJoin Text letters keyFunction { enter, update, exit }
 
   where 
     transition :: ChainableS
