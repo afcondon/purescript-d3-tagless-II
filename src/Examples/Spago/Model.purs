@@ -260,10 +260,6 @@ offsetY yOffset xy = xy { y = xy.y + yOffset }
 pinNode :: PointXY -> SpagoSimNode -> SpagoSimNode
 pinNode xy (D3SimNode node) = D3SimNode (node { fx = notNull xy.x, fy = notNull xy.y } )
 
-pinTreeNode :: SpagoSimNode -> SpagoSimNode
-pinTreeNode node@(D3SimNode { connected: true }) = pinTreeNode_ node -- NB side-effecting function
-pinTreeNode node = node -- non-connected nodes are untouched
-
 setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
 setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
 

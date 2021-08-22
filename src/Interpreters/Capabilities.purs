@@ -50,25 +50,22 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   setConfigVariable    :: SimVariable -> m Unit
 
   -- management of forces
-  removeAllForces      ::                m Unit
-  addForces            :: Array Force -> m Unit
-  addForce             :: Force       -> m Unit
-  toggleForceByLabel   :: Label            -> m Unit
-  setForcesByLabel     :: ForceConfigLists -> m Unit
+  removeAllForces       ::                m Unit
+  addForces             :: Array Force -> m Unit
+  addForce              :: Force       -> m Unit
+  toggleForceByLabel    :: Label            -> m Unit
+  setForcesByLabel      :: ForceConfigLists -> m Unit
   enableOnlyTheseForces :: Array Label -> m Unit
 
   -- management of data (nodes and links)
-  -- uniformlyDistribute :: forall d. Array (D3_SimulationNode d) -> m Unit
-
-  loadSimData :: forall d r id. SimDataRaw selection d r id -> m (SimDataCooked selection d r)
+  updateData :: forall d r id. RawData d r id -> m Unit
   
+  setNodes :: forall d.    Array (D3_SimulationNode d) -> (Datum_ -> Index_) -> m Unit
+  setLinks :: forall r id. Array (D3Link id r)        ->  (Datum_ -> Index_) -> m Unit
+
   getNodes :: forall d.   m (Array (D3_SimulationNode d))
   getLinks :: forall d r. m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
 
-  -- management of selections
-  -- addSelection :: Label -> selection -> m Unit
-  -- getSelection :: Label -> m (Maybe selection)
-  
   -- adding functions that occur on every tick of the simulation clock
   addTickFunction    :: Label -> Step selection -> m Unit 
   removeTickFunction :: Label                   -> m Unit
@@ -79,26 +76,27 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- this can't easily be solved until / unless D3 is replaced with something else
   simulationHandle :: m D3Simulation_
 
-type SimDataRaw selection d r id = {
+type RawData d r id = {
+  nodes :: Array (D3_SimulationNode d)
+, links :: Array (D3Link id r) 
+}
+type Staging selection d r id = {
     selections :: { 
       nodes :: selection
     , links :: selection
     }
-  , "data" :: {
-      nodes :: Array (D3_SimulationNode d)
-    , links :: Array (D3Link id r) 
-    }
+  , rawdata :: RawData d r id
 }
 
-type SimDataCooked selection d r = {
-    selections :: { 
-      nodes :: selection
-    , links :: selection
-    }
-  , "data" :: {
-      nodes :: Array (D3_SimulationNode d)
-    , links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) 
-    }
-}
+-- type SimDataCooked selection d r = {
+--     selections :: { 
+--       nodes :: selection
+--     , links :: selection
+--     }
+--   , "data" :: {
+--       nodes :: Array (D3_SimulationNode d)
+--     , links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) 
+--     }
+-- }
 
 

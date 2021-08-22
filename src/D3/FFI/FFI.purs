@@ -109,7 +109,6 @@ type SimulationConfig_ = {
     , alphaMin      :: Number
     , alphaDecay    :: Number
     , velocityDecay :: Number
-    , key           :: Datum_ -> Index_
 }
 
 foreign import initSimulation_         ::                  SimulationConfig_ -> D3Simulation_
@@ -122,15 +121,14 @@ foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_   -
 --   -> Array (D3Link id r) 
 --   -> (Datum_ -> Index_) 
 --   -> { nodes :: Array (D3_SimulationNode d), links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
+foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
+foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> (Datum_ -> Index_) -> Array (D3_SimulationNode d)
+foreign import setLinks_ :: forall r d id. D3Simulation_ -> Array (D3Link id r) -> (Datum_ -> Index_) -> Array (D3LinkSwizzled (D3_SimulationNode d) r)
+foreign import getLinks_ :: forall d r. D3ForceHandle_ -> Array (D3Link d r)
 
 foreign import getLinkID_              :: (Datum_ -> Index_) -> Datum_ -> Index_
 foreign import defaultKeyFunction_     :: Datum_ -> Index_
-foreign import getNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
-foreign import setNodes_               :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Unit
--- setLinks_ requires swizzled nodes
-foreign import setLinks_               :: forall r d. D3Simulation_ -> Array (D3LinkSwizzled (D3_SimulationNode d) r) -> Unit
 foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_
-foreign import getLinks_               :: forall d r. D3ForceHandle_ -> Array (D3Link d r)
 foreign import getLinksFromSimulation_ :: forall d r. D3Simulation_ -> Array (D3LinkSwizzled (D3_SimulationNode d) r)
 
 foreign import startSimulation_        :: D3Simulation_ -> Unit
@@ -141,17 +139,17 @@ foreign import unsetInSimNodeFlag_   :: forall d. D3_SimulationNode d -> Unit
 
 -- following functions modify the node and return it
 -- TODO fix all the FFI returns for these!!!
-foreign import pinNode_              :: forall d. Number -> Number -> D3_SimulationNode d -> D3_SimulationNode d
-foreign import pinNamedNode_         :: forall d. String -> Number -> Number -> D3_SimulationNode d -> D3_SimulationNode d
-foreign import pinTreeNode_          :: forall d. D3_SimulationNode d -> D3_SimulationNode d -- modifies fx/fy
-foreign import unpinNode_            :: forall d. D3_SimulationNode d -> D3_SimulationNode d -- deletes fx/fy if present
-foreign import setPositionToNaN_     :: forall d. Array (D3_SimulationNode d) -> Unit
+foreign import pinNode_              :: Number -> Number -> Datum_ -> Datum_
+foreign import pinNamedNode_         :: String -> Number -> Number -> Datum_ -> Datum_
+foreign import pinTreeNode_          :: Datum_ -> Datum_ -- modifies fx/fy
+foreign import unpinNode_            :: Datum_ -> Datum_ -- deletes fx/fy if present
+foreign import setPositionToNaN_     :: Array Datum_ -> Unit
 
 -- NB mutating function
-pinNode :: forall d. D3_SimulationNode d -> PointXY -> D3_SimulationNode d
-pinNode node p = do
-  let _ = pinNode_ p.x p.y node
-  node -- NB mutated value, fx / fy have been set
+-- pinNode :: forall d. D3_SimulationNode d -> PointXY -> D3_SimulationNode d
+-- pinNode node p = do
+--   let _ = pinNode_ p.x p.y node
+--   node -- NB mutated value, fx / fy have been set
 -- NB mutating function
 setInSimNodeFlag :: forall d. D3_SimulationNode d -> D3_SimulationNode d
 setInSimNodeFlag node = do

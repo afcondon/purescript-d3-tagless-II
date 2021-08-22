@@ -6,11 +6,100 @@ import D3.Attributes.Instances (AttributeSetter, Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_)
 import D3.FFI (D3ForceHandle_, SimulationConfig_, defaultKeyFunction_, initSimulation_)
 import D3.Selection (ChainableS)
+import Data.Lens (Lens', Prism', prism')
+import Data.Lens.At (at)
+import Data.Lens.Iso.Newtype (_Newtype)
+import Data.Lens.Record (prop)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
-import Data.Nullable (Nullable, null)
+import Data.Nullable (Nullable, notNull, null)
+import Data.Nullable as N
+import Data.Profunctor.Choice (class Choice)
+import Data.Profunctor.Strong (class Strong)
 import Debug (trace)
+import Type.Proxy (Proxy(..))
+
+-- representation of all that is stateful in the D3 simulation engine
+-- (not generalized because we have no other examples of simulation engines ATM
+-- perhaps it can become a more abstract interface in the future)
+newtype D3SimulationState_ = SimState_ D3SimulationStateRecord
+-- TODO uses D3Selection instead of type variable, can avoid coercing if generalized correctly
+type D3SimulationStateRecord = { 
+    handle_       :: D3Simulation_
+  , forces        :: M.Map Label Force
+  , ticks         :: M.Map Label (Step D3Selection_)
+
+  , selections    :: { nodes :: Nullable D3Selection_, links :: Nullable D3Selection_ }
+  , "data"        :: { nodes :: Array Datum_         , links :: Array Datum_ }
+  , key           :: (Datum_ -> Index_)
+
+  , alpha         :: Number
+  , alphaTarget   :: Number
+  , alphaMin      :: Number
+  , alphaDecay    :: Number
+  , velocityDecay :: Number
+}
+
+derive instance Newtype D3SimulationState_ _
+
+-- | ========================================================================================================
+-- | Lenses for the simulation state
+-- | ========================================================================================================
+_nullable :: forall a. Prism' (Nullable a) a
+_nullable = prism' notNull N.toMaybe
+
+_handle :: Lens' D3SimulationState_ D3Simulation_
+_handle = _Newtype <<< prop (Proxy :: Proxy "handle_")
+
+_forces :: Lens' D3SimulationState_ (M.Map Label Force)
+_forces = _Newtype <<< prop (Proxy :: Proxy "forces")
+
+_force :: String -> Lens' D3SimulationState_ (Maybe Force)
+_force label = _Newtype <<< prop (Proxy :: Proxy "forces") <<< at label
+
+_ticks :: Lens' D3SimulationState_ (M.Map Label (Step D3Selection_))
+_ticks = _Newtype <<< prop (Proxy :: Proxy "ticks")
+
+_tick :: String -> Lens' D3SimulationState_ (Maybe (Step D3Selection_))
+_tick label = _Newtype <<< prop (Proxy :: Proxy "ticks") <<< at label
+
+_selections :: Lens' D3SimulationState_ { nodes :: Nullable D3Selection_, links :: Nullable D3Selection_ }
+_selections = _Newtype <<< prop (Proxy :: Proxy "selections")
+
+_data :: Lens' D3SimulationState_ { nodes :: Array Datum_ , links :: Array Datum_ }
+_data = _Newtype <<< prop (Proxy :: Proxy "data")
+
+_nodedata :: Lens' D3SimulationState_ (Array Datum_ )
+_nodedata = _data <<< prop (Proxy :: Proxy "nodes")
+
+_linkdata :: Lens' D3SimulationState_ (Array Datum_ )
+_linkdata = _data <<< prop (Proxy :: Proxy "links")
+
+-- _nodes :: forall p. Strong p => Choice p => p D3SimulationState_ D3Selection_
+_nodes :: forall p. Strong p => Choice p => p D3Selection_ D3Selection_ -> p D3SimulationState_ D3SimulationState_
+_nodes = _selections <<< prop (Proxy :: Proxy "nodes") <<< _nullable
+
+_links :: forall p. Strong p => Choice p => p D3Selection_ D3Selection_ -> p D3SimulationState_ D3SimulationState_
+_links = _selections <<< prop (Proxy :: Proxy "links") <<< _nullable 
+
+_key :: Lens' D3SimulationState_ (Datum_ -> Index_)
+_key = _Newtype <<< prop (Proxy :: Proxy "key")
+
+_alpha :: Lens' D3SimulationState_ Number
+_alpha = _Newtype <<< prop (Proxy :: Proxy "alpha")
+
+_alphaTarget :: Lens' D3SimulationState_ Number
+_alphaTarget   = _Newtype <<< prop (Proxy :: Proxy "alphaTarget")
+
+_alphaMin :: Lens' D3SimulationState_ Number
+_alphaMin = _Newtype <<< prop (Proxy :: Proxy "alphaMin")
+
+_alphaDecay :: Lens' D3SimulationState_ Number
+_alphaDecay = _Newtype <<< prop (Proxy :: Proxy "alphaDecay")
+
+_velocityDecay :: Lens' D3SimulationState_ Number
+_velocityDecay = _Newtype <<< prop (Proxy :: Proxy "velocityDecay")
 
 data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number
 
@@ -107,34 +196,22 @@ instance Show FixForceType where
   show (ForceFixPositionX _)  = "ForceFixPositionX"
   show (ForceFixPositionY _)  = "ForceFixPositionY"
 
--- representation of all that is stateful in the D3 simulation engine
--- not generalized because we have no other examples of simulation engines ATM
--- perhaps it can become a more abstract interface in the future
-data D3SimulationState_ = SimState_ { 
-    simulation_   :: D3Simulation_
-  , forces        :: M.Map Label Force
-  , ticks         :: M.Map Label (Step D3Selection_)
-
-  , nodes         :: Nullable D3Selection_
-  , links         :: Nullable D3Selection_
-  , key           :: (Datum_ -> Index_)
-
-  , alpha         :: Number
-  , alphaTarget   :: Number
-  , alphaMin      :: Number
-  , alphaDecay    :: Number
-  , velocityDecay :: Number
-}
 
 -- unused parameter is to ensure a NEW simulation is created so that, 
 -- for example, two Halogen components won't _accidentally_ share one
 initialSimulationState :: Int -> D3SimulationState_
 initialSimulationState id = SimState_
    {  -- common state for all D3 Simulation
-      simulation_  : initSimulation_ defaultConfigSimulation
-    , nodes        : null
-    , links        : null
-    , key          : defaultConfigSimulation.key
+      handle_  : initSimulation_ defaultConfigSimulation
+    , selections : {
+        nodes: null
+      , links: null
+    }
+    , "data" : {
+        nodes: []
+      , links: []
+    }
+    , key          : defaultKeyFunction_
 
     , forces       : M.empty
     , ticks        : M.empty
@@ -155,6 +232,5 @@ defaultConfigSimulation = {
     , alphaMin     : 0.0001
     , alphaDecay   : 0.0228
     , velocityDecay: 0.4
-    , key          : defaultKeyFunction_
 }
 

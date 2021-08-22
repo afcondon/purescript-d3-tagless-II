@@ -22,7 +22,7 @@ import Ocelot.Block.Format as Format
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
-import Stories.Spago.Lenses (_countDataLinks, _countDataNodes)
+-- import Stories.Spago.Lenses (_countDataLinks, _countDataNodes)
 import Stories.Spago.State (State)
 import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
@@ -34,10 +34,10 @@ renderSimState state =
     [ Format.caption_ [ HH.text "Simulation state" ]
     , HH.p_
         [ HH.text $ "class: " <> state.svgClass ] 
-    , HH.p_
-        [ HH.text $ "link count: " <> show (_countDataLinks state) ] 
-    , HH.p_
-        [ HH.text $ "node count:" <> show (_countDataNodes state)] 
+    -- , HH.p_
+    --     [ HH.text $ "link count: " <> show (_countDataLinks state) ] 
+    -- , HH.p_
+    --     [ HH.text $ "node count:" <> show (_countDataNodes state)] 
     , HH.p_
         [ HH.text $ "initial forces:" <> show state.activeForces ] 
     ]
@@ -156,7 +156,7 @@ render state =
           [ Utils.tailwindClass "story-panel-about" ]
           [ renderSimState state
           , renderSimControls state
-          , renderTableForces state.simulationState
+          , renderTableForces state.simulation
           -- , renderTableElements state.simulation
           , Card.card_ [ blurbtext ]
           ]

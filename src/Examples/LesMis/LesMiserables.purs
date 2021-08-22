@@ -10,13 +10,14 @@ import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), node)
 import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SimulationM, addTickFunction, attach, on, loadSimData)
+import D3Tagless.Capabilities (class SimulationM, addTickFunction, attach, getLinks, getNodes, on, setLinks, setNodes)
 import D3Tagless.Capabilities as D3
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Math (sqrt)
+import Ocelot.DatePicker (EmbeddedAction(..))
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
 import Utility (getWindowWidthHeight)
 
@@ -74,7 +75,7 @@ datum_ = {
 graphScript :: forall row m. 
   Bind m => 
   MonadEffect m =>
-  MonadState { simulationState :: D3SimulationState_ | row } m => 
+  MonadState { simulation :: D3SimulationState_ | row } m => 
   SimulationM D3Selection_ m =>
   LesMisRawModel -> Selector D3Selection_ -> m Unit
 graphScript model selector = do
@@ -87,11 +88,15 @@ graphScript model selector = do
   
   -- in contrast to a simple SelectionM function, we have additional typeclass capabilities for simulation
   -- which we use here to introduce the nodes and links to the simulation
-  cookedData <- loadSimData { selections: { nodes: nodesGroup, links: linksGroup}, "data": { nodes: model.nodes, links: model.links} }
+  setNodes model.nodes keyIsID
+  setLinks model.links keyIsID
+
+  cookedNodes <- getNodes
+  cookedLinks <- getLinks
   
   -- joining the data from the model after it has been put into the simulation
-  nodesSelection <- nodesGroup D3.<+> Join Circle cookedData.data.nodes keyIsID [ radius 5.0, fill datum_.colorByGroup ] 
-  linksSelection <- linksGroup D3.<+> Join Line   cookedData.data.links keyIsID [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
+  nodesSelection <- nodesGroup D3.<+> Join Circle cookedNodes keyIsID [ radius 5.0, fill datum_.colorByGroup ] 
+  linksSelection <- linksGroup D3.<+> Join Line   cookedLinks keyIsID [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
 
   -- both links and nodes are updated on each step of the simulation, 
   -- in this case it's a simple translation of underlying (x,y) data for the circle centers

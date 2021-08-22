@@ -353,12 +353,12 @@ exports.configSimulation_ = simulation => config => {
 exports.keyIsID = d => d.id;
 
 // d3UpdateNodesAndLinks_ :: D3Selection_ -> Array NativeNode -> Array NativeNode -> (Datum_ -> Id) -> { nodes :: Array NativeNode, links: Array NativeLinks }
-// exports.d3UpdateNodesAndLinks_ = selections => nodes => links => keyFn => {
-//   const old = new Map(selections.nodes.nodes().data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
-//   let updateNodes = nodes.map(d => Object.assign(old.get(keyFn(d)) || {}, d));
-//   let updateLinks = links.map(d => Object.assign({}, d));  
-//   return { nodes: updateNodes, links: updateLinks}
-// }
+exports.d3UpdateNodesAndLinks_ = selections => nodes => links => keyFn => {
+  const old = new Map(selections.nodes.nodes().data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
+  let updateNodes = nodes.map(d => Object.assign(old.get(keyFn(d)) || {}, d));
+  let updateLinks = links.map(d => Object.assign({}, d));  
+  return { nodes: updateNodes, links: updateLinks}
+}
 
 // defaultKeyFunction_     :: Datum_ -> Index_
 exports.defaultKeyFunction_ = d => d.id
@@ -383,11 +383,12 @@ exports.setNodes_ = simulation => nodes => {
 exports.setLinks_ = simulation => links => {
   const linkForce = simulation.force(exports.linksForceName);
   if (typeof linkForce === `undefined`) {
+    // TODO this is definitely wrong
     // there is no link force, possibly we should instead make one here but then it wouldn't be visible in SimulationState so best not to
     console.log("attempt to set links but no link force is defined: ignored");
     return;
   }
-  linkForce.links(links);
+  linkForce.links(links); // the key function must already have been set on creation of the link force in the simulation
 }
 exports.unsetLinks_ = simulation => {
   const linkForce = d3.forceLink([])
@@ -639,7 +640,7 @@ exports.pinNamedNode_ = name => fx => fy => node => {
     node.fy = fy
   }
 }
-// pinTreeNode_ :: forall d. D3_SimulationNode d -> Unit
+// pinTreeNode_ :: Datum_ -> Datum_
 // TODO side-effecting function
 exports.pinTreeNode_ = node => {
   node.fx = node.treeX

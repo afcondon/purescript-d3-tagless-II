@@ -50,7 +50,7 @@ instance Show LinksSetting where
   show LinksOff = "No link force"
 
 type State = { 
-    simulationState :: D3SimulationState_
+    simulation :: D3SimulationState_
   , manybodySetting :: ManyBodyParam
   , linksSetting    :: LinksSetting
   , blurb           :: Expandable.Status
@@ -78,7 +78,7 @@ component = H.mkComponent
   where
   initialState :: State
   initialState = { 
-        simulationState: initialSimulationState 2
+        simulation: initialSimulationState 2
       , manybodySetting: SmallRadius
       , linksSetting: LinksOn
       , blurb: Expandable.Collapsed
@@ -171,7 +171,7 @@ handleAction = case _ of
     let graph = readGraphFromFileContents response
 
     state <- H.get
-    runEffectSimulation $ addForces state.forces
+    -- runEffectSimulation $ addForces state.forces
     runEffectSimulation $ LesMis.graphScript graph "div.svg-container"
 
   Finalize ->  runEffectSimulation removeAllForces
@@ -231,7 +231,7 @@ datum_ = {
 graphScript :: forall row m. 
   Bind m => 
   MonadEffect m =>
-  MonadState { simulationState :: D3SimulationState_ | row } m => 
+  MonadState { simulation :: D3SimulationState_ | row } m => 
   SimulationM D3Selection_ m =>
   LesMisRawModel -> Selector D3Selection_ -> m Unit
 graphScript model selector = do
