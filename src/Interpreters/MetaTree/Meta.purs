@@ -25,7 +25,7 @@ data D3GrammarNode =
   | ModifyNode (Array ChainableS)
   -- TODO if datum type can be peeled off the Join type, just store the Join directly
   | JoinSimpleNode     Element (Array ChainableS)
-  | SplitJoinCloseNode     Element EnterUpdateExit
+  | UpdateJoinNode     Element EnterUpdateExit
   | OpenJoinNode (Selector NodeID)
   | JoinSimpleWithKeyFunctionNode Element (Array ChainableS) ComputeKeyFunction_
   | SplitJoinCloseWithKeyFunctionNode Element  EnterUpdateExit ComputeKeyFunction_
@@ -46,7 +46,7 @@ instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implem
   show (ModifyNode _)             = "Modify"
 
   show (JoinSimpleNode _ _)       = "JoinSimple"
-  show (SplitJoinCloseNode _ _)       = "JoinGeneral"
+  show (UpdateJoinNode _ _)       = "JoinGeneral"
   show (OpenJoinNode s)           = "OpenJoin" <> s
   show (JoinSimpleWithKeyFunctionNode _ _ _) = "JoinSimple"
   show (SplitJoinCloseWithKeyFunctionNode _ _ _) = "JoinGeneral"
@@ -69,7 +69,7 @@ showAsSymbol =
     (FilterNode s)             ->  { name: "Filter"        , symbol: "/"   , param1: tag s,        param2: "" }
     (ModifyNode as)            ->  { name: "Modify"        , symbol: "->"  , param1: "",           param2: "" }
     (JoinSimpleNode e _)       ->  { name: "JoinSimple"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
-    (SplitJoinCloseNode e _)       ->  { name: "SplitJoinClose"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
+    (UpdateJoinNode e _)       ->  { name: "SplitJoinClose"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
     (OpenJoinNode s)           ->  { name: "SplitJoinClose"    , symbol: "<+>" , param1: tag $ s, param2: "" }
     (JoinSimpleWithKeyFunctionNode e _ _) ->  { name: "JoinSimpleK" , symbol: "<+>" , param1: tag $ show e, param2: "" }
     (SplitJoinCloseWithKeyFunctionNode e _ _) ->  { name: "SplitJoinCloseK" , symbol: "<+>" , param1: tag $ show e, param2: "" }
@@ -190,6 +190,10 @@ instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
   join nodeID (Join e ds k cs)          = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e cs k)
+    pure id
+  join nodeID (UpdateJoin e ds k cs)          = do
+    (ScriptTree id _ _) <- get
+    insertInScriptTree nodeID (UpdateJoinNode e cs)
     pure id
   join nodeID (SplitJoinOpen s)          = do
     (ScriptTree id _ _) <- get

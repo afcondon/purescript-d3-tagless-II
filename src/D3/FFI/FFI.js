@@ -323,7 +323,7 @@ exports.linksForceName = "links"
 //            SIMULATION functions
 exports.initSimulation_ = config => keyFn => { 
   const simulation = d3
-    .forceSimulation([],keyFn)
+    .forceSimulation([])
     .force('link', d3.forceLink([]).id(keyFn))
     .alpha(config.alpha) // default is 1
     .alphaTarget(config.alphaTarget) // default is 0

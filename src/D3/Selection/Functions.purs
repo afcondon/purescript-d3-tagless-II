@@ -2,7 +2,7 @@ module D3.Selection.Functions where
 
 import Control.Monad.State (gets)
 import D3.Data.Types (D3Selection_, Selector)
-import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3DataWithKeyFunction_, d3SelectAllInDOM_, d3SelectionSelectAll_, disableDrag_)
+import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3DataWithKeyFunction_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, disableDrag_)
 import D3.Selection (Behavior(..), ChainableS, D3_Node(..), DragBehavior(..), Join(..), applyChainableSD3)
 import D3.Simulation.Types (D3SimulationState_(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -37,6 +37,18 @@ selectionJoin selection (Join e ds k cs) = do
     enterS  = d3EnterAndAppend_ element dataS
     enterS' = foldl applyChainableSD3 enterS cs
   pure enterS'
+
+selectionJoin selection (UpdateJoin e ds k cs) = do
+  let
+    element = show e
+    selectS = d3SelectionSelectAll_ element selection
+    dataS  = d3DataWithKeyFunction_ ds k selectS
+    enterS = d3EnterAndAppend_ element dataS
+    exitS  = d3Exit_ dataS
+    _      = foldl applyChainableSD3 enterS  cs.enter
+    _      = foldl applyChainableSD3 exitS   cs.exit
+    _      = foldl applyChainableSD3 dataS   cs.update
+  pure enterS
 
 selectionJoin selection (SplitJoinOpen selector) = do
   pure $ d3SelectionSelectAll_ selector selection
