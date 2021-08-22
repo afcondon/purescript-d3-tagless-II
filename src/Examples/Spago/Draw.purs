@@ -109,11 +109,11 @@ setup = do
                            }
 
   nodesGroup <- inner      D3.+   (node Group [ classed "nodes" ])
-  nodes      <- nodesGroup D3.<+> PreJoin "g.node"
+  nodes      <- nodesGroup D3.<+> SplitJoinOpen "g.node"
   modifying (_d3Simulation <<< _selections <<< _nodes) (const $ notNull nodes)
 
   linksGroup <- inner      D3.+   (node Group [ classed "links" ])
-  links      <- linksGroup D3.<+> PreJoin "line.link"
+  links      <- linksGroup D3.<+> SplitJoinOpen "line.link"
   modifying (_d3Simulation <<< _selections <<< _links) (const $ notNull links)
   
 -- REVIEW this is just temporary as we will explicitly model the conversion somehow later on
@@ -137,7 +137,7 @@ updateSimulation staging attrs = do
   links       <- getLinks
 
   -- first the nodes
-  let joinNodes = UpdateJoin Group nodes keyIsID
+  let joinNodes = SplitJoinClose Group nodes keyIsID
                   { enter : enterAttrs simulation_
                   , update: updateAttrs simulation_
                   , exit  : [ remove ] 
@@ -146,7 +146,7 @@ updateSimulation staging attrs = do
   nodesSelection <- staging.selections.nodes D3.<+> joinNodes
   
   -- now the links
-  let joinLinks = UpdateJoin Line links keyIsID
+  let joinLinks = SplitJoinClose Line links keyIsID
                     { enter : [ classed link_.linkClass, strokeColor link_.color ]
                     , update: [ classed "graphlinkSimUpdate" ]
                     , exit  : [ remove ]
@@ -183,7 +183,7 @@ updateGraphLinks links = do
     (Just linksGroup) -> do
       -- TODO the links need valid IDs too if they are to do general update pattern, probably best to actually make them when making the model
       linksSelection <- linksGroup D3.<+> 
-                        UpdateJoinWithKeyFunction
+                        SplitJoinCloseWithKeyFunction
                         Line
                         links
                         { enter: [ classed link_.linkClass, strokeColor link_.color ]
@@ -213,7 +213,7 @@ updateGraphLinks' links = do
     Nothing -> pure unit
     (Just linksGroup) -> do
       linksSelection <- linksGroup D3.<+> 
-                        UpdateJoinWithKeyFunction
+                        SplitJoinCloseWithKeyFunction
                         Line
                         links
                         { enter: [ classed link_.linkClass, strokeColor link_.color ]
@@ -249,7 +249,7 @@ updateTreeLinks links layout = do
     Nothing -> pure unit
     (Just linksGroup) -> do
       linksSelection <- linksGroup D3.<+> 
-                        UpdateJoinWithKeyFunction
+                        SplitJoinCloseWithKeyFunction
                         Path
                         linksInSimulation
                         { enter: [ classed link_.linkClass, strokeColor link_.color, linkPath ]

@@ -171,8 +171,6 @@ exports.d3DataWithKeyFunction_ = data => keyFn => selection => {
   if (debug) {
     showKeyFunction_(data)(keyFn)(selection)
   }
-  // TODO sort out where sorting should really go for the trees to be right - hint, it's not here
-  // selection.sort(idComparer)
   result = selection.data(data, keyFn)
   return result
 }
@@ -325,7 +323,7 @@ exports.linksForceName = "links"
 //            SIMULATION functions
 exports.initSimulation_ = config => keyFn => { 
   const simulation = d3
-    .forceSimulation([])
+    .forceSimulation([],keyFn)
     .force('link', d3.forceLink([]).id(keyFn))
     .alpha(config.alpha) // default is 1
     .alphaTarget(config.alphaTarget) // default is 0

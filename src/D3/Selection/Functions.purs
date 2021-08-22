@@ -38,11 +38,11 @@ selectionJoin selection (Join e ds k cs) = do
     enterS' = foldl applyChainableSD3 enterS cs
   pure enterS'
 
-selectionJoin selection (PreJoin selector) = do
+selectionJoin selection (SplitJoinOpen selector) = do
   pure $ d3SelectionSelectAll_ selector selection
 
 
-selectionJoin selection (UpdateJoin e ds k cs) = do
+selectionJoin selection (SplitJoinClose e ds k cs) = do
   let
     dataS  = d3DataWithKeyFunction_ ds k selection 
     enterS = d3EnterAndAppend_ (show e) dataS

@@ -49,10 +49,10 @@ instance d3Tagless :: SelectionM String D3PrinterM where
     let attributeString = foldl applyChainableSString selection cs
     modify_ (\s -> s <> "\nentering a "   <> show e <> " for each datum" )
     pure "join"
-  join selection (PreJoin selector) = do
+  join selection (SplitJoinOpen selector) = do
     modify_ (\s -> s <> "\n\tseletion.selectAll: " <> selector)
     pure "join"
-  join selection (UpdateJoin e ds k cs) = do
+  join selection (SplitJoinClose e ds k cs) = do
     let enterAttributes  = foldl applyChainableSString selection cs.enter
         exitAttributes   = foldl applyChainableSString selection cs.exit
         updateAttributes = foldl applyChainableSString selection cs.update

@@ -225,7 +225,7 @@ script3 selector = do
   svg         <- root D3.+ (node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ])
   letterGroup <- svg  D3.+ (node Group [])
 
-  pure $ \letters -> letterGroup <+> UpdateJoin Text letters { enter, update, exit }
+  pure $ \letters -> letterGroup <+> SplitJoinClose Text letters { enter, update, exit }
 
   where 
     transition :: ChainableS
