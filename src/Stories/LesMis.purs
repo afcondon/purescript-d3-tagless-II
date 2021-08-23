@@ -171,7 +171,7 @@ handleAction = case _ of
     let graph = readGraphFromFileContents response
 
     state <- H.get
-    -- runEffectSimulation $ addForces state.forces
+    runEffectSimulation $ addForces state.forces
     runEffectSimulation $ LesMis.graphScript graph "div.svg-container"
 
   Finalize ->  runEffectSimulation removeAllForces

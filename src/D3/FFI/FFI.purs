@@ -95,9 +95,12 @@ foreign import selectionOn_         :: forall selection callback. selection -> S
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js Simulation module  *********************************************
 -- | *********************************************************************************************************************
--- | foreign types associated with Force Layout Simulation
+
+-- links force is very special, can't (easily) manage multiple named versions. 
+-- consistency of naming of link force is established with top level name
 foreign import linksForceName :: String
 
+-- | foreign types associated with Force Layout Simulation
 type GraphModel_ link node = { links :: Array link, nodes :: Array node }
 foreign import data D3ForceHandle_     :: Type
 foreign import data CustomForceConfig_ :: Type
@@ -181,8 +184,7 @@ foreign import forceMany_         :: Unit -> D3ForceHandle_
 foreign import forceRadial_       :: Unit -> D3ForceHandle_
 foreign import forceX_            :: Unit -> D3ForceHandle_
 foreign import forceY_            :: Unit -> D3ForceHandle_
--- foreign import forceLink_         :: forall r d. Array (D3Link NodeID r) -> (Datum_ -> d) -> D3ForceHandle_ -- takes key function
-foreign import forceLink_         :: Unit -> D3ForceHandle_ -- TODO parameterize with keyFN, essential that this is done before links actually passed to linkForce otherwise default d => index is used
+foreign import forceLink_         :: Unit -> D3ForceHandle_ -- actually created in initSimulation where keyFunction is provided too
 foreign import forceCustom_       :: Unit -> D3ForceHandle_
 foreign import dummyForceHandle_  :: D3ForceHandle_ -- used for fixed "forces", is null under the hood
 

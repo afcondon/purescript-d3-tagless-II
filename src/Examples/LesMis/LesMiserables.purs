@@ -81,14 +81,13 @@ graphScript :: forall row m.
 graphScript model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   (root :: D3Selection_) <- attach selector
-  svg        <- root D3.+ (node Svg [ viewBox (-w / 2.0) (-h / 2.0) w h
-                                    , classed "lesmis" ] )
+  svg <- root D3.+ (node Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "lesmis" ] )
   linksGroup <- svg  D3.+ (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
   nodesGroup <- svg  D3.+ (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
   
   -- in contrast to a simple SelectionM function, we have additional typeclass capabilities for simulation
   -- which we use here to introduce the nodes and links to the simulation
-  setNodes model.nodes
+  setNodes model.nodes -- no staging here, we just load the nodes straight into Sim
   setLinks model.links
 
   cookedNodes <- getNodes
