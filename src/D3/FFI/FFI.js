@@ -324,7 +324,7 @@ exports.linksForceName = "links"
 exports.initSimulation_ = config => keyFn => { 
   const simulation = d3
     .forceSimulation([])
-    .force('link', d3.forceLink([]).id(keyFn))
+    .force(exports.linksForceName, d3.forceLink([]).id(keyFn))
     .alpha(config.alpha) // default is 1
     .alphaTarget(config.alphaTarget) // default is 0
     .alphaMin(config.alphaMin) // default is 0.0001
@@ -379,14 +379,10 @@ exports.setNodes_ = simulation => nodes => {
 // setLinks_ uses the "inside"/FFI name for the links function, outside in PureScript there could be multiple
 // different links functions but here in FFI we're going to always use the one denominated by the linksForceName string
 exports.setLinks_ = simulation => links => {
-  const linkForce = simulation.force(exports.linksForceName);
-  if (typeof linkForce === `undefined`) {
-    // TODO this is definitely wrong
-    // there is no link force, possibly we should instead make one here but then it wouldn't be visible in SimulationState so best not to
-    console.log("attempt to set links but no link force is defined: ignored");
-    return;
-  }
-  linkForce.links(links); // the key function must already have been set on creation of the link force in the simulation
+  console.log(`setting links in simulation, there are ${links.length} links`);
+  // simulation is created with links force and the key function is provided at that time
+  // so we just put the links directly in here - this may change later if we give PS API to change links forces more
+  simulation.force(exports.linksForceName).links(links)
 }
 exports.unsetLinks_ = simulation => {
   const linkForce = d3.forceLink([])
@@ -401,10 +397,10 @@ exports.unsetLinks_ = simulation => {
 // exports.removeForceByName_ = simulation => name => simulation.force(name, null)
 // setLinks_ :: ForceHandle -> Array (D3_Simulation_Link d r) ->
 // links_        :: forall d r. ForceHandle_ -> Array (D3_Simulation_Link d r)
-exports.getLinks_ = linkForce => linkForce.links()
+exports.getLinksFromForce_ = linkForce => linkForce.links()
 // getLinksFromSimulation_ :: forall d r. D3Simulation_ -> String -> Array (D3Link d r) -- get links from named link force in simulation
-exports.getLinksFromSimulation_ = simulation => forceName => {
-  linksForce = simulation.force(forceName)
+exports.getLinksFromSimulation_ = simulation => {
+  linksForce = simulation.force(exports.linksForceName)
   if (typeof linksForce === `undefined`) {
     return [] // either the force wasn't found, or the force wasn't a links force
   }
