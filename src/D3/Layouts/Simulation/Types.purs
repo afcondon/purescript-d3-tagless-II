@@ -17,6 +17,7 @@ import Data.Nullable (Nullable, notNull, null)
 import Data.Nullable as N
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
+import Data.Tuple (Tuple(..))
 import Debug (trace)
 import Type.Proxy (Proxy(..))
 
@@ -117,6 +118,13 @@ data Force =
     Force     Label ForceStatus RegularForceType (Maybe ForceNodesFilter) (Array ChainableF) D3ForceHandle_
   | LinkForce Label ForceStatus                  (Maybe ForceLinksFilter) (Array ChainableF) D3ForceHandle_
   | FixForce  Label ForceStatus FixForceType     (Maybe ForceNodesFilter) (Array ChainableF) D3ForceHandle_
+
+forceTuple :: Force -> Tuple Label Force
+forceTuple f = 
+  case f of
+    Force     label _ _ _ _ _ -> Tuple label f
+    LinkForce label _ _ _ _ -> Tuple label f
+    FixForce  label _ _ _ _ _ -> Tuple label f
 
 instance Show Force where
   show (Force label status t f cs h) = "Force: " <> label <> " " <> show status <> " applying to all nodes"

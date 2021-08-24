@@ -150,7 +150,7 @@ handleAction = case _ of
         runEffectSimulation $ enableOnlyTheseForces forces
         simulationStart
 
-  ChangeStyling style -> modify_ (\s -> s { svgClass = style })
+  ChangeStyling style -> modifying _class (const style) -- modify_ (\s -> s { svgClass = style })
 
   ChangeSimConfig c -> runEffectSimulation $ setConfigVariable c
 

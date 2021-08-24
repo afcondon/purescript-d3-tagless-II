@@ -11,7 +11,7 @@ import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
 import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
 import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, enableOnlyTheseLabels, getHandle, getLabel, putForceInSimulation, setForceAttr, setForceAttrWithFilter)
-import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceLinksFilter(..), ForceNodesFilter(..), ForceStatus(..), LinkForceType(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _force, _forces, _handle, _tick, _ticks, _velocityDecay)
+import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceLinksFilter(..), ForceNodesFilter(..), ForceStatus(..), LinkForceType(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _force, _forces, _handle, _tick, _ticks, _velocityDecay, forceTuple)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Array (intercalate)
 import Data.Array as A
@@ -41,7 +41,10 @@ reheatSimulation = set _alpha 1.0
 simulationAddForces :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) => 
   Array Force -> m Unit
-simulationAddForces forces = traverse_ simulationAddForce forces
+simulationAddForces forces = do
+  traverse_ simulationAddForce forces -- effectfully put the forces in the simulation
+  let (updateMap :: M.Map Label Force) = M.fromFoldable $ forceTuple <$> forces
+  modifying (_d3Simulation <<< _forces) (\m -> M.union updateMap m )
 
 simulationRemoveAllForces :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) => 
@@ -119,7 +122,6 @@ simulationEnableOnlyTheseForces labels = do
   handle <- use (_d3Simulation <<< _handle)
   forces <- use (_d3Simulation <<< _forces)
   let updatedForces = (enableOnlyTheseLabels handle labels) <$> forces -- REVIEW can't we traversed (optic) this update?
-  forces <- use (_d3Simulation <<< _forces)
   modifying (_d3Simulation <<< _forces) (const updatedForces)
 
 simulationEnableForcesByLabel :: forall m row. 
@@ -127,7 +129,7 @@ simulationEnableForcesByLabel :: forall m row.
   Array Label  -> m Unit
 simulationEnableForcesByLabel labels  = do
   handle <- use (_d3Simulation <<< _handle)
-  forces <- use (_d3Simulation <<< _forces)
+  forces <- use (_d3Simulation <<< _forces) -- TODO this is the forces table inside the simulation record
   let updatedForces = (enableByLabels handle labels) <$> forces -- REVIEW can't we traversed (optic) this update?
   modifying (_d3Simulation <<< _forces) (const updatedForces)
   

@@ -7,6 +7,7 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, modify_)
 import D3.Examples.LesMiserables as LesMis
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
+import D3.FFI (linksForceName)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationStart)
@@ -193,8 +194,8 @@ handleAction = case _ of
                       LinksOn  -> LinksOff
                       LinksOff -> LinksOn
     case newSetting of
-      LinksOn  -> runEffectSimulation $ setForcesByLabel { enable: ["links"], disable: []} 
-      LinksOff -> runEffectSimulation $ setForcesByLabel { enable: [], disable: ["links"]} 
+      LinksOn  -> runEffectSimulation $ setForcesByLabel { enable: [linksForceName], disable: []} 
+      LinksOff -> runEffectSimulation $ setForcesByLabel { enable: [], disable: [linksForceName]} 
     modify_ (\s -> s { linksSetting = newSetting })
     simulationStart
 
