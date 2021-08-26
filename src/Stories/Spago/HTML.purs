@@ -5,8 +5,8 @@ import Prelude
 import D3.Data.Tree (TreeLayout(..))
 import D3.Examples.Spago.Files (isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (isPackage, isUsedModule)
-import D3.Simulation.Forces (getLabel, isForceActive, showType)
-import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), showForceFilter, showForceNodesFilter)
+import D3.Simulation.Forces
+import D3.Simulation.Types
 import D3Tagless.Block.Card as Card
 import Data.Array (length, (:))
 import Data.Map (toUnfoldable)
@@ -240,20 +240,17 @@ renderTableForces (SimState_ simulation)  =
     Table.row_ <$> ( renderData <$> tableData )
 
   -- renderData :: ∀ p i. Force -> Array (HH.HTML p i)
-  renderData force = do
-    let label = getLabel force
-        t     = showType force
-        s     = isForceActive force
+  renderData (Force force) = do
     [ Table.cell_ [ Checkbox.checkbox_ 
-                  [ HP.checked (s == ForceActive)
-                  , HE.onChecked $ const (ToggleForce label)
+                  [ HP.checked (force.status == ForceActive)
+                  , HE.onChecked $ const (ToggleForce force.name)
                   ] [] ]
     , Table.cell  [ css "text-left" ]
       [ HH.div_ [
-          HH.text $ label <> "\n" <> t -- use forceDescription t for more detailed explanation
+          HH.text $ force.name <> "\n" <> showType force.type -- use forceDescription t for more detailed explanation
         ]
       ]
-    , Table.cell  [ css "text-left" ] [ HH.text $ showForceFilter force ]
+    , Table.cell  [ css "text-left" ] [ HH.text $ showForceFilter force.filter ]
     ]
 
 renderTableElements :: forall m. D3SimulationState_ -> H.ComponentHTML Action () m

@@ -4,9 +4,10 @@ import Prelude
 
 import D3.Attributes.Instances (AttributeSetter, Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_)
-import D3.FFI (D3ForceHandle_, SimulationConfig_, defaultKeyFunction_, initSimulation_)
+import D3.FFI (D3ForceHandle_, SimulationConfig_, defaultKeyFunction_, dummyForceHandle_, initSimulation_)
 import D3.Selection (ChainableS)
-import Data.Lens (Lens', Prism', prism')
+import Data.Array (intercalate)
+import Data.Lens (Lens', Prism', _Just, lens', prism', view)
 import Data.Lens.At (at)
 import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
@@ -15,6 +16,7 @@ import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
 import Data.Nullable (Nullable, notNull, null)
 import Data.Nullable as N
+import Data.Profunctor (class Profunctor)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
 import Data.Tuple (Tuple(..))
@@ -114,25 +116,69 @@ instance showSimVariable :: Show SimVariable where
   show (VelocityDecay n) = "VelocityDecay: " <> show n
 
 -- TODO we won't export Force constructor here when we close exports
-data Force = 
-    Force     Label ForceStatus RegularForceType (Maybe ForceNodesFilter) (Array ChainableF) D3ForceHandle_
-  | LinkForce Label ForceStatus                  (Maybe ForceLinksFilter) (Array ChainableF) D3ForceHandle_
-  | FixForce  Label ForceStatus FixForceType     (Maybe ForceNodesFilter) (Array ChainableF) D3ForceHandle_
+data ForceType = RegularForce RegularForceType | LinkForce | FixForce FixForceType
+
+newtype Force = Force {
+    "type"     :: ForceType
+  , name       :: Label
+  , status     :: ForceStatus
+  , filter     :: Maybe ForceFilter
+  , attributes :: Array ChainableF
+  , force_     :: D3ForceHandle_
+}
+derive instance Newtype Force _
+
+_name :: Lens' Force Label
+_name = _Newtype <<< prop (Proxy :: Proxy "name")
+_status :: Lens' Force ForceStatus
+_status = _Newtype <<< prop (Proxy :: Proxy "status")
+_type :: Lens' Force ForceType
+_type = _Newtype <<< prop (Proxy :: Proxy "type")
+
+-- _filter :: forall p row.
+--      Newtype Force { filter :: Maybe ForceFilter | row }
+--   => Newtype Force { filter :: Maybe ForceFilter | row }
+--   => Profunctor p
+--   => Strong p
+--   => Choice p
+--   => p (Datum_ -> Boolean) (Datum_ -> Boolean) -> p Force Force
+-- _filter = _Newtype <<< prop (Proxy :: Proxy "filter") <<< _Just <<< _forceFilterFilter
+
+-- getForceFilter :: Force -> (Datum_ -> Boolean)
+-- getForceFilter f = do
+--   let maybeFilter = view _filter f
+--   case maybeFilter of
+--     Nothing -> const true -- a slightly expensive NO-OP filter
+--     Just filter -> view _forceFilterFilter filter
+
+_filter :: forall p. Profunctor p => Strong p => p (Maybe ForceFilter) (Maybe ForceFilter) -> p Force Force
+_filter = _Newtype <<< prop (Proxy :: Proxy "filter")
+
+_filterLabel :: forall p row.
+     Newtype Force { filter :: Maybe ForceFilter | row }
+  => Newtype Force { filter :: Maybe ForceFilter | row }
+  => Profunctor p
+  => Strong p
+  => Choice p
+  => p Label Label -> p Force Force
+_filterLabel = _Newtype <<< prop (Proxy :: Proxy "filter") <<< _Just <<< _forceFilterLabel
+
+_attributes :: Lens' Force (Array ChainableF)
+_attributes = _Newtype <<< prop (Proxy :: Proxy "attributes")
+_force_ :: Lens' Force D3ForceHandle_
+_force_ = _Newtype <<< prop (Proxy :: Proxy "force_")
 
 forceTuple :: Force -> Tuple Label Force
-forceTuple f = 
-  case f of
-    Force     label _ _ _ _ _ -> Tuple label f
-    LinkForce label _ _ _ _ -> Tuple label f
-    FixForce  label _ _ _ _ _ -> Tuple label f
+forceTuple f = Tuple (view _name f) f
+
+instance Show ForceType where
+  show (RegularForce t) = show t
+  show LinkForce        = "Link force"
+  show (FixForce f)     = show f
 
 instance Show Force where
-  show (Force label status t f cs h) = "Force: " <> label <> " " <> show status <> " applying to all nodes"
-  show (LinkForce label status (Just f) cs h) = "LinkForce: " <> label <> " " <> show status <> " " <> show f
-  show (LinkForce label status (Nothing) cs h) = "LinkForce: " <> label <> " " <> show status <> " applying to all nodes"
-  show (FixForce label status t (Just f) cs h) = "FixForce: " <> label <> " " <> show status <> " " <> show f
-  show (FixForce label status t (Nothing) cs h) = "FixForce: " <> label <> " " <> show status <> " applying to all nodes"
-
+  show (Force f) = intercalate " " [show f.type, show f.name, show f.status, show f.filter]
+  
 -- not sure if there needs to be a separate type for force attributes, maybe not, but we'll start assuming so
 newtype ChainableF = ForceT AttributeSetter
 derive instance Newtype ChainableF _
@@ -145,29 +191,21 @@ instance showForceStatus :: Show ForceStatus where
 
 allNodes :: forall t69. Maybe t69
 allNodes = Nothing -- just some sugar so that force declarations are nicer to read, Nothing == No filter == applies to all nodes
--- with sufficiently nice types might be possible to have just one filter type which would be better
--- but for now we have a separate one for Nodes and Links so that the predicate can be tweaked for each
-data ForceNodesFilter = FilterNodes Label (Datum_ -> Boolean)
-data ForceLinksFilter = FilterLinks Label (Datum_ -> Boolean) 
-instance Show ForceNodesFilter where
-  show (FilterNodes description _) = description
-instance Show ForceLinksFilter where
-  show (FilterLinks description _) = description
 
-showForceFilter :: Force -> String
-showForceFilter =
-  case _ of
-    (Force _ _ _ f _ _)    -> showForceNodesFilter f
-    (LinkForce _ _ f _ _)  -> showForceLinksFilter f
-    (FixForce _ _ _ f _ _) -> showForceNodesFilter f
+-- this filter data type will handle both links and nodes, both considered as opaque type Datum_ and needing coercion
+data ForceFilter = ForceFilter Label (Datum_ -> Boolean)
+instance Show ForceFilter where
+  show (ForceFilter description _) = description
 
-showForceLinksFilter :: Maybe ForceLinksFilter -> String
-showForceLinksFilter (Just (FilterLinks description _)) = description
-showForceLinksFilter Nothing = " (links are not filtered)"
+_forceFilterLabel :: Lens' ForceFilter Label
+_forceFilterLabel = lens' \(ForceFilter l f) -> Tuple l (\new -> ForceFilter new f)
 
-showForceNodesFilter :: Maybe ForceNodesFilter -> String
-showForceNodesFilter (Just (FilterNodes description _)) = description
-showForceNodesFilter Nothing = " (all nodes)"
+_forceFilterFilter :: Lens' ForceFilter (Datum_ -> Boolean)
+_forceFilterFilter = lens' \(ForceFilter l f) -> Tuple f (\new -> ForceFilter l new)
+
+showForceFilter :: Maybe ForceFilter -> String
+showForceFilter (Just (ForceFilter description _)) = description
+showForceFilter Nothing = " (no filter)"
 
 data RegularForceType = 
     ForceManyBody -- strength, theta, distanceMax, distanceMin
@@ -207,6 +245,8 @@ instance Show FixForceType where
 
 -- unused parameter is to ensure a NEW simulation is created so that, 
 -- for example, two Halogen components won't _accidentally_ share one
+-- should be dropped later when we can be sure that isn't a problem
+-- needs POC with two sims in one page, sim continuing despite page change etc etc
 initialSimulationState :: Int -> D3SimulationState_
 initialSimulationState id = SimState_
    {  -- common state for all D3 Simulation

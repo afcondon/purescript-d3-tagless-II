@@ -11,7 +11,7 @@ import D3.FFI (linksForceName)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, enableForce)
 import D3.Simulation.Functions (simulationStart)
-import D3.Simulation.Types (D3SimulationState_, Force, RegularForceType(..), SimVariable(..), allNodes, initialSimulationState)
+import D3.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), SimVariable(..), allNodes, initialSimulationState)
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
@@ -85,10 +85,10 @@ component = H.mkComponent
       , blurb: Expandable.Collapsed
       , code: Expandable.Collapsed
       , forces: [ 
-          enableForce $ createForce "center"      ForceCenter   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-        , enableForce $ createForce "many body"   ForceManyBody allNodes []
-        , enableForce $ createForce "collision"   ForceCollide  allNodes [ F.radius 4.0 ]
-        ,               createForce "collision20" ForceCollide  allNodes [ F.radius 20.0] -- NB initially not enabled
+          enableForce $ createForce "center"      (RegularForce ForceCenter)   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+        , enableForce $ createForce "many body"   (RegularForce ForceManyBody) allNodes []
+        , enableForce $ createForce "collision"   (RegularForce ForceCollide)  allNodes [ F.radius 4.0 ]
+        ,               createForce "collision20" (RegularForce ForceCollide)  allNodes [ F.radius 20.0] -- NB initially not enabled
         ]
     }
 

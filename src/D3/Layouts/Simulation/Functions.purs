@@ -2,6 +2,8 @@ module D3.Simulation.Functions where
 
 import D3.FFI
 import D3.Node
+import D3.Simulation.Forces
+import D3.Simulation.Types
 import D3Tagless.Capabilities
 import Prelude
 import Stories.Spago.State
@@ -10,13 +12,11 @@ import Control.Monad.State (class MonadState, State, get, gets, modify_)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
 import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
-import D3.Simulation.Forces (createForce, disableByLabels, enableByLabels, enableForce, enableOnlyTheseLabels, getHandle, getLabel, putForceInSimulation, setForceAttr, setForceAttrWithFilter)
-import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceLinksFilter(..), ForceNodesFilter(..), ForceStatus(..), LinkForceType(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _force, _forces, _handle, _tick, _ticks, _velocityDecay, forceTuple)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Array (intercalate)
 import Data.Array as A
 import Data.Foldable (traverse_)
-import Data.Lens (_Just, modifying, set, use)
+import Data.Lens (_Just, modifying, set, use, view)
 import Data.Lens.At (at)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -31,7 +31,7 @@ import Unsafe.Coerce (unsafeCoerce)
 
 insertForce :: Force -> D3SimulationState_ -> D3SimulationState_
 -- insertForce force (SimState_ ss_) = SimState_ ss_ { forces = M.insert (getLabel force) force ss_.forces }
-insertForce force = set (_force (getLabel force)) (Just force)
+insertForce force = set (_force (view _name force)) (Just force)
 
 reheatSimulation :: D3SimulationState_ -> D3SimulationState_
 reheatSimulation = set _alpha 1.0
@@ -58,38 +58,13 @@ simulationRemoveAllForces = do
 simulationAddForce :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   Force -> m Unit
-simulationAddForce force@(Force label status t f attrs h_) = do 
-  let _ = 
-        case f of
-          Nothing                       -> (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
-          (Just (FilterNodes _ filter)) -> (\a -> setForceAttrWithFilter h_ filter (unwrap a)) <$> attrs 
+simulationAddForce (Force force) = do 
+  let _ = (\a -> setForceAttr force.force_ force.filter (unwrap a)) <$> force.attributes -- side-effecting function that sets force's attributes
   handle <- use (_d3Simulation <<< _handle)
-  let _ = if status == ForceActive
-          then putForceInSimulation force handle
+  let _ = if force.status == ForceActive
+          then putForceInSimulation (Force force) handle
           else handle          
-  modifying (_d3Simulation <<< _force label) (liftA1 $ const force)
-
-simulationAddForce force@(LinkForce label status f attrs h_) = do 
-  let _ = 
-        case f of
-          Nothing                       -> (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
-          (Just (FilterLinks _ filter)) -> (\a -> setForceAttrWithFilter h_ filter (unwrap a)) <$> attrs 
-  handle <- use (_d3Simulation <<< _handle)
-  let _ = if status == ForceActive
-          then putForceInSimulation force handle
-          else handle
-  modifying (_d3Simulation <<< _force label) (liftA1 $ const force)
-
-simulationAddForce force@(FixForce label status t f attrs h_) = do 
-  let _ = 
-        case f of
-          Nothing                       -> (\a -> setForceAttr h_ (unwrap a)) <$> attrs 
-          (Just (FilterNodes _ filter)) -> (\a -> setForceAttrWithFilter h_ filter (unwrap a)) <$> attrs 
-  handle <- use (_d3Simulation <<< _handle)
-  let _ = if status == ForceActive
-          then putForceInSimulation force handle
-          else handle
-  modifying (_d3Simulation <<< _force label) (liftA1 $ const force)
+  modifying (_d3Simulation <<< _force force.name) (liftA1 $ const $ Force force)
 
 simulationToggleForce :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
@@ -98,13 +73,10 @@ simulationToggleForce label = do
   maybeForce <- use (_d3Simulation <<< _forces <<< at label)
   case maybeForce of
     Nothing -> pure unit
-    (Just (Force _ ForceActive _ _ _ _))      -> simulationDisableForcesByLabel [ label ]
-    (Just (LinkForce _ ForceActive _ _ _))    -> simulationDisableForcesByLabel [ label ]
-    (Just (FixForce _ ForceActive _ _ _ _))   -> simulationDisableForcesByLabel [ label ]
-
-    (Just (Force _ ForceDisabled _ _ _ _))    -> simulationEnableForcesByLabel [ label ]
-    (Just (LinkForce _ ForceDisabled _ _ _))  -> simulationEnableForcesByLabel [ label ]
-    (Just (FixForce _ ForceDisabled _ _ _ _)) -> simulationEnableForcesByLabel [ label ]
+    Just (Force force) ->
+      if (force.status == ForceActive)
+      then simulationDisableForcesByLabel [force.name]
+      else simulationEnableForcesByLabel [force.name]
 
 simulationDisableForcesByLabel :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
