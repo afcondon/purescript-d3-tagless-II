@@ -35,8 +35,8 @@ _model = prop (Proxy :: Proxy "model")
 _staging :: forall a r. Lens' { staging :: a | r } a
 _staging = prop (Proxy :: Proxy "staging")
 
-_class :: forall a r. Lens' { svgClass :: a | r } a
-_class = prop (Proxy :: Proxy "svgClass")
+_cssClass :: forall a r. Lens' { svgClass :: a | r } a
+_cssClass = prop (Proxy :: Proxy "svgClass")
 
 _activeForces :: forall a r. Lens' { activeForces :: a | r } a
 _activeForces = prop (Proxy :: Proxy "activeForces")

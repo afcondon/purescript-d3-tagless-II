@@ -1,11 +1,10 @@
 module Stories.Spago where
 
 import Prelude
-import Stories.Spago.State (State, _activeForces, _class, _d3Simulation, _model, _staging)
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, modify_)
+import Control.Monad.State (class MonadState, get, modify_)
 import D3.Examples.Spago.Draw (graphAttrs, treeAttrs)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
@@ -16,16 +15,18 @@ import D3.Simulation.Functions (simulationStart, simulationStop)
 import D3.Simulation.Types (SimVariable(..), _nodedata, initialSimulationState)
 import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, toggleForceByLabel)
 import D3Tagless.Instance.Simulation (runEffectSimulation)
+import Data.Array (filter)
 import Data.Either (hush)
-import Data.Lens (modifying, over, set, use)
+import Data.Lens (modifying, over, set, use, view, (%=))
 import Data.Map as M
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forces, gridForceSettings, packageForceSettings, treeForceSettings)
 import Stories.Spago.HTML (render)
+import Stories.Spago.State (State, _activeForces, _cssClass, _d3Simulation, _model, _modelLinks, _staging, _stagingLinks, _stagingNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -64,8 +65,8 @@ handleAction = case _ of
     setCssEnvironment "cluster"
     -- TODO make this removeSelection part of the Halogen State of the component
     -- runEffectSimulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
-    setActiveLinks  isM2P_Link -- only module-to-package (ie containment) links
-    setActiveNodes  noFilter   -- all the nodes
+    stageLinks  isM2P_Link -- only module-to-package (ie containment) links
+    stageNodes  noFilter   -- all the nodes
     setActiveForces gridForceSettings
     unpinActiveNodes
     -- everything from here on down should be factorable out???
@@ -79,8 +80,8 @@ handleAction = case _ of
   Scene PackageGraph -> do
     setCssEnvironment "graph"
     -- runEffectSimulation $ removeNamedSelection "treelinksSelection"
-    setActiveLinks isP2P_Link
-    setActiveNodes isPackage
+    stageLinks isP2P_Link
+    stageNodes isPackage
     setActiveForces packageForceSettings
     unpinActiveNodes
     -- runEffectSimulation $ uniformlyDistributeNodes -- FIXME
@@ -96,8 +97,8 @@ handleAction = case _ of
     setCssEnvironment "tree"
     -- runEffectSimulation $ removeNamedSelection "graphlinksSelection"
     setActiveForces treeForceSettings
-    setActiveNodes isUsedModule
-    setActiveLinks isM2M_Tree_Link
+    stageNodes isUsedModule
+    stageLinks isM2M_Tree_Link
     pinTreeNodes -- side-effect, because if we make _new_ nodes the links won't be pointing to them
 
     staging <- use _staging
@@ -113,7 +114,7 @@ handleAction = case _ of
     simulationStart
 
   Filter (LinkFilter x) -> do
-    setActiveLinks x
+    stageLinks x
 
     staging <- use _staging
     forces  <- use _activeForces
@@ -123,7 +124,7 @@ handleAction = case _ of
     simulationStart
 
   Filter (NodeFilter x) -> do
-    setActiveNodes x
+    stageNodes x
 
     staging <- use _staging
     forces  <- use _activeForces
@@ -132,7 +133,7 @@ handleAction = case _ of
     runEffectSimulation $ enableOnlyTheseForces forces
     simulationStart
 
-  ChangeStyling style -> modifying _class (const style) -- modify_ (\s -> s { svgClass = style })
+  ChangeStyling style -> _cssClass %= (const style) -- modify_ (\s -> s { svgClass = style })
 
   ChangeSimConfig c -> runEffectSimulation $ setConfigVariable c
 
@@ -141,18 +142,30 @@ handleAction = case _ of
   StopSim -> runEffectSimulation (setConfigVariable $ Alpha 0.0)
 
 setCssEnvironment :: forall m. MonadState State m => String -> m Unit
-setCssEnvironment string = modifying _class (const string)
+setCssEnvironment string = _cssClass %= (const string)
 
 setActiveForces :: forall m. MonadState State m => Array String -> m Unit
 setActiveForces forces = modify_ $ set _activeForces forces
 
 -- TODO modifying _linksInSim (filtered _linksInModel)
-setActiveLinks :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
-setActiveLinks fn = pure unit
+stageLinks :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
+stageLinks filterFn = do
+  state <- get
+  case state.model of
+    Nothing -> pure unit
+    Just m  -> do
+      let filteredLinks = filter filterFn m.links
+      _stagingLinks %= (const filteredLinks)
 
 -- TODO modifying _nodesInSim (filtered _nodesInModel)
-setActiveNodes :: forall m. MonadState State m => (SpagoSimNode -> Boolean) -> m Unit
-setActiveNodes fn = pure unit
+stageNodes :: forall m. MonadState State m => (SpagoSimNode -> Boolean) -> m Unit
+stageNodes filterFn = do
+  state <- get
+  case state.model of
+    Nothing -> pure unit
+    Just m  -> do
+      let filteredNodes = filter filterFn m.nodes
+      _stagingNodes %= (const filteredNodes)
 
 pinTreeNodes :: forall m. MonadState State m => m Unit
 pinTreeNodes = do
