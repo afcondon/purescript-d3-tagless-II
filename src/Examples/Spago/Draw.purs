@@ -88,7 +88,7 @@ treeAttrs  = {
 
 -- | recipe for this force layout graph
 setup :: forall m selection.
-  Bind m => MonadEffect m => SimulationM D3Selection_ m => SelectionM selection m => MonadState Spago.State m => m Unit
+  Bind m => MonadEffect m => SimulationM D3Selection_ m => SelectionM D3Selection_ m => MonadState Spago.State m => m Unit
 setup = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   sim <- simulationHandle -- needed for click handler to stop / start simulation
@@ -113,15 +113,15 @@ setup = do
   nodesEnter <- nodesGroup D3.<+> SplitJoinOpen "g.node"
   -- store the open join in both simulation state and component state
   -- TODO store only in staging, yes?
-  modifying (_d3Simulation <<< _selections <<< _nodes) (const $ notNull nodesEnter)
-  modifying (_staging <<< _enterselections <<< _nodes) (const $ Just nodesEnter)
+  modifying (_d3Simulation <<< _selections      <<< _nodes) (const $ notNull nodesEnter)
+  modifying (_staging      <<< _enterselections <<< _nodes) (const $ Just nodesEnter)
 
   linksGroup <- inner      D3.+   (node Group [ classed "links" ])
   linksEnter <- linksGroup D3.<+> SplitJoinOpen "line.link"
   -- store the open join in both simulation state and component state
   -- TODO store only in staging, yes?
-  modifying (_d3Simulation <<< _selections <<< _links) (const $ notNull linksEnter)
-  modifying (_staging <<< _enterselections <<< _links) (const $ Just linksEnter)
+  modifying (_d3Simulation <<< _selections      <<< _links) (const $ notNull linksEnter)
+  modifying (_staging      <<< _enterselections <<< _links) (const $ Just linksEnter)
   
 -- REVIEW this is just temporary as we will explicitly model the conversion somehow later on
 coerceLinks :: forall id r d. Array (D3Link id r) -> Array (D3Link (D3_SimulationNode d) r) 

@@ -54,9 +54,9 @@ handleAction = case _ of
   Initialize -> do    
     (maybeModel :: Maybe SpagoModel) <- H.liftAff getModel
     modifying _model (const maybeModel)
-    -- runEffectSimulation Graph.setup -- should result in the "enter" selections being in the simulation
+    runEffectSimulation Graph.setup -- should result in the "enter" selections being in the simulation
     runEffectSimulation (addForces forces)
-    -- handleAction $ Scene PackageGraph
+    handleAction $ Scene PackageGraph
 
   Finalize -> pure unit
 
