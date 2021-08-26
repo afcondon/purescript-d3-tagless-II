@@ -5,8 +5,8 @@ import Prelude
 import D3.Data.Types (Datum_)
 import D3.Examples.Spago.Model (cluster2Point, datum_)
 import D3.Simulation.Config as F
-import D3.Simulation.Forces
-import D3.Simulation.Types 
+import D3.Simulation.Forces (createForce)
+import D3.Simulation.Types (FixForceType(..), Force, ForceFilter(..), ForceType(..), RegularForceType(..), allNodes) 
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)

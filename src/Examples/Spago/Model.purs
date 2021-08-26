@@ -6,23 +6,20 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, Index_, PointXY, index_ToInt, intToIndex_)
 import D3.Examples.Spago.Files (NodeType(..), Pinned(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
-import D3.FFI (getIndexFromDatum_, hasChildren_, pinTreeNode_, setInSimNodeFlag)
+import D3.FFI (getIndexFromDatum_, hasChildren_, setInSimNodeFlag)
 import D3.Node (D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_, d3SchemeDiverging10N_)
 import Data.Array (foldl, partition)
 import Data.Graph (Graph, fromMap)
 import Data.Int (toNumber)
-import Data.Lens.Record (prop)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Newtype (unwrap)
 import Data.Nullable (Nullable, notNull, toMaybe)
 import Data.Nullable (Nullable, null) as N
 import Data.Set as S
 import Data.Tuple (Tuple(..))
 import Math (pi, sqrt, (%))
 import Math as Math
-import Type.Proxy (Proxy(..))
 import Type.Row (type (+))
 import Web.Event.Internal.Types (Event)
 

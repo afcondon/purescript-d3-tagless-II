@@ -4,10 +4,9 @@ import Control.Monad.State (class MonadState)
 import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
-import D3.Examples.Spago.Files (SpagoDataRow, SpagoLinkData)
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
 import D3.FFI (keyIsID)
-import D3.Node (D3Link, D3_SimulationNode, NodeID)
+import D3.Node (D3Link, D3_SimulationNode)
 import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
 import D3.Simulation.Types (D3SimulationState_, Step(..), _selections)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -15,7 +14,7 @@ import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, add
 import D3Tagless.Capabilities as D3
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
-import Data.Nullable (Nullable, notNull)
+import Data.Nullable (notNull)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, const, discard, negate, pure, unit, ($), (/), (<<<))
@@ -87,7 +86,7 @@ treeAttrs  = {
 }
 
 -- | recipe for this force layout graph
-setup :: forall m selection.
+setup :: forall m.
   Bind m => MonadEffect m => SimulationM D3Selection_ m => SelectionM D3Selection_ m => MonadState Spago.State m => m Unit
 setup = do
   (Tuple w h) <- liftEffect getWindowWidthHeight

@@ -1,8 +1,8 @@
 module D3.Examples.MetaTree where
 
 import D3.Attributes.Sugar
-import Math
 
+import Math (abs)
 import D3.Data.Tree (TreeModel, TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.MetaTree.Model (MetaTreeNode)

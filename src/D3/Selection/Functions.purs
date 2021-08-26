@@ -1,14 +1,12 @@
 module D3.Selection.Functions where
 
-import Control.Monad.State (gets)
 import D3.Data.Types (D3Selection_, Selector)
-import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3DataWithKeyFunction_, d3Data_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_, disableDrag_)
-import D3.Selection (Behavior(..), ChainableS, D3_Node(..), DragBehavior(..), Join(..), applyChainableSD3)
-import D3.Simulation.Types (D3SimulationState_(..))
+import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3DataWithKeyFunction_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_)
+import D3.Selection (Behavior(..), ChainableS, D3_Node(..), Join(..), applyChainableSD3)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM)
 import Data.Foldable (foldl)
-import Prelude (Unit, bind, discard, identity, pure, show, unit, ($))
+import Prelude (Unit, discard, pure, show, unit, ($))
 
 
 selectionAttach :: forall m. (SelectionM D3Selection_ m) => Selector D3Selection_ -> m D3Selection_

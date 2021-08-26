@@ -1,8 +1,8 @@
 module D3.Examples.Tree.Configure where
 
-import Utility
+import Utility (getWindowWidthHeight)
 
-import D3.Attributes.Sugar 
+import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), preserveAspectRatio, transform, viewBox) 
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_, Selector)
 import D3.Examples.Spago.Model (tree_datum_)
@@ -20,8 +20,7 @@ import Data.Tuple (Tuple(..), snd)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Math (pi, abs)
-import Prelude (class Bind, Unit, bind, negate, pure, show, unit, max, ($), (*), (+), (-), (/), (<>), (==))
-import Debug (spy)
+import Prelude (class Bind, Unit, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>), (==))
 
 -- TODO move this to a library, it really only needs the params for runPrinter to be completely generic
 -- | Evaluate the tree drawing script in the "printer" monad which will render it as a string
@@ -87,11 +86,9 @@ configureAndRunScript (Tuple width height ) model selector =
     { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
     xExtent = abs $ xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
     yExtent = abs $ yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
-    maxExtent = max xExtent yExtent
     radialRadius = yMax  -- on the radial tree the y is the distance from origin, ie yMax == radius
     radialExtent       = 2.0 * radialRadius
     pad n = n * 1.2
-    halfpad n = n * 1.1
     vtreeYOffset = (abs (height - yExtent)) / 2.0
     vtreeXOffset = xMin -- the left and right sides might be different so (xExtent / 2) would not necessarily be right
     htreeYOffset = xMin

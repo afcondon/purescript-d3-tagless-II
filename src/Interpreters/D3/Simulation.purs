@@ -1,20 +1,17 @@
 module D3Tagless.Instance.Simulation where
 
-import D3.Simulation.Functions
 import Prelude
-import Stories.Spago.Lenses
-import Stories.Spago.State
 
-import Control.Monad.State (class MonadState, StateT, get, gets, modify_, runStateT)
-import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_)
+import D3.Simulation.Functions (simulationAddForce, simulationAddForces, simulationDisableForcesByLabel, simulationEnableForcesByLabel, simulationEnableOnlyTheseForces, simulationGetLinks, simulationGetNodes, simulationOn, simulationRemoveAllForces, simulationSetLinks, simulationSetNodes, simulationSetVariable, simulationStart, simulationStop, simulationToggleForce, simulationUpdateData)
+import Stories.Spago.State (_d3Simulation)
+import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
+import D3.Data.Types (D3Selection_)
 import D3.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, onTick_)
-import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (applyChainableSD3)
 import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionModifySelection)
-import D3.Simulation.Types (D3SimulationState_(..), Step(..), _handle)
+import D3.Simulation.Types (D3SimulationState_, Step(..), _handle)
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, simulationHandle)
-import Data.Lens (Forget, modifying, use, view)
-import Data.Newtype (unwrap)
+import Data.Lens (use)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -108,7 +105,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   -- getSelection label                   = simulationGetSelection label
 -- management of tick functions, what to do with the selection on each step of simulation
     -- TODO this would be the more efficient but less attractive route to defining a Tick function
-  addTickFunction label (StepTransformFFI selection function) = do
+  addTickFunction _ (StepTransformFFI _ _) = do
     pure unit
   addTickFunction label (Step selection chain) = do
     handle <- simulationHandle

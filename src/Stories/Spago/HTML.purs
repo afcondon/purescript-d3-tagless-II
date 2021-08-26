@@ -5,10 +5,11 @@ import Prelude
 import D3.Data.Tree (TreeLayout(..))
 import D3.Examples.Spago.Files (isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (isPackage, isUsedModule)
-import D3.Simulation.Forces
-import D3.Simulation.Types
+import D3.Simulation.Forces (showType)
+import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), showForceFilter)
 import D3Tagless.Block.Card as Card
 import Data.Array (length, (:))
+import Data.Lens (view)
 import Data.Map (toUnfoldable)
 import Data.Tuple (snd)
 import Halogen (ComponentSlot)
@@ -22,8 +23,7 @@ import Ocelot.Block.Format as Format
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
--- import Stories.Spago.Lenses (_countDataLinks, _countDataNodes)
-import Stories.Spago.State (State)
+import Stories.Spago.State (State, _stagingLinks, _stagingNodes)
 import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
 
@@ -34,10 +34,10 @@ renderSimState state =
     [ Format.caption_ [ HH.text "Simulation state" ]
     , HH.p_
         [ HH.text $ "class: " <> state.svgClass ] 
-    -- , HH.p_
-    --     [ HH.text $ "link count: " <> show (_countDataLinks state) ] 
-    -- , HH.p_
-    --     [ HH.text $ "node count:" <> show (_countDataNodes state)] 
+    , HH.p_
+        [ HH.text $ "link count: " <> show (length $ view _stagingLinks state) ] 
+    , HH.p_
+        [ HH.text $ "node count:" <> show (length $ view _stagingNodes state)] 
     , HH.p_
         [ HH.text $ "initial forces:" <> show state.activeForces ] 
     ]

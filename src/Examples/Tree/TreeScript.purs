@@ -1,6 +1,6 @@
 module D3.Examples.Tree.Script where
 
-import D3.Attributes.Sugar
+import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, width, x)
 import Prelude
 
 import D3.Data.Tree (TreeLayout(..))

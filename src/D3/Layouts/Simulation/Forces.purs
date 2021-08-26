@@ -1,16 +1,15 @@
 module D3.Simulation.Forces where
 
-import D3.FFI
-import D3.Simulation.Types
+import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
+import D3.Simulation.Types (ChainableF, FixForceType(..), Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), LinkForceType(..), RegularForceType(..), _name, _status)
 import Prelude
 
 import D3.Attributes.Instances (Attr(..), AttrBuilder(..), AttributeSetter(..), IndexedLambda, Label, unboxAttr)
 import D3.Data.Types (D3Simulation_, Datum_, Index_)
 import Data.Array (elem)
 import Data.Function.Uncurried (mkFn2, runFn2)
-import Data.Lens (_Just, over, set, view)
-import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Nullable (toMaybe)
+import Data.Lens (over, set, view)
+import Data.Maybe (Maybe(..))
 
 
 showType :: ForceType -> String
@@ -100,9 +99,9 @@ removeForceFromSimulation (Force force) simulation_ = do
               Nothing -> const true -- a NO-OP filter
               Just (ForceFilter _ f) -> f
       case fix of
-        ForceFixPositionXY fn -> removeFixForceXY_ simulation_ filter
-        ForceFixPositionX fn  -> removeFixForceX_  simulation_ filter
-        ForceFixPositionY fn  -> removeFixForceY_  simulation_ filter
+        ForceFixPositionXY _ -> removeFixForceXY_ simulation_ filter
+        ForceFixPositionX _  -> removeFixForceX_  simulation_ filter
+        ForceFixPositionY _  -> removeFixForceY_  simulation_ filter
 
 
 forceDescription :: RegularForceType -> String
@@ -210,7 +209,7 @@ setForceAttr force_ maybeFilter (AttributeSetter label attr) = do
 
 
 attrFilter :: (Datum_ -> Boolean) -> Number -> Attr -> Attr
-attrFilter filter default = do
+attrFilter filter' default' = do
   let 
     addFilterToStatic :: (Datum_ -> Boolean) -> Number -> Number -> (Datum_ -> Number)
     addFilterToStatic filter value default = \d -> if filter d then value else default
@@ -218,17 +217,17 @@ attrFilter filter default = do
     addFilterToFn :: (Datum_ -> Boolean) -> (Datum_ -> Number) -> Number -> (Datum_ -> Number)
     addFilterToFn filter fn default = \d -> if filter d then fn d else default
 
-    addFilterToFnI :: (Datum_ -> Index_ -> Boolean) -> IndexedLambda Number -> Number -> IndexedLambda Number
-    addFilterToFnI filter fni default = mkFn2 f 
-      where
-        f d i = if filter d i then runFn2 fni d i else default
+    -- addFilterToFnI :: (Datum_ -> Index_ -> Boolean) -> IndexedLambda Number -> Number -> IndexedLambda Number
+    -- addFilterToFnI filter fni default = mkFn2 f 
+    --   where
+    --     f d i = if filter d i then runFn2 fni d i else default
   case _ of
     (StringAttr (Static a)) -> StringAttr (Static a)
     (StringAttr (Fn a))     -> StringAttr (Fn a)
     (StringAttr (FnI a))    -> StringAttr (FnI a)
 
-    (NumberAttr (Static a)) -> NumberAttr (Fn (addFilterToStatic filter a default)) -- turns static setter into dynamic because of filtering
-    (NumberAttr (Fn a))     -> NumberAttr (Fn (addFilterToFn filter a default))
+    (NumberAttr (Static a)) -> NumberAttr (Fn (addFilterToStatic filter' a default')) -- turns static setter into dynamic because of filtering
+    (NumberAttr (Fn a))     -> NumberAttr (Fn (addFilterToFn filter' a default'))
     (NumberAttr (FnI a))    -> NumberAttr (FnI a) -- NB doesn't handle filtering of indexed functions at the moment
 
     (ArrayAttr (Static a))  -> ArrayAttr (Static a)

@@ -17,16 +17,16 @@ import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariab
 import D3Tagless.Instance.Simulation (runEffectSimulation)
 import Data.Array (filter)
 import Data.Either (hush)
-import Data.Lens (modifying, over, set, use, view, (%=))
+import Data.Lens (modifying, over, set, use, (%=))
 import Data.Map as M
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forces, gridForceSettings, packageForceSettings, treeForceSettings)
 import Stories.Spago.HTML (render)
-import Stories.Spago.State (State, _activeForces, _cssClass, _d3Simulation, _model, _modelLinks, _staging, _stagingLinks, _stagingNodes)
+import Stories.Spago.State (State, _activeForces, _cssClass, _d3Simulation, _model, _staging, _stagingLinks, _stagingNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent

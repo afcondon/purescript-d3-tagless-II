@@ -2,7 +2,6 @@ module Main where
 
 import Prelude
 
-import D3.Simulation.Types (initialSimulationState)
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff.Class (class MonadAff)
@@ -14,7 +13,6 @@ import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 import Ocelot.Block.Format as Format
 import Stories.GUP as GUP
-import Stories.Index as Index
 import Stories.LesMis as LesMis
 import Stories.MetaTree as MetaTree
 import Stories.PrintTree as PrintTree

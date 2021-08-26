@@ -71,7 +71,7 @@ component = H.mkComponent
               , inputId: "show-blurb"
               }
               [ Toggle.toggle
-                [ HP.id_ "show-blurb"
+                [ HP.id "show-blurb"
                 , HP.checked
                   $ Expandable.toBoolean state.blurb
                 , HE.onChange \_ -> ToggleCard _blurb
@@ -88,7 +88,7 @@ component = H.mkComponent
                 , inputId: "show-code"
                 }
               [ Toggle.toggle
-                [ HP.id_ "show-code"
+                [ HP.id "show-code"
                 , HP.checked
                   $ Expandable.toBoolean state.code
                 , HE.onChange \_ -> ToggleCard _code

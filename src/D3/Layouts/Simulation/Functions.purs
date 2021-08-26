@@ -1,14 +1,14 @@
 module D3.Simulation.Functions where
 
-import D3.FFI
-import D3.Node
-import D3.Simulation.Forces
-import D3.Simulation.Types
-import D3Tagless.Capabilities
 import Prelude
-import Stories.Spago.State
 
-import Control.Monad.State (class MonadState, State, get, gets, modify_)
+import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
+import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
+import D3.Simulation.Forces (disableByLabels, enableByLabels, enableOnlyTheseLabels, putForceInSimulation, setForceAttr)
+import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _force, _forces, _handle, _name, _tick, _velocityDecay, forceTuple)
+import D3Tagless.Capabilities (RawData)
+import Stories.Spago.State (_d3Simulation)
+import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
 import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
@@ -16,14 +16,12 @@ import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Array (intercalate)
 import Data.Array as A
 import Data.Foldable (traverse_)
-import Data.Lens (_Just, modifying, set, use, view)
+import Data.Lens (modifying, set, use, view)
 import Data.Lens.At (at)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
-import Debug (spy, trace)
-import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | Underlying functions which allow us to make monadic updates from OUTSIDE of a script
@@ -140,6 +138,13 @@ simulationStart = do
 -- simulationStop :: forall m row. 
 --   (MonadState { simulation :: D3SimulationState_ | row } m) => 
 --   m Unit
+simulationStop :: forall t34 t48.
+  Bind t34 => MonadState
+                { simulation :: D3SimulationState_
+                | t48
+                }
+                t34
+               => t34 Unit
 simulationStop = do
   handle <- use (_d3Simulation <<< _handle)
   let _ = stopSimulation_ handle
@@ -149,7 +154,6 @@ simulationShowForces :: forall m row.
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   m String
 simulationShowForces = do
-  handle <- use (_d3Simulation <<< _handle)
   forces <- use (_d3Simulation <<< _forces)
   let forceTuples = M.toUnfoldable forces
       showTuple (Tuple label force) = show label <> " " <> show force
@@ -239,7 +243,7 @@ simulationCreateTickFunction label tick@(Step selection chain) = do
   
 -- the price of being able to treat Drag, Zoom, Click etc the same in SimulationM and SelectionM instances is some duplication here
 -- Drag has to behave differently in the simulation case
-simulationOn :: forall selection row m. 
+simulationOn :: forall row m. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
    D3Selection_ -> Behavior D3Selection_ -> m Unit
 simulationOn selection (Drag drag) = do

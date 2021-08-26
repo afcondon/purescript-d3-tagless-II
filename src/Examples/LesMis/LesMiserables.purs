@@ -17,7 +17,6 @@ import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Math (sqrt)
-import Ocelot.DatePicker (EmbeddedAction(..))
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
 import Utility (getWindowWidthHeight)
 

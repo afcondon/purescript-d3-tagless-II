@@ -8,7 +8,6 @@ import Data.Array (catMaybes, foldl, groupBy, length, range, sortBy, zip, (!!), 
 import Data.Foldable (sum)
 import Data.Map as M
 import Data.Maybe (fromMaybe, Maybe(..))
-import Data.Newtype (class Newtype)
 import Data.Nullable (Nullable, null)
 import Data.String (Pattern(..), split)
 import Data.Tuple (Tuple(..))

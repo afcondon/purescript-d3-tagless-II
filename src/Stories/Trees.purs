@@ -10,7 +10,6 @@ import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Instance.Selection (eval_D3M)
 import D3Tagless.Utility (removeExistingSVG)
-import Data.Array (catMaybes)
 import Data.Either (Either(..)) as E
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
@@ -61,15 +60,6 @@ component = H.mkComponent
     , blurb: Expandable.Collapsed
     , code: Expandable.Collapsed
   }
-
-  showState :: Maybe TreeModel -> String
-  showState Nothing = "There is no model yet"
-  showState (Just model) = show model.treeType <> " " <> show model.treeLayout
-
-  treeClasses :: State -> Array HH.ClassName
-  treeClasses model = do
-    let classStrings = catMaybes [ Just "trees", (show <<< _.treeLayout) <$> model.tree]
-    HH.ClassName <$> classStrings
   
   controlsRadio =
     HH.div

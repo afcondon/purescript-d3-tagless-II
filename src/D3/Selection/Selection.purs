@@ -98,9 +98,9 @@ applyChainableSD3 selection_ (AttrT (AttributeSetter label attr)) =
 
 -- NB only protection against non-text attribute for Text field is in the helper function
 -- and similarly for Property and HTML
-applyChainableSD3 selection_ (TextT (AttributeSetter label attr))     = d3SetText_    (unboxAttr attr) selection_ 
-applyChainableSD3 selection_ (PropertyT (AttributeSetter label attr)) = d3SetProperty_ (unboxAttr attr) selection_ 
-applyChainableSD3 selection_ (HTMLT (AttributeSetter label attr))     = d3SetHTML_     (unboxAttr attr) selection_ 
+applyChainableSD3 selection_ (TextT (AttributeSetter _ attr))     = d3SetText_    (unboxAttr attr) selection_ 
+applyChainableSD3 selection_ (PropertyT (AttributeSetter _ attr)) = d3SetProperty_ (unboxAttr attr) selection_ 
+applyChainableSD3 selection_ (HTMLT (AttributeSetter _ attr))     = d3SetHTML_     (unboxAttr attr) selection_ 
 
 -- NB this remove call will have no effect on elements with active or pending transitions
 -- and this gives rise to very counter-intuitive misbehaviour as subsequent enters clash with 

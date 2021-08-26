@@ -10,7 +10,7 @@ import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.FormField as FormField
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Instance.Selection (eval_D3M, runD3M)
-import Data.Array (catMaybes, singleton)
+import Data.Array (catMaybes)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
@@ -34,6 +34,7 @@ import Type.Proxy (Proxy(..))
 data Action
   = Initialize
   | SetStatus Status
+  | ToggleStatus
   | Finalize
   | ToggleCard (Lens' State Expandable.Status)
 
@@ -87,7 +88,7 @@ component = H.mkComponent
             [ Utils.tailwindClass "story-panel-controls"] 
             [ Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
               [ Button.buttonVertical
-                [ HE.onClick $ if state.status == Running then const (SetStatus Paused) else const (SetStatus Running) ]
+                [ HE.onClick $ const ToggleStatus ]
                 [ HH.text $ show state.status ]
               ]
             ]
@@ -100,7 +101,7 @@ component = H.mkComponent
               , inputId: "show-blurb"
               }
               [ Toggle.toggle
-                [ HP.id_ "show-blurb"
+                [ HP.id "show-blurb"
                 , HP.checked
                   $ Expandable.toBoolean state.blurb
                 , HE.onChange \_ -> ToggleCard _blurb
@@ -117,7 +118,7 @@ component = H.mkComponent
                 , inputId: "show-code"
                 }
               [ Toggle.toggle
-                [ HP.id_ "show-code"
+                [ HP.id "show-code"
                 , HP.checked
                   $ Expandable.toBoolean state.code
                 , HE.onChange \_ -> ToggleCard _code
@@ -171,15 +172,16 @@ handleAction = case _ of
 
     H.modify_ (\state -> state { status = Running, fiber = Just fiber, update = Just updateFn })
 
-  SetStatus status -> do
+  SetStatus status -> H.modify_ (\state -> state { status = status })
+  ToggleStatus -> do
     currentStatus <- H.gets _.status
     case currentStatus of
       Running -> pauseUpdating
-      otherwise -> startUpdating
+      _ -> startUpdating
 
   Finalize -> do
-    fiber <- H.gets _.fiber
-    _ <- case fiber of
+    maybeFiber <- H.gets _.fiber
+    _ <- case maybeFiber of
             Nothing      -> pure unit
             (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
     -- is it necessary to remove the component from the DOM? don't think it is

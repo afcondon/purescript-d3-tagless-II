@@ -3,9 +3,8 @@ module D3.Examples.Spago.Unsafe where
 import Prelude
 
 import D3.Data.Types (Datum_, Index_)
-import D3.Examples.Spago.Files (NodeType, Pinned, SpagoDataRecord, SpagoGraphLinkRecord, SpagoTreeObj, SpagoLinkData)
-import D3.Node (D3Link(..), D3LinkSwizzled(..), D3_SimulationNode(..), D3_TreeNode(..), D3LinkDatum)
-import Data.Nullable (Nullable)
+import D3.Examples.Spago.Files (SpagoDataRecord, SpagoLinkData, SpagoTreeObj)
+import D3.Node (D3LinkDatum, D3LinkSwizzled(..), D3_SimulationNode(..), D3_TreeNode(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 spagoNodeKeyFunction :: Datum_ -> Index_
@@ -25,7 +24,6 @@ unboxD3SimLink datum = l
 -- ======================================================================
 -- unboxD3TreeNode :: Datum_ -> SpagoDataRecord -- + Children / Parent
 -- ======================================================================
-
 unboxD3TreeNode datum = t
   where
     (t' :: SpagoTreeObj )  = unsafeCoerce datum
