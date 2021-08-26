@@ -33,7 +33,6 @@ type D3SimulationStateRecord = {
   , forces        :: M.Map Label Force
   , ticks         :: M.Map Label (Step D3Selection_)
 
-  , selections    :: { nodes :: Nullable D3Selection_, links :: Nullable D3Selection_ }
   , "data"        :: { nodes :: Array Datum_         , links :: Array Datum_ }
   , key           :: (Datum_ -> Index_)
 
@@ -67,9 +66,6 @@ _ticks = _Newtype <<< prop (Proxy :: Proxy "ticks")
 _tick :: String -> Lens' D3SimulationState_ (Maybe (Step D3Selection_))
 _tick label = _Newtype <<< prop (Proxy :: Proxy "ticks") <<< at label
 
-_selections :: Lens' D3SimulationState_ { nodes :: Nullable D3Selection_, links :: Nullable D3Selection_ }
-_selections = _Newtype <<< prop (Proxy :: Proxy "selections")
-
 _data :: Lens' D3SimulationState_ { nodes :: Array Datum_ , links :: Array Datum_ }
 _data = _Newtype <<< prop (Proxy :: Proxy "data")
 
@@ -78,13 +74,6 @@ _nodedata = _data <<< prop (Proxy :: Proxy "nodes")
 
 _linkdata :: Lens' D3SimulationState_ (Array Datum_ )
 _linkdata = _data <<< prop (Proxy :: Proxy "links")
-
--- _nodes :: forall p. Strong p => Choice p => p D3SimulationState_ D3Selection_
-_nodes :: forall p. Strong p => Choice p => p D3Selection_ D3Selection_ -> p D3SimulationState_ D3SimulationState_
-_nodes = _selections <<< prop (Proxy :: Proxy "nodes") <<< _nullable
-
-_links :: forall p. Strong p => Choice p => p D3Selection_ D3Selection_ -> p D3SimulationState_ D3SimulationState_
-_links = _selections <<< prop (Proxy :: Proxy "links") <<< _nullable 
 
 _key :: Lens' D3SimulationState_ (Datum_ -> Index_)
 _key = _Newtype <<< prop (Proxy :: Proxy "key")
@@ -251,10 +240,6 @@ initialSimulationState :: Int -> D3SimulationState_
 initialSimulationState id = SimState_
    {  -- common state for all D3 Simulation
       handle_  : initSimulation_ defaultConfigSimulation defaultKeyFunction_
-    , selections : {
-        nodes: null
-      , links: null
-    }
     , "data" : {
         nodes: []
       , links: []

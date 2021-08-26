@@ -8,18 +8,17 @@ import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight
 import D3.FFI (keyIsID)
 import D3.Node (D3Link, D3_SimulationNode)
 import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
-import D3.Simulation.Types (D3SimulationState_, Step(..), _selections)
+import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, attach, getLinks, getNodes, on, simulationHandle, updateData)
 import D3Tagless.Capabilities as D3
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
-import Data.Nullable (notNull)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, const, discard, negate, pure, unit, ($), (/), (<<<))
 import Stories.Spago.State (State) as Spago
-import Stories.Spago.State (_d3Simulation, _enterselections, _links, _nodes, _staging)
+import Stories.Spago.State (_enterselections, _links, _nodes, _staging)
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
@@ -110,16 +109,10 @@ setup = do
 
   nodesGroup <- inner      D3.+   (node Group [ classed "nodes" ])
   nodesEnter <- nodesGroup D3.<+> SplitJoinOpen "g.node"
-  -- store the open join in both simulation state and component state
-  -- TODO store only in staging, yes?
-  modifying (_d3Simulation <<< _selections      <<< _nodes) (const $ notNull nodesEnter)
   modifying (_staging      <<< _enterselections <<< _nodes) (const $ Just nodesEnter)
 
   linksGroup <- inner      D3.+   (node Group [ classed "links" ])
   linksEnter <- linksGroup D3.<+> SplitJoinOpen "line.link"
-  -- store the open join in both simulation state and component state
-  -- TODO store only in staging, yes?
-  modifying (_d3Simulation <<< _selections      <<< _links) (const $ notNull linksEnter)
   modifying (_staging      <<< _enterselections <<< _links) (const $ Just linksEnter)
   
 -- REVIEW this is just temporary as we will explicitly model the conversion somehow later on
