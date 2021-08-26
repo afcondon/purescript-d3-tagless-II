@@ -1,16 +1,12 @@
 module D3Tagless.Capabilities where
 
 import D3.Attributes.Instances (Label)
-import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_, Selector)
-import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode, NodeID)
+import D3.Data.Types (D3Simulation_, Datum_, Index_, Selector)
+import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior, ChainableS, D3_Node, Join)
 import D3.Simulation.Types (Force, SimVariable, Step)
-import Data.Lens (Lens')
-import Data.Lens.Record (prop)
 import Data.Maybe (Maybe)
-import Data.Tuple (Tuple)
 import Prelude (class Monad, Unit)
-import Type.Proxy (Proxy(..))
 
 -- TODO see whether it can be useful to extend the interpreter here, for different visualization types
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
@@ -18,7 +14,7 @@ import Type.Proxy (Proxy(..))
 class (Monad m) <= SelectionM selection m where
   attach :: Selector selection -> m selection
 
-  appendElement :: selection -> D3_Node              -> m selection
+  appendElement   :: selection -> D3_Node              -> m selection
   filterSelection :: selection -> Selector selection -> m selection
   modifySelection :: selection -> Array (ChainableS) -> m Unit
   
@@ -82,8 +78,8 @@ type RawData d r id = {
 }
 type Staging selection d r id = {
     selections :: { 
-      nodes :: selection
-    , links :: selection
+      nodes :: Maybe selection
+    , links :: Maybe selection
     }
   , rawdata :: RawData d r id
 }

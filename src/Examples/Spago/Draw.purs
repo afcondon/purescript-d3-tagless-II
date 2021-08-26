@@ -14,12 +14,13 @@ import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, attach, getLinks, getNodes, on, simulationHandle, updateData)
 import D3Tagless.Capabilities as D3
 import Data.Lens (modifying)
-import Data.Nullable (notNull)
+import Data.Maybe (Maybe(..))
+import Data.Nullable (Nullable, notNull)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, const, discard, negate, pure, unit, ($), (/), (<<<))
 import Stories.Spago.State (State) as Spago
-import Stories.Spago.State (_d3Simulation, _links, _nodes)
+import Stories.Spago.State (_d3Simulation, _enterselections, _links, _nodes, _staging)
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
@@ -109,12 +110,18 @@ setup = do
                            }
 
   nodesGroup <- inner      D3.+   (node Group [ classed "nodes" ])
-  nodes      <- nodesGroup D3.<+> SplitJoinOpen "g.node"
-  modifying (_d3Simulation <<< _selections <<< _nodes) (const $ notNull nodes)
+  nodesEnter <- nodesGroup D3.<+> SplitJoinOpen "g.node"
+  -- store the open join in both simulation state and component state
+  -- TODO store only in staging, yes?
+  modifying (_d3Simulation <<< _selections <<< _nodes) (const $ notNull nodesEnter)
+  modifying (_staging <<< _enterselections <<< _nodes) (const $ Just nodesEnter)
 
   linksGroup <- inner      D3.+   (node Group [ classed "links" ])
-  links      <- linksGroup D3.<+> SplitJoinOpen "line.link"
-  modifying (_d3Simulation <<< _selections <<< _links) (const $ notNull links)
+  linksEnter <- linksGroup D3.<+> SplitJoinOpen "line.link"
+  -- store the open join in both simulation state and component state
+  -- TODO store only in staging, yes?
+  modifying (_d3Simulation <<< _selections <<< _links) (const $ notNull linksEnter)
+  modifying (_staging <<< _enterselections <<< _links) (const $ Just linksEnter)
   
 -- REVIEW this is just temporary as we will explicitly model the conversion somehow later on
 coerceLinks :: forall id r d. Array (D3Link id r) -> Array (D3Link (D3_SimulationNode d) r) 
@@ -130,7 +137,7 @@ updateSimulation :: forall m row d r id.
   (Staging D3Selection_ d r id) ->
   { circle :: Array ChainableS, labels :: Array ChainableS } -> 
   m Unit
-updateSimulation staging attrs = do
+updateSimulation staging@{ selections: { nodes: Just nodesEnter, links: Just linksEnter }} attrs = do
   simulation_ <- simulationHandle
   updateData staging.rawdata keyIsID
   nodes       <- getNodes
@@ -143,7 +150,7 @@ updateSimulation staging attrs = do
                   , exit  : [ remove ] 
                   }
                   
-  nodesSelection <- staging.selections.nodes D3.<+> joinNodes
+  (nodesSelection :: D3Selection_) <- nodesEnter D3.<+> joinNodes
   
   -- now the links
   let joinLinks = SplitJoinClose Line links keyIsID
@@ -151,19 +158,19 @@ updateSimulation staging attrs = do
                     , update: [ classed "graphlinkSimUpdate" ]
                     , exit  : [ remove ]
                     }
-  linksSelection <- staging.selections.links D3.<+> joinLinks
+  linksSelection <- linksEnter D3.<+> joinLinks
 
   circle <- nodesSelection D3.+ (node Circle attrs.circle)
-  _      <- circle `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle
+  _      <- circle `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
   labels <- nodesSelection D3.+ (node Text attrs.labels) 
   
   addTickFunction "nodes" $
     Step nodesSelection [ transform' datum_.translateNode ]
   addTickFunction "links" $
     Step linksSelection [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
-  
   pure unit
-    
+-- without both the nodesEnter and linksEnter selections we cannot do anything, so just exit
+updateSimulation _ _ = pure unit    
 
 
 {-

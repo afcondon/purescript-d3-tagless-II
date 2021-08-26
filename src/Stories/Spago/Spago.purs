@@ -1,8 +1,7 @@
 module Stories.Spago where
 
 import Prelude
-import Stories.Spago.Lenses
-import Stories.Spago.State
+import Stories.Spago.State (State, _activeForces, _class, _d3Simulation, _model, _staging)
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
@@ -13,16 +12,14 @@ import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Tree_Link, isM2P_Link, i
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, convertFilesToGraphModel, isPackage, isUsedModule, noFilter)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (pinNamedNode_, pinTreeNode_, unpinNode_)
-import D3.Simulation.Functions (simulationGetNodes, simulationStart, simulationStop)
+import D3.Simulation.Functions (simulationStart, simulationStop)
 import D3.Simulation.Types (SimVariable(..), _nodedata, initialSimulationState)
 import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, toggleForceByLabel)
-import D3Tagless.Instance.Simulation (evalEffectSimulation, runEffectSimulation)
-import Data.Array (length)
+import D3Tagless.Instance.Simulation (runEffectSimulation)
 import Data.Either (hush)
 import Data.Lens (modifying, over, set, use)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Debug (trace)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
@@ -46,7 +43,7 @@ component = H.mkComponent
       svgClass: "cluster"
     , activeForces: []
     , model: Nothing
-    , staging: Nothing
+    , staging: { selections: { nodes: Nothing, links: Nothing }, rawdata: { nodes: [], links: [] }}
     , simulation: initialSimulationState 1 -- TODO replace number with unit when all working satisfactorily 
   }
 
@@ -73,14 +70,11 @@ handleAction = case _ of
     unpinActiveNodes
     -- everything from here on down should be factorable out???
     staging <- use _staging
-    forces <- use _activeForces
-    case staging of
-      Nothing -> pure unit
-      Just update -> do
-        simulationStop
-        runEffectSimulation $ Graph.updateSimulation update graphAttrs
-        runEffectSimulation $ enableOnlyTheseForces forces
-        simulationStart
+    forces  <- use _activeForces
+    simulationStop
+    runEffectSimulation $ Graph.updateSimulation staging graphAttrs
+    runEffectSimulation $ enableOnlyTheseForces forces
+    simulationStart
 
   Scene PackageGraph -> do
     setCssEnvironment "graph"
@@ -92,14 +86,11 @@ handleAction = case _ of
     -- runEffectSimulation $ uniformlyDistributeNodes -- FIXME
 
     staging <- use _staging
-    forces <- use _activeForces
-    case staging of
-      Nothing -> pure unit
-      Just update -> do
-        simulationStop
-        runEffectSimulation $ Graph.updateSimulation update graphAttrs
-        runEffectSimulation $ enableOnlyTheseForces forces
-        simulationStart
+    forces  <- use _activeForces
+    simulationStop
+    runEffectSimulation $ Graph.updateSimulation staging graphAttrs
+    runEffectSimulation $ enableOnlyTheseForces forces
+    simulationStart
 
   Scene (ModuleTree _) -> do
     setCssEnvironment "tree"
@@ -110,14 +101,11 @@ handleAction = case _ of
     pinTreeNodes -- side-effect, because if we make _new_ nodes the links won't be pointing to them
 
     staging <- use _staging
-    forces <- use _activeForces
-    case staging of
-      Nothing -> pure unit
-      Just update -> do
-        simulationStop
-        runEffectSimulation $ Graph.updateSimulation update treeAttrs
-        runEffectSimulation $ enableOnlyTheseForces forces
-        simulationStart
+    forces  <- use _activeForces
+    simulationStop
+    runEffectSimulation $ Graph.updateSimulation staging treeAttrs
+    runEffectSimulation $ enableOnlyTheseForces forces
+    simulationStart
     
   ToggleForce label -> do
     simulationStop
@@ -129,26 +117,20 @@ handleAction = case _ of
 
     staging <- use _staging
     forces  <- use _activeForces
-    case staging of
-      Nothing -> pure unit
-      Just update -> do
-        simulationStop
-        runEffectSimulation $ Graph.updateSimulation update graphAttrs
-        runEffectSimulation $ enableOnlyTheseForces forces
-        simulationStart
+    simulationStop
+    runEffectSimulation $ Graph.updateSimulation staging graphAttrs
+    runEffectSimulation $ enableOnlyTheseForces forces
+    simulationStart
 
   Filter (NodeFilter x) -> do
     setActiveNodes x
 
     staging <- use _staging
     forces  <- use _activeForces
-    case staging of
-      Nothing -> pure unit
-      Just update -> do
-        simulationStop
-        runEffectSimulation $ Graph.updateSimulation update graphAttrs
-        runEffectSimulation $ enableOnlyTheseForces forces
-        simulationStart
+    simulationStop
+    runEffectSimulation $ Graph.updateSimulation staging graphAttrs
+    runEffectSimulation $ enableOnlyTheseForces forces
+    simulationStart
 
   ChangeStyling style -> modifying _class (const style) -- modify_ (\s -> s { svgClass = style })
 

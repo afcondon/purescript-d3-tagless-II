@@ -24,7 +24,7 @@ type State = {
   , model        :: Maybe SpagoModel 
   -- we'll filter nodes/links to staging and then, if staging is valid (has selections) we will put this staging data in the simulation
   -- if there are updates to data they will be detected and handled by defensive copying in the FFI to ensure continuity of object references from links
-  , staging      :: Maybe (Staging D3Selection_ SpagoDataRow SpagoLinkData NodeID)
+  , staging      :: Staging D3Selection_ SpagoDataRow SpagoLinkData NodeID
   -- the simulationState manages the Nodes, Links, Forces, Selections, Ticks & simulation parameters
   , simulation   :: D3SimulationState_
 }
@@ -63,14 +63,14 @@ _stagingNodes :: forall p.
   => Choice p
   => p (Array SpagoSimNode) (Array SpagoSimNode)
   -> p State State 
-_stagingNodes = _staging <<< _Just <<< _rawdata <<< _nodes
+_stagingNodes = _staging <<< _rawdata <<< _nodes
 
 _stagingLinks :: forall p. 
      Strong p
   => Choice p
   => p (Array SpagoGraphLinkID) (Array SpagoGraphLinkID)
   -> p State State
-_stagingLinks = _staging <<< _Just <<< _rawdata <<< _links
+_stagingLinks = _staging <<< _rawdata <<< _links
 
 _nodes :: forall a r. Lens' { nodes :: a | r } a
 _nodes = prop (Proxy :: Proxy "nodes")
@@ -83,4 +83,7 @@ _rawdata = prop (Proxy :: Proxy "rawdata")
 
 _enterselections :: forall a r. Lens' { selections :: a | r } a
 _enterselections = prop (Proxy :: Proxy "selections")
+
+-- _selections' :: Lens' State { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
+-- _selections' = _Newtype <<< prop (Proxy :: Proxy "selections")
 

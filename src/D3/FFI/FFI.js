@@ -746,8 +746,7 @@ exports.treeMinMax_ = root => {
 
     if (d.x < min_x) min_x = d.x // if we find a value less than current min, that's our new minimum
     if (d.y < min_y) min_y = d.y 
-
-    console.log(`node ${d} (${min_x}, ${min_y}) (${max_x}, ${max_y})`);
+    // console.log(`node ${d} (${min_x}, ${min_y}) (${max_x}, ${max_y})`);
   })      
   return { xMin: min_x, xMax: max_x, yMin: min_y, yMax: max_y }
 }
