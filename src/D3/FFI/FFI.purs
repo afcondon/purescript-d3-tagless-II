@@ -33,6 +33,7 @@ foreign import d3SelectionSelect_    :: Selector D3Selection_    -> D3Selection_
 foreign import d3SelectionIsEmpty_   :: D3Selection_ -> Boolean
 foreign import d3EnterAndAppend_     :: String      -> D3Selection_ -> D3Selection_
 foreign import d3Append_             :: String      -> D3Selection_ -> D3Selection_
+foreign import d3MergeSelectionWith_ :: D3Selection_ -> D3Selection_ -> D3Selection_
 
 foreign import d3Exit_               :: D3Selection_ -> D3Selection_
 
@@ -52,7 +53,7 @@ foreign import getIndexFromDatum_    :: Datum_ -> Int
 
 foreign import d3Data_               :: forall d. Array d -> D3Selection_ -> D3Selection_
 type ComputeKeyFunction_ = Datum_ -> Index_
-foreign import keyIsID :: ComputeKeyFunction_
+foreign import keyIsID_ :: ComputeKeyFunction_
 foreign import d3DataWithKeyFunction_ :: forall d. Array d -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
@@ -74,21 +75,6 @@ foreign import emptyD3Data_ :: D3Data_ -- probably just null, could this be mono
 foreign import defaultSimulationDrag_ :: D3Selection_ -> D3Simulation_ -> D3Selection_
 foreign import disableDrag_ :: D3Selection_ -> D3Selection_
 
--- show functions that are used for the string version of the interpreter and also for debugging inside Selection.js
-foreign import showSelectAllInDOM_  :: forall selection. Selector D3Selection_ -> String -> selection
-foreign import showSelectAll_       :: forall selection. Selector D3Selection_ -> String -> selection -> selection
-foreign import showEnterAndAppend_  :: forall selection. Element -> selection -> selection
-foreign import showExit_            :: forall selection. selection -> selection
-foreign import showAddTransition_   :: forall selection. selection -> Transition -> selection 
-foreign import showRemoveSelection_ :: forall selection. selection -> selection
-foreign import showAppend_          :: forall selection. Element -> selection -> selection
-foreign import showKeyFunction_     :: forall selection d. Array d -> ComputeKeyFunction_ -> selection -> selection
-foreign import showData_            :: forall selection d. Array d -> selection -> selection
-foreign import showSetAttr_         :: forall selection. String -> D3Attr -> selection -> selection
-foreign import showSetText_         :: forall selection. D3Attr -> selection -> selection
-foreign import showSetHTML_         :: forall selection. D3Attr -> selection -> selection
-foreign import showSetProperty_     :: forall selection. D3Attr -> selection -> selection
-foreign import showSetOrdering_     :: forall selection. String -> selection -> selection
 foreign import selectionOn_         :: forall selection callback. selection -> String -> callback -> selection  
 
 
@@ -129,7 +115,6 @@ foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNod
 foreign import setLinks_ :: forall r d id. D3Simulation_ -> Array (D3Link id r) -> Array (D3LinkSwizzled (D3_SimulationNode d) r)
 
 foreign import getLinkID_              :: (Datum_ -> Index_) -> Datum_ -> Index_
-foreign import defaultKeyFunction_     :: Datum_ -> Index_
 foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_
 
 foreign import getLinksFromForce_      :: forall d r. D3ForceHandle_ -> Array (D3Link d r)

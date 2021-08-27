@@ -4,7 +4,8 @@ import D3.Selection
 
 import Control.Monad.State (class MonadState, StateT, modify_, runStateT)
 import D3.Attributes.Instances (AttributeSetter(..), unboxAttr)
-import D3.FFI (showAddTransition_, showRemoveSelection_, showSetAttr_, showSetHTML_, showSetOrdering_, showSetProperty_, showSetText_)
+import D3.Data.Types (D3Selection_, Element, Selector, Transition)
+import D3.FFI (ComputeKeyFunction_, D3Attr)
 import D3Tagless.Capabilities (class SelectionM)
 import Data.Array (foldl)
 import Data.Tuple (Tuple)
@@ -97,3 +98,18 @@ applyChainableSString selection  =
     (OnT event listener) -> do
       show "event handler for " <> show event <> " has been set"
 
+-- REVIEW surely these must all be s/D3Selection/String/ here ???
+foreign import showSelectAllInDOM_  :: forall selection. Selector D3Selection_ -> String -> selection
+foreign import showSelectAll_       :: forall selection. Selector D3Selection_ -> String -> selection -> selection
+foreign import showEnterAndAppend_  :: forall selection. Element -> selection -> selection
+foreign import showExit_            :: forall selection. selection -> selection
+foreign import showAddTransition_   :: forall selection. selection -> Transition -> selection 
+foreign import showRemoveSelection_ :: forall selection. selection -> selection
+foreign import showAppend_          :: forall selection. Element -> selection -> selection
+foreign import showKeyFunction_     :: forall selection d. Array d -> ComputeKeyFunction_ -> selection -> selection
+foreign import showData_            :: forall selection d. Array d -> selection -> selection
+foreign import showSetAttr_         :: forall selection. String -> D3Attr -> selection -> selection
+foreign import showSetText_         :: forall selection. D3Attr -> selection -> selection
+foreign import showSetHTML_         :: forall selection. D3Attr -> selection -> selection
+foreign import showSetProperty_     :: forall selection. D3Attr -> selection -> selection
+foreign import showSetOrdering_     :: forall selection. String -> selection -> selection

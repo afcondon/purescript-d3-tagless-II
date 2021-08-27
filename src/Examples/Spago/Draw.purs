@@ -5,7 +5,7 @@ import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, radius,
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
-import D3.FFI (keyIsID)
+import D3.FFI (keyIsID_)
 import D3.Node (D3Link, D3_SimulationNode)
 import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
 import D3.Simulation.Types (D3SimulationState_, Step(..))
@@ -131,12 +131,12 @@ updateSimulation :: forall m row d r id.
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesEnter, links: Just linksEnter }} attrs = do
   simulation_ <- simulationHandle
-  updateData staging.rawdata keyIsID
+  updateData staging.rawdata keyIsID_
   nodes       <- getNodes
   links       <- getLinks
 
   -- first the nodes
-  let joinNodes = SplitJoinClose Group nodes keyIsID
+  let joinNodes = SplitJoinClose Group nodes keyIsID_
                   { enter : enterAttrs simulation_
                   , update: updateAttrs simulation_
                   , exit  : [ remove ] 
@@ -145,7 +145,7 @@ updateSimulation staging@{ selections: { nodes: Just nodesEnter, links: Just lin
   (nodesSelection :: D3Selection_) <- nodesEnter D3.<+> joinNodes
   
   -- now the links
-  let joinLinks = SplitJoinClose Line links keyIsID
+  let joinLinks = SplitJoinClose Line links keyIsID_
                     { enter : [ classed link_.linkClass, strokeColor link_.color ]
                     , update: [ classed "graphlinkSimUpdate" ]
                     , exit  : [ remove ]

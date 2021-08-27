@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Attributes.Instances (AttributeSetter, Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_)
-import D3.FFI (D3ForceHandle_, SimulationConfig_, defaultKeyFunction_, dummyForceHandle_, initSimulation_)
+import D3.FFI (D3ForceHandle_, SimulationConfig_, dummyForceHandle_, initSimulation_, keyIsID_)
 import D3.Selection (ChainableS)
 import Data.Array (intercalate)
 import Data.Lens (Lens', Prism', _Just, lens', prism', view)
@@ -33,7 +33,7 @@ type D3SimulationStateRecord = {
   , forces        :: M.Map Label Force
   , ticks         :: M.Map Label (Step D3Selection_)
 
-  , "data"        :: { nodes :: Array Datum_         , links :: Array Datum_ }
+  , "data"        :: { nodes :: Array Datum_ , links :: Array Datum_ }
   , key           :: (Datum_ -> Index_)
 
   , alpha         :: Number
@@ -239,12 +239,12 @@ instance Show FixForceType where
 initialSimulationState :: Int -> D3SimulationState_
 initialSimulationState id = SimState_
    {  -- common state for all D3 Simulation
-      handle_  : initSimulation_ defaultConfigSimulation defaultKeyFunction_
+      handle_  : initSimulation_ defaultConfigSimulation keyIsID_
     , "data" : {
         nodes: []
       , links: []
     }
-    , key          : defaultKeyFunction_
+    , key          : keyIsID_
 
     , forces       : M.empty
     , ticks        : M.empty

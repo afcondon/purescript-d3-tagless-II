@@ -124,7 +124,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
 
   defaultNodeTick label selection = do
     handle <- simulationHandle
-    let _ = defaultNodeTick_ label handle selection
+    let _ = defaultNodeTick_ label handle selection -- TODO this is hardwired to cx/cy right now
     pure unit
 
   defaultLinkTick label selection = do

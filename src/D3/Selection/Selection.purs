@@ -38,10 +38,11 @@ data D3_Node = D3_Node Element (Array ChainableS)
 instance showD3_Node :: Show D3_Node where
   show (D3_Node e cs) = "D3Node: " <> show e
 
--- sugar for appending with no attributes
+-- sugar for appending WITH attributes
 node :: Element -> (Array ChainableS) -> D3_Node
 node e a = D3_Node e a
 
+-- sugar for appending with NO attributes
 node_ :: Element -> D3_Node
 node_ e = D3_Node e []
 

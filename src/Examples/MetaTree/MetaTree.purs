@@ -7,7 +7,7 @@ import D3.Data.Tree (TreeModel, TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.MetaTree.Model (MetaTreeNode)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
-import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, keyIsID, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
+import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, keyIsID_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
 import D3.Layouts.Hierarchical (verticalLink)
 import D3.Selection (Join(..), node)
 import D3Tagless.Capabilities (class SelectionM, appendElement, attach, (<+>))
@@ -75,7 +75,7 @@ treeScript (Tuple w h) tree = do
   links      <- container `appendElement` (node Group [ classed "links"])
   nodes      <- container `appendElement` (node Group [ classed "nodes"])
 
-  theLinks_  <- links <+> Join Path (links_ tree) keyIsID
+  theLinks_  <- links <+> Join Path (links_ tree) keyIsID_
                           [ strokeWidth   1.5
                           , strokeColor   "black"
                           , strokeOpacity 0.4
@@ -83,7 +83,7 @@ treeScript (Tuple w h) tree = do
                           , verticalLink
                           ]
 
-  nodeJoin_  <- nodes <+> Join Group (descendants_ tree) keyIsID [ transform [ datum_.positionXY ] ]
+  nodeJoin_  <- nodes <+> Join Group (descendants_ tree) keyIsID_ [ transform [ datum_.positionXY ] ]
   
 
   theNodes <- nodeJoin_ `appendElement` 

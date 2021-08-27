@@ -1,7 +1,7 @@
 module D3.Selection.Functions where
 
 import D3.Data.Types (D3Selection_, Selector)
-import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3DataWithKeyFunction_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3SelectAllInDOM_, d3SelectionSelectAll_)
+import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3DataWithKeyFunction_, d3EnterAndAppend_, d3Exit_, d3FilterSelection_, d3MergeSelectionWith_, d3SelectAllInDOM_, d3SelectionSelectAll_)
 import D3.Selection (Behavior(..), ChainableS, D3_Node(..), Join(..), applyChainableSD3)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM)
@@ -27,40 +27,41 @@ selectionModifySelection selection_ attributes = do
   pure unit
 
 selectionJoin   :: forall datum m. (SelectionM D3Selection_ m) => D3Selection_ -> Join D3Selection_ datum -> m D3Selection_
-selectionJoin selection (Join e ds k cs) = do
+selectionJoin selection (Join e theData keyFn cs) = do
   let 
-    element = show e
-    selectS = d3SelectionSelectAll_ element selection
-    dataS   = d3DataWithKeyFunction_ ds k selectS 
-    enterS  = d3EnterAndAppend_ element dataS
-    enterS' = foldl applyChainableSD3 enterS cs
-  pure enterS'
+    element         = show e
+    selectS         = d3SelectionSelectAll_ element selection
+    dataSelection   = d3DataWithKeyFunction_ theData keyFn selectS 
+    enterSelection  = d3EnterAndAppend_ element dataSelection
+    enterSelection' = foldl applyChainableSD3 enterSelection cs
+  pure enterSelection'
 
-selectionJoin selection (UpdateJoin e ds k cs) = do
+selectionJoin selection (UpdateJoin e theData keyFn cs) = do
   let
-    element = show e
-    selectS = d3SelectionSelectAll_ element selection
-    dataS  = d3DataWithKeyFunction_ ds k selectS
-    enterS = d3EnterAndAppend_ element dataS
-    exitS  = d3Exit_ dataS
-    _      = foldl applyChainableSD3 enterS  cs.enter
-    _      = foldl applyChainableSD3 exitS   cs.exit
-    _      = foldl applyChainableSD3 dataS   cs.update
-  pure enterS
+    element          = show e
+    initialSelection = d3SelectionSelectAll_ element selection
+    updateSelection  = d3DataWithKeyFunction_ theData keyFn initialSelection
+    enterSelection   = d3EnterAndAppend_ element updateSelection
+    exitSelection    = d3Exit_ updateSelection
+    _                = foldl applyChainableSD3 enterSelection  cs.enter
+    _                = foldl applyChainableSD3 exitSelection   cs.exit
+    _                = foldl applyChainableSD3 updateSelection cs.update
+  pure enterSelection -- REVIEW shouldn't this be merged selection too? how's that possibly work
 
 selectionJoin selection (SplitJoinOpen selector) = do
   pure $ d3SelectionSelectAll_ selector selection
 
 
-selectionJoin selection (SplitJoinClose e ds k cs) = do
+selectionJoin selection (SplitJoinClose e theData keyFn cs) = do
   let
-    dataS  = d3DataWithKeyFunction_ ds k selection 
-    enterS = d3EnterAndAppend_ (show e) dataS
-    exitS  = d3Exit_ dataS
-    _      = foldl applyChainableSD3 enterS  cs.enter
-    _      = foldl applyChainableSD3 exitS   cs.exit
-    _      = foldl applyChainableSD3 dataS   cs.update
-  pure enterS
+    updateSelection = d3DataWithKeyFunction_ theData keyFn selection 
+    enterSelection  = d3EnterAndAppend_ (show e) updateSelection
+    exitSelection   = d3Exit_ updateSelection
+    mergedSelection = updateSelection `d3MergeSelectionWith_` enterSelection
+    _               = foldl applyChainableSD3 enterSelection  cs.enter
+    _               = foldl applyChainableSD3 exitSelection   cs.exit
+    _               = foldl applyChainableSD3 updateSelection cs.update
+  pure mergedSelection
 
 
 selectionOn :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Behavior D3Selection_ -> m Unit

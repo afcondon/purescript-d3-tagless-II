@@ -5,7 +5,7 @@ import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOp
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.Model (LesMisRawModel)
-import D3.FFI (keyIsID)
+import D3.FFI (keyIsID_)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..), Join(..), node)
 import D3.Simulation.Types (D3SimulationState_, Step(..))
@@ -93,8 +93,8 @@ graphScript model selector = do
   cookedLinks <- getLinks
   
   -- joining the data from the model after it has been put into the simulation
-  nodesSelection <- nodesGroup D3.<+> Join Circle cookedNodes keyIsID [ radius 5.0, fill datum_.colorByGroup ] 
-  linksSelection <- linksGroup D3.<+> Join Line   cookedLinks keyIsID [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
+  nodesSelection <- nodesGroup D3.<+> Join Circle cookedNodes keyIsID_ [ radius 5.0, fill datum_.colorByGroup ] 
+  linksSelection <- linksGroup D3.<+> Join Line   cookedLinks keyIsID_ [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
 
   -- both links and nodes are updated on each step of the simulation, 
   -- in this case it's a simple translation of underlying (x,y) data for the circle centers
