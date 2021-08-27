@@ -13,6 +13,7 @@ import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 import Ocelot.Block.Format as Format
 import Stories.GUP as GUP
+import Stories.Index as Index
 import Stories.LesMis as LesMis
 import Stories.MetaTree as MetaTree
 import Stories.PrintTree as PrintTree
@@ -130,8 +131,8 @@ parent =
   renderExample = do
     case _ of
     -- TODO write an index page that explains the project
-      -- None            -> HH.slot_ _index     unit Index.component unit
-      None            -> HH.slot_ _index     unit Spago.component unit
+      None            -> HH.slot_ _index     unit Index.component unit
+      -- None            -> HH.slot_ _index     unit Spago.component unit
       ExampleCircles  -> HH.slot_ _circles   unit Circles.component unit
       ExampleGUP      -> HH.slot_ _gup       unit GUP.component GUP.Paused
       ExampleTrees    -> HH.slot_ _trees     unit Trees.component unit 

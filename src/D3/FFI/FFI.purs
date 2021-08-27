@@ -35,7 +35,9 @@ foreign import d3EnterAndAppend_     :: String      -> D3Selection_ -> D3Selecti
 foreign import d3Append_             :: String      -> D3Selection_ -> D3Selection_
 foreign import d3MergeSelectionWith_ :: D3Selection_ -> D3Selection_ -> D3Selection_
 
-foreign import d3Exit_               :: D3Selection_ -> D3Selection_
+-- these next two are for getting Enter and Exit selections during an update
+foreign import d3GetEnterSelection_ :: D3Selection_ -> D3Selection_
+foreign import d3GetExitSelection_  :: D3Selection_ -> D3Selection_
 
 -- Removes the selected elements from the document. Returns this selection (the
 -- removed elements) which are now detached from the DOM. There is not currently a

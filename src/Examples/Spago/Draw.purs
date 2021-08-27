@@ -120,46 +120,51 @@ coerceLinks :: forall id r d. Array (D3Link id r) -> Array (D3Link (D3_Simulatio
 coerceLinks links = unsafeCoerce links
 
 
-updateSimulation :: forall m row d r id. 
+updateSimulation :: forall m d r id. 
   Bind m => 
   MonadEffect m =>
-  MonadState { simulation :: D3SimulationState_ | row } m =>
+  MonadState Spago.State m =>
   SelectionM D3Selection_ m =>
   SimulationM D3Selection_ m =>
   (Staging D3Selection_ d r id) ->
   { circle :: Array ChainableS, labels :: Array ChainableS } -> 
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesEnter, links: Just linksEnter }} attrs = do
-  simulation_ <- simulationHandle
   updateData staging.rawdata keyIsID_
-  nodes       <- getNodes
-  links       <- getLinks
 
-  -- first the nodes
-  let joinNodes = SplitJoinClose Group nodes keyIsID_
+  simulation_ <- simulationHandle
+  nodeData    <- getNodes
+  linkData    <- getLinks
+
+  let -- first the nodedata
+    joinNodes = SplitJoinClose Group nodeData keyIsID_
                   { enter : enterAttrs simulation_
                   , update: updateAttrs simulation_
                   , exit  : [ remove ] 
                   }
                   
-  (nodesSelection :: D3Selection_) <- nodesEnter D3.<+> joinNodes
+  nodesSelection <- nodesEnter D3.<+> joinNodes
+  circle         <- nodesSelection D3.+ (node Circle attrs.circle)
+  labels         <- nodesSelection D3.+ (node Text attrs.labels) 
+  _              <- circle `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
   
-  -- now the links
-  let joinLinks = SplitJoinClose Line links keyIsID_
+  let -- now the linkData
+    joinLinks = SplitJoinClose Line linkData keyIsID_
                     { enter : [ classed link_.linkClass, strokeColor link_.color ]
                     , update: [ classed "graphlinkSimUpdate" ]
                     , exit  : [ remove ]
                     }
   linksSelection <- linksEnter D3.<+> joinLinks
 
-  circle <- nodesSelection D3.+ (node Circle attrs.circle)
-  _      <- circle `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
-  labels <- nodesSelection D3.+ (node Text attrs.labels) 
   
   addTickFunction "nodes" $
     Step nodesSelection [ transform' datum_.translateNode ]
   addTickFunction "links" $
     Step linksSelection [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
+
+  modifying (_staging <<< _enterselections <<< _nodes) (const $ Just nodesSelection)
+  modifying (_staging <<< _enterselections <<< _links) (const $ Just linksSelection)
+
   pure unit
 -- without both the nodesEnter and linksEnter selections we cannot do anything, so just exit
 updateSimulation _ _ = pure unit    

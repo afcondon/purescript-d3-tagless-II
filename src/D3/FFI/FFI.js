@@ -7,7 +7,8 @@ exports.d3Append_ = element => selection => { return selection.append(element) }
 exports.d3Data_ = data => selection => { return selection.data(data) }
 exports.d3DataWithKeyFunction_ = data => keyFn => selection => { return selection.data(data, keyFn) }
 exports.d3EnterAndAppend_ = element => selection => { return selection.enter().append(element) }
-exports.d3Exit_ = selection => { return selection.exit() }
+exports.d3GetExitSelection_ = selection => { return selection.exit() }
+exports.d3GetEnterSelection_ = selection => { return selection.enter() }
 exports.d3FilterSelection_ = selection => selector => selection.filter(selector)
 exports.d3LowerSelection_ = selection => selection.lower()
 exports.d3MergeSelectionWith_ = update => enter => { return update.merge(enter); }
@@ -173,9 +174,10 @@ exports.getLinksFromSimulation_ = simulation => {
   return result
 }
 exports.onTick_ = simulation => name => tickFn => {
-  return simulation.on('tick.' + name, () => {
+  var result = simulation.on('tick.' + name, () => {
     tickFn()
   })
+  return result;
 }
 exports.defaultNodeTick_ = label => simulation => nodeSelection => {
   simulation.on('tick.' + label, () => {
