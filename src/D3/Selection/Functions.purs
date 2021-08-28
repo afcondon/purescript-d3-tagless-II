@@ -73,7 +73,8 @@ selectionJoin openSelection (SplitJoinClose e theData keyFn cs) = do
     _               = foldl applyChainableSD3 updateSelection cs.update
 -- finally merge the entering and updating items
     mergedSelection = updateSelection `d3MergeSelectionWith_` enterSelection'
-  pure mergedSelection
+  -- REVIEW this is a very particular semantics, it DOES however allow you to add underneath the newly entered nodes
+  pure enterSelection' 
 
 
 selectionOn :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Behavior D3Selection_ -> m Unit

@@ -168,10 +168,7 @@ simulationUpdateData ::
   m Unit
 simulationUpdateData rawdata key = do
   handle <- use (_d3Simulation <<< _handle)
-  let
-      _ = d3MergeDataIntoSimulation handle rawdata.nodes rawdata.links key
-      -- _ = setNodes_ handle rawdata.nodes
-      -- _ = setLinks_ handle rawdata.links
+  let _ = d3MergeDataIntoSimulation handle rawdata.nodes rawdata.links key
   pure unit
 
 simulationSetNodes :: 
@@ -209,21 +206,6 @@ simulationGetLinks = do
   handle <- use (_d3Simulation <<< _handle)
   let links = getLinksFromSimulation_ handle
   pure links
-
--- simulationAddSelection :: forall m row.  -- NB not polymorphic in selection because D3SimulationState_ isn't
---   (MonadState { simulation :: D3SimulationState_ | row } m) =>
---   Label -> D3Selection_ -> m Unit
--- simulationAddSelection label selection = do
---     handle <- use (_d3Simulation <<< _handle)
---   modify_ (\s -> s { simulationState = (SimState_ ss_ { selections = M.insert label selection ss_.selections } )})
-
--- simulationGetSelection :: forall m row. 
---   (MonadState { simulation :: D3SimulationState_ | row } m) =>
---   Label -> m (Maybe D3Selection_)
--- simulationGetSelection label = do
---     handle <- use (_d3Simulation <<< _handle)
---   pure $ M.lookup label ss_.selections
-
 
 simulationCreateTickFunction :: forall selection row m. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>

@@ -142,11 +142,11 @@ updateSimulation staging@{ selections: { nodes: Just nodesEnter, links: Just lin
                   , update: updateAttrs simulation_
                   , exit  : [ remove ] 
                   }
-                  
-  nodesSelection <- nodesEnter D3.<+> joinNodes
-  circle         <- nodesSelection D3.+ (node Circle attrs.circle)
-  labels         <- nodesSelection D3.+ (node Text attrs.labels) 
-  _              <- circle `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
+  nodesEnterSelection <- nodesEnter D3.<+> joinNodes
+  -- TODO the circles and labels must only be put in on THE ENTER SELECTION
+  circles        <- nodesEnterSelection D3.+ (node Circle attrs.circle)
+  labels         <- nodesEnterSelection D3.+ (node Text attrs.labels) 
+  _              <- circles `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
   
   let -- now the linkData
     joinLinks = SplitJoinClose Line linkData keyIsID_
@@ -158,12 +158,12 @@ updateSimulation staging@{ selections: { nodes: Just nodesEnter, links: Just lin
 
   
   addTickFunction "nodes" $
-    Step nodesSelection [ transform' datum_.translateNode ]
+    Step nodesEnterSelection [ transform' datum_.translateNode ]
   addTickFunction "links" $
     Step linksSelection [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
 
-  modifying (_staging <<< _enterselections <<< _nodes) (const $ Just nodesSelection)
-  modifying (_staging <<< _enterselections <<< _links) (const $ Just linksSelection)
+  -- modifying (_staging <<< _enterselections <<< _nodes) (const $ Just nodesSelection)
+  -- modifying (_staging <<< _enterselections <<< _links) (const $ Just linksSelection)
 
   pure unit
 -- without both the nodesEnter and linksEnter selections we cannot do anything, so just exit

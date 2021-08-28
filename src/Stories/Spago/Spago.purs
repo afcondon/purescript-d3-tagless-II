@@ -20,6 +20,7 @@ import Data.Either (hush)
 import Data.Lens (modifying, over, set, use, (%=))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Debug (trace)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
@@ -54,6 +55,7 @@ handleAction = case _ of
 
   Initialize -> do    -- TODO think we actually don't want to be doing anything here until the component is shown
     (maybeModel :: Maybe SpagoModel) <- H.liftAff getModel
+    let _ = trace { spago: "initialize" } \_ -> unit
     modifying _model (const maybeModel)
     runEffectSimulation Graph.setup -- should result in the "enter" selections being in the simulation
     runEffectSimulation (addForces forces)
