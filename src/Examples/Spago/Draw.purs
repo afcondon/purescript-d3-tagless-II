@@ -7,10 +7,10 @@ import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
 import D3.FFI (keyIsID_)
 import D3.Node (D3Link, D3_SimulationNode)
-import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
+import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), UpdateJoin(..), node, node_)
 import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, attach, getLinks, getNodes, on, simulationHandle, updateData)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, attach, getLinks, getNodes, on, openSelection, simulationHandle, updateData)
 import D3Tagless.Capabilities as D3
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
@@ -108,18 +108,13 @@ setup = do
                            }
 
   nodesGroup <- inner      D3.+   (node Group [ classed "nodes" ])
-  nodesEnter <- nodesGroup D3.<+> SplitJoinOpen "g.node"
+  nodesEnter <- openSelection nodesGroup "g.node"
   modifying (_staging      <<< _enterselections <<< _nodes) (const $ Just nodesEnter)
 
   linksGroup <- inner      D3.+   (node Group [ classed "links" ])
-  linksEnter <- linksGroup D3.<+> SplitJoinOpen "line.link"
+  linksEnter <- openSelection linksGroup "line.link"
   modifying (_staging      <<< _enterselections <<< _links) (const $ Just linksEnter)
   
--- REVIEW this is just temporary as we will explicitly model the conversion somehow later on
-coerceLinks :: forall id r d. Array (D3Link id r) -> Array (D3Link (D3_SimulationNode d) r) 
-coerceLinks links = unsafeCoerce links
-
-
 updateSimulation :: forall m d r id. 
   Bind m => 
   MonadEffect m =>
@@ -137,33 +132,30 @@ updateSimulation staging@{ selections: { nodes: Just nodesEnter, links: Just lin
   linkData    <- getLinks
 
   let -- first the nodedata
-    joinNodes = SplitJoinClose Group nodeData keyIsID_
+    joinNodes = UpdateJoin Group nodeData keyIsID_
                   { enter : enterAttrs simulation_
                   , update: updateAttrs simulation_
                   , exit  : [ remove ] 
                   }
-  nodesEnterSelection <- nodesEnter D3.<+> joinNodes
+  nodesSelections <- nodesEnter D3.<+++> joinNodes
   -- TODO the circles and labels must only be put in on THE ENTER SELECTION
-  circles        <- nodesEnterSelection D3.+ (node Circle attrs.circle)
-  labels         <- nodesEnterSelection D3.+ (node Text attrs.labels) 
+  circles        <- nodesSelections.enter D3.+ (node Circle attrs.circle)
+  labels         <- nodesSelections.enter D3.+ (node Text attrs.labels) 
   _              <- circles `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
   
   let -- now the linkData
-    joinLinks = SplitJoinClose Line linkData keyIsID_
+    joinLinks = UpdateJoin Line linkData keyIsID_
                     { enter : [ classed link_.linkClass, strokeColor link_.color ]
                     , update: [ classed "graphlinkSimUpdate" ]
                     , exit  : [ remove ]
                     }
-  linksSelection <- linksEnter D3.<+> joinLinks
+  linksSelection <- linksEnter D3.<+++> joinLinks
 
   
   addTickFunction "nodes" $
-    Step nodesEnterSelection [ transform' datum_.translateNode ]
+    Step nodesSelections.update [ transform' datum_.translateNode ]
   addTickFunction "links" $
-    Step linksSelection [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
-
-  -- modifying (_staging <<< _enterselections <<< _nodes) (const $ Just nodesSelection)
-  -- modifying (_staging <<< _enterselections <<< _links) (const $ Just linksSelection)
+    Step linksSelection.update [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
 
   pure unit
 -- without both the nodesEnter and linksEnter selections we cannot do anything, so just exit
@@ -186,7 +178,7 @@ updateGraphLinks links = do
     Nothing -> pure unit
     (Just linksGroup) -> do
       -- TODO the links need valid IDs too if they are to do general update pattern, probably best to actually make them when making the model
-      linksSelection <- linksGroup D3.<+> 
+      linksSelection <- linksGroup D3.<-> 
                         SplitJoinCloseWithKeyFunction
                         Line
                         links
@@ -216,7 +208,7 @@ updateGraphLinks' links = do
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
-      linksSelection <- linksGroup D3.<+> 
+      linksSelection <- linksGroup D3.<-> 
                         SplitJoinCloseWithKeyFunction
                         Line
                         links
@@ -252,7 +244,7 @@ updateTreeLinks links layout = do
   case maybeLinksGroup of
     Nothing -> pure unit
     (Just linksGroup) -> do
-      linksSelection <- linksGroup D3.<+> 
+      linksSelection <- linksGroup D3.<-> 
                         SplitJoinCloseWithKeyFunction
                         Path
                         linksInSimulation

@@ -2,7 +2,7 @@ module D3.Selection.Functions where
 
 import D3.Data.Types (D3Selection_, Selector)
 import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3DataWithKeyFunction_, d3EnterAndAppend_, d3FilterSelection_, d3GetEnterSelection_, d3GetExitSelection_, d3MergeSelectionWith_, d3SelectAllInDOM_, d3SelectionSelectAll_)
-import D3.Selection (Behavior(..), ChainableS, D3_Node(..), Join(..), applyChainableSD3)
+import D3.Selection (Behavior(..), ChainableS, D3_Node(..), Join(..), UpdateJoin(..), applyChainableSD3)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM)
 import Data.Foldable (foldl)
@@ -37,11 +37,17 @@ selectionJoin selection (Join e theData keyFn cs) = do
     enterSelection' = foldl applyChainableSD3 enterSelection cs
   pure enterSelection'
 
-selectionJoin selection (UpdateJoin e theData keyFn cs) = do
+selectionUpdateJoin   :: forall datum m.
+  (SelectionM D3Selection_ m) =>
+  D3Selection_ ->
+  UpdateJoin D3Selection_ datum ->
+  m { enter :: D3Selection_, exit :: D3Selection_, update :: D3Selection_ }
+selectionUpdateJoin openSelection (UpdateJoin e theData keyFn cs) = do
   let
     element          = spy "UpdateJoin: " $ show e
-    initialSelection = d3SelectionSelectAll_ element selection
-    updateSelection  = d3DataWithKeyFunction_ theData keyFn initialSelection
+    -- REVIEW the openSelection here is not used anymore, for UpdateJoin you have to give an OpenSelection (not yet represented in the type system)
+    -- openSelection = d3SelectionSelectAll_ element selection
+    updateSelection  = d3DataWithKeyFunction_ theData keyFn openSelection
 
     enterSelection   = d3GetEnterSelection_ updateSelection
     enterSelection'  = d3Append_ element enterSelection
@@ -51,31 +57,15 @@ selectionJoin selection (UpdateJoin e theData keyFn cs) = do
     _                = foldl applyChainableSD3 exitSelection   cs.exit
     
     _                = foldl applyChainableSD3 updateSelection cs.update
-  pure enterSelection -- REVIEW shouldn't this be merged selection too? how's that possibly work
+  pure { enter: enterSelection', exit: exitSelection, update: updateSelection }
 
-selectionJoin selection (SplitJoinOpen selector) = do
-  let _ = spy "SplitJoinOpen: " $ selector
+selectionOpenSelection :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Selector D3Selection_ -> m D3Selection_
+selectionOpenSelection selection selector = do
+  let _ = spy "open selection: " $ selector
   pure $ d3SelectionSelectAll_ selector selection
 
-
-selectionJoin openSelection (SplitJoinClose e theData keyFn cs) = do
-  let
-    element         = spy "SplitJoinClose: " $ show e -- d3 is stringy
-    updateSelection = d3DataWithKeyFunction_ theData keyFn openSelection 
--- first the entering items
-    enterSelection  = d3GetEnterSelection_ updateSelection
-    enterSelection' = d3Append_ element enterSelection
-    _               = foldl applyChainableSD3 enterSelection' cs.enter
--- next the leaving items
-    exitSelection   = d3GetExitSelection_ updateSelection
-    _               = foldl applyChainableSD3 exitSelection   cs.exit
--- third, the updating items
-    _               = foldl applyChainableSD3 updateSelection cs.update
--- finally merge the entering and updating items
-    mergedSelection = updateSelection `d3MergeSelectionWith_` enterSelection'
-  -- REVIEW this is a very particular semantics, it DOES however allow you to add underneath the newly entered nodes
-  pure enterSelection' 
-
+selectionMergeSelections :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> D3Selection_ -> m D3Selection_
+selectionMergeSelections selectionA selectionB = pure $ d3MergeSelectionWith_ selectionA selectionB
 
 selectionOn :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Behavior D3Selection_ -> m Unit
 selectionOn selection (Drag drag) = do

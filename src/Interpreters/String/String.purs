@@ -6,7 +6,7 @@ import Control.Monad.State (class MonadState, StateT, modify_, runStateT)
 import D3.Attributes.Instances (AttributeSetter(..), unboxAttr)
 import D3.Data.Types (D3Selection_, Element, Selector, Transition)
 import D3.FFI (ComputeKeyFunction_, D3Attr)
-import D3Tagless.Capabilities (class SelectionM)
+import D3Tagless.Capabilities (class SelectionM, mergeSelections)
 import Data.Array (foldl)
 import Data.Tuple (Tuple)
 import Effect (Effect)
@@ -41,41 +41,40 @@ instance d3Tagless :: SelectionM String D3PrinterM where
     modify_ (\s -> s <> "\nfiltering selection using " <> show selector)
     pure "filter"
 
+  mergeSelections a b = do
+    modify_ (\s -> s <> "merging selections")
+    pure "merge"
+
   modifySelection selection attributes = do
     let attributeString = foldl applyChainableSString selection attributes
     modify_ (\s -> s <> "\nmodifying " <> selection <> "\n" <> attributeString)
     pure unit
 
-  join selection (Join e ds k cs) = do
-    let attributeString = foldl applyChainableSString selection cs
-    modify_ (\s -> s <> "\nentering a "   <> show e <> " for each datum" )
-    pure "join"
-  join selection (UpdateJoin e ds k cs) = do
-    let enterAttributes  = foldl applyChainableSString selection cs.enter
-        exitAttributes   = foldl applyChainableSString selection cs.exit
-        updateAttributes = foldl applyChainableSString selection cs.update
-    modify_ (\s -> s <> "\n\tenter behaviour: " <> enterAttributes)
-    modify_ (\s -> s <> "\n\tupdate behaviour: " <> updateAttributes)
-    modify_ (\s -> s <> "\n\texit behaviour: " <> exitAttributes)
-    pure "join"
-  join selection (SplitJoinOpen selector) = do
-    modify_ (\s -> s <> "\n\tseletion.selectAll: " <> selector)
-    pure "join"
-  join selection (SplitJoinClose e ds k cs) = do
-    let enterAttributes  = foldl applyChainableSString selection cs.enter
-        exitAttributes   = foldl applyChainableSString selection cs.exit
-        updateAttributes = foldl applyChainableSString selection cs.update
-    modify_ (\s -> s <> "\n\tenter behaviour: " <> enterAttributes)
-    modify_ (\s -> s <> "\n\tupdate behaviour: " <> updateAttributes)
-    modify_ (\s -> s <> "\n\texit behaviour: " <> exitAttributes)
-    pure "join"
-      
   on selection (Drag drag) = do
     modify_ (\s -> s <> "\nadding drag behavior to " <> selection)
     pure unit
   on selection (Zoom zoom) = do
     modify_ (\s -> s <> "\nadding drag behavior to " <> selection)
     pure unit
+
+  openSelection selection selector = do
+    modify_ (\s -> s <> "\nopening a selection using " <> show selector)
+    pure "openSelection"
+
+  simpleJoin selection (Join e ds k cs) = do
+    let attributeString = foldl applyChainableSString selection cs
+    modify_ (\s -> s <> "\nentering a "   <> show e <> " for each datum" )
+    pure "join"
+
+  updateJoin selection (UpdateJoin e ds k cs) = do
+    let enterAttributes  = foldl applyChainableSString selection cs.enter
+        exitAttributes   = foldl applyChainableSString selection cs.exit
+        updateAttributes = foldl applyChainableSString selection cs.update
+    modify_ (\s -> s <> "\n\tenter behaviour: " <> enterAttributes)
+    modify_ (\s -> s <> "\n\tupdate behaviour: " <> updateAttributes)
+    modify_ (\s -> s <> "\n\texit behaviour: " <> exitAttributes)
+    pure { enter: "enter", exit: "exit", update: "update" }
+      
 
 
 applyChainableSString :: String -> ChainableS -> String

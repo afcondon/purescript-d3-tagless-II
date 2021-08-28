@@ -6,7 +6,7 @@ import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
 import D3.Data.Types (Element, MouseEvent, Transition, Selector)
 import D3.FFI (ComputeKeyFunction_)
-import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), EnterUpdateExit, Join(..), OrderingAttribute(..))
+import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), EnterUpdateExit, Join(..), OrderingAttribute(..), UpdateJoin(..))
 import D3Tagless.Capabilities (class SelectionM)
 import Data.Array (filter, (:))
 import Data.Map (Map, empty, insert, lookup)
@@ -168,18 +168,23 @@ insertAttributeInScriptTree parentID =
 
 
 instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
-  attach selector = do
-    insertInScriptTree 0 (AttachNode selector) -- TODO this could actually be a multiple insert
-    pure 1
-
   appendElement nodeID (D3_Node element attributes) = do
     insertInScriptTree nodeID (AppendNode element)
     (ScriptTree id _ _) <- get
     -- _ <- traverse (insertAttributeInScriptTree id) attributes
     pure id -- this is the id of the AppendNode itself
 
+  attach selector = do
+    insertInScriptTree 0 (AttachNode selector) -- TODO this could actually be a multiple insert
+    pure 1
+
   filterSelection nodeID selector = do
     insertInScriptTree nodeID (FilterNode selector)
+    (ScriptTree id _ _) <- get
+    pure id
+
+  mergeSelections a b = do
+    -- insertInScriptTree nodeID (MergeNode a b)
     (ScriptTree id _ _) <- get
     pure id
 
@@ -187,26 +192,23 @@ instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
     insertInScriptTree nodeID (ModifyNode attributes)
     pure unit
 
-  join nodeID (Join e ds k cs)          = do
-    (ScriptTree id _ _) <- get
-    insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e cs k)
-    pure id
-  join nodeID (UpdateJoin e ds k cs)          = do
-    (ScriptTree id _ _) <- get
-    insertInScriptTree nodeID (UpdateJoinNode e cs)
-    pure id
-  join nodeID (SplitJoinOpen s)          = do
-    (ScriptTree id _ _) <- get
-    insertInScriptTree nodeID (OpenJoinNode s)
-    pure id
-  join nodeID (SplitJoinClose e ds k cs)   = do
-    (ScriptTree id _ _) <- get
-    insertInScriptTree nodeID (SplitJoinCloseWithKeyFunctionNode e cs k)
-    pure id
-
   on nodeID behavior = do
     insertInScriptTree nodeID (OnNode behavior) 
     pure unit
+
+  openSelection selection selector = do
+    -- insertInScriptTree nodeID (OpenNode selector)
+    (ScriptTree id _ _) <- get
+    pure id
+
+  simpleJoin nodeID (Join e ds k cs)          = do
+    (ScriptTree id _ _) <- get
+    insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e cs k)
+    pure id
+  updateJoin nodeID (UpdateJoin e ds k cs)          = do
+    (ScriptTree id _ _) <- get
+    insertInScriptTree nodeID (UpdateJoinNode e cs)
+    pure { enter: id, exit: id, update: id }
 
 -- applyChainableSString :: String -> ChainableS -> String
 -- applyChainableSString selection  = 

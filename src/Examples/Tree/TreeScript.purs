@@ -89,14 +89,14 @@ script config tree = do
   links      <- container D3.+  (node Group [ classed "links"] )
   nodes      <- container D3.+  (node Group [ classed "nodes"] )
 
-  theLinks_  <- links D3.<+>  Join Path (links_ tree) keyIsID_
+  theLinks_  <- links D3.<->  Join Path (links_ tree) keyIsID_
                               [ strokeWidth   1.5
                               , strokeColor config.color
                               , strokeOpacity 0.4
                               , fill "none", config.linkPath ]
 
   -- we make a group to hold the node circle and the label text
-  nodeJoin_  <- nodes D3.<+> Join Group (descendants_ tree) keyIsID_ config.nodeTransform
+  nodeJoin_  <- nodes D3.<-> Join Group (descendants_ tree) keyIsID_ config.nodeTransform
 
   theNodes <- nodeJoin_ D3.+  
                 (node Circle  [ fill         (\d -> if datum_.hasChildren d then "#999" else "#555")

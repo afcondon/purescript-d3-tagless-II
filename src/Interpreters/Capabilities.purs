@@ -3,7 +3,7 @@ module D3Tagless.Capabilities where
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Simulation_, Datum_, Index_, Selector)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
-import D3.Selection (Behavior, ChainableS, D3_Node, Join)
+import D3.Selection (Behavior, ChainableS, D3_Node, Join, UpdateJoin)
 import D3.Simulation.Types (Force, SimVariable, Step)
 import Data.Maybe (Maybe)
 import Prelude (class Monad, Unit)
@@ -12,17 +12,19 @@ import Prelude (class Monad, Unit)
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
 -- into both DOM and Simulation for example (and current implementation is gross and wrong)
 class (Monad m) <= SelectionM selection m where
-  attach :: Selector selection -> m selection
-
-  appendElement   :: selection -> D3_Node              -> m selection
+  appendElement   :: selection -> D3_Node -> m selection
+  attach          :: Selector selection -> m selection
   filterSelection :: selection -> Selector selection -> m selection
+  mergeSelections :: selection -> selection -> m selection
   modifySelection :: selection -> Array (ChainableS) -> m Unit
-  
-  on     :: selection -> Behavior selection -> m Unit
+  on              :: selection -> Behavior selection -> m Unit
+  openSelection   :: selection -> Selector selection -> m selection
+  simpleJoin      :: ∀ datum.  selection -> Join selection datum -> m selection
+  updateJoin      :: ∀ datum.  selection -> UpdateJoin selection datum 
+    -> m { enter :: selection, exit :: selection, update :: selection }
 
-  join   :: ∀ datum.  selection -> Join selection datum -> m selection
-
-infix 4 join as <+>
+infix 4 simpleJoin as <->
+infix 4 updateJoin as <+++>
 infix 4 appendElement as +
 
 -- TODO things that are not handled by this (deliberately) ultra-simple grammar so far:

@@ -20,14 +20,10 @@ data Behavior selection = Drag DragBehavior
 
 -- Join requires a type parameter to determine which interpreter to use
 data Join :: forall k. k -> Type -> Type
-data Join selection d = 
-    Join       Element (Array d) ComputeKeyFunction_ (Array ChainableS) 
-  | UpdateJoin Element (Array d) ComputeKeyFunction_ EnterUpdateExit    
-  -- SplitJoinOpen pairs with SplitJoinClose to allow us to split the setup and the update functions
-  -- as is done in idiomatic D3 in JavaScript, this is necessary in order to capture the 
-  -- previously bound data so that the enter and exit selections can be computed
-  | SplitJoinOpen (Selector selection)
-  | SplitJoinClose Element (Array d) ComputeKeyFunction_ EnterUpdateExit 
+data Join selection d =  Join       Element (Array d) ComputeKeyFunction_ (Array ChainableS) 
+
+data UpdateJoin :: forall k. k -> Type -> Type
+data UpdateJoin selection d = UpdateJoin Element (Array d) ComputeKeyFunction_ EnterUpdateExit    
 
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName

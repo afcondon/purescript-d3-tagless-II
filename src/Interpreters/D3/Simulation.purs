@@ -2,19 +2,19 @@ module D3Tagless.Instance.Simulation where
 
 import Prelude
 
-import D3.Simulation.Functions (simulationAddForce, simulationAddForces, simulationDisableForcesByLabel, simulationEnableForcesByLabel, simulationEnableOnlyTheseForces, simulationGetLinks, simulationGetNodes, simulationOn, simulationRemoveAllForces, simulationSetLinks, simulationSetNodes, simulationSetVariable, simulationStart, simulationStop, simulationToggleForce, simulationUpdateData)
-import Stories.Spago.State (_d3Simulation)
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Types (D3Selection_)
 import D3.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, onTick_)
 import D3.Selection (applyChainableSD3)
-import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionModifySelection)
+import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionUpdateJoin)
+import D3.Simulation.Functions (simulationAddForce, simulationAddForces, simulationDisableForcesByLabel, simulationEnableForcesByLabel, simulationEnableOnlyTheseForces, simulationGetLinks, simulationGetNodes, simulationOn, simulationRemoveAllForces, simulationSetLinks, simulationSetNodes, simulationSetVariable, simulationStart, simulationStop, simulationToggleForce, simulationUpdateData)
 import D3.Simulation.Types (D3SimulationState_, Step(..), _handle)
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, simulationHandle)
 import Data.Lens (use)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
+import Stories.Spago.State (_d3Simulation)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | ====================================================
@@ -66,13 +66,17 @@ instance showD3SimM :: Show (D3SimM row D3Selection_ a) where
   show x = "D3SimM"
 
 instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
-  attach selector    = selectionAttach selector 
   appendElement s_   = selectionAppendElement s_
+  attach selector    = selectionAttach selector 
   filterSelection s_ = selectionFilterSelection s_
+  mergeSelections s_ = selectionMergeSelections s_
   modifySelection s_ = selectionModifySelection s_
-  join s_            = selectionJoin s_ -- maybe Join will also have to be different for simulation
-  -- NOTE that simulation on is handled differently from selectionOn
-  on s_              = simulationOn s_
+  on s_              = simulationOn s_ -- NB simulation "on" is handled differently from selectionOn
+  openSelection s_   = selectionFilterSelection s_
+  simpleJoin s_      = selectionJoin s_
+  updateJoin s_      = selectionUpdateJoin s_
+
+
 
 -- TODO should each of these facets (stop/go, forces, data, selections, tick functions)
 instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
