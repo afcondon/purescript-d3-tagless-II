@@ -2,17 +2,16 @@ module D3.Simulation.Functions where
 
 import Prelude
 
-import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
-import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
-import D3.Simulation.Forces (disableByLabels, enableByLabels, enableOnlyTheseLabels, putForceInSimulation, setForceAttr)
-import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _force, _forces, _handle, _name, _tick, _velocityDecay, forceTuple)
-import D3Tagless.Capabilities (RawData)
-import Stories.Spago.State (_d3Simulation)
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
+import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3MergeDataIntoSimulation, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
+import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
+import D3.Simulation.Forces (disableByLabels, enableByLabels, enableOnlyTheseLabels, putForceInSimulation, setForceAttr)
+import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _force, _forces, _handle, _name, _tick, _velocityDecay, forceTuple)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
+import D3Tagless.Capabilities (RawData)
 import Data.Array (intercalate)
 import Data.Array as A
 import Data.Foldable (traverse_)
@@ -22,6 +21,7 @@ import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
+import Stories.Spago.State (_d3Simulation)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | Underlying functions which allow us to make monadic updates from OUTSIDE of a script
@@ -168,9 +168,10 @@ simulationUpdateData ::
   m Unit
 simulationUpdateData rawdata key = do
   handle <- use (_d3Simulation <<< _handle)
-  let 
-      _ = setNodes_ handle rawdata.nodes
-      _ = setLinks_ handle rawdata.links
+  let
+      _ = d3MergeDataIntoSimulation handle rawdata.nodes rawdata.links key
+      -- _ = setNodes_ handle rawdata.nodes
+      -- _ = setLinks_ handle rawdata.links
   pure unit
 
 simulationSetNodes :: 

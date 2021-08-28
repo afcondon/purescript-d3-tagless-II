@@ -129,20 +129,13 @@ exports.configSimulation_ = simulation => config => {
   }
   return simulation
 }
-// not sure if this is actually necessary
 // d3UpdateNodesAndLinks_ :: D3Selection_ -> Array NativeNode -> Array NativeNode -> (Datum_ -> Id) -> { nodes :: Array NativeNode, links: Array NativeLinks }
-// exports.d3UpdateNodesAndLinks_ = selections => nodes => links => keyFn => {
-//   const old = new Map(selections.nodes.nodes().data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
-//   let updateNodes = nodes.map(d => Object.assign(old.get(keyFn(d)) || {}, d));
-//   let updateLinks = links.map(d => Object.assign({}, d));  
-//   return { nodes: updateNodes, links: updateLinks}
-// }
-// this will work on both swizzled and unswizzled links
-// TODO check if that is really necessary later
-exports.getLinkID_ = keyFn => link => {
-  const sourceID = (typeof link.source == `object`) ? keyFn(link.source) : link.source
-  const targetID = (typeof link.target == `object`) ? keyFn(link.target) : link.target
-  return sourceID + "-" + targetID 
+exports.d3MergeDataIntoSimulation = simulation => newNodes => newLinks => keyFn => {
+  const old = new Map(simulation.nodes().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
+  let updateNodes = newNodes.map(d => Object.assign(old.get(keyFn(d)) || {}, d));
+  let updateLinks = newLinks.map(d => Object.assign({}, d));  
+  simulation.nodes(updateNodes)
+  simulation.force(exports.linksForceName).links(updateLinks)
 }
 exports.setNodes_ = simulation => nodes => {
   console.log(`setting nodes in simulation, there are ${nodes.length} nodes`);
@@ -159,8 +152,15 @@ exports.setLinks_ = simulation => links => {
 exports.unsetLinks_ = simulation => {
   const linkForce = d3.forceLink([])
   console.log('removing all links from simulation');
-  simulation.force('links', linkForce)
+  simulation.force(exports.linksForceName, linkForce)
   return simulation
+}
+// this will work on both swizzled and unswizzled links
+// TODO check if that is really necessary later
+exports.getLinkID_ = keyFn => link => {
+  const sourceID = (typeof link.source == `object`) ? keyFn(link.source) : link.source
+  const targetID = (typeof link.target == `object`) ? keyFn(link.target) : link.target
+  return sourceID + "-" + targetID 
 }
 exports.getLinksFromSimulation_ = simulation => {
   linksForce = simulation.force(exports.linksForceName)

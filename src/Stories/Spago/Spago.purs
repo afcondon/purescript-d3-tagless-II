@@ -52,12 +52,12 @@ handleAction :: forall m. Bind m => MonadAff m => MonadState State m =>
   Action -> m Unit
 handleAction = case _ of
 
-  Initialize -> do    
+  Initialize -> do    -- TODO think we actually don't want to be doing anything here until the component is shown
     (maybeModel :: Maybe SpagoModel) <- H.liftAff getModel
     modifying _model (const maybeModel)
     runEffectSimulation Graph.setup -- should result in the "enter" selections being in the simulation
     runEffectSimulation (addForces forces)
-    handleAction $ Scene PackageGraph
+    -- handleAction $ Scene PackageGraph
 
   Finalize -> pure unit
 

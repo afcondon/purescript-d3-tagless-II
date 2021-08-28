@@ -6,12 +6,10 @@ module D3.FFI where
 import D3.Node
 
 import D3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
-import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Element, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
-import Data.Array (find)
+import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
 import Data.Function.Uncurried (Fn2)
-import Data.Maybe (fromMaybe)
 import Data.Nullable (Nullable)
-import Prelude (class Ord, Unit, unit, ($), (<$>))
+import Prelude (Unit, unit)
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for D3js zoom module       *********************************************
@@ -105,13 +103,13 @@ type SimulationConfig_ = {
 foreign import initSimulation_         ::                  SimulationConfig_ -> (Datum_ -> Index_) -> D3Simulation_
 foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_ -> D3Simulation_
 
--- foreign import d3UpdateNodesAndLinks_ :: 
---   forall id r d. 
---      { nodes :: D3Selection_, links :: D3Selection_ }
---   -> Array (D3_SimulationNode d) 
---   -> Array (D3Link id r) 
---   -> (Datum_ -> Index_) 
---   -> { nodes :: Array (D3_SimulationNode d), links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
+foreign import d3MergeDataIntoSimulation :: 
+  forall id r d. 
+  D3Simulation_ ->
+  Array (D3_SimulationNode d) ->
+  Array (D3Link id r) ->
+  (Datum_ -> Index_) ->
+  Unit
 foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
 foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)
 foreign import setLinks_ :: forall r d id. D3Simulation_ -> Array (D3Link id r) -> Array (D3LinkSwizzled (D3_SimulationNode d) r)

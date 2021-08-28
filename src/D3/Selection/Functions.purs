@@ -6,6 +6,7 @@ import D3.Selection (Behavior(..), ChainableS, D3_Node(..), Join(..), applyChain
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM)
 import Data.Foldable (foldl)
+import Debug (spy)
 import Prelude (Unit, discard, pure, show, unit, ($))
 
 
@@ -29,7 +30,7 @@ selectionModifySelection selection_ attributes = do
 selectionJoin   :: forall datum m. (SelectionM D3Selection_ m) => D3Selection_ -> Join D3Selection_ datum -> m D3Selection_
 selectionJoin selection (Join e theData keyFn cs) = do
   let 
-    element         = show e
+    element         = spy "Join: " $ show e
     selectS         = d3SelectionSelectAll_ element selection
     dataSelection   = d3DataWithKeyFunction_ theData keyFn selectS 
     enterSelection  = d3EnterAndAppend_ element dataSelection
@@ -38,7 +39,7 @@ selectionJoin selection (Join e theData keyFn cs) = do
 
 selectionJoin selection (UpdateJoin e theData keyFn cs) = do
   let
-    element          = show e
+    element          = spy "UpdateJoin: " $ show e
     initialSelection = d3SelectionSelectAll_ element selection
     updateSelection  = d3DataWithKeyFunction_ theData keyFn initialSelection
 
@@ -53,12 +54,13 @@ selectionJoin selection (UpdateJoin e theData keyFn cs) = do
   pure enterSelection -- REVIEW shouldn't this be merged selection too? how's that possibly work
 
 selectionJoin selection (SplitJoinOpen selector) = do
+  let _ = spy "SplitJoinOpen: " $ selector
   pure $ d3SelectionSelectAll_ selector selection
 
 
 selectionJoin openSelection (SplitJoinClose e theData keyFn cs) = do
   let
-    element         = show e -- d3 is stringy
+    element         = spy "SplitJoinClose: " $ show e -- d3 is stringy
     updateSelection = d3DataWithKeyFunction_ theData keyFn openSelection 
 -- first the entering items
     enterSelection  = d3GetEnterSelection_ updateSelection
