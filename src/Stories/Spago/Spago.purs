@@ -5,7 +5,7 @@ import Prelude
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get, modify_)
-import D3.Examples.Spago.Draw (graphAttrs, treeAttrs)
+import D3.Examples.Spago.Draw (graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, convertFilesToGraphModel, isPackage, isUsedModule, noFilter)
@@ -57,7 +57,7 @@ handleAction = case _ of
     (maybeModel :: Maybe SpagoModel) <- H.liftAff getModel
     let _ = trace { spago: "initialize" } \_ -> unit
     modifying _model (const maybeModel)
-    runEffectSimulation Graph.setup -- should result in the "enter" selections being in the simulation
+    runEffectSimulation Graph.initialize -- should result in the "enter" selections being in the simulation
     runEffectSimulation (addForces forces)
     -- handleAction $ Scene PackageGraph
 
@@ -75,7 +75,7 @@ handleAction = case _ of
     staging <- use _staging
     forces  <- use _activeForces
     simulationStop
-    runEffectSimulation $ Graph.updateSimulation staging graphAttrs
+    runEffectSimulation $ Graph.updateSimulation staging graphSceneAttributes
     runEffectSimulation $ enableOnlyTheseForces forces
     simulationStart
 
@@ -91,7 +91,7 @@ handleAction = case _ of
     staging <- use _staging
     forces  <- use _activeForces
     simulationStop
-    runEffectSimulation $ Graph.updateSimulation staging graphAttrs
+    runEffectSimulation $ Graph.updateSimulation staging graphSceneAttributes
     runEffectSimulation $ enableOnlyTheseForces forces
     simulationStart
 
@@ -106,7 +106,7 @@ handleAction = case _ of
     staging <- use _staging
     forces  <- use _activeForces
     simulationStop
-    runEffectSimulation $ Graph.updateSimulation staging treeAttrs
+    runEffectSimulation $ Graph.updateSimulation staging treeSceneAttributes
     runEffectSimulation $ enableOnlyTheseForces forces
     simulationStart
     
@@ -121,7 +121,7 @@ handleAction = case _ of
     staging <- use _staging
     forces  <- use _activeForces
     simulationStop
-    runEffectSimulation $ Graph.updateSimulation staging graphAttrs
+    runEffectSimulation $ Graph.updateSimulation staging graphSceneAttributes
     runEffectSimulation $ enableOnlyTheseForces forces
     simulationStart
 
@@ -131,7 +131,7 @@ handleAction = case _ of
     staging <- use _staging
     forces  <- use _activeForces
     simulationStop
-    runEffectSimulation $ Graph.updateSimulation staging graphAttrs
+    runEffectSimulation $ Graph.updateSimulation staging graphSceneAttributes
     runEffectSimulation $ enableOnlyTheseForces forces
     simulationStart
 

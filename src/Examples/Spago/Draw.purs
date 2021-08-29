@@ -6,11 +6,10 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
 import D3.FFI (keyIsID_)
-import D3.Selection (Behavior(..), SelectionAttribute, DragBehavior(..))
+import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, getLinks, getNodes, on, openSelection, setAttributes, simulationHandle, updateData, updateJoin)
-import D3Tagless.Capabilities as D3
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
@@ -70,33 +69,35 @@ labelsAttrsH = [
   , text datum_.name
 ]
 
-graphAttrs :: { circle :: Array SelectionAttribute , labels :: Array SelectionAttribute }
-graphAttrs = { 
+graphSceneAttributes :: { circle :: Array SelectionAttribute , labels :: Array SelectionAttribute }
+graphSceneAttributes = { 
     circle: circleAttrs1
   , labels: labelsAttrs1 
 }
 
-treeAttrs :: { circle :: Array SelectionAttribute, labels :: Array SelectionAttribute }
-treeAttrs  = {
+treeSceneAttributes :: { circle :: Array SelectionAttribute, labels :: Array SelectionAttribute }
+treeSceneAttributes  = {
     circle: circleAttrs2
   , labels: labelsAttrsH
 }
 
+svgAttrs :: D3Simulation_ -> Number -> Number -> Array SelectionAttribute
+svgAttrs sim w h = [ viewBox (-w / 2.1) (-h / 2.05) w h 
+                    -- , preserveAspectRatio $ AspectRatio XMid YMid Meet 
+                    , classed "overlay"
+                    , width w, height h
+                    , cursor "grab"
+                    , onMouseEvent MouseClick (\e d t -> cancelSpotlight_ sim) ]
+                    
 -- | recipe for this force layout graph
-setup :: forall m.
+initialize :: forall m.
   Bind m => MonadEffect m => SimulationM D3Selection_ m => SelectionM D3Selection_ m => MonadState Spago.State m => m Unit
-setup = do
+initialize = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   sim <- simulationHandle -- needed for click handler to stop / start simulation
   root <- attach "div.svg-container" -- typeclass here determined by D3Selection_ in SimulationM
 
-  let svgAttrs = [ viewBox (-w / 2.1) (-h / 2.05) w h 
-                -- , preserveAspectRatio $ AspectRatio XMid YMid Meet 
-                , classed "overlay"
-                , width w, height h
-                , cursor "grab"
-                , onMouseEvent MouseClick (\e d t -> cancelSpotlight_ sim) ]
-  svg   <- appendTo root Svg svgAttrs 
+  svg   <- appendTo root Svg (svgAttrs sim w h) 
   inner <- appendTo svg  Group []
   _     <- inner `on` Drag DefaultDrag
   _     <- svg   `on` Zoom { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
