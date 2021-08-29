@@ -18,7 +18,7 @@ class (Monad m) <= SelectionM selection m where
   mergeSelections :: selection -> selection -> m selection
   modifySelection :: selection -> Array (ChainableS) -> m Unit
   on              :: selection -> Behavior selection -> m Unit
-  openSelection   :: selection -> Selector selection -> m selection
+  openSelection   :: selection -> Selector selection -> m selection 
   simpleJoin      :: ∀ datum.  selection -> Join selection datum -> m selection
   updateJoin      :: ∀ datum.  selection -> UpdateJoin selection datum 
     -> m { enter :: selection, exit :: selection, update :: selection }

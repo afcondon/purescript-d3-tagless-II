@@ -6,7 +6,7 @@ import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Types (D3Selection_)
 import D3.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, onTick_)
 import D3.Selection (applyChainableSD3)
-import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionUpdateJoin)
+import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionOpenSelection, selectionUpdateJoin)
 import D3.Simulation.Functions (simulationAddForce, simulationAddForces, simulationDisableForcesByLabel, simulationEnableForcesByLabel, simulationEnableOnlyTheseForces, simulationGetLinks, simulationGetNodes, simulationOn, simulationRemoveAllForces, simulationSetLinks, simulationSetNodes, simulationSetVariable, simulationStart, simulationStop, simulationToggleForce, simulationUpdateData)
 import D3.Simulation.Types (D3SimulationState_, Step(..), _handle)
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, simulationHandle)
@@ -72,7 +72,7 @@ instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
   mergeSelections s_ = selectionMergeSelections s_
   modifySelection s_ = selectionModifySelection s_
   on s_              = simulationOn s_ -- NB simulation "on" is handled differently from selectionOn
-  openSelection s_   = selectionFilterSelection s_
+  openSelection s_   = selectionOpenSelection s_
   simpleJoin s_      = selectionJoin s_
   updateJoin s_      = selectionUpdateJoin s_
 

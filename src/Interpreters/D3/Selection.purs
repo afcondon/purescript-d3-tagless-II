@@ -3,7 +3,7 @@ module D3Tagless.Instance.Selection where
 
 import Control.Monad.State (class MonadState, StateT, runStateT)
 import D3.Data.Types (D3Selection_)
-import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionOn, selectionUpdateJoin)
+import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionOn, selectionOpenSelection, selectionUpdateJoin)
 import D3Tagless.Capabilities (class SelectionM)
 import Data.Tuple (Tuple, fst, snd)
 import Effect (Effect)
@@ -29,7 +29,7 @@ instance d3TaglessD3M :: SelectionM D3Selection_ (D3M state D3Selection_) where
   attach selector    = selectionAttach selector 
   appendElement s_   = selectionAppendElement s_
   filterSelection s_ = selectionFilterSelection s_
-  openSelection s_   = selectionFilterSelection s_
+  openSelection s_   = selectionOpenSelection s_
   mergeSelections s_ = selectionMergeSelections s_
   modifySelection s_ = selectionModifySelection s_
   simpleJoin s_      = selectionJoin s_

@@ -135,7 +135,7 @@ runGeneralUpdatePattern = do
   -- detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
   update   <- H.liftEffect $ eval_D3M $ GUP.script3 "div.svg-container"
   -- the script sets up the SVG and returns a function that the component can run whenever it likes
-  -- (but NB if it runs more often than every 2000 milliseconds there will be big problems)
+  -- (but NB if it runs more often than every 2000 milliseconds there will be big problems due to uncompleted transitions)
   pure (\letters -> H.liftEffect $ runD3M (update letters) *> pure unit )
 
 runUpdate :: (Array Char -> Aff Unit) -> Aff Unit

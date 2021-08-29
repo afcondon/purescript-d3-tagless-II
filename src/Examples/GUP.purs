@@ -5,7 +5,7 @@ import D3.Attributes.Sugar
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 import D3.Selection (ChainableS, UpdateJoin(..), node)
 import D3Tagless.Capabilities ((+), (<+++>)) as D3
-import D3Tagless.Capabilities (class SelectionM, attach)
+import D3Tagless.Capabilities (class SelectionM, attach, openSelection)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))
 import Prelude (bind, pure, ($), (*), (+), (<<<))
@@ -25,17 +25,19 @@ datumIsChar = unsafeCoerce
 indexIsNumber :: Index_ -> Number
 indexIsNumber = unsafeCoerce
 
-keyFunction :: Datum_ -> Index_
+keyFunction :: Datum_ -> Index_ -- for this very simple example, the data (Char) can be used directly as the key
 keyFunction = unsafeCoerce
 
 
 script3 :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m { enter::D3Selection_, exit::D3Selection_, update::D3Selection_})
 script3 selector = do 
-  root        <- attach selector
-  svg         <- root D3.+ (node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ])
-  letterGroup <- svg  D3.+ (node Group [])
+  root           <- attach selector
+  svg            <- root D3.+ (node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ])
+  letterGroup    <- svg  D3.+ (node Group [])
   
-  pure $ \letters -> letterGroup D3.<+++> UpdateJoin Text letters keyFunction { enter, update, exit }
+  pure $ \letters -> do
+    enterSelection <- openSelection letterGroup "text"
+    enterSelection D3.<+++> UpdateJoin Text letters keyFunction { enter, update, exit }
 
   where 
     transition :: ChainableS

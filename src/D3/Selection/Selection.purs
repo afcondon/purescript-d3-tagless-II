@@ -3,7 +3,7 @@ module D3.Selection where
 import D3.FFI
 
 import D3.Attributes.Instances (AttributeSetter(..), Listener_, attributeLabel, unboxAttr)
-import D3.Data.Types (D3Selection_, Datum_, Element, MouseEvent, Transition, Selector)
+import D3.Data.Types (D3Selection_, Datum_, Element, MouseEvent, Transition)
 import D3.Zoom (ZoomConfig)
 import Data.Array (foldl)
 import Prelude (class Eq, class Ord, class Show, Unit, show, (<>))
@@ -32,7 +32,7 @@ derive instance ordSelectionName :: Ord SelectionName
 data D3_Node = D3_Node Element (Array ChainableS)
 
 instance showD3_Node :: Show D3_Node where
-  show (D3_Node e cs) = "D3Node: " <> show e
+  show (D3_Node e _) = "D3Node: " <> show e
 
 -- sugar for appending WITH attributes
 node :: Element -> (Array ChainableS) -> D3_Node
