@@ -8,7 +8,7 @@ import D3Tagless.Capabilities ((+), (<+++>)) as D3
 import D3Tagless.Capabilities (class SelectionM, attach, openSelection)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))
-import Prelude (bind, pure, ($), (*), (+), (<<<))
+import Prelude (Unit, bind, discard, unit, pure, ($), (*), (+), (<<<))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | ====================================================================================
@@ -29,7 +29,7 @@ keyFunction :: Datum_ -> Index_ -- for this very simple example, the data (Char)
 keyFunction = unsafeCoerce
 
 
-script3 :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m { enter::D3Selection_, exit::D3Selection_, update::D3Selection_})
+script3 :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
 script3 selector = do 
   root           <- attach selector
   svg            <- root D3.+ (node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ])
@@ -37,7 +37,8 @@ script3 selector = do
   
   pure $ \letters -> do
     enterSelection <- openSelection letterGroup "text"
-    enterSelection D3.<+++> UpdateJoin Text letters keyFunction { enter, update, exit }
+    updateSelections <-enterSelection D3.<+++> UpdateJoin Text letters keyFunction { enter, update, exit }
+    pure updateSelections.enter
 
   where 
     transition :: ChainableS

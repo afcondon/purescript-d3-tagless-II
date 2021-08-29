@@ -10,7 +10,7 @@ import D3.Node (D3Link, D3_SimulationNode)
 import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), UpdateJoin(..), node, node_)
 import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, attach, getLinks, getNodes, on, openSelection, simulationHandle, updateData)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, attach, getLinks, getNodes, modifySelection, on, openSelection, simulationHandle, updateData)
 import D3Tagless.Capabilities as D3
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
@@ -108,12 +108,12 @@ setup = do
                            }
 
   nodesGroup <- inner      D3.+   (node Group [ classed "nodes" ])
-  nodesEnter <- openSelection nodesGroup "g.node"
-  modifying (_staging      <<< _enterselections <<< _nodes) (const $ Just nodesEnter)
+  -- nodesEnter <- openSelection nodesGroup "g.node"
+  modifying (_staging      <<< _enterselections <<< _nodes) (const $ Just nodesGroup)
 
   linksGroup <- inner      D3.+   (node Group [ classed "links" ])
-  linksEnter <- openSelection linksGroup "line.link"
-  modifying (_staging      <<< _enterselections <<< _links) (const $ Just linksEnter)
+  -- linksEnter <- openSelection linksGroup "line.link"
+  modifying (_staging      <<< _enterselections <<< _links) (const $ Just linksGroup)
   
 updateSimulation :: forall m d r id. 
   Bind m => 
@@ -124,42 +124,49 @@ updateSimulation :: forall m d r id.
   (Staging D3Selection_ d r id) ->
   { circle :: Array ChainableS, labels :: Array ChainableS } -> 
   m Unit
-updateSimulation staging@{ selections: { nodes: Just nodesEnter, links: Just linksEnter }} attrs = do
+updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
+
+  nodesEnter <- openSelection nodesGroup "g.node"
+  linksEnter <- openSelection linksGroup "line.link"
+
   updateData staging.rawdata keyIsID_
 
   simulation_ <- simulationHandle
   nodeData    <- getNodes
   linkData    <- getLinks
 
-  let -- first the nodedata
-    joinNodes = UpdateJoin Group nodeData keyIsID_
-                  { enter : enterAttrs simulation_
-                  , update: updateAttrs simulation_
-                  , exit  : [ remove ] 
-                  }
-  nodesSelections <- nodesEnter D3.<+++> joinNodes
-  -- TODO the circles and labels must only be put in on THE ENTER SELECTION
-  circles        <- nodesSelections.enter D3.+ (node Circle attrs.circle)
-  labels         <- nodesSelections.enter D3.+ (node Text attrs.labels) 
-  _              <- circles `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
-  
-  let -- now the linkData
-    joinLinks = UpdateJoin Line linkData keyIsID_
-                    { enter : [ classed link_.linkClass, strokeColor link_.color ]
-                    , update: [ classed "graphlinkSimUpdate" ]
+  -- first the nodedata
+  let nodeUpdateSpec 
+        = UpdateJoin Group nodeData keyIsID_ 
+                    { enter : enterAttrs simulation_
+                    , update: updateAttrs simulation_
                     , exit  : [ remove ]
                     }
-  linksSelection <- linksEnter D3.<+++> joinLinks
+  nodesUpdateSelections   <- nodesEnter D3.<+++> nodeUpdateSpec
+
+  _ <- modifySelection nodesUpdateSelections.enter [ classed "enter" ]
+  _ <- modifySelection nodesUpdateSelections.update [ classed "update" ]
+  _ <- modifySelection nodesUpdateSelections.exit [ classed "exit" ]
+  circlesSelection <- nodesUpdateSelections.enter D3.+ (node Circle attrs.circle)
+  labelsSelection  <- nodesUpdateSelections.enter D3.+ (node Text attrs.labels) 
+  _                <- circlesSelection `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
+  
+  -- now the linkData
+  let linkUpdateSpec
+        = UpdateJoin Line linkData keyIsID_
+                      { enter : [ classed link_.linkClass, strokeColor link_.color ]
+                      , update: [ classed "graphlinkSimUpdate" ]
+                      , exit  : [ remove ]
+                      }
+  linksUpdateSelections <- linksEnter D3.<+++> linkUpdateSpec
 
   
-  addTickFunction "nodes" $
-    Step nodesSelections.update [ transform' datum_.translateNode ]
+  addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
+    Step nodesUpdateSelections.update [ transform' datum_.translateNode ]
   addTickFunction "links" $
-    Step linksSelection.update [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
+    Step linksUpdateSelections.update [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
 
-  pure unit
--- without both the nodesEnter and linksEnter selections we cannot do anything, so just exit
-updateSimulation _ _ = pure unit    
+updateSimulation _ _ = pure unit -- something's gone badly wrong, one or both selections are missing
 
 
 {-
