@@ -5,9 +5,9 @@ import D3.Attributes.Sugar
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 import D3.FFI (keyIsID_)
 import D3.Scales (d3SchemeCategory10N_)
-import D3.Selection (Join(..), node)
+import D3.Selection (node)
 import D3Tagless.Capabilities ((+)) as D3
-import D3Tagless.Capabilities (class SelectionM, attach, modifySelection, (<->))
+import D3Tagless.Capabilities (class SelectionM, attach, setAttributes, simpleJoin)
 import Data.Int (toNumber)
 import Math as Math
 import Prelude (discard, bind, negate, pure, ($), (/), (*))
@@ -30,8 +30,8 @@ threeLittleCircles selector = do
   root        <- attach selector
   svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
   circleGroup <- svg  D3.+ (node Group [])
-  circles     <- circleGroup <-> Join Circle [32, 57, 293] keyIsID_ 
-  modifySelection circles circleAttributes
+  circles     <- simpleJoin circleGroup Circle [32, 57, 293] keyIsID_ 
+  setAttributes circles circleAttributes
 
   pure circles
 
@@ -47,8 +47,8 @@ threeLittleCircles2 circleData selector = do
   svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
   circleGroup <- svg  D3.+ (node Group [])
 
-  circles     <- circleGroup <-> Join Circle circleData keyIsID_ 
-  modifySelection circles circleAttributes
+  circles     <- simpleJoin circleGroup Circle circleData keyIsID_ 
+  setAttributes circles circleAttributes
 
   pure circles
 
@@ -78,7 +78,7 @@ threeLittleCircles3 circleData selector = do
   svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
   circleGroup <- svg  D3.+ (node Group [])
 
-  circles     <- circleGroup <-> Join Circle circleData keyIsID_ 
-  modifySelection circles circleAttributes
+  circles     <- simpleJoin circleGroup Circle circleData keyIsID_ 
+  setAttributes circles circleAttributes
 
   pure circles

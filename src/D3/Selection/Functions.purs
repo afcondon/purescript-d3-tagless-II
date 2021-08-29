@@ -1,8 +1,8 @@
 module D3.Selection.Functions where
 
-import D3.Data.Types (D3Selection_, Element, Selector)
+import D3.Data.Types (D3Selection_, Datum_, Element, Index_, Selector)
 import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3DataWithKeyFunction_, d3EnterAndAppend_, d3FilterSelection_, d3GetEnterSelection_, d3GetExitSelection_, d3MergeSelectionWith_, d3SelectAllInDOM_, d3SelectionSelectAll_)
-import D3.Selection (Behavior(..), ChainableS, D3_Node(..), Join(..), Join(..), applyChainableSD3)
+import D3.Selection (Behavior(..), SelectionAttribute, D3_Node(..), applySelectionAttributeD3)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM)
 import Data.Foldable (foldl)
@@ -22,13 +22,13 @@ selectionAppendElement selection_ (D3_Node element attributes) = do
 selectionFilterSelection :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Selector D3Selection_ -> m D3Selection_
 selectionFilterSelection selection_ selector = pure $ d3FilterSelection_ selection_ selector
 
-selectionModifySelection :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Array (ChainableS) -> m Unit
+selectionModifySelection :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Array (SelectionAttribute) -> m Unit
 selectionModifySelection selection_ attributes = do
-  let _ = foldl applyChainableSD3 selection_ attributes
+  let _ = foldl applySelectionAttributeD3 selection_ attributes
   pure unit
 
-selectionJoin   :: forall datum m. (SelectionM D3Selection_ m) => D3Selection_ -> Join D3Selection_ datum -> m D3Selection_
-selectionJoin selection (Join e theData keyFn) = do
+selectionJoin   :: forall datum m. (SelectionM D3Selection_ m) => D3Selection_ -> Element -> (Array datum) -> (Datum_ -> Index_) -> m D3Selection_
+selectionJoin selection e theData keyFn = do
   let 
     element         = spy "Join: " $ show e
     selectS         = d3SelectionSelectAll_ element selection
@@ -39,9 +39,10 @@ selectionJoin selection (Join e theData keyFn) = do
 selectionUpdateJoin   :: forall datum m.
   (SelectionM D3Selection_ m) =>
   D3Selection_ ->
-  Join D3Selection_ datum ->
+  Element -> (Array datum) ->
+  (Datum_ -> Index_) ->
   m { enter :: D3Selection_, exit :: D3Selection_, update :: D3Selection_ }
-selectionUpdateJoin openSelection (Join e theData keyFn) = do
+selectionUpdateJoin openSelection e theData keyFn = do
   let
     element          = spy "Join: " $ show e
     -- REVIEW the openSelection here is not used anymore, for UpdateJoin you have to give an OpenSelection (not yet represented in the type system)

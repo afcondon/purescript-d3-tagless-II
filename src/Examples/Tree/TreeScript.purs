@@ -8,8 +8,8 @@ import D3.Data.Types (Datum_, Element(..), Selector)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.Examples.Tree.Model (FlareTreeNode)
 import D3.FFI (descendants_, hasChildren_, keyIsID_, links_)
-import D3.Selection (ChainableS, Join(..), node)
-import D3Tagless.Capabilities (class SelectionM, attach, modifySelection)
+import D3.Selection (SelectionAttribute, node)
+import D3Tagless.Capabilities (class SelectionM, attach, setAttributes, simpleJoin)
 import D3Tagless.Capabilities as D3
 import Data.Nullable (Nullable)
 import Math (pi)
@@ -66,10 +66,10 @@ datum_ = {
 type ScriptConfig = { 
     layout        :: TreeLayout
   , selector      :: Selector String
-  , linkPath      :: ChainableS
+  , linkPath      :: SelectionAttribute
   , spacing       :: { interChild :: Number, interLevel :: Number }
-  , viewbox       :: Array ChainableS
-  , nodeTransform :: Array ChainableS
+  , viewbox       :: Array SelectionAttribute
+  , nodeTransform :: Array SelectionAttribute
   , color         :: String
   , svg           :: { width :: Number, height :: Number }
 }
@@ -89,12 +89,12 @@ script config tree = do
   links      <- container D3.+  (node Group [ classed "links"] )
   nodes      <- container D3.+  (node Group [ classed "nodes"] )
 
-  theLinks_  <- links D3.<->  Join Path (links_ tree) keyIsID_
-  modifySelection theLinks_ [ strokeWidth 1.5, strokeColor config.color, strokeOpacity 0.4, fill "none", config.linkPath ]
+  theLinks_  <- simpleJoin links Path (links_ tree) keyIsID_
+  setAttributes theLinks_ [ strokeWidth 1.5, strokeColor config.color, strokeOpacity 0.4, fill "none", config.linkPath ]
 
   -- we make a group to hold the node circle and the label text
-  nodeJoin_  <- nodes D3.<-> Join Group (descendants_ tree) keyIsID_ 
-  modifySelection nodeJoin_ config.nodeTransform
+  nodeJoin_  <- simpleJoin nodes Group (descendants_ tree) keyIsID_ 
+  setAttributes nodeJoin_ config.nodeTransform
 
   theNodes <- nodeJoin_ D3.+  
                 (node Circle  [ fill         (\d -> if datum_.hasChildren d then "#999" else "#555")

@@ -1,9 +1,9 @@
 module D3Tagless.Capabilities where
 
 import D3.Attributes.Instances (Label)
-import D3.Data.Types (D3Simulation_, Datum_, Index_, Selector)
+import D3.Data.Types (D3Simulation_, Datum_, Element, Index_, Selector)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
-import D3.Selection (Behavior, ChainableS, D3_Node, Join)
+import D3.Selection (Behavior, SelectionAttribute, D3_Node)
 import D3.Simulation.Types (Force, SimVariable, Step)
 import Data.Maybe (Maybe)
 import Prelude (class Monad, Unit)
@@ -16,11 +16,11 @@ class (Monad m) <= SelectionM selection m where
   attach          :: Selector selection -> m selection
   filterSelection :: selection -> Selector selection -> m selection
   mergeSelections :: selection -> selection -> m selection
-  modifySelection :: selection -> Array (ChainableS) -> m Unit
+  setAttributes :: selection -> Array (SelectionAttribute) -> m Unit
   on              :: selection -> Behavior selection -> m Unit
   openSelection   :: selection -> Selector selection -> m selection 
-  simpleJoin      :: ∀ datum.  selection -> Join selection datum -> m selection
-  updateJoin      :: ∀ datum.  selection -> Join selection datum 
+  simpleJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_) -> m selection
+  updateJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_)
     -> m { enter :: selection, exit :: selection, update :: selection }
 
 infix 4 simpleJoin as <->

@@ -7,7 +7,7 @@ import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
 import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3MergeDataIntoSimulation, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
-import D3.Selection (Behavior(..), DragBehavior(..), applyChainableSD3)
+import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
 import D3.Simulation.Forces (disableByLabels, enableByLabels, enableOnlyTheseLabels, putForceInSimulation, setForceAttr)
 import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _force, _forces, _handle, _name, _tick, _velocityDecay, forceTuple)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -217,7 +217,7 @@ simulationCreateTickFunction label tick@(Step selection chain) = do
     makeTick _ = do
       -- TODO this coerce is forced upon us here due to forall selection in SimulationM
       -- going to have to parameterize simulation with selection or hide the type dep somehow
-      let _ = (applyChainableSD3 (unsafeCoerce selection)) <$> chain
+      let _ = (applySelectionAttributeD3 (unsafeCoerce selection)) <$> chain
       unit
     _ = onTick_ handle label makeTick  -- actually put this tick function into the simulation
     (tick' :: Step D3Selection_) = unsafeCoerce tick

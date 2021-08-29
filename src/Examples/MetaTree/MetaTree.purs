@@ -8,8 +8,8 @@ import D3.Examples.MetaTree.Model (MetaTreeNode)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, keyIsID_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
 import D3.Layouts.Hierarchical (verticalLink)
-import D3.Selection (Join(..), node)
-import D3Tagless.Capabilities (class SelectionM, appendElement, attach, modifySelection, (<->))
+import D3.Selection (node)
+import D3Tagless.Capabilities (class SelectionM, appendElement, attach, setAttributes, simpleJoin)
 import D3Tagless.Instance.Selection (runD3M)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
@@ -75,12 +75,12 @@ treeScript (Tuple w h) tree = do
   links      <- container `appendElement` (node Group [ classed "links"])
   nodes      <- container `appendElement` (node Group [ classed "nodes"])
 
-  theLinks_  <- links <-> Join Path (links_ tree) keyIsID_
-  modifySelection theLinks_ 
+  theLinks_  <- simpleJoin links Path (links_ tree) keyIsID_
+  setAttributes theLinks_ 
     [ strokeWidth 1.5, strokeColor "black", strokeOpacity 0.4, fill "none", verticalLink]
 
-  nodeJoin_  <- nodes <-> Join Group (descendants_ tree) keyIsID_ 
-  modifySelection nodeJoin_ [ transform [ datum_.positionXY ] ]
+  nodeJoin_  <- simpleJoin nodes Group (descendants_ tree) keyIsID_ 
+  setAttributes nodeJoin_ [ transform [ datum_.positionXY ] ]
   
 
   theNodes <- nodeJoin_ `appendElement` 

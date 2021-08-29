@@ -9,7 +9,7 @@ import D3.Attributes.Instances (AttributeSetter(..), toAttr)
 import D3.Data.Tree (TreeJson_, TreeLayout, TreeModel, TreeType)
 import D3.Data.Types (Datum_)
 import D3.FFI (find_, getLayout, hNodeDepth_, linkClusterHorizontal_, linkClusterVertical_, linkHorizontal2_, linkHorizontal_, linkRadial_, linkVertical_, sharesParent_)
-import D3.Selection (ChainableS(..))
+import D3.Selection (SelectionAttribute(..))
 import Data.Bifunctor (rmap)
 import Data.Either (Either)
 import Data.Function.Uncurried (Fn2, mkFn2)
@@ -55,24 +55,24 @@ radialSeparation  = mkFn2 (\a b -> if (sharesParent_ a b)
                                    then 1.0 
                                    else 2.0 / (hNodeDepth_ a))
 
-horizontalLink :: ChainableS
+horizontalLink :: SelectionAttribute
 horizontalLink = AttrT $ AttributeSetter "d" $ toAttr linkHorizontal_
 
 -- version for when the x and y point are already swapped
 -- should be default someday
-horizontalLink' :: ChainableS
+horizontalLink' :: SelectionAttribute
 horizontalLink' = AttrT $ AttributeSetter "d" $ toAttr linkHorizontal2_
 
-verticalLink :: ChainableS
+verticalLink :: SelectionAttribute
 verticalLink = AttrT $ AttributeSetter "d" $ toAttr linkVertical_
 
-horizontalClusterLink :: Number -> ChainableS
+horizontalClusterLink :: Number -> SelectionAttribute
 horizontalClusterLink yOffset = AttrT $ AttributeSetter "d" $ toAttr (linkClusterHorizontal_ yOffset)
 
-verticalClusterLink :: Number -> ChainableS
+verticalClusterLink :: Number -> SelectionAttribute
 verticalClusterLink xOffset = AttrT $ AttributeSetter "d" $ toAttr (linkClusterVertical_ xOffset)
 
-radialLink :: (Datum_ -> Number) -> (Datum_ -> Number) -> ChainableS
+radialLink :: (Datum_ -> Number) -> (Datum_ -> Number) -> SelectionAttribute
 radialLink angleFn radius_Fn = do
   let radialFn = linkRadial_ angleFn radius_Fn
   AttrT $ AttributeSetter "d" $ toAttr radialFn

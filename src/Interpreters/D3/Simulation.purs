@@ -5,7 +5,7 @@ import Prelude
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Types (D3Selection_)
 import D3.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, onTick_)
-import D3.Selection (applyChainableSD3)
+import D3.Selection (applySelectionAttributeD3)
 import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionOpenSelection, selectionUpdateJoin)
 import D3.Simulation.Functions (simulationAddForce, simulationAddForces, simulationDisableForcesByLabel, simulationEnableForcesByLabel, simulationEnableOnlyTheseForces, simulationGetLinks, simulationGetNodes, simulationOn, simulationRemoveAllForces, simulationSetLinks, simulationSetNodes, simulationSetVariable, simulationStart, simulationStop, simulationToggleForce, simulationUpdateData)
 import D3.Simulation.Types (D3SimulationState_, Step(..), _handle)
@@ -70,7 +70,7 @@ instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
   attach selector    = selectionAttach selector 
   filterSelection s_ = selectionFilterSelection s_
   mergeSelections s_ = selectionMergeSelections s_
-  modifySelection s_ = selectionModifySelection s_
+  setAttributes s_ = selectionModifySelection s_
   on s_              = simulationOn s_ -- NB simulation "on" is handled differently from selectionOn
   openSelection s_   = selectionOpenSelection s_
   simpleJoin s_      = selectionJoin s_
@@ -115,7 +115,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     handle <- simulationHandle
     let makeTick _ = do
           -- TODO this coerce is forced upon us here due to forall selection in SimulationM
-          let _ = chain <#> applyChainableSD3 (unsafeCoerce selection)
+          let _ = chain <#> applySelectionAttributeD3 (unsafeCoerce selection)
           unit
         _ = onTick_ handle label makeTick
     pure unit

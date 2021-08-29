@@ -6,7 +6,7 @@ import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
 import D3.Data.Types (Element, MouseEvent, Transition, Selector)
 import D3.FFI (ComputeKeyFunction_)
-import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), Join(..), OrderingAttribute(..), Join(..))
+import D3.Selection (Behavior(..), SelectionAttribute(..), D3_Node(..), OrderingAttribute(..))
 import D3Tagless.Capabilities (class SelectionM)
 import Data.Array (filter, (:))
 import Data.Map (Map, empty, insert, lookup)
@@ -22,19 +22,19 @@ data D3GrammarNode =
   | AttachNode String
   | AppendNode Element
   | FilterNode String
-  | ModifyNode (Array ChainableS)
+  | ModifyNode (Array SelectionAttribute)
   -- TODO if datum type can be peeled off the Join type, just store the Join directly
-  | JoinSimpleNode     Element (Array ChainableS)
+  | JoinSimpleNode     Element (Array SelectionAttribute)
   | UpdateJoinNode     Element
   | OpenJoinNode (Selector NodeID)
   | JoinSimpleWithKeyFunctionNode Element ComputeKeyFunction_
   | SplitJoinCloseWithKeyFunctionNode Element ComputeKeyFunction_
   -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
   | OnNode (Behavior NodeID) -- TODO make chainable
-  | AttrNode ChainableS -- actually only Attr and Text
+  | AttrNode SelectionAttribute -- actually only Attr and Text
   | OrderNode String
   | OnEventNode MouseEvent
-  | TransitionNode (Array ChainableS) Transition
+  | TransitionNode (Array SelectionAttribute) Transition
   | RemoveNode
 
 instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implementation to get started
@@ -139,7 +139,7 @@ insertInScriptTree parentID newNode = do
   modify_ (\s -> ScriptTree (id + 1) (insert id newNode nodeMap) ((Tuple parentID (id+1)) : links))
   pure unit
 
-insertAttributeInScriptTree :: NodeID -> ChainableS -> D3MetaTreeM Unit
+insertAttributeInScriptTree :: NodeID -> SelectionAttribute -> D3MetaTreeM Unit
 insertAttributeInScriptTree parentID = 
   case _ of 
       -- simple attributes are just nodes
@@ -157,7 +157,7 @@ insertAttributeInScriptTree parentID =
           Raise    -> insertInScriptTree parentID (OrderNode "raise")
           Lower    -> insertInScriptTree parentID (OrderNode "lower")
 
-      -- the transition attribute is an exception, it can have further (Array ChainableS)
+      -- the transition attribute is an exception, it can have further (Array SelectionAttribute)
       transition@(TransitionT chain config) ->
         insertInScriptTree parentID (TransitionNode chain config)
 
@@ -188,7 +188,7 @@ instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
     (ScriptTree id _ _) <- get
     pure id
 
-  modifySelection nodeID attributes = do
+  setAttributes nodeID attributes = do
     insertInScriptTree nodeID (ModifyNode attributes)
     pure unit
 
@@ -201,22 +201,22 @@ instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
     (ScriptTree id _ _) <- get
     pure id
 
-  simpleJoin nodeID (Join e ds k)          = do
+  simpleJoin nodeID e ds k          = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e k)
     pure id
-  updateJoin nodeID (Join e ds k)          = do
+  updateJoin nodeID e ds k          = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (UpdateJoinNode e)
     pure { enter: id, exit: id, update: id }
 
--- applyChainableSString :: String -> ChainableS -> String
--- applyChainableSString selection  = 
+-- applySelectionAttributeString :: String -> SelectionAttribute -> String
+-- applySelectionAttributeString selection  = 
 --   case _ of 
 --     (AttrT (AttributeSetter label attr)) -> showSetAttr_ label (unboxAttr attr) selection
 --     (TextT (AttributeSetter label text)) -> showSetText_ (unboxText text) selection 
 --     RemoveT                        -> showRemoveSelection_ selection
 --     (TransitionT chain transition) -> do 
 --       let tString = showAddTransition_ selection transition
---       foldl applyChainableSString tString chain
+--       foldl applySelectionAttributeString tString chain
 

@@ -230,7 +230,7 @@ script3 selector = do
   pure $ \letters -> letterGroup <+> SplitJoinClose Text letters { enter, update, exit }
 
   where 
-    transition :: ChainableS
+    transition :: SelectionAttribute
     transition = transitionWithDuration $ Milliseconds 2000.0
 
     -- letters enter at this position, and then must transition to new position on each update

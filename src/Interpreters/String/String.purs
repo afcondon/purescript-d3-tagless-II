@@ -33,7 +33,7 @@ instance d3Tagless :: SelectionM String D3PrinterM where
     pure "attach"
 
   appendElement selection (D3_Node element attributes) = do
-    let attributeString = foldl applyChainableSString selection attributes
+    let attributeString = foldl applySelectionAttributeString selection attributes
     modify_ (\s -> s <> "\nappending "    <> show element <> " to " <> selection <> "\n" <> attributeString)
     pure "append"
 
@@ -45,8 +45,8 @@ instance d3Tagless :: SelectionM String D3PrinterM where
     modify_ (\s -> s <> "merging selections")
     pure "merge"
 
-  modifySelection selection attributes = do
-    let attributeString = foldl applyChainableSString selection attributes
+  setAttributes selection attributes = do
+    let attributeString = foldl applySelectionAttributeString selection attributes
     modify_ (\s -> s <> "\nmodifying " <> selection <> "\n" <> attributeString)
     pure unit
 
@@ -61,18 +61,18 @@ instance d3Tagless :: SelectionM String D3PrinterM where
     modify_ (\s -> s <> "\nopening a selection using " <> show selector)
     pure "openSelection"
 
-  simpleJoin selection (Join e ds k) = do
+  simpleJoin selection e ds k = do
     modify_ (\s -> s <> "\nentering a "   <> show e <> " for each datum" )
     pure "join"
 
-  updateJoin selection (Join e ds k) = do
+  updateJoin selection e ds k = do
     modify_ (\s -> s <> "\nentering a "   <> show e <> " for each datum" )
     pure { enter: "enter", exit: "exit", update: "update" }
       
 
 
-applyChainableSString :: String -> ChainableS -> String
-applyChainableSString selection  = 
+applySelectionAttributeString :: String -> SelectionAttribute -> String
+applySelectionAttributeString selection  = 
   case _ of 
     (AttrT (AttributeSetter label attr))     -> showSetAttr_ label (unboxAttr attr) selection
     (TextT (AttributeSetter label text))     -> showSetText_       (unboxAttr text) selection
@@ -85,7 +85,7 @@ applyChainableSString selection  =
 
     (TransitionT chain transition) -> do 
       let tString = showAddTransition_ selection transition
-      foldl applyChainableSString tString chain
+      foldl applySelectionAttributeString tString chain
     -- (ForceT (AttributeSetter label attr)) -> showSetAttr_ label (unboxAttr attr) selection -- might need custom one for forces
 
     (OnT event listener) -> do

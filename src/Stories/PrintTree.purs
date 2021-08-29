@@ -142,7 +142,7 @@ codetext =
   """script :: forall m. SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
   script = do 
     let 
-      transition :: ChainableS
+      transition :: SelectionAttribute
       transition = transitionWithDuration $ Milliseconds 2000.0
       -- new entries enter at this position, updating entries need to transition to it on each update
       xFromIndex :: Datum_ -> Index_ -> Number

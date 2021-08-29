@@ -31,7 +31,7 @@ instance d3TaglessD3M :: SelectionM D3Selection_ (D3M state D3Selection_) where
   filterSelection s_ = selectionFilterSelection s_
   openSelection s_   = selectionOpenSelection s_
   mergeSelections s_ = selectionMergeSelections s_
-  modifySelection s_ = selectionModifySelection s_
+  setAttributes s_ = selectionModifySelection s_
   simpleJoin s_      = selectionJoin s_
   updateJoin s_      = selectionUpdateJoin s_
   on s_              = selectionOn s_

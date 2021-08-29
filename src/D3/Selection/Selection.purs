@@ -18,21 +18,17 @@ data DragBehavior =
 data Behavior selection = Drag DragBehavior
                         | Zoom (ZoomConfig selection)
 
--- Join requires a type parameter to determine which interpreter to use
-data Join :: forall k. k -> Type -> Type
-data Join selection d =  Join       Element (Array d) ComputeKeyFunction_
-
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
 derive instance ordSelectionName :: Ord SelectionName
 
-data D3_Node = D3_Node Element (Array ChainableS)
+data D3_Node = D3_Node Element (Array SelectionAttribute)
 
 instance showD3_Node :: Show D3_Node where
   show (D3_Node e _) = "D3Node: " <> show e
 
 -- sugar for appending WITH attributes
-node :: Element -> (Array ChainableS) -> D3_Node
+node :: Element -> (Array SelectionAttribute) -> D3_Node
 node e a = D3_Node e a
 
 -- sugar for appending with NO attributes
@@ -41,7 +37,7 @@ node_ e = D3_Node e []
 
 data OrderingAttribute = Order | Sort (Datum_ -> Datum_ -> Int) | Raise | Lower
 
-data ChainableS =  
+data SelectionAttribute =  
     AttrT AttributeSetter
   | TextT AttributeSetter -- we can't narrow it to String here but helper function will do that
   | HTMLT AttributeSetter -- we can't narrow it to String here but helper function will do that
@@ -49,13 +45,13 @@ data ChainableS =
 
   | OrderingT OrderingAttribute
 
-  | TransitionT (Array ChainableS) Transition -- the array is set situationally
+  | TransitionT (Array SelectionAttribute) Transition -- the array is set situationally
 
   | RemoveT
 
   | OnT MouseEvent Listener_
                 
-instance showChainableS :: Show ChainableS where
+instance showSelectionAttribute :: Show SelectionAttribute where
   show (AttrT attr)      = "chainable: attr " <> attributeLabel attr
   show (TextT _)         = "chainable: text"
   show (HTMLT attr)      = "chainable: html" <> attributeLabel attr
@@ -77,37 +73,37 @@ instance showOrderingAttribute :: Show OrderingAttribute where
   show (Sort _) = "Sort"
 
 
-applyChainableSD3 :: D3Selection_ -> ChainableS -> D3Selection_
-applyChainableSD3 selection_ (AttrT (AttributeSetter label attr)) = 
+applySelectionAttributeD3 :: D3Selection_ -> SelectionAttribute -> D3Selection_
+applySelectionAttributeD3 selection_ (AttrT (AttributeSetter label attr)) = 
   d3SetAttr_ label (unboxAttr attr) selection_
 
 -- NB only protection against non-text attribute for Text field is in the helper function
 -- and similarly for Property and HTML
-applyChainableSD3 selection_ (TextT (AttributeSetter _ attr))     = d3SetText_    (unboxAttr attr) selection_ 
-applyChainableSD3 selection_ (PropertyT (AttributeSetter _ attr)) = d3SetProperty_ (unboxAttr attr) selection_ 
-applyChainableSD3 selection_ (HTMLT (AttributeSetter _ attr))     = d3SetHTML_     (unboxAttr attr) selection_ 
+applySelectionAttributeD3 selection_ (TextT (AttributeSetter _ attr))     = d3SetText_    (unboxAttr attr) selection_ 
+applySelectionAttributeD3 selection_ (PropertyT (AttributeSetter _ attr)) = d3SetProperty_ (unboxAttr attr) selection_ 
+applySelectionAttributeD3 selection_ (HTMLT (AttributeSetter _ attr))     = d3SetHTML_     (unboxAttr attr) selection_ 
 
 -- NB this remove call will have no effect on elements with active or pending transitions
 -- and this gives rise to very counter-intuitive misbehaviour as subsequent enters clash with 
 -- elements that should have been removed
 -- also NB "selection" here will often be a "transition" but this distinction won't matter (i think)
 -- TODO remove is not like other chainables, in fact it's not chainable since it returns unit
-applyChainableSD3 selection_ RemoveT = do
+applySelectionAttributeD3 selection_ RemoveT = do
   let _ = d3RemoveSelection_ selection_ 
   selection_
 
 -- for transition in D3 we must use .call(selection, transition) so that chain continues
 -- in this interpreter it's enought to just return the selection instead of the transition
-applyChainableSD3 selection_ (TransitionT chain transition) = do
+applySelectionAttributeD3 selection_ (TransitionT chain transition) = do
   let tHandler = d3AddTransition_ selection_ transition
-      _        = foldl applyChainableSD3 tHandler chain
+      _        = foldl applySelectionAttributeD3 tHandler chain
   selection_ -- NB we return selection, not transition
 
-applyChainableSD3 selection_ (OnT event listener) = selectionOn_ selection_ (show event) listener
+applySelectionAttributeD3 selection_ (OnT event listener) = selectionOn_ selection_ (show event) listener
 
-applyChainableSD3 selection_ (OrderingT oAttr) =
+applySelectionAttributeD3 selection_ (OrderingT oAttr) =
   case oAttr of
     Order          -> d3OrderSelection_ selection_
-    (Sort compare) -> d3SortSelection_ selection_ compare
+    (Sort compare) -> d3SortSelection_  selection_ compare
     Raise          -> d3RaiseSelection_ selection_
     Lower          -> d3LowerSelection_ selection_

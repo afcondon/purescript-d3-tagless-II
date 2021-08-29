@@ -210,10 +210,10 @@ codetext =
 type ScriptConfig = { 
     layout        :: TreeLayout
   , selector      :: Selector String
-  , linkPath      :: ChainableS
+  , linkPath      :: SelectionAttribute
   , spacing       :: { interChild :: Number, interLevel :: Number }
-  , viewbox       :: Array ChainableS
-  , nodeTransform :: Array ChainableS
+  , viewbox       :: Array SelectionAttribute
+  , nodeTransform :: Array SelectionAttribute
   , color         :: String
   , svg           :: { width :: Number, height :: Number }
 }

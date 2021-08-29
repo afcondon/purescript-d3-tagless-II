@@ -249,8 +249,8 @@ graphScript model selector = do
   simulationLinks <- setLinks model.links datum_.id -- the "links" force will already be there
   
   -- joining the data from the model after it has been put into the simulation
-  linksSelection <- linksGroup D3.<-> Join Line   simulationLinks [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
-  nodesSelection <- nodesGroup D3.<-> Join Circle simulationNodes [ radius 5.0, fill datum_.colorByGroup ]
+  linksSelection <- simpleJoin linksGroup Line   simulationLinks [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
+  nodesSelection <- simpleJoin nodesGroup Circle simulationNodes [ radius 5.0, fill datum_.colorByGroup ]
 
   -- both links and nodes are updated on each step of the simulation, 
   -- in this case it's a simple translation of underlying (x,y) data for the circle centers

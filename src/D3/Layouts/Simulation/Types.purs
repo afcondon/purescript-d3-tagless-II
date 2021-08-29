@@ -5,7 +5,7 @@ import Prelude
 import D3.Attributes.Instances (AttributeSetter, Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_)
 import D3.FFI (D3ForceHandle_, SimulationConfig_, dummyForceHandle_, initSimulation_, keyIsID_)
-import D3.Selection (ChainableS)
+import D3.Selection (SelectionAttribute)
 import Data.Array (intercalate)
 import Data.Lens (Lens', Prism', _Just, lens', prism', view)
 import Data.Lens.At (at)
@@ -95,7 +95,7 @@ _velocityDecay = _Newtype <<< prop (Proxy :: Proxy "velocityDecay")
 
 data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number
 
-data Step selection = Step selection (Array ChainableS) | StepTransformFFI selection (Datum_ -> String)
+data Step selection = Step selection (Array SelectionAttribute) | StepTransformFFI selection (Datum_ -> String)
 
 instance showSimVariable :: Show SimVariable where
   show (Alpha n)         = "Alpha: " <> show n

@@ -6,11 +6,10 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
 import D3.FFI (keyIsID_)
-import D3.Node (D3Link, D3_SimulationNode)
-import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
-import D3.Simulation.Types (D3SimulationState_, Step(..))
+import D3.Selection (Behavior(..), SelectionAttribute, DragBehavior(..), node, node_)
+import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, attach, getLinks, getNodes, modifySelection, on, openSelection, simulationHandle, updateData)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, attach, getLinks, getNodes, on, openSelection, setAttributes, simulationHandle, updateData, updateJoin)
 import D3Tagless.Capabilities as D3
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
@@ -19,40 +18,39 @@ import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, const, discard, negate, pure, unit, ($), (/), (<<<))
 import Stories.Spago.State (State) as Spago
 import Stories.Spago.State (_enterselections, _links, _nodes, _staging)
-import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
 -- TODO this is a problem once extracted from "script", leads to undefined in D3.js
 enterLinks :: forall t339. Array t339
 enterLinks = [] -- [ classed link_.linkClass ] -- default invisible in CSS unless marked "visible"
 
-enterAttrs :: D3Simulation_ -> Array ChainableS
+enterAttrs :: D3Simulation_ -> Array SelectionAttribute
 enterAttrs simulation_ = 
   [ classed datum_.nodeClass
   , transform' datum_.translateNode
   , onMouseEvent MouseClick (\e d _ -> toggleSpotlight e simulation_ d)
   ]
 
-updateAttrs :: forall t1. t1 -> Array ChainableS
+updateAttrs :: forall t1. t1 -> Array SelectionAttribute
 updateAttrs _ = 
   [ classed datum_.nodeClass
   , transform' datum_.translateNode
   ]
 
 -- | Some examples of pre-packaged attribute sets available to the app maker
-circleAttrs1 :: Array ChainableS
+circleAttrs1 :: Array SelectionAttribute
 circleAttrs1 = [ 
     radius datum_.radius
   , fill datum_.colorByGroup
 ]
 
-circleAttrs2 :: Array ChainableS
+circleAttrs2 :: Array SelectionAttribute
 circleAttrs2 = [
     radius 3.0
   , fill datum_.colorByUsage
 ]
 
-labelsAttrs1 :: Array ChainableS
+labelsAttrs1 :: Array SelectionAttribute
 labelsAttrs1 = [ 
     classed "label"
   , x 0.2
@@ -63,7 +61,7 @@ labelsAttrs1 = [
 ]
 
 -- TODO x and y position for label would also depend on "hasChildren", need to get "tree" data into nodes
-labelsAttrsH :: Array ChainableS
+labelsAttrsH :: Array SelectionAttribute
 labelsAttrsH = [ 
     classed "label"
   , x 4.0
@@ -72,13 +70,13 @@ labelsAttrsH = [
   , text datum_.name
 ]
 
-graphAttrs :: { circle :: Array ChainableS , labels :: Array ChainableS }
+graphAttrs :: { circle :: Array SelectionAttribute , labels :: Array SelectionAttribute }
 graphAttrs = { 
     circle: circleAttrs1
   , labels: labelsAttrs1 
 }
 
-treeAttrs :: { circle :: Array ChainableS, labels :: Array ChainableS }
+treeAttrs :: { circle :: Array SelectionAttribute, labels :: Array SelectionAttribute }
 treeAttrs  = {
     circle: circleAttrs2
   , labels: labelsAttrsH
@@ -108,11 +106,9 @@ setup = do
                            }
 
   nodesGroup <- inner      D3.+   (node Group [ classed "nodes" ])
-  -- nodesEnter <- openSelection nodesGroup "g.node"
   modifying (_staging      <<< _enterselections <<< _nodes) (const $ Just nodesGroup)
 
   linksGroup <- inner      D3.+   (node Group [ classed "links" ])
-  -- linksEnter <- openSelection linksGroup "line.link"
   modifying (_staging      <<< _enterselections <<< _links) (const $ Just linksGroup)
   
 updateSimulation :: forall m d r id. 
@@ -122,38 +118,32 @@ updateSimulation :: forall m d r id.
   SelectionM D3Selection_ m =>
   SimulationM D3Selection_ m =>
   (Staging D3Selection_ d r id) ->
-  { circle :: Array ChainableS, labels :: Array ChainableS } -> 
+  { circle :: Array SelectionAttribute, labels :: Array SelectionAttribute } -> 
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
-
-  nodesEnter <- openSelection nodesGroup "g.node"
-  linksEnter <- openSelection linksGroup "line.link"
-
   updateData staging.rawdata keyIsID_
 
-  simulation_ <- simulationHandle
-  nodeData    <- getNodes
-  linkData    <- getLinks
+  simulation_           <- simulationHandle
+  nodeData              <- getNodes
+  linkData              <- getLinks
 
   -- first the nodedata
-  nodesUpdateSelections <- nodesEnter D3.<+++> Join Group nodeData keyIsID_
+  nodesEnter            <- openSelection nodesGroup "g.node"
+  nodesUpdateSelections <- updateJoin nodesEnter Group nodeData keyIsID_
 
-  _ <- modifySelection nodesUpdateSelections.enter $ enterAttrs simulation_
-  _ <- modifySelection nodesUpdateSelections.exit [ remove ]
-  _ <- modifySelection nodesUpdateSelections.update $ updateAttrs simulation_
-  circlesSelection <- nodesUpdateSelections.enter D3.+ (node Circle attrs.circle)
-  labelsSelection  <- nodesUpdateSelections.enter D3.+ (node Text attrs.labels) 
-  _                <- circlesSelection `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
+  _                     <- setAttributes nodesUpdateSelections.enter $ enterAttrs simulation_
+  _                     <- setAttributes nodesUpdateSelections.exit [ remove ]
+  _                     <- setAttributes nodesUpdateSelections.update $ updateAttrs simulation_
+  circlesSelection      <- nodesUpdateSelections.enter D3.+ (node Circle attrs.circle)
+  labelsSelection       <- nodesUpdateSelections.enter D3.+ (node Text attrs.labels) 
+  _                     <- circlesSelection `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
   
   -- now the linkData
-  let linkUpdateSpec
-        = Join Line linkData keyIsID_
-                      -- { enter : [ classed link_.linkClass, strokeColor link_.color ]
-                      -- , update: [ classed "graphlinkSimUpdate" ]
-                      -- , exit  : [ remove ]
-                      -- }
-  linksUpdateSelections <- linksEnter D3.<+++> linkUpdateSpec
-
+  linksEnter            <- openSelection linksGroup "line.link"
+  linksUpdateSelections <- updateJoin linksEnter Line linkData keyIsID_
+  _                     <- setAttributes linksUpdateSelections.enter   [ classed link_.linkClass, strokeColor link_.color ]
+  _                     <- setAttributes linksUpdateSelections.update  [ classed "graphlinkSimUpdate" ]
+  _                     <- setAttributes linksUpdateSelections.exit    [ remove ]
   
   addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
     Step nodesUpdateSelections.update [ transform' datum_.translateNode ]
@@ -273,7 +263,7 @@ updateTreeLinks links layout = do
 --   case maybeSelection of
 --     Nothing -> pure unit
 --     (Just selection) -> do
---       modifySelection selection [ remove ]
+--       setAttributes selection [ remove ]
 
 --   pure unit
   

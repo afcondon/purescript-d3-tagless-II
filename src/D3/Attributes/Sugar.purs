@@ -3,39 +3,39 @@ module D3.Attributes.Sugar where
 import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), Listener, toAttr)
 import D3.Data.Types (Datum_, EasingFunction(..), MouseEvent, Transition)
 import D3.FFI (autoBox_)
-import D3.Selection (ChainableS(..), OrderingAttribute(..))
+import D3.Selection (SelectionAttribute(..), OrderingAttribute(..))
 import Data.Array (intercalate, (:))
 import Data.Function.Uncurried (mkFn3)
 import Effect.Aff (Milliseconds(..))
 import Prelude (class Semigroup, class Show, append, flap, show, ($), (<$>), (<<<), (<>))
 import Unsafe.Coerce (unsafeCoerce)
 
-backgroundColor :: ∀ a. ToAttr String a => a -> ChainableS
+backgroundColor :: ∀ a. ToAttr String a => a -> SelectionAttribute
 backgroundColor = AttrT <<< AttributeSetter "background-color" <<< toAttr
 
-strokeColor :: ∀ a. ToAttr String a => a -> ChainableS
+strokeColor :: ∀ a. ToAttr String a => a -> SelectionAttribute
 strokeColor = AttrT <<< AttributeSetter "stroke" <<< toAttr
 
-strokeOpacity :: ∀ a. ToAttr Number a => a -> ChainableS
+strokeOpacity :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 strokeOpacity = AttrT <<< AttributeSetter "stroke-opacity" <<< toAttr
 
-opacity :: ∀ a. ToAttr Number a => a -> ChainableS
+opacity :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 opacity = AttrT <<< AttributeSetter "opacity" <<< toAttr
 
-strokeWidth :: ∀ a. ToAttr Number a => a -> ChainableS
+strokeWidth :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 strokeWidth = AttrT <<< AttributeSetter "stroke-width" <<< toAttr
 
-fill :: ∀ a. ToAttr String a => a -> ChainableS
+fill :: ∀ a. ToAttr String a => a -> SelectionAttribute
 fill = AttrT <<< AttributeSetter "fill" <<< toAttr
 
 -- TODO this definitely needs to be Number-with-unit here
-viewBox :: Number -> Number -> Number -> Number -> ChainableS
+viewBox :: Number -> Number -> Number -> Number -> SelectionAttribute
 viewBox xo yo w h = AttrT <<< AttributeSetter "viewBox" $ toAttr vb
   where
     vb = intercalate " " $ show <$> [ xo, yo, w, h ]
 
 -- preserveAspectRatio as an attribute only applies to viewBox
-preserveAspectRatio :: AspectRatioSpec -> ChainableS
+preserveAspectRatio :: AspectRatioSpec -> SelectionAttribute
 preserveAspectRatio = AttrT <<< AttributeSetter "preserveAspectRatio" <<< toAttr <<< show
 
 data AlignAspectRatio_X = XMin | XMid | XMax
@@ -59,90 +59,90 @@ instance Show AspectRatioSpec where
   show (AspectRatio x y None) =  "none"
   show (AspectRatio x y p)    =  show x <> show y <> " " <> show p
 
-autoBox :: ChainableS
+autoBox :: SelectionAttribute
 autoBox = AttrT <<< AttributeSetter "viewBox" $ toAttr vb
   where
     vb = \d -> intercalate " " $ show <$> (autoBox_ d)
 
-fontFamily :: ∀ a. ToAttr String a => a -> ChainableS
+fontFamily :: ∀ a. ToAttr String a => a -> SelectionAttribute
 fontFamily = AttrT <<< AttributeSetter "font-family" <<< toAttr
 
-textAnchor :: ∀ a. ToAttr String a => a -> ChainableS
+textAnchor :: ∀ a. ToAttr String a => a -> SelectionAttribute
 textAnchor = AttrT <<< AttributeSetter "text-anchor" <<< toAttr
 
-radius :: ∀ a. ToAttr Number a => a -> ChainableS
+radius :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 radius = AttrT <<< AttributeSetter "r" <<< toAttr
 
-fontSize :: ∀ a. ToAttr Number a => a -> ChainableS
+fontSize :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 fontSize = AttrT <<< AttributeSetter "font-size" <<< toAttr
 
-width :: ∀ a. ToAttr Number a => a -> ChainableS
+width :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 width = AttrT <<< AttributeSetter "width" <<< toAttr
 
-height :: ∀ a. ToAttr Number a => a -> ChainableS
+height :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 height = AttrT <<< AttributeSetter "height" <<< toAttr
 
-width100 :: ChainableS
+width100 :: SelectionAttribute
 width100 = AttrT <<< AttributeSetter "width" $ toAttr "100%"
 
-height100 :: ChainableS
+height100 :: SelectionAttribute
 height100 = AttrT <<< AttributeSetter "height" $ toAttr "100%"
 
-x :: ∀ a. ToAttr Number a => a -> ChainableS
+x :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 x = AttrT <<< AttributeSetter "x" <<< toAttr
 
-y :: ∀ a. ToAttr Number a => a -> ChainableS
+y :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 y = AttrT <<< AttributeSetter "y" <<< toAttr
 
--- yu :: ∀ a. ToAttr NWU a => a -> ChainableS
+-- yu :: ∀ a. ToAttr NWU a => a -> SelectionAttribute
 -- yu = AttrT <<< AttributeSetter "y" <<< toAttr
 
-x1 :: ∀ a. ToAttr Number a => a -> ChainableS
+x1 :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 x1 = AttrT <<< AttributeSetter "x1" <<< toAttr
 
-y1 :: ∀ a. ToAttr Number a => a -> ChainableS
+y1 :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 y1 = AttrT <<< AttributeSetter "y1" <<< toAttr
 
-x2 :: ∀ a. ToAttr Number a => a -> ChainableS
+x2 :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 x2 = AttrT <<< AttributeSetter "x2" <<< toAttr
 
-y2 :: ∀ a. ToAttr Number a => a -> ChainableS
+y2 :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 y2 = AttrT <<< AttributeSetter "y2" <<< toAttr
 
-dx :: ∀ a. ToAttr Number a => a -> ChainableS
+dx :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 dx = AttrT <<< AttributeSetter "dx" <<< toAttr
 
-dy :: ∀ a. ToAttr Number a => a -> ChainableS
+dy :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 dy = AttrT <<< AttributeSetter "dy" <<< toAttr
 
-cx :: ∀ a. ToAttr Number a => a -> ChainableS
+cx :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 cx = AttrT <<< AttributeSetter "cx" <<< toAttr
 
-cy :: ∀ a. ToAttr Number a => a -> ChainableS
+cy :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 cy = AttrT <<< AttributeSetter "cy" <<< toAttr
 
-text :: ∀ a. ToAttr String a => a -> ChainableS
+text :: ∀ a. ToAttr String a => a -> SelectionAttribute
 text = TextT <<< AttributeSetter "text" <<< toAttr
 
 -- TODO classed here has destructive semantics which D3 doesn't, because in D3 you give a Boolean to indicate whether you're adding or removing the class
-classed :: ∀ a. ToAttr String a => a -> ChainableS
+classed :: ∀ a. ToAttr String a => a -> SelectionAttribute
 classed = AttrT <<< AttributeSetter "class" <<< toAttr
 
-cursor :: ∀ a. ToAttr String a => a -> ChainableS
+cursor :: ∀ a. ToAttr String a => a -> SelectionAttribute
 cursor = AttrT <<< AttributeSetter "cursor" <<< toAttr
 
-onMouseEvent :: MouseEvent -> Listener -> ChainableS
+onMouseEvent :: MouseEvent -> Listener -> SelectionAttribute
 onMouseEvent event listener = OnT event (mkFn3 listener)
 
 -- helpers for Forces
 
-originX :: ∀ a. ToAttr Number a => a -> ChainableS
+originX :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 originX = AttrT <<< AttributeSetter "originX" <<< toAttr
 
-originY :: ∀ a. ToAttr Number a => a -> ChainableS
+originY :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 originY = AttrT <<< AttributeSetter "originY" <<< toAttr
 
-strength :: ∀ a. ToAttr Number a => a -> ChainableS
+strength :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 strength = AttrT <<< AttributeSetter "strength" <<< toAttr
 
 
@@ -153,24 +153,24 @@ defaultTransition :: Transition
 defaultTransition = { name: "", delay: Milliseconds 0.0, duration: Milliseconds 0.0, easing: DefaultCubic }
 
 -- always make this empty because the other chainable things compose at the use-point
-transition :: Transition -> ChainableS
+transition :: Transition -> SelectionAttribute
 transition t = TransitionT [] t
 
-namedTransition :: String -> ChainableS
+namedTransition :: String -> SelectionAttribute
 namedTransition name = TransitionT [] $ defaultTransition { name = name } 
 
-transitionWithDuration :: Milliseconds -> ChainableS -- this can be mempty for monoid
+transitionWithDuration :: Milliseconds -> SelectionAttribute -- this can be mempty for monoid
 transitionWithDuration duration = TransitionT [] defaultTransition { duration = duration }
 
 andThen :: forall a. Semigroup a => a -> a -> a
 andThen = append
 
-to :: ChainableS -> Array ChainableS -> Array ChainableS
+to :: SelectionAttribute -> Array SelectionAttribute -> Array SelectionAttribute
 to (TransitionT [] t) chain = [ TransitionT chain t ]
 to (TransitionT existingChain t) newChain = [ TransitionT (existingChain <> newChain) t ]
-to otherChainableS chain = otherChainableS:chain
+to otherSelectionAttribute chain = otherSelectionAttribute:chain
 
-remove :: ChainableS
+remove :: SelectionAttribute
 remove = RemoveT
 
 
@@ -182,16 +182,16 @@ instance showLineJoin :: Show LineJoin where
   show MiterClip = "miter-clip"
   show Round     = "round"
 
-strokeLineJoin :: LineJoin -> ChainableS
+strokeLineJoin :: LineJoin -> SelectionAttribute
 strokeLineJoin = AttrT <<< AttributeSetter "stroke-linejoin" <<< toAttr <<< show
 
 -- helpers for transitions, a sequence of functions but expressed as text in the DOM
 -- TODO don't export transform'
-transform' :: (Datum_ -> String) -> ChainableS
+transform' :: (Datum_ -> String) -> SelectionAttribute
 transform' = AttrT <<< AttributeSetter "transform" <<< StringAttr <<< Fn
 
 -- make a single (Datum_ -> String) function out of the array (ie sequence) of functions provided
-transform :: Array (Datum_ -> String) -> ChainableS
+transform :: Array (Datum_ -> String) -> SelectionAttribute
 transform = transform' <<< assembleTransforms
 
 -- we take a stack of (Datum_ -> String) functions and produce just one
@@ -202,11 +202,11 @@ assembleTransforms fs = unsafeCoerce (\d -> intercalate " " $ flap fs d)
 
 
 -- helpers for Ordering type attributes
-lower :: ChainableS
+lower :: SelectionAttribute
 lower = OrderingT Lower
-raise :: ChainableS
+raise :: SelectionAttribute
 raise = OrderingT Raise
-order :: ChainableS
+order :: SelectionAttribute
 order = OrderingT Order
-sortSelection :: (Datum_ -> Datum_ -> Int) -> ChainableS
+sortSelection :: (Datum_ -> Datum_ -> Int) -> SelectionAttribute
 sortSelection compare = OrderingT (Sort compare)
