@@ -32,7 +32,7 @@ instance d3Tagless :: SelectionM String D3PrinterM where
     modify_ (\s -> s <> "\nattaching to " <> selector <> " in DOM" )
     pure "attach"
 
-  appendElement selection (D3_Node element attributes) = do
+  appendTo selection element attributes = do
     let attributeString = foldl applySelectionAttributeString selection attributes
     modify_ (\s -> s <> "\nappending "    <> show element <> " to " <> selection <> "\n" <> attributeString)
     pure "append"

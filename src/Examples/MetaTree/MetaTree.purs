@@ -8,8 +8,7 @@ import D3.Examples.MetaTree.Model (MetaTreeNode)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, keyIsID_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
 import D3.Layouts.Hierarchical (verticalLink)
-import D3.Selection (node)
-import D3Tagless.Capabilities (class SelectionM, appendElement, attach, setAttributes, simpleJoin)
+import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import D3Tagless.Instance.Selection (runD3M)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
@@ -64,16 +63,16 @@ treeScript (Tuple w h) tree = do
 
   -- "script"
   root       <- attach ".svg-container"                           
-  svg        <- root `appendElement` (node Svg  [ viewBox vtreeXOffset (-vtreeYOffset) (pad xExtent) (pad yExtent)
-                                                , preserveAspectRatio $ AspectRatio XMin YMid Meet 
-                                                , width w
-                                                , height h
-                                                , classed "metatree" ] )
-  container  <- svg  `appendElement` (node Group [ fontFamily      "sans-serif"
+  svg        <- appendTo root Svg  [ viewBox vtreeXOffset (-vtreeYOffset) (pad xExtent) (pad yExtent)
+                                        , preserveAspectRatio $ AspectRatio XMin YMid Meet 
+                                        , width w
+                                        , height h
+                                        , classed "metatree" ]
+  container  <- appendTo svg  Group [ fontFamily      "sans-serif"
                                           , fontSize        18.0
-                                          ])
-  links      <- container `appendElement` (node Group [ classed "links"])
-  nodes      <- container `appendElement` (node Group [ classed "nodes"])
+                                          ]
+  links      <- appendTo container Group [ classed "links"]
+  nodes      <- appendTo container Group [ classed "nodes"]
 
   theLinks_  <- simpleJoin links Path (links_ tree) keyIsID_
   setAttributes theLinks_ 
@@ -83,28 +82,28 @@ treeScript (Tuple w h) tree = do
   setAttributes nodeJoin_ [ transform [ datum_.positionXY ] ]
   
 
-  theNodes <- nodeJoin_ `appendElement` 
-                (node Circle  [ fill         "blue"
-                              , radius       20.0
-                              , strokeColor "white"
-                              , strokeWidth 3.0
-                              ])
+  theNodes <- appendTo nodeJoin_ 
+                Circle  [ fill         "blue"
+                        , radius       20.0
+                        , strokeColor "white"
+                        , strokeWidth 3.0
+                        ]
 
-  labelsWhite <- nodeJoin_ `appendElement`
-                (node Text  [ x          0.0
-                            , y          3.0
-                            , textAnchor "middle"
-                            , text       datum_.symbol
-                            , fill       "white"
-                            ])
+  labelsWhite <- appendTo nodeJoin_
+                Text  [ x          0.0
+                      , y          3.0
+                      , textAnchor "middle"
+                      , text       datum_.symbol
+                      , fill       "white"
+                      ]
                             
-  labelsGray <- nodeJoin_ `appendElement`
-                (node Text  [ x          22.0
-                            , y          3.0
-                            , textAnchor "start"
-                            , text       datum_.param1
-                            , fill       "gray"
-                            ])
+  labelsGray <- appendTo nodeJoin_
+                Text  [ x          22.0
+                      , y          3.0
+                      , textAnchor "start"
+                      , text       datum_.param1
+                      , fill       "gray"
+                      ]
                             
   pure svg
 

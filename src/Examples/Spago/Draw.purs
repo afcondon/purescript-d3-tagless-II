@@ -6,10 +6,10 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
 import D3.FFI (keyIsID_)
-import D3.Selection (Behavior(..), SelectionAttribute, DragBehavior(..), node, node_)
+import D3.Selection (Behavior(..), SelectionAttribute, DragBehavior(..))
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, attach, getLinks, getNodes, on, openSelection, setAttributes, simulationHandle, updateData, updateJoin)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, getLinks, getNodes, on, openSelection, setAttributes, simulationHandle, updateData, updateJoin)
 import D3Tagless.Capabilities as D3
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
@@ -96,8 +96,8 @@ setup = do
                 , width w, height h
                 , cursor "grab"
                 , onMouseEvent MouseClick (\e d t -> cancelSpotlight_ sim) ]
-  svg   <- root D3.+ (node Svg svgAttrs )
-  inner <- svg  D3.+ (node_ Group)
+  svg   <- appendTo root Svg svgAttrs 
+  inner <- appendTo svg  Group []
   _     <- inner `on` Drag DefaultDrag
   _     <- svg   `on` Zoom { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                            , scale  : ScaleExtent 0.1 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
@@ -105,10 +105,10 @@ setup = do
                            , target : inner
                            }
 
-  nodesGroup <- inner      D3.+   (node Group [ classed "nodes" ])
+  nodesGroup <- appendTo inner Group [ classed "nodes" ]
   modifying (_staging      <<< _enterselections <<< _nodes) (const $ Just nodesGroup)
 
-  linksGroup <- inner      D3.+   (node Group [ classed "links" ])
+  linksGroup <- appendTo inner Group [ classed "links" ]
   modifying (_staging      <<< _enterselections <<< _links) (const $ Just linksGroup)
   
 updateSimulation :: forall m d r id. 
@@ -134,8 +134,8 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   _                     <- setAttributes nodesUpdateSelections.enter $ enterAttrs simulation_
   _                     <- setAttributes nodesUpdateSelections.exit [ remove ]
   _                     <- setAttributes nodesUpdateSelections.update $ updateAttrs simulation_
-  circlesSelection      <- nodesUpdateSelections.enter D3.+ (node Circle attrs.circle)
-  labelsSelection       <- nodesUpdateSelections.enter D3.+ (node Text attrs.labels) 
+  circlesSelection      <- appendTo nodesUpdateSelections.enter Circle attrs.circle
+  labelsSelection       <- appendTo nodesUpdateSelections.enter Text attrs.labels
   _                     <- circlesSelection `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
   
   -- now the linkData

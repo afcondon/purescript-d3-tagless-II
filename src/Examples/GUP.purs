@@ -3,12 +3,11 @@ module D3.Examples.GUP where
 import D3.Attributes.Sugar
 
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
-import D3.Selection (SelectionAttribute, node)
-import D3Tagless.Capabilities ((+), (<+++>)) as D3
-import D3Tagless.Capabilities (class SelectionM, attach, openSelection, setAttributes, updateJoin)
+import D3.Selection (SelectionAttribute)
+import D3Tagless.Capabilities (class SelectionM, appendTo, attach, openSelection, setAttributes, updateJoin)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))
-import Prelude (Unit, bind, discard, unit, pure, ($), (*), (+), (<<<))
+import Prelude (bind, discard, pure, ($), (*), (+), (<<<))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | ====================================================================================
@@ -32,8 +31,8 @@ keyFunction = unsafeCoerce
 script3 :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
 script3 selector = do 
   root           <- attach selector
-  svg            <- root D3.+ (node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ])
-  letterGroup    <- svg  D3.+ (node Group [])
+  svg            <- appendTo root Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ]
+  letterGroup    <- appendTo svg Group []
   
   pure $ \letters -> do
     enterSelection <- openSelection letterGroup "text"

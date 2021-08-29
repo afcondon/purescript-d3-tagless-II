@@ -6,7 +6,7 @@ import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
 import D3.Data.Types (Element, MouseEvent, Transition, Selector)
 import D3.FFI (ComputeKeyFunction_)
-import D3.Selection (Behavior(..), SelectionAttribute(..), D3_Node(..), OrderingAttribute(..))
+import D3.Selection (Behavior(..), SelectionAttribute(..), OrderingAttribute(..))
 import D3Tagless.Capabilities (class SelectionM)
 import Data.Array (filter, (:))
 import Data.Map (Map, empty, insert, lookup)
@@ -168,7 +168,7 @@ insertAttributeInScriptTree parentID =
 
 
 instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
-  appendElement nodeID (D3_Node element attributes) = do
+  appendTo nodeID element attributes = do
     insertInScriptTree nodeID (AppendNode element)
     (ScriptTree id _ _) <- get
     -- _ <- traverse (insertAttributeInScriptTree id) attributes

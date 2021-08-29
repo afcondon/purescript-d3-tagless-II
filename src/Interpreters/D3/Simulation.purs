@@ -66,7 +66,7 @@ instance showD3SimM :: Show (D3SimM row D3Selection_ a) where
   show x = "D3SimM"
 
 instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
-  appendElement s_   = selectionAppendElement s_
+  appendTo s_   = selectionAppendElement s_
   attach selector    = selectionAttach selector 
   filterSelection s_ = selectionFilterSelection s_
   mergeSelections s_ = selectionMergeSelections s_

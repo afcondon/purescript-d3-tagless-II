@@ -27,7 +27,7 @@ derive newtype instance monadEffD3M    :: MonadEffect       (D3M state selection
 -- | ====================================================
 instance d3TaglessD3M :: SelectionM D3Selection_ (D3M state D3Selection_) where
   attach selector    = selectionAttach selector 
-  appendElement s_   = selectionAppendElement s_
+  appendTo s_   = selectionAppendElement s_
   filterSelection s_ = selectionFilterSelection s_
   openSelection s_   = selectionOpenSelection s_
   mergeSelections s_ = selectionMergeSelections s_

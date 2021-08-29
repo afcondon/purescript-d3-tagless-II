@@ -3,7 +3,7 @@ module D3Tagless.Capabilities where
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Simulation_, Datum_, Element, Index_, Selector)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
-import D3.Selection (Behavior, SelectionAttribute, D3_Node)
+import D3.Selection (Behavior, SelectionAttribute)
 import D3.Simulation.Types (Force, SimVariable, Step)
 import Data.Maybe (Maybe)
 import Prelude (class Monad, Unit)
@@ -12,20 +12,20 @@ import Prelude (class Monad, Unit)
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
 -- into both DOM and Simulation for example (and current implementation is gross and wrong)
 class (Monad m) <= SelectionM selection m where
-  appendElement   :: selection -> D3_Node -> m selection
+  appendTo   :: selection -> Element -> Array (SelectionAttribute) -> m selection
   attach          :: Selector selection -> m selection
   filterSelection :: selection -> Selector selection -> m selection
   mergeSelections :: selection -> selection -> m selection
-  setAttributes :: selection -> Array (SelectionAttribute) -> m Unit
+  setAttributes   :: selection -> Array (SelectionAttribute) -> m Unit
   on              :: selection -> Behavior selection -> m Unit
   openSelection   :: selection -> Selector selection -> m selection 
   simpleJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_) -> m selection
   updateJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_)
     -> m { enter :: selection, exit :: selection, update :: selection }
 
-infix 4 simpleJoin as <->
-infix 4 updateJoin as <+++>
-infix 4 appendElement as +
+-- infix 4 simpleJoin as <->
+-- infix 4 updateJoin as <+++>
+-- infix 4 appendTo as +
 
 -- TODO things that are not handled by this (deliberately) ultra-simple grammar so far:
 -- 1) say you wanted to attach to "div#hook" and then select an _already existing_ <h1> in it and apply Attrs to that h1

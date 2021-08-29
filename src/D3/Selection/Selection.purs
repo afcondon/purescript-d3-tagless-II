@@ -22,18 +22,18 @@ newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
 derive instance ordSelectionName :: Ord SelectionName
 
-data D3_Node = D3_Node Element (Array SelectionAttribute)
+-- data D3_Node = D3_Node Element (Array SelectionAttribute)
 
-instance showD3_Node :: Show D3_Node where
-  show (D3_Node e _) = "D3Node: " <> show e
+-- instance showD3_Node :: Show D3_Node where
+--   show (D3_Node e _) = "D3Node: " <> show e
 
--- sugar for appending WITH attributes
-node :: Element -> (Array SelectionAttribute) -> D3_Node
-node e a = D3_Node e a
+-- -- sugar for appending WITH attributes
+-- node :: Element -> (Array SelectionAttribute) -> D3_Node
+-- node e a = D3_Node e a
 
--- sugar for appending with NO attributes
-node_ :: Element -> D3_Node
-node_ e = D3_Node e []
+-- -- sugar for appending with NO attributes
+-- node_ :: Element -> D3_Node
+-- node_ e = D3_Node e []
 
 data OrderingAttribute = Order | Sort (Datum_ -> Datum_ -> Int) | Raise | Lower
 

@@ -5,9 +5,7 @@ import D3.Attributes.Sugar
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 import D3.FFI (keyIsID_)
 import D3.Scales (d3SchemeCategory10N_)
-import D3.Selection (node)
-import D3Tagless.Capabilities ((+)) as D3
-import D3Tagless.Capabilities (class SelectionM, attach, setAttributes, simpleJoin)
+import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import Data.Int (toNumber)
 import Math as Math
 import Prelude (discard, bind, negate, pure, ($), (/), (*))
@@ -28,8 +26,8 @@ threeLittleCircles selector = do
   let circleAttributes = [ fill "green", cx xFromIndex, cy 50.0, radius 20.0 ]
 
   root        <- attach selector
-  svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
-  circleGroup <- svg  D3.+ (node Group [])
+  svg         <- appendTo root Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ]
+  circleGroup <- appendTo svg  Group []
   circles     <- simpleJoin circleGroup Circle [32, 57, 293] keyIsID_ 
   setAttributes circles circleAttributes
 
@@ -44,8 +42,8 @@ threeLittleCircles2 circleData selector = do
   let circleAttributes = [ fill "green", cx xFromIndex, cy 50.0, radius 20.0 ]
 
   root        <- attach selector
-  svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
-  circleGroup <- svg  D3.+ (node Group [])
+  svg         <- appendTo root Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ]
+  circleGroup <- appendTo svg  Group []
 
   circles     <- simpleJoin circleGroup Circle circleData keyIsID_ 
   setAttributes circles circleAttributes
@@ -75,8 +73,8 @@ threeLittleCircles3 circleData selector = do
   let circleAttributes = [ fill datum_.color, cx xFromIndex, cy 50.0, radius datum_.radius ]
 
   root        <- attach selector
-  svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
-  circleGroup <- svg  D3.+ (node Group [])
+  svg         <- appendTo root Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ]
+  circleGroup <- appendTo svg  Group []
 
   circles     <- simpleJoin circleGroup Circle circleData keyIsID_ 
   setAttributes circles circleAttributes

@@ -8,8 +8,8 @@ import D3.Data.Types (Datum_, Element(..), Selector)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.Examples.Tree.Model (FlareTreeNode)
 import D3.FFI (descendants_, hasChildren_, keyIsID_, links_)
-import D3.Selection (SelectionAttribute, node)
-import D3Tagless.Capabilities (class SelectionM, attach, setAttributes, simpleJoin)
+import D3.Selection (SelectionAttribute)
+import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import D3Tagless.Capabilities as D3
 import Data.Nullable (Nullable)
 import Math (pi)
@@ -83,11 +83,11 @@ script :: forall m selection. Bind m => SelectionM selection m =>
   ScriptConfig -> FlareTreeNode ->  m selection
 script config tree = do
   root       <- attach config.selector  
-  svg        <- root D3.+ (node Svg (config.viewbox <> 
-                                    [ classed "tree", width config.svg.width, height config.svg.height ]))          
-  container  <- svg  D3.+ (node Group [ fontFamily      "sans-serif", fontSize 10.0 ])
-  links      <- container D3.+  (node Group [ classed "links"] )
-  nodes      <- container D3.+  (node Group [ classed "nodes"] )
+  svg        <- appendTo root Svg (config.viewbox <> 
+                                    [ classed "tree", width config.svg.width, height config.svg.height ]) 
+  container  <- appendTo svg  Group [ fontFamily      "sans-serif", fontSize 10.0 ]
+  links      <- appendTo container Group [ classed "links"]
+  nodes      <- appendTo container Group [ classed "nodes"]
 
   theLinks_  <- simpleJoin links Path (links_ tree) keyIsID_
   setAttributes theLinks_ [ strokeWidth 1.5, strokeColor config.color, strokeOpacity 0.4, fill "none", config.linkPath ]
@@ -96,17 +96,17 @@ script config tree = do
   nodeJoin_  <- simpleJoin nodes Group (descendants_ tree) keyIsID_ 
   setAttributes nodeJoin_ config.nodeTransform
 
-  theNodes <- nodeJoin_ D3.+  
-                (node Circle  [ fill         (\d -> if datum_.hasChildren d then "#999" else "#555")
-                              , radius       2.5
-                              , strokeColor "white"
-                              ])
+  theNodes <- appendTo nodeJoin_ Circle
+                [ fill         (\d -> if datum_.hasChildren d then "#999" else "#555")
+                , radius       2.5
+                , strokeColor "white"
+                ]
 
-  theLabels <- nodeJoin_ D3.+
-                (node Text  [ dy         0.31
-                            , x          (datum_.textX config.layout)
-                            , textAnchor (datum_.textAnchor config.layout)
-                            , text       datum_.name
-                            , fill       config.color
-                            ])               
+  theLabels <- appendTo nodeJoin_ Text
+                 [ dy         0.31
+                  , x          (datum_.textX config.layout)
+                  , textAnchor (datum_.textAnchor config.layout)
+                  , text       datum_.name
+                  , fill       config.color
+                  ]               
   pure svg

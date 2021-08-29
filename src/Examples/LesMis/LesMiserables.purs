@@ -7,10 +7,10 @@ import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.Model (LesMisRawModel)
 import D3.FFI (keyIsID_)
 import D3.Scales (d3SchemeCategory10N_)
-import D3.Selection (Behavior(..), DragBehavior(..), node)
+import D3.Selection (Behavior(..), DragBehavior(..))
 import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SimulationM, addTickFunction, attach, getLinks, getNodes, on, setAttributes, setLinks, setNodes, simpleJoin)
+import D3Tagless.Capabilities (class SimulationM, addTickFunction, appendTo, attach, getLinks, getNodes, on, setAttributes, setLinks, setNodes, simpleJoin)
 import D3Tagless.Capabilities as D3
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
@@ -80,9 +80,9 @@ graphScript :: forall row m.
 graphScript model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   (root :: D3Selection_) <- attach selector
-  svg <- root D3.+ (node Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "lesmis" ] )
-  linksGroup <- svg  D3.+ (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
-  nodesGroup <- svg  D3.+ (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
+  svg        <- appendTo root Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "lesmis" ]
+  linksGroup <- appendTo svg Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ]
+  nodesGroup <- appendTo svg Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ]
   
   -- in contrast to a simple SelectionM function, we have additional typeclass capabilities for simulation
   -- which we use here to introduce the nodes and links to the simulation

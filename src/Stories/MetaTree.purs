@@ -168,13 +168,13 @@ treeScript (Tuple width height) tree = do
 
   -- "script"
   root       <- attach ".svg-container"                           
-  svg        <- root `appendElement` (node Svg  [ viewBox (-svgWH.width / 2.0) (-80.0) 800.0 800.0 -- svgWH.width svgWH.height
+  svg        <- root `appendTo` (node Svg  [ viewBox (-svgWH.width / 2.0) (-80.0) 800.0 800.0 -- svgWH.width svgWH.height
                                          , classed "metatree" ] )
-  container  <- svg  `appendElement` (node Group [ fontFamily      "sans-serif"
+  container  <- svg  `appendTo` (node Group [ fontFamily      "sans-serif"
                                           , fontSize        18.0
                                           ])
-  links      <- container `appendElement` (node Group [ classed "links"])
-  nodes      <- container `appendElement` (node Group [ classed "nodes"])
+  links      <- container `appendTo` (node Group [ classed "links"])
+  nodes      <- container `appendTo` (node Group [ classed "nodes"])
 
   theLinks_  <- links <+> Join Path (links_ tree) [ strokeWidth   1.5
                                                   , strokeColor   "black"
@@ -186,14 +186,14 @@ treeScript (Tuple width height) tree = do
   nodeJoin_  <- nodes <+> Join Group (descendants_ tree) [ transform [ datum_.positionXY ] ]
   
 
-  theNodes <- nodeJoin_ `appendElement` 
+  theNodes <- nodeJoin_ `appendTo` 
                 (node Circle  [ fill         "blue"
                               , radius       20.0
                               , strokeColor "white"
                               , strokeWidth 3.0
                               ])
 
-  labelsWhite <- nodeJoin_ `appendElement`
+  labelsWhite <- nodeJoin_ `appendTo`
                 (node Text  [ x          0.0
                             , y          3.0
                             , textAnchor "middle"
@@ -201,7 +201,7 @@ treeScript (Tuple width height) tree = do
                             , fill       "white"
                             ])
                             
-  labelsGray <- nodeJoin_ `appendElement`
+  labelsGray <- nodeJoin_ `appendTo`
                 (node Text  [ x          22.0
                             , y          3.0
                             , textAnchor "start"
