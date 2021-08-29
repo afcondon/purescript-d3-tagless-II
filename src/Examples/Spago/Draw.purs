@@ -7,7 +7,7 @@ import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
 import D3.FFI (keyIsID_)
 import D3.Node (D3Link, D3_SimulationNode)
-import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), UpdateJoin(..), node, node_)
+import D3.Selection (Behavior(..), ChainableS, DragBehavior(..), Join(..), node, node_)
 import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, attach, getLinks, getNodes, modifySelection, on, openSelection, simulationHandle, updateData)
@@ -136,28 +136,22 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   linkData    <- getLinks
 
   -- first the nodedata
-  let nodeUpdateSpec 
-        = UpdateJoin Group nodeData keyIsID_ 
-                    { enter : enterAttrs simulation_
-                    , update: updateAttrs simulation_
-                    , exit  : [ remove ]
-                    }
-  nodesUpdateSelections   <- nodesEnter D3.<+++> nodeUpdateSpec
+  nodesUpdateSelections <- nodesEnter D3.<+++> Join Group nodeData keyIsID_
 
-  _ <- modifySelection nodesUpdateSelections.enter [ classed "enter" ]
-  _ <- modifySelection nodesUpdateSelections.update [ classed "update" ]
-  _ <- modifySelection nodesUpdateSelections.exit [ classed "exit" ]
+  _ <- modifySelection nodesUpdateSelections.enter $ enterAttrs simulation_
+  _ <- modifySelection nodesUpdateSelections.exit [ remove ]
+  _ <- modifySelection nodesUpdateSelections.update $ updateAttrs simulation_
   circlesSelection <- nodesUpdateSelections.enter D3.+ (node Circle attrs.circle)
   labelsSelection  <- nodesUpdateSelections.enter D3.+ (node Text attrs.labels) 
   _                <- circlesSelection `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
   
   -- now the linkData
   let linkUpdateSpec
-        = UpdateJoin Line linkData keyIsID_
-                      { enter : [ classed link_.linkClass, strokeColor link_.color ]
-                      , update: [ classed "graphlinkSimUpdate" ]
-                      , exit  : [ remove ]
-                      }
+        = Join Line linkData keyIsID_
+                      -- { enter : [ classed link_.linkClass, strokeColor link_.color ]
+                      -- , update: [ classed "graphlinkSimUpdate" ]
+                      -- , exit  : [ remove ]
+                      -- }
   linksUpdateSelections <- linksEnter D3.<+++> linkUpdateSpec
 
   

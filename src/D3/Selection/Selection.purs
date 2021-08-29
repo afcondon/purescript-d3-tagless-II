@@ -20,10 +20,7 @@ data Behavior selection = Drag DragBehavior
 
 -- Join requires a type parameter to determine which interpreter to use
 data Join :: forall k. k -> Type -> Type
-data Join selection d =  Join       Element (Array d) ComputeKeyFunction_ (Array ChainableS) 
-
-data UpdateJoin :: forall k. k -> Type -> Type
-data UpdateJoin selection d = UpdateJoin Element (Array d) ComputeKeyFunction_ EnterUpdateExit    
+data Join selection d =  Join       Element (Array d) ComputeKeyFunction_
 
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName
@@ -58,15 +55,6 @@ data ChainableS =
 
   | OnT MouseEvent Listener_
                 
-type EnterUpdateExit = {
-    enter  :: Array ChainableS
-  , update :: Array ChainableS
-  , exit   :: Array ChainableS
-}
-
-enterOnly :: Array ChainableS -> EnterUpdateExit
-enterOnly as = { enter: as, update: [], exit: [] }
-
 instance showChainableS :: Show ChainableS where
   show (AttrT attr)      = "chainable: attr " <> attributeLabel attr
   show (TextT _)         = "chainable: text"

@@ -61,18 +61,12 @@ instance d3Tagless :: SelectionM String D3PrinterM where
     modify_ (\s -> s <> "\nopening a selection using " <> show selector)
     pure "openSelection"
 
-  simpleJoin selection (Join e ds k cs) = do
-    let attributeString = foldl applyChainableSString selection cs
+  simpleJoin selection (Join e ds k) = do
     modify_ (\s -> s <> "\nentering a "   <> show e <> " for each datum" )
     pure "join"
 
-  updateJoin selection (UpdateJoin e ds k cs) = do
-    let enterAttributes  = foldl applyChainableSString selection cs.enter
-        exitAttributes   = foldl applyChainableSString selection cs.exit
-        updateAttributes = foldl applyChainableSString selection cs.update
-    modify_ (\s -> s <> "\n\tenter behaviour: " <> enterAttributes)
-    modify_ (\s -> s <> "\n\tupdate behaviour: " <> updateAttributes)
-    modify_ (\s -> s <> "\n\texit behaviour: " <> exitAttributes)
+  updateJoin selection (Join e ds k) = do
+    modify_ (\s -> s <> "\nentering a "   <> show e <> " for each datum" )
     pure { enter: "enter", exit: "exit", update: "update" }
       
 

@@ -3,9 +3,9 @@ module D3.Examples.GUP where
 import D3.Attributes.Sugar
 
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
-import D3.Selection (ChainableS, UpdateJoin(..), node)
+import D3.Selection (ChainableS, Join(..), node)
 import D3Tagless.Capabilities ((+), (<+++>)) as D3
-import D3Tagless.Capabilities (class SelectionM, attach, openSelection)
+import D3Tagless.Capabilities (class SelectionM, attach, modifySelection, openSelection)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))
 import Prelude (Unit, bind, discard, unit, pure, ($), (*), (+), (<<<))
@@ -37,7 +37,10 @@ script3 selector = do
   
   pure $ \letters -> do
     enterSelection <- openSelection letterGroup "text"
-    updateSelections <-enterSelection D3.<+++> UpdateJoin Text letters keyFunction { enter, update, exit }
+    updateSelections <- enterSelection D3.<+++> Join Text letters keyFunction
+    modifySelection updateSelections.enter enter
+    modifySelection updateSelections.exit exit
+    modifySelection updateSelections.update update
     pure updateSelections.enter
 
   where 

@@ -7,10 +7,10 @@ import D3.FFI (keyIsID_)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Join(..), node)
 import D3Tagless.Capabilities ((+)) as D3
-import D3Tagless.Capabilities (class SelectionM, attach, (<->))
+import D3Tagless.Capabilities (class SelectionM, attach, modifySelection, (<->))
 import Data.Int (toNumber)
 import Math as Math
-import Prelude (bind, negate, pure, ($), (/), (*))
+import Prelude (discard, bind, negate, pure, ($), (/), (*))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | simple utility function used in all three of these examples
@@ -30,7 +30,8 @@ threeLittleCircles selector = do
   root        <- attach selector
   svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
   circleGroup <- svg  D3.+ (node Group [])
-  circles     <- circleGroup <-> Join Circle [32, 57, 293] keyIsID_ circleAttributes
+  circles     <- circleGroup <-> Join Circle [32, 57, 293] keyIsID_ 
+  modifySelection circles circleAttributes
 
   pure circles
 
@@ -46,7 +47,8 @@ threeLittleCircles2 circleData selector = do
   svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
   circleGroup <- svg  D3.+ (node Group [])
 
-  circles     <- circleGroup <-> Join Circle circleData keyIsID_ circleAttributes
+  circles     <- circleGroup <-> Join Circle circleData keyIsID_ 
+  modifySelection circles circleAttributes
 
   pure circles
 
@@ -76,6 +78,7 @@ threeLittleCircles3 circleData selector = do
   svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
   circleGroup <- svg  D3.+ (node Group [])
 
-  circles     <- circleGroup <-> Join Circle circleData keyIsID_ circleAttributes
+  circles     <- circleGroup <-> Join Circle circleData keyIsID_ 
+  modifySelection circles circleAttributes
 
   pure circles

@@ -6,7 +6,7 @@ import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Tree (TreeJson_)
 import D3.Data.Types (Element, MouseEvent, Transition, Selector)
 import D3.FFI (ComputeKeyFunction_)
-import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), EnterUpdateExit, Join(..), OrderingAttribute(..), UpdateJoin(..))
+import D3.Selection (Behavior(..), ChainableS(..), D3_Node(..), Join(..), OrderingAttribute(..), Join(..))
 import D3Tagless.Capabilities (class SelectionM)
 import Data.Array (filter, (:))
 import Data.Map (Map, empty, insert, lookup)
@@ -25,10 +25,10 @@ data D3GrammarNode =
   | ModifyNode (Array ChainableS)
   -- TODO if datum type can be peeled off the Join type, just store the Join directly
   | JoinSimpleNode     Element (Array ChainableS)
-  | UpdateJoinNode     Element EnterUpdateExit
+  | UpdateJoinNode     Element
   | OpenJoinNode (Selector NodeID)
-  | JoinSimpleWithKeyFunctionNode Element (Array ChainableS) ComputeKeyFunction_
-  | SplitJoinCloseWithKeyFunctionNode Element  EnterUpdateExit ComputeKeyFunction_
+  | JoinSimpleWithKeyFunctionNode Element ComputeKeyFunction_
+  | SplitJoinCloseWithKeyFunctionNode Element ComputeKeyFunction_
   -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
   | OnNode (Behavior NodeID) -- TODO make chainable
   | AttrNode ChainableS -- actually only Attr and Text
@@ -46,10 +46,10 @@ instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implem
   show (ModifyNode _)             = "Modify"
 
   show (JoinSimpleNode _ _)       = "JoinSimple"
-  show (UpdateJoinNode _ _)       = "JoinGeneral"
+  show (UpdateJoinNode _)       = "JoinGeneral"
   show (OpenJoinNode s)           = "OpenJoin" <> s
-  show (JoinSimpleWithKeyFunctionNode _ _ _) = "JoinSimple"
-  show (SplitJoinCloseWithKeyFunctionNode _ _ _) = "JoinGeneral"
+  show (JoinSimpleWithKeyFunctionNode _ _) = "JoinSimple"
+  show (SplitJoinCloseWithKeyFunctionNode _ _) = "JoinGeneral"
 
   show (AttrNode _)               = "Attr"
   show (OrderNode _)              = "Order"
@@ -69,10 +69,10 @@ showAsSymbol =
     (FilterNode s)             ->  { name: "Filter"        , symbol: "/"   , param1: tag s,        param2: "" }
     (ModifyNode as)            ->  { name: "Modify"        , symbol: "->"  , param1: "",           param2: "" }
     (JoinSimpleNode e _)       ->  { name: "JoinSimple"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
-    (UpdateJoinNode e _)       ->  { name: "SplitJoinClose"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
+    (UpdateJoinNode e)       ->  { name: "SplitJoinClose"    , symbol: "<+>" , param1: tag $ show e, param2: "" }
     (OpenJoinNode s)           ->  { name: "SplitJoinClose"    , symbol: "<+>" , param1: tag $ s, param2: "" }
-    (JoinSimpleWithKeyFunctionNode e _ _) ->  { name: "JoinSimpleK" , symbol: "<+>" , param1: tag $ show e, param2: "" }
-    (SplitJoinCloseWithKeyFunctionNode e _ _) ->  { name: "SplitJoinCloseK" , symbol: "<+>" , param1: tag $ show e, param2: "" }
+    (JoinSimpleWithKeyFunctionNode e _) ->  { name: "JoinSimpleK" , symbol: "<+>" , param1: tag $ show e, param2: "" }
+    (SplitJoinCloseWithKeyFunctionNode e _) ->  { name: "SplitJoinCloseK" , symbol: "<+>" , param1: tag $ show e, param2: "" }
     (OnNode (Zoom _))          ->  { name: "Zoom"          , symbol: "z"   , param1: "",           param2: "" }
     (OnNode (Drag _))          ->  { name: "Drag"          , symbol: "drag", param1: "",           param2: "" }
     (AttrNode c)               ->  { name: "Attr"          , symbol: "attr", param1: show c,       param2: "" }
@@ -201,13 +201,13 @@ instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
     (ScriptTree id _ _) <- get
     pure id
 
-  simpleJoin nodeID (Join e ds k cs)          = do
+  simpleJoin nodeID (Join e ds k)          = do
     (ScriptTree id _ _) <- get
-    insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e cs k)
+    insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e k)
     pure id
-  updateJoin nodeID (UpdateJoin e ds k cs)          = do
+  updateJoin nodeID (Join e ds k)          = do
     (ScriptTree id _ _) <- get
-    insertInScriptTree nodeID (UpdateJoinNode e cs)
+    insertInScriptTree nodeID (UpdateJoinNode e)
     pure { enter: id, exit: id, update: id }
 
 -- applyChainableSString :: String -> ChainableS -> String

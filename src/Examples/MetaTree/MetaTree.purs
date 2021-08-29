@@ -2,7 +2,6 @@ module D3.Examples.MetaTree where
 
 import D3.Attributes.Sugar
 
-import Math (abs)
 import D3.Data.Tree (TreeModel, TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.MetaTree.Model (MetaTreeNode)
@@ -10,12 +9,13 @@ import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, keyIsID_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
 import D3.Layouts.Hierarchical (verticalLink)
 import D3.Selection (Join(..), node)
-import D3Tagless.Capabilities (class SelectionM, appendElement, attach, (<->))
+import D3Tagless.Capabilities (class SelectionM, appendElement, attach, modifySelection, (<->))
 import D3Tagless.Instance.Selection (runD3M)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Prelude (class Bind, Unit, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>))
+import Math (abs)
+import Prelude (class Bind, Unit, discard, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>))
 import Utility (getWindowWidthHeight)
 
 datum_ :: { 
@@ -76,14 +76,11 @@ treeScript (Tuple w h) tree = do
   nodes      <- container `appendElement` (node Group [ classed "nodes"])
 
   theLinks_  <- links <-> Join Path (links_ tree) keyIsID_
-                          [ strokeWidth   1.5
-                          , strokeColor   "black"
-                          , strokeOpacity 0.4
-                          , fill          "none"
-                          , verticalLink
-                          ]
+  modifySelection theLinks_ 
+    [ strokeWidth 1.5, strokeColor "black", strokeOpacity 0.4, fill "none", verticalLink]
 
-  nodeJoin_  <- nodes <-> Join Group (descendants_ tree) keyIsID_ [ transform [ datum_.positionXY ] ]
+  nodeJoin_  <- nodes <-> Join Group (descendants_ tree) keyIsID_ 
+  modifySelection nodeJoin_ [ transform [ datum_.positionXY ] ]
   
 
   theNodes <- nodeJoin_ `appendElement` 
