@@ -126,8 +126,8 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   node <- openSelection nodesGroup "g" -- node.selectAll("g"), this call and updateJoin and append all have to match FIX THIS
   -- this will change all the object refs so a defensive copy is needed if join is to work
   mergedData  <- carryOverSimState node staging.rawdata keyIsID_ 
-  let dataForJoin = staging.rawdata.nodes 
-  -- let dataForJoin = mergedData.updatedNodeData
+  -- let dataForJoin = staging.rawdata.nodes 
+  let dataForJoin = mergedData.updatedNodeData
   simulation_ <- simulationHandle
   -- first the nodedata
   node'            <- updateJoin node Group dataForJoin keyIsID_
