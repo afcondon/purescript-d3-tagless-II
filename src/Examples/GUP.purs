@@ -35,12 +35,15 @@ script3 selector = do
   letterGroup    <- appendTo svg Group []
   
   pure $ \letters -> do
-    enterSelection <- openSelection letterGroup "text"
+    enterSelection   <- openSelection letterGroup "text"
     updateSelections <- updateJoin enterSelection Text letters keyFunction
-    setAttributes updateSelections.enter enter
     setAttributes updateSelections.exit exit
     setAttributes updateSelections.update update
-    pure updateSelections.enter
+
+    newlyEntered     <- appendTo updateSelections.enter Text []
+    setAttributes newlyEntered enter
+    
+    pure newlyEntered
 
   where 
     transition :: SelectionAttribute

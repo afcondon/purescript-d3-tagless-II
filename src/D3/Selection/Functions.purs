@@ -44,15 +44,12 @@ selectionUpdateJoin   :: forall datum m.
   m { enter :: D3Selection_, exit :: D3Selection_, update :: D3Selection_ }
 selectionUpdateJoin openSelection e theData keyFn = do
   let
-    element          = spy "Join: " $ show e
-    -- REVIEW the openSelection here is not used anymore, for UpdateJoin you have to give an OpenSelection (not yet represented in the type system)
-    -- openSelection = d3SelectionSelectAll_ element selection
+    -- REVIEW use these FFI function to decompose the update Selection into it's component parts
     updateSelection  = d3DataWithKeyFunction_ theData keyFn openSelection
-
     enterSelection   = d3GetEnterSelection_ updateSelection
-    enterSelection'  = d3Append_ element enterSelection    
     exitSelection    = d3GetExitSelection_ updateSelection
-  pure { enter: enterSelection', exit: exitSelection, update: updateSelection }
+    
+  pure $ spy "updateJoin: " { enter: enterSelection, exit: exitSelection, update: updateSelection }
 
 selectionOpenSelection :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Selector D3Selection_ -> m D3Selection_
 selectionOpenSelection selection selector = do

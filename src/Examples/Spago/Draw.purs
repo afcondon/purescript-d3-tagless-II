@@ -9,7 +9,7 @@ import D3.FFI (keyIsID_)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, getLinks, getNodes, on, openSelection, setAttributes, simulationHandle, updateData, updateJoin)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimState, getLinks, getNodes, mergeSelections, on, openSelection, setAttributes, setNodes, simulationHandle, updateJoin)
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
@@ -88,7 +88,7 @@ svgAttrs sim w h = [ viewBox (-w / 2.1) (-h / 2.05) w h
                     , width w, height h
                     , cursor "grab"
                     , onMouseEvent MouseClick (\e d t -> cancelSpotlight_ sim) ]
-                    
+
 -- | recipe for this force layout graph
 initialize :: forall m.
   Bind m => MonadEffect m => SimulationM D3Selection_ m => SelectionM D3Selection_ m => MonadState Spago.State m => m Unit
@@ -105,12 +105,13 @@ initialize = do
                            , name   : "spago"
                            , target : inner
                            }
-
+  -- create the <g>'s to hold the nodes and links and pass these selection onward
+  -- so that the data can be joined here each time it is changed
   nodesGroup <- appendTo inner Group [ classed "nodes" ]
-  modifying (_staging      <<< _enterselections <<< _nodes) (const $ Just nodesGroup)
+  modifying (_staging <<< _enterselections <<< _nodes) (const $ Just nodesGroup)
 
   linksGroup <- appendTo inner Group [ classed "links" ]
-  modifying (_staging      <<< _enterselections <<< _links) (const $ Just linksGroup)
+  modifying (_staging <<< _enterselections <<< _links) (const $ Just linksGroup)
   
 updateSimulation :: forall m d r id. 
   Bind m => 
@@ -121,35 +122,37 @@ updateSimulation :: forall m d r id.
   (Staging D3Selection_ d r id) ->
   { circle :: Array SelectionAttribute, labels :: Array SelectionAttribute } -> 
   m Unit
-updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
-  updateData staging.rawdata keyIsID_
-
-  simulation_           <- simulationHandle
-  nodeData              <- getNodes
-  linkData              <- getLinks
-
+updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linkSelection }} attrs = do
+  node <- openSelection nodesGroup "g" -- node.selectAll("g"), this call and updateJoin and append all have to match FIX THIS
+  -- this will change all the object refs so a defensive copy is needed if join is to work
+  mergedData  <- carryOverSimState node staging.rawdata keyIsID_ 
+  let dataForJoin = staging.rawdata.nodes 
+  -- let dataForJoin = mergedData.updatedNodeData
+  simulation_ <- simulationHandle
   -- first the nodedata
-  nodesEnter            <- openSelection nodesGroup "g.node"
-  nodesUpdateSelections <- updateJoin nodesEnter Group nodeData keyIsID_
-
-  _                     <- setAttributes nodesUpdateSelections.enter $ enterAttrs simulation_
-  _                     <- setAttributes nodesUpdateSelections.exit [ remove ]
-  _                     <- setAttributes nodesUpdateSelections.update $ updateAttrs simulation_
-  circlesSelection      <- appendTo nodesUpdateSelections.enter Circle attrs.circle
-  labelsSelection       <- appendTo nodesUpdateSelections.enter Text attrs.labels
-  _                     <- circlesSelection `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
-  
-  -- now the linkData
-  linksEnter            <- openSelection linksGroup "line.link"
-  linksUpdateSelections <- updateJoin linksEnter Line linkData keyIsID_
-  _                     <- setAttributes linksUpdateSelections.enter   [ classed link_.linkClass, strokeColor link_.color ]
-  _                     <- setAttributes linksUpdateSelections.update  [ classed "graphlinkSimUpdate" ]
-  _                     <- setAttributes linksUpdateSelections.exit    [ remove ]
-  
-  addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
-    Step nodesUpdateSelections.update [ transform' datum_.translateNode ]
-  addTickFunction "links" $
-    Step linksUpdateSelections.update [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
+  node'            <- updateJoin node Group dataForJoin keyIsID_
+  nodeEnter        <- appendTo node'.enter Group [] -- fill in the empty slots in the selection with the new data
+  circlesSelection <- appendTo nodeEnter Circle attrs.circle
+  labelsSelection  <- appendTo nodeEnter Text attrs.labels
+  setAttributes nodeEnter $ enterAttrs simulation_ -- now you can set attributes on these newly entered elements without triggering exception
+  setAttributes node'.exit [ remove ]
+  setAttributes node'.update $ updateAttrs simulation_
+  _ <- circlesSelection `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
+    -- now the linkData
+  linksEnter <- openSelection linkSelection "line.link"
+  -- linksUpdateSelections <- updateJoin linksEnter Line mergedData.atedLinkData keyIsID_
+  -- newlyEnteredLinks     <- appendTo linksUpdateSelections.enter Group [] -- fill in the empty slots in the selection with the new data
+  -- _                     <- setAttributes newlyEnteredLinks [ classed link_.linkClass, strokeColor link_.color ]
+  -- _                     <- setAttributes linksUpdateSelections.update  [ classed "graphlinkSimUpdate" ]
+  -- _                     <- setAttributes linksUpdateSelections.exit    [ remove ]  
+  -- addTickFunction "links" $
+  --   Step linksUpdateSelections.update [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
+  mergedSelection <- mergeSelections node'.enter node'.update  -- merged enter and update becomes the `node` selection for next pass
+  setNodes dataForJoin
+  -- addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
+  --   Step mergedSelection [ transform' datum_.translateNode ]
+  -- modifying (_staging <<< _enterselections <<< _nodes) (const $ Just mergedSelection)
+  -- modifying (_staging <<< _enterselections <<< _links) (const $ Just linksUpdateSelections.update)
 
 updateSimulation _ _ = pure unit -- something's gone badly wrong, one or both selections are missing
 

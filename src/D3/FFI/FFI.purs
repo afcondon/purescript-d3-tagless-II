@@ -54,6 +54,9 @@ foreign import getIndexFromDatum_    :: Datum_ -> Int
 foreign import d3Data_               :: forall d. Array d -> D3Selection_ -> D3Selection_
 type ComputeKeyFunction_ = Datum_ -> Index_
 foreign import keyIsID_ :: ComputeKeyFunction_
+-- REVIEW the returned D3Selection_ here is the full enter, update, exit type of selection
+-- which we haven't really modelled in PureScript (opaque type) but maybe it will turn out that we 
+-- needed to all along
 foreign import d3DataWithKeyFunction_ :: forall d. Array d -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
@@ -103,13 +106,14 @@ type SimulationConfig_ = {
 foreign import initSimulation_         ::                  SimulationConfig_ -> (Datum_ -> Index_) -> D3Simulation_
 foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_ -> D3Simulation_
 
-foreign import d3MergeDataIntoSimulation :: 
+foreign import d3PreserveSimulationPositions :: 
   forall id r d. 
-  D3Simulation_ ->
+  D3Selection_ ->
   Array (D3_SimulationNode d) ->
   Array (D3Link id r) ->
   (Datum_ -> Index_) ->
-  Unit
+  { updatedNodeData :: Array (D3_SimulationNode d)
+  , updatedLinkData :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
 foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
 foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)
 foreign import setLinks_ :: forall r d id. D3Simulation_ -> Array (D3Link id r) -> Array (D3LinkSwizzled (D3_SimulationNode d) r)

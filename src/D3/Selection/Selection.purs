@@ -87,10 +87,10 @@ applySelectionAttributeD3 selection_ (HTMLT (AttributeSetter _ attr))     = d3Se
 -- and this gives rise to very counter-intuitive misbehaviour as subsequent enters clash with 
 -- elements that should have been removed
 -- also NB "selection" here will often be a "transition" but this distinction won't matter (i think)
--- TODO remove is not like other chainables, in fact it's not chainable since it returns unit
+-- the remove function returns the removed selection which allows it to be cached amongst other things
 applySelectionAttributeD3 selection_ RemoveT = do
-  let _ = d3RemoveSelection_ selection_ 
-  selection_
+  let removed_ = d3RemoveSelection_ selection_ 
+  removed_
 
 -- for transition in D3 we must use .call(selection, transition) so that chain continues
 -- in this interpreter it's enought to just return the selection instead of the transition

@@ -5,7 +5,7 @@ import Prelude
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
-import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3MergeDataIntoSimulation, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
+import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveSimulationPositions, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
 import D3.Simulation.Forces (disableByLabels, enableByLabels, enableOnlyTheseLabels, putForceInSimulation, setForceAttr)
@@ -159,17 +159,18 @@ simulationShowForces = do
       showTuple (Tuple label force) = show label <> " " <> show force
   pure $ intercalate "\n" $ showTuple <$> forceTuples
 
-simulationUpdateData ::
+simulationPreservePositions ::
   forall id d r m row. 
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
+  D3Selection_ ->
   RawData d r id -> 
   (Datum_ -> Index_) ->
-  m Unit
-simulationUpdateData rawdata key = do
-  handle <- use (_d3Simulation <<< _handle)
-  let _ = d3MergeDataIntoSimulation handle rawdata.nodes rawdata.links key
-  pure unit
+  m { updatedNodeData :: Array (D3_SimulationNode d)
+    , updatedLinkData :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
+simulationPreservePositions selection rawdata key = do
+  let updatedData = d3PreserveSimulationPositions selection rawdata.nodes rawdata.links key
+  pure updatedData
 
 simulationSetNodes :: 
   forall d row m.

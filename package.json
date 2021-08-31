@@ -16,6 +16,10 @@
     "tailwindcss": "^2.1.4"
   },
   "dependencies": {
+    "d3": "^7.0.1",
+    "d3-color": "^3.0.1",
+    "d3-interpolate": "^3.0.1",
+    "d3-scale-chromatic": "^3.0.0",
     "purescript": "0.14.3",
     "spago": "^0.20.3",
     "yarn": "^1.22.10"

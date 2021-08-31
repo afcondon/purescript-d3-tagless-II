@@ -11,7 +11,7 @@ exports.d3GetExitSelection_ = selection => { return selection.exit() }
 exports.d3GetEnterSelection_ = selection => { return selection.enter() }
 exports.d3FilterSelection_ = selection => selector => selection.filter(selector)
 exports.d3LowerSelection_ = selection => selection.lower()
-exports.d3MergeSelectionWith_ = update => enter => { return update.merge(enter); }
+exports.d3MergeSelectionWith_ = enter => update => { return enter.merge(update); }
 exports.d3OrderSelection_ = selection => selection.order()
 exports.d3RaiseSelection_ = selection => selection.raise()
 exports.d3RemoveSelection_ = selection => { return selection.remove() }
@@ -82,7 +82,7 @@ exports.forceY_ = () => d3.forceY()
 exports.getLinksFromForce_ = linkForce => linkForce.links()
 exports.getNodes_ = simulation => simulation.nodes()
 exports.keyIsID_ = d => { 
-  console.log(`looking up the id of node: ${d.id}`);
+  // console.log(`looking up the id of node: ${d.id}`);
   return d.id;
 }
 exports.setAlpha_ = simulation => alpha => simulation.alpha(alpha)
@@ -133,19 +133,19 @@ exports.configSimulation_ = simulation => config => {
   return simulation
 }
 // d3UpdateNodesAndLinks_ :: D3Selection_ -> Array NativeNode -> Array NativeNode -> (Datum_ -> Id) -> { nodes :: Array NativeNode, links: Array NativeLinks }
-exports.d3MergeDataIntoSimulation = simulation => newNodes => newLinks => keyFn => {
-  const old = simulation.nodes()
-  console.log(`there are ${old.length} nodes already in the simulation`);
-  console.log(`there are ${newNodes.length} nodes in the new data`);
-  for (let index = 0; index < old.length; index++) {
-    old[index].aaa = "old node";
-  }
-  const map2Old = new Map(old.map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
-  let updateNodes = newNodes.map(d => Object.assign(map2Old.get(keyFn(d)) || { aaa: "fresh node"}, d));
-  let updateLinks = newLinks.map(d => Object.assign({}, d));  
-  simulation.nodes(updateNodes)
-  simulation.force(exports.linksForceName).links(updateLinks)
+exports.d3PreserveSimulationPositions = node => nodes => newLinks => keyFn => {
+  console.log(node);
+  // const old = new Map(node.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
+  const old = new Map(node.data().map(d => [d.id, d])); // creates a map from our chosen id to the old obj reference
+  console.log(old);
+  // let updatedNodeData = nodes.map(d => Object.assign(old.get(keyFn(d)) || { aaa: "fresh node"}, d));
+  let updatedNodeData = nodes.map(d => Object.assign(old.get(d.id) || { aaa: "fresh node"}, d));
+  let updatedLinkData = newLinks.map(d => Object.assign({}, d));  
+  return { updatedNodeData, updatedLinkData}
 }
+// const old = new Map(node.data().map(d => [d.id, d]));
+// nodes = nodes.map(d => Object.assign(old.get(d.id) || {}, d));
+// links = links.map(d => Object.assign({}, d));
 
 exports.setNodes_ = simulation => nodes => {
   console.log(`setting nodes in simulation, there are ${nodes.length} nodes`);
