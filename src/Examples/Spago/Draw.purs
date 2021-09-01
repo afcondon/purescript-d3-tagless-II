@@ -124,38 +124,36 @@ updateSimulation :: forall m d r id.
   { circle :: Array SelectionAttribute, labels :: Array SelectionAttribute } -> 
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
-  node <- openSelection nodesGroup "g" -- node.selectAll("g"), this call and updateJoin and append all have to match FIX THIS
-  link <- openSelection linksGroup "g" -- node.selectAll("g"), this call and updateJoin and append all have to match FIX THIS
+  node                  <- openSelection nodesGroup "g" -- node.selectAll("g"), this call and updateJoin and append all have to match FIX THIS
+  link                  <- openSelection linksGroup "g" -- node.selectAll("g"), this call and updateJoin and append all have to match FIX THIS
   -- this will change all the object refs so a defensive copy is needed if join is to work
-  mergedData  <- carryOverSimState node staging.rawdata keyIsID_ 
-  simulation_ <- simulationHandle
+  mergedData            <- carryOverSimState node staging.rawdata keyIsID_ 
+  simulation_           <- simulationHandle
   -- first the nodedata
-  node'            <- updateJoin node Group mergedData.updatedNodeData keyIsID_
+  node'                 <- updateJoin node Group mergedData.updatedNodeData keyIsID_
   -- put new elements (g, g.circle & g.text) into the DOM
-  nodeEnter        <- appendTo node'.enter Group []
-  setAttributes nodeEnter $ enterAttrs simulation_ -- now you can set attributes on these newly entered elements without triggering exception
-  circlesSelection <- appendTo nodeEnter Circle attrs.circle
-  labelsSelection  <- appendTo nodeEnter Text attrs.labels
+  nodeEnter             <- appendTo node'.enter Group $ enterAttrs simulation_
+  circlesSelection      <- appendTo nodeEnter Circle attrs.circle
+  labelsSelection       <- appendTo nodeEnter Text attrs.labels
   -- remove elements corresponding to exiting data
   setAttributes node'.exit [ remove ]
   -- change anything that needs changing on the continuing elements
   setAttributes node'.update $ updateAttrs simulation_
   -- now merge the update selection into the enter selection (NB other way round doesn't work)
-  mergedNodeSelection <- mergeSelections nodeEnter node'.update  -- merged enter and update becomes the `node` selection for next pass
+  mergedNodeSelection   <- mergeSelections nodeEnter node'.update  -- merged enter and update becomes the `node` selection for next pass
   
-  -- _ <- circlesSelection `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
+  -- _                  <- circlesSelection `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
   
   -- now the linkData
   link'                 <- updateJoin link Line mergedData.updatedLinkData keyIsID_
   -- put new element (line) into the DOM
-  linkEnter            <- appendTo link'.enter Line [] -- fill in the empty slots in the selection with the new data
-  setAttributes linkEnter [ classed link_.linkClass, strokeColor link_.color ]
+  linkEnter             <- appendTo link'.enter Line [ classed link_.linkClass, strokeColor link_.color ]
   -- remove links that are leaving
   setAttributes link'.exit    [ remove ]  
   -- update links that are staying
   setAttributes link'.update  [ classed "graphlinkSimUpdate" ]
   -- merge the update and enter selections for the links
-  mergedLinkSelection <- mergeSelections linkEnter link'.update  -- merged enter and update becomes the `node` selection for next pass
+  mergedLinkSelection   <- mergeSelections linkEnter link'.update  -- merged enter and update becomes the `node` selection for next pass
 
   -- now put the nodes and links into the simulation 
   setNodes $ unsafeCoerce $ d3GetSelectionData_ mergedNodeSelection -- TODO hide this coerce in setNodes
