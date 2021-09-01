@@ -49,7 +49,7 @@ selectionUpdateJoin openSelection e theData keyFn = do
     enterSelection   = d3GetEnterSelection_ updateSelection
     exitSelection    = d3GetExitSelection_ updateSelection
     
-  pure $ spy "updateJoin: " { enter: enterSelection, exit: exitSelection, update: updateSelection }
+  pure { enter: enterSelection, exit: exitSelection, update: updateSelection }
 
 selectionOpenSelection :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Selector D3Selection_ -> m D3Selection_
 selectionOpenSelection selection selector = do
