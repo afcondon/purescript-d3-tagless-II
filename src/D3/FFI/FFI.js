@@ -9,6 +9,7 @@ exports.d3DataWithKeyFunction_ = data => keyFn => selection => { return selectio
 exports.d3EnterAndAppend_ = element => selection => { return selection.enter().append(element) }
 exports.d3GetExitSelection_ = selection => { return selection.exit() }
 exports.d3GetEnterSelection_ = selection => { return selection.enter() }
+exports.d3GetSelectionData_ = selection => { return selection.data() }
 exports.d3FilterSelection_ = selection => selector => selection.filter(selector)
 exports.d3LowerSelection_ = selection => selection.lower()
 exports.d3MergeSelectionWith_ = enter => update => { return enter.merge(update); }

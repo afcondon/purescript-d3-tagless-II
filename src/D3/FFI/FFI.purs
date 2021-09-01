@@ -29,6 +29,7 @@ foreign import d3SelectFirstInDOM_   :: Selector D3Selection_    -> D3Selection_
 foreign import d3SelectionSelectAll_ :: Selector D3Selection_    -> D3Selection_ -> D3Selection_
 foreign import d3SelectionSelect_    :: Selector D3Selection_    -> D3Selection_ -> D3Selection_
 foreign import d3SelectionIsEmpty_   :: D3Selection_ -> Boolean
+foreign import d3GetSelectionData_   :: D3Selection_ -> Array Datum_
 foreign import d3EnterAndAppend_     :: String      -> D3Selection_ -> D3Selection_
 foreign import d3Append_             :: String      -> D3Selection_ -> D3Selection_
 foreign import d3MergeSelectionWith_ :: D3Selection_ -> D3Selection_ -> D3Selection_

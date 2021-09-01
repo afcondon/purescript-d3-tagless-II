@@ -5,7 +5,7 @@ import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, radius,
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
-import D3.FFI (keyIsID_)
+import D3.FFI (d3GetSelectionData_, keyIsID_)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -17,6 +17,7 @@ import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, const, discard, negate, pure, unit, ($), (/), (<<<))
 import Stories.Spago.State (State) as Spago
 import Stories.Spago.State (_enterselections, _links, _nodes, _staging)
+import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
 -- TODO this is a problem once extracted from "script", leads to undefined in D3.js
@@ -108,9 +109,9 @@ initialize = do
   -- create the <g>'s to hold the nodes and links and pass these selection onward
   -- so that the data can be joined here each time it is changed
   nodesGroup <- appendTo inner Group [ classed "nodes" ]
-  modifying (_staging <<< _enterselections <<< _nodes) (const $ Just nodesGroup)
-
   linksGroup <- appendTo inner Group [ classed "links" ]
+
+  modifying (_staging <<< _enterselections <<< _nodes) (const $ Just nodesGroup)
   modifying (_staging <<< _enterselections <<< _links) (const $ Just linksGroup)
   
 updateSimulation :: forall m d r id. 
@@ -147,12 +148,10 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   -- _                     <- setAttributes linksUpdateSelections.exit    [ remove ]  
   -- addTickFunction "links" $
   --   Step linksUpdateSelections.update [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
-  mergedSelection <- mergeSelections node'.enter node'.update  -- merged enter and update becomes the `node` selection for next pass
-  setNodes dataForJoin
-  -- addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
-  --   Step mergedSelection [ transform' datum_.translateNode ]
-  -- modifying (_staging <<< _enterselections <<< _nodes) (const $ Just mergedSelection)
-  -- modifying (_staging <<< _enterselections <<< _links) (const $ Just linksUpdateSelections.update)
+  mergedSelection <- mergeSelections nodeEnter node'.update  -- merged enter and update becomes the `node` selection for next pass
+  setNodes $ unsafeCoerce $ d3GetSelectionData_ mergedSelection
+  addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
+    Step mergedSelection [ transform' datum_.translateNode ]
 
 updateSimulation _ _ = pure unit -- something's gone badly wrong, one or both selections are missing
 
