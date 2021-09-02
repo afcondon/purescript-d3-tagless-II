@@ -138,28 +138,10 @@ exports.configSimulation_ = simulation => config => {
   return simulation
 }
 
-// d3UpdateNodesAndLinks_ :: D3Selection_ -> Array NativeNode -> Array NativeNode -> (Datum_ -> Id) -> { nodes :: Array NativeNode, links: Array NativeLinks }
-exports.d3PreserveSimulationPositions = node => nodes => newLinks => keyFn => {
-  // logNodesXY("current selection data", node.data())
-  // logNodesXY("incoming nodes", nodes)
-  // const old = new Map(node.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
-  const old = new Map(node.data().map(d => [d.id, d])); // creates a map from our chosen id to the old obj reference
-  // console.log(old);
-  // function logNodesXY (label, nodes) {
-  //   console.log(label);
-  //   for (let index = 0; index < nodes.length; index++) {
-  //     const d = nodes[index];
-  //     console.log(`node: ${d.id} (${d.x},${d.y})`);
-  //   }
-  // }
-  function assignFromOld (d) {
-    let newD = Object.assign(old.get(keyFn(d)) || d, {} )
-    return newD
-  }
-  let updatedNodeData = nodes.map(assignFromOld);
-  let updatedLinkData = newLinks.map(d => Object.assign({}, d));  
-  // logNodesXY("updated data", updatedNodeData)
-  return { updatedNodeData, updatedLinkData }
+exports.d3PreserveSimulationPositions = node => nodes => keyFn => {
+  const old = new Map(node.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
+  let updatedNodeData = nodes.map(d => Object.assign(old.get(keyFn(d)) || d, {} ));
+  return updatedNodeData
 }
 
 exports.setNodes_ = simulation => nodes => {
@@ -168,11 +150,34 @@ exports.setNodes_ = simulation => nodes => {
   return simulation.nodes()
 }
 // we're going to always use the same name for the links force denominated by the linksForceName string
-exports.setLinks_ = simulation => links => {
+exports.setLinks_ = simulation => links => simulation.force(exports.linksForceName).links(links)
+// returns array of links with ids replaced by object references, invalid links are discarded
+exports.swizzleLinks_ = links => simNodes => keyFn => {
   console.log(`setting links in simulation, there are ${links.length} links`);
-  // simulation is created with links force and the key function is provided at that time
-  // so we just put the links directly in here - this may change later if we give PS API to change links forces more
-  simulation.force(exports.linksForceName).links(links)
+  const nodeById = new Map(simNodes.map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
+  // we could use the copy approach from d3PreserveSimulationPositions here so that links animate
+  const swizzledLinks = links.filter( (link, index, arr ) => {
+    // look up both source and target (which could be id or obj reference)
+    // if both source and target are found in nodeMap then we can swizzle and return true
+    // else we just return false and this node will go in the bit bucket
+    if (typeof link.source !== "object") { 
+      link.source = nodeById.get(link.source) // try to get object reference if we don't have it
+    } else {
+      link.source = nodeById.get(keyFn(link.source)) // try to replace object reference with new object reference
+    }
+    if (typeof link.target !== "object") { 
+      link.target = nodeById.get(link.target)
+    } else {
+      link.target = nodeById.get(keyFn(link.target))
+    }
+    // now let's see what we got from that and if we have a valid link or not
+    if (typeof link.source === 'undefined' || link.target === 'undefined') {
+      return false; // filter this node
+    } else {
+      return true // we've updated the 
+    }
+  })
+  return swizzledLinks
 }
 exports.unsetLinks_ = simulation => {
   const linkForce = d3.forceLink([])

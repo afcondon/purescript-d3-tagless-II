@@ -109,16 +109,26 @@ foreign import initSimulation_         ::                  SimulationConfig_ -> 
 foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_ -> D3Simulation_
 
 foreign import d3PreserveSimulationPositions :: 
-  forall id r d. 
+  forall d. 
   D3Selection_ ->
   Array (D3_SimulationNode d) ->
-  Array (D3Link id r) ->
-  (Datum_ -> Index_) ->
-  { updatedNodeData :: Array (D3_SimulationNode d)
-  , updatedLinkData :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
+  (Datum_ -> Index_) -> 
+  Array (D3_SimulationNode d)
 foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
 foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)
-foreign import setLinks_ :: forall r d id. D3Simulation_ -> Array (D3Link id r) -> Array (D3LinkSwizzled (D3_SimulationNode d) r)
+-- setLinks will do the swizzling AND prune any links that have source or target that is not in [nodes]
+foreign import setLinks_ :: 
+  forall r id. 
+  D3Simulation_ ->
+  Array (D3Link id r) ->
+  Unit
+foreign import swizzleLinks_ :: 
+  forall r d id. 
+  D3Simulation_ ->
+  Array (D3Link id r) ->
+  Array (D3_SimulationNode d) ->
+  (Datum_ -> Index_) -> 
+  Array (D3LinkSwizzled (D3_SimulationNode d) r)
 
 foreign import getLinkID_              :: (Datum_ -> Index_) -> Datum_ -> Index_
 foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_

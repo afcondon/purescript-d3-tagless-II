@@ -134,7 +134,7 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   simulationStop
   mergedData            <- carryOverSimState node staging.rawdata keyIsID_ 
   -- first the nodedata
-  node'                 <- updateJoin node Group mergedData.updatedNodeData keyIsID_
+  node'                 <- updateJoin node Group mergedData keyIsID_
   -- put new elements (g, g.circle & g.text) into the DOM
   simulation_           <- simulationHandle
   nodeEnter             <- appendTo node'.enter Group $ enterAttrs simulation_
@@ -150,7 +150,10 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   -- _                  <- circlesSelection `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
   
   -- now the linkData
-  link'                 <- updateJoin link Line mergedData.updatedLinkData keyIsSourceTarget_ -- keyIsID_
+  -- we'd like the linkdata to be pruned and swizzled here but...can we call setLinks here? 
+
+
+  link'                 <- updateJoin link Line updatedLinkData keyIsSourceTarget_ -- keyIsID_
   -- put new element (line) into the DOM
   linkEnter             <- appendTo link'.enter Line [ classed link_.linkClass, strokeColor link_.color ]
   -- remove links that are leaving
@@ -162,7 +165,7 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   
   -- now put the nodes and links into the simulation 
   setNodes $ unsafeCoerce $ d3GetSelectionData_ mergedNodeSelection -- TODO hide this coerce in setNodes
-  -- setLinks $ unsafeCoerce $ d3GetSelectionData_ mergedLinkSelection -- TODO hide this coerce in setLinks
+  setLinks $ unsafeCoerce $ d3GetSelectionData_ mergedLinkSelection -- TODO hide this coerce in setLinks
   -- tick functions for each selection
   addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
     Step mergedNodeSelection [ transform' datum_.translateNode ]

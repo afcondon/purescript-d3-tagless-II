@@ -7,7 +7,7 @@ import D3.Data.Types (D3Selection_)
 import D3.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, onTick_)
 import D3.Selection (applySelectionAttributeD3)
 import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionOpenSelection, selectionUpdateJoin)
-import D3.Simulation.Functions (simulationAddForce, simulationAddForces, simulationDisableForcesByLabel, simulationEnableForcesByLabel, simulationEnableOnlyTheseForces, simulationGetLinks, simulationGetNodes, simulationOn, simulationRemoveAllForces, simulationSetLinks, simulationSetNodes, simulationSetVariable, simulationStart, simulationStop, simulationToggleForce, simulationPreservePositions)
+import D3.Simulation.Functions (simulationAddForce, simulationAddForces, simulationDisableForcesByLabel, simulationEnableForcesByLabel, simulationEnableOnlyTheseForces, simulationGetLinks, simulationGetNodes, simulationOn, simulationPreservePositions, simulationRemoveAllForces, simulationSetLinks, simulationSetNodes, simulationSetVariable, simulationStart, simulationStop, simulationSwizzleLinks, simulationToggleForce)
 import D3.Simulation.Types (D3SimulationState_, Step(..), _handle)
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, simulationHandle)
 import Data.Lens (use)
@@ -99,6 +99,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   carryOverSimState selection rawdata key = simulationPreservePositions selection rawdata key
   setNodes           = simulationSetNodes
   setLinks           = simulationSetLinks 
+  swizzleLinks       = simulationSwizzleLinks
   getNodes           = simulationGetNodes
   getLinks           = simulationGetLinks 
 

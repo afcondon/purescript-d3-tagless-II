@@ -5,7 +5,7 @@ import Prelude
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
-import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveSimulationPositions, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_)
+import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveSimulationPositions, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_, swizzleLinks_)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
 import D3.Simulation.Forces (disableByLabels, enableByLabels, enableOnlyTheseLabels, putForceInSimulation, setForceAttr)
@@ -167,10 +167,9 @@ simulationPreservePositions ::
   D3Selection_ ->
   RawData d r id -> 
   (Datum_ -> Index_) ->
-  m { updatedNodeData :: Array (D3_SimulationNode d)
-    , updatedLinkData :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
+  m (Array (D3_SimulationNode d))
 simulationPreservePositions selection rawdata key = do
-  let updatedData = d3PreserveSimulationPositions selection rawdata.nodes rawdata.links key
+  let updatedData = d3PreserveSimulationPositions selection rawdata.nodes key
   pure updatedData
 
 simulationSetNodes :: 
@@ -192,6 +191,18 @@ simulationSetLinks links = do
   handle <- use (_d3Simulation <<< _handle)
   let _ = setLinks_ handle links
   pure unit
+
+simulationSwizzleLinks ::
+  forall d r row id m. 
+  Bind m =>
+  MonadState { simulation :: D3SimulationState_ | row } m =>
+  Array (D3Link id r) ->
+  Array (D3_SimulationNode d) ->
+  (Datum_ -> Index_) ->
+  m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
+simulationSwizzleLinks links nodes keyFn = do
+  handle <- use (_d3Simulation <<< _handle)
+  pure $ swizzleLinks_ handle links nodes keyFn 
 
 simulationGetNodes :: forall m row d.
   (MonadState { simulation :: D3SimulationState_ | row } m) => 

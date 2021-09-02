@@ -55,11 +55,15 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
 
   -- management of data (nodes and links)
   carryOverSimState :: forall d r id. selection -> RawData d r id -> (Datum_ -> Index_) -> 
-    m { updatedNodeData :: Array (D3_SimulationNode d)
-      , updatedLinkData :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
+    m (Array (D3_SimulationNode d))
   
   setNodes :: forall d.    Array (D3_SimulationNode d) -> m Unit
   setLinks :: forall r id. Array (D3Link id r)         -> m Unit
+  swizzleLinks :: forall d r id. 
+    Array (D3Link id r) ->
+    Array (D3_SimulationNode d) ->
+    (Datum_ -> Index_) ->
+    m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
 
   getNodes :: forall d.   m (Array (D3_SimulationNode d))
   getLinks :: forall d r. m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
