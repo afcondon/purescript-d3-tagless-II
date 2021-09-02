@@ -83,8 +83,12 @@ exports.forceY_ = () => d3.forceY()
 exports.getLinksFromForce_ = linkForce => linkForce.links()
 exports.getNodes_ = simulation => simulation.nodes()
 exports.keyIsID_ = d => { 
-  // console.log(`looking up the id of node: ${d.id}`);
+  console.log(`looking up the id of node: ${d.id}`);
   return d.id;
+}
+exports.keyIsSourceTarget_ = d => { 
+  console.log(`looking up the id of node: ${[d.source, d.target]}`);
+  return [d.source, d.target];
 }
 exports.setAlpha_ = simulation => alpha => simulation.alpha(alpha)
 exports.setAlphaDecay_ = simulation => alphaDecay => simulation.alphaDecay(alphaDecay)

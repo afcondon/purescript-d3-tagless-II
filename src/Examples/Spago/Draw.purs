@@ -5,7 +5,7 @@ import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, radius,
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
-import D3.FFI (d3GetSelectionData_, keyIsID_)
+import D3.FFI (d3GetSelectionData_, keyIsID_, keyIsSourceTarget_)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -111,7 +111,9 @@ initialize = do
   nodesGroup <- appendTo inner Group [ classed "nodes" ]
   linksGroup <- appendTo inner Group [ classed "links" ]
 
-  modifying (_staging <<< _enterselections <<< _nodes) (const $ Just nodesGroup)
+  -- we could just return these, no need to cache them (and in simpler apps 
+  -- could instead return the update as a lambda with these selections baked in)
+  modifying (_staging <<< _enterselections <<< _nodes) (const $ Just nodesGroup) 
   modifying (_staging <<< _enterselections <<< _links) (const $ Just linksGroup)
   
 updateSimulation :: forall m d r id. 
@@ -145,7 +147,7 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   -- _                  <- circlesSelection `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
   
   -- now the linkData
-  link'                 <- updateJoin link Line mergedData.updatedLinkData keyIsID_
+  link'                 <- updateJoin link Line mergedData.updatedLinkData keyIsSourceTarget_ -- keyIsID_
   -- put new element (line) into the DOM
   linkEnter             <- appendTo link'.enter Line [ classed link_.linkClass, strokeColor link_.color ]
   -- remove links that are leaving

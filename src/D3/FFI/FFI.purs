@@ -54,7 +54,8 @@ foreign import getIndexFromDatum_    :: Datum_ -> Int
 
 foreign import d3Data_               :: forall d. Array d -> D3Selection_ -> D3Selection_
 type ComputeKeyFunction_ = Datum_ -> Index_
-foreign import keyIsID_ :: ComputeKeyFunction_
+foreign import keyIsID_           :: ComputeKeyFunction_
+foreign import keyIsSourceTarget_ :: ComputeKeyFunction_ -- used for links in simulation
 -- REVIEW the returned D3Selection_ here is the full enter, update, exit type of selection
 -- which we haven't really modelled in PureScript (opaque type) but maybe it will turn out that we 
 -- needed to all along
