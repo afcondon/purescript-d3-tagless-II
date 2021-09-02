@@ -83,11 +83,11 @@ exports.forceY_ = () => d3.forceY()
 exports.getLinksFromForce_ = linkForce => linkForce.links()
 exports.getNodes_ = simulation => simulation.nodes()
 exports.keyIsID_ = d => { 
-  console.log(`looking up the id of node: ${d.id}`);
+  // console.log(`looking up the id of node: ${d.id}`);
   return d.id;
 }
 exports.keyIsSourceTarget_ = d => { 
-  console.log(`looking up the id of node: ${[d.source, d.target]}`);
+  // console.log(`looking up the id of node: ${[d.source, d.target]}`);
   return [d.source, d.target];
 }
 exports.setAlpha_ = simulation => alpha => simulation.alpha(alpha)
@@ -137,20 +137,30 @@ exports.configSimulation_ = simulation => config => {
   }
   return simulation
 }
+
 // d3UpdateNodesAndLinks_ :: D3Selection_ -> Array NativeNode -> Array NativeNode -> (Datum_ -> Id) -> { nodes :: Array NativeNode, links: Array NativeLinks }
 exports.d3PreserveSimulationPositions = node => nodes => newLinks => keyFn => {
-  console.log(node);
+  // logNodesXY("current selection data", node.data())
+  // logNodesXY("incoming nodes", nodes)
   // const old = new Map(node.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
   const old = new Map(node.data().map(d => [d.id, d])); // creates a map from our chosen id to the old obj reference
-  console.log(old);
-  // let updatedNodeData = nodes.map(d => Object.assign(old.get(keyFn(d)) || { aaa: "fresh node"}, d));
-  let updatedNodeData = nodes.map(d => Object.assign(old.get(d.id) || { aaa: "fresh node"}, d));
+  // console.log(old);
+  // function logNodesXY (label, nodes) {
+  //   console.log(label);
+  //   for (let index = 0; index < nodes.length; index++) {
+  //     const d = nodes[index];
+  //     console.log(`node: ${d.id} (${d.x},${d.y})`);
+  //   }
+  // }
+  function assignFromOld (d) {
+    let newD = Object.assign(old.get(keyFn(d)) || d, {} )
+    return newD
+  }
+  let updatedNodeData = nodes.map(assignFromOld);
   let updatedLinkData = newLinks.map(d => Object.assign({}, d));  
-  return { updatedNodeData, updatedLinkData}
+  // logNodesXY("updated data", updatedNodeData)
+  return { updatedNodeData, updatedLinkData }
 }
-// const old = new Map(node.data().map(d => [d.id, d]));
-// nodes = nodes.map(d => Object.assign(old.get(d.id) || {}, d));
-// links = links.map(d => Object.assign({}, d));
 
 exports.setNodes_ = simulation => nodes => {
   console.log(`setting nodes in simulation, there are ${nodes.length} nodes`);

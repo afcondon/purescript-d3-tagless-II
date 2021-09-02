@@ -6,7 +6,7 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Examples.Spago.Files (isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (isPackage, isUsedModule)
 import D3.Simulation.Forces (showType)
-import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), showForceFilter)
+import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), showForceFilter)
 import D3Tagless.Block.Card as Card
 import Data.Array (length, (:))
 import Data.Lens (view)
@@ -52,6 +52,9 @@ renderSimControls _ =
           [ Button.buttonPrimaryLeft
               [ HE.onClick $ const StopSim ]
               [ HH.text "Stop" ]
+          , Button.buttonPrimaryCenter
+              [ HE.onClick $ const (ChangeSimConfig $ AlphaTarget 0.3) ]
+              [ HH.text "Slow" ]
           , Button.buttonPrimaryRight
               [ HE.onClick $ const StartSim ]
               [ HH.text "Start" ]

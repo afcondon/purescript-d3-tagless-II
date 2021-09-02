@@ -1,12 +1,13 @@
 module D3.Examples.Spago.Draw where
 
 import Control.Monad.State (class MonadState)
-import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
+import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, opacity, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
 import D3.FFI (d3GetSelectionData_, keyIsID_, keyIsSourceTarget_)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
+import D3.Simulation.Functions (simulationStart, simulationStop)
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimState, getLinks, getNodes, mergeSelections, on, openSelection, setAttributes, setLinks, setNodes, simulationHandle, updateJoin)
@@ -42,6 +43,7 @@ circleAttrs1 :: Array SelectionAttribute
 circleAttrs1 = [ 
     radius datum_.radius
   , fill datum_.colorByGroup
+  , opacity datum_.opacityByType
 ]
 
 circleAttrs2 :: Array SelectionAttribute
@@ -126,14 +128,15 @@ updateSimulation :: forall m d r id.
   { circle :: Array SelectionAttribute, labels :: Array SelectionAttribute } -> 
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
-  node                  <- openSelection nodesGroup "g" -- node.selectAll("g"), this call and updateJoin and append all have to match FIX THIS
-  link                  <- openSelection linksGroup "g" -- node.selectAll("g"), this call and updateJoin and append all have to match FIX THIS
+  node                  <- openSelection nodesGroup "g" -- this call and updateJoin and append all have to match FIX THIS
+  link                  <- openSelection linksGroup "g" -- this call and updateJoin and append all have to match FIX THIS
   -- this will change all the object refs so a defensive copy is needed if join is to work
+  simulationStop
   mergedData            <- carryOverSimState node staging.rawdata keyIsID_ 
-  simulation_           <- simulationHandle
   -- first the nodedata
   node'                 <- updateJoin node Group mergedData.updatedNodeData keyIsID_
   -- put new elements (g, g.circle & g.text) into the DOM
+  simulation_           <- simulationHandle
   nodeEnter             <- appendTo node'.enter Group $ enterAttrs simulation_
   circlesSelection      <- appendTo nodeEnter Circle attrs.circle
   labelsSelection       <- appendTo nodeEnter Text attrs.labels
@@ -156,17 +159,19 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   setAttributes link'.update  [ classed "graphlinkSimUpdate" ]
   -- merge the update and enter selections for the links
   mergedLinkSelection   <- mergeSelections linkEnter link'.update  -- merged enter and update becomes the `node` selection for next pass
-
+  
   -- now put the nodes and links into the simulation 
   setNodes $ unsafeCoerce $ d3GetSelectionData_ mergedNodeSelection -- TODO hide this coerce in setNodes
-  setLinks $ unsafeCoerce $ d3GetSelectionData_ mergedLinkSelection -- TODO hide this coerce in setLinks
+  -- setLinks $ unsafeCoerce $ d3GetSelectionData_ mergedLinkSelection -- TODO hide this coerce in setLinks
   -- tick functions for each selection
   addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
     Step mergedNodeSelection [ transform' datum_.translateNode ]
   addTickFunction "links" $
     Step mergedLinkSelection [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
--- alternate path, should never be used, if we can't match the selections
+  simulationStart -- everything should be teed up to kick off again
+
 -- REVIEW should be possible to remove this, just directly pass the (unchanging) selections in every time  
+-- alternate path, should never be used, if we can't match the selections
 updateSimulation _ _ = pure unit -- something's gone badly wrong, one or both selections are missing
 
 

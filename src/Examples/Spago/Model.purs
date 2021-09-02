@@ -155,6 +155,8 @@ datum_ = {
       \d -> d3SchemeDiverging10N_ (toNumber $ datum_.id d) -- we don't have level in SimNode yet so let's test with id
   , colorByUsage:
       \d -> if (datum_.connected d) then "red" else "blue"
+  , opacityByType:
+      \d -> if (datum_.isPackage d) then 0.4 else 0.7
   , translateNode:
       \d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <> ")"
       

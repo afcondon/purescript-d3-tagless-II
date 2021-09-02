@@ -132,14 +132,18 @@ handleAction = case _ of
     forces  <- use _activeForces
     simulationStop
     runEffectSimulation $ Graph.updateSimulation staging graphSceneAttributes
-    runEffectSimulation $ enableOnlyTheseForces forces
+    -- runEffectSimulation $ enableOnlyTheseForces forces
     simulationStart
 
   ChangeStyling style -> _cssClass %= (const style) -- modify_ (\s -> s { svgClass = style })
 
-  ChangeSimConfig c -> runEffectSimulation $ setConfigVariable c
+  ChangeSimConfig c -> do
+    simulationStart
+    runEffectSimulation $ setConfigVariable c
 
-  StartSim -> simulationStart
+  StartSim -> do
+    simulationStart
+    runEffectSimulation $ setConfigVariable $ AlphaTarget 1.0
 
   StopSim -> runEffectSimulation (setConfigVariable $ Alpha 0.0)
 
