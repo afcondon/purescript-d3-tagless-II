@@ -10,7 +10,7 @@ import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Functions (simulationStart, simulationStop)
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimState, getLinks, getNodes, mergeSelections, on, openSelection, setAttributes, setLinks, setNodes, simulationHandle, updateJoin)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimState, getLinks, getNodes, mergeSelections, on, openSelection, setAttributes, setLinks, setNodes, simulationHandle, swizzleLinks, updateJoin)
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
@@ -132,9 +132,9 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   link                  <- openSelection linksGroup "g" -- this call and updateJoin and append all have to match FIX THIS
   -- this will change all the object refs so a defensive copy is needed if join is to work
   simulationStop
-  mergedData            <- carryOverSimState node staging.rawdata keyIsID_ 
+  mergedNodeData        <- carryOverSimState node staging.rawdata keyIsID_ 
   -- first the nodedata
-  node'                 <- updateJoin node Group mergedData keyIsID_
+  node'                 <- updateJoin node Group mergedNodeData keyIsID_
   -- put new elements (g, g.circle & g.text) into the DOM
   simulation_           <- simulationHandle
   nodeEnter             <- appendTo node'.enter Group $ enterAttrs simulation_
@@ -152,8 +152,8 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   -- now the linkData
   -- we'd like the linkdata to be pruned and swizzled here but...can we call setLinks here? 
 
-
-  link'                 <- updateJoin link Line updatedLinkData keyIsSourceTarget_ -- keyIsID_
+  swizzledLinks         <- swizzleLinks staging.rawdata.links mergedNodeData keyIsID_ 
+  link'                 <- updateJoin link Line swizzledLinks keyIsID_ -- after swizzling the id should be (source.id,target.id)
   -- put new element (line) into the DOM
   linkEnter             <- appendTo link'.enter Line [ classed link_.linkClass, strokeColor link_.color ]
   -- remove links that are leaving

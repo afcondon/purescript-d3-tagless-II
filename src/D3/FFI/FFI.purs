@@ -118,13 +118,12 @@ foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNod
 foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)
 -- setLinks will do the swizzling AND prune any links that have source or target that is not in [nodes]
 foreign import setLinks_ :: 
-  forall r id. 
+  forall d r. 
   D3Simulation_ ->
-  Array (D3Link id r) ->
+  Array (D3LinkSwizzled (D3_SimulationNode d) r) ->
   Unit
 foreign import swizzleLinks_ :: 
   forall r d id. 
-  D3Simulation_ ->
   Array (D3Link id r) ->
   Array (D3_SimulationNode d) ->
   (Datum_ -> Index_) -> 

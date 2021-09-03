@@ -183,10 +183,10 @@ simulationSetNodes nodes = do
   pure unit
 
 simulationSetLinks :: 
-  forall id r row m.
+  forall d r row m.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
-  Array (D3Link id r) -> m Unit
+  Array (D3LinkSwizzled (D3_SimulationNode d) r) -> m Unit
 simulationSetLinks links = do
   handle <- use (_d3Simulation <<< _handle)
   let _ = setLinks_ handle links
@@ -202,7 +202,7 @@ simulationSwizzleLinks ::
   m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
 simulationSwizzleLinks links nodes keyFn = do
   handle <- use (_d3Simulation <<< _handle)
-  pure $ swizzleLinks_ handle links nodes keyFn 
+  pure $ swizzleLinks_ links nodes keyFn 
 
 simulationGetNodes :: forall m row d.
   (MonadState { simulation :: D3SimulationState_ | row } m) => 

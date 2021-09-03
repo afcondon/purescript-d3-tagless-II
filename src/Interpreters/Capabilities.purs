@@ -57,8 +57,9 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   carryOverSimState :: forall d r id. selection -> RawData d r id -> (Datum_ -> Index_) -> 
     m (Array (D3_SimulationNode d))
   
-  setNodes :: forall d.    Array (D3_SimulationNode d) -> m Unit
-  setLinks :: forall r id. Array (D3Link id r)         -> m Unit
+  -- REVIEW probably we can actually model the simulation merge bit analogously to the swizzling for links?
+  setNodes :: forall d.      Array (D3_SimulationNode d) -> m Unit
+  setLinks :: forall d r. Array (D3LinkSwizzled (D3_SimulationNode d) r) -> m Unit
   swizzleLinks :: forall d r id. 
     Array (D3Link id r) ->
     Array (D3_SimulationNode d) ->

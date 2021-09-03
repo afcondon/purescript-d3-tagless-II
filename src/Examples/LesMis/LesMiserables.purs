@@ -10,7 +10,7 @@ import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..))
 import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SimulationM, addTickFunction, appendTo, attach, getLinks, getNodes, on, setAttributes, setLinks, setNodes, simpleJoin)
+import D3Tagless.Capabilities (class SimulationM, addTickFunction, appendTo, attach, getLinks, getNodes, on, setAttributes, setLinks, setNodes, simpleJoin, swizzleLinks)
 import D3Tagless.Capabilities as D3
 import Data.Int (toNumber)
 import Data.Nullable (Nullable)
@@ -87,7 +87,8 @@ graphScript model selector = do
   -- in contrast to a simple SelectionM function, we have additional typeclass capabilities for simulation
   -- which we use here to introduce the nodes and links to the simulation
   setNodes model.nodes -- no staging here, we just load the nodes straight into Sim
-  setLinks model.links
+  swizzledLinks <- swizzleLinks model.links model.nodes keyIsID_
+  setLinks swizzledLinks
 
   cookedNodes <- getNodes
   cookedLinks <- getLinks
