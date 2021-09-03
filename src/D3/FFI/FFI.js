@@ -174,6 +174,7 @@ exports.swizzleLinks_ = links => simNodes => keyFn => {
     if (typeof link.source === 'undefined' || link.target === 'undefined') {
       return false; // filter this node
     } else {
+      link.id = keyFn(link.source) + "-" + keyFn(link.target)
       return true // we've updated the 
     }
   })
