@@ -5,14 +5,14 @@ import Prelude
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
-import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveSimulationPositions, defaultSimulationDrag_, disableDrag_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_, swizzleLinks_)
+import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveLinkReferences_, d3PreserveSimulationPositions_, defaultSimulationDrag_, disableDrag_, getIDsFromNodes_, getLinkID_, getLinkIDs_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_, swizzleLinks_)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
 import D3.Simulation.Forces (disableByLabels, enableByLabels, enableOnlyTheseLabels, putForceInSimulation, setForceAttr)
 import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _force, _forces, _handle, _name, _tick, _velocityDecay, forceTuple)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (RawData)
-import Data.Array (intercalate)
+import Data.Array (elem, filter, intercalate)
 import Data.Array as A
 import Data.Foldable (traverse_)
 import Data.Lens (modifying, set, use, view)
@@ -169,7 +169,28 @@ simulationPreservePositions ::
   (Datum_ -> Index_) ->
   m (Array (D3_SimulationNode d))
 simulationPreservePositions selection rawdata key = do
-  let updatedData = d3PreserveSimulationPositions selection rawdata.nodes key
+  let updatedData = d3PreserveSimulationPositions_ selection rawdata.nodes key
+  pure updatedData
+
+simulationPreserveLinkReferences ::
+  forall d id r m row. 
+  Eq id => 
+  Bind m =>
+  MonadState { simulation :: D3SimulationState_ | row } m =>
+  D3Selection_ ->
+  RawData d r id -> 
+  (Datum_ -> Index_) ->
+  m (Array (D3Link id r))
+simulationPreserveLinkReferences selection rawdata keyFn = do
+  let
+    nodeIDs :: Array id 
+    nodeIDs       = getIDsFromNodes_ rawdata.nodes keyFn
+    validLink :: D3Link id r -> Boolean
+    validLink l = do
+      let { sourceID, targetID } = getLinkIDs_ keyFn l
+      (sourceID `elem` nodeIDs) && (targetID `elem` nodeIDs)
+    validNewLinks = filter validLink rawdata.links 
+    updatedData = d3PreserveLinkReferences_ selection validNewLinks
   pure updatedData
 
 simulationSetNodes :: 

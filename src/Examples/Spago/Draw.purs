@@ -10,12 +10,12 @@ import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Functions (simulationStart, simulationStop)
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimState, getLinks, getNodes, mergeSelections, on, openSelection, setAttributes, setLinks, setNodes, simulationHandle, swizzleLinks, updateJoin)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimStateN, carryOverSimStateL, getLinks, getNodes, mergeSelections, on, openSelection, setAttributes, setLinks, setNodes, simulationHandle, swizzleLinks, updateJoin)
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
-import Prelude (class Bind, Unit, bind, const, discard, negate, pure, unit, ($), (/), (<<<))
+import Prelude (class Bind, class Eq, Unit, bind, const, discard, negate, pure, unit, ($), (/), (<<<))
 import Stories.Spago.State (State) as Spago
 import Stories.Spago.State (_enterselections, _links, _nodes, _staging)
 import Unsafe.Coerce (unsafeCoerce)
@@ -119,6 +119,7 @@ initialize = do
   modifying (_staging <<< _enterselections <<< _links) (const $ Just linksGroup)
   
 updateSimulation :: forall m d r id. 
+  Eq id =>
   Bind m => 
   MonadEffect m =>
   MonadState Spago.State m =>
@@ -129,17 +130,17 @@ updateSimulation :: forall m d r id.
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
   node                  <- openSelection nodesGroup "g" -- this call and updateJoin and append all have to match FIX THIS
-  link                  <- openSelection linksGroup "g" -- this call and updateJoin and append all have to match FIX THIS
+  link                  <- openSelection linksGroup "line" -- this call and updateJoin and append all have to match FIX THIS
   -- this will change all the object refs so a defensive copy is needed if join is to work
   simulationStop
-  mergedNodeData        <- carryOverSimState node staging.rawdata keyIsID_ 
+  mergedNodeData        <- carryOverSimStateN node staging.rawdata keyIsID_ 
+  mergedLinkData        <- carryOverSimStateL link staging.rawdata keyIsID_ 
+  swizzledLinks         <- swizzleLinks mergedLinkData mergedNodeData keyIsID_ -- the key function here is for the SOURCE and TARGET, not the link itself
   -- first the nodedata
   node'                 <- updateJoin node Group mergedNodeData keyIsID_
   -- put new elements (g, g.circle & g.text) into the DOM
   simulation_           <- simulationHandle
   nodeEnter             <- appendTo node'.enter Group $ enterAttrs simulation_
-  circlesSelection      <- appendTo nodeEnter Circle attrs.circle
-  labelsSelection       <- appendTo nodeEnter Text attrs.labels
   -- remove elements corresponding to exiting data
   setAttributes node'.exit [ remove ]
   -- change anything that needs changing on the continuing elements
@@ -150,10 +151,8 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   -- _                  <- circlesSelection `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
   
   -- now the linkData
-  -- we'd like the linkdata to be pruned and swizzled here but...can we call setLinks here? 
-
-  swizzledLinks         <- swizzleLinks staging.rawdata.links mergedNodeData keyIsID_ 
-  link'                 <- updateJoin link Line swizzledLinks keyIsID_ -- after swizzling the id should be (source.id,target.id)
+  -- after swizzling keyIsID_ should work on links, the id would be "5-8" if keyFn(link.source) == 5 && keyFn(link.target) == 8, for example
+  link'                 <- updateJoin link Line swizzledLinks keyIsID_
   -- put new element (line) into the DOM
   linkEnter             <- appendTo link'.enter Line [ classed link_.linkClass, strokeColor link_.color ]
   -- remove links that are leaving
@@ -165,6 +164,8 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   
   -- now put the nodes and links into the simulation 
   setNodes $ unsafeCoerce $ d3GetSelectionData_ mergedNodeSelection -- TODO hide this coerce in setNodes
+  circlesSelection      <- appendTo nodeEnter   Circle attrs.circle
+  labelsSelection       <- appendTo nodeEnter   Text attrs.labels
   setLinks $ unsafeCoerce $ d3GetSelectionData_ mergedLinkSelection -- TODO hide this coerce in setLinks
   -- tick functions for each selection
   addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it

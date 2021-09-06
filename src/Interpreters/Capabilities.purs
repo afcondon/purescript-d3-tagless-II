@@ -6,7 +6,7 @@ import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior, SelectionAttribute)
 import D3.Simulation.Types (Force, SimVariable, Step)
 import Data.Maybe (Maybe)
-import Prelude (class Monad, Unit)
+import Prelude (class Eq, class Monad, Unit)
 
 -- TODO see whether it can be useful to extend the interpreter here, for different visualization types
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
@@ -54,12 +54,14 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   enableOnlyTheseForces :: Array Label -> m Unit
 
   -- management of data (nodes and links)
-  carryOverSimState :: forall d r id. selection -> RawData d r id -> (Datum_ -> Index_) -> 
-    m (Array (D3_SimulationNode d))
+  -- merge these functions back together later
+  carryOverSimStateN :: forall d r id. selection -> RawData d r id -> (Datum_ -> Index_) ->  m (Array (D3_SimulationNode d))
   
   -- REVIEW probably we can actually model the simulation merge bit analogously to the swizzling for links?
   setNodes :: forall d.      Array (D3_SimulationNode d) -> m Unit
   setLinks :: forall d r. Array (D3LinkSwizzled (D3_SimulationNode d) r) -> m Unit
+  -- should be able to merge carryOverSimStateL and swizzleLinks (and possibly carryOverSimStateN)
+  carryOverSimStateL :: forall d r id. (Eq id) => selection -> RawData d r id -> (Datum_ -> Index_) ->  m (Array (D3Link id r))
   swizzleLinks :: forall d r id. 
     Array (D3Link id r) ->
     Array (D3_SimulationNode d) ->

@@ -83,11 +83,11 @@ exports.forceY_ = () => d3.forceY()
 exports.getLinksFromForce_ = linkForce => linkForce.links()
 exports.getNodes_ = simulation => simulation.nodes()
 exports.keyIsID_ = d => { 
-  // console.log(`looking up the id of node: ${d.id}`);
+  console.log(`looking up the id of node: ${d.id}`);
   return d.id;
 }
 exports.keyIsSourceTarget_ = d => { 
-  // console.log(`looking up the id of node: ${[d.source, d.target]}`);
+  console.log(`looking up the id of node: ${[d.source, d.target]}`);
   return [d.source, d.target];
 }
 exports.setAlpha_ = simulation => alpha => simulation.alpha(alpha)
@@ -138,10 +138,23 @@ exports.configSimulation_ = simulation => config => {
   return simulation
 }
 
-exports.d3PreserveSimulationPositions = node => nodes => keyFn => {
+exports.d3PreserveSimulationPositions_ = node => nodes => keyFn => {
   const old = new Map(node.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
   let updatedNodeData = nodes.map(d => Object.assign(old.get(keyFn(d)) || d, {} ));
   return updatedNodeData
+}
+exports.d3PreserveLinkReferences_ = link => links => {
+  const old = new Map(link.data().map(d => [exports.getLinkID_(d), d])); 
+  let updatedLinkData = links.map(d => Object.assign(old.get(exports.getLinkID_(d)) || d, {} ));
+  // now, based on link signature, we should really de-swizzle here? and we may HAVE TO do so
+  return updatedLinkData
+}
+exports.getIDsFromNodes_ = nodes => keyFn => {
+  const keys = [];
+  for (let i = 0; i < nodes.length; i++) {
+    keys[i] = keyFn(nodes[i]);
+  }
+  return keys
 }
 
 exports.setNodes_ = simulation => nodes => {
@@ -187,11 +200,15 @@ exports.unsetLinks_ = simulation => {
   return simulation
 }
 // this will work on both swizzled and unswizzled links
-// TODO check if that is really necessary later
-exports.getLinkID_ = keyFn => link => {
+exports.getLinkID_ = keyFn => link => { // version for generating an ID for the link object
   const sourceID = (typeof link.source == `object`) ? keyFn(link.source) : link.source
   const targetID = (typeof link.target == `object`) ? keyFn(link.target) : link.target
   return sourceID + "-" + targetID 
+}
+exports.getLinkIDs_ = keyFn => link => { // version for generating the pairs to check against node ids for pruning
+  const sourceID = (typeof link.source == `object`) ? keyFn(link.source) : link.source
+  const targetID = (typeof link.target == `object`) ? keyFn(link.target) : link.target
+  return { sourceID, targetID } 
 }
 exports.getLinksFromSimulation_ = simulation => {
   linksForce = simulation.force(exports.linksForceName)
