@@ -53,7 +53,7 @@ renderSimControls _ =
               [ HE.onClick $ const StopSim ]
               [ HH.text "Stop" ]
           , Button.buttonPrimaryCenter
-              [ HE.onClick $ const (ChangeSimConfig $ AlphaTarget 0.3) ]
+              [ HE.onClick $ const (ChangeSimConfig $ VelocityDecay 0.7) ]
               [ HH.text "Slow" ]
           , Button.buttonPrimaryRight
               [ HE.onClick $ const StartSim ]

@@ -5,12 +5,12 @@ import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, opacity
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
-import D3.FFI (d3GetSelectionData_, keyIsID_, keyIsSourceTarget_)
+import D3.FFI (d3GetSelectionData_, keyIsID_)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Functions (simulationStart, simulationStop)
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimStateN, carryOverSimStateL, getLinks, getNodes, mergeSelections, on, openSelection, setAttributes, setLinks, setNodes, simulationHandle, swizzleLinks, updateJoin)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimStateL, carryOverSimStateN, mergeSelections, on, openSelection, setAttributes, setLinks, setNodes, simulationHandle, swizzleLinks, updateJoin)
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
@@ -129,7 +129,7 @@ updateSimulation :: forall m d r id.
   { circle :: Array SelectionAttribute, labels :: Array SelectionAttribute } -> 
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
-  node                  <- openSelection nodesGroup "g" -- this call and updateJoin and append all have to match FIX THIS
+  node                  <- openSelection nodesGroup "g"    -- this call and updateJoin and append all have to match FIX THIS
   link                  <- openSelection linksGroup "line" -- this call and updateJoin and append all have to match FIX THIS
   -- this will change all the object refs so a defensive copy is needed if join is to work
   simulationStop
@@ -141,6 +141,8 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   -- put new elements (g, g.circle & g.text) into the DOM
   simulation_           <- simulationHandle
   nodeEnter             <- appendTo node'.enter Group $ enterAttrs simulation_
+  circlesSelection      <- appendTo nodeEnter   Circle attrs.circle
+  labelsSelection       <- appendTo nodeEnter   Text attrs.labels
   -- remove elements corresponding to exiting data
   setAttributes node'.exit [ remove ]
   -- change anything that needs changing on the continuing elements
@@ -155,17 +157,16 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   link'                 <- updateJoin link Line swizzledLinks keyIsID_
   -- put new element (line) into the DOM
   linkEnter             <- appendTo link'.enter Line [ classed link_.linkClass, strokeColor link_.color ]
+  setAttributes linkEnter  [ classed "enter" ]
   -- remove links that are leaving
   setAttributes link'.exit    [ remove ]  
   -- update links that are staying
-  setAttributes link'.update  [ classed "graphlinkSimUpdate" ]
+  setAttributes link'.update  [ classed "update" ]
   -- merge the update and enter selections for the links
   mergedLinkSelection   <- mergeSelections linkEnter link'.update  -- merged enter and update becomes the `node` selection for next pass
   
   -- now put the nodes and links into the simulation 
   setNodes $ unsafeCoerce $ d3GetSelectionData_ mergedNodeSelection -- TODO hide this coerce in setNodes
-  circlesSelection      <- appendTo nodeEnter   Circle attrs.circle
-  labelsSelection       <- appendTo nodeEnter   Text attrs.labels
   setLinks $ unsafeCoerce $ d3GetSelectionData_ mergedLinkSelection -- TODO hide this coerce in setLinks
   -- tick functions for each selection
   addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
@@ -174,7 +175,6 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
     Step mergedLinkSelection [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
   simulationStart -- everything should be teed up to kick off again
 
--- REVIEW should be possible to remove this, just directly pass the (unchanging) selections in every time  
 -- alternate path, should never be used, if we can't match the selections
 updateSimulation _ _ = pure unit -- something's gone badly wrong, one or both selections are missing
 
