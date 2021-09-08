@@ -4,30 +4,38 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, get, modify_)
+import Control.Monad.State (class MonadState, get, modify_, runStateT)
+import D3.Data.Types (D3Selection_)
 import D3.Examples.Spago.Draw (graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Draw as Graph
-import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
+import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, convertFilesToGraphModel, isPackage, isUsedModule, noFilter)
 import D3.Examples.Spago.Tree (treeReduction)
-import D3.FFI (pinNamedNode_, pinTreeNode_, unpinNode_)
+import D3.FFI (dummySelection_, pinNamedNode_, pinTreeNode_, unpinNode_)
+import D3.Node (NodeID)
+import D3.Selection (SelectionAttribute)
 import D3.Simulation.Functions (simulationStart, simulationStop)
-import D3.Simulation.Types (SimVariable(..), _nodedata, initialSimulationState)
-import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, toggleForceByLabel)
-import D3Tagless.Instance.Simulation (runEffectSimulation)
+import D3.Simulation.Types (D3SimulationState_, _nodedata, initialSimulationState)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addForces, enableOnlyTheseForces, setConfigVariable, toggleForceByLabel)
+import D3Tagless.Instance.Simulation (D3SimM(..), exec_D3M_Simulation, runEffectSimulation)
 import Data.Array (filter)
 import Data.Either (hush)
 import Data.Lens (modifying, over, set, use, (%=))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..), snd)
 import Debug (trace)
+import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (class MonadEffect, liftEffect)
 import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
-import Stories.Spago.Forces (forces, gridForceSettings, packageForceSettings, treeForceSettings)
+import Stories.Spago.Forces as Force
 import Stories.Spago.HTML (render)
-import Stories.Spago.State (State, _activeForces, _cssClass, _d3Simulation, _model, _staging, _stagingLinks, _stagingNodes)
+import Stories.Spago.State (State, StateRow, _activeForces, _cssClass, _d3Simulation, _model, _staging, _stagingLinks, _stagingNodes)
+import Type.Row (type (+))
+import Unsafe.Coerce (unsafeCoerce)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -43,7 +51,7 @@ component = H.mkComponent
   initialState :: State
   initialState = { 
       svgClass: "cluster"
-    , activeForces: []
+    , forces: { all: Force.forces, active: [] }
     , model: Nothing
     , staging: { selections: { nodes: Nothing, links: Nothing }, rawdata: { nodes: [], links: [] }}
     , simulation: initialSimulationState 1 -- TODO replace number with unit when all working satisfactorily 
@@ -57,58 +65,37 @@ handleAction = case _ of
     (maybeModel :: Maybe SpagoModel) <- H.liftAff getModel
     let _ = trace { spago: "initialize" } \_ -> unit
     modifying _model (const maybeModel)
-    runEffectSimulation Graph.initialize -- should result in the "enter" selections being in the simulation
-    runEffectSimulation (addForces forces)
-    -- handleAction $ Scene PackageGraph
+    -- realizeSimulation (\_ _ -> Graph.initialize) { circle: [], labels: [] }
 
   Finalize -> pure unit
 
   Scene PackageGrid -> do
     setCssEnvironment "cluster"
-    -- TODO make this removeSelection part of the Halogen State of the component
     -- runEffectSimulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     stageLinks  isM2P_Link -- only module-to-package (ie containment) links
     stageNodes  noFilter   -- all the nodes
-    setActiveForces gridForceSettings
+    stageForces Force.gridForces
     unpinActiveNodes
-    -- everything from here on down should be factorable out???
-    staging <- use _staging
-    forces  <- use _activeForces
-    simulationStop
-    runEffectSimulation $ Graph.updateSimulation staging graphSceneAttributes
-    runEffectSimulation $ enableOnlyTheseForces forces
-    simulationStart
+    realizeSimulation dummySelection_ Graph.updateSimulation graphSceneAttributes
 
   Scene PackageGraph -> do
     setCssEnvironment "graph"
     -- runEffectSimulation $ removeNamedSelection "treelinksSelection"
     stageLinks isP2P_Link
     stageNodes isPackage
-    setActiveForces packageForceSettings
+    stageForces Force.packageGraphForces
     unpinActiveNodes
     -- runEffectSimulation $ uniformlyDistributeNodes -- FIXME
-
-    staging <- use _staging
-    forces  <- use _activeForces
-    simulationStop
-    runEffectSimulation $ Graph.updateSimulation staging graphSceneAttributes
-    runEffectSimulation $ enableOnlyTheseForces forces
-    simulationStart
+    -- realizeSimulation Graph.updateSimulation graphSceneAttributes
 
   Scene (ModuleTree _) -> do
     setCssEnvironment "tree"
     -- runEffectSimulation $ removeNamedSelection "graphlinksSelection"
-    setActiveForces treeForceSettings
+    stageForces Force.treeForces
     stageNodes isUsedModule
     stageLinks isM2M_Tree_Link
     pinTreeNodes -- side-effect, because if we make _new_ nodes the links won't be pointing to them
-
-    staging <- use _staging
-    forces  <- use _activeForces
-    simulationStop
-    runEffectSimulation $ Graph.updateSimulation staging treeSceneAttributes
-    runEffectSimulation $ enableOnlyTheseForces forces
-    simulationStart
+    -- realizeSimulation Graph.updateSimulation treeSceneAttributes
     
   ToggleForce label -> do
     simulationStop
@@ -117,41 +104,29 @@ handleAction = case _ of
 
   Filter (LinkFilter x) -> do
     stageLinks x
-
-    staging <- use _staging
-    forces  <- use _activeForces
-    simulationStop
-    runEffectSimulation $ Graph.updateSimulation staging graphSceneAttributes
-    runEffectSimulation $ enableOnlyTheseForces forces
-    simulationStart
+    -- realizeSimulation Graph.updateSimulation graphSceneAttributes -- TODO this could change from Tree to Graph, surely not what's wanted?
 
   Filter (NodeFilter x) -> do
     stageNodes x
-
-    staging <- use _staging
-    forces  <- use _activeForces
-    simulationStop
-    runEffectSimulation $ Graph.updateSimulation staging graphSceneAttributes
-    -- runEffectSimulation $ enableOnlyTheseForces forces
-    simulationStart
+    -- realizeSimulation Graph.updateSimulation graphSceneAttributes -- TODO this could change from Tree to Graph, surely not what's wanted?
 
   ChangeStyling style -> _cssClass %= (const style) -- modify_ (\s -> s { svgClass = style })
 
   ChangeSimConfig c -> do
-    simulationStart
     runEffectSimulation $ setConfigVariable c
+    simulationStart
 
   StartSim -> do
     simulationStart
-    runEffectSimulation $ setConfigVariable $ AlphaTarget 1.0
 
-  StopSim -> runEffectSimulation (setConfigVariable $ Alpha 0.0)
+  StopSim -> do
+    simulationStop
 
 setCssEnvironment :: forall m. MonadState State m => String -> m Unit
 setCssEnvironment string = _cssClass %= (const string)
 
-setActiveForces :: forall m. MonadState State m => Array String -> m Unit
-setActiveForces forces = modify_ $ set _activeForces forces
+stageForces :: forall m. MonadState State m => Array String -> m Unit
+stageForces forces = modify_ $ set _activeForces forces
 
 -- TODO modifying _linksInSim (filtered _linksInModel)
 stageLinks :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
@@ -193,7 +168,7 @@ unpinActiveNodes = do
 -- the dependency tree will contain all nodes reachable from Main but NOT all links
 getModel :: Aff (Maybe SpagoModel)
 getModel = do
-  let datadir = "http://localhost:1234/spago-small/"
+  let datadir = "http://localhost:1234/spago-data/"
   moduleJSON  <- AJAX.get ResponseFormat.string $ datadir <> "modules.json"
   packageJSON <- AJAX.get ResponseFormat.string $ datadir <> "packages.json"
   lsdepJSON   <- AJAX.get ResponseFormat.string $ datadir <> "lsdeps.jsonlines"
@@ -207,3 +182,42 @@ addTreeToModel rootName maybeModel = do
   model  <- maybeModel
   rootID <- M.lookup rootName model.maps.name2ID
   pure $ treeReduction rootID model
+
+type SceneAttributes = { circle :: Array SelectionAttribute , labels :: Array SelectionAttribute }
+type StagingType = Staging D3Selection_ SpagoDataRow SpagoLinkData NodeID
+
+
+-- realizeSimulation :: forall t106 t108 t111 t113 t132 t139 t154.
+--   Bind t108 => MonadState
+--                  { simulation :: D3SimulationState_
+--                  | t111
+--                  }
+--                  t108
+--                 => MonadEffect t108 => (t113
+--                                         -> t106
+--                                            -> D3SimM
+--                                                 ( forces :: { active :: Array String
+--                                                             | t132
+--                                                             }
+--                                                 , staging :: t113
+--                                                 | t154
+--                                                 )
+--                                                 D3Selection_
+--                                                 t139
+--                                        )
+--                                        -> t106 -> t108 Unit
+realizeSimulation :: forall m a .
+  Bind m => 
+  MonadState State m =>
+  MonadEffect m =>
+  SelectionM D3Selection_ m =>
+  SimulationM D3Selection_ m =>
+  (StagingType -> SceneAttributes -> m (StateRow ()) D3Selection_ a ) -> SceneAttributes -> m Unit
+realizeSimulation selection script sceneAttributes = do
+    simulationStop
+    staging <- use _staging
+    forces  <- use _activeForces
+    state   <- get -- the scripts run in a StateT that only requires { simulation :: D3Simulation_ }
+    state'  <- liftEffect $ liftA1 snd $ runStateT (script staging sceneAttributes) state
+    -- runEffectSimulation (enableOnlyTheseForces forces)
+    simulationStart

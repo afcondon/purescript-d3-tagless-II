@@ -6,7 +6,7 @@ import D3.Data.Types (D3Selection_)
 import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode)
 import D3.Node (NodeID)
-import D3.Simulation.Types (D3SimulationState_)
+import D3.Simulation.Types (D3SimulationState_, Force)
 import D3Tagless.Capabilities (Staging)
 import Data.Lens (Lens', _Just)
 import Data.Lens.Record (prop)
@@ -14,20 +14,26 @@ import Data.Maybe (Maybe)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
 import Type.Proxy (Proxy(..))
+import Type.Row (type (+))
   
-type State = {
+type State = Record ( SimStateRow + StateRow + ())
+type StateRow row = (
   -- governing class on the SVG means we can completely change the look of the vis (and not have to think about this at D3 level)
     svgClass     :: String 
   -- just a simple list of the names of the forces that are meant to be active
-  , activeForces :: Array String
+  , forces       :: { active :: Array String, all :: Array Force }
   -- the model should actually be a component, probably a hook so that it can be constructed by this component and not be a Maybe
   , model        :: Maybe SpagoModel 
   -- we'll filter nodes/links to staging and then, if staging is valid (has selections) we will put this staging data in the simulation
   -- if there are updates to data they will be detected and handled by defensive copying in the FFI to ensure continuity of object references from links
   , staging      :: Staging D3Selection_ SpagoDataRow SpagoLinkData NodeID
+  | row
+)
+type SimStateRow row = ( 
   -- the simulationState manages the Nodes, Links, Forces, Selections, Ticks & simulation parameters
-  , simulation   :: D3SimulationState_
-}
+  simulation   :: D3SimulationState_ 
+  | row
+)
 
 _model :: forall a r. Lens' { model :: a | r } a
 _model = prop (Proxy :: Proxy "model")
@@ -38,8 +44,11 @@ _staging = prop (Proxy :: Proxy "staging")
 _cssClass :: forall a r. Lens' { svgClass :: a | r } a
 _cssClass = prop (Proxy :: Proxy "svgClass")
 
-_activeForces :: forall a r. Lens' { activeForces :: a | r } a
-_activeForces = prop (Proxy :: Proxy "activeForces")
+_activeForces :: forall a r r2. Lens' { forces :: { active :: a | r } | r2 } a
+_activeForces = prop (Proxy :: Proxy "forces") <<< prop (Proxy :: Proxy "active")
+
+_forces :: forall a r r2. Lens' { forces :: { all :: a | r } | r2 } a
+_forces = prop (Proxy :: Proxy "forces") <<< prop (Proxy :: Proxy "all")
 
 _d3Simulation :: forall a r. Lens' { simulation :: a | r} a
 _d3Simulation = prop (Proxy :: Proxy "simulation")
@@ -83,7 +92,3 @@ _rawdata = prop (Proxy :: Proxy "rawdata")
 
 _enterselections :: forall a r. Lens' { selections :: a | r } a
 _enterselections = prop (Proxy :: Proxy "selections")
-
--- _selections' :: Lens' State { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
--- _selections' = _Newtype <<< prop (Proxy :: Proxy "selections")
-
