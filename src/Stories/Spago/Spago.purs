@@ -206,13 +206,13 @@ type StagingType = Staging D3Selection_ SpagoDataRow SpagoLinkData NodeID
 --                                                 t139
 --                                        )
 --                                        -> t106 -> t108 Unit
-realizeSimulation :: forall m a .
-  Bind m => 
-  MonadState State m =>
-  MonadEffect m =>
-  SelectionM D3Selection_ m =>
-  SimulationM D3Selection_ m =>
-  (StagingType -> SceneAttributes -> m (StateRow ()) D3Selection_ a ) -> SceneAttributes -> m Unit
+-- realizeSimulation :: forall m a.
+--   Bind m => 
+--   MonadState State m =>
+--   MonadEffect m =>
+--   SelectionM D3Selection_ m =>
+--   SimulationM D3Selection_ m =>
+--   (StagingType -> SceneAttributes -> m StateRow D3Selection_ a ) -> SceneAttributes -> m Unit
 realizeSimulation selection script sceneAttributes = do
     simulationStop
     staging <- use _staging
