@@ -15,6 +15,7 @@ import Prelude (Unit, unit)
 -- | ***************************   FFI signatures for D3js zoom module       *********************************************
 -- | *********************************************************************************************************************
 foreign import data ZoomBehavior_ :: Type  -- the zoom behavior, provided to Event Handler
+foreign import dummySelection_ :: D3Selection_
 foreign import d3AttachZoom_              :: D3Selection_ -> ZoomConfig_        -> D3Selection_
 foreign import d3AttachZoomDefaultExtent_ :: D3Selection_ -> ZoomConfigDefault_ -> D3Selection_
 foreign import showAttachZoomDefaultExtent_ :: forall selection. selection -> ZoomConfigDefault_ -> selection

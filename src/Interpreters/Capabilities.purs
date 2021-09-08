@@ -30,7 +30,6 @@ class (Monad m) <= SelectionM selection m where
 -- 2)...
 
 -- | These data types are to prevent "boolean blindness" when choosing forces to enable and disable
-type ForceConfigLists = { enable :: Array Label, disable :: Array Label }
 
   -- TODO 
   -- parameterize out the D3_ part of SimulationNode - could we make all this opaque?
@@ -46,21 +45,22 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   setConfigVariable    :: SimVariable -> m Unit
 
   -- management of forces
+  -- REVIEW could make this a single function with a record of "add", "toggle", "enable", "disable", "enableOnly" ??
   removeAllForces       ::                m Unit
   addForces             :: Array Force -> m Unit
   addForce              :: Force       -> m Unit
-  toggleForceByLabel    :: Label            -> m Unit
-  setForcesByLabel      :: ForceConfigLists -> m Unit
+  toggleForceByLabel    :: Label       -> m Unit
+  setForcesByLabel      :: { enable :: Array Label, disable :: Array Label } -> m Unit
   enableOnlyTheseForces :: Array Label -> m Unit
 
   -- management of data (nodes and links)
   -- merge these functions back together later
-  carryOverSimStateN :: forall d r id. selection -> RawData d r id -> (Datum_ -> Index_) ->  m (Array (D3_SimulationNode d))
   
   -- REVIEW probably we can actually model the simulation merge bit analogously to the swizzling for links?
   setNodes :: forall d.      Array (D3_SimulationNode d) -> m Unit
   setLinks :: forall d r. Array (D3LinkSwizzled (D3_SimulationNode d) r) -> m Unit
   -- should be able to merge carryOverSimStateL and swizzleLinks (and possibly carryOverSimStateN)
+  carryOverSimStateN :: forall d r id. selection -> RawData d r id -> (Datum_ -> Index_) ->  m (Array (D3_SimulationNode d))
   carryOverSimStateL :: forall d r id. (Eq id) => selection -> RawData d r id -> (Datum_ -> Index_) ->  m (Array (D3Link id r))
   swizzleLinks :: forall d r id. 
     Array (D3Link id r) ->

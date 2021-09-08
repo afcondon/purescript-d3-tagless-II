@@ -53,7 +53,7 @@ selectionUpdateJoin openSelection e theData keyFn = do
 
 selectionOpenSelection :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Selector D3Selection_ -> m D3Selection_
 selectionOpenSelection selection selector = do
-  let _ = spy "open selection: " $ selector
+  -- let _ = spy "open selection: " $ selector
   pure $ d3SelectionSelectAll_ selector selection
 
 selectionMergeSelections :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> D3Selection_ -> m D3Selection_

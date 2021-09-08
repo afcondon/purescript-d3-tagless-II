@@ -11,17 +11,17 @@ import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
 
-gridForceSettings :: Array String
-gridForceSettings = [ "packageGrid", "clusterx", "clustery", "collide1" ]
+gridForces :: Array String
+gridForces = [ "packageGrid", "clusterx", "clustery", "collide1" ]
 
-gridForceSettings2 :: Array String
-gridForceSettings2 = [ "center", "collide2", "x", "y" ]
+gridForces2 :: Array String
+gridForces2 = [ "center", "collide2", "x", "y" ]
 
-packageForceSettings :: Array String
-packageForceSettings = [ "centerNamedNode", "center", "collide2", "charge2", "links"]
+packageGraphForces :: Array String
+packageGraphForces = [ "centerNamedNode", "center", "collide2", "charge2", "links"]
 
-treeForceSettings :: Array String
-treeForceSettings = ["links", "center", "charge1", "collide1" ]
+treeForces :: Array String
+treeForces = ["links", "center", "charge1", "collide1" ]
 
 -- these are the force settings for the force-layout radial tree in Observables
 -- .force("link", d3.forceLink(links).id(d => d.id).distance(0).strength(1))

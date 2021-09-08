@@ -8,7 +8,7 @@ import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight
 import D3.FFI (d3GetSelectionData_, keyIsID_)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Functions (simulationStart, simulationStop)
-import D3.Simulation.Types (Step(..))
+import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimStateL, carryOverSimStateN, mergeSelections, on, openSelection, setAttributes, setLinks, setNodes, simulationHandle, swizzleLinks, updateJoin)
 import Data.Lens (modifying)
@@ -58,8 +58,8 @@ labelsAttrs1 = [
   , x 0.2
   , y datum_.positionLabel
   , textAnchor "middle"
-  , text datum_.indexAndID
-  -- , text datum_.name
+  -- , text datum_.indexAndID
+  , text datum_.name
 ]
 
 -- TODO x and y position for label would also depend on "hasChildren", need to get "tree" data into nodes
@@ -113,8 +113,7 @@ initialize = do
   nodesGroup <- appendTo inner Group [ classed "nodes" ]
   linksGroup <- appendTo inner Group [ classed "links" ]
 
-  -- we could just return these, no need to cache them (and in simpler apps 
-  -- could instead return the update as a lambda with these selections baked in)
+  -- set the "open" selections that will be used to begin each update
   modifying (_staging <<< _enterselections <<< _nodes) (const $ Just nodesGroup) 
   modifying (_staging <<< _enterselections <<< _links) (const $ Just linksGroup)
   
@@ -275,21 +274,4 @@ updateTreeLinks links layout = do
 
   pure unit
 -}
-  
--- removeNamedSelection :: forall m row. 
---   Bind m => 
---   MonadEffect m =>
---   MonadState { simulation :: D3SimulationState_ | row } m =>
---   SelectionM D3Selection_ m =>
---   SimulationM D3Selection_ m =>
---   String -> 
---   m Unit
--- removeNamedSelection name = do
---   (maybeSelection :: Maybe D3Selection_) <- getSelection name
---   case maybeSelection of
---     Nothing -> pure unit
---     (Just selection) -> do
---       setAttributes selection [ remove ]
-
---   pure unit
   

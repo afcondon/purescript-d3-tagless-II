@@ -23,7 +23,7 @@ import Ocelot.Block.Format as Format
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
-import Stories.Spago.State (State, _stagingLinks, _stagingNodes)
+import Stories.Spago.State (State, _activeForces, _stagingLinks, _stagingNodes)
 import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
 
@@ -39,7 +39,7 @@ renderSimState state =
     , HH.p_
         [ HH.text $ "node count:" <> show (length $ view _stagingNodes state)] 
     , HH.p_
-        [ HH.text $ "initial forces:" <> show state.activeForces ] 
+        [ HH.text $ "initial forces:" <> show (view _activeForces state) ] 
     ]
 
 renderSimControls :: forall p. State -> HH.HTML p Action

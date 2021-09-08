@@ -3,6 +3,7 @@ const debug = false
 // ************************** functions from d3js Selection & Transition         ***********************************
 // *****************************************************************************************************************
 exports.emptyD3Data_ = null
+exports.dummySelection_ = null
 exports.d3Append_ = element => selection => { return selection.append(element) }
 exports.d3Data_ = data => selection => { return selection.data(data) }
 exports.d3DataWithKeyFunction_ = data => keyFn => selection => { return selection.data(data, keyFn) }
@@ -83,11 +84,11 @@ exports.forceY_ = () => d3.forceY()
 exports.getLinksFromForce_ = linkForce => linkForce.links()
 exports.getNodes_ = simulation => simulation.nodes()
 exports.keyIsID_ = d => { 
-  console.log(`looking up the id of node: ${d.id}`);
+  // console.log(`looking up the id of node: ${d.id}`);
   return d.id;
 }
 exports.keyIsSourceTarget_ = d => { 
-  console.log(`looking up the id of node: ${[d.source, d.target]}`);
+  // console.log(`looking up the id of node: ${[d.source, d.target]}`);
   return [d.source, d.target];
 }
 exports.setAlpha_ = simulation => alpha => simulation.alpha(alpha)
