@@ -10,7 +10,7 @@ import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Functions (simulationStart, simulationStop)
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimStateL, carryOverSimStateN, mergeSelections, on, openSelection, setAttributes, setLinks, setNodes, simulationHandle, swizzleLinks, updateJoin)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimStateL, carryOverSimStateN, mergeSelections, on, openSelection, setAttributes, setLinks, setNodes, simulationHandle, start, stop, swizzleLinks, updateJoin)
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
@@ -94,11 +94,15 @@ svgAttrs sim w h = [ viewBox (-w / 2.1) (-h / 2.05) w h
 
 -- | recipe for this force layout graph
 initialize :: forall m.
-  Bind m => MonadEffect m => SimulationM D3Selection_ m => SelectionM D3Selection_ m => MonadState Spago.State m => m Unit
+  Bind m =>
+  MonadEffect m =>
+  SimulationM D3Selection_ m =>
+  SelectionM D3Selection_ m =>
+  m { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
 initialize = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
-  sim <- simulationHandle -- needed for click handler to stop / start simulation
-  root <- attach "div.svg-container" -- typeclass here determined by D3Selection_ in SimulationM
+  sim   <- simulationHandle -- needed for click handler to stop / start simulation
+  root  <- attach "div.svg-container" -- typeclass here determined by D3Selection_ in SimulationM
 
   svg   <- appendTo root Svg (svgAttrs sim w h) 
   inner <- appendTo svg  Group []
@@ -113,26 +117,22 @@ initialize = do
   nodesGroup <- appendTo inner Group [ classed "nodes" ]
   linksGroup <- appendTo inner Group [ classed "links" ]
 
-  -- we could just return these, no need to cache them (and in simpler apps 
-  -- could instead return the update as a lambda with these selections baked in)
-  modifying (_staging <<< _enterselections <<< _nodes) (const $ Just nodesGroup) 
-  modifying (_staging <<< _enterselections <<< _links) (const $ Just linksGroup)
+  pure { nodes: Just nodesGroup, links: Just linksGroup }
   
 updateSimulation :: forall m d r id. 
   Eq id =>
   Bind m => 
   MonadEffect m =>
-  MonadState Spago.State m =>
   SelectionM D3Selection_ m =>
   SimulationM D3Selection_ m =>
   (Staging D3Selection_ d r id) ->
   { circle :: Array SelectionAttribute, labels :: Array SelectionAttribute } -> 
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
+  stop
   node                  <- openSelection nodesGroup "g"    -- this call and updateJoin and append all have to match FIX THIS
   link                  <- openSelection linksGroup "line" -- this call and updateJoin and append all have to match FIX THIS
   -- this will change all the object refs so a defensive copy is needed if join is to work
-  simulationStop
   mergedNodeData        <- carryOverSimStateN node staging.rawdata keyIsID_ 
   mergedLinkData        <- carryOverSimStateL link staging.rawdata keyIsID_ 
   swizzledLinks         <- swizzleLinks mergedLinkData mergedNodeData keyIsID_ -- the key function here is for the SOURCE and TARGET, not the link itself
@@ -173,7 +173,7 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
     Step mergedNodeSelection [ transform' datum_.translateNode ]
   addTickFunction "links" $
     Step mergedLinkSelection [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
-  simulationStart -- everything should be teed up to kick off again
+  start
 
 -- alternate path, should never be used, if we can't match the selections
 updateSimulation _ _ = pure unit -- something's gone badly wrong, one or both selections are missing

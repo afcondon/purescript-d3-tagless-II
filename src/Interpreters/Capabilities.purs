@@ -49,7 +49,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   removeAllForces       ::                m Unit
   addForces             :: Array Force -> m Unit
   addForce              :: Force       -> m Unit
-  toggleForceByLabel    :: Label            -> m Unit
+  toggleForceByLabel    :: Label       -> m Unit
   setForcesByLabel      :: ForceConfigLists -> m Unit
   enableOnlyTheseForces :: Array Label -> m Unit
 
@@ -58,7 +58,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   carryOverSimStateN :: forall d r id. selection -> RawData d r id -> (Datum_ -> Index_) ->  m (Array (D3_SimulationNode d))
   
   -- REVIEW probably we can actually model the simulation merge bit analogously to the swizzling for links?
-  setNodes :: forall d.      Array (D3_SimulationNode d) -> m Unit
+  setNodes :: forall d.   Array (D3_SimulationNode d) -> m Unit
   setLinks :: forall d r. Array (D3LinkSwizzled (D3_SimulationNode d) r) -> m Unit
   -- should be able to merge carryOverSimStateL and swizzleLinks (and possibly carryOverSimStateN)
   carryOverSimStateL :: forall d r id. (Eq id) => selection -> RawData d r id -> (Datum_ -> Index_) ->  m (Array (D3Link id r))

@@ -13,8 +13,8 @@ import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (pinNamedNode_, pinTreeNode_, unpinNode_)
 import D3.Simulation.Functions (simulationStart, simulationStop)
 import D3.Simulation.Types (SimVariable(..), _nodedata, initialSimulationState)
-import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, toggleForceByLabel)
-import D3Tagless.Instance.Simulation (runEffectSimulation)
+import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, openSelection, setConfigVariable, toggleForceByLabel)
+import D3Tagless.Instance.Simulation (evalEffectSimulation, runEffectSimulation)
 import Data.Array (filter)
 import Data.Either (hush)
 import Data.Lens (modifying, over, set, use, (%=))
@@ -27,7 +27,7 @@ import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forces, gridForceSettings, packageForceSettings, treeForceSettings)
 import Stories.Spago.HTML (render)
-import Stories.Spago.State (State, _activeForces, _cssClass, _d3Simulation, _model, _staging, _stagingLinks, _stagingNodes)
+import Stories.Spago.State (State, _activeForces, _cssClass, _d3Simulation, _enterselections, _links, _model, _nodes, _staging, _stagingLinks, _stagingNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -49,16 +49,22 @@ component = H.mkComponent
     , simulation: initialSimulationState 1 -- TODO replace number with unit when all working satisfactorily 
   }
 
-handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
+handleAction :: forall m. 
+  Bind m =>
+  MonadAff m =>
+  MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
 
   Initialize -> do    -- TODO think we actually don't want to be doing anything here until the component is shown
     (maybeModel :: Maybe SpagoModel) <- H.liftAff getModel
     let _ = trace { spago: "initialize" } \_ -> unit
-    modifying _model (const maybeModel)
-    runEffectSimulation Graph.initialize -- should result in the "enter" selections being in the simulation
-    runEffectSimulation (addForces forces)
+    _model %= (const maybeModel)
+    runEffectSimulation (addForces forces) -- NB these are all disabled initially
+    openSelections <- evalEffectSimulation Graph.initialize -- should result in the "enter" selections being in the simulation
+    (_staging <<< _enterselections <<< _nodes) %= (const $ openSelections.nodes) 
+    (_staging <<< _enterselections <<< _links) %= (const $ openSelections.links)
+    
     -- handleAction $ Scene PackageGraph
 
   Finalize -> pure unit
@@ -73,27 +79,25 @@ handleAction = case _ of
     unpinActiveNodes
     -- everything from here on down should be factorable out???
     staging <- use _staging
-    forces  <- use _activeForces
-    simulationStop
     runEffectSimulation $ Graph.updateSimulation staging graphSceneAttributes
+
+    forces  <- use _activeForces
     runEffectSimulation $ enableOnlyTheseForces forces
-    simulationStart
 
   Scene PackageGraph -> do
     setCssEnvironment "graph"
     -- runEffectSimulation $ removeNamedSelection "treelinksSelection"
+    -- runEffectSimulation $ uniformlyDistributeNodes -- FIXME
     stageLinks isP2P_Link
     stageNodes isPackage
     setActiveForces packageForceSettings
     unpinActiveNodes
-    -- runEffectSimulation $ uniformlyDistributeNodes -- FIXME
 
     staging <- use _staging
-    forces  <- use _activeForces
-    simulationStop
     runEffectSimulation $ Graph.updateSimulation staging graphSceneAttributes
+
+    forces  <- use _activeForces
     runEffectSimulation $ enableOnlyTheseForces forces
-    simulationStart
 
   Scene (ModuleTree _) -> do
     setCssEnvironment "tree"
@@ -104,48 +108,38 @@ handleAction = case _ of
     pinTreeNodes -- side-effect, because if we make _new_ nodes the links won't be pointing to them
 
     staging <- use _staging
-    forces  <- use _activeForces
-    simulationStop
     runEffectSimulation $ Graph.updateSimulation staging treeSceneAttributes
+
+    forces  <- use _activeForces
     runEffectSimulation $ enableOnlyTheseForces forces
-    simulationStart
     
-  ToggleForce label -> do
-    simulationStop
-    runEffectSimulation $ toggleForceByLabel label
-    simulationStart
+  ToggleForce label -> runEffectSimulation $ toggleForceByLabel label
 
   Filter (LinkFilter x) -> do
     stageLinks x
 
     staging <- use _staging
-    forces  <- use _activeForces
-    simulationStop
     runEffectSimulation $ Graph.updateSimulation staging graphSceneAttributes
+
+    forces  <- use _activeForces
     runEffectSimulation $ enableOnlyTheseForces forces
-    simulationStart
 
   Filter (NodeFilter x) -> do
     stageNodes x
-
     staging <- use _staging
-    forces  <- use _activeForces
-    simulationStop
     runEffectSimulation $ Graph.updateSimulation staging graphSceneAttributes
+    -- forces  <- use _activeForces
     -- runEffectSimulation $ enableOnlyTheseForces forces
-    simulationStart
 
   ChangeStyling style -> _cssClass %= (const style) -- modify_ (\s -> s { svgClass = style })
 
-  ChangeSimConfig c -> do
-    simulationStart
-    runEffectSimulation $ setConfigVariable c
+  ChangeSimConfig c -> runEffectSimulation $ setConfigVariable c
 
   StartSim -> do
-    simulationStart
     runEffectSimulation $ setConfigVariable $ AlphaTarget 1.0
+    simulationStart
 
-  StopSim -> runEffectSimulation (setConfigVariable $ Alpha 0.0)
+  StopSim -> runEffectSimulation $ setConfigVariable $ Alpha 0.0
 
 setCssEnvironment :: forall m. MonadState State m => String -> m Unit
 setCssEnvironment string = _cssClass %= (const string)

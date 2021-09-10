@@ -15,7 +15,8 @@ import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
 import Type.Proxy (Proxy(..))
   
-type State = {
+type State = Record (StateRow)
+type StateRow = (
   -- governing class on the SVG means we can completely change the look of the vis (and not have to think about this at D3 level)
     svgClass     :: String 
   -- just a simple list of the names of the forces that are meant to be active
@@ -27,7 +28,7 @@ type State = {
   , staging      :: Staging D3Selection_ SpagoDataRow SpagoLinkData NodeID
   -- the simulationState manages the Nodes, Links, Forces, Selections, Ticks & simulation parameters
   , simulation   :: D3SimulationState_
-}
+)
 
 _model :: forall a r. Lens' { model :: a | r } a
 _model = prop (Proxy :: Proxy "model")
