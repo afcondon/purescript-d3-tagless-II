@@ -338,17 +338,19 @@ exports.putForceInSimulationWithFilter_ = simulation => label => filterFn => for
 exports.pinNode_ = fx => fy => node => {
   node.fx = fx
   node.fy = fy
+  return node
 }
 exports.pinNamedNode_ = name => fx => fy => node => {
   if (node.name === name) {
     node.fx = fx
     node.fy = fy
   }
+  return node
 }
-exports.pinTreeNode_ = node => { node.fx = node.treeX; node.fy = node.treeY }
-exports.setInSimNodeFlag_ = node => { node.inSim = true } 
-exports.unsetInSimNodeFlag_ = node => { node.inSim = false }
-exports.unpinNode_ = node => { delete node.fx; delete node.fy }
+exports.pinTreeNode_ = node => { node.fx = node.treeX; node.fy = node.treeY; return node } // if treeX/Y is null, no harm!
+exports.setInSimNodeFlag_ = node => { node.inSim = true; return node } 
+exports.unsetInSimNodeFlag_ = node => { node.inSim = false; return node  }
+exports.unpinNode_ = node => { node.fx = null; node.fy = null; return node }
 exports.setPositionToNaN_ = nodes => {
   for (let index = 0; index < nodes.length; index++) {
     nodes[index].x = NaN;

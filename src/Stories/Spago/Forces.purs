@@ -11,24 +11,7 @@ import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
 
-gridForceSettings :: Array String
-gridForceSettings = [ "packageGrid", "clusterx", "clustery", "collide1" ]
-
-gridForceSettings2 :: Array String
-gridForceSettings2 = [ "center", "collide2", "x", "y" ]
-
-packageForceSettings :: Array String
-packageForceSettings = [ "centerNamedNode", "center", "collide2", "charge2", "links"]
-
-treeForceSettings :: Array String
-treeForceSettings = ["links", "center", "charge1", "collide1" ]
-
--- these are the force settings for the force-layout radial tree in Observables
--- .force("link", d3.forceLink(links).id(d => d.id).distance(0).strength(1))
--- .force("charge", d3.forceManyBody().strength(-50))
--- .force("x", d3.forceX())
--- .force("y", d3.forceY());
-
+-- | table of all the forces that are used in the Spago component
 forces :: Array Force
 forces = [
         createForce "collide1"     (RegularForce ForceCollide)  allNodes [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
@@ -60,4 +43,24 @@ forces = [
     centerXY _ _ = { x: 0.0, y: 0.0 }
     selectivelyApplyForce :: (Datum_ -> Boolean) -> String -> Maybe ForceFilter
     selectivelyApplyForce filterFn description = Just $ ForceFilter description filterFn
+
+-- | NOTES
+
+-- gridForceSettings :: Array String
+-- gridForceSettings = [ "packageGrid", "clusterx", "clustery", "collide1" ]
+
+-- gridForceSettings2 :: Array String
+-- gridForceSettings2 = [ "center", "collide2", "x", "y" ]
+
+-- packageForceSettings :: Array String
+-- packageForceSettings = [ "centerNamedNode", "center", "collide2", "charge2", "links"]
+
+-- treeForceSettings :: Array String
+-- treeForceSettings = ["links", "center", "charge1", "collide1" ]
+
+-- these are the force settings for the force-layout radial tree in Observables
+-- .force("link", d3.forceLink(links).id(d => d.id).distance(0).strength(1))
+-- .force("charge", d3.forceManyBody().strength(-50))
+-- .force("x", d3.forceX())
+-- .force("y", d3.forceY());
 

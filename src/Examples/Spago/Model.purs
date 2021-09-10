@@ -187,8 +187,8 @@ datum_ = {
 }
 
 -- type LinkFilter = forall r. D3_SimulationNode r -> Boolean
-noFilter :: SpagoSimNode -> Boolean
-noFilter = const true
+allNodes :: SpagoSimNode -> Boolean
+allNodes = const true
 isPackage :: SpagoSimNode -> Boolean
 isPackage (D3SimNode d) =
   case d.nodetype of

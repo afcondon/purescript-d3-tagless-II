@@ -150,12 +150,11 @@ foreign import stopSimulation_         :: D3Simulation_ -> Unit
 foreign import setInSimNodeFlag_     :: forall d. D3_SimulationNode d -> Unit
 foreign import unsetInSimNodeFlag_   :: forall d. D3_SimulationNode d -> Unit
 
--- following functions modify the node and return it
--- TODO fix all the FFI returns for these!!!
-foreign import pinNode_              :: Number -> Number -> Datum_ -> Datum_
-foreign import pinNamedNode_         :: String -> Number -> Number -> Datum_ -> Datum_
-foreign import pinTreeNode_          :: Datum_ -> Datum_ -- modifies fx/fy
-foreign import unpinNode_            :: Datum_ -> Datum_ -- deletes fx/fy if present
+-- following functions modify the node and return it - meant to be used on staged data which will then be re-entered to sim
+foreign import pinNode_              :: forall d. Number -> Number -> D3_SimulationNode d -> D3_SimulationNode d
+foreign import pinNamedNode_         :: forall d. String -> Number -> Number -> D3_SimulationNode d -> D3_SimulationNode d
+foreign import pinTreeNode_          :: forall d. D3_SimulationNode d -> D3_SimulationNode d -- modifies fx/fy
+foreign import unpinNode_            :: forall d. D3_SimulationNode d -> D3_SimulationNode d -- seet fx/fy to null
 foreign import setPositionToNaN_     :: Array Datum_ -> Unit
 
 -- NB mutating function

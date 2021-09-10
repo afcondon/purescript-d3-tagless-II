@@ -279,7 +279,6 @@ updateTreeLinks links layout = do
 -- removeNamedSelection :: forall m row. 
 --   Bind m => 
 --   MonadEffect m =>
---   MonadState { simulation :: D3SimulationState_ | row } m =>
 --   SelectionM D3Selection_ m =>
 --   SimulationM D3Selection_ m =>
 --   String -> 

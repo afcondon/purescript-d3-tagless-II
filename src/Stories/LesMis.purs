@@ -16,7 +16,7 @@ import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Capabilities (addForces, removeAllForces, setConfigVariable, setForcesByLabel)
-import D3Tagless.Instance.Simulation (runEffectSimulation)
+import D3Tagless.Instance.Simulation (runD3SimM)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
@@ -172,10 +172,10 @@ handleAction = case _ of
     let graph = readGraphFromFileContents response
 
     state <- H.get
-    runEffectSimulation $ addForces state.forces
-    runEffectSimulation $ LesMis.graphScript graph "div.svg-container"
+    runD3SimM $ addForces state.forces
+    runD3SimM $ LesMis.graphScript graph "div.svg-container"
 
-  Finalize ->  runEffectSimulation removeAllForces
+  Finalize ->  runD3SimM removeAllForces
 
   ToggleManyBody -> do
     state <- H.get
@@ -183,8 +183,8 @@ handleAction = case _ of
                       SmallRadius -> BigRadius
                       BigRadius   -> SmallRadius
     case newSetting of
-      SmallRadius -> runEffectSimulation $ setForcesByLabel { enable: ["collision"], disable: ["collision20"]} 
-      BigRadius   -> runEffectSimulation $ setForcesByLabel { enable: ["collision20"], disable: ["collision"]} 
+      SmallRadius -> runD3SimM $ setForcesByLabel { enable: ["collision"], disable: ["collision20"]} 
+      BigRadius   -> runD3SimM $ setForcesByLabel { enable: ["collision20"], disable: ["collision"]} 
     modify_ (\s -> s { manybodySetting = newSetting })
     simulationStart
 
@@ -194,12 +194,12 @@ handleAction = case _ of
                       LinksOn  -> LinksOff
                       LinksOff -> LinksOn
     case newSetting of
-      LinksOn  -> runEffectSimulation $ setForcesByLabel { enable: [linksForceName], disable: []} 
-      LinksOff -> runEffectSimulation $ setForcesByLabel { enable: [], disable: [linksForceName]} 
+      LinksOn  -> runD3SimM $ setForcesByLabel { enable: [linksForceName], disable: []} 
+      LinksOff -> runD3SimM $ setForcesByLabel { enable: [], disable: [linksForceName]} 
     modify_ (\s -> s { linksSetting = newSetting })
     simulationStart
 
-  Freeze  -> runEffectSimulation $ setConfigVariable $ Alpha 0.0
+  Freeze  -> runD3SimM $ setConfigVariable $ Alpha 0.0
   Reheat  -> simulationStart
 
 

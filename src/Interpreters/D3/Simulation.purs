@@ -32,12 +32,12 @@ exec_D3M_Simulation simulation (D3SimM state_T) = liftA1 snd $ runStateT state_T
 eval_D3M_Simulation :: forall a row. { simulation :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect a
 eval_D3M_Simulation simulation (D3SimM state_T) = liftA1 fst $ runStateT state_T simulation
 
-runEffectSimulation :: forall m a row.
+runD3SimM :: forall m a row.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
   MonadEffect m =>
   D3SimM row D3Selection_ a -> m Unit
-runEffectSimulation state_T = do
+runD3SimM state_T = do
     state <- get
     state' <- liftEffect $ exec_D3M_Simulation state state_T
     modify_ (\_ -> state')
