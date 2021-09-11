@@ -9,7 +9,7 @@ import D3.Simulation.Forces (showType)
 import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), showForceFilter)
 import D3Tagless.Block.Card as Card
 import Data.Array (length, (:))
-import Data.Lens (view)
+import Data.Lens (over, view)
 import Data.Map (toUnfoldable)
 import Data.Tuple (snd)
 import Halogen (ComponentSlot)
@@ -23,7 +23,7 @@ import Ocelot.Block.Format as Format
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
-import Stories.Spago.State (State, _stagingLinks, _stagingNodes)
+import Stories.Spago.State (State, _stagingForces, _stagingLinks, _stagingNodes)
 import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
 
@@ -39,7 +39,7 @@ renderSimState state =
     , HH.p_
         [ HH.text $ "node count:" <> show (length $ view _stagingNodes state)] 
     , HH.p_
-        [ HH.text $ "initial forces:" <> show state.activeForces ] 
+        [ HH.text $ "initial forces:" <> show (view _stagingForces state) ] 
     ]
 
 renderSimControls :: forall p. State -> HH.HTML p Action

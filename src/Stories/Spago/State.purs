@@ -5,22 +5,22 @@ import Prelude
 import D3.Data.Types (D3Selection_)
 import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode)
-import D3.Node (NodeID)
+import D3.Node (D3_SimulationNode(..), NodeID)
 import D3.Simulation.Types (D3SimulationState_)
 import D3Tagless.Capabilities (Staging)
-import Data.Lens (Lens', _Just)
+import Data.Array (filter)
+import Data.Lens (class Wander, Lens', _Just, filtered, over, preview, traversed, view)
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
+import Data.Traversable (class Traversable)
 import Type.Proxy (Proxy(..))
   
 type State = Record (StateRow)
 type StateRow = (
   -- governing class on the SVG means we can completely change the look of the vis (and not have to think about this at D3 level)
     svgClass     :: String 
-  -- just a simple list of the names of the forces that are meant to be active
-  , activeForces :: Array String
   -- the model should actually be a component, probably a hook so that it can be constructed by this component and not be a Maybe
   , model        :: Maybe SpagoModel 
   -- we'll filter nodes/links to staging and then, if staging is valid (has selections) we will put this staging data in the simulation
@@ -39,11 +39,54 @@ _staging = prop (Proxy :: Proxy "staging")
 _cssClass :: forall a r. Lens' { svgClass :: a | r } a
 _cssClass = prop (Proxy :: Proxy "svgClass")
 
-_activeForces :: forall a r. Lens' { activeForces :: a | r } a
-_activeForces = prop (Proxy :: Proxy "activeForces")
-
 _d3Simulation :: forall a r. Lens' { simulation :: a | r} a
 _d3Simulation = prop (Proxy :: Proxy "simulation")
+
+chooseSimNodes :: (SpagoSimNode -> Boolean) -> State -> Maybe (Array SpagoSimNode)
+chooseSimNodes fn state = filter fn <$> preview _modelNodes state
+
+pred :: SpagoSimNode -> Boolean
+pred (D3SimNode d) = d.x == 1.0
+
+-- awn :: forall t p. Traversable t => Wander p => p SpagoSimNode SpagoSimNode -> p (t SpagoSimNode) (t SpagoSimNode)
+bel :: forall p. Wander p => p SpagoSimNode SpagoSimNode -> p (Array SpagoSimNode) (Array SpagoSimNode)
+bel = traversed <<< filtered pred
+
+-- cep = over bel []
+
+-- obviously this can't work, any or all would work, filter not so much
+-- fPred :: Array SpagoSimNode -> Boolean
+-- fPred arr = filter pred arr
+
+foo :: forall p. Strong p => Choice p => p (Array  SpagoSimNode) (Array  SpagoSimNode)  -> p  State  State
+foo = _modelNodes <<< filtered (const true :: Array SpagoSimNode -> Boolean)
+
+dop = over (_modelNodes <<< traversed) (\(D3SimNode d) -> D3SimNode d { x = 0.0 })
+
+erg ::  (SpagoSimNode -> SpagoSimNode) -> State -> State 
+erg = over (_modelNodes <<< traversed <<< filtered pred)
+
+-- foo' :: forall p. Strong p => Choice p => p (Array  SpagoSimNode) (Array  SpagoSimNode)  -> p  State  State
+-- foo' = _stagingNodes <<< bel
+
+quux :: forall p. Choice p => p SpagoSimNode SpagoSimNode -> p SpagoSimNode SpagoSimNode
+quux = filtered pred
+
+-- foo' :: forall p. Strong p => Choice p => p (Array  SpagoSimNode) (Array  SpagoSimNode)  -> p  State  State
+-- foo' = _stagingNodes <<< (filtered pred)
+
+-- foo' :: forall p. Strong p => Choice p => p (Array  SpagoSimNode) (Array  SpagoSimNode)  -> p  State  State
+-- foo' = (filtered ) <<< _modelNodes
+
+-- foo' :: forall p. Strong p => Choice p => (SpagoSimNode -> Boolean) -> p (Array  SpagoSimNode) (Array  SpagoSimNode)  -> p  State  State
+-- foo' fn = _modelNodes <<< filtered fn
+
+chooseSimNodes' :: (SpagoSimNode -> Boolean) -> State -> Maybe (Array SpagoSimNode)
+chooseSimNodes' fn state = preview foo state
+
+chooseSimLinks :: (SpagoGraphLinkID -> Boolean) -> State -> Maybe (Array SpagoGraphLinkID)
+chooseSimLinks fn state = filter fn <$> preview _modelLinks state
+
 
 _modelNodes :: forall p. 
      Strong p
@@ -73,18 +116,24 @@ _stagingLinks :: forall p.
   -> p State State
 _stagingLinks = _staging <<< _rawdata <<< _links
 
+_stagingForces :: forall p. 
+     Strong p
+  => Choice p
+  => p (Array String) (Array String)
+  -> p State State
+_stagingForces = _staging <<< _forces
+
 _nodes :: forall a r. Lens' { nodes :: a | r } a
 _nodes = prop (Proxy :: Proxy "nodes")
 
 _links :: forall a r. Lens' { links :: a | r } a
 _links = prop (Proxy :: Proxy "links")
 
+_forces :: forall a r. Lens' { forces :: a | r } a
+_forces = prop (Proxy :: Proxy "forces")
+
 _rawdata :: forall a r. Lens' { rawdata :: a | r } a
 _rawdata = prop (Proxy :: Proxy "rawdata")
 
 _enterselections :: forall a r. Lens' { selections :: a | r } a
 _enterselections = prop (Proxy :: Proxy "selections")
-
--- _selections' :: Lens' State { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
--- _selections' = _Newtype <<< prop (Proxy :: Proxy "selections")
-

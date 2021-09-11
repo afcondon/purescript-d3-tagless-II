@@ -4,21 +4,24 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, get, modify_)
+import Control.Monad.State (class MonadState, get)
 import D3.Examples.Spago.Draw (graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, convertFilesToGraphModel, isPackage, isUsedModule, allNodes)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, allNodes, convertFilesToGraphModel, isPackage, isUsedModule)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (pinTreeNode_, unpinNode_)
+import D3.Node (D3_SimulationNode(..), NodeID)
 import D3.Simulation.Types (SimVariable(..), initialSimulationState)
-import D3Tagless.Capabilities (addForces, enableOnlyTheseForces, setConfigVariable, start, toggleForceByLabel)
+import D3Tagless.Capabilities (addForces, setConfigVariable, start, toggleForceByLabel)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runD3SimM)
 import Data.Array (filter)
 import Data.Either (hush)
-import Data.Lens (assign, modifying, over, set, traversed, use, (%=))
+import Data.Lens (class Wander, filtered, over, traversed, use, view, (%=))
 import Data.Map as M
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Profunctor.Choice (class Choice)
+import Data.Profunctor.Strong (class Strong)
 import Debug (trace)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
@@ -26,7 +29,7 @@ import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forces)
 import Stories.Spago.HTML (render)
-import Stories.Spago.State (State, _activeForces, _cssClass, _enterselections, _links, _model, _nodes, _staging, _stagingLinks, _stagingNodes)
+import Stories.Spago.State (State, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingForces, _stagingLinks, _stagingNodes, chooseSimNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -42,9 +45,8 @@ component = H.mkComponent
   initialState :: State
   initialState = { 
       svgClass: "cluster"
-    , activeForces: []
     , model: Nothing
-    , staging: { selections: { nodes: Nothing, links: Nothing }, rawdata: { nodes: [], links: [] }}
+    , staging: { selections: { nodes: Nothing, links: Nothing }, rawdata: { nodes: [], links: [] }, forces: [] }
     , simulation: initialSimulationState 1 -- TODO replace number with unit when all working satisfactorily 
   }
 
@@ -75,14 +77,10 @@ handleAction = case _ of
     -- runD3SimM $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     setNodesLinksForces { chooseLinks: isM2P_Link
                         , chooseNodes: allNodes
-                        , forceNames: [ "packageGrid", "clusterx", "clustery", "collide1" ] }
+                        , forces: [ "packageGrid", "clusterx", "clustery", "collide1" ] }
     _stagingNodes <<< traversed %= unpinNode_
-
     staging <- use _staging
     runD3SimM $ Graph.updateSimulation staging graphSceneAttributes
-
-    forces  <- use _activeForces
-    runD3SimM $ enableOnlyTheseForces forces
 
   Scene PackageGraph -> do
     _cssClass %= (const "graph")
@@ -90,27 +88,21 @@ handleAction = case _ of
     -- runD3SimM $ uniformlyDistributeNodes -- FIXME
     setNodesLinksForces { chooseLinks: isP2P_Link
                         , chooseNodes: isPackage
-                        , forceNames: [ "centerNamedNode", "center", "collide2", "charge2", "links"] }
+                        , forces: [ "centerNamedNode", "center", "collide2", "charge2", "links"] }
     _stagingNodes <<< traversed %= unpinNode_
     staging <- use _staging
     runD3SimM $ Graph.updateSimulation staging graphSceneAttributes
 
-    forces  <- use _activeForces
-    runD3SimM $ enableOnlyTheseForces forces
-
   Scene (ModuleTree _) -> do
     _cssClass %= (const "tree")
     -- runD3SimM $ removeNamedSelection "graphlinksSelection"
-    setNodesLinksForces { forceNames: ["links", "center", "charge1", "collide1" ]
+    setNodesLinksForces { forces: ["links", "center", "charge1", "collide1" ]
                         , chooseNodes: isUsedModule
                         , chooseLinks: isM2M_Tree_Link }
     _stagingNodes <<< traversed %= pinTreeNode_ -- TODO replace this slighly hacky idea with Custom Force
    
     staging <- use _staging
     runD3SimM $ Graph.updateSimulation staging treeSceneAttributes
-
-    forces  <- use _activeForces
-    runD3SimM $ enableOnlyTheseForces forces
     
   ToggleForce label -> runD3SimM $ toggleForceByLabel label
 
@@ -135,32 +127,24 @@ handleAction = case _ of
   StopSim -> runD3SimM $ setConfigVariable $ Alpha 0.0
 
 chooseForces :: forall m. MonadState State m => Array String -> m Unit
-chooseForces forces = modify_ $ set _activeForces forces
+chooseForces forces = _stagingForces %= (const forces)
 
--- TODO modifying _linksInSim (filtered _linksInModel)
+-- filter links from Maybe Model into Staging
 chooseLinks :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
 chooseLinks filterFn = do
   state <- get
-  case state.model of
-    Nothing -> pure unit
-    Just m  -> do
-      let filteredLinks = filter filterFn m.links
-      _stagingLinks %= (const filteredLinks)
+  _stagingLinks %= const (filter filterFn $ view _modelLinks state)
 
--- TODO modifying _nodesInSim (filtered _nodesInModel)
+-- filter nodes from Maybe Model into Staging
 chooseNodes :: forall m. MonadState State m => (SpagoSimNode -> Boolean) -> m Unit
 chooseNodes filterFn = do
   state <- get
-  case state.model of
-    Nothing -> pure unit
-    Just m  -> do
-      let filteredNodes = filter filterFn m.nodes
-      _stagingNodes %= (const filteredNodes)
+  _stagingNodes %= const (filter filterFn $ view _modelNodes state)
 
-type SpagoConfigRecord = {
-    chooseNodes  :: (SpagoSimNode -> Boolean)
-  , chooseLinks  :: (SpagoGraphLinkID -> Boolean)
-  , forceNames   :: Array String
+type SpagoConfigRecord = { -- convenience type to hold filter functions for nodes & links and list of forces to activate
+    chooseNodes :: (SpagoSimNode -> Boolean)
+  , chooseLinks :: (SpagoGraphLinkID -> Boolean)
+  , forces      :: Array String
 }
 
 setNodesLinksForces :: forall m.
@@ -169,14 +153,9 @@ setNodesLinksForces :: forall m.
   m Unit
 setNodesLinksForces config = do
   state <- get
-  case state.model of
-    Nothing -> pure unit
-    Just m  -> do
-      let filteredNodes = filter config.chooseNodes m.nodes
-      _stagingNodes %= (const filteredNodes)
-      let filteredLinks = filter config.chooseLinks m.links
-      _stagingLinks %= (const filteredLinks)
-  _activeForces %= (const config.forceNames)
+  _stagingLinks  %= const (filter config.chooseLinks $ view _modelLinks state)
+  _stagingNodes  %= const (filter config.chooseNodes $ view _modelNodes state)
+  _stagingForces %= (const config.forces)
 
 -- readModelData will try to build a model from files and to derive a dependency tree from Main
 -- the dependency tree will contain all nodes reachable from Main but NOT all links

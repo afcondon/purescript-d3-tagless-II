@@ -81,6 +81,9 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- this can't easily be solved until / unless D3 is replaced with something else
   simulationHandle :: m D3Simulation_
 
+-- RawData type exists to clean up types of carryOverSimState functions and maybe can just fold into Staging if 
+-- Simulation capability can wrap up, ie hide, the complexity around updates of running simulations and the 
+-- corresponding need for copying data from existing selections without losing simulation position/velocity information
 type RawData d r id = {
   nodes :: Array (D3_SimulationNode d)
 , links :: Array (D3Link id r) 
@@ -91,4 +94,6 @@ type Staging selection d r id = {
     , links :: Maybe selection
     }
   , rawdata :: RawData d r id
+    -- just a simple list of the names of the forces that are meant to be active
+  , forces :: Array String
 }
