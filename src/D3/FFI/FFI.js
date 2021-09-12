@@ -83,11 +83,11 @@ exports.forceY_ = () => d3.forceY()
 exports.getLinksFromForce_ = linkForce => linkForce.links()
 exports.getNodes_ = simulation => simulation.nodes()
 exports.keyIsID_ = d => { 
-  console.log(`looking up the id of node: ${d.id}`);
+  // console.log(`looking up the id of node: ${d.id}`);
   return d.id;
 }
 exports.keyIsSourceTarget_ = d => { 
-  console.log(`looking up the id of node: ${[d.source, d.target]}`);
+  // console.log(`looking up the id of node: ${[d.source, d.target]}`);
   return [d.source, d.target];
 }
 exports.setAlpha_ = simulation => alpha => simulation.alpha(alpha)
@@ -273,28 +273,25 @@ exports.lookupForceByName_ = simulation => name => {
   return lookup;
 }
 exports.removeFixForceXY_ = simulation => filterFn => {
-  let nodes = simulation.nodes()
-  for (let index = 0; index < nodes.length; index++) {
-    if (filterFn(nodes[index])) { // only fix nodes that this thing applies to
-      nodes[index].fx = null;
-      nodes[index].fy = null;
+  let filteredNodes = simulation.nodes().filter(filterFn)
+  for (let index = 0; index < filteredNodes.length; index++) {
+      // console.log(`removing FixForceXY from node: ${filteredNodes[index].id}`);
+      filteredNodes[index].fx = null;
+      filteredNodes[index].fy = null;
     }
-  }
 }
 exports.removeFixForceX_ = simulation => filterFn => {
-  let nodes = simulation.nodes()
-  for (let index = 0; index < nodes.length; index++) {
-    if (filterFn(nodes[index])) { // only fix nodes that this thing applies to
-      nodes[index].fx = null;
-    }
+  let filteredNodes = simulation.nodes().filter(filterFn)
+  for (let index = 0; index < filteredNodes.length; index++) { // TODO do this with map
+    // console.log(`removing FixForceX from node: ${filteredNodes[index].id}`);
+    filteredNodes[index].fx = null;
   }
 }
 exports.removeFixForceY_ = simulation => filterFn => {
-  let nodes = simulation.nodes()
-  for (let index = 0; index < nodes.length; index++) {
-    if (filterFn(nodes[index])) { // only unfix nodes that this thing applies to
-      nodes[index].fy = null;
-    }
+  let filteredNodes = simulation.nodes().filter(filterFn)
+  for (let index = 0; index < filteredNodes.length; index++) {
+      // console.log(`removing FixForceY from node: ${filteredNodes[index].id}`);
+      filteredNodes[index].fy = null;
   }
 }
 exports.applyFixForceInSimulationXY_ = simulation => label => fn => filterFn => {

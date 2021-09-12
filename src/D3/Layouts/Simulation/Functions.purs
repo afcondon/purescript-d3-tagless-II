@@ -15,7 +15,7 @@ import D3Tagless.Capabilities (RawData)
 import Data.Array (elem, filter, intercalate)
 import Data.Array as A
 import Data.Foldable (traverse_)
-import Data.Lens (modifying, set, use, view)
+import Data.Lens (modifying, set, use, view, (%=))
 import Data.Lens.At (at)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -82,8 +82,7 @@ simulationDisableForcesByLabel :: forall m row.
 simulationDisableForcesByLabel labels = do
   handle <- use (_d3Simulation <<< _handle)
   forces <- use (_d3Simulation <<< _forces)
-  let updatedForces = (disableByLabels handle labels) <$> forces -- REVIEW can't we traversed (optic) this update?
-  modifying (_d3Simulation <<< _forces) (const updatedForces)
+  (_d3Simulation <<< _forces) %= (const $ (disableByLabels handle labels) <$> forces)
 
 simulationEnableOnlyTheseForces :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>

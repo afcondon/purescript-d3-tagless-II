@@ -10,6 +10,7 @@ import D3.Simulation.Types (FixForceType(..), Force, ForceFilter(..), ForceType(
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
+import Debug (spy)
 
 -- | table of all the forces that are used in the Spago component
 forces :: Array Force
@@ -23,12 +24,12 @@ forces = [
       , createForce "charge2"      (RegularForce ForceManyBody) allNodes [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 100.0 ]
       -- the "xy" cluster force lacks any sugar for setting via a PointXY instead of individually (seems like it'd be worth writing one)
       -- , createForce "clusterxy"    (RegularForce ForceX)        allNodes [ F.strength 0.2, F.x (\d i -> cluster2Point i) ]
-      , createForce "clusterx"     (RegularForce ForceX)        allNodes [ F.strength 0.2, F.x (\(d :: Datum_) i -> _.x $ cluster2Point i) ] -- TODO d:: Datum_ is ugly but needed for typeclass
-      , createForce "clustery"     (RegularForce ForceY)        allNodes [ F.strength 0.2, F.y (\(d :: Datum_) i -> _.y $ cluster2Point i) ]
+      , createForce "clusterx"     (RegularForce ForceX)        allNodes [ F.strength 0.2, F.x (\(_ :: Datum_) i -> _.x $ cluster2Point i) ] -- TODO d:: Datum_ is ugly but needed for typeclass
+      , createForce "clustery"     (RegularForce ForceY)        allNodes [ F.strength 0.2, F.y (\(_ :: Datum_) i -> _.y $ cluster2Point i) ]
 
-      , createForce "packageGrid"     (FixForce $ ForceFixPositionXY gridXY)   (Just $ ForceFilter "packages only" datum_.isPackage) [ ] 
-      , createForce "centerNamedNode" (FixForce $ ForceFixPositionXY centerXY) (Just $ ForceFilter "src only" (\d -> (datum_.name d) == "src")) [ ] 
-      , createForce "treeNodesPinned" (FixForce $ ForceFixPositionXY (\d i -> datum_.treePoint d)) (Just $ ForceFilter "src only" (\d -> datum_.connected d)) [ ] 
+      , createForce "packageGrid"     (FixForce $ ForceFixPositionXY gridXY)   (Just $ ForceFilter "packages only" datum_.isPackage)            [ ] 
+      , createForce "centerNamedNode" (FixForce $ ForceFixPositionXY centerXY) (Just $ ForceFilter "src only"     \d -> datum_.name d == "src") [ ] 
+      , createForce "treeNodesPinned" (FixForce $ ForceFixPositionXY treeXY)   (Just $ ForceFilter "tree only"    \d -> datum_.connected d)     [ ] 
 
       , createForce "packageOrbit" (RegularForce ForceRadial)   (selectivelyApplyForce datum_.isPackage "packages only") 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 300.0 ]
@@ -42,8 +43,9 @@ forces = [
       , createForce "links" LinkForce Nothing [ F.strength 1.0, F.distance 0.0, F.numKey (toNumber <<< datum_.id) ]
       ]
   where
-    gridXY _ i = cluster2Point i
+    gridXY   _ i = spy "clusterPoint" $ cluster2Point i
     centerXY _ _ = { x: 0.0, y: 0.0 }
+    treeXY   d _ = spy "treePoint" $ datum_.treePoint d
     selectivelyApplyForce :: (Datum_ -> Boolean) -> String -> Maybe ForceFilter
     selectivelyApplyForce filterFn description = Just $ ForceFilter description filterFn
 

@@ -7,21 +7,17 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Examples.Spago.Draw (graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Draw as Graph
-import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, allNodes, convertFilesToGraphModel, isPackage, isUsedModule)
+import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Graph_Link, isM2P_Link, isP2P_Link)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, allNodes, convertFilesToGraphModel, isModule, isPackage)
 import D3.Examples.Spago.Tree (treeReduction)
-import D3.FFI (pinTreeNode_, unpinNode_)
-import D3.Node (D3_SimulationNode(..), NodeID)
 import D3.Simulation.Types (SimVariable(..), initialSimulationState)
 import D3Tagless.Capabilities (addForces, setConfigVariable, start, toggleForceByLabel)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runD3SimM)
 import Data.Array (filter)
 import Data.Either (hush)
-import Data.Lens (class Wander, filtered, over, traversed, use, view, (%=))
+import Data.Lens (use, view, (%=))
 import Data.Map as M
-import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Profunctor.Choice (class Choice)
-import Data.Profunctor.Strong (class Strong)
+import Data.Maybe (Maybe(..))
 import Debug (trace)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
@@ -29,7 +25,7 @@ import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forces)
 import Stories.Spago.HTML (render)
-import Stories.Spago.State (State, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingForces, _stagingLinks, _stagingNodes, chooseSimNodes)
+import Stories.Spago.State (State, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingForces, _stagingLinks, _stagingNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -78,7 +74,6 @@ handleAction = case _ of
     setNodesLinksForces { chooseLinks: isM2P_Link
                         , chooseNodes: allNodes
                         , forces: [ "packageGrid", "clusterx", "clustery", "collide1" ] }
-    -- _stagingNodes <<< traversed %= unpinNode_
     staging <- use _staging
     runD3SimM $ Graph.updateSimulation staging graphSceneAttributes
 
@@ -89,18 +84,15 @@ handleAction = case _ of
     setNodesLinksForces { chooseLinks: isP2P_Link
                         , chooseNodes: isPackage
                         , forces: [ "centerNamedNode", "center", "collide2", "charge2", "links"] }
-    -- _stagingNodes <<< traversed %= unpinNode_
     staging <- use _staging
     runD3SimM $ Graph.updateSimulation staging graphSceneAttributes
 
   Scene (ModuleTree _) -> do
     _cssClass %= (const "tree")
     -- runD3SimM $ removeNamedSelection "graphlinksSelection"
-    setNodesLinksForces { forces: ["links", "center", "charge1", "collide1" ]
-                        , chooseNodes: isUsedModule
-                        , chooseLinks: isM2M_Tree_Link }
-    _stagingNodes <<< traversed %= pinTreeNode_ -- TODO replace this slighly hacky idea with Custom Force
-   
+    setNodesLinksForces { forces: ["treeNodesPinned", "links", "center", "charge1", "collide2", "moduleOrbit1" ]
+                        , chooseNodes: isModule           -- show all modules, 
+                        , chooseLinks: isM2M_Graph_Link } -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
     staging <- use _staging
     runD3SimM $ Graph.updateSimulation staging treeSceneAttributes
     

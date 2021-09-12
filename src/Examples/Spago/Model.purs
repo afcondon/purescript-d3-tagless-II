@@ -108,11 +108,12 @@ datum_ = {
   , indexAndID    : \d -> (unboxD3SimNode d).name <> " " <> show (getIndexFromDatum_ d) <> " " <>  show (unboxD3SimNode d).id
   , namePos       : \d -> "(" <> show (Math.floor $ datum_.x d) <> "," <> show (Math.floor $ datum_.y d) <> ")" -- for debugging position
 
-  -- , clusterPoint  : \d -> cluster2Point (intToIndex_ $ (unboxD3SimNode d).cluster - 5) -- TODO fix this dirty hack (magic number for start of package ids)
+-- TODO clusterPoint should be cluster2Point for Packages and cluster2Point of containing package for modules
+  -- , clusterPoint  : \d -> cluster2Point -- REVIEW to be written
   -- , clusterPointX : \d -> _.x $ datum_.clusterPoint d
   -- , clusterPointY : \d -> _.y $ datum_.clusterPoint d
 
-  , treePoint     : \d -> { x: 0.0, y: 0.0 } -- fromMaybe { x: datum_.x d, y: datum_.y } $ toMaybe datum_.treeXY
+  , treePoint     : \d -> fromMaybe { x: datum_.x d, y: datum_.y d} $ toMaybe (datum_.treeXY d)
   -- , treePointX    : \d -> _.x $ datum_.treePoint d
   -- , treePointY    : \d -> _.y $ datum_.treePoint d
 
