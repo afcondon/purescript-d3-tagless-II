@@ -1,7 +1,7 @@
 module D3.Attributes.Sugar where
 
 import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), Listener, toAttr)
-import D3.Data.Types (Datum_, EasingFunction(..), MouseEvent, Transition)
+import D3.Data.Types (Datum_, EasingFunction(..), MouseEvent, Transition, PointXY)
 import D3.FFI (autoBox_)
 import D3.Selection (SelectionAttribute(..), OrderingAttribute(..))
 import Data.Array (intercalate, (:))
@@ -33,6 +33,13 @@ viewBox :: Number -> Number -> Number -> Number -> SelectionAttribute
 viewBox xo yo w h = AttrT <<< AttributeSetter "viewBox" $ toAttr vb
   where
     vb = intercalate " " $ show <$> [ xo, yo, w, h ]
+
+-- REVIEW this isn't plumbed in anywhere but it's a pattern (generating array of attrs) that could apply in multiple places potentially
+-- attr for setting both x and y at the same time from a point
+pointXY :: PointXY -> Array SelectionAttribute
+pointXY point = 
+  [ AttrT <<< AttributeSetter "x" $ toAttr point.x
+  , AttrT <<< AttributeSetter "y" $ toAttr point.y ]
 
 -- preserveAspectRatio as an attribute only applies to viewBox
 preserveAspectRatio :: AspectRatioSpec -> SelectionAttribute

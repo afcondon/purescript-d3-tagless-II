@@ -3,6 +3,7 @@ module D3.Examples.Spago.Files where
 import Prelude
 
 import Affjax (URL)
+import D3.Data.Types (PointXY)
 import D3.Node (D3Link(..), D3LinkSwizzled, D3_FocusXY, D3_ID, D3_Leaf, D3_Radius, D3_TreeNode, D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import Data.Array (catMaybes, foldl, groupBy, length, range, sortBy, zip, (!!), (:))
 import Data.Foldable (sum)
@@ -14,6 +15,9 @@ import Data.Tuple (Tuple(..))
 import Type.Row (type (+))
 import Utility (chunk, compareSnd, equalSnd)
 
+-- ======================================================================================================================
+-- | Types for all the data from the files
+-- ======================================================================================================================
 type ModuleRow row  = ( key :: String, depends :: Array String, path :: String | row )
 type PackageRow row = ( key :: String, depends :: Array String | row )
 type RepoRow row    = ( packageName :: String, version :: String, repo :: { tag :: String, contents :: URL } | row )
@@ -90,13 +94,15 @@ type SpagoNodeRow row = (
   , name          :: String
   , nodetype      :: NodeType
   , pinned        :: Pinned
-  , treeX         :: Nullable Number
-  , treeY         :: Nullable Number
+  , treeXY        :: Nullable PointXY
   | row )
 type SpagoNodeData    = { | SpagoNodeRow () }
 type SpagoDataRow   = (D3_XY + D3_VxyFxy + SpagoNodeRow  + D3_FocusXY + D3_Radius + ())
 type SpagoDataRecord = Record SpagoDataRow
 
+-- ======================================================================================================================
+-- | Synthesize the Model from the data in the files, would be better done with SQL if data were in DB
+-- ======================================================================================================================
 getGraphJSONData :: Spago_Raw_JSON_ -> Spago_Cooked_JSON
 getGraphJSONData { packages, modules, lsDeps, loc } = do
   let
@@ -187,8 +193,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
                         } 
       , connected    : false -- this is shorthand for "connected to Main by a dependency tree", essentially it's treeNodes.no
       , containsMany : false 
-      , treeX        : null
-      , treeY        : null
+      , treeXY       : null
       } 
 
     depsMap :: M.Map String { version :: String, repo :: String }
@@ -217,8 +222,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
                         } 
       , connected    : true -- unless something has gone very wrong we shouldn't have any unconnected _packages_ (only modules)
       , containsMany : (length p.contains) > 1 -- we won't try to cluster contents of single module packages
-      , treeX        : null
-      , treeY        : null
+      , treeXY       : null
       }
 
     moduleNodes        = makeNodeFromModuleJSONPL  <$> modulesPL

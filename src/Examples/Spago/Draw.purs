@@ -58,8 +58,8 @@ labelsAttrs1 = [
   , x 0.2
   , y datum_.positionLabel
   , textAnchor "middle"
-  , text datum_.indexAndID
-  -- , text datum_.name
+  , text datum_.name
+  -- , text datum_.indexAndID
 ]
 
 -- TODO x and y position for label would also depend on "hasChildren", need to get "tree" data into nodes

@@ -23,6 +23,7 @@ import Math as Math
 import Type.Row (type (+))
 import Web.Event.Internal.Types (Event)
 
+
 -- Model data types specialized with inital data
 type SpagoTreeNode = D3TreeRow         (EmbeddedData SpagoNodeData                                  + ())
 type SpagoSimNode  = D3_SimulationNode ( SpagoNodeRow  + D3_XY + D3_VxyFxy + D3_FocusXY + D3_Radius + ()) -- note we've woven in focusXY so that we can cluster the nodes
@@ -40,6 +41,7 @@ type SpagoModel = {
              , id2XYLeaf  :: M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
              }
 }
+
 
 tree_datum_ = {
     x           : _.x                <<< unboxD3TreeNode
@@ -84,18 +86,6 @@ link_ = {
   , color     : d3SchemeCategory10N_ <<< toNumber <<< _.target.containerID <<< unboxD3SimLink
 }
 
--- TODO this is a ridiculously brittle and specific function to distribute package nodes on the screen, general solution needed here
-cluster2Point :: Index_ -> PointXY
-cluster2Point i =  
-  scalePoint 200.0 200.0 $
-  offsetXY { x: (-4.5), y: (-2.5) } $ -- center the grid on the (already centered) origin
-  numberToGridPoint 10 (index_ToInt i)
-
-tree2Point :: Nullable Number -> Nullable Number -> Maybe PointXY
-tree2Point x' y' = do
-  x <- toMaybe x'
-  y <- toMaybe y'
-  Just { x, y } 
 
 -- | all the coercions in one place
 datum_ = {
@@ -108,8 +98,7 @@ datum_ = {
   , name          : _.name          <<< unboxD3SimNode
   , x             : _.x             <<< unboxD3SimNode
   , y             : _.y             <<< unboxD3SimNode
-  , treeX         : _.treeX         <<< unboxD3SimNode
-  , treeY         : _.treeY         <<< unboxD3SimNode
+  , treeXY        : _.treeXY        <<< unboxD3SimNode
   , nodetype      : _.nodetype      <<< unboxD3SimNode
   , cluster       : _.cluster       <<< unboxD3SimNode
   , links         : _.links         <<< unboxD3SimNode
@@ -119,13 +108,13 @@ datum_ = {
   , indexAndID    : \d -> (unboxD3SimNode d).name <> " " <> show (getIndexFromDatum_ d) <> " " <>  show (unboxD3SimNode d).id
   , namePos       : \d -> "(" <> show (Math.floor $ datum_.x d) <> "," <> show (Math.floor $ datum_.y d) <> ")" -- for debugging position
 
-  , clusterPoint  : \d -> cluster2Point (intToIndex_ $ (unboxD3SimNode d).cluster - 5) -- TODO fix this dirty hack (magic number for start of package ids)
-  , clusterPointX : \d -> _.x $ datum_.clusterPoint d
-  , clusterPointY : \d -> _.y $ datum_.clusterPoint d
+  -- , clusterPoint  : \d -> cluster2Point (intToIndex_ $ (unboxD3SimNode d).cluster - 5) -- TODO fix this dirty hack (magic number for start of package ids)
+  -- , clusterPointX : \d -> _.x $ datum_.clusterPoint d
+  -- , clusterPointY : \d -> _.y $ datum_.clusterPoint d
 
-  , treePoint     : \d -> fromMaybe (datum_.clusterPoint d) (tree2Point (datum_.treeX d) (datum_.treeY d))
-  , treePointX    : \d -> _.x $ datum_.treePoint d
-  , treePointY    : \d -> _.y $ datum_.treePoint d
+  , treePoint     : \d -> { x: 0.0, y: 0.0 } -- fromMaybe { x: datum_.x d, y: datum_.y } $ toMaybe datum_.treeXY
+  -- , treePointX    : \d -> _.x $ datum_.treePoint d
+  -- , treePointY    : \d -> _.y $ datum_.treePoint d
 
 -- the crucial index function which allows us to reference Nodes from Links in JSON
   , indexFunction : _.id <<< unboxD3SimNode
@@ -226,8 +215,7 @@ upgradeSpagoNodeData sourcesMap node = D3SimNode {
   , nodetype     : node.nodetype
   , pinned       : Floating
   , r            : sqrt node.loc
-  , treeX        : (N.null :: N.Nullable Number)
-  , treeY        : (N.null :: N.Nullable Number)
+  , treeXY       : (N.null :: N.Nullable PointXY)
   , vx           : 0.0
   , vy           : 0.0
   , x            : 0.0
@@ -262,15 +250,15 @@ pinNode xy (D3SimNode node) = D3SimNode (node { fx = notNull xy.x, fy = notNull 
 setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
 setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
 
-setXYIncludingLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
-setXYIncludingLeaves (D3SimNode node) { x, y } =
-  D3SimNode (node { x = x, y = y, treeX = notNull x, treeY = notNull y, connected = true, pinned = Forced })
+setTreeXYIncludingLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
+setTreeXYIncludingLeaves (D3SimNode node) { x, y } =
+  D3SimNode (node { treeXY = notNull {x, y}, connected = true, pinned = Forced })
 
-setXYExceptLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
-setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = 
-  D3SimNode node { treeX = (N.null :: Nullable Number), treeY = (N.null :: Nullable Number), connected = true }
-setXYExceptLeaves (D3SimNode node) { x, y, isLeaf: false } =
-  D3SimNode (node { x = x, y = y, treeX = notNull x, treeY = notNull y, connected = true, pinned = Forced })
+setTreeXYExceptLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
+setTreeXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = 
+  D3SimNode node { treeXY = (N.null :: Nullable PointXY), connected = true }
+setTreeXYExceptLeaves (D3SimNode node) { x, y, isLeaf: false } =
+  D3SimNode (node { treeXY = notNull { x,y }, connected = true, pinned = Forced })
 
 convertFilesToGraphModel :: forall r. 
   { body :: String | r } -> 

@@ -78,7 +78,7 @@ handleAction = case _ of
     setNodesLinksForces { chooseLinks: isM2P_Link
                         , chooseNodes: allNodes
                         , forces: [ "packageGrid", "clusterx", "clustery", "collide1" ] }
-    _stagingNodes <<< traversed %= unpinNode_
+    -- _stagingNodes <<< traversed %= unpinNode_
     staging <- use _staging
     runD3SimM $ Graph.updateSimulation staging graphSceneAttributes
 
@@ -89,7 +89,7 @@ handleAction = case _ of
     setNodesLinksForces { chooseLinks: isP2P_Link
                         , chooseNodes: isPackage
                         , forces: [ "centerNamedNode", "center", "collide2", "charge2", "links"] }
-    _stagingNodes <<< traversed %= unpinNode_
+    -- _stagingNodes <<< traversed %= unpinNode_
     staging <- use _staging
     runD3SimM $ Graph.updateSimulation staging graphSceneAttributes
 
@@ -126,6 +126,16 @@ handleAction = case _ of
 
   StopSim -> runD3SimM $ setConfigVariable $ Alpha 0.0
 
+-- ======================================================================================================================
+-- some utility functions to manage what data from the model gets given to the visualization code
+-- (and also what forces should be engaged)
+-- ======================================================================================================================
+type SpagoConfigRecord = { -- convenience type to hold filter functions for nodes & links and list of forces to activate
+    chooseNodes :: (SpagoSimNode -> Boolean)
+  , chooseLinks :: (SpagoGraphLinkID -> Boolean)
+  , forces      :: Array String
+}
+
 chooseForces :: forall m. MonadState State m => Array String -> m Unit
 chooseForces forces = _stagingForces %= (const forces)
 
@@ -141,12 +151,6 @@ chooseNodes filterFn = do
   state <- get
   _stagingNodes %= const (filter filterFn $ view _modelNodes state)
 
-type SpagoConfigRecord = { -- convenience type to hold filter functions for nodes & links and list of forces to activate
-    chooseNodes :: (SpagoSimNode -> Boolean)
-  , chooseLinks :: (SpagoGraphLinkID -> Boolean)
-  , forces      :: Array String
-}
-
 setNodesLinksForces :: forall m.
   MonadState State m =>
   SpagoConfigRecord ->
@@ -157,11 +161,14 @@ setNodesLinksForces config = do
   _stagingNodes  %= const (filter config.chooseNodes $ view _modelNodes state)
   _stagingForces %= (const config.forces)
 
+-- ======================================================================================================================
+-- functions to read the data from files and build the model (only lives here to prevent cycles)
 -- readModelData will try to build a model from files and to derive a dependency tree from Main
 -- the dependency tree will contain all nodes reachable from Main but NOT all links
+-- ======================================================================================================================
 readModelData :: Aff (Maybe SpagoModel)
 readModelData = do
-  let datadir = "http://localhost:1234/spago-small/"
+  let datadir = "http://localhost:1234/spago-data/"
   moduleJSON  <- AJAX.get ResponseFormat.string $ datadir <> "modules.json"
   packageJSON <- AJAX.get ResponseFormat.string $ datadir <> "packages.json"
   lsdepJSON   <- AJAX.get ResponseFormat.string $ datadir <> "lsdeps.jsonlines"

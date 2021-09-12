@@ -2,11 +2,11 @@ module Stories.Spago.Forces where
 
 import Prelude
 
-import D3.Data.Types (Datum_)
-import D3.Examples.Spago.Model (cluster2Point, datum_)
+import D3.Data.Types (Datum_, Index_, PointXY, index_ToInt)
+import D3.Examples.Spago.Model (datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce)
-import D3.Simulation.Types (FixForceType(..), Force, ForceFilter(..), ForceType(..), RegularForceType(..), allNodes) 
+import D3.Simulation.Types (FixForceType(..), Force, ForceFilter(..), ForceType(..), RegularForceType(..), allNodes)
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
@@ -21,11 +21,14 @@ forces = [
       , createForce "x"            (RegularForce ForceX)        allNodes [ F.strength 0.05, F.x 0.0 ]
       , createForce "y"            (RegularForce ForceY)        allNodes [ F.strength 0.07, F.y 0.0 ]
       , createForce "charge2"      (RegularForce ForceManyBody) allNodes [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 100.0 ]
-      , createForce "clusterx"     (RegularForce ForceX)        allNodes [ F.strength 0.2, F.x datum_.clusterPointX ]
-      , createForce "clustery"     (RegularForce ForceY)        allNodes [ F.strength 0.2, F.y datum_.clusterPointY ]
+      -- the "xy" cluster force lacks any sugar for setting via a PointXY instead of individually (seems like it'd be worth writing one)
+      -- , createForce "clusterxy"    (RegularForce ForceX)        allNodes [ F.strength 0.2, F.x (\d i -> cluster2Point i) ]
+      , createForce "clusterx"     (RegularForce ForceX)        allNodes [ F.strength 0.2, F.x (\(d :: Datum_) i -> _.x $ cluster2Point i) ] -- TODO d:: Datum_ is ugly but needed for typeclass
+      , createForce "clustery"     (RegularForce ForceY)        allNodes [ F.strength 0.2, F.y (\(d :: Datum_) i -> _.y $ cluster2Point i) ]
 
       , createForce "packageGrid"     (FixForce $ ForceFixPositionXY gridXY)   (Just $ ForceFilter "packages only" datum_.isPackage) [ ] 
       , createForce "centerNamedNode" (FixForce $ ForceFixPositionXY centerXY) (Just $ ForceFilter "src only" (\d -> (datum_.name d) == "src")) [ ] 
+      , createForce "treeNodesPinned" (FixForce $ ForceFixPositionXY (\d i -> datum_.treePoint d)) (Just $ ForceFilter "src only" (\d -> datum_.connected d)) [ ] 
 
       , createForce "packageOrbit" (RegularForce ForceRadial)   (selectivelyApplyForce datum_.isPackage "packages only") 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 300.0 ]
@@ -43,6 +46,14 @@ forces = [
     centerXY _ _ = { x: 0.0, y: 0.0 }
     selectivelyApplyForce :: (Datum_ -> Boolean) -> String -> Maybe ForceFilter
     selectivelyApplyForce filterFn description = Just $ ForceFilter description filterFn
+
+-- TODO this is a ridiculously brittle and specific function to distribute package nodes on the screen, general solution needed here
+cluster2Point :: Index_ -> PointXY
+cluster2Point i =  
+  scalePoint 200.0 200.0 $
+  offsetXY { x: (-4.5), y: (-2.5) } $ -- center the grid on the (already centered) origin
+  numberToGridPoint 10 (index_ToInt i)
+
 
 -- | NOTES
 
