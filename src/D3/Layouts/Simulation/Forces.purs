@@ -1,13 +1,12 @@
 module D3.Simulation.Forces where
 
-import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
-import D3.Simulation.Types (ChainableF, FixForceType(..), Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), LinkForceType(..), RegularForceType(..), _name, _status)
 import Prelude
 
-import D3.Attributes.Instances (Attr(..), AttrBuilder(..), AttributeSetter(..), IndexedLambda, Label, unboxAttr)
-import D3.Data.Types (D3Simulation_, Datum_, Index_)
+import D3.Attributes.Instances (Attr(..), AttrBuilder(..), AttributeSetter(..), Label, unboxAttr)
+import D3.Data.Types (D3Simulation_, Datum_)
+import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
+import D3.Simulation.Types (ChainableF, FixForceType(..), Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), LinkForceType(..), RegularForceType(..), _name, _status, toggleForceStatus)
 import Data.Array (elem)
-import Data.Function.Uncurried (mkFn2, runFn2)
 import Data.Lens (over, set, view)
 import Data.Maybe (Maybe(..))
 
@@ -37,13 +36,6 @@ enableForce = set _status ForceActive
 
 toggleForce :: Force -> Force
 toggleForce = over _status toggleForceStatus
-  where
-    toggleForceStatus :: ForceStatus -> ForceStatus
-    toggleForceStatus =
-      case _ of
-        ForceActive   -> ForceDisabled
-        ForceDisabled -> ForceActive
-
 
 disableByLabels :: D3Simulation_ -> Array Label -> Force -> Force
 disableByLabels simulation labels force =

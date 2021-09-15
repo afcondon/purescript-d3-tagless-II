@@ -1,5 +1,6 @@
 module D3Tagless.Instance.Simulation where
 
+import D3.Simulation.Functions
 import Prelude
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
@@ -7,10 +8,11 @@ import D3.Data.Types (D3Selection_)
 import D3.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, onTick_)
 import D3.Selection (applySelectionAttributeD3)
 import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionOpenSelection, selectionUpdateJoin)
-import D3.Simulation.Functions
 import D3.Simulation.Types (D3SimulationState_, Step(..), _handle)
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, simulationHandle)
+import Data.Array (partition)
 import Data.Lens (use)
+import Data.Map (filter, toUnfoldable)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -86,11 +88,11 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
 -- management of simulation variables
   setConfigVariable v                  = simulationSetVariable v
 -- management of forces
-  addForce force                       = simulationAddForce force
+  -- addForce force                       = simulationAddForce force
   addForces forces                     = simulationAddForces forces  
-  removeAllForces                      = simulationRemoveAllForces
-  enableOnlyTheseForces                = simulationEnableOnlyTheseForces
-  toggleForceByLabel label             = simulationToggleForce label
+  -- removeAllForces                      = simulationRemoveAllForces
+  -- enableOnlyTheseForces                = simulationEnableOnlyTheseForces
+  -- toggleForceByLabel label             = simulationToggleForce label
   setForcesByLabel { enable, disable } = 
     do
       simulationDisableForcesByLabel disable
@@ -100,6 +102,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   carryOverSimStateL selection rawdata key = simulationPreserveLinkReferences selection rawdata key
   setNodes           = simulationSetNodes
   setLinks           = simulationSetLinks 
+  setForces          = simulationSetActiveForces
   swizzleLinks       = simulationSwizzleLinks
   getNodes           = simulationGetNodes
   getLinks           = simulationGetLinks 

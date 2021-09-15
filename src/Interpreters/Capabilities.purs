@@ -4,7 +4,8 @@ import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Simulation_, Datum_, Element, Index_, Selector)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior, SelectionAttribute)
-import D3.Simulation.Types (Force, SimVariable, Step)
+import D3.Simulation.Types (Force, ForceStatus, SimVariable, Step)
+import Data.Map (Map)
 import Data.Maybe (Maybe)
 import Prelude (class Eq, class Monad, Unit)
 
@@ -46,12 +47,12 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   setConfigVariable    :: SimVariable -> m Unit
 
   -- management of forces
-  removeAllForces       ::                m Unit
+  -- removeAllForces       ::                m Unit
   addForces             :: Array Force -> m Unit
-  addForce              :: Force       -> m Unit
-  toggleForceByLabel    :: Label       -> m Unit
-  setForcesByLabel      :: ForceConfigLists -> m Unit
-  enableOnlyTheseForces :: Array Label -> m Unit
+  -- addForce              :: Force       -> m Unit
+  -- toggleForceByLabel    :: Label       -> m Unit
+  setForcesByLabel      :: { enable :: Array Label, disable :: Array Label } -> m Unit
+  -- enableOnlyTheseForces :: Array Label -> m Unit
 
   -- management of data (nodes and links)
   -- merge these functions back together later
@@ -60,6 +61,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- REVIEW probably we can actually model the simulation merge bit analogously to the swizzling for links?
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m Unit
   setLinks :: forall d r. Array (D3LinkSwizzled (D3_SimulationNode d) r) -> m Unit
+  setForces :: Map Label ForceStatus -> m Unit
   -- should be able to merge carryOverSimStateL and swizzleLinks (and possibly carryOverSimStateN)
   carryOverSimStateL :: forall d r id. (Eq id) => selection -> RawData d r id -> (Datum_ -> Index_) ->  m (Array (D3Link id r))
   swizzleLinks :: forall d r id. 
@@ -94,6 +96,5 @@ type Staging selection d r id = {
     , links :: Maybe selection
     }
   , rawdata :: RawData d r id
-    -- just a simple list of the names of the forces that are meant to be active
-  , forces :: Array String
+  , forces :: Map Label ForceStatus
 }

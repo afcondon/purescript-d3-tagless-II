@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Attributes.Instances (AttributeSetter, Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_)
-import D3.FFI (D3ForceHandle_, SimulationConfig_, dummyForceHandle_, initSimulation_, keyIsID_)
+import D3.FFI (D3ForceHandle_, SimulationConfig_, initSimulation_, keyIsID_)
 import D3.Selection (SelectionAttribute)
 import Data.Array (intercalate)
 import Data.Lens (Lens', Prism', _Just, lens', prism', view)
@@ -14,7 +14,7 @@ import Data.Lens.Record (prop)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
-import Data.Nullable (Nullable, notNull, null)
+import Data.Nullable (Nullable, notNull)
 import Data.Nullable as N
 import Data.Profunctor (class Profunctor)
 import Data.Profunctor.Choice (class Choice)
@@ -30,7 +30,7 @@ newtype D3SimulationState_ = SimState_ D3SimulationStateRecord
 -- TODO uses D3Selection instead of type variable, can avoid coercing if generalized correctly
 type D3SimulationStateRecord = { 
     handle_       :: D3Simulation_
-  , forces        :: M.Map Label Force
+  , forces        :: M.Map Label Force -- REVIEW keeping forces here is a debatable design decision cf semi-duplication of table in Spago example
   , ticks         :: M.Map Label (Step D3Selection_)
 
   , "data"        :: { nodes :: Array Datum_ , links :: Array Datum_ }
@@ -124,6 +124,16 @@ _status = _Newtype <<< prop (Proxy :: Proxy "status")
 _type :: Lens' Force ForceType
 _type = _Newtype <<< prop (Proxy :: Proxy "type")
 
+forceStatusTuples :: Array Force -> Array (Tuple Label ForceStatus)
+forceStatusTuples forces = do
+  let go f = Tuple (view _name f) (view _status f)
+  go <$> forces
+
+forceTuples :: Array Force -> Array (Tuple Label Force)
+forceTuples forces = do
+  let go f = Tuple (view _name f) f
+  go <$> forces
+
 -- _filter :: forall p row.
 --      Newtype Force { filter :: Maybe ForceFilter | row }
 --   => Newtype Force { filter :: Maybe ForceFilter | row }
@@ -157,9 +167,6 @@ _attributes = _Newtype <<< prop (Proxy :: Proxy "attributes")
 _force_ :: Lens' Force D3ForceHandle_
 _force_ = _Newtype <<< prop (Proxy :: Proxy "force_")
 
-forceTuple :: Force -> Tuple Label Force
-forceTuple f = Tuple (view _name f) f
-
 instance Show ForceType where
   show (RegularForce t) = show t
   show LinkForce        = "Link force"
@@ -177,6 +184,10 @@ derive instance eqForceStatus :: Eq ForceStatus
 instance showForceStatus :: Show ForceStatus where
   show ForceActive = "active"
   show ForceDisabled = "inactive"
+
+toggleForceStatus :: ForceStatus -> ForceStatus
+toggleForceStatus ForceActive   = ForceDisabled
+toggleForceStatus ForceDisabled = ForceActive
 
 allNodes :: forall t69. Maybe t69
 allNodes = Nothing -- just some sugar so that force declarations are nicer to read, Nothing == No filter == applies to all nodes

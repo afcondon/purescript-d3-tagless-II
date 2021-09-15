@@ -2,6 +2,7 @@ module Stories.Spago.HTML where
 
 import Prelude
 
+import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Examples.Spago.Files (isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (isPackage, isUsedModule)
@@ -23,7 +24,7 @@ import Ocelot.Block.Format as Format
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
-import Stories.Spago.State (State, _stagingForces, _stagingLinks, _stagingNodes)
+import Stories.Spago.State (State, _stagingForces, _stagingLinks, _stagingNodes, listActiveForces)
 import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
 
@@ -39,7 +40,7 @@ renderSimState state =
     , HH.p_
         [ HH.text $ "node count:" <> show (length $ view _stagingNodes state)] 
     , HH.p_
-        [ HH.text $ "initial forces:" <> show (view _stagingForces state) ] 
+        [ HH.text $ "initial forces:" <> show (listActiveForces state) ] 
     ]
 
 renderSimControls :: forall p. State -> HH.HTML p Action
@@ -157,11 +158,11 @@ render state =
       [ Utils.tailwindClass "story-container spago" ]
       [ HH.div
           [ Utils.tailwindClass "story-panel-about" ]
-          [ renderSimState state
+          [ Card.card_ [ blurbtext ]
           , renderSimControls state
+          , renderSimState state
           , renderTableForces state.simulation
           -- , renderTableElements state.simulation
-          , Card.card_ [ blurbtext ]
           ]
       , HH.div
           [ Utils.tailwindClass $ "svg-container " <> state.svgClass ]

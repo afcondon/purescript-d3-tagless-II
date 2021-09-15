@@ -2,19 +2,22 @@ module Stories.Spago.State where
 
 import Prelude
 
+import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_)
 import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode)
 import D3.Node (D3_SimulationNode(..), NodeID)
-import D3.Simulation.Types (D3SimulationState_)
+import D3.Simulation.Types (D3SimulationState_, ForceStatus(..))
 import D3Tagless.Capabilities (Staging)
 import Data.Array (filter)
-import Data.Lens (class Wander, Lens', _Just, filtered, over, preview, traversed, view)
+import Data.Lens (class Wander, Lens', _1, _2, _Just, filtered, over, preview, traversed, view)
 import Data.Lens.Record (prop)
+import Data.Map (Map, toUnfoldable)
 import Data.Maybe (Maybe)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
 import Data.Traversable (class Traversable)
+import Data.Tuple (Tuple, fst, snd)
 import Type.Proxy (Proxy(..))
   
 type State = Record (StateRow)
@@ -119,9 +122,25 @@ _stagingLinks = _staging <<< _rawdata <<< _links
 _stagingForces :: forall p. 
      Strong p
   => Choice p
-  => p (Array String) (Array String)
+  => p (Map Label ForceStatus) (Map Label ForceStatus)
   -> p State State
 _stagingForces = _staging <<< _forces
+
+-- _stagingForcesActive :: forall r2 p r1 t.
+--   Strong p =>
+--   Traversable t =>
+--   Wander p =>
+--   p Label Label -> p State State
+--   -- p { staging :: { forces :: t (Tuple Label ForceStatus) | r1 } | r2 }
+--   --   { staging :: { forces :: t (Tuple Label ForceStatus) | r1 } | r2 }
+-- _stagingForcesActive = _staging <<< _forces <<< traversed <<< (filtered (\f -> snd f == ForceActive)) <<< _1
+
+-- listActiveForces :: forall r1 r2 t.
+--   Traversable t => { staging :: { forces :: t (Tuple Label ForceStatus) | r1 } | r2 } -> String
+listActiveForces :: State -> Array String
+listActiveForces state = do
+  let tuples = toUnfoldable state.staging.forces 
+  fst <$> (filter (\f -> (snd f) == ForceActive) $ tuples)
 
 _nodes :: forall a r. Lens' { nodes :: a | r } a
 _nodes = prop (Proxy :: Proxy "nodes")

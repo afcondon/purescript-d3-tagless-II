@@ -10,20 +10,24 @@ import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Graph_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, allNodes, convertFilesToGraphModel, isModule, isPackage)
 import D3.Examples.Spago.Tree (treeReduction)
-import D3.Simulation.Types (SimVariable(..), initialSimulationState)
-import D3Tagless.Capabilities (addForces, setConfigVariable, start, toggleForceByLabel)
+import D3.Simulation.Forces (toggleForce)
+import D3.Simulation.Types (ForceStatus(..), SimVariable(..), _name, initialSimulationState, toggleForceStatus)
+import D3Tagless.Capabilities (addForces, setConfigVariable, start)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runD3SimM)
-import Data.Array (filter)
+import Data.Array (elem, filter)
 import Data.Either (hush)
-import Data.Lens (use, view, (%=))
+import Data.Lens (modifying, over, traversed, use, view, (%=))
+import Data.Lens.At (at)
+import Data.Map (fromFoldable, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Debug (trace)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
-import Stories.Spago.Forces (forces)
+import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
 import Stories.Spago.State (State, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingForces, _stagingLinks, _stagingNodes)
 
@@ -42,7 +46,7 @@ component = H.mkComponent
   initialState = { 
       svgClass: "cluster"
     , model: Nothing
-    , staging: { selections: { nodes: Nothing, links: Nothing }, rawdata: { nodes: [], links: [] }, forces: [] }
+    , staging: { selections: { nodes: Nothing, links: Nothing }, rawdata: { nodes: [], links: [] }, forces: M.empty }
     , simulation: initialSimulationState 1 -- TODO replace number with unit when all working satisfactorily 
   }
 
@@ -58,13 +62,11 @@ handleAction = case _ of
     
     (maybeModel :: Maybe SpagoModel) <- H.liftAff readModelData
     _model %= (const maybeModel)
-    runD3SimM (addForces forces) -- NB these are all disabled initially
+    runD3SimM (addForces forceLibrary) -- NB these are all disabled initially
     openSelections <- evalEffectSimulation Graph.initialize -- should result in the "enter" selections being in the simulation
     (_staging <<< _enterselections <<< _nodes) %= (const $ openSelections.nodes) 
     (_staging <<< _enterselections <<< _links) %= (const $ openSelections.links)
-    
-    -- handleAction $ Scene PackageGraph
-
+  
   Finalize -> pure unit
 
   Scene PackageGrid -> do
@@ -96,7 +98,10 @@ handleAction = case _ of
     staging <- use _staging
     runD3SimM $ Graph.updateSimulation staging treeSceneAttributes
     
-  ToggleForce label -> runD3SimM $ toggleForceByLabel label
+  ToggleForce label -> do
+    modifying (_stagingForces <<< at label) (\maybeStatus -> toggleForceStatus <$> maybeStatus)
+    staging <- use _staging
+    runD3SimM $ Graph.updateForcesOnly staging
 
   Filter (LinkFilter filterFn) -> do
     chooseLinks filterFn
@@ -129,7 +134,15 @@ type SpagoConfigRecord = { -- convenience type to hold filter functions for node
 }
 
 chooseForces :: forall m. MonadState State m => Array String -> m Unit
-chooseForces forces = _stagingForces %= (const forces)
+chooseForces forceNames = do
+  let 
+    setStatus f = do
+      let fName   = view _name f
+          fStatus = if fName `elem` forceNames
+                    then ForceActive
+                    else ForceDisabled
+      Tuple fName fStatus
+  _stagingForces %= const (fromFoldable $ setStatus <$> forceLibrary)
 
 -- filter links from Maybe Model into Staging
 chooseLinks :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
@@ -151,7 +164,7 @@ setNodesLinksForces config = do
   state <- get
   _stagingLinks  %= const (filter config.chooseLinks $ view _modelLinks state)
   _stagingNodes  %= const (filter config.chooseNodes $ view _modelNodes state)
-  _stagingForces %= (const config.forces)
+  chooseForces config.forces
 
 -- ======================================================================================================================
 -- functions to read the data from files and build the model (only lives here to prevent cycles)

@@ -5,11 +5,11 @@ import Prelude
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
-import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveLinkReferences_, d3PreserveSimulationPositions_, defaultSimulationDrag_, disableDrag_, getIDsFromNodes_, getLinkID_, getLinkIDs_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_, swizzleLinks_)
+import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveLinkReferences_, d3PreserveSimulationPositions_, defaultSimulationDrag_, disableDrag_, getIDsFromNodes_, getLinkIDs_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_, swizzleLinks_)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
 import D3.Simulation.Forces (disableByLabels, enableByLabels, enableOnlyTheseLabels, putForceInSimulation, setForceAttr)
-import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _force, _forces, _handle, _name, _tick, _velocityDecay, forceTuple)
+import D3.Simulation.Types 
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (RawData)
 import Data.Array (elem, filter, intercalate)
@@ -17,10 +17,11 @@ import Data.Array as A
 import Data.Foldable (traverse_)
 import Data.Lens (modifying, set, use, view, (%=))
 import Data.Lens.At (at)
+import Data.Map (Map, toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
-import Data.Tuple (Tuple(..))
+import Data.Tuple (Tuple(..), fst, snd)
 import Stories.Spago.State (_d3Simulation)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -41,7 +42,7 @@ simulationAddForces :: forall m row.
   Array Force -> m Unit
 simulationAddForces forces = do
   traverse_ simulationAddForce forces -- effectfully put the forces in the simulation
-  let (updateMap :: M.Map Label Force) = M.fromFoldable $ forceTuple <$> forces
+  let (updateMap :: M.Map Label Force) = M.fromFoldable $ forceTuples forces
   modifying (_d3Simulation <<< _forces) (\m -> M.union updateMap m )
 
 simulationRemoveAllForces :: forall m row. 
@@ -102,6 +103,16 @@ simulationEnableForcesByLabel labels  = do
   let updatedForces = (enableByLabels handle labels) <$> forces -- REVIEW can't we traversed (optic) this update?
   modifying (_d3Simulation <<< _forces) (const updatedForces)
   
+simulationSetActiveForces :: forall m row. 
+  (MonadState { simulation :: D3SimulationState_ | row } m) =>
+  Map Label ForceStatus -> m Unit
+simulationSetActiveForces stagingforces = do
+  handle <- use (_d3Simulation <<< _handle)
+  forces <- use (_d3Simulation <<< _forces) -- TODO this is the forces table inside the simulation record
+  let labels = fst <$> (filter (\f -> snd f == ForceActive) $ toUnfoldable stagingforces) -- only forces that are (label, ForceActive)
+  let updatedForces = (enableOnlyTheseLabels handle labels) <$> forces -- REVIEW can't we traversed (optic) this update?
+  modifying (_d3Simulation <<< _forces) (const updatedForces)
+
 simulationSetVariable :: forall m row.
   (MonadState { simulation :: D3SimulationState_ | row } m) => 
   SimVariable -> m Unit

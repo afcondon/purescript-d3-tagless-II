@@ -9,13 +9,13 @@ import D3.Examples.LesMiserables as LesMis
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.FFI (linksForceName)
 import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce, enableForce)
+import D3.Simulation.Forces (createForce)
 import D3.Simulation.Functions (simulationStart)
 import D3.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), SimVariable(..), allNodes, initialSimulationState)
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Capabilities (addForces, removeAllForces, setConfigVariable, setForcesByLabel)
+import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel)
 import D3Tagless.Instance.Simulation (runD3SimM)
 import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
@@ -39,9 +39,9 @@ data Action
   | Freeze
   | Reheat
 
-data ManyBodyParam = SmallRadius | BigRadius
-derive instance Eq ManyBodyParam
-instance Show ManyBodyParam where
+data ManyBodySetting = SmallRadius | BigRadius
+derive instance Eq ManyBodySetting
+instance Show ManyBodySetting where
   show SmallRadius = "Compact"
   show BigRadius   = "Expanded"
 data LinksSetting  = LinksOn | LinksOff
@@ -51,8 +51,8 @@ instance Show LinksSetting where
   show LinksOff = "No link force"
 
 type State = { 
-    simulation :: D3SimulationState_
-  , manybodySetting :: ManyBodyParam
+    simulation      :: D3SimulationState_
+  , manybodySetting :: ManyBodySetting
   , linksSetting    :: LinksSetting
   , blurb           :: Expandable.Status
   , code            :: Expandable.Status
@@ -85,10 +85,10 @@ component = H.mkComponent
       , blurb: Expandable.Collapsed
       , code: Expandable.Collapsed
       , forces: [ 
-          enableForce $ createForce "center"      (RegularForce ForceCenter)   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-        , enableForce $ createForce "many body"   (RegularForce ForceManyBody) allNodes []
-        , enableForce $ createForce "collision"   (RegularForce ForceCollide)  allNodes [ F.radius 4.0 ]
-        ,               createForce "collision20" (RegularForce ForceCollide)  allNodes [ F.radius 20.0] -- NB initially not enabled
+          createForce "center"      (RegularForce ForceCenter)   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+        , createForce "many body"   (RegularForce ForceManyBody) allNodes []
+        , createForce "collision"   (RegularForce ForceCollide)  allNodes [ F.radius 4.0 ]
+        , createForce "collision20" (RegularForce ForceCollide)  allNodes [ F.radius 20.0] -- NB initially not enabled
         ]
     }
 
@@ -173,9 +173,10 @@ handleAction = case _ of
 
     state <- H.get
     runD3SimM $ addForces state.forces
+    runD3SimM $ setForcesByLabel { enable: [ "center", "many body", "collision"], disable: [] } 
     runD3SimM $ LesMis.graphScript graph "div.svg-container"
 
-  Finalize ->  runD3SimM removeAllForces
+  Finalize ->  pure unit -- runD3SimM removeAllForces
 
   ToggleManyBody -> do
     state <- H.get
