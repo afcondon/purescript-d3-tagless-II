@@ -10,26 +10,24 @@ import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Graph_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, allNodes, convertFilesToGraphModel, isModule, isPackage)
 import D3.Examples.Spago.Tree (treeReduction)
-import D3.Simulation.Forces (toggleForce)
 import D3.Simulation.Types (ForceStatus(..), SimVariable(..), _name, initialSimulationState, toggleForceStatus)
 import D3Tagless.Capabilities (addForces, setConfigVariable, start)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runD3SimM)
 import Data.Array (elem, filter)
 import Data.Either (hush)
-import Data.Lens (modifying, over, traversed, use, view, (%=))
+import Data.Lens (modifying, use, view, (%=))
 import Data.Lens.At (at)
-import Data.Map (fromFoldable, lookup)
+import Data.Map (fromFoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import Debug (trace)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
-import Stories.Spago.State (State, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingForces, _stagingLinks, _stagingNodes)
+import Stories.Spago.State (State, _cssClass, _d3Simulation, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingForces, _stagingLinks, _stagingNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -44,7 +42,7 @@ component = H.mkComponent
 
   initialState :: State
   initialState = { 
-      svgClass: "cluster"
+      svgClass: ""
     , model: Nothing
     , staging: { selections: { nodes: Nothing, links: Nothing }, rawdata: { nodes: [], links: [] }, forces: M.empty }
     , simulation: initialSimulationState 1 -- TODO replace number with unit when all working satisfactorily 
@@ -58,11 +56,9 @@ handleAction :: forall m.
 handleAction = case _ of
 
   Initialize -> do    -- TODO think we actually don't want to be doing anything here until the component is shown
-    let _ = trace { spago: "initialize" } \_ -> unit
-    
     (maybeModel :: Maybe SpagoModel) <- H.liftAff readModelData
     _model %= (const maybeModel)
-    runD3SimM (addForces forceLibrary) -- NB these are all disabled initially
+    runD3SimM $ addForces forceLibrary -- NB these are all disabled initially
     openSelections <- evalEffectSimulation Graph.initialize -- should result in the "enter" selections being in the simulation
     (_staging <<< _enterselections <<< _nodes) %= (const $ openSelections.nodes) 
     (_staging <<< _enterselections <<< _links) %= (const $ openSelections.links)
@@ -113,15 +109,18 @@ handleAction = case _ of
     staging <- use _staging
     runD3SimM $ Graph.updateSimulation staging graphSceneAttributes
 
-  ChangeStyling style -> _cssClass %= (const style) -- modify_ (\s -> s { svgClass = style })
+  ChangeStyling style -> do
+    _cssClass %= (const style) -- modify_ (\s -> s { svgClass = style })
 
-  ChangeSimConfig c -> runD3SimM $ setConfigVariable c
+  ChangeSimConfig c -> do
+    runD3SimM $ setConfigVariable c    
 
   StartSim -> do
-    runD3SimM $ setConfigVariable $ AlphaTarget 1.0
+    runD3SimM $ setConfigVariable $ Alpha 1.0
     runD3SimM start
 
-  StopSim -> runD3SimM $ setConfigVariable $ Alpha 0.0
+  StopSim -> do
+    runD3SimM $ setConfigVariable $ Alpha 0.0
 
 -- ======================================================================================================================
 -- some utility functions to manage what data from the model gets given to the visualization code

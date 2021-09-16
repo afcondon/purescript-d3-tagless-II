@@ -6,18 +6,18 @@ import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_)
 import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode)
+import D3.FFI (SimulationConfig_, readSimulationConfig_)
 import D3.Node (D3_SimulationNode(..), NodeID)
-import D3.Simulation.Types (D3SimulationState_, ForceStatus(..))
+import D3.Simulation.Types (D3SimulationState_, ForceStatus(..), _handle)
 import D3Tagless.Capabilities (Staging)
 import Data.Array (filter)
-import Data.Lens (class Wander, Lens', _1, _2, _Just, filtered, over, preview, traversed, view)
+import Data.Lens (class Wander, Lens', _Just, filtered, over, preview, traversed, view)
 import Data.Lens.Record (prop)
 import Data.Map (Map, toUnfoldable)
 import Data.Maybe (Maybe)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
-import Data.Traversable (class Traversable)
-import Data.Tuple (Tuple, fst, snd)
+import Data.Tuple (fst, snd)
 import Type.Proxy (Proxy(..))
   
 type State = Record (StateRow)
@@ -48,48 +48,13 @@ _d3Simulation = prop (Proxy :: Proxy "simulation")
 chooseSimNodes :: (SpagoSimNode -> Boolean) -> State -> Maybe (Array SpagoSimNode)
 chooseSimNodes fn state = filter fn <$> preview _modelNodes state
 
-pred :: SpagoSimNode -> Boolean
-pred (D3SimNode d) = d.x == 1.0
-
--- awn :: forall t p. Traversable t => Wander p => p SpagoSimNode SpagoSimNode -> p (t SpagoSimNode) (t SpagoSimNode)
-bel :: forall p. Wander p => p SpagoSimNode SpagoSimNode -> p (Array SpagoSimNode) (Array SpagoSimNode)
-bel = traversed <<< filtered pred
-
--- cep = over bel []
-
--- obviously this can't work, any or all would work, filter not so much
--- fPred :: Array SpagoSimNode -> Boolean
--- fPred arr = filter pred arr
-
-foo :: forall p. Strong p => Choice p => p (Array  SpagoSimNode) (Array  SpagoSimNode)  -> p  State  State
-foo = _modelNodes <<< filtered (const true :: Array SpagoSimNode -> Boolean)
-
-dop = over (_modelNodes <<< traversed) (\(D3SimNode d) -> D3SimNode d { x = 0.0 })
-
-erg ::  (SpagoSimNode -> SpagoSimNode) -> State -> State 
-erg = over (_modelNodes <<< traversed <<< filtered pred)
-
--- foo' :: forall p. Strong p => Choice p => p (Array  SpagoSimNode) (Array  SpagoSimNode)  -> p  State  State
--- foo' = _stagingNodes <<< bel
-
-quux :: forall p. Choice p => p SpagoSimNode SpagoSimNode -> p SpagoSimNode SpagoSimNode
-quux = filtered pred
-
--- foo' :: forall p. Strong p => Choice p => p (Array  SpagoSimNode) (Array  SpagoSimNode)  -> p  State  State
--- foo' = _stagingNodes <<< (filtered pred)
-
--- foo' :: forall p. Strong p => Choice p => p (Array  SpagoSimNode) (Array  SpagoSimNode)  -> p  State  State
--- foo' = (filtered ) <<< _modelNodes
-
--- foo' :: forall p. Strong p => Choice p => (SpagoSimNode -> Boolean) -> p (Array  SpagoSimNode) (Array  SpagoSimNode)  -> p  State  State
--- foo' fn = _modelNodes <<< filtered fn
-
-chooseSimNodes' :: (SpagoSimNode -> Boolean) -> State -> Maybe (Array SpagoSimNode)
-chooseSimNodes' fn state = preview foo state
-
 chooseSimLinks :: (SpagoGraphLinkID -> Boolean) -> State -> Maybe (Array SpagoGraphLinkID)
 chooseSimLinks fn state = filter fn <$> preview _modelLinks state
 
+getSimConfigRecord :: State -> SimulationConfig_
+getSimConfigRecord state = do
+  let handle = view (_d3Simulation <<< _handle) state
+  readSimulationConfig_ handle
 
 _modelNodes :: forall p. 
      Strong p

@@ -137,6 +137,15 @@ exports.configSimulation_ = simulation => config => {
   }
   return simulation
 }
+exports.readSimulationConfig_ = simulation => {
+  return {
+    alpha: simulation.alpha(),
+    alphaTarget: simulation.alphaTarget(),
+    alphaMin: simulation.alphaMin(),
+    alphaDecay: simulation.alphaDecay(),
+    velocityDecay: simulation.velocityDecay()
+  }
+}
 
 exports.d3PreserveSimulationPositions_ = node => nodes => keyFn => {
   const old = new Map(node.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference

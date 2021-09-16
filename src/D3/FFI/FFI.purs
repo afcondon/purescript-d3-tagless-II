@@ -107,6 +107,7 @@ type SimulationConfig_ = {
 
 foreign import initSimulation_         ::                  SimulationConfig_ -> (Datum_ -> Index_) -> D3Simulation_
 foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_ -> D3Simulation_
+foreign import readSimulationConfig_   :: D3Simulation_ -> SimulationConfig_
 
 foreign import d3PreserveSimulationPositions_ :: 
   forall d. 

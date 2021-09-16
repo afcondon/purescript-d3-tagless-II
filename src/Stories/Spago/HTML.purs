@@ -2,7 +2,6 @@ module Stories.Spago.HTML where
 
 import Prelude
 
-import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Examples.Spago.Files (isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (isPackage, isUsedModule)
@@ -10,7 +9,7 @@ import D3.Simulation.Forces (showType)
 import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), showForceFilter)
 import D3Tagless.Block.Card as Card
 import Data.Array (length, (:))
-import Data.Lens (over, view)
+import Data.Lens (view)
 import Data.Map (toUnfoldable)
 import Data.Tuple (snd)
 import Halogen (ComponentSlot)
@@ -24,7 +23,7 @@ import Ocelot.Block.Format as Format
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
-import Stories.Spago.State (State, _stagingForces, _stagingLinks, _stagingNodes, listActiveForces)
+import Stories.Spago.State (State, _stagingLinks, _stagingNodes, getSimConfigRecord, listActiveForces)
 import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
 
@@ -41,6 +40,8 @@ renderSimState state =
         [ HH.text $ "node count:" <> show (length $ view _stagingNodes state)] 
     , HH.p_
         [ HH.text $ "initial forces:" <> show (listActiveForces state) ] 
+    , HH.p_
+        [ HH.text $ "sim vars: " <> show (getSimConfigRecord state)]
     ]
 
 renderSimControls :: forall p. State -> HH.HTML p Action
@@ -54,7 +55,7 @@ renderSimControls _ =
               [ HE.onClick $ const StopSim ]
               [ HH.text "Stop" ]
           , Button.buttonPrimaryCenter
-              [ HE.onClick $ const (ChangeSimConfig $ VelocityDecay 0.7) ]
+              [ HE.onClick $ const (ChangeSimConfig $ Alpha 0.5) ]
               [ HH.text "Slow" ]
           , Button.buttonPrimaryRight
               [ HE.onClick $ const StartSim ]

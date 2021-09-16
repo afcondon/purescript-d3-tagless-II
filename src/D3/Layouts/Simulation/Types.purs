@@ -134,22 +134,6 @@ forceTuples forces = do
   let go f = Tuple (view _name f) f
   go <$> forces
 
--- _filter :: forall p row.
---      Newtype Force { filter :: Maybe ForceFilter | row }
---   => Newtype Force { filter :: Maybe ForceFilter | row }
---   => Profunctor p
---   => Strong p
---   => Choice p
---   => p (Datum_ -> Boolean) (Datum_ -> Boolean) -> p Force Force
--- _filter = _Newtype <<< prop (Proxy :: Proxy "filter") <<< _Just <<< _forceFilterFilter
-
--- getForceFilter :: Force -> (Datum_ -> Boolean)
--- getForceFilter f = do
---   let maybeFilter = view _filter f
---   case maybeFilter of
---     Nothing -> const true -- a slightly expensive NO-OP filter
---     Just filter -> view _forceFilterFilter filter
-
 _filter :: forall p. Profunctor p => Strong p => p (Maybe ForceFilter) (Maybe ForceFilter) -> p Force Force
 _filter = _Newtype <<< prop (Proxy :: Proxy "filter")
 
@@ -277,4 +261,3 @@ defaultConfigSimulation = {
     , alphaDecay   : 0.0228
     , velocityDecay: 0.4
 }
-

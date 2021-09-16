@@ -18,5 +18,6 @@ data Action
   | Filter FilterData
   | ChangeStyling String
   | ChangeSimConfig SimVariable
+  -- | ShowSimConfig
   | StopSim
   | StartSim
