@@ -257,7 +257,7 @@ defaultConfigSimulation :: SimulationConfig_
 defaultConfigSimulation = { 
       alpha        : 1.0
     , alphaTarget  : 0.0
-    , alphaMin     : 0.0001
+    , alphaMin     : 0.001
     , alphaDecay   : 0.0228
     , velocityDecay: 0.4
 }

@@ -113,7 +113,8 @@ handleAction = case _ of
     _cssClass %= (const style) -- modify_ (\s -> s { svgClass = style })
 
   ChangeSimConfig c -> do
-    runD3SimM $ setConfigVariable c    
+    runD3SimM $ setConfigVariable c 
+    runD3SimM start   
 
   StartSim -> do
     runD3SimM $ setConfigVariable $ Alpha 1.0

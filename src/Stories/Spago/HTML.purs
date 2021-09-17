@@ -9,13 +9,16 @@ import D3.Simulation.Forces (showType)
 import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), showForceFilter)
 import D3Tagless.Block.Card as Card
 import Data.Array (length, (:))
+import Data.Int (fromString, toNumber)
 import Data.Lens (view)
 import Data.Map (toUnfoldable)
+import Data.Maybe (fromMaybe)
 import Data.Tuple (snd)
 import Halogen (ComponentSlot)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
+import Halogen.HTML.Properties (StepValue(..))
 import Halogen.HTML.Properties as HP
 import Ocelot.Block.Button as Button
 import Ocelot.Block.Checkbox as Checkbox
@@ -38,32 +41,24 @@ renderSimState state =
         [ HH.text $ "link count: " <> show (length $ view _stagingLinks state) ] 
     , HH.p_
         [ HH.text $ "node count:" <> show (length $ view _stagingNodes state)] 
-    , HH.p_
-        [ HH.text $ "initial forces:" <> show (listActiveForces state) ] 
-    , HH.p_
-        [ HH.text $ "sim vars: " <> show (getSimConfigRecord state)]
+    -- , HH.p_
+    --     [ HH.text $ "initial forces:" <> show (listActiveForces state) ] 
+    -- , HH.p_
+    --     [ HH.text $ "sim vars: " <> show (getSimConfigRecord state)]
     ]
 
 renderSimControls :: forall p. State -> HH.HTML p Action
-renderSimControls _ =
+renderSimControls state = do
+  let
+    toScale :: String -> Number
+    toScale s =
+      (toNumber $ fromMaybe 0 $ fromString s) / 100.0
+    params = getSimConfigRecord state
   HH.div
     [ HP.classes [ HH.ClassName "m-6" ]]
-    [ Format.caption_ [ HH.text "Simulation controls" ]
+    [ Format.subHeading_ [ HH.text "Simulation controls" ]
     , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
-        [ Button.buttonGroup_
-          [ Button.buttonPrimaryLeft
-              [ HE.onClick $ const StopSim ]
-              [ HH.text "Stop" ]
-          , Button.buttonPrimaryCenter
-              [ HE.onClick $ const (ChangeSimConfig $ Alpha 0.5) ]
-              [ HH.text "Slow" ]
-          , Button.buttonPrimaryRight
-              [ HE.onClick $ const StartSim ]
-              [ HH.text "Start" ]
-          ]
-        ]
-    , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
-        [ Format.caption_ [ HH.text "Scenes" ]
+        [ Format.contentHeading_ [ HH.text "Scenes" ]
         , Button.buttonGroup_
           [ Button.buttonPrimaryLeft
               [ HE.onClick $ const (Scene PackageGrid) ]
@@ -80,7 +75,78 @@ renderSimControls _ =
           ]
         ]
     , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
-        [ Format.caption_ [ HH.text "Which nodes should be displayed?" ]
+        [ Format.contentHeading_ [ HH.text "Params" ]
+        , HH.input
+            [ HE.onValueInput (ChangeSimConfig <<< Alpha <<< toScale)
+            , HP.type_ HP.InputRange
+            , HP.id "alpha-slider"
+            , HP.class_ (H.ClassName "scaling-slider")
+            , HP.min 0.0
+            , HP.max 100.0
+            , HP.step (Step 10.0)
+            , HP.value (show (params.alpha * 100.0 ))
+            ]
+        , Format.caption_ [ HH.text ("Alpha: " <> show params.alpha) ]
+        , HH.input
+            [ HE.onValueInput (ChangeSimConfig <<< AlphaDecay <<< toScale)
+            , HP.type_ HP.InputRange
+            , HP.id "alphadecay-slider"
+            , HP.class_ (H.ClassName "scaling-slider")
+            , HP.min 0.0
+            , HP.max 100.0
+            , HP.step (Step 10.0)
+            , HP.value (show (params.alphaDecay * 100.0 ))
+            ]
+        , Format.caption_ [ HH.text ("AlphaDecay: " <> show params.alphaDecay) ]
+        , HH.input
+            [ HE.onValueInput (ChangeSimConfig <<< AlphaMin <<< toScale)
+            , HP.type_ HP.InputRange
+            , HP.id "alphamin-slider"
+            , HP.class_ (H.ClassName "scaling-slider")
+            , HP.min 0.0
+            , HP.max 100.0
+            , HP.step (Step 10.0)
+            , HP.value (show (params.alphaMin * 100.0 ))
+            ]
+        , Format.caption_ [ HH.text ("AlphaMin: " <> show params.alphaMin) ]
+        , HH.input
+            [ HE.onValueInput (ChangeSimConfig <<< AlphaTarget <<< toScale)
+            , HP.type_ HP.InputRange
+            , HP.id "alphatarget-slider"
+            , HP.class_ (H.ClassName "scaling-slider")
+            , HP.min 0.0
+            , HP.max 100.0
+            , HP.step (Step 10.0)
+            , HP.value (show (params.alphaTarget * 100.0 ))
+            ]
+        , Format.caption_ [ HH.text ("AlphaTarget: " <> show params.alphaTarget) ]
+        , HH.input
+            [ HE.onValueInput (ChangeSimConfig <<< VelocityDecay <<< toScale)
+            , HP.type_ HP.InputRange
+            , HP.id "velocitydecay-slider"
+            , HP.class_ (H.ClassName "scaling-slider")
+            , HP.min 0.0
+            , HP.max 100.0
+            , HP.step (Step 10.0)
+            , HP.value (show (params.velocityDecay * 100.0))
+            ]
+        , Format.caption_ [ HH.text ("VelocityDecay: " <> show params.velocityDecay) ]
+        ]
+    -- , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
+    --     [ Button.buttonGroup_
+    --       [ Button.buttonPrimaryLeft
+    --           [ HE.onClick $ const StopSim ]
+    --           [ HH.text "Stop" ]
+    --       , Button.buttonPrimaryCenter
+    --           [ HE.onClick $ const (ChangeSimConfig $ Alpha 0.5) ]
+    --           [ HH.text "Slow" ]
+    --       , Button.buttonPrimaryRight
+    --           [ HE.onClick $ const StartSim ]
+    --           [ HH.text "Start" ]
+    --       ]
+    --     ]
+    , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
+        [ Format.contentHeading_ [ HH.text "Which nodes should be displayed?" ]
         , Button.buttonGroup_
           [ Button.buttonLeft
               [ HE.onClick $ const (Filter $ NodeFilter isPackage) ]
@@ -97,7 +163,7 @@ renderSimControls _ =
           ]
         ]
     , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
-        [ Format.caption_ [ HH.text "Which links should be displayed?" ]
+        [ Format.contentHeading_ [ HH.text "Which links should be displayed?" ]
         , Button.buttonGroup_
           [ Button.buttonLeft
               [ HE.onClick $ const (Filter $ LinkFilter isM2M_Tree_Link) ]
@@ -117,7 +183,7 @@ renderSimControls _ =
           ]
         ]
     , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
-        [ Format.caption_ [ HH.text "Which links should be exert force?" ]
+        [ Format.contentHeading_ [ HH.text "Which links should be exert force?" ]
         , Button.buttonGroup_
           [ Button.buttonLeft
               [ HE.onClick $ const (Filter $ LinkFilter isM2M_Tree_Link) ]
@@ -134,7 +200,7 @@ renderSimControls _ =
           ]
         ]
     , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
-        [ Format.caption_ [ HH.text "Stylesheet" ]
+        [ Format.contentHeading_ [ HH.text "Stylesheet" ]
         , Button.buttonGroup_
           [ Button.buttonLeft
               [ HE.onClick $ const (ChangeStyling "cluster") ]

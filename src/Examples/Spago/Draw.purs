@@ -8,9 +8,9 @@ import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight
 import D3.FFI (d3GetSelectionData_, keyIsID_)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Functions (simulationStart, simulationStop)
-import D3.Simulation.Types (Step(..))
+import D3.Simulation.Types (SimVariable(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addForces, addTickFunction, appendTo, attach, carryOverSimStateL, carryOverSimStateN, mergeSelections, on, openSelection, setAttributes, setForces, setLinks, setNodes, simulationHandle, start, stop, swizzleLinks, updateJoin)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addForces, addTickFunction, appendTo, attach, carryOverSimStateL, carryOverSimStateN, mergeSelections, on, openSelection, setAttributes, setConfigVariable, setForces, setLinks, setNodes, simulationHandle, start, stop, swizzleLinks, updateJoin)
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
@@ -130,7 +130,8 @@ updateForcesOnly :: forall m d r id.
 updateForcesOnly staging = do
   stop
   setForces staging.forces
-  start
+  -- now what you'd maybe like to do here is bump the AlphaTarget for a brief window and then bring it back down to 0.0
+  -- start
 
 updateSimulation :: forall m d r id. 
   Eq id =>
@@ -187,7 +188,7 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
     Step mergedNodeSelection [ transform' datum_.translateNode ]
   addTickFunction "links" $
     Step mergedLinkSelection [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
-  start
+  -- start
 
 -- alternate path, should never be used, if we can't match the selections
 updateSimulation _ _ = pure unit -- something's gone badly wrong, one or both selections are missing

@@ -140,8 +140,8 @@ simulationStart :: forall m row.
   m Unit
 simulationStart = do
   handle <- use (_d3Simulation <<< _handle)
-  let newAlpha = 1.0
-  modifying (_d3Simulation <<< _alpha) (const newAlpha)
+  -- let newAlpha = 1.0
+  -- modifying (_d3Simulation <<< _alpha) (const newAlpha)
   pure $ startSimulation_ handle
 
 -- simulationStop :: forall m row. 
