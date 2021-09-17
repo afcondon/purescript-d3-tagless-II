@@ -89,6 +89,7 @@ component = H.mkComponent
         , createForce "many body"   (RegularForce ForceManyBody) allNodes []
         , createForce "collision"   (RegularForce ForceCollide)  allNodes [ F.radius 4.0 ]
         , createForce "collision20" (RegularForce ForceCollide)  allNodes [ F.radius 20.0] -- NB initially not enabled
+        , createForce linksForceName LinkForce Nothing [ ]
         ]
     }
 
@@ -187,6 +188,7 @@ handleAction = case _ of
       SmallRadius -> runD3SimM $ setForcesByLabel { enable: ["collision"], disable: ["collision20"]} 
       BigRadius   -> runD3SimM $ setForcesByLabel { enable: ["collision20"], disable: ["collision"]} 
     modify_ (\s -> s { manybodySetting = newSetting })
+    runD3SimM $ setConfigVariable $ Alpha 0.7
     simulationStart
 
   ToggleLinks -> do
@@ -198,10 +200,13 @@ handleAction = case _ of
       LinksOn  -> runD3SimM $ setForcesByLabel { enable: [linksForceName], disable: []} 
       LinksOff -> runD3SimM $ setForcesByLabel { enable: [], disable: [linksForceName]} 
     modify_ (\s -> s { linksSetting = newSetting })
+    runD3SimM $ setConfigVariable $ Alpha 0.7
     simulationStart
 
   Freeze  -> runD3SimM $ setConfigVariable $ Alpha 0.0
-  Reheat  -> simulationStart
+  Reheat  -> do
+    runD3SimM $ setConfigVariable $ Alpha 0.7
+    simulationStart
 
 
 codetext :: String

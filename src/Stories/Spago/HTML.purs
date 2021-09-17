@@ -50,9 +50,6 @@ renderSimState state =
 renderSimControls :: forall p. State -> HH.HTML p Action
 renderSimControls state = do
   let
-    toScale :: String -> Number
-    toScale s =
-      (toNumber $ fromMaybe 0 $ fromString s) / 100.0
     params = getSimConfigRecord state
   HH.div
     [ HP.classes [ HH.ClassName "m-6" ]]
@@ -76,75 +73,33 @@ renderSimControls state = do
         ]
     , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
         [ Format.contentHeading_ [ HH.text "Params" ]
-        , HH.input
-            [ HE.onValueInput (ChangeSimConfig <<< Alpha <<< toScale)
-            , HP.type_ HP.InputRange
-            , HP.id "alpha-slider"
-            , HP.class_ (H.ClassName "scaling-slider")
-            , HP.min 0.0
-            , HP.max 100.0
-            , HP.step (Step 10.0)
-            , HP.value (show (params.alpha * 100.0 ))
-            ]
+        , HH.input $ slider { var: Alpha, id: "alpha-slider", min: 0.0, max: 100.0, step: 10.0, value: params.alpha * 100.0 }
         , Format.caption_ [ HH.text ("Alpha: " <> show params.alpha) ]
-        , HH.input
-            [ HE.onValueInput (ChangeSimConfig <<< AlphaDecay <<< toScale)
-            , HP.type_ HP.InputRange
-            , HP.id "alphadecay-slider"
-            , HP.class_ (H.ClassName "scaling-slider")
-            , HP.min 0.0
-            , HP.max 100.0
-            , HP.step (Step 10.0)
-            , HP.value (show (params.alphaDecay * 100.0 ))
-            ]
+        , HH.input $ slider { var: AlphaDecay, id: "alphadecay-slider", min: 0.0, max: 100.0, step: 10.0, value: params.alphaDecay * 100.0 }
         , Format.caption_ [ HH.text ("AlphaDecay: " <> show params.alphaDecay) ]
-        , HH.input
-            [ HE.onValueInput (ChangeSimConfig <<< AlphaMin <<< toScale)
-            , HP.type_ HP.InputRange
-            , HP.id "alphamin-slider"
-            , HP.class_ (H.ClassName "scaling-slider")
-            , HP.min 0.0
-            , HP.max 100.0
-            , HP.step (Step 10.0)
-            , HP.value (show (params.alphaMin * 100.0 ))
-            ]
+        , HH.input $ slider { var: AlphaMin, id: "alphamin-slider", min: 0.0, max: 100.0, step: 10.0, value: params.alphaMin * 100.0 }
         , Format.caption_ [ HH.text ("AlphaMin: " <> show params.alphaMin) ]
-        , HH.input
-            [ HE.onValueInput (ChangeSimConfig <<< AlphaTarget <<< toScale)
-            , HP.type_ HP.InputRange
-            , HP.id "alphatarget-slider"
-            , HP.class_ (H.ClassName "scaling-slider")
-            , HP.min 0.0
-            , HP.max 100.0
-            , HP.step (Step 10.0)
-            , HP.value (show (params.alphaTarget * 100.0 ))
-            ]
+        , HH.input $ slider { var: AlphaTarget, id: "alphatarget-slider", min: 0.0, max: 100.0, step: 10.0, value: params.alphaTarget * 100.0 }
         , Format.caption_ [ HH.text ("AlphaTarget: " <> show params.alphaTarget) ]
-        , HH.input
-            [ HE.onValueInput (ChangeSimConfig <<< VelocityDecay <<< toScale)
-            , HP.type_ HP.InputRange
-            , HP.id "velocitydecay-slider"
-            , HP.class_ (H.ClassName "scaling-slider")
-            , HP.min 0.0
-            , HP.max 100.0
-            , HP.step (Step 10.0)
-            , HP.value (show (params.velocityDecay * 100.0))
-            ]
+        , HH.input $ slider { var: VelocityDecay, id: "velocitydecay-slider", min: 0.0, max: 100.0, step: 10.0, value: params.velocityDecay * 100.0 }
         , Format.caption_ [ HH.text ("VelocityDecay: " <> show params.velocityDecay) ]
         ]
-    -- , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
-    --     [ Button.buttonGroup_
-    --       [ Button.buttonPrimaryLeft
-    --           [ HE.onClick $ const StopSim ]
-    --           [ HH.text "Stop" ]
-    --       , Button.buttonPrimaryCenter
-    --           [ HE.onClick $ const (ChangeSimConfig $ Alpha 0.5) ]
-    --           [ HH.text "Slow" ]
-    --       , Button.buttonPrimaryRight
-    --           [ HE.onClick $ const StartSim ]
-    --           [ HH.text "Start" ]
-    --       ]
-    --     ]
+    , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
+        [ Button.buttonGroup_
+          [ Button.buttonPrimaryLeft
+              [ HE.onClick $ const StopSim ]
+              [ HH.text "Stop" ]
+          , Button.buttonPrimaryCenter
+              [ HE.onClick $ const (ChangeSimConfig $ AlphaTarget 0.3) ]
+              [ HH.text "Heat" ]
+          , Button.buttonPrimaryCenter
+              [ HE.onClick $ const (ChangeSimConfig $ AlphaTarget 0.0) ]
+              [ HH.text "Cool" ]
+          , Button.buttonPrimaryRight
+              [ HE.onClick $ const StartSim ]
+              [ HH.text "Start" ]
+          ]
+        ]
     , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
         [ Format.contentHeading_ [ HH.text "Which nodes should be displayed?" ]
         , Button.buttonGroup_
@@ -367,3 +322,19 @@ renderTableElements (SimState_ simulation)  =
       ]
     , Table.cell  [ css "text-left" ] [ HH.text "elements" ]
     ]
+
+slider config = do
+  let
+    toScale :: String -> Number
+    toScale s =
+      (toNumber $ fromMaybe 0 $ fromString s) / 100.0
+
+  [ HE.onValueInput (ChangeSimConfig <<< config.var <<< toScale)
+  , HP.type_ HP.InputRange
+  , HP.id config.id
+  , HP.class_ (H.ClassName "scaling-slider")
+  , HP.min config.min
+  , HP.max config.max
+  , HP.step (Step config.step)
+  , HP.value (show config.value)
+  ]

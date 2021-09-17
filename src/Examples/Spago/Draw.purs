@@ -130,8 +130,8 @@ updateForcesOnly :: forall m d r id.
 updateForcesOnly staging = do
   stop
   setForces staging.forces
-  -- now what you'd maybe like to do here is bump the AlphaTarget for a brief window and then bring it back down to 0.0
-  -- start
+  -- now what you'd maybe like to do here is bump the AlphaTarget and then bring it back down to 0.0 after some brief window of time?
+  start
 
 updateSimulation :: forall m d r id. 
   Eq id =>
