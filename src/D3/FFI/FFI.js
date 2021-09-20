@@ -335,6 +335,11 @@ exports.putForceInSimulation_ = simulation => label => force => {
   console.log(`Putting ${label} force in the simulation`);
   simulation.force(label, force)
 }
+exports.restartLinksForceInSimulation_ = simulation => force => links => {
+  console.log(`Re-enabling links force in the simulation`);
+  simulation.force(this.linksForceName, force)
+  simulation.links(links) // NB these links are the SWIZZLED links that are cached in the D3SimulationState_
+}
 exports.putForceInSimulationWithFilter_ = simulation => label => filterFn => force => {
   console.log(`Putting ${label} force in the simulation`);
   console.log("remember to put in the filter here"); // TODO

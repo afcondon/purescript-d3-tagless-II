@@ -27,7 +27,7 @@ import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
-import Stories.Spago.State (State, _cssClass, _d3Simulation, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingForces, _stagingLinks, _stagingNodes)
+import Stories.Spago.State (State, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingForces, _stagingLinks, _stagingNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -187,19 +187,3 @@ addTreeToModel rootName maybeModel = do
   model  <- maybeModel
   rootID <- M.lookup rootName model.maps.name2ID
   pure $ treeReduction rootID model
-
--- pinTreeNodes :: forall m. MonadState State m => m Unit
--- pinTreeNodes = do
---   let _ = over (_d3Simulation <<< _nodedata) (map pinTreeNode_)
---   pure unit
-
--- centerPinNamedNode :: forall m. MonadState State m => String -> m Unit
--- centerPinNamedNode name = do
---   let _ = over (_d3Simulation <<< _nodedata) (map $ pinNamedNode_ name 0.0 0.0)
---   pure unit
-
--- unpinActiveNodes :: forall m. MonadState State m => m Unit
--- -- unpinActiveNodes = modify_ $ over _nodesForSim (unpinNode_ <$> _)
--- unpinActiveNodes = do
---   let _ = over (_d3Simulation <<< _nodedata) (map unpinNode_)
---   pure unit

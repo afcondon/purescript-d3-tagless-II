@@ -30,10 +30,13 @@ newtype D3SimulationState_ = SimState_ D3SimulationStateRecord
 -- TODO uses D3Selection instead of type variable, can avoid coercing if generalized correctly
 type D3SimulationStateRecord = { 
     handle_       :: D3Simulation_
-  , forces        :: M.Map Label Force -- REVIEW keeping forces here is a debatable design decision cf semi-duplication of table in Spago example
+  -- keeping the map of labels to forces enables functionality like "enableByLabel"
+  , forces        :: M.Map Label Force
+  -- TODO perhaps by keeping tick functions here we can run simulation, tick by tick from PureScript
   , ticks         :: M.Map Label (Step D3Selection_)
 
-  , "data"        :: { nodes :: Array Datum_ , links :: Array Datum_ }
+  -- this field is used to cache the swizzled links so that links force can be toggled as D3 simply forgets this information if force is deleted
+  , "data"        :: { nodes :: Array Datum_ , links :: Array Datum_ } -- REVIEW are we updating this on setNodes and setLinks
   , key           :: (Datum_ -> Index_)
 
   , alpha         :: Number
@@ -165,6 +168,9 @@ derive instance Newtype ChainableF _
 
 data ForceStatus = ForceActive | ForceDisabled
 derive instance eqForceStatus :: Eq ForceStatus
+showMaybeForceStatus :: Maybe ForceStatus -> String
+showMaybeForceStatus Nothing = ""
+showMaybeForceStatus (Just s) = show s
 instance showForceStatus :: Show ForceStatus where
   show ForceActive = "active"
   show ForceDisabled = "inactive"

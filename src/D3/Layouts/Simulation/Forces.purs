@@ -4,13 +4,56 @@ import Prelude
 
 import D3.Attributes.Instances (Attr(..), AttrBuilder(..), AttributeSetter(..), Label, unboxAttr)
 import D3.Data.Types (D3Simulation_, Datum_)
-import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
+import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, linksForceName, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
 import D3.Simulation.Types (ChainableF, FixForceType(..), Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), LinkForceType(..), RegularForceType(..), _name, _status, toggleForceStatus)
 import Data.Array (elem)
+import Data.Foldable (class Foldable)
 import Data.Lens (over, set, view)
+import Data.Lens.At (at)
+import Data.Map (Map, fromFoldable)
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 
+-- | typeclass to lower the boilerplate obligations when managing forces that you want to take in and out of the simulation
+class ForceLibrary a where
+  initialize   :: forall f. (Foldable f) => (Functor f) => f Force -> a
+  getStatusMap :: a -> Map Label ForceStatus
+  putStatusMap :: Map Label ForceStatus -> a -> a
 
+-- partitionMapWithIndex :: forall a k. (Ord k) => (Tuple k a -> Boolean) -> Map k a -> { no :: Map k a, yes :: Map k a }
+-- partitionMapWithIndex predicate m = do
+--   let { yes, no } = partition predicate $ toUnfoldable m
+--   { yes: fromFoldable yes, no: fromFoldable no }
+
+-- partitionMap :: forall a k. (Ord k) => (a -> Boolean) -> Map k a -> { no :: Map k a, yes :: Map k a }
+-- partitionMap predicate m = do
+--   let { yes, no } = partition (predicate <<< snd) $ toUnfoldable m
+--   { yes: fromFoldable yes, no: fromFoldable no }
+
+instance ForceLibrary (Map Label Force) where
+  initialize forces     = fromFoldable $ (\f -> Tuple (view _name f) f) <$> forces
+  getStatusMap forceMap = fromFoldable $ (\f -> Tuple (view _name f) (view _status f)) <$> forceMap
+  putStatusMap forceStatusMap forceMap = update <$> forceMap
+    where
+      update force =
+        case (view (at (view _name force)) forceStatusMap) of -- get desired status from status map
+          Nothing -> force -- this force wasn't in status map so it's unchanged
+          (Just status) -> set _status status force -- update the status
+
+  -- alternative, uglier, implementation kept as reference and gone in next commit
+  -- putStatusMap forceStatuses forces = do
+  --   let
+  --     { yes, no } = partitionMap (_ == ForceActive) forceStatuses
+  --     enableLabels   = A.fromFoldable $ keys yes
+  --     disableLabels  = A.fromFoldable $ keys no
+  --     update force = if (view _name force) `elem` enableLabels 
+  --                    then set _status ForceActive force
+  --                    else if (view _name force) `elem` disableLabels
+  --                         then set _status ForceDisabled force
+  --                         else force  
+    
+  --   update <$> forces
+    
 showType :: ForceType -> String
 showType = 
   case _ of
@@ -26,6 +69,16 @@ createForce l t f cs = Force {
   , filter: f
   , attributes: cs
   , force_: createForce_ t
+}
+
+createLinkForce :: Maybe ForceFilter -> Array ChainableF -> Force
+createLinkForce f cs = Force {
+    "type": LinkForce
+  , name: linksForceName
+  , status: ForceDisabled
+  , filter: f
+  , attributes: cs
+  , force_: createForce_ LinkForce
 }
 
 disableForce :: Force -> Force
@@ -68,7 +121,8 @@ putForceInSimulation (Force force) simulation_ = do
   case force.type of
     -- CustomForce   -> simulation_ -- REVIEW not implemented or even designed yet
     RegularForce _ -> putForceInSimulation_ simulation_ force.name force.force_
-    LinkForce      -> putForceInSimulation_ simulation_ force.name force.force_ -- TODO use filter on links here, force should already be in sim too
+    -- NB putting the linkforce in the simulation doesn't put the links back in the simulation
+    LinkForce      -> putForceInSimulation_ simulation_ force.name force.force_ -- FIXME need to reload the links if this is just a toggle
     FixForce fix -> do
       let (filter :: (Datum_ -> Boolean)) = 
             case force.filter of
@@ -225,19 +279,3 @@ attrFilter filter' default' = do
     (ArrayAttr (Static a))  -> ArrayAttr (Static a)
     (ArrayAttr (Fn a))      -> ArrayAttr (Fn a)
     (ArrayAttr (FnI a))     -> ArrayAttr (FnI a)
-
--- attrFilterI :: (Datum_ -> Index_ -> Boolean) -> Number -> Attr -> Attr
--- attrFilterI filter default = 
---   case _ of
---     (StringAttr (Static a)) -> StringAttr (Static a)
---     (StringAttr (Fn a))     -> StringAttr (Fn a)
---     (StringAttr (FnI a))    -> StringAttr (FnI a)
-
---     (NumberAttr (Static a)) -> NumberAttr (Fn (addFilterToStatic filter a default))
---     (NumberAttr (Fn a))     -> NumberAttr (Fn (addFilterToFn filter a default))
---     (NumberAttr (FnI a))    -> NumberAttr (FnI (addFilterToFnI filter a default))
-
---     (ArrayAttr (Static a))  -> ArrayAttr (Static a)
---     (ArrayAttr (Fn a))      -> ArrayAttr (Fn a)
---     (ArrayAttr (FnI a))     -> ArrayAttr (FnI a)
-

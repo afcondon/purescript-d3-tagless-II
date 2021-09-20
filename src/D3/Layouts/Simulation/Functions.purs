@@ -1,5 +1,6 @@
 module D3.Simulation.Functions where
 
+import D3.Simulation.Types
 import Prelude
 
 import Control.Monad.State (class MonadState)
@@ -9,21 +10,25 @@ import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveLinkReferenc
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
 import D3.Simulation.Forces (disableByLabels, enableByLabels, enableOnlyTheseLabels, putForceInSimulation, setForceAttr)
-import D3.Simulation.Types 
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (RawData)
 import Data.Array (elem, filter, intercalate)
 import Data.Array as A
 import Data.Foldable (traverse_)
-import Data.Lens (modifying, set, use, view, (%=))
+import Data.Lens (Lens', modifying, set, use, view, (%=))
 import Data.Lens.At (at)
+import Data.Lens.Record (prop)
 import Data.Map (Map, toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..), fst, snd)
-import Stories.Spago.State (_d3Simulation)
+import Type.Proxy (Proxy(..))
 import Unsafe.Coerce (unsafeCoerce)
+
+-- | anything that wants to use a simulation will need a row that matches this in its State
+_d3Simulation :: forall a r. Lens' { simulation :: a | r} a
+_d3Simulation = prop (Proxy :: Proxy "simulation")
 
 -- | Underlying functions which allow us to make monadic updates from OUTSIDE of a script
 -- | allowing control of the simulation outside of the drawing phase which runs in D3M
@@ -39,11 +44,10 @@ reheatSimulation = set _alpha 1.0
 
 simulationAddForces :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) => 
-  Array Force -> m Unit
+  Map Label Force -> m Unit
 simulationAddForces forces = do
   traverse_ simulationAddForce forces -- effectfully put the forces in the simulation
-  let (updateMap :: M.Map Label Force) = M.fromFoldable $ forceTuples forces
-  modifying (_d3Simulation <<< _forces) (\m -> M.union updateMap m )
+  modifying (_d3Simulation <<< _forces) (\m -> M.union forces m )
 
 simulationRemoveAllForces :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) => 
@@ -85,6 +89,14 @@ simulationDisableForcesByLabel labels = do
   forces <- use (_d3Simulation <<< _forces)
   (_d3Simulation <<< _forces) %= (const $ (disableByLabels handle labels) <$> forces)
 
+simulationEnableForcesByLabel :: forall m row. 
+  (MonadState { simulation :: D3SimulationState_ | row } m) =>
+  Array Label  -> m Unit
+simulationEnableForcesByLabel labels  = do
+  handle <- use (_d3Simulation <<< _handle)
+  forces <- use (_d3Simulation <<< _forces) -- TODO this is the forces table inside the simulation record
+  (_d3Simulation <<< _forces) %= (const $ (enableByLabels handle labels) <$> forces)
+  
 simulationEnableOnlyTheseForces :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   Array Label -> m Unit
@@ -94,15 +106,6 @@ simulationEnableOnlyTheseForces labels = do
   let updatedForces = (enableOnlyTheseLabels handle labels) <$> forces -- REVIEW can't we traversed (optic) this update?
   modifying (_d3Simulation <<< _forces) (const updatedForces)
 
-simulationEnableForcesByLabel :: forall m row. 
-  (MonadState { simulation :: D3SimulationState_ | row } m) =>
-  Array Label  -> m Unit
-simulationEnableForcesByLabel labels  = do
-  handle <- use (_d3Simulation <<< _handle)
-  forces <- use (_d3Simulation <<< _forces) -- TODO this is the forces table inside the simulation record
-  let updatedForces = (enableByLabels handle labels) <$> forces -- REVIEW can't we traversed (optic) this update?
-  modifying (_d3Simulation <<< _forces) (const updatedForces)
-  
 simulationSetActiveForces :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   Map Label ForceStatus -> m Unit

@@ -16,7 +16,6 @@ import Data.Map (filter, toUnfoldable)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
-import Stories.Spago.State (_d3Simulation)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | ====================================================
@@ -129,16 +128,6 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     handle <- simulationHandle
     -- TODO delete the tick function from the state
     let _ = disableTick_ handle label
-    pure unit
-
-  defaultNodeTick label selection = do
-    handle <- simulationHandle
-    let _ = defaultNodeTick_ label handle selection -- TODO this is hardwired to cx/cy right now
-    pure unit
-
-  defaultLinkTick label selection = do
-    handle <- simulationHandle
-    let _ = defaultLinkTick_ label handle selection
     pure unit
     
 -- TODO is this really necessary tho? couldn't it be added to the tick function 

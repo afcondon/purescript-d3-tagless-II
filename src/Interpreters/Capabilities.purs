@@ -39,49 +39,35 @@ type ForceConfigLists = { enable :: Array Label, disable :: Array Label }
   -- return them for the Join to use using the same type...however, they may actually be changed 
   -- from what was sent...it's not tidy yet
 class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> selection where
+  -- writing callbacks from JavaScript will sometimes necessitate having the simulation handle
+  -- this can't easily be solved until / unless D3 is replaced with something else
+  simulationHandle :: m D3Simulation_
   -- control
   start :: m Unit
   stop  :: m Unit
-
   -- config
   setConfigVariable    :: SimVariable -> m Unit
-
   -- management of forces
-  -- removeAllForces       ::                m Unit
-  addForces             :: Array Force -> m Unit
-  -- addForce              :: Force       -> m Unit
-  -- toggleForceByLabel    :: Label       -> m Unit
-  setForcesByLabel      :: { enable :: Array Label, disable :: Array Label } -> m Unit
-  -- enableOnlyTheseForces :: Array Label -> m Unit
-
+  addForces :: Map Label Force -> m Unit
+  setForces :: Map Label ForceStatus -> m Unit -- TODO provide lenses to make it easy to enable / disable / toggle map entries
+  setForcesByLabel :: { enable :: Array Label, disable :: Array Label } -> m Unit -- REVIEW not convinced this function is necessary
   -- management of data (nodes and links)
-  -- merge these functions back together later
-  carryOverSimStateN :: forall d r id. selection -> RawData d r id -> (Datum_ -> Index_) ->  m (Array (D3_SimulationNode d))
-  
-  -- REVIEW probably we can actually model the simulation merge bit analogously to the swizzling for links?
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m Unit
   setLinks :: forall d r. Array (D3LinkSwizzled (D3_SimulationNode d) r) -> m Unit
-  setForces :: Map Label ForceStatus -> m Unit
-  -- should be able to merge carryOverSimStateL and swizzleLinks (and possibly carryOverSimStateN)
+  getNodes :: forall d.   m (Array (D3_SimulationNode d))
+  getLinks :: forall d r. m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
+  -- TODO merge these functions back together later once we have some good usage examples to validate
+  -- TODO should be able to merge carryOverSimStateL and swizzleLinks (and possibly carryOverSimStateN)
+  carryOverSimStateN :: forall d r id. selection -> RawData d r id -> (Datum_ -> Index_) ->  m (Array (D3_SimulationNode d))
   carryOverSimStateL :: forall d r id. (Eq id) => selection -> RawData d r id -> (Datum_ -> Index_) ->  m (Array (D3Link id r))
   swizzleLinks :: forall d r id. 
     Array (D3Link id r) ->
     Array (D3_SimulationNode d) ->
     (Datum_ -> Index_) ->
     m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
-
-  getNodes :: forall d.   m (Array (D3_SimulationNode d))
-  getLinks :: forall d r. m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
-
   -- adding functions that occur on every tick of the simulation clock
   addTickFunction    :: Label -> Step selection -> m Unit 
   removeTickFunction :: Label                   -> m Unit
-  defaultNodeTick    :: Label -> selection      -> m Unit
-  defaultLinkTick    :: Label -> selection      -> m Unit
-
-  -- writing callbacks from JavaScript will sometimes necessitate having the simulation handle
-  -- this can't easily be solved until / unless D3 is replaced with something else
-  simulationHandle :: m D3Simulation_
 
 -- RawData type exists to clean up types of carryOverSimState functions and maybe can just fold into Staging if 
 -- Simulation capability can wrap up, ie hide, the complexity around updates of running simulations and the 

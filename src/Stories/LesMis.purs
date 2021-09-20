@@ -5,21 +5,25 @@ import Prelude
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, modify_)
+import D3.Attributes.Instances (Label)
 import D3.Examples.LesMiserables as LesMis
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.FFI (linksForceName)
 import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce)
-import D3.Simulation.Functions (simulationStart)
-import D3.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), SimVariable(..), allNodes, initialSimulationState)
+import D3.Simulation.Forces (createForce, createLinkForce, initialize)
+import D3.Simulation.Functions (_d3Simulation, simulationStart)
+import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus, ForceType(..), RegularForceType(..), SimVariable(..), _linkdata, _name, _status, allNodes, initialSimulationState, showMaybeForceStatus)
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel)
+import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel, setLinks)
 import D3Tagless.Instance.Simulation (runD3SimM)
-import Data.Lens (Lens', over)
+import Data.Lens (Lens', _Just, over, preview, use, view, (%=))
+import Data.Lens.At (at)
 import Data.Lens.Record (prop)
+import Data.Map (Map, fromFoldable)
 import Data.Maybe (Maybe(..))
+import Data.Tuple (Tuple(..))
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
@@ -29,6 +33,7 @@ import Ocelot.Block.FormField as FormField
 import Stories.Utilities (syntaxHighlightedCode)
 import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
+import Unsafe.Coerce (unsafeCoerce)
 
 data Action
   = Initialize
@@ -39,24 +44,11 @@ data Action
   | Freeze
   | Reheat
 
-data ManyBodySetting = SmallRadius | BigRadius
-derive instance Eq ManyBodySetting
-instance Show ManyBodySetting where
-  show SmallRadius = "Compact"
-  show BigRadius   = "Expanded"
-data LinksSetting  = LinksOn | LinksOff
-derive instance Eq LinksSetting
-instance Show LinksSetting where
-  show LinksOn = "Link Force"
-  show LinksOff = "No link force"
-
 type State = { 
     simulation      :: D3SimulationState_
-  , manybodySetting :: ManyBodySetting
-  , linksSetting    :: LinksSetting
   , blurb           :: Expandable.Status
   , code            :: Expandable.Status
-  , forces          :: Array Force
+  , forceLibrary    :: Map Label Force
 }
 
 _blurb :: Lens' State Expandable.Status
@@ -65,6 +57,13 @@ _blurb = prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
+_forceLibrary :: Lens' State (Map Label Force)
+_forceLibrary = prop (Proxy :: Proxy "forceLibrary")
+
+_linksSetting = _forceLibrary <<< at linksForceName <<< _Just <<< _status
+
+_manyBodySetting = _forceLibrary <<< at "many body" <<< _Just <<< _status
+ 
 component :: forall query output m. 
   MonadAff m => 
   H.Component query Unit output m
@@ -80,16 +79,14 @@ component = H.mkComponent
   initialState :: State
   initialState = { 
         simulation: initialSimulationState 2
-      , manybodySetting: SmallRadius
-      , linksSetting: LinksOn
       , blurb: Expandable.Collapsed
       , code: Expandable.Collapsed
-      , forces: [ 
+      , forceLibrary: initialize [ 
           createForce "center"      (RegularForce ForceCenter)   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
         , createForce "many body"   (RegularForce ForceManyBody) allNodes []
         , createForce "collision"   (RegularForce ForceCollide)  allNodes [ F.radius 4.0 ]
         , createForce "collision20" (RegularForce ForceCollide)  allNodes [ F.radius 20.0] -- NB initially not enabled
-        , createForce linksForceName LinkForce Nothing [ ]
+        , createLinkForce Nothing [ ]
         ]
     }
 
@@ -99,10 +96,10 @@ component = H.mkComponent
       [ Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
         [ Button.buttonVertical
           [ HE.onClick (const $ ToggleLinks) ] -- { enable: ["links"], disable: [""]}
-          [ HH.text $ show state.linksSetting ]
+          [ HH.text $ showMaybeForceStatus (preview _linksSetting state) ]
         , Button.buttonVertical
           [ HE.onClick (const $ ToggleManyBody) ]
-          [ HH.text $ show state.manybodySetting ]
+          [ HH.text $ showMaybeForceStatus (preview _manyBodySetting state) ]
         , Button.buttonVertical
           [ HE.onClick (const $ Freeze) ]
           [ HH.text "Freeze" ]
@@ -173,7 +170,7 @@ handleAction = case _ of
     let graph = readGraphFromFileContents response
 
     state <- H.get
-    runD3SimM $ addForces state.forces
+    runD3SimM $ addForces state.forceLibrary
     runD3SimM $ setForcesByLabel { enable: [ "center", "many body", "collision"], disable: [] } 
     runD3SimM $ LesMis.graphScript graph "div.svg-container"
 
@@ -181,25 +178,24 @@ handleAction = case _ of
 
   ToggleManyBody -> do
     state <- H.get
-    let newSetting = case state.manybodySetting of
-                      SmallRadius -> BigRadius
-                      BigRadius   -> SmallRadius
-    case newSetting of
-      SmallRadius -> runD3SimM $ setForcesByLabel { enable: ["collision"], disable: ["collision20"]} 
-      BigRadius   -> runD3SimM $ setForcesByLabel { enable: ["collision20"], disable: ["collision"]} 
-    modify_ (\s -> s { manybodySetting = newSetting })
+    -- let newSetting = case state.manybodySetting of
+    --                   SmallRadius -> BigRadius
+    --                   BigRadius   -> SmallRadius
+    -- case newSetting of
+    --   SmallRadius -> runD3SimM $ setForcesByLabel { enable: ["collision"], disable: ["collision20"]} 
+    --   BigRadius   -> runD3SimM $ setForcesByLabel { enable: ["collision20"], disable: ["collision"]} 
+    -- modify_ (\s -> s { manybodySetting = newSetting })
     runD3SimM $ setConfigVariable $ Alpha 0.7
     simulationStart
 
   ToggleLinks -> do
-    state <- H.get
-    let newSetting = case state.linksSetting of
-                      LinksOn  -> LinksOff
-                      LinksOff -> LinksOn
-    case newSetting of
-      LinksOn  -> runD3SimM $ setForcesByLabel { enable: [linksForceName], disable: []} 
-      LinksOff -> runD3SimM $ setForcesByLabel { enable: [], disable: [linksForceName]} 
-    modify_ (\s -> s { linksSetting = newSetting })
+    -- case (use _linksSetting) of
+    --   LinksOn  -> do
+    --     runD3SimM $ setForcesByLabel { enable: [linksForceName], disable: []}
+    --     runD3SimM $ setLinks (unsafeCoerce links) -- FIXME, just to check if data stored in D3SimulationState is correct for links
+    --   LinksOff -> do
+    --     runD3SimM $ setForcesByLabel { enable: [], disable: [linksForceName]} 
+    -- _linksSetting %= toggleLinkSetting
     runD3SimM $ setConfigVariable $ Alpha 0.7
     simulationStart
 
@@ -207,7 +203,6 @@ handleAction = case _ of
   Reheat  -> do
     runD3SimM $ setConfigVariable $ Alpha 0.7
     simulationStart
-
 
 codetext :: String
 codetext = 

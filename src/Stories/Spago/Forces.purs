@@ -6,7 +6,7 @@ import D3.Attributes.Instances (Label)
 import D3.Data.Types (Datum_, Index_, PointXY, index_ToInt)
 import D3.Examples.Spago.Model (datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce)
+import D3.Simulation.Forces (class ForceLibrary, createForce, createLinkForce, initialize)
 import D3.Simulation.Types (FixForceType(..), Force, ForceFilter(..), ForceStatus, ForceType(..), RegularForceType(..), _name, _status, allNodes)
 import Data.Int (toNumber)
 import Data.Lens (view)
@@ -24,8 +24,8 @@ forceLibraryMap = do
   fromFoldable $ forceTuple <$> forceLibrary
 
 -- | table of all the forces that are used in the Spago component
-forceLibrary :: Array Force
-forceLibrary = [
+forceLibrary :: Map Label Force
+forceLibrary = initialize [
         createForce "collide1"     (RegularForce ForceCollide)  allNodes [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
       , createForce "collide2"     (RegularForce ForceCollide)  allNodes [ F.strength 1.0, F.radius datum_.collideRadiusBig, F.iterations 1.0 ]
       , createForce "charge1"      (RegularForce ForceManyBody) allNodes [ F.strength (-30.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
@@ -51,7 +51,7 @@ forceLibrary = [
       , createForce "moduleOrbit3" (RegularForce ForceRadial)   (selectivelyApplyForce datum_.isUsedModule "direct deps of Main")
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
 -- REVIEW shouldn't this be "exports.linksforcename"
-      , createForce "links" LinkForce Nothing [ F.strength 1.0, F.distance 0.0, F.numKey (toNumber <<< datum_.id) ]
+      , createLinkForce Nothing [ F.strength 1.0, F.distance 0.0, F.numKey (toNumber <<< datum_.id) ]
       ]
   where
     gridXY   _ i = spy "clusterPoint" $ cluster2Point i

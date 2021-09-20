@@ -8,6 +8,7 @@ import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode)
 import D3.FFI (SimulationConfig_, readSimulationConfig_)
 import D3.Node (D3_SimulationNode(..), NodeID)
+import D3.Simulation.Functions (_d3Simulation)
 import D3.Simulation.Types (D3SimulationState_, ForceStatus(..), _handle)
 import D3Tagless.Capabilities (Staging)
 import Data.Array (filter)
@@ -41,9 +42,6 @@ _staging = prop (Proxy :: Proxy "staging")
 
 _cssClass :: forall a r. Lens' { svgClass :: a | r } a
 _cssClass = prop (Proxy :: Proxy "svgClass")
-
-_d3Simulation :: forall a r. Lens' { simulation :: a | r} a
-_d3Simulation = prop (Proxy :: Proxy "simulation")
 
 chooseSimNodes :: (SpagoSimNode -> Boolean) -> State -> Maybe (Array SpagoSimNode)
 chooseSimNodes fn state = filter fn <$> preview _modelNodes state
