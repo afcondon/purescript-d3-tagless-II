@@ -10,18 +10,18 @@ import D3.Examples.LesMiserables as LesMis
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.FFI (linksForceName)
 import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce, createLinkForce, initialize)
+import D3.Simulation.Forces (createForce, createLinkForce, getStatusMap, initialize)
 import D3.Simulation.Functions (_d3Simulation, simulationStart)
-import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus, ForceType(..), RegularForceType(..), SimVariable(..), _linkdata, _name, _status, allNodes, initialSimulationState, showMaybeForceStatus)
+import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus(..), ForceType(..), RegularForceType(..), SimVariable(..), _linkdata, _name, _status, allNodes, initialSimulationState, showMaybeForceStatus, toggleForceStatus)
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Capabilities (addForces, setConfigVariable, setForcesByLabel, setLinks)
-import D3Tagless.Instance.Simulation (runD3SimM)
+import D3Tagless.Capabilities (addForces, setConfigVariable, setForceStatuses, setLinks)
+import D3Tagless.Instance.Simulation (runWithD3_Simulation)
 import Data.Lens (Lens', _Just, over, preview, use, view, (%=))
 import Data.Lens.At (at)
 import Data.Lens.Record (prop)
-import Data.Map (Map, fromFoldable)
+import Data.Map (Map, empty, fromFoldable)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Aff.Class (class MonadAff)
@@ -170,38 +170,31 @@ handleAction = case _ of
     let graph = readGraphFromFileContents response
 
     state <- H.get
-    runD3SimM $ addForces state.forceLibrary
-    runD3SimM $ setForcesByLabel { enable: [ "center", "many body", "collision"], disable: [] } 
-    runD3SimM $ LesMis.graphScript graph "div.svg-container"
+    runWithD3_Simulation $ addForces state.forceLibrary
+    runWithD3_Simulation $ setForceStatuses $ fromFoldable $ (\l -> Tuple l ForceActive) <$> [ "center", "many body", "collision", "links" ]
+    runWithD3_Simulation $ LesMis.graphScript graph "div.svg-container"
 
-  Finalize ->  pure unit -- runD3SimM removeAllForces
+  Finalize ->  pure unit -- runWithD3_Simulation removeAllForces
 
   ToggleManyBody -> do
+    _manyBodySetting %= toggleForceStatus
     state <- H.get
-    -- let newSetting = case state.manybodySetting of
-    --                   SmallRadius -> BigRadius
-    --                   BigRadius   -> SmallRadius
-    -- case newSetting of
-    --   SmallRadius -> runD3SimM $ setForcesByLabel { enable: ["collision"], disable: ["collision20"]} 
-    --   BigRadius   -> runD3SimM $ setForcesByLabel { enable: ["collision20"], disable: ["collision"]} 
-    -- modify_ (\s -> s { manybodySetting = newSetting })
-    runD3SimM $ setConfigVariable $ Alpha 0.7
+    let statusMap = getStatusMap state.forceLibrary
+    runWithD3_Simulation $ setForceStatuses statusMap
+    runWithD3_Simulation $ setConfigVariable $ Alpha 0.7
     simulationStart
 
   ToggleLinks -> do
-    -- case (use _linksSetting) of
-    --   LinksOn  -> do
-    --     runD3SimM $ setForcesByLabel { enable: [linksForceName], disable: []}
-    --     runD3SimM $ setLinks (unsafeCoerce links) -- FIXME, just to check if data stored in D3SimulationState is correct for links
-    --   LinksOff -> do
-    --     runD3SimM $ setForcesByLabel { enable: [], disable: [linksForceName]} 
-    -- _linksSetting %= toggleLinkSetting
-    runD3SimM $ setConfigVariable $ Alpha 0.7
+    _linksSetting %= toggleForceStatus
+    state <- H.get
+    let statusMap = getStatusMap state.forceLibrary
+    runWithD3_Simulation $ setForceStatuses statusMap
+    runWithD3_Simulation $ setConfigVariable $ Alpha 0.7
     simulationStart
 
-  Freeze  -> runD3SimM $ setConfigVariable $ Alpha 0.0
+  Freeze  -> runWithD3_Simulation $ setConfigVariable $ Alpha 0.0
   Reheat  -> do
-    runD3SimM $ setConfigVariable $ Alpha 0.7
+    runWithD3_Simulation $ setConfigVariable $ Alpha 0.7
     simulationStart
 
 codetext :: String
@@ -287,3 +280,4 @@ particle’s position.""
 
 
 """
+

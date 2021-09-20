@@ -9,7 +9,7 @@ import D3.Data.Types (D3Selection_, Datum_, Index_)
 import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveLinkReferences_, d3PreserveSimulationPositions_, defaultSimulationDrag_, disableDrag_, getIDsFromNodes_, getLinkIDs_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_, swizzleLinks_)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
-import D3.Simulation.Forces (disableByLabels, enableByLabels, enableOnlyTheseLabels, putForceInSimulation, setForceAttr)
+import D3.Simulation.Forces (disableByLabels, enableByLabels, enableOnlyTheseLabels, putForceInSimulation, putStatusMap, setForceAttr, updateForceInSimulation)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (RawData)
 import Data.Array (elem, filter, intercalate)
@@ -97,24 +97,24 @@ simulationEnableForcesByLabel labels  = do
   forces <- use (_d3Simulation <<< _forces) -- TODO this is the forces table inside the simulation record
   (_d3Simulation <<< _forces) %= (const $ (enableByLabels handle labels) <$> forces)
   
-simulationEnableOnlyTheseForces :: forall m row. 
-  (MonadState { simulation :: D3SimulationState_ | row } m) =>
-  Array Label -> m Unit
-simulationEnableOnlyTheseForces labels = do
-  handle <- use (_d3Simulation <<< _handle)
-  forces <- use (_d3Simulation <<< _forces)
-  let updatedForces = (enableOnlyTheseLabels handle labels) <$> forces -- REVIEW can't we traversed (optic) this update?
-  modifying (_d3Simulation <<< _forces) (const updatedForces)
+-- simulationEnableOnlyTheseForces :: forall m row. 
+--   (MonadState { simulation :: D3SimulationState_ | row } m) =>
+--   Array Label -> m Unit
+-- simulationEnableOnlyTheseForces labels = do
+--   handle <- use (_d3Simulation <<< _handle)
+--   forces <- use (_d3Simulation <<< _forces)
+--   let updatedForces = (enableOnlyTheseLabels handle labels) <$> forces -- REVIEW can't we traversed (optic) this update?
+--   modifying (_d3Simulation <<< _forces) (const updatedForces)
 
-simulationSetActiveForces :: forall m row. 
+simulationSetForceStatuses :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   Map Label ForceStatus -> m Unit
-simulationSetActiveForces stagingforces = do
+simulationSetForceStatuses stagingforces = do
+  modifying (_d3Simulation <<< _forces) (putStatusMap stagingforces)
+  forces <- use (_d3Simulation <<< _forces) 
   handle <- use (_d3Simulation <<< _handle)
-  forces <- use (_d3Simulation <<< _forces) -- TODO this is the forces table inside the simulation record
-  let labels = fst <$> (filter (\f -> snd f == ForceActive) $ toUnfoldable stagingforces) -- only forces that are (label, ForceActive)
-  let updatedForces = (enableOnlyTheseLabels handle labels) <$> forces -- REVIEW can't we traversed (optic) this update?
-  modifying (_d3Simulation <<< _forces) (const updatedForces)
+  let _ = (flip updateForceInSimulation $ handle) <$> forces
+  pure unit
 
 simulationSetVariable :: forall m row.
   (MonadState { simulation :: D3SimulationState_ | row } m) => 

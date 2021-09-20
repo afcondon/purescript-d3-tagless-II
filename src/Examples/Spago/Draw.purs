@@ -10,7 +10,7 @@ import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Functions (simulationStart, simulationStop)
 import D3.Simulation.Types (SimVariable(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addForces, addTickFunction, appendTo, attach, carryOverSimStateL, carryOverSimStateN, mergeSelections, on, openSelection, setAttributes, setConfigVariable, setForces, setLinks, setNodes, simulationHandle, start, stop, swizzleLinks, updateJoin)
+import D3Tagless.Capabilities 
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
@@ -129,7 +129,7 @@ updateForcesOnly :: forall m d r id.
   m Unit
 updateForcesOnly staging = do
   stop
-  setForces staging.forces
+  setForceStatuses staging.forces
   -- now what you'd maybe like to do here is bump the AlphaTarget and then bring it back down to 0.0 after some brief window of time?
   start
 
@@ -144,7 +144,7 @@ updateSimulation :: forall m d r id.
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
   stop
-  setForces staging.forces
+  setForceStatuses staging.forces
   node                  <- openSelection nodesGroup "g"    -- this call and updateJoin and append all have to match FIX THIS
   link                  <- openSelection linksGroup "line" -- this call and updateJoin and append all have to match FIX THIS
   -- this will change all the object refs so a defensive copy is needed if join is to work

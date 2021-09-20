@@ -12,7 +12,7 @@ import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, allNodes, convertFiles
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.Simulation.Types (ForceStatus(..), SimVariable(..), _name, initialSimulationState, toggleForceStatus)
 import D3Tagless.Capabilities (addForces, setConfigVariable, start)
-import D3Tagless.Instance.Simulation (evalEffectSimulation, runD3SimM)
+import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
 import Data.Array (elem, filter)
 import Data.Either (hush)
 import Data.Lens (modifying, use, view, (%=))
@@ -58,7 +58,7 @@ handleAction = case _ of
   Initialize -> do    -- TODO think we actually don't want to be doing anything here until the component is shown
     (maybeModel :: Maybe SpagoModel) <- H.liftAff readModelData
     _model %= (const maybeModel)
-    runD3SimM $ addForces forceLibrary -- NB these are all disabled initially
+    runWithD3_Simulation $ addForces forceLibrary -- NB these are all disabled initially
     openSelections <- evalEffectSimulation Graph.initialize -- should result in the "enter" selections being in the simulation
     (_staging <<< _enterselections <<< _nodes) %= (const $ openSelections.nodes) 
     (_staging <<< _enterselections <<< _links) %= (const $ openSelections.links)
@@ -68,60 +68,60 @@ handleAction = case _ of
   Scene PackageGrid -> do
     _cssClass %= (const "cluster")
     -- TODO make this removeSelection part of the Halogen State of the component
-    -- runD3SimM $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
+    -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     setNodesLinksForces { chooseLinks: isM2P_Link
                         , chooseNodes: allNodes
                         , forces: [ "packageGrid", "clusterx", "clustery", "collide1" ] }
     staging <- use _staging
-    runD3SimM $ Graph.updateSimulation staging graphSceneAttributes
+    runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
 
   Scene PackageGraph -> do
     _cssClass %= (const "graph")
-    -- runD3SimM $ removeNamedSelection "treelinksSelection"
-    -- runD3SimM $ uniformlyDistributeNodes -- FIXME
+    -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection"
+    -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
     setNodesLinksForces { chooseLinks: isP2P_Link
                         , chooseNodes: isPackage
                         , forces: [ "centerNamedNode", "center", "collide2", "charge2", "links"] }
     staging <- use _staging
-    runD3SimM $ Graph.updateSimulation staging graphSceneAttributes
+    runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
 
   Scene (ModuleTree _) -> do
     _cssClass %= (const "tree")
-    -- runD3SimM $ removeNamedSelection "graphlinksSelection"
+    -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     setNodesLinksForces { forces: ["treeNodesPinned", "links", "center", "charge1", "collide2", "moduleOrbit1" ]
                         , chooseNodes: isModule           -- show all modules, 
                         , chooseLinks: isM2M_Graph_Link } -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
     staging <- use _staging
-    runD3SimM $ Graph.updateSimulation staging treeSceneAttributes
+    runWithD3_Simulation $ Graph.updateSimulation staging treeSceneAttributes
     
   ToggleForce label -> do
     modifying (_stagingForces <<< at label) (\maybeStatus -> toggleForceStatus <$> maybeStatus)
     staging <- use _staging
-    runD3SimM $ Graph.updateForcesOnly staging
+    runWithD3_Simulation $ Graph.updateForcesOnly staging
 
   Filter (LinkFilter filterFn) -> do
     chooseLinks filterFn
     staging <- use _staging
-    runD3SimM $ Graph.updateSimulation staging graphSceneAttributes
+    runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
 
   Filter (NodeFilter filterFn) -> do
     chooseNodes filterFn
     staging <- use _staging
-    runD3SimM $ Graph.updateSimulation staging graphSceneAttributes
+    runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
 
   ChangeStyling style -> do
     _cssClass %= (const style) -- modify_ (\s -> s { svgClass = style })
 
   ChangeSimConfig c -> do
-    runD3SimM $ setConfigVariable c 
-    runD3SimM start   
+    runWithD3_Simulation $ setConfigVariable c 
+    runWithD3_Simulation start   
 
   StartSim -> do
-    runD3SimM $ setConfigVariable $ Alpha 1.0
-    runD3SimM start
+    runWithD3_Simulation $ setConfigVariable $ Alpha 1.0
+    runWithD3_Simulation start
 
   StopSim -> do
-    runD3SimM $ setConfigVariable $ Alpha 0.0
+    runWithD3_Simulation $ setConfigVariable $ Alpha 0.0
 
 -- ======================================================================================================================
 -- some utility functions to manage what data from the model gets given to the visualization code

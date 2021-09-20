@@ -33,12 +33,12 @@ exec_D3M_Simulation simulation (D3SimM state_T) = liftA1 snd $ runStateT state_T
 eval_D3M_Simulation :: forall a row. { simulation :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect a
 eval_D3M_Simulation simulation (D3SimM state_T) = liftA1 fst $ runStateT state_T simulation
 
-runD3SimM :: forall m a row.
+runWithD3_Simulation :: forall m a row.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
   MonadEffect m =>
   D3SimM row D3Selection_ a -> m Unit
-runD3SimM state_T = do
+runWithD3_Simulation state_T = do
     state <- get
     state' <- liftEffect $ exec_D3M_Simulation state state_T
     modify_ (\_ -> state')
@@ -82,26 +82,18 @@ instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
 -- TODO should each of these facets (stop/go, forces, data, selections, tick functions)
 instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
 -- stop and go
-  start                                = simulationStart
-  stop                                 = simulationStop
+  start                 = simulationStart
+  stop                  = simulationStop
 -- management of simulation variables
-  setConfigVariable v                  = simulationSetVariable v
+  setConfigVariable v   = simulationSetVariable v
 -- management of forces
-  -- addForce force                       = simulationAddForce force
-  addForces forces                     = simulationAddForces forces  
-  -- removeAllForces                      = simulationRemoveAllForces
-  -- enableOnlyTheseForces                = simulationEnableOnlyTheseForces
-  -- toggleForceByLabel label             = simulationToggleForce label
-  setForcesByLabel { enable, disable } = 
-    do
-      simulationDisableForcesByLabel disable
-      simulationEnableForcesByLabel  enable
+  addForces forces      = simulationAddForces forces  
+  setForceStatuses      = simulationSetForceStatuses
 -- management of data 
   carryOverSimStateN selection rawdata key = simulationPreservePositions selection rawdata key
   carryOverSimStateL selection rawdata key = simulationPreserveLinkReferences selection rawdata key
   setNodes           = simulationSetNodes
   setLinks           = simulationSetLinks 
-  setForces          = simulationSetActiveForces
   swizzleLinks       = simulationSwizzleLinks
   getNodes           = simulationGetNodes
   getLinks           = simulationGetLinks 
