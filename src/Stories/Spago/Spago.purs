@@ -1,7 +1,6 @@
 module Stories.Spago where
 
 import Prelude
-import Stories.Spago.State (State, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingLinks, _stagingNodes)
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
@@ -12,7 +11,7 @@ import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Graph_Link, isM2P_Link, 
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, allNodes, convertFilesToGraphModel, isModule, isPackage)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (linksForceName)
-import D3.Simulation.Types (ForceStatus(..), SimVariable(..), _forceStatus, _forceStatuses, initialSimulationState, toggleForceStatus)
+import D3.Simulation.Types (ForceStatus(..), SimVariable(..), _forceStatus, _forceStatuses, _onlyTheseForcesActive, initialSimulationState, toggleForceStatus)
 import D3Tagless.Capabilities (actualizeForces, addForces, setConfigVariable, start)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
 import Data.Array (filter)
@@ -27,6 +26,7 @@ import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
+import Stories.Spago.State (State, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingLinks, _stagingNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -68,11 +68,7 @@ handleAction = case _ of
     _cssClass %= (const "cluster")
     -- TODO make this removeSelection part of the Halogen State of the component
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
-    _forceStatuses %= (const empty)
-    _forceStatus "packageGrid" %= (const ForceActive)
-    _forceStatus "clusterx" %= (const ForceActive)
-    _forceStatus "clustery" %= (const ForceActive)
-    _forceStatus "collide1" %= (const ForceActive)
+    _forceStatuses %= _onlyTheseForcesActive [ "packageGrid", "clusterx", "clustery", "collide1" ]
     setNodesLinksForces { chooseLinks: isM2P_Link, chooseNodes: allNodes }
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
@@ -81,12 +77,7 @@ handleAction = case _ of
     _cssClass %= (const "graph")
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection"
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
-    _forceStatuses %= (const empty)
-    _forceStatus "centerNamedNode" %= (const ForceActive)
-    _forceStatus "center"          %= (const ForceActive)
-    _forceStatus "collide2"        %= (const ForceActive)
-    _forceStatus "charge2"         %= (const ForceActive)
-    _forceStatus linksForceName    %= (const ForceActive)
+    _forceStatuses %= _onlyTheseForcesActive ["centerNamedNode", "center", "collide2", "charge2", linksForceName ]
     setNodesLinksForces { chooseLinks: isP2P_Link, chooseNodes: isPackage }
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
@@ -94,13 +85,7 @@ handleAction = case _ of
   Scene (ModuleTree _) -> do
     _cssClass %= (const "tree")
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
-    _forceStatuses %= (const empty)
-    _forceStatus "treeNodesPinned" %= (const ForceActive)
-    _forceStatus "center"          %= (const ForceActive)
-    _forceStatus "charge1"         %= (const ForceActive)
-    _forceStatus "collide2"        %= (const ForceActive)
-    _forceStatus "moduleOrbit1"        %= (const ForceActive)
-    _forceStatus linksForceName    %= (const ForceActive)
+    _forceStatuses %= _onlyTheseForcesActive [ "treeNodesPinned", "center", "charge1", "collide2", "moduleOrbit1", linksForceName ]
     setNodesLinksForces { chooseNodes: isModule           -- show all modules, 
                         , chooseLinks: isM2M_Graph_Link } -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
     staging <- use _staging

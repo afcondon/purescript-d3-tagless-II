@@ -1,5 +1,7 @@
 module Stories.ThreeLittleCircles where
 
+import Data.Lens
+import Data.Lens
 import Prelude
 
 import Control.Monad.State (class MonadState, modify_)
@@ -11,15 +13,17 @@ import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Instance.Selection (eval_D3M)
 import D3Tagless.Utility (removeExistingSVG)
 import Data.Array (singleton)
-import Data.Lens (Lens', over)
+import Data.Lens.At (at)
 import Data.Lens.Record (prop)
-import Data.Maybe (Maybe(..))
+import Data.Map (Map)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Html.Renderer.Halogen as RH
+import Snippets (readSnippetFiles)
 import Stories.Utilities (highlightString_)
 import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
@@ -28,12 +32,14 @@ data Action
   = Initialize
   | Finalize
   | ToggleCard (Lens' State Expandable.Status)
-  | ToggleExample 
+  | ToggleExample
   
 type State = {
     toggle  :: Boolean -- Toggle between ultra simple and merely super-simple examples
   , blurb   :: Expandable.Status
   , code    :: Expandable.Status
+  , ex1     :: String
+  , ex2     :: String
 }
 
 _blurb :: Lens' State Expandable.Status
@@ -42,6 +48,12 @@ _blurb = prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
+_ex1 :: Lens' State String
+_ex1 = prop (Proxy :: Proxy "ex1")
+
+_ex2 :: Lens' State String
+_ex2 = prop (Proxy :: Proxy "ex2")
+
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
   { initialState: const initialState
@@ -49,7 +61,7 @@ component = H.mkComponent
   , eval: H.mkEval $ H.defaultEval
     { handleAction = handleAction
     , initialize = Just Initialize
-    , finalize   = Just Finalize }
+    , finalize   = Just Finalize  }
   }
   where
 
@@ -58,6 +70,8 @@ component = H.mkComponent
       toggle: true
     , blurb:  Expandable.Expanded
     , code:   Expandable.Expanded
+    , ex1: ""
+    , ex2: ""
   }
 
   render :: State -> H.ComponentHTML Action () m
@@ -107,7 +121,7 @@ component = H.mkComponent
             , Expandable.content_ state.code
                 [ HH.pre 
                   [ HP.class_ $ HH.ClassName "language-purescript" ]  
-                  [ HH.code_ [ RH.render_ $ highlightString_ $ if state.toggle then codetext1 else codetext2 ] ]
+                  [ HH.code_ [ RH.render_ $ highlightString_ $ if state.toggle then state.ex1 else state.ex2 ] ]
                 ]
             ]  
       , HH.div [ Utils.tailwindClass "svg-container" ] []
@@ -121,6 +135,10 @@ handleAction = case _ of
     H.put (over lens not st)
 
   Initialize -> do 
+    text1 <- H.liftAff $ readSnippetFiles "ThreeLittleCircles1"
+    _ex1 %= const text1
+    text2 <- H.liftAff $ readSnippetFiles "ThreeLittleCircles2"
+    _ex2 %= const text2
     _ <- H.liftEffect $ eval_D3M $ Circles.threeLittleCircles "div.svg-container"
     pure unit
 
@@ -136,58 +154,6 @@ handleAction = case _ of
     modify_ (\s -> s { toggle = toggle' })
 
   Finalize -> pure unit
-
-codetext1 :: String
-codetext1 = 
-  """
--- | simple utility function used in all three of these examples
-xFromIndex :: Datum_ -> Index_ -> Number
-xFromIndex _ i = ((indexIsNumber i) * 100.0)
-
--- | Pretty much the most basic example imaginable, three ints represented by three circles
-threeLittleCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
-threeLittleCircles selector = do 
-
-  let circleAttributes = [ fill "green", cx xFromIndex, cy 50.0, radius 20.0 ]
-
-  root        <- attach selector
-  svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
-  circleGroup <- svg  D3.+ (node Group [])
-  circles     <- circleGroup <+> Join Circle [32, 57, 293] circleAttributes
-
-  pure circles
-"""
-
-codetext2 :: String
-codetext2 = 
-  """
--- | finally, using the data (as opposed to merely the index) in the visualization  
-type Model = Array Int  -- not necessary in such a simple example, of course
-
-getDatum :: Datum_ -> Int
-getDatum = unsafeCoerce
-
-datum_ :: { color :: Datum_ -> String
-, radius :: Datum_ -> Number
-}
-datum_ = {
-    radius: (\d -> Math.sqrt $ toNumber $ getDatum d)
-  , color: (\d -> d3SchemeCategory10N_ ((toNumber $ getDatum d) / 100.0))
-}
-
-threeLittleCircles3 :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_
-threeLittleCircles3 circleData selector = do 
-
-  let circleAttributes = [ fill datum_.color, cx xFromIndex, cy 50.0, radius datum_.radius ]
-
-  root        <- attach selector
-  svg         <- root D3.+ (node Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ])
-  circleGroup <- svg  D3.+ (node Group [])
-
-  circles     <- circleGroup <+> Join Circle circleData circleAttributes
-
-  pure circles
-"""
 
 blurbtext1 :: forall t235 t236. Array (HH.HTML t235 t236)
 blurbtext1 = (HH.p [ HP.classes [ HH.ClassName "m-2" ] ]) <$> ((singleton <<< HH.text) <$> texts)

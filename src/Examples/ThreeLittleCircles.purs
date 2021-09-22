@@ -11,13 +11,13 @@ import Math as Math
 import Prelude (discard, bind, negate, pure, ($), (/), (*))
 import Unsafe.Coerce (unsafeCoerce)
 
+-- SNIPPET Three Little Circles 1
 -- | simple utility function used in all three of these examples
 xFromIndex :: Datum_ -> Index_ -> Number
 xFromIndex _ i = ((indexIsNumber i) * 100.0)
   where
     indexIsNumber :: Index_ -> Number
     indexIsNumber = unsafeCoerce
-
 
 -- | Pretty much the most basic example imaginable, three ints represented by three circles
 threeLittleCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
@@ -32,9 +32,10 @@ threeLittleCircles selector = do
   setAttributes circles circleAttributes
 
   pure circles
+-- END_SNIPPET Three Little Circles 1
 
 
-
+-- SNIPPET Three Little Circles 2
 -- | Passing in the data
 threeLittleCircles2 :: forall m. SelectionM D3Selection_ m => Array Int -> Selector D3Selection_-> m D3Selection_
 threeLittleCircles2 circleData selector = do 
@@ -49,7 +50,7 @@ threeLittleCircles2 circleData selector = do
   setAttributes circles circleAttributes
 
   pure circles
-
+-- END_SNIPPET
 
 
 

@@ -64,9 +64,6 @@ forceLibrary = initialize [
   , createLinkForce Nothing [ ]
 ]
 
--- _linksSetting = _forceLibrary <<< at linksForceName <<< _Just <<< _status
--- _manyBodySetting = _forceLibrary <<< at "many body" <<< _Just <<< _status
-
 _linksSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
 _linksSetting = _forceStatus linksForceName
 _manyBodySetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State

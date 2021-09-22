@@ -1,0 +1,20 @@
+-- | simple utility function used in all three of these examples
+xFromIndex :: Datum_ -> Index_ -> Number
+xFromIndex _ i = ((indexIsNumber i) * 100.0)
+  where
+    indexIsNumber :: Index_ -> Number
+    indexIsNumber = unsafeCoerce
+
+-- | Pretty much the most basic example imaginable, three ints represented by three circles
+threeLittleCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
+threeLittleCircles selector = do 
+
+  let circleAttributes = [ fill "green", cx xFromIndex, cy 50.0, radius 20.0 ]
+
+  root        <- attach selector
+  svg         <- appendTo root Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ]
+  circleGroup <- appendTo svg  Group []
+  circles     <- simpleJoin circleGroup Circle [32, 57, 293] keyIsID_ 
+  setAttributes circles circleAttributes
+
+  pure circles

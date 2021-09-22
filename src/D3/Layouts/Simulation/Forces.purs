@@ -13,7 +13,7 @@ import Data.Lens.At (at)
 import Data.Map (Map, fromFoldable)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
-import Debug (spy)
+import Debug (spy, trace)
 
 
 initialize   :: forall f. (Foldable f) => (Functor f) => f Force -> Map Label Force
@@ -94,10 +94,11 @@ enableOnlyTheseLabels simulation labels force =
 
 updateForceInSimulation :: Force -> D3Simulation_ -> D3Simulation_
 updateForceInSimulation force simulation = do
-  spy "updateForceInSimulation: " $
     case (view _status force) of
-      ForceActive -> putForceInSimulation force simulation
-      ForceDisabled -> removeForceFromSimulation force simulation
+      ForceActive -> do
+        trace { putForceInSimulation: view _name force } \_ -> putForceInSimulation force simulation
+      ForceDisabled -> do
+        trace { removeForceFromSimulation: view _name force } \_ -> removeForceFromSimulation force simulation
     -- CustomForce   -> simulation_ -- REVIEW not implemented or even designed yet
 
 putForceInSimulation :: Force -> D3Simulation_ -> D3Simulation_

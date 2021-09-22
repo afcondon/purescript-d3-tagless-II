@@ -54,7 +54,7 @@ forceLibrary = initialize [
       , createLinkForce Nothing [ F.strength 1.0, F.distance 0.0, F.numKey (toNumber <<< datum_.id) ]
       ]
   where
-    gridXY   _ i = spy "clusterPoint" $ cluster2Point i
+    gridXY   _ i = cluster2Point i
     centerXY _ _ = { x: 0.0, y: 0.0 }
     treeXY   d _ = spy "treePoint" $ datum_.treePoint d
     selectivelyApplyForce :: (Datum_ -> Boolean) -> String -> Maybe ForceFilter

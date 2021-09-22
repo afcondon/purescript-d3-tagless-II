@@ -2,8 +2,15 @@ module Main where
 
 import Prelude
 
+import Affjax as AJAX
+import Affjax.ResponseFormat as ResponseFormat
+import Data.Either (Either(..), hush)
+import Data.Map (Map, fromFoldable)
 import Data.Maybe (Maybe(..))
+import Data.Traversable (traverse)
+import Data.Tuple (Tuple(..))
 import Effect (Effect)
+import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.Aff as HA
@@ -147,4 +154,4 @@ parent =
   handleAction = case _ of
     Initialize   -> H.modify_ \_ -> None
     (Example ex) -> H.modify_ \_ -> ex
-
+  
