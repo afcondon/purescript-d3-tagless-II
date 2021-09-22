@@ -88,7 +88,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   setConfigVariable v   = simulationSetVariable v
 -- management of forces
   addForces forces      = simulationAddForces forces  
-  setForceStatuses      = simulationSetForceStatuses
+  actualizeForces       = simulationSetForceStatuses
 -- management of data 
   carryOverSimStateN selection rawdata key = simulationPreservePositions selection rawdata key
   carryOverSimStateL selection rawdata key = simulationPreserveLinkReferences selection rawdata key
@@ -100,9 +100,6 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
 
 -- uniformlyDistribute nodes = pure $ setPositionToNaN_ nodes
 
--- management of selections
-  -- addSelection label selection         = simulationAddSelection label selection
-  -- getSelection label                   = simulationGetSelection label
 -- management of tick functions, what to do with the selection on each step of simulation
     -- TODO this would be the more efficient but less attractive route to defining a Tick function
   addTickFunction _ (StepTransformFFI _ _) = do
@@ -124,4 +121,4 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     
 -- TODO is this really necessary tho? couldn't it be added to the tick function 
 -- get the underlying simulation handle out of the simulation (necessary for tick functions? )
-  simulationHandle = use (_d3Simulation <<< _handle)
+  simulationHandle = use _handle

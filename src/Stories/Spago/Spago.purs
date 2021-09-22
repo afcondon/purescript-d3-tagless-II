@@ -1,6 +1,7 @@
 module Stories.Spago where
 
 import Prelude
+import Stories.Spago.State (State, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingLinks, _stagingNodes)
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
@@ -10,24 +11,22 @@ import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Graph_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, allNodes, convertFilesToGraphModel, isModule, isPackage)
 import D3.Examples.Spago.Tree (treeReduction)
-import D3.Simulation.Types (ForceStatus(..), SimVariable(..), _name, initialSimulationState, toggleForceStatus)
-import D3Tagless.Capabilities (addForces, setConfigVariable, start)
+import D3.FFI (linksForceName)
+import D3.Simulation.Types (ForceStatus(..), SimVariable(..), _forceStatus, _forceStatuses, initialSimulationState, toggleForceStatus)
+import D3Tagless.Capabilities (actualizeForces, addForces, setConfigVariable, start)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
-import Data.Array (elem, filter)
+import Data.Array (filter)
 import Data.Either (hush)
-import Data.Lens (modifying, use, view, (%=))
-import Data.Lens.At (at)
-import Data.Map (fromFoldable)
+import Data.Lens (use, view, (%=))
+import Data.Map (empty)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
-import Stories.Spago.State (State, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingForces, _stagingLinks, _stagingNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -44,7 +43,7 @@ component = H.mkComponent
   initialState = { 
       svgClass: ""
     , model: Nothing
-    , staging: { selections: { nodes: Nothing, links: Nothing }, rawdata: { nodes: [], links: [] }, forces: M.empty }
+    , staging: { selections: { nodes: Nothing, links: Nothing }, rawdata: { nodes: [], links: [] } }
     , simulation: initialSimulationState 1 -- TODO replace number with unit when all working satisfactorily 
   }
 
@@ -69,9 +68,12 @@ handleAction = case _ of
     _cssClass %= (const "cluster")
     -- TODO make this removeSelection part of the Halogen State of the component
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
-    setNodesLinksForces { chooseLinks: isM2P_Link
-                        , chooseNodes: allNodes
-                        , forces: [ "packageGrid", "clusterx", "clustery", "collide1" ] }
+    _forceStatuses %= (const empty)
+    _forceStatus "packageGrid" %= (const ForceActive)
+    _forceStatus "clusterx" %= (const ForceActive)
+    _forceStatus "clustery" %= (const ForceActive)
+    _forceStatus "collide1" %= (const ForceActive)
+    setNodesLinksForces { chooseLinks: isM2P_Link, chooseNodes: allNodes }
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
 
@@ -79,25 +81,34 @@ handleAction = case _ of
     _cssClass %= (const "graph")
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection"
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
-    setNodesLinksForces { chooseLinks: isP2P_Link
-                        , chooseNodes: isPackage
-                        , forces: [ "centerNamedNode", "center", "collide2", "charge2", "links"] }
+    _forceStatuses %= (const empty)
+    _forceStatus "centerNamedNode" %= (const ForceActive)
+    _forceStatus "center"          %= (const ForceActive)
+    _forceStatus "collide2"        %= (const ForceActive)
+    _forceStatus "charge2"         %= (const ForceActive)
+    _forceStatus linksForceName    %= (const ForceActive)
+    setNodesLinksForces { chooseLinks: isP2P_Link, chooseNodes: isPackage }
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
 
   Scene (ModuleTree _) -> do
     _cssClass %= (const "tree")
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
-    setNodesLinksForces { forces: ["treeNodesPinned", "links", "center", "charge1", "collide2", "moduleOrbit1" ]
-                        , chooseNodes: isModule           -- show all modules, 
+    _forceStatuses %= (const empty)
+    _forceStatus "treeNodesPinned" %= (const ForceActive)
+    _forceStatus "center"          %= (const ForceActive)
+    _forceStatus "charge1"         %= (const ForceActive)
+    _forceStatus "collide2"        %= (const ForceActive)
+    _forceStatus "moduleOrbit1"        %= (const ForceActive)
+    _forceStatus linksForceName    %= (const ForceActive)
+    setNodesLinksForces { chooseNodes: isModule           -- show all modules, 
                         , chooseLinks: isM2M_Graph_Link } -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging treeSceneAttributes
     
   ToggleForce label -> do
-    modifying (_stagingForces <<< at label) (\maybeStatus -> toggleForceStatus <$> maybeStatus)
-    staging <- use _staging
-    runWithD3_Simulation $ Graph.updateForcesOnly staging
+    _forceStatus label %= toggleForceStatus
+    runWithD3_Simulation $ actualizeForces
 
   Filter (LinkFilter filterFn) -> do
     chooseLinks filterFn
@@ -130,19 +141,18 @@ handleAction = case _ of
 type SpagoConfigRecord = { -- convenience type to hold filter functions for nodes & links and list of forces to activate
     chooseNodes :: (SpagoSimNode -> Boolean)
   , chooseLinks :: (SpagoGraphLinkID -> Boolean)
-  , forces      :: Array String
 }
 
-chooseForces :: forall m. MonadState State m => Array String -> m Unit
-chooseForces forceNames = do
-  let 
-    setStatus f = do
-      let fName   = view _name f
-          fStatus = if fName `elem` forceNames
-                    then ForceActive
-                    else ForceDisabled
-      Tuple fName fStatus
-  _stagingForces %= const (fromFoldable $ setStatus <$> forceLibrary)
+-- chooseForces :: forall m. MonadState State m => Array String -> m Unit
+-- chooseForces forceNames = do
+--   let 
+--     setStatus f = do
+--       let fName   = view _name f
+--           fStatus = if fName `elem` forceNames
+--                     then ForceActive
+--                     else ForceDisabled
+--       Tuple fName fStatus
+--   _stagingForces %= const (fromFoldable $ setStatus <$> forceLibrary)
 
 -- filter links from Maybe Model into Staging
 chooseLinks :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
@@ -164,7 +174,7 @@ setNodesLinksForces config = do
   state <- get
   _stagingLinks  %= const (filter config.chooseLinks $ view _modelLinks state)
   _stagingNodes  %= const (filter config.chooseNodes $ view _modelNodes state)
-  chooseForces config.forces
+
 
 -- ======================================================================================================================
 -- functions to read the data from files and build the model (only lives here to prevent cycles)

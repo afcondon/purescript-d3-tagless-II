@@ -1,6 +1,6 @@
 module D3.Simulation.Functions where
 
-import D3.Simulation.Types
+import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _forceStatuses, _handle, _tick, _velocityDecay)
 import Prelude
 
 import Control.Monad.State (class MonadState)
@@ -9,33 +9,22 @@ import D3.Data.Types (D3Selection_, Datum_, Index_)
 import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveLinkReferences_, d3PreserveSimulationPositions_, defaultSimulationDrag_, disableDrag_, getIDsFromNodes_, getLinkIDs_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_, swizzleLinks_)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
-import D3.Simulation.Forces (disableByLabels, enableByLabels, enableOnlyTheseLabels, putForceInSimulation, putStatusMap, setForceAttr, updateForceInSimulation)
+import D3.Simulation.Forces (disableByLabels, enableByLabels, putForceInSimulation, putStatusMap, setForceAttr, updateForceInSimulation)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (RawData)
 import Data.Array (elem, filter, intercalate)
 import Data.Array as A
 import Data.Foldable (traverse_)
-import Data.Lens (Lens', modifying, set, use, view, (%=))
-import Data.Lens.At (at)
-import Data.Lens.Record (prop)
-import Data.Map (Map, toUnfoldable)
+import Data.Lens (modifying, set, use, (%=))
+import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
-import Data.Tuple (Tuple(..), fst, snd)
-import Type.Proxy (Proxy(..))
+import Data.Tuple (Tuple(..))
 import Unsafe.Coerce (unsafeCoerce)
-
--- | anything that wants to use a simulation will need a row that matches this in its State
-_d3Simulation :: forall a r. Lens' { simulation :: a | r} a
-_d3Simulation = prop (Proxy :: Proxy "simulation")
 
 -- | Underlying functions which allow us to make monadic updates from OUTSIDE of a script
 -- | allowing control of the simulation outside of the drawing phase which runs in D3M
-
-insertForce :: Force -> D3SimulationState_ -> D3SimulationState_
--- insertForce force (SimState_ ss_) = SimState_ ss_ { forces = M.insert (getLabel force) force ss_.forces }
-insertForce force = set (_force (view _name force)) (Just force)
 
 reheatSimulation :: D3SimulationState_ -> D3SimulationState_
 reheatSimulation = set _alpha 1.0
@@ -47,33 +36,33 @@ simulationAddForces :: forall m row.
   Map Label Force -> m Unit
 simulationAddForces forces = do
   traverse_ simulationAddForce forces -- effectfully put the forces in the simulation
-  modifying (_d3Simulation <<< _forces) (\m -> M.union forces m )
+  _forceLibrary %= (\m -> M.union forces m )
 
 simulationRemoveAllForces :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) => 
   m Unit
 simulationRemoveAllForces = do
-  handle <- use (_d3Simulation <<< _handle)
-  forces <- use (_d3Simulation <<< _forces)
+  handle <- use _handle
+  forces <- use _forceLibrary
   let _ = (setAsNullForceInSimulation_ handle) <$> (A.fromFoldable $ M.keys forces)
-  modifying (_d3Simulation <<< _forces) (const M.empty)
+  _forceLibrary %= (const M.empty)
 
 simulationAddForce :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   Force -> m Unit
 simulationAddForce (Force force) = do 
   let _ = (\a -> setForceAttr force.force_ force.filter (unwrap a)) <$> force.attributes -- side-effecting function that sets force's attributes
-  handle <- use (_d3Simulation <<< _handle)
+  handle <- use _handle
   let _ = if force.status == ForceActive
           then putForceInSimulation (Force force) handle
           else handle          
-  modifying (_d3Simulation <<< _force force.name) (liftA1 $ const $ Force force)
+  (_force force.name) %= (liftA1 $ const $ Force force)
 
 simulationToggleForce :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   Label -> m Unit
 simulationToggleForce label = do
-  maybeForce <- use (_d3Simulation <<< _forces <<< at label)
+  maybeForce <- use (_force label)
   case maybeForce of
     Nothing -> pure unit
     Just (Force force) ->
@@ -85,42 +74,43 @@ simulationDisableForcesByLabel :: forall m row.
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   Array Label -> m Unit
 simulationDisableForcesByLabel labels = do
-  handle <- use (_d3Simulation <<< _handle)
-  forces <- use (_d3Simulation <<< _forces)
-  (_d3Simulation <<< _forces) %= (const $ (disableByLabels handle labels) <$> forces)
+  handle <- use _handle
+  forces <- use _forceLibrary
+  _forceLibrary %= (const $ (disableByLabels handle labels) <$> forces)
 
 simulationEnableForcesByLabel :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   Array Label  -> m Unit
 simulationEnableForcesByLabel labels  = do
-  handle <- use (_d3Simulation <<< _handle)
-  forces <- use (_d3Simulation <<< _forces) -- TODO this is the forces table inside the simulation record
-  (_d3Simulation <<< _forces) %= (const $ (enableByLabels handle labels) <$> forces)
+  handle <- use _handle
+  forces <- use _forceLibrary -- TODO this is the forces table inside the simulation record
+  _forceLibrary %= (const $ (enableByLabels handle labels) <$> forces)
   
 -- simulationEnableOnlyTheseForces :: forall m row. 
 --   (MonadState { simulation :: D3SimulationState_ | row } m) =>
 --   Array Label -> m Unit
 -- simulationEnableOnlyTheseForces labels = do
---   handle <- use (_d3Simulation <<< _handle)
---   forces <- use (_d3Simulation <<< _forces)
+--   handle <- use _handle
+--   forces <- use _forceLibrary
 --   let updatedForces = (enableOnlyTheseLabels handle labels) <$> forces -- REVIEW can't we traversed (optic) this update?
---   modifying (_d3Simulation <<< _forces) (const updatedForces)
+--   _forceLibrary %= (const updatedForces)
 
 simulationSetForceStatuses :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
-  Map Label ForceStatus -> m Unit
-simulationSetForceStatuses stagingforces = do
-  modifying (_d3Simulation <<< _forces) (putStatusMap stagingforces)
-  forces <- use (_d3Simulation <<< _forces) 
-  handle <- use (_d3Simulation <<< _handle)
-  let _ = (flip updateForceInSimulation $ handle) <$> forces
+  m Unit
+simulationSetForceStatuses = do
+  handle        <- use _handle
+  forceStatuses <- use _forceStatuses
+  _forceLibrary %= (putStatusMap forceStatuses)
+  forceLibrary  <- use _forceLibrary -- now use the updated force library
+  let _ = (flip updateForceInSimulation $ handle) <$> forceLibrary -- effectfully enter and remove each force from simulation
   pure unit
 
 simulationSetVariable :: forall m row.
   (MonadState { simulation :: D3SimulationState_ | row } m) => 
   SimVariable -> m Unit
 simulationSetVariable v = do
-  handle <- use (_d3Simulation <<< _handle)
+  handle <- use _handle
   case v of
     (Alpha n)         -> do
       let _ = setAlpha_ handle n
@@ -142,7 +132,7 @@ simulationStart :: forall m row.
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   m Unit
 simulationStart = do
-  handle <- use (_d3Simulation <<< _handle)
+  handle <- use _handle
 -- let newAlpha = 1.0
 -- modifying (_d3Simulation <<< _alpha) (const newAlpha)
   pure $ startSimulation_ handle
@@ -158,7 +148,7 @@ simulationStop :: forall t34 t48.
                 t34
                => t34 Unit
 simulationStop = do
-  handle <- use (_d3Simulation <<< _handle)
+  handle <- use _handle
   let _ = stopSimulation_ handle
   pure unit
 
@@ -166,7 +156,7 @@ simulationShowForces :: forall m row.
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   m String
 simulationShowForces = do
-  forces <- use (_d3Simulation <<< _forces)
+  forces <- use _forceLibrary
   let forceTuples = M.toUnfoldable forces
       showTuple (Tuple label force) = show label <> " " <> show force
   pure $ intercalate "\n" $ showTuple <$> forceTuples
@@ -210,7 +200,7 @@ simulationSetNodes ::
   MonadState { simulation :: D3SimulationState_ | row } m =>
   Array (D3_SimulationNode d) -> m Unit
 simulationSetNodes nodes = do
-  handle <- use (_d3Simulation <<< _handle)
+  handle <- use _handle
   let _ = setNodes_ handle nodes
   pure unit
 
@@ -220,7 +210,7 @@ simulationSetLinks ::
   MonadState { simulation :: D3SimulationState_ | row } m =>
   Array (D3LinkSwizzled (D3_SimulationNode d) r) -> m Unit
 simulationSetLinks links = do
-  handle <- use (_d3Simulation <<< _handle)
+  handle <- use _handle
   let _ = setLinks_ handle links
   pure unit
 
@@ -233,14 +223,14 @@ simulationSwizzleLinks ::
   (Datum_ -> Index_) ->
   m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
 simulationSwizzleLinks links nodes keyFn = do
-  handle <- use (_d3Simulation <<< _handle)
+  handle <- use _handle
   pure $ swizzleLinks_ links nodes keyFn 
 
 simulationGetNodes :: forall m row d.
   (MonadState { simulation :: D3SimulationState_ | row } m) => 
   m (Array (D3_SimulationNode d))
 simulationGetNodes = do
-  handle <- use (_d3Simulation <<< _handle)
+  handle <- use _handle
   let opaqueNodes = getNodes_ handle
   pure $ unsafeCoerce opaqueNodes
 
@@ -248,7 +238,7 @@ simulationGetLinks :: forall m row d r.
   (MonadState { simulation :: D3SimulationState_ | row } m) => 
   m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
 simulationGetLinks = do
-  handle <- use (_d3Simulation <<< _handle)
+  handle <- use _handle
   let links = getLinksFromSimulation_ handle
   pure links
 
@@ -257,7 +247,7 @@ simulationCreateTickFunction :: forall selection row m.
   Label -> Step selection -> m Unit
 simulationCreateTickFunction label tick@(StepTransformFFI selection fn) = pure unit
 simulationCreateTickFunction label tick@(Step selection chain) = do
-  handle <- use (_d3Simulation <<< _handle)
+  handle <- use _handle
   let 
     makeTick _ = do
       -- TODO this coerce is forced upon us here due to forall selection in SimulationM
@@ -275,7 +265,7 @@ simulationOn :: forall row m.
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
    D3Selection_ -> Behavior D3Selection_ -> m Unit
 simulationOn selection (Drag drag) = do
-  handle <- use (_d3Simulation <<< _handle)
+  handle <- use _handle
   let _ = case drag of 
             DefaultDrag     -> defaultSimulationDrag_ selection handle
             NoDrag          -> disableDrag_ selection

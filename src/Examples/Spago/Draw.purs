@@ -119,19 +119,19 @@ initialize = do
 
   pure { nodes: Just nodesGroup, links: Just linksGroup }
   
-updateForcesOnly :: forall m d r id. 
-  Eq id =>
-  Bind m => 
-  MonadEffect m =>
-  SelectionM D3Selection_ m =>
-  SimulationM D3Selection_ m =>
-  (Staging D3Selection_ d r id) ->
-  m Unit
-updateForcesOnly staging = do
-  stop
-  setForceStatuses staging.forces
-  -- now what you'd maybe like to do here is bump the AlphaTarget and then bring it back down to 0.0 after some brief window of time?
-  start
+-- updateForcesOnly :: forall m d r id. 
+--   Eq id =>
+--   Bind m => 
+--   MonadEffect m =>
+--   SelectionM D3Selection_ m =>
+--   SimulationM D3Selection_ m =>
+--   (Staging D3Selection_ d r id) ->
+--   m Unit
+-- updateForcesOnly staging = do
+--   stop
+--   actualizeForces staging.forces
+--   -- now what you'd maybe like to do here is bump the AlphaTarget and then bring it back down to 0.0 after some brief window of time?
+--   start
 
 updateSimulation :: forall m d r id. 
   Eq id =>
@@ -144,7 +144,7 @@ updateSimulation :: forall m d r id.
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
   stop
-  setForceStatuses staging.forces
+  actualizeForces
   node                  <- openSelection nodesGroup "g"    -- this call and updateJoin and append all have to match FIX THIS
   link                  <- openSelection linksGroup "line" -- this call and updateJoin and append all have to match FIX THIS
   -- this will change all the object refs so a defensive copy is needed if join is to work

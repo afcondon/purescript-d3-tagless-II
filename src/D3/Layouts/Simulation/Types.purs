@@ -31,7 +31,8 @@ newtype D3SimulationState_ = SimState_ D3SimulationStateRecord
 type D3SimulationStateRecord = { 
     handle_       :: D3Simulation_
   -- keeping the map of labels to forces enables functionality like "enableByLabel"
-  , forces        :: M.Map Label Force
+  , forceLibrary  :: M.Map Label Force
+  , forceStatuses :: M.Map Label ForceStatus
   -- TODO perhaps by keeping tick functions here we can run simulation, tick by tick from PureScript
   , ticks         :: M.Map Label (Step D3Selection_)
 
@@ -48,20 +49,30 @@ type D3SimulationStateRecord = {
 
 derive instance Newtype D3SimulationState_ _
 
+-- | anything that wants to use a simulation will need a row that matches this in its State
+_d3Simulation :: forall a r. Lens' { simulation :: a | r} a
+_d3Simulation = prop (Proxy :: Proxy "simulation")
+
 -- | ========================================================================================================
 -- | Lenses for the simulation state
 -- | ========================================================================================================
 _nullable :: forall a. Prism' (Nullable a) a
 _nullable = prism' notNull N.toMaybe
 
-_handle :: Lens' D3SimulationState_ D3Simulation_
-_handle = _Newtype <<< prop (Proxy :: Proxy "handle_")
+_handle :: forall r. Lens' { simulation :: D3SimulationState_ | r } D3Simulation_
+_handle = _d3Simulation <<< _Newtype <<< prop (Proxy :: Proxy "handle_")
 
-_forces :: Lens' D3SimulationState_ (M.Map Label Force)
-_forces = _Newtype <<< prop (Proxy :: Proxy "forces")
+_forceLibrary :: forall r. Lens' { simulation :: D3SimulationState_ | r } (M.Map Label Force)
+_forceLibrary = _d3Simulation <<< _Newtype <<< prop (Proxy :: Proxy "forceLibrary")
 
-_force :: String -> Lens' D3SimulationState_ (Maybe Force)
-_force label = _Newtype <<< prop (Proxy :: Proxy "forces") <<< at label
+_force :: forall r. String -> Lens' { simulation :: D3SimulationState_ | r } (Maybe Force)
+_force label = _forceLibrary <<< at label
+
+_forceStatuses :: forall r. Lens' { simulation :: D3SimulationState_ | r } (M.Map Label ForceStatus)
+_forceStatuses = _d3Simulation <<< _Newtype <<< prop (Proxy :: Proxy "forceStatuses")
+
+-- _forceStatus :: String -> Lens' D3SimulationState_ (Maybe ForceStatus)
+_forceStatus label = _forceStatuses <<< at label <<< _Just
 
 _ticks :: Lens' D3SimulationState_ (M.Map Label (Step D3Selection_))
 _ticks = _Newtype <<< prop (Proxy :: Proxy "ticks")
@@ -247,7 +258,8 @@ initialSimulationState id = SimState_
     }
     , key          : keyIsID_
 
-    , forces       : M.empty
+    , forceLibrary : M.empty
+    , forceStatuses : M.empty
     , ticks        : M.empty
     -- parameters of the D3 simulation engine
     , alpha        : defaultConfigSimulation.alpha

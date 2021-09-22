@@ -4,26 +4,26 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, modify_)
+import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Label)
 import D3.Examples.LesMiserables as LesMis
 import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.FFI (linksForceName)
 import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce, createLinkForce, getStatusMap, initialize)
-import D3.Simulation.Functions (_d3Simulation, simulationStart)
-import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus(..), ForceType(..), RegularForceType(..), SimVariable(..), _linkdata, _name, _status, allNodes, initialSimulationState, showMaybeForceStatus, toggleForceStatus)
+import D3.Simulation.Forces (createForce, createLinkForce, initialize)
+import D3.Simulation.Functions (simulationStart)
+import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus(..), ForceType(..), RegularForceType(..), SimVariable(..), _forceStatus, allNodes, initialSimulationState, showMaybeForceStatus, toggleForceStatus)
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Capabilities (addForces, setConfigVariable, setForceStatuses, setLinks)
+import D3Tagless.Capabilities (actualizeForces, setConfigVariable)
 import D3Tagless.Instance.Simulation (runWithD3_Simulation)
-import Data.Lens (Lens', _Just, over, preview, use, view, (%=))
-import Data.Lens.At (at)
+import Data.Lens (Lens', over, preview, (%=))
 import Data.Lens.Record (prop)
-import Data.Map (Map, empty, fromFoldable)
+import Data.Map (Map)
 import Data.Maybe (Maybe(..))
-import Data.Tuple (Tuple(..))
+import Data.Profunctor.Choice (class Choice)
+import Data.Profunctor.Strong (class Strong)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
@@ -33,7 +33,6 @@ import Ocelot.Block.FormField as FormField
 import Stories.Utilities (syntaxHighlightedCode)
 import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
-import Unsafe.Coerce (unsafeCoerce)
 
 data Action
   = Initialize
@@ -48,7 +47,6 @@ type State = {
     simulation      :: D3SimulationState_
   , blurb           :: Expandable.Status
   , code            :: Expandable.Status
-  , forceLibrary    :: Map Label Force
 }
 
 _blurb :: Lens' State Expandable.Status
@@ -57,12 +55,22 @@ _blurb = prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
-_forceLibrary :: Lens' State (Map Label Force)
-_forceLibrary = prop (Proxy :: Proxy "forceLibrary")
+forceLibrary :: Map Label Force
+forceLibrary = initialize [ 
+    createForce "center"      (RegularForce ForceCenter)   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+  , createForce "many body"   (RegularForce ForceManyBody) allNodes []
+  , createForce "collision"   (RegularForce ForceCollide)  allNodes [ F.radius 4.0 ]
+  , createForce "collision20" (RegularForce ForceCollide)  allNodes [ F.radius 20.0] -- NB initially not enabled
+  , createLinkForce Nothing [ ]
+]
 
-_linksSetting = _forceLibrary <<< at linksForceName <<< _Just <<< _status
+-- _linksSetting = _forceLibrary <<< at linksForceName <<< _Just <<< _status
+-- _manyBodySetting = _forceLibrary <<< at "many body" <<< _Just <<< _status
 
-_manyBodySetting = _forceLibrary <<< at "many body" <<< _Just <<< _status
+_linksSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
+_linksSetting = _forceStatus linksForceName
+_manyBodySetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
+_manyBodySetting = _forceStatus "many body"
  
 component :: forall query output m. 
   MonadAff m => 
@@ -81,13 +89,6 @@ component = H.mkComponent
         simulation: initialSimulationState 2
       , blurb: Expandable.Collapsed
       , code: Expandable.Collapsed
-      , forceLibrary: initialize [ 
-          createForce "center"      (RegularForce ForceCenter)   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-        , createForce "many body"   (RegularForce ForceManyBody) allNodes []
-        , createForce "collision"   (RegularForce ForceCollide)  allNodes [ F.radius 4.0 ]
-        , createForce "collision20" (RegularForce ForceCollide)  allNodes [ F.radius 20.0] -- NB initially not enabled
-        , createLinkForce Nothing [ ]
-        ]
     }
 
   controls state = 
@@ -168,27 +169,24 @@ handleAction = case _ of
   Initialize -> do
     response <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
     let graph = readGraphFromFileContents response
-
-    state <- H.get
-    runWithD3_Simulation $ addForces state.forceLibrary
-    runWithD3_Simulation $ setForceStatuses $ fromFoldable $ (\l -> Tuple l ForceActive) <$> [ "center", "many body", "collision", "links" ]
+    _forceStatus "center"       %= (const ForceActive)
+    _forceStatus "many body"    %= (const ForceActive)
+    _forceStatus "collision"    %= (const ForceActive)
+    _forceStatus linksForceName %= (const ForceActive)
+    runWithD3_Simulation $ actualizeForces 
     runWithD3_Simulation $ LesMis.graphScript graph "div.svg-container"
 
   Finalize ->  pure unit -- runWithD3_Simulation removeAllForces
 
   ToggleManyBody -> do
     _manyBodySetting %= toggleForceStatus
-    state <- H.get
-    let statusMap = getStatusMap state.forceLibrary
-    runWithD3_Simulation $ setForceStatuses statusMap
+    runWithD3_Simulation $ actualizeForces
     runWithD3_Simulation $ setConfigVariable $ Alpha 0.7
     simulationStart
 
   ToggleLinks -> do
     _linksSetting %= toggleForceStatus
-    state <- H.get
-    let statusMap = getStatusMap state.forceLibrary
-    runWithD3_Simulation $ setForceStatuses statusMap
+    runWithD3_Simulation actualizeForces
     runWithD3_Simulation $ setConfigVariable $ Alpha 0.7
     simulationStart
 

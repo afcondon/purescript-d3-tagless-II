@@ -15,45 +15,20 @@ import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Debug (spy)
 
--- | typeclass to lower the boilerplate obligations when managing forces that you want to take in and out of the simulation
-class ForceLibrary a where
-  initialize   :: forall f. (Foldable f) => (Functor f) => f Force -> a
-  getStatusMap :: a -> Map Label ForceStatus
-  putStatusMap :: Map Label ForceStatus -> a -> a
 
--- partitionMapWithIndex :: forall a k. (Ord k) => (Tuple k a -> Boolean) -> Map k a -> { no :: Map k a, yes :: Map k a }
--- partitionMapWithIndex predicate m = do
---   let { yes, no } = partition predicate $ toUnfoldable m
---   { yes: fromFoldable yes, no: fromFoldable no }
+initialize   :: forall f. (Foldable f) => (Functor f) => f Force -> Map Label Force
+initialize forces     = fromFoldable $ (\f -> Tuple (view _name f) f) <$> forces
 
--- partitionMap :: forall a k. (Ord k) => (a -> Boolean) -> Map k a -> { no :: Map k a, yes :: Map k a }
--- partitionMap predicate m = do
---   let { yes, no } = partition (predicate <<< snd) $ toUnfoldable m
---   { yes: fromFoldable yes, no: fromFoldable no }
+getStatusMap :: Map Label Force -> Map Label ForceStatus
+getStatusMap forceMap = fromFoldable $ (\f -> Tuple (view _name f) (view _status f)) <$> forceMap
 
-instance ForceLibrary (Map Label Force) where
-  initialize forces     = fromFoldable $ (\f -> Tuple (view _name f) f) <$> forces
-  getStatusMap forceMap = fromFoldable $ (\f -> Tuple (view _name f) (view _status f)) <$> forceMap
-  putStatusMap forceStatusMap forceMap = update <$> forceMap
-    where
-      update force =
-        case (view (at (view _name force)) forceStatusMap) of -- get desired status from status map
-          Nothing -> force -- this force wasn't in status map so it's unchanged
-          (Just status) -> set _status status force -- update the status
-
-  -- alternative, uglier, implementation kept as reference and gone in next commit
-  -- putStatusMap forceStatuses forces = do
-  --   let
-  --     { yes, no } = partitionMap (_ == ForceActive) forceStatuses
-  --     enableLabels   = A.fromFoldable $ keys yes
-  --     disableLabels  = A.fromFoldable $ keys no
-  --     update force = if (view _name force) `elem` enableLabels 
-  --                    then set _status ForceActive force
-  --                    else if (view _name force) `elem` disableLabels
-  --                         then set _status ForceDisabled force
-  --                         else force  
-    
-  --   update <$> forces
+putStatusMap :: Map Label ForceStatus -> Map Label Force -> Map Label Force
+putStatusMap forceStatusMap forceMap = update <$> forceMap
+  where
+    update force =
+      case (view (at (view _name force)) forceStatusMap) of -- get desired status from status map
+        Nothing -> force -- this force wasn't in status map so it's unchanged
+        (Just status) -> set _status status force -- update the status
     
 showType :: ForceType -> String
 showType = 

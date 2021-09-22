@@ -6,7 +6,7 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Examples.Spago.Files (isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (isPackage, isUsedModule)
 import D3.Simulation.Forces (showType)
-import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), showForceFilter)
+import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), _forceLibrary, showForceFilter)
 import D3Tagless.Block.Card as Card
 import Data.Array (length, (:))
 import Data.Int (fromString, toNumber)
@@ -26,7 +26,7 @@ import Ocelot.Block.Format as Format
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
-import Stories.Spago.State (State, _stagingLinks, _stagingNodes, getSimConfigRecord, listActiveForces)
+import Stories.Spago.State (State, _stagingLinks, _stagingNodes, getSimConfigRecord)
 import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
 
@@ -183,7 +183,7 @@ render state =
           [ Card.card_ [ blurbtext ]
           , renderSimControls state
           , renderSimState state
-          , renderTableForces state.simulation
+          , renderTableForces state
           -- , renderTableElements state.simulation
           ]
       , HH.div
@@ -232,8 +232,8 @@ blurbtext = HH.div_ (title : paras)
       highlighting."""
     ]
 
-renderTableForces :: forall m. D3SimulationState_ -> H.ComponentHTML Action () m
-renderTableForces (SimState_ simulation)  =
+renderTableForces :: forall m. State -> H.ComponentHTML Action () m
+renderTableForces state  =
   HH.div_
   [ HH.div
     [ Utils.tailwindClass "text-sm" ]
@@ -260,7 +260,7 @@ renderTableForces (SimState_ simulation)  =
       ]
   
   tableData = snd <$> 
-              (toUnfoldable $ simulation.forces)
+              (toUnfoldable $ view _forceLibrary state)
 
   renderBody =
     Table.row_ <$> ( renderData <$> tableData )
@@ -279,8 +279,8 @@ renderTableForces (SimState_ simulation)  =
     , Table.cell  [ css "text-left" ] [ HH.text $ showForceFilter force.filter ]
     ]
 
-renderTableElements :: forall m. D3SimulationState_ -> H.ComponentHTML Action () m
-renderTableElements (SimState_ simulation)  =
+renderTableElements :: forall m. State -> H.ComponentHTML Action () m
+renderTableElements state  =
   HH.div_
   [ HH.div_
     [ Backdrop.backdrop_
@@ -306,8 +306,7 @@ renderTableElements (SimState_ simulation)  =
   
   tableData =
     snd <$> 
-    (toUnfoldable $
-    simulation.forces)
+    (toUnfoldable $ view _forceLibrary state)
 
   renderBody =
     Table.row_ <$> ( renderData <$> tableData )

@@ -6,7 +6,7 @@ import D3.Attributes.Instances (Label)
 import D3.Data.Types (Datum_, Index_, PointXY, index_ToInt)
 import D3.Examples.Spago.Model (datum_, numberToGridPoint, offsetXY, scalePoint)
 import D3.Simulation.Config as F
-import D3.Simulation.Forces (class ForceLibrary, createForce, createLinkForce, initialize)
+import D3.Simulation.Forces (createForce, createLinkForce, initialize)
 import D3.Simulation.Types (FixForceType(..), Force, ForceFilter(..), ForceStatus, ForceType(..), RegularForceType(..), _name, _status, allNodes)
 import Data.Int (toNumber)
 import Data.Lens (view)
