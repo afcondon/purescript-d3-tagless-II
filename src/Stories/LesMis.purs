@@ -54,33 +54,51 @@ _blurb = prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
-manyBodyForce = "many body"
-collisionForce = "collision"
-centerForce = "center"
-
+-- | ================================================================================================
+-- | Everything Forces: force names to keep typos at bay, lenses to access the forces in the State
+-- | ================================================================================================
 forceLibrary :: Map Label Force
-forceLibrary = initialize [ 
-    createForce centerForce    (RegularForce ForceCenter)   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-  , createForce manyBodyForce  (RegularForce ForceManyBody) allNodes []
-  , createForce collisionForce (RegularForce ForceCollide)  allNodes [ F.radius 4.0 ]
-  , createLinkForce Nothing [ ]
-]
+forceLibrary = initialize [ forces.manyBodyNeg, forces.manyBodyPos, forces.collision, forces.center, forces.links ]
 
-toggleForceByName name
-  | name == manyBodyForce  = _manyBodySetting %= toggleForceStatus
-  | name == collisionForce = _collisionSetting %= toggleForceStatus
-  | name == linksForceName = _linksSetting %= toggleForceStatus
-  | otherwise = pure unit
-
-
+forceNames :: { center :: String, collision :: String, links :: String, manyBodyPos :: String, manyBodyNeg :: String  }
+forceNames = {
+    manyBodyNeg: "many body negative"
+  , manyBodyPos: "many body positive"
+  , collision: "collision"
+  , center: "center"
+  , links: linksForceName
+}
 
 _linksSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
-_linksSetting = _forceStatus linksForceName
-_manyBodySetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
-_manyBodySetting = _forceStatus "many body"
+_linksSetting = _forceStatus forceNames.links
+_manyBodyNegSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
+_manyBodyNegSetting = _forceStatus forceNames.manyBodyNeg
+_manyBodyPosSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
+_manyBodyPosSetting = _forceStatus forceNames.manyBodyPos
 _collisionSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
-_collisionSetting = _forceStatus collisionForce
+_collisionSetting = _forceStatus forceNames.collision
+
+forces :: { center :: Force, collision :: Force, links :: Force, manyBodyPos :: Force , manyBodyNeg :: Force }
+forces = { 
+    manyBodyNeg: createForce forceNames.manyBodyNeg  (RegularForce ForceManyBody) allNodes [ F.strength (-40.0) ]
+  , manyBodyPos: createForce forceNames.manyBodyPos  (RegularForce ForceManyBody) allNodes [ F.strength 30.0 ]
+  , collision:   createForce forceNames.collision    (RegularForce ForceCollide)  allNodes [ F.radius 4.0 ]
+  , center:      createForce forceNames.center       (RegularForce ForceCenter)   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+  , links:       createLinkForce Nothing [] -- link force is special, there can be only one of them
+}
+
+toggleForceByName :: forall m. MonadState State m => String -> m Unit
+toggleForceByName name
+  | name == forceNames.manyBodyNeg  = _manyBodyNegSetting %= toggleForceStatus
+  | name == forceNames.manyBodyPos  = _manyBodyPosSetting %= toggleForceStatus
+  | name == forceNames.collision    = _collisionSetting   %= toggleForceStatus
+  | name == forceNames.links        = _linksSetting       %= toggleForceStatus
+  | otherwise = pure unit
+
  
+-- | ================================================================================================
+-- | Halogen component 
+-- | ================================================================================================
 component :: forall query output m. 
   MonadAff m => 
   H.Component query Unit output m
@@ -105,13 +123,16 @@ component = H.mkComponent
       [ Utils.tailwindClass "story-panel-controls"] 
       [ Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
         [ Button.buttonVertical
-          [ HE.onClick (const $ ToggleForce linksForceName) ]
+          [ HE.onClick (const $ ToggleForce forceNames.links) ]
           [ HH.text $ "links: " <> showMaybeForceStatus (preview _linksSetting state) ]
         , Button.buttonVertical
-          [ HE.onClick (const $ ToggleForce manyBodyForce) ]
-          [ HH.text $ "many body: " <> showMaybeForceStatus (preview _manyBodySetting state) ]
+          [ HE.onClick (const $ ToggleForce forceNames.manyBodyPos) ]
+          [ HH.text $ "many body +: " <> showMaybeForceStatus (preview _manyBodyPosSetting state) ]
         , Button.buttonVertical
-          [ HE.onClick (const $ ToggleForce collisionForce) ]
+          [ HE.onClick (const $ ToggleForce forceNames.manyBodyNeg) ]
+          [ HH.text $ "many body: -" <> showMaybeForceStatus (preview _manyBodyNegSetting state) ]
+        , Button.buttonVertical
+          [ HE.onClick (const $ ToggleForce forceNames.collision) ]
           [ HH.text $ "collision: " <> showMaybeForceStatus (preview _collisionSetting state) ]
         , Button.buttonVertical
           [ HE.onClick (const $ Freeze) ]
@@ -181,11 +202,11 @@ handleAction = case _ of
   Initialize -> do
     response <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
     let graph = readGraphFromFileContents response
-    _forceStatus centerForce %= (const ForceActive)
-    _forceStatus manyBodyForce    %= (const ForceActive)
-    _forceStatus collisionForce    %= (const ForceActive)
-    _forceStatus linksForceName %= (const ForceActive)
-    _forceStatus "collision20"  %= (const ForceDisabled)
+    _forceStatus forceNames.center       %= (const ForceActive)
+    _forceStatus forceNames.manyBodyPos  %= (const ForceActive)
+    _forceStatus forceNames.manyBodyNeg  %= (const ForceDisabled)
+    _forceStatus forceNames.collision    %= (const ForceActive)
+    _forceStatus forceNames.links        %= (const ForceActive)
     runWithD3_Simulation $ actualizeForces 
     runWithD3_Simulation $ LesMis.graphScript graph "div.svg-container"
 

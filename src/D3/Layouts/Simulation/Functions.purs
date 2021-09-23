@@ -31,12 +31,12 @@ reheatSimulation = set _alpha 1.0
 
 -- type SimulationStateRow row = ( simulation :: D3SimulationState_ | row )
 
-simulationAddForces :: forall m row. 
-  (MonadState { simulation :: D3SimulationState_ | row } m) => 
-  Map Label Force -> m Unit
-simulationAddForces forces = do
-  traverse_ simulationAddForce forces -- effectfully put the forces in the simulation
-  _forceLibrary %= (\m -> M.union forces m )
+-- simulationAddForces :: forall m row. 
+--   (MonadState { simulation :: D3SimulationState_ | row } m) => 
+--   Map Label Force -> m Unit
+-- simulationAddForces forces = do
+--   traverse_ simulationAddForce forces -- effectfully put the forces in the simulation
+--   _forceLibrary %= (\m -> M.union forces m )
 
 simulationRemoveAllForces :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) => 
@@ -47,16 +47,16 @@ simulationRemoveAllForces = do
   let _ = (setAsNullForceInSimulation_ handle) <$> (A.fromFoldable $ M.keys forces)
   _forceLibrary %= (const M.empty)
 
-simulationAddForce :: forall m row. 
-  (MonadState { simulation :: D3SimulationState_ | row } m) =>
-  Force -> m Unit
-simulationAddForce (Force force) = do 
-  let _ = (\a -> setForceAttr force.force_ force.filter (unwrap a)) <$> force.attributes -- side-effecting function that sets force's attributes
-  handle <- use _handle
-  let _ = if force.status == ForceActive
-          then putForceInSimulation (Force force) handle
-          else handle          
-  (_force force.name) %= (liftA1 $ const $ Force force)
+-- simulationAddForce :: forall m row. 
+--   (MonadState { simulation :: D3SimulationState_ | row } m) =>
+--   Force -> m Unit
+-- simulationAddForce (Force force) = do 
+--   let _ = (\a -> setForceAttr force.force_ force.filter (unwrap a)) <$> force.attributes -- side-effecting function that sets force's attributes
+--   handle <- use _handle
+--   let _ = if force.status == ForceActive
+--           then putForceInSimulation (Force force) handle
+--           else handle          
+--   (_force force.name) %= (liftA1 $ const $ Force force)
 
 simulationToggleForce :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>

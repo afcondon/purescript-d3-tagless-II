@@ -142,6 +142,10 @@ _status :: Lens' Force ForceStatus
 _status = _Newtype <<< prop (Proxy :: Proxy "status")
 _type :: Lens' Force ForceType
 _type = _Newtype <<< prop (Proxy :: Proxy "type")
+_attributes :: Lens' Force (Array ChainableF)
+_attributes = _Newtype <<< prop (Proxy :: Proxy "attributes")
+_force_ :: Lens' Force D3ForceHandle_
+_force_ = _Newtype <<< prop (Proxy :: Proxy "force_")
 
 getStatusMap :: Map Label Force -> Map Label ForceStatus
 getStatusMap forceMap = fromFoldable $ (\f -> Tuple (view _name f) (view _status f)) <$> forceMap
@@ -168,10 +172,6 @@ _filterLabel :: forall p row.
   => p Label Label -> p Force Force
 _filterLabel = _Newtype <<< prop (Proxy :: Proxy "filter") <<< _Just <<< _forceFilterLabel
 
-_attributes :: Lens' Force (Array ChainableF)
-_attributes = _Newtype <<< prop (Proxy :: Proxy "attributes")
-_force_ :: Lens' Force D3ForceHandle_
-_force_ = _Newtype <<< prop (Proxy :: Proxy "force_")
 
 instance Show ForceType where
   show (RegularForce t) = show t

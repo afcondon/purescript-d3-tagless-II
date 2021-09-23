@@ -5,13 +5,14 @@ import Prelude
 import D3.Attributes.Instances (Attr(..), AttrBuilder(..), AttributeSetter(..), Label, unboxAttr)
 import D3.Data.Types (D3Simulation_, Datum_)
 import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, linksForceName, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
-import D3.Simulation.Types (ChainableF, FixForceType(..), Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), LinkForceType(..), RegularForceType(..), _name, _status, toggleForceStatus)
+import D3.Simulation.Types (ChainableF, FixForceType(..), Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), LinkForceType(..), RegularForceType(..), _attributes, _filter, _force_, _name, _status, toggleForceStatus)
 import Data.Array (elem)
 import Data.Foldable (class Foldable)
 import Data.Lens (over, set, view)
 import Data.Lens.At (at)
 import Data.Map (Map, fromFoldable)
 import Data.Maybe (Maybe(..))
+import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
 import Debug (spy, trace)
 
@@ -91,7 +92,9 @@ enableOnlyTheseLabels simulation labels force =
 
 updateForceInSimulation :: D3Simulation_ -> Force -> D3Simulation_
 updateForceInSimulation simulation force = do
-    case (view _status force) of
+    let f = unwrap force
+    let _ = (\a -> setForceAttr f.force_ f.filter (unwrap a)) <$> f.attributes -- side-effecting function that sets force's attributes
+    case f.status of
       ForceActive -> putForceInSimulation force simulation
       ForceDisabled -> removeForceFromSimulation force simulation
     -- CustomForce   -> simulation_ -- REVIEW not implemented or even designed yet
