@@ -38,8 +38,7 @@ data Action
   = Initialize
   | Finalize
   | ToggleCard (Lens' State Expandable.Status)
-  | ToggleManyBody
-  | ToggleLinks
+  | ToggleForce Label
   | Freeze
   | Reheat
 
@@ -55,19 +54,32 @@ _blurb = prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
+manyBodyForce = "many body"
+collisionForce = "collision"
+centerForce = "center"
+
 forceLibrary :: Map Label Force
 forceLibrary = initialize [ 
-    createForce "center"      (RegularForce ForceCenter)   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-  , createForce "many body"   (RegularForce ForceManyBody) allNodes []
-  , createForce "collision"   (RegularForce ForceCollide)  allNodes [ F.radius 4.0 ]
-  , createForce "collision20" (RegularForce ForceCollide)  allNodes [ F.radius 20.0] -- NB initially not enabled
+    createForce centerForce    (RegularForce ForceCenter)   allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
+  , createForce manyBodyForce  (RegularForce ForceManyBody) allNodes []
+  , createForce collisionForce (RegularForce ForceCollide)  allNodes [ F.radius 4.0 ]
   , createLinkForce Nothing [ ]
 ]
+
+toggleForceByName name
+  | name == manyBodyForce  = _manyBodySetting %= toggleForceStatus
+  | name == collisionForce = _collisionSetting %= toggleForceStatus
+  | name == linksForceName = _linksSetting %= toggleForceStatus
+  | otherwise = pure unit
+
+
 
 _linksSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
 _linksSetting = _forceStatus linksForceName
 _manyBodySetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
 _manyBodySetting = _forceStatus "many body"
+_collisionSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
+_collisionSetting = _forceStatus collisionForce
  
 component :: forall query output m. 
   MonadAff m => 
@@ -83,7 +95,7 @@ component = H.mkComponent
   where
   initialState :: State
   initialState = { 
-        simulation: initialSimulationState 2
+        simulation: initialSimulationState forceLibrary
       , blurb: Expandable.Collapsed
       , code: Expandable.Collapsed
     }
@@ -93,11 +105,14 @@ component = H.mkComponent
       [ Utils.tailwindClass "story-panel-controls"] 
       [ Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
         [ Button.buttonVertical
-          [ HE.onClick (const $ ToggleLinks) ] -- { enable: ["links"], disable: [""]}
-          [ HH.text $ showMaybeForceStatus (preview _linksSetting state) ]
+          [ HE.onClick (const $ ToggleForce linksForceName) ]
+          [ HH.text $ "links: " <> showMaybeForceStatus (preview _linksSetting state) ]
         , Button.buttonVertical
-          [ HE.onClick (const $ ToggleManyBody) ]
-          [ HH.text $ showMaybeForceStatus (preview _manyBodySetting state) ]
+          [ HE.onClick (const $ ToggleForce manyBodyForce) ]
+          [ HH.text $ "many body: " <> showMaybeForceStatus (preview _manyBodySetting state) ]
+        , Button.buttonVertical
+          [ HE.onClick (const $ ToggleForce collisionForce) ]
+          [ HH.text $ "collision: " <> showMaybeForceStatus (preview _collisionSetting state) ]
         , Button.buttonVertical
           [ HE.onClick (const $ Freeze) ]
           [ HH.text "Freeze" ]
@@ -166,24 +181,19 @@ handleAction = case _ of
   Initialize -> do
     response <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
     let graph = readGraphFromFileContents response
-    _forceStatus "center"       %= (const ForceActive)
-    _forceStatus "many body"    %= (const ForceActive)
-    _forceStatus "collision"    %= (const ForceActive)
+    _forceStatus centerForce %= (const ForceActive)
+    _forceStatus manyBodyForce    %= (const ForceActive)
+    _forceStatus collisionForce    %= (const ForceActive)
     _forceStatus linksForceName %= (const ForceActive)
+    _forceStatus "collision20"  %= (const ForceDisabled)
     runWithD3_Simulation $ actualizeForces 
     runWithD3_Simulation $ LesMis.graphScript graph "div.svg-container"
 
   Finalize ->  pure unit -- runWithD3_Simulation removeAllForces
 
-  ToggleManyBody -> do
-    _manyBodySetting %= toggleForceStatus
+  ToggleForce name -> do
+    toggleForceByName name
     runWithD3_Simulation $ actualizeForces
-    runWithD3_Simulation $ setConfigVariable $ Alpha 0.7
-    simulationStart
-
-  ToggleLinks -> do
-    _linksSetting %= toggleForceStatus
-    runWithD3_Simulation actualizeForces
     runWithD3_Simulation $ setConfigVariable $ Alpha 0.7
     simulationStart
 

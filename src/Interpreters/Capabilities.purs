@@ -48,7 +48,6 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- config
   setConfigVariable    :: SimVariable -> m Unit
   -- management of forces
-  addForces :: Map Label Force -> m Unit
   actualizeForces:: m Unit -- make the forces in the simulation match the forces in the simulation state
   -- setForcesByLabel :: { enable :: Array Label, disable :: Array Label } -> m Unit -- REVIEW not convinced this function is necessary
   -- management of data (nodes and links)

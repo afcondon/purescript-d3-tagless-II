@@ -19,9 +19,6 @@ import Debug (spy, trace)
 initialize   :: forall f. (Foldable f) => (Functor f) => f Force -> Map Label Force
 initialize forces     = fromFoldable $ (\f -> Tuple (view _name f) f) <$> forces
 
-getStatusMap :: Map Label Force -> Map Label ForceStatus
-getStatusMap forceMap = fromFoldable $ (\f -> Tuple (view _name f) (view _status f)) <$> forceMap
-
 putStatusMap :: Map Label ForceStatus -> Map Label Force -> Map Label Force
 putStatusMap forceStatusMap forceMap = update <$> forceMap
   where
@@ -92,13 +89,11 @@ enableOnlyTheseLabels simulation labels force =
     let _ = removeForceFromSimulation force simulation
     disableForce force
 
-updateForceInSimulation :: Force -> D3Simulation_ -> D3Simulation_
-updateForceInSimulation force simulation = do
+updateForceInSimulation :: D3Simulation_ -> Force -> D3Simulation_
+updateForceInSimulation simulation force = do
     case (view _status force) of
-      ForceActive -> do
-        trace { putForceInSimulation: view _name force } \_ -> putForceInSimulation force simulation
-      ForceDisabled -> do
-        trace { removeForceFromSimulation: view _name force } \_ -> removeForceFromSimulation force simulation
+      ForceActive -> putForceInSimulation force simulation
+      ForceDisabled -> removeForceFromSimulation force simulation
     -- CustomForce   -> simulation_ -- REVIEW not implemented or even designed yet
 
 putForceInSimulation :: Force -> D3Simulation_ -> D3Simulation_

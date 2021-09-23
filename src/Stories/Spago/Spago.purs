@@ -12,7 +12,7 @@ import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, allNodes, convertFiles
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (linksForceName)
 import D3.Simulation.Types (ForceStatus(..), SimVariable(..), _forceStatus, _forceStatuses, _onlyTheseForcesActive, initialSimulationState, toggleForceStatus)
-import D3Tagless.Capabilities (actualizeForces, addForces, setConfigVariable, start)
+import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
 import Data.Array (filter)
 import Data.Either (hush)
@@ -44,7 +44,7 @@ component = H.mkComponent
       svgClass: ""
     , model: Nothing
     , staging: { selections: { nodes: Nothing, links: Nothing }, rawdata: { nodes: [], links: [] } }
-    , simulation: initialSimulationState 1 -- TODO replace number with unit when all working satisfactorily 
+    , simulation: initialSimulationState forceLibrary
   }
 
 handleAction :: forall m. 
@@ -57,7 +57,7 @@ handleAction = case _ of
   Initialize -> do    -- TODO think we actually don't want to be doing anything here until the component is shown
     (maybeModel :: Maybe SpagoModel) <- H.liftAff readModelData
     _model %= (const maybeModel)
-    runWithD3_Simulation $ addForces forceLibrary -- NB these are all disabled initially
+    runWithD3_Simulation actualizeForces
     openSelections <- evalEffectSimulation Graph.initialize -- should result in the "enter" selections being in the simulation
     (_staging <<< _enterselections <<< _nodes) %= (const $ openSelections.nodes) 
     (_staging <<< _enterselections <<< _links) %= (const $ openSelections.links)
@@ -69,7 +69,8 @@ handleAction = case _ of
     -- TODO make this removeSelection part of the Halogen State of the component
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     _forceStatuses %= _onlyTheseForcesActive [ "packageGrid", "clusterx", "clustery", "collide1" ]
-    setNodesLinksForces { chooseLinks: isM2P_Link, chooseNodes: allNodes }
+    runWithD3_Simulation actualizeForces
+    setNodesAndLinks { chooseLinks: isM2P_Link, chooseNodes: allNodes }
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
 
@@ -78,7 +79,8 @@ handleAction = case _ of
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection"
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
     _forceStatuses %= _onlyTheseForcesActive ["centerNamedNode", "center", "collide2", "charge2", linksForceName ]
-    setNodesLinksForces { chooseLinks: isP2P_Link, chooseNodes: isPackage }
+    runWithD3_Simulation actualizeForces
+    setNodesAndLinks { chooseLinks: isP2P_Link, chooseNodes: isPackage }
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
 
@@ -86,14 +88,16 @@ handleAction = case _ of
     _cssClass %= (const "tree")
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     _forceStatuses %= _onlyTheseForcesActive [ "treeNodesPinned", "center", "charge1", "collide2", "moduleOrbit1", linksForceName ]
-    setNodesLinksForces { chooseNodes: isModule           -- show all modules, 
-                        , chooseLinks: isM2M_Graph_Link } -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
+    runWithD3_Simulation actualizeForces
+    setNodesAndLinks { chooseNodes: isModule           -- show all modules, 
+                     , chooseLinks: isM2M_Graph_Link } -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging treeSceneAttributes
     
   ToggleForce label -> do
     _forceStatus label %= toggleForceStatus
     runWithD3_Simulation $ actualizeForces
+    runWithD3_Simulation start
 
   Filter (LinkFilter filterFn) -> do
     chooseLinks filterFn
@@ -110,7 +114,6 @@ handleAction = case _ of
 
   ChangeSimConfig c -> do
     runWithD3_Simulation $ setConfigVariable c 
-    runWithD3_Simulation start   
 
   StartSim -> do
     runWithD3_Simulation $ setConfigVariable $ Alpha 1.0
@@ -151,11 +154,11 @@ chooseNodes filterFn = do
   state <- get
   _stagingNodes %= const (filter filterFn $ view _modelNodes state)
 
-setNodesLinksForces :: forall m.
+setNodesAndLinks :: forall m.
   MonadState State m =>
   SpagoConfigRecord ->
   m Unit
-setNodesLinksForces config = do
+setNodesAndLinks config = do
   state <- get
   _stagingLinks  %= const (filter config.chooseLinks $ view _modelLinks state)
   _stagingNodes  %= const (filter config.chooseNodes $ view _modelNodes state)

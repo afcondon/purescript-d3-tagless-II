@@ -87,8 +87,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
 -- management of simulation variables
   setConfigVariable v   = simulationSetVariable v
 -- management of forces
-  addForces forces      = simulationAddForces forces  
-  actualizeForces       = simulationSetForceStatuses
+  actualizeForces       = simulationUpdateForceStatuses
 -- management of data 
   carryOverSimStateN selection rawdata key = simulationPreservePositions selection rawdata key
   carryOverSimStateL selection rawdata key = simulationPreserveLinkReferences selection rawdata key

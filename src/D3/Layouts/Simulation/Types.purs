@@ -143,15 +143,18 @@ _status = _Newtype <<< prop (Proxy :: Proxy "status")
 _type :: Lens' Force ForceType
 _type = _Newtype <<< prop (Proxy :: Proxy "type")
 
-forceStatusTuples :: Array Force -> Array (Tuple Label ForceStatus)
-forceStatusTuples forces = do
-  let go f = Tuple (view _name f) (view _status f)
-  go <$> forces
+getStatusMap :: Map Label Force -> Map Label ForceStatus
+getStatusMap forceMap = fromFoldable $ (\f -> Tuple (view _name f) (view _status f)) <$> forceMap
 
-forceTuples :: Array Force -> Array (Tuple Label Force)
-forceTuples forces = do
-  let go f = Tuple (view _name f) f
-  go <$> forces
+-- forceStatusTuples :: Array Force -> Array (Tuple Label ForceStatus)
+-- forceStatusTuples forces = do
+--   let go f = Tuple (view _name f) (view _status f)
+--   go <$> forces
+
+-- forceTuples :: Array Force -> Array (Tuple Label Force)
+-- forceTuples forces = do
+--   let go f = Tuple (view _name f) f
+--   go <$> forces
 
 _filter :: forall p. Profunctor p => Strong p => p (Maybe ForceFilter) (Maybe ForceFilter) -> p Force Force
 _filter = _Newtype <<< prop (Proxy :: Proxy "filter")
@@ -253,8 +256,8 @@ instance Show FixForceType where
 -- for example, two Halogen components won't _accidentally_ share one
 -- should be dropped later when we can be sure that isn't a problem
 -- needs POC with two sims in one page, sim continuing despite page change etc etc
-initialSimulationState :: Int -> D3SimulationState_
-initialSimulationState id = SimState_
+initialSimulationState :: Map Label Force -> D3SimulationState_
+initialSimulationState forces = SimState_
    {  -- common state for all D3 Simulation
       handle_  : initSimulation_ defaultConfigSimulation keyIsID_
     , "data" : {
@@ -263,8 +266,8 @@ initialSimulationState id = SimState_
     }
     , key          : keyIsID_
 
-    , forceLibrary : M.empty
-    , forceStatuses : M.empty
+    , forceLibrary : forces
+    , forceStatuses : getStatusMap forces
     , ticks        : M.empty
     -- parameters of the D3 simulation engine
     , alpha        : defaultConfigSimulation.alpha
@@ -274,7 +277,7 @@ initialSimulationState id = SimState_
     , velocityDecay: defaultConfigSimulation.velocityDecay
   }
   where
-    _ = trace { simulation: "initialized", engineNo: id } \_ -> unit
+    _ = trace { simulation: "initialized", forceLibrary: forces } \_ -> unit
 
 defaultConfigSimulation :: SimulationConfig_
 defaultConfigSimulation = { 

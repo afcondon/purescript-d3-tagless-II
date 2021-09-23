@@ -1,6 +1,5 @@
 module D3.Simulation.Functions where
 
-import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _forceStatuses, _handle, _tick, _velocityDecay)
 import Prelude
 
 import Control.Monad.State (class MonadState)
@@ -10,6 +9,7 @@ import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveLinkReferenc
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
 import D3.Simulation.Forces (disableByLabels, enableByLabels, putForceInSimulation, putStatusMap, setForceAttr, updateForceInSimulation)
+import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _forceStatuses, _handle, _tick, _velocityDecay)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (RawData)
 import Data.Array (elem, filter, intercalate)
@@ -95,15 +95,15 @@ simulationEnableForcesByLabel labels  = do
 --   let updatedForces = (enableOnlyTheseLabels handle labels) <$> forces -- REVIEW can't we traversed (optic) this update?
 --   _forceLibrary %= (const updatedForces)
 
-simulationSetForceStatuses :: forall m row. 
+simulationUpdateForceStatuses :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   m Unit
-simulationSetForceStatuses = do
+simulationUpdateForceStatuses = do
   handle        <- use _handle
   forceStatuses <- use _forceStatuses
   _forceLibrary %= (putStatusMap forceStatuses)
   forceLibrary  <- use _forceLibrary -- now use the updated force library
-  let _ = (flip updateForceInSimulation $ handle) <$> forceLibrary -- effectfully enter and remove each force from simulation
+  let _ = (updateForceInSimulation handle) <$> forceLibrary
   pure unit
 
 simulationSetVariable :: forall m row.
