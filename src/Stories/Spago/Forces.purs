@@ -16,18 +16,11 @@ import Data.Number (infinity)
 import Data.Tuple (Tuple(..))
 import Debug (spy)
 
-forceLibraryMap :: Map Label ForceStatus
-forceLibraryMap = do
-  let
-    forceTuple :: Force -> Tuple Label ForceStatus
-    forceTuple f = Tuple (view _name f) (view _status f)
-  fromFoldable $ forceTuple <$> forceLibrary
-
 -- | table of all the forces that are used in the Spago component
 forceLibrary :: Map Label Force
 forceLibrary = initialize [
-        createForce "collide1"     (RegularForce ForceCollide)  allNodes [ F.strength 1.0, F.radius datum_.collideRadius, F.iterations 1.0 ]
-      , createForce "collide2"     (RegularForce ForceCollide)  allNodes [ F.strength 1.0, F.radius datum_.collideRadiusBig, F.iterations 1.0 ]
+        createForce "collide1"     (RegularForce ForceCollide)  allNodes [ F.strength 1.0, F.radius datum_.collideRadius ]
+      , createForce "collide2"     (RegularForce ForceCollide)  allNodes [ F.strength 0.7, F.radius datum_.collideRadiusBig ]
       , createForce "charge1"      (RegularForce ForceManyBody) allNodes [ F.strength (-30.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
       , createForce "center"       (RegularForce ForceCenter)   allNodes [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
       , createForce "x"            (RegularForce ForceX)        allNodes [ F.strength 0.05, F.x 0.0 ]
@@ -50,7 +43,6 @@ forceLibrary = initialize [
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
       , createForce "moduleOrbit3" (RegularForce ForceRadial)   (selectivelyApplyForce datum_.isUsedModule "direct deps of Main")
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
--- REVIEW shouldn't this be "exports.linksforcename"
       , createLinkForce Nothing [ F.strength 1.0, F.distance 0.0, F.numKey (toNumber <<< datum_.id) ]
       ]
   where

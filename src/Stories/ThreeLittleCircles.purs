@@ -36,14 +36,10 @@ data Action
   
 type State = {
     toggle  :: Boolean -- Toggle between ultra simple and merely super-simple examples
-  , blurb   :: Expandable.Status
   , code    :: Expandable.Status
   , ex1     :: String
   , ex2     :: String
 }
-
-_blurb :: Lens' State Expandable.Status
-_blurb = prop (Proxy :: Proxy "blurb")
 
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
@@ -68,7 +64,6 @@ component = H.mkComponent
   initialState :: State
   initialState = { 
       toggle: true
-    , blurb:  Expandable.Expanded
     , code:   Expandable.Expanded
     , ex1: ""
     , ex2: ""
@@ -87,23 +82,6 @@ component = H.mkComponent
               ] 
             ]
       , HH.div
-            [ Utils.tailwindClass "story-panel-about"]
-            [ FormField.field_
-              { label: HH.text "About"
-              , helpText: []
-              , error: []
-              , inputId: "show-blurb"
-              }
-              [ Toggle.toggle
-                [ HP.id "show-blurb"
-                , HP.checked
-                  $ Expandable.toBoolean state.blurb
-                , HE.onChange \_ -> ToggleCard _blurb
-                ]
-              ]
-            , Expandable.content_ state.blurb $ if state.toggle then blurbtext1 else blurbtext2
-            ]  
-      , HH.div
             [ Utils.tailwindClass "story-panel-code"]
             [ FormField.field_
                 { label: HH.text "Code"
@@ -118,6 +96,7 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
+            , Expandable.content_ state.code $ if state.toggle then blurbtext1 else blurbtext2
             , Expandable.content_ state.code
                 [ HH.pre 
                   [ HP.class_ $ HH.ClassName "language-purescript" ]  
@@ -150,17 +129,32 @@ handleAction = case _ of
     _ <- H.liftEffect $ eval_D3M $ 
           if toggle'
           then Circles.threeLittleCircles container
-          else Circles.threeLittleCircles3 [100, 45, 267] container
+          else Circles.threeLittleCircles3 [310, 474, 613, 726, 814, 877, 914, 926, 913, 874, 810] container
     modify_ (\s -> s { toggle = toggle' })
 
   Finalize -> pure unit
 
 blurbtext1 :: forall t235 t236. Array (HH.HTML t235 t236)
-blurbtext1 = (HH.p [ HP.classes [ HH.ClassName "m-2" ] ]) <$> ((singleton <<< HH.text) <$> texts)
+blurbtext1 = (HH.p [ HP.classes [ HH.ClassName "m-2", HH.ClassName "w-2/3" ] ]) <$> ((singleton <<< HH.text) <$> texts)
   where 
     texts = ["Simplest possible example, just to show syntax." ]
 
 blurbtext2 :: forall t235 t236. Array (HH.HTML t235 t236)
 blurbtext2 = (HH.p [ HP.classes [ HH.ClassName "m-2" ] ]) <$> ((singleton <<< HH.text) <$> texts)
   where 
-    texts = ["This extends the super-simple model in the direction one would go for a more real-world example. It's still extremely simple, and the Model, datum_ and so on would not be necessary for such a simple example. Again, we're just showing syntax and shape of the DSL here." ]
+    texts = [
+      
+      """This extends the super-simple model in the direction one would go for
+      a more real-world example."""
+
+      , """In this example, the data is passed in and must match the type
+      specified in the Model. Because the data loses its type information when
+      put into D3 we recover the type of Datum and Index using a couple of
+      functions to wrap unsafeCoerce. These functions are then used to write
+      any attribute setters that are derived from the data elements themselves,
+      or their indices"""
+
+      , """Again, we're just showing syntax and shape of the DSL here: it's still extremely simple, and the Model,
+      datum_ and so on might not be needed for such a simple example."""
+    
+    ]

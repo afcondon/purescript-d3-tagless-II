@@ -90,7 +90,10 @@ exports.keyIsSourceTarget_ = d => {
   // console.log(`looking up the id of node: ${[d.source, d.target]}`);
   return [d.source, d.target];
 }
-exports.setAlpha_ = simulation => alpha => simulation.alpha(alpha)
+exports.setAlpha_ = simulation => alpha => {
+  console.log(`setting simulation.alpha to ${alpha}`);
+  simulation.alpha(alpha)
+}
 exports.setAlphaDecay_ = simulation => alphaDecay => simulation.alphaDecay(alphaDecay)
 exports.setAlphaMin_ = simulation => alphaMin => simulation.alphaMin(alphaMin)
 exports.setAlphaTarget_ = simulation => alphaTarget => simulation.alphaTarget(alphaTarget)
@@ -109,7 +112,10 @@ exports.setForceX_ = force => attr => force.x(attr)
 exports.setForceY_ = force => attr => force.y(attr)
 exports.setLinksKeyFunction_ = force => attr => force.id(attr)
 exports.setVelocityDecay_ = simulation => velocityDecay => simulation.velocityDecay(velocityDecay)
-exports.startSimulation_ = simulation => simulation.restart()
+exports.startSimulation_ = simulation => {
+  console.log(`restarting the simulation, alpha is: ${simulation.alpha()}`);
+  simulation.restart()
+}
 exports.stopSimulation_ = simulation => simulation.stop()
 exports.initSimulation_ = config => keyFn => { 
   const simulation = d3

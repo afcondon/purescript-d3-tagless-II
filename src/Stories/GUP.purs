@@ -133,7 +133,7 @@ runGeneralUpdatePattern :: forall m. Bind m => MonadEffect m => m (Array Char ->
 runGeneralUpdatePattern = do
   log "General Update Pattern example"
   -- detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
-  update   <- H.liftEffect $ eval_D3M $ GUP.script3 "div.svg-container"
+  update   <- H.liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern "div.svg-container"
   -- the script sets up the SVG and returns a function that the component can run whenever it likes
   -- (but NB if it runs more often than every 2000 milliseconds there will be big problems due to uncompleted transitions)
   pure (\letters -> H.liftEffect $ runD3M (update letters) *> pure unit )
@@ -221,8 +221,8 @@ codetext :: String
 codetext =
   """type Model = Array Char
 
-script3 :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
-script3 selector = do 
+exGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
+exGeneralUpdatePattern selector = do 
   root        <- attach selector
   svg         <- root D3.+ (node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ])
   letterGroup <- svg  D3.+ (node Group [])

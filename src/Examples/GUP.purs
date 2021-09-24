@@ -14,6 +14,7 @@ import Unsafe.Coerce (unsafeCoerce)
 -- | Simple-as-can-be example of the more complex Join which allows for new data to be
 -- | entered, existing data to be updated and disappearing data to be removed
 -- | ====================================================================================
+-- SNIPPET GeneralUpdatePattern
 type Model = Array Char
 
 -- in the interests of brevity these unsafe functions are defined here with the "script"
@@ -27,9 +28,8 @@ indexIsNumber = unsafeCoerce
 keyFunction :: Datum_ -> Index_ -- for this very simple example, the data (Char) can be used directly as the key
 keyFunction = unsafeCoerce
 
-
-script3 :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
-script3 selector = do 
+exGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
+exGeneralUpdatePattern selector = do 
   root           <- attach selector
   svg            <- appendTo root Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ]
   letterGroup    <- appendTo svg Group []
@@ -65,3 +65,4 @@ script3 selector = do
 
     exit =  [ classed "exit", fill "brown"] 
             `andThen` (transition `to` [ y 400.0, remove ])
+-- END_SNIPPET

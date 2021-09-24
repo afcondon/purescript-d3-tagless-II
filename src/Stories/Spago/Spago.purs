@@ -73,6 +73,7 @@ handleAction = case _ of
     setNodesAndLinks { chooseLinks: isM2P_Link, chooseNodes: allNodes }
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
+    runWithD3_Simulation (setConfigVariable $ Alpha 1.0)
 
   Scene PackageGraph -> do
     _cssClass %= (const "graph")
@@ -83,6 +84,7 @@ handleAction = case _ of
     setNodesAndLinks { chooseLinks: isP2P_Link, chooseNodes: isPackage }
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
+    runWithD3_Simulation (setConfigVariable $ Alpha 1.0)
 
   Scene (ModuleTree _) -> do
     _cssClass %= (const "tree")
@@ -93,21 +95,25 @@ handleAction = case _ of
                      , chooseLinks: isM2M_Graph_Link } -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging treeSceneAttributes
+    runWithD3_Simulation (setConfigVariable $ Alpha 1.0)
     
   ToggleForce label -> do
     _forceStatus label %= toggleForceStatus
     runWithD3_Simulation $ actualizeForces
     runWithD3_Simulation start
+    runWithD3_Simulation (setConfigVariable $ Alpha 0.7)
 
   Filter (LinkFilter filterFn) -> do
     chooseLinks filterFn
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
+    runWithD3_Simulation (setConfigVariable $ Alpha 0.7)
 
   Filter (NodeFilter filterFn) -> do
     chooseNodes filterFn
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
+    runWithD3_Simulation (setConfigVariable $ Alpha 0.7)
 
   ChangeStyling style -> do
     _cssClass %= (const style) -- modify_ (\s -> s { svgClass = style })
@@ -116,7 +122,7 @@ handleAction = case _ of
     runWithD3_Simulation $ setConfigVariable c 
 
   StartSim -> do
-    runWithD3_Simulation $ setConfigVariable $ Alpha 1.0
+    runWithD3_Simulation (setConfigVariable $ Alpha 1.0)
     runWithD3_Simulation start
 
   StopSim -> do

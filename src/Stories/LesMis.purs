@@ -18,6 +18,7 @@ import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable)
 import D3Tagless.Instance.Simulation (runWithD3_Simulation)
+import Data.Array (singleton)
 import Data.Lens (Lens', over, preview, (%=))
 import Data.Lens.Record (prop)
 import Data.Map (Map)
@@ -44,12 +45,8 @@ data Action
 
 type State = { 
     simulation      :: D3SimulationState_
-  , blurb           :: Expandable.Status
   , code            :: Expandable.Status
 }
-
-_blurb :: Lens' State Expandable.Status
-_blurb = prop (Proxy :: Proxy "blurb")
 
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
@@ -114,7 +111,6 @@ component = H.mkComponent
   initialState :: State
   initialState = { 
         simulation: initialSimulationState forceLibrary
-      , blurb: Expandable.Collapsed
       , code: Expandable.Collapsed
     }
 
@@ -151,23 +147,22 @@ component = H.mkComponent
       [ HH.div -- [ Utils.tailwindClass "story-panel"]
         [ Utils.tailwindClass "story-panel-controls"] 
         (controls state)
-      , HH.div -- [ Utils.tailwindClass "story-panel" ] 
-            [ Utils.tailwindClass "story-panel-about"]
-            [ FormField.field_
-              { label: HH.text "About"
-              , helpText: []
-              , error: []
-              , inputId: "show-blurb"
-              }
-              [ Toggle.toggle
-                [ HP.id "show-blurb"
-                , HP.checked
-                  $ Expandable.toBoolean state.blurb
-                , HE.onChange \_ -> ToggleCard _blurb
-                ]
-              ]
-            , Expandable.content_ state.blurb [ HH.text blurbtext ]
-            ]  
+      -- , HH.div -- [ Utils.tailwindClass "story-panel" ] 
+      --       [ Utils.tailwindClass "story-panel-about"]
+      --       [ FormField.field_
+      --         { label: HH.text "About"
+      --         , helpText: []
+      --         , error: []
+      --         , inputId: "show-blurb"
+      --         }
+      --         [ Toggle.toggle
+      --           [ HP.id "show-blurb"
+      --           , HP.checked
+      --             $ Expandable.toBoolean state.blurb
+      --           , HE.onChange \_ -> ToggleCard _blurb
+      --           ]
+      --         ]
+      --       ]  
       , HH.div -- [ Utils.tailwindClass "story-panel" ] 
             [ Utils.tailwindClass "story-panel-code"]
             [ FormField.field_
@@ -183,6 +178,7 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
+            , Expandable.content_ state.code blurbtext
             , Expandable.content_ state.code $ syntaxHighlightedCode codetext 
             ]  
       , HH.div [ Utils.tailwindClass "svg-container" ] []
@@ -203,8 +199,8 @@ handleAction = case _ of
     response <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
     let graph = readGraphFromFileContents response
     _forceStatus forceNames.center       %= (const ForceActive)
-    _forceStatus forceNames.manyBodyPos  %= (const ForceActive)
-    _forceStatus forceNames.manyBodyNeg  %= (const ForceDisabled)
+    _forceStatus forceNames.manyBodyNeg  %= (const ForceActive)
+    _forceStatus forceNames.manyBodyPos  %= (const ForceDisabled)
     _forceStatus forceNames.collision    %= (const ForceActive)
     _forceStatus forceNames.links        %= (const ForceActive)
     runWithD3_Simulation $ actualizeForces 
@@ -291,19 +287,22 @@ graphScript model selector = do
   pure unit
   """
 
-blurbtext :: String
-blurbtext = 
-  """This example introduces a new capability, signalled by the SimulationM constraint on the function. This monad runs with a D3 Simulation engine in its State. This allows us to let the simulation engine do the layout, we provide the nodes and (optionally) links and configure the simulation with additional forces.
+blurbtext = (HH.p [ HP.classes [ HH.ClassName "m-2", HH.ClassName "w-2/3" ] ]) <$> ((singleton <<< HH.text) <$> texts)
+  where texts = ["""
+    
+This example introduces a new capability, signalled by the SimulationM
+constraint on the function. This monad runs with a D3 Simulation engine in its
+State. This allows us to let the simulation engine do the layout, we provide
+the nodes and (optionally) links and configure the simulation with additional
+forces. """
 
-From the D3 docs: 
-"This module implements a velocity Verlet numerical integrator for simulating
-physical forces on particles. The simulation is simplified: it assumes a
-constant unit time step Δt = 1 for each step, and a constant unit mass m = 1
-for all particles. As a result, a force F acting on a particle is equivalent to
-a constant acceleration a over the time interval Δt, and can be simulated
-simply by adding to the particle’s velocity, which is then added to the
-particle’s position."" 
-
-
-"""
+, """From the D3 docs: "This module implements a velocity Verlet numerical
+integrator for simulating physical forces on particles. The simulation is
+simplified: it assumes a constant unit time step Δt = 1 for each step, and a
+constant unit mass m = 1 for all particles. As a result, a force F acting on a
+particle is equivalent to a constant acceleration a over the time interval Δt,
+and can be simulated simply by adding to the particle’s velocity, which is then
+added to the particle’s position.""
+    
+  """]
 

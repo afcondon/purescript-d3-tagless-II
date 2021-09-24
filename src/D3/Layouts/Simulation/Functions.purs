@@ -8,19 +8,17 @@ import D3.Data.Types (D3Selection_, Datum_, Index_)
 import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveLinkReferences_, d3PreserveSimulationPositions_, defaultSimulationDrag_, disableDrag_, getIDsFromNodes_, getLinkIDs_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_, swizzleLinks_)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
-import D3.Simulation.Forces (disableByLabels, enableByLabels, putForceInSimulation, putStatusMap, setForceAttr, updateForceInSimulation)
+import D3.Simulation.Forces (disableByLabels, enableByLabels, putStatusMap, updateForceInSimulation)
 import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _forceStatuses, _handle, _tick, _velocityDecay)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (RawData)
 import Data.Array (elem, filter, intercalate)
 import Data.Array as A
-import Data.Foldable (traverse_)
 import Data.Lens (modifying, set, use, (%=))
-import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
+import Debug (spy)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | Underlying functions which allow us to make monadic updates from OUTSIDE of a script
@@ -28,15 +26,6 @@ import Unsafe.Coerce (unsafeCoerce)
 
 reheatSimulation :: D3SimulationState_ -> D3SimulationState_
 reheatSimulation = set _alpha 1.0
-
--- type SimulationStateRow row = ( simulation :: D3SimulationState_ | row )
-
--- simulationAddForces :: forall m row. 
---   (MonadState { simulation :: D3SimulationState_ | row } m) => 
---   Map Label Force -> m Unit
--- simulationAddForces forces = do
---   traverse_ simulationAddForce forces -- effectfully put the forces in the simulation
---   _forceLibrary %= (\m -> M.union forces m )
 
 simulationRemoveAllForces :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) => 
@@ -46,17 +35,6 @@ simulationRemoveAllForces = do
   forces <- use _forceLibrary
   let _ = (setAsNullForceInSimulation_ handle) <$> (A.fromFoldable $ M.keys forces)
   _forceLibrary %= (const M.empty)
-
--- simulationAddForce :: forall m row. 
---   (MonadState { simulation :: D3SimulationState_ | row } m) =>
---   Force -> m Unit
--- simulationAddForce (Force force) = do 
---   let _ = (\a -> setForceAttr force.force_ force.filter (unwrap a)) <$> force.attributes -- side-effecting function that sets force's attributes
---   handle <- use _handle
---   let _ = if force.status == ForceActive
---           then putForceInSimulation (Force force) handle
---           else handle          
---   (_force force.name) %= (liftA1 $ const $ Force force)
 
 simulationToggleForce :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
@@ -86,23 +64,16 @@ simulationEnableForcesByLabel labels  = do
   forces <- use _forceLibrary -- TODO this is the forces table inside the simulation record
   _forceLibrary %= (const $ (enableByLabels handle labels) <$> forces)
   
--- simulationEnableOnlyTheseForces :: forall m row. 
---   (MonadState { simulation :: D3SimulationState_ | row } m) =>
---   Array Label -> m Unit
--- simulationEnableOnlyTheseForces labels = do
---   handle <- use _handle
---   forces <- use _forceLibrary
---   let updatedForces = (enableOnlyTheseLabels handle labels) <$> forces -- REVIEW can't we traversed (optic) this update?
---   _forceLibrary %= (const updatedForces)
-
 simulationUpdateForceStatuses :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   m Unit
 simulationUpdateForceStatuses = do
   handle        <- use _handle
   forceStatuses <- use _forceStatuses
+  let _ = spy "forceStatuses on update: " forceStatuses
   _forceLibrary %= (putStatusMap forceStatuses)
-  forceLibrary  <- use _forceLibrary -- now use the updated force library
+  forceLibrary  <- use _forceLibrary -- now use the updated force
+  let _ = spy "forceLibrary after applying forceStatuses: " forceLibrary
   let _ = (updateForceInSimulation handle) <$> forceLibrary
   pure unit
 
@@ -114,39 +85,31 @@ simulationSetVariable v = do
   case v of
     (Alpha n)         -> do
       let _ = setAlpha_ handle n
-      modifying (_d3Simulation <<< _alpha) (const n)
+      _d3Simulation <<< _alpha %= (const n)
     (AlphaTarget n)   -> do
       let _ = setAlphaTarget_ handle n
-      modifying (_d3Simulation <<< _alphaTarget) (const n)
+      _d3Simulation <<< _alphaTarget %= (const n)
     (AlphaMin n)      -> do
       let _ = setAlphaMin_ handle n
-      modifying (_d3Simulation <<< _alphaMin) (const n)
+      _d3Simulation <<< _alphaMin %= (const n)
     (AlphaDecay n)    -> do
       let _ = setAlphaDecay_ handle n
-      modifying (_d3Simulation <<< _alphaDecay) (const n)
+      _d3Simulation <<< _alphaDecay %= (const n)
     (VelocityDecay n) -> do
       let _ = setVelocityDecay_ handle n
-      modifying (_d3Simulation <<< _velocityDecay) (const n)
+      _d3Simulation <<< _velocityDecay %= (const n)
 
 simulationStart :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   m Unit
 simulationStart = do
   handle <- use _handle
--- let newAlpha = 1.0
--- modifying (_d3Simulation <<< _alpha) (const newAlpha)
+  _d3Simulation <<< _alpha %= (const 1.0)
   pure $ startSimulation_ handle
 
--- simulationStop :: forall m row. 
---   (MonadState { simulation :: D3SimulationState_ | row } m) => 
---   m Unit
-simulationStop :: forall t34 t48.
-  Bind t34 => MonadState
-                { simulation :: D3SimulationState_
-                | t48
-                }
-                t34
-               => t34 Unit
+simulationStop :: forall m row. 
+  (MonadState { simulation :: D3SimulationState_ | row } m) => 
+  m Unit
 simulationStop = do
   handle <- use _handle
   let _ = stopSimulation_ handle

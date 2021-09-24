@@ -133,7 +133,7 @@ datum_ = {
         else datum_.radius d
 
   , collideRadiusBig:
-      \d -> (datum_.radius d) + 50.0
+      \d -> (datum_.radius d) + 10.0
 
   , nodeClass:
       \d -> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d) <> (if (datum_.connected d) then " connected" else "")

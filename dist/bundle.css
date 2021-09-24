@@ -1,5 +1,8 @@
+div.story-panel-code pre.language-purescript {
+  font-size: 8pt;
+}
 
-  div.svg-container svg.gup text { font-size: 48px; font-family: monospace;
+div.svg-container svg.gup text { font-size: 48px; font-family: monospace;
   }
 
 /* the svg-container's class is set by Halogen, thus controlling look of the visualization */
@@ -1285,6 +1288,7 @@ dt {
   display: flex;
   flex-direction: column;
   height: 100vh;
+  max-width: 65ch;
   min-width: -webkit-min-content;
   min-width: -moz-min-content;
   min-width: min-content;

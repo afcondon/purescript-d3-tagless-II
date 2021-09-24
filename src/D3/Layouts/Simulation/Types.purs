@@ -22,7 +22,7 @@ import Data.Profunctor (class Profunctor)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
 import Data.Tuple (Tuple(..))
-import Debug (trace)
+import Debug (spy, trace)
 import Type.Proxy (Proxy(..))
 
 -- representation of all that is stateful in the D3 simulation engine
@@ -148,17 +148,7 @@ _force_ :: Lens' Force D3ForceHandle_
 _force_ = _Newtype <<< prop (Proxy :: Proxy "force_")
 
 getStatusMap :: Map Label Force -> Map Label ForceStatus
-getStatusMap forceMap = fromFoldable $ (\f -> Tuple (view _name f) (view _status f)) <$> forceMap
-
--- forceStatusTuples :: Array Force -> Array (Tuple Label ForceStatus)
--- forceStatusTuples forces = do
---   let go f = Tuple (view _name f) (view _status f)
---   go <$> forces
-
--- forceTuples :: Array Force -> Array (Tuple Label Force)
--- forceTuples forces = do
---   let go f = Tuple (view _name f) f
---   go <$> forces
+getStatusMap forceMap = spy "getStatusMap: " $ fromFoldable $ (\f -> Tuple (view _name f) (view _status f)) <$> forceMap
 
 _filter :: forall p. Profunctor p => Strong p => p (Maybe ForceFilter) (Maybe ForceFilter) -> p Force Force
 _filter = _Newtype <<< prop (Proxy :: Proxy "filter")
@@ -278,6 +268,14 @@ initialSimulationState forces = SimState_
   }
   where
     _ = trace { simulation: "initialized", forceLibrary: forces } \_ -> unit
+
+-- forceLibraryMap :: Map Label ForceStatus
+-- forceLibraryMap = do
+--   let
+--     forceTuple :: Force -> Tuple Label ForceStatus
+--     forceTuple f = Tuple (view _name f) (view _status f)
+--   spy "forceLibraryMap: " $ fromFoldable $ forceTuple <$> forceLibrary
+
 
 defaultConfigSimulation :: SimulationConfig_
 defaultConfigSimulation = { 
