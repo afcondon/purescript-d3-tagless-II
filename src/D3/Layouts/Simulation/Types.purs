@@ -124,7 +124,10 @@ instance showSimVariable :: Show SimVariable where
   show (VelocityDecay n) = "VelocityDecay: " <> show n
 
 -- TODO we won't export Force constructor here when we close exports
-data ForceType = RegularForce RegularForceType | LinkForce | FixForce FixForceType
+data ForceType = 
+    RegularForce RegularForceType
+  | LinkForce
+  | FixForce FixForceType
 
 newtype Force = Force {
     "type"     :: ForceType

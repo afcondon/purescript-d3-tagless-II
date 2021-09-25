@@ -25,8 +25,8 @@ putStatusMap forceStatusMap forceMap = update <$> forceMap
   where
     update force =
       case (view (at (view _name force)) forceStatusMap) of -- get desired status from status map
-        Nothing -> force -- this force wasn't in status map so it's unchanged
-        (Just status) -> set _status status force -- update the status
+        Nothing       -> set _status ForceDisabled force -- default is to disable
+        (Just status) -> set _status status force 
     
 showType :: ForceType -> String
 showType = 

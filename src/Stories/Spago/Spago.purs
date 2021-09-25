@@ -7,22 +7,28 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Examples.Spago.Draw (graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Draw as Graph
-import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Graph_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, allNodes, convertFilesToGraphModel, isModule, isPackage)
+import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID, isM2M_Graph_Link, isM2P_Link, isP2P_Link)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, allNodes, convertFilesToGraphModel, isModule, isPackage, numberToGridPoint, scalePoint)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (linksForceName)
+import D3.Node (D3_SimulationNode(..))
 import D3.Simulation.Types (ForceStatus(..), SimVariable(..), _forceStatus, _forceStatuses, _onlyTheseForcesActive, initialSimulationState, toggleForceStatus)
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
-import Data.Array (filter)
+import Data.Array (filter, foldl, length, partition, range, (:))
 import Data.Either (hush)
+import Data.FoldableWithIndex (foldlWithIndex)
+import Data.Int (floor, fromNumber, toNumber)
 import Data.Lens (use, view, (%=))
-import Data.Map (empty)
+import Data.Map (empty, fromFoldable, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Data.Nullable (notNull, null)
+import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
+import Math (ceil, pow, sqrt)
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
@@ -71,6 +77,7 @@ handleAction = case _ of
     _forceStatuses %= _onlyTheseForcesActive [ "packageGrid", "clusterx", "clustery", "collide1" ]
     runWithD3_Simulation actualizeForces
     setNodesAndLinks { chooseLinks: isM2P_Link, chooseNodes: allNodes }
+    _stagingNodes %= addGridPoints
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
     runWithD3_Simulation (setConfigVariable $ Alpha 1.0)
@@ -89,7 +96,7 @@ handleAction = case _ of
   Scene (ModuleTree _) -> do
     _cssClass %= (const "tree")
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
-    _forceStatuses %= _onlyTheseForcesActive [ "treeNodesPinned", "center", "charge1", "collide2", "moduleOrbit1", linksForceName ]
+    _forceStatuses %= _onlyTheseForcesActive [ "treeNodesX", "treeNodesY", "center", "charge1", "collide2", "unusedOrbit" ]
     runWithD3_Simulation actualizeForces
     setNodesAndLinks { chooseNodes: isModule           -- show all modules, 
                      , chooseLinks: isM2M_Graph_Link } -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
@@ -154,6 +161,34 @@ chooseLinks filterFn = do
   state <- get
   _stagingLinks %= const (filter filterFn $ view _modelLinks state)
 
+-- TODO make this generic: needs partitioning function and 
+addGridPoints :: Array SpagoSimNode -> Array SpagoSimNode
+addGridPoints nodes = modulesWithGrid <> packagesWithGrid
+  where
+    -- we're going to set gridXY of packages and then make modules have gridXY of their containing package
+    packagesAndModules = partition isPackage nodes
+    packageCount = length packagesAndModules.yes
+    -- | we want a square (eventually rect) that is large enough to hold all the packages
+    -- nearestSquare = pow (ceil $ sqrt packageCount) 2.0
+    -- | columns would be sqrt of nearestSquare, so we simply don't square it
+    -- | when extending this to a rectangle we will actually need the square tho
+    columns = floor $ ceil $ sqrt $ toNumber packageCount -- we don't actually ever need rows
+
+    packagesWithGrid = foldlWithIndex (\i b a -> (setGridXY a i) : b) [] packagesAndModules.yes
+      where setGridXY (D3SimNode p) i = D3SimNode p { gridXY = notNull $ scalePoint 100.0 100.0 $ numberToGridPoint columns i }
+
+    packagesIndexMap = 
+      fromFoldable $
+      foldl (\b (D3SimNode a) -> (Tuple a.id a.gridXY) : b) [] packagesWithGrid
+
+    modulesWithGrid = map setModuleGridXY packagesAndModules.no
+
+    setModuleGridXY (D3SimNode m) = 
+      case lookup m.containerID packagesIndexMap of
+        Nothing -> D3SimNode m -- shouldn't be possible, but a noop is fine if not found
+        Just gridXY -> D3SimNode m { gridXY = gridXY }
+
+
 -- filter nodes from Maybe Model into Staging
 chooseNodes :: forall m. MonadState State m => (SpagoSimNode -> Boolean) -> m Unit
 chooseNodes filterFn = do
@@ -166,8 +201,10 @@ setNodesAndLinks :: forall m.
   m Unit
 setNodesAndLinks config = do
   state <- get
-  _stagingLinks  %= const (filter config.chooseLinks $ view _modelLinks state)
-  _stagingNodes  %= const (filter config.chooseNodes $ view _modelNodes state)
+  _stagingLinks %= const (filter config.chooseLinks $ view _modelLinks state)
+  _stagingNodes %= const (filter config.chooseNodes $ view _modelNodes state)
+  _stagingNodes %= addGridPoints
+ -- FIXME this is where the grid point can be set, once we know how many packages we have
 
 
 -- ======================================================================================================================

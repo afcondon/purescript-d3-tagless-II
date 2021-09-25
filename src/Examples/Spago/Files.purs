@@ -67,7 +67,6 @@ derive instance Eq LinkType
 data PackageInfo     = PackageInfo { version :: String, repo :: String }
 type ModulePath      = String
 data NodeType        = IsModule ModulePath | IsPackage PackageInfo
-data Pinned          = Pinned | Floating | Forced -- might be more categories here, "pinned connectd", "pinned unused" whatever...
 type Deps            = Array NodeID
 
 type SpagoLinkData        = ( linktype :: LinkType, inSim :: Boolean )
@@ -93,8 +92,8 @@ type SpagoNodeRow row = (
   , loc           :: Number
   , name          :: String
   , nodetype      :: NodeType
-  , pinned        :: Pinned
   , treeXY        :: Nullable PointXY
+  , gridXY        :: Nullable PointXY
   | row )
 type SpagoNodeData    = { | SpagoNodeRow () }
 type SpagoDataRow   = (D3_XY + D3_VxyFxy + SpagoNodeRow  + D3_FocusXY + D3_Radius + ())
@@ -182,7 +181,6 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       , containerName: m.package
       , loc          : m.loc
       , nodetype     : IsModule m.path
-      , pinned       : Floating
       , inSim        : true
       , links        :  { targets: (getId <$> m.depends) -- NB these are Module depends
                         , sources   : []  -- these can be filled in later?
@@ -194,6 +192,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       , connected    : false -- this is shorthand for "connected to Main by a dependency tree", essentially it's treeNodes.no
       , containsMany : false 
       , treeXY       : null
+      , gridXY       : null
       } 
 
     depsMap :: M.Map String { version :: String, repo :: String }
@@ -209,7 +208,6 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       , name         : p.key
       , inSim        : true
       , nodetype     : IsPackage (PackageInfo repo)
-      , pinned       : Floating
       , containerID  : id -- package belongs to itself
       , containerName: p.key
       , loc          : p.loc 
@@ -223,6 +221,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       , connected    : true -- unless something has gone very wrong we shouldn't have any unconnected _packages_ (only modules)
       , containsMany : (length p.contains) > 1 -- we won't try to cluster contents of single module packages
       , treeXY       : null
+      , gridXY       : null
       }
 
     moduleNodes        = makeNodeFromModuleJSONPL  <$> modulesPL
@@ -294,5 +293,3 @@ instance showLinkType :: Show LinkType where
   show M2M_Graph = "M2M-Graph"
   show P2P = "P2P"
   show M2P = "module to package dependency"
-
-derive instance eqPinned :: Eq Pinned

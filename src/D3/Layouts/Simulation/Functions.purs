@@ -9,15 +9,16 @@ import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveLinkReferenc
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
 import D3.Simulation.Forces (disableByLabels, enableByLabels, putStatusMap, updateForceInSimulation)
-import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _forceStatuses, _handle, _tick, _velocityDecay)
+import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _forceStatuses, _handle, _status, _tick, _velocityDecay)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (RawData)
 import Data.Array (elem, filter, intercalate)
 import Data.Array as A
-import Data.Lens (modifying, set, use, (%=))
+import Data.Lens (modifying, set, use, view, (%=))
+import Data.Map (Map, toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Tuple (Tuple(..))
+import Data.Tuple (Tuple(..), fst)
 import Debug (spy)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -64,15 +65,22 @@ simulationEnableForcesByLabel labels  = do
   forces <- use _forceLibrary -- TODO this is the forces table inside the simulation record
   _forceLibrary %= (const $ (enableByLabels handle labels) <$> forces)
   
+listActiveForces :: Map Label ForceStatus -> Array Label
+listActiveForces forceMap = fst <$> (filter (\(Tuple n s) -> s == ForceActive) $ toUnfoldable forceMap)
+
+listActiveForcesInLibrary :: Map Label Force -> Array Label
+listActiveForcesInLibrary forceMap = fst <$> (filter (\(Tuple n f) -> (view _status f) == ForceActive) $ toUnfoldable forceMap)
+
 simulationUpdateForceStatuses :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   m Unit
 simulationUpdateForceStatuses = do
   handle        <- use _handle
   forceStatuses <- use _forceStatuses
-  let _ = spy "forceStatuses on update: " forceStatuses
+  let _ = spy "forceStatuses on update: " $ listActiveForces forceStatuses
   _forceLibrary %= (putStatusMap forceStatuses)
   forceLibrary  <- use _forceLibrary -- now use the updated force
+  let _ = spy "forceLibrary after status update: " $ listActiveForcesInLibrary forceLibrary
   let _ = spy "forceLibrary after applying forceStatuses: " forceLibrary
   let _ = (updateForceInSimulation handle) <$> forceLibrary
   pure unit

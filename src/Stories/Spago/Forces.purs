@@ -19,46 +19,45 @@ import Debug (spy)
 -- | table of all the forces that are used in the Spago component
 forceLibrary :: Map Label Force
 forceLibrary = initialize [
-        createForce "collide1"     (RegularForce ForceCollide)  allNodes [ F.strength 1.0, F.radius datum_.collideRadius ]
-      , createForce "collide2"     (RegularForce ForceCollide)  allNodes [ F.strength 0.7, F.radius datum_.collideRadiusBig ]
-      , createForce "charge1"      (RegularForce ForceManyBody) allNodes [ F.strength (-30.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
-      , createForce "center"       (RegularForce ForceCenter)   allNodes [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
+        createForce "center"       (RegularForce ForceCenter)   allNodes [ F.strength 0.5, F.x 0.0, F.y 0.0 ]
       , createForce "x"            (RegularForce ForceX)        allNodes [ F.strength 0.05, F.x 0.0 ]
       , createForce "y"            (RegularForce ForceY)        allNodes [ F.strength 0.07, F.y 0.0 ]
-      , createForce "charge2"      (RegularForce ForceManyBody) allNodes [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 100.0 ]
-      -- the "xy" cluster force lacks any sugar for setting via a PointXY instead of individually (seems like it'd be worth writing one)
-      -- , createForce "clusterxy"    (RegularForce ForceX)        allNodes [ F.strength 0.2, F.x (\d i -> cluster2Point i) ]
-      , createForce "clusterx"     (RegularForce ForceX)        allNodes [ F.strength 0.2, F.x (\(_ :: Datum_) i -> _.x $ cluster2Point i) ] -- TODO d:: Datum_ is ugly but needed for typeclass
-      , createForce "clustery"     (RegularForce ForceY)        allNodes [ F.strength 0.2, F.y (\(_ :: Datum_) i -> _.y $ cluster2Point i) ]
 
-      , createForce "packageGrid"     (FixForce $ ForceFixPositionXY gridXY)   (Just $ ForceFilter "packages only" datum_.isPackage)            [ ] 
+      , createForce "collide1"     (RegularForce ForceCollide)  allNodes [ F.strength 1.0, F.radius datum_.collideRadius ]
+      , createForce "collide2"     (RegularForce ForceCollide)  allNodes [ F.strength 0.7, F.radius datum_.collideRadiusBig ]
+      , createForce "charge1"      (RegularForce ForceManyBody) allNodes [ F.strength (-30.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
+      , createForce "charge2"      (RegularForce ForceManyBody) allNodes [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 400.0 ]
+
+      , createForce "clusterx"     (RegularForce ForceX)        modulesOnly [ F.strength 0.2, F.x datum_.gridPointX ]
+      , createForce "clustery"     (RegularForce ForceY)        modulesOnly [ F.strength 0.2, F.y datum_.gridPointY ]
+
+      , createForce "packageGrid"     (FixForce $ ForceFixPositionXY useGridXY) (Just $ ForceFilter "packages only" datum_.isPackage)           [ ] 
       , createForce "centerNamedNode" (FixForce $ ForceFixPositionXY centerXY) (Just $ ForceFilter "src only"     \d -> datum_.name d == "src") [ ] 
       , createForce "treeNodesPinned" (FixForce $ ForceFixPositionXY treeXY)   (Just $ ForceFilter "tree only"    \d -> datum_.connected d)     [ ] 
+      
+      , createForce "treeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
+          [ F.strength 0.2, F.x datum_.treePointX ] 
+      , createForce "treeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
+          [ F.strength 0.2, F.y datum_.treePointY ] 
 
-      , createForce "packageOrbit" (RegularForce ForceRadial)   (selectivelyApplyForce datum_.isPackage "packages only") 
+      , createForce "packageOrbit" (RegularForce ForceRadial)   packagesOnly 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 300.0 ]
-      , createForce "moduleOrbit1" (RegularForce ForceRadial)   (selectivelyApplyForce datum_.isUnusedModule "unused modules only") 
-                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 700.0 ]
-      , createForce "moduleOrbit2" (RegularForce ForceRadial)   (selectivelyApplyForce datum_.isUsedModule "used modules only")
+      , createForce "unusedOrbit" (RegularForce ForceRadial)   unusedModulesOnly 
+                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 900.0 ]
+      , createForce "moduleOrbit" (RegularForce ForceRadial)   usedModulesOnly
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
-      , createForce "moduleOrbit3" (RegularForce ForceRadial)   (selectivelyApplyForce datum_.isUsedModule "direct deps of Main")
-                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
+                                   
       , createLinkForce Nothing [ F.strength 1.0, F.distance 0.0, F.numKey (toNumber <<< datum_.id) ]
       ]
   where
-    gridXY   _ i = cluster2Point i
+    packagesOnly      = Just $ ForceFilter "all packages" datum_.isPackage
+    modulesOnly       = Just $ ForceFilter "all modules" datum_.isModule
+    unusedModulesOnly = Just $ ForceFilter "unused modules only" datum_.isUnusedModule
+    usedModulesOnly   = Just $ ForceFilter "used modules only" datum_.isUsedModule
+
+    useGridXY d _ = datum_.gridPoint d
     centerXY _ _ = { x: 0.0, y: 0.0 }
     treeXY   d _ = spy "treePoint" $ datum_.treePoint d
-    selectivelyApplyForce :: (Datum_ -> Boolean) -> String -> Maybe ForceFilter
-    selectivelyApplyForce filterFn description = Just $ ForceFilter description filterFn
-
--- TODO this is a ridiculously brittle and specific function to distribute package nodes on the screen, general solution needed here
-cluster2Point :: Index_ -> PointXY
-cluster2Point i =  
-  scalePoint 200.0 200.0 $
-  offsetXY { x: (-4.5), y: (-2.5) } $ -- center the grid on the (already centered) origin
-  numberToGridPoint 10 (index_ToInt i)
-
 
 -- | NOTES
 

@@ -12,6 +12,9 @@ spagoNodeKeyFunction d = index
   where
     index = unsafeCoerce $ (unboxD3SimNode d).id
 
+coerceToIndex_ :: forall a. (Ord a) => a -> Index_
+coerceToIndex_ = unsafeCoerce
+
 unboxD3SimNode :: Datum_ -> SpagoDataRecord
 unboxD3SimNode datum = d
   where (D3SimNode d) = unsafeCoerce datum
