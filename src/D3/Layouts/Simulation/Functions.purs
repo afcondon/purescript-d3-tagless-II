@@ -8,14 +8,14 @@ import D3.Data.Types (D3Selection_, Datum_, Index_)
 import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveLinkReferences_, d3PreserveSimulationPositions_, defaultSimulationDrag_, disableDrag_, getIDsFromNodes_, getLinkIDs_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_, swizzleLinks_)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
-import D3.Simulation.Forces (disableByLabels, enableByLabels, putStatusMap, updateForceInSimulation)
+import D3.Simulation.Forces (disableByLabels, enableByLabels, putFixedForcesInSimulation, putStatusMap, updateForceInSimulation)
 import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _forceStatuses, _handle, _status, _tick, _velocityDecay)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (RawData)
 import Data.Array (elem, filter, intercalate)
 import Data.Array as A
 import Data.Lens (modifying, set, use, view, (%=))
-import Data.Map (Map, toUnfoldable)
+import Data.Map (Map, toUnfoldable, values)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..), fst)
@@ -112,6 +112,9 @@ simulationStart :: forall m row.
   m Unit
 simulationStart = do
   handle <- use _handle
+  forces <- use _forceLibrary
+  -- fix the nodes that are held by a fixed force, can only be done when nodes already in simulation, hence, here just before restart
+  let _ = (putFixedForcesInSimulation handle) <$> (values forces)
   _d3Simulation <<< _alpha %= (const 1.0)
   pure $ startSimulation_ handle
 

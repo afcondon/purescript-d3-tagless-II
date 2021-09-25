@@ -5,7 +5,7 @@ import Prelude
 import D3.Attributes.Instances (Attr(..), AttrBuilder(..), AttributeSetter(..), Label, unboxAttr)
 import D3.Data.Types (D3Simulation_, Datum_)
 import D3.FFI (D3ForceHandle_, applyFixForceInSimulationXY_, applyFixForceInSimulationX_, applyFixForceInSimulationY_, dummyForceHandle_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, linksForceName, putForceInSimulation_, removeFixForceXY_, removeFixForceX_, removeFixForceY_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
-import D3.Simulation.Types (ChainableF, FixForceType(..), Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), LinkForceType(..), RegularForceType(..), _attributes, _filter, _force_, _name, _status, toggleForceStatus)
+import D3.Simulation.Types (ChainableF, FixForceType(..), Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), LinkForceType(..), RegularForceType(..), _attributes, _filter, _forceStatus, _force_, _name, _status, toggleForceStatus)
 import Data.Array (elem)
 import Data.Foldable (class Foldable)
 import Data.Lens (over, set, view)
@@ -106,15 +106,26 @@ putForceInSimulation (Force force) simulation_ = do
     RegularForce _ -> putForceInSimulation_ simulation_ force.name force.force_
     -- NB putting the linkforce in the simulation doesn't put the links back in the simulation
     LinkForce      -> putForceInSimulation_ simulation_ force.name force.force_ -- FIXME need to reload the links if this is just a toggle
-    FixForce fix -> do
-      let (filter :: (Datum_ -> Boolean)) = 
-            case force.filter of
-              Nothing -> const true -- a NO-OP filter
-              Just (ForceFilter _ f) -> f
-      case fix of
-        ForceFixPositionXY fn -> applyFixForceInSimulationXY_ simulation_ force.name fn filter
-        ForceFixPositionX fn  -> applyFixForceInSimulationX_  simulation_ force.name fn filter
-        ForceFixPositionY fn  -> applyFixForceInSimulationY_  simulation_ force.name fn filter
+    FixForce _     -> simulation_ -- REVIEW we will only run these when the simulation starts
+
+putFixedForcesInSimulation :: D3Simulation_ -> Force -> D3Simulation_
+putFixedForcesInSimulation simulation_ (Force force) = do
+  if force.status == ForceActive
+  then 
+    case force.type of
+      -- CustomForce   -> simulation_ -- REVIEW not implemented or even designed yet
+      RegularForce _ -> simulation_ -- we're only doing fixed forces at this point
+      LinkForce      -> simulation_ -- we're only doing fixed forces at this point
+      FixForce fix -> do
+        let (filter :: (Datum_ -> Boolean)) = 
+              case force.filter of
+                Nothing -> const true -- a NO-OP filter
+                Just (ForceFilter _ f) -> f
+        case fix of 
+          ForceFixPositionXY fn -> applyFixForceInSimulationXY_ simulation_ force.name fn filter
+          ForceFixPositionX fn  -> applyFixForceInSimulationX_  simulation_ force.name fn filter
+          ForceFixPositionY fn  -> applyFixForceInSimulationY_  simulation_ force.name fn filter
+  else simulation_ -- don't do anything if the fixed force is not active
 
 removeForceFromSimulation :: Force -> D3Simulation_ -> D3Simulation_
 removeForceFromSimulation (Force force) simulation_ = do
