@@ -8,11 +8,11 @@ import D3.FFI (D3ForceHandle_, SimulationConfig_, initSimulation_, keyIsID_)
 import D3.Selection (SelectionAttribute)
 import Data.Array (intercalate)
 import Data.Foldable (class Foldable)
-import Data.Lens (Lens', Prism', _Just, lens', prism', view)
+import Data.Lens (Lens', Prism', _Just, lens', prism', set, view)
 import Data.Lens.At (at)
 import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
-import Data.Map (Map, fromFoldable)
+import Data.Map (Map, fromFoldable, union)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Newtype (class Newtype)
@@ -73,8 +73,11 @@ _force label = _forceLibrary <<< at label
 _forceStatuses :: forall r. Lens' { simulation :: D3SimulationState_ | r } (M.Map Label ForceStatus)
 _forceStatuses = _d3Simulation <<< _Newtype <<< prop (Proxy :: Proxy "forceStatuses")
 
+-- | given a list of forces to enable, ensure that those forces are enabled and all others disabled, no forces removed
+-- | (if you give a label that is not in the library it will have no effect when actualizing the force library from the status map)
 _onlyTheseForcesActive :: forall f. Foldable f => Functor f => f Label -> Map Label ForceStatus -> Map Label ForceStatus
-_onlyTheseForcesActive labels = \_ -> fromFoldable $ (\l -> Tuple l ForceActive) <$> labels
+_onlyTheseForcesActive labels = \statusMap -> union updatedMap ((const ForceDisabled) <$> statusMap)
+  where updatedMap           = fromFoldable $ (\l -> Tuple l ForceActive) <$> labels
 
 -- _forceStatus :: String -> Lens' D3SimulationState_ (Maybe ForceStatus)
 _forceStatus label = _forceStatuses <<< at label <<< _Just

@@ -3,22 +3,24 @@ module D3.Examples.Spago.Model where
 import Prelude
 
 import D3.Data.Tree (TreeLayout(..))
-import D3.Data.Types (D3Simulation_, Datum_, Index_, PointXY, index_ToInt, intToIndex_)
+import D3.Data.Types (D3Simulation_, Datum_, PointXY)
 import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
-import D3.Examples.Spago.Unsafe (coerceToIndex_, unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
+import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
 import D3.FFI (getIndexFromDatum_, hasChildren_, setInSimNodeFlag)
 import D3.Node (D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
-import D3.Scales (d3SchemeCategory10N_, d3SchemeDiverging10N_)
-import Data.Array (foldl, partition)
+import D3.Scales (d3SchemeCategory10N_)
+import Data.Array (foldl, length, partition, (:))
+import Data.FoldableWithIndex (foldlWithIndex)
 import Data.Graph (Graph, fromMap)
-import Data.Int (toNumber)
+import Data.Int (floor, toNumber)
+import Math (ceil, pi, sqrt, (%))
+import Data.Map (fromFoldable, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (Nullable, notNull, toMaybe)
 import Data.Nullable (Nullable, null) as N
 import Data.Set as S
 import Data.Tuple (Tuple(..))
-import Math (pi, sqrt, (%))
 import Math as Math
 import Type.Row (type (+))
 import Web.Event.Internal.Types (Event)
@@ -176,19 +178,6 @@ datum_ = {
               
 }
 
--- -- TODO this is a ridiculously brittle and specific function to distribute package nodes on the screen, general solution needed here
--- cluster2Point :: Datum_ -> (Array Datum_) -> PointXY
--- cluster2Point d ds = do
---   let i = if (datum_.isPackage d)
---           then datum_.containerID
---           else 
---     scalePoint 200.0 200.0 $
---     offsetXY { x: (-4.5), y: (-2.5) } $ -- center the grid on the (already centered) origin
---     numberToGridPoint 10 (index_ToInt i)
---   else
-
-
-
 -- type LinkFilter = forall r. D3_SimulationNode r -> Boolean
 allNodes :: SpagoSimNode -> Boolean
 allNodes = const true
@@ -245,6 +234,36 @@ numberToGridPoint columns i = do
     y = Math.floor (d / c)
     -- _ = trace { numberToGridPoint: i, columns, x, y } \_ -> unit
   { x, y }
+
+-- TODO make this generic: needs partitioning function and 
+addGridPoints :: Array SpagoSimNode -> Array SpagoSimNode
+addGridPoints nodes = modulesWithGrid <> packagesWithGrid
+  where
+    -- we're going to set gridXY of packages and then make modules have gridXY of their containing package
+    packagesAndModules = partition isPackage nodes
+    packageCount = length packagesAndModules.yes
+    -- | we want a square (eventually rect) that is large enough to hold all the packages
+    -- nearestSquare = pow (ceil $ sqrt packageCount) 2.0
+    -- | columns would be sqrt of nearestSquare, so we simply don't square it
+    -- | when extending this to a rectangle we will actually need the square tho
+    columns = floor $ ceil $ sqrt $ toNumber packageCount -- we don't actually ever need rows
+    offset  = -((toNumber columns) / 2.0)
+
+    packagesWithGrid = foldlWithIndex (\i b a -> (setGridXY a i) : b) [] packagesAndModules.yes
+      where setGridXY (D3SimNode p) i = D3SimNode p { gridXY = notNull $ scalePoint 200.0 200.0 $ offsetXY { x: offset, y: offset } $ numberToGridPoint columns i }
+
+    packagesIndexMap = 
+      fromFoldable $
+      foldl (\b (D3SimNode a) -> (Tuple a.id a.gridXY) : b) [] packagesWithGrid
+
+    modulesWithGrid = map setModuleGridXY packagesAndModules.no
+
+    setModuleGridXY (D3SimNode m) = 
+      case lookup m.containerID packagesIndexMap of
+        Nothing -> D3SimNode m -- shouldn't be possible, but a noop is fine if not found
+        Just gridXY -> D3SimNode m { gridXY = gridXY }
+
+
 
 scalePoint :: Number -> Number -> PointXY -> PointXY
 scalePoint xFactor yFactor xy = { x: xy.x * xFactor, y: xy.y * yFactor }

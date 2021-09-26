@@ -81,7 +81,6 @@ simulationUpdateForceStatuses = do
   _forceLibrary %= (putStatusMap forceStatuses)
   forceLibrary  <- use _forceLibrary -- now use the updated force
   let _ = spy "forceLibrary after status update: " $ listActiveForcesInLibrary forceLibrary
-  let _ = spy "forceLibrary after applying forceStatuses: " forceLibrary
   let _ = (updateForceInSimulation handle) <$> forceLibrary
   pure unit
 

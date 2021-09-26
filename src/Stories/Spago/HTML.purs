@@ -202,7 +202,7 @@ blurbtext = HH.div_ (title : paras)
     title        = HH.h2 [ HP.classes titleClasses ] [ HH.text "About this Example"]
     titleClasses = HH.ClassName <$> [ "font-bold text-2xl" ]
 
-    paras       = (HH.p [ HP.classes paraClasses ]) <$> paraTexts
+    paras       = (HH.p [ HP.classes paraClasses ]) <$> [] -- paraTexts
     paraClasses = HH.ClassName <$> [ "m-4 " ]
     paraTexts   = map (\s -> [ HH.text s ] ) [
 
