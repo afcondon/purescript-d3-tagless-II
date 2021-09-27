@@ -41,7 +41,7 @@ forceLibrary = initialize [
           [ F.strength 0.2, F.y datum_.treePointY ] 
 
       , createForce "packageOrbit" (RegularForce ForceRadial)   packagesOnly 
-                                   [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 300.0 ]
+                                   [ F.strength 0.7, F.x 0.0, F.y 0.0, F.radius 500.0 ]
       , createForce "unusedOrbit" (RegularForce ForceRadial)   unusedModulesOnly 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 900.0 ]
       , createForce "moduleOrbit" (RegularForce ForceRadial)   usedModulesOnly

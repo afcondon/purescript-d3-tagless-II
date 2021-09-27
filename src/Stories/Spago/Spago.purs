@@ -80,9 +80,9 @@ handleAction = case _ of
     _cssClass %= (const "graph")
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection"
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
-    _forceStatuses %= _onlyTheseForcesActive ["centerNamedNode", "center", "collide2", "charge2", linksForceName ]
+    _forceStatuses %= _onlyTheseForcesActive ["centerNamedNode", "center", "collide2", "charge2", "packageOrbit"]
     runWithD3_Simulation actualizeForces
-    setNodesAndLinks { chooseLinks: isP2P_Link, chooseNodes: isPackage, linkFilter: const true }
+    setNodesAndLinks { chooseLinks: isP2P_Link, chooseNodes: isPackage, linkFilter: sourcePackageIs "my-project" }
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
     runWithD3_Simulation (setConfigVariable $ Alpha 1.0)
@@ -159,12 +159,12 @@ setNodesAndLinks :: forall m.
 setNodesAndLinks config = do
   state <- get
   _stagingLinks %= const (filter config.chooseLinks $ view _modelLinks state)
-  _stagingLinkFilter %= const config.linkFilter -- config.linkFilter
+  _stagingLinkFilter %= const config.linkFilter
   _stagingNodes %= const (filter config.chooseNodes $ view _modelNodes state)
   _stagingNodes %= addGridPoints
  -- FIXME this is where the grid point can be set, once we know how many packages we have
 
-
+sourcePackageIs name link = (link_.source link).name == name
 -- ======================================================================================================================
 -- functions to read the data from files and build the model (only lives here to prevent cycles)
 -- readModelData will try to build a model from files and to derive a dependency tree from Main

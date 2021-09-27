@@ -3,13 +3,18 @@ div.svg-container.graph {
   & svg {
     background-color: white;
     & g.links {
+      & line {
+        visibility: visible;
+        opacity: 0.2;
+        stroke-width: 1px;
+      } 
       & line.M2M-Graph {
         visibility: hidden;
       } 
       & line.P2P {
         visibility: visible;
-        opacity: 0.3;
-        stroke-width: 2px;
+        opacity: 0.2;
+        stroke-width: 1px;
       } 
     }
 
@@ -41,7 +46,6 @@ div.svg-container.graph {
       }
       & g.package {
         & circle {
-          visibility: hidden;
         }
         & text {
           visibility: visible;

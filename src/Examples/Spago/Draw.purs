@@ -3,7 +3,7 @@ module D3.Examples.Spago.Draw where
 import D3Tagless.Capabilities
 
 import Control.Monad.State (class MonadState)
-import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, opacity, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
+import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, opacity, radius, raise, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Draw.Attributes (enterAttrs, svgAttrs, updateAttrs)
@@ -47,8 +47,9 @@ initialize = do
                            }
   -- create the <g>'s to hold the nodes and links and pass these selection onward
   -- so that the data can be joined here each time it is changed
+  -- NB links first because it looks best if links under nodes, but can be changed later with setAttributes linksGroup [ raise ] 
+  linksGroup <- appendTo inner Group [ classed "links" ] 
   nodesGroup <- appendTo inner Group [ classed "nodes" ]
-  linksGroup <- appendTo inner Group [ classed "links" ]
 
   pure { nodes: Just nodesGroup, links: Just linksGroup }
   
