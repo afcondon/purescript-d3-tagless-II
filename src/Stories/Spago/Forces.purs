@@ -57,7 +57,7 @@ forceLibrary = initialize [
 
     useGridXY d _ = datum_.gridPoint d
     centerXY _ _ = { x: 0.0, y: 0.0 }
-    treeXY   d _ = spy "treePoint" $ datum_.treePoint d
+    treeXY   d _ = datum_.treePoint d
 
 -- | NOTES
 

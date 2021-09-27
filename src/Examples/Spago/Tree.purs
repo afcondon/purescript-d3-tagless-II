@@ -56,7 +56,7 @@ treeReduction rootID model = do
           -- layout            = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
           numberOfLevels    = (hNodeHeight_ rootTree) + 1.0
           -- layout            = (getLayout TidyTree) `treeSetNodeSize_` [ 10.0, svg.width / numberOfLevels]
-          layout            = (getLayout TidyTree) `treeSetNodeSize_` [ 10.0, 2000.0 / numberOfLevels]
+          layout            = (getLayout TidyTree) `treeSetNodeSize_` [ 8.0, 4000.0 / numberOfLevels]
 
           idTree            = buildTree rootID treelinks
           jsontree          = makeD3TreeJSONFromTreeID idTree model.maps.id2Node
@@ -107,7 +107,7 @@ setNodeXY_ForHorizontalTree nodes treeDerivedDataMap = do
       case M.lookup node.id treeDerivedDataMap of
         Nothing -> D3SimNode node
         (Just p) -> 
-          let { x,y } = { x: p.y - 800.0 , y: p.x } -- TODO just shifting left because origin is in center
+          let { x,y } = { x: p.y - 2000.0 , y: p.x } -- TODO just shifting left because origin is in center
           in 
             if pinLeaves
             then (D3SimNode node) `setTreeXYIncludingLeaves` { x, y, depth: p.depth, isLeaf: p.isLeaf } -- only pin parents

@@ -153,6 +153,10 @@ div.svg-container.graph svg g.nodes g.package:hover circle { visibility: visible
 
 /* the svg-container's class is set by Halogen, thus controlling look of the visualization */
 
+div.svg-container.tree svg g.links line {
+        opacity: 0.3;
+      }
+
 div.svg-container.tree svg g.links line.M2M-Graph {
         stroke: red;
         visibility: hidden;

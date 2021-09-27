@@ -2,6 +2,9 @@
 div.svg-container.tree { 
   & svg {
     & g.links {
+      & line {
+        opacity: 0.3;
+      }
       & line.M2M-Graph {
         stroke: red;
         visibility: hidden;

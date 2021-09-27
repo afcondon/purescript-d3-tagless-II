@@ -9,7 +9,7 @@ import D3.Data.Types (Datum_)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Files (LinkType(..), SpagoGraphLinkID, SpagoGraphLinkRecord, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, addGridPoints, allNodes, convertFilesToGraphModel, isModule, isPackage, link_)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, addGridPoints, allNodes, convertFilesToGraphModel, isModule, isPackage, isUsedModule, link_)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (linksForceName)
 import D3.Simulation.Types (SimVariable(..), _forceStatus, _forceStatuses, _onlyTheseForcesActive, initialSimulationState, toggleForceStatus)
@@ -92,7 +92,7 @@ handleAction = case _ of
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     _forceStatuses %= _onlyTheseForcesActive [ "treeNodesX", "treeNodesY", "center", "charge1", "collide2", "unusedOrbit" ]
     runWithD3_Simulation actualizeForces
-    setNodesAndLinks { chooseNodes: isModule           -- show all modules, 
+    setNodesAndLinks { chooseNodes: isUsedModule           -- show all modules, 
                      , chooseLinks: isM2M_Graph_Link 
                      , linkFilter: (\l -> link_.linkType l == M2M_Tree)} -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
     staging <- use _staging
@@ -151,6 +151,7 @@ chooseNodes :: forall m. MonadState State m => (SpagoSimNode -> Boolean) -> m Un
 chooseNodes filterFn = do
   state <- get
   _stagingNodes %= const (filter filterFn $ view _modelNodes state)
+  _stagingNodes %= addGridPoints
 
 setNodesAndLinks :: forall m.
   MonadState State m =>
