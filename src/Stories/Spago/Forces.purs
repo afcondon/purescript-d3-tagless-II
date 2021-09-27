@@ -32,7 +32,7 @@ forceLibrary = initialize [
       , createForce "clustery"     (RegularForce ForceY)        modulesOnly [ F.strength 0.2, F.y datum_.gridPointY ]
 
       , createForce "packageGrid"     (FixForce $ ForceFixPositionXY useGridXY) (Just $ ForceFilter "packages only" datum_.isPackage)           [ ] 
-      , createForce "centerNamedNode" (FixForce $ ForceFixPositionXY centerXY) (Just $ ForceFilter "src only"     \d -> datum_.name d == "src") [ ] 
+      , createForce "centerNamedNode" (FixForce $ ForceFixPositionXY centerXY) (Just $ ForceFilter "src only"     \d -> datum_.name d == "my-project") [ ] 
       , createForce "treeNodesPinned" (FixForce $ ForceFixPositionXY treeXY)   (Just $ ForceFilter "tree only"    \d -> datum_.connected d)     [ ] 
       
       , createForce "treeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)

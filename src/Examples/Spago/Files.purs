@@ -67,7 +67,7 @@ derive instance Eq LinkType
 data PackageInfo     = PackageInfo { version :: String, repo :: String }
 type ModulePath      = String
 data NodeType        = IsModule ModulePath | IsPackage PackageInfo
-type Deps            = Array NodeID
+type Dependencies    = Array NodeID
 
 type SpagoLinkData        = ( linktype :: LinkType, inSim :: Boolean )
 type SpagoGraphLinkID     = D3Link NodeID SpagoLinkData
@@ -77,12 +77,12 @@ type SpagoTreeObj = D3_TreeNode (D3_ID + D3_TreeRow + D3_XY + D3_Leaf + D3_Radiu
 
 type SpagoNodeRow row = ( 
     id       :: NodeID
-  , links    :: { targets    :: Deps -- the nodes on which this nodes depends
-                , sources    :: Deps -- the nodes which depend on this node
-                , tree       :: Deps
-                , inPackage  :: Deps
-                , outPackage :: Deps
-                , contains   :: Deps -- in case of package, modules; in case of modules, codepoints? (not implemented)
+  , links    :: { targets    :: Dependencies -- the nodes on which this nodes depends
+                , sources    :: Dependencies -- the nodes which depend on this node
+                , tree       :: Dependencies 
+                , inPackage  :: Dependencies
+                , outPackage :: Dependencies
+                , contains   :: Dependencies -- in case of package, modules; in case of modules, codepoints? (not implemented)
                 }
   , connected     :: Boolean
   , containerID   :: NodeID
@@ -93,6 +93,7 @@ type SpagoNodeRow row = (
   , name          :: String
   , nodetype      :: NodeType
   , treeXY        :: Nullable PointXY
+  , treeDepth     :: Nullable Int
   , gridXY        :: Nullable PointXY
   | row )
 type SpagoNodeData    = { | SpagoNodeRow () }
@@ -124,7 +125,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
           packageString <- pieces !! 1
           case root of
             ".spago" -> Just packageString
-            "src"    -> Just "src" -- TODO this name comes from the packages.json via the spago.dhall file
+            "src"    -> Just "my-project" -- TODO this name comes from the packages.json via the spago.dhall file
             _ -> Nothing
 
     modulesPL :: Array ModuleJSONPL
@@ -192,6 +193,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       , connected    : false -- this is shorthand for "connected to Main by a dependency tree", essentially it's treeNodes.no
       , containsMany : false 
       , treeXY       : null
+      , treeDepth    : null
       , gridXY       : null
       } 
 
@@ -221,6 +223,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       , connected    : true -- unless something has gone very wrong we shouldn't have any unconnected _packages_ (only modules)
       , containsMany : (length p.contains) > 1 -- we won't try to cluster contents of single module packages
       , treeXY       : null
+      , treeDepth    : null
       , gridXY       : null
       }
 

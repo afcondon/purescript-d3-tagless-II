@@ -58,8 +58,10 @@ graphSceneAttributes = {
 
 treeSceneAttributes :: { circle :: Array SelectionAttribute, labels :: Array SelectionAttribute }
 treeSceneAttributes  = {
-    circle: [ radius 3.0
-            , fill datum_.colorByUsage
+    circle: [ radius datum_.radius
+            , fill datum_.colorByDepth
+            , strokeColor datum_.colorByGroup
+            , strokeWidth 3.0
             ]
   , labels: [ classed "label"
             , x 4.0

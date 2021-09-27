@@ -7,7 +7,7 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
-import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Graph_Link, isM2P_Link, isP2P_Link)
+import D3.Examples.Spago.Files (SpagoGraphLinkID, SpagoGraphLinkRecord, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, addGridPoints, allNodes, convertFilesToGraphModel, isModule, isPackage)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (linksForceName)
@@ -25,7 +25,7 @@ import Halogen as H
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
-import Stories.Spago.State (State, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingLinks, _stagingNodes)
+import Stories.Spago.State (State, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -42,7 +42,7 @@ component = H.mkComponent
   initialState = { 
       svgClass: ""
     , model: Nothing
-    , staging: { selections: { nodes: Nothing, links: Nothing }, rawdata: { nodes: [], links: [] } }
+    , staging: { selections: { nodes: Nothing, links: Nothing }, linksFilter: const true, rawdata: { nodes: [], links: [] } }
     , simulation: initialSimulationState forceLibrary
   }
 
@@ -81,7 +81,7 @@ handleAction = case _ of
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
     _forceStatuses %= _onlyTheseForcesActive ["centerNamedNode", "center", "collide2", "charge2", linksForceName ]
     runWithD3_Simulation actualizeForces
-    setNodesAndLinks { chooseLinks: isP2P_Link, chooseNodes: isPackage }
+    setNodesAndLinks { chooseLinks: isP2P_Link, chooseNodes: isPackage, linkFilter: const false }
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
     runWithD3_Simulation (setConfigVariable $ Alpha 1.0)
@@ -92,7 +92,7 @@ handleAction = case _ of
     _forceStatuses %= _onlyTheseForcesActive [ "treeNodesX", "treeNodesY", "center", "charge1", "collide2", "unusedOrbit" ]
     runWithD3_Simulation actualizeForces
     setNodesAndLinks { chooseNodes: isModule           -- show all modules, 
-                     , chooseLinks: isM2M_Graph_Link } -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
+                     , chooseLinks: isM2M_Tree_Link } -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging treeSceneAttributes
     runWithD3_Simulation (setConfigVariable $ Alpha 1.0)
@@ -135,18 +135,8 @@ handleAction = case _ of
 type SpagoConfigRecord = { -- convenience type to hold filter functions for nodes & links and list of forces to activate
     chooseNodes :: (SpagoSimNode -> Boolean)
   , chooseLinks :: (SpagoGraphLinkID -> Boolean)
+  , linkFilter  :: (SpagoGraphLinkRecord -> Boolean)
 }
-
--- chooseForces :: forall m. MonadState State m => Array String -> m Unit
--- chooseForces forceNames = do
---   let 
---     setStatus f = do
---       let fName   = view _name f
---           fStatus = if fName `elem` forceNames
---                     then ForceActive
---                     else ForceDisabled
---       Tuple fName fStatus
---   _stagingForces %= const (fromFoldable $ setStatus <$> forceLibrary)
 
 -- filter links from Maybe Model into Staging
 chooseLinks :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
@@ -167,6 +157,8 @@ setNodesAndLinks :: forall m.
 setNodesAndLinks config = do
   state <- get
   _stagingLinks %= const (filter config.chooseLinks $ view _modelLinks state)
+  -- _stagingLinkFilter %= const (const true)
+  _stagingLinkFilter %= const (\link -> config.linkFilter link) -- config.linkFilter
   _stagingNodes %= const (filter config.chooseNodes $ view _modelNodes state)
   _stagingNodes %= addGridPoints
  -- FIXME this is where the grid point can be set, once we know how many packages we have

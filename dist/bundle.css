@@ -184,7 +184,6 @@ div.svg-container.tree svg g.nodes g.module circle {
 div.svg-container.tree svg g.nodes g.module circle.connected {
           visibility: visible;
           fill-opacity: 1;
-          fill: maroon;
         }
 
 div.svg-container.tree svg g.nodes g.module:hover text {
@@ -203,7 +202,6 @@ div.svg-container.tree svg g.nodes g.module.connected { /* not sure why this rul
 div.svg-container.tree svg g.nodes g.module.connected circle {
           visibility: visible;
           fill-opacity: 1;
-          fill: maroon;
         }
 
 div.svg-container.tree svg g.nodes g.package circle {

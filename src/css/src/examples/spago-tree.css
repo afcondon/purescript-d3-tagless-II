@@ -35,7 +35,6 @@ div.svg-container.tree {
         & circle.connected {
           visibility: visible;
           fill-opacity: 1;
-          fill: maroon;
         }
         &:hover {
           & text {
@@ -52,7 +51,6 @@ div.svg-container.tree {
         & circle {
           visibility: visible;
           fill-opacity: 1;
-          fill: maroon;
         }
       }
       & g.package {

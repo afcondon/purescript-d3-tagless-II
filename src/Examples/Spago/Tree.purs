@@ -1,13 +1,13 @@
 module D3.Examples.Spago.Tree where
 
-import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeSetNodeSize_, treeSortForTree_Spago)
 import Prelude
 
 import D3.Data.Graph (getReachableNodes)
 import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Data.Types (PointXY)
 import D3.Examples.Spago.Files (LinkType(..), isP2P_Link)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, setTreeXYExceptLeaves, setTreeXYIncludingLeaves)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, TreeFields, setTreeXYExceptLeaves, setTreeXYIncludingLeaves)
+import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeSetNodeSize_, treeSortForTree_Spago)
 import D3.Node (D3Link(..), D3_SimulationNode(..), D3_TreeNode(..), NodeID)
 import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
 import Data.List (List(..), (:))
@@ -63,9 +63,9 @@ treeReduction rootID model = do
           rootTree          = hierarchyFromJSON_       jsontree
           sortedTree        = treeSortForTree_Spago    rootTree
           laidOutRoot_      = (runLayoutFn_ layout)    sortedTree
-          positionMap       = getPositionMap           laidOutRoot_
-          -- positionedNodes   = setNodeXY_ForRadialTree   treenodes.yes positionMap
-          positionedNodes   = setNodeXY_ForHorizontalTree   treenodes.yes positionMap
+          treeDerivedDataMap = getTreeDerivedData      laidOutRoot_
+          -- positionedNodes   = setNodeXY_ForRadialTree   treenodes.yes treeDerivedDataMap
+          positionedNodes   = setNodeXY_ForHorizontalTree   treenodes.yes treeDerivedDataMap
           -- TODO seems we can't position for Phyllotaxis here because we need to put nodes into the DOM before putting them into simulation (to support update pattern)
           -- unpositionedNodes = setForPhyllotaxis  <$> treenodes.no
           unpositionedNodes = treenodes.no
@@ -73,7 +73,7 @@ treeReduction rootID model = do
 
           links = treelinks <> prunedTreeLinks <> onlyPackageLinks -- now all the links should have the right type, M2M_Graph / M2M_Tree / P2P 
 
-      model { links = links, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, maps { id2XYLeaf = positionMap } }
+      model { links = links, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, maps { id2TreeData = treeDerivedDataMap } }
 
 -- for radial positioning we treat x as angle and y as radius
 radialTranslate :: PointXY -> PointXY
@@ -84,44 +84,45 @@ radialTranslate p =
       y = radius * sin angle
   in { x, y }
 
-setNodeXY_ForRadialTree :: Array SpagoSimNode -> M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean } -> Array SpagoSimNode
-setNodeXY_ForRadialTree nodes positionMap = do
+setNodeXY_ForRadialTree :: Array SpagoSimNode -> M.Map NodeID TreeFields -> Array SpagoSimNode
+setNodeXY_ForRadialTree nodes treeDerivedDataMap = do
   let 
     pinLeaves = false
     updateXY (D3SimNode node) = do
-      case M.lookup node.id positionMap of
+      case M.lookup node.id treeDerivedDataMap of
         Nothing -> D3SimNode node
         (Just p) -> 
           let { x,y } = radialTranslate { x: p.x, y: p.y }
           in 
             if pinLeaves
-            then (D3SimNode node) `setTreeXYIncludingLeaves` { x, y, isLeaf: p.isLeaf } -- only pin parents
-            else (D3SimNode node) `setTreeXYExceptLeaves`    { x, y, isLeaf: p.isLeaf } -- only pin parents
+            then (D3SimNode node) `setTreeXYIncludingLeaves` { x, y, depth: p.depth, isLeaf: p.isLeaf } -- only pin parents
+            else (D3SimNode node) `setTreeXYExceptLeaves`    { x, y, depth: p.depth, isLeaf: p.isLeaf } -- only pin parents
   updateXY <$> nodes
 
-setNodeXY_ForHorizontalTree :: Array SpagoSimNode -> M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean } -> Array SpagoSimNode
-setNodeXY_ForHorizontalTree nodes positionMap = do
+setNodeXY_ForHorizontalTree :: Array SpagoSimNode -> M.Map NodeID TreeFields -> Array SpagoSimNode
+setNodeXY_ForHorizontalTree nodes treeDerivedDataMap = do
   let 
     pinLeaves = true
     updateXY (D3SimNode node) = do
-      case M.lookup node.id positionMap of
+      case M.lookup node.id treeDerivedDataMap of
         Nothing -> D3SimNode node
         (Just p) -> 
           let { x,y } = { x: p.y - 800.0 , y: p.x } -- TODO just shifting left because origin is in center
           in 
             if pinLeaves
-            then (D3SimNode node) `setTreeXYIncludingLeaves` { x, y, isLeaf: p.isLeaf } -- only pin parents
-            else (D3SimNode node) `setTreeXYExceptLeaves`    { x, y, isLeaf: p.isLeaf } -- only pin parents
+            then (D3SimNode node) `setTreeXYIncludingLeaves` { x, y, depth: p.depth, isLeaf: p.isLeaf } -- only pin parents
+            else (D3SimNode node) `setTreeXYExceptLeaves`    { x, y, depth: p.depth, isLeaf: p.isLeaf } -- only pin parents
   updateXY <$> nodes
 
 setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode
 setForPhyllotaxis (D3SimNode d) = D3SimNode $ d { x = nan }
 
-getPositionMap :: SpagoTreeNode -> Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
+-- | having calculated tree from graph at origin Main, extract the information that we need in visualisation
+getTreeDerivedData :: SpagoTreeNode -> Map NodeID TreeFields
 -- TODO coerce here is because the transformation done by hierarchyFromJSON_ is not yet modelled in the type system
 -- ideally you'd want to be able to do a (slightly) more principled cast as shown in commented out line below
--- getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isLeaf: (tree_datum_.isLeaf n) } acc) empty (descendants_ root) 
-getPositionMap root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isLeaf: (unsafeCoerce n).data.isLeaf } acc) empty (descendants_ root) 
+-- getTreeDerivedData root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isLeaf: (tree_datum_.isLeaf n) } acc) empty (descendants_ root) 
+getTreeDerivedData root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, depth: n.depth, isLeaf: (unsafeCoerce n).data.isLeaf } acc) empty (descendants_ root) 
 
 buildTree :: forall r. NodeID -> Array (D3Link NodeID r) -> Tree NodeID
 buildTree rootID treelinks = do

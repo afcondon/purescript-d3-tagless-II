@@ -17,7 +17,7 @@ import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Math (sqrt)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
+import Prelude (class Bind, Unit, bind, const, discard, negate, pure, unit, ($), (/), (<<<))
 import Utility (getWindowWidthHeight)
 
 -- type-safe(ish) accessors for the data that is given to D3
@@ -88,7 +88,7 @@ graphScript model selector = do
   -- which we use here to introduce the nodes and links to the simulation
   setNodes model.nodes -- no staging here, we just load the nodes straight into Sim
   swizzledLinks <- swizzleLinks model.links model.nodes keyIsID_
-  setLinks swizzledLinks
+  setLinks (const true) swizzledLinks
 
   cookedNodes <- getNodes
   cookedLinks <- getLinks

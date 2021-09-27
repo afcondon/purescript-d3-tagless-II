@@ -8,12 +8,11 @@ import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID, SpagoNodeData, S
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
 import D3.FFI (getIndexFromDatum_, hasChildren_, setInSimNodeFlag)
 import D3.Node (D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
-import D3.Scales (d3SchemeCategory10N_)
+import D3.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_)
 import Data.Array (foldl, length, partition, (:))
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.Graph (Graph, fromMap)
 import Data.Int (floor, toNumber)
-import Math (ceil, pi, sqrt, (%))
 import Data.Map (fromFoldable, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -21,6 +20,7 @@ import Data.Nullable (Nullable, notNull, toMaybe)
 import Data.Nullable (Nullable, null) as N
 import Data.Set as S
 import Data.Tuple (Tuple(..))
+import Math (ceil, pi, sqrt, (%))
 import Math as Math
 import Type.Row (type (+))
 import Web.Event.Internal.Types (Event)
@@ -29,6 +29,8 @@ import Web.Event.Internal.Types (Event)
 -- Model data types specialized with inital data
 type SpagoTreeNode = D3TreeRow         (EmbeddedData SpagoNodeData                                  + ())
 type SpagoSimNode  = D3_SimulationNode ( SpagoNodeRow  + D3_XY + D3_VxyFxy + D3_FocusXY + D3_Radius + ()) -- note we've woven in focusXY so that we can cluster the nodes
+-- | this is the only data that we're bringing over from the SpagoTreeNode to SpagoSimNode (at the momment)
+type TreeFields = { x :: Number, y :: Number, isLeaf :: Boolean, depth :: Int }
 
 type SpagoModel = { 
     links :: Array SpagoGraphLinkID
@@ -40,7 +42,7 @@ type SpagoModel = {
              , id2Node    :: M.Map NodeID SpagoNodeData
              , id2Package :: M.Map NodeID NodeID
              , id2LOC     :: M.Map NodeID Number
-             , id2XYLeaf  :: M.Map NodeID { x :: Number, y :: Number, isLeaf :: Boolean }
+             , id2TreeData :: M.Map NodeID TreeFields
              }
 }
 
@@ -101,6 +103,7 @@ datum_ = {
   , x             : _.x             <<< unboxD3SimNode
   , y             : _.y             <<< unboxD3SimNode
   , treeXY        : _.treeXY        <<< unboxD3SimNode
+  , treeDepth     : _.treeDepth     <<< unboxD3SimNode
   , gridXY        : _.gridXY        <<< unboxD3SimNode
   , nodetype      : _.nodetype      <<< unboxD3SimNode
   , cluster       : _.cluster       <<< unboxD3SimNode
@@ -143,8 +146,10 @@ datum_ = {
       \d -> "updated" <> show (datum_.nodetype d) <> " " <> (datum_.containerName d) <> " " <> (datum_.name d) <> (if (datum_.connected d) then " connected" else "")
   , colorByGroup:
       \d -> d3SchemeCategory10N_ (toNumber $ datum_.cluster d)
-  -- , colorByLevel:
-  --     \d -> d3SchemeDiverging10N_ (toNumber $ datum_.indexFunction d) -- we don't have level in SimNode yet so let's test with id
+  , colorByDepth:
+      \d -> case toMaybe $ datum_.treeDepth d of
+              Nothing -> "none"
+              Just depth -> d3SchemeSequential10N_ (toNumber depth)
   , fillByUsage:
       \d -> if (datum_.connected d) then datum_.colorByGroup d else "none"
   , strokeByUsage:
@@ -222,6 +227,7 @@ upgradeSpagoNodeData sourcesMap node = D3SimNode {
   , nodetype     : node.nodetype
   , r            : sqrt node.loc
   , treeXY       : (N.null :: N.Nullable PointXY)
+  , treeDepth    : (N.null :: N.Nullable Int)
   , gridXY       : (N.null :: N.Nullable PointXY)
   , vx           : 0.0
   , vy           : 0.0
@@ -287,15 +293,15 @@ pinNode xy (D3SimNode node) = D3SimNode (node { fx = notNull xy.x, fy = notNull 
 setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
 setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
 
-setTreeXYIncludingLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
-setTreeXYIncludingLeaves (D3SimNode node) { x, y } =
-  D3SimNode (node { treeXY = notNull {x, y}, connected = true})
+setTreeXYIncludingLeaves :: SpagoSimNode -> TreeFields -> SpagoSimNode
+setTreeXYIncludingLeaves (D3SimNode node) { x, y, depth } =
+  D3SimNode (node { treeXY = notNull {x, y}, treeDepth = notNull depth, connected = true})
 
-setTreeXYExceptLeaves :: SpagoSimNode -> { x :: Number, y :: Number, isLeaf :: Boolean } -> SpagoSimNode
-setTreeXYExceptLeaves (D3SimNode node) { x, y, isLeaf: true }  = 
-  D3SimNode node { treeXY = (N.null :: Nullable PointXY), connected = true }
-setTreeXYExceptLeaves (D3SimNode node) { x, y, isLeaf: false } =
-  D3SimNode (node { treeXY = notNull { x,y }, connected = true })
+setTreeXYExceptLeaves :: SpagoSimNode -> TreeFields -> SpagoSimNode
+setTreeXYExceptLeaves (D3SimNode node) { depth, isLeaf: true }  = 
+  D3SimNode node { treeXY = (N.null :: Nullable PointXY), treeDepth = notNull depth, connected = true }
+setTreeXYExceptLeaves (D3SimNode node) { x, y, depth, isLeaf: false } =
+  D3SimNode (node { treeXY = notNull { x,y }, treeDepth = notNull depth, connected = true })
 
 convertFilesToGraphModel :: forall r. 
   { body :: String | r } -> 
@@ -320,7 +326,7 @@ makeSpagoGraphModel json = do
                , id2Node
                , id2Package
                , id2LOC
-               , id2XYLeaf: M.empty
+               , id2TreeData: M.empty
                }
   }
 

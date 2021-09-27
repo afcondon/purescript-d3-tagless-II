@@ -181,10 +181,11 @@ simulationSetLinks ::
   forall d r row m.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
+  (((D3LinkSwizzled (D3_SimulationNode d) r)) -> Boolean) -> -- filter
   Array (D3LinkSwizzled (D3_SimulationNode d) r) -> m Unit
-simulationSetLinks links = do
+simulationSetLinks filterFn links = do
   handle <- use _handle
-  let _ = setLinks_ handle links
+  let _ = setLinks_ handle (filter filterFn links)
   pure unit
 
 simulationSwizzleLinks ::

@@ -3,10 +3,10 @@ module Stories.Spago.State where
 import Prelude
 
 import D3.Data.Types (D3Selection_)
-import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
+import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData, SpagoGraphLinkRecord)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode)
 import D3.FFI (SimulationConfig_, readSimulationConfig_)
-import D3.Node (NodeID)
+import D3.Node (D3LinkSwizzled, D3_SimulationNode, NodeID)
 import D3.Simulation.Types (D3SimulationState_, _handle)
 import D3Tagless.Capabilities (Staging)
 import Data.Array (filter)
@@ -78,28 +78,11 @@ _stagingLinks :: forall p.
   -> p State State
 _stagingLinks = _staging <<< _rawdata <<< _links
 
--- _stagingForces :: forall p. 
---      Strong p
---   => Choice p
---   => p (Map Label ForceStatus) (Map Label ForceStatus)
---   -> p State State
--- _stagingForces = _staging <<< _forces
-
--- _stagingForcesActive :: forall r2 p r1 t.
---   Strong p =>
---   Traversable t =>
---   Wander p =>
---   p Label Label -> p State State
---   -- p { staging :: { forces :: t (Tuple Label ForceStatus) | r1 } | r2 }
---   --   { staging :: { forces :: t (Tuple Label ForceStatus) | r1 } | r2 }
--- _stagingForcesActive = _staging <<< _forces <<< traversed <<< (filtered (\f -> snd f == ForceActive)) <<< _1
-
--- listActiveForces :: forall r1 r2 t.
---   Traversable t => { staging :: { forces :: t (Tuple Label ForceStatus) | r1 } | r2 } -> String
--- listActiveForces :: State -> Array String
--- listActiveForces state = do
---   let tuples = toUnfoldable state.staging.forces 
---   fst <$> (filter (\f -> (snd f) == ForceActive) $ tuples)
+_stagingLinkFilter :: forall t154 p t157.
+  Strong p => 
+  p (SpagoGraphLinkRecord -> Boolean) (SpagoGraphLinkRecord -> Boolean) ->
+  p State State
+_stagingLinkFilter = _staging <<< _linksFilter
 
 _nodes :: forall a r. Lens' { nodes :: a | r } a
 _nodes = prop (Proxy :: Proxy "nodes")
@@ -109,6 +92,9 @@ _links = prop (Proxy :: Proxy "links")
 
 _forces :: forall a r. Lens' { forces :: a | r } a
 _forces = prop (Proxy :: Proxy "forces")
+
+-- _linksFilter :: forall a r. Lens' { linksFilter :: a | r } a
+_linksFilter = prop (Proxy :: Proxy "linksFilter")
 
 _rawdata :: forall a r. Lens' { rawdata :: a | r } a
 _rawdata = prop (Proxy :: Proxy "rawdata")
