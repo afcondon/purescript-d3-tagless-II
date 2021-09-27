@@ -5,10 +5,11 @@ import Prelude
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
+import D3.Data.Types (Datum_)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
-import D3.Examples.Spago.Files (SpagoGraphLinkID, SpagoGraphLinkRecord, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, addGridPoints, allNodes, convertFilesToGraphModel, isModule, isPackage)
+import D3.Examples.Spago.Files (LinkType(..), SpagoGraphLinkID, SpagoGraphLinkRecord, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, addGridPoints, allNodes, convertFilesToGraphModel, isModule, isPackage, link_)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (linksForceName)
 import D3.Simulation.Types (SimVariable(..), _forceStatus, _forceStatuses, _onlyTheseForcesActive, initialSimulationState, toggleForceStatus)
@@ -69,7 +70,7 @@ handleAction = case _ of
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     _forceStatuses %= _onlyTheseForcesActive [ "packageGrid", "clusterx", "clustery", "collide2" ]
     runWithD3_Simulation actualizeForces
-    setNodesAndLinks { chooseLinks: isM2P_Link, chooseNodes: allNodes }
+    setNodesAndLinks { chooseLinks: isM2P_Link, chooseNodes: allNodes, linkFilter: const true }
     _stagingNodes %= addGridPoints
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging clusterSceneAttributes
@@ -81,7 +82,7 @@ handleAction = case _ of
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
     _forceStatuses %= _onlyTheseForcesActive ["centerNamedNode", "center", "collide2", "charge2", linksForceName ]
     runWithD3_Simulation actualizeForces
-    setNodesAndLinks { chooseLinks: isP2P_Link, chooseNodes: isPackage, linkFilter: const false }
+    setNodesAndLinks { chooseLinks: isP2P_Link, chooseNodes: isPackage, linkFilter: const true }
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
     runWithD3_Simulation (setConfigVariable $ Alpha 1.0)
@@ -92,7 +93,8 @@ handleAction = case _ of
     _forceStatuses %= _onlyTheseForcesActive [ "treeNodesX", "treeNodesY", "center", "charge1", "collide2", "unusedOrbit" ]
     runWithD3_Simulation actualizeForces
     setNodesAndLinks { chooseNodes: isModule           -- show all modules, 
-                     , chooseLinks: isM2M_Tree_Link } -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
+                     , chooseLinks: isM2M_Graph_Link 
+                     , linkFilter: (\l -> link_.linkType l == M2M_Tree)} -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
     staging <- use _staging
     runWithD3_Simulation $ Graph.updateSimulation staging treeSceneAttributes
     runWithD3_Simulation (setConfigVariable $ Alpha 1.0)
@@ -135,7 +137,7 @@ handleAction = case _ of
 type SpagoConfigRecord = { -- convenience type to hold filter functions for nodes & links and list of forces to activate
     chooseNodes :: (SpagoSimNode -> Boolean)
   , chooseLinks :: (SpagoGraphLinkID -> Boolean)
-  , linkFilter  :: (SpagoGraphLinkRecord -> Boolean)
+  , linkFilter  :: (Datum_ -> Boolean)
 }
 
 -- filter links from Maybe Model into Staging
@@ -157,8 +159,7 @@ setNodesAndLinks :: forall m.
 setNodesAndLinks config = do
   state <- get
   _stagingLinks %= const (filter config.chooseLinks $ view _modelLinks state)
-  -- _stagingLinkFilter %= const (const true)
-  _stagingLinkFilter %= const (\link -> config.linkFilter link) -- config.linkFilter
+  _stagingLinkFilter %= const config.linkFilter -- config.linkFilter
   _stagingNodes %= const (filter config.chooseNodes $ view _modelNodes state)
   _stagingNodes %= addGridPoints
  -- FIXME this is where the grid point can be set, once we know how many packages we have

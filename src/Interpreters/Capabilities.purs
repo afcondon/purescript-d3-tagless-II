@@ -53,7 +53,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- management of data (nodes and links)
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m Unit
   -- we have a filter on the Links because we will often want only a subset of the links in the DOM to be links in the simulation
-  setLinks :: forall d r. ((D3LinkSwizzled (D3_SimulationNode d) r) -> Boolean) -> Array (D3LinkSwizzled (D3_SimulationNode d) r) -> m Unit
+  setLinks :: forall d r. Array (D3LinkSwizzled (D3_SimulationNode d) r) -> m Unit
   getNodes :: forall d.   m (Array (D3_SimulationNode d))
   getLinks :: forall d r. m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
   -- TODO merge these functions back together later once we have some good usage examples to validate
@@ -81,6 +81,6 @@ type Staging selection d r id = {
       nodes :: Maybe selection
     , links :: Maybe selection
     }
-  , linksFilter :: D3LinkSwizzled (D3_SimulationNode d) r -> Boolean -- filter for links given to simulation engine
+  , linksFilter :: Datum_ -> Boolean -- filter for links given to simulation engine
   , rawdata :: RawData d r id
 }

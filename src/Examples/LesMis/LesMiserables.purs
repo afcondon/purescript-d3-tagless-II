@@ -88,7 +88,7 @@ graphScript model selector = do
   -- which we use here to introduce the nodes and links to the simulation
   setNodes model.nodes -- no staging here, we just load the nodes straight into Sim
   swizzledLinks <- swizzleLinks model.links model.nodes keyIsID_
-  setLinks (const true) swizzledLinks
+  setLinks swizzledLinks
 
   cookedNodes <- getNodes
   cookedLinks <- getLinks

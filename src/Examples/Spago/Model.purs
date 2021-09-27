@@ -84,6 +84,7 @@ tree_datum_ = {
 link_ = {
     source    : _.source <<< unboxD3SimLink 
   , target    : _.target <<< unboxD3SimLink
+  , linkType  : _.linktype <<< unboxD3SimLink
 
   , linkClass :                          show     <<< _.linktype           <<< unboxD3SimLink
   , linkClass2: (append "updated ")  <<< show     <<< _.linktype           <<< unboxD3SimLink

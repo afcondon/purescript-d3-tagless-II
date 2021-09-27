@@ -2,7 +2,7 @@ module Stories.Spago.State where
 
 import Prelude
 
-import D3.Data.Types (D3Selection_)
+import D3.Data.Types (D3Selection_, Datum_)
 import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData, SpagoGraphLinkRecord)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode)
 import D3.FFI (SimulationConfig_, readSimulationConfig_)
@@ -78,9 +78,9 @@ _stagingLinks :: forall p.
   -> p State State
 _stagingLinks = _staging <<< _rawdata <<< _links
 
-_stagingLinkFilter :: forall t154 p t157.
+_stagingLinkFilter :: forall p.
   Strong p => 
-  p (SpagoGraphLinkRecord -> Boolean) (SpagoGraphLinkRecord -> Boolean) ->
+  p (Datum_ -> Boolean) (Datum_ -> Boolean) ->
   p State State
 _stagingLinkFilter = _staging <<< _linksFilter
 
@@ -93,7 +93,7 @@ _links = prop (Proxy :: Proxy "links")
 _forces :: forall a r. Lens' { forces :: a | r } a
 _forces = prop (Proxy :: Proxy "forces")
 
--- _linksFilter :: forall a r. Lens' { linksFilter :: a | r } a
+_linksFilter :: forall a r. Lens' { linksFilter :: a | r } a
 _linksFilter = prop (Proxy :: Proxy "linksFilter")
 
 _rawdata :: forall a r. Lens' { rawdata :: a | r } a
