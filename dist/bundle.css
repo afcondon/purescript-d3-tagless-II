@@ -51,8 +51,6 @@ div.svg-container.cluster svg g.nodes g.module text {
         }
 
 div.svg-container.cluster svg g.nodes g.module circle {
-          stroke: white;
-          stroke-width: 1.5px;
           opacity: 1;
         }
 
@@ -63,7 +61,8 @@ div.svg-container.cluster svg g.nodes g.module:hover text {
           }
 
 div.svg-container.cluster svg g.nodes g.package circle {
-          visibility: hidden;
+          visibility: visible;
+          opacity: 0.3;
         }
 
 div.svg-container.cluster svg g.nodes g.package text {

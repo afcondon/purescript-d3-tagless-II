@@ -145,6 +145,10 @@ datum_ = {
       \d -> d3SchemeCategory10N_ (toNumber $ datum_.cluster d)
   -- , colorByLevel:
   --     \d -> d3SchemeDiverging10N_ (toNumber $ datum_.indexFunction d) -- we don't have level in SimNode yet so let's test with id
+  , fillByUsage:
+      \d -> if (datum_.connected d) then datum_.colorByGroup d else "none"
+  , strokeByUsage:
+      \d -> if (datum_.connected d) then "none" else datum_.colorByGroup d
   , colorByUsage:
       \d -> if (datum_.connected d) then "red" else "blue"
   , opacityByType:

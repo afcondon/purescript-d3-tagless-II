@@ -5,8 +5,8 @@ import Prelude
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
-import D3.Examples.Spago.Draw (graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Draw as Graph
+import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Files (SpagoGraphLinkID, isM2M_Graph_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, addGridPoints, allNodes, convertFilesToGraphModel, isModule, isPackage)
 import D3.Examples.Spago.Tree (treeReduction)
@@ -72,7 +72,7 @@ handleAction = case _ of
     setNodesAndLinks { chooseLinks: isM2P_Link, chooseNodes: allNodes }
     _stagingNodes %= addGridPoints
     staging <- use _staging
-    runWithD3_Simulation $ Graph.updateSimulation staging graphSceneAttributes
+    runWithD3_Simulation $ Graph.updateSimulation staging clusterSceneAttributes
     runWithD3_Simulation (setConfigVariable $ Alpha 1.0)
 
   Scene PackageGraph -> do

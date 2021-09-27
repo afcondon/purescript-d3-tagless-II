@@ -1,16 +1,18 @@
 module D3.Examples.Spago.Draw where
 
+import D3Tagless.Capabilities
+
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, opacity, radius, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
+import D3.Examples.Spago.Draw.Attributes (enterAttrs, svgAttrs, updateAttrs)
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
 import D3.FFI (d3GetSelectionData_, keyIsID_)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Functions (simulationStart, simulationStop)
 import D3.Simulation.Types (SimVariable(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities 
 import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
@@ -21,76 +23,6 @@ import Stories.Spago.State (_enterselections, _links, _nodes, _staging)
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
--- TODO this is a problem once extracted from "script", leads to undefined in D3.js
-enterLinks :: forall t339. Array t339
-enterLinks = [] -- [ classed link_.linkClass ] -- default invisible in CSS unless marked "visible"
-
-enterAttrs :: D3Simulation_ -> Array SelectionAttribute
-enterAttrs simulation_ = 
-  [ classed datum_.nodeClass
-  , transform' datum_.translateNode
-  , onMouseEvent MouseClick (\e d _ -> toggleSpotlight e simulation_ d)
-  ]
-
-updateAttrs :: forall t1. t1 -> Array SelectionAttribute
-updateAttrs _ = 
-  [ classed datum_.nodeClass
-  , transform' datum_.translateNode
-  ]
-
--- | Some examples of pre-packaged attribute sets available to the app maker
-circleAttrs1 :: Array SelectionAttribute
-circleAttrs1 = [ 
-    radius datum_.radius
-  , fill datum_.colorByGroup
-  , opacity datum_.opacityByType
-]
-
-circleAttrs2 :: Array SelectionAttribute
-circleAttrs2 = [
-    radius 3.0
-  , fill datum_.colorByUsage
-]
-
-labelsAttrs1 :: Array SelectionAttribute
-labelsAttrs1 = [ 
-    classed "label"
-  , x 0.2
-  , y datum_.positionLabel
-  , textAnchor "middle"
-  , text datum_.name
-  -- , text datum_.indexAndID
-]
-
--- TODO x and y position for label would also depend on "hasChildren", need to get "tree" data into nodes
-labelsAttrsH :: Array SelectionAttribute
-labelsAttrsH = [ 
-    classed "label"
-  , x 4.0
-  , y 2.0
-  , textAnchor (tree_datum_.textAnchor Horizontal)
-  , text datum_.name
-]
-
-graphSceneAttributes :: { circle :: Array SelectionAttribute , labels :: Array SelectionAttribute }
-graphSceneAttributes = { 
-    circle: circleAttrs1
-  , labels: labelsAttrs1 
-}
-
-treeSceneAttributes :: { circle :: Array SelectionAttribute, labels :: Array SelectionAttribute }
-treeSceneAttributes  = {
-    circle: circleAttrs2
-  , labels: labelsAttrsH
-}
-
-svgAttrs :: D3Simulation_ -> Number -> Number -> Array SelectionAttribute
-svgAttrs sim w h = [ viewBox (-w / 2.1) (-h / 2.05) w h 
-                    -- , preserveAspectRatio $ AspectRatio XMid YMid Meet 
-                    , classed "overlay"
-                    , width w, height h
-                    , cursor "grab"
-                    , onMouseEvent MouseClick (\e d t -> cancelSpotlight_ sim) ]
 
 -- | recipe for this force layout graph
 initialize :: forall m.
