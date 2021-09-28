@@ -68,7 +68,7 @@ treeSceneAttributes  = {
             , y 2.0
             , textAnchor (tree_datum_.textAnchor Horizontal)
             , text datum_.name
-          ]
+            ]
 }
 
 svgAttrs :: D3Simulation_ -> Number -> Number -> Array SelectionAttribute

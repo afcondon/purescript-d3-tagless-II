@@ -7,7 +7,7 @@ import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Types (D3Selection_)
 import D3.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, onTick_)
 import D3.Selection (applySelectionAttributeD3)
-import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionOpenSelection, selectionUpdateJoin)
+import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionOpenSelection, selectionSelectUnder, selectionUpdateJoin)
 import D3.Simulation.Types (D3SimulationState_, Step(..), _handle)
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, simulationHandle)
 import Data.Array (partition)
@@ -67,11 +67,12 @@ instance showD3SimM :: Show (D3SimM row D3Selection_ a) where
   show x = "D3SimM"
 
 instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
-  appendTo s_   = selectionAppendElement s_
+  appendTo s_        = selectionAppendElement s_
+  selectUnder s_     = selectionSelectUnder s_
   attach selector    = selectionAttach selector 
   filterSelection s_ = selectionFilterSelection s_
   mergeSelections s_ = selectionMergeSelections s_
-  setAttributes s_ = selectionModifySelection s_
+  setAttributes s_   = selectionModifySelection s_
   on s_              = simulationOn s_ -- NB simulation "on" is handled differently from selectionOn
   openSelection s_   = selectionOpenSelection s_
   simpleJoin s_      = selectionJoin s_

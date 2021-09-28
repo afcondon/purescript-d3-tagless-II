@@ -6,7 +6,7 @@ import Control.Monad.State (class MonadState, StateT, modify_, runStateT)
 import D3.Attributes.Instances (AttributeSetter(..), unboxAttr)
 import D3.Data.Types (D3Selection_, Element, Selector, Transition)
 import D3.FFI (ComputeKeyFunction_, D3Attr)
-import D3Tagless.Capabilities (class SelectionM, mergeSelections)
+import D3Tagless.Capabilities (class SelectionM, mergeSelections, selectUnder)
 import Data.Array (foldl)
 import Data.Tuple (Tuple)
 import Effect (Effect)
@@ -29,7 +29,11 @@ derive newtype instance monadEffD3PrinterM    :: MonadEffect       D3PrinterM
 
 instance d3Tagless :: SelectionM String D3PrinterM where
   attach selector = do
-    modify_ (\s -> s <> "\nattaching to " <> selector <> " in DOM" )
+    modify_ (\s -> s <> "\nattaching to " <> selector <> " in DOM\n" ) -- TODO good case for (+=) ?
+    pure "attach"
+
+  selectUnder selection selector = do
+    modify_ (\s -> s <> "\nsub-selection " <> selector <> "\n" )
     pure "attach"
 
   appendTo selection element attributes = do
@@ -38,11 +42,11 @@ instance d3Tagless :: SelectionM String D3PrinterM where
     pure "append"
 
   filterSelection selection selector = do
-    modify_ (\s -> s <> "\nfiltering selection using " <> show selector)
+    modify_ (\s -> s <> "\nfiltering selection using " <> show selector <> "\n" )
     pure "filter"
 
   mergeSelections a b = do
-    modify_ (\s -> s <> "merging selections")
+    modify_ (\s -> s <> "merging selections" <> "\n" )
     pure "merge"
 
   setAttributes selection attributes = do

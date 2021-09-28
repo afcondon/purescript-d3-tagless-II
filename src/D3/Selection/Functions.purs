@@ -1,7 +1,7 @@
 module D3.Selection.Functions where
 
 import D3.Data.Types (D3Selection_, Datum_, Element, Index_, Selector)
-import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3DataWithKeyFunction_, d3EnterAndAppend_, d3FilterSelection_, d3GetEnterSelection_, d3GetExitSelection_, d3MergeSelectionWith_, d3SelectAllInDOM_, d3SelectionSelectAll_)
+import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3DataWithKeyFunction_, d3EnterAndAppend_, d3FilterSelection_, d3GetEnterSelection_, d3GetExitSelection_, d3MergeSelectionWith_, d3SelectAllInDOM_, d3SelectionSelectAll_, d3SelectionSelect_)
 import D3.Selection (Behavior(..), SelectionAttribute, applySelectionAttributeD3)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM)
@@ -12,6 +12,9 @@ import Prelude (Unit, discard, pure, show, unit, ($))
 
 selectionAttach :: forall m. (SelectionM D3Selection_ m) => Selector D3Selection_ -> m D3Selection_
 selectionAttach selector = pure $ d3SelectAllInDOM_ selector 
+
+selectionSelectUnder :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Selector D3Selection_ -> m D3Selection_
+selectionSelectUnder selection selector = pure $ d3SelectionSelectAll_ selector selection
 
 selectionAppendElement :: forall m. (SelectionM D3Selection_ m) => D3Selection_ -> Element -> Array SelectionAttribute -> m D3Selection_
 selectionAppendElement selection_ element attributes = do

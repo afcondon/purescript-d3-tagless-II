@@ -16,10 +16,14 @@ import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Prelude (class Applicative, class Apply, class Bind, class Functor, class Monad, class Show, Unit, bind, discard, pure, show, unit, ($), (+), (<$>), (<>), (==))
 
+-- REVIEW this whole module should be re-written cleanly to match the final Final Tagless language for Selection and Simulation, it's really just a placeholder
+-- but also serves to validate the ability of the interpreter to run in multiple monads
+
 -- TODO fix interpreter build up of AST, not correct currently as attrs become children (just look at example in browser to see problem)
 data D3GrammarNode = 
     Empty
   | AttachNode String
+  | SelectUnderNode String
   | AppendNode Element
   | FilterNode String
   | ModifyNode (Array SelectionAttribute)
@@ -41,6 +45,7 @@ instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implem
   show Empty                      = "Empty"
   show RemoveNode                 = "Remove"
   show (AttachNode _)             = "Attach"
+  show (SelectUnderNode _)        = "SelectUnder"
   show (AppendNode _)             = "Append"
   show (FilterNode _)             = "Filter"
   show (ModifyNode _)             = "Modify"
@@ -65,6 +70,7 @@ showAsSymbol =
     Empty                      ->  { name: "Empty"         , symbol: ""    , param1: "",           param2: "" }
     RemoveNode                 ->  { name: "Remove"        , symbol: "x"   , param1: "",           param2: "" }
     (AttachNode s)             ->  { name: "Attach"        , symbol: "a"   , param1: "",           param2: "" }
+    (SelectUnderNode s)        ->  { name: "SelectUnder"   , symbol: "s"   , param1: tag s,        param2: "" }
     (AppendNode e)             ->  { name: "Append"        , symbol: "+"   , param1: tag $ show e, param2: "" }
     (FilterNode s)             ->  { name: "Filter"        , symbol: "/"   , param1: tag s,        param2: "" }
     (ModifyNode as)            ->  { name: "Modify"        , symbol: "->"  , param1: "",           param2: "" }
@@ -170,9 +176,14 @@ insertAttributeInScriptTree parentID =
 instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
   appendTo nodeID element attributes = do
     insertInScriptTree nodeID (AppendNode element)
-    (ScriptTree id _ _) <- get
+    (ScriptTree id _ _) <- get -- TODO write a lens to get at the ID and all this code will be much shorter
     -- _ <- traverse (insertAttributeInScriptTree id) attributes
     pure id -- this is the id of the AppendNode itself
+
+  selectUnder nodeID selector = do
+    insertInScriptTree nodeID (SelectUnderNode selector)
+    (ScriptTree id _ _) <- get
+    pure id
 
   attach selector = do
     insertInScriptTree 0 (AttachNode selector) -- TODO this could actually be a multiple insert

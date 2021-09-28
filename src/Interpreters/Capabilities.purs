@@ -13,7 +13,8 @@ import Prelude (class Eq, class Monad, Unit)
 -- in particular, it could be good to have Simulation do it's join function by putting nodes / links
 -- into both DOM and Simulation for example (and current implementation is gross and wrong)
 class (Monad m) <= SelectionM selection m where
-  appendTo   :: selection -> Element -> Array (SelectionAttribute) -> m selection
+  appendTo        :: selection -> Element -> Array (SelectionAttribute) -> m selection
+  selectUnder     :: selection -> Selector selection -> m selection
   attach          :: Selector selection -> m selection
   filterSelection :: selection -> Selector selection -> m selection
   mergeSelections :: selection -> selection -> m selection
