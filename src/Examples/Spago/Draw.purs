@@ -8,7 +8,7 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
 import D3.Examples.Spago.Draw.Attributes (enterAttrs, svgAttrs, updateAttrs)
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
-import D3.FFI (d3GetSelectionData_, keyIsID_)
+import D3.FFI (d3GetSelectionData_, keyIsID_, simdrag2)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Functions (simulationStart, simulationStop)
 import D3.Simulation.Types (SimVariable(..), Step(..))
@@ -89,7 +89,8 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   -- now merge the update selection into the enter selection (NB other way round doesn't work)
   mergedNodeSelection   <- mergeSelections nodeEnter node'.update  -- merged enter and update becomes the `node` selection for next pass
   
-  -- _                  <- circlesSelection `on` Drag DefaultDrag -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
+  -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
+  _ <- circlesSelection `on` Drag (CustomDrag "spago" simdrag2) 
   
   -- now the linkData
   -- after swizzling keyIsID_ should work on links, the id would be "5-8" if keyFn(link.source) == 5 && keyFn(link.target) == 8, for example

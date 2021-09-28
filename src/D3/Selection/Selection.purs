@@ -2,7 +2,7 @@ module D3.Selection where
 
 import D3.FFI
 
-import D3.Attributes.Instances (AttributeSetter(..), Listener_, attributeLabel, unboxAttr)
+import D3.Attributes.Instances (AttributeSetter(..), Listener_, Label, attributeLabel, unboxAttr)
 import D3.Data.Types (D3Selection_, Datum_, Element, MouseEvent, Transition)
 import D3.Zoom (ZoomConfig)
 import Data.Array (foldl)
@@ -13,7 +13,7 @@ import Prelude (class Eq, class Ord, class Show, Unit, show, (<>))
 data DragBehavior = 
     DefaultDrag
   | NoDrag
-  | CustomDrag (D3Selection_ -> Unit)
+  | CustomDrag Label D3DragFunction_
 
 data Behavior selection = Drag DragBehavior
                         | Zoom (ZoomConfig selection)

@@ -5,7 +5,7 @@ import Prelude
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
-import D3.FFI (d3AttachZoomDefaultExtent_, d3AttachZoom_, d3PreserveLinkReferences_, d3PreserveSimulationPositions_, defaultSimulationDrag_, disableDrag_, getIDsFromNodes_, getLinkIDs_, getLinksFromSimulation_, getNodes_, onTick_, setAlphaDecay_, setAlphaMin_, setAlphaTarget_, setAlpha_, setAsNullForceInSimulation_, setLinks_, setNodes_, setVelocityDecay_, startSimulation_, stopSimulation_, swizzleLinks_)
+import D3.FFI 
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
 import D3.Simulation.Forces (disableByLabels, enableByLabels, putFixedForcesInSimulation, putStatusMap, updateForceInSimulation)
@@ -240,9 +240,9 @@ simulationOn :: forall row m.
 simulationOn selection (Drag drag) = do
   handle <- use _handle
   let _ = case drag of 
-            DefaultDrag     -> defaultSimulationDrag_ selection handle
-            NoDrag          -> disableDrag_ selection
-            (CustomDrag fn) -> defaultSimulationDrag_ selection handle -- TODO no custom drag implemented yet
+            DefaultDrag      -> simulationDrag_ "default" selection handle simdrag
+            NoDrag           -> disableDrag_ selection
+            (CustomDrag name fn)  -> simulationDrag_ name selection handle fn
   pure unit
 
 simulationOn selection (Zoom config) = do

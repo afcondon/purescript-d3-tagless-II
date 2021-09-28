@@ -26,7 +26,7 @@ exports.d3SetHTML_ = value => selection => { return selection.html(value) }
 exports.d3SetProperty_ = value => selection => { return selection.property(value) }
 exports.d3SetText_ = value => selection => { return selection.text(value) }
 exports.d3SortSelection_ = selection => compare => selection.sort(compare)
-exports.defaultSimulationDrag_ = selection => simulation => selection.call(simdrag(simulation))
+exports.simulationDrag_ = label => selection => simulation => dragFn => selection.call(dragFn(label, simulation))
 exports.disableDrag_ = selection => { return selection.on('.drag', null) }
 exports.getIndexFromDatum_ = datum => { return (typeof datum.index == `undefined`) ? "?" : datum.index }
 exports.selectionOn_ = selection => event => callback => { return selection.on(event, callback) }
@@ -46,7 +46,13 @@ exports.d3AddTransition_ = selection => transition => {
   }
   return handle
 }
-const simdrag = simulation => {  
+// *****************************************************************************************************************
+// *****  there will either need to be quite a range of these functions or a way of writing them in Purs     *******
+// *****  this is really down in the weeds of D3 without supporting abstractions in the PS library           *******
+// *****  CONCRETE EXAMPLE: this defaults to updating fx but in Spago example position is on parent, using   *******
+// *****  transforms to move both circle and label together (only way to position a <group> in SVG)
+// *****************************************************************************************************************
+exports.simdrag = (label,simulation) => {  
   function dragstarted(event) {
     if (!event.active) simulation.alphaTarget(0.3).restart();
     event.subject.fx = event.subject.x;
@@ -62,9 +68,32 @@ const simdrag = simulation => {
     event.subject.fy = null;
   }
   return d3.drag()
-      .on("start", dragstarted)
-      .on("drag", dragged)
-      .on("end", dragended);
+          .on('start.' + label, dragstarted)
+          .on('drag.' + label, dragged)
+          .on('end.' + label, dragended);
+}
+exports.simdrag2 = (label, simulation) => {  
+  function dragstarted(event) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    let parent = this.parentElement.__data__;
+    parent.fx = parent.x;
+    parent.fy = parent.y;
+  }
+  function dragged(event) {
+    let parent = this.parentElement.__data__;
+    parent.fx = event.x;
+    parent.fy = event.y;
+  }
+  function dragended(event) {
+    if (!event.active) simulation.alphaTarget(0);
+    let parent = this.parentElement.__data__;
+    parent.fx = null;
+    parent.fy = null;
+  }
+  return d3.drag()
+      .on('start.' + label, dragstarted)
+      .on('drag.' + label, dragged)
+      .on('end.' + label, dragended);
 }
 // *****************************************************************************************************************
 // ************************** functions from d3js Simulation module         *****************************************
@@ -257,30 +286,6 @@ exports.defaultLinkTick_ = label => simulation => linkSelection => {
                  .attr("x2", d => d.target.x)
                  .attr("y2", d => d.target.y);
   })
-}
-exports.defaultSimulationDrag_ = selection => simulation => {
-  var drag = function (simulation) {
-    function dragstarted (event, d) {
-      if (!event.active) simulation.alphaTarget(0.3).restart()
-      d.fx = d.x
-      d.fy = d.y
-    }
-    function dragged (event, d) {
-      d.fx = event.x
-      d.fy = event.y
-    }
-    function dragended (event, d) {
-      if (!event.active) simulation.alphaTarget(0)
-      d.fx = null
-      d.fy = null
-    }
-    return d3
-      .drag()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended)
-  }
-  selection.call(drag(simulation))
 }
 exports.lookupForceByName_ = simulation => name => {
   let lookup = simulation.force(name)

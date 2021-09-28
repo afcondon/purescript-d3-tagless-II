@@ -76,8 +76,10 @@ foreign import d3SetHTML_       :: D3Attr -> D3Selection_ -> D3Selection_
 
 foreign import emptyD3Data_ :: D3Data_ -- probably just null, could this be monoid too??? ie Last (Maybe D3Data_)
 
--- foreign import defaultDrag_ :: D3Selection_ -> D3Selection_
-foreign import defaultSimulationDrag_ :: D3Selection_ -> D3Simulation_ -> D3Selection_
+foreign import data D3DragFunction_ :: Type
+foreign import simulationDrag_ :: String -> D3Selection_ -> D3Simulation_ -> D3DragFunction_ -> D3Selection_
+foreign import simdrag  :: D3DragFunction_
+foreign import simdrag2 :: D3DragFunction_
 foreign import disableDrag_ :: D3Selection_ -> D3Selection_
 
 foreign import selectionOn_         :: forall selection callback. selection -> String -> callback -> selection  

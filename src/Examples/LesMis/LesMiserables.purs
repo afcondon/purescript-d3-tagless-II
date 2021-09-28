@@ -5,7 +5,7 @@ import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOp
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.Model (LesMisRawModel)
-import D3.FFI (keyIsID_)
+import D3.FFI (keyIsID_, simdrag)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..))
 import D3.Simulation.Types (D3SimulationState_, Step(..))
@@ -108,7 +108,8 @@ graphScript model selector = do
                                                 , x2 (_.x <<< link_.target)
                                                 , y2 (_.y <<< link_.target)
                                                 ]
-  _ <- nodesSelection `on` Drag DefaultDrag
+  -- _ <- nodesSelection `on` Drag DefaultDrag
+  _ <- nodesSelection `on` Drag (CustomDrag "lesmis" simdrag)
 
   _ <- svg `on`  Zoom { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                       , scale  : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
