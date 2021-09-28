@@ -286,7 +286,6 @@ isM2M_Tree_Link :: SpagoGraphLinkID -> Boolean
 isM2M_Tree_Link (D3LinkID { linktype }) = linktype == M2M_Tree
 
 
-
 -- | boilerplate
 instance showNodeType :: Show NodeType where
   show (IsModule _) = "module"

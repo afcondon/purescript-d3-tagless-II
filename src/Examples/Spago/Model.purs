@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, PointXY)
-import D3.Examples.Spago.Files (NodeType(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
+import D3.Examples.Spago.Files (LinkType(..), NodeType(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
 import D3.FFI (getIndexFromDatum_, hasChildren_, setInSimNodeFlag)
 import D3.Node (D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
@@ -91,6 +91,10 @@ link_ = {
   , color     : d3SchemeCategory10N_ <<< toNumber <<< _.target.containerID <<< unboxD3SimLink
 }
 
+isP2P_Link_ l = link_.linkType l == P2P
+isM2P_Link_ l = link_.linkType l == M2P
+isM2M_Graph_Link_ l = link_.linkType l == M2M_Graph
+isM2M_Tree_Link_ l = link_.linkType l == M2M_Tree
 
 -- | all the coercions in one place
 datum_ = {

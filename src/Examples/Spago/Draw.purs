@@ -67,6 +67,7 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   node                  <- openSelection nodesGroup "g"    -- this call and updateJoin and append all have to match FIX THIS
   link                  <- openSelection linksGroup "line" -- this call and updateJoin and append all have to match FIX THIS
   -- this will change all the object refs so a defensive copy is needed if join is to work
+  -- TODO we'd really like to set entering nodesXY to one of [ (NaN,NaN), gridXY, treeXY ] here while leaving update nodes as they were
   mergedNodeData        <- carryOverSimStateN node staging.rawdata keyIsID_ 
   mergedLinkData        <- carryOverSimStateL link staging.rawdata keyIsID_ 
   swizzledLinks         <- swizzleLinks mergedLinkData mergedNodeData keyIsID_ -- the key function here is for the SOURCE and TARGET, not the link itself
@@ -101,7 +102,7 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   
   -- now put the nodes and links into the simulation 
   setNodes $ unsafeCoerce $ d3GetSelectionData_ mergedNodeSelection -- TODO hide this coerce in setNodes
-  setLinks $ unsafeCoerce $ filter staging.linksFilter $ d3GetSelectionData_ mergedLinkSelection -- TODO hide this coerce in setLinks
+  setLinks $ unsafeCoerce $ filter staging.linksInSimulation $ d3GetSelectionData_ mergedLinkSelection -- TODO hide this coerce in setLinks
   -- tick functions for each selection
   addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
     Step mergedNodeSelection [ transform' datum_.translateNode ]

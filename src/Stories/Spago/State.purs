@@ -82,7 +82,7 @@ _stagingLinkFilter :: forall p.
   Strong p => 
   p (Datum_ -> Boolean) (Datum_ -> Boolean) ->
   p State State
-_stagingLinkFilter = _staging <<< _linksFilter
+_stagingLinkFilter = _staging <<< _linksInSimulation
 
 _nodes :: forall a r. Lens' { nodes :: a | r } a
 _nodes = prop (Proxy :: Proxy "nodes")
@@ -93,8 +93,8 @@ _links = prop (Proxy :: Proxy "links")
 _forces :: forall a r. Lens' { forces :: a | r } a
 _forces = prop (Proxy :: Proxy "forces")
 
-_linksFilter :: forall a r. Lens' { linksFilter :: a | r } a
-_linksFilter = prop (Proxy :: Proxy "linksFilter")
+_linksInSimulation :: forall a r. Lens' { linksInSimulation :: a | r } a
+_linksInSimulation = prop (Proxy :: Proxy "linksInSimulation")
 
 _rawdata :: forall a r. Lens' { rawdata :: a | r } a
 _rawdata = prop (Proxy :: Proxy "rawdata")

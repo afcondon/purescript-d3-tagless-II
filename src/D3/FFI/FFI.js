@@ -155,6 +155,8 @@ exports.readSimulationConfig_ = simulation => {
 
 exports.d3PreserveSimulationPositions_ = node => nodes => keyFn => {
   const old = new Map(node.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
+//  TODO we could set the (x,y) on the new nodes here, either to NaN, gridXY or treeXY
+// since this is completely generic code, we'll need to figure a way to get that information down here into the FFI
   let updatedNodeData = nodes.map(d => Object.assign(old.get(keyFn(d)) || d, {} ));
   return updatedNodeData
 }

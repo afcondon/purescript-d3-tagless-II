@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Data.Tree (TreeLayout(..))
 import D3.Examples.Spago.Files (isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Model (isPackage, isUsedModule)
+import D3.Examples.Spago.Model (isM2M_Graph_Link_, isM2M_Tree_Link_, isM2P_Link_, isP2P_Link_, isPackage, isUsedModule)
 import D3.Simulation.Forces (showType)
 import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), _forceLibrary, showForceFilter)
 import D3Tagless.Block.Card as Card
@@ -75,14 +75,14 @@ renderSimControls state = do
         [ Format.contentHeading_ [ HH.text "Params" ]
         , HH.input $ slider { var: Alpha, id: "alpha-slider", min: 0.0, max: 100.0, step: 10.0, value: params.alpha * 100.0 }
         , Format.caption_ [ HH.text ("Alpha: " <> show params.alpha) ]
-        , HH.input $ slider { var: AlphaDecay, id: "alphadecay-slider", min: 0.0, max: 100.0, step: 10.0, value: params.alphaDecay * 100.0 }
-        , Format.caption_ [ HH.text ("AlphaDecay: " <> show params.alphaDecay) ]
-        , HH.input $ slider { var: AlphaMin, id: "alphamin-slider", min: 0.0, max: 100.0, step: 10.0, value: params.alphaMin * 100.0 }
-        , Format.caption_ [ HH.text ("AlphaMin: " <> show params.alphaMin) ]
+        -- , HH.input $ slider { var: AlphaDecay, id: "alphadecay-slider", min: 0.0, max: 100.0, step: 10.0, value: params.alphaDecay * 100.0 }
+        -- , Format.caption_ [ HH.text ("AlphaDecay: " <> show params.alphaDecay) ]
+        -- , HH.input $ slider { var: AlphaMin, id: "alphamin-slider", min: 0.0, max: 100.0, step: 10.0, value: params.alphaMin * 100.0 }
+        -- , Format.caption_ [ HH.text ("AlphaMin: " <> show params.alphaMin) ]
         , HH.input $ slider { var: AlphaTarget, id: "alphatarget-slider", min: 0.0, max: 100.0, step: 10.0, value: params.alphaTarget * 100.0 }
         , Format.caption_ [ HH.text ("AlphaTarget: " <> show params.alphaTarget) ]
-        , HH.input $ slider { var: VelocityDecay, id: "velocitydecay-slider", min: 0.0, max: 100.0, step: 10.0, value: params.velocityDecay * 100.0 }
-        , Format.caption_ [ HH.text ("VelocityDecay: " <> show params.velocityDecay) ]
+        -- , HH.input $ slider { var: VelocityDecay, id: "velocitydecay-slider", min: 0.0, max: 100.0, step: 10.0, value: params.velocityDecay * 100.0 }
+        -- , Format.caption_ [ HH.text ("VelocityDecay: " <> show params.velocityDecay) ]
         ]
     , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
         [ Button.buttonGroup_
@@ -121,19 +121,19 @@ renderSimControls state = do
         [ Format.contentHeading_ [ HH.text "Which links should be displayed?" ]
         , Button.buttonGroup_
           [ Button.buttonLeft
-              [ HE.onClick $ const (Filter $ LinkFilter isM2M_Tree_Link) ]
+              [ HE.onClick $ const (Filter $ LinkShowFilter isM2M_Tree_Link) ]
               [ HH.text "Treelink" ]
           , Button.buttonCenter
-              [ HE.onClick $ const (Filter $ LinkFilter isM2M_Graph_Link) ]
+              [ HE.onClick $ const (Filter $ LinkShowFilter isM2M_Graph_Link) ]
               [ HH.text "Graphlink" ]
           , Button.buttonCenter
-              [ HE.onClick $ const (Filter $ LinkFilter isM2P_Link) ]
+              [ HE.onClick $ const (Filter $ LinkShowFilter isM2P_Link) ]
               [ HH.text "M2P" ]
           , Button.buttonCenter
-              [ HE.onClick $ const (Filter $ LinkFilter isP2P_Link) ]
+              [ HE.onClick $ const (Filter $ LinkShowFilter isP2P_Link) ]
               [ HH.text "P2P" ]
           , Button.buttonRight
-              [ HE.onClick $ const (Filter $ LinkFilter (const false)) ]
+              [ HE.onClick $ const (Filter $ LinkShowFilter (const false)) ]
               [ HH.text "none" ]
           ]
         ]
@@ -141,16 +141,16 @@ renderSimControls state = do
         [ Format.contentHeading_ [ HH.text "Which links should be exert force?" ]
         , Button.buttonGroup_
           [ Button.buttonLeft
-              [ HE.onClick $ const (Filter $ LinkFilter isM2M_Tree_Link) ]
+              [ HE.onClick $ const (Filter $ LinkForceFilter isM2M_Tree_Link_) ]
               [ HH.text "Treelink" ]
           , Button.buttonCenter
-              [ HE.onClick $ const (Filter $ LinkFilter isM2M_Graph_Link) ]
+              [ HE.onClick $ const (Filter $ LinkForceFilter isM2M_Graph_Link_) ]
               [ HH.text "Graphlink" ]
           , Button.buttonCenter
-              [ HE.onClick $ const (Filter $ LinkFilter isM2P_Link) ]
+              [ HE.onClick $ const (Filter $ LinkForceFilter isM2P_Link_) ]
               [ HH.text "M2P" ]
           , Button.buttonRight
-              [ HE.onClick $ const (Filter $ LinkFilter isP2P_Link) ]
+              [ HE.onClick $ const (Filter $ LinkForceFilter isP2P_Link_) ]
               [ HH.text "P2P" ]
           ]
         ]

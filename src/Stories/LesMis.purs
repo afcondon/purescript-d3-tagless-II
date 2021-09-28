@@ -16,7 +16,7 @@ import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus(..), ForceTyp
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
-import D3Tagless.Capabilities (actualizeForces, setConfigVariable)
+import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start)
 import D3Tagless.Instance.Simulation (runWithD3_Simulation)
 import Data.Array (singleton)
 import Data.Lens (Lens', over, preview, (%=))
@@ -198,26 +198,32 @@ handleAction = case _ of
   Initialize -> do
     response <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
     let graph = readGraphFromFileContents response
+
     _forceStatus forceNames.center       %= (const ForceActive)
     _forceStatus forceNames.manyBodyNeg  %= (const ForceActive)
-    _forceStatus forceNames.manyBodyPos  %= (const ForceDisabled)
     _forceStatus forceNames.collision    %= (const ForceActive)
     _forceStatus forceNames.links        %= (const ForceActive)
-    runWithD3_Simulation $ actualizeForces 
-    runWithD3_Simulation $ LesMis.graphScript graph "div.svg-container"
+
+    _forceStatus forceNames.manyBodyPos  %= (const ForceDisabled)
+    
+    runWithD3_Simulation do
+      actualizeForces 
+      LesMis.graphScript graph "div.svg-container"
 
   Finalize ->  pure unit -- runWithD3_Simulation removeAllForces
 
   ToggleForce name -> do
     toggleForceByName name
-    runWithD3_Simulation $ actualizeForces
-    runWithD3_Simulation $ setConfigVariable $ Alpha 0.7
-    simulationStart
+    runWithD3_Simulation do
+      actualizeForces
+      setConfigVariable $ Alpha 0.7
+      start
 
   Freeze  -> runWithD3_Simulation $ setConfigVariable $ Alpha 0.0
   Reheat  -> do
-    runWithD3_Simulation $ setConfigVariable $ Alpha 0.7
-    simulationStart
+    runWithD3_Simulation do
+      setConfigVariable $ Alpha 0.7
+      start
 
 codetext :: String
 codetext = 
