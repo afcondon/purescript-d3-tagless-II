@@ -64,8 +64,8 @@ updateSimulation :: forall m d r id.
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
   stop
-  node                  <- openSelection nodesGroup "g"    -- FIXME this call and updateJoin and append all have to match FIX -- can we use (show Group)
-  link                  <- openSelection linksGroup "line" -- FIXME this call and updateJoin and append all have to match FIX
+  node                  <- openSelection nodesGroup (show Group) -- FIXME this call and updateJoin and append all have to match FIX -- can we use (show Group)
+  link                  <- openSelection linksGroup (show Line)  -- FIXME this call and updateJoin and append all have to match FIX
   -- this will change all the object refs so a defensive copy is needed if join is to work
   -- TODO we'd really like to set entering nodesXY to one of [ (NaN,NaN), gridXY, treeXY ] here while leaving update nodes as they were
   mergedNodeData        <- carryOverSimStateN node staging.rawdata keyIsID_ 
@@ -85,7 +85,7 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   updateCirclesSelection <- selectUnder node'.update (show Circle)
   setAttributes updateCirclesSelection attrs.circle
   updateLabelsSelection <- selectUnder node'.update (show Text)
-  setAttributes updateLabelsSelection [ fill "red" ]
+  setAttributes updateLabelsSelection attrs.labels
   -- now merge the update selection into the enter selection (NB other way round doesn't work)
   mergedNodeSelection   <- mergeSelections nodeEnter node'.update  -- merged enter and update becomes the `node` selection for next pass
   
