@@ -107,6 +107,8 @@ datum_ = {
   , name          : _.name          <<< unboxD3SimNode
   , x             : _.x             <<< unboxD3SimNode
   , y             : _.y             <<< unboxD3SimNode
+  , fx            : _.fx            <<< unboxD3SimNode
+  , fy            : _.fy            <<< unboxD3SimNode
   , treeXY        : _.treeXY        <<< unboxD3SimNode
   , treeDepth     : _.treeDepth     <<< unboxD3SimNode
   , gridXY        : _.gridXY        <<< unboxD3SimNode

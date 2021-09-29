@@ -72,29 +72,6 @@ exports.simdrag = (label,simulation) => {
           .on('drag.' + label, dragged)
           .on('end.' + label, dragended);
 }
-exports.simdrag2 = (label, simulation) => {  
-  function dragstarted(event) {
-    if (!event.active) simulation.alphaTarget(0.3).restart();
-    let parent = this.parentElement.__data__;
-    parent.fx = parent.x;
-    parent.fy = parent.y;
-  }
-  function dragged(event) {
-    let parent = this.parentElement.__data__;
-    parent.fx = event.x;
-    parent.fy = event.y;
-  }
-  function dragended(event) {
-    if (!event.active) simulation.alphaTarget(0);
-    let parent = this.parentElement.__data__;
-    parent.fx = null;
-    parent.fy = null;
-  }
-  return d3.drag()
-      .on('start.' + label, dragstarted)
-      .on('drag.' + label, dragged)
-      .on('end.' + label, dragended);
-}
 // *****************************************************************************************************************
 // ************************** functions from d3js Simulation module         *****************************************
 // *****************************************************************************************************************
