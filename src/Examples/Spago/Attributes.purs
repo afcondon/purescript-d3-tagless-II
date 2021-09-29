@@ -12,7 +12,7 @@ enterLinks :: forall t339. Array t339
 enterLinks = [] -- [ classed link_.linkClass ] -- default invisible in CSS unless marked "visible"
 
 explodePackageOnClick :: D3Simulation_ -> SelectionAttribute
-explodePackageOnClick simulation_ = onMouseEvent MouseClick (\e d _ -> explodePackages e simulation_ d)
+explodePackageOnClick simulation_ = onMouseEvent MouseClick (\e d _ -> explodePackages e simulation_ d) -- here we need to raise a Halogen Event
 
 toggleSpotlightOnClick :: D3Simulation_ -> SelectionAttribute
 toggleSpotlightOnClick simulation_ = onMouseEvent MouseClick (\e d _ -> toggleSpotlight e simulation_ d)

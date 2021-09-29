@@ -9,14 +9,17 @@ import Data.Map (Map, fromFoldable)
 import Data.Maybe (Maybe(..))
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
+import Debug (trace)
 import Effect (Effect)
 import Effect.Aff (Aff)
-import Effect.Aff.Class (class MonadAff)
+import Effect.Aff.Class (class MonadAff, liftAff)
+import Halogen (liftEffect)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Halogen.Subscription as HS
 import Halogen.VDom.Driver (runUI)
 import Ocelot.Block.Format as Format
 import Stories.GUP as GUP
@@ -33,6 +36,17 @@ import UIGuide.Block.Backdrop (backdrop) as Backdrop
 
 main :: Effect Unit
 main = HA.runHalogenAff do
+
+  { emitter, listener } <- liftEffect HS.create
+
+  subscription <- liftEffect $ HS.subscribe emitter \str -> trace { subscription: str } \_ -> pure unit
+
+  liftEffect $ HS.notify listener "Hello"
+  liftEffect $ HS.notify listener "Goodbye!"
+
+  liftEffect $ HS.unsubscribe subscription
+
+
   body <- HA.awaitBody
   runUI parent unit body
 

@@ -5,7 +5,7 @@ import Prelude
 
 import D3.Attributes.Sugar (classed, remove, strokeColor, transform', x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, Element(..))
-import D3.Examples.Spago.Draw.Attributes (enterAttrs, explodePackageOnClick, svgAttrs, toggleSpotlightOnClick, undoSpotlightOnClick, updateAttrs)
+import D3.Examples.Spago.Draw.Attributes (enterAttrs, explodePackageOnClick, svgAttrs, toggleSpotlightOnClick, updateAttrs)
 import D3.Examples.Spago.Model (datum_, link_)
 import D3.FFI (d3GetSelectionData_, keyIsID_, simdrag)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
