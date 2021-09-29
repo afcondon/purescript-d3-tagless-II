@@ -1,3 +1,17 @@
+// ********************************************************************************
+// functionality to "explode" a package by removing it and replacing with it's constituent modules
+// ********************************************************************************
+exports.explodePackages_ = event => simulation => id => nodetype => {
+  event.stopPropagation()
+  if (nodetype === "package") {
+    console.log('clicked on a package');
+    return
+  }
+}
+// ********************************************************************************
+// functionality to spotlight the immediate graph neighbours of a module 
+// (and only modules at present)
+// ********************************************************************************
 let spotlitSelection
 let spotlitNode
 let sourcesSelection
@@ -14,6 +28,9 @@ exports.cancelSpotlight_ = simulation => {
 
 exports.toggleSpotlight_ = event => simulation => id => nodetype => {
   event.stopPropagation()
+  if (nodetype === "package") {
+    return
+  }
   if ((spotlit && id !== spotlitID)) {
     console.log(`changing spotlight from ${spotlitID} to ${id}`);
     unSpotlightNeighbours_(simulation)
@@ -27,10 +44,8 @@ exports.toggleSpotlight_ = event => simulation => id => nodetype => {
   }
 }
 
+// TODO implement this as purescript-function-called from FFI??
 spotlightNeighbours_ = (simulation, id, nodetype) => {
-  if (nodetype === "package") {
-    return
-  }
   // else
   spotlit   = true; 
   spotlitID = id
@@ -40,8 +55,9 @@ spotlightNeighbours_ = (simulation, id, nodetype) => {
   spotlitSelection = nodeSelection.filter((d, i) => d.id == id)
 
   spotlitNode = spotlitSelection.node()
-  spotlitNode.__data__.fx = spotlitNode.__data__.x
-  spotlitNode.__data__.fy = spotlitNode.__data__.y
+  // check if fx already set, don't reset if so
+  spotlitNode.__data__.fx = spotlitNode.__data__.fx || spotlitNode.__data__.x 
+  spotlitNode.__data__.fy = spotlitNode.__data__.fy || spotlitNode.__data__.y
   const targets = spotlitNode.__data__.links.targets
   const sources = spotlitNode.__data__.links.sources
 

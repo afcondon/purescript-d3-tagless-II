@@ -1,26 +1,20 @@
 module D3.Examples.Spago.Draw where
 
-import D3Tagless.Capabilities
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimStateL, carryOverSimStateN, mergeSelections, on, openSelection, selectUnder, setAttributes, setLinks, setNodes, simulationHandle, start, stop, swizzleLinks, updateJoin)
+import Prelude
 
-import Control.Monad.State (class MonadState)
-import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, opacity, radius, raise, remove, strokeColor, text, textAnchor, transform', viewBox, width, x, x1, x2, y, y1, y2)
-import D3.Data.Tree (TreeLayout(..))
-import D3.Data.Types (D3Selection_, D3Simulation_, Element(..), MouseEvent(..))
-import D3.Examples.Spago.Draw.Attributes (enterAttrs, svgAttrs, updateAttrs)
-import D3.Examples.Spago.Model (cancelSpotlight_, datum_, link_, toggleSpotlight, tree_datum_)
+import D3.Attributes.Sugar (classed, remove, strokeColor, transform', x1, x2, y1, y2)
+import D3.Data.Types (D3Selection_, Element(..))
+import D3.Examples.Spago.Draw.Attributes (enterAttrs, explodePackageOnClick, svgAttrs, toggleSpotlightOnClick, undoSpotlightOnClick, updateAttrs)
+import D3.Examples.Spago.Model (datum_, link_)
 import D3.FFI (d3GetSelectionData_, keyIsID_, simdrag)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
-import D3.Simulation.Functions (simulationStart, simulationStop)
-import D3.Simulation.Types (SimVariable(..), Step(..))
+import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Data.Array (filter)
-import Data.Lens (modifying)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
-import Prelude (class Bind, class Eq, Unit, bind, const, discard, negate, pure, show, unit, ($), (/), (<<<))
-import Stories.Spago.State (State) as Spago
-import Stories.Spago.State (_enterselections, _links, _nodes, _staging)
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 
@@ -34,10 +28,9 @@ initialize :: forall m.
   m { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
 initialize = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
-  sim   <- simulationHandle -- needed for click handler to stop / start simulation
   root  <- attach "div.svg-container" -- typeclass here determined by D3Selection_ in SimulationM
 
-  svg   <- appendTo root Svg (svgAttrs sim w h) 
+  svg   <- appendTo root Svg (svgAttrs w h) 
   inner <- appendTo svg  Group []
   _     <- inner `on` Drag DefaultDrag
   _     <- svg   `on` Zoom { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
@@ -75,9 +68,9 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   node'                 <- updateJoin node Group mergedNodeData keyIsID_
   -- put new elements (g, g.circle & g.text) into the DOM
   simulation_           <- simulationHandle
-  nodeEnter             <- appendTo node'.enter Group $ enterAttrs simulation_
-  circlesSelection      <- appendTo nodeEnter   Circle attrs.circle
-  labelsSelection       <- appendTo nodeEnter   Text attrs.labels
+  nodeEnter             <- appendTo node'.enter Group enterAttrs
+  circlesSelection      <- appendTo nodeEnter Circle attrs.circle
+  labelsSelection       <- appendTo nodeEnter Text attrs.labels
   -- remove elements corresponding to exiting data
   setAttributes node'.exit [ remove ]
   -- change anything that needs changing on the continuing elements
@@ -88,6 +81,12 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   setAttributes updateLabelsSelection attrs.labels
   -- now merge the update selection into the enter selection (NB other way round doesn't work)
   mergedNodeSelection   <- mergeSelections nodeEnter node'.update  -- merged enter and update becomes the `node` selection for next pass
+
+  -- | now add clickhandlers that are particular to certain groups of nodes, ie packages and modules
+  packageNodes <- selectUnder mergedNodeSelection "g.package circle"
+  moduleNodes <- selectUnder mergedNodeSelection "g.module circle"
+  setAttributes packageNodes [ explodePackageOnClick simulation_ ]
+  setAttributes moduleNodes [ toggleSpotlightOnClick simulation_ ]
   
   -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
   _ <- mergedNodeSelection `on` Drag (CustomDrag "spago" simdrag) 

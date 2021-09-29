@@ -349,6 +349,11 @@ makeGraph nodes = do
   fromMap graphMap
 
 
+explodePackages :: Event -> D3Simulation_ -> Datum_ -> Unit
+explodePackages event simulation d = explodePackages_ event simulation nodeID nodeType
+  where
+    nodeID   = datum_.id d
+    nodeType = show $ datum_.nodetype d
 
 toggleSpotlight :: Event -> D3Simulation_ -> Datum_ -> Unit
 toggleSpotlight event simulation d = toggleSpotlight_ event simulation nodeID nodeType
@@ -358,6 +363,8 @@ toggleSpotlight event simulation d = toggleSpotlight_ event simulation nodeID no
 
 -- foreign functions to implement Spotlight, essentially because it's easier to prototype some 
 -- behaviors in D3js while deciding whether/how to express them in PureScript
+-- REVIEW make a common signature type for click handlers
+foreign import explodePackages_ :: Event -> D3Simulation_ -> NodeID -> String -> Unit
 foreign import toggleSpotlight_ :: Event -> D3Simulation_ -> NodeID -> String -> Unit
 foreign import cancelSpotlight_ :: D3Simulation_ -> Unit
 
