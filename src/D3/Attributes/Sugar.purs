@@ -1,12 +1,13 @@
 module D3.Attributes.Sugar where
 
-import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), Listener, toAttr)
+import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), Listener, EffectfulListener, toAttr)
 import D3.Data.Types (Datum_, EasingFunction(..), MouseEvent, Transition, PointXY)
 import D3.FFI (autoBox_)
 import D3.Selection (SelectionAttribute(..), OrderingAttribute(..))
 import Data.Array (intercalate, (:))
 import Data.Function.Uncurried (mkFn3)
 import Effect.Aff (Milliseconds(..))
+import Effect.Uncurried (mkEffectFn3)
 import Prelude (class Semigroup, class Show, append, flap, show, ($), (<$>), (<<<), (<>))
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -140,6 +141,9 @@ cursor = AttrT <<< AttributeSetter "cursor" <<< toAttr
 
 onMouseEvent :: MouseEvent -> Listener -> SelectionAttribute
 onMouseEvent event listener = OnT event (mkFn3 listener)
+
+onMouseEventEffectful :: MouseEvent -> EffectfulListener -> SelectionAttribute
+onMouseEventEffectful event listener = OnT' event (mkEffectFn3 listener)
 
 -- helpers for Forces
 

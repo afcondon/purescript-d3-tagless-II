@@ -5,13 +5,15 @@ import Prelude
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
-import D3.Data.Types (Datum_)
+import D3.Attributes.Sugar (onMouseEvent, onMouseEventEffectful)
+import D3.Data.Types (Datum_, MouseEvent(..))
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Files (LinkType(..), SpagoGraphLinkID, SpagoGraphLinkRecord, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, addGridPoints, allNodes, convertFilesToGraphModel, isModule, isPackage, isUsedModule, link_)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (linksForceName)
+import D3.Selection (SelectionAttribute)
 import D3.Simulation.Types (SimVariable(..), _forceStatus, _forceStatuses, _onlyTheseForcesActive, initialSimulationState, toggleForceStatus)
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
@@ -20,9 +22,13 @@ import Data.Either (hush)
 import Data.Lens (use, view, (%=))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Debug (trace)
 import Effect.Aff (Aff)
-import Effect.Aff.Class (class MonadAff)
+import Effect.Aff.Class (class MonadAff, liftAff)
+import Effect.Class.Console (log)
+import Halogen (liftEffect, raise)
 import Halogen as H
+import Halogen.Subscription as HS
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
@@ -57,10 +63,19 @@ handleAction = case _ of
   Initialize -> do    -- TODO think we actually don't want to be doing anything here until the component is shown
     (maybeModel :: Maybe SpagoModel) <- H.liftAff readModelData
     _model %= (const maybeModel)
-    -- runWithD3_Simulation actualizeForces
     openSelections <- evalEffectSimulation Graph.initialize -- should result in the "enter" selections being in the simulation
     (_staging <<< _enterselections <<< _nodes) %= (const $ openSelections.nodes) 
     (_staging <<< _enterselections <<< _links) %= (const $ openSelections.links)
+ 
+    { emitter, listener } <- liftEffect $ HS.create
+    -- subscription <- liftEffect $ HS.subscribe emitter \action -> liftEffect $ raise action
+    -- liftEffect $ HS.notify listener "StartSim"
+    subscription <- liftEffect $ HS.subscribe emitter \someString -> liftEffect $ log someString
+    let restartSimOnClick :: SelectionAttribute
+        restartSimOnClick = onMouseEventEffectful MouseClick (\e d t -> liftEffect $ HS.notify listener "StartSim")
+
+    pure unit
+
   
   Finalize -> pure unit
 
@@ -69,7 +84,6 @@ handleAction = case _ of
     -- TODO make this removeSelection part of the Halogen State of the component
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     _forceStatuses %= _onlyTheseForcesActive [ "packageGrid", "clusterx", "clustery", "collide2" ]
-    -- runWithD3_Simulation actualizeForces
     setNodesAndLinks { linkSelection: isM2P_Link, chooseNodes: allNodes, linksInSimulation: const true }
     _stagingNodes %= addGridPoints
     staging <- use _staging
@@ -83,7 +97,6 @@ handleAction = case _ of
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection"
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
     _forceStatuses %= _onlyTheseForcesActive ["centerNamedNode", "center", "collide2", "charge2", "packageOrbit"]
-    -- runWithD3_Simulation actualizeForces
     setNodesAndLinks { linkSelection: isP2P_Link, chooseNodes: isPackage, linksInSimulation: sourcePackageIs "my-project" }
     staging <- use _staging
     runWithD3_Simulation do
@@ -95,7 +108,6 @@ handleAction = case _ of
     _cssClass %= (const "tree")
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     _forceStatuses %= _onlyTheseForcesActive [ "treeNodesX", "treeNodesY", "center", "charge1", "collide2", "unusedOrbit" ]
-    -- runWithD3_Simulation actualizeForces
     setNodesAndLinks { chooseNodes: isUsedModule       -- show all modules, 
                      , linkSelection: isM2M_Tree_Link  -- show only Tree links
                      , linksInSimulation: const true } -- all links shown are added to simulation
@@ -167,7 +179,6 @@ linkSelection filterFn = do
 -- a further level of filtering to put subset of links into Simulation, ie exerting force
 linkSimulation :: forall m. MonadState State m => (Datum_ -> Boolean) -> m Unit
 linkSimulation filterFn = do
-  state <- get
   _stagingLinkFilter %= const filterFn
 
 -- filter nodes from Maybe Model into Staging

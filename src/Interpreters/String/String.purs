@@ -94,6 +94,8 @@ applySelectionAttributeString selection  =
 
     (OnT event listener) -> do
       show "event handler for " <> show event <> " has been set"
+    (OnT' event listener) -> do
+      show "effectful event handler for " <> show event <> " has been set"
 
 -- REVIEW surely these must all be s/D3Selection/String/ here ???
 foreign import showSelectAllInDOM_  :: forall selection. Selector D3Selection_ -> String -> selection

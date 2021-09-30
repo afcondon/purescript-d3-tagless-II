@@ -168,6 +168,7 @@ insertAttributeInScriptTree parentID =
         insertInScriptTree parentID (TransitionNode chain config)
 
       (OnT event listener) -> insertInScriptTree parentID (OnEventNode event)
+      (OnT' event listener) -> insertInScriptTree parentID (OnEventNode event) -- NB this is the effectful branch, doesn't matter to String interpreter tho
 
       -- attr@(ForceT _)       -> insertInScriptTree parentID (AttrNode attr) -- TODO specialize for Force attributes if needed
   

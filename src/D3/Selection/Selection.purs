@@ -2,7 +2,7 @@ module D3.Selection where
 
 import D3.FFI
 
-import D3.Attributes.Instances (AttributeSetter(..), Listener_, Label, attributeLabel, unboxAttr)
+import D3.Attributes.Instances (AttributeSetter(..), Label, Listener_, EffectfulListener_, attributeLabel, unboxAttr)
 import D3.Data.Types (D3Selection_, Datum_, Element, MouseEvent, Transition)
 import D3.Zoom (ZoomConfig)
 import Data.Array (foldl)
@@ -50,6 +50,7 @@ data SelectionAttribute =
   | RemoveT
 
   | OnT MouseEvent Listener_
+  | OnT' MouseEvent EffectfulListener_
                 
 instance showSelectionAttribute :: Show SelectionAttribute where
   show (AttrT attr)      = "chainable: attr " <> attributeLabel attr
@@ -62,6 +63,7 @@ instance showSelectionAttribute :: Show SelectionAttribute where
   show RemoveT           = "chainable: remove"
   -- show (ForceT _)        = "chainable: force attr"
   show (OnT event _)     = show event
+  show (OnT' event _)     = show event
 
   show (OrderingT attr)  = "chainable: ordering" <> show attr
 
@@ -100,6 +102,7 @@ applySelectionAttributeD3 selection_ (TransitionT chain transition) = do
   selection_ -- NB we return selection, not transition
 
 applySelectionAttributeD3 selection_ (OnT event listener) = selectionOn_ selection_ (show event) listener
+applySelectionAttributeD3 selection_ (OnT' event listener) = selectionOn_ selection_ (show event) listener
 
 applySelectionAttributeD3 selection_ (OrderingT oAttr) =
   case oAttr of

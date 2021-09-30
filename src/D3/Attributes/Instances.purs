@@ -2,15 +2,19 @@ module D3.Attributes.Instances where
 
 import Prelude
 
-import D3.Data.Types (D3This_, Datum_, Index_, UnitType)
+import D3.Data.Types (D3This_, Datum_, Index_)
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2)
+import Effect (Effect)
+import Effect.Uncurried (EffectFn3)
 import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
 
 -- | Some useful type aliases
 type IndexedLambda a = Fn2 Datum_ Index_ a
-type Listener        = (Event -> Datum_ -> D3This_ -> Unit) 
-type Listener_       = Fn3 Event Datum_ D3This_ Unit 
+type Listener           = (Event -> Datum_ -> D3This_ -> Unit) 
+type Listener_          = Fn3 Event Datum_ D3This_ Unit 
+type EffectfulListener  = (Event -> Datum_ -> D3This_ -> Effect Unit) 
+type EffectfulListener_ = EffectFn3 Event Datum_ D3This_ Unit 
 type Label           = String
 
 -- | Central feature of this module, 
