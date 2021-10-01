@@ -7,6 +7,7 @@ import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData, S
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode)
 import D3.FFI (SimulationConfig_, readSimulationConfig_)
 import D3.Node (D3LinkSwizzled, D3_SimulationNode, NodeID)
+import D3.Selection (SelectionAttribute)
 import D3.Simulation.Types (D3SimulationState_, _handle)
 import D3Tagless.Capabilities (Staging)
 import Data.Array (filter)
@@ -15,6 +16,7 @@ import Data.Lens.Record (prop)
 import Data.Maybe (Maybe)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
+import Halogen.Subscription (Emitter, Listener) as HS
 import Type.Proxy (Proxy(..))
   
 type State = Record (StateRow)
@@ -28,6 +30,9 @@ type StateRow = (
   , staging      :: Staging D3Selection_ SpagoDataRow SpagoLinkData NodeID
   -- the simulationState manages the Nodes, Links, Forces, Selections, Ticks & simulation parameters
   , simulation   :: D3SimulationState_
+  , callback     :: SelectionAttribute
+  -- , emitter      :: HS.Emitter String
+  -- , listener     :: HS.Listener String
 )
 
 _model :: forall a r. Lens' { model :: a | r } a
@@ -38,6 +43,15 @@ _staging = prop (Proxy :: Proxy "staging")
 
 _cssClass :: forall a r. Lens' { svgClass :: a | r } a
 _cssClass = prop (Proxy :: Proxy "svgClass")
+
+_callback :: forall a r. Lens' { callback :: a | r } a
+_callback = prop (Proxy :: Proxy "callback")
+
+-- _emitter :: forall a r. Lens' { emitter :: a | r } a
+-- _emitter = prop (Proxy :: Proxy "emitter")
+
+-- _listener :: forall a r. Lens' { listener :: a | r } a
+-- _listener = prop (Proxy :: Proxy "listener")
 
 chooseSimNodes :: (SpagoSimNode -> Boolean) -> State -> Maybe (Array SpagoSimNode)
 chooseSimNodes fn state = filter fn <$> preview _modelNodes state

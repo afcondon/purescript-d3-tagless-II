@@ -4,8 +4,8 @@ import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, get)
-import D3.Attributes.Sugar (onMouseEvent, onMouseEventEffectful)
+import Control.Monad.State (class MonadState, get, modify_)
+import D3.Attributes.Sugar (onMouseEvent, onMouseEventEffectful, x)
 import D3.Data.Types (Datum_, MouseEvent(..))
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
@@ -26,13 +26,13 @@ import Debug (trace)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class.Console (log)
-import Halogen (liftEffect, raise)
+import Halogen (HalogenM, liftEffect, raise)
 import Halogen as H
 import Halogen.Subscription as HS
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
-import Stories.Spago.State (State, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes)
+import Stories.Spago.State (State, _callback, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -46,35 +46,42 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { 
+  initialState = do
+    { 
       svgClass: ""
     , model: Nothing
     , staging: { selections: { nodes: Nothing, links: Nothing }, linksInSimulation: const true, rawdata: { nodes: [], links: [] } }
     , simulation: initialSimulationState forceLibrary
-  }
-
-handleAction :: forall m. 
-  Bind m =>
-  MonadAff m =>
-  MonadState State m => 
-  Action -> m Unit
+    , callback: x 0.0 -- a dummy SelectionAttribute that will be replaced by the callback, avoids a Maybe here while prototyping
+    }
+ 
+handleAction :: forall t316 t317 t318.
+  MonadAff t318 => 
+  Action ->
+  HalogenM State Action t316 t317 t318 Unit
 handleAction = case _ of
 
-  Initialize -> do    -- TODO think we actually don't want to be doing anything here until the component is shown
+  -- TODO defer reading of model data until component actually needs it
+  Initialize -> do    
+    -- read various JSON files and synthesize a Model
     (maybeModel :: Maybe SpagoModel) <- H.liftAff readModelData
     _model %= (const maybeModel)
-    openSelections <- evalEffectSimulation Graph.initialize -- should result in the "enter" selections being in the simulation
+    -- set things up in the DOM with SVG, groups for links and nodes, open selections for updates
+    openSelections <- evalEffectSimulation Graph.initialize
     (_staging <<< _enterselections <<< _nodes) %= (const $ openSelections.nodes) 
     (_staging <<< _enterselections <<< _links) %= (const $ openSelections.links)
- 
+    -- create subscriptions for actions arising in the visualization to trigger actions in Halogen app
     { emitter, listener } <- liftEffect $ HS.create
-    -- subscription <- liftEffect $ HS.subscribe emitter \action -> liftEffect $ raise action
-    -- liftEffect $ HS.notify listener "StartSim"
-    subscription <- liftEffect $ HS.subscribe emitter \someString -> liftEffect $ log someString
     let restartSimOnClick :: SelectionAttribute
-        restartSimOnClick = onMouseEventEffectful MouseClick (\e d t -> liftEffect $ HS.notify listener "StartSim")
+        restartSimOnClick = onMouseEventEffectful MouseClick (\e d t -> liftEffect $ HS.notify listener (EventFromVizualization "hello"))
+    -- now hook up this emitter so that Halogen Actions will be triggered by notifications from that emitter
+    void $ H.subscribe emitter
 
+    modify_ _ { callback = restartSimOnClick }
     pure unit
+
+  EventFromVizualization s -> do
+    runWithD3_Simulation start
 
   
   Finalize -> pure unit
@@ -87,9 +94,10 @@ handleAction = case _ of
     setNodesAndLinks { linkSelection: isM2P_Link, chooseNodes: allNodes, linksInSimulation: const true }
     _stagingNodes %= addGridPoints
     staging <- use _staging
+    callback <- use _callback
     runWithD3_Simulation do
       actualizeForces
-      Graph.updateSimulation staging clusterSceneAttributes
+      Graph.updateSimulation staging (clusterSceneAttributes callback)
       setConfigVariable $ Alpha 1.0
 
   Scene PackageGraph -> do
@@ -99,6 +107,7 @@ handleAction = case _ of
     _forceStatuses %= _onlyTheseForcesActive ["centerNamedNode", "center", "collide2", "charge2", "packageOrbit"]
     setNodesAndLinks { linkSelection: isP2P_Link, chooseNodes: isPackage, linksInSimulation: sourcePackageIs "my-project" }
     staging <- use _staging
+    -- callback <- use _callback
     runWithD3_Simulation do
       actualizeForces
       Graph.updateSimulation staging graphSceneAttributes
@@ -128,6 +137,7 @@ handleAction = case _ of
   Filter (LinkShowFilter filterFn) -> do
     linkSelection filterFn
     staging <- use _staging
+    -- callback <- use _callback
     runWithD3_Simulation do
       Graph.updateSimulation staging graphSceneAttributes
       setConfigVariable $ Alpha 0.7
@@ -135,6 +145,7 @@ handleAction = case _ of
   Filter (LinkForceFilter filterFn) -> do
     linkSimulation filterFn
     staging <- use _staging
+    -- callback <- use _callback
     runWithD3_Simulation do
       Graph.updateSimulation staging graphSceneAttributes
       setConfigVariable $ Alpha 0.7
@@ -142,6 +153,7 @@ handleAction = case _ of
   Filter (NodeFilter filterFn) -> do
     chooseNodes filterFn
     staging <- use _staging
+    -- callback <- use _callback
     runWithD3_Simulation do
       Graph.updateSimulation staging graphSceneAttributes
       setConfigVariable $ Alpha 0.7

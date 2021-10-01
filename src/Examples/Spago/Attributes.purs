@@ -5,7 +5,8 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, MouseEvent(..))
 import D3.Examples.Spago.Model (cancelSpotlight_, datum_, explodePackages, toggleSpotlight, tree_datum_)
 import D3.Selection (SelectionAttribute)
-import Prelude (negate, (/))
+import Data.Maybe (Maybe)
+import Prelude (negate, (/), (<>))
 
 -- TODO this is a problem once extracted from "script", leads to undefined in D3.js
 enterLinks :: forall t339. Array t339
@@ -33,13 +34,20 @@ updateAttrs _ =
   , transform' datum_.translateNode
   ]
 
-clusterSceneAttributes :: { circle :: Array SelectionAttribute , labels :: Array SelectionAttribute }
-clusterSceneAttributes = { 
+type SpagoSceneAttributes = { 
+    circle :: Array SelectionAttribute
+  , labels :: Array SelectionAttribute
+}
+
+clusterSceneAttributes :: SelectionAttribute -> SpagoSceneAttributes
+-- clusterSceneAttributes :: SpagoSceneAttributes
+clusterSceneAttributes callback = {
     circle: [ radius datum_.radius
             , fill datum_.fillByUsage
             , strokeColor datum_.strokeByUsage
             , strokeWidth 3.0
             , opacity datum_.opacityByType
+            , callback
           ]
   , labels: [ classed "label"
             , x 0.2
@@ -50,11 +58,13 @@ clusterSceneAttributes = {
           ] 
 }
 
-graphSceneAttributes :: { circle :: Array SelectionAttribute , labels :: Array SelectionAttribute }
+-- graphSceneAttributes :: SelectionAttribute -> SpagoSceneAttributes
+graphSceneAttributes :: SpagoSceneAttributes
 graphSceneAttributes = { 
     circle: [ radius datum_.radius
             , fill datum_.colorByGroup
             , opacity datum_.opacityByType
+            -- , callback
            ]
   , labels: [ classed "label"
             , x 0.2
@@ -65,12 +75,14 @@ graphSceneAttributes = {
           ] 
 }
 
-treeSceneAttributes :: { circle :: Array SelectionAttribute, labels :: Array SelectionAttribute }
-treeSceneAttributes  = {
+-- treeSceneAttributes :: SelectionAttribute -> SpagoSceneAttributes
+treeSceneAttributes :: SpagoSceneAttributes
+treeSceneAttributes = {
     circle: [ radius datum_.radius
             , fill datum_.colorByDepth
             , strokeColor datum_.colorByGroup
             , strokeWidth 3.0
+            -- , callback
             ]
   , labels: [ classed "label"
             , x 4.0

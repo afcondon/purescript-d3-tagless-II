@@ -22,3 +22,4 @@ data Action
   | ChangeSimConfig SimVariable
   | StopSim
   | StartSim
+  | EventFromVizualization String
