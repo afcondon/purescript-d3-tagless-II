@@ -30,6 +30,24 @@ import Stories.Spago.State (State, _stagingLinks, _stagingNodes, getSimConfigRec
 import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
 
+render :: forall t633.
+  State -> HH.HTML (ComponentSlot () t633 Action) Action
+render state =
+  HH.div
+      [ Utils.tailwindClass "story-container spago" ]
+      [ HH.div
+          [ Utils.tailwindClass "story-panel-about" ]
+          [ Card.card_ [ blurbtext ]
+          , renderSimControls state
+          , renderSimState state
+          , renderTableForces state
+          -- , renderTableElements state.simulation
+          ]
+      , HH.div
+          [ Utils.tailwindClass $ "svg-container " <> state.svgClass ]
+          [ ]
+      ]
+
 renderSimState :: forall p. State -> HH.HTML p Action
 renderSimState state =
   HH.div
@@ -172,25 +190,6 @@ renderSimControls state = do
           ]
         ]
     ]
-
-render :: forall t633.
-  State -> HH.HTML (ComponentSlot () t633 Action) Action
-render state =
-  HH.div
-      [ Utils.tailwindClass "story-container spago" ]
-      [ HH.div
-          [ Utils.tailwindClass "story-panel-about" ]
-          [ Card.card_ [ blurbtext ]
-          , renderSimControls state
-          , renderSimState state
-          , renderTableForces state
-          -- , renderTableElements state.simulation
-          ]
-      , HH.div
-          [ Utils.tailwindClass $ "svg-container " <> state.svgClass ]
-          [ ]
-      ]
-
 
 -- | ============================================
 -- | HTML
