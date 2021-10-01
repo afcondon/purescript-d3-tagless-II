@@ -24,9 +24,9 @@ data Action
   | StopSim
   | StartSim
   | EventFromVizualization VizEvent
-  | ExplodeNode NodeID
+  | ToggleChildrenOfNode NodeID
   | SpotlightNode NodeID
-  | UnexplodeNode NodeID
+  | UnToggleChildrenOfNode NodeID
 
 data VizEvent = NodeClick NodeType NodeID 
 -- to be added:

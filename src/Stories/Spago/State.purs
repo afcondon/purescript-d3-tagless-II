@@ -17,6 +17,7 @@ import Data.Maybe (Maybe)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
 import Halogen.Subscription (Emitter, Listener) as HS
+import Stories.Spago.Actions (Scene)
 import Type.Proxy (Proxy(..))
   
 type State = Record (StateRow)
@@ -31,6 +32,7 @@ type StateRow = (
   -- the simulationState manages the Nodes, Links, Forces, Selections, Ticks & simulation parameters
   , simulation   :: D3SimulationState_
   , callback     :: SelectionAttribute
+  , scene        :: Scene -- scene will determine the attributes
 )
 
 _model :: forall a r. Lens' { model :: a | r } a
@@ -44,6 +46,9 @@ _cssClass = prop (Proxy :: Proxy "svgClass")
 
 _callback :: forall a r. Lens' { callback :: a | r } a
 _callback = prop (Proxy :: Proxy "callback")
+
+_scene :: forall a r. Lens' { scene :: a | r } a
+_scene = prop (Proxy :: Proxy "scene")
 
 chooseSimNodes :: (SpagoSimNode -> Boolean) -> State -> Maybe (Array SpagoSimNode)
 chooseSimNodes fn state = filter fn <$> preview _modelNodes state
