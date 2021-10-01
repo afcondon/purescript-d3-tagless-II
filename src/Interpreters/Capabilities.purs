@@ -83,6 +83,6 @@ type Staging selection d r id = {
     , links :: Maybe selection
     }
    -- filter for links given to simulation engine, you don't necessarily want all links to be exerting force
-  , linksInSimulation :: Datum_ -> Boolean
+  , linksWithForce :: Datum_ -> Boolean
   , rawdata :: RawData d r id
 }

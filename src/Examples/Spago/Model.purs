@@ -202,6 +202,11 @@ isPackage (D3SimNode d) =
   case d.nodetype of
     (IsModule _) -> false
     (IsPackage _) -> true
+isPackageOrVisibleModule :: NodeID -> SpagoSimNode -> Boolean
+isPackageOrVisibleModule id (D3SimNode d) =
+  case d.nodetype of
+    (IsModule _) -> d.containerID == id -- include modules whose
+    (IsPackage _) -> true
 isModule :: SpagoSimNode -> Boolean
 isModule (D3SimNode d) =
   case d.nodetype of
@@ -221,6 +226,9 @@ upgradeSpagoNodeData sourcesMap node = D3SimNode {
   , id           : node.id
   , cluster      : node.containerID -- TODO cluster all the single module packages together
   , connected    : node.connected
+  , showChildren : case node.nodetype of
+                      (IsPackage _) -> true
+                      (IsModule _)  -> false
   , containerID  : node.containerID
   , containerName: node.containerName
   , containsMany : node.containsMany
@@ -349,17 +357,17 @@ makeGraph nodes = do
   fromMap graphMap
 
 
-explodePackages :: Event -> D3Simulation_ -> Datum_ -> Unit
-explodePackages event simulation d = explodePackages_ event simulation nodeID nodeType
-  where
-    nodeID   = datum_.id d
-    nodeType = show $ datum_.nodetype d
+-- explodePackages :: Event -> D3Simulation_ -> Datum_ -> Unit
+-- explodePackages event simulation d = explodePackages_ event simulation nodeID nodeType
+--   where
+--     nodeID   = datum_.id d
+--     nodeType = show $ datum_.nodetype d
 
-toggleSpotlight :: Event -> D3Simulation_ -> Datum_ -> Unit
-toggleSpotlight event simulation d = toggleSpotlight_ event simulation nodeID nodeType
-  where
-    nodeID   = datum_.id d
-    nodeType = show $ datum_.nodetype d
+-- toggleSpotlight :: Event -> D3Simulation_ -> Datum_ -> Unit
+-- toggleSpotlight event simulation d = toggleSpotlight_ event simulation nodeID nodeType
+--   where
+--     nodeID   = datum_.id d
+--     nodeType = show $ datum_.nodetype d
 
 -- foreign functions to implement Spotlight, essentially because it's easier to prototype some 
 -- behaviors in D3js while deciding whether/how to express them in PureScript

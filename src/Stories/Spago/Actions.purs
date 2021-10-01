@@ -4,7 +4,7 @@ module Stories.Spago.Actions where
 import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout)
 import D3.Data.Types (Datum_)
-import D3.Examples.Spago.Files (SpagoGraphLinkID)
+import D3.Examples.Spago.Files (NodeType, SpagoGraphLinkID)
 import D3.Examples.Spago.Model (SpagoSimNode)
 import D3.Node (NodeID)
 import D3.Simulation.Types (SimVariable)
@@ -24,5 +24,12 @@ data Action
   | StopSim
   | StartSim
   | EventFromVizualization VizEvent
+  | ExplodeNode NodeID
+  | SpotlightNode NodeID
+  | UnexplodeNode NodeID
 
-data VizEvent = PackageClick NodeID | ModuleClick NodeID | SimpleString String
+data VizEvent = NodeClick NodeType NodeID 
+-- to be added:
+-- | DragFinished
+-- | LinkClick
+-- and whatever other events are meaningful in terms of the graphics objects and DOM events on them

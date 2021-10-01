@@ -10,13 +10,13 @@ import D3.Data.Types (Datum_, MouseEvent(..))
 import D3.Examples.Spago.Draw (getVizEventFromClick)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
-import D3.Examples.Spago.Files (LinkType(..), SpagoGraphLinkID, SpagoGraphLinkRecord, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, addGridPoints, allNodes, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, link_)
+import D3.Examples.Spago.Files (LinkType(..), NodeType(..), SpagoGraphLinkID, SpagoGraphLinkRecord, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, addGridPoints, allNodes, convertFilesToGraphModel, datum_, isModule, isPackage, isPackageOrVisibleModule, isUsedModule, link_)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (linksForceName)
 import D3.Selection (SelectionAttribute)
 import D3.Simulation.Types (SimVariable(..), _forceStatus, _forceStatuses, _onlyTheseForcesActive, initialSimulationState, toggleForceStatus)
-import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start)
+import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start, stop)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
 import Data.Array (filter)
 import Data.Either (hush)
@@ -52,7 +52,7 @@ component = H.mkComponent
     { 
       svgClass: ""
     , model: Nothing
-    , staging: { selections: { nodes: Nothing, links: Nothing }, linksInSimulation: const true, rawdata: { nodes: [], links: [] } }
+    , staging: { selections: { nodes: Nothing, links: Nothing }, linksWithForce: const true, rawdata: { nodes: [], links: [] } }
     , simulation: initialSimulationState forceLibrary
     , callback: x 0.0 -- a dummy SelectionAttribute that will be replaced by the callback, avoids a Maybe here while prototyping
     }
@@ -83,21 +83,46 @@ handleAction = case _ of
     modify_ _ { callback = simulationEvent listener }
     pure unit
 
-  EventFromVizualization vizEvent -> do
-    case vizEvent of
-      PackageClick id -> runWithD3_Simulation start
-      ModuleClick id -> pure unit
-      SimpleString s -> pure unit
+  Finalize -> pure unit
+
+  -- here's where we convert low level D3 Events from the visualization into the appropriate Halogen Action
+  -- this keeps the low level code concerned only with the syntax of the event, while the app (Halogen) will
+  -- deal with the semantics
+  EventFromVizualization ve -> do
+    case ve of
+      NodeClick (IsPackage _) id -> handleAction $ ExplodeNode id
+      NodeClick (IsModule _)  id -> handleAction $ SpotlightNode id
 
   
-  Finalize -> pure unit
+  ExplodeNode id -> runWithD3_Simulation do -- just a copy of PackageGrid right now, need to refactor so that it's all parameterized
+    _forceStatuses %= _onlyTheseForcesActive [ "packageGrid", "clusterx", "clustery", "collide2" ]
+    setNodesAndLinks { linksShown: isM2P_Link, chooseNodes: isPackageOrVisibleModule id, linksWithForce: const true }
+    staging  <- use _staging
+    callback <- use _callback
+    runWithD3_Simulation do
+      actualizeForces
+      Graph.updateSimulation staging (clusterSceneAttributes callback)
+      setConfigVariable $ Alpha 1.0
+
+  -- FIXME just a copy of PackageGrid right now, need to refactor so that it's all parameterized
+  UnexplodeNode id -> runWithD3_Simulation do 
+    _forceStatuses %= _onlyTheseForcesActive [ "packageGrid", "clusterx", "clustery", "collide2" ]
+    setNodesAndLinks { linksShown: isM2P_Link, chooseNodes: isPackage, linksWithForce: const true }
+    staging  <- use _staging
+    callback <- use _callback
+    runWithD3_Simulation do
+      actualizeForces
+      Graph.updateSimulation staging (clusterSceneAttributes callback)
+      setConfigVariable $ Alpha 1.0
+
+  SpotlightNode id -> runWithD3_Simulation stop
 
   Scene PackageGrid -> do
     _cssClass %= (const "cluster")
     -- TODO make this removeSelection part of the Halogen State of the component
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     _forceStatuses %= _onlyTheseForcesActive [ "packageGrid", "clusterx", "clustery", "collide2" ]
-    setNodesAndLinks { linkSelection: isM2P_Link, chooseNodes: allNodes, linksInSimulation: const true }
+    setNodesAndLinks { linksShown: isM2P_Link, chooseNodes: allNodes, linksWithForce: const true }
     _stagingNodes %= addGridPoints
     staging <- use _staging
     callback <- use _callback
@@ -111,9 +136,8 @@ handleAction = case _ of
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection"
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
     _forceStatuses %= _onlyTheseForcesActive ["centerNamedNode", "center", "collide2", "charge2", "packageOrbit"]
-    setNodesAndLinks { linkSelection: isP2P_Link, chooseNodes: isPackage, linksInSimulation: sourcePackageIs "my-project" }
+    setNodesAndLinks { linksShown: isP2P_Link, chooseNodes: isPackage, linksWithForce: sourcePackageIs "my-project" }
     staging <- use _staging
-    -- callback <- use _callback
     runWithD3_Simulation do
       actualizeForces
       Graph.updateSimulation staging graphSceneAttributes
@@ -124,8 +148,8 @@ handleAction = case _ of
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     _forceStatuses %= _onlyTheseForcesActive [ "treeNodesX", "treeNodesY", "center", "charge1", "collide2", "unusedOrbit" ]
     setNodesAndLinks { chooseNodes: isUsedModule       -- show all modules, 
-                     , linkSelection: isM2M_Tree_Link  -- show only Tree links
-                     , linksInSimulation: const true } -- all links shown are added to simulation
+                     , linksShown: isM2M_Tree_Link  -- show only Tree links
+                     , linksWithForce: const true } -- all links shown are added to simulation
                      -- isM2M_TreeLink_ } -- show all links, the "non-tree" modules will be drawn in to fixed tree nodes
     staging <- use _staging
     runWithD3_Simulation do
@@ -141,9 +165,8 @@ handleAction = case _ of
       setConfigVariable $ Alpha 0.7
 
   Filter (LinkShowFilter filterFn) -> do
-    linkSelection filterFn
+    linksShown filterFn
     staging <- use _staging
-    -- callback <- use _callback
     runWithD3_Simulation do
       Graph.updateSimulation staging graphSceneAttributes
       setConfigVariable $ Alpha 0.7
@@ -151,7 +174,6 @@ handleAction = case _ of
   Filter (LinkForceFilter filterFn) -> do
     linkSimulation filterFn
     staging <- use _staging
-    -- callback <- use _callback
     runWithD3_Simulation do
       Graph.updateSimulation staging graphSceneAttributes
       setConfigVariable $ Alpha 0.7
@@ -159,7 +181,6 @@ handleAction = case _ of
   Filter (NodeFilter filterFn) -> do
     chooseNodes filterFn
     staging <- use _staging
-    -- callback <- use _callback
     runWithD3_Simulation do
       Graph.updateSimulation staging graphSceneAttributes
       setConfigVariable $ Alpha 0.7
@@ -175,8 +196,11 @@ handleAction = case _ of
       setConfigVariable $ Alpha 1.0
       start
 
-  StopSim -> do
-    runWithD3_Simulation $ setConfigVariable $ Alpha 0.0
+  StopSim -> runWithD3_Simulation $ 
+    do
+      setConfigVariable $ Alpha 0.0
+      stop
+
 
 -- ======================================================================================================================
 -- some utility functions to manage what data from the model gets given to the visualization code
@@ -184,13 +208,13 @@ handleAction = case _ of
 -- ======================================================================================================================
 type SpagoConfigRecord = { -- convenience type to hold filter functions for nodes & links and list of forces to activate
     chooseNodes :: (SpagoSimNode -> Boolean)
-  , linkSelection :: (SpagoGraphLinkID -> Boolean)
-  , linksInSimulation  :: (Datum_ -> Boolean) -- defined as Datum_ but it's really Link_, ugly
+  , linksShown :: (SpagoGraphLinkID -> Boolean)
+  , linksWithForce  :: (Datum_ -> Boolean) -- defined as Datum_ but it's really Link_, ugly
 }
 
 -- filter links from Maybe Model into Staging
-linkSelection :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
-linkSelection filterFn = do
+linksShown :: forall m. MonadState State m => (SpagoGraphLinkID -> Boolean) -> m Unit
+linksShown filterFn = do
   state <- get
   _stagingLinks %= const (filter filterFn $ view _modelLinks state)
 
@@ -212,8 +236,8 @@ setNodesAndLinks :: forall m.
   m Unit
 setNodesAndLinks config = do
   state <- get
-  _stagingLinks %= const (filter config.linkSelection $ view _modelLinks state)
-  _stagingLinkFilter %= const config.linksInSimulation
+  _stagingLinks %= const (filter config.linksShown $ view _modelLinks state)
+  _stagingLinkFilter %= const config.linksWithForce
   _stagingNodes %= const (filter config.chooseNodes $ view _modelNodes state)
   _stagingNodes %= addGridPoints
  -- FIXME this is where the grid point can be set, once we know how many packages we have

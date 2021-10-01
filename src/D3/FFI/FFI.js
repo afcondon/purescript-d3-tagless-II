@@ -256,9 +256,9 @@ exports.defaultNodeTick_ = label => simulation => nodeSelection => {
                  .attr('cy', d => d.y )
   })
 }
-exports.defaultLinkTick_ = label => simulation => linkSelection => {
+exports.defaultLinkTick_ = label => simulation => linksShown => {
   simulation.on('tick.' + label, () => {
-    linkSelection.attr("x1", d => d.source.x)
+    linksShown.attr("x1", d => d.source.x)
                  .attr("y1", d => d.source.y)
                  .attr("x2", d => d.target.x)
                  .attr("y2", d => d.target.y);

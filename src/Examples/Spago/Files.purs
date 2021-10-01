@@ -85,6 +85,7 @@ type SpagoNodeRow row = (
                 , contains   :: Dependencies -- in case of package, modules; in case of modules, codepoints? (not implemented)
                 }
   , connected     :: Boolean
+  , showChildren  :: Boolean
   , containerID   :: NodeID
   , containerName :: String
   , containsMany  :: Boolean
@@ -190,7 +191,8 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
                         , outPackage: []
                         , contains  : [] -- we're not looking inside packages yet
                         } 
-      , connected    : false -- this is shorthand for "connected to Main by a dependency tree", essentially it's treeNodes.no
+      , connected    : false -- this is shorthand for "connected to Main by a dependency tree", essentially it's treeNodes.no 
+      , showChildren : false
       , containsMany : false 
       , treeXY       : null
       , treeDepth    : null
@@ -221,6 +223,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
                         , contains: (getId <$> p.contains)
                         } 
       , connected    : true -- unless something has gone very wrong we shouldn't have any unconnected _packages_ (only modules)
+      , showChildren : true
       , containsMany : (length p.contains) > 1 -- we won't try to cluster contents of single module packages
       , treeXY       : null
       , treeDepth    : null

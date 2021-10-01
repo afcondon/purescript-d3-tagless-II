@@ -83,12 +83,12 @@ import Type.Proxy (Proxy(..))
 --   -> p State State 
 -- _nodeSelection = _inSim <<< _Just <<< _selections <<< _nodes
 
--- _linkSelection :: forall p. 
+-- _linksShown :: forall p. 
 --      Strong p
 --   => Choice p
 --   => p D3Selection_ D3Selection_
 --   -> p State State 
--- _linkSelection = _inSim <<< _Just <<< _selections <<< _links
+-- _linksShown = _inSim <<< _Just <<< _selections <<< _links
 -- _forSim :: forall a r. Lens' { Staging :: a | r } a
 -- _forSim = prop (Proxy :: Proxy "Staging")
 
@@ -102,11 +102,11 @@ import Type.Proxy (Proxy(..))
 -- _nodeSelectionSet :: (D3Selection_ -> D3Selection_) -> State -> State
 -- _nodeSelectionSet = over _nodeSelection 
 
--- _linkSelectionGet :: State -> Maybe D3Selection_
--- _linkSelectionGet = preview _linkSelection 
+-- _linksShownGet :: State -> Maybe D3Selection_
+-- _linksShownGet = preview _linksShown 
 
--- _linkSelectionSet :: (D3Selection_ -> D3Selection_) -> State -> State
--- _linkSelectionSet = over _linkSelection 
+-- _linksShownSet :: (D3Selection_ -> D3Selection_) -> State -> State
+-- _linksShownSet = over _linksShown 
 
 -- _nodeDataGet :: State -> Maybe (Array SpagoSimNode)
 -- _nodeDataGet = preview _dataNodes 

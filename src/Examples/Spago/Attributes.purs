@@ -3,7 +3,7 @@ module D3.Examples.Spago.Draw.Attributes where
 import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, opacity, radius, strokeColor, strokeWidth, text, textAnchor, transform', viewBox, width, x, y)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, MouseEvent(..))
-import D3.Examples.Spago.Model (cancelSpotlight_, datum_, explodePackages, toggleSpotlight, tree_datum_)
+import D3.Examples.Spago.Model (datum_, tree_datum_)
 import D3.Selection (SelectionAttribute)
 import Data.Maybe (Maybe)
 import Prelude (negate, (/), (<>))
@@ -12,15 +12,15 @@ import Prelude (negate, (/), (<>))
 enterLinks :: forall t339. Array t339
 enterLinks = [] -- [ classed link_.linkClass ] -- default invisible in CSS unless marked "visible"
 
-explodePackageOnClick :: D3Simulation_ -> SelectionAttribute
-explodePackageOnClick simulation_ = onMouseEvent MouseClick (\e d _ -> explodePackages e simulation_ d) -- here we need to raise a Halogen Event
+-- explodePackageOnClick :: D3Simulation_ -> SelectionAttribute
+-- explodePackageOnClick simulation_ = onMouseEvent MouseClick (\e d _ -> explodePackages e simulation_ d) -- here we need to raise a Halogen Event
 
-toggleSpotlightOnClick :: D3Simulation_ -> SelectionAttribute
-toggleSpotlightOnClick simulation_ = onMouseEvent MouseClick (\e d _ -> toggleSpotlight e simulation_ d)
+-- toggleSpotlightOnClick :: D3Simulation_ -> SelectionAttribute
+-- toggleSpotlightOnClick simulation_ = onMouseEvent MouseClick (\e d _ -> toggleSpotlight e simulation_ d)
 
 -- unused right now but could be used to make, for example, click on Package or background cause unSpotlighting of node
-undoSpotlightOnClick :: D3Simulation_ -> SelectionAttribute
-undoSpotlightOnClick simulation_ = onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation_)
+-- undoSpotlightOnClick :: D3Simulation_ -> SelectionAttribute
+-- undoSpotlightOnClick simulation_ = onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation_)
 
 enterAttrs :: Array SelectionAttribute
 enterAttrs = 
@@ -53,8 +53,8 @@ clusterSceneAttributes callback = {
             , x 0.2
             , y datum_.positionLabel
             , textAnchor "middle"
-            , text datum_.name
-            -- , text datum_.indexAndID
+            -- , text datum_.name
+            , text datum_.nameAndID
           ] 
 }
 

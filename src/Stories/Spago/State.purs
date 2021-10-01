@@ -31,8 +31,6 @@ type StateRow = (
   -- the simulationState manages the Nodes, Links, Forces, Selections, Ticks & simulation parameters
   , simulation   :: D3SimulationState_
   , callback     :: SelectionAttribute
-  -- , emitter      :: HS.Emitter String
-  -- , listener     :: HS.Listener String
 )
 
 _model :: forall a r. Lens' { model :: a | r } a
@@ -46,12 +44,6 @@ _cssClass = prop (Proxy :: Proxy "svgClass")
 
 _callback :: forall a r. Lens' { callback :: a | r } a
 _callback = prop (Proxy :: Proxy "callback")
-
--- _emitter :: forall a r. Lens' { emitter :: a | r } a
--- _emitter = prop (Proxy :: Proxy "emitter")
-
--- _listener :: forall a r. Lens' { listener :: a | r } a
--- _listener = prop (Proxy :: Proxy "listener")
 
 chooseSimNodes :: (SpagoSimNode -> Boolean) -> State -> Maybe (Array SpagoSimNode)
 chooseSimNodes fn state = filter fn <$> preview _modelNodes state
@@ -96,7 +88,7 @@ _stagingLinkFilter :: forall p.
   Strong p => 
   p (Datum_ -> Boolean) (Datum_ -> Boolean) ->
   p State State
-_stagingLinkFilter = _staging <<< _linksInSimulation
+_stagingLinkFilter = _staging <<< _linksWithForce
 
 _nodes :: forall a r. Lens' { nodes :: a | r } a
 _nodes = prop (Proxy :: Proxy "nodes")
@@ -107,8 +99,8 @@ _links = prop (Proxy :: Proxy "links")
 _forces :: forall a r. Lens' { forces :: a | r } a
 _forces = prop (Proxy :: Proxy "forces")
 
-_linksInSimulation :: forall a r. Lens' { linksInSimulation :: a | r } a
-_linksInSimulation = prop (Proxy :: Proxy "linksInSimulation")
+_linksWithForce :: forall a r. Lens' { linksWithForce :: a | r } a
+_linksWithForce = prop (Proxy :: Proxy "linksWithForce")
 
 _rawdata :: forall a r. Lens' { rawdata :: a | r } a
 _rawdata = prop (Proxy :: Proxy "rawdata")

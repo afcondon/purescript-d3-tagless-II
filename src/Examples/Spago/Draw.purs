@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Attributes.Sugar (classed, remove, strokeColor, transform', x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, D3This_, Datum_, Element(..))
-import D3.Examples.Spago.Draw.Attributes (enterAttrs, explodePackageOnClick, svgAttrs, toggleSpotlightOnClick, updateAttrs)
+import D3.Examples.Spago.Draw.Attributes (enterAttrs, svgAttrs, updateAttrs)
 import D3.Examples.Spago.Model (datum_, link_)
 import D3.FFI (d3GetSelectionData_, keyIsID_, simdrag)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
@@ -21,7 +21,7 @@ import Utility (getWindowWidthHeight)
 import Web.Event.Internal.Types (Event)
 
 getVizEventFromClick :: Event -> Datum_ -> D3This_ -> VizEvent
-getVizEventFromClick e d t = if (datum_.isPackage d) then (PackageClick (datum_.id d)) else (ModuleClick (datum_.id d))
+getVizEventFromClick e d t = NodeClick (datum_.nodetype d) (datum_.id d)
 
 -- | recipe for this force layout graph
 initialize :: forall m.
@@ -85,12 +85,6 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   setAttributes updateLabelsSelection attrs.labels
   -- now merge the update selection into the enter selection (NB other way round doesn't work)
   mergedNodeSelection   <- mergeSelections nodeEnter node'.update  -- merged enter and update becomes the `node` selection for next pass
-
-  -- | now add clickhandlers that are particular to certain groups of nodes, ie packages and modules
-  packageNodes <- selectUnder mergedNodeSelection "g.package circle"
-  moduleNodes <- selectUnder mergedNodeSelection "g.module circle"
-  setAttributes packageNodes [ explodePackageOnClick simulation_ ]
-  setAttributes moduleNodes [ toggleSpotlightOnClick simulation_ ]
   
   -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
   _ <- mergedNodeSelection `on` Drag (CustomDrag "spago" simdrag) 
@@ -106,16 +100,16 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   -- update links that are staying
   setAttributes link'.update  [ classed "update" ]
   -- merge the update and enter selections for the links
-  mergedLinkSelection   <- mergeSelections linkEnter link'.update  -- merged enter and update becomes the `node` selection for next pass
+  mergedlinksShown   <- mergeSelections linkEnter link'.update  -- merged enter and update becomes the `node` selection for next pass
   
   -- now put the nodes and links into the simulation 
   setNodes $ unsafeCoerce $ d3GetSelectionData_ mergedNodeSelection -- TODO hide this coerce in setNodes
-  setLinks $ unsafeCoerce $ filter staging.linksInSimulation $ d3GetSelectionData_ mergedLinkSelection -- TODO hide this coerce in setLinks
+  setLinks $ unsafeCoerce $ filter staging.linksWithForce $ d3GetSelectionData_ mergedlinksShown -- TODO hide this coerce in setLinks
   -- tick functions for each selection
   addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
     Step mergedNodeSelection [ transform' datum_.translateNode ]
   addTickFunction "links" $
-    Step mergedLinkSelection [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
+    Step mergedlinksShown [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
   start
 
 -- alternate path, should never be used, if we can't match the selections
