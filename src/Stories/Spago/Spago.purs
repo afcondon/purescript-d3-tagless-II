@@ -7,10 +7,11 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get, modify_)
 import D3.Attributes.Sugar (onMouseEvent, onMouseEventEffectful, x)
 import D3.Data.Types (Datum_, MouseEvent(..))
+import D3.Examples.Spago.Draw (getVizEventFromClick)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Files (LinkType(..), SpagoGraphLinkID, SpagoGraphLinkRecord, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, addGridPoints, allNodes, convertFilesToGraphModel, isModule, isPackage, isUsedModule, link_)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, addGridPoints, allNodes, convertFilesToGraphModel, datum_, isModule, isPackage, isUsedModule, link_)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (linksForceName)
 import D3.Selection (SelectionAttribute)
@@ -29,7 +30,7 @@ import Effect.Class.Console (log)
 import Halogen (HalogenM, liftEffect, raise)
 import Halogen as H
 import Halogen.Subscription as HS
-import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
+import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..), VizEvent(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
 import Stories.Spago.State (State, _callback, _cssClass, _enterselections, _links, _model, _modelLinks, _modelNodes, _nodes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes)
@@ -73,15 +74,18 @@ handleAction = case _ of
     -- create subscriptions for actions arising in the visualization to trigger actions in Halogen app
     { emitter, listener } <- liftEffect $ HS.create
     let restartSimOnClick :: SelectionAttribute
-        restartSimOnClick = onMouseEventEffectful MouseClick (\e d t -> liftEffect $ HS.notify listener (EventFromVizualization "hello"))
+        restartSimOnClick = onMouseEventEffectful MouseClick (\e d t -> liftEffect $ HS.notify listener (EventFromVizualization (getVizEventFromClick e d t)))
     -- now hook up this emitter so that Halogen Actions will be triggered by notifications from that emitter
     void $ H.subscribe emitter
 
     modify_ _ { callback = restartSimOnClick }
     pure unit
 
-  EventFromVizualization s -> do
-    runWithD3_Simulation start
+  EventFromVizualization vizEvent -> do
+    case vizEvent of
+      PackageClick id -> runWithD3_Simulation start
+      ModuleClick id -> pure unit
+      SimpleString s -> pure unit
 
   
   Finalize -> pure unit

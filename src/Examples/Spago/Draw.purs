@@ -1,23 +1,27 @@
 module D3.Examples.Spago.Draw where
 
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimStateL, carryOverSimStateN, mergeSelections, on, openSelection, selectUnder, setAttributes, setLinks, setNodes, simulationHandle, start, stop, swizzleLinks, updateJoin)
 import Prelude
 
 import D3.Attributes.Sugar (classed, remove, strokeColor, transform', x1, x2, y1, y2)
-import D3.Data.Types (D3Selection_, Element(..))
+import D3.Data.Types (D3Selection_, D3This_, Datum_, Element(..))
 import D3.Examples.Spago.Draw.Attributes (enterAttrs, explodePackageOnClick, svgAttrs, toggleSpotlightOnClick, updateAttrs)
 import D3.Examples.Spago.Model (datum_, link_)
 import D3.FFI (d3GetSelectionData_, keyIsID_, simdrag)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimStateL, carryOverSimStateN, mergeSelections, on, openSelection, selectUnder, setAttributes, setLinks, setNodes, simulationHandle, start, stop, swizzleLinks, updateJoin)
 import Data.Array (filter)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
+import Stories.Spago.Actions (VizEvent(..))
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
+import Web.Event.Internal.Types (Event)
 
+getVizEventFromClick :: Event -> Datum_ -> D3This_ -> VizEvent
+getVizEventFromClick e d t = if (datum_.isPackage d) then (PackageClick (datum_.id d)) else (ModuleClick (datum_.id d))
 
 -- | recipe for this force layout graph
 initialize :: forall m.
