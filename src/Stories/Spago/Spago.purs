@@ -29,6 +29,7 @@ import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class.Console (log)
 import Halogen (HalogenM, liftEffect, raise)
 import Halogen as H
+import Halogen.Subscription (Listener)
 import Halogen.Subscription as HS
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..), VizEvent(..))
 import Stories.Spago.Forces (forceLibrary)
@@ -55,6 +56,9 @@ component = H.mkComponent
     , simulation: initialSimulationState forceLibrary
     , callback: x 0.0 -- a dummy SelectionAttribute that will be replaced by the callback, avoids a Maybe here while prototyping
     }
+
+simulationEvent :: Listener Action -> SelectionAttribute
+simulationEvent l = onMouseEventEffectful MouseClick (\e d t -> liftEffect $ HS.notify l (EventFromVizualization (getVizEventFromClick e d t)))
  
 handleAction :: forall t316 t317 t318.
   MonadAff t318 => 
@@ -73,12 +77,10 @@ handleAction = case _ of
     (_staging <<< _enterselections <<< _links) %= (const $ openSelections.links)
     -- create subscriptions for actions arising in the visualization to trigger actions in Halogen app
     { emitter, listener } <- liftEffect $ HS.create
-    let restartSimOnClick :: SelectionAttribute
-        restartSimOnClick = onMouseEventEffectful MouseClick (\e d t -> liftEffect $ HS.notify listener (EventFromVizualization (getVizEventFromClick e d t)))
     -- now hook up this emitter so that Halogen Actions will be triggered by notifications from that emitter
     void $ H.subscribe emitter
 
-    modify_ _ { callback = restartSimOnClick }
+    modify_ _ { callback = simulationEvent listener }
     pure unit
 
   EventFromVizualization vizEvent -> do
