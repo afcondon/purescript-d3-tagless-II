@@ -98,7 +98,7 @@ foreign import data D3ForceHandle_     :: Type
 foreign import data CustomForceConfig_ :: Type
 
 -- | a record to initialize / configure simulations
-type SimulationConfig_ = { 
+type SimulationVariables = { 
       alpha         :: Number
     , alphaTarget   :: Number
     , alphaMin      :: Number
@@ -106,9 +106,9 @@ type SimulationConfig_ = {
     , velocityDecay :: Number
 }
 
-foreign import initSimulation_         ::                  SimulationConfig_ -> (Datum_ -> Index_) -> D3Simulation_
-foreign import configSimulation_       :: D3Simulation_ -> SimulationConfig_ -> D3Simulation_
-foreign import readSimulationConfig_   :: D3Simulation_ -> SimulationConfig_
+foreign import initSimulation_         ::                  SimulationVariables -> (Datum_ -> Index_) -> D3Simulation_
+foreign import configSimulation_       :: D3Simulation_ -> SimulationVariables -> D3Simulation_
+foreign import readSimulationVariables :: D3Simulation_ -> SimulationVariables
 
 foreign import d3PreserveSimulationPositions_ :: 
   forall d. 

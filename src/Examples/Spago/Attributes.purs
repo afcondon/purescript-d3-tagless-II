@@ -35,19 +35,18 @@ updateAttrs _ =
   ]
 
 type SpagoSceneAttributes = { 
-    circle :: Array SelectionAttribute
-  , labels :: Array SelectionAttribute
+    circles :: Array SelectionAttribute
+  , labels  :: Array SelectionAttribute
 }
 
-clusterSceneAttributes :: SelectionAttribute -> SpagoSceneAttributes
+clusterSceneAttributes :: SpagoSceneAttributes
 -- clusterSceneAttributes :: SpagoSceneAttributes
-clusterSceneAttributes callback = {
-    circle: [ radius datum_.radius
+clusterSceneAttributes = {
+    circles: [ radius datum_.radius
             , fill datum_.fillByUsage
             , strokeColor datum_.strokeByUsage
             , strokeWidth 3.0
             , opacity datum_.opacityByType
-            , callback
           ]
   , labels: [ classed "label"
             , x 0.2
@@ -61,7 +60,7 @@ clusterSceneAttributes callback = {
 -- graphSceneAttributes :: SelectionAttribute -> SpagoSceneAttributes
 graphSceneAttributes :: SpagoSceneAttributes
 graphSceneAttributes = { 
-    circle: [ radius datum_.radius
+    circles: [ radius datum_.radius
             , fill datum_.colorByGroup
             , opacity datum_.opacityByType
             -- , callback
@@ -78,7 +77,7 @@ graphSceneAttributes = {
 -- treeSceneAttributes :: SelectionAttribute -> SpagoSceneAttributes
 treeSceneAttributes :: SpagoSceneAttributes
 treeSceneAttributes = {
-    circle: [ radius datum_.radius
+    circles: [ radius datum_.radius
             , fill datum_.colorByDepth
             , strokeColor datum_.colorByGroup
             , strokeWidth 3.0

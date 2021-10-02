@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Attributes.Sugar (classed, remove, strokeColor, transform', x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, D3This_, Datum_, Element(..))
-import D3.Examples.Spago.Draw.Attributes (enterAttrs, svgAttrs, updateAttrs)
+import D3.Examples.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, svgAttrs, updateAttrs)
 import D3.Examples.Spago.Model (datum_, link_)
 import D3.FFI (d3GetSelectionData_, keyIsID_, simdrag)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
@@ -57,7 +57,7 @@ updateSimulation :: forall m d r id.
   SelectionM D3Selection_ m =>
   SimulationM D3Selection_ m =>
   (Staging D3Selection_ d r id) ->
-  { circle :: Array SelectionAttribute, labels :: Array SelectionAttribute } -> 
+  SpagoSceneAttributes -> 
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
   stop
@@ -73,14 +73,14 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   -- put new elements (g, g.circle & g.text) into the DOM
   simulation_           <- simulationHandle
   nodeEnter             <- appendTo node'.enter Group enterAttrs
-  circlesSelection      <- appendTo nodeEnter Circle attrs.circle
+  circlesSelection      <- appendTo nodeEnter Circle attrs.circles
   labelsSelection       <- appendTo nodeEnter Text attrs.labels
   -- remove elements corresponding to exiting data
   setAttributes node'.exit [ remove ]
   -- change anything that needs changing on the continuing elements
   setAttributes node'.update $ updateAttrs simulation_ 
   updateCirclesSelection <- selectUnder node'.update (show Circle)
-  setAttributes updateCirclesSelection attrs.circle
+  setAttributes updateCirclesSelection attrs.circles
   updateLabelsSelection <- selectUnder node'.update (show Text)
   setAttributes updateLabelsSelection attrs.labels
   -- now merge the update selection into the enter selection (NB other way round doesn't work)

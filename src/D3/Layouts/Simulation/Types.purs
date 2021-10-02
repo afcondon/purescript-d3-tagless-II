@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Attributes.Instances (AttributeSetter, Label)
 import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_)
-import D3.FFI (D3ForceHandle_, SimulationConfig_, initSimulation_, keyIsID_)
+import D3.FFI (D3ForceHandle_, SimulationVariables, initSimulation_, keyIsID_)
 import D3.Selection (SelectionAttribute)
 import Data.Array (intercalate)
 import Data.Foldable (class Foldable)
@@ -283,7 +283,7 @@ initialSimulationState forces = SimState_
 --   spy "forceLibraryMap: " $ fromFoldable $ forceTuple <$> forceLibrary
 
 
-defaultConfigSimulation :: SimulationConfig_
+defaultConfigSimulation :: SimulationVariables
 defaultConfigSimulation = { 
       alpha        : 1.0
     , alphaTarget  : 0.0

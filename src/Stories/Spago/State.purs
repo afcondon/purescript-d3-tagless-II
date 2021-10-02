@@ -2,10 +2,13 @@ module Stories.Spago.State where
 
 import Prelude
 
+import D3.Attributes.Instances (Label)
+import D3.Attributes.Sugar (x)
 import D3.Data.Types (D3Selection_, Datum_)
+import D3.Examples.Spago.Draw.Attributes (SpagoSceneAttributes)
 import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData, SpagoGraphLinkRecord)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode)
-import D3.FFI (SimulationConfig_, readSimulationConfig_)
+import D3.FFI (SimulationVariables, readSimulationVariables)
 import D3.Node (D3LinkSwizzled, D3_SimulationNode, NodeID)
 import D3.Selection (SelectionAttribute)
 import D3.Simulation.Types (D3SimulationState_, _handle)
@@ -13,7 +16,7 @@ import D3Tagless.Capabilities (Staging)
 import Data.Array (filter)
 import Data.Lens (Lens', _Just, preview, view)
 import Data.Lens.Record (prop)
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
 import Halogen.Subscription (Emitter, Listener) as HS
@@ -22,18 +25,41 @@ import Type.Proxy (Proxy(..))
   
 type State = Record (StateRow)
 type StateRow = (
-  -- governing class on the SVG means we can completely change the look of the vis (and not have to think about this at D3 level)
-    svgClass     :: String 
+  -- the simulationState manages the Nodes, Links, Forces, Selections, Ticks & simulation parameters
+    simulation   :: D3SimulationState_
   -- the model should actually be a component, probably a hook so that it can be constructed by this component and not be a Maybe
   , model        :: Maybe SpagoModel 
   -- we'll filter nodes/links to staging and then, if staging is valid (has selections) we will put this staging data in the simulation
   -- if there are updates to data they will be detected and handled by defensive copying in the FFI to ensure continuity of object references from links
   , staging      :: Staging D3Selection_ SpagoDataRow SpagoLinkData NodeID
-  -- the simulationState manages the Nodes, Links, Forces, Selections, Ticks & simulation parameters
-  , simulation   :: D3SimulationState_
-  , callback     :: SelectionAttribute
-  , scene        :: Scene -- scene will determine the attributes
+-- | Contains all the settings necessary to call the Draw function
+  , scene        :: MiseEnScene
 )
+
+type MiseEnScene = { 
+-- first: filter functions for nodes and links (both what links are shown and which ones exert force)
+    chooseNodes     :: (SpagoSimNode -> Boolean)
+  , linksShown      :: (SpagoGraphLinkID -> Boolean)
+  , linksActive     :: (Datum_ -> Boolean) -- defined as Datum_ but it's really Link_, ugly
+-- list of forces to activate
+  , forces          :: Array Label
+  -- governing class on the SVG means we can completely change the look of the vis (and not have to think about this at D3 level)
+  , cssClass        :: String
+  , attributes      :: SpagoSceneAttributes
+  -- at present just one call back which is added to the circle attributes
+  , callback        :: SelectionAttribute
+  -- could add the simulation variables here too?
+}
+defaultSceneConfig :: MiseEnScene
+defaultSceneConfig = {
+    chooseNodes: const true -- chooses all nodes
+  , linksShown:  const true
+  , linksActive: const true
+  , forces: []
+  , cssClass: ""
+  , attributes: { circles: [], labels: [] }
+  , callback: x 0.0 -- possibly want to store the listener here rather than the callback?
+}
 
 _model :: forall a r. Lens' { model :: a | r } a
 _model = prop (Proxy :: Proxy "model")
@@ -41,25 +67,29 @@ _model = prop (Proxy :: Proxy "model")
 _staging :: forall a r. Lens' { staging :: a | r } a
 _staging = prop (Proxy :: Proxy "staging")
 
-_cssClass :: forall a r. Lens' { svgClass :: a | r } a
-_cssClass = prop (Proxy :: Proxy "svgClass")
-
-_callback :: forall a r. Lens' { callback :: a | r } a
-_callback = prop (Proxy :: Proxy "callback")
-
 _scene :: forall a r. Lens' { scene :: a | r } a
 _scene = prop (Proxy :: Proxy "scene")
 
-chooseSimNodes :: (SpagoSimNode -> Boolean) -> State -> Maybe (Array SpagoSimNode)
-chooseSimNodes fn state = filter fn <$> preview _modelNodes state
+-- lenses for mise-en-scene things 
+_chooseNodes    = _scene <<< prop (Proxy :: Proxy "chooseNodes")
+_linksShown     = _scene <<< prop (Proxy :: Proxy "linksShown")
+_linksActive    = _scene <<< prop (Proxy :: Proxy "linksActive")
+_sceneForces    = _scene <<< _forces
+_cssClass       = _scene <<< prop (Proxy :: Proxy "cssClass")
+_callback       = _scene <<< prop (Proxy :: Proxy "callback") 
+_sceneAttributes = _scene <<< prop (Proxy :: Proxy "attributes")
 
-chooseSimLinks :: (SpagoGraphLinkID -> Boolean) -> State -> Maybe (Array SpagoGraphLinkID)
-chooseSimLinks fn state = filter fn <$> preview _modelLinks state
+-- -- REVIEW appears to be unused, why?
+-- chooseSimNodes :: (SpagoSimNode -> Boolean) -> State -> Maybe (Array SpagoSimNode)
+-- chooseSimNodes fn state = filter fn <$> preview _modelNodes state
 
-getSimConfigRecord :: State -> SimulationConfig_
-getSimConfigRecord state = do
+-- chooseSimLinks :: (SpagoGraphLinkID -> Boolean) -> State -> Maybe (Array SpagoGraphLinkID)
+-- chooseSimLinks fn state = filter fn <$> preview _modelLinks state
+
+getSimulationVariables :: State -> SimulationVariables
+getSimulationVariables state = do
   let handle = view _handle state
-  readSimulationConfig_ handle
+  readSimulationVariables handle
 
 _modelNodes :: forall p. 
      Strong p

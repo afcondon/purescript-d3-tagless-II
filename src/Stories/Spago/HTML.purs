@@ -26,12 +26,12 @@ import Ocelot.Block.Format as Format
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
-import Stories.Spago.State (State, _stagingLinks, _stagingNodes, getSimConfigRecord)
+import Stories.Spago.State (State, _cssClass, _stagingLinks, _stagingNodes, getSimulationVariables)
 import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
 
-render :: forall t633.
-  State -> HH.HTML (ComponentSlot () t633 Action) Action
+render :: forall m.
+  State -> HH.HTML (ComponentSlot () m Action) Action
 render state =
   HH.div
       [ Utils.tailwindClass "story-container spago" ]
@@ -44,7 +44,7 @@ render state =
           -- , renderTableElements state.simulation
           ]
       , HH.div
-          [ Utils.tailwindClass $ "svg-container " <> state.svgClass ]
+          [ Utils.tailwindClass $ "svg-container " <> (view _cssClass state) ]
           [ ]
       ]
 
@@ -54,7 +54,7 @@ renderSimState state =
     [ HP.classes [ HH.ClassName "m-6" ]]
     [ Format.caption_ [ HH.text "Simulation state" ]
     , HH.p_
-        [ HH.text $ "class: " <> state.svgClass ] 
+        [ HH.text $ "class: " <> (view _cssClass state) ] 
     , HH.p_
         [ HH.text $ "link count: " <> show (length $ view _stagingLinks state) ] 
     , HH.p_
@@ -62,13 +62,13 @@ renderSimState state =
     -- , HH.p_
     --     [ HH.text $ "initial forces:" <> show (listActiveForces state) ] 
     -- , HH.p_
-    --     [ HH.text $ "sim vars: " <> show (getSimConfigRecord state)]
+    --     [ HH.text $ "sim vars: " <> show (getSimulationVariables state)]
     ]
 
 renderSimControls :: forall p. State -> HH.HTML p Action
 renderSimControls state = do
   let
-    params = getSimConfigRecord state
+    params = getSimulationVariables state
   HH.div
     [ HP.classes [ HH.ClassName "m-6" ]]
     [ Format.subHeading_ [ HH.text "Simulation controls" ]

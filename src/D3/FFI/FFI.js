@@ -149,7 +149,7 @@ exports.configSimulation_ = simulation => config => {
   }
   return simulation
 }
-exports.readSimulationConfig_ = simulation => {
+exports.readSimulationVariables = simulation => {
   return {
     alpha: simulation.alpha(),
     alphaTarget: simulation.alphaTarget(),
