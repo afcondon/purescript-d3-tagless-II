@@ -158,12 +158,17 @@ exports.readSimulationVariables = simulation => {
     velocityDecay: simulation.velocityDecay()
   }
 }
-
+unpin = d => {
+  d.fx = null
+  d.fy = null
+  return d;
+}
 exports.d3PreserveSimulationPositions_ = node => nodes => keyFn => {
+  const old = new Map(node.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
   const old = new Map(node.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
 // since this is completely generic code, we'll need to figure a way to get that information down here into the FFI
 // REVIEW we need to copy the fx/fy (at least) from the updating data (also what if we wanted r, say, or x, to change???)
-  let updatedNodeData = nodes.map(d => Object.assign(old.get(keyFn(d)) || d, {} ));
+  let updatedNodeData = nodes.map(d => Object.assign(old.get(keyFn(d)) || unpin(d), {} ));
   return updatedNodeData
 }
 exports.d3PreserveLinkReferences_ = link => links => {
