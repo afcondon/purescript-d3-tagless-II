@@ -8,7 +8,7 @@ import D3.Data.Types (D3Selection_, Datum_, Index_)
 import D3.FFI 
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
-import D3.Simulation.Forces (disableByLabels, enableByLabels, putFixedForcesInSimulation, putStatusMap, updateForceInSimulation)
+import D3.Simulation.Forces 
 import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _forceStatuses, _handle, _status, _tick, _velocityDecay)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (RawData)
@@ -111,9 +111,6 @@ simulationStart :: forall m row.
   m Unit
 simulationStart = do
   handle <- use _handle
-  forces <- use _forceLibrary
-  -- fix the nodes that are held by a fixed force, can only be done when nodes already in simulation, hence, here just before restart
-  let _ = (putFixedForcesInSimulation handle) <$> (values forces)
   _d3Simulation <<< _alpha %= (const 1.0)
   pure $ startSimulation_ handle
 

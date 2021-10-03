@@ -8,6 +8,7 @@ import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get, modify_)
 import D3.Attributes.Instances (Label)
 import D3.Attributes.Sugar (onMouseEvent, onMouseEventEffectful, x)
+import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (Datum_, MouseEvent(..))
 import D3.Examples.Spago.Draw (getVizEventFromClick)
 import D3.Examples.Spago.Draw as Graph
@@ -111,7 +112,7 @@ handleAction = case _ of
     _sceneForces     .= [ "packageGrid", "clusterx", "clustery", "collide2" ]
     _cssClass        .= "cluster"
     _sceneAttributes .= clusterSceneAttributes
-    _nodeInitializerFunctions .= [ packageNodesToGridXY, moduleNodesToContainerXY ]
+    _nodeInitializerFunctions .= [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     runSimulation
 
@@ -120,23 +121,30 @@ handleAction = case _ of
     _chooseNodes     .= isPackage
     _linksShown      .= isP2P_Link
     _linksActive     .= (sourcePackageIs "my-project")
-    _sceneForces     .= ["centerNamedNode", "center", "collide2", "charge2", "packageOrbit"]
+    _sceneForces     .= ["center", "collide2", "charge2", "packageOrbit"]
     _cssClass        .= "graph"
     _sceneAttributes .= graphSceneAttributes
-    _nodeInitializerFunctions .= [ packagesNodesToPhyllotaxis ]
+    _nodeInitializerFunctions .= [ unpinAllNodes, packagesNodesToPhyllotaxis, fixNamedNode "my-project" { x: -500.0, y: 0.0 } ]
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection"
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
     runSimulation
 
-  Scene (ModuleTree _) -> do
+  Scene (ModuleTree treetype) -> do
     _chooseNodes     .= isUsedModule
     _linksShown      .= isM2M_Tree_Link
     _linksActive     .= const true
-    -- _sceneForces     .= [ "treeNodesX", "treeNodesY", "center", "charge1", "collide2", "unusedOrbit" ]
-    _sceneForces     .= [ "center", "charge1", "collide2", "unusedOrbit" ]
     _cssClass        .= "tree"
     _sceneAttributes .= treeSceneAttributes
-    _nodeInitializerFunctions .= [ treeNodesToTreeXY ]
+    _sceneForces     .= 
+      case treetype of
+        Horizontal -> [ "htreeNodesX", "htreeNodesY", "charge1", "collide2" ]
+        Vertical   -> [ "vtreeNodesX", "vtreeNodesY", "charge1", "collide2" ]
+        Radial     -> [ "charge2", "collide1", "charge2" ]
+    _nodeInitializerFunctions .=
+      case treetype of
+        Horizontal -> [ unpinAllNodes, treeNodesToTreeXY_H, fixNamedNode "Main" { x: -500.0, y: 0.0 } ]
+        Vertical   -> [ unpinAllNodes, treeNodesToTreeXY_V, fixNamedNode "Main" { x: 0.0, y: -500.0 } ]
+        Radial     -> [ unpinAllNodes, modulesNodesToPhyllotaxis, fixNamedNode "Main" { x: 0.0, y: 0.0 } ]
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     runSimulation 
     

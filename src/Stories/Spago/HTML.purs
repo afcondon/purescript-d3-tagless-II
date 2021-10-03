@@ -84,6 +84,9 @@ renderSimControls state = do
           , Button.buttonPrimaryCenter
               [ HE.onClick $ const (Scene $ ModuleTree Horizontal) ]
               [ HH.text "Horiz. Tree" ]
+          , Button.buttonPrimaryCenter
+              [ HE.onClick $ const (Scene $ ModuleTree Vertical) ]
+              [ HH.text "Vert. Tree" ]
           , Button.buttonPrimaryRight
               [ HE.onClick $ const (Scene $ ModuleTree Radial) ]
               [ HH.text "Radial Tree" ]

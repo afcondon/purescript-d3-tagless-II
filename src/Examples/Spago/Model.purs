@@ -7,7 +7,7 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, PointXY)
 import D3.Examples.Spago.Files (LinkType(..), NodeType(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
-import D3.FFI (getIndexFromDatum_, hasChildren_, setInSimNodeFlag)
+import D3.FFI (getIndexFromDatum_, hasChildren_, setInSimNodeFlag, unpinNode_)
 import D3.Node (D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_)
 import Data.Array (foldl, length, partition, (:))
@@ -17,7 +17,7 @@ import Data.Int (floor, toNumber)
 import Data.Map (fromFoldable, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Nullable (Nullable, notNull, toMaybe)
+import Data.Nullable (Nullable, notNull, null, toMaybe)
 import Data.Nullable (Nullable, null) as N
 import Data.Number (nan)
 import Data.Set as S
@@ -263,7 +263,19 @@ numberToGridPoint columns i = do
     -- _ = trace { numberToGridPoint: i, columns, x, y } \_ -> unit
   { x, y }
 
--- TODO make this generic: needs partitioning function and 
+-- | ==================================================================================================================
+-- | collection of functions for initializing nodes prior to putting them in the simulation
+-- | ==================================================================================================================
+
+-- | setting the fx / fy to null ensures that D3 will calculate their positions as normal
+unpinAllNodes :: Array SpagoSimNode -> Array SpagoSimNode
+unpinAllNodes nodes = unpin <$> nodes
+  where
+    -- unpin (D3SimNode d) = D3SimNode $ unpinNode_ d
+    unpin :: SpagoSimNode -> SpagoSimNode
+    unpin (D3SimNode d) = D3SimNode d { fx = (null :: Nullable Number), fy = (null :: Nullable Number) }
+
+-- | put (only) package nodes on a fixed grid
 packageNodesToGridXY :: Array SpagoSimNode -> Array SpagoSimNode
 packageNodesToGridXY nodes = partitioned.no <> packagesWithGrid
   where
@@ -278,7 +290,10 @@ packageNodesToGridXY nodes = partitioned.no <> packagesWithGrid
     offset  = -((toNumber columns) / 2.0)
 
     packagesWithGrid = foldlWithIndex (\i b a -> (setGridXY a i) : b) [] partitioned.yes
-      where setGridXY (D3SimNode p) i = D3SimNode p { gridXY = notNull $ scalePoint 200.0 200.0 $ offsetXY { x: offset, y: offset } $ numberToGridPoint columns i }
+      where 
+        setGridXY (D3SimNode p) i = do
+          let gridXY = scalePoint 200.0 200.0 $ offsetXY { x: offset, y: offset } $ numberToGridPoint columns i 
+          D3SimNode p { gridXY = notNull gridXY, fx = notNull gridXY.x, fy = notNull gridXY.y }
 
 moduleNodesToContainerXY :: Array SpagoSimNode -> Array SpagoSimNode
 moduleNodesToContainerXY nodes = modulesWithGrid <> partitioned.yes
@@ -298,26 +313,40 @@ moduleNodesToContainerXY nodes = modulesWithGrid <> partitioned.yes
         Just gridXY -> D3SimNode m { gridXY = gridXY }
 
 packagesNodesToPhyllotaxis :: Array SpagoSimNode -> Array SpagoSimNode
-packagesNodesToPhyllotaxis nodes = partitioned.no <> (setForPhyllotaxis <$> partitioned.yes)
+packagesNodesToPhyllotaxis = nodesToPhyllotaxis isPackage
+
+modulesNodesToPhyllotaxis :: Array SpagoSimNode -> Array SpagoSimNode
+modulesNodesToPhyllotaxis = nodesToPhyllotaxis isModule
+
+nodesToPhyllotaxis :: (SpagoSimNode -> Boolean) -> Array SpagoSimNode -> Array SpagoSimNode
+nodesToPhyllotaxis predicate nodes = partitioned.no <> (setForPhyllotaxis <$> partitioned.yes)
   where
-    partitioned = partition isPackage nodes
+    partitioned = partition predicate nodes
     setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode
     setForPhyllotaxis (D3SimNode d) = D3SimNode $ d { x = nan }
 
-treeNodesToTreeXY :: Array SpagoSimNode -> Array SpagoSimNode
-treeNodesToTreeXY nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes)
+treeNodesToTreeXY_H :: Array SpagoSimNode -> Array SpagoSimNode
+treeNodesToTreeXY_H nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes)
   where
     partitioned = partition isUsedModule nodes
     setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
     setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { fx = notNull treeXY.x, fy = notNull treeXY.y }
       where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
 
-centerNamedNode :: Label -> Array SpagoSimNode -> Array SpagoSimNode
-centerNamedNode label nodes = fixNamedNode <$> nodes
+treeNodesToTreeXY_V :: Array SpagoSimNode -> Array SpagoSimNode
+treeNodesToTreeXY_V nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes)
   where
-    fixNamedNode (D3SimNode d) = if d.name == label 
-                                 then D3SimNode d { fx = notNull 0.0, fy = notNull 0.0 }
-                                 else D3SimNode d
+    partitioned = partition isUsedModule nodes
+    setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
+    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { fx = notNull treeXY.x, fy = notNull treeXY.y }
+      where treeXY = fromMaybe { x: d.y, y: d.x } $ toMaybe d.treeXY
+
+fixNamedNode :: Label -> PointXY -> Array SpagoSimNode -> Array SpagoSimNode
+fixNamedNode label point nodes = fixNamedNode' <$> nodes
+  where
+    fixNamedNode' (D3SimNode d) = if d.name == label 
+                                  then D3SimNode d { fx = notNull point.x, fy = notNull point.y }
+                                  else D3SimNode d
 
 scalePoint :: Number -> Number -> PointXY -> PointXY
 scalePoint xFactor yFactor xy = { x: xy.x * xFactor, y: xy.y * yFactor }

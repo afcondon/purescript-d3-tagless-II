@@ -3,18 +3,14 @@ module Stories.Spago.Forces where
 import Prelude
 
 import D3.Attributes.Instances (Label)
-import D3.Data.Types (Datum_, Index_, PointXY, index_ToInt)
-import D3.Examples.Spago.Model (datum_, numberToGridPoint, offsetXY, scalePoint)
+import D3.Examples.Spago.Model (datum_)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, createLinkForce, initialize)
-import D3.Simulation.Types (FixForceType(..), Force, ForceFilter(..), ForceStatus, ForceType(..), RegularForceType(..), _name, _status, allNodes)
+import D3.Simulation.Types (Force, ForceFilter(..), ForceType(..), RegularForceType(..), allNodes) 
 import Data.Int (toNumber)
-import Data.Lens (view)
-import Data.Map (Map, fromFoldable)
+import Data.Map (Map)
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
-import Data.Tuple (Tuple(..))
-import Debug (spy)
 
 -- | table of all the forces that are used in the Spago component
 forceLibrary :: Map Label Force
@@ -31,14 +27,14 @@ forceLibrary = initialize [
       , createForce "clusterx"     (RegularForce ForceX)        modulesOnly [ F.strength 0.2, F.x datum_.gridPointX ]
       , createForce "clustery"     (RegularForce ForceY)        modulesOnly [ F.strength 0.2, F.y datum_.gridPointY ]
 
-      , createForce "packageGrid"     (FixForce $ ForceFixPositionXY useGridXY) (Just $ ForceFilter "packages only" datum_.isPackage)           [ ] 
-      , createForce "centerNamedNode" (FixForce $ ForceFixPositionXY centerXY) (Just $ ForceFilter "src only"     \d -> datum_.name d == "my-project") [ ] 
-      , createForce "treeNodesPinned" (FixForce $ ForceFixPositionXY treeXY)   (Just $ ForceFilter "tree only"    \d -> datum_.connected d)     [ ] 
-      
-      , createForce "treeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
+      , createForce "htreeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
           [ F.strength 0.2, F.x datum_.treePointX ] 
-      , createForce "treeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
+      , createForce "htreeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
           [ F.strength 0.2, F.y datum_.treePointY ] 
+      , createForce "vtreeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
+          [ F.strength 0.2, F.x datum_.treePointY ] 
+      , createForce "vtreeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
+          [ F.strength 0.2, F.y datum_.treePointX ] 
 
       , createForce "packageOrbit" (RegularForce ForceRadial)   packagesOnly 
                                    [ F.strength 0.7, F.x 0.0, F.y 0.0, F.radius 500.0 ]

@@ -130,7 +130,6 @@ instance showSimVariable :: Show SimVariable where
 data ForceType = 
     RegularForce RegularForceType
   | LinkForce
-  | FixForce FixForceType
 
 newtype Force = Force {
     "type"     :: ForceType
@@ -172,7 +171,6 @@ _filterLabel = _Newtype <<< prop (Proxy :: Proxy "filter") <<< _Just <<< _forceF
 instance Show ForceType where
   show (RegularForce t) = show t
   show LinkForce        = "Link force"
-  show (FixForce f)     = show f
 
 instance Show Force where
   show (Force f) = intercalate " " [show f.type, show f.name, show f.status, show f.filter]
@@ -224,11 +222,6 @@ data LinkForceType =
   -- NOTE because data for links can _only_ be provided when setting links in a simulation, initial links array will always be []
   ForceLink     -- strength, distance, iterations, keyFn
 
-data FixForceType =
-    ForceFixPositionXY (Datum_ -> Index_ -> { x :: Number, y :: Number }) 
-  | ForceFixPositionX  (Datum_ -> Index_ -> { x :: Number })
-  | ForceFixPositionY  (Datum_ -> Index_ -> { y :: Number })
-
 data CustomForceType = CustomForce -- TODO need something to hold extra custom force config, perhaps?
 
 instance Show RegularForceType where
@@ -241,12 +234,6 @@ instance Show RegularForceType where
 
 instance Show LinkForceType where
   show ForceLink              = "ForceLink"
-
-instance Show FixForceType where
-  show (ForceFixPositionXY _) = "ForceFixPositionXY"
-  show (ForceFixPositionX _)  = "ForceFixPositionX"
-  show (ForceFixPositionY _)  = "ForceFixPositionY"
-
 
 -- unused parameter is to ensure a NEW simulation is created so that, 
 -- for example, two Halogen components won't _accidentally_ share one
