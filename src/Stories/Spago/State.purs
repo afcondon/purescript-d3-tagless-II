@@ -48,10 +48,12 @@ type MiseEnScene = {
   , attributes      :: SpagoSceneAttributes
   -- at present just one call back which is added to the circle attributes
   , callback        :: SelectionAttribute
+  -- fix functions - run one after another on the data to set fixed nodes
+  , nodeInitializerFunctions :: Array (Array SpagoSimNode -> Array SpagoSimNode)
   -- could add the simulation variables here too?
 }
-defaultSceneConfig :: MiseEnScene
-defaultSceneConfig = {
+initialScene :: MiseEnScene
+initialScene = {
     chooseNodes: const true -- chooses all nodes
   , linksShown:  const true
   , linksActive: const true
@@ -59,6 +61,7 @@ defaultSceneConfig = {
   , cssClass: ""
   , attributes: { circles: [], labels: [] }
   , callback: x 0.0 -- possibly want to store the listener here rather than the callback?
+  , nodeInitializerFunctions: []
 }
 
 _model :: forall a r. Lens' { model :: a | r } a
@@ -70,14 +73,37 @@ _staging = prop (Proxy :: Proxy "staging")
 _scene :: forall a r. Lens' { scene :: a | r } a
 _scene = prop (Proxy :: Proxy "scene")
 
+_nodes :: forall a r. Lens' { nodes :: a | r } a
+_nodes = prop (Proxy :: Proxy "nodes")
+
+_links :: forall a r. Lens' { links :: a | r } a
+_links = prop (Proxy :: Proxy "links")
+
+_forces :: forall a r. Lens' { forces :: a | r } a
+_forces = prop (Proxy :: Proxy "forces")
+
+_linksWithForce :: forall a r. Lens' { linksWithForce :: a | r } a
+_linksWithForce = prop (Proxy :: Proxy "linksWithForce")
+
+_rawdata :: forall a r. Lens' { rawdata :: a | r } a
+_rawdata = prop (Proxy :: Proxy "rawdata")
+
+_enterselections :: forall a r. Lens' { selections :: a | r } a
+_enterselections = prop (Proxy :: Proxy "selections")
+
 -- lenses for mise-en-scene things 
-_chooseNodes    = _scene <<< prop (Proxy :: Proxy "chooseNodes")
-_linksShown     = _scene <<< prop (Proxy :: Proxy "linksShown")
-_linksActive    = _scene <<< prop (Proxy :: Proxy "linksActive")
-_sceneForces    = _scene <<< _forces
-_cssClass       = _scene <<< prop (Proxy :: Proxy "cssClass")
-_callback       = _scene <<< prop (Proxy :: Proxy "callback") 
-_sceneAttributes = _scene <<< prop (Proxy :: Proxy "attributes")
+_chooseNodes              = _scene <<< prop (Proxy :: Proxy "chooseNodes")
+_linksShown               = _scene <<< prop (Proxy :: Proxy "linksShown")
+_linksActive              = _scene <<< prop (Proxy :: Proxy "linksActive")
+_sceneForces              = _scene <<< _forces
+_cssClass                 = _scene <<< prop (Proxy :: Proxy "cssClass")
+_callback                 = _scene <<< prop (Proxy :: Proxy "callback") 
+_sceneAttributes          = _scene <<< prop (Proxy :: Proxy "attributes")
+_nodeInitializerFunctions :: forall p.
+  Strong p =>
+  p (Array (Array SpagoSimNode -> Array SpagoSimNode)) (Array (Array SpagoSimNode -> Array SpagoSimNode)) ->
+  p State State
+_nodeInitializerFunctions = _scene <<< prop (Proxy :: Proxy "nodeInitializerFunctions")
 
 -- -- REVIEW appears to be unused, why?
 -- chooseSimNodes :: (SpagoSimNode -> Boolean) -> State -> Maybe (Array SpagoSimNode)
@@ -125,20 +151,3 @@ _stagingLinkFilter :: forall p.
   p State State
 _stagingLinkFilter = _staging <<< _linksWithForce
 
-_nodes :: forall a r. Lens' { nodes :: a | r } a
-_nodes = prop (Proxy :: Proxy "nodes")
-
-_links :: forall a r. Lens' { links :: a | r } a
-_links = prop (Proxy :: Proxy "links")
-
-_forces :: forall a r. Lens' { forces :: a | r } a
-_forces = prop (Proxy :: Proxy "forces")
-
-_linksWithForce :: forall a r. Lens' { linksWithForce :: a | r } a
-_linksWithForce = prop (Proxy :: Proxy "linksWithForce")
-
-_rawdata :: forall a r. Lens' { rawdata :: a | r } a
-_rawdata = prop (Proxy :: Proxy "rawdata")
-
-_enterselections :: forall a r. Lens' { selections :: a | r } a
-_enterselections = prop (Proxy :: Proxy "selections")

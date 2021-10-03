@@ -261,12 +261,12 @@ numberToGridPoint columns i = do
   { x, y }
 
 -- TODO make this generic: needs partitioning function and 
-addGridPoints :: Array SpagoSimNode -> Array SpagoSimNode
-addGridPoints nodes = modulesWithGrid <> packagesWithGrid
+packageNodesToGridXY :: Array SpagoSimNode -> Array SpagoSimNode
+packageNodesToGridXY nodes = partitioned.no <> packagesWithGrid
   where
     -- we're going to set gridXY of packages and then make modules have gridXY of their containing package
-    packagesAndModules = partition isPackage nodes
-    packageCount = length packagesAndModules.yes
+    partitioned = partition isPackage nodes
+    packageCount = length partitioned.yes
     -- | we want a square (eventually rect) that is large enough to hold all the packages
     -- nearestSquare = pow (ceil $ sqrt packageCount) 2.0
     -- | columns would be sqrt of nearestSquare, so we simply don't square it
@@ -274,14 +274,20 @@ addGridPoints nodes = modulesWithGrid <> packagesWithGrid
     columns = floor $ ceil $ sqrt $ toNumber packageCount -- we don't actually ever need rows
     offset  = -((toNumber columns) / 2.0)
 
-    packagesWithGrid = foldlWithIndex (\i b a -> (setGridXY a i) : b) [] packagesAndModules.yes
+    packagesWithGrid = foldlWithIndex (\i b a -> (setGridXY a i) : b) [] partitioned.yes
       where setGridXY (D3SimNode p) i = D3SimNode p { gridXY = notNull $ scalePoint 200.0 200.0 $ offsetXY { x: offset, y: offset } $ numberToGridPoint columns i }
+
+moduleNodesToContainerXY :: Array SpagoSimNode -> Array SpagoSimNode
+moduleNodesToContainerXY nodes = modulesWithGrid <> partitioned.yes
+  where
+    -- we're going to set gridXY of packages and then make modules have gridXY of their containing package
+    partitioned = partition isPackage nodes
 
     packagesIndexMap = 
       fromFoldable $
-      foldl (\b (D3SimNode a) -> (Tuple a.id a.gridXY) : b) [] packagesWithGrid
+      foldl (\b (D3SimNode a) -> (Tuple a.id a.gridXY) : b) [] partitioned.yes
 
-    modulesWithGrid = map setModuleGridXY packagesAndModules.no
+    modulesWithGrid = map setModuleGridXY partitioned.no
 
     setModuleGridXY (D3SimNode m) = 
       case lookup m.containerID packagesIndexMap of

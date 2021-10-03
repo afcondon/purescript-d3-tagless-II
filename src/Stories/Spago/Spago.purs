@@ -1,5 +1,6 @@
 module Stories.Spago where
 
+import D3.Examples.Spago.Model
 import Prelude
 
 import Affjax as AJAX
@@ -12,16 +13,15 @@ import D3.Examples.Spago.Draw (getVizEventFromClick)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Files (LinkType(..), NodeType(..), SpagoGraphLinkID, SpagoGraphLinkRecord, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, addGridPoints, allNodes, convertFilesToGraphModel, datum_, isModule, isPackage, isPackageOrVisibleModule, isUsedModule, link_)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (linksForceName)
 import D3.Selection (SelectionAttribute)
 import D3.Simulation.Types (SimVariable(..), _forceStatus, _forceStatuses, _onlyTheseForcesActive, initialSimulationState, toggleForceStatus)
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start, stop)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
-import Data.Array (filter, (:))
+import Data.Array (filter, foldl, (:))
 import Data.Either (hush)
-import Data.Lens (use, view, (%=))
+import Data.Lens (appendModifying, use, view, (%=), (.=), (<>=))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Debug (trace)
@@ -36,7 +36,7 @@ import Halogen.Subscription as HS
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..), VizEvent(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
-import Stories.Spago.State (MiseEnScene, State, _callback, _chooseNodes, _cssClass, _enterselections, _links, _linksActive, _linksShown, _linksWithForce, _model, _modelLinks, _modelNodes, _nodes, _sceneAttributes, _sceneForces, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, defaultSceneConfig)
+import Stories.Spago.State (MiseEnScene, State, _callback, _chooseNodes, _cssClass, _enterselections, _links, _linksActive, _linksShown, _linksWithForce, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _sceneForces, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -54,7 +54,7 @@ component = H.mkComponent
     { model: Nothing
     , staging: { selections: { nodes: Nothing, links: Nothing }, linksWithForce: const true, rawdata: { nodes: [], links: [] } }
     , simulation: initialSimulationState forceLibrary
-    , scene: defaultSceneConfig
+    , scene: initialScene
     }
 
 simulationEvent :: Listener Action -> SelectionAttribute
@@ -80,14 +80,14 @@ handleAction = case _ of
     -- now hook up this emitter so that Halogen Actions will be triggered by notifications from that emitter
     void $ H.subscribe emitter
 
-    _callback %= const (simulationEvent listener)
+    _callback .= (simulationEvent listener)
     pure unit
 
   Finalize -> pure unit
 
   -- here's where we convert low level D3 Events from the visualization into the appropriate Halogen Action
-  -- this keeps the low level code concerned only with the syntax of the event, while the app (Halogen) will
-  -- deal with the semantics
+  -- this keeps the low level code concerned only with the DOM syntax of the event, while the app (Halogen) will
+  -- deal with the app-level semantics
   EventFromVizualization ve -> do
     case ve of
       NodeClick (IsPackage _) id -> handleAction $ ToggleChildrenOfNode id
@@ -95,44 +95,45 @@ handleAction = case _ of
   
   -- REVIEW this isn't a good way to do this, needs list of open nodes or something
   ToggleChildrenOfNode id -> runWithD3_Simulation do -- just a copy of PackageGrid right now, need to refactor so that it's all parameterized
-    _chooseNodes %= const (isPackageOrVisibleModule id)
+    _chooseNodes .= (isPackageOrVisibleModule id)
     runSimulation
+
   UnToggleChildrenOfNode _ -> runWithD3_Simulation do 
-    _chooseNodes %= const isPackage 
+    _chooseNodes .= isPackage 
     runSimulation
 
   SpotlightNode _ -> runWithD3_Simulation stop
 
   Scene PackageGrid -> do
-    _chooseNodes     %= const allNodes
-    _linksShown      %= const isM2P_Link
-    _linksActive     %= (const $ const true)
-    _sceneForces     %= const [ "packageGrid", "clusterx", "clustery", "collide2" ]
-    _cssClass        %= const "cluster"
-    _sceneAttributes %= const clusterSceneAttributes
-    _stagingNodes    %= addGridPoints -- additional setup of the selected data
+    _chooseNodes     .= allNodes
+    _linksShown      .= isM2P_Link
+    _linksActive     .= const true
+    _sceneForces     .= [ "packageGrid", "clusterx", "clustery", "collide2" ]
+    _cssClass        .= "cluster"
+    _sceneAttributes .= clusterSceneAttributes
+    _nodeInitializerFunctions .= [ packageNodesToGridXY, moduleNodesToContainerXY ]
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     runSimulation
 
   Scene PackageGraph -> do
     -- 1. set up the scene
-    _chooseNodes     %= const isPackage
-    _linksShown      %= const isP2P_Link
-    _linksActive     %= const (sourcePackageIs "my-project")
-    _sceneForces     %= const ["centerNamedNode", "center", "collide2", "charge2", "packageOrbit"]
-    _cssClass        %= const "graph"
-    _sceneAttributes %= const graphSceneAttributes
+    _chooseNodes     .= isPackage
+    _linksShown      .= isP2P_Link
+    _linksActive     .= (sourcePackageIs "my-project")
+    _sceneForces     .= ["centerNamedNode", "center", "collide2", "charge2", "packageOrbit"]
+    _cssClass        .= "graph"
+    _sceneAttributes .= graphSceneAttributes
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection"
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
     runSimulation
 
   Scene (ModuleTree _) -> do
-    _chooseNodes     %= const isUsedModule
-    _linksShown      %= const isM2M_Tree_Link
-    _linksActive     %= (const $ const true)
-    _sceneForces     %= const [ "treeNodesX", "treeNodesY", "center", "charge1", "collide2", "unusedOrbit" ]
-    _cssClass        %= const "tree"
-    _sceneAttributes %= const treeSceneAttributes
+    _chooseNodes     .= isUsedModule
+    _linksShown      .= isM2M_Tree_Link
+    _linksActive     .= const true
+    _sceneForces     .= [ "treeNodesX", "treeNodesY", "center", "charge1", "collide2", "unusedOrbit" ]
+    _cssClass        .= "tree"
+    _sceneAttributes .= treeSceneAttributes
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     runSimulation 
     
@@ -141,15 +142,15 @@ handleAction = case _ of
     runSimulation -- maybe also setConfigVariable $ Alpha 0.7
 
   Filter (LinkShowFilter filterFn) -> do
-    _linksShown %= const filterFn
+    _linksShown .= filterFn
     runSimulation -- maybe also setConfigVariable $ Alpha 0.7
 
   Filter (LinkForceFilter filterFn) -> do
-    _linksActive %= const filterFn
+    _linksActive .= filterFn
     runSimulation -- maybe also setConfigVariable $ Alpha 0.7
 
   Filter (NodeFilter filterFn) -> do
-    _chooseNodes %= const filterFn
+    _chooseNodes .= filterFn
     runSimulation -- maybe also setConfigVariable $ Alpha 0.7
 
   ChangeStyling style -> do
@@ -180,13 +181,15 @@ stageDataFromModel = do
   linksShown  <- use _linksShown
   linksActive <- use _linksActive
   chooseNodes <- use _chooseNodes
-  _stagingLinks      %= const (filter linksShown $ view _modelLinks state)
-  _stagingLinkFilter %= const linksActive
-  _stagingNodes      %= const (filter chooseNodes $ view _modelNodes state)
-  -- _stagingNodes   %= addGridPoints -- do this instead in Action between configure and run
-  -- this next line changes the simulation, shouldnt be done here
-  -- FIXME this is where the grid point can be set, once we know how many packages we have
+  nodeInitializerFunctions <- use _nodeInitializerFunctions
 
+  _stagingLinks      .= (filter linksShown $ view _modelLinks state)
+  _stagingLinkFilter .= linksActive
+  let rawnodes = filter chooseNodes $ view _modelNodes state
+      initializedNodes = foldl (\b a -> a b) rawnodes nodeInitializerFunctions
+  
+  _stagingNodes      .= initializedNodes
+  
 -- ======================================================================================================================
 -- | run the visualization "script" with the "scene" set-up as configured
 -- ======================================================================================================================
@@ -209,6 +212,7 @@ runSimulation = do
     setConfigVariable $ Alpha 1.0
 
 sourcePackageIs name link = (link_.source link).name == name -- TODO move to Model
+
 -- ======================================================================================================================
 -- functions to read the data from files and build the model (only lives here to prevent cycles)
 -- readModelData will try to build a model from files and to derive a dependency tree from Main
