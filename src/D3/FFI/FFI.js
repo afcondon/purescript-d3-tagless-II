@@ -161,7 +161,6 @@ exports.readSimulationVariables = simulation => {
 
 exports.d3PreserveSimulationPositions_ = node => nodes => keyFn => {
   const old = new Map(node.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
-//  TODO we could set the (x,y) on the new nodes here, either to NaN, gridXY or treeXY
 // since this is completely generic code, we'll need to figure a way to get that information down here into the FFI
   let updatedNodeData = nodes.map(d => Object.assign(old.get(keyFn(d)) || d, {} ));
   return updatedNodeData
@@ -352,11 +351,6 @@ exports.pinTreeNode_ = node => { node.fx = node.treeX; node.fy = node.treeY; ret
 exports.setInSimNodeFlag_ = node => { node.inSim = true; return node } 
 exports.unsetInSimNodeFlag_ = node => { node.inSim = false; return node  }
 exports.unpinNode_ = node => { node.fx = null; node.fy = null; return node }
-exports.setPositionToNaN_ = nodes => {
-  for (let index = 0; index < nodes.length; index++) {
-    nodes[index].x = NaN;
-  }
-}
 // *****************************************************************************************************************
 // ************************** functions from d3js Hierarchy module         *****************************************
 // *****************************************************************************************************************

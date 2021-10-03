@@ -157,7 +157,6 @@ foreign import pinNode_              :: forall d. Number -> Number -> D3_Simulat
 foreign import pinNamedNode_         :: forall d. String -> Number -> Number -> D3_SimulationNode d -> D3_SimulationNode d
 foreign import pinTreeNode_          :: forall d. D3_SimulationNode d -> D3_SimulationNode d -- modifies fx/fy
 foreign import unpinNode_            :: forall d. D3_SimulationNode d -> D3_SimulationNode d -- seet fx/fy to null
-foreign import setPositionToNaN_     :: Array Datum_ -> Unit
 
 -- NB mutating function
 -- pinNode :: forall d. D3_SimulationNode d -> PointXY -> D3_SimulationNode d

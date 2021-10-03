@@ -64,7 +64,6 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   node                  <- openSelection nodesGroup (show Group) -- FIXME this call and updateJoin and append all have to match FIX -- can we use (show Group)
   link                  <- openSelection linksGroup (show Line)  -- FIXME this call and updateJoin and append all have to match FIX
   -- this will change all the object refs so a defensive copy is needed if join is to work
-  -- TODO we'd really like to set entering nodesXY to one of [ (NaN,NaN), gridXY, treeXY ] here while leaving update nodes as they were
   mergedNodeData        <- carryOverSimStateN node staging.rawdata keyIsID_ 
   mergedLinkData        <- carryOverSimStateL link staging.rawdata keyIsID_ 
   swizzledLinks         <- swizzleLinks mergedLinkData mergedNodeData keyIsID_ -- the key function here is for the SOURCE and TARGET, not the link itself

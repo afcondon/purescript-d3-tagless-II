@@ -123,6 +123,7 @@ handleAction = case _ of
     _sceneForces     .= ["centerNamedNode", "center", "collide2", "charge2", "packageOrbit"]
     _cssClass        .= "graph"
     _sceneAttributes .= graphSceneAttributes
+    _nodeInitializerFunctions .= [ packagesNodesToPhyllotaxis ]
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection"
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
     runSimulation
@@ -131,9 +132,11 @@ handleAction = case _ of
     _chooseNodes     .= isUsedModule
     _linksShown      .= isM2M_Tree_Link
     _linksActive     .= const true
-    _sceneForces     .= [ "treeNodesX", "treeNodesY", "center", "charge1", "collide2", "unusedOrbit" ]
+    -- _sceneForces     .= [ "treeNodesX", "treeNodesY", "center", "charge1", "collide2", "unusedOrbit" ]
+    _sceneForces     .= [ "center", "charge1", "collide2", "unusedOrbit" ]
     _cssClass        .= "tree"
     _sceneAttributes .= treeSceneAttributes
+    _nodeInitializerFunctions .= [ treeNodesToTreeXY ]
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     runSimulation 
     

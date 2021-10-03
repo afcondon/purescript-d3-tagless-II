@@ -2,6 +2,7 @@ module D3.Examples.Spago.Model where
 
 import Prelude
 
+import D3.Attributes.Instances (Label)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, PointXY)
 import D3.Examples.Spago.Files (LinkType(..), NodeType(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
@@ -18,8 +19,10 @@ import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (Nullable, notNull, toMaybe)
 import Data.Nullable (Nullable, null) as N
+import Data.Number (nan)
 import Data.Set as S
 import Data.Tuple (Tuple(..))
+import Debug (spy)
 import Math (ceil, pi, sqrt, (%))
 import Math as Math
 import Type.Row (type (+))
@@ -291,10 +294,30 @@ moduleNodesToContainerXY nodes = modulesWithGrid <> partitioned.yes
 
     setModuleGridXY (D3SimNode m) = 
       case lookup m.containerID packagesIndexMap of
-        Nothing -> D3SimNode m -- shouldn't be possible, but a noop is fine if not found
+        Nothing -> spy "container gridXY not found" $ D3SimNode m -- shouldn't be possible, but a noop is fine if not found
         Just gridXY -> D3SimNode m { gridXY = gridXY }
 
+packagesNodesToPhyllotaxis :: Array SpagoSimNode -> Array SpagoSimNode
+packagesNodesToPhyllotaxis nodes = partitioned.no <> (setForPhyllotaxis <$> partitioned.yes)
+  where
+    partitioned = partition isPackage nodes
+    setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode
+    setForPhyllotaxis (D3SimNode d) = D3SimNode $ d { x = nan }
 
+treeNodesToTreeXY :: Array SpagoSimNode -> Array SpagoSimNode
+treeNodesToTreeXY nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes)
+  where
+    partitioned = partition isUsedModule nodes
+    setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
+    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { fx = notNull treeXY.x, fy = notNull treeXY.y }
+      where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
+
+centerNamedNode :: Label -> Array SpagoSimNode -> Array SpagoSimNode
+centerNamedNode label nodes = fixNamedNode <$> nodes
+  where
+    fixNamedNode (D3SimNode d) = if d.name == label 
+                                 then D3SimNode d { fx = notNull 0.0, fy = notNull 0.0 }
+                                 else D3SimNode d
 
 scalePoint :: Number -> Number -> PointXY -> PointXY
 scalePoint xFactor yFactor xy = { x: xy.x * xFactor, y: xy.y * yFactor }

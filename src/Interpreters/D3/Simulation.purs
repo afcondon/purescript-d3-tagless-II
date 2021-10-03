@@ -98,8 +98,6 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   getNodes           = simulationGetNodes
   getLinks           = simulationGetLinks 
 
--- uniformlyDistribute nodes = pure $ setPositionToNaN_ nodes
-
 -- management of tick functions, what to do with the selection on each step of simulation
     -- TODO this would be the more efficient but less attractive route to defining a Tick function
   addTickFunction _ (StepTransformFFI _ _) = do

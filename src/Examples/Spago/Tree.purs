@@ -114,9 +114,6 @@ setNodeXY_ForHorizontalTree nodes treeDerivedDataMap = do
             else (D3SimNode node) `setTreeXYExceptLeaves`    { x, y, depth: p.depth, isLeaf: p.isLeaf } -- only pin parents
   updateXY <$> nodes
 
-setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode
-setForPhyllotaxis (D3SimNode d) = D3SimNode $ d { x = nan }
-
 -- | having calculated tree from graph at origin Main, extract the information that we need in visualisation
 getTreeDerivedData :: SpagoTreeNode -> Map NodeID TreeFields
 -- TODO coerce here is because the transformation done by hierarchyFromJSON_ is not yet modelled in the type system
