@@ -78,6 +78,9 @@ fontFamily = AttrT <<< AttributeSetter "font-family" <<< toAttr
 textAnchor :: ∀ a. ToAttr String a => a -> SelectionAttribute
 textAnchor = AttrT <<< AttributeSetter "text-anchor" <<< toAttr
 
+rotate :: ∀ a. ToAttr String a => a -> SelectionAttribute
+rotate = AttrT <<< AttributeSetter "rotate" <<< toAttr
+
 radius :: ∀ a. ToAttr Number a => a -> SelectionAttribute
 radius = AttrT <<< AttributeSetter "r" <<< toAttr
 

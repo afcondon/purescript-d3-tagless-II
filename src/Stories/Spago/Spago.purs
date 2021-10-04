@@ -12,12 +12,13 @@ import D3.Examples.Spago.Draw (getVizEventFromClick)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Files (NodeType(..), isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Model (SpagoModel, allNodes, convertFilesToGraphModel, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, link_, moduleNodesToContainerXY, modulesNodesToPhyllotaxis, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_H, treeNodesToTreeXY_V, unpinAllNodes)
+import D3.Examples.Spago.Model (SpagoModel, allNodes, convertFilesToGraphModel, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, moduleNodesToContainerXY, modulesNodesToPhyllotaxis, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_H, treeNodesToTreeXY_V, unpinAllNodes)
 import D3.Examples.Spago.Tree (treeReduction)
+import D3.FFI (linksForceName)
 import D3.Selection (SelectionAttribute)
 import D3.Simulation.Types (SimVariable(..), _forceStatus, _forceStatuses, _onlyTheseForcesActive, initialSimulationState, toggleForceStatus)
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start, stop)
-import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
+import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation, run_D3M_Simulation)
 import Data.Array (filter, foldl, (:))
 import Data.Either (hush)
 import Data.Lens (use, view, (%=), (.=))
@@ -93,11 +94,13 @@ handleAction = case _ of
   -- REVIEW this isn't a good way to do this, needs list of open nodes or something
   ToggleChildrenOfNode id -> do -- just a copy of PackageGrid right now, need to refactor so that it's all parameterized
     _chooseNodes .= (isPackageOrVisibleModule id)
-    runSimulation
+    runWithD3_Simulation do
+      actualizeForces
 
   UnToggleChildrenOfNode _ -> do 
     _chooseNodes .= isPackage 
-    runSimulation
+    runWithD3_Simulation do
+      actualizeForces
 
   SpotlightNode _ -> runWithD3_Simulation stop
 
@@ -105,10 +108,11 @@ handleAction = case _ of
     _chooseNodes     .= allNodes
     _linksShown      .= isM2P_Link
     _linksActive     .= const true
-    _sceneForces     .= [ "packageGrid", "clusterx", "clustery", "collide2" ]
+    _sceneForces     .= [ "clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide2" ]
     _cssClass        .= "cluster"
     _sceneAttributes .= clusterSceneAttributes
-    _nodeInitializerFunctions .= [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
+    -- _nodeInitializerFunctions .= [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
+    _nodeInitializerFunctions .= [ packageNodesToGridXY, moduleNodesToContainerXY, unpinAllNodes ]
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     runSimulation
 
@@ -117,7 +121,7 @@ handleAction = case _ of
     _chooseNodes     .= isPackage
     _linksShown      .= isP2P_Link
     _linksActive     .= (sourcePackageIs "my-project")
-    _sceneForces     .= ["center", "collide2", "charge2", "packageOrbit"]
+    _sceneForces     .= ["center", "collide2", "charge2", "packageOrbit", linksForceName ]
     _cssClass        .= "graph"
     _sceneAttributes .= graphSceneAttributes
     _nodeInitializerFunctions .= [ unpinAllNodes, packagesNodesToPhyllotaxis, fixNamedNodeTo "my-project" { x: 0.0, y: 0.0 } ]
@@ -125,25 +129,38 @@ handleAction = case _ of
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
     runSimulation
 
-  Scene (ModuleTree treetype) -> do
+  Scene (ModuleTree Radial) -> do
     _chooseNodes     .= isUsedModule
     _linksShown      .= isM2M_Tree_Link
-    _linksActive     .= 
-      case treetype of 
-        Radial -> const true
-        _      -> const false    
-    _cssClass        .= "tree"
+    _linksActive     .= const true
+    _cssClass        .= "tree radial"
     _sceneAttributes .= treeSceneAttributes
-    _sceneForces     .= 
-      case treetype of
-        Horizontal -> [ "htreeNodesX", "htreeNodesY", "charge1", "collide2" ]
-        Vertical   -> [ "vtreeNodesX", "vtreeNodesY", "charge1", "collide2" ]
-        Radial     -> [ "center", "collide2", "charge2" ]
-    _nodeInitializerFunctions .=
-      case treetype of
-        Horizontal -> [ unpinAllNodes, treeNodesToTreeXY_H ]
-        Vertical   -> [ unpinAllNodes, treeNodesToTreeXY_V ]
-        Radial     -> [ unpinAllNodes, modulesNodesToPhyllotaxis, fixNamedNodeTo "Main" { x: 0.0, y: 0.0 } ]
+    _sceneForces     .= [ "center", "collide2", "charge2", linksForceName ]
+    _nodeInitializerFunctions .= [ unpinAllNodes, modulesNodesToPhyllotaxis, fixNamedNodeTo "Main" { x: 0.0, y: 0.0 } ]
+    -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
+    runSimulation 
+    
+  Scene (ModuleTree Horizontal) -> do
+    _chooseNodes     .= isUsedModule
+    _linksShown      .= isM2M_Tree_Link
+    _linksActive     .= const false    
+    _cssClass        .= "tree horizontal"
+    _sceneAttributes .= treeSceneAttributes
+    _sceneForces     .= [ "htreeNodesX", "htreeNodesY", "charge1", "collide2" ]
+    -- _nodeInitializerFunctions .= [ unpinAllNodes, treeNode÷sToTreeXY_H ]
+    _nodeInitializerFunctions .= [ unpinAllNodes ]
+    -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
+    runSimulation 
+    
+  Scene (ModuleTree Vertical) -> do
+    _chooseNodes     .= isUsedModule
+    _linksShown      .= isM2M_Tree_Link
+    _linksActive     .=  const false    
+    _cssClass        .= "tree vertical" -- we'll rotate the labels on this one
+    _sceneAttributes .= treeSceneAttributes
+    _sceneForces     .= [ "vtreeNodesX", "vtreeNodesY", "charge1", "collide2" ]
+    -- _nodeInitializerFunctions .= [ unpinAllNodes, treeNodesToTreeXY_V ]
+    _nodeInitializerFunctions .= [ unpinAllNodes ]
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     runSimulation 
     
@@ -212,13 +229,13 @@ runSimulation = do
   staging         <- use _staging
   callback        <- use _callback
   sceneAttributes <- use _sceneAttributes
-  let attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles } -- FIXME we don't actually want to stick the default value on here, needs to be Maybe
   forces          <- use _sceneForces
+  let attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles } -- FIXME we don't actually want to stick the default value on here, needs to be Maybe
   runWithD3_Simulation do
     stop
     _forceStatuses %= _onlyTheseForcesActive forces
-    actualizeForces
     Graph.updateSimulation staging attributesWithCallback
+    actualizeForces
     setConfigVariable $ Alpha 1.0
     start
 

@@ -24,17 +24,20 @@ forceLibrary = initialize [
       , createForce "charge1"      (RegularForce ForceManyBody) allNodes [ F.strength (-30.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
       , createForce "charge2"      (RegularForce ForceManyBody) allNodes [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 400.0 ]
 
-      , createForce "clusterx"     (RegularForce ForceX)        modulesOnly [ F.strength 0.2, F.x datum_.gridPointX ]
-      , createForce "clustery"     (RegularForce ForceY)        modulesOnly [ F.strength 0.2, F.y datum_.gridPointY ]
+      , createForce "clusterx_M"     (RegularForce ForceX)        modulesOnly [ F.strength 0.2, F.x datum_.gridPointX ]
+      , createForce "clustery_M"     (RegularForce ForceY)        modulesOnly [ F.strength 0.2, F.y datum_.gridPointY ]
+
+      , createForce "clusterx_P"     (RegularForce ForceX)        packagesOnly [ F.strength 0.8, F.x datum_.gridPointX ]
+      , createForce "clustery_P"     (RegularForce ForceY)        packagesOnly [ F.strength 0.8, F.y datum_.gridPointY ]
 
       , createForce "htreeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
-          [ F.strength 0.2, F.x datum_.treePointX ] 
+          [ F.strength 0.4, F.x datum_.treePointX ] 
       , createForce "htreeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
-          [ F.strength 0.2, F.y datum_.treePointY ] 
+          [ F.strength 0.4, F.y datum_.treePointY ] 
       , createForce "vtreeNodesX"  (RegularForce ForceX)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
-          [ F.strength 0.2, F.x datum_.treePointY ] 
+          [ F.strength 0.4, F.x datum_.treePointY ] 
       , createForce "vtreeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
-          [ F.strength 0.2, F.y datum_.treePointX ] 
+          [ F.strength 0.4, F.y datum_.treePointX ] 
 
       , createForce "packageOrbit" (RegularForce ForceRadial)   packagesOnly 
                                    [ F.strength 0.7, F.x 0.0, F.y 0.0, F.radius 500.0 ]

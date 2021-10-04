@@ -76,3 +76,7 @@ div.svg-container.tree {
     }
   }
 }
+/* now some small overrides (more specificity) */
+div.svg-container.tree.vertical svg g.nodes text {
+  transform: rotate(45deg);
+}

@@ -5,9 +5,9 @@ import Prelude
 import D3.Attributes.Instances (Label)
 import D3.Attributes.Sugar (x)
 import D3.Data.Types (D3Selection_, Datum_)
-import D3.Examples.Spago.Draw.Attributes (SpagoSceneAttributes)
+import D3.Examples.Spago.Draw.Attributes (SpagoSceneAttributes, clusterSceneAttributes)
 import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData, SpagoGraphLinkRecord)
-import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode)
+import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
 import D3.FFI (SimulationVariables, readSimulationVariables)
 import D3.Node (D3LinkSwizzled, D3_SimulationNode, NodeID)
 import D3.Selection (SelectionAttribute)
@@ -54,12 +54,12 @@ type MiseEnScene = {
 }
 initialScene :: MiseEnScene
 initialScene = {
-    chooseNodes: const true -- chooses all nodes
-  , linksShown:  const true
-  , linksActive: const true
+    chooseNodes: isPackage -- chooses all nodes
+  , linksShown:  const false
+  , linksActive: const false
   , forces: []
   , cssClass: ""
-  , attributes: { circles: [], labels: [] }
+  , attributes: clusterSceneAttributes
   , callback: x 0.0 -- possibly want to store the listener here rather than the callback?
   , nodeInitializerFunctions: []
 }

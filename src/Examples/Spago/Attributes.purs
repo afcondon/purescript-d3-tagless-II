@@ -1,6 +1,6 @@
 module D3.Examples.Spago.Draw.Attributes where
 
-import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, opacity, radius, strokeColor, strokeWidth, text, textAnchor, transform', viewBox, width, x, y)
+import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, opacity, radius, rotate, strokeColor, strokeWidth, text, textAnchor, transform, transform', viewBox, width, x, y)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, MouseEvent(..))
 import D3.Examples.Spago.Model (datum_, tree_datum_)
@@ -74,14 +74,12 @@ graphSceneAttributes = {
           ] 
 }
 
--- treeSceneAttributes :: SelectionAttribute -> SpagoSceneAttributes
 treeSceneAttributes :: SpagoSceneAttributes
 treeSceneAttributes = {
     circles: [ radius datum_.radius
             , fill datum_.colorByDepth
             , strokeColor datum_.colorByGroup
             , strokeWidth 3.0
-            -- , callback
             ]
   , labels: [ classed "label"
             , x 4.0
