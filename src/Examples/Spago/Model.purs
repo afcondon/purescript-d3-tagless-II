@@ -10,7 +10,7 @@ import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode
 import D3.FFI (getIndexFromDatum_, hasChildren_, setInSimNodeFlag, unpinNode_)
 import D3.Node (D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_)
-import Data.Array (foldl, length, partition, (:))
+import Data.Array (foldl, length, mapWithIndex, partition, (:))
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.Graph (Graph, fromMap)
 import Data.Int (floor, toNumber)
@@ -23,7 +23,7 @@ import Data.Number (nan)
 import Data.Set as S
 import Data.Tuple (Tuple(..))
 import Debug (spy)
-import Math (ceil, pi, sqrt, (%))
+import Math (ceil, cos, pi, sin, sqrt, (%))
 import Math as Math
 import Type.Row (type (+))
 import Web.Event.Internal.Types (Event)
@@ -320,12 +320,20 @@ packagesNodesToPhyllotaxis = nodesToPhyllotaxis isPackage
 modulesNodesToPhyllotaxis :: Array SpagoSimNode -> Array SpagoSimNode
 modulesNodesToPhyllotaxis = nodesToPhyllotaxis isModule
 
+-- | layout nodes in "sunflower pattern", both pleasing to the eye and good as a starting position for sim
+-- | (no two nodes in same spot). It's impossible to do this using D3 in simulation update situation
 nodesToPhyllotaxis :: (SpagoSimNode -> Boolean) -> Array SpagoSimNode -> Array SpagoSimNode
-nodesToPhyllotaxis predicate nodes = partitioned.no <> (setForPhyllotaxis <$> partitioned.yes)
+nodesToPhyllotaxis predicate nodes = partitioned.no <> (setForPhyllotaxis `mapWithIndex` partitioned.yes)
   where
     partitioned = partition predicate nodes
-    setForPhyllotaxis :: SpagoSimNode -> SpagoSimNode
-    setForPhyllotaxis (D3SimNode d) = D3SimNode $ d { x = nan }
+    initialRadius = 10.0
+    initialAngle = pi * (3.0 - sqrt 5.0)
+    setForPhyllotaxis :: Int -> SpagoSimNode -> SpagoSimNode
+    setForPhyllotaxis index (D3SimNode d) = D3SimNode $ d { x = (radius * cos angle), y = (radius * sin angle) }
+      where
+        i = toNumber index
+        radius = initialRadius * sqrt (0.5 + i)
+        angle  = i * initialAngle
 
 treeNodesToTreeXY_H :: Array SpagoSimNode -> Array SpagoSimNode
 treeNodesToTreeXY_H nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes)
