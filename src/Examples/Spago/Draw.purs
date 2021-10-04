@@ -60,7 +60,6 @@ updateSimulation :: forall m d r id.
   SpagoSceneAttributes -> 
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
-  stop
   node                  <- openSelection nodesGroup (show Group) -- FIXME this call and updateJoin and append all have to match FIX -- can we use (show Group)
   link                  <- openSelection linksGroup (show Line)  -- FIXME this call and updateJoin and append all have to match FIX
   -- this will change all the object refs so a defensive copy is needed if join is to work
@@ -109,7 +108,6 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
     Step mergedNodeSelection [ transform' datum_.translateNode ]
   addTickFunction "links" $
     Step mergedlinksShown [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
-  start
 
 -- alternate path, should never be used, if we can't match the selections
 updateSimulation _ _ = pure unit -- something's gone badly wrong, one or both open selections (for updates) are missing

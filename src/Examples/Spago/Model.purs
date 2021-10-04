@@ -333,19 +333,27 @@ treeNodesToTreeXY_H nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
     setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { fx = notNull treeXY.x, fy = notNull treeXY.y }
       where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
 
+-- same as horizontal tree but reverses {x,y} and {fx,fy}
 treeNodesToTreeXY_V :: Array SpagoSimNode -> Array SpagoSimNode
 treeNodesToTreeXY_V nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes)
   where
     partitioned = partition isUsedModule nodes
     setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
-    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { fx = notNull treeXY.x, fy = notNull treeXY.y }
+    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { fx = notNull treeXY.y, fy = notNull treeXY.x }
       where treeXY = fromMaybe { x: d.y, y: d.x } $ toMaybe d.treeXY
 
-fixNamedNode :: Label -> PointXY -> Array SpagoSimNode -> Array SpagoSimNode
-fixNamedNode label point nodes = fixNamedNode' <$> nodes
+fixNamedNodeTo :: Label -> PointXY -> Array SpagoSimNode -> Array SpagoSimNode
+fixNamedNodeTo label point nodes = fixNamedNode' <$> nodes
   where
     fixNamedNode' (D3SimNode d) = if d.name == label 
-                                  then D3SimNode d { fx = notNull point.x, fy = notNull point.y }
+                                  then spy "fixing a node to: " $ D3SimNode d { fx = notNull point.x, fy = notNull point.y }
+                                  else D3SimNode d
+
+fixNamedNode :: Label -> Array SpagoSimNode -> Array SpagoSimNode
+fixNamedNode label nodes = fixNamedNode' <$> nodes
+  where
+    fixNamedNode' (D3SimNode d) = if d.name == label 
+                                  then spy "fixing a node: " $ D3SimNode d { fx = notNull d.x, fy = notNull d.y }
                                   else D3SimNode d
 
 scalePoint :: Number -> Number -> PointXY -> PointXY

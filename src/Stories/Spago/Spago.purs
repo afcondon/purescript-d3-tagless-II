@@ -124,7 +124,7 @@ handleAction = case _ of
     _sceneForces     .= ["center", "collide2", "charge2", "packageOrbit"]
     _cssClass        .= "graph"
     _sceneAttributes .= graphSceneAttributes
-    _nodeInitializerFunctions .= [ unpinAllNodes, packagesNodesToPhyllotaxis, fixNamedNode "my-project" { x: -500.0, y: 0.0 } ]
+    _nodeInitializerFunctions .= [ unpinAllNodes, packagesNodesToPhyllotaxis, fixNamedNodeTo "my-project" { x: 0.0, y: 0.0 } ]
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection"
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
     runSimulation
@@ -142,9 +142,9 @@ handleAction = case _ of
         Radial     -> [ "charge2", "collide1", "charge2" ]
     _nodeInitializerFunctions .=
       case treetype of
-        Horizontal -> [ unpinAllNodes, treeNodesToTreeXY_H, fixNamedNode "Main" { x: -500.0, y: 0.0 } ]
-        Vertical   -> [ unpinAllNodes, treeNodesToTreeXY_V, fixNamedNode "Main" { x: 0.0, y: -500.0 } ]
-        Radial     -> [ unpinAllNodes, modulesNodesToPhyllotaxis, fixNamedNode "Main" { x: 0.0, y: 0.0 } ]
+        Horizontal -> [ unpinAllNodes, treeNodesToTreeXY_H ] --, fixNamedNode "Main" ]
+        Vertical   -> [ unpinAllNodes, treeNodesToTreeXY_V ] -- , fixNamedNode "Main" ]
+        Radial     -> [ unpinAllNodes, modulesNodesToPhyllotaxis, fixNamedNodeTo "Main" { x: 0.0, y: 0.0 } ]
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     runSimulation 
     
@@ -217,10 +217,12 @@ runSimulation = do
   linksActive     <- use _linksActive
   forces          <- use _sceneForces
   runWithD3_Simulation do
+    stop
     _forceStatuses %= _onlyTheseForcesActive forces
     actualizeForces
     Graph.updateSimulation staging sceneAttributes
     setConfigVariable $ Alpha 1.0
+    start
 
 sourcePackageIs name link = (link_.source link).name == name -- TODO move to Model
 

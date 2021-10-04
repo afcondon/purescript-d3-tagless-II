@@ -163,12 +163,37 @@ unpin = d => {
   d.fy = null
   return d;
 }
-exports.d3PreserveSimulationPositions_ = node => nodes => keyFn => {
-  const old = new Map(node.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
-  const old = new Map(node.data().map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
-// since this is completely generic code, we'll need to figure a way to get that information down here into the FFI
-// REVIEW we need to copy the fx/fy (at least) from the updating data (also what if we wanted r, say, or x, to change???)
-  let updatedNodeData = nodes.map(d => Object.assign(old.get(keyFn(d)) || unpin(d), {} ));
+// we create an object that contains only those fields that we want to override what was in the existing selection's data
+// concretely, if we want update to change fx/fy status then we put that data in here otherwise it will be unchanged
+// no matter what the incoming data object has for fx/fy
+getBaseForAssign = (newNodeMap, key) => {
+  let newnode = newNodeMap.get(key)
+  if (newnode) {
+    var updatedCount;
+    if (typeof newnode.updatedCount === 'undefined') {
+      updatedCount = 0;
+    } else {
+      updatedCount = newnode.updatedCount + 1;
+    }
+    return { fx: newnode.fx, fy: newnode.fy, updatedCount: updatedCount }
+  } else {
+    return d
+  }
+}
+assignFromMap = d => {
+  Object.assign(oldNodeMap.get(keyFn(d)) || d, {})
+}
+
+exports.d3PreserveSimulationPositions_ = selection => nodedata => keyFn => {
+  console.log(`d3PreserveSimulationPositions_ there are ${nodedata.length} new nodes`);
+  // create a map from our chosen id to the OLD obj reference, got from the data thats attached to selection
+  const oldNodeMap = new Map(selection.data().map(d => [keyFn(d), d])); 
+  // create a map from our chosen id to the NEW / incoming obj reference
+  const newNodeMap = new Map(nodedata.map(d => [keyFn(d), d])); 
+// we need to copy the fx/fy (at least) from the updating data 
+// REVIEW (also what if we wanted r, say, or x, to change???)
+  // let updatedNodeData = nodedata.map(d => Object.assign(oldNodeMap.get(keyFn(d)) || d, {} ));
+  let updatedNodeData = nodedata.map(d => Object.assign(oldNodeMap.get(keyFn(d)) || d, {} ));
   return updatedNodeData
 }
 exports.d3PreserveLinkReferences_ = link => links => {
