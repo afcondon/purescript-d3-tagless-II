@@ -180,9 +180,6 @@ getBaseForAssign = (newNodeMap, key) => {
     return d
   }
 }
-assignFromMap = d => {
-  Object.assign(oldNodeMap.get(keyFn(d)) || d, {})
-}
 
 exports.d3PreserveSimulationPositions_ = selection => nodedata => keyFn => {
   console.log(`d3PreserveSimulationPositions_ there are ${nodedata.length} new nodes`);
@@ -190,10 +187,18 @@ exports.d3PreserveSimulationPositions_ = selection => nodedata => keyFn => {
   const oldNodeMap = new Map(selection.data().map(d => [keyFn(d), d])); 
   // create a map from our chosen id to the NEW / incoming obj reference
   const newNodeMap = new Map(nodedata.map(d => [keyFn(d), d])); 
-// we need to copy the fx/fy (at least) from the updating data 
-// REVIEW (also what if we wanted r, say, or x, to change???)
-  // let updatedNodeData = nodedata.map(d => Object.assign(oldNodeMap.get(keyFn(d)) || d, {} ));
-  let updatedNodeData = nodedata.map(d => Object.assign(oldNodeMap.get(keyFn(d)) || d, {} ));
+  // we need to copy the fx/fy (at least) from the updating data 
+
+  // REVIEW (also what if we wanted r, say, or x, to change???)
+  let updatedNodeData = nodedata.map(d => {
+    let id = keyFn(d)
+    let newNode = newNodeMap.get(id)
+    let shell = {}
+    if (newNode) {
+      shell = { fx: newNode.fx, fy: newNode.fy }
+    }
+    return Object.assign(oldNodeMap.get(id) || d, shell)
+  });
   return updatedNodeData
 }
 exports.d3PreserveLinkReferences_ = link => links => {

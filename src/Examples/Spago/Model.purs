@@ -222,6 +222,8 @@ isUsedModule (D3SimNode d) =
     (IsModule _) -> if d.connected 
                     then true
                     else false
+sourcePackageIs :: String -> Datum_ -> Boolean
+sourcePackageIs name link = (link_.source link).name == name -- TODO move to Model
               
 upgradeSpagoNodeData :: M.Map NodeID (Array NodeID) -> SpagoNodeData -> SpagoSimNode
 upgradeSpagoNodeData sourcesMap node = D3SimNode { 

@@ -1,43 +1,39 @@
 module Stories.Spago where
 
-import D3.Examples.Spago.Model
 import Prelude
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState, get, modify_)
-import D3.Attributes.Instances (Label)
-import D3.Attributes.Sugar (onMouseEvent, onMouseEventEffectful, x)
+import Control.Monad.State (class MonadState, get)
+import D3.Attributes.Sugar (onMouseEventEffectful)
 import D3.Data.Tree (TreeLayout(..))
-import D3.Data.Types (Datum_, MouseEvent(..))
+import D3.Data.Types (MouseEvent(..))
 import D3.Examples.Spago.Draw (getVizEventFromClick)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
-import D3.Examples.Spago.Files (LinkType(..), NodeType(..), SpagoGraphLinkID, SpagoGraphLinkRecord, isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
+import D3.Examples.Spago.Files (NodeType(..), isM2M_Tree_Link, isM2P_Link, isP2P_Link)
+import D3.Examples.Spago.Model (SpagoModel, allNodes, convertFilesToGraphModel, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, link_, moduleNodesToContainerXY, modulesNodesToPhyllotaxis, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_H, treeNodesToTreeXY_V, unpinAllNodes)
 import D3.Examples.Spago.Tree (treeReduction)
-import D3.FFI (linksForceName)
 import D3.Selection (SelectionAttribute)
 import D3.Simulation.Types (SimVariable(..), _forceStatus, _forceStatuses, _onlyTheseForcesActive, initialSimulationState, toggleForceStatus)
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start, stop)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
 import Data.Array (filter, foldl, (:))
 import Data.Either (hush)
-import Data.Lens (appendModifying, use, view, (%=), (.=), (<>=))
+import Data.Lens (use, view, (%=), (.=))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Debug (trace)
 import Effect.Aff (Aff)
-import Effect.Aff.Class (class MonadAff, liftAff)
+import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect)
-import Effect.Class.Console (log)
-import Halogen (HalogenM, liftEffect, raise)
+import Halogen (HalogenM, liftEffect)
 import Halogen as H
 import Halogen.Subscription (Listener)
 import Halogen.Subscription as HS
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..), VizEvent(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
-import Stories.Spago.State (MiseEnScene, State, _callback, _chooseNodes, _cssClass, _enterselections, _links, _linksActive, _linksShown, _linksWithForce, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _sceneForces, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
+import Stories.Spago.State (State, _callback, _chooseNodes, _cssClass, _enterselections, _links, _linksActive, _linksShown, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _sceneForces, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -95,11 +91,11 @@ handleAction = case _ of
       NodeClick (IsModule _)  id -> handleAction $ SpotlightNode id
   
   -- REVIEW this isn't a good way to do this, needs list of open nodes or something
-  ToggleChildrenOfNode id -> runWithD3_Simulation do -- just a copy of PackageGrid right now, need to refactor so that it's all parameterized
+  ToggleChildrenOfNode id -> do -- just a copy of PackageGrid right now, need to refactor so that it's all parameterized
     _chooseNodes .= (isPackageOrVisibleModule id)
     runSimulation
 
-  UnToggleChildrenOfNode _ -> runWithD3_Simulation do 
+  UnToggleChildrenOfNode _ -> do 
     _chooseNodes .= isPackage 
     runSimulation
 
@@ -132,18 +128,21 @@ handleAction = case _ of
   Scene (ModuleTree treetype) -> do
     _chooseNodes     .= isUsedModule
     _linksShown      .= isM2M_Tree_Link
-    _linksActive     .= const true
+    _linksActive     .= 
+      case treetype of 
+        Radial -> const true
+        _      -> const false    
     _cssClass        .= "tree"
     _sceneAttributes .= treeSceneAttributes
     _sceneForces     .= 
       case treetype of
         Horizontal -> [ "htreeNodesX", "htreeNodesY", "charge1", "collide2" ]
         Vertical   -> [ "vtreeNodesX", "vtreeNodesY", "charge1", "collide2" ]
-        Radial     -> [ "charge2", "collide1", "charge2" ]
+        Radial     -> [ "center", "collide2", "charge2" ]
     _nodeInitializerFunctions .=
       case treetype of
-        Horizontal -> [ unpinAllNodes, treeNodesToTreeXY_H ] --, fixNamedNode "Main" ]
-        Vertical   -> [ unpinAllNodes, treeNodesToTreeXY_V ] -- , fixNamedNode "Main" ]
+        Horizontal -> [ unpinAllNodes, treeNodesToTreeXY_H ]
+        Vertical   -> [ unpinAllNodes, treeNodesToTreeXY_V ]
         Radial     -> [ unpinAllNodes, modulesNodesToPhyllotaxis, fixNamedNodeTo "Main" { x: 0.0, y: 0.0 } ]
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     runSimulation 
@@ -213,18 +212,16 @@ runSimulation = do
   staging         <- use _staging
   callback        <- use _callback
   sceneAttributes <- use _sceneAttributes
-  let attributes = sceneAttributes { circles = callback : sceneAttributes.circles } -- FIXME we don't actually want to stick the default value on here, needs to be Maybe
-  linksActive     <- use _linksActive
+  let attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles } -- FIXME we don't actually want to stick the default value on here, needs to be Maybe
   forces          <- use _sceneForces
   runWithD3_Simulation do
     stop
     _forceStatuses %= _onlyTheseForcesActive forces
     actualizeForces
-    Graph.updateSimulation staging sceneAttributes
+    Graph.updateSimulation staging attributesWithCallback
     setConfigVariable $ Alpha 1.0
     start
 
-sourcePackageIs name link = (link_.source link).name == name -- TODO move to Model
 
 -- ======================================================================================================================
 -- functions to read the data from files and build the model (only lives here to prevent cycles)
