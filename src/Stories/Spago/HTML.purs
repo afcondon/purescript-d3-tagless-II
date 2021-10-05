@@ -26,7 +26,7 @@ import Ocelot.Block.Format as Format
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
-import Stories.Spago.State (State, _cssClass, _stagingLinks, _stagingNodes, getSimulationVariables)
+import Stories.Spago.State (State, _cssClass, _stagingLinkFilter, _stagingLinks, _stagingNodes, getSimulationVariables)
 import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
 

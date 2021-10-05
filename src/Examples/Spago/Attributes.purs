@@ -52,8 +52,8 @@ clusterSceneAttributes = {
             , x 0.2
             , y datum_.positionLabel
             , textAnchor "middle"
-            -- , text datum_.name
-            , text datum_.nameAndID
+            , text datum_.name
+            -- , text datum_.nameAndID
           ] 
 }
 

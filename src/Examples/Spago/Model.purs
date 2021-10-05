@@ -312,7 +312,10 @@ moduleNodesToContainerXY nodes = modulesWithGrid <> partitioned.yes
     setModuleGridXY (D3SimNode m) = 
       case lookup m.containerID packagesIndexMap of
         Nothing -> spy "container gridXY not found" $ D3SimNode m -- shouldn't be possible, but a noop is fine if not found
-        Just gridXY -> D3SimNode m { gridXY = gridXY }
+        Just gridXY -> do
+          case toMaybe gridXY of
+            Nothing ->  D3SimNode m { x = 0.0, y = 0.0, gridXY = gridXY }
+            Just xy ->  D3SimNode m { x = xy.x, y = xy.y, gridXY = gridXY }
 
 packagesNodesToPhyllotaxis :: Array SpagoSimNode -> Array SpagoSimNode
 packagesNodesToPhyllotaxis = nodesToPhyllotaxis isPackage
@@ -326,14 +329,17 @@ nodesToPhyllotaxis :: (SpagoSimNode -> Boolean) -> Array SpagoSimNode -> Array S
 nodesToPhyllotaxis predicate nodes = partitioned.no <> (setForPhyllotaxis `mapWithIndex` partitioned.yes)
   where
     partitioned = partition predicate nodes
-    initialRadius = 10.0
-    initialAngle = pi * (3.0 - sqrt 5.0)
-    setForPhyllotaxis :: Int -> SpagoSimNode -> SpagoSimNode
-    setForPhyllotaxis index (D3SimNode d) = D3SimNode $ d { x = (radius * cos angle), y = (radius * sin angle) }
-      where
-        i = toNumber index
-        radius = initialRadius * sqrt (0.5 + i)
-        angle  = i * initialAngle
+
+initialRadius = 10.0
+initialAngle = pi * (3.0 - sqrt 5.0)
+
+-- TODO available to modules and packages as POC, but should be generalized to all D3SimNodes and moved to library
+setForPhyllotaxis :: Int -> SpagoSimNode -> SpagoSimNode
+setForPhyllotaxis index (D3SimNode d) = D3SimNode $ d { x = (radius * cos angle), y = (radius * sin angle) }
+  where
+    i = toNumber index
+    radius = initialRadius * sqrt (0.5 + i)
+    angle  = i * initialAngle
 
 treeNodesToTreeXY_H :: Array SpagoSimNode -> Array SpagoSimNode
 treeNodesToTreeXY_H nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes)
