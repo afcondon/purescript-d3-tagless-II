@@ -14,7 +14,7 @@ import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Math (abs)
-import Prelude (class Bind, Unit, discard, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>))
+import Prelude 
 import Utility (getWindowWidthHeight)
 
 datum_ :: { 
@@ -25,11 +25,11 @@ datum_ :: {
 , y          :: Datum_ -> Number
 }
 datum_ = {
-    x     : \d -> (unboxD3TreeNode d).x
-  , y     : \d -> (unboxD3TreeNode d).y
+    x     : _.x <<< unboxD3TreeNode
+  , y     : _.y <<< unboxD3TreeNode
 -- now the fields which are in the original data object, embedded in this tree object
-  , symbol: \d -> (unboxD3TreeNode d).data.symbol
-  , param1: \d -> (unboxD3TreeNode d).data.param1
+  , symbol: _.data.symbol <<< unboxD3TreeNode
+  , param1: _.data.param1 <<< unboxD3TreeNode
   , positionXY: \d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <>")"
 }
 

@@ -7,58 +7,63 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (Datum_, Element(..), Selector)
 import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
 import D3.Examples.Tree.Model (FlareTreeNode)
-import D3.FFI (descendants_, hasChildren_, keyIsID_, links_)
+import D3.FFI (descendants_, getHierarchyChildren_, hasChildren_, keyIsID_, links_)
+import D3.Node (D3_TreeNode)
 import D3.Selection (SelectionAttribute)
 import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import D3Tagless.Capabilities as D3
+import Data.Array as A
 import Data.Nullable (Nullable)
 import Math (pi)
+import Unsafe.Coerce (unsafeCoerce)
 
-datum_ :: 
-  { depth       :: Datum_ -> Int
-  , hasChildren :: Datum_ -> Boolean
-  , height      :: Datum_ -> Int
-  , id          :: Datum_ -> Int
-  , name        :: Datum_ -> String
-  , textAnchor  :: TreeLayout -> Datum_ -> String
-  , textX       :: TreeLayout -> Datum_ -> Number
-  , value       :: Datum_ -> Nullable Number
-  , x           :: Datum_ -> Number
-  , y           :: Datum_ -> Number
+treeDatum_ :: forall r.
+  { hasChildren :: Datum_ -> Boolean
+  , name :: Datum_ -> String
+  , onRHS :: TreeLayout -> Datum_ -> Boolean
+  , textAnchor :: TreeLayout -> D3_TreeNode r -> String
+  , textX :: TreeLayout -> D3_TreeNode r -> Number
+  , x :: Datum_ -> Number
+  , y :: Datum_ -> Number
+  , depth :: Datum_ -> Int
+  , height :: Datum_ -> Int
   }
-datum_ = {
+treeDatum_ = {
 -- simple accessors first
-    depth : \d -> (unboxD3TreeNode d).depth
-  , height: \d -> (unboxD3TreeNode d).height
-  , id    : \d -> (unboxD3TreeNode d).id
-  , value : \d -> (unboxD3TreeNode d).value
-  , x     : \d -> (unboxD3TreeNode d).x
-  , y     : \d -> (unboxD3TreeNode d).y
--- now accessors that use the embedded "data" object within the Tree node
-  , name   : \d -> (unboxD3TreeNode d).data.name
--- now more semanticly complicated accessors
-  , hasChildren: \d -> hasChildren_ d -- this particular one has to be done by FFI
--- TODO these next two should be rewritten to use some sort of choice operator
+    depth : _.depth <<< unboxD3TreeNode
+  , height: _.height <<< unboxD3TreeNode
+  -- , id    : _.id <<< unboxD3TreeNode
+  -- , value : _.value <<< unboxD3TreeNode
+  , x     : _.x <<< unboxD3TreeNode
+  , y     : _.y <<< unboxD3TreeNode
+-- -- now accessors that use the embedded "data" object within the Tree node
+  , name   : _.name <<< unboxD3TreeNode
+-- -- now more semanticly complicated accessors
+  , hasChildren: hasChildren_ <<< unsafeCoerce-- this particular one has to be done by FFI
+-- -- TODO these next two should be rewritten to use some sort of choice operator
   , textAnchor : (\l d -> case l of
                             Radial ->
-                              if (hasChildren_ d) == (datum_.x d < pi)
+                              if true -- (hasChildren_ d) == (treeDatum_.x d < pi)
                               then "start"
                               else "end"
                             _ -> 
-                              if (hasChildren_ d)
+                              if hasChildren_ d
                               then "start"
                               else "end"
                         )
   , textX : (\l d -> case l of
                       Radial ->
-                        if (hasChildren_ d) == (datum_.x d < pi) -- d.x < pi => node is on the RHS of Radial tree
+                        if true -- (hasChildren_ d) == (treeDatum_.x d < pi) -- d.x < pi => node is on the RHS of Radial tree
                         then 6.0
                         else (-6.0)
                       _ -> 
-                        if (hasChildren_ d)
+                        if hasChildren_ d
                         then 6.0
                         else (-6.0)
                   )
+  , onRHS       : \l d -> if l == Radial && (treeDatum_.x d >= pi)
+                        then true
+                        else false
 }
 
 
@@ -97,16 +102,16 @@ script config tree = do
   setAttributes nodeJoin_ config.nodeTransform
 
   theNodes <- appendTo nodeJoin_ Circle
-                [ fill         (\d -> if datum_.hasChildren d then "#999" else "#555")
+                [ fill         (\(d :: Datum_) -> if treeDatum_.hasChildren d then "#999" else "#555")
                 , radius       2.5
                 , strokeColor "white"
                 ]
 
   theLabels <- appendTo nodeJoin_ Text
-                 [ dy         0.31
-                  , x          (datum_.textX config.layout)
-                  , textAnchor (datum_.textAnchor config.layout)
-                  , text       datum_.name
-                  , fill       config.color
-                  ]               
+                [ dy         0.31
+                -- , x          (treeDatum_.textX config.layout)
+                -- , textAnchor (treeDatum_.textAnchor config.layout)
+                -- , text       treeDatum_.name
+                , fill       config.color
+                ]               
   pure svg

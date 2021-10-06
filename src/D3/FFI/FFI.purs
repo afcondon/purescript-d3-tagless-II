@@ -240,8 +240,10 @@ foreign import treeSortForTreeMap_      :: forall d. D3TreeMapRow d -> D3TreeMap
 foreign import treeSortForTree_         :: forall d. D3_TreeNode d -> D3_TreeNode d
 foreign import treeSortForTree_Spago    :: forall d. D3_TreeNode d -> D3_TreeNode d
 
--- next some functions to make attributes, types are a bit sloppy here
-foreign import hasChildren_             :: Datum_ -> Boolean -- really only meaningful when Datum_ when is a D3HierarchicalNode_
+-- next some functions to make attributes, types are a bit sloppy here, parent and child fields do not appear in PureScript
+foreign import hasChildren_             :: forall r. D3_TreeNode r -> Boolean
+foreign import getHierarchyChildren_    :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
+foreign import getHierarchyParent_      :: forall r. D3_TreeNode r -> D3_TreeNode r
 
 -- the full API for hierarchical nodes:
 -- TODO these should all be operating on cooked tree type, however that is to be done

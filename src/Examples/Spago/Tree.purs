@@ -7,7 +7,8 @@ import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Data.Types (PointXY)
 import D3.Examples.Spago.Files (LinkType(..), isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, TreeFields, setTreeXYExceptLeaves, setTreeXYIncludingLeaves)
-import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeSetNodeSize_, treeSortForTree_Spago)
+import D3.Examples.Spago.Unsafe (unboxD3TreeNode)
+import D3.FFI (descendants_, getHierarchyChildren_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, runLayoutFn_, treeSetNodeSize_, treeSortForTree_Spago)
 import D3.Node (D3Link(..), D3_SimulationNode(..), D3_TreeNode(..), NodeID)
 import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
 import Data.List (List(..), (:))
@@ -95,8 +96,8 @@ setNodeXY_ForRadialTree nodes treeDerivedDataMap = do
           let { x,y } = radialTranslate { x: p.x, y: p.y }
           in 
             if pinLeaves
-            then (D3SimNode node) `setTreeXYIncludingLeaves` { x, y, depth: p.depth, isLeaf: p.isLeaf } -- only pin parents
-            else (D3SimNode node) `setTreeXYExceptLeaves`    { x, y, depth: p.depth, isLeaf: p.isLeaf } -- only pin parents
+            then (D3SimNode node) `setTreeXYIncludingLeaves` { x, y, depth: p.depth, isTreeLeaf: p.isTreeLeaf, childIDs: p.childIDs } -- only pin parents
+            else (D3SimNode node) `setTreeXYExceptLeaves`    { x, y, depth: p.depth, isTreeLeaf: p.isTreeLeaf, childIDs: p.childIDs } -- only pin parents
   updateXY <$> nodes
 
 setNodeXY_ForHorizontalTree :: Array SpagoSimNode -> M.Map NodeID TreeFields -> Array SpagoSimNode
@@ -107,19 +108,28 @@ setNodeXY_ForHorizontalTree nodes treeDerivedDataMap = do
       case M.lookup node.id treeDerivedDataMap of
         Nothing -> D3SimNode node
         (Just p) -> 
-          let { x,y } = { x: p.y - 2000.0 , y: p.x } -- TODO just shifting left because origin is in center
+          let { x,y } = { x: p.y - 1200.0 , y: p.x } -- TODO MAGIC NUMBER just shifting left because origin is in center
           in 
             if pinLeaves
-            then (D3SimNode node) `setTreeXYIncludingLeaves` { x, y, depth: p.depth, isLeaf: p.isLeaf } -- only pin parents
-            else (D3SimNode node) `setTreeXYExceptLeaves`    { x, y, depth: p.depth, isLeaf: p.isLeaf } -- only pin parents
+            then (D3SimNode node) `setTreeXYIncludingLeaves` { x, y, depth: p.depth, isTreeLeaf: p.isTreeLeaf, childIDs: p.childIDs } -- only pin parents
+            else (D3SimNode node) `setTreeXYExceptLeaves`    { x, y, depth: p.depth, isTreeLeaf: p.isTreeLeaf, childIDs: p.childIDs } -- only pin parents
   updateXY <$> nodes
 
 -- | having calculated tree from graph at origin Main, extract the information that we need in visualisation
 getTreeDerivedData :: SpagoTreeNode -> Map NodeID TreeFields
 -- TODO coerce here is because the transformation done by hierarchyFromJSON_ is not yet modelled in the type system
 -- ideally you'd want to be able to do a (slightly) more principled cast as shown in commented out line below
--- getTreeDerivedData root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isLeaf: (tree_datum_.isLeaf n) } acc) empty (descendants_ root) 
-getTreeDerivedData root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, depth: n.depth, isLeaf: (unsafeCoerce n).data.isLeaf } acc) empty (descendants_ root) 
+-- getTreeDerivedData root = foldl (\acc (D3TreeNode n) -> M.insert n.data.id { x: n.x, y: n.y, isTreeLeaf: (tree_datum_.isTreeLeaf n) } acc) empty (descendants_ root) 
+getTreeDerivedData root = 
+  foldl (\acc treeNode@(D3TreeNode n) -> M.insert n.data.id
+          { x: n.x
+          , y: n.y
+          , depth: n.depth
+          , isTreeLeaf: hasChildren_ treeNode
+          , childIDs: (\(D3TreeNode n) -> n.id) <$> (getHierarchyChildren_ treeNode) }
+          acc)
+        empty
+        (descendants_ root) 
 
 buildTree :: forall r. NodeID -> Array (D3Link NodeID r) -> Tree NodeID
 buildTree rootID treelinks = do

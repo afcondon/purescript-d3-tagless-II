@@ -4,7 +4,7 @@ import Prelude
 
 import Affjax (URL)
 import D3.Data.Types (PointXY)
-import D3.Node (D3Link(..), D3LinkSwizzled, D3_FocusXY, D3_ID, D3_Leaf, D3_Radius, D3_TreeNode, D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
+import D3.Node (D3Link(..), D3LinkSwizzled, D3_FocusXY, D3_ID, D3_Radius, D3_TreeNode, D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import Data.Array (catMaybes, foldl, groupBy, length, range, sortBy, zip, (!!), (:))
 import Data.Foldable (sum)
 import Data.Map as M
@@ -73,16 +73,16 @@ type SpagoLinkData        = ( linktype :: LinkType, inSim :: Boolean )
 type SpagoGraphLinkID     = D3Link NodeID SpagoLinkData
 type SpagoGraphLinkRecord = D3LinkSwizzled SpagoDataRecord SpagoLinkData 
 
-type SpagoTreeObj = D3_TreeNode (D3_ID + D3_TreeRow + D3_XY + D3_Leaf + D3_Radius  + (EmbeddedData { | SpagoNodeRow () }) + () )
+type SpagoTreeObj = D3_TreeNode (D3_XY  + (EmbeddedData { | SpagoNodeRow () }) + () )
 
 type SpagoNodeRow row = ( 
     id       :: NodeID
-  , links    :: { targets    :: Dependencies -- the nodes on which this nodes depends
-                , sources    :: Dependencies -- the nodes which depend on this node
-                , tree       :: Dependencies 
-                , inPackage  :: Dependencies
-                , outPackage :: Dependencies
-                , contains   :: Dependencies -- in case of package, modules; in case of modules, codepoints? (not implemented)
+  , links    :: { targets      :: Dependencies -- the nodes on which this nodes depends
+                , sources      :: Dependencies -- the nodes which depend on this node
+                , treeChildren :: Dependencies 
+                , inPackage    :: Dependencies
+                , outPackage   :: Dependencies
+                , contains     :: Dependencies -- in case of package, modules; in case of modules, codepoints? (not implemented)
                 }
   , connected     :: Boolean
   , showChildren  :: Boolean
@@ -184,12 +184,12 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       , loc          : m.loc
       , nodetype     : IsModule m.path
       , inSim        : true
-      , links        :  { targets: (getId <$> m.depends) -- NB these are Module depends
-                        , sources   : []  -- these can be filled in later?
-                        , tree      : []
-                        , inPackage : []
-                        , outPackage: []
-                        , contains  : [] -- we're not looking inside packages yet
+      , links        :  { targets      : (getId <$> m.depends) -- NB these are Module depends
+                        , sources      : []  -- these can be filled in later?
+                        , treeChildren : []
+                        , inPackage    : []
+                        , outPackage   : []
+                        , contains     : [] -- we're not looking inside packages yet
                         } 
       , connected    : false -- this is shorthand for "connected to Main by a dependency tree", essentially it's treeNodes.no 
       , showChildren : false
@@ -216,11 +216,11 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
       , containerName: p.key
       , loc          : p.loc 
       , links        :  { targets: (getId <$> p.depends)  -- NB these are Package depends
-                        , sources: []
-                        , tree: []
-                        , inPackage: []
-                        , outPackage: []
-                        , contains: (getId <$> p.contains)
+                        , sources     : []
+                        , treeChildren: []
+                        , inPackage   : []
+                        , outPackage  : []
+                        , contains    : (getId <$> p.contains)
                         } 
       , connected    : true -- unless something has gone very wrong we shouldn't have any unconnected _packages_ (only modules)
       , showChildren : true

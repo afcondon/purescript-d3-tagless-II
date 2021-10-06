@@ -1,7 +1,5 @@
 module D3.Data.Types where
 
--- import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeLayoutFn_, TreeModel, TreeType(..), idTreeLeaf_, idTreeParent_, makeD3TreeJSONFromTreeID)
-
 import Data.Time.Duration (Milliseconds)
 import Prelude (class Show)
 import Unsafe.Coerce (unsafeCoerce)

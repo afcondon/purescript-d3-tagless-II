@@ -3,7 +3,7 @@ module D3.Examples.Spago.Draw.Attributes where
 import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, opacity, radius, rotate, strokeColor, strokeWidth, text, textAnchor, transform, transform', viewBox, width, x, y)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, MouseEvent(..))
-import D3.Examples.Spago.Model (datum_, tree_datum_)
+import D3.Examples.Spago.Model (datum_)
 import D3.Selection (SelectionAttribute)
 import Data.Maybe (Maybe)
 import Prelude (negate, (/), (<>))
@@ -84,7 +84,7 @@ treeSceneAttributes = {
   , labels: [ classed "label"
             , x 4.0
             , y 2.0
-            , textAnchor (tree_datum_.textAnchor Horizontal)
+            -- , textAnchor (tree_datum_.textAnchor Horizontal)
             , text datum_.name
             ]
 }

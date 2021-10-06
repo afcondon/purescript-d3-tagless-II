@@ -7,10 +7,11 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, PointXY)
 import D3.Examples.Spago.Files (LinkType(..), NodeType(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
-import D3.FFI (getIndexFromDatum_, hasChildren_, setInSimNodeFlag, unpinNode_)
+import D3.FFI (getHierarchyChildren_, getHierarchyParent_, getIndexFromDatum_, hasChildren_, setInSimNodeFlag)
 import D3.Node (D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_)
 import Data.Array (foldl, length, mapWithIndex, partition, (:))
+import Data.Array (null) as A
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.Graph (Graph, fromMap)
 import Data.Int (floor, toNumber)
@@ -19,13 +20,13 @@ import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (Nullable, notNull, null, toMaybe)
 import Data.Nullable (Nullable, null) as N
-import Data.Number (nan)
 import Data.Set as S
 import Data.Tuple (Tuple(..))
 import Debug (spy)
 import Math (ceil, cos, pi, sin, sqrt, (%))
 import Math as Math
 import Type.Row (type (+))
+import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
 
 
@@ -33,7 +34,7 @@ import Web.Event.Internal.Types (Event)
 type SpagoTreeNode = D3TreeRow         (EmbeddedData SpagoNodeData                                  + ())
 type SpagoSimNode  = D3_SimulationNode ( SpagoNodeRow  + D3_XY + D3_VxyFxy + D3_FocusXY + D3_Radius + ()) -- note we've woven in focusXY so that we can cluster the nodes
 -- | this is the only data that we're bringing over from the SpagoTreeNode to SpagoSimNode (at the momment)
-type TreeFields = { x :: Number, y :: Number, isLeaf :: Boolean, depth :: Int }
+type TreeFields = { x :: Number, y :: Number, isTreeLeaf :: Boolean, depth :: Int, childIDs :: Array NodeID }
 
 type SpagoModel = { 
     links :: Array SpagoGraphLinkID
@@ -50,38 +51,93 @@ type SpagoModel = {
 }
 
 
-tree_datum_ = {
-    x           : _.x                <<< unboxD3TreeNode
-  , y           : _.y                <<< unboxD3TreeNode
-  , isLeaf      : _.isLeaf           <<< unboxD3TreeNode
-  , containerID : _.data.containerID <<< unboxD3TreeNode
-  , name        : _.data.name        <<< unboxD3TreeNode
-  , loc         : _.data.loc         <<< unboxD3TreeNode
-  , colorByGroup: d3SchemeCategory10N_ <<< toNumber <<< _.data.containerID <<< unboxD3TreeNode
-  , textAnchor  : \l d -> case l of
-                            Radial ->
-                              if (hasChildren_ d) == (datum_.x d < pi)
-                              then "start"
-                              else "end"
-                            _ -> 
-                              if (hasChildren_ d)
-                              then "start"
-                              else "end"
+-- tree_datum_ :: { children :: Datum_ -> Array Datum_
+-- , colorByGroup :: Datum_ -> String
+-- , containerID :: Datum_ -> Int
+-- , hasChildren :: Datum_ -> Boolean
+-- , id :: Datum_ -> Int
+-- , loc :: Datum_ -> Number
+-- , name :: Datum_ -> String
+-- , onRHS :: TreeLayout -> Datum_ -> Boolean
+-- , parent :: Datum_
+--             -> Nullable
+--                  (D3_TreeNode
+--                     ( data :: { connected :: Boolean
+--                               , containerID :: Int
+--                               , containerName :: String
+--                               , containsMany :: Boolean
+--                               , gridXY :: Nullable
+--                                             { x :: Number
+--                                             , y :: Number
+--                                             }
+--                               , id :: Int
+--                               , inSim :: Boolean
+--                               , links :: { contains :: Array Int
+--                                          , inPackage :: Array Int
+--                                          , outPackage :: Array Int
+--                                          , sources :: Array Int
+--                                          , targets :: Array Int
+--                                          , treeChildren :: Array Int
+--                                          }
+--                               , loc :: Number
+--                               , name :: String
+--                               , nodetype :: NodeType
+--                               , showChildren :: Boolean
+--                               , treeDepth :: Nullable Int
+--                               , treeXY :: Nullable
+--                                             { x :: Number
+--                                             , y :: Number
+--                                             }
+--                               }
+--                     , x :: Number
+--                     , y :: Number
+--                     )
+--                  )
+-- , textAnchor :: TreeLayout -> Datum_ -> String
+-- , textX :: TreeLayout -> Datum_ -> Number
+-- , x :: Datum_ -> Number
+-- , y :: Datum_ -> Number
+-- }
+-- tree_datum_ = {
+--     x           : _.x                <<< unboxD3TreeNode
+--   , y           : _.y                <<< unboxD3TreeNode
+--   , hasChildren : \d -> not $ A.null $ getHierarchyChildren_ d
+--   , children    : \d -> getHierarchyChildren_ d -- because this field will not exist in D3 Hierarchy leaf nodes, we need to do this on the FFI side 
+--   , parent      : \d -> do
+--                           let nullableParent = getHierarchyParent_ d -- because this field will not exist in D3 Hierarchy leaf nodes, we need to do this on the FFI side 
+--                           if isNull nullableParent
+--                           then (null :: Nullable SpagoTreeNode)
+--                           else notNull (unsafeCoerce nullableParent)
+--   -- , isTreeLeaf  : _.data.isTreeLeaf  <<< unboxD3TreeNode
+--   , containerID : _.data.containerID <<< unboxD3TreeNode
+--   , id          : _.data.id          <<< unboxD3TreeNode
+--   , name        : _.data.name        <<< unboxD3TreeNode
+--   , loc         : _.data.loc         <<< unboxD3TreeNode
+--   , colorByGroup: d3SchemeCategory10N_ <<< toNumber <<< _.data.containerID <<< unboxD3TreeNode
+--   , textAnchor  : \l d -> case l of
+--                             Radial ->
+--                               if (hasChildren_ d) == (datum_.x d < pi)
+--                               then "start"
+--                               else "end"
+--                             _ -> 
+--                               if (hasChildren_ d)
+--                               then "start"
+--                               else "end"
 
-  , textX       : \l d -> case l of
-                      Radial ->
-                        if (hasChildren_ d) == (datum_.x d < pi) -- d.x < pi => node is on the RHS of Radial tree
-                        then 6.0
-                        else (-6.0)
-                      _ -> 
-                        if (hasChildren_ d)
-                        then 6.0
-                        else (-6.0)
+--   , textX       : \l d -> case l of
+--                       Radial ->
+--                         if (hasChildren_ d) == (datum_.x d < pi) -- d.x < pi => node is on the RHS of Radial tree
+--                         then 6.0
+--                         else (-6.0)
+--                       _ -> 
+--                         if (hasChildren_ d)
+--                         then 6.0
+--                         else (-6.0)
 
-  , onRHS       : \l d -> if l == Radial && (datum_.x d >= pi)
-                        then true
-                        else false
-}
+--   , onRHS       : \l d -> if l == Radial && (datum_.x d >= pi)
+--                         then true
+--                         else false
+-- }
 
 
 link_ = {
@@ -194,6 +250,10 @@ datum_ = {
               (IsModule _)  -> if datum_.connected d 
                                then true
                                else false
+  , treeChildren:
+      \d -> (datum_.links d).treeChildren              
+  , isTreeParent: -- simplifying assumption here that we don't need or care to check if its actually a tree node or not, just that it has tree children
+      \d -> not $ A.null $ datum_.treeChildren d
               
 }
 
@@ -391,14 +451,14 @@ setXY :: SpagoSimNode -> { x :: Number, y :: Number } -> SpagoSimNode
 setXY (D3SimNode node) { x, y } = D3SimNode (node { x = x, y = y })
 
 setTreeXYIncludingLeaves :: SpagoSimNode -> TreeFields -> SpagoSimNode
-setTreeXYIncludingLeaves (D3SimNode node) { x, y, depth } =
-  D3SimNode (node { treeXY = notNull {x, y}, treeDepth = notNull depth, connected = true})
+setTreeXYIncludingLeaves (D3SimNode node) { x, y, depth, childIDs } =
+  D3SimNode (node { treeXY = notNull {x, y}, treeDepth = notNull depth, connected = true, links { treeChildren = childIDs } })
 
 setTreeXYExceptLeaves :: SpagoSimNode -> TreeFields -> SpagoSimNode
-setTreeXYExceptLeaves (D3SimNode node) { depth, isLeaf: true }  = 
+setTreeXYExceptLeaves (D3SimNode node) { depth, isTreeLeaf: true }  = 
   D3SimNode node { treeXY = (N.null :: Nullable PointXY), treeDepth = notNull depth, connected = true }
-setTreeXYExceptLeaves (D3SimNode node) { x, y, depth, isLeaf: false } =
-  D3SimNode (node { treeXY = notNull { x,y }, treeDepth = notNull depth, connected = true })
+setTreeXYExceptLeaves (D3SimNode node) { x, y, depth, isTreeLeaf: false, childIDs } =
+  D3SimNode (node { treeXY = notNull { x,y }, treeDepth = notNull depth, connected = true, links { treeChildren = childIDs } })
 
 convertFilesToGraphModel :: forall r. 
   { body :: String | r } -> 

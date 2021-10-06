@@ -1,4 +1,7 @@
-module D3.Data.Tree where
+module D3.Data.Tree (
+    TreeJson_, TreeLayoutFn_, TreeType(..), TreeModel, TreeLayout(..)
+  , makeD3TreeJSONFromTreeID -- notably this is only used by Spago example right now
+)where
 
 import D3.Node (NodeID)
 import Data.Array as A

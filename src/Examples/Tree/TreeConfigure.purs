@@ -1,26 +1,26 @@
 module D3.Examples.Tree.Configure where
 
-import Utility (getWindowWidthHeight)
+import D3.Examples.Tree.Model
 
-import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), preserveAspectRatio, transform, viewBox) 
+import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), preserveAspectRatio, transform, viewBox)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_, Selector)
-import D3.Examples.Spago.Model (tree_datum_)
-import D3.Examples.Tree.Model (FlareTreeNode)
 import D3.Examples.Tree.Script (script) as Tree
+import D3.Examples.Tree.Script (treeDatum_)
 import D3.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
-import D3Tagless.Capabilities (class SelectionM)
-import D3Tagless.Instance.Selection (runD3M)
-import D3Tagless.Capabilities.MetaTree (D3GrammarNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
-import D3Tagless.Capabilities.String (runPrinter)
 import D3.Layouts.Hierarchical (horizontalClusterLink, horizontalLink, radialLink, radialSeparation, verticalClusterLink, verticalLink)
 import D3.Scales (d3SchemeCategory10N_)
+import D3Tagless.Capabilities (class SelectionM)
+import D3Tagless.Capabilities.MetaTree (D3GrammarNode, ScriptTree(..), runMetaTree, scriptTreeToJSON)
+import D3Tagless.Capabilities.String (runPrinter)
+import D3Tagless.Instance.Selection (runD3M)
 import Data.Map (toUnfoldable)
 import Data.Tuple (Tuple(..), snd)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Math (pi, abs)
 import Prelude (class Bind, Unit, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>), (==))
+import Utility (getWindowWidthHeight)
 
 -- TODO move this to a library, it really only needs the params for runPrinter to be completely generic
 -- | Evaluate the tree drawing script in the "printer" monad which will render it as a string
@@ -107,11 +107,11 @@ configureAndRunScript (Tuple width height ) model selector =
       case model.treeType, model.treeLayout of
         Dendrogram, Horizontal -> horizontalClusterLink spacing.interLevel
         Dendrogram, Vertical   -> verticalClusterLink   spacing.interLevel 
-        Dendrogram, Radial     -> radialLink tree_datum_.x tree_datum_.y
+        Dendrogram, Radial     -> radialLink treeDatum_.x treeDatum_.y
 
         TidyTree, Horizontal   -> horizontalLink
         TidyTree, Vertical     -> verticalLink
-        TidyTree, Radial       -> radialLink tree_datum_.x tree_datum_.y
+        TidyTree, Radial       -> radialLink treeDatum_.x treeDatum_.y
 
     nodeTransform =
       case model.treeType, model.treeLayout of
@@ -137,21 +137,21 @@ radialRotate :: Number -> String
 radialRotate x = show $ (x * 180.0 / pi - 90.0)
 
 radialRotateCommon :: Datum_ -> String
-radialRotateCommon d = "rotate(" <> radialRotate (tree_datum_.x d) <> ")"
+radialRotateCommon d = "rotate(" -- <> radialRotate (treeDatum_.x d) <> ")"
 
 radialTranslate :: Datum_ -> String
-radialTranslate d = "translate(" <> show (tree_datum_.y d) <> ",0)"
+radialTranslate d = "translate(" -- <> show (treeDatum_.y d) <> ",0)"
 
 rotateRadialLabels :: Datum_ -> String
 rotateRadialLabels d = -- TODO replace with nodeIsOnRHS 
   "rotate(" <> 
-    (if (tree_datum_.onRHS Radial d) 
+    (if (treeDatum_.onRHS Radial d) 
     then "180"
     else "0")
     <> ")"
 
 positionXYreflected :: Datum_ -> String  
-positionXYreflected d = "translate(" <> show (tree_datum_.y d) <> "," <> show (tree_datum_.x d) <>")"
+positionXYreflected d = "translate(" --  <> show (treeDatum_.y d) <> "," <> show (treeDatum_.x d) <>")"
 
 positionXY :: Datum_ -> String  
-positionXY d = "translate(" <> show (tree_datum_.x d) <> "," <> show (tree_datum_.y d) <>")"
+positionXY d = "translate(" -- <> show (treeDatum_.x d) <> "," <> show (treeDatum_.y d) <>")"

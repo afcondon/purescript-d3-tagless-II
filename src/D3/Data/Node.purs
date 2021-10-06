@@ -1,6 +1,5 @@
 module D3.Node where
 
-import Data.Newtype (class Newtype)
 import Data.Nullable (Nullable)
 import Type.Row (type (+))
 
@@ -44,12 +43,18 @@ type D3_Radius  row = ( r :: Number                                            |
 type D3_Rect    row = ( x0 :: Number, y0 :: Number, x1 :: Number, y1 :: Number | row )
 -- field to track whether node has TREE children, ie Parent or Leaf
 -- NB the node may still have GRAPH "children" / depends which have been pruned to get a tree
-type D3_Leaf    row = ( isLeaf :: Boolean                                      | row )
+-- (in the spago example, the Model nodes contain explicit lists of graph deps in and out and tree children
+-- which is probably the way you'll want to go)
+-- type D3_Leaf    row = ( isTreeLeaf :: Boolean                                  | row )
 
-newtype D3_TreeNode row = D3TreeNode { parent :: Nullable (D3_TreeNode row ), children :: Array (D3_TreeNode row ) | row }
-type D3TreeRow row       = D3_TreeNode ( D3_ID + D3_TreeRow + D3_XY   + D3_Leaf   + row )
-type D3CirclePackRow row = D3_TreeNode ( D3_ID + D3_TreeRow + D3_XY   + D3_Radius + row )
-type D3TreeMapRow row    = D3_TreeNode ( D3_ID + D3_TreeRow + D3_Rect             + row )
+-- REVIEW WARNING WARNING WARNING WARNING
+newtype D3_TreeNode row = D3TreeNode { | D3_ID + D3_TreeRow + row } -- parent and children also in some records but only accessible via FFI calls
+type D3TreeRow row      = D3_TreeNode ( D3_XY + row ) 
+
+-- | not tested in any way yet
+type D3CirclePackRow row = D3_TreeNode ( D3_XY + D3_Radius + row )
+-- | not tested in any way yet
+type D3TreeMapRow row    = D3_TreeNode ( D3_Rect + row )
 
 -- when you give data to d3.hierarchy the original object contents are present under the `data` field of the new hierarchical objects 
 type EmbeddedData :: forall k. k -> Row k -> Row k

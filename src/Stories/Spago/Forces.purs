@@ -21,8 +21,9 @@ forceLibrary = initialize [
 
       , createForce "collide1"     (RegularForce ForceCollide)  allNodes [ F.strength 1.0, F.radius datum_.collideRadius ]
       , createForce "collide2"     (RegularForce ForceCollide)  allNodes [ F.strength 0.7, F.radius datum_.collideRadiusBig ]
-      , createForce "charge1"      (RegularForce ForceManyBody) allNodes [ F.strength (-30.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
+      , createForce "charge1"      (RegularForce ForceManyBody) allNodes [ F.strength (-50.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax infinity ]
       , createForce "charge2"      (RegularForce ForceManyBody) allNodes [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 400.0 ]
+      , createForce "chargetree"   (RegularForce ForceManyBody) treeExceptLeaves [ F.strength (-100.0), F.theta 0.9, F.distanceMin 1.0, F.distanceMax 400.0 ]
 
       , createForce "clusterx_M"     (RegularForce ForceX)        modulesOnly [ F.strength 0.2, F.x datum_.gridPointX ]
       , createForce "clustery_M"     (RegularForce ForceY)        modulesOnly [ F.strength 0.2, F.y datum_.gridPointY ]
@@ -46,13 +47,14 @@ forceLibrary = initialize [
       , createForce "moduleOrbit" (RegularForce ForceRadial)   usedModulesOnly
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 600.0 ]
                                    
-      , createLinkForce Nothing [ F.strength 1.0, F.distance 0.0, F.numKey (toNumber <<< datum_.id) ]
+      , createLinkForce Nothing [ F.strength 0.5, F.distance 0.0, F.numKey (toNumber <<< datum_.id) ]
       ]
   where
     packagesOnly      = Just $ ForceFilter "all packages" datum_.isPackage
     modulesOnly       = Just $ ForceFilter "all modules" datum_.isModule
     unusedModulesOnly = Just $ ForceFilter "unused modules only" datum_.isUnusedModule
     usedModulesOnly   = Just $ ForceFilter "used modules only" datum_.isUsedModule
+    treeExceptLeaves  = Just $ ForceFilter "tree parent nodes only" datum_.isTreeParent
 
     useGridXY d _ = datum_.gridPoint d
     centerXY _ _ = { x: 0.0, y: 0.0 }

@@ -135,7 +135,7 @@ handleAction = case _ of
     _linksActive     .= const true
     _cssClass        .= "tree radial"
     _sceneAttributes .= treeSceneAttributes
-    _sceneForces     .= [ "center", "collide2", "charge2", linksForceName ]
+    _sceneForces     .= [ "center", "collide2", "chargetree", linksForceName ]
     _nodeInitializerFunctions .= [ unpinAllNodes, modulesNodesToPhyllotaxis, fixNamedNodeTo "Main" { x: 0.0, y: 0.0 } ]
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     runSimulation 
