@@ -396,7 +396,8 @@ exports.descendants_ = tree => tree.descendants()
 exports.find_ = tree => filter => tree.find(filter)
 exports.getClusterLayoutFn_ = () => d3.cluster()
 exports.getTreeLayoutFn_ = () => d3.tree()
-exports.hasChildren_ = d => !d.children
+exports.hasChildren_ = d => (d.children === 'undefined') ? false : true 
+exports.getHierarchyValue_ = d => (d.value === 'undefined') ? null : d.value // returns a Nullable Number 
 exports.getHierarchyChildren_ = d => !d.children ? [] : d.children 
 exports.getHierarchyParent_ = d => !d.parent ? [] : d.parent // don't think this can ever be null in valid hierarchy node but this gives us confidence that PureScript type is right 
 exports.hierarchyFromJSON_ = json => d3.hierarchy(json)

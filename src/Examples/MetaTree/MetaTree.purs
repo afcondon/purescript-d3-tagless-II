@@ -1,11 +1,12 @@
 module D3.Examples.MetaTree where
 
 import D3.Attributes.Sugar
+import Prelude
 
 import D3.Data.Tree (TreeModel, TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_, Element(..))
 import D3.Examples.MetaTree.Model (MetaTreeNode)
-import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
+import D3.Examples.MetaTree.Unsafe (coerceToTreeNode, unboxD3TreeNode)
 import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, keyIsID_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
 import D3.Layouts.Hierarchical (verticalLink)
 import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
@@ -14,7 +15,6 @@ import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Math (abs)
-import Prelude 
 import Utility (getWindowWidthHeight)
 
 datum_ :: { 
@@ -25,11 +25,11 @@ datum_ :: {
 , y          :: Datum_ -> Number
 }
 datum_ = {
-    x     : _.x <<< unboxD3TreeNode
-  , y     : _.y <<< unboxD3TreeNode
+    x     : _.x <<< unboxD3TreeNode <<< coerceToTreeNode
+  , y     : _.y <<< unboxD3TreeNode <<< coerceToTreeNode
 -- now the fields which are in the original data object, embedded in this tree object
-  , symbol: _.data.symbol <<< unboxD3TreeNode
-  , param1: _.data.param1 <<< unboxD3TreeNode
+  , symbol: _.data.symbol <<< unboxD3TreeNode <<< coerceToTreeNode
+  , param1: _.data.param1 <<< unboxD3TreeNode <<< coerceToTreeNode
   , positionXY: \d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <>")"
 }
 

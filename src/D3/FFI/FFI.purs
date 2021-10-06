@@ -242,6 +242,7 @@ foreign import treeSortForTree_Spago    :: forall d. D3_TreeNode d -> D3_TreeNod
 
 -- next some functions to make attributes, types are a bit sloppy here, parent and child fields do not appear in PureScript
 foreign import hasChildren_             :: forall r. D3_TreeNode r -> Boolean
+foreign import getHierarchyValue_       :: forall r. D3_TreeNode r -> Nullable Number
 foreign import getHierarchyChildren_    :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
 foreign import getHierarchyParent_      :: forall r. D3_TreeNode r -> D3_TreeNode r
 

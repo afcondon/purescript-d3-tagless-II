@@ -137,10 +137,10 @@ radialRotate :: Number -> String
 radialRotate x = show $ (x * 180.0 / pi - 90.0)
 
 radialRotateCommon :: Datum_ -> String
-radialRotateCommon d = "rotate(" -- <> radialRotate (treeDatum_.x d) <> ")"
+radialRotateCommon d = "rotate(" <> radialRotate (treeDatum_.x d) <> ")"
 
 radialTranslate :: Datum_ -> String
-radialTranslate d = "translate(" -- <> show (treeDatum_.y d) <> ",0)"
+radialTranslate d = "translate(" <> show (treeDatum_.y d) <> ",0)"
 
 rotateRadialLabels :: Datum_ -> String
 rotateRadialLabels d = -- TODO replace with nodeIsOnRHS 
@@ -151,7 +151,7 @@ rotateRadialLabels d = -- TODO replace with nodeIsOnRHS
     <> ")"
 
 positionXYreflected :: Datum_ -> String  
-positionXYreflected d = "translate(" --  <> show (treeDatum_.y d) <> "," <> show (treeDatum_.x d) <>")"
+positionXYreflected d = "translate("  <> show (treeDatum_.y d) <> "," <> show (treeDatum_.x d) <>")"
 
 positionXY :: Datum_ -> String  
-positionXY d = "translate(" -- <> show (treeDatum_.x d) <> "," <> show (treeDatum_.y d) <>")"
+positionXY d = "translate(" <> show (treeDatum_.x d) <> "," <> show (treeDatum_.y d) <>")"

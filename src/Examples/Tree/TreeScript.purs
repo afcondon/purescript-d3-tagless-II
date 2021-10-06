@@ -5,10 +5,10 @@ import Prelude
 import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, width, x)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (Datum_, Element(..), Selector)
-import D3.Examples.MetaTree.Unsafe (unboxD3TreeNode)
+import D3.Examples.MetaTree.Unsafe (coerceToTreeNode, unboxD3TreeNode)
 import D3.Examples.Tree.Model (FlareTreeNode)
-import D3.FFI (descendants_, getHierarchyChildren_, hasChildren_, keyIsID_, links_)
-import D3.Node (D3_TreeNode)
+import D3.FFI (descendants_, getHierarchyChildren_, getHierarchyValue_, hasChildren_, keyIsID_, links_)
+import D3.Node (D3_TreeNode(..))
 import D3.Selection (SelectionAttribute)
 import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import D3Tagless.Capabilities as D3
@@ -17,47 +17,49 @@ import Data.Nullable (Nullable)
 import Math (pi)
 import Unsafe.Coerce (unsafeCoerce)
 
-treeDatum_ :: forall r.
+treeDatum_ :: 
   { hasChildren :: Datum_ -> Boolean
   , name :: Datum_ -> String
   , onRHS :: TreeLayout -> Datum_ -> Boolean
-  , textAnchor :: TreeLayout -> D3_TreeNode r -> String
-  , textX :: TreeLayout -> D3_TreeNode r -> Number
+  , textAnchor :: TreeLayout -> Datum_ -> String
+  , textX :: TreeLayout -> Datum_ -> Number
   , x :: Datum_ -> Number
   , y :: Datum_ -> Number
   , depth :: Datum_ -> Int
   , height :: Datum_ -> Int
+  , value :: Datum_ -> Nullable Number
   }
 treeDatum_ = {
 -- simple accessors first
-    depth : _.depth <<< unboxD3TreeNode
-  , height: _.height <<< unboxD3TreeNode
-  -- , id    : _.id <<< unboxD3TreeNode
-  -- , value : _.value <<< unboxD3TreeNode
-  , x     : _.x <<< unboxD3TreeNode
-  , y     : _.y <<< unboxD3TreeNode
--- -- now accessors that use the embedded "data" object within the Tree node
-  , name   : _.name <<< unboxD3TreeNode
--- -- now more semanticly complicated accessors
-  , hasChildren: hasChildren_ <<< unsafeCoerce-- this particular one has to be done by FFI
+    depth : _.depth <<< unboxD3TreeNode <<< coerceToTreeNode
+  , height: _.height <<< unboxD3TreeNode <<< coerceToTreeNode
+  , x     : _.x <<< unboxD3TreeNode <<< coerceToTreeNode
+  , y     : _.y <<< unboxD3TreeNode <<< coerceToTreeNode
+-- now accessors that use the embedded "data" object within the Tree node
+  , name   : _.data.name <<< unboxD3TreeNode <<< coerceToTreeNode
+-- now more semanticly complicated accessors
+  -- value_ returns null rather than undefined if there is no value field
+  , value : getHierarchyValue_ <<< coerceToTreeNode
+  -- hasChildren_ returns empty array rather than undefined if there is no children field
+  , hasChildren: hasChildren_ <<< coerceToTreeNode
 -- -- TODO these next two should be rewritten to use some sort of choice operator
   , textAnchor : (\l d -> case l of
                             Radial ->
-                              if true -- (hasChildren_ d) == (treeDatum_.x d < pi)
+                              if (treeDatum_.hasChildren d) == (treeDatum_.x d < pi)
                               then "start"
                               else "end"
                             _ -> 
-                              if hasChildren_ d
+                              if (treeDatum_.hasChildren d)
                               then "start"
                               else "end"
                         )
   , textX : (\l d -> case l of
                       Radial ->
-                        if true -- (hasChildren_ d) == (treeDatum_.x d < pi) -- d.x < pi => node is on the RHS of Radial tree
+                        if (treeDatum_.hasChildren d) == (treeDatum_.x d < pi) -- d.x < pi => node is on the RHS of Radial tree
                         then 6.0
                         else (-6.0)
                       _ -> 
-                        if hasChildren_ d
+                        if (treeDatum_.hasChildren d)
                         then 6.0
                         else (-6.0)
                   )
@@ -109,9 +111,9 @@ script config tree = do
 
   theLabels <- appendTo nodeJoin_ Text
                 [ dy         0.31
-                -- , x          (treeDatum_.textX config.layout)
-                -- , textAnchor (treeDatum_.textAnchor config.layout)
-                -- , text       treeDatum_.name
+                , x          (treeDatum_.textX config.layout)
+                , textAnchor (treeDatum_.textAnchor config.layout)
+                , text       treeDatum_.name
                 , fill       config.color
                 ]               
   pure svg
