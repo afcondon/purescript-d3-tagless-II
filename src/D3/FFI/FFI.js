@@ -190,6 +190,7 @@ exports.d3PreserveSimulationPositions_ = selection => nodedata => keyFn => {
   console.log(`FFI: d3PreserveSimulationPositions_ given ${nodedata.length} nodes, in selection ${selection.data().length}`);
   
   // REVIEW (also what if we wanted r, say, or x, to change???)
+  // we need to be able to specify which fields are to change, ideally, and which are not
   let updatedNodeData = nodedata.map(d => {
     let id = keyFn(d)
     let newNode = newNodeMap.get(id)

@@ -275,6 +275,7 @@ defaultConfigSimulation = {
       alpha        : 1.0
     , alphaTarget  : 0.0
     , alphaMin     : 0.001
-    , alphaDecay   : 0.0228
+    -- , alphaDecay   : 0.0228
+    , alphaDecay   : 0.1 -- raised from default to converge quicker while debugging
     , velocityDecay: 0.4
 }
