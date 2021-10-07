@@ -108,7 +108,7 @@ handleAction = case _ of
     _linksActive     .= const true
     _cssClass        .= "cluster"
     _sceneAttributes .= clusterSceneAttributes
-    _forceStatuses   %= onlyTheseForcesActive [ "clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide1" ]
+    _forceStatuses   %= onlyTheseForcesActive [ "clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide2" ]
     -- _nodeInitializerFunctions .= [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
     _nodeInitializerFunctions .= [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
@@ -133,7 +133,7 @@ handleAction = case _ of
     _linksActive     .= const true
     _cssClass        .= "tree radial"
     _sceneAttributes .= treeSceneAttributes
-    _forceStatuses   %= onlyTheseForcesActive [ "center", "collide2", "chargetree", linksForceName ]
+    _forceStatuses   %= onlyTheseForcesActive [ "center", "collide2", "chargetree", "charge2", linksForceName ]
     _nodeInitializerFunctions .= [ unpinAllNodes, modulesNodesToPhyllotaxis, fixNamedNodeTo "Main" { x: 0.0, y: 0.0 } ]
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     runSimulation 
@@ -163,9 +163,7 @@ handleAction = case _ of
     runSimulation 
     
   ToggleForce label -> do
-    before <- use _forceStatuses
     _forceStatus label %= toggleForceStatus
-    after <- use _forceStatuses
     runSimulation -- maybe also setConfigVariable $ Alpha 0.7
 
   Filter (LinkShowFilter filterFn) -> do
@@ -198,7 +196,7 @@ handleAction = case _ of
 
 
 -- ======================================================================================================================
--- | manage what data from the model gets given to the visualization code and also what forces should be engaged
+-- | manage how data from the model gets given to the visualization code
 -- ======================================================================================================================
 stageDataFromModel :: forall m.
   MonadState State m =>
@@ -233,8 +231,8 @@ runSimulation = do
   let attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles } -- FIXME we don't actually want to stick the default value on here, needs to be Maybe
   runWithD3_Simulation do
     stop
-    Graph.updateSimulation staging attributesWithCallback
     actualizeForces forceStatuses
+    Graph.updateSimulation staging attributesWithCallback
     setConfigVariable $ Alpha 1.0
     start
 
