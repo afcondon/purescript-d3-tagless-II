@@ -6,23 +6,21 @@ import D3.Attributes.Instances (Label)
 import D3.Attributes.Sugar (x)
 import D3.Data.Types (D3Selection_, Datum_)
 import D3.Examples.Spago.Draw.Attributes (SpagoSceneAttributes, clusterSceneAttributes)
-import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData, SpagoGraphLinkRecord)
+import D3.Examples.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
 import D3.FFI (SimulationVariables, readSimulationVariables)
-import D3.Node (D3LinkSwizzled, D3_SimulationNode, NodeID)
+import D3.Node (NodeID)
 import D3.Selection (SelectionAttribute)
-import D3.Simulation.Types (D3SimulationState_, ForceStatus, _handle)
+import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus, _handle, getStatusMap)
 import D3Tagless.Capabilities (Staging)
-import Data.Array (filter)
-import Data.Lens (Lens', _Just, preview, view)
+import Data.Lens (Lens', _Just, view)
 import Data.Lens.At (at)
 import Data.Lens.Record (prop)
+import Data.Map (Map)
 import Data.Map (Map, empty) as M
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
-import Halogen.Subscription (Emitter, Listener) as HS
-import Stories.Spago.Actions (Scene)
 import Type.Proxy (Proxy(..))
   
 type State = Record (StateRow)
@@ -54,12 +52,12 @@ type MiseEnScene = {
   , nodeInitializerFunctions :: Array (Array SpagoSimNode -> Array SpagoSimNode)
   -- could add the simulation variables here too?
 }
-initialScene :: MiseEnScene
-initialScene = {
+initialScene :: Map Label Force -> MiseEnScene
+initialScene forceLibrary = {
     chooseNodes: isPackage -- chooses all nodes
   , linksShown:  const false
   , linksActive: const false
-  , forceStatuses: M.empty
+  , forceStatuses: getStatusMap forceLibrary
   , cssClass: ""
   , attributes: clusterSceneAttributes
   , callback: x 0.0 -- possibly want to store the listener here rather than the callback?
@@ -102,12 +100,90 @@ _forceStatus label = _forceStatuses <<< at label <<< _Just
 -- lenses for mise-en-scene things 
 _forceStatuses :: Lens' State (M.Map Label ForceStatus)
 _forceStatuses = _scene <<< prop (Proxy :: Proxy "forceStatuses")
+_chooseNodes :: forall t427 t428 t432 t433.
+  Strong t428 => t428 t433 t433
+                 -> t428
+                      { scene :: { chooseNodes :: t433
+                                 | t432
+                                 }
+                      | t427
+                      }
+                      { scene :: { chooseNodes :: t433
+                                 | t432
+                                 }
+                      | t427
+                      }
 _chooseNodes              = _scene <<< prop (Proxy :: Proxy "chooseNodes")
+_linksShown :: forall t232 t233 t237 t238.
+  Strong t233 => t233 t238 t238
+                 -> t233
+                      { scene :: { linksShown :: t238
+                                 | t237
+                                 }
+                      | t232
+                      }
+                      { scene :: { linksShown :: t238
+                                 | t237
+                                 }
+                      | t232
+                      }
 _linksShown               = _scene <<< prop (Proxy :: Proxy "linksShown")
+_linksActive :: forall t252 t253 t257 t258.
+  Strong t253 => t253 t258 t258
+                 -> t253
+                      { scene :: { linksActive :: t258
+                                 | t257
+                                 }
+                      | t252
+                      }
+                      { scene :: { linksActive :: t258
+                                 | t257
+                                 }
+                      | t252
+                      }
 _linksActive              = _scene <<< prop (Proxy :: Proxy "linksActive")
 -- _sceneForces              = _scene <<< _forces
+_cssClass :: forall t407 t408 t412 t413.
+  Strong t408 => t408 t413 t413
+                 -> t408
+                      { scene :: { cssClass :: t413
+                                 | t412
+                                 }
+                      | t407
+                      }
+                      { scene :: { cssClass :: t413
+                                 | t412
+                                 }
+                      | t407
+                      }
 _cssClass                 = _scene <<< prop (Proxy :: Proxy "cssClass")
+_callback :: forall t447 t448 t452 t453.
+  Strong t448 => t448 t453 t453
+                 -> t448
+                      { scene :: { callback :: t453
+                                 | t452
+                                 }
+                      | t447
+                      }
+                      { scene :: { callback :: t453
+                                 | t452
+                                 }
+                      | t447
+                      }
 _callback                 = _scene <<< prop (Proxy :: Proxy "callback") 
+_sceneAttributes :: forall t64 t65 t69 t70.
+  Strong t65 => t65 t70 t70
+                -> t65
+                     { scene :: { attributes :: t70
+                                | t69
+                                }
+                     | t64
+                     }
+                     { scene :: { attributes :: t70
+                                | t69
+                                }
+                     | t64
+                     }
 _sceneAttributes          = _scene <<< prop (Proxy :: Proxy "attributes")
 _nodeInitializerFunctions :: forall p.
   Strong p =>

@@ -1,7 +1,6 @@
 module Stories.Spago where
 
 import Prelude
-import Stories.Spago.State
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
@@ -13,23 +12,21 @@ import D3.Examples.Spago.Draw (getVizEventFromClick)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Files (NodeType(..), isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Model (SpagoModel, allNodes, convertFilesToGraphModel, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, moduleNodesToContainerXY, modulesNodesToPhyllotaxis, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_H, treeNodesToTreeXY_V, unpinAllNodes)
+import D3.Examples.Spago.Model (SpagoModel, allNodes, convertFilesToGraphModel, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, moduleNodesToContainerXY, modulesNodesToPhyllotaxis, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, unpinAllNodes)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (linksForceName)
 import D3.Selection (SelectionAttribute)
 import D3.Simulation.Types (SimVariable(..), initialSimulationState, onlyTheseForcesActive, toggleForceStatus)
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start, stop)
-import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation, run_D3M_Simulation)
+import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
 import Data.Array (filter, foldl, (:))
 import Data.Either (hush)
 import Data.Lens (use, view, (%=), (.=))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class (class MonadEffect, liftEffect)
-import Effect.Class.Console (log)
+import Effect.Class (class MonadEffect)
 import Halogen (HalogenM, liftEffect)
 import Halogen as H
 import Halogen.Subscription (Listener)
@@ -37,6 +34,7 @@ import Halogen.Subscription as HS
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..), VizEvent(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
+import Stories.Spago.State (State, _callback, _chooseNodes, _cssClass, _enterselections, _forceStatus, _forceStatuses, _links, _linksActive, _linksShown, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -54,7 +52,7 @@ component = H.mkComponent
     { model: Nothing
     , staging: { selections: { nodes: Nothing, links: Nothing }, linksWithForce: const true, rawdata: { nodes: [], links: [] } }
     , simulation: initialSimulationState forceLibrary
-    , scene: initialScene
+    , scene: initialScene forceLibrary
     }
 
 simulationEvent :: Listener Action -> SelectionAttribute
@@ -66,7 +64,7 @@ handleAction :: forall t316 t317 t318.
   HalogenM State Action t316 t317 t318 Unit
 handleAction = case _ of
 
-  -- TODO defer reading of model data until component actually needs it
+  -- TODO defer reading of model data until component actually needs it and/or allow change to different data
   Initialize -> do    
     -- read various JSON files and synthesize a Model
     (maybeModel :: Maybe SpagoModel) <- H.liftAff readModelData
@@ -165,7 +163,9 @@ handleAction = case _ of
     runSimulation 
     
   ToggleForce label -> do
+    before <- use _forceStatuses
     _forceStatus label %= toggleForceStatus
+    after <- use _forceStatuses
     runSimulation -- maybe also setConfigVariable $ Alpha 0.7
 
   Filter (LinkShowFilter filterFn) -> do
