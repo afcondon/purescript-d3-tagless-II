@@ -355,7 +355,7 @@ packageNodesToGridXY nodes = partitioned.no <> packagesWithGrid
       where 
         setGridXY (D3SimNode p) i = do
           let gridXY = scalePoint 200.0 200.0 $ offsetXY { x: offset, y: offset } $ numberToGridPoint columns i 
-          D3SimNode p { gridXY = notNull gridXY, fx = notNull gridXY.x, fy = notNull gridXY.y }
+          D3SimNode p { gridXY = notNull gridXY } -- , fx = notNull gridXY.x, fy = notNull gridXY.y }
 
 moduleNodesToContainerXY :: Array SpagoSimNode -> Array SpagoSimNode
 moduleNodesToContainerXY nodes = modulesWithGrid <> partitioned.yes

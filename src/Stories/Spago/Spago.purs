@@ -24,9 +24,11 @@ import Data.Either (hush)
 import Data.Lens (use, view, (%=), (.=))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Debug (spy)
 import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class (class MonadEffect)
+import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Class.Console (log)
 import Halogen (HalogenM, liftEffect)
 import Halogen as H
 import Halogen.Subscription (Listener)
@@ -94,13 +96,11 @@ handleAction = case _ of
   -- REVIEW this isn't a good way to do this, needs list of open nodes or something
   ToggleChildrenOfNode id -> do -- just a copy of PackageGrid right now, need to refactor so that it's all parameterized
     _chooseNodes .= (isPackageOrVisibleModule id)
-    runWithD3_Simulation do
-      actualizeForces
+    runSimulation
 
   UnToggleChildrenOfNode _ -> do 
     _chooseNodes .= isPackage 
-    runWithD3_Simulation do
-      actualizeForces
+    runSimulation
 
   SpotlightNode _ -> runWithD3_Simulation stop
 
@@ -108,11 +108,11 @@ handleAction = case _ of
     _chooseNodes     .= allNodes
     _linksShown      .= isM2P_Link
     _linksActive     .= const true
-    _sceneForces     .= [ "clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide2" ]
+    _sceneForces     .= [ "clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide1" ]
     _cssClass        .= "cluster"
     _sceneAttributes .= clusterSceneAttributes
     -- _nodeInitializerFunctions .= [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
-    _nodeInitializerFunctions .= [ packageNodesToGridXY, moduleNodesToContainerXY, unpinAllNodes ]
+    _nodeInitializerFunctions .= [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     runSimulation
 
@@ -166,6 +166,7 @@ handleAction = case _ of
     
   ToggleForce label -> do
     _forceStatus label %= toggleForceStatus
+    state <- get
     runSimulation -- maybe also setConfigVariable $ Alpha 0.7
 
   Filter (LinkShowFilter filterFn) -> do
@@ -230,6 +231,7 @@ runSimulation = do
   callback        <- use _callback
   sceneAttributes <- use _sceneAttributes
   forces          <- use _sceneForces
+  let _ = spy "forces in scene: " forces
   let attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles } -- FIXME we don't actually want to stick the default value on here, needs to be Maybe
   runWithD3_Simulation do
     stop

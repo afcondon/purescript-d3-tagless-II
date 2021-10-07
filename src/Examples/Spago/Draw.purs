@@ -60,8 +60,8 @@ updateSimulation :: forall m d r id.
   SpagoSceneAttributes -> 
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
-  node                  <- openSelection nodesGroup (show Group) -- FIXME this call and updateJoin and append all have to match FIX -- can we use (show Group)
-  link                  <- openSelection linksGroup (show Line)  -- FIXME this call and updateJoin and append all have to match FIX
+  node                  <- openSelection nodesGroup (show Group) -- FIXME this call and updateJoin and append all have to match
+  link                  <- openSelection linksGroup (show Line)  -- FIXME this call and updateJoin and append all have to match
   -- this will change all the object refs so a defensive copy is needed if join is to work
   mergedNodeData        <- carryOverSimStateN node staging.rawdata keyIsID_ -- REVIEW this honors fx/fy of new node but nothing else
   mergedLinkData        <- carryOverSimStateL link staging.rawdata keyIsID_ 
@@ -69,13 +69,13 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   -- first the nodedata
   node'                 <- updateJoin node Group mergedNodeData keyIsID_
   -- put new elements (g, g.circle & g.text) into the DOM
-  simulation_           <- simulationHandle
   nodeEnter             <- appendTo node'.enter Group enterAttrs
   circlesSelection      <- appendTo nodeEnter Circle attrs.circles
   labelsSelection       <- appendTo nodeEnter Text attrs.labels
   -- remove elements corresponding to exiting data
   setAttributes node'.exit [ remove ]
   -- change anything that needs changing on the continuing elements
+  simulation_           <- simulationHandle
   setAttributes node'.update $ updateAttrs simulation_ 
   updateCirclesSelection <- selectUnder node'.update (show Circle)
   setAttributes updateCirclesSelection attrs.circles

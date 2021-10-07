@@ -89,15 +89,15 @@ exports.forceY_ = () => d3.forceY()
 exports.getLinksFromForce_ = linkForce => linkForce.links()
 exports.getNodes_ = simulation => simulation.nodes()
 exports.keyIsID_ = d => { 
-  // console.log(`looking up the id of node: ${d.id}`);
+  // console.log(`FFI: looking up the id of node: ${d.id}`);
   return d.id;
 }
 exports.keyIsSourceTarget_ = d => { 
-  // console.log(`looking up the id of node: ${[d.source, d.target]}`);
+  // console.log(`FFI: looking up the id of node: ${[d.source, d.target]}`);
   return [d.source, d.target];
 }
 exports.setAlpha_ = simulation => alpha => {
-  console.log(`setting simulation.alpha to ${alpha}`);
+  console.log(`FFI: setting simulation.alpha to ${alpha}`);
   simulation.alpha(alpha)
 }
 exports.setAlphaDecay_ = simulation => alphaDecay => simulation.alphaDecay(alphaDecay)
@@ -119,7 +119,7 @@ exports.setForceY_ = force => attr => force.y(attr)
 exports.setLinksKeyFunction_ = force => attr => force.id(attr)
 exports.setVelocityDecay_ = simulation => velocityDecay => simulation.velocityDecay(velocityDecay)
 exports.startSimulation_ = simulation => {
-  console.log(`restarting the simulation, alpha is: ${simulation.alpha()}`);
+  console.log(`FFI: restarting the simulation, alpha is: ${simulation.alpha()}`);
   simulation.restart()
 }
 exports.stopSimulation_ = simulation => simulation.stop()
@@ -133,7 +133,7 @@ exports.initSimulation_ = config => keyFn => {
     .alphaDecay(config.alphaDecay) // default is 0.0228
     .velocityDecay(config.velocityDecay) // default is 0.4
   if (true) {
-    console.log(`initSimulation${simulation}`)
+    console.log(`FFI: initSimulation${simulation}`)
   }
   return simulation
 }
@@ -145,7 +145,7 @@ exports.configSimulation_ = simulation => config => {
     .alphaDecay(config.alphaDecay) // default is 0.0228
     .velocityDecay(config.velocityDecay) // default is 0.4
   if (debug) {
-    console.log(`configSimulation${simulation}${config}`)
+    console.log(`FFI: configSimulation${simulation}${config}`)
   }
   return simulation
 }
@@ -182,20 +182,21 @@ getBaseForAssign = (newNodeMap, key) => {
 }
 
 exports.d3PreserveSimulationPositions_ = selection => nodedata => keyFn => {
-  console.log(`d3PreserveSimulationPositions_ there are ${nodedata.length} new nodes`);
   // create a map from our chosen id to the OLD obj reference, got from the data thats attached to selection
   const oldNodeMap = new Map(selection.data().map(d => [keyFn(d), d])); 
   // create a map from our chosen id to the NEW / incoming obj reference
   const newNodeMap = new Map(nodedata.map(d => [keyFn(d), d])); 
   // we need to copy the fx/fy (at least) from the updating data 
-
+  console.log(`FFI: d3PreserveSimulationPositions_ given ${nodedata.length} nodes, in selection ${selection.data().length}`);
+  
   // REVIEW (also what if we wanted r, say, or x, to change???)
   let updatedNodeData = nodedata.map(d => {
     let id = keyFn(d)
     let newNode = newNodeMap.get(id)
     let shell = {}
     if (newNode) {
-      shell = { fx: newNode.fx, fy: newNode.fy }
+      console.log(`FFI: copying fx/fy from incoming node to old object (if present)`);
+      shell = { fx: newNode.fx, fy: newNode.fy, gridXY: newNode.gridXY, updated: true }
     }
     return Object.assign(oldNodeMap.get(id) || d, shell)
   });
@@ -216,15 +217,18 @@ exports.getIDsFromNodes_ = nodes => keyFn => {
 }
 
 exports.setNodes_ = simulation => nodes => {
-  console.log(`setting nodes in simulation, there are ${nodes.length} nodes`);
+  console.log(`FFI: setting nodes in simulation, there are ${nodes.length} nodes`);
   simulation.nodes(nodes)
   return simulation.nodes()
 }
 // we're going to always use the same name for the links force denominated by the linksForceName string
-exports.setLinks_ = simulation => links => simulation.force(exports.linksForceName).links(links)
+exports.setLinks_ = simulation => links => {
+  console.log(`FFI: setting links in simulation, there are ${links.length} links`);
+  simulation.force(exports.linksForceName).links(links)
+}
 // returns array of links with ids replaced by object references, invalid links are discarded
 exports.swizzleLinks_ = links => simNodes => keyFn => {
-  console.log(`setting links in simulation, there are ${links.length} links`);
+  console.log(`FFI: swizzling links in simulation, there are ${links.length} links`);
   const nodeById = new Map(simNodes.map(d => [keyFn(d), d])); // creates a map from our chosen id to the old obj reference
   // we could use the copy approach from d3PreserveSimulationPositions here so that links animate
   const swizzledLinks = links.filter( (link, index, arr ) => {
@@ -253,7 +257,7 @@ exports.swizzleLinks_ = links => simNodes => keyFn => {
 }
 exports.unsetLinks_ = simulation => {
   const linkForce = d3.forceLink([])
-  console.log('removing all links from simulation');
+  console.log('FFI: removing all links from simulation');
   simulation.force(exports.linksForceName, linkForce)
   return simulation
 }
@@ -357,19 +361,19 @@ exports.applyFixForceInSimulationY_ = simulation => label => fn => filterFn => {
     }
   }}
 exports.putForceInSimulation_ = simulation => label => force => {
-  console.log(`Putting ${label} force in the simulation`);
+  // console.log(`FFI: Putting ${label} force in the simulation`);
   simulation.force(label, force)
 }
-exports.restartLinksForceInSimulation_ = simulation => force => links => {
-  console.log(`Re-enabling links force in the simulation`);
-  simulation.force(this.linksForceName, force)
-  simulation.links(links) // NB these links are the SWIZZLED links that are cached in the D3SimulationState_
-}
-exports.putForceInSimulationWithFilter_ = simulation => label => filterFn => force => {
-  console.log(`Putting ${label} force in the simulation`);
-  console.log("remember to put in the filter here"); // TODO
-  simulation.force(label, force)
-}
+// exports.restartLinksForceInSimulation_ = simulation => force => links => {
+//   console.log(`Re-enabling links force in the simulation`);
+//   simulation.force(this.linksForceName, force)
+//   simulation.links(links) // NB these links are the SWIZZLED links that are cached in the D3SimulationState_
+// }
+// exports.putForceInSimulationWithFilter_ = simulation => label => filterFn => force => {
+//   console.log(`FFI: Putting ${label} force in the simulation`);
+//   console.log("remember to put in the filter here"); // TODO
+//   simulation.force(label, force)
+// }
 // REVIEW a whole group of side effecting function
 exports.pinNode_ = fx => fy => node => {
   node.fx = fx
@@ -458,7 +462,7 @@ exports.treeMinMax_ = root => {
 
     if (d.x < min_x) min_x = d.x // if we find a value less than current min, that's our new minimum
     if (d.y < min_y) min_y = d.y 
-    // console.log(`node ${d} (${min_x}, ${min_y}) (${max_x}, ${max_y})`);
+    // console.log(`FFI: node ${d} (${min_x}, ${min_y}) (${max_x}, ${max_y})`);
   })      
   return { xMin: min_x, xMax: max_x, yMin: min_y, yMax: max_y }
 }

@@ -211,8 +211,8 @@ foreign import setForceDistance_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle
 foreign import setLinksKeyFunction_ :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
 
 foreign import putForceInSimulation_        :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
-foreign import restartLinksForceInSimulation_ :: D3Simulation_ -> D3ForceHandle_ -> Array Datum_ -> D3Simulation_
-foreign import putForceInSimulationWithFilter_ :: D3Simulation_ -> String -> (Datum_ -> Boolean) -> D3ForceHandle_ -> D3Simulation_
+-- foreign import restartLinksForceInSimulation_ :: D3Simulation_ -> D3ForceHandle_ -> Array Datum_ -> D3Simulation_
+-- foreign import putForceInSimulationWithFilter_ :: D3Simulation_ -> String -> (Datum_ -> Boolean) -> D3ForceHandle_ -> D3Simulation_
 foreign import lookupForceByName_           :: D3Simulation_ -> String -> Nullable D3ForceHandle_
 foreign import removeFixForceXY_            :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
 foreign import removeFixForceX_             :: D3Simulation_ -> (Datum_ -> Boolean) -> D3Simulation_
