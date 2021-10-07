@@ -1,6 +1,7 @@
 module Stories.Spago where
 
 import Prelude
+import Stories.Spago.State
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
@@ -16,7 +17,7 @@ import D3.Examples.Spago.Model (SpagoModel, allNodes, convertFilesToGraphModel, 
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (linksForceName)
 import D3.Selection (SelectionAttribute)
-import D3.Simulation.Types (SimVariable(..), _forceStatus, _forceStatuses, _onlyTheseForcesActive, initialSimulationState, toggleForceStatus)
+import D3.Simulation.Types (SimVariable(..), initialSimulationState, onlyTheseForcesActive, toggleForceStatus)
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start, stop)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation, run_D3M_Simulation)
 import Data.Array (filter, foldl, (:))
@@ -36,7 +37,6 @@ import Halogen.Subscription as HS
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..), VizEvent(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
-import Stories.Spago.State (State, _callback, _chooseNodes, _cssClass, _enterselections, _links, _linksActive, _linksShown, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _sceneForces, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -108,9 +108,9 @@ handleAction = case _ of
     _chooseNodes     .= allNodes
     _linksShown      .= isM2P_Link
     _linksActive     .= const true
-    _sceneForces     .= [ "clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide1" ]
     _cssClass        .= "cluster"
     _sceneAttributes .= clusterSceneAttributes
+    _forceStatuses   %= onlyTheseForcesActive [ "clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide1" ]
     -- _nodeInitializerFunctions .= [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
     _nodeInitializerFunctions .= [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
@@ -121,7 +121,7 @@ handleAction = case _ of
     _chooseNodes     .= isPackage
     _linksShown      .= isP2P_Link
     _linksActive     .= (sourcePackageIs "my-project")
-    _sceneForces     .= ["center", "collide2", "charge2", "packageOrbit", linksForceName ]
+    _forceStatuses   %= onlyTheseForcesActive ["center", "collide2", "charge2", "packageOrbit", linksForceName ]
     _cssClass        .= "graph"
     _sceneAttributes .= graphSceneAttributes
     _nodeInitializerFunctions .= [ unpinAllNodes, packagesNodesToPhyllotaxis, fixNamedNodeTo "my-project" { x: 0.0, y: 0.0 } ]
@@ -135,7 +135,7 @@ handleAction = case _ of
     _linksActive     .= const true
     _cssClass        .= "tree radial"
     _sceneAttributes .= treeSceneAttributes
-    _sceneForces     .= [ "center", "collide2", "chargetree", linksForceName ]
+    _forceStatuses   %= onlyTheseForcesActive [ "center", "collide2", "chargetree", linksForceName ]
     _nodeInitializerFunctions .= [ unpinAllNodes, modulesNodesToPhyllotaxis, fixNamedNodeTo "Main" { x: 0.0, y: 0.0 } ]
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     runSimulation 
@@ -146,7 +146,7 @@ handleAction = case _ of
     _linksActive     .= const false    
     _cssClass        .= "tree horizontal"
     _sceneAttributes .= treeSceneAttributes
-    _sceneForces     .= [ "htreeNodesX", "htreeNodesY", "charge1", "collide2" ]
+    _forceStatuses   %= onlyTheseForcesActive [ "htreeNodesX", "htreeNodesY", "charge1", "collide2" ]
     -- _nodeInitializerFunctions .= [ unpinAllNodes, treeNode÷sToTreeXY_H ]
     _nodeInitializerFunctions .= [ unpinAllNodes ]
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
@@ -158,7 +158,7 @@ handleAction = case _ of
     _linksActive     .=  const false    
     _cssClass        .= "tree vertical" -- we'll rotate the labels on this one
     _sceneAttributes .= treeSceneAttributes
-    _sceneForces     .= [ "vtreeNodesX", "vtreeNodesY", "charge1", "collide2" ]
+    _forceStatuses   %= onlyTheseForcesActive [ "vtreeNodesX", "vtreeNodesY", "charge1", "collide2" ]
     -- _nodeInitializerFunctions .= [ unpinAllNodes, treeNodesToTreeXY_V ]
     _nodeInitializerFunctions .= [ unpinAllNodes ]
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
@@ -166,7 +166,6 @@ handleAction = case _ of
     
   ToggleForce label -> do
     _forceStatus label %= toggleForceStatus
-    state <- get
     runSimulation -- maybe also setConfigVariable $ Alpha 0.7
 
   Filter (LinkShowFilter filterFn) -> do
@@ -230,14 +229,12 @@ runSimulation = do
   staging         <- use _staging
   callback        <- use _callback
   sceneAttributes <- use _sceneAttributes
-  forces          <- use _sceneForces
-  let _ = spy "forces in scene: " forces
+  forceStatuses   <- use _forceStatuses
   let attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles } -- FIXME we don't actually want to stick the default value on here, needs to be Maybe
   runWithD3_Simulation do
     stop
-    _forceStatuses %= _onlyTheseForcesActive forces
     Graph.updateSimulation staging attributesWithCallback
-    actualizeForces
+    actualizeForces forceStatuses
     setConfigVariable $ Alpha 1.0
     start
 

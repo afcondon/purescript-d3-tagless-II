@@ -34,7 +34,7 @@ type D3SimulationStateRecord = {
     handle_       :: D3Simulation_
   -- keeping the map of labels to forces enables functionality like "enableByLabel"
   , forceLibrary  :: M.Map Label Force
-  , forceStatuses :: M.Map Label ForceStatus
+  -- , forceStatuses :: M.Map Label ForceStatus
   -- TODO perhaps by keeping tick functions here we can run simulation, tick by tick from PureScript
   , ticks         :: M.Map Label (Step D3Selection_)
 
@@ -70,17 +70,11 @@ _forceLibrary = _d3Simulation <<< _Newtype <<< prop (Proxy :: Proxy "forceLibrar
 _force :: forall r. String -> Lens' { simulation :: D3SimulationState_ | r } (Maybe Force)
 _force label = _forceLibrary <<< at label
 
-_forceStatuses :: forall r. Lens' { simulation :: D3SimulationState_ | r } (M.Map Label ForceStatus)
-_forceStatuses = _d3Simulation <<< _Newtype <<< prop (Proxy :: Proxy "forceStatuses")
-
 -- | given a list of forces to enable, ensure that those forces are enabled and all others disabled, no forces removed
 -- | (if you give a label that is not in the library it will have no effect when actualizing the force library from the status map)
-_onlyTheseForcesActive :: forall f. Foldable f => Functor f => f Label -> Map Label ForceStatus -> Map Label ForceStatus
-_onlyTheseForcesActive labels = \statusMap -> union updatedMap ((const ForceDisabled) <$> statusMap)
+onlyTheseForcesActive :: forall f. Foldable f => Functor f => f Label -> Map Label ForceStatus -> Map Label ForceStatus
+onlyTheseForcesActive labels = \statusMap -> union updatedMap ((const ForceDisabled) <$> statusMap)
   where updatedMap           = fromFoldable $ (\l -> Tuple l ForceActive) <$> labels
-
--- _forceStatus :: String -> Lens' D3SimulationState_ (Maybe ForceStatus)
-_forceStatus label = _forceStatuses <<< at label <<< _Just
 
 _ticks :: Lens' D3SimulationState_ (M.Map Label (Step D3Selection_))
 _ticks = _Newtype <<< prop (Proxy :: Proxy "ticks")
@@ -250,7 +244,7 @@ initialSimulationState forces = SimState_
     , key          : keyIsID_
 
     , forceLibrary : forces
-    , forceStatuses : getStatusMap forces
+    -- , forceStatuses : getStatusMap forces
     , ticks        : M.empty
     -- parameters of the D3 simulation engine
     , alpha        : defaultConfigSimulation.alpha

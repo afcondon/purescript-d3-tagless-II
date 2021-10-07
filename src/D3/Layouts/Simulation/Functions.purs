@@ -1,15 +1,15 @@
 module D3.Simulation.Functions where
 
+import D3.FFI
+import D3.Simulation.Forces
 import Prelude
 
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_, Datum_, Index_)
-import D3.FFI 
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
-import D3.Simulation.Forces 
-import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _forceStatuses, _handle, _status, _tick, _velocityDecay)
+import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _handle, _status, _tick, _velocityDecay)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (RawData)
 import Data.Array (elem, filter, intercalate)
@@ -73,10 +73,10 @@ listActiveForcesInLibrary forceMap = fst <$> (filter (\(Tuple n f) -> (view _sta
 
 simulationUpdateForceStatuses :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
+  Map Label ForceStatus ->
   m Unit
-simulationUpdateForceStatuses = do
+simulationUpdateForceStatuses forceStatuses = do
   handle        <- use _handle
-  forceStatuses <- use _forceStatuses
   let _ = spy "forceStatuses on update: " $ listActiveForces forceStatuses
   _forceLibrary %= (putStatusMap forceStatuses)
   forceLibrary  <- use _forceLibrary -- now use the updated force

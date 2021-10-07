@@ -12,14 +12,15 @@ import D3.FFI (linksForceName)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, createLinkForce, initialize)
 import D3.Simulation.Functions (simulationStart)
-import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus(..), ForceType(..), RegularForceType(..), SimVariable(..), _forceStatus, allNodes, initialSimulationState, showMaybeForceStatus, toggleForceStatus)
+import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus(..), ForceType(..), RegularForceType(..), SimVariable(..), allNodes, getStatusMap, initialSimulationState, showMaybeForceStatus, toggleForceStatus)
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start)
 import D3Tagless.Instance.Simulation (runWithD3_Simulation)
 import Data.Array (singleton)
-import Data.Lens (Lens', over, preview, (%=))
+import Data.Lens (Lens', _Just, over, preview, use, (%=))
+import Data.Lens.At (at)
 import Data.Lens.Record (prop)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
@@ -46,6 +47,7 @@ data Action
 type State = { 
     simulation      :: D3SimulationState_
   , code            :: Expandable.Status
+  , forceStatuses   :: Map Label ForceStatus
 }
 
 _code :: Lens' State Expandable.Status
@@ -65,6 +67,14 @@ forceNames = {
   , center: "center"
   , links: linksForceName
 }
+
+_forceStatuses :: Lens' State (Map Label ForceStatus)
+_forceStatuses = prop (Proxy :: Proxy "forceStatuses")
+_forceStatus :: forall p.
+  Strong p => Choice p => String ->
+  p ForceStatus ForceStatus ->
+  p State State
+_forceStatus label = _forceStatuses <<< at label <<< _Just
 
 _linksSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
 _linksSetting = _forceStatus forceNames.links
@@ -112,6 +122,7 @@ component = H.mkComponent
   initialState = { 
         simulation: initialSimulationState forceLibrary
       , code: Expandable.Collapsed
+      , forceStatuses: getStatusMap forceLibrary
     }
 
   controls state = 
@@ -207,7 +218,8 @@ handleAction = case _ of
     _forceStatus forceNames.manyBodyPos  %= (const ForceDisabled)
     
     runWithD3_Simulation do
-      actualizeForces 
+      statuses <- use _forceStatuses
+      actualizeForces statuses
       LesMis.graphScript graph "div.svg-container"
 
   Finalize ->  pure unit -- runWithD3_Simulation removeAllForces
@@ -215,7 +227,8 @@ handleAction = case _ of
   ToggleForce name -> do
     toggleForceByName name
     runWithD3_Simulation do
-      actualizeForces
+      statuses <- use _forceStatuses
+      actualizeForces statuses
       setConfigVariable $ Alpha 0.7
       start
 

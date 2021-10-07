@@ -11,11 +11,13 @@ import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
 import D3.FFI (SimulationVariables, readSimulationVariables)
 import D3.Node (D3LinkSwizzled, D3_SimulationNode, NodeID)
 import D3.Selection (SelectionAttribute)
-import D3.Simulation.Types (D3SimulationState_, _handle)
+import D3.Simulation.Types (D3SimulationState_, ForceStatus, _handle)
 import D3Tagless.Capabilities (Staging)
 import Data.Array (filter)
 import Data.Lens (Lens', _Just, preview, view)
+import Data.Lens.At (at)
 import Data.Lens.Record (prop)
+import Data.Map (Map, empty) as M
 import Data.Maybe (Maybe(..))
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
@@ -42,7 +44,7 @@ type MiseEnScene = {
   , linksShown      :: (SpagoGraphLinkID -> Boolean)
   , linksActive     :: (Datum_ -> Boolean) -- defined as Datum_ but it's really Link_, ugly
 -- list of forces to activate
-  , forces          :: Array Label
+  , forceStatuses   :: M.Map Label ForceStatus
   -- governing class on the SVG means we can completely change the look of the vis (and not have to think about this at D3 level)
   , cssClass        :: String
   , attributes      :: SpagoSceneAttributes
@@ -57,7 +59,7 @@ initialScene = {
     chooseNodes: isPackage -- chooses all nodes
   , linksShown:  const false
   , linksActive: const false
-  , forces: []
+  , forceStatuses: M.empty
   , cssClass: ""
   , attributes: clusterSceneAttributes
   , callback: x 0.0 -- possibly want to store the listener here rather than the callback?
@@ -91,11 +93,19 @@ _rawdata = prop (Proxy :: Proxy "rawdata")
 _enterselections :: forall a r. Lens' { selections :: a | r } a
 _enterselections = prop (Proxy :: Proxy "selections")
 
+_forceStatus :: forall p.
+  Strong p => Choice p => String ->
+  p ForceStatus ForceStatus ->
+  p State State
+_forceStatus label = _forceStatuses <<< at label <<< _Just
+
 -- lenses for mise-en-scene things 
+_forceStatuses :: Lens' State (M.Map Label ForceStatus)
+_forceStatuses = _scene <<< prop (Proxy :: Proxy "forceStatuses")
 _chooseNodes              = _scene <<< prop (Proxy :: Proxy "chooseNodes")
 _linksShown               = _scene <<< prop (Proxy :: Proxy "linksShown")
 _linksActive              = _scene <<< prop (Proxy :: Proxy "linksActive")
-_sceneForces              = _scene <<< _forces
+-- _sceneForces              = _scene <<< _forces
 _cssClass                 = _scene <<< prop (Proxy :: Proxy "cssClass")
 _callback                 = _scene <<< prop (Proxy :: Proxy "callback") 
 _sceneAttributes          = _scene <<< prop (Proxy :: Proxy "attributes")

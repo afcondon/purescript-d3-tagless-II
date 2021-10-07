@@ -50,7 +50,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   setConfigVariable    :: SimVariable -> m Unit
   -- management of forces
   -- | make the forces in the simulation match the forces in the simulation state
-  actualizeForces:: m Unit 
+  actualizeForces:: Map Label ForceStatus -> m Unit 
   -- setForcesByLabel :: { enable :: Array Label, disable :: Array Label } -> m Unit -- REVIEW not convinced this function is necessary
   -- management of data (nodes and links)
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m Unit
