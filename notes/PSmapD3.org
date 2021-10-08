@@ -1,0 +1,8 @@
+* PS<$>D3
+
+** BUGS
+*** initial XY on entry, need to parameterize whether continuity is desired or not
+**** alternative approach is to pull from current simulation nodes
+**** generalization might be directionality per field
+
+***  
