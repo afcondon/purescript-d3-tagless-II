@@ -1,8 +1,26 @@
 * PS<$>D3
 
 ** BUGS
-*** initial XY on entry, need to parameterize whether continuity is desired or not
+*** TODO initial XY on entry, need to parameterize whether continuity is desired or not
 **** alternative approach is to pull from current simulation nodes
 **** generalization might be directionality per field
+*** TODO display links is actually putting links into simulation and only filter links is doing filtering 
+*** TODO exploding a package in "package graph" scene results in offscreen modules
 
-***  
+** Updates
+*** TODO update which changes only attributes
+**** back and forth between color schemes
+**** buttons to match
+**** stretch goal: transitions, ie size of circle, fade on remove etc
+
+*** add buttons to unpin
+**** { all, modules, packages, tree, unused } sorts of filters
+
+*** make vertical XY the default so that radial is only one transform
+
+** Features
+*** multiphase scenes
+**** example: package graph
+***** pin packages
+***** run with fast cooling for a second or two
+***** unpin packages
