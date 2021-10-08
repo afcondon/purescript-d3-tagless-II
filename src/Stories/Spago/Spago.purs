@@ -191,9 +191,9 @@ handleAction = case _ of
   ChangeStyling (TopLevelCSS style) -> do
     _cssClass .= style
 
-  ChangeStyling (GraphStyle style) -> do
-    -- this action should change only the scene attributes in some way and then runsimulation
-    pure unit
+  ChangeStyling (GraphStyle attributes) -> do
+    _sceneAttributes .= attributes
+    runSimulation
 
   ChangeSimConfig c -> do
     runWithD3_Simulation $ setConfigVariable c 

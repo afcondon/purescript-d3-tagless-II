@@ -40,7 +40,6 @@ type SpagoSceneAttributes = {
 }
 
 clusterSceneAttributes :: SpagoSceneAttributes
--- clusterSceneAttributes :: SpagoSceneAttributes
 clusterSceneAttributes = {
     circles: [ radius datum_.radius
             , fill datum_.fillByUsage
@@ -57,7 +56,6 @@ clusterSceneAttributes = {
           ] 
 }
 
--- graphSceneAttributes :: SelectionAttribute -> SpagoSceneAttributes
 graphSceneAttributes :: SpagoSceneAttributes
 graphSceneAttributes = { 
     circles: [ radius datum_.radius
@@ -84,6 +82,7 @@ treeSceneAttributes = {
   , labels: [ classed "label"
             , x 4.0
             , y 2.0
+            -- the following attribute is suspended until we can revisit the tree_datum_ concept, see if it's really needed etc
             -- , textAnchor (tree_datum_.textAnchor Horizontal)
             , text datum_.name
             ]

@@ -3,6 +3,7 @@ module Stories.Spago.HTML where
 import Prelude
 
 import D3.Data.Tree (TreeLayout(..))
+import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Files (isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Examples.Spago.Model (isM2M_Graph_Link_, isM2M_Tree_Link_, isM2P_Link_, isP2P_Link_, isPackage, isUsedModule)
 import D3.Simulation.Forces (showType)
@@ -184,6 +185,20 @@ renderSimControls state = do
           , Button.buttonRight
               [ HE.onClick $ const (Filter $ LinkForceFilter isP2P_Link_) ]
               [ HH.text "P2P" ]
+          ]
+        ]
+    , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
+        [ Format.contentHeading_ [ HH.text "D3 attributes chosen" ]
+        , Button.buttonGroup_
+          [ Button.buttonLeft
+              [ HE.onClick $ const (ChangeStyling $ GraphStyle clusterSceneAttributes) ]
+              [ HH.text "Clusters" ]
+          , Button.buttonCenter
+              [ HE.onClick $ const (ChangeStyling $ GraphStyle graphSceneAttributes) ]
+              [ HH.text "Graph" ]
+          , Button.buttonRight
+              [ HE.onClick $ const (ChangeStyling $ GraphStyle treeSceneAttributes) ]
+              [ HH.text "Tree" ]
           ]
         ]
     , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
