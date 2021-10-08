@@ -31,7 +31,7 @@ import Halogen (HalogenM, liftEffect)
 import Halogen as H
 import Halogen.Subscription (Listener)
 import Halogen.Subscription as HS
-import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..), VizEvent(..))
+import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..), VizEvent(..))
 import Stories.Spago.Forces (forceLibrary)
 import Stories.Spago.HTML (render)
 import Stories.Spago.State (State, _callback, _chooseNodes, _cssClass, _enterselections, _forceStatus, _forceStatuses, _links, _linksActive, _linksShown, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
@@ -109,7 +109,6 @@ handleAction = case _ of
     _cssClass        .= "cluster"
     _sceneAttributes .= clusterSceneAttributes
     _forceStatuses   %= onlyTheseForcesActive [ "clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide2" ]
-    -- _nodeInitializerFunctions .= [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
     _nodeInitializerFunctions .= [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
     -- runWithD3_Simulation $ removeNamedSelection "treelinksSelection" -- make sure the links-as-SVG-paths are gone before we put in links-as-SVG-lines
     runSimulation
@@ -189,8 +188,12 @@ handleAction = case _ of
     _chooseNodes .= filterFn
     runSimulation -- maybe also setConfigVariable $ Alpha 0.7
 
-  ChangeStyling style -> do
-    _cssClass %= (const style) -- modify_ (\s -> s { svgClass = style })
+  ChangeStyling (TopLevelCSS style) -> do
+    _cssClass .= style
+
+  ChangeStyling (GraphStyle style) -> do
+    -- this action should change only the scene attributes in some way and then runsimulation
+    pure unit
 
   ChangeSimConfig c -> do
     runWithD3_Simulation $ setConfigVariable c 

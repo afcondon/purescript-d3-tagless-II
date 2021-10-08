@@ -25,7 +25,7 @@ import Ocelot.Block.Checkbox as Checkbox
 import Ocelot.Block.Format as Format
 import Ocelot.Block.Table as Table
 import Ocelot.HTML.Properties (css)
-import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..))
+import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..))
 import Stories.Spago.State (State, _cssClass, _stagingLinkFilter, _stagingLinks, _stagingNodes, getSimulationVariables)
 import Stories.Utilities as Utils
 import UIGuide.Block.Backdrop as Backdrop
@@ -190,16 +190,16 @@ renderSimControls state = do
         [ Format.contentHeading_ [ HH.text "Stylesheet" ]
         , Button.buttonGroup_
           [ Button.buttonLeft
-              [ HE.onClick $ const (ChangeStyling "cluster") ]
+              [ HE.onClick $ const (ChangeStyling $ TopLevelCSS "cluster") ]
               [ HH.text "Clusters" ]
           , Button.buttonCenter
-              [ HE.onClick $ const (ChangeStyling "graph") ]
+              [ HE.onClick $ const (ChangeStyling $ TopLevelCSS "graph") ]
               [ HH.text "Graph" ]
           , Button.buttonCenter
-              [ HE.onClick $ const (ChangeStyling "tree") ]
+              [ HE.onClick $ const (ChangeStyling $ TopLevelCSS "tree") ]
               [ HH.text "Tree" ]
           , Button.buttonRight
-              [ HE.onClick $ const (ChangeStyling "none") ]
+              [ HE.onClick $ const (ChangeStyling $ TopLevelCSS "none") ]
               [ HH.text "None" ]
           ]
         ]

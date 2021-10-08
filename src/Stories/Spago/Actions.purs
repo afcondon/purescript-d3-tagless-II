@@ -10,6 +10,7 @@ import D3.Node (NodeID)
 import D3.Simulation.Types (SimVariable)
 
 data Scene = PackageGrid | PackageGraph | ModuleTree TreeLayout | LayerSwarm
+data StyleChange = TopLevelCSS String | GraphStyle String
 data FilterData = LinkShowFilter (SpagoGraphLinkID -> Boolean)
                 | LinkForceFilter (Datum_ -> Boolean) -- because this is post- putting in the DOM, it's a filter on the opaque type
                 | NodeFilter (SpagoSimNode -> Boolean)
@@ -19,7 +20,7 @@ data Action
   | Scene Scene
   | ToggleForce Label
   | Filter FilterData
-  | ChangeStyling String
+  | ChangeStyling StyleChange
   | ChangeSimConfig SimVariable
   | StopSim
   | StartSim
