@@ -10,7 +10,7 @@ import D3.FFI (d3GetSelectionData_, keyIsID_, simdrag)
 import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimStateL, carryOverSimStateN, mergeSelections, on, openSelection, selectUnder, setAttributes, setLinks, setNodes, simulationHandle, start, stop, swizzleLinks, updateJoin)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimStateL, carryOverSimStateN, mergeSelections, on, openSelection, selectUnder, setAttributes, setLinks, setLinksFromSelection, setNodes, setNodesFromSelection, simulationHandle, start, stop, swizzleLinks, updateJoin)
 import Data.Array (filter)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
@@ -101,8 +101,9 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   mergedlinksShown   <- mergeSelections linkEnter link'.update  -- merged enter and update becomes the `node` selection for next pass
   
   -- now put the nodes and links into the simulation 
-  setNodes $ unsafeCoerce $ d3GetSelectionData_ mergedNodeSelection -- TODO hide this coerce in setNodes
-  setLinks $ unsafeCoerce $ filter staging.linksWithForce $ d3GetSelectionData_ mergedlinksShown -- TODO hide this coerce in setLinks
+  setNodesFromSelection mergedNodeSelection
+  -- setLinksFromSelection $ unsafeCoerce $ filter staging.linksWithForce $ d3GetSelectionData_ mergedlinksShown -- TODO hide this coerce in setLinks
+  setLinksFromSelection mergedlinksShown staging.linksWithForce
   -- tick functions for each selection
   addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
     Step mergedNodeSelection [ transform' datum_.translateNode ]

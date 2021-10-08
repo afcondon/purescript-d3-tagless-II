@@ -94,6 +94,8 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   carryOverSimStateL selection rawdata key = simulationPreserveLinkReferences selection rawdata key
   setNodes           = simulationSetNodes
   setLinks           = simulationSetLinks 
+  setNodesFromSelection selection = simulationSetNodesFromSelection selection
+  setLinksFromSelection selection = simulationSetLinksFromSelection selection
   swizzleLinks       = simulationSwizzleLinks
   getNodes           = simulationGetNodes
   getLinks           = simulationGetLinks 

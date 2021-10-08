@@ -54,8 +54,11 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- setForcesByLabel :: { enable :: Array Label, disable :: Array Label } -> m Unit -- REVIEW not convinced this function is necessary
   -- management of data (nodes and links)
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m Unit
-  -- we have a filter on the Links because we will often want only a subset of the links in the DOM to be links in the simulation
   setLinks :: forall d r. Array (D3LinkSwizzled (D3_SimulationNode d) r) -> m Unit
+  -- the following versions are less type-safe but they are necessary for updating simulations
+  -- it's up to the "script" writer to make sure the selection data matches the D3SimulationNode and/or D3LinkSwizzled
+  setNodesFromSelection :: selection -> m Unit
+  setLinksFromSelection :: selection -> (Datum_ -> Boolean) -> m Unit
   getNodes :: forall d.   m (Array (D3_SimulationNode d))
   getLinks :: forall d r. m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
   -- TODO merge these functions back together later once we have some good usage examples to validate

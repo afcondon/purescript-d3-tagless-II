@@ -184,6 +184,26 @@ simulationSetLinks links = do
   let _ = setLinks_ handle links
   pure unit
 
+simulationSetNodesFromSelection :: 
+  forall row m.
+  Bind m =>
+  MonadState { simulation :: D3SimulationState_ | row } m =>
+  D3Selection_ -> m Unit
+simulationSetNodesFromSelection nodeSelection = do
+  handle <- use _handle
+  let _ = setNodes_ handle (unsafeCoerce $ d3GetSelectionData_ nodeSelection)
+  pure unit
+
+simulationSetLinksFromSelection :: 
+  forall row m.
+  Bind m =>
+  MonadState { simulation :: D3SimulationState_ | row } m =>
+  D3Selection_ -> (Datum_ -> Boolean) -> m Unit
+simulationSetLinksFromSelection linkSelection filterFn = do
+  handle <- use _handle
+  let _ = setLinks_ handle (unsafeCoerce $ filter filterFn $ d3GetSelectionData_ linkSelection)
+  pure unit
+
 simulationSwizzleLinks ::
   forall d r row id m. 
   Bind m =>
