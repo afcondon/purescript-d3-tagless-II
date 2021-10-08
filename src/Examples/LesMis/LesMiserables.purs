@@ -2,7 +2,7 @@ module D3.Examples.LesMiserables where
 
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
-import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
+import D3.Data.Types (D3Selection_, Element(..), Selector)
 import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Examples.LesMiserables.Model (LesMisRawModel)
 import D3.FFI (keyIsID_, simdrag)
@@ -10,64 +10,32 @@ import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..))
 import D3.Simulation.Types (D3SimulationState_, Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SimulationM, addTickFunction, appendTo, attach, getLinks, getNodes, on, setAttributes, setLinks, setNodes, simpleJoin, swizzleLinks)
-import D3Tagless.Capabilities as D3
+import D3Tagless.Capabilities (class SimulationM, addTickFunction, appendTo, attach, on, setAttributes, setLinks, setNodes, simpleJoin)
 import Data.Int (toNumber)
-import Data.Nullable (Nullable)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Math (sqrt)
-import Prelude (class Bind, Unit, bind, const, discard, negate, pure, unit, ($), (/), (<<<))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
 import Utility (getWindowWidthHeight)
 
 -- type-safe(ish) accessors for the data that is given to D3
 -- we lose the type information in callbacks from the FFI, such as for attributes
 -- but since we know what we gave we can coerce it back to the initial type.
-link_ :: { color :: Datum_ -> String
-, source :: Datum_
-            -> { fx :: Nullable Number
-               , fy :: Nullable Number
-               , group :: Int
-               , id :: String
-               , vx :: Number
-               , vy :: Number
-               , x :: Number
-               , y :: Number
-               }
-, target :: Datum_
-            -> { fx :: Nullable Number
-               , fy :: Nullable Number
-               , group :: Int
-               , id :: String
-               , vx :: Number
-               , vy :: Number
-               , x :: Number
-               , y :: Number
-               }
-, value :: Datum_ -> Number
-}
 link_ = {
-    source: \d -> (unboxD3SimLink d).source
-  , target: \d -> (unboxD3SimLink d).target
-  , value:  \d -> (unboxD3SimLink d).value
+    source: _.source <<< unboxD3SimLink
+  , target: _.target <<< unboxD3SimLink
+  , value:  _.value <<< unboxD3SimLink
   , color:  \d -> d3SchemeCategory10N_ (toNumber $ (unboxD3SimLink d).target.group)
 }
 
-datum_ :: { colorByGroup :: Datum_ -> String
-, group :: Datum_ -> Int
-, id :: Datum_ -> String
-, x :: Datum_ -> Number
-, y :: Datum_ -> Number
-}
 datum_ = {
 -- direct accessors to fields of the datum (BOILERPLATE)
-    id    : \d -> (unboxD3SimNode d).id -- NB the id in this case is a String
-  , x     : \d -> (unboxD3SimNode d).x
-  , y     : \d -> (unboxD3SimNode d).y
-  , group : \d -> (unboxD3SimNode d).group
+    id    : _.id <<< unboxD3SimNode -- NB the id in this case is a String
+  , x     : _.x <<< unboxD3SimNode
+  , y     : _.y <<< unboxD3SimNode
+  , group : _.group <<< unboxD3SimNode
 
-  , colorByGroup:
-      \d -> d3SchemeCategory10N_ (toNumber $ datum_.group d)
+  , colorByGroup: d3SchemeCategory10N_ <<< toNumber <<< _.group <<< unboxD3SimNode
 }
 
 -- | recipe for this force layout graph
@@ -86,17 +54,13 @@ graphScript model selector = do
   
   -- in contrast to a simple SelectionM function, we have additional typeclass capabilities for simulation
   -- which we use here to introduce the nodes and links to the simulation
-  setNodes model.nodes -- no staging here, we just load the nodes straight into Sim
-  swizzledLinks <- swizzleLinks model.links model.nodes keyIsID_
-  setLinks swizzledLinks
+  nodesInSim <- setNodes model.nodes -- no staging here, we just load the nodes straight into Sim
+  linksInSim <- setLinks model.links model.nodes keyIsID_
 
-  cookedNodes <- getNodes
-  cookedLinks <- getLinks
-  
   -- joining the data from the model after it has been put into the simulation
-  nodesSelection <- simpleJoin nodesGroup Circle cookedNodes keyIsID_ 
+  nodesSelection <- simpleJoin nodesGroup Circle nodesInSim keyIsID_ 
   setAttributes nodesSelection [ radius 5.0, fill datum_.colorByGroup ] 
-  linksSelection <- simpleJoin linksGroup Line   cookedLinks keyIsID_ 
+  linksSelection <- simpleJoin linksGroup Line   linksInSim keyIsID_ 
   setAttributes linksSelection [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
 
   -- both links and nodes are updated on each step of the simulation, 
@@ -108,13 +72,12 @@ graphScript model selector = do
                                                 , x2 (_.x <<< link_.target)
                                                 , y2 (_.y <<< link_.target)
                                                 ]
-  -- _ <- nodesSelection `on` Drag DefaultDrag
+  -- use default drag function (simply drags the element that's clicked on)                                              
   _ <- nodesSelection `on` Drag (CustomDrag "lesmis" simdrag)
-
+  -- TODO create inner <g> and apply the zoom functionality to it
   _ <- svg `on`  Zoom { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                       , scale  : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
                       , name   : "LesMis"
                       , target : svg
                       }
-
   pure unit

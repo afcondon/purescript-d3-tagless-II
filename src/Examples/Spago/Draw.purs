@@ -6,17 +6,15 @@ import D3.Attributes.Sugar (classed, remove, strokeColor, transform', x1, x2, y1
 import D3.Data.Types (D3Selection_, D3This_, Datum_, Element(..))
 import D3.Examples.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, svgAttrs, updateAttrs)
 import D3.Examples.Spago.Model (datum_, link_)
-import D3.FFI (d3GetSelectionData_, keyIsID_, simdrag)
-import D3.Selection (Behavior(..), DragBehavior(..), SelectionAttribute)
+import D3.FFI (keyIsID_, simdrag)
+import D3.Selection (Behavior(..), DragBehavior(..))
 import D3.Simulation.Types (Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, carryOverSimStateL, carryOverSimStateN, mergeSelections, on, openSelection, selectUnder, setAttributes, setLinks, setLinksFromSelection, setNodes, setNodesFromSelection, simulationHandle, start, stop, swizzleLinks, updateJoin)
-import Data.Array (filter)
+import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, mergeNewDataWithSim, mergeSelections, on, openSelection, selectUnder, setAttributes, setLinksFromSelection, setNodesFromSelection, updateJoin)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Stories.Spago.Actions (VizEvent(..))
-import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
 import Web.Event.Internal.Types (Event)
 
@@ -63,20 +61,17 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   node                  <- openSelection nodesGroup (show Group) -- FIXME this call and updateJoin and append all have to match
   link                  <- openSelection linksGroup (show Line)  -- FIXME this call and updateJoin and append all have to match
   -- this will change all the object refs so a defensive copy is needed if join is to work
-  mergedNodeData        <- carryOverSimStateN node staging.rawdata keyIsID_ -- REVIEW this honors fx/fy of new node but nothing else
-  mergedLinkData        <- carryOverSimStateL link staging.rawdata keyIsID_ 
-  swizzledLinks         <- swizzleLinks mergedLinkData mergedNodeData keyIsID_ -- the key function here is for the SOURCE and TARGET, not the link itself
+  merged <- mergeNewDataWithSim node keyIsID_ link keyIsID_ staging.rawdata 
   -- first the nodedata
-  node'                 <- updateJoin node Group mergedNodeData keyIsID_
+  node'                 <- updateJoin node Group merged.nodes keyIsID_
   -- put new elements (g, g.circle & g.text) into the DOM
   nodeEnter             <- appendTo node'.enter Group enterAttrs
-  circlesSelection      <- appendTo nodeEnter Circle attrs.circles
-  labelsSelection       <- appendTo nodeEnter Text attrs.labels
+  _ <- appendTo nodeEnter Circle attrs.circles
+  void $ appendTo nodeEnter Text attrs.labels
   -- remove elements corresponding to exiting data
   setAttributes node'.exit [ remove ]
   -- change anything that needs changing on the continuing elements
-  simulation_           <- simulationHandle
-  setAttributes node'.update $ updateAttrs simulation_ 
+  setAttributes node'.update updateAttrs 
   updateCirclesSelection <- selectUnder node'.update (show Circle)
   setAttributes updateCirclesSelection attrs.circles
   updateLabelsSelection <- selectUnder node'.update (show Text)
@@ -85,11 +80,12 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   mergedNodeSelection   <- mergeSelections nodeEnter node'.update  -- merged enter and update becomes the `node` selection for next pass
   
   -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
-  _ <- mergedNodeSelection `on` Drag (CustomDrag "spago" simdrag) 
+  void $ mergedNodeSelection `on` Drag (CustomDrag "spago" simdrag) 
   
   -- now the linkData
-  -- after swizzling keyIsID_ should work on links, the id would be "5-8" if keyFn(link.source) == 5 && keyFn(link.target) == 8, for example
-  link'                 <- updateJoin link Line swizzledLinks keyIsID_
+  -- after merging data with existing data in sim, keyIsID_ is correct key function on links
+  -- the id would be "5-8" if keyFn(link.source) == 5 && keyFn(link.target) == 8, for example
+  link'                 <- updateJoin link Line merged.links keyIsID_
   -- put new element (line) into the DOM
   linkEnter             <- appendTo link'.enter Line [ classed link_.linkClass, strokeColor link_.color ]
   setAttributes linkEnter  [ classed "enter" ]
@@ -104,6 +100,7 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   setNodesFromSelection mergedNodeSelection
   -- setLinksFromSelection $ unsafeCoerce $ filter staging.linksWithForce $ d3GetSelectionData_ mergedlinksShown -- TODO hide this coerce in setLinks
   setLinksFromSelection mergedlinksShown staging.linksWithForce
+  
   -- tick functions for each selection
   addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
     Step mergedNodeSelection [ transform' datum_.translateNode ]

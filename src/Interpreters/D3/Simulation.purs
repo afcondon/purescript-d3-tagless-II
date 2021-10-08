@@ -90,15 +90,11 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
 -- management of forces
   actualizeForces       = simulationUpdateForceStatuses
 -- management of data 
-  carryOverSimStateN selection rawdata key = simulationPreservePositions selection rawdata key
-  carryOverSimStateL selection rawdata key = simulationPreserveLinkReferences selection rawdata key
-  setNodes           = simulationSetNodes
-  setLinks           = simulationSetLinks 
+  setNodes = simulationSetNodes
+  setLinks = simulationSetLinks 
+  mergeNewDataWithSim selection   = simulationMergeNewData selection
   setNodesFromSelection selection = simulationSetNodesFromSelection selection
   setLinksFromSelection selection = simulationSetLinksFromSelection selection
-  swizzleLinks       = simulationSwizzleLinks
-  getNodes           = simulationGetNodes
-  getLinks           = simulationGetLinks 
 
 -- management of tick functions, what to do with the selection on each step of simulation
     -- TODO this would be the more efficient but less attractive route to defining a Tick function
@@ -119,6 +115,6 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     let _ = disableTick_ handle label
     pure unit
     
--- TODO is this really necessary tho? couldn't it be added to the tick function 
 -- get the underlying simulation handle out of the simulation (necessary for tick functions? )
   simulationHandle = use _handle
+-- TODO is this really necessary tho? couldn't it be added to the tick function 

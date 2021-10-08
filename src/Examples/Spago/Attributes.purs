@@ -28,8 +28,8 @@ enterAttrs =
   , transform' datum_.translateNode
   ]
 
-updateAttrs :: forall t1. t1 -> Array SelectionAttribute
-updateAttrs _ = 
+updateAttrs :: Array SelectionAttribute
+updateAttrs = 
   [ classed datum_.nodeClass
   , transform' datum_.translateNode
   ]

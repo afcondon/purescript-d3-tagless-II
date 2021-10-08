@@ -40,9 +40,6 @@ type ForceConfigLists = { enable :: Array Label, disable :: Array Label }
   -- return them for the Join to use using the same type...however, they may actually be changed 
   -- from what was sent...it's not tidy yet
 class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> selection where
-  -- writing callbacks from JavaScript will sometimes necessitate having the simulation handle
-  -- this can't easily be solved until / unless D3 is replaced with something else
-  simulationHandle :: m D3Simulation_
   -- control
   start :: m Unit
   stop  :: m Unit
@@ -53,24 +50,24 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   actualizeForces:: Map Label ForceStatus -> m Unit 
   -- setForcesByLabel :: { enable :: Array Label, disable :: Array Label } -> m Unit -- REVIEW not convinced this function is necessary
   -- management of data (nodes and links)
-  setNodes :: forall d.   Array (D3_SimulationNode d) -> m Unit
-  setLinks :: forall d r. Array (D3LinkSwizzled (D3_SimulationNode d) r) -> m Unit
+  setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
+  setLinks :: forall d r id. (Eq id) => Array (D3Link id r) -> Array (D3_SimulationNode d) -> (Datum_ -> Index_ ) -> m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
   -- the following versions are less type-safe but they are necessary for updating simulations
   -- it's up to the "script" writer to make sure the selection data matches the D3SimulationNode and/or D3LinkSwizzled
   setNodesFromSelection :: selection -> m Unit
   setLinksFromSelection :: selection -> (Datum_ -> Boolean) -> m Unit
-  getNodes :: forall d.   m (Array (D3_SimulationNode d))
-  getLinks :: forall d r. m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
-  -- TODO merge these functions back together later once we have some good usage examples to validate
-  -- TODO should be able to merge carryOverSimStateL and swizzleLinks (and possibly carryOverSimStateN)
-  carryOverSimStateN :: forall d r id. selection -> RawData d r id -> (Datum_ -> Index_) ->  m (Array (D3_SimulationNode d))
-  carryOverSimStateL :: forall d r id. (Eq id) => selection -> RawData d r id -> (Datum_ -> Index_) ->  m (Array (D3Link id r))
-  swizzleLinks :: forall d r id. 
-    Array (D3Link id r) ->
-    Array (D3_SimulationNode d) ->
-    (Datum_ -> Index_) ->
-    m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
+  mergeNewDataWithSim :: forall d r id. (Eq id) =>
+    selection -> -- nodes selection
+    (Datum_ -> Index_) -> -- nodes keyFn
+    selection -> -- links selection
+    (Datum_ -> Index_) -> -- links KeyFn
+    RawData d r id -> -- links and nodes raw data
+    m { links :: (Array (D3LinkSwizzled (D3_SimulationNode d) r)), nodes :: (Array (D3_SimulationNode d))}
+
+  -- simulationHandle is needed for (at least) the following tick functions
+  simulationHandle :: m D3Simulation_
   -- adding functions that occur on every tick of the simulation clock
+  -- this could potentially be extracted from here by doing each step of sim in PureScript
   addTickFunction    :: Label -> Step selection -> m Unit 
   removeTickFunction :: Label                   -> m Unit
 
