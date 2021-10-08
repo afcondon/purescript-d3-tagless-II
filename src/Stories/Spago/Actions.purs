@@ -9,7 +9,7 @@ import D3.Examples.Spago.Model (SpagoSimNode)
 import D3.Node (NodeID)
 import D3.Simulation.Types (SimVariable)
 
-data Scene = PackageGrid | PackageGraph | ModuleTree TreeLayout
+data Scene = PackageGrid | PackageGraph | ModuleTree TreeLayout | LayerSwarm
 data FilterData = LinkShowFilter (SpagoGraphLinkID -> Boolean)
                 | LinkForceFilter (Datum_ -> Boolean) -- because this is post- putting in the DOM, it's a filter on the opaque type
                 | NodeFilter (SpagoSimNode -> Boolean)

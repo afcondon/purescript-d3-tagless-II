@@ -12,7 +12,7 @@ import D3.Examples.Spago.Draw (getVizEventFromClick)
 import D3.Examples.Spago.Draw as Graph
 import D3.Examples.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Examples.Spago.Files (NodeType(..), isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Examples.Spago.Model (SpagoModel, allNodes, convertFilesToGraphModel, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, moduleNodesToContainerXY, modulesNodesToPhyllotaxis, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, unpinAllNodes)
+import D3.Examples.Spago.Model (SpagoModel, allNodes, convertFilesToGraphModel, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, moduleNodesToContainerXY, modulesNodesToPhyllotaxis, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_R, unpinAllNodes)
 import D3.Examples.Spago.Tree (treeReduction)
 import D3.FFI (linksForceName)
 import D3.Selection (SelectionAttribute)
@@ -127,6 +127,17 @@ handleAction = case _ of
     -- runWithD3_Simulation $ uniformlyDistributeNodes -- FIXME
     runSimulation
 
+  Scene LayerSwarm -> do
+    _chooseNodes     .= isUsedModule
+    _linksShown      .= isM2M_Tree_Link
+    _linksActive     .= const true
+    _cssClass        .= "tree"
+    _sceneAttributes .= treeSceneAttributes
+    _forceStatuses   %= onlyTheseForcesActive [ "htreeNodesX", "collide1", "y", linksForceName ]
+    _nodeInitializerFunctions .= [ unpinAllNodes ]
+    -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
+    runSimulation 
+    
   Scene (ModuleTree Radial) -> do
     _chooseNodes     .= isUsedModule
     _linksShown      .= isM2M_Tree_Link
@@ -134,7 +145,7 @@ handleAction = case _ of
     _cssClass        .= "tree radial"
     _sceneAttributes .= treeSceneAttributes
     _forceStatuses   %= onlyTheseForcesActive [ "center", "collide2", "chargetree", "charge2", linksForceName ]
-    _nodeInitializerFunctions .= [ unpinAllNodes, modulesNodesToPhyllotaxis, fixNamedNodeTo "Main" { x: 0.0, y: 0.0 } ]
+    _nodeInitializerFunctions .= [ unpinAllNodes, treeNodesToTreeXY_R, fixNamedNodeTo "Main" { x: 0.0, y: 0.0 } ]
     -- runWithD3_Simulation $ removeNamedSelection "graphlinksSelection"
     runSimulation 
     

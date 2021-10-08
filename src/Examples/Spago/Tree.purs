@@ -77,7 +77,7 @@ treeReduction rootID model = do
       model { links = links, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, maps { id2TreeData = treeDerivedDataMap } }
 
 -- for radial positioning we treat x as angle and y as radius
-radialTranslate :: PointXY -> PointXY
+radialTranslate :: PointXY -> PointXY -- TODO move this to more basic library so it can be used without cycles
 radialTranslate p = 
   let angle  = p.x
       radius = p.y

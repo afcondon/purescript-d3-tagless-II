@@ -409,6 +409,24 @@ treeNodesToTreeXY_H nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
     setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { fx = notNull treeXY.x, fy = notNull treeXY.y }
       where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
 
+-- same as horizontal tree but uses x and y as polar coordinates, computes fx/fy from them
+treeNodesToTreeXY_R :: Array SpagoSimNode -> Array SpagoSimNode
+treeNodesToTreeXY_R nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes)
+  where
+    partitioned = partition isUsedModule nodes
+    setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
+    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { fx = notNull radialXY.x, fy = notNull radialXY.y }
+      where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
+            radialXY = radialTranslate treeXY
+            -- for radial positioning we treat x as angle and y as radius
+            radialTranslate :: PointXY -> PointXY
+            radialTranslate p = 
+              let angle  = p.y -- reversed because horizontal tree is the default this should change
+                  radius = p.x
+                  x = radius * cos angle
+                  y = radius * sin angle
+              in { x, y }
+
 -- same as horizontal tree but reverses {x,y} and {fx,fy}
 treeNodesToTreeXY_V :: Array SpagoSimNode -> Array SpagoSimNode
 treeNodesToTreeXY_V nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes)

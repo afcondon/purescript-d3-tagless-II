@@ -78,10 +78,14 @@ renderSimControls state = do
           [ Button.buttonPrimaryLeft
               [ HE.onClick $ const (Scene PackageGrid) ]
               [ HH.text "Package Grid" ]
-          , Button.buttonPrimaryCenter
+          , Button.buttonPrimaryRight
               [ HE.onClick $ const (Scene PackageGraph) ]
               [ HH.text "Package Graph" ]
-          , Button.buttonPrimaryCenter
+          ]
+        ]
+    , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
+        [ Button.buttonGroup_
+          [ Button.buttonPrimaryLeft
               [ HE.onClick $ const (Scene $ ModuleTree Horizontal) ]
               [ HH.text "Horiz. Tree" ]
           , Button.buttonPrimaryCenter
@@ -90,6 +94,13 @@ renderSimControls state = do
           , Button.buttonPrimaryRight
               [ HE.onClick $ const (Scene $ ModuleTree Radial) ]
               [ HH.text "Radial Tree" ]
+          ]
+        ]
+    , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
+        [ Button.buttonGroup_
+          [ Button.buttonPrimaryLeft
+              [ HE.onClick $ const (Scene LayerSwarm) ]
+              [ HH.text "LayerSwarm" ]
           ]
         ]
     , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
