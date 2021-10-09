@@ -71,9 +71,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   addTickFunction    :: Label -> Step selection -> m Unit 
   removeTickFunction :: Label                   -> m Unit
 
--- RawData type exists to clean up types of carryOverSimState functions and maybe can just fold into Staging if 
--- Simulation capability can wrap up, ie hide, the complexity around updates of running simulations and the 
--- corresponding need for copying data from existing selections without losing simulation position/velocity information
+-- RawData type exists to clean up types of mergeNewDataWithSim
 type RawData d r id = {
   nodes :: Array (D3_SimulationNode d)
 , links :: Array (D3Link id r) 
