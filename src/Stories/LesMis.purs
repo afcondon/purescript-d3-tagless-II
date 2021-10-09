@@ -207,7 +207,7 @@ handleAction = case _ of
     H.put (over lens not cardState)
 
   Initialize -> do
-    response <- H.liftAff $ AJAX.get ResponseFormat.string "http://localhost:1234/miserables.json"
+    response <- H.liftAff $ AJAX.get ResponseFormat.string "/miserables.json"
     let graph = readGraphFromFileContents response
 
     _forceStatus forceNames.center       %= (const ForceActive)

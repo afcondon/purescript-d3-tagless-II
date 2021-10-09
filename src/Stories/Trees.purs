@@ -167,7 +167,7 @@ handleAction = case _ of
   Initialize -> do
     detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
 
-    treeJSON <- H.liftAff $ getTreeViaAJAX "http://localhost:1234/flare-2.json"
+    treeJSON <- H.liftAff $ getTreeViaAJAX "/flare-2.json"
 
     case treeJSON of
       (E.Left err) -> pure unit

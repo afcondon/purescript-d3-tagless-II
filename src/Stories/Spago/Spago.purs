@@ -258,11 +258,11 @@ runSimulation = do
 -- ======================================================================================================================
 readModelData :: Aff (Maybe SpagoModel)
 readModelData = do
-  let datadir = "http://localhost:1234/spago-data/"
+  let datadir = "spago-data/"
   moduleJSON  <- AJAX.get ResponseFormat.string $ datadir <> "modules.json"
   packageJSON <- AJAX.get ResponseFormat.string $ datadir <> "packages.json"
   lsdepJSON   <- AJAX.get ResponseFormat.string $ datadir <> "lsdeps.jsonlines"
-  locJSON     <- AJAX.get ResponseFormat.string $ datadir <> "loc.json"
+  locJSON     <- AJAX.get ResponseFormat.string $ datadir <> "LOC.json"
   let model = hush $ convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON <*> locJSON
 
   pure (addTreeToModel "Main" model) 
