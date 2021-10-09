@@ -15,3 +15,4 @@
 /dist/PSD3-logo-3.psd
 /src/css/node_modules
 /src/css/yarn.lock
+.DS_Store
