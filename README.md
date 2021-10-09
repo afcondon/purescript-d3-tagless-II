@@ -1,9 +1,7 @@
-[TaglessD3.pdf](https://github.com/afcondon/purescript-d3-tagless-II/files/6461448/TaglessD3.pdf)
 
 # purescript-d3-tagless-II
-Tagless final style interpreter / wrapper for D3 in PureScript, latest of many re-writes
 
-![image](https://user-images.githubusercontent.com/1260895/116773970-72d05800-aa59-11eb-990e-a8a809a21d9b.png)
+Tagless final style interpreter / wrapper for D3 in PureScript, latest of many re-writes
 
 Proper readme to come, see readmes for my repos with previous attempts for context
 
@@ -11,26 +9,23 @@ Collaborators very welcome.
 
 `>>>>>` FEEL FREE TO CONTACT ME FOR AN INTRO TO THE REPO AND IDEAS IN IT `<<<<<<`
 
-# state of this repo
+# to build
 
-400-ish lines of interpreter code and a  minimal example showing that this interpreter is capable of implementing 
-the "General Update Pattern" (ie for transitions between data sets where entering, exiting and retained data are
-all separately animated), a hierarchical example (in this case a radial tree) and a force layout graph. 
+After cloning, you should be able to do:
 
-The latter two examples require some kind of `httpd` in the dist directory because they're fetching JSON data to show.
+* `yarn install`
+* `yarn run build`
+* `yarn run bundle`
 
-The three examples have been chosen to show three very different patterns of usage at the _D3 pattern language level_ rather than for any graphical or data visualization reason.
+and then if you serve `http` from the `dist` directory you should be able to see the demo.
 
-# next steps
+# making changes to CSS
 
-## Tasks and issues:
-  * making the attributes work with units (ie numerical lambda but result is a string like "150px" or "0.5rem"
-  * demo of force layout using output of `purs graph`
-  * custom rendering for "meta tree" to better square with presentation style in PDF below
-  * extend the "string instance" of the monad to generate something more like - or even, exactly like - the equivalent D3 JavaScript implementation
-  * add a Sankey diagram example
-  * add a drag and drop example like this stone [classic](http://bl.ocks.org/robschmuecker/7880033)
-  * add a collapsable tree and / or graph example
-  * demo some hover effects for graph neighborhoods
-  * write a proper README!!!
-  
+The repo uses a modified version of (several files from) the [Ocelot](https://github.com/citizennet/purescript-ocelot) ui-library from CitizenNet which have been altered to work with:
+
+* work with TailwindCSS 2.0+
+* build without webpack and other toolchain from that project
+
+After making modifications to the CSS for this project it is necessary to `yarn run build-css` which will build and bundle a `bundle.css` file in the `dist` directory. However, it is not necessary to do this to run the demo as a working version of the css is checked into the repo.
+
+[TaglessD3.pdf](https://github.com/afcondon/purescript-d3-tagless-II/files/6461448/TaglessD3.pdf)
