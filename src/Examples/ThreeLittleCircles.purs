@@ -11,17 +11,19 @@ import Math as Math
 import Prelude (bind, discard, negate, pure, ($), (*), (-), (/)) 
 import Unsafe.Coerce (unsafeCoerce)
 
--- SNIPPET 3LC-helpers
+-- SNIPPET
+-- Name: 3LC-helpers
 -- | simple utility function used in all three of these examples
 xFromIndex :: Datum_ -> Index_ -> Number
 xFromIndex _ i = ((indexIsNumber i) * 100.0)
   where
     indexIsNumber :: Index_ -> Number
     indexIsNumber = unsafeCoerce
--- END_SNIPPET
+-- TEPPINS
 
 -- | Pretty much the most basic example imaginable, three ints represented by three circles
--- SNIPPET ThreeLittleCircles1
+-- SNIPPET
+-- Name: ThreeLittleCircles1
 threeLittleCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
 threeLittleCircles selector = do 
 
@@ -34,11 +36,12 @@ threeLittleCircles selector = do
   setAttributes circles circleAttributes
 
   pure circles
--- END_SNIPPET
+-- TEPPINS
 
 
 -- | finally, using the data (as opposed to merely the index) in the visualization  
--- SNIPPET ThreeLittleCircles3
+-- SNIPPET
+-- Name: ThreeLittleCircles3
 type Datum = Int
 type Model = Array Datum  -- not necessary in such a simple example, of course
 
@@ -78,4 +81,4 @@ threeLittleCircles3 circleData selector = do
   setAttributes circles circleAttributes
 
   pure circles
--- END_SNIPPET
+-- TEPPINS
