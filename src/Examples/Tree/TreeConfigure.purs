@@ -5,8 +5,8 @@ import D3.Examples.Tree.Model
 import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), preserveAspectRatio, transform, viewBox)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_, Selector)
-import D3.Examples.Tree.Script (script) as Tree
-import D3.Examples.Tree.Script (treeDatum_)
+import D3.Examples.Tree.Draw (draw) as Tree
+import D3.Examples.Tree.Draw (treeDatum_)
 import D3.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
 import D3.Layouts.Hierarchical (horizontalClusterLink, horizontalLink, radialLink, radialSeparation, verticalClusterLink, verticalLink)
 import D3.Scales (d3SchemeCategory10N_)
@@ -43,7 +43,7 @@ getMetaTreeJSON treeModel = liftEffect $ do
   pure $ scriptTreeToJSON treeified
 
 -- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
--- | TODO specialize runD3M so that this function isn't necessary
+-- TODO specialize runD3M so that this function isn't necessary
 drawTree :: forall selection. TreeModel -> Selector selection -> Aff Unit
 drawTree treeModel selector = liftEffect $ do
   widthHeight <- getWindowWidthHeight
@@ -57,7 +57,7 @@ configureAndRunScript :: forall m selection.
   SelectionM selection m => 
   Tuple Number Number -> TreeModel -> Selector selection -> m selection
 configureAndRunScript (Tuple width height ) model selector = 
-  Tree.script { spacing, viewbox, selector, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_
+  Tree.draw { spacing, viewbox, selector, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_
   where
     svg     = { width, height }
 
@@ -101,7 +101,6 @@ configureAndRunScript (Tuple width height ) model selector =
                          , preserveAspectRatio $ AspectRatio XMin YMid Meet ] -- x and y are reversed in horizontal layouts
         _, Radial     -> [ viewBox (-radialRadius * 1.2) (-radialRadius * 1.2)  (radialExtent * 1.2)    (radialExtent * 1.2)
                          , preserveAspectRatio $ AspectRatio XMin YMin Meet ]
-
       
     linkPath =
       case model.treeType, model.treeLayout of

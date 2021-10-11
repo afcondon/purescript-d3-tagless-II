@@ -138,49 +138,8 @@ handleAction = case _ of
     pure unit
 
 codetext :: String
-codetext = 
-  """script :: forall m. SelectionM D3Selection_ m => m ((Array Char) -> m D3Selection_)
-  script = do 
-    let 
-      transition :: SelectionAttribute
-      transition = transitionWithDuration $ Milliseconds 2000.0
-      -- new entries enter at this position, updating entries need to transition to it on each update
-      xFromIndex :: Datum_ -> Index_ -> Number
-      xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0)
+codetext = "snippet"
 
-    root        <- attach "div#gup"
-    svg         <- append root $ node Svg [ viewBox 0.0 0.0 650.0 650.0 ]
-    letterGroup <- append svg  $ node_ Group
-
-    pure $ \letters -> 
-      do 
-        letterGroup <+> JoinGeneral {
-            element   : Text
-          , key       : UseDatumAsKey
-          , "data"    : letters
-          , behaviour : { 
-              enter:  [ classed  "enter"
-                      , fill     "green"
-                      , x        xFromIndex
-                      , y        0.0
-                      -- , yu (NWU { i: 0, u: Px })
-                      , text     (singleton <<< datumIsChar)
-                      , fontSize 48.0
-                      ]  
-                      `andThen` (transition `to` [ y 200.0 ]) 
-
-            , update: [ classed "update"
-                      , fill "gray"
-                      , y 200.0
-                      ] 
-                      `andThen` (transition `to` [ x xFromIndex ] ) 
-
-            , exit:   [ classed "exit"
-                      , fill "brown"
-                      ] 
-                      `andThen` (transition `to` [ y 400.0, remove ])
-            }
-        }"""
 
 blurbtext :: String
 blurbtext = 

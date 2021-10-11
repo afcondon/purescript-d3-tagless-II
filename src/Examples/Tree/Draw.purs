@@ -1,4 +1,4 @@
-module D3.Examples.Tree.Script where
+module D3.Examples.Tree.Draw where
 
 import Prelude
 
@@ -86,9 +86,12 @@ type ScriptConfig = {
 -- | all six variations of [Radial, Horizontal, Vertical] * [Dendrogram, TidyTree] 
 -- | NB there would be nothing wrong, per se, with individual examples, this just shows 
 -- | some more composability, at the price of some direct legibility
-script :: forall m selection. Bind m => SelectionM selection m => 
+
+-- SNIPPET
+-- Name: TreeDraw
+draw :: forall m selection. Bind m => SelectionM selection m => 
   ScriptConfig -> FlareTreeNode ->  m selection
-script config tree = do
+draw config tree = do
   root       <- attach config.selector  
   svg        <- appendTo root Svg (config.viewbox <> 
                                     [ classed "tree", width config.svg.width, height config.svg.height ]) 
@@ -117,3 +120,4 @@ script config tree = do
                 , fill       config.color
                 ]               
   pure svg
+-- TEPPINS

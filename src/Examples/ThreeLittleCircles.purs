@@ -12,7 +12,7 @@ import Prelude (bind, discard, negate, pure, ($), (*), (-), (/))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- SNIPPET
--- Name: 3LC-helpers
+-- Name: 3LC-xFromIndex
 -- | simple utility function used in all three of these examples
 xFromIndex :: Datum_ -> Index_ -> Number
 xFromIndex _ i = ((indexIsNumber i) * 100.0)
@@ -21,11 +21,11 @@ xFromIndex _ i = ((indexIsNumber i) * 100.0)
     indexIsNumber = unsafeCoerce
 -- TEPPINS
 
--- | Pretty much the most basic example imaginable, three ints represented by three circles
 -- SNIPPET
--- Name: ThreeLittleCircles1
-threeLittleCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
-threeLittleCircles selector = do 
+-- Name: TLCSimple
+-- | Pretty much the most basic example imaginable, three ints represented by three circles
+drawThreeCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
+drawThreeCircles selector = do 
 
   let circleAttributes = [ fill "green", cx xFromIndex, cy 50.0, radius 20.0 ]
 
@@ -38,12 +38,9 @@ threeLittleCircles selector = do
   pure circles
 -- TEPPINS
 
-
--- | finally, using the data (as opposed to merely the index) in the visualization  
 -- SNIPPET
--- Name: ThreeLittleCircles3
-type Datum = Int
-type Model = Array Datum  -- not necessary in such a simple example, of course
+-- Name: TLCParabola
+type Model = Array Int  -- not necessary in such a simple example, of course
 
 datum_ :: 
   { color :: Datum_ -> String
@@ -52,7 +49,7 @@ datum_ ::
   }
 datum_ =
   let 
-    getDatum :: Datum_ -> Datum 
+    getDatum :: Datum_ -> Int 
     getDatum = unsafeCoerce
     getIndex :: Index_ -> Int
     getIndex = unsafeCoerce
@@ -62,8 +59,8 @@ datum_ =
   , color : \d   -> d3SchemeCategory10N_ ((toNumber $ getDatum d) / 100.0)
 }
 
-threeLittleCircles3 :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_
-threeLittleCircles3 circleData selector = do 
+drawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_
+drawWithData circleData selector = do 
 
   let circleAttributes = [ 
       strokeColor datum_.color

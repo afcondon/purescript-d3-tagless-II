@@ -204,56 +204,7 @@ handleAction = case _ of
 
 
 codetext :: String
-codetext = 
-  """
--- a record that packages up all the customizations that are needed to render the 6 variations on Tree
-type ScriptConfig = { 
-    layout        :: TreeLayout
-  , selector      :: Selector String
-  , linkPath      :: SelectionAttribute
-  , spacing       :: { interChild :: Number, interLevel :: Number }
-  , viewbox       :: Array SelectionAttribute
-  , nodeTransform :: Array SelectionAttribute
-  , color         :: String
-  , svg           :: { width :: Number, height :: Number }
-}
-
--- | The eDSL script that renders tree layouts
--- | it has been parameterized rather heavily using the ScriptConfig record so that it can draw
--- | all six variations of [Radial, Horizontal, Vertical] * [Dendrogram, TidyTree] 
--- | NB there would be nothing wrong, per se, with individual examples, this just shows 
--- | some more composability, at the price of some direct legibility
-script :: forall m selection. Bind m => SelectionM selection m => 
-  ScriptConfig -> FlareTreeNode ->  m selection
-script config tree = do
-  root       <- attach config.selector  
-  svg        <- root D3.+ (node Svg (config.viewbox <> [ classed "tree"]))          
-  container  <- svg  D3.+ (node Group [ fontFamily      "sans-serif", fontSize 10.0 ])
-  links      <- container D3.+  (node Group [ classed "links"] )
-  nodes      <- container D3.+  (node Group [ classed "nodes"] )
-
-  theLinks_  <- links D3.<-> Join Path (links_ tree) 
-                                       [ strokeWidth   1.5, strokeColor   config.color, strokeOpacity 0.4
-                                       , fill "none", config.linkPath ]
-
-  -- we make a group to hold the node circle and the label text
-  nodeJoin_  <- nodes D3.<-> Join Group (descendants_ tree) config.nodeTransform
-
-  theNodes <- nodeJoin_ D3.+  
-                (node Circle  [ fill         (\d -> if datum_.hasChildren d then "#999" else "#555")
-                              , radius       2.5
-                              , strokeColor "white"
-                              ])
-
-  theLabels <- nodeJoin_ D3.+
-                (node Text  [ dy         0.31
-                            , x          (datum_.textX config.layout)
-                            , textAnchor (datum_.textAnchor config.layout)
-                            , text       datum_.name
-                            , fill       config.color
-                            ])               
-  pure svg
-  """
+codetext = "snippet"
 
 blurbtext :: forall t235 t236. Array (HH.HTML t235 t236)
 blurbtext = blurbParagraphs [

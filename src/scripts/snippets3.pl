@@ -8,7 +8,7 @@ my $snipCount = 0;
 my $currentSnippetName = "";
 my @snippetLines;
 my @tokens;
- 
+
 while (<>) {
   if (/SNIPPET/../TEPPINS/) {         # snippets are between these delimiters
     next if /SNIPPET/;                # we don't include the START delimiter

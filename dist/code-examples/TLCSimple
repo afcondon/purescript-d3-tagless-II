@@ -1,13 +1,6 @@
--- | simple utility function used in all three of these examples
-xFromIndex :: Datum_ -> Index_ -> Number
-xFromIndex _ i = ((indexIsNumber i) * 100.0)
-  where
-    indexIsNumber :: Index_ -> Number
-    indexIsNumber = unsafeCoerce
-
 -- | Pretty much the most basic example imaginable, three ints represented by three circles
-threeLittleCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
-threeLittleCircles selector = do 
+drawThreeCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
+drawThreeCircles selector = do 
 
   let circleAttributes = [ fill "green", cx xFromIndex, cy 50.0, radius 20.0 ]
 

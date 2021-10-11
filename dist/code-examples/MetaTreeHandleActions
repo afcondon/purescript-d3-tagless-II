@@ -1,0 +1,18 @@
+handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
+  Action -> m Unit
+handleAction = case _ of
+  ToggleCard lens -> do
+    st <- H.get
+    H.put (over lens not st)
+
+  Initialize -> do
+    detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.d3story"
+
+    treeJSON <- H.liftAff $ getTreeViaAJAX "/flare-2.json"
+
+    case treeJSON of
+      (E.Left err) -> pure unit
+      (E.Right (tree :: TreeJson_)) -> do
+        _     <- H.liftAff $ drawMetaTree tree
+        pure unit
+    pure unit

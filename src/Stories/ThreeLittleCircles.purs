@@ -114,11 +114,11 @@ handleAction = case _ of
     H.put (over lens not st)
 
   Initialize -> do 
-    text1 <- H.liftAff $ readSnippetFiles "ThreeLittleCircles1"
-    _ex1 %= const text1
-    text2 <- H.liftAff $ readSnippetFiles "ThreeLittleCircles2"
-    _ex2 %= const text2
-    _ <- H.liftEffect $ eval_D3M $ Circles.threeLittleCircles "div.svg-container"
+    text1 <- H.liftAff $ readSnippetFiles "TLCSimple"
+    _ex1 .= text1
+    text2 <- H.liftAff $ readSnippetFiles "TLCParabola"
+    _ex2 .= text2
+    _ <- H.liftEffect $ eval_D3M $ Circles.drawThreeCircles "div.svg-container"
     pure unit
 
   ToggleExample -> do
@@ -128,8 +128,8 @@ handleAction = case _ of
     _ <- H.liftEffect $ eval_D3M $ removeExistingSVG container
     _ <- H.liftEffect $ eval_D3M $ 
           if toggle'
-          then Circles.threeLittleCircles container
-          else Circles.threeLittleCircles3 [310, 474, 613, 726, 814, 877, 914, 926, 913, 874, 810] container
+          then Circles.drawThreeCircles container
+          else Circles.drawWithData [310, 474, 613, 726, 814, 877, 914, 926, 913, 874, 810] container
     modify_ (\s -> s { toggle = toggle' })
 
   Finalize -> pure unit

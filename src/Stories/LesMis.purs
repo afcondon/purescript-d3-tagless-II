@@ -11,7 +11,6 @@ import D3.Examples.LesMiserables.File (readGraphFromFileContents)
 import D3.FFI (linksForceName)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, createLinkForce, initialize)
-import D3.Simulation.Functions (simulationStart)
 import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus(..), ForceType(..), RegularForceType(..), SimVariable(..), allNodes, getStatusMap, initialSimulationState, showMaybeForceStatus, toggleForceStatus)
 import D3Tagless.Block.Button as Button
 import D3Tagless.Block.Expandable as Expandable
@@ -151,29 +150,11 @@ component = H.mkComponent
       ]
     ]
 
-    
-  -- render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div [ Utils.tailwindClass "story-container" ]
       [ HH.div -- [ Utils.tailwindClass "story-panel"]
         [ Utils.tailwindClass "story-panel-controls"] 
         (controls state)
-      -- , HH.div -- [ Utils.tailwindClass "story-panel" ] 
-      --       [ Utils.tailwindClass "story-panel-about"]
-      --       [ FormField.field_
-      --         { label: HH.text "About"
-      --         , helpText: []
-      --         , error: []
-      --         , inputId: "show-blurb"
-      --         }
-      --         [ Toggle.toggle
-      --           [ HP.id "show-blurb"
-      --           , HP.checked
-      --             $ Expandable.toBoolean state.blurb
-      --           , HE.onChange \_ -> ToggleCard _blurb
-      --           ]
-      --         ]
-      --       ]  
       , HH.div -- [ Utils.tailwindClass "story-panel" ] 
             [ Utils.tailwindClass "story-panel-code"]
             [ FormField.field_
@@ -194,7 +175,9 @@ component = H.mkComponent
             ]  
       , HH.div [ Utils.tailwindClass "svg-container" ] []
       ]
-
+      
+-- SNIPPET
+-- Name: LesMisHandleActions
 handleAction :: forall m. 
   Bind m => 
   MonadAff m => 
@@ -220,9 +203,9 @@ handleAction = case _ of
     runWithD3_Simulation do
       statuses <- use _forceStatuses
       actualizeForces statuses
-      LesMis.graphScript graph "div.svg-container"
+      LesMis.draw graph "div.svg-container"
 
-  Finalize ->  pure unit -- runWithD3_Simulation removeAllForces
+  Finalize ->  pure unit
 
   ToggleForce name -> do
     toggleForceByName name
@@ -237,74 +220,10 @@ handleAction = case _ of
     runWithD3_Simulation do
       setConfigVariable $ Alpha 0.7
       start
+-- TEPPINS
 
 codetext :: String
-codetext = 
-  """
--- type-safe(ish) accessors for the data that is given to D3
--- we lose the type information in callbacks from the FFI, such as for attributes
--- but since we know what we gave we can coerce it back to the initial type.
-link_ = {
-    source: (\d -> (unboxD3SimLink d).source)
-  , target: (\d -> (unboxD3SimLink d).target)
-  , value:  (\d -> (unboxD3SimLink d).value)
-  , color:  (\d -> d3SchemeCategory10N_ (toNumber $ (unboxD3SimLink d).target.group))
-}
-
-datum_ = {
--- direct accessors to fields of the datum (BOILERPLATE)
-    index : (\d -> (unboxD3SimNode d).index)
-  , id    : (\d -> (unboxD3SimNode d).id)
-  , x     : (\d -> (unboxD3SimNode d).x)
-  , y     : (\d -> (unboxD3SimNode d).y)
-  , group : (\d -> (unboxD3SimNode d).group)
-
-  , colorByGroup:
-      (\d -> d3SchemeCategory10N_ (toNumber $ datum_.group d))
-}
-
--- | recipe for this force layout graph
-graphScript :: forall row m. 
-  Bind m => 
-  MonadEffect m =>
-  MonadState { simulation :: D3SimulationState_ | row } m => 
-  SimulationM D3Selection_ m =>
-  LesMisRawModel -> Selector D3Selection_ -> m Unit
-graphScript model selector = do
-  (Tuple w h) <- liftEffect getWindowWidthHeight
-  (root :: D3Selection_) <- attach selector
-  svg        <- root D3.+ (node Svg [ viewBox (-w / 2.0) (-h / 2.0) w h
-                                               , classed "lesmis" ] )
-  linksGroup <- svg  D3.+ (node Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ])
-  nodesGroup <- svg  D3.+ (node Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ])
-  
-  -- in contrast to a simple SelectionM function, we have additional typeclass capabilities for simulation
-  -- which we use here to introduce the nodes and links to the simulation
-  simulationNodes <- setNodes model.nodes
-  simulationLinks <- setLinks model.links datum_.id -- the "links" force will already be there
-  
-  -- joining the data from the model after it has been put into the simulation
-  linksSelection <- simpleJoin linksGroup Line   simulationLinks [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
-  nodesSelection <- simpleJoin nodesGroup Circle simulationNodes [ radius 5.0, fill datum_.colorByGroup ]
-
-  -- both links and nodes are updated on each step of the simulation, 
-  -- in this case it's a simple translation of underlying (x,y) data for the circle centers
-  -- tick functions have names, in this case "nodes" and "links"
-  addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y  ]
-  addTickFunction "links" $ Step linksSelection [ x1 (_.x <<< link_.source)
-                                                , y1 (_.y <<< link_.source)
-                                                , x2 (_.x <<< link_.target)
-                                                , y2 (_.y <<< link_.target)
-                                                ]
-  _ <- nodesSelection `on` Drag DefaultDrag
-
-  _ <- svg `on`  Zoom { extent    : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-                      , scale     : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
-                      , name : "LesMis"
-                      }
-
-  pure unit
-  """
+codetext = "snippet"
 
 blurbtext = (HH.p [ HP.classes [ HH.ClassName "m-2", HH.ClassName "w-2/3" ] ]) <$> ((singleton <<< HH.text) <$> texts)
   where texts = ["""

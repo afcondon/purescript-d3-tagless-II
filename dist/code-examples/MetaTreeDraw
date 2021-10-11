@@ -1,49 +1,3 @@
-module D3.Examples.MetaTree where
-
-import D3.Attributes.Sugar
-import Prelude
-
-import D3.Data.Tree (TreeModel, TreeType(..))
-import D3.Data.Types (D3Selection_, Datum_, Element(..))
-import D3.Examples.MetaTree.Model (MetaTreeNode)
-import D3.Examples.MetaTree.Unsafe (coerceToTreeNode, unboxD3TreeNode)
-import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, keyIsID_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
-import D3.Layouts.Hierarchical (verticalLink)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
-import D3Tagless.Instance.Selection (runD3M)
-import Data.Tuple (Tuple(..))
-import Effect.Aff (Aff)
-import Effect.Class (liftEffect)
-import Math (abs)
-import Utility (getWindowWidthHeight)
-
-datum_ :: { 
-  param1     :: Datum_ -> String
-, positionXY :: Datum_ -> String
-, symbol     :: Datum_ -> String
-, x          :: Datum_ -> Number
-, y          :: Datum_ -> Number
-}
-datum_ = {
-    x     : _.x <<< unboxD3TreeNode <<< coerceToTreeNode
-  , y     : _.y <<< unboxD3TreeNode <<< coerceToTreeNode
--- now the fields which are in the original data object, embedded in this tree object
-  , symbol: _.data.symbol <<< unboxD3TreeNode <<< coerceToTreeNode
-  , param1: _.data.param1 <<< unboxD3TreeNode <<< coerceToTreeNode
-  , positionXY: \d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <>")"
-}
-
--- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
--- | TODO specialize runD3M so that this function isn't necessary
-drawTree :: TreeModel -> Aff Unit
-drawTree treeModel = liftEffect $ do
-  widthHeight <- getWindowWidthHeight
-  let tree = hierarchyFromJSON_ treeModel.json
-  (_ :: Tuple D3Selection_ Unit) <- runD3M (draw widthHeight tree)
-  pure unit
-
--- SNIPPET
--- Name: MetaTreeDraw
 -- | "script" to produce the documentation-ready rendering of another script's structure
 -- | (could also be the basis for graphical editor of scripts / trees)
 draw :: forall m selection. Bind m => SelectionM selection m => 
@@ -108,4 +62,3 @@ draw (Tuple w h) tree = do
                       ]
                             
   pure svg
--- TEPPINS

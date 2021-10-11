@@ -157,7 +157,8 @@ runUpdate update = do
       choices <- sequence $ coinToss <$> letters
       pure $ catMaybes choices
 
-
+-- SNIPPET
+-- Name: GUPHandleActions
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
@@ -186,7 +187,7 @@ handleAction = case _ of
             (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
     -- is it necessary to remove the component from the DOM? don't think it is
     H.modify_ (\state -> state { status = Paused, fiber = Nothing, update = Nothing })
-
+-- TEPPINS
 
 pauseUpdating :: forall m.
   Bind m => 
@@ -218,40 +219,7 @@ startUpdating = do
 
 
 codetext :: String
-codetext =
-  """type Model = Array Char
-
-exGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
-exGeneralUpdatePattern selector = do 
-  root        <- attach selector
-  svg         <- root D3.+ (node Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ])
-  letterGroup <- svg  D3.+ (node Group [])
-
-  pure $ \letters -> letterGroup <+> SplitJoinClose Text letters { enter, update, exit }
-
-  where 
-    transition :: SelectionAttribute
-    transition = transitionWithDuration $ Milliseconds 2000.0
-
-    -- letters enter at this position, and then must transition to new position on each update
-    xFromIndex :: Datum_ -> Index_ -> Number
-    xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0) 
-
-    enter = [ classed  "enter"
-            , fill     "green"
-            , x        xFromIndex
-            , y        0.0
-            -- , yu (NWU { i: 0, u: Px })
-            , text     (singleton <<< datumIsChar)
-            , fontSize 96.0 ]  
-          `andThen` (transition `to` [ y 200.0 ]) 
-
-    update =  [ classed "update", fill "gray", y 200.0 ] 
-              `andThen` (transition `to` [ x xFromIndex ] ) 
-
-    exit =  [ classed "exit", fill "brown"] 
-            `andThen` (transition `to` [ y 400.0, remove ])
-"""
+codetext = "snippet"
 
 blurbtext :: forall t235 t236. Array (HH.HTML t235 t236)
 blurbtext =  blurbParagraphs [

@@ -99,13 +99,16 @@ component = H.mkComponent
       , HH.div [ Utils.tailwindClass "svg-container" ] []
       ]
 
+-- SNIPPET 
+-- Name: MetaTreeEvaluator      
+-- | evaluate a tree first using the "metatree" interpreter, then draw the RESULTING (syntax) tree using D3 interpreter
 drawMetaTree :: TreeJson_ -> Aff Unit
 drawMetaTree json =
   MetaTree.drawTree =<< makeModel TidyTree Vertical =<< Tree.getMetaTreeJSON =<< makeModel TidyTree Radial json
+-- TEPPINS
 
-selector :: String
-selector = "div.d3story" -- TODO redo how all this svg nonsense is handled
-
+-- SNIPPET
+-- Name: MetaTreeHandleActions
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
@@ -114,7 +117,7 @@ handleAction = case _ of
     H.put (over lens not st)
 
   Initialize -> do
-    detached <- H.liftEffect $ eval_D3M $ removeExistingSVG selector
+    detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.d3story"
 
     treeJSON <- H.liftAff $ getTreeViaAJAX "/flare-2.json"
 
@@ -122,95 +125,12 @@ handleAction = case _ of
       (E.Left err) -> pure unit
       (E.Right (tree :: TreeJson_)) -> do
         _     <- H.liftAff $ drawMetaTree tree
-        -- H.modify_ (\_ -> Just model)
         pure unit
     pure unit
+-- TEPPINS
 
 codetext :: String
-codetext = 
-  """datum_ = {
-    x     : (\d -> (unboxD3TreeNode d).x)
-  , y     : (\d -> (unboxD3TreeNode d).y)
--- now the fields which are in the original data object, embedded in this tree object
-  , symbol: (\d -> (unboxD3TreeNode d).data.symbol)
-  , param1: (\d -> (unboxD3TreeNode d).data.param1)
-  , positionXY: (\d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <>")")
-}
-
--- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
--- | TODO specialize runD3M so that this function isn't necessary
-drawTree :: TreeModel -> Aff Unit
-drawTree treeModel = liftEffect $ do
-  widthHeight <- getWindowWidthHeight
-  let tree = hierarchyFromJSON_ treeModel.json
-  (_ :: Tuple D3Selection_ Unit) <- runD3M (treeScript widthHeight tree)
-  pure unit
-
--- | "script" to produce the documentation-ready rendering of another script's structure
--- | (could also be the basis for graphical editor of scripts / trees)
-treeScript :: forall m selection. Bind m => SelectionM selection m => 
-  Tuple Number Number -> MetaTreeNode -> m selection
-treeScript (Tuple width height) tree = do
-  let 
-    -- configure dimensions
-    columns                    = 3.0  -- 3 columns, set in the grid CSS in index.html
-    gap                        = 10.0 -- 10px set in the grid CSS in index.html
-    svgWH                      = { width : ((width - ((columns - 1.0) * gap)) / columns)
-                                 , height: height / 2.0 } -- 2 rows
-    numberOfLevels             = (hNodeHeight_ tree) + 1.0
-    spacing                    = { interChild: 120.0, interLevel: svgWH.height / numberOfLevels}
-    layoutFn                   = (getLayout TidyTree) `treeSetNodeSize_` [ spacing.interChild, spacing.interLevel ]
-    laidOutRoot_               = layoutFn `runLayoutFn_` tree
-    { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
-    xExtent                    = xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
-    yExtent                    = yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
-
-
-  -- "script"
-  root       <- attach ".svg-container"                           
-  svg        <- root `appendTo` (node Svg  [ viewBox (-svgWH.width / 2.0) (-80.0) 800.0 800.0 -- svgWH.width svgWH.height
-                                         , classed "metatree" ] )
-  container  <- svg  `appendTo` (node Group [ fontFamily      "sans-serif"
-                                          , fontSize        18.0
-                                          ])
-  links      <- container `appendTo` (node Group [ classed "links"])
-  nodes      <- container `appendTo` (node Group [ classed "nodes"])
-
-  theLinks_  <- links <+> Join Path (links_ tree) [ strokeWidth   1.5
-                                                  , strokeColor   "black"
-                                                  , strokeOpacity 0.4
-                                                  , fill          "none"
-                                                  , verticalLink
-                                                  ]
-
-  nodeJoin_  <- nodes <+> Join Group (descendants_ tree) [ transform [ datum_.positionXY ] ]
-  
-
-  theNodes <- nodeJoin_ `appendTo` 
-                (node Circle  [ fill         "blue"
-                              , radius       20.0
-                              , strokeColor "white"
-                              , strokeWidth 3.0
-                              ])
-
-  labelsWhite <- nodeJoin_ `appendTo`
-                (node Text  [ x          0.0
-                            , y          3.0
-                            , textAnchor "middle"
-                            , text       datum_.symbol
-                            , fill       "white"
-                            ])
-                            
-  labelsGray <- nodeJoin_ `appendTo`
-                (node Text  [ x          22.0
-                            , y          3.0
-                            , textAnchor "start"
-                            , text       datum_.param1
-                            , fill       "gray"
-                            ])
-                            
-  pure svg
-  """
+codetext = "snippet"
 
 blurbtext :: String
 blurbtext = 
