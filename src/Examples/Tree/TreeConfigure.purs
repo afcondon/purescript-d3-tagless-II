@@ -28,14 +28,14 @@ import Utility (getWindowWidthHeight)
 getPrintTree :: TreeModel -> Aff String
 getPrintTree treeModel = liftEffect $ do
   widthHeight   <- getWindowWidthHeight
-  printedScript <- runPrinter  (configureAndRunScript widthHeight treeModel "not used") "Tree Script"
+  printedScript <- runPrinter  (configureAndRunScript widthHeight treeModel "Printer Interpreter Root> ") "Tree Script"
   pure $ snd printedScript
 
 
 getMetaTreeJSON :: TreeModel -> Aff TreeJson_
 getMetaTreeJSON treeModel = liftEffect $ do
   widthHeight <- getWindowWidthHeight
-  metaScript <- runMetaTree (configureAndRunScript widthHeight treeModel "not used") -- no need for actual widthHeight in metaTree
+  metaScript <- runMetaTree (configureAndRunScript widthHeight treeModel "MetaTree root> ") -- no need for actual widthHeight in metaTree
   let (ScriptTree _ treeMap links) = snd metaScript
       (_ :: Array (Tuple Int D3GrammarNode)) = toUnfoldable treeMap
       (_ :: Array (Tuple Int Int))          = links

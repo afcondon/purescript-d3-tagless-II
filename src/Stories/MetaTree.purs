@@ -1,5 +1,6 @@
 module Stories.MetaTree where
 
+import Data.Lens
 import Prelude
 import Data.Lens
 
@@ -71,25 +72,10 @@ component = H.mkComponent
   render state =
     HH.div [ Utils.tailwindClass "story-container" ]
       [ HH.div
-            [ Utils.tailwindClass "story-panel-controls"] 
-            [ HH.text "Meta Tree"
-            ]
-      , HH.div
             [ Utils.tailwindClass "story-panel-about"]
-            [ FormField.field_
-              { label: HH.text "About"
-              , helpText: []
-              , error: []
-              , inputId: "show-blurb"
-              }
-              [ Toggle.toggle
-                [ HP.id "show-blurb"
-                , HP.checked
-                  $ Expandable.toBoolean (view _blurb state)
-                , HE.onChange \_ -> ToggleCard _blurb
-                ]
-              ]
-            , Expandable.content_ (view _blurb state) [ HH.text blurbtext ]
+            [ HH.h1 [ HP.classes [ HH.ClassName "text-3xl", HH.ClassName "p-2" ] ] 
+                    [ HH.text "Meta and Printer Interpreters" ]
+            , HH.div_ blurbtext
             ]  
       , HH.div
             [ Utils.tailwindClass "story-panel-code"]
@@ -127,7 +113,7 @@ drawMetaTree json =
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
-  ToggleCard lens -> lens %= not
+  ToggleCard _cardState -> _cardState %= not
 
   Initialize -> do
     text <- H.liftAff $ readSnippetFiles "MetaTreeDraw"
@@ -148,25 +134,58 @@ handleAction = case _ of
     pure unit
 -- TEPPINS
 
-blurbtext :: String
-blurbtext = 
-  """Id sint laboris reprehenderit officia anim nisi consectetur voluptate enim.
-  Commodo cillum minim nisi laborum eiusmod veniam ullamco id ex fugiat eu anim.
-  Irure est aute laborum duis. Lorem dolore id sunt incididunt ut ea. Nostrud
-  enim officia nisi anim consequat cupidatat consectetur consequat ex excepteur.
-  Lorem nisi in reprehenderit ex adipisicing magna elit aute sunt. Cillum non
-  Lorem minim duis culpa ullamco aute ex minim. Mollit anim in nisi tempor enim
-  exercitation dolore. Veniam consequat minim nostrud amet duis dolore tempor
-  voluptate quis culpa. Laborum dolor pariatur ut est cupidatat elit deserunt
-  occaecat tempor aliquip anim. 
-  
-  Velit irure ea voluptate ipsum ex exercitation
-  dolore voluptate reprehenderit sit anim sunt. Anim fugiat ad ut qui cillum
-  tempor occaecat et deserunt nostrud non ipsum. Id non qui mollit culpa elit
-  cillum ipsum excepteur adipisicing qui. Incididunt adipisicing sit incididunt
-  consequat minim id do exercitation cupidatat est sunt mollit. Anim ut ullamco
-  enim culpa. Adipisicing ad non esse laboris anim consequat ut velit esse
-  consequat tempor. Commodo magna esse ullamco ipsum et ipsum minim dolore esse
-  veniam ea commodo labore. Nulla deserunt id ad anim anim proident labore
-  occaecat sint esse nostrud. Duis velit nostrud ullamco cillum cillum Lorem
-  cupidatat irure."""
+blurbtext = [
+    HH.p [ HP.classes [ HH.ClassName "p-2" ]] [ HH.text 
+          
+          """The way this library works is by creating an embedded DSL in PureScript
+          which can be interpreted to cause a visualization to come into
+          existence...typically in your browser, as an SVG.
+          """
+
+  ]
+  , HH.p [ HP.classes [ HH.ClassName "p-2" ]] 
+         [ HH.text 
+          """
+          The primary interpreter that is provided, the one that powers all of the
+          other demos here except these two, turns the statements of this eDSL into D3
+          actions.
+          """
+        ]
+
+  , HH.p [ HP.classes [ HH.ClassName "p-2" ]] 
+         [ HH.text 
+          """
+          However, other interpreters are possible. This page shows two of them, both
+          quite rudimentary but showing some powerful ideas which could be taken a lot
+          further.
+          """
+  ]
+
+  , HH.h2 [ HP.classes [ HH.ClassName "text-2xl", HH.ClassName "p-2" ]] [ HH.text "MetaTree"]
+  , HH.p [ HP.classes [ HH.ClassName "p-2" ]] 
+         [ HH.text 
+          """
+          The first one, called here "MetaTree" turns a "script" written in the DSL
+          into a syntax tree and then renders the resulting tree using the other,
+          D3-based, interpreter. The result is a kind of x-ray of the script, one which
+          visually describes the structure you are producing. Because interaction is easy
+          to add to DOM-based visualizations such as D3 this could also be a basis for
+          a point-and-click manner for writing visualizations, or perhaps for editing and
+          adapting them. 
+          """
+  ]
+
+  , HH.h2 [ HP.classes [ HH.ClassName "text-2xl", HH.ClassName "p-2" ]] [ HH.text "Printer"]
+  , HH.p [ HP.classes [ HH.ClassName "p-2" ]] 
+         [ HH.text 
+          """
+          The second example shows that the "script" can be interpreted into a textual
+          form. This could be the basis for documentation or even transpilation. In
+          principle, it is possible to emit the JavaScript / D3 version of the script
+          via this mechanism, but the current implementation is only a proof-of-concept
+          and is not elaborated to that extent.
+          
+          """
+  ]
+
+]

@@ -106,7 +106,7 @@ component = H.mkComponent
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
-  ToggleCard lens -> lens %= not
+  ToggleCard _cardState -> _cardState %= not
 
   Initialize -> do 
     text1 <- H.liftAff $ readSnippetFiles "TLCSimple"
@@ -132,7 +132,7 @@ handleAction = case _ of
 blurbtext1 :: forall t235 t236. Array (HH.HTML t235 t236)
 blurbtext1 = (HH.p [ HP.classes [ HH.ClassName "m-2", HH.ClassName "w-2/3" ] ]) <$> ((singleton <<< HH.text) <$> texts)
   where 
-    texts = ["Simplest possible example, just to show syntax." ]
+    texts = ["Simplest possible example, just to show syntax.", "Click the button to see a slightly more realistic example." ]
 
 blurbtext2 :: forall t235 t236. Array (HH.HTML t235 t236)
 blurbtext2 = (HH.p [ HP.classes [ HH.ClassName "m-2" ] ]) <$> ((singleton <<< HH.text) <$> texts)

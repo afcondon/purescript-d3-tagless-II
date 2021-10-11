@@ -151,7 +151,7 @@ renderSimControls state = do
           ]
         ]
     , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
-        [ Format.contentHeading_ [ HH.text "Which links should be displayed?" ]
+        [ Format.contentHeading_ [ HH.text "Put links into simulation" ]
         , Button.buttonGroup_
           [ Button.buttonLeft
               [ HE.onClick $ const (Filter $ LinkShowFilter isM2M_Tree_Link) ]
@@ -171,7 +171,7 @@ renderSimControls state = do
           ]
         ]
     , HH.div [ HP.classes [ HH.ClassName "mb-6"]]
-        [ Format.contentHeading_ [ HH.text "Which links should be exert force?" ]
+        [ Format.contentHeading_ [ HH.text "Limit only these links to exert force?" ]
         , Button.buttonGroup_
           [ Button.buttonLeft
               [ HE.onClick $ const (Filter $ LinkForceFilter isM2M_Tree_Link_) ]
@@ -230,7 +230,7 @@ blurbtext = HH.div_ (title : paras)
     title        = HH.h2 [ HP.classes titleClasses ] [ HH.text "About this Example"]
     titleClasses = HH.ClassName <$> [ "font-bold text-2xl" ]
 
-    paras       = (HH.p [ HP.classes paraClasses ]) <$> [] -- paraTexts
+    paras       = (HH.p [ HP.classes paraClasses ]) <$> paraTexts
     paraClasses = HH.ClassName <$> [ "m-4 " ]
     paraTexts   = map (\s -> [ HH.text s ] ) [
 

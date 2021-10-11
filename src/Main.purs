@@ -116,10 +116,18 @@ parent =
   renderNavGroup currentExample = 
     HH.div
     [ HP.class_ $ HH.ClassName "text-base overflow-y-auto" ]
-    [ Format.caption_ [ HH.text "Group name" ]
+    [ Format.caption_ [ HH.text "Simple examples" ]
     , HH.ul [ HP.class_ $ HH.ClassName "list-reset" ] 
             ((renderExampleNav currentExample) <$> 
-              [ ExampleCircles, ExampleGUP, ExampleTrees, ExampleMetaTree, ExamplePrinter, ExampleLesMis, ExampleSpago ])
+              [ ExampleCircles, ExampleGUP, ExampleTrees, ExampleLesMis ])
+    , Format.caption_ [ HH.text "Alternate interpreters" ]
+    , HH.ul [ HP.class_ $ HH.ClassName "list-reset" ] 
+            ((renderExampleNav currentExample) <$> 
+              [ ExampleMetaTree, ExamplePrinter ])
+    , Format.caption_ [ HH.text "Halogen Application" ]
+    , HH.ul [ HP.class_ $ HH.ClassName "list-reset" ] 
+            ((renderExampleNav currentExample) <$> 
+              [ ExampleSpago ])
     ]
 
   renderExampleNav :: ParentState -> ExampleType -> H.ComponentHTML ParentAction Slots m

@@ -167,7 +167,7 @@ component = H.mkComponent
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
-  ToggleCard lens -> lens %= not
+  ToggleCard _cardState -> _cardState %= not
 
   Initialize -> do
     detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"

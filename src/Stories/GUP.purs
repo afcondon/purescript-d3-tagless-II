@@ -171,7 +171,7 @@ runUpdate update = do
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
-  ToggleCard lens -> lens %= not
+  ToggleCard _cardState -> _cardState %= not
 
   Initialize -> do
     text1 <- H.liftAff $ readSnippetFiles "GUP"

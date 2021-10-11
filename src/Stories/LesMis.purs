@@ -200,7 +200,7 @@ handleAction :: forall m.
   Action -> m Unit
 handleAction = case _ of
 
-  ToggleCard lens -> lens %= not
+  ToggleCard _cardState -> _cardState %= not
 
   Initialize -> do
     response <- H.liftAff $ AJAX.get ResponseFormat.string "/miserables.json"
