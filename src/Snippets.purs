@@ -9,7 +9,7 @@ import Effect.Aff (Aff)
 
 readSnippetFiles :: String -> Aff String
 readSnippetFiles name = do
-  response <- AJAX.get ResponseFormat.string $ "/code-examples/" <> name <> ".txt"
+  response <- AJAX.get ResponseFormat.string $ "/code-examples/" <> name
   case response of
     (Left _) -> pure ""
     (Right r) -> pure r.body

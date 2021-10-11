@@ -6,6 +6,11 @@ handleAction = case _ of
     H.put (over lens not st)
 
   Initialize -> do
+    text1 <- H.liftAff $ readSnippetFiles "GUP"
+    _drawCode .= text1
+    text2 <- H.liftAff $ readSnippetFiles "GUPHandleActions"
+    _handlerCode .= text2
+
     updateFn <- runGeneralUpdatePattern
 
     fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn

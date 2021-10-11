@@ -19,14 +19,14 @@ draw (Tuple w h) tree = do
 
   -- "script"
   root       <- attach ".svg-container"                           
-  svg        <- appendTo root Svg  [ viewBox vtreeXOffset (-vtreeYOffset) (pad xExtent) (pad yExtent)
-                                        , preserveAspectRatio $ AspectRatio XMin YMid Meet 
-                                        , width w
-                                        , height h
-                                        , classed "metatree" ]
+  svg        <- appendTo root Svg [ viewBox vtreeXOffset (-vtreeYOffset) (pad xExtent) (pad yExtent)
+                                  , preserveAspectRatio $ AspectRatio XMin YMid Meet 
+                                  , width w
+                                  , height h
+                                  , classed "metatree" ]
   container  <- appendTo svg  Group [ fontFamily      "sans-serif"
-                                          , fontSize        18.0
-                                          ]
+                                    , fontSize        18.0
+                                    ]
   links      <- appendTo container Group [ classed "links"]
   nodes      <- appendTo container Group [ classed "nodes"]
 

@@ -1,6 +1,7 @@
 module Stories.MetaTree where
 
 import Prelude
+import Data.Lens
 
 import Control.Monad.State (class MonadState)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
@@ -12,7 +13,6 @@ import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Instance.Selection (eval_D3M)
 import D3Tagless.Utility (removeExistingSVG)
 import Data.Either (Either(..)) as E
-import Data.Lens (Lens', over)
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
@@ -22,6 +22,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Ocelot.Block.FormField as FormField
+import Snippets (readSnippetFiles)
 import Stories.Utilities (syntaxHighlightedCode)
 import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
@@ -32,15 +33,23 @@ data Action
 
 type State = { 
     tree :: Maybe TreeModel
-  , blurb :: Expandable.Status
-  , code  :: Expandable.Status
+  , panels  :: { blurb :: Expandable.Status, code :: Expandable.Status }
+  , snippets :: { draw :: String, evaluator :: String, handler :: String }
 }
 
-_blurb :: Lens' State Expandable.Status
-_blurb = prop (Proxy :: Proxy "blurb")
+_panels = prop (Proxy :: Proxy "panels")
+_snippets = prop (Proxy :: Proxy "snippets")
 
+_drawCode :: Lens' State String
+_drawCode = _snippets <<< prop (Proxy :: Proxy "draw")
+_handlerCode :: Lens' State String
+_handlerCode = _snippets <<< prop (Proxy :: Proxy "handler")
+_evaluatorCode :: Lens' State String
+_evaluatorCode = _snippets <<< prop (Proxy :: Proxy "evaluator")
+_blurb :: Lens' State Expandable.Status
+_blurb = _panels <<< prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
-_code = prop (Proxy :: Proxy "code")
+_code = _panels <<< prop (Proxy :: Proxy "code")
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -53,7 +62,10 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { tree: Nothing, blurb: Expandable.Collapsed, code: Expandable.Collapsed }
+  initialState = { tree: Nothing
+                 , panels: { blurb:  Expandable.Expanded, code:   Expandable.Collapsed }
+                 , snippets: { draw: "", evaluator: "", handler: "" }
+                 }
   
   render :: State -> H.ComponentHTML Action () m
   render state =
@@ -73,11 +85,11 @@ component = H.mkComponent
               [ Toggle.toggle
                 [ HP.id "show-blurb"
                 , HP.checked
-                  $ Expandable.toBoolean state.blurb
+                  $ Expandable.toBoolean (view _blurb state)
                 , HE.onChange \_ -> ToggleCard _blurb
                 ]
               ]
-            , Expandable.content_ state.blurb [ HH.text blurbtext ]
+            , Expandable.content_ (view _blurb state) [ HH.text blurbtext ]
             ]  
       , HH.div
             [ Utils.tailwindClass "story-panel-code"]
@@ -90,11 +102,14 @@ component = H.mkComponent
               [ Toggle.toggle
                 [ HP.id "show-code"
                 , HP.checked
-                  $ Expandable.toBoolean state.code
+                  $ Expandable.toBoolean (view _code state)
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
-            , Expandable.content_ state.code $ syntaxHighlightedCode codetext
+            , Expandable.content_ (view _code state) $ 
+                 syntaxHighlightedCode (view _evaluatorCode state)  <>
+                 syntaxHighlightedCode (view _drawCode state)  <>
+                 syntaxHighlightedCode (view _handlerCode state) 
             ]  
       , HH.div [ Utils.tailwindClass "svg-container" ] []
       ]
@@ -112,11 +127,15 @@ drawMetaTree json =
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
-  ToggleCard lens -> do
-    st <- H.get
-    H.put (over lens not st)
+  ToggleCard lens -> lens %= not
 
   Initialize -> do
+    text <- H.liftAff $ readSnippetFiles "MetaTreeDraw"
+    _drawCode .= text
+    text <- H.liftAff $ readSnippetFiles "MetaTreeEvaluator"
+    _evaluatorCode .= text
+    text <- H.liftAff $ readSnippetFiles "MetaTreeHandleActions"
+    _handlerCode .= text
     detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.d3story"
 
     treeJSON <- H.liftAff $ getTreeViaAJAX "/flare-2.json"
@@ -128,9 +147,6 @@ handleAction = case _ of
         pure unit
     pure unit
 -- TEPPINS
-
-codetext :: String
-codetext = "snippet"
 
 blurbtext :: String
 blurbtext = 

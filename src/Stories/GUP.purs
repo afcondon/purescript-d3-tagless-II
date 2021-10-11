@@ -11,7 +11,7 @@ import D3Tagless.Block.FormField as FormField
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Instance.Selection (eval_D3M, runD3M)
 import Data.Array (catMaybes)
-import Data.Lens (Lens', over)
+import Data.Lens
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (toCharArray)
@@ -27,6 +27,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Snippets (readSnippetFiles)
 import Stories.Utilities (blurbParagraphs, syntaxHighlightedCode)
 import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
@@ -50,15 +51,23 @@ type State = {
     status  :: Status
   , fiber   :: Maybe (Fiber Unit)
   , update  :: Maybe (Array Char -> Aff Unit)
-  , blurb   :: Expandable.Status
-  , code    :: Expandable.Status
+  , panels  :: { blurb :: Expandable.Status, code :: Expandable.Status }
+  , snippets :: { draw :: String, handler :: String }
 }
 
+_snippets = prop (Proxy :: Proxy "snippets")
+_drawCode :: Lens' State String
+_drawCode = _snippets <<< prop (Proxy :: Proxy "draw")
+_handlerCode :: Lens' State String
+_handlerCode = _snippets <<< prop (Proxy :: Proxy "handler")
+
+_panels = prop (Proxy :: Proxy "panels")
+
 _blurb :: Lens' State Expandable.Status
-_blurb = prop (Proxy :: Proxy "blurb")
+_blurb = _panels <<< prop (Proxy :: Proxy "blurb")
 
 _code :: Lens' State Expandable.Status
-_code = prop (Proxy :: Proxy "code")
+_code = _panels <<< prop (Proxy :: Proxy "code")
 
 component :: forall query output m. MonadAff m => H.Component query Status output m
 component = H.mkComponent
@@ -77,8 +86,8 @@ component = H.mkComponent
       status: Paused
     , fiber:  Nothing
     , update: Nothing
-    , blurb:  Expandable.Expanded
-    , code:   Expandable.Collapsed
+    , panels: { blurb:  Expandable.Expanded, code:   Expandable.Collapsed }
+    , snippets: { draw: "", handler: "" }
   }
 
   render :: State -> H.ComponentHTML Action () m
@@ -103,11 +112,11 @@ component = H.mkComponent
               [ Toggle.toggle
                 [ HP.id "show-blurb"
                 , HP.checked
-                  $ Expandable.toBoolean state.blurb
+                  $ Expandable.toBoolean (view _blurb state)
                 , HE.onChange \_ -> ToggleCard _blurb
                 ]
               ]
-            , Expandable.content_ state.blurb blurbtext
+            , Expandable.content_ (view _blurb state) blurbtext
             ]  
       , HH.div
             [ Utils.tailwindClass "story-panel-code"]
@@ -120,11 +129,11 @@ component = H.mkComponent
               [ Toggle.toggle
                 [ HP.id "show-code"
                 , HP.checked
-                  $ Expandable.toBoolean state.code
+                  $ Expandable.toBoolean (view _code state)
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
-            , Expandable.content_ state.code $ syntaxHighlightedCode codetext
+            , Expandable.content_ (view _code state) $ syntaxHighlightedCode (view _drawCode state)
             ]  
       , HH.div [ Utils.tailwindClass "svg-container" ] []
       ]
@@ -162,11 +171,14 @@ runUpdate update = do
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
-  ToggleCard lens -> do
-    st <- H.get
-    H.put (over lens not st)
+  ToggleCard lens -> lens %= not
 
   Initialize -> do
+    text1 <- H.liftAff $ readSnippetFiles "GUP"
+    _drawCode .= text1
+    text2 <- H.liftAff $ readSnippetFiles "GUPHandleActions"
+    _handlerCode .= text2
+
     updateFn <- runGeneralUpdatePattern
 
     fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
@@ -217,9 +229,6 @@ startUpdating = do
         fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
         H.modify_ (\state -> state { status = Running, fiber = Just fiber })
 
-
-codetext :: String
-codetext = "snippet"
 
 blurbtext :: forall t235 t236. Array (HH.HTML t235 t236)
 blurbtext =  blurbParagraphs [

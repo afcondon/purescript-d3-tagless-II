@@ -1,7 +1,6 @@
 module Stories.ThreeLittleCircles where
 
 import Data.Lens
-import Data.Lens
 import Prelude
 
 import Control.Monad.State (class MonadState, modify_)
@@ -13,10 +12,8 @@ import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Instance.Selection (eval_D3M)
 import D3Tagless.Utility (removeExistingSVG)
 import Data.Array (singleton)
-import Data.Lens.At (at)
 import Data.Lens.Record (prop)
-import Data.Map (Map)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
@@ -35,20 +32,21 @@ data Action
   | ToggleExample
   
 type State = {
-    toggle  :: Boolean -- Toggle between ultra simple and merely super-simple examples
-  , code    :: Expandable.Status
-  , ex1     :: String
-  , ex2     :: String
+    toggle   :: Boolean -- Toggle between ultra simple and merely super-simple examples
+  , code     :: Expandable.Status
+  , snippets :: { ex1 :: String, ex2 :: String }
 }
 
 _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
 
+_snippets = prop (Proxy :: Proxy "snippets")
+
 _ex1 :: Lens' State String
-_ex1 = prop (Proxy :: Proxy "ex1")
+_ex1 = _snippets <<< prop (Proxy :: Proxy "ex1")
 
 _ex2 :: Lens' State String
-_ex2 = prop (Proxy :: Proxy "ex2")
+_ex2 = _snippets <<< prop (Proxy :: Proxy "ex2")
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -65,8 +63,7 @@ component = H.mkComponent
   initialState = { 
       toggle: true
     , code:   Expandable.Expanded
-    , ex1: ""
-    , ex2: ""
+    , snippets: { ex1: "" , ex2: "" }
   }
 
   render :: State -> H.ComponentHTML Action () m
@@ -100,7 +97,7 @@ component = H.mkComponent
             , Expandable.content_ state.code
                 [ HH.pre 
                   [ HP.class_ $ HH.ClassName "language-purescript" ]  
-                  [ HH.code_ [ RH.render_ $ highlightString_ $ if state.toggle then state.ex1 else state.ex2 ] ]
+                  [ HH.code_ [ RH.render_ $ highlightString_ $ if state.toggle then view _ex1 state else view _ex2 state ] ]
                 ]
             ]  
       , HH.div [ Utils.tailwindClass "svg-container" ] []
@@ -109,9 +106,7 @@ component = H.mkComponent
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
-  ToggleCard lens -> do
-    st <- H.get
-    H.put (over lens not st)
+  ToggleCard lens -> lens %= not
 
   Initialize -> do 
     text1 <- H.liftAff $ readSnippetFiles "TLCSimple"

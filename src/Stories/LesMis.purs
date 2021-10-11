@@ -1,6 +1,7 @@
 module Stories.LesMis where
 
 import Prelude
+import Data.Lens
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
@@ -18,7 +19,6 @@ import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start)
 import D3Tagless.Instance.Simulation (runWithD3_Simulation)
 import Data.Array (singleton)
-import Data.Lens (Lens', _Just, over, preview, use, (%=))
 import Data.Lens.At (at)
 import Data.Lens.Record (prop)
 import Data.Map (Map)
@@ -31,6 +31,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Ocelot.Block.FormField as FormField
+import Snippets (readSnippetFiles)
 import Stories.Utilities (syntaxHighlightedCode)
 import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
@@ -45,12 +46,22 @@ data Action
 
 type State = { 
     simulation      :: D3SimulationState_
-  , code            :: Expandable.Status
+  , panels  :: { code :: Expandable.Status }
+  , snippets :: { draw :: String, accessors :: String, handler :: String }
   , forceStatuses   :: Map Label ForceStatus
 }
 
+_panels = prop (Proxy :: Proxy "panels")
+_snippets = prop (Proxy :: Proxy "snippets")
+
+_drawCode :: Lens' State String
+_drawCode = _snippets <<< prop (Proxy :: Proxy "draw")
+_handlerCode :: Lens' State String
+_handlerCode = _snippets <<< prop (Proxy :: Proxy "handler")
+_accessorsCode :: Lens' State String
+_accessorsCode = _snippets <<< prop (Proxy :: Proxy "accessors")
 _code :: Lens' State Expandable.Status
-_code = prop (Proxy :: Proxy "code")
+_code = _panels <<< prop (Proxy :: Proxy "code")
 
 -- | ================================================================================================
 -- | Everything Forces: force names to keep typos at bay, lenses to access the forces in the State
@@ -120,7 +131,8 @@ component = H.mkComponent
   initialState :: State
   initialState = { 
         simulation: initialSimulationState forceLibrary
-      , code: Expandable.Collapsed
+      , panels: { code: Expandable.Collapsed }
+      , snippets: { draw: "", accessors: "", handler: "" }
       , forceStatuses: getStatusMap forceLibrary
     }
 
@@ -166,12 +178,15 @@ component = H.mkComponent
               [ Toggle.toggle
                 [ HP.id "show-code"
                 , HP.checked
-                  $ Expandable.toBoolean state.code
+                  $ Expandable.toBoolean (view _code state)
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
-            , Expandable.content_ state.code blurbtext
-            , Expandable.content_ state.code $ syntaxHighlightedCode codetext 
+            , Expandable.content_ (view _code state) blurbtext
+            , Expandable.content_ (view _code state) $ 
+                syntaxHighlightedCode (view _drawCode state) <>
+                syntaxHighlightedCode (view _accessorsCode state) <>
+                syntaxHighlightedCode (view _handlerCode state) 
             ]  
       , HH.div [ Utils.tailwindClass "svg-container" ] []
       ]
@@ -185,13 +200,18 @@ handleAction :: forall m.
   Action -> m Unit
 handleAction = case _ of
 
-  ToggleCard lens -> do
-    cardState <- H.get
-    H.put (over lens not cardState)
+  ToggleCard lens -> lens %= not
 
   Initialize -> do
     response <- H.liftAff $ AJAX.get ResponseFormat.string "/miserables.json"
     let graph = readGraphFromFileContents response
+
+    text <- H.liftAff $ readSnippetFiles "LesMisScript"
+    _drawCode .= text
+    text <- H.liftAff $ readSnippetFiles "LesMisHandleActions"
+    _handlerCode .= text
+    text <- H.liftAff $ readSnippetFiles "LesMisAccessors"
+    _accessorsCode .= text
 
     _forceStatus forceNames.center       %= (const ForceActive)
     _forceStatus forceNames.manyBodyNeg  %= (const ForceActive)
@@ -221,9 +241,6 @@ handleAction = case _ of
       setConfigVariable $ Alpha 0.7
       start
 -- TEPPINS
-
-codetext :: String
-codetext = "snippet"
 
 blurbtext = (HH.p [ HP.classes [ HH.ClassName "m-2", HH.ClassName "w-2/3" ] ]) <$> ((singleton <<< HH.text) <$> texts)
   where texts = ["""

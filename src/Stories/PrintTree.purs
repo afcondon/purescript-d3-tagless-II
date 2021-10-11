@@ -11,7 +11,7 @@ import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Instance.Selection (eval_D3M)
 import D3Tagless.Utility (removeExistingSVG)
 import Data.Either (Either(..)) as E
-import Data.Lens (Lens', over)
+import Data.Lens
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
@@ -20,6 +20,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Ocelot.Block.FormField as FormField
+import Snippets (readSnippetFiles)
 import Stories.Utilities (syntaxHighlightedCode)
 import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
@@ -29,20 +30,24 @@ data Action
   | ToggleCard (Lens' State Expandable.Status)
   
 type State = { 
-    tree :: String
-  , blurb :: Expandable.Status
-  , code  :: Expandable.Status
-  , print :: Expandable.Status
+    tree     :: String
+  , panels   :: { blurb :: Expandable.Status, code :: Expandable.Status, print :: Expandable.Status }
+  , snippets :: { draw :: String, handler :: String }
 }
 
-_blurb :: Lens' State Expandable.Status
-_blurb = prop (Proxy :: Proxy "blurb")
+_snippets = prop (Proxy :: Proxy "snippets")
+_panels = prop (Proxy :: Proxy "panels")
 
+_drawCode :: Lens' State String
+_drawCode = _snippets <<< prop (Proxy :: Proxy "draw")
+_handlerCode :: Lens' State String
+_handlerCode = _snippets <<< prop (Proxy :: Proxy "handler")
+_blurb :: Lens' State Expandable.Status
+_blurb = _panels <<< prop (Proxy :: Proxy "blurb")
 _code :: Lens' State Expandable.Status
-_code = prop (Proxy :: Proxy "code")
-  
+_code = _panels <<< prop (Proxy :: Proxy "code")
 _print :: Lens' State Expandable.Status
-_print = prop (Proxy :: Proxy "print")
+_print = _panels <<< prop (Proxy :: Proxy "print")
   
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
@@ -56,7 +61,10 @@ component = H.mkComponent
   where
 
   initialState :: State
-  initialState = { tree: "", blurb: Expandable.Collapsed, code: Expandable.Collapsed, print: Expandable.Expanded  } 
+  initialState = { tree: "" 
+                 , panels: { blurb: Expandable.Collapsed, code: Expandable.Collapsed, print: Expandable.Expanded }
+                 , snippets: { draw: "", handler: "" }
+                 } 
   
   render :: State -> H.ComponentHTML Action () m
   render state =
@@ -75,11 +83,11 @@ component = H.mkComponent
               [ Toggle.toggle
                 [ HP.id "show-blurb"
                 , HP.checked
-                  $ Expandable.toBoolean state.blurb
+                  $ Expandable.toBoolean (view _blurb state)
                 , HE.onChange \_ -> ToggleCard _blurb
                 ]
               ]
-            , Expandable.content_ state.blurb [ HH.text blurbtext ]
+            , Expandable.content_ (view _blurb state) [ HH.text blurbtext ]
             ]  
       , HH.div
             [ Utils.tailwindClass "story-panel-code"]
@@ -92,11 +100,11 @@ component = H.mkComponent
               [ Toggle.toggle
                 [ HP.id "show-code"
                 , HP.checked
-                  $ Expandable.toBoolean state.code
+                  $ Expandable.toBoolean (view _code state)
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
-            , Expandable.content_ state.code $ syntaxHighlightedCode codetext
+            , Expandable.content_ (view _code state) $ syntaxHighlightedCode (view _handlerCode state)
             ]  
       , HH.div
             [ Utils.tailwindClass "story-panel-code"]
@@ -109,23 +117,26 @@ component = H.mkComponent
               [ Toggle.toggle
                 [ HP.id "show-print"
                 , HP.checked
-                  $ Expandable.toBoolean state.print
+                  $ Expandable.toBoolean (view _print state)
                 , HE.onChange \_ -> ToggleCard _print
                 ]
               ]
-            , Expandable.content_ state.print [ HH.code_ [ HH.text state.tree ] ]
+            , Expandable.content_ (view _print state) [ HH.code_ [ HH.text state.tree ] ]
             ]  
       ]
 
+-- SNIPPET
+-- Name: PrintTreeHandleActions
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
 handleAction = case _ of
-  ToggleCard lens -> do
-    st <- H.get
-    H.put (over lens not st)
+  ToggleCard lens -> lens %= not
 
   Initialize -> do
     detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
+
+    text <- H.liftAff $ readSnippetFiles "PrintTreeHandleActions"
+    _handlerCode .= text
 
     treeJSON <- H.liftAff $ getTreeViaAJAX "/flare-2.json"
 
@@ -136,10 +147,7 @@ handleAction = case _ of
         H.modify_ (\st -> st { tree = textRep } )
         pure unit
     pure unit
-
-codetext :: String
-codetext = "snippet"
-
+-- TEPPINS
 
 blurbtext :: String
 blurbtext = 
