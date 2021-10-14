@@ -16,3 +16,6 @@
 /src/css/node_modules
 /src/css/yarn.lock
 .DS_Store
+/docs/foo.db3
+*.psd
+/dist/PSD3-logo-4.psd
