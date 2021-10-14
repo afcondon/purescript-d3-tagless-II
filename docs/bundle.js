@@ -20943,7 +20943,7 @@ var PS = {};
                       return Data_Lens_Setter.modifying(dictMonadState)(v.value0(Data_Profunctor_Strong.strongFn))(Data_HeytingAlgebra.not(D3Tagless_Block_Expandable.heytingAlgebraStatus));
                   };
                   if (v instanceof Initialize) {
-                      return Control_Bind.bind(dictBind)(Effect_Aff_Class.liftAff(dictMonadAff)(Affjax.get(Affjax_ResponseFormat.string)("/miserables.json")))(function (response) {
+                      return Control_Bind.bind(dictBind)(Effect_Aff_Class.liftAff(dictMonadAff)(Affjax.get(Affjax_ResponseFormat.string)("./data/miserables.json")))(function (response) {
                           var graph = D3_Examples_LesMiserables_File.readGraphFromFileContents(response);
                           return Control_Bind.bind(dictBind)(Effect_Aff_Class.liftAff(dictMonadAff)(Snippets.readSnippetFiles("LesMisScript")))(function (text) {
                               return Control_Bind.discard(Control_Bind.discardUnit)(dictBind)(Data_Lens_Setter.assign(dictMonadState)(_drawCode(Data_Profunctor_Strong.strongFn))(text))(function () {
@@ -21151,7 +21151,7 @@ var PS = {};
                                       return Control_Bind.bind(dictBind)(Effect_Aff_Class.liftAff(dictMonadAff)(Snippets.readSnippetFiles("MetaTreeHandleActions")))(function (text2) {
                                           return Control_Bind.discard(Control_Bind.discardUnit)(dictBind)(Data_Lens_Setter.assign(dictMonadState)(_handlerCode(Data_Profunctor_Strong.strongFn))(text2))(function () {
                                               return Control_Bind.bind(dictBind)(Effect_Class.liftEffect(dictMonadAff.MonadEffect0())(D3Tagless_Instance_Selection.eval_D3M(D3Tagless_Utility.removeExistingSVG(D3Tagless_Instance_Selection.d3TaglessD3M)("div.d3story"))))(function (detached) {
-                                                  return Control_Bind.bind(dictBind)(Effect_Aff_Class.liftAff(dictMonadAff)(D3_Layouts_Hierarchical.getTreeViaAJAX("/flare-2.json")))(function (treeJSON) {
+                                                  return Control_Bind.bind(dictBind)(Effect_Aff_Class.liftAff(dictMonadAff)(D3_Layouts_Hierarchical.getTreeViaAJAX("./data/flare-2.json")))(function (treeJSON) {
                                                       return Control_Bind.discard(Control_Bind.discardUnit)(dictBind)((function () {
                                                           if (treeJSON instanceof Data_Either.Left) {
                                                               return Control_Applicative.pure(((dictMonadAff.MonadEffect0()).Monad0()).Applicative0())(Data_Unit.unit);
@@ -21318,7 +21318,7 @@ var PS = {};
                       return Control_Bind.bind(dictBind)(Effect_Class.liftEffect(dictMonadAff.MonadEffect0())(D3Tagless_Instance_Selection.eval_D3M(D3Tagless_Utility.removeExistingSVG(D3Tagless_Instance_Selection.d3TaglessD3M)("div.svg-container"))))(function (detached) {
                           return Control_Bind.bind(dictBind)(Effect_Aff_Class.liftAff(dictMonadAff)(Snippets.readSnippetFiles("PrintTreeHandleActions")))(function (text) {
                               return Control_Bind.discard(Control_Bind.discardUnit)(dictBind)(Data_Lens_Setter.assign(dictMonadState)(_handlerCode(Data_Profunctor_Strong.strongFn))(text))(function () {
-                                  return Control_Bind.bind(dictBind)(Effect_Aff_Class.liftAff(dictMonadAff)(D3_Layouts_Hierarchical.getTreeViaAJAX("/flare-2.json")))(function (treeJSON) {
+                                  return Control_Bind.bind(dictBind)(Effect_Aff_Class.liftAff(dictMonadAff)(D3_Layouts_Hierarchical.getTreeViaAJAX("./data/flare-2.json")))(function (treeJSON) {
                                       return Control_Bind.discard(Control_Bind.discardUnit)(dictBind)((function () {
                                           if (treeJSON instanceof Data_Either.Left) {
                                               return Control_Applicative.pure(((dictMonadAff.MonadEffect0()).Monad0()).Applicative0())(Data_Unit.unit);
@@ -22064,10 +22064,10 @@ var PS = {};
           });
       };
   };
-  var readModelData = Control_Bind.bind(Effect_Aff.bindAff)(Affjax.get(Affjax_ResponseFormat.string)("spago-data/" + "modules.json"))(function (moduleJSON) {
-      return Control_Bind.bind(Effect_Aff.bindAff)(Affjax.get(Affjax_ResponseFormat.string)("spago-data/" + "packages.json"))(function (packageJSON) {
-          return Control_Bind.bind(Effect_Aff.bindAff)(Affjax.get(Affjax_ResponseFormat.string)("spago-data/" + "lsdeps.jsonlines"))(function (lsdepJSON) {
-              return Control_Bind.bind(Effect_Aff.bindAff)(Affjax.get(Affjax_ResponseFormat.string)("spago-data/" + "LOC.json"))(function (locJSON) {
+  var readModelData = Control_Bind.bind(Effect_Aff.bindAff)(Affjax.get(Affjax_ResponseFormat.string)("./data/spago-data/" + "modules.json"))(function (moduleJSON) {
+      return Control_Bind.bind(Effect_Aff.bindAff)(Affjax.get(Affjax_ResponseFormat.string)("./data/spago-data/" + "packages.json"))(function (packageJSON) {
+          return Control_Bind.bind(Effect_Aff.bindAff)(Affjax.get(Affjax_ResponseFormat.string)("./data/spago-data/" + "lsdeps.jsonlines"))(function (lsdepJSON) {
+              return Control_Bind.bind(Effect_Aff.bindAff)(Affjax.get(Affjax_ResponseFormat.string)("./data/spago-data/" + "LOC.json"))(function (locJSON) {
                   var model = Data_Either.hush(Control_Apply.apply(Data_Either.applyEither)(Control_Apply.apply(Data_Either.applyEither)(Control_Apply.apply(Data_Either.applyEither)(Data_Functor.map(Data_Either.functorEither)(D3_Examples_Spago_Model.convertFilesToGraphModel)(moduleJSON))(packageJSON))(lsdepJSON))(locJSON));
                   return Control_Applicative.pure(Effect_Aff.applicativeAff)(addTreeToModel("Main")(model));
               });
@@ -22689,7 +22689,7 @@ var PS = {};
                       return Control_Bind.bind(dictBind)(Effect_Class.liftEffect(dictMonadAff.MonadEffect0())(D3Tagless_Instance_Selection.eval_D3M(D3Tagless_Utility.removeExistingSVG(D3Tagless_Instance_Selection.d3TaglessD3M)("div.svg-container"))))(function (detached) {
                           return Control_Bind.bind(dictBind)(Effect_Aff_Class.liftAff(dictMonadAff)(Snippets.readSnippetFiles("TreeDraw")))(function (text1) {
                               return Control_Bind.discard(Control_Bind.discardUnit)(dictBind)(Data_Lens_Setter.assign(dictMonadState)(_drawCode(Data_Profunctor_Strong.strongFn))(text1))(function () {
-                                  return Control_Bind.bind(dictBind)(Effect_Aff_Class.liftAff(dictMonadAff)(D3_Layouts_Hierarchical.getTreeViaAJAX("/flare-2.json")))(function (treeJSON) {
+                                  return Control_Bind.bind(dictBind)(Effect_Aff_Class.liftAff(dictMonadAff)(D3_Layouts_Hierarchical.getTreeViaAJAX("./data/flare-2.json")))(function (treeJSON) {
                                       return Control_Bind.discard(Control_Bind.discardUnit)(dictBind)((function () {
                                           if (treeJSON instanceof Data_Either.Left) {
                                               return Control_Applicative.pure(((dictMonadAff.MonadEffect0()).Monad0()).Applicative0())(Data_Unit.unit);

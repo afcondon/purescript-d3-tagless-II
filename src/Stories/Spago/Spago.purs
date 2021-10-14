@@ -258,7 +258,7 @@ runSimulation = do
 -- ======================================================================================================================
 readModelData :: Aff (Maybe SpagoModel)
 readModelData = do
-  let datadir = "spago-data/"
+  let datadir = "./data/spago-data/"
   moduleJSON  <- AJAX.get ResponseFormat.string $ datadir <> "modules.json"
   packageJSON <- AJAX.get ResponseFormat.string $ datadir <> "packages.json"
   lsdepJSON   <- AJAX.get ResponseFormat.string $ datadir <> "lsdeps.jsonlines"

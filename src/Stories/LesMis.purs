@@ -203,7 +203,7 @@ handleAction = case _ of
   ToggleCard _cardState -> _cardState %= not
 
   Initialize -> do
-    response <- H.liftAff $ AJAX.get ResponseFormat.string "/miserables.json"
+    response <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
     let graph = readGraphFromFileContents response
 
     text <- H.liftAff $ readSnippetFiles "LesMisScript"

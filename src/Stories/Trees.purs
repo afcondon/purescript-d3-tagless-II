@@ -175,7 +175,7 @@ handleAction = case _ of
     text1 <- H.liftAff $ readSnippetFiles "TreeDraw"
     _drawCode .= text1
 
-    treeJSON <- H.liftAff $ getTreeViaAJAX "./flare-2.json"
+    treeJSON <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
 
     case treeJSON of
       (E.Left err) -> pure unit
