@@ -65,7 +65,7 @@ instance showExampleType :: Show ExampleType where
   show = case _ of
     None -> "No example selected"
     ExampleCircles  -> "Three Little Circles"
-    ExampleGUP      -> "GUP"
+    ExampleGUP      -> "General Update Pattern"
     ExampleTrees    -> "Trees"
     ExampleLesMis   -> "LesMis"
     ExampleMetaTree -> "MetaTree"

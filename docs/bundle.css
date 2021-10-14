@@ -2,6 +2,12 @@ div.story-panel-code pre.language-purescript {
   font-size: 8pt;
 }
 
+div.story-panel-code {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
 div.svg-container svg.gup text { font-size: 48px; font-family: monospace;
   }
 

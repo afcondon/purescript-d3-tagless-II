@@ -249,8 +249,9 @@ arrival, update and exit phases. Even if this tracking isn't interesting in
 itself, it can lessen the fatigue of looking at updated data and it conveys a
 sense of how much the data has changed.""",
 
-"""This example is called "General Update Pattern" in D3.js, hence the name of
-this example. You can see in the code panel how the "data join" contains three
-separate specifications, each with their own *transition*."""
+"""This example is called "General Update Pattern" in an early Mike Bostock
+post explaining the (then new) D3.js. You can see in the code panel how the
+"data join" contains three separate specifications, each with their own
+*transition*."""
 
 ]
