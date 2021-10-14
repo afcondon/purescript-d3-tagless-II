@@ -3,6 +3,8 @@
 
 Tagless final style interpreter / wrapper for D3 in PureScript, latest of many re-writes
 
+See it working [here](https://afcondon.github.io/purescript-d3-tagless-II/)
+
 Proper readme to come, see readmes for my repos with previous attempts for context
 
 Collaborators very welcome.
