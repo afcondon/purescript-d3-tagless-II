@@ -256,20 +256,12 @@ initialSimulationState forces = SimState_
   where
     _ = trace { simulation: "initialized", forceLibrary: forces } \_ -> unit
 
--- forceLibraryMap :: Map Label ForceStatus
--- forceLibraryMap = do
---   let
---     forceTuple :: Force -> Tuple Label ForceStatus
---     forceTuple f = Tuple (view _name f) (view _status f)
---   spy "forceLibraryMap: " $ fromFoldable $ forceTuple <$> forceLibrary
-
-
 defaultConfigSimulation :: SimulationVariables
 defaultConfigSimulation = { 
       alpha        : 1.0
     , alphaTarget  : 0.0
     , alphaMin     : 0.001
-    -- , alphaDecay   : 0.0228
-    , alphaDecay   : 0.05 -- raised from default to converge quicker while debugging
+    , alphaDecay   : 0.0228
+    -- , alphaDecay   : 0.05 -- useful when debugging to converge quicker (but less well)
     , velocityDecay: 0.4
 }

@@ -8,9 +8,9 @@ import D3.Examples.LesMiserables.Model (LesMisRawModel)
 import D3.FFI (keyIsID_, simdrag)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..))
-import D3.Simulation.Types (D3SimulationState_, Step(..))
+import D3.Simulation.Types (D3SimulationState_, SimVariable(..), Step(..))
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SimulationM, addTickFunction, appendTo, attach, on, setAttributes, setLinks, setNodes, simpleJoin)
+import D3Tagless.Capabilities (class SimulationM, addTickFunction, appendTo, attach, on, setAttributes, setConfigVariable, setLinks, setNodes, simpleJoin)
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
@@ -85,5 +85,6 @@ draw model selector = do
                       , name   : "LesMis"
                       , target : svg
                       }
+  setConfigVariable $ Alpha 1.0
   pure unit
 -- TEPPINS
