@@ -1,28 +1,13 @@
 # About this repo
 
-## Types of Documentation to consider
-
-### Four types of documentation (as promoted by Divio)
-
-[2017 Daniel Procida](https://www.youtube.com/watch?v=p0PPtdRHG6M)
-[David Lang](https://documentation.divio.com/_images/overview.png)
-
-* Type 1: learning-oriented TUTORIALS
-* Type 2: goal-oriented HOW-TO GUIDES
-* TYpe 3: understanding-oriented DISCUSSIONS
-* Type 4: information-oriented REFERENCE material
-
-### Four types of documentation (2018? DSullivan)
-
-* Technical Documentation #1: Internal Development Document
-* Technical Documentation #2: Product Documentation
-* Technical Documentation #3: Troubleshooting Documentation
-* Technical Documentation #4: Knowledge-base
-
-------------------------------------------------------------------
-
 ## Project Overview: Functional Programming and Data Visualization (DISCUSSION)
 
+### Compact summary of project
+
+* goals
+* non-goals
+* what's here
+  
 ### Data Visualization for Functional Programmers
 
 ### Functional Programming for Data Visualizers
