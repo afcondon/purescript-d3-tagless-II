@@ -145,7 +145,7 @@ Introduce the concepts of the library using the small examples.
 
 #### Building the General Update Pattern example
 
-![image](https://user-images.githubusercontent.com/1260895/138757709-1671b786-8858-43e5-b56a-a560f93730b0.png)
+https://user-images.githubusercontent.com/1260895/138759374-53fb1cd1-a501-460e-8e77-ed01f951e6dd.mov
 
 #### Building the Trees example
 
