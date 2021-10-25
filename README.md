@@ -1,3 +1,5 @@
+![Pasted Graphic 8](https://user-images.githubusercontent.com/1260895/138756849-2d9e93c3-2393-48eb-ad86-88b4798e14c0.png)
+
 # Project Overview: Functional Programming and Data Visualization
 
 This project demonstrates an embedded DSL for building interactive data visualizations with PureScript, using D3.js both as inspiration and as an implementation layer under the Foreign Function Interface (FFI).
@@ -18,7 +20,10 @@ After cloning the repo, you should be able to do:
 * `yarn run build`
 * `yarn run bundle`
 
-and then if you serve `http` from the `dist` directory you should be able to see the demo.
+and then if you serve `http` from the `dist` directory you should be able to see the same demo as at the link above.
+
+![image](https://user-images.githubusercontent.com/1260895/138757015-9d169f46-f0ac-4e5e-8a15-da087349d09d.png)
+
 
 ## Motivation and goals
 
@@ -124,6 +129,8 @@ Tamara Munzner, FT guide, Wattenberger, Manuel Lima
 
 Purity, totality, static types, type inference, category theory, composition, illegal states unrepresentable
 
+![Pasted Graphic 6](https://user-images.githubusercontent.com/1260895/138757124-2edcdb52-ba96-4200-9acb-a3138639c0d3.png)
+
 ## Next steps: guide to other docs
 
 This is the list of documents that i intend to write. In keeping with the useful ideas in the Divio [documentation system](https://documentation.divio.com), i'll be categorizing these into four types, as shown below.
@@ -134,12 +141,20 @@ Introduce the concepts of the library using the small examples.
 
 #### Building the Three Little Circles example
 
+![image](https://user-images.githubusercontent.com/1260895/138757643-a5c0596d-129c-47e8-81b0-f4f2547917be.png)
+
 #### Building the General Update Pattern example
+
+![image](https://user-images.githubusercontent.com/1260895/138757709-1671b786-8858-43e5-b56a-a560f93730b0.png)
 
 #### Building the Trees example
 
+![image](https://user-images.githubusercontent.com/1260895/138757828-b9fd83b8-0fc9-40c0-8980-68a01d82111e.png)
+
 #### Building the Les Miserables example
-  
+
+![image](https://user-images.githubusercontent.com/1260895/138757898-717c38af-9811-4890-91a0-646677bd8992.png)
+
 ### How-to Guide
 
 Enable the reader to understand how a more fully complex, app-like example such as the Spago demo is built.
