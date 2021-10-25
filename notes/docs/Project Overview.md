@@ -6,6 +6,20 @@ The DSL uses a Finally Tagless approach that allows multiple implementations for
 
 This overview document is an introduction to the ideas in the project and a guide to the other documentation and articles about it. Presuming that many people who might be interested in this work are going to come from only one of two disciplines: data-visualisation OR functional programming, i've tried to provide introductions for each camp to at least be acquainted with the important aspects of the other before reading further.
 
+## Show me something right now
+
+There's a demo, see it working [here](https://afcondon.github.io/purescript-d3-tagless-II/).
+
+## Installation
+
+After cloning the repo, you should be able to do:
+
+* `yarn install`
+* `yarn run build`
+* `yarn run bundle`
+
+and then if you serve `http` from the `dist` directory you should be able to see the demo.
+
 ## Motivation and goals
 
 ### Motivation
@@ -30,7 +44,7 @@ There are two "number one priority" goals: *expressability* and *readability*. S
 
 Something that people with limited prior knowledge / experience of data visualisation often seem to find surprising is the degree to which D3 is *fundamentally different* from "a charting library". While the library has some affordances that make it very easy to do common visualisations it is not in any way about "canned visualisations". Rather, it is a language for describing a relationship between arrays of data and arbitrary constructions of DOM (HTML or SVG) element or marks on Canvas, and it could in principle be used to do auditory "visualisation" or, who knows, maybe olfactory "visualisation" or drone displays or whatever.
 
-You can get a greater sense of the potential of D3 and the range of things that have thus far been produced using it at [Observables](https://observablehq.com/) and i will discuss this again in the [section "Introduction to Data Visualisation for Functional Programmers](#data-visualization-for-functional-programmers).
+You can get a greater sense of the potential of D3 and the range of things that have thus far been produced using it at [ObservableHQ](https://observablehq.com/) and i will discuss this again in the [section "Introduction to Data Visualisation for Functional Programmers](#data-visualization-for-functional-programmers).
 
 So when we talk about expressability as a goal for this PureScript eDSL, we're not talking about working at the level of "make me a bar graph", "make me a scatterplot", we're talking about retaining the expressability of that translation from array to, for example, SVG.
 
@@ -88,7 +102,6 @@ The performance bottlenecks in a D3 visualisation are, by their nature, going to
 
 There definitely are other ways one could make this tradeoff, the approach taken has proved satisfactory thus far but other options would be very interesting to discuss and PRs are welcome, particularly if they are additive rather than replacements to what is here. A 100% PureScript alternative for D3's Selection, Attribute and Transition APIs would be very welcome even at a price of performance.
   
---------------------------------
 ## Data Visualization for Functional Programmers
 
 > Computer-based visualization systems provide visual  representations of datasets designed to help people carry  out tasks more effectively.  Visualization is suitable when there is a need to augment  human capabilities rather than replace people with computational decision-making methods. The design space  of possible vis idioms is huge, and includes the considerations of both how to create and how to interact with  visual representations. Vis design is full of trade-offs, and  most possibilities in the design space are ineffective for a  particular task, so validating the effectiveness of a design  is both necessary and difficult. Vis designers must take  into account three very different kinds of resource limitations: those of computers, of humans, and of displays.  Vis usage can be analyzed in terms of why the user needs  it, what data is shown, and how the idiom is designed.
@@ -111,11 +124,13 @@ Tamara Munzner, FT guide, Wattenberger, Manuel Lima
 
 Purity, totality, static types, type inference, category theory, composition, illegal states unrepresentable
 
---------------------------------
-
 ## Next steps: guide to other docs
 
+This is the list of documents that i intend to write. In keeping with the useful ideas in the Divio [documentation system](https://documentation.divio.com), i'll be categorizing these into four types, as shown below.
+
 ### Tutorials
+
+Introduce the concepts of the library using the small examples.
 
 #### Building the Three Little Circles example
 
@@ -124,14 +139,16 @@ Purity, totality, static types, type inference, category theory, composition, il
 #### Building the Trees example
 
 #### Building the Les Miserables example
+  
+### How-to Guide
 
---------------------------------
-### How-Tos
+Enable the reader to understand how a more fully complex, app-like example such as the Spago demo is built.
 
-#### Building an App
+#### Designing and Building the Spago App
 
---------------------------------
-### Discussion
+### Explanations
+
+More general discussions of concepts in the library and its implementation.
 
 #### Finally Tagless Viz
 
@@ -145,12 +162,8 @@ Describes the particular approach to application development and the separation 
 
 Possibility of using GraphViz for layout, of writing a PureScript native Selection monad etc etc
 
---------------------------------
+#### Layers of DSLs
+
 ### Reference
 
-#### Library Architecture and API guide
-
-(probably just Pursuit once published)
-
-Layers of DSLs
-
+#### Library Architecture and API guide (probably just Pursuit once published)

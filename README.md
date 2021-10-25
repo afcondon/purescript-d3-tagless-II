@@ -102,7 +102,6 @@ The performance bottlenecks in a D3 visualisation are, by their nature, going to
 
 There definitely are other ways one could make this tradeoff, the approach taken has proved satisfactory thus far but other options would be very interesting to discuss and PRs are welcome, particularly if they are additive rather than replacements to what is here. A 100% PureScript alternative for D3's Selection, Attribute and Transition APIs would be very welcome even at a price of performance.
   
---------------------------------
 ## Data Visualization for Functional Programmers
 
 > Computer-based visualization systems provide visual  representations of datasets designed to help people carry  out tasks more effectively.  Visualization is suitable when there is a need to augment  human capabilities rather than replace people with computational decision-making methods. The design space  of possible vis idioms is huge, and includes the considerations of both how to create and how to interact with  visual representations. Vis design is full of trade-offs, and  most possibilities in the design space are ineffective for a  particular task, so validating the effectiveness of a design  is both necessary and difficult. Vis designers must take  into account three very different kinds of resource limitations: those of computers, of humans, and of displays.  Vis usage can be analyzed in terms of why the user needs  it, what data is shown, and how the idiom is designed.
@@ -125,11 +124,13 @@ Tamara Munzner, FT guide, Wattenberger, Manuel Lima
 
 Purity, totality, static types, type inference, category theory, composition, illegal states unrepresentable
 
---------------------------------
-
 ## Next steps: guide to other docs
 
+This is the list of documents that i intend to write. In keeping with the useful ideas in the Divio [documentation system](https://documentation.divio.com), i'll be categorizing these into four types, as shown below.
+
 ### Tutorials
+
+Introduce the concepts of the library using the small examples.
 
 #### Building the Three Little Circles example
 
@@ -138,14 +139,16 @@ Purity, totality, static types, type inference, category theory, composition, il
 #### Building the Trees example
 
 #### Building the Les Miserables example
+  
+### How-to Guide
 
---------------------------------
-### How-Tos
+Enable the reader to understand how a more fully complex, app-like example such as the Spago demo is built.
 
-#### Building an App
+#### Designing and Building the Spago App
 
---------------------------------
-### Discussion
+### Explanations
+
+More general discussions of concepts in the library and its implementation.
 
 #### Finally Tagless Viz
 
@@ -159,12 +162,8 @@ Describes the particular approach to application development and the separation 
 
 Possibility of using GraphViz for layout, of writing a PureScript native Selection monad etc etc
 
---------------------------------
+#### Layers of DSLs
+
 ### Reference
 
-#### Library Architecture and API guide
-
-(probably just Pursuit once published)
-
-Layers of DSLs
-
+#### Library Architecture and API guide (probably just Pursuit once published)
