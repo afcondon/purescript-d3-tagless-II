@@ -6,20 +6,6 @@ The DSL uses a Finally Tagless approach that allows multiple implementations for
 
 This overview document is an introduction to the ideas in the project and a guide to the other documentation and articles about it. Presuming that many people who might be interested in this work are going to come from only one of two disciplines: data-visualisation OR functional programming, i've tried to provide introductions for each camp to at least be acquainted with the important aspects of the other before reading further.
 
-## Show me something right now
-
-There's a demo, see it working [here](https://afcondon.github.io/purescript-d3-tagless-II/).
-
-## Installation
-
-After cloning the repo, you should be able to do:
-
-* `yarn install`
-* `yarn run build`
-* `yarn run bundle`
-
-and then if you serve `http` from the `dist` directory you should be able to see the demo.
-
 ## Motivation and goals
 
 ### Motivation
@@ -44,7 +30,7 @@ There are two "number one priority" goals: *expressability* and *readability*. S
 
 Something that people with limited prior knowledge / experience of data visualisation often seem to find surprising is the degree to which D3 is *fundamentally different* from "a charting library". While the library has some affordances that make it very easy to do common visualisations it is not in any way about "canned visualisations". Rather, it is a language for describing a relationship between arrays of data and arbitrary constructions of DOM (HTML or SVG) element or marks on Canvas, and it could in principle be used to do auditory "visualisation" or, who knows, maybe olfactory "visualisation" or drone displays or whatever.
 
-You can get a greater sense of the potential of D3 and the range of things that have thus far been produced using it at [ObservableHQ](https://observablehq.com/) and i will discuss this again in the [section "Introduction to Data Visualisation for Functional Programmers](#data-visualization-for-functional-programmers).
+You can get a greater sense of the potential of D3 and the range of things that have thus far been produced using it at [Observables](https://observablehq.com/) and i will discuss this again in the [section "Introduction to Data Visualisation for Functional Programmers](#data-visualization-for-functional-programmers).
 
 So when we talk about expressability as a goal for this PureScript eDSL, we're not talking about working at the level of "make me a bar graph", "make me a scatterplot", we're talking about retaining the expressability of that translation from array to, for example, SVG.
 
