@@ -22,8 +22,7 @@ After cloning the repo, you should be able to do:
 
 and then if you serve `http` from the `dist` directory you should be able to see the same demo as at the link above.
 
-![image](https://user-images.githubusercontent.com/1260895/138757015-9d169f46-f0ac-4e5e-8a15-da087349d09d.png)
-
+![image](https://user-images.githubusercontent.com/1260895/138859399-a758dcb2-e05b-407f-9538-035acd99845f.png)
 
 ## Motivation and goals
 
@@ -160,6 +159,8 @@ https://user-images.githubusercontent.com/1260895/138759374-53fb1cd1-a501-460e-8
 Enable the reader to understand how a more fully complex, app-like example such as the Spago demo is built.
 
 #### Designing and Building the Spago App
+
+![image](https://user-images.githubusercontent.com/1260895/138757015-9d169f46-f0ac-4e5e-8a15-da087349d09d.png)
 
 ### Explanations
 
