@@ -98,7 +98,7 @@ Furthermore, i have only written those wrappers *as I needed them* to there are 
 
 This might seem like a surprising choice - D3 is inherently _very_ stateful, there's state in D3, there's state in the DOM, there's statefulness in your (pure) data after you give it to D3. State everywhere. In many cases in functional programming you might try to ameliorate the dangers of this by explicitly modelling the state, using a State Monad or marking everything that changes or depends upon state as "Effect"-full.
 
-Indeed i have tried this approach in the past. In this library i have instead striven to isolate the statefulness to only the code that uses eDSL represented by the `Selection` and `Simulation` monads. This *significantly* removes but cannot fully eliminate the issues associated with state. However, i believe it is a good compromise although much more could be said on the matter. 
+Indeed i have tried this approach in the past. In this library i have instead striven to isolate the statefulness to only the code that uses eDSL represented by the `Selection` and `Simulation` monads. This *significantly* removes but cannot fully eliminate the issues associated with state. However, i believe it is a good compromise although much more could be said on the matter.
 
 ### Non-goal: performance optimisation that compromise readability
 
@@ -108,25 +108,94 @@ There definitely are other ways one could make this tradeoff, the approach taken
   
 ## Data Visualization for Functional Programmers
 
+Data visualisation is a huge topic and i'm only going to make the briefest of introductions here. Let's start with a definition from a really good text book on the subject, followed by one strong example, the visualization that the late, great Hans Rosling made famous in his TED talk about human development: 
+
+
 > Computer-based visualization systems provide visual  representations of datasets designed to help people carry  out tasks more effectively.  Visualization is suitable when there is a need to augment  human capabilities rather than replace people with computational decision-making methods. The design space  of possible vis idioms is huge, and includes the considerations of both how to create and how to interact with  visual representations. Vis design is full of trade-offs, and  most possibilities in the design space are ineffective for a  particular task, so validating the effectiveness of a design  is both necessary and difficult. Vis designers must take  into account three very different kinds of resource limitations: those of computers, of humans, and of displays.  Vis usage can be analyzed in terms of why the user needs  it, what data is shown, and how the idiom is designed.
 >
 > -- <cite>Munzner, Tamara. Visualization Analysis and Design (AK Peters Visualization Series) (p. 1). A K Peters/CRC Press.</cite>
 
+* [Gapminder version](https://www.gapminder.org/tools/?from=world#$chart-type=bubbles&url=v1)
+* [D3 version](https://observablehq.com/@mbostock/the-wealth-health-of-nations)
+* [Hans Rosling's TED talk](https://youtu.be/hVimVzgtD6w) which is, somewhat incredibly now 14 years old
+
+I'm primarily concerned in this section to address common confusions or misperceptions that have arisen when i've demo-ed this stuff to other FP programmers. I'm not going to try to argue for the _utility_ of dataviz, only to get some clarification as to what it is.
+
 ### General overview: DataViz
 
-Tufte, Minard, Anscombe etc
+One way of looking at data visualisation if you've never really thought about it or worked with it is that it is a form of parallelisation of the _human_ computer: all people who are lucky enough to have "normal" vision are able to pick out anomalies and/or patterns in data that is presented visually that we would find extraordinarily difficult to perceive in tabular, numeric data.
+
+We often, and increasingly, use computers to pick out these patterns nowadays using ML and statistical tools. However, there are many circumstances where these techniques *don't* work or don't work in a *timely* or *convenient* of *ad hoc* manner. So it is still very valuable to have the possibility to use the human brain for this.
+
+The range of _common_ data visualizations is large and the range of _possible_ data visualisations is infinite and the reason for this is that each data visualization is (or should be) specifically tuned to _make it easy for a human to perceive the important detail_.
+
+#### DataViz for Sanity Checks
+
+Consider this famous example known as [Anscombe's Quartet](https://en.wikipedia.org/wiki/Anscombe's_quartet).
+
+> Anscombe's quartet comprises four data sets that have nearly identical simple descriptive statistics, yet have very different distributions and appear very different when graphed. Each dataset consists of eleven (x,y) points. They were constructed in 1973 by the statistician Francis Anscombe to demonstrate both the importance of graphing data before analyzing it, and the effect of outliers and other influential observations on statistical properties.
+> -- <cite>Wikipedia</cite>
+
+[image from Wikipedia](https://en.wikipedia.org/wiki/File:Anscombe%27s_quartet_3.svg)
+
+So one reason to visualize things could just be as a sanity check on statistical or geographical anomalies like the outliers in tables 3 and 4 of Anscombe's quartet.
+
+#### Interactive DataViz for Invariants
+
+Another reason to use dataviz techniques is something that has an analogy in one of the foundational ideas of strong static typing in Haskell-family languages and that is "to make illegal states unrepresentable".
+
+Consider a tree structure such as a HTML page. We can represent this as text, edit it as text, give it to a browser as text and have it rendered in the browser DOM as a tree data structure. This is so familiar that it probably seems natural, inevitable, unimprovable.
+
+I'm not going to argue that we should also use visual editors for editing HTML - there are reasons why this is a local maximum for most people, not least because we probably don't want to take our hands of the keyboard and most of the input is likely to be `text` rather than `<tags>` . But consider these two closely related implications of this approach:
+
+* we can easily formulate malformed trees
+* we can't make atomic edits to change the tree structure
+
+In both cases we're likely either having a linter pick up the error or we're hitting save and seeing a browser refresh of the page we're working on and immediately noticing our error. But what if we were working on tree-shaped data that _didn't have a linter_ or didn't have a quick auto-reloading validation? This is the circumstance we find ourselves in with many kinds of data structures, notably many Concrete Syntax Trees.
+
+And even if we can get instantaneous feedback that we've botched the structure it's often not that easy to see how to fix it, as anyone who's tried to re-factor a pageful of components has surely found.
+
+So one reason we might use visualisation as an accompaniment to textual or tabular data is just this kind of sanity checking.
+
+If the dataviz is _interactive_ however, we can enable editing that *cannot* break the structure. A tree or graph editor for example. And if we can round-trip from data-structures in our programming language of choice to editable dataviz of those structures this can be very useful.
+
+#### DataViz for discovery and exploration
+
+Another aspect of interactive dataviz is in seeing and exploring structures that are simply too big to examine in a debugger window or a terminal.
+
+You're probably already very familiar with situations where you need to debug a data structure that is many levels deep and which requires clicking little dropdowns repeatedly to get to the thing you want to examine while debugging. This is useful but it won't help much if you are looking for relationships between elements in the data structure such or want to know if two nodes in a tree share a parent or what links are responsable for the cycles in a graph. In cases where a graphical representation can help you identify patterns it makes sense to use dataviz, if the overhead of producing it is advantageous.
+
+Additionally, there are many existing examples of techniques for exploring data of the sorts you can see here:
+
+* [Density Contour Matrix with Brushing](https://observablehq.com/@pstuffa/density-contour-matrix-with-brushing)
+* [Dashboard with Brushing and Linking Example in Vega-Lite](https://observablehq.com/@weiglemc/brushing-and-linking-example-with-vega-lite)
+* [Zoomable sunburst](https://observablehq.com/@d3/zoomable-sunburst)
+* [Collapsable tree](https://observablehq.com/@d3/collapsible-tree)
+* [Sequences sunburst](https://observablehq.com/@kerryrodden/sequences-sunburst)
+
+(most of those examples are taken from the gallery [here](https://observablehq.com/@d3/gallery), which contains a very broad range of well-chosen examples of dataviz specifically written with D3)
+
+#### Dataviz and Napoleon
+
+The books of Edward Tufte are where a lot of modern dataviz as a discipline started and he invented or popularized a lot of data visualization techniques that continue to be relevant even as we've moved from paper to screens and from static to dynamic in many cases.
+
+Amongst the early dataviz examples that he championed is a famous graphic describing Napoleon's disastrous invasion of Russia in 1812, developed by Charles Minard in 1869. The map shows six variables (longitude, latitute, number of soldiers, temperature, directions of travel) yet it is displayed coherently on the two dimensions of paper. The map and some ideas about adapting it for modern dataviz can be found [here](http://minardmap.org).
+
+This concept of showing more than two variables on the two dimension paper, or more than three on an animated display is quite a key concept, and one which extended "dataviz" beyond mere bar charts and scatterplots. Though the latter should not be disdained if they are sufficient to the task, the possibilities are much greater.
 
 ### D3 particularly
 
-### Further reading
+### Further reading and examples and exploration
 
-Tamara Munzner, FT guide, Wattenberger, Manuel Lima
+Tamara Munzner, [FT guide](https://ft-interactive.github.io/visual-vocabulary/), Wattenberger, Manuel Lima
+
+Examples: [d3-graph-gallery](https://www.d3-graph-gallery.com/index.html)
 
 ## Functional Programming for Data Visualizers
 
 ### General overview: FP
 
-Purity, totality, static types, type inference, category theory, composition, illegal states unrepresentable
+Purity and no nulls, totality , static types, ADTs, illegal states unrepresentable, type inference, "category theory" (really just typeclassopedia-lite), composition 
 
 ![Pasted Graphic 6](https://user-images.githubusercontent.com/1260895/138757124-2edcdb52-ba96-4200-9acb-a3138639c0d3.png)
 
