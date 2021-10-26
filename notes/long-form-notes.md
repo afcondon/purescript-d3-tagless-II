@@ -1,6 +1,6 @@
 # About this repo
 
-## Project Overview: Functional Programming and Data Visualization (DISCUSSION)
+## Project Overview: Functional Programming and Data Visualization (EXPLANATION)
 
 ### Compact summary of project
 
@@ -17,7 +17,7 @@
 * TUTORIALS
 * HOW-TO
   * Spago example from scratch
-* DISCUSSION software enginering and technology considerations
+* EXPLANATION software enginering and technology considerations
   * roles and responsabilities
   * finally tagless as a method / approach
   * alternatives / extensions / future-work
@@ -25,7 +25,7 @@
 
 ------------------------------------------------------------------
 
-## Finally Tagless Visualization (DISCUSSION)
+## Finally Tagless Visualization (EXPLANATION)
 
 ### What it is
 
@@ -37,7 +37,7 @@
 
 ------------------------------------------------------------------
 
-## Roles and responsibilities (DISCUSSION)
+## Roles and responsibilities (EXPLANATION)
 
 ### Visualization as "decoration" vs "core"
 
@@ -102,7 +102,7 @@ Tying it all together. Treating the data visualization as a component, even if i
 
 ------------------------------------------------------------------
 
-## Swapping out, re-writing or augmenting D3.js (DISCUSSION)
+## Swapping out, re-writing or augmenting D3.js (EXPLANATION)
 
 Using graphviz or other layouts, replacing the Selection and/or simulation FFIs
 
