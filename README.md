@@ -110,14 +110,13 @@ There definitely are other ways one could make this tradeoff, the approach taken
 
 Data visualisation is a huge topic and i'm only going to make the briefest of introductions here. Let's start with a definition from a really good text book on the subject, followed by one strong example, the visualization that the late, great Hans Rosling made famous in his TED talk about human development: 
 
-
-> Computer-based visualization systems provide visual  representations of datasets designed to help people carry  out tasks more effectively.  Visualization is suitable when there is a need to augment  human capabilities rather than replace people with computational decision-making methods. The design space  of possible vis idioms is huge, and includes the considerations of both how to create and how to interact with  visual representations. Vis design is full of trade-offs, and  most possibilities in the design space are ineffective for a  particular task, so validating the effectiveness of a design  is both necessary and difficult. Vis designers must take  into account three very different kinds of resource limitations: those of computers, of humans, and of displays.  Vis usage can be analyzed in terms of why the user needs  it, what data is shown, and how the idiom is designed.
+> *Computer-based visualization systems provide visual  representations of datasets designed to help people carry  out tasks more effectively*.  Visualization is suitable when there is a need to augment  human capabilities rather than replace people with computational decision-making methods. The design space  of possible vis idioms is huge, and includes the considerations of both how to create and how to interact with  visual representations. Vis design is full of trade-offs, and  most possibilities in the design space are ineffective for a  particular task, so validating the effectiveness of a design  is both necessary and difficult. Vis designers must take  into account three very different kinds of resource limitations: those of computers, of humans, and of displays.  Vis usage can be analyzed in terms of why the user needs  it, what data is shown, and how the idiom is designed.
 >
 > -- <cite>Munzner, Tamara. Visualization Analysis and Design (AK Peters Visualization Series) (p. 1). A K Peters/CRC Press.</cite>
 
 * [Gapminder version](https://www.gapminder.org/tools/?from=world#$chart-type=bubbles&url=v1)
 * [D3 version](https://observablehq.com/@mbostock/the-wealth-health-of-nations)
-* [Hans Rosling's TED talk](https://youtu.be/hVimVzgtD6w) which is, somewhat incredibly now 14 years old
+* [Hans Rosling's TED talk](https://youtu.be/hVimVzgtD6w) which is, somewhat incredibly, now 14 years old
 
 I'm primarily concerned in this section to address common confusions or misperceptions that have arisen when i've demo-ed this stuff to other FP programmers. I'm not going to try to argue for the _utility_ of dataviz, only to get some clarification as to what it is.
 
@@ -136,7 +135,8 @@ Consider this famous example known as [Anscombe's Quartet](https://en.wikipedia.
 > Anscombe's quartet comprises four data sets that have nearly identical simple descriptive statistics, yet have very different distributions and appear very different when graphed. Each dataset consists of eleven (x,y) points. They were constructed in 1973 by the statistician Francis Anscombe to demonstrate both the importance of graphing data before analyzing it, and the effect of outliers and other influential observations on statistical properties.
 > -- <cite>Wikipedia</cite>
 
-[image from Wikipedia](https://en.wikipedia.org/wiki/File:Anscombe%27s_quartet_3.svg)
+![image](https://user-images.githubusercontent.com/1260895/139079259-8ada3640-359d-4ac9-b96e-4fe47c7cf642.png)
+<cite>image from [Wikipedia](https://en.wikipedia.org/wiki/File:Anscombe%27s_quartet_3.svg)</cite>
 
 So one reason to visualize things could just be as a sanity check on statistical or geographical anomalies like the outliers in tables 3 and 4 of Anscombe's quartet.
 
