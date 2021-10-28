@@ -193,11 +193,148 @@ Examples: [d3-graph-gallery](https://www.d3-graph-gallery.com/index.html)
 
 ## Functional Programming for Data Visualizers
 
-### General overview: FP
+The TL;DR of this section is just that you should know that there exist communities of programmers who work in these somewhat esoteric languages because we believe they give us:
 
-Purity and no nulls, totality , static types, ADTs, illegal states unrepresentable, type inference, "category theory" (really just typeclassopedia-lite), composition 
+* better composability of sub-programs
+* better expressiveness in describing the problem domain
+* better correctness in implementations (ie fewer bugs)
+* better ability to evolve programs due to shifting requirements (re-factoring)
+
+One note for the reader: the features i'm going to describe get much of their power from their combinations. It's the hardest thing to show and a significant part of the learning curve.
+
+### General overview: PureScript
+
+PureScript the language is part of a family of languages that are known as "statically-typed, functional programming language with type inference". I'll explain what those terms mean and why they matter in this section. This will necessarily be a very brief introduction with pointers for further reading as it is a very big topic.
+
+PureScript is very closely related to Haskell. Unlike Haskell, PureScript has no run-time of its own and instead compiles ("transpiles") to JavaScript and runs in a JavaScript runtime such as a browser or Node.js. Other target languages and runtimes are possible and are actually in use (Erlang in particular) but this library really only works with JavaScript so i'll assume that version in this section.
+
+So what do those phrases "statically-typed", "functional" and "type-inference" mean in this context? and why would we care if building data visualizations?
+
+The sub-sections which follow will explain some of the terminology of pure functional programming in somewhat abstract terms and then look at concrete language elements and how they can benefit programmers.
+
+#### Functional programming, abstractly
+
+This most fundamental distinction means that programs in the language are exclusively built up out of "pure" functions. Pure functions are ones that will always return the same value for the same input and which have no side-effects. This restriction has enormous implications for how programs are built that are typically not obvious until you try to write a program in the language. The reason that this restriction - which makes *writing* programs harder, arguably - is worth doing is because it makes *reasoning* about programs much, much easier.
+
+As well as being "pure", Haskell-family functions are "higher-order functions": you can write functions which take other functions as arguments and return still other functions as results. In this case, the advantage is in allowing abstractions which lessen the amount of code we have to write and understand.
+
+Statically-typed with type-inference means something more than just checking that a function which takes, say, an `Int` as an argument is being called with an `Int` as an argument. It means that a function may, for example, take any numeric type as an argument and that the compiler will check that this is consistent with the way the function is used in the program. The compiler does a kind of forward and backward deduction process to see if your program is consistent in this way. This can catch a whole category of bugs at compile time.
+
+Additionally, the type-system in Haskell-like languages such as PureScript uses Algebraic Data Types (ADT) which are very expressive and allow one to completely eliminate some common sources of bugs in programs such as `null` (Tony Hoare's famous "billion dollar mistake"). Expressiveness in types is advantageous because it enables us to reach towards a goal of "making illegal states unrepresentable" and have this tracked and managed by the compiler instead of defensively programming at every usage site of a more primitive type.
+
+Each of these concepts is quite deep and has an extensive literature as well as much discussion in books that teach functional programming. These paragraphs are really just signposts to further reading if you are curious, as well as hopefully connecting claims made in the following section to specific theoretical concepts.
+
+#### Functional programming in PureScript, concretely
+
+Leaving programming language theory aside here are some concrete examples of these ideas in PureScript.
+
+##### No nulls
+
+We often have values that are uninitialized at some point in the program. Maybe we need user input to get a value for them, or maybe they can only be initialized if some other value, such as a date, validates correctly.
+
+In languages that have `undefined`, `null`, `NaN` (which are all just different types of null) we will typically check for this before using the value. PureScript is no different except that it won't allow us to forget to check because we'll have to wrap the value in some type, probably a `Maybe` from the `Data.Maybe` library or, if it was something we were getting via, say, AJAX, it might be an `Either` from `Data.Either`
+
+```haskell
+data Maybe a = Just a | Nothing
+data Either a b = Left a | Right b
+```
+
+`a` and `b` are *type variables* so you can have a `Maybe String` or a `Maybe Int` or a `Maybe Foo` or an `Either Error String` and these things are all different from one another and they're all going to force you to pattern-match them explicitly to get out what may be inside them. 
+
+This is surprisingly lovely to use in practice, but it gets better: because `Maybe` and `Either` have *instances* of common *type-classes* we can do a range of common operations to the possible contents without tediously wrapping and unwrapping them. A `Functor` instance allows us to map some function over them. 
+
+```haskell
+add2 :: Int -> Int
+add2 i = i + 2
+
+foo :: Maybe Int
+foo = Just 1
+
+bar :: Maybe Int
+bar = Nothing
+
+fooPlusTwo = map add2 foo -- Just 3
+barPlusTwo = map add2 bar -- Nothing
+```
+
+It's important to note that the `add2` function there knows absolutely nothing about unwrapping `Maybe` or `Either`. This kind of thing is what enables us to bottom-out writing very simple functions (perhaps not as simple as `add2`) and thus having more confidence in the correctness of our programs even before we write any tests.
+
+##### Totality
+
+Following on from this, PureScript enforces *totality* meaning not only do you have to pattern-match but you can't accidentally omit a pattern to match on.
+
+In the case of `Maybe` you're not going to forget a match but in more application or domain-specific types, you very easily could:
+
+```haskell
+data Month = January | February | March | April | May | June | July | August | September | October | November | December
+data Season = Spring | Summer | Autumn | Winter
+
+getSeason :: Month -> Season
+getSeason m = 
+    case m of
+        January -> Winter
+        February -> Winter
+        March -> Spring
+        April -> Spring
+        May -> Spring
+        June -> Summer
+        July -> Summer
+        August -> Summer
+        September -> Autumn
+        October -> Autumn
+        November -> Autumn
+        December -> Winter -- omit any of these and compiler will generate error
+```
+
+##### Type-classes
+
+I already alluded to one type-class above when I said that both `Maybe` and `Either` had "Functor instances". Let's look at what this means now and then look at some other type-classes and what they buy us.
+
+This is the definition for the type-class Functor, from `Data.Functor`:
+```haskell
+class Functor f where
+  map :: forall a b. (a -> b) -> f a -> f b
+```
+
+The parameter `f` there is a *type* parameter. We can see this from the instance definition for `Maybe`:
+
+```haskell
+instance functorMaybe :: Functor Maybe where
+  map fn (Just x) = Just (fn x)
+  map _  _        = Nothing
+```
+
+So these type-classes are kind of like methods on a class in an Object Oriented language. In OO parlance we might call them mix-ins. However, they're not totally ad hoc, because to be useful for program composition a type class will have laws associated with it (these laws are not enforced by the compiler, that's currently above the pay-grade of the PureScript and Haskell compilers). But, if your instance is lawful, then other people who use your types will immediately be able to do quite sophisticated things with values of your types *without knowing anything about the type beforehand*.
+
+For example, a common sort of validation involves the pattern where you get given a `List (Maybe Int)` and you want to have `Maybe (List Int)`, ie if all values were `Just`. This can be done with the library function `sequence`. But that library function does not deal with either `List` or `Maybe`, instead it is implemented in much more abstract terms.
+
+This means that `sequence` will work just as well going from `Array (Maybe Int)` to `Maybe (Array Int)` as it did with `List` and the benefit of this is that that line of code does not need to be re-written if you later decide that you need `Array` instead of `List`. 
+
+There is a LOT MORE to be said about type-classes, particularly the type-classes `Monoid`, `Semigroup`, `Applicative`,`Monad`, `Foldable` but the most important thing to know about them is that they form a deep structuring mechanism inside PureScript and Haskell programs that is a major source of their power.
 
 ![Pasted Graphic 6](https://user-images.githubusercontent.com/1260895/138757124-2edcdb52-ba96-4200-9acb-a3138639c0d3.png)
+
+>I think Elm and PureScript both benefit from the "culture" generated by Haskell. We know what data structures work, that do notation works, that type classes work and which ones are definitely useful (functors, Monoid, etc.), parsers, ST, etc. That reduces the cost of making a useful pure functional language. You just have to do the implementation, make your decisions that distinguish this language from others and re-use the library tropes we've accumulated over 30 years.
+That also makes it really easy for us to switch between these languages. I barely had to learn anything for either PureScript or Elm to be productive. That's a real opportunity for trying out alternatives.
+>--<cite>Chris Done, reddit forum</cite>
+
+List from [Phil Freeman post](https://blog.functorial.com/posts/2017-08-09-Why-You-Should-Use-PureScript.html):
+
+* better libraries
+* better abstractions
+* more guarantees: In JavaScript, we get very few guarantees about our code. For example, we rarely can know for sure that
+** Our data is even in the right format
+** A value is never null
+** We handled exceptions in the right places
+** We removed a piece of debugging code before deploying to production
+** We handled all possible cases in a complex pattern match
+** We didn't leak a reference to a mutable data structure
+** We took the right steps to avoid possible SQL injection attacks
+** Our application doesn't accidentally launch any missiles.
+* Better records
+* Better tools
+* Better techniques
+
 
 ## Next steps: guide to other docs
 
