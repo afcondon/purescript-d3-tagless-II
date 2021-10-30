@@ -42,7 +42,7 @@ drawTree treeModel = liftEffect $ do
   (_ :: Tuple D3Selection_ Unit) <- runD3M (draw widthHeight tree)
   pure unit
 
--- SNIPPET
+-- Snippet_Start
 -- Name: MetaTreeDraw
 -- | "script" to produce the documentation-ready rendering of another script's structure
 -- | (could also be the basis for graphical editor of scripts / trees)
@@ -108,4 +108,4 @@ draw (Tuple w h) tree = do
                       ]
                             
   pure svg
--- TEPPINS
+-- Snippet_End

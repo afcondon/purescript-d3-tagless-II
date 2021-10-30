@@ -166,7 +166,7 @@ runUpdate update = do
       choices <- sequence $ coinToss <$> letters
       pure $ catMaybes choices
 
--- SNIPPET
+-- Snippet_Start
 -- Name: GUPHandleActions
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
@@ -199,7 +199,7 @@ handleAction = case _ of
             (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
     -- is it necessary to remove the component from the DOM? don't think it is
     H.modify_ (\state -> state { status = Paused, fiber = Nothing, update = Nothing })
--- TEPPINS
+-- Snippet_End
 
 pauseUpdating :: forall m.
   Bind m => 

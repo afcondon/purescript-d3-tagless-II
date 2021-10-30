@@ -1,22 +1,3 @@
-type Model = Array Int  -- not necessary in such a simple example, of course
-
-datum_ :: 
-  { color :: Datum_ -> String
-  , x :: Datum_ -> Index_ -> Number
-  , y :: Datum_ -> Number
-  }
-datum_ =
-  let 
-    getDatum :: Datum_ -> Int 
-    getDatum = unsafeCoerce
-    getIndex :: Index_ -> Int
-    getIndex = unsafeCoerce
-  in {
-    x :     \_ i -> (toNumber $ getIndex i) * 20.0
-  , y :     \d   -> 100.0 - (toNumber $ getDatum d) / 5.0
-  , color : \d   -> d3SchemeCategory10N_ ((toNumber $ getDatum d) / 100.0)
-}
-
 drawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_
 drawWithData circleData selector = do 
 

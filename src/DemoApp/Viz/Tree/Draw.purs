@@ -87,7 +87,7 @@ type ScriptConfig = {
 -- | NB there would be nothing wrong, per se, with individual examples, this just shows 
 -- | some more composability, at the price of some direct legibility
 
--- SNIPPET
+-- Snippet_Start
 -- Name: TreeDraw
 draw :: forall m selection. Bind m => SelectionM selection m => 
   ScriptConfig -> FlareTreeNode ->  m selection
@@ -120,4 +120,4 @@ draw config tree = do
                 , fill       config.color
                 ]               
   pure svg
--- TEPPINS
+-- Snippet_End

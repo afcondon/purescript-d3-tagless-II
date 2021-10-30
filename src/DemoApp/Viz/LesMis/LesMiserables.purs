@@ -21,7 +21,7 @@ import Utility (getWindowWidthHeight)
 -- type-safe(ish) accessors for the data that is given to D3
 -- we lose the type information in callbacks from the FFI, such as for attributes
 -- but since we know what we gave we can coerce it back to the initial type.
--- SNIPPET
+-- Snippet_Start
 -- Name: LesMisAccessors
 link_ = {
     source: _.source <<< unboxD3SimLink
@@ -39,9 +39,9 @@ datum_ = {
 
   , colorByGroup: d3SchemeCategory10N_ <<< toNumber <<< _.group <<< unboxD3SimNode
 }
--- TEPPINS
+-- Snippet_End
 
--- SNIPPET
+-- Snippet_Start
 -- Name: LesMisScript
 -- | recipe for this force layout graph
 draw :: forall row m. 
@@ -87,4 +87,4 @@ draw model selector = do
                       }
   setConfigVariable $ Alpha 1.0
   pure unit
--- TEPPINS
+-- Snippet_End

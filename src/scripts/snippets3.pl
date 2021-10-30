@@ -10,9 +10,9 @@ my @snippetLines;
 my @tokens;
 
 while (<>) {
-  if (/SNIPPET/../TEPPINS/) {         # snippets are between these delimiters
-    next if /SNIPPET/;                # we don't include the START delimiter
-    if (/TEPPINS/ || eof) {           # if end of file and in middle of snippet, finish current snippet
+  if (/Snippet_Start/../Snippet_End/) {   # snippets are between these delimiters
+    next if /Snippet_Start/;              # we don't include the START delimiter
+    if (/Snippet_End/ || eof) {           # if end of file and in middle of snippet, finish current snippet
       $snippets{$currentSnippetName} = [ @snippetLines ];
       @snippetLines = ();             # reset the accumulator to empty array
       next;                           # we don't include the END delimiters

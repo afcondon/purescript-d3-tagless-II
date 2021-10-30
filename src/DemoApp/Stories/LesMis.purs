@@ -191,7 +191,7 @@ component = H.mkComponent
       , HH.div [ Utils.tailwindClass "svg-container" ] []
       ]
       
--- SNIPPET
+-- Snippet_Start
 -- Name: LesMisHandleActions
 handleAction :: forall m. 
   Bind m => 
@@ -240,7 +240,7 @@ handleAction = case _ of
     runWithD3_Simulation do
       setConfigVariable $ Alpha 0.7
       start
--- TEPPINS
+-- Snippet_End
 
 blurbtext = (HH.p [ HP.classes [ HH.ClassName "m-2", HH.ClassName "w-2/3" ] ]) <$> ((singleton <<< HH.text) <$> texts)
   where texts = ["""

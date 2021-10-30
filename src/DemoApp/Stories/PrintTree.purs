@@ -125,7 +125,7 @@ component = H.mkComponent
             ]  
       ]
 
--- SNIPPET
+-- Snippet_Start
 -- Name: PrintTreeHandleActions
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
@@ -147,7 +147,7 @@ handleAction = case _ of
         H.modify_ (\st -> st { tree = textRep } )
         pure unit
     pure unit
--- TEPPINS
+-- Snippet_End
 
 blurbtext :: String
 blurbtext = 

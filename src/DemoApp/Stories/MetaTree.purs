@@ -100,15 +100,15 @@ component = H.mkComponent
       , HH.div [ Utils.tailwindClass "svg-container" ] []
       ]
 
--- SNIPPET 
+-- Snippet_Start 
 -- Name: MetaTreeEvaluator      
 -- | evaluate a tree first using the "metatree" interpreter, then draw the RESULTING (syntax) tree using D3 interpreter
 drawMetaTree :: TreeJson_ -> Aff Unit
 drawMetaTree json =
   MetaTree.drawTree =<< makeModel TidyTree Vertical =<< Tree.getMetaTreeJSON =<< makeModel TidyTree Radial json
--- TEPPINS
+-- Snippet_End
 
--- SNIPPET
+-- Snippet_Start
 -- Name: MetaTreeHandleActions
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
   Action -> m Unit
@@ -132,7 +132,7 @@ handleAction = case _ of
         _     <- H.liftAff $ drawMetaTree tree
         pure unit
     pure unit
--- TEPPINS
+-- Snippet_End
 
 blurbtext = [
     HH.p [ HP.classes [ HH.ClassName "p-2" ]] [ HH.text 

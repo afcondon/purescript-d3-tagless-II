@@ -14,7 +14,7 @@ import Unsafe.Coerce (unsafeCoerce)
 -- | Simple-as-can-be example of the more complex Join which allows for new data to be
 -- | entered, existing data to be updated and disappearing data to be removed
 -- | ====================================================================================
--- SNIPPET
+-- Snippet_Start
 -- Name: GUP
 type Model = Array Char
 
@@ -66,4 +66,4 @@ exGeneralUpdatePattern selector = do
 
     exit =  [ classed "exit", fill "brown"] 
             `andThen` (transition `to` [ y 400.0, remove ])
--- TEPPINS
+-- Snippet_End

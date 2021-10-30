@@ -40,4 +40,5 @@ draw model selector = do
                       , name   : "LesMis"
                       , target : svg
                       }
+  setConfigVariable $ Alpha 1.0
   pure unit

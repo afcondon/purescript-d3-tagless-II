@@ -4,14 +4,14 @@ import D3.Attributes.Sugar
 
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 import D3.FFI (keyIsID_)
-import D3.Scales (d3SchemeCategory10N_)
+import D3.Scales (d3SchemeCategory10N_, d3SchemeDiverging10N_, d3SchemePairedN_, d3SchemeSequential10N_)
 import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import Data.Int (toNumber)
 import Math as Math
-import Prelude (bind, discard, negate, pure, ($), (*), (-), (/)) 
+import Prelude (bind, discard, negate, pure, ($), (*), (-), (/))
 import Unsafe.Coerce (unsafeCoerce)
 
--- SNIPPET
+-- Snippet_Start
 -- Name: 3LC-xFromIndex
 -- | simple utility function used in all three of these examples
 xFromIndex :: Datum_ -> Index_ -> Number
@@ -19,9 +19,9 @@ xFromIndex _ i = ((indexIsNumber i) * 100.0)
   where
     indexIsNumber :: Index_ -> Number
     indexIsNumber = unsafeCoerce
--- TEPPINS
+-- Snippet_End
 
--- SNIPPET
+-- Snippet_Start
 -- Name: TLCSimple
 -- | Pretty much the most basic example imaginable, three ints represented by three circles
 drawThreeCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
@@ -36,19 +36,20 @@ drawThreeCircles selector = do
   setAttributes circles circleAttributes
 
   pure circles
--- TEPPINS
+-- Snippet_End
 
--- SNIPPET
--- Name: TLCParabola
-type Model = Array Int  -- not necessary in such a simple example, of course
+-- Snippet_Start
+-- Name: TLCDatum_
+type Model = Array Int  -- not strictly necessary in such a simple example, of course
 
-datum_ :: 
+datum_ ::               -- a record containing all the accessor functions needed for attributes
   { color :: Datum_ -> String
   , x :: Datum_ -> Index_ -> Number
   , y :: Datum_ -> Number
   }
 datum_ =
   let 
+    -- we bury the unsafe functions inside the datum_ record, unsafeCoerce yes, but very restricted how it can be used
     getDatum :: Datum_ -> Int 
     getDatum = unsafeCoerce
     getIndex :: Index_ -> Int
@@ -56,9 +57,12 @@ datum_ =
   in {
     x :     \_ i -> (toNumber $ getIndex i) * 20.0
   , y :     \d   -> 100.0 - (toNumber $ getDatum d) / 5.0
-  , color : \d   -> d3SchemeCategory10N_ ((toNumber $ getDatum d) / 100.0)
+  , color : \d   -> d3SchemePairedN_ ((toNumber $ getDatum d) / 100.0)
 }
+-- Snippet_End
 
+-- Snippet_Start
+-- Name: TLCParabola
 drawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_
 drawWithData circleData selector = do 
 
@@ -78,4 +82,4 @@ drawWithData circleData selector = do
   setAttributes circles circleAttributes
 
   pure circles
--- TEPPINS
+-- Snippet_End
