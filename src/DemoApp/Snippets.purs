@@ -28,6 +28,9 @@ type Notebook state w i = Array (Cell state w i)
 renderNotebook :: forall state w i. state -> Notebook state w i -> Array (HH.HTML w i)
 renderNotebook state notebook = (renderCell state) <$> notebook
 
+renderNotebook_ :: forall w i. Notebook Unit w i -> Array (HH.HTML w i)
+renderNotebook_ notebook = (renderCell unit) <$> notebook
+
 renderCell :: forall state w i. state -> Cell state w i -> HH.HTML w i
 renderCell _ (Blurb b) = 
   HH.p [ HP.classes [ HH.ClassName "m-2" ] ]

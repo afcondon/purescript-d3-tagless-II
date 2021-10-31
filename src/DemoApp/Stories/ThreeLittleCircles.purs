@@ -19,7 +19,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Snippets (Cell(..), Notebook, renderNotebook, substituteSnippetCells)
+import Snippets (Cell(..), Notebook, renderNotebook_, substituteSnippetCells)
 import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
 
@@ -79,8 +79,8 @@ component = H.mkComponent
               ]
             , Expandable.content_ state.code $ 
                 if state.toggle 
-                then renderNotebook unit (view _simple state)
-                else renderNotebook unit (view _parabola state)
+                then renderNotebook_ (view _simple state)
+                else renderNotebook_ (view _parabola state)
             ]  
       , HH.div [ Utils.tailwindClass "svg-container" ] []
       ]
