@@ -1,7 +1,6 @@
 module Stories.LesMis where
 
 import Prelude
-import Data.Lens
 
 import Affjax as AJAX
 import Affjax.ResponseFormat as ResponseFormat
@@ -18,21 +17,21 @@ import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start)
 import D3Tagless.Instance.Simulation (runWithD3_Simulation)
-import Data.Array (singleton)
+import Data.Lens (Lens', _Just, preview, use, view, (%=), (.=))
 import Data.Lens.At (at)
 import Data.Lens.Record (prop)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
+import Data.Traversable (traverse)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Ocelot.Block.FormField as FormField
-import Snippets (readSnippetFiles)
-import Stories.Utilities (syntaxHighlightedCode)
+import Snippets (Cell(..), Notebook, renderNotebook, substituteSnippetCells)
 import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
 
@@ -47,19 +46,13 @@ data Action
 type State = { 
     simulation      :: D3SimulationState_
   , panels  :: { code :: Expandable.Status }
-  , snippets :: { draw :: String, accessors :: String, handler :: String }
+  , notebook :: forall w. Notebook (Map Label ForceStatus) w Action
   , forceStatuses   :: Map Label ForceStatus
 }
 
 _panels = prop (Proxy :: Proxy "panels")
-_snippets = prop (Proxy :: Proxy "snippets")
+_notebook = prop (Proxy :: Proxy "notebook")
 
-_drawCode :: Lens' State String
-_drawCode = _snippets <<< prop (Proxy :: Proxy "draw")
-_handlerCode :: Lens' State String
-_handlerCode = _snippets <<< prop (Proxy :: Proxy "handler")
-_accessorsCode :: Lens' State String
-_accessorsCode = _snippets <<< prop (Proxy :: Proxy "accessors")
 _code :: Lens' State Expandable.Status
 _code = _panels <<< prop (Proxy :: Proxy "code")
 
@@ -78,21 +71,17 @@ forceNames = {
   , links: linksForceName
 }
 
-_forceStatuses :: Lens' State (Map Label ForceStatus)
+-- _forceStatuses :: Lens' State (Map Label ForceStatus)
 _forceStatuses = prop (Proxy :: Proxy "forceStatuses")
-_forceStatus :: forall p.
-  Strong p => Choice p => String ->
-  p ForceStatus ForceStatus ->
-  p State State
-_forceStatus label = _forceStatuses <<< at label <<< _Just
+_forceStatus label = at label <<< _Just
 
-_linksSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
+_linksSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p (Map Label ForceStatus) (Map Label ForceStatus)
 _linksSetting = _forceStatus forceNames.links
-_manyBodyNegSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
+_manyBodyNegSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p (Map Label ForceStatus) (Map Label ForceStatus)
 _manyBodyNegSetting = _forceStatus forceNames.manyBodyNeg
-_manyBodyPosSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
+_manyBodyPosSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p (Map Label ForceStatus) (Map Label ForceStatus)
 _manyBodyPosSetting = _forceStatus forceNames.manyBodyPos
-_collisionSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p State State
+_collisionSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p (Map Label ForceStatus) (Map Label ForceStatus)
 _collisionSetting = _forceStatus forceNames.collision
 
 forces :: { center :: Force, collision :: Force, links :: Force, manyBodyPos :: Force , manyBodyNeg :: Force }
@@ -106,10 +95,10 @@ forces = {
 
 toggleForceByName :: forall m. MonadState State m => String -> m Unit
 toggleForceByName name
-  | name == forceNames.manyBodyNeg  = _manyBodyNegSetting %= toggleForceStatus
-  | name == forceNames.manyBodyPos  = _manyBodyPosSetting %= toggleForceStatus
-  | name == forceNames.collision    = _collisionSetting   %= toggleForceStatus
-  | name == forceNames.links        = _linksSetting       %= toggleForceStatus
+  | name == forceNames.manyBodyNeg  = (_forceStatuses <<< _manyBodyNegSetting) %= toggleForceStatus
+  | name == forceNames.manyBodyPos  = (_forceStatuses <<< _manyBodyPosSetting) %= toggleForceStatus
+  | name == forceNames.collision    = (_forceStatuses <<< _collisionSetting)   %= toggleForceStatus
+  | name == forceNames.links        = (_forceStatuses <<< _linksSetting)       %= toggleForceStatus
   | otherwise = pure unit
 
  
@@ -131,63 +120,32 @@ component = H.mkComponent
   initialState :: State
   initialState = { 
         simulation: initialSimulationState forceLibrary
-      , panels: { code: Expandable.Collapsed }
-      , snippets: { draw: "", accessors: "", handler: "" }
+      , panels: { code: Expandable.Expanded }
+      , notebook: lesMisNotebook
       , forceStatuses: getStatusMap forceLibrary
     }
 
-  controls state = 
-    [ HH.div
-      [ Utils.tailwindClass "story-panel-controls"] 
-      [ Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
-        [ Button.buttonVertical
-          [ HE.onClick (const $ ToggleForce forceNames.links) ]
-          [ HH.text $ "links: " <> showMaybeForceStatus (preview _linksSetting state) ]
-        , Button.buttonVertical
-          [ HE.onClick (const $ ToggleForce forceNames.manyBodyPos) ]
-          [ HH.text $ "many body +: " <> showMaybeForceStatus (preview _manyBodyPosSetting state) ]
-        , Button.buttonVertical
-          [ HE.onClick (const $ ToggleForce forceNames.manyBodyNeg) ]
-          [ HH.text $ "many body: -" <> showMaybeForceStatus (preview _manyBodyNegSetting state) ]
-        , Button.buttonVertical
-          [ HE.onClick (const $ ToggleForce forceNames.collision) ]
-          [ HH.text $ "collision: " <> showMaybeForceStatus (preview _collisionSetting state) ]
-        , Button.buttonVertical
-          [ HE.onClick (const $ Freeze) ]
-          [ HH.text "Freeze" ]
-        , Button.buttonVertical
-          [ HE.onClick (const $ Reheat) ]
-          [ HH.text "Reheat!" ]
-        ]
-      ]
-    ]
-
+  render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div [ Utils.tailwindClass "story-container" ]
-      [ HH.div -- [ Utils.tailwindClass "story-panel"]
-        [ Utils.tailwindClass "story-panel-controls"] 
-        (controls state)
-      , HH.div -- [ Utils.tailwindClass "story-panel" ] 
-            [ Utils.tailwindClass "story-panel-code"]
-            [ FormField.field_
-                { label: HH.text "Code"
-                , helpText: []
-                , error: []
-                , inputId: "show-code"
-                }
-              [ Toggle.toggle
-                [ HP.id "show-code"
-                , HP.checked
-                  $ Expandable.toBoolean (view _code state)
-                , HE.onChange \_ -> ToggleCard _code
-                ]
-              ]
-            , Expandable.content_ (view _code state) blurbtext
-            , Expandable.content_ (view _code state) $ 
-                syntaxHighlightedCode (view _drawCode state) <>
-                syntaxHighlightedCode (view _accessorsCode state) <>
-                syntaxHighlightedCode (view _handlerCode state) 
-            ]  
+      [ HH.div -- [ Utils.tailwindClass "story-panel" ] 
+        [ Utils.tailwindClass "story-panel-code"]
+        [ FormField.field_
+            { label: HH.text "(hide this panel if screen too small)"
+            , helpText: []
+            , error: []
+            , inputId: "show-code"
+            }
+          [ Toggle.toggle
+            [ HP.id "show-code"
+            , HP.checked
+              $ Expandable.toBoolean (view _code state)
+            , HE.onChange \_ -> ToggleCard _code
+            ]
+          ]
+        -- , Expandable.content_ (view _code state) [ controls state ]
+        , Expandable.content_ (view _code state) (renderNotebook state.forceStatuses state.notebook)
+        ]  
       , HH.div [ Utils.tailwindClass "svg-container" ] []
       ]
       
@@ -203,22 +161,18 @@ handleAction = case _ of
   ToggleCard _cardState -> _cardState %= not
 
   Initialize -> do
+    notebook' <- traverse substituteSnippetCells lesMisNotebook
+    _notebook .= notebook'
+
     response <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
     let graph = readGraphFromFileContents response
 
-    text <- H.liftAff $ readSnippetFiles "LesMisScript"
-    _drawCode .= text
-    text <- H.liftAff $ readSnippetFiles "LesMisHandleActions"
-    _handlerCode .= text
-    text <- H.liftAff $ readSnippetFiles "LesMisAccessors"
-    _accessorsCode .= text
+    (_forceStatuses <<< _forceStatus forceNames.center)       %= (const ForceActive)
+    (_forceStatuses <<< _forceStatus forceNames.manyBodyNeg)  %= (const ForceActive)
+    (_forceStatuses <<< _forceStatus forceNames.collision)    %= (const ForceActive)
+    (_forceStatuses <<< _forceStatus forceNames.links)        %= (const ForceActive)
 
-    _forceStatus forceNames.center       %= (const ForceActive)
-    _forceStatus forceNames.manyBodyNeg  %= (const ForceActive)
-    _forceStatus forceNames.collision    %= (const ForceActive)
-    _forceStatus forceNames.links        %= (const ForceActive)
-
-    _forceStatus forceNames.manyBodyPos  %= (const ForceDisabled)
+    (_forceStatuses <<< _forceStatus forceNames.manyBodyPos)  %= (const ForceDisabled)
     
     runWithD3_Simulation do
       statuses <- use _forceStatuses
@@ -242,22 +196,54 @@ handleAction = case _ of
       start
 -- Snippet_End
 
-blurbtext = (HH.p [ HP.classes [ HH.ClassName "m-2", HH.ClassName "w-2/3" ] ]) <$> ((singleton <<< HH.text) <$> texts)
-  where texts = ["""
-    
-This example introduces a new capability, signalled by the SimulationM
-constraint on the function. This monad runs with a D3 Simulation engine in its
-State. This allows us to let the simulation engine do the layout, we provide
-the nodes and (optionally) links and configure the simulation with additional
-forces. """
+controls forceStatuses = 
+    Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
+      [ Button.buttonVertical
+        [ HE.onClick (const $ ToggleForce forceNames.links) ]
+        [ HH.text $ "links: " <> showMaybeForceStatus (preview _linksSetting forceStatuses) ]
+      , Button.buttonVertical
+        [ HE.onClick (const $ ToggleForce forceNames.manyBodyPos) ]
+        [ HH.text $ "many body +: " <> showMaybeForceStatus (preview _manyBodyPosSetting forceStatuses) ]
+      , Button.buttonVertical
+        [ HE.onClick (const $ ToggleForce forceNames.manyBodyNeg) ]
+        [ HH.text $ "many body: -" <> showMaybeForceStatus (preview _manyBodyNegSetting forceStatuses) ]
+      , Button.buttonVertical
+        [ HE.onClick (const $ ToggleForce forceNames.collision) ]
+        [ HH.text $ "collision: " <> showMaybeForceStatus (preview _collisionSetting forceStatuses) ]
+      , Button.buttonVertical
+        [ HE.onClick (const $ Freeze) ]
+        [ HH.text "Freeze" ]
+      , Button.buttonVertical
+        [ HE.onClick (const $ Reheat) ]
+        [ HH.text "Reheat!" ]
+      ]
 
-, """From the D3 docs: "This module implements a velocity Verlet numerical
-integrator for simulating physical forces on particles. The simulation is
-simplified: it assumes a constant unit time step Δt = 1 for each step, and a
-constant unit mass m = 1 for all particles. As a result, a force F acting on a
-particle is equivalent to a constant acceleration a over the time interval Δt,
-and can be simulated simply by adding to the particle’s velocity, which is then
-added to the particle’s position.""
-    
-  """]
+lesMisNotebook :: forall w. Notebook (Map Label ForceStatus) w Action
+lesMisNotebook = [
+    Blurb 
+
+    """This example introduces a new capability, signalled by the SimulationM
+    constraint on the function. This monad runs with a D3 Simulation engine in its
+    State. This allows us to let the simulation engine do the layout, we provide
+    the nodes and (optionally) links and configure the simulation with additional
+    forces. """
+  
+  , RenderWithState controls
+
+  , Blurb
+
+  """ From the D3 docs: "This module implements a velocity Verlet numerical
+  integrator for simulating physical forces on particles. The simulation is
+  simplified: it assumes a constant unit time step Δt = 1 for each step, and a
+  constant unit mass m = 1 for all particles. As a result, a force F acting on a
+  particle is equivalent to a constant acceleration a over the time interval Δt,
+  and can be simulated simply by adding to the particle’s velocity, which is then
+  added to the particle’s position.""
+
+  """
+
+  , SnippetFile "LesMisScript"
+  , SnippetFile "LesMisHandleActions"
+  , SnippetFile "LesMisAccessors"
+]
 

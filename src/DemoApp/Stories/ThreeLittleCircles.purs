@@ -32,19 +32,13 @@ data Action
 type State = {
     toggle   :: Boolean -- Toggle between ultra simple and merely super-simple examples
   , code     :: Expandable.Status
-  , notebooks :: { simple :: Notebook, parabola :: Notebook }
+  , notebooks :: forall w. { simple :: Notebook Unit w Action, parabola :: Notebook Unit w Action}
 }
 
 -- some lenses definitions to make setting and using the snippet easier
--- _code :: Lens' State Expandable.Status
 _code = prop (Proxy :: Proxy "code")
-
 _notebooks = prop (Proxy :: Proxy "notebooks")
-
--- _simple :: forall w i. Lens' State (Notebook w i)
 _simple = _notebooks <<< prop (Proxy :: Proxy "simple")
-
--- _parabola :: forall w i. Lens' State (Notebook w i)
 _parabola = _notebooks <<< prop (Proxy :: Proxy "parabola")
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
@@ -71,7 +65,7 @@ component = H.mkComponent
       [ HH.div
             [ Utils.tailwindClass "story-panel-code"]
             [ FormField.field_
-                { label: HH.text "Code"
+                { label: HH.text "(hide this panel if screen too small)"
                 , helpText: []
                 , error: []
                 , inputId: "show-code"
@@ -83,15 +77,10 @@ component = H.mkComponent
                 , HE.onChange \_ -> ToggleCard _code
                 ]
               ]
-            , Expandable.content_ state.code
-                [ Button.buttonVertical
-                  [ HE.onClick $ const ToggleExample ]
-                  [ HH.text if state.toggle then "Simple" else "Less Simple" ]
-                ] 
             , Expandable.content_ state.code $ 
                 if state.toggle 
-                then renderNotebook (view _simple state)
-                else renderNotebook (view _parabola state)
+                then renderNotebook unit (view _simple state)
+                else renderNotebook unit (view _parabola state)
             ]  
       , HH.div [ Utils.tailwindClass "svg-container" ] []
       ]
@@ -123,17 +112,18 @@ handleAction = case _ of
   Finalize -> pure unit
 
 -- simple :: forall w i. Notebook w i
+simple :: forall w. Notebook Unit w Action
 simple = [
     Blurb "Simplest possible example, just to show syntax."
   , SnippetFile "TLCSimple"
   , Blurb "Click the button to see a slightly more realistic example."
-  -- , PreRendered $ 
-  --     Button.buttonVertical
-  --       [ HE.onClick $ const ToggleExample ]
-  --       [ HH.text "Simple" ]
+  , PreRendered $ 
+      Button.buttonVertical
+        [ HE.onClick $ const ToggleExample ]
+        [ HH.text "Simple" ]
 ]
 
-parabola :: Notebook
+parabola :: forall w. Notebook Unit w Action
 parabola = [
     Blurb "This extends the super-simple model in the direction one would go for a more real-world example."
   , SnippetFile "TLCParabola"
@@ -150,4 +140,8 @@ parabola = [
   , Blurb """Again, we're just showing syntax and shape of the DSL here: it's still extremely simple, and the Model,
   datum_ and so on might not be needed for such a simple example."""
 
+  , PreRendered $ 
+      Button.buttonVertical
+        [ HE.onClick $ const ToggleExample ]
+        [ HH.text "Parabola" ]
 ]

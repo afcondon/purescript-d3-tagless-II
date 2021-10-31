@@ -92,7 +92,7 @@ component = H.mkComponent
       , HH.div
             [ Utils.tailwindClass "story-panel-code"]
             [ FormField.field_
-                { label: HH.text "Code"
+                { label: HH.text "(hide this panel if screen too small)"
                 , helpText: []
                 , error: []
                 , inputId: "show-code"

@@ -16,28 +16,36 @@ import Halogen.HTML.Properties as HP
 import Html.Renderer.Halogen as RH
 import Stories.Utilities (highlightString_)
 
-data Cell = Blurb String | SnippetFile String | Snippet String | PreRendered (forall w i. HH.HTML w i)
-type Notebook = Array Cell
+data Cell state w i = 
+    Blurb String
+  | SnippetFile String
+  | Snippet String
+  | PreRendered (HH.HTML w i)
+  | RenderWithState (state -> HH.HTML w i)
 
-renderNotebook :: forall w i. Notebook -> Array (HH.HTML w i)
-renderNotebook notebook = renderCell <$> notebook
+type Notebook state w i = Array (Cell state w i)
 
-renderCell :: forall w i. Cell -> HH.HTML w i
-renderCell (Blurb b) = 
+renderNotebook :: forall state w i. state -> Notebook state w i -> Array (HH.HTML w i)
+renderNotebook state notebook = (renderCell state) <$> notebook
+
+renderCell :: forall state w i. state -> Cell state w i -> HH.HTML w i
+renderCell _ (Blurb b) = 
   HH.p [ HP.classes [ HH.ClassName "m-2" ] ]
                     [ HH.text b ]
-renderCell (Snippet s) = 
+renderCell _ (Snippet s) = 
   HH.pre [ HP.class_ $ HH.ClassName "language-purescript" ]  
          [ HH.code_ [ RH.render_ $ highlightString_ s ] ]
 
-renderCell (SnippetFile filename) =
+renderCell _ (SnippetFile filename) =
   HH.p [ HP.classes [ HH.ClassName "m-2" ] ]
                     [ HH.text $ "Snippet file not loaded: " <> filename ]
 
-renderCell (PreRendered html) = html
+renderCell _ (PreRendered html) = html
 
-substituteSnippetCells :: forall m state. Bind m => MonadAff m => MonadState state m => 
-  Cell -> m Cell
+renderCell state (RenderWithState fn) = fn state
+
+substituteSnippetCells :: forall w i m state state'. Bind m => MonadAff m => MonadState state m => 
+  Cell state' w i -> m (Cell state' w i)
 substituteSnippetCells (SnippetFile snippet) = do
     snippetText <- H.liftAff $ readSnippetFiles snippet
     pure $ Snippet snippetText
