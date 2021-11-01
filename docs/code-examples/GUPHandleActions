@@ -1,0 +1,31 @@
+handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
+  Action -> m Unit
+handleAction = case _ of
+  ToggleCard _cardState -> _cardState %= not
+
+  Initialize -> do
+    text1 <- H.liftAff $ readSnippetFiles "GUP"
+    _drawCode .= text1
+    text2 <- H.liftAff $ readSnippetFiles "GUPHandleActions"
+    _handlerCode .= text2
+
+    updateFn <- runGeneralUpdatePattern
+
+    fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
+
+    H.modify_ (\state -> state { status = Running, fiber = Just fiber, update = Just updateFn })
+
+  SetStatus status -> H.modify_ (\state -> state { status = status })
+  ToggleStatus -> do
+    currentStatus <- H.gets _.status
+    case currentStatus of
+      Running -> pauseUpdating
+      _ -> startUpdating
+
+  Finalize -> do
+    maybeFiber <- H.gets _.fiber
+    _ <- case maybeFiber of
+            Nothing      -> pure unit
+            (Just fiber) -> H.liftAff $ killFiber (error "Cancelling fiber and terminating computation") fiber
+    -- is it necessary to remove the component from the DOM? don't think it is
+    H.modify_ (\state -> state { status = Paused, fiber = Nothing, update = Nothing })

@@ -2,6 +2,7 @@ use 5.010;
 use strict;
 use warnings;
 use Data::Dumper qw(Dumper);
+use File::Find::Rule;
  
 my %snippets;
 my $snipCount = 0;
@@ -9,7 +10,16 @@ my $currentSnippetName = "";
 my @snippetLines;
 my @tokens;
 
-while (<>) {
+my @files = File::Find::Rule->file()
+                            ->name( '*.purs' )
+                            ->in( './src/' );
+
+for my $file (@files) {
+    print "file: $file\n";
+}
+
+
+while (<@files>) {
   if (/Snippet_Start/../Snippet_End/) {   # snippets are between these delimiters
     next if /Snippet_Start/;              # we don't include the START delimiter
     if (/Snippet_End/ || eof) {           # if end of file and in middle of snippet, finish current snippet
@@ -33,7 +43,8 @@ while (<>) {
 my $name;
 my $i;
 foreach $name ( keys %snippets ) {
-    open(FH, '>', $name) or die $!;
+    print "snippet: $name\n";
+    open(FH, '>', $name.purs) or die $!;
     foreach $i ( 0 .. $snippets{$name}->$#* ) {
         print FH "$snippets{$name}[$i]";
     }

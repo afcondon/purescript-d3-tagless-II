@@ -20,6 +20,9 @@
   .story-panel-code {
     @apply flex flex-col overflow-y-scroll h-screen max-w-prose min-w-min p-2 bg-white shadow-md;
   }
+  .story-panel-code div {
+    @apply mb-2;
+  }
   .svg-container {
     @apply flex-grow bg-white overflow-hidden;
   }

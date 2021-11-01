@@ -1316,6 +1316,10 @@ dt {
   box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
 }
 
+.story-panel-code div {
+  margin-bottom: 0.5rem;
+}
+
 .svg-container {
   --tw-bg-opacity: 1;
   background-color: rgba(255, 255, 255, var(--tw-bg-opacity));

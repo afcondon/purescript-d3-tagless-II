@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "build": "spago build",
-    "snippets": "cd docs/code-examples; perl ../../src/scripts/snippets3.pl ../../src/DemoApp/Viz/*/*.purs ../../src/DemoApp/Viz/*.purs ../../src/DemoApp/Stories/*/*.purs",
+    "snippets": "cd docs/code-examples; perl ../../src/scripts/snippets3.pl ../../src/DemoApp/Viz/*/*.purs ../../src/DemoApp/Viz/*.purs ../../src/DemoApp/Stories/*/*.purs ../../src/DemoApp/Stories/*.purs",
     "bundle": "spago bundle-app --to docs/bundle.js",
-    "build-css": "cd src/css; postcss src/index.css -o ../../docs/bundle.css"
+    "build-css": "cd src/DemoApp/css; postcss src/index.css -o ../../../docs/bundle.css"
   },
   "devDependencies": {
     "autoprefixer": "^10.2.6",
