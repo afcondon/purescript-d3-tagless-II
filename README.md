@@ -20,7 +20,7 @@ After cloning the repo, you should be able to do:
 * `yarn run build`
 * `yarn run bundle`
 
-and then if you serve `http` from the `dist` directory you should be able to see the same demo as at the link above.
+and then if you serve `http` from the `docs` directory you should be able to see the same demo as at the link above.
 
 ![image](https://user-images.githubusercontent.com/1260895/138859399-a758dcb2-e05b-407f-9538-035acd99845f.png)
 
