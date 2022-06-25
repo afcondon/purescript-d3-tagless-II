@@ -131,8 +131,8 @@ let graphs =
 
 let html-parser-halogen =
       { dependencies = [ "string-parsers", "halogen" ]
-      , repo = "https://github.com/rnons/purescript-html-parser-halogen.git"
-      , version = "v1.1.0"
+      , repo = "https://github.com/afcondon/purescript-html-parser-halogen.git"
+      , version = "esmodules"
       }
 
 
