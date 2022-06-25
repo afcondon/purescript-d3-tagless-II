@@ -6,6 +6,7 @@ You can edit this file as you like.
 , dependencies =
   [ "aff"
   , "affjax"
+  , "affjax-web"
   , "arrays"
   , "bifunctors"
   , "console"
@@ -27,7 +28,6 @@ You can edit this file as you like.
   , "html-parser-halogen"
   , "integers"
   , "lists"
-  , "math"
   , "maybe"
   , "newtype"
   , "nullable"

@@ -1,6 +1,6 @@
 "use strict"
 
-exports.readJSONJS_ = filecontents => decodeFile(filecontents)
+export function readJSONJS_(filecontents) { return decodeFile(filecontents) }
 
 const decodeFile = function (filecontents) {
   const json = JSON.parse(filecontents)

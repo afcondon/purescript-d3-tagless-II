@@ -2,7 +2,7 @@ module Stories.Spago where
 
 import Prelude
 
-import Affjax as AJAX
+import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Sugar (onMouseEventEffectful)

@@ -1,12 +1,14 @@
 // ********************************************************************************
 // functionality to "explode" a package by removing it and replacing with it's constituent modules
 // ********************************************************************************
-exports.explodePackages_ = event => simulation => id => nodetype => {
-  event.stopPropagation()
-  if (nodetype === "package") {
-    console.log('clicked on a package');
-    return
-  }
+export function explodePackages_(event) {
+  return simulation => id => nodetype => {
+    event.stopPropagation()
+    if (nodetype === "package") {
+      console.log('clicked on a package');
+      return
+    }
+  };
 }
 // ********************************************************************************
 // functionality to spotlight the immediate graph neighbours of a module 
@@ -19,35 +21,37 @@ let targetSelection
 let spotlitID
 let spotlit = false;
 
-exports.cancelSpotlight_ = simulation => {
+export function cancelSpotlight_(simulation) {
   console.log("cancelling spotlight");
   if (spotlit) {
-    unSpotlightNeighbours_ (simulation)
+    unSpotlightNeighbours_(simulation)
   }
 }
 
-exports.toggleSpotlight_ = event => simulation => id => nodetype => {
-  event.stopPropagation()
-  if (nodetype === "package") {
-    return
-  }
-  if ((spotlit && id !== spotlitID)) {
-    console.log(`changing spotlight from ${spotlitID} to ${id}`);
-    unSpotlightNeighbours_(simulation)
-    spotlightNeighbours_(simulation, id, nodetype)
-  } else if (spotlit && id === spotlitID) {
-    console.log(`cancelling spotlight on ${spotlitID}`);
-    unSpotlightNeighbours_(simulation)
-  } else {
-    console.log(`setting a spotlight on ${id}`);
-    spotlightNeighbours_(simulation, id, nodetype)
-  }
+export function toggleSpotlight_(event) {
+  return simulation => id => nodetype => {
+    event.stopPropagation()
+    if (nodetype === "package") {
+      return
+    }
+    if ((spotlit && id !== spotlitID)) {
+      console.log(`changing spotlight from ${spotlitID} to ${id}`);
+      unSpotlightNeighbours_(simulation)
+      spotlightNeighbours_(simulation, id, nodetype)
+    } else if (spotlit && id === spotlitID) {
+      console.log(`cancelling spotlight on ${spotlitID}`);
+      unSpotlightNeighbours_(simulation)
+    } else {
+      console.log(`setting a spotlight on ${id}`);
+      spotlightNeighbours_(simulation, id, nodetype)
+    }
+  };
 }
 
 // TODO implement this as purescript-function-called from FFI??
 spotlightNeighbours_ = (simulation, id, nodetype) => {
   // else
-  spotlit   = true; 
+  spotlit = true;
   spotlitID = id
   simulation.stop()
   svg = d3.select('div.svg-container svg')
@@ -56,7 +60,7 @@ spotlightNeighbours_ = (simulation, id, nodetype) => {
 
   spotlitNode = spotlitSelection.node()
   // check if fx already set, don't reset if so
-  spotlitNode.__data__.fx = spotlitNode.__data__.fx || spotlitNode.__data__.x 
+  spotlitNode.__data__.fx = spotlitNode.__data__.fx || spotlitNode.__data__.x
   spotlitNode.__data__.fy = spotlitNode.__data__.fy || spotlitNode.__data__.y
   const targets = spotlitNode.__data__.links.targets
   const sources = spotlitNode.__data__.links.sources

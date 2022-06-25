@@ -103,13 +103,6 @@ in  upstream
           "v7.0.0"
       }
 -------------------------------
--}
-let graphs =
-  { repo = "https://github.com/colehaus/purescript-graphs.git"
-  , version = "c4a3189e39579102b8be3cff9bcde63a9d4ef322"
-  , dependencies = [ "ordered-collections", "catenable-lists" ]
-  }  
-  
 let halogen-renderless =
       { dependencies = [ "prelude", "control" ]
       , repo =
@@ -117,39 +110,44 @@ let halogen-renderless =
       , version = "v0.0.4"
       }
 
-let html-parser-halogen =
-      { dependencies = [ "string-parsers", "halogen" ]
-      , repo =
-          "https://github.com/rnons/purescript-html-parser-halogen.git"
-      , version = "v1.0.0-rc.2"
-      }
-
 let svg-parser =
       { dependencies = [ "prelude", "string-parsers" ]
-      , repo =
-          "https://github.com/citizennet/purescript-svg-parser.git"
+      , repo = "https://github.com/citizennet/purescript-svg-parser.git"
       , version = "v2.0.0"
       }
 
 let svg-parser-halogen =
       { dependencies = [ "svg-parser", "halogen" ]
-      , repo =
-          "https://github.com/rnons/purescript-svg-parser-halogen.git"
+      , repo = "https://github.com/rnons/purescript-svg-parser-halogen.git"
       , version = "v2.0.0-rc.1"
       }
+let graphs =
+      { repo = "https://github.com/colehaus/purescript-graphs.git"
+      , version = "c4a3189e39579102b8be3cff9bcde63a9d4ef322"
+      , dependencies = [ "ordered-collections", "catenable-lists" ]
+      }
+-}
+
+
+let html-parser-halogen =
+      { dependencies = [ "string-parsers", "halogen" ]
+      , repo = "https://github.com/afcondon/purescript-html-parser-halogen.git"
+      , version = "esmodules"
+      }
+
 
 let overrides = {=}
 
 let additions =
-      { graphs
-      , halogen-renderless
-      , html-parser-halogen
-      , svg-parser
-      , svg-parser-halogen
+      { -- graphs
+    --   , halogen-renderless
+    html-parser-halogen
+    --   , svg-parser
+    --   , svg-parser-halogen
       }
 
 let upstream =
-      https://github.com/purescript/package-sets/releases/download/psc-0.14.0-20210409/packages.dhall sha256:e81c2f2ce790c0e0d79869d22f7a37d16caeb5bd81cfda71d46c58f6199fd33f
+      https://github.com/purescript/package-sets/releases/download/psc-0.15.2-20220624/packages.dhall
+        sha256:08989ed9f53e381f879f1b7012ad7684b1ed64d7164c4ad75e306d3210a46c92
 
 in  upstream // overrides // additions
-

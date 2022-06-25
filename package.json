@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "build": "spago build",
+    "install": "spago install",
+    "upgrade-set": "spago upgrade-set",
     "snippets": "cd docs/code-examples; perl ../../src/scripts/snippets3.pl ../../src/DemoApp/Viz/*/*.purs ../../src/DemoApp/Viz/*.purs ../../src/DemoApp/Stories/*/*.purs ../../src/DemoApp/Stories/*.purs",
     "bundle": "spago bundle-app --to docs/bundle.js",
     "build-css": "cd src/DemoApp/css; postcss src/index.css -o ../../../docs/bundle.css"
@@ -21,8 +23,9 @@
     "d3-color": "^3.0.1",
     "d3-interpolate": "^3.0.1",
     "d3-scale-chromatic": "^3.0.0",
-    "purescript": "0.14.3",
-    "spago": "^0.20.3",
+    "esbuild": "^0.14.47",
+    "purescript": "^0.15.0",
+    "spago": "^0.20.9",
     "yarn": "^1.22.10"
   }
 }

@@ -2,8 +2,8 @@ module Snippets where
 
 import Prelude
 
-import Affjax (printError)
-import Affjax as AJAX
+import Affjax.Web (printError)
+import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState)
 import Data.Either (Either(..))

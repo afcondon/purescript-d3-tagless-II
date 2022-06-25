@@ -14,17 +14,19 @@ import Data.Array (foldl, length, mapWithIndex, partition, (:))
 import Data.Array (null) as A
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.Graph (Graph, fromMap)
-import Data.Int (floor, toNumber)
+import Data.Int (toNumber)
+import Data.Int (floor) as Int
+import Data.List as L
 import Data.Map (fromFoldable, lookup)
 import Data.Map as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (Nullable, notNull, null, toMaybe)
 import Data.Nullable (Nullable, null) as N
+import Data.Number (ceil, cos, sin, sqrt, pi, (%))
+import Data.Number (floor) as Number
 import Data.Set as S
 import Data.Tuple (Tuple(..))
 import Debug (spy)
-import Math (ceil, cos, pi, sin, sqrt, (%))
-import Math as Math
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
@@ -89,7 +91,7 @@ datum_ = {
 
   , nameAndID     : \d -> (unboxD3SimNode d).name <> " " <> show (unboxD3SimNode d).id
   , indexAndID    : \d -> (unboxD3SimNode d).name <> " " <> show (getIndexFromDatum_ d) <> " " <>  show (unboxD3SimNode d).id
-  , namePos       : \d -> "(" <> show (Math.floor $ datum_.x d) <> "," <> show (Math.floor $ datum_.y d) <> ")" -- for debugging position
+  , namePos       : \d -> "(" <> show (Number.floor $ datum_.x d) <> "," <> show (Number.floor $ datum_.y d) <> ")" -- for debugging position
 
   , gridPoint     : \d -> fromMaybe { x: datum_.x d, y: datum_.y d} $ toMaybe (datum_.gridXY d)
   , gridPointX    : \d -> (_.x $ datum_.gridPoint d)
@@ -139,7 +141,7 @@ datum_ = {
       \d -> "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <> ")"
       
 -- accessors to provide different force settings for different cohorts, quite possible that this should go thru a similar but different route from `datum`
-  , isNamed: \name d -> \d -> datum_.name d == name
+  , isNamed: \name _ -> \d -> datum_.name d == name
   , isPackage:
       \d -> case datum_.nodetype d of
               (IsModule _) -> false
@@ -232,7 +234,7 @@ numberToGridPoint columns i = do
     c = toNumber columns
     d = toNumber i
     x = (d % c)
-    y = Math.floor (d / c)
+    y = Number.floor (d / c)
     -- _ = trace { numberToGridPoint: i, columns, x, y } \_ -> unit
   { x, y }
 
@@ -259,7 +261,7 @@ packageNodesToGridXY nodes = partitioned.no <> packagesWithGrid
     -- nearestSquare = pow (ceil $ sqrt packageCount) 2.0
     -- | columns would be sqrt of nearestSquare, so we simply don't square it
     -- | when extending this to a rectangle we will actually need the square tho
-    columns = floor $ ceil $ sqrt $ toNumber packageCount -- we don't actually ever need rows
+    columns = Int.floor $ ceil $ sqrt $ toNumber packageCount -- we don't actually ever need rows
     offset  = -((toNumber columns) / 2.0)
 
     packagesWithGrid = foldlWithIndex (\i b a -> (setGridXY a i) : b) [] partitioned.yes
@@ -420,11 +422,11 @@ makeGraph :: Array SpagoNodeData -> Graph NodeID SpagoNodeData
 makeGraph nodes = do
   let
     graphMap = foldl addNode M.empty nodes
-    addNode :: M.Map NodeID (Tuple SpagoNodeData (S.Set NodeID)) -> SpagoNodeData -> M.Map NodeID (Tuple SpagoNodeData (S.Set NodeID))
+    -- addNode :: M.Map NodeID (Tuple SpagoNodeData (S.Set NodeID)) -> SpagoNodeData -> M.Map NodeID (Tuple SpagoNodeData (S.Set NodeID))
     addNode acc node = M.insert node.id (Tuple node depends) acc
       where
-        depends :: S.Set Int
-        depends = S.fromFoldable node.links.targets
+        depends :: L.List Int
+        depends = L.fromFoldable node.links.targets
   fromMap graphMap
 
 

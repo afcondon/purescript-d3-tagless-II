@@ -1,10 +1,12 @@
-exports.readSpago_Raw_JSON_ = modulesBody => packagesBody => lsdepsBody => locBody => {
-  const modules  = decodeModulesFile(modulesBody);
-  const packages = decodePackagesFile(packagesBody);
-  const lsDeps   = decodeLsDepsFile(lsdepsBody);
-  const loc      = decodeLOCFile(locBody);
+export function readSpago_Raw_JSON_(modulesBody) {
+  return packagesBody => lsdepsBody => locBody => {
+    const modules = decodeModulesFile(modulesBody);
+    const packages = decodePackagesFile(packagesBody);
+    const lsDeps = decodeLsDepsFile(lsdepsBody);
+    const loc = decodeLOCFile(locBody);
 
-  return { modules, packages, lsDeps, loc }
+    return { modules, packages, lsDeps, loc }
+  };
 }
 
 // module has key, path & depends
@@ -37,7 +39,7 @@ const decodeLsDepsFile = function (filecontents) {
   return objectArray;
 }
 
-function splitIntoLines (str) {
+function splitIntoLines(str) {
   // See http://www.unicode.org/reports/tr18/#RL1.6
   return str.split(/\r\n|[\n\v\f\r\u0085\u2028\u2029]/);
 }

@@ -2,7 +2,7 @@ module Stories.LesMis where
 
 import Prelude
 
-import Affjax as AJAX
+import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (Label)

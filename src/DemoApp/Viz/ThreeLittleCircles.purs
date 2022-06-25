@@ -7,7 +7,6 @@ import D3.FFI (keyIsID_)
 import D3.Scales (d3SchemeCategory10N_, d3SchemeDiverging10N_, d3SchemePairedN_, d3SchemeSequential10N_)
 import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import Data.Int (toNumber)
-import Math as Math
 import Prelude (bind, discard, negate, pure, ($), (*), (-), (/))
 import Unsafe.Coerce (unsafeCoerce)
 

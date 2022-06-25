@@ -11,10 +11,10 @@ import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, keyIsI
 import D3.Layouts.Hierarchical (verticalLink)
 import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import D3Tagless.Instance.Selection (runD3M)
+import Data.Number (abs)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Math (abs)
 import Utility (getWindowWidthHeight)
 
 datum_ :: { 
