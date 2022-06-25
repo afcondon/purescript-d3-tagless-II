@@ -14,7 +14,6 @@ import D3Tagless.Capabilities (class SimulationM, addTickFunction, appendTo, att
 import Data.Int (toNumber)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
-import Math (sqrt)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
 import Utility (getWindowWidthHeight)
 

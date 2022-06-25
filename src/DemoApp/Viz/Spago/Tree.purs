@@ -20,7 +20,6 @@ import Data.Number (nan)
 import Data.Set as S
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..))
-import Math (cos, sin)
 import Unsafe.Coerce (unsafeCoerce)
 
 tupleToLink :: forall t1 t6.

@@ -18,7 +18,6 @@ import Data.Map (toUnfoldable)
 import Data.Tuple (Tuple(..), snd)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Math (pi, abs)
 import Prelude (class Bind, Unit, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>), (==))
 import Utility (getWindowWidthHeight)
 

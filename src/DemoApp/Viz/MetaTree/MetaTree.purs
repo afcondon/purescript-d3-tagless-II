@@ -14,7 +14,6 @@ import D3Tagless.Instance.Selection (runD3M)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Math (abs)
 import Utility (getWindowWidthHeight)
 
 datum_ :: { 

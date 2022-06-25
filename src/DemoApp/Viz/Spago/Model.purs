@@ -23,8 +23,6 @@ import Data.Nullable (Nullable, null) as N
 import Data.Set as S
 import Data.Tuple (Tuple(..))
 import Debug (spy)
-import Math (ceil, cos, pi, sin, sqrt, (%))
-import Math as Math
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)

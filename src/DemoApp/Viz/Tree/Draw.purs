@@ -14,7 +14,6 @@ import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes
 import D3Tagless.Capabilities as D3
 import Data.Array as A
 import Data.Nullable (Nullable)
-import Math (pi)
 import Unsafe.Coerce (unsafeCoerce)
 
 treeDatum_ :: 
