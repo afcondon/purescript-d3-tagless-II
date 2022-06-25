@@ -101,7 +101,6 @@ export function setAlpha_(simulation) {
 export function setAlphaDecay_(simulation) { return alphaDecay => simulation.alphaDecay(alphaDecay) }
 export function setAlphaMin_(simulation) { return alphaMin => simulation.alphaMin(alphaMin) }
 export function setAlphaTarget_(simulation) { return alphaTarget => simulation.alphaTarget(alphaTarget) }
-export function setAlphaTarget_(simulation) { return target => simulation.alphaTarget(target) }
 export function setAsNullForceInSimulation_(simulation) { return label => simulation.force(label, null) }
 export function setForceCx_(force) { return attr => force.cx(attr) }
 export function setForceCy_(force) { return attr => force.cy(attr) }

@@ -1112,6 +1112,37 @@
   dependencies:
     "is-arrayish" "^0.2.1"
 
+"esbuild-darwin-arm64@0.14.47":
+  "integrity" "sha512-seCmearlQyvdvM/noz1L9+qblC5vcBrhUaOoLEDDoLInF/VQ9IkobGiLlyTPYP5dW1YD4LXhtBgOyevoIHGGnw=="
+  "resolved" "https://registry.npmjs.org/esbuild-darwin-arm64/-/esbuild-darwin-arm64-0.14.47.tgz"
+  "version" "0.14.47"
+
+"esbuild@^0.14.47":
+  "integrity" "sha512-wI4ZiIfFxpkuxB8ju4MHrGwGLyp1+awEHAHVpx6w7a+1pmYIq8T9FGEVVwFo0iFierDoMj++Xq69GXWYn2EiwA=="
+  "resolved" "https://registry.npmjs.org/esbuild/-/esbuild-0.14.47.tgz"
+  "version" "0.14.47"
+  optionalDependencies:
+    "esbuild-android-64" "0.14.47"
+    "esbuild-android-arm64" "0.14.47"
+    "esbuild-darwin-64" "0.14.47"
+    "esbuild-darwin-arm64" "0.14.47"
+    "esbuild-freebsd-64" "0.14.47"
+    "esbuild-freebsd-arm64" "0.14.47"
+    "esbuild-linux-32" "0.14.47"
+    "esbuild-linux-64" "0.14.47"
+    "esbuild-linux-arm" "0.14.47"
+    "esbuild-linux-arm64" "0.14.47"
+    "esbuild-linux-mips64le" "0.14.47"
+    "esbuild-linux-ppc64le" "0.14.47"
+    "esbuild-linux-riscv64" "0.14.47"
+    "esbuild-linux-s390x" "0.14.47"
+    "esbuild-netbsd-64" "0.14.47"
+    "esbuild-openbsd-64" "0.14.47"
+    "esbuild-sunos-64" "0.14.47"
+    "esbuild-windows-32" "0.14.47"
+    "esbuild-windows-64" "0.14.47"
+    "esbuild-windows-arm64" "0.14.47"
+
 "escalade@^3.1.1":
   "integrity" "sha512-k0er2gUkLf8O0zKJiAhmkTnJlTvINGv7ygDNPbeIsX/TJjGJZHuh9B2UxbsaEkmlEo9MfhrSzmhIlhRlI2GXnw=="
   "resolved" "https://registry.npmjs.org/escalade/-/escalade-3.1.1.tgz"
