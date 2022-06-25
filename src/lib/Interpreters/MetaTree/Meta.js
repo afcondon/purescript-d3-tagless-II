@@ -1,10 +1,10 @@
 //pruneEmptyChildren :: Tree MetaTreeNode -> TreeJson_
-exports.pruneEmptyChildren = (node) => {
+export function pruneEmptyChildren(node) {
   prune(node);
   return node;
 }
 
-prune = function(node) {
+prune = function (node) {
   if (node.children.length == 0) {
     delete node.children;
   } else {

@@ -15,6 +15,7 @@ import D3Tagless.Capabilities.MetaTree (D3GrammarNode, ScriptTree(..), runMetaTr
 import D3Tagless.Capabilities.String (runPrinter)
 import D3Tagless.Instance.Selection (runD3M)
 import Data.Map (toUnfoldable)
+import Data.Number (pi, abs)
 import Data.Tuple (Tuple(..), snd)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)

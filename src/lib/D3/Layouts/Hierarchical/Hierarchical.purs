@@ -2,8 +2,8 @@ module D3.Layouts.Hierarchical where
 
 import D3.Node
 
-import Affjax (Error, URL)
-import Affjax as AJAX
+import Affjax.Web (Error, URL)
+import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import D3.Attributes.Instances (AttributeSetter(..), toAttr)
 import D3.Data.Tree (TreeJson_, TreeLayout, TreeModel, TreeType)

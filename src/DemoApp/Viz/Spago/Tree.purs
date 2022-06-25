@@ -16,7 +16,7 @@ import Data.List as L
 import Data.Map (Map, empty)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Number (nan)
+import Data.Number (nan, cos, sin)
 import Data.Set as S
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..))
