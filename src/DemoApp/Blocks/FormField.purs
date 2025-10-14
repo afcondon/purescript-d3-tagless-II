@@ -5,8 +5,8 @@ import Prelude
 import DOM.HTML.Indexed (HTMLdiv)
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Ocelot.Block.Format as Format
-import Ocelot.HTML.Properties (css, (<&>))
+import DemoApp.UI.Format as Format
+import DemoApp.UI.Properties (css, (<&>))
 
 fieldClasses :: Array HH.ClassName
 fieldClasses = HH.ClassName <$>

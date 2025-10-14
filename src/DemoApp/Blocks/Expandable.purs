@@ -14,8 +14,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Core (class IsProp, Prop(..), PropValue)
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.DOM.Prop (propFromString)
-import Ocelot.Block.Icon as Icon
-import Ocelot.HTML.Properties ((<&>))
+import DemoApp.UI.Properties ((<&>))
 import Unsafe.Coerce (unsafeCoerce)
 
 data Status
@@ -137,17 +136,19 @@ heading iprops html =
       [ chevron_ status_ ]
     ]
 
+-- Simple chevron without icon dependency
 chevron
   :: ∀ p i
    . Status
   -> Array (HH.IProp HTMLspan i)
   -> HH.HTML p i
 chevron status_ iprops =
-  ( case status_ of
-    Collapsed -> Icon.expand
-    Expanded  -> Icon.collapse
-  )
-  ( [ HP.classes chevronClasses ] <&> iprops )
+  HH.span
+    ( [ HP.classes chevronClasses ] <&> iprops )
+    [ HH.text $ case status_ of
+        Collapsed -> "▼"
+        Expanded -> "▲"
+    ]
 
 chevron_
   :: ∀ p i

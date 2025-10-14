@@ -1,12 +1,15 @@
-module Ocelot.Block.FormField where
+-- | This module contains UI components originally from the Ocelot library
+-- | (https://github.com/citizennet/purescript-ocelot). The code has been
+-- | vendored into this project as Ocelot is no longer actively maintained.
+module DemoApp.UI.FormField where
 
 import Prelude
 
 import DOM.HTML.Indexed (HTMLdiv)
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Ocelot.Block.Format as Format
-import Ocelot.HTML.Properties (css, (<&>))
+import DemoApp.UI.Format as Format
+import DemoApp.UI.Properties (css, (<&>))
 
 fieldClasses :: Array HH.ClassName
 fieldClasses = HH.ClassName <$>

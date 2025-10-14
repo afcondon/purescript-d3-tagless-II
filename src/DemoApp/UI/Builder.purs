@@ -1,10 +1,13 @@
-module Ocelot.Block.Builder where
+-- | This module contains UI components originally from the Ocelot library
+-- | (https://github.com/citizennet/purescript-ocelot). The code has been
+-- | vendored into this project as Ocelot is no longer actively maintained.
+module DemoApp.UI.Builder where
 
 import Prelude
 
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Ocelot.HTML.Properties (IProp, (<&>))
+import DemoApp.UI.Properties (IProp, (<&>))
 
 blockBuilder
   :: ∀ r p i

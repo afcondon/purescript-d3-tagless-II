@@ -1,11 +1,14 @@
-module UIGuide.Block.Backdrop where
+-- | This module contains UI components originally from the Ocelot library
+-- | (https://github.com/citizennet/purescript-ocelot). The code has been
+-- | vendored into this project as Ocelot is no longer actively maintained.
+module DemoApp.UI.Backdrop where
 
 import Prelude
 
 import DOM.HTML.Indexed (HTMLdiv)
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Ocelot.HTML.Properties ((<&>))
+import DemoApp.UI.Properties ((<&>))
 
 
 backdropClasses :: Array HH.ClassName

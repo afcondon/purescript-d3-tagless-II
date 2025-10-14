@@ -20,7 +20,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
-import Ocelot.Block.Format as Format
+import DemoApp.UI.Format as Format
 import Stories.GUP as GUP
 import Stories.Index as Index
 import Stories.LesMis as LesMis
@@ -31,7 +31,7 @@ import Stories.ThreeLittleCircles as Circles
 import Stories.Trees as Trees
 import Stories.Utilities as Utils
 import Type.Proxy (Proxy(..))
-import UIGuide.Block.Backdrop (backdrop) as Backdrop
+import DemoApp.UI.Backdrop (backdrop) as Backdrop
 
 main :: Effect Unit
 main = HA.runHalogenAff do

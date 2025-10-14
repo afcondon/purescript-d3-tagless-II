@@ -19,9 +19,9 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Ocelot.Block.FormField as FormField
-import Ocelot.Block.Radio as Radio
-import Ocelot.HTML.Properties (css)
+import DemoApp.UI.FormField as FormField
+import DemoApp.UI.Radio as Radio
+import DemoApp.UI.Properties (css)
 import Snippets (readSnippetFiles)
 import Stories.Utilities (blurbParagraphs, syntaxHighlightedCode)
 import Stories.Utilities as Utils

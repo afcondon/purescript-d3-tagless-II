@@ -1,4 +1,7 @@
-module Ocelot.HTML.Properties
+-- | This module contains UI utilities originally from the Ocelot library
+-- | (https://github.com/citizennet/purescript-ocelot). The code has been
+-- | vendored into this project as Ocelot is no longer actively maintained.
+module DemoApp.UI.Properties
   ( IProp(..)
   , appendIProps
   , css

@@ -1,11 +1,14 @@
-module Ocelot.Block.Table where
+-- | This module contains UI components originally from the Ocelot library
+-- | (https://github.com/citizennet/purescript-ocelot). The code has been
+-- | vendored into this project as Ocelot is no longer actively maintained.
+module DemoApp.UI.Table where
 
 import Prelude
 
 import DOM.HTML.Indexed (HTMLtable, HTMLtd, HTMLth, HTMLtr)
 import Halogen.HTML (HTML, IProp)
 import Halogen.HTML as HH
-import Ocelot.Block.Builder (blockBuilder)
+import DemoApp.UI.Builder (blockBuilder)
 
 tableClasses :: Array HH.ClassName
 tableClasses = HH.ClassName <$>

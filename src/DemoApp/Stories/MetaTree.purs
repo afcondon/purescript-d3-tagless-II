@@ -22,7 +22,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Ocelot.Block.FormField as FormField
+import DemoApp.UI.FormField as FormField
 import Snippets (readSnippetFiles)
 import Stories.Utilities (syntaxHighlightedCode)
 import Stories.Utilities as Utils

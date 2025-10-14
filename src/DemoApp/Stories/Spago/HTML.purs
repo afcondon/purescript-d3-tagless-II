@@ -21,15 +21,15 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties (StepValue(..))
 import Halogen.HTML.Properties as HP
-import Ocelot.Block.Button as Button
-import Ocelot.Block.Checkbox as Checkbox
-import Ocelot.Block.Format as Format
-import Ocelot.Block.Table as Table
-import Ocelot.HTML.Properties (css)
+import DemoApp.UI.Button as Button
+import DemoApp.UI.Checkbox as Checkbox
+import DemoApp.UI.Format as Format
+import DemoApp.UI.Table as Table
+import DemoApp.UI.Properties (css)
 import Stories.Spago.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..))
 import Stories.Spago.State (State, _cssClass, _stagingLinkFilter, _stagingLinks, _stagingNodes, getSimulationVariables)
 import Stories.Utilities as Utils
-import UIGuide.Block.Backdrop as Backdrop
+import DemoApp.UI.Backdrop as Backdrop
 
 render :: forall m.
   State -> HH.HTML (ComponentSlot () m Action) Action
