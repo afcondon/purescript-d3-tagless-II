@@ -11,21 +11,21 @@
     "build-css": "cd src/DemoApp/css; postcss src/index.css -o ../../../docs/bundle.css"
   },
   "devDependencies": {
-    "autoprefixer": "^10.2.6",
-    "cssnano": "^5.0.6",
-    "postcss-cli": "^8.3.1",
-    "postcss-import": "^14.0.2",
-    "postcss-nesting": "^8.0.1",
-    "tailwindcss": "^2.1.4"
+    "autoprefixer": "^10.4.21",
+    "cssnano": "^7.1.1",
+    "postcss-cli": "^11.0.1",
+    "postcss-import": "^16.1.1",
+    "postcss-nesting": "^13.0.2",
+    "tailwindcss": "^3.4.16"
   },
   "dependencies": {
-    "d3": "^7.0.1",
+    "d3": "^7.9.0",
     "d3-color": "^3.0.1",
     "d3-interpolate": "^3.0.1",
-    "d3-scale-chromatic": "^3.0.0",
-    "esbuild": "^0.14.47",
+    "d3-scale-chromatic": "^3.1.0",
+    "esbuild": "^0.25.10",
     "purescript": "^0.15.15",
-    "spago": "^0.20.9",
+    "spago": "^0.21.0",
     "yarn": "^1.22.22"
   }
 }
