@@ -295,3 +295,33 @@ foreign import hNodeDepth_  :: forall r. D3_TreeNode r -> Number
 foreign import hNodeHeight_ :: forall r. D3_TreeNode r -> Number
 foreign import hNodeX_      :: forall r. D3_TreeNode r -> Number
 foreign import hNodeY_      :: forall r. D3_TreeNode r -> Number
+foreign import hNodeR_      :: forall r. D3_TreeNode r -> Number
+
+-- | *********************************************************************************************************************
+-- | ***************************   FFI signatures for D3js Chord module          *********************************************
+-- | *********************************************************************************************************************
+foreign import data ChordLayout_ :: Type
+foreign import data ChordGenerator_ :: Type
+foreign import data RibbonGenerator_ :: Type
+foreign import data ArcGenerator_ :: Type
+
+foreign import chordLayout_         :: Array (Array Number) -> ChordLayout_
+foreign import chordGroups_         :: ChordLayout_ -> Array Datum_
+foreign import chordArray_          :: ChordLayout_ -> Array Datum_
+foreign import ribbonGenerator_     :: Unit -> RibbonGenerator_
+foreign import arcGenerator_        :: Unit -> ArcGenerator_
+foreign import ribbonPath_          :: RibbonGenerator_ -> Datum_ -> String
+foreign import arcPath_             :: ArcGenerator_ -> Datum_ -> String
+foreign import setRibbonRadius_     :: RibbonGenerator_ -> Number -> RibbonGenerator_
+foreign import setArcInnerRadius_   :: ArcGenerator_ -> Number -> ArcGenerator_
+foreign import setArcOuterRadius_   :: ArcGenerator_ -> Number -> ArcGenerator_
+
+-- | *********************************************************************************************************************
+-- | ***************************   FFI signatures for D3js Pack (bubble) module  *********************************************
+-- | *********************************************************************************************************************
+foreign import data PackLayout_ :: Type
+
+foreign import packLayout_      :: Unit -> PackLayout_
+foreign import packSetSize_     :: PackLayout_ -> Number -> Number -> PackLayout_
+foreign import packSetPadding_  :: PackLayout_ -> Number -> PackLayout_
+foreign import runPackLayout_   :: forall r. PackLayout_ -> D3_TreeNode r -> D3_TreeNode r

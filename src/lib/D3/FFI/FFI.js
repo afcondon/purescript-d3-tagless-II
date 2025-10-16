@@ -556,6 +556,31 @@ export function autoBox_() {
   return [x, y, width, height]
 }
 // *****************************************************************************************************************
+// ************************** functions from d3js Chord module         *****************************************
+// *****************************************************************************************************************
+export function chordLayout_(matrix) {
+  return d3.chord()(matrix);
+}
+export function chordGroups_(chordLayout) { return chordLayout.groups }
+export function chordArray_(chordLayout) {
+  return Array.from(chordLayout);
+}
+export function ribbonGenerator_() { return d3.ribbon() }
+export function arcGenerator_() { return d3.arc() }
+export function ribbonPath_(generator) { return chord => generator(chord) }
+export function arcPath_(generator) { return group => generator(group) }
+export function setRibbonRadius_(generator) { return radius => { generator.radius(radius); return generator } }
+export function setArcInnerRadius_(generator) { return radius => { generator.innerRadius(radius); return generator } }
+export function setArcOuterRadius_(generator) { return radius => { generator.outerRadius(radius); return generator } }
+// *****************************************************************************************************************
+// ************************** functions from d3js Pack (bubble) module         *****************************************
+// *****************************************************************************************************************
+export function packLayout_() { return d3.pack() }
+export function packSetSize_(layout) { return width => height => { layout.size([width, height]); return layout } }
+export function packSetPadding_(layout) { return padding => { layout.padding(padding); return layout } }
+export function runPackLayout_(layout) { return root => layout(root) }
+export function hNodeR_(node) { return node.r }
+// *****************************************************************************************************************
 // ************************** functions from d3js zoom module         *****************************************
 // *****************************************************************************************************************
 

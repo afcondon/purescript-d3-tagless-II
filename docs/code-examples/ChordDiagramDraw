@@ -1,0 +1,86 @@
+-- Main drawing function for chord diagram
+draw :: forall m.
+  Bind m =>
+  MonadEffect m =>
+  SelectionM D3Selection_ m =>
+  DependencyMatrix -> EntityLabels -> Selector D3Selection_ -> m Unit
+draw matrix _ selector = do
+  let dims = { width: 800.0, height: 800.0 }
+  let outerR = 300.0
+  let innerR = 290.0
+  let centerX = dims.width / 2.0
+  let centerY = dims.height / 2.0
+
+  (root :: D3Selection_) <- attach selector
+  svg <- appendTo root Svg [
+      viewBox 0.0 0.0 dims.width dims.height
+    , classed "chord-diagram"
+    , width dims.width
+    , height dims.height
+    ]
+
+  -- Create main group centered in the SVG
+  centerGroup <- appendTo svg Group [
+      transform [ \_ -> "translate(" <> show centerX <> "," <> show centerY <> ")" ]
+    , classed "chord-group"
+    ]
+
+  -- Create chord layout
+  let chordData = chordLayout_ matrix
+  let groups = chordGroups_ chordData
+  let chords = chordArray_ chordData
+
+  -- Create generators
+  let ribbonGen = ribbonGenerator_ unit
+  let arcGen0 = arcGenerator_ unit
+  let arcGen1 = setArcInnerRadius_ arcGen0 innerR
+  let arcGen = setArcOuterRadius_ arcGen1 outerR
+
+  -- Draw the ribbons (chords)
+  ribbonsGroup <- appendTo centerGroup Group [ classed "ribbons" ]
+
+  let drawRibbon :: Datum_ -> m Unit
+      drawRibbon chord = do
+        let sourceIdx = getSourceIndex chord
+        let color = case colors !! sourceIdx of
+                      Just c -> c
+                      Nothing -> "#999999"
+        let pathData = ribbonPath_ ribbonGen chord
+        _ <- appendTo ribbonsGroup Path [
+            d pathData
+          , fill color
+          , fillOpacity 0.67
+          , strokeColor "#000000"
+          , strokeWidth 0.5
+          , classed "ribbon"
+          ]
+        pure unit
+
+  _ <- traverse_ drawRibbon chords
+
+  -- Draw the arcs (groups)
+  arcsGroup <- appendTo centerGroup Group [ classed "arcs" ]
+
+  groupsJoin <- simpleJoin arcsGroup Group groups keyIsID_
+
+  let drawArc :: Int -> Datum_ -> m Unit
+      drawArc idx group = do
+        let color = case colors !! idx of
+                      Just c -> c
+                      Nothing -> "#999999"
+        let pathData = arcPath_ arcGen group
+        _ <- appendTo groupsJoin Path [
+            d pathData
+          , fill color
+          , strokeColor "#ffffff"
+          , strokeWidth 2.0
+          , classed "arc"
+          ]
+        pure unit
+
+  _ <- traverse_ (\idx -> case groups !! idx of
+                           Just g -> drawArc idx g
+                           Nothing -> pure unit)
+                (0 .. (length groups - 1))
+
+  pure unit

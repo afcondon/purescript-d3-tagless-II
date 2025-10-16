@@ -14,6 +14,8 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 import Stories.BarChart as BarChart
+import Stories.BubbleChart as BubbleChart
+import Stories.ChordDiagram as ChordDiagram
 import Stories.GUP as GUP
 import Stories.LesMis as LesMis
 import Stories.LineChart as LineChart
@@ -32,36 +34,40 @@ main = HA.runHalogenAff do
   body <- HA.awaitBody
   runUI parent unit body
 
-type Slots = ( index       :: forall q. H.Slot q Void Unit
-             , circles     :: forall q. H.Slot q Void Unit
-             , gup         :: forall q. H.Slot q Void Unit
-             , trees       :: forall q. H.Slot q Void Unit
-             , metatree    :: forall q. H.Slot q Void Unit
-             , printtree   :: forall q. H.Slot q Void Unit
-             , lesmis      :: forall q. H.Slot q Void Unit
-             , spago       :: forall q. H.Slot q Void Unit
-             , sankey      :: forall q. H.Slot q Void Unit
-             , linechart   :: forall q. H.Slot q Void Unit
-             , barchart    :: forall q. H.Slot q Void Unit
-             , scatterplot :: forall q. H.Slot q Void Unit
+type Slots = ( index        :: forall q. H.Slot q Void Unit
+             , circles      :: forall q. H.Slot q Void Unit
+             , gup          :: forall q. H.Slot q Void Unit
+             , trees        :: forall q. H.Slot q Void Unit
+             , metatree     :: forall q. H.Slot q Void Unit
+             , printtree    :: forall q. H.Slot q Void Unit
+             , lesmis       :: forall q. H.Slot q Void Unit
+             , spago        :: forall q. H.Slot q Void Unit
+             , sankey       :: forall q. H.Slot q Void Unit
+             , linechart    :: forall q. H.Slot q Void Unit
+             , barchart     :: forall q. H.Slot q Void Unit
+             , scatterplot  :: forall q. H.Slot q Void Unit
+             , chord        :: forall q. H.Slot q Void Unit
+             , bubblechart  :: forall q. H.Slot q Void Unit
              )
 
-_index       = Proxy :: Proxy "index"
-_circles     = Proxy :: Proxy "circles"
-_gup         = Proxy :: Proxy "gup"
-_trees       = Proxy :: Proxy "trees"
-_metatree    = Proxy :: Proxy "metatree"
-_printtree   = Proxy :: Proxy "printtree"
-_lesmis      = Proxy :: Proxy "lesmis"
-_spago       = Proxy :: Proxy "spago"
-_sankey      = Proxy :: Proxy "sankey"
-_linechart   = Proxy :: Proxy "linechart"
-_barchart    = Proxy :: Proxy "barchart"
-_scatterplot = Proxy :: Proxy "scatterplot"
+_index        = Proxy :: Proxy "index"
+_circles      = Proxy :: Proxy "circles"
+_gup          = Proxy :: Proxy "gup"
+_trees        = Proxy :: Proxy "trees"
+_metatree     = Proxy :: Proxy "metatree"
+_printtree    = Proxy :: Proxy "printtree"
+_lesmis       = Proxy :: Proxy "lesmis"
+_spago        = Proxy :: Proxy "spago"
+_sankey       = Proxy :: Proxy "sankey"
+_linechart    = Proxy :: Proxy "linechart"
+_barchart     = Proxy :: Proxy "barchart"
+_scatterplot  = Proxy :: Proxy "scatterplot"
+_chord        = Proxy :: Proxy "chord"
+_bubblechart  = Proxy :: Proxy "bubblechart"
 
 type ParentState = ExampleType
 
-data ExampleType = None | ExampleCircles | ExampleGUP | ExampleTrees | ExampleLesMis | ExampleMetaTree | ExamplePrinter | ExampleSankey | ExampleLineChart | ExampleBarChart | ExampleScatterPlot | ExampleSpago
+data ExampleType = None | ExampleCircles | ExampleGUP | ExampleTrees | ExampleLesMis | ExampleMetaTree | ExamplePrinter | ExampleSankey | ExampleLineChart | ExampleBarChart | ExampleScatterPlot | ExampleChord | ExampleBubbleChart | ExampleSpago
 derive instance Eq ExampleType
 instance showExampleType :: Show ExampleType where
   show = case _ of
@@ -76,7 +82,9 @@ instance showExampleType :: Show ExampleType where
     ExampleSankey   -> "Sankey"
     ExampleLineChart -> "Line Chart"
     ExampleBarChart -> "Bar Chart"
-    ExampleScatterPlot -> "Scatter Plot" 
+    ExampleScatterPlot -> "Scatter Plot"
+    ExampleChord -> "Chord Diagram"
+    ExampleBubbleChart -> "Bubble Chart" 
 
 data ParentAction = Initialize | Example ExampleType
 
@@ -125,7 +133,7 @@ parent =
     [ Format.caption_ [ HH.text "Simple examples" ]
     , HH.ul [ HP.class_ $ HH.ClassName "list-reset" ]
             ((renderExampleNav currentExample) <$>
-              [ ExampleCircles, ExampleGUP, ExampleTrees, ExampleLesMis, ExampleSankey, ExampleLineChart, ExampleBarChart, ExampleScatterPlot ])
+              [ ExampleCircles, ExampleGUP, ExampleTrees, ExampleLesMis, ExampleSankey, ExampleLineChart, ExampleBarChart, ExampleScatterPlot, ExampleChord, ExampleBubbleChart ])
     , Format.caption_ [ HH.text "Alternate interpreters" ]
     , HH.ul [ HP.class_ $ HH.ClassName "list-reset" ] 
             ((renderExampleNav currentExample) <$> 
@@ -163,10 +171,12 @@ parent =
       ExamplePrinter     -> HH.slot_ _printtree   unit PrintTree.component unit
       ExampleLesMis      -> HH.slot_ _lesmis      unit LesMis.component unit
       ExampleSankey      -> HH.slot_ _sankey      unit Sankey.component unit
-      ExampleLineChart   -> HH.slot_ _linechart   unit LineChart.component unit
-      ExampleBarChart    -> HH.slot_ _barchart    unit BarChart.component unit
-      ExampleScatterPlot -> HH.slot_ _scatterplot unit ScatterPlot.component unit
-      ExampleSpago       -> HH.slot_ _spago       unit Spago.component unit
+      ExampleLineChart   -> HH.slot_ _linechart    unit LineChart.component unit
+      ExampleBarChart    -> HH.slot_ _barchart     unit BarChart.component unit
+      ExampleScatterPlot -> HH.slot_ _scatterplot  unit ScatterPlot.component unit
+      ExampleChord       -> HH.slot_ _chord        unit ChordDiagram.component unit
+      ExampleBubbleChart -> HH.slot_ _bubblechart  unit BubbleChart.component unit
+      ExampleSpago       -> HH.slot_ _spago        unit Spago.component unit
       -- _ -> HH.div_ [ HH.text "That example is currently not available" ]
 
 

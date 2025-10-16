@@ -3,7 +3,7 @@ module D3.Examples.Tree.Configure where
 import D3.Examples.Tree.Model
 
 import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), preserveAspectRatio, transform, viewBox)
-import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
+import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeLayoutFn_, TreeModel, TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_, Selector)
 import D3.Examples.Tree.Draw (draw) as Tree
 import D3.Examples.Tree.Draw (treeDatum_)
@@ -73,6 +73,7 @@ configureAndRunScript (Tuple width height ) model selector =
         TidyTree, Vertical     -> { interChild: 10.0, interLevel: svg.height / numberOfLevels}
         TidyTree, Radial       -> { interChild: 0.0,  interLevel: 0.0} -- not sure this is used in radial case
 
+    layout :: TreeLayoutFn_
     layout = 
       if model.treeLayout == Radial
       then ((getLayout model.treeType)  `treeSetSize_`       [ 2.0 * pi, (svg.width / 2.0) - 100.0 ]) 

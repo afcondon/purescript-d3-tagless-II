@@ -7,6 +7,7 @@ You can edit this file as you like.
   [ "aff"
   , "affjax"
   , "affjax-web"
+  , "argonaut-core"
   , "arrays"
   , "bifunctors"
   , "console"
