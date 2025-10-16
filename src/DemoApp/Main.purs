@@ -14,6 +14,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 import Stories.GUP as GUP
+import Stories.LineChart as LineChart
 import Stories.Sankey as Sankey
 import Stories.LesMis as LesMis
 import Stories.MetaTree as MetaTree
@@ -30,14 +31,15 @@ main = HA.runHalogenAff do
   runUI parent unit body
 
 type Slots = ( index     :: forall q. H.Slot q Void Unit
-             , circles   :: forall q. H.Slot q Void Unit 
-             , gup       :: forall q. H.Slot q Void Unit 
+             , circles   :: forall q. H.Slot q Void Unit
+             , gup       :: forall q. H.Slot q Void Unit
              , trees     :: forall q. H.Slot q Void Unit
              , metatree  :: forall q. H.Slot q Void Unit
              , printtree :: forall q. H.Slot q Void Unit
              , lesmis    :: forall q. H.Slot q Void Unit
              , spago     :: forall q. H.Slot q Void Unit
              , sankey    :: forall q. H.Slot q Void Unit
+             , linechart :: forall q. H.Slot q Void Unit
              )
 
 _index     = Proxy :: Proxy "index"
@@ -48,11 +50,12 @@ _metatree  = Proxy :: Proxy "metatree"
 _printtree = Proxy :: Proxy "printtree"
 _lesmis    = Proxy :: Proxy "lesmis"
 _spago     = Proxy :: Proxy "spago"
-_sankey     = Proxy :: Proxy "sankey"
+_sankey    = Proxy :: Proxy "sankey"
+_linechart = Proxy :: Proxy "linechart"
 
 type ParentState = ExampleType
 
-data ExampleType = None | ExampleCircles | ExampleGUP | ExampleTrees | ExampleLesMis | ExampleMetaTree | ExamplePrinter | ExampleSankey | ExampleSpago
+data ExampleType = None | ExampleCircles | ExampleGUP | ExampleTrees | ExampleLesMis | ExampleMetaTree | ExamplePrinter | ExampleSankey | ExampleLineChart | ExampleSpago
 derive instance Eq ExampleType
 instance showExampleType :: Show ExampleType where
   show = case _ of
@@ -63,8 +66,9 @@ instance showExampleType :: Show ExampleType where
     ExampleLesMis   -> "LesMis"
     ExampleMetaTree -> "MetaTree"
     ExamplePrinter  -> "Printer"
-    ExampleSpago    -> "Spago"  
-    ExampleSankey   -> "Sankey" 
+    ExampleSpago    -> "Spago"
+    ExampleSankey   -> "Sankey"
+    ExampleLineChart -> "Line Chart" 
 
 data ParentAction = Initialize | Example ExampleType
 
@@ -111,9 +115,9 @@ parent =
     HH.div
     [ HP.class_ $ HH.ClassName "text-base overflow-y-auto" ]
     [ Format.caption_ [ HH.text "Simple examples" ]
-    , HH.ul [ HP.class_ $ HH.ClassName "list-reset" ] 
-            ((renderExampleNav currentExample) <$> 
-              [ ExampleCircles, ExampleGUP, ExampleTrees, ExampleLesMis, ExampleSankey ])
+    , HH.ul [ HP.class_ $ HH.ClassName "list-reset" ]
+            ((renderExampleNav currentExample) <$>
+              [ ExampleCircles, ExampleGUP, ExampleTrees, ExampleLesMis, ExampleSankey, ExampleLineChart ])
     , Format.caption_ [ HH.text "Alternate interpreters" ]
     , HH.ul [ HP.class_ $ HH.ClassName "list-reset" ] 
             ((renderExampleNav currentExample) <$> 
@@ -149,9 +153,10 @@ parent =
       ExampleTrees    -> HH.slot_ _trees     unit Trees.component unit 
       ExampleMetaTree -> HH.slot_ _metatree  unit MetaTree.component unit 
       ExamplePrinter  -> HH.slot_ _printtree unit PrintTree.component unit 
-      ExampleLesMis   -> HH.slot_ _lesmis    unit LesMis.component unit
-      ExampleSankey   -> HH.slot_ _sankey    unit Sankey.component unit
-      ExampleSpago    -> HH.slot_ _spago     unit Spago.component unit
+      ExampleLesMis    -> HH.slot_ _lesmis    unit LesMis.component unit
+      ExampleSankey    -> HH.slot_ _sankey    unit Sankey.component unit
+      ExampleLineChart -> HH.slot_ _linechart unit LineChart.component unit
+      ExampleSpago     -> HH.slot_ _spago     unit Spago.component unit
       -- _ -> HH.div_ [ HH.text "That example is currently not available" ]
 
 
