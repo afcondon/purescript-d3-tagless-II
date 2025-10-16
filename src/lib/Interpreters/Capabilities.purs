@@ -2,7 +2,7 @@ module D3Tagless.Capabilities where
 
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Simulation_, Datum_, Element, Index_, Selector)
-import D3.Layouts.Sankey.Types (SankeyLink_, SankeyNode_)
+import D3.Layouts.Sankey.Types (SankeyConfig, SankeyLink_, SankeyNode_)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior, SelectionAttribute)
 import D3.Simulation.Types (ForceStatus, SimVariable, Step)
@@ -96,4 +96,12 @@ class (Monad m, SelectionM selection m) <= SankeyM selection m | m -> selection 
     { nodes :: Array nodeData, links :: Array linkData } ->
     Number -> -- width
     Number -> -- height
+    m { nodes :: Array SankeyNode_, links :: Array SankeyLink_ }
+
+  -- | Apply Sankey layout with custom configuration
+  setSankeyDataWithConfig :: forall nodeData linkData.
+    { nodes :: Array nodeData, links :: Array linkData } ->
+    Number -> -- width
+    Number -> -- height
+    SankeyConfig ->
     m { nodes :: Array SankeyNode_, links :: Array SankeyLink_ }

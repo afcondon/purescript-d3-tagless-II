@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import D3.Data.Types (D3Selection_)
-import D3.Layouts.Sankey.Functions (sankeySetData)
+import D3.Layouts.Sankey.Functions (sankeySetData, sankeySetDataWithConfig)
 import D3.Layouts.Sankey.Types (SankeyLayoutState_)
 import D3.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionOn, selectionOpenSelection, selectionSelectUnder, selectionUpdateJoin)
 import D3Tagless.Capabilities (class SankeyM, class SelectionM)
@@ -76,3 +76,4 @@ instance SelectionM D3Selection_ (D3SankeyM row D3Selection_) where
 -- SankeyM instance - Sankey-specific operations
 instance SankeyM D3Selection_ (D3SankeyM row D3Selection_) where
   setSankeyData data_ width height = sankeySetData data_ width height
+  setSankeyDataWithConfig data_ width height config = sankeySetDataWithConfig data_ width height config

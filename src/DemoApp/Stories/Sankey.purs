@@ -3,9 +3,12 @@ module Stories.Sankey where
 import Prelude
 
 import Control.Monad.State (class MonadState)
+import Control.Monad.State (get)
 import D3.Examples.Sankey.Model as Sankey
 import D3.Examples.SankeyDiagram as SankeyDiagram
 import D3.Layouts.Sankey.Types (SankeyLayoutState_, initialSankeyLayoutState)
+import D3Tagless.Instance.Selection (eval_D3M)
+import D3Tagless.Utility (removeExistingSVG)
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Instance.Sankey (runWithD3_Sankey)
@@ -17,19 +20,49 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import DemoApp.UI.FormField as FormField
+import DemoApp.UI.Radio as Radio
+import DemoApp.UI.Properties (css)
 import Snippets (readSnippetFiles)
 import Stories.Utilities (blurbParagraphs, syntaxHighlightedCode)
 import Stories.Utilities as Utils
 import Data.Maybe (Maybe(..))
 import Type.Proxy (Proxy(..))
 
+data SankeyAlignment = AlignJustify | AlignLeft | AlignRight | AlignCenter
+
+derive instance eqSankeyAlignment :: Eq SankeyAlignment
+
+alignmentToString :: SankeyAlignment -> String
+alignmentToString AlignJustify = "justify"
+alignmentToString AlignLeft = "left"
+alignmentToString AlignRight = "right"
+alignmentToString AlignCenter = "center"
+
+data LinkColorMode = ColorBySource | ColorByTarget | ColorBySourceTarget | ColorStatic
+
+derive instance eqLinkColorMode :: Eq LinkColorMode
+
+linkColorModeToString :: LinkColorMode -> String
+linkColorModeToString ColorBySource = "source"
+linkColorModeToString ColorByTarget = "target"
+linkColorModeToString ColorBySourceTarget = "source-target"
+linkColorModeToString ColorStatic = "static"
+
 data Action
   = Initialize
   | Finalize
   | ToggleCard (Lens' State Expandable.Status)
+  | SetAlignment SankeyAlignment
+  | SetLinkColorMode LinkColorMode
+  | SetNodeWidth Number
+  | SetNodePadding Number
 
 type State = {
     sankeyLayout :: SankeyLayoutState_
+  , alignment :: SankeyAlignment
+  , linkColorMode :: LinkColorMode
+  , nodeWidth :: Number
+  , nodePadding :: Number
   , panels :: { blurb :: Expandable.Status, code :: Expandable.Status }
   , snippets :: { draw :: String }
 }
@@ -62,14 +95,89 @@ component = H.mkComponent
   initialState :: State
   initialState = {
       sankeyLayout: initialSankeyLayoutState
+    , alignment: AlignJustify
+    , linkColorMode: ColorBySource
+    , nodeWidth: 15.0
+    , nodePadding: 10.0
     , panels: { blurb: Expandable.Collapsed, code: Expandable.Collapsed }
     , snippets: { draw: "" }
   }
 
+  controlsRadio =
+    HH.div
+      [ css "flex-1" ]
+      [ FormField.fieldset_
+        { label: HH.text "Node Alignment"
+        , inputId: "radio-alignment"
+        , helpText: []
+        , error: []
+        }
+        [ HH.div
+          [ css "flex-1" ]
+          [ Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "sankey-alignment"
+            , HP.checked true
+            , HE.onClick $ const (SetAlignment AlignJustify)
+            ]
+            [ HH.text "Justify" ]
+          , Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "sankey-alignment"
+            , HE.onClick $ const (SetAlignment AlignLeft) ]
+            [ HH.text "Left" ]
+          , Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "sankey-alignment"
+            , HE.onClick $ const (SetAlignment AlignRight) ]
+            [ HH.text "Right" ]
+          , Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "sankey-alignment"
+            , HE.onClick $ const (SetAlignment AlignCenter) ]
+            [ HH.text "Center" ]
+          ]
+        ]
+      , FormField.fieldset_
+        { label: HH.text "Link Color"
+        , inputId: "radio-link-color"
+        , helpText: []
+        , error: []
+        }
+        [ HH.div
+          [ css "flex-1" ]
+          [ Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "sankey-link-color"
+            , HP.checked true
+            , HE.onClick $ const (SetLinkColorMode ColorBySource)
+            ]
+            [ HH.text "Source" ]
+          , Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "sankey-link-color"
+            , HE.onClick $ const (SetLinkColorMode ColorByTarget) ]
+            [ HH.text "Target" ]
+          , Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "sankey-link-color"
+            , HE.onClick $ const (SetLinkColorMode ColorBySourceTarget) ]
+            [ HH.text "Gradient" ]
+          , Radio.radio
+            [ css "pr-6" ]
+            [ HP.name "sankey-link-color"
+            , HE.onClick $ const (SetLinkColorMode ColorStatic) ]
+            [ HH.text "Static" ]
+          ]
+        ]
+      ]
+
   render :: State -> H.ComponentHTML Action () m
   render state =
     HH.div [ Utils.tailwindClass "story-container" ]
-      [ HH.div
+      [ HH.div [ Utils.tailwindClass "story-panel-controls"]
+          [ controlsRadio ]
+      , HH.div
           [ Utils.tailwindClass "story-panel-about" ]
           [ FormField.field_
               { label: HH.text "About"
@@ -118,6 +226,54 @@ handleAction = case _ of
 
     runWithD3_Sankey do
       SankeyDiagram.draw Sankey.energyData "div.svg-container"
+
+  SetAlignment alignment -> do
+    detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
+    H.modify_ (\st -> st { alignment = alignment })
+    state <- get
+    runWithD3_Sankey do
+      SankeyDiagram.drawWithConfig Sankey.energyData "div.svg-container" {
+        alignment: alignmentToString state.alignment,
+        linkColorMode: linkColorModeToString state.linkColorMode,
+        nodeWidth: state.nodeWidth,
+        nodePadding: state.nodePadding
+      }
+
+  SetLinkColorMode colorMode -> do
+    detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
+    H.modify_ (\st -> st { linkColorMode = colorMode })
+    state <- get
+    runWithD3_Sankey do
+      SankeyDiagram.drawWithConfig Sankey.energyData "div.svg-container" {
+        alignment: alignmentToString state.alignment,
+        linkColorMode: linkColorModeToString state.linkColorMode,
+        nodeWidth: state.nodeWidth,
+        nodePadding: state.nodePadding
+      }
+
+  SetNodeWidth width -> do
+    detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
+    H.modify_ (\st -> st { nodeWidth = width })
+    state <- get
+    runWithD3_Sankey do
+      SankeyDiagram.drawWithConfig Sankey.energyData "div.svg-container" {
+        alignment: alignmentToString state.alignment,
+        linkColorMode: linkColorModeToString state.linkColorMode,
+        nodeWidth: state.nodeWidth,
+        nodePadding: state.nodePadding
+      }
+
+  SetNodePadding padding -> do
+    detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
+    H.modify_ (\st -> st { nodePadding = padding })
+    state <- get
+    runWithD3_Sankey do
+      SankeyDiagram.drawWithConfig Sankey.energyData "div.svg-container" {
+        alignment: alignmentToString state.alignment,
+        linkColorMode: linkColorModeToString state.linkColorMode,
+        nodeWidth: state.nodeWidth,
+        nodePadding: state.nodePadding
+      }
 
   Finalize -> pure unit
 

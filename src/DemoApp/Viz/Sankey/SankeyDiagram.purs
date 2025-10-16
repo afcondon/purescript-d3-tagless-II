@@ -9,9 +9,9 @@ import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 import D3.Examples.Sankey.Model (SankeyData)
 import D3.Examples.Sankey.Unsafe (unboxSankeyLink, unboxSankeyNode)
 import D3.Layouts.Sankey.Functions (sankeyLinkPath_)
-import D3.Layouts.Sankey.Types (SankeyLayoutState_)
+import D3.Layouts.Sankey.Types (SankeyConfig, SankeyLayoutState_)
 import D3.Selection (SelectionAttribute(..))
-import D3Tagless.Capabilities (class SankeyM, appendTo, attach, setAttributes, setSankeyData, simpleJoin)
+import D3Tagless.Capabilities (class SankeyM, appendTo, attach, setAttributes, setSankeyData, setSankeyDataWithConfig, simpleJoin)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Unsafe.Coerce (unsafeCoerce)
@@ -139,3 +139,60 @@ keyForNode d = unsafeCoerce $ node_.name d
 
 keyForLink :: Datum_ -> Index_
 keyForLink d = unsafeCoerce $ node_.name (unsafeCoerce $ link_.source d) <> "-" <> node_.name (unsafeCoerce $ link_.target d)
+
+-- | Draw Sankey diagram with custom configuration
+drawWithConfig :: forall row m.
+  Bind m =>
+  MonadEffect m =>
+  MonadState { sankeyLayout :: SankeyLayoutState_ | row } m =>
+  SankeyM D3Selection_ m =>
+  SankeyData -> Selector D3Selection_ -> SankeyConfig -> m Unit
+drawWithConfig sankeyData selector config = do
+  (Tuple w h) <- liftEffect getWindowWidthHeight
+
+  (root :: D3Selection_) <- attach selector
+  svg  <- appendTo root Svg [ viewBox 0.0 0.0 w h, classed "sankey" ]
+
+  -- Create groups for links and nodes
+  linksGroup <- appendTo svg Group [ classed "links" ]
+  nodesGroup <- appendTo svg Group [ classed "nodes" ]
+  labelsGroup <- appendTo svg Group [ classed "labels" ]
+
+  -- Pass data through Sankey layout generator with config
+  layoutResult <- setSankeyDataWithConfig sankeyData w h config
+
+  -- Join and render links (as paths with custom link path generator)
+  linksSelection <- simpleJoin linksGroup Path layoutResult.links keyForLink
+  setAttributes linksSelection
+    [ classed "sankey-link"
+    , fill "none"
+    , strokeWidth link_.width
+    , strokeOpacity 0.5
+    , d sankeyLinkPath_
+    , strokeColor link_.color
+    ]
+
+  -- Join and render nodes (as rectangles)
+  nodesSelection <- simpleJoin nodesGroup Rect layoutResult.nodes keyForNode
+  setAttributes nodesSelection
+    [ classed "sankey-node"
+    , x node_.x0
+    , y node_.y0
+    , width (\n -> node_.x1 n - node_.x0 n)
+    , height (\n -> node_.y1 n - node_.y0 n)
+    , fill node_.color
+    , fillOpacity 0.8
+    ]
+
+  -- Add labels for nodes
+  labelsSelection <- simpleJoin labelsGroup Text layoutResult.nodes keyForNode
+  setAttributes labelsSelection
+    [ classed "sankey-label"
+    , x (\n -> if node_.x0 n < w / 2.0 then node_.x1 n + 6.0 else node_.x0 n - 6.0)
+    , y (\n -> (node_.y0 n + node_.y1 n) / 2.0)
+    , dy 4.0  -- TODO: should be "0.35em" but dy is not polymorphic in our library
+    , textAnchor (\n -> if node_.x0 n < w / 2.0 then "start" else "end")
+    , text node_.name
+    ]
+
+  pure unit

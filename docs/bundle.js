@@ -11127,6 +11127,9 @@
   var simpleJoin = function(dict) {
     return dict.simpleJoin;
   };
+  var setSankeyDataWithConfig = function(dict) {
+    return dict.setSankeyDataWithConfig;
+  };
   var setSankeyData = function(dict) {
     return dict.setSankeyData;
   };
@@ -14545,7 +14548,7 @@
       return show8(v.value0);
     }
     ;
-    throw new Error("Failed pattern match at D3.Simulation.Forces (line 33, column 3 - line 35, column 29): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at D3.Simulation.Forces (line 32, column 3 - line 34, column 29): " + [v.constructor.name]);
   };
   var removeForceFromSimulation = function(v) {
     return function(simulation_) {
@@ -14557,7 +14560,7 @@
         return unsetLinks_(simulation_);
       }
       ;
-      throw new Error("Failed pattern match at D3.Simulation.Forces (line 112, column 3 - line 115, column 46): " + [v.type.constructor.name]);
+      throw new Error("Failed pattern match at D3.Simulation.Forces (line 111, column 3 - line 114, column 46): " + [v.type.constructor.name]);
     };
   };
   var putStatusMap = function(forceStatusMap) {
@@ -14572,7 +14575,7 @@
           return set2(_status2)(v.value0)(force2);
         }
         ;
-        throw new Error("Failed pattern match at D3.Simulation.Forces (line 27, column 7 - line 29, column 50): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at D3.Simulation.Forces (line 26, column 7 - line 28, column 50): " + [v.constructor.name]);
       };
       return map39(update3)(forceMap);
     };
@@ -14587,7 +14590,7 @@
         return putForceInSimulation_(simulation_)(v.name)(v.force_);
       }
       ;
-      throw new Error("Failed pattern match at D3.Simulation.Forces (line 103, column 3 - line 107, column 80): " + [v.type.constructor.name]);
+      throw new Error("Failed pattern match at D3.Simulation.Forces (line 102, column 3 - line 106, column 80): " + [v.type.constructor.name]);
     };
   };
   var initialize = function(dictFoldable) {
@@ -14626,7 +14629,7 @@
       return forceRadial_(unit);
     }
     ;
-    throw new Error("Failed pattern match at D3.Simulation.Forces (line 167, column 23 - line 173, column 52): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at D3.Simulation.Forces (line 166, column 23 - line 172, column 52): " + [v.constructor.name]);
   };
   var createForce_ = function(v) {
     if (v instanceof RegularForce) {
@@ -14637,7 +14640,7 @@
       return forceLink_(unit);
     }
     ;
-    throw new Error("Failed pattern match at D3.Simulation.Forces (line 161, column 3 - line 163, column 38): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at D3.Simulation.Forces (line 160, column 3 - line 162, column 38): " + [v.constructor.name]);
   };
   var createLinkForce = function(f) {
     return function(cs) {
@@ -14734,7 +14737,7 @@
           return new ArrayAttr(new FnI(v.value0.value0));
         }
         ;
-        throw new Error("Failed pattern match at D3.Simulation.Forces (line 212, column 3 - line 223, column 49): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at D3.Simulation.Forces (line 211, column 3 - line 222, column 49): " + [v.constructor.name]);
       };
     };
   };
@@ -14750,7 +14753,7 @@
             return setForceStrength_(force_)(unboxAttr(attrFilter(maybeFilter.value0.value1)(0)(v.value1)));
           }
           ;
-          throw new Error("Failed pattern match at D3.Simulation.Forces (line 182, column 7 - line 186, column 82): " + [maybeFilter.constructor.name]);
+          throw new Error("Failed pattern match at D3.Simulation.Forces (line 181, column 7 - line 185, column 82): " + [maybeFilter.constructor.name]);
         }
         ;
         if (v.value0 === "radius") {
@@ -14803,7 +14806,7 @@
         return removeForceFromSimulation(force2)(simulation);
       }
       ;
-      throw new Error("Failed pattern match at D3.Simulation.Forces (line 96, column 5 - line 98, column 66): " + [f.status.constructor.name]);
+      throw new Error("Failed pattern match at D3.Simulation.Forces (line 95, column 5 - line 97, column 66): " + [f.status.constructor.name]);
     };
   };
 
@@ -20254,8 +20257,20 @@
   }
 
   // node_modules/d3-sankey/src/align.js
+  function targetDepth(d5) {
+    return d5.target.depth;
+  }
+  function left2(node) {
+    return node.depth;
+  }
+  function right2(node, n) {
+    return n - 1 - node.height;
+  }
   function justify(node, n) {
     return node.sourceLinks.length ? node.depth : n - 1;
+  }
+  function center(node) {
+    return node.targetLinks.length ? node.depth : node.sourceLinks.length ? min7(node.sourceLinks, targetDepth) - 1 : 0;
   }
 
   // node_modules/d3-sankey/src/constant.js
@@ -20731,8 +20746,21 @@
   }
 
   // output/D3.Layouts.Sankey.Functions/foreign.js
-  var sankeySetData_ = (data) => (width13) => (height13) => () => {
-    const sankeyGenerator = Sankey().nodeWidth(15).nodePadding(10).extent([[1, 1], [width13 - 1, height13 - 5]]);
+  var getAlignmentFunction = (alignment) => {
+    switch (alignment) {
+      case "left":
+        return left2;
+      case "right":
+        return right2;
+      case "center":
+        return center;
+      case "justify":
+      default:
+        return justify;
+    }
+  };
+  var sankeySetDataWithConfig_ = (data) => (width13) => (height13) => (config) => () => {
+    const sankeyGenerator = Sankey().nodeWidth(config.nodeWidth).nodePadding(config.nodePadding).nodeAlign(getAlignmentFunction(config.alignment)).extent([[1, 1], [width13 - 1, height13 - 5]]);
     const dataCopy = {
       nodes: data.nodes.map((n) => ({ ...n })),
       links: data.links.map((l) => ({ ...l }))
@@ -20744,13 +20772,54 @@
     });
     graph.links.forEach((link4) => {
       link4.width = link4.width || Math.max(1, link4.value);
-      link4.color = link4.source.color || colorScale(link4.source.name);
+      switch (config.linkColorMode) {
+        case "target":
+          link4.color = link4.target.color || colorScale(link4.target.name);
+          break;
+        case "source-target":
+          const sourceColor = color(link4.source.color || colorScale(link4.source.name));
+          const targetColor = color(link4.target.color || colorScale(link4.target.name));
+          const blended = rgb(
+            (sourceColor.r + targetColor.r) / 2,
+            (sourceColor.g + targetColor.g) / 2,
+            (sourceColor.b + targetColor.b) / 2
+          );
+          link4.color = blended.toString();
+          break;
+        case "static":
+          link4.color = "#ccc";
+          break;
+        case "source":
+        default:
+          link4.color = link4.source.color || colorScale(link4.source.name);
+          break;
+      }
     });
     return graph;
+  };
+  var sankeySetData_ = (data) => (width13) => (height13) => () => {
+    return sankeySetDataWithConfig_(data)(width13)(height13)({
+      alignment: "justify",
+      linkColorMode: "source",
+      nodeWidth: 15,
+      nodePadding: 10
+    })();
   };
   var sankeyLinkPath_ = sankeyLinkHorizontal_default();
 
   // output/D3.Layouts.Sankey.Functions/index.js
+  var sankeySetDataWithConfig = function(dictMonadEffect) {
+    var liftEffect11 = liftEffect(dictMonadEffect);
+    return function(data_2) {
+      return function(width13) {
+        return function(height13) {
+          return function(config) {
+            return liftEffect11(sankeySetDataWithConfig_(data_2)(width13)(height13)(config));
+          };
+        };
+      };
+    };
+  };
   var sankeySetData = function(dictMonadEffect) {
     var liftEffect11 = liftEffect(dictMonadEffect);
     return function(data_2) {
@@ -20780,72 +20849,72 @@
   var textAnchor4 = /* @__PURE__ */ textAnchor(toAttrStringFn);
   var text10 = /* @__PURE__ */ text6(toAttrStringFn);
   var node_ = {
-    name: function($59) {
+    name: function($83) {
       return (function(v) {
         return v.name;
-      })(unboxSankeyNode($59));
+      })(unboxSankeyNode($83));
     },
-    x0: function($60) {
+    x0: function($84) {
       return (function(v) {
         return v.x0;
-      })(unboxSankeyNode($60));
+      })(unboxSankeyNode($84));
     },
-    y0: function($61) {
+    y0: function($85) {
       return (function(v) {
         return v.y0;
-      })(unboxSankeyNode($61));
+      })(unboxSankeyNode($85));
     },
-    x1: function($62) {
+    x1: function($86) {
       return (function(v) {
         return v.x1;
-      })(unboxSankeyNode($62));
+      })(unboxSankeyNode($86));
     },
-    y1: function($63) {
+    y1: function($87) {
       return (function(v) {
         return v.y1;
-      })(unboxSankeyNode($63));
+      })(unboxSankeyNode($87));
     },
-    value: function($64) {
+    value: function($88) {
       return (function(v) {
         return v.value;
-      })(unboxSankeyNode($64));
+      })(unboxSankeyNode($88));
     },
-    color: function($65) {
+    color: function($89) {
       return (function(v) {
         return v.color;
-      })(unboxSankeyNode($65));
+      })(unboxSankeyNode($89));
     }
   };
   var link_2 = {
-    source: function($66) {
+    source: function($90) {
       return (function(v) {
         return v.source;
-      })(unboxSankeyLink($66));
+      })(unboxSankeyLink($90));
     },
-    target: function($67) {
+    target: function($91) {
       return (function(v) {
         return v.target;
-      })(unboxSankeyLink($67));
+      })(unboxSankeyLink($91));
     },
-    value: function($68) {
+    value: function($92) {
       return (function(v) {
         return v.value;
-      })(unboxSankeyLink($68));
+      })(unboxSankeyLink($92));
     },
-    width: function($69) {
+    width: function($93) {
       return (function(v) {
         return v.width;
-      })(unboxSankeyLink($69));
+      })(unboxSankeyLink($93));
     },
-    color: function($70) {
+    color: function($94) {
       return (function(v) {
         return v.color;
-      })(unboxSankeyLink($70));
+      })(unboxSankeyLink($94));
     },
-    path: function($71) {
+    path: function($95) {
       return (function(v) {
         return v.path;
-      })(unboxSankeyLink($71));
+      })(unboxSankeyLink($95));
     }
   };
   var keyForNode = function(d1) {
@@ -20853,6 +20922,77 @@
   };
   var keyForLink = function(d1) {
     return node_.name(link_2.source(d1)) + ("-" + node_.name(link_2.target(d1)));
+  };
+  var drawWithConfig = function(dictBind) {
+    var bind18 = bind(dictBind);
+    var discard111 = discard20(dictBind);
+    return function(dictMonadEffect) {
+      var liftEffect11 = liftEffect(dictMonadEffect);
+      var pure21 = pure(dictMonadEffect.Monad0().Applicative0());
+      return function(dictMonadState) {
+        return function(dictSankeyM) {
+          var SelectionM1 = dictSankeyM.SelectionM1();
+          var attach2 = attach(SelectionM1);
+          var appendTo2 = appendTo(SelectionM1);
+          var setSankeyDataWithConfig2 = setSankeyDataWithConfig(dictSankeyM);
+          var simpleJoin2 = simpleJoin(SelectionM1);
+          var setAttributes2 = setAttributes(SelectionM1);
+          return function(sankeyData) {
+            return function(selector) {
+              return function(config) {
+                return bind18(liftEffect11(getWindowWidthHeight))(function(v) {
+                  return bind18(attach2(selector))(function(v1) {
+                    return bind18(appendTo2(v1)(Svg.value)([viewBox(0)(0)(v.value0)(v.value1), classed7("sankey")]))(function(svg2) {
+                      return bind18(appendTo2(svg2)(Group.value)([classed7("links")]))(function(linksGroup) {
+                        return bind18(appendTo2(svg2)(Group.value)([classed7("nodes")]))(function(nodesGroup) {
+                          return bind18(appendTo2(svg2)(Group.value)([classed7("labels")]))(function(labelsGroup) {
+                            return bind18(setSankeyDataWithConfig2(sankeyData)(v.value0)(v.value1)(config))(function(layoutResult) {
+                              return bind18(simpleJoin2(linksGroup)(Path.value)(layoutResult.links)(keyForLink))(function(linksSelection) {
+                                return discard111(setAttributes2(linksSelection)([classed7("sankey-link"), fill6("none"), strokeWidth5(link_2.width), strokeOpacity5(0.5), d4(sankeyLinkPath_), strokeColor5(link_2.color)]))(function() {
+                                  return bind18(simpleJoin2(nodesGroup)(Rect.value)(layoutResult.nodes)(keyForNode))(function(nodesSelection) {
+                                    return discard111(setAttributes2(nodesSelection)([classed7("sankey-node"), x8(node_.x0), y7(node_.y0), width11(function(n) {
+                                      return node_.x1(n) - node_.x0(n);
+                                    }), height11(function(n) {
+                                      return node_.y1(n) - node_.y0(n);
+                                    }), fill12(node_.color), fillOpacity2(0.8)]))(function() {
+                                      return bind18(simpleJoin2(labelsGroup)(Text2.value)(layoutResult.nodes)(keyForNode))(function(labelsSelection) {
+                                        return discard111(setAttributes2(labelsSelection)([classed7("sankey-label"), x8(function(n) {
+                                          var $73 = node_.x0(n) < v.value0 / 2;
+                                          if ($73) {
+                                            return node_.x1(n) + 6;
+                                          }
+                                          ;
+                                          return node_.x0(n) - 6;
+                                        }), y7(function(n) {
+                                          return (node_.y0(n) + node_.y1(n)) / 2;
+                                        }), dy3(4), textAnchor4(function(n) {
+                                          var $74 = node_.x0(n) < v.value0 / 2;
+                                          if ($74) {
+                                            return "start";
+                                          }
+                                          ;
+                                          return "end";
+                                        }), text10(node_.name)]))(function() {
+                                          return pure21(unit);
+                                        });
+                                      });
+                                    });
+                                  });
+                                });
+                              });
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              };
+            };
+          };
+        };
+      };
+    };
   };
   var draw5 = function(dictBind) {
     var bind18 = bind(dictBind);
@@ -20887,8 +21027,8 @@
                                   }), fill12(node_.color), fillOpacity2(0.8)]))(function() {
                                     return bind18(simpleJoin2(labelsGroup)(Text2.value)(layoutResult.nodes)(keyForNode))(function(labelsSelection) {
                                       return discard111(setAttributes2(labelsSelection)([classed7("sankey-label"), x8(function(n) {
-                                        var $55 = node_.x0(n) < v.value0 / 2;
-                                        if ($55) {
+                                        var $79 = node_.x0(n) < v.value0 / 2;
+                                        if ($79) {
                                           return node_.x1(n) + 6;
                                         }
                                         ;
@@ -20896,8 +21036,8 @@
                                       }), y7(function(n) {
                                         return (node_.y0(n) + node_.y1(n)) / 2;
                                       }), dy3(4), textAnchor4(function(n) {
-                                        var $56 = node_.x0(n) < v.value0 / 2;
-                                        if ($56) {
+                                        var $80 = node_.x0(n) < v.value0 / 2;
+                                        if ($80) {
                                           return "start";
                                         }
                                         ;
@@ -20932,6 +21072,7 @@
   var monadStateD3SankeyM = /* @__PURE__ */ monadStateStateT(monadEffect);
   var monadEffD3SankeyM = /* @__PURE__ */ monadEffectState(monadEffectEffect);
   var sankeySetData2 = /* @__PURE__ */ sankeySetData(monadEffD3SankeyM);
+  var sankeySetDataWithConfig2 = /* @__PURE__ */ sankeySetDataWithConfig(monadEffD3SankeyM);
   var monadD3SankeyM = /* @__PURE__ */ monadStateT(monadEffect);
   var selectionMD3Selection_D3S2 = {
     appendTo: function(s_) {
@@ -20976,6 +21117,15 @@
         };
       };
     },
+    setSankeyDataWithConfig: function(data_2) {
+      return function(width13) {
+        return function(height13) {
+          return function(config) {
+            return sankeySetDataWithConfig2(data_2)(width13)(height13)(config);
+          };
+        };
+      };
+    },
     Monad0: function() {
       return monadD3SankeyM;
     },
@@ -21009,6 +21159,21 @@
   };
   var bindD3SankeyM = /* @__PURE__ */ bindStateT(monadEffect);
 
+  // output/DemoApp.UI.Radio/index.js
+  var map43 = /* @__PURE__ */ map(functorArray);
+  var append14 = /* @__PURE__ */ append(semigroupArray);
+  var type_20 = /* @__PURE__ */ type_(isPropInputType);
+  var radioClasses = /* @__PURE__ */ map43(ClassName)(["inline-flex", "justify-center", "items-center", "content-box", "border-2", "border-solid", "h-4", "w-4", "p-1", "flex-none", "no-content", "rounded-full", "mr-3", "before:transition-1/4-bounce", "before:h-full", "before:w-full", "before:bg-blue-88", "before:no-content", "before:rounded-full", "before:shadow"]);
+  var labelClasses4 = /* @__PURE__ */ map43(ClassName)(["flex", "flex-row", "inline-block", "py-2", "cursor-pointer", "text-black-20", "items-center", "text-left"]);
+  var inputClasses2 = /* @__PURE__ */ map43(ClassName)(["!disabled:sibling:bg-white", "disabled:sibling:bg-grey-95", "checked:sibling:before:opacity-100", "checked:sibling:before:scale-1", "checked:!disabled:sibling:border-blue-88", "focus:sibling:border-blue-88", "!checked:sibling:before:opacity-0", "!checked:sibling:before:scale-0", "!focus:hover:!checked:!disabled:sibling:border-grey-70", "focus:sibling:shadow", "checked:!disabled:sibling:before:bg-blue-88", "checked:disabled:sibling:before:bg-grey-80", "checked:disabled:sibling:border-grey-80", "offscreen"]);
+  var radio = function(iprops) {
+    return function(inprops) {
+      return function(html2) {
+        return label(appendIProps([classes(labelClasses4)])(iprops))(append14([input(appendIProps([classes(inputClasses2), type_20(InputRadio.value)])(inprops)), span2([classes(radioClasses)])([])])(html2));
+      };
+    };
+  };
+
   // output/Stories.Sankey/index.js
   var prop10 = /* @__PURE__ */ prop3({
     reflectSymbol: function() {
@@ -21018,6 +21183,8 @@
   var not9 = /* @__PURE__ */ not(heytingAlgebraStatus);
   var discard21 = /* @__PURE__ */ discard(discardUnit);
   var draw6 = /* @__PURE__ */ draw5(bindD3SankeyM)(monadEffD3SankeyM)(monadStateD3SankeyM)(sankeyMD3Selection_D3Sank);
+  var removeExistingSVG4 = /* @__PURE__ */ removeExistingSVG(d3TaglessD3M);
+  var drawWithConfig2 = /* @__PURE__ */ drawWithConfig(bindD3SankeyM)(monadEffD3SankeyM)(monadStateD3SankeyM)(sankeyMD3Selection_D3Sank);
   var prop110 = /* @__PURE__ */ prop3({
     reflectSymbol: function() {
       return "code";
@@ -21028,6 +21195,62 @@
       return "blurb";
     }
   })()();
+  var AlignJustify = /* @__PURE__ */ (function() {
+    function AlignJustify2() {
+    }
+    ;
+    AlignJustify2.value = new AlignJustify2();
+    return AlignJustify2;
+  })();
+  var AlignLeft = /* @__PURE__ */ (function() {
+    function AlignLeft2() {
+    }
+    ;
+    AlignLeft2.value = new AlignLeft2();
+    return AlignLeft2;
+  })();
+  var AlignRight = /* @__PURE__ */ (function() {
+    function AlignRight2() {
+    }
+    ;
+    AlignRight2.value = new AlignRight2();
+    return AlignRight2;
+  })();
+  var AlignCenter = /* @__PURE__ */ (function() {
+    function AlignCenter2() {
+    }
+    ;
+    AlignCenter2.value = new AlignCenter2();
+    return AlignCenter2;
+  })();
+  var ColorBySource = /* @__PURE__ */ (function() {
+    function ColorBySource2() {
+    }
+    ;
+    ColorBySource2.value = new ColorBySource2();
+    return ColorBySource2;
+  })();
+  var ColorByTarget = /* @__PURE__ */ (function() {
+    function ColorByTarget2() {
+    }
+    ;
+    ColorByTarget2.value = new ColorByTarget2();
+    return ColorByTarget2;
+  })();
+  var ColorBySourceTarget = /* @__PURE__ */ (function() {
+    function ColorBySourceTarget2() {
+    }
+    ;
+    ColorBySourceTarget2.value = new ColorBySourceTarget2();
+    return ColorBySourceTarget2;
+  })();
+  var ColorStatic = /* @__PURE__ */ (function() {
+    function ColorStatic2() {
+    }
+    ;
+    ColorStatic2.value = new ColorStatic2();
+    return ColorStatic2;
+  })();
   var Initialize6 = /* @__PURE__ */ (function() {
     function Initialize11() {
     }
@@ -21052,7 +21275,85 @@
     };
     return ToggleCard8;
   })();
+  var SetAlignment = /* @__PURE__ */ (function() {
+    function SetAlignment2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    SetAlignment2.create = function(value0) {
+      return new SetAlignment2(value0);
+    };
+    return SetAlignment2;
+  })();
+  var SetLinkColorMode = /* @__PURE__ */ (function() {
+    function SetLinkColorMode2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    SetLinkColorMode2.create = function(value0) {
+      return new SetLinkColorMode2(value0);
+    };
+    return SetLinkColorMode2;
+  })();
+  var SetNodeWidth = /* @__PURE__ */ (function() {
+    function SetNodeWidth2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    SetNodeWidth2.create = function(value0) {
+      return new SetNodeWidth2(value0);
+    };
+    return SetNodeWidth2;
+  })();
+  var SetNodePadding = /* @__PURE__ */ (function() {
+    function SetNodePadding2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    SetNodePadding2.create = function(value0) {
+      return new SetNodePadding2(value0);
+    };
+    return SetNodePadding2;
+  })();
+  var linkColorModeToString = function(v) {
+    if (v instanceof ColorBySource) {
+      return "source";
+    }
+    ;
+    if (v instanceof ColorByTarget) {
+      return "target";
+    }
+    ;
+    if (v instanceof ColorBySourceTarget) {
+      return "source-target";
+    }
+    ;
+    if (v instanceof ColorStatic) {
+      return "static";
+    }
+    ;
+    throw new Error("Failed pattern match at Stories.Sankey (line 45, column 1 - line 45, column 49): " + [v.constructor.name]);
+  };
   var blurbtext4 = /* @__PURE__ */ blurbParagraphs(functorArray)(["Sankey diagrams visualize the flow of resources, energy, costs, or other\n    quantities through a system. The width of each connection (link) is\n    proportional to the flow quantity, making it easy to see dominant flows at\n    a glance.", "This example shows energy flows in the UK energy system. The diagram uses\n    D3's Sankey layout algorithm to automatically position nodes and compute\n    smooth flow paths between them. Nodes are arranged in columns, and the\n    algorithm minimizes crossing connections where possible.", "The implementation follows the Finally Tagless pattern used throughout this\n    library. The SankeyM capability extends SelectionM with layout-specific\n    operations for processing nodes and links through the Sankey algorithm.", "Common uses for Sankey diagrams include: energy and material flow analysis,\n    cost breakdowns, website traffic visualization, and any scenario where you\n    need to show how quantities are distributed and transformed through a\n    multi-stage process."]);
+  var alignmentToString = function(v) {
+    if (v instanceof AlignJustify) {
+      return "justify";
+    }
+    ;
+    if (v instanceof AlignLeft) {
+      return "left";
+    }
+    ;
+    if (v instanceof AlignRight) {
+      return "right";
+    }
+    ;
+    if (v instanceof AlignCenter) {
+      return "center";
+    }
+    ;
+    throw new Error("Failed pattern match at Stories.Sankey (line 35, column 1 - line 35, column 47): " + [v.constructor.name]);
+  };
   var _snippets4 = /* @__PURE__ */ (function() {
     return prop3({
       reflectSymbol: function() {
@@ -21068,10 +21369,10 @@
     })()()($$Proxy.value);
   })();
   var _drawCode4 = function(dictStrong) {
-    var $69 = _snippets4(dictStrong);
-    var $70 = prop10($$Proxy.value)(dictStrong);
-    return function($71) {
-      return $69($70($71));
+    var $109 = _snippets4(dictStrong);
+    var $110 = prop10($$Proxy.value)(dictStrong);
+    return function($111) {
+      return $109($110($111));
     };
   };
   var _drawCode13 = /* @__PURE__ */ _drawCode4(strongFn);
@@ -21083,11 +21384,14 @@
     return function(dictMonadAff) {
       var liftAff2 = liftAff(dictMonadAff);
       var MonadEffect0 = dictMonadAff.MonadEffect0();
+      var liftEffect11 = liftEffect(MonadEffect0);
       var pure21 = pure(MonadEffect0.Monad0().Applicative0());
       return function(dictMonadState) {
         var modifying3 = modifying(dictMonadState);
         var assign4 = assign2(dictMonadState);
         var runWithD3_Sankey1 = runWithD3_Sankey2(dictMonadState)(MonadEffect0);
+        var modify_6 = modify_(dictMonadState);
+        var get8 = get(dictMonadState);
         return function(v) {
           if (v instanceof ToggleCard5) {
             return modifying3(v.value0(strongFn))(not9);
@@ -21101,35 +21405,164 @@
             });
           }
           ;
+          if (v instanceof SetAlignment) {
+            return bind18(liftEffect11(eval_D3M(removeExistingSVG4("div.svg-container"))))(function(detached) {
+              return discard111(modify_6(function(st) {
+                var $93 = {};
+                for (var $94 in st) {
+                  if ({}.hasOwnProperty.call(st, $94)) {
+                    $93[$94] = st[$94];
+                  }
+                  ;
+                }
+                ;
+                $93.alignment = v.value0;
+                return $93;
+              }))(function() {
+                return bind18(get8)(function(state3) {
+                  return runWithD3_Sankey1(drawWithConfig2(energyData)("div.svg-container")({
+                    alignment: alignmentToString(state3.alignment),
+                    linkColorMode: linkColorModeToString(state3.linkColorMode),
+                    nodeWidth: state3.nodeWidth,
+                    nodePadding: state3.nodePadding
+                  }));
+                });
+              });
+            });
+          }
+          ;
+          if (v instanceof SetLinkColorMode) {
+            return bind18(liftEffect11(eval_D3M(removeExistingSVG4("div.svg-container"))))(function(detached) {
+              return discard111(modify_6(function(st) {
+                var $97 = {};
+                for (var $98 in st) {
+                  if ({}.hasOwnProperty.call(st, $98)) {
+                    $97[$98] = st[$98];
+                  }
+                  ;
+                }
+                ;
+                $97.linkColorMode = v.value0;
+                return $97;
+              }))(function() {
+                return bind18(get8)(function(state3) {
+                  return runWithD3_Sankey1(drawWithConfig2(energyData)("div.svg-container")({
+                    alignment: alignmentToString(state3.alignment),
+                    linkColorMode: linkColorModeToString(state3.linkColorMode),
+                    nodeWidth: state3.nodeWidth,
+                    nodePadding: state3.nodePadding
+                  }));
+                });
+              });
+            });
+          }
+          ;
+          if (v instanceof SetNodeWidth) {
+            return bind18(liftEffect11(eval_D3M(removeExistingSVG4("div.svg-container"))))(function(detached) {
+              return discard111(modify_6(function(st) {
+                var $101 = {};
+                for (var $102 in st) {
+                  if ({}.hasOwnProperty.call(st, $102)) {
+                    $101[$102] = st[$102];
+                  }
+                  ;
+                }
+                ;
+                $101.nodeWidth = v.value0;
+                return $101;
+              }))(function() {
+                return bind18(get8)(function(state3) {
+                  return runWithD3_Sankey1(drawWithConfig2(energyData)("div.svg-container")({
+                    alignment: alignmentToString(state3.alignment),
+                    linkColorMode: linkColorModeToString(state3.linkColorMode),
+                    nodeWidth: state3.nodeWidth,
+                    nodePadding: state3.nodePadding
+                  }));
+                });
+              });
+            });
+          }
+          ;
+          if (v instanceof SetNodePadding) {
+            return bind18(liftEffect11(eval_D3M(removeExistingSVG4("div.svg-container"))))(function(detached) {
+              return discard111(modify_6(function(st) {
+                var $105 = {};
+                for (var $106 in st) {
+                  if ({}.hasOwnProperty.call(st, $106)) {
+                    $105[$106] = st[$106];
+                  }
+                  ;
+                }
+                ;
+                $105.nodePadding = v.value0;
+                return $105;
+              }))(function() {
+                return bind18(get8)(function(state3) {
+                  return runWithD3_Sankey1(drawWithConfig2(energyData)("div.svg-container")({
+                    alignment: alignmentToString(state3.alignment),
+                    linkColorMode: linkColorModeToString(state3.linkColorMode),
+                    nodeWidth: state3.nodeWidth,
+                    nodePadding: state3.nodePadding
+                  }));
+                });
+              });
+            });
+          }
+          ;
           if (v instanceof Finalize4) {
             return pure21(unit);
           }
           ;
-          throw new Error("Failed pattern match at Stories.Sankey (line 114, column 16 - line 124, column 24): " + [v.constructor.name]);
+          throw new Error("Failed pattern match at Stories.Sankey (line 220, column 16 - line 278, column 24): " + [v.constructor.name]);
         };
       };
     };
   };
   var handleAction15 = /* @__PURE__ */ handleAction5(bindHalogenM);
   var _code5 = function(dictStrong) {
-    var $72 = _panels5(dictStrong);
-    var $73 = prop110($$Proxy.value)(dictStrong);
-    return function($74) {
-      return $72($73($74));
+    var $112 = _panels5(dictStrong);
+    var $113 = prop110($$Proxy.value)(dictStrong);
+    return function($114) {
+      return $112($113($114));
     };
   };
   var _code15 = /* @__PURE__ */ _code5(strongForget);
   var _blurb3 = function(dictStrong) {
-    var $75 = _panels5(dictStrong);
-    var $76 = prop25($$Proxy.value)(dictStrong);
-    return function($77) {
-      return $75($76($77));
+    var $115 = _panels5(dictStrong);
+    var $116 = prop25($$Proxy.value)(dictStrong);
+    return function($117) {
+      return $115($116($117));
     };
   };
   var _blurb13 = /* @__PURE__ */ _blurb3(strongForget);
   var component5 = function(dictMonadAff) {
+    var initialState = {
+      sankeyLayout: initialSankeyLayoutState,
+      alignment: AlignJustify.value,
+      linkColorMode: ColorBySource.value,
+      nodeWidth: 15,
+      nodePadding: 10,
+      panels: {
+        blurb: Collapsed.value,
+        code: Collapsed.value
+      },
+      snippets: {
+        draw: ""
+      }
+    };
+    var controlsRadio = div2([css("flex-1")])([fieldset_2({
+      label: text("Node Alignment"),
+      inputId: "radio-alignment",
+      helpText: [],
+      error: []
+    })([div2([css("flex-1")])([radio([css("pr-6")])([name2("sankey-alignment"), checked(true), onClick($$const(new SetAlignment(AlignJustify.value)))])([text("Justify")]), radio([css("pr-6")])([name2("sankey-alignment"), onClick($$const(new SetAlignment(AlignLeft.value)))])([text("Left")]), radio([css("pr-6")])([name2("sankey-alignment"), onClick($$const(new SetAlignment(AlignRight.value)))])([text("Right")]), radio([css("pr-6")])([name2("sankey-alignment"), onClick($$const(new SetAlignment(AlignCenter.value)))])([text("Center")])])]), fieldset_2({
+      label: text("Link Color"),
+      inputId: "radio-link-color",
+      helpText: [],
+      error: []
+    })([div2([css("flex-1")])([radio([css("pr-6")])([name2("sankey-link-color"), checked(true), onClick($$const(new SetLinkColorMode(ColorBySource.value)))])([text("Source")]), radio([css("pr-6")])([name2("sankey-link-color"), onClick($$const(new SetLinkColorMode(ColorByTarget.value)))])([text("Target")]), radio([css("pr-6")])([name2("sankey-link-color"), onClick($$const(new SetLinkColorMode(ColorBySourceTarget.value)))])([text("Gradient")]), radio([css("pr-6")])([name2("sankey-link-color"), onClick($$const(new SetLinkColorMode(ColorStatic.value)))])([text("Static")])])])]);
     var render3 = function(state3) {
-      return div2([tailwindClass("story-container")])([div2([tailwindClass("story-panel-about")])([field_2({
+      return div2([tailwindClass("story-container")])([div2([tailwindClass("story-panel-controls")])([controlsRadio]), div2([tailwindClass("story-panel-about")])([field_2({
         label: text("About"),
         helpText: [],
         error: [],
@@ -21148,16 +21581,6 @@
           return _code5(dictStrong);
         });
       })])]), content_(view(_code15)(state3))(syntaxHighlightedCode(view(_drawCode23)(state3)))]), div2([tailwindClass("svg-container")])([])]);
-    };
-    var initialState = {
-      sankeyLayout: initialSankeyLayoutState,
-      panels: {
-        blurb: Collapsed.value,
-        code: Collapsed.value
-      },
-      snippets: {
-        draw: ""
-      }
     };
     return mkComponent({
       initialState: $$const(initialState),
@@ -21263,8 +21686,8 @@
   // output/D3.Examples.Spago.Files/index.js
   var fromFoldable9 = /* @__PURE__ */ fromFoldable3(ordString)(foldableArray);
   var mapFlipped5 = /* @__PURE__ */ mapFlipped(functorArray);
-  var append14 = /* @__PURE__ */ append(semigroupArray);
-  var map43 = /* @__PURE__ */ map(functorArray);
+  var append15 = /* @__PURE__ */ append(semigroupArray);
+  var map44 = /* @__PURE__ */ map(functorArray);
   var fromFoldableWith2 = /* @__PURE__ */ fromFoldableWith(ordString)(foldableArray);
   var lookup8 = /* @__PURE__ */ lookup2(ordString);
   var bind10 = /* @__PURE__ */ bind(bindMaybe);
@@ -21404,9 +21827,9 @@
     var path2LOC = fromFoldable9(mapFlipped5(v.loc)(function(o) {
       return new Tuple(o.path, o.loc);
     }));
-    var names = append14(map43(function(v1) {
+    var names = append15(map44(function(v1) {
       return v1.key;
-    })(v.modules))(map43(function(v1) {
+    })(v.modules))(map44(function(v1) {
       return v1.key;
     })(v.packages));
     var makeModuleToPackageLink = function(m) {
@@ -21447,7 +21870,7 @@
         nodetype: new IsModule(m.path),
         inSim: true,
         links: {
-          targets: map43(getId)(m.depends),
+          targets: map44(getId)(m.depends),
           sources: [],
           treeChildren: [],
           inPackage: [],
@@ -21468,11 +21891,11 @@
         var makeTuple = function(s) {
           return new Tuple(id5, getId(s));
         };
-        return append14(map43(makeTuple)(a2.depends))(b2);
+        return append15(map44(makeTuple)(a2.depends))(b2);
       };
     };
-    var moduleLinks = map43(makeLink(M2M_Graph.value))(foldl2(foldDepends)([])(v.modules));
-    var packageLinks = map43(makeLink(P2P.value))(foldl2(foldDepends)([])(v.packages));
+    var moduleLinks = map44(makeLink(M2M_Graph.value))(foldl2(foldDepends)([])(v.modules));
+    var packageLinks = map44(makeLink(P2P.value))(foldl2(foldDepends)([])(v.packages));
     var depsMap = fromFoldable9(mapFlipped5(v.lsDeps)(function(d5) {
       return new Tuple(d5.packageName, {
         version: d5.version,
@@ -21494,12 +21917,12 @@
         containerName: p2.key,
         loc: p2.loc,
         links: {
-          targets: map43(getId)(p2.depends),
+          targets: map44(getId)(p2.depends),
           sources: [],
           treeChildren: [],
           inPackage: [],
           outPackage: [],
-          contains: map43(getId)(p2.contains)
+          contains: map44(getId)(p2.contains)
         },
         connected: true,
         showChildren: true,
@@ -21544,25 +21967,25 @@
         loc: linecount
       };
     };
-    var modulesPL = map43(function($89) {
+    var modulesPL = map44(function($89) {
       return addLOCInfo(addPackageInfo($89));
     })(v.modules);
-    var mapNamesToModules = fromFoldable9(map43(function(m) {
+    var mapNamesToModules = fromFoldable9(map44(function(m) {
       return new Tuple(m.key, m);
     })(modulesPL));
     var maybeModules = function(ms) {
-      return catMaybes(map43(function(k) {
+      return catMaybes(map44(function(k) {
         return lookup8(k)(mapNamesToModules);
       })(ms));
     };
     var rollUpLOC = function(ms) {
-      return sum3(map43(function(v1) {
+      return sum3(map44(function(v1) {
         return v1.loc;
       })(maybeModules(ms)));
     };
-    var moduleNodes = map43(makeNodeFromModuleJSONPL)(modulesPL);
-    var modulePackageLinks = map43(makeModuleToPackageLink)(moduleNodes);
-    var links = append14(moduleLinks)(append14(packageLinks)(modulePackageLinks));
+    var moduleNodes = map44(makeNodeFromModuleJSONPL)(modulesPL);
+    var modulePackageLinks = map44(makeModuleToPackageLink)(moduleNodes);
+    var links = append15(moduleLinks)(append15(packageLinks)(modulePackageLinks));
     var getSourceLinks = function(v1) {
       var sources = foldl2(function(acc) {
         return function(v2) {
@@ -21576,12 +21999,12 @@
       })([])(links);
       return new Tuple(v1.id, sources);
     };
-    var modulePackageTuples = map43(function(m) {
+    var modulePackageTuples = map44(function(m) {
       return new Tuple(m.key, m["package"]);
     })(modulesPL);
-    var packageContains = map43(chunk)(groupBy(equalSnd2)(sortBy(compareSnd2)(modulePackageTuples)));
+    var packageContains = map44(chunk)(groupBy(equalSnd2)(sortBy(compareSnd2)(modulePackageTuples)));
     var packageContainsMap = fromFoldable9(packageContains);
-    var packageLOC = map43(function(v1) {
+    var packageLOC = map44(function(v1) {
       return new Tuple(v1.value0, rollUpLOC(v1.value1));
     })(packageContains);
     var packageLOCMap = fromFoldable9(packageLOC);
@@ -21600,15 +22023,15 @@
         contains: fromMaybe([])(lookup8(v1.key)(packageContainsMap))
       };
     };
-    var packagesCL = map43(function($90) {
+    var packagesCL = map44(function($90) {
       return addRollUpLOC(addContains($90));
     })(v.packages);
-    var packageNodes = map43(makeNodeFromPackageJSONCL)(packagesCL);
-    var nodes = append14(moduleNodes)(packageNodes);
+    var packageNodes = map44(makeNodeFromPackageJSONCL)(packagesCL);
+    var nodes = append15(moduleNodes)(packageNodes);
     var id2Node = fromFoldable12(mapFlipped5(nodes)(function(node) {
       return new Tuple(node.id, node);
     }));
-    var sourceLinksMap = fromFoldable12(map43(getSourceLinks)(nodes));
+    var sourceLinksMap = fromFoldable12(map44(getSourceLinks)(nodes));
     return {
       links,
       nodes,
@@ -21651,13 +22074,13 @@
 
   // output/D3.Examples.Spago.Model/index.js
   var lookup10 = /* @__PURE__ */ lookup2(ordInt);
-  var map44 = /* @__PURE__ */ map(functorArray);
-  var append15 = /* @__PURE__ */ append(semigroupArray);
+  var map45 = /* @__PURE__ */ map(functorArray);
+  var append16 = /* @__PURE__ */ append(semigroupArray);
   var fromFoldable11 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var insert9 = /* @__PURE__ */ insert(ordInt);
   var mapFlipped6 = /* @__PURE__ */ mapFlipped(functorArray);
   var show17 = /* @__PURE__ */ show(showLinkType);
-  var append16 = /* @__PURE__ */ append(semigroupString);
+  var append17 = /* @__PURE__ */ append(semigroupString);
   var fromFoldable13 = /* @__PURE__ */ fromFoldable3(ordInt)(foldableArray);
   var spy7 = /* @__PURE__ */ spy();
   var foldlWithIndex3 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
@@ -21688,7 +22111,7 @@
             return false;
           }
           ;
-          throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 207, column 20 - line 209, column 45): " + [node.nodetype.constructor.name]);
+          throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 204, column 20 - line 206, column 45): " + [node.nodetype.constructor.name]);
         })(),
         containerID: node.containerID,
         containerName: node.containerName,
@@ -21741,7 +22164,7 @@
         fy: nullImpl
       };
     };
-    return map44(unpin2)(nodes);
+    return map45(unpin2)(nodes);
   };
   var setTreeXYIncludingLeaves = function(v) {
     return function(v1) {
@@ -21862,7 +22285,7 @@
       })(unboxD3SimLink2($201)));
     },
     linkClass2: /* @__PURE__ */ (function() {
-      var $202 = append16("updated ");
+      var $202 = append17("updated ");
       return function($203) {
         return $202(show17((function(v) {
           return v.linktype;
@@ -21893,7 +22316,7 @@
       return false;
     }
     ;
-    throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 193, column 3 - line 197, column 31): " + [v.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 190, column 3 - line 194, column 31): " + [v.nodetype.constructor.name]);
   };
   var treeNodesToTreeXY_R = function(nodes) {
     var setXYtoTreeXY = function(v) {
@@ -21938,7 +22361,7 @@
       };
     };
     var partitioned = partition(isUsedModule)(nodes);
-    return append15(partitioned.no)(map44(setXYtoTreeXY)(partitioned.yes));
+    return append16(partitioned.no)(map45(setXYtoTreeXY)(partitioned.yes));
   };
   var isPackageOrVisibleModule = function(id5) {
     return function(v) {
@@ -21950,7 +22373,7 @@
         return true;
       }
       ;
-      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 183, column 3 - line 185, column 26): " + [v.nodetype.constructor.name]);
+      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 180, column 3 - line 182, column 26): " + [v.nodetype.constructor.name]);
     };
   };
   var isPackage = function(v) {
@@ -21962,7 +22385,7 @@
       return true;
     }
     ;
-    throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 178, column 3 - line 180, column 26): " + [v.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 175, column 3 - line 177, column 26): " + [v.nodetype.constructor.name]);
   };
   var moduleNodesToContainerXY = function(nodes) {
     var partitioned = partition(isPackage)(nodes);
@@ -22037,13 +22460,13 @@
           };
         }
         ;
-        throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 289, column 11 - line 291, column 76): " + [v2.constructor.name]);
+        throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 286, column 11 - line 288, column 76): " + [v2.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 286, column 7 - line 291, column 76): " + [v1.constructor.name]);
+      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 283, column 7 - line 288, column 76): " + [v1.constructor.name]);
     };
-    var modulesWithGrid = map44(setModuleGridXY)(partitioned.no);
-    return append15(modulesWithGrid)(partitioned.yes);
+    var modulesWithGrid = map45(setModuleGridXY)(partitioned.no);
+    return append16(modulesWithGrid)(partitioned.yes);
   };
   var packageNodesToGridXY = function(nodes) {
     var partitioned = partition(isPackage)(nodes);
@@ -22093,7 +22516,7 @@
         };
       })([])(partitioned.yes);
     })();
-    return append15(partitioned.no)(packagesWithGrid);
+    return append16(partitioned.no)(packagesWithGrid);
   };
   var isP2P_Link_ = function(l) {
     return eq22(link_3.linkType(l))(P2P.value);
@@ -22147,7 +22570,7 @@
   var nodesToPhyllotaxis = function(predicate) {
     return function(nodes) {
       var partitioned = partition(predicate)(nodes);
-      return append15(partitioned.no)(mapWithIndex(setForPhyllotaxis)(partitioned.yes));
+      return append16(partitioned.no)(mapWithIndex(setForPhyllotaxis)(partitioned.yes));
     };
   };
   var packagesNodesToPhyllotaxis = /* @__PURE__ */ nodesToPhyllotaxis(isPackage);
@@ -22187,7 +22610,7 @@
           ;
           return v;
         };
-        return map44(fixNamedNode$prime)(nodes);
+        return map45(fixNamedNode$prime)(nodes);
       };
     };
   };
@@ -22333,7 +22756,7 @@
         return 0;
       }
       ;
-      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 109, column 11 - line 111, column 33): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 106, column 11 - line 108, column 33): " + [v.constructor.name]);
     },
     collideRadius: function(d5) {
       var $175 = datum_3.id(d5) === datum_3.containerID(d5);
@@ -22379,7 +22802,7 @@
         return d3SchemeSequential10N_(toNumber(v.value0));
       }
       ;
-      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 129, column 13 - line 131, column 68): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 126, column 13 - line 128, column 68): " + [v.constructor.name]);
     },
     fillByUsage: function(d5) {
       var $180 = datum_3.connected(d5);
@@ -22433,7 +22856,7 @@
         return true;
       }
       ;
-      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 146, column 13 - line 148, column 36): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 143, column 13 - line 145, column 36): " + [v.constructor.name]);
     },
     isModule: function(d5) {
       var v = datum_3.nodetype(d5);
@@ -22445,7 +22868,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 150, column 13 - line 152, column 37): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 147, column 13 - line 149, column 37): " + [v.constructor.name]);
     },
     isUnusedModule: function(d5) {
       var v = datum_3.nodetype(d5);
@@ -22462,7 +22885,7 @@
         return true;
       }
       ;
-      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 154, column 13 - line 158, column 41): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 151, column 13 - line 155, column 41): " + [v.constructor.name]);
     },
     isUsedModule: function(d5) {
       var v = datum_3.nodetype(d5);
@@ -22479,7 +22902,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 161, column 13 - line 165, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Examples.Spago.Model (line 158, column 13 - line 162, column 42): " + [v.constructor.name]);
     },
     treeChildren: function(d5) {
       return datum_3.links(d5).treeChildren;
@@ -22921,7 +23344,7 @@
   // output/D3.Data.Graph/index.js
   var bind11 = /* @__PURE__ */ bind(bindMaybe);
   var mapFlipped7 = /* @__PURE__ */ mapFlipped(functorArray);
-  var append17 = /* @__PURE__ */ append(semigroupArray);
+  var append18 = /* @__PURE__ */ append(semigroupArray);
   var getReachableNodes = function(dictOrd) {
     var lookup14 = lookup9(dictOrd);
     var elem5 = elem2(dictOrd.Eq0());
@@ -22947,16 +23370,16 @@
                     nodes: searchRecord.nodes,
                     openDepPaths: x15.tail,
                     closedDepPaths: cons2(x15.head)(searchRecord.closedDepPaths),
-                    redundantLinks: append17(searchRecord.redundantLinks)(prunedLinks)
+                    redundantLinks: append18(searchRecord.redundantLinks)(prunedLinks)
                   });
                 }
                 ;
                 return new Just({
                   closedDepPaths: searchRecord.closedDepPaths,
                   dependencyTree: searchRecord.dependencyTree,
-                  openDepPaths: append17(x15.tail)(newOpenDepPaths),
-                  nodes: append17(searchRecord.nodes)(newDeps.yes),
-                  redundantLinks: append17(searchRecord.redundantLinks)(prunedLinks)
+                  openDepPaths: append18(x15.tail)(newOpenDepPaths),
+                  nodes: append18(searchRecord.nodes)(newDeps.yes),
+                  redundantLinks: append18(searchRecord.redundantLinks)(prunedLinks)
                 });
               });
             });
@@ -23019,7 +23442,7 @@
 
   // output/D3.Examples.Spago.Tree/index.js
   var lookup11 = /* @__PURE__ */ lookup2(ordInt);
-  var map45 = /* @__PURE__ */ map(functorArray);
+  var map46 = /* @__PURE__ */ map(functorArray);
   var fromFoldable14 = /* @__PURE__ */ fromFoldable2(foldableArray);
   var foldl5 = /* @__PURE__ */ foldl(foldableList);
   var fromFoldable15 = /* @__PURE__ */ fromFoldable(foldableSet);
@@ -23029,7 +23452,7 @@
   var getReachableNodes2 = /* @__PURE__ */ getReachableNodes(ordInt);
   var elem4 = /* @__PURE__ */ elem2(eqInt);
   var elem1 = /* @__PURE__ */ elem2(/* @__PURE__ */ eqTuple(eqInt)(eqInt));
-  var append18 = /* @__PURE__ */ append(semigroupArray);
+  var append19 = /* @__PURE__ */ append(semigroupArray);
   var tupleToLink = function(linktype) {
     return function(v) {
       return {
@@ -23062,13 +23485,13 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at D3.Examples.Spago.Tree (line 107, column 7 - line 114, column 134): " + [v1.constructor.name]);
+        throw new Error("Failed pattern match at D3.Examples.Spago.Tree (line 105, column 7 - line 112, column 134): " + [v1.constructor.name]);
       };
-      return map45(updateXY)(nodes);
+      return map46(updateXY)(nodes);
     };
   };
   var pathsAsLists = function(paths) {
-    return fromFoldable14(map45(function($77) {
+    return fromFoldable14(map46(function($77) {
       return fromFoldable14(reverse($77));
     })(paths));
   };
@@ -23094,7 +23517,7 @@
           return;
         }
         ;
-        throw new Error("Failed pattern match at D3.Examples.Spago.Tree (line 146, column 1 - line 146, column 93): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at D3.Examples.Spago.Tree (line 144, column 1 - line 144, column 93): " + [v.constructor.name, v1.constructor.name]);
       }
       ;
       while (!$tco_done) {
@@ -23116,7 +23539,7 @@
           y: v.y,
           depth: v.depth,
           isTreeLeaf: hasChildren_(v),
-          childIDs: map45(function(v1) {
+          childIDs: map46(function(v1) {
             return v1.id;
           })(getHierarchyChildren_(v))
         })(acc);
@@ -23143,11 +23566,11 @@
         return v;
       };
       var linksWhoseSourceIs = function(id5) {
-        return fromFoldable14(map45(function(v) {
+        return fromFoldable14(map46(function(v) {
           return v.target;
         })(filter(function(l) {
           return l.source === id5;
-        })(map45(unwrap9)(treelinks))));
+        })(map46(unwrap9)(treelinks))));
       };
       var go2 = function(childID) {
         return new Node(childID, map115(go2)(linksWhoseSourceIs(childID)));
@@ -23161,14 +23584,14 @@
       var treenodes = partition(function(v) {
         return elem4(v.id)(reachable.nodes) || v.id === rootID;
       })(model.nodes);
-      var prunedTreeLinks = map45(tupleToLink(M2M_Graph.value))(reachable.redundantLinks);
+      var prunedTreeLinks = map46(tupleToLink(M2M_Graph.value))(reachable.redundantLinks);
       var onlyTreelinks = makeTreeLinkTuples(pathsAsLists(reachable.closedDepPaths));
       var partitionedLinks = partition(function(v) {
         return elem1(new Tuple(v.source, v.target))(onlyTreelinks);
       })(model.links);
-      var treelinks = map45(changeLinkType(M2M_Tree.value))(partitionedLinks.yes);
+      var treelinks = map46(changeLinkType(M2M_Tree.value))(partitionedLinks.yes);
       var onlyPackageLinks = filter(isP2P_Link)(model.links);
-      var links = append18(treelinks)(append18(prunedTreeLinks)(onlyPackageLinks));
+      var links = append19(treelinks)(append19(prunedTreeLinks)(onlyPackageLinks));
       var idTree = buildTree(rootID)(treelinks);
       var jsontree = makeD3TreeJSONFromTreeID(idTree)(model.maps.id2Node);
       var rootTree = hierarchyFromJSON_(jsontree);
@@ -23182,7 +23605,7 @@
       return {
         graph: model.graph,
         links,
-        nodes: append18(positionedNodes)(treenodes.no),
+        nodes: append19(positionedNodes)(treenodes.no),
         tree: new Just(tree2),
         maps: {
           name2ID: model.maps.name2ID,
@@ -23245,13 +23668,13 @@
   })();
 
   // output/D3Tagless.Block.Card/index.js
-  var map46 = /* @__PURE__ */ map(functorArray);
-  var innerCardClasses = /* @__PURE__ */ map46(ClassName)(["m-6"]);
+  var map47 = /* @__PURE__ */ map(functorArray);
+  var innerCardClasses = /* @__PURE__ */ map47(ClassName)(["m-6"]);
   var innerCard = function(iprops) {
     return div2(appendIProps([classes(innerCardClasses)])(iprops));
   };
   var innerCard_ = /* @__PURE__ */ innerCard([]);
-  var baseCardClasses = /* @__PURE__ */ map46(ClassName)(["bg-white", "mb-6", "rounded", "clearfix"]);
+  var baseCardClasses = /* @__PURE__ */ map47(ClassName)(["bg-white", "mb-6", "rounded", "clearfix"]);
   var baseCard = function(iprops) {
     return div2(appendIProps([classes(baseCardClasses)])(iprops));
   };
@@ -23263,42 +23686,42 @@
   var card_ = /* @__PURE__ */ card([]);
 
   // output/DemoApp.UI.Button/index.js
-  var map47 = /* @__PURE__ */ map(functorArray);
-  var append19 = /* @__PURE__ */ append(semigroupArray);
-  var rightClasses = /* @__PURE__ */ map47(ClassName)(["rounded-r"]);
-  var leftClasses = /* @__PURE__ */ map47(ClassName)(["mr-px", "rounded-l"]);
-  var centerClasses = /* @__PURE__ */ map47(ClassName)(["mr-px"]);
-  var buttonSharedClasses2 = /* @__PURE__ */ map47(ClassName)(["no-outline", "px-4", "py-2", "!active:border-b", "active:border-t", "disabled:opacity-50", "disabled:cursor-default", "!disabled:cursor-pointer"]);
-  var buttonPrimaryClasses = /* @__PURE__ */ map47(ClassName)(["bg-blue-88", "border-blue-88", "hover:!disabled:bg-blue-82", "focus:bg-blue-82", "text-white"]);
-  var buttonGroupClasses2 = /* @__PURE__ */ map47(ClassName)(["flex", "items-center"]);
+  var map48 = /* @__PURE__ */ map(functorArray);
+  var append20 = /* @__PURE__ */ append(semigroupArray);
+  var rightClasses = /* @__PURE__ */ map48(ClassName)(["rounded-r"]);
+  var leftClasses = /* @__PURE__ */ map48(ClassName)(["mr-px", "rounded-l"]);
+  var centerClasses = /* @__PURE__ */ map48(ClassName)(["mr-px"]);
+  var buttonSharedClasses2 = /* @__PURE__ */ map48(ClassName)(["no-outline", "px-4", "py-2", "!active:border-b", "active:border-t", "disabled:opacity-50", "disabled:cursor-default", "!disabled:cursor-pointer"]);
+  var buttonPrimaryClasses = /* @__PURE__ */ map48(ClassName)(["bg-blue-88", "border-blue-88", "hover:!disabled:bg-blue-82", "focus:bg-blue-82", "text-white"]);
+  var buttonGroupClasses2 = /* @__PURE__ */ map48(ClassName)(["flex", "items-center"]);
   var buttonGroupBuilder2 = function(classes2) {
     return function(iprops) {
-      return button(appendIProps([classes(append19(buttonSharedClasses2)(classes2))])(iprops));
+      return button(appendIProps([classes(append20(buttonSharedClasses2)(classes2))])(iprops));
     };
   };
-  var buttonPrimaryCenter = /* @__PURE__ */ buttonGroupBuilder2(/* @__PURE__ */ append19(buttonPrimaryClasses)(centerClasses));
-  var buttonPrimaryLeft = /* @__PURE__ */ buttonGroupBuilder2(/* @__PURE__ */ append19(buttonPrimaryClasses)(leftClasses));
-  var buttonPrimaryRight = /* @__PURE__ */ buttonGroupBuilder2(/* @__PURE__ */ append19(buttonPrimaryClasses)(rightClasses));
+  var buttonPrimaryCenter = /* @__PURE__ */ buttonGroupBuilder2(/* @__PURE__ */ append20(buttonPrimaryClasses)(centerClasses));
+  var buttonPrimaryLeft = /* @__PURE__ */ buttonGroupBuilder2(/* @__PURE__ */ append20(buttonPrimaryClasses)(leftClasses));
+  var buttonPrimaryRight = /* @__PURE__ */ buttonGroupBuilder2(/* @__PURE__ */ append20(buttonPrimaryClasses)(rightClasses));
   var buttonGroup2 = function(iprops) {
     return div2(appendIProps([classes(buttonGroupClasses2)])(iprops));
   };
   var buttonGroup_ = /* @__PURE__ */ buttonGroup2([]);
-  var buttonClasses2 = /* @__PURE__ */ map47(ClassName)(["bg-grey-50-a20", "border-grey-50-a20", "hover:!disabled:bg-grey-50-a30", "focus:bg-grey-50-a30", "text-black-20"]);
-  var buttonLeft = /* @__PURE__ */ buttonGroupBuilder2(/* @__PURE__ */ append19(buttonClasses2)(leftClasses));
-  var buttonRight = /* @__PURE__ */ buttonGroupBuilder2(/* @__PURE__ */ append19(buttonClasses2)(rightClasses));
-  var buttonCenter = /* @__PURE__ */ buttonGroupBuilder2(/* @__PURE__ */ append19(buttonClasses2)(centerClasses));
+  var buttonClasses2 = /* @__PURE__ */ map48(ClassName)(["bg-grey-50-a20", "border-grey-50-a20", "hover:!disabled:bg-grey-50-a30", "focus:bg-grey-50-a30", "text-black-20"]);
+  var buttonLeft = /* @__PURE__ */ buttonGroupBuilder2(/* @__PURE__ */ append20(buttonClasses2)(leftClasses));
+  var buttonRight = /* @__PURE__ */ buttonGroupBuilder2(/* @__PURE__ */ append20(buttonClasses2)(rightClasses));
+  var buttonCenter = /* @__PURE__ */ buttonGroupBuilder2(/* @__PURE__ */ append20(buttonClasses2)(centerClasses));
 
   // output/DemoApp.UI.Checkbox/index.js
-  var map48 = /* @__PURE__ */ map(functorArray);
-  var append20 = /* @__PURE__ */ append(semigroupArray);
-  var type_20 = /* @__PURE__ */ type_(isPropInputType);
-  var labelClasses4 = /* @__PURE__ */ map48(ClassName)(["flex", "flex-row", "inline-block", "py-2", "cursor-pointer", "text-black-20", "items-center", "text-left"]);
-  var inputClasses2 = /* @__PURE__ */ map48(ClassName)(["!disabled:sibling:bg-white", "disabled:sibling:bg-grey-95", "checked:sibling:before:opacity-100", "checked:sibling:before:scale-1", "checked:!disabled:sibling:border-blue-88", "focus:sibling:border-blue-88", "!checked:sibling:before:opacity-0", "!checked:sibling:before:scale-0", "!focus:hover:!checked:!disabled:sibling:border-grey-70", "focus:sibling:shadow", "checked:!disabled:sibling:before:bg-blue-88", "checked:disabled:sibling:before:bg-grey-80", "checked:disabled:sibling:border-grey-80", "offscreen", "checked:sibling:after:opacity-100", "checked:sibling:after:scale-1", "!checked:sibling:after:opacity-0", "!checked:sibling:after:scale-0"]);
-  var checkboxClasses = /* @__PURE__ */ map48(ClassName)(["relative", "content-box", "border-2", "border-solid", "h-5", "w-5", "flex-none", "no-content", "mr-3", "rounded", "before:transition-1/4-bounce", "before:absolute", "before:h-full", "before:w-full", "before:no-content", "after:transition-1/4-bounce", "after:absolute", "after:w-full", "after:h-2", "after:border-l-2", "after:border-b-2", "after:border-white", "after:no-content", "after:rotate-315", "after:shadow"]);
+  var map49 = /* @__PURE__ */ map(functorArray);
+  var append21 = /* @__PURE__ */ append(semigroupArray);
+  var type_21 = /* @__PURE__ */ type_(isPropInputType);
+  var labelClasses5 = /* @__PURE__ */ map49(ClassName)(["flex", "flex-row", "inline-block", "py-2", "cursor-pointer", "text-black-20", "items-center", "text-left"]);
+  var inputClasses3 = /* @__PURE__ */ map49(ClassName)(["!disabled:sibling:bg-white", "disabled:sibling:bg-grey-95", "checked:sibling:before:opacity-100", "checked:sibling:before:scale-1", "checked:!disabled:sibling:border-blue-88", "focus:sibling:border-blue-88", "!checked:sibling:before:opacity-0", "!checked:sibling:before:scale-0", "!focus:hover:!checked:!disabled:sibling:border-grey-70", "focus:sibling:shadow", "checked:!disabled:sibling:before:bg-blue-88", "checked:disabled:sibling:before:bg-grey-80", "checked:disabled:sibling:border-grey-80", "offscreen", "checked:sibling:after:opacity-100", "checked:sibling:after:scale-1", "!checked:sibling:after:opacity-0", "!checked:sibling:after:scale-0"]);
+  var checkboxClasses = /* @__PURE__ */ map49(ClassName)(["relative", "content-box", "border-2", "border-solid", "h-5", "w-5", "flex-none", "no-content", "mr-3", "rounded", "before:transition-1/4-bounce", "before:absolute", "before:h-full", "before:w-full", "before:no-content", "after:transition-1/4-bounce", "after:absolute", "after:w-full", "after:h-2", "after:border-l-2", "after:border-b-2", "after:border-white", "after:no-content", "after:rotate-315", "after:shadow"]);
   var checkbox = function(iprops) {
     return function(inprops) {
       return function(html2) {
-        return label(appendIProps([classes(labelClasses4)])(iprops))(append20([input(appendIProps([classes(inputClasses2), type_20(InputCheckbox.value)])(inprops)), span2([classes(checkboxClasses)])([])])(html2));
+        return label(appendIProps([classes(labelClasses5)])(iprops))(append21([input(appendIProps([classes(inputClasses3), type_21(InputCheckbox.value)])(inprops)), span2([classes(checkboxClasses)])([])])(html2));
       };
     };
   };
@@ -23314,14 +23737,14 @@
   };
 
   // output/DemoApp.UI.Table/index.js
-  var map49 = /* @__PURE__ */ map(functorArray);
-  var tableClasses = /* @__PURE__ */ map49(ClassName)(["w-full", "text-left", "border-collapse"]);
+  var map50 = /* @__PURE__ */ map(functorArray);
+  var tableClasses = /* @__PURE__ */ map50(ClassName)(["w-full", "text-left", "border-collapse"]);
   var table2 = /* @__PURE__ */ blockBuilder(table)(tableClasses);
   var table_2 = /* @__PURE__ */ table2([]);
   var row_ = tr_;
-  var headerClasses = /* @__PURE__ */ map49(ClassName)(["bg-grey-90", "py-4", "px-5", "font-medium", "text-black-20"]);
+  var headerClasses = /* @__PURE__ */ map50(ClassName)(["bg-grey-90", "py-4", "px-5", "font-medium", "text-black-20"]);
   var header2 = /* @__PURE__ */ blockBuilder(th)(headerClasses);
-  var cellClasses = /* @__PURE__ */ map49(ClassName)(["bg-white", "p-5", "min-h-20", "border-b", "border-grey-95"]);
+  var cellClasses = /* @__PURE__ */ map50(ClassName)(["bg-white", "p-5", "min-h-20", "border-b", "border-grey-95"]);
   var cell = /* @__PURE__ */ blockBuilder(td)(cellClasses);
   var cell_ = /* @__PURE__ */ cell([]);
 
@@ -23566,9 +23989,9 @@
   };
 
   // output/Stories.Spago.HTML/index.js
-  var type_21 = /* @__PURE__ */ type_(isPropInputType);
+  var type_22 = /* @__PURE__ */ type_(isPropInputType);
   var value15 = /* @__PURE__ */ value(isPropString);
-  var map50 = /* @__PURE__ */ map(functorArray);
+  var map51 = /* @__PURE__ */ map(functorArray);
   var toUnfoldable6 = /* @__PURE__ */ toUnfoldable2(unfoldableArray);
   var _forceLibrary3 = /* @__PURE__ */ _forceLibrary(strongForget);
   var eq6 = /* @__PURE__ */ eq(eqForceStatus);
@@ -23587,17 +24010,17 @@
       };
       return [onValueInput(function($24) {
         return ChangeSimConfig.create(config["var"](toScale($24)));
-      }), type_21(InputRange.value), id2(config.id), class_("scaling-slider"), min3(config.min), max3(config.max), step2(new Step(config.step)), value15(show26(config.value))];
+      }), type_22(InputRange.value), id2(config.id), class_("scaling-slider"), min3(config.min), max3(config.max), step2(new Step(config.step)), value15(show26(config.value))];
     };
   };
   var slider1 = /* @__PURE__ */ slider(showNumber);
   var renderTableForces = function(state3) {
-    var tableData = map50(snd)(toUnfoldable6(view(_forceLibrary3)(state3)));
+    var tableData = map51(snd)(toUnfoldable6(view(_forceLibrary3)(state3)));
     var renderHeader = row_([header2([css("w-10")])([text("Active")]), header2([css("w-2/3 text-left")])([text("Details")]), header2([css("w-2/3 text-left")])([text("Acting on...")])]);
     var renderData = function(v) {
       return [cell_([checkbox_([checked(eq6(v.status)(ForceActive.value)), onChecked($$const(new ToggleForce2(v.name)))])([])]), cell([css("text-left")])([div_([text(v.name + ("\n" + showType(v.type)))])]), cell([css("text-left")])([text(showForceFilter(v.filter))])];
     };
-    var renderBody = map50(row_)(map50(renderData)(tableData));
+    var renderBody = map51(row_)(map51(renderData)(tableData));
     var renderTable = table_2(append110([renderHeader])(renderBody));
     return div_([div2([tailwindClass("text-sm")])([backdrop_([div_([h2_([text("Control which forces are acting")]), renderTable])])])]);
   };
@@ -23623,13 +24046,13 @@
     })), caption_([text("AlphaTarget: " + show110(params.alphaTarget))])]), div2([classes(["mb-6"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(StopSim.value))])([text("Stop")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0.3))))])([text("Heat")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0))))])([text("Cool")]), buttonPrimaryRight([onClick($$const(StartSim.value))])([text("Start")])])]), div2([classes(["mb-6"])])([contentHeading_([text("Which nodes should be displayed?")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new NodeFilter(isPackage))))])([text("Packages")]), buttonCenter([onClick($$const(new Filter(new NodeFilter($$const(true)))))])([text("Both")]), buttonCenter([onClick($$const(new Filter(new NodeFilter($$const(false)))))])([text("Neither")]), buttonRight([onClick($$const(new Filter(new NodeFilter(isUsedModule))))])([text("Modules")])])]), div2([classes(["mb-6"])])([contentHeading_([text("Put links into simulation")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new LinkShowFilter(isM2M_Tree_Link))))])([text("Treelink")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2M_Graph_Link))))])([text("Graphlink")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2P_Link))))])([text("M2P")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isP2P_Link))))])([text("P2P")]), buttonRight([onClick($$const(new Filter(new LinkShowFilter($$const(false)))))])([text("none")])])]), div2([classes(["mb-6"])])([contentHeading_([text("Limit only these links to exert force?")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new LinkForceFilter(isM2M_Tree_Link_))))])([text("Treelink")]), buttonCenter([onClick($$const(new Filter(new LinkForceFilter(isM2M_Graph_Link_))))])([text("Graphlink")]), buttonCenter([onClick($$const(new Filter(new LinkForceFilter(isM2P_Link_))))])([text("M2P")]), buttonRight([onClick($$const(new Filter(new LinkForceFilter(isP2P_Link_))))])([text("P2P")])])]), div2([classes(["mb-6"])])([contentHeading_([text("D3 attributes chosen")]), buttonGroup_([buttonLeft([onClick($$const(new ChangeStyling(new GraphStyle(clusterSceneAttributes))))])([text("Clusters")]), buttonCenter([onClick($$const(new ChangeStyling(new GraphStyle(graphSceneAttributes))))])([text("Graph")]), buttonRight([onClick($$const(new ChangeStyling(new GraphStyle(treeSceneAttributes))))])([text("Tree")])])]), div2([classes(["mb-6"])])([contentHeading_([text("Stylesheet")]), buttonGroup_([buttonLeft([onClick($$const(new ChangeStyling(new TopLevelCSS("cluster"))))])([text("Clusters")]), buttonCenter([onClick($$const(new ChangeStyling(new TopLevelCSS("graph"))))])([text("Graph")]), buttonCenter([onClick($$const(new ChangeStyling(new TopLevelCSS("tree"))))])([text("Tree")]), buttonRight([onClick($$const(new ChangeStyling(new TopLevelCSS("none"))))])([text("None")])])])]);
   };
   var blurbtext5 = /* @__PURE__ */ (function() {
-    var titleClasses = map50(ClassName)(["font-bold text-2xl"]);
+    var titleClasses = map51(ClassName)(["font-bold text-2xl"]);
     var title4 = h2([classes(titleClasses)])([text("About this Example")]);
-    var paraTexts = map50(function(s) {
+    var paraTexts = map51(function(s) {
       return [text(s)];
     })(["This example synthesizes a complex dependency graph from the optional JSON\n        graph outputs of the PureScript compiler, together with the package\n        dependencies from Spago and adds simple line-count per module to give an\n        idea of the size of each one.", "With this dataset, operated on by the physics simulation engine, we can\n      explore different aspects of the project dependencies. The layout can be\n      entirely driven by forces and relationships or partially or totally laid-out\n      using algorithms.", "For example, a dependency tree starting at the Main module can be laid-out as\n      a radial tree and either fixed in that position or allowed to move under the\n      influences of other forces.", "Un-connected modules (which are only present because something in their\n      package has been required) can be hidden or clustered separately.", "Modules can be clustered on their packages and the packages can be positioned\n      on a simple grid or arranged in a circle by a radial force that applies only\n      to them.", "Clicking on a module highlights it and its immediate dependents and\n      dependencies. Clicking outside the highlighted module undoes the\n      highlighting."]);
-    var paraClasses = map50(ClassName)(["m-4 "]);
-    var paras = map50(p([classes(paraClasses)]))(paraTexts);
+    var paraClasses = map51(ClassName)(["m-4 "]);
+    var paras = map51(p([classes(paraClasses)]))(paraTexts);
     return div_(cons2(title4)(paras));
   })();
   var render2 = function(state3) {
@@ -23664,7 +24087,7 @@
   var pure20 = /* @__PURE__ */ pure(applicativeMaybe);
   var bind17 = /* @__PURE__ */ bind(bindAff);
   var apply3 = /* @__PURE__ */ apply(applyEither);
-  var map51 = /* @__PURE__ */ map(functorEither);
+  var map52 = /* @__PURE__ */ map(functorEither);
   var pure110 = /* @__PURE__ */ pure(applicativeAff);
   var bind22 = /* @__PURE__ */ bind(bindHalogenM);
   var discard25 = /* @__PURE__ */ discard24(bindHalogenM);
@@ -23774,7 +24197,7 @@
       return bind17(get4(string)("./data/spago-data/packages.json"))(function(packageJSON) {
         return bind17(get4(string)("./data/spago-data/lsdeps.jsonlines"))(function(lsdepJSON) {
           return bind17(get4(string)("./data/spago-data/LOC.json"))(function(locJSON) {
-            var model = hush(apply3(apply3(apply3(map51(convertFilesToGraphModel)(moduleJSON))(packageJSON))(lsdepJSON))(locJSON));
+            var model = hush(apply3(apply3(apply3(map52(convertFilesToGraphModel)(moduleJSON))(packageJSON))(lsdepJSON))(locJSON));
             return pure110(addTreeToModel("Main")(model));
           });
         });
@@ -24138,7 +24561,7 @@
   var traverse4 = /* @__PURE__ */ traverse(traversableArray);
   var discard27 = /* @__PURE__ */ discard(discardUnit);
   var drawThreeCircles2 = /* @__PURE__ */ drawThreeCircles(d3TaglessD3M);
-  var removeExistingSVG4 = /* @__PURE__ */ removeExistingSVG(d3TaglessD3M);
+  var removeExistingSVG5 = /* @__PURE__ */ removeExistingSVG(d3TaglessD3M);
   var drawWithData2 = /* @__PURE__ */ drawWithData(d3TaglessD3M);
   var Initialize8 = /* @__PURE__ */ (function() {
     function Initialize11() {
@@ -24244,7 +24667,7 @@
               return v1.toggle;
             }))(function(toggle2) {
               var toggle$prime = !toggle2;
-              return discard111($$void10(liftEffect11(eval_D3M(removeExistingSVG4("div.svg-container")))))(function() {
+              return discard111($$void10(liftEffect11(eval_D3M(removeExistingSVG5("div.svg-container")))))(function() {
                 return discard111($$void10(liftEffect11(eval_D3M((function() {
                   if (toggle$prime) {
                     return drawThreeCircles2("div.svg-container");
@@ -24326,21 +24749,6 @@
     });
   };
 
-  // output/DemoApp.UI.Radio/index.js
-  var map52 = /* @__PURE__ */ map(functorArray);
-  var append21 = /* @__PURE__ */ append(semigroupArray);
-  var type_22 = /* @__PURE__ */ type_(isPropInputType);
-  var radioClasses = /* @__PURE__ */ map52(ClassName)(["inline-flex", "justify-center", "items-center", "content-box", "border-2", "border-solid", "h-4", "w-4", "p-1", "flex-none", "no-content", "rounded-full", "mr-3", "before:transition-1/4-bounce", "before:h-full", "before:w-full", "before:bg-blue-88", "before:no-content", "before:rounded-full", "before:shadow"]);
-  var labelClasses5 = /* @__PURE__ */ map52(ClassName)(["flex", "flex-row", "inline-block", "py-2", "cursor-pointer", "text-black-20", "items-center", "text-left"]);
-  var inputClasses3 = /* @__PURE__ */ map52(ClassName)(["!disabled:sibling:bg-white", "disabled:sibling:bg-grey-95", "checked:sibling:before:opacity-100", "checked:sibling:before:scale-1", "checked:!disabled:sibling:border-blue-88", "focus:sibling:border-blue-88", "!checked:sibling:before:opacity-0", "!checked:sibling:before:scale-0", "!focus:hover:!checked:!disabled:sibling:border-grey-70", "focus:sibling:shadow", "checked:!disabled:sibling:before:bg-blue-88", "checked:disabled:sibling:before:bg-grey-80", "checked:disabled:sibling:border-grey-80", "offscreen"]);
-  var radio = function(iprops) {
-    return function(inprops) {
-      return function(html2) {
-        return label(appendIProps([classes(labelClasses5)])(iprops))(append21([input(appendIProps([classes(inputClasses3), type_22(InputRadio.value)])(inprops)), span2([classes(radioClasses)])([])])(html2));
-      };
-    };
-  };
-
   // output/Stories.Trees/index.js
   var prop27 = /* @__PURE__ */ prop3({
     reflectSymbol: function() {
@@ -24348,7 +24756,7 @@
     }
   })()();
   var not11 = /* @__PURE__ */ not(heytingAlgebraStatus);
-  var removeExistingSVG5 = /* @__PURE__ */ removeExistingSVG(d3TaglessD3M);
+  var removeExistingSVG6 = /* @__PURE__ */ removeExistingSVG(d3TaglessD3M);
   var discard28 = /* @__PURE__ */ discard(discardUnit);
   var makeModel4 = /* @__PURE__ */ makeModel(bindAff)(monadEffectAff);
   var prop113 = /* @__PURE__ */ prop3({
@@ -24441,7 +24849,7 @@
           }
           ;
           if (v instanceof Initialize9) {
-            return bind18(liftEffect11(eval_D3M(removeExistingSVG5("div.svg-container"))))(function(detached) {
+            return bind18(liftEffect11(eval_D3M(removeExistingSVG6("div.svg-container"))))(function(detached) {
               return bind18(liftAff2(readSnippetFiles("TreeDraw")))(function(text1) {
                 return discard111(assign4(_drawCode14)(text1))(function() {
                   return bind18(liftAff2(getTreeViaAJAX("./data/flare-2.json")))(function(treeJSON) {
@@ -24482,7 +24890,7 @@
           }
           ;
           if (v instanceof SetLayout) {
-            return bind18(liftEffect11(eval_D3M(removeExistingSVG5("div.svg-container"))))(function(detached) {
+            return bind18(liftEffect11(eval_D3M(removeExistingSVG6("div.svg-container"))))(function(detached) {
               return bind18(get8)(function(v1) {
                 if (v1.tree instanceof Nothing) {
                   return pure21(unit);
@@ -24520,7 +24928,7 @@
           }
           ;
           if (v instanceof SetType) {
-            return bind18(liftEffect11(eval_D3M(removeExistingSVG5("div.svg-container"))))(function(detached) {
+            return bind18(liftEffect11(eval_D3M(removeExistingSVG6("div.svg-container"))))(function(detached) {
               return bind18(get8)(function(v1) {
                 if (v1.tree instanceof Nothing) {
                   return pure21(unit);
@@ -24847,7 +25255,7 @@
         return "Sankey";
       }
       ;
-      throw new Error("Failed pattern match at Main (line 68, column 10 - line 77, column 32): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Main (line 58, column 10 - line 67, column 32): " + [v.constructor.name]);
     }
   };
   var show21 = /* @__PURE__ */ show(showExampleType);
@@ -24942,7 +25350,7 @@
         return slot_9(_spago)(unit)(component9)(unit);
       }
       ;
-      throw new Error("Failed pattern match at Main (line 153, column 5 - line 164, column 71): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Main (line 143, column 5 - line 154, column 71): " + [v.constructor.name]);
     };
     var render3 = function(currentExample) {
       return body_([div2([tailwindClass("app-container")])([renderSidebar(currentExample), renderExample(currentExample)])]);
@@ -24963,7 +25371,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at Main (line 169, column 18 - line 171, column 39): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at Main (line 159, column 18 - line 161, column 39): " + [v.constructor.name]);
     };
     return mkComponent({
       initialState,

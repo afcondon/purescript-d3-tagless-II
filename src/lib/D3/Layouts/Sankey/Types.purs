@@ -1,8 +1,18 @@
 module D3.Layouts.Sankey.Types where
 
+import Prelude
+
 -- Opaque type for D3 Sankey layout state
 -- This wraps the D3 sankey generator function
 foreign import data SankeyLayoutState_ :: Type
+
+-- Configuration for Sankey layout
+type SankeyConfig = {
+    alignment :: String  -- "justify", "left", "right", or "center"
+  , linkColorMode :: String  -- "source", "target", "source-target", or "static"
+  , nodeWidth :: Number
+  , nodePadding :: Number
+}
 
 -- Result of applying Sankey layout to data
 -- Contains nodes and links with computed positions

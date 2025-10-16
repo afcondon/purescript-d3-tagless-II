@@ -3,7 +3,7 @@ module D3.Layouts.Sankey.Functions where
 import Prelude
 
 import D3.Data.Types (Datum_)
-import D3.Layouts.Sankey.Types (SankeyLink_, SankeyNode_)
+import D3.Layouts.Sankey.Types (SankeyConfig, SankeyLink_, SankeyNode_)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 
@@ -22,6 +22,23 @@ foreign import sankeySetData_ :: forall nodeData linkData.
   { nodes :: Array nodeData, links :: Array linkData } ->
   Number ->
   Number ->
+  Effect { nodes :: Array SankeyNode_, links :: Array SankeyLink_ }
+
+-- | Apply Sankey layout with custom configuration
+sankeySetDataWithConfig :: forall m nodeData linkData.
+  MonadEffect m =>
+  { nodes :: Array nodeData, links :: Array linkData } ->
+  Number ->
+  Number ->
+  SankeyConfig ->
+  m { nodes :: Array SankeyNode_, links :: Array SankeyLink_ }
+sankeySetDataWithConfig data_ width height config = liftEffect $ sankeySetDataWithConfig_ data_ width height config
+
+foreign import sankeySetDataWithConfig_ :: forall nodeData linkData.
+  { nodes :: Array nodeData, links :: Array linkData } ->
+  Number ->
+  Number ->
+  SankeyConfig ->
   Effect { nodes :: Array SankeyNode_, links :: Array SankeyLink_ }
 
 -- | Generate SVG path data for a Sankey link
