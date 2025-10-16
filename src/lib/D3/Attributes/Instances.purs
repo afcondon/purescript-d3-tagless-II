@@ -29,7 +29,7 @@ attributeAttr (AttributeSetter _ a) = a
 data AttrBuilder a =
     Static a
   | Fn (Datum_ -> a)
-  | FnI (IndexedLambda a)
+  | FnI (IndexedLambda a) 
 
 data Attr = 
     StringAttr (AttrBuilder String)

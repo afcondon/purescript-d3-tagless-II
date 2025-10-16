@@ -2,6 +2,7 @@ module D3Tagless.Capabilities where
 
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Simulation_, Datum_, Element, Index_, Selector)
+import D3.Layouts.Sankey.Types (SankeyLayoutResult, SankeyLink_, SankeyNode_)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior, SelectionAttribute)
 import D3.Simulation.Types (Force, ForceStatus, SimVariable, Step)
@@ -77,7 +78,7 @@ type RawData d r id = {
 , links :: Array (D3Link id r) 
 }
 type Staging selection d r id = {
-    selections :: { 
+    selections :: {
       nodes :: Maybe selection
     , links :: Maybe selection
     }
@@ -85,3 +86,14 @@ type Staging selection d r id = {
   , linksWithForce :: Datum_ -> Boolean
   , rawdata :: RawData d r id
 }
+
+-- | SankeyM capability extends SelectionM with Sankey layout operations
+-- | Unlike SimulationM which manages dynamic forces, SankeyM computes a static layout
+class (Monad m, SelectionM selection m) <= SankeyM selection m | m -> selection where
+  -- | Apply Sankey layout algorithm to raw data
+  -- | Takes nodes and links, returns layout-computed nodes and links with positions
+  setSankeyData :: forall nodeData linkData.
+    { nodes :: Array nodeData, links :: Array linkData } ->
+    Number -> -- width
+    Number -> -- height
+    m { nodes :: Array SankeyNode_, links :: Array SankeyLink_ }

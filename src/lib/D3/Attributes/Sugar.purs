@@ -29,6 +29,9 @@ strokeWidth = AttrT <<< AttributeSetter "stroke-width" <<< toAttr
 fill :: ∀ a. ToAttr String a => a -> SelectionAttribute
 fill = AttrT <<< AttributeSetter "fill" <<< toAttr
 
+fillOpacity :: ∀ a. ToAttr Number a => a -> SelectionAttribute
+fillOpacity = AttrT <<< AttributeSetter "fill-opacity" <<< toAttr
+
 -- TODO this definitely needs to be Number-with-unit here
 viewBox :: Number -> Number -> Number -> Number -> SelectionAttribute
 viewBox xo yo w h = AttrT <<< AttributeSetter "viewBox" $ toAttr vb
@@ -134,6 +137,9 @@ cy = AttrT <<< AttributeSetter "cy" <<< toAttr
 
 text :: ∀ a. ToAttr String a => a -> SelectionAttribute
 text = TextT <<< AttributeSetter "text" <<< toAttr
+
+d :: ∀ a. ToAttr String a => a -> SelectionAttribute
+d = AttrT <<< AttributeSetter "d" <<< toAttr
 
 -- TODO classed here has destructive semantics which D3 doesn't, because in D3 you give a Boolean to indicate whether you're adding or removing the class
 classed :: ∀ a. ToAttr String a => a -> SelectionAttribute
