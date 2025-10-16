@@ -71,6 +71,8 @@ link_ = {
   , path: _.path  <<< unboxSankeyLink
 }
 
+-- Snippet_Start
+-- Name: SankeyDraw
 -- Main drawing function for Sankey diagram
 draw :: forall row m.
   Bind m =>
@@ -128,6 +130,7 @@ draw sankeyData selector = do
     ]
 
   pure unit
+-- Snippet_End
 
 
 -- TODO these functions do not belong here, move to D3.FFI and check if they can use generic versions

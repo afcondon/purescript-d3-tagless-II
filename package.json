@@ -6,7 +6,7 @@
     "build": "spago build",
     "install": "spago install",
     "upgrade-set": "spago upgrade-set",
-    "snippets": "cd docs/code-examples; perl ../../src/scripts/snippets3.pl ../../src/DemoApp/Viz/*/*.purs ../../src/DemoApp/Viz/*.purs ../../src/DemoApp/Stories/*/*.purs ../../src/DemoApp/Stories/*.purs",
+    "snippets": "node src/scripts/extract-snippets.js",
     "bundle": "spago bundle-app --to docs/bundle.js",
     "build-css": "cd src/DemoApp/css; postcss src/index.css -o ../../../docs/bundle.css"
   },

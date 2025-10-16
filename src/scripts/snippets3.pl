@@ -44,7 +44,7 @@ my $name;
 my $i;
 foreach $name ( keys %snippets ) {
     print "snippet: $name\n";
-    open(FH, '>', $name.purs) or die $!;
+    open(FH, '>', "$name.purs") or die $!;
     foreach $i ( 0 .. $snippets{$name}->$#* ) {
         print FH "$snippets{$name}[$i]";
     }
