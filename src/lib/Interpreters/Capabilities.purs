@@ -2,10 +2,10 @@ module D3Tagless.Capabilities where
 
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Simulation_, Datum_, Element, Index_, Selector)
-import D3.Layouts.Sankey.Types (SankeyLayoutResult, SankeyLink_, SankeyNode_)
+import D3.Layouts.Sankey.Types (SankeyLink_, SankeyNode_)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior, SelectionAttribute)
-import D3.Simulation.Types (Force, ForceStatus, SimVariable, Step)
+import D3.Simulation.Types (ForceStatus, SimVariable, Step)
 import Data.Map (Map)
 import Data.Maybe (Maybe)
 import Prelude (class Eq, class Monad, Unit)

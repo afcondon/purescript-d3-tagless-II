@@ -196,6 +196,7 @@ handleAction = case _ of
       start
 -- Snippet_End
 
+controls :: forall p125. Map String ForceStatus -> HH.HTML p125 Action
 controls forceStatuses = 
     Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
       [ Button.buttonVertical

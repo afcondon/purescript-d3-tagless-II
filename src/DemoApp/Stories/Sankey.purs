@@ -9,11 +9,9 @@ import D3.Layouts.Sankey.Types (SankeyLayoutState_, initialSankeyLayoutState)
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Instance.Sankey (runWithD3_Sankey)
-import D3Tagless.Utility (removeExistingSVG)
 import Data.Lens (Lens', view, (%=), (.=))
 import Data.Lens.Record (prop)
 import Effect.Aff.Class (class MonadAff)
-import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE

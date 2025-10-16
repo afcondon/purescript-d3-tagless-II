@@ -4,7 +4,7 @@ import D3.Attributes.Sugar
 
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 import D3.FFI (keyIsID_)
-import D3.Scales (d3SchemeCategory10N_, d3SchemeDiverging10N_, d3SchemePairedN_, d3SchemeSequential10N_)
+import D3.Scales (d3SchemePairedN_)
 import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import Data.Int (toNumber)
 import Prelude (bind, discard, negate, pure, ($), (*), (-), (/))

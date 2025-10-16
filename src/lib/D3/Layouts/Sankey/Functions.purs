@@ -3,7 +3,7 @@ module D3.Layouts.Sankey.Functions where
 import Prelude
 
 import D3.Data.Types (Datum_)
-import D3.Layouts.Sankey.Types (SankeyLayoutResult, SankeyLink_, SankeyNode_)
+import D3.Layouts.Sankey.Types (SankeyLink_, SankeyNode_)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 

@@ -15,7 +15,7 @@ import D3Tagless.Capabilities (RawData)
 import Data.Array (elem, filter, intercalate)
 import Data.Array as A
 import Data.Lens (modifying, set, use, view, (%=))
-import Data.Map (Map, toUnfoldable, values)
+import Data.Map (Map, toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..), fst)

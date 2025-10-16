@@ -11,7 +11,7 @@ import D3Tagless.Block.FormField as FormField
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Instance.Selection (eval_D3M, runD3M)
 import Data.Array (catMaybes)
-import Data.Lens
+import Data.Lens (Lens', view, (%=), (.=))
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Data.String.CodeUnits (toCharArray)

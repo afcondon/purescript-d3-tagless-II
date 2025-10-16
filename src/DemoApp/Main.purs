@@ -2,20 +2,11 @@ module Main where
 
 import Prelude
 
-import Affjax as AJAX
-import Affjax.ResponseFormat as ResponseFormat
-import Data.Either (Either(..), hush)
-import Data.Map (Map, fromFoldable)
 import Data.Maybe (Maybe(..))
-import Data.Traversable (traverse)
-import Data.Tuple (Tuple(..))
-import Debug (trace)
 import DemoApp.UI.Backdrop (backdrop) as Backdrop
 import DemoApp.UI.Format as Format
 import Effect (Effect)
-import Effect.Aff (Aff)
-import Effect.Aff.Class (class MonadAff, liftAff)
-import Halogen (liftEffect)
+import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -24,7 +15,6 @@ import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 import Stories.GUP as GUP
 import Stories.Sankey as Sankey
-import Stories.Index as Index
 import Stories.LesMis as LesMis
 import Stories.MetaTree as MetaTree
 import Stories.PrintTree as PrintTree

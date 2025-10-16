@@ -1,7 +1,5 @@
 module D3.Layouts.Sankey.Types where
 
-import Prelude
-
 -- Opaque type for D3 Sankey layout state
 -- This wraps the D3 sankey generator function
 foreign import data SankeyLayoutState_ :: Type

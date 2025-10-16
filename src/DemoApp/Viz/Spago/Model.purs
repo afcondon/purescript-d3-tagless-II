@@ -3,11 +3,10 @@ module D3.Examples.Spago.Model where
 import Prelude
 
 import D3.Attributes.Instances (Label)
-import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (D3Simulation_, Datum_, PointXY)
 import D3.Examples.Spago.Files (LinkType(..), NodeType(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
-import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode, unboxD3TreeNode)
-import D3.FFI (getHierarchyChildren_, getHierarchyParent_, getIndexFromDatum_, hasChildren_, setInSimNodeFlag)
+import D3.Examples.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode)
+import D3.FFI (getIndexFromDatum_, setInSimNodeFlag)
 import D3.Node (D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import D3.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_)
 import Data.Array (foldl, length, mapWithIndex, partition, (:))
@@ -24,11 +23,9 @@ import Data.Nullable (Nullable, notNull, null, toMaybe)
 import Data.Nullable (Nullable, null) as N
 import Data.Number (ceil, cos, sin, sqrt, pi, (%))
 import Data.Number (floor) as Number
-import Data.Set as S
 import Data.Tuple (Tuple(..))
 import Debug (spy)
 import Type.Row (type (+))
-import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
 
 

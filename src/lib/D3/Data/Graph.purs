@@ -1,6 +1,6 @@
 module D3.Data.Graph where
 
-import Data.Array (elem, filter, head, null, partition, uncons, (:))
+import Data.Array (elem, head, null, partition, uncons, (:))
 import Data.Graph (Graph)
 import Data.Graph as G
 import Data.Maybe (Maybe(..))

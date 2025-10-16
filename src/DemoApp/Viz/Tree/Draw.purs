@@ -7,15 +7,11 @@ import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (Datum_, Element(..), Selector)
 import D3.Examples.MetaTree.Unsafe (coerceToTreeNode, unboxD3TreeNode)
 import D3.Examples.Tree.Model (FlareTreeNode)
-import D3.FFI (descendants_, getHierarchyChildren_, getHierarchyValue_, hasChildren_, keyIsID_, links_)
-import D3.Node (D3_TreeNode(..))
+import D3.FFI (descendants_, getHierarchyValue_, hasChildren_, keyIsID_, links_)
 import D3.Selection (SelectionAttribute)
 import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
-import D3Tagless.Capabilities as D3
-import Data.Array as A
 import Data.Nullable (Nullable)
 import Data.Number (pi)
-import Unsafe.Coerce (unsafeCoerce)
 
 treeDatum_ :: 
   { hasChildren :: Datum_ -> Boolean

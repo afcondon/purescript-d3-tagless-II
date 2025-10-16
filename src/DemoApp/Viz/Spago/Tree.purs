@@ -7,7 +7,6 @@ import D3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
 import D3.Data.Types (PointXY)
 import D3.Examples.Spago.Files (LinkType(..), isP2P_Link)
 import D3.Examples.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, TreeFields, setTreeXYExceptLeaves, setTreeXYIncludingLeaves)
-import D3.Examples.Spago.Unsafe (unboxD3TreeNode)
 import D3.FFI (descendants_, getHierarchyChildren_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, runLayoutFn_, treeSetNodeSize_, treeSortForTree_Spago)
 import D3.Node (D3Link(..), D3_SimulationNode(..), D3_TreeNode(..), NodeID)
 import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
@@ -16,11 +15,10 @@ import Data.List as L
 import Data.Map (Map, empty)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Data.Number (nan, cos, sin)
+import Data.Number (cos, sin)
 import Data.Set as S
 import Data.Tree (Tree(..))
 import Data.Tuple (Tuple(..))
-import Unsafe.Coerce (unsafeCoerce)
 
 tupleToLink :: forall t1 t6.
   t1

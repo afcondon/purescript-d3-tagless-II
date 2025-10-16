@@ -1,6 +1,5 @@
 module Stories.Trees where
 
-import Data.Lens
 import Prelude
 
 import Control.Monad.State (class MonadState, get)
@@ -12,6 +11,7 @@ import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Instance.Selection (eval_D3M)
 import D3Tagless.Utility (removeExistingSVG)
 import Data.Either (Either(..)) as E
+import Data.Lens (Lens', view, (%=), (.=))
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
