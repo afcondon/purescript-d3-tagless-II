@@ -1,20 +1,18 @@
-module D3.Examples.LineChart where
+module D3.Examples.BarChart where
 
 import Prelude
 
-import D3.Attributes.Sugar (classed, d, fill, radius, strokeColor, strokeWidth, transform, viewBox, width, height)
-import D3.Axes (Axis, axisBottom, axisLeft, callAxis)
+import D3.Attributes.Sugar (classed, fill, height, strokeColor, strokeWidth, transform, viewBox, width, x, y)
+import D3.Axes (axisBottom, axisLeft, callAxis)
 import D3.Data.Types (D3Selection_, Element(..), Selector)
-import D3.Examples.Charts.Model (DataPoint, sineWaveData)
-import D3.Generators.Line (createLineGenerator, generateLinePath)
-import D3.Scales.Linear (LinearScale, createLinearScale)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes)
-import Data.Array (length)
-import Data.Foldable (maximum, minimum)
+import D3.Examples.Charts.Model (DataPoint, monthlySales)
+import D3.Scales.Linear (applyScale, createLinearScale)
+import D3Tagless.Capabilities (class SelectionM, appendTo, attach)
+import Data.Array (length, mapWithIndex)
+import Data.Foldable (maximum, minimum, traverse_)
+import Data.Int as Int
 import Data.Maybe (fromMaybe)
-import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
-import Utility (getWindowWidthHeight)
 
 -- Chart dimensions and margins
 type ChartDimensions = {
@@ -38,8 +36,8 @@ innerHeight :: ChartDimensions -> Number
 innerHeight dims = dims.height - dims.margin.top - dims.margin.bottom
 
 -- Snippet_Start
--- Name: LineChartDraw
--- Main drawing function for line chart
+-- Name: BarChartDraw
+-- Main drawing function for bar chart
 draw :: forall m.
   Bind m =>
   MonadEffect m =>
@@ -55,13 +53,13 @@ draw dataPoints selector = do
   let yValues = map _.y dataPoints
   let minX = fromMaybe 0.0 $ minimum xValues
   let maxX = fromMaybe 100.0 $ maximum xValues
-  let minY = fromMaybe 0.0 $ minimum yValues
+  let minY = 0.0  -- Start bars from zero
   let maxY = fromMaybe 100.0 $ maximum yValues
 
   (root :: D3Selection_) <- attach selector
   svg <- appendTo root Svg [
       viewBox 0.0 0.0 dims.width dims.height
-    , classed "line-chart"
+    , classed "bar-chart"
     , width dims.width
     , height dims.height
     ]
@@ -85,17 +83,29 @@ draw dataPoints selector = do
   _ <- liftEffect $ callAxis xAxisGroup (axisBottom xScale)
   _ <- liftEffect $ callAxis yAxisGroup (axisLeft yScale)
 
-  -- Create line generator and add the line path
-  lineGen <- liftEffect $ createLineGenerator { xScale, yScale }
-  let pathData = generateLinePath lineGen dataPoints
+  -- Calculate bar width (with padding)
+  let numBars = length dataPoints
+  let barWidth = if numBars > 0 then (iWidth / (Int.toNumber numBars)) * 0.8 else 0.0
 
-  _ <- appendTo chartGroup Path [
-      d pathData
-    , fill "none"
-    , strokeColor "#4a90e2"
-    , strokeWidth 2.0
-    , classed "line"
-    ]
+  -- Add bars
+  let addBar :: DataPoint -> m Unit
+      addBar point = do
+        let xPos = applyScale xScale point.x - (barWidth / 2.0)
+        let yPos = applyScale yScale point.y
+        let barHeight = iHeight - yPos
+        _ <- appendTo chartGroup Rect [
+            x xPos
+          , y yPos
+          , width barWidth
+          , height barHeight
+          , fill "#4a90e2"
+          , strokeColor "#357abd"
+          , strokeWidth 1.0
+          , classed "bar"
+          ]
+        pure unit
+
+  _ <- traverse_ addBar dataPoints
 
   pure unit
 -- Snippet_End

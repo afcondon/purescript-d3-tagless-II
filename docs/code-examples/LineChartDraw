@@ -1,44 +1,3 @@
-module D3.Examples.LineChart where
-
-import Prelude
-
-import D3.Attributes.Sugar (classed, d, fill, radius, strokeColor, strokeWidth, transform, viewBox, width, height)
-import D3.Axes (Axis, axisBottom, axisLeft, callAxis)
-import D3.Data.Types (D3Selection_, Element(..), Selector)
-import D3.Examples.Charts.Model (DataPoint, sineWaveData)
-import D3.Generators.Line (createLineGenerator, generateLinePath)
-import D3.Scales.Linear (LinearScale, createLinearScale)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes)
-import Data.Array (length)
-import Data.Foldable (maximum, minimum)
-import Data.Maybe (fromMaybe)
-import Data.Tuple (Tuple(..))
-import Effect.Class (class MonadEffect, liftEffect)
-import Utility (getWindowWidthHeight)
-
--- Chart dimensions and margins
-type ChartDimensions = {
-    width :: Number
-  , height :: Number
-  , margin :: { top :: Number, right :: Number, bottom :: Number, left :: Number }
-}
-
-defaultDimensions :: ChartDimensions
-defaultDimensions = {
-    width: 800.0
-  , height: 400.0
-  , margin: { top: 20.0, right: 30.0, bottom: 30.0, left: 40.0 }
-}
-
--- Calculate inner dimensions (accounting for margins)
-innerWidth :: ChartDimensions -> Number
-innerWidth dims = dims.width - dims.margin.left - dims.margin.right
-
-innerHeight :: ChartDimensions -> Number
-innerHeight dims = dims.height - dims.margin.top - dims.margin.bottom
-
--- Snippet_Start
--- Name: LineChartDraw
 -- Main drawing function for line chart
 draw :: forall m.
   Bind m =>
@@ -98,4 +57,3 @@ draw dataPoints selector = do
     ]
 
   pure unit
--- Snippet_End

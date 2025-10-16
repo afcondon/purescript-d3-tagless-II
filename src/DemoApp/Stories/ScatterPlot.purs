@@ -1,10 +1,10 @@
-module Stories.LineChart where
+module Stories.ScatterPlot where
 
 import Prelude
 
 import Control.Monad.State (class MonadState)
 import D3.Examples.Charts.Model as Charts
-import D3.Examples.LineChart as LineChart
+import D3.Examples.ScatterPlot as ScatterPlot
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Instance.Selection (eval_D3M)
@@ -110,25 +110,28 @@ handleAction = case _ of
   ToggleCard _cardState -> _cardState %= not
 
   Initialize -> do
-    text1 <- H.liftAff $ readSnippetFiles "LineChartDraw"
+    text1 <- H.liftAff $ readSnippetFiles "ScatterPlotQuartet"
     _drawCode .= text1
 
-    _ <- H.liftEffect $ eval_D3M $ LineChart.draw Charts.sineWaveData "div.svg-container"
+    _ <- H.liftEffect $ eval_D3M $ ScatterPlot.drawQuartet Charts.anscombesQuartet "div.svg-container"
     pure unit
 
   Finalize -> pure unit
 
 blurbtext :: forall t235 t236. Array (HH.HTML t235 t236)
 blurbtext = blurbParagraphs [
-    """Line charts are one of the most fundamental visualizations for showing trends
-    over time or continuous data. They excel at displaying patterns, trends, and
-    changes in data series."""
+    """This example demonstrates Anscombe's Quartet, a famous dataset created by
+    statistician Francis Anscombe in 1973. All four datasets have nearly identical
+    statistical properties (same mean, variance, correlation, and linear regression line),
+    yet when visualized they reveal completely different patterns."""
 
-  , """This example demonstrates a simple line chart showing a sine wave pattern.
-    The implementation uses D3's scale functions to map data values to pixel
-    coordinates, and a line generator to create the SVG path."""
+  , """The quartet powerfully illustrates why data visualization is essential.
+    Summary statistics alone can be misleading - you need to look at the data to
+    understand its true structure. Dataset I shows a linear relationship, Dataset II
+    is clearly non-linear, Dataset III has an outlier affecting the regression, and
+    Dataset IV shows how a single extreme value can dominate the statistics."""
 
-  , """Line charts are commonly used for: time series data, stock prices, temperature
-    readings, website analytics, and any scenario where you need to show how a
-    value changes continuously."""
+  , """This implementation uses a 'small multiples' layout (term coined by Edward Tufte),
+    displaying the four related charts side-by-side for easy comparison. All plots share
+    the same scale domains, making visual comparison straightforward."""
 ]

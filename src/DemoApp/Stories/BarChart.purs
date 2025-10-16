@@ -1,10 +1,10 @@
-module Stories.LineChart where
+module Stories.BarChart where
 
 import Prelude
 
 import Control.Monad.State (class MonadState)
 import D3.Examples.Charts.Model as Charts
-import D3.Examples.LineChart as LineChart
+import D3.Examples.BarChart as BarChart
 import D3Tagless.Block.Expandable as Expandable
 import D3Tagless.Block.Toggle as Toggle
 import D3Tagless.Instance.Selection (eval_D3M)
@@ -110,25 +110,25 @@ handleAction = case _ of
   ToggleCard _cardState -> _cardState %= not
 
   Initialize -> do
-    text1 <- H.liftAff $ readSnippetFiles "LineChartDraw"
+    text1 <- H.liftAff $ readSnippetFiles "BarChartDraw"
     _drawCode .= text1
 
-    _ <- H.liftEffect $ eval_D3M $ LineChart.draw Charts.sineWaveData "div.svg-container"
+    _ <- H.liftEffect $ eval_D3M $ BarChart.draw Charts.monthlySales "div.svg-container"
     pure unit
 
   Finalize -> pure unit
 
 blurbtext :: forall t235 t236. Array (HH.HTML t235 t236)
 blurbtext = blurbParagraphs [
-    """Line charts are one of the most fundamental visualizations for showing trends
-    over time or continuous data. They excel at displaying patterns, trends, and
-    changes in data series."""
+    """Bar charts are ideal for comparing discrete categories or showing changes across
+    time periods. They use rectangular bars with heights or lengths proportional to
+    the values they represent."""
 
-  , """This example demonstrates a simple line chart showing a sine wave pattern.
-    The implementation uses D3's scale functions to map data values to pixel
-    coordinates, and a line generator to create the SVG path."""
+  , """This example shows monthly sales data using a vertical bar chart. Each bar
+    represents a month, and the height indicates the sales value. The implementation
+    uses D3 scales to map data values to pixel coordinates."""
 
-  , """Line charts are commonly used for: time series data, stock prices, temperature
-    readings, website analytics, and any scenario where you need to show how a
-    value changes continuously."""
+  , """Bar charts are commonly used for: comparing categories, showing frequency
+    distributions, displaying survey results, tracking metrics over time periods,
+    and any scenario where you need to compare discrete quantities."""
 ]
