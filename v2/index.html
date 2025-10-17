@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PureScript Tagless D3 - V2</title>
+    <meta name="description" content="Type-safe, composable data visualization with PureScript and D3">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="bundle.css">
+    <link rel="stylesheet" href="styles/main.css">
+
+    <!-- D3.js -->
+    <script src="../v1/d3/d3.js"></script>
+    <script src="../v1/d3/d3-color.js"></script>
+    <script src="../v1/d3/d3-interpolate.js"></script>
+    <script src="../v1/d3/d3-scale-chromatic.js"></script>
+</head>
+<body>
+    <!-- Root element for Halogen app -->
+    <div id="app"></div>
+
+    <!-- Fallback for non-JS browsers -->
+    <noscript>
+        <div style="padding: 2rem; text-align: center;">
+            <h1>PureScript Tagless D3</h1>
+            <p>This application requires JavaScript to run.</p>
+            <p>Please enable JavaScript in your browser settings.</p>
+        </div>
+    </noscript>
+
+    <!-- Main application bundle -->
+    <script src="bundle.js"></script>
+</body>
+</html>

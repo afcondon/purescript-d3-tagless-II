@@ -7,8 +7,14 @@
     "install": "spago install",
     "upgrade-set": "spago upgrade-set",
     "snippets": "node src/scripts/extract-snippets.js",
-    "bundle": "spago bundle-app --to docs/bundle.js",
-    "build-css": "cd src/DemoApp/css; postcss src/index.css -o ../../../docs/bundle.css"
+    "bundle-v1": "spago bundle-app --to v1/bundle.js",
+    "bundle-v2": "spago bundle-app --to v2/bundle.js",
+    "bundle": "npm run bundle-v1 && npm run bundle-v2",
+    "build-css-v1": "cd src/DemoApp/css; postcss src/index.css -o ../../../v1/bundle.css",
+    "build-css-v2": "cd src/DemoApp/css; postcss src/index.css -o ../../../v2/bundle.css",
+    "build-css": "npm run build-css-v1 && npm run build-css-v2",
+    "dev-v1": "npm run build && npm run bundle-v1 && npm run build-css-v1",
+    "dev-v2": "npm run build && npm run bundle-v2 && npm run build-css-v2"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",
