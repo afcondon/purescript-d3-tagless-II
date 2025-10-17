@@ -16,6 +16,8 @@ import Effect (Effect)
 import Web.DOM.Document (toNonElementParentNode)
 import Web.DOM.NonElementParentNode (getElementById)
 import Data.Foldable (traverse_)
+import V2.Components.Visualization as Visualization
+import Type.Proxy (Proxy(..))
 
 -- | Input for the SplitPane component
 type Input =
@@ -25,9 +27,10 @@ type Input =
   , exampleId :: String
   }
 
--- | No slots needed
-type Slots :: forall k. Row k
-type Slots = ()
+-- | Slots for child components
+type Slots =
+  ( visualization :: forall q. H.Slot q Void Unit
+  )
 
 -- | State tracks which tab is active (mobile) and code reference
 type State =
@@ -44,6 +47,8 @@ data Tab = CodeTab | VisualizationTab
 derive instance eqTab :: Eq Tab
 
 -- | Actions
+_visualization = Proxy :: Proxy "visualization"
+
 data Action
   = Initialize
   | SetTab Tab
@@ -69,7 +74,7 @@ initialState input =
   , activeTab: CodeTab
   }
 
-render :: forall m. State -> H.ComponentHTML Action Slots m
+render :: forall m. MonadAff m => State -> H.ComponentHTML Action Slots m
 render state =
   HH.div
     [ HP.classes [ HH.ClassName "split-pane" ] ]
@@ -137,17 +142,11 @@ render state =
             [ HH.div
                 [ HP.classes [ HH.ClassName "split-pane__viz-header" ] ]
                 [ HH.h3_ [ HH.text "Visualization" ] ]
-            , case state.visualizationUrl of
-                Just url ->
-                  HH.iframe
-                    [ HP.classes [ HH.ClassName "split-pane__iframe" ]
-                    , HP.src url
-                    , HP.attr (HH.AttrName "frameborder") "0"
-                    ]
-                Nothing ->
-                  HH.div
-                    [ HP.classes [ HH.ClassName "split-pane__placeholder" ] ]
-                    [ HH.p_ [ HH.text "Visualization coming soon..." ] ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "split-pane__viz-content" ] ]
+                [ HH.slot_ _visualization unit Visualization.component
+                    { exampleId: state.exampleId }
+                ]
             ]
         ]
     ]
