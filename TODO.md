@@ -57,6 +57,13 @@ Implement a Bubble chart vizualization to show dependency data
 ### 8. Replace Ocelot-derived panes with modern CSS single page
 Replace left hand sidebar with thumbnails of the examples, then make single page for each example with good CSS choices for readability on different screensizes
 - Each example should have title and some or all of the about text at the top then the chart and then the code snippet example
+- see if we can delete all of the Ocelot-derived stuff from the project once this is implemented
 
 ### 9. Add e-charts support
 Alternative to D3 for some uses and there is an existing Purescript wrapper for it at https://github.com/lucasdicioccio/purescript-halogen-echarts-simple?tab=readme-ov-file
+
+### 10. Enhance String Interpreter
+The string interpreter could - maybe, in principle - emit D3 Javascript code
+- first cut could just be to overhaul the output a LOT for clarity, newlines, etc etc
+- secondly, we could try to make it as D3-ish as possible, at least to the point of pseudocode
+- stretch goal, multiple string interpreters, do echarts as well? Emit a succinct english paragraph describing how the visualisation is built
