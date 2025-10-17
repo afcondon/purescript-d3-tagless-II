@@ -20,8 +20,8 @@ codeFileMap = Map.fromFoldable
   , Tuple "three-little-circles" "3LC"
   , Tuple "general-update-pattern" "GUP"
   , Tuple "les-miserables" "LesMisScript"
-  , Tuple "metatree-visualizer" "MetaTreeDraw"
-  , Tuple "string-generator" "PrintTreeHandleActions"
+  , Tuple "meta-tree" "MetaTreeDraw"
+  , Tuple "print-tree" "PrintTreeHandleActions"
   , Tuple "spago-explorer" "LesMisScript"  -- Placeholder, uses similar code
   ]
 
@@ -49,8 +49,8 @@ visualizationUrlMap = Map.fromFoldable
   , Tuple "three-little-circles" "../v1/index.html#three-little-circles"
   , Tuple "general-update-pattern" "../v1/index.html#general-update-pattern"
   , Tuple "les-miserables" "../v1/index.html#les-miserables"
-  , Tuple "metatree-visualizer" "../v1/index.html#metatree"
-  , Tuple "string-generator" "../v1/index.html#string-generator"
+  , Tuple "meta-tree" "../v1/index.html#metatree"
+  , Tuple "print-tree" "../v1/index.html#string-generator"
   , Tuple "spago-explorer" "../v1/index.html#spago-explorer"
   ]
 
