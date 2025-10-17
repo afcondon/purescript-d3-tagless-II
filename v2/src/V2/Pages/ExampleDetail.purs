@@ -93,6 +93,17 @@ render state =
                 [ HH.text example.description ]
             ]
 
+        , -- About section
+          HH.div
+            [ HP.classes [ HH.ClassName "example-detail__about" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "example-detail__about-title" ] ]
+                [ HH.text "About This Example" ]
+            , HH.p
+                [ HP.classes [ HH.ClassName "example-detail__about-text" ] ]
+                [ HH.text example.about ]
+            ]
+
         , -- Main content area
           HH.div
             [ HP.classes [ HH.ClassName "example-detail__content" ] ]

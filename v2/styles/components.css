@@ -617,6 +617,29 @@
   line-height: 1.6;
 }
 
+.example-detail__about {
+  background-color: white;
+  padding: var(--spacing-xl);
+  margin: 0 var(--spacing-lg) var(--spacing-xl);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  border-left: 4px solid var(--color-primary);
+}
+
+.example-detail__about-title {
+  font-size: 1.25rem;
+  margin: 0 0 var(--spacing-md) 0;
+  color: var(--color-dark);
+  font-weight: 600;
+}
+
+.example-detail__about-text {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--color-text);
+  margin: 0;
+}
+
 .example-detail__content {
   /* Container for split pane or loading/error states */
 }

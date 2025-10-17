@@ -53,6 +53,7 @@ type ExampleMetadata = {
   id :: ExampleId
 , title :: String
 , description :: String
+, about :: String  -- Detailed explanation of the example
 , difficulty :: Difficulty
 , category :: Category
 , tags :: Array String
