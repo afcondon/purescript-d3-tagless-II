@@ -3,8 +3,8 @@
   var semigroupoidFn = {
     compose: function(f) {
       return function(g) {
-        return function(x2) {
-          return f(g(x2));
+        return function(x5) {
+          return f(g(x5));
         };
       };
     }
@@ -15,8 +15,8 @@
     return dict.identity;
   };
   var categoryFn = {
-    identity: function(x2) {
-      return x2;
+    identity: function(x5) {
+      return x5;
     },
     Semigroupoid0: function() {
       return semigroupoidFn;
@@ -29,9 +29,9 @@
   // output/Data.Function/index.js
   var on = function(f) {
     return function(g) {
-      return function(x2) {
-        return function(y2) {
-          return f(g(x2))(g(y2));
+      return function(x5) {
+        return function(y5) {
+          return f(g(x5))(g(y5));
         };
       };
     };
@@ -91,8 +91,8 @@
   var voidLeft = function(dictFunctor) {
     var map111 = map(dictFunctor);
     return function(f) {
-      return function(x2) {
-        return map111($$const(x2))(f);
+      return function(x5) {
+        return map111($$const(x5))(f);
       };
     };
   };
@@ -102,9 +102,9 @@
   var flap = function(dictFunctor) {
     var map111 = map(dictFunctor);
     return function(ff2) {
-      return function(x2) {
+      return function(x5) {
         return map111(function(f) {
-          return f(x2);
+          return f(x5);
         })(ff2);
       };
     };
@@ -117,20 +117,20 @@
   };
   var applySecond = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map26 = map(dictApply.Functor0());
+    var map28 = map(dictApply.Functor0());
     return function(a2) {
       return function(b2) {
-        return apply1(map26($$const(identity2))(a2))(b2);
+        return apply1(map28($$const(identity2))(a2))(b2);
       };
     };
   };
   var lift2 = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map26 = map(dictApply.Functor0());
+    var map28 = map(dictApply.Functor0());
     return function(f) {
       return function(a2) {
         return function(b2) {
-          return apply1(map26(f)(a2))(b2);
+          return apply1(map28(f)(a2))(b2);
         };
       };
     };
@@ -220,9 +220,9 @@
   var unsafeCompareImpl = function(lt) {
     return function(eq5) {
       return function(gt) {
-        return function(x2) {
-          return function(y2) {
-            return x2 < y2 ? lt : x2 === y2 ? eq5 : gt;
+        return function(x5) {
+          return function(y5) {
+            return x5 < y5 ? lt : x5 === y5 ? eq5 : gt;
           };
         };
       };
@@ -316,21 +316,21 @@
   };
 
   // output/Data.Ring/foreign.js
-  var intSub = function(x2) {
-    return function(y2) {
-      return x2 - y2 | 0;
+  var intSub = function(x5) {
+    return function(y5) {
+      return x5 - y5 | 0;
     };
   };
 
   // output/Data.Semiring/foreign.js
-  var intAdd = function(x2) {
-    return function(y2) {
-      return x2 + y2 | 0;
+  var intAdd = function(x5) {
+    return function(y5) {
+      return x5 + y5 | 0;
     };
   };
-  var intMul = function(x2) {
-    return function(y2) {
-      return x2 * y2 | 0;
+  var intMul = function(x5) {
+    return function(y5) {
+      return x5 * y5 | 0;
     };
   };
 
@@ -563,20 +563,20 @@
   };
 
   // output/Data.EuclideanRing/foreign.js
-  var intDegree = function(x2) {
-    return Math.min(Math.abs(x2), 2147483647);
+  var intDegree = function(x5) {
+    return Math.min(Math.abs(x5), 2147483647);
   };
-  var intDiv = function(x2) {
-    return function(y2) {
-      if (y2 === 0) return 0;
-      return y2 > 0 ? Math.floor(x2 / y2) : -Math.floor(x2 / -y2);
+  var intDiv = function(x5) {
+    return function(y5) {
+      if (y5 === 0) return 0;
+      return y5 > 0 ? Math.floor(x5 / y5) : -Math.floor(x5 / -y5);
     };
   };
-  var intMod = function(x2) {
-    return function(y2) {
-      if (y2 === 0) return 0;
-      var yy = Math.abs(y2);
-      return (x2 % yy + yy) % yy;
+  var intMod = function(x5) {
+    return function(y5) {
+      if (y5 === 0) return 0;
+      var yy = Math.abs(y5);
+      return (x5 % yy + yy) % yy;
     };
   };
 
@@ -684,9 +684,9 @@
     return function(dictEq1) {
       var eq14 = eq(dictEq1);
       return {
-        eq: function(x2) {
-          return function(y2) {
-            return eq5(x2.value0)(y2.value0) && eq14(x2.value1)(y2.value1);
+        eq: function(x5) {
+          return function(y5) {
+            return eq5(x5.value0)(y5.value0) && eq14(x5.value1)(y5.value1);
           };
         }
       };
@@ -699,9 +699,9 @@
       var compare12 = compare(dictOrd1);
       var eqTuple2 = eqTuple1(dictOrd1.Eq0());
       return {
-        compare: function(x2) {
-          return function(y2) {
-            var v = compare2(x2.value0)(y2.value0);
+        compare: function(x5) {
+          return function(y5) {
+            var v = compare2(x5.value0)(y5.value0);
             if (v instanceof LT) {
               return LT.value;
             }
@@ -710,7 +710,7 @@
               return GT.value;
             }
             ;
-            return compare12(x2.value1)(y2.value1);
+            return compare12(x5.value1)(y5.value1);
           };
         },
         Eq0: function() {
@@ -806,14 +806,14 @@
   var eqMaybe = function(dictEq) {
     var eq5 = eq(dictEq);
     return {
-      eq: function(x2) {
-        return function(y2) {
-          if (x2 instanceof Nothing && y2 instanceof Nothing) {
+      eq: function(x5) {
+        return function(y5) {
+          if (x5 instanceof Nothing && y5 instanceof Nothing) {
             return true;
           }
           ;
-          if (x2 instanceof Just && y2 instanceof Just) {
-            return eq5(x2.value0)(y2.value0);
+          if (x5 instanceof Just && y5 instanceof Just) {
+            return eq5(x5.value0)(y5.value0);
           }
           ;
           return false;
@@ -1940,18 +1940,18 @@
   var $$try = function(dictMonadError) {
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
-    var map26 = map(Monad0.Bind1().Apply0().Functor0());
+    var map28 = map(Monad0.Bind1().Apply0().Functor0());
     var pure15 = pure(Monad0.Applicative0());
     return function(a2) {
-      return catchError1(map26(Right.create)(a2))(function($52) {
+      return catchError1(map28(Right.create)(a2))(function($52) {
         return pure15(Left.create($52));
       });
     };
   };
 
   // output/Data.Identity/index.js
-  var Identity = function(x2) {
-    return x2;
+  var Identity = function(x5) {
+    return x5;
   };
   var functorIdentity = {
     map: function(f) {
@@ -2126,8 +2126,8 @@
 
   // output/Control.Monad.Except.Trans/index.js
   var map4 = /* @__PURE__ */ map(functorEither);
-  var ExceptT = function(x2) {
-    return x2;
+  var ExceptT = function(x5) {
+    return x5;
   };
   var runExceptT = function(v) {
     return v;
@@ -2256,8 +2256,8 @@
   };
 
   // output/Unsafe.Coerce/foreign.js
-  var unsafeCoerce2 = function(x2) {
-    return x2;
+  var unsafeCoerce2 = function(x5) {
+    return x5;
   };
 
   // output/Safe.Coerce/index.js
@@ -2322,8 +2322,8 @@
   };
 
   // output/Data.Monoid.Disj/index.js
-  var Disj = function(x2) {
-    return x2;
+  var Disj = function(x5) {
+    return x5;
   };
   var semigroupDisj = function(dictHeytingAlgebra) {
     var disj2 = disj(dictHeytingAlgebra);
@@ -2520,9 +2520,9 @@
       var append6 = append(dictMonoid.Semigroup0());
       var mempty3 = mempty(dictMonoid);
       return function(f) {
-        return foldr22(function(x2) {
+        return foldr22(function(x5) {
           return function(acc) {
-            return append6(f(x2))(acc);
+            return append6(f(x5))(acc);
           };
         })(mempty3);
       };
@@ -2568,7 +2568,7 @@
       };
     }
     return function(apply3) {
-      return function(map26) {
+      return function(map28) {
         return function(pure15) {
           return function(f) {
             return function(array4) {
@@ -2577,14 +2577,14 @@
                   case 0:
                     return pure15([]);
                   case 1:
-                    return map26(array1)(f(array4[bot]));
+                    return map28(array1)(f(array4[bot]));
                   case 2:
-                    return apply3(map26(array2)(f(array4[bot])))(f(array4[bot + 1]));
+                    return apply3(map28(array2)(f(array4[bot])))(f(array4[bot + 1]));
                   case 3:
-                    return apply3(apply3(map26(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
+                    return apply3(apply3(map28(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
                   default:
                     var pivot = bot + Math.floor((top4 - bot) / 4) * 2;
-                    return apply3(map26(concat2)(go2(bot, pivot)))(go2(pivot, top4));
+                    return apply3(map28(concat2)(go2(bot, pivot)))(go2(pivot, top4));
                 }
               }
               return go2(0, array4.length);
@@ -2692,8 +2692,8 @@
   var pure2 = /* @__PURE__ */ pure(applicativeEffect);
   var $$void3 = /* @__PURE__ */ $$void(functorEffect);
   var map5 = /* @__PURE__ */ map(functorEffect);
-  var Canceler = function(x2) {
-    return x2;
+  var Canceler = function(x5) {
+    return x5;
   };
   var suspendAff = /* @__PURE__ */ _fork(false);
   var functorParAff = {
@@ -2924,8 +2924,8 @@
       var pure15 = pure(dictMonad.Applicative0());
       return function(m) {
         return function(s) {
-          return bind10(m)(function(x2) {
-            return pure15(new Tuple(x2, s));
+          return bind10(m)(function(x5) {
+            return pure15(new Tuple(x5, s));
           });
         };
       };
@@ -2933,12 +2933,12 @@
   };
   var lift3 = /* @__PURE__ */ lift(monadTransStateT);
   var functorStateT = function(dictFunctor) {
-    var map26 = map(dictFunctor);
+    var map28 = map(dictFunctor);
     return {
       map: function(f) {
         return function(v) {
           return function(s) {
-            return map26(function(v1) {
+            return map28(function(v1) {
               return new Tuple(f(v1.value0), v1.value1);
             })(v(s));
           };
@@ -3049,8 +3049,8 @@
   function nullable(a2, r, f) {
     return a2 == null ? r : f(a2);
   }
-  function notNull(x2) {
-    return x2;
+  function notNull(x5) {
+    return x5;
   }
 
   // output/Data.Nullable/index.js
@@ -3178,8 +3178,8 @@
 
   // output/Web.HTML.HTMLElement/index.js
   var toNode = unsafeCoerce2;
-  var fromElement = function(x2) {
-    return _read(Nothing.value, Just.create, x2);
+  var fromElement = function(x5) {
+    return _read(Nothing.value, Just.create, x5);
   };
 
   // output/Data.Enum/foreign.js
@@ -3205,14 +3205,14 @@
     var bottom1 = bottom(dictBoundedEnum.Bounded0());
     return function(low2) {
       return function(high2) {
-        return function(x2) {
-          var v = toEnum1(x2);
+        return function(x5) {
+          var v = toEnum1(x5);
           if (v instanceof Just) {
             return v.value0;
           }
           ;
           if (v instanceof Nothing) {
-            var $140 = x2 < fromEnum1(bottom1);
+            var $140 = x5 < fromEnum1(bottom1);
             if ($140) {
               return low2;
             }
@@ -3428,8 +3428,8 @@
     };
     return Cons3;
   })();
-  var NonEmptyList = function(x2) {
-    return x2;
+  var NonEmptyList = function(x5) {
+    return x5;
   };
   var toList = function(v) {
     return new Cons(v.value0, v.value1);
@@ -4628,6 +4628,19 @@
   })();
 
   // output/Data.Array/foreign.js
+  var range2 = function(start3) {
+    return function(end) {
+      var step4 = start3 > end ? -1 : 1;
+      var result = new Array(step4 * (end - start3) + 1);
+      var i2 = start3, n = 0;
+      while (i2 !== end) {
+        result[n++] = i2;
+        i2 += step4;
+      }
+      result[n] = i2;
+      return result;
+    };
+  };
   var replicateFill = function(count) {
     return function(value13) {
       if (count < 1) {
@@ -4738,8 +4751,8 @@
   };
   var unsafeIndex1 = /* @__PURE__ */ unsafeIndex();
   var snoc = function(xs) {
-    return function(x2) {
-      return withArray(push(x2))(xs)();
+    return function(x5) {
+      return withArray(push(x5))(xs)();
     };
   };
   var intercalate3 = function(dictMonoid) {
@@ -5410,6 +5423,11 @@
     return Object.prototype.toString.call(value13) === "[object Array]";
   };
 
+  // output/Data.Int/foreign.js
+  var toNumber = function(n) {
+    return n;
+  };
+
   // output/Data.List.NonEmpty/index.js
   var singleton4 = /* @__PURE__ */ (function() {
     var $200 = singleton2(plusList);
@@ -5420,9 +5438,9 @@
   var head2 = function(v) {
     return v.value0;
   };
-  var cons3 = function(y2) {
+  var cons3 = function(y5) {
     return function(v) {
-      return new NonEmpty(y2, new Cons(v.value0, v.value1));
+      return new NonEmpty(y5, new Cons(v.value0, v.value1));
     };
   };
 
@@ -5567,6 +5585,11 @@
   });
 
   // output/Data.Function.Uncurried/foreign.js
+  var mkFn2 = function(fn) {
+    return function(a2, b2) {
+      return fn(a2)(b2);
+    };
+  };
   var runFn3 = function(fn) {
     return function(a2) {
       return function(b2) {
@@ -5580,8 +5603,8 @@
     return function(a2) {
       return function(b2) {
         return function(c) {
-          return function(d5) {
-            return fn(a2, b2, c, d5);
+          return function(d6) {
+            return fn(a2, b2, c, d6);
           };
         };
       };
@@ -5875,8 +5898,8 @@
   };
 
   // output/Halogen.HTML.Core/index.js
-  var HTML = function(x2) {
-    return x2;
+  var HTML = function(x5) {
+    return x5;
   };
   var widget = function($28) {
     return HTML(Widget.create($28));
@@ -6028,8 +6051,8 @@
   };
   var functorFreeAp = {
     map: function(f) {
-      return function(x2) {
-        return mkAp(new Pure(f))(x2);
+      return function(x5) {
+        return mkAp(new Pure(f))(x5);
       };
     }
   };
@@ -6259,9 +6282,9 @@
               var v = uncons2(xs);
               if (v instanceof Nothing) {
                 $tco_done1 = true;
-                return foldl4(function(x2) {
+                return foldl4(function(x5) {
                   return function(i2) {
-                    return i2(x2);
+                    return i2(x5);
                   };
                 })(b2)(ys);
               }
@@ -6546,11 +6569,11 @@
 
   // output/Halogen.Query.HalogenM/index.js
   var identity7 = /* @__PURE__ */ identity(categoryFn);
-  var SubscriptionId = function(x2) {
-    return x2;
+  var SubscriptionId = function(x5) {
+    return x5;
   };
-  var ForkId = function(x2) {
-    return x2;
+  var ForkId = function(x5) {
+    return x5;
   };
   var State = /* @__PURE__ */ (function() {
     function State2(value0) {
@@ -6683,8 +6706,8 @@
     };
     return GetRef2;
   })();
-  var HalogenM = function(x2) {
-    return x2;
+  var HalogenM = function(x5) {
+    return x5;
   };
   var subscribe2 = function(es) {
     return liftF(new Subscribe(function(v) {
@@ -8078,25 +8101,25 @@
     return Application2;
   })();
   var eqCategory = {
-    eq: function(x2) {
-      return function(y2) {
-        if (x2 instanceof BasicChart && y2 instanceof BasicChart) {
+    eq: function(x5) {
+      return function(y5) {
+        if (x5 instanceof BasicChart && y5 instanceof BasicChart) {
           return true;
         }
         ;
-        if (x2 instanceof AdvancedLayout && y2 instanceof AdvancedLayout) {
+        if (x5 instanceof AdvancedLayout && y5 instanceof AdvancedLayout) {
           return true;
         }
         ;
-        if (x2 instanceof Interactive2 && y2 instanceof Interactive2) {
+        if (x5 instanceof Interactive2 && y5 instanceof Interactive2) {
           return true;
         }
         ;
-        if (x2 instanceof Interpreter && y2 instanceof Interpreter) {
+        if (x5 instanceof Interpreter && y5 instanceof Interpreter) {
           return true;
         }
         ;
-        if (x2 instanceof Application && y2 instanceof Application) {
+        if (x5 instanceof Application && y5 instanceof Application) {
           return true;
         }
         ;
@@ -8950,8 +8973,8 @@
   })();
 
   // output/Data.Argonaut.Core/foreign.js
-  function id3(x2) {
-    return x2;
+  function id3(x5) {
+    return x5;
   }
   function stringify(j) {
     return JSON.stringify(j);
@@ -9317,8 +9340,8 @@
         }
         ;
         if (req2.responseFormat instanceof Document2) {
-          return function(x2) {
-            return alt6(unsafeReadTagged2("Document")(x2))(alt6(unsafeReadTagged2("XMLDocument")(x2))(unsafeReadTagged2("HTMLDocument")(x2)));
+          return function(x5) {
+            return alt6(unsafeReadTagged2("Document")(x5))(alt6(unsafeReadTagged2("XMLDocument")(x5))(unsafeReadTagged2("HTMLDocument")(x5)));
           };
         }
         ;
@@ -9541,48 +9564,6 @@
     };
   }
 
-  // output/D3.Examples.Charts.Model/index.js
-  var sineWaveData = [{
-    x: 0,
-    y: 100
-  }, {
-    x: 5,
-    y: 125
-  }, {
-    x: 10,
-    y: 145
-  }, {
-    x: 15,
-    y: 150
-  }, {
-    x: 20,
-    y: 145
-  }, {
-    x: 25,
-    y: 125
-  }, {
-    x: 30,
-    y: 100
-  }, {
-    x: 35,
-    y: 75
-  }, {
-    x: 40,
-    y: 55
-  }, {
-    x: 45,
-    y: 50
-  }, {
-    x: 50,
-    y: 55
-  }, {
-    x: 55,
-    y: 75
-  }, {
-    x: 60,
-    y: 100
-  }];
-
   // output/D3.Attributes.Instances/index.js
   var Static = /* @__PURE__ */ (function() {
     function Static2(value0) {
@@ -9699,6 +9680,11 @@
   var toAttrString = {
     toAttr: function($37) {
       return StringAttr.create(Static.create($37));
+    }
+  };
+  var toAttrNumberFnI = {
+    toAttr: function($38) {
+      return NumberAttr.create(FnI.create(mkFn2($38)));
     }
   };
   var toAttrNumber = {
@@ -9960,10 +9946,13 @@
       return handle;
     };
   }
-  unpin = (d5) => {
-    d5.fx = null;
-    d5.fy = null;
-    return d5;
+  function keyIsID_(d6) {
+    return d6.id;
+  }
+  unpin = (d6) => {
+    d6.fx = null;
+    d6.fy = null;
+    return d6;
   };
   getBaseForAssign = (newNodeMap, key) => {
     let newnode = newNodeMap.get(key);
@@ -9979,9 +9968,48 @@
       return d;
     }
   };
-  var linkHorizontal_ = d3.linkHorizontal().x((d5) => d5.y).y((d5) => d5.x);
-  var linkHorizontal2_ = d3.linkHorizontal().x((d5) => d5.x).y((d5) => d5.y);
-  var linkVertical_ = d3.linkVertical().x((d5) => d5.x).y((d5) => d5.y);
+  var linkHorizontal_ = d3.linkHorizontal().x((d6) => d6.y).y((d6) => d6.x);
+  var linkHorizontal2_ = d3.linkHorizontal().x((d6) => d6.x).y((d6) => d6.y);
+  var linkVertical_ = d3.linkVertical().x((d6) => d6.x).y((d6) => d6.y);
+  function chordLayout_(matrix) {
+    return d3.chord()(matrix);
+  }
+  function chordGroups_(chordLayout) {
+    return chordLayout.groups;
+  }
+  function chordArray_(chordLayout) {
+    return Array.from(chordLayout);
+  }
+  function ribbonGenerator_() {
+    return d3.ribbon();
+  }
+  function arcGenerator_() {
+    return d3.arc();
+  }
+  function ribbonPath_(generator) {
+    return (chord) => generator(chord);
+  }
+  function arcPath_(generator) {
+    return (group2) => generator(group2);
+  }
+  function setRibbonRadius_(generator) {
+    return (radius4) => {
+      generator.radius(radius4);
+      return generator;
+    };
+  }
+  function setArcInnerRadius_(generator) {
+    return (radius4) => {
+      generator.innerRadius(radius4);
+      return generator;
+    };
+  }
+  function setArcOuterRadius_(generator) {
+    return (radius4) => {
+      generator.outerRadius(radius4);
+      return generator;
+    };
+  }
   function d3AttachZoomDefaultExtent_(selection2) {
     return (config) => {
       function zoomed({ transform: transform3 }) {
@@ -10219,6 +10247,20 @@
   var map21 = /* @__PURE__ */ map(functorArray);
   var show4 = /* @__PURE__ */ show(showNumber);
   var flap2 = /* @__PURE__ */ flap(functorArray);
+  var y = function(dictToAttr) {
+    var $115 = AttributeSetter.create("y");
+    var $116 = toAttr(dictToAttr);
+    return function($117) {
+      return AttrT.create($115($116($117)));
+    };
+  };
+  var x = function(dictToAttr) {
+    var $124 = AttributeSetter.create("x");
+    var $125 = toAttr(dictToAttr);
+    return function($126) {
+      return AttrT.create($124($125($126)));
+    };
+  };
   var width8 = function(dictToAttr) {
     var $127 = AttributeSetter.create("width");
     var $128 = toAttr(dictToAttr);
@@ -10242,6 +10284,20 @@
       return AttrT.create($130(StringAttr.create(Fn.create($131))));
     };
   })();
+  var textAnchor = function(dictToAttr) {
+    var $132 = AttributeSetter.create("text-anchor");
+    var $133 = toAttr(dictToAttr);
+    return function($134) {
+      return AttrT.create($132($133($134)));
+    };
+  };
+  var text6 = function(dictToAttr) {
+    var $135 = AttributeSetter.create("text");
+    var $136 = toAttr(dictToAttr);
+    return function($137) {
+      return TextT.create($135($136($137)));
+    };
+  };
   var strokeWidth = function(dictToAttr) {
     var $138 = AttributeSetter.create("stroke-width");
     var $139 = toAttr(dictToAttr);
@@ -10256,11 +10312,32 @@
       return AttrT.create($144($145($146)));
     };
   };
+  var radius = function(dictToAttr) {
+    var $156 = AttributeSetter.create("r");
+    var $157 = toAttr(dictToAttr);
+    return function($158) {
+      return AttrT.create($156($157($158)));
+    };
+  };
   var height8 = function(dictToAttr) {
     var $171 = AttributeSetter.create("height");
     var $172 = toAttr(dictToAttr);
     return function($173) {
       return AttrT.create($171($172($173)));
+    };
+  };
+  var fontSize = function(dictToAttr) {
+    var $174 = AttributeSetter.create("font-size");
+    var $175 = toAttr(dictToAttr);
+    return function($176) {
+      return AttrT.create($174($175($176)));
+    };
+  };
+  var fillOpacity = function(dictToAttr) {
+    var $180 = AttributeSetter.create("fill-opacity");
+    var $181 = toAttr(dictToAttr);
+    return function($182) {
+      return AttrT.create($180($181($182)));
     };
   };
   var fill = function(dictToAttr) {
@@ -10275,6 +10352,20 @@
     var $193 = toAttr(dictToAttr);
     return function($194) {
       return AttrT.create($192($193($194)));
+    };
+  };
+  var cy = function(dictToAttr) {
+    var $195 = AttributeSetter.create("cy");
+    var $196 = toAttr(dictToAttr);
+    return function($197) {
+      return AttrT.create($195($196($197)));
+    };
+  };
+  var cx = function(dictToAttr) {
+    var $198 = AttributeSetter.create("cx");
+    var $199 = toAttr(dictToAttr);
+    return function($200) {
+      return AttrT.create($198($199($200)));
     };
   };
   var classed = function(dictToAttr) {
@@ -10308,38 +10399,38 @@
     let compare12, compare2, delta;
     if (f.length !== 2) {
       compare12 = ascending;
-      compare2 = (d5, x2) => ascending(f(d5), x2);
-      delta = (d5, x2) => f(d5) - x2;
+      compare2 = (d6, x5) => ascending(f(d6), x5);
+      delta = (d6, x5) => f(d6) - x5;
     } else {
       compare12 = f === ascending || f === descending ? f : zero2;
       compare2 = f;
       delta = f;
     }
-    function left2(a2, x2, lo = 0, hi = a2.length) {
+    function left2(a2, x5, lo = 0, hi = a2.length) {
       if (lo < hi) {
-        if (compare12(x2, x2) !== 0) return hi;
+        if (compare12(x5, x5) !== 0) return hi;
         do {
           const mid = lo + hi >>> 1;
-          if (compare2(a2[mid], x2) < 0) lo = mid + 1;
+          if (compare2(a2[mid], x5) < 0) lo = mid + 1;
           else hi = mid;
         } while (lo < hi);
       }
       return lo;
     }
-    function right2(a2, x2, lo = 0, hi = a2.length) {
+    function right2(a2, x5, lo = 0, hi = a2.length) {
       if (lo < hi) {
-        if (compare12(x2, x2) !== 0) return hi;
+        if (compare12(x5, x5) !== 0) return hi;
         do {
           const mid = lo + hi >>> 1;
-          if (compare2(a2[mid], x2) <= 0) lo = mid + 1;
+          if (compare2(a2[mid], x5) <= 0) lo = mid + 1;
           else hi = mid;
         } while (lo < hi);
       }
       return lo;
     }
-    function center2(a2, x2, lo = 0, hi = a2.length) {
-      const i2 = left2(a2, x2, lo, hi - 1);
-      return i2 > lo && delta(a2[i2 - 1], x2) > -delta(a2[i2], x2) ? i2 - 1 : i2;
+    function center2(a2, x5, lo = 0, hi = a2.length) {
+      const i2 = left2(a2, x5, lo, hi - 1);
+      return i2 > lo && delta(a2[i2 - 1], x5) > -delta(a2[i2], x5) ? i2 - 1 : i2;
     }
     return { left: left2, center: center2, right: right2 };
   }
@@ -10348,8 +10439,8 @@
   }
 
   // node_modules/d3-array/src/number.js
-  function number(x2) {
-    return x2 === null ? NaN : +x2;
+  function number(x5) {
+    return x5 === null ? NaN : +x5;
   }
 
   // node_modules/d3-array/src/bisect.js
@@ -10410,8 +10501,8 @@
   }
 
   // node_modules/d3-axis/src/identity.js
-  function identity_default(x2) {
-    return x2;
+  function identity_default(x5) {
+    return x5;
   }
 
   // node_modules/d3-axis/src/axis.js
@@ -10420,51 +10511,51 @@
   var bottom3 = 3;
   var left = 4;
   var epsilon = 1e-6;
-  function translateX(x2) {
-    return "translate(" + x2 + ",0)";
+  function translateX(x5) {
+    return "translate(" + x5 + ",0)";
   }
-  function translateY(y2) {
-    return "translate(0," + y2 + ")";
+  function translateY(y5) {
+    return "translate(0," + y5 + ")";
   }
   function number2(scale) {
-    return (d5) => +scale(d5);
+    return (d6) => +scale(d6);
   }
   function center(scale, offset) {
     offset = Math.max(0, scale.bandwidth() - offset * 2) / 2;
     if (scale.round()) offset = Math.round(offset);
-    return (d5) => +scale(d5) + offset;
+    return (d6) => +scale(d6) + offset;
   }
   function entering() {
     return !this.__axis;
   }
   function axis(orient, scale) {
-    var tickArguments = [], tickValues = null, tickFormat2 = null, tickSizeInner = 6, tickSizeOuter = 6, tickPadding = 3, offset = typeof window !== "undefined" && window.devicePixelRatio > 1 ? 0 : 0.5, k = orient === top3 || orient === left ? -1 : 1, x2 = orient === left || orient === right ? "x" : "y", transform3 = orient === top3 || orient === bottom3 ? translateX : translateY;
+    var tickArguments = [], tickValues = null, tickFormat2 = null, tickSizeInner = 6, tickSizeOuter = 6, tickPadding = 3, offset = typeof window !== "undefined" && window.devicePixelRatio > 1 ? 0 : 0.5, k = orient === top3 || orient === left ? -1 : 1, x5 = orient === left || orient === right ? "x" : "y", transform3 = orient === top3 || orient === bottom3 ? translateX : translateY;
     function axis2(context) {
-      var values = tickValues == null ? scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain() : tickValues, format2 = tickFormat2 == null ? scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity_default : tickFormat2, spacing = Math.max(tickSizeInner, 0) + tickPadding, range3 = scale.range(), range0 = +range3[0] + offset, range1 = +range3[range3.length - 1] + offset, position2 = (scale.bandwidth ? center : number2)(scale.copy(), offset), selection2 = context.selection ? context.selection() : context, path2 = selection2.selectAll(".domain").data([null]), tick = selection2.selectAll(".tick").data(values, scale).order(), tickExit = tick.exit(), tickEnter = tick.enter().append("g").attr("class", "tick"), line = tick.select("line"), text6 = tick.select("text");
+      var values = tickValues == null ? scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain() : tickValues, format2 = tickFormat2 == null ? scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity_default : tickFormat2, spacing = Math.max(tickSizeInner, 0) + tickPadding, range3 = scale.range(), range0 = +range3[0] + offset, range1 = +range3[range3.length - 1] + offset, position2 = (scale.bandwidth ? center : number2)(scale.copy(), offset), selection2 = context.selection ? context.selection() : context, path2 = selection2.selectAll(".domain").data([null]), tick = selection2.selectAll(".tick").data(values, scale).order(), tickExit = tick.exit(), tickEnter = tick.enter().append("g").attr("class", "tick"), line = tick.select("line"), text8 = tick.select("text");
       path2 = path2.merge(path2.enter().insert("path", ".tick").attr("class", "domain").attr("stroke", "currentColor"));
       tick = tick.merge(tickEnter);
-      line = line.merge(tickEnter.append("line").attr("stroke", "currentColor").attr(x2 + "2", k * tickSizeInner));
-      text6 = text6.merge(tickEnter.append("text").attr("fill", "currentColor").attr(x2, k * spacing).attr("dy", orient === top3 ? "0em" : orient === bottom3 ? "0.71em" : "0.32em"));
+      line = line.merge(tickEnter.append("line").attr("stroke", "currentColor").attr(x5 + "2", k * tickSizeInner));
+      text8 = text8.merge(tickEnter.append("text").attr("fill", "currentColor").attr(x5, k * spacing).attr("dy", orient === top3 ? "0em" : orient === bottom3 ? "0.71em" : "0.32em"));
       if (context !== selection2) {
         path2 = path2.transition(context);
         tick = tick.transition(context);
         line = line.transition(context);
-        text6 = text6.transition(context);
-        tickExit = tickExit.transition(context).attr("opacity", epsilon).attr("transform", function(d5) {
-          return isFinite(d5 = position2(d5)) ? transform3(d5 + offset) : this.getAttribute("transform");
+        text8 = text8.transition(context);
+        tickExit = tickExit.transition(context).attr("opacity", epsilon).attr("transform", function(d6) {
+          return isFinite(d6 = position2(d6)) ? transform3(d6 + offset) : this.getAttribute("transform");
         });
-        tickEnter.attr("opacity", epsilon).attr("transform", function(d5) {
+        tickEnter.attr("opacity", epsilon).attr("transform", function(d6) {
           var p2 = this.parentNode.__axis;
-          return transform3((p2 && isFinite(p2 = p2(d5)) ? p2 : position2(d5)) + offset);
+          return transform3((p2 && isFinite(p2 = p2(d6)) ? p2 : position2(d6)) + offset);
         });
       }
       tickExit.remove();
       path2.attr("d", orient === left || orient === right ? tickSizeOuter ? "M" + k * tickSizeOuter + "," + range0 + "H" + offset + "V" + range1 + "H" + k * tickSizeOuter : "M" + offset + "," + range0 + "V" + range1 : tickSizeOuter ? "M" + range0 + "," + k * tickSizeOuter + "V" + offset + "H" + range1 + "V" + k * tickSizeOuter : "M" + range0 + "," + offset + "H" + range1);
-      tick.attr("opacity", 1).attr("transform", function(d5) {
-        return transform3(position2(d5) + offset);
+      tick.attr("opacity", 1).attr("transform", function(d6) {
+        return transform3(position2(d6) + offset);
       });
-      line.attr(x2 + "2", k * tickSizeInner);
-      text6.attr(x2, k * spacing).text(format2);
+      line.attr(x5 + "2", k * tickSizeInner);
+      text8.attr(x5, k * spacing).text(format2);
       selection2.filter(entering).attr("fill", "none").attr("font-size", 10).attr("font-family", "sans-serif").attr("text-anchor", orient === right ? "start" : orient === left ? "end" : "middle");
       selection2.each(function() {
         this.__axis = position2;
@@ -10637,8 +10728,8 @@
   }
 
   // node_modules/d3-selection/src/array.js
-  function array(x2) {
-    return x2 == null ? [] : Array.isArray(x2) ? x2 : Array.from(x2);
+  function array(x5) {
+    return x5 == null ? [] : Array.isArray(x5) ? x5 : Array.from(x5);
   }
 
   // node_modules/d3-selection/src/selectorAll.js
@@ -10757,9 +10848,9 @@
   };
 
   // node_modules/d3-selection/src/constant.js
-  function constant_default(x2) {
+  function constant_default(x5) {
     return function() {
-      return x2;
+      return x5;
     };
   }
 
@@ -11733,32 +11824,32 @@
   }
 
   // node_modules/d3-interpolate/src/constant.js
-  var constant_default2 = (x2) => () => x2;
+  var constant_default2 = (x5) => () => x5;
 
   // node_modules/d3-interpolate/src/color.js
-  function linear(a2, d5) {
+  function linear(a2, d6) {
     return function(t) {
-      return a2 + t * d5;
+      return a2 + t * d6;
     };
   }
-  function exponential(a2, b2, y2) {
-    return a2 = Math.pow(a2, y2), b2 = Math.pow(b2, y2) - a2, y2 = 1 / y2, function(t) {
-      return Math.pow(a2 + t * b2, y2);
+  function exponential(a2, b2, y5) {
+    return a2 = Math.pow(a2, y5), b2 = Math.pow(b2, y5) - a2, y5 = 1 / y5, function(t) {
+      return Math.pow(a2 + t * b2, y5);
     };
   }
-  function gamma(y2) {
-    return (y2 = +y2) === 1 ? nogamma : function(a2, b2) {
-      return b2 - a2 ? exponential(a2, b2, y2) : constant_default2(isNaN(a2) ? b2 : a2);
+  function gamma(y5) {
+    return (y5 = +y5) === 1 ? nogamma : function(a2, b2) {
+      return b2 - a2 ? exponential(a2, b2, y5) : constant_default2(isNaN(a2) ? b2 : a2);
     };
   }
   function nogamma(a2, b2) {
-    var d5 = b2 - a2;
-    return d5 ? linear(a2, d5) : constant_default2(isNaN(a2) ? b2 : a2);
+    var d6 = b2 - a2;
+    return d6 ? linear(a2, d6) : constant_default2(isNaN(a2) ? b2 : a2);
   }
 
   // node_modules/d3-interpolate/src/rgb.js
-  var rgb_default = (function rgbGamma(y2) {
-    var color2 = gamma(y2);
+  var rgb_default = (function rgbGamma(y5) {
+    var color2 = gamma(y5);
     function rgb2(start3, end) {
       var r = color2((start3 = rgb(start3)).r, (end = rgb(end)).r), g = color2(start3.g, end.g), b2 = color2(start3.b, end.b), opacity = nogamma(start3.opacity, end.opacity);
       return function(t) {
@@ -11773,10 +11864,10 @@
     return rgb2;
   })(1);
   function rgbSpline(spline) {
-    return function(colors) {
-      var n = colors.length, r = new Array(n), g = new Array(n), b2 = new Array(n), i2, color2;
+    return function(colors2) {
+      var n = colors2.length, r = new Array(n), g = new Array(n), b2 = new Array(n), i2, color2;
       for (i2 = 0; i2 < n; ++i2) {
-        color2 = rgb(colors[i2]);
+        color2 = rgb(colors2[i2]);
         r[i2] = color2.r || 0;
         g[i2] = color2.g || 0;
         b2[i2] = color2.b || 0;
@@ -11805,26 +11896,26 @@
       return c;
     };
   }
-  function isNumberArray(x2) {
-    return ArrayBuffer.isView(x2) && !(x2 instanceof DataView);
+  function isNumberArray(x5) {
+    return ArrayBuffer.isView(x5) && !(x5 instanceof DataView);
   }
 
   // node_modules/d3-interpolate/src/array.js
   function genericArray(a2, b2) {
-    var nb = b2 ? b2.length : 0, na = a2 ? Math.min(nb, a2.length) : 0, x2 = new Array(na), c = new Array(nb), i2;
-    for (i2 = 0; i2 < na; ++i2) x2[i2] = value_default(a2[i2], b2[i2]);
+    var nb = b2 ? b2.length : 0, na = a2 ? Math.min(nb, a2.length) : 0, x5 = new Array(na), c = new Array(nb), i2;
+    for (i2 = 0; i2 < na; ++i2) x5[i2] = value_default(a2[i2], b2[i2]);
     for (; i2 < nb; ++i2) c[i2] = b2[i2];
     return function(t) {
-      for (i2 = 0; i2 < na; ++i2) c[i2] = x2[i2](t);
+      for (i2 = 0; i2 < na; ++i2) c[i2] = x5[i2](t);
       return c;
     };
   }
 
   // node_modules/d3-interpolate/src/date.js
   function date_default(a2, b2) {
-    var d5 = /* @__PURE__ */ new Date();
+    var d6 = /* @__PURE__ */ new Date();
     return a2 = +a2, b2 = +b2, function(t) {
-      return d5.setTime(a2 * (1 - t) + b2 * t), d5;
+      return d6.setTime(a2 * (1 - t) + b2 * t), d6;
     };
   }
 
@@ -11918,12 +12009,12 @@
     scaleX: 1,
     scaleY: 1
   };
-  function decompose_default(a2, b2, c, d5, e, f) {
+  function decompose_default(a2, b2, c, d6, e, f) {
     var scaleX, scaleY, skewX;
     if (scaleX = Math.sqrt(a2 * a2 + b2 * b2)) a2 /= scaleX, b2 /= scaleX;
-    if (skewX = a2 * c + b2 * d5) c -= a2 * skewX, d5 -= b2 * skewX;
-    if (scaleY = Math.sqrt(c * c + d5 * d5)) c /= scaleY, d5 /= scaleY, skewX /= scaleY;
-    if (a2 * d5 < b2 * c) a2 = -a2, b2 = -b2, skewX = -skewX, scaleX = -scaleX;
+    if (skewX = a2 * c + b2 * d6) c -= a2 * skewX, d6 -= b2 * skewX;
+    if (scaleY = Math.sqrt(c * c + d6 * d6)) c /= scaleY, d6 /= scaleY, skewX /= scaleY;
+    if (a2 * d6 < b2 * c) a2 = -a2, b2 = -b2, skewX = -skewX, scaleX = -scaleX;
     return {
       translateX: e,
       translateY: f,
@@ -12819,8 +12910,8 @@
   var X = {
     name: "x",
     handles: ["w", "e"].map(type),
-    input: function(x2, e) {
-      return x2 == null ? null : [[+x2[0], e[0][1]], [+x2[1], e[1][1]]];
+    input: function(x5, e) {
+      return x5 == null ? null : [[+x5[0], e[0][1]], [+x5[1], e[1][1]]];
     },
     output: function(xy) {
       return xy && [xy[0][0], xy[1][0]];
@@ -12829,8 +12920,8 @@
   var Y = {
     name: "y",
     handles: ["n", "s"].map(type),
-    input: function(y2, e) {
-      return y2 == null ? null : [[e[0][0], +y2[0]], [e[1][0], +y2[1]]];
+    input: function(y5, e) {
+      return y5 == null ? null : [[e[0][0], +y5[0]], [e[1][0], +y5[1]]];
     },
     output: function(xy) {
       return xy && [xy[0][1], xy[1][1]];
@@ -12865,8 +12956,8 @@
   }
   Path2.prototype = path.prototype = {
     constructor: Path2,
-    moveTo: function(x2, y2) {
-      this._ += "M" + (this._x0 = this._x1 = +x2) + "," + (this._y0 = this._y1 = +y2);
+    moveTo: function(x5, y5) {
+      this._ += "M" + (this._x0 = this._x1 = +x5) + "," + (this._y0 = this._y1 = +y5);
     },
     closePath: function() {
       if (this._x1 !== null) {
@@ -12874,18 +12965,18 @@
         this._ += "Z";
       }
     },
-    lineTo: function(x2, y2) {
-      this._ += "L" + (this._x1 = +x2) + "," + (this._y1 = +y2);
+    lineTo: function(x5, y5) {
+      this._ += "L" + (this._x1 = +x5) + "," + (this._y1 = +y5);
     },
-    quadraticCurveTo: function(x1, y1, x2, y2) {
-      this._ += "Q" + +x1 + "," + +y1 + "," + (this._x1 = +x2) + "," + (this._y1 = +y2);
+    quadraticCurveTo: function(x1, y1, x5, y5) {
+      this._ += "Q" + +x1 + "," + +y1 + "," + (this._x1 = +x5) + "," + (this._y1 = +y5);
     },
-    bezierCurveTo: function(x1, y1, x2, y2, x3, y3) {
-      this._ += "C" + +x1 + "," + +y1 + "," + +x2 + "," + +y2 + "," + (this._x1 = +x3) + "," + (this._y1 = +y3);
+    bezierCurveTo: function(x1, y1, x22, y22, x5, y5) {
+      this._ += "C" + +x1 + "," + +y1 + "," + +x22 + "," + +y22 + "," + (this._x1 = +x5) + "," + (this._y1 = +y5);
     },
-    arcTo: function(x1, y1, x2, y2, r) {
-      x1 = +x1, y1 = +y1, x2 = +x2, y2 = +y2, r = +r;
-      var x0 = this._x1, y0 = this._y1, x21 = x2 - x1, y21 = y2 - y1, x01 = x0 - x1, y01 = y0 - y1, l01_2 = x01 * x01 + y01 * y01;
+    arcTo: function(x1, y1, x22, y22, r) {
+      x1 = +x1, y1 = +y1, x22 = +x22, y22 = +y22, r = +r;
+      var x0 = this._x1, y0 = this._y1, x21 = x22 - x1, y21 = y22 - y1, x01 = x0 - x1, y01 = y0 - y1, l01_2 = x01 * x01 + y01 * y01;
       if (r < 0) throw new Error("negative radius: " + r);
       if (this._x1 === null) {
         this._ += "M" + (this._x1 = x1) + "," + (this._y1 = y1);
@@ -12893,16 +12984,16 @@
       else if (!(Math.abs(y01 * x21 - y21 * x01) > epsilon2) || !r) {
         this._ += "L" + (this._x1 = x1) + "," + (this._y1 = y1);
       } else {
-        var x20 = x2 - x0, y20 = y2 - y0, l21_2 = x21 * x21 + y21 * y21, l20_2 = x20 * x20 + y20 * y20, l21 = Math.sqrt(l21_2), l01 = Math.sqrt(l01_2), l = r * Math.tan((pi - Math.acos((l21_2 + l01_2 - l20_2) / (2 * l21 * l01))) / 2), t01 = l / l01, t21 = l / l21;
+        var x20 = x22 - x0, y20 = y22 - y0, l21_2 = x21 * x21 + y21 * y21, l20_2 = x20 * x20 + y20 * y20, l21 = Math.sqrt(l21_2), l01 = Math.sqrt(l01_2), l = r * Math.tan((pi - Math.acos((l21_2 + l01_2 - l20_2) / (2 * l21 * l01))) / 2), t01 = l / l01, t21 = l / l21;
         if (Math.abs(t01 - 1) > epsilon2) {
           this._ += "L" + (x1 + t01 * x01) + "," + (y1 + t01 * y01);
         }
         this._ += "A" + r + "," + r + ",0,0," + +(y01 * x20 > x01 * y20) + "," + (this._x1 = x1 + t21 * x21) + "," + (this._y1 = y1 + t21 * y21);
       }
     },
-    arc: function(x2, y2, r, a0, a1, ccw) {
-      x2 = +x2, y2 = +y2, r = +r, ccw = !!ccw;
-      var dx = r * Math.cos(a0), dy = r * Math.sin(a0), x0 = x2 + dx, y0 = y2 + dy, cw = 1 ^ ccw, da = ccw ? a0 - a1 : a1 - a0;
+    arc: function(x5, y5, r, a0, a1, ccw) {
+      x5 = +x5, y5 = +y5, r = +r, ccw = !!ccw;
+      var dx = r * Math.cos(a0), dy = r * Math.sin(a0), x0 = x5 + dx, y0 = y5 + dy, cw = 1 ^ ccw, da = ccw ? a0 - a1 : a1 - a0;
       if (r < 0) throw new Error("negative radius: " + r);
       if (this._x1 === null) {
         this._ += "M" + x0 + "," + y0;
@@ -12912,13 +13003,13 @@
       if (!r) return;
       if (da < 0) da = da % tau + tau;
       if (da > tauEpsilon) {
-        this._ += "A" + r + "," + r + ",0,1," + cw + "," + (x2 - dx) + "," + (y2 - dy) + "A" + r + "," + r + ",0,1," + cw + "," + (this._x1 = x0) + "," + (this._y1 = y0);
+        this._ += "A" + r + "," + r + ",0,1," + cw + "," + (x5 - dx) + "," + (y5 - dy) + "A" + r + "," + r + ",0,1," + cw + "," + (this._x1 = x0) + "," + (this._y1 = y0);
       } else if (da > epsilon2) {
-        this._ += "A" + r + "," + r + ",0," + +(da >= pi) + "," + cw + "," + (this._x1 = x2 + r * Math.cos(a1)) + "," + (this._y1 = y2 + r * Math.sin(a1));
+        this._ += "A" + r + "," + r + ",0," + +(da >= pi) + "," + cw + "," + (this._x1 = x5 + r * Math.cos(a1)) + "," + (this._y1 = y5 + r * Math.sin(a1));
       }
     },
-    rect: function(x2, y2, w, h) {
-      this._ += "M" + (this._x0 = this._x1 = +x2) + "," + (this._y0 = this._y1 = +y2) + "h" + +w + "v" + +h + "h" + -w + "Z";
+    rect: function(x5, y5, w, h) {
+      this._ += "M" + (this._x0 = this._x1 = +x5) + "," + (this._y0 = this._y1 = +y5) + "h" + +w + "v" + +h + "h" + -w + "Z";
     },
     toString: function() {
       return this._;
@@ -12927,31 +13018,31 @@
   var path_default = path;
 
   // node_modules/d3-format/src/formatDecimal.js
-  function formatDecimal_default(x2) {
-    return Math.abs(x2 = Math.round(x2)) >= 1e21 ? x2.toLocaleString("en").replace(/,/g, "") : x2.toString(10);
+  function formatDecimal_default(x5) {
+    return Math.abs(x5 = Math.round(x5)) >= 1e21 ? x5.toLocaleString("en").replace(/,/g, "") : x5.toString(10);
   }
-  function formatDecimalParts(x2, p2) {
-    if ((i2 = (x2 = p2 ? x2.toExponential(p2 - 1) : x2.toExponential()).indexOf("e")) < 0) return null;
-    var i2, coefficient = x2.slice(0, i2);
+  function formatDecimalParts(x5, p2) {
+    if ((i2 = (x5 = p2 ? x5.toExponential(p2 - 1) : x5.toExponential()).indexOf("e")) < 0) return null;
+    var i2, coefficient = x5.slice(0, i2);
     return [
       coefficient.length > 1 ? coefficient[0] + coefficient.slice(2) : coefficient,
-      +x2.slice(i2 + 1)
+      +x5.slice(i2 + 1)
     ];
   }
 
   // node_modules/d3-format/src/exponent.js
-  function exponent_default(x2) {
-    return x2 = formatDecimalParts(Math.abs(x2)), x2 ? x2[1] : NaN;
+  function exponent_default(x5) {
+    return x5 = formatDecimalParts(Math.abs(x5)), x5 ? x5[1] : NaN;
   }
 
   // node_modules/d3-format/src/formatGroup.js
   function formatGroup_default(grouping, thousands) {
-    return function(value13, width10) {
+    return function(value13, width13) {
       var i2 = value13.length, t = [], j = 0, g = grouping[0], length8 = 0;
       while (i2 > 0 && g > 0) {
-        if (length8 + g + 1 > width10) g = Math.max(1, width10 - length8);
+        if (length8 + g + 1 > width13) g = Math.max(1, width13 - length8);
         t.push(value13.substring(i2 -= g, i2 + g));
-        if ((length8 += g + 1) > width10) break;
+        if ((length8 += g + 1) > width13) break;
         g = grouping[j = (j + 1) % grouping.length];
       }
       return t.reverse().join(thousands);
@@ -13024,41 +13115,41 @@
 
   // node_modules/d3-format/src/formatPrefixAuto.js
   var prefixExponent;
-  function formatPrefixAuto_default(x2, p2) {
-    var d5 = formatDecimalParts(x2, p2);
-    if (!d5) return x2 + "";
-    var coefficient = d5[0], exponent = d5[1], i2 = exponent - (prefixExponent = Math.max(-8, Math.min(8, Math.floor(exponent / 3))) * 3) + 1, n = coefficient.length;
-    return i2 === n ? coefficient : i2 > n ? coefficient + new Array(i2 - n + 1).join("0") : i2 > 0 ? coefficient.slice(0, i2) + "." + coefficient.slice(i2) : "0." + new Array(1 - i2).join("0") + formatDecimalParts(x2, Math.max(0, p2 + i2 - 1))[0];
+  function formatPrefixAuto_default(x5, p2) {
+    var d6 = formatDecimalParts(x5, p2);
+    if (!d6) return x5 + "";
+    var coefficient = d6[0], exponent = d6[1], i2 = exponent - (prefixExponent = Math.max(-8, Math.min(8, Math.floor(exponent / 3))) * 3) + 1, n = coefficient.length;
+    return i2 === n ? coefficient : i2 > n ? coefficient + new Array(i2 - n + 1).join("0") : i2 > 0 ? coefficient.slice(0, i2) + "." + coefficient.slice(i2) : "0." + new Array(1 - i2).join("0") + formatDecimalParts(x5, Math.max(0, p2 + i2 - 1))[0];
   }
 
   // node_modules/d3-format/src/formatRounded.js
-  function formatRounded_default(x2, p2) {
-    var d5 = formatDecimalParts(x2, p2);
-    if (!d5) return x2 + "";
-    var coefficient = d5[0], exponent = d5[1];
+  function formatRounded_default(x5, p2) {
+    var d6 = formatDecimalParts(x5, p2);
+    if (!d6) return x5 + "";
+    var coefficient = d6[0], exponent = d6[1];
     return exponent < 0 ? "0." + new Array(-exponent).join("0") + coefficient : coefficient.length > exponent + 1 ? coefficient.slice(0, exponent + 1) + "." + coefficient.slice(exponent + 1) : coefficient + new Array(exponent - coefficient.length + 2).join("0");
   }
 
   // node_modules/d3-format/src/formatTypes.js
   var formatTypes_default = {
-    "%": (x2, p2) => (x2 * 100).toFixed(p2),
-    "b": (x2) => Math.round(x2).toString(2),
-    "c": (x2) => x2 + "",
+    "%": (x5, p2) => (x5 * 100).toFixed(p2),
+    "b": (x5) => Math.round(x5).toString(2),
+    "c": (x5) => x5 + "",
     "d": formatDecimal_default,
-    "e": (x2, p2) => x2.toExponential(p2),
-    "f": (x2, p2) => x2.toFixed(p2),
-    "g": (x2, p2) => x2.toPrecision(p2),
-    "o": (x2) => Math.round(x2).toString(8),
-    "p": (x2, p2) => formatRounded_default(x2 * 100, p2),
+    "e": (x5, p2) => x5.toExponential(p2),
+    "f": (x5, p2) => x5.toFixed(p2),
+    "g": (x5, p2) => x5.toPrecision(p2),
+    "o": (x5) => Math.round(x5).toString(8),
+    "p": (x5, p2) => formatRounded_default(x5 * 100, p2),
     "r": formatRounded_default,
     "s": formatPrefixAuto_default,
-    "X": (x2) => Math.round(x2).toString(16).toUpperCase(),
-    "x": (x2) => Math.round(x2).toString(16)
+    "X": (x5) => Math.round(x5).toString(16).toUpperCase(),
+    "x": (x5) => Math.round(x5).toString(16)
   };
 
   // node_modules/d3-format/src/identity.js
-  function identity_default2(x2) {
-    return x2;
+  function identity_default2(x5) {
+    return x5;
   }
 
   // node_modules/d3-format/src/locale.js
@@ -13068,10 +13159,10 @@
     var group2 = locale2.grouping === void 0 || locale2.thousands === void 0 ? identity_default2 : formatGroup_default(map23.call(locale2.grouping, Number), locale2.thousands + ""), currencyPrefix = locale2.currency === void 0 ? "" : locale2.currency[0] + "", currencySuffix = locale2.currency === void 0 ? "" : locale2.currency[1] + "", decimal = locale2.decimal === void 0 ? "." : locale2.decimal + "", numerals = locale2.numerals === void 0 ? identity_default2 : formatNumerals_default(map23.call(locale2.numerals, String)), percent = locale2.percent === void 0 ? "%" : locale2.percent + "", minus = locale2.minus === void 0 ? "\u2212" : locale2.minus + "", nan2 = locale2.nan === void 0 ? "NaN" : locale2.nan + "";
     function newFormat(specifier) {
       specifier = formatSpecifier(specifier);
-      var fill3 = specifier.fill, align = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero4 = specifier.zero, width10 = specifier.width, comma = specifier.comma, precision = specifier.precision, trim2 = specifier.trim, type2 = specifier.type;
+      var fill7 = specifier.fill, align = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero4 = specifier.zero, width13 = specifier.width, comma = specifier.comma, precision = specifier.precision, trim2 = specifier.trim, type2 = specifier.type;
       if (type2 === "n") comma = true, type2 = "g";
       else if (!formatTypes_default[type2]) precision === void 0 && (precision = 12), trim2 = true, type2 = "g";
-      if (zero4 || fill3 === "0" && align === "=") zero4 = true, fill3 = "0", align = "=";
+      if (zero4 || fill7 === "0" && align === "=") zero4 = true, fill7 = "0", align = "=";
       var prefix = symbol === "$" ? currencyPrefix : symbol === "#" && /[boxX]/.test(type2) ? "0" + type2.toLowerCase() : "", suffix = symbol === "$" ? currencySuffix : /[%p]/.test(type2) ? percent : "";
       var formatType = formatTypes_default[type2], maybeSuffix = /[defgprs%]/.test(type2);
       precision = precision === void 0 ? 6 : /[gprs]/.test(type2) ? Math.max(1, Math.min(21, precision)) : Math.max(0, Math.min(20, precision));
@@ -13100,8 +13191,8 @@
           }
         }
         if (comma && !zero4) value13 = group2(value13, Infinity);
-        var length8 = valuePrefix.length + value13.length + valueSuffix.length, padding = length8 < width10 ? new Array(width10 - length8 + 1).join(fill3) : "";
-        if (comma && zero4) value13 = group2(padding + value13, padding.length ? width10 - valueSuffix.length : Infinity), padding = "";
+        var length8 = valuePrefix.length + value13.length + valueSuffix.length, padding = length8 < width13 ? new Array(width13 - length8 + 1).join(fill7) : "";
+        if (comma && zero4) value13 = group2(padding + value13, padding.length ? width13 - valueSuffix.length : Infinity), padding = "";
         switch (align) {
           case "<":
             value13 = valuePrefix + value13 + valueSuffix + padding;
@@ -13183,55 +13274,55 @@
   }
 
   // node_modules/d3-scale/src/constant.js
-  function constants(x2) {
+  function constants(x5) {
     return function() {
-      return x2;
+      return x5;
     };
   }
 
   // node_modules/d3-scale/src/number.js
-  function number3(x2) {
-    return +x2;
+  function number3(x5) {
+    return +x5;
   }
 
   // node_modules/d3-scale/src/continuous.js
   var unit2 = [0, 1];
-  function identity11(x2) {
-    return x2;
+  function identity11(x5) {
+    return x5;
   }
   function normalize2(a2, b2) {
-    return (b2 -= a2 = +a2) ? function(x2) {
-      return (x2 - a2) / b2;
+    return (b2 -= a2 = +a2) ? function(x5) {
+      return (x5 - a2) / b2;
     } : constants(isNaN(b2) ? NaN : 0.5);
   }
   function clamper(a2, b2) {
     var t;
     if (a2 > b2) t = a2, a2 = b2, b2 = t;
-    return function(x2) {
-      return Math.max(a2, Math.min(b2, x2));
+    return function(x5) {
+      return Math.max(a2, Math.min(b2, x5));
     };
   }
   function bimap3(domain, range3, interpolate) {
     var d0 = domain[0], d1 = domain[1], r0 = range3[0], r1 = range3[1];
     if (d1 < d0) d0 = normalize2(d1, d0), r0 = interpolate(r1, r0);
     else d0 = normalize2(d0, d1), r0 = interpolate(r0, r1);
-    return function(x2) {
-      return r0(d0(x2));
+    return function(x5) {
+      return r0(d0(x5));
     };
   }
   function polymap(domain, range3, interpolate) {
-    var j = Math.min(domain.length, range3.length) - 1, d5 = new Array(j), r = new Array(j), i2 = -1;
+    var j = Math.min(domain.length, range3.length) - 1, d6 = new Array(j), r = new Array(j), i2 = -1;
     if (domain[j] < domain[0]) {
       domain = domain.slice().reverse();
       range3 = range3.slice().reverse();
     }
     while (++i2 < j) {
-      d5[i2] = normalize2(domain[i2], domain[i2 + 1]);
+      d6[i2] = normalize2(domain[i2], domain[i2 + 1]);
       r[i2] = interpolate(range3[i2], range3[i2 + 1]);
     }
-    return function(x2) {
-      var i3 = bisect_default(domain, x2, 1, j) - 1;
-      return r[i3](d5[i3](x2));
+    return function(x5) {
+      var i3 = bisect_default(domain, x5, 1, j) - 1;
+      return r[i3](d6[i3](x5));
     };
   }
   function copy2(source2, target7) {
@@ -13246,11 +13337,11 @@
       output2 = input3 = null;
       return scale;
     }
-    function scale(x2) {
-      return x2 == null || isNaN(x2 = +x2) ? unknown : (output2 || (output2 = piecewise(domain.map(transform3), range3, interpolate)))(transform3(clamp(x2)));
+    function scale(x5) {
+      return x5 == null || isNaN(x5 = +x5) ? unknown : (output2 || (output2 = piecewise(domain.map(transform3), range3, interpolate)))(transform3(clamp(x5)));
     }
-    scale.invert = function(y2) {
-      return clamp(untransform((input3 || (input3 = piecewise(range3, domain.map(transform3), number_default)))(y2)));
+    scale.invert = function(y5) {
+      return clamp(untransform((input3 || (input3 = piecewise(range3, domain.map(transform3), number_default)))(y5)));
     };
     scale.domain = function(_) {
       return arguments.length ? (domain = Array.from(_, number3), rescale()) : domain.slice();
@@ -13310,20 +13401,20 @@
   function linearish(scale) {
     var domain = scale.domain;
     scale.ticks = function(count) {
-      var d5 = domain();
-      return ticks(d5[0], d5[d5.length - 1], count == null ? 10 : count);
+      var d6 = domain();
+      return ticks(d6[0], d6[d6.length - 1], count == null ? 10 : count);
     };
     scale.tickFormat = function(count, specifier) {
-      var d5 = domain();
-      return tickFormat(d5[0], d5[d5.length - 1], count == null ? 10 : count, specifier);
+      var d6 = domain();
+      return tickFormat(d6[0], d6[d6.length - 1], count == null ? 10 : count, specifier);
     };
     scale.nice = function(count) {
       if (count == null) count = 10;
-      var d5 = domain();
+      var d6 = domain();
       var i0 = 0;
-      var i1 = d5.length - 1;
-      var start3 = d5[i0];
-      var stop = d5[i1];
+      var i1 = d6.length - 1;
+      var start3 = d6[i0];
+      var stop = d6[i1];
       var prestep;
       var step4;
       var maxIter = 10;
@@ -13334,9 +13425,9 @@
       while (maxIter-- > 0) {
         step4 = tickIncrement(start3, stop, count);
         if (step4 === prestep) {
-          d5[i0] = start3;
-          d5[i1] = stop;
-          return domain(d5);
+          d6[i0] = start3;
+          d6[i1] = stop;
+          return domain(d6);
         } else if (step4 > 0) {
           start3 = Math.floor(start3 / step4) * step4;
           stop = Math.ceil(stop / step4) * step4;
@@ -13362,16 +13453,16 @@
   }
 
   // node_modules/d3-shape/src/constant.js
-  function constant_default4(x2) {
+  function constant_default4(x5) {
     return function constant() {
-      return x2;
+      return x5;
     };
   }
 
   // node_modules/d3-shape/src/array.js
   var slice3 = Array.prototype.slice;
-  function array_default(x2) {
-    return typeof x2 === "object" && "length" in x2 ? x2 : Array.from(x2);
+  function array_default(x5) {
+    return typeof x5 === "object" && "length" in x5 ? x5 : Array.from(x5);
   }
 
   // node_modules/d3-shape/src/curve/linear.js
@@ -13392,18 +13483,18 @@
       if (this._line || this._line !== 0 && this._point === 1) this._context.closePath();
       this._line = 1 - this._line;
     },
-    point: function(x2, y2) {
-      x2 = +x2, y2 = +y2;
+    point: function(x5, y5) {
+      x5 = +x5, y5 = +y5;
       switch (this._point) {
         case 0:
           this._point = 1;
-          this._line ? this._context.lineTo(x2, y2) : this._context.moveTo(x2, y2);
+          this._line ? this._context.lineTo(x5, y5) : this._context.moveTo(x5, y5);
           break;
         case 1:
           this._point = 2;
         // falls through
         default:
-          this._context.lineTo(x2, y2);
+          this._context.lineTo(x5, y5);
           break;
       }
     }
@@ -13413,35 +13504,35 @@
   }
 
   // node_modules/d3-shape/src/point.js
-  function x(p2) {
+  function x2(p2) {
     return p2[0];
   }
-  function y(p2) {
+  function y2(p2) {
     return p2[1];
   }
 
   // node_modules/d3-shape/src/line.js
-  function line_default(x2, y2) {
+  function line_default(x5, y5) {
     var defined = constant_default4(true), context = null, curve = linear_default, output2 = null;
-    x2 = typeof x2 === "function" ? x2 : x2 === void 0 ? x : constant_default4(x2);
-    y2 = typeof y2 === "function" ? y2 : y2 === void 0 ? y : constant_default4(y2);
+    x5 = typeof x5 === "function" ? x5 : x5 === void 0 ? x2 : constant_default4(x5);
+    y5 = typeof y5 === "function" ? y5 : y5 === void 0 ? y2 : constant_default4(y5);
     function line(data) {
-      var i2, n = (data = array_default(data)).length, d5, defined0 = false, buffer;
+      var i2, n = (data = array_default(data)).length, d6, defined0 = false, buffer;
       if (context == null) output2 = curve(buffer = path_default());
       for (i2 = 0; i2 <= n; ++i2) {
-        if (!(i2 < n && defined(d5 = data[i2], i2, data)) === defined0) {
+        if (!(i2 < n && defined(d6 = data[i2], i2, data)) === defined0) {
           if (defined0 = !defined0) output2.lineStart();
           else output2.lineEnd();
         }
-        if (defined0) output2.point(+x2(d5, i2, data), +y2(d5, i2, data));
+        if (defined0) output2.point(+x5(d6, i2, data), +y5(d6, i2, data));
       }
       if (buffer) return output2 = null, buffer + "" || null;
     }
     line.x = function(_) {
-      return arguments.length ? (x2 = typeof _ === "function" ? _ : constant_default4(+_), line) : x2;
+      return arguments.length ? (x5 = typeof _ === "function" ? _ : constant_default4(+_), line) : x5;
     };
     line.y = function(_) {
-      return arguments.length ? (y2 = typeof _ === "function" ? _ : constant_default4(+_), line) : y2;
+      return arguments.length ? (y5 = typeof _ === "function" ? _ : constant_default4(+_), line) : y5;
     };
     line.defined = function(_) {
       return arguments.length ? (defined = typeof _ === "function" ? _ : constant_default4(!!_), line) : defined;
@@ -13456,42 +13547,42 @@
   }
 
   // node_modules/d3-zoom/src/transform.js
-  function Transform(k, x2, y2) {
+  function Transform(k, x5, y5) {
     this.k = k;
-    this.x = x2;
-    this.y = y2;
+    this.x = x5;
+    this.y = y5;
   }
   Transform.prototype = {
     constructor: Transform,
     scale: function(k) {
       return k === 1 ? this : new Transform(this.k * k, this.x, this.y);
     },
-    translate: function(x2, y2) {
-      return x2 === 0 & y2 === 0 ? this : new Transform(this.k, this.x + this.k * x2, this.y + this.k * y2);
+    translate: function(x5, y5) {
+      return x5 === 0 & y5 === 0 ? this : new Transform(this.k, this.x + this.k * x5, this.y + this.k * y5);
     },
     apply: function(point) {
       return [point[0] * this.k + this.x, point[1] * this.k + this.y];
     },
-    applyX: function(x2) {
-      return x2 * this.k + this.x;
+    applyX: function(x5) {
+      return x5 * this.k + this.x;
     },
-    applyY: function(y2) {
-      return y2 * this.k + this.y;
+    applyY: function(y5) {
+      return y5 * this.k + this.y;
     },
     invert: function(location2) {
       return [(location2[0] - this.x) / this.k, (location2[1] - this.y) / this.k];
     },
-    invertX: function(x2) {
-      return (x2 - this.x) / this.k;
+    invertX: function(x5) {
+      return (x5 - this.x) / this.k;
     },
-    invertY: function(y2) {
-      return (y2 - this.y) / this.k;
+    invertY: function(y5) {
+      return (y5 - this.y) / this.k;
     },
-    rescaleX: function(x2) {
-      return x2.copy().domain(x2.range().map(this.invertX, this).map(x2.invert, x2));
+    rescaleX: function(x5) {
+      return x5.copy().domain(x5.range().map(this.invertX, this).map(x5.invert, x5));
     },
-    rescaleY: function(y2) {
-      return y2.copy().domain(y2.range().map(this.invertY, this).map(y2.invert, y2));
+    rescaleY: function(y5) {
+      return y5.copy().domain(y5.range().map(this.invertY, this).map(y5.invert, y5));
     },
     toString: function() {
       return "translate(" + this.x + "," + this.y + ") scale(" + this.k + ")";
@@ -13517,24 +13608,23 @@
     };
   }
 
-  // output/D3.Generators.Line/foreign.js
-  function createLineGenerator(config) {
-    return () => {
-      return line_default().x((d5) => config.xScale(d5.x)).y((d5) => config.yScale(d5.y));
-    };
-  }
-  function generateLinePath(generator) {
-    return (data) => generator(data);
-  }
-
   // output/D3.Scales.Linear/foreign.js
   function createLinearScale(config) {
     return () => {
       return linear2().domain(config.domain).range(config.range);
     };
   }
+  function applyScale(scale) {
+    return (value13) => scale(value13);
+  }
 
   // output/D3Tagless.Capabilities/index.js
+  var simpleJoin = function(dict) {
+    return dict.simpleJoin;
+  };
+  var setAttributes = function(dict) {
+    return dict.setAttributes;
+  };
   var attach = function(dict) {
     return dict.attach;
   };
@@ -13542,7 +13632,7 @@
     return dict.appendTo;
   };
 
-  // output/D3.Examples.LineChart/index.js
+  // output/D3.Examples.BarChart/index.js
   var map24 = /* @__PURE__ */ map(functorArray);
   var minimum2 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var maximum2 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
@@ -13550,7 +13640,8 @@
   var width9 = /* @__PURE__ */ width8(toAttrNumber);
   var height9 = /* @__PURE__ */ height8(toAttrNumber);
   var show5 = /* @__PURE__ */ show(showNumber);
-  var d4 = /* @__PURE__ */ d2(toAttrString);
+  var x3 = /* @__PURE__ */ x(toAttrNumber);
+  var y3 = /* @__PURE__ */ y(toAttrNumber);
   var fill2 = /* @__PURE__ */ fill(toAttrString);
   var strokeColor2 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth2 = /* @__PURE__ */ strokeWidth(toAttrNumber);
@@ -13574,7 +13665,9 @@
     var bind10 = bind(dictBind);
     return function(dictMonadEffect) {
       var liftEffect8 = liftEffect(dictMonadEffect);
-      var pure15 = pure(dictMonadEffect.Monad0().Applicative0());
+      var Applicative0 = dictMonadEffect.Monad0().Applicative0();
+      var pure15 = pure(Applicative0);
+      var traverse_8 = traverse_(Applicative0)(foldableArray);
       return function(dictSelectionM) {
         var attach2 = attach(dictSelectionM);
         var appendTo2 = appendTo(dictSelectionM);
@@ -13590,12 +13683,492 @@
             })(dataPoints);
             var minX = fromMaybe(0)(minimum2(xValues));
             var maxX = fromMaybe(100)(maximum2(xValues));
-            var minY = fromMaybe(0)(minimum2(yValues));
             var maxY = fromMaybe(100)(maximum2(yValues));
             return bind10(attach2(selector))(function(v) {
-              return bind10(appendTo2(v)(Svg.value)([viewBox(0)(0)(defaultDimensions.width)(defaultDimensions.height), classed2("line-chart"), width9(defaultDimensions.width), height9(defaultDimensions.height)]))(function(svg) {
+              return bind10(appendTo2(v)(Svg.value)([viewBox(0)(0)(defaultDimensions.width)(defaultDimensions.height), classed2("bar-chart"), width9(defaultDimensions.width), height9(defaultDimensions.height)]))(function(svg) {
                 return bind10(appendTo2(svg)(Group.value)([transform([function(v1) {
                   return "translate(" + (show5(defaultDimensions.margin.left) + ("," + (show5(defaultDimensions.margin.top) + ")")));
+                }])]))(function(chartGroup) {
+                  return bind10(liftEffect8(createLinearScale({
+                    domain: [minX, maxX],
+                    range: [0, iWidth]
+                  })))(function(xScale) {
+                    return bind10(liftEffect8(createLinearScale({
+                      domain: [0, maxY],
+                      range: [iHeight, 0]
+                    })))(function(yScale) {
+                      return bind10(appendTo2(chartGroup)(Group.value)([classed2("x-axis"), transform([function(v1) {
+                        return "translate(0," + (show5(iHeight) + ")");
+                      }])]))(function(xAxisGroup) {
+                        return bind10(appendTo2(chartGroup)(Group.value)([classed2("y-axis")]))(function(yAxisGroup) {
+                          return bind10(liftEffect8(callAxis(xAxisGroup)(axisBottom2(xScale))))(function() {
+                            return bind10(liftEffect8(callAxis(yAxisGroup)(axisLeft2(yScale))))(function() {
+                              var numBars = length4(dataPoints);
+                              var barWidth = (function() {
+                                var $37 = numBars > 0;
+                                if ($37) {
+                                  return iWidth / toNumber(numBars) * 0.8;
+                                }
+                                ;
+                                return 0;
+                              })();
+                              var addBar = function(point) {
+                                var xPos = applyScale(xScale)(point.x) - barWidth / 2;
+                                var yPos = applyScale(yScale)(point.y);
+                                var barHeight = iHeight - yPos;
+                                return bind10(appendTo2(chartGroup)(Rect.value)([x3(xPos), y3(yPos), width9(barWidth), height9(barHeight), fill2("#4a90e2"), strokeColor2("#357abd"), strokeWidth2(1), classed2("bar")]))(function() {
+                                  return pure15(unit);
+                                });
+                              };
+                              return bind10(traverse_8(addBar)(dataPoints))(function() {
+                                return pure15(unit);
+                              });
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          };
+        };
+      };
+    };
+  };
+
+  // output/D3.Examples.Charts.Model/index.js
+  var sineWaveData = [{
+    x: 0,
+    y: 100
+  }, {
+    x: 5,
+    y: 125
+  }, {
+    x: 10,
+    y: 145
+  }, {
+    x: 15,
+    y: 150
+  }, {
+    x: 20,
+    y: 145
+  }, {
+    x: 25,
+    y: 125
+  }, {
+    x: 30,
+    y: 100
+  }, {
+    x: 35,
+    y: 75
+  }, {
+    x: 40,
+    y: 55
+  }, {
+    x: 45,
+    y: 50
+  }, {
+    x: 50,
+    y: 55
+  }, {
+    x: 55,
+    y: 75
+  }, {
+    x: 60,
+    y: 100
+  }];
+  var scatterData = [{
+    x: 10,
+    y: 20
+  }, {
+    x: 25,
+    y: 45
+  }, {
+    x: 40,
+    y: 30
+  }, {
+    x: 55,
+    y: 60
+  }, {
+    x: 70,
+    y: 50
+  }, {
+    x: 85,
+    y: 75
+  }, {
+    x: 100,
+    y: 65
+  }, {
+    x: 115,
+    y: 90
+  }, {
+    x: 130,
+    y: 80
+  }, {
+    x: 145,
+    y: 95
+  }];
+  var monthlySales = [{
+    x: 0,
+    y: 30
+  }, {
+    x: 1,
+    y: 45
+  }, {
+    x: 2,
+    y: 60
+  }, {
+    x: 3,
+    y: 55
+  }, {
+    x: 4,
+    y: 70
+  }, {
+    x: 5,
+    y: 65
+  }, {
+    x: 6,
+    y: 80
+  }, {
+    x: 7,
+    y: 75
+  }, {
+    x: 8,
+    y: 90
+  }, {
+    x: 9,
+    y: 85
+  }, {
+    x: 10,
+    y: 95
+  }, {
+    x: 11,
+    y: 100
+  }];
+  var anscombesQuartet = {
+    dataset1: [{
+      x: 10,
+      y: 8.04
+    }, {
+      x: 8,
+      y: 6.95
+    }, {
+      x: 13,
+      y: 7.58
+    }, {
+      x: 9,
+      y: 8.81
+    }, {
+      x: 11,
+      y: 8.33
+    }, {
+      x: 14,
+      y: 9.96
+    }, {
+      x: 6,
+      y: 7.24
+    }, {
+      x: 4,
+      y: 4.26
+    }, {
+      x: 12,
+      y: 10.84
+    }, {
+      x: 7,
+      y: 4.82
+    }, {
+      x: 5,
+      y: 5.68
+    }],
+    dataset2: [{
+      x: 10,
+      y: 9.14
+    }, {
+      x: 8,
+      y: 8.14
+    }, {
+      x: 13,
+      y: 8.74
+    }, {
+      x: 9,
+      y: 8.77
+    }, {
+      x: 11,
+      y: 9.26
+    }, {
+      x: 14,
+      y: 8.1
+    }, {
+      x: 6,
+      y: 6.13
+    }, {
+      x: 4,
+      y: 3.1
+    }, {
+      x: 12,
+      y: 9.13
+    }, {
+      x: 7,
+      y: 7.26
+    }, {
+      x: 5,
+      y: 4.74
+    }],
+    dataset3: [{
+      x: 10,
+      y: 7.46
+    }, {
+      x: 8,
+      y: 6.77
+    }, {
+      x: 13,
+      y: 12.74
+    }, {
+      x: 9,
+      y: 7.11
+    }, {
+      x: 11,
+      y: 7.81
+    }, {
+      x: 14,
+      y: 8.84
+    }, {
+      x: 6,
+      y: 6.08
+    }, {
+      x: 4,
+      y: 5.39
+    }, {
+      x: 12,
+      y: 8.15
+    }, {
+      x: 7,
+      y: 6.42
+    }, {
+      x: 5,
+      y: 5.73
+    }],
+    dataset4: [{
+      x: 8,
+      y: 6.58
+    }, {
+      x: 8,
+      y: 5.76
+    }, {
+      x: 8,
+      y: 7.71
+    }, {
+      x: 8,
+      y: 8.84
+    }, {
+      x: 8,
+      y: 8.47
+    }, {
+      x: 8,
+      y: 7.04
+    }, {
+      x: 8,
+      y: 5.25
+    }, {
+      x: 19,
+      y: 12.5
+    }, {
+      x: 8,
+      y: 5.56
+    }, {
+      x: 8,
+      y: 7.91
+    }, {
+      x: 8,
+      y: 6.89
+    }]
+  };
+
+  // output/D3.Examples.ChordDiagram/index.js
+  var classed3 = /* @__PURE__ */ classed(toAttrString);
+  var width10 = /* @__PURE__ */ width8(toAttrNumber);
+  var height10 = /* @__PURE__ */ height8(toAttrNumber);
+  var show6 = /* @__PURE__ */ show(showNumber);
+  var d4 = /* @__PURE__ */ d2(toAttrString);
+  var fill3 = /* @__PURE__ */ fill(toAttrString);
+  var fillOpacity2 = /* @__PURE__ */ fillOpacity(toAttrNumber);
+  var strokeColor3 = /* @__PURE__ */ strokeColor(toAttrString);
+  var strokeWidth3 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var getSourceIndex = function(d1) {
+    return d1.source.index;
+  };
+  var exampleMatrix = [[0, 5, 3, 2, 1], [5, 0, 4, 1, 2], [3, 4, 0, 3, 4], [2, 1, 3, 0, 5], [1, 2, 4, 5, 0]];
+  var exampleLabels = ["Data Structures", "Algorithms", "Patterns", "Testing", "Architecture"];
+  var colors = ["#e74c3c", "#3498db", "#2ecc71", "#f39c12", "#9b59b6"];
+  var draw2 = function(dictBind) {
+    var bind10 = bind(dictBind);
+    return function(dictMonadEffect) {
+      var Applicative0 = dictMonadEffect.Monad0().Applicative0();
+      var pure15 = pure(Applicative0);
+      var traverse_8 = traverse_(Applicative0)(foldableArray);
+      return function(dictSelectionM) {
+        var attach2 = attach(dictSelectionM);
+        var appendTo2 = appendTo(dictSelectionM);
+        var simpleJoin2 = simpleJoin(dictSelectionM);
+        return function(matrix) {
+          return function(v) {
+            return function(selector) {
+              var dims = {
+                width: 800,
+                height: 800
+              };
+              var centerX = dims.width / 2;
+              var centerY = dims.height / 2;
+              return bind10(attach2(selector))(function(v1) {
+                return bind10(appendTo2(v1)(Svg.value)([viewBox(0)(0)(dims.width)(dims.height), classed3("chord-diagram"), width10(dims.width), height10(dims.height)]))(function(svg) {
+                  return bind10(appendTo2(svg)(Group.value)([transform([function(v2) {
+                    return "translate(" + (show6(centerX) + ("," + (show6(centerY) + ")")));
+                  }]), classed3("chord-group")]))(function(centerGroup) {
+                    var chordData = chordLayout_(matrix);
+                    var groups = chordGroups_(chordData);
+                    var chords = chordArray_(chordData);
+                    var ribbonGen0 = ribbonGenerator_(unit);
+                    var ribbonGen = setRibbonRadius_(ribbonGen0)(290);
+                    var arcGen0 = arcGenerator_(unit);
+                    var arcGen1 = setArcInnerRadius_(arcGen0)(290);
+                    var arcGen = setArcOuterRadius_(arcGen1)(300);
+                    return bind10(appendTo2(centerGroup)(Group.value)([classed3("ribbons")]))(function(ribbonsGroup) {
+                      var drawRibbon = function(chord) {
+                        var sourceIdx = getSourceIndex(chord);
+                        var color2 = (function() {
+                          var v2 = index2(colors)(sourceIdx);
+                          if (v2 instanceof Just) {
+                            return v2.value0;
+                          }
+                          ;
+                          if (v2 instanceof Nothing) {
+                            return "#999999";
+                          }
+                          ;
+                          throw new Error("Failed pattern match at D3.Examples.ChordDiagram (line 102, column 21 - line 104, column 43): " + [v2.constructor.name]);
+                        })();
+                        var pathData = ribbonPath_(ribbonGen)(chord);
+                        return bind10(appendTo2(ribbonsGroup)(Path.value)([d4(pathData), fill3(color2), fillOpacity2(0.67), strokeColor3("#000000"), strokeWidth3(0.5), classed3("ribbon")]))(function() {
+                          return pure15(unit);
+                        });
+                      };
+                      return bind10(traverse_8(drawRibbon)(chords))(function() {
+                        return bind10(appendTo2(centerGroup)(Group.value)([classed3("arcs")]))(function(arcsGroup) {
+                          return bind10(simpleJoin2(arcsGroup)(Group.value)(groups)(keyIsID_))(function(groupsJoin) {
+                            var drawArc = function(idx) {
+                              return function(group2) {
+                                var color2 = (function() {
+                                  var v2 = index2(colors)(idx);
+                                  if (v2 instanceof Just) {
+                                    return v2.value0;
+                                  }
+                                  ;
+                                  if (v2 instanceof Nothing) {
+                                    return "#999999";
+                                  }
+                                  ;
+                                  throw new Error("Failed pattern match at D3.Examples.ChordDiagram (line 125, column 21 - line 127, column 43): " + [v2.constructor.name]);
+                                })();
+                                var pathData = arcPath_(arcGen)(group2);
+                                return bind10(appendTo2(groupsJoin)(Path.value)([d4(pathData), fill3(color2), strokeColor3("#ffffff"), strokeWidth3(2), classed3("arc")]))(function() {
+                                  return pure15(unit);
+                                });
+                              };
+                            };
+                            return bind10(traverse_8(function(idx) {
+                              var v2 = index2(groups)(idx);
+                              if (v2 instanceof Just) {
+                                return drawArc(idx)(v2.value0);
+                              }
+                              ;
+                              if (v2 instanceof Nothing) {
+                                return pure15(unit);
+                              }
+                              ;
+                              throw new Error("Failed pattern match at D3.Examples.ChordDiagram (line 138, column 27 - line 140, column 48): " + [v2.constructor.name]);
+                            })(range2(0)(length4(groups) - 1 | 0)))(function() {
+                              return pure15(unit);
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            };
+          };
+        };
+      };
+    };
+  };
+
+  // output/D3.Generators.Line/foreign.js
+  function createLineGenerator(config) {
+    return () => {
+      return line_default().x((d6) => config.xScale(d6.x)).y((d6) => config.yScale(d6.y));
+    };
+  }
+  function generateLinePath(generator) {
+    return (data) => generator(data);
+  }
+
+  // output/D3.Examples.LineChart/index.js
+  var map25 = /* @__PURE__ */ map(functorArray);
+  var minimum3 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
+  var maximum3 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
+  var classed4 = /* @__PURE__ */ classed(toAttrString);
+  var width11 = /* @__PURE__ */ width8(toAttrNumber);
+  var height11 = /* @__PURE__ */ height8(toAttrNumber);
+  var show7 = /* @__PURE__ */ show(showNumber);
+  var d5 = /* @__PURE__ */ d2(toAttrString);
+  var fill4 = /* @__PURE__ */ fill(toAttrString);
+  var strokeColor4 = /* @__PURE__ */ strokeColor(toAttrString);
+  var strokeWidth4 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var innerWidth3 = function(dims) {
+    return dims.width - dims.margin.left - dims.margin.right;
+  };
+  var innerHeight3 = function(dims) {
+    return dims.height - dims.margin.top - dims.margin.bottom;
+  };
+  var defaultDimensions2 = {
+    width: 800,
+    height: 400,
+    margin: {
+      top: 20,
+      right: 30,
+      bottom: 30,
+      left: 40
+    }
+  };
+  var draw3 = function(dictBind) {
+    var bind10 = bind(dictBind);
+    return function(dictMonadEffect) {
+      var liftEffect8 = liftEffect(dictMonadEffect);
+      var pure15 = pure(dictMonadEffect.Monad0().Applicative0());
+      return function(dictSelectionM) {
+        var attach2 = attach(dictSelectionM);
+        var appendTo2 = appendTo(dictSelectionM);
+        return function(dataPoints) {
+          return function(selector) {
+            var iWidth = innerWidth3(defaultDimensions2);
+            var iHeight = innerHeight3(defaultDimensions2);
+            var xValues = map25(function(v) {
+              return v.x;
+            })(dataPoints);
+            var yValues = map25(function(v) {
+              return v.y;
+            })(dataPoints);
+            var minX = fromMaybe(0)(minimum3(xValues));
+            var maxX = fromMaybe(100)(maximum3(xValues));
+            var minY = fromMaybe(0)(minimum3(yValues));
+            var maxY = fromMaybe(100)(maximum3(yValues));
+            return bind10(attach2(selector))(function(v) {
+              return bind10(appendTo2(v)(Svg.value)([viewBox(0)(0)(defaultDimensions2.width)(defaultDimensions2.height), classed4("line-chart"), width11(defaultDimensions2.width), height11(defaultDimensions2.height)]))(function(svg) {
+                return bind10(appendTo2(svg)(Group.value)([transform([function(v1) {
+                  return "translate(" + (show7(defaultDimensions2.margin.left) + ("," + (show7(defaultDimensions2.margin.top) + ")")));
                 }])]))(function(chartGroup) {
                   return bind10(liftEffect8(createLinearScale({
                     domain: [minX, maxX],
@@ -13605,10 +14178,10 @@
                       domain: [minY, maxY],
                       range: [iHeight, 0]
                     })))(function(yScale) {
-                      return bind10(appendTo2(chartGroup)(Group.value)([classed2("x-axis"), transform([function(v1) {
-                        return "translate(0," + (show5(iHeight) + ")");
+                      return bind10(appendTo2(chartGroup)(Group.value)([classed4("x-axis"), transform([function(v1) {
+                        return "translate(0," + (show7(iHeight) + ")");
                       }])]))(function(xAxisGroup) {
-                        return bind10(appendTo2(chartGroup)(Group.value)([classed2("y-axis")]))(function(yAxisGroup) {
+                        return bind10(appendTo2(chartGroup)(Group.value)([classed4("y-axis")]))(function(yAxisGroup) {
                           return bind10(liftEffect8(callAxis(xAxisGroup)(axisBottom2(xScale))))(function() {
                             return bind10(liftEffect8(callAxis(yAxisGroup)(axisLeft2(yScale))))(function() {
                               return bind10(liftEffect8(createLineGenerator({
@@ -13616,7 +14189,7 @@
                                 yScale
                               })))(function(lineGen) {
                                 var pathData = generateLinePath(lineGen)(dataPoints);
-                                return bind10(appendTo2(chartGroup)(Path.value)([d4(pathData), fill2("none"), strokeColor2("#4a90e2"), strokeWidth2(2), classed2("line")]))(function() {
+                                return bind10(appendTo2(chartGroup)(Path.value)([d5(pathData), fill4("none"), strokeColor4("#4a90e2"), strokeWidth4(2), classed4("line")]))(function() {
                                   return pure15(unit);
                                 });
                               });
@@ -13632,6 +14205,239 @@
           };
         };
       };
+    };
+  };
+
+  // output/D3.Examples.ScatterPlot/index.js
+  var classed5 = /* @__PURE__ */ classed(toAttrString);
+  var width12 = /* @__PURE__ */ width8(toAttrNumber);
+  var height12 = /* @__PURE__ */ height8(toAttrNumber);
+  var show8 = /* @__PURE__ */ show(showNumber);
+  var x4 = /* @__PURE__ */ x(toAttrNumber);
+  var y4 = /* @__PURE__ */ y(toAttrNumber);
+  var text7 = /* @__PURE__ */ text6(toAttrString);
+  var textAnchor2 = /* @__PURE__ */ textAnchor(toAttrString);
+  var fontSize2 = /* @__PURE__ */ fontSize(toAttrNumber);
+  var cx2 = /* @__PURE__ */ cx(toAttrNumber);
+  var cy2 = /* @__PURE__ */ cy(toAttrNumber);
+  var radius2 = /* @__PURE__ */ radius(toAttrNumber);
+  var fill5 = /* @__PURE__ */ fill(toAttrString);
+  var strokeColor5 = /* @__PURE__ */ strokeColor(toAttrString);
+  var strokeWidth5 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var map26 = /* @__PURE__ */ map(functorArray);
+  var minimum4 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
+  var maximum4 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
+  var innerWidth4 = function(dims) {
+    return dims.width - dims.margin.left - dims.margin.right;
+  };
+  var innerHeight4 = function(dims) {
+    return dims.height - dims.margin.top - dims.margin.bottom;
+  };
+  var drawQuartet = function(dictBind) {
+    var bind10 = bind(dictBind);
+    return function(dictMonadEffect) {
+      var liftEffect8 = liftEffect(dictMonadEffect);
+      var Applicative0 = dictMonadEffect.Monad0().Applicative0();
+      var pure15 = pure(Applicative0);
+      var traverse_8 = traverse_(Applicative0)(foldableArray);
+      return function(dictSelectionM) {
+        var attach2 = attach(dictSelectionM);
+        var appendTo2 = appendTo(dictSelectionM);
+        return function(quartet) {
+          return function(selector) {
+            var plotWidth = (900 - 60 * 3) / 2;
+            var plotHeight = (700 - 60 * 3) / 2;
+            var margin = {
+              top: 30,
+              right: 20,
+              bottom: 40,
+              left: 50
+            };
+            var iWidth = plotWidth - margin.left - margin.right;
+            var iHeight = plotHeight - margin.top - margin.bottom;
+            var xDomain = [0, 20];
+            var yDomain = [0, 14];
+            return bind10(attach2(selector))(function(v) {
+              return bind10(appendTo2(v)(Svg.value)([viewBox(0)(0)(900)(700), classed5("scatter-quartet"), width12(900), height12(700)]))(function(svg) {
+                var drawSubplot = function(title5) {
+                  return function(dataPoints) {
+                    return function(xOffset) {
+                      return function(yOffset) {
+                        return bind10(appendTo2(svg)(Group.value)([classed5("subplot"), transform([function(v1) {
+                          return "translate(" + (show8(xOffset + margin.left) + ("," + (show8(yOffset + margin.top) + ")")));
+                        }])]))(function(subplotGroup) {
+                          return bind10(appendTo2(svg)(Text2.value)([x4(xOffset + plotWidth / 2), y4(yOffset + 15), text7(title5), textAnchor2("middle"), fontSize2(16), classed5("subplot-title")]))(function() {
+                            return bind10(liftEffect8(createLinearScale({
+                              domain: xDomain,
+                              range: [0, iWidth]
+                            })))(function(xScale) {
+                              return bind10(liftEffect8(createLinearScale({
+                                domain: yDomain,
+                                range: [iHeight, 0]
+                              })))(function(yScale) {
+                                return bind10(appendTo2(subplotGroup)(Group.value)([classed5("x-axis"), transform([function(v1) {
+                                  return "translate(0," + (show8(iHeight) + ")");
+                                }])]))(function(xAxisGroup) {
+                                  return bind10(appendTo2(subplotGroup)(Group.value)([classed5("y-axis")]))(function(yAxisGroup) {
+                                    return bind10(liftEffect8(callAxis(xAxisGroup)(axisBottom2(xScale))))(function() {
+                                      return bind10(liftEffect8(callAxis(yAxisGroup)(axisLeft2(yScale))))(function() {
+                                        var addPoint = function(point) {
+                                          var xPos = applyScale(xScale)(point.x);
+                                          var yPos = applyScale(yScale)(point.y);
+                                          return bind10(appendTo2(subplotGroup)(Circle.value)([cx2(xPos), cy2(yPos), radius2(4), fill5("#e74c3c"), strokeColor5("#c0392b"), strokeWidth5(1.5), classed5("scatter-point")]))(function() {
+                                            return pure15(unit);
+                                          });
+                                        };
+                                        return bind10(traverse_8(addPoint)(dataPoints))(function() {
+                                          return pure15(unit);
+                                        });
+                                      });
+                                    });
+                                  });
+                                });
+                              });
+                            });
+                          });
+                        });
+                      };
+                    };
+                  };
+                };
+                return bind10(drawSubplot("Dataset I")(quartet.dataset1)(60)(60))(function() {
+                  return bind10(drawSubplot("Dataset II")(quartet.dataset2)(60 + plotWidth + 60)(60))(function() {
+                    return bind10(drawSubplot("Dataset III")(quartet.dataset3)(60)(60 + plotHeight + 60))(function() {
+                      return bind10(drawSubplot("Dataset IV")(quartet.dataset4)(60 + plotWidth + 60)(60 + plotHeight + 60))(function() {
+                        return pure15(unit);
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          };
+        };
+      };
+    };
+  };
+  var defaultDimensions3 = {
+    width: 800,
+    height: 400,
+    margin: {
+      top: 20,
+      right: 30,
+      bottom: 30,
+      left: 40
+    }
+  };
+  var draw4 = function(dictBind) {
+    var bind10 = bind(dictBind);
+    return function(dictMonadEffect) {
+      var liftEffect8 = liftEffect(dictMonadEffect);
+      var Applicative0 = dictMonadEffect.Monad0().Applicative0();
+      var pure15 = pure(Applicative0);
+      var traverse_8 = traverse_(Applicative0)(foldableArray);
+      return function(dictSelectionM) {
+        var attach2 = attach(dictSelectionM);
+        var appendTo2 = appendTo(dictSelectionM);
+        return function(dataPoints) {
+          return function(selector) {
+            var iWidth = innerWidth4(defaultDimensions3);
+            var iHeight = innerHeight4(defaultDimensions3);
+            var xValues = map26(function(v) {
+              return v.x;
+            })(dataPoints);
+            var yValues = map26(function(v) {
+              return v.y;
+            })(dataPoints);
+            var minX = fromMaybe(0)(minimum4(xValues));
+            var maxX = fromMaybe(100)(maximum4(xValues));
+            var minY = fromMaybe(0)(minimum4(yValues));
+            var maxY = fromMaybe(100)(maximum4(yValues));
+            return bind10(attach2(selector))(function(v) {
+              return bind10(appendTo2(v)(Svg.value)([viewBox(0)(0)(defaultDimensions3.width)(defaultDimensions3.height), classed5("scatter-plot"), width12(defaultDimensions3.width), height12(defaultDimensions3.height)]))(function(svg) {
+                return bind10(appendTo2(svg)(Group.value)([transform([function(v1) {
+                  return "translate(" + (show8(defaultDimensions3.margin.left) + ("," + (show8(defaultDimensions3.margin.top) + ")")));
+                }])]))(function(chartGroup) {
+                  return bind10(liftEffect8(createLinearScale({
+                    domain: [minX, maxX],
+                    range: [0, iWidth]
+                  })))(function(xScale) {
+                    return bind10(liftEffect8(createLinearScale({
+                      domain: [minY, maxY],
+                      range: [iHeight, 0]
+                    })))(function(yScale) {
+                      return bind10(appendTo2(chartGroup)(Group.value)([classed5("x-axis"), transform([function(v1) {
+                        return "translate(0," + (show8(iHeight) + ")");
+                      }])]))(function(xAxisGroup) {
+                        return bind10(appendTo2(chartGroup)(Group.value)([classed5("y-axis")]))(function(yAxisGroup) {
+                          return bind10(liftEffect8(callAxis(xAxisGroup)(axisBottom2(xScale))))(function() {
+                            return bind10(liftEffect8(callAxis(yAxisGroup)(axisLeft2(yScale))))(function() {
+                              var addPoint = function(point) {
+                                var xPos = applyScale(xScale)(point.x);
+                                var yPos = applyScale(yScale)(point.y);
+                                return bind10(appendTo2(chartGroup)(Circle.value)([cx2(xPos), cy2(yPos), radius2(5), fill5("#4a90e2"), strokeColor5("#357abd"), strokeWidth5(1), classed5("scatter-point")]))(function() {
+                                  return pure15(unit);
+                                });
+                              };
+                              return bind10(traverse_8(addPoint)(dataPoints))(function() {
+                                return pure15(unit);
+                              });
+                            });
+                          });
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          };
+        };
+      };
+    };
+  };
+
+  // output/D3.Scales/foreign.js
+  var d3SchemeCategory10 = d3.scaleOrdinal(d3.schemeCategory10);
+  var d3SchemePaired = d3.scaleOrdinal(d3.schemePaired);
+  var d3SchemeDiverging10 = d3.scaleDiverging(d3.interpolateBrBG).domain([0, 250, 500]);
+  var d3SchemeSequential10 = d3.scaleSequential().interpolator(d3.interpolateYlOrRd).domain([0, 5, 10]);
+
+  // output/D3.Examples.ThreeLittleCircles/index.js
+  var fill6 = /* @__PURE__ */ fill(toAttrString);
+  var cx3 = /* @__PURE__ */ cx(toAttrNumberFnI);
+  var cy3 = /* @__PURE__ */ cy(toAttrNumber);
+  var radius3 = /* @__PURE__ */ radius(toAttrNumber);
+  var classed6 = /* @__PURE__ */ classed(toAttrString);
+  var discard5 = /* @__PURE__ */ discard(discardUnit);
+  var xFromIndex = function(v) {
+    return function(i2) {
+      return i2 * 100;
+    };
+  };
+  var drawThreeCircles = function(dictSelectionM) {
+    var Monad0 = dictSelectionM.Monad0();
+    var Bind1 = Monad0.Bind1();
+    var bind10 = bind(Bind1);
+    var attach2 = attach(dictSelectionM);
+    var appendTo2 = appendTo(dictSelectionM);
+    var simpleJoin2 = simpleJoin(dictSelectionM);
+    var discard13 = discard5(Bind1);
+    var setAttributes2 = setAttributes(dictSelectionM);
+    var pure15 = pure(Monad0.Applicative0());
+    return function(selector) {
+      var circleAttributes = [fill6("green"), cx3(xFromIndex), cy3(50), radius3(20)];
+      return bind10(attach2(selector))(function(root2) {
+        return bind10(appendTo2(root2)(Svg.value)([viewBox(-100)(-100)(650)(650), classed6("d3svg gup")]))(function(svg) {
+          return bind10(appendTo2(svg)(Group.value)([]))(function(circleGroup) {
+            return bind10(simpleJoin2(circleGroup)(Circle.value)([32, 57, 293])(keyIsID_))(function(circles) {
+              return discard13(setAttributes2(circles)(circleAttributes))(function() {
+                return pure15(circles);
+              });
+            });
+          });
+        });
+      });
     };
   };
 
@@ -13663,13 +14469,13 @@
       return void 0;
     }
   })();
-  function _spy(tag, x2) {
+  function _spy(tag, x5) {
     if (util !== void 0) {
-      console.log(tag + ":", util.inspect(x2, { depth: null, colors: true }));
+      console.log(tag + ":", util.inspect(x5, { depth: null, colors: true }));
     } else {
-      console.log(tag + ":", x2);
+      console.log(tag + ":", x5);
     }
-    return x2;
+    return x5;
   }
   var now2 = (function() {
     var perf;
@@ -13698,8 +14504,8 @@
   // output/D3.Selection.Functions/index.js
   var spy2 = /* @__PURE__ */ spy();
   var foldl3 = /* @__PURE__ */ foldl(foldableArray);
-  var show6 = /* @__PURE__ */ show(showElement);
-  var discard5 = /* @__PURE__ */ discard(discardUnit);
+  var show9 = /* @__PURE__ */ show(showElement);
+  var discard6 = /* @__PURE__ */ discard(discardUnit);
   var selectionUpdateJoin = function(dictSelectionM) {
     var pure15 = pure(dictSelectionM.Monad0().Applicative0());
     return function(openSelection) {
@@ -13795,7 +14601,7 @@
       return function(e) {
         return function(theData) {
           return function(keyFn) {
-            var element3 = spy2("Join: ")(show6(e));
+            var element3 = spy2("Join: ")(show9(e));
             var selectS = d3SelectionSelectAll_(element3)(selection2);
             var dataSelection = d3DataWithKeyFunction_(theData)(keyFn)(selectS);
             var enterSelection = d3EnterAndAppend_(element3)(dataSelection);
@@ -13821,13 +14627,13 @@
   };
   var selectionAppendElement = function(dictSelectionM) {
     var Monad0 = dictSelectionM.Monad0();
-    var discard13 = discard5(Monad0.Bind1());
+    var discard13 = discard6(Monad0.Bind1());
     var selectionModifySelection1 = selectionModifySelection(dictSelectionM);
     var pure15 = pure(Monad0.Applicative0());
     return function(selection_) {
       return function(element3) {
         return function(attributes) {
-          var appended_ = d3Append_(show6(element3))(selection_);
+          var appended_ = d3Append_(show9(element3))(selection_);
           return discard13(selectionModifySelection1(appended_)(attributes))(function() {
             return pure15(appended_);
           });
@@ -13883,8 +14689,13 @@
   // output/V2.Components.Visualization/index.js
   var bind5 = /* @__PURE__ */ bind(bindHalogenM);
   var get6 = /* @__PURE__ */ get(monadStateHalogenM);
-  var draw2 = /* @__PURE__ */ draw(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var draw5 = /* @__PURE__ */ draw3(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var pure10 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var draw1 = /* @__PURE__ */ draw(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var draw22 = /* @__PURE__ */ draw4(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var drawQuartet2 = /* @__PURE__ */ drawQuartet(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var draw32 = /* @__PURE__ */ draw2(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var drawThreeCircles2 = /* @__PURE__ */ drawThreeCircles(d3TaglessD3M);
   var Initialize2 = /* @__PURE__ */ (function() {
     function Initialize6() {
     }
@@ -13905,9 +14716,39 @@
     var liftEffect8 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
       return bind5(get6)(function(state3) {
+        var selector = "#" + state3.containerId;
         if (state3.exampleId === "line-chart") {
-          var selector = "#" + state3.containerId;
-          return bind5(liftEffect8(eval_D3M(draw2(sineWaveData)(selector))))(function() {
+          return bind5(liftEffect8(eval_D3M(draw5(sineWaveData)(selector))))(function() {
+            return pure10(unit);
+          });
+        }
+        ;
+        if (state3.exampleId === "bar-chart") {
+          return bind5(liftEffect8(eval_D3M(draw1(monthlySales)(selector))))(function() {
+            return pure10(unit);
+          });
+        }
+        ;
+        if (state3.exampleId === "scatter-plot") {
+          return bind5(liftEffect8(eval_D3M(draw22(scatterData)(selector))))(function() {
+            return pure10(unit);
+          });
+        }
+        ;
+        if (state3.exampleId === "scatter-quartet") {
+          return bind5(liftEffect8(eval_D3M(drawQuartet2(anscombesQuartet)(selector))))(function() {
+            return pure10(unit);
+          });
+        }
+        ;
+        if (state3.exampleId === "chord-diagram") {
+          return bind5(liftEffect8(eval_D3M(draw32(exampleMatrix)(exampleLabels)(selector))))(function() {
+            return pure10(unit);
+          });
+        }
+        ;
+        if (state3.exampleId === "three-little-circles") {
+          return bind5(liftEffect8(eval_D3M(drawThreeCircles2(selector))))(function() {
             return pure10(unit);
           });
         }
@@ -13959,9 +14800,9 @@
   }
 
   // output/Web.DOM.NonElementParentNode/index.js
-  var map25 = /* @__PURE__ */ map(functorEffect);
+  var map27 = /* @__PURE__ */ map(functorEffect);
   var getElementById = function(eid) {
-    var $2 = map25(toMaybe);
+    var $2 = map27(toMaybe);
     var $3 = _getElementById(eid);
     return function($4) {
       return $2($3($4));
@@ -14065,13 +14906,13 @@
     };
   };
   var eqTab = {
-    eq: function(x2) {
-      return function(y2) {
-        if (x2 instanceof CodeTab && y2 instanceof CodeTab) {
+    eq: function(x5) {
+      return function(y5) {
+        if (x5 instanceof CodeTab && y5 instanceof CodeTab) {
           return true;
         }
         ;
-        if (x2 instanceof VisualizationTab && y2 instanceof VisualizationTab) {
+        if (x5 instanceof VisualizationTab && y5 instanceof VisualizationTab) {
           return true;
         }
         ;
@@ -14164,7 +15005,7 @@
   var bind8 = /* @__PURE__ */ bind(bindHalogenM);
   var get8 = /* @__PURE__ */ get(monadStateHalogenM);
   var modify_5 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard6 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard7 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var slot_3 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "splitPane";
@@ -14219,7 +15060,7 @@
           }
           ;
           if (v1 instanceof Just) {
-            return discard6(modify_5(function(v2) {
+            return discard7(modify_5(function(v2) {
               var $31 = {};
               for (var $32 in v2) {
                 if ({}.hasOwnProperty.call(v2, $32)) {
@@ -14360,8 +15201,8 @@
   var bind9 = /* @__PURE__ */ bind(bindHalogenM);
   var liftEffect7 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var bind15 = /* @__PURE__ */ bind(bindEffect);
-  var discard7 = /* @__PURE__ */ discard(discardUnit);
-  var discard12 = /* @__PURE__ */ discard7(bindHalogenM);
+  var discard8 = /* @__PURE__ */ discard(discardUnit);
+  var discard12 = /* @__PURE__ */ discard8(bindHalogenM);
   var modify_6 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var mempty2 = /* @__PURE__ */ mempty(/* @__PURE__ */ monoidEffect(monoidUnit));
   var pure14 = /* @__PURE__ */ pure(applicativeHalogenM);

@@ -4,6 +4,10 @@ import Prelude
 
 import D3.Examples.Charts.Model as Charts
 import D3.Examples.LineChart as LineChart
+import D3.Examples.BarChart as BarChart
+import D3.Examples.ScatterPlot as ScatterPlot
+import D3.Examples.ChordDiagram as ChordDiagram
+import D3.Examples.ThreeLittleCircles as ThreeLittleCircles
 import D3Tagless.Instance.Selection (eval_D3M)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
@@ -60,12 +64,39 @@ handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action Slot
 handleAction = case _ of
   Initialize -> do
     state <- H.get
-    -- For POC, only handle line-chart
+    let selector = "#" <> state.containerId
+
     case state.exampleId of
+      -- Basic Charts
       "line-chart" -> do
-        let selector = "#" <> state.containerId
         _ <- liftEffect $ eval_D3M $ LineChart.draw Charts.sineWaveData selector
         pure unit
+
+      "bar-chart" -> do
+        _ <- liftEffect $ eval_D3M $ BarChart.draw Charts.monthlySales selector
+        pure unit
+
+      "scatter-plot" -> do
+        _ <- liftEffect $ eval_D3M $ ScatterPlot.draw Charts.scatterData selector
+        pure unit
+
+      "scatter-quartet" -> do
+        _ <- liftEffect $ eval_D3M $ ScatterPlot.drawQuartet Charts.anscombesQuartet selector
+        pure unit
+
+      -- Advanced Layouts
+      "chord-diagram" -> do
+        _ <- liftEffect $ eval_D3M $ ChordDiagram.draw ChordDiagram.exampleMatrix ChordDiagram.exampleLabels selector
+        pure unit
+
+      -- Interactive Examples
+      "three-little-circles" -> do
+        _ <- liftEffect $ eval_D3M $ ThreeLittleCircles.drawThreeCircles selector
+        pure unit
+
       _ -> do
-        -- Other examples not yet implemented
+        -- Other examples not yet implemented:
+        -- bubble-chart, sankey, tree (need file loading or complex state)
+        -- gup, les-mis (need Halogen integration for interactivity)
+        -- meta-tree, print-tree, spago (need different interpreters/setup)
         pure unit
