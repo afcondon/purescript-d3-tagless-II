@@ -16683,7 +16683,7 @@
   };
   var getCodeFileUrl = function(exampleId) {
     return bind7(getCodeFile(exampleId))(function(filename) {
-      return pure15("../v1/code-examples/" + filename);
+      return pure15("./code-examples/" + filename);
     });
   };
 
