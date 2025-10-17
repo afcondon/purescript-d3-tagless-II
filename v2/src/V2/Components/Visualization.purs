@@ -14,6 +14,7 @@ import D3.Examples.SankeyDiagram as SankeyDiagram
 import D3.Examples.GUP as GUP
 import D3.Examples.ThreeLittleCircles as ThreeLittleCircles
 import D3.Examples.Tree.Configure as Tree
+import D3.Examples.TreeSimple as TreeSimple
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
 import D3.Layouts.Sankey.Types (initialSankeyLayoutState)
 import D3Tagless.Instance.Selection (eval_D3M, runD3M)
@@ -137,6 +138,30 @@ handleAction = case _ of
         let sankeyState = { sankeyLayout: initialSankeyLayoutState }
         _ <- liftEffect $ eval_D3M_Sankey sankeyState $ SankeyDiagram.draw Sankey.energyData selector
         pure unit
+
+      "tree-horizontal" -> do
+        treeJSON <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case treeJSON of
+          Left _err -> pure unit
+          Right json -> do
+            _ <- liftEffect $ eval_D3M $ TreeSimple.drawTreeHorizontal json selector
+            pure unit
+
+      "tree-vertical" -> do
+        treeJSON <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case treeJSON of
+          Left _err -> pure unit
+          Right json -> do
+            _ <- liftEffect $ eval_D3M $ TreeSimple.drawTreeVertical json selector
+            pure unit
+
+      "tree-radial" -> do
+        treeJSON <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case treeJSON of
+          Left _err -> pure unit
+          Right json -> do
+            _ <- liftEffect $ eval_D3M $ TreeSimple.drawTreeRadial json selector
+            pure unit
 
       -- Interactive Examples
       "three-little-circles" -> do

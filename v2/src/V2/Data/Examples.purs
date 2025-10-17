@@ -99,6 +99,39 @@ allExamples =
     , hasInteractivity: true
     , hasComparison: false
     }
+  , { id: "tree-horizontal"
+    , title: "Horizontal Tree"
+    , description: "Simple horizontal tree layout flowing left to right"
+    , about: "A straightforward horizontal tree layout using D3's tidy tree algorithm. The tree flows from left to right with parent nodes on the left and children spreading to the right. This clean, focused example demonstrates the basics of hierarchical layouts without the complexity of configuration options. Perfect for file systems, organizational charts, or any hierarchy that reads naturally left-to-right."
+    , difficulty: Beginner
+    , category: AdvancedLayout
+    , tags: ["hierarchy", "tree", "horizontal"]
+    , thumbnail: "assets/thumbnails/tree-horizontal.svg"
+    , hasInteractivity: false
+    , hasComparison: true
+    }
+  , { id: "tree-vertical"
+    , title: "Vertical Tree"
+    , description: "Simple vertical tree layout flowing top to bottom"
+    , about: "A classic top-down tree layout using D3's tidy tree algorithm. The root appears at the top with children spreading downward in a balanced, space-efficient layout. This is the most familiar tree representation, commonly used for decision trees, taxonomies, and family trees. The tidy tree algorithm ensures sibling nodes are evenly spaced and subtrees don't overlap."
+    , difficulty: Beginner
+    , category: AdvancedLayout
+    , tags: ["hierarchy", "tree", "vertical"]
+    , thumbnail: "assets/thumbnails/tree-vertical.svg"
+    , hasInteractivity: false
+    , hasComparison: true
+    }
+  , { id: "tree-radial"
+    , title: "Radial Tree"
+    , description: "Circular tree layout radiating from the center"
+    , about: "A radial tree layout that positions the root at the center with children radiating outward in a circular pattern. This space-efficient layout is excellent for large hierarchies where linear layouts would be too long or wide. The radial layout makes it easy to see the overall structure and depth of the tree at a glance. Node labels rotate to remain readable regardless of their angular position."
+    , difficulty: Beginner
+    , category: AdvancedLayout
+    , tags: ["hierarchy", "tree", "radial", "circular"]
+    , thumbnail: "assets/thumbnails/tree-radial.svg"
+    , hasInteractivity: false
+    , hasComparison: true
+    }
 
   -- Interactive Examples
   , { id: "three-little-circles"

@@ -8526,6 +8526,39 @@
       hasInteractivity: true,
       hasComparison: false
     }, {
+      id: "tree-horizontal",
+      title: "Horizontal Tree",
+      description: "Simple horizontal tree layout flowing left to right",
+      about: "A straightforward horizontal tree layout using D3's tidy tree algorithm. The tree flows from left to right with parent nodes on the left and children spreading to the right. This clean, focused example demonstrates the basics of hierarchical layouts without the complexity of configuration options. Perfect for file systems, organizational charts, or any hierarchy that reads naturally left-to-right.",
+      difficulty: Beginner.value,
+      category: AdvancedLayout.value,
+      tags: ["hierarchy", "tree", "horizontal"],
+      thumbnail: "assets/thumbnails/tree-horizontal.svg",
+      hasInteractivity: false,
+      hasComparison: true
+    }, {
+      id: "tree-vertical",
+      title: "Vertical Tree",
+      description: "Simple vertical tree layout flowing top to bottom",
+      about: "A classic top-down tree layout using D3's tidy tree algorithm. The root appears at the top with children spreading downward in a balanced, space-efficient layout. This is the most familiar tree representation, commonly used for decision trees, taxonomies, and family trees. The tidy tree algorithm ensures sibling nodes are evenly spaced and subtrees don't overlap.",
+      difficulty: Beginner.value,
+      category: AdvancedLayout.value,
+      tags: ["hierarchy", "tree", "vertical"],
+      thumbnail: "assets/thumbnails/tree-vertical.svg",
+      hasInteractivity: false,
+      hasComparison: true
+    }, {
+      id: "tree-radial",
+      title: "Radial Tree",
+      description: "Circular tree layout radiating from the center",
+      about: "A radial tree layout that positions the root at the center with children radiating outward in a circular pattern. This space-efficient layout is excellent for large hierarchies where linear layouts would be too long or wide. The radial layout makes it easy to see the overall structure and depth of the tree at a glance. Node labels rotate to remain readable regardless of their angular position.",
+      difficulty: Beginner.value,
+      category: AdvancedLayout.value,
+      tags: ["hierarchy", "tree", "radial", "circular"],
+      thumbnail: "assets/thumbnails/tree-radial.svg",
+      hasInteractivity: false,
+      hasComparison: true
+    }, {
       id: "three-little-circles",
       title: "Three Little Circles",
       description: "Introduction to D3 selections and data binding",
@@ -17710,6 +17743,161 @@
     });
   };
 
+  // output/D3.Examples.TreeSimple/index.js
+  var show14 = /* @__PURE__ */ show(showNumber);
+  var rotateRadialLabels2 = function(d7) {
+    return "rotate(" + ((function() {
+      var $34 = treeDatum_.onRHS(Radial.value)(d7);
+      if ($34) {
+        return "180";
+      }
+      ;
+      return "0";
+    })() + ")");
+  };
+  var radialTranslate2 = function(d7) {
+    return "translate(" + (show14(treeDatum_.y(d7)) + ",0)");
+  };
+  var radialRotate2 = function(x10) {
+    return show14(x10 * 180 / pi - 90);
+  };
+  var radialRotateCommon2 = function(d7) {
+    return "rotate(" + (radialRotate2(treeDatum_.x(d7)) + ")");
+  };
+  var positionXYreflected2 = function(d7) {
+    return "translate(" + (show14(treeDatum_.y(d7)) + ("," + (show14(treeDatum_.x(d7)) + ")")));
+  };
+  var positionXY2 = function(d7) {
+    return "translate(" + (show14(treeDatum_.x(d7)) + ("," + (show14(treeDatum_.y(d7)) + ")")));
+  };
+  var drawTreeVertical = function(dictBind) {
+    var bind10 = bind(dictBind);
+    var draw9 = draw7(dictBind);
+    return function(dictMonadEffect) {
+      var liftEffect10 = liftEffect(dictMonadEffect);
+      return function(dictSelectionM) {
+        var draw12 = draw9(dictSelectionM);
+        return function(json2) {
+          return function(selector) {
+            return bind10(liftEffect10(getWindowWidthHeight))(function(v) {
+              var root2 = hierarchyFromJSON_(json2);
+              var numberOfLevels = hNodeHeight_(root2) + 1;
+              var spacing = {
+                interChild: 10,
+                interLevel: v.value1 / numberOfLevels
+              };
+              var layout = treeSetNodeSize_(getLayout(TidyTree.value))([spacing.interChild, spacing.interLevel]);
+              var laidOutRoot = runLayoutFn_(layout)(root2);
+              var v1 = treeMinMax_(laidOutRoot);
+              var yExtent = abs(v1.yMax - v1.yMin);
+              var xExtent = abs(v1.xMax - v1.xMin);
+              var vtreeYOffset = abs(v.value1 - yExtent) / 2;
+              var pad = function(n) {
+                return n * 1.2;
+              };
+              var config = {
+                layout: Vertical.value,
+                selector,
+                linkPath: verticalLink,
+                spacing,
+                viewbox: [viewBox(v1.xMin)(-vtreeYOffset)(pad(xExtent))(pad(yExtent)), preserveAspectRatio(new AspectRatio(XMid.value, YMid.value, Meet.value))],
+                nodeTransform: [transform([positionXY2])],
+                color: d3SchemeCategory10N_(5),
+                svg: {
+                  width: v.value0,
+                  height: v.value1
+                }
+              };
+              return draw12(config)(laidOutRoot);
+            });
+          };
+        };
+      };
+    };
+  };
+  var drawTreeRadial = function(dictBind) {
+    var bind10 = bind(dictBind);
+    var draw9 = draw7(dictBind);
+    return function(dictMonadEffect) {
+      var liftEffect10 = liftEffect(dictMonadEffect);
+      return function(dictSelectionM) {
+        var draw12 = draw9(dictSelectionM);
+        return function(json2) {
+          return function(selector) {
+            return bind10(liftEffect10(getWindowWidthHeight))(function(v) {
+              var root2 = hierarchyFromJSON_(json2);
+              var layout = treeSetSeparation_(treeSetSize_(getLayout(TidyTree.value))([2 * pi, v.value0 / 2 - 100]))(radialSeparation);
+              var laidOutRoot = runLayoutFn_(layout)(root2);
+              var v1 = treeMinMax_(laidOutRoot);
+              var radialExtent = 2 * v1.yMax;
+              var config = {
+                layout: Radial.value,
+                selector,
+                linkPath: radialLink(treeDatum_.x)(treeDatum_.y),
+                spacing: {
+                  interChild: 0,
+                  interLevel: 0
+                },
+                viewbox: [viewBox(-v1.yMax * 1.2)(-v1.yMax * 1.2)(radialExtent * 1.2)(radialExtent * 1.2), preserveAspectRatio(new AspectRatio(XMin.value, YMin.value, Meet.value))],
+                nodeTransform: [transform([radialRotateCommon2, radialTranslate2, rotateRadialLabels2])],
+                color: d3SchemeCategory10N_(6),
+                svg: {
+                  width: v.value0,
+                  height: v.value1
+                }
+              };
+              return draw12(config)(laidOutRoot);
+            });
+          };
+        };
+      };
+    };
+  };
+  var drawTreeHorizontal = function(dictBind) {
+    var bind10 = bind(dictBind);
+    var draw9 = draw7(dictBind);
+    return function(dictMonadEffect) {
+      var liftEffect10 = liftEffect(dictMonadEffect);
+      return function(dictSelectionM) {
+        var draw12 = draw9(dictSelectionM);
+        return function(json2) {
+          return function(selector) {
+            return bind10(liftEffect10(getWindowWidthHeight))(function(v) {
+              var root2 = hierarchyFromJSON_(json2);
+              var numberOfLevels = hNodeHeight_(root2) + 1;
+              var spacing = {
+                interChild: 10,
+                interLevel: v.value0 / numberOfLevels
+              };
+              var layout = treeSetNodeSize_(getLayout(TidyTree.value))([spacing.interChild, spacing.interLevel]);
+              var laidOutRoot = runLayoutFn_(layout)(root2);
+              var v1 = treeMinMax_(laidOutRoot);
+              var yExtent = abs(v1.yMax - v1.yMin);
+              var xExtent = abs(v1.xMax - v1.xMin);
+              var pad = function(n) {
+                return n * 1.2;
+              };
+              var config = {
+                layout: Horizontal.value,
+                selector,
+                linkPath: horizontalLink,
+                spacing,
+                viewbox: [viewBox(-xExtent * 0.1)(pad(v1.xMin))(pad(yExtent))(pad(xExtent)), preserveAspectRatio(new AspectRatio(XMin.value, YMid.value, Meet.value))],
+                nodeTransform: [transform([positionXYreflected2])],
+                color: d3SchemeCategory10N_(4),
+                svg: {
+                  width: v.value0,
+                  height: v.value1
+                }
+              };
+              return draw12(config)(laidOutRoot);
+            });
+          };
+        };
+      };
+    };
+  };
+
   // output/D3.Layouts.Sankey.Types/foreign.js
   var initialSankeyLayoutState = Sankey().nodeWidth(15).nodePadding(10);
 
@@ -17838,6 +18026,9 @@
   var draw32 = /* @__PURE__ */ draw3(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var draw42 = /* @__PURE__ */ draw2(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var draw52 = /* @__PURE__ */ draw5(bindD3SankeyM)(monadEffD3SankeyM)(monadStateD3SankeyM)(sankeyMD3Selection_D3Sank);
+  var drawTreeHorizontal2 = /* @__PURE__ */ drawTreeHorizontal(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var drawTreeVertical2 = /* @__PURE__ */ drawTreeVertical(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var drawTreeRadial2 = /* @__PURE__ */ drawTreeRadial(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var drawThreeCircles2 = /* @__PURE__ */ drawThreeCircles(d3TaglessD3M);
   var exGeneralUpdatePattern2 = /* @__PURE__ */ exGeneralUpdatePattern(d3TaglessD3M);
   var discard12 = /* @__PURE__ */ discard(discardUnit);
@@ -17873,7 +18064,7 @@
         return [];
       }
       ;
-      throw new Error("Failed pattern match at V2.Components.Visualization (line 88, column 7 - line 99, column 22): " + [state3.textOutput.constructor.name]);
+      throw new Error("Failed pattern match at V2.Components.Visualization (line 89, column 7 - line 100, column 22): " + [state3.textOutput.constructor.name]);
     })());
   };
   var initialState2 = function(input3) {
@@ -17888,8 +18079,8 @@
     var coinToss = function(c) {
       return function __do3() {
         var n = random();
-        var $58 = n > 0.6;
-        if ($58) {
+        var $67 = n > 0.6;
+        if ($67) {
           return new Just(c);
         }
         ;
@@ -17955,6 +18146,54 @@
             });
           }
           ;
+          if (state3.exampleId === "tree-horizontal") {
+            return bind15(liftAff2(getTreeViaAJAX("./data/flare-2.json")))(function(treeJSON) {
+              if (treeJSON instanceof Left) {
+                return pure15(unit);
+              }
+              ;
+              if (treeJSON instanceof Right) {
+                return bind15(liftEffect12(eval_D3M(drawTreeHorizontal2(treeJSON.value0)(selector))))(function() {
+                  return pure15(unit);
+                });
+              }
+              ;
+              throw new Error("Failed pattern match at V2.Components.Visualization (line 144, column 9 - line 148, column 22): " + [treeJSON.constructor.name]);
+            });
+          }
+          ;
+          if (state3.exampleId === "tree-vertical") {
+            return bind15(liftAff2(getTreeViaAJAX("./data/flare-2.json")))(function(treeJSON) {
+              if (treeJSON instanceof Left) {
+                return pure15(unit);
+              }
+              ;
+              if (treeJSON instanceof Right) {
+                return bind15(liftEffect12(eval_D3M(drawTreeVertical2(treeJSON.value0)(selector))))(function() {
+                  return pure15(unit);
+                });
+              }
+              ;
+              throw new Error("Failed pattern match at V2.Components.Visualization (line 152, column 9 - line 156, column 22): " + [treeJSON.constructor.name]);
+            });
+          }
+          ;
+          if (state3.exampleId === "tree-radial") {
+            return bind15(liftAff2(getTreeViaAJAX("./data/flare-2.json")))(function(treeJSON) {
+              if (treeJSON instanceof Left) {
+                return pure15(unit);
+              }
+              ;
+              if (treeJSON instanceof Right) {
+                return bind15(liftEffect12(eval_D3M(drawTreeRadial2(treeJSON.value0)(selector))))(function() {
+                  return pure15(unit);
+                });
+              }
+              ;
+              throw new Error("Failed pattern match at V2.Components.Visualization (line 160, column 9 - line 164, column 22): " + [treeJSON.constructor.name]);
+            });
+          }
+          ;
           if (state3.exampleId === "three-little-circles") {
             return bind15(liftEffect12(eval_D3M(drawThreeCircles2(selector))))(function() {
               return pure15(unit);
@@ -17996,16 +18235,16 @@
                   return bind15(liftAff2(makeModel2(TidyTree.value)(Radial.value)(treeJSON.value0)))(function(treeModel) {
                     return bind15(liftAff2(getPrintTree(treeModel)))(function(textRep) {
                       return discard13(modify_5(function(v1) {
-                        var $63 = {};
-                        for (var $64 in v1) {
-                          if ({}.hasOwnProperty.call(v1, $64)) {
-                            $63[$64] = v1[$64];
+                        var $81 = {};
+                        for (var $82 in v1) {
+                          if ({}.hasOwnProperty.call(v1, $82)) {
+                            $81[$82] = v1[$82];
                           }
                           ;
                         }
                         ;
-                        $63.textOutput = new Just(textRep);
-                        return $63;
+                        $81.textOutput = new Just(textRep);
+                        return $81;
                       }))(function() {
                         return handleAction2(dictMonadAff)(HighlightCode.value);
                       });
@@ -18013,7 +18252,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at V2.Components.Visualization (line 170, column 9 - line 180, column 39): " + [treeJSON.constructor.name]);
+                throw new Error("Failed pattern match at V2.Components.Visualization (line 195, column 9 - line 205, column 39): " + [treeJSON.constructor.name]);
               })())(function() {
                 return pure15(unit);
               });
@@ -18041,11 +18280,11 @@
             return pure15(unit);
           }
           ;
-          throw new Error("Failed pattern match at V2.Components.Visualization (line 193, column 5 - line 203, column 27): " + [state3.textOutput.constructor.name]);
+          throw new Error("Failed pattern match at V2.Components.Visualization (line 218, column 5 - line 228, column 27): " + [state3.textOutput.constructor.name]);
         });
       }
       ;
-      throw new Error("Failed pattern match at V2.Components.Visualization (line 103, column 16 - line 203, column 27): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at V2.Components.Visualization (line 104, column 16 - line 228, column 27): " + [v.constructor.name]);
     };
   };
   var component3 = function(dictMonadAff) {
@@ -18237,13 +18476,13 @@
   var bind7 = /* @__PURE__ */ bind(bindMaybe);
   var pure16 = /* @__PURE__ */ pure(applicativeMaybe);
   var visualizationUrlMap = /* @__PURE__ */ (function() {
-    return fromFoldable4([new Tuple("line-chart", "../v1/index.html#line-chart"), new Tuple("bar-chart", "../v1/index.html#bar-chart"), new Tuple("scatter-plot", "../v1/index.html#scatter-plot"), new Tuple("scatter-quartet", "../v1/index.html#scatter-quartet"), new Tuple("chord-diagram", "../v1/index.html#chord-diagram"), new Tuple("bubble-chart", "../v1/index.html#bubble-chart"), new Tuple("sankey", "../v1/index.html#sankey-diagram"), new Tuple("tree", "../v1/index.html#tree-layout"), new Tuple("three-little-circles", "../v1/index.html#three-little-circles"), new Tuple("gup", "../v1/index.html#general-update-pattern"), new Tuple("les-mis", "../v1/index.html#les-miserables"), new Tuple("meta-tree", "../v1/index.html#metatree"), new Tuple("print-tree", "../v1/index.html#string-generator"), new Tuple("spago", "../v1/index.html#spago-explorer")]);
+    return fromFoldable4([new Tuple("line-chart", "../v1/index.html#line-chart"), new Tuple("bar-chart", "../v1/index.html#bar-chart"), new Tuple("scatter-plot", "../v1/index.html#scatter-plot"), new Tuple("scatter-quartet", "../v1/index.html#scatter-quartet"), new Tuple("chord-diagram", "../v1/index.html#chord-diagram"), new Tuple("bubble-chart", "../v1/index.html#bubble-chart"), new Tuple("sankey", "../v1/index.html#sankey-diagram"), new Tuple("tree", "../v1/index.html#tree-layout"), new Tuple("tree-horizontal", "../v1/index.html#tree-layout"), new Tuple("tree-vertical", "../v1/index.html#tree-layout"), new Tuple("tree-radial", "../v1/index.html#tree-layout"), new Tuple("three-little-circles", "../v1/index.html#three-little-circles"), new Tuple("gup", "../v1/index.html#general-update-pattern"), new Tuple("les-mis", "../v1/index.html#les-miserables"), new Tuple("meta-tree", "../v1/index.html#metatree"), new Tuple("print-tree", "../v1/index.html#string-generator"), new Tuple("spago", "../v1/index.html#spago-explorer")]);
   })();
   var getVisualizationUrl = function(exampleId) {
     return lookup6(exampleId)(visualizationUrlMap);
   };
   var codeFileMap = /* @__PURE__ */ (function() {
-    return fromFoldable4([new Tuple("line-chart", "LineChartDraw"), new Tuple("bar-chart", "BarChartDraw"), new Tuple("scatter-plot", "ScatterPlotDraw"), new Tuple("scatter-quartet", "ScatterPlotQuartet"), new Tuple("chord-diagram", "ChordDiagramDraw"), new Tuple("bubble-chart", "BubbleChartDraw"), new Tuple("sankey", "SankeyDraw"), new Tuple("tree", "TreeDraw"), new Tuple("three-little-circles", "3LC"), new Tuple("gup", "GUP"), new Tuple("les-mis", "LesMisScript"), new Tuple("meta-tree", "MetaTreeDraw"), new Tuple("print-tree", "PrintTreeHandleActions"), new Tuple("spago", "LesMisScript")]);
+    return fromFoldable4([new Tuple("line-chart", "LineChartDraw"), new Tuple("bar-chart", "BarChartDraw"), new Tuple("scatter-plot", "ScatterPlotDraw"), new Tuple("scatter-quartet", "ScatterPlotQuartet"), new Tuple("chord-diagram", "ChordDiagramDraw"), new Tuple("bubble-chart", "BubbleChartDraw"), new Tuple("sankey", "SankeyDraw"), new Tuple("tree", "TreeDraw"), new Tuple("tree-horizontal", "TreeHorizontalDraw"), new Tuple("tree-vertical", "TreeVerticalDraw"), new Tuple("tree-radial", "TreeRadialDraw"), new Tuple("three-little-circles", "3LC"), new Tuple("gup", "GUP"), new Tuple("les-mis", "LesMisScript"), new Tuple("meta-tree", "MetaTreeDraw"), new Tuple("print-tree", "PrintTreeHandleActions"), new Tuple("spago", "LesMisScript")]);
   })();
   var getCodeFile = function(exampleId) {
     return lookup6(exampleId)(codeFileMap);
