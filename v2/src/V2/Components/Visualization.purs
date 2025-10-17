@@ -8,6 +8,7 @@ import D3.Examples.LineChart as LineChart
 import D3.Examples.BarChart as BarChart
 import D3.Examples.ScatterPlot as ScatterPlot
 import D3.Examples.ChordDiagram as ChordDiagram
+import D3.Examples.BubbleChart as BubbleChart
 import D3.Examples.GUP as GUP
 import D3.Examples.ThreeLittleCircles as ThreeLittleCircles
 import D3.Examples.Tree.Configure as Tree
@@ -121,6 +122,11 @@ handleAction = case _ of
       -- Advanced Layouts
       "chord-diagram" -> do
         _ <- liftEffect $ eval_D3M $ ChordDiagram.draw ChordDiagram.exampleMatrix ChordDiagram.exampleLabels selector
+        pure unit
+
+      "bubble-chart" -> do
+        jsonData <- H.liftAff BubbleChart.loadFlareData
+        _ <- liftEffect $ eval_D3M $ BubbleChart.draw jsonData selector
         pure unit
 
       -- Interactive Examples
