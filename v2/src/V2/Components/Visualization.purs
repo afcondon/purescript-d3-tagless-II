@@ -2,13 +2,17 @@ module V2.Components.Visualization where
 
 import Prelude
 
+import D3.Data.Tree (TreeLayout(..), TreeType(..))
 import D3.Examples.Charts.Model as Charts
 import D3.Examples.LineChart as LineChart
 import D3.Examples.BarChart as BarChart
 import D3.Examples.ScatterPlot as ScatterPlot
 import D3.Examples.ChordDiagram as ChordDiagram
 import D3.Examples.ThreeLittleCircles as ThreeLittleCircles
+import D3.Examples.Tree.Configure as Tree
+import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
 import D3Tagless.Instance.Selection (eval_D3M)
+import Data.Either (Either(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Halogen as H
@@ -26,10 +30,11 @@ type Input = {
 type Slots :: forall k. Row k
 type Slots = ()
 
--- | State just tracks the example ID
+-- | State tracks the example ID and optional text output (for print-tree)
 type State = {
   exampleId :: ExampleId,
-  containerId :: String
+  containerId :: String,
+  textOutput :: Maybe String
 }
 
 -- | Actions
@@ -50,6 +55,7 @@ initialState :: Input -> State
 initialState input =
   { exampleId: input.exampleId
   , containerId: "viz-container-" <> input.exampleId
+  , textOutput: Nothing
   }
 
 render :: forall m. State -> H.ComponentHTML Action Slots m
@@ -58,7 +64,15 @@ render state =
     [ HP.classes [ HH.ClassName "visualization" ]
     , HP.id state.containerId
     ]
-    []
+    -- If we have text output (for print-tree), display it as pre/code
+    ( case state.textOutput of
+        Just text ->
+          [ HH.pre
+              [ HP.classes [ HH.ClassName "visualization__text-output" ] ]
+              [ HH.code_ [ HH.text text ] ]
+          ]
+        Nothing -> []
+    )
 
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action Slots o m Unit
 handleAction = case _ of
@@ -94,9 +108,24 @@ handleAction = case _ of
         _ <- liftEffect $ eval_D3M $ ThreeLittleCircles.drawThreeCircles selector
         pure unit
 
+      -- String Interpreter (print-tree)
+      "print-tree" -> do
+        -- Load tree data from JSON
+        treeJSON <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+        case treeJSON of
+          Left _err -> pure unit  -- Handle error silently for now
+          Right tree -> do
+            -- Create tree model
+            treeModel <- H.liftAff $ makeModel TidyTree Radial tree
+            -- Get string representation using printer interpreter
+            textRep <- H.liftAff $ Tree.getPrintTree treeModel
+            -- Store in state for rendering
+            H.modify_ _ { textOutput = Just textRep }
+        pure unit
+
       _ -> do
         -- Other examples not yet implemented:
         -- bubble-chart, sankey, tree (need file loading or complex state)
         -- gup, les-mis (need Halogen integration for interactivity)
-        -- meta-tree, print-tree, spago (need different interpreters/setup)
+        -- meta-tree, spago (need different interpreters/setup)
         pure unit

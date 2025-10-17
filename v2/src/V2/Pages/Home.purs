@@ -38,19 +38,31 @@ render _ =
                 [ HP.classes [ HH.ClassName "home__description" ] ]
                 [ HH.text "A PureScript library implementing a Finally Tagless embedded DSL for building interactive data visualizations with D3.js" ]
             , HH.div
-                [ HP.classes [ HH.ClassName "home__cta" ] ]
-                [ HH.a
-                    [ HP.href $ routeToHash Gallery
-                    , HP.classes [ HH.ClassName "home__button", HH.ClassName "home__button--primary" ]
-                    ]
-                    [ HH.text "View Examples" ]
-                , HH.a
-                    [ HP.href "https://github.com/afcondon/purescript-d3-tagless"
-                    , HP.target "_blank"
-                    , HP.rel "noopener noreferrer"
-                    , HP.classes [ HH.ClassName "home__button", HH.ClassName "home__button--secondary" ]
-                    ]
-                    [ HH.text "View on GitHub" ]
+                [ HP.classes [ HH.ClassName "home__cta-cards" ] ]
+                [ navCard
+                    (routeToHash Gallery)
+                    "📊"
+                    "Gallery"
+                    "Browse simple chart examples"
+                    false
+                , navCard
+                    (routeToHash Spago)
+                    "🔍"
+                    "Spago Explorer"
+                    "Real-world application demo"
+                    false
+                , navCard
+                    (routeToHash Interpreters)
+                    "🎭"
+                    "Interpreters"
+                    "Alternative interpretations"
+                    false
+                , navCard
+                    "https://github.com/afcondon/purescript-d3-tagless"
+                    "💻"
+                    "GitHub"
+                    "View source code"
+                    true
                 ]
             ]
         ]
@@ -124,5 +136,24 @@ feature emoji title description =
         [ HH.text title ]
     , HH.p
         [ HP.classes [ HH.ClassName "home__feature-description" ] ]
+        [ HH.text description ]
+    ]
+
+-- | Helper to render a navigation card
+navCard :: forall m. String -> String -> String -> String -> Boolean -> H.ComponentHTML Unit Slots m
+navCard href emoji title description isExternal =
+  HH.a
+    ( [ HP.href href
+      , HP.classes [ HH.ClassName "home__nav-card" ]
+      ] <> if isExternal then [ HP.target "_blank", HP.rel "noopener noreferrer" ] else []
+    )
+    [ HH.div
+        [ HP.classes [ HH.ClassName "home__nav-card-icon" ] ]
+        [ HH.text emoji ]
+    , HH.h3
+        [ HP.classes [ HH.ClassName "home__nav-card-title" ] ]
+        [ HH.text title ]
+    , HH.p
+        [ HP.classes [ HH.ClassName "home__nav-card-description" ] ]
         [ HH.text description ]
     ]

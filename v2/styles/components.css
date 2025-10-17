@@ -279,42 +279,61 @@
   opacity: 0.9;
 }
 
-.home__cta {
-  display: flex;
-  gap: var(--spacing-md);
-  justify-content: center;
-  flex-wrap: wrap;
+.home__cta-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+  max-width: 900px;
+  margin: 0 auto;
 }
 
-.home__button {
-  padding: var(--spacing-md) var(--spacing-xl);
-  border-radius: var(--radius-md);
-  font-weight: 600;
+.home__nav-card {
+  background-color: white;
+  color: var(--color-dark);
+  padding: var(--spacing-xl);
+  border-radius: var(--radius-lg);
   text-decoration: none;
   transition: all var(--transition-base);
-  display: inline-block;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.home__button--primary {
-  background-color: white;
+.home__nav-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.home__nav-card-icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.home__nav-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-sm);
   color: var(--color-primary);
 }
 
-.home__button--primary:hover {
-  background-color: var(--color-light);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+.home__nav-card-description {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0;
 }
 
-.home__button--secondary {
-  background-color: transparent;
-  color: white;
-  border: 2px solid white;
+@media (max-width: 768px) {
+  .home__cta-cards {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
-.home__button--secondary:hover {
-  background-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
+@media (max-width: 480px) {
+  .home__cta-cards {
+    grid-template-columns: 1fr;
+  }
 }
 
 .home__features {
@@ -540,6 +559,24 @@
 .split-pane__viz-content svg {
   max-width: 100%;
   height: auto;
+}
+
+.visualization__text-output {
+  background-color: #f5f5f5;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-md);
+  overflow: auto;
+  max-height: 600px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--color-dark);
+}
+
+.visualization__text-output code {
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .split-pane__iframe {
