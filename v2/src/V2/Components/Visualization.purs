@@ -8,15 +8,21 @@ import D3.Examples.LineChart as LineChart
 import D3.Examples.BarChart as BarChart
 import D3.Examples.ScatterPlot as ScatterPlot
 import D3.Examples.ChordDiagram as ChordDiagram
+import D3.Examples.GUP as GUP
 import D3.Examples.ThreeLittleCircles as ThreeLittleCircles
 import D3.Examples.Tree.Configure as Tree
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
-import D3Tagless.Instance.Selection (eval_D3M)
+import D3Tagless.Instance.Selection (eval_D3M, runD3M)
+import Data.Array (catMaybes)
 import Data.Either (Either(..))
 import Data.Foldable (traverse_)
+import Data.String.CodeUnits (toCharArray)
+import Data.Traversable (sequence)
 import Effect (Effect)
+import Effect.Aff (Aff, Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
+import Effect.Random (random)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -122,6 +128,26 @@ handleAction = case _ of
         _ <- liftEffect $ eval_D3M $ ThreeLittleCircles.drawThreeCircles selector
         pure unit
 
+      -- General Update Pattern (animated)
+      "general-update-pattern" -> do
+        -- Set up the GUP visualization and get the update function
+        update <- liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern selector
+        -- Run a few updates to demonstrate the pattern
+        H.liftAff do
+          -- First update with some letters
+          letters1 <- liftEffect getRandomLetters
+          _ <- liftEffect $ runD3M (update letters1)
+          delay (Milliseconds 2300.0)
+          -- Second update with different letters
+          letters2 <- liftEffect getRandomLetters
+          _ <- liftEffect $ runD3M (update letters2)
+          delay (Milliseconds 2300.0)
+          -- Third update
+          letters3 <- liftEffect getRandomLetters
+          _ <- liftEffect $ runD3M (update letters3)
+          pure unit
+        pure unit
+
       -- String Interpreter (print-tree)
       "print-tree" -> do
         -- Load tree data from JSON
@@ -163,3 +189,16 @@ handleAction = case _ of
 
 -- | FFI function to trigger Prism highlighting
 foreign import highlightElement :: forall a. a -> Effect Unit
+
+-- | Helper function to generate random letters for GUP example
+-- | Choose a string of random letters (no duplicates), ordered alphabetically
+getRandomLetters :: Effect (Array Char)
+getRandomLetters = do
+  let letters = toCharArray "abcdefghijklmnopqrstuvwxyz"
+      coinToss :: Char -> Effect (Maybe Char)
+      coinToss c = do
+        n <- random
+        pure $ if n > 0.6 then Just c else Nothing
+
+  choices <- sequence $ coinToss <$> letters
+  pure $ catMaybes choices
