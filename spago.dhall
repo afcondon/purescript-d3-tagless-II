@@ -46,6 +46,7 @@ You can edit this file as you like.
   , "tuples"
   , "typelevel-prelude"
   , "unsafe-coerce"
+  , "web-dom"
   , "web-events"
   , "web-html"
   ]

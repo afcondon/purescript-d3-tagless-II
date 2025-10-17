@@ -16,13 +16,13 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.Driver (runUI)
 import Web.HTML (window)
-import Web.HTML.Window (location)
-import Web.HTML.Location (hash)
+import Web.HTML.Window (location, toEventTarget)
+import Web.HTML.Location (hash, setHash)
 import Web.Event.EventTarget (eventListener, addEventListener)
-import Web.HTML.Window (toEventTarget)
 import Web.Event.Event (EventType(..))
 import Data.Maybe (Maybe(..))
 import Type.Proxy (Proxy(..))
+import Halogen.Subscription as HS
 
 -- | Main application state
 type State = {
@@ -34,6 +34,7 @@ data Action
   = Initialize
   | Navigate Route
   | HandleGalleryOutput ExampleId
+  | HashChanged String
 
 -- | Child component slots
 type Slots =
@@ -77,7 +78,7 @@ renderPage :: Route -> H.ComponentHTML Action Slots Aff
 renderPage route = case route of
   Home ->
     HH.slot_ _home unit Home.component unit
-
+    
   Gallery ->
     HH.slot _gallery unit Gallery.component unit HandleGalleryOutput
 
@@ -102,23 +103,36 @@ handleAction = case _ of
     let route = parseRoute currentHash
     H.modify_ _ { currentRoute = route }
 
-    -- Listen for hash changes
-    H.liftEffect do
-      win <- window
-      let target = toEventTarget win
-      listener <- eventListener \_ -> do
-        newHash <- window >>= location >>= hash
-        -- This is a simplified approach - in a real app you'd want to
-        -- communicate this back to the component
-        pure unit
-      addEventListener (EventType "hashchange") listener false target
+    -- Subscribe to hash changes
+    _ <- H.subscribe do
+      HS.makeEmitter \push -> do
+        win <- window
+        let target = toEventTarget win
+        listener <- eventListener \_ -> do
+          newHash <- window >>= location >>= hash
+          push (HashChanged newHash)
+        addEventListener (EventType "hashchange") listener false target
+        pure mempty
+    pure unit
 
   Navigate route -> do
+    -- Update component state
     H.modify_ _ { currentRoute = route }
+    -- Update browser URL hash
+    let newHash = routeToHash route
+    H.liftEffect do
+      win <- window
+      loc <- location win
+      setHash newHash loc
 
   HandleGalleryOutput exampleId -> do
     -- When gallery emits an example ID, navigate to that example
     handleAction $ Navigate (Example exampleId)
+
+  HashChanged newHash -> do
+    -- When browser hash changes (back button, etc), update route
+    let route = parseRoute newHash
+    H.modify_ _ { currentRoute = route }
 
 -- | Entry point
 main :: Effect Unit

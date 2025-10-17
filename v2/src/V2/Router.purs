@@ -11,10 +11,15 @@ import Data.Array (index)
 -- | Parse a hash string into a Route
 parseRoute :: String -> Route
 parseRoute hash =
-  let path = if String.length hash > 0 && take 1 hash == "#"
+  let -- Strip leading # if present
+      path = if String.length hash > 0 && take 1 hash == "#"
              then drop 1 hash
              else hash
-      segments = split (Pattern "/") path
+      -- Strip leading / if present
+      cleanPath = if String.length path > 0 && take 1 path == "/"
+                  then drop 1 path
+                  else path
+      segments = split (Pattern "/") cleanPath
   in case index segments 0 of
     Nothing -> Home
     Just "" -> Home

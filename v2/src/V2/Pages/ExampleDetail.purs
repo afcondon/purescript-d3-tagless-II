@@ -4,31 +4,59 @@ import Prelude
 
 import V2.Types (ExampleId)
 import V2.Data.Examples (getExample)
+import V2.Data.CodeFiles (getCodeFileUrl, getVisualizationUrl)
 import V2.Router (routeToHash)
 import V2.Types (Route(..))
+import V2.Components.SplitPane as SplitPane
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Data.Maybe (Maybe(..))
+import Effect.Aff.Class (class MonadAff)
+import Affjax.Web as AX
+import Affjax.ResponseFormat as ResponseFormat
+import Type.Proxy (Proxy(..))
+import Data.Either (Either(..))
 
 type Input = ExampleId
 
 type State = {
-  exampleId :: ExampleId
+  exampleId :: ExampleId,
+  code :: Maybe String,
+  loading :: Boolean,
+  error :: Maybe String
 }
 
-type Slots :: forall k. Row k
-type Slots = ()
+type Slots =
+  ( splitPane :: forall q. H.Slot q Void Unit
+  )
 
--- | Example detail page (placeholder for now)
-component :: forall q o m. H.Component q Input o m
+_splitPane = Proxy :: Proxy "splitPane"
+
+data Action
+  = Initialize
+  | LoadCode
+
+-- | Example detail page
+component :: forall q o m. MonadAff m => H.Component q Input o m
 component = H.mkComponent
-  { initialState: \exampleId -> { exampleId }
+  { initialState
   , render
   , eval: H.mkEval H.defaultEval
+      { handleAction = handleAction
+      , initialize = Just Initialize
+      }
   }
 
-render :: forall m. State -> H.ComponentHTML Unit Slots m
+initialState :: Input -> State
+initialState exampleId =
+  { exampleId
+  , code: Nothing
+  , loading: true
+  , error: Nothing
+  }
+
+render :: forall m. MonadAff m => State -> H.ComponentHTML Action Slots m
 render state =
   case getExample state.exampleId of
     Nothing ->
@@ -65,30 +93,66 @@ render state =
                 [ HH.text example.description ]
             ]
 
-        , -- Placeholder content
+        , -- Main content area
           HH.div
             [ HP.classes [ HH.ClassName "example-detail__content" ] ]
-            [ HH.div
-                [ HP.classes [ HH.ClassName "example-detail__placeholder" ] ]
-                [ HH.h2_ [ HH.text "Coming Soon" ]
-                , HH.p_ [ HH.text "This is a placeholder for the full example detail view." ]
-                , HH.p_ [ HH.text "In Phase 2, this will include:" ]
-                , HH.ul_
-                    [ HH.li_ [ HH.text "Split-pane layout with code and visualization" ]
-                    , HH.li_ [ HH.text "Syntax-highlighted code" ]
-                    , HH.li_ [ HH.text "Live, interactive visualization" ]
-                    , HH.li_ [ HH.text "D3 JavaScript comparison" ]
-                    , HH.li_ [ HH.text "Export and share options" ]
-                    ]
-                , HH.p_
-                    [ HH.text "For now, please visit "
-                    , HH.a
-                        [ HP.href "../v1/"
-                        , HP.target "_blank"
+            [ if state.loading then
+                HH.div
+                  [ HP.classes [ HH.ClassName "example-detail__loading" ] ]
+                  [ HH.text "Loading code..." ]
+              else case state.error of
+                Just err ->
+                  HH.div
+                    [ HP.classes [ HH.ClassName "example-detail__error" ] ]
+                    [ HH.h3_ [ HH.text "Error Loading Code" ]
+                    , HH.p_ [ HH.text err ]
+                    , HH.p_
+                        [ HH.text "View this example in "
+                        , HH.a
+                            [ HP.href "../v1/"
+                            , HP.target "_blank"
+                            ]
+                            [ HH.text "V1" ]
                         ]
-                        [ HH.text "V1" ]
-                    , HH.text " to see the working examples."
                     ]
-                ]
+                Nothing ->
+                  case state.code of
+                    Just code ->
+                      HH.slot_ _splitPane unit SplitPane.component
+                        { code
+                        , language: "haskell"  -- PureScript uses Haskell syntax highlighting
+                        , visualizationUrl: getVisualizationUrl state.exampleId
+                        , exampleId: state.exampleId
+                        }
+                    Nothing ->
+                      HH.div
+                        [ HP.classes [ HH.ClassName "example-detail__no-code" ] ]
+                        [ HH.text "No code available for this example." ]
             ]
         ]
+
+handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action Slots o m Unit
+handleAction = case _ of
+  Initialize -> do
+    handleAction LoadCode
+
+  LoadCode -> do
+    state <- H.get
+    case getCodeFileUrl state.exampleId of
+      Nothing -> do
+        H.modify_ _ { loading = false, error = Just "Code file not found" }
+      Just url -> do
+        H.modify_ _ { loading = true, error = Nothing }
+        result <- H.liftAff $ AX.get ResponseFormat.string url
+        case result of
+          Left err -> do
+            H.modify_ _
+              { loading = false
+              , error = Just $ "Failed to load code: " <> AX.printError err
+              }
+          Right response -> do
+            H.modify_ _
+              { loading = false
+              , code = Just response.body
+              , error = Nothing
+              }

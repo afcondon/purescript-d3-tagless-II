@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,16 +11,19 @@
     <link rel="stylesheet" href="styles/main.css">
     <link rel="stylesheet" href="styles/components.css">
 
+    <!-- Prism.js for syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.css">
+
     <!-- D3.js -->
     <script src="../v1/d3/d3.js"></script>
     <script src="../v1/d3/d3-color.js"></script>
     <script src="../v1/d3/d3-interpolate.js"></script>
     <script src="../v1/d3/d3-scale-chromatic.js"></script>
 </head>
-<body>
-    <!-- Root element for Halogen app -->
-    <div id="app"></div>
 
+<body>
     <!-- Fallback for non-JS browsers -->
     <noscript>
         <div style="padding: 2rem; text-align: center;">
@@ -29,7 +33,15 @@
         </div>
     </noscript>
 
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-haskell.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
     <!-- Main application bundle -->
     <script src="bundle.js"></script>
 </body>
+
 </html>

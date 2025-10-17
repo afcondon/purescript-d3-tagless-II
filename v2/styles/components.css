@@ -89,6 +89,7 @@
   padding: var(--spacing-2xl) var(--spacing-lg);
   max-width: var(--breakpoint-desktop);
   margin: 0 auto;
+  margin-top: 0;
 }
 
 .gallery__header {
@@ -242,6 +243,7 @@
 
 .home {
   min-height: calc(100vh - 72px);
+  margin-top: 0;
 }
 
 .home__hero {
@@ -249,6 +251,7 @@
   color: white;
   padding: var(--spacing-2xl) var(--spacing-lg);
   text-align: center;
+  margin-top: 0;
 }
 
 .home__hero-content {
@@ -384,6 +387,198 @@
 }
 
 /* ============================================
+   Split Pane Component
+   ============================================ */
+
+.split-pane {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 72px - 4rem); /* viewport height minus nav and padding */
+  min-height: 600px;
+  background-color: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+}
+
+/* Tabs for mobile */
+.split-pane__tabs {
+  display: flex;
+  border-bottom: 2px solid var(--color-border);
+  background-color: white;
+}
+
+.split-pane__tab {
+  flex: 1;
+  padding: var(--spacing-md);
+  border: none;
+  background-color: transparent;
+  color: var(--color-text);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border-bottom: 3px solid transparent;
+}
+
+.split-pane__tab:hover {
+  background-color: var(--color-light);
+  color: var(--color-primary);
+}
+
+.split-pane__tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  background-color: white;
+}
+
+/* Content area */
+.split-pane__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Panels */
+.split-pane__panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.split-pane__panel--hidden {
+  display: none;
+}
+
+/* On mobile: stack panels */
+.split-pane__panel--code,
+.split-pane__panel--visualization {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Code panel */
+.split-pane__panel--code {
+  background-color: #2d2d2d; /* Match Prism tomorrow theme */
+}
+
+.split-pane__code-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: #1e1e1e;
+  color: white;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.split-pane__code-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.split-pane__copy-button {
+  padding: var(--spacing-xs) var(--spacing-md);
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color var(--transition-fast);
+}
+
+.split-pane__copy-button:hover {
+  background-color: var(--color-secondary);
+}
+
+.split-pane__panel--code pre {
+  margin: 0;
+  flex: 1;
+  overflow: auto;
+  padding: var(--spacing-lg);
+  background-color: #2d2d2d;
+}
+
+.split-pane__panel--code code {
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+/* Visualization panel */
+.split-pane__panel--visualization {
+  background-color: white;
+}
+
+.split-pane__viz-header {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background-color: var(--color-light);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.split-pane__viz-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--color-dark);
+}
+
+.split-pane__iframe {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: white;
+}
+
+.split-pane__placeholder {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-light);
+  padding: var(--spacing-2xl);
+}
+
+/* Desktop: side-by-side split view */
+@media (min-width: 768px) {
+  .split-pane__tabs {
+    display: none; /* Hide tabs on desktop */
+  }
+
+  .split-pane__content {
+    flex-direction: row;
+  }
+
+  .split-pane__panel--code,
+  .split-pane__panel--visualization {
+    width: 50%;
+    flex: 1;
+  }
+
+  .split-pane__panel--hidden {
+    display: flex; /* Show both panels on desktop */
+  }
+
+  /* Add a visual separator */
+  .split-pane__panel--code {
+    border-right: 2px solid var(--color-border);
+  }
+}
+
+/* Large desktop: give more room */
+@media (min-width: 1280px) {
+  .split-pane__panel--code pre {
+    padding: var(--spacing-xl);
+  }
+
+  .split-pane__panel--code code {
+    font-size: 0.9375rem;
+  }
+}
+
+/* ============================================
    Example Detail Page
    ============================================ */
 
@@ -422,6 +617,39 @@
   line-height: 1.6;
 }
 
+.example-detail__content {
+  /* Container for split pane or loading/error states */
+}
+
+.example-detail__loading,
+.example-detail__error,
+.example-detail__no-code {
+  background-color: white;
+  padding: var(--spacing-2xl);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.example-detail__loading {
+  color: var(--color-text-light);
+  font-size: 1.125rem;
+}
+
+.example-detail__error {
+  color: var(--color-text);
+}
+
+.example-detail__error h3 {
+  color: #e74c3c;
+  margin-bottom: var(--spacing-md);
+}
+
 .example-detail__placeholder {
   background-color: white;
   padding: var(--spacing-2xl);
@@ -456,6 +684,8 @@
 
 .app__main {
   flex: 1;
+  margin-top: 0;
+  padding-top: 0;
 }
 
 /* ============================================
