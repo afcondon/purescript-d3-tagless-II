@@ -15,14 +15,14 @@ codeFileMap = Map.fromFoldable
   , Tuple "scatter-quartet" "ScatterPlotQuartet"
   , Tuple "chord-diagram" "ChordDiagramDraw"
   , Tuple "bubble-chart" "BubbleChartDraw"
-  , Tuple "sankey-diagram" "SankeyDraw"
-  , Tuple "tree-layout" "TreeDraw"
+  , Tuple "sankey" "SankeyDraw"
+  , Tuple "tree" "TreeDraw"
   , Tuple "three-little-circles" "3LC"
-  , Tuple "general-update-pattern" "GUP"
-  , Tuple "les-miserables" "LesMisScript"
+  , Tuple "gup" "GUP"
+  , Tuple "les-mis" "LesMisScript"
   , Tuple "meta-tree" "MetaTreeDraw"
   , Tuple "print-tree" "PrintTreeHandleActions"
-  , Tuple "spago-explorer" "LesMisScript"  -- Placeholder, uses similar code
+  , Tuple "spago" "LesMisScript"  -- Placeholder, uses similar code
   ]
 
 -- | Get the code file name for an example
@@ -44,14 +44,14 @@ visualizationUrlMap = Map.fromFoldable
   , Tuple "scatter-quartet" "../v1/index.html#scatter-quartet"
   , Tuple "chord-diagram" "../v1/index.html#chord-diagram"
   , Tuple "bubble-chart" "../v1/index.html#bubble-chart"
-  , Tuple "sankey-diagram" "../v1/index.html#sankey-diagram"
-  , Tuple "tree-layout" "../v1/index.html#tree-layout"
+  , Tuple "sankey" "../v1/index.html#sankey-diagram"
+  , Tuple "tree" "../v1/index.html#tree-layout"
   , Tuple "three-little-circles" "../v1/index.html#three-little-circles"
-  , Tuple "general-update-pattern" "../v1/index.html#general-update-pattern"
-  , Tuple "les-miserables" "../v1/index.html#les-miserables"
+  , Tuple "gup" "../v1/index.html#general-update-pattern"
+  , Tuple "les-mis" "../v1/index.html#les-miserables"
   , Tuple "meta-tree" "../v1/index.html#metatree"
   , Tuple "print-tree" "../v1/index.html#string-generator"
-  , Tuple "spago-explorer" "../v1/index.html#spago-explorer"
+  , Tuple "spago" "../v1/index.html#spago-explorer"
   ]
 
 -- | Get the visualization URL for an example

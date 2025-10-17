@@ -129,7 +129,7 @@ handleAction = case _ of
         pure unit
 
       -- General Update Pattern (animated)
-      "general-update-pattern" -> do
+      "gup" -> do
         -- Set up the GUP visualization and get the update function
         update <- liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern selector
         -- Run a few updates to demonstrate the pattern

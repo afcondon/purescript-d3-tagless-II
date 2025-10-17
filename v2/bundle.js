@@ -16394,7 +16394,7 @@
             });
           }
           ;
-          if (state3.exampleId === "general-update-pattern") {
+          if (state3.exampleId === "gup") {
             return bind15(liftEffect12(eval_D3M(exGeneralUpdatePattern2(selector))))(function(update) {
               return discard12(liftAff2(bind22(liftEffect8(getRandomLetters))(function(letters1) {
                 return bind22(liftEffect8(runD3M(update(letters1))))(function() {
@@ -16670,13 +16670,13 @@
   var bind7 = /* @__PURE__ */ bind(bindMaybe);
   var pure15 = /* @__PURE__ */ pure(applicativeMaybe);
   var visualizationUrlMap = /* @__PURE__ */ (function() {
-    return fromFoldable4([new Tuple("line-chart", "../v1/index.html#line-chart"), new Tuple("bar-chart", "../v1/index.html#bar-chart"), new Tuple("scatter-plot", "../v1/index.html#scatter-plot"), new Tuple("scatter-quartet", "../v1/index.html#scatter-quartet"), new Tuple("chord-diagram", "../v1/index.html#chord-diagram"), new Tuple("bubble-chart", "../v1/index.html#bubble-chart"), new Tuple("sankey-diagram", "../v1/index.html#sankey-diagram"), new Tuple("tree-layout", "../v1/index.html#tree-layout"), new Tuple("three-little-circles", "../v1/index.html#three-little-circles"), new Tuple("general-update-pattern", "../v1/index.html#general-update-pattern"), new Tuple("les-miserables", "../v1/index.html#les-miserables"), new Tuple("meta-tree", "../v1/index.html#metatree"), new Tuple("print-tree", "../v1/index.html#string-generator"), new Tuple("spago-explorer", "../v1/index.html#spago-explorer")]);
+    return fromFoldable4([new Tuple("line-chart", "../v1/index.html#line-chart"), new Tuple("bar-chart", "../v1/index.html#bar-chart"), new Tuple("scatter-plot", "../v1/index.html#scatter-plot"), new Tuple("scatter-quartet", "../v1/index.html#scatter-quartet"), new Tuple("chord-diagram", "../v1/index.html#chord-diagram"), new Tuple("bubble-chart", "../v1/index.html#bubble-chart"), new Tuple("sankey", "../v1/index.html#sankey-diagram"), new Tuple("tree", "../v1/index.html#tree-layout"), new Tuple("three-little-circles", "../v1/index.html#three-little-circles"), new Tuple("gup", "../v1/index.html#general-update-pattern"), new Tuple("les-mis", "../v1/index.html#les-miserables"), new Tuple("meta-tree", "../v1/index.html#metatree"), new Tuple("print-tree", "../v1/index.html#string-generator"), new Tuple("spago", "../v1/index.html#spago-explorer")]);
   })();
   var getVisualizationUrl = function(exampleId) {
     return lookup6(exampleId)(visualizationUrlMap);
   };
   var codeFileMap = /* @__PURE__ */ (function() {
-    return fromFoldable4([new Tuple("line-chart", "LineChartDraw"), new Tuple("bar-chart", "BarChartDraw"), new Tuple("scatter-plot", "ScatterPlotDraw"), new Tuple("scatter-quartet", "ScatterPlotQuartet"), new Tuple("chord-diagram", "ChordDiagramDraw"), new Tuple("bubble-chart", "BubbleChartDraw"), new Tuple("sankey-diagram", "SankeyDraw"), new Tuple("tree-layout", "TreeDraw"), new Tuple("three-little-circles", "3LC"), new Tuple("general-update-pattern", "GUP"), new Tuple("les-miserables", "LesMisScript"), new Tuple("meta-tree", "MetaTreeDraw"), new Tuple("print-tree", "PrintTreeHandleActions"), new Tuple("spago-explorer", "LesMisScript")]);
+    return fromFoldable4([new Tuple("line-chart", "LineChartDraw"), new Tuple("bar-chart", "BarChartDraw"), new Tuple("scatter-plot", "ScatterPlotDraw"), new Tuple("scatter-quartet", "ScatterPlotQuartet"), new Tuple("chord-diagram", "ChordDiagramDraw"), new Tuple("bubble-chart", "BubbleChartDraw"), new Tuple("sankey", "SankeyDraw"), new Tuple("tree", "TreeDraw"), new Tuple("three-little-circles", "3LC"), new Tuple("gup", "GUP"), new Tuple("les-mis", "LesMisScript"), new Tuple("meta-tree", "MetaTreeDraw"), new Tuple("print-tree", "PrintTreeHandleActions"), new Tuple("spago", "LesMisScript")]);
   })();
   var getCodeFile = function(exampleId) {
     return lookup6(exampleId)(codeFileMap);
