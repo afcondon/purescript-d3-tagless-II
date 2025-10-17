@@ -33,7 +33,7 @@ getCodeFile exampleId = Map.lookup exampleId codeFileMap
 getCodeFileUrl :: ExampleId -> Maybe String
 getCodeFileUrl exampleId = do
   filename <- getCodeFile exampleId
-  pure $ "./code-examples/" <> filename
+  pure $ "../v1/code-examples/" <> filename
 
 -- | Map example IDs to their V1 visualization URLs
 visualizationUrlMap :: Map.Map ExampleId String
