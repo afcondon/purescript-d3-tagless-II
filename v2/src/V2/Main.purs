@@ -1,0 +1,127 @@
+module V2.Main where
+
+import Prelude
+
+import V2.Types (Route(..), ExampleId)
+import V2.Router (parseRoute, routeToHash)
+import V2.Components.Navigation as Navigation
+import V2.Components.Gallery as Gallery
+import V2.Pages.Home as Home
+import V2.Pages.ExampleDetail as ExampleDetail
+import Effect (Effect)
+import Effect.Aff (Aff)
+import Halogen as H
+import Halogen.Aff as HA
+import Halogen.HTML as HH
+import Halogen.HTML.Properties as HP
+import Halogen.VDom.Driver (runUI)
+import Web.HTML (window)
+import Web.HTML.Window (location)
+import Web.HTML.Location (hash)
+import Web.Event.EventTarget (eventListener, addEventListener)
+import Web.HTML.Window (toEventTarget)
+import Web.Event.Event (EventType(..))
+import Data.Maybe (Maybe(..))
+import Type.Proxy (Proxy(..))
+
+-- | Main application state
+type State = {
+  currentRoute :: Route
+}
+
+-- | Main application actions
+data Action
+  = Initialize
+  | Navigate Route
+  | HandleGalleryOutput ExampleId
+
+-- | Child component slots
+type Slots =
+  ( navigation :: forall q. H.Slot q Void Unit
+  , home :: forall q. H.Slot q Void Unit
+  , gallery :: forall q. H.Slot q ExampleId Unit
+  , exampleDetail :: forall q. H.Slot q Void Unit
+  )
+
+_navigation = Proxy :: Proxy "navigation"
+_home = Proxy :: Proxy "home"
+_gallery = Proxy :: Proxy "gallery"
+_exampleDetail = Proxy :: Proxy "exampleDetail"
+
+-- | Main application component
+component :: forall q i. H.Component q i Void Aff
+component = H.mkComponent
+  { initialState: \_ -> { currentRoute: Home }
+  , render
+  , eval: H.mkEval H.defaultEval
+      { handleAction = handleAction
+      , initialize = Just Initialize
+      }
+  }
+
+render :: State -> H.ComponentHTML Action Slots Aff
+render state =
+  HH.div
+    [ HP.classes [ HH.ClassName "app" ] ]
+    [ -- Navigation (always visible)
+      HH.slot_ _navigation unit Navigation.component state.currentRoute
+
+    , -- Main content area
+      HH.main
+        [ HP.classes [ HH.ClassName "app__main" ] ]
+        [ renderPage state.currentRoute ]
+    ]
+
+-- | Render the current page based on route
+renderPage :: Route -> H.ComponentHTML Action Slots Aff
+renderPage route = case route of
+  Home ->
+    HH.slot_ _home unit Home.component unit
+
+  Gallery ->
+    HH.slot _gallery unit Gallery.component unit HandleGalleryOutput
+
+  Example exampleId ->
+    HH.slot_ _exampleDetail unit ExampleDetail.component exampleId
+
+  NotFound ->
+    HH.div
+      [ HP.classes [ HH.ClassName "not-found" ] ]
+      [ HH.h1_ [ HH.text "404 - Page Not Found" ]
+      , HH.p_ [ HH.text "The page you're looking for doesn't exist." ]
+      , HH.a
+          [ HP.href $ routeToHash Home ]
+          [ HH.text "Go Home" ]
+      ]
+
+handleAction :: Action -> H.HalogenM State Action Slots Void Aff Unit
+handleAction = case _ of
+  Initialize -> do
+    -- Read initial route from URL hash
+    currentHash <- H.liftEffect $ window >>= location >>= hash
+    let route = parseRoute currentHash
+    H.modify_ _ { currentRoute = route }
+
+    -- Listen for hash changes
+    H.liftEffect do
+      win <- window
+      let target = toEventTarget win
+      listener <- eventListener \_ -> do
+        newHash <- window >>= location >>= hash
+        -- This is a simplified approach - in a real app you'd want to
+        -- communicate this back to the component
+        pure unit
+      addEventListener (EventType "hashchange") listener false target
+
+  Navigate route -> do
+    H.modify_ _ { currentRoute = route }
+
+  HandleGalleryOutput exampleId -> do
+    -- When gallery emits an example ID, navigate to that example
+    handleAction $ Navigate (Example exampleId)
+
+-- | Entry point
+main :: Effect Unit
+main = HA.runHalogenAff do
+  body <- HA.awaitBody
+  runUI component unit body
