@@ -67,6 +67,8 @@ data Route
   = Home
   | Gallery
   | Example ExampleId
+  | Spago
+  | Interpreters
   | NotFound
 
 derive instance eqRoute :: Eq Route
@@ -75,4 +77,6 @@ instance showRoute :: Show Route where
   show Home = "Home"
   show Gallery = "Gallery"
   show (Example id) = "Example: " <> id
+  show Spago = "Spago Explorer"
+  show Interpreters = "Interpreters"
   show NotFound = "Not Found"

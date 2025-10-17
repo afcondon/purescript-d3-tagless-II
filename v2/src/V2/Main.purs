@@ -8,6 +8,8 @@ import V2.Components.Navigation as Navigation
 import V2.Components.Gallery as Gallery
 import V2.Pages.Home as Home
 import V2.Pages.ExampleDetail as ExampleDetail
+import V2.Pages.Spago as Spago
+import V2.Pages.Interpreters as Interpreters
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Halogen as H
@@ -42,12 +44,16 @@ type Slots =
   , home :: forall q. H.Slot q Void Unit
   , gallery :: forall q. H.Slot q ExampleId Unit
   , exampleDetail :: forall q. H.Slot q Void Unit
+  , spago :: forall q. H.Slot q Void Unit
+  , interpreters :: forall q. H.Slot q Void Unit
   )
 
 _navigation = Proxy :: Proxy "navigation"
 _home = Proxy :: Proxy "home"
 _gallery = Proxy :: Proxy "gallery"
 _exampleDetail = Proxy :: Proxy "exampleDetail"
+_spago = Proxy :: Proxy "spago"
+_interpreters = Proxy :: Proxy "interpreters"
 
 -- | Main application component
 component :: forall q i. H.Component q i Void Aff
@@ -78,12 +84,18 @@ renderPage :: Route -> H.ComponentHTML Action Slots Aff
 renderPage route = case route of
   Home ->
     HH.slot_ _home unit Home.component unit
-    
+
   Gallery ->
     HH.slot _gallery unit Gallery.component unit HandleGalleryOutput
 
   Example exampleId ->
     HH.slot_ _exampleDetail unit ExampleDetail.component exampleId
+
+  Spago ->
+    HH.slot_ _spago unit Spago.component unit
+
+  Interpreters ->
+    HH.slot_ _interpreters unit Interpreters.component unit
 
   NotFound ->
     HH.div

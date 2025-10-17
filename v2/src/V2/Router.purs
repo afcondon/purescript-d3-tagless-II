@@ -27,6 +27,8 @@ parseRoute hash =
     Just "example" -> case index segments 1 of
       Just id -> Example id
       Nothing -> Gallery
+    Just "spago" -> Spago
+    Just "interpreters" -> Interpreters
     _ -> NotFound
 
 -- | Convert a Route to a hash string
@@ -34,6 +36,8 @@ routeToHash :: Route -> String
 routeToHash Home = "#/"
 routeToHash Gallery = "#/gallery"
 routeToHash (Example id) = "#/example/" <> id
+routeToHash Spago = "#/spago"
+routeToHash Interpreters = "#/interpreters"
 routeToHash NotFound = "#/not-found"
 
 -- | Get a user-friendly title for a route
@@ -41,4 +45,6 @@ routeTitle :: Route -> String
 routeTitle Home = "PureScript Tagless D3"
 routeTitle Gallery = "Examples Gallery"
 routeTitle (Example _) = "Example"
+routeTitle Spago = "Spago Dependency Explorer"
+routeTitle Interpreters = "Alternative Interpreters"
 routeTitle NotFound = "Not Found"

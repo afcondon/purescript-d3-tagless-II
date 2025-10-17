@@ -46,7 +46,9 @@ render currentRoute =
           HH.ul
             [ HP.classes [ HH.ClassName "navigation__links" ] ]
             [ navLink Home "Home" currentRoute
-            , navLink Gallery "Examples" currentRoute
+            , navLink Gallery "Gallery" currentRoute
+            , navLink Spago "Spago Explorer" currentRoute
+            , navLink Interpreters "Interpreters" currentRoute
             , HH.li
                 [ HP.classes [ HH.ClassName "navigation__item" ] ]
                 [ HH.a
@@ -82,4 +84,6 @@ isActive :: Route -> Route -> Boolean
 isActive Home Home = true
 isActive Gallery Gallery = true
 isActive (Example _) (Example _) = true
+isActive Spago Spago = true
+isActive Interpreters Interpreters = true
 isActive _ _ = false
