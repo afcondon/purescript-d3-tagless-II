@@ -13,6 +13,8 @@ import D3.Examples.Tree.Configure as Tree
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
 import D3Tagless.Instance.Selection (eval_D3M)
 import Data.Either (Either(..))
+import Data.Foldable (traverse_)
+import Effect (Effect)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Halogen as H
@@ -20,6 +22,11 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import V2.Types (ExampleId)
 import Data.Maybe (Maybe(..))
+import Web.DOM.Document (toNonElementParentNode)
+import Web.DOM.NonElementParentNode (getElementById)
+import Web.HTML (window)
+import Web.HTML.HTMLDocument (toDocument)
+import Web.HTML.Window (document)
 
 -- | Input for the Visualization component
 type Input = {
@@ -38,7 +45,9 @@ type State = {
 }
 
 -- | Actions
-data Action = Initialize
+data Action
+  = Initialize
+  | HighlightCode
 
 -- | Component definition
 component :: forall q o m. MonadAff m => H.Component q Input o m
@@ -64,12 +73,17 @@ render state =
     [ HP.classes [ HH.ClassName "visualization" ]
     , HP.id state.containerId
     ]
-    -- If we have text output (for print-tree), display it as pre/code
+    -- If we have text output (for print-tree), display it as pre/code with Prism highlighting
     ( case state.textOutput of
         Just text ->
           [ HH.pre
-              [ HP.classes [ HH.ClassName "visualization__text-output" ] ]
-              [ HH.code_ [ HH.text text ] ]
+              [ HP.classes [ HH.ClassName "visualization__text-output", HH.ClassName "line-numbers" ] ]
+              [ HH.code
+                  [ HP.classes [ HH.ClassName "language-javascript" ]
+                  , HP.id ("generated-js-" <> state.exampleId)
+                  ]
+                  [ HH.text text ]
+              ]
           ]
         Nothing -> []
     )
@@ -121,6 +135,8 @@ handleAction = case _ of
             textRep <- H.liftAff $ Tree.getPrintTree treeModel
             -- Store in state for rendering
             H.modify_ _ { textOutput = Just textRep }
+            -- Trigger syntax highlighting
+            handleAction HighlightCode
         pure unit
 
       _ -> do
@@ -129,3 +145,21 @@ handleAction = case _ of
         -- gup, les-mis (need Halogen integration for interactivity)
         -- meta-tree, spago (need different interpreters/setup)
         pure unit
+
+  HighlightCode -> do
+    state <- H.get
+    -- Only highlight if we have text output (for print-tree example)
+    case state.textOutput of
+      Just _ -> do
+        -- Call Prism.highlightElement() via FFI
+        H.liftEffect do
+          win <- window
+          htmlDoc <- document win
+          let doc = toDocument htmlDoc
+          let node = toNonElementParentNode doc
+          maybeEl <- getElementById ("generated-js-" <> state.exampleId) node
+          traverse_ highlightElement maybeEl
+      Nothing -> pure unit
+
+-- | FFI function to trigger Prism highlighting
+foreign import highlightElement :: forall a. a -> Effect Unit

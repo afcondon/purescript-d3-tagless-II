@@ -562,21 +562,33 @@
 }
 
 .visualization__text-output {
-  background-color: #f5f5f5;
-  border: 1px solid var(--color-border);
+  /* Match the code panel styling for consistency */
+  background-color: #2d2d2d !important; /* Match Prism tomorrow theme */
+  border: none;
   border-radius: var(--radius-sm);
-  padding: var(--spacing-md);
+  padding: 0 !important;
   overflow: auto;
   max-height: 600px;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace;
+  margin: 0 !important;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'Courier New', monospace;
   font-size: 0.875rem;
-  line-height: 1.5;
-  color: var(--color-dark);
+  line-height: 1.6;
 }
 
 .visualization__text-output code {
-  white-space: pre-wrap;
-  word-break: break-word;
+  background-color: transparent !important;
+  padding: var(--spacing-lg) !important;
+  display: block;
+  overflow-x: auto;
+}
+
+/* Ensure line numbers work properly */
+.visualization__text-output.line-numbers {
+  padding-left: 3.8em !important;
+}
+
+.visualization__text-output .line-numbers-rows {
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .split-pane__iframe {

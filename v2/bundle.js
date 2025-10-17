@@ -2647,10 +2647,10 @@
   var identity6 = /* @__PURE__ */ identity(categoryFn);
   var parTraverse_ = function(dictParallel) {
     var sequential3 = sequential(dictParallel);
-    var traverse_8 = traverse_(dictParallel.Applicative1());
+    var traverse_9 = traverse_(dictParallel.Applicative1());
     var parallel3 = parallel(dictParallel);
     return function(dictFoldable) {
-      var traverse_14 = traverse_8(dictFoldable);
+      var traverse_14 = traverse_9(dictFoldable);
       return function(f) {
         var $48 = traverse_14(function($50) {
           return parallel3(f($50));
@@ -4688,10 +4688,10 @@
     };
   };
   var foreachSlot = function(dictApplicative) {
-    var traverse_8 = traverse_(dictApplicative)(foldableMap);
+    var traverse_9 = traverse_(dictApplicative)(foldableMap);
     return function(v) {
       return function(k) {
-        return traverse_8(function($54) {
+        return traverse_9(function($54) {
           return k($54);
         })(v);
       };
@@ -7134,7 +7134,6 @@
   var ul_ = /* @__PURE__ */ ul([]);
   var div2 = /* @__PURE__ */ element2("div");
   var code = /* @__PURE__ */ element2("code");
-  var code_ = /* @__PURE__ */ code([]);
   var button = /* @__PURE__ */ element2("button");
   var a = /* @__PURE__ */ element2("a");
 
@@ -7228,10 +7227,10 @@
   var unRenderStateX = unsafeCoerce2;
   var unDriverStateX = unsafeCoerce2;
   var renderStateX_ = function(dictApplicative) {
-    var traverse_8 = traverse_(dictApplicative)(foldableMaybe);
+    var traverse_9 = traverse_(dictApplicative)(foldableMaybe);
     return function(f) {
       return unDriverStateX(function(st) {
-        return traverse_8(f)(st.rendering);
+        return traverse_9(f)(st.rendering);
       });
     };
   };
@@ -9781,6 +9780,19 @@
 
   // output/V2.Components.SplitPane/foreign.js
   function highlightElement(element3) {
+    return function() {
+      if (typeof Prism !== "undefined" && Prism.highlightElement) {
+        try {
+          Prism.highlightElement(element3);
+        } catch (e) {
+          console.error("Prism highlighting error:", e);
+        }
+      }
+    };
+  }
+
+  // output/V2.Components.Visualization/foreign.js
+  function highlightElement2(element3) {
     return function() {
       if (typeof Prism !== "undefined" && Prism.highlightElement) {
         try {
@@ -14235,7 +14247,7 @@
       var liftEffect9 = liftEffect(dictMonadEffect);
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
       var pure17 = pure(Applicative0);
-      var traverse_8 = traverse_(Applicative0)(foldableArray);
+      var traverse_9 = traverse_(Applicative0)(foldableArray);
       return function(dictSelectionM) {
         var attach2 = attach(dictSelectionM);
         var appendTo2 = appendTo(dictSelectionM);
@@ -14288,7 +14300,7 @@
                                   return pure17(unit);
                                 });
                               };
-                              return bind11(traverse_8(addBar)(dataPoints))(function() {
+                              return bind11(traverse_9(addBar)(dataPoints))(function() {
                                 return pure17(unit);
                               });
                             });
@@ -14575,7 +14587,7 @@
     return function(dictMonadEffect) {
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
       var pure17 = pure(Applicative0);
-      var traverse_8 = traverse_(Applicative0)(foldableArray);
+      var traverse_9 = traverse_(Applicative0)(foldableArray);
       return function(dictSelectionM) {
         var attach2 = attach(dictSelectionM);
         var appendTo2 = appendTo(dictSelectionM);
@@ -14622,7 +14634,7 @@
                           return pure17(unit);
                         });
                       };
-                      return bind11(traverse_8(drawRibbon)(chords))(function() {
+                      return bind11(traverse_9(drawRibbon)(chords))(function() {
                         return bind11(appendTo2(centerGroup)(Group.value)([classed3("arcs")]))(function(arcsGroup) {
                           return bind11(simpleJoin2(arcsGroup)(Group.value)(groups)(keyIsID_))(function(groupsJoin) {
                             var drawArc = function(idx) {
@@ -14645,7 +14657,7 @@
                                 });
                               };
                             };
-                            return bind11(traverse_8(function(idx) {
+                            return bind11(traverse_9(function(idx) {
                               var v2 = index2(groups)(idx);
                               if (v2 instanceof Just) {
                                 return drawArc(idx)(v2.value0);
@@ -14807,7 +14819,7 @@
       var liftEffect9 = liftEffect(dictMonadEffect);
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
       var pure17 = pure(Applicative0);
-      var traverse_8 = traverse_(Applicative0)(foldableArray);
+      var traverse_9 = traverse_(Applicative0)(foldableArray);
       return function(dictSelectionM) {
         var attach2 = attach(dictSelectionM);
         var appendTo2 = appendTo(dictSelectionM);
@@ -14856,7 +14868,7 @@
                                             return pure17(unit);
                                           });
                                         };
-                                        return bind11(traverse_8(addPoint)(dataPoints))(function() {
+                                        return bind11(traverse_9(addPoint)(dataPoints))(function() {
                                           return pure17(unit);
                                         });
                                       });
@@ -14903,7 +14915,7 @@
       var liftEffect9 = liftEffect(dictMonadEffect);
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
       var pure17 = pure(Applicative0);
-      var traverse_8 = traverse_(Applicative0)(foldableArray);
+      var traverse_9 = traverse_(Applicative0)(foldableArray);
       return function(dictSelectionM) {
         var attach2 = attach(dictSelectionM);
         var appendTo2 = appendTo(dictSelectionM);
@@ -14947,7 +14959,7 @@
                                   return pure17(unit);
                                 });
                               };
-                              return bind11(traverse_8(addPoint)(dataPoints))(function() {
+                              return bind11(traverse_9(addPoint)(dataPoints))(function() {
                                 return pure17(unit);
                               });
                             });
@@ -16019,139 +16031,6 @@
     });
   };
 
-  // output/V2.Components.Visualization/index.js
-  var bind6 = /* @__PURE__ */ bind(bindHalogenM);
-  var get6 = /* @__PURE__ */ get(monadStateHalogenM);
-  var draw6 = /* @__PURE__ */ draw3(bindD3M)(monadEffD3M)(d3TaglessD3M);
-  var pure14 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var draw1 = /* @__PURE__ */ draw(bindD3M)(monadEffD3M)(d3TaglessD3M);
-  var draw22 = /* @__PURE__ */ draw4(bindD3M)(monadEffD3M)(d3TaglessD3M);
-  var drawQuartet2 = /* @__PURE__ */ drawQuartet(bindD3M)(monadEffD3M)(d3TaglessD3M);
-  var draw32 = /* @__PURE__ */ draw2(bindD3M)(monadEffD3M)(d3TaglessD3M);
-  var drawThreeCircles2 = /* @__PURE__ */ drawThreeCircles(d3TaglessD3M);
-  var discard9 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var makeModel2 = /* @__PURE__ */ makeModel(bindAff)(monadEffectAff);
-  var modify_5 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var Initialize2 = /* @__PURE__ */ (function() {
-    function Initialize6() {
-    }
-    ;
-    Initialize6.value = new Initialize6();
-    return Initialize6;
-  })();
-  var render3 = function(state3) {
-    return div2([classes(["visualization"]), id2(state3.containerId)])((function() {
-      if (state3.textOutput instanceof Just) {
-        return [pre([classes(["visualization__text-output"])])([code_([text5(state3.textOutput.value0)])])];
-      }
-      ;
-      if (state3.textOutput instanceof Nothing) {
-        return [];
-      }
-      ;
-      throw new Error("Failed pattern match at V2.Components.Visualization (line 68, column 7 - line 74, column 22): " + [state3.textOutput.constructor.name]);
-    })());
-  };
-  var initialState2 = function(input3) {
-    return {
-      exampleId: input3.exampleId,
-      containerId: "viz-container-" + input3.exampleId,
-      textOutput: Nothing.value
-    };
-  };
-  var handleAction2 = function(dictMonadAff) {
-    var liftEffect9 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
-    var liftAff2 = liftAff(monadAffHalogenM(dictMonadAff));
-    return function(v) {
-      return bind6(get6)(function(state3) {
-        var selector = "#" + state3.containerId;
-        if (state3.exampleId === "line-chart") {
-          return bind6(liftEffect9(eval_D3M(draw6(sineWaveData)(selector))))(function() {
-            return pure14(unit);
-          });
-        }
-        ;
-        if (state3.exampleId === "bar-chart") {
-          return bind6(liftEffect9(eval_D3M(draw1(monthlySales)(selector))))(function() {
-            return pure14(unit);
-          });
-        }
-        ;
-        if (state3.exampleId === "scatter-plot") {
-          return bind6(liftEffect9(eval_D3M(draw22(scatterData)(selector))))(function() {
-            return pure14(unit);
-          });
-        }
-        ;
-        if (state3.exampleId === "scatter-quartet") {
-          return bind6(liftEffect9(eval_D3M(drawQuartet2(anscombesQuartet)(selector))))(function() {
-            return pure14(unit);
-          });
-        }
-        ;
-        if (state3.exampleId === "chord-diagram") {
-          return bind6(liftEffect9(eval_D3M(draw32(exampleMatrix)(exampleLabels)(selector))))(function() {
-            return pure14(unit);
-          });
-        }
-        ;
-        if (state3.exampleId === "three-little-circles") {
-          return bind6(liftEffect9(eval_D3M(drawThreeCircles2(selector))))(function() {
-            return pure14(unit);
-          });
-        }
-        ;
-        if (state3.exampleId === "print-tree") {
-          return bind6(liftAff2(getTreeViaAJAX("./data/flare-2.json")))(function(treeJSON) {
-            return discard9((function() {
-              if (treeJSON instanceof Left) {
-                return pure14(unit);
-              }
-              ;
-              if (treeJSON instanceof Right) {
-                return bind6(liftAff2(makeModel2(TidyTree.value)(Radial.value)(treeJSON.value0)))(function(treeModel) {
-                  return bind6(liftAff2(getPrintTree(treeModel)))(function(textRep) {
-                    return modify_5(function(v1) {
-                      var $42 = {};
-                      for (var $43 in v1) {
-                        if ({}.hasOwnProperty.call(v1, $43)) {
-                          $42[$43] = v1[$43];
-                        }
-                        ;
-                      }
-                      ;
-                      $42.textOutput = new Just(textRep);
-                      return $42;
-                    });
-                  });
-                });
-              }
-              ;
-              throw new Error("Failed pattern match at V2.Components.Visualization (line 115, column 9 - line 123, column 54): " + [treeJSON.constructor.name]);
-            })())(function() {
-              return pure14(unit);
-            });
-          });
-        }
-        ;
-        return pure14(unit);
-      });
-    };
-  };
-  var component3 = function(dictMonadAff) {
-    return mkComponent({
-      initialState: initialState2,
-      render: render3,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction: handleAction2(dictMonadAff),
-        initialize: new Just(Initialize2.value)
-      })
-    });
-  };
-
   // output/Web.DOM.Document/foreign.js
   var getEffProp3 = function(name16) {
     return function(doc) {
@@ -16190,11 +16069,179 @@
     };
   };
 
+  // output/V2.Components.Visualization/index.js
+  var bind6 = /* @__PURE__ */ bind(bindHalogenM);
+  var get6 = /* @__PURE__ */ get(monadStateHalogenM);
+  var draw6 = /* @__PURE__ */ draw3(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var pure14 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var draw1 = /* @__PURE__ */ draw(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var draw22 = /* @__PURE__ */ draw4(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var drawQuartet2 = /* @__PURE__ */ drawQuartet(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var draw32 = /* @__PURE__ */ draw2(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var drawThreeCircles2 = /* @__PURE__ */ drawThreeCircles(d3TaglessD3M);
+  var discard9 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var makeModel2 = /* @__PURE__ */ makeModel(bindAff)(monadEffectAff);
+  var modify_5 = /* @__PURE__ */ modify_(monadStateHalogenM);
+  var traverse_7 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
+  var Initialize2 = /* @__PURE__ */ (function() {
+    function Initialize6() {
+    }
+    ;
+    Initialize6.value = new Initialize6();
+    return Initialize6;
+  })();
+  var HighlightCode = /* @__PURE__ */ (function() {
+    function HighlightCode3() {
+    }
+    ;
+    HighlightCode3.value = new HighlightCode3();
+    return HighlightCode3;
+  })();
+  var render3 = function(state3) {
+    return div2([classes(["visualization"]), id2(state3.containerId)])((function() {
+      if (state3.textOutput instanceof Just) {
+        return [pre([classes(["visualization__text-output", "line-numbers"])])([code([classes(["language-javascript"]), id2("generated-js-" + state3.exampleId)])([text5(state3.textOutput.value0)])])];
+      }
+      ;
+      if (state3.textOutput instanceof Nothing) {
+        return [];
+      }
+      ;
+      throw new Error("Failed pattern match at V2.Components.Visualization (line 77, column 7 - line 88, column 22): " + [state3.textOutput.constructor.name]);
+    })());
+  };
+  var initialState2 = function(input3) {
+    return {
+      exampleId: input3.exampleId,
+      containerId: "viz-container-" + input3.exampleId,
+      textOutput: Nothing.value
+    };
+  };
+  var handleAction2 = function(dictMonadAff) {
+    var liftEffect9 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var liftAff2 = liftAff(monadAffHalogenM(dictMonadAff));
+    return function(v) {
+      if (v instanceof Initialize2) {
+        return bind6(get6)(function(state3) {
+          var selector = "#" + state3.containerId;
+          if (state3.exampleId === "line-chart") {
+            return bind6(liftEffect9(eval_D3M(draw6(sineWaveData)(selector))))(function() {
+              return pure14(unit);
+            });
+          }
+          ;
+          if (state3.exampleId === "bar-chart") {
+            return bind6(liftEffect9(eval_D3M(draw1(monthlySales)(selector))))(function() {
+              return pure14(unit);
+            });
+          }
+          ;
+          if (state3.exampleId === "scatter-plot") {
+            return bind6(liftEffect9(eval_D3M(draw22(scatterData)(selector))))(function() {
+              return pure14(unit);
+            });
+          }
+          ;
+          if (state3.exampleId === "scatter-quartet") {
+            return bind6(liftEffect9(eval_D3M(drawQuartet2(anscombesQuartet)(selector))))(function() {
+              return pure14(unit);
+            });
+          }
+          ;
+          if (state3.exampleId === "chord-diagram") {
+            return bind6(liftEffect9(eval_D3M(draw32(exampleMatrix)(exampleLabels)(selector))))(function() {
+              return pure14(unit);
+            });
+          }
+          ;
+          if (state3.exampleId === "three-little-circles") {
+            return bind6(liftEffect9(eval_D3M(drawThreeCircles2(selector))))(function() {
+              return pure14(unit);
+            });
+          }
+          ;
+          if (state3.exampleId === "print-tree") {
+            return bind6(liftAff2(getTreeViaAJAX("./data/flare-2.json")))(function(treeJSON) {
+              return discard9((function() {
+                if (treeJSON instanceof Left) {
+                  return pure14(unit);
+                }
+                ;
+                if (treeJSON instanceof Right) {
+                  return bind6(liftAff2(makeModel2(TidyTree.value)(Radial.value)(treeJSON.value0)))(function(treeModel) {
+                    return bind6(liftAff2(getPrintTree(treeModel)))(function(textRep) {
+                      return discard9(modify_5(function(v1) {
+                        var $45 = {};
+                        for (var $46 in v1) {
+                          if ({}.hasOwnProperty.call(v1, $46)) {
+                            $45[$46] = v1[$46];
+                          }
+                          ;
+                        }
+                        ;
+                        $45.textOutput = new Just(textRep);
+                        return $45;
+                      }))(function() {
+                        return handleAction2(dictMonadAff)(HighlightCode.value);
+                      });
+                    });
+                  });
+                }
+                ;
+                throw new Error("Failed pattern match at V2.Components.Visualization (line 129, column 9 - line 139, column 39): " + [treeJSON.constructor.name]);
+              })())(function() {
+                return pure14(unit);
+              });
+            });
+          }
+          ;
+          return pure14(unit);
+        });
+      }
+      ;
+      if (v instanceof HighlightCode) {
+        return bind6(get6)(function(state3) {
+          if (state3.textOutput instanceof Just) {
+            return liftEffect9(function __do3() {
+              var win = windowImpl();
+              var htmlDoc = document2(win)();
+              var doc = toDocument(htmlDoc);
+              var node = toNonElementParentNode(doc);
+              var maybeEl = getElementById("generated-js-" + state3.exampleId)(node)();
+              return traverse_7(highlightElement2)(maybeEl)();
+            });
+          }
+          ;
+          if (state3.textOutput instanceof Nothing) {
+            return pure14(unit);
+          }
+          ;
+          throw new Error("Failed pattern match at V2.Components.Visualization (line 152, column 5 - line 162, column 27): " + [state3.textOutput.constructor.name]);
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at V2.Components.Visualization (line 92, column 16 - line 162, column 27): " + [v.constructor.name]);
+    };
+  };
+  var component3 = function(dictMonadAff) {
+    return mkComponent({
+      initialState: initialState2,
+      render: render3,
+      "eval": mkEval({
+        handleQuery: defaultEval.handleQuery,
+        receive: defaultEval.receive,
+        finalize: defaultEval.finalize,
+        handleAction: handleAction2(dictMonadAff),
+        initialize: new Just(Initialize2.value)
+      })
+    });
+  };
+
   // output/V2.Components.SplitPane/index.js
   var modify_6 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var bind7 = /* @__PURE__ */ bind(bindHalogenM);
   var get7 = /* @__PURE__ */ get(monadStateHalogenM);
-  var traverse_7 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
+  var traverse_8 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableMaybe);
   var append12 = /* @__PURE__ */ append(semigroupArray);
   var slot_2 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
@@ -16232,12 +16279,12 @@
     };
     return SetTab2;
   })();
-  var HighlightCode = /* @__PURE__ */ (function() {
-    function HighlightCode2() {
+  var HighlightCode2 = /* @__PURE__ */ (function() {
+    function HighlightCode3() {
     }
     ;
-    HighlightCode2.value = new HighlightCode2();
-    return HighlightCode2;
+    HighlightCode3.value = new HighlightCode3();
+    return HighlightCode3;
   })();
   var initialState3 = function(input3) {
     return {
@@ -16252,7 +16299,7 @@
     var liftEffect9 = liftEffect(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return function(v) {
       if (v instanceof Initialize3) {
-        return handleAction3(dictMonadAff)(HighlightCode.value);
+        return handleAction3(dictMonadAff)(HighlightCode2.value);
       }
       ;
       if (v instanceof SetTab) {
@@ -16270,7 +16317,7 @@
         });
       }
       ;
-      if (v instanceof HighlightCode) {
+      if (v instanceof HighlightCode2) {
         return bind7(get7)(function(state3) {
           return liftEffect9(function __do3() {
             var win = windowImpl();
@@ -16278,7 +16325,7 @@
             var doc = toDocument(htmlDoc);
             var node = toNonElementParentNode(doc);
             var maybeEl = getElementById("code-" + state3.exampleId)(node)();
-            return traverse_7(highlightElement)(maybeEl)();
+            return traverse_8(highlightElement)(maybeEl)();
           });
         });
       }
