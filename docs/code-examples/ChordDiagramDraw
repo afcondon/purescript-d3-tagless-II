@@ -31,7 +31,8 @@ draw matrix _ selector = do
   let chords = chordArray_ chordData
 
   -- Create generators
-  let ribbonGen = ribbonGenerator_ unit
+  let ribbonGen0 = ribbonGenerator_ unit
+  let ribbonGen = setRibbonRadius_ ribbonGen0 innerR
   let arcGen0 = arcGenerator_ unit
   let arcGen1 = setArcInnerRadius_ arcGen0 innerR
   let arcGen = setArcOuterRadius_ arcGen1 outerR

@@ -2,7 +2,7 @@ module V2.Data.CodeFiles where
 
 import Prelude
 import V2.Types (ExampleId)
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
 import Data.Map as Map
 import Data.Tuple (Tuple(..))
 
@@ -36,30 +36,9 @@ getCodeFile exampleId = Map.lookup exampleId codeFileMap
 getCodeFileUrl :: ExampleId -> Maybe String
 getCodeFileUrl exampleId = do
   filename <- getCodeFile exampleId
-  pure $ "../v1/code-examples/" <> filename
-
--- | Map example IDs to their V1 visualization URLs
-visualizationUrlMap :: Map.Map ExampleId String
-visualizationUrlMap = Map.fromFoldable
-  [ Tuple "line-chart" "../v1/index.html#line-chart"
-  , Tuple "bar-chart" "../v1/index.html#bar-chart"
-  , Tuple "scatter-plot" "../v1/index.html#scatter-plot"
-  , Tuple "scatter-quartet" "../v1/index.html#scatter-quartet"
-  , Tuple "chord-diagram" "../v1/index.html#chord-diagram"
-  , Tuple "bubble-chart" "../v1/index.html#bubble-chart"
-  , Tuple "sankey" "../v1/index.html#sankey-diagram"
-  , Tuple "tree" "../v1/index.html#tree-layout"
-  , Tuple "tree-horizontal" "../v1/index.html#tree-layout"
-  , Tuple "tree-vertical" "../v1/index.html#tree-layout"
-  , Tuple "tree-radial" "../v1/index.html#tree-layout"
-  , Tuple "three-little-circles" "../v1/index.html#three-little-circles"
-  , Tuple "gup" "../v1/index.html#general-update-pattern"
-  , Tuple "les-mis" "../v1/index.html#les-miserables"
-  , Tuple "meta-tree" "../v1/index.html#metatree"
-  , Tuple "print-tree" "../v1/index.html#string-generator"
-  , Tuple "spago" "../v1/index.html#spago-explorer"
-  ]
+  pure $ "./code-examples/" <> filename
 
 -- | Get the visualization URL for an example
+-- | (V1 removed - all examples now in V2)
 getVisualizationUrl :: ExampleId -> Maybe String
-getVisualizationUrl exampleId = Map.lookup exampleId visualizationUrlMap
+getVisualizationUrl _ = Nothing
