@@ -9,11 +9,15 @@ import D3.Examples.BarChart as BarChart
 import D3.Examples.ScatterPlot as ScatterPlot
 import D3.Examples.ChordDiagram as ChordDiagram
 import D3.Examples.BubbleChart as BubbleChart
+import D3.Examples.Sankey.Model as Sankey
+import D3.Examples.SankeyDiagram as SankeyDiagram
 import D3.Examples.GUP as GUP
 import D3.Examples.ThreeLittleCircles as ThreeLittleCircles
 import D3.Examples.Tree.Configure as Tree
 import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
+import D3.Layouts.Sankey.Types (initialSankeyLayoutState)
 import D3Tagless.Instance.Selection (eval_D3M, runD3M)
+import D3Tagless.Instance.Sankey (eval_D3M_Sankey)
 import Data.Array (catMaybes)
 import Data.Either (Either(..))
 import Data.Foldable (traverse_)
@@ -127,6 +131,11 @@ handleAction = case _ of
       "bubble-chart" -> do
         jsonData <- H.liftAff BubbleChart.loadFlareData
         _ <- liftEffect $ eval_D3M $ BubbleChart.draw jsonData selector
+        pure unit
+
+      "sankey" -> do
+        let sankeyState = { sankeyLayout: initialSankeyLayoutState }
+        _ <- liftEffect $ eval_D3M_Sankey sankeyState $ SankeyDiagram.draw Sankey.energyData selector
         pure unit
 
       -- Interactive Examples
