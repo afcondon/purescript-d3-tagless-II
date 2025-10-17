@@ -117,20 +117,20 @@
   };
   var applySecond = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map28 = map(dictApply.Functor0());
+    var map29 = map(dictApply.Functor0());
     return function(a2) {
       return function(b2) {
-        return apply1(map28($$const(identity2))(a2))(b2);
+        return apply1(map29($$const(identity2))(a2))(b2);
       };
     };
   };
   var lift2 = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map28 = map(dictApply.Functor0());
+    var map29 = map(dictApply.Functor0());
     return function(f) {
       return function(a2) {
         return function(b2) {
-          return apply1(map28(f)(a2))(b2);
+          return apply1(map29(f)(a2))(b2);
         };
       };
     };
@@ -1940,10 +1940,10 @@
   var $$try = function(dictMonadError) {
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
-    var map28 = map(Monad0.Bind1().Apply0().Functor0());
+    var map29 = map(Monad0.Bind1().Apply0().Functor0());
     var pure17 = pure(Monad0.Applicative0());
     return function(a2) {
-      return catchError1(map28(Right.create)(a2))(function($52) {
+      return catchError1(map29(Right.create)(a2))(function($52) {
         return pure17(Left.create($52));
       });
     };
@@ -2589,7 +2589,7 @@
       };
     }
     return function(apply3) {
-      return function(map28) {
+      return function(map29) {
         return function(pure17) {
           return function(f) {
             return function(array4) {
@@ -2598,14 +2598,14 @@
                   case 0:
                     return pure17([]);
                   case 1:
-                    return map28(array1)(f(array4[bot]));
+                    return map29(array1)(f(array4[bot]));
                   case 2:
-                    return apply3(map28(array2)(f(array4[bot])))(f(array4[bot + 1]));
+                    return apply3(map29(array2)(f(array4[bot])))(f(array4[bot + 1]));
                   case 3:
-                    return apply3(apply3(map28(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
+                    return apply3(apply3(map29(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
                   default:
                     var pivot = bot + Math.floor((top4 - bot) / 4) * 2;
-                    return apply3(map28(concat2)(go2(bot, pivot)))(go2(pivot, top4));
+                    return apply3(map29(concat2)(go2(bot, pivot)))(go2(pivot, top4));
                 }
               }
               return go2(0, array4.length);
@@ -2954,12 +2954,12 @@
   };
   var lift3 = /* @__PURE__ */ lift(monadTransStateT);
   var functorStateT = function(dictFunctor) {
-    var map28 = map(dictFunctor);
+    var map29 = map(dictFunctor);
     return {
       map: function(f) {
         return function(v) {
           return function(s) {
-            return map28(function(v1) {
+            return map29(function(v1) {
               return new Tuple(f(v1.value0), v1.value1);
             })(v(s));
           };
@@ -3224,6 +3224,70 @@
   function fromCharCode(c) {
     return String.fromCharCode(c);
   }
+
+  // output/Data.Unfoldable/foreign.js
+  var unfoldrArrayImpl = function(isNothing2) {
+    return function(fromJust5) {
+      return function(fst2) {
+        return function(snd2) {
+          return function(f) {
+            return function(b2) {
+              var result = [];
+              var value13 = b2;
+              while (true) {
+                var maybe2 = f(value13);
+                if (isNothing2(maybe2)) return result;
+                var tuple = fromJust5(maybe2);
+                result.push(fst2(tuple));
+                value13 = snd2(tuple);
+              }
+            };
+          };
+        };
+      };
+    };
+  };
+
+  // output/Data.Unfoldable1/foreign.js
+  var unfoldr1ArrayImpl = function(isNothing2) {
+    return function(fromJust5) {
+      return function(fst2) {
+        return function(snd2) {
+          return function(f) {
+            return function(b2) {
+              var result = [];
+              var value13 = b2;
+              while (true) {
+                var tuple = f(value13);
+                result.push(fst2(tuple));
+                var maybe2 = snd2(tuple);
+                if (isNothing2(maybe2)) return result;
+                value13 = fromJust5(maybe2);
+              }
+            };
+          };
+        };
+      };
+    };
+  };
+
+  // output/Data.Unfoldable1/index.js
+  var fromJust2 = /* @__PURE__ */ fromJust();
+  var unfoldable1Array = {
+    unfoldr1: /* @__PURE__ */ unfoldr1ArrayImpl(isNothing)(fromJust2)(fst)(snd)
+  };
+
+  // output/Data.Unfoldable/index.js
+  var fromJust3 = /* @__PURE__ */ fromJust();
+  var unfoldr = function(dict) {
+    return dict.unfoldr;
+  };
+  var unfoldableArray = {
+    unfoldr: /* @__PURE__ */ unfoldrArrayImpl(isNothing)(fromJust3)(fst)(snd),
+    Unfoldable10: function() {
+      return unfoldable1Array;
+    }
+  };
 
   // output/Data.Enum/index.js
   var top2 = /* @__PURE__ */ top(boundedInt);
@@ -4790,7 +4854,7 @@
   // output/Data.Array/index.js
   var intercalate1 = /* @__PURE__ */ intercalate2(foldableArray);
   var map12 = /* @__PURE__ */ map(functorMaybe);
-  var fromJust2 = /* @__PURE__ */ fromJust();
+  var fromJust4 = /* @__PURE__ */ fromJust();
   var unsafeIndex = function() {
     return unsafeIndexImpl;
   };
@@ -4826,7 +4890,7 @@
         }
         ;
         return maybe(v2)(function(i2) {
-          return fromJust2(deleteAt(i2)(v2));
+          return fromJust4(deleteAt(i2)(v2));
         })(findIndex(v(v1))(v2));
       };
     };
@@ -5502,6 +5566,21 @@
   var length5 = function(s) {
     return s.length;
   };
+  var _indexOf = function(just) {
+    return function(nothing) {
+      return function(x6) {
+        return function(s) {
+          var i2 = s.indexOf(x6);
+          return i2 === -1 ? nothing : just(i2);
+        };
+      };
+    };
+  };
+  var take2 = function(n) {
+    return function(s) {
+      return s.substr(0, n);
+    };
+  };
   var drop2 = function(n) {
     return function(s) {
       return s.substring(n);
@@ -5515,6 +5594,11 @@
       throw new Error("Data.String.Unsafe.charAt: Invalid index.");
     };
   };
+
+  // output/Data.String.CodeUnits/index.js
+  var indexOf = /* @__PURE__ */ (function() {
+    return _indexOf(Just.create)(Nothing.value);
+  })();
 
   // output/Foreign/index.js
   var show2 = /* @__PURE__ */ show(showString);
@@ -8509,6 +8593,11 @@
   var hasStringIterator = typeof Symbol !== "undefined" && Symbol != null && typeof Symbol.iterator !== "undefined" && typeof String.prototype[Symbol.iterator] === "function";
   var hasFromCodePoint = typeof String.prototype.fromCodePoint === "function";
   var hasCodePointAt = typeof String.prototype.codePointAt === "function";
+  var _unsafeCodePointAt0 = function(fallback) {
+    return hasCodePointAt ? function(str) {
+      return str.codePointAt(0);
+    } : fallback;
+  };
   var _singleton = function(fallback) {
     return hasFromCodePoint ? String.fromCodePoint : fallback;
   };
@@ -8529,9 +8618,21 @@
       return fallback(n);
     };
   };
+  var _toCodePointArray = function(fallback) {
+    return function(unsafeCodePointAt02) {
+      if (hasArrayFrom) {
+        return function(str) {
+          return Array.from(str, unsafeCodePointAt02);
+        };
+      }
+      return fallback;
+    };
+  };
 
   // output/Data.String.CodePoints/index.js
   var fromEnum2 = /* @__PURE__ */ fromEnum(boundedEnumChar);
+  var map19 = /* @__PURE__ */ map(functorMaybe);
+  var unfoldr2 = /* @__PURE__ */ unfoldr(unfoldableArray);
   var div3 = /* @__PURE__ */ div(euclideanRingInt);
   var mod2 = /* @__PURE__ */ mod(euclideanRingInt);
   var unsurrogate = function(lead) {
@@ -8572,6 +8673,41 @@
       head: cu0,
       tail: drop2(1)(s)
     });
+  };
+  var unconsButWithTuple = function(s) {
+    return map19(function(v) {
+      return new Tuple(v.head, v.tail);
+    })(uncons4(s));
+  };
+  var toCodePointArrayFallback = function(s) {
+    return unfoldr2(unconsButWithTuple)(s);
+  };
+  var unsafeCodePointAt0Fallback = function(s) {
+    var cu0 = fromEnum2(charAt(0)(s));
+    var $47 = isLead(cu0) && length5(s) > 1;
+    if ($47) {
+      var cu1 = fromEnum2(charAt(1)(s));
+      var $48 = isTrail(cu1);
+      if ($48) {
+        return unsurrogate(cu0)(cu1);
+      }
+      ;
+      return cu0;
+    }
+    ;
+    return cu0;
+  };
+  var unsafeCodePointAt0 = /* @__PURE__ */ _unsafeCodePointAt0(unsafeCodePointAt0Fallback);
+  var toCodePointArray = /* @__PURE__ */ _toCodePointArray(toCodePointArrayFallback)(unsafeCodePointAt0);
+  var length8 = function($74) {
+    return length4(toCodePointArray($74));
+  };
+  var indexOf2 = function(p2) {
+    return function(s) {
+      return map19(function(i2) {
+        return length8(take2(i2)(s));
+      })(indexOf(p2)(s));
+    };
   };
   var fromCharCode2 = /* @__PURE__ */ (function() {
     var $75 = toEnumWithDefaults(boundedEnumChar)(bottom(boundedChar))(top(boundedChar));
@@ -9110,7 +9246,7 @@
 
   // output/Data.FormURLEncoded/index.js
   var apply2 = /* @__PURE__ */ apply(applyMaybe);
-  var map19 = /* @__PURE__ */ map(functorMaybe);
+  var map20 = /* @__PURE__ */ map(functorMaybe);
   var traverse2 = /* @__PURE__ */ traverse(traversableArray)(applicativeMaybe);
   var toArray = function(v) {
     return v;
@@ -9122,7 +9258,7 @@
       }
       ;
       if (v.value1 instanceof Just) {
-        return apply2(map19(function(key) {
+        return apply2(map20(function(key) {
           return function(val) {
             return key + ("=" + val);
           };
@@ -9131,7 +9267,7 @@
       ;
       throw new Error("Failed pattern match at Data.FormURLEncoded (line 37, column 16 - line 39, column 114): " + [v.constructor.name]);
     };
-    var $37 = map19(joinWith("&"));
+    var $37 = map20(joinWith("&"));
     var $38 = traverse2(encodePart);
     return function($39) {
       return $37($38(toArray($39)));
@@ -9356,7 +9492,7 @@
   var unsafeReadTagged2 = /* @__PURE__ */ unsafeReadTagged(monadIdentity);
   var alt6 = /* @__PURE__ */ alt(/* @__PURE__ */ altExceptT(semigroupNonEmptyList)(monadIdentity));
   var composeKleisliFlipped3 = /* @__PURE__ */ composeKleisliFlipped(/* @__PURE__ */ bindExceptT(monadIdentity));
-  var map20 = /* @__PURE__ */ map(functorMaybe);
+  var map21 = /* @__PURE__ */ map(functorMaybe);
   var any3 = /* @__PURE__ */ any(foldableArray)(heytingAlgebraBoolean);
   var eq3 = /* @__PURE__ */ eq(eqString);
   var bindFlipped8 = /* @__PURE__ */ bindFlipped(bindMaybe);
@@ -9475,7 +9611,7 @@
         }
         ;
         if (v2 instanceof FormURLEncoded) {
-          return note("Body contains values that cannot be encoded as application/x-www-form-urlencoded")(map20(unsafeToForeign)(encode2(v2.value0)));
+          return note("Body contains values that cannot be encoded as application/x-www-form-urlencoded")(map21(unsafeToForeign)(encode2(v2.value0)));
         }
         ;
         if (v2 instanceof Json) {
@@ -9494,7 +9630,7 @@
         };
       };
       var headers = function(reqContent) {
-        return addHeader(map20(ContentType.create)(bindFlipped8(toMediaType)(reqContent)))(addHeader(map20(Accept.create)(toMediaType2(req2.responseFormat)))(req2.headers));
+        return addHeader(map21(ContentType.create)(bindFlipped8(toMediaType)(reqContent)))(addHeader(map21(Accept.create)(toMediaType2(req2.responseFormat)))(req2.headers));
       };
       var ajaxRequest = function(v2) {
         return {
@@ -9511,7 +9647,7 @@
           username: toNullable(req2.username),
           password: toNullable(req2.password),
           withCredentials: req2.withCredentials,
-          timeout: fromMaybe(0)(map20(function(v1) {
+          timeout: fromMaybe(0)(map21(function(v1) {
             return v1;
           })(req2.timeout))
         };
@@ -10506,7 +10642,7 @@
   // output/D3.Attributes.Sugar/index.js
   var toAttr2 = /* @__PURE__ */ toAttr(toAttrString);
   var intercalate4 = /* @__PURE__ */ intercalate3(monoidString);
-  var map21 = /* @__PURE__ */ map(functorArray);
+  var map23 = /* @__PURE__ */ map(functorArray);
   var show4 = /* @__PURE__ */ show(showNumber);
   var flap2 = /* @__PURE__ */ flap(functorArray);
   var Meet = /* @__PURE__ */ (function() {
@@ -10676,7 +10812,7 @@
     return function(yo) {
       return function(w) {
         return function(h) {
-          var vb = intercalate4(" ")(map21(show4)([xo, yo, w, h]));
+          var vb = intercalate4(" ")(map23(show4)([xo, yo, w, h]));
           return AttrT.create(AttributeSetter.create("viewBox")(toAttr2(vb)));
         };
       };
@@ -13470,11 +13606,11 @@
   // node_modules/d3-format/src/formatGroup.js
   function formatGroup_default(grouping, thousands) {
     return function(value13, width14) {
-      var i2 = value13.length, t = [], j = 0, g = grouping[0], length8 = 0;
+      var i2 = value13.length, t = [], j = 0, g = grouping[0], length9 = 0;
       while (i2 > 0 && g > 0) {
-        if (length8 + g + 1 > width14) g = Math.max(1, width14 - length8);
+        if (length9 + g + 1 > width14) g = Math.max(1, width14 - length9);
         t.push(value13.substring(i2 -= g, i2 + g));
-        if ((length8 += g + 1) > width14) break;
+        if ((length9 += g + 1) > width14) break;
         g = grouping[j = (j + 1) % grouping.length];
       }
       return t.reverse().join(thousands);
@@ -13585,10 +13721,10 @@
   }
 
   // node_modules/d3-format/src/locale.js
-  var map23 = Array.prototype.map;
+  var map24 = Array.prototype.map;
   var prefixes = ["y", "z", "a", "f", "p", "n", "\xB5", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y"];
   function locale_default(locale2) {
-    var group3 = locale2.grouping === void 0 || locale2.thousands === void 0 ? identity_default2 : formatGroup_default(map23.call(locale2.grouping, Number), locale2.thousands + ""), currencyPrefix = locale2.currency === void 0 ? "" : locale2.currency[0] + "", currencySuffix = locale2.currency === void 0 ? "" : locale2.currency[1] + "", decimal = locale2.decimal === void 0 ? "." : locale2.decimal + "", numerals = locale2.numerals === void 0 ? identity_default2 : formatNumerals_default(map23.call(locale2.numerals, String)), percent = locale2.percent === void 0 ? "%" : locale2.percent + "", minus = locale2.minus === void 0 ? "\u2212" : locale2.minus + "", nan2 = locale2.nan === void 0 ? "NaN" : locale2.nan + "";
+    var group3 = locale2.grouping === void 0 || locale2.thousands === void 0 ? identity_default2 : formatGroup_default(map24.call(locale2.grouping, Number), locale2.thousands + ""), currencyPrefix = locale2.currency === void 0 ? "" : locale2.currency[0] + "", currencySuffix = locale2.currency === void 0 ? "" : locale2.currency[1] + "", decimal = locale2.decimal === void 0 ? "." : locale2.decimal + "", numerals = locale2.numerals === void 0 ? identity_default2 : formatNumerals_default(map24.call(locale2.numerals, String)), percent = locale2.percent === void 0 ? "%" : locale2.percent + "", minus = locale2.minus === void 0 ? "\u2212" : locale2.minus + "", nan2 = locale2.nan === void 0 ? "NaN" : locale2.nan + "";
     function newFormat(specifier) {
       specifier = formatSpecifier(specifier);
       var fill8 = specifier.fill, align = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero4 = specifier.zero, width14 = specifier.width, comma = specifier.comma, precision = specifier.precision, trim2 = specifier.trim, type2 = specifier.type;
@@ -13623,7 +13759,7 @@
           }
         }
         if (comma && !zero4) value13 = group3(value13, Infinity);
-        var length8 = valuePrefix.length + value13.length + valueSuffix.length, padding = length8 < width14 ? new Array(width14 - length8 + 1).join(fill8) : "";
+        var length9 = valuePrefix.length + value13.length + valueSuffix.length, padding = length9 < width14 ? new Array(width14 - length9 + 1).join(fill8) : "";
         if (comma && zero4) value13 = group3(padding + value13, padding.length ? width14 - valueSuffix.length : Infinity), padding = "";
         switch (align) {
           case "<":
@@ -13633,7 +13769,7 @@
             value13 = valuePrefix + padding + value13 + valueSuffix;
             break;
           case "^":
-            value13 = padding.slice(0, length8 = padding.length >> 1) + valuePrefix + value13 + valueSuffix + padding.slice(length8);
+            value13 = padding.slice(0, length9 = padding.length >> 1) + valuePrefix + value13 + valueSuffix + padding.slice(length9);
             break;
           default:
             value13 = padding + valuePrefix + value13 + valueSuffix;
@@ -14065,7 +14201,7 @@
   };
 
   // output/D3.Examples.BarChart/index.js
-  var map24 = /* @__PURE__ */ map(functorArray);
+  var map25 = /* @__PURE__ */ map(functorArray);
   var minimum2 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var maximum2 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var classed2 = /* @__PURE__ */ classed(toAttrString);
@@ -14107,10 +14243,10 @@
           return function(selector) {
             var iWidth = innerWidth2(defaultDimensions);
             var iHeight = innerHeight2(defaultDimensions);
-            var xValues = map24(function(v) {
+            var xValues = map25(function(v) {
               return v.x;
             })(dataPoints);
-            var yValues = map24(function(v) {
+            var yValues = map25(function(v) {
               return v.y;
             })(dataPoints);
             var minX = fromMaybe(0)(minimum2(xValues));
@@ -14548,7 +14684,7 @@
   }
 
   // output/D3.Examples.LineChart/index.js
-  var map25 = /* @__PURE__ */ map(functorArray);
+  var map26 = /* @__PURE__ */ map(functorArray);
   var minimum3 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var maximum3 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var classed4 = /* @__PURE__ */ classed(toAttrString);
@@ -14587,10 +14723,10 @@
           return function(selector) {
             var iWidth = innerWidth3(defaultDimensions2);
             var iHeight = innerHeight3(defaultDimensions2);
-            var xValues = map25(function(v) {
+            var xValues = map26(function(v) {
               return v.x;
             })(dataPoints);
-            var yValues = map25(function(v) {
+            var yValues = map26(function(v) {
               return v.y;
             })(dataPoints);
             var minX = fromMaybe(0)(minimum3(xValues));
@@ -14656,7 +14792,7 @@
   var fill5 = /* @__PURE__ */ fill(toAttrString);
   var strokeColor5 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth5 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var map26 = /* @__PURE__ */ map(functorArray);
+  var map27 = /* @__PURE__ */ map(functorArray);
   var minimum4 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var maximum4 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var innerWidth4 = function(dims) {
@@ -14775,10 +14911,10 @@
           return function(selector) {
             var iWidth = innerWidth4(defaultDimensions3);
             var iHeight = innerHeight4(defaultDimensions3);
-            var xValues = map26(function(v) {
+            var xValues = map27(function(v) {
               return v.x;
             })(dataPoints);
-            var yValues = map26(function(v) {
+            var yValues = map27(function(v) {
               return v.y;
             })(dataPoints);
             var minX = fromMaybe(0)(minimum4(xValues));
@@ -15107,58 +15243,109 @@
   };
 
   // output/D3Tagless.Capabilities.String/foreign.js
+  function formatElement(element3) {
+    const el = element3.toString().replace(/"/g, "");
+    return `"${el.toLowerCase()}"`;
+  }
+  function formatSelector(selector) {
+    const s = selector.toString();
+    return s.startsWith('"') || s.startsWith("'") ? s : `"${s}"`;
+  }
+  function formatValue(value13) {
+    if (typeof value13 === "function" || value13.toString().includes("=>") || value13.toString().includes("function")) {
+      return value13.toString();
+    }
+    if (!isNaN(value13) && value13 !== "") {
+      return value13;
+    }
+    const str = value13.toString();
+    if (str.startsWith('"') || str.startsWith("'")) {
+      return str;
+    }
+    return `"${str}"`;
+  }
+  function showSelectAllInDOM_(selector) {
+    return `d3.select(${formatSelector(selector)})`;
+  }
+  function showSelectAll_(selector) {
+    return (selection2) => {
+      return `${selection2}.selectAll(${formatSelector(selector)})`;
+    };
+  }
   function showAddTransition_(selection2) {
     return (transition2) => {
-      if (transition2.name == "") {
-        const statement1 = `	d3addTransition: ${selection2}.transition(${transition2})`;
-        var statement2 = "";
-        var statement3 = "";
-        if (transition2.duration != 0) {
-          statement2 = `transition.duration(${transition2.duration})`;
-        }
-        if (transition2.delay != 0) {
-          statement3 = `		transition.delay(${transition2.delay})`;
-        }
-        return statement1 + statement2 + statement3;
-      } else {
-        return `	d3addNamedTransition: ${selection2}.transition(${transition2})`;
+      let result = `${selection2}.transition()`;
+      if (transition2.duration && transition2.duration != 0) {
+        result += `
+  .duration(${transition2.duration})`;
       }
+      if (transition2.delay && transition2.delay != 0) {
+        result += `
+  .delay(${transition2.delay})`;
+      }
+      if (transition2.name && transition2.name !== "") {
+        result = `${selection2}.transition("${transition2.name}")`;
+      }
+      return result;
     };
   }
   function showRemoveSelection_(selection2) {
-    return `	d3Remove: ${selection2}.remove()`;
+    return `${selection2}.remove()`;
+  }
+  function showAppend_(element3) {
+    return (selection2) => {
+      return `${selection2}.append(${formatElement(element3)})`;
+    };
+  }
+  function showData_(data) {
+    return (selection2) => {
+      const dataStr = Array.isArray(data) ? `[/* ${data.length} items */]` : data.toString();
+      return `${selection2}.data(${dataStr})`;
+    };
   }
   function showSetAttr_(name16) {
     return (value13) => (selection2) => {
-      return `	${selection2}.attr(${name16}, ${value13})`;
+      return `${selection2}.attr("${name16}", ${formatValue(value13)})`;
     };
   }
   function showSetText_(value13) {
     return (selection2) => {
-      return `	${selection2}.text(${value13})`;
+      return `${selection2}.text(${formatValue(value13)})`;
     };
   }
   function showSetHTML_(value13) {
     return (selection2) => {
-      return `	${selection2}.html(${value13})`;
+      return `${selection2}.html(${formatValue(value13)})`;
     };
   }
   function showSetProperty_(value13) {
     return (selection2) => {
-      return `	${selection2}.property(${value13})`;
+      return `${selection2}.property(${formatValue(value13)})`;
     };
   }
   function showSetOrdering_(ordering) {
     return (selection2) => {
-      return `	${selection2}.${ordering}()`;
+      return `${selection2}.${ordering}()`;
     };
   }
 
   // output/D3Tagless.Capabilities.String/index.js
   var show9 = /* @__PURE__ */ show(showOrderingAttribute);
-  var show13 = /* @__PURE__ */ show(showString);
-  var show23 = /* @__PURE__ */ show(showMouseEvent);
+  var show13 = /* @__PURE__ */ show(showMouseEvent);
+  var show23 = /* @__PURE__ */ show(showString);
   var show33 = /* @__PURE__ */ show(showElement);
+  var trimSelectionPrefix = function(str) {
+    var v = indexOf2(".")(str);
+    if (v instanceof Just) {
+      return drop4(v.value0 + 1 | 0)(str);
+    }
+    ;
+    if (v instanceof Nothing) {
+      return str;
+    }
+    ;
+    throw new Error("Failed pattern match at D3Tagless.Capabilities.String (line 118, column 3 - line 120, column 19): " + [v.constructor.name]);
+  };
   var runPrinter = function(v) {
     return function(initialString) {
       return runStateT(v)(initialString);
@@ -15172,99 +15359,113 @@
   var applySelectionAttributeString = function(selection2) {
     return function(v) {
       if (v instanceof AttrT) {
-        return showSetAttr_(v.value0.value0)(unboxAttr(v.value0.value1))(selection2);
+        return trimSelectionPrefix(showSetAttr_(v.value0.value0)(unboxAttr(v.value0.value1))(selection2));
       }
       ;
       if (v instanceof TextT) {
-        return showSetText_(unboxAttr(v.value0.value1))(selection2);
+        return trimSelectionPrefix(showSetText_(unboxAttr(v.value0.value1))(selection2));
       }
       ;
       if (v instanceof PropertyT) {
-        return showSetProperty_(unboxAttr(v.value0.value1))(selection2);
+        return trimSelectionPrefix(showSetProperty_(unboxAttr(v.value0.value1))(selection2));
       }
       ;
       if (v instanceof HTMLT) {
-        return showSetHTML_(unboxAttr(v.value0.value1))(selection2);
+        return trimSelectionPrefix(showSetHTML_(unboxAttr(v.value0.value1))(selection2));
       }
       ;
       if (v instanceof RemoveT) {
-        return showRemoveSelection_(selection2);
+        return trimSelectionPrefix(showRemoveSelection_(selection2));
       }
       ;
       if (v instanceof OrderingT) {
-        return showSetOrdering_(show9(v.value0))(selection2);
+        return trimSelectionPrefix(showSetOrdering_(show9(v.value0))(selection2));
       }
       ;
       if (v instanceof TransitionT) {
         var tString = showAddTransition_(selection2)(v.value1);
-        return foldl2(applySelectionAttributeString)(tString)(v.value0);
+        var trimmed = trimSelectionPrefix(tString);
+        return foldl2(function(acc) {
+          return function(attr3) {
+            return acc + ("\n  ." + trimSelectionPrefix(applySelectionAttributeString(tString)(attr3)));
+          };
+        })(trimmed)(v.value0);
       }
       ;
       if (v instanceof OnT) {
-        return show13("event handler for ") + (show23(v.value0) + " has been set");
+        return "on(" + (show13(v.value0) + ", function(d) { /* event handler */ })");
       }
       ;
       if (v instanceof OnT$prime) {
-        return show13("effectful event handler for ") + (show23(v.value0) + " has been set");
+        return "on(" + (show13(v.value0) + ", function(d) { /* event handler */ })");
       }
       ;
-      throw new Error("Failed pattern match at D3Tagless.Capabilities.String (line 80, column 3 - line 98, column 75): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3Tagless.Capabilities.String (line 94, column 3 - line 113, column 70): " + [v.constructor.name]);
     };
   };
   var applicativeD3PrinterM = /* @__PURE__ */ applicativeStateT(monadEffect);
   var pure11 = /* @__PURE__ */ pure(applicativeD3PrinterM);
   var d3Tagless = {
     attach: function(selector) {
+      var code2 = showSelectAllInDOM_(selector);
       return discard7(modify_4(function(s) {
-        return s + ("\nattaching to " + (selector + " in DOM\n"));
+        return s + code2;
       }))(function() {
-        return pure11("attach");
+        return pure11(code2);
       });
     },
     selectUnder: function(selection2) {
       return function(selector) {
+        var code2 = showSelectAll_(selector)(selection2);
         return discard7(modify_4(function(s) {
-          return s + ("\nsub-selection " + (selector + "\n"));
+          return s + ("\n  ." + code2);
         }))(function() {
-          return pure11("attach");
+          return pure11(code2);
         });
       };
     },
     appendTo: function(selection2) {
       return function(element3) {
         return function(attributes) {
-          var attributeString = foldl2(applySelectionAttributeString)(selection2)(attributes);
+          var appendCode = showAppend_(element3)(selection2);
+          var attributeString = foldl2(applySelectionAttributeString)(appendCode)(attributes);
           return discard7(modify_4(function(s) {
-            return s + ("\nappending " + (show33(element3) + (" to " + (selection2 + ("\n" + attributeString)))));
+            return s + ("\n\nconst /* TODO: varName */ = " + (appendCode + (attributeString + ";")));
           }))(function() {
-            return pure11("append");
+            return pure11(appendCode);
           });
         };
       };
     },
     filterSelection: function(selection2) {
       return function(selector) {
+        var code2 = selection2 + (".filter(" + (show23(selector) + ")"));
         return discard7(modify_4(function(s) {
-          return s + ("\nfiltering selection using " + (show13(selector) + "\n"));
+          return s + ("\n  ." + code2);
         }))(function() {
-          return pure11("filter");
+          return pure11(code2);
         });
       };
     },
     mergeSelections: function(a2) {
       return function(b2) {
+        var code2 = a2 + (".merge(" + (b2 + ")"));
         return discard7(modify_4(function(s) {
-          return s + "merging selections\n";
+          return s + ("\n  ." + code2);
         }))(function() {
-          return pure11("merge");
+          return pure11(code2);
         });
       };
     },
     setAttributes: function(selection2) {
       return function(attributes) {
-        var attributeString = foldl2(applySelectionAttributeString)(selection2)(attributes);
+        var attributeString = foldl2(function(acc) {
+          return function(attr3) {
+            return acc + ("\n  ." + applySelectionAttributeString(selection2)(attr3));
+          };
+        })("")(attributes);
         return discard7(modify_4(function(s) {
-          return s + ("\nmodifying " + (selection2 + ("\n" + attributeString)));
+          return s + attributeString;
         }))(function() {
           return pure11(unit);
         });
@@ -15274,7 +15475,7 @@
       return function(v1) {
         if (v1 instanceof Drag) {
           return discard7(modify_4(function(s) {
-            return s + ("\nadding drag behavior to " + v);
+            return s + "\n  .call(d3.drag())";
           }))(function() {
             return pure11(unit);
           });
@@ -15282,21 +15483,22 @@
         ;
         if (v1 instanceof Zoom) {
           return discard7(modify_4(function(s) {
-            return s + ("\nadding drag behavior to " + v);
+            return s + "\n  .call(d3.zoom())";
           }))(function() {
             return pure11(unit);
           });
         }
         ;
-        throw new Error("Failed pattern match at D3Tagless.Capabilities.String (line 30, column 1 - line 74, column 60): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at D3Tagless.Capabilities.String (line 33, column 1 - line 88, column 64): " + [v.constructor.name, v1.constructor.name]);
       };
     },
     openSelection: function(selection2) {
       return function(selector) {
+        var code2 = showSelectAll_(selector)(selection2);
         return discard7(modify_4(function(s) {
-          return s + ("\nopening a selection using " + show13(selector));
+          return s + ("\n\nconst /* TODO: varName */ = " + (code2 + ";"));
         }))(function() {
-          return pure11("openSelection");
+          return pure11(code2);
         });
       };
     },
@@ -15304,10 +15506,12 @@
       return function(e) {
         return function(ds) {
           return function(k) {
+            var dataCode = showData_(ds)(selection2);
+            var joinCode = dataCode + ("\n  .join(" + (show33(e) + ")"));
             return discard7(modify_4(function(s) {
-              return s + ("\nentering a " + (show33(e) + " for each datum"));
+              return s + ("\n\nconst /* TODO: varName */ = " + (joinCode + ";"));
             }))(function() {
-              return pure11("join");
+              return pure11(joinCode);
             });
           };
         };
@@ -15317,13 +15521,16 @@
       return function(e) {
         return function(ds) {
           return function(k) {
+            var dataCode = showData_(ds)(selection2);
+            var enterCode = dataCode + ("\n  .enter().append(" + (show33(e) + ")"));
+            var exitCode = dataCode + "\n  .exit().remove()";
             return discard7(modify_4(function(s) {
-              return s + ("\nentering a " + (show33(e) + " for each datum"));
+              return s + ("\n\n// Update pattern\nconst update = " + (dataCode + (";\nconst enter = " + (enterCode + (";\nconst exit = " + (exitCode + ";"))))));
             }))(function() {
               return pure11({
-                enter: "enter",
-                exit: "exit",
-                update: "update"
+                enter: enterCode,
+                exit: exitCode,
+                update: dataCode
               });
             });
           };
@@ -15974,9 +16181,9 @@
   }
 
   // output/Web.DOM.NonElementParentNode/index.js
-  var map27 = /* @__PURE__ */ map(functorEffect);
+  var map28 = /* @__PURE__ */ map(functorEffect);
   var getElementById = function(eid) {
-    var $2 = map27(toMaybe);
+    var $2 = map28(toMaybe);
     var $3 = _getElementById(eid);
     return function($4) {
       return $2($3($4));
