@@ -20483,9 +20483,29 @@
   };
 
   // output/V2.Pages.HomeForceLayout/foreign.js
+  var categoryColors = {
+    "basic-chart": "#3b82f6",
+    // blue
+    "advanced-layout": "#8b5cf6",
+    // purple
+    "interactive": "#10b981",
+    // green
+    "interpreter": "#f59e0b",
+    // amber
+    "application": "#ef4444"
+    // red
+  };
   var navigationData = {
     nodes: [
-      { id: "gallery", label: "Gallery", type: "root", expanded: false, children: [
+      // Central root
+      { id: "purescript-d3", label: "PureScript D3", type: "center", expanded: true, children: [
+        "gallery",
+        "spago",
+        "interpreters",
+        "github"
+      ] },
+      // Main sections
+      { id: "gallery", label: "Gallery", type: "section", expanded: false, parent: "purescript-d3", children: [
         "line-chart",
         "bar-chart",
         "scatter-plot",
@@ -20496,29 +20516,37 @@
         "tree",
         "tree-horizontal",
         "tree-vertical",
-        "tree-radial"
+        "tree-radial",
+        "three-little-circles",
+        "gup",
+        "les-mis"
       ] },
-      { id: "spago", label: "Spago Explorer", type: "root", url: "#/spago" },
-      { id: "interpreters", label: "Interpreters", type: "root", expanded: false, children: [
+      { id: "spago", label: "Spago Explorer", type: "section", parent: "purescript-d3", url: "#/spago" },
+      { id: "interpreters", label: "Interpreters", type: "section", expanded: false, parent: "purescript-d3", children: [
         "meta-tree",
         "print-tree"
       ] },
-      { id: "github", label: "GitHub", type: "root", url: "https://github.com/afcondon/purescript-d3-tagless", external: true },
-      // Gallery children
-      { id: "line-chart", label: "Line Chart", type: "example", parent: "gallery" },
-      { id: "bar-chart", label: "Bar Chart", type: "example", parent: "gallery" },
-      { id: "scatter-plot", label: "Scatter Plot", type: "example", parent: "gallery" },
-      { id: "scatter-quartet", label: "Anscombe's Quartet", type: "example", parent: "gallery" },
-      { id: "chord-diagram", label: "Chord Diagram", type: "example", parent: "gallery" },
-      { id: "bubble-chart", label: "Bubble Chart", type: "example", parent: "gallery" },
-      { id: "sankey", label: "Sankey Diagram", type: "example", parent: "gallery" },
-      { id: "tree", label: "Tree Layout", type: "example", parent: "gallery" },
-      { id: "tree-horizontal", label: "Horizontal Tree", type: "example", parent: "gallery" },
-      { id: "tree-vertical", label: "Vertical Tree", type: "example", parent: "gallery" },
-      { id: "tree-radial", label: "Radial Tree", type: "example", parent: "gallery" },
+      { id: "github", label: "GitHub", type: "section", parent: "purescript-d3", url: "https://github.com/afcondon/purescript-d3-tagless", external: true },
+      // Gallery children - Basic Charts
+      { id: "line-chart", label: "Line Chart", type: "example", category: "basic-chart", parent: "gallery" },
+      { id: "bar-chart", label: "Bar Chart", type: "example", category: "basic-chart", parent: "gallery" },
+      { id: "scatter-plot", label: "Scatter Plot", type: "example", category: "basic-chart", parent: "gallery" },
+      { id: "scatter-quartet", label: "Anscombe's Quartet", type: "example", category: "basic-chart", parent: "gallery" },
+      // Gallery children - Advanced Layouts
+      { id: "chord-diagram", label: "Chord Diagram", type: "example", category: "advanced-layout", parent: "gallery" },
+      { id: "bubble-chart", label: "Bubble Chart", type: "example", category: "advanced-layout", parent: "gallery" },
+      { id: "sankey", label: "Sankey Diagram", type: "example", category: "advanced-layout", parent: "gallery" },
+      { id: "tree", label: "Tree Layout", type: "example", category: "advanced-layout", parent: "gallery" },
+      { id: "tree-horizontal", label: "Horizontal Tree", type: "example", category: "advanced-layout", parent: "gallery" },
+      { id: "tree-vertical", label: "Vertical Tree", type: "example", category: "advanced-layout", parent: "gallery" },
+      { id: "tree-radial", label: "Radial Tree", type: "example", category: "advanced-layout", parent: "gallery" },
+      // Gallery children - Interactive
+      { id: "three-little-circles", label: "Three Little Circles", type: "example", category: "interactive", parent: "gallery" },
+      { id: "gup", label: "General Update Pattern", type: "example", category: "interactive", parent: "gallery" },
+      { id: "les-mis", label: "Les Mis\xE9rables Network", type: "example", category: "interactive", parent: "gallery" },
       // Interpreters children
-      { id: "meta-tree", label: "MetaTree Visualizer", type: "example", parent: "interpreters" },
-      { id: "print-tree", label: "String Generator", type: "example", parent: "interpreters" }
+      { id: "meta-tree", label: "MetaTree Visualizer", type: "example", category: "interpreter", parent: "interpreters" },
+      { id: "print-tree", label: "String Generator", type: "example", category: "interpreter", parent: "interpreters" }
     ]
   };
   function initializeEmptyForceLayout(selector) {
@@ -20528,9 +20556,18 @@
           d3.select(selector).selectAll("svg").remove();
           const svg2 = d3.select(selector).append("svg").attr("width", width17).attr("height", height17).attr("viewBox", [0, 0, width17, height17]);
           svg2.append("rect").attr("width", width17).attr("height", height17).attr("fill", "#fafafa");
-          let visibleNodes = navigationData.nodes.filter((n) => n.type === "root");
-          let visibleLinks = [];
-          const simulation = d3.forceSimulation(visibleNodes).force("charge", d3.forceManyBody().strength(-800)).force("center", d3.forceCenter(width17 / 2, height17 / 2)).force("collision", d3.forceCollide().radius(80)).force("link", d3.forceLink(visibleLinks).id((d7) => d7.id).distance(150));
+          const centerNode = navigationData.nodes.find((n) => n.type === "center");
+          const sectionNodes = navigationData.nodes.filter((n) => n.type === "section");
+          let visibleNodes = [centerNode, ...sectionNodes];
+          let visibleLinks = sectionNodes.map((s) => ({ source: "purescript-d3", target: s.id }));
+          function boundaryForce() {
+            const padding = 80;
+            for (let node of visibleNodes) {
+              node.x = Math.max(padding, Math.min(width17 - padding, node.x));
+              node.y = Math.max(padding, Math.min(height17 - padding, node.y));
+            }
+          }
+          const simulation = d3.forceSimulation(visibleNodes).force("charge", d3.forceManyBody().strength(-800)).force("center", d3.forceCenter(width17 / 2, height17 / 2)).force("collision", d3.forceCollide().radius(80)).force("link", d3.forceLink(visibleLinks).id((d7) => d7.id).distance(150)).force("boundary", boundaryForce);
           const linkGroup = svg2.append("g").attr("class", "links");
           const nodeGroup = svg2.append("g").attr("class", "nodes");
           function update3() {
@@ -20540,14 +20577,23 @@
             const node = nodeGroup.selectAll("g").data(visibleNodes, (d7) => d7.id);
             node.exit().remove();
             const nodeEnter = node.enter().append("g").attr("class", "node").call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
-            nodeEnter.append("circle").attr("r", (d7) => d7.type === "root" ? 50 : 35).attr("fill", (d7) => {
-              if (d7.type === "root") return d7.expanded ? "#2563eb" : "#3b82f6";
-              return "#10b981";
+            nodeEnter.append("circle").attr("r", (d7) => {
+              if (d7.type === "center") return 60;
+              if (d7.type === "section") return 50;
+              return 35;
+            }).attr("fill", (d7) => {
+              if (d7.type === "center") return "#1e40af";
+              if (d7.type === "section") return d7.expanded ? "#2563eb" : "#3b82f6";
+              return categoryColors[d7.category] || "#10b981";
             }).attr("stroke", "#fff").attr("stroke-width", 3);
-            nodeEnter.append("text").attr("dy", "0.35em").attr("text-anchor", "middle").attr("fill", "#fff").attr("font-size", (d7) => d7.type === "root" ? "14px" : "11px").attr("font-weight", "600").attr("pointer-events", "none").text((d7) => d7.label);
+            nodeEnter.append("text").attr("dy", "0.35em").attr("text-anchor", "middle").attr("fill", "#fff").attr("font-size", (d7) => {
+              if (d7.type === "center") return "16px";
+              if (d7.type === "section") return "14px";
+              return "11px";
+            }).attr("font-weight", "600").attr("pointer-events", "none").text((d7) => d7.label);
             nodeEnter.on("click", function(event, d7) {
               event.stopPropagation();
-              if (d7.type === "root" && d7.children) {
+              if ((d7.type === "center" || d7.type === "section") && d7.children) {
                 d7.expanded = !d7.expanded;
                 if (d7.expanded) {
                   const children3 = navigationData.nodes.filter((n) => d7.children.includes(n.id));
@@ -20558,8 +20604,20 @@
                     }
                   });
                 } else {
-                  visibleLinks = visibleLinks.filter((l) => l.source.id !== d7.id && l.target.id !== d7.id);
+                  let removeDescendants = function(nodeId) {
+                    const node2 = navigationData.nodes.find((n) => n.id === nodeId);
+                    if (node2 && node2.children) {
+                      node2.children.forEach((childId) => {
+                        removeDescendants(childId);
+                        visibleNodes = visibleNodes.filter((n) => n.id !== childId);
+                      });
+                      node2.expanded = false;
+                    }
+                    visibleLinks = visibleLinks.filter((l) => l.source.id !== nodeId && l.target.id !== nodeId);
+                  };
+                  d7.children.forEach((childId) => removeDescendants(childId));
                   visibleNodes = visibleNodes.filter((n) => !d7.children.includes(n.id));
+                  visibleLinks = visibleLinks.filter((l) => l.source.id !== d7.id && l.target.id !== d7.id);
                 }
                 update3();
               } else if (d7.type === "example") {

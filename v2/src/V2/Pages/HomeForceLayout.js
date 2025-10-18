@@ -1,35 +1,58 @@
 // FFI for HomeForceLayout component
 
+// Category colors
+const categoryColors = {
+  "basic-chart": "#3b82f6",      // blue
+  "advanced-layout": "#8b5cf6",  // purple
+  "interactive": "#10b981",      // green
+  "interpreter": "#f59e0b",      // amber
+  "application": "#ef4444"       // red
+};
+
 // Navigation data structure with hierarchical relationships
 const navigationData = {
   nodes: [
-    { id: "gallery", label: "Gallery", type: "root", expanded: false, children: [
+    // Central root
+    { id: "purescript-d3", label: "PureScript D3", type: "center", expanded: true, children: [
+      "gallery", "spago", "interpreters", "github"
+    ]},
+
+    // Main sections
+    { id: "gallery", label: "Gallery", type: "section", expanded: false, parent: "purescript-d3", children: [
       "line-chart", "bar-chart", "scatter-plot", "scatter-quartet",
       "chord-diagram", "bubble-chart", "sankey",
-      "tree", "tree-horizontal", "tree-vertical", "tree-radial"
+      "tree", "tree-horizontal", "tree-vertical", "tree-radial",
+      "three-little-circles", "gup", "les-mis"
     ]},
-    { id: "spago", label: "Spago Explorer", type: "root", url: "#/spago" },
-    { id: "interpreters", label: "Interpreters", type: "root", expanded: false, children: [
+    { id: "spago", label: "Spago Explorer", type: "section", parent: "purescript-d3", url: "#/spago" },
+    { id: "interpreters", label: "Interpreters", type: "section", expanded: false, parent: "purescript-d3", children: [
       "meta-tree", "print-tree"
     ]},
-    { id: "github", label: "GitHub", type: "root", url: "https://github.com/afcondon/purescript-d3-tagless", external: true },
+    { id: "github", label: "GitHub", type: "section", parent: "purescript-d3", url: "https://github.com/afcondon/purescript-d3-tagless", external: true },
 
-    // Gallery children
-    { id: "line-chart", label: "Line Chart", type: "example", parent: "gallery" },
-    { id: "bar-chart", label: "Bar Chart", type: "example", parent: "gallery" },
-    { id: "scatter-plot", label: "Scatter Plot", type: "example", parent: "gallery" },
-    { id: "scatter-quartet", label: "Anscombe's Quartet", type: "example", parent: "gallery" },
-    { id: "chord-diagram", label: "Chord Diagram", type: "example", parent: "gallery" },
-    { id: "bubble-chart", label: "Bubble Chart", type: "example", parent: "gallery" },
-    { id: "sankey", label: "Sankey Diagram", type: "example", parent: "gallery" },
-    { id: "tree", label: "Tree Layout", type: "example", parent: "gallery" },
-    { id: "tree-horizontal", label: "Horizontal Tree", type: "example", parent: "gallery" },
-    { id: "tree-vertical", label: "Vertical Tree", type: "example", parent: "gallery" },
-    { id: "tree-radial", label: "Radial Tree", type: "example", parent: "gallery" },
+    // Gallery children - Basic Charts
+    { id: "line-chart", label: "Line Chart", type: "example", category: "basic-chart", parent: "gallery" },
+    { id: "bar-chart", label: "Bar Chart", type: "example", category: "basic-chart", parent: "gallery" },
+    { id: "scatter-plot", label: "Scatter Plot", type: "example", category: "basic-chart", parent: "gallery" },
+    { id: "scatter-quartet", label: "Anscombe's Quartet", type: "example", category: "basic-chart", parent: "gallery" },
+
+    // Gallery children - Advanced Layouts
+    { id: "chord-diagram", label: "Chord Diagram", type: "example", category: "advanced-layout", parent: "gallery" },
+    { id: "bubble-chart", label: "Bubble Chart", type: "example", category: "advanced-layout", parent: "gallery" },
+    { id: "sankey", label: "Sankey Diagram", type: "example", category: "advanced-layout", parent: "gallery" },
+    { id: "tree", label: "Tree Layout", type: "example", category: "advanced-layout", parent: "gallery" },
+    { id: "tree-horizontal", label: "Horizontal Tree", type: "example", category: "advanced-layout", parent: "gallery" },
+    { id: "tree-vertical", label: "Vertical Tree", type: "example", category: "advanced-layout", parent: "gallery" },
+    { id: "tree-radial", label: "Radial Tree", type: "example", category: "advanced-layout", parent: "gallery" },
+
+    // Gallery children - Interactive
+    { id: "three-little-circles", label: "Three Little Circles", type: "example", category: "interactive", parent: "gallery" },
+    { id: "gup", label: "General Update Pattern", type: "example", category: "interactive", parent: "gallery" },
+    { id: "les-mis", label: "Les Misérables Network", type: "example", category: "interactive", parent: "gallery" },
 
     // Interpreters children
-    { id: "meta-tree", label: "MetaTree Visualizer", type: "example", parent: "interpreters" },
-    { id: "print-tree", label: "String Generator", type: "example", parent: "interpreters" }
+    { id: "meta-tree", label: "MetaTree Visualizer", type: "example", category: "interpreter", parent: "interpreters" },
+    { id: "print-tree", label: "String Generator", type: "example", category: "interpreter", parent: "interpreters" }
   ]
 };
 
@@ -57,15 +80,28 @@ export function initializeEmptyForceLayout(selector) {
           .attr("fill", "#fafafa");
 
         // State: currently visible nodes and links
-        let visibleNodes = navigationData.nodes.filter(n => n.type === "root");
-        let visibleLinks = [];
+        // Start with central node and its immediate children (main sections)
+        const centerNode = navigationData.nodes.find(n => n.type === "center");
+        const sectionNodes = navigationData.nodes.filter(n => n.type === "section");
+        let visibleNodes = [centerNode, ...sectionNodes];
+        let visibleLinks = sectionNodes.map(s => ({ source: "purescript-d3", target: s.id }));
+
+        // Boundary force to keep nodes in viewport
+        function boundaryForce() {
+          const padding = 80;
+          for (let node of visibleNodes) {
+            node.x = Math.max(padding, Math.min(width - padding, node.x));
+            node.y = Math.max(padding, Math.min(height - padding, node.y));
+          }
+        }
 
         // Create force simulation
         const simulation = d3.forceSimulation(visibleNodes)
           .force("charge", d3.forceManyBody().strength(-800))
           .force("center", d3.forceCenter(width / 2, height / 2))
           .force("collision", d3.forceCollide().radius(80))
-          .force("link", d3.forceLink(visibleLinks).id(d => d.id).distance(150));
+          .force("link", d3.forceLink(visibleLinks).id(d => d.id).distance(150))
+          .force("boundary", boundaryForce);
 
         // Create container groups
         const linkGroup = svg.append("g").attr("class", "links");
@@ -101,10 +137,16 @@ export function initializeEmptyForceLayout(selector) {
 
           // Add circles
           nodeEnter.append("circle")
-            .attr("r", d => d.type === "root" ? 50 : 35)
+            .attr("r", d => {
+              if (d.type === "center") return 60;
+              if (d.type === "section") return 50;
+              return 35;
+            })
             .attr("fill", d => {
-              if (d.type === "root") return d.expanded ? "#2563eb" : "#3b82f6";
-              return "#10b981";
+              if (d.type === "center") return "#1e40af"; // dark blue for center
+              if (d.type === "section") return d.expanded ? "#2563eb" : "#3b82f6";
+              // Example nodes use category colors
+              return categoryColors[d.category] || "#10b981";
             })
             .attr("stroke", "#fff")
             .attr("stroke-width", 3);
@@ -114,7 +156,11 @@ export function initializeEmptyForceLayout(selector) {
             .attr("dy", "0.35em")
             .attr("text-anchor", "middle")
             .attr("fill", "#fff")
-            .attr("font-size", d => d.type === "root" ? "14px" : "11px")
+            .attr("font-size", d => {
+              if (d.type === "center") return "16px";
+              if (d.type === "section") return "14px";
+              return "11px";
+            })
             .attr("font-weight", "600")
             .attr("pointer-events", "none")
             .text(d => d.label);
@@ -123,7 +169,8 @@ export function initializeEmptyForceLayout(selector) {
           nodeEnter.on("click", function(event, d) {
             event.stopPropagation();
 
-            if (d.type === "root" && d.children) {
+            // Handle expandable nodes (center and section nodes with children)
+            if ((d.type === "center" || d.type === "section") && d.children) {
               // Toggle expansion
               d.expanded = !d.expanded;
 
@@ -137,9 +184,22 @@ export function initializeEmptyForceLayout(selector) {
                   }
                 });
               } else {
-                // Remove children
-                visibleLinks = visibleLinks.filter(l => l.source.id !== d.id && l.target.id !== d.id);
+                // Remove children (and their children recursively)
+                function removeDescendants(nodeId) {
+                  const node = navigationData.nodes.find(n => n.id === nodeId);
+                  if (node && node.children) {
+                    node.children.forEach(childId => {
+                      removeDescendants(childId);
+                      visibleNodes = visibleNodes.filter(n => n.id !== childId);
+                    });
+                    node.expanded = false;
+                  }
+                  visibleLinks = visibleLinks.filter(l => l.source.id !== nodeId && l.target.id !== nodeId);
+                }
+
+                d.children.forEach(childId => removeDescendants(childId));
                 visibleNodes = visibleNodes.filter(n => !d.children.includes(n.id));
+                visibleLinks = visibleLinks.filter(l => l.source.id !== d.id && l.target.id !== d.id);
               }
 
               update();
