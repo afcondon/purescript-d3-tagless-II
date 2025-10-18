@@ -9,12 +9,20 @@ const categoryColors = {
   "application": "#ef4444"       // red
 };
 
+// Type colors
+const typeColors = {
+  "center": "#1e40af",     // dark blue
+  "section": "#3b82f6",    // blue
+  "example": "#10b981",    // green (default, overridden by category)
+  "feature": "#ec4899"     // pink
+};
+
 // Navigation data structure with hierarchical relationships
 const navigationData = {
   nodes: [
     // Central root
     { id: "purescript-d3", label: "PureScript D3", type: "center", expanded: true, children: [
-      "gallery", "spago", "interpreters", "github"
+      "gallery", "about", "spago", "interpreters", "github"
     ]},
 
     // Main sections
@@ -23,6 +31,9 @@ const navigationData = {
       "chord-diagram", "bubble-chart", "sankey",
       "tree", "tree-horizontal", "tree-vertical", "tree-radial",
       "three-little-circles", "gup", "les-mis"
+    ]},
+    { id: "about", label: "About", type: "section", expanded: false, parent: "purescript-d3", children: [
+      "type-safe", "composable", "interpreters", "d3-powered", "interactive", "documented"
     ]},
     { id: "spago", label: "Spago Explorer", type: "section", parent: "purescript-d3", url: "#/spago" },
     { id: "interpreters", label: "Interpreters", type: "section", expanded: false, parent: "purescript-d3", children: [
@@ -52,7 +63,15 @@ const navigationData = {
 
     // Interpreters children
     { id: "meta-tree", label: "MetaTree Visualizer", type: "example", category: "interpreter", parent: "interpreters" },
-    { id: "print-tree", label: "String Generator", type: "example", category: "interpreter", parent: "interpreters" }
+    { id: "print-tree", label: "String Generator", type: "example", category: "interpreter", parent: "interpreters" },
+
+    // About children (features)
+    { id: "type-safe", label: "Type-Safe", description: "Strong type safety with PureScript", type: "feature", parent: "about" },
+    { id: "composable", label: "Composable", description: "Build complex visualizations from simple components", type: "feature", parent: "about" },
+    { id: "interpreters", label: "Multiple Interpreters", description: "Finally Tagless pattern enables different interpretations", type: "feature", parent: "about" },
+    { id: "d3-powered", label: "D3-Powered", description: "Leverages D3.js for battle-tested rendering", type: "feature", parent: "about" },
+    { id: "interactive", label: "Interactive", description: "Support for drag, zoom, and other behaviors", type: "feature", parent: "about" },
+    { id: "documented", label: "Well-Documented", description: "Comprehensive examples with comparisons", type: "feature", parent: "about" }
   ]
 };
 
@@ -86,6 +105,10 @@ export function initializeEmptyForceLayout(selector) {
         let visibleNodes = [centerNode, ...sectionNodes];
         let visibleLinks = sectionNodes.map(s => ({ source: "purescript-d3", target: s.id }));
 
+        // Fix center node to viewport center
+        centerNode.fx = width / 2;
+        centerNode.fy = height / 2;
+
         // Boundary force to keep nodes in viewport
         function boundaryForce() {
           const padding = 80;
@@ -98,7 +121,6 @@ export function initializeEmptyForceLayout(selector) {
         // Create force simulation
         const simulation = d3.forceSimulation(visibleNodes)
           .force("charge", d3.forceManyBody().strength(-800))
-          .force("center", d3.forceCenter(width / 2, height / 2))
           .force("collision", d3.forceCollide().radius(80))
           .force("link", d3.forceLink(visibleLinks).id(d => d.id).distance(150))
           .force("boundary", boundaryForce);
@@ -140,13 +162,15 @@ export function initializeEmptyForceLayout(selector) {
             .attr("r", d => {
               if (d.type === "center") return 60;
               if (d.type === "section") return 50;
+              if (d.type === "feature") return 30;
               return 35;
             })
             .attr("fill", d => {
-              if (d.type === "center") return "#1e40af"; // dark blue for center
-              if (d.type === "section") return d.expanded ? "#2563eb" : "#3b82f6";
+              if (d.type === "center") return typeColors.center;
+              if (d.type === "section") return d.expanded ? "#2563eb" : typeColors.section;
+              if (d.type === "feature") return typeColors.feature;
               // Example nodes use category colors
-              return categoryColors[d.category] || "#10b981";
+              return categoryColors[d.category] || typeColors.example;
             })
             .attr("stroke", "#fff")
             .attr("stroke-width", 3);
@@ -179,8 +203,8 @@ export function initializeEmptyForceLayout(selector) {
                 const children = navigationData.nodes.filter(n => d.children.includes(n.id));
                 children.forEach(child => {
                   if (!visibleNodes.find(n => n.id === child.id)) {
-                    visibleNodes.push(child);
-                    visibleLinks.push({ source: d.id, target: child.id });
+                    visibleNodes.push(child); // children should be entered at parent's position initially
+                    visibleLinks.push({ source: d.id, target: child.id }); 
                   }
                 });
               } else {
@@ -194,12 +218,21 @@ export function initializeEmptyForceLayout(selector) {
                     });
                     node.expanded = false;
                   }
-                  visibleLinks = visibleLinks.filter(l => l.source.id !== nodeId && l.target.id !== nodeId);
+                  // Remove links where this node is the source (but keep parent link)
+                  visibleLinks = visibleLinks.filter(l => l.source.id !== nodeId);
                 }
 
                 d.children.forEach(childId => removeDescendants(childId));
                 visibleNodes = visibleNodes.filter(n => !d.children.includes(n.id));
-                visibleLinks = visibleLinks.filter(l => l.source.id !== d.id && l.target.id !== d.id);
+                // Remove child links but keep the parent link to this node
+                visibleLinks = visibleLinks.filter(l => {
+                  // Keep link if this node is the target (parent link)
+                  if (l.target.id === d.id) return true;
+                  // Keep link if this node is not the source
+                  if (l.source.id !== d.id) return true;
+                  // Remove link (this node is source and we're collapsing)
+                  return false;
+                });
               }
 
               update();

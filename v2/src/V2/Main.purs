@@ -85,6 +85,7 @@ render state =
 shouldHideNavigation :: Route -> Boolean
 shouldHideNavigation (Example _) = true
 shouldHideNavigation Spago = true
+shouldHideNavigation Home = true
 shouldHideNavigation _ = false
 
 -- | Render the current page based on route

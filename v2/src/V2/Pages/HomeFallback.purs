@@ -13,6 +13,7 @@ type Slots = ()
 
 -- | Accessible fallback home page for screen readers and no-JS users
 -- | Based on the original home page but simplified
+-- | Obviously tho, this has to be replaced with static, non-purs, hence non-JS HTML!!!
 component :: forall q i o m. H.Component q i o m
 component = H.mkComponent
   { initialState: \_ -> unit

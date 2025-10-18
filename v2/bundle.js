@@ -20495,11 +20495,22 @@
     "application": "#ef4444"
     // red
   };
+  var typeColors = {
+    "center": "#1e40af",
+    // dark blue
+    "section": "#3b82f6",
+    // blue
+    "example": "#10b981",
+    // green (default, overridden by category)
+    "feature": "#ec4899"
+    // pink
+  };
   var navigationData = {
     nodes: [
       // Central root
       { id: "purescript-d3", label: "PureScript D3", type: "center", expanded: true, children: [
         "gallery",
+        "about",
         "spago",
         "interpreters",
         "github"
@@ -20520,6 +20531,14 @@
         "three-little-circles",
         "gup",
         "les-mis"
+      ] },
+      { id: "about", label: "About", type: "section", expanded: false, parent: "purescript-d3", children: [
+        "type-safe",
+        "composable",
+        "interpreters",
+        "d3-powered",
+        "interactive",
+        "documented"
       ] },
       { id: "spago", label: "Spago Explorer", type: "section", parent: "purescript-d3", url: "#/spago" },
       { id: "interpreters", label: "Interpreters", type: "section", expanded: false, parent: "purescript-d3", children: [
@@ -20546,7 +20565,14 @@
       { id: "les-mis", label: "Les Mis\xE9rables Network", type: "example", category: "interactive", parent: "gallery" },
       // Interpreters children
       { id: "meta-tree", label: "MetaTree Visualizer", type: "example", category: "interpreter", parent: "interpreters" },
-      { id: "print-tree", label: "String Generator", type: "example", category: "interpreter", parent: "interpreters" }
+      { id: "print-tree", label: "String Generator", type: "example", category: "interpreter", parent: "interpreters" },
+      // About children (features)
+      { id: "type-safe", label: "Type-Safe", description: "Strong type safety with PureScript", type: "feature", parent: "about" },
+      { id: "composable", label: "Composable", description: "Build complex visualizations from simple components", type: "feature", parent: "about" },
+      { id: "interpreters", label: "Multiple Interpreters", description: "Finally Tagless pattern enables different interpretations", type: "feature", parent: "about" },
+      { id: "d3-powered", label: "D3-Powered", description: "Leverages D3.js for battle-tested rendering", type: "feature", parent: "about" },
+      { id: "interactive", label: "Interactive", description: "Support for drag, zoom, and other behaviors", type: "feature", parent: "about" },
+      { id: "documented", label: "Well-Documented", description: "Comprehensive examples with comparisons", type: "feature", parent: "about" }
     ]
   };
   function initializeEmptyForceLayout(selector) {
@@ -20560,6 +20586,8 @@
           const sectionNodes = navigationData.nodes.filter((n) => n.type === "section");
           let visibleNodes = [centerNode, ...sectionNodes];
           let visibleLinks = sectionNodes.map((s) => ({ source: "purescript-d3", target: s.id }));
+          centerNode.fx = width17 / 2;
+          centerNode.fy = height17 / 2;
           function boundaryForce() {
             const padding = 80;
             for (let node of visibleNodes) {
@@ -20567,7 +20595,7 @@
               node.y = Math.max(padding, Math.min(height17 - padding, node.y));
             }
           }
-          const simulation = d3.forceSimulation(visibleNodes).force("charge", d3.forceManyBody().strength(-800)).force("center", d3.forceCenter(width17 / 2, height17 / 2)).force("collision", d3.forceCollide().radius(80)).force("link", d3.forceLink(visibleLinks).id((d7) => d7.id).distance(150)).force("boundary", boundaryForce);
+          const simulation = d3.forceSimulation(visibleNodes).force("charge", d3.forceManyBody().strength(-800)).force("collision", d3.forceCollide().radius(80)).force("link", d3.forceLink(visibleLinks).id((d7) => d7.id).distance(150)).force("boundary", boundaryForce);
           const linkGroup = svg2.append("g").attr("class", "links");
           const nodeGroup = svg2.append("g").attr("class", "nodes");
           function update3() {
@@ -20580,11 +20608,13 @@
             nodeEnter.append("circle").attr("r", (d7) => {
               if (d7.type === "center") return 60;
               if (d7.type === "section") return 50;
+              if (d7.type === "feature") return 30;
               return 35;
             }).attr("fill", (d7) => {
-              if (d7.type === "center") return "#1e40af";
-              if (d7.type === "section") return d7.expanded ? "#2563eb" : "#3b82f6";
-              return categoryColors[d7.category] || "#10b981";
+              if (d7.type === "center") return typeColors.center;
+              if (d7.type === "section") return d7.expanded ? "#2563eb" : typeColors.section;
+              if (d7.type === "feature") return typeColors.feature;
+              return categoryColors[d7.category] || typeColors.example;
             }).attr("stroke", "#fff").attr("stroke-width", 3);
             nodeEnter.append("text").attr("dy", "0.35em").attr("text-anchor", "middle").attr("fill", "#fff").attr("font-size", (d7) => {
               if (d7.type === "center") return "16px";
@@ -20613,11 +20643,15 @@
                       });
                       node2.expanded = false;
                     }
-                    visibleLinks = visibleLinks.filter((l) => l.source.id !== nodeId && l.target.id !== nodeId);
+                    visibleLinks = visibleLinks.filter((l) => l.source.id !== nodeId);
                   };
                   d7.children.forEach((childId) => removeDescendants(childId));
                   visibleNodes = visibleNodes.filter((n) => !d7.children.includes(n.id));
-                  visibleLinks = visibleLinks.filter((l) => l.source.id !== d7.id && l.target.id !== d7.id);
+                  visibleLinks = visibleLinks.filter((l) => {
+                    if (l.target.id === d7.id) return true;
+                    if (l.source.id !== d7.id) return true;
+                    return false;
+                  });
                 }
                 update3();
               } else if (d7.type === "example") {
@@ -25416,6 +25450,10 @@
       return true;
     }
     ;
+    if (v instanceof Home) {
+      return true;
+    }
+    ;
     return false;
   };
   var handleAction6 = function($copy_v) {
@@ -25503,7 +25541,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at V2.Main (line 119, column 16 - line 155, column 41): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at V2.Main (line 120, column 16 - line 156, column 41): " + [v.constructor.name]);
     }
     ;
     while (!$tco_done) {
@@ -25555,7 +25593,7 @@
       return div2([classes(["not-found"])])([h1_([text5("404 - Page Not Found")]), p_([text5("The page you're looking for doesn't exist.")]), a([href4(routeToHash(Home.value))])([text5("Go Home")])]);
     }
     ;
-    throw new Error("Failed pattern match at V2.Main (line 92, column 20 - line 116, column 8): " + [route.constructor.name]);
+    throw new Error("Failed pattern match at V2.Main (line 93, column 20 - line 117, column 8): " + [route.constructor.name]);
   };
   var render10 = function(state3) {
     return div2([classes(["app"])])([(function() {
