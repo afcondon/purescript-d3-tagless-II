@@ -750,8 +750,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-sm);
-  width: auto;
-  min-width: 180px;
+  width: 320px;
+  max-width: 320px;
+  max-height: calc(100vh - 2 * var(--spacing-md));
 }
 
 .example-fullscreen__toolbar-title {
@@ -805,6 +806,8 @@
   margin-top: var(--spacing-md);
   padding-top: var(--spacing-md);
   border-top: 1px solid var(--color-border);
+  max-height: 50vh;
+  overflow-y: auto;
 }
 
 .example-fullscreen__info-label {
@@ -822,6 +825,8 @@
   color: var(--color-text);
   margin: 0 0 var(--spacing-sm) 0;
   font-style: italic;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .example-fullscreen__about {
@@ -829,6 +834,26 @@
   line-height: 1.6;
   color: var(--color-text);
   margin: 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Scrollbar for info section */
+.example-fullscreen__info-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.example-fullscreen__info-section::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.example-fullscreen__info-section::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.example-fullscreen__info-section::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-light);
 }
 
 /* Code panel - light mode, wider, on right */

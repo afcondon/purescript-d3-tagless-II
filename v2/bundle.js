@@ -20274,7 +20274,7 @@
                 }
                 ;
                 if (result instanceof Right) {
-                  return modify_6(function(v2) {
+                  return discard14(modify_6(function(v2) {
                     var $54 = {};
                     for (var $55 in v2) {
                       if ({}.hasOwnProperty.call(v2, $55)) {
@@ -20287,20 +20287,23 @@
                     $54.code = new Just(result.value0.body);
                     $54.error = Nothing.value;
                     return $54;
+                  }))(function() {
+                    return handleAction3(dictMonadAff)(HighlightCode2.value);
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 205, column 9 - line 216, column 16): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 205, column 9 - line 218, column 39): " + [result.constructor.name]);
               });
             });
           }
           ;
-          throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 199, column 5 - line 216, column 16): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 199, column 5 - line 218, column 39): " + [v1.constructor.name]);
         });
       }
       ;
       if (v instanceof ToggleCode) {
         return bind7(get7)(function(state3) {
+          var newShowCode = !state3.showCode;
           return discard14(modify_6(function(v1) {
             var $59 = {};
             for (var $60 in v1) {
@@ -20310,10 +20313,10 @@
               ;
             }
             ;
-            $59.showCode = !state3.showCode;
+            $59.showCode = newShowCode;
             return $59;
           }))(function() {
-            return when5(!state3.showCode)(handleAction3(dictMonadAff)(HighlightCode2.value));
+            return when5(newShowCode)(handleAction3(dictMonadAff)(HighlightCode2.value));
           });
         });
       }
@@ -20365,7 +20368,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 193, column 16 - line 241, column 41): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 193, column 16 - line 244, column 41): " + [v.constructor.name]);
     };
   };
   var _visualization = /* @__PURE__ */ (function() {

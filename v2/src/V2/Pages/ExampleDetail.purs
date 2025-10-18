@@ -214,12 +214,15 @@ handleAction = case _ of
               , code = Just response.body
               , error = Nothing
               }
+            -- Trigger syntax highlighting after code loads
+            handleAction HighlightCode
 
   ToggleCode -> do
     state <- H.get
-    H.modify_ _ { showCode = not state.showCode }
+    let newShowCode = not state.showCode
+    H.modify_ _ { showCode = newShowCode }
     -- Highlight code when showing (wait for DOM update)
-    when (not state.showCode) $ handleAction HighlightCode
+    when newShowCode $ handleAction HighlightCode
 
   ToggleInfo -> do
     state <- H.get
