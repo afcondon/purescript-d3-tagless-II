@@ -70,14 +70,22 @@ render :: State -> H.ComponentHTML Action Slots Aff
 render state =
   HH.div
     [ HP.classes [ HH.ClassName "app" ] ]
-    [ -- Navigation (always visible)
-      HH.slot_ _navigation unit Navigation.component state.currentRoute
+    [ -- Navigation (hidden on example detail pages for fullscreen experience)
+      if shouldHideNavigation state.currentRoute
+        then HH.text ""
+        else HH.slot_ _navigation unit Navigation.component state.currentRoute
 
     , -- Main content area
       HH.main
         [ HP.classes [ HH.ClassName "app__main" ] ]
         [ renderPage state.currentRoute ]
     ]
+
+-- | Hide navigation on example detail pages for immersive fullscreen
+shouldHideNavigation :: Route -> Boolean
+shouldHideNavigation (Example _) = true
+shouldHideNavigation Spago = true
+shouldHideNavigation _ = false
 
 -- | Render the current page based on route
 renderPage :: Route -> H.ComponentHTML Action Slots Aff
