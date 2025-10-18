@@ -20483,6 +20483,44 @@
   };
 
   // output/V2.Pages.HomeForceLayout/foreign.js
+  var navigationData = {
+    nodes: [
+      { id: "gallery", label: "Gallery", type: "root", expanded: false, children: [
+        "line-chart",
+        "bar-chart",
+        "scatter-plot",
+        "scatter-quartet",
+        "chord-diagram",
+        "bubble-chart",
+        "sankey",
+        "tree",
+        "tree-horizontal",
+        "tree-vertical",
+        "tree-radial"
+      ] },
+      { id: "spago", label: "Spago Explorer", type: "root", url: "#/spago" },
+      { id: "interpreters", label: "Interpreters", type: "root", expanded: false, children: [
+        "meta-tree",
+        "print-tree"
+      ] },
+      { id: "github", label: "GitHub", type: "root", url: "https://github.com/afcondon/purescript-d3-tagless", external: true },
+      // Gallery children
+      { id: "line-chart", label: "Line Chart", type: "example", parent: "gallery" },
+      { id: "bar-chart", label: "Bar Chart", type: "example", parent: "gallery" },
+      { id: "scatter-plot", label: "Scatter Plot", type: "example", parent: "gallery" },
+      { id: "scatter-quartet", label: "Anscombe's Quartet", type: "example", parent: "gallery" },
+      { id: "chord-diagram", label: "Chord Diagram", type: "example", parent: "gallery" },
+      { id: "bubble-chart", label: "Bubble Chart", type: "example", parent: "gallery" },
+      { id: "sankey", label: "Sankey Diagram", type: "example", parent: "gallery" },
+      { id: "tree", label: "Tree Layout", type: "example", parent: "gallery" },
+      { id: "tree-horizontal", label: "Horizontal Tree", type: "example", parent: "gallery" },
+      { id: "tree-vertical", label: "Vertical Tree", type: "example", parent: "gallery" },
+      { id: "tree-radial", label: "Radial Tree", type: "example", parent: "gallery" },
+      // Interpreters children
+      { id: "meta-tree", label: "MetaTree Visualizer", type: "example", parent: "interpreters" },
+      { id: "print-tree", label: "String Generator", type: "example", parent: "interpreters" }
+    ]
+  };
   function initializeEmptyForceLayout(selector) {
     return function(width17) {
       return function(height17) {
@@ -20490,16 +20528,74 @@
           d3.select(selector).selectAll("svg").remove();
           const svg2 = d3.select(selector).append("svg").attr("width", width17).attr("height", height17).attr("viewBox", [0, 0, width17, height17]);
           svg2.append("rect").attr("width", width17).attr("height", height17).attr("fill", "#fafafa");
-          const simulation = d3.forceSimulation([]).force("charge", d3.forceManyBody().strength(-300)).force("center", d3.forceCenter(width17 / 2, height17 / 2)).force("collision", d3.forceCollide().radius(50));
+          let visibleNodes = navigationData.nodes.filter((n) => n.type === "root");
+          let visibleLinks = [];
+          const simulation = d3.forceSimulation(visibleNodes).force("charge", d3.forceManyBody().strength(-800)).force("center", d3.forceCenter(width17 / 2, height17 / 2)).force("collision", d3.forceCollide().radius(80)).force("link", d3.forceLink(visibleLinks).id((d7) => d7.id).distance(150));
           const linkGroup = svg2.append("g").attr("class", "links");
           const nodeGroup = svg2.append("g").attr("class", "nodes");
-          console.log("Empty force layout initialized:", { selector, width: width17, height: height17 });
-          return {
-            simulation,
-            svg: svg2,
-            linkGroup,
-            nodeGroup
-          };
+          function update3() {
+            const link4 = linkGroup.selectAll("line").data(visibleLinks, (d7) => `${d7.source.id}-${d7.target.id}`);
+            link4.exit().remove();
+            const linkEnter = link4.enter().append("line").attr("stroke", "#999").attr("stroke-opacity", 0.6).attr("stroke-width", 2);
+            const node = nodeGroup.selectAll("g").data(visibleNodes, (d7) => d7.id);
+            node.exit().remove();
+            const nodeEnter = node.enter().append("g").attr("class", "node").call(d3.drag().on("start", dragstarted).on("drag", dragged).on("end", dragended));
+            nodeEnter.append("circle").attr("r", (d7) => d7.type === "root" ? 50 : 35).attr("fill", (d7) => {
+              if (d7.type === "root") return d7.expanded ? "#2563eb" : "#3b82f6";
+              return "#10b981";
+            }).attr("stroke", "#fff").attr("stroke-width", 3);
+            nodeEnter.append("text").attr("dy", "0.35em").attr("text-anchor", "middle").attr("fill", "#fff").attr("font-size", (d7) => d7.type === "root" ? "14px" : "11px").attr("font-weight", "600").attr("pointer-events", "none").text((d7) => d7.label);
+            nodeEnter.on("click", function(event, d7) {
+              event.stopPropagation();
+              if (d7.type === "root" && d7.children) {
+                d7.expanded = !d7.expanded;
+                if (d7.expanded) {
+                  const children3 = navigationData.nodes.filter((n) => d7.children.includes(n.id));
+                  children3.forEach((child) => {
+                    if (!visibleNodes.find((n) => n.id === child.id)) {
+                      visibleNodes.push(child);
+                      visibleLinks.push({ source: d7.id, target: child.id });
+                    }
+                  });
+                } else {
+                  visibleLinks = visibleLinks.filter((l) => l.source.id !== d7.id && l.target.id !== d7.id);
+                  visibleNodes = visibleNodes.filter((n) => !d7.children.includes(n.id));
+                }
+                update3();
+              } else if (d7.type === "example") {
+                window.location.hash = `#/example/${d7.id}`;
+              } else if (d7.url) {
+                if (d7.external) {
+                  window.open(d7.url, "_blank");
+                } else {
+                  window.location.hash = d7.url.replace("#", "");
+                }
+              }
+            });
+            simulation.nodes(visibleNodes);
+            simulation.force("link").links(visibleLinks);
+            simulation.alpha(0.3).restart();
+          }
+          simulation.on("tick", () => {
+            linkGroup.selectAll("line").attr("x1", (d7) => d7.source.x).attr("y1", (d7) => d7.source.y).attr("x2", (d7) => d7.target.x).attr("y2", (d7) => d7.target.y);
+            nodeGroup.selectAll("g").attr("transform", (d7) => `translate(${d7.x},${d7.y})`);
+          });
+          function dragstarted(event, d7) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d7.fx = d7.x;
+            d7.fy = d7.y;
+          }
+          function dragged(event, d7) {
+            d7.fx = event.x;
+            d7.fy = event.y;
+          }
+          function dragended(event, d7) {
+            if (!event.active) simulation.alphaTarget(0);
+            d7.fx = null;
+            d7.fy = null;
+          }
+          update3();
+          console.log("Force layout initialized with navigation nodes");
         };
       };
     };
