@@ -7,6 +7,8 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Effect.Aff.Class (class MonadAff)
 import Data.Maybe (Maybe(..))
+import Effect (Effect)
+import Effect.Class (liftEffect)
 
 type Slots :: forall k. Row k
 type Slots = ()
@@ -59,6 +61,13 @@ render _ =
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action Slots o m Unit
 handleAction = case _ of
   Initialize -> do
-    -- TODO: Initialize empty force layout
-    -- For now, just mark as initialized
+    -- Get window dimensions and initialize empty force layout
+    dims <- liftEffect getWindowDimensions
+    _ <- liftEffect $ initializeEmptyForceLayout "#home-force-viz" dims.width dims.height
     H.modify_ _ { initialized = true }
+
+-- | FFI: Get current window dimensions
+foreign import getWindowDimensions :: Effect { width :: Number, height :: Number }
+
+-- | FFI: Initialize an empty D3 force simulation
+foreign import initializeEmptyForceLayout :: String -> Number -> Number -> Effect Unit
