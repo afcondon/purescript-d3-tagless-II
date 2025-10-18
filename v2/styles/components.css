@@ -820,17 +820,20 @@
   margin: 0;
 }
 
-/* Code panel */
+/* Code panel - light mode, wider, on right */
 .example-fullscreen__code {
   /* Uses floating-panel classes */
+  width: 45vw;  /* Wider than default */
+  max-width: 800px;
   max-height: calc(100vh - 2 * var(--spacing-md));
-  background-color: #2d2d2d; /* Match Prism tomorrow theme */
-  color: #ccc;
+  background-color: rgba(255, 255, 255, 0.95);
+  color: var(--color-text);
+  box-shadow: var(--shadow-lg);
 }
 
 .example-fullscreen__code .floating-panel__title {
-  color: #ccc;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-dark);
+  border-bottom: 1px solid var(--color-border);
   padding-bottom: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
 }
@@ -845,12 +848,13 @@
 .example-fullscreen__code code {
   font-size: 0.875rem;
   line-height: 1.6;
+  color: var(--color-text);
 }
 
-/* Translucent code panel variant */
+/* Translucent variant - light translucent */
 .example-fullscreen__code--translucent {
-  background-color: rgba(45, 45, 45, 0.85);
-  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
 }
 
 /* Loading state */

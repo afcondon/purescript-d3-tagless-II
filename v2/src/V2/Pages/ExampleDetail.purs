@@ -68,9 +68,9 @@ initialState exampleId =
   , code: Nothing
   , loading: true
   , error: Nothing
-  , showCode: false  -- Start with code hidden
+  , showCode: true  -- Start with code visible
   , showInfo: false  -- Start with info hidden
-  , codeTranslucent: false  -- Start with solid code panel
+  , codeTranslucent: true  -- Start translucent
   }
 
 render :: forall m. MonadAff m => State -> H.ComponentHTML Action Slots m
@@ -104,12 +104,18 @@ render state =
                     { exampleId: state.exampleId }
                 ]
 
-            , -- Floating toolbar (top-right)
+            , -- Floating toolbar (left side)
               HH.div
-                [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-right", HH.ClassName "example-fullscreen__toolbar" ] ]
+                [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left", HH.ClassName "example-fullscreen__toolbar" ] ]
                 [ HH.div
                     [ HP.classes [ HH.ClassName "example-fullscreen__toolbar-title" ] ]
                     [ HH.text example.title ]
+                , HH.a
+                    [ HP.href $ routeToHash Gallery
+                    , HP.classes [ HH.ClassName "btn", HH.ClassName "btn--secondary" ]
+                    , HP.title "Back to Gallery"
+                    ]
+                    [ HH.text "← Gallery" ]
                 , HH.button
                     [ HP.classes [ HH.ClassName "btn", HH.ClassName "btn--secondary" ]
                     , HE.onClick \_ -> ToggleInfo
@@ -129,14 +135,8 @@ render state =
                       , HE.onClick \_ -> ToggleCodeTranslucency
                       , HP.title if state.codeTranslucent then "Make Solid" else "Make Translucent"
                       ]
-                      [ HH.text if state.codeTranslucent then "⬜" else "⬛" ]
+                      [ HH.text if state.codeTranslucent then "▢" else "▣" ]
                     else HH.text ""
-                , HH.a
-                    [ HP.href $ routeToHash Gallery
-                    , HP.classes [ HH.ClassName "btn", HH.ClassName "btn--secondary" ]
-                    , HP.title "Back to Gallery"
-                    ]
-                    [ HH.text "← Gallery" ]
                 ]
 
             , -- Floating info panel (bottom-left, conditionally visible)
@@ -155,15 +155,14 @@ render state =
                   ]
                 else HH.text ""
 
-            , -- Floating code panel (top-left, conditionally visible)
+            , -- Floating code panel (right side, conditionally visible)
               if state.showCode
                 then case state.code of
                   Just code ->
                     HH.div
                       [ HP.classes $
                           [ HH.ClassName "floating-panel"
-                          , HH.ClassName "floating-panel--top-left"
-                          , HH.ClassName "floating-panel--large"
+                          , HH.ClassName "floating-panel--top-right"
                           , HH.ClassName "example-fullscreen__code"
                           ] <> if state.codeTranslucent
                             then [ HH.ClassName "example-fullscreen__code--translucent" ]
@@ -184,7 +183,7 @@ render state =
                   Nothing ->
                     if state.loading
                       then HH.div
-                        [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left", HH.ClassName "example-fullscreen__loading" ] ]
+                        [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-right", HH.ClassName "example-fullscreen__loading" ] ]
                         [ HH.text "Loading code..." ]
                       else HH.text ""
                 else HH.text ""
