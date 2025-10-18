@@ -104,7 +104,7 @@ render state =
                     { exampleId: state.exampleId }
                 ]
 
-            , -- Floating toolbar (left side)
+            , -- Floating toolbar (left side) with integrated info
               HH.div
                 [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left", HH.ClassName "example-fullscreen__toolbar" ] ]
                 [ HH.div
@@ -137,23 +137,22 @@ render state =
                       ]
                       [ HH.text if state.codeTranslucent then "▢" else "▣" ]
                     else HH.text ""
+                -- Info section (collapsible, inside toolbar)
+                , if state.showInfo
+                    then HH.div
+                      [ HP.classes [ HH.ClassName "example-fullscreen__info-section" ] ]
+                      [ HH.div
+                          [ HP.classes [ HH.ClassName "example-fullscreen__info-label" ] ]
+                          [ HH.text "About" ]
+                      , HH.p
+                          [ HP.classes [ HH.ClassName "example-fullscreen__description" ] ]
+                          [ HH.text example.description ]
+                      , HH.p
+                          [ HP.classes [ HH.ClassName "example-fullscreen__about" ] ]
+                          [ HH.text example.about ]
+                      ]
+                    else HH.text ""
                 ]
-
-            , -- Floating info panel (bottom-left, conditionally visible)
-              if state.showInfo
-                then HH.div
-                  [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--bottom-left", HH.ClassName "floating-panel--medium", HH.ClassName "example-fullscreen__info" ] ]
-                  [ HH.div
-                      [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
-                      [ HH.text "About This Example" ]
-                  , HH.p
-                      [ HP.classes [ HH.ClassName "example-fullscreen__description" ] ]
-                      [ HH.text example.description ]
-                  , HH.p
-                      [ HP.classes [ HH.ClassName "example-fullscreen__about" ] ]
-                      [ HH.text example.about ]
-                  ]
-                else HH.text ""
 
             , -- Floating code panel (right side, conditionally visible)
               if state.showCode

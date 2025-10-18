@@ -20290,12 +20290,12 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 206, column 9 - line 217, column 16): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 205, column 9 - line 216, column 16): " + [result.constructor.name]);
               });
             });
           }
           ;
-          throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 200, column 5 - line 217, column 16): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 199, column 5 - line 216, column 16): " + [v1.constructor.name]);
         });
       }
       ;
@@ -20365,7 +20365,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 194, column 16 - line 242, column 41): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 193, column 16 - line 241, column 41): " + [v.constructor.name]);
     };
   };
   var _visualization = /* @__PURE__ */ (function() {
@@ -20430,13 +20430,13 @@
           }
           ;
           return text5("");
-        })()]), (function() {
+        })(), (function() {
           if (state3.showInfo) {
-            return div2([classes(["floating-panel", "floating-panel--bottom-left", "floating-panel--medium", "example-fullscreen__info"])])([div2([classes(["floating-panel__title"])])([text5("About This Example")]), p([classes(["example-fullscreen__description"])])([text5(v.value0.description)]), p([classes(["example-fullscreen__about"])])([text5(v.value0.about)])]);
+            return div2([classes(["example-fullscreen__info-section"])])([div2([classes(["example-fullscreen__info-label"])])([text5("About")]), p([classes(["example-fullscreen__description"])])([text5(v.value0.description)]), p([classes(["example-fullscreen__about"])])([text5(v.value0.about)])]);
           }
           ;
           return text5("");
-        })(), (function() {
+        })()]), (function() {
           if (state3.showCode) {
             if (state3.code instanceof Just) {
               return div2([classes(append13(["floating-panel", "floating-panel--top-right", "example-fullscreen__code"])((function() {
@@ -20456,14 +20456,14 @@
               return text5("");
             }
             ;
-            throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 160, column 22 - line 188, column 38): " + [state3.code.constructor.name]);
+            throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 159, column 22 - line 187, column 38): " + [state3.code.constructor.name]);
           }
           ;
           return text5("");
         })()])]);
       }
       ;
-      throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 78, column 3 - line 191, column 10): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 78, column 3 - line 190, column 10): " + [v.constructor.name]);
     };
   };
   var component4 = function(dictMonadAff) {

@@ -800,21 +800,32 @@
   color: var(--color-dark);
 }
 
-/* Info panel */
-.example-fullscreen__info {
-  /* Uses floating-panel classes */
+/* Info section (inside toolbar) */
+.example-fullscreen__info-section {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
+.example-fullscreen__info-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-sm);
 }
 
 .example-fullscreen__description {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.5;
   color: var(--color-text);
-  margin: 0 0 var(--spacing-md) 0;
+  margin: 0 0 var(--spacing-sm) 0;
   font-style: italic;
 }
 
 .example-fullscreen__about {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.6;
   color: var(--color-text);
   margin: 0;
@@ -827,7 +838,6 @@
   max-width: 800px;
   max-height: calc(100vh - 2 * var(--spacing-md));
   background-color: rgba(255, 255, 255, 0.95);
-  color: var(--color-text);
   box-shadow: var(--shadow-lg);
 }
 
@@ -836,11 +846,12 @@
   border-bottom: 1px solid var(--color-border);
   padding-bottom: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
+  opacity: 1;  /* Title always solid */
 }
 
 .example-fullscreen__code pre {
   margin: 0;
-  background: transparent;
+  background: transparent !important;  /* Override Prism background */
   overflow: auto;
   max-height: calc(100vh - 8rem);
 }
@@ -848,10 +859,17 @@
 .example-fullscreen__code code {
   font-size: 0.875rem;
   line-height: 1.6;
-  color: var(--color-text);
+  background: transparent !important;  /* Override Prism background */
 }
 
-/* Translucent variant - light translucent */
+/* Ensure syntax highlighting stays opaque */
+.example-fullscreen__code code,
+.example-fullscreen__code code *,
+.example-fullscreen__code .token {
+  opacity: 1 !important;
+}
+
+/* Translucent variant - light translucent background only */
 .example-fullscreen__code--translucent {
   background-color: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(12px);
