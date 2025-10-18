@@ -1,0 +1,135 @@
+/*
+ * Spago-Specific Styles
+ *
+ * Uses shared fullscreen.css as foundation
+ * Adds only Spago-specific customizations
+ */
+
+/*
+ * Backwards compatibility: Apply shared classes to Spago-specific names
+ * This allows old code using only Spago classes to still work
+ */
+.spago-page-wrapper {
+  /* Inherits from .fullscreen-page-wrapper */
+}
+
+.spago-fullscreen {
+  /* Inherits from .fullscreen-container */
+}
+
+.spago-viz-container {
+  /* Inherits from .fullscreen-viz */
+}
+
+.spago-controls-panel {
+  /* Inherits from .floating-panel + modifiers */
+  width: 280px;
+}
+
+.spago-forces-panel {
+  /* Inherits from .floating-panel + modifiers */
+  width: 340px;
+}
+
+.scaling-slider {
+  /* Inherits from .range-slider */
+}
+
+/* Sim State Info - Spago-specific */
+.spago-sim-state {
+  background-color: var(--color-light);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  font-size: 0.7rem;
+}
+
+.spago-sim-state p {
+  margin: 2px 0;
+  color: var(--color-text-light);
+  line-height: 1.4;
+}
+
+/* Sim Controls - Spago-specific */
+.spago-sim-controls {
+  margin-top: var(--spacing-md);
+}
+
+/* Force Table Styles - Spago-specific */
+.spago-forces-table h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-md);
+  color: var(--color-dark);
+}
+
+.spago-forces-table table {
+  width: 100%;
+  font-size: 0.875rem;
+}
+
+.spago-forces-table th,
+.spago-forces-table td {
+  padding: var(--spacing-sm);
+  text-align: left;
+}
+
+.spago-forces-table th {
+  font-weight: 600;
+  color: var(--color-dark);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.spago-forces-table tr:hover {
+  background-color: var(--color-light);
+}
+
+/* Responsive - forces panel height adjustment */
+@media (max-width: 1024px) {
+  .spago-forces-panel {
+    max-height: 250px;
+  }
+}
+
+/* Scene-specific styles */
+.spago-viz-container.cluster .node.package {
+  fill: var(--color-primary);
+  stroke: var(--color-dark);
+  stroke-width: 2px;
+}
+
+.spago-viz-container.cluster .node.module {
+  fill: var(--color-secondary);
+  stroke: none;
+}
+
+.spago-viz-container.graph .node {
+  fill: var(--color-accent);
+  stroke: white;
+  stroke-width: 2px;
+}
+
+.spago-viz-container.tree .node {
+  fill: var(--color-primary);
+  stroke: var(--color-secondary);
+  stroke-width: 2px;
+}
+
+.spago-viz-container.tree .link {
+  stroke: var(--color-primary);
+  stroke-opacity: 0.4;
+}
+
+/* Print Styles - Hide Panels */
+@media print {
+  .spago-controls-panel,
+  .spago-forces-panel {
+    display: none;
+  }
+
+  .spago-viz-container {
+    position: static;
+    width: 100%;
+    height: auto;
+  }
+}

@@ -25,10 +25,9 @@ function findPursFiles(dir, fileList = []) {
 function extractSnippets(filePath) {
   const content = fs.readFileSync(filePath, 'utf8');
   const lines = content.split('\n');
-  const snippets = {};
+  const snippets = [];
 
   let inSnippet = false;
-  let currentSnippetName = null;
   let snippetLines = [];
 
   for (let i = 0; i < lines.length; i++) {
@@ -41,23 +40,17 @@ function extractSnippets(filePath) {
     }
 
     if (line.includes('Snippet_End')) {
-      if (currentSnippetName && snippetLines.length > 0) {
-        snippets[currentSnippetName] = snippetLines.join('\n') + '\n';
+      if (snippetLines.length > 0) {
+        snippets.push(snippetLines.join('\n') + '\n');
       }
       inSnippet = false;
-      currentSnippetName = null;
       snippetLines = [];
       continue;
     }
 
     if (inSnippet) {
-      if (line.includes('Name:')) {
-        // Extract name from line like "-- Name: TreeDraw"
-        const match = line.match(/Name:\s*(\w+)/);
-        if (match) {
-          currentSnippetName = match[1];
-        }
-      } else {
+      // Skip the Name: line if present, just collect the code
+      if (!line.includes('Name:')) {
         snippetLines.push(line);
       }
     }
@@ -84,15 +77,22 @@ function main() {
   let totalSnippets = 0;
   pursFiles.forEach(file => {
     const snippets = extractSnippets(file);
-    const snippetCount = Object.keys(snippets).length;
+    const snippetCount = snippets.length;
 
     if (snippetCount > 0) {
+      // Get the base filename without extension
+      const fileName = path.basename(file, '.purs');
       console.log(`${file}: ${snippetCount} snippet(s)`);
 
-      Object.entries(snippets).forEach(([name, content]) => {
-        const outputPath = path.join(outputDir, name);
+      snippets.forEach((content, index) => {
+        // Generate numbered filename: ThreeLittleCircles-1.purs, ThreeLittleCircles-2.purs, etc.
+        const snippetNumber = index + 1;
+        const outputFileName = snippetCount === 1
+          ? `${fileName}.purs`
+          : `${fileName}-${snippetNumber}.purs`;
+        const outputPath = path.join(outputDir, outputFileName);
         fs.writeFileSync(outputPath, content, 'utf8');
-        console.log(`  - ${name}`);
+        console.log(`  - ${outputFileName}`);
         totalSnippets++;
       });
     }

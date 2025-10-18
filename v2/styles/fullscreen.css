@@ -1,0 +1,335 @@
+/*
+ * Full-Screen Visualization Layout System
+ *
+ * Reusable CSS patterns for immersive, full-viewport visualizations
+ * with floating control panels. Based on the Spago example design.
+ */
+
+/* ========================================
+   CORE LAYOUT
+   ======================================== */
+
+/* Page Wrapper - Full Screen */
+.fullscreen-page-wrapper {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+/* Full-Screen Container */
+.fullscreen-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #fafafa;
+}
+
+/* Main Visualization Container - Full Screen */
+.fullscreen-viz {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Ensure svg-container class exists for D3 to attach */
+.svg-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* SVG should fill container */
+.fullscreen-viz svg,
+.svg-container svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ========================================
+   FLOATING PANELS
+   ======================================== */
+
+/* Base floating panel style */
+.floating-panel {
+  position: fixed;
+  background: white;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacing-md);
+  overflow-y: auto;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.92);
+}
+
+/* Panel Positioning Variants */
+.floating-panel--top-left {
+  top: var(--spacing-md);
+  left: var(--spacing-md);
+}
+
+.floating-panel--top-right {
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+}
+
+.floating-panel--bottom-left {
+  bottom: var(--spacing-md);
+  left: var(--spacing-md);
+}
+
+.floating-panel--bottom-right {
+  bottom: var(--spacing-md);
+  right: var(--spacing-md);
+}
+
+.floating-panel--top-center {
+  top: var(--spacing-md);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.floating-panel--bottom-center {
+  bottom: var(--spacing-md);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* Panel Size Variants */
+.floating-panel--small {
+  width: 240px;
+  max-height: calc(100vh - 2 * var(--spacing-md));
+}
+
+.floating-panel--medium {
+  width: 320px;
+  max-height: calc(100vh - 2 * var(--spacing-md));
+}
+
+.floating-panel--large {
+  width: 420px;
+  max-height: calc(100vh - 2 * var(--spacing-md));
+}
+
+/* ========================================
+   PANEL CONTENT STYLES
+   ======================================== */
+
+/* Panel Headers */
+.floating-panel__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--color-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+.floating-panel h2,
+.floating-panel h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 var(--spacing-sm) 0;
+  color: var(--color-dark);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+}
+
+/* Control Groups */
+.control-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.control-group:last-child {
+  margin-bottom: 0;
+}
+
+.control-group h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin: var(--spacing-md) 0 var(--spacing-xs) 0;
+  color: var(--color-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+}
+
+/* Info boxes within panels */
+.panel-info-box {
+  background-color: var(--color-light);
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
+  font-size: 0.7rem;
+}
+
+.panel-info-box p {
+  margin: 2px 0;
+  color: var(--color-text-light);
+  line-height: 1.4;
+}
+
+/* ========================================
+   FORM CONTROLS
+   ======================================== */
+
+/* Range Sliders */
+.range-slider {
+  width: 100%;
+  margin: var(--spacing-sm) 0;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  outline: none;
+  opacity: 0.8;
+  transition: opacity var(--transition-fast);
+}
+
+.range-slider:hover {
+  opacity: 1;
+}
+
+.range-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.range-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  cursor: pointer;
+  border: none;
+  transition: background var(--transition-fast);
+}
+
+.range-slider::-webkit-slider-thumb:hover {
+  background: var(--color-secondary);
+}
+
+.range-slider::-moz-range-thumb:hover {
+  background: var(--color-secondary);
+}
+
+/* ========================================
+   SCROLLBAR STYLING
+   ======================================== */
+
+.floating-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.floating-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.floating-panel::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+}
+
+.floating-panel::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-light);
+}
+
+/* ========================================
+   VISUALIZATION ELEMENT STYLES
+   ======================================== */
+
+.fullscreen-viz .node {
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.fullscreen-viz .node:hover {
+  opacity: 0.8;
+}
+
+.fullscreen-viz .link {
+  stroke: #999;
+  stroke-opacity: 0.6;
+  stroke-width: 1.5px;
+}
+
+.fullscreen-viz .label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  fill: var(--color-text);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ========================================
+   RESPONSIVE ADJUSTMENTS
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .floating-panel--medium {
+    width: 280px;
+  }
+
+  .floating-panel--large {
+    width: 320px;
+  }
+}
+
+@media (max-width: 768px) {
+  .floating-panel--top-left,
+  .floating-panel--top-right,
+  .floating-panel--top-center {
+    width: calc(100vw - 2 * var(--spacing-lg));
+    max-height: 40vh;
+    top: var(--spacing-sm);
+    left: var(--spacing-sm);
+    right: auto;
+    transform: none;
+  }
+
+  .floating-panel--bottom-left,
+  .floating-panel--bottom-right,
+  .floating-panel--bottom-center {
+    width: calc(100vw - 2 * var(--spacing-lg));
+    max-height: 30vh;
+    bottom: var(--spacing-sm);
+    left: var(--spacing-sm);
+    right: auto;
+    transform: none;
+  }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
+@media print {
+  .floating-panel {
+    display: none;
+  }
+
+  .fullscreen-viz,
+  .svg-container {
+    position: static;
+    width: 100%;
+    height: auto;
+  }
+}
