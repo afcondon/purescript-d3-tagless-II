@@ -645,6 +645,94 @@
   }
 }
 
+/* Fullscreen button in headers */
+.split-pane__fullscreen-button {
+  padding: var(--spacing-xs) var(--spacing-md);
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-left: var(--spacing-sm);
+}
+
+.split-pane__fullscreen-button:hover {
+  background-color: var(--color-secondary);
+}
+
+/* ============================================
+   Split Pane Fullscreen Mode
+   ============================================ */
+
+.split-pane-fullscreen {
+  /* Uses fullscreen-container from fullscreen.css */
+}
+
+.split-pane-fullscreen__viz {
+  /* Uses fullscreen-viz from fullscreen.css */
+}
+
+.split-pane-fullscreen__toolbar {
+  /* Uses floating-panel classes from fullscreen.css */
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  width: auto;
+  min-width: 140px;
+}
+
+.split-pane-fullscreen__toolbar .btn {
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.split-pane-fullscreen__toolbar .btn--secondary {
+  background-color: white;
+  color: var(--color-dark);
+  border: 1px solid var(--color-border);
+}
+
+.split-pane-fullscreen__toolbar .btn--secondary:hover {
+  background-color: var(--color-light);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.split-pane-fullscreen__code {
+  /* Uses floating-panel classes from fullscreen.css */
+  max-height: calc(100vh - 2 * var(--spacing-md));
+  background-color: #2d2d2d; /* Match Prism tomorrow theme */
+  color: #ccc;
+}
+
+.split-pane-fullscreen__code .floating-panel__title {
+  color: #ccc;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.split-pane-fullscreen__code pre {
+  margin: 0;
+  background: transparent;
+  overflow: auto;
+  max-height: calc(100vh - 8rem);
+}
+
+.split-pane-fullscreen__code code {
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
 /* ============================================
    Example Detail Page
    ============================================ */

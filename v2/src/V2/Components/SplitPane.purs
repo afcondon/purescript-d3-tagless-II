@@ -32,13 +32,15 @@ type Slots =
   ( visualization :: forall q. H.Slot q Void Unit
   )
 
--- | State tracks which tab is active (mobile) and code reference
+-- | State tracks which tab is active (mobile), fullscreen mode, and code reference
 type State =
   { code :: String
   , language :: String
   , visualizationUrl :: Maybe String
   , exampleId :: String
   , activeTab :: Tab
+  , isFullscreen :: Boolean
+  , showCode :: Boolean  -- In fullscreen mode, whether code panel is visible
   }
 
 -- | Tabs for mobile view
@@ -53,6 +55,8 @@ data Action
   = Initialize
   | SetTab Tab
   | HighlightCode
+  | ToggleFullscreen
+  | ToggleCodePanel
 
 -- | Component definition
 component :: forall q o m. MonadAff m => H.Component q Input o m
@@ -72,10 +76,68 @@ initialState input =
   , visualizationUrl: input.visualizationUrl
   , exampleId: input.exampleId
   , activeTab: CodeTab
+  , isFullscreen: false
+  , showCode: false
   }
 
 render :: forall m. MonadAff m => State -> H.ComponentHTML Action Slots m
 render state =
+  if state.isFullscreen
+    then renderFullscreen state
+    else renderSplitView state
+
+-- | Render full-screen mode
+renderFullscreen :: forall m. MonadAff m => State -> H.ComponentHTML Action Slots m
+renderFullscreen state =
+  HH.div
+    [ HP.classes [ HH.ClassName "fullscreen-container", HH.ClassName "split-pane-fullscreen" ] ]
+    [ -- Full-screen visualization
+      HH.div
+        [ HP.classes [ HH.ClassName "fullscreen-viz", HH.ClassName "split-pane-fullscreen__viz" ] ]
+        [ HH.slot_ _visualization unit Visualization.component
+            { exampleId: state.exampleId }
+        ]
+
+    , -- Floating toolbar (top-right)
+      HH.div
+        [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-right", HH.ClassName "floating-panel--small", HH.ClassName "split-pane-fullscreen__toolbar" ] ]
+        [ HH.button
+            [ HP.classes [ HH.ClassName "btn", HH.ClassName "btn--secondary" ]
+            , HE.onClick \_ -> ToggleCodePanel
+            , HP.title if state.showCode then "Hide Code" else "Show Code"
+            ]
+            [ HH.text if state.showCode then "Hide Code" else "Show Code" ]
+        , HH.button
+            [ HP.classes [ HH.ClassName "btn", HH.ClassName "btn--secondary" ]
+            , HE.onClick \_ -> ToggleFullscreen
+            , HP.title "Exit Fullscreen"
+            ]
+            [ HH.text "Exit Fullscreen" ]
+        ]
+
+    , -- Floating code panel (left side, conditionally visible)
+      if state.showCode
+        then
+          HH.div
+            [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left", HH.ClassName "floating-panel--large", HH.ClassName "split-pane-fullscreen__code" ] ]
+            [ HH.div
+                [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
+                [ HH.text "PureScript Code" ]
+            , HH.pre
+                [ HP.classes [ HH.ClassName "line-numbers" ] ]
+                [ HH.code
+                    [ HP.classes [ HH.ClassName ("language-" <> state.language) ]
+                    , HP.id ("code-fullscreen-" <> state.exampleId)
+                    ]
+                    [ HH.text state.code ]
+                ]
+            ]
+        else HH.text ""
+    ]
+
+-- | Render standard split-pane view
+renderSplitView :: forall m. MonadAff m => State -> H.ComponentHTML Action Slots m
+renderSplitView state =
   HH.div
     [ HP.classes [ HH.ClassName "split-pane" ] ]
     [ -- Mobile tabs
@@ -116,6 +178,12 @@ render state =
                 [ HP.classes [ HH.ClassName "split-pane__code-header" ] ]
                 [ HH.h3_ [ HH.text "PureScript Code" ]
                 , HH.button
+                    [ HP.classes [ HH.ClassName "split-pane__fullscreen-button" ]
+                    , HE.onClick \_ -> ToggleFullscreen
+                    , HP.title "Enter Fullscreen"
+                    ]
+                    [ HH.text "⛶ Fullscreen" ]
+                , HH.button
                     [ HP.classes [ HH.ClassName "split-pane__copy-button" ]
                     , HP.title "Copy to clipboard"
                     ]
@@ -141,7 +209,14 @@ render state =
             ]
             [ HH.div
                 [ HP.classes [ HH.ClassName "split-pane__viz-header" ] ]
-                [ HH.h3_ [ HH.text "Visualization" ] ]
+                [ HH.h3_ [ HH.text "Visualization" ]
+                , HH.button
+                    [ HP.classes [ HH.ClassName "split-pane__fullscreen-button" ]
+                    , HE.onClick \_ -> ToggleFullscreen
+                    , HP.title "Enter Fullscreen"
+                    ]
+                    [ HH.text "⛶" ]
+                ]
             , HH.div
                 [ HP.classes [ HH.ClassName "split-pane__viz-content" ] ]
                 [ HH.slot_ _visualization unit Visualization.component
@@ -160,6 +235,18 @@ handleAction = case _ of
   SetTab tab -> do
     H.modify_ _ { activeTab = tab }
 
+  ToggleFullscreen -> do
+    state <- H.get
+    H.modify_ _ { isFullscreen = not state.isFullscreen }
+    -- Re-highlight code in new mode
+    handleAction HighlightCode
+
+  ToggleCodePanel -> do
+    state <- H.get
+    H.modify_ _ { showCode = not state.showCode }
+    -- Highlight code when showing panel
+    when state.showCode $ handleAction HighlightCode
+
   HighlightCode -> do
     state <- H.get
     -- Call Prism.highlightAll() via FFI
@@ -168,8 +255,11 @@ handleAction = case _ of
       htmlDoc <- document win
       let doc = toDocument htmlDoc
       let node = toNonElementParentNode doc
-      maybeEl <- getElementById ("code-" <> state.exampleId) node
-      traverse_ highlightElement maybeEl
+      -- Try both code element IDs (normal and fullscreen)
+      maybeEl1 <- getElementById ("code-" <> state.exampleId) node
+      traverse_ highlightElement maybeEl1
+      maybeEl2 <- getElementById ("code-fullscreen-" <> state.exampleId) node
+      traverse_ highlightElement maybeEl2
 
 -- | FFI function to trigger Prism highlighting
 foreign import highlightElement :: forall a. a -> Effect Unit
