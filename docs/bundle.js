@@ -287,11 +287,11 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq9) {
+    return function(eq8) {
       return function(gt) {
         return function(x18) {
           return function(y16) {
-            return x18 < y16 ? lt : x18 === y16 ? eq9 : gt;
+            return x18 < y16 ? lt : x18 === y16 ? eq8 : gt;
           };
         };
       };
@@ -843,13 +843,13 @@
     return v.value0;
   };
   var eqTuple = function(dictEq) {
-    var eq9 = eq(dictEq);
+    var eq8 = eq(dictEq);
     return function(dictEq1) {
       var eq16 = eq(dictEq1);
       return {
         eq: function(x18) {
           return function(y16) {
-            return eq9(x18.value0)(y16.value0) && eq16(x18.value1)(y16.value1);
+            return eq8(x18.value0)(y16.value0) && eq16(x18.value1)(y16.value1);
           };
         }
       };
@@ -999,7 +999,7 @@
     };
   };
   var eqMaybe = function(dictEq) {
-    var eq9 = eq(dictEq);
+    var eq8 = eq(dictEq);
     return {
       eq: function(x18) {
         return function(y16) {
@@ -1008,7 +1008,7 @@
           }
           ;
           if (x18 instanceof Just && y16 instanceof Just) {
-            return eq9(x18.value0)(y16.value0);
+            return eq8(x18.value0)(y16.value0);
           }
           ;
           return false;
@@ -9766,11 +9766,11 @@
     return Interpreter3;
   })();
   var Application = /* @__PURE__ */ (function() {
-    function Application2() {
+    function Application3() {
     }
     ;
-    Application2.value = new Application2();
-    return Application2;
+    Application3.value = new Application3();
+    return Application3;
   })();
   var eqCategory = {
     eq: function(x18) {
@@ -18130,10 +18130,10 @@
     return new Tuple(toNumber(w), toNumber(h));
   };
   var equalSnd = function(dictEq) {
-    var eq9 = eq(dictEq);
+    var eq8 = eq(dictEq);
     return function(a2) {
       return function(b2) {
-        return eq9(snd(a2))(snd(b2));
+        return eq8(snd(a2))(snd(b2));
       };
     };
   };
@@ -21403,6 +21403,13 @@
     Interpreter3.value = new Interpreter3();
     return Interpreter3;
   })();
+  var Application2 = /* @__PURE__ */ (function() {
+    function Application3() {
+    }
+    ;
+    Application3.value = new Application3();
+    return Application3;
+  })();
   var eqNodeType = {
     eq: function(x18) {
       return function(y16) {
@@ -22721,7 +22728,6 @@
   // output/PSD3.Apps.Navigation.Draw/index.js
   var classed11 = /* @__PURE__ */ classed(toAttrString);
   var show17 = /* @__PURE__ */ show(showNumber);
-  var eq6 = /* @__PURE__ */ eq(eqNodeType);
   var show18 = /* @__PURE__ */ show(showElement);
   var radius6 = /* @__PURE__ */ radius(toAttrNumberFn);
   var fill11 = /* @__PURE__ */ fill(toAttrStringFn);
@@ -22737,15 +22743,15 @@
   var x22 = /* @__PURE__ */ x2(toAttrNumberFn);
   var y22 = /* @__PURE__ */ y2(toAttrNumberFn);
   var link_2 = {
-    source: function($84) {
+    source: function($91) {
       return (function(v) {
         return v.source;
-      })(unboxD3SimLink($84));
+      })(unboxD3SimLink($91));
     },
-    target: function($85) {
+    target: function($92) {
       return (function(v) {
         return v.target;
-      })(unboxD3SimLink($85));
+      })(unboxD3SimLink($92));
     }
   };
   var initialize2 = function(dictBind) {
@@ -22793,35 +22799,35 @@
     };
   };
   var datum_ = {
-    id: function($86) {
+    id: function($93) {
       return (function(v) {
         return v.id;
-      })(unboxD3SimNode($86));
+      })(unboxD3SimNode($93));
     },
-    label: function($87) {
+    label: function($94) {
       return (function(v) {
         return v.label;
-      })(unboxD3SimNode($87));
+      })(unboxD3SimNode($94));
     },
-    nodeType: function($88) {
+    nodeType: function($95) {
       return (function(v) {
         return v.nodeType;
-      })(unboxD3SimNode($88));
+      })(unboxD3SimNode($95));
     },
-    category: function($89) {
+    category: function($96) {
       return (function(v) {
         return v.category;
-      })(unboxD3SimNode($89));
+      })(unboxD3SimNode($96));
     },
-    x: function($90) {
+    x: function($97) {
       return (function(v) {
         return v.x;
-      })(unboxD3SimNode($90));
+      })(unboxD3SimNode($97));
     },
-    y: function($91) {
+    y: function($98) {
       return (function(v) {
         return v.y;
-      })(unboxD3SimNode($91));
+      })(unboxD3SimNode($98));
     },
     translateNode: function(d7) {
       var node = unboxD3SimNode(d7);
@@ -22829,19 +22835,79 @@
     },
     nodeRadius: function(d7) {
       var node = unboxD3SimNode(d7);
-      if (eq6(node.nodeType)(node.nodeType)) {
+      if (node.nodeType instanceof Center) {
+        return 60;
+      }
+      ;
+      if (node.nodeType instanceof Section) {
         return 50;
       }
       ;
-      return 35;
+      if (node.nodeType instanceof Feature) {
+        return 30;
+      }
+      ;
+      if (node.nodeType instanceof Example2) {
+        return 35;
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.Apps.Navigation.Draw (line 48, column 7 - line 52, column 24): " + [node.nodeType.constructor.name]);
     },
     nodeColor: function(d7) {
       var node = unboxD3SimNode(d7);
-      return "#3b82f6";
+      if (node.nodeType instanceof Center) {
+        return "#1e40af";
+      }
+      ;
+      if (node.nodeType instanceof Section) {
+        return "#3b82f6";
+      }
+      ;
+      if (node.nodeType instanceof Feature) {
+        return "#ec4899";
+      }
+      ;
+      if (node.nodeType instanceof Example2) {
+        if (node.category instanceof Just && node.category.value0 instanceof BasicChart2) {
+          return "#3b82f6";
+        }
+        ;
+        if (node.category instanceof Just && node.category.value0 instanceof AdvancedLayout2) {
+          return "#8b5cf6";
+        }
+        ;
+        if (node.category instanceof Just && node.category.value0 instanceof Interactive3) {
+          return "#10b981";
+        }
+        ;
+        if (node.category instanceof Just && node.category.value0 instanceof Interpreter2) {
+          return "#f59e0b";
+        }
+        ;
+        if (node.category instanceof Just && node.category.value0 instanceof Application2) {
+          return "#ef4444";
+        }
+        ;
+        if (node.category instanceof Nothing) {
+          return "#10b981";
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.Apps.Navigation.Draw (line 60, column 20 - line 66, column 31): " + [node.category.constructor.name]);
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.Apps.Navigation.Draw (line 56, column 7 - line 66, column 31): " + [node.nodeType.constructor.name]);
     },
     nodeFontSize: function(d7) {
       var node = unboxD3SimNode(d7);
-      return 14;
+      if (node.nodeType instanceof Center) {
+        return 16;
+      }
+      ;
+      if (node.nodeType instanceof Section) {
+        return 14;
+      }
+      ;
+      return 11;
     }
   };
   var getVizEventFromClick = function(e) {
@@ -22898,22 +22964,22 @@
                                                       return discard112(setNodesFromSelection2(mergedNodeSelection))(function() {
                                                         return discard112(setLinksFromSelection2(mergedLinksSelection)($$const(true)))(function() {
                                                           return discard112(addTickFunction2("nodes")(new Step3(mergedNodeSelection, [transform$prime(datum_.translateNode)])))(function() {
-                                                            return discard112(addTickFunction2("links")(new Step3(mergedLinksSelection, [x12(function($92) {
+                                                            return discard112(addTickFunction2("links")(new Step3(mergedLinksSelection, [x12(function($99) {
                                                               return (function(v3) {
                                                                 return v3.x;
-                                                              })(link_2.source($92));
-                                                            }), y12(function($93) {
+                                                              })(link_2.source($99));
+                                                            }), y12(function($100) {
                                                               return (function(v3) {
                                                                 return v3.y;
-                                                              })(link_2.source($93));
-                                                            }), x22(function($94) {
+                                                              })(link_2.source($100));
+                                                            }), x22(function($101) {
                                                               return (function(v3) {
                                                                 return v3.x;
-                                                              })(link_2.target($94));
-                                                            }), y22(function($95) {
+                                                              })(link_2.target($101));
+                                                            }), y22(function($102) {
                                                               return (function(v3) {
                                                                 return v3.y;
-                                                              })(link_2.target($95));
+                                                              })(link_2.target($102));
                                                             })])))(function() {
                                                               return pure25(unit);
                                                             });
@@ -23024,7 +23090,7 @@
   })();
 
   // output/PSD3.Apps.Navigation.State/index.js
-  var eq7 = /* @__PURE__ */ eq(eqNodeType);
+  var eq6 = /* @__PURE__ */ eq(eqNodeType);
   var bind9 = /* @__PURE__ */ bind(bindArray);
   var member3 = /* @__PURE__ */ member2(ordString);
   var elem3 = /* @__PURE__ */ elem2(eqString);
@@ -23044,7 +23110,7 @@
   var visibleNodes = function(expanded) {
     return function(allNodes3) {
       var sectionNodes = filter2(function(v) {
-        return eq7(v.nodeType)(Section.value);
+        return eq6(v.nodeType)(Section.value);
       })(allNodes3);
       var expandedChildren = bind9(allNodes3)(function(v) {
         var $33 = member3(v.id)(expanded);
@@ -25852,7 +25918,7 @@
   var type_19 = /* @__PURE__ */ type_17(isPropInputType);
   var value15 = /* @__PURE__ */ value12(isPropString);
   var show21 = /* @__PURE__ */ show(showNumber);
-  var eq8 = /* @__PURE__ */ eq(eqForceStatus);
+  var eq7 = /* @__PURE__ */ eq(eqForceStatus);
   var map45 = /* @__PURE__ */ map(functorArray);
   var toUnfoldable5 = /* @__PURE__ */ toUnfoldable(unfoldableArray);
   var _forceLibrary3 = /* @__PURE__ */ _forceLibrary(strongForget);
@@ -25872,7 +25938,7 @@
   var renderTableForces = function(state3) {
     var renderForceItem = function(v) {
       return div2([classes(["force-item", (function() {
-        var $20 = eq8(v.status)(ForceActive.value);
+        var $20 = eq7(v.status)(ForceActive.value);
         if ($20) {
           return "force-active";
         }

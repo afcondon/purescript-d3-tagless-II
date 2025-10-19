@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Attributes.Sugar (classed, cx, cy, fill, fontSize, radius, remove, strokeColor, strokeOpacity, strokeWidth, textAnchor, transform', viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, D3This_, Datum_, Element(..))
-import D3.Viz.Navigation.Model (NavigationRawModel)
+import D3.Viz.Navigation.Model (Category(..), NavigationRawModel, NodeType(..))
 import D3.Viz.Navigation.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.FFI (keyIsID_, simdrag)
 import D3.Selection (Behavior(..), DragBehavior(..))
@@ -46,17 +46,31 @@ datum_ = {
   , nodeRadius: \d -> do
       let node = unboxD3SimNode d
       case node.nodeType of
-        _ -> case node.nodeType of
-          _ | node.nodeType == node.nodeType -> 50.0  -- FIXME: proper pattern match
-          _ -> 35.0
+        Center -> 60.0
+        Section -> 50.0
+        Feature -> 30.0
+        Example -> 35.0
 
   , nodeColor: \d -> do
       let node = unboxD3SimNode d
-      "#3b82f6"  -- Default blue for now - FIXME: implement proper color logic
+      case node.nodeType of
+        Center -> "#1e40af"  -- dark blue
+        Section -> "#3b82f6" -- blue
+        Feature -> "#ec4899" -- pink
+        Example -> case node.category of
+          Just BasicChart -> "#3b82f6"      -- blue
+          Just AdvancedLayout -> "#8b5cf6" -- purple
+          Just Interactive -> "#10b981"     -- green
+          Just Interpreter -> "#f59e0b"     -- amber
+          Just Application -> "#ef4444"     -- red
+          Nothing -> "#10b981"              -- green default
 
   , nodeFontSize: \d -> do
       let node = unboxD3SimNode d
-      14.0  -- Default size - FIXME: implement size by type
+      case node.nodeType of
+        Center -> 16.0
+        Section -> 14.0
+        _ -> 11.0
 }
 
 -- | Initialize the SVG structure and return open selections
