@@ -24,6 +24,7 @@ Enhance code documentation throughout the codebase:
 - Add inline comments for complex FFI interactions
 - Document the relationship between capabilities and interpreters
 - Add usage examples in documentation comments
+- can we get the comments to appear on hover over each line of code or something? or attach 'i' icons to sections?
 
 ### 4. Replace Perl scripts with PureScript code for dependency extraction
 Create PureScript tooling to derive project dependencies for the Spago example:
@@ -67,3 +68,15 @@ The string interpreter could - maybe, in principle - emit D3 Javascript code
 - first cut could just be to overhaul the output a LOT for clarity, newlines, etc etc
 - secondly, we could try to make it as D3-ish as possible, at least to the point of pseudocode
 - stretch goal, multiple string interpreters, do echarts as well? Emit a succinct english paragraph describing how the visualisation is built
+
+### 11. Generating the site using PureScriptD3 
+- write a parser to take markdown to tree data and allow it to be displayed as either (1) text (2) tree layout (3) force layout
+
+### 12. Home page overhaul
+- use the above to make homepage from a markdown file
+- key elements: what, why, how, code, examples, apps, finally tagless
+- screen readers and those without javascript - ensure the main text appears and is navigable, explain what a sighted user would see and do on the site. stretch goal: think about sonic "visualisations"
+
+### 13. Further data visualizations beyond the basics
+1. https://blocks.roadtolarissa.com/emeeks/894ff63d02551badfc75536d77dcd49c
+2. https://setosa.io/simpsons/
