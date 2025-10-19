@@ -4,8 +4,8 @@ import Prelude
 
 import PSD3.Types (Route(..), ExampleId)
 import PSD3.Router (parseRoute, routeToHash)
-import PSD3.Components.Navigation as Navigation
-import PSD3.Components.Gallery as Gallery
+import PSD3.Component.Navigation as Navigation
+import PSD3.Component.Gallery as Gallery
 import PSD3.Pages.Home as Home
 import PSD3.Pages.ExampleDetail as ExampleDetail
 import PSD3.Pages.Spago as Spago

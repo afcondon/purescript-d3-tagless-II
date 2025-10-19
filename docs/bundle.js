@@ -9670,7 +9670,7 @@
   };
   var onValueInput = /* @__PURE__ */ addForeignPropHandler(input)("value")(readString2);
 
-  // output/V2.Types/index.js
+  // output/PSD3.Types/index.js
   var Home = /* @__PURE__ */ (function() {
     function Home2() {
     }
@@ -9800,7 +9800,7 @@
     }
   };
 
-  // output/V2.Data.Examples/index.js
+  // output/PSD3.Data.Examples/index.js
   var eq13 = /* @__PURE__ */ eq(eqCategory);
   var allExamples = /* @__PURE__ */ (function() {
     return [{
@@ -10003,7 +10003,7 @@
     })(allExamples);
   };
 
-  // output/V2.Components.Gallery/index.js
+  // output/PSD3.Components.Gallery/index.js
   var mapFlipped2 = /* @__PURE__ */ mapFlipped(functorArray);
   var modify_3 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var eq2 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqCategory));
@@ -10085,7 +10085,7 @@
       return raise(v.value0);
     }
     ;
-    throw new Error("Failed pattern match at V2.Components.Gallery (line 161, column 16 - line 170, column 22): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Components.Gallery (line 161, column 16 - line 170, column 22): " + [v.constructor.name]);
   };
   var filteredExamples = function(state3) {
     if (state3.filterCategory instanceof Nothing) {
@@ -10096,7 +10096,7 @@
       return getExamplesByCategory(state3.filterCategory.value0);
     }
     ;
-    throw new Error("Failed pattern match at V2.Components.Gallery (line 117, column 3 - line 119, column 42): " + [state3.filterCategory.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Components.Gallery (line 117, column 3 - line 119, column 42): " + [state3.filterCategory.constructor.name]);
   };
   var categoryButtonClasses = function(buttonCat) {
     return function(selectedCat) {
@@ -10299,7 +10299,7 @@
     };
   };
 
-  // output/V2.Router/index.js
+  // output/PSD3.Router/index.js
   var routeToHash = function(v) {
     if (v instanceof Home) {
       return "#/";
@@ -10325,7 +10325,7 @@
       return "#/not-found";
     }
     ;
-    throw new Error("Failed pattern match at V2.Router (line 35, column 1 - line 35, column 31): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Router (line 35, column 1 - line 35, column 31): " + [v.constructor.name]);
   };
   var parseRoute = function(hash2) {
     var path3 = (function() {
@@ -10368,7 +10368,7 @@
         return Gallery.value;
       }
       ;
-      throw new Error("Failed pattern match at V2.Router (line 27, column 23 - line 29, column 25): " + [v1.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Router (line 27, column 23 - line 29, column 25): " + [v1.constructor.name]);
     }
     ;
     if (v instanceof Just && v.value0 === "spago") {
@@ -10382,7 +10382,7 @@
     return NotFound.value;
   };
 
-  // output/V2.Components.Navigation/index.js
+  // output/PSD3.Components.Navigation/index.js
   var append6 = /* @__PURE__ */ append(semigroupArray);
   var isActive = function(v) {
     return function(v1) {
@@ -10432,7 +10432,7 @@
     "eval": /* @__PURE__ */ mkEval(defaultEval)
   });
 
-  // output/V2.Pages.ExampleDetail/foreign.js
+  // output/PSD3.Pages.ExampleDetail/foreign.js
   function highlightElement(element3) {
     return function() {
       if (window.Prism) {
@@ -11344,7 +11344,7 @@
   // output/Affjax.Web/index.js
   var get3 = /* @__PURE__ */ get2(driver);
 
-  // output/V2.Components.Visualization/foreign.js
+  // output/PSD3.Components.Visualization/foreign.js
   function highlightElement2(element3) {
     return function() {
       if (typeof Prism !== "undefined" && Prism.highlightElement) {
@@ -19854,7 +19854,7 @@
     };
   };
 
-  // output/V2.Components.Visualization/index.js
+  // output/PSD3.Components.Visualization/index.js
   var bind15 = /* @__PURE__ */ bind(bindHalogenM);
   var get6 = /* @__PURE__ */ get(monadStateHalogenM);
   var draw8 = /* @__PURE__ */ draw4(bindD3M)(monadEffD3M)(d3TaglessD3M);
@@ -19903,7 +19903,7 @@
         return [];
       }
       ;
-      throw new Error("Failed pattern match at V2.Components.Visualization (line 89, column 7 - line 100, column 22): " + [state3.textOutput.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Components.Visualization (line 89, column 7 - line 100, column 22): " + [state3.textOutput.constructor.name]);
     })());
   };
   var initialState2 = function(input3) {
@@ -19997,7 +19997,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at V2.Components.Visualization (line 144, column 9 - line 148, column 22): " + [treeJSON.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Components.Visualization (line 144, column 9 - line 148, column 22): " + [treeJSON.constructor.name]);
             });
           }
           ;
@@ -20013,7 +20013,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at V2.Components.Visualization (line 152, column 9 - line 156, column 22): " + [treeJSON.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Components.Visualization (line 152, column 9 - line 156, column 22): " + [treeJSON.constructor.name]);
             });
           }
           ;
@@ -20029,7 +20029,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at V2.Components.Visualization (line 160, column 9 - line 164, column 22): " + [treeJSON.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Components.Visualization (line 160, column 9 - line 164, column 22): " + [treeJSON.constructor.name]);
             });
           }
           ;
@@ -20091,7 +20091,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at V2.Components.Visualization (line 195, column 9 - line 205, column 39): " + [treeJSON.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Components.Visualization (line 195, column 9 - line 205, column 39): " + [treeJSON.constructor.name]);
               })())(function() {
                 return pure15(unit);
               });
@@ -20119,11 +20119,11 @@
             return pure15(unit);
           }
           ;
-          throw new Error("Failed pattern match at V2.Components.Visualization (line 218, column 5 - line 228, column 27): " + [state3.textOutput.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Components.Visualization (line 218, column 5 - line 228, column 27): " + [state3.textOutput.constructor.name]);
         });
       }
       ;
-      throw new Error("Failed pattern match at V2.Components.Visualization (line 104, column 16 - line 228, column 27): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Components.Visualization (line 104, column 16 - line 228, column 27): " + [v.constructor.name]);
     };
   };
   var component3 = function(dictMonadAff) {
@@ -20140,7 +20140,7 @@
     });
   };
 
-  // output/V2.Data.CodeFiles/index.js
+  // output/PSD3.Data.CodeFiles/index.js
   var lookup7 = /* @__PURE__ */ lookup(ordString);
   var bind6 = /* @__PURE__ */ bind(bindMaybe);
   var pure16 = /* @__PURE__ */ pure(applicativeMaybe);
@@ -20156,7 +20156,7 @@
     });
   };
 
-  // output/V2.Pages.ExampleDetail/index.js
+  // output/PSD3.Pages.ExampleDetail/index.js
   var bind7 = /* @__PURE__ */ bind(bindHalogenM);
   var get7 = /* @__PURE__ */ get(monadStateHalogenM);
   var modify_6 = /* @__PURE__ */ modify_(monadStateHalogenM);
@@ -20299,12 +20299,12 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 205, column 9 - line 218, column 39): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Pages.ExampleDetail (line 205, column 9 - line 218, column 39): " + [result.constructor.name]);
               });
             });
           }
           ;
-          throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 199, column 5 - line 218, column 39): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Pages.ExampleDetail (line 199, column 5 - line 218, column 39): " + [v1.constructor.name]);
         });
       }
       ;
@@ -20375,7 +20375,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 193, column 16 - line 244, column 41): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Pages.ExampleDetail (line 193, column 16 - line 244, column 41): " + [v.constructor.name]);
     };
   };
   var _visualization = /* @__PURE__ */ (function() {
@@ -20466,14 +20466,14 @@
               return text5("");
             }
             ;
-            throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 159, column 22 - line 187, column 38): " + [state3.code.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Pages.ExampleDetail (line 159, column 22 - line 187, column 38): " + [state3.code.constructor.name]);
           }
           ;
           return text5("");
         })()])]);
       }
       ;
-      throw new Error("Failed pattern match at V2.Pages.ExampleDetail (line 78, column 3 - line 190, column 10): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Pages.ExampleDetail (line 78, column 3 - line 190, column 10): " + [v.constructor.name]);
     };
   };
   var component4 = function(dictMonadAff) {
@@ -20490,7 +20490,7 @@
     });
   };
 
-  // output/V2.Navigation.NavigationComponent/foreign.js
+  // output/PSD3.Apps.Navigation.NavigationComponent/foreign.js
   function setHash2(hash2) {
     return function() {
       window.location.hash = hash2;
@@ -22641,7 +22641,7 @@
     }
   };
 
-  // output/V2.Navigation.Actions/index.js
+  // output/PSD3.Apps.Navigation.Actions/index.js
   var NodeClick = /* @__PURE__ */ (function() {
     function NodeClick3(value0) {
       this.value0 = value0;
@@ -22718,7 +22718,7 @@
     return datum2;
   };
 
-  // output/V2.Navigation.Draw/index.js
+  // output/PSD3.Apps.Navigation.Draw/index.js
   var classed11 = /* @__PURE__ */ classed(toAttrString);
   var show17 = /* @__PURE__ */ show(showNumber);
   var eq6 = /* @__PURE__ */ eq(eqNodeType);
@@ -23013,7 +23013,7 @@
     };
   };
 
-  // output/V2.Navigation.Forces/index.js
+  // output/PSD3.Apps.Navigation.Forces/index.js
   var strength2 = /* @__PURE__ */ strength(toAttrNumber);
   var collisionRadius = function(d7) {
     var node = unboxD3SimNode(d7);
@@ -23023,7 +23023,7 @@
     return initialize(foldableArray)(functorArray)([createForce("charge")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-800), theta(toAttrNumber)(0.9), distanceMin(toAttrNumber)(1), distanceMax(toAttrNumber)(infinity)]), createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([strength2(0.5), x11(toAttrNumber)(0), y10(toAttrNumber)(0)]), createForce("collision")(new RegularForce(ForceCollide.value))(allNodes)([strength2(1), radius7(toAttrNumberFn)(collisionRadius)]), createLinkForce(Nothing.value)([strength2(0.5), distance(toAttrNumber)(150)])]);
   })();
 
-  // output/V2.Navigation.State/index.js
+  // output/PSD3.Apps.Navigation.State/index.js
   var eq7 = /* @__PURE__ */ eq(eqNodeType);
   var bind9 = /* @__PURE__ */ bind(bindArray);
   var member3 = /* @__PURE__ */ member2(ordString);
@@ -23059,7 +23059,7 @@
             return [];
           }
           ;
-          throw new Error("Failed pattern match at V2.Navigation.State (line 50, column 14 - line 52, column 24): " + [v.children.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Apps.Navigation.State (line 50, column 14 - line 52, column 24): " + [v.children.constructor.name]);
         }
         ;
         return [];
@@ -23095,7 +23095,7 @@
     return prop23($$Proxy.value)(dictStrong);
   };
 
-  // output/V2.Navigation.NavigationComponent/index.js
+  // output/PSD3.Apps.Navigation.NavigationComponent/index.js
   var liftEffect9 = /* @__PURE__ */ liftEffect(monadEffectEffect);
   var _openSelections2 = /* @__PURE__ */ _openSelections(strongForget);
   var _expandedNodes2 = /* @__PURE__ */ _expandedNodes(strongForget);
@@ -23165,7 +23165,7 @@
                 return pure25(unit);
               }
               ;
-              throw new Error("Failed pattern match at V2.Navigation.NavigationComponent (line 129, column 3 - line 136, column 25): " + [openSels.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Apps.Navigation.NavigationComponent (line 129, column 3 - line 136, column 25): " + [openSels.constructor.name]);
             });
           });
         });
@@ -23280,7 +23280,7 @@
         return liftEffect12(setHash2(v.value0));
       }
       ;
-      throw new Error("Failed pattern match at V2.Navigation.NavigationComponent (line 56, column 16 - line 112, column 29): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Apps.Navigation.NavigationComponent (line 56, column 16 - line 112, column 29): " + [v.constructor.name]);
     };
   };
   var component5 = function(dictMonadAff) {
@@ -23297,7 +23297,7 @@
     });
   };
 
-  // output/V2.Pages.HomeForceLayout/index.js
+  // output/PSD3.Pages.HomeForceLayout/index.js
   var slot_3 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "navigationViz";
@@ -23322,7 +23322,7 @@
     });
   };
 
-  // output/V2.Pages.Home/index.js
+  // output/PSD3.Pages.Home/index.js
   var slot_4 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "forceLayout";
@@ -23347,7 +23347,7 @@
     });
   };
 
-  // output/V2.Pages.Interpreters/index.js
+  // output/PSD3.Pages.Interpreters/index.js
   var render8 = function(v) {
     return div2([classes(["interpreters-page"])])([div2([classes(["interpreters-page__header"])])([h1([classes(["interpreters-page__title"])])([text5("Alternative Interpreters")]), p([classes(["interpreters-page__subtitle"])])([text5("Demonstrating the Finally Tagless pattern")])]), div2([classes(["interpreters-page__content"])])([div2([classes(["interpreters-page__about"])])([h2_([text5("What is Finally Tagless?")]), p_([text5("Finally Tagless is an advanced functional programming pattern that allows the same code to be interpreted in multiple ways. Instead of tying your code to a specific implementation, you write against a set of type class capabilities.")]), p_([text5("This library demonstrates this by providing multiple interpreters for the same visualization code:")])]), div2([classes(["interpreters-page__grid"])])([div2([classes(["interpreter-card"])])([h3_([text5("MetaTree Visualizer")]), p_([text5("Instead of rendering to SVG, this interpreter visualizes the abstract syntax tree of the visualization itself as a tree diagram.")]), p_([text5("This meta-visualization shows how the same code can be interpreted in completely different ways - a key advantage of the Finally Tagless approach.")]), a([href4(routeToHash(new Example("meta-tree"))), classes(["interpreter-card__link"])])([text5("View MetaTree \u2192")])]), div2([classes(["interpreter-card"])])([h3_([text5("String Generator")]), p_([text5("This interpreter takes visualization code and generates human-readable text descriptions or code snippets.")]), p_([text5("Shows how the same high-level visualization definition can be used for documentation generation, code analysis, or teaching - all without modifying the original visualization code.")]), a([href4(routeToHash(new Example("print-tree"))), classes(["interpreter-card__link"])])([text5("View String Generator \u2192")])])]), div2([classes(["interpreters-page__explanation"])])([h3_([text5("Why Multiple Interpreters?")]), p_([text5("The ability to run the same code through different interpreters provides several benefits:")]), ul_([li_([text5("Debugging: Visualize the structure of your visualization")]), li_([text5("Documentation: Generate descriptions automatically")]), li_([text5("Testing: Verify structure without rendering")]), li_([text5("Flexibility: Add new interpretations without changing existing code")])]), p_([a([href4(routeToHash(Gallery.value))])([text5("\u2190 Back to Gallery")])])])])]);
   };
@@ -24716,7 +24716,7 @@
     };
   })();
 
-  // output/Stories.Spago.Actions/index.js
+  // output/PSD3.Pages.Spago.Actions/index.js
   var NodeClick2 = /* @__PURE__ */ (function() {
     function NodeClick3(value0, value1) {
       this.value0 = value0;
@@ -25169,7 +25169,7 @@
     };
   };
 
-  // output/V2.Spago.Actions/index.js
+  // output/PSD3.Apps.Spago.Actions/index.js
   var TopLevelCSS = /* @__PURE__ */ (function() {
     function TopLevelCSS2(value0) {
       this.value0 = value0;
@@ -25370,7 +25370,7 @@
     return UnToggleChildrenOfNode2;
   })();
 
-  // output/V2.Spago.Forces/index.js
+  // output/PSD3.Apps.Spago.Forces/index.js
   var strength3 = /* @__PURE__ */ strength(toAttrNumber);
   var x15 = /* @__PURE__ */ x11(toAttrNumber);
   var y14 = /* @__PURE__ */ y10(toAttrNumber);
@@ -25418,197 +25418,7 @@
     })])]);
   })();
 
-  // output/DemoApp.UI.Properties/index.js
-  var lmap2 = /* @__PURE__ */ lmap(bifunctorTuple);
-  var append16 = /* @__PURE__ */ append(semigroupArray);
-  var rmap4 = /* @__PURE__ */ rmap2(bifunctorTuple);
-  var elem5 = /* @__PURE__ */ elem2(eqString);
-  var not4 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean));
-  var pure20 = /* @__PURE__ */ pure(applicativeArray);
-  var map42 = /* @__PURE__ */ map(functorArray);
-  var startsWith = function(str0) {
-    return function(str1) {
-      return str0 === take2(length5(str0))(str1);
-    };
-  };
-  var extract3 = /* @__PURE__ */ (function() {
-    var f = function(v) {
-      return function(v1) {
-        if (v1 instanceof Property && v1.value0 === "className") {
-          return lmap2(function(v2) {
-            return append16(v2)(split(" ")(v1.value1));
-          })(v);
-        }
-        ;
-        return rmap4(function(v2) {
-          return append16(v2)([v1]);
-        })(v);
-      };
-    };
-    return foldl2(f)(new Tuple([], []));
-  })();
-  var classifySide = function(str) {
-    if (startsWith("t-")(str)) {
-      return "top";
-    }
-    ;
-    if (startsWith("r-")(str)) {
-      return "right";
-    }
-    ;
-    if (startsWith("b-")(str)) {
-      return "bottom";
-    }
-    ;
-    if (startsWith("l-")(str)) {
-      return "left";
-    }
-    ;
-    if (startsWith("x-")(str)) {
-      return "horizontal";
-    }
-    ;
-    if (startsWith("y-")(str)) {
-      return "vertical";
-    }
-    ;
-    if (startsWith("-")(str)) {
-      return "all";
-    }
-    ;
-    if (otherwise) {
-      return "";
-    }
-    ;
-    throw new Error("Failed pattern match at DemoApp.UI.Properties (line 103, column 1 - line 105, column 12): " + [str.constructor.name]);
-  };
-  var append$prime = function(v) {
-    return function(v1) {
-      if (v1 === "") {
-        return v;
-      }
-      ;
-      return v + ("-" + v1);
-    };
-  };
-  var classifyOverflow = function(str) {
-    if (startsWith("x-")(str)) {
-      return append$prime("horizontal")(classifyOverflow(drop2(2)(str)));
-    }
-    ;
-    if (startsWith("y-")(str)) {
-      return append$prime("vertical")(classifyOverflow(drop2(2)(str)));
-    }
-    ;
-    if (elem5(str)(["auto", "hidden", "visible", "scroll"])) {
-      return "";
-    }
-    ;
-    if (otherwise) {
-      return str;
-    }
-    ;
-    throw new Error("Failed pattern match at DemoApp.UI.Properties (line 116, column 1 - line 118, column 12): " + [str.constructor.name]);
-  };
-  var classify = function(str) {
-    if (startsWith("p")(str) && not4($$null2)(classifySide(drop2(1)(str)))) {
-      return append$prime("padding")(classifySide(drop2(1)(str)));
-    }
-    ;
-    if (startsWith("m")(str) && not4($$null2)(classifySide(drop2(1)(str)))) {
-      return append$prime("margin")(classifySide(drop2(1)(str)));
-    }
-    ;
-    if (startsWith("-m")(str) && not4($$null2)(classifySide(drop2(2)(str)))) {
-      return append$prime("margin")(classifySide(drop2(2)(str)));
-    }
-    ;
-    if (startsWith("min-")(str)) {
-      return append$prime("min")(classify(drop2(4)(str)));
-    }
-    ;
-    if (startsWith("max-")(str)) {
-      return append$prime("max")(classify(drop2(4)(str)));
-    }
-    ;
-    if (startsWith("w-")(str)) {
-      return "width";
-    }
-    ;
-    if (startsWith("h-")(str)) {
-      return "height";
-    }
-    ;
-    if (startsWith("overflow-")(str) && classifyOverflow(drop2(9)(str)) !== drop2(9)(str)) {
-      return append$prime("overflow")(classifyOverflow(drop2(9)(str)));
-    }
-    ;
-    if (otherwise) {
-      return str;
-    }
-    ;
-    throw new Error("Failed pattern match at DemoApp.UI.Properties (line 85, column 1 - line 87, column 12): " + [str.constructor.name]);
-  };
-  var appendIProps = function(ip) {
-    return function(ip$prime) {
-      var v = extract3(ip);
-      var v1 = extract3(ip$prime);
-      var classNames = pure20(classes(map42(ClassName)(nubByEq(function(c) {
-        return function(c$prime) {
-          return classify(c) === classify(c$prime);
-        };
-      })(append16(v1.value0)(v.value0)))));
-      return append16(v.value1)(append16(v1.value1)(classNames));
-    };
-  };
-
-  // output/DemoApp.UI.Button/index.js
-  var map43 = /* @__PURE__ */ map(functorArray);
-  var append17 = /* @__PURE__ */ append(semigroupArray);
-  var rightClasses = /* @__PURE__ */ map43(ClassName)(["rounded-r"]);
-  var leftClasses = /* @__PURE__ */ map43(ClassName)(["mr-px", "rounded-l"]);
-  var centerClasses = /* @__PURE__ */ map43(ClassName)(["mr-px"]);
-  var buttonSharedClasses = /* @__PURE__ */ map43(ClassName)(["no-outline", "px-4", "py-2", "!active:border-b", "active:border-t", "disabled:opacity-50", "disabled:cursor-default", "!disabled:cursor-pointer"]);
-  var buttonPrimaryClasses = /* @__PURE__ */ map43(ClassName)(["bg-blue-88", "border-blue-88", "hover:!disabled:bg-blue-82", "focus:bg-blue-82", "text-white"]);
-  var buttonGroupClasses = /* @__PURE__ */ map43(ClassName)(["flex", "items-center"]);
-  var buttonGroupBuilder = function(classes2) {
-    return function(iprops) {
-      return button(appendIProps([classes(append17(buttonSharedClasses)(classes2))])(iprops));
-    };
-  };
-  var buttonPrimaryCenter = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonPrimaryClasses)(centerClasses));
-  var buttonPrimaryLeft = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonPrimaryClasses)(leftClasses));
-  var buttonPrimaryRight = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonPrimaryClasses)(rightClasses));
-  var buttonGroup = function(iprops) {
-    return div2(appendIProps([classes(buttonGroupClasses)])(iprops));
-  };
-  var buttonGroup_ = /* @__PURE__ */ buttonGroup([]);
-  var buttonClasses = /* @__PURE__ */ map43(ClassName)(["bg-grey-50-a20", "border-grey-50-a20", "hover:!disabled:bg-grey-50-a30", "focus:bg-grey-50-a30", "text-black-20"]);
-  var buttonLeft = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonClasses)(leftClasses));
-  var buttonRight = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonClasses)(rightClasses));
-  var buttonCenter = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonClasses)(centerClasses));
-
-  // output/DemoApp.UI.Format/index.js
-  var map44 = /* @__PURE__ */ map(functorArray);
-  var subHeadingClasses = /* @__PURE__ */ map44(ClassName)(["text-xl", "font-medium", "leading-loose", "flex", "items-center", "mb-6"]);
-  var subHeading = function(iprops) {
-    return function(html2) {
-      return h2(appendIProps([classes(subHeadingClasses)])(iprops))(html2);
-    };
-  };
-  var subHeading_ = /* @__PURE__ */ subHeading([]);
-  var contentHeadingClasses = /* @__PURE__ */ map44(ClassName)(["mb-6", "text-lg", "font-normal", "leading-loose", "flex", "items-center"]);
-  var contentHeading = function(iprops) {
-    return h3(appendIProps([classes(contentHeadingClasses)])(iprops));
-  };
-  var contentHeading_ = /* @__PURE__ */ contentHeading([]);
-  var captionClasses = /* @__PURE__ */ map44(ClassName)(["block", "font-light", "mb-6", "text-grey-70", "text-sm", "tracking-wide", "uppercase"]);
-  var caption2 = function(iprops) {
-    return h4(appendIProps([classes(captionClasses)])(iprops));
-  };
-  var caption_2 = /* @__PURE__ */ caption2([]);
-
-  // output/V2.Spago.State/index.js
+  // output/PSD3.Apps.Spago.State/index.js
   var x17 = /* @__PURE__ */ x(toAttrNumber);
   var _handle3 = /* @__PURE__ */ _handle(strongForget);
   var prop6 = /* @__PURE__ */ prop3({
@@ -25848,7 +25658,197 @@
     };
   };
 
-  // output/V2.Spago.HTML/index.js
+  // output/PSD3.Components.UI.Properties/index.js
+  var lmap2 = /* @__PURE__ */ lmap(bifunctorTuple);
+  var append16 = /* @__PURE__ */ append(semigroupArray);
+  var rmap4 = /* @__PURE__ */ rmap2(bifunctorTuple);
+  var elem5 = /* @__PURE__ */ elem2(eqString);
+  var not4 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean));
+  var pure20 = /* @__PURE__ */ pure(applicativeArray);
+  var map42 = /* @__PURE__ */ map(functorArray);
+  var startsWith = function(str0) {
+    return function(str1) {
+      return str0 === take2(length5(str0))(str1);
+    };
+  };
+  var extract3 = /* @__PURE__ */ (function() {
+    var f = function(v) {
+      return function(v1) {
+        if (v1 instanceof Property && v1.value0 === "className") {
+          return lmap2(function(v2) {
+            return append16(v2)(split(" ")(v1.value1));
+          })(v);
+        }
+        ;
+        return rmap4(function(v2) {
+          return append16(v2)([v1]);
+        })(v);
+      };
+    };
+    return foldl2(f)(new Tuple([], []));
+  })();
+  var classifySide = function(str) {
+    if (startsWith("t-")(str)) {
+      return "top";
+    }
+    ;
+    if (startsWith("r-")(str)) {
+      return "right";
+    }
+    ;
+    if (startsWith("b-")(str)) {
+      return "bottom";
+    }
+    ;
+    if (startsWith("l-")(str)) {
+      return "left";
+    }
+    ;
+    if (startsWith("x-")(str)) {
+      return "horizontal";
+    }
+    ;
+    if (startsWith("y-")(str)) {
+      return "vertical";
+    }
+    ;
+    if (startsWith("-")(str)) {
+      return "all";
+    }
+    ;
+    if (otherwise) {
+      return "";
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Components.UI.Properties (line 103, column 1 - line 105, column 12): " + [str.constructor.name]);
+  };
+  var append$prime = function(v) {
+    return function(v1) {
+      if (v1 === "") {
+        return v;
+      }
+      ;
+      return v + ("-" + v1);
+    };
+  };
+  var classifyOverflow = function(str) {
+    if (startsWith("x-")(str)) {
+      return append$prime("horizontal")(classifyOverflow(drop2(2)(str)));
+    }
+    ;
+    if (startsWith("y-")(str)) {
+      return append$prime("vertical")(classifyOverflow(drop2(2)(str)));
+    }
+    ;
+    if (elem5(str)(["auto", "hidden", "visible", "scroll"])) {
+      return "";
+    }
+    ;
+    if (otherwise) {
+      return str;
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Components.UI.Properties (line 116, column 1 - line 118, column 12): " + [str.constructor.name]);
+  };
+  var classify = function(str) {
+    if (startsWith("p")(str) && not4($$null2)(classifySide(drop2(1)(str)))) {
+      return append$prime("padding")(classifySide(drop2(1)(str)));
+    }
+    ;
+    if (startsWith("m")(str) && not4($$null2)(classifySide(drop2(1)(str)))) {
+      return append$prime("margin")(classifySide(drop2(1)(str)));
+    }
+    ;
+    if (startsWith("-m")(str) && not4($$null2)(classifySide(drop2(2)(str)))) {
+      return append$prime("margin")(classifySide(drop2(2)(str)));
+    }
+    ;
+    if (startsWith("min-")(str)) {
+      return append$prime("min")(classify(drop2(4)(str)));
+    }
+    ;
+    if (startsWith("max-")(str)) {
+      return append$prime("max")(classify(drop2(4)(str)));
+    }
+    ;
+    if (startsWith("w-")(str)) {
+      return "width";
+    }
+    ;
+    if (startsWith("h-")(str)) {
+      return "height";
+    }
+    ;
+    if (startsWith("overflow-")(str) && classifyOverflow(drop2(9)(str)) !== drop2(9)(str)) {
+      return append$prime("overflow")(classifyOverflow(drop2(9)(str)));
+    }
+    ;
+    if (otherwise) {
+      return str;
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Components.UI.Properties (line 85, column 1 - line 87, column 12): " + [str.constructor.name]);
+  };
+  var appendIProps = function(ip) {
+    return function(ip$prime) {
+      var v = extract3(ip);
+      var v1 = extract3(ip$prime);
+      var classNames = pure20(classes(map42(ClassName)(nubByEq(function(c) {
+        return function(c$prime) {
+          return classify(c) === classify(c$prime);
+        };
+      })(append16(v1.value0)(v.value0)))));
+      return append16(v.value1)(append16(v1.value1)(classNames));
+    };
+  };
+
+  // output/PSD3.Components.UI.Button/index.js
+  var map43 = /* @__PURE__ */ map(functorArray);
+  var append17 = /* @__PURE__ */ append(semigroupArray);
+  var rightClasses = /* @__PURE__ */ map43(ClassName)(["rounded-r"]);
+  var leftClasses = /* @__PURE__ */ map43(ClassName)(["mr-px", "rounded-l"]);
+  var centerClasses = /* @__PURE__ */ map43(ClassName)(["mr-px"]);
+  var buttonSharedClasses = /* @__PURE__ */ map43(ClassName)(["no-outline", "px-4", "py-2", "!active:border-b", "active:border-t", "disabled:opacity-50", "disabled:cursor-default", "!disabled:cursor-pointer"]);
+  var buttonPrimaryClasses = /* @__PURE__ */ map43(ClassName)(["bg-blue-88", "border-blue-88", "hover:!disabled:bg-blue-82", "focus:bg-blue-82", "text-white"]);
+  var buttonGroupClasses = /* @__PURE__ */ map43(ClassName)(["flex", "items-center"]);
+  var buttonGroupBuilder = function(classes2) {
+    return function(iprops) {
+      return button(appendIProps([classes(append17(buttonSharedClasses)(classes2))])(iprops));
+    };
+  };
+  var buttonPrimaryCenter = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonPrimaryClasses)(centerClasses));
+  var buttonPrimaryLeft = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonPrimaryClasses)(leftClasses));
+  var buttonPrimaryRight = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonPrimaryClasses)(rightClasses));
+  var buttonGroup = function(iprops) {
+    return div2(appendIProps([classes(buttonGroupClasses)])(iprops));
+  };
+  var buttonGroup_ = /* @__PURE__ */ buttonGroup([]);
+  var buttonClasses = /* @__PURE__ */ map43(ClassName)(["bg-grey-50-a20", "border-grey-50-a20", "hover:!disabled:bg-grey-50-a30", "focus:bg-grey-50-a30", "text-black-20"]);
+  var buttonLeft = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonClasses)(leftClasses));
+  var buttonRight = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonClasses)(rightClasses));
+  var buttonCenter = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonClasses)(centerClasses));
+
+  // output/PSD3.Components.UI.Format/index.js
+  var map44 = /* @__PURE__ */ map(functorArray);
+  var subHeadingClasses = /* @__PURE__ */ map44(ClassName)(["text-xl", "font-medium", "leading-loose", "flex", "items-center", "mb-6"]);
+  var subHeading = function(iprops) {
+    return function(html2) {
+      return h2(appendIProps([classes(subHeadingClasses)])(iprops))(html2);
+    };
+  };
+  var subHeading_ = /* @__PURE__ */ subHeading([]);
+  var contentHeadingClasses = /* @__PURE__ */ map44(ClassName)(["mb-6", "text-lg", "font-normal", "leading-loose", "flex", "items-center"]);
+  var contentHeading = function(iprops) {
+    return h3(appendIProps([classes(contentHeadingClasses)])(iprops));
+  };
+  var contentHeading_ = /* @__PURE__ */ contentHeading([]);
+  var captionClasses = /* @__PURE__ */ map44(ClassName)(["block", "font-light", "mb-6", "text-grey-70", "text-sm", "tracking-wide", "uppercase"]);
+  var caption2 = function(iprops) {
+    return h4(appendIProps([classes(captionClasses)])(iprops));
+  };
+  var caption_2 = /* @__PURE__ */ caption2([]);
+
+  // output/PSD3.Apps.Spago.HTML/index.js
   var type_19 = /* @__PURE__ */ type_17(isPropInputType);
   var value15 = /* @__PURE__ */ value12(isPropString);
   var show21 = /* @__PURE__ */ show(showNumber);
@@ -25908,7 +25908,7 @@
     return div2([classes(["fullscreen-container", "spago-fullscreen"])])([div2([classes(["floating-panel", "floating-panel--top-left", "floating-panel--small", "spago-controls-panel"])])([h2([classes(["floating-panel__title", "spago-controls__title"])])([text5("Controls")]), renderSimControls(state3), renderSimState(state3)]), div2([classes(["floating-panel", "floating-panel--top-right", "floating-panel--large", "spago-forces-panel"])])([renderTableForces(state3)]), div2([classes(["svg-container", "fullscreen-viz", "spago-viz-container", view(_cssClass2)(state3)])])([])]);
   };
 
-  // output/V2.Pages.SpagoComponent/index.js
+  // output/PSD3.Pages.SpagoComponent/index.js
   var _linksShown2 = /* @__PURE__ */ _linksShown(strongForget);
   var _linksActive2 = /* @__PURE__ */ _linksActive(strongForget);
   var _chooseNodes2 = /* @__PURE__ */ _chooseNodes(strongForget);
@@ -26098,7 +26098,7 @@
           return handleAction5(dictMonadAff)(new SpotlightNode(v.value0.value1));
         }
         ;
-        throw new Error("Failed pattern match at V2.Pages.SpagoComponent (line 87, column 5 - line 89, column 68): " + [v.value0.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Pages.SpagoComponent (line 87, column 5 - line 89, column 68): " + [v.value0.constructor.name]);
       }
       ;
       if (v instanceof ToggleChildrenOfNode) {
@@ -26281,7 +26281,7 @@
         }));
       }
       ;
-      throw new Error("Failed pattern match at V2.Pages.SpagoComponent (line 66, column 16 - line 195, column 11): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Pages.SpagoComponent (line 66, column 16 - line 195, column 11): " + [v.constructor.name]);
     };
   };
   var component9 = function(dictMonadAff) {
@@ -26314,7 +26314,7 @@
     });
   };
 
-  // output/V2.Pages.Spago/index.js
+  // output/PSD3.Pages.Spago/index.js
   var slot_5 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "spagoComponent";
@@ -26338,7 +26338,7 @@
     });
   };
 
-  // output/V2.Main/index.js
+  // output/PSD3.Main/index.js
   var bind19 = /* @__PURE__ */ bind(bindHalogenM);
   var liftEffect11 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var bind110 = /* @__PURE__ */ bind(bindEffect);
@@ -26518,7 +26518,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at V2.Main (line 120, column 16 - line 156, column 41): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Main (line 120, column 16 - line 156, column 41): " + [v.constructor.name]);
     }
     ;
     while (!$tco_done) {
@@ -26570,7 +26570,7 @@
       return div2([classes(["not-found"])])([h1_([text5("404 - Page Not Found")]), p_([text5("The page you're looking for doesn't exist.")]), a([href4(routeToHash(Home.value))])([text5("Go Home")])]);
     }
     ;
-    throw new Error("Failed pattern match at V2.Main (line 93, column 20 - line 117, column 8): " + [route.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Main (line 93, column 20 - line 117, column 8): " + [route.constructor.name]);
   };
   var render11 = function(state3) {
     return div2([classes(["app"])])([(function() {
