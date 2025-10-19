@@ -1,4 +1,4 @@
-module D3.Examples.Navigation.Model where
+module D3.Viz.Navigation.Model where
 
 import Prelude
 import D3.Node (D3Link, D3_SimulationNode, D3_VxyFxy, D3_XY)

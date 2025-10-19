@@ -1,8 +1,8 @@
-module D3.Examples.Navigation.Data where
+module D3.Viz.Navigation.Data where
 
 import Prelude
 
-import D3.Examples.Navigation.Model (Category(..), NavigationRawModel, NodeType(..))
+import D3.Viz.Navigation.Model (Category(..), NavigationRawModel, NodeType(..))
 import D3.Node (D3Link(..), D3_SimulationNode(..))
 import Data.Maybe (Maybe(..))
 import Data.Nullable (notNull, null)

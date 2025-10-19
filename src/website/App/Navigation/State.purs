@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_)
-import D3.Examples.Navigation.Model (NavigationRawModel, NavigationSimNode, NodeType(..))
+import D3.Viz.Navigation.Model (NavigationRawModel, NavigationSimNode, NodeType(..))
 import D3.Node (D3Link(..), D3_SimulationNode(..))
 import D3.Selection (SelectionAttribute)
 import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus, initialSimulationState)
