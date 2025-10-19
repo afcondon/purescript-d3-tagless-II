@@ -8,7 +8,6 @@
     "upgrade-set": "spago upgrade-set",
     "snippets": "node src/scripts/extract-snippets.js",
     "bundle": "spago bundle-app --main PSD3.Main --to docs/bundle.js",
-    "build-css": "cd src/DemoApp/css && postcss src/index.css -o ../../docs/bundle.css",
     "dev": "npm run build && npm run bundle && npm run build-css"
   },
   "devDependencies": {

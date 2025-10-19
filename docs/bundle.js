@@ -10003,7 +10003,7 @@
     })(allExamples);
   };
 
-  // output/PSD3.Components.Gallery/index.js
+  // output/PSD3.Component.Gallery/index.js
   var mapFlipped2 = /* @__PURE__ */ mapFlipped(functorArray);
   var modify_3 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var eq2 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqCategory));
@@ -10085,7 +10085,7 @@
       return raise(v.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Components.Gallery (line 161, column 16 - line 170, column 22): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Component.Gallery (line 161, column 16 - line 170, column 22): " + [v.constructor.name]);
   };
   var filteredExamples = function(state3) {
     if (state3.filterCategory instanceof Nothing) {
@@ -10096,7 +10096,7 @@
       return getExamplesByCategory(state3.filterCategory.value0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Components.Gallery (line 117, column 3 - line 119, column 42): " + [state3.filterCategory.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Component.Gallery (line 117, column 3 - line 119, column 42): " + [state3.filterCategory.constructor.name]);
   };
   var categoryButtonClasses = function(buttonCat) {
     return function(selectedCat) {
@@ -10382,7 +10382,7 @@
     return NotFound.value;
   };
 
-  // output/PSD3.Components.Navigation/index.js
+  // output/PSD3.Component.Navigation/index.js
   var append6 = /* @__PURE__ */ append(semigroupArray);
   var isActive = function(v) {
     return function(v1) {
@@ -11344,7 +11344,7 @@
   // output/Affjax.Web/index.js
   var get3 = /* @__PURE__ */ get2(driver);
 
-  // output/PSD3.Components.Visualization/foreign.js
+  // output/PSD3.Component.Visualization/foreign.js
   function highlightElement2(element3) {
     return function() {
       if (typeof Prism !== "undefined" && Prism.highlightElement) {
@@ -19854,7 +19854,7 @@
     };
   };
 
-  // output/PSD3.Components.Visualization/index.js
+  // output/PSD3.Component.Visualization/index.js
   var bind15 = /* @__PURE__ */ bind(bindHalogenM);
   var get6 = /* @__PURE__ */ get(monadStateHalogenM);
   var draw8 = /* @__PURE__ */ draw4(bindD3M)(monadEffD3M)(d3TaglessD3M);
@@ -19903,7 +19903,7 @@
         return [];
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Components.Visualization (line 89, column 7 - line 100, column 22): " + [state3.textOutput.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Component.Visualization (line 89, column 7 - line 100, column 22): " + [state3.textOutput.constructor.name]);
     })());
   };
   var initialState2 = function(input3) {
@@ -19997,7 +19997,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Components.Visualization (line 144, column 9 - line 148, column 22): " + [treeJSON.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Component.Visualization (line 144, column 9 - line 148, column 22): " + [treeJSON.constructor.name]);
             });
           }
           ;
@@ -20013,7 +20013,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Components.Visualization (line 152, column 9 - line 156, column 22): " + [treeJSON.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Component.Visualization (line 152, column 9 - line 156, column 22): " + [treeJSON.constructor.name]);
             });
           }
           ;
@@ -20029,7 +20029,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Components.Visualization (line 160, column 9 - line 164, column 22): " + [treeJSON.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Component.Visualization (line 160, column 9 - line 164, column 22): " + [treeJSON.constructor.name]);
             });
           }
           ;
@@ -20091,7 +20091,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Components.Visualization (line 195, column 9 - line 205, column 39): " + [treeJSON.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Visualization (line 195, column 9 - line 205, column 39): " + [treeJSON.constructor.name]);
               })())(function() {
                 return pure15(unit);
               });
@@ -20119,11 +20119,11 @@
             return pure15(unit);
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Components.Visualization (line 218, column 5 - line 228, column 27): " + [state3.textOutput.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Component.Visualization (line 218, column 5 - line 228, column 27): " + [state3.textOutput.constructor.name]);
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Components.Visualization (line 104, column 16 - line 228, column 27): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Component.Visualization (line 104, column 16 - line 228, column 27): " + [v.constructor.name]);
     };
   };
   var component3 = function(dictMonadAff) {
@@ -25658,7 +25658,7 @@
     };
   };
 
-  // output/PSD3.Components.UI.Properties/index.js
+  // output/PSD3.Component.Properties/index.js
   var lmap2 = /* @__PURE__ */ lmap(bifunctorTuple);
   var append16 = /* @__PURE__ */ append(semigroupArray);
   var rmap4 = /* @__PURE__ */ rmap2(bifunctorTuple);
@@ -25720,7 +25720,7 @@
       return "";
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Components.UI.Properties (line 103, column 1 - line 105, column 12): " + [str.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Component.Properties (line 103, column 1 - line 105, column 12): " + [str.constructor.name]);
   };
   var append$prime = function(v) {
     return function(v1) {
@@ -25748,7 +25748,7 @@
       return str;
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Components.UI.Properties (line 116, column 1 - line 118, column 12): " + [str.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Component.Properties (line 116, column 1 - line 118, column 12): " + [str.constructor.name]);
   };
   var classify = function(str) {
     if (startsWith("p")(str) && not4($$null2)(classifySide(drop2(1)(str)))) {
@@ -25787,7 +25787,7 @@
       return str;
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Components.UI.Properties (line 85, column 1 - line 87, column 12): " + [str.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Component.Properties (line 85, column 1 - line 87, column 12): " + [str.constructor.name]);
   };
   var appendIProps = function(ip) {
     return function(ip$prime) {
@@ -25802,7 +25802,7 @@
     };
   };
 
-  // output/PSD3.Components.UI.Button/index.js
+  // output/PSD3.Component.Button/index.js
   var map43 = /* @__PURE__ */ map(functorArray);
   var append17 = /* @__PURE__ */ append(semigroupArray);
   var rightClasses = /* @__PURE__ */ map43(ClassName)(["rounded-r"]);
@@ -25828,7 +25828,7 @@
   var buttonRight = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonClasses)(rightClasses));
   var buttonCenter = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append17(buttonClasses)(centerClasses));
 
-  // output/PSD3.Components.UI.Format/index.js
+  // output/PSD3.Component.Format/index.js
   var map44 = /* @__PURE__ */ map(functorArray);
   var subHeadingClasses = /* @__PURE__ */ map44(ClassName)(["text-xl", "font-medium", "leading-loose", "flex", "items-center", "mb-6"]);
   var subHeading = function(iprops) {
