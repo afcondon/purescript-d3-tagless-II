@@ -1,4 +1,4 @@
-module PSD3.Pages.SpagoComponent where
+module PSD3.Component.Spago where
 
 import Prelude
 
@@ -30,8 +30,7 @@ import Effect.Class (class MonadEffect)
 import Halogen (HalogenM, liftEffect)
 import Halogen as H
 import Halogen.Subscription as HS
-import PSD3.Apps.Spago.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..))
-import PSD3.Pages.Spago.Actions (VizEvent(..))
+import PSD3.Apps.Spago.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..), VizEvent(..))
 import PSD3.Apps.Spago.Forces (forceLibrary)
 import PSD3.Apps.Spago.HTML (render)
 import PSD3.Apps.Spago.State (State, _callback, _chooseNodes, _cssClass, _enterselections, _forceStatus, _forceStatuses, _links, _linksActive, _linksShown, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)

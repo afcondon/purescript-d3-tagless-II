@@ -9,7 +9,6 @@ import D3.Examples.Spago.Files (NodeType, SpagoGraphLinkID)
 import D3.Examples.Spago.Model (SpagoSimNode)
 import D3.Node (NodeID)
 import D3.Simulation.Types (SimVariable)
-import PSD3.Pages.Spago.Actions (VizEvent(..))
 
 data Scene = PackageGrid | PackageGraph | ModuleTree TreeLayout | LayerSwarm
 data StyleChange = TopLevelCSS String | GraphStyle SpagoSceneAttributes
@@ -30,3 +29,9 @@ data Action
   | ToggleChildrenOfNode NodeID
   | SpotlightNode NodeID
   | UnToggleChildrenOfNode NodeID
+
+data VizEvent = NodeClick NodeType NodeID 
+-- to be added:
+-- | DragFinished
+-- | LinkClick
+-- and whatever other events are meaningful in terms of the graphics objects and DOM events on them

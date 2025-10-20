@@ -2,7 +2,7 @@ module PSD3.Pages.Spago where
 
 import Prelude
 
-import PSD3.Pages.SpagoComponent as SpagoComponent
+import PSD3.Component.Spago as SpagoComponent
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP

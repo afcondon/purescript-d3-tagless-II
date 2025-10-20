@@ -1,4 +1,4 @@
-module PSD3.Pages.HomeForceLayout where
+module PSD3.Component.HomeForceLayout where
 
 import Prelude
 

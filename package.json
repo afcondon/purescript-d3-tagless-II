@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "spago build",
+    "clean-build": "rm -rf output/D3.* output/PSD3.* && spago build",
     "install": "spago install",
     "upgrade-set": "spago upgrade-set",
     "snippets": "node src/scripts/extract-snippets.js",
@@ -12,7 +13,7 @@
     "graph-json": "spago graph modules --json",
     "graph-topo": "spago graph modules --topo",
     "versions": "spago --version && npm --version",
-    "dev": "npm run build && npm run bundle && npm run build-css"
+    "dev": "npm run build && npm run bundle"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",

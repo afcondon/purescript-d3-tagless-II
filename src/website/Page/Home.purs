@@ -2,7 +2,7 @@ module PSD3.Pages.Home where
 
 import Prelude
 
-import PSD3.Pages.HomeForceLayout as HomeForceLayout
+import PSD3.Component.HomeForceLayout as HomeForceLayout
 import Halogen as H
 import Halogen.HTML as HH
 import Type.Proxy (Proxy(..))

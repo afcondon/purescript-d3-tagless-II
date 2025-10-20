@@ -23364,7 +23364,7 @@
     });
   };
 
-  // output/PSD3.Pages.HomeForceLayout/index.js
+  // output/PSD3.Component.HomeForceLayout/index.js
   var slot_3 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "navigationViz";
@@ -24783,7 +24783,7 @@
     };
   })();
 
-  // output/PSD3.Pages.Spago.Actions/index.js
+  // output/PSD3.Apps.Spago.Actions/index.js
   var NodeClick2 = /* @__PURE__ */ (function() {
     function NodeClick3(value0, value1) {
       this.value0 = value0;
@@ -24796,6 +24796,205 @@
       };
     };
     return NodeClick3;
+  })();
+  var TopLevelCSS = /* @__PURE__ */ (function() {
+    function TopLevelCSS2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    TopLevelCSS2.create = function(value0) {
+      return new TopLevelCSS2(value0);
+    };
+    return TopLevelCSS2;
+  })();
+  var GraphStyle = /* @__PURE__ */ (function() {
+    function GraphStyle2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    GraphStyle2.create = function(value0) {
+      return new GraphStyle2(value0);
+    };
+    return GraphStyle2;
+  })();
+  var PackageGrid = /* @__PURE__ */ (function() {
+    function PackageGrid2() {
+    }
+    ;
+    PackageGrid2.value = new PackageGrid2();
+    return PackageGrid2;
+  })();
+  var PackageGraph = /* @__PURE__ */ (function() {
+    function PackageGraph2() {
+    }
+    ;
+    PackageGraph2.value = new PackageGraph2();
+    return PackageGraph2;
+  })();
+  var ModuleTree = /* @__PURE__ */ (function() {
+    function ModuleTree2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ModuleTree2.create = function(value0) {
+      return new ModuleTree2(value0);
+    };
+    return ModuleTree2;
+  })();
+  var LayerSwarm = /* @__PURE__ */ (function() {
+    function LayerSwarm2() {
+    }
+    ;
+    LayerSwarm2.value = new LayerSwarm2();
+    return LayerSwarm2;
+  })();
+  var LinkShowFilter = /* @__PURE__ */ (function() {
+    function LinkShowFilter2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    LinkShowFilter2.create = function(value0) {
+      return new LinkShowFilter2(value0);
+    };
+    return LinkShowFilter2;
+  })();
+  var LinkForceFilter = /* @__PURE__ */ (function() {
+    function LinkForceFilter2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    LinkForceFilter2.create = function(value0) {
+      return new LinkForceFilter2(value0);
+    };
+    return LinkForceFilter2;
+  })();
+  var NodeFilter = /* @__PURE__ */ (function() {
+    function NodeFilter2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    NodeFilter2.create = function(value0) {
+      return new NodeFilter2(value0);
+    };
+    return NodeFilter2;
+  })();
+  var Initialize5 = /* @__PURE__ */ (function() {
+    function Initialize7() {
+    }
+    ;
+    Initialize7.value = new Initialize7();
+    return Initialize7;
+  })();
+  var Finalize3 = /* @__PURE__ */ (function() {
+    function Finalize4() {
+    }
+    ;
+    Finalize4.value = new Finalize4();
+    return Finalize4;
+  })();
+  var Scene = /* @__PURE__ */ (function() {
+    function Scene2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Scene2.create = function(value0) {
+      return new Scene2(value0);
+    };
+    return Scene2;
+  })();
+  var ToggleForce = /* @__PURE__ */ (function() {
+    function ToggleForce2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ToggleForce2.create = function(value0) {
+      return new ToggleForce2(value0);
+    };
+    return ToggleForce2;
+  })();
+  var Filter = /* @__PURE__ */ (function() {
+    function Filter2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Filter2.create = function(value0) {
+      return new Filter2(value0);
+    };
+    return Filter2;
+  })();
+  var ChangeStyling = /* @__PURE__ */ (function() {
+    function ChangeStyling2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ChangeStyling2.create = function(value0) {
+      return new ChangeStyling2(value0);
+    };
+    return ChangeStyling2;
+  })();
+  var ChangeSimConfig = /* @__PURE__ */ (function() {
+    function ChangeSimConfig2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ChangeSimConfig2.create = function(value0) {
+      return new ChangeSimConfig2(value0);
+    };
+    return ChangeSimConfig2;
+  })();
+  var StopSim = /* @__PURE__ */ (function() {
+    function StopSim2() {
+    }
+    ;
+    StopSim2.value = new StopSim2();
+    return StopSim2;
+  })();
+  var StartSim = /* @__PURE__ */ (function() {
+    function StartSim2() {
+    }
+    ;
+    StartSim2.value = new StartSim2();
+    return StartSim2;
+  })();
+  var EventFromVizualization2 = /* @__PURE__ */ (function() {
+    function EventFromVizualization3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    EventFromVizualization3.create = function(value0) {
+      return new EventFromVizualization3(value0);
+    };
+    return EventFromVizualization3;
+  })();
+  var ToggleChildrenOfNode = /* @__PURE__ */ (function() {
+    function ToggleChildrenOfNode2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ToggleChildrenOfNode2.create = function(value0) {
+      return new ToggleChildrenOfNode2(value0);
+    };
+    return ToggleChildrenOfNode2;
+  })();
+  var SpotlightNode = /* @__PURE__ */ (function() {
+    function SpotlightNode2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    SpotlightNode2.create = function(value0) {
+      return new SpotlightNode2(value0);
+    };
+    return SpotlightNode2;
+  })();
+  var UnToggleChildrenOfNode = /* @__PURE__ */ (function() {
+    function UnToggleChildrenOfNode2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    UnToggleChildrenOfNode2.create = function(value0) {
+      return new UnToggleChildrenOfNode2(value0);
+    };
+    return UnToggleChildrenOfNode2;
   })();
 
   // output/D3.Examples.Spago.Draw/index.js
@@ -25235,207 +25434,6 @@
       };
     };
   };
-
-  // output/PSD3.Apps.Spago.Actions/index.js
-  var TopLevelCSS = /* @__PURE__ */ (function() {
-    function TopLevelCSS2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    TopLevelCSS2.create = function(value0) {
-      return new TopLevelCSS2(value0);
-    };
-    return TopLevelCSS2;
-  })();
-  var GraphStyle = /* @__PURE__ */ (function() {
-    function GraphStyle2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    GraphStyle2.create = function(value0) {
-      return new GraphStyle2(value0);
-    };
-    return GraphStyle2;
-  })();
-  var PackageGrid = /* @__PURE__ */ (function() {
-    function PackageGrid2() {
-    }
-    ;
-    PackageGrid2.value = new PackageGrid2();
-    return PackageGrid2;
-  })();
-  var PackageGraph = /* @__PURE__ */ (function() {
-    function PackageGraph2() {
-    }
-    ;
-    PackageGraph2.value = new PackageGraph2();
-    return PackageGraph2;
-  })();
-  var ModuleTree = /* @__PURE__ */ (function() {
-    function ModuleTree2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    ModuleTree2.create = function(value0) {
-      return new ModuleTree2(value0);
-    };
-    return ModuleTree2;
-  })();
-  var LayerSwarm = /* @__PURE__ */ (function() {
-    function LayerSwarm2() {
-    }
-    ;
-    LayerSwarm2.value = new LayerSwarm2();
-    return LayerSwarm2;
-  })();
-  var LinkShowFilter = /* @__PURE__ */ (function() {
-    function LinkShowFilter2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    LinkShowFilter2.create = function(value0) {
-      return new LinkShowFilter2(value0);
-    };
-    return LinkShowFilter2;
-  })();
-  var LinkForceFilter = /* @__PURE__ */ (function() {
-    function LinkForceFilter2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    LinkForceFilter2.create = function(value0) {
-      return new LinkForceFilter2(value0);
-    };
-    return LinkForceFilter2;
-  })();
-  var NodeFilter = /* @__PURE__ */ (function() {
-    function NodeFilter2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    NodeFilter2.create = function(value0) {
-      return new NodeFilter2(value0);
-    };
-    return NodeFilter2;
-  })();
-  var Initialize5 = /* @__PURE__ */ (function() {
-    function Initialize7() {
-    }
-    ;
-    Initialize7.value = new Initialize7();
-    return Initialize7;
-  })();
-  var Finalize3 = /* @__PURE__ */ (function() {
-    function Finalize4() {
-    }
-    ;
-    Finalize4.value = new Finalize4();
-    return Finalize4;
-  })();
-  var Scene = /* @__PURE__ */ (function() {
-    function Scene2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Scene2.create = function(value0) {
-      return new Scene2(value0);
-    };
-    return Scene2;
-  })();
-  var ToggleForce = /* @__PURE__ */ (function() {
-    function ToggleForce2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    ToggleForce2.create = function(value0) {
-      return new ToggleForce2(value0);
-    };
-    return ToggleForce2;
-  })();
-  var Filter = /* @__PURE__ */ (function() {
-    function Filter2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Filter2.create = function(value0) {
-      return new Filter2(value0);
-    };
-    return Filter2;
-  })();
-  var ChangeStyling = /* @__PURE__ */ (function() {
-    function ChangeStyling2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    ChangeStyling2.create = function(value0) {
-      return new ChangeStyling2(value0);
-    };
-    return ChangeStyling2;
-  })();
-  var ChangeSimConfig = /* @__PURE__ */ (function() {
-    function ChangeSimConfig2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    ChangeSimConfig2.create = function(value0) {
-      return new ChangeSimConfig2(value0);
-    };
-    return ChangeSimConfig2;
-  })();
-  var StopSim = /* @__PURE__ */ (function() {
-    function StopSim2() {
-    }
-    ;
-    StopSim2.value = new StopSim2();
-    return StopSim2;
-  })();
-  var StartSim = /* @__PURE__ */ (function() {
-    function StartSim2() {
-    }
-    ;
-    StartSim2.value = new StartSim2();
-    return StartSim2;
-  })();
-  var EventFromVizualization2 = /* @__PURE__ */ (function() {
-    function EventFromVizualization3(value0) {
-      this.value0 = value0;
-    }
-    ;
-    EventFromVizualization3.create = function(value0) {
-      return new EventFromVizualization3(value0);
-    };
-    return EventFromVizualization3;
-  })();
-  var ToggleChildrenOfNode = /* @__PURE__ */ (function() {
-    function ToggleChildrenOfNode2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    ToggleChildrenOfNode2.create = function(value0) {
-      return new ToggleChildrenOfNode2(value0);
-    };
-    return ToggleChildrenOfNode2;
-  })();
-  var SpotlightNode = /* @__PURE__ */ (function() {
-    function SpotlightNode2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    SpotlightNode2.create = function(value0) {
-      return new SpotlightNode2(value0);
-    };
-    return SpotlightNode2;
-  })();
-  var UnToggleChildrenOfNode = /* @__PURE__ */ (function() {
-    function UnToggleChildrenOfNode2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    UnToggleChildrenOfNode2.create = function(value0) {
-      return new UnToggleChildrenOfNode2(value0);
-    };
-    return UnToggleChildrenOfNode2;
-  })();
 
   // output/PSD3.Apps.Spago.Forces/index.js
   var strength3 = /* @__PURE__ */ strength(toAttrNumber);
@@ -25975,7 +25973,7 @@
     return div2([classes(["fullscreen-container", "spago-fullscreen"])])([div2([classes(["floating-panel", "floating-panel--top-left", "floating-panel--small", "spago-controls-panel"])])([h2([classes(["floating-panel__title", "spago-controls__title"])])([text5("Controls")]), renderSimControls(state3), renderSimState(state3)]), div2([classes(["floating-panel", "floating-panel--top-right", "floating-panel--large", "spago-forces-panel"])])([renderTableForces(state3)]), div2([classes(["svg-container", "fullscreen-viz", "spago-viz-container", view(_cssClass2)(state3)])])([])]);
   };
 
-  // output/PSD3.Pages.SpagoComponent/index.js
+  // output/PSD3.Component.Spago/index.js
   var _linksShown2 = /* @__PURE__ */ _linksShown(strongForget);
   var _linksActive2 = /* @__PURE__ */ _linksActive(strongForget);
   var _chooseNodes2 = /* @__PURE__ */ _chooseNodes(strongForget);
@@ -26165,7 +26163,7 @@
           return handleAction5(dictMonadAff)(new SpotlightNode(v.value0.value1));
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Pages.SpagoComponent (line 86, column 5 - line 88, column 68): " + [v.value0.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Component.Spago (line 85, column 5 - line 87, column 68): " + [v.value0.constructor.name]);
       }
       ;
       if (v instanceof ToggleChildrenOfNode) {
@@ -26348,7 +26346,7 @@
         }));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Pages.SpagoComponent (line 65, column 16 - line 194, column 11): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Component.Spago (line 64, column 16 - line 193, column 11): " + [v.constructor.name]);
     };
   };
   var component9 = function(dictMonadAff) {
