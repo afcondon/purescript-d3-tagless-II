@@ -72,18 +72,9 @@ navLink route label currentRoute =
         [ HP.href $ routeToHash route
         , HP.classes $
             [ HH.ClassName "navigation__link" ] <>
-            if isActive route currentRoute
+            if route == currentRoute
               then [ HH.ClassName "navigation__link--active" ]
               else []
         ]
         [ HH.text label ]
     ]
-
--- | Check if a route is active
-isActive :: Route -> Route -> Boolean
-isActive Home Home = true
-isActive Gallery Gallery = true
-isActive (Example _) (Example _) = true
-isActive Spago Spago = true
-isActive Interpreters Interpreters = true
-isActive _ _ = false
