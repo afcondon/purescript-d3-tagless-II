@@ -16,8 +16,7 @@ import D3Tagless.Capabilities (Staging)
 import Data.Lens (Lens', _Just, view)
 import Data.Lens.At (at)
 import Data.Lens.Record (prop)
-import Data.Map (Map)
-import Data.Map (Map, empty) as M
+import Data.Map (Map) as M
 import Data.Maybe (Maybe)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
@@ -52,7 +51,7 @@ type MiseEnScene = {
   , nodeInitializerFunctions :: Array (Array SpagoSimNode -> Array SpagoSimNode)
   -- could add the simulation variables here too?
 }
-initialScene :: Map Label Force -> MiseEnScene
+initialScene :: M.Map Label Force -> MiseEnScene
 initialScene forceLibrary = {
     chooseNodes: isPackage -- chooses all nodes
   , linksShown:  const false

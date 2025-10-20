@@ -1,7 +1,7 @@
-module D3.Viz.Navigation.Unsafe where
+module D3.Viz.ForceNavigator.Unsafe where
 
 import D3.Data.Types (Datum_)
-import D3.Viz.Navigation.Model (NavigationGraphLinkObj, NavigationSimRecord)
+import D3.Viz.ForceNavigator.Model (NavigationGraphLinkObj, NavigationSimRecord)
 import D3.Node (D3LinkSwizzled(..), D3_SimulationNode(..))
 import Unsafe.Coerce (unsafeCoerce)
 

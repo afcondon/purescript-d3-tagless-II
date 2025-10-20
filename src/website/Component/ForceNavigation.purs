@@ -5,15 +5,15 @@ import Prelude
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Sugar (onMouseEventEffectful)
 import D3.Data.Types (MouseEvent(..))
-import D3.Viz.Navigation.Data (navigationData)
-import D3.Viz.Navigation.Model (NodeType(..))
 import D3.Node (D3_SimulationNode(..))
 import D3.Selection (SelectionAttribute)
-import D3.Simulation.Types (SimVariable(..), getStatusMap)
+import D3.Simulation.Types (SimVariable(..), getStatusMap, onlyTheseForcesActive)
+import D3.Viz.ForceNavigator.Data (navigationData)
+import D3.Viz.ForceNavigator.Model (NodeType(..))
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start, stop)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
 import Data.Array (filter)
-import Data.Lens (use, (.=))
+import Data.Lens (use, (.=), (%=))
 import Data.Maybe (Maybe(..), isJust)
 import Data.Nullable (null)
 import Data.Set as Set
@@ -27,7 +27,7 @@ import Halogen.Subscription as HS
 import PSD3.ForceNavigator.Actions (Action(..), VizEvent(..))
 import PSD3.ForceNavigator.Draw as Draw
 import PSD3.ForceNavigator.Forces (forceLibrary)
-import PSD3.ForceNavigator.State (State, _expandedNodes, _openSelections, initialState, visibleLinks, visibleNodes)
+import PSD3.ForceNavigator.State (State, _expandedNodes, _forceStatuses, _openSelections, initialState, visibleLinks, visibleNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -62,6 +62,10 @@ handleAction = case _ of
     -- Create subscription for viz events
     { emitter, listener } <- liftEffect $ HS.create
     void $ H.subscribe emitter
+
+    -- Enable initial forces chosen from the ForceLibary for this Model
+    -- TODO force library still listing as empty in console 
+    _forceStatuses %= onlyTheseForcesActive [ "charge", "center", "collision" ]
 
     -- Run initial simulation with only center + sections visible
     runSimulation (simulationEvent listener)
@@ -128,7 +132,7 @@ runSimulation callback = do
   case openSels of
     Just sels -> runWithD3_Simulation do
       stop
-      actualizeForces (getStatusMap forceLibrary)
+      actualizeForces (getStatusMap forceLibrary) -- TODO are any forces enabled??
       Draw.updateSimulation sels model Draw.getVizEventFromClick
       setConfigVariable $ Alpha 1.0
       start

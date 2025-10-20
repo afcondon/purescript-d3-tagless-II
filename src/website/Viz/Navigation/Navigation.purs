@@ -1,12 +1,12 @@
-module D3.Viz.Navigation.Navigation where
+module D3.Viz.ForceNavigator.Navigation where
 
 import Prelude
 
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, remove, strokeColor, strokeOpacity, strokeWidth, transform', viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
-import D3.Viz.Navigation.Model (Category(..), NavigationRawModel, NodeType(..))
-import D3.Viz.Navigation.Unsafe (unboxD3SimLink, unboxD3SimNode)
+import D3.Viz.ForceNavigator.Model (Category(..), NavigationRawModel, NodeType(..))
+import D3.Viz.ForceNavigator.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.FFI (keyIsID_, simdrag)
 import D3.Selection (Behavior(..), DragBehavior(..))
 import D3.Simulation.Types (D3SimulationState_, SimVariable(..), Step(..))

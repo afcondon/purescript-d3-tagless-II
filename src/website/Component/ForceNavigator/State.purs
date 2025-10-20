@@ -4,13 +4,13 @@ import Prelude
 
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_)
-import D3.Viz.Navigation.Model (NavigationSimNode, NodeType(..))
 import D3.Node (D3Link(..), D3_SimulationNode(..))
-import D3.Simulation.Types (D3SimulationState_, Force, initialSimulationState)
+import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus, getStatusMap, initialSimulationState)
+import D3.Viz.ForceNavigator.Model (NavigationSimNode, NodeType(..))
 import Data.Array (elem, filter)
 import Data.Lens (Lens')
 import Data.Lens.Record (prop)
-import Data.Map (Map)
+import Data.Map (Map) as M
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.Set as Set
@@ -20,13 +20,15 @@ type State = {
   simulation :: D3SimulationState_
 , expandedNodes :: Set String  -- IDs of expanded section nodes
 , openSelections :: Maybe { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
+, forceStatuses :: M.Map Label ForceStatus
 }
 
-initialState :: Map Label Force -> State
+initialState :: M.Map Label Force -> State
 initialState forceLibrary = {
   simulation: initialSimulationState forceLibrary
 , expandedNodes: Set.singleton "purescript-d3"  -- Center node starts expanded
 , openSelections: Nothing
+, forceStatuses: getStatusMap forceLibrary
 }
 
 -- | Get the currently visible nodes based on expansion state
@@ -68,3 +70,6 @@ _expandedNodes = prop (Proxy :: Proxy "expandedNodes")
 
 _openSelections :: forall a r. Lens' { openSelections :: a | r } a
 _openSelections = prop (Proxy :: Proxy "openSelections")
+
+_forceStatuses :: Lens' State (M.Map Label ForceStatus)
+_forceStatuses = prop (Proxy :: Proxy "forceStatuses")

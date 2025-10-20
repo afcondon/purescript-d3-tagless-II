@@ -3,7 +3,7 @@ module PSD3.ForceNavigator.Forces where
 import Prelude
 
 import D3.Attributes.Instances (Label)
-import D3.Viz.Navigation.Unsafe (unboxD3SimNode)
+import D3.Viz.ForceNavigator.Unsafe (unboxD3SimNode)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, createLinkForce, initialize)
 import D3.Simulation.Types (Force, ForceType(..), RegularForceType(..), allNodes)

@@ -4,8 +4,8 @@ import Prelude
 
 import D3.Attributes.Sugar (classed, fill, fontSize, radius, remove, strokeColor, strokeOpacity, strokeWidth, textAnchor, transform', viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, D3This_, Datum_, Element(..))
-import D3.Viz.Navigation.Model (Category(..), NavigationRawModel, NodeType(..))
-import D3.Viz.Navigation.Unsafe (unboxD3SimLink, unboxD3SimNode)
+import D3.Viz.ForceNavigator.Model (Category(..), NavigationRawModel, NodeType(..))
+import D3.Viz.ForceNavigator.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.FFI (keyIsID_, simdrag)
 import D3.Selection (Behavior(..), DragBehavior(..))
 import D3.Simulation.Types (Step(..))
