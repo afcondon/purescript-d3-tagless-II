@@ -5,8 +5,8 @@ This repo contains a library for building D3.js visualizations in PureScript AND
 ## Directory and file structure
 All directories shall be lower case EXCEPT those with PureScript modules which should match PureScript naming requirements of capitalized module names, ie module Foo.Bar.Baz is found in <src>/Foo/Bar/Baz.purs 
 
-### /docs
-The website lives in the /docs directory from where it is served by Github Pages. This folder contains static assets as well as compiled assets such as the bundle.js output by Spago
+### /website
+The website lives in the /website directory from where it is served by Github Pages. This folder contains static assets as well as compiled assets such as the bundle.js output by Spago
 
 ### /src
 All PureScript code lives under the /src directory

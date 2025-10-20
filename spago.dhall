@@ -37,7 +37,6 @@ You can edit this file as you like.
   , "prelude"
   , "profunctor"
   , "profunctor-lenses"
-  , "psci-support"
   , "random"
   , "read"
   , "strings"

@@ -7,7 +7,7 @@
     "install": "spago install",
     "upgrade-set": "spago upgrade-set",
     "snippets": "node src/scripts/extract-snippets.js",
-    "bundle": "spago bundle-app --main PSD3.Main --to docs/bundle.js",
+    "bundle": "spago bundle-app --main PSD3.Main --to website/bundle.js",
     "dev": "npm run build && npm run bundle && npm run build-css"
   },
   "devDependencies": {
