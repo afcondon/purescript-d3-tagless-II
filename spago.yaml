@@ -3,7 +3,6 @@ package:
   - aff
   - affjax
   - affjax-web
-  - argonaut-core
   - arrays
   - bifunctors
   - console
@@ -42,7 +41,6 @@ package:
   - tuples
   - typelevel-prelude
   - unsafe-coerce
-  - web-dom
   - web-events
   - web-html
   name: my-project
