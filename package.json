@@ -7,7 +7,11 @@
     "install": "spago install",
     "upgrade-set": "spago upgrade-set",
     "snippets": "node src/scripts/extract-snippets.js",
-    "bundle": "spago bundle-app --main PSD3.Main --to docs/bundle.js",
+    "bundle": "spago bundle --module PSD3.Main --outfile docs/bundle.js",
+    "graph-dot": "spago graph modules --dot",
+    "graph-json": "spago graph modules --json",
+    "graph-topo": "spago graph modules --topo",
+    "versions": "spago --version && npm --version",
     "dev": "npm run build && npm run bundle && npm run build-css"
   },
   "devDependencies": {
@@ -26,7 +30,6 @@
     "d3-scale-chromatic": "^3.1.0",
     "esbuild": "^0.25.10",
     "purescript": "^0.15.15",
-    "spago": "^0.21.0",
-    "yarn": "^1.22.22"
+    "spago": "^0.93.44"
   }
 }
