@@ -2,29 +2,30 @@ module PSD3.Main where
 
 import Prelude
 
-import PSD3.Types (Route(..), ExampleId)
-import PSD3.Router (parseRoute, routeToHash)
-import PSD3.Navigation as Navigation
-import PSD3.Gallery as Gallery
-import PSD3.Home as Home
-import PSD3.ExampleDetail as ExampleDetail
-import PSD3.SpagoWrapper as Spago
-import PSD3.Interpreters as Interpreters
+import Data.Maybe (Maybe(..))
+import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Halogen.VDom.Driver (runUI)
-import Web.HTML (window)
-import Web.HTML.Window (location, toEventTarget)
-import Web.HTML.Location (hash, setHash)
-import Web.Event.EventTarget (eventListener, addEventListener)
-import Web.Event.Event (EventType(..))
-import Data.Maybe (Maybe(..))
-import Type.Proxy (Proxy(..))
 import Halogen.Subscription as HS
+import Halogen.VDom.Driver (runUI)
+import PSD3.ExampleDetail as ExampleDetail
+import PSD3.Gallery as Gallery
+import PSD3.Home as Home
+import PSD3.Interpreters as Interpreters
+import PSD3.Navigation as Navigation
+import PSD3.Router (parseRoute, routeToHash)
+import PSD3.SpagoWrapper as Spago
+import PSD3.Types (Route(..), ExampleId)
+import Type.Proxy (Proxy(..))
+import Web.Event.Event (EventType(..))
+import Web.Event.EventTarget (eventListener, addEventListener)
+import Web.HTML (window)
+import Web.HTML.Location (hash, setHash)
+import Web.HTML.Window (location, toEventTarget)
 
 -- | Main application state
 type State = {
@@ -58,7 +59,7 @@ _interpreters = Proxy :: Proxy "interpreters"
 -- | Main application component
 component :: forall q i. H.Component q i Void Aff
 component = H.mkComponent
-  { initialState: \_ -> { currentRoute: Home }
+  { initialState: \_ -> { currentRoute: Home } -- note, it really doesn't matter what's initalized here as Initialize reads the route from the hash
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -83,14 +84,12 @@ render state =
 
 -- | Hide navigation on example detail pages for immersive fullscreen
 shouldHideNavigation :: Route -> Boolean
-shouldHideNavigation (Example _) = true
-shouldHideNavigation Spago = true
-shouldHideNavigation Home = true
-shouldHideNavigation _ = false
+shouldHideNavigation Gallery = false
+shouldHideNavigation _ = true
 
 -- | Render the current page based on route
 renderPage :: Route -> H.ComponentHTML Action Slots Aff
-renderPage route = case route of
+renderPage route = case spy "Route is" route of
   Home ->
     HH.slot_ _home unit Home.component unit
 
