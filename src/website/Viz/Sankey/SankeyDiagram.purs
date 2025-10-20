@@ -1,4 +1,4 @@
-module D3.Examples.SankeyDiagram where
+module D3.Viz.SankeyDiagram where
 
 import Prelude
 
@@ -6,8 +6,8 @@ import Control.Monad.State (class MonadState)
 import D3.Attributes.Instances (AttributeSetter(..), toAttr)
 import D3.Attributes.Sugar (classed, d, fill, fillOpacity, height, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, viewBox, width, x, y, dy)
 import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
-import D3.Examples.Sankey.Model (SankeyData)
-import D3.Examples.Sankey.Unsafe (unboxSankeyLink, unboxSankeyNode)
+import D3.Viz.Sankey.Model (SankeyData)
+import D3.Viz.Sankey.Unsafe (unboxSankeyLink, unboxSankeyNode)
 import D3.Layouts.Sankey.Functions (sankeyLinkPath_)
 import D3.Layouts.Sankey.Types (SankeyConfig, SankeyLayoutState_)
 import D3.Selection (SelectionAttribute(..))

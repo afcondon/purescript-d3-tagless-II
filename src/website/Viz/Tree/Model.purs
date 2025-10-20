@@ -1,4 +1,4 @@
-module D3.Examples.Tree.Model where
+module D3.Viz.Tree.Model where
 
 
 import D3.Node (D3TreeRow, D3Link, D3_SimulationNode, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)

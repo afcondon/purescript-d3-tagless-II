@@ -1,11 +1,11 @@
-module D3.Examples.BarChart where
+module D3.Viz.BarChart where
 
 import Prelude
 
 import D3.Attributes.Sugar (classed, fill, height, strokeColor, strokeWidth, transform, viewBox, width, x, y)
 import D3.Axes (axisBottom, axisLeft, callAxis)
 import D3.Data.Types (D3Selection_, Element(..), Selector)
-import D3.Examples.Charts.Model (DataPoint, monthlySales)
+import D3.Viz.Charts.Model (DataPoint, monthlySales)
 import D3.Scales.Linear (applyScale, createLinearScale)
 import D3Tagless.Capabilities (class SelectionM, appendTo, attach)
 import Data.Array (length, mapWithIndex)

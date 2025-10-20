@@ -1,4 +1,4 @@
-module D3.Examples.MetaTree.Model where
+module D3.Viz.MetaTree.Model where
 
 import D3.Node (D3TreeRow, D3Link, EmbeddedData, NodeID)
 

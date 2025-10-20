@@ -1,11 +1,11 @@
-module D3.Examples.ScatterPlot where
+module D3.Viz.ScatterPlot where
 
 import Prelude
 
 import D3.Attributes.Sugar (classed, cx, cy, fill, fontSize, height, radius, strokeColor, strokeWidth, text, textAnchor, transform, viewBox, width, x, y)
 import D3.Axes (axisBottom, axisLeft, callAxis)
 import D3.Data.Types (D3Selection_, Element(..), Selector)
-import D3.Examples.Charts.Model (DataPoint, QuartetData, anscombesQuartet, scatterData)
+import D3.Viz.Charts.Model (DataPoint, QuartetData, anscombesQuartet, scatterData)
 import D3.Scales.Linear (applyScale, createLinearScale)
 import D3Tagless.Capabilities (class SelectionM, appendTo, attach)
 import Data.Foldable (maximum, minimum, traverse_)

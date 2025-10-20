@@ -1,4 +1,4 @@
-module D3.Examples.Sankey.Model where
+module D3.Viz.Sankey.Model where
 
 -- Raw data format for Sankey diagrams (before layout computation)
 type SankeyData = {

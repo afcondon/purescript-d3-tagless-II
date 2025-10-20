@@ -1,7 +1,7 @@
-module D3.Examples.LesMiserables.File where
+module D3.Viz.LesMiserables.File where
 
 import Affjax (Error)
-import D3.Examples.LesMiserables.Model (LesMisRawModel)
+import D3.Viz.LesMiserables.Model (LesMisRawModel)
 import Data.Either (Either(..))
 
 -- TODO no error handling at all here RN (OTOH - performant!!)

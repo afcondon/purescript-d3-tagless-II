@@ -1,4 +1,4 @@
-module D3.Examples.GUP where
+module D3.Viz.GUP where
 
 import D3.Attributes.Sugar
 

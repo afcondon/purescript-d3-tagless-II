@@ -1,11 +1,11 @@
-module D3.Examples.LineChart where
+module D3.Viz.LineChart where
 
 import Prelude
 
 import D3.Attributes.Sugar (classed, d, fill, radius, strokeColor, strokeWidth, transform, viewBox, width, height)
 import D3.Axes (Axis, axisBottom, axisLeft, callAxis)
 import D3.Data.Types (D3Selection_, Element(..), Selector)
-import D3.Examples.Charts.Model (DataPoint, sineWaveData)
+import D3.Viz.Charts.Model (DataPoint, sineWaveData)
 import D3.Generators.Line (createLineGenerator, generateLinePath)
 import D3.Scales.Linear (LinearScale, createLinearScale)
 import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes)

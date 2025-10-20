@@ -18,17 +18,10 @@ All PureScript code lives under the /src directory
 
 #### /src/website
 Contains
-- /src/website/App
-- /src/website/Componen
-- /src/website/Data
-- /src/website/Page
-- /src/website/Viz
-- Main.pur
-- Router.pur
-- Snippets.pur
-- Types.purs
-
-TODO: make pages for landing page and example gallery, remove Data
+- /src/website/Component    -- Halogen components used in the website, larger components have their own sub-directories
+- /src/website/HTML         -- non-Halogen reusable chunks
+- /src/website/Viz          -- data viz code which uses the project library/DSL to render D3 visualizations
+- Main.purs, Router.purs, Types.purs  -- top-level Halogen code for the website 
 
 ### /notes
 All markdown files and other design notes live in /notes, except README.md and TODO.md

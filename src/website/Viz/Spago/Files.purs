@@ -1,4 +1,4 @@
-module D3.Examples.Spago.Files where
+module D3.Viz.Spago.Files where
 
 import Prelude
 

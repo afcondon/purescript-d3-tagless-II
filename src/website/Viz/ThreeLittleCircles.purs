@@ -1,4 +1,4 @@
-module D3.Examples.ThreeLittleCircles where
+module D3.Viz.ThreeLittleCircles where
 
 import D3.Attributes.Sugar
 

@@ -1,4 +1,4 @@
-module D3.Examples.LesMiserables.Model where
+module D3.Viz.LesMiserables.Model where
 
 import D3.Node (D3TreeRow, D3Link, D3_SimulationNode, D3_VxyFxy, D3_XY, EmbeddedData)
 import Type.Row (type (+))

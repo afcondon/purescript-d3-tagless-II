@@ -1,4 +1,4 @@
-module D3.Examples.ChordDiagram where
+module D3.Viz.ChordDiagram where
 
 import Prelude
 

@@ -1,4 +1,4 @@
-module D3.Examples.BubbleChart where
+module D3.Viz.BubbleChart where
 
 import Prelude
 

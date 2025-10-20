@@ -1,12 +1,12 @@
-module D3.Examples.TreeSimple where
+module D3.Viz.TreeSimple where
 
 import Prelude
 
 import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), preserveAspectRatio, transform, viewBox)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..))
 import D3.Data.Types (D3Selection_, Datum_, Selector)
-import D3.Examples.Tree.Draw (draw) as Tree
-import D3.Examples.Tree.Draw (treeDatum_)
+import D3.Viz.Tree.Draw (draw) as Tree
+import D3.Viz.Tree.Draw (treeDatum_)
 import D3.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
 import D3.Layouts.Hierarchical (horizontalLink, radialLink, radialSeparation, verticalLink)
 import D3.Scales (d3SchemeCategory10N_)

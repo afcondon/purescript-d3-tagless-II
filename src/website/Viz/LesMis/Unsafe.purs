@@ -1,8 +1,8 @@
-module D3.Examples.LesMis.Unsafe where
+module D3.Viz.LesMis.Unsafe where
 
 
 import D3.Data.Types (Datum_)
-import D3.Examples.LesMiserables.Model (LesMisGraphLinkObj, LesMisSimRecord)
+import D3.Viz.LesMiserables.Model (LesMisGraphLinkObj, LesMisSimRecord)
 import D3.Node (D3LinkSwizzled(..), D3_SimulationNode(..))
 import Unsafe.Coerce (unsafeCoerce)
 

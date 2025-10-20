@@ -1,11 +1,11 @@
-module D3.Examples.Spago.Draw where
+module D3.Viz.Spago.Draw where
 
 import Prelude
 
 import D3.Attributes.Sugar (classed, remove, strokeColor, transform', x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, D3This_, Datum_, Element(..))
-import D3.Examples.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, svgAttrs, updateAttrs)
-import D3.Examples.Spago.Model (datum_, link_)
+import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, svgAttrs, updateAttrs)
+import D3.Viz.Spago.Model (datum_, link_)
 import D3.FFI (keyIsID_, simdrag)
 import D3.Selection (Behavior(..), DragBehavior(..))
 import D3.Simulation.Types (Step(..))
@@ -14,7 +14,7 @@ import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, add
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
-import PSD3.Apps.Spago.Actions (VizEvent(..))
+import PSD3.Spago.Actions (VizEvent(..))
 import Utility (getWindowWidthHeight)
 import Web.Event.Internal.Types (Event)
 

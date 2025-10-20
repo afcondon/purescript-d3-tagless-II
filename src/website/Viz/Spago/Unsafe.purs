@@ -1,9 +1,9 @@
-module D3.Examples.Spago.Unsafe where
+module D3.Viz.Spago.Unsafe where
 
 import Prelude
 
 import D3.Data.Types (Datum_, Index_)
-import D3.Examples.Spago.Files (NodeType, SpagoDataRecord, SpagoLinkData, SpagoNodeRow, SpagoTreeObj)
+import D3.Viz.Spago.Files (NodeType, SpagoDataRecord, SpagoLinkData, SpagoNodeRow, SpagoTreeObj)
 import D3.Node (D3Link(..), D3LinkSwizzled, D3_FocusXY, D3_ID, D3_Radius, D3_TreeNode(..), D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import D3.Node (D3LinkDatum, D3LinkSwizzled(..), D3_SimulationNode(..), D3_TreeNode(..))
 import Data.Nullable (Nullable)

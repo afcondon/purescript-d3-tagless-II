@@ -1,10 +1,10 @@
-module D3.Examples.LesMiserables where
+module D3.Viz.LesMiserables where
 
 import Control.Monad.State (class MonadState)
 import D3.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, Element(..), Selector)
-import D3.Examples.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
-import D3.Examples.LesMiserables.Model (LesMisRawModel)
+import D3.Viz.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
+import D3.Viz.LesMiserables.Model (LesMisRawModel)
 import D3.FFI (keyIsID_, simdrag)
 import D3.Scales (d3SchemeCategory10N_)
 import D3.Selection (Behavior(..), DragBehavior(..))

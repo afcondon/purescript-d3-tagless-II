@@ -1,4 +1,4 @@
-module D3.Examples.Charts.Model where
+module D3.Viz.Charts.Model where
 
 import Prelude
 import Data.Int as Int
