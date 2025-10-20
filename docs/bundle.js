@@ -20491,7 +20491,7 @@
     });
   };
 
-  // output/PSD3.Apps.Navigation.NavigationComponent/foreign.js
+  // output/PSD3.Component.ForceNavigator/foreign.js
   function setHash2(hash2) {
     return function() {
       window.location.hash = hash2;
@@ -22649,7 +22649,7 @@
     }
   };
 
-  // output/PSD3.Apps.Navigation.Actions/index.js
+  // output/PSD3.App.ForceNavigator.Actions/index.js
   var NodeClick = /* @__PURE__ */ (function() {
     function NodeClick3(value0) {
       this.value0 = value0;
@@ -22726,7 +22726,7 @@
     return datum2;
   };
 
-  // output/PSD3.Apps.Navigation.Draw/index.js
+  // output/PSD3.App.ForceNavigator.Draw/index.js
   var classed11 = /* @__PURE__ */ classed(toAttrString);
   var show17 = /* @__PURE__ */ show(showNumber);
   var show18 = /* @__PURE__ */ show(showElement);
@@ -22852,7 +22852,7 @@
         return 35;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Apps.Navigation.Draw (line 48, column 7 - line 52, column 24): " + [node.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.App.ForceNavigator.Draw (line 48, column 7 - line 52, column 24): " + [node.nodeType.constructor.name]);
     },
     nodeColor: function(d7) {
       var node = unboxD3SimNode(d7);
@@ -22893,10 +22893,10 @@
           return "#10b981";
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Apps.Navigation.Draw (line 60, column 20 - line 66, column 31): " + [node.category.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.App.ForceNavigator.Draw (line 60, column 20 - line 66, column 31): " + [node.category.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Apps.Navigation.Draw (line 56, column 7 - line 66, column 31): " + [node.nodeType.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.App.ForceNavigator.Draw (line 56, column 7 - line 66, column 31): " + [node.nodeType.constructor.name]);
     },
     nodeFontSize: function(d7) {
       var node = unboxD3SimNode(d7);
@@ -23080,7 +23080,7 @@
     };
   };
 
-  // output/PSD3.Apps.Navigation.Forces/index.js
+  // output/PSD3.App.ForceNavigator.Forces/index.js
   var strength2 = /* @__PURE__ */ strength(toAttrNumber);
   var collisionRadius = function(d7) {
     var node = unboxD3SimNode(d7);
@@ -23090,7 +23090,7 @@
     return initialize(foldableArray)(functorArray)([createForce("charge")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-800), theta(toAttrNumber)(0.9), distanceMin(toAttrNumber)(1), distanceMax(toAttrNumber)(infinity)]), createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([strength2(0.5), x11(toAttrNumber)(0), y10(toAttrNumber)(0)]), createForce("collision")(new RegularForce(ForceCollide.value))(allNodes)([strength2(1), radius7(toAttrNumberFn)(collisionRadius)]), createLinkForce(Nothing.value)([strength2(0.5), distance(toAttrNumber)(150)])]);
   })();
 
-  // output/PSD3.Apps.Navigation.State/index.js
+  // output/PSD3.App.ForceNavigator.State/index.js
   var eq6 = /* @__PURE__ */ eq(eqNodeType);
   var bind9 = /* @__PURE__ */ bind(bindArray);
   var member3 = /* @__PURE__ */ member2(ordString);
@@ -23126,7 +23126,7 @@
             return [];
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Apps.Navigation.State (line 50, column 14 - line 52, column 24): " + [v.children.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.App.ForceNavigator.State (line 50, column 14 - line 52, column 24): " + [v.children.constructor.name]);
         }
         ;
         return [];
@@ -23162,7 +23162,7 @@
     return prop23($$Proxy.value)(dictStrong);
   };
 
-  // output/PSD3.Apps.Navigation.NavigationComponent/index.js
+  // output/PSD3.Component.ForceNavigator/index.js
   var liftEffect9 = /* @__PURE__ */ liftEffect(monadEffectEffect);
   var _openSelections2 = /* @__PURE__ */ _openSelections(strongForget);
   var _expandedNodes2 = /* @__PURE__ */ _expandedNodes(strongForget);
@@ -23232,7 +23232,7 @@
                 return pure25(unit);
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Apps.Navigation.NavigationComponent (line 128, column 3 - line 135, column 25): " + [openSels.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Component.ForceNavigator (line 128, column 3 - line 135, column 25): " + [openSels.constructor.name]);
             });
           });
         });
@@ -23347,7 +23347,7 @@
         return liftEffect12(setHash2(v.value0));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Apps.Navigation.NavigationComponent (line 55, column 16 - line 111, column 29): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Component.ForceNavigator (line 55, column 16 - line 111, column 29): " + [v.constructor.name]);
     };
   };
   var component5 = function(dictMonadAff) {

@@ -1,4 +1,4 @@
-module PSD3.Apps.Navigation.Draw where
+module PSD3.App.ForceNavigator.Draw where
 
 import Prelude
 
@@ -14,7 +14,7 @@ import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunct
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
-import PSD3.Apps.Navigation.Actions (VizEvent(..))
+import PSD3.App.ForceNavigator.Actions (VizEvent(..))
 import Utility (getWindowWidthHeight)
 import Web.Event.Internal.Types (Event)
 

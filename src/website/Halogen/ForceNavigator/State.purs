@@ -1,4 +1,4 @@
-module PSD3.Apps.Navigation.State where
+module PSD3.App.ForceNavigator.State where
 
 import Prelude
 

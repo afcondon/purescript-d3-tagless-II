@@ -1,4 +1,4 @@
-module PSD3.Apps.Navigation.NavigationComponent where
+module PSD3.Component.ForceNavigator where
 
 import Prelude
 
@@ -24,10 +24,10 @@ import Halogen (HalogenM)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.Subscription as HS
-import PSD3.Apps.Navigation.Actions (Action(..), VizEvent(..))
-import PSD3.Apps.Navigation.Draw as Draw
-import PSD3.Apps.Navigation.Forces (forceLibrary)
-import PSD3.Apps.Navigation.State (State, _expandedNodes, _openSelections, _simulation, initialState, visibleLinks, visibleNodes)
+import PSD3.App.ForceNavigator.Actions (Action(..), VizEvent(..))
+import PSD3.App.ForceNavigator.Draw as Draw
+import PSD3.App.ForceNavigator.Forces (forceLibrary)
+import PSD3.App.ForceNavigator.State (State, _expandedNodes, _openSelections, _simulation, initialState, visibleLinks, visibleNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent

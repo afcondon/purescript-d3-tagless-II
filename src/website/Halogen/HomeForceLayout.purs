@@ -2,7 +2,7 @@ module PSD3.Component.HomeForceLayout where
 
 import Prelude
 
-import PSD3.Apps.Navigation.NavigationComponent as NavigationComponent
+import PSD3.Component.ForceNavigator as NavigationComponent
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
