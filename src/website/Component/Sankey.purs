@@ -2,8 +2,7 @@ module PSD3.Sankey where
 
 import Prelude
 
-import Control.Monad.State (class MonadState)
-import Control.Monad.State (get)
+import Control.Monad.State (class MonadState, get)
 import D3.Viz.Sankey.Model as Sankey
 import D3.Viz.SankeyDiagram as SankeyDiagram
 import D3.Layouts.Sankey.Types (SankeyLayoutState_, initialSankeyLayoutState)
@@ -228,7 +227,7 @@ handleAction = case _ of
       SankeyDiagram.draw Sankey.energyData "div.svg-container"
 
   SetAlignment alignment -> do
-    detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
+    _ <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
     H.modify_ (\st -> st { alignment = alignment })
     state <- get
     runWithD3_Sankey do
@@ -240,7 +239,7 @@ handleAction = case _ of
       }
 
   SetLinkColorMode colorMode -> do
-    detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
+    _ <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
     H.modify_ (\st -> st { linkColorMode = colorMode })
     state <- get
     runWithD3_Sankey do
@@ -252,7 +251,7 @@ handleAction = case _ of
       }
 
   SetNodeWidth width -> do
-    detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
+    _ <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
     H.modify_ (\st -> st { nodeWidth = width })
     state <- get
     runWithD3_Sankey do
@@ -264,7 +263,7 @@ handleAction = case _ of
       }
 
   SetNodePadding padding -> do
-    detached <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
+    _ <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.svg-container"
     H.modify_ (\st -> st { nodePadding = padding })
     state <- get
     runWithD3_Sankey do

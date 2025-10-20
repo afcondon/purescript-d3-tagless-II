@@ -8,7 +8,6 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
-import Type.Proxy (Proxy(..))
 
 -- | Input configuration for FloatingPanel
 type Input = {

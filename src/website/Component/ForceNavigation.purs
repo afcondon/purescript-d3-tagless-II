@@ -27,7 +27,7 @@ import Halogen.Subscription as HS
 import PSD3.ForceNavigator.Actions (Action(..), VizEvent(..))
 import PSD3.ForceNavigator.Draw as Draw
 import PSD3.ForceNavigator.Forces (forceLibrary)
-import PSD3.ForceNavigator.State (State, _expandedNodes, _openSelections, _simulation, initialState, visibleLinks, visibleNodes)
+import PSD3.ForceNavigator.State (State, _expandedNodes, _openSelections, initialState, visibleLinks, visibleNodes)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent

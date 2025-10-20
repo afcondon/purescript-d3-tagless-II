@@ -4,21 +4,21 @@ import Prelude
 
 import Control.Monad.State (class MonadState)
 import D3.Viz.BubbleChart as BubbleChart
-import PSD3.Expandable as Expandable
-import PSD3.Toggle as Toggle
 import D3Tagless.Instance.Selection (eval_D3M)
 import Data.Lens (Lens', view, (%=), (.=))
 import Data.Lens.Record (prop)
 import Data.Maybe (Maybe(..))
-import PSD3.FormField as FormField
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import Snippets (readSnippetFiles)
+import PSD3.Expandable as Expandable
+import PSD3.FormField as FormField
+import PSD3.Toggle as Toggle
 import PSD3.Utilities (blurbParagraphs, syntaxHighlightedCode)
 import PSD3.Utilities as Utils
+import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))
 
 data Action

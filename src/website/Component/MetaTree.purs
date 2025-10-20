@@ -1,8 +1,7 @@
 module PSD3.MetaTree where
 
-import Data.Lens
+import Data.Lens (Lens', view, (%=), (.=))
 import Prelude
-import Data.Lens
 
 import Control.Monad.State (class MonadState)
 import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
