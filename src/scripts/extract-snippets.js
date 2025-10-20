@@ -62,7 +62,7 @@ function extractSnippets(filePath) {
 // Main execution
 function main() {
   const srcDir = path.join(__dirname, '../../src/DemoApp');
-  const outputDir = path.join(__dirname, '../../website/code-examples');
+  const outputDir = path.join(__dirname, '../../docs/code-examples');
 
   // Ensure output directory exists
   if (!fs.existsSync(outputDir)) {
