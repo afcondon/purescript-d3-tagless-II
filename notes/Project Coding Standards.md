@@ -18,11 +18,11 @@ All PureScript code lives under the /src directory
 
 #### /src/website
 Contains
-- /src/website/Ap
+- /src/website/App
 - /src/website/Componen
 - /src/website/Data
-- /src/website/Pag
-- /src/website/Vi
+- /src/website/Page
+- /src/website/Viz
 - Main.pur
 - Router.pur
 - Snippets.pur

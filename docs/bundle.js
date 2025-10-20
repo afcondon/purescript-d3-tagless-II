@@ -23231,7 +23231,7 @@
                 return pure25(unit);
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Apps.Navigation.NavigationComponent (line 129, column 3 - line 136, column 25): " + [openSels.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Apps.Navigation.NavigationComponent (line 128, column 3 - line 135, column 25): " + [openSels.constructor.name]);
             });
           });
         });
@@ -23346,7 +23346,7 @@
         return liftEffect12(setHash2(v.value0));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Apps.Navigation.NavigationComponent (line 56, column 16 - line 112, column 29): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Apps.Navigation.NavigationComponent (line 55, column 16 - line 111, column 29): " + [v.constructor.name]);
     };
   };
   var component5 = function(dictMonadAff) {
@@ -26164,7 +26164,7 @@
           return handleAction5(dictMonadAff)(new SpotlightNode(v.value0.value1));
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Pages.SpagoComponent (line 87, column 5 - line 89, column 68): " + [v.value0.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Pages.SpagoComponent (line 86, column 5 - line 88, column 68): " + [v.value0.constructor.name]);
       }
       ;
       if (v instanceof ToggleChildrenOfNode) {
@@ -26347,7 +26347,7 @@
         }));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Pages.SpagoComponent (line 66, column 16 - line 195, column 11): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Pages.SpagoComponent (line 65, column 16 - line 194, column 11): " + [v.constructor.name]);
     };
   };
   var component9 = function(dictMonadAff) {
