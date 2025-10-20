@@ -23,7 +23,6 @@ import Effect.Class (class MonadEffect, liftEffect)
 import Halogen (HalogenM)
 import Halogen as H
 import Halogen.HTML as HH
-import Halogen.Subscription (Listener)
 import Halogen.Subscription as HS
 import PSD3.Apps.Navigation.Actions (Action(..), VizEvent(..))
 import PSD3.Apps.Navigation.Draw as Draw
@@ -46,7 +45,7 @@ render _ =
   HH.div [] []  -- Empty render - all visualization is done via D3
 
 -- | Create a callback for simulation events
-simulationEvent :: Listener Action -> SelectionAttribute
+simulationEvent :: HS.Listener Action -> SelectionAttribute
 simulationEvent l = onMouseEventEffectful MouseClick (\e d t -> liftEffect $ HS.notify l (EventFromVizualization (Draw.getVizEventFromClick e d t)))
 
 handleAction :: forall output m.

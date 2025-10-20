@@ -29,7 +29,6 @@ import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect)
 import Halogen (HalogenM, liftEffect)
 import Halogen as H
-import Halogen.Subscription (Listener)
 import Halogen.Subscription as HS
 import PSD3.Apps.Spago.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..))
 import PSD3.Pages.Spago.Actions (VizEvent(..))
@@ -56,7 +55,7 @@ component = H.mkComponent
     , scene: initialScene forceLibrary
     }
 
-simulationEvent :: Listener Action -> SelectionAttribute
+simulationEvent :: HS.Listener Action -> SelectionAttribute
 simulationEvent l = onMouseEventEffectful MouseClick (\e d t -> liftEffect $ HS.notify l (EventFromVizualization (getVizEventFromClick e d t)))
 
 handleAction :: forall t316 t317 t318.

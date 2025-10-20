@@ -25,6 +25,7 @@ Enhance code documentation throughout the codebase:
 - Document the relationship between capabilities and interpreters
 - Add usage examples in documentation comments
 - can we get the comments to appear on hover over each line of code or something? or attach 'i' icons to sections?
+- make the four kinds of documentation: API/reference, overview, tutorial, cookbook
 
 ### 4. Replace Perl scripts with PureScript code for dependency extraction
 Create PureScript tooling to derive project dependencies for the Spago example:
