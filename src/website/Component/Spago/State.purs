@@ -20,6 +20,8 @@ import Data.Map (Map) as M
 import Data.Maybe (Maybe)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
+import Halogen.Subscription as HS
+import PSD3.Spago.Actions (Action)
 import Type.Proxy (Proxy(..))
   
 type State = Record (StateRow)
@@ -27,12 +29,14 @@ type StateRow = (
   -- the simulationState manages the Nodes, Links, Forces, Selections, Ticks & simulation parameters
     simulation   :: D3SimulationState_
   -- the model should actually be a component, probably a hook so that it can be constructed by this component and not be a Maybe
-  , model        :: Maybe SpagoModel 
+  , model        :: Maybe SpagoModel
   -- we'll filter nodes/links to staging and then, if staging is valid (has selections) we will put this staging data in the simulation
   -- if there are updates to data they will be detected and handled by defensive copying in the FFI to ensure continuity of object references from links
   , staging      :: Staging D3Selection_ SpagoDataRow SpagoLinkData NodeID
 -- | Contains all the settings necessary to call the Draw function
   , scene        :: MiseEnScene
+-- | Event listener for D3→Halogen event flow (component infrastructure, not scene config)
+  , eventListener :: Maybe (HS.Listener Action)
 )
 
 -- | Configuration for a visualization "scene" - a complete specification of:
@@ -40,11 +44,10 @@ type StateRow = (
 -- | - how forces behave (force statuses)
 -- | - visual appearance (CSS class, attributes)
 -- | - initialization (node positioning functions)
--- | - interactivity (event callbacks)
 -- |
 -- | This pattern could be generalized into a library by parameterizing over
 -- | the specific node and link types, but for now it's specialized to Spago.
-type MiseEnScene = { 
+type MiseEnScene = {
 -- first: filter functions for nodes and links (both what links are shown and which ones exert force)
     chooseNodes     :: (SpagoSimNode -> Boolean)
   , linksShown      :: (SpagoGraphLinkID -> Boolean)
@@ -54,8 +57,6 @@ type MiseEnScene = {
   -- governing class on the SVG means we can completely change the look of the vis (and not have to think about this at D3 level)
   , cssClass        :: String
   , attributes      :: SpagoSceneAttributes
-  -- at present just one call back which is added to the circle attributes
-  , callback        :: SelectionAttribute
   -- fix functions - run one after another on the data to set fixed nodes
   , nodeInitializerFunctions :: Array (Array SpagoSimNode -> Array SpagoSimNode)
   -- could add the simulation variables here too?
@@ -68,7 +69,6 @@ initialScene forceLibrary = {
   , forceStatuses: getStatusMap forceLibrary
   , cssClass: ""
   , attributes: clusterSceneAttributes
-  , callback: x 0.0 -- possibly want to store the listener here rather than the callback?
   , nodeInitializerFunctions: []
 }
 
@@ -117,10 +117,10 @@ _linksActive = _scene <<< prop (Proxy :: Proxy "linksActive")
 -- _sceneForces              = _scene <<< _forces
 _cssClass :: Lens' State String
 _cssClass = _scene <<< prop (Proxy :: Proxy "cssClass")
-_callback :: Lens' State SelectionAttribute
-_callback = _scene <<< prop (Proxy :: Proxy "callback") 
 _sceneAttributes :: Lens' State SpagoSceneAttributes
 _sceneAttributes = _scene <<< prop (Proxy :: Proxy "attributes")
+_eventListener :: Lens' State (Maybe (HS.Listener Action))
+_eventListener = prop (Proxy :: Proxy "eventListener")
 _nodeInitializerFunctions :: forall p.
   Strong p =>
   p (Array (Array SpagoSimNode -> Array SpagoSimNode)) (Array (Array SpagoSimNode -> Array SpagoSimNode)) ->

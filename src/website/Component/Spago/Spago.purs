@@ -32,7 +32,7 @@ module PSD3.Spago where
 import Prelude
 
 import Control.Monad.State (class MonadState, get)
-import D3.Attributes.Sugar (onMouseEventEffectful)
+import D3.Attributes.Sugar (onMouseEventEffectful, x)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (MouseEvent(..))
 import D3.Viz.Spago.Draw (getVizEventFromClick)
@@ -57,7 +57,7 @@ import PSD3.Spago.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..
 import PSD3.Spago.Data (readModelData)
 import PSD3.Spago.Forces (forceLibrary)
 import PSD3.Spago.HTML (render)
-import PSD3.Spago.State (State, _callback, _chooseNodes, _cssClass, _enterselections, _forceStatus, _forceStatuses, _links, _linksActive, _linksShown, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
+import PSD3.Spago.State (State, _chooseNodes, _cssClass, _enterselections, _eventListener, _forceStatus, _forceStatuses, _links, _linksActive, _linksShown, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -76,6 +76,7 @@ component = H.mkComponent
     , staging: { selections: { nodes: Nothing, links: Nothing }, linksWithForce: const true, rawdata: { nodes: [], links: [] } }
     , simulation: initialSimulationState forceLibrary
     , scene: initialScene forceLibrary
+    , eventListener: Nothing
     }
 
 simulationEvent :: HS.Listener Action -> SelectionAttribute
@@ -103,7 +104,7 @@ handleAction = case _ of
     -- Create emitter/listener pair for D3 click events to trigger Halogen actions
     { emitter, listener } <- liftEffect $ HS.create
     void $ H.subscribe emitter  -- Subscribe Halogen to the emitter
-    _callback .= (simulationEvent listener)  -- Store callback in scene config
+    _eventListener .= Just listener  -- Store listener in component state (not scene config)
 
     pure unit
 
@@ -263,10 +264,16 @@ runSimulation :: forall m.
 runSimulation = do
   stageDataFromModel
   staging         <- use _staging
-  callback        <- use _callback
+  maybeListener   <- use _eventListener
   sceneAttributes <- use _sceneAttributes
   forceStatuses   <- use _forceStatuses
-  let attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles }
+
+  -- Construct callback from listener (or dummy if not yet initialized)
+  let callback = case maybeListener of
+        Just listener -> simulationEvent listener
+        Nothing -> x 0.0  -- dummy during initialization
+      attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles }
+
   runWithD3_Simulation do
     stop
     actualizeForces forceStatuses
