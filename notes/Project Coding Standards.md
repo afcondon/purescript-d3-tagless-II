@@ -63,3 +63,6 @@ Fundamentally all raw JavaScript is considered technical debt in this project, b
 All FFI that is concerned with the underlying D3.js library should be in the /lib/D3/FFI.purs and /lib/D3/FFI.js pair of files. Similarly, other necessary FFI should be amalgamated according to the specific JavaScript library that it's using, such as Prism.js or whatever.
 
 It's acceptable during development to accumulate some technical debt here with short-lived .js FFI files on an ad-hoc basis but these should be periodically reviewed and swept up into cleaner abstractions which are then used and the small local .js FFI files excised.
+
+### Debug and Console
+For console debugging it is preferred to use the purescript-debug library as this generates a custom warning on the function which uses it, aiding us not to ship production code with debug statements in it. Generally usage of the form `x = spy "what's going on here?" $ functionWhichGivesUsX` is preferred. 
