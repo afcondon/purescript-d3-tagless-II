@@ -13690,16 +13690,16 @@
   function axis(orient, scale) {
     var tickArguments = [], tickValues = null, tickFormat2 = null, tickSizeInner = 6, tickSizeOuter = 6, tickPadding = 3, offset = typeof window !== "undefined" && window.devicePixelRatio > 1 ? 0 : 0.5, k = orient === top4 || orient === left2 ? -1 : 1, x18 = orient === left2 || orient === right2 ? "x" : "y", transform3 = orient === top4 || orient === bottom4 ? translateX : translateY;
     function axis2(context) {
-      var values2 = tickValues == null ? scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain() : tickValues, format2 = tickFormat2 == null ? scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity_default : tickFormat2, spacing = Math.max(tickSizeInner, 0) + tickPadding, range3 = scale.range(), range0 = +range3[0] + offset, range1 = +range3[range3.length - 1] + offset, position2 = (scale.bandwidth ? center2 : number2)(scale.copy(), offset), selection2 = context.selection ? context.selection() : context, path3 = selection2.selectAll(".domain").data([null]), tick = selection2.selectAll(".tick").data(values2, scale).order(), tickExit = tick.exit(), tickEnter = tick.enter().append("g").attr("class", "tick"), line = tick.select("line"), text13 = tick.select("text");
+      var values2 = tickValues == null ? scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain() : tickValues, format2 = tickFormat2 == null ? scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity_default : tickFormat2, spacing = Math.max(tickSizeInner, 0) + tickPadding, range3 = scale.range(), range0 = +range3[0] + offset, range1 = +range3[range3.length - 1] + offset, position2 = (scale.bandwidth ? center2 : number2)(scale.copy(), offset), selection2 = context.selection ? context.selection() : context, path3 = selection2.selectAll(".domain").data([null]), tick = selection2.selectAll(".tick").data(values2, scale).order(), tickExit = tick.exit(), tickEnter = tick.enter().append("g").attr("class", "tick"), line = tick.select("line"), text14 = tick.select("text");
       path3 = path3.merge(path3.enter().insert("path", ".tick").attr("class", "domain").attr("stroke", "currentColor"));
       tick = tick.merge(tickEnter);
       line = line.merge(tickEnter.append("line").attr("stroke", "currentColor").attr(x18 + "2", k * tickSizeInner));
-      text13 = text13.merge(tickEnter.append("text").attr("fill", "currentColor").attr(x18, k * spacing).attr("dy", orient === top4 ? "0em" : orient === bottom4 ? "0.71em" : "0.32em"));
+      text14 = text14.merge(tickEnter.append("text").attr("fill", "currentColor").attr(x18, k * spacing).attr("dy", orient === top4 ? "0em" : orient === bottom4 ? "0.71em" : "0.32em"));
       if (context !== selection2) {
         path3 = path3.transition(context);
         tick = tick.transition(context);
         line = line.transition(context);
-        text13 = text13.transition(context);
+        text14 = text14.transition(context);
         tickExit = tickExit.transition(context).attr("opacity", epsilon2).attr("transform", function(d7) {
           return isFinite(d7 = position2(d7)) ? transform3(d7 + offset) : this.getAttribute("transform");
         });
@@ -13714,7 +13714,7 @@
         return transform3(position2(d7) + offset);
       });
       line.attr(x18 + "2", k * tickSizeInner);
-      text13.attr(x18, k * spacing).text(format2);
+      text14.attr(x18, k * spacing).text(format2);
       selection2.filter(entering).attr("fill", "none").attr("font-size", 10).attr("font-family", "sans-serif").attr("text-anchor", orient === right2 ? "start" : orient === left2 ? "end" : "middle");
       selection2.each(function() {
         this.__axis = position2;
@@ -20472,18 +20472,6 @@
     });
   })();
 
-  // output/PSD3.ForceNavigator/foreign.js
-  function setHash2(hash2) {
-    return function() {
-      window.location.hash = hash2;
-    };
-  }
-  function openInNewTab(url2) {
-    return function() {
-      window.open(url2, "_blank");
-    };
-  }
-
   // output/Data.Lens.Internal.Forget/index.js
   var profunctorForget = {
     dimap: function(f) {
@@ -22670,19 +22658,6 @@
     };
     return NavigateToExample2;
   })();
-  var NavigateToUrl = /* @__PURE__ */ (function() {
-    function NavigateToUrl2(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
-    }
-    ;
-    NavigateToUrl2.create = function(value0) {
-      return function(value1) {
-        return new NavigateToUrl2(value0, value1);
-      };
-    };
-    return NavigateToUrl2;
-  })();
 
   // output/D3.Viz.ForceNavigator.Unsafe/index.js
   var unboxD3SimNode = function(datum2) {
@@ -22703,6 +22678,7 @@
   var textAnchor6 = /* @__PURE__ */ textAnchor(toAttrString);
   var fill13 = /* @__PURE__ */ fill(toAttrString);
   var fontSize6 = /* @__PURE__ */ fontSize(toAttrNumberFn);
+  var text12 = /* @__PURE__ */ text6(toAttrStringFn);
   var discard17 = /* @__PURE__ */ discard(discardUnit);
   var strokeOpacity4 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
   var x12 = /* @__PURE__ */ x1(toAttrNumberFn);
@@ -22710,15 +22686,15 @@
   var x22 = /* @__PURE__ */ x2(toAttrNumberFn);
   var y22 = /* @__PURE__ */ y2(toAttrNumberFn);
   var link_2 = {
-    source: function($91) {
+    source: function($92) {
       return (function(v) {
         return v.source;
-      })(unboxD3SimLink($91));
+      })(unboxD3SimLink($92));
     },
-    target: function($92) {
+    target: function($93) {
       return (function(v) {
         return v.target;
-      })(unboxD3SimLink($92));
+      })(unboxD3SimLink($93));
     }
   };
   var initialize2 = function(dictBind) {
@@ -22766,35 +22742,35 @@
     };
   };
   var datum_ = {
-    id: function($93) {
+    id: function($94) {
       return (function(v) {
         return v.id;
-      })(unboxD3SimNode($93));
-    },
-    label: function($94) {
-      return (function(v) {
-        return v.label;
       })(unboxD3SimNode($94));
     },
-    nodeType: function($95) {
+    label: function($95) {
       return (function(v) {
-        return v.nodeType;
+        return v.label;
       })(unboxD3SimNode($95));
     },
-    category: function($96) {
+    nodeType: function($96) {
       return (function(v) {
-        return v.category;
+        return v.nodeType;
       })(unboxD3SimNode($96));
     },
-    x: function($97) {
+    category: function($97) {
       return (function(v) {
-        return v.x;
+        return v.category;
       })(unboxD3SimNode($97));
     },
-    y: function($98) {
+    x: function($98) {
+      return (function(v) {
+        return v.x;
+      })(unboxD3SimNode($98));
+    },
+    y: function($99) {
       return (function(v) {
         return v.y;
-      })(unboxD3SimNode($98));
+      })(unboxD3SimNode($99));
     },
     translateNode: function(d7) {
       var node = unboxD3SimNode(d7);
@@ -22916,7 +22892,7 @@
                         return bind20(updateJoin2(node)(Group.value)(merged.nodes)(keyIsID_))(function(node$prime) {
                           return bind20(appendTo2(node$prime.enter)(Group.value)([]))(function(nodeEnter) {
                             return bind20(appendTo2(nodeEnter)(Circle.value)([radius6(datum_.nodeRadius), fill11(datum_.nodeColor), strokeColor9("#fff"), strokeWidth9(3)]))(function() {
-                              return bind20(appendTo2(nodeEnter)(Text2.value)([textAnchor6("middle"), fill13("#fff"), fontSize6(datum_.nodeFontSize)]))(function() {
+                              return bind20(appendTo2(nodeEnter)(Text2.value)([textAnchor6("middle"), fill13("#fff"), fontSize6(datum_.nodeFontSize), text12(datum_.label)]))(function() {
                                 return discard112(setAttributes2(node$prime.exit)([remove]))(function() {
                                   return bind20(selectUnder2(node$prime.update)(show18(Circle.value)))(function(updateCircles) {
                                     return discard112(setAttributes2(updateCircles)([radius6(datum_.nodeRadius), fill11(datum_.nodeColor)]))(function() {
@@ -22931,22 +22907,22 @@
                                                       return discard112(setNodesFromSelection2(mergedNodeSelection))(function() {
                                                         return discard112(setLinksFromSelection2(mergedLinksSelection)($$const(true)))(function() {
                                                           return discard112(addTickFunction2("nodes")(new Step3(mergedNodeSelection, [transform$prime(datum_.translateNode)])))(function() {
-                                                            return discard112(addTickFunction2("links")(new Step3(mergedLinksSelection, [x12(function($99) {
+                                                            return discard112(addTickFunction2("links")(new Step3(mergedLinksSelection, [x12(function($100) {
                                                               return (function(v3) {
                                                                 return v3.x;
-                                                              })(link_2.source($99));
-                                                            }), y12(function($100) {
-                                                              return (function(v3) {
-                                                                return v3.y;
                                                               })(link_2.source($100));
-                                                            }), x22(function($101) {
-                                                              return (function(v3) {
-                                                                return v3.x;
-                                                              })(link_2.target($101));
-                                                            }), y22(function($102) {
+                                                            }), y12(function($101) {
                                                               return (function(v3) {
                                                                 return v3.y;
+                                                              })(link_2.source($101));
+                                                            }), x22(function($102) {
+                                                              return (function(v3) {
+                                                                return v3.x;
                                                               })(link_2.target($102));
+                                                            }), y22(function($103) {
+                                                              return (function(v3) {
+                                                                return v3.y;
+                                                              })(link_2.target($103));
                                                             })])))(function() {
                                                               return pure25(unit);
                                                             });
@@ -23154,6 +23130,16 @@
   var insert8 = /* @__PURE__ */ insert6(ordString);
   var _expandedNodes1 = /* @__PURE__ */ _expandedNodes(strongFn);
   var pure19 = /* @__PURE__ */ pure(applicativeEffect);
+  var GoToExample = /* @__PURE__ */ (function() {
+    function GoToExample2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    GoToExample2.create = function(value0) {
+      return new GoToExample2(value0);
+    };
+    return GoToExample2;
+  })();
   var simulationEvent = function(l) {
     return onMouseEventEffectful(MouseClick.value)(function(e) {
       return function(d7) {
@@ -23199,7 +23185,7 @@
                 return pure25(unit);
               }
               ;
-              throw new Error("Failed pattern match at PSD3.ForceNavigator (line 128, column 3 - line 135, column 25): " + [openSels.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.ForceNavigator (line 123, column 3 - line 130, column 25): " + [openSels.constructor.name]);
             });
           });
         });
@@ -23266,14 +23252,6 @@
         }
         ;
         if (v1.nodeType instanceof Section && isJust(v1.url)) {
-          if (v1.url instanceof Just && v1.external instanceof Just) {
-            return handleAction4(dictMonadAff)(new NavigateToUrl(v1.url.value0, v1.external.value0));
-          }
-          ;
-          if (v1.url instanceof Just && v1.external instanceof Nothing) {
-            return handleAction4(dictMonadAff)(new NavigateToUrl(v1.url.value0, false));
-          }
-          ;
           return pure18(unit);
         }
         ;
@@ -23283,8 +23261,8 @@
       if (v instanceof ToggleExpansion) {
         return bind10(use2(_expandedNodes2))(function(expanded) {
           var newExpanded = (function() {
-            var $82 = member4(v.value0)(expanded);
-            if ($82) {
+            var $76 = member4(v.value0)(expanded);
+            if ($76) {
               return $$delete7(v.value0)(expanded);
             }
             ;
@@ -23303,18 +23281,10 @@
       }
       ;
       if (v instanceof NavigateToExample) {
-        return liftEffect12(setHash2("#/example/" + v.value0));
+        return raise(new GoToExample(v.value0));
       }
       ;
-      if (v instanceof NavigateToUrl && v.value1) {
-        return liftEffect12(openInNewTab(v.value0));
-      }
-      ;
-      if (v instanceof NavigateToUrl && !v.value1) {
-        return liftEffect12(setHash2(v.value0));
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.ForceNavigator (line 55, column 16 - line 111, column 29): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.ForceNavigator (line 58, column 16 - line 106, column 36): " + [v.constructor.name]);
     };
   };
   var component4 = function(dictMonadAff) {
@@ -24739,7 +24709,7 @@
   var strokeWidth10 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var classed1 = /* @__PURE__ */ classed(toAttrString);
   var x13 = /* @__PURE__ */ x3(toAttrNumber);
-  var text12 = /* @__PURE__ */ text6(toAttrStringFn);
+  var text13 = /* @__PURE__ */ text6(toAttrStringFn);
   var width16 = /* @__PURE__ */ width8(toAttrNumber);
   var height16 = /* @__PURE__ */ height8(toAttrNumber);
   var cursor2 = /* @__PURE__ */ cursor(toAttrString);
@@ -24752,7 +24722,7 @@
   var treeSceneAttributes = /* @__PURE__ */ (function() {
     return {
       circles: [radius8(datum_2.radius), fill14(datum_2.colorByDepth), strokeColor10(datum_2.colorByGroup), strokeWidth10(3)],
-      labels: [classed1("label"), x13(4), y3(toAttrNumber)(2), text12(datum_2.name)]
+      labels: [classed1("label"), x13(4), y3(toAttrNumber)(2), text13(datum_2.name)]
     };
   })();
   var svgAttrs = function(w) {
@@ -24763,7 +24733,7 @@
   var graphSceneAttributes = /* @__PURE__ */ (function() {
     return {
       circles: [radius8(datum_2.radius), fill14(datum_2.colorByGroup), opacity2(datum_2.opacityByType)],
-      labels: [classed1("label"), x13(0.2), y11(datum_2.positionLabel), textAnchor7("middle"), text12(datum_2.name)]
+      labels: [classed1("label"), x13(0.2), y11(datum_2.positionLabel), textAnchor7("middle"), text13(datum_2.name)]
     };
   })();
   var enterAttrs = /* @__PURE__ */ (function() {
@@ -24772,7 +24742,7 @@
   var clusterSceneAttributes = /* @__PURE__ */ (function() {
     return {
       circles: [radius8(datum_2.radius), fill14(datum_2.fillByUsage), strokeColor10(datum_2.strokeByUsage), strokeWidth10(3), opacity2(datum_2.opacityByType)],
-      labels: [classed1("label"), x13(0.2), y11(datum_2.positionLabel), textAnchor7("middle"), text12(datum_2.name)]
+      labels: [classed1("label"), x13(0.2), y11(datum_2.positionLabel), textAnchor7("middle"), text13(datum_2.name)]
     };
   })();
 

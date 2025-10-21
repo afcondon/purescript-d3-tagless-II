@@ -2,13 +2,13 @@ module PSD3.ForceNavigator.Draw where
 
 import Prelude
 
-import D3.Attributes.Sugar (classed, fill, fontSize, radius, remove, strokeColor, strokeOpacity, strokeWidth, textAnchor, transform', viewBox, x1, x2, y1, y2)
+import D3.Attributes.Sugar (classed, fill, fontSize, radius, remove, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform', viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, D3This_, Datum_, Element(..))
-import D3.Viz.ForceNavigator.Model (Category(..), NavigationRawModel, NodeType(..))
-import D3.Viz.ForceNavigator.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.FFI (keyIsID_, simdrag)
 import D3.Selection (Behavior(..), DragBehavior(..))
 import D3.Simulation.Types (Step(..))
+import D3.Viz.ForceNavigator.Model (Category(..), NavigationRawModel, NodeType(..))
+import D3.Viz.ForceNavigator.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
 import D3Tagless.Capabilities (class SelectionM, class SimulationM, addTickFunction, appendTo, attach, mergeNewDataWithSim, mergeSelections, on, openSelection, selectUnder, setAttributes, setLinksFromSelection, setNodesFromSelection, updateJoin)
 import Data.Maybe (Maybe(..))
@@ -137,6 +137,7 @@ updateSimulation { nodes: Just nodesGroup, links: Just linksGroup } model callba
       textAnchor "middle"
     , fill "#fff"
     , fontSize datum_.nodeFontSize
+    , text datum_.label
     ]
 
   -- Remove exiting nodes

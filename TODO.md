@@ -85,3 +85,6 @@ The string interpreter could - maybe, in principle - emit D3 Javascript code
 ### 13. Further data visualizations beyond the basics
 1. https://blocks.roadtolarissa.com/emeeks/894ff63d02551badfc75536d77dcd49c
 2. https://setosa.io/simpsons/
+
+### 14. Make routing fully idiomatic
+Use `purescript-routing` and get rid of the hashes etc 

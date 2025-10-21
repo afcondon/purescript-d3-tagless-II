@@ -2,15 +2,15 @@ module PSD3.HomeForceLayout where
 
 import Prelude
 
-import PSD3.ForceNavigator as NavigationComponent
+import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import Effect.Aff.Class (class MonadAff)
+import PSD3.ForceNavigator as FN
 import Type.Proxy (Proxy(..))
 
 type Slots =
-  ( navigationViz :: forall q. H.Slot q Void Unit
+  ( navigationViz :: forall q. H.Slot q FN.FN_Output Unit
   )
 
 _navigationViz = Proxy :: Proxy "navigationViz"
@@ -35,7 +35,7 @@ render _ =
             [ HP.classes [ HH.ClassName "fullscreen-viz", HH.ClassName "home-force-layout__viz", HH.ClassName "svg-container" ]
             ]
             [ -- Render the navigation visualization component
-              HH.slot_ _navigationViz unit NavigationComponent.component unit
+              HH.slot_ _navigationViz unit FN.component unit
             ]
 
         , -- Floating toolbar (top-left) - minimal for now

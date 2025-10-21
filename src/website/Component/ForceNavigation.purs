@@ -13,11 +13,10 @@ import D3.Viz.ForceNavigator.Model (NodeType(..))
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start, stop)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
 import Data.Array (filter)
-import Data.Lens (use, (.=), (%=))
+import Data.Lens (use, (.=))
 import Data.Maybe (Maybe(..), isJust)
 import Data.Nullable (null)
 import Data.Set as Set
-import Effect (Effect)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Halogen (HalogenM)
@@ -27,9 +26,13 @@ import Halogen.Subscription as HS
 import PSD3.ForceNavigator.Actions (Action(..), VizEvent(..))
 import PSD3.ForceNavigator.Draw as Draw
 import PSD3.ForceNavigator.Forces (forceLibrary)
-import PSD3.ForceNavigator.State (State, _expandedNodes, _forceStatuses, _openSelections, initialState, visibleLinks, visibleNodes)
+import PSD3.ForceNavigator.State (State, _expandedNodes, _openSelections, initialState, visibleLinks, visibleNodes)
 
-component :: forall query output m. MonadAff m => H.Component query Unit output m
+data FN_Output = 
+    GoToExample String
+  | OpenNewTab
+
+component :: forall query m. MonadAff m => H.Component query Unit FN_Output m
 component = H.mkComponent
   { initialState: const $ initialState forceLibrary -- all forces enabled from the get go
   , render
@@ -48,10 +51,10 @@ render _ =
 simulationEvent :: HS.Listener Action -> SelectionAttribute
 simulationEvent l = onMouseEventEffectful MouseClick (\e d t -> liftEffect $ HS.notify l (EventFromVizualization (Draw.getVizEventFromClick e d t)))
 
-handleAction :: forall output m.
+handleAction :: forall m.
   MonadAff m =>
   Action ->
-  HalogenM State Action () output m Unit
+  HalogenM State Action () FN_Output m Unit
 handleAction = case _ of
 
   Initialize -> do
@@ -81,9 +84,9 @@ handleAction = case _ of
       Example -> handleAction $ NavigateToExample nodeId
       -- Navigate for sections with URLs
       Section | isJust clickedNode.url -> case clickedNode.url, clickedNode.external of
-        Just url, Just ext -> handleAction $ NavigateToUrl url ext
-        Just url, Nothing -> handleAction $ NavigateToUrl url false
-        _, _ -> pure unit
+        -- Just url, Just ext -> handleAction $ NavigateToUrl url ext
+        -- Just url, Nothing -> handleAction $ NavigateToUrl url false
+        _, _ -> pure unit -- TODO removed pending solution with purescript libraries
       -- Do nothing for other node types
       _ -> pure unit
 
@@ -98,17 +101,9 @@ handleAction = case _ of
     -- TODO: Get callback from somewhere - for now use dummy
     runSimulation (onMouseEventEffectful MouseClick (\_ _ _ -> pure unit))
 
-  NavigateToExample exampleId -> do
+  NavigateToExample exampleId -> do -- WIP TODO we just raise this to the parent, not implement it here
     -- Navigate to example page
-    liftEffect $ setHash $ "#/example/" <> exampleId
-
-  NavigateToUrl url true -> do
-    -- Open external URL in new tab
-    liftEffect $ openInNewTab url
-
-  NavigateToUrl url false -> do
-    -- Navigate to internal URL
-    liftEffect $ setHash url
+    H.raise $ GoToExample exampleId
 
 runSimulation :: forall m.
   MonadEffect m =>
@@ -133,7 +128,3 @@ runSimulation callback = do
       setConfigVariable $ Alpha 1.0
       start
     Nothing -> pure unit
-
--- FFI helpers (we'll need to add these)
-foreign import setHash :: String -> Effect Unit
-foreign import openInNewTab :: String -> Effect Unit

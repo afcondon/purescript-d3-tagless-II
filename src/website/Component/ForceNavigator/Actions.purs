@@ -15,4 +15,3 @@ data Action
   | EventFromVizualization VizEvent  -- Event from D3 visualization
   | ToggleExpansion String        -- Toggle expansion of a section node
   | NavigateToExample String      -- Navigate to an example page
-  | NavigateToUrl String Boolean  -- Navigate to URL (external flag)
