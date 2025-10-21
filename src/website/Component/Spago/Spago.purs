@@ -2,8 +2,6 @@ module PSD3.Spago where
 
 import Prelude
 
-import Affjax.Web as AJAX
-import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.State (class MonadState, get)
 import D3.Attributes.Sugar (onMouseEventEffectful)
 import D3.Data.Tree (TreeLayout(..))
@@ -12,25 +10,22 @@ import D3.Viz.Spago.Draw (getVizEventFromClick)
 import D3.Viz.Spago.Draw as Graph
 import D3.Viz.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Viz.Spago.Files (NodeType(..), isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Viz.Spago.Model (SpagoModel, allNodes, convertFilesToGraphModel, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, moduleNodesToContainerXY, modulesNodesToPhyllotaxis, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_R, unpinAllNodes)
-import D3.Viz.Spago.Tree (treeReduction)
+import D3.Viz.Spago.Model (SpagoModel, allNodes, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_R, unpinAllNodes)
 import D3.FFI (linksForceName)
 import D3.Selection (SelectionAttribute)
 import D3.Simulation.Types (SimVariable(..), initialSimulationState, onlyTheseForcesActive, toggleForceStatus)
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start, stop)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
 import Data.Array (filter, foldl, (:))
-import Data.Either (hush)
 import Data.Lens (use, view, (%=), (.=))
-import Data.Map as M
 import Data.Maybe (Maybe(..))
-import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect)
 import Halogen (HalogenM, liftEffect)
 import Halogen as H
 import Halogen.Subscription as HS
 import PSD3.Spago.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..), VizEvent(..))
+import PSD3.Spago.Data (readModelData)
 import PSD3.Spago.Forces (forceLibrary)
 import PSD3.Spago.HTML (render)
 import PSD3.Spago.State (State, _callback, _chooseNodes, _cssClass, _enterselections, _forceStatus, _forceStatuses, _links, _linksActive, _linksShown, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
@@ -227,21 +222,3 @@ runSimulation = do
     Graph.updateSimulation staging attributesWithCallback
     setConfigVariable $ Alpha 1.0
     start
-
-
-readModelData :: Aff (Maybe SpagoModel)
-readModelData = do
-  let datadir = "./data/spago-data/"  -- Relative to v2/ serving directory
-  moduleJSON  <- AJAX.get ResponseFormat.string $ datadir <> "modules.json"
-  packageJSON <- AJAX.get ResponseFormat.string $ datadir <> "packages.json"
-  lsdepJSON   <- AJAX.get ResponseFormat.string $ datadir <> "lsdeps.jsonlines"
-  locJSON     <- AJAX.get ResponseFormat.string $ datadir <> "LOC.json"
-  let model = hush $ convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON <*> locJSON
-
-  pure (addTreeToModel "Main" model)
-
-addTreeToModel :: String -> Maybe SpagoModel -> Maybe SpagoModel
-addTreeToModel rootName maybeModel = do
-  model  <- maybeModel
-  rootID <- M.lookup rootName model.maps.name2ID
-  pure $ treeReduction rootID model

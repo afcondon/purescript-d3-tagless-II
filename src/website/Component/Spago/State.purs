@@ -35,6 +35,8 @@ type StateRow = (
   , scene        :: MiseEnScene
 )
 
+-- TODO MiseEnScene can be generalized and put in a library
+-- it would need to be parameterized with the types of the nodes and links and (maybe) their attributes
 type MiseEnScene = { 
 -- first: filter functions for nodes and links (both what links are shown and which ones exert force)
     chooseNodes     :: (SpagoSimNode -> Boolean)

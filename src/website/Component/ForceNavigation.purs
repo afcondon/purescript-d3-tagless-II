@@ -7,7 +7,7 @@ import D3.Attributes.Sugar (onMouseEventEffectful)
 import D3.Data.Types (MouseEvent(..))
 import D3.Node (D3_SimulationNode(..))
 import D3.Selection (SelectionAttribute)
-import D3.Simulation.Types (SimVariable(..), getStatusMap, onlyTheseForcesActive)
+import D3.Simulation.Types (SimVariable(..), getStatusMap)
 import D3.Viz.ForceNavigator.Data (navigationData)
 import D3.Viz.ForceNavigator.Model (NodeType(..))
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start, stop)
@@ -17,8 +17,10 @@ import Data.Lens (use, (.=))
 import Data.Maybe (Maybe(..), isJust)
 import Data.Nullable (null)
 import Data.Set as Set
+import Debug (spy)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Console (log)
 import Halogen (HalogenM)
 import Halogen as H
 import Halogen.HTML as HH
@@ -26,7 +28,7 @@ import Halogen.Subscription as HS
 import PSD3.ForceNavigator.Actions (Action(..), VizEvent(..))
 import PSD3.ForceNavigator.Draw as Draw
 import PSD3.ForceNavigator.Forces (forceLibrary)
-import PSD3.ForceNavigator.State (State, _expandedNodes, _openSelections, initialState, visibleLinks, visibleNodes)
+import PSD3.ForceNavigator.State (State, _callback, _expandedNodes, _openSelections, initialState, visibleLinks, visibleNodes)
 
 data FN_Output = 
     GoToExample String
@@ -64,15 +66,16 @@ handleAction = case _ of
 
     -- Create subscription for viz events
     { emitter, listener } <- liftEffect $ HS.create
+    -- now hook up this emitter so that Halogen actions will be triggered from the emitter
     void $ H.subscribe emitter
-
-    -- Run initial simulation with only center + sections visible
-    runSimulation (simulationEvent listener)
+    _callback .= (simulationEvent listener)
+    pure unit
 
   Finalize -> pure unit
 
   EventFromVizualization (NodeClick nodeId) -> do
     -- Find the clicked node to determine its type
+    H.liftEffect $ log "got an event from the force layout"
     let (D3SimNode clickedNode) = case filter (\(D3SimNode n) -> n.id == nodeId) navigationData.nodes of
           [node] -> node
           _ -> D3SimNode { id: "", label: "", nodeType: Section, category: Nothing, children: Nothing, url: Nothing, external: Nothing, description: Nothing, x: 0.0, y: 0.0, vx: 0.0, vy: 0.0, fx: null, fy: null }
@@ -99,32 +102,32 @@ handleAction = case _ of
 
     -- Re-run simulation with updated expansion
     -- TODO: Get callback from somewhere - for now use dummy
-    runSimulation (onMouseEventEffectful MouseClick (\_ _ _ -> pure unit))
+    runSimulation 
 
   NavigateToExample exampleId -> do -- WIP TODO we just raise this to the parent, not implement it here
     -- Navigate to example page
-    H.raise $ GoToExample exampleId
+    H.raise $ spy "Raising a GoToExample event on the parent component" $ GoToExample exampleId
 
 runSimulation :: forall m.
   MonadEffect m =>
   MonadState State m =>
-  SelectionAttribute ->
   m Unit
-runSimulation callback = do
+runSimulation = do
   state <- get
   openSels <- use _openSelections
   expanded <- use _expandedNodes
+  callback <- use _callback
 
   -- Filter data based on expansion state
   let visible = visibleNodes expanded navigationData.nodes
       links = visibleLinks visible navigationData.links
       model = { nodes: visible, links: links }
+      -- attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles }
 
-  case openSels of
-    Just sels -> runWithD3_Simulation do
+
+  runWithD3_Simulation do
       stop
-      actualizeForces (getStatusMap forceLibrary) -- TODO are any forces enabled??
-      Draw.updateSimulation sels model Draw.getVizEventFromClick
+      actualizeForces (getStatusMap forceLibrary)
+      -- Draw.updateSimulation { nodes: Nothing, links: Nothing } 
       setConfigVariable $ Alpha 1.0
       start
-    Nothing -> pure unit
