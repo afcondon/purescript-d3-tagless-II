@@ -84,3 +84,10 @@ It's acceptable during development to accumulate some technical debt here with s
 
 ### Debug and Console
 For console debugging it is preferred to use the purescript-debug library as this generates a custom warning on the function which uses it, aiding us not to ship production code with debug statements in it. Generally usage of the form `x = spy "what's going on here?" $ functionWhichGivesUsX` is preferred. 
+
+### The Simulation Monad
+It's quite easy to get confused between the State that's being managed by Halogen and the State that's being managed by the D3Simulation monad. See commit hash f570f0844c59113b5585c0d99aa71c811bf3043a for some commentary
+
+The management of events to and from Simulations is one of the hardest and most complicated things in the library - however the Spago example has shown that it's possible to do things with D3 using this library that have rarely if ever been attempted from JavaScript. There's probably work to do here to clarify and abstract this complexity out of such apps.
+
+Of particular interest in the Spago example is the concept of mise-en-scene: a configuration record for a particular view of the model, the forces acting on it and the styling.
