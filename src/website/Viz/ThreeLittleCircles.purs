@@ -49,6 +49,7 @@ datum_ ::               -- a record containing all the accessor functions needed
 datum_ =
   let 
     -- we bury the unsafe functions inside the datum_ record, unsafeCoerce yes, but very restricted how it can be used
+    -- in this simplest of examples, the index is also the datum itself
     getDatum :: Datum_ -> Int 
     getDatum = unsafeCoerce
     getIndex :: Index_ -> Int

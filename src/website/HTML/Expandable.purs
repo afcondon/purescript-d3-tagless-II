@@ -15,7 +15,7 @@ import Halogen.HTML.Core (class IsProp, Prop(..), PropValue)
 import Halogen.HTML.Properties as HP
 import Halogen.VDom.DOM.Prop (propFromString)
 import PSD3.Properties ((<&>))
-import Unsafe.Coerce (unsafeCoerce)
+import Unsafe.Coerce (unsafeCoerce) -- TODO a great sign that this module needs complete overhaul
 
 data Status
   = Collapsed

@@ -25,7 +25,7 @@ import Halogen.HTML as Halogen.HTML
 import Halogen.HTML.Core (Prop(..), PropValue)
 import Halogen.HTML.Properties as HP
 import Halogen.HTML.Properties as Halogen.HTML.Properties
-import Unsafe.Coerce (unsafeCoerce)
+import Unsafe.Coerce (unsafeCoerce) -- TODO excellent sign that this module needs overhaul to PureScript idiomatic codejs
 
 type IProp r i = HH.IProp ("class" :: String | r) i
 

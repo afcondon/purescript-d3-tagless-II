@@ -18,7 +18,11 @@ Implement a Sankey diagram visualization to show flow data:
 - Integrate as a new Story in the demo application
 
 ### 3. Improve comments and inline documentation
-Enhance code documentation throughout the codebase:
+Enhance code documentation throughout the codebase BUT ALSO if documenation is complex prefer refactor of DSL 
+- datum_:
+    - document the datum_ pattern
+    - rationalize it thru ALL examples
+    - simplify syntax and pattern if possible
 - Add module-level documentation to all core modules
 - Document the Finally Tagless pattern and how to extend it
 - Add inline comments for complex FFI interactions

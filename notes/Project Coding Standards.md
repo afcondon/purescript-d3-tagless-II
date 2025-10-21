@@ -1,6 +1,6 @@
-# Coding Standards for PSD3 project
+# Coding Standards for PS<$>D3 project
 ## Overview
-This repo contains a library for building D3.js visualizations in PureScript AND a website to explain, document and demonstrate the usage of the library.
+This repo contains a library for building D3.js-style visualizations in PureScript AND a website to explain, document and demonstrate the usage of the library.
 
 ## Directory and file structure
 All directories shall be lower case EXCEPT those with PureScript modules which should match PureScript naming requirements of capitalized module names, ie module Foo.Bar.Baz is found in <src>/Foo/Bar/Baz.purs 
