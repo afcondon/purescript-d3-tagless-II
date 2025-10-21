@@ -23452,7 +23452,7 @@
         return "package";
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Files (line 293, column 1 - line 295, column 47): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.Spago.Files (line 295, column 1 - line 297, column 47): " + [v.constructor.name]);
     }
   };
   var showLinkType = {
@@ -23473,7 +23473,7 @@
         return "module to package dependency";
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Files (line 296, column 1 - line 300, column 44): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.Spago.Files (line 298, column 1 - line 302, column 44): " + [v.constructor.name]);
     }
   };
   var isP2P_Link = function(v) {
@@ -23747,7 +23747,6 @@
   var show18 = /* @__PURE__ */ show(showLinkType);
   var append14 = /* @__PURE__ */ append(semigroupString);
   var fromFoldable13 = /* @__PURE__ */ fromFoldable2(ordInt)(foldableArray);
-  var spy4 = /* @__PURE__ */ spy();
   var foldlWithIndex3 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
   var show19 = /* @__PURE__ */ show(showInt);
   var show24 = /* @__PURE__ */ show(showNumber);
@@ -23928,38 +23927,38 @@
     };
   };
   var link_2 = {
-    source: function($198) {
+    source: function($197) {
       return (function(v) {
         return v.source;
-      })(unboxD3SimLink2($198));
+      })(unboxD3SimLink2($197));
     },
-    target: function($199) {
+    target: function($198) {
       return (function(v) {
         return v.target;
-      })(unboxD3SimLink2($199));
+      })(unboxD3SimLink2($198));
     },
-    linkType: function($200) {
+    linkType: function($199) {
       return (function(v) {
         return v.linktype;
-      })(unboxD3SimLink2($200));
+      })(unboxD3SimLink2($199));
     },
-    linkClass: function($201) {
+    linkClass: function($200) {
       return show18((function(v) {
         return v.linktype;
-      })(unboxD3SimLink2($201)));
+      })(unboxD3SimLink2($200)));
     },
     linkClass2: /* @__PURE__ */ (function() {
-      var $202 = append14("updated ");
-      return function($203) {
-        return $202(show18((function(v) {
+      var $201 = append14("updated ");
+      return function($202) {
+        return $201(show18((function(v) {
           return v.linktype;
-        })(unboxD3SimLink2($203))));
+        })(unboxD3SimLink2($202))));
       };
     })(),
-    color: function($204) {
+    color: function($203) {
       return d3SchemeCategory10N_(toNumber((function(v) {
         return v.target.containerID;
-      })(unboxD3SimLink2($204))));
+      })(unboxD3SimLink2($203))));
     }
   };
   var sourcePackageIs = function(name16) {
@@ -23980,7 +23979,7 @@
       return false;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 190, column 3 - line 194, column 31): " + [v.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 189, column 3 - line 193, column 31): " + [v.nodetype.constructor.name]);
   };
   var treeNodesToTreeXY_R = function(nodes) {
     var setXYtoTreeXY = function(v) {
@@ -24037,7 +24036,7 @@
         return true;
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 180, column 3 - line 182, column 26): " + [v.nodetype.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 179, column 3 - line 181, column 26): " + [v.nodetype.constructor.name]);
     };
   };
   var isPackage = function(v) {
@@ -24049,7 +24048,7 @@
       return true;
     }
     ;
-    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 175, column 3 - line 177, column 26): " + [v.nodetype.constructor.name]);
+    throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 174, column 3 - line 176, column 26): " + [v.nodetype.constructor.name]);
   };
   var moduleNodesToContainerXY = function(nodes) {
     var partitioned = partition(isPackage)(nodes);
@@ -24061,7 +24060,7 @@
     var setModuleGridXY = function(v) {
       var v1 = lookup10(v.containerID)(packagesIndexMap);
       if (v1 instanceof Nothing) {
-        return spy4("container gridXY not found")(v);
+        return v;
       }
       ;
       if (v1 instanceof Just) {
@@ -24230,9 +24229,9 @@
     return function(point) {
       return function(nodes) {
         var fixNamedNode$prime = function(v) {
-          var $169 = v.name === label5;
-          if ($169) {
-            return spy4("fixing a node to: ")({
+          var $168 = v.name === label5;
+          if ($168) {
+            return {
               name: v.name,
               cluster: v.cluster,
               connected: v.connected,
@@ -24257,7 +24256,7 @@
               y: v.y,
               fx: notNull(point.x),
               fy: notNull(point.y)
-            });
+            };
           }
           ;
           return v;
@@ -24267,90 +24266,90 @@
     };
   };
   var datum_2 = {
-    radius: function($205) {
+    radius: function($204) {
       return (function(v) {
         return v.r;
-      })(unboxD3SimNode2($205));
+      })(unboxD3SimNode2($204));
     },
-    id: function($206) {
+    id: function($205) {
       return (function(v) {
         return v.id;
-      })(unboxD3SimNode2($206));
+      })(unboxD3SimNode2($205));
     },
-    loc: function($207) {
+    loc: function($206) {
       return (function(v) {
         return v.loc;
-      })(unboxD3SimNode2($207));
+      })(unboxD3SimNode2($206));
     },
-    containerID: function($208) {
+    containerID: function($207) {
       return (function(v) {
         return v.containerID;
-      })(unboxD3SimNode2($208));
+      })(unboxD3SimNode2($207));
     },
-    containerName: function($209) {
+    containerName: function($208) {
       return (function(v) {
         return v.containerName;
-      })(unboxD3SimNode2($209));
+      })(unboxD3SimNode2($208));
     },
-    name: function($210) {
+    name: function($209) {
       return (function(v) {
         return v.name;
-      })(unboxD3SimNode2($210));
+      })(unboxD3SimNode2($209));
     },
-    x: function($211) {
+    x: function($210) {
       return (function(v) {
         return v.x;
-      })(unboxD3SimNode2($211));
+      })(unboxD3SimNode2($210));
     },
-    y: function($212) {
+    y: function($211) {
       return (function(v) {
         return v.y;
-      })(unboxD3SimNode2($212));
+      })(unboxD3SimNode2($211));
     },
-    fx: function($213) {
+    fx: function($212) {
       return (function(v) {
         return v.fx;
-      })(unboxD3SimNode2($213));
+      })(unboxD3SimNode2($212));
     },
-    fy: function($214) {
+    fy: function($213) {
       return (function(v) {
         return v.fy;
-      })(unboxD3SimNode2($214));
+      })(unboxD3SimNode2($213));
     },
-    treeXY: function($215) {
+    treeXY: function($214) {
       return (function(v) {
         return v.treeXY;
-      })(unboxD3SimNode2($215));
+      })(unboxD3SimNode2($214));
     },
-    treeDepth: function($216) {
+    treeDepth: function($215) {
       return (function(v) {
         return v.treeDepth;
-      })(unboxD3SimNode2($216));
+      })(unboxD3SimNode2($215));
     },
-    gridXY: function($217) {
+    gridXY: function($216) {
       return (function(v) {
         return v.gridXY;
-      })(unboxD3SimNode2($217));
+      })(unboxD3SimNode2($216));
     },
-    nodetype: function($218) {
+    nodetype: function($217) {
       return (function(v) {
         return v.nodetype;
-      })(unboxD3SimNode2($218));
+      })(unboxD3SimNode2($217));
     },
-    cluster: function($219) {
+    cluster: function($218) {
       return (function(v) {
         return v.cluster;
-      })(unboxD3SimNode2($219));
+      })(unboxD3SimNode2($218));
     },
-    links: function($220) {
+    links: function($219) {
       return (function(v) {
         return v.links;
-      })(unboxD3SimNode2($220));
+      })(unboxD3SimNode2($219));
     },
-    connected: function($221) {
+    connected: function($220) {
       return (function(v) {
         return v.connected;
-      })(unboxD3SimNode2($221));
+      })(unboxD3SimNode2($220));
     },
     nameAndID: function(d7) {
       return unboxD3SimNode2(d7).name + (" " + show19(unboxD3SimNode2(d7).id));
@@ -24393,10 +24392,10 @@
         return v.y;
       })(datum_2.treePoint(d7));
     },
-    indexFunction: function($222) {
+    indexFunction: function($221) {
       return (function(v) {
         return v.id;
-      })(unboxD3SimNode2($222));
+      })(unboxD3SimNode2($221));
     },
     positionLabel: function(d7) {
       var v = datum_2.nodetype(d7);
@@ -24408,11 +24407,11 @@
         return 0;
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 106, column 11 - line 108, column 33): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 105, column 11 - line 107, column 33): " + [v.constructor.name]);
     },
     collideRadius: function(d7) {
-      var $175 = datum_2.id(d7) === datum_2.containerID(d7);
-      if ($175) {
+      var $174 = datum_2.id(d7) === datum_2.containerID(d7);
+      if ($174) {
         return 10;
       }
       ;
@@ -24423,8 +24422,8 @@
     },
     nodeClass: function(d7) {
       return show34(datum_2.nodetype(d7)) + (" " + (datum_2.containerName(d7) + (" " + (datum_2.name(d7) + (function() {
-        var $176 = datum_2.connected(d7);
-        if ($176) {
+        var $175 = datum_2.connected(d7);
+        if ($175) {
           return " connected";
         }
         ;
@@ -24433,8 +24432,8 @@
     },
     "nodeClass'": function(d7) {
       return "updated" + (show34(datum_2.nodetype(d7)) + (" " + (datum_2.containerName(d7) + (" " + (datum_2.name(d7) + (function() {
-        var $177 = datum_2.connected(d7);
-        if ($177) {
+        var $176 = datum_2.connected(d7);
+        if ($176) {
           return " connected";
         }
         ;
@@ -24454,35 +24453,35 @@
         return d3SchemeSequential10N_(toNumber(v.value0));
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 126, column 13 - line 128, column 68): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 125, column 13 - line 127, column 68): " + [v.constructor.name]);
     },
     fillByUsage: function(d7) {
-      var $180 = datum_2.connected(d7);
-      if ($180) {
+      var $179 = datum_2.connected(d7);
+      if ($179) {
         return datum_2.colorByGroup(d7);
       }
       ;
       return "none";
     },
     strokeByUsage: function(d7) {
-      var $181 = datum_2.connected(d7);
-      if ($181) {
+      var $180 = datum_2.connected(d7);
+      if ($180) {
         return "none";
       }
       ;
       return datum_2.colorByGroup(d7);
     },
     colorByUsage: function(d7) {
-      var $182 = datum_2.connected(d7);
-      if ($182) {
+      var $181 = datum_2.connected(d7);
+      if ($181) {
         return "red";
       }
       ;
       return "blue";
     },
     opacityByType: function(d7) {
-      var $183 = datum_2.isPackage(d7);
-      if ($183) {
+      var $182 = datum_2.isPackage(d7);
+      if ($182) {
         return 0.4;
       }
       ;
@@ -24508,7 +24507,7 @@
         return true;
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 143, column 13 - line 145, column 36): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 142, column 13 - line 144, column 36): " + [v.constructor.name]);
     },
     isModule: function(d7) {
       var v = datum_2.nodetype(d7);
@@ -24520,7 +24519,7 @@
         return false;
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 147, column 13 - line 149, column 37): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 146, column 13 - line 148, column 37): " + [v.constructor.name]);
     },
     isUnusedModule: function(d7) {
       var v = datum_2.nodetype(d7);
@@ -24529,15 +24528,15 @@
       }
       ;
       if (v instanceof IsModule) {
-        var $192 = datum_2.connected(d7);
-        if ($192) {
+        var $191 = datum_2.connected(d7);
+        if ($191) {
           return false;
         }
         ;
         return true;
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 151, column 13 - line 155, column 41): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 150, column 13 - line 154, column 41): " + [v.constructor.name]);
     },
     isUsedModule: function(d7) {
       var v = datum_2.nodetype(d7);
@@ -24546,15 +24545,15 @@
       }
       ;
       if (v instanceof IsModule) {
-        var $196 = datum_2.connected(d7);
-        if ($196) {
+        var $195 = datum_2.connected(d7);
+        if ($195) {
           return true;
         }
         ;
         return false;
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 158, column 13 - line 162, column 42): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 157, column 13 - line 161, column 42): " + [v.constructor.name]);
     },
     treeChildren: function(d7) {
       return datum_2.links(d7).treeChildren;
@@ -26250,7 +26249,7 @@
   var modify_7 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var mempty2 = /* @__PURE__ */ mempty(/* @__PURE__ */ monoidEffect(monoidUnit));
   var pure111 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var spy5 = /* @__PURE__ */ spy();
+  var spy4 = /* @__PURE__ */ spy();
   var slot_6 = /* @__PURE__ */ slot_();
   var slot_1 = /* @__PURE__ */ slot_6({
     reflectSymbol: function() {
@@ -26442,7 +26441,7 @@
     return $$Proxy.value;
   })();
   var renderPage = function(route) {
-    var v = spy5("Route is")(route);
+    var v = spy4("Route is")(route);
     if (v instanceof Home) {
       return slot_1(_home)(unit)(component1)(unit);
     }

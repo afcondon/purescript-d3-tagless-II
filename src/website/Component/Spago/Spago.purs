@@ -1,3 +1,32 @@
+-- | The Spago Component - A Complex Force-Directed Graph Visualization
+-- |
+-- | This module demonstrates the "MiseEnScene" pattern for building interactive
+-- | force simulations with multiple views/scenes. Key architectural elements:
+-- |
+-- | **Scene Management**: Each "scene" is a complete configuration (MiseEnScene)
+-- | that specifies data filters, force settings, visual styling, and initialization.
+-- | Switching scenes is as simple as setting up the config and calling runSimulation.
+-- |
+-- | **State Structure**:
+-- | - `model`: Immutable source data (graph structure, node/link properties)
+-- | - `staging`: Filtered/transformed data ready for D3 (nodes, links, selections)
+-- | - `simulation`: D3 simulation state (managed by library)
+-- | - `scene`: Current MiseEnScene configuration
+-- |
+-- | **Event Flow**:
+-- | 1. User interaction in Halogen UI → Action
+-- | 2. Action handler updates State (filters, forces, styling)
+-- | 3. `runSimulation` stages data and updates D3 visualization
+-- | 4. D3 events (clicks, drags) → VizEvent → Halogen Action (bidirectional!)
+-- |
+-- | **The runSimulation Pattern**:
+-- | This is the key function that bridges Halogen state to D3 rendering:
+-- | 1. Apply filters to model data → staging
+-- | 2. Run node initialization functions (positioning, pinning)
+-- | 3. Stop simulation
+-- | 4. Update forces based on scene configuration
+-- | 5. Call updateSimulation (D3 General Update Pattern)
+-- | 6. Restart simulation
 module PSD3.Spago where
 
 import Prelude
@@ -52,6 +81,7 @@ component = H.mkComponent
 simulationEvent :: HS.Listener Action -> SelectionAttribute
 simulationEvent l = onMouseEventEffectful MouseClick (\e d t -> liftEffect $ HS.notify l (EventFromVizualization (getVizEventFromClick e d t)))
 
+-- | Main action handler - processes all user interactions and internal events
 handleAction :: forall t316 t317 t318.
   MonadAff t318 =>
   Action ->
@@ -59,19 +89,22 @@ handleAction :: forall t316 t317 t318.
 handleAction = case _ of
 
   Initialize -> do
+    -- 1. Load model data from JSON files (async)
     -- read various JSON files and synthesize a Model
     (maybeModel :: Maybe SpagoModel) <- H.liftAff readModelData
     _model %= (const maybeModel)
-    -- set things up in the DOM with SVG, groups for links and nodes, open selections for updates
+
+    -- 2. Initialize D3 structure (one-time SVG setup)
     openSelections <- evalEffectSimulation Graph.initialize
     (_staging <<< _enterselections <<< _nodes) %= (const $ openSelections.nodes)
     (_staging <<< _enterselections <<< _links) %= (const $ openSelections.links)
-    -- create subscriptions for actions arising in the visualization to trigger actions in Halogen app
-    { emitter, listener } <- liftEffect $ HS.create
-    -- now hook up this emitter so that Halogen Actions will be triggered by notifications from that emitter
-    void $ H.subscribe emitter
 
-    _callback .= (simulationEvent listener)
+    -- 3. Set up bidirectional event flow: D3 → Halogen
+    -- Create emitter/listener pair for D3 click events to trigger Halogen actions
+    { emitter, listener } <- liftEffect $ HS.create
+    void $ H.subscribe emitter  -- Subscribe Halogen to the emitter
+    _callback .= (simulationEvent listener)  -- Store callback in scene config
+
     pure unit
 
   Finalize -> pure unit
@@ -91,6 +124,13 @@ handleAction = case _ of
 
   SpotlightNode _ -> runWithD3_Simulation stop
 
+  -- | Scene Switching Pattern - demonstrates the MiseEnScene approach
+  -- | Each scene handler:
+  -- | 1. Sets node/link filters (_chooseNodes, _linksShown, _linksActive)
+  -- | 2. Configures forces (_forceStatuses)
+  -- | 3. Sets visual style (_cssClass, _sceneAttributes)
+  -- | 4. Specifies initialization functions (_nodeInitializerFunctions)
+  -- | 5. Calls runSimulation to apply the configuration
   Scene PackageGrid -> do
     _chooseNodes     .= allNodes
     _linksShown      .= isM2P_Link
@@ -187,7 +227,8 @@ handleAction = case _ of
       setConfigVariable $ Alpha 0.0
       stop
 
-
+-- | Prepare model data for visualization by applying filters and transformations
+-- | This is the bridge between immutable model data and mutable staging data
 stageDataFromModel :: forall m.
   MonadState State m =>
   m Unit
@@ -205,6 +246,16 @@ stageDataFromModel = do
 
   _stagingNodes      .= initializedNodes
 
+-- | The core simulation orchestrator - bridges Halogen state to D3 rendering
+-- |
+-- | This is the key pattern for updating force simulations:
+-- | 1. Stage data from model (apply filters, run initializers)
+-- | 2. Stop the running simulation
+-- | 3. Activate/deactivate forces based on scene config
+-- | 4. Update D3 visualization (General Update Pattern)
+-- | 5. Restart simulation with new alpha
+-- |
+-- | Called whenever scene configuration changes or data is filtered
 runSimulation :: forall m.
   MonadEffect m =>
   MonadState State m =>
