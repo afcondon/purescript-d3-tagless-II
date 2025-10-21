@@ -3,14 +3,12 @@ module PSD3.Spago.State where
 import Prelude
 
 import D3.Attributes.Instances (Label)
-import D3.Attributes.Sugar (x)
 import D3.Data.Types (D3Selection_, Datum_)
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, clusterSceneAttributes)
 import D3.Viz.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
 import D3.FFI (SimulationVariables, readSimulationVariables)
 import D3.Node (NodeID)
-import D3.Selection (SelectionAttribute)
 import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus, _handle, getStatusMap)
 import D3Tagless.Capabilities (Staging)
 import Data.Lens (Lens', _Just, view)
@@ -24,8 +22,7 @@ import Halogen.Subscription as HS
 import PSD3.Spago.Actions (Action)
 import Type.Proxy (Proxy(..))
   
-type State = Record (StateRow)
-type StateRow = (
+type State = {
   -- the simulationState manages the Nodes, Links, Forces, Selections, Ticks & simulation parameters
     simulation   :: D3SimulationState_
   -- the model should actually be a component, probably a hook so that it can be constructed by this component and not be a Maybe
@@ -37,7 +34,7 @@ type StateRow = (
   , scene        :: MiseEnScene
 -- | Event listener for D3→Halogen event flow (component infrastructure, not scene config)
   , eventListener :: Maybe (HS.Listener Action)
-)
+}
 
 -- | Configuration for a visualization "scene" - a complete specification of:
 -- | - which data to show (node/link filters)

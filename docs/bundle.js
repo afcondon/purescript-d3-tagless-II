@@ -25539,7 +25539,6 @@
   var caption_2 = /* @__PURE__ */ caption2([]);
 
   // output/PSD3.Spago.State/index.js
-  var x17 = /* @__PURE__ */ x3(toAttrNumber);
   var _handle3 = /* @__PURE__ */ _handle(strongForget);
   var prop6 = /* @__PURE__ */ prop3({
     reflectSymbol: function() {
@@ -25604,22 +25603,22 @@
   var at3 = /* @__PURE__ */ at(/* @__PURE__ */ atMap(ordString));
   var prop132 = /* @__PURE__ */ prop3({
     reflectSymbol: function() {
-      return "selections";
+      return "eventListener";
     }
   })()();
   var prop142 = /* @__PURE__ */ prop3({
     reflectSymbol: function() {
-      return "cssClass";
+      return "selections";
     }
   })()();
   var prop152 = /* @__PURE__ */ prop3({
     reflectSymbol: function() {
-      return "chooseNodes";
+      return "cssClass";
     }
   })()();
   var prop162 = /* @__PURE__ */ prop3({
     reflectSymbol: function() {
-      return "callback";
+      return "chooseNodes";
     }
   })()();
   var initialScene = function(forceLibrary3) {
@@ -25630,7 +25629,6 @@
       forceStatuses: getStatusMap(forceLibrary3),
       cssClass: "",
       attributes: clusterSceneAttributes,
-      callback: x17(0),
       nodeInitializerFunctions: []
     };
   };
@@ -25645,10 +25643,10 @@
     return prop19($$Proxy.value)(dictStrong);
   };
   var _sceneAttributes = function(dictStrong) {
-    var $125 = _scene(dictStrong);
-    var $126 = prop23($$Proxy.value)(dictStrong);
-    return function($127) {
-      return $125($126($127));
+    var $123 = _scene(dictStrong);
+    var $124 = prop23($$Proxy.value)(dictStrong);
+    return function($125) {
+      return $123($124($125));
     };
   };
   var _rawdata = function(dictStrong) {
@@ -25662,16 +25660,16 @@
     var _rawdata1 = _rawdata(dictStrong);
     var _nodes1 = _nodes(dictStrong);
     return function(dictChoice) {
-      return function($128) {
-        return _staging12(_rawdata1(_nodes1($128)));
+      return function($126) {
+        return _staging12(_rawdata1(_nodes1($126)));
       };
     };
   };
   var _nodeInitializerFunctions = function(dictStrong) {
-    var $129 = _scene(dictStrong);
-    var $130 = prop52($$Proxy.value)(dictStrong);
-    return function($131) {
-      return $129($130($131));
+    var $127 = _scene(dictStrong);
+    var $128 = prop52($$Proxy.value)(dictStrong);
+    return function($129) {
+      return $127($128($129));
     };
   };
   var _model = function(dictStrong) {
@@ -25681,9 +25679,9 @@
     var _model1 = _model(dictStrong);
     var _nodes1 = _nodes(dictStrong);
     return function(dictChoice) {
-      var $132 = _Just(dictChoice);
-      return function($133) {
-        return _model1($132(_nodes1($133)));
+      var $130 = _Just(dictChoice);
+      return function($131) {
+        return _model1($130(_nodes1($131)));
       };
     };
   };
@@ -25691,24 +25689,24 @@
     return prop7($$Proxy.value)(dictStrong);
   };
   var _stagingLinkFilter = function(dictStrong) {
-    var $134 = _staging(dictStrong);
-    var $135 = _linksWithForce(dictStrong);
-    return function($136) {
-      return $134($135($136));
+    var $132 = _staging(dictStrong);
+    var $133 = _linksWithForce(dictStrong);
+    return function($134) {
+      return $132($133($134));
     };
   };
   var _linksShown = function(dictStrong) {
-    var $137 = _scene(dictStrong);
-    var $138 = prop8($$Proxy.value)(dictStrong);
-    return function($139) {
-      return $137($138($139));
+    var $135 = _scene(dictStrong);
+    var $136 = prop8($$Proxy.value)(dictStrong);
+    return function($137) {
+      return $135($136($137));
     };
   };
   var _linksActive = function(dictStrong) {
-    var $140 = _scene(dictStrong);
-    var $141 = prop9($$Proxy.value)(dictStrong);
-    return function($142) {
-      return $140($141($142));
+    var $138 = _scene(dictStrong);
+    var $139 = prop9($$Proxy.value)(dictStrong);
+    return function($140) {
+      return $138($139($140));
     };
   };
   var _links = function(dictStrong) {
@@ -25718,9 +25716,9 @@
     var _model1 = _model(dictStrong);
     var _links1 = _links(dictStrong);
     return function(dictChoice) {
-      var $143 = _Just(dictChoice);
-      return function($144) {
-        return _model1($143(_links1($144)));
+      var $141 = _Just(dictChoice);
+      return function($142) {
+        return _model1($141(_links1($142)));
       };
     };
   };
@@ -25729,16 +25727,16 @@
     var _rawdata1 = _rawdata(dictStrong);
     var _links1 = _links(dictStrong);
     return function(dictChoice) {
-      return function($145) {
-        return _staging12(_rawdata1(_links1($145)));
+      return function($143) {
+        return _staging12(_rawdata1(_links1($143)));
       };
     };
   };
   var _forceStatuses = function(dictStrong) {
-    var $146 = _scene(dictStrong);
-    var $147 = prop122($$Proxy.value)(dictStrong);
-    return function($148) {
-      return $146($147($148));
+    var $144 = _scene(dictStrong);
+    var $145 = prop122($$Proxy.value)(dictStrong);
+    return function($146) {
+      return $144($145($146));
     };
   };
   var _forceStatus = function(dictStrong) {
@@ -25746,35 +25744,31 @@
     return function(dictChoice) {
       var _Just2 = _Just(dictChoice);
       return function(label5) {
-        var $149 = at3(label5)(dictStrong);
-        return function($150) {
-          return _forceStatuses12($149(_Just2($150)));
+        var $147 = at3(label5)(dictStrong);
+        return function($148) {
+          return _forceStatuses12($147(_Just2($148)));
         };
       };
     };
   };
-  var _enterselections = function(dictStrong) {
+  var _eventListener = function(dictStrong) {
     return prop132($$Proxy.value)(dictStrong);
   };
+  var _enterselections = function(dictStrong) {
+    return prop142($$Proxy.value)(dictStrong);
+  };
   var _cssClass = function(dictStrong) {
-    var $151 = _scene(dictStrong);
-    var $152 = prop142($$Proxy.value)(dictStrong);
-    return function($153) {
-      return $151($152($153));
+    var $149 = _scene(dictStrong);
+    var $150 = prop152($$Proxy.value)(dictStrong);
+    return function($151) {
+      return $149($150($151));
     };
   };
   var _chooseNodes = function(dictStrong) {
-    var $154 = _scene(dictStrong);
-    var $155 = prop152($$Proxy.value)(dictStrong);
-    return function($156) {
-      return $154($155($156));
-    };
-  };
-  var _callback3 = function(dictStrong) {
-    var $157 = _scene(dictStrong);
-    var $158 = prop162($$Proxy.value)(dictStrong);
-    return function($159) {
-      return $157($158($159));
+    var $152 = _scene(dictStrong);
+    var $153 = prop162($$Proxy.value)(dictStrong);
+    return function($154) {
+      return $152($153($154));
     };
   };
 
@@ -25852,9 +25846,10 @@
   var _stagingNodes3 = /* @__PURE__ */ _stagingNodes(strongFn)(choiceFn);
   var liftEffect10 = /* @__PURE__ */ liftEffect(monadEffectEffect);
   var _staging2 = /* @__PURE__ */ _staging(strongForget);
-  var _callback4 = /* @__PURE__ */ _callback3(strongForget);
+  var _eventListener2 = /* @__PURE__ */ _eventListener(strongForget);
   var _sceneAttributes2 = /* @__PURE__ */ _sceneAttributes(strongForget);
   var _forceStatuses2 = /* @__PURE__ */ _forceStatuses(strongForget);
+  var x17 = /* @__PURE__ */ x3(toAttrNumber);
   var discard110 = /* @__PURE__ */ discard20(bindD3SimM);
   var stop3 = /* @__PURE__ */ stop(simulationMD3Selection_D3);
   var actualizeForces3 = /* @__PURE__ */ actualizeForces(simulationMD3Selection_D3);
@@ -25873,7 +25868,7 @@
   var _links2 = /* @__PURE__ */ _links(strongFn);
   var $$void10 = /* @__PURE__ */ $$void(functorHalogenM);
   var assign4 = /* @__PURE__ */ assign2(monadStateHalogenM);
-  var _callback12 = /* @__PURE__ */ _callback3(strongFn);
+  var _eventListener1 = /* @__PURE__ */ _eventListener(strongFn);
   var pure21 = /* @__PURE__ */ pure(applicativeHalogenM);
   var _chooseNodes1 = /* @__PURE__ */ _chooseNodes(strongFn);
   var runWithD3_Simulation2 = /* @__PURE__ */ runWithD3_Simulation(bindHalogenM)(monadStateHalogenM);
@@ -25932,9 +25927,20 @@
       var runWithD3_Simulation22 = runWithD3_Simulation1(dictMonadState)(dictMonadEffect);
       return discard32(stageDataFromModel(dictMonadState))(function() {
         return bind111(use3(_staging2))(function(staging) {
-          return bind111(use3(_callback4))(function(callback) {
+          return bind111(use3(_eventListener2))(function(maybeListener) {
             return bind111(use3(_sceneAttributes2))(function(sceneAttributes) {
               return bind111(use3(_forceStatuses2))(function(forceStatuses) {
+                var callback = (function() {
+                  if (maybeListener instanceof Just) {
+                    return simulationEvent2(maybeListener.value0);
+                  }
+                  ;
+                  if (maybeListener instanceof Nothing) {
+                    return x17(0);
+                  }
+                  ;
+                  throw new Error("Failed pattern match at PSD3.Spago (line 272, column 18 - line 274, column 25): " + [maybeListener.constructor.name]);
+                })();
                 var attributesWithCallback = {
                   labels: sceneAttributes.labels,
                   circles: cons3(callback)(sceneAttributes.circles)
@@ -25967,15 +25973,15 @@
         return bind19(liftAff2(readModelData))(function(v1) {
           return discard25(modifying2(_model2)($$const(v1)))(function() {
             return bind19(evalEffectSimulation1(initialize5))(function(openSelections) {
-              return discard25(modifying2(function($135) {
-                return _staging1(_enterselections2(_nodes2($135)));
+              return discard25(modifying2(function($138) {
+                return _staging1(_enterselections2(_nodes2($138)));
               })($$const(openSelections.nodes)))(function() {
-                return discard25(modifying2(function($136) {
-                  return _staging1(_enterselections2(_links2($136)));
+                return discard25(modifying2(function($139) {
+                  return _staging1(_enterselections2(_links2($139)));
                 })($$const(openSelections.links)))(function() {
                   return bind19(liftEffect12(create3))(function(v2) {
                     return discard25($$void10(subscribe2(v2.emitter)))(function() {
-                      return discard25(assign4(_callback12)(simulationEvent2(v2.listener)))(function() {
+                      return discard25(assign4(_eventListener1)(new Just(v2.listener)))(function() {
                         return pure21(unit);
                       });
                     });
@@ -26000,7 +26006,7 @@
           return handleAction5(dictMonadAff)(new SpotlightNode(v.value0.value1));
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Spago (line 80, column 5 - line 82, column 68): " + [v.value0.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Spago (line 114, column 5 - line 116, column 68): " + [v.value0.constructor.name]);
       }
       ;
       if (v instanceof ToggleChildrenOfNode) {
@@ -26183,7 +26189,7 @@
         }));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Spago (line 59, column 16 - line 188, column 11): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Spago (line 90, column 16 - line 229, column 11): " + [v.constructor.name]);
     };
   };
   var component9 = function(dictMonadAff) {
@@ -26201,7 +26207,8 @@
         }
       },
       simulation: initialSimulationState(forceLibrary2),
-      scene: initialScene(forceLibrary2)
+      scene: initialScene(forceLibrary2),
+      eventListener: Nothing.value
     };
     return mkComponent({
       initialState: $$const(initialState5),
