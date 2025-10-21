@@ -31,7 +31,7 @@ import PSD3.ForceNavigator.State (State, _expandedNodes, _forceStatuses, _openSe
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
-  { initialState: const $ initialState forceLibrary
+  { initialState: const $ initialState forceLibrary -- all forces enabled from the get go
   , render
   , eval: H.mkEval $ H.defaultEval
     { handleAction = handleAction
@@ -62,10 +62,6 @@ handleAction = case _ of
     -- Create subscription for viz events
     { emitter, listener } <- liftEffect $ HS.create
     void $ H.subscribe emitter
-
-    -- Enable initial forces chosen from the ForceLibary for this Model
-    -- TODO force library still listing as empty in console 
-    _forceStatuses %= onlyTheseForcesActive [ "charge", "center", "collision" ]
 
     -- Run initial simulation with only center + sections visible
     runSimulation (simulationEvent listener)

@@ -3,10 +3,10 @@ module PSD3.ForceNavigator.Forces where
 import Prelude
 
 import D3.Attributes.Instances (Label)
-import D3.Viz.ForceNavigator.Unsafe (unboxD3SimNode)
 import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce, createLinkForce, initialize)
+import D3.Simulation.Forces (createForce, createLinkForce, enableForce, initialize)
 import D3.Simulation.Types (Force, ForceType(..), RegularForceType(..), allNodes)
+import D3.Viz.ForceNavigator.Unsafe (unboxD3SimNode)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)
@@ -20,7 +20,7 @@ collisionRadius d = do
 
 -- | Table of all forces used in the navigation component
 forceLibrary :: Map Label Force
-forceLibrary = initialize [
+forceLibrary = enableForce <$> initialize [ -- in this usage we can just go ahead and enable all on initialisation (unless that causes a problem with no nodes present, can't remember, TODO)
     -- Strong charge to spread nodes out
     createForce "charge" (RegularForce ForceManyBody) allNodes [
         F.strength (-800.0)

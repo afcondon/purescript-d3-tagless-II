@@ -77,10 +77,10 @@ simulationUpdateForceStatuses :: forall m row.
   m Unit
 simulationUpdateForceStatuses forceStatuses = do
   handle        <- use _handle
-  let _ = spy "forceStatuses on update: " $ listActiveForces forceStatuses
+  -- let _ = spy "forceStatuses on update: " $ listActiveForces forceStatuses
   _forceLibrary %= (putStatusMap forceStatuses)
   forceLibrary  <- use _forceLibrary -- now use the updated force
-  let _ = spy "forceLibrary after status update: " $ listActiveForcesInLibrary forceLibrary
+  -- let _ = spy "forceLibrary after status update: " $ listActiveForcesInLibrary forceLibrary
   let _ = (updateForceInSimulation handle) <$> forceLibrary
   pure unit
 

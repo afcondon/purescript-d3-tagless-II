@@ -26,7 +26,7 @@ type State = {
 initialState :: M.Map Label Force -> State
 initialState forceLibrary = {
   simulation: initialSimulationState forceLibrary
-, expandedNodes: Set.singleton "purescript-d3"  -- Center node starts expanded
+, expandedNodes: Set.singleton "PS<$>D3"  -- Center node starts expanded
 , openSelections: Nothing
 , forceStatuses: getStatusMap forceLibrary
 }

@@ -107,10 +107,10 @@
     return dict.map;
   };
   var mapFlipped = function(dictFunctor) {
-    var map115 = map(dictFunctor);
+    var map114 = map(dictFunctor);
     return function(fa) {
       return function(f) {
-        return map115(f)(fa);
+        return map114(f)(fa);
       };
     };
   };
@@ -118,10 +118,10 @@
     return map(dictFunctor)($$const(unit));
   };
   var voidLeft = function(dictFunctor) {
-    var map115 = map(dictFunctor);
+    var map114 = map(dictFunctor);
     return function(f) {
       return function(x18) {
-        return map115($$const(x18))(f);
+        return map114($$const(x18))(f);
       };
     };
   };
@@ -129,10 +129,10 @@
     map: arrayMap
   };
   var flap = function(dictFunctor) {
-    var map115 = map(dictFunctor);
+    var map114 = map(dictFunctor);
     return function(ff2) {
       return function(x18) {
-        return map115(function(f) {
+        return map114(function(f) {
           return f(x18);
         })(ff2);
       };
@@ -288,11 +288,11 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq9) {
+    return function(eq8) {
       return function(gt) {
         return function(x18) {
           return function(y16) {
-            return x18 < y16 ? lt : x18 === y16 ? eq9 : gt;
+            return x18 < y16 ? lt : x18 === y16 ? eq8 : gt;
           };
         };
       };
@@ -844,13 +844,13 @@
     return v.value0;
   };
   var eqTuple = function(dictEq) {
-    var eq9 = eq(dictEq);
+    var eq8 = eq(dictEq);
     return function(dictEq1) {
       var eq16 = eq(dictEq1);
       return {
         eq: function(x18) {
           return function(y16) {
-            return eq9(x18.value0)(y16.value0) && eq16(x18.value1)(y16.value1);
+            return eq8(x18.value0)(y16.value0) && eq16(x18.value1)(y16.value1);
           };
         }
       };
@@ -1000,7 +1000,7 @@
     };
   };
   var eqMaybe = function(dictEq) {
-    var eq9 = eq(dictEq);
+    var eq8 = eq(dictEq);
     return {
       eq: function(x18) {
         return function(y16) {
@@ -1009,7 +1009,7 @@
           }
           ;
           if (x18 instanceof Just && y16 instanceof Just) {
-            return eq9(x18.value0)(y16.value0);
+            return eq8(x18.value0)(y16.value0);
           }
           ;
           return false;
@@ -2467,10 +2467,10 @@
     };
   };
   var functorExceptT = function(dictFunctor) {
-    var map115 = map(dictFunctor);
+    var map114 = map(dictFunctor);
     return {
       map: function(f) {
-        return mapExceptT(map115(map5(f)));
+        return mapExceptT(map114(map5(f)));
       }
     };
   };
@@ -8123,18 +8123,18 @@
   };
   var foldFree = function(dictMonadRec) {
     var Monad0 = dictMonadRec.Monad0();
-    var map115 = map(Monad0.Bind1().Apply0().Functor0());
+    var map114 = map(Monad0.Bind1().Apply0().Functor0());
     var pure112 = pure(Monad0.Applicative0());
     var tailRecM4 = tailRecM(dictMonadRec);
     return function(k) {
       var go2 = function(f) {
         var v = toView(f);
         if (v instanceof Return) {
-          return map115(Done.create)(pure112(v.value0));
+          return map114(Done.create)(pure112(v.value0));
         }
         ;
         if (v instanceof Bind) {
-          return map115(function($199) {
+          return map114(function($199) {
             return Loop.create(v.value1($199));
           })(k(v.value0));
         }
@@ -18115,10 +18115,10 @@
     return new Tuple(toNumber(w), toNumber(h));
   };
   var equalSnd = function(dictEq) {
-    var eq9 = eq(dictEq);
+    var eq8 = eq(dictEq);
     return function(a2) {
       return function(b2) {
-        return eq9(snd(a2))(snd(b2));
+        return eq8(snd(a2))(snd(b2));
       };
     };
   };
@@ -20937,7 +20937,6 @@
       return "name";
     }
   })()();
-  var spy3 = /* @__PURE__ */ spy();
   var fromFoldable1 = /* @__PURE__ */ fromFoldable6(foldableMap);
   var prop11 = /* @__PURE__ */ prop3({
     reflectSymbol: function() {
@@ -21193,9 +21192,9 @@
   var onlyTheseForcesActive = function(dictFoldable) {
     var fromFoldable23 = fromFoldable6(dictFoldable);
     return function(dictFunctor) {
-      var map115 = map(dictFunctor);
+      var map114 = map(dictFunctor);
       return function(labels9) {
-        var updatedMap = fromFoldable23(map115(function(l) {
+        var updatedMap = fromFoldable23(map114(function(l) {
           return new Tuple(l, ForceActive.value);
         })(labels9));
         return function(statusMap) {
@@ -21253,78 +21252,78 @@
     return Nothing.value;
   })();
   var _velocityDecay = function(dictStrong) {
-    var $226 = _Newtype2(dictStrong.Profunctor0());
-    var $227 = prop5($$Proxy.value)(dictStrong);
-    return function($228) {
-      return $226($227($228));
+    var $225 = _Newtype2(dictStrong.Profunctor0());
+    var $226 = prop5($$Proxy.value)(dictStrong);
+    return function($227) {
+      return $225($226($227));
     };
   };
   var _status = function(dictStrong) {
-    var $239 = _Newtype2(dictStrong.Profunctor0());
-    var $240 = prop32($$Proxy.value)(dictStrong);
-    return function($241) {
-      return $239($240($241));
+    var $238 = _Newtype2(dictStrong.Profunctor0());
+    var $239 = prop32($$Proxy.value)(dictStrong);
+    return function($240) {
+      return $238($239($240));
     };
   };
   var _status1 = /* @__PURE__ */ _status(strongForget);
   var _name = function(dictStrong) {
-    var $242 = _Newtype2(dictStrong.Profunctor0());
-    var $243 = prop42($$Proxy.value)(dictStrong);
-    return function($244) {
-      return $242($243($244));
+    var $241 = _Newtype2(dictStrong.Profunctor0());
+    var $242 = prop42($$Proxy.value)(dictStrong);
+    return function($243) {
+      return $241($242($243));
     };
   };
   var _name1 = /* @__PURE__ */ _name(strongForget);
   var getStatusMap = function(forceMap) {
-    return spy3("getStatusMap: ")(fromFoldable1(map35(function(f) {
+    return fromFoldable1(map35(function(f) {
       return new Tuple(view(_name1)(f), view(_status1)(f));
-    })(forceMap)));
+    })(forceMap));
   };
   var _d3Simulation = function(dictStrong) {
     return prop11($$Proxy.value)(dictStrong);
   };
   var _forceLibrary = function(dictStrong) {
-    var $266 = _d3Simulation(dictStrong);
-    var $267 = _Newtype2(dictStrong.Profunctor0());
-    var $268 = prop12($$Proxy.value)(dictStrong);
-    return function($269) {
-      return $266($267($268($269)));
+    var $265 = _d3Simulation(dictStrong);
+    var $266 = _Newtype2(dictStrong.Profunctor0());
+    var $267 = prop12($$Proxy.value)(dictStrong);
+    return function($268) {
+      return $265($266($267($268)));
     };
   };
   var _handle = function(dictStrong) {
-    var $273 = _d3Simulation(dictStrong);
-    var $274 = _Newtype2(dictStrong.Profunctor0());
-    var $275 = prop13($$Proxy.value)(dictStrong);
-    return function($276) {
-      return $273($274($275($276)));
+    var $272 = _d3Simulation(dictStrong);
+    var $273 = _Newtype2(dictStrong.Profunctor0());
+    var $274 = prop13($$Proxy.value)(dictStrong);
+    return function($275) {
+      return $272($273($274($275)));
     };
   };
   var _alphaTarget = function(dictStrong) {
-    var $280 = _Newtype2(dictStrong.Profunctor0());
-    var $281 = prop15($$Proxy.value)(dictStrong);
-    return function($282) {
-      return $280($281($282));
+    var $279 = _Newtype2(dictStrong.Profunctor0());
+    var $280 = prop15($$Proxy.value)(dictStrong);
+    return function($281) {
+      return $279($280($281));
     };
   };
   var _alphaMin = function(dictStrong) {
-    var $283 = _Newtype2(dictStrong.Profunctor0());
-    var $284 = prop16($$Proxy.value)(dictStrong);
-    return function($285) {
-      return $283($284($285));
+    var $282 = _Newtype2(dictStrong.Profunctor0());
+    var $283 = prop16($$Proxy.value)(dictStrong);
+    return function($284) {
+      return $282($283($284));
     };
   };
   var _alphaDecay = function(dictStrong) {
-    var $286 = _Newtype2(dictStrong.Profunctor0());
-    var $287 = prop17($$Proxy.value)(dictStrong);
-    return function($288) {
-      return $286($287($288));
+    var $285 = _Newtype2(dictStrong.Profunctor0());
+    var $286 = prop17($$Proxy.value)(dictStrong);
+    return function($287) {
+      return $285($286($287));
     };
   };
   var _alpha = function(dictStrong) {
-    var $289 = _Newtype2(dictStrong.Profunctor0());
-    var $290 = prop18($$Proxy.value)(dictStrong);
-    return function($291) {
-      return $289($290($291));
+    var $288 = _Newtype2(dictStrong.Profunctor0());
+    var $289 = prop18($$Proxy.value)(dictStrong);
+    return function($290) {
+      return $288($289($290));
     };
   };
 
@@ -21999,6 +21998,9 @@
       };
     };
   };
+  var enableForce = /* @__PURE__ */ (function() {
+    return set3(_status2)(ForceActive.value);
+  })();
   var createRegularForce_ = function(v) {
     if (v instanceof ForceManyBody) {
       return forceMany_(unit);
@@ -22208,20 +22210,34 @@
   // output/D3.Simulation.Functions/index.js
   var _handle2 = /* @__PURE__ */ _handle(strongForget);
   var discard15 = /* @__PURE__ */ discard(discardUnit);
+  var _forceLibrary2 = /* @__PURE__ */ _forceLibrary(strongFn);
+  var _forceLibrary1 = /* @__PURE__ */ _forceLibrary(strongForget);
+  var map37 = /* @__PURE__ */ map(functorMap);
   var _d3Simulation2 = /* @__PURE__ */ _d3Simulation(strongFn);
   var _alpha2 = /* @__PURE__ */ _alpha(strongFn);
-  var _forceLibrary2 = /* @__PURE__ */ _forceLibrary(strongForget);
-  var toUnfoldable4 = /* @__PURE__ */ toUnfoldable(unfoldableArray);
-  var map37 = /* @__PURE__ */ map(functorArray);
   var _alphaTarget2 = /* @__PURE__ */ _alphaTarget(strongFn);
   var _alphaMin2 = /* @__PURE__ */ _alphaMin(strongFn);
   var _alphaDecay2 = /* @__PURE__ */ _alphaDecay(strongFn);
   var _velocityDecay2 = /* @__PURE__ */ _velocityDecay(strongFn);
-  var _forceLibrary1 = /* @__PURE__ */ _forceLibrary(strongFn);
-  var map112 = /* @__PURE__ */ map(functorMap);
-  var eq5 = /* @__PURE__ */ eq(eqForceStatus);
-  var _status3 = /* @__PURE__ */ _status(strongForget);
-  var spy4 = /* @__PURE__ */ spy();
+  var simulationUpdateForceStatuses = function(dictMonadState) {
+    var Monad0 = dictMonadState.Monad0();
+    var Bind1 = Monad0.Bind1();
+    var bind20 = bind(Bind1);
+    var use3 = use(dictMonadState);
+    var discard112 = discard15(Bind1);
+    var modifying3 = modifying(dictMonadState);
+    var pure25 = pure(Monad0.Applicative0());
+    return function(forceStatuses) {
+      return bind20(use3(_handle2))(function(handle) {
+        return discard112(modifying3(_forceLibrary2)(putStatusMap(forceStatuses)))(function() {
+          return bind20(use3(_forceLibrary1))(function(forceLibrary3) {
+            var v = map37(updateForceInSimulation(handle))(forceLibrary3);
+            return pure25(unit);
+          });
+        });
+      });
+    };
+  };
   var simulationStop = function(dictMonadState) {
     var Monad0 = dictMonadState.Monad0();
     var pure25 = pure(Monad0.Applicative0());
@@ -22234,11 +22250,11 @@
     var Monad0 = dictMonadState.Monad0();
     var Bind1 = Monad0.Bind1();
     var discard112 = discard15(Bind1);
-    var modifying4 = modifying(dictMonadState);
+    var modifying3 = modifying(dictMonadState);
     var pure25 = pure(Monad0.Applicative0());
     return bind(Bind1)(use(dictMonadState)(_handle2))(function(handle) {
-      return discard112(modifying4(function($231) {
-        return _d3Simulation2(_alpha2($231));
+      return discard112(modifying3(function($228) {
+        return _d3Simulation2(_alpha2($228));
       })($$const(1)))(function() {
         return pure25(startSimulation_(handle));
       });
@@ -22247,41 +22263,41 @@
   var simulationSetVariable = function(dictMonadState) {
     var bind20 = bind(dictMonadState.Monad0().Bind1());
     var use3 = use(dictMonadState);
-    var modifying4 = modifying(dictMonadState);
+    var modifying3 = modifying(dictMonadState);
     return function(v) {
       return bind20(use3(_handle2))(function(handle) {
         if (v instanceof Alpha) {
           var v1 = setAlpha_(handle)(v.value0);
-          return modifying4(function($232) {
-            return _d3Simulation2(_alpha2($232));
+          return modifying3(function($229) {
+            return _d3Simulation2(_alpha2($229));
           })($$const(v.value0));
         }
         ;
         if (v instanceof AlphaTarget) {
           var v1 = setAlphaTarget_(handle)(v.value0);
-          return modifying4(function($233) {
-            return _d3Simulation2(_alphaTarget2($233));
+          return modifying3(function($230) {
+            return _d3Simulation2(_alphaTarget2($230));
           })($$const(v.value0));
         }
         ;
         if (v instanceof AlphaMin) {
           var v1 = setAlphaMin_(handle)(v.value0);
-          return modifying4(function($234) {
-            return _d3Simulation2(_alphaMin2($234));
+          return modifying3(function($231) {
+            return _d3Simulation2(_alphaMin2($231));
           })($$const(v.value0));
         }
         ;
         if (v instanceof AlphaDecay) {
           var v1 = setAlphaDecay_(handle)(v.value0);
-          return modifying4(function($235) {
-            return _d3Simulation2(_alphaDecay2($235));
+          return modifying3(function($232) {
+            return _d3Simulation2(_alphaDecay2($232));
           })($$const(v.value0));
         }
         ;
         if (v instanceof VelocityDecay) {
           var v1 = setVelocityDecay_(handle)(v.value0);
-          return modifying4(function($236) {
-            return _d3Simulation2(_velocityDecay2($236));
+          return modifying3(function($233) {
+            return _d3Simulation2(_velocityDecay2($233));
           })($$const(v.value0));
         }
         ;
@@ -22436,37 +22452,6 @@
           };
         };
       };
-    };
-  };
-  var listActiveForcesInLibrary = function(forceMap) {
-    return map37(fst)(filter2(function(v) {
-      return eq5(view(_status3)(v.value1))(ForceActive.value);
-    })(toUnfoldable4(forceMap)));
-  };
-  var listActiveForces = function(forceMap) {
-    return map37(fst)(filter2(function(v) {
-      return eq5(v.value1)(ForceActive.value);
-    })(toUnfoldable4(forceMap)));
-  };
-  var simulationUpdateForceStatuses = function(dictMonadState) {
-    var Monad0 = dictMonadState.Monad0();
-    var Bind1 = Monad0.Bind1();
-    var bind20 = bind(Bind1);
-    var use3 = use(dictMonadState);
-    var discard112 = discard15(Bind1);
-    var modifying4 = modifying(dictMonadState);
-    var pure25 = pure(Monad0.Applicative0());
-    return function(forceStatuses) {
-      return bind20(use3(_handle2))(function(handle) {
-        var v = spy4("forceStatuses on update: ")(listActiveForces(forceStatuses));
-        return discard112(modifying4(_forceLibrary1)(putStatusMap(forceStatuses)))(function() {
-          return bind20(use3(_forceLibrary2))(function(forceLibrary3) {
-            var v1 = spy4("forceLibrary after status update: ")(listActiveForcesInLibrary(forceLibrary3));
-            var v2 = map112(updateForceInSimulation(handle))(forceLibrary3);
-            return pure25(unit);
-          });
-        });
-      });
     };
   };
 
@@ -23068,11 +23053,11 @@
     return 80;
   };
   var forceLibrary = /* @__PURE__ */ (function() {
-    return initialize(foldableArray)(functorArray)([createForce("charge")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-800), theta(toAttrNumber)(0.9), distanceMin(toAttrNumber)(1), distanceMax(toAttrNumber)(infinity)]), createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([strength2(0.5), x11(toAttrNumber)(0), y10(toAttrNumber)(0)]), createForce("collision")(new RegularForce(ForceCollide.value))(allNodes)([strength2(1), radius7(toAttrNumberFn)(collisionRadius)]), createLinkForce(Nothing.value)([strength2(0.5), distance(toAttrNumber)(150)])]);
+    return map(functorMap)(enableForce)(initialize(foldableArray)(functorArray)([createForce("charge")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-800), theta(toAttrNumber)(0.9), distanceMin(toAttrNumber)(1), distanceMax(toAttrNumber)(infinity)]), createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([strength2(0.5), x11(toAttrNumber)(0), y10(toAttrNumber)(0)]), createForce("collision")(new RegularForce(ForceCollide.value))(allNodes)([strength2(1), radius7(toAttrNumberFn)(collisionRadius)]), createLinkForce(Nothing.value)([strength2(0.5), distance(toAttrNumber)(150)])]));
   })();
 
   // output/PSD3.ForceNavigator.State/index.js
-  var eq6 = /* @__PURE__ */ eq(eqNodeType);
+  var eq5 = /* @__PURE__ */ eq(eqNodeType);
   var bind9 = /* @__PURE__ */ bind(bindArray);
   var member3 = /* @__PURE__ */ member2(ordString);
   var elem3 = /* @__PURE__ */ elem2(eqString);
@@ -23084,11 +23069,6 @@
       return "openSelections";
     }
   })()();
-  var prop23 = /* @__PURE__ */ prop3({
-    reflectSymbol: function() {
-      return "forceStatuses";
-    }
-  })()();
   var prop33 = /* @__PURE__ */ prop3({
     reflectSymbol: function() {
       return "expandedNodes";
@@ -23097,7 +23077,7 @@
   var visibleNodes = function(expanded) {
     return function(allNodes3) {
       var sectionNodes = filter2(function(v) {
-        return eq6(v.nodeType)(Section.value);
+        return eq5(v.nodeType)(Section.value);
       })(allNodes3);
       var expandedChildren = bind9(allNodes3)(function(v) {
         var $38 = member3(v.id)(expanded);
@@ -23137,16 +23117,13 @@
   var initialState4 = function(forceLibrary3) {
     return {
       simulation: initialSimulationState(forceLibrary3),
-      expandedNodes: singleton9("purescript-d3"),
+      expandedNodes: singleton9("PS<$>D3"),
       openSelections: Nothing.value,
       forceStatuses: getStatusMap(forceLibrary3)
     };
   };
   var _openSelections = function(dictStrong) {
     return prop14($$Proxy.value)(dictStrong);
-  };
-  var _forceStatuses = function(dictStrong) {
-    return prop23($$Proxy.value)(dictStrong);
   };
   var _expandedNodes = function(dictStrong) {
     return prop33($$Proxy.value)(dictStrong);
@@ -23170,9 +23147,6 @@
   var assign3 = /* @__PURE__ */ assign2(monadStateHalogenM);
   var _openSelections1 = /* @__PURE__ */ _openSelections(strongFn);
   var $$void9 = /* @__PURE__ */ $$void(functorHalogenM);
-  var modifying2 = /* @__PURE__ */ modifying(monadStateHalogenM);
-  var _forceStatuses2 = /* @__PURE__ */ _forceStatuses(strongFn);
-  var onlyTheseForcesActive2 = /* @__PURE__ */ onlyTheseForcesActive(foldableArray)(functorArray);
   var pure18 = /* @__PURE__ */ pure(applicativeHalogenM);
   var use2 = /* @__PURE__ */ use(monadStateHalogenM);
   var member4 = /* @__PURE__ */ member2(ordString);
@@ -23225,7 +23199,7 @@
                 return pure25(unit);
               }
               ;
-              throw new Error("Failed pattern match at PSD3.ForceNavigator (line 131, column 3 - line 138, column 25): " + [openSels.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.ForceNavigator (line 128, column 3 - line 135, column 25): " + [openSels.constructor.name]);
             });
           });
         });
@@ -23246,9 +23220,7 @@
           return discard24(assign3(_openSelections1)(new Just(openSels)))(function() {
             return bind10(liftEffect12(create3))(function(v12) {
               return discard24($$void9(subscribe2(v12.emitter)))(function() {
-                return discard24(modifying2(_forceStatuses2)(onlyTheseForcesActive2(["charge", "center", "collision"])))(function() {
-                  return runSimulation1(simulationEvent(v12.listener));
-                });
+                return runSimulation1(simulationEvent(v12.listener));
               });
             });
           });
@@ -23311,8 +23283,8 @@
       if (v instanceof ToggleExpansion) {
         return bind10(use2(_expandedNodes2))(function(expanded) {
           var newExpanded = (function() {
-            var $86 = member4(v.value0)(expanded);
-            if ($86) {
+            var $82 = member4(v.value0)(expanded);
+            if ($82) {
               return $$delete7(v.value0)(expanded);
             }
             ;
@@ -23342,7 +23314,7 @@
         return liftEffect12(setHash2(v.value0));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.ForceNavigator (line 55, column 16 - line 114, column 29): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.ForceNavigator (line 55, column 16 - line 111, column 29): " + [v.constructor.name]);
     };
   };
   var component4 = function(dictMonadAff) {
@@ -23421,12 +23393,12 @@
 
   // output/PSD3.Navigation/index.js
   var append8 = /* @__PURE__ */ append(semigroupArray);
-  var eq7 = /* @__PURE__ */ eq(eqRoute);
+  var eq6 = /* @__PURE__ */ eq(eqRoute);
   var navLink = function(route) {
     return function(label5) {
       return function(currentRoute) {
         return li([classes(["navigation__item"])])([a([href4(routeToHash(route)), classes(append8(["navigation__link"])((function() {
-          var $3 = eq7(route)(currentRoute);
+          var $3 = eq6(route)(currentRoute);
           if ($3) {
             return ["navigation__link--active"];
           }
@@ -23908,7 +23880,7 @@
   };
 
   // output/Data.Graph/index.js
-  var map113 = /* @__PURE__ */ map(functorMaybe);
+  var map112 = /* @__PURE__ */ map(functorMaybe);
   var Graph = function(x18) {
     return x18;
   };
@@ -23916,7 +23888,7 @@
     var lookup14 = lookup(dictOrd);
     return function(k) {
       return function(v) {
-        return map113(fst)(lookup14(k)(v));
+        return map112(fst)(lookup14(k)(v));
       };
     };
   };
@@ -23932,7 +23904,7 @@
   var show19 = /* @__PURE__ */ show(showLinkType);
   var append14 = /* @__PURE__ */ append(semigroupString);
   var fromFoldable13 = /* @__PURE__ */ fromFoldable2(ordInt)(foldableArray);
-  var spy5 = /* @__PURE__ */ spy();
+  var spy3 = /* @__PURE__ */ spy();
   var foldlWithIndex3 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
   var show110 = /* @__PURE__ */ show(showInt);
   var show24 = /* @__PURE__ */ show(showNumber);
@@ -24246,7 +24218,7 @@
     var setModuleGridXY = function(v) {
       var v1 = lookup10(v.containerID)(packagesIndexMap);
       if (v1 instanceof Nothing) {
-        return spy5("container gridXY not found")(v);
+        return spy3("container gridXY not found")(v);
       }
       ;
       if (v1 instanceof Just) {
@@ -24417,7 +24389,7 @@
         var fixNamedNode$prime = function(v) {
           var $169 = v.name === label5;
           if ($169) {
-            return spy5("fixing a node to: ")({
+            return spy3("fixing a node to: ")({
               name: v.name,
               cluster: v.cluster,
               connected: v.connected,
@@ -25285,7 +25257,7 @@
   var fromFoldable15 = /* @__PURE__ */ fromFoldable3(foldableSet);
   var fromFoldable22 = /* @__PURE__ */ fromFoldable5(foldableList)(/* @__PURE__ */ ordTuple(ordInt)(ordInt));
   var insert10 = /* @__PURE__ */ insert(ordInt);
-  var map114 = /* @__PURE__ */ map(functorList);
+  var map113 = /* @__PURE__ */ map(functorList);
   var getReachableNodes2 = /* @__PURE__ */ getReachableNodes(ordInt);
   var elem4 = /* @__PURE__ */ elem2(eqInt);
   var elem1 = /* @__PURE__ */ elem2(/* @__PURE__ */ eqTuple(eqInt)(eqInt));
@@ -25410,9 +25382,9 @@
         })(map41(unwrap8)(treelinks))));
       };
       var go2 = function(childID) {
-        return new Node(childID, map114(go2)(linksWhoseSourceIs(childID)));
+        return new Node(childID, map113(go2)(linksWhoseSourceIs(childID)));
       };
-      return new Node(rootID, map114(go2)(linksWhoseSourceIs(rootID)));
+      return new Node(rootID, map113(go2)(linksWhoseSourceIs(rootID)));
     };
   };
   var treeReduction = function(rootID) {
@@ -25707,7 +25679,7 @@
       return "scene";
     }
   })()();
-  var prop24 = /* @__PURE__ */ prop3({
+  var prop23 = /* @__PURE__ */ prop3({
     reflectSymbol: function() {
       return "attributes";
     }
@@ -25802,7 +25774,7 @@
   };
   var _sceneAttributes = function(dictStrong) {
     var $125 = _scene(dictStrong);
-    var $126 = prop24($$Proxy.value)(dictStrong);
+    var $126 = prop23($$Proxy.value)(dictStrong);
     return function($127) {
       return $125($126($127));
     };
@@ -25890,7 +25862,7 @@
       };
     };
   };
-  var _forceStatuses3 = function(dictStrong) {
+  var _forceStatuses = function(dictStrong) {
     var $146 = _scene(dictStrong);
     var $147 = prop122($$Proxy.value)(dictStrong);
     return function($148) {
@@ -25898,7 +25870,7 @@
     };
   };
   var _forceStatus = function(dictStrong) {
-    var _forceStatuses12 = _forceStatuses3(dictStrong);
+    var _forceStatuses12 = _forceStatuses(dictStrong);
     return function(dictChoice) {
       var _Just2 = _Just(dictChoice);
       return function(label5) {
@@ -25938,9 +25910,9 @@
   var type_19 = /* @__PURE__ */ type_17(isPropInputType);
   var value15 = /* @__PURE__ */ value12(isPropString);
   var show21 = /* @__PURE__ */ show(showNumber);
-  var eq8 = /* @__PURE__ */ eq(eqForceStatus);
+  var eq7 = /* @__PURE__ */ eq(eqForceStatus);
   var map45 = /* @__PURE__ */ map(functorArray);
-  var toUnfoldable5 = /* @__PURE__ */ toUnfoldable(unfoldableArray);
+  var toUnfoldable4 = /* @__PURE__ */ toUnfoldable(unfoldableArray);
   var _forceLibrary3 = /* @__PURE__ */ _forceLibrary(strongForget);
   var _cssClass2 = /* @__PURE__ */ _cssClass(strongForget);
   var show111 = /* @__PURE__ */ show(showInt);
@@ -25958,7 +25930,7 @@
   var renderTableForces = function(state3) {
     var renderForceItem = function(v) {
       return div2([classes(["force-item", (function() {
-        var $20 = eq8(v.status)(ForceActive.value);
+        var $20 = eq7(v.status)(ForceActive.value);
         if ($20) {
           return "force-active";
         }
@@ -25966,7 +25938,7 @@
         return "force-inactive";
       })()]), onClick($$const(new ToggleForce(v.name)))])([div2([classes(["force-name"])])([text5(v.name)]), div2([classes(["force-type"])])([text5(showType(v.type))]), div2([classes(["force-filter"])])([text5(showForceFilter(v.filter))])]);
     };
-    var forceData = map45(snd)(toUnfoldable5(view(_forceLibrary3)(state3)));
+    var forceData = map45(snd)(toUnfoldable4(view(_forceLibrary3)(state3)));
     return div_([h3_([text5("Forces")]), div2([classes(["force-grid"])])(map45(renderForceItem)(forceData))]);
   };
   var renderSimState = function(state3) {
@@ -26010,7 +25982,7 @@
   var _staging2 = /* @__PURE__ */ _staging(strongForget);
   var _callback2 = /* @__PURE__ */ _callback(strongForget);
   var _sceneAttributes2 = /* @__PURE__ */ _sceneAttributes(strongForget);
-  var _forceStatuses4 = /* @__PURE__ */ _forceStatuses3(strongForget);
+  var _forceStatuses2 = /* @__PURE__ */ _forceStatuses(strongForget);
   var discard110 = /* @__PURE__ */ discard21(bindD3SimM);
   var stop3 = /* @__PURE__ */ stop(simulationMD3Selection_D3);
   var actualizeForces3 = /* @__PURE__ */ actualizeForces(simulationMD3Selection_D3);
@@ -26026,7 +25998,7 @@
   var pure110 = /* @__PURE__ */ pure(applicativeAff);
   var bind23 = /* @__PURE__ */ bind(bindHalogenM);
   var discard25 = /* @__PURE__ */ discard21(bindHalogenM);
-  var modifying3 = /* @__PURE__ */ modifying(monadStateHalogenM);
+  var modifying2 = /* @__PURE__ */ modifying(monadStateHalogenM);
   var _model2 = /* @__PURE__ */ _model(strongFn);
   var evalEffectSimulation3 = /* @__PURE__ */ evalEffectSimulation(bindHalogenM)(monadStateHalogenM);
   var initialize5 = /* @__PURE__ */ initialize4(bindD3SimM)(monadEffD3SimM)(simulationMD3Selection_D3)(selectionMD3Selection_D3S2);
@@ -26044,8 +26016,8 @@
   var _linksActive1 = /* @__PURE__ */ _linksActive(strongFn);
   var _cssClass3 = /* @__PURE__ */ _cssClass(strongFn);
   var _sceneAttributes1 = /* @__PURE__ */ _sceneAttributes(strongFn);
-  var _forceStatuses1 = /* @__PURE__ */ _forceStatuses3(strongFn);
-  var onlyTheseForcesActive3 = /* @__PURE__ */ onlyTheseForcesActive(foldableArray)(functorArray);
+  var _forceStatuses1 = /* @__PURE__ */ _forceStatuses(strongFn);
+  var onlyTheseForcesActive2 = /* @__PURE__ */ onlyTheseForcesActive(foldableArray)(functorArray);
   var _nodeInitializerFunctions1 = /* @__PURE__ */ _nodeInitializerFunctions(strongFn);
   var _forceStatus2 = /* @__PURE__ */ _forceStatus(strongFn)(choiceFn);
   var stageDataFromModel = function(dictMonadState) {
@@ -26097,7 +26069,7 @@
         return bind32(use3(_staging2))(function(staging) {
           return bind32(use3(_callback2))(function(callback) {
             return bind32(use3(_sceneAttributes2))(function(sceneAttributes) {
-              return bind32(use3(_forceStatuses4))(function(forceStatuses) {
+              return bind32(use3(_forceStatuses2))(function(forceStatuses) {
                 var attributesWithCallback = {
                   labels: sceneAttributes.labels,
                   circles: cons3(callback)(sceneAttributes.circles)
@@ -26149,12 +26121,12 @@
     return function(v) {
       if (v instanceof Initialize5) {
         return bind23(liftAff2(readModelData))(function(v1) {
-          return discard25(modifying3(_model2)($$const(v1)))(function() {
+          return discard25(modifying2(_model2)($$const(v1)))(function() {
             return bind23(evalEffectSimulation1(initialize5))(function(openSelections) {
-              return discard25(modifying3(function($143) {
+              return discard25(modifying2(function($143) {
                 return _staging1(_enterselections2(_nodes2($143)));
               })($$const(openSelections.nodes)))(function() {
-                return discard25(modifying3(function($144) {
+                return discard25(modifying2(function($144) {
                   return _staging1(_enterselections2(_links2($144)));
                 })($$const(openSelections.links)))(function() {
                   return bind23(liftEffect12(create3))(function(v2) {
@@ -26209,7 +26181,7 @@
             return discard25(assign4(_linksActive1)($$const(true)))(function() {
               return discard25(assign4(_cssClass3)("cluster"))(function() {
                 return discard25(assign4(_sceneAttributes1)(clusterSceneAttributes))(function() {
-                  return discard25(modifying3(_forceStatuses1)(onlyTheseForcesActive3(["clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide2"])))(function() {
+                  return discard25(modifying2(_forceStatuses1)(onlyTheseForcesActive2(["clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide2"])))(function() {
                     return discard25(assign4(_nodeInitializerFunctions1)([unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY]))(function() {
                       return runSimulation1;
                     });
@@ -26225,7 +26197,7 @@
         return discard25(assign4(_chooseNodes1)(isPackage))(function() {
           return discard25(assign4(_linksShown1)(isP2P_Link))(function() {
             return discard25(assign4(_linksActive1)(sourcePackageIs("my-project")))(function() {
-              return discard25(modifying3(_forceStatuses1)(onlyTheseForcesActive3(["center", "collide2", "charge2", "packageOrbit", linksForceName])))(function() {
+              return discard25(modifying2(_forceStatuses1)(onlyTheseForcesActive2(["center", "collide2", "charge2", "packageOrbit", linksForceName])))(function() {
                 return discard25(assign4(_cssClass3)("graph"))(function() {
                   return discard25(assign4(_sceneAttributes1)(graphSceneAttributes))(function() {
                     return discard25(assign4(_nodeInitializerFunctions1)([unpinAllNodes, packagesNodesToPhyllotaxis, fixNamedNodeTo("my-project")({
@@ -26248,7 +26220,7 @@
             return discard25(assign4(_linksActive1)($$const(true)))(function() {
               return discard25(assign4(_cssClass3)("tree"))(function() {
                 return discard25(assign4(_sceneAttributes1)(treeSceneAttributes))(function() {
-                  return discard25(modifying3(_forceStatuses1)(onlyTheseForcesActive3(["htreeNodesX", "collide1", "y", linksForceName])))(function() {
+                  return discard25(modifying2(_forceStatuses1)(onlyTheseForcesActive2(["htreeNodesX", "collide1", "y", linksForceName])))(function() {
                     return discard25(assign4(_nodeInitializerFunctions1)([unpinAllNodes]))(function() {
                       return runSimulation1;
                     });
@@ -26266,7 +26238,7 @@
             return discard25(assign4(_linksActive1)($$const(true)))(function() {
               return discard25(assign4(_cssClass3)("tree radial"))(function() {
                 return discard25(assign4(_sceneAttributes1)(treeSceneAttributes))(function() {
-                  return discard25(modifying3(_forceStatuses1)(onlyTheseForcesActive3(["center", "collide2", "chargetree", "charge2", linksForceName])))(function() {
+                  return discard25(modifying2(_forceStatuses1)(onlyTheseForcesActive2(["center", "collide2", "chargetree", "charge2", linksForceName])))(function() {
                     return discard25(assign4(_nodeInitializerFunctions1)([unpinAllNodes, treeNodesToTreeXY_R, fixNamedNodeTo("Main")({
                       x: 0,
                       y: 0
@@ -26287,7 +26259,7 @@
             return discard25(assign4(_linksActive1)($$const(false)))(function() {
               return discard25(assign4(_cssClass3)("tree horizontal"))(function() {
                 return discard25(assign4(_sceneAttributes1)(treeSceneAttributes))(function() {
-                  return discard25(modifying3(_forceStatuses1)(onlyTheseForcesActive3(["htreeNodesX", "htreeNodesY", "charge1", "collide2"])))(function() {
+                  return discard25(modifying2(_forceStatuses1)(onlyTheseForcesActive2(["htreeNodesX", "htreeNodesY", "charge1", "collide2"])))(function() {
                     return discard25(assign4(_nodeInitializerFunctions1)([unpinAllNodes]))(function() {
                       return runSimulation1;
                     });
@@ -26305,7 +26277,7 @@
             return discard25(assign4(_linksActive1)($$const(false)))(function() {
               return discard25(assign4(_cssClass3)("tree vertical"))(function() {
                 return discard25(assign4(_sceneAttributes1)(treeSceneAttributes))(function() {
-                  return discard25(modifying3(_forceStatuses1)(onlyTheseForcesActive3(["vtreeNodesX", "vtreeNodesY", "charge1", "collide2"])))(function() {
+                  return discard25(modifying2(_forceStatuses1)(onlyTheseForcesActive2(["vtreeNodesX", "vtreeNodesY", "charge1", "collide2"])))(function() {
                     return discard25(assign4(_nodeInitializerFunctions1)([unpinAllNodes]))(function() {
                       return runSimulation1;
                     });
@@ -26318,7 +26290,7 @@
       }
       ;
       if (v instanceof ToggleForce) {
-        return discard25(modifying3(_forceStatus2(v.value0))(toggleForceStatus))(function() {
+        return discard25(modifying2(_forceStatus2(v.value0))(toggleForceStatus))(function() {
           return runSimulation1;
         });
       }
@@ -26433,7 +26405,7 @@
   var modify_7 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var mempty2 = /* @__PURE__ */ mempty(/* @__PURE__ */ monoidEffect(monoidUnit));
   var pure111 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var spy6 = /* @__PURE__ */ spy();
+  var spy4 = /* @__PURE__ */ spy();
   var slot_6 = /* @__PURE__ */ slot_();
   var slot_1 = /* @__PURE__ */ slot_6({
     reflectSymbol: function() {
@@ -26625,7 +26597,7 @@
     return $$Proxy.value;
   })();
   var renderPage = function(route) {
-    var v = spy6("Route is")(route);
+    var v = spy4("Route is")(route);
     if (v instanceof Home) {
       return slot_1(_home)(unit)(component1)(unit);
     }
