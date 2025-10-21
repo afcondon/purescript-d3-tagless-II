@@ -32,6 +32,7 @@ treeDatum_ = {
   , x     : _.x <<< unboxD3TreeNode <<< coerceToTreeNode
   , y     : _.y <<< unboxD3TreeNode <<< coerceToTreeNode
 -- now accessors that use the embedded "data" object within the Tree node
+-- remember this "data" object is the original data that we gave D3 for each node
   , name   : _.data.name <<< unboxD3TreeNode <<< coerceToTreeNode
 -- now more semanticly complicated accessors
   -- value_ returns null rather than undefined if there is no value field

@@ -36,7 +36,9 @@ Contains all npm-installed packages
 ## Coding standards and conventions
 
 ### Lenses have a PREFIX underscore
-We use lenses primarily to manipulate Halogen State in the Visualizations, because they're a composable way of reaching into potentially complex model state wihout decomposing it and reassembling the results. This dramatically simplifies code readability (albeit at a price of deeper code comprehensibility). It also, but less importantly, helps retain some structural similarity to the antecedent D3 script style.
+As with common practice in PureScript we use `_lensName` format in naming lenses. 
+
+In this project we use lenses primarily to manipulate Halogen State and Visualization Model State, because they're a composable way of reaching into potentially complex model state wihout decomposing it and reassembling the results. This dramatically simplifies code readability (albeit at a price of deeper code comprehensibility). It also, but less importantly, helps retain some structural similarity to the antecedent D3 script style.
 
 Example:
 `
@@ -56,6 +58,22 @@ This is intended as a mnemonic that everywhere you see this naming convention in
 Example:
 `foreign import d3SelectFirstInDOM_   :: Selector D3Selection_    -> D3Selection_
 `
+
+### Datum_ and datum_
+
+Fundamentally we are using D3 to mutate data which we largely represent on the PureScript side as immutable. The reasons for this are all about syntactic lightness - this comes after earlier versions which took a more ideologically pure functional programming approach to wrapping the APIs. It is certainly possible to do but it is IMHO massive overkill and unlikely to ever be used by anybody as a library. 
+
+Instead what we do is, is leverage the fact that D3 is generally mutating the data in two quite specific ways (it varies by visualizations). This wouldn't even matter to us except that we want to interact with this data, or use user interactions with the drawn elements to do something else in our program. 
+
+Firstly, it is extending the individual data elements, giving them `x`and `y` (and `x1`/ `y1` / `x2` / `y2`) fields as a result of some layout algorithm.
+
+Secondly, it is changing values, again such as `x` and ¨y`, as it unfolds transitions, animates changes, runs a force layout algorithm etc.
+
+What it is not doing is removing fields from our data or changing the data itself.
+
+So we have a need to access our data elements ("datum", singular of data) after they've been modified but we can make a contract with the PureScript programmer to specify exactly what will be available. And we do this by declaring a record of conversion functions, most of which are simply field accessors plus an `UnsafeCoerce`. D3 is not super-consistent about this itself, some layouts such as hierarchies embed the original data as a field inside the D3 object, others simply extend whatever they've been given.
+
+If at some point, the D3 parts of this library were re-written, which might happen, probably a much cleaner solution with greater consistency could be implemented. For now, the idea is that the person writing the `datum_` accessors in the Visualisation's Model module must understand this to some extent but it would be possible for developers further down stream, writing and editing visualisations, not to be concerned with these issues.
 
 ### FFI and JavaScript files
 Fundamentally all raw JavaScript is considered technical debt in this project, but pragmatism dictates the amount is probably never going to be zero.
