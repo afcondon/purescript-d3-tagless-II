@@ -8,14 +8,15 @@ This is a PureScript library implementing a Finally Tagless embedded DSL for bui
 
 ## Build Commands
 
-- **Install dependencies**: `yarn install` or `spago install`
-- **Build PureScript**: `yarn run build` or `spago build`
-- **Bundle application**: `yarn run bundle` (outputs to `docs/bundle.js`)
-- **Build CSS**: `yarn run build-css`
-- **Upgrade package set**: `yarn run upgrade-set`
-- **Extract code snippets**: `yarn run snippets`
+- **Install dependencies**: `yarn install` or `npm install`
+- **Build PureScript**: `npm run build`
+- **Bundle application**: `npm run bundle` (outputs to `docs/bundle.js`)
+- **Upgrade package set**: `npm run upgrade-set`
+- **Extract code snippets**: `npm run snippets`
 
-The demo application is served from the `docs/` directory (GitHub Pages hosting).
+The website/demo is served from the `docs/` directory (GitHub Pages hosting).
+
+**Important**: This repo uses Spago 0.93 (via npm), NOT the system spago (0.21). Always use `npm run build`, not `spago build` directly. Configuration is in `spago.yaml`, not `spago.dhall`.
 
 ## Architecture
 
@@ -23,8 +24,8 @@ The demo application is served from the `docs/` directory (GitHub Pages hosting)
 
 The library uses a Finally Tagless encoding that allows multiple interpreters for the same DSL. The core type classes define capabilities without tying them to specific implementations:
 
-- **`SelectionM` capability** (src/lib/Interpreters/Capabilities.purs:15-27): Defines operations for DOM manipulation via selections (appending, selecting, joining data to DOM elements)
-- **`SimulationM` capability** (src/lib/Interpreters/Capabilities.purs:42-72): Extends SelectionM with physics simulation capabilities for force-directed graphs
+- **`SelectionM` capability**: Defines operations for DOM manipulation via selections (appending, selecting, joining data to DOM elements)
+- **`SimulationM` capability**: Extends SelectionM with physics simulation capabilities for force-directed graphs
 
 ### Interpreters
 
@@ -34,7 +35,7 @@ Three interpreters demonstrate the pattern:
 2. **MetaTree Interpreter** (src/lib/Interpreters/MetaTree/): Generates visualizations of the DSL syntax tree itself
 3. **String Interpreter** (src/lib/Interpreters/String/): Generates code or documentation from visualization definitions
 
-### Core Modules
+### Core Library Modules (src/lib/)
 
 **Data Layer** (src/lib/D3/Data/):
 - `Tree.purs`, `Graph.purs`, `Node.purs`: Type-safe data structures for visualizations
@@ -54,19 +55,26 @@ Three interpreters demonstrate the pattern:
 - Low-level JavaScript interop
 - Keeps state management and side effects isolated to FFI boundary
 
-### Demo Application
+### Website/Demo Application (src/website/)
 
-**Halogen Integration** (src/DemoApp/):
-- `Main.purs`: Top-level Halogen application with navigation
-- `Stories/`: Example components (ThreeLittleCircles, GUP, Trees, LesMis, Spago)
-- `Viz/`: Visualization implementations for each example
-- Demonstrates how to integrate visualizations as Halogen components with bidirectional communication
+The website demonstrates library usage with multiple examples:
 
-Examples showcase:
+**Structure**:
+- `Main.purs`, `Router.purs`, `Types.purs`: Top-level Halogen application
+- **Component/**: Reusable Halogen components
+  - Complex components have subdirectories (e.g., Component/Spago/, Component/ForceNavigator/)
+  - Simpler components are single files (e.g., Button.purs, Checkbox.purs)
+- **HTML/**: Non-Halogen reusable HTML chunks
+- **Viz/**: D3 visualization implementations organized by example
+  - Each visualization has Model, Draw, Unsafe, and often Attributes modules
+  - Examples: Spago (force-directed graph), LesMis, Trees, Sankey, BubbleChart, etc.
+
+**Key Examples**:
+- **Spago** (Component/Spago/ + Viz/Spago/): The flagship example showing the MiseEnScene pattern for complex force simulations with multiple scenes/views
 - Simple selections and attributes (ThreeLittleCircles)
 - General Update Pattern with transitions (GUP)
 - D3 hierarchy layouts (Trees, MetaTree)
-- Force-directed graphs (LesMis, Spago)
+- Force-directed graphs (LesMis)
 - Interactive behaviors (dragging, zooming, panning)
 
 ## Key Design Decisions
@@ -79,9 +87,19 @@ Examples showcase:
 
 **Type Safety**: Uses `Datum_` and `Index_` as opaque types for D3 data, with typed wrappers (`D3_SimulationNode`, `D3Link`, `D3LinkSwizzled`) providing safety at usage sites.
 
+**MiseEnScene Pattern** (demonstrated in Spago example): A configuration record pattern for complex force simulations that packages together data filters, force settings, visual styling, initialization functions, and event callbacks. This enables declarative scene switching for multiple views of the same data.
+
 ## Development Notes
 
-- The `packages.dhall` file pins PureScript package versions and includes a custom fork of `html-parser-halogen` (esmodules branch)
-- Spago configuration is in `spago.dhall` with dependencies for Halogen, lenses, graphs, and web APIs
+- Configuration is in `spago.yaml` (Spago 0.93) with dependencies for Halogen, lenses, graphs, and web APIs
 - JavaScript dependencies (D3 v7, d3-color, d3-interpolate, d3-scale-chromatic) are managed via npm/yarn
 - Tests are in `test/` but test infrastructure is minimal - examples serve as integration tests
+- See `notes/Project Coding Standards.md` and `notes/Project Documentation Standards.md` for detailed guidelines
+
+## Coding Conventions (Summary)
+
+- **Lenses**: Prefix with `_` (e.g., `_chooseNodes`, `_simulation`)
+- **Foreign functions and types**: Postfix with `_` (e.g., `Datum_`, `d3SelectFirstInDOM_`)
+- **datum_ pattern**: Record of accessor functions for safely extracting data from D3's opaque `Datum_` type
+- **FFI consolidation**: All D3.js FFI should live in src/lib/D3/FFI.purs/.js
+- **Debug statements**: Use purescript-debug library's `spy` function (generates warnings to prevent shipping debug code)
