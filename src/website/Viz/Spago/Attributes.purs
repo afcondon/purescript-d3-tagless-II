@@ -8,37 +8,29 @@ import D3.Selection (SelectionAttribute)
 import Data.Maybe (Maybe)
 import Prelude (negate, (/), (<>))
 
--- TODO this is a problem once extracted from "script", leads to undefined in D3.js
-enterLinks :: forall t339. Array t339
-enterLinks = [] -- [ classed link_.linkClass ] -- default invisible in CSS unless marked "visible"
-
--- explodePackageOnClick :: D3Simulation_ -> SelectionAttribute
--- explodePackageOnClick simulation_ = onMouseEvent MouseClick (\e d _ -> explodePackages e simulation_ d) -- here we need to raise a Halogen Event
-
--- toggleSpotlightOnClick :: D3Simulation_ -> SelectionAttribute
--- toggleSpotlightOnClick simulation_ = onMouseEvent MouseClick (\e d _ -> toggleSpotlight e simulation_ d)
-
--- unused right now but could be used to make, for example, click on Package or background cause unSpotlighting of node
--- undoSpotlightOnClick :: D3Simulation_ -> SelectionAttribute
--- undoSpotlightOnClick simulation_ = onMouseEvent MouseClick (\e d t -> cancelSpotlight_ simulation_)
-
+-- | Attributes for entering node groups (applied when new nodes are added to DOM)
 enterAttrs :: Array SelectionAttribute
 enterAttrs = 
   [ classed datum_.nodeClass
   , transform' datum_.translateNode
   ]
 
+-- | Attributes for updating existing node groups (reapplied on data updates)
 updateAttrs :: Array SelectionAttribute
 updateAttrs = 
   [ classed datum_.nodeClass
   , transform' datum_.translateNode
   ]
 
+-- | Visual attributes for a scene - split into circle and label attributes
+-- | so they can be applied to the appropriate child elements
 type SpagoSceneAttributes = { 
     circles :: Array SelectionAttribute
   , labels  :: Array SelectionAttribute
 }
 
+-- | Attributes for the "cluster" scene - emphasizes package groupings with
+-- | fill/stroke based on usage and semi-transparent packages
 clusterSceneAttributes :: SpagoSceneAttributes
 clusterSceneAttributes = {
     circles: [ radius datum_.radius
@@ -53,9 +45,11 @@ clusterSceneAttributes = {
             , textAnchor "middle"
             , text datum_.name
             -- , text datum_.nameAndID
-          ] 
+          ]
 }
 
+-- | Attributes for the "graph" scene - colors nodes by group/package with
+-- | opacity differentiating packages from modules
 graphSceneAttributes :: SpagoSceneAttributes
 graphSceneAttributes = { 
     circles: [ radius datum_.radius
@@ -69,9 +63,11 @@ graphSceneAttributes = {
             , textAnchor "middle"
             , text datum_.name
             -- , text datum_.indexAndID
-          ] 
+          ]
 }
 
+-- | Attributes for the "tree" scene - uses depth-based color gradient for fill
+-- | and group-based colors for stroke to show hierarchy
 treeSceneAttributes :: SpagoSceneAttributes
 treeSceneAttributes = {
     circles: [ radius datum_.radius

@@ -24,7 +24,6 @@ import Data.Nullable (Nullable, null) as N
 import Data.Number (ceil, cos, sin, sqrt, pi, (%))
 import Data.Number (floor) as Number
 import Data.Tuple (Tuple(..))
-import Debug (spy)
 import Type.Row (type (+))
 import Web.Event.Internal.Types (Event)
 
@@ -104,8 +103,8 @@ datum_ = {
 -- more complicated calculations (CONVENIENCE)
   , positionLabel:
     \d -> case datum_.nodetype d of
-            (IsModule _)  -> negate $ datum_.radius d
-            (IsPackage _) -> 0.0 -- TODO move the magic numbers out by making the filter / groupFn available
+            (IsModule _)  -> negate $ datum_.radius d  -- position below center
+            (IsPackage _) -> 0.0  -- position at center
 
   , collideRadius:
       \d -> 
@@ -189,17 +188,18 @@ isUsedModule :: SpagoSimNode -> Boolean
 isUsedModule (D3SimNode d) =
   case d.nodetype of
     (IsPackage _) -> false
-    (IsModule _) -> if d.connected 
+    (IsModule _) -> if d.connected
                     then true
                     else false
+
 sourcePackageIs :: String -> Datum_ -> Boolean
-sourcePackageIs name link = (link_.source link).name == name -- TODO move to Model
+sourcePackageIs name link = (link_.source link).name == name
               
 upgradeSpagoNodeData :: M.Map NodeID (Array NodeID) -> SpagoNodeData -> SpagoSimNode
-upgradeSpagoNodeData sourcesMap node = D3SimNode { 
+upgradeSpagoNodeData sourcesMap node = D3SimNode {
     links        : node.links { sources = fromMaybe [] $ M.lookup node.id sourcesMap }
   , id           : node.id
-  , cluster      : node.containerID -- TODO cluster all the single module packages together
+  , cluster      : node.containerID  -- packages cluster by their own ID, modules by their container
   , connected    : node.connected
   , showChildren : case node.nodetype of
                       (IsPackage _) -> true
@@ -279,9 +279,9 @@ moduleNodesToContainerXY nodes = modulesWithGrid <> partitioned.yes
 
     modulesWithGrid = map setModuleGridXY partitioned.no
 
-    setModuleGridXY (D3SimNode m) = 
+    setModuleGridXY (D3SimNode m) =
       case lookup m.containerID packagesIndexMap of
-        Nothing -> spy "container gridXY not found" $ D3SimNode m -- shouldn't be possible, but a noop is fine if not found
+        Nothing -> D3SimNode m -- shouldn't be possible, but a noop is fine if not found
         Just gridXY -> do
           case toMaybe gridXY of
             Nothing ->  D3SimNode m { x = 0.0, y = 0.0, gridXY = gridXY }
@@ -303,7 +303,8 @@ nodesToPhyllotaxis predicate nodes = partitioned.no <> (setForPhyllotaxis `mapWi
 initialRadius = 10.0
 initialAngle = pi * (3.0 - sqrt 5.0)
 
--- TODO available to modules and packages as POC, but should be generalized to all D3SimNodes and moved to library
+-- | Position a node in a sunflower/phyllotaxis pattern based on its index.
+-- | This creates aesthetically pleasing, evenly-distributed circular layouts.
 setForPhyllotaxis :: Int -> SpagoSimNode -> SpagoSimNode
 setForPhyllotaxis index (D3SimNode d) = D3SimNode $ d { x = (radius * cos angle), y = (radius * sin angle) }
   where
@@ -349,15 +350,15 @@ treeNodesToTreeXY_V nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
 fixNamedNodeTo :: Label -> PointXY -> Array SpagoSimNode -> Array SpagoSimNode
 fixNamedNodeTo label point nodes = fixNamedNode' <$> nodes
   where
-    fixNamedNode' (D3SimNode d) = if d.name == label 
-                                  then spy "fixing a node to: " $ D3SimNode d { fx = notNull point.x, fy = notNull point.y }
+    fixNamedNode' (D3SimNode d) = if d.name == label
+                                  then D3SimNode d { fx = notNull point.x, fy = notNull point.y }
                                   else D3SimNode d
 
 fixNamedNode :: Label -> Array SpagoSimNode -> Array SpagoSimNode
 fixNamedNode label nodes = fixNamedNode' <$> nodes
   where
-    fixNamedNode' (D3SimNode d) = if d.name == label 
-                                  then spy "fixing a node: " $ D3SimNode d { fx = notNull d.x, fy = notNull d.y }
+    fixNamedNode' (D3SimNode d) = if d.name == label
+                                  then D3SimNode d { fx = notNull d.x, fy = notNull d.y }
                                   else D3SimNode d
 
 scalePoint :: Number -> Number -> PointXY -> PointXY

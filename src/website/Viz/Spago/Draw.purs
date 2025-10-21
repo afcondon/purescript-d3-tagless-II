@@ -58,9 +58,11 @@ updateSimulation :: forall m d r id.
   SpagoSceneAttributes -> 
   m Unit
 updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
-  node                  <- openSelection nodesGroup (show Group) -- FIXME this call and updateJoin and append all have to match
-  link                  <- openSelection linksGroup (show Line)  -- FIXME this call and updateJoin and append all have to match
-  -- this will change all the object refs so a defensive copy is needed if join is to work
+  -- Open the selections for updating. Element type must match between:
+  -- openSelection (Group/Line), updateJoin (Group/Line), and appendTo (Group/Line)
+  node                  <- openSelection nodesGroup (show Group)
+  link                  <- openSelection linksGroup (show Line)
+  -- Merge new data with simulation (creates defensive copy for D3's join pattern)
   merged <- mergeNewDataWithSim node keyIsID_ link keyIsID_ staging.rawdata 
   -- first the nodedata
   node'                 <- updateJoin node Group merged.nodes keyIsID_
@@ -78,8 +80,8 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   setAttributes updateLabelsSelection attrs.labels
   -- now merge the update selection into the enter selection (NB other way round doesn't work)
   mergedNodeSelection   <- mergeSelections nodeEnter node'.update  -- merged enter and update becomes the `node` selection for next pass
-  
-  -- TODO needs to ACTUALLY drag the parent transform, not this circle as per DefaultDrag
+
+  -- Apply drag behavior (simdrag integrates with D3 simulation for smooth physics)
   void $ mergedNodeSelection `on` Drag (CustomDrag "spago" simdrag) 
   
   -- now the linkData
@@ -95,10 +97,10 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   setAttributes link'.update  [ classed "update" ]
   -- merge the update and enter selections for the links
   mergedlinksShown   <- mergeSelections linkEnter link'.update  -- merged enter and update becomes the `node` selection for next pass
-  
-  -- now put the nodes and links into the simulation 
+
+
+  -- Put nodes and links into the simulation
   setNodesFromSelection mergedNodeSelection
-  -- setLinksFromSelection $ unsafeCoerce $ filter staging.linksWithForce $ d3GetSelectionData_ mergedlinksShown -- TODO hide this coerce in setLinks
   setLinksFromSelection mergedlinksShown staging.linksWithForce
   
   -- tick functions for each selection

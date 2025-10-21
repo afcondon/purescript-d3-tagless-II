@@ -35,8 +35,15 @@ type StateRow = (
   , scene        :: MiseEnScene
 )
 
--- TODO MiseEnScene can be generalized and put in a library
--- it would need to be parameterized with the types of the nodes and links and (maybe) their attributes
+-- | Configuration for a visualization "scene" - a complete specification of:
+-- | - which data to show (node/link filters)
+-- | - how forces behave (force statuses)
+-- | - visual appearance (CSS class, attributes)
+-- | - initialization (node positioning functions)
+-- | - interactivity (event callbacks)
+-- |
+-- | This pattern could be generalized into a library by parameterizing over
+-- | the specific node and link types, but for now it's specialized to Spago.
 type MiseEnScene = { 
 -- first: filter functions for nodes and links (both what links are shown and which ones exert force)
     chooseNodes     :: (SpagoSimNode -> Boolean)
@@ -101,103 +108,24 @@ _forceStatus label = _forceStatuses <<< at label <<< _Just
 -- lenses for mise-en-scene things 
 _forceStatuses :: Lens' State (M.Map Label ForceStatus)
 _forceStatuses = _scene <<< prop (Proxy :: Proxy "forceStatuses")
-_chooseNodes :: forall t427 t428 t432 t433.
-  Strong t428 => t428 t433 t433
-                 -> t428
-                      { scene :: { chooseNodes :: t433
-                                 | t432
-                                 }
-                      | t427
-                      }
-                      { scene :: { chooseNodes :: t433
-                                 | t432
-                                 }
-                      | t427
-                      }
-_chooseNodes              = _scene <<< prop (Proxy :: Proxy "chooseNodes")
-_linksShown :: forall t232 t233 t237 t238.
-  Strong t233 => t233 t238 t238
-                 -> t233
-                      { scene :: { linksShown :: t238
-                                 | t237
-                                 }
-                      | t232
-                      }
-                      { scene :: { linksShown :: t238
-                                 | t237
-                                 }
-                      | t232
-                      }
-_linksShown               = _scene <<< prop (Proxy :: Proxy "linksShown")
-_linksActive :: forall t252 t253 t257 t258.
-  Strong t253 => t253 t258 t258
-                 -> t253
-                      { scene :: { linksActive :: t258
-                                 | t257
-                                 }
-                      | t252
-                      }
-                      { scene :: { linksActive :: t258
-                                 | t257
-                                 }
-                      | t252
-                      }
-_linksActive              = _scene <<< prop (Proxy :: Proxy "linksActive")
+_chooseNodes :: Lens' State (SpagoSimNode -> Boolean)
+_chooseNodes = _scene <<< prop (Proxy :: Proxy "chooseNodes")
+_linksShown :: Lens' State (SpagoGraphLinkID -> Boolean)
+_linksShown = _scene <<< prop (Proxy :: Proxy "linksShown")
+_linksActive :: Lens' State (Datum_ -> Boolean)
+_linksActive = _scene <<< prop (Proxy :: Proxy "linksActive")
 -- _sceneForces              = _scene <<< _forces
-_cssClass :: forall t407 t408 t412 t413.
-  Strong t408 => t408 t413 t413
-                 -> t408
-                      { scene :: { cssClass :: t413
-                                 | t412
-                                 }
-                      | t407
-                      }
-                      { scene :: { cssClass :: t413
-                                 | t412
-                                 }
-                      | t407
-                      }
-_cssClass                 = _scene <<< prop (Proxy :: Proxy "cssClass")
-_callback :: forall t447 t448 t452 t453.
-  Strong t448 => t448 t453 t453
-                 -> t448
-                      { scene :: { callback :: t453
-                                 | t452
-                                 }
-                      | t447
-                      }
-                      { scene :: { callback :: t453
-                                 | t452
-                                 }
-                      | t447
-                      }
-_callback                 = _scene <<< prop (Proxy :: Proxy "callback") 
-_sceneAttributes :: forall t64 t65 t69 t70.
-  Strong t65 => t65 t70 t70
-                -> t65
-                     { scene :: { attributes :: t70
-                                | t69
-                                }
-                     | t64
-                     }
-                     { scene :: { attributes :: t70
-                                | t69
-                                }
-                     | t64
-                     }
-_sceneAttributes          = _scene <<< prop (Proxy :: Proxy "attributes")
+_cssClass :: Lens' State String
+_cssClass = _scene <<< prop (Proxy :: Proxy "cssClass")
+_callback :: Lens' State SelectionAttribute
+_callback = _scene <<< prop (Proxy :: Proxy "callback") 
+_sceneAttributes :: Lens' State SpagoSceneAttributes
+_sceneAttributes = _scene <<< prop (Proxy :: Proxy "attributes")
 _nodeInitializerFunctions :: forall p.
   Strong p =>
   p (Array (Array SpagoSimNode -> Array SpagoSimNode)) (Array (Array SpagoSimNode -> Array SpagoSimNode)) ->
   p State State
 _nodeInitializerFunctions = _scene <<< prop (Proxy :: Proxy "nodeInitializerFunctions")
-
--- -- REVIEW appears to be unused, why?
--- chooseSimNodes :: (SpagoSimNode -> Boolean) -> State -> Maybe (Array SpagoSimNode)
--- chooseSimNodes fn state = filter fn <$> preview _modelNodes state
-
--- chooseSimLinks :: (SpagoGraphLinkID -> Boolean) -> State -> Maybe (Array SpagoGraphLinkID)
--- chooseSimLinks fn state = filter fn <$> preview _modelLinks state
 
 getSimulationVariables :: State -> SimulationVariables
 getSimulationVariables state = do

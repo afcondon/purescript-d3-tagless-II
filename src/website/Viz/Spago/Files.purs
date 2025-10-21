@@ -34,15 +34,17 @@ type PackageJSONCL  = { loc :: Number, contains :: Array String | PackageRow () 
 type RepoJSON       = { | RepoRow () }
 type LOCJSON        = { | LOCRow () }
 
--- TODO no error handling at all here RN (OTOH - performant!!)
+-- | Raw JSON data from multiple Spago files merged together
+-- | Note: No error handling - assumes well-formed JSON (performance over safety)
 type Spago_Raw_JSON_ = { 
     packages        :: Array PackageJSON
   , modules         :: Array ModuleJSON
   , lsDeps          :: Array RepoJSON
   , loc             :: Array LOCJSON
-} 
+}
 
--- TODO use a generic, per-file read for this, and lose the FFI file here
+-- | FFI function to parse and merge JSON from four separate files
+-- | Takes raw JSON strings for modules, packages, dependencies, and LOC data
 foreign import readSpago_Raw_JSON_ :: String -> String -> String -> String -> Spago_Raw_JSON_
 
 type Spago_Cooked_JSON    = { 
@@ -126,7 +128,7 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
           packageString <- pieces !! 1
           case root of
             ".spago" -> Just packageString
-            "src"    -> Just "my-project" -- TODO this name comes from the packages.json via the spago.dhall file
+            "src"    -> Just "my-project"  -- hardcoded for this project's source files
             _ -> Nothing
 
     modulesPL :: Array ModuleJSONPL
