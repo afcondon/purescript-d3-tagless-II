@@ -78,8 +78,15 @@ simulationActualizeForces activeForces = do
   let allLabels = M.keys library
       enableLabels = A.fromFoldable $ Set.intersection activeForces (Set.fromFoldable allLabels)
       disableLabels = A.fromFoldable $ Set.difference (Set.fromFoldable allLabels) activeForces
+      _ = spy "🔧 actualizeForces - enabling" enableLabels
+      _ = spy "🔧 actualizeForces - disabling" disableLabels
+  -- Update status in PureScript state
   simulationEnableForcesByLabel enableLabels
   simulationDisableForcesByLabel disableLabels
+  -- Sync to D3 simulation (this is the critical step!)
+  updatedLibrary <- use _forceLibrary
+  let _ = (updateForceInSimulation handle) <$> updatedLibrary
+  pure unit
   
 listActiveForces :: Map Label ForceStatus -> Array Label
 listActiveForces forceMap = fst <$> (filter (\(Tuple n s) -> s == ForceActive) $ toUnfoldable forceMap)
