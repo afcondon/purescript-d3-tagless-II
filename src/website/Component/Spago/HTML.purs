@@ -34,9 +34,9 @@ render :: forall m.
 render state =
   HH.div
       [ HP.classes [ HH.ClassName "fullscreen-container", HH.ClassName "spago-fullscreen" ] ]
-      [ -- Floating control panel (top-left)
+      [ -- Floating control panel (top-left) - with editorial styling
         HH.div
-          [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left", HH.ClassName "floating-panel--small", HH.ClassName "spago-controls-panel" ] ]
+          [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left", HH.ClassName "floating-panel--small", HH.ClassName "spago-controls-panel", HH.ClassName "editorial" ] ]
           [ HH.h2
               [ HP.classes [ HH.ClassName "floating-panel__title", HH.ClassName "spago-controls__title" ] ]
               [ HH.text "Controls" ]
@@ -44,9 +44,9 @@ render state =
           , renderSimState state
           ]
 
-      , -- Floating force table panel (top-right)
+      , -- Floating force table panel (top-right) - with editorial styling
         HH.div
-          [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-right", HH.ClassName "floating-panel--large", HH.ClassName "spago-forces-panel" ] ]
+          [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-right", HH.ClassName "floating-panel--large", HH.ClassName "spago-forces-panel", HH.ClassName "editorial" ] ]
           [ renderTableForces state ]
 
       , -- Main visualization area (full screen)

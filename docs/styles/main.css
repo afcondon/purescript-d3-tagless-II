@@ -2,20 +2,40 @@
 
 /* CSS Variables for Design System */
 :root {
-  /* Colors */
-  --color-primary: #4a90e2;     /* D3 blue */
-  --color-secondary: #50c878;   /* PureScript green */
-  --color-accent: #f39c12;      /* Highlight orange */
+  /* Colors - Editorial Palette */
+  --color-primary: #4a90e2;     /* D3 blue (keep for compatibility) */
+  --color-secondary: #50c878;   /* PureScript green (keep for compatibility) */
+  --color-accent: #f39c12;      /* Highlight orange (keep for compatibility) */
   --color-dark: #2c3e50;        /* Code background */
   --color-light: #ecf0f1;       /* Page background */
   --color-text: #333333;
   --color-text-light: #666666;
   --color-border: #dddddd;
 
+  /* Editorial/Print Aesthetic Colors */
+  --color-beige-base: #D4C9A8;      /* Warm beige background */
+  --color-beige-light: #D9C9B8;     /* Light beige */
+  --color-beige-dark: #C9B8A0;      /* Darker beige */
+  --color-red-accent: #E63946;      /* Bold red focal point */
+  --color-coral: #D97560;           /* Coral accent */
+  --color-peach: #E8B8A0;           /* Peach accent */
+  --color-teal: #5A8A8A;            /* Muted teal */
+  --color-line: #999999;            /* Divider lines */
+  --color-text-dark: #333333;       /* Primary text */
+  --color-text-muted: #666666;      /* Secondary text */
+
   /* Typography */
   --font-headers: Inter, system-ui, -apple-system, sans-serif;
   --font-body: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-code: 'Fira Code', Monaco, 'Courier New', monospace;
+
+  /* Editorial Typography */
+  --font-mono: 'Courier New', 'Courier', Monaco, monospace;
+  --font-size-tiny: 0.5rem;        /* 8px - small labels */
+  --font-size-small: 0.5625rem;    /* 9px - small text */
+  --font-size-label: 0.6875rem;    /* 11px - main labels */
+  --letter-spacing-wide: 0.125rem; /* 2px - uppercase labels */
+  --letter-spacing-normal: 0.0625rem; /* 1px - body text */
 
   /* Spacing */
   --spacing-xs: 0.25rem;
