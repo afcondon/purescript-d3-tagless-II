@@ -6766,6 +6766,8 @@
       "D3.Viz.Spago.Draw.Attributes",
       "D3.Viz.Spago.Files",
       "D3.Viz.Spago.Model",
+      "D3.Node",
+      "Data.String.CodeUnits",
       "D3.Simulation.Forces",
       "D3.Simulation.Types",
       "PSD3.Button",

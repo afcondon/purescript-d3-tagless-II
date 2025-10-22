@@ -4,8 +4,10 @@ import Prelude
 
 import D3.Data.Tree (TreeLayout(..))
 import D3.Viz.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
-import D3.Viz.Spago.Files (isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Viz.Spago.Model (isM2M_Graph_Link_, isM2M_Tree_Link_, isM2P_Link_, isP2P_Link_, isPackage, isUsedModule)
+import D3.Viz.Spago.Files (isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link, NodeType(..))
+import D3.Viz.Spago.Model (SpagoSimNode, isM2M_Graph_Link_, isM2M_Tree_Link_, isM2P_Link_, isP2P_Link_, isPackage, isUsedModule)
+import D3.Node (D3_SimulationNode(..))
+import Data.String.CodeUnits (take)
 import D3.Simulation.Forces (showType)
 import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), _forceLibrary, showForceFilter)
 import PSD3.Button as Button
@@ -27,6 +29,12 @@ import Halogen.HTML.Properties (StepValue(..))
 import Halogen.HTML.Properties as HP
 import PSD3.Spago.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..))
 import PSD3.Spago.State (State, _cssClass, _stagingLinkFilter, _stagingLinks, _stagingNodes, getSimulationVariables)
+
+-- | Filter for project modules only (D3.* and PSD3.*)
+isProjectModule :: SpagoSimNode -> Boolean
+isProjectModule (D3SimNode node) = case node.nodetype of
+  IsModule name -> take 3 name == "D3." || take 5 name == "PSD3."
+  _ -> false
 
 -- | Full-screen render for Spago page
 render :: forall m.
@@ -132,7 +140,7 @@ renderSimControls state = do
 
     , Format.subHeading_ [ HH.text "Filters" ]
     , HH.div [ HP.classes [ HH.ClassName "control-group"]]
-        [ Format.contentHeading_ [ HH.text "Nodes" ]
+        [ Format.contentHeading_ [ HH.text "Node visibility" ]
         , Button.buttonGroup_
           [ Button.buttonLeft
               [ HE.onClick $ const (Filter $ NodeFilter isPackage) ]
@@ -144,6 +152,11 @@ renderSimControls state = do
               [ HE.onClick $ const (Filter $ NodeFilter isUsedModule) ]
               [ HH.text "Modules" ]
           ]
+        ]
+    , HH.div [ HP.classes [ HH.ClassName "control-group"]]
+        [ Button.button
+              [ HE.onClick $ const (Filter $ NodeFilter isProjectModule) ]
+              [ HH.text "Only project files" ]
         ]
     , HH.div [ HP.classes [ HH.ClassName "control-group"]]
         [ Format.contentHeading_ [ HH.text "Link Visibility" ]
