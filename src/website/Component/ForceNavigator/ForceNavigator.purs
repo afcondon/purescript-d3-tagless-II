@@ -79,6 +79,9 @@ runSimulation = do
   evalEffectSimulation $ do
     -- Enable only the forces in the Set, disable all others
     actualizeForces activeLabels
+    -- Configure slower cooling for better settling
+    setConfigVariable $ AlphaDecay 0.01  -- Slower decay (default is ~0.023)
+    setConfigVariable $ Alpha 1.0        -- Full heat
     -- Start the simulation (or restart if already running, reheating the physics)
     start
 

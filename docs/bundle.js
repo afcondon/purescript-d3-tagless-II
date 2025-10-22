@@ -20486,603 +20486,6 @@
     });
   })();
 
-  // output/D3.Viz.ForceNavigator.Model/index.js
-  var Center = /* @__PURE__ */ (function() {
-    function Center2() {
-    }
-    ;
-    Center2.value = new Center2();
-    return Center2;
-  })();
-  var Section = /* @__PURE__ */ (function() {
-    function Section2() {
-    }
-    ;
-    Section2.value = new Section2();
-    return Section2;
-  })();
-  var Example2 = /* @__PURE__ */ (function() {
-    function Example3() {
-    }
-    ;
-    Example3.value = new Example3();
-    return Example3;
-  })();
-  var Feature = /* @__PURE__ */ (function() {
-    function Feature2() {
-    }
-    ;
-    Feature2.value = new Feature2();
-    return Feature2;
-  })();
-  var BasicChart2 = /* @__PURE__ */ (function() {
-    function BasicChart3() {
-    }
-    ;
-    BasicChart3.value = new BasicChart3();
-    return BasicChart3;
-  })();
-  var AdvancedLayout2 = /* @__PURE__ */ (function() {
-    function AdvancedLayout3() {
-    }
-    ;
-    AdvancedLayout3.value = new AdvancedLayout3();
-    return AdvancedLayout3;
-  })();
-  var Interactive3 = /* @__PURE__ */ (function() {
-    function Interactive4() {
-    }
-    ;
-    Interactive4.value = new Interactive4();
-    return Interactive4;
-  })();
-  var Interpreter2 = /* @__PURE__ */ (function() {
-    function Interpreter3() {
-    }
-    ;
-    Interpreter3.value = new Interpreter3();
-    return Interpreter3;
-  })();
-  var Application2 = /* @__PURE__ */ (function() {
-    function Application3() {
-    }
-    ;
-    Application3.value = new Application3();
-    return Application3;
-  })();
-  var eqNodeType = {
-    eq: function(x18) {
-      return function(y16) {
-        if (x18 instanceof Center && y16 instanceof Center) {
-          return true;
-        }
-        ;
-        if (x18 instanceof Section && y16 instanceof Section) {
-          return true;
-        }
-        ;
-        if (x18 instanceof Example2 && y16 instanceof Example2) {
-          return true;
-        }
-        ;
-        if (x18 instanceof Feature && y16 instanceof Feature) {
-          return true;
-        }
-        ;
-        return false;
-      };
-    }
-  };
-
-  // output/D3.Viz.ForceNavigator.Data/index.js
-  var navigationData = /* @__PURE__ */ (function() {
-    return {
-      nodes: [{
-        id: "purescript-d3",
-        label: "PureScript D3",
-        nodeType: Center.value,
-        category: Nothing.value,
-        children: new Just(["gallery", "about", "spago", "interpreters", "github"]),
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: notNull(0),
-        fy: notNull(0)
-      }, {
-        id: "gallery",
-        label: "Gallery",
-        nodeType: Section.value,
-        category: Nothing.value,
-        children: new Just(["line-chart", "bar-chart", "scatter-plot", "scatter-quartet", "chord-diagram", "bubble-chart", "sankey", "tree", "tree-horizontal", "tree-vertical", "tree-radial", "three-little-circles", "gup", "les-mis"]),
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "about",
-        label: "About",
-        nodeType: Section.value,
-        category: Nothing.value,
-        children: new Just(["type-safe", "composable", "interpreters-feature", "d3-powered", "interactive-feature", "documented"]),
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "spago",
-        label: "Spago Explorer",
-        nodeType: Section.value,
-        category: Nothing.value,
-        children: Nothing.value,
-        url: new Just("#/spago"),
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "interpreters",
-        label: "Interpreters",
-        nodeType: Section.value,
-        category: Nothing.value,
-        children: new Just(["meta-tree", "print-tree"]),
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "github",
-        label: "GitHub",
-        nodeType: Section.value,
-        category: Nothing.value,
-        children: Nothing.value,
-        url: new Just("https://github.com/afcondon/purescript-d3-tagless"),
-        external: new Just(true),
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "line-chart",
-        label: "Line Chart",
-        nodeType: Example2.value,
-        category: new Just(BasicChart2.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "bar-chart",
-        label: "Bar Chart",
-        nodeType: Example2.value,
-        category: new Just(BasicChart2.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "scatter-plot",
-        label: "Scatter Plot",
-        nodeType: Example2.value,
-        category: new Just(BasicChart2.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "scatter-quartet",
-        label: "Anscombe's Quartet",
-        nodeType: Example2.value,
-        category: new Just(BasicChart2.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "chord-diagram",
-        label: "Chord Diagram",
-        nodeType: Example2.value,
-        category: new Just(AdvancedLayout2.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "bubble-chart",
-        label: "Bubble Chart",
-        nodeType: Example2.value,
-        category: new Just(AdvancedLayout2.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "sankey",
-        label: "Sankey Diagram",
-        nodeType: Example2.value,
-        category: new Just(AdvancedLayout2.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "tree",
-        label: "Tree Layout",
-        nodeType: Example2.value,
-        category: new Just(AdvancedLayout2.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "tree-horizontal",
-        label: "Horizontal Tree",
-        nodeType: Example2.value,
-        category: new Just(AdvancedLayout2.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "tree-vertical",
-        label: "Vertical Tree",
-        nodeType: Example2.value,
-        category: new Just(AdvancedLayout2.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "tree-radial",
-        label: "Radial Tree",
-        nodeType: Example2.value,
-        category: new Just(AdvancedLayout2.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "three-little-circles",
-        label: "Three Little Circles",
-        nodeType: Example2.value,
-        category: new Just(Interactive3.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "gup",
-        label: "General Update Pattern",
-        nodeType: Example2.value,
-        category: new Just(Interactive3.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "les-mis",
-        label: "Les Mis\xE9rables Network",
-        nodeType: Example2.value,
-        category: new Just(Interactive3.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "meta-tree",
-        label: "MetaTree Visualizer",
-        nodeType: Example2.value,
-        category: new Just(Interpreter2.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "print-tree",
-        label: "String Generator",
-        nodeType: Example2.value,
-        category: new Just(Interpreter2.value),
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: Nothing.value,
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "type-safe",
-        label: "Type-Safe",
-        nodeType: Feature.value,
-        category: Nothing.value,
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: new Just("Strong type safety with PureScript"),
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "composable",
-        label: "Composable",
-        nodeType: Feature.value,
-        category: Nothing.value,
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: new Just("Build complex visualizations from simple components"),
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "interpreters-feature",
-        label: "Multiple Interpreters",
-        nodeType: Feature.value,
-        category: Nothing.value,
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: new Just("Finally Tagless pattern enables different interpretations"),
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "d3-powered",
-        label: "D3-Powered",
-        nodeType: Feature.value,
-        category: Nothing.value,
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: new Just("Leverages D3.js for battle-tested rendering"),
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "interactive-feature",
-        label: "Interactive",
-        nodeType: Feature.value,
-        category: Nothing.value,
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: new Just("Support for drag, zoom, and other behaviors"),
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }, {
-        id: "documented",
-        label: "Well-Documented",
-        nodeType: Feature.value,
-        category: Nothing.value,
-        children: Nothing.value,
-        url: Nothing.value,
-        external: Nothing.value,
-        description: new Just("Comprehensive examples with comparisons"),
-        x: 0,
-        y: 0,
-        vx: 0,
-        vy: 0,
-        fx: nullImpl,
-        fy: nullImpl
-      }],
-      links: [{
-        source: "purescript-d3",
-        target: "gallery"
-      }, {
-        source: "purescript-d3",
-        target: "about"
-      }, {
-        source: "purescript-d3",
-        target: "spago"
-      }, {
-        source: "purescript-d3",
-        target: "interpreters"
-      }, {
-        source: "purescript-d3",
-        target: "github"
-      }, {
-        source: "gallery",
-        target: "line-chart"
-      }, {
-        source: "gallery",
-        target: "bar-chart"
-      }, {
-        source: "gallery",
-        target: "scatter-plot"
-      }, {
-        source: "gallery",
-        target: "scatter-quartet"
-      }, {
-        source: "gallery",
-        target: "chord-diagram"
-      }, {
-        source: "gallery",
-        target: "bubble-chart"
-      }, {
-        source: "gallery",
-        target: "sankey"
-      }, {
-        source: "gallery",
-        target: "tree"
-      }, {
-        source: "gallery",
-        target: "tree-horizontal"
-      }, {
-        source: "gallery",
-        target: "tree-vertical"
-      }, {
-        source: "gallery",
-        target: "tree-radial"
-      }, {
-        source: "gallery",
-        target: "three-little-circles"
-      }, {
-        source: "gallery",
-        target: "gup"
-      }, {
-        source: "gallery",
-        target: "les-mis"
-      }, {
-        source: "about",
-        target: "type-safe"
-      }, {
-        source: "about",
-        target: "composable"
-      }, {
-        source: "about",
-        target: "interpreters-feature"
-      }, {
-        source: "about",
-        target: "d3-powered"
-      }, {
-        source: "about",
-        target: "interactive-feature"
-      }, {
-        source: "about",
-        target: "documented"
-      }, {
-        source: "interpreters",
-        target: "meta-tree"
-      }, {
-        source: "interpreters",
-        target: "print-tree"
-      }]
-    };
-  })();
-
   // output/Data.Lens.Internal.Forget/index.js
   var profunctorForget = {
     dimap: function(f) {
@@ -21846,6 +21249,603 @@
       return $288($289($290));
     };
   };
+
+  // output/D3.Viz.ForceNavigator.Model/index.js
+  var Center = /* @__PURE__ */ (function() {
+    function Center2() {
+    }
+    ;
+    Center2.value = new Center2();
+    return Center2;
+  })();
+  var Section = /* @__PURE__ */ (function() {
+    function Section2() {
+    }
+    ;
+    Section2.value = new Section2();
+    return Section2;
+  })();
+  var Example2 = /* @__PURE__ */ (function() {
+    function Example3() {
+    }
+    ;
+    Example3.value = new Example3();
+    return Example3;
+  })();
+  var Feature = /* @__PURE__ */ (function() {
+    function Feature2() {
+    }
+    ;
+    Feature2.value = new Feature2();
+    return Feature2;
+  })();
+  var BasicChart2 = /* @__PURE__ */ (function() {
+    function BasicChart3() {
+    }
+    ;
+    BasicChart3.value = new BasicChart3();
+    return BasicChart3;
+  })();
+  var AdvancedLayout2 = /* @__PURE__ */ (function() {
+    function AdvancedLayout3() {
+    }
+    ;
+    AdvancedLayout3.value = new AdvancedLayout3();
+    return AdvancedLayout3;
+  })();
+  var Interactive3 = /* @__PURE__ */ (function() {
+    function Interactive4() {
+    }
+    ;
+    Interactive4.value = new Interactive4();
+    return Interactive4;
+  })();
+  var Interpreter2 = /* @__PURE__ */ (function() {
+    function Interpreter3() {
+    }
+    ;
+    Interpreter3.value = new Interpreter3();
+    return Interpreter3;
+  })();
+  var Application2 = /* @__PURE__ */ (function() {
+    function Application3() {
+    }
+    ;
+    Application3.value = new Application3();
+    return Application3;
+  })();
+  var eqNodeType = {
+    eq: function(x18) {
+      return function(y16) {
+        if (x18 instanceof Center && y16 instanceof Center) {
+          return true;
+        }
+        ;
+        if (x18 instanceof Section && y16 instanceof Section) {
+          return true;
+        }
+        ;
+        if (x18 instanceof Example2 && y16 instanceof Example2) {
+          return true;
+        }
+        ;
+        if (x18 instanceof Feature && y16 instanceof Feature) {
+          return true;
+        }
+        ;
+        return false;
+      };
+    }
+  };
+
+  // output/D3.Viz.ForceNavigator.Data/index.js
+  var navigationData = /* @__PURE__ */ (function() {
+    return {
+      nodes: [{
+        id: "purescript-d3",
+        label: "PureScript D3",
+        nodeType: Center.value,
+        category: Nothing.value,
+        children: new Just(["gallery", "about", "spago", "interpreters", "github"]),
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: notNull(0),
+        fy: notNull(0)
+      }, {
+        id: "gallery",
+        label: "Gallery",
+        nodeType: Section.value,
+        category: Nothing.value,
+        children: new Just(["line-chart", "bar-chart", "scatter-plot", "scatter-quartet", "chord-diagram", "bubble-chart", "sankey", "tree", "tree-horizontal", "tree-vertical", "tree-radial", "three-little-circles", "gup", "les-mis"]),
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "about",
+        label: "About",
+        nodeType: Section.value,
+        category: Nothing.value,
+        children: new Just(["type-safe", "composable", "interpreters-feature", "d3-powered", "interactive-feature", "documented"]),
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "spago",
+        label: "Spago Explorer",
+        nodeType: Section.value,
+        category: Nothing.value,
+        children: Nothing.value,
+        url: new Just("#/spago"),
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "interpreters",
+        label: "Interpreters",
+        nodeType: Section.value,
+        category: Nothing.value,
+        children: new Just(["meta-tree", "print-tree"]),
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "github",
+        label: "GitHub",
+        nodeType: Section.value,
+        category: Nothing.value,
+        children: Nothing.value,
+        url: new Just("https://github.com/afcondon/purescript-d3-tagless"),
+        external: new Just(true),
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "line-chart",
+        label: "Line Chart",
+        nodeType: Example2.value,
+        category: new Just(BasicChart2.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "bar-chart",
+        label: "Bar Chart",
+        nodeType: Example2.value,
+        category: new Just(BasicChart2.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "scatter-plot",
+        label: "Scatter Plot",
+        nodeType: Example2.value,
+        category: new Just(BasicChart2.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "scatter-quartet",
+        label: "Anscombe's Quartet",
+        nodeType: Example2.value,
+        category: new Just(BasicChart2.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "chord-diagram",
+        label: "Chord Diagram",
+        nodeType: Example2.value,
+        category: new Just(AdvancedLayout2.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "bubble-chart",
+        label: "Bubble Chart",
+        nodeType: Example2.value,
+        category: new Just(AdvancedLayout2.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "sankey",
+        label: "Sankey Diagram",
+        nodeType: Example2.value,
+        category: new Just(AdvancedLayout2.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "tree",
+        label: "Tree Layout",
+        nodeType: Example2.value,
+        category: new Just(AdvancedLayout2.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "tree-horizontal",
+        label: "Horizontal Tree",
+        nodeType: Example2.value,
+        category: new Just(AdvancedLayout2.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "tree-vertical",
+        label: "Vertical Tree",
+        nodeType: Example2.value,
+        category: new Just(AdvancedLayout2.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "tree-radial",
+        label: "Radial Tree",
+        nodeType: Example2.value,
+        category: new Just(AdvancedLayout2.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "three-little-circles",
+        label: "Three Little Circles",
+        nodeType: Example2.value,
+        category: new Just(Interactive3.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "gup",
+        label: "General Update Pattern",
+        nodeType: Example2.value,
+        category: new Just(Interactive3.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "les-mis",
+        label: "Les Mis\xE9rables Network",
+        nodeType: Example2.value,
+        category: new Just(Interactive3.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "meta-tree",
+        label: "MetaTree Visualizer",
+        nodeType: Example2.value,
+        category: new Just(Interpreter2.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "print-tree",
+        label: "String Generator",
+        nodeType: Example2.value,
+        category: new Just(Interpreter2.value),
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: Nothing.value,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "type-safe",
+        label: "Type-Safe",
+        nodeType: Feature.value,
+        category: Nothing.value,
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: new Just("Strong type safety with PureScript"),
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "composable",
+        label: "Composable",
+        nodeType: Feature.value,
+        category: Nothing.value,
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: new Just("Build complex visualizations from simple components"),
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "interpreters-feature",
+        label: "Multiple Interpreters",
+        nodeType: Feature.value,
+        category: Nothing.value,
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: new Just("Finally Tagless pattern enables different interpretations"),
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "d3-powered",
+        label: "D3-Powered",
+        nodeType: Feature.value,
+        category: Nothing.value,
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: new Just("Leverages D3.js for battle-tested rendering"),
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "interactive-feature",
+        label: "Interactive",
+        nodeType: Feature.value,
+        category: Nothing.value,
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: new Just("Support for drag, zoom, and other behaviors"),
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }, {
+        id: "documented",
+        label: "Well-Documented",
+        nodeType: Feature.value,
+        category: Nothing.value,
+        children: Nothing.value,
+        url: Nothing.value,
+        external: Nothing.value,
+        description: new Just("Comprehensive examples with comparisons"),
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        fx: nullImpl,
+        fy: nullImpl
+      }],
+      links: [{
+        source: "purescript-d3",
+        target: "gallery"
+      }, {
+        source: "purescript-d3",
+        target: "about"
+      }, {
+        source: "purescript-d3",
+        target: "spago"
+      }, {
+        source: "purescript-d3",
+        target: "interpreters"
+      }, {
+        source: "purescript-d3",
+        target: "github"
+      }, {
+        source: "gallery",
+        target: "line-chart"
+      }, {
+        source: "gallery",
+        target: "bar-chart"
+      }, {
+        source: "gallery",
+        target: "scatter-plot"
+      }, {
+        source: "gallery",
+        target: "scatter-quartet"
+      }, {
+        source: "gallery",
+        target: "chord-diagram"
+      }, {
+        source: "gallery",
+        target: "bubble-chart"
+      }, {
+        source: "gallery",
+        target: "sankey"
+      }, {
+        source: "gallery",
+        target: "tree"
+      }, {
+        source: "gallery",
+        target: "tree-horizontal"
+      }, {
+        source: "gallery",
+        target: "tree-vertical"
+      }, {
+        source: "gallery",
+        target: "tree-radial"
+      }, {
+        source: "gallery",
+        target: "three-little-circles"
+      }, {
+        source: "gallery",
+        target: "gup"
+      }, {
+        source: "gallery",
+        target: "les-mis"
+      }, {
+        source: "about",
+        target: "type-safe"
+      }, {
+        source: "about",
+        target: "composable"
+      }, {
+        source: "about",
+        target: "interpreters-feature"
+      }, {
+        source: "about",
+        target: "d3-powered"
+      }, {
+        source: "about",
+        target: "interactive-feature"
+      }, {
+        source: "about",
+        target: "documented"
+      }, {
+        source: "interpreters",
+        target: "meta-tree"
+      }, {
+        source: "interpreters",
+        target: "print-tree"
+      }]
+    };
+  })();
 
   // output/D3.Viz.ForceNavigator.Unsafe/index.js
   var unboxD3SimNode = function(datum2) {
@@ -23013,7 +23013,7 @@
     return 80;
   };
   var forceLibrary = /* @__PURE__ */ (function() {
-    return initialize(foldableArray)(functorArray)([createForce("charge")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-800), theta(toAttrNumber)(0.9), distanceMin(toAttrNumber)(1), distanceMax(toAttrNumber)(infinity)]), createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([strength2(0.5), x11(toAttrNumber)(0), y10(toAttrNumber)(0)]), createForce("collision")(new RegularForce(ForceCollide.value))(allNodes)([strength2(1), radius7(toAttrNumberFn)(collisionRadius)]), createLinkForce(Nothing.value)([strength2(0.5), distance(toAttrNumber)(150)])]);
+    return initialize(foldableArray)(functorArray)([createForce("collision")(new RegularForce(ForceCollide.value))(allNodes)([strength2(1), radius7(toAttrNumberFn)(collisionRadius)]), createLinkForce(Nothing.value)([strength2(0.5), distance(toAttrNumber)(150)])]);
   })();
 
   // output/PSD3.ForceNavigator.Forces/index.js
@@ -23120,6 +23120,7 @@
   var discard19 = /* @__PURE__ */ discard(discardUnit);
   var discard110 = /* @__PURE__ */ discard19(bindD3SimM);
   var actualizeForces2 = /* @__PURE__ */ actualizeForces(simulationMD3Selection_D3);
+  var setConfigVariable2 = /* @__PURE__ */ setConfigVariable(simulationMD3Selection_D3);
   var start4 = /* @__PURE__ */ start3(simulationMD3Selection_D3);
   var discard24 = /* @__PURE__ */ discard19(bindHalogenM);
   var $$void10 = /* @__PURE__ */ $$void(functorHalogenM);
@@ -23157,7 +23158,11 @@
     var evalEffectSimulation1 = evalEffectSimulation2(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
     return bind16(use2(_activeForces2))(function(activeLabels) {
       return evalEffectSimulation1(discard110(actualizeForces2(activeLabels))(function() {
-        return start4;
+        return discard110(setConfigVariable2(new AlphaDecay(0.01)))(function() {
+          return discard110(setConfigVariable2(new Alpha(1)))(function() {
+            return start4;
+          });
+        });
       }));
     });
   };
@@ -23209,8 +23214,8 @@
         });
         if (v.value0.value0 instanceof Section) {
           return discard24(modifying2(_expandedNodes1)(function(expanded) {
-            var $56 = member4(v.value0.value1)(expanded);
-            if ($56) {
+            var $57 = member4(v.value0.value1)(expanded);
+            if ($57) {
               var v22 = spy4("\u{1F4C2} Collapsing")(v.value0.value1);
               return $$delete7(v.value0.value1)(expanded);
             }
@@ -23238,7 +23243,7 @@
                     return pure20(unit);
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.ForceNavigator (line 136, column 9 - line 142, column 31): " + [maybeListener.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.ForceNavigator (line 139, column 9 - line 145, column 31): " + [maybeListener.constructor.name]);
                 })())(function() {
                   return pure20(unit);
                 });
@@ -23251,7 +23256,7 @@
         return pure20(unit);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.ForceNavigator (line 89, column 16 - line 147, column 18): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.ForceNavigator (line 92, column 16 - line 150, column 18): " + [v.constructor.name]);
     };
   };
   var component4 = function(dictMonadAff) {
@@ -25936,7 +25941,7 @@
   var stop2 = /* @__PURE__ */ stop(simulationMD3Selection_D3);
   var actualizeForces3 = /* @__PURE__ */ actualizeForces(simulationMD3Selection_D3);
   var updateSimulation2 = /* @__PURE__ */ updateSimulation(eqInt)(bindD3SimM)(monadEffD3SimM)(selectionMD3Selection_D3S2)(simulationMD3Selection_D3);
-  var setConfigVariable2 = /* @__PURE__ */ setConfigVariable(simulationMD3Selection_D3);
+  var setConfigVariable3 = /* @__PURE__ */ setConfigVariable(simulationMD3Selection_D3);
   var start5 = /* @__PURE__ */ start3(simulationMD3Selection_D3);
   var bind20 = /* @__PURE__ */ bind(bindHalogenM);
   var discard25 = /* @__PURE__ */ discard21(bindHalogenM);
@@ -26032,7 +26037,7 @@
                 return runWithD3_Simulation22(discard111(stop2)(function() {
                   return discard111(actualizeForces3(activeForces))(function() {
                     return discard111(updateSimulation2(staging)(attributesWithCallback))(function() {
-                      return discard111(setConfigVariable2(new Alpha(1)))(function() {
+                      return discard111(setConfigVariable3(new Alpha(1)))(function() {
                         return start5;
                       });
                     });
@@ -26265,17 +26270,17 @@
       }
       ;
       if (v instanceof ChangeSimConfig) {
-        return runWithD3_Simulation1(setConfigVariable2(v.value0));
+        return runWithD3_Simulation1(setConfigVariable3(v.value0));
       }
       ;
       if (v instanceof StartSim) {
-        return runWithD3_Simulation1(discard111(setConfigVariable2(new Alpha(1)))(function() {
+        return runWithD3_Simulation1(discard111(setConfigVariable3(new Alpha(1)))(function() {
           return start5;
         }));
       }
       ;
       if (v instanceof StopSim) {
-        return runWithD3_Simulation1(discard111(setConfigVariable2(new Alpha(0)))(function() {
+        return runWithD3_Simulation1(discard111(setConfigVariable3(new Alpha(0)))(function() {
           return stop2;
         }));
       }
