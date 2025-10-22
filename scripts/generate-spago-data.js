@@ -53,36 +53,39 @@ try {
 // 3. Generate LOC.json
 console.log('📊 Generating LOC.json...');
 try {
-  // Find all .purs files in src/ and .spago/
-  const srcFiles = execSync('find src -name "*.purs" 2>/dev/null || true', { encoding: 'utf8' })
-    .split('\n')
-    .filter(f => f.trim());
+  // Extract all file paths from modules.json (which has the canonical spago paths)
+  const modulesJsonPath = path.join(OUTPUT_DIR, 'modules.json');
+  const modulesData = JSON.parse(fs.readFileSync(modulesJsonPath, 'utf8'));
 
-  const spagoFiles = execSync('find .spago -name "*.purs" 2>/dev/null || true', { encoding: 'utf8' })
-    .split('\n')
-    .filter(f => f.trim());
-
-  const allFiles = [...srcFiles, ...spagoFiles];
+  // Get unique paths from all modules
+  const filePaths = Object.values(modulesData)
+    .map(module => module.path)
+    .filter(path => path && path.endsWith('.purs'));
 
   const locData = {
     loc: []
   };
 
-  for (const file of allFiles) {
-    if (!file) continue;
+  let successCount = 0;
+  let failCount = 0;
 
+  for (const filePath of filePaths) {
     try {
-      // Count lines in the file (excluding blank lines)
-      const lineCount = execSync(`grep -c ^ "${file}" || echo 0`, { encoding: 'utf8' }).trim();
+      // Count lines in the file
+      const lineCount = execSync(`grep -c ^ "${filePath}" 2>/dev/null || echo 0`, { encoding: 'utf8' }).trim();
       const loc = parseInt(lineCount, 10);
 
-      locData.loc.push({
-        loc: loc,
-        path: file
-      });
+      if (loc > 0) {
+        locData.loc.push({
+          loc: loc,
+          path: filePath
+        });
+        successCount++;
+      } else {
+        failCount++;
+      }
     } catch (err) {
-      // Skip files that can't be read
-      console.warn(`  Warning: Could not count lines in ${file}`);
+      failCount++;
     }
   }
 
@@ -93,7 +96,7 @@ try {
     path.join(OUTPUT_DIR, 'LOC.json'),
     JSON.stringify(locData, null, 2)
   );
-  console.log(`✓ LOC.json generated (${locData.loc.length} files: ${srcFiles.length} src, ${spagoFiles.length} .spago)`);
+  console.log(`✓ LOC.json generated (${successCount} files, ${failCount} skipped)`);
 } catch (err) {
   console.error('✗ Error generating LOC.json:', err.message);
   process.exit(1);
