@@ -23817,38 +23817,9 @@
     });
   };
 
-  // output/PSD3.Router/index.js
-  var routeToHash = function(v) {
-    if (v instanceof Home) {
-      return "#/";
-    }
-    ;
-    if (v instanceof Gallery) {
-      return "#/gallery";
-    }
-    ;
-    if (v instanceof Example) {
-      return "#/example/" + v.value0;
-    }
-    ;
-    if (v instanceof Spago) {
-      return "#/spago";
-    }
-    ;
-    if (v instanceof Interpreters) {
-      return "#/interpreters";
-    }
-    ;
-    if (v instanceof NotFound) {
-      return "#/not-found";
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Router (line 35, column 1 - line 35, column 31): " + [v.constructor.name]);
-  };
-
   // output/PSD3.Interpreters/index.js
   var render7 = function(v) {
-    return div2([classes(["interpreters-page"])])([div2([classes(["interpreters-page__header"])])([h1([classes(["interpreters-page__title"])])([text5("Alternative Interpreters")]), p([classes(["interpreters-page__subtitle"])])([text5("Demonstrating the Finally Tagless pattern")])]), div2([classes(["interpreters-page__content"])])([div2([classes(["interpreters-page__about"])])([h2_([text5("What is Finally Tagless?")]), p_([text5("Finally Tagless is an advanced functional programming pattern that allows the same code to be interpreted in multiple ways. Instead of tying your code to a specific implementation, you write against a set of type class capabilities.")]), p_([text5("This library demonstrates this by providing multiple interpreters for the same visualization code:")])]), div2([classes(["interpreters-page__grid"])])([div2([classes(["interpreter-card"])])([h3_([text5("MetaTree Visualizer")]), p_([text5("Instead of rendering to SVG, this interpreter visualizes the abstract syntax tree of the visualization itself as a tree diagram.")]), p_([text5("This meta-visualization shows how the same code can be interpreted in completely different ways - a key advantage of the Finally Tagless approach.")]), a([href4(routeToHash(new Example("meta-tree"))), classes(["interpreter-card__link"])])([text5("View MetaTree \u2192")])]), div2([classes(["interpreter-card"])])([h3_([text5("String Generator")]), p_([text5("This interpreter takes visualization code and generates human-readable text descriptions or code snippets.")]), p_([text5("Shows how the same high-level visualization definition can be used for documentation generation, code analysis, or teaching - all without modifying the original visualization code.")]), a([href4(routeToHash(new Example("print-tree"))), classes(["interpreter-card__link"])])([text5("View String Generator \u2192")])])]), div2([classes(["interpreters-page__explanation"])])([h3_([text5("Why Multiple Interpreters?")]), p_([text5("The ability to run the same code through different interpreters provides several benefits:")]), ul_([li_([text5("Debugging: Visualize the structure of your visualization")]), li_([text5("Documentation: Generate descriptions automatically")]), li_([text5("Testing: Verify structure without rendering")]), li_([text5("Flexibility: Add new interpretations without changing existing code")])]), p_([a([href4(routeToHash(Gallery.value))])([text5("\u2190 Back to Gallery")])])])])]);
+    return div2([classes(["interpreters-page"])])([div2([classes(["interpreters-page__header"])])([h1([classes(["interpreters-page__title"])])([text5("Alternative Interpreters")]), p([classes(["interpreters-page__subtitle"])])([text5("Demonstrating the Finally Tagless pattern")])]), div2([classes(["interpreters-page__content"])])([div2([classes(["interpreters-page__about"])])([h2_([text5("What is Finally Tagless?")]), p_([text5("Finally Tagless is an advanced functional programming pattern that allows the same code to be interpreted in multiple ways. Instead of tying your code to a specific implementation, you write against a set of type class capabilities.")]), p_([text5("This library demonstrates this by providing multiple interpreters for the same visualization code:")])]), div2([classes(["interpreters-page__grid"])])([div2([classes(["interpreter-card"])])([h3_([text5("MetaTree Visualizer")]), p_([text5("Instead of rendering to SVG, this interpreter visualizes the abstract syntax tree of the visualization itself as a tree diagram.")]), p_([text5("This meta-visualization shows how the same code can be interpreted in completely different ways - a key advantage of the Finally Tagless approach.")]), a([href4("#" + routeToPath(new Example("meta-tree"))), classes(["interpreter-card__link"])])([text5("View MetaTree \u2192")])]), div2([classes(["interpreter-card"])])([h3_([text5("String Generator")]), p_([text5("This interpreter takes visualization code and generates human-readable text descriptions or code snippets.")]), p_([text5("Shows how the same high-level visualization definition can be used for documentation generation, code analysis, or teaching - all without modifying the original visualization code.")]), a([href4("#" + routeToPath(new Example("print-tree"))), classes(["interpreter-card__link"])])([text5("View String Generator \u2192")])])]), div2([classes(["interpreters-page__explanation"])])([h3_([text5("Why Multiple Interpreters?")]), p_([text5("The ability to run the same code through different interpreters provides several benefits:")]), ul_([li_([text5("Debugging: Visualize the structure of your visualization")]), li_([text5("Documentation: Generate descriptions automatically")]), li_([text5("Testing: Verify structure without rendering")]), li_([text5("Flexibility: Add new interpretations without changing existing code")])]), p_([a([href4("#" + routeToPath(Gallery.value))])([text5("\u2190 Back to Gallery")])])])])]);
   };
   var component7 = /* @__PURE__ */ mkComponent({
     initialState: /* @__PURE__ */ identity(categoryFn),
