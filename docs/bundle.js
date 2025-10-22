@@ -26220,7 +26220,7 @@
         return bind110(get3(string)("./data/spago-data/lsdeps.jsonlines"))(function(lsdepJSON) {
           return bind110(get3(string)("./data/spago-data/LOC.json"))(function(locJSON) {
             var model = hush(apply3(apply3(apply3(map43(convertFilesToGraphModel)(moduleJSON))(packageJSON))(lsdepJSON))(locJSON));
-            return pure111(addTreeToModel("Main")(model));
+            return pure111(addTreeToModel("PSD3.Main")(model));
           });
         });
       });

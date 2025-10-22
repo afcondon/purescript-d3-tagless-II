@@ -20,7 +20,7 @@ readModelData = do
   locJSON     <- AJAX.get ResponseFormat.string $ datadir <> "LOC.json"
   let model = hush $ convertFilesToGraphModel <$> moduleJSON <*> packageJSON <*> lsdepJSON <*> locJSON
 
-  pure (addTreeToModel "Main" model)
+  pure (addTreeToModel "PSD3.Main" model)
 
 addTreeToModel :: String -> Maybe SpagoModel -> Maybe SpagoModel
 addTreeToModel rootName maybeModel = do
