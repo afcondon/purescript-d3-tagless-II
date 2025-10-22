@@ -5,7 +5,7 @@ import Prelude
 import PSD3.Types (ExampleId, Route(..))
 import PSD3.Gallery.Examples (getExample)
 import PSD3.Gallery.CodeFiles (getCodeFileUrl)
-import PSD3.Router (routeToHash)
+import PSD3.RoutingDSL (routeToPath)
 import PSD3.Visualization as Visualization
 import Halogen as H
 import Halogen.HTML as HH
@@ -84,7 +84,7 @@ render state =
             [ HH.h1_ [ HH.text "Example Not Found" ]
             , HH.p_ [ HH.text $ "Could not find example with ID: " <> state.exampleId ]
             , HH.a
-                [ HP.href $ routeToHash Gallery
+                [ HP.href $ "#" <> routeToPath Gallery
                 , HP.classes [ HH.ClassName "example-detail__back-link" ]
                 ]
                 [ HH.text "← Back to Gallery" ]
@@ -111,7 +111,7 @@ render state =
                     [ HP.classes [ HH.ClassName "example-fullscreen__toolbar-title" ] ]
                     [ HH.text example.title ]
                 , HH.a
-                    [ HP.href $ routeToHash Gallery
+                    [ HP.href $ "#" <> routeToPath Gallery
                     , HP.classes [ HH.ClassName "btn", HH.ClassName "btn--secondary" ]
                     , HP.title "Back to Gallery"
                     ]
