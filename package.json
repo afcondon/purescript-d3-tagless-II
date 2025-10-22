@@ -8,9 +8,10 @@
     "install": "spago install",
     "upgrade-set": "spago upgrade-set",
     "snippets": "node src/scripts/extract-snippets.js",
-    "bundle": "spago bundle --module PSD3.Main --outfile docs/bundle.js",
+    "convert-about": "node scripts/convert-about.js",
+    "bundle": "npm run convert-about && spago bundle --module PSD3.Main --outfile docs/bundle.js",
     "graph-dot": "spago graph modules --dot",
-    "graph-json": "spago graph modules --json",
+    "graph-json": "spago graph modules --json && spago graph packages --json",
     "graph-topo": "spago graph modules --topo",
     "versions": "spago --version && npm --version",
     "dev": "npm run build && npm run bundle"
@@ -18,6 +19,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.21",
     "cssnano": "^7.1.1",
+    "marked": "^16.4.1",
     "postcss-cli": "^11.0.1",
     "postcss-import": "^16.1.1",
     "postcss-nesting": "^13.0.2",

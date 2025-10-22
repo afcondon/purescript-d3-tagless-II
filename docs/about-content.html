@@ -1,0 +1,255 @@
+<h1 id="heading-0">PS<$>D3: Interactive Data Visualization in PureScript</h1>
+<p>A PureScript embedded DSL for building interactive data visualizations, using D3.js both as inspiration and as an implementation layer under the Foreign Function Interface (FFI).</p>
+<p><strong>Demo</strong>: <a href="https://afcondon.github.io/purescript-d3-tagless-II/">https://afcondon.github.io/purescript-d3-tagless-II/</a></p>
+<h2 id="heading-1">What is This Project?</h2>
+<p>This project demonstrates an embedded DSL for building interactive data visualizations with PureScript. The DSL uses a Finally Tagless approach that allows multiple implementations for the &quot;language&quot; which permits both alternative implementations (only one, D3, is currently shown) but also alternative interpreters which generate code, documentation or even further &quot;meta&quot; visualizations to allow one to manipulate the DSL syntax tree.</p>
+<h2 id="heading-2">The Data Visualization Process</h2>
+<p>Data visualization transforms boring tables of data into perceivable patterns:</p>
+<ol>
+<li><strong>Data</strong> - Raw data structures (tables, JSON, etc.)</li>
+<li><strong>Data structure</strong> - Relationships between data elements</li>
+<li><strong>Data presentation</strong> - Visual encoding (HTML/SVG/Canvas)</li>
+<li><strong>Perception</strong> - Human insight and understanding</li>
+</ol>
+<p>The goal is to make relationships in data visible through appropriate visual encoding, enabling the human visual system to process patterns that would be difficult or impossible to perceive in tabular form.</p>
+<h3 id="heading-3">Diverse visuals... but structural similarity</h3>
+<p>D3 enables an enormous range of visualizations - from simple bar charts to complex hierarchical layouts, force-directed graphs, geographic projections, and interactive dashboards. Despite their visual diversity, these visualizations share common structural patterns: data is bound to DOM elements, attributes are computed from data, and layouts determine spatial positioning.</p>
+<h2 id="heading-4">Project Goals (and non-Goals)</h2>
+<h3 id="heading-5">Two #1 priorities, necessitates trade-offs</h3>
+<table>
+<thead>
+<tr>
+<th>Primary</th>
+<th>Non-goals</th>
+<th>Sub-goals</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Expressivity:</strong> fully equivalent to D3.js</td>
+<td><strong>Completeness:</strong> not all D3.js API surface is needed</td>
+<td>Prefer idiomatic PureScript to exposing D3 APIs directly</td>
+</tr>
+<tr>
+<td><strong>Readability:</strong> ideally <em>more</em> readable than JS equivalent</td>
+<td><strong>Modelling</strong> of D3 state complexity thru type-system</td>
+<td>Design for progressive enhancement</td>
+</tr>
+<tr>
+<td><strong>Composable:</strong> suitable for &quot;programming in the large&quot;</td>
+<td><strong>Performance</strong> equality to D3</td>
+<td>Showcase PureScript ecosystem and libraries</td>
+</tr>
+</tbody></table>
+<h3 id="heading-6">Expressivity</h3>
+<p>Something that people with limited prior knowledge / experience of data visualisation often seem to find surprising is the degree to which D3 is <em>fundamentally different</em> from &quot;a charting library&quot;. While the library has some affordances that make it very easy to do common visualisations it is not in any way about &quot;canned visualisations&quot;. Rather, it is a language for describing a relationship between arrays of data and arbitrary constructions of DOM (HTML or SVG) element or marks on Canvas, and it could in principle be used to do auditory &quot;visualisation&quot; or, who knows, maybe olfactory &quot;visualisation&quot; or drone displays or whatever.</p>
+<p>You can get a greater sense of the potential of D3 and the range of things that have thus far been produced using it at <a href="https://observablehq.com/">ObservableHQ</a>.</p>
+<p>So when we talk about expressability as a goal for this PureScript eDSL, we&#39;re not talking about working at the level of &quot;make me a bar graph&quot;, &quot;make me a scatterplot&quot;, we&#39;re talking about retaining the expressability of that translation from array to, for example, SVG.</p>
+<p>Furthermore, I am especially interested in, and an advocate for, interactive data visualisations that act as control elements for other aspects of applications. It&#39;s worth calling this out here because &quot;interactive visualisation&quot; very often means &quot;explorable&quot; visualisation, ie one in which you can interact with the elements <em>but only to manipulate the visualisation itself</em>. That is a different, and more limited, sense of interaction from what i intend.</p>
+<h3 id="heading-7">Readability</h3>
+<p>If we look at D3.js as a kind of embedded DSL in JavaScript it is certainly clear and readable in it&#39;s core feature: declaratively associating some array(s) of data with some elements in the DOM and attributes of those elements. While it is definitely not a goal to reproduce the structures of D3js own language, it&#39;s also unwise to change it arbitrarily because there&#39;s a very large amount of real world experience to be leveraged or at least not shunned. So that&#39;s one kind of readability concern - can it be somewhat isomorphic to the equivalent JavaScript where that&#39;s appropriate?</p>
+<p>A second form of readability is concerned with the places where - for me - the D3 / JavaScript approach breaks down, which is in roles and responsabilities of different parts of the code. This is related pretty closely to composability (see next goal for more on this).</p>
+<p>Ideally, i would like the person coding the data layer and data model to be somewhat insulated from the concerns of the person using that data model to create a visualisation. And likewise, i would like the person developing the data visualisation to be somewhat insulated from the concerns of a web app developer. Now, these might very well all be the <em>same person</em> but separating the concerns like this makes it easier to evolve the code and, crucially, makes it all a little less brittle.</p>
+<h3 id="heading-8">Composability</h3>
+<p>There is an additional important goal which is <em>composability</em>, if you are a PureScript or Haskell programmer you probably know what i mean by this and if you are, say, a JavaScript D3 programmer perhaps that will seem odd or even contentious.</p>
+<p>The benefits we seek from composability include:</p>
+<ul>
+<li>better composability of sub-programs</li>
+<li>better expressiveness in describing the problem domain</li>
+<li>better correctness in implementations (ie fewer bugs)</li>
+<li>better ability to evolve programs due to shifting requirements (re-factoring)</li>
+</ul>
+<h3 id="heading-9">Non-goal: Complete API coverage</h3>
+<p>As alluded to above, there&#39;s lots of API in D3 that needs nothing more than an FFI wrapper to be accessible from a PureScript eDSL. D3 is both modular and somewhat functional in style (in the JavaScript sense of functional programming, to be clear). So it was from the start a non-goal to completely expose all of D3 as <em>idiomatic</em> PureScript where a simple wrapper was sufficient.</p>
+<p>Furthermore, i have only written those wrappers <em>as I needed them</em> to there are still <em>many</em> parts of D3 that are not covered by this eDSL.</p>
+<h3 id="heading-10">Non-goal: Modelling of D3 State</h3>
+<p>This might seem like a surprising choice - D3 is inherently <em>very</em> stateful, there&#39;s state in D3, there&#39;s state in the DOM, there&#39;s statefulness in your (pure) data after you give it to D3. State everywhere. In many cases in functional programming you might try to ameliorate the dangers of this by explicitly modelling the state, using a State Monad or marking everything that changes or depends upon state as &quot;Effect&quot;-full.</p>
+<p>Indeed i have tried this approach in the past. In this library i have instead striven to isolate the statefulness to only the code that uses eDSL represented by the <code>Selection</code> and <code>Simulation</code> monads. This <em>significantly</em> removes but cannot fully eliminate the issues associated with state. However, i believe it is a good compromise although much more could be said on the matter.</p>
+<h3 id="heading-11">Non-goal: performance optimisation that compromise readability</h3>
+<p>The performance bottlenecks in a D3 visualisation are, by their nature, going to be the assignment of attributes to (potentially millions of) DOM elements. It is likely that this code will always have to have a native implementation, ie FFI, <em>or</em> it would have to be re-written in a way that was as performant as possible in PureScript. I have chosen to use D3 for this as a low-level, well-tested, optimised layer in order to preserve readability of the visualisation code.</p>
+<h2 id="heading-12">What's a DSL? and what's an eDSL?</h2>
+<h3 id="heading-13">Domain Specific Language</h3>
+<p>Programming language tailored to a particular domain.</p>
+<p>Might be limited compared to general purpose programming language.</p>
+<p>But, may also be easier for novices, domain experts, non-programmers to use.</p>
+<h3 id="heading-14">Embedded Domain Specific Language</h3>
+<p>Embedded Domain Specific Language makes domain specific tasks easier <em>without</em> limiting the programmer in any way - they still have access to all parts of the host language.</p>
+<p>This has Pros &amp; Cons</p>
+<h2 id="heading-15">The grammar of D3...</h2>
+<p>Analyse the <em>implicit</em> grammar of D3...</p>
+<p>...in order to define a <em>minimal</em> grammar for our PureScript eDSL</p>
+<p>(consistent with priority goals of readability and expressiveness)</p>
+<h3 id="heading-16">A Visual D3 Grammar</h3>
+<p><strong>This is much simpler than D3&#39;s actual AST would be (if it had one) but it is sufficient to express a LOT of D3 scripts.</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Symbol</th>
+<th>Function</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>attach</td>
+<td>a</td>
+<td>Select an entry point (or points) in the DOM</td>
+<td>Simply uses a CSS type selector to identify the target. Resulting selection can then be used for append / join in order to build up a visualisation from HTML, SVG or Canvas elements.</td>
+</tr>
+<tr>
+<td>appendTo</td>
+<td>+</td>
+<td>Add some DOM element <strong>e</strong> to a selection</td>
+<td>Each element can have attributes. If data has been bound higher up in the AST then that data is available in this element&#39;s attributes</td>
+</tr>
+<tr>
+<td>join</td>
+<td>&lt;+&gt;</td>
+<td>For every <em>datum</em> <strong>d</strong> in some array, insert an element <strong>e</strong></td>
+<td>We&#39;ll run the visualisation with some data model which can be arbitrary in structure, but at every point where we want to append <em>multiple</em> elements we need to have a function that yields a simple array.<br><br>Each element can have attributes that are derived from the datum with which it is associated.<br><br>The datum at each element is inherited by its children, so any subsequent join starts with the structure of this datum.</td>
+</tr>
+</tbody></table>
+<h3 id="heading-17">3 Little Circles: A canonical simplest example</h3>
+<pre><code>    a        &quot;div#hook&quot;
+    ↓
+    +        &lt;svg&gt;
+    ↓
+    +        &lt;g&gt;
+    ↓
+   &lt;+&gt;       [1,2,3] → &lt;circle&gt;
+</code></pre>
+<p><a href="https://bost.ocks.org/mike/circles/">https://bost.ocks.org/mike/circles/</a></p>
+<h3 id="heading-18">Radial Tree: A more complex example</h3>
+<p>The Radial Tree and Cluster Dendrogram visualizations share the exact same structure:</p>
+<pre><code>    a          &quot;div#hook&quot;
+    ↓
+    +          &lt;svg&gt;
+    ↓
+    +          &lt;g.links&gt;    +          &lt;g.nodes&gt;    +          &lt;g.labels&gt;
+    ↓                       ↓                       ↓
+   &lt;+&gt;         &lt;path&gt;      &lt;+&gt;         &lt;circle&gt;    &lt;+&gt;         &lt;text&gt;
+               ↑                       ↑                       ↑
+            m-&gt;m.links              m-&gt;m.nodes              m-&gt;m.nodes
+</code></pre>
+<p>All the differences are in details of how the node attributes are calculated from the data.</p>
+<h3 id="heading-19">Even complex examples structurally simple</h3>
+<p>Even highly complex visualizations like <a href="https://top2000.visualcinnamon.com">Nadieh Bremer&#39;s Top 2000 visualization</a> can be expressed with this simple grammar - the complexity lies in the data transformations and attribute calculations, not in the fundamental structure.</p>
+<h2 id="heading-20">Interpreter for Selections</h2>
+<pre><code class="language-purescript">class (Monad m) &lt;= SelectionM selection m where
+  appendTo    :: selection -&gt; Element -&gt; Array (SelectionAttribute) -&gt; m selection
+  attach      :: Selector selection                                  -&gt; m selection
+  simpleJoin  :: ∀ datum. selection -&gt; Element -&gt; (Array datum) -&gt; (Datum_ -&gt; Index_)
+                                                                     -&gt; m selection
+</code></pre>
+<p><strong>(as you can see, actual grammar a bit richer, but still small)</strong></p>
+<p>The full <code>SelectionM</code> type class includes:</p>
+<pre><code class="language-purescript">class (Monad m) &lt;= SelectionM selection m where
+  appendTo         :: selection -&gt; Element -&gt; Array (SelectionAttribute) -&gt; m selection
+  attach           :: Selector selection                                  -&gt; m selection
+  simpleJoin       :: ∀ datum. selection -&gt; Element -&gt; (Array datum) -&gt; (Datum_ -&gt; Index_)
+                                                                          -&gt; m selection
+  selectUnder      :: selection -&gt; Selector selection                    -&gt; m selection
+  filterSelection  :: selection -&gt; Selector selection                    -&gt; m selection
+  mergeSelections  :: selection -&gt; selection                             -&gt; m selection
+  setAttributes    :: selection -&gt; Array (SelectionAttribute)            -&gt; m Unit
+  on               :: selection -&gt; Behavior selection                    -&gt; m Unit
+  updateJoin       :: ∀ datum. selection -&gt; Element -&gt; (Array datum) -&gt; (Datum_ -&gt; Index_)
+                      -&gt; m { enter :: selection, exit :: selection, update :: selection }
+</code></pre>
+<h2 id="heading-21">Interpreter for Simulations</h2>
+<p><strong>(a lot more complicated, much Effect, many State etc)</strong></p>
+<p>The <code>SimulationM</code> type class extends <code>SelectionM</code> with physics simulation capabilities:</p>
+<pre><code class="language-purescript">class (Monad m, SelectionM selection m) &lt;= SimulationM selection m | m -&gt; selection where
+  -- control
+  start :: m Unit
+  stop  :: m Unit
+
+  -- config
+  setConfigVariable :: SimVariable -&gt; m Unit
+
+  -- management of forces
+  actualizeForces :: Map Label ForceStatus -&gt; m Unit
+
+  -- management of data (nodes and links)
+  setNodes :: forall d. Array (D3_SimulationNode d) -&gt; m (Array (D3_SimulationNode d))
+  setLinks :: forall d r id. (Eq id) =&gt;
+              Array (D3Link id r) -&gt; Array (D3_SimulationNode d) -&gt; (Datum_ -&gt; Index_)
+              -&gt; m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
+
+  -- updating with selections (less type-safe but necessary for dynamic updates)
+  setNodesFromSelection :: selection -&gt; m Unit
+  setLinksFromSelection :: selection -&gt; (Datum_ -&gt; Boolean) -&gt; m Unit
+
+  -- merge new data with existing simulation state
+  mergeNewDataWithSim :: forall d r id. (Eq id) =&gt;
+    selection -&gt;                                    -- nodes selection
+    (Datum_ -&gt; Index_) -&gt;                          -- nodes keyFn
+    selection -&gt;                                    -- links selection
+    (Datum_ -&gt; Index_) -&gt;                          -- links KeyFn
+    RawData d r id -&gt;                              -- links and nodes raw data
+    m { links :: (Array (D3LinkSwizzled (D3_SimulationNode d) r))
+      , nodes :: (Array (D3_SimulationNode d))
+      }
+
+  -- tick functions
+  addTickFunction    :: Label -&gt; Step selection -&gt; m Unit
+  removeTickFunction :: Label                    -&gt; m Unit
+</code></pre>
+<h2 id="heading-22">Multiple Interpreters FTW</h2>
+<p>The Finally Tagless encoding enables multiple interpretations of the same visualization code:</p>
+<ul>
+<li><p><strong>&quot;D3&quot; interpreter</strong> - consumes &quot;script&quot; and produces visualisation in the DOM - just like D3.js script would</p>
+</li>
+<li><p><strong>&quot;Printer&quot; interpreter</strong> - consumes &quot;script&quot; and produces a textual representation of the script actions - in principle, this could be extended to output the equivalent JavaScript.</p>
+</li>
+<li><p><strong>&quot;Meta&quot; interpreter</strong> - consumes &quot;script&quot; and produces...another Tree structure, representing the structure of the visualisation itself. This Tree structure can then be fed back in to, for example, the &quot;D3&quot; interpreter to produce a diagrammatic documentation of the script.</p>
+</li>
+</ul>
+<h2 id="heading-23">Motivation</h2>
+<p>I have built moderately complex, custom interactive data visualisations in the past both in JavaScript and PureScript, using D3.js. I found that JavaScript generally, and D3 in particular, seemed to work best for visualisations that were less &quot;app-like&quot; and more &quot;chart-like&quot;. What i mean by this is that when the complexity started to rise to the level of a small application and when multiple programmers were involved, or if one had to return to some code after time had elapsed, the whole thing was very brittle and refactoring of it prohibitively difficult.</p>
+<p>This could certainly be a &quot;feature, not a bug&quot; for some domains of application such as building a big beautiful rich visualisation for a one-off publication such as a New York Times feature. However, when the visualisation is used to <em>control</em> application behaviour or the visualisation begins to approach the complexity and multi-layered-ness of an app...this all in one single script language is a real problem, at least in my experience.</p>
+<p>In PureScript it is common, and easy, to use JavaScript libraries via the FFI initially as it is a very quick way to get access to the enormous world of functionality that exists in open source JavaScript libraries. Sometimes this can be sufficient, you wrap a component or a function and its abstractions never leak and all is well. Other times, you wrap something but there&#39;s a kind of impedance mismatch with the way the JavaScript abstraction work and the way you&#39;d like to handle, and particularly to compose, things in the purely functional world. D3.js was definitely the latter, for me.</p>
+<p>D3.js is a big library with thousands of API end-points but, crucially, not all of those end-points are problematic for composing larger scale applications or weaving visualisations into PureScript web applications. Instead, its is primarily two core areas of the API, Selection and Simulation (more details on these later) which tend to actually <em>structure</em> programs in a characteristic D3 / JavaScript vernacular. It is these APIs that are first wrapped (by FFI) and then made available in purely functional idiomatic way by this library.</p>
+<p>A secondary, but also very important, consideration is the ability to design and work with Algebraic Data Types (ADTs) and the rich container libraries that are available in PureScript while building and implementing visualisations and especially the code that surrounds the visualization. While D3 ultimately is a kind of array programming DSL <em>within</em> JavaScript and our PureScript eDSL is going to bottom out to some sort of &quot;arrays mapped over the DOM&quot; too, we want to be able to create data models that are more sophisticated and have better invariants as these are keys to both composability and maintainable, long-lived programs.</p>
+<h2 id="heading-24">Installation</h2>
+<p>After cloning the repo, you should be able to do:</p>
+<ul>
+<li><code>yarn install</code></li>
+<li><code>yarn run build</code></li>
+<li><code>yarn run bundle</code></li>
+</ul>
+<p>and then if you serve <code>http</code> from the <code>docs</code> directory you should be able to see the same demo as at the link above.</p>
+<h2 id="heading-25">Examples</h2>
+<p>The project includes several examples demonstrating different aspects of the library:</p>
+<h3 id="heading-26">Simple Examples</h3>
+<ul>
+<li><strong>Three Little Circles</strong> - The canonical simplest D3 example, demonstrating basic data binding</li>
+<li><strong>General Update Pattern</strong> - Shows how to handle dynamic data updates with enter/exit/update</li>
+<li><strong>Anscombe&#39;s Quartet</strong> - Four datasets with identical statistics but different distributions</li>
+</ul>
+<h3 id="heading-27">Layout Examples</h3>
+<ul>
+<li><strong>Tree Layouts</strong> - Multiple variations (horizontal, vertical, radial) showing hierarchical data</li>
+<li><strong>Bubble Chart</strong> - Circle packing layout</li>
+<li><strong>Sankey Diagram</strong> - Flow visualization</li>
+<li><strong>Chord Diagram</strong> - Relationship visualization</li>
+</ul>
+<h3 id="heading-28">Interactive Examples</h3>
+<ul>
+<li><strong>Les Misérables Network</strong> - Force-directed graph with draggable nodes</li>
+<li><strong>Spago Explorer</strong> - Full Halogen application demonstrating multiple scenes, force configurations, and interactive controls</li>
+</ul>
+<h3 id="heading-29">Alternative Interpreters</h3>
+<ul>
+<li><strong>MetaTree</strong> - Visualizes the structure of visualization code itself</li>
+<li><strong>Printer</strong> - Generates textual representation of visualization scripts</li>
+</ul>
+<h2 id="heading-30">Further Reading</h2>
+<ul>
+<li><a href="https://observablehq.com/@d3/gallery">ObservableHQ D3 Gallery</a> - Excellent examples of D3 visualizations</li>
+<li><a href="https://www.d3-graph-gallery.com/">D3 Graph Gallery</a> - Comprehensive D3 examples</li>
+<li><a href="https://ft-interactive.github.io/visual-vocabulary/">Visual Vocabulary (FT)</a> - Guide to choosing visualizations</li>
+<li>Munzner, Tamara. <em>Visualization Analysis and Design</em> - Theoretical foundation</li>
+<li>Edward Tufte&#39;s books - Classic data visualization theory</li>
+</ul>
+<h2 id="heading-31">License</h2>
+<p>See LICENSE file for details.</p>

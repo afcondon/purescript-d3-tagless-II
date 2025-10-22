@@ -12,6 +12,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
 import Halogen.VDom.Driver (runUI)
+import PSD3.About as About
 import PSD3.ExampleDetail as ExampleDetail
 import PSD3.Gallery as Gallery
 import PSD3.Home as Home
@@ -43,6 +44,7 @@ type Slots =
   , exampleDetail :: forall q. H.Slot q Void Unit
   , spago :: forall q. H.Slot q Void Unit
   , interpreters :: forall q. H.Slot q Void Unit
+  , about :: forall q. H.Slot q Void Unit
   )
 
 _navigation = Proxy :: Proxy "navigation"
@@ -51,6 +53,7 @@ _gallery = Proxy :: Proxy "gallery"
 _exampleDetail = Proxy :: Proxy "exampleDetail"
 _spago = Proxy :: Proxy "spago"
 _interpreters = Proxy :: Proxy "interpreters"
+_about = Proxy :: Proxy "about"
 
 -- | Main application component
 component :: forall q i. H.Component q i Void Aff
@@ -100,6 +103,9 @@ renderPage route = case spy "Route is" route of
 
   Interpreters ->
     HH.slot_ _interpreters unit Interpreters.component unit
+
+  About ->
+    HH.slot_ _about unit About.component unit
 
   NotFound ->
     HH.div

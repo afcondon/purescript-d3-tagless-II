@@ -1,0 +1,162 @@
+[
+  {
+    "id": "heading-0",
+    "text": "PS<$>D3: Interactive Data Visualization in PureScript",
+    "level": 1
+  },
+  {
+    "id": "heading-1",
+    "text": "What is This Project?",
+    "level": 2
+  },
+  {
+    "id": "heading-2",
+    "text": "The Data Visualization Process",
+    "level": 2
+  },
+  {
+    "id": "heading-3",
+    "text": "Diverse visuals... but structural similarity",
+    "level": 3
+  },
+  {
+    "id": "heading-4",
+    "text": "Project Goals (and non-Goals)",
+    "level": 2
+  },
+  {
+    "id": "heading-5",
+    "text": "Two #1 priorities, necessitates trade-offs",
+    "level": 3
+  },
+  {
+    "id": "heading-6",
+    "text": "Expressivity",
+    "level": 3
+  },
+  {
+    "id": "heading-7",
+    "text": "Readability",
+    "level": 3
+  },
+  {
+    "id": "heading-8",
+    "text": "Composability",
+    "level": 3
+  },
+  {
+    "id": "heading-9",
+    "text": "Non-goal: Complete API coverage",
+    "level": 3
+  },
+  {
+    "id": "heading-10",
+    "text": "Non-goal: Modelling of D3 State",
+    "level": 3
+  },
+  {
+    "id": "heading-11",
+    "text": "Non-goal: performance optimisation that compromise readability",
+    "level": 3
+  },
+  {
+    "id": "heading-12",
+    "text": "What's a DSL? and what's an eDSL?",
+    "level": 2
+  },
+  {
+    "id": "heading-13",
+    "text": "Domain Specific Language",
+    "level": 3
+  },
+  {
+    "id": "heading-14",
+    "text": "Embedded Domain Specific Language",
+    "level": 3
+  },
+  {
+    "id": "heading-15",
+    "text": "The grammar of D3...",
+    "level": 2
+  },
+  {
+    "id": "heading-16",
+    "text": "A Visual D3 Grammar",
+    "level": 3
+  },
+  {
+    "id": "heading-17",
+    "text": "3 Little Circles: A canonical simplest example",
+    "level": 3
+  },
+  {
+    "id": "heading-18",
+    "text": "Radial Tree: A more complex example",
+    "level": 3
+  },
+  {
+    "id": "heading-19",
+    "text": "Even complex examples structurally simple",
+    "level": 3
+  },
+  {
+    "id": "heading-20",
+    "text": "Interpreter for Selections",
+    "level": 2
+  },
+  {
+    "id": "heading-21",
+    "text": "Interpreter for Simulations",
+    "level": 2
+  },
+  {
+    "id": "heading-22",
+    "text": "Multiple Interpreters FTW",
+    "level": 2
+  },
+  {
+    "id": "heading-23",
+    "text": "Motivation",
+    "level": 2
+  },
+  {
+    "id": "heading-24",
+    "text": "Installation",
+    "level": 2
+  },
+  {
+    "id": "heading-25",
+    "text": "Examples",
+    "level": 2
+  },
+  {
+    "id": "heading-26",
+    "text": "Simple Examples",
+    "level": 3
+  },
+  {
+    "id": "heading-27",
+    "text": "Layout Examples",
+    "level": 3
+  },
+  {
+    "id": "heading-28",
+    "text": "Interactive Examples",
+    "level": 3
+  },
+  {
+    "id": "heading-29",
+    "text": "Alternative Interpreters",
+    "level": 3
+  },
+  {
+    "id": "heading-30",
+    "text": "Further Reading",
+    "level": 2
+  },
+  {
+    "id": "heading-31",
+    "text": "License",
+    "level": 2
+  }
+]

@@ -22,6 +22,7 @@ routes =
   <|> example
   <|> spago
   <|> interpreters
+  <|> about
   <|> notFound
 
 -- | Match: /
@@ -45,6 +46,10 @@ spago = Spago <$ lit "spago" <* end
 interpreters :: Match Route
 interpreters = Interpreters <$ lit "interpreters" <* end
 
+-- | Match: /about
+about :: Match Route
+about = About <$ lit "about" <* end
+
 -- | Fallback: everything else is NotFound
 notFound :: Match Route
 notFound = pure NotFound
@@ -58,4 +63,5 @@ routeToPath Gallery = "/gallery"
 routeToPath (Example id) = "/example/" <> id
 routeToPath Spago = "/spago"
 routeToPath Interpreters = "/interpreters"
+routeToPath About = "/about"
 routeToPath NotFound = "/not-found"
