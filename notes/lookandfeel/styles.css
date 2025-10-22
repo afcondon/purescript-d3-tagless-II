@@ -1,0 +1,248 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    font-family: 'Courier New', monospace;
+    background-color: #D4C9A8;
+    color: #333;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    display: flex;
+    flex: 1;
+    width: 100%;
+    height: 85vh;
+}
+
+.column {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    border-right: 1px solid #999;
+}
+
+.column:last-child {
+    border-right: none;
+}
+
+.left-column {
+    background-color: #D4C9A8;
+}
+
+.center-column {
+    background-color: #D4C9A8;
+    flex: 1.2;
+}
+
+.right-column {
+    background-color: #D4C9A8;
+    flex: 0.8;
+}
+
+.left-content,
+.center-content,
+.right-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    height: 100%;
+    padding: 40px 20px;
+    position: relative;
+}
+
+/* Vertical Lines */
+.vertical-line {
+    width: 1px;
+    height: 80px;
+    background-color: #999;
+    margin: 20px 0;
+}
+
+.line-red {
+    width: 3px;
+    height: 120px;
+    background-color: #E63946;
+    margin-bottom: 30px;
+}
+
+.line-thin {
+    width: 1px;
+    height: 60px;
+    background-color: #999;
+}
+
+.dotted {
+    border-right: 1px dotted #999;
+    background-color: transparent;
+}
+
+/* Text Blocks */
+.text-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.label {
+    font-size: 11px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.label.small {
+    font-size: 9px;
+}
+
+.label-text {
+    font-size: 10px;
+    letter-spacing: 1px;
+    line-height: 1.6;
+    color: #333;
+}
+
+.small-text {
+    font-size: 8px;
+    letter-spacing: 1px;
+    line-height: 1.8;
+    color: #666;
+    margin-top: 8px;
+}
+
+.small-text p {
+    margin: 3px 0;
+}
+
+/* Mountain Image Placeholder */
+.mountain-image {
+    width: 120px;
+    height: 300px;
+    background: linear-gradient(180deg, 
+        rgba(200, 180, 140, 0.3) 0%,
+        rgba(100, 140, 150, 0.5) 50%,
+        rgba(80, 120, 130, 0.7) 100%);
+    margin-top: 40px;
+    border: 1px solid #999;
+}
+
+.left-mountain {
+    width: 100px;
+    height: 250px;
+}
+
+.center-image {
+    width: 100%;
+    height: 100%;
+    max-width: 400px;
+    max-height: 600px;
+    background: linear-gradient(135deg,
+        rgba(150, 180, 190, 0.4) 0%,
+        rgba(100, 140, 160, 0.6) 50%,
+        rgba(80, 120, 140, 0.8) 100%);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    z-index: 1;
+}
+
+/* Red Circle */
+.red-circle {
+    width: 180px;
+    height: 180px;
+    background-color: #E63946;
+    border-radius: 50%;
+    margin: 30px 0;
+    box-shadow: 0 10px 40px rgba(230, 57, 70, 0.3);
+}
+
+/* Color Blocks */
+.color-blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.color-block {
+    width: 80px;
+    height: 60px;
+    border: 1px solid #999;
+}
+
+.color-block.teal {
+    background-color: #5A8A8A;
+}
+
+.color-block.beige {
+    background-color: #C9B8A0;
+}
+
+.color-block.coral {
+    background-color: #D97560;
+}
+
+.color-block.light-beige {
+    background-color: #D9C9B8;
+}
+
+.color-block.peach {
+    background-color: #E8B8A0;
+}
+
+/* Bottom Section */
+.bottom-section {
+    width: 100%;
+    height: 15vh;
+    background-color: #D4C9A8;
+    border-top: 1px solid #999;
+    display: flex;
+    align-items: flex-start;
+    padding: 30px 40px;
+    overflow-y: auto;
+}
+
+.bottom-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.bottom-text {
+    font-size: 9px;
+    line-height: 1.6;
+    color: #333;
+    max-width: 800px;
+}
+
+.bottom-text p {
+    margin: 5px 0;
+}
+
+/* Full Screen Constraints */
+@media (max-width: 1920px) {
+    .container {
+        height: 85vh;
+    }
+}
+
