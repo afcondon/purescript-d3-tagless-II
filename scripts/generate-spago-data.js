@@ -53,16 +53,22 @@ try {
 // 3. Generate LOC.json
 console.log('📊 Generating LOC.json...');
 try {
-  // Find all .purs files in src/ and lib/
-  const pursFiles = execSync('find src -name "*.purs" 2>/dev/null || true', { encoding: 'utf8' })
+  // Find all .purs files in src/ and .spago/
+  const srcFiles = execSync('find src -name "*.purs" 2>/dev/null || true', { encoding: 'utf8' })
     .split('\n')
     .filter(f => f.trim());
+
+  const spagoFiles = execSync('find .spago -name "*.purs" 2>/dev/null || true', { encoding: 'utf8' })
+    .split('\n')
+    .filter(f => f.trim());
+
+  const allFiles = [...srcFiles, ...spagoFiles];
 
   const locData = {
     loc: []
   };
 
-  for (const file of pursFiles) {
+  for (const file of allFiles) {
     if (!file) continue;
 
     try {
@@ -87,7 +93,7 @@ try {
     path.join(OUTPUT_DIR, 'LOC.json'),
     JSON.stringify(locData, null, 2)
   );
-  console.log(`✓ LOC.json generated (${locData.loc.length} files)`);
+  console.log(`✓ LOC.json generated (${locData.loc.length} files: ${srcFiles.length} src, ${spagoFiles.length} .spago)`);
 } catch (err) {
   console.error('✗ Error generating LOC.json:', err.message);
   process.exit(1);
