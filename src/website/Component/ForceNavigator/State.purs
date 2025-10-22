@@ -5,12 +5,12 @@ import Prelude
 import D3.Attributes.Instances (Label)
 import D3.Data.Types (D3Selection_)
 import D3.Node (D3Link(..), D3_SimulationNode(..))
-import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus, getStatusMap, initialSimulationState)
+import D3.Simulation.Types (D3SimulationState_, Force, initialSimulationState)
 import D3.Viz.ForceNavigator.Model (NavigationSimNode, NodeType(..))
 import Data.Array (elem, filter)
 import Data.Lens (Lens')
 import Data.Lens.Record (prop)
-import Data.Map (Map) as M
+import Data.Map (Map, keys) as M
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.Set as Set
@@ -22,16 +22,16 @@ type State = {
     simulation :: D3SimulationState_
   , expandedNodes :: Set String  -- IDs of expanded section nodes
   , openSelections :: Maybe { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
-  , forceStatuses :: M.Map Label ForceStatus
+  , activeForces :: Set Label  -- Labels of forces currently enabled (parallel to expandedNodes for data)
   , eventListener :: Maybe (HS.Listener Action)  -- Component infrastructure, not scene config
 }
 
 initialState :: M.Map Label Force -> State
 initialState forceLibrary = {
     simulation: initialSimulationState forceLibrary
-  , expandedNodes: Set.singleton "PS<$>D3"  -- Center node starts expanded
+  , expandedNodes: Set.empty  -- Start with no sections expanded (just center + sections visible)
   , openSelections: Nothing
-  , forceStatuses: getStatusMap forceLibrary
+  , activeForces: Set.fromFoldable (M.keys forceLibrary)  -- Start with all forces enabled
   , eventListener: Nothing
 }
 
@@ -40,7 +40,7 @@ visibleNodes :: Set String -> Array NavigationSimNode -> Array NavigationSimNode
 visibleNodes expanded allNodes =
   let
     -- Start with center node
-    centerNode = allNodes # filter (\(D3SimNode n) -> n.id == "PS<$>D3")
+    centerNode = allNodes # filter (\(D3SimNode n) -> n.id == "purescript-d3")
 
     -- Get all section nodes (children of center)
     sectionNodes = allNodes # filter (\(D3SimNode n) -> n.nodeType == Section)
@@ -75,8 +75,8 @@ _expandedNodes = prop (Proxy :: Proxy "expandedNodes")
 _openSelections :: Lens' State (Maybe { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ })
 _openSelections = prop (Proxy :: Proxy "openSelections")
 
-_forceStatuses :: Lens' State (M.Map Label ForceStatus)
-_forceStatuses = prop (Proxy :: Proxy "forceStatuses")
+_activeForces :: Lens' State (Set Label)
+_activeForces = prop (Proxy :: Proxy "activeForces")
 
 _eventListener :: Lens' State (Maybe (HS.Listener Action))
 _eventListener = prop (Proxy :: Proxy "eventListener")

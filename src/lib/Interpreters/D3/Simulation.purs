@@ -88,7 +88,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
 -- management of simulation variables
   setConfigVariable v   = simulationSetVariable v
 -- management of forces
-  actualizeForces       = simulationUpdateForceStatuses
+  actualizeForces       = simulationActualizeForces
 -- management of data 
   setNodes = simulationSetNodes
   setLinks = simulationSetLinks 

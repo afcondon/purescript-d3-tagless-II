@@ -18,6 +18,8 @@ import Data.Lens (modifying, set, use, view, (%=))
 import Data.Map (Map, toUnfoldable)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
+import Data.Set (Set)
+import Data.Set as Set
 import Data.Tuple (Tuple(..), fst)
 import Debug (spy)
 import Unsafe.Coerce (unsafeCoerce)
@@ -49,7 +51,7 @@ simulationToggleForce label = do
       then simulationDisableForcesByLabel [force.name]
       else simulationEnableForcesByLabel [force.name]
 
-simulationDisableForcesByLabel :: forall m row. 
+simulationDisableForcesByLabel :: forall m row.
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   Array Label -> m Unit
 simulationDisableForcesByLabel labels = do
@@ -57,13 +59,27 @@ simulationDisableForcesByLabel labels = do
   forces <- use _forceLibrary
   _forceLibrary %= (const $ (disableByLabels handle labels) <$> forces)
 
-simulationEnableForcesByLabel :: forall m row. 
+simulationEnableForcesByLabel :: forall m row.
   (MonadState { simulation :: D3SimulationState_ | row } m) =>
   Array Label  -> m Unit
 simulationEnableForcesByLabel labels  = do
   handle <- use _handle
   forces <- use _forceLibrary -- TODO this is the forces table inside the simulation record
   _forceLibrary %= (const $ (enableByLabels handle labels) <$> forces)
+
+-- | Enable only the forces in the Set, disable all others
+simulationActualizeForces :: forall m row.
+  (MonadState { simulation :: D3SimulationState_ | row } m) =>
+  Set Label ->
+  m Unit
+simulationActualizeForces activeForces = do
+  handle <- use _handle
+  library <- use _forceLibrary
+  let allLabels = M.keys library
+      enableLabels = A.fromFoldable $ Set.intersection activeForces (Set.fromFoldable allLabels)
+      disableLabels = A.fromFoldable $ Set.difference (Set.fromFoldable allLabels) activeForces
+  simulationEnableForcesByLabel enableLabels
+  simulationDisableForcesByLabel disableLabels
   
 listActiveForces :: Map Label ForceStatus -> Array Label
 listActiveForces forceMap = fst <$> (filter (\(Tuple n s) -> s == ForceActive) $ toUnfoldable forceMap)

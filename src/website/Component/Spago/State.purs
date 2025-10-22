@@ -9,15 +9,17 @@ import D3.Viz.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
 import D3.FFI (SimulationVariables, readSimulationVariables)
 import D3.Node (NodeID)
-import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus, _handle, getStatusMap)
+import D3.Simulation.Types (D3SimulationState_, Force, _handle)
 import D3Tagless.Capabilities (Staging)
 import Data.Lens (Lens', _Just, view)
 import Data.Lens.At (at)
 import Data.Lens.Record (prop)
-import Data.Map (Map) as M
+import Data.Map (Map, keys) as M
 import Data.Maybe (Maybe)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
+import Data.Set (Set)
+import Data.Set as Set
 import Halogen.Subscription as HS
 import PSD3.Spago.Actions (Action)
 import Type.Proxy (Proxy(..))
@@ -38,7 +40,7 @@ type State = {
 
 -- | Configuration for a visualization "scene" - a complete specification of:
 -- | - which data to show (node/link filters)
--- | - how forces behave (force statuses)
+-- | - which forces to enable (Set of active force labels)
 -- | - visual appearance (CSS class, attributes)
 -- | - initialization (node positioning functions)
 -- |
@@ -49,8 +51,8 @@ type MiseEnScene = {
     chooseNodes     :: (SpagoSimNode -> Boolean)
   , linksShown      :: (SpagoGraphLinkID -> Boolean)
   , linksActive     :: (Datum_ -> Boolean) -- defined as Datum_ but it's really Link_, ugly
--- list of forces to activate
-  , forceStatuses   :: M.Map Label ForceStatus
+-- Set of force labels to activate (parallel to data filtering above)
+  , activeForces    :: Set Label
   -- governing class on the SVG means we can completely change the look of the vis (and not have to think about this at D3 level)
   , cssClass        :: String
   , attributes      :: SpagoSceneAttributes
@@ -63,7 +65,7 @@ initialScene forceLibrary = {
     chooseNodes: isPackage -- chooses all nodes
   , linksShown:  const false
   , linksActive: const false
-  , forceStatuses: getStatusMap forceLibrary
+  , activeForces: Set.fromFoldable (M.keys forceLibrary)  -- Start with all forces enabled
   , cssClass: ""
   , attributes: clusterSceneAttributes
   , nodeInitializerFunctions: []
@@ -96,15 +98,9 @@ _rawdata = prop (Proxy :: Proxy "rawdata")
 _enterselections :: forall a r. Lens' { selections :: a | r } a
 _enterselections = prop (Proxy :: Proxy "selections")
 
-_forceStatus :: forall p.
-  Strong p => Choice p => String ->
-  p ForceStatus ForceStatus ->
-  p State State
-_forceStatus label = _forceStatuses <<< at label <<< _Just
-
--- lenses for mise-en-scene things 
-_forceStatuses :: Lens' State (M.Map Label ForceStatus)
-_forceStatuses = _scene <<< prop (Proxy :: Proxy "forceStatuses")
+-- lenses for mise-en-scene things
+_activeForces :: Lens' State (Set Label)
+_activeForces = _scene <<< prop (Proxy :: Proxy "activeForces")
 _chooseNodes :: Lens' State (SpagoSimNode -> Boolean)
 _chooseNodes = _scene <<< prop (Proxy :: Proxy "chooseNodes")
 _linksShown :: Lens' State (SpagoGraphLinkID -> Boolean)

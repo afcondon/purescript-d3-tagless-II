@@ -5,9 +5,10 @@ import D3.Data.Types (D3Simulation_, Datum_, Element, Index_, Selector)
 import D3.Layouts.Sankey.Types (SankeyConfig, SankeyLink_, SankeyNode_)
 import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
 import D3.Selection (Behavior, SelectionAttribute)
-import D3.Simulation.Types (ForceStatus, SimVariable, Step)
+import D3.Simulation.Types (SimVariable, Step)
 import Data.Map (Map)
 import Data.Maybe (Maybe)
+import Data.Set (Set)
 import Prelude (class Eq, class Monad, Unit)
 
 -- TODO see whether it can be useful to extend the interpreter here, for different visualization types
@@ -47,8 +48,8 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- config
   setConfigVariable    :: SimVariable -> m Unit
   -- management of forces
-  -- | make the forces in the simulation match the forces in the simulation state
-  actualizeForces:: Map Label ForceStatus -> m Unit 
+  -- | Enable only the forces in the given Set, disable all others
+  actualizeForces:: Set Label -> m Unit 
   -- setForcesByLabel :: { enable :: Array Label, disable :: Array Label } -> m Unit -- REVIEW not convinced this function is necessary
   -- management of data (nodes and links)
   setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))

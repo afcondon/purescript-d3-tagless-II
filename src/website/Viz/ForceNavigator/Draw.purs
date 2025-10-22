@@ -4,6 +4,7 @@ import Prelude
 
 import D3.Attributes.Sugar (classed, fill, fontSize, radius, remove, strokeColor, strokeWidth, text, textAnchor, transform', viewBox, x1, x2, y1, y2)
 import D3.Data.Types (D3Selection_, D3This_, Datum_, Element(..))
+import D3.Selection (SelectionAttribute)
 import D3.Viz.ForceNavigator.Model (Category(..), NavigationRawModel, NodeType(..))
 import D3.Viz.ForceNavigator.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.FFI (keyIsID_, simdrag)
@@ -69,12 +70,15 @@ datum_ = {
 }
 
 -- | Recipe for the navigation force layout
+-- | Takes a click callback to attach to node circles
+-- | Returns the node and link selections for later updates
 draw :: forall row m.
   Bind m =>
   MonadEffect m =>
   SimulationM D3Selection_ m =>
-  NavigationRawModel -> m Unit
-draw model = do
+  SelectionAttribute ->
+  NavigationRawModel -> m { nodes :: D3Selection_, links :: D3Selection_ }
+draw clickCallback model = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   (root :: D3Selection_) <- attach "div.svg-container"
 
@@ -100,6 +104,7 @@ draw model = do
     , fill datum_.nodeColor
     , strokeColor "#fff"
     , strokeWidth 3.0
+    , clickCallback  -- Attach click event handler
     ]
 
   -- Add labels to node groups
@@ -131,5 +136,65 @@ draw model = do
     , name: "navigation"
     , target: svg
     }
+
+  pure { nodes: nodesSelection, links: linksSelection }
+
+-- | Update the visualization with new visible nodes/links
+-- | Uses General Update Pattern (enter/update/exit)
+update :: forall row m.
+  Bind m =>
+  MonadEffect m =>
+  SimulationM D3Selection_ m =>
+  SelectionAttribute ->
+  NavigationRawModel ->
+  m Unit
+update clickCallback model = do
+  -- Re-attach to existing groups
+  (svg :: D3Selection_) <- attach "svg.navigation"
+  (linksGroup :: D3Selection_) <- attach "g.link"
+  (nodesGroup :: D3Selection_) <- attach "g.node"
+
+  -- Update simulation with new nodes/links
+  nodesInSim <- setNodes model.nodes
+  linksInSim <- setLinks model.links model.nodes keyIsID_
+
+  -- Update links (enter/update/exit)
+  linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_
+  setAttributes linksSelection [ strokeWidth 2.0 ]
+
+  -- Update node groups (enter/update/exit)
+  nodesSelection <- simpleJoin nodesGroup Group nodesInSim keyIsID_
+
+  -- Add circles to new node groups
+  circlesGroup <- appendTo nodesSelection Circle []
+  setAttributes circlesGroup [
+      radius datum_.nodeRadius
+    , fill datum_.nodeColor
+    , strokeColor "#fff"
+    , strokeWidth 3.0
+    , clickCallback
+    ]
+
+  -- Add labels to new node groups
+  labelsGroup <- appendTo nodesSelection Text []
+  setAttributes labelsGroup [
+      classed "node-label"
+    , fill "#fff"
+    , textAnchor "middle"
+    , fontSize datum_.nodeFontSize
+    , text datum_.label
+    ]
+
+  -- Update tick functions with new selections
+  addTickFunction "nodes" $ Step nodesSelection [ transform' datum_.translateNode ]
+  addTickFunction "links" $ Step linksSelection [
+      x1 (_.x <<< link_.source)
+    , y1 (_.y <<< link_.source)
+    , x2 (_.x <<< link_.target)
+    , y2 (_.y <<< link_.target)
+    ]
+
+  -- Add drag to new nodes
+  _ <- nodesSelection `on` Drag (CustomDrag "navigation" simdrag)
 
   pure unit
