@@ -40,6 +40,7 @@
             "psci-support",
             "random",
             "read",
+            "routing",
             "strings",
             "tailrec",
             "transformers",
@@ -115,7 +116,9 @@
             "read",
             "record",
             "refs",
+            "routing",
             "safe-coerce",
+            "semirings",
             "st",
             "string-parsers",
             "strings",
@@ -127,6 +130,7 @@
             "unfoldable",
             "unsafe-coerce",
             "unsafe-reference",
+            "validation",
             "web-clipboard",
             "web-dom",
             "web-events",
@@ -5348,12 +5352,47 @@
         "prelude"
       ]
     },
+    "routing": {
+      "type": "git",
+      "url": "https://github.com/purescript-contrib/purescript-routing.git",
+      "rev": "255ec9ada5ceb6e6e0e02f71a767cf86064165c0",
+      "dependencies": [
+        "aff",
+        "console",
+        "control",
+        "effect",
+        "either",
+        "foldable-traversable",
+        "integers",
+        "js-uri",
+        "lists",
+        "maybe",
+        "numbers",
+        "partial",
+        "prelude",
+        "semirings",
+        "tuples",
+        "validation",
+        "web-html"
+      ]
+    },
     "safe-coerce": {
       "type": "git",
       "url": "https://github.com/purescript/purescript-safe-coerce.git",
       "rev": "7fa799ae80a38b8d948efcb52608e58e198b3da7",
       "dependencies": [
         "unsafe-coerce"
+      ]
+    },
+    "semirings": {
+      "type": "git",
+      "url": "https://github.com/purescript/purescript-semirings.git",
+      "rev": "e862c970483feff7dacdf6db5be5a84ea754fd63",
+      "dependencies": [
+        "foldable-traversable",
+        "lists",
+        "newtype",
+        "prelude"
       ]
     },
     "st": {
@@ -5491,6 +5530,19 @@
       "url": "https://github.com/purescript-contrib/purescript-unsafe-reference.git",
       "rev": "058e23b8b9adcf776a910f9934ff515ddee73af5",
       "dependencies": [
+        "prelude"
+      ]
+    },
+    "validation": {
+      "type": "git",
+      "url": "https://github.com/purescript/purescript-validation.git",
+      "rev": "a3d9ec2176a7a808d70a01fa7e6f16d10e05429a",
+      "dependencies": [
+        "bifunctors",
+        "control",
+        "either",
+        "foldable-traversable",
+        "newtype",
         "prelude"
       ]
     },

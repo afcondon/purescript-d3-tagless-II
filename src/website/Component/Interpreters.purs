@@ -2,7 +2,7 @@ module PSD3.Interpreters where
 
 import Prelude
 
-import PSD3.Router (routeToHash)
+import PSD3.RoutingDSL (routeToPath)
 import PSD3.Types (Route(..))
 import Halogen as H
 import Halogen.HTML as HH
@@ -51,7 +51,7 @@ render _ =
                 , HH.p_ [ HH.text "Instead of rendering to SVG, this interpreter visualizes the abstract syntax tree of the visualization itself as a tree diagram." ]
                 , HH.p_ [ HH.text "This meta-visualization shows how the same code can be interpreted in completely different ways - a key advantage of the Finally Tagless approach." ]
                 , HH.a
-                    [ HP.href $ routeToHash (Example "meta-tree")
+                    [ HP.href $ "#" <> routeToPath (Example "meta-tree")
                     , HP.classes [ HH.ClassName "interpreter-card__link" ]
                     ]
                     [ HH.text "View MetaTree →" ]
@@ -64,7 +64,7 @@ render _ =
                 , HH.p_ [ HH.text "This interpreter takes visualization code and generates human-readable text descriptions or code snippets." ]
                 , HH.p_ [ HH.text "Shows how the same high-level visualization definition can be used for documentation generation, code analysis, or teaching - all without modifying the original visualization code." ]
                 , HH.a
-                    [ HP.href $ routeToHash (Example "print-tree")
+                    [ HP.href $ "#" <> routeToPath (Example "print-tree")
                     , HP.classes [ HH.ClassName "interpreter-card__link" ]
                     ]
                     [ HH.text "View String Generator →" ]
@@ -83,7 +83,7 @@ render _ =
                 ]
             , HH.p_
                 [ HH.a
-                    [ HP.href $ routeToHash Gallery ]
+                    [ HP.href $ "#" <> routeToPath Gallery ]
                     [ HH.text "← Back to Gallery" ]
                 ]
             ]

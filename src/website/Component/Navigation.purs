@@ -3,7 +3,7 @@ module PSD3.Navigation where
 import Prelude
 
 import PSD3.Types (Route(..))
-import PSD3.Router (routeToHash)
+import PSD3.RoutingDSL (routeToPath)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -29,7 +29,7 @@ render currentRoute =
         [ HP.classes [ HH.ClassName "navigation__container" ] ]
         [ -- Logo/Brand
           HH.a
-            [ HP.href $ routeToHash Home
+            [ HP.href $ "#" <> routeToPath Home
             , HP.classes [ HH.ClassName "navigation__brand" ]
             ]
             [ HH.img
@@ -69,7 +69,7 @@ navLink route label currentRoute =
   HH.li
     [ HP.classes [ HH.ClassName "navigation__item" ] ]
     [ HH.a
-        [ HP.href $ routeToHash route
+        [ HP.href $ "#" <> routeToPath route
         , HP.classes $
             [ HH.ClassName "navigation__link" ] <>
             if route == currentRoute

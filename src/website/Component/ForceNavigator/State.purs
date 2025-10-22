@@ -7,8 +7,9 @@ import D3.Data.Types (D3Selection_)
 import D3.Node (D3Link(..), D3_SimulationNode(..))
 import D3.Simulation.Types (D3SimulationState_, Force, initialSimulationState)
 import D3.Viz.ForceNavigator.Model (NavigationSimNode, NodeType(..))
-import Data.Array (elem, filter)
+import Data.Array (elem, filter, length) as Array
 import Data.Lens (Lens')
+import Debug (spy) as Debug
 import Data.Lens.Record (prop)
 import Data.Map (Map, keys) as M
 import Data.Maybe (Maybe(..))
@@ -40,30 +41,61 @@ visibleNodes :: Set String -> Array NavigationSimNode -> Array NavigationSimNode
 visibleNodes expanded allNodes =
   let
     -- Start with center node
-    centerNode = allNodes # filter (\(D3SimNode n) -> n.id == "purescript-d3")
+    centerNode = allNodes # Array.filter (\(D3SimNode n) -> n.id == "purescript-d3")
 
     -- Get all section nodes (children of center)
-    sectionNodes = allNodes # filter (\(D3SimNode n) -> n.nodeType == Section)
+    sectionNodes = allNodes # Array.filter (\(D3SimNode n) -> n.nodeType == Section)
 
     -- For each expanded section, get its children
     expandedChildren = do
       (D3SimNode node) <- allNodes
       if Set.member node.id expanded
         then case node.children of
-          Just childIds -> allNodes # filter (\(D3SimNode n) -> elem n.id childIds)
+          Just childIds -> allNodes # Array.filter (\(D3SimNode n) -> Array.elem n.id childIds)
           Nothing -> []
         else []
   in
     centerNode <> sectionNodes <> expandedChildren
 
+-- | Clone a link to create a fresh object (prevents mutation of static data)
+-- | Specific to String IDs with no extra fields for NavigationRawModel
+cloneLink :: D3Link String () -> D3Link String ()
+cloneLink (D3LinkID link) = D3LinkID { source: link.source, target: link.target }
+
 -- | Get the visible links based on which nodes are visible
+-- | CRITICAL: Must clone links to prevent FFI swizzling from mutating static navigationData
 visibleLinks :: Array NavigationSimNode -> Array (D3Link String ()) -> Array (D3Link String ())
 visibleLinks nodes allLinks =
   let
     visibleIds = Set.fromFoldable $ map (\(D3SimNode n) -> n.id) nodes
-    isVisible (D3LinkID link) = Set.member link.source visibleIds && Set.member link.target visibleIds
+
+    -- Show ALL links in the input to see if skeleton links are even there
+    _ = Debug.spy "📊 ALL INPUT LINKS" $ map (\(D3LinkID l) -> l.source <> " → " <> l.target) allLinks
+
+    -- Test the skeleton links specifically
+    skeletonTests = map (\target ->
+      let sourceInSet = Set.member "purescript-d3" visibleIds
+          targetInSet = Set.member target visibleIds
+      in { target, sourceInSet, targetInSet }
+    ) ["gallery", "about", "spago", "interpreters", "github"]
+    _ = Debug.spy "🔍 Skeleton link tests" skeletonTests
+
+    isVisible (D3LinkID link) =
+      let sourceIn = Set.member link.source visibleIds
+          targetIn = Set.member link.target visibleIds
+          visible = sourceIn && targetIn
+      in visible
+
+    -- Filter visible links and CLONE them to prevent mutation of static data
+    filtered = Array.filter isVisible allLinks
+    result = map cloneLink filtered
+
+    _ = Debug.spy "📊 Total links in navigationData" $ Array.length allLinks
+    _ = Debug.spy "📊 visibleNodes IDs" $ Set.toUnfoldable visibleIds :: Array String
+    _ = Debug.spy "📊 visibleLinks (filtered)" $ map (\(D3LinkID l) -> l.source <> " → " <> l.target) result
+    _ = Debug.spy "📊 visibleLinks count" $ Array.length result
   in
-    filter isVisible allLinks
+    result
 
 -- Lenses
 _simulation :: Lens' State D3SimulationState_

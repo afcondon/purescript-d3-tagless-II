@@ -17,15 +17,11 @@ import PSD3.Gallery as Gallery
 import PSD3.Home as Home
 import PSD3.Interpreters as Interpreters
 import PSD3.Navigation as Navigation
-import PSD3.Router (parseRoute, routeToHash)
+import PSD3.RoutingDSL (routing, routeToPath)
 import PSD3.SpagoWrapper as Spago
 import PSD3.Types (Route(..), ExampleId)
+import Routing.Hash (matches, setHash)
 import Type.Proxy (Proxy(..))
-import Web.Event.Event (EventType(..))
-import Web.Event.EventTarget (eventListener, addEventListener)
-import Web.HTML (window)
-import Web.HTML.Location (hash, setHash)
-import Web.HTML.Window (location, toEventTarget)
 
 -- | Main application state
 type State = {
@@ -37,7 +33,7 @@ data Action
   = Initialize
   | Navigate Route
   | HandleGalleryOutput ExampleId
-  | HashChanged String
+  | RouteChanged (Maybe Route)
 
 -- | Child component slots
 type Slots =
@@ -111,48 +107,33 @@ renderPage route = case spy "Route is" route of
       [ HH.h1_ [ HH.text "404 - Page Not Found" ]
       , HH.p_ [ HH.text "The page you're looking for doesn't exist." ]
       , HH.a
-          [ HP.href $ routeToHash Home ]
+          [ HP.href $ "#" <> routeToPath Home ]
           [ HH.text "Go Home" ]
       ]
 
 handleAction :: Action -> H.HalogenM State Action Slots Void Aff Unit
 handleAction = case _ of
   Initialize -> do
-    -- Read initial route from URL hash
-    currentHash <- H.liftEffect $ window >>= location >>= hash
-    let route = parseRoute currentHash
-    H.modify_ _ { currentRoute = route }
-
-    -- Subscribe to hash changes
-    _ <- H.subscribe do
-      HS.makeEmitter \push -> do
-        win <- window
-        let target = toEventTarget win
-        listener <- eventListener \_ -> do
-          newHash <- window >>= location >>= hash
-          push (HashChanged newHash)
-        addEventListener (EventType "hashchange") listener false target
-        pure mempty
+    -- Subscribe to route changes using purescript-routing
+    -- This handles both initial route and hash changes (back/forward buttons)
+    _ <- H.subscribe $ HS.makeEmitter \push -> do
+      matches routing \_ newRoute -> push (RouteChanged (Just newRoute))
     pure unit
 
   Navigate route -> do
-    -- Update component state
-    H.modify_ _ { currentRoute = route }
-    -- Update browser URL hash
-    let newHash = routeToHash route
-    H.liftEffect do
-      win <- window
-      loc <- location win
-      setHash newHash loc
+    -- Navigation is now handled by Routing.Hash.setHash
+    -- which will trigger the matches subscription above
+    H.liftEffect $ setHash (routeToPath route)
 
   HandleGalleryOutput exampleId -> do
     -- When gallery emits an example ID, navigate to that example
     handleAction $ Navigate (Example exampleId)
 
-  HashChanged newHash -> do
-    -- When browser hash changes (back button, etc), update route
-    let route = parseRoute newHash
-    H.modify_ _ { currentRoute = route }
+  RouteChanged maybeRoute -> do
+    -- When route changes (initial load, back/forward, or manual navigation)
+    case maybeRoute of
+      Just route -> H.modify_ _ { currentRoute = route }
+      Nothing -> H.modify_ _ { currentRoute = NotFound } -- Fallback if route doesn't match
 
 -- | Entry point
 main :: Effect Unit
