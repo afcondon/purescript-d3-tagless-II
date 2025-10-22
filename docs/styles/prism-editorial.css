@@ -1,0 +1,227 @@
+/**
+ * Prism.js Editorial Theme
+ *
+ * Custom syntax highlighting theme matching the editorial/print aesthetic.
+ * Designed for warm beige backgrounds with monospace typography.
+ * Uses muted, sophisticated colors inspired by print design.
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+  color: #333333; /* Dark text for readability */
+  background: none;
+  font-family: 'Courier New', 'Courier', Monaco, monospace;
+  font-size: 0.5625rem; /* 9px - editorial small size */
+  line-height: 1.8;
+  letter-spacing: 0.0625rem; /* 1px */
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  tab-size: 2;
+  hyphens: none;
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+  padding: 1rem;
+  margin: 0;
+  overflow: auto;
+  background: transparent;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+  padding: 0.1em 0.3em;
+  border-radius: 0;
+  white-space: normal;
+  background: rgba(217, 201, 184, 0.5);
+  border: 1px solid #999;
+}
+
+/* ========================================
+   TOKEN COLORS - Editorial Palette
+   ======================================== */
+
+/* Comments - muted gray */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #999999;
+  font-style: italic;
+}
+
+/* Punctuation - medium gray */
+.token.punctuation {
+  color: #666666;
+}
+
+/* Property, tag, boolean, number, constant - teal */
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #5A8A8A; /* var(--color-teal) */
+}
+
+/* Selector, attr-name, string, char, builtin, inserted - coral */
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #D97560; /* var(--color-coral) */
+}
+
+/* Operator, entity, url - dark text */
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #333333;
+  background: transparent;
+}
+
+/* Atrule, attr-value, keyword - red accent */
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #E63946; /* var(--color-red-accent) */
+  font-weight: bold;
+}
+
+/* Function, class-name - darker teal/blue-gray */
+.token.function,
+.token.class-name {
+  color: #4A6B6B;
+  font-weight: bold;
+}
+
+/* Regex, important, variable - peach */
+.token.regex,
+.token.important,
+.token.variable {
+  color: #E8B8A0; /* var(--color-peach) */
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+.token.entity {
+  cursor: help;
+}
+
+/* ========================================
+   LINE NUMBERS PLUGIN
+   ======================================== */
+
+pre[class*="language-"].line-numbers {
+  position: relative;
+  padding-left: 3.8em;
+  counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+  position: relative;
+  white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+  position: absolute;
+  pointer-events: none;
+  top: 0;
+  font-size: 100%;
+  left: -3.8em;
+  width: 3em; /* works for line-numbers below 1000 lines */
+  letter-spacing: -1px;
+  border-right: 1px solid #999999;
+  user-select: none;
+}
+
+.line-numbers-rows > span {
+  display: block;
+  counter-increment: linenumber;
+}
+
+.line-numbers-rows > span:before {
+  content: counter(linenumber);
+  color: #999999;
+  display: block;
+  padding-right: 0.8em;
+  text-align: right;
+  font-size: 0.5rem; /* 8px - tiny */
+}
+
+/* ========================================
+   EDITORIAL-SPECIFIC OVERRIDES
+   ======================================== */
+
+/* When code is in editorial panels */
+.editorial code[class*="language-"],
+.editorial pre[class*="language-"],
+.floating-panel.editorial code[class*="language-"],
+.floating-panel.editorial pre[class*="language-"] {
+  font-size: 0.5rem; /* 8px in editorial panels */
+  line-height: 1.8;
+}
+
+/* Editorial code blocks - transparent background */
+.editorial pre[class*="language-"],
+.floating-panel.editorial pre[class*="language-"] {
+  background: transparent;
+  border: 1px solid #999999;
+  padding: var(--spacing-md);
+}
+
+/* ========================================
+   SELECTION HIGHLIGHTING
+   ======================================== */
+
+code[class*="language-"]::-moz-selection,
+pre[class*="language-"]::-moz-selection,
+code[class*="language-"] ::-moz-selection,
+pre[class*="language-"] ::-moz-selection {
+  background: rgba(230, 57, 70, 0.2); /* Red accent selection */
+}
+
+code[class*="language-"]::selection,
+pre[class*="language-"]::selection,
+code[class*="language-"] ::selection,
+pre[class*="language-"] ::selection {
+  background: rgba(230, 57, 70, 0.2); /* Red accent selection */
+}
+
+/* ========================================
+   HASKELL/PURESCRIPT SPECIFIC
+   ======================================== */
+
+/* Type signatures - emphasize with darker color */
+.language-haskell .token.operator.double-colon,
+.language-haskell .token.class-name {
+  color: #4A6B6B;
+  font-weight: bold;
+}
+
+/* Data constructors */
+.language-haskell .token.constant {
+  color: #5A8A8A;
+  font-weight: normal;
+}
+
+/* Module names */
+.language-haskell .token.namespace {
+  color: #666666;
+}

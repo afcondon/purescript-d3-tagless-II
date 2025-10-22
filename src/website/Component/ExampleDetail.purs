@@ -104,9 +104,9 @@ render state =
                     { exampleId: state.exampleId }
                 ]
 
-            , -- Floating toolbar (left side) with integrated info
+            , -- Floating toolbar (left side) with integrated info - editorial styling
               HH.div
-                [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left", HH.ClassName "example-fullscreen__toolbar" ] ]
+                [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left", HH.ClassName "example-fullscreen__toolbar", HH.ClassName "editorial" ] ]
                 [ HH.div
                     [ HP.classes [ HH.ClassName "example-fullscreen__toolbar-title" ] ]
                     [ HH.text example.title ]
@@ -163,6 +163,7 @@ render state =
                           [ HH.ClassName "floating-panel"
                           , HH.ClassName "floating-panel--top-right"
                           , HH.ClassName "example-fullscreen__code"
+                          , HH.ClassName "editorial"
                           ] <> if state.codeTranslucent
                             then [ HH.ClassName "example-fullscreen__code--translucent" ]
                             else []
@@ -182,7 +183,7 @@ render state =
                   Nothing ->
                     if state.loading
                       then HH.div
-                        [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-right", HH.ClassName "example-fullscreen__loading" ] ]
+                        [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-right", HH.ClassName "example-fullscreen__loading", HH.ClassName "editorial" ] ]
                         [ HH.text "Loading code..." ]
                       else HH.text ""
                 else HH.text ""

@@ -20157,12 +20157,12 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.ExampleDetail (line 205, column 9 - line 218, column 39): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.ExampleDetail (line 206, column 9 - line 219, column 39): " + [result.constructor.name]);
               });
             });
           }
           ;
-          throw new Error("Failed pattern match at PSD3.ExampleDetail (line 199, column 5 - line 218, column 39): " + [v1.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.ExampleDetail (line 200, column 5 - line 219, column 39): " + [v1.constructor.name]);
         });
       }
       ;
@@ -20233,7 +20233,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.ExampleDetail (line 193, column 16 - line 244, column 41): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.ExampleDetail (line 194, column 16 - line 245, column 41): " + [v.constructor.name]);
     };
   };
   var _visualization = /* @__PURE__ */ (function() {
@@ -20250,7 +20250,7 @@
       if (v instanceof Just) {
         return div2([classes(["fullscreen-page-wrapper", "example-fullscreen"])])([div2([classes(["fullscreen-container"])])([div2([classes(["fullscreen-viz", "example-fullscreen__viz"])])([slot_2(_visualization)(unit)(component12)({
           exampleId: state3.exampleId
-        })]), div2([classes(["floating-panel", "floating-panel--top-left", "example-fullscreen__toolbar"])])([div2([classes(["example-fullscreen__toolbar-title"])])([text5(v.value0.title)]), a([href4(routeToHash(Gallery.value)), classes(["btn", "btn--secondary"]), title3("Back to Gallery")])([text5("\u2190 Gallery")]), button([classes(["btn", "btn--secondary"]), onClick(function(v1) {
+        })]), div2([classes(["floating-panel", "floating-panel--top-left", "example-fullscreen__toolbar", "editorial"])])([div2([classes(["example-fullscreen__toolbar-title"])])([text5(v.value0.title)]), a([href4(routeToHash(Gallery.value)), classes(["btn", "btn--secondary"]), title3("Back to Gallery")])([text5("\u2190 Gallery")]), button([classes(["btn", "btn--secondary"]), onClick(function(v1) {
           return ToggleInfo.value;
         }), title3((function() {
           if (state3.showInfo) {
@@ -20307,7 +20307,7 @@
         })()]), (function() {
           if (state3.showCode) {
             if (state3.code instanceof Just) {
-              return div2([classes(append13(["floating-panel", "floating-panel--top-right", "example-fullscreen__code"])((function() {
+              return div2([classes(append13(["floating-panel", "floating-panel--top-right", "example-fullscreen__code", "editorial"])((function() {
                 if (state3.codeTranslucent) {
                   return ["example-fullscreen__code--translucent"];
                 }
@@ -20318,20 +20318,20 @@
             ;
             if (state3.code instanceof Nothing) {
               if (state3.loading) {
-                return div2([classes(["floating-panel", "floating-panel--top-right", "example-fullscreen__loading"])])([text5("Loading code...")]);
+                return div2([classes(["floating-panel", "floating-panel--top-right", "example-fullscreen__loading", "editorial"])])([text5("Loading code...")]);
               }
               ;
               return text5("");
             }
             ;
-            throw new Error("Failed pattern match at PSD3.ExampleDetail (line 159, column 22 - line 187, column 38): " + [state3.code.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.ExampleDetail (line 159, column 22 - line 188, column 38): " + [state3.code.constructor.name]);
           }
           ;
           return text5("");
         })()])]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.ExampleDetail (line 78, column 3 - line 190, column 10): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.ExampleDetail (line 78, column 3 - line 191, column 10): " + [v.constructor.name]);
     };
   };
   var component2 = function(dictMonadAff) {
