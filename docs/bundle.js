@@ -26711,8 +26711,8 @@
     var toScale = function(s) {
       return toNumber(fromMaybe(0)(fromString(s))) / 100;
     };
-    return [onValueInput(function($27) {
-      return ChangeSimConfig.create(config["var"](toScale($27)));
+    return [onValueInput(function($28) {
+      return ChangeSimConfig.create(config["var"](toScale($28)));
     }), type_19(InputRange.value), id2(config.id), class_("range-slider scaling-slider"), min5(config.min), max6(config.max), step4(new Step(config.step)), value15(show21(config.value))];
   };
   var renderTableForces = function(state3) {
@@ -26737,7 +26737,11 @@
       return take2(3)(v.nodetype.value0) === "D3." || take2(5)(v.nodetype.value0) === "PSD3.";
     }
     ;
-    return false;
+    if (v.nodetype instanceof IsPackage) {
+      return true;
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Spago.HTML (line 35, column 36 - line 37, column 22): " + [v.nodetype.constructor.name]);
   };
   var renderSimControls = function(state3) {
     var params = getSimulationVariables(state3);

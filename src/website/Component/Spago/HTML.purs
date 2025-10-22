@@ -30,11 +30,11 @@ import Halogen.HTML.Properties as HP
 import PSD3.Spago.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..))
 import PSD3.Spago.State (State, _cssClass, _stagingLinkFilter, _stagingLinks, _stagingNodes, getSimulationVariables)
 
--- | Filter for project modules only (D3.* and PSD3.*)
+-- | Filter for project modules only (D3.* and PSD3.*), but keep all packages
 isProjectModule :: SpagoSimNode -> Boolean
 isProjectModule (D3SimNode node) = case node.nodetype of
   IsModule name -> take 3 name == "D3." || take 5 name == "PSD3."
-  _ -> false
+  IsPackage _ -> true  -- Keep all packages visible
 
 -- | Full-screen render for Spago page
 render :: forall m.
