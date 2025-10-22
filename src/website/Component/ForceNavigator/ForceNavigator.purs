@@ -97,17 +97,20 @@ handleAction = case _ of
     void $ H.subscribe emitter
     _eventListener .= Just listener
 
-    -- 2. Create callback from listener
-    let callback = simulationEvent listener
+    -- 2. Initialize D3 SVG structure (creates empty groups, no data yet)
+    selections <- evalEffectSimulation Draw.initialize
+    _openSelections .= Just selections
 
-    -- 3. Initialize D3 SVG structure with callback (only show center + sections initially)
+    -- 3. Add initial data using update (ensures consistent state via mergeNewDataWithSim)
+    -- CRITICAL: navigationData.links is static and gets mutated by swizzling
+    -- We must filter BEFORE passing to update to avoid repeated swizzling
+    let callback = simulationEvent listener
     expanded <- use _expandedNodes
     let visibleNodesArray = visibleNodes expanded navigationData.nodes
     let visibleLinksArray = visibleLinks visibleNodesArray navigationData.links
     let initialModel = { nodes: visibleNodesArray, links: visibleLinksArray }
 
-    selections <- evalEffectSimulation $ Draw.draw callback initialModel
-    _openSelections .= Just { nodes: Just selections.nodes, links: Just selections.links }
+    evalEffectSimulation $ Draw.update callback initialModel
 
     -- 4. Start the simulation with forces from the force library
     runSimulation

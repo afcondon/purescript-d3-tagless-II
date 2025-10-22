@@ -41,7 +41,7 @@ forceLibrary :: Map Label Force
 forceLibrary = initialize [
     -- Strong charge to spread nodes out
     createForce "charge" (RegularForce ForceManyBody) allNodes [
-        F.strength (-800.0)
+        F.strength (-80.0)
       , F.theta 0.9
       , F.distanceMin 1.0
       , F.distanceMax infinity
