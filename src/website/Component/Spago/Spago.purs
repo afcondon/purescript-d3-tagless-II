@@ -32,7 +32,7 @@ module PSD3.Spago where
 import Prelude
 
 import Control.Monad.State (class MonadState, get)
-import D3.Attributes.Sugar (onMouseEventEffectful)
+import D3.Attributes.Sugar (onMouseEventEffectful, x)
 import D3.Data.Tree (TreeLayout(..))
 import D3.Data.Types (MouseEvent(..))
 import D3.Viz.Spago.Draw (getVizEventFromClick)
@@ -42,7 +42,8 @@ import D3.Viz.Spago.Files (NodeType(..), isM2M_Tree_Link, isM2P_Link, isP2P_Link
 import D3.Viz.Spago.Model (SpagoModel, allNodes, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_R, unpinAllNodes)
 import D3.FFI (linksForceName)
 import D3.Selection (SelectionAttribute)
-import D3.Simulation.Types (SimVariable(..), initialSimulationState, onlyTheseForcesActive, toggleForceStatus)
+import D3.Simulation.Types (SimVariable(..), initialSimulationState)
+import Data.Set as Set
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start, stop)
 import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
 import Data.Array (filter, foldl, (:))
@@ -57,7 +58,7 @@ import PSD3.Spago.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..
 import PSD3.Spago.Data (readModelData)
 import PSD3.Spago.Forces (forceLibrary)
 import PSD3.Spago.HTML (render)
-import PSD3.Spago.State (State, _callback, _chooseNodes, _cssClass, _enterselections, _forceStatus, _forceStatuses, _links, _linksActive, _linksShown, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
+import PSD3.Spago.State (State, _activeForces, _chooseNodes, _cssClass, _enterselections, _eventListener, _links, _linksActive, _linksShown, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -76,6 +77,7 @@ component = H.mkComponent
     , staging: { selections: { nodes: Nothing, links: Nothing }, linksWithForce: const true, rawdata: { nodes: [], links: [] } }
     , simulation: initialSimulationState forceLibrary
     , scene: initialScene forceLibrary
+    , eventListener: Nothing
     }
 
 simulationEvent :: HS.Listener Action -> SelectionAttribute
@@ -103,7 +105,7 @@ handleAction = case _ of
     -- Create emitter/listener pair for D3 click events to trigger Halogen actions
     { emitter, listener } <- liftEffect $ HS.create
     void $ H.subscribe emitter  -- Subscribe Halogen to the emitter
-    _callback .= (simulationEvent listener)  -- Store callback in scene config
+    _eventListener .= Just listener  -- Store listener in component state (not scene config)
 
     pure unit
 
@@ -127,7 +129,7 @@ handleAction = case _ of
   -- | Scene Switching Pattern - demonstrates the MiseEnScene approach
   -- | Each scene handler:
   -- | 1. Sets node/link filters (_chooseNodes, _linksShown, _linksActive)
-  -- | 2. Configures forces (_forceStatuses)
+  -- | 2. Configures forces (_activeForces: Set of force labels to enable)
   -- | 3. Sets visual style (_cssClass, _sceneAttributes)
   -- | 4. Specifies initialization functions (_nodeInitializerFunctions)
   -- | 5. Calls runSimulation to apply the configuration
@@ -137,7 +139,7 @@ handleAction = case _ of
     _linksActive     .= const true
     _cssClass        .= "cluster"
     _sceneAttributes .= clusterSceneAttributes
-    _forceStatuses   %= onlyTheseForcesActive [ "clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide2" ]
+    _activeForces    .= Set.fromFoldable [ "clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide2" ]
     _nodeInitializerFunctions .= [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
     runSimulation
 
@@ -145,7 +147,7 @@ handleAction = case _ of
     _chooseNodes     .= isPackage
     _linksShown      .= isP2P_Link
     _linksActive     .= (sourcePackageIs "my-project")
-    _forceStatuses   %= onlyTheseForcesActive ["center", "collide2", "charge2", "packageOrbit", linksForceName ]
+    _activeForces    .= Set.fromFoldable ["center", "collide2", "charge2", "packageOrbit", linksForceName ]
     _cssClass        .= "graph"
     _sceneAttributes .= graphSceneAttributes
     _nodeInitializerFunctions .= [ unpinAllNodes, packagesNodesToPhyllotaxis, fixNamedNodeTo "my-project" { x: 0.0, y: 0.0 } ]
@@ -157,7 +159,7 @@ handleAction = case _ of
     _linksActive     .= const true
     _cssClass        .= "tree"
     _sceneAttributes .= treeSceneAttributes
-    _forceStatuses   %= onlyTheseForcesActive [ "htreeNodesX", "collide1", "y", linksForceName ]
+    _activeForces    .= Set.fromFoldable [ "htreeNodesX", "collide1", "y", linksForceName ]
     _nodeInitializerFunctions .= [ unpinAllNodes ]
     runSimulation
 
@@ -167,7 +169,7 @@ handleAction = case _ of
     _linksActive     .= const true
     _cssClass        .= "tree radial"
     _sceneAttributes .= treeSceneAttributes
-    _forceStatuses   %= onlyTheseForcesActive [ "center", "collide2", "chargetree", "charge2", linksForceName ]
+    _activeForces    .= Set.fromFoldable [ "center", "collide2", "chargetree", "charge2", linksForceName ]
     _nodeInitializerFunctions .= [ unpinAllNodes, treeNodesToTreeXY_R, fixNamedNodeTo "Main" { x: 0.0, y: 0.0 } ]
     runSimulation
 
@@ -177,7 +179,7 @@ handleAction = case _ of
     _linksActive     .= const false
     _cssClass        .= "tree horizontal"
     _sceneAttributes .= treeSceneAttributes
-    _forceStatuses   %= onlyTheseForcesActive [ "htreeNodesX", "htreeNodesY", "charge1", "collide2" ]
+    _activeForces    .= Set.fromFoldable [ "htreeNodesX", "htreeNodesY", "charge1", "collide2" ]
     _nodeInitializerFunctions .= [ unpinAllNodes ]
     runSimulation
 
@@ -187,12 +189,15 @@ handleAction = case _ of
     _linksActive     .=  const false
     _cssClass        .= "tree vertical"
     _sceneAttributes .= treeSceneAttributes
-    _forceStatuses   %= onlyTheseForcesActive [ "vtreeNodesX", "vtreeNodesY", "charge1", "collide2" ]
+    _activeForces    .= Set.fromFoldable [ "vtreeNodesX", "vtreeNodesY", "charge1", "collide2" ]
     _nodeInitializerFunctions .= [ unpinAllNodes ]
     runSimulation
 
   ToggleForce label -> do
-    _forceStatus label %= toggleForceStatus
+    _activeForces %= \forces ->
+      if Set.member label forces
+        then Set.delete label forces
+        else Set.insert label forces
     runSimulation
 
   Filter (LinkShowFilter filterFn) -> do
@@ -263,13 +268,19 @@ runSimulation :: forall m.
 runSimulation = do
   stageDataFromModel
   staging         <- use _staging
-  callback        <- use _callback
+  maybeListener   <- use _eventListener
   sceneAttributes <- use _sceneAttributes
-  forceStatuses   <- use _forceStatuses
-  let attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles }
+  activeForces    <- use _activeForces
+
+  -- Construct callback from listener (or dummy if not yet initialized)
+  let callback = case maybeListener of
+        Just listener -> simulationEvent listener
+        Nothing -> x 0.0  -- dummy during initialization
+      attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles }
+
   runWithD3_Simulation do
     stop
-    actualizeForces forceStatuses
+    actualizeForces activeForces
     Graph.updateSimulation staging attributesWithCallback
     setConfigVariable $ Alpha 1.0
     start

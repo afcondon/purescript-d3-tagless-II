@@ -10,7 +10,7 @@ import PSD3.ForceNavigator as FN
 import Type.Proxy (Proxy(..))
 
 type Slots =
-  ( navigationViz :: forall q. H.Slot q FN.FN_Output Unit
+  ( navigationViz :: forall q. H.Slot q Void Unit
   )
 
 _navigationViz = Proxy :: Proxy "navigationViz"

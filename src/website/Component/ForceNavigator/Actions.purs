@@ -1,17 +1,12 @@
 module PSD3.ForceNavigator.Actions where
 
-import Prelude
+import D3.Viz.ForceNavigator.Model (NodeType)
 
--- | Events that come from the visualization (clicks on nodes)
-data VizEvent
-  = NodeClick String  -- Click on a node with this ID
-
-derive instance eqVizEvent :: Eq VizEvent
-
--- | Actions that can be performed in the component
+-- | Simple actions for the force navigator
 data Action
-  = Initialize                    -- Initialize the visualization
-  | Finalize                      -- Clean up
-  | EventFromVizualization VizEvent  -- Event from D3 visualization
-  | ToggleExpansion String        -- Toggle expansion of a section node
-  | NavigateToExample String      -- Navigate to an example page
+  = Initialize
+  | Finalize
+  | EventFromVizualization VizEvent
+
+-- | Events that originate from D3 visualization (uses String IDs for semantic navigation)
+data VizEvent = NodeClick NodeType String

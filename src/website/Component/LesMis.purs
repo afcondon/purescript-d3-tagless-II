@@ -4,26 +4,25 @@ import Prelude
 
 import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import Control.Monad.State (class MonadState)
+import Control.Monad.State (class MonadState, get, put)
 import D3.Attributes.Instances (Label)
 import D3.Viz.LesMiserables as LesMis
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
 import D3.FFI (linksForceName)
 import D3.Simulation.Config as F
 import D3.Simulation.Forces (createForce, createLinkForce, initialize)
-import D3.Simulation.Types (D3SimulationState_, Force, ForceStatus(..), ForceType(..), RegularForceType(..), SimVariable(..), allNodes, getStatusMap, initialSimulationState, showMaybeForceStatus, toggleForceStatus)
+import D3.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), SimVariable(..), allNodes, initialSimulationState)
 import PSD3.Button as Button
 import PSD3.Expandable as Expandable
 import PSD3.Toggle as Toggle
 import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start)
 import D3Tagless.Instance.Simulation (runWithD3_Simulation)
-import Data.Lens (Lens', _Just, preview, use, view, (%=), (.=))
-import Data.Lens.At (at)
+import Data.Lens (Lens', use, view, (%=), (.=))
 import Data.Lens.Record (prop)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
-import Data.Profunctor.Choice (class Choice)
-import Data.Profunctor.Strong (class Strong)
+import Data.Set (Set)
+import Data.Set as Set
 import Data.Traversable (traverse)
 import Effect.Aff.Class (class MonadAff)
 import Halogen as H
@@ -43,11 +42,11 @@ data Action
   | Freeze
   | Reheat
 
-type State = { 
+type State = {
     simulation      :: D3SimulationState_
   , panels  :: { code :: Expandable.Status }
-  , notebook :: forall w. Notebook (Map Label ForceStatus) w Action
-  , forceStatuses   :: Map Label ForceStatus
+  , notebook :: forall w. Notebook (Set Label) w Action
+  , activeForces    :: Set Label
 }
 
 _panels = prop (Proxy :: Proxy "panels")
@@ -71,18 +70,7 @@ forceNames = {
   , links: linksForceName
 }
 
--- _forceStatuses :: Lens' State (Map Label ForceStatus)
-_forceStatuses = prop (Proxy :: Proxy "forceStatuses")
-_forceStatus label = at label <<< _Just
-
-_linksSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p (Map Label ForceStatus) (Map Label ForceStatus)
-_linksSetting = _forceStatus forceNames.links
-_manyBodyNegSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p (Map Label ForceStatus) (Map Label ForceStatus)
-_manyBodyNegSetting = _forceStatus forceNames.manyBodyNeg
-_manyBodyPosSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p (Map Label ForceStatus) (Map Label ForceStatus)
-_manyBodyPosSetting = _forceStatus forceNames.manyBodyPos
-_collisionSetting :: forall p. Strong p => Choice p => p ForceStatus ForceStatus -> p (Map Label ForceStatus) (Map Label ForceStatus)
-_collisionSetting = _forceStatus forceNames.collision
+-- Note: Cannot use lens due to forall in notebook field, use direct field access instead
 
 forces :: { center :: Force, collision :: Force, links :: Force, manyBodyPos :: Force , manyBodyNeg :: Force }
 forces = { 
@@ -94,12 +82,14 @@ forces = {
 }
 
 toggleForceByName :: forall m. MonadState State m => String -> m Unit
-toggleForceByName name
-  | name == forceNames.manyBodyNeg  = (_forceStatuses <<< _manyBodyNegSetting) %= toggleForceStatus
-  | name == forceNames.manyBodyPos  = (_forceStatuses <<< _manyBodyPosSetting) %= toggleForceStatus
-  | name == forceNames.collision    = (_forceStatuses <<< _collisionSetting)   %= toggleForceStatus
-  | name == forceNames.links        = (_forceStatuses <<< _linksSetting)       %= toggleForceStatus
-  | otherwise = pure unit
+toggleForceByName name = do
+  state <- get
+  let updated = state { activeForces =
+        if Set.member name state.activeForces
+          then Set.delete name state.activeForces
+          else Set.insert name state.activeForces
+      }
+  put updated
 
  
 -- | ================================================================================================
@@ -118,11 +108,11 @@ component = H.mkComponent
   }
   where
   initialState :: State
-  initialState = { 
+  initialState = {
         simulation: initialSimulationState forceLibrary
       , panels: { code: Expandable.Expanded }
       , notebook: lesMisNotebook
-      , forceStatuses: getStatusMap forceLibrary
+      , activeForces: Set.fromFoldable [forceNames.center, forceNames.manyBodyNeg, forceNames.collision, forceNames.links]
     }
 
   render :: State -> H.ComponentHTML Action () m
@@ -144,7 +134,7 @@ component = H.mkComponent
             ]
           ]
         -- , Expandable.content_ (view _code state) [ controls state ]
-        , Expandable.content_ (view _code state) (renderNotebook state.forceStatuses state.notebook)
+        , Expandable.content_ (view _code state) (renderNotebook state.activeForces state.notebook)
         ]  
       , HH.div [ Utils.tailwindClass "svg-container" ] []
       ]
@@ -167,25 +157,18 @@ handleAction = case _ of
     response <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
     let graph = readGraphFromFileContents response
 
-    (_forceStatuses <<< _forceStatus forceNames.center)       %= (const ForceActive)
-    (_forceStatuses <<< _forceStatus forceNames.manyBodyNeg)  %= (const ForceActive)
-    (_forceStatuses <<< _forceStatus forceNames.collision)    %= (const ForceActive)
-    (_forceStatuses <<< _forceStatus forceNames.links)        %= (const ForceActive)
-
-    (_forceStatuses <<< _forceStatus forceNames.manyBodyPos)  %= (const ForceDisabled)
-    
+    state <- get
     runWithD3_Simulation do
-      statuses <- use _forceStatuses
-      actualizeForces statuses
+      actualizeForces state.activeForces
       LesMis.draw graph "div.svg-container"
 
   Finalize ->  pure unit
 
   ToggleForce name -> do
     toggleForceByName name
+    state <- get
     runWithD3_Simulation do
-      statuses <- use _forceStatuses
-      actualizeForces statuses
+      actualizeForces state.activeForces
       setConfigVariable $ Alpha 0.7
       start
 
@@ -196,21 +179,21 @@ handleAction = case _ of
       start
 -- Snippet_End
 
-controls :: forall p125. Map String ForceStatus -> HH.HTML p125 Action
-controls forceStatuses = 
+controls :: forall p125. Set Label -> HH.HTML p125 Action
+controls activeForces =
     Button.buttonGroup [ HP.class_ $ HH.ClassName "flex-col" ]
       [ Button.buttonVertical
         [ HE.onClick (const $ ToggleForce forceNames.links) ]
-        [ HH.text $ "links: " <> showMaybeForceStatus (preview _linksSetting forceStatuses) ]
+        [ HH.text $ "links: " <> if Set.member forceNames.links activeForces then "On" else "Off" ]
       , Button.buttonVertical
         [ HE.onClick (const $ ToggleForce forceNames.manyBodyPos) ]
-        [ HH.text $ "many body +: " <> showMaybeForceStatus (preview _manyBodyPosSetting forceStatuses) ]
+        [ HH.text $ "many body +: " <> if Set.member forceNames.manyBodyPos activeForces then "On" else "Off" ]
       , Button.buttonVertical
         [ HE.onClick (const $ ToggleForce forceNames.manyBodyNeg) ]
-        [ HH.text $ "many body: -" <> showMaybeForceStatus (preview _manyBodyNegSetting forceStatuses) ]
+        [ HH.text $ "many body: -" <> if Set.member forceNames.manyBodyNeg activeForces then "On" else "Off" ]
       , Button.buttonVertical
         [ HE.onClick (const $ ToggleForce forceNames.collision) ]
-        [ HH.text $ "collision: " <> showMaybeForceStatus (preview _collisionSetting forceStatuses) ]
+        [ HH.text $ "collision: " <> if Set.member forceNames.collision activeForces then "On" else "Off" ]
       , Button.buttonVertical
         [ HE.onClick (const $ Freeze) ]
         [ HH.text "Freeze" ]
@@ -219,7 +202,7 @@ controls forceStatuses =
         [ HH.text "Reheat!" ]
       ]
 
-lesMisNotebook :: forall w. Notebook (Map Label ForceStatus) w Action
+lesMisNotebook :: forall w. Notebook (Set Label) w Action
 lesMisNotebook = [
     Blurb 
 
