@@ -18,6 +18,10 @@ routing =
 routes :: Match Route
 routes =
   tutorial        -- Must come before 'about' because it's more specific
+  <|> simpleCharts
+  <|> chordDiagram
+  <|> bubbleChart
+  <|> sankeyDiagram
   <|> hierarchies
   <|> interpreters
   <|> codeExplorer
@@ -36,6 +40,22 @@ rootRedirect = About <$ end
 -- | Match: /tutorial
 tutorial :: Match Route
 tutorial = Tutorial <$ lit "tutorial" <* end
+
+-- | Match: /simple-charts
+simpleCharts :: Match Route
+simpleCharts = SimpleCharts <$ lit "simple-charts" <* end
+
+-- | Match: /chord-diagram
+chordDiagram :: Match Route
+chordDiagram = ChordDiagram <$ lit "chord-diagram" <* end
+
+-- | Match: /bubble-chart
+bubbleChart :: Match Route
+bubbleChart = BubbleChart <$ lit "bubble-chart" <* end
+
+-- | Match: /sankey-diagram
+sankeyDiagram :: Match Route
+sankeyDiagram = SankeyDiagram <$ lit "sankey-diagram" <* end
 
 -- | Match: /hierarchies
 hierarchies :: Match Route
@@ -59,6 +79,10 @@ notFound = pure NotFound
 routeToPath :: Route -> String
 routeToPath About = "/about"
 routeToPath Tutorial = "/tutorial"
+routeToPath SimpleCharts = "/simple-charts"
+routeToPath ChordDiagram = "/chord-diagram"
+routeToPath BubbleChart = "/bubble-chart"
+routeToPath SankeyDiagram = "/sankey-diagram"
 routeToPath Hierarchies = "/hierarchies"
 routeToPath Interpreters = "/interpreters"
 routeToPath CodeExplorer = "/code-explorer"

@@ -10,7 +10,7 @@
     "snippets": "node src/scripts/extract-snippets.js",
     "convert-about": "node scripts/convert-about.js",
     "generate-spago-data": "node scripts/generate-spago-data.js",
-    "bundle": "npm run convert-about && npm run generate-spago-data && spago bundle --module PSD3.Main --outfile docs/bundle.js",
+    "bundle": "spago bundle --module PSD3.Main --outfile docs/bundle.js",
     "graph-dot": "spago graph modules --dot",
     "graph-json": "spago graph modules --json && spago graph packages --json",
     "graph-topo": "spago graph modules --topo",

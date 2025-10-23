@@ -2,7 +2,6 @@ module PSD3.Hierarchies where
 
 import Prelude
 
-import D3.Data.Tree (TreeLayout(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Halogen as H
@@ -10,6 +9,9 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.Button as Button
+import PSD3.RHSNavigation as RHSNav
+import PSD3.Types (Route(..))
+import Type.Proxy (Proxy(..))
 
 -- | Hierarchies page state
 type State = {
@@ -38,6 +40,11 @@ data Action
   = Initialize
   | SwitchLayout HierarchyLayout
 
+-- | Child component slots
+type Slots = ( rhsNav :: forall q. H.Slot q Void Unit )
+
+_rhsNav = Proxy :: Proxy "rhsNav"
+
 -- | Hierarchies page component
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
@@ -49,11 +56,14 @@ component = H.mkComponent
       }
   }
 
-render :: forall m. State -> H.ComponentHTML Action () m
+render :: State -> H.ComponentHTML Action Slots Aff
 render state =
   HH.div
     [ HP.classes [ HH.ClassName "fullscreen-container", HH.ClassName "hierarchies-page" ] ]
-    [ -- Floating control panel
+    [ -- Navigation Panel (RHS)
+      HH.slot_ _rhsNav unit RHSNav.component Hierarchies
+
+    , -- Floating control panel
       HH.div
         [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left", HH.ClassName "hierarchies-controls" ] ]
         [ HH.h2
@@ -106,7 +116,7 @@ renderLayoutPlaceholder layout =
     , HH.p_ [ HH.text "Visualization will be implemented here" ]
     ]
 
-handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
+handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
   Initialize -> pure unit
 

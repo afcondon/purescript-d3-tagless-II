@@ -23,9 +23,11 @@ import Effect.Random (random)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.RHSNavigation as RHSNav
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Types (Route(..))
 import PSD3.Utilities (syntaxHighlightedCode)
+import Type.Proxy (Proxy(..))
 
 -- | Tutorial page state
 type State = {
@@ -34,6 +36,11 @@ type State = {
 
 -- | Tutorial page actions
 data Action = Initialize | Finalize
+
+-- | Child component slots
+type Slots = ( rhsNav :: forall q. H.Slot q Void Unit )
+
+_rhsNav = Proxy :: Proxy "rhsNav"
 
 -- | Tutorial page component
 component :: forall q i o. H.Component q i o Aff
@@ -47,7 +54,7 @@ component = H.mkComponent
       }
   }
 
-render :: State -> H.ComponentHTML Action () Aff
+render :: State -> H.ComponentHTML Action Slots Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "tutorial-page" ] ]
@@ -89,42 +96,7 @@ render _ =
         ]
 
     -- Navigation Panel (RHS)
-    , HH.div
-        [ HP.classes [ HH.ClassName "tutorial-page__nav-panel" ] ]
-        [ HH.h3
-            [ HP.classes [ HH.ClassName "tutorial-page__nav-title" ] ]
-            [ HH.text "Explore" ]
-        , HH.nav
-            [ HP.classes [ HH.ClassName "tutorial-page__nav-links" ] ]
-            [ HH.a
-                [ HP.href $ "#" <> routeToPath About
-                , HP.classes [ HH.ClassName "tutorial-page__nav-link" ]
-                ]
-                [ HH.text "About →" ]
-            , HH.a
-                [ HP.href $ "#" <> routeToPath Hierarchies
-                , HP.classes [ HH.ClassName "tutorial-page__nav-link" ]
-                ]
-                [ HH.text "Hierarchies →" ]
-            , HH.a
-                [ HP.href $ "#" <> routeToPath Interpreters
-                , HP.classes [ HH.ClassName "tutorial-page__nav-link" ]
-                ]
-                [ HH.text "Interpreters →" ]
-            , HH.a
-                [ HP.href $ "#" <> routeToPath CodeExplorer
-                , HP.classes [ HH.ClassName "tutorial-page__nav-link" ]
-                ]
-                [ HH.text "Code Explorer →" ]
-            , HH.a
-                [ HP.href "https://github.com/afcondon/purescript-d3-tagless"
-                , HP.target "_blank"
-                , HP.rel "noopener noreferrer"
-                , HP.classes [ HH.ClassName "tutorial-page__nav-link", HH.ClassName "tutorial-page__nav-link--external" ]
-                ]
-                [ HH.text "GitHub ↗" ]
-            ]
-        ]
+    , HH.slot_ _rhsNav unit RHSNav.component Tutorial
 
     -- Tutorial introduction
     , HH.section
@@ -319,7 +291,7 @@ render _ =
         ]
     ]
 
-handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
+handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
   Initialize -> do
     -- Draw Three Little Circles

@@ -101,6 +101,21 @@ render state =
                 ]
                 [ HH.text "Tutorial →" ]
             , HH.a
+                [ HP.href $ "#" <> routeToPath SimpleCharts
+                , HP.classes [ HH.ClassName "about-page__nav-link" ]
+                ]
+                [ HH.text "Simple Charts →" ]
+            , HH.a
+                [ HP.href $ "#" <> routeToPath ChordDiagram
+                , HP.classes [ HH.ClassName "about-page__nav-link" ]
+                ]
+                [ HH.text "Chord Diagram →" ]
+            , HH.a
+                [ HP.href $ "#" <> routeToPath BubbleChart
+                , HP.classes [ HH.ClassName "about-page__nav-link" ]
+                ]
+                [ HH.text "Bubble Chart →" ]
+            , HH.a
                 [ HP.href $ "#" <> routeToPath Hierarchies
                 , HP.classes [ HH.ClassName "about-page__nav-link" ]
                 ]

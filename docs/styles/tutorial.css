@@ -55,6 +55,14 @@
   color: var(--color-gray-darker);
 }
 
+.tutorial-page__nav-link--active {
+  background-color: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+  font-weight: bold;
+  color: var(--color-gray-darker);
+  cursor: default;
+}
+
 .tutorial-page__nav-link--external {
   color: var(--color-teal);
 }

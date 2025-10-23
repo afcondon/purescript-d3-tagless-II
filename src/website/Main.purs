@@ -14,6 +14,10 @@ import Halogen.Subscription as HS
 import Halogen.VDom.Driver (runUI)
 import PSD3.About as About
 import PSD3.Tutorial as Tutorial
+import PSD3.SimpleCharts as SimpleCharts
+import PSD3.ChordDiagram as ChordDiagram
+import PSD3.BubbleChart as BubbleChart
+import PSD3.SankeyDiagram as SankeyDiagram
 import PSD3.Hierarchies as Hierarchies
 import PSD3.Interpreters as Interpreters
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -37,6 +41,10 @@ data Action
 type Slots =
   ( about :: forall q. H.Slot q Void Unit
   , tutorial :: forall q. H.Slot q Void Unit
+  , simpleCharts :: forall q. H.Slot q Void Unit
+  , chordDiagram :: forall q. H.Slot q Void Unit
+  , bubbleChart :: forall q. H.Slot q Void Unit
+  , sankeyDiagram :: forall q. H.Slot q Void Unit
   , hierarchies :: forall q. H.Slot q Void Unit
   , interpreters :: forall q. H.Slot q Void Unit
   , codeExplorer :: forall q. H.Slot q Void Unit
@@ -44,6 +52,10 @@ type Slots =
 
 _about = Proxy :: Proxy "about"
 _tutorial = Proxy :: Proxy "tutorial"
+_simpleCharts = Proxy :: Proxy "simpleCharts"
+_chordDiagram = Proxy :: Proxy "chordDiagram"
+_bubbleChart = Proxy :: Proxy "bubbleChart"
+_sankeyDiagram = Proxy :: Proxy "sankeyDiagram"
 _hierarchies = Proxy :: Proxy "hierarchies"
 _interpreters = Proxy :: Proxy "interpreters"
 _codeExplorer = Proxy :: Proxy "codeExplorer"
@@ -77,6 +89,18 @@ renderPage route = case spy "Route is" route of
 
   Tutorial ->
     HH.slot_ _tutorial unit Tutorial.component unit
+
+  SimpleCharts ->
+    HH.slot_ _simpleCharts unit SimpleCharts.component unit
+
+  ChordDiagram ->
+    HH.slot_ _chordDiagram unit ChordDiagram.component unit
+
+  BubbleChart ->
+    HH.slot_ _bubbleChart unit BubbleChart.component unit
+
+  SankeyDiagram ->
+    HH.slot_ _sankeyDiagram unit SankeyDiagram.component unit
 
   Hierarchies ->
     HH.slot_ _hierarchies unit Hierarchies.component unit

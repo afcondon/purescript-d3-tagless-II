@@ -66,6 +66,10 @@ type ExampleMetadata = {
 data Route
   = About
   | Tutorial
+  | SimpleCharts
+  | ChordDiagram
+  | BubbleChart
+  | SankeyDiagram
   | Hierarchies
   | Interpreters
   | CodeExplorer
@@ -76,6 +80,10 @@ derive instance eqRoute :: Eq Route
 instance showRoute :: Show Route where
   show About = "About"
   show Tutorial = "Tutorial"
+  show SimpleCharts = "Simple Charts"
+  show ChordDiagram = "Chord Diagram"
+  show BubbleChart = "Bubble Chart"
+  show SankeyDiagram = "Sankey Diagram"
   show Hierarchies = "Hierarchies"
   show Interpreters = "Interpreters"
   show CodeExplorer = "Code Explorer"
