@@ -1,4 +1,4 @@
-module PSD3.Spago.Forces where
+module PSD3.CodeExplorer.Forces where
 
 import Prelude
 

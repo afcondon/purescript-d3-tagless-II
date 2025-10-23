@@ -1,4 +1,4 @@
-module PSD3.Spago.Actions where
+module PSD3.CodeExplorer.Actions where
 
 
 import D3.Attributes.Instances (Label)

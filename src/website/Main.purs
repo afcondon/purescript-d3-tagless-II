@@ -13,14 +13,12 @@ import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
 import Halogen.VDom.Driver (runUI)
 import PSD3.About as About
-import PSD3.ExampleDetail as ExampleDetail
-import PSD3.Gallery as Gallery
-import PSD3.Home as Home
+import PSD3.Tutorial as Tutorial
+import PSD3.Hierarchies as Hierarchies
 import PSD3.Interpreters as Interpreters
-import PSD3.Navigation as Navigation
 import PSD3.RoutingDSL (routing, routeToPath)
-import PSD3.SpagoWrapper as Spago
-import PSD3.Types (Route(..), ExampleId)
+import PSD3.CodeExplorerWrapper as CodeExplorer
+import PSD3.Types (Route(..))
 import Routing.Hash (matches, setHash)
 import Type.Proxy (Proxy(..))
 
@@ -33,32 +31,27 @@ type State = {
 data Action
   = Initialize
   | Navigate Route
-  | HandleGalleryOutput ExampleId
   | RouteChanged (Maybe Route)
 
 -- | Child component slots
 type Slots =
-  ( navigation :: forall q. H.Slot q Void Unit
-  , home :: forall q. H.Slot q Void Unit
-  , gallery :: forall q. H.Slot q ExampleId Unit
-  , exampleDetail :: forall q. H.Slot q Void Unit
-  , spago :: forall q. H.Slot q Void Unit
+  ( about :: forall q. H.Slot q Void Unit
+  , tutorial :: forall q. H.Slot q Void Unit
+  , hierarchies :: forall q. H.Slot q Void Unit
   , interpreters :: forall q. H.Slot q Void Unit
-  , about :: forall q. H.Slot q Void Unit
+  , codeExplorer :: forall q. H.Slot q Void Unit
   )
 
-_navigation = Proxy :: Proxy "navigation"
-_home = Proxy :: Proxy "home"
-_gallery = Proxy :: Proxy "gallery"
-_exampleDetail = Proxy :: Proxy "exampleDetail"
-_spago = Proxy :: Proxy "spago"
-_interpreters = Proxy :: Proxy "interpreters"
 _about = Proxy :: Proxy "about"
+_tutorial = Proxy :: Proxy "tutorial"
+_hierarchies = Proxy :: Proxy "hierarchies"
+_interpreters = Proxy :: Proxy "interpreters"
+_codeExplorer = Proxy :: Proxy "codeExplorer"
 
 -- | Main application component
 component :: forall q i. H.Component q i Void Aff
 component = H.mkComponent
-  { initialState: \_ -> { currentRoute: Home } -- note, it really doesn't matter what's initalized here as Initialize reads the route from the hash
+  { initialState: \_ -> { currentRoute: About } -- note, it really doesn't matter what's initialized here as Initialize reads the route from the hash
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -70,42 +63,29 @@ render :: State -> H.ComponentHTML Action Slots Aff
 render state =
   HH.div
     [ HP.classes [ HH.ClassName "app" ] ]
-    [ -- Navigation (hidden on example detail pages for fullscreen experience)
-      if shouldHideNavigation state.currentRoute
-        then HH.text ""
-        else HH.slot_ _navigation unit Navigation.component state.currentRoute
-
-    , -- Main content area
+    [ -- Main content area (no separate navigation component)
       HH.main
         [ HP.classes [ HH.ClassName "app__main" ] ]
         [ renderPage state.currentRoute ]
     ]
 
--- | Hide navigation on example detail pages for immersive fullscreen
-shouldHideNavigation :: Route -> Boolean
-shouldHideNavigation Gallery = false
-shouldHideNavigation _ = true
-
 -- | Render the current page based on route
 renderPage :: Route -> H.ComponentHTML Action Slots Aff
 renderPage route = case spy "Route is" route of
-  Home ->
-    HH.slot_ _home unit Home.component unit
+  About ->
+    HH.slot_ _about unit About.component unit
 
-  Gallery ->
-    HH.slot _gallery unit Gallery.component unit HandleGalleryOutput
+  Tutorial ->
+    HH.slot_ _tutorial unit Tutorial.component unit
 
-  Example exampleId ->
-    HH.slot_ _exampleDetail unit ExampleDetail.component exampleId
-
-  Spago ->
-    HH.slot_ _spago unit Spago.component unit
+  Hierarchies ->
+    HH.slot_ _hierarchies unit Hierarchies.component unit
 
   Interpreters ->
     HH.slot_ _interpreters unit Interpreters.component unit
 
-  About ->
-    HH.slot_ _about unit About.component unit
+  CodeExplorer ->
+    HH.slot_ _codeExplorer unit CodeExplorer.component unit
 
   NotFound ->
     HH.div
@@ -113,8 +93,8 @@ renderPage route = case spy "Route is" route of
       [ HH.h1_ [ HH.text "404 - Page Not Found" ]
       , HH.p_ [ HH.text "The page you're looking for doesn't exist." ]
       , HH.a
-          [ HP.href $ "#" <> routeToPath Home ]
-          [ HH.text "Go Home" ]
+          [ HP.href $ "#" <> routeToPath About ]
+          [ HH.text "Go to About" ]
       ]
 
 handleAction :: Action -> H.HalogenM State Action Slots Void Aff Unit
@@ -130,10 +110,6 @@ handleAction = case _ of
     -- Navigation is now handled by Routing.Hash.setHash
     -- which will trigger the matches subscription above
     H.liftEffect $ setHash (routeToPath route)
-
-  HandleGalleryOutput exampleId -> do
-    -- When gallery emits an example ID, navigate to that example
-    handleAction $ Navigate (Example exampleId)
 
   RouteChanged maybeRoute -> do
     -- When route changes (initial load, back/forward, or manual navigation)

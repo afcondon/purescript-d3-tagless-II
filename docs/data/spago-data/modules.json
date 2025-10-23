@@ -1507,7 +1507,7 @@
       "Data.Maybe",
       "Data.Tuple",
       "Effect.Class",
-      "PSD3.Spago.Actions",
+      "PSD3.CodeExplorer.Actions",
       "Utility",
       "Web.Event.Internal.Types"
     ],
@@ -6143,6 +6143,126 @@
     "package": "my-project",
     "path": "src/website/Component/ChordDiagram.purs"
   },
+  "PSD3.CodeExplorer.Actions": {
+    "depends": [
+      "D3.Attributes.Instances",
+      "D3.Data.Tree",
+      "D3.Data.Types",
+      "D3.Viz.Spago.Draw.Attributes",
+      "D3.Viz.Spago.Files",
+      "D3.Viz.Spago.Model",
+      "D3.Node",
+      "D3.Simulation.Types"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/CodeExplorer/Actions.purs"
+  },
+  "PSD3.CodeExplorer.Data": {
+    "depends": [
+      "Prelude",
+      "Affjax.ResponseFormat",
+      "Affjax.Web",
+      "D3.Viz.Spago.Model",
+      "D3.Viz.Spago.Tree",
+      "Data.Either",
+      "Data.Map",
+      "Data.Maybe",
+      "Effect.Aff"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/CodeExplorer/Data.purs"
+  },
+  "PSD3.CodeExplorer.Forces": {
+    "depends": [
+      "Prelude",
+      "D3.Attributes.Instances",
+      "D3.Viz.Spago.Model",
+      "D3.Simulation.Config",
+      "D3.Simulation.Forces",
+      "D3.Simulation.Types",
+      "Data.Int",
+      "Data.Map",
+      "Data.Maybe",
+      "Data.Number"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/CodeExplorer/Forces.purs"
+  },
+  "PSD3.CodeExplorer.HTML": {
+    "depends": [
+      "Prelude",
+      "D3.Data.Tree",
+      "D3.Viz.Spago.Draw.Attributes",
+      "D3.Viz.Spago.Files",
+      "D3.Viz.Spago.Model",
+      "D3.Node",
+      "Data.String.CodeUnits",
+      "D3.Simulation.Forces",
+      "D3.Simulation.Types",
+      "PSD3.Button",
+      "PSD3.Checkbox",
+      "PSD3.Format",
+      "PSD3.Table",
+      "PSD3.Properties",
+      "Data.Array",
+      "Data.Int",
+      "Data.Lens",
+      "Data.Map",
+      "Data.Maybe",
+      "Data.Tuple",
+      "Halogen",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "Halogen.HTML.Properties",
+      "PSD3.CodeExplorer.Actions",
+      "PSD3.CodeExplorer.State"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/CodeExplorer/HTML.purs"
+  },
+  "PSD3.CodeExplorer.State": {
+    "depends": [
+      "Prelude",
+      "D3.Attributes.Instances",
+      "D3.Data.Types",
+      "D3.Viz.Spago.Draw.Attributes",
+      "D3.Viz.Spago.Files",
+      "D3.Viz.Spago.Model",
+      "D3.FFI",
+      "D3.Node",
+      "D3.Simulation.Types",
+      "D3Tagless.Capabilities",
+      "Data.Lens",
+      "Data.Lens.At",
+      "Data.Lens.Record",
+      "Data.Map",
+      "Data.Maybe",
+      "Data.Profunctor.Choice",
+      "Data.Profunctor.Strong",
+      "Data.Set",
+      "Data.Set",
+      "Halogen.Subscription",
+      "PSD3.CodeExplorer.Actions",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/CodeExplorer/State.purs"
+  },
+  "PSD3.CodeExplorerWrapper": {
+    "depends": [
+      "Prelude",
+      "PSD3.Spago",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "Effect.Aff.Class",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/CodeExplorerWrapper.purs"
+  },
   "PSD3.ExampleCard": {
     "depends": [
       "Prelude",
@@ -6154,35 +6274,6 @@
     ],
     "package": "my-project",
     "path": "src/website/Component/ExampleCard.purs"
-  },
-  "PSD3.ExampleDetail": {
-    "depends": [
-      "Prelude",
-      "PSD3.Types",
-      "PSD3.Gallery.Examples",
-      "PSD3.Gallery.CodeFiles",
-      "PSD3.RoutingDSL",
-      "PSD3.Visualization",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Properties",
-      "Halogen.HTML.Events",
-      "Data.Maybe",
-      "Effect.Aff.Class",
-      "Affjax.Web",
-      "Affjax.ResponseFormat",
-      "Type.Proxy",
-      "Data.Either",
-      "Web.HTML",
-      "Web.HTML.Window",
-      "Web.HTML.HTMLDocument",
-      "Effect",
-      "Web.DOM.Document",
-      "Web.DOM.NonElementParentNode",
-      "Data.Foldable"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/ExampleDetail.purs"
   },
   "PSD3.Expandable": {
     "depends": [
@@ -6343,40 +6434,20 @@
     "package": "my-project",
     "path": "src/website/Component/GUP.purs"
   },
-  "PSD3.Gallery": {
+  "PSD3.Hierarchies": {
     "depends": [
       "Prelude",
-      "PSD3.Types",
-      "PSD3.Gallery.Examples",
+      "D3.Data.Tree",
+      "Data.Maybe",
+      "Effect.Aff",
       "Halogen",
       "Halogen.HTML",
-      "Halogen.HTML.Properties",
       "Halogen.HTML.Events",
-      "Data.Maybe"
+      "Halogen.HTML.Properties",
+      "PSD3.Button"
     ],
     "package": "my-project",
-    "path": "src/website/Component/Gallery/Gallery.purs"
-  },
-  "PSD3.Gallery.CodeFiles": {
-    "depends": [
-      "Prelude",
-      "PSD3.Types",
-      "Data.Maybe",
-      "Data.Map",
-      "Data.Tuple"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/Gallery/CodeFiles.purs"
-  },
-  "PSD3.Gallery.Examples": {
-    "depends": [
-      "Prelude",
-      "PSD3.Types",
-      "Data.Array",
-      "Data.Maybe"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/Gallery/Examples.purs"
+    "path": "src/website/Component/Hierarchies.purs"
   },
   "PSD3.Home": {
     "depends": [
@@ -6493,13 +6564,11 @@
       "Halogen.Subscription",
       "Halogen.VDom.Driver",
       "PSD3.About",
-      "PSD3.ExampleDetail",
-      "PSD3.Gallery",
-      "PSD3.Home",
+      "PSD3.Tutorial",
+      "PSD3.Hierarchies",
       "PSD3.Interpreters",
-      "PSD3.Navigation",
       "PSD3.RoutingDSL",
-      "PSD3.SpagoWrapper",
+      "PSD3.CodeExplorerWrapper",
       "PSD3.Types",
       "Routing.Hash",
       "Type.Proxy"
@@ -6705,134 +6774,14 @@
       "Halogen",
       "Halogen",
       "Halogen.Subscription",
-      "PSD3.Spago.Actions",
-      "PSD3.Spago.Data",
-      "PSD3.Spago.Forces",
-      "PSD3.Spago.HTML",
-      "PSD3.Spago.State"
+      "PSD3.CodeExplorer.Actions",
+      "PSD3.CodeExplorer.Data",
+      "PSD3.CodeExplorer.Forces",
+      "PSD3.CodeExplorer.HTML",
+      "PSD3.CodeExplorer.State"
     ],
     "package": "my-project",
-    "path": "src/website/Component/Spago/Spago.purs"
-  },
-  "PSD3.Spago.Actions": {
-    "depends": [
-      "D3.Attributes.Instances",
-      "D3.Data.Tree",
-      "D3.Data.Types",
-      "D3.Viz.Spago.Draw.Attributes",
-      "D3.Viz.Spago.Files",
-      "D3.Viz.Spago.Model",
-      "D3.Node",
-      "D3.Simulation.Types"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/Spago/Actions.purs"
-  },
-  "PSD3.Spago.Data": {
-    "depends": [
-      "Prelude",
-      "Affjax.ResponseFormat",
-      "Affjax.Web",
-      "D3.Viz.Spago.Model",
-      "D3.Viz.Spago.Tree",
-      "Data.Either",
-      "Data.Map",
-      "Data.Maybe",
-      "Effect.Aff"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/Spago/Data.purs"
-  },
-  "PSD3.Spago.Forces": {
-    "depends": [
-      "Prelude",
-      "D3.Attributes.Instances",
-      "D3.Viz.Spago.Model",
-      "D3.Simulation.Config",
-      "D3.Simulation.Forces",
-      "D3.Simulation.Types",
-      "Data.Int",
-      "Data.Map",
-      "Data.Maybe",
-      "Data.Number"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/Spago/Forces.purs"
-  },
-  "PSD3.Spago.HTML": {
-    "depends": [
-      "Prelude",
-      "D3.Data.Tree",
-      "D3.Viz.Spago.Draw.Attributes",
-      "D3.Viz.Spago.Files",
-      "D3.Viz.Spago.Model",
-      "D3.Node",
-      "Data.String.CodeUnits",
-      "D3.Simulation.Forces",
-      "D3.Simulation.Types",
-      "PSD3.Button",
-      "PSD3.Checkbox",
-      "PSD3.Format",
-      "PSD3.Table",
-      "PSD3.Properties",
-      "Data.Array",
-      "Data.Int",
-      "Data.Lens",
-      "Data.Map",
-      "Data.Maybe",
-      "Data.Tuple",
-      "Halogen",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Events",
-      "Halogen.HTML.Properties",
-      "Halogen.HTML.Properties",
-      "PSD3.Spago.Actions",
-      "PSD3.Spago.State"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/Spago/HTML.purs"
-  },
-  "PSD3.Spago.State": {
-    "depends": [
-      "Prelude",
-      "D3.Attributes.Instances",
-      "D3.Data.Types",
-      "D3.Viz.Spago.Draw.Attributes",
-      "D3.Viz.Spago.Files",
-      "D3.Viz.Spago.Model",
-      "D3.FFI",
-      "D3.Node",
-      "D3.Simulation.Types",
-      "D3Tagless.Capabilities",
-      "Data.Lens",
-      "Data.Lens.At",
-      "Data.Lens.Record",
-      "Data.Map",
-      "Data.Maybe",
-      "Data.Profunctor.Choice",
-      "Data.Profunctor.Strong",
-      "Data.Set",
-      "Data.Set",
-      "Halogen.Subscription",
-      "PSD3.Spago.Actions",
-      "Type.Proxy"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/Spago/State.purs"
-  },
-  "PSD3.SpagoWrapper": {
-    "depends": [
-      "Prelude",
-      "PSD3.Spago",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Properties",
-      "Effect.Aff.Class",
-      "Type.Proxy"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/SpagoWrapper.purs"
+    "path": "src/website/Component/CodeExplorer/CodeExplorer.purs"
   },
   "PSD3.Table": {
     "depends": [
@@ -6913,6 +6862,22 @@
     ],
     "package": "my-project",
     "path": "src/website/Component/Trees.purs"
+  },
+  "PSD3.Tutorial": {
+    "depends": [
+      "Prelude",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.GUP",
+      "PSD3.ThreeLittleCircles",
+      "PSD3.GUP",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Tutorial.purs"
   },
   "PSD3.Types": {
     "depends": [

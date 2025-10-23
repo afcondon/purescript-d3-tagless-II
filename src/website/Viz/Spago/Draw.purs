@@ -14,7 +14,7 @@ import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, add
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
-import PSD3.Spago.Actions (VizEvent(..))
+import PSD3.CodeExplorer.Actions (VizEvent(..))
 import Utility (getWindowWidthHeight)
 import Web.Event.Internal.Types (Event)
 

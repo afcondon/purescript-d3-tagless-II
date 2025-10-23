@@ -12501,7 +12501,7 @@
       "path": "src/lib/Interpreters/String/String.purs"
     },
     {
-      "loc": 125,
+      "loc": 121,
       "path": "src/website/Component/About.purs"
     },
     {
@@ -12517,12 +12517,36 @@
       "path": "src/website/Component/ChordDiagram.purs"
     },
     {
-      "loc": 97,
-      "path": "src/website/Component/ExampleCard.purs"
+      "loc": 37,
+      "path": "src/website/Component/CodeExplorer/Actions.purs"
     },
     {
-      "loc": 248,
-      "path": "src/website/Component/ExampleDetail.purs"
+      "loc": 286,
+      "path": "src/website/Component/CodeExplorer/CodeExplorer.purs"
+    },
+    {
+      "loc": 29,
+      "path": "src/website/Component/CodeExplorer/Data.purs"
+    },
+    {
+      "loc": 82,
+      "path": "src/website/Component/CodeExplorer/Forces.purs"
+    },
+    {
+      "loc": 243,
+      "path": "src/website/Component/CodeExplorer/HTML.purs"
+    },
+    {
+      "loc": 161,
+      "path": "src/website/Component/CodeExplorer/State.purs"
+    },
+    {
+      "loc": 32,
+      "path": "src/website/Component/CodeExplorerWrapper.purs"
+    },
+    {
+      "loc": 97,
+      "path": "src/website/Component/ExampleCard.purs"
     },
     {
       "loc": 133,
@@ -12545,20 +12569,12 @@
       "path": "src/website/Component/ForceNavigator/State.purs"
     },
     {
-      "loc": 44,
-      "path": "src/website/Component/Gallery/CodeFiles.purs"
-    },
-    {
-      "loc": 228,
-      "path": "src/website/Component/Gallery/Examples.purs"
-    },
-    {
-      "loc": 169,
-      "path": "src/website/Component/Gallery/Gallery.purs"
-    },
-    {
       "loc": 257,
       "path": "src/website/Component/GUP.purs"
+    },
+    {
+      "loc": 114,
+      "path": "src/website/Component/Hierarchies.purs"
     },
     {
       "loc": 28,
@@ -12569,7 +12585,7 @@
       "path": "src/website/Component/HomeForceLayout.purs"
     },
     {
-      "loc": 91,
+      "loc": 89,
       "path": "src/website/Component/Interpreters.purs"
     },
     {
@@ -12585,7 +12601,7 @@
       "path": "src/website/Component/MetaTree.purs"
     },
     {
-      "loc": 80,
+      "loc": 81,
       "path": "src/website/Component/Navigation.purs"
     },
     {
@@ -12601,40 +12617,16 @@
       "path": "src/website/Component/ScatterPlot.purs"
     },
     {
-      "loc": 37,
-      "path": "src/website/Component/Spago/Actions.purs"
-    },
-    {
-      "loc": 29,
-      "path": "src/website/Component/Spago/Data.purs"
-    },
-    {
-      "loc": 82,
-      "path": "src/website/Component/Spago/Forces.purs"
-    },
-    {
-      "loc": 243,
-      "path": "src/website/Component/Spago/HTML.purs"
-    },
-    {
-      "loc": 286,
-      "path": "src/website/Component/Spago/Spago.purs"
-    },
-    {
-      "loc": 161,
-      "path": "src/website/Component/Spago/State.purs"
-    },
-    {
-      "loc": 32,
-      "path": "src/website/Component/SpagoWrapper.purs"
-    },
-    {
       "loc": 147,
       "path": "src/website/Component/ThreeLittleCircles.purs"
     },
     {
       "loc": 235,
       "path": "src/website/Component/Trees.purs"
+    },
+    {
+      "loc": 109,
+      "path": "src/website/Component/Tutorial.purs"
     },
     {
       "loc": 42,
@@ -12701,15 +12693,15 @@
       "path": "src/website/HTML/Toggle.purs"
     },
     {
-      "loc": 148,
+      "loc": 124,
       "path": "src/website/Main.purs"
     },
     {
-      "loc": 67,
+      "loc": 65,
       "path": "src/website/RoutingDSL.purs"
     },
     {
-      "loc": 84,
+      "loc": 82,
       "path": "src/website/Types.purs"
     },
     {

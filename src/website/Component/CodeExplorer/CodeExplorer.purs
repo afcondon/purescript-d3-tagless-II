@@ -1,4 +1,4 @@
--- | The Spago Component - A Complex Force-Directed Graph Visualization
+-- | The Code Explorer Component - A Complex Force-Directed Graph Visualization
 -- |
 -- | This module demonstrates the "MiseEnScene" pattern for building interactive
 -- | force simulations with multiple views/scenes. Key architectural elements:
@@ -54,11 +54,11 @@ import Effect.Class (class MonadEffect)
 import Halogen (HalogenM, liftEffect)
 import Halogen as H
 import Halogen.Subscription as HS
-import PSD3.Spago.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..), VizEvent(..))
-import PSD3.Spago.Data (readModelData)
-import PSD3.Spago.Forces (forceLibrary)
-import PSD3.Spago.HTML (render)
-import PSD3.Spago.State (State, _activeForces, _chooseNodes, _cssClass, _enterselections, _eventListener, _links, _linksActive, _linksShown, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
+import PSD3.CodeExplorer.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..), VizEvent(..))
+import PSD3.CodeExplorer.Data (readModelData)
+import PSD3.CodeExplorer.Forces (forceLibrary)
+import PSD3.CodeExplorer.HTML (render)
+import PSD3.CodeExplorer.State (State, _activeForces, _chooseNodes, _cssClass, _enterselections, _eventListener, _links, _linksActive, _linksShown, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent

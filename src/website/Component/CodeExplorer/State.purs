@@ -1,4 +1,4 @@
-module PSD3.Spago.State where
+module PSD3.CodeExplorer.State where
 
 import Prelude
 
@@ -21,7 +21,7 @@ import Data.Profunctor.Strong (class Strong)
 import Data.Set (Set)
 import Data.Set as Set
 import Halogen.Subscription as HS
-import PSD3.Spago.Actions (Action)
+import PSD3.CodeExplorer.Actions (Action)
 import Type.Proxy (Proxy(..))
   
 type State = {

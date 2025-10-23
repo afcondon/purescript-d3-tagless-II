@@ -1,4 +1,4 @@
-module PSD3.Spago.Data where
+module PSD3.CodeExplorer.Data where
 
 import Prelude
 

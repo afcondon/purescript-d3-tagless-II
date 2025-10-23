@@ -64,21 +64,19 @@ type ExampleMetadata = {
 
 -- | Route in the application
 data Route
-  = Home
-  | Gallery
-  | Example ExampleId
-  | Spago
+  = About
+  | Tutorial
+  | Hierarchies
   | Interpreters
-  | About
+  | CodeExplorer
   | NotFound
 
 derive instance eqRoute :: Eq Route
 
 instance showRoute :: Show Route where
-  show Home = "Home"
-  show Gallery = "Gallery"
-  show (Example id) = "Example: " <> id
-  show Spago = "Spago Explorer"
-  show Interpreters = "Interpreters"
   show About = "About"
+  show Tutorial = "Tutorial"
+  show Hierarchies = "Hierarchies"
+  show Interpreters = "Interpreters"
+  show CodeExplorer = "Code Explorer"
   show NotFound = "Not Found"

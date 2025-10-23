@@ -29,7 +29,7 @@ render currentRoute =
         [ HP.classes [ HH.ClassName "navigation__container" ] ]
         [ -- Logo/Brand
           HH.a
-            [ HP.href $ "#" <> routeToPath Home
+            [ HP.href $ "#" <> routeToPath About
             , HP.classes [ HH.ClassName "navigation__brand" ]
             ]
             [ HH.img
@@ -45,10 +45,11 @@ render currentRoute =
         , -- Navigation Links
           HH.ul
             [ HP.classes [ HH.ClassName "navigation__links" ] ]
-            [ navLink Home "Home" currentRoute
-            , navLink Gallery "Gallery" currentRoute
-            , navLink Spago "Spago Explorer" currentRoute
+            [ navLink About "About" currentRoute
+            , navLink Tutorial "Tutorial" currentRoute
+            , navLink Hierarchies "Hierarchies" currentRoute
             , navLink Interpreters "Interpreters" currentRoute
+            , navLink CodeExplorer "Code Explorer" currentRoute
             , HH.li
                 [ HP.classes [ HH.ClassName "navigation__item" ] ]
                 [ HH.a

@@ -1,4 +1,4 @@
-module PSD3.SpagoWrapper where
+module PSD3.CodeExplorerWrapper where
 
 import Prelude
 

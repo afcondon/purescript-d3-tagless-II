@@ -50,11 +50,10 @@ render _ =
                 [ HH.h3_ [ HH.text "MetaTree Visualizer" ]
                 , HH.p_ [ HH.text "Instead of rendering to SVG, this interpreter visualizes the abstract syntax tree of the visualization itself as a tree diagram." ]
                 , HH.p_ [ HH.text "This meta-visualization shows how the same code can be interpreted in completely different ways - a key advantage of the Finally Tagless approach." ]
-                , HH.a
-                    [ HP.href $ "#" <> routeToPath (Example "meta-tree")
-                    , HP.classes [ HH.ClassName "interpreter-card__link" ]
-                    ]
-                    [ HH.text "View MetaTree →" ]
+                -- MetaTree example will be part of this page
+                , HH.p
+                    [ HP.classes [ HH.ClassName "interpreter-card__note" ] ]
+                    [ HH.text "(MetaTree visualization will appear on this page)" ]
                 ]
 
             , -- String Generator
@@ -63,11 +62,10 @@ render _ =
                 [ HH.h3_ [ HH.text "String Generator" ]
                 , HH.p_ [ HH.text "This interpreter takes visualization code and generates human-readable text descriptions or code snippets." ]
                 , HH.p_ [ HH.text "Shows how the same high-level visualization definition can be used for documentation generation, code analysis, or teaching - all without modifying the original visualization code." ]
-                , HH.a
-                    [ HP.href $ "#" <> routeToPath (Example "print-tree")
-                    , HP.classes [ HH.ClassName "interpreter-card__link" ]
-                    ]
-                    [ HH.text "View String Generator →" ]
+                -- String generator example will be part of this page
+                , HH.p
+                    [ HP.classes [ HH.ClassName "interpreter-card__note" ] ]
+                    [ HH.text "(String generator visualization will appear on this page)" ]
                 ]
             ]
 
@@ -83,8 +81,8 @@ render _ =
                 ]
             , HH.p_
                 [ HH.a
-                    [ HP.href $ "#" <> routeToPath Gallery ]
-                    [ HH.text "← Back to Gallery" ]
+                    [ HP.href $ "#" <> routeToPath About ]
+                    [ HH.text "← Back to About" ]
                 ]
             ]
         ]

@@ -1,4 +1,4 @@
-module PSD3.Spago.HTML where
+module PSD3.CodeExplorer.HTML where
 
 import Prelude
 
@@ -27,8 +27,8 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties (StepValue(..))
 import Halogen.HTML.Properties as HP
-import PSD3.Spago.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..))
-import PSD3.Spago.State (State, _cssClass, _stagingLinkFilter, _stagingLinks, _stagingNodes, getSimulationVariables)
+import PSD3.CodeExplorer.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..))
+import PSD3.CodeExplorer.State (State, _cssClass, _stagingLinkFilter, _stagingLinks, _stagingNodes, getSimulationVariables)
 
 -- | Filter for project modules only (from src/ directory), but keep all packages
 isProjectModule :: SpagoSimNode -> Boolean

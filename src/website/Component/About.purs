@@ -65,12 +65,8 @@ render state =
         [ HP.classes [ HH.ClassName "about-page__container", HH.ClassName "editorial" ] ]
         [ HH.div
             [ HP.classes [ HH.ClassName "about-page__header" ] ]
-            [ HH.a
-                [ HP.href $ "#" <> routeToPath Home
-                , HP.classes [ HH.ClassName "about-page__back-link" ]
-                ]
-                [ HH.text "← Home" ]
-            ]
+            -- No back link needed - About is the home page
+            []
         , HH.div
             [ HP.classes [ HH.ClassName "about-page__content" ] ]
             [ case state.content of
