@@ -1,90 +1,253 @@
-# TODO
+# TODO - Organized by Pages/Work Packages
 
-## Feature Enhancements
+This TODO is derived from `notes/VISION.md` and organized by the major pages and features that will comprise the finished demo site.
 
-### 1. Add simple two dimensional charts (line, bar, scatterplot) example
-Add examples demonstrating basic 2D chart types using the Finally Tagless DSL:
-- Line chart with axes and transitions
-- Bar chart with dynamic data updates
-- Scatterplot with interactive tooltips
-- Demonstrate the General Update Pattern for each chart type
-- enhance the simple line chart to a multi-line chart with highlighting
+---
 
-### 2. Add a Sankey Diagram example
-Implement a Sankey diagram visualization to show flow data:
-- Wrap D3's Sankey layout in the Finally Tagless API
-- Create example data showing energy flows or data pipelines
-- Add interactive features (hover states, click handlers)
-- Integrate as a new Story in the demo application
+## 1. About/Tutorial Page (Enhanced)
 
-### 3. Improve comments and inline documentation
-Enhance code documentation throughout the codebase BUT ALSO if documenation is complex prefer refactor of DSL 
-- datum_:
-    - document the datum_ pattern
-    - rationalize it thru ALL examples
-    - simplify syntax and pattern if possible
-- Add module-level documentation to all core modules
-- Document the Finally Tagless pattern and how to extend it
-- Add inline comments for complex FFI interactions
-- Document the relationship between capabilities and interpreters
-- Add usage examples in documentation comments
-- can we get the comments to appear on hover over each line of code or something? or attach 'i' icons to sections?
-- make the four kinds of documentation: API/reference, overview, tutorial, cookbook
+**Goal:** Progressive learning from simplest examples to more complex patterns, embedded directly in explanatory text.
 
-### 4. Replace Perl scripts with PureScript code for dependency extraction
-Create PureScript tooling to derive project dependencies for the Spago example:
-- Replace existing Perl scripts with idiomatic PureScript code
-- Use spago's graph command to get the data for the project
-- Generate the data structure consumed by the Spago force-directed graph visualization OR adapt the Spago example to consume the output of 'spago graph'
-- Consider using `purescript-dhall` library for parsing
-- Add as a build step or standalone tool
+### Examples to include:
+- [ ] **Three Little Circles** - Move from current Stories to About page
+- [ ] **Small parabola of circles** - Create simple parametric example
+- [ ] **General Update Pattern** - Fix (currently broken, stops after three updates) and move to About page
+- [ ] **Simple line chart** - Single line, basic example
+- [ ] **Simple bar chart** - Fix first bar offset issue
+- [ ] **Anscombe's Quartet** - Keep as scatter plot example (remove basic scatter)
 
-### 5. Add database and data-serving app
-Create a backend service to serve visualization data:
-- Set up a database (PostgreSQL/SQLite) to store example datasets
-- Create a simple HTTP API server (using Servant or similar)
-- Migrate example data from static files to database
-- Update demo stories to fetch data via HTTP requests
-- Consider using `purescript-affjax` for client-side requests
-- Add development setup instructions for running the data server
+### Requirements:
+- [ ] Each example shows code snippet inline with rendered viz
+- [ ] Progressive complexity: start with Three Little Circles, build up
+- [ ] Good responsive CSS for readability across screen sizes
+- [ ] Consider adding collapsible code sections with syntax highlighting
 
-### 6. Add Chord Diagram example
-Implement a Chord diagram vizualization to show dependency data
-- Wrap D3's Chord layout in the Finally Tagless API
-- Use example data from flare-2.json for now (later use project's own dependencies)
-- Integrate as a new Story in the demo application
+---
 
-### 7. Add Bubble Chart example
-Implement a Bubble chart vizualization to show dependency data
-- Wrap D3's Bubble chart in the Finally Tagless API
-- Use example data from flare-2.json for now (later use project's own dependencies)
-- Integrate as a new Story in the demo application
+## 2. Simple Charts Page
 
-### 8. Replace Ocelot-derived panes with modern CSS single page
-Replace left hand sidebar with thumbnails of the examples, then make single page for each example with good CSS choices for readability on different screensizes
-- Each example should have title and some or all of the about text at the top then the chart and then the code snippet example
-- see if we can delete all of the Ocelot-derived stuff from the project once this is implemented
+**Goal:** Polished, production-ready examples of common chart types with interesting data.
 
-### 9. Add e-charts support
-Alternative to D3 for some uses and there is an existing Purescript wrapper for it at https://github.com/lucasdicioccio/purescript-halogen-echarts-simple?tab=readme-ov-file
+### Line Chart
+- [ ] Multi-line chart with interesting dataset (suggestions: temperature trends, stock prices, COVID data)
+- [ ] Hover interaction to highlight individual lines
+- [ ] Legend with hover coordination
+- [ ] Proper axes and labels
 
-### 10. Enhance String Interpreter
-The string interpreter could - maybe, in principle - emit D3 Javascript code
-- first cut could just be to overhaul the output a LOT for clarity, newlines, etc etc
-- secondly, we could try to make it as D3-ish as possible, at least to the point of pseudocode
-- stretch goal, multiple string interpreters, do echarts as well? Emit a succinct english paragraph describing how the visualisation is built
+### Bar Chart
+- [ ] Fix first bar offset issue
+- [ ] Find interesting dataset (suggestions: top programming languages by year, renewable energy adoption, GitHub stars)
+- [ ] Add stacked bar variant or grouped bar variant
+- [ ] Smooth transitions on data updates
 
-### 11. Generating the site using PureScriptD3 
-- write a parser to take markdown to tree data and allow it to be displayed as either (1) text (2) tree layout (3) force layout
+### Anscombe's Quartet
+- [ ] Keep current implementation (good scatter plot example)
+- [ ] Minor polish: ensure all four charts are clearly labeled
+- [ ] Show summary statistics alongside charts
 
-### 12. Home page overhaul
-- use the above to make homepage from a markdown file
-- key elements: what, why, how, code, examples, apps, finally tagless
-- screen readers and those without javascript - ensure the main text appears and is navigable, explain what a sighted user would see and do on the site. stretch goal: think about sonic "visualisations"
+---
 
-### 13. Further data visualizations beyond the basics
-1. https://blocks.roadtolarissa.com/emeeks/894ff63d02551badfc75536d77dcd49c
-2. https://setosa.io/simpsons/
+## 3. Chord Diagram Page
 
-### 14. Make routing fully idiomatic
-Use `purescript-routing` and get rid of the hashes etc 
+- [ ] Add labels to arcs and chords
+- [ ] Source interesting dataset (not just dependencies - maybe trade flows, migration patterns, or music genre relationships)
+- [ ] Respect container height to keep all elements visible
+- [ ] Hover interactions: highlight connected arcs
+- [ ] Color scheme that's accessible and attractive
+
+---
+
+## 4. Bubble Chart Page
+
+- [ ] Find our own interesting dataset (not Flare)
+- [ ] Implement click-to-zoom interactivity: click inner bubble to drill down, click outer to go back up
+- [ ] Fix labeling: drop tiny labels, hide labels that don't fit in circles
+- [ ] Respect container height to keep visible
+- [ ] **Stretch goal:** Live transition to tree, treemap, or graph layout
+
+---
+
+## 5. Hierarchical Data Displays Page
+
+**Goal:** Single comprehensive page showing the same real-world dataset (our codebase, like Mike Bostock's Flare) in multiple hierarchy layouts.
+
+### Layouts to include:
+- [ ] Horizontal tree (needs centering, zoom)
+- [ ] Vertical tree (needs centering, zoom, 45° rotated labels for readability)
+- [ ] Radial tree (needs centering, zoom, click-to-rotate OR auto-rotate clicked label to 3 o'clock)
+- [ ] Circle packing
+- [ ] Treemap (new - needs implementation)
+
+### Features:
+- [ ] Control panel to switch between layouts
+- [ ] Code overlay panels showing implementation
+- [ ] Use our own codebase as data source (following Bostock's Flare example)
+- [ ] **Stretch goal:** Animate transitions between layouts (retain labels, move nodes smoothly)
+- [ ] **Stretch goal - FINAL BOSS:** Animate tree into force layout graph
+
+### Debug:
+- [ ] Fix the three-layout switcher example (currently not working)
+
+---
+
+## 6. Sankey Diagram Page
+
+- [ ] Add margins for proper spacing
+- [ ] Implement hover highlighting for flow paths
+- [ ] Find more up-to-date energy flow data
+- [ ] **Feature:** Add color toggle to highlight "primary energy fallacy"
+  - Show path to lost energy inherent in fossil fuel lines
+  - Demonstrate value of interactive climate advocacy visualization
+- [ ] Ensure labels are readable
+- [ ] Smooth transitions when changing views
+
+---
+
+## 7. Interpreters Page (formerly "String Interpreter")
+
+**Goal:** Demonstrate Finally Tagless pattern by showing multiple interpretations of the same visualization code.
+
+### Four-panel display showing one piece of PureScript code interpreted as:
+1. [ ] **English description** - Succinct paragraph describing how the visualization is built
+2. [ ] **D3.js JavaScript code** - Pseudo-code or actual D3.js equivalent
+3. [ ] **Vega-Lite JSON specification** - Same viz in declarative format
+4. [ ] **AST visualization as tree** - Show the visualization code's syntax tree
+
+### Additional content:
+- [ ] Diagram explaining Finally Tagless: PureScript code → multiple interpreters → different outputs
+- [ ] EBNF-style grammar documentation for SelectionM
+- [ ] **Stretch goal:** Side-by-side live code generation as you modify parameters
+
+### Implementation notes:
+- [ ] Overhaul string interpreter output for clarity (newlines, indentation)
+- [ ] Create Vega-Lite interpreter (new)
+- [ ] Create English-language interpreter (new)
+- [ ] Create AST-to-tree-data interpreter (new)
+
+---
+
+## 8. Les Mis (Force Layout Example)
+
+**Status:** Currently broken, needs rewrite with new SimulationM API
+
+- [ ] Rewrite using current SimulationM API
+- [ ] Ensure drag interactions work smoothly
+- [ ] Add hover highlighting for connected nodes
+- [ ] Color by community detection or node degree
+- [ ] Control panel for force parameters
+- [ ] Demonstrate the MiseEnScene pattern if applicable
+
+---
+
+## 9. Code Explorer (formerly "Spago")
+
+**Status:** Semi-standalone app, currently working but needs enhancements
+
+### Current repo goals (visualization and filtering):
+- [ ] Rename from "Spago" to "Code Explorer" throughout
+- [ ] Add module cohesion metrics visualization
+- [ ] Add package coupling visualization
+- [ ] Highlight "candidate for extraction" functions (functions that might belong elsewhere)
+- [ ] Demonstrate at least one concrete insight about the codebase (TBD which insight)
+- [ ] Show multiple interaction patterns: filter, zoom, pan, select, highlight
+
+### Long-term vision (for standalone app):
+- Database backend with comprehensive dependency analysis
+- Every line-level dependency captured (line X uses function Y from module Z)
+- Drag-and-drop refactoring tools
+- Node/PureScript or Haskell server
+- (Not part of current TODO, documented for future reference)
+
+---
+
+## 10. Meta-Tree Page
+
+**Goal:** Description of interactive AST editor concept (separate repo in future)
+
+### Current repo deliverable:
+- [ ] Explanatory page describing the vision
+- [ ] Diagram showing the formal grammar developed above D3 (expressed in SelectionM)
+- [ ] Note that this is now covered in Interpreters page (AST as tree visualization)
+
+### Long-term vision (documented for reference):
+- Interactive tool to create visualization AST graphically
+- Visual palette/toolbox UI with LEGO-like pieces
+- Target bespoke visualizations (maps, choropleths, custom layouts)
+- Backend PureScript compilation (like try.purescript.org)
+- (Not part of current TODO, separate repo once library is mature)
+
+---
+
+## 11. Site Infrastructure
+
+### Remove Gallery indirection:
+- [ ] Eliminate Gallery routing layer
+- [ ] Direct navigation to individual example pages
+- [ ] Simplify routing (see also: make routing fully idiomatic using `purescript-routing`)
+
+### CSS and layout:
+- [ ] Replace Ocelot-derived components with modern CSS
+- [ ] Responsive design for all screen sizes
+- [ ] Consider thumbnail navigation for examples
+- [ ] Clean up and possibly delete Ocelot-derived code
+
+### Accessibility:
+- [ ] Ensure main text appears and is navigable for screen readers
+- [ ] Handle no-JS case gracefully
+- [ ] Explain what sighted users see/do for non-visual users
+- [ ] **Stretch goal:** Sonic "visualizations" or audio descriptions
+
+### Home page overhaul:
+- [ ] Key sections: what, why, how, code, examples, apps, Finally Tagless
+- [ ] Consider generating from markdown
+- [ ] Clean, modern design
+- [ ] Clear calls to action (view examples, read docs, see code)
+
+---
+
+## 12. Documentation (Separate from examples)
+
+### Four types of documentation:
+1. [ ] **API/Reference** - Complete module and function documentation
+2. [ ] **Overview** - Architecture, Finally Tagless pattern, interpreter pattern
+3. [ ] **Tutorial** - Progressive learning (covered by About page examples)
+4. [ ] **Cookbook** - Common patterns and recipes
+
+### Specific improvements:
+- [ ] Document datum_ pattern thoroughly and rationalize across ALL examples
+- [ ] Add module-level documentation to all core modules
+- [ ] Document capability/interpreter relationship
+- [ ] Add inline comments for complex FFI interactions
+- [ ] Consider hover-over comments or 'i' icons for code sections
+
+---
+
+## 13. Data and Build Pipeline
+
+### Spago data generation:
+- [x] ~~Replace Perl scripts with PureScript~~ (using Node.js scripts now)
+- [x] Use `spago graph` commands to extract data
+- [ ] Consider additional metrics beyond basic dependencies
+
+### Database backend (future):
+- [ ] Set up PostgreSQL/SQLite for example datasets
+- [ ] Create HTTP API server
+- [ ] Migrate static data files to database
+- [ ] Update examples to fetch via `purescript-affjax`
+
+---
+
+## 14. Stretch Goals / Future Considerations
+
+- [ ] Add e-charts support (existing PureScript wrapper available)
+- [ ] Parser to convert markdown to tree data (display as text, tree layout, or force layout)
+- [ ] Additional advanced visualizations (parallel coordinates, hexbin, etc.)
+- [ ] Explore other interpreters beyond visualization (data validation, accessibility descriptions)
+
+---
+
+## Notes
+
+- Priorities can be adjusted based on what's most impactful for demonstrating the library
+- "Stretch goals" within sections can be deferred to later phases
+- Focus on polish and education: each example should be both impressive and instructive

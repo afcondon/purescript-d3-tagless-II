@@ -89,6 +89,18 @@ The website demonstrates library usage with multiple examples:
 
 **MiseEnScene Pattern** (demonstrated in Spago example): A configuration record pattern for complex force simulations that packages together data filters, force settings, visual styling, initialization functions, and event callbacks. This enables declarative scene switching for multiple views of the same data.
 
+## Project Vision and Roadmap
+
+See `notes/VISION.md` for the long-term vision and `TODO.md` for the current roadmap. Key themes:
+
+1. **Enhanced examples**: Polish existing visualizations, fix broken examples, add interactive features
+2. **Page consolidation**: Remove Gallery indirection, create focused pages (About/Tutorial, Simple Charts, Hierarchies, Interpreters, Code Explorer)
+3. **Multiple interpreters**: Demonstrate Finally Tagless by showing same code interpreted as English, D3.js, Vega-Lite, and AST visualization
+4. **Code Explorer**: Evolve the Spago example into a comprehensive code analysis tool (current focus: visualization and insights; future: standalone app with database backend)
+5. **Educational focus**: Progressive learning from Three Little Circles to complex force simulations, with embedded code examples
+
+The project aims to be both an impressive demonstration of functional visualization techniques AND an instructional resource for learning PureScript, D3, and Finally Tagless patterns.
+
 ## Development Notes
 
 - Configuration is in `spago.yaml` (Spago 0.93) with dependencies for Halogen, lenses, graphs, and web APIs
