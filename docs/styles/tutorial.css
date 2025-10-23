@@ -1,0 +1,158 @@
+/* Tutorial Page Styles */
+
+.tutorial-page {
+  min-height: 100vh;
+  background-color: var(--color-beige-base);
+  padding: 2rem 1rem;
+}
+
+.tutorial-section {
+  max-width: 52rem;
+  margin: 0 auto 3rem auto;
+  background-color: #F5F1E8;
+  padding: 2rem 3rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  position: relative; /* For positioning margin notes */
+}
+
+.tutorial-intro {
+  margin-bottom: 4rem;
+}
+
+.tutorial-title {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 1.5rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 3px solid var(--color-red-accent);
+  color: var(--color-gray-darker);
+}
+
+.tutorial-section-title {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 1rem 0;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-red-accent);
+  color: var(--color-gray-darker);
+}
+
+.tutorial-section p {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: #2A2A2A;
+  margin-bottom: 1rem;
+}
+
+.tutorial-section ul {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: #2A2A2A;
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+  list-style-type: square;
+}
+
+.tutorial-section li {
+  margin-bottom: 0.5rem;
+}
+
+/* Visualization Container */
+.tutorial-viz-container {
+  margin: 2rem 0;
+  padding: 2rem;
+  background-color: white;
+  border: 2px solid var(--color-gray-medium);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Margin Notes */
+.tutorial-margin-note {
+  position: absolute;
+  right: -280px; /* Position outside the main content column */
+  width: 240px;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-top: -1rem; /* Align with adjacent content */
+}
+
+.tutorial-margin-note__label {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray-medium);
+  margin: 0 0 0.75rem 0;
+}
+
+.tutorial-margin-note__link {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-red-accent);
+  text-decoration: none;
+  padding: 0.5rem 0;
+  border-left: 3px solid transparent;
+  padding-left: 0.75rem;
+  transition: all 0.15s ease;
+}
+
+.tutorial-margin-note__link:hover {
+  border-left-color: var(--color-red-accent);
+  background-color: var(--color-beige-base);
+}
+
+/* Responsive */
+@media (max-width: 1400px) {
+  .tutorial-section {
+    margin-right: 1rem;
+  }
+
+  .tutorial-margin-note {
+    right: -240px;
+    width: 200px;
+  }
+}
+
+@media (max-width: 1200px) {
+  /* Move margin notes inline on smaller screens */
+  .tutorial-margin-note {
+    position: static;
+    width: auto;
+    margin: 1.5rem 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .tutorial-section {
+    padding: 1.5rem;
+  }
+
+  .tutorial-title {
+    font-size: 1.5rem;
+  }
+
+  .tutorial-section-title {
+    font-size: 1.25rem;
+  }
+
+  .tutorial-section p,
+  .tutorial-section ul {
+    font-size: 0.8125rem;
+  }
+
+  .tutorial-viz-container {
+    padding: 1rem;
+  }
+}
