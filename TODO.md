@@ -150,6 +150,7 @@ This TODO is derived from `notes/VISION.md` and organized by the major pages and
 - [ ] Highlight "candidate for extraction" functions (functions that might belong elsewhere)
 - [ ] Demonstrate at least one concrete insight about the codebase (TBD which insight)
 - [ ] Show multiple interaction patterns: filter, zoom, pan, select, highlight
+- [ ] **"Blueprint" CSS style** - Add architectural drawing aesthetic as neutral/default view when not highlighting anything particular
 
 ### Long-term vision (for standalone app):
 - Database backend with comprehensive dependency analysis
@@ -237,7 +238,32 @@ This TODO is derived from `notes/VISION.md` and organized by the major pages and
 
 ---
 
-## 14. Stretch Goals / Future Considerations
+## 14. Library API Improvements
+
+### SimulationM Refactoring
+**Goal:** Offer two levels of SimulationM API for different use cases
+
+- [ ] **SimpleSimulationM** - Simpler API that doesn't support General Update Pattern complexity
+  - Easier to write correctly for straightforward force simulations
+  - Good for learning and simple use cases
+  - Less ceremony, fewer moving parts
+
+- [ ] **AdvancedSimulationM** (current SimulationM, refactored) - Full-featured API for complex scenarios
+  - Support for General Update Pattern with enter/update/exit
+  - Parameterize with a configuration record containing data and functions
+  - Let SimulationM handle complicated interleaving of operations automatically
+  - Goal: Make complex scripts easier to write correctly by moving complexity into the API itself
+  - Consider what can be automated vs. what must be user-specified
+
+### Testing
+- [ ] **Test suite for D3 API wrapper** - Comprehensive tests for library (future work)
+  - Unit tests for core Selection and Simulation operations
+  - Integration tests for common patterns
+  - Property-based testing where applicable
+
+---
+
+## 15. Stretch Goals / Future Considerations
 
 - [ ] Add e-charts support (existing PureScript wrapper available)
 - [ ] Parser to convert markdown to tree data (display as text, tree layout, or force layout)
