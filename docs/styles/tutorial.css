@@ -149,6 +149,19 @@
   margin: 0 auto;
 }
 
+/* Code blocks in tutorial - use existing Prism editorial theme */
+.tutorial-code-block {
+  margin: 1.5rem 0;
+}
+
+.tutorial-code-block pre {
+  margin: 0;
+}
+
+.tutorial-code-block code {
+  font-size: 0.8125rem;
+}
+
 /* Margin Notes */
 .tutorial-margin-note {
   position: absolute;

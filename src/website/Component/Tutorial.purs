@@ -25,6 +25,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Types (Route(..))
+import PSD3.Utilities (syntaxHighlightedCode)
 
 -- | Tutorial page state
 type State = {
@@ -146,17 +147,16 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
             [ HH.text "1. Three Little Circles" ]
         , HH.p_
-            [ HH.text "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante." ]
-        , HH.p_
-            [ HH.text "Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra." ]
+            [ HH.text "Simplest possible example, just to show syntax." ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
             [ HH.div
                 [ HP.classes [ HH.ClassName "three-circles-viz" ] ]
                 []
             ]
-        , HH.p_
-            [ HH.text "Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui." ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
+            (syntaxHighlightedCode threeCirclesCode)
         ]
 
     -- Section 2: General Update Pattern
@@ -168,17 +168,18 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
             [ HH.text "2. The General Update Pattern" ]
         , HH.p_
-            [ HH.text "Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sagittis dui vel nisl. Duis ac tellus et risus vulputate vehicula. Donec lobortis risus a elit. Etiam tempor. Ut ullamcorper, ligula eu tempor congue, eros est euismod turpis." ]
+            [ HH.text "This deceptively simple example shows off an aspect of screen-based data visualization that has no analogue in paper visualizations: the ability to specify how updates to the data should be represented." ]
         , HH.p_
-            [ HH.text "Mauris sollicitudin fermentum libero. Praesent nonummy mi in odio. Nunc interdum lacus sit amet orci. Vestibulum rutrum, mi nec elementum vehicula, eros quam gravida nisl, id fringilla neque ante vel mi." ]
+            [ HH.text "In this example, some letters of the alphabet are presented and then constantly updated. When a letter enters at first, it falls in from the top and it is green. If it's still present in the next set of letters it stays on the screen, but it turns gray and moves to an alphabetically correct new position. And if it's not present in the new data, it turns red and falls out before disappearing." ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
             [ HH.div
                 [ HP.classes [ HH.ClassName "gup-viz" ] ]
                 []
             ]
-        , HH.p_
-            [ HH.text "Sed egestas, ante et vulputate volutpat, eros pede semper est, vitae luctus metus libero eu augue. Morbi purus libero, faucibus adipiscing, commodo quis, gravida id, est." ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
+            (syntaxHighlightedCode gupCode)
         ]
 
     -- Section 3: Parabola of Circles
@@ -190,15 +191,16 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
             [ HH.text "3. Data-Driven Positioning" ]
         , HH.p_
-            [ HH.text "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Using data to drive visual properties like position and color." ]
+            [ HH.text "This extends the super-simple model in the direction one would go for a more real-world example. In this example, the data is passed in and must match the type specified in the Model. Because the data loses its type information when joined to the DOM elements, we use the datum_ record to provide typed accessors for extracting values." ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
             [ HH.div
                 [ HP.classes [ HH.ClassName "parabola-viz" ] ]
                 []
             ]
-        , HH.p_
-            [ HH.text "Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi." ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
+            (syntaxHighlightedCode parabolaCode)
         ]
 
     -- Section 4: Bar Chart
@@ -210,15 +212,18 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
             [ HH.text "4. Bar Charts with Scales" ]
         , HH.p_
-            [ HH.text "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Bar charts demonstrate the use of scales to map data to screen coordinates." ]
+            [ HH.text "Bar charts are ideal for comparing discrete categories or showing changes across time periods. They use rectangular bars with heights or lengths proportional to the values they represent." ]
+        , HH.p_
+            [ HH.text "This example shows monthly sales data using a vertical bar chart. Each bar represents a month, and the height indicates the sales value. The implementation uses D3 scales to map data values to pixel coordinates." ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
             [ HH.div
                 [ HP.classes [ HH.ClassName "barchart-viz" ] ]
                 []
             ]
-        , HH.p_
-            [ HH.text "Praesent nonummy mi in odio. Nunc interdum lacus sit amet orci." ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
+            (syntaxHighlightedCode barChartCode)
         ]
 
     -- Section 5: Line Chart
@@ -230,15 +235,18 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
             [ HH.text "5. Line Charts and Paths" ]
         , HH.p_
-            [ HH.text "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Line charts use SVG paths to connect data points smoothly." ]
+            [ HH.text "Line charts are one of the most fundamental visualizations for showing trends over time or continuous data. They excel at displaying patterns, trends, and changes in data series." ]
+        , HH.p_
+            [ HH.text "This example demonstrates a simple line chart showing a sine wave pattern. The implementation uses D3's scale functions to map data values to pixel coordinates, and a line generator to create the SVG path." ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
             [ HH.div
                 [ HP.classes [ HH.ClassName "linechart-viz" ] ]
                 []
             ]
-        , HH.p_
-            [ HH.text "Mauris sollicitudin fermentum libero. Vestibulum rutrum, mi nec elementum vehicula." ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
+            (syntaxHighlightedCode lineChartCode)
         ]
 
     -- Section 6: Anscombe's Quartet
@@ -250,15 +258,18 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
             [ HH.text "6. Anscombe's Quartet" ]
         , HH.p_
-            [ HH.text "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Anscombe's quartet demonstrates why visualization matters - four datasets with identical statistics but very different distributions." ]
+            [ HH.text "This example demonstrates Anscombe's Quartet, a famous dataset created by statistician Francis Anscombe in 1973. All four datasets have nearly identical statistical properties (same mean, variance, correlation, and linear regression line), yet when visualized they reveal completely different patterns." ]
+        , HH.p_
+            [ HH.text "The quartet powerfully illustrates why data visualization is essential. Summary statistics alone can be misleading - you need to look at the data to understand its true structure. This implementation uses a 'small multiples' layout, displaying the four related charts side-by-side for easy comparison." ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
             [ HH.div
                 [ HP.classes [ HH.ClassName "quartet-viz" ] ]
                 []
             ]
-        , HH.p_
-            [ HH.text "Sed egestas, ante et vulputate volutpat, eros pede semper est." ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
+            (syntaxHighlightedCode quartetCode)
         ]
 
     -- Section 7: Next Steps with margin links
@@ -365,3 +376,147 @@ runUpdate update = do
 
       choices <- sequence $ coinToss <$> letters
       pure $ catMaybes choices
+
+-- Code snippets for tutorial examples
+threeCirclesCode :: String
+threeCirclesCode = """drawThreeCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
+drawThreeCircles selector = do
+  let circleAttributes = [ fill "green", cx xFromIndex, cy 50.0, radius 20.0 ]
+
+  root        <- attach selector
+  svg         <- appendTo root Svg [ viewBox (-10.0) 20.0 120.0 60.0, classed "d3svg" ]
+  circleGroup <- appendTo svg  Group []
+  circles     <- simpleJoin circleGroup Circle [32, 57, 293] keyIsID_
+  setAttributes circles circleAttributes
+
+  pure circles"""
+
+gupCode :: String
+gupCode = """exGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_ -> m ((Array Char) -> m D3Selection_)
+exGeneralUpdatePattern selector = do
+  root        <- attach selector
+  svg         <- appendTo root Svg [ viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup" ]
+  letterGroup <- appendTo svg Group []
+
+  pure $ \\letters -> do
+    enterSelection   <- openSelection letterGroup "text"
+    updateSelections <- updateJoin enterSelection Text letters keyFunction
+    setAttributes updateSelections.exit exit
+    setAttributes updateSelections.update update
+    newlyEntered     <- appendTo updateSelections.enter Text []
+    setAttributes newlyEntered enter
+    pure newlyEntered
+  where
+    transition = transitionWithDuration $ Milliseconds 2000.0
+    enter  = [ classed "enter", fill "green", x xFromIndex, y 0.0, text (singleton <<< datumIsChar), fontSize 96.0 ]
+             `andThen` (transition `to` [ y 200.0 ])
+    update = [ classed "update", fill "gray", y 200.0 ]
+             `andThen` (transition `to` [ x xFromIndex ])
+    exit   = [ classed "exit", fill "brown"]
+             `andThen` (transition `to` [ y 400.0, remove ])"""
+
+parabolaCode :: String
+parabolaCode = """drawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_ -> m D3Selection_
+drawWithData circleData selector = do
+  let circleAttributes = [
+      strokeColor datum_.color
+    , strokeWidth 3.0
+    , fill "none"
+    , cx datum_.x
+    , cy datum_.y
+    , radius 10.0 ]
+
+  root        <- attach selector
+  svg         <- appendTo root Svg [ viewBox (-10.0) (-100.0) 320.0 160.0, classed "d3svg" ]
+  circleGroup <- appendTo svg  Group []
+  circles     <- simpleJoin circleGroup Circle circleData keyIsID_
+  setAttributes circles circleAttributes
+  pure circles"""
+
+barChartCode :: String
+barChartCode = """draw :: Array DataPoint -> Selector D3Selection_ -> m Unit
+draw dataPoints selector = do
+  let dims = defaultDimensions
+
+  root <- attach selector
+  svg <- appendTo root Svg [ viewBox 0.0 0.0 dims.width dims.height, classed "bar-chart" ]
+  chartGroup <- appendTo svg Group [
+      transform [ \\_ -> "translate(" <> show dims.margin.left <> "," <> show dims.margin.top <> ")" ]
+    ]
+
+  -- Create scales
+  xScale <- liftEffect $ createLinearScale { domain: [minX, maxX], range: [0.0, iWidth] }
+  yScale <- liftEffect $ createLinearScale { domain: [minY, maxY], range: [iHeight, 0.0] }
+
+  -- Add axes
+  xAxisGroup <- appendTo chartGroup Group [ classed "x-axis", transform [ \\_ -> "translate(0," <> show iHeight <> ")" ] ]
+  yAxisGroup <- appendTo chartGroup Group [ classed "y-axis" ]
+  _ <- liftEffect $ callAxis xAxisGroup (axisBottom xScale)
+  _ <- liftEffect $ callAxis yAxisGroup (axisLeft yScale)
+
+  -- Add bars
+  let addBar point = do
+        let xPos = applyScale xScale point.x - (barWidth / 2.0)
+        let yPos = applyScale yScale point.y
+        let barHeight = iHeight - yPos
+        _ <- appendTo chartGroup Rect [ x xPos, y yPos, width barWidth, height barHeight, fill "#4a90e2" ]
+        pure unit
+  _ <- traverse_ addBar dataPoints
+  pure unit"""
+
+lineChartCode :: String
+lineChartCode = """draw :: Array DataPoint -> Selector D3Selection_ -> m Unit
+draw dataPoints selector = do
+  let dims = defaultDimensions
+
+  root <- attach selector
+  svg <- appendTo root Svg [ viewBox 0.0 0.0 dims.width dims.height, classed "line-chart" ]
+  chartGroup <- appendTo svg Group [
+      transform [ \\_ -> "translate(" <> show dims.margin.left <> "," <> show dims.margin.top <> ")" ]
+    ]
+
+  -- Create scales
+  xScale <- liftEffect $ createLinearScale { domain: [minX, maxX], range: [0.0, iWidth] }
+  yScale <- liftEffect $ createLinearScale { domain: [minY, maxY], range: [iHeight, 0.0] }
+
+  -- Add axes
+  xAxisGroup <- appendTo chartGroup Group [ classed "x-axis", transform [ \\_ -> "translate(0," <> show iHeight <> ")" ] ]
+  yAxisGroup <- appendTo chartGroup Group [ classed "y-axis" ]
+  _ <- liftEffect $ callAxis xAxisGroup (axisBottom xScale)
+  _ <- liftEffect $ callAxis yAxisGroup (axisLeft yScale)
+
+  -- Create line generator and add the line path
+  lineGen <- liftEffect $ createLineGenerator { xScale, yScale }
+  let pathData = generateLinePath lineGen dataPoints
+  _ <- appendTo chartGroup Path [ d pathData, fill "none", strokeColor "#4a90e2", strokeWidth 2.0, classed "line" ]
+  pure unit"""
+
+quartetCode :: String
+quartetCode = """drawQuartet :: QuartetData -> Selector D3Selection_ -> m Unit
+drawQuartet quartet selector = do
+  -- Overall dimensions for the quartet display (2x2 grid of small multiples)
+  let totalWidth = 900.0
+  let totalHeight = 700.0
+
+  root <- attach selector
+  svg <- appendTo root Svg [ viewBox 0.0 0.0 totalWidth totalHeight, classed "scatter-quartet" ]
+
+  -- Helper function to draw a single subplot
+  let drawSubplot title dataPoints xOffset yOffset = do
+        subplotGroup <- appendTo svg Group [ classed "subplot", transform [ \\_ -> "translate(" <> show xOffset <> "," <> show yOffset <> ")" ] ]
+
+        -- Add title
+        _ <- appendTo svg Text [ x (xOffset + plotWidth / 2.0), y (yOffset + 15.0), text title, textAnchor "middle" ]
+
+        -- Create scales (use fixed domains for valid comparison)
+        xScale <- liftEffect $ createLinearScale { domain: [0.0, 20.0], range: [0.0, iWidth] }
+        yScale <- liftEffect $ createLinearScale { domain: [0.0, 14.0], range: [iHeight, 0.0] }
+
+        -- Add axes and data points...
+
+  -- Draw all four subplots in a 2x2 grid
+  _ <- drawSubplot "Dataset I" quartet.dataset1 padding padding
+  _ <- drawSubplot "Dataset II" quartet.dataset2 (padding + plotWidth + padding) padding
+  _ <- drawSubplot "Dataset III" quartet.dataset3 padding (padding + plotHeight + padding)
+  _ <- drawSubplot "Dataset IV" quartet.dataset4 (padding + plotWidth + padding) (padding + plotHeight + padding)
+  pure unit"""
