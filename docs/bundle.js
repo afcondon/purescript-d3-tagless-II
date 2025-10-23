@@ -17656,7 +17656,7 @@
   var about = /* @__PURE__ */ (function() {
     return applyFirst2(voidRight2(About.value)(lit("about")))(end);
   })();
-  var routes = /* @__PURE__ */ alt7(about)(/* @__PURE__ */ alt7(tutorial)(/* @__PURE__ */ alt7(hierarchies)(/* @__PURE__ */ alt7(interpreters)(/* @__PURE__ */ alt7(codeExplorer)(/* @__PURE__ */ alt7(rootRedirect)(notFound))))));
+  var routes = /* @__PURE__ */ alt7(tutorial)(/* @__PURE__ */ alt7(hierarchies)(/* @__PURE__ */ alt7(interpreters)(/* @__PURE__ */ alt7(codeExplorer)(/* @__PURE__ */ alt7(about)(/* @__PURE__ */ alt7(rootRedirect)(notFound))))));
   var routing = /* @__PURE__ */ applySecond(matchApply)(root)(routes);
 
   // output/PSD3.Interpreters/index.js

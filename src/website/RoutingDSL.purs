@@ -17,21 +17,21 @@ routing =
 
 routes :: Match Route
 routes =
-  about
-  <|> tutorial
+  tutorial        -- Must come before 'about' because it's more specific
   <|> hierarchies
   <|> interpreters
   <|> codeExplorer
+  <|> about
   <|> rootRedirect
   <|> notFound
-
--- | Match: / (redirect to /about)
-rootRedirect :: Match Route
-rootRedirect = About <$ end
 
 -- | Match: /about
 about :: Match Route
 about = About <$ lit "about" <* end
+
+-- | Match: / (redirect to /about)
+rootRedirect :: Match Route
+rootRedirect = About <$ end
 
 -- | Match: /tutorial
 tutorial :: Match Route
