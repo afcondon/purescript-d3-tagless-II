@@ -26741,15 +26741,15 @@
     var toScale = function(s) {
       return toNumber(fromMaybe(0)(fromString(s))) / 100;
     };
-    return [onValueInput(function($28) {
-      return ChangeSimConfig.create(config["var"](toScale($28)));
+    return [onValueInput(function($27) {
+      return ChangeSimConfig.create(config["var"](toScale($27)));
     }), type_19(InputRange.value), id2(config.id), class_("range-slider scaling-slider"), min5(config.min), max6(config.max), step4(new Step(config.step)), value15(show21(config.value))];
   };
   var renderTableForces = function(state3) {
     var renderForceItem = function(v) {
       return div2([classes(["force-item", (function() {
-        var $23 = eq7(v.status)(ForceActive.value);
-        if ($23) {
+        var $22 = eq7(v.status)(ForceActive.value);
+        if ($22) {
           return "force-active";
         }
         ;
@@ -26764,7 +26764,7 @@
   };
   var isProjectModule = function(v) {
     if (v.nodetype instanceof IsModule) {
-      return take2(3)(v.nodetype.value0) === "D3." || take2(5)(v.nodetype.value0) === "PSD3.";
+      return take2(4)(v.nodetype.value0) === "src/";
     }
     ;
     if (v.nodetype instanceof IsPackage) {
