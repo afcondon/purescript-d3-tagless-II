@@ -32,7 +32,7 @@ keyFunction = unsafeCoerce
 exGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
 exGeneralUpdatePattern selector = do 
   root           <- attach selector
-  svg            <- appendTo root Svg [ viewBox 0.0 0.0 650.0 650.0, classed "d3svg gup" ]
+  svg            <- appendTo root Svg [ viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup" ]
   letterGroup    <- appendTo svg Group []
   
   pure $ \letters -> do

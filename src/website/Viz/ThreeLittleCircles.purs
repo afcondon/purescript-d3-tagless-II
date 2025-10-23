@@ -24,12 +24,12 @@ xFromIndex _ i = ((indexIsNumber i) * 100.0)
 -- Name: TLCSimple
 -- | Pretty much the most basic example imaginable, three ints represented by three circles
 drawThreeCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
-drawThreeCircles selector = do 
+drawThreeCircles selector = do
 
   let circleAttributes = [ fill "green", cx xFromIndex, cy 50.0, radius 20.0 ]
 
   root        <- attach selector
-  svg         <- appendTo root Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ]
+  svg         <- appendTo root Svg [ viewBox (-10.0) 20.0 120.0 60.0, classed "d3svg gup" ]
   circleGroup <- appendTo svg  Group []
   circles     <- simpleJoin circleGroup Circle [32, 57, 293] keyIsID_ 
   setAttributes circles circleAttributes
@@ -64,9 +64,9 @@ datum_ =
 -- Snippet_Start
 -- Name: TLCParabola
 drawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_
-drawWithData circleData selector = do 
+drawWithData circleData selector = do
 
-  let circleAttributes = [ 
+  let circleAttributes = [
       strokeColor datum_.color
     , strokeWidth 3.0
     , fill "none"
@@ -75,7 +75,7 @@ drawWithData circleData selector = do
     , radius 10.0 ]
 
   root        <- attach selector
-  svg         <- appendTo root Svg [ viewBox (-100.0) (-100.0) 650.0 650.0, classed "d3svg gup" ]
+  svg         <- appendTo root Svg [ viewBox (-10.0) (-100.0) 320.0 160.0, classed "d3svg gup" ]
   circleGroup <- appendTo svg  Group []
 
   circles     <- simpleJoin circleGroup Circle circleData keyIsID_ 

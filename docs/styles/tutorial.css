@@ -77,7 +77,8 @@
 /* Embedded visualization divs */
 .tutorial-viz-container .three-circles-viz,
 .tutorial-viz-container .gup-viz {
-  min-height: 200px;
+  min-height: 150px;
+  max-height: 200px;
   width: 100%;
 }
 
