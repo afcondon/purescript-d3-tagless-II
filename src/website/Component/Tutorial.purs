@@ -2,45 +2,47 @@ module PSD3.Tutorial where
 
 import Prelude
 
+import Control.Monad.Rec.Class (forever)
+import D3.Viz.ThreeLittleCircles as Circles
+import D3.Viz.GUP as GUP
+import D3Tagless.Instance.Selection (eval_D3M, runD3M)
+import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..))
-import Effect.Aff (Aff)
+import Data.String.CodeUnits (toCharArray)
+import Data.Traversable (sequence)
+import Effect (Effect)
+import Effect.Aff (Aff, Fiber, Milliseconds(..), delay, forkAff, killFiber)
+import Effect.Class (class MonadEffect)
+import Effect.Class.Console (log)
+import Effect.Exception (error)
+import Effect.Random (random)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.GUP (Status(..))
-import PSD3.ThreeLittleCircles as ThreeLittleCircles
-import PSD3.GUP as GUP
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Types (Route(..))
-import Type.Proxy (Proxy(..))
 
 -- | Tutorial page state
-type State = Unit
+type State = {
+  gupFiber :: Maybe (Fiber Unit)
+}
 
 -- | Tutorial page actions
-data Action = Initialize
-
--- | Child component slots
-type Slots =
-  ( threeLittleCircles :: forall q. H.Slot q Void Unit
-  , gup :: forall q. H.Slot q Void Unit
-  )
-
-_threeLittleCircles = Proxy :: Proxy "threeLittleCircles"
-_gup = Proxy :: Proxy "gup"
+data Action = Initialize | Finalize
 
 -- | Tutorial page component
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
-  { initialState: \_ -> unit
+  { initialState: \_ -> { gupFiber: Nothing }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
       , initialize = Just Initialize
+      , finalize = Just Finalize
       }
   }
 
-render :: State -> H.ComponentHTML Action Slots Aff
+render :: State -> H.ComponentHTML Action () Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "tutorial-page" ] ]
@@ -68,7 +70,10 @@ render _ =
             [ HH.text "Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra." ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
-            [ HH.slot_ _threeLittleCircles unit ThreeLittleCircles.component unit ]
+            [ HH.div
+                [ HP.classes [ HH.ClassName "three-circles-viz" ] ]
+                []
+            ]
         , HH.p_
             [ HH.text "Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui." ]
         ]
@@ -85,7 +90,10 @@ render _ =
             [ HH.text "Mauris sollicitudin fermentum libero. Praesent nonummy mi in odio. Nunc interdum lacus sit amet orci. Vestibulum rutrum, mi nec elementum vehicula, eros quam gravida nisl, id fringilla neque ante vel mi." ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
-            [ HH.slot_ _gup unit GUP.component Running ]
+            [ HH.div
+                [ HP.classes [ HH.ClassName "gup-viz" ] ]
+                []
+            ]
         , HH.p_
             [ HH.text "Sed egestas, ante et vulputate volutpat, eros pede semper est, vitae luctus metus libero eu augue. Morbi purus libero, faucibus adipiscing, commodo quis, gravida id, est." ]
         ]
@@ -135,6 +143,46 @@ render _ =
         ]
     ]
 
-handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
+handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
 handleAction = case _ of
-  Initialize -> pure unit
+  Initialize -> do
+    -- Draw Three Little Circles
+    _ <- H.liftEffect $ eval_D3M $ Circles.drawThreeCircles "div.three-circles-viz"
+
+    -- Set up General Update Pattern animation
+    updateFn <- runGeneralUpdatePattern
+    fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
+    H.modify_ (\state -> state { gupFiber = Just fiber })
+
+  Finalize -> do
+    -- Kill the GUP animation fiber
+    maybeFiber <- H.gets _.gupFiber
+    case maybeFiber of
+      Nothing -> pure unit
+      Just fiber -> H.liftAff $ killFiber (error "Cancelling GUP animation") fiber
+
+-- Helper functions for GUP animation
+runGeneralUpdatePattern :: forall m. MonadEffect m => m (Array Char -> Aff Unit)
+runGeneralUpdatePattern = do
+  log "General Update Pattern example"
+  update <- H.liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern "div.gup-viz"
+  pure (\letters -> H.liftEffect $ runD3M (update letters) *> pure unit)
+
+runUpdate :: (Array Char -> Aff Unit) -> Aff Unit
+runUpdate update = do
+  letters <- H.liftEffect $ getLetters
+  update letters
+  delay (Milliseconds 2300.0)
+  where
+    -- | choose a string of random letters (no duplicates), ordered alphabetically
+    getLetters :: Effect (Array Char)
+    getLetters = do
+      let
+        letters = toCharArray "abcdefghijklmnopqrstuvwxyz"
+        coinToss :: Char -> Effect (Maybe Char)
+        coinToss c = do
+          n <- random
+          pure $ if n > 0.6 then Just c else Nothing
+
+      choices <- sequence $ coinToss <$> letters
+      pure $ catMaybes choices

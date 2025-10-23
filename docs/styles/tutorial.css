@@ -74,6 +74,18 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Embedded visualization divs */
+.tutorial-viz-container .three-circles-viz,
+.tutorial-viz-container .gup-viz {
+  min-height: 200px;
+  width: 100%;
+}
+
+.tutorial-viz-container svg {
+  display: block;
+  margin: 0 auto;
+}
+
 /* Margin Notes */
 .tutorial-margin-note {
   position: absolute;
