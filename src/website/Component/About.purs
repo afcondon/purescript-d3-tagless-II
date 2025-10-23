@@ -51,14 +51,40 @@ render :: forall m. State -> H.ComponentHTML Action Slots m
 render state =
   HH.div
     [ HP.classes [ HH.ClassName "about-page" ] ]
-    [ -- TOC Panel (if loaded)
+    [ -- TOC Panel (if loaded) - renders directly as HTML
       case state.toc of
         Just tocHtml ->
+          -- Render the TOC structure directly in Halogen instead of using innerHTML
           HH.div
-            [ HP.classes [ HH.ClassName "about-page__toc-container" ]
-            , HP.prop (H.PropName "innerHTML") tocHtml
+            [ HP.classes [ HH.ClassName "toc-panel" ] ]
+            [ HH.img
+                [ HP.src "bookmark.jpeg"
+                , HP.alt ""
+                , HP.classes [ HH.ClassName "toc-panel__bookmark-pin" ]
+                ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "toc-panel__main" ] ]
+                [ HH.div
+                    [ HP.classes [ HH.ClassName "floating-panel__header" ] ]
+                    [ HH.h3
+                        [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
+                        [ HH.text "Contents" ]
+                    , HH.button
+                        [ HP.classes [ HH.ClassName "floating-panel__toggle" ]
+                        , HP.type_ HP.ButtonButton
+                        ]
+                        [ HH.text "−" ]
+                    ]
+                , HH.div
+                    [ HP.classes [ HH.ClassName "floating-panel__content", HH.ClassName "toc-panel__content" ] ]
+                    [ HH.nav
+                        [ HP.classes [ HH.ClassName "toc-nav" ]
+                        , HP.prop (H.PropName "innerHTML") tocHtml
+                        ]
+                        []
+                    ]
+                ]
             ]
-            []
         Nothing -> HH.text ""
 
     -- Navigation Panel (RHS)

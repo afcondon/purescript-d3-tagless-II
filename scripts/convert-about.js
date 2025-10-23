@@ -47,26 +47,21 @@ const html = marked.parse(markdown);
 // Write the HTML
 fs.writeFileSync(OUTPUT_PATH, html, 'utf8');
 
-// Generate TOC HTML with floating panel
-const tocHtml = `
-<div class="floating-panel toc-panel">
-  <img src="bookmark.jpeg" alt="" class="toc-panel__bookmark-pin" />
-  <div class="toc-panel__main">
-    <div class="floating-panel__header">
-      <h3 class="floating-panel__title">Contents</h3>
-      <button class="floating-panel__toggle" type="button" onclick="this.closest('.floating-panel').classList.toggle('floating-panel--collapsed')">−</button>
-    </div>
-    <div class="floating-panel__content toc-panel__content">
-      <nav class="toc-nav">
-        ${toc.map(item => {
-          const indent = item.level === 1 ? '' : item.level === 2 ? 'toc-nav__item--level-2' : 'toc-nav__item--level-3';
-          return `<a href="#${item.id}" class="toc-nav__item ${indent}">${item.text}</a>`;
-        }).join('\n        ')}
-      </nav>
-    </div>
-  </div>
-</div>
-`;
+// HTML escape function
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+// Generate TOC HTML - just the links (Halogen renders the structure)
+const tocHtml = toc.map(item => {
+  const indent = item.level === 1 ? '' : item.level === 2 ? 'toc-nav__item--level-2' : 'toc-nav__item--level-3';
+  return `<a href="#${item.id}" class="toc-nav__item ${indent}">${escapeHtml(item.text)}</a>`;
+}).join('\n');
 
 fs.writeFileSync(TOC_PATH, tocHtml, 'utf8');
 
