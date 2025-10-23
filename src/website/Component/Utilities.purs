@@ -20,8 +20,8 @@ blurbParagraphs texts =
 
 syntaxHighlightedCode :: forall t2 t3. String -> Array (HTML t2 t3)
 syntaxHighlightedCode codetext =
-  [ HH.pre 
-    [ HP.class_ $ HH.ClassName "language-purescript" ]  
+  [ HH.pre
+    [ HP.class_ $ HH.ClassName "language-haskell" ]  -- Using Haskell syntax for PureScript
     [ HH.code_ [ RH.render_ $ highlightString_ codetext ] ]
   ]
 

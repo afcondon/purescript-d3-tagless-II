@@ -6,6 +6,6 @@ export function highlightBlock_(selector) {
 }
 
 export function highlightString_(codetext) {
-  const highlightedCode = Prism.highlight(codetext, Prism.languages.purescript, 'purescript');
+  const highlightedCode = Prism.highlight(codetext, Prism.languages.haskell, 'haskell');
   return highlightedCode
 }

@@ -47,11 +47,11 @@ renderCell _ (PreRendered html) = html
 
 renderCell state (RenderWithState fn) = fn state
 
-substituteSnippetCells :: forall w i m state state'. Bind m => MonadAff m => MonadState state m => 
+substituteSnippetCells :: forall w i m state state'. Bind m => MonadAff m => MonadState state m =>
   Cell state' w i -> m (Cell state' w i)
 substituteSnippetCells (SnippetFile snippet) = do -- TODO check extension to get language setting
     snippetText <- H.liftAff $ readSnippetFiles snippet
-    pure $ Snippet { file: snippet, text: snippetText, language: "language-purescript" } -- REVIEW lang is hardwired here
+    pure $ Snippet { file: snippet, text: snippetText, language: "language-haskell" } -- Using Haskell for PureScript syntax
 substituteSnippetCells cell = pure cell -- no change to other cells
 
 readSnippetFiles :: String -> Aff String
