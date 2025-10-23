@@ -12501,7 +12501,7 @@
       "path": "src/lib/Interpreters/String/String.purs"
     },
     {
-      "loc": 121,
+      "loc": 159,
       "path": "src/website/Component/About.purs"
     },
     {
@@ -12625,7 +12625,7 @@
       "path": "src/website/Component/Trees.purs"
     },
     {
-      "loc": 109,
+      "loc": 140,
       "path": "src/website/Component/Tutorial.purs"
     },
     {

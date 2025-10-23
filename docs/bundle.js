@@ -3443,9 +3443,9 @@
   function addEventListener(type) {
     return function(listener) {
       return function(useCapture) {
-        return function(target6) {
+        return function(target7) {
           return function() {
-            return target6.addEventListener(type, listener, useCapture);
+            return target7.addEventListener(type, listener, useCapture);
           };
         };
       };
@@ -3454,9 +3454,9 @@
   function removeEventListener(type) {
     return function(listener) {
       return function(useCapture) {
-        return function(target6) {
+        return function(target7) {
           return function() {
-            return target6.removeEventListener(type, listener, useCapture);
+            return target7.removeEventListener(type, listener, useCapture);
           };
         };
       };
@@ -8718,6 +8718,7 @@
   var li = /* @__PURE__ */ element2("li");
   var li_ = /* @__PURE__ */ li([]);
   var main = /* @__PURE__ */ element2("main");
+  var nav = /* @__PURE__ */ element2("nav");
   var p = /* @__PURE__ */ element2("p");
   var p_ = /* @__PURE__ */ p([]);
   var pre = /* @__PURE__ */ element2("pre");
@@ -8730,6 +8731,7 @@
   var code = /* @__PURE__ */ element2("code");
   var code_ = /* @__PURE__ */ code([]);
   var button = /* @__PURE__ */ element2("button");
+  var aside = /* @__PURE__ */ element2("aside");
   var a = /* @__PURE__ */ element2("a");
 
   // output/Halogen.HTML.Properties/index.js
@@ -8740,7 +8742,9 @@
   var prop1 = /* @__PURE__ */ prop2(isPropBoolean);
   var prop22 = /* @__PURE__ */ prop2(isPropString);
   var prop4 = /* @__PURE__ */ prop2(isPropNumber);
+  var rel4 = /* @__PURE__ */ prop22("rel");
   var step4 = /* @__PURE__ */ prop2(isPropStepValue)("step");
+  var target5 = /* @__PURE__ */ prop22("target");
   var type_17 = function(dictIsProp) {
     return prop2(dictIsProp)("type");
   };
@@ -10637,12 +10641,482 @@
   // output/Affjax.Web/index.js
   var get3 = /* @__PURE__ */ get2(driver);
 
+  // output/PSD3.Types/index.js
+  var About = /* @__PURE__ */ (function() {
+    function About2() {
+    }
+    ;
+    About2.value = new About2();
+    return About2;
+  })();
+  var Tutorial = /* @__PURE__ */ (function() {
+    function Tutorial2() {
+    }
+    ;
+    Tutorial2.value = new Tutorial2();
+    return Tutorial2;
+  })();
+  var Hierarchies = /* @__PURE__ */ (function() {
+    function Hierarchies2() {
+    }
+    ;
+    Hierarchies2.value = new Hierarchies2();
+    return Hierarchies2;
+  })();
+  var Interpreters = /* @__PURE__ */ (function() {
+    function Interpreters2() {
+    }
+    ;
+    Interpreters2.value = new Interpreters2();
+    return Interpreters2;
+  })();
+  var CodeExplorer = /* @__PURE__ */ (function() {
+    function CodeExplorer2() {
+    }
+    ;
+    CodeExplorer2.value = new CodeExplorer2();
+    return CodeExplorer2;
+  })();
+  var NotFound = /* @__PURE__ */ (function() {
+    function NotFound2() {
+    }
+    ;
+    NotFound2.value = new NotFound2();
+    return NotFound2;
+  })();
+
+  // output/Data.Semiring.Free/index.js
+  var append12 = /* @__PURE__ */ append(semigroupList);
+  var bind6 = /* @__PURE__ */ bind(bindList);
+  var pure14 = /* @__PURE__ */ pure(applicativeList);
+  var semiringFree = /* @__PURE__ */ (function() {
+    return {
+      add: function(v) {
+        return function(v1) {
+          return append12(v)(v1);
+        };
+      },
+      zero: Nil.value,
+      mul: function(v) {
+        return function(v1) {
+          return bind6(v)(function(xs) {
+            return bind6(v1)(function(ys) {
+              return pure14(append12(xs)(ys));
+            });
+          });
+        };
+      },
+      one: singleton3(Nil.value)
+    };
+  })();
+  var free = function(a2) {
+    return singleton3(singleton3(a2));
+  };
+
+  // output/Data.Validation.Semiring/index.js
+  var V = function(x8) {
+    return x8;
+  };
+  var validation = function(v) {
+    return function(v1) {
+      return function(v2) {
+        if (v2 instanceof Left) {
+          return v(v2.value0);
+        }
+        ;
+        if (v2 instanceof Right) {
+          return v1(v2.value0);
+        }
+        ;
+        throw new Error("Failed pattern match at Data.Validation.Semiring (line 49, column 1 - line 49, column 84): " + [v.constructor.name, v1.constructor.name, v2.constructor.name]);
+      };
+    };
+  };
+  var invalid = function($113) {
+    return V(Left.create($113));
+  };
+  var functorV = functorEither;
+  var applyV = function(dictSemiring) {
+    var mul3 = mul(dictSemiring);
+    return {
+      apply: function(v) {
+        return function(v1) {
+          if (v instanceof Left && v1 instanceof Left) {
+            return new Left(mul3(v.value0)(v1.value0));
+          }
+          ;
+          if (v instanceof Left) {
+            return new Left(v.value0);
+          }
+          ;
+          if (v1 instanceof Left) {
+            return new Left(v1.value0);
+          }
+          ;
+          if (v instanceof Right && v1 instanceof Right) {
+            return new Right(v.value0(v1.value0));
+          }
+          ;
+          throw new Error("Failed pattern match at Data.Validation.Semiring (line 90, column 1 - line 94, column 54): " + [v.constructor.name, v1.constructor.name]);
+        };
+      },
+      Functor0: function() {
+        return functorV;
+      }
+    };
+  };
+  var applicativeV = function(dictSemiring) {
+    var applyV1 = applyV(dictSemiring);
+    return {
+      pure: function($121) {
+        return V(Right.create($121));
+      },
+      Apply0: function() {
+        return applyV1;
+      }
+    };
+  };
+  var altV = function(dictSemiring) {
+    var add2 = add(dictSemiring);
+    return {
+      alt: function(v) {
+        return function(v1) {
+          if (v instanceof Left && v1 instanceof Left) {
+            return new Left(add2(v.value0)(v1.value0));
+          }
+          ;
+          if (v instanceof Left) {
+            return v1;
+          }
+          ;
+          if (v instanceof Right) {
+            return new Right(v.value0);
+          }
+          ;
+          throw new Error("Failed pattern match at Data.Validation.Semiring (line 105, column 1 - line 108, column 36): " + [v.constructor.name, v1.constructor.name]);
+        };
+      },
+      Functor0: function() {
+        return functorV;
+      }
+    };
+  };
+
+  // output/Routing.Match.Error/index.js
+  var UnexpectedPath = /* @__PURE__ */ (function() {
+    function UnexpectedPath2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    UnexpectedPath2.create = function(value0) {
+      return new UnexpectedPath2(value0);
+    };
+    return UnexpectedPath2;
+  })();
+  var ExpectedBoolean = /* @__PURE__ */ (function() {
+    function ExpectedBoolean2() {
+    }
+    ;
+    ExpectedBoolean2.value = new ExpectedBoolean2();
+    return ExpectedBoolean2;
+  })();
+  var ExpectedEnd = /* @__PURE__ */ (function() {
+    function ExpectedEnd2() {
+    }
+    ;
+    ExpectedEnd2.value = new ExpectedEnd2();
+    return ExpectedEnd2;
+  })();
+  var ExpectedNumber = /* @__PURE__ */ (function() {
+    function ExpectedNumber2() {
+    }
+    ;
+    ExpectedNumber2.value = new ExpectedNumber2();
+    return ExpectedNumber2;
+  })();
+  var ExpectedInt = /* @__PURE__ */ (function() {
+    function ExpectedInt2() {
+    }
+    ;
+    ExpectedInt2.value = new ExpectedInt2();
+    return ExpectedInt2;
+  })();
+  var ExpectedString = /* @__PURE__ */ (function() {
+    function ExpectedString2() {
+    }
+    ;
+    ExpectedString2.value = new ExpectedString2();
+    return ExpectedString2;
+  })();
+  var ExpectedQuery = /* @__PURE__ */ (function() {
+    function ExpectedQuery2() {
+    }
+    ;
+    ExpectedQuery2.value = new ExpectedQuery2();
+    return ExpectedQuery2;
+  })();
+  var ExpectedPathPart = /* @__PURE__ */ (function() {
+    function ExpectedPathPart2() {
+    }
+    ;
+    ExpectedPathPart2.value = new ExpectedPathPart2();
+    return ExpectedPathPart2;
+  })();
+  var KeyNotFound = /* @__PURE__ */ (function() {
+    function KeyNotFound2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    KeyNotFound2.create = function(value0) {
+      return new KeyNotFound2(value0);
+    };
+    return KeyNotFound2;
+  })();
+  var Fail = /* @__PURE__ */ (function() {
+    function Fail2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Fail2.create = function(value0) {
+      return new Fail2(value0);
+    };
+    return Fail2;
+  })();
+  var showMatchError = function(err) {
+    if (err instanceof UnexpectedPath) {
+      return "expected path part: " + err.value0;
+    }
+    ;
+    if (err instanceof KeyNotFound) {
+      return "key: " + (err.value0 + " has not found in query part");
+    }
+    ;
+    if (err instanceof ExpectedQuery) {
+      return "expected query - found path";
+    }
+    ;
+    if (err instanceof ExpectedNumber) {
+      return "expected number";
+    }
+    ;
+    if (err instanceof ExpectedInt) {
+      return "expected int";
+    }
+    ;
+    if (err instanceof ExpectedBoolean) {
+      return "expected boolean";
+    }
+    ;
+    if (err instanceof ExpectedEnd) {
+      return "expected end";
+    }
+    ;
+    if (err instanceof ExpectedString) {
+      return "expected string var";
+    }
+    ;
+    if (err instanceof ExpectedPathPart) {
+      return "expected path part, found query";
+    }
+    ;
+    if (err instanceof Fail) {
+      return "match error: " + err.value0;
+    }
+    ;
+    throw new Error("Failed pattern match at Routing.Match.Error (line 19, column 3 - line 29, column 39): " + [err.constructor.name]);
+  };
+
+  // output/Routing.Types/index.js
+  var Path = /* @__PURE__ */ (function() {
+    function Path3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Path3.create = function(value0) {
+      return new Path3(value0);
+    };
+    return Path3;
+  })();
+  var Query2 = /* @__PURE__ */ (function() {
+    function Query3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Query3.create = function(value0) {
+      return new Query3(value0);
+    };
+    return Query3;
+  })();
+
+  // output/Routing.Match/index.js
+  var pure15 = /* @__PURE__ */ pure(/* @__PURE__ */ applicativeV(semiringFree));
+  var foldl3 = /* @__PURE__ */ foldl(foldableList);
+  var bind7 = /* @__PURE__ */ bind(bindList);
+  var map27 = /* @__PURE__ */ map(functorList);
+  var unwrap6 = /* @__PURE__ */ unwrap();
+  var pure16 = /* @__PURE__ */ pure(applicativeList);
+  var mul2 = /* @__PURE__ */ mul(semiringFree);
+  var identity13 = /* @__PURE__ */ identity(categoryFn);
+  var one2 = /* @__PURE__ */ one(semiringFree);
+  var alt6 = /* @__PURE__ */ alt(/* @__PURE__ */ altV(semiringFree));
+  var runMatch = function(v) {
+    return function(route) {
+      var foldErrors = function(errs) {
+        return new Left(foldl3(function(b2) {
+          return function(a2) {
+            return a2 + ("\n" + b2);
+          };
+        })("")(bind7(map27(reverse)(unwrap6(errs)))(function(es) {
+          return pure16(foldl3(function(b2) {
+            return function(a2) {
+              return a2 + (";" + b2);
+            };
+          })("")(map27(showMatchError)(es)));
+        })));
+      };
+      return validation(foldErrors)(function($109) {
+        return Right.create(snd($109));
+      })(v(route));
+    };
+  };
+  var matchFunctor = {
+    map: function(fn) {
+      return function(v) {
+        return function(r) {
+          return validation(invalid)(function(v1) {
+            return pure15(new Tuple(v1.value0, fn(v1.value1)));
+          })(v(r));
+        };
+      };
+    }
+  };
+  var matchApply = {
+    apply: function(v) {
+      return function(v1) {
+        var processFnRes = function(v2) {
+          return validation(invalid)(function(v3) {
+            return pure15(new Tuple(v3.value0, v2.value1(v3.value1)));
+          })(v1(v2.value0));
+        };
+        var processFnErr = function(r) {
+          return function(err) {
+            return invalid(mul2(err)(validation(identity13)($$const(one2))(v1(r))));
+          };
+        };
+        return function(r) {
+          return validation(processFnErr(r))(processFnRes)(v(r));
+        };
+      };
+    },
+    Functor0: function() {
+      return matchFunctor;
+    }
+  };
+  var matchApplicative = {
+    pure: function(a2) {
+      return function(r) {
+        return pure15(new Tuple(r, a2));
+      };
+    },
+    Apply0: function() {
+      return matchApply;
+    }
+  };
+  var matchAlt = {
+    alt: function(v) {
+      return function(v1) {
+        return function(r) {
+          return alt6(v(r))(v1(r));
+        };
+      };
+    },
+    Functor0: function() {
+      return matchFunctor;
+    }
+  };
+  var lit = function(input3) {
+    return function(route) {
+      if (route instanceof Cons && (route.value0 instanceof Path && route.value0.value0 === input3)) {
+        return pure15(new Tuple(route.value1, unit));
+      }
+      ;
+      if (route instanceof Cons && route.value0 instanceof Path) {
+        return invalid(free(new UnexpectedPath(input3)));
+      }
+      ;
+      return invalid(free(ExpectedPathPart.value));
+    };
+  };
+  var root = /* @__PURE__ */ lit("");
+  var end = function(route) {
+    if (route instanceof Nil) {
+      return pure15(new Tuple(Nil.value, unit));
+    }
+    ;
+    return invalid(free(ExpectedEnd.value));
+  };
+
+  // output/PSD3.RoutingDSL/index.js
+  var applyFirst2 = /* @__PURE__ */ applyFirst(matchApply);
+  var voidRight2 = /* @__PURE__ */ voidRight(matchFunctor);
+  var alt7 = /* @__PURE__ */ alt(matchAlt);
+  var tutorial = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(Tutorial.value)(lit("tutorial")))(end);
+  })();
+  var routeToPath = function(v) {
+    if (v instanceof About) {
+      return "/about";
+    }
+    ;
+    if (v instanceof Tutorial) {
+      return "/tutorial";
+    }
+    ;
+    if (v instanceof Hierarchies) {
+      return "/hierarchies";
+    }
+    ;
+    if (v instanceof Interpreters) {
+      return "/interpreters";
+    }
+    ;
+    if (v instanceof CodeExplorer) {
+      return "/code-explorer";
+    }
+    ;
+    if (v instanceof NotFound) {
+      return "/not-found";
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.RoutingDSL (line 59, column 1 - line 59, column 31): " + [v.constructor.name]);
+  };
+  var rootRedirect = /* @__PURE__ */ (function() {
+    return voidRight2(About.value)(end);
+  })();
+  var notFound = /* @__PURE__ */ (function() {
+    return pure(matchApplicative)(NotFound.value);
+  })();
+  var interpreters = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(Interpreters.value)(lit("interpreters")))(end);
+  })();
+  var hierarchies = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(Hierarchies.value)(lit("hierarchies")))(end);
+  })();
+  var codeExplorer = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(CodeExplorer.value)(lit("code-explorer")))(end);
+  })();
+  var about = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(About.value)(lit("about")))(end);
+  })();
+  var routes = /* @__PURE__ */ alt7(tutorial)(/* @__PURE__ */ alt7(hierarchies)(/* @__PURE__ */ alt7(interpreters)(/* @__PURE__ */ alt7(codeExplorer)(/* @__PURE__ */ alt7(about)(/* @__PURE__ */ alt7(rootRedirect)(notFound))))));
+  var routing = /* @__PURE__ */ applySecond(matchApply)(root)(routes);
+
   // output/PSD3.About/index.js
   var prop3 = /* @__PURE__ */ prop2(isPropString);
   var discard6 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_3 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var bind6 = /* @__PURE__ */ bind(bindHalogenM);
-  var pure14 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var bind8 = /* @__PURE__ */ bind(bindHalogenM);
+  var pure17 = /* @__PURE__ */ pure(applicativeHalogenM);
   var Initialize2 = /* @__PURE__ */ (function() {
     function Initialize9() {
     }
@@ -10675,7 +11149,7 @@
       }
       ;
       throw new Error("Failed pattern match at PSD3.About (line 55, column 7 - line 62, column 30): " + [state3.toc.constructor.name]);
-    })(), div2([classes(["about-page__container", "editorial"])])([div2([classes(["about-page__header"])])([]), div2([classes(["about-page__content"])])([(function() {
+    })(), div2([classes(["about-page__nav-panel"])])([h3([classes(["about-page__nav-title"])])([text5("Explore")]), nav([classes(["about-page__nav-links"])])([a([href4("#" + routeToPath(Tutorial.value)), classes(["about-page__nav-link"])])([text5("Tutorial \u2192")]), a([href4("#" + routeToPath(Hierarchies.value)), classes(["about-page__nav-link"])])([text5("Hierarchies \u2192")]), a([href4("#" + routeToPath(Interpreters.value)), classes(["about-page__nav-link"])])([text5("Interpreters \u2192")]), a([href4("#" + routeToPath(CodeExplorer.value)), classes(["about-page__nav-link"])])([text5("Code Explorer \u2192")]), a([href4("https://github.com/afcondon/purescript-d3-tagless"), target5("_blank"), rel4("noopener noreferrer"), classes(["about-page__nav-link", "about-page__nav-link--external"])])([text5("GitHub \u2197")])])]), div2([classes(["about-page__container", "editorial"])])([div2([classes(["about-page__header"])])([]), div2([classes(["about-page__content"])])([(function() {
       if (state3.content instanceof Nothing) {
         if (state3.loading) {
           return div2([classes(["about-page__loading"])])([text5("Loading...")]);
@@ -10689,14 +11163,14 @@
           return text5("");
         }
         ;
-        throw new Error("Failed pattern match at PSD3.About (line 78, column 26 - line 82, column 44): " + [state3.error.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.About (line 116, column 26 - line 120, column 44): " + [state3.error.constructor.name]);
       }
       ;
       if (state3.content instanceof Just) {
         return div2([classes(["about-page__markdown"]), prop3("innerHTML")(state3.content.value0)])([]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.About (line 72, column 15 - line 89, column 23): " + [state3.content.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.About (line 110, column 15 - line 127, column 23): " + [state3.content.constructor.name]);
     })()])])]);
   };
   var initialState = /* @__PURE__ */ (function() {
@@ -10730,7 +11204,7 @@
           $26.error = Nothing.value;
           return $26;
         }))(function() {
-          return bind6(liftAff2(get3(string)("about-content.html")))(function(result) {
+          return bind8(liftAff2(get3(string)("about-content.html")))(function(result) {
             if (result instanceof Left) {
               return modify_3(function(v1) {
                 var $30 = {};
@@ -10764,15 +11238,15 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at PSD3.About (line 103, column 5 - line 114, column 12): " + [result.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.About (line 141, column 5 - line 152, column 12): " + [result.constructor.name]);
           });
         });
       }
       ;
       if (v instanceof LoadTOC) {
-        return bind6(liftAff2(get3(string)("about-toc.html")))(function(result) {
+        return bind8(liftAff2(get3(string)("about-toc.html")))(function(result) {
           if (result instanceof Left) {
-            return pure14(unit);
+            return pure17(unit);
           }
           ;
           if (result instanceof Right) {
@@ -10790,11 +11264,11 @@
             });
           }
           ;
-          throw new Error("Failed pattern match at PSD3.About (line 118, column 5 - line 121, column 49): " + [result.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.About (line 156, column 5 - line 159, column 49): " + [result.constructor.name]);
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.About (line 95, column 16 - line 121, column 49): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.About (line 133, column 16 - line 159, column 49): " + [v.constructor.name]);
     };
   };
   var component = function(dictMonadAff) {
@@ -11031,7 +11505,7 @@
     Text3.value = new Text3();
     return Text3;
   })();
-  var Path = /* @__PURE__ */ (function() {
+  var Path2 = /* @__PURE__ */ (function() {
     function Path3() {
     }
     ;
@@ -11103,7 +11577,7 @@
         return "text";
       }
       ;
-      if (v instanceof Path) {
+      if (v instanceof Path2) {
         return "path";
       }
       ;
@@ -11568,7 +12042,7 @@
 
   // output/D3.Data.Tree/index.js
   var lookup6 = /* @__PURE__ */ lookup(ordInt);
-  var map27 = /* @__PURE__ */ map(functorArray);
+  var map28 = /* @__PURE__ */ map(functorArray);
   var fromFoldable4 = /* @__PURE__ */ fromFoldable3(foldableList);
   var TidyTree = /* @__PURE__ */ (function() {
     function TidyTree2() {
@@ -11618,7 +12092,7 @@
             return idTreeLeaf_(v1.value0);
           }
           ;
-          return idTreeParent_(v1.value0)(map27(go2)(fromFoldable4(v.value1)));
+          return idTreeParent_(v1.value0)(map28(go2)(fromFoldable4(v.value1)));
         }
         ;
         throw new Error("Failed pattern match at D3.Data.Tree (line 49, column 7 - line 53, column 84): " + [v1.constructor.name]);
@@ -11880,9 +12354,9 @@
   // output/D3.Attributes.Sugar/index.js
   var toAttr2 = /* @__PURE__ */ toAttr(toAttrString);
   var intercalate4 = /* @__PURE__ */ intercalate3(monoidString);
-  var map28 = /* @__PURE__ */ map(functorArray);
+  var map29 = /* @__PURE__ */ map(functorArray);
   var show5 = /* @__PURE__ */ show(showNumber);
-  var append12 = /* @__PURE__ */ append(semigroupArray);
+  var append13 = /* @__PURE__ */ append(semigroupArray);
   var y2 = function(dictToAttr) {
     var $109 = AttributeSetter.create("y2");
     var $110 = toAttr(dictToAttr);
@@ -11936,7 +12410,7 @@
     return function(yo) {
       return function(w) {
         return function(h) {
-          var vb = intercalate4(" ")(map28(show5)([xo, yo, w, h]));
+          var vb = intercalate4(" ")(map29(show5)([xo, yo, w, h]));
           return AttrT.create(AttributeSetter.create("viewBox")(toAttr2(vb)));
         };
       };
@@ -11955,7 +12429,7 @@
       }
       ;
       if (v instanceof TransitionT) {
-        return [new TransitionT(append12(v.value0)(v1), v.value1)];
+        return [new TransitionT(append13(v.value0)(v1), v.value1)];
       }
       ;
       return cons3(v)(v1);
@@ -12232,7 +12706,7 @@
   };
 
   // output/Data.Lens.Prism/index.js
-  var identity13 = /* @__PURE__ */ identity(categoryFn);
+  var identity14 = /* @__PURE__ */ identity(categoryFn);
   var prism = function(to2) {
     return function(fro) {
       return function(dictChoice) {
@@ -12241,7 +12715,7 @@
         var right2 = right(dictChoice);
         var rmap4 = rmap(Profunctor0);
         return function(pab) {
-          return dimap2(fro)(either(identity13)(identity13))(right2(rmap4(to2)(pab)));
+          return dimap2(fro)(either(identity14)(identity14))(right2(rmap4(to2)(pab)));
         };
       };
     };
@@ -12254,12 +12728,12 @@
 
   // output/Data.Set/index.js
   var foldMap2 = /* @__PURE__ */ foldMap(foldableList);
-  var foldl3 = /* @__PURE__ */ foldl(foldableList);
+  var foldl4 = /* @__PURE__ */ foldl(foldableList);
   var foldr4 = /* @__PURE__ */ foldr(foldableList);
   var fromFoldable1 = /* @__PURE__ */ fromFoldable3(foldableList);
   var unsafeIndex2 = /* @__PURE__ */ unsafeIndex();
-  var bind7 = /* @__PURE__ */ bind(bindST);
-  var pure15 = /* @__PURE__ */ pure(applicativeST);
+  var bind9 = /* @__PURE__ */ bind(bindST);
+  var pure18 = /* @__PURE__ */ pure(applicativeST);
   var tailRecM22 = /* @__PURE__ */ tailRecM2(monadRecST);
   var $$Set = function(x8) {
     return x8;
@@ -12296,7 +12770,7 @@
     },
     foldl: function(f) {
       return function(x8) {
-        var $131 = foldl3(f)(x8);
+        var $131 = foldl4(f)(x8);
         return function($132) {
           return $131(toList2($132));
         };
@@ -12353,14 +12827,14 @@
                 }
                 ;
                 if (v instanceof LT) {
-                  return pure15(new Loop({
+                  return pure18(new Loop({
                     a: l + 1 | 0,
                     b: r
                   }));
                 }
                 ;
                 if (v instanceof GT) {
-                  return pure15(new Loop({
+                  return pure18(new Loop({
                     a: l,
                     b: r + 1 | 0
                   }));
@@ -12369,12 +12843,12 @@
                 throw new Error("Failed pattern match at Data.Set (line 184, column 12 - line 189, column 43): " + [v.constructor.name]);
               }
               ;
-              return pure15(new Done(acc));
+              return pure18(new Done(acc));
             };
           };
           return tailRecM22(go2)(0)(0);
         };
-        return fromFoldable32(bind7(bind7(newSTArray)(intersect2))(unsafeFreeze)());
+        return fromFoldable32(bind9(bind9(newSTArray)(intersect2))(unsafeFreeze)());
       };
     };
   };
@@ -12390,7 +12864,7 @@
     var delete1 = $$delete5(dictOrd);
     return function(s1) {
       return function(s2) {
-        return foldl3(flip(delete1))(s1)(toList2(s2));
+        return foldl4(flip(delete1))(s1)(toList2(s2));
       };
     };
   };
@@ -12424,10 +12898,10 @@
   };
 
   // output/Data.Lens.Getter/index.js
-  var unwrap6 = /* @__PURE__ */ unwrap();
-  var identity14 = /* @__PURE__ */ identity(categoryFn);
+  var unwrap7 = /* @__PURE__ */ unwrap();
+  var identity15 = /* @__PURE__ */ identity(categoryFn);
   var view = function(l) {
-    return unwrap6(l(identity14));
+    return unwrap7(l(identity15));
   };
   var viewOn = function(s) {
     return function(l) {
@@ -13002,7 +13476,7 @@
   }
 
   // output/Utility/index.js
-  var map29 = /* @__PURE__ */ map(functorNonEmptyArray);
+  var map30 = /* @__PURE__ */ map(functorNonEmptyArray);
   var getWindowWidthHeight = function __do2() {
     var win = windowImpl();
     var w = innerWidth(win)();
@@ -13027,18 +13501,18 @@
   };
   var chunk = function(tuples) {
     var $$package = snd(head5(tuples));
-    var contains3 = toArray2(map29(fst)(tuples));
+    var contains3 = toArray2(map30(fst)(tuples));
     return new Tuple($$package, contains3);
   };
 
   // output/D3.Viz.Spago.Files/index.js
   var append6 = /* @__PURE__ */ append(semigroupArray);
-  var map30 = /* @__PURE__ */ map(functorArray);
+  var map31 = /* @__PURE__ */ map(functorArray);
   var fromFoldableWith2 = /* @__PURE__ */ fromFoldableWith(ordString)(foldableArray);
   var lookup7 = /* @__PURE__ */ lookup(ordString);
   var fromFoldable6 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
   var mapFlipped3 = /* @__PURE__ */ mapFlipped(functorArray);
-  var bind8 = /* @__PURE__ */ bind(bindMaybe);
+  var bind10 = /* @__PURE__ */ bind(bindMaybe);
   var sum2 = /* @__PURE__ */ sum(foldableArray)(semiringNumber);
   var equalSnd2 = /* @__PURE__ */ equalSnd(eqString);
   var compareSnd2 = /* @__PURE__ */ compareSnd(ordString);
@@ -13172,9 +13646,9 @@
     return eq22(v.linktype)(M2M_Graph.value);
   };
   var getGraphJSONData = function(v) {
-    var names = append6(map30(function(v1) {
+    var names = append6(map31(function(v1) {
       return v1.key;
-    })(v.modules))(map30(function(v1) {
+    })(v.modules))(map31(function(v1) {
       return v1.key;
     })(v.packages));
     var makeModuleToPackageLink = function(m) {
@@ -13215,7 +13689,7 @@
         nodetype: new IsModule(m.path),
         inSim: true,
         links: {
-          targets: map30(getId)(m.depends),
+          targets: map31(getId)(m.depends),
           sources: [],
           treeChildren: [],
           inPackage: [],
@@ -13236,11 +13710,11 @@
         var makeTuple = function(s) {
           return new Tuple(id4, getId(s));
         };
-        return append6(map30(makeTuple)(a2.depends))(b2);
+        return append6(map31(makeTuple)(a2.depends))(b2);
       };
     };
-    var moduleLinks = map30(makeLink(M2M_Graph.value))(foldl2(foldDepends)([])(v.modules));
-    var packageLinks = map30(makeLink(P2P.value))(foldl2(foldDepends)([])(v.packages));
+    var moduleLinks = map31(makeLink(M2M_Graph.value))(foldl2(foldDepends)([])(v.modules));
+    var packageLinks = map31(makeLink(P2P.value))(foldl2(foldDepends)([])(v.packages));
     var depsMap = fromFoldable6(mapFlipped3(v.lsDeps)(function(d2) {
       return new Tuple(d2.packageName, {
         version: d2.version,
@@ -13262,12 +13736,12 @@
         containerName: p2.key,
         loc: p2.loc,
         links: {
-          targets: map30(getId)(p2.depends),
+          targets: map31(getId)(p2.depends),
           sources: [],
           treeChildren: [],
           inPackage: [],
           outPackage: [],
-          contains: map30(getId)(p2.contains)
+          contains: map31(getId)(p2.contains)
         },
         connected: true,
         showChildren: true,
@@ -13280,8 +13754,8 @@
     var addPackageInfo = function(v1) {
       var packageName = (function() {
         var pieces = split("/")(v1.path);
-        return bind8(index2(pieces)(0))(function(root2) {
-          return bind8(index2(pieces)(1))(function(packageString) {
+        return bind10(index2(pieces)(0))(function(root2) {
+          return bind10(index2(pieces)(1))(function(packageString) {
             if (root2 === ".spago") {
               var $63 = packageString === "p";
               if ($63) {
@@ -13308,22 +13782,22 @@
         "package": $$package
       };
     };
-    var modulesPL = map30(addPackageInfo)(v.modules);
-    var mapNamesToModules = fromFoldable6(map30(function(m) {
+    var modulesPL = map31(addPackageInfo)(v.modules);
+    var mapNamesToModules = fromFoldable6(map31(function(m) {
       return new Tuple(m.key, m);
     })(modulesPL));
     var maybeModules = function(ms) {
-      return catMaybes(map30(function(k) {
+      return catMaybes(map31(function(k) {
         return lookup7(k)(mapNamesToModules);
       })(ms));
     };
     var rollUpLOC = function(ms) {
-      return sum2(map30(function(v1) {
+      return sum2(map31(function(v1) {
         return v1.loc;
       })(maybeModules(ms)));
     };
-    var moduleNodes = map30(makeNodeFromModuleJSONPL)(modulesPL);
-    var modulePackageLinks = map30(makeModuleToPackageLink)(moduleNodes);
+    var moduleNodes = map31(makeNodeFromModuleJSONPL)(modulesPL);
+    var modulePackageLinks = map31(makeModuleToPackageLink)(moduleNodes);
     var links = append6(moduleLinks)(append6(packageLinks)(modulePackageLinks));
     var getSourceLinks = function(v1) {
       var sources = foldl2(function(acc) {
@@ -13338,12 +13812,12 @@
       })([])(links);
       return new Tuple(v1.id, sources);
     };
-    var modulePackageTuples = map30(function(m) {
+    var modulePackageTuples = map31(function(m) {
       return new Tuple(m.key, m["package"]);
     })(modulesPL);
-    var packageContains = map30(chunk)(groupBy(equalSnd2)(sortBy(compareSnd2)(modulePackageTuples)));
+    var packageContains = map31(chunk)(groupBy(equalSnd2)(sortBy(compareSnd2)(modulePackageTuples)));
     var packageContainsMap = fromFoldable6(packageContains);
-    var packageLOC = map30(function(v1) {
+    var packageLOC = map31(function(v1) {
       return new Tuple(v1.value0, rollUpLOC(v1.value1));
     })(packageContains);
     var packageLOCMap = fromFoldable6(packageLOC);
@@ -13362,15 +13836,15 @@
         contains: fromMaybe([])(lookup7(v1.key)(packageContainsMap))
       };
     };
-    var packagesCL = map30(function($86) {
+    var packagesCL = map31(function($86) {
       return addRollUpLOC(addContains($86));
     })(v.packages);
-    var packageNodes = map30(makeNodeFromPackageJSONCL)(packagesCL);
+    var packageNodes = map31(makeNodeFromPackageJSONCL)(packagesCL);
     var nodes = append6(moduleNodes)(packageNodes);
     var id2Node = fromFoldable12(mapFlipped3(nodes)(function(node) {
       return new Tuple(node.id, node);
     }));
-    var sourceLinksMap = fromFoldable12(map30(getSourceLinks)(nodes));
+    var sourceLinksMap = fromFoldable12(map31(getSourceLinks)(nodes));
     return {
       links,
       nodes,
@@ -13413,13 +13887,13 @@
 
   // output/D3.Viz.Spago.Model/index.js
   var lookup9 = /* @__PURE__ */ lookup(ordInt);
-  var map31 = /* @__PURE__ */ map(functorArray);
+  var map32 = /* @__PURE__ */ map(functorArray);
   var append7 = /* @__PURE__ */ append(semigroupArray);
   var fromFoldable8 = /* @__PURE__ */ fromFoldable(foldableArray);
   var insert8 = /* @__PURE__ */ insert(ordInt);
   var mapFlipped4 = /* @__PURE__ */ mapFlipped(functorArray);
   var show6 = /* @__PURE__ */ show(showLinkType);
-  var append13 = /* @__PURE__ */ append(semigroupString);
+  var append14 = /* @__PURE__ */ append(semigroupString);
   var fromFoldable13 = /* @__PURE__ */ fromFoldable2(ordInt)(foldableArray);
   var foldlWithIndex2 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
   var show12 = /* @__PURE__ */ show(showInt);
@@ -13501,7 +13975,7 @@
         fy: nullImpl
       };
     };
-    return map31(unpin2)(nodes);
+    return map32(unpin2)(nodes);
   };
   var setTreeXYIncludingLeaves = function(v) {
     return function(v1) {
@@ -13622,7 +14096,7 @@
       })(unboxD3SimLink($200)));
     },
     linkClass2: /* @__PURE__ */ (function() {
-      var $201 = append13("updated ");
+      var $201 = append14("updated ");
       return function($202) {
         return $201(show6((function(v) {
           return v.linktype;
@@ -13698,7 +14172,7 @@
       };
     };
     var partitioned = partition(isUsedModule)(nodes);
-    return append7(partitioned.no)(map31(setXYtoTreeXY)(partitioned.yes));
+    return append7(partitioned.no)(map32(setXYtoTreeXY)(partitioned.yes));
   };
   var isPackageOrVisibleModule = function(id4) {
     return function(v) {
@@ -13802,7 +14276,7 @@
       ;
       throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 283, column 7 - line 288, column 76): " + [v1.constructor.name]);
     };
-    var modulesWithGrid = map31(setModuleGridXY)(partitioned.no);
+    var modulesWithGrid = map32(setModuleGridXY)(partitioned.no);
     return append7(modulesWithGrid)(partitioned.yes);
   };
   var packageNodesToGridXY = function(nodes) {
@@ -13935,7 +14409,7 @@
           ;
           return v;
         };
-        return map31(fixNamedNode$prime)(nodes);
+        return map32(fixNamedNode$prime)(nodes);
       };
     };
   };
@@ -14756,7 +15230,7 @@
 
   // output/D3.Selection.Functions/index.js
   var spy2 = /* @__PURE__ */ spy();
-  var foldl4 = /* @__PURE__ */ foldl(foldableArray);
+  var foldl5 = /* @__PURE__ */ foldl(foldableArray);
   var show8 = /* @__PURE__ */ show(showElement);
   var discard8 = /* @__PURE__ */ discard(discardUnit);
   var selectionUpdateJoin = function(dictSelectionM) {
@@ -14835,7 +15309,7 @@
     var pure30 = pure(dictSelectionM.Monad0().Applicative0());
     return function(selection_) {
       return function(attributes) {
-        var v = foldl4(applySelectionAttributeD3)(selection_)(attributes);
+        var v = foldl5(applySelectionAttributeD3)(selection_)(attributes);
         return pure30(unit);
       };
     };
@@ -14901,7 +15375,7 @@
   var _name2 = /* @__PURE__ */ _name(strongForget);
   var fromFoldable9 = /* @__PURE__ */ fromFoldable2(ordString);
   var elem3 = /* @__PURE__ */ elem2(eqString);
-  var unwrap7 = /* @__PURE__ */ unwrap();
+  var unwrap8 = /* @__PURE__ */ unwrap();
   var map113 = /* @__PURE__ */ map(functorArray);
   var showType = function(v) {
     if (v instanceof LinkForce) {
@@ -15173,9 +15647,9 @@
   };
   var updateForceInSimulation = function(simulation) {
     return function(force2) {
-      var f = unwrap7(force2);
+      var f = unwrap8(force2);
       var v = map113(function(a2) {
-        return setForceAttr(f.force_)(f.filter)(unwrap7(a2));
+        return setForceAttr(f.force_)(f.filter)(unwrap8(a2));
       })(f.attributes);
       if (f.status instanceof ForceActive) {
         return putForceInSimulation(force2)(simulation);
@@ -15202,7 +15676,7 @@
   var discard9 = /* @__PURE__ */ discard(discardUnit);
   var _forceLibrary2 = /* @__PURE__ */ _forceLibrary(strongFn);
   var _forceLibrary1 = /* @__PURE__ */ _forceLibrary(strongForget);
-  var map32 = /* @__PURE__ */ map(functorMap);
+  var map33 = /* @__PURE__ */ map(functorMap);
   var _d3Simulation2 = /* @__PURE__ */ _d3Simulation(strongFn);
   var _alpha2 = /* @__PURE__ */ _alpha(strongFn);
   var _alphaTarget2 = /* @__PURE__ */ _alphaTarget(strongFn);
@@ -15437,7 +15911,7 @@
     return function(labels9) {
       return bind22(use2(_handle2))(function(handle) {
         return bind22(use2(_forceLibrary1))(function(forces) {
-          return modifying3(_forceLibrary2)($$const(map32(enableByLabels(handle)(labels9))(forces)));
+          return modifying3(_forceLibrary2)($$const(map33(enableByLabels(handle)(labels9))(forces)));
         });
       });
     };
@@ -15449,7 +15923,7 @@
     return function(labels9) {
       return bind22(use2(_handle2))(function(handle) {
         return bind22(use2(_forceLibrary1))(function(forces) {
-          return modifying3(_forceLibrary2)($$const(map32(disableByLabels(handle)(labels9))(forces)));
+          return modifying3(_forceLibrary2)($$const(map33(disableByLabels(handle)(labels9))(forces)));
         });
       });
     };
@@ -15474,7 +15948,7 @@
           return discard19(simulationEnableForcesByLabel1(enableLabels))(function() {
             return discard19(simulationDisableForcesByLabel1(disableLabels))(function() {
               return bind22(use2(_forceLibrary1))(function(updatedLibrary) {
-                var v2 = map32(updateForceInSimulation(handle))(updatedLibrary);
+                var v2 = map33(updateForceInSimulation(handle))(updatedLibrary);
                 return pure30(unit);
               });
             });
@@ -15583,9 +16057,9 @@
   var bindD3SimM = /* @__PURE__ */ bindStateT(monadEffect);
   var simulationSetNodesFromSelection2 = /* @__PURE__ */ simulationSetNodesFromSelection(bindD3SimM)(monadStateD3SimM);
   var simulationSetLinksFromSelection2 = /* @__PURE__ */ simulationSetLinksFromSelection(bindD3SimM)(monadStateD3SimM);
-  var bind9 = /* @__PURE__ */ bind(bindD3SimM);
+  var bind11 = /* @__PURE__ */ bind(bindD3SimM);
   var applicativeD3SimM = /* @__PURE__ */ applicativeStateT(monadEffect);
-  var pure16 = /* @__PURE__ */ pure(applicativeD3SimM);
+  var pure19 = /* @__PURE__ */ pure(applicativeD3SimM);
   var simulationMD3Selection_D3 = {
     start: /* @__PURE__ */ simulationStart(monadStateD3SimM),
     stop: /* @__PURE__ */ simulationStop(monadStateD3SimM),
@@ -15612,17 +16086,17 @@
     addTickFunction: function(v) {
       return function(v1) {
         if (v1 instanceof StepTransformFFI) {
-          return pure16(unit);
+          return pure19(unit);
         }
         ;
         if (v1 instanceof Step3) {
-          return bind9(simulationHandle(simulationMD3Selection_D3))(function(handle) {
+          return bind11(simulationHandle(simulationMD3Selection_D3))(function(handle) {
             var makeTick = function(v22) {
               var v3 = mapFlipped5(v1.value1)(applySelectionAttributeD3(v1.value0));
               return unit;
             };
             var v2 = onTick_(handle)(v)(makeTick);
-            return pure16(unit);
+            return pure19(unit);
           });
         }
         ;
@@ -15630,9 +16104,9 @@
       };
     },
     removeTickFunction: function(label5) {
-      return bind9(simulationHandle(simulationMD3Selection_D3))(function(handle) {
+      return bind11(simulationHandle(simulationMD3Selection_D3))(function(handle) {
         var v = disableTick_(handle)(label5);
-        return pure16(unit);
+        return pure19(unit);
       });
     },
     simulationHandle: /* @__PURE__ */ use(monadStateD3SimM)(/* @__PURE__ */ _handle(strongForget)),
@@ -15645,7 +16119,7 @@
   };
 
   // output/D3.Data.Graph/index.js
-  var bind10 = /* @__PURE__ */ bind(bindMaybe);
+  var bind15 = /* @__PURE__ */ bind(bindMaybe);
   var mapFlipped6 = /* @__PURE__ */ mapFlipped(functorArray);
   var append8 = /* @__PURE__ */ append(semigroupArray);
   var getReachableNodes = function(dictOrd) {
@@ -15654,9 +16128,9 @@
     return function(id4) {
       return function(graph) {
         var processNextOpenDepPath = function(searchRecord) {
-          return bind10(uncons(searchRecord.openDepPaths))(function(x8) {
-            return bind10(head2(x8.head))(function(firstID) {
-              return bind10(lookup13(firstID)(graph))(function(firstNode) {
+          return bind15(uncons(searchRecord.openDepPaths))(function(x8) {
+            return bind15(head2(x8.head))(function(firstID) {
+              return bind15(lookup13(firstID)(graph))(function(firstNode) {
                 var newDeps = partition(function(d2) {
                   return !elem6(d2)(searchRecord.nodes);
                 })(firstNode.links.targets);
@@ -15745,9 +16219,9 @@
 
   // output/D3.Viz.Spago.Tree/index.js
   var lookup10 = /* @__PURE__ */ lookup(ordInt);
-  var map33 = /* @__PURE__ */ map(functorArray);
+  var map34 = /* @__PURE__ */ map(functorArray);
   var fromFoldable11 = /* @__PURE__ */ fromFoldable(foldableArray);
-  var foldl5 = /* @__PURE__ */ foldl(foldableList);
+  var foldl6 = /* @__PURE__ */ foldl(foldableList);
   var fromFoldable15 = /* @__PURE__ */ fromFoldable3(foldableSet);
   var fromFoldable23 = /* @__PURE__ */ fromFoldable5(foldableList)(/* @__PURE__ */ ordTuple(ordInt)(ordInt));
   var insert9 = /* @__PURE__ */ insert(ordInt);
@@ -15790,11 +16264,11 @@
         ;
         throw new Error("Failed pattern match at D3.Viz.Spago.Tree (line 105, column 7 - line 112, column 134): " + [v1.constructor.name]);
       };
-      return map33(updateXY)(nodes);
+      return map34(updateXY)(nodes);
     };
   };
   var pathsAsLists = function(paths) {
-    return fromFoldable11(map33(function($77) {
+    return fromFoldable11(map34(function($77) {
       return fromFoldable11(reverse2($77));
     })(paths));
   };
@@ -15831,7 +16305,7 @@
     };
   };
   var makeTreeLinkTuples = function(closedPaths) {
-    var linkTuples = foldl5(path2Tuples)(Nil.value)(closedPaths);
+    var linkTuples = foldl6(path2Tuples)(Nil.value)(closedPaths);
     return fromFoldable15(fromFoldable23(linkTuples));
   };
   var getTreeDerivedData = function(root2) {
@@ -15842,7 +16316,7 @@
           y: v.y,
           depth: v.depth,
           isTreeLeaf: hasChildren_(v),
-          childIDs: map33(function(v1) {
+          childIDs: map34(function(v1) {
             return v1.id;
           })(getHierarchyChildren_(v))
         })(acc);
@@ -15869,11 +16343,11 @@
         return v;
       };
       var linksWhoseSourceIs = function(id4) {
-        return fromFoldable11(map33(function(v) {
+        return fromFoldable11(map34(function(v) {
           return v.target;
         })(filter2(function(l) {
           return l.source === id4;
-        })(map33(unwrap9)(treelinks))));
+        })(map34(unwrap9)(treelinks))));
       };
       var go2 = function(childID) {
         return new Node(childID, map114(go2)(linksWhoseSourceIs(childID)));
@@ -15887,12 +16361,12 @@
       var treenodes = partition(function(v) {
         return elem4(v.id)(reachable.nodes) || v.id === rootID;
       })(model.nodes);
-      var prunedTreeLinks = map33(tupleToLink(M2M_Graph.value))(reachable.redundantLinks);
+      var prunedTreeLinks = map34(tupleToLink(M2M_Graph.value))(reachable.redundantLinks);
       var onlyTreelinks = makeTreeLinkTuples(pathsAsLists(reachable.closedDepPaths));
       var partitionedLinks = partition(function(v) {
         return elem1(new Tuple(v.source, v.target))(onlyTreelinks);
       })(model.links);
-      var treelinks = map33(changeLinkType(M2M_Tree.value))(partitionedLinks.yes);
+      var treelinks = map34(changeLinkType(M2M_Tree.value))(partitionedLinks.yes);
       var onlyPackageLinks = filter2(isP2P_Link)(model.links);
       var links = append9(treelinks)(append9(prunedTreeLinks)(onlyPackageLinks));
       var idTree = buildTree(rootID)(treelinks);
@@ -15923,29 +16397,29 @@
   };
 
   // output/PSD3.CodeExplorer.Data/index.js
-  var bind11 = /* @__PURE__ */ bind(bindMaybe);
+  var bind16 = /* @__PURE__ */ bind(bindMaybe);
   var lookup11 = /* @__PURE__ */ lookup(ordString);
-  var pure17 = /* @__PURE__ */ pure(applicativeMaybe);
-  var bind15 = /* @__PURE__ */ bind(bindAff);
+  var pure20 = /* @__PURE__ */ pure(applicativeMaybe);
+  var bind17 = /* @__PURE__ */ bind(bindAff);
   var apply3 = /* @__PURE__ */ apply(applyEither);
-  var map34 = /* @__PURE__ */ map(functorEither);
-  var pure18 = /* @__PURE__ */ pure(applicativeAff);
+  var map35 = /* @__PURE__ */ map(functorEither);
+  var pure110 = /* @__PURE__ */ pure(applicativeAff);
   var addTreeToModel = function(rootName) {
     return function(maybeModel) {
-      return bind11(maybeModel)(function(model) {
-        return bind11(lookup11(rootName)(model.maps.name2ID))(function(rootID) {
-          return pure17(treeReduction(rootID)(model));
+      return bind16(maybeModel)(function(model) {
+        return bind16(lookup11(rootName)(model.maps.name2ID))(function(rootID) {
+          return pure20(treeReduction(rootID)(model));
         });
       });
     };
   };
   var readModelData = /* @__PURE__ */ (function() {
-    return bind15(get3(string)("./data/spago-data/modules.json"))(function(moduleJSON) {
-      return bind15(get3(string)("./data/spago-data/packages.json"))(function(packageJSON) {
-        return bind15(get3(string)("./data/spago-data/lsdeps.jsonlines"))(function(lsdepJSON) {
-          return bind15(get3(string)("./data/spago-data/LOC.json"))(function(locJSON) {
-            var model = hush(apply3(apply3(apply3(map34(convertFilesToGraphModel)(moduleJSON))(packageJSON))(lsdepJSON))(locJSON));
-            return pure18(addTreeToModel("PSD3.Main")(model));
+    return bind17(get3(string)("./data/spago-data/modules.json"))(function(moduleJSON) {
+      return bind17(get3(string)("./data/spago-data/packages.json"))(function(packageJSON) {
+        return bind17(get3(string)("./data/spago-data/lsdeps.jsonlines"))(function(lsdepJSON) {
+          return bind17(get3(string)("./data/spago-data/LOC.json"))(function(locJSON) {
+            var model = hush(apply3(apply3(apply3(map35(convertFilesToGraphModel)(moduleJSON))(packageJSON))(lsdepJSON))(locJSON));
+            return pure110(addTreeToModel("PSD3.Main")(model));
           });
         });
       });
@@ -16097,7 +16571,7 @@
   var click2 = "click";
 
   // output/Halogen.HTML.Events/index.js
-  var map35 = /* @__PURE__ */ map(functorMaybe);
+  var map36 = /* @__PURE__ */ map(functorMaybe);
   var composeKleisli2 = /* @__PURE__ */ composeKleisli(bindMaybe);
   var composeKleisliFlipped4 = /* @__PURE__ */ composeKleisliFlipped(/* @__PURE__ */ bindExceptT(monadIdentity));
   var readProp2 = /* @__PURE__ */ readProp(monadIdentity);
@@ -16106,7 +16580,7 @@
   var handler$prime = function(et) {
     return function(f) {
       return handler(et)(function(ev) {
-        return map35(Action.create)(f(ev));
+        return map36(Action.create)(f(ev));
       });
     };
   };
@@ -16144,12 +16618,12 @@
 
   // output/PSD3.Properties/index.js
   var lmap2 = /* @__PURE__ */ lmap(bifunctorTuple);
-  var append14 = /* @__PURE__ */ append(semigroupArray);
+  var append15 = /* @__PURE__ */ append(semigroupArray);
   var rmap3 = /* @__PURE__ */ rmap2(bifunctorTuple);
   var elem5 = /* @__PURE__ */ elem2(eqString);
   var not4 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean));
-  var pure19 = /* @__PURE__ */ pure(applicativeArray);
-  var map36 = /* @__PURE__ */ map(functorArray);
+  var pure21 = /* @__PURE__ */ pure(applicativeArray);
+  var map37 = /* @__PURE__ */ map(functorArray);
   var startsWith = function(str0) {
     return function(str1) {
       return str0 === take2(length5(str0))(str1);
@@ -16160,12 +16634,12 @@
       return function(v1) {
         if (v1 instanceof Property && v1.value0 === "className") {
           return lmap2(function(v2) {
-            return append14(v2)(split(" ")(v1.value1));
+            return append15(v2)(split(" ")(v1.value1));
           })(v);
         }
         ;
         return rmap3(function(v2) {
-          return append14(v2)([v1]);
+          return append15(v2)([v1]);
         })(v);
       };
     };
@@ -16280,26 +16754,26 @@
     return function(ip$prime) {
       var v = extract3(ip);
       var v1 = extract3(ip$prime);
-      var classNames = pure19(classes(map36(ClassName)(nubByEq(function(c) {
+      var classNames = pure21(classes(map37(ClassName)(nubByEq(function(c) {
         return function(c$prime) {
           return classify(c) === classify(c$prime);
         };
-      })(append14(v1.value0)(v.value0)))));
-      return append14(v.value1)(append14(v1.value1)(classNames));
+      })(append15(v1.value0)(v.value0)))));
+      return append15(v.value1)(append15(v1.value1)(classNames));
     };
   };
 
   // output/PSD3.Button/index.js
-  var map37 = /* @__PURE__ */ map(functorArray);
+  var map38 = /* @__PURE__ */ map(functorArray);
   var append10 = /* @__PURE__ */ append(semigroupArray);
-  var rightClasses = /* @__PURE__ */ map37(ClassName)(["rounded-r"]);
-  var leftClasses = /* @__PURE__ */ map37(ClassName)(["mr-px", "rounded-l"]);
-  var centerVerticalClasses = /* @__PURE__ */ map37(ClassName)(["w-11/12", "rounded", "m-2"]);
-  var centerClasses = /* @__PURE__ */ map37(ClassName)(["mr-px"]);
-  var buttonSharedClasses = /* @__PURE__ */ map37(ClassName)(["no-outline", "px-4", "py-2", "!active:border-b", "active:border-t", "disabled:opacity-50", "disabled:cursor-default", "!disabled:cursor-pointer"]);
-  var buttonPrimaryClasses = /* @__PURE__ */ map37(ClassName)(["bg-blue-88", "border-blue-88", "hover:!disabled:bg-blue-82", "focus:bg-blue-82", "text-white"]);
-  var buttonMainClasses = /* @__PURE__ */ append10(buttonSharedClasses)(/* @__PURE__ */ map37(ClassName)(["rounded"]));
-  var buttonGroupClasses = /* @__PURE__ */ map37(ClassName)(["flex", "items-center"]);
+  var rightClasses = /* @__PURE__ */ map38(ClassName)(["rounded-r"]);
+  var leftClasses = /* @__PURE__ */ map38(ClassName)(["mr-px", "rounded-l"]);
+  var centerVerticalClasses = /* @__PURE__ */ map38(ClassName)(["w-11/12", "rounded", "m-2"]);
+  var centerClasses = /* @__PURE__ */ map38(ClassName)(["mr-px"]);
+  var buttonSharedClasses = /* @__PURE__ */ map38(ClassName)(["no-outline", "px-4", "py-2", "!active:border-b", "active:border-t", "disabled:opacity-50", "disabled:cursor-default", "!disabled:cursor-pointer"]);
+  var buttonPrimaryClasses = /* @__PURE__ */ map38(ClassName)(["bg-blue-88", "border-blue-88", "hover:!disabled:bg-blue-82", "focus:bg-blue-82", "text-white"]);
+  var buttonMainClasses = /* @__PURE__ */ append10(buttonSharedClasses)(/* @__PURE__ */ map38(ClassName)(["rounded"]));
+  var buttonGroupClasses = /* @__PURE__ */ map38(ClassName)(["flex", "items-center"]);
   var buttonGroupBuilder = function(classes2) {
     return function(iprops) {
       return button(appendIProps([classes(append10(buttonSharedClasses)(classes2))])(iprops));
@@ -16312,7 +16786,7 @@
     return div2(appendIProps([classes(buttonGroupClasses)])(iprops));
   };
   var buttonGroup_ = /* @__PURE__ */ buttonGroup([]);
-  var buttonClasses = /* @__PURE__ */ map37(ClassName)(["bg-grey-50-a20", "border-grey-50-a20", "hover:!disabled:bg-grey-50-a30", "focus:bg-grey-50-a30", "text-black-20"]);
+  var buttonClasses = /* @__PURE__ */ map38(ClassName)(["bg-grey-50-a20", "border-grey-50-a20", "hover:!disabled:bg-grey-50-a30", "focus:bg-grey-50-a30", "text-black-20"]);
   var buttonLeft = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append10(buttonClasses)(leftClasses));
   var buttonRight = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append10(buttonClasses)(rightClasses));
   var buttonVertical = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append10(buttonClasses)(centerVerticalClasses));
@@ -16547,21 +17021,21 @@
   };
 
   // output/PSD3.Format/index.js
-  var map38 = /* @__PURE__ */ map(functorArray);
-  var subHeadingClasses = /* @__PURE__ */ map38(ClassName)(["text-xl", "font-medium", "leading-loose", "flex", "items-center", "mb-6"]);
+  var map39 = /* @__PURE__ */ map(functorArray);
+  var subHeadingClasses = /* @__PURE__ */ map39(ClassName)(["text-xl", "font-medium", "leading-loose", "flex", "items-center", "mb-6"]);
   var subHeading = function(iprops) {
     return function(html2) {
       return h2(appendIProps([classes(subHeadingClasses)])(iprops))(html2);
     };
   };
   var subHeading_ = /* @__PURE__ */ subHeading([]);
-  var mutedClasses = /* @__PURE__ */ map38(ClassName)(["text-grey-50"]);
-  var contentHeadingClasses = /* @__PURE__ */ map38(ClassName)(["mb-6", "text-lg", "font-normal", "leading-loose", "flex", "items-center"]);
+  var mutedClasses = /* @__PURE__ */ map39(ClassName)(["text-grey-50"]);
+  var contentHeadingClasses = /* @__PURE__ */ map39(ClassName)(["mb-6", "text-lg", "font-normal", "leading-loose", "flex", "items-center"]);
   var contentHeading = function(iprops) {
     return h3(appendIProps([classes(contentHeadingClasses)])(iprops));
   };
   var contentHeading_ = /* @__PURE__ */ contentHeading([]);
-  var captionClasses = /* @__PURE__ */ map38(ClassName)(["block", "font-light", "mb-6", "text-grey-70", "text-sm", "tracking-wide", "uppercase"]);
+  var captionClasses = /* @__PURE__ */ map39(ClassName)(["block", "font-light", "mb-6", "text-grey-70", "text-sm", "tracking-wide", "uppercase"]);
   var caption2 = function(iprops) {
     return h4(appendIProps([classes(captionClasses)])(iprops));
   };
@@ -16572,7 +17046,7 @@
   var value14 = /* @__PURE__ */ value12(isPropString);
   var show10 = /* @__PURE__ */ show(showNumber);
   var eq4 = /* @__PURE__ */ eq(eqForceStatus);
-  var map39 = /* @__PURE__ */ map(functorArray);
+  var map40 = /* @__PURE__ */ map(functorArray);
   var toUnfoldable4 = /* @__PURE__ */ toUnfoldable(unfoldableArray);
   var _forceLibrary3 = /* @__PURE__ */ _forceLibrary(strongForget);
   var _cssClass2 = /* @__PURE__ */ _cssClass(strongForget);
@@ -16599,8 +17073,8 @@
         return "force-inactive";
       })()]), onClick($$const(new ToggleForce(v.name)))])([div2([classes(["force-name"])])([text5(v.name)]), div2([classes(["force-type"])])([text5(showType(v.type))]), div2([classes(["force-filter"])])([text5(showForceFilter(v.filter))])]);
     };
-    var forceData = map39(snd)(toUnfoldable4(view(_forceLibrary3)(state3)));
-    return div_([h3_([text5("Forces")]), div2([classes(["force-grid"])])(map39(renderForceItem)(forceData))]);
+    var forceData = map40(snd)(toUnfoldable4(view(_forceLibrary3)(state3)));
+    return div_([h3_([text5("Forces")]), div2([classes(["force-grid"])])(map40(renderForceItem)(forceData))]);
   };
   var renderSimState = function(state3) {
     return div2([classes(["spago-sim-state"])])([caption_2([text5("Simulation state")]), p_([text5("CSS Class: " + view(_cssClass2)(state3))]), p_([text5("Links: " + show13(length4(view(_stagingLinks2)(state3))))]), p_([text5("Nodes: " + show13(length4(view(_stagingNodes2)(state3))))])]);
@@ -16662,7 +17136,7 @@
   var updateSimulation2 = /* @__PURE__ */ updateSimulation(eqInt)(bindD3SimM)(monadEffD3SimM)(selectionMD3Selection_D3S)(simulationMD3Selection_D3);
   var setConfigVariable2 = /* @__PURE__ */ setConfigVariable(simulationMD3Selection_D3);
   var start3 = /* @__PURE__ */ start2(simulationMD3Selection_D3);
-  var bind16 = /* @__PURE__ */ bind(bindHalogenM);
+  var bind18 = /* @__PURE__ */ bind(bindHalogenM);
   var discard23 = /* @__PURE__ */ discard11(bindHalogenM);
   var modifying2 = /* @__PURE__ */ modifying(monadStateHalogenM);
   var _model2 = /* @__PURE__ */ _model(strongFn);
@@ -16675,7 +17149,7 @@
   var $$void10 = /* @__PURE__ */ $$void(functorHalogenM);
   var assign3 = /* @__PURE__ */ assign2(monadStateHalogenM);
   var _eventListener1 = /* @__PURE__ */ _eventListener(strongFn);
-  var pure20 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var pure23 = /* @__PURE__ */ pure(applicativeHalogenM);
   var _chooseNodes1 = /* @__PURE__ */ _chooseNodes(strongFn);
   var runWithD3_Simulation2 = /* @__PURE__ */ runWithD3_Simulation(bindHalogenM)(monadStateHalogenM);
   var _linksShown1 = /* @__PURE__ */ _linksShown(strongFn);
@@ -16778,19 +17252,19 @@
     var runWithD3_Simulation1 = runWithD3_Simulation2(monadEffectHalogenM2);
     return function(v) {
       if (v instanceof Initialize3) {
-        return bind16(liftAff2(readModelData))(function(v1) {
+        return bind18(liftAff2(readModelData))(function(v1) {
           return discard23(modifying2(_model2)($$const(v1)))(function() {
-            return bind16(evalEffectSimulation1(initialize3))(function(openSelections) {
+            return bind18(evalEffectSimulation1(initialize3))(function(openSelections) {
               return discard23(modifying2(function($140) {
                 return _staging1(_enterselections2(_nodes2($140)));
               })($$const(openSelections.nodes)))(function() {
                 return discard23(modifying2(function($141) {
                   return _staging1(_enterselections2(_links2($141)));
                 })($$const(openSelections.links)))(function() {
-                  return bind16(liftEffect12(create3))(function(v2) {
+                  return bind18(liftEffect12(create3))(function(v2) {
                     return discard23($$void10(subscribe2(v2.emitter)))(function() {
                       return discard23(assign3(_eventListener1)(new Just(v2.listener)))(function() {
-                        return pure20(unit);
+                        return pure23(unit);
                       });
                     });
                   });
@@ -16802,7 +17276,7 @@
       }
       ;
       if (v instanceof Finalize2) {
-        return pure20(unit);
+        return pure23(unit);
       }
       ;
       if (v instanceof EventFromVizualization) {
@@ -17044,7 +17518,7 @@
       return "spagoComponent";
     }
   })(ordUnit);
-  var identity15 = /* @__PURE__ */ identity(categoryFn);
+  var identity16 = /* @__PURE__ */ identity(categoryFn);
   var _spagoComponent = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
@@ -17056,14 +17530,14 @@
   };
   var component3 = function(dictMonadAff) {
     return mkComponent({
-      initialState: identity15,
+      initialState: identity16,
       render: render3(dictMonadAff),
       "eval": mkEval(defaultEval)
     });
   };
 
   // output/PSD3.Hierarchies/index.js
-  var pure21 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var pure24 = /* @__PURE__ */ pure(applicativeHalogenM);
   var modify_4 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var HorizontalTree = /* @__PURE__ */ (function() {
     function HorizontalTree2() {
@@ -17151,7 +17625,7 @@
   };
   var handleAction3 = function(v) {
     if (v instanceof Initialize4) {
-      return pure21(unit);
+      return pure24(unit);
     }
     ;
     if (v instanceof SwitchLayout) {
@@ -17188,476 +17662,6 @@
       })
     });
   })();
-
-  // output/PSD3.Types/index.js
-  var About = /* @__PURE__ */ (function() {
-    function About2() {
-    }
-    ;
-    About2.value = new About2();
-    return About2;
-  })();
-  var Tutorial = /* @__PURE__ */ (function() {
-    function Tutorial2() {
-    }
-    ;
-    Tutorial2.value = new Tutorial2();
-    return Tutorial2;
-  })();
-  var Hierarchies = /* @__PURE__ */ (function() {
-    function Hierarchies2() {
-    }
-    ;
-    Hierarchies2.value = new Hierarchies2();
-    return Hierarchies2;
-  })();
-  var Interpreters = /* @__PURE__ */ (function() {
-    function Interpreters2() {
-    }
-    ;
-    Interpreters2.value = new Interpreters2();
-    return Interpreters2;
-  })();
-  var CodeExplorer = /* @__PURE__ */ (function() {
-    function CodeExplorer2() {
-    }
-    ;
-    CodeExplorer2.value = new CodeExplorer2();
-    return CodeExplorer2;
-  })();
-  var NotFound = /* @__PURE__ */ (function() {
-    function NotFound2() {
-    }
-    ;
-    NotFound2.value = new NotFound2();
-    return NotFound2;
-  })();
-
-  // output/Data.Semiring.Free/index.js
-  var append15 = /* @__PURE__ */ append(semigroupList);
-  var bind17 = /* @__PURE__ */ bind(bindList);
-  var pure23 = /* @__PURE__ */ pure(applicativeList);
-  var semiringFree = /* @__PURE__ */ (function() {
-    return {
-      add: function(v) {
-        return function(v1) {
-          return append15(v)(v1);
-        };
-      },
-      zero: Nil.value,
-      mul: function(v) {
-        return function(v1) {
-          return bind17(v)(function(xs) {
-            return bind17(v1)(function(ys) {
-              return pure23(append15(xs)(ys));
-            });
-          });
-        };
-      },
-      one: singleton3(Nil.value)
-    };
-  })();
-  var free = function(a2) {
-    return singleton3(singleton3(a2));
-  };
-
-  // output/Data.Validation.Semiring/index.js
-  var V = function(x8) {
-    return x8;
-  };
-  var validation = function(v) {
-    return function(v1) {
-      return function(v2) {
-        if (v2 instanceof Left) {
-          return v(v2.value0);
-        }
-        ;
-        if (v2 instanceof Right) {
-          return v1(v2.value0);
-        }
-        ;
-        throw new Error("Failed pattern match at Data.Validation.Semiring (line 49, column 1 - line 49, column 84): " + [v.constructor.name, v1.constructor.name, v2.constructor.name]);
-      };
-    };
-  };
-  var invalid2 = function($113) {
-    return V(Left.create($113));
-  };
-  var functorV = functorEither;
-  var applyV = function(dictSemiring) {
-    var mul3 = mul(dictSemiring);
-    return {
-      apply: function(v) {
-        return function(v1) {
-          if (v instanceof Left && v1 instanceof Left) {
-            return new Left(mul3(v.value0)(v1.value0));
-          }
-          ;
-          if (v instanceof Left) {
-            return new Left(v.value0);
-          }
-          ;
-          if (v1 instanceof Left) {
-            return new Left(v1.value0);
-          }
-          ;
-          if (v instanceof Right && v1 instanceof Right) {
-            return new Right(v.value0(v1.value0));
-          }
-          ;
-          throw new Error("Failed pattern match at Data.Validation.Semiring (line 90, column 1 - line 94, column 54): " + [v.constructor.name, v1.constructor.name]);
-        };
-      },
-      Functor0: function() {
-        return functorV;
-      }
-    };
-  };
-  var applicativeV = function(dictSemiring) {
-    var applyV1 = applyV(dictSemiring);
-    return {
-      pure: function($121) {
-        return V(Right.create($121));
-      },
-      Apply0: function() {
-        return applyV1;
-      }
-    };
-  };
-  var altV = function(dictSemiring) {
-    var add2 = add(dictSemiring);
-    return {
-      alt: function(v) {
-        return function(v1) {
-          if (v instanceof Left && v1 instanceof Left) {
-            return new Left(add2(v.value0)(v1.value0));
-          }
-          ;
-          if (v instanceof Left) {
-            return v1;
-          }
-          ;
-          if (v instanceof Right) {
-            return new Right(v.value0);
-          }
-          ;
-          throw new Error("Failed pattern match at Data.Validation.Semiring (line 105, column 1 - line 108, column 36): " + [v.constructor.name, v1.constructor.name]);
-        };
-      },
-      Functor0: function() {
-        return functorV;
-      }
-    };
-  };
-
-  // output/Routing.Match.Error/index.js
-  var UnexpectedPath = /* @__PURE__ */ (function() {
-    function UnexpectedPath2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    UnexpectedPath2.create = function(value0) {
-      return new UnexpectedPath2(value0);
-    };
-    return UnexpectedPath2;
-  })();
-  var ExpectedBoolean = /* @__PURE__ */ (function() {
-    function ExpectedBoolean2() {
-    }
-    ;
-    ExpectedBoolean2.value = new ExpectedBoolean2();
-    return ExpectedBoolean2;
-  })();
-  var ExpectedEnd = /* @__PURE__ */ (function() {
-    function ExpectedEnd2() {
-    }
-    ;
-    ExpectedEnd2.value = new ExpectedEnd2();
-    return ExpectedEnd2;
-  })();
-  var ExpectedNumber = /* @__PURE__ */ (function() {
-    function ExpectedNumber2() {
-    }
-    ;
-    ExpectedNumber2.value = new ExpectedNumber2();
-    return ExpectedNumber2;
-  })();
-  var ExpectedInt = /* @__PURE__ */ (function() {
-    function ExpectedInt2() {
-    }
-    ;
-    ExpectedInt2.value = new ExpectedInt2();
-    return ExpectedInt2;
-  })();
-  var ExpectedString = /* @__PURE__ */ (function() {
-    function ExpectedString2() {
-    }
-    ;
-    ExpectedString2.value = new ExpectedString2();
-    return ExpectedString2;
-  })();
-  var ExpectedQuery = /* @__PURE__ */ (function() {
-    function ExpectedQuery2() {
-    }
-    ;
-    ExpectedQuery2.value = new ExpectedQuery2();
-    return ExpectedQuery2;
-  })();
-  var ExpectedPathPart = /* @__PURE__ */ (function() {
-    function ExpectedPathPart2() {
-    }
-    ;
-    ExpectedPathPart2.value = new ExpectedPathPart2();
-    return ExpectedPathPart2;
-  })();
-  var KeyNotFound = /* @__PURE__ */ (function() {
-    function KeyNotFound2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    KeyNotFound2.create = function(value0) {
-      return new KeyNotFound2(value0);
-    };
-    return KeyNotFound2;
-  })();
-  var Fail = /* @__PURE__ */ (function() {
-    function Fail2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Fail2.create = function(value0) {
-      return new Fail2(value0);
-    };
-    return Fail2;
-  })();
-  var showMatchError = function(err) {
-    if (err instanceof UnexpectedPath) {
-      return "expected path part: " + err.value0;
-    }
-    ;
-    if (err instanceof KeyNotFound) {
-      return "key: " + (err.value0 + " has not found in query part");
-    }
-    ;
-    if (err instanceof ExpectedQuery) {
-      return "expected query - found path";
-    }
-    ;
-    if (err instanceof ExpectedNumber) {
-      return "expected number";
-    }
-    ;
-    if (err instanceof ExpectedInt) {
-      return "expected int";
-    }
-    ;
-    if (err instanceof ExpectedBoolean) {
-      return "expected boolean";
-    }
-    ;
-    if (err instanceof ExpectedEnd) {
-      return "expected end";
-    }
-    ;
-    if (err instanceof ExpectedString) {
-      return "expected string var";
-    }
-    ;
-    if (err instanceof ExpectedPathPart) {
-      return "expected path part, found query";
-    }
-    ;
-    if (err instanceof Fail) {
-      return "match error: " + err.value0;
-    }
-    ;
-    throw new Error("Failed pattern match at Routing.Match.Error (line 19, column 3 - line 29, column 39): " + [err.constructor.name]);
-  };
-
-  // output/Routing.Types/index.js
-  var Path2 = /* @__PURE__ */ (function() {
-    function Path3(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Path3.create = function(value0) {
-      return new Path3(value0);
-    };
-    return Path3;
-  })();
-  var Query2 = /* @__PURE__ */ (function() {
-    function Query3(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Query3.create = function(value0) {
-      return new Query3(value0);
-    };
-    return Query3;
-  })();
-
-  // output/Routing.Match/index.js
-  var pure24 = /* @__PURE__ */ pure(/* @__PURE__ */ applicativeV(semiringFree));
-  var foldl6 = /* @__PURE__ */ foldl(foldableList);
-  var bind18 = /* @__PURE__ */ bind(bindList);
-  var map40 = /* @__PURE__ */ map(functorList);
-  var unwrap8 = /* @__PURE__ */ unwrap();
-  var pure110 = /* @__PURE__ */ pure(applicativeList);
-  var mul2 = /* @__PURE__ */ mul(semiringFree);
-  var identity16 = /* @__PURE__ */ identity(categoryFn);
-  var one2 = /* @__PURE__ */ one(semiringFree);
-  var alt6 = /* @__PURE__ */ alt(/* @__PURE__ */ altV(semiringFree));
-  var runMatch = function(v) {
-    return function(route) {
-      var foldErrors = function(errs) {
-        return new Left(foldl6(function(b2) {
-          return function(a2) {
-            return a2 + ("\n" + b2);
-          };
-        })("")(bind18(map40(reverse)(unwrap8(errs)))(function(es) {
-          return pure110(foldl6(function(b2) {
-            return function(a2) {
-              return a2 + (";" + b2);
-            };
-          })("")(map40(showMatchError)(es)));
-        })));
-      };
-      return validation(foldErrors)(function($109) {
-        return Right.create(snd($109));
-      })(v(route));
-    };
-  };
-  var matchFunctor = {
-    map: function(fn) {
-      return function(v) {
-        return function(r) {
-          return validation(invalid2)(function(v1) {
-            return pure24(new Tuple(v1.value0, fn(v1.value1)));
-          })(v(r));
-        };
-      };
-    }
-  };
-  var matchApply = {
-    apply: function(v) {
-      return function(v1) {
-        var processFnRes = function(v2) {
-          return validation(invalid2)(function(v3) {
-            return pure24(new Tuple(v3.value0, v2.value1(v3.value1)));
-          })(v1(v2.value0));
-        };
-        var processFnErr = function(r) {
-          return function(err) {
-            return invalid2(mul2(err)(validation(identity16)($$const(one2))(v1(r))));
-          };
-        };
-        return function(r) {
-          return validation(processFnErr(r))(processFnRes)(v(r));
-        };
-      };
-    },
-    Functor0: function() {
-      return matchFunctor;
-    }
-  };
-  var matchApplicative = {
-    pure: function(a2) {
-      return function(r) {
-        return pure24(new Tuple(r, a2));
-      };
-    },
-    Apply0: function() {
-      return matchApply;
-    }
-  };
-  var matchAlt = {
-    alt: function(v) {
-      return function(v1) {
-        return function(r) {
-          return alt6(v(r))(v1(r));
-        };
-      };
-    },
-    Functor0: function() {
-      return matchFunctor;
-    }
-  };
-  var lit = function(input3) {
-    return function(route) {
-      if (route instanceof Cons && (route.value0 instanceof Path2 && route.value0.value0 === input3)) {
-        return pure24(new Tuple(route.value1, unit));
-      }
-      ;
-      if (route instanceof Cons && route.value0 instanceof Path2) {
-        return invalid2(free(new UnexpectedPath(input3)));
-      }
-      ;
-      return invalid2(free(ExpectedPathPart.value));
-    };
-  };
-  var root = /* @__PURE__ */ lit("");
-  var end = function(route) {
-    if (route instanceof Nil) {
-      return pure24(new Tuple(Nil.value, unit));
-    }
-    ;
-    return invalid2(free(ExpectedEnd.value));
-  };
-
-  // output/PSD3.RoutingDSL/index.js
-  var applyFirst2 = /* @__PURE__ */ applyFirst(matchApply);
-  var voidRight2 = /* @__PURE__ */ voidRight(matchFunctor);
-  var alt7 = /* @__PURE__ */ alt(matchAlt);
-  var tutorial = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(Tutorial.value)(lit("tutorial")))(end);
-  })();
-  var routeToPath = function(v) {
-    if (v instanceof About) {
-      return "/about";
-    }
-    ;
-    if (v instanceof Tutorial) {
-      return "/tutorial";
-    }
-    ;
-    if (v instanceof Hierarchies) {
-      return "/hierarchies";
-    }
-    ;
-    if (v instanceof Interpreters) {
-      return "/interpreters";
-    }
-    ;
-    if (v instanceof CodeExplorer) {
-      return "/code-explorer";
-    }
-    ;
-    if (v instanceof NotFound) {
-      return "/not-found";
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.RoutingDSL (line 59, column 1 - line 59, column 31): " + [v.constructor.name]);
-  };
-  var rootRedirect = /* @__PURE__ */ (function() {
-    return voidRight2(About.value)(end);
-  })();
-  var notFound = /* @__PURE__ */ (function() {
-    return pure(matchApplicative)(NotFound.value);
-  })();
-  var interpreters = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(Interpreters.value)(lit("interpreters")))(end);
-  })();
-  var hierarchies = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(Hierarchies.value)(lit("hierarchies")))(end);
-  })();
-  var codeExplorer = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(CodeExplorer.value)(lit("code-explorer")))(end);
-  })();
-  var about = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(About.value)(lit("about")))(end);
-  })();
-  var routes = /* @__PURE__ */ alt7(tutorial)(/* @__PURE__ */ alt7(hierarchies)(/* @__PURE__ */ alt7(interpreters)(/* @__PURE__ */ alt7(codeExplorer)(/* @__PURE__ */ alt7(about)(/* @__PURE__ */ alt7(rootRedirect)(notFound))))));
-  var routing = /* @__PURE__ */ applySecond(matchApply)(root)(routes);
 
   // output/PSD3.Interpreters/index.js
   var render5 = function(v) {
@@ -19043,7 +19047,7 @@
     return $$Proxy.value;
   })();
   var render7 = function(v) {
-    return div2([classes(["tutorial-page"])])([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Tutorial: Building Visualizations with PureScript D3")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.")]), p_([text5("Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Three Little Circles")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante.")]), p_([text5("Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra.")]), div2([classes(["tutorial-viz-container"])])([slot_1(_threeLittleCircles)(unit)(component1)(unit)]), p_([text5("Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("2. The General Update Pattern")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sagittis dui vel nisl. Duis ac tellus et risus vulputate vehicula. Donec lobortis risus a elit. Etiam tempor. Ut ullamcorper, ligula eu tempor congue, eros est euismod turpis.")]), p_([text5("Mauris sollicitudin fermentum libero. Praesent nonummy mi in odio. Nunc interdum lacus sit amet orci. Vestibulum rutrum, mi nec elementum vehicula, eros quam gravida nisl, id fringilla neque ante vel mi.")]), div2([classes(["tutorial-viz-container"])])([slot_22(_gup)(unit)(component22)(Running.value)]), p_([text5("Sed egestas, ante et vulputate volutpat, eros pede semper est, vitae luctus metus libero eu augue. Morbi purus libero, faucibus adipiscing, commodo quis, gravida id, est.")])]), section([classes(["tutorial-section", "tutorial-conclusion"])])([h2([classes(["tutorial-section-title"])])([text5("Next Steps")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien.")]), ul_([li_([text5("Explore hierarchical data visualizations")]), li_([text5("Learn about the Finally Tagless pattern with interpreters")]), li_([text5("Dive into the Code Explorer for complex applications")])])])]);
+    return div2([classes(["tutorial-page"])])([section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Tutorial: Building Visualizations with PureScript D3")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.")]), p_([text5("Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Three Little Circles")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante.")]), p_([text5("Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo. Quisque sit amet est et sapien ullamcorper pharetra.")]), div2([classes(["tutorial-viz-container"])])([slot_1(_threeLittleCircles)(unit)(component1)(unit)]), p_([text5("Vestibulum erat wisi, condimentum sed, commodo vitae, ornare sit amet, wisi. Aenean fermentum, elit eget tincidunt condimentum, eros ipsum rutrum orci, sagittis tempus lacus enim ac dui.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("2. The General Update Pattern")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. In sagittis dui vel nisl. Duis ac tellus et risus vulputate vehicula. Donec lobortis risus a elit. Etiam tempor. Ut ullamcorper, ligula eu tempor congue, eros est euismod turpis.")]), p_([text5("Mauris sollicitudin fermentum libero. Praesent nonummy mi in odio. Nunc interdum lacus sit amet orci. Vestibulum rutrum, mi nec elementum vehicula, eros quam gravida nisl, id fringilla neque ante vel mi.")]), div2([classes(["tutorial-viz-container"])])([slot_22(_gup)(unit)(component22)(Running.value)]), p_([text5("Sed egestas, ante et vulputate volutpat, eros pede semper est, vitae luctus metus libero eu augue. Morbi purus libero, faucibus adipiscing, commodo quis, gravida id, est.")])]), section([classes(["tutorial-section", "tutorial-conclusion"])])([h2([classes(["tutorial-section-title"])])([text5("Next Steps")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien.")]), aside([classes(["tutorial-margin-note"])])([p([classes(["tutorial-margin-note__label"])])([text5("Learn More")]), a([href4("#" + routeToPath(Hierarchies.value)), classes(["tutorial-margin-note__link"])])([text5("Hierarchies \u2192")])]), ul_([li_([text5("Explore hierarchical data visualizations")]), li_([text5("Learn about the Finally Tagless pattern with interpreters")]), li_([text5("Dive into the Code Explorer for complex applications")])]), aside([classes(["tutorial-margin-note"])])([a([href4("#" + routeToPath(Interpreters.value)), classes(["tutorial-margin-note__link"])])([text5("Interpreters \u2192")]), a([href4("#" + routeToPath(CodeExplorer.value)), classes(["tutorial-margin-note__link"])])([text5("Code Explorer \u2192")])])])]);
   };
   var component8 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -19258,10 +19262,10 @@
     return function(hash2) {
       var pathParts = function(str) {
         var parts = fromFoldable110(map48(function($31) {
-          return Path2.create(decoder($31));
+          return Path.create(decoder($31));
         })(split("/")(str)));
         var v2 = unsnoc(parts);
-        if (v2 instanceof Just && (v2.value0.last instanceof Path2 && v2.value0.last.value0 === "")) {
+        if (v2 instanceof Just && (v2.value0.last instanceof Path && v2.value0.last.value0 === "")) {
           return v2.value0.init;
         }
         ;

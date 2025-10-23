@@ -6874,6 +6874,8 @@
       "PSD3.GUP",
       "PSD3.ThreeLittleCircles",
       "PSD3.GUP",
+      "PSD3.RoutingDSL",
+      "PSD3.Types",
       "Type.Proxy"
     ],
     "package": "my-project",

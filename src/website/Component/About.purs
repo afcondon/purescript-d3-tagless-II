@@ -61,6 +61,44 @@ render state =
             []
         Nothing -> HH.text ""
 
+    -- Navigation Panel (RHS)
+    , HH.div
+        [ HP.classes [ HH.ClassName "about-page__nav-panel" ] ]
+        [ HH.h3
+            [ HP.classes [ HH.ClassName "about-page__nav-title" ] ]
+            [ HH.text "Explore" ]
+        , HH.nav
+            [ HP.classes [ HH.ClassName "about-page__nav-links" ] ]
+            [ HH.a
+                [ HP.href $ "#" <> routeToPath Tutorial
+                , HP.classes [ HH.ClassName "about-page__nav-link" ]
+                ]
+                [ HH.text "Tutorial →" ]
+            , HH.a
+                [ HP.href $ "#" <> routeToPath Hierarchies
+                , HP.classes [ HH.ClassName "about-page__nav-link" ]
+                ]
+                [ HH.text "Hierarchies →" ]
+            , HH.a
+                [ HP.href $ "#" <> routeToPath Interpreters
+                , HP.classes [ HH.ClassName "about-page__nav-link" ]
+                ]
+                [ HH.text "Interpreters →" ]
+            , HH.a
+                [ HP.href $ "#" <> routeToPath CodeExplorer
+                , HP.classes [ HH.ClassName "about-page__nav-link" ]
+                ]
+                [ HH.text "Code Explorer →" ]
+            , HH.a
+                [ HP.href "https://github.com/afcondon/purescript-d3-tagless"
+                , HP.target "_blank"
+                , HP.rel "noopener noreferrer"
+                , HP.classes [ HH.ClassName "about-page__nav-link", HH.ClassName "about-page__nav-link--external" ]
+                ]
+                [ HH.text "GitHub ↗" ]
+            ]
+        ]
+
     , HH.div
         [ HP.classes [ HH.ClassName "about-page__container", HH.ClassName "editorial" ] ]
         [ HH.div

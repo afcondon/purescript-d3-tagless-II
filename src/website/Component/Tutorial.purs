@@ -10,6 +10,8 @@ import Halogen.HTML.Properties as HP
 import PSD3.GUP (Status(..))
 import PSD3.ThreeLittleCircles as ThreeLittleCircles
 import PSD3.GUP as GUP
+import PSD3.RoutingDSL (routeToPath)
+import PSD3.Types (Route(..))
 import Type.Proxy (Proxy(..))
 
 -- | Tutorial page state
@@ -88,7 +90,7 @@ render _ =
             [ HH.text "Sed egestas, ante et vulputate volutpat, eros pede semper est, vitae luctus metus libero eu augue. Morbi purus libero, faucibus adipiscing, commodo quis, gravida id, est." ]
         ]
 
-    -- Section 3: Next Steps
+    -- Section 3: Next Steps with margin links
     , HH.section
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-conclusion" ] ]
         [ HH.h2
@@ -96,10 +98,39 @@ render _ =
             [ HH.text "Next Steps" ]
         , HH.p_
             [ HH.text "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien." ]
+
+        -- Contextual "learn more" links
+        , HH.aside
+            [ HP.classes [ HH.ClassName "tutorial-margin-note" ] ]
+            [ HH.p
+                [ HP.classes [ HH.ClassName "tutorial-margin-note__label" ] ]
+                [ HH.text "Learn More" ]
+            , HH.a
+                [ HP.href $ "#" <> routeToPath Hierarchies
+                , HP.classes [ HH.ClassName "tutorial-margin-note__link" ]
+                ]
+                [ HH.text "Hierarchies →" ]
+            ]
+
         , HH.ul_
             [ HH.li_ [ HH.text "Explore hierarchical data visualizations" ]
             , HH.li_ [ HH.text "Learn about the Finally Tagless pattern with interpreters" ]
             , HH.li_ [ HH.text "Dive into the Code Explorer for complex applications" ]
+            ]
+
+        -- More contextual links
+        , HH.aside
+            [ HP.classes [ HH.ClassName "tutorial-margin-note" ] ]
+            [ HH.a
+                [ HP.href $ "#" <> routeToPath Interpreters
+                , HP.classes [ HH.ClassName "tutorial-margin-note__link" ]
+                ]
+                [ HH.text "Interpreters →" ]
+            , HH.a
+                [ HP.href $ "#" <> routeToPath CodeExplorer
+                , HP.classes [ HH.ClassName "tutorial-margin-note__link" ]
+                ]
+                [ HH.text "Code Explorer →" ]
             ]
         ]
     ]
