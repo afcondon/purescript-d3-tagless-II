@@ -53,14 +53,16 @@ try {
 // 3. Generate LOC.json
 console.log('📊 Generating LOC.json...');
 try {
-  // Extract all file paths from modules.json (which has the canonical spago paths)
-  const modulesJsonPath = path.join(OUTPUT_DIR, 'modules.json');
-  const modulesData = JSON.parse(fs.readFileSync(modulesJsonPath, 'utf8'));
+  // Find all .purs files on disk (using actual filesystem structure)
+  const srcFiles = execSync('find src -name "*.purs" 2>/dev/null || true', { encoding: 'utf8' })
+    .split('\n')
+    .filter(f => f.trim());
 
-  // Get unique paths from all modules
-  const filePaths = Object.values(modulesData)
-    .map(module => module.path)
-    .filter(path => path && path.endsWith('.purs'));
+  const spagoFiles = execSync('find .spago -name "*.purs" 2>/dev/null || true', { encoding: 'utf8' })
+    .split('\n')
+    .filter(f => f.trim());
+
+  const allFiles = [...srcFiles, ...spagoFiles];
 
   const locData = {
     loc: []
@@ -69,7 +71,9 @@ try {
   let successCount = 0;
   let failCount = 0;
 
-  for (const filePath of filePaths) {
+  for (const filePath of allFiles) {
+    if (!filePath) continue;
+
     try {
       // Count lines in the file
       const lineCount = execSync(`grep -c ^ "${filePath}" 2>/dev/null || echo 0`, { encoding: 'utf8' }).trim();
@@ -96,7 +100,7 @@ try {
     path.join(OUTPUT_DIR, 'LOC.json'),
     JSON.stringify(locData, null, 2)
   );
-  console.log(`✓ LOC.json generated (${successCount} files, ${failCount} skipped)`);
+  console.log(`✓ LOC.json generated (${successCount} files from filesystem)`);
 } catch (err) {
   console.error('✗ Error generating LOC.json:', err.message);
   process.exit(1);

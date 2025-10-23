@@ -839,11 +839,11 @@
   var eqTuple = function(dictEq) {
     var eq8 = eq(dictEq);
     return function(dictEq1) {
-      var eq16 = eq(dictEq1);
+      var eq15 = eq(dictEq1);
       return {
         eq: function(x18) {
           return function(y16) {
-            return eq8(x18.value0)(y16.value0) && eq16(x18.value1)(y16.value1);
+            return eq8(x18.value0)(y16.value0) && eq15(x18.value1)(y16.value1);
           };
         }
       };
@@ -6442,7 +6442,7 @@
   var $$null3 = function(xs) {
     return length4(xs) === 0;
   };
-  var nubByEq = function(eq22) {
+  var nubByEq = function(eq23) {
     return function(xs) {
       return (function __do3() {
         var arr = newSTArray();
@@ -6450,7 +6450,7 @@
           return function __do4() {
             var e = map14((function() {
               var $179 = any2(function(v) {
-                return eq22(v)(x18);
+                return eq23(v)(x18);
               });
               return function($180) {
                 return !$179($180);
@@ -6510,10 +6510,10 @@
     };
   };
   var elemIndex = function(dictEq) {
-    var eq22 = eq(dictEq);
+    var eq23 = eq(dictEq);
     return function(x18) {
       return findIndex(function(v) {
-        return eq22(v)(x18);
+        return eq23(v)(x18);
       });
     };
   };
@@ -24244,8 +24244,47 @@
       const packages = decodePackagesFile(packagesBody);
       const lsDeps = decodeLsDepsFile(lsdepsBody);
       const loc = decodeLOCFile(locBody);
-      return { modules, packages, lsDeps, loc };
+      const pathToLOC = buildPathLookup(loc);
+      const modulesWithLOC = modules.map((module2) => ({
+        ...module2,
+        loc: lookupLOC(module2.path, pathToLOC, loc)
+      }));
+      return { modules: modulesWithLOC, packages, lsDeps, loc };
     };
+  }
+  function buildPathLookup(locArray) {
+    const lookup14 = {};
+    for (const entry of locArray) {
+      lookup14[entry.path] = entry.loc;
+      const parts = entry.path.split("/");
+      if (parts[0] === ".spago" && parts.length >= 4) {
+        const pkg = parts[1];
+        const relPath = parts.slice(3).join("/");
+        lookup14[`${pkg}::${relPath}`] = entry.loc;
+      }
+    }
+    return lookup14;
+  }
+  function lookupLOC(modulePath, pathToLOC, locArray) {
+    if (pathToLOC[modulePath]) {
+      return pathToLOC[modulePath];
+    }
+    const parts = modulePath.split("/");
+    if (parts[0] === ".spago" && parts.length >= 4) {
+      let pkg, relPath;
+      if (parts[1] === "p" && parts.length >= 5) {
+        pkg = parts[2];
+        relPath = parts.slice(4).join("/");
+      } else {
+        pkg = parts[1];
+        relPath = parts.slice(3).join("/");
+      }
+      const fuzzyKey = `${pkg}::${relPath}`;
+      if (pathToLOC[fuzzyKey]) {
+        return pathToLOC[fuzzyKey];
+      }
+    }
+    return 10;
   }
   var decodeModulesFile = function(filecontents) {
     const json2 = JSON.parse(filecontents);
@@ -24276,12 +24315,12 @@
   }
 
   // output/D3.Viz.Spago.Files/index.js
-  var fromFoldable9 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
-  var mapFlipped5 = /* @__PURE__ */ mapFlipped(functorArray);
   var append8 = /* @__PURE__ */ append(semigroupArray);
   var map40 = /* @__PURE__ */ map(functorArray);
   var fromFoldableWith2 = /* @__PURE__ */ fromFoldableWith(ordString)(foldableArray);
   var lookup8 = /* @__PURE__ */ lookup(ordString);
+  var fromFoldable9 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
+  var mapFlipped5 = /* @__PURE__ */ mapFlipped(functorArray);
   var bind20 = /* @__PURE__ */ bind(bindMaybe);
   var sum3 = /* @__PURE__ */ sum(foldableArray)(semiringNumber);
   var equalSnd2 = /* @__PURE__ */ equalSnd(eqString);
@@ -24368,7 +24407,7 @@
       };
     }
   };
-  var eq15 = /* @__PURE__ */ eq(eqLinkType);
+  var eq22 = /* @__PURE__ */ eq(eqLinkType);
   var showNodeType = {
     show: function(v) {
       if (v instanceof IsModule) {
@@ -24379,7 +24418,7 @@
         return "package";
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Files (line 295, column 1 - line 297, column 47): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.Spago.Files (line 292, column 1 - line 294, column 47): " + [v.constructor.name]);
     }
   };
   var showLinkType = {
@@ -24400,25 +24439,22 @@
         return "module to package dependency";
       }
       ;
-      throw new Error("Failed pattern match at D3.Viz.Spago.Files (line 298, column 1 - line 302, column 44): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at D3.Viz.Spago.Files (line 295, column 1 - line 299, column 44): " + [v.constructor.name]);
     }
   };
   var isP2P_Link = function(v) {
-    return eq15(v.linktype)(P2P.value);
+    return eq22(v.linktype)(P2P.value);
   };
   var isM2P_Link = function(v) {
-    return eq15(v.linktype)(M2P.value);
+    return eq22(v.linktype)(M2P.value);
   };
   var isM2M_Tree_Link = function(v) {
-    return eq15(v.linktype)(M2M_Tree.value);
+    return eq22(v.linktype)(M2M_Tree.value);
   };
   var isM2M_Graph_Link = function(v) {
-    return eq15(v.linktype)(M2M_Graph.value);
+    return eq22(v.linktype)(M2M_Graph.value);
   };
   var getGraphJSONData = function(v) {
-    var path2LOC = fromFoldable9(mapFlipped5(v.loc)(function(o) {
-      return new Tuple(o.path, o.loc);
-    }));
     var names = append8(map40(function(v1) {
       return v1.key;
     })(v.modules))(map40(function(v1) {
@@ -24530,6 +24566,11 @@
         return bind20(index2(pieces)(0))(function(root3) {
           return bind20(index2(pieces)(1))(function(packageString) {
             if (root3 === ".spago") {
+              var $63 = packageString === "p";
+              if ($63) {
+                return index2(pieces)(2);
+              }
+              ;
               return new Just(packageString);
             }
             ;
@@ -24546,22 +24587,11 @@
         key: v1.key,
         depends: v1.depends,
         path: v1.path,
+        loc: v1.loc,
         "package": $$package
       };
     };
-    var addLOCInfo = function(v1) {
-      var linecount = fromMaybe(10)(lookup8(v1.path)(path2LOC));
-      return {
-        key: v1.key,
-        depends: v1.depends,
-        path: v1.path,
-        "package": v1["package"],
-        loc: linecount
-      };
-    };
-    var modulesPL = map40(function($89) {
-      return addLOCInfo(addPackageInfo($89));
-    })(v.modules);
+    var modulesPL = map40(addPackageInfo)(v.modules);
     var mapNamesToModules = fromFoldable9(map40(function(m) {
       return new Tuple(m.key, m);
     })(modulesPL));
@@ -24581,8 +24611,8 @@
     var getSourceLinks = function(v1) {
       var sources = foldl2(function(acc) {
         return function(v2) {
-          var $73 = v1.id === v2.target;
-          if ($73) {
+          var $70 = v1.id === v2.target;
+          if ($70) {
             return cons3(v2.source)(acc);
           }
           ;
@@ -24615,8 +24645,8 @@
         contains: fromMaybe([])(lookup8(v1.key)(packageContainsMap))
       };
     };
-    var packagesCL = map40(function($90) {
-      return addRollUpLOC(addContains($90));
+    var packagesCL = map40(function($86) {
+      return addRollUpLOC(addContains($86));
     })(v.packages);
     var packageNodes = map40(makeNodeFromPackageJSONCL)(packagesCL);
     var nodes = append8(moduleNodes)(packageNodes);

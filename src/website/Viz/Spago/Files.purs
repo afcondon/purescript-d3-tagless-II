@@ -23,8 +23,8 @@ type PackageRow row = ( key :: String, depends :: Array String | row )
 type RepoRow row    = ( packageName :: String, version :: String, repo :: { tag :: String, contents :: URL } | row )
 type LOCRow row     = ( loc :: Number, path :: String | row )
 
-type ModuleJSON     = {                                  | ModuleRow () }
-type ModuleJSONP    = {                package :: String | ModuleRow () }
+type ModuleJSON     = { loc :: Number                    | ModuleRow () }  -- Now includes LOC from JS
+type ModuleJSONP    = { loc :: Number, package :: String | ModuleRow () }
 type ModuleJSONPL   = { loc :: Number, package :: String | ModuleRow () }
 
 type PackageJSON    = {                                         | PackageRow () }
@@ -109,16 +109,9 @@ type SpagoDataRecord = Record SpagoDataRow
 getGraphJSONData :: Spago_Raw_JSON_ -> Spago_Cooked_JSON
 getGraphJSONData { packages, modules, lsDeps, loc } = do
   let
-    path2LOC = M.fromFoldable $ 
-               loc <#> \o -> Tuple o.path o.loc
-
-    addLOCInfo :: ModuleJSONP -> ModuleJSONPL
-    addLOCInfo { key, depends, path, package } = { key, depends, path, package, loc: linecount }
-      where
-        linecount = fromMaybe 10.0 $ M.lookup path path2LOC
-
+    -- LOC is now already attached to modules from JS, just need to add package info
     addPackageInfo :: ModuleJSON -> ModuleJSONP
-    addPackageInfo { key, depends, path } = { key, depends, path, package }
+    addPackageInfo { key, depends, path, loc: locValue } = { key, depends, path, loc: locValue, package }
       where
         package = fromMaybe "" packageName
         packageName :: Maybe String
@@ -127,12 +120,16 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
           root          <- pieces !! 0
           packageString <- pieces !! 1
           case root of
-            ".spago" -> Just packageString
+            ".spago" ->
+              -- Handle both .spago/p/pkg/hash and .spago/pkg/version formats
+              if packageString == "p"
+                then pieces !! 2  -- .spago/p/aff/hash -> aff
+                else Just packageString  -- .spago/aff/version -> aff
             "src"    -> Just "my-project"  -- hardcoded for this project's source files
             _ -> Nothing
 
     modulesPL :: Array ModuleJSONPL
-    modulesPL = (addLOCInfo <<< addPackageInfo) <$> modules
+    modulesPL = addPackageInfo <$> modules
 
     -- the tuples are basis for Map moduleName packageName
     modulePackageTuples = (\m -> Tuple m.key m.package) <$> modulesPL
