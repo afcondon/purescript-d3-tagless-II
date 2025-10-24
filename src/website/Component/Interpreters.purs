@@ -2,12 +2,14 @@ module PSD3.Interpreters where
 
 import Prelude
 
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Effect.Aff (Aff)
+import Effect.Class (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import PSD3.InterpretersDemo (generateD3Code)
 import PSD3.RHSNavigation as RHSNav
 import PSD3.Types (Route(..))
 import Type.Proxy (Proxy(..))
@@ -25,6 +27,7 @@ derive instance eqInterpreterType :: Eq InterpreterType
 -- | Page state
 type State =
   { selectedInterpreter :: InterpreterType
+  , generatedD3Code :: Maybe String
   }
 
 -- | Page actions
@@ -50,11 +53,15 @@ component = H.mkComponent
     initialState :: State
     initialState =
       { selectedInterpreter: EnglishDescription
+      , generatedD3Code: Nothing
       }
 
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
-  Initialize -> pure unit
+  Initialize -> do
+    -- Generate D3 code on initialization
+    d3Code <- liftEffect generateD3Code
+    H.modify_ _ { generatedD3Code = Just d3Code }
   SelectInterpreter interpreter -> do
     H.modify_ _ { selectedInterpreter = interpreter }
 
@@ -132,7 +139,7 @@ render state =
         ]
 
     -- Selected interpreter output
-    , renderInterpreterOutput state.selectedInterpreter
+    , renderInterpreterOutput state state.selectedInterpreter
     ]
 
 -- | Render a clickable interpreter link in the TOC
@@ -145,8 +152,8 @@ renderInterpreterLink interpreter label =
     [ HH.text label ]
 
 -- | Render the output section for the selected interpreter
-renderInterpreterOutput :: InterpreterType -> H.ComponentHTML Action Slots Aff
-renderInterpreterOutput interpreter =
+renderInterpreterOutput :: State -> InterpreterType -> H.ComponentHTML Action Slots Aff
+renderInterpreterOutput state interpreter =
   HH.section
     [ HP.classes [ HH.ClassName "tutorial-section" ] ]
     [ HH.h2
@@ -156,7 +163,7 @@ renderInterpreterOutput interpreter =
         [ HH.text $ interpreterDescription interpreter ]
     , HH.div
         [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
-        [ renderInterpreterContent interpreter ]
+        [ renderInterpreterContent state interpreter ]
     ]
 
 -- | Get the title for an interpreter
@@ -183,8 +190,8 @@ interpreterDescription = case _ of
     "This interpreter visualizes the abstract syntax tree of the visualization code itself. It creates a tree diagram showing the structure of DSL operations, demonstrating meta-programming capabilities."
 
 -- | Render the actual content/output for each interpreter
-renderInterpreterContent :: InterpreterType -> H.ComponentHTML Action Slots Aff
-renderInterpreterContent = case _ of
+renderInterpreterContent :: State -> InterpreterType -> H.ComponentHTML Action Slots Aff
+renderInterpreterContent state = case _ of
   EnglishDescription ->
     HH.div
       [ HP.classes [ HH.ClassName "interpreter-output" ] ]
@@ -214,7 +221,7 @@ renderInterpreterContent = case _ of
       [ HH.pre
           [ HP.classes [ HH.ClassName "code-block" ] ]
           [ HH.code_
-              [ HH.text d3CodeOutput ]
+              [ HH.text $ fromMaybe "// Generating code..." state.generatedD3Code ]
           ]
       ]
 
