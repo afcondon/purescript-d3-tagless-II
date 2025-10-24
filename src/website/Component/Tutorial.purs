@@ -11,7 +11,7 @@ import D3.Viz.ScatterPlot as ScatterPlot
 import D3.Viz.Charts.Model (monthlySales, sineWaveData, anscombesQuartet)
 import D3Tagless.Instance.Selection (eval_D3M, runD3M)
 import Data.Array (catMaybes)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String.CodeUnits (toCharArray)
 import Data.Traversable (sequence)
 import Effect (Effect)
@@ -28,11 +28,18 @@ import PSD3.RoutingDSL (routeToPath)
 import PSD3.TOC (renderTOC)
 import PSD3.Types (Route(..))
 import PSD3.Utilities (syntaxHighlightedCode)
+import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))
 
 -- | Tutorial page state
 type State = {
   gupFiber :: Maybe (Fiber Unit)
+, threeCirclesSnippet :: Maybe String
+, gupSnippet :: Maybe String
+, parabolaSnippet :: Maybe String
+, barChartSnippet :: Maybe String
+, lineChartSnippet :: Maybe String
+, quartetSnippet :: Maybe String
 }
 
 -- | Tutorial page actions
@@ -46,7 +53,15 @@ _rhsNav = Proxy :: Proxy "rhsNav"
 -- | Tutorial page component
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
-  { initialState: \_ -> { gupFiber: Nothing }
+  { initialState: \_ ->
+      { gupFiber: Nothing
+      , threeCirclesSnippet: Nothing
+      , gupSnippet: Nothing
+      , parabolaSnippet: Nothing
+      , barChartSnippet: Nothing
+      , lineChartSnippet: Nothing
+      , quartetSnippet: Nothing
+      }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -71,7 +86,7 @@ lhsNav = renderTOC
 
 
 render :: State -> H.ComponentHTML Action Slots Aff
-render _ =
+render state =
   HH.div
     [ HP.classes [ HH.ClassName "tutorial-page" ] ]
     [ lhsNav
@@ -108,7 +123,7 @@ render _ =
             ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            (syntaxHighlightedCode threeCirclesCode)
+            (syntaxHighlightedCode $ fromMaybe "-- Snippet not defined: TLCSimple.purs" state.threeCirclesSnippet)
         ]
 
     -- Section 2: General Update Pattern
@@ -131,7 +146,7 @@ render _ =
             ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            (syntaxHighlightedCode gupCode)
+            (syntaxHighlightedCode $ fromMaybe "-- Snippet not defined: GUP.purs" state.gupSnippet)
         ]
 
     -- Section 3: Parabola of Circles
@@ -152,7 +167,7 @@ render _ =
             ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            (syntaxHighlightedCode parabolaCode)
+            (syntaxHighlightedCode $ fromMaybe "-- Snippet not defined: TLCParabola.purs" state.parabolaSnippet)
         ]
 
     -- Section 4: Bar Chart
@@ -175,7 +190,7 @@ render _ =
             ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            (syntaxHighlightedCode barChartCode)
+            (syntaxHighlightedCode $ fromMaybe "-- Snippet not defined: BarChartDraw.purs" state.barChartSnippet)
         ]
 
     -- Section 5: Line Chart
@@ -198,7 +213,7 @@ render _ =
             ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            (syntaxHighlightedCode lineChartCode)
+            (syntaxHighlightedCode $ fromMaybe "-- Snippet not defined: LineChartDraw.purs" state.lineChartSnippet)
         ]
 
     -- Section 6: Anscombe's Quartet
@@ -221,7 +236,7 @@ render _ =
             ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            (syntaxHighlightedCode quartetCode)
+            (syntaxHighlightedCode $ fromMaybe "-- Snippet not defined: ScatterPlotQuartet.purs" state.quartetSnippet)
         ]
 
     -- Section 7: Next Steps with margin links
@@ -274,6 +289,22 @@ render _ =
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
   Initialize -> do
+    -- Load code snippets
+    threeCircles <- H.liftAff $ readSnippetFiles "TLCSimple.purs"
+    gup <- H.liftAff $ readSnippetFiles "GUP.purs"
+    parabola <- H.liftAff $ readSnippetFiles "TLCParabola.purs"
+    barChart <- H.liftAff $ readSnippetFiles "BarChartDraw.purs"
+    lineChart <- H.liftAff $ readSnippetFiles "LineChartDraw.purs"
+    quartet <- H.liftAff $ readSnippetFiles "ScatterPlotQuartet.purs"
+
+    H.modify_ _ { threeCirclesSnippet = Just threeCircles
+                , gupSnippet = Just gup
+                , parabolaSnippet = Just parabola
+                , barChartSnippet = Just barChart
+                , lineChartSnippet = Just lineChart
+                , quartetSnippet = Just quartet
+                }
+
     -- Draw Three Little Circles
     _ <- H.liftEffect $ eval_D3M $ Circles.drawThreeCircles "div.three-circles-viz"
 
@@ -329,145 +360,3 @@ runUpdate update = do
       choices <- sequence $ coinToss <$> letters
       pure $ catMaybes choices
 
--- Code snippets for tutorial examples
-threeCirclesCode :: String
-threeCirclesCode = """drawThreeCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
-drawThreeCircles selector = do
-  root        <- attach selector
-  svg         <- appendTo root Svg [ viewBox (-10.0) 20.0 120.0 60.0, classed "d3svg" ]
-  circleGroup <- appendTo svg  Group []
-  circles     <- simpleJoin circleGroup Circle [32, 57, 293] keyIsID_
-  setAttributes circles [ fill "green"
-                         , cx datum_.x
-                         , cy 50.0
-                         , radius 20.0 ]
-  pure circles"""
-
-gupCode :: String
-gupCode = """exGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_ -> m ((Array Char) -> m D3Selection_)
-exGeneralUpdatePattern selector = do
-  root        <- attach selector
-  svg         <- appendTo root Svg [ viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup" ]
-  letterGroup <- appendTo svg Group []
-
-  pure $ \letters -> do
-    enterSelection   <- openSelection letterGroup "text"
-    updateSelections <- updateJoin enterSelection Text letters keyFunction
-    setAttributes updateSelections.exit exit
-    setAttributes updateSelections.update update
-    newlyEntered     <- appendTo updateSelections.enter Text []
-    setAttributes newlyEntered enter
-    pure newlyEntered
-  where
-    transition = transitionWithDuration $ Milliseconds 2000.0
-    enter  = [ classed "enter", fill "green", x xFromIndex, y 0.0, text (singleton <<< datumIsChar), fontSize 96.0 ]
-             `andThen` (transition `to` [ y 200.0 ])
-    update = [ classed "update", fill "gray", y 200.0 ]
-             `andThen` (transition `to` [ x xFromIndex ])
-    exit   = [ classed "exit", fill "brown"]
-             `andThen` (transition `to` [ y 400.0, remove ])"""
-
-parabolaCode :: String
-parabolaCode = """drawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_ -> m D3Selection_
-drawWithData circleData selector = do
-  let circleAttributes = 
-
-  root        <- attach selector
-  svg         <- appendTo root Svg [ viewBox (-10.0) (-100.0) 320.0 160.0, classed "d3svg" ]
-  circleGroup <- appendTo svg  Group []
-  circles     <- simpleJoin circleGroup Circle circleData keyIsID_
-  setAttributes circles [ strokeColor datum_.color
-                        , strokeWidth 3.0
-                        , fill "none"
-                        , cx datum_.x
-                        , cy datum_.y
-                        , radius 10.0 ]
-  pure circles"""
-
-barChartCode :: String
-barChartCode = """draw :: Array DataPoint -> Selector D3Selection_ -> m Unit
-draw dataPoints selector = do
-  let dims = defaultDimensions
-
-  root <- attach selector
-  svg <- appendTo root Svg [ viewBox 0.0 0.0 dims.width dims.height, classed "bar-chart" ]
-  chartGroup <- appendTo svg Group [
-      transform [ \\_ -> "translate(" <> show dims.margin.left <> "," <> show dims.margin.top <> ")" ]
-    ]
-
-  -- Create scales
-  xScale <- liftEffect $ createLinearScale { domain: [minX, maxX], range: [0.0, iWidth] }
-  yScale <- liftEffect $ createLinearScale { domain: [minY, maxY], range: [iHeight, 0.0] }
-
-  -- Add axes
-  xAxisGroup <- appendTo chartGroup Group [ classed "x-axis", transform [ \\_ -> "translate(0," <> show iHeight <> ")" ] ]
-  yAxisGroup <- appendTo chartGroup Group [ classed "y-axis" ]
-  _ <- liftEffect $ callAxis xAxisGroup (axisBottom xScale)
-  _ <- liftEffect $ callAxis yAxisGroup (axisLeft yScale)
-
-  -- Add bars
-  let addBar point = do
-        let xPos = applyScale xScale point.x - (barWidth / 2.0)
-        let yPos = applyScale yScale point.y
-        let barHeight = iHeight - yPos
-        _ <- appendTo chartGroup Rect [ x xPos, y yPos, width barWidth, height barHeight, fill "#4a90e2" ]
-        pure unit
-  _ <- traverse_ addBar dataPoints
-  pure unit"""
-
-lineChartCode :: String
-lineChartCode = """draw :: Array DataPoint -> Selector D3Selection_ -> m Unit
-draw dataPoints selector = do
-  let dims = defaultDimensions
-
-  root <- attach selector
-  svg <- appendTo root Svg [ viewBox 0.0 0.0 dims.width dims.height, classed "line-chart" ]
-  chartGroup <- appendTo svg Group [
-      transform [ \\_ -> "translate(" <> show dims.margin.left <> "," <> show dims.margin.top <> ")" ]
-    ]
-
-  -- Create scales
-  xScale <- liftEffect $ createLinearScale { domain: [minX, maxX], range: [0.0, iWidth] }
-  yScale <- liftEffect $ createLinearScale { domain: [minY, maxY], range: [iHeight, 0.0] }
-
-  -- Add axes
-  xAxisGroup <- appendTo chartGroup Group [ classed "x-axis", transform [ \\_ -> "translate(0," <> show iHeight <> ")" ] ]
-  yAxisGroup <- appendTo chartGroup Group [ classed "y-axis" ]
-  _ <- liftEffect $ callAxis xAxisGroup (axisBottom xScale)
-  _ <- liftEffect $ callAxis yAxisGroup (axisLeft yScale)
-
-  -- Create line generator and add the line path
-  lineGen <- liftEffect $ createLineGenerator { xScale, yScale }
-  let pathData = generateLinePath lineGen dataPoints
-  _ <- appendTo chartGroup Path [ d pathData, fill "none", strokeColor "#4a90e2", strokeWidth 2.0, classed "line" ]
-  pure unit"""
-
-quartetCode :: String
-quartetCode = """drawQuartet :: QuartetData -> Selector D3Selection_ -> m Unit
-drawQuartet quartet selector = do
-  -- Overall dimensions for the quartet display (2x2 grid of small multiples)
-  let totalWidth = 900.0
-  let totalHeight = 700.0
-
-  root <- attach selector
-  svg <- appendTo root Svg [ viewBox 0.0 0.0 totalWidth totalHeight, classed "scatter-quartet" ]
-
-  -- Helper function to draw a single subplot
-  let drawSubplot title dataPoints xOffset yOffset = do
-        subplotGroup <- appendTo svg Group [ classed "subplot", transform [ \\_ -> "translate(" <> show xOffset <> "," <> show yOffset <> ")" ] ]
-
-        -- Add title
-        _ <- appendTo svg Text [ x (xOffset + plotWidth / 2.0), y (yOffset + 15.0), text title, textAnchor "middle" ]
-
-        -- Create scales (use fixed domains for valid comparison)
-        xScale <- liftEffect $ createLinearScale { domain: [0.0, 20.0], range: [0.0, iWidth] }
-        yScale <- liftEffect $ createLinearScale { domain: [0.0, 14.0], range: [iHeight, 0.0] }
-
-        -- Add axes and data points...
-
-  -- Draw all four subplots in a 2x2 grid
-  _ <- drawSubplot "Dataset I" quartet.dataset1 padding padding
-  _ <- drawSubplot "Dataset II" quartet.dataset2 (padding + plotWidth + padding) padding
-  _ <- drawSubplot "Dataset III" quartet.dataset3 padding (padding + plotHeight + padding)
-  _ <- drawSubplot "Dataset IV" quartet.dataset4 (padding + plotWidth + padding) (padding + plotHeight + padding)
-  pure unit"""

@@ -12,6 +12,7 @@ import Halogen.HTML.Properties as HP
 import PSD3.InterpretersDemo (generateD3Code)
 import PSD3.RHSNavigation as RHSNav
 import PSD3.Types (Route(..))
+import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))
 
 -- | Available interpreters
@@ -28,6 +29,9 @@ derive instance eqInterpreterType :: Eq InterpreterType
 type State =
   { selectedInterpreter :: InterpreterType
   , generatedD3Code :: Maybe String
+  , exampleSnippet :: Maybe String
+  , vegaLiteSnippet :: Maybe String
+  , mermaidSnippet :: Maybe String
   }
 
 -- | Page actions
@@ -54,6 +58,9 @@ component = H.mkComponent
     initialState =
       { selectedInterpreter: EnglishDescription
       , generatedD3Code: Nothing
+      , exampleSnippet: Nothing
+      , vegaLiteSnippet: Nothing
+      , mermaidSnippet: Nothing
       }
 
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
@@ -61,7 +68,17 @@ handleAction = case _ of
   Initialize -> do
     -- Generate D3 code on initialization
     d3Code <- liftEffect generateD3Code
-    H.modify_ _ { generatedD3Code = Just d3Code }
+
+    -- Load code snippets
+    exampleCode <- H.liftAff $ readSnippetFiles "TLCSimple.purs"
+    vegaCode <- H.liftAff $ readSnippetFiles "VegaLiteExample.purs"
+    mermaidCode <- H.liftAff $ readSnippetFiles "MermaidExample.purs"
+
+    H.modify_ _ { generatedD3Code = Just d3Code
+                , exampleSnippet = Just exampleCode
+                , vegaLiteSnippet = Just vegaCode
+                , mermaidSnippet = Just mermaidCode
+                }
   SelectInterpreter interpreter -> do
     H.modify_ _ { selectedInterpreter = interpreter }
 
@@ -130,11 +147,11 @@ render state =
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
             [ HH.text "The Source Code" ]
         , HH.p_
-            [ HH.text "Here's a simple example using our PureScript D3 DSL to create a scatter plot:" ]
+            [ HH.text "Here's a simple example using our PureScript D3 DSL - the most basic example imaginable, three circles:" ]
         , HH.pre
             [ HP.classes [ HH.ClassName "code-block" ] ]
             [ HH.code_
-                [ HH.text exampleCode ]
+                [ HH.text $ fromMaybe "-- Snippet not defined: TLCSimple.purs" state.exampleSnippet ]
             ]
         ]
 
@@ -231,7 +248,7 @@ renderInterpreterContent state = case _ of
       [ HH.pre
           [ HP.classes [ HH.ClassName "code-block" ] ]
           [ HH.code_
-              [ HH.text vegaLiteOutput ]
+              [ HH.text $ fromMaybe "// Snippet not defined: VegaLiteExample.purs" state.vegaLiteSnippet ]
           ]
       ]
 
@@ -241,7 +258,7 @@ renderInterpreterContent state = case _ of
       [ HH.pre
           [ HP.classes [ HH.ClassName "code-block" ] ]
           [ HH.code_
-              [ HH.text mermaidOutput ]
+              [ HH.text $ fromMaybe "// Snippet not defined: MermaidExample.purs" state.mermaidSnippet ]
           ]
       ]
 
@@ -253,117 +270,3 @@ renderInterpreterContent state = case _ of
           [ HH.text "[AST Tree visualization will be rendered here]" ]
       ]
 
--- | Example PureScript D3 DSL code
-exampleCode :: String
-exampleCode = """-- Create a simple scatter plot
-scatterPlot :: forall m. SelectionM D3Selection_ m => MonadEffect m => m Unit
-scatterPlot = do
-  root <- attach "div.scatterplot-viz"
-  svg <- appendTo root Svg
-    [ classed "simple-scatterplot"
-    , width 400.0
-    , height 300.0
-    , viewBox 0.0 0.0 400.0 300.0
-    ]
-  dotsGroup <- appendTo svg Group [ classed "dots" ]
-
-  let dataPoints = generateDataPoints 20
-
-  _ <- traverse_ (\\pt -> do
-    appendTo dotsGroup Circle
-      [ cx pt.x
-      , cy pt.y
-      , radius 4.0
-      , fill "steelblue"
-      , fillOpacity 0.7
-      ]
-  ) dataPoints
-
-  pure unit"""
-
--- | D3 JavaScript code output
-d3CodeOutput :: String
-d3CodeOutput = """// Create a simple scatter plot
-function scatterPlot() {
-  // Attach to div
-  const root = d3.select("div.scatterplot-viz");
-
-  // Create SVG
-  const svg = root.append("svg")
-    .attr("class", "simple-scatterplot")
-    .attr("width", 400)
-    .attr("height", 300)
-    .attr("viewBox", "0 0 400 300");
-
-  // Create group for dots
-  const dotsGroup = svg.append("g")
-    .attr("class", "dots");
-
-  // Generate data
-  const dataPoints = generateDataPoints(20);
-
-  // Add circles
-  dotsGroup.selectAll("circle")
-    .data(dataPoints)
-    .enter()
-    .append("circle")
-      .attr("cx", d => d.x)
-      .attr("cy", d => d.y)
-      .attr("r", 4)
-      .attr("fill", "steelblue")
-      .attr("fill-opacity", 0.7);
-}"""
-
--- | Vega-Lite JSON output
-vegaLiteOutput :: String
-vegaLiteOutput = """{
-  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-  "description": "A simple scatter plot",
-  "width": 400,
-  "height": 300,
-  "data": {
-    "name": "dataPoints",
-    "values": [
-      {"x": 50, "y": 100},
-      {"x": 120, "y": 80},
-      {"x": 200, "y": 150},
-      "... (20 points total)"
-    ]
-  },
-  "mark": {
-    "type": "circle",
-    "size": 50,
-    "opacity": 0.7,
-    "color": "steelblue"
-  },
-  "encoding": {
-    "x": {
-      "field": "x",
-      "type": "quantitative",
-      "scale": {"domain": [0, 400]}
-    },
-    "y": {
-      "field": "y",
-      "type": "quantitative",
-      "scale": {"domain": [0, 300]}
-    }
-  }
-}"""
-
--- | Mermaid diagram output
-mermaidOutput :: String
-mermaidOutput = """graph TD
-    A[Attach to div.scatterplot-viz] --> B[Create SVG]
-    B --> C[Set SVG attributes]
-    C --> D[width: 400, height: 300]
-    C --> E[class: simple-scatterplot]
-    C --> F[viewBox: 0 0 400 300]
-    B --> G[Append Group]
-    G --> H[Set group class: dots]
-    G --> I[Generate 20 data points]
-    I --> J[For each point...]
-    J --> K[Append Circle]
-    K --> L[cx, cy from data]
-    K --> M[radius: 4]
-    K --> N[fill: steelblue]
-    K --> O[opacity: 0.7]"""
