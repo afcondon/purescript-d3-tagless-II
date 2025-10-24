@@ -11,6 +11,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RHSNavigation as RHSNav
+import PSD3.TOC (renderTOC)
 import PSD3.Types (Route(..))
 import Type.Proxy (Proxy(..))
 
@@ -41,46 +42,23 @@ render _ =
   HH.div
     [ HP.classes [ HH.ClassName "tutorial-page" ] ]
     [ -- TOC Panel (LHS)
-      HH.div
-        [ HP.classes [ HH.ClassName "toc-panel" ] ]
-        [ HH.img
-            [ HP.src "bookmark.jpeg"
-            , HP.alt ""
-            , HP.classes [ HH.ClassName "toc-panel__bookmark-pin" ]
+      renderTOC
+        { title: "Contents"
+        , items:
+            [ { anchor: "heading-0", label: "PS<$>D3", level: 0 }
+            , { anchor: "heading-2", label: "What is This Project?", level: 1 }
+            , { anchor: "heading-3", label: "Motivation", level: 1 }
+            , { anchor: "heading-4", label: "The Data Visualization Process", level: 1 }
+            , { anchor: "anscombe", label: "Why Visualize? Anscombe's Quartet", level: 2 }
+            , { anchor: "heading-5", label: "Design philosophy of D3*", level: 2 }
+            , { anchor: "heading-6", label: "Design philosophy of PS<$>D3", level: 2 }
+            , { anchor: "heading-7", label: "Project Goals (and non-Goals)", level: 1 }
+            , { anchor: "heading-9", label: "Goals: details", level: 2 }
+            , { anchor: "heading-13", label: "Non-goals: details", level: 2 }
+            , { anchor: "heading-17", label: "What's a DSL? and what's an eDSL?", level: 1 }
+            , { anchor: "heading-20", label: "The grammar of D3...", level: 1 }
             ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "toc-panel__main" ] ]
-            [ HH.div
-                [ HP.classes [ HH.ClassName "floating-panel__header" ] ]
-                [ HH.h3
-                    [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
-                    [ HH.text "Contents" ]
-                , HH.button
-                    [ HP.classes [ HH.ClassName "floating-panel__toggle" ]
-                    , HP.type_ HP.ButtonButton
-                    ]
-                    [ HH.text "−" ]
-                ]
-            , HH.div
-                [ HP.classes [ HH.ClassName "floating-panel__content", HH.ClassName "toc-panel__content" ] ]
-                [ HH.nav
-                    [ HP.classes [ HH.ClassName "toc-nav" ] ]
-                    [ HH.a [ HP.href "#heading-0", HP.classes [ HH.ClassName "toc-nav__item" ] ] [ HH.text "PS<$>D3" ]
-                    , HH.a [ HP.href "#heading-2", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-2" ] ] [ HH.text "What is This Project?" ]
-                    , HH.a [ HP.href "#heading-3", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-2" ] ] [ HH.text "Motivation" ]
-                    , HH.a [ HP.href "#heading-4", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-2" ] ] [ HH.text "The Data Visualization Process" ]
-                    , HH.a [ HP.href "#anscombe", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-3" ] ] [ HH.text "Why Visualize? Anscombe's Quartet" ]
-                    , HH.a [ HP.href "#heading-5", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-3" ] ] [ HH.text "Design philosophy of D3*" ]
-                    , HH.a [ HP.href "#heading-6", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-3" ] ] [ HH.text "Design philosophy of PS<$>D3" ]
-                    , HH.a [ HP.href "#heading-7", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-2" ] ] [ HH.text "Project Goals (and non-Goals)" ]
-                    , HH.a [ HP.href "#heading-9", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-3" ] ] [ HH.text "Goals: details" ]
-                    , HH.a [ HP.href "#heading-13", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-3" ] ] [ HH.text "Non-goals: details" ]
-                    , HH.a [ HP.href "#heading-17", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-2" ] ] [ HH.text "What's a DSL? and what's an eDSL?" ]
-                    , HH.a [ HP.href "#heading-20", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-2" ] ] [ HH.text "The grammar of D3..." ]
-                    ]
-                ]
-            ]
-        ]
+        }
 
     -- Navigation Panel (RHS)
     , HH.slot_ _rhsNav unit RHSNav.component About

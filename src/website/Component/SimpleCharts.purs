@@ -13,6 +13,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RHSNavigation as RHSNav
+import PSD3.TOC (renderTOC)
 import PSD3.Types (Route(..))
 import Type.Proxy (Proxy(..))
 
@@ -51,37 +52,14 @@ render _ =
   HH.div
     [ HP.classes [ HH.ClassName "tutorial-page" ] ]
     [ -- TOC Panel (LHS)
-      HH.div
-        [ HP.classes [ HH.ClassName "toc-panel" ] ]
-        [ HH.img
-            [ HP.src "bookmark.jpeg"
-            , HP.alt ""
-            , HP.classes [ HH.ClassName "toc-panel__bookmark-pin" ]
+      renderTOC
+        { title: "Contents"
+        , items:
+            [ { anchor: "grouped-bar", label: "1. Grouped Bar Chart", level: 0 }
+            , { anchor: "multi-line", label: "2. Multi-Line Chart", level: 0 }
+            , { anchor: "radial-stacked", label: "3. Radial Stacked Bar Chart", level: 0 }
             ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "toc-panel__main" ] ]
-            [ HH.div
-                [ HP.classes [ HH.ClassName "floating-panel__header" ] ]
-                [ HH.h3
-                    [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
-                    [ HH.text "Contents" ]
-                , HH.button
-                    [ HP.classes [ HH.ClassName "floating-panel__toggle" ]
-                    , HP.type_ HP.ButtonButton
-                    ]
-                    [ HH.text "−" ]
-                ]
-            , HH.div
-                [ HP.classes [ HH.ClassName "floating-panel__content", HH.ClassName "toc-panel__content" ] ]
-                [ HH.nav
-                    [ HP.classes [ HH.ClassName "toc-nav" ] ]
-                    [ HH.a [ HP.href "#grouped-bar", HP.classes [ HH.ClassName "toc-nav__item" ] ] [ HH.text "1. Grouped Bar Chart" ]
-                    , HH.a [ HP.href "#multi-line", HP.classes [ HH.ClassName "toc-nav__item" ] ] [ HH.text "2. Multi-Line Chart" ]
-                    , HH.a [ HP.href "#radial-stacked", HP.classes [ HH.ClassName "toc-nav__item" ] ] [ HH.text "3. Radial Stacked Bar Chart" ]
-                    ]
-                ]
-            ]
-        ]
+        }
 
     -- Navigation Panel (RHS)
     , HH.slot_ _rhsNav unit RHSNav.component SimpleCharts

@@ -7,14 +7,14 @@ import D3.FFI (keyIsID_)
 import D3.Scales (d3SchemePairedN_)
 import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import Data.Int (toNumber)
-import Prelude (bind, discard, negate, pure, ($), (*), (-), (/))
+import Prelude (bind, discard, negate, pure, ($), (*), (+), (-), (/))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- Snippet_Start
 -- Name: 3LC-xFromIndex
 -- | simple utility function used in all three of these examples
 xFromIndex :: Datum_ -> Index_ -> Number
-xFromIndex _ i = ((indexIsNumber i) * 100.0)
+xFromIndex _ i = ((indexIsNumber i) * 30.0) + 10.0
   where
     indexIsNumber :: Index_ -> Number
     indexIsNumber = unsafeCoerce
@@ -25,14 +25,14 @@ xFromIndex _ i = ((indexIsNumber i) * 100.0)
 -- | Pretty much the most basic example imaginable, three ints represented by three circles
 drawThreeCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
 drawThreeCircles selector = do
-
-  let circleAttributes = [ fill "green", cx xFromIndex, cy 50.0, radius 20.0 ]
-
   root        <- attach selector
   svg         <- appendTo root Svg [ viewBox (-10.0) 20.0 120.0 60.0, classed "d3svg gup" ]
   circleGroup <- appendTo svg  Group []
   circles     <- simpleJoin circleGroup Circle [32, 57, 293] keyIsID_ 
-  setAttributes circles circleAttributes
+  setAttributes circles [ fill "green"
+                        , cx xFromIndex
+                        , cy 50.0
+                        , radius 10.0 ]
 
   pure circles
 -- Snippet_End
@@ -65,21 +65,16 @@ datum_ =
 -- Name: TLCParabola
 drawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_
 drawWithData circleData selector = do
-
-  let circleAttributes = [
-      strokeColor datum_.color
-    , strokeWidth 3.0
-    , fill "none"
-    , cx datum_.x
-    , cy datum_.y
-    , radius 10.0 ]
-
   root        <- attach selector
   svg         <- appendTo root Svg [ viewBox (-10.0) (-100.0) 320.0 160.0, classed "d3svg gup" ]
   circleGroup <- appendTo svg  Group []
 
   circles     <- simpleJoin circleGroup Circle circleData keyIsID_ 
-  setAttributes circles circleAttributes
-
+  setAttributes circles [ strokeColor datum_.color
+                        , strokeWidth 3.0
+                        , fill "none"
+                        , cx datum_.x
+                        , cy datum_.y
+                        , radius 10.0 ]
   pure circles
 -- Snippet_End

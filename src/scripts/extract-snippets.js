@@ -29,6 +29,7 @@ function extractSnippets(filePath) {
 
   let inSnippet = false;
   let snippetLines = [];
+  let snippetName = null;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -36,21 +37,31 @@ function extractSnippets(filePath) {
     if (line.includes('Snippet_Start')) {
       inSnippet = true;
       snippetLines = [];
+      snippetName = null;
       continue;
     }
 
     if (line.includes('Snippet_End')) {
       if (snippetLines.length > 0) {
-        snippets.push(snippetLines.join('\n') + '\n');
+        snippets.push({
+          name: snippetName,
+          content: snippetLines.join('\n') + '\n'
+        });
       }
       inSnippet = false;
       snippetLines = [];
+      snippetName = null;
       continue;
     }
 
     if (inSnippet) {
-      // Skip the Name: line if present, just collect the code
-      if (!line.includes('Name:')) {
+      // Extract snippet name from Name: line
+      if (line.includes('Name:')) {
+        const nameMatch = line.match(/Name:\s*(.+)/);
+        if (nameMatch) {
+          snippetName = nameMatch[1].trim();
+        }
+      } else {
         snippetLines.push(line);
       }
     }
@@ -61,7 +72,7 @@ function extractSnippets(filePath) {
 
 // Main execution
 function main() {
-  const srcDir = path.join(__dirname, '../../src/DemoApp');
+  const srcDir = path.join(__dirname, '../../src/website/Viz');
   const outputDir = path.join(__dirname, '../../docs/code-examples');
 
   // Ensure output directory exists
@@ -84,14 +95,20 @@ function main() {
       const fileName = path.basename(file, '.purs');
       console.log(`${file}: ${snippetCount} snippet(s)`);
 
-      snippets.forEach((content, index) => {
-        // Generate numbered filename: ThreeLittleCircles-1.purs, ThreeLittleCircles-2.purs, etc.
-        const snippetNumber = index + 1;
-        const outputFileName = snippetCount === 1
-          ? `${fileName}.purs`
-          : `${fileName}-${snippetNumber}.purs`;
+      snippets.forEach((snippet, index) => {
+        // Use snippet name if available, otherwise use numbered filename
+        let outputFileName;
+        if (snippet.name) {
+          outputFileName = `${snippet.name}.purs`;
+        } else {
+          const snippetNumber = index + 1;
+          outputFileName = snippetCount === 1
+            ? `${fileName}.purs`
+            : `${fileName}-${snippetNumber}.purs`;
+        }
+
         const outputPath = path.join(outputDir, outputFileName);
-        fs.writeFileSync(outputPath, content, 'utf8');
+        fs.writeFileSync(outputPath, snippet.content, 'utf8');
         console.log(`  - ${outputFileName}`);
         totalSnippets++;
       });

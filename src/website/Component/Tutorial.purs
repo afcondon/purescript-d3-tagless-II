@@ -25,6 +25,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RHSNavigation as RHSNav
 import PSD3.RoutingDSL (routeToPath)
+import PSD3.TOC (renderTOC)
 import PSD3.Types (Route(..))
 import PSD3.Utilities (syntaxHighlightedCode)
 import Type.Proxy (Proxy(..))
@@ -54,47 +55,26 @@ component = H.mkComponent
       }
   }
 
+lhsNav :: H.ComponentHTML Action Slots Aff
+lhsNav = renderTOC
+  { title: "Contents"
+  , items:
+      [ { anchor: "section-1", label: "1. Three Little Circles", level: 0 }
+      , { anchor: "section-2", label: "2. General Update Pattern", level: 0 }
+      , { anchor: "section-3", label: "3. Data-Driven Positioning", level: 0 }
+      , { anchor: "section-4", label: "4. Bar Charts with Scales", level: 0 }
+      , { anchor: "section-5", label: "5. Line Charts and Paths", level: 0 }
+      , { anchor: "section-6", label: "6. Anscombe's Quartet", level: 0 }
+      , { anchor: "section-7", label: "7. Next Steps", level: 0 }
+      ]
+  }
+
+
 render :: State -> H.ComponentHTML Action Slots Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "tutorial-page" ] ]
-    [ -- TOC Panel (LHS)
-      HH.div
-        [ HP.classes [ HH.ClassName "toc-panel" ] ]
-        [ HH.img
-            [ HP.src "bookmark.jpeg"
-            , HP.alt ""
-            , HP.classes [ HH.ClassName "toc-panel__bookmark-pin" ]
-            ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "toc-panel__main" ] ]
-            [ HH.div
-                [ HP.classes [ HH.ClassName "floating-panel__header" ] ]
-                [ HH.h3
-                    [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
-                    [ HH.text "Contents" ]
-                , HH.button
-                    [ HP.classes [ HH.ClassName "floating-panel__toggle" ]
-                    , HP.type_ HP.ButtonButton
-                    ]
-                    [ HH.text "−" ]
-                ]
-            , HH.div
-                [ HP.classes [ HH.ClassName "floating-panel__content", HH.ClassName "toc-panel__content" ] ]
-                [ HH.nav
-                    [ HP.classes [ HH.ClassName "toc-nav" ] ]
-                    [ HH.a [ HP.href "#section-1", HP.classes [ HH.ClassName "toc-nav__item" ] ] [ HH.text "1. Three Little Circles" ]
-                    , HH.a [ HP.href "#section-2", HP.classes [ HH.ClassName "toc-nav__item" ] ] [ HH.text "2. General Update Pattern" ]
-                    , HH.a [ HP.href "#section-3", HP.classes [ HH.ClassName "toc-nav__item" ] ] [ HH.text "3. Data-Driven Positioning" ]
-                    , HH.a [ HP.href "#section-4", HP.classes [ HH.ClassName "toc-nav__item" ] ] [ HH.text "4. Bar Charts with Scales" ]
-                    , HH.a [ HP.href "#section-5", HP.classes [ HH.ClassName "toc-nav__item" ] ] [ HH.text "5. Line Charts and Paths" ]
-                    , HH.a [ HP.href "#section-6", HP.classes [ HH.ClassName "toc-nav__item" ] ] [ HH.text "6. Anscombe's Quartet" ]
-                    , HH.a [ HP.href "#section-7", HP.classes [ HH.ClassName "toc-nav__item" ] ] [ HH.text "7. Next Steps" ]
-                    ]
-                ]
-            ]
-        ]
-
+    [ lhsNav
     -- Navigation Panel (RHS)
     , HH.slot_ _rhsNav unit RHSNav.component Tutorial
 
@@ -105,9 +85,9 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
             [ HH.text "Tutorial: Building Visualizations with PureScript D3" ]
         , HH.p_
-            [ HH.text "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat." ]
+            [ HH.text "We'll show just the very simplest examples of putting elements in the DOM, in this case into an SVG, using the PS<$>D3 grammar." ]
         , HH.p_
-            [ HH.text "Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." ]
+            [ HH.text "In the How-to manual we'll explain in detail what each of these lines means, but if you're already familiar with D3.js the shape of the code should look very familiar." ]
         ]
 
     -- Section 1: Three Little Circles
@@ -353,14 +333,14 @@ runUpdate update = do
 threeCirclesCode :: String
 threeCirclesCode = """drawThreeCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
 drawThreeCircles selector = do
-  let circleAttributes = [ fill "green", cx xFromIndex, cy 50.0, radius 20.0 ]
-
   root        <- attach selector
   svg         <- appendTo root Svg [ viewBox (-10.0) 20.0 120.0 60.0, classed "d3svg" ]
   circleGroup <- appendTo svg  Group []
   circles     <- simpleJoin circleGroup Circle [32, 57, 293] keyIsID_
-  setAttributes circles circleAttributes
-
+  setAttributes circles [ fill "green"
+                         , cx datum_.x
+                         , cy 50.0
+                         , radius 20.0 ]
   pure circles"""
 
 gupCode :: String
@@ -370,7 +350,7 @@ exGeneralUpdatePattern selector = do
   svg         <- appendTo root Svg [ viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup" ]
   letterGroup <- appendTo svg Group []
 
-  pure $ \\letters -> do
+  pure $ \letters -> do
     enterSelection   <- openSelection letterGroup "text"
     updateSelections <- updateJoin enterSelection Text letters keyFunction
     setAttributes updateSelections.exit exit
@@ -390,19 +370,18 @@ exGeneralUpdatePattern selector = do
 parabolaCode :: String
 parabolaCode = """drawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_ -> m D3Selection_
 drawWithData circleData selector = do
-  let circleAttributes = [
-      strokeColor datum_.color
-    , strokeWidth 3.0
-    , fill "none"
-    , cx datum_.x
-    , cy datum_.y
-    , radius 10.0 ]
+  let circleAttributes = 
 
   root        <- attach selector
   svg         <- appendTo root Svg [ viewBox (-10.0) (-100.0) 320.0 160.0, classed "d3svg" ]
   circleGroup <- appendTo svg  Group []
   circles     <- simpleJoin circleGroup Circle circleData keyIsID_
-  setAttributes circles circleAttributes
+  setAttributes circles [ strokeColor datum_.color
+                        , strokeWidth 3.0
+                        , fill "none"
+                        , cx datum_.x
+                        , cy datum_.y
+                        , radius 10.0 ]
   pure circles"""
 
 barChartCode :: String

@@ -147,19 +147,19 @@
   };
   var applyFirst = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map53 = map(dictApply.Functor0());
+    var map54 = map(dictApply.Functor0());
     return function(a2) {
       return function(b2) {
-        return apply1(map53($$const)(a2))(b2);
+        return apply1(map54($$const)(a2))(b2);
       };
     };
   };
   var applySecond = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map53 = map(dictApply.Functor0());
+    var map54 = map(dictApply.Functor0());
     return function(a2) {
       return function(b2) {
-        return apply1(map53($$const(identity2))(a2))(b2);
+        return apply1(map54($$const(identity2))(a2))(b2);
       };
     };
   };
@@ -791,12 +791,12 @@
     return dict.append;
   };
   var semigroupFn = function(dictSemigroup) {
-    var append19 = append(dictSemigroup);
+    var append110 = append(dictSemigroup);
     return {
       append: function(f) {
         return function(g) {
           return function(x23) {
-            return append19(f(x23))(g(x23));
+            return append110(f(x23))(g(x23));
           };
         };
       }
@@ -2267,10 +2267,10 @@
   var $$try = function(dictMonadError) {
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
-    var map53 = map(Monad0.Bind1().Apply0().Functor0());
+    var map54 = map(Monad0.Bind1().Apply0().Functor0());
     var pure34 = pure(Monad0.Applicative0());
     return function(a2) {
-      return catchError1(map53(Right.create)(a2))(function($52) {
+      return catchError1(map54(Right.create)(a2))(function($52) {
         return pure34(Left.create($52));
       });
     };
@@ -2562,7 +2562,7 @@
     };
   };
   var altExceptT = function(dictSemigroup) {
-    var append19 = append(dictSemigroup);
+    var append20 = append(dictSemigroup);
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
       var bind31 = bind(Bind1);
@@ -2583,7 +2583,7 @@
                   }
                   ;
                   if (rn instanceof Left) {
-                    return pure34(new Left(append19(rm.value0)(rn.value0)));
+                    return pure34(new Left(append20(rm.value0)(rn.value0)));
                   }
                   ;
                   throw new Error("Failed pattern match at Control.Monad.Except.Trans (line 86, column 9 - line 88, column 49): " + [rn.constructor.name]);
@@ -2819,7 +2819,7 @@
   var intercalate2 = function(dictFoldable) {
     var foldl22 = foldl(dictFoldable);
     return function(dictMonoid) {
-      var append19 = append(dictMonoid.Semigroup0());
+      var append20 = append(dictMonoid.Semigroup0());
       var mempty2 = mempty(dictMonoid);
       return function(sep) {
         return function(xs) {
@@ -2834,7 +2834,7 @@
               ;
               return {
                 init: false,
-                acc: append19(v.acc)(append19(sep)(v1))
+                acc: append20(v.acc)(append20(sep)(v1))
               };
             };
           };
@@ -3015,12 +3015,12 @@
   var foldMapDefaultR = function(dictFoldable) {
     var foldr22 = foldr(dictFoldable);
     return function(dictMonoid) {
-      var append19 = append(dictMonoid.Semigroup0());
+      var append20 = append(dictMonoid.Semigroup0());
       var mempty2 = mempty(dictMonoid);
       return function(f) {
         return foldr22(function(x23) {
           return function(acc) {
-            return append19(f(x23))(acc);
+            return append20(f(x23))(acc);
           };
         })(mempty2);
       };
@@ -3066,7 +3066,7 @@
       };
     }
     return function(apply6) {
-      return function(map53) {
+      return function(map54) {
         return function(pure34) {
           return function(f) {
             return function(array4) {
@@ -3075,14 +3075,14 @@
                   case 0:
                     return pure34([]);
                   case 1:
-                    return map53(array1)(f(array4[bot]));
+                    return map54(array1)(f(array4[bot]));
                   case 2:
-                    return apply6(map53(array2)(f(array4[bot])))(f(array4[bot + 1]));
+                    return apply6(map54(array2)(f(array4[bot])))(f(array4[bot + 1]));
                   case 3:
-                    return apply6(apply6(map53(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
+                    return apply6(apply6(map54(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
                   default:
                     var pivot = bot + Math.floor((top5 - bot) / 4) * 2;
-                    return apply6(map53(concat2)(go2(bot, pivot)))(go2(pivot, top5));
+                    return apply6(map54(concat2)(go2(bot, pivot)))(go2(pivot, top5));
                 }
               }
               return go2(0, array4.length);
@@ -3437,12 +3437,12 @@
   };
   var lift3 = /* @__PURE__ */ lift(monadTransStateT);
   var functorStateT = function(dictFunctor) {
-    var map53 = map(dictFunctor);
+    var map54 = map(dictFunctor);
     return {
       map: function(f) {
         return function(v) {
           return function(s) {
-            return map53(function(v1) {
+            return map54(function(v1) {
               return new Tuple(f(v1.value0), v1.value1);
             })(v(s));
           };
@@ -4044,13 +4044,13 @@
   var foldMapWithIndexDefaultR = function(dictFoldableWithIndex) {
     var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
     return function(dictMonoid) {
-      var append19 = append(dictMonoid.Semigroup0());
+      var append20 = append(dictMonoid.Semigroup0());
       var mempty2 = mempty(dictMonoid);
       return function(f) {
         return foldrWithIndex1(function(i2) {
           return function(x23) {
             return function(acc) {
-              return append19(f(i2)(x23))(acc);
+              return append20(f(i2)(x23))(acc);
             };
           };
         })(mempty2);
@@ -16496,12 +16496,31 @@
     "eval": /* @__PURE__ */ mkEval(defaultEval)
   });
 
+  // output/PSD3.TOC/index.js
+  var show7 = /* @__PURE__ */ show(showInt);
+  var append14 = /* @__PURE__ */ append(semigroupArray);
+  var type_18 = /* @__PURE__ */ type_17(isPropButtonType);
+  var map30 = /* @__PURE__ */ map(functorArray);
+  var renderTOCItem = function(item) {
+    var levelClass = (function() {
+      if (item.level === 0) {
+        return [];
+      }
+      ;
+      return ["toc-nav__item--level-" + show7(item.level + 1 | 0)];
+    })();
+    var classes2 = append14(["toc-nav__item"])(levelClass);
+    return a([href4("#" + item.anchor), classes(classes2)])([text5(item.label)]);
+  };
+  var renderTOC = function(config) {
+    return div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5(config.title)]), button([classes(["floating-panel__toggle"]), type_18(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])(map30(renderTOCItem)(config.items))])])]);
+  };
+
   // output/PSD3.About/index.js
   var bind8 = /* @__PURE__ */ bind(bindHalogenM);
   var liftEffect7 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var drawQuartet2 = /* @__PURE__ */ drawQuartet(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var pure15 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var type_18 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_2 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "rhsNav";
@@ -16523,7 +16542,58 @@
     return $$Proxy.value;
   })();
   var render2 = function(v) {
-    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_18(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#heading-0"), classes(["toc-nav__item"])])([text5("PS<$>D3")]), a([href4("#heading-2"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("What is This Project?")]), a([href4("#heading-3"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("Motivation")]), a([href4("#heading-4"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("The Data Visualization Process")]), a([href4("#anscombe"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Why Visualize? Anscombe's Quartet")]), a([href4("#heading-5"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Design philosophy of D3*")]), a([href4("#heading-6"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Design philosophy of PS<$>D3")]), a([href4("#heading-7"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("Project Goals (and non-Goals)")]), a([href4("#heading-9"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Goals: details")]), a([href4("#heading-13"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Non-goals: details")]), a([href4("#heading-17"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("What's a DSL? and what's an eDSL?")]), a([href4("#heading-20"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("The grammar of D3...")])])])])]), slot_2(_rhsNav)(unit)(component)(About.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"]), id2("heading-0")])([text5("PS<$>D3")]), h2([id2("heading-1")])([text5("Interactive Data Visualization in PureScript")]), p_([text5("A PureScript embedded "), em_([text5("DSL")]), text5(" for building "), em_([text5("interactive data visualizations")]), text5(", using "), em_([text5("D3.js")]), text5(" both as inspiration and as an implementation layer under the Foreign Function Interface (FFI).")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-2")])([text5("What is This Project?")]), p_([text5('This project demonstrates an embedded DSL for building interactive data visualizations with PureScript. The DSL uses a Finally Tagless approach that allows multiple interpreters for the same "language" which allows us to generate working code using an FFI to D3 or documentation and other more complex uses which will be discussed below.')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-3")])([text5("Motivation")]), p_([text5('I have built moderately complex, custom interactive data visualisations in the past both in JavaScript and PureScript, using D3.js. I found that JavaScript generally, and D3 in particular, seemed to work best for visualisations that were less "app-like" and more "chart-like". What i mean by this is that when the complexity started to rise to the level of a small application and when multiple programmers were involved, or if one had to return to some code after time had elapsed, the whole thing was very brittle and refactoring of it prohibitively difficult.')]), p_([text5('This could certainly be a "feature, not a bug" for some domains of application such as building a big beautiful rich visualisation for a one-off publication such as a New York Times feature. However, when the visualisation is used to '), em_([text5("control")]), text5(" application behaviour or the visualisation begins to approach the complexity and multi-layered-ness of an app...this all in one single script language is a real problem, at least in my experience.")]), p_([text5("In PureScript it is common, and easy, to use JavaScript libraries via the FFI initially as it is a very quick way to get access to the enormous world of functionality that exists in open source JavaScript libraries. Sometimes this can be sufficient, you wrap a component or a function and its abstractions never leak and all is well. Other times, you wrap something but there's a kind of impedance mismatch with the way the JavaScript abstraction work and the way you'd like to handle, and particularly to compose, things in the purely functional world. D3.js was definitely the latter, for me.")]), p_([text5("D3.js is a big library with thousands of API end-points but, crucially, not all of those end-points are problematic for composing larger scale applications or weaving visualisations into PureScript web applications. Instead, its is primarily two core areas of the API, Selection and Simulation (more details on these later) which tend to actually "), em_([text5("structure")]), text5(" programs in a characteristic D3 / JavaScript vernacular. It is these APIs that are first wrapped (by FFI) and then made available in purely functional idiomatic way by this library.")]), p_([text5("A secondary, but also very important, consideration is the ability to design and work with Algebraic Data Types (ADTs) and the rich container libraries that are available in PureScript while building and implementing visualisations and especially the code that surrounds the visualization. While D3 ultimately is a kind of array programming DSL "), em_([text5("within")]), text5(' JavaScript and our PureScript eDSL is going to bottom out to some sort of "arrays mapped over the DOM" too, we want to be able to create data models that are more sophisticated and have better invariants as these are keys to both composability and maintainable, long-lived programs.')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-4")])([text5("The Data Visualization Process")]), h3([id2("anscombe")])([text5("Why Visualize? Anscombe's Quartet")]), p_([text5("The famous Anscombe's Quartet demonstrates why visualization is essential. These four datasets have nearly identical statistical properties - same mean, variance, correlation, and linear regression line - yet reveal completely different patterns when visualized:")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), p_([text5("Summary statistics alone would suggest these datasets are interchangeable, but the visualizations tell a very different story: linear relationship, curved relationship, linear with outlier, and vertical with outlier. This perfectly illustrates why we need visualization - numbers hide patterns that become immediately obvious when seen.")]), p_([text5('Data visualization transforms "boring" - but more importantly '), em_([text5("less informative")]), text5(" tables of data into perceivable patterns. We can think of this as a pipeline in which steps 2 and 3 are the purpose of this library.")]), ol_([li_([strong_([text5("Data")]), text5(" - Raw data structures (tables, JSON, etc.)")]), li_([strong_([text5("Data structure")]), text5(" - Relationships between data elements")]), li_([strong_([text5("Data presentation")]), text5(" - Visual encoding (HTML/SVG/Canvas)")]), li_([strong_([text5("Perception")]), text5(" - Human insight and understanding")])]), p_([text5("The goal is to make relationships in data visible through appropriate visual encoding, enabling the human visual system to process patterns that would be difficult or impossible to perceive in tabular form.")]), h3([id2("heading-5")])([text5("Design philosophy of D3*")]), ul_([li_([text5("(as I understand it)")])]), p_([text5("D3's great innovation was to enable an enormous range of visualizations using some simple fundamental concepts and a small core API. It supports dataviz from simple bar charts to complex hierarchical layouts, force-directed graphs, geographic projections, and interactive dashboards. Despite their visual diversity, these visualizations share common structural patterns: data is bound to DOM elements, attributes are computed from data, and layouts determine spatial positioning.")]), p_([text5("Something that people with limited prior knowledge / experience of data visualisation often seem to find surprising is the degree to which D3 is "), em_([text5("fundamentally different")]), text5(' from "a charting library". While the library has some affordances that make it very easy to do common visualisations it is not in any way about "canned visualisations". Rather, it is a language for describing a relationship between arrays of data and arbitrary constructions of DOM (HTML or SVG) element or marks on Canvas, and it could in principle be used to do auditory "visualisation" or, who knows, maybe olfactory "visualisation" or drone displays or whatever.')]), p_([text5("Another revolutionary aspect of D3 was that it was "), em_([text5("screen/web native")]), text5(" - right from the beginning it supported responsive design, transitions, animations, force-layouts all of which are completely distinct from data visualisation on paper.")]), p_([text5("You can get a greater sense of the potential of D3 and the range of things that have thus far been produced using it at "), a([href4("https://observablehq.com/")])([text5("ObservableHQ")]), text5(".")]), h3([id2("heading-6")])([text5("Design philosophy of PS<$>D3")]), p_([text5("This library presents a slighly more formal grammar embedded in a language that is a lot better suited to larger and more long-lived projects. Whereas D3 has patterns of use that you learn, in PS<$>D3 the pattern is formalised into a grammar with an interpreter. Moreover, the same grammar can be interpreted by different interpreters directly "), em_([text5("in")]), text5(" PureScript, which, as we will see creates some powerful new uses.")]), p_([text5(`Where D3 enabled data visualisers to create movement and responsiveness, PS<$>D3 seeks to enable something that's theoretically possible in D3 but not much seen in practice and that is using the data visualisation as the user interface. This is not the same thing as "interactive visualisation" in the sense of "explorable" visualisation, ie one in which you can interact with the elements `), em_([text5("but only to manipulate the visualisation itself")]), text5(". That is a different, and more limited, sense of interaction. What we are talking about when building UI with data visualisation is leveraging the information density of data visualisation to provide direct manipulation of complex or large systems.")]), p_([text5('This is actually not a revolutionary idea - think how much of an improvement over the initial "folders of icons" on the Mac the NeXT column browser was. But it is a direction of travel that has been effectively lost during the web UI revolution of the past 20 years.')]), p_([text5("This repo and website contains one example of how this might work, the Code Explorer.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-7")])([text5("Project Goals (and non-Goals)")]), h3([id2("heading-8")])([text5("Priorities and Trade-offs")]), p_([text5("We have two principal priorities in writing this library and since you can't have two number one priorities, some trade-offs are inevitable which we will discuss here.")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Primary")]), th_([text5("Non-goals")]), th_([text5("Sub-goals")])])]), tbody_([tr_([td_([strong_([text5("Expressivity:")]), text5(" fully equivalent to D3.js")]), td_([strong_([text5("Completeness:")]), text5(" not all D3.js API surface is needed")]), td_([text5("Prefer idiomatic PureScript to exposing D3 APIs directly")])]), tr_([td_([strong_([text5("Readability:")]), text5(" as readable as D3.js equivalent")]), td_([strong_([text5("Modelling")]), text5(" of D3 state complexity thru type-system")]), td_([text5("Design for progressive enhancement")])]), tr_([td_([strong_([text5("Composable:")]), text5(' suitable for "programming in the large"')]), td_([strong_([text5("Performance")]), text5(" equality to D3")]), td_([text5("Showcase PureScript ecosystem and libraries")])])])]), h3([id2("heading-9")])([text5("Goals: details")]), h4([id2("heading-10")])([text5("Expressivity")]), p_([text5("As alluded to above, expressivity is a key to D3's success - it's not limited to some library of canned visualisations and it's far, far more than even the most parameterized control of colours and symbols. It's important not to lose that in making D3 available directly in PureScript.")]), h4([id2("heading-11")])([text5("Readability")]), p_([text5("If we look at D3.js as a kind of embedded DSL in JavaScript it is certainly clear and readable in its core feature: declaratively associating some array(s) of data with some elements in the DOM and attributes of those elements. While it is definitely not a goal to reproduce the structures of D3js own language in PureScript per se, the goal is to have the same readability, leverage the good work that Mike Bostock did in developing it. At the same time the library should be as idiomatically PureScript / Haskell style as possible.")]), h4([id2("heading-12")])([text5("Composability")]), p_([text5("A related concern to readability is composability, the separation of concerns that makes componentisation possible and which makes possible programming in the large.")]), p_([text5("YMMV but for me this is where the D3 / JavaScript approach breaks down.")]), p_([text5("If you are a PureScript or Haskell programmer you probably know what i mean by this and if you are, say, a JavaScript D3 programmer perhaps that will seem odd or even contentious.")]), p_([text5("The benefits we seek from composability include:")]), ul_([li_([text5("better composability of sub-programs")]), li_([text5("better expressiveness in describing the problem domain")]), li_([text5("better correctness in implementations (ie fewer bugs)")]), li_([text5("better ability to evolve programs due to shifting requirements (re-factoring)")])]), p_([text5("Ideally, i would like the person coding the data layer and data model to be somewhat insulated from the concerns of the person using that data model to create a visualisation. And likewise, i would like the person developing the data visualisation to be somewhat insulated from the concerns of a web app developer. Now, these might very well all be the "), em_([text5("same person")]), text5(" but separating the concerns like this makes it easier to evolve the code and, crucially, makes it all a little less brittle.")]), h3([id2("heading-13")])([text5("Non-goals: details")]), h4([id2("heading-14")])([text5("Complete API coverage")]), p_([text5("As alluded to above, there's lots of API in D3 that needs nothing more than an FFI wrapper to be accessible from a PureScript eDSL. D3 is both modular and somewhat functional in style (in the JavaScript sense of functional programming, to be clear). So it was from the start a non-goal to completely expose all of D3 as "), em_([text5("idiomatic")]), text5(" PureScript where a simple wrapper was sufficient.")]), p_([text5("Furthermore, i have only written those wrappers "), em_([text5("as I needed them")]), text5(" to there are still "), em_([text5("many")]), text5(" parts of D3 that are not covered by this eDSL.")]), p_([text5("Addendum 2025 - the advent of LLMs and coding assistance agents means that perhaps complete API coverage might arrive sooner than expected.")]), h4([id2("heading-15")])([text5("Modelling of D3 State")]), p_([text5("This might seem like a surprising choice - D3 is inherently "), em_([text5("very")]), text5(` stateful, there's state in D3, there's state in the DOM, there's statefulness in your (pure) data after you give it to D3. State everywhere. In many cases in functional programming you might try to ameliorate the dangers of this by explicitly modelling the state, using a State Monad or marking everything that changes or depends upon state as "Effect"-full.`)]), p_([text5("Indeed i have tried this approach in the past. In this library i have instead striven to isolate the statefulness to only the code that uses eDSL represented by the "), code_([text5("Selection")]), text5(" and "), code_([text5("Simulation")]), text5(" monads. This "), em_([text5("significantly")]), text5(" removes but cannot fully eliminate the issues associated with state.")]), h4([id2("heading-16")])([text5("Performance equality with D3")]), p_([text5("While this was a non-goal in practice it doesn't seem to have been a problem. Essentially, this is because PS<$>D3 simply leverages D3.js for all the performance critical aspects and because the FFI has been kept simple by the decision described in the previous section.")]), p_([text5("The performance bottlenecks in a web data visualisation are, by their nature, going to be the assignment of potentially millions of attributes to potentially millions of DOM elements. D3.js does this extremely well and the PureScript layer doesn't compromise it much, if at all.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-17")])([text5("What's a DSL? and what's an eDSL?")]), h3([id2("heading-18")])([text5("Domain Specific Language")]), p_([text5("Programming language tailored to a particular domain.")]), p_([text5("Might be limited compared to general purpose programming language.")]), p_([text5("But, may also be easier for novices, domain experts, non-programmers to use.")]), h3([id2("heading-19")])([text5("Embedded Domain Specific Language")]), p_([text5("Embedded Domain Specific Language makes domain specific tasks easier "), em_([text5("without")]), text5(" limiting the programmer in any way - they still have access to all parts of the host language.")]), p_([text5("This has Pros & Cons")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-20")])([text5("The grammar of D3...")]), p_([text5("Analyse the "), em_([text5("implicit")]), text5(" grammar of D3...")]), p_([text5("...in order to define a "), em_([text5("minimal")]), text5(" grammar for our PureScript eDSL")]), p_([text5("(consistent with priority goals of readability and expressiveness)")]), h3([id2("heading-21")])([text5("A Visual D3 Grammar")]), p_([strong_([text5("This is much simpler than D3's actual AST would be (if it had one) but it is sufficient to express a LOT of D3 scripts.")])]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Name")]), th_([text5("Function")]), th_([text5("Notes")])])]), tbody_([tr_([td_([em_([text5("attach")])]), td_([text5("Select an entry point (or points) in the DOM")]), td_([text5("Simply uses a CSS type selector to identify the target. Resulting selection can then be used for append / join in order to build up a visualisation from HTML, SVG or Canvas elements.")])]), tr_([td_([em_([text5("appendTo")])]), td_([text5("Add some DOM element "), strong_([text5("e")]), text5(" to a selection")]), td_([text5("Each element can have attributes. If data has been bound higher up in the AST then that data is available in this element's attributes")])]), tr_([td_([em_([text5("join")])]), td_([text5("For every "), em_([text5("datum")]), text5(" "), strong_([text5("d")]), text5(" in some array, insert an element "), strong_([text5("e")])]), td_([text5("We'll run the visualisation with some data model which can be arbitrary in structure, but at every point where we want to append "), em_([text5("multiple")]), text5(" elements we need to have a function that yields a simple array."), br_, br_, text5("Each element can have attributes that are derived from the datum with which it is associated."), br_, br_, text5("The datum at each element is inherited by its children, so any subsequent join starts with the structure of this datum.")])])])]), h3([id2("heading-22")])([text5("Grammar diagrams")]), h4([id2("heading-23")])([text5("3 Little Circles: the canonical simplest example")]), p_([text5("Insert Mermaid diagram here")]), pre_([code_([text5('    a        "div#hook"\n    \u2193\n    +        <svg>\n    \u2193\n    +        <g>\n    \u2193\n   <+>       [1,2,3] \u2192 <circle>')])]), p_([a([href4("https://bost.ocks.org/mike/circles/")])([text5("https://bost.ocks.org/mike/circles/")])]), h4([id2("heading-24")])([text5("Radial Tree: A more complex example")]), p_([text5("The Radial Tree and Cluster Dendrogram visualizations share the exact same structure:")]), pre_([code_([text5('    a          "div#hook"\n    \u2193\n    +          <svg>\n    \u2193\n    +          <g.links>    +          <g.nodes>    +          <g.labels>\n    \u2193                       \u2193                       \u2193\n   <+>         <path>      <+>         <circle>    <+>         <text>\n               \u2191                       \u2191                       \u2191\n            m->m.links              m->m.nodes              m->m.nodes')])]), p_([text5("All the differences are in details of how the node attributes are calculated from the data.")]), h4([id2("heading-25")])([text5("Even complex examples structurally simple")]), p_([text5("Even highly complex visualizations like "), a([href4("https://top2000.visualcinnamon.com")])([text5("Nadieh Bremer's Top 2000 visualization")]), text5(" can be expressed with this simple grammar - the complexity lies in the data transformations and attribute calculations, not in the fundamental structure.")])])]);
+    return div2([classes(["tutorial-page"])])([renderTOC({
+      title: "Contents",
+      items: [{
+        anchor: "heading-0",
+        label: "PS<$>D3",
+        level: 0
+      }, {
+        anchor: "heading-2",
+        label: "What is This Project?",
+        level: 1
+      }, {
+        anchor: "heading-3",
+        label: "Motivation",
+        level: 1
+      }, {
+        anchor: "heading-4",
+        label: "The Data Visualization Process",
+        level: 1
+      }, {
+        anchor: "anscombe",
+        label: "Why Visualize? Anscombe's Quartet",
+        level: 2
+      }, {
+        anchor: "heading-5",
+        label: "Design philosophy of D3*",
+        level: 2
+      }, {
+        anchor: "heading-6",
+        label: "Design philosophy of PS<$>D3",
+        level: 2
+      }, {
+        anchor: "heading-7",
+        label: "Project Goals (and non-Goals)",
+        level: 1
+      }, {
+        anchor: "heading-9",
+        label: "Goals: details",
+        level: 2
+      }, {
+        anchor: "heading-13",
+        label: "Non-goals: details",
+        level: 2
+      }, {
+        anchor: "heading-17",
+        label: "What's a DSL? and what's an eDSL?",
+        level: 1
+      }, {
+        anchor: "heading-20",
+        label: "The grammar of D3...",
+        level: 1
+      }]
+    }), slot_2(_rhsNav)(unit)(component)(About.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"]), id2("heading-0")])([text5("PS<$>D3")]), h2([id2("heading-1")])([text5("Interactive Data Visualization in PureScript")]), p_([text5("A PureScript embedded "), em_([text5("DSL")]), text5(" for building "), em_([text5("interactive data visualizations")]), text5(", using "), em_([text5("D3.js")]), text5(" both as inspiration and as an implementation layer under the Foreign Function Interface (FFI).")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-2")])([text5("What is This Project?")]), p_([text5('This project demonstrates an embedded DSL for building interactive data visualizations with PureScript. The DSL uses a Finally Tagless approach that allows multiple interpreters for the same "language" which allows us to generate working code using an FFI to D3 or documentation and other more complex uses which will be discussed below.')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-3")])([text5("Motivation")]), p_([text5('I have built moderately complex, custom interactive data visualisations in the past both in JavaScript and PureScript, using D3.js. I found that JavaScript generally, and D3 in particular, seemed to work best for visualisations that were less "app-like" and more "chart-like". What i mean by this is that when the complexity started to rise to the level of a small application and when multiple programmers were involved, or if one had to return to some code after time had elapsed, the whole thing was very brittle and refactoring of it prohibitively difficult.')]), p_([text5('This could certainly be a "feature, not a bug" for some domains of application such as building a big beautiful rich visualisation for a one-off publication such as a New York Times feature. However, when the visualisation is used to '), em_([text5("control")]), text5(" application behaviour or the visualisation begins to approach the complexity and multi-layered-ness of an app...this all in one single script language is a real problem, at least in my experience.")]), p_([text5("In PureScript it is common, and easy, to use JavaScript libraries via the FFI initially as it is a very quick way to get access to the enormous world of functionality that exists in open source JavaScript libraries. Sometimes this can be sufficient, you wrap a component or a function and its abstractions never leak and all is well. Other times, you wrap something but there's a kind of impedance mismatch with the way the JavaScript abstraction work and the way you'd like to handle, and particularly to compose, things in the purely functional world. D3.js was definitely the latter, for me.")]), p_([text5("D3.js is a big library with thousands of API end-points but, crucially, not all of those end-points are problematic for composing larger scale applications or weaving visualisations into PureScript web applications. Instead, its is primarily two core areas of the API, Selection and Simulation (more details on these later) which tend to actually "), em_([text5("structure")]), text5(" programs in a characteristic D3 / JavaScript vernacular. It is these APIs that are first wrapped (by FFI) and then made available in purely functional idiomatic way by this library.")]), p_([text5("A secondary, but also very important, consideration is the ability to design and work with Algebraic Data Types (ADTs) and the rich container libraries that are available in PureScript while building and implementing visualisations and especially the code that surrounds the visualization. While D3 ultimately is a kind of array programming DSL "), em_([text5("within")]), text5(' JavaScript and our PureScript eDSL is going to bottom out to some sort of "arrays mapped over the DOM" too, we want to be able to create data models that are more sophisticated and have better invariants as these are keys to both composability and maintainable, long-lived programs.')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-4")])([text5("The Data Visualization Process")]), h3([id2("anscombe")])([text5("Why Visualize? Anscombe's Quartet")]), p_([text5("The famous Anscombe's Quartet demonstrates why visualization is essential. These four datasets have nearly identical statistical properties - same mean, variance, correlation, and linear regression line - yet reveal completely different patterns when visualized:")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), p_([text5("Summary statistics alone would suggest these datasets are interchangeable, but the visualizations tell a very different story: linear relationship, curved relationship, linear with outlier, and vertical with outlier. This perfectly illustrates why we need visualization - numbers hide patterns that become immediately obvious when seen.")]), p_([text5('Data visualization transforms "boring" - but more importantly '), em_([text5("less informative")]), text5(" tables of data into perceivable patterns. We can think of this as a pipeline in which steps 2 and 3 are the purpose of this library.")]), ol_([li_([strong_([text5("Data")]), text5(" - Raw data structures (tables, JSON, etc.)")]), li_([strong_([text5("Data structure")]), text5(" - Relationships between data elements")]), li_([strong_([text5("Data presentation")]), text5(" - Visual encoding (HTML/SVG/Canvas)")]), li_([strong_([text5("Perception")]), text5(" - Human insight and understanding")])]), p_([text5("The goal is to make relationships in data visible through appropriate visual encoding, enabling the human visual system to process patterns that would be difficult or impossible to perceive in tabular form.")]), h3([id2("heading-5")])([text5("Design philosophy of D3*")]), ul_([li_([text5("(as I understand it)")])]), p_([text5("D3's great innovation was to enable an enormous range of visualizations using some simple fundamental concepts and a small core API. It supports dataviz from simple bar charts to complex hierarchical layouts, force-directed graphs, geographic projections, and interactive dashboards. Despite their visual diversity, these visualizations share common structural patterns: data is bound to DOM elements, attributes are computed from data, and layouts determine spatial positioning.")]), p_([text5("Something that people with limited prior knowledge / experience of data visualisation often seem to find surprising is the degree to which D3 is "), em_([text5("fundamentally different")]), text5(' from "a charting library". While the library has some affordances that make it very easy to do common visualisations it is not in any way about "canned visualisations". Rather, it is a language for describing a relationship between arrays of data and arbitrary constructions of DOM (HTML or SVG) element or marks on Canvas, and it could in principle be used to do auditory "visualisation" or, who knows, maybe olfactory "visualisation" or drone displays or whatever.')]), p_([text5("Another revolutionary aspect of D3 was that it was "), em_([text5("screen/web native")]), text5(" - right from the beginning it supported responsive design, transitions, animations, force-layouts all of which are completely distinct from data visualisation on paper.")]), p_([text5("You can get a greater sense of the potential of D3 and the range of things that have thus far been produced using it at "), a([href4("https://observablehq.com/")])([text5("ObservableHQ")]), text5(".")]), h3([id2("heading-6")])([text5("Design philosophy of PS<$>D3")]), p_([text5("This library presents a slighly more formal grammar embedded in a language that is a lot better suited to larger and more long-lived projects. Whereas D3 has patterns of use that you learn, in PS<$>D3 the pattern is formalised into a grammar with an interpreter. Moreover, the same grammar can be interpreted by different interpreters directly "), em_([text5("in")]), text5(" PureScript, which, as we will see creates some powerful new uses.")]), p_([text5(`Where D3 enabled data visualisers to create movement and responsiveness, PS<$>D3 seeks to enable something that's theoretically possible in D3 but not much seen in practice and that is using the data visualisation as the user interface. This is not the same thing as "interactive visualisation" in the sense of "explorable" visualisation, ie one in which you can interact with the elements `), em_([text5("but only to manipulate the visualisation itself")]), text5(". That is a different, and more limited, sense of interaction. What we are talking about when building UI with data visualisation is leveraging the information density of data visualisation to provide direct manipulation of complex or large systems.")]), p_([text5('This is actually not a revolutionary idea - think how much of an improvement over the initial "folders of icons" on the Mac the NeXT column browser was. But it is a direction of travel that has been effectively lost during the web UI revolution of the past 20 years.')]), p_([text5("This repo and website contains one example of how this might work, the Code Explorer.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-7")])([text5("Project Goals (and non-Goals)")]), h3([id2("heading-8")])([text5("Priorities and Trade-offs")]), p_([text5("We have two principal priorities in writing this library and since you can't have two number one priorities, some trade-offs are inevitable which we will discuss here.")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Primary")]), th_([text5("Non-goals")]), th_([text5("Sub-goals")])])]), tbody_([tr_([td_([strong_([text5("Expressivity:")]), text5(" fully equivalent to D3.js")]), td_([strong_([text5("Completeness:")]), text5(" not all D3.js API surface is needed")]), td_([text5("Prefer idiomatic PureScript to exposing D3 APIs directly")])]), tr_([td_([strong_([text5("Readability:")]), text5(" as readable as D3.js equivalent")]), td_([strong_([text5("Modelling")]), text5(" of D3 state complexity thru type-system")]), td_([text5("Design for progressive enhancement")])]), tr_([td_([strong_([text5("Composable:")]), text5(' suitable for "programming in the large"')]), td_([strong_([text5("Performance")]), text5(" equality to D3")]), td_([text5("Showcase PureScript ecosystem and libraries")])])])]), h3([id2("heading-9")])([text5("Goals: details")]), h4([id2("heading-10")])([text5("Expressivity")]), p_([text5("As alluded to above, expressivity is a key to D3's success - it's not limited to some library of canned visualisations and it's far, far more than even the most parameterized control of colours and symbols. It's important not to lose that in making D3 available directly in PureScript.")]), h4([id2("heading-11")])([text5("Readability")]), p_([text5("If we look at D3.js as a kind of embedded DSL in JavaScript it is certainly clear and readable in its core feature: declaratively associating some array(s) of data with some elements in the DOM and attributes of those elements. While it is definitely not a goal to reproduce the structures of D3js own language in PureScript per se, the goal is to have the same readability, leverage the good work that Mike Bostock did in developing it. At the same time the library should be as idiomatically PureScript / Haskell style as possible.")]), h4([id2("heading-12")])([text5("Composability")]), p_([text5("A related concern to readability is composability, the separation of concerns that makes componentisation possible and which makes possible programming in the large.")]), p_([text5("YMMV but for me this is where the D3 / JavaScript approach breaks down.")]), p_([text5("If you are a PureScript or Haskell programmer you probably know what i mean by this and if you are, say, a JavaScript D3 programmer perhaps that will seem odd or even contentious.")]), p_([text5("The benefits we seek from composability include:")]), ul_([li_([text5("better composability of sub-programs")]), li_([text5("better expressiveness in describing the problem domain")]), li_([text5("better correctness in implementations (ie fewer bugs)")]), li_([text5("better ability to evolve programs due to shifting requirements (re-factoring)")])]), p_([text5("Ideally, i would like the person coding the data layer and data model to be somewhat insulated from the concerns of the person using that data model to create a visualisation. And likewise, i would like the person developing the data visualisation to be somewhat insulated from the concerns of a web app developer. Now, these might very well all be the "), em_([text5("same person")]), text5(" but separating the concerns like this makes it easier to evolve the code and, crucially, makes it all a little less brittle.")]), h3([id2("heading-13")])([text5("Non-goals: details")]), h4([id2("heading-14")])([text5("Complete API coverage")]), p_([text5("As alluded to above, there's lots of API in D3 that needs nothing more than an FFI wrapper to be accessible from a PureScript eDSL. D3 is both modular and somewhat functional in style (in the JavaScript sense of functional programming, to be clear). So it was from the start a non-goal to completely expose all of D3 as "), em_([text5("idiomatic")]), text5(" PureScript where a simple wrapper was sufficient.")]), p_([text5("Furthermore, i have only written those wrappers "), em_([text5("as I needed them")]), text5(" to there are still "), em_([text5("many")]), text5(" parts of D3 that are not covered by this eDSL.")]), p_([text5("Addendum 2025 - the advent of LLMs and coding assistance agents means that perhaps complete API coverage might arrive sooner than expected.")]), h4([id2("heading-15")])([text5("Modelling of D3 State")]), p_([text5("This might seem like a surprising choice - D3 is inherently "), em_([text5("very")]), text5(` stateful, there's state in D3, there's state in the DOM, there's statefulness in your (pure) data after you give it to D3. State everywhere. In many cases in functional programming you might try to ameliorate the dangers of this by explicitly modelling the state, using a State Monad or marking everything that changes or depends upon state as "Effect"-full.`)]), p_([text5("Indeed i have tried this approach in the past. In this library i have instead striven to isolate the statefulness to only the code that uses eDSL represented by the "), code_([text5("Selection")]), text5(" and "), code_([text5("Simulation")]), text5(" monads. This "), em_([text5("significantly")]), text5(" removes but cannot fully eliminate the issues associated with state.")]), h4([id2("heading-16")])([text5("Performance equality with D3")]), p_([text5("While this was a non-goal in practice it doesn't seem to have been a problem. Essentially, this is because PS<$>D3 simply leverages D3.js for all the performance critical aspects and because the FFI has been kept simple by the decision described in the previous section.")]), p_([text5("The performance bottlenecks in a web data visualisation are, by their nature, going to be the assignment of potentially millions of attributes to potentially millions of DOM elements. D3.js does this extremely well and the PureScript layer doesn't compromise it much, if at all.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-17")])([text5("What's a DSL? and what's an eDSL?")]), h3([id2("heading-18")])([text5("Domain Specific Language")]), p_([text5("Programming language tailored to a particular domain.")]), p_([text5("Might be limited compared to general purpose programming language.")]), p_([text5("But, may also be easier for novices, domain experts, non-programmers to use.")]), h3([id2("heading-19")])([text5("Embedded Domain Specific Language")]), p_([text5("Embedded Domain Specific Language makes domain specific tasks easier "), em_([text5("without")]), text5(" limiting the programmer in any way - they still have access to all parts of the host language.")]), p_([text5("This has Pros & Cons")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-20")])([text5("The grammar of D3...")]), p_([text5("Analyse the "), em_([text5("implicit")]), text5(" grammar of D3...")]), p_([text5("...in order to define a "), em_([text5("minimal")]), text5(" grammar for our PureScript eDSL")]), p_([text5("(consistent with priority goals of readability and expressiveness)")]), h3([id2("heading-21")])([text5("A Visual D3 Grammar")]), p_([strong_([text5("This is much simpler than D3's actual AST would be (if it had one) but it is sufficient to express a LOT of D3 scripts.")])]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Name")]), th_([text5("Function")]), th_([text5("Notes")])])]), tbody_([tr_([td_([em_([text5("attach")])]), td_([text5("Select an entry point (or points) in the DOM")]), td_([text5("Simply uses a CSS type selector to identify the target. Resulting selection can then be used for append / join in order to build up a visualisation from HTML, SVG or Canvas elements.")])]), tr_([td_([em_([text5("appendTo")])]), td_([text5("Add some DOM element "), strong_([text5("e")]), text5(" to a selection")]), td_([text5("Each element can have attributes. If data has been bound higher up in the AST then that data is available in this element's attributes")])]), tr_([td_([em_([text5("join")])]), td_([text5("For every "), em_([text5("datum")]), text5(" "), strong_([text5("d")]), text5(" in some array, insert an element "), strong_([text5("e")])]), td_([text5("We'll run the visualisation with some data model which can be arbitrary in structure, but at every point where we want to append "), em_([text5("multiple")]), text5(" elements we need to have a function that yields a simple array."), br_, br_, text5("Each element can have attributes that are derived from the datum with which it is associated."), br_, br_, text5("The datum at each element is inherited by its children, so any subsequent join starts with the structure of this datum.")])])])]), h3([id2("heading-22")])([text5("Grammar diagrams")]), h4([id2("heading-23")])([text5("3 Little Circles: the canonical simplest example")]), p_([text5("Insert Mermaid diagram here")]), pre_([code_([text5('    a        "div#hook"\n    \u2193\n    +        <svg>\n    \u2193\n    +        <g>\n    \u2193\n   <+>       [1,2,3] \u2192 <circle>')])]), p_([a([href4("https://bost.ocks.org/mike/circles/")])([text5("https://bost.ocks.org/mike/circles/")])]), h4([id2("heading-24")])([text5("Radial Tree: A more complex example")]), p_([text5("The Radial Tree and Cluster Dendrogram visualizations share the exact same structure:")]), pre_([code_([text5('    a          "div#hook"\n    \u2193\n    +          <svg>\n    \u2193\n    +          <g.links>    +          <g.nodes>    +          <g.labels>\n    \u2193                       \u2193                       \u2193\n   <+>         <path>      <+>         <circle>    <+>         <text>\n               \u2191                       \u2191                       \u2191\n            m->m.links              m->m.nodes              m->m.nodes')])]), p_([text5("All the differences are in details of how the node attributes are calculated from the data.")]), h4([id2("heading-25")])([text5("Even complex examples structurally simple")]), p_([text5("Even highly complex visualizations like "), a([href4("https://top2000.visualcinnamon.com")])([text5("Nadieh Bremer's Top 2000 visualization")]), text5(" can be expressed with this simple grammar - the complexity lies in the data transformations and attribute calculations, not in the fundamental structure.")])])]);
   };
   var component2 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -16937,7 +17007,7 @@
 
   // output/Data.FormURLEncoded/index.js
   var apply2 = /* @__PURE__ */ apply(applyMaybe);
-  var map30 = /* @__PURE__ */ map(functorMaybe);
+  var map31 = /* @__PURE__ */ map(functorMaybe);
   var traverse2 = /* @__PURE__ */ traverse(traversableArray)(applicativeMaybe);
   var toArray = function(v) {
     return v;
@@ -16949,7 +17019,7 @@
       }
       ;
       if (v.value1 instanceof Just) {
-        return apply2(map30(function(key) {
+        return apply2(map31(function(key) {
           return function(val) {
             return key + ("=" + val);
           };
@@ -16958,7 +17028,7 @@
       ;
       throw new Error("Failed pattern match at Data.FormURLEncoded (line 37, column 16 - line 39, column 114): " + [v.constructor.name]);
     };
-    var $37 = map30(joinWith("&"));
+    var $37 = map31(joinWith("&"));
     var $38 = traverse2(encodePart);
     return function($39) {
       return $37($38(toArray($39)));
@@ -17183,7 +17253,7 @@
   var unsafeReadTagged2 = /* @__PURE__ */ unsafeReadTagged(monadIdentity);
   var alt8 = /* @__PURE__ */ alt(/* @__PURE__ */ altExceptT(semigroupNonEmptyList)(monadIdentity));
   var composeKleisliFlipped3 = /* @__PURE__ */ composeKleisliFlipped(/* @__PURE__ */ bindExceptT(monadIdentity));
-  var map31 = /* @__PURE__ */ map(functorMaybe);
+  var map32 = /* @__PURE__ */ map(functorMaybe);
   var any3 = /* @__PURE__ */ any(foldableArray)(heytingAlgebraBoolean);
   var eq4 = /* @__PURE__ */ eq(eqString);
   var bindFlipped9 = /* @__PURE__ */ bindFlipped(bindMaybe);
@@ -17302,7 +17372,7 @@
         }
         ;
         if (v2 instanceof FormURLEncoded) {
-          return note("Body contains values that cannot be encoded as application/x-www-form-urlencoded")(map31(unsafeToForeign)(encode2(v2.value0)));
+          return note("Body contains values that cannot be encoded as application/x-www-form-urlencoded")(map32(unsafeToForeign)(encode2(v2.value0)));
         }
         ;
         if (v2 instanceof Json2) {
@@ -17321,7 +17391,7 @@
         };
       };
       var headers = function(reqContent) {
-        return addHeader(map31(ContentType.create)(bindFlipped9(toMediaType2)(reqContent)))(addHeader(map31(Accept.create)(toMediaType(req2.responseFormat)))(req2.headers));
+        return addHeader(map32(ContentType.create)(bindFlipped9(toMediaType2)(reqContent)))(addHeader(map32(Accept.create)(toMediaType(req2.responseFormat)))(req2.headers));
       };
       var ajaxRequest = function(v2) {
         return {
@@ -17338,7 +17408,7 @@
           username: toNullable(req2.username),
           password: toNullable(req2.password),
           withCredentials: req2.withCredentials,
-          timeout: fromMaybe(0)(map31(function(v1) {
+          timeout: fromMaybe(0)(map32(function(v1) {
             return v1;
           })(req2.timeout))
         };
@@ -17601,7 +17671,7 @@
   var classed4 = /* @__PURE__ */ classed(toAttrString);
   var width11 = /* @__PURE__ */ width8(toAttrNumber);
   var height11 = /* @__PURE__ */ height8(toAttrNumber);
-  var show7 = /* @__PURE__ */ show(showNumber);
+  var show8 = /* @__PURE__ */ show(showNumber);
   var d4 = /* @__PURE__ */ d2(toAttrString);
   var fill4 = /* @__PURE__ */ fill(toAttrString);
   var fillOpacity3 = /* @__PURE__ */ fillOpacity(toAttrNumber);
@@ -17635,7 +17705,7 @@
               return bind31(attach2(selector))(function(v1) {
                 return bind31(appendTo2(v1)(Svg.value)([viewBox(0)(0)(dims.width)(dims.height), classed4("chord-diagram"), width11(dims.width), height11(dims.height)]))(function(svg2) {
                   return bind31(appendTo2(svg2)(Group.value)([transform([function(v2) {
-                    return "translate(" + (show7(centerX) + ("," + (show7(centerY) + ")")));
+                    return "translate(" + (show8(centerX) + ("," + (show8(centerY) + ")")));
                   }]), classed4("chord-group")]))(function(centerGroup) {
                     var chordData = chordLayout_(matrix);
                     var groups = chordGroups_(chordData);
@@ -18683,7 +18753,7 @@
   }
 
   // output/Utility/index.js
-  var map32 = /* @__PURE__ */ map(functorNonEmptyArray);
+  var map33 = /* @__PURE__ */ map(functorNonEmptyArray);
   var getWindowWidthHeight = function __do2() {
     var win = windowImpl();
     var w = innerWidth(win)();
@@ -18708,13 +18778,13 @@
   };
   var chunk = function(tuples) {
     var $$package = snd(head5(tuples));
-    var contains3 = toArray2(map32(fst)(tuples));
+    var contains3 = toArray2(map33(fst)(tuples));
     return new Tuple($$package, contains3);
   };
 
   // output/D3.Viz.Spago.Files/index.js
   var append6 = /* @__PURE__ */ append(semigroupArray);
-  var map33 = /* @__PURE__ */ map(functorArray);
+  var map34 = /* @__PURE__ */ map(functorArray);
   var fromFoldableWith2 = /* @__PURE__ */ fromFoldableWith(ordString)(foldableArray);
   var lookup7 = /* @__PURE__ */ lookup(ordString);
   var fromFoldable6 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
@@ -18853,9 +18923,9 @@
     return eq22(v.linktype)(M2M_Graph.value);
   };
   var getGraphJSONData = function(v) {
-    var names = append6(map33(function(v1) {
+    var names = append6(map34(function(v1) {
       return v1.key;
-    })(v.modules))(map33(function(v1) {
+    })(v.modules))(map34(function(v1) {
       return v1.key;
     })(v.packages));
     var makeModuleToPackageLink = function(m) {
@@ -18896,7 +18966,7 @@
         nodetype: new IsModule(m.path),
         inSim: true,
         links: {
-          targets: map33(getId)(m.depends),
+          targets: map34(getId)(m.depends),
           sources: [],
           treeChildren: [],
           inPackage: [],
@@ -18917,11 +18987,11 @@
         var makeTuple = function(s) {
           return new Tuple(id5, getId(s));
         };
-        return append6(map33(makeTuple)(a2.depends))(b2);
+        return append6(map34(makeTuple)(a2.depends))(b2);
       };
     };
-    var moduleLinks = map33(makeLink(M2M_Graph.value))(foldl2(foldDepends)([])(v.modules));
-    var packageLinks = map33(makeLink(P2P.value))(foldl2(foldDepends)([])(v.packages));
+    var moduleLinks = map34(makeLink(M2M_Graph.value))(foldl2(foldDepends)([])(v.modules));
+    var packageLinks = map34(makeLink(P2P.value))(foldl2(foldDepends)([])(v.packages));
     var depsMap = fromFoldable6(mapFlipped3(v.lsDeps)(function(d9) {
       return new Tuple(d9.packageName, {
         version: d9.version,
@@ -18943,12 +19013,12 @@
         containerName: p2.key,
         loc: p2.loc,
         links: {
-          targets: map33(getId)(p2.depends),
+          targets: map34(getId)(p2.depends),
           sources: [],
           treeChildren: [],
           inPackage: [],
           outPackage: [],
-          contains: map33(getId)(p2.contains)
+          contains: map34(getId)(p2.contains)
         },
         connected: true,
         showChildren: true,
@@ -18989,22 +19059,22 @@
         "package": $$package
       };
     };
-    var modulesPL = map33(addPackageInfo)(v.modules);
-    var mapNamesToModules = fromFoldable6(map33(function(m) {
+    var modulesPL = map34(addPackageInfo)(v.modules);
+    var mapNamesToModules = fromFoldable6(map34(function(m) {
       return new Tuple(m.key, m);
     })(modulesPL));
     var maybeModules = function(ms) {
-      return catMaybes(map33(function(k) {
+      return catMaybes(map34(function(k) {
         return lookup7(k)(mapNamesToModules);
       })(ms));
     };
     var rollUpLOC = function(ms) {
-      return sum2(map33(function(v1) {
+      return sum2(map34(function(v1) {
         return v1.loc;
       })(maybeModules(ms)));
     };
-    var moduleNodes = map33(makeNodeFromModuleJSONPL)(modulesPL);
-    var modulePackageLinks = map33(makeModuleToPackageLink)(moduleNodes);
+    var moduleNodes = map34(makeNodeFromModuleJSONPL)(modulesPL);
+    var modulePackageLinks = map34(makeModuleToPackageLink)(moduleNodes);
     var links = append6(moduleLinks)(append6(packageLinks)(modulePackageLinks));
     var getSourceLinks = function(v1) {
       var sources = foldl2(function(acc) {
@@ -19019,12 +19089,12 @@
       })([])(links);
       return new Tuple(v1.id, sources);
     };
-    var modulePackageTuples = map33(function(m) {
+    var modulePackageTuples = map34(function(m) {
       return new Tuple(m.key, m["package"]);
     })(modulesPL);
-    var packageContains = map33(chunk)(groupBy(equalSnd2)(sortBy(compareSnd2)(modulePackageTuples)));
+    var packageContains = map34(chunk)(groupBy(equalSnd2)(sortBy(compareSnd2)(modulePackageTuples)));
     var packageContainsMap = fromFoldable6(packageContains);
-    var packageLOC = map33(function(v1) {
+    var packageLOC = map34(function(v1) {
       return new Tuple(v1.value0, rollUpLOC(v1.value1));
     })(packageContains);
     var packageLOCMap = fromFoldable6(packageLOC);
@@ -19043,15 +19113,15 @@
         contains: fromMaybe([])(lookup7(v1.key)(packageContainsMap))
       };
     };
-    var packagesCL = map33(function($86) {
+    var packagesCL = map34(function($86) {
       return addRollUpLOC(addContains($86));
     })(v.packages);
-    var packageNodes = map33(makeNodeFromPackageJSONCL)(packagesCL);
+    var packageNodes = map34(makeNodeFromPackageJSONCL)(packagesCL);
     var nodes = append6(moduleNodes)(packageNodes);
     var id2Node = fromFoldable12(mapFlipped3(nodes)(function(node) {
       return new Tuple(node.id, node);
     }));
-    var sourceLinksMap = fromFoldable12(map33(getSourceLinks)(nodes));
+    var sourceLinksMap = fromFoldable12(map34(getSourceLinks)(nodes));
     return {
       links,
       nodes,
@@ -19094,13 +19164,13 @@
 
   // output/D3.Viz.Spago.Model/index.js
   var lookup9 = /* @__PURE__ */ lookup(ordInt);
-  var map34 = /* @__PURE__ */ map(functorArray);
+  var map35 = /* @__PURE__ */ map(functorArray);
   var append7 = /* @__PURE__ */ append(semigroupArray);
   var fromFoldable8 = /* @__PURE__ */ fromFoldable(foldableArray);
   var insert8 = /* @__PURE__ */ insert(ordInt);
   var mapFlipped4 = /* @__PURE__ */ mapFlipped(functorArray);
-  var show8 = /* @__PURE__ */ show(showLinkType);
-  var append14 = /* @__PURE__ */ append(semigroupString);
+  var show9 = /* @__PURE__ */ show(showLinkType);
+  var append15 = /* @__PURE__ */ append(semigroupString);
   var fromFoldable13 = /* @__PURE__ */ fromFoldable2(ordInt)(foldableArray);
   var foldlWithIndex2 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
   var show12 = /* @__PURE__ */ show(showInt);
@@ -19182,7 +19252,7 @@
         fy: nullImpl
       };
     };
-    return map34(unpin2)(nodes);
+    return map35(unpin2)(nodes);
   };
   var setTreeXYIncludingLeaves = function(v) {
     return function(v1) {
@@ -19298,14 +19368,14 @@
       })(unboxD3SimLink($199));
     },
     linkClass: function($200) {
-      return show8((function(v) {
+      return show9((function(v) {
         return v.linktype;
       })(unboxD3SimLink($200)));
     },
     linkClass2: /* @__PURE__ */ (function() {
-      var $201 = append14("updated ");
+      var $201 = append15("updated ");
       return function($202) {
-        return $201(show8((function(v) {
+        return $201(show9((function(v) {
           return v.linktype;
         })(unboxD3SimLink($202))));
       };
@@ -19379,7 +19449,7 @@
       };
     };
     var partitioned = partition(isUsedModule)(nodes);
-    return append7(partitioned.no)(map34(setXYtoTreeXY)(partitioned.yes));
+    return append7(partitioned.no)(map35(setXYtoTreeXY)(partitioned.yes));
   };
   var isPackageOrVisibleModule = function(id5) {
     return function(v) {
@@ -19483,7 +19553,7 @@
       ;
       throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 283, column 7 - line 288, column 76): " + [v1.constructor.name]);
     };
-    var modulesWithGrid = map34(setModuleGridXY)(partitioned.no);
+    var modulesWithGrid = map35(setModuleGridXY)(partitioned.no);
     return append7(modulesWithGrid)(partitioned.yes);
   };
   var packageNodesToGridXY = function(nodes) {
@@ -19616,7 +19686,7 @@
           ;
           return v;
         };
-        return map34(fixNamedNode$prime)(nodes);
+        return map35(fixNamedNode$prime)(nodes);
       };
     };
   };
@@ -20188,7 +20258,7 @@
   })();
 
   // output/D3.Viz.Spago.Draw/index.js
-  var show9 = /* @__PURE__ */ show(showElement);
+  var show10 = /* @__PURE__ */ show(showElement);
   var discard8 = /* @__PURE__ */ discard(discardUnit);
   var classed6 = /* @__PURE__ */ classed(toAttrStringFn);
   var strokeColor6 = /* @__PURE__ */ strokeColor(toAttrStringFn);
@@ -20220,8 +20290,8 @@
             return function(v) {
               return function(v1) {
                 if (v.selections.nodes instanceof Just && v.selections.links instanceof Just) {
-                  return bind31(openSelection2(v.selections.nodes.value0)(show9(Group.value)))(function(node) {
-                    return bind31(openSelection2(v.selections.links.value0)(show9(Line.value)))(function(link4) {
+                  return bind31(openSelection2(v.selections.nodes.value0)(show10(Group.value)))(function(node) {
+                    return bind31(openSelection2(v.selections.links.value0)(show10(Line.value)))(function(link4) {
                       return bind31(mergeNewDataWithSim2(node)(keyIsID_)(link4)(keyIsID_)(v.rawdata))(function(merged) {
                         return bind31(updateJoin2(node)(Group.value)(merged.nodes)(keyIsID_))(function(node$prime) {
                           return bind31(appendTo2(node$prime.enter)(Group.value)(enterAttrs))(function(nodeEnter) {
@@ -20229,9 +20299,9 @@
                               return discard111($$void11(appendTo2(nodeEnter)(Text2.value)(v1.labels)))(function() {
                                 return discard111(setAttributes2(node$prime.exit)([remove]))(function() {
                                   return discard111(setAttributes2(node$prime.update)(updateAttrs))(function() {
-                                    return bind31(selectUnder2(node$prime.update)(show9(Circle.value)))(function(updateCirclesSelection) {
+                                    return bind31(selectUnder2(node$prime.update)(show10(Circle.value)))(function(updateCirclesSelection) {
                                       return discard111(setAttributes2(updateCirclesSelection)(v1.circles))(function() {
-                                        return bind31(selectUnder2(node$prime.update)(show9(Text2.value)))(function(updateLabelsSelection) {
+                                        return bind31(selectUnder2(node$prime.update)(show10(Text2.value)))(function(updateLabelsSelection) {
                                           return discard111(setAttributes2(updateLabelsSelection)(v1.labels))(function() {
                                             return bind31(mergeSelections2(nodeEnter)(node$prime.update))(function(mergedNodeSelection) {
                                               return discard111($$void11(on3(mergedNodeSelection)(new Drag(new CustomDrag("spago", simdrag)))))(function() {
@@ -20349,7 +20419,7 @@
 
   // output/D3.Simulation.Forces/index.js
   var _status2 = /* @__PURE__ */ _status(strongFn);
-  var show10 = /* @__PURE__ */ show(showRegularForceType);
+  var show11 = /* @__PURE__ */ show(showRegularForceType);
   var _name2 = /* @__PURE__ */ _name(strongForget);
   var fromFoldable9 = /* @__PURE__ */ fromFoldable2(ordString);
   var elem3 = /* @__PURE__ */ elem2(eqString);
@@ -20361,7 +20431,7 @@
     }
     ;
     if (v instanceof RegularForce) {
-      return show10(v.value0);
+      return show11(v.value0);
     }
     ;
     throw new Error("Failed pattern match at D3.Simulation.Forces (line 32, column 3 - line 34, column 29): " + [v.constructor.name]);
@@ -20654,7 +20724,7 @@
   var discard9 = /* @__PURE__ */ discard(discardUnit);
   var _forceLibrary2 = /* @__PURE__ */ _forceLibrary(strongFn);
   var _forceLibrary1 = /* @__PURE__ */ _forceLibrary(strongForget);
-  var map35 = /* @__PURE__ */ map(functorMap);
+  var map36 = /* @__PURE__ */ map(functorMap);
   var _d3Simulation2 = /* @__PURE__ */ _d3Simulation(strongFn);
   var _alpha2 = /* @__PURE__ */ _alpha(strongFn);
   var _alphaTarget2 = /* @__PURE__ */ _alphaTarget(strongFn);
@@ -20889,7 +20959,7 @@
     return function(labels9) {
       return bind31(use2(_handle2))(function(handle) {
         return bind31(use2(_forceLibrary1))(function(forces) {
-          return modifying3(_forceLibrary2)($$const(map35(enableByLabels(handle)(labels9))(forces)));
+          return modifying3(_forceLibrary2)($$const(map36(enableByLabels(handle)(labels9))(forces)));
         });
       });
     };
@@ -20901,7 +20971,7 @@
     return function(labels9) {
       return bind31(use2(_handle2))(function(handle) {
         return bind31(use2(_forceLibrary1))(function(forces) {
-          return modifying3(_forceLibrary2)($$const(map35(disableByLabels(handle)(labels9))(forces)));
+          return modifying3(_forceLibrary2)($$const(map36(disableByLabels(handle)(labels9))(forces)));
         });
       });
     };
@@ -20926,7 +20996,7 @@
           return discard111(simulationEnableForcesByLabel1(enableLabels))(function() {
             return discard111(simulationDisableForcesByLabel1(disableLabels))(function() {
               return bind31(use2(_forceLibrary1))(function(updatedLibrary) {
-                var v2 = map35(updateForceInSimulation(handle))(updatedLibrary);
+                var v2 = map36(updateForceInSimulation(handle))(updatedLibrary);
                 return pure34(unit);
               });
             });
@@ -21197,7 +21267,7 @@
 
   // output/D3.Viz.Spago.Tree/index.js
   var lookup10 = /* @__PURE__ */ lookup(ordInt);
-  var map36 = /* @__PURE__ */ map(functorArray);
+  var map37 = /* @__PURE__ */ map(functorArray);
   var fromFoldable11 = /* @__PURE__ */ fromFoldable(foldableArray);
   var foldl6 = /* @__PURE__ */ foldl(foldableList);
   var fromFoldable15 = /* @__PURE__ */ fromFoldable3(foldableSet);
@@ -21242,11 +21312,11 @@
         ;
         throw new Error("Failed pattern match at D3.Viz.Spago.Tree (line 105, column 7 - line 112, column 134): " + [v1.constructor.name]);
       };
-      return map36(updateXY)(nodes);
+      return map37(updateXY)(nodes);
     };
   };
   var pathsAsLists = function(paths) {
-    return fromFoldable11(map36(function($77) {
+    return fromFoldable11(map37(function($77) {
       return fromFoldable11(reverse2($77));
     })(paths));
   };
@@ -21294,7 +21364,7 @@
           y: v.y,
           depth: v.depth,
           isTreeLeaf: hasChildren_(v),
-          childIDs: map36(function(v1) {
+          childIDs: map37(function(v1) {
             return v1.id;
           })(getHierarchyChildren_(v))
         })(acc);
@@ -21321,11 +21391,11 @@
         return v;
       };
       var linksWhoseSourceIs = function(id5) {
-        return fromFoldable11(map36(function(v) {
+        return fromFoldable11(map37(function(v) {
           return v.target;
         })(filter2(function(l) {
           return l.source === id5;
-        })(map36(unwrap9)(treelinks))));
+        })(map37(unwrap9)(treelinks))));
       };
       var go2 = function(childID) {
         return new Node(childID, map114(go2)(linksWhoseSourceIs(childID)));
@@ -21339,12 +21409,12 @@
       var treenodes = partition(function(v) {
         return elem4(v.id)(reachable.nodes) || v.id === rootID;
       })(model.nodes);
-      var prunedTreeLinks = map36(tupleToLink(M2M_Graph.value))(reachable.redundantLinks);
+      var prunedTreeLinks = map37(tupleToLink(M2M_Graph.value))(reachable.redundantLinks);
       var onlyTreelinks = makeTreeLinkTuples(pathsAsLists(reachable.closedDepPaths));
       var partitionedLinks = partition(function(v) {
         return elem1(new Tuple(v.source, v.target))(onlyTreelinks);
       })(model.links);
-      var treelinks = map36(changeLinkType(M2M_Tree.value))(partitionedLinks.yes);
+      var treelinks = map37(changeLinkType(M2M_Tree.value))(partitionedLinks.yes);
       var onlyPackageLinks = filter2(isP2P_Link)(model.links);
       var links = append9(treelinks)(append9(prunedTreeLinks)(onlyPackageLinks));
       var idTree = buildTree(rootID)(treelinks);
@@ -21380,7 +21450,7 @@
   var pure24 = /* @__PURE__ */ pure(applicativeMaybe);
   var bind19 = /* @__PURE__ */ bind(bindAff);
   var apply3 = /* @__PURE__ */ apply(applyEither);
-  var map37 = /* @__PURE__ */ map(functorEither);
+  var map38 = /* @__PURE__ */ map(functorEither);
   var pure110 = /* @__PURE__ */ pure(applicativeAff);
   var addTreeToModel = function(rootName) {
     return function(maybeModel) {
@@ -21396,7 +21466,7 @@
       return bind19(get5(string)("./data/spago-data/packages.json"))(function(packageJSON) {
         return bind19(get5(string)("./data/spago-data/lsdeps.jsonlines"))(function(lsdepJSON) {
           return bind19(get5(string)("./data/spago-data/LOC.json"))(function(locJSON) {
-            var model = hush(apply3(apply3(apply3(map37(convertFilesToGraphModel)(moduleJSON))(packageJSON))(lsdepJSON))(locJSON));
+            var model = hush(apply3(apply3(apply3(map38(convertFilesToGraphModel)(moduleJSON))(packageJSON))(lsdepJSON))(locJSON));
             return pure110(addTreeToModel("PSD3.Main")(model));
           });
         });
@@ -21549,7 +21619,7 @@
   var click2 = "click";
 
   // output/Halogen.HTML.Events/index.js
-  var map38 = /* @__PURE__ */ map(functorMaybe);
+  var map39 = /* @__PURE__ */ map(functorMaybe);
   var composeKleisli2 = /* @__PURE__ */ composeKleisli(bindMaybe);
   var composeKleisliFlipped4 = /* @__PURE__ */ composeKleisliFlipped(/* @__PURE__ */ bindExceptT(monadIdentity));
   var readProp2 = /* @__PURE__ */ readProp(monadIdentity);
@@ -21558,7 +21628,7 @@
   var handler$prime = function(et) {
     return function(f) {
       return handler(et)(function(ev) {
-        return map38(Action.create)(f(ev));
+        return map39(Action.create)(f(ev));
       });
     };
   };
@@ -21595,12 +21665,12 @@
 
   // output/PSD3.Properties/index.js
   var lmap2 = /* @__PURE__ */ lmap(bifunctorTuple);
-  var append15 = /* @__PURE__ */ append(semigroupArray);
+  var append16 = /* @__PURE__ */ append(semigroupArray);
   var rmap3 = /* @__PURE__ */ rmap2(bifunctorTuple);
   var elem5 = /* @__PURE__ */ elem2(eqString);
   var not4 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean));
   var pure25 = /* @__PURE__ */ pure(applicativeArray);
-  var map39 = /* @__PURE__ */ map(functorArray);
+  var map40 = /* @__PURE__ */ map(functorArray);
   var startsWith = function(str0) {
     return function(str1) {
       return str0 === take2(length5(str0))(str1);
@@ -21611,12 +21681,12 @@
       return function(v1) {
         if (v1 instanceof Property && v1.value0 === "className") {
           return lmap2(function(v2) {
-            return append15(v2)(split(" ")(v1.value1));
+            return append16(v2)(split(" ")(v1.value1));
           })(v);
         }
         ;
         return rmap3(function(v2) {
-          return append15(v2)([v1]);
+          return append16(v2)([v1]);
         })(v);
       };
     };
@@ -21728,25 +21798,25 @@
     return function(ip$prime) {
       var v = extract3(ip);
       var v1 = extract3(ip$prime);
-      var classNames = pure25(classes(map39(ClassName)(nubByEq(function(c) {
+      var classNames = pure25(classes(map40(ClassName)(nubByEq(function(c) {
         return function(c$prime) {
           return classify(c) === classify(c$prime);
         };
-      })(append15(v1.value0)(v.value0)))));
-      return append15(v.value1)(append15(v1.value1)(classNames));
+      })(append16(v1.value0)(v.value0)))));
+      return append16(v.value1)(append16(v1.value1)(classNames));
     };
   };
 
   // output/PSD3.Button/index.js
-  var map40 = /* @__PURE__ */ map(functorArray);
+  var map41 = /* @__PURE__ */ map(functorArray);
   var append10 = /* @__PURE__ */ append(semigroupArray);
-  var rightClasses = /* @__PURE__ */ map40(ClassName)(["rounded-r"]);
-  var leftClasses = /* @__PURE__ */ map40(ClassName)(["mr-px", "rounded-l"]);
-  var centerClasses = /* @__PURE__ */ map40(ClassName)(["mr-px"]);
-  var buttonSharedClasses = /* @__PURE__ */ map40(ClassName)(["no-outline", "px-4", "py-2", "!active:border-b", "active:border-t", "disabled:opacity-50", "disabled:cursor-default", "!disabled:cursor-pointer"]);
-  var buttonPrimaryClasses = /* @__PURE__ */ map40(ClassName)(["bg-blue-88", "border-blue-88", "hover:!disabled:bg-blue-82", "focus:bg-blue-82", "text-white"]);
-  var buttonMainClasses = /* @__PURE__ */ append10(buttonSharedClasses)(/* @__PURE__ */ map40(ClassName)(["rounded"]));
-  var buttonGroupClasses = /* @__PURE__ */ map40(ClassName)(["flex", "items-center"]);
+  var rightClasses = /* @__PURE__ */ map41(ClassName)(["rounded-r"]);
+  var leftClasses = /* @__PURE__ */ map41(ClassName)(["mr-px", "rounded-l"]);
+  var centerClasses = /* @__PURE__ */ map41(ClassName)(["mr-px"]);
+  var buttonSharedClasses = /* @__PURE__ */ map41(ClassName)(["no-outline", "px-4", "py-2", "!active:border-b", "active:border-t", "disabled:opacity-50", "disabled:cursor-default", "!disabled:cursor-pointer"]);
+  var buttonPrimaryClasses = /* @__PURE__ */ map41(ClassName)(["bg-blue-88", "border-blue-88", "hover:!disabled:bg-blue-82", "focus:bg-blue-82", "text-white"]);
+  var buttonMainClasses = /* @__PURE__ */ append10(buttonSharedClasses)(/* @__PURE__ */ map41(ClassName)(["rounded"]));
+  var buttonGroupClasses = /* @__PURE__ */ map41(ClassName)(["flex", "items-center"]);
   var buttonGroupBuilder = function(classes2) {
     return function(iprops) {
       return button(appendIProps([classes(append10(buttonSharedClasses)(classes2))])(iprops));
@@ -21759,7 +21829,7 @@
     return div2(appendIProps([classes(buttonGroupClasses)])(iprops));
   };
   var buttonGroup_ = /* @__PURE__ */ buttonGroup([]);
-  var buttonClasses = /* @__PURE__ */ map40(ClassName)(["bg-grey-50-a20", "border-grey-50-a20", "hover:!disabled:bg-grey-50-a30", "focus:bg-grey-50-a30", "text-black-20"]);
+  var buttonClasses = /* @__PURE__ */ map41(ClassName)(["bg-grey-50-a20", "border-grey-50-a20", "hover:!disabled:bg-grey-50-a30", "focus:bg-grey-50-a30", "text-black-20"]);
   var buttonLeft = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append10(buttonClasses)(leftClasses));
   var buttonRight = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append10(buttonClasses)(rightClasses));
   var buttonCenter = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append10(buttonClasses)(centerClasses));
@@ -21993,20 +22063,20 @@
   };
 
   // output/PSD3.Format/index.js
-  var map41 = /* @__PURE__ */ map(functorArray);
-  var subHeadingClasses = /* @__PURE__ */ map41(ClassName)(["text-xl", "font-medium", "leading-loose", "flex", "items-center", "mb-6"]);
+  var map42 = /* @__PURE__ */ map(functorArray);
+  var subHeadingClasses = /* @__PURE__ */ map42(ClassName)(["text-xl", "font-medium", "leading-loose", "flex", "items-center", "mb-6"]);
   var subHeading = function(iprops) {
     return function(html2) {
       return h2(appendIProps([classes(subHeadingClasses)])(iprops))(html2);
     };
   };
   var subHeading_ = /* @__PURE__ */ subHeading([]);
-  var contentHeadingClasses = /* @__PURE__ */ map41(ClassName)(["mb-6", "text-lg", "font-normal", "leading-loose", "flex", "items-center"]);
+  var contentHeadingClasses = /* @__PURE__ */ map42(ClassName)(["mb-6", "text-lg", "font-normal", "leading-loose", "flex", "items-center"]);
   var contentHeading = function(iprops) {
     return h3(appendIProps([classes(contentHeadingClasses)])(iprops));
   };
   var contentHeading_ = /* @__PURE__ */ contentHeading([]);
-  var captionClasses = /* @__PURE__ */ map41(ClassName)(["block", "font-light", "mb-6", "text-grey-70", "text-sm", "tracking-wide", "uppercase"]);
+  var captionClasses = /* @__PURE__ */ map42(ClassName)(["block", "font-light", "mb-6", "text-grey-70", "text-sm", "tracking-wide", "uppercase"]);
   var caption2 = function(iprops) {
     return h4(appendIProps([classes(captionClasses)])(iprops));
   };
@@ -22015,13 +22085,13 @@
   // output/PSD3.CodeExplorer.HTML/index.js
   var type_22 = /* @__PURE__ */ type_17(isPropInputType);
   var value14 = /* @__PURE__ */ value12(isPropString);
-  var show11 = /* @__PURE__ */ show(showNumber);
+  var show13 = /* @__PURE__ */ show(showNumber);
   var eq5 = /* @__PURE__ */ eq(eqForceStatus);
-  var map42 = /* @__PURE__ */ map(functorArray);
+  var map43 = /* @__PURE__ */ map(functorArray);
   var toUnfoldable4 = /* @__PURE__ */ toUnfoldable(unfoldableArray);
   var _forceLibrary3 = /* @__PURE__ */ _forceLibrary(strongForget);
   var _cssClass2 = /* @__PURE__ */ _cssClass(strongForget);
-  var show13 = /* @__PURE__ */ show(showInt);
+  var show14 = /* @__PURE__ */ show(showInt);
   var choiceForget2 = /* @__PURE__ */ choiceForget(monoidArray);
   var _stagingLinks2 = /* @__PURE__ */ _stagingLinks(strongForget)(choiceForget2);
   var _stagingNodes2 = /* @__PURE__ */ _stagingNodes(strongForget)(choiceForget2);
@@ -22031,7 +22101,7 @@
     };
     return [onValueInput(function($27) {
       return ChangeSimConfig.create(config["var"](toScale($27)));
-    }), type_22(InputRange.value), id2(config.id), class_("range-slider scaling-slider"), min5(config.min), max6(config.max), step4(new Step(config.step)), value14(show11(config.value))];
+    }), type_22(InputRange.value), id2(config.id), class_("range-slider scaling-slider"), min5(config.min), max6(config.max), step4(new Step(config.step)), value14(show13(config.value))];
   };
   var renderTableForces = function(state3) {
     var renderForceItem = function(v) {
@@ -22044,11 +22114,11 @@
         return "force-inactive";
       })()]), onClick($$const(new ToggleForce(v.name)))])([div2([classes(["force-name"])])([text5(v.name)]), div2([classes(["force-type"])])([text5(showType(v.type))]), div2([classes(["force-filter"])])([text5(showForceFilter(v.filter))])]);
     };
-    var forceData = map42(snd)(toUnfoldable4(view(_forceLibrary3)(state3)));
-    return div_([h3_([text5("Forces")]), div2([classes(["force-grid"])])(map42(renderForceItem)(forceData))]);
+    var forceData = map43(snd)(toUnfoldable4(view(_forceLibrary3)(state3)));
+    return div_([h3_([text5("Forces")]), div2([classes(["force-grid"])])(map43(renderForceItem)(forceData))]);
   };
   var renderSimState = function(state3) {
-    return div2([classes(["spago-sim-state"])])([caption_2([text5("Simulation state")]), p_([text5("CSS Class: " + view(_cssClass2)(state3))]), p_([text5("Links: " + show13(length4(view(_stagingLinks2)(state3))))]), p_([text5("Nodes: " + show13(length4(view(_stagingNodes2)(state3))))])]);
+    return div2([classes(["spago-sim-state"])])([caption_2([text5("Simulation state")]), p_([text5("CSS Class: " + view(_cssClass2)(state3))]), p_([text5("Links: " + show14(length4(view(_stagingLinks2)(state3))))]), p_([text5("Nodes: " + show14(length4(view(_stagingNodes2)(state3))))])]);
   };
   var isProjectModule = function(v) {
     if (v.nodetype instanceof IsModule) {
@@ -22070,14 +22140,14 @@
       max: 100,
       step: 10,
       value: params.alpha * 100
-    })), caption_2([text5("Alpha: " + show11(params.alpha))]), input2(slider({
+    })), caption_2([text5("Alpha: " + show13(params.alpha))]), input2(slider({
       "var": AlphaTarget.create,
       id: "alphatarget-slider",
       min: 0,
       max: 100,
       step: 10,
       value: params.alphaTarget * 100
-    })), caption_2([text5("AlphaTarget: " + show11(params.alphaTarget))])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(StopSim.value))])([text5("Stop")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0.3))))])([text5("Heat")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0))))])([text5("Cool")]), buttonPrimaryRight([onClick($$const(StartSim.value))])([text5("Start")])])]), subHeading_([text5("Filters")]), div2([classes(["control-group"])])([contentHeading_([text5("Node visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new NodeFilter(isPackage))))])([text5("Packages")]), buttonCenter([onClick($$const(new Filter(new NodeFilter($$const(true)))))])([text5("All")]), buttonRight([onClick($$const(new Filter(new NodeFilter(isUsedModule))))])([text5("Modules")])])]), div2([classes(["control-group"])])([button2([onClick($$const(new Filter(new NodeFilter(isProjectModule))))])([text5("Only project files")])]), div2([classes(["control-group"])])([contentHeading_([text5("Link Visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new LinkShowFilter(isM2M_Tree_Link))))])([text5("Tree")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2M_Graph_Link))))])([text5("Graph")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2P_Link))))])([text5("M2P")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isP2P_Link))))])([text5("P2P")]), buttonRight([onClick($$const(new Filter(new LinkShowFilter($$const(false)))))])([text5("None")])])]), subHeading_([text5("Styling")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeStyling(new GraphStyle(clusterSceneAttributes))))])([text5("Cluster")]), buttonCenter([onClick($$const(new ChangeStyling(new GraphStyle(graphSceneAttributes))))])([text5("Graph")]), buttonRight([onClick($$const(new ChangeStyling(new GraphStyle(treeSceneAttributes))))])([text5("Tree")])])])]);
+    })), caption_2([text5("AlphaTarget: " + show13(params.alphaTarget))])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(StopSim.value))])([text5("Stop")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0.3))))])([text5("Heat")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0))))])([text5("Cool")]), buttonPrimaryRight([onClick($$const(StartSim.value))])([text5("Start")])])]), subHeading_([text5("Filters")]), div2([classes(["control-group"])])([contentHeading_([text5("Node visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new NodeFilter(isPackage))))])([text5("Packages")]), buttonCenter([onClick($$const(new Filter(new NodeFilter($$const(true)))))])([text5("All")]), buttonRight([onClick($$const(new Filter(new NodeFilter(isUsedModule))))])([text5("Modules")])])]), div2([classes(["control-group"])])([button2([onClick($$const(new Filter(new NodeFilter(isProjectModule))))])([text5("Only project files")])]), div2([classes(["control-group"])])([contentHeading_([text5("Link Visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new LinkShowFilter(isM2M_Tree_Link))))])([text5("Tree")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2M_Graph_Link))))])([text5("Graph")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2P_Link))))])([text5("M2P")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isP2P_Link))))])([text5("P2P")]), buttonRight([onClick($$const(new Filter(new LinkShowFilter($$const(false)))))])([text5("None")])])]), subHeading_([text5("Styling")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeStyling(new GraphStyle(clusterSceneAttributes))))])([text5("Cluster")]), buttonCenter([onClick($$const(new ChangeStyling(new GraphStyle(graphSceneAttributes))))])([text5("Graph")]), buttonRight([onClick($$const(new ChangeStyling(new GraphStyle(treeSceneAttributes))))])([text5("Tree")])])])]);
   };
   var render5 = function(state3) {
     return div2([classes(["fullscreen-container", "spago-fullscreen"])])([div2([classes(["floating-panel", "floating-panel--top-left", "floating-panel--small", "spago-controls-panel", "editorial"])])([h2([classes(["floating-panel__title", "spago-controls__title"])])([text5("Controls")]), div2([classes(["control-group", "control-group--home"])])([a([href4("#/"), classes(["button", "button--primary"])])([text5("\u2190 Home")])]), renderSimControls(state3), renderSimState(state3)]), div2([classes(["floating-panel", "floating-panel--top-right", "floating-panel--large", "spago-forces-panel", "editorial"])])([renderTableForces(state3)]), div2([classes(["svg-container", "fullscreen-viz", "spago-viz-container", view(_cssClass2)(state3)])])([])]);
@@ -23089,7 +23159,7 @@
 
   // output/Data.String.CodePoints/index.js
   var fromEnum2 = /* @__PURE__ */ fromEnum(boundedEnumChar);
-  var map43 = /* @__PURE__ */ map(functorMaybe);
+  var map44 = /* @__PURE__ */ map(functorMaybe);
   var unfoldr2 = /* @__PURE__ */ unfoldr(unfoldableArray);
   var div3 = /* @__PURE__ */ div(euclideanRingInt);
   var mod2 = /* @__PURE__ */ mod(euclideanRingInt);
@@ -23133,7 +23203,7 @@
     });
   };
   var unconsButWithTuple = function(s) {
-    return map43(function(v) {
+    return map44(function(v) {
       return new Tuple(v.head, v.tail);
     })(uncons5(s));
   };
@@ -23162,7 +23232,7 @@
   };
   var indexOf2 = function(p2) {
     return function(s) {
-      return map43(function(i2) {
+      return map44(function(i2) {
         return length8(take2(i2)(s));
       })(indexOf(p2)(s));
     };
@@ -23214,8 +23284,8 @@
   };
 
   // output/D3Tagless.Capabilities.String/index.js
-  var show14 = /* @__PURE__ */ show(showOrderingAttribute);
-  var show15 = /* @__PURE__ */ show(showMouseEvent);
+  var show15 = /* @__PURE__ */ show(showOrderingAttribute);
+  var show16 = /* @__PURE__ */ show(showMouseEvent);
   var show24 = /* @__PURE__ */ show(showString);
   var show34 = /* @__PURE__ */ show(showElement);
   var trimSelectionPrefix = function(str) {
@@ -23263,7 +23333,7 @@
       }
       ;
       if (v instanceof OrderingT) {
-        return trimSelectionPrefix(showSetOrdering_(show14(v.value0))(selection2));
+        return trimSelectionPrefix(showSetOrdering_(show15(v.value0))(selection2));
       }
       ;
       if (v instanceof TransitionT) {
@@ -23277,11 +23347,11 @@
       }
       ;
       if (v instanceof OnT) {
-        return "on(" + (show15(v.value0) + ", function(d) { /* event handler */ })");
+        return "on(" + (show16(v.value0) + ", function(d) { /* event handler */ })");
       }
       ;
       if (v instanceof OnT$prime) {
-        return "on(" + (show15(v.value0) + ", function(d) { /* event handler */ })");
+        return "on(" + (show16(v.value0) + ", function(d) { /* event handler */ })");
       }
       ;
       throw new Error("Failed pattern match at D3Tagless.Capabilities.String (line 94, column 3 - line 113, column 70): " + [v.constructor.name]);
@@ -23427,7 +23497,7 @@
   };
 
   // output/D3.Viz.Tree.Configure/index.js
-  var show16 = /* @__PURE__ */ show(showNumber);
+  var show17 = /* @__PURE__ */ show(showNumber);
   var eq6 = /* @__PURE__ */ eq(eqTreeLayout);
   var liftEffect12 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var rotateRadialLabels = function(d9) {
@@ -23441,19 +23511,19 @@
     })() + ")");
   };
   var radialTranslate = function(d9) {
-    return "translate(" + (show16(treeDatum_.y(d9)) + ",0)");
+    return "translate(" + (show17(treeDatum_.y(d9)) + ",0)");
   };
   var radialRotate = function(x23) {
-    return show16(x23 * 180 / pi - 90);
+    return show17(x23 * 180 / pi - 90);
   };
   var radialRotateCommon = function(d9) {
     return "rotate(" + (radialRotate(treeDatum_.x(d9)) + ")");
   };
   var positionXYreflected = function(d9) {
-    return "translate(" + (show16(treeDatum_.y(d9)) + ("," + (show16(treeDatum_.x(d9)) + ")")));
+    return "translate(" + (show17(treeDatum_.y(d9)) + ("," + (show17(treeDatum_.x(d9)) + ")")));
   };
   var positionXY = function(d9) {
-    return "translate(" + (show16(treeDatum_.x(d9)) + ("," + (show16(treeDatum_.y(d9)) + ")")));
+    return "translate(" + (show17(treeDatum_.x(d9)) + ("," + (show17(treeDatum_.y(d9)) + ")")));
   };
   var configureAndRunScript = function(dictBind) {
     var draw20 = draw8(dictBind);
@@ -23675,7 +23745,7 @@
   };
 
   // output/PSD3.Hierarchies/index.js
-  var append16 = /* @__PURE__ */ append(semigroupArray);
+  var append17 = /* @__PURE__ */ append(semigroupArray);
   var type_23 = /* @__PURE__ */ type_17(isPropButtonType);
   var bind22 = /* @__PURE__ */ bind(bindHalogenM);
   var liftEffect13 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
@@ -23812,7 +23882,7 @@
       throw new Error("Failed pattern match at PSD3.Hierarchies (line 45, column 1 - line 54, column 27): " + [v.constructor.name]);
     }
   };
-  var show17 = /* @__PURE__ */ show(showHierarchyLayout);
+  var show18 = /* @__PURE__ */ show(showHierarchyLayout);
   var renderLayoutPlaceholder = function(v) {
     return div_([]);
   };
@@ -23902,7 +23972,7 @@
   var renderLayoutOption = function(layout) {
     return function(label5) {
       return function(currentLayout) {
-        return button([classes(append16(["control-panel__option"])((function() {
+        return button([classes(append17(["control-panel__option"])((function() {
           var $41 = eq7(layout)(currentLayout);
           if ($41) {
             return ["control-panel__option--active"];
@@ -24067,7 +24137,7 @@
     return $$Proxy.value;
   })();
   var render7 = function(state3) {
-    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel", "control-panel"])])([div2([classes(["toc-panel__main", "control-panel__main"])])([img([src9("controller.jpeg"), alt5(""), classes(["control-panel__icon"])]), div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Layout Controls")]), button([classes(["floating-panel__toggle"]), type_23(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "control-panel__content"])])([div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Node-Link Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(HorizontalTidy.value)("H-Tidy")(state3.currentLayout), renderLayoutOption(HorizontalDendrogram.value)("H-Dendro")(state3.currentLayout), renderLayoutOption(VerticalTidy.value)("V-Tidy")(state3.currentLayout), renderLayoutOption(VerticalDendrogram.value)("V-Dendro")(state3.currentLayout), renderLayoutOption(RadialTidy.value)("R-Tidy")(state3.currentLayout), renderLayoutOption(RadialDendrogram.value)("R-Dendro")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Adjacency Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(Icicle.value)("Icicle")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Enclosure Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(CirclePacking.value)("Circle Pack")(state3.currentLayout), renderLayoutOption(Treemap.value)("Treemap")(state3.currentLayout)])]), div2([classes(["control-panel__current"])])([strong_([text5("Current:")]), text5(" "), text5(show17(state3.currentLayout))])])])]), slot_6(_rhsNav4)(unit)(component)(Hierarchies.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Hierarchical Layouts")]), p_([text5("Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data.")]), p_([text5("This page demonstrates five different ways to visualize the same hierarchical dataset. Use the controls on the left to switch between layouts and explore how each representation emphasizes different relationships in the data.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5(show17(state3.currentLayout))]), p_([text5(layoutDescription(state3.currentLayout))]), div2([classes(["tutorial-viz-container"])])([div2([classes(["hierarchies-viz"])])([renderLayoutPlaceholder(state3.currentLayout)])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Implementation")]), p_([text5("The visualization code for "), strong_([text5(show17(state3.currentLayout))]), text5(" demonstrates how D3's hierarchical layout algorithms transform tree data into visual coordinates.")]), div2([classes(["tutorial-code-block"])])([pre_([code_([text5("-- Code for "), text5(show17(state3.currentLayout)), text5(" layout will go here\n"), text5("-- Demonstrates D3 hierarchy layout with PureScript DSL")])])])])]);
+    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel", "control-panel"])])([div2([classes(["toc-panel__main", "control-panel__main"])])([img([src9("controller.jpeg"), alt5(""), classes(["control-panel__icon"])]), div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Layout Controls")]), button([classes(["floating-panel__toggle"]), type_23(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "control-panel__content"])])([div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Node-Link Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(HorizontalTidy.value)("H-Tidy")(state3.currentLayout), renderLayoutOption(HorizontalDendrogram.value)("H-Dendro")(state3.currentLayout), renderLayoutOption(VerticalTidy.value)("V-Tidy")(state3.currentLayout), renderLayoutOption(VerticalDendrogram.value)("V-Dendro")(state3.currentLayout), renderLayoutOption(RadialTidy.value)("R-Tidy")(state3.currentLayout), renderLayoutOption(RadialDendrogram.value)("R-Dendro")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Adjacency Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(Icicle.value)("Icicle")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Enclosure Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(CirclePacking.value)("Circle Pack")(state3.currentLayout), renderLayoutOption(Treemap.value)("Treemap")(state3.currentLayout)])]), div2([classes(["control-panel__current"])])([strong_([text5("Current:")]), text5(" "), text5(show18(state3.currentLayout))])])])]), slot_6(_rhsNav4)(unit)(component)(Hierarchies.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Hierarchical Layouts")]), p_([text5("Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data.")]), p_([text5("This page demonstrates five different ways to visualize the same hierarchical dataset. Use the controls on the left to switch between layouts and explore how each representation emphasizes different relationships in the data.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5(show18(state3.currentLayout))]), p_([text5(layoutDescription(state3.currentLayout))]), div2([classes(["tutorial-viz-container"])])([div2([classes(["hierarchies-viz"])])([renderLayoutPlaceholder(state3.currentLayout)])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Implementation")]), p_([text5("The visualization code for "), strong_([text5(show18(state3.currentLayout))]), text5(" demonstrates how D3's hierarchical layout algorithms transform tree data into visual coordinates.")]), div2([classes(["tutorial-code-block"])])([pre_([code_([text5("-- Code for "), text5(show18(state3.currentLayout)), text5(" layout will go here\n"), text5("-- Demonstrates D3 hierarchy layout with PureScript DSL")])])])])]);
   };
   var component7 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -25717,14 +25787,14 @@
 
   // output/D3.Viz.GroupedBarChart/index.js
   var nub3 = /* @__PURE__ */ nub2(ordString);
-  var map44 = /* @__PURE__ */ map(functorArray);
+  var map45 = /* @__PURE__ */ map(functorArray);
   var maximum2 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var map115 = /* @__PURE__ */ map(functorMaybe);
   var bind24 = /* @__PURE__ */ bind(bindMaybe);
   var classed13 = /* @__PURE__ */ classed(toAttrString);
   var width18 = /* @__PURE__ */ width8(toAttrNumber);
   var height18 = /* @__PURE__ */ height8(toAttrNumber);
-  var show18 = /* @__PURE__ */ show(showNumber);
+  var show19 = /* @__PURE__ */ show(showNumber);
   var x17 = /* @__PURE__ */ x(toAttrNumber);
   var y15 = /* @__PURE__ */ y(toAttrNumber);
   var fill11 = /* @__PURE__ */ fill(toAttrString);
@@ -25732,7 +25802,7 @@
   var text14 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor9 = /* @__PURE__ */ textAnchor(toAttrString);
   var getStates = /* @__PURE__ */ (function() {
-    var $45 = map44(function(v) {
+    var $45 = map45(function(v) {
       return v.state;
     });
     return function($46) {
@@ -25740,7 +25810,7 @@
     };
   })();
   var getAges = /* @__PURE__ */ (function() {
-    var $47 = map44(function(v) {
+    var $47 = map45(function(v) {
       return v.age;
     });
     return function($48) {
@@ -25778,7 +25848,7 @@
             var chartHeight = dims.height - dims.marginTop - dims.marginBottom;
             var states = getStates(data$prime);
             var ages = getAges(data$prime);
-            var maxPop = fromMaybe(0)(maximum2(map44(function(v) {
+            var maxPop = fromMaybe(0)(maximum2(map45(function(v) {
               return v.population;
             })(data$prime)));
             var stateCount = toNumber(length4(states));
@@ -25811,7 +25881,7 @@
             return bind112(attach2(selector))(function(v) {
               return bind112(appendTo2(v)(Svg.value)([classed13("grouped-bar-chart"), width18(dims.width), height18(dims.height)]))(function(svg2) {
                 return bind112(appendTo2(svg2)(Group.value)([transform([function(v1) {
-                  return "translate(" + (show18(dims.marginLeft) + ("," + (show18(dims.marginTop) + ")")));
+                  return "translate(" + (show19(dims.marginLeft) + ("," + (show19(dims.marginTop) + ")")));
                 }]), classed13("chart")]))(function(chartGroup) {
                   var drawBar = function(d9) {
                     var barHeight = d9.population / maxPop * chartHeight;
@@ -25823,7 +25893,7 @@
                   };
                   return bind112(traverse_7(drawBar)(data$prime))(function() {
                     return bind112(appendTo2(chartGroup)(Group.value)([transform([function(v1) {
-                      return "translate(0," + (show18(chartHeight) + ")");
+                      return "translate(0," + (show19(chartHeight) + ")");
                     }]), classed13("x-axis")]))(function(xAxis) {
                       var drawStateLabel = function(state$prime) {
                         var labelX = getStateX(state$prime) + stateWidth / 2;
@@ -25859,14 +25929,14 @@
   // output/D3.Viz.MultiLineChart/index.js
   var foldlWithIndex3 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
   var nub4 = /* @__PURE__ */ nub2(ordString);
-  var map45 = /* @__PURE__ */ map(functorArray);
+  var map46 = /* @__PURE__ */ map(functorArray);
   var maximum3 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var minimum2 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var bind25 = /* @__PURE__ */ bind(bindMaybe);
   var classed14 = /* @__PURE__ */ classed(toAttrString);
   var width19 = /* @__PURE__ */ width8(toAttrNumber);
   var height19 = /* @__PURE__ */ height8(toAttrNumber);
-  var show19 = /* @__PURE__ */ show(showNumber);
+  var show20 = /* @__PURE__ */ show(showNumber);
   var d6 = /* @__PURE__ */ d2(toAttrString);
   var strokeColor12 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth10 = /* @__PURE__ */ strokeWidth(toAttrNumber);
@@ -25916,7 +25986,7 @@
     };
   };
   var groupBySeries = function(data$prime) {
-    var series = nub4(map45(function(v) {
+    var series = nub4(map46(function(v) {
       return v.series;
     })(data$prime));
     var getSeriesData = function(s) {
@@ -25924,10 +25994,10 @@
         return d1.series === s;
       })(data$prime);
     };
-    return map45(getSeriesData)(series);
+    return map46(getSeriesData)(series);
   };
   var getSeries = /* @__PURE__ */ (function() {
-    var $53 = map45(function(v) {
+    var $53 = map46(function(v) {
       return v.series;
     });
     return function($54) {
@@ -25955,7 +26025,7 @@
             };
             var chartWidth = dims.width - dims.marginLeft - dims.marginRight;
             var chartHeight = dims.height - dims.marginTop - dims.marginBottom;
-            var allValues = map45(function(v) {
+            var allValues = map46(function(v) {
               return v.value;
             })(data$prime);
             var maxValue = fromMaybe(0)(maximum3(allValues));
@@ -25972,7 +26042,7 @@
             return bind112(attach2(selector))(function(v) {
               return bind112(appendTo2(v)(Svg.value)([classed14("multi-line-chart"), width19(dims.width), height19(dims.height)]))(function(svg2) {
                 return bind112(appendTo2(svg2)(Group.value)([transform([function(v1) {
-                  return "translate(" + (show19(dims.marginLeft) + ("," + (show19(dims.marginTop) + ")")));
+                  return "translate(" + (show20(dims.marginLeft) + ("," + (show20(dims.marginTop) + ")")));
                 }]), classed14("chart")]))(function(chartGroup) {
                   var drawLine = function(points) {
                     var v1 = head2(points);
@@ -26005,7 +26075,7 @@
                       };
                       return bind112(traverse_7(drawYTick)(yTicks))(function() {
                         return bind112(appendTo2(chartGroup)(Group.value)([transform([function(v1) {
-                          return "translate(" + (show19(chartWidth + 20) + ", 0)");
+                          return "translate(" + (show20(chartWidth + 20) + ", 0)");
                         }]), classed14("legend")]))(function(legend2) {
                           var drawLegendItem = function(idx) {
                             return function(series$prime) {
@@ -26041,17 +26111,17 @@
   };
 
   // output/D3.Viz.RadialStackedBar/index.js
-  var append17 = /* @__PURE__ */ append(semigroupArray);
+  var append18 = /* @__PURE__ */ append(semigroupArray);
   var foldl7 = /* @__PURE__ */ foldl(foldableArray);
   var nub5 = /* @__PURE__ */ nub2(ordString);
-  var map46 = /* @__PURE__ */ map(functorArray);
+  var map47 = /* @__PURE__ */ map(functorArray);
   var compare2 = /* @__PURE__ */ compare(ordString);
   var maximum4 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var bind26 = /* @__PURE__ */ bind(bindMaybe);
   var classed15 = /* @__PURE__ */ classed(toAttrString);
   var width20 = /* @__PURE__ */ width8(toAttrNumber);
   var height20 = /* @__PURE__ */ height8(toAttrNumber);
-  var show20 = /* @__PURE__ */ show(showNumber);
+  var show21 = /* @__PURE__ */ show(showNumber);
   var d7 = /* @__PURE__ */ d2(toAttrString);
   var fill14 = /* @__PURE__ */ fill(toAttrString);
   var fillOpacity8 = /* @__PURE__ */ fillOpacity(toAttrNumber);
@@ -26077,7 +26147,7 @@
         if (acc.last instanceof Just) {
           var next2 = acc.last.value0 + v;
           return {
-            stack: append17(acc.stack)([{
+            stack: append18(acc.stack)([{
               start: acc.last.value0,
               end: next2,
               value: v
@@ -26096,7 +26166,7 @@
     return result.stack;
   };
   var getStates2 = /* @__PURE__ */ (function() {
-    var $53 = map46(function(v) {
+    var $53 = map47(function(v) {
       return v.state;
     });
     return function($54) {
@@ -26115,7 +26185,7 @@
     };
   };
   var getAges2 = /* @__PURE__ */ (function() {
-    var $55 = map46(function(v) {
+    var $55 = map47(function(v) {
       return v.age;
     });
     return function($56) {
@@ -26176,7 +26246,7 @@
                 };
               })(0)(getStateData(state$prime)(data$prime));
             };
-            var maxTotal = fromMaybe(0)(maximum4(map46(getStateTotal)(states)));
+            var maxTotal = fromMaybe(0)(maximum4(map47(getStateTotal)(states)));
             var anglePerState = 2 * pi / stateCount;
             var anglepadding = 0.02 * anglePerState;
             var ageColors = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf", "#999999"];
@@ -26190,12 +26260,12 @@
             return bind112(attach2(selector))(function(v) {
               return bind112(appendTo2(v)(Svg.value)([classed15("radial-stacked-bar"), width20(dims.width), height20(dims.height)]))(function(svg2) {
                 return bind112(appendTo2(svg2)(Group.value)([transform([function(v1) {
-                  return "translate(" + (show20(centerX) + ("," + (show20(centerY) + ")")));
+                  return "translate(" + (show21(centerX) + ("," + (show21(centerY) + ")")));
                 }]), classed15("chart")]))(function(chartGroup) {
                   var drawStateBar = function(stateIdx) {
                     return function(state$prime) {
                       var stateData = getStateData(state$prime)(data$prime);
-                      var values2 = map46(function(v1) {
+                      var values2 = map47(function(v1) {
                         return v1.population;
                       })(stateData);
                       var stacked = stackData(values2);
@@ -26271,7 +26341,6 @@
   var draw15 = /* @__PURE__ */ draw12(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var draw23 = /* @__PURE__ */ draw13(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var pure30 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var type_26 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_9 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "rhsNav";
@@ -26297,7 +26366,22 @@
     return $$Proxy.value;
   })();
   var render10 = function(v) {
-    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_26(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#grouped-bar"), classes(["toc-nav__item"])])([text5("1. Grouped Bar Chart")]), a([href4("#multi-line"), classes(["toc-nav__item"])])([text5("2. Multi-Line Chart")]), a([href4("#radial-stacked"), classes(["toc-nav__item"])])([text5("3. Radial Stacked Bar Chart")])])])])]), slot_9(_rhsNav7)(unit)(component)(SimpleCharts.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Simple Charts")]), p_([text5(`Real-world examples of common chart types showing state-level US population data and economic indicators. These charts are "simple" not because the visualizations are trivial, but because they don't include hierarchies, animations, transitions, or physical simulations.`)]), p_([text5("Each example demonstrates best practices for scales, axes, legends, and color coding to create clear and informative visualizations.")])]), section([id2("grouped-bar"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Grouped Bar Chart")]), p_([text5("US population by state and age group. This grouped bar chart shows population distribution across 6 states (CA, TX, FL, NY, PA, IL) broken down into 9 age groups. Each state has its own cluster of bars, with colors representing different age groups.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["grouped-bar-viz"])])([])]), p_([text5("The chart uses nested band scales: an outer scale positions each state cluster, and an inner scale positions individual bars within each cluster. The population values are scaled linearly to bar heights, with colors from the Spectral color scheme to distinguish age groups.")])]), section([id2("multi-line"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("2. Multi-Line Chart")]), p_([text5("Unemployment rates over time for four major US metro areas: San Francisco, New York, Detroit, and Miami. This chart shows how unemployment fluctuated from 2000 to 2013, clearly illustrating the impact of the 2008 financial crisis and subsequent recovery.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["multi-line-viz"])])([])]), p_([text5("Each city is represented by a colored line, with a legend on the right for identification. The chart uses SVG path elements for smooth lines, linear scales for time (x-axis) and unemployment percentage (y-axis), and includes axis labels for context.")])]), section([id2("radial-stacked"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("3. Radial Stacked Bar Chart")]), p_([text5('The same US state population data as the grouped bar chart, but visualized in polar coordinates. Each state gets a wedge around the circle, with age groups stacked radially from the center outward. This "sunburst-like" layout efficiently uses space and creates an aesthetically pleasing circular composition.')]), div2([classes(["tutorial-viz-container"])])([div2([classes(["radial-stacked-viz"])])([])]), p_([text5("The chart uses polar coordinates with an angular scale (\u03B8) dividing the circle by states and a radial scale (r) for population. Arc paths are generated for each segment, with the same color scheme as the grouped bar chart for consistency. State labels are positioned around the perimeter.")])])]);
+    return div2([classes(["tutorial-page"])])([renderTOC({
+      title: "Contents",
+      items: [{
+        anchor: "grouped-bar",
+        label: "1. Grouped Bar Chart",
+        level: 0
+      }, {
+        anchor: "multi-line",
+        label: "2. Multi-Line Chart",
+        level: 0
+      }, {
+        anchor: "radial-stacked",
+        label: "3. Radial Stacked Bar Chart",
+        level: 0
+      }]
+    }), slot_9(_rhsNav7)(unit)(component)(SimpleCharts.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Simple Charts")]), p_([text5(`Real-world examples of common chart types showing state-level US population data and economic indicators. These charts are "simple" not because the visualizations are trivial, but because they don't include hierarchies, animations, transitions, or physical simulations.`)]), p_([text5("Each example demonstrates best practices for scales, axes, legends, and color coding to create clear and informative visualizations.")])]), section([id2("grouped-bar"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Grouped Bar Chart")]), p_([text5("US population by state and age group. This grouped bar chart shows population distribution across 6 states (CA, TX, FL, NY, PA, IL) broken down into 9 age groups. Each state has its own cluster of bars, with colors representing different age groups.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["grouped-bar-viz"])])([])]), p_([text5("The chart uses nested band scales: an outer scale positions each state cluster, and an inner scale positions individual bars within each cluster. The population values are scaled linearly to bar heights, with colors from the Spectral color scheme to distinguish age groups.")])]), section([id2("multi-line"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("2. Multi-Line Chart")]), p_([text5("Unemployment rates over time for four major US metro areas: San Francisco, New York, Detroit, and Miami. This chart shows how unemployment fluctuated from 2000 to 2013, clearly illustrating the impact of the 2008 financial crisis and subsequent recovery.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["multi-line-viz"])])([])]), p_([text5("Each city is represented by a colored line, with a legend on the right for identification. The chart uses SVG path elements for smooth lines, linear scales for time (x-axis) and unemployment percentage (y-axis), and includes axis labels for context.")])]), section([id2("radial-stacked"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("3. Radial Stacked Bar Chart")]), p_([text5('The same US state population data as the grouped bar chart, but visualized in polar coordinates. Each state gets a wedge around the circle, with age groups stacked radially from the center outward. This "sunburst-like" layout efficiently uses space and creates an aesthetically pleasing circular composition.')]), div2([classes(["tutorial-viz-container"])])([div2([classes(["radial-stacked-viz"])])([])]), p_([text5("The chart uses polar coordinates with an angular scale (\u03B8) dividing the circle by states and a radial scale (r) for population. Arc paths are generated for each segment, with the same color scheme as the grouped bar chart for consistency. State labels are positioned around the perimeter.")])])]);
   };
   var component10 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -26316,13 +26400,13 @@
   })();
 
   // output/D3.Viz.BarChart/index.js
-  var map47 = /* @__PURE__ */ map(functorArray);
+  var map48 = /* @__PURE__ */ map(functorArray);
   var minimum3 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var maximum5 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var classed16 = /* @__PURE__ */ classed(toAttrString);
   var width21 = /* @__PURE__ */ width8(toAttrNumber);
   var height21 = /* @__PURE__ */ height8(toAttrNumber);
-  var show21 = /* @__PURE__ */ show(showNumber);
+  var show25 = /* @__PURE__ */ show(showNumber);
   var x20 = /* @__PURE__ */ x(toAttrNumber);
   var y18 = /* @__PURE__ */ y(toAttrNumber);
   var fill15 = /* @__PURE__ */ fill(toAttrString);
@@ -26358,10 +26442,10 @@
           return function(selector) {
             var iWidth = innerWidth2(defaultDimensions);
             var iHeight = innerHeight2(defaultDimensions);
-            var xValues = map47(function(v) {
+            var xValues = map48(function(v) {
               return v.x;
             })(dataPoints);
-            var yValues = map47(function(v) {
+            var yValues = map48(function(v) {
               return v.y;
             })(dataPoints);
             var minX = fromMaybe(0)(minimum3(xValues));
@@ -26379,7 +26463,7 @@
                   return 0;
                 })();
                 return bind31(appendTo2(svg2)(Group.value)([transform([function(v1) {
-                  return "translate(" + (show21(defaultDimensions.margin.left) + ("," + (show21(defaultDimensions.margin.top) + ")")));
+                  return "translate(" + (show25(defaultDimensions.margin.left) + ("," + (show25(defaultDimensions.margin.top) + ")")));
                 }])]))(function(chartGroup) {
                   return bind31(liftEffect19(createLinearScale({
                     domain: [minX, maxX],
@@ -26390,10 +26474,10 @@
                       range: [iHeight, 0]
                     })))(function(yScale) {
                       return bind31(appendTo2(chartGroup)(Group.value)([classed16("x-axis"), transform([function(v1) {
-                        return "translate(0," + (show21(iHeight) + ")");
+                        return "translate(0," + (show25(iHeight) + ")");
                       }])]))(function(xAxisGroup) {
                         return bind31(appendTo2(chartGroup)(Group.value)([classed16("y-axis"), transform([function(v1) {
-                          return "translate(" + (show21(barWidth / 2 * -1 - 5) + ",0)");
+                          return "translate(" + (show25(barWidth / 2 * -1 - 5) + ",0)");
                         }])]))(function(yAxisGroup) {
                           return bind31(liftEffect19(callAxis(xAxisGroup)(axisBottom2(xScale))))(function() {
                             return bind31(liftEffect19(callAxis(yAxisGroup)(axisLeft2(yScale))))(function() {
@@ -26493,13 +26577,13 @@
   }
 
   // output/D3.Viz.LineChart/index.js
-  var map48 = /* @__PURE__ */ map(functorArray);
+  var map49 = /* @__PURE__ */ map(functorArray);
   var minimum4 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var maximum6 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var classed18 = /* @__PURE__ */ classed(toAttrString);
   var width22 = /* @__PURE__ */ width8(toAttrNumber);
   var height22 = /* @__PURE__ */ height8(toAttrNumber);
-  var show25 = /* @__PURE__ */ show(showNumber);
+  var show26 = /* @__PURE__ */ show(showNumber);
   var d8 = /* @__PURE__ */ d2(toAttrString);
   var fill17 = /* @__PURE__ */ fill(toAttrString);
   var strokeColor15 = /* @__PURE__ */ strokeColor(toAttrString);
@@ -26532,10 +26616,10 @@
           return function(selector) {
             var iWidth = innerWidth3(defaultDimensions2);
             var iHeight = innerHeight3(defaultDimensions2);
-            var xValues = map48(function(v) {
+            var xValues = map49(function(v) {
               return v.x;
             })(dataPoints);
-            var yValues = map48(function(v) {
+            var yValues = map49(function(v) {
               return v.y;
             })(dataPoints);
             var minX = fromMaybe(0)(minimum4(xValues));
@@ -26545,7 +26629,7 @@
             return bind31(attach2(selector))(function(v) {
               return bind31(appendTo2(v)(Svg.value)([viewBox(0)(0)(defaultDimensions2.width)(defaultDimensions2.height), classed18("line-chart"), width22(defaultDimensions2.width), height22(defaultDimensions2.height)]))(function(svg2) {
                 return bind31(appendTo2(svg2)(Group.value)([transform([function(v1) {
-                  return "translate(" + (show25(defaultDimensions2.margin.left) + ("," + (show25(defaultDimensions2.margin.top) + ")")));
+                  return "translate(" + (show26(defaultDimensions2.margin.left) + ("," + (show26(defaultDimensions2.margin.top) + ")")));
                 }])]))(function(chartGroup) {
                   return bind31(liftEffect19(createLinearScale({
                     domain: [minX, maxX],
@@ -26556,7 +26640,7 @@
                       range: [iHeight, 0]
                     })))(function(yScale) {
                       return bind31(appendTo2(chartGroup)(Group.value)([classed18("x-axis"), transform([function(v1) {
-                        return "translate(0," + (show25(iHeight) + ")");
+                        return "translate(0," + (show26(iHeight) + ")");
                       }])]))(function(xAxisGroup) {
                         return bind31(appendTo2(chartGroup)(Group.value)([classed18("y-axis")]))(function(yAxisGroup) {
                           return bind31(liftEffect19(callAxis(xAxisGroup)(axisBottom2(xScale))))(function() {
@@ -26812,7 +26896,7 @@
   var alt9 = /* @__PURE__ */ alt(altMaybe);
   var mapFlipped1 = /* @__PURE__ */ mapFlipped(functorArray);
   var fromFoldable18 = /* @__PURE__ */ fromFoldable3(foldableArray);
-  var map49 = /* @__PURE__ */ map(functorArray);
+  var map50 = /* @__PURE__ */ map(functorArray);
   var htmlAttributeToProp = function(v) {
     return attr2(v.value0)(v.value1);
   };
@@ -26853,11 +26937,11 @@
         throw new Error("Failed pattern match at Html.Renderer.Halogen (line 34, column 12 - line 36, column 28): " + [mNs.constructor.name]);
       })();
       var children3 = mapFlipped1(ele.children)(nodeToHtml(mNs));
-      return ctor(ele.name)(fromFoldable18(map49(htmlAttributeToProp)(ele.attributes)))(children3);
+      return ctor(ele.name)(fromFoldable18(map50(htmlAttributeToProp)(ele.attributes)))(children3);
     };
   };
   var renderToArray = function(raw) {
-    return map49(nodeToHtml(Nothing.value))(parse6(raw));
+    return map50(nodeToHtml(Nothing.value))(parse6(raw));
   };
   var render11 = function(props) {
     var $28 = div2(props);
@@ -26875,7 +26959,7 @@
   // output/PSD3.Tutorial/index.js
   var pure31 = /* @__PURE__ */ pure(applicativeEffect);
   var sequence2 = /* @__PURE__ */ sequence(traversableArray)(applicativeEffect);
-  var map50 = /* @__PURE__ */ map(functorArray);
+  var map51 = /* @__PURE__ */ map(functorArray);
   var bind111 = /* @__PURE__ */ bind(bindAff);
   var liftEffect16 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var discard21 = /* @__PURE__ */ discard(discardUnit);
@@ -26922,8 +27006,8 @@
       var coinToss = function(c) {
         return function __do4() {
           var n = random();
-          var $55 = n > 0.6;
-          if ($55) {
+          var $54 = n > 0.6;
+          if ($54) {
             return new Just(c);
           }
           ;
@@ -26931,7 +27015,7 @@
         };
       };
       return function __do4() {
-        var choices = sequence2(map50(coinToss)(letters))();
+        var choices = sequence2(map51(coinToss)(letters))();
         return catMaybes(choices);
       };
     })();
@@ -26959,25 +27043,54 @@
   var quartetCode = 'drawQuartet :: QuartetData -> Selector D3Selection_ -> m Unit\ndrawQuartet quartet selector = do\n  -- Overall dimensions for the quartet display (2x2 grid of small multiples)\n  let totalWidth = 900.0\n  let totalHeight = 700.0\n\n  root <- attach selector\n  svg <- appendTo root Svg [ viewBox 0.0 0.0 totalWidth totalHeight, classed "scatter-quartet" ]\n\n  -- Helper function to draw a single subplot\n  let drawSubplot title dataPoints xOffset yOffset = do\n        subplotGroup <- appendTo svg Group [ classed "subplot", transform [ \\\\_ -> "translate(" <> show xOffset <> "," <> show yOffset <> ")" ] ]\n\n        -- Add title\n        _ <- appendTo svg Text [ x (xOffset + plotWidth / 2.0), y (yOffset + 15.0), text title, textAnchor "middle" ]\n\n        -- Create scales (use fixed domains for valid comparison)\n        xScale <- liftEffect $ createLinearScale { domain: [0.0, 20.0], range: [0.0, iWidth] }\n        yScale <- liftEffect $ createLinearScale { domain: [0.0, 14.0], range: [iHeight, 0.0] }\n\n        -- Add axes and data points...\n\n  -- Draw all four subplots in a 2x2 grid\n  _ <- drawSubplot "Dataset I" quartet.dataset1 padding padding\n  _ <- drawSubplot "Dataset II" quartet.dataset2 (padding + plotWidth + padding) padding\n  _ <- drawSubplot "Dataset III" quartet.dataset3 padding (padding + plotHeight + padding)\n  _ <- drawSubplot "Dataset IV" quartet.dataset4 (padding + plotWidth + padding) (padding + plotHeight + padding)\n  pure unit';
   var parabolaCode = 'drawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_ -> m D3Selection_\ndrawWithData circleData selector = do\n  let circleAttributes = \n\n  root        <- attach selector\n  svg         <- appendTo root Svg [ viewBox (-10.0) (-100.0) 320.0 160.0, classed "d3svg" ]\n  circleGroup <- appendTo svg  Group []\n  circles     <- simpleJoin circleGroup Circle circleData keyIsID_\n  setAttributes circles [ strokeColor datum_.color\n                        , strokeWidth 3.0\n                        , fill "none"\n                        , cx datum_.x\n                        , cy datum_.y\n                        , radius 10.0 ]\n  pure circles';
   var lineChartCode = 'draw :: Array DataPoint -> Selector D3Selection_ -> m Unit\ndraw dataPoints selector = do\n  let dims = defaultDimensions\n\n  root <- attach selector\n  svg <- appendTo root Svg [ viewBox 0.0 0.0 dims.width dims.height, classed "line-chart" ]\n  chartGroup <- appendTo svg Group [\n      transform [ \\\\_ -> "translate(" <> show dims.margin.left <> "," <> show dims.margin.top <> ")" ]\n    ]\n\n  -- Create scales\n  xScale <- liftEffect $ createLinearScale { domain: [minX, maxX], range: [0.0, iWidth] }\n  yScale <- liftEffect $ createLinearScale { domain: [minY, maxY], range: [iHeight, 0.0] }\n\n  -- Add axes\n  xAxisGroup <- appendTo chartGroup Group [ classed "x-axis", transform [ \\\\_ -> "translate(0," <> show iHeight <> ")" ] ]\n  yAxisGroup <- appendTo chartGroup Group [ classed "y-axis" ]\n  _ <- liftEffect $ callAxis xAxisGroup (axisBottom xScale)\n  _ <- liftEffect $ callAxis yAxisGroup (axisLeft yScale)\n\n  -- Create line generator and add the line path\n  lineGen <- liftEffect $ createLineGenerator { xScale, yScale }\n  let pathData = generateLinePath lineGen dataPoints\n  _ <- appendTo chartGroup Path [ d pathData, fill "none", strokeColor "#4a90e2", strokeWidth 2.0, classed "line" ]\n  pure unit';
-  var lhsNav = /* @__PURE__ */ (function() {
-    return div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_17(isPropButtonType)(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. Three Little Circles")]), a([href4("#section-2"), classes(["toc-nav__item"])])([text5("2. General Update Pattern")]), a([href4("#section-3"), classes(["toc-nav__item"])])([text5("3. Data-Driven Positioning")]), a([href4("#section-4"), classes(["toc-nav__item"])])([text5("4. Bar Charts with Scales")]), a([href4("#section-5"), classes(["toc-nav__item"])])([text5("5. Line Charts and Paths")]), a([href4("#section-6"), classes(["toc-nav__item"])])([text5("6. Anscombe's Quartet")]), a([href4("#section-7"), classes(["toc-nav__item"])])([text5("7. Next Steps")])])])])]);
-  })();
+  var lhsNav = /* @__PURE__ */ renderTOC({
+    title: "Contents",
+    items: [{
+      anchor: "section-1",
+      label: "1. Three Little Circles",
+      level: 0
+    }, {
+      anchor: "section-2",
+      label: "2. General Update Pattern",
+      level: 0
+    }, {
+      anchor: "section-3",
+      label: "3. Data-Driven Positioning",
+      level: 0
+    }, {
+      anchor: "section-4",
+      label: "4. Bar Charts with Scales",
+      level: 0
+    }, {
+      anchor: "section-5",
+      label: "5. Line Charts and Paths",
+      level: 0
+    }, {
+      anchor: "section-6",
+      label: "6. Anscombe's Quartet",
+      level: 0
+    }, {
+      anchor: "section-7",
+      label: "7. Next Steps",
+      level: 0
+    }]
+  });
   var handleAction9 = function(v) {
     if (v instanceof Initialize10) {
       return bind28(liftEffect17(eval_D3M(drawThreeCircles2("div.three-circles-viz"))))(function() {
         return bind28(runGeneralUpdatePattern1)(function(updateFn) {
           return bind28(liftAff4(forkAff(forever2(runUpdate(updateFn)))))(function(fiber) {
             return discard24(modify_6(function(state3) {
-              var $57 = {};
-              for (var $58 in state3) {
-                if ({}.hasOwnProperty.call(state3, $58)) {
-                  $57[$58] = state3[$58];
+              var $56 = {};
+              for (var $57 in state3) {
+                if ({}.hasOwnProperty.call(state3, $57)) {
+                  $56[$57] = state3[$57];
                 }
                 ;
               }
               ;
-              $57.gupFiber = new Just(fiber);
-              return $57;
+              $56.gupFiber = new Just(fiber);
+              return $56;
             }))(function() {
               return bind28(liftEffect17(eval_D3M(drawWithData2([310, 474, 613, 726, 814, 877, 914, 926, 914, 877, 814, 726, 613, 474, 310])("div.parabola-viz"))))(function() {
                 return bind28(liftEffect17(eval_D3M(draw18(monthlySales)("div.barchart-viz"))))(function() {
@@ -27006,11 +27119,11 @@
           return liftAff4(killFiber(error("Cancelling GUP animation"))(maybeFiber.value0));
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Tutorial (line 325, column 5 - line 327, column 83): " + [maybeFiber.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Tutorial (line 302, column 5 - line 304, column 83): " + [maybeFiber.constructor.name]);
       });
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Tutorial (line 298, column 16 - line 327, column 83): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Tutorial (line 275, column 16 - line 304, column 83): " + [v.constructor.name]);
   };
   var gupCode = 'exGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_ -> m ((Array Char) -> m D3Selection_)\nexGeneralUpdatePattern selector = do\n  root        <- attach selector\n  svg         <- appendTo root Svg [ viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup" ]\n  letterGroup <- appendTo svg Group []\n\n  pure $ \\letters -> do\n    enterSelection   <- openSelection letterGroup "text"\n    updateSelections <- updateJoin enterSelection Text letters keyFunction\n    setAttributes updateSelections.exit exit\n    setAttributes updateSelections.update update\n    newlyEntered     <- appendTo updateSelections.enter Text []\n    setAttributes newlyEntered enter\n    pure newlyEntered\n  where\n    transition = transitionWithDuration $ Milliseconds 2000.0\n    enter  = [ classed "enter", fill "green", x xFromIndex, y 0.0, text (singleton <<< datumIsChar), fontSize 96.0 ]\n             `andThen` (transition `to` [ y 200.0 ])\n    update = [ classed "update", fill "gray", y 200.0 ]\n             `andThen` (transition `to` [ x xFromIndex ])\n    exit   = [ classed "exit", fill "brown"]\n             `andThen` (transition `to` [ y 400.0, remove ])';
   var barChartCode = 'draw :: Array DataPoint -> Selector D3Selection_ -> m Unit\ndraw dataPoints selector = do\n  let dims = defaultDimensions\n\n  root <- attach selector\n  svg <- appendTo root Svg [ viewBox 0.0 0.0 dims.width dims.height, classed "bar-chart" ]\n  chartGroup <- appendTo svg Group [\n      transform [ \\\\_ -> "translate(" <> show dims.margin.left <> "," <> show dims.margin.top <> ")" ]\n    ]\n\n  -- Create scales\n  xScale <- liftEffect $ createLinearScale { domain: [minX, maxX], range: [0.0, iWidth] }\n  yScale <- liftEffect $ createLinearScale { domain: [minY, maxY], range: [iHeight, 0.0] }\n\n  -- Add axes\n  xAxisGroup <- appendTo chartGroup Group [ classed "x-axis", transform [ \\\\_ -> "translate(0," <> show iHeight <> ")" ] ]\n  yAxisGroup <- appendTo chartGroup Group [ classed "y-axis" ]\n  _ <- liftEffect $ callAxis xAxisGroup (axisBottom xScale)\n  _ <- liftEffect $ callAxis yAxisGroup (axisLeft yScale)\n\n  -- Add bars\n  let addBar point = do\n        let xPos = applyScale xScale point.x - (barWidth / 2.0)\n        let yPos = applyScale yScale point.y\n        let barHeight = iHeight - yPos\n        _ <- appendTo chartGroup Rect [ x xPos, y yPos, width barWidth, height barHeight, fill "#4a90e2" ]\n        pure unit\n  _ <- traverse_ addBar dataPoints\n  pure unit';
@@ -27039,7 +27152,7 @@
   })();
 
   // output/Routing.Parser/index.js
-  var map51 = /* @__PURE__ */ map(functorArray);
+  var map52 = /* @__PURE__ */ map(functorArray);
   var discard25 = /* @__PURE__ */ discard(discardUnit)(bindMaybe);
   var guard2 = /* @__PURE__ */ guard(alternativeMaybe);
   var apply4 = /* @__PURE__ */ apply(applyMaybe);
@@ -27047,12 +27160,12 @@
   var fromFoldable19 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
   var traverse3 = /* @__PURE__ */ traverse(traversableArray)(applicativeMaybe);
   var fromFoldable110 = /* @__PURE__ */ fromFoldable(foldableArray);
-  var append18 = /* @__PURE__ */ append(semigroupList);
+  var append19 = /* @__PURE__ */ append(semigroupList);
   var map210 = /* @__PURE__ */ map(functorList);
   var fromFoldable24 = /* @__PURE__ */ fromFoldable(foldableMaybe);
   var parseQueryPart = function(decoder) {
     var part2tuple = function(input3) {
-      var keyVal = map51(decoder)(split("=")(input3));
+      var keyVal = map52(decoder)(split("=")(input3));
       return discard25(guard2(length4(keyVal) <= 2))(function() {
         return apply4(map116(Tuple.create)(head2(keyVal)))(index2(keyVal)(1));
       });
@@ -27067,7 +27180,7 @@
   var parse7 = function(decoder) {
     return function(hash2) {
       var pathParts = function(str) {
-        var parts = fromFoldable110(map51(function($31) {
+        var parts = fromFoldable110(map52(function($31) {
           return Path3.create(decoder($31));
         })(split("/")(str)));
         var v2 = unsnoc(parts);
@@ -27079,7 +27192,7 @@
       };
       var v = map116(flip(splitAt3)(hash2))(indexOf2("?")(hash2));
       if (v instanceof Just) {
-        return append18(pathParts(v.value0.before))(map210(Query2.create)(fromFoldable24(parseQueryPart(decoder)(drop5(1)(v.value0.after)))));
+        return append19(pathParts(v.value0.before))(map210(Query2.create)(fromFoldable24(parseQueryPart(decoder)(drop5(1)(v.value0.after)))));
       }
       ;
       if (v instanceof Nothing) {
@@ -27110,7 +27223,7 @@
 
   // output/Routing.Hash/index.js
   var bind29 = /* @__PURE__ */ bind(bindEffect);
-  var map52 = /* @__PURE__ */ map(functorEffect);
+  var map53 = /* @__PURE__ */ map(functorEffect);
   var bindFlipped10 = /* @__PURE__ */ bindFlipped(bindEffect);
   var join3 = /* @__PURE__ */ join(bindEffect);
   var apply5 = /* @__PURE__ */ apply(applyEffect);
@@ -27120,7 +27233,7 @@
     return bind29(bind29(windowImpl)(location))(setHash(h));
   };
   var getHash = /* @__PURE__ */ bind29(/* @__PURE__ */ bind29(windowImpl)(location))(/* @__PURE__ */ (function() {
-    var $16 = map52((function() {
+    var $16 = map53((function() {
       var $18 = fromMaybe("");
       var $19 = stripPrefix("#");
       return function($20) {
@@ -27135,9 +27248,9 @@
     return function(init4) {
       return function __do4() {
         var ref2 = bindFlipped10($$new)(bindFlipped10(init4)(getHash))();
-        var win = map52(toEventTarget)(windowImpl)();
+        var win = map53(toEventTarget)(windowImpl)();
         var listener = eventListener(function(v) {
-          return bindFlipped10(flip(write)(ref2))(join3(apply5(map52(cb)(read(ref2)))(getHash)));
+          return bindFlipped10(flip(write)(ref2))(join3(apply5(map53(cb)(read(ref2)))(getHash)));
         })();
         addEventListener(hashchange)(listener)(false)(win)();
         return removeEventListener(hashchange)(listener)(false)(win);
