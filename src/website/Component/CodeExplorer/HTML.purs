@@ -48,6 +48,14 @@ render state =
           [ HH.h2
               [ HP.classes [ HH.ClassName "floating-panel__title", HH.ClassName "spago-controls__title" ] ]
               [ HH.text "Controls" ]
+          , HH.div
+              [ HP.classes [ HH.ClassName "control-group", HH.ClassName "control-group--home" ] ]
+              [ HH.a
+                  [ HP.href "#/"
+                  , HP.classes [ HH.ClassName "button", HH.ClassName "button--primary" ]
+                  ]
+                  [ HH.text "← Home" ]
+              ]
           , renderSimControls state
           , renderSimState state
           ]
