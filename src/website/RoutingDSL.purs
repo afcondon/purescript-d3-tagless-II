@@ -25,6 +25,7 @@ routes =
   <|> hierarchies
   <|> interpreters
   <|> codeExplorer
+  <|> explore
   <|> about
   <|> rootRedirect
   <|> notFound
@@ -69,6 +70,10 @@ interpreters = Interpreters <$ lit "interpreters" <* end
 codeExplorer :: Match Route
 codeExplorer = CodeExplorer <$ lit "code-explorer" <* end
 
+-- | Match: /explore/:snippetId
+explore :: Match Route
+explore = Explore <$> (lit "explore" *> str) <* end
+
 -- | Fallback: everything else is NotFound
 notFound :: Match Route
 notFound = pure NotFound
@@ -86,4 +91,5 @@ routeToPath SankeyDiagram = "/sankey-diagram"
 routeToPath Hierarchies = "/hierarchies"
 routeToPath Interpreters = "/interpreters"
 routeToPath CodeExplorer = "/code-explorer"
+routeToPath (Explore snippetId) = "/explore/" <> snippetId
 routeToPath NotFound = "/not-found"

@@ -73,6 +73,7 @@ data Route
   | Hierarchies
   | Interpreters
   | CodeExplorer
+  | Explore String  -- Code exploration page for a specific snippet
   | NotFound
 
 derive instance eqRoute :: Eq Route
@@ -87,4 +88,5 @@ instance showRoute :: Show Route where
   show Hierarchies = "Hierarchies"
   show Interpreters = "Interpreters"
   show CodeExplorer = "Code Explorer"
+  show (Explore snippetId) = "Explore: " <> snippetId
   show NotFound = "Not Found"

@@ -20,6 +20,7 @@ import PSD3.BubbleChart as BubbleChart
 import PSD3.SankeyDiagram as SankeyDiagram
 import PSD3.Hierarchies as Hierarchies
 import PSD3.Interpreters as Interpreters
+import PSD3.CodeExplorationPage as CodeExplorationPage
 import PSD3.RoutingDSL (routing, routeToPath)
 import PSD3.CodeExplorerWrapper as CodeExplorer
 import PSD3.Types (Route(..))
@@ -48,6 +49,7 @@ type Slots =
   , hierarchies :: forall q. H.Slot q Void Unit
   , interpreters :: forall q. H.Slot q Void Unit
   , codeExplorer :: forall q. H.Slot q Void Unit
+  , codeExploration :: forall q. H.Slot q Void Unit
   )
 
 _about = Proxy :: Proxy "about"
@@ -59,6 +61,7 @@ _sankeyDiagram = Proxy :: Proxy "sankeyDiagram"
 _hierarchies = Proxy :: Proxy "hierarchies"
 _interpreters = Proxy :: Proxy "interpreters"
 _codeExplorer = Proxy :: Proxy "codeExplorer"
+_codeExploration = Proxy :: Proxy "codeExploration"
 
 -- | Main application component
 component :: forall q i. H.Component q i Void Aff
@@ -110,6 +113,9 @@ renderPage route = case spy "Route is" route of
 
   CodeExplorer ->
     HH.slot_ _codeExplorer unit CodeExplorer.component unit
+
+  Explore snippetId ->
+    HH.slot_ _codeExploration unit CodeExplorationPage.component snippetId
 
   NotFound ->
     HH.div
