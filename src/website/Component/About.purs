@@ -2,6 +2,9 @@ module PSD3.About where
 
 import Prelude
 
+import D3.Viz.ScatterPlot as ScatterPlot
+import D3.Viz.Charts.Model (anscombesQuartet)
+import D3Tagless.Instance.Selection (eval_D3M)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Halogen as H
@@ -66,6 +69,7 @@ render _ =
                     , HH.a [ HP.href "#heading-2", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-2" ] ] [ HH.text "What is This Project?" ]
                     , HH.a [ HP.href "#heading-3", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-2" ] ] [ HH.text "Motivation" ]
                     , HH.a [ HP.href "#heading-4", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-2" ] ] [ HH.text "The Data Visualization Process" ]
+                    , HH.a [ HP.href "#anscombe", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-3" ] ] [ HH.text "Why Visualize? Anscombe's Quartet" ]
                     , HH.a [ HP.href "#heading-5", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-3" ] ] [ HH.text "Design philosophy of D3*" ]
                     , HH.a [ HP.href "#heading-6", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-3" ] ] [ HH.text "Design philosophy of PS<$>D3" ]
                     , HH.a [ HP.href "#heading-7", HP.classes [ HH.ClassName "toc-nav__item", HH.ClassName "toc-nav__item--level-2" ] ] [ HH.text "Project Goals (and non-Goals)" ]
@@ -152,6 +156,22 @@ render _ =
             , HP.id "heading-4"
             ]
             [ HH.text "The Data Visualization Process" ]
+
+        -- Anscombe's Quartet subsection
+        , HH.h3
+            [ HP.id "anscombe" ]
+            [ HH.text "Why Visualize? Anscombe's Quartet" ]
+        , HH.p_
+            [ HH.text "The famous Anscombe's Quartet demonstrates why visualization is essential. These four datasets have nearly identical statistical properties - same mean, variance, correlation, and linear regression line - yet reveal completely different patterns when visualized:" ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
+            [ HH.div
+                [ HP.classes [ HH.ClassName "quartet-viz" ] ]
+                []
+            ]
+        , HH.p_
+            [ HH.text "Summary statistics alone would suggest these datasets are interchangeable, but the visualizations tell a very different story: linear relationship, curved relationship, linear with outlier, and vertical with outlier. This perfectly illustrates why we need visualization - numbers hide patterns that become immediately obvious when seen." ]
+
         , HH.p_
             [ HH.text "Data visualization transforms \"boring\" - but more importantly "
             , HH.em_ [ HH.text "less informative" ]
@@ -499,4 +519,6 @@ render _ =
 -- Handle actions
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
-  Initialize -> pure unit
+  Initialize -> do
+    _ <- H.liftEffect $ eval_D3M $ ScatterPlot.drawQuartet anscombesQuartet "div.quartet-viz"
+    pure unit

@@ -2018,23 +2018,23 @@
 
   // output/Control.Monad/index.js
   var unlessM = function(dictMonad) {
-    var bind26 = bind(dictMonad.Bind1());
+    var bind27 = bind(dictMonad.Bind1());
     var unless2 = unless(dictMonad.Applicative0());
     return function(mb) {
       return function(m) {
-        return bind26(mb)(function(b2) {
+        return bind27(mb)(function(b2) {
           return unless2(b2)(m);
         });
       };
     };
   };
   var ap = function(dictMonad) {
-    var bind26 = bind(dictMonad.Bind1());
+    var bind27 = bind(dictMonad.Bind1());
     var pure33 = pure(dictMonad.Applicative0());
     return function(f) {
       return function(a2) {
-        return bind26(f)(function(f$prime) {
-          return bind26(a2)(function(a$prime) {
+        return bind27(f)(function(f$prime) {
+          return bind27(a2)(function(a$prime) {
             return pure33(f$prime(a$prime));
           });
         });
@@ -2450,12 +2450,12 @@
     };
   };
   var bindExceptT = function(dictMonad) {
-    var bind26 = bind(dictMonad.Bind1());
+    var bind27 = bind(dictMonad.Bind1());
     var pure33 = pure(dictMonad.Applicative0());
     return {
       bind: function(v) {
         return function(k) {
-          return bind26(v)(either(function($187) {
+          return bind27(v)(either(function($187) {
             return pure33(Left.create($187));
           })(function(a2) {
             var v1 = k(a2);
@@ -2508,19 +2508,19 @@
     var append18 = append(dictSemigroup);
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
-      var bind26 = bind(Bind1);
+      var bind27 = bind(Bind1);
       var pure33 = pure(dictMonad.Applicative0());
       var functorExceptT1 = functorExceptT(Bind1.Apply0().Functor0());
       return {
         alt: function(v) {
           return function(v1) {
-            return bind26(v)(function(rm) {
+            return bind27(v)(function(rm) {
               if (rm instanceof Right) {
                 return pure33(new Right(rm.value0));
               }
               ;
               if (rm instanceof Left) {
-                return bind26(v1)(function(rn) {
+                return bind27(v1)(function(rn) {
                   if (rn instanceof Right) {
                     return pure33(new Right(rn.value0));
                   }
@@ -3367,11 +3367,11 @@
   };
   var monadTransStateT = {
     lift: function(dictMonad) {
-      var bind26 = bind(dictMonad.Bind1());
+      var bind27 = bind(dictMonad.Bind1());
       var pure33 = pure(dictMonad.Applicative0());
       return function(m) {
         return function(s) {
-          return bind26(m)(function(x19) {
+          return bind27(m)(function(x19) {
             return pure33(new Tuple(x19, s));
           });
         };
@@ -3404,12 +3404,12 @@
     };
   };
   var bindStateT = function(dictMonad) {
-    var bind26 = bind(dictMonad.Bind1());
+    var bind27 = bind(dictMonad.Bind1());
     return {
       bind: function(v) {
         return function(f) {
           return function(s) {
-            return bind26(v(s))(function(v1) {
+            return bind27(v(s))(function(v1) {
               var v3 = f(v1.value0);
               return v3(v1.value1);
             });
@@ -9841,1537 +9841,222 @@
     };
   };
 
-  // output/PSD3.Types/index.js
-  var About = /* @__PURE__ */ (function() {
-    function About2() {
-    }
-    ;
-    About2.value = new About2();
-    return About2;
-  })();
-  var Tutorial = /* @__PURE__ */ (function() {
-    function Tutorial2() {
-    }
-    ;
-    Tutorial2.value = new Tutorial2();
-    return Tutorial2;
-  })();
-  var SimpleCharts = /* @__PURE__ */ (function() {
-    function SimpleCharts2() {
-    }
-    ;
-    SimpleCharts2.value = new SimpleCharts2();
-    return SimpleCharts2;
-  })();
-  var ChordDiagram = /* @__PURE__ */ (function() {
-    function ChordDiagram2() {
-    }
-    ;
-    ChordDiagram2.value = new ChordDiagram2();
-    return ChordDiagram2;
-  })();
-  var BubbleChart = /* @__PURE__ */ (function() {
-    function BubbleChart2() {
-    }
-    ;
-    BubbleChart2.value = new BubbleChart2();
-    return BubbleChart2;
-  })();
-  var SankeyDiagram = /* @__PURE__ */ (function() {
-    function SankeyDiagram2() {
-    }
-    ;
-    SankeyDiagram2.value = new SankeyDiagram2();
-    return SankeyDiagram2;
-  })();
-  var Hierarchies = /* @__PURE__ */ (function() {
-    function Hierarchies2() {
-    }
-    ;
-    Hierarchies2.value = new Hierarchies2();
-    return Hierarchies2;
-  })();
-  var Interpreters = /* @__PURE__ */ (function() {
-    function Interpreters2() {
-    }
-    ;
-    Interpreters2.value = new Interpreters2();
-    return Interpreters2;
-  })();
-  var CodeExplorer = /* @__PURE__ */ (function() {
-    function CodeExplorer2() {
-    }
-    ;
-    CodeExplorer2.value = new CodeExplorer2();
-    return CodeExplorer2;
-  })();
-  var NotFound = /* @__PURE__ */ (function() {
-    function NotFound2() {
-    }
-    ;
-    NotFound2.value = new NotFound2();
-    return NotFound2;
-  })();
-  var eqRoute = {
-    eq: function(x19) {
-      return function(y17) {
-        if (x19 instanceof About && y17 instanceof About) {
-          return true;
-        }
-        ;
-        if (x19 instanceof Tutorial && y17 instanceof Tutorial) {
-          return true;
-        }
-        ;
-        if (x19 instanceof SimpleCharts && y17 instanceof SimpleCharts) {
-          return true;
-        }
-        ;
-        if (x19 instanceof ChordDiagram && y17 instanceof ChordDiagram) {
-          return true;
-        }
-        ;
-        if (x19 instanceof BubbleChart && y17 instanceof BubbleChart) {
-          return true;
-        }
-        ;
-        if (x19 instanceof SankeyDiagram && y17 instanceof SankeyDiagram) {
-          return true;
-        }
-        ;
-        if (x19 instanceof Hierarchies && y17 instanceof Hierarchies) {
-          return true;
-        }
-        ;
-        if (x19 instanceof Interpreters && y17 instanceof Interpreters) {
-          return true;
-        }
-        ;
-        if (x19 instanceof CodeExplorer && y17 instanceof CodeExplorer) {
-          return true;
-        }
-        ;
-        if (x19 instanceof NotFound && y17 instanceof NotFound) {
-          return true;
-        }
-        ;
-        return false;
-      };
-    }
+  // output/D3.Viz.Charts.Model/index.js
+  var sineWaveData = [{
+    x: 0,
+    y: 100
+  }, {
+    x: 5,
+    y: 125
+  }, {
+    x: 10,
+    y: 145
+  }, {
+    x: 15,
+    y: 150
+  }, {
+    x: 20,
+    y: 145
+  }, {
+    x: 25,
+    y: 125
+  }, {
+    x: 30,
+    y: 100
+  }, {
+    x: 35,
+    y: 75
+  }, {
+    x: 40,
+    y: 55
+  }, {
+    x: 45,
+    y: 50
+  }, {
+    x: 50,
+    y: 55
+  }, {
+    x: 55,
+    y: 75
+  }, {
+    x: 60,
+    y: 100
+  }];
+  var monthlySales = [{
+    x: 0,
+    y: 30
+  }, {
+    x: 1,
+    y: 45
+  }, {
+    x: 2,
+    y: 60
+  }, {
+    x: 3,
+    y: 55
+  }, {
+    x: 4,
+    y: 70
+  }, {
+    x: 5,
+    y: 65
+  }, {
+    x: 6,
+    y: 80
+  }, {
+    x: 7,
+    y: 75
+  }, {
+    x: 8,
+    y: 90
+  }, {
+    x: 9,
+    y: 85
+  }, {
+    x: 10,
+    y: 95
+  }, {
+    x: 11,
+    y: 100
+  }];
+  var anscombesQuartet = {
+    dataset1: [{
+      x: 10,
+      y: 8.04
+    }, {
+      x: 8,
+      y: 6.95
+    }, {
+      x: 13,
+      y: 7.58
+    }, {
+      x: 9,
+      y: 8.81
+    }, {
+      x: 11,
+      y: 8.33
+    }, {
+      x: 14,
+      y: 9.96
+    }, {
+      x: 6,
+      y: 7.24
+    }, {
+      x: 4,
+      y: 4.26
+    }, {
+      x: 12,
+      y: 10.84
+    }, {
+      x: 7,
+      y: 4.82
+    }, {
+      x: 5,
+      y: 5.68
+    }],
+    dataset2: [{
+      x: 10,
+      y: 9.14
+    }, {
+      x: 8,
+      y: 8.14
+    }, {
+      x: 13,
+      y: 8.74
+    }, {
+      x: 9,
+      y: 8.77
+    }, {
+      x: 11,
+      y: 9.26
+    }, {
+      x: 14,
+      y: 8.1
+    }, {
+      x: 6,
+      y: 6.13
+    }, {
+      x: 4,
+      y: 3.1
+    }, {
+      x: 12,
+      y: 9.13
+    }, {
+      x: 7,
+      y: 7.26
+    }, {
+      x: 5,
+      y: 4.74
+    }],
+    dataset3: [{
+      x: 10,
+      y: 7.46
+    }, {
+      x: 8,
+      y: 6.77
+    }, {
+      x: 13,
+      y: 12.74
+    }, {
+      x: 9,
+      y: 7.11
+    }, {
+      x: 11,
+      y: 7.81
+    }, {
+      x: 14,
+      y: 8.84
+    }, {
+      x: 6,
+      y: 6.08
+    }, {
+      x: 4,
+      y: 5.39
+    }, {
+      x: 12,
+      y: 8.15
+    }, {
+      x: 7,
+      y: 6.42
+    }, {
+      x: 5,
+      y: 5.73
+    }],
+    dataset4: [{
+      x: 8,
+      y: 6.58
+    }, {
+      x: 8,
+      y: 5.76
+    }, {
+      x: 8,
+      y: 7.71
+    }, {
+      x: 8,
+      y: 8.84
+    }, {
+      x: 8,
+      y: 8.47
+    }, {
+      x: 8,
+      y: 7.04
+    }, {
+      x: 8,
+      y: 5.25
+    }, {
+      x: 19,
+      y: 12.5
+    }, {
+      x: 8,
+      y: 5.56
+    }, {
+      x: 8,
+      y: 7.91
+    }, {
+      x: 8,
+      y: 6.89
+    }]
   };
-
-  // output/Data.Semiring.Free/index.js
-  var append12 = /* @__PURE__ */ append(semigroupList);
-  var bind6 = /* @__PURE__ */ bind(bindList);
-  var pure11 = /* @__PURE__ */ pure(applicativeList);
-  var semiringFree = /* @__PURE__ */ (function() {
-    return {
-      add: function(v) {
-        return function(v1) {
-          return append12(v)(v1);
-        };
-      },
-      zero: Nil.value,
-      mul: function(v) {
-        return function(v1) {
-          return bind6(v)(function(xs) {
-            return bind6(v1)(function(ys) {
-              return pure11(append12(xs)(ys));
-            });
-          });
-        };
-      },
-      one: singleton3(Nil.value)
-    };
-  })();
-  var free = function(a2) {
-    return singleton3(singleton3(a2));
-  };
-
-  // output/Data.Validation.Semiring/index.js
-  var V = function(x19) {
-    return x19;
-  };
-  var validation = function(v) {
-    return function(v1) {
-      return function(v2) {
-        if (v2 instanceof Left) {
-          return v(v2.value0);
-        }
-        ;
-        if (v2 instanceof Right) {
-          return v1(v2.value0);
-        }
-        ;
-        throw new Error("Failed pattern match at Data.Validation.Semiring (line 49, column 1 - line 49, column 84): " + [v.constructor.name, v1.constructor.name, v2.constructor.name]);
-      };
-    };
-  };
-  var invalid = function($113) {
-    return V(Left.create($113));
-  };
-  var functorV = functorEither;
-  var applyV = function(dictSemiring) {
-    var mul3 = mul(dictSemiring);
-    return {
-      apply: function(v) {
-        return function(v1) {
-          if (v instanceof Left && v1 instanceof Left) {
-            return new Left(mul3(v.value0)(v1.value0));
-          }
-          ;
-          if (v instanceof Left) {
-            return new Left(v.value0);
-          }
-          ;
-          if (v1 instanceof Left) {
-            return new Left(v1.value0);
-          }
-          ;
-          if (v instanceof Right && v1 instanceof Right) {
-            return new Right(v.value0(v1.value0));
-          }
-          ;
-          throw new Error("Failed pattern match at Data.Validation.Semiring (line 90, column 1 - line 94, column 54): " + [v.constructor.name, v1.constructor.name]);
-        };
-      },
-      Functor0: function() {
-        return functorV;
-      }
-    };
-  };
-  var applicativeV = function(dictSemiring) {
-    var applyV1 = applyV(dictSemiring);
-    return {
-      pure: function($121) {
-        return V(Right.create($121));
-      },
-      Apply0: function() {
-        return applyV1;
-      }
-    };
-  };
-  var altV = function(dictSemiring) {
-    var add2 = add(dictSemiring);
-    return {
-      alt: function(v) {
-        return function(v1) {
-          if (v instanceof Left && v1 instanceof Left) {
-            return new Left(add2(v.value0)(v1.value0));
-          }
-          ;
-          if (v instanceof Left) {
-            return v1;
-          }
-          ;
-          if (v instanceof Right) {
-            return new Right(v.value0);
-          }
-          ;
-          throw new Error("Failed pattern match at Data.Validation.Semiring (line 105, column 1 - line 108, column 36): " + [v.constructor.name, v1.constructor.name]);
-        };
-      },
-      Functor0: function() {
-        return functorV;
-      }
-    };
-  };
-
-  // output/Routing.Match.Error/index.js
-  var UnexpectedPath = /* @__PURE__ */ (function() {
-    function UnexpectedPath2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    UnexpectedPath2.create = function(value0) {
-      return new UnexpectedPath2(value0);
-    };
-    return UnexpectedPath2;
-  })();
-  var ExpectedBoolean = /* @__PURE__ */ (function() {
-    function ExpectedBoolean2() {
-    }
-    ;
-    ExpectedBoolean2.value = new ExpectedBoolean2();
-    return ExpectedBoolean2;
-  })();
-  var ExpectedEnd = /* @__PURE__ */ (function() {
-    function ExpectedEnd2() {
-    }
-    ;
-    ExpectedEnd2.value = new ExpectedEnd2();
-    return ExpectedEnd2;
-  })();
-  var ExpectedNumber = /* @__PURE__ */ (function() {
-    function ExpectedNumber2() {
-    }
-    ;
-    ExpectedNumber2.value = new ExpectedNumber2();
-    return ExpectedNumber2;
-  })();
-  var ExpectedInt = /* @__PURE__ */ (function() {
-    function ExpectedInt2() {
-    }
-    ;
-    ExpectedInt2.value = new ExpectedInt2();
-    return ExpectedInt2;
-  })();
-  var ExpectedString = /* @__PURE__ */ (function() {
-    function ExpectedString2() {
-    }
-    ;
-    ExpectedString2.value = new ExpectedString2();
-    return ExpectedString2;
-  })();
-  var ExpectedQuery = /* @__PURE__ */ (function() {
-    function ExpectedQuery2() {
-    }
-    ;
-    ExpectedQuery2.value = new ExpectedQuery2();
-    return ExpectedQuery2;
-  })();
-  var ExpectedPathPart = /* @__PURE__ */ (function() {
-    function ExpectedPathPart2() {
-    }
-    ;
-    ExpectedPathPart2.value = new ExpectedPathPart2();
-    return ExpectedPathPart2;
-  })();
-  var KeyNotFound = /* @__PURE__ */ (function() {
-    function KeyNotFound2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    KeyNotFound2.create = function(value0) {
-      return new KeyNotFound2(value0);
-    };
-    return KeyNotFound2;
-  })();
-  var Fail = /* @__PURE__ */ (function() {
-    function Fail2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Fail2.create = function(value0) {
-      return new Fail2(value0);
-    };
-    return Fail2;
-  })();
-  var showMatchError = function(err) {
-    if (err instanceof UnexpectedPath) {
-      return "expected path part: " + err.value0;
-    }
-    ;
-    if (err instanceof KeyNotFound) {
-      return "key: " + (err.value0 + " has not found in query part");
-    }
-    ;
-    if (err instanceof ExpectedQuery) {
-      return "expected query - found path";
-    }
-    ;
-    if (err instanceof ExpectedNumber) {
-      return "expected number";
-    }
-    ;
-    if (err instanceof ExpectedInt) {
-      return "expected int";
-    }
-    ;
-    if (err instanceof ExpectedBoolean) {
-      return "expected boolean";
-    }
-    ;
-    if (err instanceof ExpectedEnd) {
-      return "expected end";
-    }
-    ;
-    if (err instanceof ExpectedString) {
-      return "expected string var";
-    }
-    ;
-    if (err instanceof ExpectedPathPart) {
-      return "expected path part, found query";
-    }
-    ;
-    if (err instanceof Fail) {
-      return "match error: " + err.value0;
-    }
-    ;
-    throw new Error("Failed pattern match at Routing.Match.Error (line 19, column 3 - line 29, column 39): " + [err.constructor.name]);
-  };
-
-  // output/Routing.Types/index.js
-  var Path = /* @__PURE__ */ (function() {
-    function Path5(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Path5.create = function(value0) {
-      return new Path5(value0);
-    };
-    return Path5;
-  })();
-  var Query2 = /* @__PURE__ */ (function() {
-    function Query3(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Query3.create = function(value0) {
-      return new Query3(value0);
-    };
-    return Query3;
-  })();
-
-  // output/Routing.Match/index.js
-  var pure13 = /* @__PURE__ */ pure(/* @__PURE__ */ applicativeV(semiringFree));
-  var foldl3 = /* @__PURE__ */ foldl(foldableList);
-  var bind7 = /* @__PURE__ */ bind(bindList);
-  var map25 = /* @__PURE__ */ map(functorList);
-  var unwrap4 = /* @__PURE__ */ unwrap();
-  var pure14 = /* @__PURE__ */ pure(applicativeList);
-  var mul2 = /* @__PURE__ */ mul(semiringFree);
-  var identity12 = /* @__PURE__ */ identity(categoryFn);
-  var one2 = /* @__PURE__ */ one(semiringFree);
-  var alt6 = /* @__PURE__ */ alt(/* @__PURE__ */ altV(semiringFree));
-  var runMatch = function(v) {
-    return function(route) {
-      var foldErrors = function(errs) {
-        return new Left(foldl3(function(b2) {
-          return function(a2) {
-            return a2 + ("\n" + b2);
-          };
-        })("")(bind7(map25(reverse)(unwrap4(errs)))(function(es) {
-          return pure14(foldl3(function(b2) {
-            return function(a2) {
-              return a2 + (";" + b2);
-            };
-          })("")(map25(showMatchError)(es)));
-        })));
-      };
-      return validation(foldErrors)(function($109) {
-        return Right.create(snd($109));
-      })(v(route));
-    };
-  };
-  var matchFunctor = {
-    map: function(fn) {
-      return function(v) {
-        return function(r) {
-          return validation(invalid)(function(v1) {
-            return pure13(new Tuple(v1.value0, fn(v1.value1)));
-          })(v(r));
-        };
-      };
-    }
-  };
-  var matchApply = {
-    apply: function(v) {
-      return function(v1) {
-        var processFnRes = function(v2) {
-          return validation(invalid)(function(v3) {
-            return pure13(new Tuple(v3.value0, v2.value1(v3.value1)));
-          })(v1(v2.value0));
-        };
-        var processFnErr = function(r) {
-          return function(err) {
-            return invalid(mul2(err)(validation(identity12)($$const(one2))(v1(r))));
-          };
-        };
-        return function(r) {
-          return validation(processFnErr(r))(processFnRes)(v(r));
-        };
-      };
-    },
-    Functor0: function() {
-      return matchFunctor;
-    }
-  };
-  var matchApplicative = {
-    pure: function(a2) {
-      return function(r) {
-        return pure13(new Tuple(r, a2));
-      };
-    },
-    Apply0: function() {
-      return matchApply;
-    }
-  };
-  var matchAlt = {
-    alt: function(v) {
-      return function(v1) {
-        return function(r) {
-          return alt6(v(r))(v1(r));
-        };
-      };
-    },
-    Functor0: function() {
-      return matchFunctor;
-    }
-  };
-  var lit = function(input3) {
-    return function(route) {
-      if (route instanceof Cons && (route.value0 instanceof Path && route.value0.value0 === input3)) {
-        return pure13(new Tuple(route.value1, unit));
-      }
-      ;
-      if (route instanceof Cons && route.value0 instanceof Path) {
-        return invalid(free(new UnexpectedPath(input3)));
-      }
-      ;
-      return invalid(free(ExpectedPathPart.value));
-    };
-  };
-  var root = /* @__PURE__ */ lit("");
-  var end = function(route) {
-    if (route instanceof Nil) {
-      return pure13(new Tuple(Nil.value, unit));
-    }
-    ;
-    return invalid(free(ExpectedEnd.value));
-  };
-
-  // output/PSD3.RoutingDSL/index.js
-  var applyFirst2 = /* @__PURE__ */ applyFirst(matchApply);
-  var voidRight2 = /* @__PURE__ */ voidRight(matchFunctor);
-  var alt7 = /* @__PURE__ */ alt(matchAlt);
-  var tutorial = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(Tutorial.value)(lit("tutorial")))(end);
-  })();
-  var simpleCharts = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(SimpleCharts.value)(lit("simple-charts")))(end);
-  })();
-  var sankeyDiagram = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(SankeyDiagram.value)(lit("sankey-diagram")))(end);
-  })();
-  var routeToPath = function(v) {
-    if (v instanceof About) {
-      return "/about";
-    }
-    ;
-    if (v instanceof Tutorial) {
-      return "/tutorial";
-    }
-    ;
-    if (v instanceof SimpleCharts) {
-      return "/simple-charts";
-    }
-    ;
-    if (v instanceof ChordDiagram) {
-      return "/chord-diagram";
-    }
-    ;
-    if (v instanceof BubbleChart) {
-      return "/bubble-chart";
-    }
-    ;
-    if (v instanceof SankeyDiagram) {
-      return "/sankey-diagram";
-    }
-    ;
-    if (v instanceof Hierarchies) {
-      return "/hierarchies";
-    }
-    ;
-    if (v instanceof Interpreters) {
-      return "/interpreters";
-    }
-    ;
-    if (v instanceof CodeExplorer) {
-      return "/code-explorer";
-    }
-    ;
-    if (v instanceof NotFound) {
-      return "/not-found";
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.RoutingDSL (line 79, column 1 - line 79, column 31): " + [v.constructor.name]);
-  };
-  var rootRedirect = /* @__PURE__ */ (function() {
-    return voidRight2(About.value)(end);
-  })();
-  var notFound = /* @__PURE__ */ (function() {
-    return pure(matchApplicative)(NotFound.value);
-  })();
-  var interpreters = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(Interpreters.value)(lit("interpreters")))(end);
-  })();
-  var hierarchies = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(Hierarchies.value)(lit("hierarchies")))(end);
-  })();
-  var codeExplorer = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(CodeExplorer.value)(lit("code-explorer")))(end);
-  })();
-  var chordDiagram = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(ChordDiagram.value)(lit("chord-diagram")))(end);
-  })();
-  var bubbleChart = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(BubbleChart.value)(lit("bubble-chart")))(end);
-  })();
-  var about = /* @__PURE__ */ (function() {
-    return applyFirst2(voidRight2(About.value)(lit("about")))(end);
-  })();
-  var routes = /* @__PURE__ */ alt7(tutorial)(/* @__PURE__ */ alt7(simpleCharts)(/* @__PURE__ */ alt7(chordDiagram)(/* @__PURE__ */ alt7(bubbleChart)(/* @__PURE__ */ alt7(sankeyDiagram)(/* @__PURE__ */ alt7(hierarchies)(/* @__PURE__ */ alt7(interpreters)(/* @__PURE__ */ alt7(codeExplorer)(/* @__PURE__ */ alt7(about)(/* @__PURE__ */ alt7(rootRedirect)(notFound))))))))));
-  var routing = /* @__PURE__ */ applySecond(matchApply)(root)(routes);
-
-  // output/PSD3.RHSNavigation/index.js
-  var eq2 = /* @__PURE__ */ eq(eqRoute);
-  var navLink = function(route) {
-    return function(label5) {
-      return function(currentRoute) {
-        var $3 = eq2(route)(currentRoute);
-        if ($3) {
-          return span3([classes(["tutorial-page__nav-link", "tutorial-page__nav-link--active"])])([text5(label5)]);
-        }
-        ;
-        return a([href4("#" + routeToPath(route)), classes(["tutorial-page__nav-link"])])([text5(label5 + " \u2192")]);
-      };
-    };
-  };
-  var render = function(currentRoute) {
-    return div2([classes(["tutorial-page__nav-panel"])])([h3([classes(["tutorial-page__nav-title"])])([text5("Explore")]), nav([classes(["tutorial-page__nav-links"])])([navLink(About.value)("About")(currentRoute), navLink(Tutorial.value)("Tutorial")(currentRoute), navLink(SimpleCharts.value)("Simple Charts")(currentRoute), navLink(ChordDiagram.value)("Chord Diagram")(currentRoute), navLink(BubbleChart.value)("Bubble Chart")(currentRoute), navLink(SankeyDiagram.value)("Sankey Diagram")(currentRoute), navLink(Hierarchies.value)("Hierarchies")(currentRoute), navLink(Interpreters.value)("Interpreters")(currentRoute), navLink(CodeExplorer.value)("Code Explorer")(currentRoute), a([href4("https://github.com/afcondon/purescript-d3-tagless"), target5("_blank"), rel4("noopener noreferrer"), classes(["tutorial-page__nav-link", "tutorial-page__nav-link--external"])])([text5("GitHub \u2197")])])]);
-  };
-  var component = /* @__PURE__ */ mkComponent({
-    initialState: /* @__PURE__ */ identity(categoryFn),
-    render,
-    "eval": /* @__PURE__ */ mkEval(defaultEval)
-  });
-
-  // output/PSD3.About/index.js
-  var pure15 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var type_18 = /* @__PURE__ */ type_17(isPropButtonType);
-  var slot_2 = /* @__PURE__ */ slot_()({
-    reflectSymbol: function() {
-      return "rhsNav";
-    }
-  })(ordUnit);
-  var Initialize2 = /* @__PURE__ */ (function() {
-    function Initialize11() {
-    }
-    ;
-    Initialize11.value = new Initialize11();
-    return Initialize11;
-  })();
-  var handleAction = function(v) {
-    return pure15(unit);
-  };
-  var _rhsNav = /* @__PURE__ */ (function() {
-    return $$Proxy.value;
-  })();
-  var render2 = function(v) {
-    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_18(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#heading-0"), classes(["toc-nav__item"])])([text5("PS<$>D3")]), a([href4("#heading-2"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("What is This Project?")]), a([href4("#heading-3"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("Motivation")]), a([href4("#heading-4"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("The Data Visualization Process")]), a([href4("#heading-5"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Design philosophy of D3*")]), a([href4("#heading-6"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Design philosophy of PS<$>D3")]), a([href4("#heading-7"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("Project Goals (and non-Goals)")]), a([href4("#heading-9"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Goals: details")]), a([href4("#heading-13"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Non-goals: details")]), a([href4("#heading-17"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("What's a DSL? and what's an eDSL?")]), a([href4("#heading-20"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("The grammar of D3...")])])])])]), slot_2(_rhsNav)(unit)(component)(About.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"]), id2("heading-0")])([text5("PS<$>D3")]), h2([id2("heading-1")])([text5("Interactive Data Visualization in PureScript")]), p_([text5("A PureScript embedded "), em_([text5("DSL")]), text5(" for building "), em_([text5("interactive data visualizations")]), text5(", using "), em_([text5("D3.js")]), text5(" both as inspiration and as an implementation layer under the Foreign Function Interface (FFI).")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-2")])([text5("What is This Project?")]), p_([text5('This project demonstrates an embedded DSL for building interactive data visualizations with PureScript. The DSL uses a Finally Tagless approach that allows multiple interpreters for the same "language" which allows us to generate working code using an FFI to D3 or documentation and other more complex uses which will be discussed below.')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-3")])([text5("Motivation")]), p_([text5('I have built moderately complex, custom interactive data visualisations in the past both in JavaScript and PureScript, using D3.js. I found that JavaScript generally, and D3 in particular, seemed to work best for visualisations that were less "app-like" and more "chart-like". What i mean by this is that when the complexity started to rise to the level of a small application and when multiple programmers were involved, or if one had to return to some code after time had elapsed, the whole thing was very brittle and refactoring of it prohibitively difficult.')]), p_([text5('This could certainly be a "feature, not a bug" for some domains of application such as building a big beautiful rich visualisation for a one-off publication such as a New York Times feature. However, when the visualisation is used to '), em_([text5("control")]), text5(" application behaviour or the visualisation begins to approach the complexity and multi-layered-ness of an app...this all in one single script language is a real problem, at least in my experience.")]), p_([text5("In PureScript it is common, and easy, to use JavaScript libraries via the FFI initially as it is a very quick way to get access to the enormous world of functionality that exists in open source JavaScript libraries. Sometimes this can be sufficient, you wrap a component or a function and its abstractions never leak and all is well. Other times, you wrap something but there's a kind of impedance mismatch with the way the JavaScript abstraction work and the way you'd like to handle, and particularly to compose, things in the purely functional world. D3.js was definitely the latter, for me.")]), p_([text5("D3.js is a big library with thousands of API end-points but, crucially, not all of those end-points are problematic for composing larger scale applications or weaving visualisations into PureScript web applications. Instead, its is primarily two core areas of the API, Selection and Simulation (more details on these later) which tend to actually "), em_([text5("structure")]), text5(" programs in a characteristic D3 / JavaScript vernacular. It is these APIs that are first wrapped (by FFI) and then made available in purely functional idiomatic way by this library.")]), p_([text5("A secondary, but also very important, consideration is the ability to design and work with Algebraic Data Types (ADTs) and the rich container libraries that are available in PureScript while building and implementing visualisations and especially the code that surrounds the visualization. While D3 ultimately is a kind of array programming DSL "), em_([text5("within")]), text5(' JavaScript and our PureScript eDSL is going to bottom out to some sort of "arrays mapped over the DOM" too, we want to be able to create data models that are more sophisticated and have better invariants as these are keys to both composability and maintainable, long-lived programs.')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-4")])([text5("The Data Visualization Process")]), p_([text5('Data visualization transforms "boring" - but more importantly '), em_([text5("less informative")]), text5(" tables of data into perceivable patterns. We can think of this as a pipeline in which steps 2 and 3 are the purpose of this library.")]), ol_([li_([strong_([text5("Data")]), text5(" - Raw data structures (tables, JSON, etc.)")]), li_([strong_([text5("Data structure")]), text5(" - Relationships between data elements")]), li_([strong_([text5("Data presentation")]), text5(" - Visual encoding (HTML/SVG/Canvas)")]), li_([strong_([text5("Perception")]), text5(" - Human insight and understanding")])]), p_([text5("The goal is to make relationships in data visible through appropriate visual encoding, enabling the human visual system to process patterns that would be difficult or impossible to perceive in tabular form.")]), h3([id2("heading-5")])([text5("Design philosophy of D3*")]), ul_([li_([text5("(as I understand it)")])]), p_([text5("D3's great innovation was to enable an enormous range of visualizations using some simple fundamental concepts and a small core API. It supports dataviz from simple bar charts to complex hierarchical layouts, force-directed graphs, geographic projections, and interactive dashboards. Despite their visual diversity, these visualizations share common structural patterns: data is bound to DOM elements, attributes are computed from data, and layouts determine spatial positioning.")]), p_([text5("Something that people with limited prior knowledge / experience of data visualisation often seem to find surprising is the degree to which D3 is "), em_([text5("fundamentally different")]), text5(' from "a charting library". While the library has some affordances that make it very easy to do common visualisations it is not in any way about "canned visualisations". Rather, it is a language for describing a relationship between arrays of data and arbitrary constructions of DOM (HTML or SVG) element or marks on Canvas, and it could in principle be used to do auditory "visualisation" or, who knows, maybe olfactory "visualisation" or drone displays or whatever.')]), p_([text5("Another revolutionary aspect of D3 was that it was "), em_([text5("screen/web native")]), text5(" - right from the beginning it supported responsive design, transitions, animations, force-layouts all of which are completely distinct from data visualisation on paper.")]), p_([text5("You can get a greater sense of the potential of D3 and the range of things that have thus far been produced using it at "), a([href4("https://observablehq.com/")])([text5("ObservableHQ")]), text5(".")]), h3([id2("heading-6")])([text5("Design philosophy of PS<$>D3")]), p_([text5("This library presents a slighly more formal grammar embedded in a language that is a lot better suited to larger and more long-lived projects. Whereas D3 has patterns of use that you learn, in PS<$>D3 the pattern is formalised into a grammar with an interpreter. Moreover, the same grammar can be interpreted by different interpreters directly "), em_([text5("in")]), text5(" PureScript, which, as we will see creates some powerful new uses.")]), p_([text5(`Where D3 enabled data visualisers to create movement and responsiveness, PS<$>D3 seeks to enable something that's theoretically possible in D3 but not much seen in practice and that is using the data visualisation as the user interface. This is not the same thing as "interactive visualisation" in the sense of "explorable" visualisation, ie one in which you can interact with the elements `), em_([text5("but only to manipulate the visualisation itself")]), text5(". That is a different, and more limited, sense of interaction. What we are talking about when building UI with data visualisation is leveraging the information density of data visualisation to provide direct manipulation of complex or large systems.")]), p_([text5('This is actually not a revolutionary idea - think how much of an improvement over the initial "folders of icons" on the Mac the NeXT column browser was. But it is a direction of travel that has been effectively lost during the web UI revolution of the past 20 years.')]), p_([text5("This repo and website contains one example of how this might work, the Code Explorer.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-7")])([text5("Project Goals (and non-Goals)")]), h3([id2("heading-8")])([text5("Priorities and Trade-offs")]), p_([text5("We have two principal priorities in writing this library and since you can't have two number one priorities, some trade-offs are inevitable which we will discuss here.")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Primary")]), th_([text5("Non-goals")]), th_([text5("Sub-goals")])])]), tbody_([tr_([td_([strong_([text5("Expressivity:")]), text5(" fully equivalent to D3.js")]), td_([strong_([text5("Completeness:")]), text5(" not all D3.js API surface is needed")]), td_([text5("Prefer idiomatic PureScript to exposing D3 APIs directly")])]), tr_([td_([strong_([text5("Readability:")]), text5(" as readable as D3.js equivalent")]), td_([strong_([text5("Modelling")]), text5(" of D3 state complexity thru type-system")]), td_([text5("Design for progressive enhancement")])]), tr_([td_([strong_([text5("Composable:")]), text5(' suitable for "programming in the large"')]), td_([strong_([text5("Performance")]), text5(" equality to D3")]), td_([text5("Showcase PureScript ecosystem and libraries")])])])]), h3([id2("heading-9")])([text5("Goals: details")]), h4([id2("heading-10")])([text5("Expressivity")]), p_([text5("As alluded to above, expressivity is a key to D3's success - it's not limited to some library of canned visualisations and it's far, far more than even the most parameterized control of colours and symbols. It's important not to lose that in making D3 available directly in PureScript.")]), h4([id2("heading-11")])([text5("Readability")]), p_([text5("If we look at D3.js as a kind of embedded DSL in JavaScript it is certainly clear and readable in its core feature: declaratively associating some array(s) of data with some elements in the DOM and attributes of those elements. While it is definitely not a goal to reproduce the structures of D3js own language in PureScript per se, the goal is to have the same readability, leverage the good work that Mike Bostock did in developing it. At the same time the library should be as idiomatically PureScript / Haskell style as possible.")]), h4([id2("heading-12")])([text5("Composability")]), p_([text5("A related concern to readability is composability, the separation of concerns that makes componentisation possible and which makes possible programming in the large.")]), p_([text5("YMMV but for me this is where the D3 / JavaScript approach breaks down.")]), p_([text5("If you are a PureScript or Haskell programmer you probably know what i mean by this and if you are, say, a JavaScript D3 programmer perhaps that will seem odd or even contentious.")]), p_([text5("The benefits we seek from composability include:")]), ul_([li_([text5("better composability of sub-programs")]), li_([text5("better expressiveness in describing the problem domain")]), li_([text5("better correctness in implementations (ie fewer bugs)")]), li_([text5("better ability to evolve programs due to shifting requirements (re-factoring)")])]), p_([text5("Ideally, i would like the person coding the data layer and data model to be somewhat insulated from the concerns of the person using that data model to create a visualisation. And likewise, i would like the person developing the data visualisation to be somewhat insulated from the concerns of a web app developer. Now, these might very well all be the "), em_([text5("same person")]), text5(" but separating the concerns like this makes it easier to evolve the code and, crucially, makes it all a little less brittle.")]), h3([id2("heading-13")])([text5("Non-goals: details")]), h4([id2("heading-14")])([text5("Complete API coverage")]), p_([text5("As alluded to above, there's lots of API in D3 that needs nothing more than an FFI wrapper to be accessible from a PureScript eDSL. D3 is both modular and somewhat functional in style (in the JavaScript sense of functional programming, to be clear). So it was from the start a non-goal to completely expose all of D3 as "), em_([text5("idiomatic")]), text5(" PureScript where a simple wrapper was sufficient.")]), p_([text5("Furthermore, i have only written those wrappers "), em_([text5("as I needed them")]), text5(" to there are still "), em_([text5("many")]), text5(" parts of D3 that are not covered by this eDSL.")]), p_([text5("Addendum 2025 - the advent of LLMs and coding assistance agents means that perhaps complete API coverage might arrive sooner than expected.")]), h4([id2("heading-15")])([text5("Modelling of D3 State")]), p_([text5("This might seem like a surprising choice - D3 is inherently "), em_([text5("very")]), text5(` stateful, there's state in D3, there's state in the DOM, there's statefulness in your (pure) data after you give it to D3. State everywhere. In many cases in functional programming you might try to ameliorate the dangers of this by explicitly modelling the state, using a State Monad or marking everything that changes or depends upon state as "Effect"-full.`)]), p_([text5("Indeed i have tried this approach in the past. In this library i have instead striven to isolate the statefulness to only the code that uses eDSL represented by the "), code_([text5("Selection")]), text5(" and "), code_([text5("Simulation")]), text5(" monads. This "), em_([text5("significantly")]), text5(" removes but cannot fully eliminate the issues associated with state.")]), h4([id2("heading-16")])([text5("Performance equality with D3")]), p_([text5("While this was a non-goal in practice it doesn't seem to have been a problem. Essentially, this is because PS<$>D3 simply leverages D3.js for all the performance critical aspects and because the FFI has been kept simple by the decision described in the previous section.")]), p_([text5("The performance bottlenecks in a web data visualisation are, by their nature, going to be the assignment of potentially millions of attributes to potentially millions of DOM elements. D3.js does this extremely well and the PureScript layer doesn't compromise it much, if at all.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-17")])([text5("What's a DSL? and what's an eDSL?")]), h3([id2("heading-18")])([text5("Domain Specific Language")]), p_([text5("Programming language tailored to a particular domain.")]), p_([text5("Might be limited compared to general purpose programming language.")]), p_([text5("But, may also be easier for novices, domain experts, non-programmers to use.")]), h3([id2("heading-19")])([text5("Embedded Domain Specific Language")]), p_([text5("Embedded Domain Specific Language makes domain specific tasks easier "), em_([text5("without")]), text5(" limiting the programmer in any way - they still have access to all parts of the host language.")]), p_([text5("This has Pros & Cons")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-20")])([text5("The grammar of D3...")]), p_([text5("Analyse the "), em_([text5("implicit")]), text5(" grammar of D3...")]), p_([text5("...in order to define a "), em_([text5("minimal")]), text5(" grammar for our PureScript eDSL")]), p_([text5("(consistent with priority goals of readability and expressiveness)")]), h3([id2("heading-21")])([text5("A Visual D3 Grammar")]), p_([strong_([text5("This is much simpler than D3's actual AST would be (if it had one) but it is sufficient to express a LOT of D3 scripts.")])]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Name")]), th_([text5("Function")]), th_([text5("Notes")])])]), tbody_([tr_([td_([em_([text5("attach")])]), td_([text5("Select an entry point (or points) in the DOM")]), td_([text5("Simply uses a CSS type selector to identify the target. Resulting selection can then be used for append / join in order to build up a visualisation from HTML, SVG or Canvas elements.")])]), tr_([td_([em_([text5("appendTo")])]), td_([text5("Add some DOM element "), strong_([text5("e")]), text5(" to a selection")]), td_([text5("Each element can have attributes. If data has been bound higher up in the AST then that data is available in this element's attributes")])]), tr_([td_([em_([text5("join")])]), td_([text5("For every "), em_([text5("datum")]), text5(" "), strong_([text5("d")]), text5(" in some array, insert an element "), strong_([text5("e")])]), td_([text5("We'll run the visualisation with some data model which can be arbitrary in structure, but at every point where we want to append "), em_([text5("multiple")]), text5(" elements we need to have a function that yields a simple array."), br_, br_, text5("Each element can have attributes that are derived from the datum with which it is associated."), br_, br_, text5("The datum at each element is inherited by its children, so any subsequent join starts with the structure of this datum.")])])])]), h3([id2("heading-22")])([text5("Grammar diagrams")]), h4([id2("heading-23")])([text5("3 Little Circles: the canonical simplest example")]), p_([text5("Insert Mermaid diagram here")]), pre_([code_([text5('    a        "div#hook"\n    \u2193\n    +        <svg>\n    \u2193\n    +        <g>\n    \u2193\n   <+>       [1,2,3] \u2192 <circle>')])]), p_([a([href4("https://bost.ocks.org/mike/circles/")])([text5("https://bost.ocks.org/mike/circles/")])]), h4([id2("heading-24")])([text5("Radial Tree: A more complex example")]), p_([text5("The Radial Tree and Cluster Dendrogram visualizations share the exact same structure:")]), pre_([code_([text5('    a          "div#hook"\n    \u2193\n    +          <svg>\n    \u2193\n    +          <g.links>    +          <g.nodes>    +          <g.labels>\n    \u2193                       \u2193                       \u2193\n   <+>         <path>      <+>         <circle>    <+>         <text>\n               \u2191                       \u2191                       \u2191\n            m->m.links              m->m.nodes              m->m.nodes')])]), p_([text5("All the differences are in details of how the node attributes are calculated from the data.")]), h4([id2("heading-25")])([text5("Even complex examples structurally simple")]), p_([text5("Even highly complex visualizations like "), a([href4("https://top2000.visualcinnamon.com")])([text5("Nadieh Bremer's Top 2000 visualization")]), text5(" can be expressed with this simple grammar - the complexity lies in the data transformations and attribute calculations, not in the fundamental structure.")])])]);
-  };
-  var component2 = /* @__PURE__ */ (function() {
-    return mkComponent({
-      initialState: function(v) {
-        return unit;
-      },
-      render: render2,
-      "eval": mkEval({
-        handleQuery: defaultEval.handleQuery,
-        receive: defaultEval.receive,
-        finalize: defaultEval.finalize,
-        handleAction,
-        initialize: new Just(Initialize2.value)
-      })
-    });
-  })();
-
-  // output/Data.MediaType.Common/index.js
-  var applicationJSON = "application/json";
-  var applicationFormURLEncoded = "application/x-www-form-urlencoded";
-
-  // output/Affjax.ResponseFormat/index.js
-  var identity13 = /* @__PURE__ */ identity(categoryFn);
-  var $$ArrayBuffer = /* @__PURE__ */ (function() {
-    function $$ArrayBuffer2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    $$ArrayBuffer2.create = function(value0) {
-      return new $$ArrayBuffer2(value0);
-    };
-    return $$ArrayBuffer2;
-  })();
-  var Blob = /* @__PURE__ */ (function() {
-    function Blob3(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Blob3.create = function(value0) {
-      return new Blob3(value0);
-    };
-    return Blob3;
-  })();
-  var Document = /* @__PURE__ */ (function() {
-    function Document3(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Document3.create = function(value0) {
-      return new Document3(value0);
-    };
-    return Document3;
-  })();
-  var Json = /* @__PURE__ */ (function() {
-    function Json3(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Json3.create = function(value0) {
-      return new Json3(value0);
-    };
-    return Json3;
-  })();
-  var $$String = /* @__PURE__ */ (function() {
-    function $$String3(value0) {
-      this.value0 = value0;
-    }
-    ;
-    $$String3.create = function(value0) {
-      return new $$String3(value0);
-    };
-    return $$String3;
-  })();
-  var Ignore = /* @__PURE__ */ (function() {
-    function Ignore2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Ignore2.create = function(value0) {
-      return new Ignore2(value0);
-    };
-    return Ignore2;
-  })();
-  var toResponseType = function(v) {
-    if (v instanceof $$ArrayBuffer) {
-      return "arraybuffer";
-    }
-    ;
-    if (v instanceof Blob) {
-      return "blob";
-    }
-    ;
-    if (v instanceof Document) {
-      return "document";
-    }
-    ;
-    if (v instanceof Json) {
-      return "text";
-    }
-    ;
-    if (v instanceof $$String) {
-      return "text";
-    }
-    ;
-    if (v instanceof Ignore) {
-      return "";
-    }
-    ;
-    throw new Error("Failed pattern match at Affjax.ResponseFormat (line 44, column 3 - line 50, column 19): " + [v.constructor.name]);
-  };
-  var toMediaType = function(v) {
-    if (v instanceof Json) {
-      return new Just(applicationJSON);
-    }
-    ;
-    return Nothing.value;
-  };
-  var string = /* @__PURE__ */ (function() {
-    return new $$String(identity13);
-  })();
-  var json = /* @__PURE__ */ (function() {
-    return new Json(identity13);
-  })();
-  var ignore = /* @__PURE__ */ (function() {
-    return new Ignore(identity13);
-  })();
-
-  // output/Affjax.Web/foreign.js
-  var driver = {
-    newXHR: function() {
-      return new XMLHttpRequest();
-    },
-    fixupUrl: function(url) {
-      return url || "/";
-    }
-  };
-
-  // output/Affjax/foreign.js
-  function _ajax(platformSpecificDriver, timeoutErrorMessageIdent, requestFailedMessageIdent, mkHeader, options2) {
-    return function(errback, callback) {
-      var xhr = platformSpecificDriver.newXHR();
-      var fixedUrl = platformSpecificDriver.fixupUrl(options2.url, xhr);
-      xhr.open(options2.method || "GET", fixedUrl, true, options2.username, options2.password);
-      if (options2.headers) {
-        try {
-          for (var i2 = 0, header2; (header2 = options2.headers[i2]) != null; i2++) {
-            xhr.setRequestHeader(header2.field, header2.value);
-          }
-        } catch (e) {
-          errback(e);
-        }
-      }
-      var onerror = function(msgIdent) {
-        return function() {
-          errback(new Error(msgIdent));
-        };
-      };
-      xhr.onerror = onerror(requestFailedMessageIdent);
-      xhr.ontimeout = onerror(timeoutErrorMessageIdent);
-      xhr.onload = function() {
-        callback({
-          status: xhr.status,
-          statusText: xhr.statusText,
-          headers: xhr.getAllResponseHeaders().split("\r\n").filter(function(header3) {
-            return header3.length > 0;
-          }).map(function(header3) {
-            var i3 = header3.indexOf(":");
-            return mkHeader(header3.substring(0, i3))(header3.substring(i3 + 2));
-          }),
-          body: xhr.response
-        });
-      };
-      xhr.responseType = options2.responseType;
-      xhr.withCredentials = options2.withCredentials;
-      xhr.timeout = options2.timeout;
-      xhr.send(options2.content);
-      return function(error4, cancelErrback, cancelCallback) {
-        try {
-          xhr.abort();
-        } catch (e) {
-          return cancelErrback(e);
-        }
-        return cancelCallback();
-      };
-    };
-  }
-
-  // output/Affjax.RequestBody/index.js
-  var ArrayView = /* @__PURE__ */ (function() {
-    function ArrayView2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    ArrayView2.create = function(value0) {
-      return new ArrayView2(value0);
-    };
-    return ArrayView2;
-  })();
-  var Blob2 = /* @__PURE__ */ (function() {
-    function Blob3(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Blob3.create = function(value0) {
-      return new Blob3(value0);
-    };
-    return Blob3;
-  })();
-  var Document2 = /* @__PURE__ */ (function() {
-    function Document3(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Document3.create = function(value0) {
-      return new Document3(value0);
-    };
-    return Document3;
-  })();
-  var $$String2 = /* @__PURE__ */ (function() {
-    function $$String3(value0) {
-      this.value0 = value0;
-    }
-    ;
-    $$String3.create = function(value0) {
-      return new $$String3(value0);
-    };
-    return $$String3;
-  })();
-  var FormData = /* @__PURE__ */ (function() {
-    function FormData2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    FormData2.create = function(value0) {
-      return new FormData2(value0);
-    };
-    return FormData2;
-  })();
-  var FormURLEncoded = /* @__PURE__ */ (function() {
-    function FormURLEncoded2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    FormURLEncoded2.create = function(value0) {
-      return new FormURLEncoded2(value0);
-    };
-    return FormURLEncoded2;
-  })();
-  var Json2 = /* @__PURE__ */ (function() {
-    function Json3(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Json3.create = function(value0) {
-      return new Json3(value0);
-    };
-    return Json3;
-  })();
-  var toMediaType2 = function(v) {
-    if (v instanceof FormURLEncoded) {
-      return new Just(applicationFormURLEncoded);
-    }
-    ;
-    if (v instanceof Json2) {
-      return new Just(applicationJSON);
-    }
-    ;
-    return Nothing.value;
-  };
-
-  // output/Affjax.RequestHeader/index.js
-  var unwrap5 = /* @__PURE__ */ unwrap();
-  var Accept = /* @__PURE__ */ (function() {
-    function Accept2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    Accept2.create = function(value0) {
-      return new Accept2(value0);
-    };
-    return Accept2;
-  })();
-  var ContentType = /* @__PURE__ */ (function() {
-    function ContentType2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    ContentType2.create = function(value0) {
-      return new ContentType2(value0);
-    };
-    return ContentType2;
-  })();
-  var RequestHeader = /* @__PURE__ */ (function() {
-    function RequestHeader2(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
-    }
-    ;
-    RequestHeader2.create = function(value0) {
-      return function(value1) {
-        return new RequestHeader2(value0, value1);
-      };
-    };
-    return RequestHeader2;
-  })();
-  var value13 = function(v) {
-    if (v instanceof Accept) {
-      return unwrap5(v.value0);
-    }
-    ;
-    if (v instanceof ContentType) {
-      return unwrap5(v.value0);
-    }
-    ;
-    if (v instanceof RequestHeader) {
-      return v.value1;
-    }
-    ;
-    throw new Error("Failed pattern match at Affjax.RequestHeader (line 26, column 1 - line 26, column 33): " + [v.constructor.name]);
-  };
-  var name15 = function(v) {
-    if (v instanceof Accept) {
-      return "Accept";
-    }
-    ;
-    if (v instanceof ContentType) {
-      return "Content-Type";
-    }
-    ;
-    if (v instanceof RequestHeader) {
-      return v.value0;
-    }
-    ;
-    throw new Error("Failed pattern match at Affjax.RequestHeader (line 21, column 1 - line 21, column 32): " + [v.constructor.name]);
-  };
-
-  // output/Affjax.ResponseHeader/index.js
-  var ResponseHeader = /* @__PURE__ */ (function() {
-    function ResponseHeader2(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
-    }
-    ;
-    ResponseHeader2.create = function(value0) {
-      return function(value1) {
-        return new ResponseHeader2(value0, value1);
-      };
-    };
-    return ResponseHeader2;
-  })();
-
-  // output/Control.Monad.Except/index.js
-  var unwrap6 = /* @__PURE__ */ unwrap();
-  var runExcept = function($3) {
-    return unwrap6(runExceptT($3));
-  };
-
-  // output/Data.Argonaut.Core/foreign.js
-  function id3(x19) {
-    return x19;
-  }
-  function stringify(j) {
-    return JSON.stringify(j);
-  }
-
-  // output/Data.Argonaut.Core/index.js
-  var jsonEmptyObject = /* @__PURE__ */ id3(empty4);
-
-  // output/Data.Argonaut.Parser/foreign.js
-  function _jsonParser(fail3, succ, s) {
-    try {
-      return succ(JSON.parse(s));
-    } catch (e) {
-      return fail3(e.message);
-    }
-  }
-
-  // output/Data.Argonaut.Parser/index.js
-  var jsonParser = function(j) {
-    return _jsonParser(Left.create, Right.create, j);
-  };
-
-  // output/JSURI/foreign.js
-  function toRFC3896(input3) {
-    return input3.replace(/[!'()*]/g, function(c) {
-      return "%" + c.charCodeAt(0).toString(16);
-    });
-  }
-  var _encodeFormURLComponent = function encode(fail3, succeed, input3) {
-    try {
-      return succeed(toRFC3896(encodeURIComponent(input3)).replace(/%20/g, "+"));
-    } catch (err) {
-      return fail3(err);
-    }
-  };
-  function _decodeURIComponent(fail3, succeed, input3) {
-    try {
-      return succeed(decodeURIComponent(input3));
-    } catch (err) {
-      return fail3(err);
-    }
-  }
-
-  // output/JSURI/index.js
-  var encodeFormURLComponent = /* @__PURE__ */ (function() {
-    return runFn3(_encodeFormURLComponent)($$const(Nothing.value))(Just.create);
-  })();
-  var $$decodeURIComponent = /* @__PURE__ */ (function() {
-    return runFn3(_decodeURIComponent)($$const(Nothing.value))(Just.create);
-  })();
-
-  // output/Data.FormURLEncoded/index.js
-  var apply2 = /* @__PURE__ */ apply(applyMaybe);
-  var map26 = /* @__PURE__ */ map(functorMaybe);
-  var traverse2 = /* @__PURE__ */ traverse(traversableArray)(applicativeMaybe);
-  var toArray = function(v) {
-    return v;
-  };
-  var encode2 = /* @__PURE__ */ (function() {
-    var encodePart = function(v) {
-      if (v.value1 instanceof Nothing) {
-        return encodeFormURLComponent(v.value0);
-      }
-      ;
-      if (v.value1 instanceof Just) {
-        return apply2(map26(function(key) {
-          return function(val) {
-            return key + ("=" + val);
-          };
-        })(encodeFormURLComponent(v.value0)))(encodeFormURLComponent(v.value1.value0));
-      }
-      ;
-      throw new Error("Failed pattern match at Data.FormURLEncoded (line 37, column 16 - line 39, column 114): " + [v.constructor.name]);
-    };
-    var $37 = map26(joinWith("&"));
-    var $38 = traverse2(encodePart);
-    return function($39) {
-      return $37($38(toArray($39)));
-    };
-  })();
-
-  // output/Data.HTTP.Method/index.js
-  var OPTIONS = /* @__PURE__ */ (function() {
-    function OPTIONS2() {
-    }
-    ;
-    OPTIONS2.value = new OPTIONS2();
-    return OPTIONS2;
-  })();
-  var GET2 = /* @__PURE__ */ (function() {
-    function GET3() {
-    }
-    ;
-    GET3.value = new GET3();
-    return GET3;
-  })();
-  var HEAD = /* @__PURE__ */ (function() {
-    function HEAD2() {
-    }
-    ;
-    HEAD2.value = new HEAD2();
-    return HEAD2;
-  })();
-  var POST2 = /* @__PURE__ */ (function() {
-    function POST3() {
-    }
-    ;
-    POST3.value = new POST3();
-    return POST3;
-  })();
-  var PUT = /* @__PURE__ */ (function() {
-    function PUT2() {
-    }
-    ;
-    PUT2.value = new PUT2();
-    return PUT2;
-  })();
-  var DELETE = /* @__PURE__ */ (function() {
-    function DELETE2() {
-    }
-    ;
-    DELETE2.value = new DELETE2();
-    return DELETE2;
-  })();
-  var TRACE = /* @__PURE__ */ (function() {
-    function TRACE2() {
-    }
-    ;
-    TRACE2.value = new TRACE2();
-    return TRACE2;
-  })();
-  var CONNECT = /* @__PURE__ */ (function() {
-    function CONNECT2() {
-    }
-    ;
-    CONNECT2.value = new CONNECT2();
-    return CONNECT2;
-  })();
-  var PROPFIND = /* @__PURE__ */ (function() {
-    function PROPFIND2() {
-    }
-    ;
-    PROPFIND2.value = new PROPFIND2();
-    return PROPFIND2;
-  })();
-  var PROPPATCH = /* @__PURE__ */ (function() {
-    function PROPPATCH2() {
-    }
-    ;
-    PROPPATCH2.value = new PROPPATCH2();
-    return PROPPATCH2;
-  })();
-  var MKCOL = /* @__PURE__ */ (function() {
-    function MKCOL2() {
-    }
-    ;
-    MKCOL2.value = new MKCOL2();
-    return MKCOL2;
-  })();
-  var COPY = /* @__PURE__ */ (function() {
-    function COPY2() {
-    }
-    ;
-    COPY2.value = new COPY2();
-    return COPY2;
-  })();
-  var MOVE = /* @__PURE__ */ (function() {
-    function MOVE2() {
-    }
-    ;
-    MOVE2.value = new MOVE2();
-    return MOVE2;
-  })();
-  var LOCK = /* @__PURE__ */ (function() {
-    function LOCK2() {
-    }
-    ;
-    LOCK2.value = new LOCK2();
-    return LOCK2;
-  })();
-  var UNLOCK = /* @__PURE__ */ (function() {
-    function UNLOCK2() {
-    }
-    ;
-    UNLOCK2.value = new UNLOCK2();
-    return UNLOCK2;
-  })();
-  var PATCH = /* @__PURE__ */ (function() {
-    function PATCH2() {
-    }
-    ;
-    PATCH2.value = new PATCH2();
-    return PATCH2;
-  })();
-  var unCustomMethod = function(v) {
-    return v;
-  };
-  var showMethod = {
-    show: function(v) {
-      if (v instanceof OPTIONS) {
-        return "OPTIONS";
-      }
-      ;
-      if (v instanceof GET2) {
-        return "GET";
-      }
-      ;
-      if (v instanceof HEAD) {
-        return "HEAD";
-      }
-      ;
-      if (v instanceof POST2) {
-        return "POST";
-      }
-      ;
-      if (v instanceof PUT) {
-        return "PUT";
-      }
-      ;
-      if (v instanceof DELETE) {
-        return "DELETE";
-      }
-      ;
-      if (v instanceof TRACE) {
-        return "TRACE";
-      }
-      ;
-      if (v instanceof CONNECT) {
-        return "CONNECT";
-      }
-      ;
-      if (v instanceof PROPFIND) {
-        return "PROPFIND";
-      }
-      ;
-      if (v instanceof PROPPATCH) {
-        return "PROPPATCH";
-      }
-      ;
-      if (v instanceof MKCOL) {
-        return "MKCOL";
-      }
-      ;
-      if (v instanceof COPY) {
-        return "COPY";
-      }
-      ;
-      if (v instanceof MOVE) {
-        return "MOVE";
-      }
-      ;
-      if (v instanceof LOCK) {
-        return "LOCK";
-      }
-      ;
-      if (v instanceof UNLOCK) {
-        return "UNLOCK";
-      }
-      ;
-      if (v instanceof PATCH) {
-        return "PATCH";
-      }
-      ;
-      throw new Error("Failed pattern match at Data.HTTP.Method (line 43, column 1 - line 59, column 23): " + [v.constructor.name]);
-    }
-  };
-  var print6 = /* @__PURE__ */ either(/* @__PURE__ */ show(showMethod))(unCustomMethod);
-
-  // output/Effect.Aff.Compat/index.js
-  var fromEffectFnAff = function(v) {
-    return makeAff(function(k) {
-      return function __do3() {
-        var v1 = v(function($9) {
-          return k(Left.create($9))();
-        }, function($10) {
-          return k(Right.create($10))();
-        });
-        return function(e) {
-          return makeAff(function(k2) {
-            return function __do4() {
-              v1(e, function($11) {
-                return k2(Left.create($11))();
-              }, function($12) {
-                return k2(Right.create($12))();
-              });
-              return nonCanceler;
-            };
-          });
-        };
-      };
-    });
-  };
-
-  // output/Affjax/index.js
-  var pure16 = /* @__PURE__ */ pure(/* @__PURE__ */ applicativeExceptT(monadIdentity));
-  var fail2 = /* @__PURE__ */ fail(monadIdentity);
-  var unsafeReadTagged2 = /* @__PURE__ */ unsafeReadTagged(monadIdentity);
-  var alt8 = /* @__PURE__ */ alt(/* @__PURE__ */ altExceptT(semigroupNonEmptyList)(monadIdentity));
-  var composeKleisliFlipped3 = /* @__PURE__ */ composeKleisliFlipped(/* @__PURE__ */ bindExceptT(monadIdentity));
-  var map27 = /* @__PURE__ */ map(functorMaybe);
-  var any3 = /* @__PURE__ */ any(foldableArray)(heytingAlgebraBoolean);
-  var eq3 = /* @__PURE__ */ eq(eqString);
-  var bindFlipped9 = /* @__PURE__ */ bindFlipped(bindMaybe);
-  var map111 = /* @__PURE__ */ map(functorArray);
-  var mapFlipped2 = /* @__PURE__ */ mapFlipped(functorAff);
-  var $$try3 = /* @__PURE__ */ $$try(monadErrorAff);
-  var pure17 = /* @__PURE__ */ pure(applicativeAff);
-  var RequestContentError = /* @__PURE__ */ (function() {
-    function RequestContentError2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    RequestContentError2.create = function(value0) {
-      return new RequestContentError2(value0);
-    };
-    return RequestContentError2;
-  })();
-  var ResponseBodyError = /* @__PURE__ */ (function() {
-    function ResponseBodyError2(value0, value1) {
-      this.value0 = value0;
-      this.value1 = value1;
-    }
-    ;
-    ResponseBodyError2.create = function(value0) {
-      return function(value1) {
-        return new ResponseBodyError2(value0, value1);
-      };
-    };
-    return ResponseBodyError2;
-  })();
-  var TimeoutError = /* @__PURE__ */ (function() {
-    function TimeoutError2() {
-    }
-    ;
-    TimeoutError2.value = new TimeoutError2();
-    return TimeoutError2;
-  })();
-  var RequestFailedError = /* @__PURE__ */ (function() {
-    function RequestFailedError2() {
-    }
-    ;
-    RequestFailedError2.value = new RequestFailedError2();
-    return RequestFailedError2;
-  })();
-  var XHROtherError = /* @__PURE__ */ (function() {
-    function XHROtherError2(value0) {
-      this.value0 = value0;
-    }
-    ;
-    XHROtherError2.create = function(value0) {
-      return new XHROtherError2(value0);
-    };
-    return XHROtherError2;
-  })();
-  var request2 = function(driver2) {
-    return function(req2) {
-      var parseJSON = function(v2) {
-        if (v2 === "") {
-          return pure16(jsonEmptyObject);
-        }
-        ;
-        return either(function($74) {
-          return fail2(ForeignError.create($74));
-        })(pure16)(jsonParser(v2));
-      };
-      var fromResponse = (function() {
-        if (req2.responseFormat instanceof $$ArrayBuffer) {
-          return unsafeReadTagged2("ArrayBuffer");
-        }
-        ;
-        if (req2.responseFormat instanceof Blob) {
-          return unsafeReadTagged2("Blob");
-        }
-        ;
-        if (req2.responseFormat instanceof Document) {
-          return function(x19) {
-            return alt8(unsafeReadTagged2("Document")(x19))(alt8(unsafeReadTagged2("XMLDocument")(x19))(unsafeReadTagged2("HTMLDocument")(x19)));
-          };
-        }
-        ;
-        if (req2.responseFormat instanceof Json) {
-          return composeKleisliFlipped3(function($75) {
-            return req2.responseFormat.value0(parseJSON($75));
-          })(unsafeReadTagged2("String"));
-        }
-        ;
-        if (req2.responseFormat instanceof $$String) {
-          return unsafeReadTagged2("String");
-        }
-        ;
-        if (req2.responseFormat instanceof Ignore) {
-          return $$const(req2.responseFormat.value0(pure16(unit)));
-        }
-        ;
-        throw new Error("Failed pattern match at Affjax (line 274, column 18 - line 283, column 57): " + [req2.responseFormat.constructor.name]);
-      })();
-      var extractContent = function(v2) {
-        if (v2 instanceof ArrayView) {
-          return new Right(v2.value0(unsafeToForeign));
-        }
-        ;
-        if (v2 instanceof Blob2) {
-          return new Right(unsafeToForeign(v2.value0));
-        }
-        ;
-        if (v2 instanceof Document2) {
-          return new Right(unsafeToForeign(v2.value0));
-        }
-        ;
-        if (v2 instanceof $$String2) {
-          return new Right(unsafeToForeign(v2.value0));
-        }
-        ;
-        if (v2 instanceof FormData) {
-          return new Right(unsafeToForeign(v2.value0));
-        }
-        ;
-        if (v2 instanceof FormURLEncoded) {
-          return note("Body contains values that cannot be encoded as application/x-www-form-urlencoded")(map27(unsafeToForeign)(encode2(v2.value0)));
-        }
-        ;
-        if (v2 instanceof Json2) {
-          return new Right(unsafeToForeign(stringify(v2.value0)));
-        }
-        ;
-        throw new Error("Failed pattern match at Affjax (line 235, column 20 - line 250, column 69): " + [v2.constructor.name]);
-      };
-      var addHeader = function(mh) {
-        return function(hs) {
-          if (mh instanceof Just && !any3(on(eq3)(name15)(mh.value0))(hs)) {
-            return snoc(hs)(mh.value0);
-          }
-          ;
-          return hs;
-        };
-      };
-      var headers = function(reqContent) {
-        return addHeader(map27(ContentType.create)(bindFlipped9(toMediaType2)(reqContent)))(addHeader(map27(Accept.create)(toMediaType(req2.responseFormat)))(req2.headers));
-      };
-      var ajaxRequest = function(v2) {
-        return {
-          method: print6(req2.method),
-          url: req2.url,
-          headers: map111(function(h) {
-            return {
-              field: name15(h),
-              value: value13(h)
-            };
-          })(headers(req2.content)),
-          content: v2,
-          responseType: toResponseType(req2.responseFormat),
-          username: toNullable(req2.username),
-          password: toNullable(req2.password),
-          withCredentials: req2.withCredentials,
-          timeout: fromMaybe(0)(map27(function(v1) {
-            return v1;
-          })(req2.timeout))
-        };
-      };
-      var send = function(content3) {
-        return mapFlipped2($$try3(fromEffectFnAff(_ajax(driver2, "AffjaxTimeoutErrorMessageIdent", "AffjaxRequestFailedMessageIdent", ResponseHeader.create, ajaxRequest(content3)))))(function(v2) {
-          if (v2 instanceof Right) {
-            var v1 = runExcept(fromResponse(v2.value0.body));
-            if (v1 instanceof Left) {
-              return new Left(new ResponseBodyError(head3(v1.value0), v2.value0));
-            }
-            ;
-            if (v1 instanceof Right) {
-              return new Right({
-                headers: v2.value0.headers,
-                status: v2.value0.status,
-                statusText: v2.value0.statusText,
-                body: v1.value0
-              });
-            }
-            ;
-            throw new Error("Failed pattern match at Affjax (line 209, column 9 - line 211, column 52): " + [v1.constructor.name]);
-          }
-          ;
-          if (v2 instanceof Left) {
-            return new Left((function() {
-              var message2 = message(v2.value0);
-              var $61 = message2 === "AffjaxTimeoutErrorMessageIdent";
-              if ($61) {
-                return TimeoutError.value;
-              }
-              ;
-              var $62 = message2 === "AffjaxRequestFailedMessageIdent";
-              if ($62) {
-                return RequestFailedError.value;
-              }
-              ;
-              return new XHROtherError(v2.value0);
-            })());
-          }
-          ;
-          throw new Error("Failed pattern match at Affjax (line 207, column 144 - line 219, column 28): " + [v2.constructor.name]);
-        });
-      };
-      if (req2.content instanceof Nothing) {
-        return send(toNullable(Nothing.value));
-      }
-      ;
-      if (req2.content instanceof Just) {
-        var v = extractContent(req2.content.value0);
-        if (v instanceof Right) {
-          return send(toNullable(new Just(v.value0)));
-        }
-        ;
-        if (v instanceof Left) {
-          return pure17(new Left(new RequestContentError(v.value0)));
-        }
-        ;
-        throw new Error("Failed pattern match at Affjax (line 199, column 7 - line 203, column 48): " + [v.constructor.name]);
-      }
-      ;
-      throw new Error("Failed pattern match at Affjax (line 195, column 3 - line 203, column 48): " + [req2.content.constructor.name]);
-    };
-  };
-  var defaultRequest = /* @__PURE__ */ (function() {
-    return {
-      method: new Left(GET2.value),
-      url: "/",
-      headers: [],
-      content: Nothing.value,
-      username: Nothing.value,
-      password: Nothing.value,
-      withCredentials: false,
-      responseFormat: ignore,
-      timeout: Nothing.value
-    };
-  })();
-  var get2 = function(driver2) {
-    return function(rf) {
-      return function(u2) {
-        return request2(driver2)({
-          method: defaultRequest.method,
-          headers: defaultRequest.headers,
-          content: defaultRequest.content,
-          username: defaultRequest.username,
-          password: defaultRequest.password,
-          withCredentials: defaultRequest.withCredentials,
-          timeout: defaultRequest.timeout,
-          url: u2,
-          responseFormat: rf
-        });
-      };
-    };
-  };
-
-  // output/Affjax.Web/index.js
-  var get3 = /* @__PURE__ */ get2(driver);
 
   // output/D3.Attributes.Instances/index.js
   var Static = /* @__PURE__ */ (function() {
@@ -11593,7 +10278,7 @@
     Text3.value = new Text3();
     return Text3;
   })();
-  var Path2 = /* @__PURE__ */ (function() {
+  var Path = /* @__PURE__ */ (function() {
     function Path5() {
     }
     ;
@@ -11665,7 +10350,7 @@
         return "text";
       }
       ;
-      if (v instanceof Path2) {
+      if (v instanceof Path) {
         return "path";
       }
       ;
@@ -12311,7 +10996,7 @@
 
   // output/D3.Data.Tree/index.js
   var lookup6 = /* @__PURE__ */ lookup(ordInt);
-  var map28 = /* @__PURE__ */ map(functorArray);
+  var map25 = /* @__PURE__ */ map(functorArray);
   var fromFoldable4 = /* @__PURE__ */ fromFoldable3(foldableList);
   var TidyTree = /* @__PURE__ */ (function() {
     function TidyTree2() {
@@ -12361,7 +11046,7 @@
             return idTreeLeaf_(v1.value0);
           }
           ;
-          return idTreeParent_(v1.value0)(map28(go2)(fromFoldable4(v.value1)));
+          return idTreeParent_(v1.value0)(map25(go2)(fromFoldable4(v.value1)));
         }
         ;
         throw new Error("Failed pattern match at D3.Data.Tree (line 49, column 7 - line 53, column 84): " + [v1.constructor.name]);
@@ -12642,9 +11327,9 @@
   // output/D3.Attributes.Sugar/index.js
   var toAttr2 = /* @__PURE__ */ toAttr(toAttrString);
   var intercalate4 = /* @__PURE__ */ intercalate3(monoidString);
-  var map29 = /* @__PURE__ */ map(functorArray);
+  var map26 = /* @__PURE__ */ map(functorArray);
   var show4 = /* @__PURE__ */ show(showNumber);
-  var append13 = /* @__PURE__ */ append(semigroupArray);
+  var append12 = /* @__PURE__ */ append(semigroupArray);
   var flap2 = /* @__PURE__ */ flap(functorArray);
   var Meet = /* @__PURE__ */ (function() {
     function Meet2() {
@@ -12841,7 +11526,7 @@
     return function(yo) {
       return function(w) {
         return function(h) {
-          var vb = intercalate4(" ")(map29(show4)([xo, yo, w, h]));
+          var vb = intercalate4(" ")(map26(show4)([xo, yo, w, h]));
           return AttrT.create(AttributeSetter.create("viewBox")(toAttr2(vb)));
         };
       };
@@ -12860,7 +11545,7 @@
       }
       ;
       if (v instanceof TransitionT) {
-        return [new TransitionT(append13(v.value0)(v1), v.value1)];
+        return [new TransitionT(append12(v.value0)(v1), v.value1)];
       }
       ;
       return cons3(v)(v1);
@@ -13035,6 +11720,3326 @@
     return append(dictSemigroup);
   };
 
+  // node_modules/d3-array/src/ascending.js
+  function ascending(a2, b2) {
+    return a2 == null || b2 == null ? NaN : a2 < b2 ? -1 : a2 > b2 ? 1 : a2 >= b2 ? 0 : NaN;
+  }
+
+  // node_modules/d3-array/src/descending.js
+  function descending(a2, b2) {
+    return a2 == null || b2 == null ? NaN : b2 < a2 ? -1 : b2 > a2 ? 1 : b2 >= a2 ? 0 : NaN;
+  }
+
+  // node_modules/d3-array/src/bisector.js
+  function bisector(f) {
+    let compare12, compare2, delta;
+    if (f.length !== 2) {
+      compare12 = ascending;
+      compare2 = (d7, x19) => ascending(f(d7), x19);
+      delta = (d7, x19) => f(d7) - x19;
+    } else {
+      compare12 = f === ascending || f === descending ? f : zero2;
+      compare2 = f;
+      delta = f;
+    }
+    function left4(a2, x19, lo = 0, hi = a2.length) {
+      if (lo < hi) {
+        if (compare12(x19, x19) !== 0) return hi;
+        do {
+          const mid = lo + hi >>> 1;
+          if (compare2(a2[mid], x19) < 0) lo = mid + 1;
+          else hi = mid;
+        } while (lo < hi);
+      }
+      return lo;
+    }
+    function right4(a2, x19, lo = 0, hi = a2.length) {
+      if (lo < hi) {
+        if (compare12(x19, x19) !== 0) return hi;
+        do {
+          const mid = lo + hi >>> 1;
+          if (compare2(a2[mid], x19) <= 0) lo = mid + 1;
+          else hi = mid;
+        } while (lo < hi);
+      }
+      return lo;
+    }
+    function center3(a2, x19, lo = 0, hi = a2.length) {
+      const i2 = left4(a2, x19, lo, hi - 1);
+      return i2 > lo && delta(a2[i2 - 1], x19) > -delta(a2[i2], x19) ? i2 - 1 : i2;
+    }
+    return { left: left4, center: center3, right: right4 };
+  }
+  function zero2() {
+    return 0;
+  }
+
+  // node_modules/d3-array/src/number.js
+  function number(x19) {
+    return x19 === null ? NaN : +x19;
+  }
+
+  // node_modules/d3-array/src/bisect.js
+  var ascendingBisect = bisector(ascending);
+  var bisectRight = ascendingBisect.right;
+  var bisectLeft = ascendingBisect.left;
+  var bisectCenter = bisector(number).center;
+  var bisect_default = bisectRight;
+
+  // node_modules/internmap/src/index.js
+  var InternMap = class extends Map {
+    constructor(entries, key = keyof) {
+      super();
+      Object.defineProperties(this, { _intern: { value: /* @__PURE__ */ new Map() }, _key: { value: key } });
+      if (entries != null) for (const [key2, value16] of entries) this.set(key2, value16);
+    }
+    get(key) {
+      return super.get(intern_get(this, key));
+    }
+    has(key) {
+      return super.has(intern_get(this, key));
+    }
+    set(key, value16) {
+      return super.set(intern_set(this, key), value16);
+    }
+    delete(key) {
+      return super.delete(intern_delete(this, key));
+    }
+  };
+  function intern_get({ _intern, _key }, value16) {
+    const key = _key(value16);
+    return _intern.has(key) ? _intern.get(key) : value16;
+  }
+  function intern_set({ _intern, _key }, value16) {
+    const key = _key(value16);
+    if (_intern.has(key)) return _intern.get(key);
+    _intern.set(key, value16);
+    return value16;
+  }
+  function intern_delete({ _intern, _key }, value16) {
+    const key = _key(value16);
+    if (_intern.has(key)) {
+      value16 = _intern.get(key);
+      _intern.delete(key);
+    }
+    return value16;
+  }
+  function keyof(value16) {
+    return value16 !== null && typeof value16 === "object" ? value16.valueOf() : value16;
+  }
+
+  // node_modules/d3-array/src/ticks.js
+  var e10 = Math.sqrt(50);
+  var e5 = Math.sqrt(10);
+  var e2 = Math.sqrt(2);
+  function tickSpec(start5, stop3, count) {
+    const step5 = (stop3 - start5) / Math.max(0, count), power = Math.floor(Math.log10(step5)), error4 = step5 / Math.pow(10, power), factor = error4 >= e10 ? 10 : error4 >= e5 ? 5 : error4 >= e2 ? 2 : 1;
+    let i1, i2, inc;
+    if (power < 0) {
+      inc = Math.pow(10, -power) / factor;
+      i1 = Math.round(start5 * inc);
+      i2 = Math.round(stop3 * inc);
+      if (i1 / inc < start5) ++i1;
+      if (i2 / inc > stop3) --i2;
+      inc = -inc;
+    } else {
+      inc = Math.pow(10, power) * factor;
+      i1 = Math.round(start5 / inc);
+      i2 = Math.round(stop3 / inc);
+      if (i1 * inc < start5) ++i1;
+      if (i2 * inc > stop3) --i2;
+    }
+    if (i2 < i1 && 0.5 <= count && count < 2) return tickSpec(start5, stop3, count * 2);
+    return [i1, i2, inc];
+  }
+  function ticks(start5, stop3, count) {
+    stop3 = +stop3, start5 = +start5, count = +count;
+    if (!(count > 0)) return [];
+    if (start5 === stop3) return [start5];
+    const reverse3 = stop3 < start5, [i1, i2, inc] = reverse3 ? tickSpec(stop3, start5, count) : tickSpec(start5, stop3, count);
+    if (!(i2 >= i1)) return [];
+    const n = i2 - i1 + 1, ticks2 = new Array(n);
+    if (reverse3) {
+      if (inc < 0) for (let i3 = 0; i3 < n; ++i3) ticks2[i3] = (i2 - i3) / -inc;
+      else for (let i3 = 0; i3 < n; ++i3) ticks2[i3] = (i2 - i3) * inc;
+    } else {
+      if (inc < 0) for (let i3 = 0; i3 < n; ++i3) ticks2[i3] = (i1 + i3) / -inc;
+      else for (let i3 = 0; i3 < n; ++i3) ticks2[i3] = (i1 + i3) * inc;
+    }
+    return ticks2;
+  }
+  function tickIncrement(start5, stop3, count) {
+    stop3 = +stop3, start5 = +start5, count = +count;
+    return tickSpec(start5, stop3, count)[2];
+  }
+  function tickStep(start5, stop3, count) {
+    stop3 = +stop3, start5 = +start5, count = +count;
+    const reverse3 = stop3 < start5, inc = reverse3 ? tickIncrement(stop3, start5, count) : tickIncrement(start5, stop3, count);
+    return (reverse3 ? -1 : 1) * (inc < 0 ? 1 / -inc : inc);
+  }
+
+  // node_modules/d3-axis/src/identity.js
+  function identity_default(x19) {
+    return x19;
+  }
+
+  // node_modules/d3-axis/src/axis.js
+  var top4 = 1;
+  var right = 2;
+  var bottom4 = 3;
+  var left = 4;
+  var epsilon = 1e-6;
+  function translateX(x19) {
+    return "translate(" + x19 + ",0)";
+  }
+  function translateY(y17) {
+    return "translate(0," + y17 + ")";
+  }
+  function number2(scale) {
+    return (d7) => +scale(d7);
+  }
+  function center(scale, offset) {
+    offset = Math.max(0, scale.bandwidth() - offset * 2) / 2;
+    if (scale.round()) offset = Math.round(offset);
+    return (d7) => +scale(d7) + offset;
+  }
+  function entering() {
+    return !this.__axis;
+  }
+  function axis(orient, scale) {
+    var tickArguments = [], tickValues = null, tickFormat2 = null, tickSizeInner = 6, tickSizeOuter = 6, tickPadding = 3, offset = typeof window !== "undefined" && window.devicePixelRatio > 1 ? 0 : 0.5, k = orient === top4 || orient === left ? -1 : 1, x19 = orient === left || orient === right ? "x" : "y", transform3 = orient === top4 || orient === bottom4 ? translateX : translateY;
+    function axis2(context) {
+      var values2 = tickValues == null ? scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain() : tickValues, format2 = tickFormat2 == null ? scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity_default : tickFormat2, spacing = Math.max(tickSizeInner, 0) + tickPadding, range3 = scale.range(), range0 = +range3[0] + offset, range1 = +range3[range3.length - 1] + offset, position2 = (scale.bandwidth ? center : number2)(scale.copy(), offset), selection2 = context.selection ? context.selection() : context, path3 = selection2.selectAll(".domain").data([null]), tick = selection2.selectAll(".tick").data(values2, scale).order(), tickExit = tick.exit(), tickEnter = tick.enter().append("g").attr("class", "tick"), line = tick.select("line"), text15 = tick.select("text");
+      path3 = path3.merge(path3.enter().insert("path", ".tick").attr("class", "domain").attr("stroke", "currentColor"));
+      tick = tick.merge(tickEnter);
+      line = line.merge(tickEnter.append("line").attr("stroke", "currentColor").attr(x19 + "2", k * tickSizeInner));
+      text15 = text15.merge(tickEnter.append("text").attr("fill", "currentColor").attr(x19, k * spacing).attr("dy", orient === top4 ? "0em" : orient === bottom4 ? "0.71em" : "0.32em"));
+      if (context !== selection2) {
+        path3 = path3.transition(context);
+        tick = tick.transition(context);
+        line = line.transition(context);
+        text15 = text15.transition(context);
+        tickExit = tickExit.transition(context).attr("opacity", epsilon).attr("transform", function(d7) {
+          return isFinite(d7 = position2(d7)) ? transform3(d7 + offset) : this.getAttribute("transform");
+        });
+        tickEnter.attr("opacity", epsilon).attr("transform", function(d7) {
+          var p2 = this.parentNode.__axis;
+          return transform3((p2 && isFinite(p2 = p2(d7)) ? p2 : position2(d7)) + offset);
+        });
+      }
+      tickExit.remove();
+      path3.attr("d", orient === left || orient === right ? tickSizeOuter ? "M" + k * tickSizeOuter + "," + range0 + "H" + offset + "V" + range1 + "H" + k * tickSizeOuter : "M" + offset + "," + range0 + "V" + range1 : tickSizeOuter ? "M" + range0 + "," + k * tickSizeOuter + "V" + offset + "H" + range1 + "V" + k * tickSizeOuter : "M" + range0 + "," + offset + "H" + range1);
+      tick.attr("opacity", 1).attr("transform", function(d7) {
+        return transform3(position2(d7) + offset);
+      });
+      line.attr(x19 + "2", k * tickSizeInner);
+      text15.attr(x19, k * spacing).text(format2);
+      selection2.filter(entering).attr("fill", "none").attr("font-size", 10).attr("font-family", "sans-serif").attr("text-anchor", orient === right ? "start" : orient === left ? "end" : "middle");
+      selection2.each(function() {
+        this.__axis = position2;
+      });
+    }
+    axis2.scale = function(_) {
+      return arguments.length ? (scale = _, axis2) : scale;
+    };
+    axis2.ticks = function() {
+      return tickArguments = Array.from(arguments), axis2;
+    };
+    axis2.tickArguments = function(_) {
+      return arguments.length ? (tickArguments = _ == null ? [] : Array.from(_), axis2) : tickArguments.slice();
+    };
+    axis2.tickValues = function(_) {
+      return arguments.length ? (tickValues = _ == null ? null : Array.from(_), axis2) : tickValues && tickValues.slice();
+    };
+    axis2.tickFormat = function(_) {
+      return arguments.length ? (tickFormat2 = _, axis2) : tickFormat2;
+    };
+    axis2.tickSize = function(_) {
+      return arguments.length ? (tickSizeInner = tickSizeOuter = +_, axis2) : tickSizeInner;
+    };
+    axis2.tickSizeInner = function(_) {
+      return arguments.length ? (tickSizeInner = +_, axis2) : tickSizeInner;
+    };
+    axis2.tickSizeOuter = function(_) {
+      return arguments.length ? (tickSizeOuter = +_, axis2) : tickSizeOuter;
+    };
+    axis2.tickPadding = function(_) {
+      return arguments.length ? (tickPadding = +_, axis2) : tickPadding;
+    };
+    axis2.offset = function(_) {
+      return arguments.length ? (offset = +_, axis2) : offset;
+    };
+    return axis2;
+  }
+  function axisBottom(scale) {
+    return axis(bottom4, scale);
+  }
+  function axisLeft(scale) {
+    return axis(left, scale);
+  }
+
+  // node_modules/d3-dispatch/src/dispatch.js
+  var noop = { value: () => {
+  } };
+  function dispatch() {
+    for (var i2 = 0, n = arguments.length, _ = {}, t; i2 < n; ++i2) {
+      if (!(t = arguments[i2] + "") || t in _ || /[\s.]/.test(t)) throw new Error("illegal type: " + t);
+      _[t] = [];
+    }
+    return new Dispatch(_);
+  }
+  function Dispatch(_) {
+    this._ = _;
+  }
+  function parseTypenames(typenames, types) {
+    return typenames.trim().split(/^|\s+/).map(function(t) {
+      var name16 = "", i2 = t.indexOf(".");
+      if (i2 >= 0) name16 = t.slice(i2 + 1), t = t.slice(0, i2);
+      if (t && !types.hasOwnProperty(t)) throw new Error("unknown type: " + t);
+      return { type: t, name: name16 };
+    });
+  }
+  Dispatch.prototype = dispatch.prototype = {
+    constructor: Dispatch,
+    on: function(typename, callback) {
+      var _ = this._, T = parseTypenames(typename + "", _), t, i2 = -1, n = T.length;
+      if (arguments.length < 2) {
+        while (++i2 < n) if ((t = (typename = T[i2]).type) && (t = get2(_[t], typename.name))) return t;
+        return;
+      }
+      if (callback != null && typeof callback !== "function") throw new Error("invalid callback: " + callback);
+      while (++i2 < n) {
+        if (t = (typename = T[i2]).type) _[t] = set(_[t], typename.name, callback);
+        else if (callback == null) for (t in _) _[t] = set(_[t], typename.name, null);
+      }
+      return this;
+    },
+    copy: function() {
+      var copy3 = {}, _ = this._;
+      for (var t in _) copy3[t] = _[t].slice();
+      return new Dispatch(copy3);
+    },
+    call: function(type2, that) {
+      if ((n = arguments.length - 2) > 0) for (var args = new Array(n), i2 = 0, n, t; i2 < n; ++i2) args[i2] = arguments[i2 + 2];
+      if (!this._.hasOwnProperty(type2)) throw new Error("unknown type: " + type2);
+      for (t = this._[type2], i2 = 0, n = t.length; i2 < n; ++i2) t[i2].value.apply(that, args);
+    },
+    apply: function(type2, that, args) {
+      if (!this._.hasOwnProperty(type2)) throw new Error("unknown type: " + type2);
+      for (var t = this._[type2], i2 = 0, n = t.length; i2 < n; ++i2) t[i2].value.apply(that, args);
+    }
+  };
+  function get2(type2, name16) {
+    for (var i2 = 0, n = type2.length, c; i2 < n; ++i2) {
+      if ((c = type2[i2]).name === name16) {
+        return c.value;
+      }
+    }
+  }
+  function set(type2, name16, callback) {
+    for (var i2 = 0, n = type2.length; i2 < n; ++i2) {
+      if (type2[i2].name === name16) {
+        type2[i2] = noop, type2 = type2.slice(0, i2).concat(type2.slice(i2 + 1));
+        break;
+      }
+    }
+    if (callback != null) type2.push({ name: name16, value: callback });
+    return type2;
+  }
+  var dispatch_default = dispatch;
+
+  // node_modules/d3-selection/src/namespaces.js
+  var xhtml = "http://www.w3.org/1999/xhtml";
+  var namespaces_default = {
+    svg: "http://www.w3.org/2000/svg",
+    xhtml,
+    xlink: "http://www.w3.org/1999/xlink",
+    xml: "http://www.w3.org/XML/1998/namespace",
+    xmlns: "http://www.w3.org/2000/xmlns/"
+  };
+
+  // node_modules/d3-selection/src/namespace.js
+  function namespace_default(name16) {
+    var prefix = name16 += "", i2 = prefix.indexOf(":");
+    if (i2 >= 0 && (prefix = name16.slice(0, i2)) !== "xmlns") name16 = name16.slice(i2 + 1);
+    return namespaces_default.hasOwnProperty(prefix) ? { space: namespaces_default[prefix], local: name16 } : name16;
+  }
+
+  // node_modules/d3-selection/src/creator.js
+  function creatorInherit(name16) {
+    return function() {
+      var document3 = this.ownerDocument, uri = this.namespaceURI;
+      return uri === xhtml && document3.documentElement.namespaceURI === xhtml ? document3.createElement(name16) : document3.createElementNS(uri, name16);
+    };
+  }
+  function creatorFixed(fullname) {
+    return function() {
+      return this.ownerDocument.createElementNS(fullname.space, fullname.local);
+    };
+  }
+  function creator_default(name16) {
+    var fullname = namespace_default(name16);
+    return (fullname.local ? creatorFixed : creatorInherit)(fullname);
+  }
+
+  // node_modules/d3-selection/src/selector.js
+  function none() {
+  }
+  function selector_default(selector) {
+    return selector == null ? none : function() {
+      return this.querySelector(selector);
+    };
+  }
+
+  // node_modules/d3-selection/src/selection/select.js
+  function select_default(select5) {
+    if (typeof select5 !== "function") select5 = selector_default(select5);
+    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
+      for (var group3 = groups[j], n = group3.length, subgroup = subgroups[j] = new Array(n), node, subnode, i2 = 0; i2 < n; ++i2) {
+        if ((node = group3[i2]) && (subnode = select5.call(node, node.__data__, i2, group3))) {
+          if ("__data__" in node) subnode.__data__ = node.__data__;
+          subgroup[i2] = subnode;
+        }
+      }
+    }
+    return new Selection(subgroups, this._parents);
+  }
+
+  // node_modules/d3-selection/src/array.js
+  function array(x19) {
+    return x19 == null ? [] : Array.isArray(x19) ? x19 : Array.from(x19);
+  }
+
+  // node_modules/d3-selection/src/selectorAll.js
+  function empty7() {
+    return [];
+  }
+  function selectorAll_default(selector) {
+    return selector == null ? empty7 : function() {
+      return this.querySelectorAll(selector);
+    };
+  }
+
+  // node_modules/d3-selection/src/selection/selectAll.js
+  function arrayAll(select5) {
+    return function() {
+      return array(select5.apply(this, arguments));
+    };
+  }
+  function selectAll_default(select5) {
+    if (typeof select5 === "function") select5 = arrayAll(select5);
+    else select5 = selectorAll_default(select5);
+    for (var groups = this._groups, m = groups.length, subgroups = [], parents = [], j = 0; j < m; ++j) {
+      for (var group3 = groups[j], n = group3.length, node, i2 = 0; i2 < n; ++i2) {
+        if (node = group3[i2]) {
+          subgroups.push(select5.call(node, node.__data__, i2, group3));
+          parents.push(node);
+        }
+      }
+    }
+    return new Selection(subgroups, parents);
+  }
+
+  // node_modules/d3-selection/src/matcher.js
+  function matcher_default(selector) {
+    return function() {
+      return this.matches(selector);
+    };
+  }
+  function childMatcher(selector) {
+    return function(node) {
+      return node.matches(selector);
+    };
+  }
+
+  // node_modules/d3-selection/src/selection/selectChild.js
+  var find3 = Array.prototype.find;
+  function childFind(match2) {
+    return function() {
+      return find3.call(this.children, match2);
+    };
+  }
+  function childFirst() {
+    return this.firstElementChild;
+  }
+  function selectChild_default(match2) {
+    return this.select(match2 == null ? childFirst : childFind(typeof match2 === "function" ? match2 : childMatcher(match2)));
+  }
+
+  // node_modules/d3-selection/src/selection/selectChildren.js
+  var filter4 = Array.prototype.filter;
+  function children2() {
+    return Array.from(this.children);
+  }
+  function childrenFilter(match2) {
+    return function() {
+      return filter4.call(this.children, match2);
+    };
+  }
+  function selectChildren_default(match2) {
+    return this.selectAll(match2 == null ? children2 : childrenFilter(typeof match2 === "function" ? match2 : childMatcher(match2)));
+  }
+
+  // node_modules/d3-selection/src/selection/filter.js
+  function filter_default(match2) {
+    if (typeof match2 !== "function") match2 = matcher_default(match2);
+    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
+      for (var group3 = groups[j], n = group3.length, subgroup = subgroups[j] = [], node, i2 = 0; i2 < n; ++i2) {
+        if ((node = group3[i2]) && match2.call(node, node.__data__, i2, group3)) {
+          subgroup.push(node);
+        }
+      }
+    }
+    return new Selection(subgroups, this._parents);
+  }
+
+  // node_modules/d3-selection/src/selection/sparse.js
+  function sparse_default(update3) {
+    return new Array(update3.length);
+  }
+
+  // node_modules/d3-selection/src/selection/enter.js
+  function enter_default() {
+    return new Selection(this._enter || this._groups.map(sparse_default), this._parents);
+  }
+  function EnterNode(parent2, datum2) {
+    this.ownerDocument = parent2.ownerDocument;
+    this.namespaceURI = parent2.namespaceURI;
+    this._next = null;
+    this._parent = parent2;
+    this.__data__ = datum2;
+  }
+  EnterNode.prototype = {
+    constructor: EnterNode,
+    appendChild: function(child) {
+      return this._parent.insertBefore(child, this._next);
+    },
+    insertBefore: function(child, next2) {
+      return this._parent.insertBefore(child, next2);
+    },
+    querySelector: function(selector) {
+      return this._parent.querySelector(selector);
+    },
+    querySelectorAll: function(selector) {
+      return this._parent.querySelectorAll(selector);
+    }
+  };
+
+  // node_modules/d3-selection/src/constant.js
+  function constant_default(x19) {
+    return function() {
+      return x19;
+    };
+  }
+
+  // node_modules/d3-selection/src/selection/data.js
+  function bindIndex(parent2, group3, enter, update3, exit, data) {
+    var i2 = 0, node, groupLength = group3.length, dataLength = data.length;
+    for (; i2 < dataLength; ++i2) {
+      if (node = group3[i2]) {
+        node.__data__ = data[i2];
+        update3[i2] = node;
+      } else {
+        enter[i2] = new EnterNode(parent2, data[i2]);
+      }
+    }
+    for (; i2 < groupLength; ++i2) {
+      if (node = group3[i2]) {
+        exit[i2] = node;
+      }
+    }
+  }
+  function bindKey(parent2, group3, enter, update3, exit, data, key) {
+    var i2, node, nodeByKeyValue = /* @__PURE__ */ new Map(), groupLength = group3.length, dataLength = data.length, keyValues = new Array(groupLength), keyValue;
+    for (i2 = 0; i2 < groupLength; ++i2) {
+      if (node = group3[i2]) {
+        keyValues[i2] = keyValue = key.call(node, node.__data__, i2, group3) + "";
+        if (nodeByKeyValue.has(keyValue)) {
+          exit[i2] = node;
+        } else {
+          nodeByKeyValue.set(keyValue, node);
+        }
+      }
+    }
+    for (i2 = 0; i2 < dataLength; ++i2) {
+      keyValue = key.call(parent2, data[i2], i2, data) + "";
+      if (node = nodeByKeyValue.get(keyValue)) {
+        update3[i2] = node;
+        node.__data__ = data[i2];
+        nodeByKeyValue.delete(keyValue);
+      } else {
+        enter[i2] = new EnterNode(parent2, data[i2]);
+      }
+    }
+    for (i2 = 0; i2 < groupLength; ++i2) {
+      if ((node = group3[i2]) && nodeByKeyValue.get(keyValues[i2]) === node) {
+        exit[i2] = node;
+      }
+    }
+  }
+  function datum(node) {
+    return node.__data__;
+  }
+  function data_default(value16, key) {
+    if (!arguments.length) return Array.from(this, datum);
+    var bind27 = key ? bindKey : bindIndex, parents = this._parents, groups = this._groups;
+    if (typeof value16 !== "function") value16 = constant_default(value16);
+    for (var m = groups.length, update3 = new Array(m), enter = new Array(m), exit = new Array(m), j = 0; j < m; ++j) {
+      var parent2 = parents[j], group3 = groups[j], groupLength = group3.length, data = arraylike(value16.call(parent2, parent2 && parent2.__data__, j, parents)), dataLength = data.length, enterGroup = enter[j] = new Array(dataLength), updateGroup = update3[j] = new Array(dataLength), exitGroup = exit[j] = new Array(groupLength);
+      bind27(parent2, group3, enterGroup, updateGroup, exitGroup, data, key);
+      for (var i0 = 0, i1 = 0, previous, next2; i0 < dataLength; ++i0) {
+        if (previous = enterGroup[i0]) {
+          if (i0 >= i1) i1 = i0 + 1;
+          while (!(next2 = updateGroup[i1]) && ++i1 < dataLength) ;
+          previous._next = next2 || null;
+        }
+      }
+    }
+    update3 = new Selection(update3, parents);
+    update3._enter = enter;
+    update3._exit = exit;
+    return update3;
+  }
+  function arraylike(data) {
+    return typeof data === "object" && "length" in data ? data : Array.from(data);
+  }
+
+  // node_modules/d3-selection/src/selection/exit.js
+  function exit_default() {
+    return new Selection(this._exit || this._groups.map(sparse_default), this._parents);
+  }
+
+  // node_modules/d3-selection/src/selection/join.js
+  function join_default(onenter, onupdate, onexit) {
+    var enter = this.enter(), update3 = this, exit = this.exit();
+    if (typeof onenter === "function") {
+      enter = onenter(enter);
+      if (enter) enter = enter.selection();
+    } else {
+      enter = enter.append(onenter + "");
+    }
+    if (onupdate != null) {
+      update3 = onupdate(update3);
+      if (update3) update3 = update3.selection();
+    }
+    if (onexit == null) exit.remove();
+    else onexit(exit);
+    return enter && update3 ? enter.merge(update3).order() : update3;
+  }
+
+  // node_modules/d3-selection/src/selection/merge.js
+  function merge_default(context) {
+    var selection2 = context.selection ? context.selection() : context;
+    for (var groups0 = this._groups, groups1 = selection2._groups, m0 = groups0.length, m1 = groups1.length, m = Math.min(m0, m1), merges = new Array(m0), j = 0; j < m; ++j) {
+      for (var group0 = groups0[j], group1 = groups1[j], n = group0.length, merge = merges[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
+        if (node = group0[i2] || group1[i2]) {
+          merge[i2] = node;
+        }
+      }
+    }
+    for (; j < m0; ++j) {
+      merges[j] = groups0[j];
+    }
+    return new Selection(merges, this._parents);
+  }
+
+  // node_modules/d3-selection/src/selection/order.js
+  function order_default() {
+    for (var groups = this._groups, j = -1, m = groups.length; ++j < m; ) {
+      for (var group3 = groups[j], i2 = group3.length - 1, next2 = group3[i2], node; --i2 >= 0; ) {
+        if (node = group3[i2]) {
+          if (next2 && node.compareDocumentPosition(next2) ^ 4) next2.parentNode.insertBefore(node, next2);
+          next2 = node;
+        }
+      }
+    }
+    return this;
+  }
+
+  // node_modules/d3-selection/src/selection/sort.js
+  function sort_default(compare2) {
+    if (!compare2) compare2 = ascending2;
+    function compareNode(a2, b2) {
+      return a2 && b2 ? compare2(a2.__data__, b2.__data__) : !a2 - !b2;
+    }
+    for (var groups = this._groups, m = groups.length, sortgroups = new Array(m), j = 0; j < m; ++j) {
+      for (var group3 = groups[j], n = group3.length, sortgroup = sortgroups[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
+        if (node = group3[i2]) {
+          sortgroup[i2] = node;
+        }
+      }
+      sortgroup.sort(compareNode);
+    }
+    return new Selection(sortgroups, this._parents).order();
+  }
+  function ascending2(a2, b2) {
+    return a2 < b2 ? -1 : a2 > b2 ? 1 : a2 >= b2 ? 0 : NaN;
+  }
+
+  // node_modules/d3-selection/src/selection/call.js
+  function call_default() {
+    var callback = arguments[0];
+    arguments[0] = this;
+    callback.apply(null, arguments);
+    return this;
+  }
+
+  // node_modules/d3-selection/src/selection/nodes.js
+  function nodes_default() {
+    return Array.from(this);
+  }
+
+  // node_modules/d3-selection/src/selection/node.js
+  function node_default() {
+    for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {
+      for (var group3 = groups[j], i2 = 0, n = group3.length; i2 < n; ++i2) {
+        var node = group3[i2];
+        if (node) return node;
+      }
+    }
+    return null;
+  }
+
+  // node_modules/d3-selection/src/selection/size.js
+  function size_default() {
+    let size5 = 0;
+    for (const node of this) ++size5;
+    return size5;
+  }
+
+  // node_modules/d3-selection/src/selection/empty.js
+  function empty_default() {
+    return !this.node();
+  }
+
+  // node_modules/d3-selection/src/selection/each.js
+  function each_default(callback) {
+    for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {
+      for (var group3 = groups[j], i2 = 0, n = group3.length, node; i2 < n; ++i2) {
+        if (node = group3[i2]) callback.call(node, node.__data__, i2, group3);
+      }
+    }
+    return this;
+  }
+
+  // node_modules/d3-selection/src/selection/attr.js
+  function attrRemove(name16) {
+    return function() {
+      this.removeAttribute(name16);
+    };
+  }
+  function attrRemoveNS(fullname) {
+    return function() {
+      this.removeAttributeNS(fullname.space, fullname.local);
+    };
+  }
+  function attrConstant(name16, value16) {
+    return function() {
+      this.setAttribute(name16, value16);
+    };
+  }
+  function attrConstantNS(fullname, value16) {
+    return function() {
+      this.setAttributeNS(fullname.space, fullname.local, value16);
+    };
+  }
+  function attrFunction(name16, value16) {
+    return function() {
+      var v = value16.apply(this, arguments);
+      if (v == null) this.removeAttribute(name16);
+      else this.setAttribute(name16, v);
+    };
+  }
+  function attrFunctionNS(fullname, value16) {
+    return function() {
+      var v = value16.apply(this, arguments);
+      if (v == null) this.removeAttributeNS(fullname.space, fullname.local);
+      else this.setAttributeNS(fullname.space, fullname.local, v);
+    };
+  }
+  function attr_default(name16, value16) {
+    var fullname = namespace_default(name16);
+    if (arguments.length < 2) {
+      var node = this.node();
+      return fullname.local ? node.getAttributeNS(fullname.space, fullname.local) : node.getAttribute(fullname);
+    }
+    return this.each((value16 == null ? fullname.local ? attrRemoveNS : attrRemove : typeof value16 === "function" ? fullname.local ? attrFunctionNS : attrFunction : fullname.local ? attrConstantNS : attrConstant)(fullname, value16));
+  }
+
+  // node_modules/d3-selection/src/window.js
+  function window_default(node) {
+    return node.ownerDocument && node.ownerDocument.defaultView || node.document && node || node.defaultView;
+  }
+
+  // node_modules/d3-selection/src/selection/style.js
+  function styleRemove(name16) {
+    return function() {
+      this.style.removeProperty(name16);
+    };
+  }
+  function styleConstant(name16, value16, priority) {
+    return function() {
+      this.style.setProperty(name16, value16, priority);
+    };
+  }
+  function styleFunction(name16, value16, priority) {
+    return function() {
+      var v = value16.apply(this, arguments);
+      if (v == null) this.style.removeProperty(name16);
+      else this.style.setProperty(name16, v, priority);
+    };
+  }
+  function style_default(name16, value16, priority) {
+    return arguments.length > 1 ? this.each((value16 == null ? styleRemove : typeof value16 === "function" ? styleFunction : styleConstant)(name16, value16, priority == null ? "" : priority)) : styleValue(this.node(), name16);
+  }
+  function styleValue(node, name16) {
+    return node.style.getPropertyValue(name16) || window_default(node).getComputedStyle(node, null).getPropertyValue(name16);
+  }
+
+  // node_modules/d3-selection/src/selection/property.js
+  function propertyRemove(name16) {
+    return function() {
+      delete this[name16];
+    };
+  }
+  function propertyConstant(name16, value16) {
+    return function() {
+      this[name16] = value16;
+    };
+  }
+  function propertyFunction(name16, value16) {
+    return function() {
+      var v = value16.apply(this, arguments);
+      if (v == null) delete this[name16];
+      else this[name16] = v;
+    };
+  }
+  function property_default(name16, value16) {
+    return arguments.length > 1 ? this.each((value16 == null ? propertyRemove : typeof value16 === "function" ? propertyFunction : propertyConstant)(name16, value16)) : this.node()[name16];
+  }
+
+  // node_modules/d3-selection/src/selection/classed.js
+  function classArray(string2) {
+    return string2.trim().split(/^|\s+/);
+  }
+  function classList2(node) {
+    return node.classList || new ClassList(node);
+  }
+  function ClassList(node) {
+    this._node = node;
+    this._names = classArray(node.getAttribute("class") || "");
+  }
+  ClassList.prototype = {
+    add: function(name16) {
+      var i2 = this._names.indexOf(name16);
+      if (i2 < 0) {
+        this._names.push(name16);
+        this._node.setAttribute("class", this._names.join(" "));
+      }
+    },
+    remove: function(name16) {
+      var i2 = this._names.indexOf(name16);
+      if (i2 >= 0) {
+        this._names.splice(i2, 1);
+        this._node.setAttribute("class", this._names.join(" "));
+      }
+    },
+    contains: function(name16) {
+      return this._names.indexOf(name16) >= 0;
+    }
+  };
+  function classedAdd(node, names) {
+    var list = classList2(node), i2 = -1, n = names.length;
+    while (++i2 < n) list.add(names[i2]);
+  }
+  function classedRemove(node, names) {
+    var list = classList2(node), i2 = -1, n = names.length;
+    while (++i2 < n) list.remove(names[i2]);
+  }
+  function classedTrue(names) {
+    return function() {
+      classedAdd(this, names);
+    };
+  }
+  function classedFalse(names) {
+    return function() {
+      classedRemove(this, names);
+    };
+  }
+  function classedFunction(names, value16) {
+    return function() {
+      (value16.apply(this, arguments) ? classedAdd : classedRemove)(this, names);
+    };
+  }
+  function classed_default(name16, value16) {
+    var names = classArray(name16 + "");
+    if (arguments.length < 2) {
+      var list = classList2(this.node()), i2 = -1, n = names.length;
+      while (++i2 < n) if (!list.contains(names[i2])) return false;
+      return true;
+    }
+    return this.each((typeof value16 === "function" ? classedFunction : value16 ? classedTrue : classedFalse)(names, value16));
+  }
+
+  // node_modules/d3-selection/src/selection/text.js
+  function textRemove() {
+    this.textContent = "";
+  }
+  function textConstant(value16) {
+    return function() {
+      this.textContent = value16;
+    };
+  }
+  function textFunction(value16) {
+    return function() {
+      var v = value16.apply(this, arguments);
+      this.textContent = v == null ? "" : v;
+    };
+  }
+  function text_default(value16) {
+    return arguments.length ? this.each(value16 == null ? textRemove : (typeof value16 === "function" ? textFunction : textConstant)(value16)) : this.node().textContent;
+  }
+
+  // node_modules/d3-selection/src/selection/html.js
+  function htmlRemove() {
+    this.innerHTML = "";
+  }
+  function htmlConstant(value16) {
+    return function() {
+      this.innerHTML = value16;
+    };
+  }
+  function htmlFunction(value16) {
+    return function() {
+      var v = value16.apply(this, arguments);
+      this.innerHTML = v == null ? "" : v;
+    };
+  }
+  function html_default(value16) {
+    return arguments.length ? this.each(value16 == null ? htmlRemove : (typeof value16 === "function" ? htmlFunction : htmlConstant)(value16)) : this.node().innerHTML;
+  }
+
+  // node_modules/d3-selection/src/selection/raise.js
+  function raise2() {
+    if (this.nextSibling) this.parentNode.appendChild(this);
+  }
+  function raise_default() {
+    return this.each(raise2);
+  }
+
+  // node_modules/d3-selection/src/selection/lower.js
+  function lower() {
+    if (this.previousSibling) this.parentNode.insertBefore(this, this.parentNode.firstChild);
+  }
+  function lower_default() {
+    return this.each(lower);
+  }
+
+  // node_modules/d3-selection/src/selection/append.js
+  function append_default(name16) {
+    var create5 = typeof name16 === "function" ? name16 : creator_default(name16);
+    return this.select(function() {
+      return this.appendChild(create5.apply(this, arguments));
+    });
+  }
+
+  // node_modules/d3-selection/src/selection/insert.js
+  function constantNull() {
+    return null;
+  }
+  function insert_default(name16, before) {
+    var create5 = typeof name16 === "function" ? name16 : creator_default(name16), select5 = before == null ? constantNull : typeof before === "function" ? before : selector_default(before);
+    return this.select(function() {
+      return this.insertBefore(create5.apply(this, arguments), select5.apply(this, arguments) || null);
+    });
+  }
+
+  // node_modules/d3-selection/src/selection/remove.js
+  function remove2() {
+    var parent2 = this.parentNode;
+    if (parent2) parent2.removeChild(this);
+  }
+  function remove_default() {
+    return this.each(remove2);
+  }
+
+  // node_modules/d3-selection/src/selection/clone.js
+  function selection_cloneShallow() {
+    var clone2 = this.cloneNode(false), parent2 = this.parentNode;
+    return parent2 ? parent2.insertBefore(clone2, this.nextSibling) : clone2;
+  }
+  function selection_cloneDeep() {
+    var clone2 = this.cloneNode(true), parent2 = this.parentNode;
+    return parent2 ? parent2.insertBefore(clone2, this.nextSibling) : clone2;
+  }
+  function clone_default(deep) {
+    return this.select(deep ? selection_cloneDeep : selection_cloneShallow);
+  }
+
+  // node_modules/d3-selection/src/selection/datum.js
+  function datum_default(value16) {
+    return arguments.length ? this.property("__data__", value16) : this.node().__data__;
+  }
+
+  // node_modules/d3-selection/src/selection/on.js
+  function contextListener(listener) {
+    return function(event) {
+      listener.call(this, event, this.__data__);
+    };
+  }
+  function parseTypenames2(typenames) {
+    return typenames.trim().split(/^|\s+/).map(function(t) {
+      var name16 = "", i2 = t.indexOf(".");
+      if (i2 >= 0) name16 = t.slice(i2 + 1), t = t.slice(0, i2);
+      return { type: t, name: name16 };
+    });
+  }
+  function onRemove(typename) {
+    return function() {
+      var on3 = this.__on;
+      if (!on3) return;
+      for (var j = 0, i2 = -1, m = on3.length, o; j < m; ++j) {
+        if (o = on3[j], (!typename.type || o.type === typename.type) && o.name === typename.name) {
+          this.removeEventListener(o.type, o.listener, o.options);
+        } else {
+          on3[++i2] = o;
+        }
+      }
+      if (++i2) on3.length = i2;
+      else delete this.__on;
+    };
+  }
+  function onAdd(typename, value16, options2) {
+    return function() {
+      var on3 = this.__on, o, listener = contextListener(value16);
+      if (on3) for (var j = 0, m = on3.length; j < m; ++j) {
+        if ((o = on3[j]).type === typename.type && o.name === typename.name) {
+          this.removeEventListener(o.type, o.listener, o.options);
+          this.addEventListener(o.type, o.listener = listener, o.options = options2);
+          o.value = value16;
+          return;
+        }
+      }
+      this.addEventListener(typename.type, listener, options2);
+      o = { type: typename.type, name: typename.name, value: value16, listener, options: options2 };
+      if (!on3) this.__on = [o];
+      else on3.push(o);
+    };
+  }
+  function on_default(typename, value16, options2) {
+    var typenames = parseTypenames2(typename + ""), i2, n = typenames.length, t;
+    if (arguments.length < 2) {
+      var on3 = this.node().__on;
+      if (on3) for (var j = 0, m = on3.length, o; j < m; ++j) {
+        for (i2 = 0, o = on3[j]; i2 < n; ++i2) {
+          if ((t = typenames[i2]).type === o.type && t.name === o.name) {
+            return o.value;
+          }
+        }
+      }
+      return;
+    }
+    on3 = value16 ? onAdd : onRemove;
+    for (i2 = 0; i2 < n; ++i2) this.each(on3(typenames[i2], value16, options2));
+    return this;
+  }
+
+  // node_modules/d3-selection/src/selection/dispatch.js
+  function dispatchEvent2(node, type2, params) {
+    var window2 = window_default(node), event = window2.CustomEvent;
+    if (typeof event === "function") {
+      event = new event(type2, params);
+    } else {
+      event = window2.document.createEvent("Event");
+      if (params) event.initEvent(type2, params.bubbles, params.cancelable), event.detail = params.detail;
+      else event.initEvent(type2, false, false);
+    }
+    node.dispatchEvent(event);
+  }
+  function dispatchConstant(type2, params) {
+    return function() {
+      return dispatchEvent2(this, type2, params);
+    };
+  }
+  function dispatchFunction(type2, params) {
+    return function() {
+      return dispatchEvent2(this, type2, params.apply(this, arguments));
+    };
+  }
+  function dispatch_default2(type2, params) {
+    return this.each((typeof params === "function" ? dispatchFunction : dispatchConstant)(type2, params));
+  }
+
+  // node_modules/d3-selection/src/selection/iterator.js
+  function* iterator_default() {
+    for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {
+      for (var group3 = groups[j], i2 = 0, n = group3.length, node; i2 < n; ++i2) {
+        if (node = group3[i2]) yield node;
+      }
+    }
+  }
+
+  // node_modules/d3-selection/src/selection/index.js
+  var root = [null];
+  function Selection(groups, parents) {
+    this._groups = groups;
+    this._parents = parents;
+  }
+  function selection() {
+    return new Selection([[document.documentElement]], root);
+  }
+  function selection_selection() {
+    return this;
+  }
+  Selection.prototype = selection.prototype = {
+    constructor: Selection,
+    select: select_default,
+    selectAll: selectAll_default,
+    selectChild: selectChild_default,
+    selectChildren: selectChildren_default,
+    filter: filter_default,
+    data: data_default,
+    enter: enter_default,
+    exit: exit_default,
+    join: join_default,
+    merge: merge_default,
+    selection: selection_selection,
+    order: order_default,
+    sort: sort_default,
+    call: call_default,
+    nodes: nodes_default,
+    node: node_default,
+    size: size_default,
+    empty: empty_default,
+    each: each_default,
+    attr: attr_default,
+    style: style_default,
+    property: property_default,
+    classed: classed_default,
+    text: text_default,
+    html: html_default,
+    raise: raise_default,
+    lower: lower_default,
+    append: append_default,
+    insert: insert_default,
+    remove: remove_default,
+    clone: clone_default,
+    datum: datum_default,
+    on: on_default,
+    dispatch: dispatch_default2,
+    [Symbol.iterator]: iterator_default
+  };
+  var selection_default = selection;
+
+  // node_modules/d3-color/src/define.js
+  function define_default(constructor, factory, prototype) {
+    constructor.prototype = factory.prototype = prototype;
+    prototype.constructor = constructor;
+  }
+  function extend2(parent2, definition) {
+    var prototype = Object.create(parent2.prototype);
+    for (var key in definition) prototype[key] = definition[key];
+    return prototype;
+  }
+
+  // node_modules/d3-color/src/color.js
+  function Color() {
+  }
+  var darker = 0.7;
+  var brighter = 1 / darker;
+  var reI = "\\s*([+-]?\\d+)\\s*";
+  var reN = "\\s*([+-]?(?:\\d*\\.)?\\d+(?:[eE][+-]?\\d+)?)\\s*";
+  var reP = "\\s*([+-]?(?:\\d*\\.)?\\d+(?:[eE][+-]?\\d+)?)%\\s*";
+  var reHex = /^#([0-9a-f]{3,8})$/;
+  var reRgbInteger = new RegExp(`^rgb\\(${reI},${reI},${reI}\\)$`);
+  var reRgbPercent = new RegExp(`^rgb\\(${reP},${reP},${reP}\\)$`);
+  var reRgbaInteger = new RegExp(`^rgba\\(${reI},${reI},${reI},${reN}\\)$`);
+  var reRgbaPercent = new RegExp(`^rgba\\(${reP},${reP},${reP},${reN}\\)$`);
+  var reHslPercent = new RegExp(`^hsl\\(${reN},${reP},${reP}\\)$`);
+  var reHslaPercent = new RegExp(`^hsla\\(${reN},${reP},${reP},${reN}\\)$`);
+  var named = {
+    aliceblue: 15792383,
+    antiquewhite: 16444375,
+    aqua: 65535,
+    aquamarine: 8388564,
+    azure: 15794175,
+    beige: 16119260,
+    bisque: 16770244,
+    black: 0,
+    blanchedalmond: 16772045,
+    blue: 255,
+    blueviolet: 9055202,
+    brown: 10824234,
+    burlywood: 14596231,
+    cadetblue: 6266528,
+    chartreuse: 8388352,
+    chocolate: 13789470,
+    coral: 16744272,
+    cornflowerblue: 6591981,
+    cornsilk: 16775388,
+    crimson: 14423100,
+    cyan: 65535,
+    darkblue: 139,
+    darkcyan: 35723,
+    darkgoldenrod: 12092939,
+    darkgray: 11119017,
+    darkgreen: 25600,
+    darkgrey: 11119017,
+    darkkhaki: 12433259,
+    darkmagenta: 9109643,
+    darkolivegreen: 5597999,
+    darkorange: 16747520,
+    darkorchid: 10040012,
+    darkred: 9109504,
+    darksalmon: 15308410,
+    darkseagreen: 9419919,
+    darkslateblue: 4734347,
+    darkslategray: 3100495,
+    darkslategrey: 3100495,
+    darkturquoise: 52945,
+    darkviolet: 9699539,
+    deeppink: 16716947,
+    deepskyblue: 49151,
+    dimgray: 6908265,
+    dimgrey: 6908265,
+    dodgerblue: 2003199,
+    firebrick: 11674146,
+    floralwhite: 16775920,
+    forestgreen: 2263842,
+    fuchsia: 16711935,
+    gainsboro: 14474460,
+    ghostwhite: 16316671,
+    gold: 16766720,
+    goldenrod: 14329120,
+    gray: 8421504,
+    green: 32768,
+    greenyellow: 11403055,
+    grey: 8421504,
+    honeydew: 15794160,
+    hotpink: 16738740,
+    indianred: 13458524,
+    indigo: 4915330,
+    ivory: 16777200,
+    khaki: 15787660,
+    lavender: 15132410,
+    lavenderblush: 16773365,
+    lawngreen: 8190976,
+    lemonchiffon: 16775885,
+    lightblue: 11393254,
+    lightcoral: 15761536,
+    lightcyan: 14745599,
+    lightgoldenrodyellow: 16448210,
+    lightgray: 13882323,
+    lightgreen: 9498256,
+    lightgrey: 13882323,
+    lightpink: 16758465,
+    lightsalmon: 16752762,
+    lightseagreen: 2142890,
+    lightskyblue: 8900346,
+    lightslategray: 7833753,
+    lightslategrey: 7833753,
+    lightsteelblue: 11584734,
+    lightyellow: 16777184,
+    lime: 65280,
+    limegreen: 3329330,
+    linen: 16445670,
+    magenta: 16711935,
+    maroon: 8388608,
+    mediumaquamarine: 6737322,
+    mediumblue: 205,
+    mediumorchid: 12211667,
+    mediumpurple: 9662683,
+    mediumseagreen: 3978097,
+    mediumslateblue: 8087790,
+    mediumspringgreen: 64154,
+    mediumturquoise: 4772300,
+    mediumvioletred: 13047173,
+    midnightblue: 1644912,
+    mintcream: 16121850,
+    mistyrose: 16770273,
+    moccasin: 16770229,
+    navajowhite: 16768685,
+    navy: 128,
+    oldlace: 16643558,
+    olive: 8421376,
+    olivedrab: 7048739,
+    orange: 16753920,
+    orangered: 16729344,
+    orchid: 14315734,
+    palegoldenrod: 15657130,
+    palegreen: 10025880,
+    paleturquoise: 11529966,
+    palevioletred: 14381203,
+    papayawhip: 16773077,
+    peachpuff: 16767673,
+    peru: 13468991,
+    pink: 16761035,
+    plum: 14524637,
+    powderblue: 11591910,
+    purple: 8388736,
+    rebeccapurple: 6697881,
+    red: 16711680,
+    rosybrown: 12357519,
+    royalblue: 4286945,
+    saddlebrown: 9127187,
+    salmon: 16416882,
+    sandybrown: 16032864,
+    seagreen: 3050327,
+    seashell: 16774638,
+    sienna: 10506797,
+    silver: 12632256,
+    skyblue: 8900331,
+    slateblue: 6970061,
+    slategray: 7372944,
+    slategrey: 7372944,
+    snow: 16775930,
+    springgreen: 65407,
+    steelblue: 4620980,
+    tan: 13808780,
+    teal: 32896,
+    thistle: 14204888,
+    tomato: 16737095,
+    turquoise: 4251856,
+    violet: 15631086,
+    wheat: 16113331,
+    white: 16777215,
+    whitesmoke: 16119285,
+    yellow: 16776960,
+    yellowgreen: 10145074
+  };
+  define_default(Color, color, {
+    copy(channels) {
+      return Object.assign(new this.constructor(), this, channels);
+    },
+    displayable() {
+      return this.rgb().displayable();
+    },
+    hex: color_formatHex,
+    // Deprecated! Use color.formatHex.
+    formatHex: color_formatHex,
+    formatHex8: color_formatHex8,
+    formatHsl: color_formatHsl,
+    formatRgb: color_formatRgb,
+    toString: color_formatRgb
+  });
+  function color_formatHex() {
+    return this.rgb().formatHex();
+  }
+  function color_formatHex8() {
+    return this.rgb().formatHex8();
+  }
+  function color_formatHsl() {
+    return hslConvert(this).formatHsl();
+  }
+  function color_formatRgb() {
+    return this.rgb().formatRgb();
+  }
+  function color(format2) {
+    var m, l;
+    format2 = (format2 + "").trim().toLowerCase();
+    return (m = reHex.exec(format2)) ? (l = m[1].length, m = parseInt(m[1], 16), l === 6 ? rgbn(m) : l === 3 ? new Rgb(m >> 8 & 15 | m >> 4 & 240, m >> 4 & 15 | m & 240, (m & 15) << 4 | m & 15, 1) : l === 8 ? rgba(m >> 24 & 255, m >> 16 & 255, m >> 8 & 255, (m & 255) / 255) : l === 4 ? rgba(m >> 12 & 15 | m >> 8 & 240, m >> 8 & 15 | m >> 4 & 240, m >> 4 & 15 | m & 240, ((m & 15) << 4 | m & 15) / 255) : null) : (m = reRgbInteger.exec(format2)) ? new Rgb(m[1], m[2], m[3], 1) : (m = reRgbPercent.exec(format2)) ? new Rgb(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, 1) : (m = reRgbaInteger.exec(format2)) ? rgba(m[1], m[2], m[3], m[4]) : (m = reRgbaPercent.exec(format2)) ? rgba(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, m[4]) : (m = reHslPercent.exec(format2)) ? hsla(m[1], m[2] / 100, m[3] / 100, 1) : (m = reHslaPercent.exec(format2)) ? hsla(m[1], m[2] / 100, m[3] / 100, m[4]) : named.hasOwnProperty(format2) ? rgbn(named[format2]) : format2 === "transparent" ? new Rgb(NaN, NaN, NaN, 0) : null;
+  }
+  function rgbn(n) {
+    return new Rgb(n >> 16 & 255, n >> 8 & 255, n & 255, 1);
+  }
+  function rgba(r, g, b2, a2) {
+    if (a2 <= 0) r = g = b2 = NaN;
+    return new Rgb(r, g, b2, a2);
+  }
+  function rgbConvert(o) {
+    if (!(o instanceof Color)) o = color(o);
+    if (!o) return new Rgb();
+    o = o.rgb();
+    return new Rgb(o.r, o.g, o.b, o.opacity);
+  }
+  function rgb(r, g, b2, opacity3) {
+    return arguments.length === 1 ? rgbConvert(r) : new Rgb(r, g, b2, opacity3 == null ? 1 : opacity3);
+  }
+  function Rgb(r, g, b2, opacity3) {
+    this.r = +r;
+    this.g = +g;
+    this.b = +b2;
+    this.opacity = +opacity3;
+  }
+  define_default(Rgb, rgb, extend2(Color, {
+    brighter(k) {
+      k = k == null ? brighter : Math.pow(brighter, k);
+      return new Rgb(this.r * k, this.g * k, this.b * k, this.opacity);
+    },
+    darker(k) {
+      k = k == null ? darker : Math.pow(darker, k);
+      return new Rgb(this.r * k, this.g * k, this.b * k, this.opacity);
+    },
+    rgb() {
+      return this;
+    },
+    clamp() {
+      return new Rgb(clampi(this.r), clampi(this.g), clampi(this.b), clampa(this.opacity));
+    },
+    displayable() {
+      return -0.5 <= this.r && this.r < 255.5 && (-0.5 <= this.g && this.g < 255.5) && (-0.5 <= this.b && this.b < 255.5) && (0 <= this.opacity && this.opacity <= 1);
+    },
+    hex: rgb_formatHex,
+    // Deprecated! Use color.formatHex.
+    formatHex: rgb_formatHex,
+    formatHex8: rgb_formatHex8,
+    formatRgb: rgb_formatRgb,
+    toString: rgb_formatRgb
+  }));
+  function rgb_formatHex() {
+    return `#${hex(this.r)}${hex(this.g)}${hex(this.b)}`;
+  }
+  function rgb_formatHex8() {
+    return `#${hex(this.r)}${hex(this.g)}${hex(this.b)}${hex((isNaN(this.opacity) ? 1 : this.opacity) * 255)}`;
+  }
+  function rgb_formatRgb() {
+    const a2 = clampa(this.opacity);
+    return `${a2 === 1 ? "rgb(" : "rgba("}${clampi(this.r)}, ${clampi(this.g)}, ${clampi(this.b)}${a2 === 1 ? ")" : `, ${a2})`}`;
+  }
+  function clampa(opacity3) {
+    return isNaN(opacity3) ? 1 : Math.max(0, Math.min(1, opacity3));
+  }
+  function clampi(value16) {
+    return Math.max(0, Math.min(255, Math.round(value16) || 0));
+  }
+  function hex(value16) {
+    value16 = clampi(value16);
+    return (value16 < 16 ? "0" : "") + value16.toString(16);
+  }
+  function hsla(h, s, l, a2) {
+    if (a2 <= 0) h = s = l = NaN;
+    else if (l <= 0 || l >= 1) h = s = NaN;
+    else if (s <= 0) h = NaN;
+    return new Hsl(h, s, l, a2);
+  }
+  function hslConvert(o) {
+    if (o instanceof Hsl) return new Hsl(o.h, o.s, o.l, o.opacity);
+    if (!(o instanceof Color)) o = color(o);
+    if (!o) return new Hsl();
+    if (o instanceof Hsl) return o;
+    o = o.rgb();
+    var r = o.r / 255, g = o.g / 255, b2 = o.b / 255, min9 = Math.min(r, g, b2), max9 = Math.max(r, g, b2), h = NaN, s = max9 - min9, l = (max9 + min9) / 2;
+    if (s) {
+      if (r === max9) h = (g - b2) / s + (g < b2) * 6;
+      else if (g === max9) h = (b2 - r) / s + 2;
+      else h = (r - g) / s + 4;
+      s /= l < 0.5 ? max9 + min9 : 2 - max9 - min9;
+      h *= 60;
+    } else {
+      s = l > 0 && l < 1 ? 0 : h;
+    }
+    return new Hsl(h, s, l, o.opacity);
+  }
+  function hsl(h, s, l, opacity3) {
+    return arguments.length === 1 ? hslConvert(h) : new Hsl(h, s, l, opacity3 == null ? 1 : opacity3);
+  }
+  function Hsl(h, s, l, opacity3) {
+    this.h = +h;
+    this.s = +s;
+    this.l = +l;
+    this.opacity = +opacity3;
+  }
+  define_default(Hsl, hsl, extend2(Color, {
+    brighter(k) {
+      k = k == null ? brighter : Math.pow(brighter, k);
+      return new Hsl(this.h, this.s, this.l * k, this.opacity);
+    },
+    darker(k) {
+      k = k == null ? darker : Math.pow(darker, k);
+      return new Hsl(this.h, this.s, this.l * k, this.opacity);
+    },
+    rgb() {
+      var h = this.h % 360 + (this.h < 0) * 360, s = isNaN(h) || isNaN(this.s) ? 0 : this.s, l = this.l, m2 = l + (l < 0.5 ? l : 1 - l) * s, m1 = 2 * l - m2;
+      return new Rgb(
+        hsl2rgb(h >= 240 ? h - 240 : h + 120, m1, m2),
+        hsl2rgb(h, m1, m2),
+        hsl2rgb(h < 120 ? h + 240 : h - 120, m1, m2),
+        this.opacity
+      );
+    },
+    clamp() {
+      return new Hsl(clamph(this.h), clampt(this.s), clampt(this.l), clampa(this.opacity));
+    },
+    displayable() {
+      return (0 <= this.s && this.s <= 1 || isNaN(this.s)) && (0 <= this.l && this.l <= 1) && (0 <= this.opacity && this.opacity <= 1);
+    },
+    formatHsl() {
+      const a2 = clampa(this.opacity);
+      return `${a2 === 1 ? "hsl(" : "hsla("}${clamph(this.h)}, ${clampt(this.s) * 100}%, ${clampt(this.l) * 100}%${a2 === 1 ? ")" : `, ${a2})`}`;
+    }
+  }));
+  function clamph(value16) {
+    value16 = (value16 || 0) % 360;
+    return value16 < 0 ? value16 + 360 : value16;
+  }
+  function clampt(value16) {
+    return Math.max(0, Math.min(1, value16 || 0));
+  }
+  function hsl2rgb(h, m1, m2) {
+    return (h < 60 ? m1 + (m2 - m1) * h / 60 : h < 180 ? m2 : h < 240 ? m1 + (m2 - m1) * (240 - h) / 60 : m1) * 255;
+  }
+
+  // node_modules/d3-interpolate/src/basis.js
+  function basis(t1, v0, v1, v2, v3) {
+    var t2 = t1 * t1, t3 = t2 * t1;
+    return ((1 - 3 * t1 + 3 * t2 - t3) * v0 + (4 - 6 * t2 + 3 * t3) * v1 + (1 + 3 * t1 + 3 * t2 - 3 * t3) * v2 + t3 * v3) / 6;
+  }
+  function basis_default(values2) {
+    var n = values2.length - 1;
+    return function(t) {
+      var i2 = t <= 0 ? t = 0 : t >= 1 ? (t = 1, n - 1) : Math.floor(t * n), v1 = values2[i2], v2 = values2[i2 + 1], v0 = i2 > 0 ? values2[i2 - 1] : 2 * v1 - v2, v3 = i2 < n - 1 ? values2[i2 + 2] : 2 * v2 - v1;
+      return basis((t - i2 / n) * n, v0, v1, v2, v3);
+    };
+  }
+
+  // node_modules/d3-interpolate/src/basisClosed.js
+  function basisClosed_default(values2) {
+    var n = values2.length;
+    return function(t) {
+      var i2 = Math.floor(((t %= 1) < 0 ? ++t : t) * n), v0 = values2[(i2 + n - 1) % n], v1 = values2[i2 % n], v2 = values2[(i2 + 1) % n], v3 = values2[(i2 + 2) % n];
+      return basis((t - i2 / n) * n, v0, v1, v2, v3);
+    };
+  }
+
+  // node_modules/d3-interpolate/src/constant.js
+  var constant_default2 = (x19) => () => x19;
+
+  // node_modules/d3-interpolate/src/color.js
+  function linear(a2, d7) {
+    return function(t) {
+      return a2 + t * d7;
+    };
+  }
+  function exponential(a2, b2, y17) {
+    return a2 = Math.pow(a2, y17), b2 = Math.pow(b2, y17) - a2, y17 = 1 / y17, function(t) {
+      return Math.pow(a2 + t * b2, y17);
+    };
+  }
+  function gamma(y17) {
+    return (y17 = +y17) === 1 ? nogamma : function(a2, b2) {
+      return b2 - a2 ? exponential(a2, b2, y17) : constant_default2(isNaN(a2) ? b2 : a2);
+    };
+  }
+  function nogamma(a2, b2) {
+    var d7 = b2 - a2;
+    return d7 ? linear(a2, d7) : constant_default2(isNaN(a2) ? b2 : a2);
+  }
+
+  // node_modules/d3-interpolate/src/rgb.js
+  var rgb_default = (function rgbGamma(y17) {
+    var color2 = gamma(y17);
+    function rgb2(start5, end2) {
+      var r = color2((start5 = rgb(start5)).r, (end2 = rgb(end2)).r), g = color2(start5.g, end2.g), b2 = color2(start5.b, end2.b), opacity3 = nogamma(start5.opacity, end2.opacity);
+      return function(t) {
+        start5.r = r(t);
+        start5.g = g(t);
+        start5.b = b2(t);
+        start5.opacity = opacity3(t);
+        return start5 + "";
+      };
+    }
+    rgb2.gamma = rgbGamma;
+    return rgb2;
+  })(1);
+  function rgbSpline(spline) {
+    return function(colors2) {
+      var n = colors2.length, r = new Array(n), g = new Array(n), b2 = new Array(n), i2, color2;
+      for (i2 = 0; i2 < n; ++i2) {
+        color2 = rgb(colors2[i2]);
+        r[i2] = color2.r || 0;
+        g[i2] = color2.g || 0;
+        b2[i2] = color2.b || 0;
+      }
+      r = spline(r);
+      g = spline(g);
+      b2 = spline(b2);
+      color2.opacity = 1;
+      return function(t) {
+        color2.r = r(t);
+        color2.g = g(t);
+        color2.b = b2(t);
+        return color2 + "";
+      };
+    };
+  }
+  var rgbBasis = rgbSpline(basis_default);
+  var rgbBasisClosed = rgbSpline(basisClosed_default);
+
+  // node_modules/d3-interpolate/src/numberArray.js
+  function numberArray_default(a2, b2) {
+    if (!b2) b2 = [];
+    var n = a2 ? Math.min(b2.length, a2.length) : 0, c = b2.slice(), i2;
+    return function(t) {
+      for (i2 = 0; i2 < n; ++i2) c[i2] = a2[i2] * (1 - t) + b2[i2] * t;
+      return c;
+    };
+  }
+  function isNumberArray(x19) {
+    return ArrayBuffer.isView(x19) && !(x19 instanceof DataView);
+  }
+
+  // node_modules/d3-interpolate/src/array.js
+  function genericArray(a2, b2) {
+    var nb = b2 ? b2.length : 0, na = a2 ? Math.min(nb, a2.length) : 0, x19 = new Array(na), c = new Array(nb), i2;
+    for (i2 = 0; i2 < na; ++i2) x19[i2] = value_default(a2[i2], b2[i2]);
+    for (; i2 < nb; ++i2) c[i2] = b2[i2];
+    return function(t) {
+      for (i2 = 0; i2 < na; ++i2) c[i2] = x19[i2](t);
+      return c;
+    };
+  }
+
+  // node_modules/d3-interpolate/src/date.js
+  function date_default(a2, b2) {
+    var d7 = /* @__PURE__ */ new Date();
+    return a2 = +a2, b2 = +b2, function(t) {
+      return d7.setTime(a2 * (1 - t) + b2 * t), d7;
+    };
+  }
+
+  // node_modules/d3-interpolate/src/number.js
+  function number_default(a2, b2) {
+    return a2 = +a2, b2 = +b2, function(t) {
+      return a2 * (1 - t) + b2 * t;
+    };
+  }
+
+  // node_modules/d3-interpolate/src/object.js
+  function object_default(a2, b2) {
+    var i2 = {}, c = {}, k;
+    if (a2 === null || typeof a2 !== "object") a2 = {};
+    if (b2 === null || typeof b2 !== "object") b2 = {};
+    for (k in b2) {
+      if (k in a2) {
+        i2[k] = value_default(a2[k], b2[k]);
+      } else {
+        c[k] = b2[k];
+      }
+    }
+    return function(t) {
+      for (k in i2) c[k] = i2[k](t);
+      return c;
+    };
+  }
+
+  // node_modules/d3-interpolate/src/string.js
+  var reA = /[-+]?(?:\d+\.?\d*|\.?\d+)(?:[eE][-+]?\d+)?/g;
+  var reB = new RegExp(reA.source, "g");
+  function zero3(b2) {
+    return function() {
+      return b2;
+    };
+  }
+  function one2(b2) {
+    return function(t) {
+      return b2(t) + "";
+    };
+  }
+  function string_default(a2, b2) {
+    var bi = reA.lastIndex = reB.lastIndex = 0, am, bm, bs, i2 = -1, s = [], q2 = [];
+    a2 = a2 + "", b2 = b2 + "";
+    while ((am = reA.exec(a2)) && (bm = reB.exec(b2))) {
+      if ((bs = bm.index) > bi) {
+        bs = b2.slice(bi, bs);
+        if (s[i2]) s[i2] += bs;
+        else s[++i2] = bs;
+      }
+      if ((am = am[0]) === (bm = bm[0])) {
+        if (s[i2]) s[i2] += bm;
+        else s[++i2] = bm;
+      } else {
+        s[++i2] = null;
+        q2.push({ i: i2, x: number_default(am, bm) });
+      }
+      bi = reB.lastIndex;
+    }
+    if (bi < b2.length) {
+      bs = b2.slice(bi);
+      if (s[i2]) s[i2] += bs;
+      else s[++i2] = bs;
+    }
+    return s.length < 2 ? q2[0] ? one2(q2[0].x) : zero3(b2) : (b2 = q2.length, function(t) {
+      for (var i3 = 0, o; i3 < b2; ++i3) s[(o = q2[i3]).i] = o.x(t);
+      return s.join("");
+    });
+  }
+
+  // node_modules/d3-interpolate/src/value.js
+  function value_default(a2, b2) {
+    var t = typeof b2, c;
+    return b2 == null || t === "boolean" ? constant_default2(b2) : (t === "number" ? number_default : t === "string" ? (c = color(b2)) ? (b2 = c, rgb_default) : string_default : b2 instanceof color ? rgb_default : b2 instanceof Date ? date_default : isNumberArray(b2) ? numberArray_default : Array.isArray(b2) ? genericArray : typeof b2.valueOf !== "function" && typeof b2.toString !== "function" || isNaN(b2) ? object_default : number_default)(a2, b2);
+  }
+
+  // node_modules/d3-interpolate/src/round.js
+  function round_default(a2, b2) {
+    return a2 = +a2, b2 = +b2, function(t) {
+      return Math.round(a2 * (1 - t) + b2 * t);
+    };
+  }
+
+  // node_modules/d3-interpolate/src/transform/decompose.js
+  var degrees = 180 / Math.PI;
+  var identity12 = {
+    translateX: 0,
+    translateY: 0,
+    rotate: 0,
+    skewX: 0,
+    scaleX: 1,
+    scaleY: 1
+  };
+  function decompose_default(a2, b2, c, d7, e, f) {
+    var scaleX, scaleY, skewX;
+    if (scaleX = Math.sqrt(a2 * a2 + b2 * b2)) a2 /= scaleX, b2 /= scaleX;
+    if (skewX = a2 * c + b2 * d7) c -= a2 * skewX, d7 -= b2 * skewX;
+    if (scaleY = Math.sqrt(c * c + d7 * d7)) c /= scaleY, d7 /= scaleY, skewX /= scaleY;
+    if (a2 * d7 < b2 * c) a2 = -a2, b2 = -b2, skewX = -skewX, scaleX = -scaleX;
+    return {
+      translateX: e,
+      translateY: f,
+      rotate: Math.atan2(b2, a2) * degrees,
+      skewX: Math.atan(skewX) * degrees,
+      scaleX,
+      scaleY
+    };
+  }
+
+  // node_modules/d3-interpolate/src/transform/parse.js
+  var svgNode;
+  function parseCss(value16) {
+    const m = new (typeof DOMMatrix === "function" ? DOMMatrix : WebKitCSSMatrix)(value16 + "");
+    return m.isIdentity ? identity12 : decompose_default(m.a, m.b, m.c, m.d, m.e, m.f);
+  }
+  function parseSvg(value16) {
+    if (value16 == null) return identity12;
+    if (!svgNode) svgNode = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    svgNode.setAttribute("transform", value16);
+    if (!(value16 = svgNode.transform.baseVal.consolidate())) return identity12;
+    value16 = value16.matrix;
+    return decompose_default(value16.a, value16.b, value16.c, value16.d, value16.e, value16.f);
+  }
+
+  // node_modules/d3-interpolate/src/transform/index.js
+  function interpolateTransform(parse8, pxComma, pxParen, degParen) {
+    function pop4(s) {
+      return s.length ? s.pop() + " " : "";
+    }
+    function translate(xa, ya, xb, yb, s, q2) {
+      if (xa !== xb || ya !== yb) {
+        var i2 = s.push("translate(", null, pxComma, null, pxParen);
+        q2.push({ i: i2 - 4, x: number_default(xa, xb) }, { i: i2 - 2, x: number_default(ya, yb) });
+      } else if (xb || yb) {
+        s.push("translate(" + xb + pxComma + yb + pxParen);
+      }
+    }
+    function rotate(a2, b2, s, q2) {
+      if (a2 !== b2) {
+        if (a2 - b2 > 180) b2 += 360;
+        else if (b2 - a2 > 180) a2 += 360;
+        q2.push({ i: s.push(pop4(s) + "rotate(", null, degParen) - 2, x: number_default(a2, b2) });
+      } else if (b2) {
+        s.push(pop4(s) + "rotate(" + b2 + degParen);
+      }
+    }
+    function skewX(a2, b2, s, q2) {
+      if (a2 !== b2) {
+        q2.push({ i: s.push(pop4(s) + "skewX(", null, degParen) - 2, x: number_default(a2, b2) });
+      } else if (b2) {
+        s.push(pop4(s) + "skewX(" + b2 + degParen);
+      }
+    }
+    function scale(xa, ya, xb, yb, s, q2) {
+      if (xa !== xb || ya !== yb) {
+        var i2 = s.push(pop4(s) + "scale(", null, ",", null, ")");
+        q2.push({ i: i2 - 4, x: number_default(xa, xb) }, { i: i2 - 2, x: number_default(ya, yb) });
+      } else if (xb !== 1 || yb !== 1) {
+        s.push(pop4(s) + "scale(" + xb + "," + yb + ")");
+      }
+    }
+    return function(a2, b2) {
+      var s = [], q2 = [];
+      a2 = parse8(a2), b2 = parse8(b2);
+      translate(a2.translateX, a2.translateY, b2.translateX, b2.translateY, s, q2);
+      rotate(a2.rotate, b2.rotate, s, q2);
+      skewX(a2.skewX, b2.skewX, s, q2);
+      scale(a2.scaleX, a2.scaleY, b2.scaleX, b2.scaleY, s, q2);
+      a2 = b2 = null;
+      return function(t) {
+        var i2 = -1, n = q2.length, o;
+        while (++i2 < n) s[(o = q2[i2]).i] = o.x(t);
+        return s.join("");
+      };
+    };
+  }
+  var interpolateTransformCss = interpolateTransform(parseCss, "px, ", "px)", "deg)");
+  var interpolateTransformSvg = interpolateTransform(parseSvg, ", ", ")", ")");
+
+  // node_modules/d3-timer/src/timer.js
+  var frame = 0;
+  var timeout = 0;
+  var interval = 0;
+  var pokeDelay = 1e3;
+  var taskHead;
+  var taskTail;
+  var clockLast = 0;
+  var clockNow = 0;
+  var clockSkew = 0;
+  var clock = typeof performance === "object" && performance.now ? performance : Date;
+  var setFrame = typeof window === "object" && window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function(f) {
+    setTimeout(f, 17);
+  };
+  function now2() {
+    return clockNow || (setFrame(clearNow), clockNow = clock.now() + clockSkew);
+  }
+  function clearNow() {
+    clockNow = 0;
+  }
+  function Timer() {
+    this._call = this._time = this._next = null;
+  }
+  Timer.prototype = timer.prototype = {
+    constructor: Timer,
+    restart: function(callback, delay2, time3) {
+      if (typeof callback !== "function") throw new TypeError("callback is not a function");
+      time3 = (time3 == null ? now2() : +time3) + (delay2 == null ? 0 : +delay2);
+      if (!this._next && taskTail !== this) {
+        if (taskTail) taskTail._next = this;
+        else taskHead = this;
+        taskTail = this;
+      }
+      this._call = callback;
+      this._time = time3;
+      sleep();
+    },
+    stop: function() {
+      if (this._call) {
+        this._call = null;
+        this._time = Infinity;
+        sleep();
+      }
+    }
+  };
+  function timer(callback, delay2, time3) {
+    var t = new Timer();
+    t.restart(callback, delay2, time3);
+    return t;
+  }
+  function timerFlush() {
+    now2();
+    ++frame;
+    var t = taskHead, e;
+    while (t) {
+      if ((e = clockNow - t._time) >= 0) t._call.call(void 0, e);
+      t = t._next;
+    }
+    --frame;
+  }
+  function wake() {
+    clockNow = (clockLast = clock.now()) + clockSkew;
+    frame = timeout = 0;
+    try {
+      timerFlush();
+    } finally {
+      frame = 0;
+      nap();
+      clockNow = 0;
+    }
+  }
+  function poke3() {
+    var now3 = clock.now(), delay2 = now3 - clockLast;
+    if (delay2 > pokeDelay) clockSkew -= delay2, clockLast = now3;
+  }
+  function nap() {
+    var t0, t1 = taskHead, t2, time3 = Infinity;
+    while (t1) {
+      if (t1._call) {
+        if (time3 > t1._time) time3 = t1._time;
+        t0 = t1, t1 = t1._next;
+      } else {
+        t2 = t1._next, t1._next = null;
+        t1 = t0 ? t0._next = t2 : taskHead = t2;
+      }
+    }
+    taskTail = t0;
+    sleep(time3);
+  }
+  function sleep(time3) {
+    if (frame) return;
+    if (timeout) timeout = clearTimeout(timeout);
+    var delay2 = time3 - clockNow;
+    if (delay2 > 24) {
+      if (time3 < Infinity) timeout = setTimeout(wake, time3 - clock.now() - clockSkew);
+      if (interval) interval = clearInterval(interval);
+    } else {
+      if (!interval) clockLast = clock.now(), interval = setInterval(poke3, pokeDelay);
+      frame = 1, setFrame(wake);
+    }
+  }
+
+  // node_modules/d3-timer/src/timeout.js
+  function timeout_default(callback, delay2, time3) {
+    var t = new Timer();
+    delay2 = delay2 == null ? 0 : +delay2;
+    t.restart((elapsed) => {
+      t.stop();
+      callback(elapsed + delay2);
+    }, delay2, time3);
+    return t;
+  }
+
+  // node_modules/d3-transition/src/transition/schedule.js
+  var emptyOn = dispatch_default("start", "end", "cancel", "interrupt");
+  var emptyTween = [];
+  var CREATED = 0;
+  var SCHEDULED = 1;
+  var STARTING = 2;
+  var STARTED = 3;
+  var RUNNING = 4;
+  var ENDING = 5;
+  var ENDED = 6;
+  function schedule_default(node, name16, id5, index5, group3, timing) {
+    var schedules = node.__transition;
+    if (!schedules) node.__transition = {};
+    else if (id5 in schedules) return;
+    create4(node, id5, {
+      name: name16,
+      index: index5,
+      // For context during callback.
+      group: group3,
+      // For context during callback.
+      on: emptyOn,
+      tween: emptyTween,
+      time: timing.time,
+      delay: timing.delay,
+      duration: timing.duration,
+      ease: timing.ease,
+      timer: null,
+      state: CREATED
+    });
+  }
+  function init2(node, id5) {
+    var schedule = get3(node, id5);
+    if (schedule.state > CREATED) throw new Error("too late; already scheduled");
+    return schedule;
+  }
+  function set2(node, id5) {
+    var schedule = get3(node, id5);
+    if (schedule.state > STARTED) throw new Error("too late; already running");
+    return schedule;
+  }
+  function get3(node, id5) {
+    var schedule = node.__transition;
+    if (!schedule || !(schedule = schedule[id5])) throw new Error("transition not found");
+    return schedule;
+  }
+  function create4(node, id5, self) {
+    var schedules = node.__transition, tween;
+    schedules[id5] = self;
+    self.timer = timer(schedule, 0, self.time);
+    function schedule(elapsed) {
+      self.state = SCHEDULED;
+      self.timer.restart(start5, self.delay, self.time);
+      if (self.delay <= elapsed) start5(elapsed - self.delay);
+    }
+    function start5(elapsed) {
+      var i2, j, n, o;
+      if (self.state !== SCHEDULED) return stop3();
+      for (i2 in schedules) {
+        o = schedules[i2];
+        if (o.name !== self.name) continue;
+        if (o.state === STARTED) return timeout_default(start5);
+        if (o.state === RUNNING) {
+          o.state = ENDED;
+          o.timer.stop();
+          o.on.call("interrupt", node, node.__data__, o.index, o.group);
+          delete schedules[i2];
+        } else if (+i2 < id5) {
+          o.state = ENDED;
+          o.timer.stop();
+          o.on.call("cancel", node, node.__data__, o.index, o.group);
+          delete schedules[i2];
+        }
+      }
+      timeout_default(function() {
+        if (self.state === STARTED) {
+          self.state = RUNNING;
+          self.timer.restart(tick, self.delay, self.time);
+          tick(elapsed);
+        }
+      });
+      self.state = STARTING;
+      self.on.call("start", node, node.__data__, self.index, self.group);
+      if (self.state !== STARTING) return;
+      self.state = STARTED;
+      tween = new Array(n = self.tween.length);
+      for (i2 = 0, j = -1; i2 < n; ++i2) {
+        if (o = self.tween[i2].value.call(node, node.__data__, self.index, self.group)) {
+          tween[++j] = o;
+        }
+      }
+      tween.length = j + 1;
+    }
+    function tick(elapsed) {
+      var t = elapsed < self.duration ? self.ease.call(null, elapsed / self.duration) : (self.timer.restart(stop3), self.state = ENDING, 1), i2 = -1, n = tween.length;
+      while (++i2 < n) {
+        tween[i2].call(node, t);
+      }
+      if (self.state === ENDING) {
+        self.on.call("end", node, node.__data__, self.index, self.group);
+        stop3();
+      }
+    }
+    function stop3() {
+      self.state = ENDED;
+      self.timer.stop();
+      delete schedules[id5];
+      for (var i2 in schedules) return;
+      delete node.__transition;
+    }
+  }
+
+  // node_modules/d3-transition/src/interrupt.js
+  function interrupt_default(node, name16) {
+    var schedules = node.__transition, schedule, active, empty9 = true, i2;
+    if (!schedules) return;
+    name16 = name16 == null ? null : name16 + "";
+    for (i2 in schedules) {
+      if ((schedule = schedules[i2]).name !== name16) {
+        empty9 = false;
+        continue;
+      }
+      active = schedule.state > STARTING && schedule.state < ENDING;
+      schedule.state = ENDED;
+      schedule.timer.stop();
+      schedule.on.call(active ? "interrupt" : "cancel", node, node.__data__, schedule.index, schedule.group);
+      delete schedules[i2];
+    }
+    if (empty9) delete node.__transition;
+  }
+
+  // node_modules/d3-transition/src/selection/interrupt.js
+  function interrupt_default2(name16) {
+    return this.each(function() {
+      interrupt_default(this, name16);
+    });
+  }
+
+  // node_modules/d3-transition/src/transition/tween.js
+  function tweenRemove(id5, name16) {
+    var tween0, tween1;
+    return function() {
+      var schedule = set2(this, id5), tween = schedule.tween;
+      if (tween !== tween0) {
+        tween1 = tween0 = tween;
+        for (var i2 = 0, n = tween1.length; i2 < n; ++i2) {
+          if (tween1[i2].name === name16) {
+            tween1 = tween1.slice();
+            tween1.splice(i2, 1);
+            break;
+          }
+        }
+      }
+      schedule.tween = tween1;
+    };
+  }
+  function tweenFunction(id5, name16, value16) {
+    var tween0, tween1;
+    if (typeof value16 !== "function") throw new Error();
+    return function() {
+      var schedule = set2(this, id5), tween = schedule.tween;
+      if (tween !== tween0) {
+        tween1 = (tween0 = tween).slice();
+        for (var t = { name: name16, value: value16 }, i2 = 0, n = tween1.length; i2 < n; ++i2) {
+          if (tween1[i2].name === name16) {
+            tween1[i2] = t;
+            break;
+          }
+        }
+        if (i2 === n) tween1.push(t);
+      }
+      schedule.tween = tween1;
+    };
+  }
+  function tween_default(name16, value16) {
+    var id5 = this._id;
+    name16 += "";
+    if (arguments.length < 2) {
+      var tween = get3(this.node(), id5).tween;
+      for (var i2 = 0, n = tween.length, t; i2 < n; ++i2) {
+        if ((t = tween[i2]).name === name16) {
+          return t.value;
+        }
+      }
+      return null;
+    }
+    return this.each((value16 == null ? tweenRemove : tweenFunction)(id5, name16, value16));
+  }
+  function tweenValue(transition2, name16, value16) {
+    var id5 = transition2._id;
+    transition2.each(function() {
+      var schedule = set2(this, id5);
+      (schedule.value || (schedule.value = {}))[name16] = value16.apply(this, arguments);
+    });
+    return function(node) {
+      return get3(node, id5).value[name16];
+    };
+  }
+
+  // node_modules/d3-transition/src/transition/interpolate.js
+  function interpolate_default(a2, b2) {
+    var c;
+    return (typeof b2 === "number" ? number_default : b2 instanceof color ? rgb_default : (c = color(b2)) ? (b2 = c, rgb_default) : string_default)(a2, b2);
+  }
+
+  // node_modules/d3-transition/src/transition/attr.js
+  function attrRemove2(name16) {
+    return function() {
+      this.removeAttribute(name16);
+    };
+  }
+  function attrRemoveNS2(fullname) {
+    return function() {
+      this.removeAttributeNS(fullname.space, fullname.local);
+    };
+  }
+  function attrConstant2(name16, interpolate, value1) {
+    var string00, string1 = value1 + "", interpolate0;
+    return function() {
+      var string0 = this.getAttribute(name16);
+      return string0 === string1 ? null : string0 === string00 ? interpolate0 : interpolate0 = interpolate(string00 = string0, value1);
+    };
+  }
+  function attrConstantNS2(fullname, interpolate, value1) {
+    var string00, string1 = value1 + "", interpolate0;
+    return function() {
+      var string0 = this.getAttributeNS(fullname.space, fullname.local);
+      return string0 === string1 ? null : string0 === string00 ? interpolate0 : interpolate0 = interpolate(string00 = string0, value1);
+    };
+  }
+  function attrFunction2(name16, interpolate, value16) {
+    var string00, string10, interpolate0;
+    return function() {
+      var string0, value1 = value16(this), string1;
+      if (value1 == null) return void this.removeAttribute(name16);
+      string0 = this.getAttribute(name16);
+      string1 = value1 + "";
+      return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
+    };
+  }
+  function attrFunctionNS2(fullname, interpolate, value16) {
+    var string00, string10, interpolate0;
+    return function() {
+      var string0, value1 = value16(this), string1;
+      if (value1 == null) return void this.removeAttributeNS(fullname.space, fullname.local);
+      string0 = this.getAttributeNS(fullname.space, fullname.local);
+      string1 = value1 + "";
+      return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
+    };
+  }
+  function attr_default2(name16, value16) {
+    var fullname = namespace_default(name16), i2 = fullname === "transform" ? interpolateTransformSvg : interpolate_default;
+    return this.attrTween(name16, typeof value16 === "function" ? (fullname.local ? attrFunctionNS2 : attrFunction2)(fullname, i2, tweenValue(this, "attr." + name16, value16)) : value16 == null ? (fullname.local ? attrRemoveNS2 : attrRemove2)(fullname) : (fullname.local ? attrConstantNS2 : attrConstant2)(fullname, i2, value16));
+  }
+
+  // node_modules/d3-transition/src/transition/attrTween.js
+  function attrInterpolate(name16, i2) {
+    return function(t) {
+      this.setAttribute(name16, i2.call(this, t));
+    };
+  }
+  function attrInterpolateNS(fullname, i2) {
+    return function(t) {
+      this.setAttributeNS(fullname.space, fullname.local, i2.call(this, t));
+    };
+  }
+  function attrTweenNS(fullname, value16) {
+    var t0, i0;
+    function tween() {
+      var i2 = value16.apply(this, arguments);
+      if (i2 !== i0) t0 = (i0 = i2) && attrInterpolateNS(fullname, i2);
+      return t0;
+    }
+    tween._value = value16;
+    return tween;
+  }
+  function attrTween(name16, value16) {
+    var t0, i0;
+    function tween() {
+      var i2 = value16.apply(this, arguments);
+      if (i2 !== i0) t0 = (i0 = i2) && attrInterpolate(name16, i2);
+      return t0;
+    }
+    tween._value = value16;
+    return tween;
+  }
+  function attrTween_default(name16, value16) {
+    var key = "attr." + name16;
+    if (arguments.length < 2) return (key = this.tween(key)) && key._value;
+    if (value16 == null) return this.tween(key, null);
+    if (typeof value16 !== "function") throw new Error();
+    var fullname = namespace_default(name16);
+    return this.tween(key, (fullname.local ? attrTweenNS : attrTween)(fullname, value16));
+  }
+
+  // node_modules/d3-transition/src/transition/delay.js
+  function delayFunction(id5, value16) {
+    return function() {
+      init2(this, id5).delay = +value16.apply(this, arguments);
+    };
+  }
+  function delayConstant(id5, value16) {
+    return value16 = +value16, function() {
+      init2(this, id5).delay = value16;
+    };
+  }
+  function delay_default(value16) {
+    var id5 = this._id;
+    return arguments.length ? this.each((typeof value16 === "function" ? delayFunction : delayConstant)(id5, value16)) : get3(this.node(), id5).delay;
+  }
+
+  // node_modules/d3-transition/src/transition/duration.js
+  function durationFunction(id5, value16) {
+    return function() {
+      set2(this, id5).duration = +value16.apply(this, arguments);
+    };
+  }
+  function durationConstant(id5, value16) {
+    return value16 = +value16, function() {
+      set2(this, id5).duration = value16;
+    };
+  }
+  function duration_default(value16) {
+    var id5 = this._id;
+    return arguments.length ? this.each((typeof value16 === "function" ? durationFunction : durationConstant)(id5, value16)) : get3(this.node(), id5).duration;
+  }
+
+  // node_modules/d3-transition/src/transition/ease.js
+  function easeConstant(id5, value16) {
+    if (typeof value16 !== "function") throw new Error();
+    return function() {
+      set2(this, id5).ease = value16;
+    };
+  }
+  function ease_default(value16) {
+    var id5 = this._id;
+    return arguments.length ? this.each(easeConstant(id5, value16)) : get3(this.node(), id5).ease;
+  }
+
+  // node_modules/d3-transition/src/transition/easeVarying.js
+  function easeVarying(id5, value16) {
+    return function() {
+      var v = value16.apply(this, arguments);
+      if (typeof v !== "function") throw new Error();
+      set2(this, id5).ease = v;
+    };
+  }
+  function easeVarying_default(value16) {
+    if (typeof value16 !== "function") throw new Error();
+    return this.each(easeVarying(this._id, value16));
+  }
+
+  // node_modules/d3-transition/src/transition/filter.js
+  function filter_default2(match2) {
+    if (typeof match2 !== "function") match2 = matcher_default(match2);
+    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
+      for (var group3 = groups[j], n = group3.length, subgroup = subgroups[j] = [], node, i2 = 0; i2 < n; ++i2) {
+        if ((node = group3[i2]) && match2.call(node, node.__data__, i2, group3)) {
+          subgroup.push(node);
+        }
+      }
+    }
+    return new Transition(subgroups, this._parents, this._name, this._id);
+  }
+
+  // node_modules/d3-transition/src/transition/merge.js
+  function merge_default2(transition2) {
+    if (transition2._id !== this._id) throw new Error();
+    for (var groups0 = this._groups, groups1 = transition2._groups, m0 = groups0.length, m1 = groups1.length, m = Math.min(m0, m1), merges = new Array(m0), j = 0; j < m; ++j) {
+      for (var group0 = groups0[j], group1 = groups1[j], n = group0.length, merge = merges[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
+        if (node = group0[i2] || group1[i2]) {
+          merge[i2] = node;
+        }
+      }
+    }
+    for (; j < m0; ++j) {
+      merges[j] = groups0[j];
+    }
+    return new Transition(merges, this._parents, this._name, this._id);
+  }
+
+  // node_modules/d3-transition/src/transition/on.js
+  function start2(name16) {
+    return (name16 + "").trim().split(/^|\s+/).every(function(t) {
+      var i2 = t.indexOf(".");
+      if (i2 >= 0) t = t.slice(0, i2);
+      return !t || t === "start";
+    });
+  }
+  function onFunction(id5, name16, listener) {
+    var on0, on1, sit = start2(name16) ? init2 : set2;
+    return function() {
+      var schedule = sit(this, id5), on3 = schedule.on;
+      if (on3 !== on0) (on1 = (on0 = on3).copy()).on(name16, listener);
+      schedule.on = on1;
+    };
+  }
+  function on_default2(name16, listener) {
+    var id5 = this._id;
+    return arguments.length < 2 ? get3(this.node(), id5).on.on(name16) : this.each(onFunction(id5, name16, listener));
+  }
+
+  // node_modules/d3-transition/src/transition/remove.js
+  function removeFunction(id5) {
+    return function() {
+      var parent2 = this.parentNode;
+      for (var i2 in this.__transition) if (+i2 !== id5) return;
+      if (parent2) parent2.removeChild(this);
+    };
+  }
+  function remove_default2() {
+    return this.on("end.remove", removeFunction(this._id));
+  }
+
+  // node_modules/d3-transition/src/transition/select.js
+  function select_default2(select5) {
+    var name16 = this._name, id5 = this._id;
+    if (typeof select5 !== "function") select5 = selector_default(select5);
+    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
+      for (var group3 = groups[j], n = group3.length, subgroup = subgroups[j] = new Array(n), node, subnode, i2 = 0; i2 < n; ++i2) {
+        if ((node = group3[i2]) && (subnode = select5.call(node, node.__data__, i2, group3))) {
+          if ("__data__" in node) subnode.__data__ = node.__data__;
+          subgroup[i2] = subnode;
+          schedule_default(subgroup[i2], name16, id5, i2, subgroup, get3(node, id5));
+        }
+      }
+    }
+    return new Transition(subgroups, this._parents, name16, id5);
+  }
+
+  // node_modules/d3-transition/src/transition/selectAll.js
+  function selectAll_default2(select5) {
+    var name16 = this._name, id5 = this._id;
+    if (typeof select5 !== "function") select5 = selectorAll_default(select5);
+    for (var groups = this._groups, m = groups.length, subgroups = [], parents = [], j = 0; j < m; ++j) {
+      for (var group3 = groups[j], n = group3.length, node, i2 = 0; i2 < n; ++i2) {
+        if (node = group3[i2]) {
+          for (var children3 = select5.call(node, node.__data__, i2, group3), child, inherit2 = get3(node, id5), k = 0, l = children3.length; k < l; ++k) {
+            if (child = children3[k]) {
+              schedule_default(child, name16, id5, k, children3, inherit2);
+            }
+          }
+          subgroups.push(children3);
+          parents.push(node);
+        }
+      }
+    }
+    return new Transition(subgroups, parents, name16, id5);
+  }
+
+  // node_modules/d3-transition/src/transition/selection.js
+  var Selection2 = selection_default.prototype.constructor;
+  function selection_default2() {
+    return new Selection2(this._groups, this._parents);
+  }
+
+  // node_modules/d3-transition/src/transition/style.js
+  function styleNull(name16, interpolate) {
+    var string00, string10, interpolate0;
+    return function() {
+      var string0 = styleValue(this, name16), string1 = (this.style.removeProperty(name16), styleValue(this, name16));
+      return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : interpolate0 = interpolate(string00 = string0, string10 = string1);
+    };
+  }
+  function styleRemove2(name16) {
+    return function() {
+      this.style.removeProperty(name16);
+    };
+  }
+  function styleConstant2(name16, interpolate, value1) {
+    var string00, string1 = value1 + "", interpolate0;
+    return function() {
+      var string0 = styleValue(this, name16);
+      return string0 === string1 ? null : string0 === string00 ? interpolate0 : interpolate0 = interpolate(string00 = string0, value1);
+    };
+  }
+  function styleFunction2(name16, interpolate, value16) {
+    var string00, string10, interpolate0;
+    return function() {
+      var string0 = styleValue(this, name16), value1 = value16(this), string1 = value1 + "";
+      if (value1 == null) string1 = value1 = (this.style.removeProperty(name16), styleValue(this, name16));
+      return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
+    };
+  }
+  function styleMaybeRemove(id5, name16) {
+    var on0, on1, listener0, key = "style." + name16, event = "end." + key, remove3;
+    return function() {
+      var schedule = set2(this, id5), on3 = schedule.on, listener = schedule.value[key] == null ? remove3 || (remove3 = styleRemove2(name16)) : void 0;
+      if (on3 !== on0 || listener0 !== listener) (on1 = (on0 = on3).copy()).on(event, listener0 = listener);
+      schedule.on = on1;
+    };
+  }
+  function style_default2(name16, value16, priority) {
+    var i2 = (name16 += "") === "transform" ? interpolateTransformCss : interpolate_default;
+    return value16 == null ? this.styleTween(name16, styleNull(name16, i2)).on("end.style." + name16, styleRemove2(name16)) : typeof value16 === "function" ? this.styleTween(name16, styleFunction2(name16, i2, tweenValue(this, "style." + name16, value16))).each(styleMaybeRemove(this._id, name16)) : this.styleTween(name16, styleConstant2(name16, i2, value16), priority).on("end.style." + name16, null);
+  }
+
+  // node_modules/d3-transition/src/transition/styleTween.js
+  function styleInterpolate(name16, i2, priority) {
+    return function(t) {
+      this.style.setProperty(name16, i2.call(this, t), priority);
+    };
+  }
+  function styleTween(name16, value16, priority) {
+    var t, i0;
+    function tween() {
+      var i2 = value16.apply(this, arguments);
+      if (i2 !== i0) t = (i0 = i2) && styleInterpolate(name16, i2, priority);
+      return t;
+    }
+    tween._value = value16;
+    return tween;
+  }
+  function styleTween_default(name16, value16, priority) {
+    var key = "style." + (name16 += "");
+    if (arguments.length < 2) return (key = this.tween(key)) && key._value;
+    if (value16 == null) return this.tween(key, null);
+    if (typeof value16 !== "function") throw new Error();
+    return this.tween(key, styleTween(name16, value16, priority == null ? "" : priority));
+  }
+
+  // node_modules/d3-transition/src/transition/text.js
+  function textConstant2(value16) {
+    return function() {
+      this.textContent = value16;
+    };
+  }
+  function textFunction2(value16) {
+    return function() {
+      var value1 = value16(this);
+      this.textContent = value1 == null ? "" : value1;
+    };
+  }
+  function text_default2(value16) {
+    return this.tween("text", typeof value16 === "function" ? textFunction2(tweenValue(this, "text", value16)) : textConstant2(value16 == null ? "" : value16 + ""));
+  }
+
+  // node_modules/d3-transition/src/transition/textTween.js
+  function textInterpolate(i2) {
+    return function(t) {
+      this.textContent = i2.call(this, t);
+    };
+  }
+  function textTween(value16) {
+    var t0, i0;
+    function tween() {
+      var i2 = value16.apply(this, arguments);
+      if (i2 !== i0) t0 = (i0 = i2) && textInterpolate(i2);
+      return t0;
+    }
+    tween._value = value16;
+    return tween;
+  }
+  function textTween_default(value16) {
+    var key = "text";
+    if (arguments.length < 1) return (key = this.tween(key)) && key._value;
+    if (value16 == null) return this.tween(key, null);
+    if (typeof value16 !== "function") throw new Error();
+    return this.tween(key, textTween(value16));
+  }
+
+  // node_modules/d3-transition/src/transition/transition.js
+  function transition_default() {
+    var name16 = this._name, id0 = this._id, id1 = newId();
+    for (var groups = this._groups, m = groups.length, j = 0; j < m; ++j) {
+      for (var group3 = groups[j], n = group3.length, node, i2 = 0; i2 < n; ++i2) {
+        if (node = group3[i2]) {
+          var inherit2 = get3(node, id0);
+          schedule_default(node, name16, id1, i2, group3, {
+            time: inherit2.time + inherit2.delay + inherit2.duration,
+            delay: 0,
+            duration: inherit2.duration,
+            ease: inherit2.ease
+          });
+        }
+      }
+    }
+    return new Transition(groups, this._parents, name16, id1);
+  }
+
+  // node_modules/d3-transition/src/transition/end.js
+  function end_default() {
+    var on0, on1, that = this, id5 = that._id, size5 = that.size();
+    return new Promise(function(resolve, reject) {
+      var cancel = { value: reject }, end2 = { value: function() {
+        if (--size5 === 0) resolve();
+      } };
+      that.each(function() {
+        var schedule = set2(this, id5), on3 = schedule.on;
+        if (on3 !== on0) {
+          on1 = (on0 = on3).copy();
+          on1._.cancel.push(cancel);
+          on1._.interrupt.push(cancel);
+          on1._.end.push(end2);
+        }
+        schedule.on = on1;
+      });
+      if (size5 === 0) resolve();
+    });
+  }
+
+  // node_modules/d3-transition/src/transition/index.js
+  var id3 = 0;
+  function Transition(groups, parents, name16, id5) {
+    this._groups = groups;
+    this._parents = parents;
+    this._name = name16;
+    this._id = id5;
+  }
+  function transition(name16) {
+    return selection_default().transition(name16);
+  }
+  function newId() {
+    return ++id3;
+  }
+  var selection_prototype = selection_default.prototype;
+  Transition.prototype = transition.prototype = {
+    constructor: Transition,
+    select: select_default2,
+    selectAll: selectAll_default2,
+    selectChild: selection_prototype.selectChild,
+    selectChildren: selection_prototype.selectChildren,
+    filter: filter_default2,
+    merge: merge_default2,
+    selection: selection_default2,
+    transition: transition_default,
+    call: selection_prototype.call,
+    nodes: selection_prototype.nodes,
+    node: selection_prototype.node,
+    size: selection_prototype.size,
+    empty: selection_prototype.empty,
+    each: selection_prototype.each,
+    on: on_default2,
+    attr: attr_default2,
+    attrTween: attrTween_default,
+    style: style_default2,
+    styleTween: styleTween_default,
+    text: text_default2,
+    textTween: textTween_default,
+    remove: remove_default2,
+    tween: tween_default,
+    delay: delay_default,
+    duration: duration_default,
+    ease: ease_default,
+    easeVarying: easeVarying_default,
+    end: end_default,
+    [Symbol.iterator]: selection_prototype[Symbol.iterator]
+  };
+
+  // node_modules/d3-ease/src/cubic.js
+  function cubicInOut(t) {
+    return ((t *= 2) <= 1 ? t * t * t : (t -= 2) * t * t + 2) / 2;
+  }
+
+  // node_modules/d3-transition/src/selection/transition.js
+  var defaultTiming = {
+    time: null,
+    // Set on use.
+    delay: 0,
+    duration: 250,
+    ease: cubicInOut
+  };
+  function inherit(node, id5) {
+    var timing;
+    while (!(timing = node.__transition) || !(timing = timing[id5])) {
+      if (!(node = node.parentNode)) {
+        throw new Error(`transition ${id5} not found`);
+      }
+    }
+    return timing;
+  }
+  function transition_default2(name16) {
+    var id5, timing;
+    if (name16 instanceof Transition) {
+      id5 = name16._id, name16 = name16._name;
+    } else {
+      id5 = newId(), (timing = defaultTiming).time = now2(), name16 = name16 == null ? null : name16 + "";
+    }
+    for (var groups = this._groups, m = groups.length, j = 0; j < m; ++j) {
+      for (var group3 = groups[j], n = group3.length, node, i2 = 0; i2 < n; ++i2) {
+        if (node = group3[i2]) {
+          schedule_default(node, name16, id5, i2, group3, timing || inherit(node, id5));
+        }
+      }
+    }
+    return new Transition(groups, this._parents, name16, id5);
+  }
+
+  // node_modules/d3-transition/src/selection/index.js
+  selection_default.prototype.interrupt = interrupt_default2;
+  selection_default.prototype.transition = transition_default2;
+
+  // node_modules/d3-brush/src/brush.js
+  var { abs: abs2, max: max7, min: min6 } = Math;
+  function number1(e) {
+    return [+e[0], +e[1]];
+  }
+  function number22(e) {
+    return [number1(e[0]), number1(e[1])];
+  }
+  var X = {
+    name: "x",
+    handles: ["w", "e"].map(type),
+    input: function(x19, e) {
+      return x19 == null ? null : [[+x19[0], e[0][1]], [+x19[1], e[1][1]]];
+    },
+    output: function(xy) {
+      return xy && [xy[0][0], xy[1][0]];
+    }
+  };
+  var Y = {
+    name: "y",
+    handles: ["n", "s"].map(type),
+    input: function(y17, e) {
+      return y17 == null ? null : [[e[0][0], +y17[0]], [e[1][0], +y17[1]]];
+    },
+    output: function(xy) {
+      return xy && [xy[0][1], xy[1][1]];
+    }
+  };
+  var XY = {
+    name: "xy",
+    handles: ["n", "w", "e", "s", "nw", "ne", "sw", "se"].map(type),
+    input: function(xy) {
+      return xy == null ? null : number22(xy);
+    },
+    output: function(xy) {
+      return xy;
+    }
+  };
+  function type(t) {
+    return { type: t };
+  }
+
+  // node_modules/d3-path/src/path.js
+  var pi2 = Math.PI;
+  var tau = 2 * pi2;
+  var epsilon2 = 1e-6;
+  var tauEpsilon = tau - epsilon2;
+  function Path2() {
+    this._x0 = this._y0 = // start of current subpath
+    this._x1 = this._y1 = null;
+    this._ = "";
+  }
+  function path() {
+    return new Path2();
+  }
+  Path2.prototype = path.prototype = {
+    constructor: Path2,
+    moveTo: function(x19, y17) {
+      this._ += "M" + (this._x0 = this._x1 = +x19) + "," + (this._y0 = this._y1 = +y17);
+    },
+    closePath: function() {
+      if (this._x1 !== null) {
+        this._x1 = this._x0, this._y1 = this._y0;
+        this._ += "Z";
+      }
+    },
+    lineTo: function(x19, y17) {
+      this._ += "L" + (this._x1 = +x19) + "," + (this._y1 = +y17);
+    },
+    quadraticCurveTo: function(x19, y17, x20, y18) {
+      this._ += "Q" + +x19 + "," + +y17 + "," + (this._x1 = +x20) + "," + (this._y1 = +y18);
+    },
+    bezierCurveTo: function(x19, y17, x23, y23, x20, y18) {
+      this._ += "C" + +x19 + "," + +y17 + "," + +x23 + "," + +y23 + "," + (this._x1 = +x20) + "," + (this._y1 = +y18);
+    },
+    arcTo: function(x19, y17, x23, y23, r) {
+      x19 = +x19, y17 = +y17, x23 = +x23, y23 = +y23, r = +r;
+      var x0 = this._x1, y0 = this._y1, x21 = x23 - x19, y21 = y23 - y17, x01 = x0 - x19, y01 = y0 - y17, l01_2 = x01 * x01 + y01 * y01;
+      if (r < 0) throw new Error("negative radius: " + r);
+      if (this._x1 === null) {
+        this._ += "M" + (this._x1 = x19) + "," + (this._y1 = y17);
+      } else if (!(l01_2 > epsilon2)) ;
+      else if (!(Math.abs(y01 * x21 - y21 * x01) > epsilon2) || !r) {
+        this._ += "L" + (this._x1 = x19) + "," + (this._y1 = y17);
+      } else {
+        var x20 = x23 - x0, y20 = y23 - y0, l21_2 = x21 * x21 + y21 * y21, l20_2 = x20 * x20 + y20 * y20, l21 = Math.sqrt(l21_2), l01 = Math.sqrt(l01_2), l = r * Math.tan((pi2 - Math.acos((l21_2 + l01_2 - l20_2) / (2 * l21 * l01))) / 2), t01 = l / l01, t21 = l / l21;
+        if (Math.abs(t01 - 1) > epsilon2) {
+          this._ += "L" + (x19 + t01 * x01) + "," + (y17 + t01 * y01);
+        }
+        this._ += "A" + r + "," + r + ",0,0," + +(y01 * x20 > x01 * y20) + "," + (this._x1 = x19 + t21 * x21) + "," + (this._y1 = y17 + t21 * y21);
+      }
+    },
+    arc: function(x19, y17, r, a0, a1, ccw) {
+      x19 = +x19, y17 = +y17, r = +r, ccw = !!ccw;
+      var dx = r * Math.cos(a0), dy4 = r * Math.sin(a0), x0 = x19 + dx, y0 = y17 + dy4, cw = 1 ^ ccw, da = ccw ? a0 - a1 : a1 - a0;
+      if (r < 0) throw new Error("negative radius: " + r);
+      if (this._x1 === null) {
+        this._ += "M" + x0 + "," + y0;
+      } else if (Math.abs(this._x1 - x0) > epsilon2 || Math.abs(this._y1 - y0) > epsilon2) {
+        this._ += "L" + x0 + "," + y0;
+      }
+      if (!r) return;
+      if (da < 0) da = da % tau + tau;
+      if (da > tauEpsilon) {
+        this._ += "A" + r + "," + r + ",0,1," + cw + "," + (x19 - dx) + "," + (y17 - dy4) + "A" + r + "," + r + ",0,1," + cw + "," + (this._x1 = x0) + "," + (this._y1 = y0);
+      } else if (da > epsilon2) {
+        this._ += "A" + r + "," + r + ",0," + +(da >= pi2) + "," + cw + "," + (this._x1 = x19 + r * Math.cos(a1)) + "," + (this._y1 = y17 + r * Math.sin(a1));
+      }
+    },
+    rect: function(x19, y17, w, h) {
+      this._ += "M" + (this._x0 = this._x1 = +x19) + "," + (this._y0 = this._y1 = +y17) + "h" + +w + "v" + +h + "h" + -w + "Z";
+    },
+    toString: function() {
+      return this._;
+    }
+  };
+  var path_default = path;
+
+  // node_modules/d3-format/src/formatDecimal.js
+  function formatDecimal_default(x19) {
+    return Math.abs(x19 = Math.round(x19)) >= 1e21 ? x19.toLocaleString("en").replace(/,/g, "") : x19.toString(10);
+  }
+  function formatDecimalParts(x19, p2) {
+    if ((i2 = (x19 = p2 ? x19.toExponential(p2 - 1) : x19.toExponential()).indexOf("e")) < 0) return null;
+    var i2, coefficient = x19.slice(0, i2);
+    return [
+      coefficient.length > 1 ? coefficient[0] + coefficient.slice(2) : coefficient,
+      +x19.slice(i2 + 1)
+    ];
+  }
+
+  // node_modules/d3-format/src/exponent.js
+  function exponent_default(x19) {
+    return x19 = formatDecimalParts(Math.abs(x19)), x19 ? x19[1] : NaN;
+  }
+
+  // node_modules/d3-format/src/formatGroup.js
+  function formatGroup_default(grouping, thousands) {
+    return function(value16, width19) {
+      var i2 = value16.length, t = [], j = 0, g = grouping[0], length9 = 0;
+      while (i2 > 0 && g > 0) {
+        if (length9 + g + 1 > width19) g = Math.max(1, width19 - length9);
+        t.push(value16.substring(i2 -= g, i2 + g));
+        if ((length9 += g + 1) > width19) break;
+        g = grouping[j = (j + 1) % grouping.length];
+      }
+      return t.reverse().join(thousands);
+    };
+  }
+
+  // node_modules/d3-format/src/formatNumerals.js
+  function formatNumerals_default(numerals) {
+    return function(value16) {
+      return value16.replace(/[0-9]/g, function(i2) {
+        return numerals[+i2];
+      });
+    };
+  }
+
+  // node_modules/d3-format/src/formatSpecifier.js
+  var re = /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
+  function formatSpecifier(specifier) {
+    if (!(match2 = re.exec(specifier))) throw new Error("invalid format: " + specifier);
+    var match2;
+    return new FormatSpecifier({
+      fill: match2[1],
+      align: match2[2],
+      sign: match2[3],
+      symbol: match2[4],
+      zero: match2[5],
+      width: match2[6],
+      comma: match2[7],
+      precision: match2[8] && match2[8].slice(1),
+      trim: match2[9],
+      type: match2[10]
+    });
+  }
+  formatSpecifier.prototype = FormatSpecifier.prototype;
+  function FormatSpecifier(specifier) {
+    this.fill = specifier.fill === void 0 ? " " : specifier.fill + "";
+    this.align = specifier.align === void 0 ? ">" : specifier.align + "";
+    this.sign = specifier.sign === void 0 ? "-" : specifier.sign + "";
+    this.symbol = specifier.symbol === void 0 ? "" : specifier.symbol + "";
+    this.zero = !!specifier.zero;
+    this.width = specifier.width === void 0 ? void 0 : +specifier.width;
+    this.comma = !!specifier.comma;
+    this.precision = specifier.precision === void 0 ? void 0 : +specifier.precision;
+    this.trim = !!specifier.trim;
+    this.type = specifier.type === void 0 ? "" : specifier.type + "";
+  }
+  FormatSpecifier.prototype.toString = function() {
+    return this.fill + this.align + this.sign + this.symbol + (this.zero ? "0" : "") + (this.width === void 0 ? "" : Math.max(1, this.width | 0)) + (this.comma ? "," : "") + (this.precision === void 0 ? "" : "." + Math.max(0, this.precision | 0)) + (this.trim ? "~" : "") + this.type;
+  };
+
+  // node_modules/d3-format/src/formatTrim.js
+  function formatTrim_default(s) {
+    out: for (var n = s.length, i2 = 1, i0 = -1, i1; i2 < n; ++i2) {
+      switch (s[i2]) {
+        case ".":
+          i0 = i1 = i2;
+          break;
+        case "0":
+          if (i0 === 0) i0 = i2;
+          i1 = i2;
+          break;
+        default:
+          if (!+s[i2]) break out;
+          if (i0 > 0) i0 = 0;
+          break;
+      }
+    }
+    return i0 > 0 ? s.slice(0, i0) + s.slice(i1 + 1) : s;
+  }
+
+  // node_modules/d3-format/src/formatPrefixAuto.js
+  var prefixExponent;
+  function formatPrefixAuto_default(x19, p2) {
+    var d7 = formatDecimalParts(x19, p2);
+    if (!d7) return x19 + "";
+    var coefficient = d7[0], exponent = d7[1], i2 = exponent - (prefixExponent = Math.max(-8, Math.min(8, Math.floor(exponent / 3))) * 3) + 1, n = coefficient.length;
+    return i2 === n ? coefficient : i2 > n ? coefficient + new Array(i2 - n + 1).join("0") : i2 > 0 ? coefficient.slice(0, i2) + "." + coefficient.slice(i2) : "0." + new Array(1 - i2).join("0") + formatDecimalParts(x19, Math.max(0, p2 + i2 - 1))[0];
+  }
+
+  // node_modules/d3-format/src/formatRounded.js
+  function formatRounded_default(x19, p2) {
+    var d7 = formatDecimalParts(x19, p2);
+    if (!d7) return x19 + "";
+    var coefficient = d7[0], exponent = d7[1];
+    return exponent < 0 ? "0." + new Array(-exponent).join("0") + coefficient : coefficient.length > exponent + 1 ? coefficient.slice(0, exponent + 1) + "." + coefficient.slice(exponent + 1) : coefficient + new Array(exponent - coefficient.length + 2).join("0");
+  }
+
+  // node_modules/d3-format/src/formatTypes.js
+  var formatTypes_default = {
+    "%": (x19, p2) => (x19 * 100).toFixed(p2),
+    "b": (x19) => Math.round(x19).toString(2),
+    "c": (x19) => x19 + "",
+    "d": formatDecimal_default,
+    "e": (x19, p2) => x19.toExponential(p2),
+    "f": (x19, p2) => x19.toFixed(p2),
+    "g": (x19, p2) => x19.toPrecision(p2),
+    "o": (x19) => Math.round(x19).toString(8),
+    "p": (x19, p2) => formatRounded_default(x19 * 100, p2),
+    "r": formatRounded_default,
+    "s": formatPrefixAuto_default,
+    "X": (x19) => Math.round(x19).toString(16).toUpperCase(),
+    "x": (x19) => Math.round(x19).toString(16)
+  };
+
+  // node_modules/d3-format/src/identity.js
+  function identity_default2(x19) {
+    return x19;
+  }
+
+  // node_modules/d3-format/src/locale.js
+  var map27 = Array.prototype.map;
+  var prefixes = ["y", "z", "a", "f", "p", "n", "\xB5", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y"];
+  function locale_default(locale2) {
+    var group3 = locale2.grouping === void 0 || locale2.thousands === void 0 ? identity_default2 : formatGroup_default(map27.call(locale2.grouping, Number), locale2.thousands + ""), currencyPrefix = locale2.currency === void 0 ? "" : locale2.currency[0] + "", currencySuffix = locale2.currency === void 0 ? "" : locale2.currency[1] + "", decimal = locale2.decimal === void 0 ? "." : locale2.decimal + "", numerals = locale2.numerals === void 0 ? identity_default2 : formatNumerals_default(map27.call(locale2.numerals, String)), percent = locale2.percent === void 0 ? "%" : locale2.percent + "", minus = locale2.minus === void 0 ? "\u2212" : locale2.minus + "", nan2 = locale2.nan === void 0 ? "NaN" : locale2.nan + "";
+    function newFormat(specifier) {
+      specifier = formatSpecifier(specifier);
+      var fill15 = specifier.fill, align = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero4 = specifier.zero, width19 = specifier.width, comma = specifier.comma, precision = specifier.precision, trim2 = specifier.trim, type2 = specifier.type;
+      if (type2 === "n") comma = true, type2 = "g";
+      else if (!formatTypes_default[type2]) precision === void 0 && (precision = 12), trim2 = true, type2 = "g";
+      if (zero4 || fill15 === "0" && align === "=") zero4 = true, fill15 = "0", align = "=";
+      var prefix = symbol === "$" ? currencyPrefix : symbol === "#" && /[boxX]/.test(type2) ? "0" + type2.toLowerCase() : "", suffix = symbol === "$" ? currencySuffix : /[%p]/.test(type2) ? percent : "";
+      var formatType = formatTypes_default[type2], maybeSuffix = /[defgprs%]/.test(type2);
+      precision = precision === void 0 ? 6 : /[gprs]/.test(type2) ? Math.max(1, Math.min(21, precision)) : Math.max(0, Math.min(20, precision));
+      function format2(value16) {
+        var valuePrefix = prefix, valueSuffix = suffix, i2, n, c;
+        if (type2 === "c") {
+          valueSuffix = formatType(value16) + valueSuffix;
+          value16 = "";
+        } else {
+          value16 = +value16;
+          var valueNegative = value16 < 0 || 1 / value16 < 0;
+          value16 = isNaN(value16) ? nan2 : formatType(Math.abs(value16), precision);
+          if (trim2) value16 = formatTrim_default(value16);
+          if (valueNegative && +value16 === 0 && sign2 !== "+") valueNegative = false;
+          valuePrefix = (valueNegative ? sign2 === "(" ? sign2 : minus : sign2 === "-" || sign2 === "(" ? "" : sign2) + valuePrefix;
+          valueSuffix = (type2 === "s" ? prefixes[8 + prefixExponent / 3] : "") + valueSuffix + (valueNegative && sign2 === "(" ? ")" : "");
+          if (maybeSuffix) {
+            i2 = -1, n = value16.length;
+            while (++i2 < n) {
+              if (c = value16.charCodeAt(i2), 48 > c || c > 57) {
+                valueSuffix = (c === 46 ? decimal + value16.slice(i2 + 1) : value16.slice(i2)) + valueSuffix;
+                value16 = value16.slice(0, i2);
+                break;
+              }
+            }
+          }
+        }
+        if (comma && !zero4) value16 = group3(value16, Infinity);
+        var length9 = valuePrefix.length + value16.length + valueSuffix.length, padding = length9 < width19 ? new Array(width19 - length9 + 1).join(fill15) : "";
+        if (comma && zero4) value16 = group3(padding + value16, padding.length ? width19 - valueSuffix.length : Infinity), padding = "";
+        switch (align) {
+          case "<":
+            value16 = valuePrefix + value16 + valueSuffix + padding;
+            break;
+          case "=":
+            value16 = valuePrefix + padding + value16 + valueSuffix;
+            break;
+          case "^":
+            value16 = padding.slice(0, length9 = padding.length >> 1) + valuePrefix + value16 + valueSuffix + padding.slice(length9);
+            break;
+          default:
+            value16 = padding + valuePrefix + value16 + valueSuffix;
+            break;
+        }
+        return numerals(value16);
+      }
+      format2.toString = function() {
+        return specifier + "";
+      };
+      return format2;
+    }
+    function formatPrefix2(specifier, value16) {
+      var f = newFormat((specifier = formatSpecifier(specifier), specifier.type = "f", specifier)), e = Math.max(-8, Math.min(8, Math.floor(exponent_default(value16) / 3))) * 3, k = Math.pow(10, -e), prefix = prefixes[8 + e / 3];
+      return function(value17) {
+        return f(k * value17) + prefix;
+      };
+    }
+    return {
+      format: newFormat,
+      formatPrefix: formatPrefix2
+    };
+  }
+
+  // node_modules/d3-format/src/defaultLocale.js
+  var locale;
+  var format;
+  var formatPrefix;
+  defaultLocale({
+    thousands: ",",
+    grouping: [3],
+    currency: ["$", ""]
+  });
+  function defaultLocale(definition) {
+    locale = locale_default(definition);
+    format = locale.format;
+    formatPrefix = locale.formatPrefix;
+    return locale;
+  }
+
+  // node_modules/d3-format/src/precisionFixed.js
+  function precisionFixed_default(step5) {
+    return Math.max(0, -exponent_default(Math.abs(step5)));
+  }
+
+  // node_modules/d3-format/src/precisionPrefix.js
+  function precisionPrefix_default(step5, value16) {
+    return Math.max(0, Math.max(-8, Math.min(8, Math.floor(exponent_default(value16) / 3))) * 3 - exponent_default(Math.abs(step5)));
+  }
+
+  // node_modules/d3-format/src/precisionRound.js
+  function precisionRound_default(step5, max9) {
+    step5 = Math.abs(step5), max9 = Math.abs(max9) - step5;
+    return Math.max(0, exponent_default(max9) - exponent_default(step5)) + 1;
+  }
+
+  // node_modules/d3-scale/src/init.js
+  function initRange(domain, range3) {
+    switch (arguments.length) {
+      case 0:
+        break;
+      case 1:
+        this.range(domain);
+        break;
+      default:
+        this.range(range3).domain(domain);
+        break;
+    }
+    return this;
+  }
+
+  // node_modules/d3-scale/src/ordinal.js
+  var implicit = Symbol("implicit");
+  function ordinal() {
+    var index5 = new InternMap(), domain = [], range3 = [], unknown = implicit;
+    function scale(d7) {
+      let i2 = index5.get(d7);
+      if (i2 === void 0) {
+        if (unknown !== implicit) return unknown;
+        index5.set(d7, i2 = domain.push(d7) - 1);
+      }
+      return range3[i2 % range3.length];
+    }
+    scale.domain = function(_) {
+      if (!arguments.length) return domain.slice();
+      domain = [], index5 = new InternMap();
+      for (const value16 of _) {
+        if (index5.has(value16)) continue;
+        index5.set(value16, domain.push(value16) - 1);
+      }
+      return scale;
+    };
+    scale.range = function(_) {
+      return arguments.length ? (range3 = Array.from(_), scale) : range3.slice();
+    };
+    scale.unknown = function(_) {
+      return arguments.length ? (unknown = _, scale) : unknown;
+    };
+    scale.copy = function() {
+      return ordinal(domain, range3).unknown(unknown);
+    };
+    initRange.apply(scale, arguments);
+    return scale;
+  }
+
+  // node_modules/d3-scale/src/constant.js
+  function constants(x19) {
+    return function() {
+      return x19;
+    };
+  }
+
+  // node_modules/d3-scale/src/number.js
+  function number3(x19) {
+    return +x19;
+  }
+
+  // node_modules/d3-scale/src/continuous.js
+  var unit2 = [0, 1];
+  function identity13(x19) {
+    return x19;
+  }
+  function normalize2(a2, b2) {
+    return (b2 -= a2 = +a2) ? function(x19) {
+      return (x19 - a2) / b2;
+    } : constants(isNaN(b2) ? NaN : 0.5);
+  }
+  function clamper(a2, b2) {
+    var t;
+    if (a2 > b2) t = a2, a2 = b2, b2 = t;
+    return function(x19) {
+      return Math.max(a2, Math.min(b2, x19));
+    };
+  }
+  function bimap3(domain, range3, interpolate) {
+    var d0 = domain[0], d1 = domain[1], r0 = range3[0], r1 = range3[1];
+    if (d1 < d0) d0 = normalize2(d1, d0), r0 = interpolate(r1, r0);
+    else d0 = normalize2(d0, d1), r0 = interpolate(r0, r1);
+    return function(x19) {
+      return r0(d0(x19));
+    };
+  }
+  function polymap(domain, range3, interpolate) {
+    var j = Math.min(domain.length, range3.length) - 1, d7 = new Array(j), r = new Array(j), i2 = -1;
+    if (domain[j] < domain[0]) {
+      domain = domain.slice().reverse();
+      range3 = range3.slice().reverse();
+    }
+    while (++i2 < j) {
+      d7[i2] = normalize2(domain[i2], domain[i2 + 1]);
+      r[i2] = interpolate(range3[i2], range3[i2 + 1]);
+    }
+    return function(x19) {
+      var i3 = bisect_default(domain, x19, 1, j) - 1;
+      return r[i3](d7[i3](x19));
+    };
+  }
+  function copy(source2, target7) {
+    return target7.domain(source2.domain()).range(source2.range()).interpolate(source2.interpolate()).clamp(source2.clamp()).unknown(source2.unknown());
+  }
+  function transformer() {
+    var domain = unit2, range3 = unit2, interpolate = value_default, transform3, untransform, unknown, clamp = identity13, piecewise, output2, input3;
+    function rescale() {
+      var n = Math.min(domain.length, range3.length);
+      if (clamp !== identity13) clamp = clamper(domain[0], domain[n - 1]);
+      piecewise = n > 2 ? polymap : bimap3;
+      output2 = input3 = null;
+      return scale;
+    }
+    function scale(x19) {
+      return x19 == null || isNaN(x19 = +x19) ? unknown : (output2 || (output2 = piecewise(domain.map(transform3), range3, interpolate)))(transform3(clamp(x19)));
+    }
+    scale.invert = function(y17) {
+      return clamp(untransform((input3 || (input3 = piecewise(range3, domain.map(transform3), number_default)))(y17)));
+    };
+    scale.domain = function(_) {
+      return arguments.length ? (domain = Array.from(_, number3), rescale()) : domain.slice();
+    };
+    scale.range = function(_) {
+      return arguments.length ? (range3 = Array.from(_), rescale()) : range3.slice();
+    };
+    scale.rangeRound = function(_) {
+      return range3 = Array.from(_), interpolate = round_default, rescale();
+    };
+    scale.clamp = function(_) {
+      return arguments.length ? (clamp = _ ? true : identity13, rescale()) : clamp !== identity13;
+    };
+    scale.interpolate = function(_) {
+      return arguments.length ? (interpolate = _, rescale()) : interpolate;
+    };
+    scale.unknown = function(_) {
+      return arguments.length ? (unknown = _, scale) : unknown;
+    };
+    return function(t, u2) {
+      transform3 = t, untransform = u2;
+      return rescale();
+    };
+  }
+  function continuous() {
+    return transformer()(identity13, identity13);
+  }
+
+  // node_modules/d3-scale/src/tickFormat.js
+  function tickFormat(start5, stop3, count, specifier) {
+    var step5 = tickStep(start5, stop3, count), precision;
+    specifier = formatSpecifier(specifier == null ? ",f" : specifier);
+    switch (specifier.type) {
+      case "s": {
+        var value16 = Math.max(Math.abs(start5), Math.abs(stop3));
+        if (specifier.precision == null && !isNaN(precision = precisionPrefix_default(step5, value16))) specifier.precision = precision;
+        return formatPrefix(specifier, value16);
+      }
+      case "":
+      case "e":
+      case "g":
+      case "p":
+      case "r": {
+        if (specifier.precision == null && !isNaN(precision = precisionRound_default(step5, Math.max(Math.abs(start5), Math.abs(stop3))))) specifier.precision = precision - (specifier.type === "e");
+        break;
+      }
+      case "f":
+      case "%": {
+        if (specifier.precision == null && !isNaN(precision = precisionFixed_default(step5))) specifier.precision = precision - (specifier.type === "%") * 2;
+        break;
+      }
+    }
+    return format(specifier);
+  }
+
+  // node_modules/d3-scale/src/linear.js
+  function linearish(scale) {
+    var domain = scale.domain;
+    scale.ticks = function(count) {
+      var d7 = domain();
+      return ticks(d7[0], d7[d7.length - 1], count == null ? 10 : count);
+    };
+    scale.tickFormat = function(count, specifier) {
+      var d7 = domain();
+      return tickFormat(d7[0], d7[d7.length - 1], count == null ? 10 : count, specifier);
+    };
+    scale.nice = function(count) {
+      if (count == null) count = 10;
+      var d7 = domain();
+      var i0 = 0;
+      var i1 = d7.length - 1;
+      var start5 = d7[i0];
+      var stop3 = d7[i1];
+      var prestep;
+      var step5;
+      var maxIter = 10;
+      if (stop3 < start5) {
+        step5 = start5, start5 = stop3, stop3 = step5;
+        step5 = i0, i0 = i1, i1 = step5;
+      }
+      while (maxIter-- > 0) {
+        step5 = tickIncrement(start5, stop3, count);
+        if (step5 === prestep) {
+          d7[i0] = start5;
+          d7[i1] = stop3;
+          return domain(d7);
+        } else if (step5 > 0) {
+          start5 = Math.floor(start5 / step5) * step5;
+          stop3 = Math.ceil(stop3 / step5) * step5;
+        } else if (step5 < 0) {
+          start5 = Math.ceil(start5 * step5) / step5;
+          stop3 = Math.floor(stop3 * step5) / step5;
+        } else {
+          break;
+        }
+        prestep = step5;
+      }
+      return scale;
+    };
+    return scale;
+  }
+  function linear2() {
+    var scale = continuous();
+    scale.copy = function() {
+      return copy(scale, linear2());
+    };
+    initRange.apply(scale, arguments);
+    return linearish(scale);
+  }
+
+  // node_modules/d3-scale-chromatic/src/colors.js
+  function colors_default(specifier) {
+    var n = specifier.length / 6 | 0, colors2 = new Array(n), i2 = 0;
+    while (i2 < n) colors2[i2] = "#" + specifier.slice(i2 * 6, ++i2 * 6);
+    return colors2;
+  }
+
+  // node_modules/d3-scale-chromatic/src/categorical/category10.js
+  var category10_default = colors_default("1f77b4ff7f0e2ca02cd627289467bd8c564be377c27f7f7fbcbd2217becf");
+
+  // node_modules/d3-shape/src/constant.js
+  function constant_default4(x19) {
+    return function constant2() {
+      return x19;
+    };
+  }
+
+  // node_modules/d3-shape/src/array.js
+  var slice3 = Array.prototype.slice;
+  function array_default(x19) {
+    return typeof x19 === "object" && "length" in x19 ? x19 : Array.from(x19);
+  }
+
+  // node_modules/d3-shape/src/curve/linear.js
+  function Linear(context) {
+    this._context = context;
+  }
+  Linear.prototype = {
+    areaStart: function() {
+      this._line = 0;
+    },
+    areaEnd: function() {
+      this._line = NaN;
+    },
+    lineStart: function() {
+      this._point = 0;
+    },
+    lineEnd: function() {
+      if (this._line || this._line !== 0 && this._point === 1) this._context.closePath();
+      this._line = 1 - this._line;
+    },
+    point: function(x19, y17) {
+      x19 = +x19, y17 = +y17;
+      switch (this._point) {
+        case 0:
+          this._point = 1;
+          this._line ? this._context.lineTo(x19, y17) : this._context.moveTo(x19, y17);
+          break;
+        case 1:
+          this._point = 2;
+        // falls through
+        default:
+          this._context.lineTo(x19, y17);
+          break;
+      }
+    }
+  };
+  function linear_default(context) {
+    return new Linear(context);
+  }
+
+  // node_modules/d3-shape/src/point.js
+  function x3(p2) {
+    return p2[0];
+  }
+  function y3(p2) {
+    return p2[1];
+  }
+
+  // node_modules/d3-shape/src/line.js
+  function line_default(x19, y17) {
+    var defined = constant_default4(true), context = null, curve = linear_default, output2 = null;
+    x19 = typeof x19 === "function" ? x19 : x19 === void 0 ? x3 : constant_default4(x19);
+    y17 = typeof y17 === "function" ? y17 : y17 === void 0 ? y3 : constant_default4(y17);
+    function line(data) {
+      var i2, n = (data = array_default(data)).length, d7, defined0 = false, buffer;
+      if (context == null) output2 = curve(buffer = path_default());
+      for (i2 = 0; i2 <= n; ++i2) {
+        if (!(i2 < n && defined(d7 = data[i2], i2, data)) === defined0) {
+          if (defined0 = !defined0) output2.lineStart();
+          else output2.lineEnd();
+        }
+        if (defined0) output2.point(+x19(d7, i2, data), +y17(d7, i2, data));
+      }
+      if (buffer) return output2 = null, buffer + "" || null;
+    }
+    line.x = function(_) {
+      return arguments.length ? (x19 = typeof _ === "function" ? _ : constant_default4(+_), line) : x19;
+    };
+    line.y = function(_) {
+      return arguments.length ? (y17 = typeof _ === "function" ? _ : constant_default4(+_), line) : y17;
+    };
+    line.defined = function(_) {
+      return arguments.length ? (defined = typeof _ === "function" ? _ : constant_default4(!!_), line) : defined;
+    };
+    line.curve = function(_) {
+      return arguments.length ? (curve = _, context != null && (output2 = curve(context)), line) : curve;
+    };
+    line.context = function(_) {
+      return arguments.length ? (_ == null ? context = output2 = null : output2 = curve(context = _), line) : context;
+    };
+    return line;
+  }
+
+  // node_modules/d3-zoom/src/transform.js
+  function Transform(k, x19, y17) {
+    this.k = k;
+    this.x = x19;
+    this.y = y17;
+  }
+  Transform.prototype = {
+    constructor: Transform,
+    scale: function(k) {
+      return k === 1 ? this : new Transform(this.k * k, this.x, this.y);
+    },
+    translate: function(x19, y17) {
+      return x19 === 0 & y17 === 0 ? this : new Transform(this.k, this.x + this.k * x19, this.y + this.k * y17);
+    },
+    apply: function(point) {
+      return [point[0] * this.k + this.x, point[1] * this.k + this.y];
+    },
+    applyX: function(x19) {
+      return x19 * this.k + this.x;
+    },
+    applyY: function(y17) {
+      return y17 * this.k + this.y;
+    },
+    invert: function(location2) {
+      return [(location2[0] - this.x) / this.k, (location2[1] - this.y) / this.k];
+    },
+    invertX: function(x19) {
+      return (x19 - this.x) / this.k;
+    },
+    invertY: function(y17) {
+      return (y17 - this.y) / this.k;
+    },
+    rescaleX: function(x19) {
+      return x19.copy().domain(x19.range().map(this.invertX, this).map(x19.invert, x19));
+    },
+    rescaleY: function(y17) {
+      return y17.copy().domain(y17.range().map(this.invertY, this).map(y17.invert, y17));
+    },
+    toString: function() {
+      return "translate(" + this.x + "," + this.y + ") scale(" + this.k + ")";
+    }
+  };
+  var identity14 = new Transform(1, 0, 0);
+  transform2.prototype = Transform.prototype;
+  function transform2(node) {
+    while (!node.__zoom) if (!(node = node.parentNode)) return identity14;
+    return node.__zoom;
+  }
+
+  // output/D3.Axes/foreign.js
+  function axisBottom2(scale) {
+    return axisBottom(scale);
+  }
+  function axisLeft2(scale) {
+    return axisLeft(scale);
+  }
+  function callAxis(selection2) {
+    return (axis2) => () => {
+      selection2.call(axis2);
+    };
+  }
+
+  // output/D3.Scales.Linear/foreign.js
+  function createLinearScale(config) {
+    return () => {
+      return linear2().domain(config.domain).range(config.range);
+    };
+  }
+  function applyScale(scale) {
+    return (value16) => scale(value16);
+  }
+
   // output/D3Tagless.Capabilities/index.js
   var updateJoin = function(dict) {
     return dict.updateJoin;
@@ -13042,7 +15047,7 @@
   var stop = function(dict) {
     return dict.stop;
   };
-  var start2 = function(dict) {
+  var start3 = function(dict) {
     return dict.start;
   };
   var simulationHandle = function(dict) {
@@ -13094,108 +15099,99 @@
     return dict.actualizeForces;
   };
 
-  // output/D3.Viz.BubbleChart/index.js
-  var pure18 = /* @__PURE__ */ pure(applicativeAff);
+  // output/D3.Viz.ScatterPlot/index.js
   var classed2 = /* @__PURE__ */ classed(toAttrString);
   var width9 = /* @__PURE__ */ width8(toAttrNumber);
   var height9 = /* @__PURE__ */ height8(toAttrNumber);
+  var show5 = /* @__PURE__ */ show(showNumber);
+  var x4 = /* @__PURE__ */ x(toAttrNumber);
+  var y4 = /* @__PURE__ */ y(toAttrNumber);
+  var text7 = /* @__PURE__ */ text6(toAttrString);
+  var textAnchor2 = /* @__PURE__ */ textAnchor(toAttrString);
+  var fontSize2 = /* @__PURE__ */ fontSize(toAttrNumber);
   var cx2 = /* @__PURE__ */ cx(toAttrNumber);
   var cy2 = /* @__PURE__ */ cy(toAttrNumber);
   var radius2 = /* @__PURE__ */ radius(toAttrNumber);
   var fill2 = /* @__PURE__ */ fill(toAttrString);
-  var fillOpacity2 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var strokeColor2 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth2 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var discard6 = /* @__PURE__ */ discard(discardUnit);
-  var x3 = /* @__PURE__ */ x(toAttrNumber);
-  var y3 = /* @__PURE__ */ y(toAttrNumber);
-  var text7 = /* @__PURE__ */ text6(toAttrString);
-  var textAnchor2 = /* @__PURE__ */ textAnchor(toAttrString);
-  var fontSize2 = /* @__PURE__ */ fontSize(toAttrNumber);
-  var min6 = /* @__PURE__ */ min(ordNumber);
-  var loadFlareData = /* @__PURE__ */ bind(bindAff)(/* @__PURE__ */ get3(json)("./data/flare-2.json"))(function(result) {
-    if (result instanceof Left) {
-      return pure18({
-        name: "error",
-        children: []
-      });
-    }
-    ;
-    if (result instanceof Right) {
-      return pure18(result.value0.body);
-    }
-    ;
-    throw new Error("Failed pattern match at D3.Viz.BubbleChart (line 25, column 3 - line 30, column 25): " + [result.constructor.name]);
-  });
-  var getName = function(node) {
-    return node.data.name;
-  };
-  var depthColor = function(depth) {
-    if (depth === 0) {
-      return "#e74c3c";
-    }
-    ;
-    if (depth === 1) {
-      return "#3498db";
-    }
-    ;
-    if (depth === 2) {
-      return "#2ecc71";
-    }
-    ;
-    if (depth === 3) {
-      return "#f39c12";
-    }
-    ;
-    if (depth === 4) {
-      return "#9b59b6";
-    }
-    ;
-    return "#95a5a6";
-  };
-  var draw = function(dictBind) {
-    var bind26 = bind(dictBind);
-    var discard111 = discard6(dictBind);
+  var drawQuartet = function(dictBind) {
+    var bind27 = bind(dictBind);
     return function(dictMonadEffect) {
+      var liftEffect18 = liftEffect(dictMonadEffect);
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
-      var when5 = when(Applicative0);
-      var pure112 = pure(Applicative0);
+      var pure33 = pure(Applicative0);
       var traverse_7 = traverse_(Applicative0)(foldableArray);
       return function(dictSelectionM) {
         var attach2 = attach(dictSelectionM);
         var appendTo2 = appendTo(dictSelectionM);
-        return function(jsonData) {
+        return function(quartet) {
           return function(selector) {
-            var dims = {
-              width: 900,
-              height: 900
+            var plotWidth = (900 - 60 * 3) / 2;
+            var plotHeight = (700 - 60 * 3) / 2;
+            var margin = {
+              top: 30,
+              right: 20,
+              bottom: 40,
+              left: 50
             };
-            return bind26(attach2(selector))(function(v) {
-              return bind26(appendTo2(v)(Svg.value)([viewBox(0)(0)(dims.width)(dims.height), classed2("bubble-chart"), width9(dims.width), height9(dims.height)]))(function(svg2) {
-                return bind26(appendTo2(svg2)(Group.value)([classed2("bubbles")]))(function(chartGroup) {
-                  var hierarchy = hierarchyFromJSON_(jsonData);
-                  var sortedHierarchy = treeSortForCirclePack_(hierarchy);
-                  var packLayout0 = packLayout_(unit);
-                  var packLayout1 = packSetSize_(packLayout0)(dims.width)(dims.height);
-                  var packLayout = packSetPadding_(packLayout1)(2);
-                  var packedRoot = runPackLayout_(packLayout)(sortedHierarchy);
-                  var nodes = descendants_(packedRoot);
-                  var drawBubble = function(node) {
-                    var xPos = hNodeX_(node);
-                    var yPos = hNodeY_(node);
-                    var r = hNodeR_(node);
-                    var depth = hNodeDepth_(node);
-                    var name16 = getName(node);
-                    return when5(r > 0)(bind26(appendTo2(chartGroup)(Circle.value)([cx2(xPos), cy2(yPos), radius2(r), fill2(depthColor(round2(depth))), fillOpacity2(0.7), strokeColor2("#ffffff"), strokeWidth2(1), classed2("bubble")]))(function() {
-                      return discard111(when5(r > 20)(bind26(appendTo2(chartGroup)(Text2.value)([x3(xPos), y3(yPos), text7(name16), textAnchor2("middle"), fontSize2(min6(12)(r / 3)), fill2("#ffffff"), classed2("bubble-label")]))(function() {
-                        return pure112(unit);
-                      })))(function() {
-                        return pure112(unit);
-                      });
-                    }));
+            var iWidth = plotWidth - margin.left - margin.right;
+            var iHeight = plotHeight - margin.top - margin.bottom;
+            var xDomain = [0, 20];
+            var yDomain = [0, 14];
+            return bind27(attach2(selector))(function(v) {
+              return bind27(appendTo2(v)(Svg.value)([viewBox(0)(0)(900)(700), classed2("scatter-quartet"), width9(900), height9(700)]))(function(svg2) {
+                var drawSubplot = function(title4) {
+                  return function(dataPoints) {
+                    return function(xOffset) {
+                      return function(yOffset) {
+                        return bind27(appendTo2(svg2)(Group.value)([classed2("subplot"), transform([function(v1) {
+                          return "translate(" + (show5(xOffset + margin.left) + ("," + (show5(yOffset + margin.top) + ")")));
+                        }])]))(function(subplotGroup) {
+                          return bind27(appendTo2(svg2)(Text2.value)([x4(xOffset + plotWidth / 2), y4(yOffset + 15), text7(title4), textAnchor2("middle"), fontSize2(16), classed2("subplot-title")]))(function() {
+                            return bind27(liftEffect18(createLinearScale({
+                              domain: xDomain,
+                              range: [0, iWidth]
+                            })))(function(xScale) {
+                              return bind27(liftEffect18(createLinearScale({
+                                domain: yDomain,
+                                range: [iHeight, 0]
+                              })))(function(yScale) {
+                                return bind27(appendTo2(subplotGroup)(Group.value)([classed2("x-axis"), transform([function(v1) {
+                                  return "translate(0," + (show5(iHeight) + ")");
+                                }])]))(function(xAxisGroup) {
+                                  return bind27(appendTo2(subplotGroup)(Group.value)([classed2("y-axis")]))(function(yAxisGroup) {
+                                    return bind27(liftEffect18(callAxis(xAxisGroup)(axisBottom2(xScale))))(function() {
+                                      return bind27(liftEffect18(callAxis(yAxisGroup)(axisLeft2(yScale))))(function() {
+                                        var addPoint = function(point) {
+                                          var xPos = applyScale(xScale)(point.x);
+                                          var yPos = applyScale(yScale)(point.y);
+                                          return bind27(appendTo2(subplotGroup)(Circle.value)([cx2(xPos), cy2(yPos), radius2(4), fill2("#e74c3c"), strokeColor2("#c0392b"), strokeWidth2(1.5), classed2("scatter-point")]))(function() {
+                                            return pure33(unit);
+                                          });
+                                        };
+                                        return bind27(traverse_7(addPoint)(dataPoints))(function() {
+                                          return pure33(unit);
+                                        });
+                                      });
+                                    });
+                                  });
+                                });
+                              });
+                            });
+                          });
+                        });
+                      };
+                    };
                   };
-                  return bind26(traverse_7(drawBubble)(nodes))(function() {
-                    return pure112(unit);
+                };
+                return bind27(drawSubplot("Dataset I")(quartet.dataset1)(60)(60))(function() {
+                  return bind27(drawSubplot("Dataset II")(quartet.dataset2)(60 + plotWidth + 60)(60))(function() {
+                    return bind27(drawSubplot("Dataset III")(quartet.dataset3)(60)(60 + plotHeight + 60))(function() {
+                      return bind27(drawSubplot("Dataset IV")(quartet.dataset4)(60 + plotWidth + 60)(60 + plotHeight + 60))(function() {
+                        return pure33(unit);
+                      });
+                    });
                   });
                 });
               });
@@ -13240,9 +15236,9 @@
 
   // output/D3.Selection.Functions/index.js
   var spy2 = /* @__PURE__ */ spy();
-  var foldl4 = /* @__PURE__ */ foldl(foldableArray);
-  var show5 = /* @__PURE__ */ show(showElement);
-  var discard7 = /* @__PURE__ */ discard(discardUnit);
+  var foldl3 = /* @__PURE__ */ foldl(foldableArray);
+  var show6 = /* @__PURE__ */ show(showElement);
+  var discard6 = /* @__PURE__ */ discard(discardUnit);
   var selectionUpdateJoin = function(dictSelectionM) {
     var pure33 = pure(dictSelectionM.Monad0().Applicative0());
     return function(openSelection2) {
@@ -13319,7 +15315,7 @@
     var pure33 = pure(dictSelectionM.Monad0().Applicative0());
     return function(selection_) {
       return function(attributes) {
-        var v = foldl4(applySelectionAttributeD3)(selection_)(attributes);
+        var v = foldl3(applySelectionAttributeD3)(selection_)(attributes);
         return pure33(unit);
       };
     };
@@ -13338,7 +15334,7 @@
       return function(e) {
         return function(theData) {
           return function(keyFn) {
-            var element3 = spy2("Join: ")(show5(e));
+            var element3 = spy2("Join: ")(show6(e));
             var selectS = d3SelectionSelectAll_(element3)(selection2);
             var dataSelection = d3DataWithKeyFunction_(theData)(keyFn)(selectS);
             var enterSelection = d3EnterAndAppend_(element3)(dataSelection);
@@ -13364,13 +15360,13 @@
   };
   var selectionAppendElement = function(dictSelectionM) {
     var Monad0 = dictSelectionM.Monad0();
-    var discard111 = discard7(Monad0.Bind1());
+    var discard111 = discard6(Monad0.Bind1());
     var selectionModifySelection1 = selectionModifySelection(dictSelectionM);
     var pure33 = pure(Monad0.Applicative0());
     return function(selection_) {
       return function(element3) {
         return function(attributes) {
-          var appended_ = d3Append_(show5(element3))(selection_);
+          var appended_ = d3Append_(show6(element3))(selection_);
           return discard111(selectionModifySelection1(appended_)(attributes))(function() {
             return pure33(appended_);
           });
@@ -13426,10 +15422,1659 @@
   };
   var bindD3M = /* @__PURE__ */ bindStateT(monadEffect);
 
-  // output/PSD3.BubbleChart/index.js
+  // output/PSD3.Types/index.js
+  var About = /* @__PURE__ */ (function() {
+    function About2() {
+    }
+    ;
+    About2.value = new About2();
+    return About2;
+  })();
+  var Tutorial = /* @__PURE__ */ (function() {
+    function Tutorial2() {
+    }
+    ;
+    Tutorial2.value = new Tutorial2();
+    return Tutorial2;
+  })();
+  var SimpleCharts = /* @__PURE__ */ (function() {
+    function SimpleCharts2() {
+    }
+    ;
+    SimpleCharts2.value = new SimpleCharts2();
+    return SimpleCharts2;
+  })();
+  var ChordDiagram = /* @__PURE__ */ (function() {
+    function ChordDiagram2() {
+    }
+    ;
+    ChordDiagram2.value = new ChordDiagram2();
+    return ChordDiagram2;
+  })();
+  var BubbleChart = /* @__PURE__ */ (function() {
+    function BubbleChart2() {
+    }
+    ;
+    BubbleChart2.value = new BubbleChart2();
+    return BubbleChart2;
+  })();
+  var SankeyDiagram = /* @__PURE__ */ (function() {
+    function SankeyDiagram2() {
+    }
+    ;
+    SankeyDiagram2.value = new SankeyDiagram2();
+    return SankeyDiagram2;
+  })();
+  var Hierarchies = /* @__PURE__ */ (function() {
+    function Hierarchies2() {
+    }
+    ;
+    Hierarchies2.value = new Hierarchies2();
+    return Hierarchies2;
+  })();
+  var Interpreters = /* @__PURE__ */ (function() {
+    function Interpreters2() {
+    }
+    ;
+    Interpreters2.value = new Interpreters2();
+    return Interpreters2;
+  })();
+  var CodeExplorer = /* @__PURE__ */ (function() {
+    function CodeExplorer2() {
+    }
+    ;
+    CodeExplorer2.value = new CodeExplorer2();
+    return CodeExplorer2;
+  })();
+  var NotFound = /* @__PURE__ */ (function() {
+    function NotFound2() {
+    }
+    ;
+    NotFound2.value = new NotFound2();
+    return NotFound2;
+  })();
+  var eqRoute = {
+    eq: function(x19) {
+      return function(y17) {
+        if (x19 instanceof About && y17 instanceof About) {
+          return true;
+        }
+        ;
+        if (x19 instanceof Tutorial && y17 instanceof Tutorial) {
+          return true;
+        }
+        ;
+        if (x19 instanceof SimpleCharts && y17 instanceof SimpleCharts) {
+          return true;
+        }
+        ;
+        if (x19 instanceof ChordDiagram && y17 instanceof ChordDiagram) {
+          return true;
+        }
+        ;
+        if (x19 instanceof BubbleChart && y17 instanceof BubbleChart) {
+          return true;
+        }
+        ;
+        if (x19 instanceof SankeyDiagram && y17 instanceof SankeyDiagram) {
+          return true;
+        }
+        ;
+        if (x19 instanceof Hierarchies && y17 instanceof Hierarchies) {
+          return true;
+        }
+        ;
+        if (x19 instanceof Interpreters && y17 instanceof Interpreters) {
+          return true;
+        }
+        ;
+        if (x19 instanceof CodeExplorer && y17 instanceof CodeExplorer) {
+          return true;
+        }
+        ;
+        if (x19 instanceof NotFound && y17 instanceof NotFound) {
+          return true;
+        }
+        ;
+        return false;
+      };
+    }
+  };
+
+  // output/Data.Semiring.Free/index.js
+  var append13 = /* @__PURE__ */ append(semigroupList);
+  var bind6 = /* @__PURE__ */ bind(bindList);
+  var pure11 = /* @__PURE__ */ pure(applicativeList);
+  var semiringFree = /* @__PURE__ */ (function() {
+    return {
+      add: function(v) {
+        return function(v1) {
+          return append13(v)(v1);
+        };
+      },
+      zero: Nil.value,
+      mul: function(v) {
+        return function(v1) {
+          return bind6(v)(function(xs) {
+            return bind6(v1)(function(ys) {
+              return pure11(append13(xs)(ys));
+            });
+          });
+        };
+      },
+      one: singleton3(Nil.value)
+    };
+  })();
+  var free = function(a2) {
+    return singleton3(singleton3(a2));
+  };
+
+  // output/Data.Validation.Semiring/index.js
+  var V = function(x19) {
+    return x19;
+  };
+  var validation = function(v) {
+    return function(v1) {
+      return function(v2) {
+        if (v2 instanceof Left) {
+          return v(v2.value0);
+        }
+        ;
+        if (v2 instanceof Right) {
+          return v1(v2.value0);
+        }
+        ;
+        throw new Error("Failed pattern match at Data.Validation.Semiring (line 49, column 1 - line 49, column 84): " + [v.constructor.name, v1.constructor.name, v2.constructor.name]);
+      };
+    };
+  };
+  var invalid = function($113) {
+    return V(Left.create($113));
+  };
+  var functorV = functorEither;
+  var applyV = function(dictSemiring) {
+    var mul3 = mul(dictSemiring);
+    return {
+      apply: function(v) {
+        return function(v1) {
+          if (v instanceof Left && v1 instanceof Left) {
+            return new Left(mul3(v.value0)(v1.value0));
+          }
+          ;
+          if (v instanceof Left) {
+            return new Left(v.value0);
+          }
+          ;
+          if (v1 instanceof Left) {
+            return new Left(v1.value0);
+          }
+          ;
+          if (v instanceof Right && v1 instanceof Right) {
+            return new Right(v.value0(v1.value0));
+          }
+          ;
+          throw new Error("Failed pattern match at Data.Validation.Semiring (line 90, column 1 - line 94, column 54): " + [v.constructor.name, v1.constructor.name]);
+        };
+      },
+      Functor0: function() {
+        return functorV;
+      }
+    };
+  };
+  var applicativeV = function(dictSemiring) {
+    var applyV1 = applyV(dictSemiring);
+    return {
+      pure: function($121) {
+        return V(Right.create($121));
+      },
+      Apply0: function() {
+        return applyV1;
+      }
+    };
+  };
+  var altV = function(dictSemiring) {
+    var add2 = add(dictSemiring);
+    return {
+      alt: function(v) {
+        return function(v1) {
+          if (v instanceof Left && v1 instanceof Left) {
+            return new Left(add2(v.value0)(v1.value0));
+          }
+          ;
+          if (v instanceof Left) {
+            return v1;
+          }
+          ;
+          if (v instanceof Right) {
+            return new Right(v.value0);
+          }
+          ;
+          throw new Error("Failed pattern match at Data.Validation.Semiring (line 105, column 1 - line 108, column 36): " + [v.constructor.name, v1.constructor.name]);
+        };
+      },
+      Functor0: function() {
+        return functorV;
+      }
+    };
+  };
+
+  // output/Routing.Match.Error/index.js
+  var UnexpectedPath = /* @__PURE__ */ (function() {
+    function UnexpectedPath2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    UnexpectedPath2.create = function(value0) {
+      return new UnexpectedPath2(value0);
+    };
+    return UnexpectedPath2;
+  })();
+  var ExpectedBoolean = /* @__PURE__ */ (function() {
+    function ExpectedBoolean2() {
+    }
+    ;
+    ExpectedBoolean2.value = new ExpectedBoolean2();
+    return ExpectedBoolean2;
+  })();
+  var ExpectedEnd = /* @__PURE__ */ (function() {
+    function ExpectedEnd2() {
+    }
+    ;
+    ExpectedEnd2.value = new ExpectedEnd2();
+    return ExpectedEnd2;
+  })();
+  var ExpectedNumber = /* @__PURE__ */ (function() {
+    function ExpectedNumber2() {
+    }
+    ;
+    ExpectedNumber2.value = new ExpectedNumber2();
+    return ExpectedNumber2;
+  })();
+  var ExpectedInt = /* @__PURE__ */ (function() {
+    function ExpectedInt2() {
+    }
+    ;
+    ExpectedInt2.value = new ExpectedInt2();
+    return ExpectedInt2;
+  })();
+  var ExpectedString = /* @__PURE__ */ (function() {
+    function ExpectedString2() {
+    }
+    ;
+    ExpectedString2.value = new ExpectedString2();
+    return ExpectedString2;
+  })();
+  var ExpectedQuery = /* @__PURE__ */ (function() {
+    function ExpectedQuery2() {
+    }
+    ;
+    ExpectedQuery2.value = new ExpectedQuery2();
+    return ExpectedQuery2;
+  })();
+  var ExpectedPathPart = /* @__PURE__ */ (function() {
+    function ExpectedPathPart2() {
+    }
+    ;
+    ExpectedPathPart2.value = new ExpectedPathPart2();
+    return ExpectedPathPart2;
+  })();
+  var KeyNotFound = /* @__PURE__ */ (function() {
+    function KeyNotFound2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    KeyNotFound2.create = function(value0) {
+      return new KeyNotFound2(value0);
+    };
+    return KeyNotFound2;
+  })();
+  var Fail = /* @__PURE__ */ (function() {
+    function Fail2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Fail2.create = function(value0) {
+      return new Fail2(value0);
+    };
+    return Fail2;
+  })();
+  var showMatchError = function(err) {
+    if (err instanceof UnexpectedPath) {
+      return "expected path part: " + err.value0;
+    }
+    ;
+    if (err instanceof KeyNotFound) {
+      return "key: " + (err.value0 + " has not found in query part");
+    }
+    ;
+    if (err instanceof ExpectedQuery) {
+      return "expected query - found path";
+    }
+    ;
+    if (err instanceof ExpectedNumber) {
+      return "expected number";
+    }
+    ;
+    if (err instanceof ExpectedInt) {
+      return "expected int";
+    }
+    ;
+    if (err instanceof ExpectedBoolean) {
+      return "expected boolean";
+    }
+    ;
+    if (err instanceof ExpectedEnd) {
+      return "expected end";
+    }
+    ;
+    if (err instanceof ExpectedString) {
+      return "expected string var";
+    }
+    ;
+    if (err instanceof ExpectedPathPart) {
+      return "expected path part, found query";
+    }
+    ;
+    if (err instanceof Fail) {
+      return "match error: " + err.value0;
+    }
+    ;
+    throw new Error("Failed pattern match at Routing.Match.Error (line 19, column 3 - line 29, column 39): " + [err.constructor.name]);
+  };
+
+  // output/Routing.Types/index.js
+  var Path3 = /* @__PURE__ */ (function() {
+    function Path5(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Path5.create = function(value0) {
+      return new Path5(value0);
+    };
+    return Path5;
+  })();
+  var Query2 = /* @__PURE__ */ (function() {
+    function Query3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Query3.create = function(value0) {
+      return new Query3(value0);
+    };
+    return Query3;
+  })();
+
+  // output/Routing.Match/index.js
+  var pure13 = /* @__PURE__ */ pure(/* @__PURE__ */ applicativeV(semiringFree));
+  var foldl4 = /* @__PURE__ */ foldl(foldableList);
+  var bind7 = /* @__PURE__ */ bind(bindList);
+  var map28 = /* @__PURE__ */ map(functorList);
+  var unwrap4 = /* @__PURE__ */ unwrap();
+  var pure14 = /* @__PURE__ */ pure(applicativeList);
+  var mul2 = /* @__PURE__ */ mul(semiringFree);
+  var identity15 = /* @__PURE__ */ identity(categoryFn);
+  var one3 = /* @__PURE__ */ one(semiringFree);
+  var alt6 = /* @__PURE__ */ alt(/* @__PURE__ */ altV(semiringFree));
+  var runMatch = function(v) {
+    return function(route) {
+      var foldErrors = function(errs) {
+        return new Left(foldl4(function(b2) {
+          return function(a2) {
+            return a2 + ("\n" + b2);
+          };
+        })("")(bind7(map28(reverse)(unwrap4(errs)))(function(es) {
+          return pure14(foldl4(function(b2) {
+            return function(a2) {
+              return a2 + (";" + b2);
+            };
+          })("")(map28(showMatchError)(es)));
+        })));
+      };
+      return validation(foldErrors)(function($109) {
+        return Right.create(snd($109));
+      })(v(route));
+    };
+  };
+  var matchFunctor = {
+    map: function(fn) {
+      return function(v) {
+        return function(r) {
+          return validation(invalid)(function(v1) {
+            return pure13(new Tuple(v1.value0, fn(v1.value1)));
+          })(v(r));
+        };
+      };
+    }
+  };
+  var matchApply = {
+    apply: function(v) {
+      return function(v1) {
+        var processFnRes = function(v2) {
+          return validation(invalid)(function(v3) {
+            return pure13(new Tuple(v3.value0, v2.value1(v3.value1)));
+          })(v1(v2.value0));
+        };
+        var processFnErr = function(r) {
+          return function(err) {
+            return invalid(mul2(err)(validation(identity15)($$const(one3))(v1(r))));
+          };
+        };
+        return function(r) {
+          return validation(processFnErr(r))(processFnRes)(v(r));
+        };
+      };
+    },
+    Functor0: function() {
+      return matchFunctor;
+    }
+  };
+  var matchApplicative = {
+    pure: function(a2) {
+      return function(r) {
+        return pure13(new Tuple(r, a2));
+      };
+    },
+    Apply0: function() {
+      return matchApply;
+    }
+  };
+  var matchAlt = {
+    alt: function(v) {
+      return function(v1) {
+        return function(r) {
+          return alt6(v(r))(v1(r));
+        };
+      };
+    },
+    Functor0: function() {
+      return matchFunctor;
+    }
+  };
+  var lit = function(input3) {
+    return function(route) {
+      if (route instanceof Cons && (route.value0 instanceof Path3 && route.value0.value0 === input3)) {
+        return pure13(new Tuple(route.value1, unit));
+      }
+      ;
+      if (route instanceof Cons && route.value0 instanceof Path3) {
+        return invalid(free(new UnexpectedPath(input3)));
+      }
+      ;
+      return invalid(free(ExpectedPathPart.value));
+    };
+  };
+  var root2 = /* @__PURE__ */ lit("");
+  var end = function(route) {
+    if (route instanceof Nil) {
+      return pure13(new Tuple(Nil.value, unit));
+    }
+    ;
+    return invalid(free(ExpectedEnd.value));
+  };
+
+  // output/PSD3.RoutingDSL/index.js
+  var applyFirst2 = /* @__PURE__ */ applyFirst(matchApply);
+  var voidRight2 = /* @__PURE__ */ voidRight(matchFunctor);
+  var alt7 = /* @__PURE__ */ alt(matchAlt);
+  var tutorial = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(Tutorial.value)(lit("tutorial")))(end);
+  })();
+  var simpleCharts = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(SimpleCharts.value)(lit("simple-charts")))(end);
+  })();
+  var sankeyDiagram = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(SankeyDiagram.value)(lit("sankey-diagram")))(end);
+  })();
+  var routeToPath = function(v) {
+    if (v instanceof About) {
+      return "/about";
+    }
+    ;
+    if (v instanceof Tutorial) {
+      return "/tutorial";
+    }
+    ;
+    if (v instanceof SimpleCharts) {
+      return "/simple-charts";
+    }
+    ;
+    if (v instanceof ChordDiagram) {
+      return "/chord-diagram";
+    }
+    ;
+    if (v instanceof BubbleChart) {
+      return "/bubble-chart";
+    }
+    ;
+    if (v instanceof SankeyDiagram) {
+      return "/sankey-diagram";
+    }
+    ;
+    if (v instanceof Hierarchies) {
+      return "/hierarchies";
+    }
+    ;
+    if (v instanceof Interpreters) {
+      return "/interpreters";
+    }
+    ;
+    if (v instanceof CodeExplorer) {
+      return "/code-explorer";
+    }
+    ;
+    if (v instanceof NotFound) {
+      return "/not-found";
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.RoutingDSL (line 79, column 1 - line 79, column 31): " + [v.constructor.name]);
+  };
+  var rootRedirect = /* @__PURE__ */ (function() {
+    return voidRight2(About.value)(end);
+  })();
+  var notFound = /* @__PURE__ */ (function() {
+    return pure(matchApplicative)(NotFound.value);
+  })();
+  var interpreters = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(Interpreters.value)(lit("interpreters")))(end);
+  })();
+  var hierarchies = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(Hierarchies.value)(lit("hierarchies")))(end);
+  })();
+  var codeExplorer = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(CodeExplorer.value)(lit("code-explorer")))(end);
+  })();
+  var chordDiagram = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(ChordDiagram.value)(lit("chord-diagram")))(end);
+  })();
+  var bubbleChart = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(BubbleChart.value)(lit("bubble-chart")))(end);
+  })();
+  var about = /* @__PURE__ */ (function() {
+    return applyFirst2(voidRight2(About.value)(lit("about")))(end);
+  })();
+  var routes = /* @__PURE__ */ alt7(tutorial)(/* @__PURE__ */ alt7(simpleCharts)(/* @__PURE__ */ alt7(chordDiagram)(/* @__PURE__ */ alt7(bubbleChart)(/* @__PURE__ */ alt7(sankeyDiagram)(/* @__PURE__ */ alt7(hierarchies)(/* @__PURE__ */ alt7(interpreters)(/* @__PURE__ */ alt7(codeExplorer)(/* @__PURE__ */ alt7(about)(/* @__PURE__ */ alt7(rootRedirect)(notFound))))))))));
+  var routing = /* @__PURE__ */ applySecond(matchApply)(root2)(routes);
+
+  // output/PSD3.RHSNavigation/index.js
+  var eq2 = /* @__PURE__ */ eq(eqRoute);
+  var navLink = function(route) {
+    return function(label5) {
+      return function(currentRoute) {
+        var $3 = eq2(route)(currentRoute);
+        if ($3) {
+          return span3([classes(["tutorial-page__nav-link", "tutorial-page__nav-link--active"])])([text5(label5)]);
+        }
+        ;
+        return a([href4("#" + routeToPath(route)), classes(["tutorial-page__nav-link"])])([text5(label5 + " \u2192")]);
+      };
+    };
+  };
+  var render = function(currentRoute) {
+    return div2([classes(["tutorial-page__nav-panel"])])([h3([classes(["tutorial-page__nav-title"])])([text5("Explore")]), nav([classes(["tutorial-page__nav-links"])])([navLink(About.value)("About")(currentRoute), navLink(Tutorial.value)("Tutorial")(currentRoute), navLink(SimpleCharts.value)("Simple Charts")(currentRoute), navLink(ChordDiagram.value)("Chord Diagram")(currentRoute), navLink(BubbleChart.value)("Bubble Chart")(currentRoute), navLink(SankeyDiagram.value)("Sankey Diagram")(currentRoute), navLink(Hierarchies.value)("Hierarchies")(currentRoute), navLink(Interpreters.value)("Interpreters")(currentRoute), navLink(CodeExplorer.value)("Code Explorer")(currentRoute), a([href4("https://github.com/afcondon/purescript-d3-tagless"), target5("_blank"), rel4("noopener noreferrer"), classes(["tutorial-page__nav-link", "tutorial-page__nav-link--external"])])([text5("GitHub \u2197")])])]);
+  };
+  var component = /* @__PURE__ */ mkComponent({
+    initialState: /* @__PURE__ */ identity(categoryFn),
+    render,
+    "eval": /* @__PURE__ */ mkEval(defaultEval)
+  });
+
+  // output/PSD3.About/index.js
   var bind8 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftAff2 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var liftEffect7 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  var drawQuartet2 = /* @__PURE__ */ drawQuartet(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var pure15 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var type_18 = /* @__PURE__ */ type_17(isPropButtonType);
+  var slot_2 = /* @__PURE__ */ slot_()({
+    reflectSymbol: function() {
+      return "rhsNav";
+    }
+  })(ordUnit);
+  var Initialize2 = /* @__PURE__ */ (function() {
+    function Initialize11() {
+    }
+    ;
+    Initialize11.value = new Initialize11();
+    return Initialize11;
+  })();
+  var handleAction = function(v) {
+    return bind8(liftEffect7(eval_D3M(drawQuartet2(anscombesQuartet)("div.quartet-viz"))))(function() {
+      return pure15(unit);
+    });
+  };
+  var _rhsNav = /* @__PURE__ */ (function() {
+    return $$Proxy.value;
+  })();
+  var render2 = function(v) {
+    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_18(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#heading-0"), classes(["toc-nav__item"])])([text5("PS<$>D3")]), a([href4("#heading-2"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("What is This Project?")]), a([href4("#heading-3"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("Motivation")]), a([href4("#heading-4"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("The Data Visualization Process")]), a([href4("#anscombe"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Why Visualize? Anscombe's Quartet")]), a([href4("#heading-5"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Design philosophy of D3*")]), a([href4("#heading-6"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Design philosophy of PS<$>D3")]), a([href4("#heading-7"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("Project Goals (and non-Goals)")]), a([href4("#heading-9"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Goals: details")]), a([href4("#heading-13"), classes(["toc-nav__item", "toc-nav__item--level-3"])])([text5("Non-goals: details")]), a([href4("#heading-17"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("What's a DSL? and what's an eDSL?")]), a([href4("#heading-20"), classes(["toc-nav__item", "toc-nav__item--level-2"])])([text5("The grammar of D3...")])])])])]), slot_2(_rhsNav)(unit)(component)(About.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"]), id2("heading-0")])([text5("PS<$>D3")]), h2([id2("heading-1")])([text5("Interactive Data Visualization in PureScript")]), p_([text5("A PureScript embedded "), em_([text5("DSL")]), text5(" for building "), em_([text5("interactive data visualizations")]), text5(", using "), em_([text5("D3.js")]), text5(" both as inspiration and as an implementation layer under the Foreign Function Interface (FFI).")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-2")])([text5("What is This Project?")]), p_([text5('This project demonstrates an embedded DSL for building interactive data visualizations with PureScript. The DSL uses a Finally Tagless approach that allows multiple interpreters for the same "language" which allows us to generate working code using an FFI to D3 or documentation and other more complex uses which will be discussed below.')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-3")])([text5("Motivation")]), p_([text5('I have built moderately complex, custom interactive data visualisations in the past both in JavaScript and PureScript, using D3.js. I found that JavaScript generally, and D3 in particular, seemed to work best for visualisations that were less "app-like" and more "chart-like". What i mean by this is that when the complexity started to rise to the level of a small application and when multiple programmers were involved, or if one had to return to some code after time had elapsed, the whole thing was very brittle and refactoring of it prohibitively difficult.')]), p_([text5('This could certainly be a "feature, not a bug" for some domains of application such as building a big beautiful rich visualisation for a one-off publication such as a New York Times feature. However, when the visualisation is used to '), em_([text5("control")]), text5(" application behaviour or the visualisation begins to approach the complexity and multi-layered-ness of an app...this all in one single script language is a real problem, at least in my experience.")]), p_([text5("In PureScript it is common, and easy, to use JavaScript libraries via the FFI initially as it is a very quick way to get access to the enormous world of functionality that exists in open source JavaScript libraries. Sometimes this can be sufficient, you wrap a component or a function and its abstractions never leak and all is well. Other times, you wrap something but there's a kind of impedance mismatch with the way the JavaScript abstraction work and the way you'd like to handle, and particularly to compose, things in the purely functional world. D3.js was definitely the latter, for me.")]), p_([text5("D3.js is a big library with thousands of API end-points but, crucially, not all of those end-points are problematic for composing larger scale applications or weaving visualisations into PureScript web applications. Instead, its is primarily two core areas of the API, Selection and Simulation (more details on these later) which tend to actually "), em_([text5("structure")]), text5(" programs in a characteristic D3 / JavaScript vernacular. It is these APIs that are first wrapped (by FFI) and then made available in purely functional idiomatic way by this library.")]), p_([text5("A secondary, but also very important, consideration is the ability to design and work with Algebraic Data Types (ADTs) and the rich container libraries that are available in PureScript while building and implementing visualisations and especially the code that surrounds the visualization. While D3 ultimately is a kind of array programming DSL "), em_([text5("within")]), text5(' JavaScript and our PureScript eDSL is going to bottom out to some sort of "arrays mapped over the DOM" too, we want to be able to create data models that are more sophisticated and have better invariants as these are keys to both composability and maintainable, long-lived programs.')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-4")])([text5("The Data Visualization Process")]), h3([id2("anscombe")])([text5("Why Visualize? Anscombe's Quartet")]), p_([text5("The famous Anscombe's Quartet demonstrates why visualization is essential. These four datasets have nearly identical statistical properties - same mean, variance, correlation, and linear regression line - yet reveal completely different patterns when visualized:")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), p_([text5("Summary statistics alone would suggest these datasets are interchangeable, but the visualizations tell a very different story: linear relationship, curved relationship, linear with outlier, and vertical with outlier. This perfectly illustrates why we need visualization - numbers hide patterns that become immediately obvious when seen.")]), p_([text5('Data visualization transforms "boring" - but more importantly '), em_([text5("less informative")]), text5(" tables of data into perceivable patterns. We can think of this as a pipeline in which steps 2 and 3 are the purpose of this library.")]), ol_([li_([strong_([text5("Data")]), text5(" - Raw data structures (tables, JSON, etc.)")]), li_([strong_([text5("Data structure")]), text5(" - Relationships between data elements")]), li_([strong_([text5("Data presentation")]), text5(" - Visual encoding (HTML/SVG/Canvas)")]), li_([strong_([text5("Perception")]), text5(" - Human insight and understanding")])]), p_([text5("The goal is to make relationships in data visible through appropriate visual encoding, enabling the human visual system to process patterns that would be difficult or impossible to perceive in tabular form.")]), h3([id2("heading-5")])([text5("Design philosophy of D3*")]), ul_([li_([text5("(as I understand it)")])]), p_([text5("D3's great innovation was to enable an enormous range of visualizations using some simple fundamental concepts and a small core API. It supports dataviz from simple bar charts to complex hierarchical layouts, force-directed graphs, geographic projections, and interactive dashboards. Despite their visual diversity, these visualizations share common structural patterns: data is bound to DOM elements, attributes are computed from data, and layouts determine spatial positioning.")]), p_([text5("Something that people with limited prior knowledge / experience of data visualisation often seem to find surprising is the degree to which D3 is "), em_([text5("fundamentally different")]), text5(' from "a charting library". While the library has some affordances that make it very easy to do common visualisations it is not in any way about "canned visualisations". Rather, it is a language for describing a relationship between arrays of data and arbitrary constructions of DOM (HTML or SVG) element or marks on Canvas, and it could in principle be used to do auditory "visualisation" or, who knows, maybe olfactory "visualisation" or drone displays or whatever.')]), p_([text5("Another revolutionary aspect of D3 was that it was "), em_([text5("screen/web native")]), text5(" - right from the beginning it supported responsive design, transitions, animations, force-layouts all of which are completely distinct from data visualisation on paper.")]), p_([text5("You can get a greater sense of the potential of D3 and the range of things that have thus far been produced using it at "), a([href4("https://observablehq.com/")])([text5("ObservableHQ")]), text5(".")]), h3([id2("heading-6")])([text5("Design philosophy of PS<$>D3")]), p_([text5("This library presents a slighly more formal grammar embedded in a language that is a lot better suited to larger and more long-lived projects. Whereas D3 has patterns of use that you learn, in PS<$>D3 the pattern is formalised into a grammar with an interpreter. Moreover, the same grammar can be interpreted by different interpreters directly "), em_([text5("in")]), text5(" PureScript, which, as we will see creates some powerful new uses.")]), p_([text5(`Where D3 enabled data visualisers to create movement and responsiveness, PS<$>D3 seeks to enable something that's theoretically possible in D3 but not much seen in practice and that is using the data visualisation as the user interface. This is not the same thing as "interactive visualisation" in the sense of "explorable" visualisation, ie one in which you can interact with the elements `), em_([text5("but only to manipulate the visualisation itself")]), text5(". That is a different, and more limited, sense of interaction. What we are talking about when building UI with data visualisation is leveraging the information density of data visualisation to provide direct manipulation of complex or large systems.")]), p_([text5('This is actually not a revolutionary idea - think how much of an improvement over the initial "folders of icons" on the Mac the NeXT column browser was. But it is a direction of travel that has been effectively lost during the web UI revolution of the past 20 years.')]), p_([text5("This repo and website contains one example of how this might work, the Code Explorer.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-7")])([text5("Project Goals (and non-Goals)")]), h3([id2("heading-8")])([text5("Priorities and Trade-offs")]), p_([text5("We have two principal priorities in writing this library and since you can't have two number one priorities, some trade-offs are inevitable which we will discuss here.")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Primary")]), th_([text5("Non-goals")]), th_([text5("Sub-goals")])])]), tbody_([tr_([td_([strong_([text5("Expressivity:")]), text5(" fully equivalent to D3.js")]), td_([strong_([text5("Completeness:")]), text5(" not all D3.js API surface is needed")]), td_([text5("Prefer idiomatic PureScript to exposing D3 APIs directly")])]), tr_([td_([strong_([text5("Readability:")]), text5(" as readable as D3.js equivalent")]), td_([strong_([text5("Modelling")]), text5(" of D3 state complexity thru type-system")]), td_([text5("Design for progressive enhancement")])]), tr_([td_([strong_([text5("Composable:")]), text5(' suitable for "programming in the large"')]), td_([strong_([text5("Performance")]), text5(" equality to D3")]), td_([text5("Showcase PureScript ecosystem and libraries")])])])]), h3([id2("heading-9")])([text5("Goals: details")]), h4([id2("heading-10")])([text5("Expressivity")]), p_([text5("As alluded to above, expressivity is a key to D3's success - it's not limited to some library of canned visualisations and it's far, far more than even the most parameterized control of colours and symbols. It's important not to lose that in making D3 available directly in PureScript.")]), h4([id2("heading-11")])([text5("Readability")]), p_([text5("If we look at D3.js as a kind of embedded DSL in JavaScript it is certainly clear and readable in its core feature: declaratively associating some array(s) of data with some elements in the DOM and attributes of those elements. While it is definitely not a goal to reproduce the structures of D3js own language in PureScript per se, the goal is to have the same readability, leverage the good work that Mike Bostock did in developing it. At the same time the library should be as idiomatically PureScript / Haskell style as possible.")]), h4([id2("heading-12")])([text5("Composability")]), p_([text5("A related concern to readability is composability, the separation of concerns that makes componentisation possible and which makes possible programming in the large.")]), p_([text5("YMMV but for me this is where the D3 / JavaScript approach breaks down.")]), p_([text5("If you are a PureScript or Haskell programmer you probably know what i mean by this and if you are, say, a JavaScript D3 programmer perhaps that will seem odd or even contentious.")]), p_([text5("The benefits we seek from composability include:")]), ul_([li_([text5("better composability of sub-programs")]), li_([text5("better expressiveness in describing the problem domain")]), li_([text5("better correctness in implementations (ie fewer bugs)")]), li_([text5("better ability to evolve programs due to shifting requirements (re-factoring)")])]), p_([text5("Ideally, i would like the person coding the data layer and data model to be somewhat insulated from the concerns of the person using that data model to create a visualisation. And likewise, i would like the person developing the data visualisation to be somewhat insulated from the concerns of a web app developer. Now, these might very well all be the "), em_([text5("same person")]), text5(" but separating the concerns like this makes it easier to evolve the code and, crucially, makes it all a little less brittle.")]), h3([id2("heading-13")])([text5("Non-goals: details")]), h4([id2("heading-14")])([text5("Complete API coverage")]), p_([text5("As alluded to above, there's lots of API in D3 that needs nothing more than an FFI wrapper to be accessible from a PureScript eDSL. D3 is both modular and somewhat functional in style (in the JavaScript sense of functional programming, to be clear). So it was from the start a non-goal to completely expose all of D3 as "), em_([text5("idiomatic")]), text5(" PureScript where a simple wrapper was sufficient.")]), p_([text5("Furthermore, i have only written those wrappers "), em_([text5("as I needed them")]), text5(" to there are still "), em_([text5("many")]), text5(" parts of D3 that are not covered by this eDSL.")]), p_([text5("Addendum 2025 - the advent of LLMs and coding assistance agents means that perhaps complete API coverage might arrive sooner than expected.")]), h4([id2("heading-15")])([text5("Modelling of D3 State")]), p_([text5("This might seem like a surprising choice - D3 is inherently "), em_([text5("very")]), text5(` stateful, there's state in D3, there's state in the DOM, there's statefulness in your (pure) data after you give it to D3. State everywhere. In many cases in functional programming you might try to ameliorate the dangers of this by explicitly modelling the state, using a State Monad or marking everything that changes or depends upon state as "Effect"-full.`)]), p_([text5("Indeed i have tried this approach in the past. In this library i have instead striven to isolate the statefulness to only the code that uses eDSL represented by the "), code_([text5("Selection")]), text5(" and "), code_([text5("Simulation")]), text5(" monads. This "), em_([text5("significantly")]), text5(" removes but cannot fully eliminate the issues associated with state.")]), h4([id2("heading-16")])([text5("Performance equality with D3")]), p_([text5("While this was a non-goal in practice it doesn't seem to have been a problem. Essentially, this is because PS<$>D3 simply leverages D3.js for all the performance critical aspects and because the FFI has been kept simple by the decision described in the previous section.")]), p_([text5("The performance bottlenecks in a web data visualisation are, by their nature, going to be the assignment of potentially millions of attributes to potentially millions of DOM elements. D3.js does this extremely well and the PureScript layer doesn't compromise it much, if at all.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-17")])([text5("What's a DSL? and what's an eDSL?")]), h3([id2("heading-18")])([text5("Domain Specific Language")]), p_([text5("Programming language tailored to a particular domain.")]), p_([text5("Might be limited compared to general purpose programming language.")]), p_([text5("But, may also be easier for novices, domain experts, non-programmers to use.")]), h3([id2("heading-19")])([text5("Embedded Domain Specific Language")]), p_([text5("Embedded Domain Specific Language makes domain specific tasks easier "), em_([text5("without")]), text5(" limiting the programmer in any way - they still have access to all parts of the host language.")]), p_([text5("This has Pros & Cons")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-20")])([text5("The grammar of D3...")]), p_([text5("Analyse the "), em_([text5("implicit")]), text5(" grammar of D3...")]), p_([text5("...in order to define a "), em_([text5("minimal")]), text5(" grammar for our PureScript eDSL")]), p_([text5("(consistent with priority goals of readability and expressiveness)")]), h3([id2("heading-21")])([text5("A Visual D3 Grammar")]), p_([strong_([text5("This is much simpler than D3's actual AST would be (if it had one) but it is sufficient to express a LOT of D3 scripts.")])]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Name")]), th_([text5("Function")]), th_([text5("Notes")])])]), tbody_([tr_([td_([em_([text5("attach")])]), td_([text5("Select an entry point (or points) in the DOM")]), td_([text5("Simply uses a CSS type selector to identify the target. Resulting selection can then be used for append / join in order to build up a visualisation from HTML, SVG or Canvas elements.")])]), tr_([td_([em_([text5("appendTo")])]), td_([text5("Add some DOM element "), strong_([text5("e")]), text5(" to a selection")]), td_([text5("Each element can have attributes. If data has been bound higher up in the AST then that data is available in this element's attributes")])]), tr_([td_([em_([text5("join")])]), td_([text5("For every "), em_([text5("datum")]), text5(" "), strong_([text5("d")]), text5(" in some array, insert an element "), strong_([text5("e")])]), td_([text5("We'll run the visualisation with some data model which can be arbitrary in structure, but at every point where we want to append "), em_([text5("multiple")]), text5(" elements we need to have a function that yields a simple array."), br_, br_, text5("Each element can have attributes that are derived from the datum with which it is associated."), br_, br_, text5("The datum at each element is inherited by its children, so any subsequent join starts with the structure of this datum.")])])])]), h3([id2("heading-22")])([text5("Grammar diagrams")]), h4([id2("heading-23")])([text5("3 Little Circles: the canonical simplest example")]), p_([text5("Insert Mermaid diagram here")]), pre_([code_([text5('    a        "div#hook"\n    \u2193\n    +        <svg>\n    \u2193\n    +        <g>\n    \u2193\n   <+>       [1,2,3] \u2192 <circle>')])]), p_([a([href4("https://bost.ocks.org/mike/circles/")])([text5("https://bost.ocks.org/mike/circles/")])]), h4([id2("heading-24")])([text5("Radial Tree: A more complex example")]), p_([text5("The Radial Tree and Cluster Dendrogram visualizations share the exact same structure:")]), pre_([code_([text5('    a          "div#hook"\n    \u2193\n    +          <svg>\n    \u2193\n    +          <g.links>    +          <g.nodes>    +          <g.labels>\n    \u2193                       \u2193                       \u2193\n   <+>         <path>      <+>         <circle>    <+>         <text>\n               \u2191                       \u2191                       \u2191\n            m->m.links              m->m.nodes              m->m.nodes')])]), p_([text5("All the differences are in details of how the node attributes are calculated from the data.")]), h4([id2("heading-25")])([text5("Even complex examples structurally simple")]), p_([text5("Even highly complex visualizations like "), a([href4("https://top2000.visualcinnamon.com")])([text5("Nadieh Bremer's Top 2000 visualization")]), text5(" can be expressed with this simple grammar - the complexity lies in the data transformations and attribute calculations, not in the fundamental structure.")])])]);
+  };
+  var component2 = /* @__PURE__ */ (function() {
+    return mkComponent({
+      initialState: function(v) {
+        return unit;
+      },
+      render: render2,
+      "eval": mkEval({
+        handleQuery: defaultEval.handleQuery,
+        receive: defaultEval.receive,
+        finalize: defaultEval.finalize,
+        handleAction,
+        initialize: new Just(Initialize2.value)
+      })
+    });
+  })();
+
+  // output/Data.MediaType.Common/index.js
+  var applicationJSON = "application/json";
+  var applicationFormURLEncoded = "application/x-www-form-urlencoded";
+
+  // output/Affjax.ResponseFormat/index.js
+  var identity16 = /* @__PURE__ */ identity(categoryFn);
+  var $$ArrayBuffer = /* @__PURE__ */ (function() {
+    function $$ArrayBuffer2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    $$ArrayBuffer2.create = function(value0) {
+      return new $$ArrayBuffer2(value0);
+    };
+    return $$ArrayBuffer2;
+  })();
+  var Blob = /* @__PURE__ */ (function() {
+    function Blob3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Blob3.create = function(value0) {
+      return new Blob3(value0);
+    };
+    return Blob3;
+  })();
+  var Document = /* @__PURE__ */ (function() {
+    function Document3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Document3.create = function(value0) {
+      return new Document3(value0);
+    };
+    return Document3;
+  })();
+  var Json = /* @__PURE__ */ (function() {
+    function Json3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Json3.create = function(value0) {
+      return new Json3(value0);
+    };
+    return Json3;
+  })();
+  var $$String = /* @__PURE__ */ (function() {
+    function $$String3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    $$String3.create = function(value0) {
+      return new $$String3(value0);
+    };
+    return $$String3;
+  })();
+  var Ignore = /* @__PURE__ */ (function() {
+    function Ignore2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Ignore2.create = function(value0) {
+      return new Ignore2(value0);
+    };
+    return Ignore2;
+  })();
+  var toResponseType = function(v) {
+    if (v instanceof $$ArrayBuffer) {
+      return "arraybuffer";
+    }
+    ;
+    if (v instanceof Blob) {
+      return "blob";
+    }
+    ;
+    if (v instanceof Document) {
+      return "document";
+    }
+    ;
+    if (v instanceof Json) {
+      return "text";
+    }
+    ;
+    if (v instanceof $$String) {
+      return "text";
+    }
+    ;
+    if (v instanceof Ignore) {
+      return "";
+    }
+    ;
+    throw new Error("Failed pattern match at Affjax.ResponseFormat (line 44, column 3 - line 50, column 19): " + [v.constructor.name]);
+  };
+  var toMediaType = function(v) {
+    if (v instanceof Json) {
+      return new Just(applicationJSON);
+    }
+    ;
+    return Nothing.value;
+  };
+  var string = /* @__PURE__ */ (function() {
+    return new $$String(identity16);
+  })();
+  var json = /* @__PURE__ */ (function() {
+    return new Json(identity16);
+  })();
+  var ignore = /* @__PURE__ */ (function() {
+    return new Ignore(identity16);
+  })();
+
+  // output/Affjax.Web/foreign.js
+  var driver = {
+    newXHR: function() {
+      return new XMLHttpRequest();
+    },
+    fixupUrl: function(url) {
+      return url || "/";
+    }
+  };
+
+  // output/Affjax/foreign.js
+  function _ajax(platformSpecificDriver, timeoutErrorMessageIdent, requestFailedMessageIdent, mkHeader, options2) {
+    return function(errback, callback) {
+      var xhr = platformSpecificDriver.newXHR();
+      var fixedUrl = platformSpecificDriver.fixupUrl(options2.url, xhr);
+      xhr.open(options2.method || "GET", fixedUrl, true, options2.username, options2.password);
+      if (options2.headers) {
+        try {
+          for (var i2 = 0, header2; (header2 = options2.headers[i2]) != null; i2++) {
+            xhr.setRequestHeader(header2.field, header2.value);
+          }
+        } catch (e) {
+          errback(e);
+        }
+      }
+      var onerror = function(msgIdent) {
+        return function() {
+          errback(new Error(msgIdent));
+        };
+      };
+      xhr.onerror = onerror(requestFailedMessageIdent);
+      xhr.ontimeout = onerror(timeoutErrorMessageIdent);
+      xhr.onload = function() {
+        callback({
+          status: xhr.status,
+          statusText: xhr.statusText,
+          headers: xhr.getAllResponseHeaders().split("\r\n").filter(function(header3) {
+            return header3.length > 0;
+          }).map(function(header3) {
+            var i3 = header3.indexOf(":");
+            return mkHeader(header3.substring(0, i3))(header3.substring(i3 + 2));
+          }),
+          body: xhr.response
+        });
+      };
+      xhr.responseType = options2.responseType;
+      xhr.withCredentials = options2.withCredentials;
+      xhr.timeout = options2.timeout;
+      xhr.send(options2.content);
+      return function(error4, cancelErrback, cancelCallback) {
+        try {
+          xhr.abort();
+        } catch (e) {
+          return cancelErrback(e);
+        }
+        return cancelCallback();
+      };
+    };
+  }
+
+  // output/Affjax.RequestBody/index.js
+  var ArrayView = /* @__PURE__ */ (function() {
+    function ArrayView2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ArrayView2.create = function(value0) {
+      return new ArrayView2(value0);
+    };
+    return ArrayView2;
+  })();
+  var Blob2 = /* @__PURE__ */ (function() {
+    function Blob3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Blob3.create = function(value0) {
+      return new Blob3(value0);
+    };
+    return Blob3;
+  })();
+  var Document2 = /* @__PURE__ */ (function() {
+    function Document3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Document3.create = function(value0) {
+      return new Document3(value0);
+    };
+    return Document3;
+  })();
+  var $$String2 = /* @__PURE__ */ (function() {
+    function $$String3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    $$String3.create = function(value0) {
+      return new $$String3(value0);
+    };
+    return $$String3;
+  })();
+  var FormData = /* @__PURE__ */ (function() {
+    function FormData2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    FormData2.create = function(value0) {
+      return new FormData2(value0);
+    };
+    return FormData2;
+  })();
+  var FormURLEncoded = /* @__PURE__ */ (function() {
+    function FormURLEncoded2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    FormURLEncoded2.create = function(value0) {
+      return new FormURLEncoded2(value0);
+    };
+    return FormURLEncoded2;
+  })();
+  var Json2 = /* @__PURE__ */ (function() {
+    function Json3(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Json3.create = function(value0) {
+      return new Json3(value0);
+    };
+    return Json3;
+  })();
+  var toMediaType2 = function(v) {
+    if (v instanceof FormURLEncoded) {
+      return new Just(applicationFormURLEncoded);
+    }
+    ;
+    if (v instanceof Json2) {
+      return new Just(applicationJSON);
+    }
+    ;
+    return Nothing.value;
+  };
+
+  // output/Affjax.RequestHeader/index.js
+  var unwrap5 = /* @__PURE__ */ unwrap();
+  var Accept = /* @__PURE__ */ (function() {
+    function Accept2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    Accept2.create = function(value0) {
+      return new Accept2(value0);
+    };
+    return Accept2;
+  })();
+  var ContentType = /* @__PURE__ */ (function() {
+    function ContentType2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ContentType2.create = function(value0) {
+      return new ContentType2(value0);
+    };
+    return ContentType2;
+  })();
+  var RequestHeader = /* @__PURE__ */ (function() {
+    function RequestHeader2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    RequestHeader2.create = function(value0) {
+      return function(value1) {
+        return new RequestHeader2(value0, value1);
+      };
+    };
+    return RequestHeader2;
+  })();
+  var value13 = function(v) {
+    if (v instanceof Accept) {
+      return unwrap5(v.value0);
+    }
+    ;
+    if (v instanceof ContentType) {
+      return unwrap5(v.value0);
+    }
+    ;
+    if (v instanceof RequestHeader) {
+      return v.value1;
+    }
+    ;
+    throw new Error("Failed pattern match at Affjax.RequestHeader (line 26, column 1 - line 26, column 33): " + [v.constructor.name]);
+  };
+  var name15 = function(v) {
+    if (v instanceof Accept) {
+      return "Accept";
+    }
+    ;
+    if (v instanceof ContentType) {
+      return "Content-Type";
+    }
+    ;
+    if (v instanceof RequestHeader) {
+      return v.value0;
+    }
+    ;
+    throw new Error("Failed pattern match at Affjax.RequestHeader (line 21, column 1 - line 21, column 32): " + [v.constructor.name]);
+  };
+
+  // output/Affjax.ResponseHeader/index.js
+  var ResponseHeader = /* @__PURE__ */ (function() {
+    function ResponseHeader2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    ResponseHeader2.create = function(value0) {
+      return function(value1) {
+        return new ResponseHeader2(value0, value1);
+      };
+    };
+    return ResponseHeader2;
+  })();
+
+  // output/Control.Monad.Except/index.js
+  var unwrap6 = /* @__PURE__ */ unwrap();
+  var runExcept = function($3) {
+    return unwrap6(runExceptT($3));
+  };
+
+  // output/Data.Argonaut.Core/foreign.js
+  function id4(x19) {
+    return x19;
+  }
+  function stringify(j) {
+    return JSON.stringify(j);
+  }
+
+  // output/Data.Argonaut.Core/index.js
+  var jsonEmptyObject = /* @__PURE__ */ id4(empty4);
+
+  // output/Data.Argonaut.Parser/foreign.js
+  function _jsonParser(fail3, succ, s) {
+    try {
+      return succ(JSON.parse(s));
+    } catch (e) {
+      return fail3(e.message);
+    }
+  }
+
+  // output/Data.Argonaut.Parser/index.js
+  var jsonParser = function(j) {
+    return _jsonParser(Left.create, Right.create, j);
+  };
+
+  // output/JSURI/foreign.js
+  function toRFC3896(input3) {
+    return input3.replace(/[!'()*]/g, function(c) {
+      return "%" + c.charCodeAt(0).toString(16);
+    });
+  }
+  var _encodeFormURLComponent = function encode(fail3, succeed, input3) {
+    try {
+      return succeed(toRFC3896(encodeURIComponent(input3)).replace(/%20/g, "+"));
+    } catch (err) {
+      return fail3(err);
+    }
+  };
+  function _decodeURIComponent(fail3, succeed, input3) {
+    try {
+      return succeed(decodeURIComponent(input3));
+    } catch (err) {
+      return fail3(err);
+    }
+  }
+
+  // output/JSURI/index.js
+  var encodeFormURLComponent = /* @__PURE__ */ (function() {
+    return runFn3(_encodeFormURLComponent)($$const(Nothing.value))(Just.create);
+  })();
+  var $$decodeURIComponent = /* @__PURE__ */ (function() {
+    return runFn3(_decodeURIComponent)($$const(Nothing.value))(Just.create);
+  })();
+
+  // output/Data.FormURLEncoded/index.js
+  var apply2 = /* @__PURE__ */ apply(applyMaybe);
+  var map29 = /* @__PURE__ */ map(functorMaybe);
+  var traverse2 = /* @__PURE__ */ traverse(traversableArray)(applicativeMaybe);
+  var toArray = function(v) {
+    return v;
+  };
+  var encode2 = /* @__PURE__ */ (function() {
+    var encodePart = function(v) {
+      if (v.value1 instanceof Nothing) {
+        return encodeFormURLComponent(v.value0);
+      }
+      ;
+      if (v.value1 instanceof Just) {
+        return apply2(map29(function(key) {
+          return function(val) {
+            return key + ("=" + val);
+          };
+        })(encodeFormURLComponent(v.value0)))(encodeFormURLComponent(v.value1.value0));
+      }
+      ;
+      throw new Error("Failed pattern match at Data.FormURLEncoded (line 37, column 16 - line 39, column 114): " + [v.constructor.name]);
+    };
+    var $37 = map29(joinWith("&"));
+    var $38 = traverse2(encodePart);
+    return function($39) {
+      return $37($38(toArray($39)));
+    };
+  })();
+
+  // output/Data.HTTP.Method/index.js
+  var OPTIONS = /* @__PURE__ */ (function() {
+    function OPTIONS2() {
+    }
+    ;
+    OPTIONS2.value = new OPTIONS2();
+    return OPTIONS2;
+  })();
+  var GET2 = /* @__PURE__ */ (function() {
+    function GET3() {
+    }
+    ;
+    GET3.value = new GET3();
+    return GET3;
+  })();
+  var HEAD = /* @__PURE__ */ (function() {
+    function HEAD2() {
+    }
+    ;
+    HEAD2.value = new HEAD2();
+    return HEAD2;
+  })();
+  var POST2 = /* @__PURE__ */ (function() {
+    function POST3() {
+    }
+    ;
+    POST3.value = new POST3();
+    return POST3;
+  })();
+  var PUT = /* @__PURE__ */ (function() {
+    function PUT2() {
+    }
+    ;
+    PUT2.value = new PUT2();
+    return PUT2;
+  })();
+  var DELETE = /* @__PURE__ */ (function() {
+    function DELETE2() {
+    }
+    ;
+    DELETE2.value = new DELETE2();
+    return DELETE2;
+  })();
+  var TRACE = /* @__PURE__ */ (function() {
+    function TRACE2() {
+    }
+    ;
+    TRACE2.value = new TRACE2();
+    return TRACE2;
+  })();
+  var CONNECT = /* @__PURE__ */ (function() {
+    function CONNECT2() {
+    }
+    ;
+    CONNECT2.value = new CONNECT2();
+    return CONNECT2;
+  })();
+  var PROPFIND = /* @__PURE__ */ (function() {
+    function PROPFIND2() {
+    }
+    ;
+    PROPFIND2.value = new PROPFIND2();
+    return PROPFIND2;
+  })();
+  var PROPPATCH = /* @__PURE__ */ (function() {
+    function PROPPATCH2() {
+    }
+    ;
+    PROPPATCH2.value = new PROPPATCH2();
+    return PROPPATCH2;
+  })();
+  var MKCOL = /* @__PURE__ */ (function() {
+    function MKCOL2() {
+    }
+    ;
+    MKCOL2.value = new MKCOL2();
+    return MKCOL2;
+  })();
+  var COPY = /* @__PURE__ */ (function() {
+    function COPY2() {
+    }
+    ;
+    COPY2.value = new COPY2();
+    return COPY2;
+  })();
+  var MOVE = /* @__PURE__ */ (function() {
+    function MOVE2() {
+    }
+    ;
+    MOVE2.value = new MOVE2();
+    return MOVE2;
+  })();
+  var LOCK = /* @__PURE__ */ (function() {
+    function LOCK2() {
+    }
+    ;
+    LOCK2.value = new LOCK2();
+    return LOCK2;
+  })();
+  var UNLOCK = /* @__PURE__ */ (function() {
+    function UNLOCK2() {
+    }
+    ;
+    UNLOCK2.value = new UNLOCK2();
+    return UNLOCK2;
+  })();
+  var PATCH = /* @__PURE__ */ (function() {
+    function PATCH2() {
+    }
+    ;
+    PATCH2.value = new PATCH2();
+    return PATCH2;
+  })();
+  var unCustomMethod = function(v) {
+    return v;
+  };
+  var showMethod = {
+    show: function(v) {
+      if (v instanceof OPTIONS) {
+        return "OPTIONS";
+      }
+      ;
+      if (v instanceof GET2) {
+        return "GET";
+      }
+      ;
+      if (v instanceof HEAD) {
+        return "HEAD";
+      }
+      ;
+      if (v instanceof POST2) {
+        return "POST";
+      }
+      ;
+      if (v instanceof PUT) {
+        return "PUT";
+      }
+      ;
+      if (v instanceof DELETE) {
+        return "DELETE";
+      }
+      ;
+      if (v instanceof TRACE) {
+        return "TRACE";
+      }
+      ;
+      if (v instanceof CONNECT) {
+        return "CONNECT";
+      }
+      ;
+      if (v instanceof PROPFIND) {
+        return "PROPFIND";
+      }
+      ;
+      if (v instanceof PROPPATCH) {
+        return "PROPPATCH";
+      }
+      ;
+      if (v instanceof MKCOL) {
+        return "MKCOL";
+      }
+      ;
+      if (v instanceof COPY) {
+        return "COPY";
+      }
+      ;
+      if (v instanceof MOVE) {
+        return "MOVE";
+      }
+      ;
+      if (v instanceof LOCK) {
+        return "LOCK";
+      }
+      ;
+      if (v instanceof UNLOCK) {
+        return "UNLOCK";
+      }
+      ;
+      if (v instanceof PATCH) {
+        return "PATCH";
+      }
+      ;
+      throw new Error("Failed pattern match at Data.HTTP.Method (line 43, column 1 - line 59, column 23): " + [v.constructor.name]);
+    }
+  };
+  var print6 = /* @__PURE__ */ either(/* @__PURE__ */ show(showMethod))(unCustomMethod);
+
+  // output/Effect.Aff.Compat/index.js
+  var fromEffectFnAff = function(v) {
+    return makeAff(function(k) {
+      return function __do3() {
+        var v1 = v(function($9) {
+          return k(Left.create($9))();
+        }, function($10) {
+          return k(Right.create($10))();
+        });
+        return function(e) {
+          return makeAff(function(k2) {
+            return function __do4() {
+              v1(e, function($11) {
+                return k2(Left.create($11))();
+              }, function($12) {
+                return k2(Right.create($12))();
+              });
+              return nonCanceler;
+            };
+          });
+        };
+      };
+    });
+  };
+
+  // output/Affjax/index.js
+  var pure16 = /* @__PURE__ */ pure(/* @__PURE__ */ applicativeExceptT(monadIdentity));
+  var fail2 = /* @__PURE__ */ fail(monadIdentity);
+  var unsafeReadTagged2 = /* @__PURE__ */ unsafeReadTagged(monadIdentity);
+  var alt8 = /* @__PURE__ */ alt(/* @__PURE__ */ altExceptT(semigroupNonEmptyList)(monadIdentity));
+  var composeKleisliFlipped3 = /* @__PURE__ */ composeKleisliFlipped(/* @__PURE__ */ bindExceptT(monadIdentity));
+  var map30 = /* @__PURE__ */ map(functorMaybe);
+  var any3 = /* @__PURE__ */ any(foldableArray)(heytingAlgebraBoolean);
+  var eq3 = /* @__PURE__ */ eq(eqString);
+  var bindFlipped9 = /* @__PURE__ */ bindFlipped(bindMaybe);
+  var map111 = /* @__PURE__ */ map(functorArray);
+  var mapFlipped2 = /* @__PURE__ */ mapFlipped(functorAff);
+  var $$try3 = /* @__PURE__ */ $$try(monadErrorAff);
+  var pure17 = /* @__PURE__ */ pure(applicativeAff);
+  var RequestContentError = /* @__PURE__ */ (function() {
+    function RequestContentError2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    RequestContentError2.create = function(value0) {
+      return new RequestContentError2(value0);
+    };
+    return RequestContentError2;
+  })();
+  var ResponseBodyError = /* @__PURE__ */ (function() {
+    function ResponseBodyError2(value0, value1) {
+      this.value0 = value0;
+      this.value1 = value1;
+    }
+    ;
+    ResponseBodyError2.create = function(value0) {
+      return function(value1) {
+        return new ResponseBodyError2(value0, value1);
+      };
+    };
+    return ResponseBodyError2;
+  })();
+  var TimeoutError = /* @__PURE__ */ (function() {
+    function TimeoutError2() {
+    }
+    ;
+    TimeoutError2.value = new TimeoutError2();
+    return TimeoutError2;
+  })();
+  var RequestFailedError = /* @__PURE__ */ (function() {
+    function RequestFailedError2() {
+    }
+    ;
+    RequestFailedError2.value = new RequestFailedError2();
+    return RequestFailedError2;
+  })();
+  var XHROtherError = /* @__PURE__ */ (function() {
+    function XHROtherError2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    XHROtherError2.create = function(value0) {
+      return new XHROtherError2(value0);
+    };
+    return XHROtherError2;
+  })();
+  var request2 = function(driver2) {
+    return function(req2) {
+      var parseJSON = function(v2) {
+        if (v2 === "") {
+          return pure16(jsonEmptyObject);
+        }
+        ;
+        return either(function($74) {
+          return fail2(ForeignError.create($74));
+        })(pure16)(jsonParser(v2));
+      };
+      var fromResponse = (function() {
+        if (req2.responseFormat instanceof $$ArrayBuffer) {
+          return unsafeReadTagged2("ArrayBuffer");
+        }
+        ;
+        if (req2.responseFormat instanceof Blob) {
+          return unsafeReadTagged2("Blob");
+        }
+        ;
+        if (req2.responseFormat instanceof Document) {
+          return function(x19) {
+            return alt8(unsafeReadTagged2("Document")(x19))(alt8(unsafeReadTagged2("XMLDocument")(x19))(unsafeReadTagged2("HTMLDocument")(x19)));
+          };
+        }
+        ;
+        if (req2.responseFormat instanceof Json) {
+          return composeKleisliFlipped3(function($75) {
+            return req2.responseFormat.value0(parseJSON($75));
+          })(unsafeReadTagged2("String"));
+        }
+        ;
+        if (req2.responseFormat instanceof $$String) {
+          return unsafeReadTagged2("String");
+        }
+        ;
+        if (req2.responseFormat instanceof Ignore) {
+          return $$const(req2.responseFormat.value0(pure16(unit)));
+        }
+        ;
+        throw new Error("Failed pattern match at Affjax (line 274, column 18 - line 283, column 57): " + [req2.responseFormat.constructor.name]);
+      })();
+      var extractContent = function(v2) {
+        if (v2 instanceof ArrayView) {
+          return new Right(v2.value0(unsafeToForeign));
+        }
+        ;
+        if (v2 instanceof Blob2) {
+          return new Right(unsafeToForeign(v2.value0));
+        }
+        ;
+        if (v2 instanceof Document2) {
+          return new Right(unsafeToForeign(v2.value0));
+        }
+        ;
+        if (v2 instanceof $$String2) {
+          return new Right(unsafeToForeign(v2.value0));
+        }
+        ;
+        if (v2 instanceof FormData) {
+          return new Right(unsafeToForeign(v2.value0));
+        }
+        ;
+        if (v2 instanceof FormURLEncoded) {
+          return note("Body contains values that cannot be encoded as application/x-www-form-urlencoded")(map30(unsafeToForeign)(encode2(v2.value0)));
+        }
+        ;
+        if (v2 instanceof Json2) {
+          return new Right(unsafeToForeign(stringify(v2.value0)));
+        }
+        ;
+        throw new Error("Failed pattern match at Affjax (line 235, column 20 - line 250, column 69): " + [v2.constructor.name]);
+      };
+      var addHeader = function(mh) {
+        return function(hs) {
+          if (mh instanceof Just && !any3(on(eq3)(name15)(mh.value0))(hs)) {
+            return snoc(hs)(mh.value0);
+          }
+          ;
+          return hs;
+        };
+      };
+      var headers = function(reqContent) {
+        return addHeader(map30(ContentType.create)(bindFlipped9(toMediaType2)(reqContent)))(addHeader(map30(Accept.create)(toMediaType(req2.responseFormat)))(req2.headers));
+      };
+      var ajaxRequest = function(v2) {
+        return {
+          method: print6(req2.method),
+          url: req2.url,
+          headers: map111(function(h) {
+            return {
+              field: name15(h),
+              value: value13(h)
+            };
+          })(headers(req2.content)),
+          content: v2,
+          responseType: toResponseType(req2.responseFormat),
+          username: toNullable(req2.username),
+          password: toNullable(req2.password),
+          withCredentials: req2.withCredentials,
+          timeout: fromMaybe(0)(map30(function(v1) {
+            return v1;
+          })(req2.timeout))
+        };
+      };
+      var send = function(content3) {
+        return mapFlipped2($$try3(fromEffectFnAff(_ajax(driver2, "AffjaxTimeoutErrorMessageIdent", "AffjaxRequestFailedMessageIdent", ResponseHeader.create, ajaxRequest(content3)))))(function(v2) {
+          if (v2 instanceof Right) {
+            var v1 = runExcept(fromResponse(v2.value0.body));
+            if (v1 instanceof Left) {
+              return new Left(new ResponseBodyError(head3(v1.value0), v2.value0));
+            }
+            ;
+            if (v1 instanceof Right) {
+              return new Right({
+                headers: v2.value0.headers,
+                status: v2.value0.status,
+                statusText: v2.value0.statusText,
+                body: v1.value0
+              });
+            }
+            ;
+            throw new Error("Failed pattern match at Affjax (line 209, column 9 - line 211, column 52): " + [v1.constructor.name]);
+          }
+          ;
+          if (v2 instanceof Left) {
+            return new Left((function() {
+              var message2 = message(v2.value0);
+              var $61 = message2 === "AffjaxTimeoutErrorMessageIdent";
+              if ($61) {
+                return TimeoutError.value;
+              }
+              ;
+              var $62 = message2 === "AffjaxRequestFailedMessageIdent";
+              if ($62) {
+                return RequestFailedError.value;
+              }
+              ;
+              return new XHROtherError(v2.value0);
+            })());
+          }
+          ;
+          throw new Error("Failed pattern match at Affjax (line 207, column 144 - line 219, column 28): " + [v2.constructor.name]);
+        });
+      };
+      if (req2.content instanceof Nothing) {
+        return send(toNullable(Nothing.value));
+      }
+      ;
+      if (req2.content instanceof Just) {
+        var v = extractContent(req2.content.value0);
+        if (v instanceof Right) {
+          return send(toNullable(new Just(v.value0)));
+        }
+        ;
+        if (v instanceof Left) {
+          return pure17(new Left(new RequestContentError(v.value0)));
+        }
+        ;
+        throw new Error("Failed pattern match at Affjax (line 199, column 7 - line 203, column 48): " + [v.constructor.name]);
+      }
+      ;
+      throw new Error("Failed pattern match at Affjax (line 195, column 3 - line 203, column 48): " + [req2.content.constructor.name]);
+    };
+  };
+  var defaultRequest = /* @__PURE__ */ (function() {
+    return {
+      method: new Left(GET2.value),
+      url: "/",
+      headers: [],
+      content: Nothing.value,
+      username: Nothing.value,
+      password: Nothing.value,
+      withCredentials: false,
+      responseFormat: ignore,
+      timeout: Nothing.value
+    };
+  })();
+  var get4 = function(driver2) {
+    return function(rf) {
+      return function(u2) {
+        return request2(driver2)({
+          method: defaultRequest.method,
+          headers: defaultRequest.headers,
+          content: defaultRequest.content,
+          username: defaultRequest.username,
+          password: defaultRequest.password,
+          withCredentials: defaultRequest.withCredentials,
+          timeout: defaultRequest.timeout,
+          url: u2,
+          responseFormat: rf
+        });
+      };
+    };
+  };
+
+  // output/Affjax.Web/index.js
+  var get5 = /* @__PURE__ */ get4(driver);
+
+  // output/D3.Viz.BubbleChart/index.js
+  var pure18 = /* @__PURE__ */ pure(applicativeAff);
+  var classed3 = /* @__PURE__ */ classed(toAttrString);
+  var width10 = /* @__PURE__ */ width8(toAttrNumber);
+  var height10 = /* @__PURE__ */ height8(toAttrNumber);
+  var cx3 = /* @__PURE__ */ cx(toAttrNumber);
+  var cy3 = /* @__PURE__ */ cy(toAttrNumber);
+  var radius3 = /* @__PURE__ */ radius(toAttrNumber);
+  var fill3 = /* @__PURE__ */ fill(toAttrString);
+  var fillOpacity2 = /* @__PURE__ */ fillOpacity(toAttrNumber);
+  var strokeColor3 = /* @__PURE__ */ strokeColor(toAttrString);
+  var strokeWidth3 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var discard7 = /* @__PURE__ */ discard(discardUnit);
+  var x5 = /* @__PURE__ */ x(toAttrNumber);
+  var y5 = /* @__PURE__ */ y(toAttrNumber);
+  var text8 = /* @__PURE__ */ text6(toAttrString);
+  var textAnchor3 = /* @__PURE__ */ textAnchor(toAttrString);
+  var fontSize3 = /* @__PURE__ */ fontSize(toAttrNumber);
+  var min7 = /* @__PURE__ */ min(ordNumber);
+  var loadFlareData = /* @__PURE__ */ bind(bindAff)(/* @__PURE__ */ get5(json)("./data/flare-2.json"))(function(result) {
+    if (result instanceof Left) {
+      return pure18({
+        name: "error",
+        children: []
+      });
+    }
+    ;
+    if (result instanceof Right) {
+      return pure18(result.value0.body);
+    }
+    ;
+    throw new Error("Failed pattern match at D3.Viz.BubbleChart (line 25, column 3 - line 30, column 25): " + [result.constructor.name]);
+  });
+  var getName = function(node) {
+    return node.data.name;
+  };
+  var depthColor = function(depth) {
+    if (depth === 0) {
+      return "#e74c3c";
+    }
+    ;
+    if (depth === 1) {
+      return "#3498db";
+    }
+    ;
+    if (depth === 2) {
+      return "#2ecc71";
+    }
+    ;
+    if (depth === 3) {
+      return "#f39c12";
+    }
+    ;
+    if (depth === 4) {
+      return "#9b59b6";
+    }
+    ;
+    return "#95a5a6";
+  };
+  var draw = function(dictBind) {
+    var bind27 = bind(dictBind);
+    var discard111 = discard7(dictBind);
+    return function(dictMonadEffect) {
+      var Applicative0 = dictMonadEffect.Monad0().Applicative0();
+      var when5 = when(Applicative0);
+      var pure112 = pure(Applicative0);
+      var traverse_7 = traverse_(Applicative0)(foldableArray);
+      return function(dictSelectionM) {
+        var attach2 = attach(dictSelectionM);
+        var appendTo2 = appendTo(dictSelectionM);
+        return function(jsonData) {
+          return function(selector) {
+            var dims = {
+              width: 900,
+              height: 900
+            };
+            return bind27(attach2(selector))(function(v) {
+              return bind27(appendTo2(v)(Svg.value)([viewBox(0)(0)(dims.width)(dims.height), classed3("bubble-chart"), width10(dims.width), height10(dims.height)]))(function(svg2) {
+                return bind27(appendTo2(svg2)(Group.value)([classed3("bubbles")]))(function(chartGroup) {
+                  var hierarchy = hierarchyFromJSON_(jsonData);
+                  var sortedHierarchy = treeSortForCirclePack_(hierarchy);
+                  var packLayout0 = packLayout_(unit);
+                  var packLayout1 = packSetSize_(packLayout0)(dims.width)(dims.height);
+                  var packLayout = packSetPadding_(packLayout1)(2);
+                  var packedRoot = runPackLayout_(packLayout)(sortedHierarchy);
+                  var nodes = descendants_(packedRoot);
+                  var drawBubble = function(node) {
+                    var xPos = hNodeX_(node);
+                    var yPos = hNodeY_(node);
+                    var r = hNodeR_(node);
+                    var depth = hNodeDepth_(node);
+                    var name16 = getName(node);
+                    return when5(r > 0)(bind27(appendTo2(chartGroup)(Circle.value)([cx3(xPos), cy3(yPos), radius3(r), fill3(depthColor(round2(depth))), fillOpacity2(0.7), strokeColor3("#ffffff"), strokeWidth3(1), classed3("bubble")]))(function() {
+                      return discard111(when5(r > 20)(bind27(appendTo2(chartGroup)(Text2.value)([x5(xPos), y5(yPos), text8(name16), textAnchor3("middle"), fontSize3(min7(12)(r / 3)), fill3("#ffffff"), classed3("bubble-label")]))(function() {
+                        return pure112(unit);
+                      })))(function() {
+                        return pure112(unit);
+                      });
+                    }));
+                  };
+                  return bind27(traverse_7(drawBubble)(nodes))(function() {
+                    return pure112(unit);
+                  });
+                });
+              });
+            });
+          };
+        };
+      };
+    };
+  };
+
+  // output/PSD3.BubbleChart/index.js
+  var bind9 = /* @__PURE__ */ bind(bindHalogenM);
+  var liftAff2 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
+  var liftEffect8 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var draw2 = /* @__PURE__ */ draw(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var pure19 = /* @__PURE__ */ pure(applicativeHalogenM);
   var type_19 = /* @__PURE__ */ type_17(isPropButtonType);
@@ -13446,8 +17091,8 @@
     return Initialize11;
   })();
   var handleAction2 = function(v) {
-    return bind8(liftAff2(loadFlareData))(function(jsonData) {
-      return bind8(liftEffect7(eval_D3M(draw2(jsonData)("div.bubble-viz"))))(function() {
+    return bind9(liftAff2(loadFlareData))(function(jsonData) {
+      return bind9(liftEffect8(eval_D3M(draw2(jsonData)("div.bubble-viz"))))(function() {
         return pure19(unit);
       });
     });
@@ -13475,15 +17120,15 @@
   })();
 
   // output/D3.Viz.ChordDiagram/index.js
-  var classed3 = /* @__PURE__ */ classed(toAttrString);
-  var width10 = /* @__PURE__ */ width8(toAttrNumber);
-  var height10 = /* @__PURE__ */ height8(toAttrNumber);
-  var show6 = /* @__PURE__ */ show(showNumber);
+  var classed4 = /* @__PURE__ */ classed(toAttrString);
+  var width11 = /* @__PURE__ */ width8(toAttrNumber);
+  var height11 = /* @__PURE__ */ height8(toAttrNumber);
+  var show7 = /* @__PURE__ */ show(showNumber);
   var d4 = /* @__PURE__ */ d2(toAttrString);
-  var fill3 = /* @__PURE__ */ fill(toAttrString);
+  var fill4 = /* @__PURE__ */ fill(toAttrString);
   var fillOpacity3 = /* @__PURE__ */ fillOpacity(toAttrNumber);
-  var strokeColor3 = /* @__PURE__ */ strokeColor(toAttrString);
-  var strokeWidth3 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var strokeColor4 = /* @__PURE__ */ strokeColor(toAttrString);
+  var strokeWidth4 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var getSourceIndex = function(d1) {
     return d1.source.index;
   };
@@ -13491,7 +17136,7 @@
   var exampleLabels = ["Data Structures", "Algorithms", "Patterns", "Testing", "Architecture"];
   var colors = ["#e74c3c", "#3498db", "#2ecc71", "#f39c12", "#9b59b6"];
   var draw3 = function(dictBind) {
-    var bind26 = bind(dictBind);
+    var bind27 = bind(dictBind);
     return function(dictMonadEffect) {
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
       var pure33 = pure(Applicative0);
@@ -13509,11 +17154,11 @@
               };
               var centerX = dims.width / 2;
               var centerY = dims.height / 2;
-              return bind26(attach2(selector))(function(v1) {
-                return bind26(appendTo2(v1)(Svg.value)([viewBox(0)(0)(dims.width)(dims.height), classed3("chord-diagram"), width10(dims.width), height10(dims.height)]))(function(svg2) {
-                  return bind26(appendTo2(svg2)(Group.value)([transform([function(v2) {
-                    return "translate(" + (show6(centerX) + ("," + (show6(centerY) + ")")));
-                  }]), classed3("chord-group")]))(function(centerGroup) {
+              return bind27(attach2(selector))(function(v1) {
+                return bind27(appendTo2(v1)(Svg.value)([viewBox(0)(0)(dims.width)(dims.height), classed4("chord-diagram"), width11(dims.width), height11(dims.height)]))(function(svg2) {
+                  return bind27(appendTo2(svg2)(Group.value)([transform([function(v2) {
+                    return "translate(" + (show7(centerX) + ("," + (show7(centerY) + ")")));
+                  }]), classed4("chord-group")]))(function(centerGroup) {
                     var chordData = chordLayout_(matrix);
                     var groups = chordGroups_(chordData);
                     var chords = chordArray_(chordData);
@@ -13522,7 +17167,7 @@
                     var arcGen0 = arcGenerator_(unit);
                     var arcGen1 = setArcInnerRadius_(arcGen0)(290);
                     var arcGen = setArcOuterRadius_(arcGen1)(300);
-                    return bind26(appendTo2(centerGroup)(Group.value)([classed3("ribbons")]))(function(ribbonsGroup) {
+                    return bind27(appendTo2(centerGroup)(Group.value)([classed4("ribbons")]))(function(ribbonsGroup) {
                       var drawRibbon = function(chord) {
                         var sourceIdx = getSourceIndex(chord);
                         var color2 = (function() {
@@ -13538,13 +17183,13 @@
                           throw new Error("Failed pattern match at D3.Viz.ChordDiagram (line 102, column 21 - line 104, column 43): " + [v2.constructor.name]);
                         })();
                         var pathData = ribbonPath_(ribbonGen)(chord);
-                        return bind26(appendTo2(ribbonsGroup)(Path2.value)([d4(pathData), fill3(color2), fillOpacity3(0.67), strokeColor3("#000000"), strokeWidth3(0.5), classed3("ribbon")]))(function() {
+                        return bind27(appendTo2(ribbonsGroup)(Path.value)([d4(pathData), fill4(color2), fillOpacity3(0.67), strokeColor4("#000000"), strokeWidth4(0.5), classed4("ribbon")]))(function() {
                           return pure33(unit);
                         });
                       };
-                      return bind26(traverse_7(drawRibbon)(chords))(function() {
-                        return bind26(appendTo2(centerGroup)(Group.value)([classed3("arcs")]))(function(arcsGroup) {
-                          return bind26(simpleJoin2(arcsGroup)(Group.value)(groups)(keyIsID_))(function(groupsJoin) {
+                      return bind27(traverse_7(drawRibbon)(chords))(function() {
+                        return bind27(appendTo2(centerGroup)(Group.value)([classed4("arcs")]))(function(arcsGroup) {
+                          return bind27(simpleJoin2(arcsGroup)(Group.value)(groups)(keyIsID_))(function(groupsJoin) {
                             var drawArc = function(idx) {
                               return function(group3) {
                                 var color2 = (function() {
@@ -13560,12 +17205,12 @@
                                   throw new Error("Failed pattern match at D3.Viz.ChordDiagram (line 125, column 21 - line 127, column 43): " + [v2.constructor.name]);
                                 })();
                                 var pathData = arcPath_(arcGen)(group3);
-                                return bind26(appendTo2(groupsJoin)(Path2.value)([d4(pathData), fill3(color2), strokeColor3("#ffffff"), strokeWidth3(2), classed3("arc")]))(function() {
+                                return bind27(appendTo2(groupsJoin)(Path.value)([d4(pathData), fill4(color2), strokeColor4("#ffffff"), strokeWidth4(2), classed4("arc")]))(function() {
                                   return pure33(unit);
                                 });
                               };
                             };
-                            return bind26(traverse_7(function(idx) {
+                            return bind27(traverse_7(function(idx) {
                               var v2 = index2(groups)(idx);
                               if (v2 instanceof Just) {
                                 return drawArc(idx)(v2.value0);
@@ -13594,8 +17239,8 @@
   };
 
   // output/PSD3.ChordDiagram/index.js
-  var bind9 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftEffect8 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  var bind10 = /* @__PURE__ */ bind(bindHalogenM);
+  var liftEffect9 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var draw4 = /* @__PURE__ */ draw3(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var pure20 = /* @__PURE__ */ pure(applicativeHalogenM);
   var type_20 = /* @__PURE__ */ type_17(isPropButtonType);
@@ -13612,7 +17257,7 @@
     return Initialize11;
   })();
   var handleAction3 = function(v) {
-    return bind9(liftEffect8(eval_D3M(draw4(exampleMatrix)(exampleLabels)("div.chord-viz"))))(function() {
+    return bind10(liftEffect9(eval_D3M(draw4(exampleMatrix)(exampleLabels)("div.chord-viz"))))(function() {
       return pure20(unit);
     });
   };
@@ -13696,7 +17341,7 @@
   };
 
   // output/Data.Profunctor.Choice/index.js
-  var right = function(dict) {
+  var right2 = function(dict) {
     return dict.right;
   };
   var choiceFn = {
@@ -13790,16 +17435,16 @@
   };
 
   // output/Data.Lens.Prism/index.js
-  var identity14 = /* @__PURE__ */ identity(categoryFn);
+  var identity17 = /* @__PURE__ */ identity(categoryFn);
   var prism = function(to2) {
     return function(fro) {
       return function(dictChoice) {
         var Profunctor0 = dictChoice.Profunctor0();
         var dimap2 = dimap(Profunctor0);
-        var right4 = right(dictChoice);
+        var right4 = right2(dictChoice);
         var rmap5 = rmap(Profunctor0);
         return function(pab) {
-          return dimap2(fro)(either(identity14)(identity14))(right4(rmap5(to2)(pab)));
+          return dimap2(fro)(either(identity17)(identity17))(right4(rmap5(to2)(pab)));
         };
       };
     };
@@ -13816,7 +17461,7 @@
   var foldr4 = /* @__PURE__ */ foldr(foldableList);
   var fromFoldable1 = /* @__PURE__ */ fromFoldable3(foldableList);
   var unsafeIndex2 = /* @__PURE__ */ unsafeIndex();
-  var bind10 = /* @__PURE__ */ bind(bindST);
+  var bind11 = /* @__PURE__ */ bind(bindST);
   var pure21 = /* @__PURE__ */ pure(applicativeST);
   var tailRecM22 = /* @__PURE__ */ tailRecM2(monadRecST);
   var $$Set = function(x19) {
@@ -13869,7 +17514,7 @@
       };
     }
   };
-  var empty7 = empty2;
+  var empty8 = empty2;
   var fromFoldable5 = function(dictFoldable) {
     var foldl22 = foldl(dictFoldable);
     return function(dictOrd) {
@@ -13878,7 +17523,7 @@
         return function(a2) {
           return insert13(a2)(m);
         };
-      })(empty7);
+      })(empty8);
     };
   };
   var fromFoldable22 = /* @__PURE__ */ fromFoldable5(foldableArray);
@@ -13932,7 +17577,7 @@
           };
           return tailRecM22(go2)(0)(0);
         };
-        return fromFoldable32(bind10(bind10(newSTArray)(intersect2))(unsafeFreeze)());
+        return fromFoldable32(bind11(bind11(newSTArray)(intersect2))(unsafeFreeze)());
       };
     };
   };
@@ -13957,7 +17602,7 @@
   var over2 = function(l) {
     return l;
   };
-  var set = function(l) {
+  var set3 = function(l) {
     return function(b2) {
       return over2(l)($$const(b2));
     };
@@ -13976,16 +17621,16 @@
     var modify5 = modify(dictMonadState);
     return function(p2) {
       return function(b2) {
-        return $$void11(modify5(set(p2)(b2)));
+        return $$void11(modify5(set3(p2)(b2)));
       };
     };
   };
 
   // output/Data.Lens.Getter/index.js
   var unwrap7 = /* @__PURE__ */ unwrap();
-  var identity15 = /* @__PURE__ */ identity(categoryFn);
+  var identity18 = /* @__PURE__ */ identity(categoryFn);
   var view = function(l) {
-    return unwrap7(l(identity15));
+    return unwrap7(l(identity18));
   };
   var viewOn = function(s) {
     return function(l) {
@@ -14002,7 +17647,7 @@
   };
 
   // output/Record/index.js
-  var set2 = function(dictIsSymbol) {
+  var set4 = function(dictIsSymbol) {
     var reflectSymbol2 = reflectSymbol(dictIsSymbol);
     return function() {
       return function() {
@@ -14016,7 +17661,7 @@
       };
     };
   };
-  var get4 = function(dictIsSymbol) {
+  var get6 = function(dictIsSymbol) {
     var reflectSymbol2 = reflectSymbol(dictIsSymbol);
     return function() {
       return function(l) {
@@ -14029,8 +17674,8 @@
 
   // output/Data.Lens.Record/index.js
   var prop3 = function(dictIsSymbol) {
-    var get8 = get4(dictIsSymbol)();
-    var set5 = set2(dictIsSymbol)()();
+    var get8 = get6(dictIsSymbol)();
+    var set5 = set4(dictIsSymbol)()();
     return function() {
       return function() {
         return function(l) {
@@ -14560,7 +18205,7 @@
   }
 
   // output/Utility/index.js
-  var map30 = /* @__PURE__ */ map(functorNonEmptyArray);
+  var map31 = /* @__PURE__ */ map(functorNonEmptyArray);
   var getWindowWidthHeight = function __do2() {
     var win = windowImpl();
     var w = innerWidth(win)();
@@ -14585,18 +18230,18 @@
   };
   var chunk = function(tuples) {
     var $$package = snd(head5(tuples));
-    var contains3 = toArray2(map30(fst)(tuples));
+    var contains3 = toArray2(map31(fst)(tuples));
     return new Tuple($$package, contains3);
   };
 
   // output/D3.Viz.Spago.Files/index.js
   var append6 = /* @__PURE__ */ append(semigroupArray);
-  var map31 = /* @__PURE__ */ map(functorArray);
+  var map32 = /* @__PURE__ */ map(functorArray);
   var fromFoldableWith2 = /* @__PURE__ */ fromFoldableWith(ordString)(foldableArray);
   var lookup7 = /* @__PURE__ */ lookup(ordString);
   var fromFoldable6 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
   var mapFlipped3 = /* @__PURE__ */ mapFlipped(functorArray);
-  var bind11 = /* @__PURE__ */ bind(bindMaybe);
+  var bind15 = /* @__PURE__ */ bind(bindMaybe);
   var sum2 = /* @__PURE__ */ sum(foldableArray)(semiringNumber);
   var equalSnd2 = /* @__PURE__ */ equalSnd(eqString);
   var compareSnd2 = /* @__PURE__ */ compareSnd(ordString);
@@ -14730,9 +18375,9 @@
     return eq22(v.linktype)(M2M_Graph.value);
   };
   var getGraphJSONData = function(v) {
-    var names = append6(map31(function(v1) {
+    var names = append6(map32(function(v1) {
       return v1.key;
-    })(v.modules))(map31(function(v1) {
+    })(v.modules))(map32(function(v1) {
       return v1.key;
     })(v.packages));
     var makeModuleToPackageLink = function(m) {
@@ -14773,7 +18418,7 @@
         nodetype: new IsModule(m.path),
         inSim: true,
         links: {
-          targets: map31(getId)(m.depends),
+          targets: map32(getId)(m.depends),
           sources: [],
           treeChildren: [],
           inPackage: [],
@@ -14794,11 +18439,11 @@
         var makeTuple = function(s) {
           return new Tuple(id5, getId(s));
         };
-        return append6(map31(makeTuple)(a2.depends))(b2);
+        return append6(map32(makeTuple)(a2.depends))(b2);
       };
     };
-    var moduleLinks = map31(makeLink(M2M_Graph.value))(foldl2(foldDepends)([])(v.modules));
-    var packageLinks = map31(makeLink(P2P.value))(foldl2(foldDepends)([])(v.packages));
+    var moduleLinks = map32(makeLink(M2M_Graph.value))(foldl2(foldDepends)([])(v.modules));
+    var packageLinks = map32(makeLink(P2P.value))(foldl2(foldDepends)([])(v.packages));
     var depsMap = fromFoldable6(mapFlipped3(v.lsDeps)(function(d7) {
       return new Tuple(d7.packageName, {
         version: d7.version,
@@ -14820,12 +18465,12 @@
         containerName: p2.key,
         loc: p2.loc,
         links: {
-          targets: map31(getId)(p2.depends),
+          targets: map32(getId)(p2.depends),
           sources: [],
           treeChildren: [],
           inPackage: [],
           outPackage: [],
-          contains: map31(getId)(p2.contains)
+          contains: map32(getId)(p2.contains)
         },
         connected: true,
         showChildren: true,
@@ -14838,8 +18483,8 @@
     var addPackageInfo = function(v1) {
       var packageName = (function() {
         var pieces = split("/")(v1.path);
-        return bind11(index2(pieces)(0))(function(root3) {
-          return bind11(index2(pieces)(1))(function(packageString) {
+        return bind15(index2(pieces)(0))(function(root3) {
+          return bind15(index2(pieces)(1))(function(packageString) {
             if (root3 === ".spago") {
               var $63 = packageString === "p";
               if ($63) {
@@ -14866,22 +18511,22 @@
         "package": $$package
       };
     };
-    var modulesPL = map31(addPackageInfo)(v.modules);
-    var mapNamesToModules = fromFoldable6(map31(function(m) {
+    var modulesPL = map32(addPackageInfo)(v.modules);
+    var mapNamesToModules = fromFoldable6(map32(function(m) {
       return new Tuple(m.key, m);
     })(modulesPL));
     var maybeModules = function(ms) {
-      return catMaybes(map31(function(k) {
+      return catMaybes(map32(function(k) {
         return lookup7(k)(mapNamesToModules);
       })(ms));
     };
     var rollUpLOC = function(ms) {
-      return sum2(map31(function(v1) {
+      return sum2(map32(function(v1) {
         return v1.loc;
       })(maybeModules(ms)));
     };
-    var moduleNodes = map31(makeNodeFromModuleJSONPL)(modulesPL);
-    var modulePackageLinks = map31(makeModuleToPackageLink)(moduleNodes);
+    var moduleNodes = map32(makeNodeFromModuleJSONPL)(modulesPL);
+    var modulePackageLinks = map32(makeModuleToPackageLink)(moduleNodes);
     var links = append6(moduleLinks)(append6(packageLinks)(modulePackageLinks));
     var getSourceLinks = function(v1) {
       var sources = foldl2(function(acc) {
@@ -14896,12 +18541,12 @@
       })([])(links);
       return new Tuple(v1.id, sources);
     };
-    var modulePackageTuples = map31(function(m) {
+    var modulePackageTuples = map32(function(m) {
       return new Tuple(m.key, m["package"]);
     })(modulesPL);
-    var packageContains = map31(chunk)(groupBy(equalSnd2)(sortBy(compareSnd2)(modulePackageTuples)));
+    var packageContains = map32(chunk)(groupBy(equalSnd2)(sortBy(compareSnd2)(modulePackageTuples)));
     var packageContainsMap = fromFoldable6(packageContains);
-    var packageLOC = map31(function(v1) {
+    var packageLOC = map32(function(v1) {
       return new Tuple(v1.value0, rollUpLOC(v1.value1));
     })(packageContains);
     var packageLOCMap = fromFoldable6(packageLOC);
@@ -14920,15 +18565,15 @@
         contains: fromMaybe([])(lookup7(v1.key)(packageContainsMap))
       };
     };
-    var packagesCL = map31(function($86) {
+    var packagesCL = map32(function($86) {
       return addRollUpLOC(addContains($86));
     })(v.packages);
-    var packageNodes = map31(makeNodeFromPackageJSONCL)(packagesCL);
+    var packageNodes = map32(makeNodeFromPackageJSONCL)(packagesCL);
     var nodes = append6(moduleNodes)(packageNodes);
     var id2Node = fromFoldable12(mapFlipped3(nodes)(function(node) {
       return new Tuple(node.id, node);
     }));
-    var sourceLinksMap = fromFoldable12(map31(getSourceLinks)(nodes));
+    var sourceLinksMap = fromFoldable12(map32(getSourceLinks)(nodes));
     return {
       links,
       nodes,
@@ -14971,12 +18616,12 @@
 
   // output/D3.Viz.Spago.Model/index.js
   var lookup9 = /* @__PURE__ */ lookup(ordInt);
-  var map32 = /* @__PURE__ */ map(functorArray);
+  var map33 = /* @__PURE__ */ map(functorArray);
   var append7 = /* @__PURE__ */ append(semigroupArray);
   var fromFoldable8 = /* @__PURE__ */ fromFoldable(foldableArray);
   var insert8 = /* @__PURE__ */ insert(ordInt);
   var mapFlipped4 = /* @__PURE__ */ mapFlipped(functorArray);
-  var show7 = /* @__PURE__ */ show(showLinkType);
+  var show8 = /* @__PURE__ */ show(showLinkType);
   var append14 = /* @__PURE__ */ append(semigroupString);
   var fromFoldable13 = /* @__PURE__ */ fromFoldable2(ordInt)(foldableArray);
   var foldlWithIndex2 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
@@ -15059,7 +18704,7 @@
         fy: nullImpl
       };
     };
-    return map32(unpin2)(nodes);
+    return map33(unpin2)(nodes);
   };
   var setTreeXYIncludingLeaves = function(v) {
     return function(v1) {
@@ -15175,14 +18820,14 @@
       })(unboxD3SimLink($199));
     },
     linkClass: function($200) {
-      return show7((function(v) {
+      return show8((function(v) {
         return v.linktype;
       })(unboxD3SimLink($200)));
     },
     linkClass2: /* @__PURE__ */ (function() {
       var $201 = append14("updated ");
       return function($202) {
-        return $201(show7((function(v) {
+        return $201(show8((function(v) {
           return v.linktype;
         })(unboxD3SimLink($202))));
       };
@@ -15256,7 +18901,7 @@
       };
     };
     var partitioned = partition(isUsedModule)(nodes);
-    return append7(partitioned.no)(map32(setXYtoTreeXY)(partitioned.yes));
+    return append7(partitioned.no)(map33(setXYtoTreeXY)(partitioned.yes));
   };
   var isPackageOrVisibleModule = function(id5) {
     return function(v) {
@@ -15360,7 +19005,7 @@
       ;
       throw new Error("Failed pattern match at D3.Viz.Spago.Model (line 283, column 7 - line 288, column 76): " + [v1.constructor.name]);
     };
-    var modulesWithGrid = map32(setModuleGridXY)(partitioned.no);
+    var modulesWithGrid = map33(setModuleGridXY)(partitioned.no);
     return append7(modulesWithGrid)(partitioned.yes);
   };
   var packageNodesToGridXY = function(nodes) {
@@ -15493,7 +19138,7 @@
           ;
           return v;
         };
-        return map32(fixNamedNode$prime)(nodes);
+        return map33(fixNamedNode$prime)(nodes);
       };
     };
   };
@@ -15806,47 +19451,47 @@
   var allNodes2 = /* @__PURE__ */ $$const(true);
 
   // output/D3.Viz.Spago.Draw.Attributes/index.js
-  var classed4 = /* @__PURE__ */ classed(toAttrStringFn);
-  var radius3 = /* @__PURE__ */ radius(toAttrNumberFn);
-  var fill4 = /* @__PURE__ */ fill(toAttrStringFn);
-  var strokeColor4 = /* @__PURE__ */ strokeColor(toAttrStringFn);
-  var strokeWidth4 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var classed5 = /* @__PURE__ */ classed(toAttrStringFn);
+  var radius4 = /* @__PURE__ */ radius(toAttrNumberFn);
+  var fill5 = /* @__PURE__ */ fill(toAttrStringFn);
+  var strokeColor5 = /* @__PURE__ */ strokeColor(toAttrStringFn);
+  var strokeWidth5 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var classed1 = /* @__PURE__ */ classed(toAttrString);
-  var x4 = /* @__PURE__ */ x(toAttrNumber);
-  var text8 = /* @__PURE__ */ text6(toAttrStringFn);
-  var width11 = /* @__PURE__ */ width8(toAttrNumber);
-  var height11 = /* @__PURE__ */ height8(toAttrNumber);
+  var x6 = /* @__PURE__ */ x(toAttrNumber);
+  var text9 = /* @__PURE__ */ text6(toAttrStringFn);
+  var width12 = /* @__PURE__ */ width8(toAttrNumber);
+  var height12 = /* @__PURE__ */ height8(toAttrNumber);
   var cursor2 = /* @__PURE__ */ cursor(toAttrString);
   var opacity2 = /* @__PURE__ */ opacity(toAttrNumberFn);
-  var y4 = /* @__PURE__ */ y(toAttrNumberFn);
-  var textAnchor3 = /* @__PURE__ */ textAnchor(toAttrString);
+  var y6 = /* @__PURE__ */ y(toAttrNumberFn);
+  var textAnchor4 = /* @__PURE__ */ textAnchor(toAttrString);
   var updateAttrs = /* @__PURE__ */ (function() {
-    return [classed4(datum_.nodeClass), transform$prime(datum_.translateNode)];
+    return [classed5(datum_.nodeClass), transform$prime(datum_.translateNode)];
   })();
   var treeSceneAttributes = /* @__PURE__ */ (function() {
     return {
-      circles: [radius3(datum_.radius), fill4(datum_.colorByDepth), strokeColor4(datum_.colorByGroup), strokeWidth4(3)],
-      labels: [classed1("label"), x4(4), y(toAttrNumber)(2), text8(datum_.name)]
+      circles: [radius4(datum_.radius), fill5(datum_.colorByDepth), strokeColor5(datum_.colorByGroup), strokeWidth5(3)],
+      labels: [classed1("label"), x6(4), y(toAttrNumber)(2), text9(datum_.name)]
     };
   })();
   var svgAttrs = function(w) {
     return function(h) {
-      return [viewBox(-w / 2.1)(-h / 2.05)(w)(h), classed1("overlay"), width11(w), height11(h), cursor2("grab")];
+      return [viewBox(-w / 2.1)(-h / 2.05)(w)(h), classed1("overlay"), width12(w), height12(h), cursor2("grab")];
     };
   };
   var graphSceneAttributes = /* @__PURE__ */ (function() {
     return {
-      circles: [radius3(datum_.radius), fill4(datum_.colorByGroup), opacity2(datum_.opacityByType)],
-      labels: [classed1("label"), x4(0.2), y4(datum_.positionLabel), textAnchor3("middle"), text8(datum_.name)]
+      circles: [radius4(datum_.radius), fill5(datum_.colorByGroup), opacity2(datum_.opacityByType)],
+      labels: [classed1("label"), x6(0.2), y6(datum_.positionLabel), textAnchor4("middle"), text9(datum_.name)]
     };
   })();
   var enterAttrs = /* @__PURE__ */ (function() {
-    return [classed4(datum_.nodeClass), transform$prime(datum_.translateNode)];
+    return [classed5(datum_.nodeClass), transform$prime(datum_.translateNode)];
   })();
   var clusterSceneAttributes = /* @__PURE__ */ (function() {
     return {
-      circles: [radius3(datum_.radius), fill4(datum_.fillByUsage), strokeColor4(datum_.strokeByUsage), strokeWidth4(3), opacity2(datum_.opacityByType)],
-      labels: [classed1("label"), x4(0.2), y4(datum_.positionLabel), textAnchor3("middle"), text8(datum_.name)]
+      circles: [radius4(datum_.radius), fill5(datum_.fillByUsage), strokeColor5(datum_.strokeByUsage), strokeWidth5(3), opacity2(datum_.opacityByType)],
+      labels: [classed1("label"), x6(0.2), y6(datum_.positionLabel), textAnchor4("middle"), text9(datum_.name)]
     };
   })();
 
@@ -16065,10 +19710,10 @@
   })();
 
   // output/D3.Viz.Spago.Draw/index.js
-  var show8 = /* @__PURE__ */ show(showElement);
+  var show9 = /* @__PURE__ */ show(showElement);
   var discard8 = /* @__PURE__ */ discard(discardUnit);
-  var classed5 = /* @__PURE__ */ classed(toAttrStringFn);
-  var strokeColor5 = /* @__PURE__ */ strokeColor(toAttrStringFn);
+  var classed6 = /* @__PURE__ */ classed(toAttrStringFn);
+  var strokeColor6 = /* @__PURE__ */ strokeColor(toAttrStringFn);
   var classed12 = /* @__PURE__ */ classed(toAttrString);
   var x12 = /* @__PURE__ */ x1(toAttrNumberFn);
   var y12 = /* @__PURE__ */ y1(toAttrNumberFn);
@@ -16076,7 +19721,7 @@
   var y22 = /* @__PURE__ */ y2(toAttrNumberFn);
   var updateSimulation = function(dictEq) {
     return function(dictBind) {
-      var bind26 = bind(dictBind);
+      var bind27 = bind(dictBind);
       var discard111 = discard8(dictBind);
       var $$void11 = $$void(dictBind.Apply0().Functor0());
       return function(dictMonadEffect) {
@@ -16097,27 +19742,27 @@
             return function(v) {
               return function(v1) {
                 if (v.selections.nodes instanceof Just && v.selections.links instanceof Just) {
-                  return bind26(openSelection2(v.selections.nodes.value0)(show8(Group.value)))(function(node) {
-                    return bind26(openSelection2(v.selections.links.value0)(show8(Line.value)))(function(link4) {
-                      return bind26(mergeNewDataWithSim2(node)(keyIsID_)(link4)(keyIsID_)(v.rawdata))(function(merged) {
-                        return bind26(updateJoin2(node)(Group.value)(merged.nodes)(keyIsID_))(function(node$prime) {
-                          return bind26(appendTo2(node$prime.enter)(Group.value)(enterAttrs))(function(nodeEnter) {
-                            return bind26(appendTo2(nodeEnter)(Circle.value)(v1.circles))(function() {
+                  return bind27(openSelection2(v.selections.nodes.value0)(show9(Group.value)))(function(node) {
+                    return bind27(openSelection2(v.selections.links.value0)(show9(Line.value)))(function(link4) {
+                      return bind27(mergeNewDataWithSim2(node)(keyIsID_)(link4)(keyIsID_)(v.rawdata))(function(merged) {
+                        return bind27(updateJoin2(node)(Group.value)(merged.nodes)(keyIsID_))(function(node$prime) {
+                          return bind27(appendTo2(node$prime.enter)(Group.value)(enterAttrs))(function(nodeEnter) {
+                            return bind27(appendTo2(nodeEnter)(Circle.value)(v1.circles))(function() {
                               return discard111($$void11(appendTo2(nodeEnter)(Text2.value)(v1.labels)))(function() {
                                 return discard111(setAttributes2(node$prime.exit)([remove]))(function() {
                                   return discard111(setAttributes2(node$prime.update)(updateAttrs))(function() {
-                                    return bind26(selectUnder2(node$prime.update)(show8(Circle.value)))(function(updateCirclesSelection) {
+                                    return bind27(selectUnder2(node$prime.update)(show9(Circle.value)))(function(updateCirclesSelection) {
                                       return discard111(setAttributes2(updateCirclesSelection)(v1.circles))(function() {
-                                        return bind26(selectUnder2(node$prime.update)(show8(Text2.value)))(function(updateLabelsSelection) {
+                                        return bind27(selectUnder2(node$prime.update)(show9(Text2.value)))(function(updateLabelsSelection) {
                                           return discard111(setAttributes2(updateLabelsSelection)(v1.labels))(function() {
-                                            return bind26(mergeSelections2(nodeEnter)(node$prime.update))(function(mergedNodeSelection) {
+                                            return bind27(mergeSelections2(nodeEnter)(node$prime.update))(function(mergedNodeSelection) {
                                               return discard111($$void11(on3(mergedNodeSelection)(new Drag(new CustomDrag("spago", simdrag)))))(function() {
-                                                return bind26(updateJoin2(link4)(Line.value)(merged.links)(keyIsID_))(function(link$prime) {
-                                                  return bind26(appendTo2(link$prime.enter)(Line.value)([classed5(link_.linkClass), strokeColor5(link_.color)]))(function(linkEnter) {
+                                                return bind27(updateJoin2(link4)(Line.value)(merged.links)(keyIsID_))(function(link$prime) {
+                                                  return bind27(appendTo2(link$prime.enter)(Line.value)([classed6(link_.linkClass), strokeColor6(link_.color)]))(function(linkEnter) {
                                                     return discard111(setAttributes2(linkEnter)([classed12("enter")]))(function() {
                                                       return discard111(setAttributes2(link$prime.exit)([remove]))(function() {
                                                         return discard111(setAttributes2(link$prime.update)([classed12("update")]))(function() {
-                                                          return bind26(mergeSelections2(linkEnter)(link$prime.update))(function(mergedlinksShown) {
+                                                          return bind27(mergeSelections2(linkEnter)(link$prime.update))(function(mergedlinksShown) {
                                                             return discard111(setNodesFromSelection2(mergedNodeSelection))(function() {
                                                               return discard111(setLinksFromSelection2(mergedlinksShown)(v.linksWithForce))(function() {
                                                                 return discard111(addTickFunction2("nodes")(new Step3(mergedNodeSelection, [transform$prime(datum_.translateNode)])))(function() {
@@ -16173,21 +19818,21 @@
     };
   };
   var initialize = function(dictBind) {
-    var bind26 = bind(dictBind);
+    var bind27 = bind(dictBind);
     return function(dictMonadEffect) {
-      var liftEffect17 = liftEffect(dictMonadEffect);
+      var liftEffect18 = liftEffect(dictMonadEffect);
       var pure33 = pure(dictMonadEffect.Monad0().Applicative0());
       return function(dictSimulationM) {
         return function(dictSelectionM) {
           var attach2 = attach(dictSelectionM);
           var appendTo2 = appendTo(dictSelectionM);
           var on3 = on2(dictSelectionM);
-          return bind26(liftEffect17(getWindowWidthHeight))(function(v) {
-            return bind26(attach2("div.svg-container"))(function(root3) {
-              return bind26(appendTo2(root3)(Svg.value)(svgAttrs(v.value0)(v.value1)))(function(svg2) {
-                return bind26(appendTo2(svg2)(Group.value)([]))(function(inner) {
-                  return bind26(on3(inner)(new Drag(DefaultDrag.value)))(function() {
-                    return bind26(on3(svg2)(new Zoom({
+          return bind27(liftEffect18(getWindowWidthHeight))(function(v) {
+            return bind27(attach2("div.svg-container"))(function(root3) {
+              return bind27(appendTo2(root3)(Svg.value)(svgAttrs(v.value0)(v.value1)))(function(svg2) {
+                return bind27(appendTo2(svg2)(Group.value)([]))(function(inner) {
+                  return bind27(on3(inner)(new Drag(DefaultDrag.value)))(function() {
+                    return bind27(on3(svg2)(new Zoom({
                       extent: new ZoomExtent({
                         top: 0,
                         left: 0,
@@ -16198,8 +19843,8 @@
                       name: "spago",
                       target: inner
                     })))(function() {
-                      return bind26(appendTo2(inner)(Group.value)([classed12("links")]))(function(linksGroup) {
-                        return bind26(appendTo2(inner)(Group.value)([classed12("nodes")]))(function(nodesGroup) {
+                      return bind27(appendTo2(inner)(Group.value)([classed12("links")]))(function(linksGroup) {
+                        return bind27(appendTo2(inner)(Group.value)([classed12("nodes")]))(function(nodesGroup) {
                           return pure33({
                             nodes: new Just(nodesGroup),
                             links: new Just(linksGroup)
@@ -16226,7 +19871,7 @@
 
   // output/D3.Simulation.Forces/index.js
   var _status2 = /* @__PURE__ */ _status(strongFn);
-  var show9 = /* @__PURE__ */ show(showRegularForceType);
+  var show10 = /* @__PURE__ */ show(showRegularForceType);
   var _name2 = /* @__PURE__ */ _name(strongForget);
   var fromFoldable9 = /* @__PURE__ */ fromFoldable2(ordString);
   var elem3 = /* @__PURE__ */ elem2(eqString);
@@ -16238,7 +19883,7 @@
     }
     ;
     if (v instanceof RegularForce) {
-      return show9(v.value0);
+      return show10(v.value0);
     }
     ;
     throw new Error("Failed pattern match at D3.Simulation.Forces (line 32, column 3 - line 34, column 29): " + [v.constructor.name]);
@@ -16281,7 +19926,7 @@
     };
   };
   var enableForce = /* @__PURE__ */ (function() {
-    return set(_status2)(ForceActive.value);
+    return set3(_status2)(ForceActive.value);
   })();
   var enableByLabels = function(simulation) {
     return function(labels9) {
@@ -16297,7 +19942,7 @@
     };
   };
   var disableForce = /* @__PURE__ */ (function() {
-    return set(_status2)(ForceDisabled.value);
+    return set3(_status2)(ForceDisabled.value);
   })();
   var disableByLabels = function(simulation) {
     return function(labels9) {
@@ -16531,7 +20176,7 @@
   var discard9 = /* @__PURE__ */ discard(discardUnit);
   var _forceLibrary2 = /* @__PURE__ */ _forceLibrary(strongFn);
   var _forceLibrary1 = /* @__PURE__ */ _forceLibrary(strongForget);
-  var map33 = /* @__PURE__ */ map(functorMap);
+  var map34 = /* @__PURE__ */ map(functorMap);
   var _d3Simulation2 = /* @__PURE__ */ _d3Simulation(strongFn);
   var _alpha2 = /* @__PURE__ */ _alpha(strongFn);
   var _alphaTarget2 = /* @__PURE__ */ _alphaTarget(strongFn);
@@ -16566,11 +20211,11 @@
     });
   };
   var simulationSetVariable = function(dictMonadState) {
-    var bind26 = bind(dictMonadState.Monad0().Bind1());
+    var bind27 = bind(dictMonadState.Monad0().Bind1());
     var use2 = use(dictMonadState);
     var modifying3 = modifying(dictMonadState);
     return function(v) {
-      return bind26(use2(_handle2))(function(handle) {
+      return bind27(use2(_handle2))(function(handle) {
         if (v instanceof Alpha) {
           var v1 = setAlpha_(handle)(v.value0);
           return modifying3(function($247) {
@@ -16611,12 +20256,12 @@
     };
   };
   var simulationSetNodesFromSelection = function(dictBind) {
-    var bind26 = bind(dictBind);
+    var bind27 = bind(dictBind);
     return function(dictMonadState) {
       var use2 = use(dictMonadState);
       var pure33 = pure(dictMonadState.Monad0().Applicative0());
       return function(nodeSelection2) {
-        return bind26(use2(_handle2))(function(handle) {
+        return bind27(use2(_handle2))(function(handle) {
           var v = setNodes_(handle)(d3GetSelectionData_(nodeSelection2));
           return pure33(unit);
         });
@@ -16624,12 +20269,12 @@
     };
   };
   var simulationSetNodes = function(dictBind) {
-    var bind26 = bind(dictBind);
+    var bind27 = bind(dictBind);
     return function(dictMonadState) {
       var use2 = use(dictMonadState);
       var pure33 = pure(dictMonadState.Monad0().Applicative0());
       return function(nodes) {
-        return bind26(use2(_handle2))(function(handle) {
+        return bind27(use2(_handle2))(function(handle) {
           var v = setNodes_(handle)(nodes);
           var opaqueNodes = getNodes_(handle);
           return pure33(opaqueNodes);
@@ -16638,13 +20283,13 @@
     };
   };
   var simulationSetLinksFromSelection = function(dictBind) {
-    var bind26 = bind(dictBind);
+    var bind27 = bind(dictBind);
     return function(dictMonadState) {
       var use2 = use(dictMonadState);
       var pure33 = pure(dictMonadState.Monad0().Applicative0());
       return function(linkSelection) {
         return function(filterFn) {
-          return bind26(use2(_handle2))(function(handle) {
+          return bind27(use2(_handle2))(function(handle) {
             var v = setLinks_(handle)(filter2(filterFn)(d3GetSelectionData_(linkSelection)));
             return pure33(unit);
           });
@@ -16654,14 +20299,14 @@
   };
   var simulationSetLinks = function(dictEq) {
     return function(dictBind) {
-      var bind26 = bind(dictBind);
+      var bind27 = bind(dictBind);
       return function(dictMonadState) {
         var use2 = use(dictMonadState);
         var pure33 = pure(dictMonadState.Monad0().Applicative0());
         return function(links) {
           return function(nodes) {
             return function(keyFn) {
-              return bind26(use2(_handle2))(function(handle) {
+              return bind27(use2(_handle2))(function(handle) {
                 var v = setLinks_(handle)(swizzleLinks_(links)(nodes)(keyFn));
                 var swizzledLinks = getLinksFromSimulation_(handle);
                 return pure33(swizzledLinks);
@@ -16674,13 +20319,13 @@
   };
   var simulationOn = function(dictMonadState) {
     var Monad0 = dictMonadState.Monad0();
-    var bind26 = bind(Monad0.Bind1());
+    var bind27 = bind(Monad0.Bind1());
     var use2 = use(dictMonadState);
     var pure33 = pure(Monad0.Applicative0());
     return function(v) {
       return function(v1) {
         if (v1 instanceof Drag) {
-          return bind26(use2(_handle2))(function(handle) {
+          return bind27(use2(_handle2))(function(handle) {
             var v22 = (function() {
               if (v1.value0 instanceof DefaultDrag) {
                 return simulationDrag_("default")(v)(handle)(simdrag);
@@ -16760,25 +20405,25 @@
     };
   };
   var simulationEnableForcesByLabel = function(dictMonadState) {
-    var bind26 = bind(dictMonadState.Monad0().Bind1());
+    var bind27 = bind(dictMonadState.Monad0().Bind1());
     var use2 = use(dictMonadState);
     var modifying3 = modifying(dictMonadState);
     return function(labels9) {
-      return bind26(use2(_handle2))(function(handle) {
-        return bind26(use2(_forceLibrary1))(function(forces) {
-          return modifying3(_forceLibrary2)($$const(map33(enableByLabels(handle)(labels9))(forces)));
+      return bind27(use2(_handle2))(function(handle) {
+        return bind27(use2(_forceLibrary1))(function(forces) {
+          return modifying3(_forceLibrary2)($$const(map34(enableByLabels(handle)(labels9))(forces)));
         });
       });
     };
   };
   var simulationDisableForcesByLabel = function(dictMonadState) {
-    var bind26 = bind(dictMonadState.Monad0().Bind1());
+    var bind27 = bind(dictMonadState.Monad0().Bind1());
     var use2 = use(dictMonadState);
     var modifying3 = modifying(dictMonadState);
     return function(labels9) {
-      return bind26(use2(_handle2))(function(handle) {
-        return bind26(use2(_forceLibrary1))(function(forces) {
-          return modifying3(_forceLibrary2)($$const(map33(disableByLabels(handle)(labels9))(forces)));
+      return bind27(use2(_handle2))(function(handle) {
+        return bind27(use2(_forceLibrary1))(function(forces) {
+          return modifying3(_forceLibrary2)($$const(map34(disableByLabels(handle)(labels9))(forces)));
         });
       });
     };
@@ -16786,15 +20431,15 @@
   var simulationActualizeForces = function(dictMonadState) {
     var Monad0 = dictMonadState.Monad0();
     var Bind1 = Monad0.Bind1();
-    var bind26 = bind(Bind1);
+    var bind27 = bind(Bind1);
     var use2 = use(dictMonadState);
     var discard111 = discard9(Bind1);
     var simulationEnableForcesByLabel1 = simulationEnableForcesByLabel(dictMonadState);
     var simulationDisableForcesByLabel1 = simulationDisableForcesByLabel(dictMonadState);
     var pure33 = pure(Monad0.Applicative0());
     return function(activeForces) {
-      return bind26(use2(_handle2))(function(handle) {
-        return bind26(use2(_forceLibrary1))(function(library) {
+      return bind27(use2(_handle2))(function(handle) {
+        return bind27(use2(_forceLibrary1))(function(library) {
           var allLabels = keys3(library);
           var disableLabels = fromFoldable10(difference4(fromFoldable14(allLabels))(activeForces));
           var enableLabels = fromFoldable10(intersection3(activeForces)(fromFoldable14(allLabels)));
@@ -16802,8 +20447,8 @@
           var v1 = spy3("\u{1F527} actualizeForces - disabling")(disableLabels);
           return discard111(simulationEnableForcesByLabel1(enableLabels))(function() {
             return discard111(simulationDisableForcesByLabel1(disableLabels))(function() {
-              return bind26(use2(_forceLibrary1))(function(updatedLibrary) {
-                var v2 = map33(updateForceInSimulation(handle))(updatedLibrary);
+              return bind27(use2(_forceLibrary1))(function(updatedLibrary) {
+                var v2 = map34(updateForceInSimulation(handle))(updatedLibrary);
                 return pure33(unit);
               });
             });
@@ -16873,10 +20518,10 @@
       var get8 = get(dictMonadState);
       var modify_6 = modify_(dictMonadState);
       return function(dictMonadEffect) {
-        var liftEffect17 = liftEffect(dictMonadEffect);
+        var liftEffect18 = liftEffect(dictMonadEffect);
         return function(state_T) {
           return bind111(get8)(function(state3) {
-            return bind111(liftEffect17(exec_D3M_Simulation(state3)(state_T)))(function(state$prime) {
+            return bind111(liftEffect18(exec_D3M_Simulation(state3)(state_T)))(function(state$prime) {
               return modify_6(function(v) {
                 return state$prime;
               });
@@ -16893,11 +20538,11 @@
       var get8 = get(dictMonadState);
       var modify_6 = modify_(dictMonadState);
       return function(dictMonadEffect) {
-        var liftEffect17 = liftEffect(dictMonadEffect);
+        var liftEffect18 = liftEffect(dictMonadEffect);
         var pure112 = pure(dictMonadEffect.Monad0().Applicative0());
         return function(state_T) {
           return bind111(get8)(function(state3) {
-            return bind111(liftEffect17(run_D3M_Simulation(state3)(state_T)))(function(v) {
+            return bind111(liftEffect18(run_D3M_Simulation(state3)(state_T)))(function(v) {
               return discard111(modify_6(function(v1) {
                 return v.value1;
               }))(function() {
@@ -16912,7 +20557,7 @@
   var bindD3SimM = /* @__PURE__ */ bindStateT(monadEffect);
   var simulationSetNodesFromSelection2 = /* @__PURE__ */ simulationSetNodesFromSelection(bindD3SimM)(monadStateD3SimM);
   var simulationSetLinksFromSelection2 = /* @__PURE__ */ simulationSetLinksFromSelection(bindD3SimM)(monadStateD3SimM);
-  var bind15 = /* @__PURE__ */ bind(bindD3SimM);
+  var bind16 = /* @__PURE__ */ bind(bindD3SimM);
   var applicativeD3SimM = /* @__PURE__ */ applicativeStateT(monadEffect);
   var pure23 = /* @__PURE__ */ pure(applicativeD3SimM);
   var simulationMD3Selection_D3 = {
@@ -16945,7 +20590,7 @@
         }
         ;
         if (v1 instanceof Step3) {
-          return bind15(simulationHandle(simulationMD3Selection_D3))(function(handle) {
+          return bind16(simulationHandle(simulationMD3Selection_D3))(function(handle) {
             var makeTick = function(v22) {
               var v3 = mapFlipped5(v1.value1)(applySelectionAttributeD3(v1.value0));
               return unit;
@@ -16959,7 +20604,7 @@
       };
     },
     removeTickFunction: function(label5) {
-      return bind15(simulationHandle(simulationMD3Selection_D3))(function(handle) {
+      return bind16(simulationHandle(simulationMD3Selection_D3))(function(handle) {
         var v = disableTick_(handle)(label5);
         return pure23(unit);
       });
@@ -16974,7 +20619,7 @@
   };
 
   // output/D3.Data.Graph/index.js
-  var bind16 = /* @__PURE__ */ bind(bindMaybe);
+  var bind17 = /* @__PURE__ */ bind(bindMaybe);
   var mapFlipped6 = /* @__PURE__ */ mapFlipped(functorArray);
   var append8 = /* @__PURE__ */ append(semigroupArray);
   var getReachableNodes = function(dictOrd) {
@@ -16983,9 +20628,9 @@
     return function(id5) {
       return function(graph) {
         var processNextOpenDepPath = function(searchRecord) {
-          return bind16(uncons(searchRecord.openDepPaths))(function(x19) {
-            return bind16(head2(x19.head))(function(firstID) {
-              return bind16(lookup13(firstID)(graph))(function(firstNode) {
+          return bind17(uncons(searchRecord.openDepPaths))(function(x19) {
+            return bind17(head2(x19.head))(function(firstID) {
+              return bind17(lookup13(firstID)(graph))(function(firstNode) {
                 var newDeps = partition(function(d7) {
                   return !elem6(d7)(searchRecord.nodes);
                 })(firstNode.links.targets);
@@ -17074,7 +20719,7 @@
 
   // output/D3.Viz.Spago.Tree/index.js
   var lookup10 = /* @__PURE__ */ lookup(ordInt);
-  var map34 = /* @__PURE__ */ map(functorArray);
+  var map35 = /* @__PURE__ */ map(functorArray);
   var fromFoldable11 = /* @__PURE__ */ fromFoldable(foldableArray);
   var foldl6 = /* @__PURE__ */ foldl(foldableList);
   var fromFoldable15 = /* @__PURE__ */ fromFoldable3(foldableSet);
@@ -17119,11 +20764,11 @@
         ;
         throw new Error("Failed pattern match at D3.Viz.Spago.Tree (line 105, column 7 - line 112, column 134): " + [v1.constructor.name]);
       };
-      return map34(updateXY)(nodes);
+      return map35(updateXY)(nodes);
     };
   };
   var pathsAsLists = function(paths) {
-    return fromFoldable11(map34(function($77) {
+    return fromFoldable11(map35(function($77) {
       return fromFoldable11(reverse2($77));
     })(paths));
   };
@@ -17171,7 +20816,7 @@
           y: v.y,
           depth: v.depth,
           isTreeLeaf: hasChildren_(v),
-          childIDs: map34(function(v1) {
+          childIDs: map35(function(v1) {
             return v1.id;
           })(getHierarchyChildren_(v))
         })(acc);
@@ -17198,11 +20843,11 @@
         return v;
       };
       var linksWhoseSourceIs = function(id5) {
-        return fromFoldable11(map34(function(v) {
+        return fromFoldable11(map35(function(v) {
           return v.target;
         })(filter2(function(l) {
           return l.source === id5;
-        })(map34(unwrap9)(treelinks))));
+        })(map35(unwrap9)(treelinks))));
       };
       var go2 = function(childID) {
         return new Node(childID, map114(go2)(linksWhoseSourceIs(childID)));
@@ -17216,12 +20861,12 @@
       var treenodes = partition(function(v) {
         return elem4(v.id)(reachable.nodes) || v.id === rootID;
       })(model.nodes);
-      var prunedTreeLinks = map34(tupleToLink(M2M_Graph.value))(reachable.redundantLinks);
+      var prunedTreeLinks = map35(tupleToLink(M2M_Graph.value))(reachable.redundantLinks);
       var onlyTreelinks = makeTreeLinkTuples(pathsAsLists(reachable.closedDepPaths));
       var partitionedLinks = partition(function(v) {
         return elem1(new Tuple(v.source, v.target))(onlyTreelinks);
       })(model.links);
-      var treelinks = map34(changeLinkType(M2M_Tree.value))(partitionedLinks.yes);
+      var treelinks = map35(changeLinkType(M2M_Tree.value))(partitionedLinks.yes);
       var onlyPackageLinks = filter2(isP2P_Link)(model.links);
       var links = append9(treelinks)(append9(prunedTreeLinks)(onlyPackageLinks));
       var idTree = buildTree(rootID)(treelinks);
@@ -17252,28 +20897,28 @@
   };
 
   // output/PSD3.CodeExplorer.Data/index.js
-  var bind17 = /* @__PURE__ */ bind(bindMaybe);
+  var bind18 = /* @__PURE__ */ bind(bindMaybe);
   var lookup11 = /* @__PURE__ */ lookup(ordString);
   var pure24 = /* @__PURE__ */ pure(applicativeMaybe);
-  var bind18 = /* @__PURE__ */ bind(bindAff);
+  var bind19 = /* @__PURE__ */ bind(bindAff);
   var apply3 = /* @__PURE__ */ apply(applyEither);
-  var map35 = /* @__PURE__ */ map(functorEither);
+  var map36 = /* @__PURE__ */ map(functorEither);
   var pure110 = /* @__PURE__ */ pure(applicativeAff);
   var addTreeToModel = function(rootName) {
     return function(maybeModel) {
-      return bind17(maybeModel)(function(model) {
-        return bind17(lookup11(rootName)(model.maps.name2ID))(function(rootID) {
+      return bind18(maybeModel)(function(model) {
+        return bind18(lookup11(rootName)(model.maps.name2ID))(function(rootID) {
           return pure24(treeReduction(rootID)(model));
         });
       });
     };
   };
   var readModelData = /* @__PURE__ */ (function() {
-    return bind18(get3(string)("./data/spago-data/modules.json"))(function(moduleJSON) {
-      return bind18(get3(string)("./data/spago-data/packages.json"))(function(packageJSON) {
-        return bind18(get3(string)("./data/spago-data/lsdeps.jsonlines"))(function(lsdepJSON) {
-          return bind18(get3(string)("./data/spago-data/LOC.json"))(function(locJSON) {
-            var model = hush(apply3(apply3(apply3(map35(convertFilesToGraphModel)(moduleJSON))(packageJSON))(lsdepJSON))(locJSON));
+    return bind19(get5(string)("./data/spago-data/modules.json"))(function(moduleJSON) {
+      return bind19(get5(string)("./data/spago-data/packages.json"))(function(packageJSON) {
+        return bind19(get5(string)("./data/spago-data/lsdeps.jsonlines"))(function(lsdepJSON) {
+          return bind19(get5(string)("./data/spago-data/LOC.json"))(function(locJSON) {
+            var model = hush(apply3(apply3(apply3(map36(convertFilesToGraphModel)(moduleJSON))(packageJSON))(lsdepJSON))(locJSON));
             return pure110(addTreeToModel("PSD3.Main")(model));
           });
         });
@@ -17282,14 +20927,14 @@
   })();
 
   // output/D3.Simulation.Config/index.js
-  var y5 = function(dictToAttr) {
+  var y7 = function(dictToAttr) {
     var $34 = AttributeSetter.create("y");
     var $35 = toAttr(dictToAttr);
     return function($36) {
       return ForceT($34($35($36)));
     };
   };
-  var x5 = function(dictToAttr) {
+  var x7 = function(dictToAttr) {
     var $37 = AttributeSetter.create("x");
     var $38 = toAttr(dictToAttr);
     return function($39) {
@@ -17310,7 +20955,7 @@
       return ForceT($45($46($47)));
     };
   };
-  var radius4 = function(dictToAttr) {
+  var radius5 = function(dictToAttr) {
     var $48 = AttributeSetter.create("radius");
     var $49 = toAttr(dictToAttr);
     return function($50) {
@@ -17347,15 +20992,15 @@
 
   // output/PSD3.CodeExplorer.Forces/index.js
   var strength2 = /* @__PURE__ */ strength(toAttrNumber);
-  var x6 = /* @__PURE__ */ x5(toAttrNumber);
-  var y6 = /* @__PURE__ */ y5(toAttrNumber);
-  var radius5 = /* @__PURE__ */ radius4(toAttrNumberFn);
+  var x8 = /* @__PURE__ */ x7(toAttrNumber);
+  var y8 = /* @__PURE__ */ y7(toAttrNumber);
+  var radius6 = /* @__PURE__ */ radius5(toAttrNumberFn);
   var theta2 = /* @__PURE__ */ theta(toAttrNumber);
   var distanceMin2 = /* @__PURE__ */ distanceMin(toAttrNumber);
   var distanceMax2 = /* @__PURE__ */ distanceMax(toAttrNumber);
-  var x13 = /* @__PURE__ */ x5(toAttrNumberFn);
-  var y13 = /* @__PURE__ */ y5(toAttrNumberFn);
-  var radius1 = /* @__PURE__ */ radius4(toAttrNumber);
+  var x13 = /* @__PURE__ */ x7(toAttrNumberFn);
+  var y13 = /* @__PURE__ */ y7(toAttrNumberFn);
+  var radius1 = /* @__PURE__ */ radius5(toAttrNumber);
   var forceLibrary = /* @__PURE__ */ (function() {
     var usedModulesOnly = new Just(new ForceFilter("used modules only", datum_.isUsedModule));
     var useGridXY = function(d7) {
@@ -17380,7 +21025,7 @@
         };
       };
     };
-    return initialize2(foldableArray)(functorArray)([createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([strength2(0.5), x6(0), y6(0)]), createForce("x")(new RegularForce(ForceX.value))(allNodes)([strength2(0.05), x6(0)]), createForce("y")(new RegularForce(ForceY.value))(allNodes)([strength2(0.07), y6(0)]), createForce("collide1")(new RegularForce(ForceCollide.value))(allNodes)([strength2(1), radius5(datum_.collideRadius)]), createForce("collide2")(new RegularForce(ForceCollide.value))(allNodes)([strength2(0.7), radius5(datum_.collideRadiusBig)]), createForce("charge1")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-50), theta2(0.9), distanceMin2(1), distanceMax2(infinity)]), createForce("charge2")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-100), theta2(0.9), distanceMin2(1), distanceMax2(400)]), createForce("chargetree")(new RegularForce(ForceManyBody.value))(treeExceptLeaves)([strength2(-100), theta2(0.9), distanceMin2(1), distanceMax2(400)]), createForce("clusterx_M")(new RegularForce(ForceX.value))(modulesOnly)([strength2(0.2), x13(datum_.gridPointX)]), createForce("clustery_M")(new RegularForce(ForceY.value))(modulesOnly)([strength2(0.2), y13(datum_.gridPointY)]), createForce("clusterx_P")(new RegularForce(ForceX.value))(packagesOnly)([strength2(0.8), x13(datum_.gridPointX)]), createForce("clustery_P")(new RegularForce(ForceY.value))(packagesOnly)([strength2(0.8), y13(datum_.gridPointY)]), createForce("htreeNodesX")(new RegularForce(ForceX.value))(new Just(new ForceFilter("tree only", function(d7) {
+    return initialize2(foldableArray)(functorArray)([createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([strength2(0.5), x8(0), y8(0)]), createForce("x")(new RegularForce(ForceX.value))(allNodes)([strength2(0.05), x8(0)]), createForce("y")(new RegularForce(ForceY.value))(allNodes)([strength2(0.07), y8(0)]), createForce("collide1")(new RegularForce(ForceCollide.value))(allNodes)([strength2(1), radius6(datum_.collideRadius)]), createForce("collide2")(new RegularForce(ForceCollide.value))(allNodes)([strength2(0.7), radius6(datum_.collideRadiusBig)]), createForce("charge1")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-50), theta2(0.9), distanceMin2(1), distanceMax2(infinity)]), createForce("charge2")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-100), theta2(0.9), distanceMin2(1), distanceMax2(400)]), createForce("chargetree")(new RegularForce(ForceManyBody.value))(treeExceptLeaves)([strength2(-100), theta2(0.9), distanceMin2(1), distanceMax2(400)]), createForce("clusterx_M")(new RegularForce(ForceX.value))(modulesOnly)([strength2(0.2), x13(datum_.gridPointX)]), createForce("clustery_M")(new RegularForce(ForceY.value))(modulesOnly)([strength2(0.2), y13(datum_.gridPointY)]), createForce("clusterx_P")(new RegularForce(ForceX.value))(packagesOnly)([strength2(0.8), x13(datum_.gridPointX)]), createForce("clustery_P")(new RegularForce(ForceY.value))(packagesOnly)([strength2(0.8), y13(datum_.gridPointY)]), createForce("htreeNodesX")(new RegularForce(ForceX.value))(new Just(new ForceFilter("tree only", function(d7) {
       return datum_.connected(d7);
     })))([strength2(0.4), x13(datum_.treePointX)]), createForce("htreeNodesY")(new RegularForce(ForceY.value))(new Just(new ForceFilter("tree only", function(d7) {
       return datum_.connected(d7);
@@ -17388,7 +21033,7 @@
       return datum_.connected(d7);
     })))([strength2(0.4), x13(datum_.treePointY)]), createForce("vtreeNodesY")(new RegularForce(ForceY.value))(new Just(new ForceFilter("tree only", function(d7) {
       return datum_.connected(d7);
-    })))([strength2(0.4), y13(datum_.treePointX)]), createForce("packageOrbit")(new RegularForce(ForceRadial.value))(packagesOnly)([strength2(0.7), x6(0), y6(0), radius1(500)]), createForce("unusedOrbit")(new RegularForce(ForceRadial.value))(unusedModulesOnly)([strength2(0.8), x6(0), y6(0), radius1(900)]), createForce("moduleOrbit")(new RegularForce(ForceRadial.value))(usedModulesOnly)([strength2(0.8), x6(0), y6(0), radius1(600)]), createLinkForce(Nothing.value)([strength2(0.5), distance(toAttrNumber)(0), numKey(function($19) {
+    })))([strength2(0.4), y13(datum_.treePointX)]), createForce("packageOrbit")(new RegularForce(ForceRadial.value))(packagesOnly)([strength2(0.7), x8(0), y8(0), radius1(500)]), createForce("unusedOrbit")(new RegularForce(ForceRadial.value))(unusedModulesOnly)([strength2(0.8), x8(0), y8(0), radius1(900)]), createForce("moduleOrbit")(new RegularForce(ForceRadial.value))(usedModulesOnly)([strength2(0.8), x8(0), y8(0), radius1(600)]), createLinkForce(Nothing.value)([strength2(0.5), distance(toAttrNumber)(0), numKey(function($19) {
       return toNumber(datum_.id($19));
     })])]);
   })();
@@ -17426,7 +21071,7 @@
   var click2 = "click";
 
   // output/Halogen.HTML.Events/index.js
-  var map36 = /* @__PURE__ */ map(functorMaybe);
+  var map37 = /* @__PURE__ */ map(functorMaybe);
   var composeKleisli2 = /* @__PURE__ */ composeKleisli(bindMaybe);
   var composeKleisliFlipped4 = /* @__PURE__ */ composeKleisliFlipped(/* @__PURE__ */ bindExceptT(monadIdentity));
   var readProp2 = /* @__PURE__ */ readProp(monadIdentity);
@@ -17435,7 +21080,7 @@
   var handler$prime = function(et) {
     return function(f) {
       return handler(et)(function(ev) {
-        return map36(Action.create)(f(ev));
+        return map37(Action.create)(f(ev));
       });
     };
   };
@@ -17477,7 +21122,7 @@
   var elem5 = /* @__PURE__ */ elem2(eqString);
   var not4 = /* @__PURE__ */ not(/* @__PURE__ */ heytingAlgebraFunction(heytingAlgebraBoolean));
   var pure25 = /* @__PURE__ */ pure(applicativeArray);
-  var map37 = /* @__PURE__ */ map(functorArray);
+  var map38 = /* @__PURE__ */ map(functorArray);
   var startsWith = function(str0) {
     return function(str1) {
       return str0 === take2(length5(str0))(str1);
@@ -17605,7 +21250,7 @@
     return function(ip$prime) {
       var v = extract3(ip);
       var v1 = extract3(ip$prime);
-      var classNames = pure25(classes(map37(ClassName)(nubByEq(function(c) {
+      var classNames = pure25(classes(map38(ClassName)(nubByEq(function(c) {
         return function(c$prime) {
           return classify(c) === classify(c$prime);
         };
@@ -17615,15 +21260,15 @@
   };
 
   // output/PSD3.Button/index.js
-  var map38 = /* @__PURE__ */ map(functorArray);
+  var map39 = /* @__PURE__ */ map(functorArray);
   var append10 = /* @__PURE__ */ append(semigroupArray);
-  var rightClasses = /* @__PURE__ */ map38(ClassName)(["rounded-r"]);
-  var leftClasses = /* @__PURE__ */ map38(ClassName)(["mr-px", "rounded-l"]);
-  var centerClasses = /* @__PURE__ */ map38(ClassName)(["mr-px"]);
-  var buttonSharedClasses = /* @__PURE__ */ map38(ClassName)(["no-outline", "px-4", "py-2", "!active:border-b", "active:border-t", "disabled:opacity-50", "disabled:cursor-default", "!disabled:cursor-pointer"]);
-  var buttonPrimaryClasses = /* @__PURE__ */ map38(ClassName)(["bg-blue-88", "border-blue-88", "hover:!disabled:bg-blue-82", "focus:bg-blue-82", "text-white"]);
-  var buttonMainClasses = /* @__PURE__ */ append10(buttonSharedClasses)(/* @__PURE__ */ map38(ClassName)(["rounded"]));
-  var buttonGroupClasses = /* @__PURE__ */ map38(ClassName)(["flex", "items-center"]);
+  var rightClasses = /* @__PURE__ */ map39(ClassName)(["rounded-r"]);
+  var leftClasses = /* @__PURE__ */ map39(ClassName)(["mr-px", "rounded-l"]);
+  var centerClasses = /* @__PURE__ */ map39(ClassName)(["mr-px"]);
+  var buttonSharedClasses = /* @__PURE__ */ map39(ClassName)(["no-outline", "px-4", "py-2", "!active:border-b", "active:border-t", "disabled:opacity-50", "disabled:cursor-default", "!disabled:cursor-pointer"]);
+  var buttonPrimaryClasses = /* @__PURE__ */ map39(ClassName)(["bg-blue-88", "border-blue-88", "hover:!disabled:bg-blue-82", "focus:bg-blue-82", "text-white"]);
+  var buttonMainClasses = /* @__PURE__ */ append10(buttonSharedClasses)(/* @__PURE__ */ map39(ClassName)(["rounded"]));
+  var buttonGroupClasses = /* @__PURE__ */ map39(ClassName)(["flex", "items-center"]);
   var buttonGroupBuilder = function(classes2) {
     return function(iprops) {
       return button(appendIProps([classes(append10(buttonSharedClasses)(classes2))])(iprops));
@@ -17636,7 +21281,7 @@
     return div2(appendIProps([classes(buttonGroupClasses)])(iprops));
   };
   var buttonGroup_ = /* @__PURE__ */ buttonGroup([]);
-  var buttonClasses = /* @__PURE__ */ map38(ClassName)(["bg-grey-50-a20", "border-grey-50-a20", "hover:!disabled:bg-grey-50-a30", "focus:bg-grey-50-a30", "text-black-20"]);
+  var buttonClasses = /* @__PURE__ */ map39(ClassName)(["bg-grey-50-a20", "border-grey-50-a20", "hover:!disabled:bg-grey-50-a30", "focus:bg-grey-50-a30", "text-black-20"]);
   var buttonLeft = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append10(buttonClasses)(leftClasses));
   var buttonRight = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append10(buttonClasses)(rightClasses));
   var buttonCenter = /* @__PURE__ */ buttonGroupBuilder(/* @__PURE__ */ append10(buttonClasses)(centerClasses));
@@ -17870,20 +21515,20 @@
   };
 
   // output/PSD3.Format/index.js
-  var map39 = /* @__PURE__ */ map(functorArray);
-  var subHeadingClasses = /* @__PURE__ */ map39(ClassName)(["text-xl", "font-medium", "leading-loose", "flex", "items-center", "mb-6"]);
+  var map40 = /* @__PURE__ */ map(functorArray);
+  var subHeadingClasses = /* @__PURE__ */ map40(ClassName)(["text-xl", "font-medium", "leading-loose", "flex", "items-center", "mb-6"]);
   var subHeading = function(iprops) {
     return function(html2) {
       return h2(appendIProps([classes(subHeadingClasses)])(iprops))(html2);
     };
   };
   var subHeading_ = /* @__PURE__ */ subHeading([]);
-  var contentHeadingClasses = /* @__PURE__ */ map39(ClassName)(["mb-6", "text-lg", "font-normal", "leading-loose", "flex", "items-center"]);
+  var contentHeadingClasses = /* @__PURE__ */ map40(ClassName)(["mb-6", "text-lg", "font-normal", "leading-loose", "flex", "items-center"]);
   var contentHeading = function(iprops) {
     return h3(appendIProps([classes(contentHeadingClasses)])(iprops));
   };
   var contentHeading_ = /* @__PURE__ */ contentHeading([]);
-  var captionClasses = /* @__PURE__ */ map39(ClassName)(["block", "font-light", "mb-6", "text-grey-70", "text-sm", "tracking-wide", "uppercase"]);
+  var captionClasses = /* @__PURE__ */ map40(ClassName)(["block", "font-light", "mb-6", "text-grey-70", "text-sm", "tracking-wide", "uppercase"]);
   var caption2 = function(iprops) {
     return h4(appendIProps([classes(captionClasses)])(iprops));
   };
@@ -17892,9 +21537,9 @@
   // output/PSD3.CodeExplorer.HTML/index.js
   var type_22 = /* @__PURE__ */ type_17(isPropInputType);
   var value14 = /* @__PURE__ */ value12(isPropString);
-  var show10 = /* @__PURE__ */ show(showNumber);
+  var show11 = /* @__PURE__ */ show(showNumber);
   var eq4 = /* @__PURE__ */ eq(eqForceStatus);
-  var map40 = /* @__PURE__ */ map(functorArray);
+  var map41 = /* @__PURE__ */ map(functorArray);
   var toUnfoldable4 = /* @__PURE__ */ toUnfoldable(unfoldableArray);
   var _forceLibrary3 = /* @__PURE__ */ _forceLibrary(strongForget);
   var _cssClass2 = /* @__PURE__ */ _cssClass(strongForget);
@@ -17908,7 +21553,7 @@
     };
     return [onValueInput(function($27) {
       return ChangeSimConfig.create(config["var"](toScale($27)));
-    }), type_22(InputRange.value), id2(config.id), class_("range-slider scaling-slider"), min5(config.min), max6(config.max), step4(new Step(config.step)), value14(show10(config.value))];
+    }), type_22(InputRange.value), id2(config.id), class_("range-slider scaling-slider"), min5(config.min), max6(config.max), step4(new Step(config.step)), value14(show11(config.value))];
   };
   var renderTableForces = function(state3) {
     var renderForceItem = function(v) {
@@ -17921,8 +21566,8 @@
         return "force-inactive";
       })()]), onClick($$const(new ToggleForce(v.name)))])([div2([classes(["force-name"])])([text5(v.name)]), div2([classes(["force-type"])])([text5(showType(v.type))]), div2([classes(["force-filter"])])([text5(showForceFilter(v.filter))])]);
     };
-    var forceData = map40(snd)(toUnfoldable4(view(_forceLibrary3)(state3)));
-    return div_([h3_([text5("Forces")]), div2([classes(["force-grid"])])(map40(renderForceItem)(forceData))]);
+    var forceData = map41(snd)(toUnfoldable4(view(_forceLibrary3)(state3)));
+    return div_([h3_([text5("Forces")]), div2([classes(["force-grid"])])(map41(renderForceItem)(forceData))]);
   };
   var renderSimState = function(state3) {
     return div2([classes(["spago-sim-state"])])([caption_2([text5("Simulation state")]), p_([text5("CSS Class: " + view(_cssClass2)(state3))]), p_([text5("Links: " + show13(length4(view(_stagingLinks2)(state3))))]), p_([text5("Nodes: " + show13(length4(view(_stagingNodes2)(state3))))])]);
@@ -17947,14 +21592,14 @@
       max: 100,
       step: 10,
       value: params.alpha * 100
-    })), caption_2([text5("Alpha: " + show10(params.alpha))]), input2(slider({
+    })), caption_2([text5("Alpha: " + show11(params.alpha))]), input2(slider({
       "var": AlphaTarget.create,
       id: "alphatarget-slider",
       min: 0,
       max: 100,
       step: 10,
       value: params.alphaTarget * 100
-    })), caption_2([text5("AlphaTarget: " + show10(params.alphaTarget))])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(StopSim.value))])([text5("Stop")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0.3))))])([text5("Heat")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0))))])([text5("Cool")]), buttonPrimaryRight([onClick($$const(StartSim.value))])([text5("Start")])])]), subHeading_([text5("Filters")]), div2([classes(["control-group"])])([contentHeading_([text5("Node visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new NodeFilter(isPackage))))])([text5("Packages")]), buttonCenter([onClick($$const(new Filter(new NodeFilter($$const(true)))))])([text5("All")]), buttonRight([onClick($$const(new Filter(new NodeFilter(isUsedModule))))])([text5("Modules")])])]), div2([classes(["control-group"])])([button2([onClick($$const(new Filter(new NodeFilter(isProjectModule))))])([text5("Only project files")])]), div2([classes(["control-group"])])([contentHeading_([text5("Link Visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new LinkShowFilter(isM2M_Tree_Link))))])([text5("Tree")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2M_Graph_Link))))])([text5("Graph")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2P_Link))))])([text5("M2P")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isP2P_Link))))])([text5("P2P")]), buttonRight([onClick($$const(new Filter(new LinkShowFilter($$const(false)))))])([text5("None")])])]), subHeading_([text5("Styling")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeStyling(new GraphStyle(clusterSceneAttributes))))])([text5("Cluster")]), buttonCenter([onClick($$const(new ChangeStyling(new GraphStyle(graphSceneAttributes))))])([text5("Graph")]), buttonRight([onClick($$const(new ChangeStyling(new GraphStyle(treeSceneAttributes))))])([text5("Tree")])])])]);
+    })), caption_2([text5("AlphaTarget: " + show11(params.alphaTarget))])]), div2([classes(["control-group"])])([buttonGroup_([buttonPrimaryLeft([onClick($$const(StopSim.value))])([text5("Stop")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0.3))))])([text5("Heat")]), buttonPrimaryCenter([onClick($$const(new ChangeSimConfig(new AlphaTarget(0))))])([text5("Cool")]), buttonPrimaryRight([onClick($$const(StartSim.value))])([text5("Start")])])]), subHeading_([text5("Filters")]), div2([classes(["control-group"])])([contentHeading_([text5("Node visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new NodeFilter(isPackage))))])([text5("Packages")]), buttonCenter([onClick($$const(new Filter(new NodeFilter($$const(true)))))])([text5("All")]), buttonRight([onClick($$const(new Filter(new NodeFilter(isUsedModule))))])([text5("Modules")])])]), div2([classes(["control-group"])])([button2([onClick($$const(new Filter(new NodeFilter(isProjectModule))))])([text5("Only project files")])]), div2([classes(["control-group"])])([contentHeading_([text5("Link Visibility")]), buttonGroup_([buttonLeft([onClick($$const(new Filter(new LinkShowFilter(isM2M_Tree_Link))))])([text5("Tree")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2M_Graph_Link))))])([text5("Graph")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isM2P_Link))))])([text5("M2P")]), buttonCenter([onClick($$const(new Filter(new LinkShowFilter(isP2P_Link))))])([text5("P2P")]), buttonRight([onClick($$const(new Filter(new LinkShowFilter($$const(false)))))])([text5("None")])])]), subHeading_([text5("Styling")]), div2([classes(["control-group"])])([buttonGroup_([buttonLeft([onClick($$const(new ChangeStyling(new GraphStyle(clusterSceneAttributes))))])([text5("Cluster")]), buttonCenter([onClick($$const(new ChangeStyling(new GraphStyle(graphSceneAttributes))))])([text5("Graph")]), buttonRight([onClick($$const(new ChangeStyling(new GraphStyle(treeSceneAttributes))))])([text5("Tree")])])])]);
   };
   var render5 = function(state3) {
     return div2([classes(["fullscreen-container", "spago-fullscreen"])])([div2([classes(["floating-panel", "floating-panel--top-left", "floating-panel--small", "spago-controls-panel", "editorial"])])([h2([classes(["floating-panel__title", "spago-controls__title"])])([text5("Controls")]), renderSimControls(state3), renderSimState(state3)]), div2([classes(["floating-panel", "floating-panel--top-right", "floating-panel--large", "spago-forces-panel", "editorial"])])([renderTableForces(state3)]), div2([classes(["svg-container", "fullscreen-viz", "spago-viz-container", view(_cssClass2)(state3)])])([])]);
@@ -17972,19 +21617,19 @@
   var _stagingLinkFilter2 = /* @__PURE__ */ _stagingLinkFilter(strongFn);
   var _modelNodes2 = /* @__PURE__ */ _modelNodes(strongForget)(choiceForget3);
   var _stagingNodes3 = /* @__PURE__ */ _stagingNodes(strongFn)(choiceFn);
-  var liftEffect9 = /* @__PURE__ */ liftEffect(monadEffectEffect);
+  var liftEffect10 = /* @__PURE__ */ liftEffect(monadEffectEffect);
   var _staging2 = /* @__PURE__ */ _staging(strongForget);
   var _eventListener2 = /* @__PURE__ */ _eventListener(strongForget);
   var _sceneAttributes2 = /* @__PURE__ */ _sceneAttributes(strongForget);
   var _activeForces2 = /* @__PURE__ */ _activeForces(strongForget);
-  var x7 = /* @__PURE__ */ x(toAttrNumber);
+  var x9 = /* @__PURE__ */ x(toAttrNumber);
   var discard12 = /* @__PURE__ */ discard11(bindD3SimM);
   var stop2 = /* @__PURE__ */ stop(simulationMD3Selection_D3);
   var actualizeForces2 = /* @__PURE__ */ actualizeForces(simulationMD3Selection_D3);
   var updateSimulation2 = /* @__PURE__ */ updateSimulation(eqInt)(bindD3SimM)(monadEffD3SimM)(selectionMD3Selection_D3S)(simulationMD3Selection_D3);
   var setConfigVariable2 = /* @__PURE__ */ setConfigVariable(simulationMD3Selection_D3);
-  var start3 = /* @__PURE__ */ start2(simulationMD3Selection_D3);
-  var bind19 = /* @__PURE__ */ bind(bindHalogenM);
+  var start4 = /* @__PURE__ */ start3(simulationMD3Selection_D3);
+  var bind20 = /* @__PURE__ */ bind(bindHalogenM);
   var discard23 = /* @__PURE__ */ discard11(bindHalogenM);
   var modifying2 = /* @__PURE__ */ modifying(monadStateHalogenM);
   var _model2 = /* @__PURE__ */ _model(strongFn);
@@ -18042,7 +21687,7 @@
     return onMouseEventEffectful(MouseClick.value)(function(e) {
       return function(d7) {
         return function(t) {
-          return liftEffect9(notify(l)(new EventFromVizualization(getVizEventFromClick(e)(d7)(t))));
+          return liftEffect10(notify(l)(new EventFromVizualization(getVizEventFromClick(e)(d7)(t))));
         };
       };
     });
@@ -18066,7 +21711,7 @@
                   }
                   ;
                   if (maybeListener instanceof Nothing) {
-                    return x7(0);
+                    return x9(0);
                   }
                   ;
                   throw new Error("Failed pattern match at PSD3.Spago (line 276, column 18 - line 278, column 25): " + [maybeListener.constructor.name]);
@@ -18079,7 +21724,7 @@
                   return discard12(actualizeForces2(activeForces))(function() {
                     return discard12(updateSimulation2(staging)(attributesWithCallback))(function() {
                       return discard12(setConfigVariable2(new Alpha(1)))(function() {
-                        return start3;
+                        return start4;
                       });
                     });
                   });
@@ -18095,21 +21740,21 @@
     var liftAff5 = liftAff(monadAffHalogenM(dictMonadAff));
     var monadEffectHalogenM3 = monadEffectHalogenM(dictMonadAff.MonadEffect0());
     var evalEffectSimulation1 = evalEffectSimulation2(monadEffectHalogenM3);
-    var liftEffect17 = liftEffect(monadEffectHalogenM3);
+    var liftEffect18 = liftEffect(monadEffectHalogenM3);
     var runSimulation1 = runSimulation(monadEffectHalogenM3)(monadStateHalogenM);
     var runWithD3_Simulation1 = runWithD3_Simulation2(monadEffectHalogenM3);
     return function(v) {
       if (v instanceof Initialize5) {
-        return bind19(liftAff5(readModelData))(function(v1) {
+        return bind20(liftAff5(readModelData))(function(v1) {
           return discard23(modifying2(_model2)($$const(v1)))(function() {
-            return bind19(evalEffectSimulation1(initialize3))(function(openSelections) {
+            return bind20(evalEffectSimulation1(initialize3))(function(openSelections) {
               return discard23(modifying2(function($140) {
                 return _staging1(_enterselections2(_nodes2($140)));
               })($$const(openSelections.nodes)))(function() {
                 return discard23(modifying2(function($141) {
                   return _staging1(_enterselections2(_links2($141)));
                 })($$const(openSelections.links)))(function() {
-                  return bind19(liftEffect17(create3))(function(v2) {
+                  return bind20(liftEffect18(create3))(function(v2) {
                     return discard23($$void10(subscribe2(v2.emitter)))(function() {
                       return discard23(assign3(_eventListener1)(new Just(v2.listener)))(function() {
                         return pure26(unit);
@@ -18316,7 +21961,7 @@
       ;
       if (v instanceof StartSim) {
         return runWithD3_Simulation1(discard12(setConfigVariable2(new Alpha(1)))(function() {
-          return start3;
+          return start4;
         }));
       }
       ;
@@ -18366,7 +22011,7 @@
       return "spagoComponent";
     }
   })(ordUnit);
-  var identity16 = /* @__PURE__ */ identity(categoryFn);
+  var identity19 = /* @__PURE__ */ identity(categoryFn);
   var _spagoComponent = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
@@ -18378,7 +22023,7 @@
   };
   var component6 = function(dictMonadAff) {
     return mkComponent({
-      initialState: identity16,
+      initialState: identity19,
       render: render6(dictMonadAff),
       "eval": mkEval(defaultEval)
     });
@@ -18392,7 +22037,7 @@
   // output/D3.Layouts.Hierarchical/index.js
   var toAttr3 = /* @__PURE__ */ toAttr(toAttrStringFn);
   var pure27 = /* @__PURE__ */ pure(applicativeAff);
-  var bind20 = /* @__PURE__ */ bind(bindAff);
+  var bind21 = /* @__PURE__ */ bind(bindAff);
   var rmap4 = /* @__PURE__ */ rmap2(bifunctorEither);
   var verticalLink = /* @__PURE__ */ (function() {
     return new AttrT(new AttributeSetter("d", toAttr3(linkVertical_)));
@@ -18443,7 +22088,7 @@
     return new AttrT(new AttributeSetter("d", toAttr3(linkClusterHorizontal_(yOffset))));
   };
   var getTreeViaAJAX = function(url) {
-    return bind20(get3(string)(url))(function(result) {
+    return bind21(get5(string)(url))(function(result) {
       return pure27(rmap4(function(v) {
         return readJSON_(v.body);
       })(result));
@@ -18451,19 +22096,19 @@
   };
 
   // output/D3.Viz.Icicle/index.js
-  var classed6 = /* @__PURE__ */ classed(toAttrString);
-  var width12 = /* @__PURE__ */ width8(toAttrNumber);
-  var height12 = /* @__PURE__ */ height8(toAttrNumber);
-  var x8 = /* @__PURE__ */ x(toAttrNumber);
-  var y7 = /* @__PURE__ */ y(toAttrNumber);
-  var fill5 = /* @__PURE__ */ fill(toAttrString);
+  var classed7 = /* @__PURE__ */ classed(toAttrString);
+  var width13 = /* @__PURE__ */ width8(toAttrNumber);
+  var height13 = /* @__PURE__ */ height8(toAttrNumber);
+  var x10 = /* @__PURE__ */ x(toAttrNumber);
+  var y9 = /* @__PURE__ */ y(toAttrNumber);
+  var fill6 = /* @__PURE__ */ fill(toAttrString);
   var fillOpacity4 = /* @__PURE__ */ fillOpacity(toAttrNumber);
-  var strokeColor6 = /* @__PURE__ */ strokeColor(toAttrString);
-  var strokeWidth5 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var strokeColor7 = /* @__PURE__ */ strokeColor(toAttrString);
+  var strokeWidth6 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var discard13 = /* @__PURE__ */ discard(discardUnit);
-  var text9 = /* @__PURE__ */ text6(toAttrString);
-  var textAnchor4 = /* @__PURE__ */ textAnchor(toAttrString);
-  var fontSize3 = /* @__PURE__ */ fontSize(toAttrNumber);
+  var text10 = /* @__PURE__ */ text6(toAttrString);
+  var textAnchor5 = /* @__PURE__ */ textAnchor(toAttrString);
+  var fontSize4 = /* @__PURE__ */ fontSize(toAttrNumber);
   var getName2 = function(node) {
     return node.data.name;
   };
@@ -18491,7 +22136,7 @@
     return "#95a5a6";
   };
   var draw5 = function(dictBind) {
-    var bind26 = bind(dictBind);
+    var bind27 = bind(dictBind);
     var discard111 = discard13(dictBind);
     return function(dictMonadEffect) {
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
@@ -18507,9 +22152,9 @@
               width: 900,
               height: 600
             };
-            return bind26(attach2(selector))(function(v) {
-              return bind26(appendTo2(v)(Svg.value)([viewBox(0)(0)(dims.width)(dims.height), classed6("icicle"), width12(dims.width), height12(dims.height)]))(function(svg2) {
-                return bind26(appendTo2(svg2)(Group.value)([classed6("partitions")]))(function(chartGroup) {
+            return bind27(attach2(selector))(function(v) {
+              return bind27(appendTo2(v)(Svg.value)([viewBox(0)(0)(dims.width)(dims.height), classed7("icicle"), width13(dims.width), height13(dims.height)]))(function(svg2) {
+                return bind27(appendTo2(svg2)(Group.value)([classed7("partitions")]))(function(chartGroup) {
                   var hierarchy = hierarchyFromJSON_(treeJson);
                   var sortedHierarchy = treeSortForPartition_(hierarchy);
                   var partitionLayout0 = partitionLayout_(unit);
@@ -18526,15 +22171,15 @@
                     var partHeight = y17 - y0;
                     var depth = hNodeDepth_(node);
                     var name16 = getName2(node);
-                    return when5(partWidth > 0 && partHeight > 0)(bind26(appendTo2(chartGroup)(Rect.value)([x8(x0), y7(y0), width12(partWidth), height12(partHeight), fill5(depthColor2(round2(depth))), fillOpacity4(0.7), strokeColor6("#ffffff"), strokeWidth5(1), classed6("partition")]))(function() {
-                      return discard111(when5(partWidth > 60 && partHeight > 15)(bind26(appendTo2(chartGroup)(Text2.value)([x8(x0 + 4), y7(y0 + partHeight / 2 + 4), text9(name16), textAnchor4("start"), fontSize3(10), fill5("#ffffff"), classed6("partition-label")]))(function() {
+                    return when5(partWidth > 0 && partHeight > 0)(bind27(appendTo2(chartGroup)(Rect.value)([x10(x0), y9(y0), width13(partWidth), height13(partHeight), fill6(depthColor2(round2(depth))), fillOpacity4(0.7), strokeColor7("#ffffff"), strokeWidth6(1), classed7("partition")]))(function() {
+                      return discard111(when5(partWidth > 60 && partHeight > 15)(bind27(appendTo2(chartGroup)(Text2.value)([x10(x0 + 4), y9(y0 + partHeight / 2 + 4), text10(name16), textAnchor5("start"), fontSize4(10), fill6("#ffffff"), classed7("partition-label")]))(function() {
                         return pure33(unit);
                       })))(function() {
                         return pure33(unit);
                       });
                     }));
                   };
-                  return bind26(traverse_7(drawPartition)(nodes))(function() {
+                  return bind27(traverse_7(drawPartition)(nodes))(function() {
                     return pure33(unit);
                   });
                 });
@@ -18547,19 +22192,19 @@
   };
 
   // output/D3.Viz.Treemap/index.js
-  var classed7 = /* @__PURE__ */ classed(toAttrString);
-  var width13 = /* @__PURE__ */ width8(toAttrNumber);
-  var height13 = /* @__PURE__ */ height8(toAttrNumber);
-  var x9 = /* @__PURE__ */ x(toAttrNumber);
-  var y8 = /* @__PURE__ */ y(toAttrNumber);
-  var fill6 = /* @__PURE__ */ fill(toAttrString);
+  var classed8 = /* @__PURE__ */ classed(toAttrString);
+  var width14 = /* @__PURE__ */ width8(toAttrNumber);
+  var height14 = /* @__PURE__ */ height8(toAttrNumber);
+  var x11 = /* @__PURE__ */ x(toAttrNumber);
+  var y10 = /* @__PURE__ */ y(toAttrNumber);
+  var fill7 = /* @__PURE__ */ fill(toAttrString);
   var fillOpacity5 = /* @__PURE__ */ fillOpacity(toAttrNumber);
-  var strokeColor7 = /* @__PURE__ */ strokeColor(toAttrString);
-  var strokeWidth6 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var strokeColor8 = /* @__PURE__ */ strokeColor(toAttrString);
+  var strokeWidth7 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var discard14 = /* @__PURE__ */ discard(discardUnit);
-  var text10 = /* @__PURE__ */ text6(toAttrString);
-  var textAnchor5 = /* @__PURE__ */ textAnchor(toAttrString);
-  var fontSize4 = /* @__PURE__ */ fontSize(toAttrNumber);
+  var text11 = /* @__PURE__ */ text6(toAttrString);
+  var textAnchor6 = /* @__PURE__ */ textAnchor(toAttrString);
+  var fontSize5 = /* @__PURE__ */ fontSize(toAttrNumber);
   var getName3 = function(node) {
     return node.data.name;
   };
@@ -18587,7 +22232,7 @@
     return "#95a5a6";
   };
   var draw6 = function(dictBind) {
-    var bind26 = bind(dictBind);
+    var bind27 = bind(dictBind);
     var discard111 = discard14(dictBind);
     return function(dictMonadEffect) {
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
@@ -18603,9 +22248,9 @@
               width: 900,
               height: 600
             };
-            return bind26(attach2(selector))(function(v) {
-              return bind26(appendTo2(v)(Svg.value)([viewBox(0)(0)(dims.width)(dims.height), classed7("treemap"), width13(dims.width), height13(dims.height)]))(function(svg2) {
-                return bind26(appendTo2(svg2)(Group.value)([classed7("tiles")]))(function(chartGroup) {
+            return bind27(attach2(selector))(function(v) {
+              return bind27(appendTo2(v)(Svg.value)([viewBox(0)(0)(dims.width)(dims.height), classed8("treemap"), width14(dims.width), height14(dims.height)]))(function(svg2) {
+                return bind27(appendTo2(svg2)(Group.value)([classed8("tiles")]))(function(chartGroup) {
                   var hierarchy = hierarchyFromJSON_(treeJson);
                   var sortedHierarchy = treeSortForTreeMap_(hierarchy);
                   var treemapLayout0 = treemapLayout_(unit);
@@ -18622,15 +22267,15 @@
                     var tileHeight = y17 - y0;
                     var depth = hNodeDepth_(node);
                     var name16 = getName3(node);
-                    return when5(tileWidth > 0 && tileHeight > 0)(bind26(appendTo2(chartGroup)(Rect.value)([x9(x0), y8(y0), width13(tileWidth), height13(tileHeight), fill6(depthColor3(round2(depth))), fillOpacity5(0.6), strokeColor7("#ffffff"), strokeWidth6(1), classed7("tile")]))(function() {
-                      return discard111(when5(tileWidth > 30 && tileHeight > 20)(bind26(appendTo2(chartGroup)(Text2.value)([x9(x0 + 2), y8(y0 + 12), text10(name16), textAnchor5("start"), fontSize4(10), fill6("#ffffff"), classed7("tile-label")]))(function() {
+                    return when5(tileWidth > 0 && tileHeight > 0)(bind27(appendTo2(chartGroup)(Rect.value)([x11(x0), y10(y0), width14(tileWidth), height14(tileHeight), fill7(depthColor3(round2(depth))), fillOpacity5(0.6), strokeColor8("#ffffff"), strokeWidth7(1), classed8("tile")]))(function() {
+                      return discard111(when5(tileWidth > 30 && tileHeight > 20)(bind27(appendTo2(chartGroup)(Text2.value)([x11(x0 + 2), y10(y0 + 12), text11(name16), textAnchor6("start"), fontSize5(10), fill7("#ffffff"), classed8("tile-label")]))(function() {
                         return pure33(unit);
                       })))(function() {
                         return pure33(unit);
                       });
                     }));
                   };
-                  return bind26(traverse_7(drawTile)(nodes))(function() {
+                  return bind27(traverse_7(drawTile)(nodes))(function() {
                     return pure33(unit);
                   });
                 });
@@ -18643,13 +22288,13 @@
   };
 
   // output/D3.Viz.Hierarchies/index.js
-  var liftEffect10 = /* @__PURE__ */ liftEffect(monadEffectAff);
+  var liftEffect11 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var draw7 = /* @__PURE__ */ draw6(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var draw1 = /* @__PURE__ */ draw5(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var draw22 = /* @__PURE__ */ draw(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var drawTreemap = function(treeJson) {
     return function(selector) {
-      return liftEffect10(function __do3() {
+      return liftEffect11(function __do3() {
         var v = runD3M(draw7(treeJson)(selector))();
         return unit;
       });
@@ -18657,7 +22302,7 @@
   };
   var drawIcicle = function(treeJson) {
     return function(selector) {
-      return liftEffect10(function __do3() {
+      return liftEffect11(function __do3() {
         var v = runD3M(draw1(treeJson)(selector))();
         return unit;
       });
@@ -18665,7 +22310,7 @@
   };
   var drawCirclePacking = function(treeJson) {
     return function(selector) {
-      return liftEffect10(function __do3() {
+      return liftEffect11(function __do3() {
         var v = runD3M(draw22(treeJson)(selector))();
         return unit;
       });
@@ -18681,22 +22326,22 @@
   // output/D3.Viz.Tree.Draw/index.js
   var eq13 = /* @__PURE__ */ eq(eqTreeLayout);
   var append11 = /* @__PURE__ */ append(semigroupArray);
-  var classed8 = /* @__PURE__ */ classed(toAttrString);
-  var width14 = /* @__PURE__ */ width8(toAttrNumber);
-  var height14 = /* @__PURE__ */ height8(toAttrNumber);
+  var classed9 = /* @__PURE__ */ classed(toAttrString);
+  var width15 = /* @__PURE__ */ width8(toAttrNumber);
+  var height15 = /* @__PURE__ */ height8(toAttrNumber);
   var fontFamily2 = /* @__PURE__ */ fontFamily(toAttrString);
-  var fontSize5 = /* @__PURE__ */ fontSize(toAttrNumber);
+  var fontSize6 = /* @__PURE__ */ fontSize(toAttrNumber);
   var discard15 = /* @__PURE__ */ discard(discardUnit);
-  var strokeWidth7 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var strokeColor8 = /* @__PURE__ */ strokeColor(toAttrString);
+  var strokeWidth8 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var strokeColor9 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeOpacity2 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
-  var fill7 = /* @__PURE__ */ fill(toAttrString);
+  var fill8 = /* @__PURE__ */ fill(toAttrString);
   var fill1 = /* @__PURE__ */ fill(toAttrStringFn);
-  var radius6 = /* @__PURE__ */ radius(toAttrNumber);
+  var radius7 = /* @__PURE__ */ radius(toAttrNumber);
   var dy2 = /* @__PURE__ */ dy(toAttrNumber);
-  var x10 = /* @__PURE__ */ x(toAttrNumberFn);
-  var textAnchor6 = /* @__PURE__ */ textAnchor(toAttrStringFn);
-  var text11 = /* @__PURE__ */ text6(toAttrStringFn);
+  var x14 = /* @__PURE__ */ x(toAttrNumberFn);
+  var textAnchor7 = /* @__PURE__ */ textAnchor(toAttrStringFn);
+  var text12 = /* @__PURE__ */ text6(toAttrStringFn);
   var treeDatum_ = {
     depth: function($50) {
       return (function(v) {
@@ -18779,7 +22424,7 @@
     }
   };
   var draw8 = function(dictBind) {
-    var bind26 = bind(dictBind);
+    var bind27 = bind(dictBind);
     var discard111 = discard15(dictBind);
     return function(dictSelectionM) {
       var attach2 = attach(dictSelectionM);
@@ -18789,24 +22434,24 @@
       var pure33 = pure(dictSelectionM.Monad0().Applicative0());
       return function(config) {
         return function(tree2) {
-          return bind26(attach2(config.selector))(function(root3) {
-            return bind26(appendTo2(root3)(Svg.value)(append11(config.viewbox)([classed8("tree"), width14(config.svg.width), height14(config.svg.height)])))(function(svg2) {
-              return bind26(appendTo2(svg2)(Group.value)([fontFamily2("sans-serif"), fontSize5(10)]))(function(container) {
-                return bind26(appendTo2(container)(Group.value)([classed8("links")]))(function(links) {
-                  return bind26(appendTo2(container)(Group.value)([classed8("nodes")]))(function(nodes) {
-                    return bind26(simpleJoin2(links)(Path2.value)(links_(tree2))(keyIsID_))(function(theLinks_) {
-                      return discard111(setAttributes2(theLinks_)([strokeWidth7(1.5), strokeColor8(config.color), strokeOpacity2(0.4), fill7("none"), config.linkPath]))(function() {
-                        return bind26(simpleJoin2(nodes)(Group.value)(descendants_(tree2))(keyIsID_))(function(nodeJoin_) {
+          return bind27(attach2(config.selector))(function(root3) {
+            return bind27(appendTo2(root3)(Svg.value)(append11(config.viewbox)([classed9("tree"), width15(config.svg.width), height15(config.svg.height)])))(function(svg2) {
+              return bind27(appendTo2(svg2)(Group.value)([fontFamily2("sans-serif"), fontSize6(10)]))(function(container) {
+                return bind27(appendTo2(container)(Group.value)([classed9("links")]))(function(links) {
+                  return bind27(appendTo2(container)(Group.value)([classed9("nodes")]))(function(nodes) {
+                    return bind27(simpleJoin2(links)(Path.value)(links_(tree2))(keyIsID_))(function(theLinks_) {
+                      return discard111(setAttributes2(theLinks_)([strokeWidth8(1.5), strokeColor9(config.color), strokeOpacity2(0.4), fill8("none"), config.linkPath]))(function() {
+                        return bind27(simpleJoin2(nodes)(Group.value)(descendants_(tree2))(keyIsID_))(function(nodeJoin_) {
                           return discard111(setAttributes2(nodeJoin_)(config.nodeTransform))(function() {
-                            return bind26(appendTo2(nodeJoin_)(Circle.value)([fill1(function(v) {
+                            return bind27(appendTo2(nodeJoin_)(Circle.value)([fill1(function(v) {
                               var $49 = treeDatum_.hasChildren(v);
                               if ($49) {
                                 return "#999";
                               }
                               ;
                               return "#555";
-                            }), radius6(2.5), strokeColor8("white")]))(function(theNodes) {
-                              return bind26(appendTo2(nodeJoin_)(Text2.value)([dy2(0.31), x10(treeDatum_.textX(config.layout)), textAnchor6(treeDatum_.textAnchor(config.layout)), text11(treeDatum_.name), fill7(config.color)]))(function(theLabels) {
+                            }), radius7(2.5), strokeColor9("white")]))(function(theNodes) {
+                              return bind27(appendTo2(nodeJoin_)(Text2.value)([dy2(0.31), x14(treeDatum_.textX(config.layout)), textAnchor7(treeDatum_.textAnchor(config.layout)), text12(treeDatum_.name), fill8(config.color)]))(function(theLabels) {
                                 return pure33(svg2);
                               });
                             });
@@ -18879,7 +22524,7 @@
 
   // output/Data.String.CodePoints/index.js
   var fromEnum2 = /* @__PURE__ */ fromEnum(boundedEnumChar);
-  var map41 = /* @__PURE__ */ map(functorMaybe);
+  var map42 = /* @__PURE__ */ map(functorMaybe);
   var unfoldr2 = /* @__PURE__ */ unfoldr(unfoldableArray);
   var div3 = /* @__PURE__ */ div(euclideanRingInt);
   var mod2 = /* @__PURE__ */ mod(euclideanRingInt);
@@ -18923,7 +22568,7 @@
     });
   };
   var unconsButWithTuple = function(s) {
-    return map41(function(v) {
+    return map42(function(v) {
       return new Tuple(v.head, v.tail);
     })(uncons5(s));
   };
@@ -18952,7 +22597,7 @@
   };
   var indexOf2 = function(p2) {
     return function(s) {
-      return map41(function(i2) {
+      return map42(function(i2) {
         return length8(take2(i2)(s));
       })(indexOf(p2)(s));
     };
@@ -19004,9 +22649,9 @@
   };
 
   // output/D3.Viz.Tree.Configure/index.js
-  var show11 = /* @__PURE__ */ show(showNumber);
+  var show14 = /* @__PURE__ */ show(showNumber);
   var eq5 = /* @__PURE__ */ eq(eqTreeLayout);
-  var liftEffect11 = /* @__PURE__ */ liftEffect(monadEffectAff);
+  var liftEffect12 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var rotateRadialLabels = function(d7) {
     return "rotate(" + ((function() {
       var $27 = treeDatum_.onRHS(Radial.value)(d7);
@@ -19018,19 +22663,19 @@
     })() + ")");
   };
   var radialTranslate = function(d7) {
-    return "translate(" + (show11(treeDatum_.y(d7)) + ",0)");
+    return "translate(" + (show14(treeDatum_.y(d7)) + ",0)");
   };
   var radialRotate = function(x19) {
-    return show11(x19 * 180 / pi - 90);
+    return show14(x19 * 180 / pi - 90);
   };
   var radialRotateCommon = function(d7) {
     return "rotate(" + (radialRotate(treeDatum_.x(d7)) + ")");
   };
   var positionXYreflected = function(d7) {
-    return "translate(" + (show11(treeDatum_.y(d7)) + ("," + (show11(treeDatum_.x(d7)) + ")")));
+    return "translate(" + (show14(treeDatum_.y(d7)) + ("," + (show14(treeDatum_.x(d7)) + ")")));
   };
   var positionXY = function(d7) {
-    return "translate(" + (show11(treeDatum_.x(d7)) + ("," + (show11(treeDatum_.y(d7)) + ")")));
+    return "translate(" + (show14(treeDatum_.x(d7)) + ("," + (show14(treeDatum_.y(d7)) + ")")));
   };
   var configureAndRunScript = function(dictBind) {
     var draw17 = draw8(dictBind);
@@ -19221,7 +22866,7 @@
   var configureAndRunScript1 = /* @__PURE__ */ configureAndRunScript(bindD3M)(d3TaglessD3M);
   var drawTree = function(treeModel) {
     return function(selector) {
-      return liftEffect11(function __do3() {
+      return liftEffect12(function __do3() {
         var widthHeight = getWindowWidthHeight();
         var v = runD3M(configureAndRunScript1(widthHeight)(treeModel)(selector))();
         return unit;
@@ -19254,15 +22899,15 @@
   // output/PSD3.Hierarchies/index.js
   var append16 = /* @__PURE__ */ append(semigroupArray);
   var type_23 = /* @__PURE__ */ type_17(isPropButtonType);
-  var bind21 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftEffect12 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  var bind22 = /* @__PURE__ */ bind(bindHalogenM);
+  var liftEffect13 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var removeExistingSVG2 = /* @__PURE__ */ removeExistingSVG(d3TaglessD3M);
   var liftAff3 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var pure28 = /* @__PURE__ */ pure(applicativeHalogenM);
   var makeModel2 = /* @__PURE__ */ makeModel(bindAff)(monadEffectAff);
   var discard16 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_3 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var get5 = /* @__PURE__ */ get(monadStateHalogenM);
+  var get7 = /* @__PURE__ */ get(monadStateHalogenM);
   var slot_6 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "rhsNav";
@@ -19389,7 +23034,7 @@
       throw new Error("Failed pattern match at PSD3.Hierarchies (line 45, column 1 - line 54, column 27): " + [v.constructor.name]);
     }
   };
-  var show14 = /* @__PURE__ */ show(showHierarchyLayout);
+  var show15 = /* @__PURE__ */ show(showHierarchyLayout);
   var renderLayoutPlaceholder = function(v) {
     return div_([]);
   };
@@ -19575,15 +23220,15 @@
   };
   var handleAction5 = function(v) {
     if (v instanceof Initialize6) {
-      return bind21(liftEffect12(eval_D3M(removeExistingSVG2("div.hierarchies-viz"))))(function() {
-        return bind21(liftAff3(getTreeViaAJAX("./data/flare-2.json")))(function(treeJSON) {
+      return bind22(liftEffect13(eval_D3M(removeExistingSVG2("div.hierarchies-viz"))))(function() {
+        return bind22(liftAff3(getTreeViaAJAX("./data/flare-2.json")))(function(treeJSON) {
           if (treeJSON instanceof Left) {
             return pure28(unit);
           }
           ;
           if (treeJSON instanceof Right) {
-            return bind21(liftAff3(makeModel2(TidyTree.value)(Horizontal.value)(treeJSON.value0)))(function(model) {
-              return bind21(liftAff3(drawLayoutViz(HorizontalTidy.value)(model)))(function() {
+            return bind22(liftAff3(makeModel2(TidyTree.value)(Horizontal.value)(treeJSON.value0)))(function(model) {
+              return bind22(liftAff3(drawLayoutViz(HorizontalTidy.value)(model)))(function() {
                 return discard16(modify_3(function(st) {
                   var $46 = {};
                   for (var $47 in st) {
@@ -19608,7 +23253,7 @@
     }
     ;
     if (v instanceof SelectLayout) {
-      return bind21(liftEffect12(eval_D3M(removeExistingSVG2("div.hierarchies-viz"))))(function() {
+      return bind22(liftEffect13(eval_D3M(removeExistingSVG2("div.hierarchies-viz"))))(function() {
         return discard16(modify_3(function(v1) {
           var $50 = {};
           for (var $51 in v1) {
@@ -19621,13 +23266,13 @@
           $50.currentLayout = v.value0;
           return $50;
         }))(function() {
-          return bind21(get5)(function(state3) {
+          return bind22(get7)(function(state3) {
             if (state3.tree instanceof Nothing) {
               return pure28(unit);
             }
             ;
             if (state3.tree instanceof Just) {
-              return bind21(liftAff3(drawLayoutViz(v.value0)(state3.tree.value0)))(function() {
+              return bind22(liftAff3(drawLayoutViz(v.value0)(state3.tree.value0)))(function() {
                 return pure28(unit);
               });
             }
@@ -19644,7 +23289,7 @@
     return $$Proxy.value;
   })();
   var render7 = function(state3) {
-    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel", "control-panel"])])([div2([classes(["toc-panel__main", "control-panel__main"])])([img([src9("controller.jpeg"), alt5(""), classes(["control-panel__icon"])]), div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Layout Controls")]), button([classes(["floating-panel__toggle"]), type_23(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "control-panel__content"])])([div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Node-Link Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(HorizontalTidy.value)("H-Tidy")(state3.currentLayout), renderLayoutOption(HorizontalDendrogram.value)("H-Dendro")(state3.currentLayout), renderLayoutOption(VerticalTidy.value)("V-Tidy")(state3.currentLayout), renderLayoutOption(VerticalDendrogram.value)("V-Dendro")(state3.currentLayout), renderLayoutOption(RadialTidy.value)("R-Tidy")(state3.currentLayout), renderLayoutOption(RadialDendrogram.value)("R-Dendro")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Adjacency Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(Icicle.value)("Icicle")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Enclosure Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(CirclePacking.value)("Circle Pack")(state3.currentLayout), renderLayoutOption(Treemap.value)("Treemap")(state3.currentLayout)])]), div2([classes(["control-panel__current"])])([strong_([text5("Current:")]), text5(" "), text5(show14(state3.currentLayout))])])])]), slot_6(_rhsNav4)(unit)(component)(Hierarchies.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Hierarchical Layouts")]), p_([text5("Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data.")]), p_([text5("This page demonstrates five different ways to visualize the same hierarchical dataset. Use the controls on the left to switch between layouts and explore how each representation emphasizes different relationships in the data.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5(show14(state3.currentLayout))]), p_([text5(layoutDescription(state3.currentLayout))]), div2([classes(["tutorial-viz-container"])])([div2([classes(["hierarchies-viz"])])([renderLayoutPlaceholder(state3.currentLayout)])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Implementation")]), p_([text5("The visualization code for "), strong_([text5(show14(state3.currentLayout))]), text5(" demonstrates how D3's hierarchical layout algorithms transform tree data into visual coordinates.")]), div2([classes(["tutorial-code-block"])])([pre_([code_([text5("-- Code for "), text5(show14(state3.currentLayout)), text5(" layout will go here\n"), text5("-- Demonstrates D3 hierarchy layout with PureScript DSL")])])])])]);
+    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel", "control-panel"])])([div2([classes(["toc-panel__main", "control-panel__main"])])([img([src9("controller.jpeg"), alt5(""), classes(["control-panel__icon"])]), div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Layout Controls")]), button([classes(["floating-panel__toggle"]), type_23(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "control-panel__content"])])([div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Node-Link Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(HorizontalTidy.value)("H-Tidy")(state3.currentLayout), renderLayoutOption(HorizontalDendrogram.value)("H-Dendro")(state3.currentLayout), renderLayoutOption(VerticalTidy.value)("V-Tidy")(state3.currentLayout), renderLayoutOption(VerticalDendrogram.value)("V-Dendro")(state3.currentLayout), renderLayoutOption(RadialTidy.value)("R-Tidy")(state3.currentLayout), renderLayoutOption(RadialDendrogram.value)("R-Dendro")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Adjacency Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(Icicle.value)("Icicle")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Enclosure Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(CirclePacking.value)("Circle Pack")(state3.currentLayout), renderLayoutOption(Treemap.value)("Treemap")(state3.currentLayout)])]), div2([classes(["control-panel__current"])])([strong_([text5("Current:")]), text5(" "), text5(show15(state3.currentLayout))])])])]), slot_6(_rhsNav4)(unit)(component)(Hierarchies.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Hierarchical Layouts")]), p_([text5("Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data.")]), p_([text5("This page demonstrates five different ways to visualize the same hierarchical dataset. Use the controls on the left to switch between layouts and explore how each representation emphasizes different relationships in the data.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5(show15(state3.currentLayout))]), p_([text5(layoutDescription(state3.currentLayout))]), div2([classes(["tutorial-viz-container"])])([div2([classes(["hierarchies-viz"])])([renderLayoutPlaceholder(state3.currentLayout)])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Implementation")]), p_([text5("The visualization code for "), strong_([text5(show15(state3.currentLayout))]), text5(" demonstrates how D3's hierarchical layout algorithms transform tree data into visual coordinates.")]), div2([classes(["tutorial-code-block"])])([pre_([code_([text5("-- Code for "), text5(show15(state3.currentLayout)), text5(" layout will go here\n"), text5("-- Demonstrates D3 hierarchy layout with PureScript DSL")])])])])]);
   };
   var component7 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -19684,7 +23329,7 @@
   });
 
   // node_modules/d3-sankey/node_modules/d3-array/src/max.js
-  function max7(values2, valueof) {
+  function max8(values2, valueof) {
     let max9;
     if (valueof === void 0) {
       for (const value16 of values2) {
@@ -19704,7 +23349,7 @@
   }
 
   // node_modules/d3-sankey/node_modules/d3-array/src/min.js
-  function min7(values2, valueof) {
+  function min8(values2, valueof) {
     let min9;
     if (valueof === void 0) {
       for (const value16 of values2) {
@@ -19747,17 +23392,17 @@
   function targetDepth(d7) {
     return d7.target.depth;
   }
-  function left2(node) {
+  function left3(node) {
     return node.depth;
   }
-  function right2(node, n) {
+  function right3(node, n) {
     return n - 1 - node.height;
   }
   function justify(node, n) {
     return node.sourceLinks.length ? node.depth : n - 1;
   }
-  function center(node) {
-    return node.targetLinks.length ? node.depth : node.sourceLinks.length ? min7(node.sourceLinks, targetDepth) - 1 : 0;
+  function center2(node) {
+    return node.targetLinks.length ? node.depth : node.sourceLinks.length ? min8(node.sourceLinks, targetDepth) - 1 : 0;
   }
 
   // node_modules/d3-sankey/src/constant.js
@@ -19789,7 +23434,7 @@
   function defaultLinks(graph) {
     return graph.links;
   }
-  function find3(nodeById, id5) {
+  function find4(nodeById, id5) {
     const node = nodeById.get(id5);
     if (!node) throw new Error("missing: " + id5);
     return node;
@@ -19876,8 +23521,8 @@
       for (const [i2, link4] of links2.entries()) {
         link4.index = i2;
         let { source: source2, target: target7 } = link4;
-        if (typeof source2 !== "object") source2 = link4.source = find3(nodeById, source2);
-        if (typeof target7 !== "object") target7 = link4.target = find3(nodeById, target7);
+        if (typeof source2 !== "object") source2 = link4.source = find4(nodeById, source2);
+        if (typeof target7 !== "object") target7 = link4.target = find4(nodeById, target7);
         source2.sourceLinks.push(link4);
         target7.targetLinks.push(link4);
       }
@@ -19928,7 +23573,7 @@
       }
     }
     function computeNodeLayers({ nodes: nodes2 }) {
-      const x20 = max7(nodes2, (d7) => d7.depth) + 1;
+      const x20 = max8(nodes2, (d7) => d7.depth) + 1;
       const kx = (x19 - x0 - dx) / (x20 - 1);
       const columns = new Array(x20);
       for (const node of nodes2) {
@@ -19945,7 +23590,7 @@
       return columns;
     }
     function initializeNodeBreadths(columns) {
-      const ky = min7(columns, (c) => (y17 - y0 - (c.length - 1) * py) / sum3(c, value15));
+      const ky = min8(columns, (c) => (y17 - y0 - (c.length - 1) * py) / sum3(c, value15));
       for (const nodes2 of columns) {
         let y18 = y0;
         for (const node of nodes2) {
@@ -19967,7 +23612,7 @@
     }
     function computeNodeBreadths(graph) {
       const columns = computeNodeLayers(graph);
-      py = Math.min(dy4, (y17 - y0) / (max7(columns, (c) => c.length) - 1));
+      py = Math.min(dy4, (y17 - y0) / (max8(columns, (c) => c.length) - 1));
       initializeNodeBreadths(columns);
       for (let i2 = 0; i2 < iterations; ++i2) {
         const alpha = Math.pow(0.99, i2);
@@ -20088,20 +23733,20 @@
   }
 
   // node_modules/d3-sankey/node_modules/d3-path/src/path.js
-  var pi2 = Math.PI;
-  var tau = 2 * pi2;
-  var epsilon = 1e-6;
-  var tauEpsilon = tau - epsilon;
-  function Path3() {
+  var pi3 = Math.PI;
+  var tau2 = 2 * pi3;
+  var epsilon3 = 1e-6;
+  var tauEpsilon2 = tau2 - epsilon3;
+  function Path4() {
     this._x0 = this._y0 = // start of current subpath
     this._x1 = this._y1 = null;
     this._ = "";
   }
-  function path() {
-    return new Path3();
+  function path2() {
+    return new Path4();
   }
-  Path3.prototype = path.prototype = {
-    constructor: Path3,
+  Path4.prototype = path2.prototype = {
+    constructor: Path4,
     moveTo: function(x19, y17) {
       this._ += "M" + (this._x0 = this._x1 = +x19) + "," + (this._y0 = this._y1 = +y17);
     },
@@ -20126,12 +23771,12 @@
       if (r < 0) throw new Error("negative radius: " + r);
       if (this._x1 === null) {
         this._ += "M" + (this._x1 = x19) + "," + (this._y1 = y17);
-      } else if (!(l01_2 > epsilon)) ;
-      else if (!(Math.abs(y01 * x21 - y21 * x01) > epsilon) || !r) {
+      } else if (!(l01_2 > epsilon3)) ;
+      else if (!(Math.abs(y01 * x21 - y21 * x01) > epsilon3) || !r) {
         this._ += "L" + (this._x1 = x19) + "," + (this._y1 = y17);
       } else {
-        var x20 = x23 - x0, y20 = y23 - y0, l21_2 = x21 * x21 + y21 * y21, l20_2 = x20 * x20 + y20 * y20, l21 = Math.sqrt(l21_2), l01 = Math.sqrt(l01_2), l = r * Math.tan((pi2 - Math.acos((l21_2 + l01_2 - l20_2) / (2 * l21 * l01))) / 2), t01 = l / l01, t21 = l / l21;
-        if (Math.abs(t01 - 1) > epsilon) {
+        var x20 = x23 - x0, y20 = y23 - y0, l21_2 = x21 * x21 + y21 * y21, l20_2 = x20 * x20 + y20 * y20, l21 = Math.sqrt(l21_2), l01 = Math.sqrt(l01_2), l = r * Math.tan((pi3 - Math.acos((l21_2 + l01_2 - l20_2) / (2 * l21 * l01))) / 2), t01 = l / l01, t21 = l / l21;
+        if (Math.abs(t01 - 1) > epsilon3) {
           this._ += "L" + (x19 + t01 * x01) + "," + (y17 + t01 * y01);
         }
         this._ += "A" + r + "," + r + ",0,0," + +(y01 * x20 > x01 * y20) + "," + (this._x1 = x19 + t21 * x21) + "," + (this._y1 = y17 + t21 * y21);
@@ -20143,15 +23788,15 @@
       if (r < 0) throw new Error("negative radius: " + r);
       if (this._x1 === null) {
         this._ += "M" + x0 + "," + y0;
-      } else if (Math.abs(this._x1 - x0) > epsilon || Math.abs(this._y1 - y0) > epsilon) {
+      } else if (Math.abs(this._x1 - x0) > epsilon3 || Math.abs(this._y1 - y0) > epsilon3) {
         this._ += "L" + x0 + "," + y0;
       }
       if (!r) return;
-      if (da < 0) da = da % tau + tau;
-      if (da > tauEpsilon) {
+      if (da < 0) da = da % tau2 + tau2;
+      if (da > tauEpsilon2) {
         this._ += "A" + r + "," + r + ",0,1," + cw + "," + (x19 - dx) + "," + (y17 - dy4) + "A" + r + "," + r + ",0,1," + cw + "," + (this._x1 = x0) + "," + (this._y1 = y0);
-      } else if (da > epsilon) {
-        this._ += "A" + r + "," + r + ",0," + +(da >= pi2) + "," + cw + "," + (this._x1 = x19 + r * Math.cos(a1)) + "," + (this._y1 = y17 + r * Math.sin(a1));
+      } else if (da > epsilon3) {
+        this._ += "A" + r + "," + r + ",0," + +(da >= pi3) + "," + cw + "," + (this._x1 = x19 + r * Math.cos(a1)) + "," + (this._y1 = y17 + r * Math.sin(a1));
       }
     },
     rect: function(x19, y17, w, h) {
@@ -20161,25 +23806,25 @@
       return this._;
     }
   };
-  var path_default = path;
+  var path_default2 = path2;
 
   // node_modules/d3-sankey/node_modules/d3-shape/src/constant.js
-  function constant_default(x19) {
+  function constant_default6(x19) {
     return function constant2() {
       return x19;
     };
   }
 
   // node_modules/d3-sankey/node_modules/d3-shape/src/point.js
-  function x11(p2) {
+  function x15(p2) {
     return p2[0];
   }
-  function y9(p2) {
+  function y11(p2) {
     return p2[1];
   }
 
   // node_modules/d3-sankey/node_modules/d3-shape/src/array.js
-  var slice3 = Array.prototype.slice;
+  var slice4 = Array.prototype.slice;
 
   // node_modules/d3-sankey/node_modules/d3-shape/src/link/index.js
   function linkSource(d7) {
@@ -20189,10 +23834,10 @@
     return d7.target;
   }
   function link3(curve) {
-    var source2 = linkSource, target7 = linkTarget, x19 = x11, y17 = y9, context = null;
+    var source2 = linkSource, target7 = linkTarget, x19 = x15, y17 = y11, context = null;
     function link4() {
-      var buffer, argv = slice3.call(arguments), s = source2.apply(this, argv), t = target7.apply(this, argv);
-      if (!context) context = buffer = path_default();
+      var buffer, argv = slice4.call(arguments), s = source2.apply(this, argv), t = target7.apply(this, argv);
+      if (!context) context = buffer = path_default2();
       curve(context, +x19.apply(this, (argv[0] = s, argv)), +y17.apply(this, argv), +x19.apply(this, (argv[0] = t, argv)), +y17.apply(this, argv));
       if (buffer) return context = null, buffer + "" || null;
     }
@@ -20203,10 +23848,10 @@
       return arguments.length ? (target7 = _, link4) : target7;
     };
     link4.x = function(_) {
-      return arguments.length ? (x19 = typeof _ === "function" ? _ : constant_default(+_), link4) : x19;
+      return arguments.length ? (x19 = typeof _ === "function" ? _ : constant_default6(+_), link4) : x19;
     };
     link4.y = function(_) {
-      return arguments.length ? (y17 = typeof _ === "function" ? _ : constant_default(+_), link4) : y17;
+      return arguments.length ? (y17 = typeof _ === "function" ? _ : constant_default6(+_), link4) : y17;
     };
     link4.context = function(_) {
       return arguments.length ? (context = _ == null ? null : _, link4) : context;
@@ -20609,3312 +24254,15 @@
     }]
   };
 
-  // node_modules/d3-array/src/ascending.js
-  function ascending(a2, b2) {
-    return a2 == null || b2 == null ? NaN : a2 < b2 ? -1 : a2 > b2 ? 1 : a2 >= b2 ? 0 : NaN;
-  }
-
-  // node_modules/d3-array/src/descending.js
-  function descending(a2, b2) {
-    return a2 == null || b2 == null ? NaN : b2 < a2 ? -1 : b2 > a2 ? 1 : b2 >= a2 ? 0 : NaN;
-  }
-
-  // node_modules/d3-array/src/bisector.js
-  function bisector(f) {
-    let compare12, compare2, delta;
-    if (f.length !== 2) {
-      compare12 = ascending;
-      compare2 = (d7, x19) => ascending(f(d7), x19);
-      delta = (d7, x19) => f(d7) - x19;
-    } else {
-      compare12 = f === ascending || f === descending ? f : zero2;
-      compare2 = f;
-      delta = f;
-    }
-    function left4(a2, x19, lo = 0, hi = a2.length) {
-      if (lo < hi) {
-        if (compare12(x19, x19) !== 0) return hi;
-        do {
-          const mid = lo + hi >>> 1;
-          if (compare2(a2[mid], x19) < 0) lo = mid + 1;
-          else hi = mid;
-        } while (lo < hi);
-      }
-      return lo;
-    }
-    function right4(a2, x19, lo = 0, hi = a2.length) {
-      if (lo < hi) {
-        if (compare12(x19, x19) !== 0) return hi;
-        do {
-          const mid = lo + hi >>> 1;
-          if (compare2(a2[mid], x19) <= 0) lo = mid + 1;
-          else hi = mid;
-        } while (lo < hi);
-      }
-      return lo;
-    }
-    function center3(a2, x19, lo = 0, hi = a2.length) {
-      const i2 = left4(a2, x19, lo, hi - 1);
-      return i2 > lo && delta(a2[i2 - 1], x19) > -delta(a2[i2], x19) ? i2 - 1 : i2;
-    }
-    return { left: left4, center: center3, right: right4 };
-  }
-  function zero2() {
-    return 0;
-  }
-
-  // node_modules/d3-array/src/number.js
-  function number(x19) {
-    return x19 === null ? NaN : +x19;
-  }
-
-  // node_modules/d3-array/src/bisect.js
-  var ascendingBisect = bisector(ascending);
-  var bisectRight = ascendingBisect.right;
-  var bisectLeft = ascendingBisect.left;
-  var bisectCenter = bisector(number).center;
-  var bisect_default = bisectRight;
-
-  // node_modules/internmap/src/index.js
-  var InternMap = class extends Map {
-    constructor(entries, key = keyof) {
-      super();
-      Object.defineProperties(this, { _intern: { value: /* @__PURE__ */ new Map() }, _key: { value: key } });
-      if (entries != null) for (const [key2, value16] of entries) this.set(key2, value16);
-    }
-    get(key) {
-      return super.get(intern_get(this, key));
-    }
-    has(key) {
-      return super.has(intern_get(this, key));
-    }
-    set(key, value16) {
-      return super.set(intern_set(this, key), value16);
-    }
-    delete(key) {
-      return super.delete(intern_delete(this, key));
-    }
-  };
-  function intern_get({ _intern, _key }, value16) {
-    const key = _key(value16);
-    return _intern.has(key) ? _intern.get(key) : value16;
-  }
-  function intern_set({ _intern, _key }, value16) {
-    const key = _key(value16);
-    if (_intern.has(key)) return _intern.get(key);
-    _intern.set(key, value16);
-    return value16;
-  }
-  function intern_delete({ _intern, _key }, value16) {
-    const key = _key(value16);
-    if (_intern.has(key)) {
-      value16 = _intern.get(key);
-      _intern.delete(key);
-    }
-    return value16;
-  }
-  function keyof(value16) {
-    return value16 !== null && typeof value16 === "object" ? value16.valueOf() : value16;
-  }
-
-  // node_modules/d3-array/src/ticks.js
-  var e10 = Math.sqrt(50);
-  var e5 = Math.sqrt(10);
-  var e2 = Math.sqrt(2);
-  function tickSpec(start5, stop3, count) {
-    const step5 = (stop3 - start5) / Math.max(0, count), power = Math.floor(Math.log10(step5)), error4 = step5 / Math.pow(10, power), factor = error4 >= e10 ? 10 : error4 >= e5 ? 5 : error4 >= e2 ? 2 : 1;
-    let i1, i2, inc;
-    if (power < 0) {
-      inc = Math.pow(10, -power) / factor;
-      i1 = Math.round(start5 * inc);
-      i2 = Math.round(stop3 * inc);
-      if (i1 / inc < start5) ++i1;
-      if (i2 / inc > stop3) --i2;
-      inc = -inc;
-    } else {
-      inc = Math.pow(10, power) * factor;
-      i1 = Math.round(start5 / inc);
-      i2 = Math.round(stop3 / inc);
-      if (i1 * inc < start5) ++i1;
-      if (i2 * inc > stop3) --i2;
-    }
-    if (i2 < i1 && 0.5 <= count && count < 2) return tickSpec(start5, stop3, count * 2);
-    return [i1, i2, inc];
-  }
-  function ticks(start5, stop3, count) {
-    stop3 = +stop3, start5 = +start5, count = +count;
-    if (!(count > 0)) return [];
-    if (start5 === stop3) return [start5];
-    const reverse3 = stop3 < start5, [i1, i2, inc] = reverse3 ? tickSpec(stop3, start5, count) : tickSpec(start5, stop3, count);
-    if (!(i2 >= i1)) return [];
-    const n = i2 - i1 + 1, ticks2 = new Array(n);
-    if (reverse3) {
-      if (inc < 0) for (let i3 = 0; i3 < n; ++i3) ticks2[i3] = (i2 - i3) / -inc;
-      else for (let i3 = 0; i3 < n; ++i3) ticks2[i3] = (i2 - i3) * inc;
-    } else {
-      if (inc < 0) for (let i3 = 0; i3 < n; ++i3) ticks2[i3] = (i1 + i3) / -inc;
-      else for (let i3 = 0; i3 < n; ++i3) ticks2[i3] = (i1 + i3) * inc;
-    }
-    return ticks2;
-  }
-  function tickIncrement(start5, stop3, count) {
-    stop3 = +stop3, start5 = +start5, count = +count;
-    return tickSpec(start5, stop3, count)[2];
-  }
-  function tickStep(start5, stop3, count) {
-    stop3 = +stop3, start5 = +start5, count = +count;
-    const reverse3 = stop3 < start5, inc = reverse3 ? tickIncrement(stop3, start5, count) : tickIncrement(start5, stop3, count);
-    return (reverse3 ? -1 : 1) * (inc < 0 ? 1 / -inc : inc);
-  }
-
-  // node_modules/d3-axis/src/identity.js
-  function identity_default(x19) {
-    return x19;
-  }
-
-  // node_modules/d3-axis/src/axis.js
-  var top4 = 1;
-  var right3 = 2;
-  var bottom4 = 3;
-  var left3 = 4;
-  var epsilon2 = 1e-6;
-  function translateX(x19) {
-    return "translate(" + x19 + ",0)";
-  }
-  function translateY(y17) {
-    return "translate(0," + y17 + ")";
-  }
-  function number2(scale) {
-    return (d7) => +scale(d7);
-  }
-  function center2(scale, offset) {
-    offset = Math.max(0, scale.bandwidth() - offset * 2) / 2;
-    if (scale.round()) offset = Math.round(offset);
-    return (d7) => +scale(d7) + offset;
-  }
-  function entering() {
-    return !this.__axis;
-  }
-  function axis(orient, scale) {
-    var tickArguments = [], tickValues = null, tickFormat2 = null, tickSizeInner = 6, tickSizeOuter = 6, tickPadding = 3, offset = typeof window !== "undefined" && window.devicePixelRatio > 1 ? 0 : 0.5, k = orient === top4 || orient === left3 ? -1 : 1, x19 = orient === left3 || orient === right3 ? "x" : "y", transform3 = orient === top4 || orient === bottom4 ? translateX : translateY;
-    function axis2(context) {
-      var values2 = tickValues == null ? scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain() : tickValues, format2 = tickFormat2 == null ? scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity_default : tickFormat2, spacing = Math.max(tickSizeInner, 0) + tickPadding, range3 = scale.range(), range0 = +range3[0] + offset, range1 = +range3[range3.length - 1] + offset, position2 = (scale.bandwidth ? center2 : number2)(scale.copy(), offset), selection2 = context.selection ? context.selection() : context, path3 = selection2.selectAll(".domain").data([null]), tick = selection2.selectAll(".tick").data(values2, scale).order(), tickExit = tick.exit(), tickEnter = tick.enter().append("g").attr("class", "tick"), line = tick.select("line"), text15 = tick.select("text");
-      path3 = path3.merge(path3.enter().insert("path", ".tick").attr("class", "domain").attr("stroke", "currentColor"));
-      tick = tick.merge(tickEnter);
-      line = line.merge(tickEnter.append("line").attr("stroke", "currentColor").attr(x19 + "2", k * tickSizeInner));
-      text15 = text15.merge(tickEnter.append("text").attr("fill", "currentColor").attr(x19, k * spacing).attr("dy", orient === top4 ? "0em" : orient === bottom4 ? "0.71em" : "0.32em"));
-      if (context !== selection2) {
-        path3 = path3.transition(context);
-        tick = tick.transition(context);
-        line = line.transition(context);
-        text15 = text15.transition(context);
-        tickExit = tickExit.transition(context).attr("opacity", epsilon2).attr("transform", function(d7) {
-          return isFinite(d7 = position2(d7)) ? transform3(d7 + offset) : this.getAttribute("transform");
-        });
-        tickEnter.attr("opacity", epsilon2).attr("transform", function(d7) {
-          var p2 = this.parentNode.__axis;
-          return transform3((p2 && isFinite(p2 = p2(d7)) ? p2 : position2(d7)) + offset);
-        });
-      }
-      tickExit.remove();
-      path3.attr("d", orient === left3 || orient === right3 ? tickSizeOuter ? "M" + k * tickSizeOuter + "," + range0 + "H" + offset + "V" + range1 + "H" + k * tickSizeOuter : "M" + offset + "," + range0 + "V" + range1 : tickSizeOuter ? "M" + range0 + "," + k * tickSizeOuter + "V" + offset + "H" + range1 + "V" + k * tickSizeOuter : "M" + range0 + "," + offset + "H" + range1);
-      tick.attr("opacity", 1).attr("transform", function(d7) {
-        return transform3(position2(d7) + offset);
-      });
-      line.attr(x19 + "2", k * tickSizeInner);
-      text15.attr(x19, k * spacing).text(format2);
-      selection2.filter(entering).attr("fill", "none").attr("font-size", 10).attr("font-family", "sans-serif").attr("text-anchor", orient === right3 ? "start" : orient === left3 ? "end" : "middle");
-      selection2.each(function() {
-        this.__axis = position2;
-      });
-    }
-    axis2.scale = function(_) {
-      return arguments.length ? (scale = _, axis2) : scale;
-    };
-    axis2.ticks = function() {
-      return tickArguments = Array.from(arguments), axis2;
-    };
-    axis2.tickArguments = function(_) {
-      return arguments.length ? (tickArguments = _ == null ? [] : Array.from(_), axis2) : tickArguments.slice();
-    };
-    axis2.tickValues = function(_) {
-      return arguments.length ? (tickValues = _ == null ? null : Array.from(_), axis2) : tickValues && tickValues.slice();
-    };
-    axis2.tickFormat = function(_) {
-      return arguments.length ? (tickFormat2 = _, axis2) : tickFormat2;
-    };
-    axis2.tickSize = function(_) {
-      return arguments.length ? (tickSizeInner = tickSizeOuter = +_, axis2) : tickSizeInner;
-    };
-    axis2.tickSizeInner = function(_) {
-      return arguments.length ? (tickSizeInner = +_, axis2) : tickSizeInner;
-    };
-    axis2.tickSizeOuter = function(_) {
-      return arguments.length ? (tickSizeOuter = +_, axis2) : tickSizeOuter;
-    };
-    axis2.tickPadding = function(_) {
-      return arguments.length ? (tickPadding = +_, axis2) : tickPadding;
-    };
-    axis2.offset = function(_) {
-      return arguments.length ? (offset = +_, axis2) : offset;
-    };
-    return axis2;
-  }
-  function axisBottom(scale) {
-    return axis(bottom4, scale);
-  }
-  function axisLeft(scale) {
-    return axis(left3, scale);
-  }
-
-  // node_modules/d3-dispatch/src/dispatch.js
-  var noop = { value: () => {
-  } };
-  function dispatch() {
-    for (var i2 = 0, n = arguments.length, _ = {}, t; i2 < n; ++i2) {
-      if (!(t = arguments[i2] + "") || t in _ || /[\s.]/.test(t)) throw new Error("illegal type: " + t);
-      _[t] = [];
-    }
-    return new Dispatch(_);
-  }
-  function Dispatch(_) {
-    this._ = _;
-  }
-  function parseTypenames(typenames, types) {
-    return typenames.trim().split(/^|\s+/).map(function(t) {
-      var name16 = "", i2 = t.indexOf(".");
-      if (i2 >= 0) name16 = t.slice(i2 + 1), t = t.slice(0, i2);
-      if (t && !types.hasOwnProperty(t)) throw new Error("unknown type: " + t);
-      return { type: t, name: name16 };
-    });
-  }
-  Dispatch.prototype = dispatch.prototype = {
-    constructor: Dispatch,
-    on: function(typename, callback) {
-      var _ = this._, T = parseTypenames(typename + "", _), t, i2 = -1, n = T.length;
-      if (arguments.length < 2) {
-        while (++i2 < n) if ((t = (typename = T[i2]).type) && (t = get6(_[t], typename.name))) return t;
-        return;
-      }
-      if (callback != null && typeof callback !== "function") throw new Error("invalid callback: " + callback);
-      while (++i2 < n) {
-        if (t = (typename = T[i2]).type) _[t] = set3(_[t], typename.name, callback);
-        else if (callback == null) for (t in _) _[t] = set3(_[t], typename.name, null);
-      }
-      return this;
-    },
-    copy: function() {
-      var copy3 = {}, _ = this._;
-      for (var t in _) copy3[t] = _[t].slice();
-      return new Dispatch(copy3);
-    },
-    call: function(type2, that) {
-      if ((n = arguments.length - 2) > 0) for (var args = new Array(n), i2 = 0, n, t; i2 < n; ++i2) args[i2] = arguments[i2 + 2];
-      if (!this._.hasOwnProperty(type2)) throw new Error("unknown type: " + type2);
-      for (t = this._[type2], i2 = 0, n = t.length; i2 < n; ++i2) t[i2].value.apply(that, args);
-    },
-    apply: function(type2, that, args) {
-      if (!this._.hasOwnProperty(type2)) throw new Error("unknown type: " + type2);
-      for (var t = this._[type2], i2 = 0, n = t.length; i2 < n; ++i2) t[i2].value.apply(that, args);
-    }
-  };
-  function get6(type2, name16) {
-    for (var i2 = 0, n = type2.length, c; i2 < n; ++i2) {
-      if ((c = type2[i2]).name === name16) {
-        return c.value;
-      }
-    }
-  }
-  function set3(type2, name16, callback) {
-    for (var i2 = 0, n = type2.length; i2 < n; ++i2) {
-      if (type2[i2].name === name16) {
-        type2[i2] = noop, type2 = type2.slice(0, i2).concat(type2.slice(i2 + 1));
-        break;
-      }
-    }
-    if (callback != null) type2.push({ name: name16, value: callback });
-    return type2;
-  }
-  var dispatch_default = dispatch;
-
-  // node_modules/d3-selection/src/namespaces.js
-  var xhtml = "http://www.w3.org/1999/xhtml";
-  var namespaces_default = {
-    svg: "http://www.w3.org/2000/svg",
-    xhtml,
-    xlink: "http://www.w3.org/1999/xlink",
-    xml: "http://www.w3.org/XML/1998/namespace",
-    xmlns: "http://www.w3.org/2000/xmlns/"
-  };
-
-  // node_modules/d3-selection/src/namespace.js
-  function namespace_default(name16) {
-    var prefix = name16 += "", i2 = prefix.indexOf(":");
-    if (i2 >= 0 && (prefix = name16.slice(0, i2)) !== "xmlns") name16 = name16.slice(i2 + 1);
-    return namespaces_default.hasOwnProperty(prefix) ? { space: namespaces_default[prefix], local: name16 } : name16;
-  }
-
-  // node_modules/d3-selection/src/creator.js
-  function creatorInherit(name16) {
-    return function() {
-      var document3 = this.ownerDocument, uri = this.namespaceURI;
-      return uri === xhtml && document3.documentElement.namespaceURI === xhtml ? document3.createElement(name16) : document3.createElementNS(uri, name16);
-    };
-  }
-  function creatorFixed(fullname) {
-    return function() {
-      return this.ownerDocument.createElementNS(fullname.space, fullname.local);
-    };
-  }
-  function creator_default(name16) {
-    var fullname = namespace_default(name16);
-    return (fullname.local ? creatorFixed : creatorInherit)(fullname);
-  }
-
-  // node_modules/d3-selection/src/selector.js
-  function none2() {
-  }
-  function selector_default(selector) {
-    return selector == null ? none2 : function() {
-      return this.querySelector(selector);
-    };
-  }
-
-  // node_modules/d3-selection/src/selection/select.js
-  function select_default(select5) {
-    if (typeof select5 !== "function") select5 = selector_default(select5);
-    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
-      for (var group3 = groups[j], n = group3.length, subgroup = subgroups[j] = new Array(n), node, subnode, i2 = 0; i2 < n; ++i2) {
-        if ((node = group3[i2]) && (subnode = select5.call(node, node.__data__, i2, group3))) {
-          if ("__data__" in node) subnode.__data__ = node.__data__;
-          subgroup[i2] = subnode;
-        }
-      }
-    }
-    return new Selection(subgroups, this._parents);
-  }
-
-  // node_modules/d3-selection/src/array.js
-  function array(x19) {
-    return x19 == null ? [] : Array.isArray(x19) ? x19 : Array.from(x19);
-  }
-
-  // node_modules/d3-selection/src/selectorAll.js
-  function empty8() {
-    return [];
-  }
-  function selectorAll_default(selector) {
-    return selector == null ? empty8 : function() {
-      return this.querySelectorAll(selector);
-    };
-  }
-
-  // node_modules/d3-selection/src/selection/selectAll.js
-  function arrayAll(select5) {
-    return function() {
-      return array(select5.apply(this, arguments));
-    };
-  }
-  function selectAll_default(select5) {
-    if (typeof select5 === "function") select5 = arrayAll(select5);
-    else select5 = selectorAll_default(select5);
-    for (var groups = this._groups, m = groups.length, subgroups = [], parents = [], j = 0; j < m; ++j) {
-      for (var group3 = groups[j], n = group3.length, node, i2 = 0; i2 < n; ++i2) {
-        if (node = group3[i2]) {
-          subgroups.push(select5.call(node, node.__data__, i2, group3));
-          parents.push(node);
-        }
-      }
-    }
-    return new Selection(subgroups, parents);
-  }
-
-  // node_modules/d3-selection/src/matcher.js
-  function matcher_default(selector) {
-    return function() {
-      return this.matches(selector);
-    };
-  }
-  function childMatcher(selector) {
-    return function(node) {
-      return node.matches(selector);
-    };
-  }
-
-  // node_modules/d3-selection/src/selection/selectChild.js
-  var find4 = Array.prototype.find;
-  function childFind(match2) {
-    return function() {
-      return find4.call(this.children, match2);
-    };
-  }
-  function childFirst() {
-    return this.firstElementChild;
-  }
-  function selectChild_default(match2) {
-    return this.select(match2 == null ? childFirst : childFind(typeof match2 === "function" ? match2 : childMatcher(match2)));
-  }
-
-  // node_modules/d3-selection/src/selection/selectChildren.js
-  var filter5 = Array.prototype.filter;
-  function children2() {
-    return Array.from(this.children);
-  }
-  function childrenFilter(match2) {
-    return function() {
-      return filter5.call(this.children, match2);
-    };
-  }
-  function selectChildren_default(match2) {
-    return this.selectAll(match2 == null ? children2 : childrenFilter(typeof match2 === "function" ? match2 : childMatcher(match2)));
-  }
-
-  // node_modules/d3-selection/src/selection/filter.js
-  function filter_default(match2) {
-    if (typeof match2 !== "function") match2 = matcher_default(match2);
-    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
-      for (var group3 = groups[j], n = group3.length, subgroup = subgroups[j] = [], node, i2 = 0; i2 < n; ++i2) {
-        if ((node = group3[i2]) && match2.call(node, node.__data__, i2, group3)) {
-          subgroup.push(node);
-        }
-      }
-    }
-    return new Selection(subgroups, this._parents);
-  }
-
-  // node_modules/d3-selection/src/selection/sparse.js
-  function sparse_default(update3) {
-    return new Array(update3.length);
-  }
-
-  // node_modules/d3-selection/src/selection/enter.js
-  function enter_default() {
-    return new Selection(this._enter || this._groups.map(sparse_default), this._parents);
-  }
-  function EnterNode(parent2, datum2) {
-    this.ownerDocument = parent2.ownerDocument;
-    this.namespaceURI = parent2.namespaceURI;
-    this._next = null;
-    this._parent = parent2;
-    this.__data__ = datum2;
-  }
-  EnterNode.prototype = {
-    constructor: EnterNode,
-    appendChild: function(child) {
-      return this._parent.insertBefore(child, this._next);
-    },
-    insertBefore: function(child, next2) {
-      return this._parent.insertBefore(child, next2);
-    },
-    querySelector: function(selector) {
-      return this._parent.querySelector(selector);
-    },
-    querySelectorAll: function(selector) {
-      return this._parent.querySelectorAll(selector);
-    }
-  };
-
-  // node_modules/d3-selection/src/constant.js
-  function constant_default2(x19) {
-    return function() {
-      return x19;
-    };
-  }
-
-  // node_modules/d3-selection/src/selection/data.js
-  function bindIndex(parent2, group3, enter, update3, exit, data) {
-    var i2 = 0, node, groupLength = group3.length, dataLength = data.length;
-    for (; i2 < dataLength; ++i2) {
-      if (node = group3[i2]) {
-        node.__data__ = data[i2];
-        update3[i2] = node;
-      } else {
-        enter[i2] = new EnterNode(parent2, data[i2]);
-      }
-    }
-    for (; i2 < groupLength; ++i2) {
-      if (node = group3[i2]) {
-        exit[i2] = node;
-      }
-    }
-  }
-  function bindKey(parent2, group3, enter, update3, exit, data, key) {
-    var i2, node, nodeByKeyValue = /* @__PURE__ */ new Map(), groupLength = group3.length, dataLength = data.length, keyValues = new Array(groupLength), keyValue;
-    for (i2 = 0; i2 < groupLength; ++i2) {
-      if (node = group3[i2]) {
-        keyValues[i2] = keyValue = key.call(node, node.__data__, i2, group3) + "";
-        if (nodeByKeyValue.has(keyValue)) {
-          exit[i2] = node;
-        } else {
-          nodeByKeyValue.set(keyValue, node);
-        }
-      }
-    }
-    for (i2 = 0; i2 < dataLength; ++i2) {
-      keyValue = key.call(parent2, data[i2], i2, data) + "";
-      if (node = nodeByKeyValue.get(keyValue)) {
-        update3[i2] = node;
-        node.__data__ = data[i2];
-        nodeByKeyValue.delete(keyValue);
-      } else {
-        enter[i2] = new EnterNode(parent2, data[i2]);
-      }
-    }
-    for (i2 = 0; i2 < groupLength; ++i2) {
-      if ((node = group3[i2]) && nodeByKeyValue.get(keyValues[i2]) === node) {
-        exit[i2] = node;
-      }
-    }
-  }
-  function datum(node) {
-    return node.__data__;
-  }
-  function data_default(value16, key) {
-    if (!arguments.length) return Array.from(this, datum);
-    var bind26 = key ? bindKey : bindIndex, parents = this._parents, groups = this._groups;
-    if (typeof value16 !== "function") value16 = constant_default2(value16);
-    for (var m = groups.length, update3 = new Array(m), enter = new Array(m), exit = new Array(m), j = 0; j < m; ++j) {
-      var parent2 = parents[j], group3 = groups[j], groupLength = group3.length, data = arraylike(value16.call(parent2, parent2 && parent2.__data__, j, parents)), dataLength = data.length, enterGroup = enter[j] = new Array(dataLength), updateGroup = update3[j] = new Array(dataLength), exitGroup = exit[j] = new Array(groupLength);
-      bind26(parent2, group3, enterGroup, updateGroup, exitGroup, data, key);
-      for (var i0 = 0, i1 = 0, previous, next2; i0 < dataLength; ++i0) {
-        if (previous = enterGroup[i0]) {
-          if (i0 >= i1) i1 = i0 + 1;
-          while (!(next2 = updateGroup[i1]) && ++i1 < dataLength) ;
-          previous._next = next2 || null;
-        }
-      }
-    }
-    update3 = new Selection(update3, parents);
-    update3._enter = enter;
-    update3._exit = exit;
-    return update3;
-  }
-  function arraylike(data) {
-    return typeof data === "object" && "length" in data ? data : Array.from(data);
-  }
-
-  // node_modules/d3-selection/src/selection/exit.js
-  function exit_default() {
-    return new Selection(this._exit || this._groups.map(sparse_default), this._parents);
-  }
-
-  // node_modules/d3-selection/src/selection/join.js
-  function join_default(onenter, onupdate, onexit) {
-    var enter = this.enter(), update3 = this, exit = this.exit();
-    if (typeof onenter === "function") {
-      enter = onenter(enter);
-      if (enter) enter = enter.selection();
-    } else {
-      enter = enter.append(onenter + "");
-    }
-    if (onupdate != null) {
-      update3 = onupdate(update3);
-      if (update3) update3 = update3.selection();
-    }
-    if (onexit == null) exit.remove();
-    else onexit(exit);
-    return enter && update3 ? enter.merge(update3).order() : update3;
-  }
-
-  // node_modules/d3-selection/src/selection/merge.js
-  function merge_default(context) {
-    var selection2 = context.selection ? context.selection() : context;
-    for (var groups0 = this._groups, groups1 = selection2._groups, m0 = groups0.length, m1 = groups1.length, m = Math.min(m0, m1), merges = new Array(m0), j = 0; j < m; ++j) {
-      for (var group0 = groups0[j], group1 = groups1[j], n = group0.length, merge = merges[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
-        if (node = group0[i2] || group1[i2]) {
-          merge[i2] = node;
-        }
-      }
-    }
-    for (; j < m0; ++j) {
-      merges[j] = groups0[j];
-    }
-    return new Selection(merges, this._parents);
-  }
-
-  // node_modules/d3-selection/src/selection/order.js
-  function order_default() {
-    for (var groups = this._groups, j = -1, m = groups.length; ++j < m; ) {
-      for (var group3 = groups[j], i2 = group3.length - 1, next2 = group3[i2], node; --i2 >= 0; ) {
-        if (node = group3[i2]) {
-          if (next2 && node.compareDocumentPosition(next2) ^ 4) next2.parentNode.insertBefore(node, next2);
-          next2 = node;
-        }
-      }
-    }
-    return this;
-  }
-
-  // node_modules/d3-selection/src/selection/sort.js
-  function sort_default(compare2) {
-    if (!compare2) compare2 = ascending2;
-    function compareNode(a2, b2) {
-      return a2 && b2 ? compare2(a2.__data__, b2.__data__) : !a2 - !b2;
-    }
-    for (var groups = this._groups, m = groups.length, sortgroups = new Array(m), j = 0; j < m; ++j) {
-      for (var group3 = groups[j], n = group3.length, sortgroup = sortgroups[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
-        if (node = group3[i2]) {
-          sortgroup[i2] = node;
-        }
-      }
-      sortgroup.sort(compareNode);
-    }
-    return new Selection(sortgroups, this._parents).order();
-  }
-  function ascending2(a2, b2) {
-    return a2 < b2 ? -1 : a2 > b2 ? 1 : a2 >= b2 ? 0 : NaN;
-  }
-
-  // node_modules/d3-selection/src/selection/call.js
-  function call_default() {
-    var callback = arguments[0];
-    arguments[0] = this;
-    callback.apply(null, arguments);
-    return this;
-  }
-
-  // node_modules/d3-selection/src/selection/nodes.js
-  function nodes_default() {
-    return Array.from(this);
-  }
-
-  // node_modules/d3-selection/src/selection/node.js
-  function node_default() {
-    for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {
-      for (var group3 = groups[j], i2 = 0, n = group3.length; i2 < n; ++i2) {
-        var node = group3[i2];
-        if (node) return node;
-      }
-    }
-    return null;
-  }
-
-  // node_modules/d3-selection/src/selection/size.js
-  function size_default() {
-    let size5 = 0;
-    for (const node of this) ++size5;
-    return size5;
-  }
-
-  // node_modules/d3-selection/src/selection/empty.js
-  function empty_default() {
-    return !this.node();
-  }
-
-  // node_modules/d3-selection/src/selection/each.js
-  function each_default(callback) {
-    for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {
-      for (var group3 = groups[j], i2 = 0, n = group3.length, node; i2 < n; ++i2) {
-        if (node = group3[i2]) callback.call(node, node.__data__, i2, group3);
-      }
-    }
-    return this;
-  }
-
-  // node_modules/d3-selection/src/selection/attr.js
-  function attrRemove(name16) {
-    return function() {
-      this.removeAttribute(name16);
-    };
-  }
-  function attrRemoveNS(fullname) {
-    return function() {
-      this.removeAttributeNS(fullname.space, fullname.local);
-    };
-  }
-  function attrConstant(name16, value16) {
-    return function() {
-      this.setAttribute(name16, value16);
-    };
-  }
-  function attrConstantNS(fullname, value16) {
-    return function() {
-      this.setAttributeNS(fullname.space, fullname.local, value16);
-    };
-  }
-  function attrFunction(name16, value16) {
-    return function() {
-      var v = value16.apply(this, arguments);
-      if (v == null) this.removeAttribute(name16);
-      else this.setAttribute(name16, v);
-    };
-  }
-  function attrFunctionNS(fullname, value16) {
-    return function() {
-      var v = value16.apply(this, arguments);
-      if (v == null) this.removeAttributeNS(fullname.space, fullname.local);
-      else this.setAttributeNS(fullname.space, fullname.local, v);
-    };
-  }
-  function attr_default(name16, value16) {
-    var fullname = namespace_default(name16);
-    if (arguments.length < 2) {
-      var node = this.node();
-      return fullname.local ? node.getAttributeNS(fullname.space, fullname.local) : node.getAttribute(fullname);
-    }
-    return this.each((value16 == null ? fullname.local ? attrRemoveNS : attrRemove : typeof value16 === "function" ? fullname.local ? attrFunctionNS : attrFunction : fullname.local ? attrConstantNS : attrConstant)(fullname, value16));
-  }
-
-  // node_modules/d3-selection/src/window.js
-  function window_default(node) {
-    return node.ownerDocument && node.ownerDocument.defaultView || node.document && node || node.defaultView;
-  }
-
-  // node_modules/d3-selection/src/selection/style.js
-  function styleRemove(name16) {
-    return function() {
-      this.style.removeProperty(name16);
-    };
-  }
-  function styleConstant(name16, value16, priority) {
-    return function() {
-      this.style.setProperty(name16, value16, priority);
-    };
-  }
-  function styleFunction(name16, value16, priority) {
-    return function() {
-      var v = value16.apply(this, arguments);
-      if (v == null) this.style.removeProperty(name16);
-      else this.style.setProperty(name16, v, priority);
-    };
-  }
-  function style_default(name16, value16, priority) {
-    return arguments.length > 1 ? this.each((value16 == null ? styleRemove : typeof value16 === "function" ? styleFunction : styleConstant)(name16, value16, priority == null ? "" : priority)) : styleValue(this.node(), name16);
-  }
-  function styleValue(node, name16) {
-    return node.style.getPropertyValue(name16) || window_default(node).getComputedStyle(node, null).getPropertyValue(name16);
-  }
-
-  // node_modules/d3-selection/src/selection/property.js
-  function propertyRemove(name16) {
-    return function() {
-      delete this[name16];
-    };
-  }
-  function propertyConstant(name16, value16) {
-    return function() {
-      this[name16] = value16;
-    };
-  }
-  function propertyFunction(name16, value16) {
-    return function() {
-      var v = value16.apply(this, arguments);
-      if (v == null) delete this[name16];
-      else this[name16] = v;
-    };
-  }
-  function property_default(name16, value16) {
-    return arguments.length > 1 ? this.each((value16 == null ? propertyRemove : typeof value16 === "function" ? propertyFunction : propertyConstant)(name16, value16)) : this.node()[name16];
-  }
-
-  // node_modules/d3-selection/src/selection/classed.js
-  function classArray(string2) {
-    return string2.trim().split(/^|\s+/);
-  }
-  function classList2(node) {
-    return node.classList || new ClassList(node);
-  }
-  function ClassList(node) {
-    this._node = node;
-    this._names = classArray(node.getAttribute("class") || "");
-  }
-  ClassList.prototype = {
-    add: function(name16) {
-      var i2 = this._names.indexOf(name16);
-      if (i2 < 0) {
-        this._names.push(name16);
-        this._node.setAttribute("class", this._names.join(" "));
-      }
-    },
-    remove: function(name16) {
-      var i2 = this._names.indexOf(name16);
-      if (i2 >= 0) {
-        this._names.splice(i2, 1);
-        this._node.setAttribute("class", this._names.join(" "));
-      }
-    },
-    contains: function(name16) {
-      return this._names.indexOf(name16) >= 0;
-    }
-  };
-  function classedAdd(node, names) {
-    var list = classList2(node), i2 = -1, n = names.length;
-    while (++i2 < n) list.add(names[i2]);
-  }
-  function classedRemove(node, names) {
-    var list = classList2(node), i2 = -1, n = names.length;
-    while (++i2 < n) list.remove(names[i2]);
-  }
-  function classedTrue(names) {
-    return function() {
-      classedAdd(this, names);
-    };
-  }
-  function classedFalse(names) {
-    return function() {
-      classedRemove(this, names);
-    };
-  }
-  function classedFunction(names, value16) {
-    return function() {
-      (value16.apply(this, arguments) ? classedAdd : classedRemove)(this, names);
-    };
-  }
-  function classed_default(name16, value16) {
-    var names = classArray(name16 + "");
-    if (arguments.length < 2) {
-      var list = classList2(this.node()), i2 = -1, n = names.length;
-      while (++i2 < n) if (!list.contains(names[i2])) return false;
-      return true;
-    }
-    return this.each((typeof value16 === "function" ? classedFunction : value16 ? classedTrue : classedFalse)(names, value16));
-  }
-
-  // node_modules/d3-selection/src/selection/text.js
-  function textRemove() {
-    this.textContent = "";
-  }
-  function textConstant(value16) {
-    return function() {
-      this.textContent = value16;
-    };
-  }
-  function textFunction(value16) {
-    return function() {
-      var v = value16.apply(this, arguments);
-      this.textContent = v == null ? "" : v;
-    };
-  }
-  function text_default(value16) {
-    return arguments.length ? this.each(value16 == null ? textRemove : (typeof value16 === "function" ? textFunction : textConstant)(value16)) : this.node().textContent;
-  }
-
-  // node_modules/d3-selection/src/selection/html.js
-  function htmlRemove() {
-    this.innerHTML = "";
-  }
-  function htmlConstant(value16) {
-    return function() {
-      this.innerHTML = value16;
-    };
-  }
-  function htmlFunction(value16) {
-    return function() {
-      var v = value16.apply(this, arguments);
-      this.innerHTML = v == null ? "" : v;
-    };
-  }
-  function html_default(value16) {
-    return arguments.length ? this.each(value16 == null ? htmlRemove : (typeof value16 === "function" ? htmlFunction : htmlConstant)(value16)) : this.node().innerHTML;
-  }
-
-  // node_modules/d3-selection/src/selection/raise.js
-  function raise2() {
-    if (this.nextSibling) this.parentNode.appendChild(this);
-  }
-  function raise_default() {
-    return this.each(raise2);
-  }
-
-  // node_modules/d3-selection/src/selection/lower.js
-  function lower() {
-    if (this.previousSibling) this.parentNode.insertBefore(this, this.parentNode.firstChild);
-  }
-  function lower_default() {
-    return this.each(lower);
-  }
-
-  // node_modules/d3-selection/src/selection/append.js
-  function append_default(name16) {
-    var create5 = typeof name16 === "function" ? name16 : creator_default(name16);
-    return this.select(function() {
-      return this.appendChild(create5.apply(this, arguments));
-    });
-  }
-
-  // node_modules/d3-selection/src/selection/insert.js
-  function constantNull() {
-    return null;
-  }
-  function insert_default(name16, before) {
-    var create5 = typeof name16 === "function" ? name16 : creator_default(name16), select5 = before == null ? constantNull : typeof before === "function" ? before : selector_default(before);
-    return this.select(function() {
-      return this.insertBefore(create5.apply(this, arguments), select5.apply(this, arguments) || null);
-    });
-  }
-
-  // node_modules/d3-selection/src/selection/remove.js
-  function remove2() {
-    var parent2 = this.parentNode;
-    if (parent2) parent2.removeChild(this);
-  }
-  function remove_default() {
-    return this.each(remove2);
-  }
-
-  // node_modules/d3-selection/src/selection/clone.js
-  function selection_cloneShallow() {
-    var clone2 = this.cloneNode(false), parent2 = this.parentNode;
-    return parent2 ? parent2.insertBefore(clone2, this.nextSibling) : clone2;
-  }
-  function selection_cloneDeep() {
-    var clone2 = this.cloneNode(true), parent2 = this.parentNode;
-    return parent2 ? parent2.insertBefore(clone2, this.nextSibling) : clone2;
-  }
-  function clone_default(deep) {
-    return this.select(deep ? selection_cloneDeep : selection_cloneShallow);
-  }
-
-  // node_modules/d3-selection/src/selection/datum.js
-  function datum_default(value16) {
-    return arguments.length ? this.property("__data__", value16) : this.node().__data__;
-  }
-
-  // node_modules/d3-selection/src/selection/on.js
-  function contextListener(listener) {
-    return function(event) {
-      listener.call(this, event, this.__data__);
-    };
-  }
-  function parseTypenames2(typenames) {
-    return typenames.trim().split(/^|\s+/).map(function(t) {
-      var name16 = "", i2 = t.indexOf(".");
-      if (i2 >= 0) name16 = t.slice(i2 + 1), t = t.slice(0, i2);
-      return { type: t, name: name16 };
-    });
-  }
-  function onRemove(typename) {
-    return function() {
-      var on3 = this.__on;
-      if (!on3) return;
-      for (var j = 0, i2 = -1, m = on3.length, o; j < m; ++j) {
-        if (o = on3[j], (!typename.type || o.type === typename.type) && o.name === typename.name) {
-          this.removeEventListener(o.type, o.listener, o.options);
-        } else {
-          on3[++i2] = o;
-        }
-      }
-      if (++i2) on3.length = i2;
-      else delete this.__on;
-    };
-  }
-  function onAdd(typename, value16, options2) {
-    return function() {
-      var on3 = this.__on, o, listener = contextListener(value16);
-      if (on3) for (var j = 0, m = on3.length; j < m; ++j) {
-        if ((o = on3[j]).type === typename.type && o.name === typename.name) {
-          this.removeEventListener(o.type, o.listener, o.options);
-          this.addEventListener(o.type, o.listener = listener, o.options = options2);
-          o.value = value16;
-          return;
-        }
-      }
-      this.addEventListener(typename.type, listener, options2);
-      o = { type: typename.type, name: typename.name, value: value16, listener, options: options2 };
-      if (!on3) this.__on = [o];
-      else on3.push(o);
-    };
-  }
-  function on_default(typename, value16, options2) {
-    var typenames = parseTypenames2(typename + ""), i2, n = typenames.length, t;
-    if (arguments.length < 2) {
-      var on3 = this.node().__on;
-      if (on3) for (var j = 0, m = on3.length, o; j < m; ++j) {
-        for (i2 = 0, o = on3[j]; i2 < n; ++i2) {
-          if ((t = typenames[i2]).type === o.type && t.name === o.name) {
-            return o.value;
-          }
-        }
-      }
-      return;
-    }
-    on3 = value16 ? onAdd : onRemove;
-    for (i2 = 0; i2 < n; ++i2) this.each(on3(typenames[i2], value16, options2));
-    return this;
-  }
-
-  // node_modules/d3-selection/src/selection/dispatch.js
-  function dispatchEvent2(node, type2, params) {
-    var window2 = window_default(node), event = window2.CustomEvent;
-    if (typeof event === "function") {
-      event = new event(type2, params);
-    } else {
-      event = window2.document.createEvent("Event");
-      if (params) event.initEvent(type2, params.bubbles, params.cancelable), event.detail = params.detail;
-      else event.initEvent(type2, false, false);
-    }
-    node.dispatchEvent(event);
-  }
-  function dispatchConstant(type2, params) {
-    return function() {
-      return dispatchEvent2(this, type2, params);
-    };
-  }
-  function dispatchFunction(type2, params) {
-    return function() {
-      return dispatchEvent2(this, type2, params.apply(this, arguments));
-    };
-  }
-  function dispatch_default2(type2, params) {
-    return this.each((typeof params === "function" ? dispatchFunction : dispatchConstant)(type2, params));
-  }
-
-  // node_modules/d3-selection/src/selection/iterator.js
-  function* iterator_default() {
-    for (var groups = this._groups, j = 0, m = groups.length; j < m; ++j) {
-      for (var group3 = groups[j], i2 = 0, n = group3.length, node; i2 < n; ++i2) {
-        if (node = group3[i2]) yield node;
-      }
-    }
-  }
-
-  // node_modules/d3-selection/src/selection/index.js
-  var root2 = [null];
-  function Selection(groups, parents) {
-    this._groups = groups;
-    this._parents = parents;
-  }
-  function selection() {
-    return new Selection([[document.documentElement]], root2);
-  }
-  function selection_selection() {
-    return this;
-  }
-  Selection.prototype = selection.prototype = {
-    constructor: Selection,
-    select: select_default,
-    selectAll: selectAll_default,
-    selectChild: selectChild_default,
-    selectChildren: selectChildren_default,
-    filter: filter_default,
-    data: data_default,
-    enter: enter_default,
-    exit: exit_default,
-    join: join_default,
-    merge: merge_default,
-    selection: selection_selection,
-    order: order_default,
-    sort: sort_default,
-    call: call_default,
-    nodes: nodes_default,
-    node: node_default,
-    size: size_default,
-    empty: empty_default,
-    each: each_default,
-    attr: attr_default,
-    style: style_default,
-    property: property_default,
-    classed: classed_default,
-    text: text_default,
-    html: html_default,
-    raise: raise_default,
-    lower: lower_default,
-    append: append_default,
-    insert: insert_default,
-    remove: remove_default,
-    clone: clone_default,
-    datum: datum_default,
-    on: on_default,
-    dispatch: dispatch_default2,
-    [Symbol.iterator]: iterator_default
-  };
-  var selection_default = selection;
-
-  // node_modules/d3-color/src/define.js
-  function define_default(constructor, factory, prototype) {
-    constructor.prototype = factory.prototype = prototype;
-    prototype.constructor = constructor;
-  }
-  function extend2(parent2, definition) {
-    var prototype = Object.create(parent2.prototype);
-    for (var key in definition) prototype[key] = definition[key];
-    return prototype;
-  }
-
-  // node_modules/d3-color/src/color.js
-  function Color() {
-  }
-  var darker = 0.7;
-  var brighter = 1 / darker;
-  var reI = "\\s*([+-]?\\d+)\\s*";
-  var reN = "\\s*([+-]?(?:\\d*\\.)?\\d+(?:[eE][+-]?\\d+)?)\\s*";
-  var reP = "\\s*([+-]?(?:\\d*\\.)?\\d+(?:[eE][+-]?\\d+)?)%\\s*";
-  var reHex = /^#([0-9a-f]{3,8})$/;
-  var reRgbInteger = new RegExp(`^rgb\\(${reI},${reI},${reI}\\)$`);
-  var reRgbPercent = new RegExp(`^rgb\\(${reP},${reP},${reP}\\)$`);
-  var reRgbaInteger = new RegExp(`^rgba\\(${reI},${reI},${reI},${reN}\\)$`);
-  var reRgbaPercent = new RegExp(`^rgba\\(${reP},${reP},${reP},${reN}\\)$`);
-  var reHslPercent = new RegExp(`^hsl\\(${reN},${reP},${reP}\\)$`);
-  var reHslaPercent = new RegExp(`^hsla\\(${reN},${reP},${reP},${reN}\\)$`);
-  var named = {
-    aliceblue: 15792383,
-    antiquewhite: 16444375,
-    aqua: 65535,
-    aquamarine: 8388564,
-    azure: 15794175,
-    beige: 16119260,
-    bisque: 16770244,
-    black: 0,
-    blanchedalmond: 16772045,
-    blue: 255,
-    blueviolet: 9055202,
-    brown: 10824234,
-    burlywood: 14596231,
-    cadetblue: 6266528,
-    chartreuse: 8388352,
-    chocolate: 13789470,
-    coral: 16744272,
-    cornflowerblue: 6591981,
-    cornsilk: 16775388,
-    crimson: 14423100,
-    cyan: 65535,
-    darkblue: 139,
-    darkcyan: 35723,
-    darkgoldenrod: 12092939,
-    darkgray: 11119017,
-    darkgreen: 25600,
-    darkgrey: 11119017,
-    darkkhaki: 12433259,
-    darkmagenta: 9109643,
-    darkolivegreen: 5597999,
-    darkorange: 16747520,
-    darkorchid: 10040012,
-    darkred: 9109504,
-    darksalmon: 15308410,
-    darkseagreen: 9419919,
-    darkslateblue: 4734347,
-    darkslategray: 3100495,
-    darkslategrey: 3100495,
-    darkturquoise: 52945,
-    darkviolet: 9699539,
-    deeppink: 16716947,
-    deepskyblue: 49151,
-    dimgray: 6908265,
-    dimgrey: 6908265,
-    dodgerblue: 2003199,
-    firebrick: 11674146,
-    floralwhite: 16775920,
-    forestgreen: 2263842,
-    fuchsia: 16711935,
-    gainsboro: 14474460,
-    ghostwhite: 16316671,
-    gold: 16766720,
-    goldenrod: 14329120,
-    gray: 8421504,
-    green: 32768,
-    greenyellow: 11403055,
-    grey: 8421504,
-    honeydew: 15794160,
-    hotpink: 16738740,
-    indianred: 13458524,
-    indigo: 4915330,
-    ivory: 16777200,
-    khaki: 15787660,
-    lavender: 15132410,
-    lavenderblush: 16773365,
-    lawngreen: 8190976,
-    lemonchiffon: 16775885,
-    lightblue: 11393254,
-    lightcoral: 15761536,
-    lightcyan: 14745599,
-    lightgoldenrodyellow: 16448210,
-    lightgray: 13882323,
-    lightgreen: 9498256,
-    lightgrey: 13882323,
-    lightpink: 16758465,
-    lightsalmon: 16752762,
-    lightseagreen: 2142890,
-    lightskyblue: 8900346,
-    lightslategray: 7833753,
-    lightslategrey: 7833753,
-    lightsteelblue: 11584734,
-    lightyellow: 16777184,
-    lime: 65280,
-    limegreen: 3329330,
-    linen: 16445670,
-    magenta: 16711935,
-    maroon: 8388608,
-    mediumaquamarine: 6737322,
-    mediumblue: 205,
-    mediumorchid: 12211667,
-    mediumpurple: 9662683,
-    mediumseagreen: 3978097,
-    mediumslateblue: 8087790,
-    mediumspringgreen: 64154,
-    mediumturquoise: 4772300,
-    mediumvioletred: 13047173,
-    midnightblue: 1644912,
-    mintcream: 16121850,
-    mistyrose: 16770273,
-    moccasin: 16770229,
-    navajowhite: 16768685,
-    navy: 128,
-    oldlace: 16643558,
-    olive: 8421376,
-    olivedrab: 7048739,
-    orange: 16753920,
-    orangered: 16729344,
-    orchid: 14315734,
-    palegoldenrod: 15657130,
-    palegreen: 10025880,
-    paleturquoise: 11529966,
-    palevioletred: 14381203,
-    papayawhip: 16773077,
-    peachpuff: 16767673,
-    peru: 13468991,
-    pink: 16761035,
-    plum: 14524637,
-    powderblue: 11591910,
-    purple: 8388736,
-    rebeccapurple: 6697881,
-    red: 16711680,
-    rosybrown: 12357519,
-    royalblue: 4286945,
-    saddlebrown: 9127187,
-    salmon: 16416882,
-    sandybrown: 16032864,
-    seagreen: 3050327,
-    seashell: 16774638,
-    sienna: 10506797,
-    silver: 12632256,
-    skyblue: 8900331,
-    slateblue: 6970061,
-    slategray: 7372944,
-    slategrey: 7372944,
-    snow: 16775930,
-    springgreen: 65407,
-    steelblue: 4620980,
-    tan: 13808780,
-    teal: 32896,
-    thistle: 14204888,
-    tomato: 16737095,
-    turquoise: 4251856,
-    violet: 15631086,
-    wheat: 16113331,
-    white: 16777215,
-    whitesmoke: 16119285,
-    yellow: 16776960,
-    yellowgreen: 10145074
-  };
-  define_default(Color, color, {
-    copy(channels) {
-      return Object.assign(new this.constructor(), this, channels);
-    },
-    displayable() {
-      return this.rgb().displayable();
-    },
-    hex: color_formatHex,
-    // Deprecated! Use color.formatHex.
-    formatHex: color_formatHex,
-    formatHex8: color_formatHex8,
-    formatHsl: color_formatHsl,
-    formatRgb: color_formatRgb,
-    toString: color_formatRgb
-  });
-  function color_formatHex() {
-    return this.rgb().formatHex();
-  }
-  function color_formatHex8() {
-    return this.rgb().formatHex8();
-  }
-  function color_formatHsl() {
-    return hslConvert(this).formatHsl();
-  }
-  function color_formatRgb() {
-    return this.rgb().formatRgb();
-  }
-  function color(format2) {
-    var m, l;
-    format2 = (format2 + "").trim().toLowerCase();
-    return (m = reHex.exec(format2)) ? (l = m[1].length, m = parseInt(m[1], 16), l === 6 ? rgbn(m) : l === 3 ? new Rgb(m >> 8 & 15 | m >> 4 & 240, m >> 4 & 15 | m & 240, (m & 15) << 4 | m & 15, 1) : l === 8 ? rgba(m >> 24 & 255, m >> 16 & 255, m >> 8 & 255, (m & 255) / 255) : l === 4 ? rgba(m >> 12 & 15 | m >> 8 & 240, m >> 8 & 15 | m >> 4 & 240, m >> 4 & 15 | m & 240, ((m & 15) << 4 | m & 15) / 255) : null) : (m = reRgbInteger.exec(format2)) ? new Rgb(m[1], m[2], m[3], 1) : (m = reRgbPercent.exec(format2)) ? new Rgb(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, 1) : (m = reRgbaInteger.exec(format2)) ? rgba(m[1], m[2], m[3], m[4]) : (m = reRgbaPercent.exec(format2)) ? rgba(m[1] * 255 / 100, m[2] * 255 / 100, m[3] * 255 / 100, m[4]) : (m = reHslPercent.exec(format2)) ? hsla(m[1], m[2] / 100, m[3] / 100, 1) : (m = reHslaPercent.exec(format2)) ? hsla(m[1], m[2] / 100, m[3] / 100, m[4]) : named.hasOwnProperty(format2) ? rgbn(named[format2]) : format2 === "transparent" ? new Rgb(NaN, NaN, NaN, 0) : null;
-  }
-  function rgbn(n) {
-    return new Rgb(n >> 16 & 255, n >> 8 & 255, n & 255, 1);
-  }
-  function rgba(r, g, b2, a2) {
-    if (a2 <= 0) r = g = b2 = NaN;
-    return new Rgb(r, g, b2, a2);
-  }
-  function rgbConvert(o) {
-    if (!(o instanceof Color)) o = color(o);
-    if (!o) return new Rgb();
-    o = o.rgb();
-    return new Rgb(o.r, o.g, o.b, o.opacity);
-  }
-  function rgb(r, g, b2, opacity3) {
-    return arguments.length === 1 ? rgbConvert(r) : new Rgb(r, g, b2, opacity3 == null ? 1 : opacity3);
-  }
-  function Rgb(r, g, b2, opacity3) {
-    this.r = +r;
-    this.g = +g;
-    this.b = +b2;
-    this.opacity = +opacity3;
-  }
-  define_default(Rgb, rgb, extend2(Color, {
-    brighter(k) {
-      k = k == null ? brighter : Math.pow(brighter, k);
-      return new Rgb(this.r * k, this.g * k, this.b * k, this.opacity);
-    },
-    darker(k) {
-      k = k == null ? darker : Math.pow(darker, k);
-      return new Rgb(this.r * k, this.g * k, this.b * k, this.opacity);
-    },
-    rgb() {
-      return this;
-    },
-    clamp() {
-      return new Rgb(clampi(this.r), clampi(this.g), clampi(this.b), clampa(this.opacity));
-    },
-    displayable() {
-      return -0.5 <= this.r && this.r < 255.5 && (-0.5 <= this.g && this.g < 255.5) && (-0.5 <= this.b && this.b < 255.5) && (0 <= this.opacity && this.opacity <= 1);
-    },
-    hex: rgb_formatHex,
-    // Deprecated! Use color.formatHex.
-    formatHex: rgb_formatHex,
-    formatHex8: rgb_formatHex8,
-    formatRgb: rgb_formatRgb,
-    toString: rgb_formatRgb
-  }));
-  function rgb_formatHex() {
-    return `#${hex(this.r)}${hex(this.g)}${hex(this.b)}`;
-  }
-  function rgb_formatHex8() {
-    return `#${hex(this.r)}${hex(this.g)}${hex(this.b)}${hex((isNaN(this.opacity) ? 1 : this.opacity) * 255)}`;
-  }
-  function rgb_formatRgb() {
-    const a2 = clampa(this.opacity);
-    return `${a2 === 1 ? "rgb(" : "rgba("}${clampi(this.r)}, ${clampi(this.g)}, ${clampi(this.b)}${a2 === 1 ? ")" : `, ${a2})`}`;
-  }
-  function clampa(opacity3) {
-    return isNaN(opacity3) ? 1 : Math.max(0, Math.min(1, opacity3));
-  }
-  function clampi(value16) {
-    return Math.max(0, Math.min(255, Math.round(value16) || 0));
-  }
-  function hex(value16) {
-    value16 = clampi(value16);
-    return (value16 < 16 ? "0" : "") + value16.toString(16);
-  }
-  function hsla(h, s, l, a2) {
-    if (a2 <= 0) h = s = l = NaN;
-    else if (l <= 0 || l >= 1) h = s = NaN;
-    else if (s <= 0) h = NaN;
-    return new Hsl(h, s, l, a2);
-  }
-  function hslConvert(o) {
-    if (o instanceof Hsl) return new Hsl(o.h, o.s, o.l, o.opacity);
-    if (!(o instanceof Color)) o = color(o);
-    if (!o) return new Hsl();
-    if (o instanceof Hsl) return o;
-    o = o.rgb();
-    var r = o.r / 255, g = o.g / 255, b2 = o.b / 255, min9 = Math.min(r, g, b2), max9 = Math.max(r, g, b2), h = NaN, s = max9 - min9, l = (max9 + min9) / 2;
-    if (s) {
-      if (r === max9) h = (g - b2) / s + (g < b2) * 6;
-      else if (g === max9) h = (b2 - r) / s + 2;
-      else h = (r - g) / s + 4;
-      s /= l < 0.5 ? max9 + min9 : 2 - max9 - min9;
-      h *= 60;
-    } else {
-      s = l > 0 && l < 1 ? 0 : h;
-    }
-    return new Hsl(h, s, l, o.opacity);
-  }
-  function hsl(h, s, l, opacity3) {
-    return arguments.length === 1 ? hslConvert(h) : new Hsl(h, s, l, opacity3 == null ? 1 : opacity3);
-  }
-  function Hsl(h, s, l, opacity3) {
-    this.h = +h;
-    this.s = +s;
-    this.l = +l;
-    this.opacity = +opacity3;
-  }
-  define_default(Hsl, hsl, extend2(Color, {
-    brighter(k) {
-      k = k == null ? brighter : Math.pow(brighter, k);
-      return new Hsl(this.h, this.s, this.l * k, this.opacity);
-    },
-    darker(k) {
-      k = k == null ? darker : Math.pow(darker, k);
-      return new Hsl(this.h, this.s, this.l * k, this.opacity);
-    },
-    rgb() {
-      var h = this.h % 360 + (this.h < 0) * 360, s = isNaN(h) || isNaN(this.s) ? 0 : this.s, l = this.l, m2 = l + (l < 0.5 ? l : 1 - l) * s, m1 = 2 * l - m2;
-      return new Rgb(
-        hsl2rgb(h >= 240 ? h - 240 : h + 120, m1, m2),
-        hsl2rgb(h, m1, m2),
-        hsl2rgb(h < 120 ? h + 240 : h - 120, m1, m2),
-        this.opacity
-      );
-    },
-    clamp() {
-      return new Hsl(clamph(this.h), clampt(this.s), clampt(this.l), clampa(this.opacity));
-    },
-    displayable() {
-      return (0 <= this.s && this.s <= 1 || isNaN(this.s)) && (0 <= this.l && this.l <= 1) && (0 <= this.opacity && this.opacity <= 1);
-    },
-    formatHsl() {
-      const a2 = clampa(this.opacity);
-      return `${a2 === 1 ? "hsl(" : "hsla("}${clamph(this.h)}, ${clampt(this.s) * 100}%, ${clampt(this.l) * 100}%${a2 === 1 ? ")" : `, ${a2})`}`;
-    }
-  }));
-  function clamph(value16) {
-    value16 = (value16 || 0) % 360;
-    return value16 < 0 ? value16 + 360 : value16;
-  }
-  function clampt(value16) {
-    return Math.max(0, Math.min(1, value16 || 0));
-  }
-  function hsl2rgb(h, m1, m2) {
-    return (h < 60 ? m1 + (m2 - m1) * h / 60 : h < 180 ? m2 : h < 240 ? m1 + (m2 - m1) * (240 - h) / 60 : m1) * 255;
-  }
-
-  // node_modules/d3-interpolate/src/basis.js
-  function basis(t1, v0, v1, v2, v3) {
-    var t2 = t1 * t1, t3 = t2 * t1;
-    return ((1 - 3 * t1 + 3 * t2 - t3) * v0 + (4 - 6 * t2 + 3 * t3) * v1 + (1 + 3 * t1 + 3 * t2 - 3 * t3) * v2 + t3 * v3) / 6;
-  }
-  function basis_default(values2) {
-    var n = values2.length - 1;
-    return function(t) {
-      var i2 = t <= 0 ? t = 0 : t >= 1 ? (t = 1, n - 1) : Math.floor(t * n), v1 = values2[i2], v2 = values2[i2 + 1], v0 = i2 > 0 ? values2[i2 - 1] : 2 * v1 - v2, v3 = i2 < n - 1 ? values2[i2 + 2] : 2 * v2 - v1;
-      return basis((t - i2 / n) * n, v0, v1, v2, v3);
-    };
-  }
-
-  // node_modules/d3-interpolate/src/basisClosed.js
-  function basisClosed_default(values2) {
-    var n = values2.length;
-    return function(t) {
-      var i2 = Math.floor(((t %= 1) < 0 ? ++t : t) * n), v0 = values2[(i2 + n - 1) % n], v1 = values2[i2 % n], v2 = values2[(i2 + 1) % n], v3 = values2[(i2 + 2) % n];
-      return basis((t - i2 / n) * n, v0, v1, v2, v3);
-    };
-  }
-
-  // node_modules/d3-interpolate/src/constant.js
-  var constant_default3 = (x19) => () => x19;
-
-  // node_modules/d3-interpolate/src/color.js
-  function linear(a2, d7) {
-    return function(t) {
-      return a2 + t * d7;
-    };
-  }
-  function exponential(a2, b2, y17) {
-    return a2 = Math.pow(a2, y17), b2 = Math.pow(b2, y17) - a2, y17 = 1 / y17, function(t) {
-      return Math.pow(a2 + t * b2, y17);
-    };
-  }
-  function gamma(y17) {
-    return (y17 = +y17) === 1 ? nogamma : function(a2, b2) {
-      return b2 - a2 ? exponential(a2, b2, y17) : constant_default3(isNaN(a2) ? b2 : a2);
-    };
-  }
-  function nogamma(a2, b2) {
-    var d7 = b2 - a2;
-    return d7 ? linear(a2, d7) : constant_default3(isNaN(a2) ? b2 : a2);
-  }
-
-  // node_modules/d3-interpolate/src/rgb.js
-  var rgb_default = (function rgbGamma(y17) {
-    var color2 = gamma(y17);
-    function rgb2(start5, end2) {
-      var r = color2((start5 = rgb(start5)).r, (end2 = rgb(end2)).r), g = color2(start5.g, end2.g), b2 = color2(start5.b, end2.b), opacity3 = nogamma(start5.opacity, end2.opacity);
-      return function(t) {
-        start5.r = r(t);
-        start5.g = g(t);
-        start5.b = b2(t);
-        start5.opacity = opacity3(t);
-        return start5 + "";
-      };
-    }
-    rgb2.gamma = rgbGamma;
-    return rgb2;
-  })(1);
-  function rgbSpline(spline) {
-    return function(colors2) {
-      var n = colors2.length, r = new Array(n), g = new Array(n), b2 = new Array(n), i2, color2;
-      for (i2 = 0; i2 < n; ++i2) {
-        color2 = rgb(colors2[i2]);
-        r[i2] = color2.r || 0;
-        g[i2] = color2.g || 0;
-        b2[i2] = color2.b || 0;
-      }
-      r = spline(r);
-      g = spline(g);
-      b2 = spline(b2);
-      color2.opacity = 1;
-      return function(t) {
-        color2.r = r(t);
-        color2.g = g(t);
-        color2.b = b2(t);
-        return color2 + "";
-      };
-    };
-  }
-  var rgbBasis = rgbSpline(basis_default);
-  var rgbBasisClosed = rgbSpline(basisClosed_default);
-
-  // node_modules/d3-interpolate/src/numberArray.js
-  function numberArray_default(a2, b2) {
-    if (!b2) b2 = [];
-    var n = a2 ? Math.min(b2.length, a2.length) : 0, c = b2.slice(), i2;
-    return function(t) {
-      for (i2 = 0; i2 < n; ++i2) c[i2] = a2[i2] * (1 - t) + b2[i2] * t;
-      return c;
-    };
-  }
-  function isNumberArray(x19) {
-    return ArrayBuffer.isView(x19) && !(x19 instanceof DataView);
-  }
-
-  // node_modules/d3-interpolate/src/array.js
-  function genericArray(a2, b2) {
-    var nb = b2 ? b2.length : 0, na = a2 ? Math.min(nb, a2.length) : 0, x19 = new Array(na), c = new Array(nb), i2;
-    for (i2 = 0; i2 < na; ++i2) x19[i2] = value_default(a2[i2], b2[i2]);
-    for (; i2 < nb; ++i2) c[i2] = b2[i2];
-    return function(t) {
-      for (i2 = 0; i2 < na; ++i2) c[i2] = x19[i2](t);
-      return c;
-    };
-  }
-
-  // node_modules/d3-interpolate/src/date.js
-  function date_default(a2, b2) {
-    var d7 = /* @__PURE__ */ new Date();
-    return a2 = +a2, b2 = +b2, function(t) {
-      return d7.setTime(a2 * (1 - t) + b2 * t), d7;
-    };
-  }
-
-  // node_modules/d3-interpolate/src/number.js
-  function number_default(a2, b2) {
-    return a2 = +a2, b2 = +b2, function(t) {
-      return a2 * (1 - t) + b2 * t;
-    };
-  }
-
-  // node_modules/d3-interpolate/src/object.js
-  function object_default(a2, b2) {
-    var i2 = {}, c = {}, k;
-    if (a2 === null || typeof a2 !== "object") a2 = {};
-    if (b2 === null || typeof b2 !== "object") b2 = {};
-    for (k in b2) {
-      if (k in a2) {
-        i2[k] = value_default(a2[k], b2[k]);
-      } else {
-        c[k] = b2[k];
-      }
-    }
-    return function(t) {
-      for (k in i2) c[k] = i2[k](t);
-      return c;
-    };
-  }
-
-  // node_modules/d3-interpolate/src/string.js
-  var reA = /[-+]?(?:\d+\.?\d*|\.?\d+)(?:[eE][-+]?\d+)?/g;
-  var reB = new RegExp(reA.source, "g");
-  function zero3(b2) {
-    return function() {
-      return b2;
-    };
-  }
-  function one3(b2) {
-    return function(t) {
-      return b2(t) + "";
-    };
-  }
-  function string_default(a2, b2) {
-    var bi = reA.lastIndex = reB.lastIndex = 0, am, bm, bs, i2 = -1, s = [], q2 = [];
-    a2 = a2 + "", b2 = b2 + "";
-    while ((am = reA.exec(a2)) && (bm = reB.exec(b2))) {
-      if ((bs = bm.index) > bi) {
-        bs = b2.slice(bi, bs);
-        if (s[i2]) s[i2] += bs;
-        else s[++i2] = bs;
-      }
-      if ((am = am[0]) === (bm = bm[0])) {
-        if (s[i2]) s[i2] += bm;
-        else s[++i2] = bm;
-      } else {
-        s[++i2] = null;
-        q2.push({ i: i2, x: number_default(am, bm) });
-      }
-      bi = reB.lastIndex;
-    }
-    if (bi < b2.length) {
-      bs = b2.slice(bi);
-      if (s[i2]) s[i2] += bs;
-      else s[++i2] = bs;
-    }
-    return s.length < 2 ? q2[0] ? one3(q2[0].x) : zero3(b2) : (b2 = q2.length, function(t) {
-      for (var i3 = 0, o; i3 < b2; ++i3) s[(o = q2[i3]).i] = o.x(t);
-      return s.join("");
-    });
-  }
-
-  // node_modules/d3-interpolate/src/value.js
-  function value_default(a2, b2) {
-    var t = typeof b2, c;
-    return b2 == null || t === "boolean" ? constant_default3(b2) : (t === "number" ? number_default : t === "string" ? (c = color(b2)) ? (b2 = c, rgb_default) : string_default : b2 instanceof color ? rgb_default : b2 instanceof Date ? date_default : isNumberArray(b2) ? numberArray_default : Array.isArray(b2) ? genericArray : typeof b2.valueOf !== "function" && typeof b2.toString !== "function" || isNaN(b2) ? object_default : number_default)(a2, b2);
-  }
-
-  // node_modules/d3-interpolate/src/round.js
-  function round_default(a2, b2) {
-    return a2 = +a2, b2 = +b2, function(t) {
-      return Math.round(a2 * (1 - t) + b2 * t);
-    };
-  }
-
-  // node_modules/d3-interpolate/src/transform/decompose.js
-  var degrees = 180 / Math.PI;
-  var identity17 = {
-    translateX: 0,
-    translateY: 0,
-    rotate: 0,
-    skewX: 0,
-    scaleX: 1,
-    scaleY: 1
-  };
-  function decompose_default(a2, b2, c, d7, e, f) {
-    var scaleX, scaleY, skewX;
-    if (scaleX = Math.sqrt(a2 * a2 + b2 * b2)) a2 /= scaleX, b2 /= scaleX;
-    if (skewX = a2 * c + b2 * d7) c -= a2 * skewX, d7 -= b2 * skewX;
-    if (scaleY = Math.sqrt(c * c + d7 * d7)) c /= scaleY, d7 /= scaleY, skewX /= scaleY;
-    if (a2 * d7 < b2 * c) a2 = -a2, b2 = -b2, skewX = -skewX, scaleX = -scaleX;
-    return {
-      translateX: e,
-      translateY: f,
-      rotate: Math.atan2(b2, a2) * degrees,
-      skewX: Math.atan(skewX) * degrees,
-      scaleX,
-      scaleY
-    };
-  }
-
-  // node_modules/d3-interpolate/src/transform/parse.js
-  var svgNode;
-  function parseCss(value16) {
-    const m = new (typeof DOMMatrix === "function" ? DOMMatrix : WebKitCSSMatrix)(value16 + "");
-    return m.isIdentity ? identity17 : decompose_default(m.a, m.b, m.c, m.d, m.e, m.f);
-  }
-  function parseSvg(value16) {
-    if (value16 == null) return identity17;
-    if (!svgNode) svgNode = document.createElementNS("http://www.w3.org/2000/svg", "g");
-    svgNode.setAttribute("transform", value16);
-    if (!(value16 = svgNode.transform.baseVal.consolidate())) return identity17;
-    value16 = value16.matrix;
-    return decompose_default(value16.a, value16.b, value16.c, value16.d, value16.e, value16.f);
-  }
-
-  // node_modules/d3-interpolate/src/transform/index.js
-  function interpolateTransform(parse8, pxComma, pxParen, degParen) {
-    function pop4(s) {
-      return s.length ? s.pop() + " " : "";
-    }
-    function translate(xa, ya, xb, yb, s, q2) {
-      if (xa !== xb || ya !== yb) {
-        var i2 = s.push("translate(", null, pxComma, null, pxParen);
-        q2.push({ i: i2 - 4, x: number_default(xa, xb) }, { i: i2 - 2, x: number_default(ya, yb) });
-      } else if (xb || yb) {
-        s.push("translate(" + xb + pxComma + yb + pxParen);
-      }
-    }
-    function rotate(a2, b2, s, q2) {
-      if (a2 !== b2) {
-        if (a2 - b2 > 180) b2 += 360;
-        else if (b2 - a2 > 180) a2 += 360;
-        q2.push({ i: s.push(pop4(s) + "rotate(", null, degParen) - 2, x: number_default(a2, b2) });
-      } else if (b2) {
-        s.push(pop4(s) + "rotate(" + b2 + degParen);
-      }
-    }
-    function skewX(a2, b2, s, q2) {
-      if (a2 !== b2) {
-        q2.push({ i: s.push(pop4(s) + "skewX(", null, degParen) - 2, x: number_default(a2, b2) });
-      } else if (b2) {
-        s.push(pop4(s) + "skewX(" + b2 + degParen);
-      }
-    }
-    function scale(xa, ya, xb, yb, s, q2) {
-      if (xa !== xb || ya !== yb) {
-        var i2 = s.push(pop4(s) + "scale(", null, ",", null, ")");
-        q2.push({ i: i2 - 4, x: number_default(xa, xb) }, { i: i2 - 2, x: number_default(ya, yb) });
-      } else if (xb !== 1 || yb !== 1) {
-        s.push(pop4(s) + "scale(" + xb + "," + yb + ")");
-      }
-    }
-    return function(a2, b2) {
-      var s = [], q2 = [];
-      a2 = parse8(a2), b2 = parse8(b2);
-      translate(a2.translateX, a2.translateY, b2.translateX, b2.translateY, s, q2);
-      rotate(a2.rotate, b2.rotate, s, q2);
-      skewX(a2.skewX, b2.skewX, s, q2);
-      scale(a2.scaleX, a2.scaleY, b2.scaleX, b2.scaleY, s, q2);
-      a2 = b2 = null;
-      return function(t) {
-        var i2 = -1, n = q2.length, o;
-        while (++i2 < n) s[(o = q2[i2]).i] = o.x(t);
-        return s.join("");
-      };
-    };
-  }
-  var interpolateTransformCss = interpolateTransform(parseCss, "px, ", "px)", "deg)");
-  var interpolateTransformSvg = interpolateTransform(parseSvg, ", ", ")", ")");
-
-  // node_modules/d3-timer/src/timer.js
-  var frame = 0;
-  var timeout = 0;
-  var interval = 0;
-  var pokeDelay = 1e3;
-  var taskHead;
-  var taskTail;
-  var clockLast = 0;
-  var clockNow = 0;
-  var clockSkew = 0;
-  var clock = typeof performance === "object" && performance.now ? performance : Date;
-  var setFrame = typeof window === "object" && window.requestAnimationFrame ? window.requestAnimationFrame.bind(window) : function(f) {
-    setTimeout(f, 17);
-  };
-  function now2() {
-    return clockNow || (setFrame(clearNow), clockNow = clock.now() + clockSkew);
-  }
-  function clearNow() {
-    clockNow = 0;
-  }
-  function Timer() {
-    this._call = this._time = this._next = null;
-  }
-  Timer.prototype = timer.prototype = {
-    constructor: Timer,
-    restart: function(callback, delay2, time3) {
-      if (typeof callback !== "function") throw new TypeError("callback is not a function");
-      time3 = (time3 == null ? now2() : +time3) + (delay2 == null ? 0 : +delay2);
-      if (!this._next && taskTail !== this) {
-        if (taskTail) taskTail._next = this;
-        else taskHead = this;
-        taskTail = this;
-      }
-      this._call = callback;
-      this._time = time3;
-      sleep();
-    },
-    stop: function() {
-      if (this._call) {
-        this._call = null;
-        this._time = Infinity;
-        sleep();
-      }
-    }
-  };
-  function timer(callback, delay2, time3) {
-    var t = new Timer();
-    t.restart(callback, delay2, time3);
-    return t;
-  }
-  function timerFlush() {
-    now2();
-    ++frame;
-    var t = taskHead, e;
-    while (t) {
-      if ((e = clockNow - t._time) >= 0) t._call.call(void 0, e);
-      t = t._next;
-    }
-    --frame;
-  }
-  function wake() {
-    clockNow = (clockLast = clock.now()) + clockSkew;
-    frame = timeout = 0;
-    try {
-      timerFlush();
-    } finally {
-      frame = 0;
-      nap();
-      clockNow = 0;
-    }
-  }
-  function poke3() {
-    var now3 = clock.now(), delay2 = now3 - clockLast;
-    if (delay2 > pokeDelay) clockSkew -= delay2, clockLast = now3;
-  }
-  function nap() {
-    var t0, t1 = taskHead, t2, time3 = Infinity;
-    while (t1) {
-      if (t1._call) {
-        if (time3 > t1._time) time3 = t1._time;
-        t0 = t1, t1 = t1._next;
-      } else {
-        t2 = t1._next, t1._next = null;
-        t1 = t0 ? t0._next = t2 : taskHead = t2;
-      }
-    }
-    taskTail = t0;
-    sleep(time3);
-  }
-  function sleep(time3) {
-    if (frame) return;
-    if (timeout) timeout = clearTimeout(timeout);
-    var delay2 = time3 - clockNow;
-    if (delay2 > 24) {
-      if (time3 < Infinity) timeout = setTimeout(wake, time3 - clock.now() - clockSkew);
-      if (interval) interval = clearInterval(interval);
-    } else {
-      if (!interval) clockLast = clock.now(), interval = setInterval(poke3, pokeDelay);
-      frame = 1, setFrame(wake);
-    }
-  }
-
-  // node_modules/d3-timer/src/timeout.js
-  function timeout_default(callback, delay2, time3) {
-    var t = new Timer();
-    delay2 = delay2 == null ? 0 : +delay2;
-    t.restart((elapsed) => {
-      t.stop();
-      callback(elapsed + delay2);
-    }, delay2, time3);
-    return t;
-  }
-
-  // node_modules/d3-transition/src/transition/schedule.js
-  var emptyOn = dispatch_default("start", "end", "cancel", "interrupt");
-  var emptyTween = [];
-  var CREATED = 0;
-  var SCHEDULED = 1;
-  var STARTING = 2;
-  var STARTED = 3;
-  var RUNNING = 4;
-  var ENDING = 5;
-  var ENDED = 6;
-  function schedule_default(node, name16, id5, index5, group3, timing) {
-    var schedules = node.__transition;
-    if (!schedules) node.__transition = {};
-    else if (id5 in schedules) return;
-    create4(node, id5, {
-      name: name16,
-      index: index5,
-      // For context during callback.
-      group: group3,
-      // For context during callback.
-      on: emptyOn,
-      tween: emptyTween,
-      time: timing.time,
-      delay: timing.delay,
-      duration: timing.duration,
-      ease: timing.ease,
-      timer: null,
-      state: CREATED
-    });
-  }
-  function init3(node, id5) {
-    var schedule = get7(node, id5);
-    if (schedule.state > CREATED) throw new Error("too late; already scheduled");
-    return schedule;
-  }
-  function set4(node, id5) {
-    var schedule = get7(node, id5);
-    if (schedule.state > STARTED) throw new Error("too late; already running");
-    return schedule;
-  }
-  function get7(node, id5) {
-    var schedule = node.__transition;
-    if (!schedule || !(schedule = schedule[id5])) throw new Error("transition not found");
-    return schedule;
-  }
-  function create4(node, id5, self) {
-    var schedules = node.__transition, tween;
-    schedules[id5] = self;
-    self.timer = timer(schedule, 0, self.time);
-    function schedule(elapsed) {
-      self.state = SCHEDULED;
-      self.timer.restart(start5, self.delay, self.time);
-      if (self.delay <= elapsed) start5(elapsed - self.delay);
-    }
-    function start5(elapsed) {
-      var i2, j, n, o;
-      if (self.state !== SCHEDULED) return stop3();
-      for (i2 in schedules) {
-        o = schedules[i2];
-        if (o.name !== self.name) continue;
-        if (o.state === STARTED) return timeout_default(start5);
-        if (o.state === RUNNING) {
-          o.state = ENDED;
-          o.timer.stop();
-          o.on.call("interrupt", node, node.__data__, o.index, o.group);
-          delete schedules[i2];
-        } else if (+i2 < id5) {
-          o.state = ENDED;
-          o.timer.stop();
-          o.on.call("cancel", node, node.__data__, o.index, o.group);
-          delete schedules[i2];
-        }
-      }
-      timeout_default(function() {
-        if (self.state === STARTED) {
-          self.state = RUNNING;
-          self.timer.restart(tick, self.delay, self.time);
-          tick(elapsed);
-        }
-      });
-      self.state = STARTING;
-      self.on.call("start", node, node.__data__, self.index, self.group);
-      if (self.state !== STARTING) return;
-      self.state = STARTED;
-      tween = new Array(n = self.tween.length);
-      for (i2 = 0, j = -1; i2 < n; ++i2) {
-        if (o = self.tween[i2].value.call(node, node.__data__, self.index, self.group)) {
-          tween[++j] = o;
-        }
-      }
-      tween.length = j + 1;
-    }
-    function tick(elapsed) {
-      var t = elapsed < self.duration ? self.ease.call(null, elapsed / self.duration) : (self.timer.restart(stop3), self.state = ENDING, 1), i2 = -1, n = tween.length;
-      while (++i2 < n) {
-        tween[i2].call(node, t);
-      }
-      if (self.state === ENDING) {
-        self.on.call("end", node, node.__data__, self.index, self.group);
-        stop3();
-      }
-    }
-    function stop3() {
-      self.state = ENDED;
-      self.timer.stop();
-      delete schedules[id5];
-      for (var i2 in schedules) return;
-      delete node.__transition;
-    }
-  }
-
-  // node_modules/d3-transition/src/interrupt.js
-  function interrupt_default(node, name16) {
-    var schedules = node.__transition, schedule, active, empty9 = true, i2;
-    if (!schedules) return;
-    name16 = name16 == null ? null : name16 + "";
-    for (i2 in schedules) {
-      if ((schedule = schedules[i2]).name !== name16) {
-        empty9 = false;
-        continue;
-      }
-      active = schedule.state > STARTING && schedule.state < ENDING;
-      schedule.state = ENDED;
-      schedule.timer.stop();
-      schedule.on.call(active ? "interrupt" : "cancel", node, node.__data__, schedule.index, schedule.group);
-      delete schedules[i2];
-    }
-    if (empty9) delete node.__transition;
-  }
-
-  // node_modules/d3-transition/src/selection/interrupt.js
-  function interrupt_default2(name16) {
-    return this.each(function() {
-      interrupt_default(this, name16);
-    });
-  }
-
-  // node_modules/d3-transition/src/transition/tween.js
-  function tweenRemove(id5, name16) {
-    var tween0, tween1;
-    return function() {
-      var schedule = set4(this, id5), tween = schedule.tween;
-      if (tween !== tween0) {
-        tween1 = tween0 = tween;
-        for (var i2 = 0, n = tween1.length; i2 < n; ++i2) {
-          if (tween1[i2].name === name16) {
-            tween1 = tween1.slice();
-            tween1.splice(i2, 1);
-            break;
-          }
-        }
-      }
-      schedule.tween = tween1;
-    };
-  }
-  function tweenFunction(id5, name16, value16) {
-    var tween0, tween1;
-    if (typeof value16 !== "function") throw new Error();
-    return function() {
-      var schedule = set4(this, id5), tween = schedule.tween;
-      if (tween !== tween0) {
-        tween1 = (tween0 = tween).slice();
-        for (var t = { name: name16, value: value16 }, i2 = 0, n = tween1.length; i2 < n; ++i2) {
-          if (tween1[i2].name === name16) {
-            tween1[i2] = t;
-            break;
-          }
-        }
-        if (i2 === n) tween1.push(t);
-      }
-      schedule.tween = tween1;
-    };
-  }
-  function tween_default(name16, value16) {
-    var id5 = this._id;
-    name16 += "";
-    if (arguments.length < 2) {
-      var tween = get7(this.node(), id5).tween;
-      for (var i2 = 0, n = tween.length, t; i2 < n; ++i2) {
-        if ((t = tween[i2]).name === name16) {
-          return t.value;
-        }
-      }
-      return null;
-    }
-    return this.each((value16 == null ? tweenRemove : tweenFunction)(id5, name16, value16));
-  }
-  function tweenValue(transition2, name16, value16) {
-    var id5 = transition2._id;
-    transition2.each(function() {
-      var schedule = set4(this, id5);
-      (schedule.value || (schedule.value = {}))[name16] = value16.apply(this, arguments);
-    });
-    return function(node) {
-      return get7(node, id5).value[name16];
-    };
-  }
-
-  // node_modules/d3-transition/src/transition/interpolate.js
-  function interpolate_default(a2, b2) {
-    var c;
-    return (typeof b2 === "number" ? number_default : b2 instanceof color ? rgb_default : (c = color(b2)) ? (b2 = c, rgb_default) : string_default)(a2, b2);
-  }
-
-  // node_modules/d3-transition/src/transition/attr.js
-  function attrRemove2(name16) {
-    return function() {
-      this.removeAttribute(name16);
-    };
-  }
-  function attrRemoveNS2(fullname) {
-    return function() {
-      this.removeAttributeNS(fullname.space, fullname.local);
-    };
-  }
-  function attrConstant2(name16, interpolate, value1) {
-    var string00, string1 = value1 + "", interpolate0;
-    return function() {
-      var string0 = this.getAttribute(name16);
-      return string0 === string1 ? null : string0 === string00 ? interpolate0 : interpolate0 = interpolate(string00 = string0, value1);
-    };
-  }
-  function attrConstantNS2(fullname, interpolate, value1) {
-    var string00, string1 = value1 + "", interpolate0;
-    return function() {
-      var string0 = this.getAttributeNS(fullname.space, fullname.local);
-      return string0 === string1 ? null : string0 === string00 ? interpolate0 : interpolate0 = interpolate(string00 = string0, value1);
-    };
-  }
-  function attrFunction2(name16, interpolate, value16) {
-    var string00, string10, interpolate0;
-    return function() {
-      var string0, value1 = value16(this), string1;
-      if (value1 == null) return void this.removeAttribute(name16);
-      string0 = this.getAttribute(name16);
-      string1 = value1 + "";
-      return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
-    };
-  }
-  function attrFunctionNS2(fullname, interpolate, value16) {
-    var string00, string10, interpolate0;
-    return function() {
-      var string0, value1 = value16(this), string1;
-      if (value1 == null) return void this.removeAttributeNS(fullname.space, fullname.local);
-      string0 = this.getAttributeNS(fullname.space, fullname.local);
-      string1 = value1 + "";
-      return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
-    };
-  }
-  function attr_default2(name16, value16) {
-    var fullname = namespace_default(name16), i2 = fullname === "transform" ? interpolateTransformSvg : interpolate_default;
-    return this.attrTween(name16, typeof value16 === "function" ? (fullname.local ? attrFunctionNS2 : attrFunction2)(fullname, i2, tweenValue(this, "attr." + name16, value16)) : value16 == null ? (fullname.local ? attrRemoveNS2 : attrRemove2)(fullname) : (fullname.local ? attrConstantNS2 : attrConstant2)(fullname, i2, value16));
-  }
-
-  // node_modules/d3-transition/src/transition/attrTween.js
-  function attrInterpolate(name16, i2) {
-    return function(t) {
-      this.setAttribute(name16, i2.call(this, t));
-    };
-  }
-  function attrInterpolateNS(fullname, i2) {
-    return function(t) {
-      this.setAttributeNS(fullname.space, fullname.local, i2.call(this, t));
-    };
-  }
-  function attrTweenNS(fullname, value16) {
-    var t0, i0;
-    function tween() {
-      var i2 = value16.apply(this, arguments);
-      if (i2 !== i0) t0 = (i0 = i2) && attrInterpolateNS(fullname, i2);
-      return t0;
-    }
-    tween._value = value16;
-    return tween;
-  }
-  function attrTween(name16, value16) {
-    var t0, i0;
-    function tween() {
-      var i2 = value16.apply(this, arguments);
-      if (i2 !== i0) t0 = (i0 = i2) && attrInterpolate(name16, i2);
-      return t0;
-    }
-    tween._value = value16;
-    return tween;
-  }
-  function attrTween_default(name16, value16) {
-    var key = "attr." + name16;
-    if (arguments.length < 2) return (key = this.tween(key)) && key._value;
-    if (value16 == null) return this.tween(key, null);
-    if (typeof value16 !== "function") throw new Error();
-    var fullname = namespace_default(name16);
-    return this.tween(key, (fullname.local ? attrTweenNS : attrTween)(fullname, value16));
-  }
-
-  // node_modules/d3-transition/src/transition/delay.js
-  function delayFunction(id5, value16) {
-    return function() {
-      init3(this, id5).delay = +value16.apply(this, arguments);
-    };
-  }
-  function delayConstant(id5, value16) {
-    return value16 = +value16, function() {
-      init3(this, id5).delay = value16;
-    };
-  }
-  function delay_default(value16) {
-    var id5 = this._id;
-    return arguments.length ? this.each((typeof value16 === "function" ? delayFunction : delayConstant)(id5, value16)) : get7(this.node(), id5).delay;
-  }
-
-  // node_modules/d3-transition/src/transition/duration.js
-  function durationFunction(id5, value16) {
-    return function() {
-      set4(this, id5).duration = +value16.apply(this, arguments);
-    };
-  }
-  function durationConstant(id5, value16) {
-    return value16 = +value16, function() {
-      set4(this, id5).duration = value16;
-    };
-  }
-  function duration_default(value16) {
-    var id5 = this._id;
-    return arguments.length ? this.each((typeof value16 === "function" ? durationFunction : durationConstant)(id5, value16)) : get7(this.node(), id5).duration;
-  }
-
-  // node_modules/d3-transition/src/transition/ease.js
-  function easeConstant(id5, value16) {
-    if (typeof value16 !== "function") throw new Error();
-    return function() {
-      set4(this, id5).ease = value16;
-    };
-  }
-  function ease_default(value16) {
-    var id5 = this._id;
-    return arguments.length ? this.each(easeConstant(id5, value16)) : get7(this.node(), id5).ease;
-  }
-
-  // node_modules/d3-transition/src/transition/easeVarying.js
-  function easeVarying(id5, value16) {
-    return function() {
-      var v = value16.apply(this, arguments);
-      if (typeof v !== "function") throw new Error();
-      set4(this, id5).ease = v;
-    };
-  }
-  function easeVarying_default(value16) {
-    if (typeof value16 !== "function") throw new Error();
-    return this.each(easeVarying(this._id, value16));
-  }
-
-  // node_modules/d3-transition/src/transition/filter.js
-  function filter_default2(match2) {
-    if (typeof match2 !== "function") match2 = matcher_default(match2);
-    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
-      for (var group3 = groups[j], n = group3.length, subgroup = subgroups[j] = [], node, i2 = 0; i2 < n; ++i2) {
-        if ((node = group3[i2]) && match2.call(node, node.__data__, i2, group3)) {
-          subgroup.push(node);
-        }
-      }
-    }
-    return new Transition(subgroups, this._parents, this._name, this._id);
-  }
-
-  // node_modules/d3-transition/src/transition/merge.js
-  function merge_default2(transition2) {
-    if (transition2._id !== this._id) throw new Error();
-    for (var groups0 = this._groups, groups1 = transition2._groups, m0 = groups0.length, m1 = groups1.length, m = Math.min(m0, m1), merges = new Array(m0), j = 0; j < m; ++j) {
-      for (var group0 = groups0[j], group1 = groups1[j], n = group0.length, merge = merges[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
-        if (node = group0[i2] || group1[i2]) {
-          merge[i2] = node;
-        }
-      }
-    }
-    for (; j < m0; ++j) {
-      merges[j] = groups0[j];
-    }
-    return new Transition(merges, this._parents, this._name, this._id);
-  }
-
-  // node_modules/d3-transition/src/transition/on.js
-  function start4(name16) {
-    return (name16 + "").trim().split(/^|\s+/).every(function(t) {
-      var i2 = t.indexOf(".");
-      if (i2 >= 0) t = t.slice(0, i2);
-      return !t || t === "start";
-    });
-  }
-  function onFunction(id5, name16, listener) {
-    var on0, on1, sit = start4(name16) ? init3 : set4;
-    return function() {
-      var schedule = sit(this, id5), on3 = schedule.on;
-      if (on3 !== on0) (on1 = (on0 = on3).copy()).on(name16, listener);
-      schedule.on = on1;
-    };
-  }
-  function on_default2(name16, listener) {
-    var id5 = this._id;
-    return arguments.length < 2 ? get7(this.node(), id5).on.on(name16) : this.each(onFunction(id5, name16, listener));
-  }
-
-  // node_modules/d3-transition/src/transition/remove.js
-  function removeFunction(id5) {
-    return function() {
-      var parent2 = this.parentNode;
-      for (var i2 in this.__transition) if (+i2 !== id5) return;
-      if (parent2) parent2.removeChild(this);
-    };
-  }
-  function remove_default2() {
-    return this.on("end.remove", removeFunction(this._id));
-  }
-
-  // node_modules/d3-transition/src/transition/select.js
-  function select_default2(select5) {
-    var name16 = this._name, id5 = this._id;
-    if (typeof select5 !== "function") select5 = selector_default(select5);
-    for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
-      for (var group3 = groups[j], n = group3.length, subgroup = subgroups[j] = new Array(n), node, subnode, i2 = 0; i2 < n; ++i2) {
-        if ((node = group3[i2]) && (subnode = select5.call(node, node.__data__, i2, group3))) {
-          if ("__data__" in node) subnode.__data__ = node.__data__;
-          subgroup[i2] = subnode;
-          schedule_default(subgroup[i2], name16, id5, i2, subgroup, get7(node, id5));
-        }
-      }
-    }
-    return new Transition(subgroups, this._parents, name16, id5);
-  }
-
-  // node_modules/d3-transition/src/transition/selectAll.js
-  function selectAll_default2(select5) {
-    var name16 = this._name, id5 = this._id;
-    if (typeof select5 !== "function") select5 = selectorAll_default(select5);
-    for (var groups = this._groups, m = groups.length, subgroups = [], parents = [], j = 0; j < m; ++j) {
-      for (var group3 = groups[j], n = group3.length, node, i2 = 0; i2 < n; ++i2) {
-        if (node = group3[i2]) {
-          for (var children3 = select5.call(node, node.__data__, i2, group3), child, inherit2 = get7(node, id5), k = 0, l = children3.length; k < l; ++k) {
-            if (child = children3[k]) {
-              schedule_default(child, name16, id5, k, children3, inherit2);
-            }
-          }
-          subgroups.push(children3);
-          parents.push(node);
-        }
-      }
-    }
-    return new Transition(subgroups, parents, name16, id5);
-  }
-
-  // node_modules/d3-transition/src/transition/selection.js
-  var Selection2 = selection_default.prototype.constructor;
-  function selection_default2() {
-    return new Selection2(this._groups, this._parents);
-  }
-
-  // node_modules/d3-transition/src/transition/style.js
-  function styleNull(name16, interpolate) {
-    var string00, string10, interpolate0;
-    return function() {
-      var string0 = styleValue(this, name16), string1 = (this.style.removeProperty(name16), styleValue(this, name16));
-      return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : interpolate0 = interpolate(string00 = string0, string10 = string1);
-    };
-  }
-  function styleRemove2(name16) {
-    return function() {
-      this.style.removeProperty(name16);
-    };
-  }
-  function styleConstant2(name16, interpolate, value1) {
-    var string00, string1 = value1 + "", interpolate0;
-    return function() {
-      var string0 = styleValue(this, name16);
-      return string0 === string1 ? null : string0 === string00 ? interpolate0 : interpolate0 = interpolate(string00 = string0, value1);
-    };
-  }
-  function styleFunction2(name16, interpolate, value16) {
-    var string00, string10, interpolate0;
-    return function() {
-      var string0 = styleValue(this, name16), value1 = value16(this), string1 = value1 + "";
-      if (value1 == null) string1 = value1 = (this.style.removeProperty(name16), styleValue(this, name16));
-      return string0 === string1 ? null : string0 === string00 && string1 === string10 ? interpolate0 : (string10 = string1, interpolate0 = interpolate(string00 = string0, value1));
-    };
-  }
-  function styleMaybeRemove(id5, name16) {
-    var on0, on1, listener0, key = "style." + name16, event = "end." + key, remove3;
-    return function() {
-      var schedule = set4(this, id5), on3 = schedule.on, listener = schedule.value[key] == null ? remove3 || (remove3 = styleRemove2(name16)) : void 0;
-      if (on3 !== on0 || listener0 !== listener) (on1 = (on0 = on3).copy()).on(event, listener0 = listener);
-      schedule.on = on1;
-    };
-  }
-  function style_default2(name16, value16, priority) {
-    var i2 = (name16 += "") === "transform" ? interpolateTransformCss : interpolate_default;
-    return value16 == null ? this.styleTween(name16, styleNull(name16, i2)).on("end.style." + name16, styleRemove2(name16)) : typeof value16 === "function" ? this.styleTween(name16, styleFunction2(name16, i2, tweenValue(this, "style." + name16, value16))).each(styleMaybeRemove(this._id, name16)) : this.styleTween(name16, styleConstant2(name16, i2, value16), priority).on("end.style." + name16, null);
-  }
-
-  // node_modules/d3-transition/src/transition/styleTween.js
-  function styleInterpolate(name16, i2, priority) {
-    return function(t) {
-      this.style.setProperty(name16, i2.call(this, t), priority);
-    };
-  }
-  function styleTween(name16, value16, priority) {
-    var t, i0;
-    function tween() {
-      var i2 = value16.apply(this, arguments);
-      if (i2 !== i0) t = (i0 = i2) && styleInterpolate(name16, i2, priority);
-      return t;
-    }
-    tween._value = value16;
-    return tween;
-  }
-  function styleTween_default(name16, value16, priority) {
-    var key = "style." + (name16 += "");
-    if (arguments.length < 2) return (key = this.tween(key)) && key._value;
-    if (value16 == null) return this.tween(key, null);
-    if (typeof value16 !== "function") throw new Error();
-    return this.tween(key, styleTween(name16, value16, priority == null ? "" : priority));
-  }
-
-  // node_modules/d3-transition/src/transition/text.js
-  function textConstant2(value16) {
-    return function() {
-      this.textContent = value16;
-    };
-  }
-  function textFunction2(value16) {
-    return function() {
-      var value1 = value16(this);
-      this.textContent = value1 == null ? "" : value1;
-    };
-  }
-  function text_default2(value16) {
-    return this.tween("text", typeof value16 === "function" ? textFunction2(tweenValue(this, "text", value16)) : textConstant2(value16 == null ? "" : value16 + ""));
-  }
-
-  // node_modules/d3-transition/src/transition/textTween.js
-  function textInterpolate(i2) {
-    return function(t) {
-      this.textContent = i2.call(this, t);
-    };
-  }
-  function textTween(value16) {
-    var t0, i0;
-    function tween() {
-      var i2 = value16.apply(this, arguments);
-      if (i2 !== i0) t0 = (i0 = i2) && textInterpolate(i2);
-      return t0;
-    }
-    tween._value = value16;
-    return tween;
-  }
-  function textTween_default(value16) {
-    var key = "text";
-    if (arguments.length < 1) return (key = this.tween(key)) && key._value;
-    if (value16 == null) return this.tween(key, null);
-    if (typeof value16 !== "function") throw new Error();
-    return this.tween(key, textTween(value16));
-  }
-
-  // node_modules/d3-transition/src/transition/transition.js
-  function transition_default() {
-    var name16 = this._name, id0 = this._id, id1 = newId();
-    for (var groups = this._groups, m = groups.length, j = 0; j < m; ++j) {
-      for (var group3 = groups[j], n = group3.length, node, i2 = 0; i2 < n; ++i2) {
-        if (node = group3[i2]) {
-          var inherit2 = get7(node, id0);
-          schedule_default(node, name16, id1, i2, group3, {
-            time: inherit2.time + inherit2.delay + inherit2.duration,
-            delay: 0,
-            duration: inherit2.duration,
-            ease: inherit2.ease
-          });
-        }
-      }
-    }
-    return new Transition(groups, this._parents, name16, id1);
-  }
-
-  // node_modules/d3-transition/src/transition/end.js
-  function end_default() {
-    var on0, on1, that = this, id5 = that._id, size5 = that.size();
-    return new Promise(function(resolve, reject) {
-      var cancel = { value: reject }, end2 = { value: function() {
-        if (--size5 === 0) resolve();
-      } };
-      that.each(function() {
-        var schedule = set4(this, id5), on3 = schedule.on;
-        if (on3 !== on0) {
-          on1 = (on0 = on3).copy();
-          on1._.cancel.push(cancel);
-          on1._.interrupt.push(cancel);
-          on1._.end.push(end2);
-        }
-        schedule.on = on1;
-      });
-      if (size5 === 0) resolve();
-    });
-  }
-
-  // node_modules/d3-transition/src/transition/index.js
-  var id4 = 0;
-  function Transition(groups, parents, name16, id5) {
-    this._groups = groups;
-    this._parents = parents;
-    this._name = name16;
-    this._id = id5;
-  }
-  function transition(name16) {
-    return selection_default().transition(name16);
-  }
-  function newId() {
-    return ++id4;
-  }
-  var selection_prototype = selection_default.prototype;
-  Transition.prototype = transition.prototype = {
-    constructor: Transition,
-    select: select_default2,
-    selectAll: selectAll_default2,
-    selectChild: selection_prototype.selectChild,
-    selectChildren: selection_prototype.selectChildren,
-    filter: filter_default2,
-    merge: merge_default2,
-    selection: selection_default2,
-    transition: transition_default,
-    call: selection_prototype.call,
-    nodes: selection_prototype.nodes,
-    node: selection_prototype.node,
-    size: selection_prototype.size,
-    empty: selection_prototype.empty,
-    each: selection_prototype.each,
-    on: on_default2,
-    attr: attr_default2,
-    attrTween: attrTween_default,
-    style: style_default2,
-    styleTween: styleTween_default,
-    text: text_default2,
-    textTween: textTween_default,
-    remove: remove_default2,
-    tween: tween_default,
-    delay: delay_default,
-    duration: duration_default,
-    ease: ease_default,
-    easeVarying: easeVarying_default,
-    end: end_default,
-    [Symbol.iterator]: selection_prototype[Symbol.iterator]
-  };
-
-  // node_modules/d3-ease/src/cubic.js
-  function cubicInOut(t) {
-    return ((t *= 2) <= 1 ? t * t * t : (t -= 2) * t * t + 2) / 2;
-  }
-
-  // node_modules/d3-transition/src/selection/transition.js
-  var defaultTiming = {
-    time: null,
-    // Set on use.
-    delay: 0,
-    duration: 250,
-    ease: cubicInOut
-  };
-  function inherit(node, id5) {
-    var timing;
-    while (!(timing = node.__transition) || !(timing = timing[id5])) {
-      if (!(node = node.parentNode)) {
-        throw new Error(`transition ${id5} not found`);
-      }
-    }
-    return timing;
-  }
-  function transition_default2(name16) {
-    var id5, timing;
-    if (name16 instanceof Transition) {
-      id5 = name16._id, name16 = name16._name;
-    } else {
-      id5 = newId(), (timing = defaultTiming).time = now2(), name16 = name16 == null ? null : name16 + "";
-    }
-    for (var groups = this._groups, m = groups.length, j = 0; j < m; ++j) {
-      for (var group3 = groups[j], n = group3.length, node, i2 = 0; i2 < n; ++i2) {
-        if (node = group3[i2]) {
-          schedule_default(node, name16, id5, i2, group3, timing || inherit(node, id5));
-        }
-      }
-    }
-    return new Transition(groups, this._parents, name16, id5);
-  }
-
-  // node_modules/d3-transition/src/selection/index.js
-  selection_default.prototype.interrupt = interrupt_default2;
-  selection_default.prototype.transition = transition_default2;
-
-  // node_modules/d3-brush/src/brush.js
-  var { abs: abs2, max: max8, min: min8 } = Math;
-  function number1(e) {
-    return [+e[0], +e[1]];
-  }
-  function number22(e) {
-    return [number1(e[0]), number1(e[1])];
-  }
-  var X = {
-    name: "x",
-    handles: ["w", "e"].map(type),
-    input: function(x19, e) {
-      return x19 == null ? null : [[+x19[0], e[0][1]], [+x19[1], e[1][1]]];
-    },
-    output: function(xy) {
-      return xy && [xy[0][0], xy[1][0]];
-    }
-  };
-  var Y = {
-    name: "y",
-    handles: ["n", "s"].map(type),
-    input: function(y17, e) {
-      return y17 == null ? null : [[e[0][0], +y17[0]], [e[1][0], +y17[1]]];
-    },
-    output: function(xy) {
-      return xy && [xy[0][1], xy[1][1]];
-    }
-  };
-  var XY = {
-    name: "xy",
-    handles: ["n", "w", "e", "s", "nw", "ne", "sw", "se"].map(type),
-    input: function(xy) {
-      return xy == null ? null : number22(xy);
-    },
-    output: function(xy) {
-      return xy;
-    }
-  };
-  function type(t) {
-    return { type: t };
-  }
-
-  // node_modules/d3-path/src/path.js
-  var pi3 = Math.PI;
-  var tau2 = 2 * pi3;
-  var epsilon3 = 1e-6;
-  var tauEpsilon2 = tau2 - epsilon3;
-  function Path4() {
-    this._x0 = this._y0 = // start of current subpath
-    this._x1 = this._y1 = null;
-    this._ = "";
-  }
-  function path2() {
-    return new Path4();
-  }
-  Path4.prototype = path2.prototype = {
-    constructor: Path4,
-    moveTo: function(x19, y17) {
-      this._ += "M" + (this._x0 = this._x1 = +x19) + "," + (this._y0 = this._y1 = +y17);
-    },
-    closePath: function() {
-      if (this._x1 !== null) {
-        this._x1 = this._x0, this._y1 = this._y0;
-        this._ += "Z";
-      }
-    },
-    lineTo: function(x19, y17) {
-      this._ += "L" + (this._x1 = +x19) + "," + (this._y1 = +y17);
-    },
-    quadraticCurveTo: function(x19, y17, x20, y18) {
-      this._ += "Q" + +x19 + "," + +y17 + "," + (this._x1 = +x20) + "," + (this._y1 = +y18);
-    },
-    bezierCurveTo: function(x19, y17, x23, y23, x20, y18) {
-      this._ += "C" + +x19 + "," + +y17 + "," + +x23 + "," + +y23 + "," + (this._x1 = +x20) + "," + (this._y1 = +y18);
-    },
-    arcTo: function(x19, y17, x23, y23, r) {
-      x19 = +x19, y17 = +y17, x23 = +x23, y23 = +y23, r = +r;
-      var x0 = this._x1, y0 = this._y1, x21 = x23 - x19, y21 = y23 - y17, x01 = x0 - x19, y01 = y0 - y17, l01_2 = x01 * x01 + y01 * y01;
-      if (r < 0) throw new Error("negative radius: " + r);
-      if (this._x1 === null) {
-        this._ += "M" + (this._x1 = x19) + "," + (this._y1 = y17);
-      } else if (!(l01_2 > epsilon3)) ;
-      else if (!(Math.abs(y01 * x21 - y21 * x01) > epsilon3) || !r) {
-        this._ += "L" + (this._x1 = x19) + "," + (this._y1 = y17);
-      } else {
-        var x20 = x23 - x0, y20 = y23 - y0, l21_2 = x21 * x21 + y21 * y21, l20_2 = x20 * x20 + y20 * y20, l21 = Math.sqrt(l21_2), l01 = Math.sqrt(l01_2), l = r * Math.tan((pi3 - Math.acos((l21_2 + l01_2 - l20_2) / (2 * l21 * l01))) / 2), t01 = l / l01, t21 = l / l21;
-        if (Math.abs(t01 - 1) > epsilon3) {
-          this._ += "L" + (x19 + t01 * x01) + "," + (y17 + t01 * y01);
-        }
-        this._ += "A" + r + "," + r + ",0,0," + +(y01 * x20 > x01 * y20) + "," + (this._x1 = x19 + t21 * x21) + "," + (this._y1 = y17 + t21 * y21);
-      }
-    },
-    arc: function(x19, y17, r, a0, a1, ccw) {
-      x19 = +x19, y17 = +y17, r = +r, ccw = !!ccw;
-      var dx = r * Math.cos(a0), dy4 = r * Math.sin(a0), x0 = x19 + dx, y0 = y17 + dy4, cw = 1 ^ ccw, da = ccw ? a0 - a1 : a1 - a0;
-      if (r < 0) throw new Error("negative radius: " + r);
-      if (this._x1 === null) {
-        this._ += "M" + x0 + "," + y0;
-      } else if (Math.abs(this._x1 - x0) > epsilon3 || Math.abs(this._y1 - y0) > epsilon3) {
-        this._ += "L" + x0 + "," + y0;
-      }
-      if (!r) return;
-      if (da < 0) da = da % tau2 + tau2;
-      if (da > tauEpsilon2) {
-        this._ += "A" + r + "," + r + ",0,1," + cw + "," + (x19 - dx) + "," + (y17 - dy4) + "A" + r + "," + r + ",0,1," + cw + "," + (this._x1 = x0) + "," + (this._y1 = y0);
-      } else if (da > epsilon3) {
-        this._ += "A" + r + "," + r + ",0," + +(da >= pi3) + "," + cw + "," + (this._x1 = x19 + r * Math.cos(a1)) + "," + (this._y1 = y17 + r * Math.sin(a1));
-      }
-    },
-    rect: function(x19, y17, w, h) {
-      this._ += "M" + (this._x0 = this._x1 = +x19) + "," + (this._y0 = this._y1 = +y17) + "h" + +w + "v" + +h + "h" + -w + "Z";
-    },
-    toString: function() {
-      return this._;
-    }
-  };
-  var path_default2 = path2;
-
-  // node_modules/d3-format/src/formatDecimal.js
-  function formatDecimal_default(x19) {
-    return Math.abs(x19 = Math.round(x19)) >= 1e21 ? x19.toLocaleString("en").replace(/,/g, "") : x19.toString(10);
-  }
-  function formatDecimalParts(x19, p2) {
-    if ((i2 = (x19 = p2 ? x19.toExponential(p2 - 1) : x19.toExponential()).indexOf("e")) < 0) return null;
-    var i2, coefficient = x19.slice(0, i2);
-    return [
-      coefficient.length > 1 ? coefficient[0] + coefficient.slice(2) : coefficient,
-      +x19.slice(i2 + 1)
-    ];
-  }
-
-  // node_modules/d3-format/src/exponent.js
-  function exponent_default(x19) {
-    return x19 = formatDecimalParts(Math.abs(x19)), x19 ? x19[1] : NaN;
-  }
-
-  // node_modules/d3-format/src/formatGroup.js
-  function formatGroup_default(grouping, thousands) {
-    return function(value16, width19) {
-      var i2 = value16.length, t = [], j = 0, g = grouping[0], length9 = 0;
-      while (i2 > 0 && g > 0) {
-        if (length9 + g + 1 > width19) g = Math.max(1, width19 - length9);
-        t.push(value16.substring(i2 -= g, i2 + g));
-        if ((length9 += g + 1) > width19) break;
-        g = grouping[j = (j + 1) % grouping.length];
-      }
-      return t.reverse().join(thousands);
-    };
-  }
-
-  // node_modules/d3-format/src/formatNumerals.js
-  function formatNumerals_default(numerals) {
-    return function(value16) {
-      return value16.replace(/[0-9]/g, function(i2) {
-        return numerals[+i2];
-      });
-    };
-  }
-
-  // node_modules/d3-format/src/formatSpecifier.js
-  var re = /^(?:(.)?([<>=^]))?([+\-( ])?([$#])?(0)?(\d+)?(,)?(\.\d+)?(~)?([a-z%])?$/i;
-  function formatSpecifier(specifier) {
-    if (!(match2 = re.exec(specifier))) throw new Error("invalid format: " + specifier);
-    var match2;
-    return new FormatSpecifier({
-      fill: match2[1],
-      align: match2[2],
-      sign: match2[3],
-      symbol: match2[4],
-      zero: match2[5],
-      width: match2[6],
-      comma: match2[7],
-      precision: match2[8] && match2[8].slice(1),
-      trim: match2[9],
-      type: match2[10]
-    });
-  }
-  formatSpecifier.prototype = FormatSpecifier.prototype;
-  function FormatSpecifier(specifier) {
-    this.fill = specifier.fill === void 0 ? " " : specifier.fill + "";
-    this.align = specifier.align === void 0 ? ">" : specifier.align + "";
-    this.sign = specifier.sign === void 0 ? "-" : specifier.sign + "";
-    this.symbol = specifier.symbol === void 0 ? "" : specifier.symbol + "";
-    this.zero = !!specifier.zero;
-    this.width = specifier.width === void 0 ? void 0 : +specifier.width;
-    this.comma = !!specifier.comma;
-    this.precision = specifier.precision === void 0 ? void 0 : +specifier.precision;
-    this.trim = !!specifier.trim;
-    this.type = specifier.type === void 0 ? "" : specifier.type + "";
-  }
-  FormatSpecifier.prototype.toString = function() {
-    return this.fill + this.align + this.sign + this.symbol + (this.zero ? "0" : "") + (this.width === void 0 ? "" : Math.max(1, this.width | 0)) + (this.comma ? "," : "") + (this.precision === void 0 ? "" : "." + Math.max(0, this.precision | 0)) + (this.trim ? "~" : "") + this.type;
-  };
-
-  // node_modules/d3-format/src/formatTrim.js
-  function formatTrim_default(s) {
-    out: for (var n = s.length, i2 = 1, i0 = -1, i1; i2 < n; ++i2) {
-      switch (s[i2]) {
-        case ".":
-          i0 = i1 = i2;
-          break;
-        case "0":
-          if (i0 === 0) i0 = i2;
-          i1 = i2;
-          break;
-        default:
-          if (!+s[i2]) break out;
-          if (i0 > 0) i0 = 0;
-          break;
-      }
-    }
-    return i0 > 0 ? s.slice(0, i0) + s.slice(i1 + 1) : s;
-  }
-
-  // node_modules/d3-format/src/formatPrefixAuto.js
-  var prefixExponent;
-  function formatPrefixAuto_default(x19, p2) {
-    var d7 = formatDecimalParts(x19, p2);
-    if (!d7) return x19 + "";
-    var coefficient = d7[0], exponent = d7[1], i2 = exponent - (prefixExponent = Math.max(-8, Math.min(8, Math.floor(exponent / 3))) * 3) + 1, n = coefficient.length;
-    return i2 === n ? coefficient : i2 > n ? coefficient + new Array(i2 - n + 1).join("0") : i2 > 0 ? coefficient.slice(0, i2) + "." + coefficient.slice(i2) : "0." + new Array(1 - i2).join("0") + formatDecimalParts(x19, Math.max(0, p2 + i2 - 1))[0];
-  }
-
-  // node_modules/d3-format/src/formatRounded.js
-  function formatRounded_default(x19, p2) {
-    var d7 = formatDecimalParts(x19, p2);
-    if (!d7) return x19 + "";
-    var coefficient = d7[0], exponent = d7[1];
-    return exponent < 0 ? "0." + new Array(-exponent).join("0") + coefficient : coefficient.length > exponent + 1 ? coefficient.slice(0, exponent + 1) + "." + coefficient.slice(exponent + 1) : coefficient + new Array(exponent - coefficient.length + 2).join("0");
-  }
-
-  // node_modules/d3-format/src/formatTypes.js
-  var formatTypes_default = {
-    "%": (x19, p2) => (x19 * 100).toFixed(p2),
-    "b": (x19) => Math.round(x19).toString(2),
-    "c": (x19) => x19 + "",
-    "d": formatDecimal_default,
-    "e": (x19, p2) => x19.toExponential(p2),
-    "f": (x19, p2) => x19.toFixed(p2),
-    "g": (x19, p2) => x19.toPrecision(p2),
-    "o": (x19) => Math.round(x19).toString(8),
-    "p": (x19, p2) => formatRounded_default(x19 * 100, p2),
-    "r": formatRounded_default,
-    "s": formatPrefixAuto_default,
-    "X": (x19) => Math.round(x19).toString(16).toUpperCase(),
-    "x": (x19) => Math.round(x19).toString(16)
-  };
-
-  // node_modules/d3-format/src/identity.js
-  function identity_default2(x19) {
-    return x19;
-  }
-
-  // node_modules/d3-format/src/locale.js
-  var map42 = Array.prototype.map;
-  var prefixes = ["y", "z", "a", "f", "p", "n", "\xB5", "m", "", "k", "M", "G", "T", "P", "E", "Z", "Y"];
-  function locale_default(locale2) {
-    var group3 = locale2.grouping === void 0 || locale2.thousands === void 0 ? identity_default2 : formatGroup_default(map42.call(locale2.grouping, Number), locale2.thousands + ""), currencyPrefix = locale2.currency === void 0 ? "" : locale2.currency[0] + "", currencySuffix = locale2.currency === void 0 ? "" : locale2.currency[1] + "", decimal = locale2.decimal === void 0 ? "." : locale2.decimal + "", numerals = locale2.numerals === void 0 ? identity_default2 : formatNumerals_default(map42.call(locale2.numerals, String)), percent = locale2.percent === void 0 ? "%" : locale2.percent + "", minus = locale2.minus === void 0 ? "\u2212" : locale2.minus + "", nan2 = locale2.nan === void 0 ? "NaN" : locale2.nan + "";
-    function newFormat(specifier) {
-      specifier = formatSpecifier(specifier);
-      var fill15 = specifier.fill, align = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero4 = specifier.zero, width19 = specifier.width, comma = specifier.comma, precision = specifier.precision, trim2 = specifier.trim, type2 = specifier.type;
-      if (type2 === "n") comma = true, type2 = "g";
-      else if (!formatTypes_default[type2]) precision === void 0 && (precision = 12), trim2 = true, type2 = "g";
-      if (zero4 || fill15 === "0" && align === "=") zero4 = true, fill15 = "0", align = "=";
-      var prefix = symbol === "$" ? currencyPrefix : symbol === "#" && /[boxX]/.test(type2) ? "0" + type2.toLowerCase() : "", suffix = symbol === "$" ? currencySuffix : /[%p]/.test(type2) ? percent : "";
-      var formatType = formatTypes_default[type2], maybeSuffix = /[defgprs%]/.test(type2);
-      precision = precision === void 0 ? 6 : /[gprs]/.test(type2) ? Math.max(1, Math.min(21, precision)) : Math.max(0, Math.min(20, precision));
-      function format2(value16) {
-        var valuePrefix = prefix, valueSuffix = suffix, i2, n, c;
-        if (type2 === "c") {
-          valueSuffix = formatType(value16) + valueSuffix;
-          value16 = "";
-        } else {
-          value16 = +value16;
-          var valueNegative = value16 < 0 || 1 / value16 < 0;
-          value16 = isNaN(value16) ? nan2 : formatType(Math.abs(value16), precision);
-          if (trim2) value16 = formatTrim_default(value16);
-          if (valueNegative && +value16 === 0 && sign2 !== "+") valueNegative = false;
-          valuePrefix = (valueNegative ? sign2 === "(" ? sign2 : minus : sign2 === "-" || sign2 === "(" ? "" : sign2) + valuePrefix;
-          valueSuffix = (type2 === "s" ? prefixes[8 + prefixExponent / 3] : "") + valueSuffix + (valueNegative && sign2 === "(" ? ")" : "");
-          if (maybeSuffix) {
-            i2 = -1, n = value16.length;
-            while (++i2 < n) {
-              if (c = value16.charCodeAt(i2), 48 > c || c > 57) {
-                valueSuffix = (c === 46 ? decimal + value16.slice(i2 + 1) : value16.slice(i2)) + valueSuffix;
-                value16 = value16.slice(0, i2);
-                break;
-              }
-            }
-          }
-        }
-        if (comma && !zero4) value16 = group3(value16, Infinity);
-        var length9 = valuePrefix.length + value16.length + valueSuffix.length, padding = length9 < width19 ? new Array(width19 - length9 + 1).join(fill15) : "";
-        if (comma && zero4) value16 = group3(padding + value16, padding.length ? width19 - valueSuffix.length : Infinity), padding = "";
-        switch (align) {
-          case "<":
-            value16 = valuePrefix + value16 + valueSuffix + padding;
-            break;
-          case "=":
-            value16 = valuePrefix + padding + value16 + valueSuffix;
-            break;
-          case "^":
-            value16 = padding.slice(0, length9 = padding.length >> 1) + valuePrefix + value16 + valueSuffix + padding.slice(length9);
-            break;
-          default:
-            value16 = padding + valuePrefix + value16 + valueSuffix;
-            break;
-        }
-        return numerals(value16);
-      }
-      format2.toString = function() {
-        return specifier + "";
-      };
-      return format2;
-    }
-    function formatPrefix2(specifier, value16) {
-      var f = newFormat((specifier = formatSpecifier(specifier), specifier.type = "f", specifier)), e = Math.max(-8, Math.min(8, Math.floor(exponent_default(value16) / 3))) * 3, k = Math.pow(10, -e), prefix = prefixes[8 + e / 3];
-      return function(value17) {
-        return f(k * value17) + prefix;
-      };
-    }
-    return {
-      format: newFormat,
-      formatPrefix: formatPrefix2
-    };
-  }
-
-  // node_modules/d3-format/src/defaultLocale.js
-  var locale;
-  var format;
-  var formatPrefix;
-  defaultLocale({
-    thousands: ",",
-    grouping: [3],
-    currency: ["$", ""]
-  });
-  function defaultLocale(definition) {
-    locale = locale_default(definition);
-    format = locale.format;
-    formatPrefix = locale.formatPrefix;
-    return locale;
-  }
-
-  // node_modules/d3-format/src/precisionFixed.js
-  function precisionFixed_default(step5) {
-    return Math.max(0, -exponent_default(Math.abs(step5)));
-  }
-
-  // node_modules/d3-format/src/precisionPrefix.js
-  function precisionPrefix_default(step5, value16) {
-    return Math.max(0, Math.max(-8, Math.min(8, Math.floor(exponent_default(value16) / 3))) * 3 - exponent_default(Math.abs(step5)));
-  }
-
-  // node_modules/d3-format/src/precisionRound.js
-  function precisionRound_default(step5, max9) {
-    step5 = Math.abs(step5), max9 = Math.abs(max9) - step5;
-    return Math.max(0, exponent_default(max9) - exponent_default(step5)) + 1;
-  }
-
-  // node_modules/d3-scale/src/init.js
-  function initRange(domain, range3) {
-    switch (arguments.length) {
-      case 0:
-        break;
-      case 1:
-        this.range(domain);
-        break;
-      default:
-        this.range(range3).domain(domain);
-        break;
-    }
-    return this;
-  }
-
-  // node_modules/d3-scale/src/ordinal.js
-  var implicit = Symbol("implicit");
-  function ordinal() {
-    var index5 = new InternMap(), domain = [], range3 = [], unknown = implicit;
-    function scale(d7) {
-      let i2 = index5.get(d7);
-      if (i2 === void 0) {
-        if (unknown !== implicit) return unknown;
-        index5.set(d7, i2 = domain.push(d7) - 1);
-      }
-      return range3[i2 % range3.length];
-    }
-    scale.domain = function(_) {
-      if (!arguments.length) return domain.slice();
-      domain = [], index5 = new InternMap();
-      for (const value16 of _) {
-        if (index5.has(value16)) continue;
-        index5.set(value16, domain.push(value16) - 1);
-      }
-      return scale;
-    };
-    scale.range = function(_) {
-      return arguments.length ? (range3 = Array.from(_), scale) : range3.slice();
-    };
-    scale.unknown = function(_) {
-      return arguments.length ? (unknown = _, scale) : unknown;
-    };
-    scale.copy = function() {
-      return ordinal(domain, range3).unknown(unknown);
-    };
-    initRange.apply(scale, arguments);
-    return scale;
-  }
-
-  // node_modules/d3-scale/src/constant.js
-  function constants(x19) {
-    return function() {
-      return x19;
-    };
-  }
-
-  // node_modules/d3-scale/src/number.js
-  function number3(x19) {
-    return +x19;
-  }
-
-  // node_modules/d3-scale/src/continuous.js
-  var unit2 = [0, 1];
-  function identity18(x19) {
-    return x19;
-  }
-  function normalize2(a2, b2) {
-    return (b2 -= a2 = +a2) ? function(x19) {
-      return (x19 - a2) / b2;
-    } : constants(isNaN(b2) ? NaN : 0.5);
-  }
-  function clamper(a2, b2) {
-    var t;
-    if (a2 > b2) t = a2, a2 = b2, b2 = t;
-    return function(x19) {
-      return Math.max(a2, Math.min(b2, x19));
-    };
-  }
-  function bimap3(domain, range3, interpolate) {
-    var d0 = domain[0], d1 = domain[1], r0 = range3[0], r1 = range3[1];
-    if (d1 < d0) d0 = normalize2(d1, d0), r0 = interpolate(r1, r0);
-    else d0 = normalize2(d0, d1), r0 = interpolate(r0, r1);
-    return function(x19) {
-      return r0(d0(x19));
-    };
-  }
-  function polymap(domain, range3, interpolate) {
-    var j = Math.min(domain.length, range3.length) - 1, d7 = new Array(j), r = new Array(j), i2 = -1;
-    if (domain[j] < domain[0]) {
-      domain = domain.slice().reverse();
-      range3 = range3.slice().reverse();
-    }
-    while (++i2 < j) {
-      d7[i2] = normalize2(domain[i2], domain[i2 + 1]);
-      r[i2] = interpolate(range3[i2], range3[i2 + 1]);
-    }
-    return function(x19) {
-      var i3 = bisect_default(domain, x19, 1, j) - 1;
-      return r[i3](d7[i3](x19));
-    };
-  }
-  function copy2(source2, target7) {
-    return target7.domain(source2.domain()).range(source2.range()).interpolate(source2.interpolate()).clamp(source2.clamp()).unknown(source2.unknown());
-  }
-  function transformer() {
-    var domain = unit2, range3 = unit2, interpolate = value_default, transform3, untransform, unknown, clamp = identity18, piecewise, output2, input3;
-    function rescale() {
-      var n = Math.min(domain.length, range3.length);
-      if (clamp !== identity18) clamp = clamper(domain[0], domain[n - 1]);
-      piecewise = n > 2 ? polymap : bimap3;
-      output2 = input3 = null;
-      return scale;
-    }
-    function scale(x19) {
-      return x19 == null || isNaN(x19 = +x19) ? unknown : (output2 || (output2 = piecewise(domain.map(transform3), range3, interpolate)))(transform3(clamp(x19)));
-    }
-    scale.invert = function(y17) {
-      return clamp(untransform((input3 || (input3 = piecewise(range3, domain.map(transform3), number_default)))(y17)));
-    };
-    scale.domain = function(_) {
-      return arguments.length ? (domain = Array.from(_, number3), rescale()) : domain.slice();
-    };
-    scale.range = function(_) {
-      return arguments.length ? (range3 = Array.from(_), rescale()) : range3.slice();
-    };
-    scale.rangeRound = function(_) {
-      return range3 = Array.from(_), interpolate = round_default, rescale();
-    };
-    scale.clamp = function(_) {
-      return arguments.length ? (clamp = _ ? true : identity18, rescale()) : clamp !== identity18;
-    };
-    scale.interpolate = function(_) {
-      return arguments.length ? (interpolate = _, rescale()) : interpolate;
-    };
-    scale.unknown = function(_) {
-      return arguments.length ? (unknown = _, scale) : unknown;
-    };
-    return function(t, u2) {
-      transform3 = t, untransform = u2;
-      return rescale();
-    };
-  }
-  function continuous() {
-    return transformer()(identity18, identity18);
-  }
-
-  // node_modules/d3-scale/src/tickFormat.js
-  function tickFormat(start5, stop3, count, specifier) {
-    var step5 = tickStep(start5, stop3, count), precision;
-    specifier = formatSpecifier(specifier == null ? ",f" : specifier);
-    switch (specifier.type) {
-      case "s": {
-        var value16 = Math.max(Math.abs(start5), Math.abs(stop3));
-        if (specifier.precision == null && !isNaN(precision = precisionPrefix_default(step5, value16))) specifier.precision = precision;
-        return formatPrefix(specifier, value16);
-      }
-      case "":
-      case "e":
-      case "g":
-      case "p":
-      case "r": {
-        if (specifier.precision == null && !isNaN(precision = precisionRound_default(step5, Math.max(Math.abs(start5), Math.abs(stop3))))) specifier.precision = precision - (specifier.type === "e");
-        break;
-      }
-      case "f":
-      case "%": {
-        if (specifier.precision == null && !isNaN(precision = precisionFixed_default(step5))) specifier.precision = precision - (specifier.type === "%") * 2;
-        break;
-      }
-    }
-    return format(specifier);
-  }
-
-  // node_modules/d3-scale/src/linear.js
-  function linearish(scale) {
-    var domain = scale.domain;
-    scale.ticks = function(count) {
-      var d7 = domain();
-      return ticks(d7[0], d7[d7.length - 1], count == null ? 10 : count);
-    };
-    scale.tickFormat = function(count, specifier) {
-      var d7 = domain();
-      return tickFormat(d7[0], d7[d7.length - 1], count == null ? 10 : count, specifier);
-    };
-    scale.nice = function(count) {
-      if (count == null) count = 10;
-      var d7 = domain();
-      var i0 = 0;
-      var i1 = d7.length - 1;
-      var start5 = d7[i0];
-      var stop3 = d7[i1];
-      var prestep;
-      var step5;
-      var maxIter = 10;
-      if (stop3 < start5) {
-        step5 = start5, start5 = stop3, stop3 = step5;
-        step5 = i0, i0 = i1, i1 = step5;
-      }
-      while (maxIter-- > 0) {
-        step5 = tickIncrement(start5, stop3, count);
-        if (step5 === prestep) {
-          d7[i0] = start5;
-          d7[i1] = stop3;
-          return domain(d7);
-        } else if (step5 > 0) {
-          start5 = Math.floor(start5 / step5) * step5;
-          stop3 = Math.ceil(stop3 / step5) * step5;
-        } else if (step5 < 0) {
-          start5 = Math.ceil(start5 * step5) / step5;
-          stop3 = Math.floor(stop3 * step5) / step5;
-        } else {
-          break;
-        }
-        prestep = step5;
-      }
-      return scale;
-    };
-    return scale;
-  }
-  function linear2() {
-    var scale = continuous();
-    scale.copy = function() {
-      return copy2(scale, linear2());
-    };
-    initRange.apply(scale, arguments);
-    return linearish(scale);
-  }
-
-  // node_modules/d3-scale-chromatic/src/colors.js
-  function colors_default(specifier) {
-    var n = specifier.length / 6 | 0, colors2 = new Array(n), i2 = 0;
-    while (i2 < n) colors2[i2] = "#" + specifier.slice(i2 * 6, ++i2 * 6);
-    return colors2;
-  }
-
-  // node_modules/d3-scale-chromatic/src/categorical/category10.js
-  var category10_default = colors_default("1f77b4ff7f0e2ca02cd627289467bd8c564be377c27f7f7fbcbd2217becf");
-
-  // node_modules/d3-shape/src/constant.js
-  function constant_default5(x19) {
-    return function constant2() {
-      return x19;
-    };
-  }
-
-  // node_modules/d3-shape/src/array.js
-  var slice4 = Array.prototype.slice;
-  function array_default(x19) {
-    return typeof x19 === "object" && "length" in x19 ? x19 : Array.from(x19);
-  }
-
-  // node_modules/d3-shape/src/curve/linear.js
-  function Linear(context) {
-    this._context = context;
-  }
-  Linear.prototype = {
-    areaStart: function() {
-      this._line = 0;
-    },
-    areaEnd: function() {
-      this._line = NaN;
-    },
-    lineStart: function() {
-      this._point = 0;
-    },
-    lineEnd: function() {
-      if (this._line || this._line !== 0 && this._point === 1) this._context.closePath();
-      this._line = 1 - this._line;
-    },
-    point: function(x19, y17) {
-      x19 = +x19, y17 = +y17;
-      switch (this._point) {
-        case 0:
-          this._point = 1;
-          this._line ? this._context.lineTo(x19, y17) : this._context.moveTo(x19, y17);
-          break;
-        case 1:
-          this._point = 2;
-        // falls through
-        default:
-          this._context.lineTo(x19, y17);
-          break;
-      }
-    }
-  };
-  function linear_default(context) {
-    return new Linear(context);
-  }
-
-  // node_modules/d3-shape/src/point.js
-  function x14(p2) {
-    return p2[0];
-  }
-  function y10(p2) {
-    return p2[1];
-  }
-
-  // node_modules/d3-shape/src/line.js
-  function line_default(x19, y17) {
-    var defined = constant_default5(true), context = null, curve = linear_default, output2 = null;
-    x19 = typeof x19 === "function" ? x19 : x19 === void 0 ? x14 : constant_default5(x19);
-    y17 = typeof y17 === "function" ? y17 : y17 === void 0 ? y10 : constant_default5(y17);
-    function line(data) {
-      var i2, n = (data = array_default(data)).length, d7, defined0 = false, buffer;
-      if (context == null) output2 = curve(buffer = path_default2());
-      for (i2 = 0; i2 <= n; ++i2) {
-        if (!(i2 < n && defined(d7 = data[i2], i2, data)) === defined0) {
-          if (defined0 = !defined0) output2.lineStart();
-          else output2.lineEnd();
-        }
-        if (defined0) output2.point(+x19(d7, i2, data), +y17(d7, i2, data));
-      }
-      if (buffer) return output2 = null, buffer + "" || null;
-    }
-    line.x = function(_) {
-      return arguments.length ? (x19 = typeof _ === "function" ? _ : constant_default5(+_), line) : x19;
-    };
-    line.y = function(_) {
-      return arguments.length ? (y17 = typeof _ === "function" ? _ : constant_default5(+_), line) : y17;
-    };
-    line.defined = function(_) {
-      return arguments.length ? (defined = typeof _ === "function" ? _ : constant_default5(!!_), line) : defined;
-    };
-    line.curve = function(_) {
-      return arguments.length ? (curve = _, context != null && (output2 = curve(context)), line) : curve;
-    };
-    line.context = function(_) {
-      return arguments.length ? (_ == null ? context = output2 = null : output2 = curve(context = _), line) : context;
-    };
-    return line;
-  }
-
-  // node_modules/d3-zoom/src/transform.js
-  function Transform(k, x19, y17) {
-    this.k = k;
-    this.x = x19;
-    this.y = y17;
-  }
-  Transform.prototype = {
-    constructor: Transform,
-    scale: function(k) {
-      return k === 1 ? this : new Transform(this.k * k, this.x, this.y);
-    },
-    translate: function(x19, y17) {
-      return x19 === 0 & y17 === 0 ? this : new Transform(this.k, this.x + this.k * x19, this.y + this.k * y17);
-    },
-    apply: function(point) {
-      return [point[0] * this.k + this.x, point[1] * this.k + this.y];
-    },
-    applyX: function(x19) {
-      return x19 * this.k + this.x;
-    },
-    applyY: function(y17) {
-      return y17 * this.k + this.y;
-    },
-    invert: function(location2) {
-      return [(location2[0] - this.x) / this.k, (location2[1] - this.y) / this.k];
-    },
-    invertX: function(x19) {
-      return (x19 - this.x) / this.k;
-    },
-    invertY: function(y17) {
-      return (y17 - this.y) / this.k;
-    },
-    rescaleX: function(x19) {
-      return x19.copy().domain(x19.range().map(this.invertX, this).map(x19.invert, x19));
-    },
-    rescaleY: function(y17) {
-      return y17.copy().domain(y17.range().map(this.invertY, this).map(y17.invert, y17));
-    },
-    toString: function() {
-      return "translate(" + this.x + "," + this.y + ") scale(" + this.k + ")";
-    }
-  };
-  var identity19 = new Transform(1, 0, 0);
-  transform2.prototype = Transform.prototype;
-  function transform2(node) {
-    while (!node.__zoom) if (!(node = node.parentNode)) return identity19;
-    return node.__zoom;
-  }
-
   // output/D3.Layouts.Sankey.Functions/foreign.js
   var getAlignmentFunction = (alignment) => {
     switch (alignment) {
       case "left":
-        return left2;
+        return left3;
       case "right":
-        return right2;
+        return right3;
       case "center":
-        return center;
+        return center2;
       case "justify":
       default:
         return justify;
@@ -23970,23 +24318,23 @@
 
   // output/D3.Layouts.Sankey.Functions/index.js
   var sankeySetDataWithConfig = function(dictMonadEffect) {
-    var liftEffect17 = liftEffect(dictMonadEffect);
+    var liftEffect18 = liftEffect(dictMonadEffect);
     return function(data_2) {
       return function(width19) {
         return function(height19) {
           return function(config) {
-            return liftEffect17(sankeySetDataWithConfig_(data_2)(width19)(height19)(config));
+            return liftEffect18(sankeySetDataWithConfig_(data_2)(width19)(height19)(config));
           };
         };
       };
     };
   };
   var sankeySetData = function(dictMonadEffect) {
-    var liftEffect17 = liftEffect(dictMonadEffect);
+    var liftEffect18 = liftEffect(dictMonadEffect);
     return function(data_2) {
       return function(width19) {
         return function(height19) {
-          return liftEffect17(sankeySetData_(data_2)(width19)(height19));
+          return liftEffect18(sankeySetData_(data_2)(width19)(height19));
         };
       };
     };
@@ -23997,22 +24345,22 @@
   var unboxSankeyLink = unsafeCoerce2;
 
   // output/D3.Viz.SankeyDiagram/index.js
-  var classed9 = /* @__PURE__ */ classed(toAttrString);
+  var classed10 = /* @__PURE__ */ classed(toAttrString);
   var discard17 = /* @__PURE__ */ discard(discardUnit);
-  var fill8 = /* @__PURE__ */ fill(toAttrString);
-  var strokeWidth8 = /* @__PURE__ */ strokeWidth(toAttrNumberFn);
+  var fill9 = /* @__PURE__ */ fill(toAttrString);
+  var strokeWidth9 = /* @__PURE__ */ strokeWidth(toAttrNumberFn);
   var strokeOpacity3 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
   var d5 = /* @__PURE__ */ d2(toAttrStringFn);
-  var strokeColor9 = /* @__PURE__ */ strokeColor(toAttrStringFn);
-  var x15 = /* @__PURE__ */ x(toAttrNumberFn);
-  var y11 = /* @__PURE__ */ y(toAttrNumberFn);
-  var width15 = /* @__PURE__ */ width8(toAttrNumberFn);
-  var height15 = /* @__PURE__ */ height8(toAttrNumberFn);
+  var strokeColor10 = /* @__PURE__ */ strokeColor(toAttrStringFn);
+  var x16 = /* @__PURE__ */ x(toAttrNumberFn);
+  var y14 = /* @__PURE__ */ y(toAttrNumberFn);
+  var width16 = /* @__PURE__ */ width8(toAttrNumberFn);
+  var height16 = /* @__PURE__ */ height8(toAttrNumberFn);
   var fill12 = /* @__PURE__ */ fill(toAttrStringFn);
   var fillOpacity6 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var dy3 = /* @__PURE__ */ dy(toAttrNumber);
-  var textAnchor7 = /* @__PURE__ */ textAnchor(toAttrStringFn);
-  var text12 = /* @__PURE__ */ text6(toAttrStringFn);
+  var textAnchor8 = /* @__PURE__ */ textAnchor(toAttrStringFn);
+  var text13 = /* @__PURE__ */ text6(toAttrStringFn);
   var node_ = {
     name: function($83) {
       return (function(v) {
@@ -24089,10 +24437,10 @@
     return node_.name(link_2.source(d1)) + ("-" + node_.name(link_2.target(d1)));
   };
   var draw9 = function(dictBind) {
-    var bind26 = bind(dictBind);
+    var bind27 = bind(dictBind);
     var discard111 = discard17(dictBind);
     return function(dictMonadEffect) {
-      var liftEffect17 = liftEffect(dictMonadEffect);
+      var liftEffect18 = liftEffect(dictMonadEffect);
       var pure33 = pure(dictMonadEffect.Monad0().Applicative0());
       return function(dictMonadState) {
         return function(dictSankeyM) {
@@ -24104,39 +24452,39 @@
           var setAttributes2 = setAttributes(SelectionM1);
           return function(sankeyData) {
             return function(selector) {
-              return bind26(liftEffect17(getWindowWidthHeight))(function(v) {
-                return bind26(attach2(selector))(function(v1) {
-                  return bind26(appendTo2(v1)(Svg.value)([viewBox(0)(0)(v.value0)(v.value1), classed9("sankey")]))(function(svg2) {
-                    return bind26(appendTo2(svg2)(Group.value)([classed9("links")]))(function(linksGroup) {
-                      return bind26(appendTo2(svg2)(Group.value)([classed9("nodes")]))(function(nodesGroup) {
-                        return bind26(appendTo2(svg2)(Group.value)([classed9("labels")]))(function(labelsGroup) {
-                          return bind26(setSankeyData2(sankeyData)(v.value0)(v.value1))(function(layoutResult) {
-                            return bind26(simpleJoin2(linksGroup)(Path2.value)(layoutResult.links)(keyForLink))(function(linksSelection) {
-                              return discard111(setAttributes2(linksSelection)([classed9("sankey-link"), fill8("none"), strokeWidth8(link_2.width), strokeOpacity3(0.5), d5(sankeyLinkPath_), strokeColor9(link_2.color)]))(function() {
-                                return bind26(simpleJoin2(nodesGroup)(Rect.value)(layoutResult.nodes)(keyForNode))(function(nodesSelection) {
-                                  return discard111(setAttributes2(nodesSelection)([classed9("sankey-node"), x15(node_.x0), y11(node_.y0), width15(function(n) {
+              return bind27(liftEffect18(getWindowWidthHeight))(function(v) {
+                return bind27(attach2(selector))(function(v1) {
+                  return bind27(appendTo2(v1)(Svg.value)([viewBox(0)(0)(v.value0)(v.value1), classed10("sankey")]))(function(svg2) {
+                    return bind27(appendTo2(svg2)(Group.value)([classed10("links")]))(function(linksGroup) {
+                      return bind27(appendTo2(svg2)(Group.value)([classed10("nodes")]))(function(nodesGroup) {
+                        return bind27(appendTo2(svg2)(Group.value)([classed10("labels")]))(function(labelsGroup) {
+                          return bind27(setSankeyData2(sankeyData)(v.value0)(v.value1))(function(layoutResult) {
+                            return bind27(simpleJoin2(linksGroup)(Path.value)(layoutResult.links)(keyForLink))(function(linksSelection) {
+                              return discard111(setAttributes2(linksSelection)([classed10("sankey-link"), fill9("none"), strokeWidth9(link_2.width), strokeOpacity3(0.5), d5(sankeyLinkPath_), strokeColor10(link_2.color)]))(function() {
+                                return bind27(simpleJoin2(nodesGroup)(Rect.value)(layoutResult.nodes)(keyForNode))(function(nodesSelection) {
+                                  return discard111(setAttributes2(nodesSelection)([classed10("sankey-node"), x16(node_.x0), y14(node_.y0), width16(function(n) {
                                     return node_.x1(n) - node_.x0(n);
-                                  }), height15(function(n) {
+                                  }), height16(function(n) {
                                     return node_.y1(n) - node_.y0(n);
                                   }), fill12(node_.color), fillOpacity6(0.8)]))(function() {
-                                    return bind26(simpleJoin2(labelsGroup)(Text2.value)(layoutResult.nodes)(keyForNode))(function(labelsSelection) {
-                                      return discard111(setAttributes2(labelsSelection)([classed9("sankey-label"), x15(function(n) {
+                                    return bind27(simpleJoin2(labelsGroup)(Text2.value)(layoutResult.nodes)(keyForNode))(function(labelsSelection) {
+                                      return discard111(setAttributes2(labelsSelection)([classed10("sankey-label"), x16(function(n) {
                                         var $79 = node_.x0(n) < v.value0 / 2;
                                         if ($79) {
                                           return node_.x1(n) + 6;
                                         }
                                         ;
                                         return node_.x0(n) - 6;
-                                      }), y11(function(n) {
+                                      }), y14(function(n) {
                                         return (node_.y0(n) + node_.y1(n)) / 2;
-                                      }), dy3(4), textAnchor7(function(n) {
+                                      }), dy3(4), textAnchor8(function(n) {
                                         var $80 = node_.x0(n) < v.value0 / 2;
                                         if ($80) {
                                           return "start";
                                         }
                                         ;
                                         return "end";
-                                      }), text12(node_.name)]))(function() {
+                                      }), text13(node_.name)]))(function() {
                                         return pure33(unit);
                                       });
                                     });
@@ -24230,15 +24578,15 @@
     };
   };
   var runWithD3_Sankey = function(dictBind) {
-    var bind26 = bind(dictBind);
+    var bind27 = bind(dictBind);
     return function(dictMonadState) {
       var get8 = get(dictMonadState);
       var modify_6 = modify_(dictMonadState);
       return function(dictMonadEffect) {
-        var liftEffect17 = liftEffect(dictMonadEffect);
+        var liftEffect18 = liftEffect(dictMonadEffect);
         return function(state_T) {
-          return bind26(get8)(function(state3) {
-            return bind26(liftEffect17(exec_D3M_Sankey(state3)(state_T)))(function(state$prime) {
+          return bind27(get8)(function(state3) {
+            return bind27(liftEffect18(exec_D3M_Sankey(state3)(state_T)))(function(state$prime) {
               return modify_6(function(v) {
                 return state$prime;
               });
@@ -24293,42 +24641,19 @@
     });
   })();
 
-  // output/D3.Axes/foreign.js
-  function axisBottom2(scale) {
-    return axisBottom(scale);
-  }
-  function axisLeft2(scale) {
-    return axisLeft(scale);
-  }
-  function callAxis(selection2) {
-    return (axis2) => () => {
-      selection2.call(axis2);
-    };
-  }
-
-  // output/D3.Scales.Linear/foreign.js
-  function createLinearScale(config) {
-    return () => {
-      return linear2().domain(config.domain).range(config.range);
-    };
-  }
-  function applyScale(scale) {
-    return (value16) => scale(value16);
-  }
-
   // output/D3.Viz.BarChart/index.js
   var map43 = /* @__PURE__ */ map(functorArray);
   var minimum2 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var maximum2 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
-  var classed10 = /* @__PURE__ */ classed(toAttrString);
-  var width16 = /* @__PURE__ */ width8(toAttrNumber);
-  var height16 = /* @__PURE__ */ height8(toAttrNumber);
-  var show15 = /* @__PURE__ */ show(showNumber);
-  var x16 = /* @__PURE__ */ x(toAttrNumber);
-  var y14 = /* @__PURE__ */ y(toAttrNumber);
-  var fill9 = /* @__PURE__ */ fill(toAttrString);
-  var strokeColor10 = /* @__PURE__ */ strokeColor(toAttrString);
-  var strokeWidth9 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var classed11 = /* @__PURE__ */ classed(toAttrString);
+  var width17 = /* @__PURE__ */ width8(toAttrNumber);
+  var height17 = /* @__PURE__ */ height8(toAttrNumber);
+  var show16 = /* @__PURE__ */ show(showNumber);
+  var x17 = /* @__PURE__ */ x(toAttrNumber);
+  var y15 = /* @__PURE__ */ y(toAttrNumber);
+  var fill10 = /* @__PURE__ */ fill(toAttrString);
+  var strokeColor11 = /* @__PURE__ */ strokeColor(toAttrString);
+  var strokeWidth10 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var innerWidth2 = function(dims) {
     return dims.width - dims.margin.left - dims.margin.right;
   };
@@ -24346,9 +24671,9 @@
     }
   };
   var draw11 = function(dictBind) {
-    var bind26 = bind(dictBind);
+    var bind27 = bind(dictBind);
     return function(dictMonadEffect) {
-      var liftEffect17 = liftEffect(dictMonadEffect);
+      var liftEffect18 = liftEffect(dictMonadEffect);
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
       var pure33 = pure(Applicative0);
       var traverse_7 = traverse_(Applicative0)(foldableArray);
@@ -24368,25 +24693,25 @@
             var minX = fromMaybe(0)(minimum2(xValues));
             var maxX = fromMaybe(100)(maximum2(xValues));
             var maxY = fromMaybe(100)(maximum2(yValues));
-            return bind26(attach2(selector))(function(v) {
-              return bind26(appendTo2(v)(Svg.value)([viewBox(0)(0)(defaultDimensions.width)(defaultDimensions.height), classed10("bar-chart"), width16(defaultDimensions.width), height16(defaultDimensions.height)]))(function(svg2) {
-                return bind26(appendTo2(svg2)(Group.value)([transform([function(v1) {
-                  return "translate(" + (show15(defaultDimensions.margin.left) + ("," + (show15(defaultDimensions.margin.top) + ")")));
+            return bind27(attach2(selector))(function(v) {
+              return bind27(appendTo2(v)(Svg.value)([viewBox(0)(0)(defaultDimensions.width)(defaultDimensions.height), classed11("bar-chart"), width17(defaultDimensions.width), height17(defaultDimensions.height)]))(function(svg2) {
+                return bind27(appendTo2(svg2)(Group.value)([transform([function(v1) {
+                  return "translate(" + (show16(defaultDimensions.margin.left) + ("," + (show16(defaultDimensions.margin.top) + ")")));
                 }])]))(function(chartGroup) {
-                  return bind26(liftEffect17(createLinearScale({
+                  return bind27(liftEffect18(createLinearScale({
                     domain: [minX, maxX],
                     range: [0, iWidth]
                   })))(function(xScale) {
-                    return bind26(liftEffect17(createLinearScale({
+                    return bind27(liftEffect18(createLinearScale({
                       domain: [0, maxY],
                       range: [iHeight, 0]
                     })))(function(yScale) {
-                      return bind26(appendTo2(chartGroup)(Group.value)([classed10("x-axis"), transform([function(v1) {
-                        return "translate(0," + (show15(iHeight) + ")");
+                      return bind27(appendTo2(chartGroup)(Group.value)([classed11("x-axis"), transform([function(v1) {
+                        return "translate(0," + (show16(iHeight) + ")");
                       }])]))(function(xAxisGroup) {
-                        return bind26(appendTo2(chartGroup)(Group.value)([classed10("y-axis")]))(function(yAxisGroup) {
-                          return bind26(liftEffect17(callAxis(xAxisGroup)(axisBottom2(xScale))))(function() {
-                            return bind26(liftEffect17(callAxis(yAxisGroup)(axisLeft2(yScale))))(function() {
+                        return bind27(appendTo2(chartGroup)(Group.value)([classed11("y-axis")]))(function(yAxisGroup) {
+                          return bind27(liftEffect18(callAxis(xAxisGroup)(axisBottom2(xScale))))(function() {
+                            return bind27(liftEffect18(callAxis(yAxisGroup)(axisLeft2(yScale))))(function() {
                               var numBars = length4(dataPoints);
                               var barWidth = (function() {
                                 var $37 = numBars > 0;
@@ -24400,11 +24725,11 @@
                                 var xPos = applyScale(xScale)(point.x) - barWidth / 2;
                                 var yPos = applyScale(yScale)(point.y);
                                 var barHeight = iHeight - yPos;
-                                return bind26(appendTo2(chartGroup)(Rect.value)([x16(xPos), y14(yPos), width16(barWidth), height16(barHeight), fill9("#4a90e2"), strokeColor10("#357abd"), strokeWidth9(1), classed10("bar")]))(function() {
+                                return bind27(appendTo2(chartGroup)(Rect.value)([x17(xPos), y15(yPos), width17(barWidth), height17(barHeight), fill10("#4a90e2"), strokeColor11("#357abd"), strokeWidth10(1), classed11("bar")]))(function() {
                                   return pure33(unit);
                                 });
                               };
-                              return bind26(traverse_7(addBar)(dataPoints))(function() {
+                              return bind27(traverse_7(addBar)(dataPoints))(function() {
                                 return pure33(unit);
                               });
                             });
@@ -24422,223 +24747,6 @@
     };
   };
 
-  // output/D3.Viz.Charts.Model/index.js
-  var sineWaveData = [{
-    x: 0,
-    y: 100
-  }, {
-    x: 5,
-    y: 125
-  }, {
-    x: 10,
-    y: 145
-  }, {
-    x: 15,
-    y: 150
-  }, {
-    x: 20,
-    y: 145
-  }, {
-    x: 25,
-    y: 125
-  }, {
-    x: 30,
-    y: 100
-  }, {
-    x: 35,
-    y: 75
-  }, {
-    x: 40,
-    y: 55
-  }, {
-    x: 45,
-    y: 50
-  }, {
-    x: 50,
-    y: 55
-  }, {
-    x: 55,
-    y: 75
-  }, {
-    x: 60,
-    y: 100
-  }];
-  var monthlySales = [{
-    x: 0,
-    y: 30
-  }, {
-    x: 1,
-    y: 45
-  }, {
-    x: 2,
-    y: 60
-  }, {
-    x: 3,
-    y: 55
-  }, {
-    x: 4,
-    y: 70
-  }, {
-    x: 5,
-    y: 65
-  }, {
-    x: 6,
-    y: 80
-  }, {
-    x: 7,
-    y: 75
-  }, {
-    x: 8,
-    y: 90
-  }, {
-    x: 9,
-    y: 85
-  }, {
-    x: 10,
-    y: 95
-  }, {
-    x: 11,
-    y: 100
-  }];
-  var anscombesQuartet = {
-    dataset1: [{
-      x: 10,
-      y: 8.04
-    }, {
-      x: 8,
-      y: 6.95
-    }, {
-      x: 13,
-      y: 7.58
-    }, {
-      x: 9,
-      y: 8.81
-    }, {
-      x: 11,
-      y: 8.33
-    }, {
-      x: 14,
-      y: 9.96
-    }, {
-      x: 6,
-      y: 7.24
-    }, {
-      x: 4,
-      y: 4.26
-    }, {
-      x: 12,
-      y: 10.84
-    }, {
-      x: 7,
-      y: 4.82
-    }, {
-      x: 5,
-      y: 5.68
-    }],
-    dataset2: [{
-      x: 10,
-      y: 9.14
-    }, {
-      x: 8,
-      y: 8.14
-    }, {
-      x: 13,
-      y: 8.74
-    }, {
-      x: 9,
-      y: 8.77
-    }, {
-      x: 11,
-      y: 9.26
-    }, {
-      x: 14,
-      y: 8.1
-    }, {
-      x: 6,
-      y: 6.13
-    }, {
-      x: 4,
-      y: 3.1
-    }, {
-      x: 12,
-      y: 9.13
-    }, {
-      x: 7,
-      y: 7.26
-    }, {
-      x: 5,
-      y: 4.74
-    }],
-    dataset3: [{
-      x: 10,
-      y: 7.46
-    }, {
-      x: 8,
-      y: 6.77
-    }, {
-      x: 13,
-      y: 12.74
-    }, {
-      x: 9,
-      y: 7.11
-    }, {
-      x: 11,
-      y: 7.81
-    }, {
-      x: 14,
-      y: 8.84
-    }, {
-      x: 6,
-      y: 6.08
-    }, {
-      x: 4,
-      y: 5.39
-    }, {
-      x: 12,
-      y: 8.15
-    }, {
-      x: 7,
-      y: 6.42
-    }, {
-      x: 5,
-      y: 5.73
-    }],
-    dataset4: [{
-      x: 8,
-      y: 6.58
-    }, {
-      x: 8,
-      y: 5.76
-    }, {
-      x: 8,
-      y: 7.71
-    }, {
-      x: 8,
-      y: 8.84
-    }, {
-      x: 8,
-      y: 8.47
-    }, {
-      x: 8,
-      y: 7.04
-    }, {
-      x: 8,
-      y: 5.25
-    }, {
-      x: 19,
-      y: 12.5
-    }, {
-      x: 8,
-      y: 5.56
-    }, {
-      x: 8,
-      y: 7.91
-    }, {
-      x: 8,
-      y: 6.89
-    }]
-  };
-
   // output/D3.Generators.Line/foreign.js
   function createLineGenerator(config) {
     return () => {
@@ -24653,14 +24761,14 @@
   var map44 = /* @__PURE__ */ map(functorArray);
   var minimum3 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var maximum3 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
-  var classed11 = /* @__PURE__ */ classed(toAttrString);
-  var width17 = /* @__PURE__ */ width8(toAttrNumber);
-  var height17 = /* @__PURE__ */ height8(toAttrNumber);
-  var show16 = /* @__PURE__ */ show(showNumber);
+  var classed13 = /* @__PURE__ */ classed(toAttrString);
+  var width18 = /* @__PURE__ */ width8(toAttrNumber);
+  var height18 = /* @__PURE__ */ height8(toAttrNumber);
+  var show17 = /* @__PURE__ */ show(showNumber);
   var d6 = /* @__PURE__ */ d2(toAttrString);
-  var fill10 = /* @__PURE__ */ fill(toAttrString);
-  var strokeColor11 = /* @__PURE__ */ strokeColor(toAttrString);
-  var strokeWidth10 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var fill11 = /* @__PURE__ */ fill(toAttrString);
+  var strokeColor12 = /* @__PURE__ */ strokeColor(toAttrString);
+  var strokeWidth11 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var innerWidth3 = function(dims) {
     return dims.width - dims.margin.left - dims.margin.right;
   };
@@ -24678,9 +24786,9 @@
     }
   };
   var draw12 = function(dictBind) {
-    var bind26 = bind(dictBind);
+    var bind27 = bind(dictBind);
     return function(dictMonadEffect) {
-      var liftEffect17 = liftEffect(dictMonadEffect);
+      var liftEffect18 = liftEffect(dictMonadEffect);
       var pure33 = pure(dictMonadEffect.Monad0().Applicative0());
       return function(dictSelectionM) {
         var attach2 = attach(dictSelectionM);
@@ -24699,31 +24807,31 @@
             var maxX = fromMaybe(100)(maximum3(xValues));
             var minY = fromMaybe(0)(minimum3(yValues));
             var maxY = fromMaybe(100)(maximum3(yValues));
-            return bind26(attach2(selector))(function(v) {
-              return bind26(appendTo2(v)(Svg.value)([viewBox(0)(0)(defaultDimensions2.width)(defaultDimensions2.height), classed11("line-chart"), width17(defaultDimensions2.width), height17(defaultDimensions2.height)]))(function(svg2) {
-                return bind26(appendTo2(svg2)(Group.value)([transform([function(v1) {
-                  return "translate(" + (show16(defaultDimensions2.margin.left) + ("," + (show16(defaultDimensions2.margin.top) + ")")));
+            return bind27(attach2(selector))(function(v) {
+              return bind27(appendTo2(v)(Svg.value)([viewBox(0)(0)(defaultDimensions2.width)(defaultDimensions2.height), classed13("line-chart"), width18(defaultDimensions2.width), height18(defaultDimensions2.height)]))(function(svg2) {
+                return bind27(appendTo2(svg2)(Group.value)([transform([function(v1) {
+                  return "translate(" + (show17(defaultDimensions2.margin.left) + ("," + (show17(defaultDimensions2.margin.top) + ")")));
                 }])]))(function(chartGroup) {
-                  return bind26(liftEffect17(createLinearScale({
+                  return bind27(liftEffect18(createLinearScale({
                     domain: [minX, maxX],
                     range: [0, iWidth]
                   })))(function(xScale) {
-                    return bind26(liftEffect17(createLinearScale({
+                    return bind27(liftEffect18(createLinearScale({
                       domain: [minY, maxY],
                       range: [iHeight, 0]
                     })))(function(yScale) {
-                      return bind26(appendTo2(chartGroup)(Group.value)([classed11("x-axis"), transform([function(v1) {
-                        return "translate(0," + (show16(iHeight) + ")");
+                      return bind27(appendTo2(chartGroup)(Group.value)([classed13("x-axis"), transform([function(v1) {
+                        return "translate(0," + (show17(iHeight) + ")");
                       }])]))(function(xAxisGroup) {
-                        return bind26(appendTo2(chartGroup)(Group.value)([classed11("y-axis")]))(function(yAxisGroup) {
-                          return bind26(liftEffect17(callAxis(xAxisGroup)(axisBottom2(xScale))))(function() {
-                            return bind26(liftEffect17(callAxis(yAxisGroup)(axisLeft2(yScale))))(function() {
-                              return bind26(liftEffect17(createLineGenerator({
+                        return bind27(appendTo2(chartGroup)(Group.value)([classed13("y-axis")]))(function(yAxisGroup) {
+                          return bind27(liftEffect18(callAxis(xAxisGroup)(axisBottom2(xScale))))(function() {
+                            return bind27(liftEffect18(callAxis(yAxisGroup)(axisLeft2(yScale))))(function() {
+                              return bind27(liftEffect18(createLineGenerator({
                                 xScale,
                                 yScale
                               })))(function(lineGen) {
                                 var pathData = generateLinePath(lineGen)(dataPoints);
-                                return bind26(appendTo2(chartGroup)(Path2.value)([d6(pathData), fill10("none"), strokeColor11("#4a90e2"), strokeWidth10(2), classed11("line")]))(function() {
+                                return bind27(appendTo2(chartGroup)(Path.value)([d6(pathData), fill11("none"), strokeColor12("#4a90e2"), strokeWidth11(2), classed13("line")]))(function() {
                                   return pure33(unit);
                                 });
                               });
@@ -24742,115 +24850,12 @@
     };
   };
 
-  // output/D3.Viz.ScatterPlot/index.js
-  var classed13 = /* @__PURE__ */ classed(toAttrString);
-  var width18 = /* @__PURE__ */ width8(toAttrNumber);
-  var height18 = /* @__PURE__ */ height8(toAttrNumber);
-  var show17 = /* @__PURE__ */ show(showNumber);
-  var x17 = /* @__PURE__ */ x(toAttrNumber);
-  var y15 = /* @__PURE__ */ y(toAttrNumber);
-  var text13 = /* @__PURE__ */ text6(toAttrString);
-  var textAnchor8 = /* @__PURE__ */ textAnchor(toAttrString);
-  var fontSize6 = /* @__PURE__ */ fontSize(toAttrNumber);
-  var cx3 = /* @__PURE__ */ cx(toAttrNumber);
-  var cy3 = /* @__PURE__ */ cy(toAttrNumber);
-  var radius7 = /* @__PURE__ */ radius(toAttrNumber);
-  var fill11 = /* @__PURE__ */ fill(toAttrString);
-  var strokeColor12 = /* @__PURE__ */ strokeColor(toAttrString);
-  var strokeWidth11 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var drawQuartet = function(dictBind) {
-    var bind26 = bind(dictBind);
-    return function(dictMonadEffect) {
-      var liftEffect17 = liftEffect(dictMonadEffect);
-      var Applicative0 = dictMonadEffect.Monad0().Applicative0();
-      var pure33 = pure(Applicative0);
-      var traverse_7 = traverse_(Applicative0)(foldableArray);
-      return function(dictSelectionM) {
-        var attach2 = attach(dictSelectionM);
-        var appendTo2 = appendTo(dictSelectionM);
-        return function(quartet) {
-          return function(selector) {
-            var plotWidth = (900 - 60 * 3) / 2;
-            var plotHeight = (700 - 60 * 3) / 2;
-            var margin = {
-              top: 30,
-              right: 20,
-              bottom: 40,
-              left: 50
-            };
-            var iWidth = plotWidth - margin.left - margin.right;
-            var iHeight = plotHeight - margin.top - margin.bottom;
-            var xDomain = [0, 20];
-            var yDomain = [0, 14];
-            return bind26(attach2(selector))(function(v) {
-              return bind26(appendTo2(v)(Svg.value)([viewBox(0)(0)(900)(700), classed13("scatter-quartet"), width18(900), height18(700)]))(function(svg2) {
-                var drawSubplot = function(title4) {
-                  return function(dataPoints) {
-                    return function(xOffset) {
-                      return function(yOffset) {
-                        return bind26(appendTo2(svg2)(Group.value)([classed13("subplot"), transform([function(v1) {
-                          return "translate(" + (show17(xOffset + margin.left) + ("," + (show17(yOffset + margin.top) + ")")));
-                        }])]))(function(subplotGroup) {
-                          return bind26(appendTo2(svg2)(Text2.value)([x17(xOffset + plotWidth / 2), y15(yOffset + 15), text13(title4), textAnchor8("middle"), fontSize6(16), classed13("subplot-title")]))(function() {
-                            return bind26(liftEffect17(createLinearScale({
-                              domain: xDomain,
-                              range: [0, iWidth]
-                            })))(function(xScale) {
-                              return bind26(liftEffect17(createLinearScale({
-                                domain: yDomain,
-                                range: [iHeight, 0]
-                              })))(function(yScale) {
-                                return bind26(appendTo2(subplotGroup)(Group.value)([classed13("x-axis"), transform([function(v1) {
-                                  return "translate(0," + (show17(iHeight) + ")");
-                                }])]))(function(xAxisGroup) {
-                                  return bind26(appendTo2(subplotGroup)(Group.value)([classed13("y-axis")]))(function(yAxisGroup) {
-                                    return bind26(liftEffect17(callAxis(xAxisGroup)(axisBottom2(xScale))))(function() {
-                                      return bind26(liftEffect17(callAxis(yAxisGroup)(axisLeft2(yScale))))(function() {
-                                        var addPoint = function(point) {
-                                          var xPos = applyScale(xScale)(point.x);
-                                          var yPos = applyScale(yScale)(point.y);
-                                          return bind26(appendTo2(subplotGroup)(Circle.value)([cx3(xPos), cy3(yPos), radius7(4), fill11("#e74c3c"), strokeColor12("#c0392b"), strokeWidth11(1.5), classed13("scatter-point")]))(function() {
-                                            return pure33(unit);
-                                          });
-                                        };
-                                        return bind26(traverse_7(addPoint)(dataPoints))(function() {
-                                          return pure33(unit);
-                                        });
-                                      });
-                                    });
-                                  });
-                                });
-                              });
-                            });
-                          });
-                        });
-                      };
-                    };
-                  };
-                };
-                return bind26(drawSubplot("Dataset I")(quartet.dataset1)(60)(60))(function() {
-                  return bind26(drawSubplot("Dataset II")(quartet.dataset2)(60 + plotWidth + 60)(60))(function() {
-                    return bind26(drawSubplot("Dataset III")(quartet.dataset3)(60)(60 + plotHeight + 60))(function() {
-                      return bind26(drawSubplot("Dataset IV")(quartet.dataset4)(60 + plotWidth + 60)(60 + plotHeight + 60))(function() {
-                        return pure33(unit);
-                      });
-                    });
-                  });
-                });
-              });
-            });
-          };
-        };
-      };
-    };
-  };
-
   // output/PSD3.SimpleCharts/index.js
-  var bind22 = /* @__PURE__ */ bind(bindHalogenM);
-  var liftEffect13 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  var bind23 = /* @__PURE__ */ bind(bindHalogenM);
+  var liftEffect14 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var draw13 = /* @__PURE__ */ draw12(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var draw14 = /* @__PURE__ */ draw11(bindD3M)(monadEffD3M)(d3TaglessD3M);
-  var drawQuartet2 = /* @__PURE__ */ drawQuartet(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var drawQuartet3 = /* @__PURE__ */ drawQuartet(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var pure29 = /* @__PURE__ */ pure(applicativeHalogenM);
   var type_25 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_9 = /* @__PURE__ */ slot_()({
@@ -24866,9 +24871,9 @@
     return Initialize11;
   })();
   var handleAction7 = function(v) {
-    return bind22(liftEffect13(eval_D3M(draw13(sineWaveData)("div.linechart-viz"))))(function() {
-      return bind22(liftEffect13(eval_D3M(draw14(monthlySales)("div.barchart-viz"))))(function() {
-        return bind22(liftEffect13(eval_D3M(drawQuartet2(anscombesQuartet)("div.quartet-viz"))))(function() {
+    return bind23(liftEffect14(eval_D3M(draw13(sineWaveData)("div.linechart-viz"))))(function() {
+      return bind23(liftEffect14(eval_D3M(draw14(monthlySales)("div.barchart-viz"))))(function() {
+        return bind23(liftEffect14(eval_D3M(drawQuartet3(anscombesQuartet)("div.quartet-viz"))))(function() {
           return pure29(unit);
         });
       });
@@ -24911,7 +24916,7 @@
   var exGeneralUpdatePattern = function(dictSelectionM) {
     var Monad0 = dictSelectionM.Monad0();
     var Bind1 = Monad0.Bind1();
-    var bind26 = bind(Bind1);
+    var bind27 = bind(Bind1);
     var attach2 = attach(dictSelectionM);
     var appendTo2 = appendTo(dictSelectionM);
     var pure33 = pure(Monad0.Applicative0());
@@ -24931,15 +24936,15 @@
       var enter = andThen2([classed14("enter"), fill13("green"), x18(xFromIndex2), y16(0), text14(function($24) {
         return singleton7(datumIsChar($24));
       }), fontSize7(96)])(to(transition2)([y16(200)]));
-      return bind26(attach2(selector))(function(root3) {
-        return bind26(appendTo2(root3)(Svg.value)([viewBox(0)(100)(800)(350), classed14("d3svg gup")]))(function(svg2) {
-          return bind26(appendTo2(svg2)(Group.value)([]))(function(letterGroup) {
+      return bind27(attach2(selector))(function(root3) {
+        return bind27(appendTo2(root3)(Svg.value)([viewBox(0)(100)(800)(350), classed14("d3svg gup")]))(function(svg2) {
+          return bind27(appendTo2(svg2)(Group.value)([]))(function(letterGroup) {
             return pure33(function(letters) {
-              return bind26(openSelection2(letterGroup)("text"))(function(enterSelection) {
-                return bind26(updateJoin2(enterSelection)(Text2.value)(letters)(keyFunction))(function(updateSelections) {
+              return bind27(openSelection2(letterGroup)("text"))(function(enterSelection) {
+                return bind27(updateJoin2(enterSelection)(Text2.value)(letters)(keyFunction))(function(updateSelections) {
                   return discard111(setAttributes2(updateSelections.exit)(exit))(function() {
                     return discard111(setAttributes2(updateSelections.update)(update3))(function() {
-                      return bind26(appendTo2(updateSelections.enter)(Text2.value)([]))(function(newlyEntered) {
+                      return bind27(appendTo2(updateSelections.enter)(Text2.value)([]))(function(newlyEntered) {
                         return discard111(setAttributes2(newlyEntered)(enter))(function() {
                           return pure33(newlyEntered);
                         });
@@ -24973,7 +24978,7 @@
   var drawThreeCircles = function(dictSelectionM) {
     var Monad0 = dictSelectionM.Monad0();
     var Bind1 = Monad0.Bind1();
-    var bind26 = bind(Bind1);
+    var bind27 = bind(Bind1);
     var attach2 = attach(dictSelectionM);
     var appendTo2 = appendTo(dictSelectionM);
     var simpleJoin2 = simpleJoin(dictSelectionM);
@@ -24982,10 +24987,10 @@
     var pure33 = pure(Monad0.Applicative0());
     return function(selector) {
       var circleAttributes = [fill14("green"), cx4(xFromIndex), cy4(50), radius8(20)];
-      return bind26(attach2(selector))(function(root3) {
-        return bind26(appendTo2(root3)(Svg.value)([viewBox(-10)(20)(120)(60), classed15("d3svg gup")]))(function(svg2) {
-          return bind26(appendTo2(svg2)(Group.value)([]))(function(circleGroup) {
-            return bind26(simpleJoin2(circleGroup)(Circle.value)([32, 57, 293])(keyIsID_))(function(circles) {
+      return bind27(attach2(selector))(function(root3) {
+        return bind27(appendTo2(root3)(Svg.value)([viewBox(-10)(20)(120)(60), classed15("d3svg gup")]))(function(svg2) {
+          return bind27(appendTo2(svg2)(Group.value)([]))(function(circleGroup) {
+            return bind27(simpleJoin2(circleGroup)(Circle.value)([32, 57, 293])(keyIsID_))(function(circles) {
               return discard111(setAttributes2(circles)(circleAttributes))(function() {
                 return pure33(circles);
               });
@@ -25011,7 +25016,7 @@
   var drawWithData = function(dictSelectionM) {
     var Monad0 = dictSelectionM.Monad0();
     var Bind1 = Monad0.Bind1();
-    var bind26 = bind(Bind1);
+    var bind27 = bind(Bind1);
     var attach2 = attach(dictSelectionM);
     var appendTo2 = appendTo(dictSelectionM);
     var simpleJoin2 = simpleJoin(dictSelectionM);
@@ -25021,10 +25026,10 @@
     return function(circleData) {
       return function(selector) {
         var circleAttributes = [strokeColor13(datum_2.color), strokeWidth12(3), fill14("none"), cx4(datum_2.x), cy1(datum_2.y), radius8(10)];
-        return bind26(attach2(selector))(function(root3) {
-          return bind26(appendTo2(root3)(Svg.value)([viewBox(-10)(-100)(320)(160), classed15("d3svg gup")]))(function(svg2) {
-            return bind26(appendTo2(svg2)(Group.value)([]))(function(circleGroup) {
-              return bind26(simpleJoin2(circleGroup)(Circle.value)(circleData)(keyIsID_))(function(circles) {
+        return bind27(attach2(selector))(function(root3) {
+          return bind27(appendTo2(root3)(Svg.value)([viewBox(-10)(-100)(320)(160), classed15("d3svg gup")]))(function(svg2) {
+            return bind27(appendTo2(svg2)(Group.value)([]))(function(circleGroup) {
+              return bind27(simpleJoin2(circleGroup)(Circle.value)(circleData)(keyIsID_))(function(circles) {
                 return discard111(setAttributes2(circles)(circleAttributes))(function() {
                   return pure33(circles);
                 });
@@ -25249,14 +25254,14 @@
   var sequence2 = /* @__PURE__ */ sequence(traversableArray)(applicativeEffect);
   var map46 = /* @__PURE__ */ map(functorArray);
   var bind110 = /* @__PURE__ */ bind(bindAff);
-  var liftEffect14 = /* @__PURE__ */ liftEffect(monadEffectAff);
+  var liftEffect15 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var discard20 = /* @__PURE__ */ discard(discardUnit);
   var discard110 = /* @__PURE__ */ discard20(bindAff);
   var exGeneralUpdatePattern2 = /* @__PURE__ */ exGeneralUpdatePattern(d3TaglessD3M);
   var applySecond2 = /* @__PURE__ */ applySecond(applyEffect);
-  var bind23 = /* @__PURE__ */ bind(bindHalogenM);
+  var bind24 = /* @__PURE__ */ bind(bindHalogenM);
   var monadEffectHalogenM2 = /* @__PURE__ */ monadEffectHalogenM(monadEffectAff);
-  var liftEffect15 = /* @__PURE__ */ liftEffect(monadEffectHalogenM2);
+  var liftEffect16 = /* @__PURE__ */ liftEffect(monadEffectHalogenM2);
   var drawThreeCircles2 = /* @__PURE__ */ drawThreeCircles(d3TaglessD3M);
   var liftAff4 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var forever2 = /* @__PURE__ */ forever(monadRecAff);
@@ -25265,7 +25270,7 @@
   var drawWithData2 = /* @__PURE__ */ drawWithData(d3TaglessD3M);
   var draw15 = /* @__PURE__ */ draw11(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var draw16 = /* @__PURE__ */ draw12(bindD3M)(monadEffD3M)(d3TaglessD3M);
-  var drawQuartet3 = /* @__PURE__ */ drawQuartet(bindD3M)(monadEffD3M)(d3TaglessD3M);
+  var drawQuartet4 = /* @__PURE__ */ drawQuartet(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var pure111 = /* @__PURE__ */ pure(applicativeHalogenM);
   var gets2 = /* @__PURE__ */ gets(monadStateHalogenM);
   var type_26 = /* @__PURE__ */ type_17(isPropButtonType);
@@ -25308,7 +25313,7 @@
         return catMaybes(choices);
       };
     })();
-    return bind110(liftEffect14(getLetters))(function(letters) {
+    return bind110(liftEffect15(getLetters))(function(letters) {
       return discard110(update3(letters))(function() {
         return delay(2300);
       });
@@ -25323,7 +25328,7 @@
     return discard20(Bind1)(log3(dictMonadEffect)("General Update Pattern example"))(function() {
       return bind32(liftEffect22(eval_D3M(exGeneralUpdatePattern2("div.gup-viz"))))(function(update3) {
         return pure210(function(letters) {
-          return liftEffect14(applySecond2(runD3M(update3(letters)))(pure30(unit)));
+          return liftEffect15(applySecond2(runD3M(update3(letters)))(pure30(unit)));
         });
       });
     });
@@ -25334,9 +25339,9 @@
   var lineChartCode = 'draw :: Array DataPoint -> Selector D3Selection_ -> m Unit\ndraw dataPoints selector = do\n  let dims = defaultDimensions\n\n  root <- attach selector\n  svg <- appendTo root Svg [ viewBox 0.0 0.0 dims.width dims.height, classed "line-chart" ]\n  chartGroup <- appendTo svg Group [\n      transform [ \\\\_ -> "translate(" <> show dims.margin.left <> "," <> show dims.margin.top <> ")" ]\n    ]\n\n  -- Create scales\n  xScale <- liftEffect $ createLinearScale { domain: [minX, maxX], range: [0.0, iWidth] }\n  yScale <- liftEffect $ createLinearScale { domain: [minY, maxY], range: [iHeight, 0.0] }\n\n  -- Add axes\n  xAxisGroup <- appendTo chartGroup Group [ classed "x-axis", transform [ \\\\_ -> "translate(0," <> show iHeight <> ")" ] ]\n  yAxisGroup <- appendTo chartGroup Group [ classed "y-axis" ]\n  _ <- liftEffect $ callAxis xAxisGroup (axisBottom xScale)\n  _ <- liftEffect $ callAxis yAxisGroup (axisLeft yScale)\n\n  -- Create line generator and add the line path\n  lineGen <- liftEffect $ createLineGenerator { xScale, yScale }\n  let pathData = generateLinePath lineGen dataPoints\n  _ <- appendTo chartGroup Path [ d pathData, fill "none", strokeColor "#4a90e2", strokeWidth 2.0, classed "line" ]\n  pure unit';
   var handleAction8 = function(v) {
     if (v instanceof Initialize9) {
-      return bind23(liftEffect15(eval_D3M(drawThreeCircles2("div.three-circles-viz"))))(function() {
-        return bind23(runGeneralUpdatePattern1)(function(updateFn) {
-          return bind23(liftAff4(forkAff(forever2(runUpdate(updateFn)))))(function(fiber) {
+      return bind24(liftEffect16(eval_D3M(drawThreeCircles2("div.three-circles-viz"))))(function() {
+        return bind24(runGeneralUpdatePattern1)(function(updateFn) {
+          return bind24(liftAff4(forkAff(forever2(runUpdate(updateFn)))))(function(fiber) {
             return discard24(modify_4(function(state3) {
               var $57 = {};
               for (var $58 in state3) {
@@ -25349,10 +25354,10 @@
               $57.gupFiber = new Just(fiber);
               return $57;
             }))(function() {
-              return bind23(liftEffect15(eval_D3M(drawWithData2([310, 474, 613, 726, 814, 877, 914, 926, 914, 877, 814, 726, 613, 474, 310])("div.parabola-viz"))))(function() {
-                return bind23(liftEffect15(eval_D3M(draw15(monthlySales)("div.barchart-viz"))))(function() {
-                  return bind23(liftEffect15(eval_D3M(draw16(sineWaveData)("div.linechart-viz"))))(function() {
-                    return bind23(liftEffect15(eval_D3M(drawQuartet3(anscombesQuartet)("div.quartet-viz"))))(function() {
+              return bind24(liftEffect16(eval_D3M(drawWithData2([310, 474, 613, 726, 814, 877, 914, 926, 914, 877, 814, 726, 613, 474, 310])("div.parabola-viz"))))(function() {
+                return bind24(liftEffect16(eval_D3M(draw15(monthlySales)("div.barchart-viz"))))(function() {
+                  return bind24(liftEffect16(eval_D3M(draw16(sineWaveData)("div.linechart-viz"))))(function() {
+                    return bind24(liftEffect16(eval_D3M(drawQuartet4(anscombesQuartet)("div.quartet-viz"))))(function() {
                       return pure111(unit);
                     });
                   });
@@ -25365,7 +25370,7 @@
     }
     ;
     if (v instanceof Finalize3) {
-      return bind23(gets2(function(v1) {
+      return bind24(gets2(function(v1) {
         return v1.gupFiber;
       }))(function(maybeFiber) {
         if (maybeFiber instanceof Nothing) {
@@ -25438,10 +25443,10 @@
     return function(hash2) {
       var pathParts = function(str) {
         var parts = fromFoldable110(map47(function($31) {
-          return Path.create(decoder($31));
+          return Path3.create(decoder($31));
         })(split("/")(str)));
         var v2 = unsnoc(parts);
-        if (v2 instanceof Just && (v2.value0.last instanceof Path && v2.value0.last.value0 === "")) {
+        if (v2 instanceof Just && (v2.value0.last instanceof Path3 && v2.value0.last.value0 === "")) {
           return v2.value0.init;
         }
         ;
@@ -25479,7 +25484,7 @@
   var hashchange = "hashchange";
 
   // output/Routing.Hash/index.js
-  var bind24 = /* @__PURE__ */ bind(bindEffect);
+  var bind25 = /* @__PURE__ */ bind(bindEffect);
   var map48 = /* @__PURE__ */ map(functorEffect);
   var bindFlipped10 = /* @__PURE__ */ bindFlipped(bindEffect);
   var join3 = /* @__PURE__ */ join(bindEffect);
@@ -25487,9 +25492,9 @@
   var pure31 = /* @__PURE__ */ pure(applicativeEffect);
   var voidRight3 = /* @__PURE__ */ voidRight(functorEffect);
   var setHash2 = function(h) {
-    return bind24(bind24(windowImpl)(location))(setHash(h));
+    return bind25(bind25(windowImpl)(location))(setHash(h));
   };
-  var getHash = /* @__PURE__ */ bind24(/* @__PURE__ */ bind24(windowImpl)(location))(/* @__PURE__ */ (function() {
+  var getHash = /* @__PURE__ */ bind25(/* @__PURE__ */ bind25(windowImpl)(location))(/* @__PURE__ */ (function() {
     var $16 = map48((function() {
       var $18 = fromMaybe("");
       var $19 = stripPrefix("#");
@@ -25539,9 +25544,9 @@
   })();
 
   // output/PSD3.Main/index.js
-  var bind25 = /* @__PURE__ */ bind(bindHalogenM);
+  var bind26 = /* @__PURE__ */ bind(bindHalogenM);
   var pure32 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var liftEffect16 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  var liftEffect17 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var modify_5 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var spy5 = /* @__PURE__ */ spy();
   var slot_11 = /* @__PURE__ */ slot_();
@@ -25620,7 +25625,7 @@
   })();
   var handleAction9 = function(v) {
     if (v instanceof Initialize10) {
-      return bind25(subscribe2(makeEmitter(function(push2) {
+      return bind26(subscribe2(makeEmitter(function(push2) {
         return matches2(routing)(function(v1) {
           return function(newRoute) {
             return push2(new RouteChanged(new Just(newRoute)));
@@ -25632,7 +25637,7 @@
     }
     ;
     if (v instanceof Navigate) {
-      return liftEffect16(setHash2(routeToPath(v.value0)));
+      return liftEffect17(setHash2(routeToPath(v.value0)));
     }
     ;
     if (v instanceof RouteChanged) {
