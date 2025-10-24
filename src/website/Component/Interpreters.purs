@@ -9,6 +9,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import PSD3.CodeExample (renderCodeExampleSimple)
 import PSD3.InterpretersDemo (generateD3Code)
 import PSD3.RHSNavigation as RHSNav
 import PSD3.Types (Route(..))
@@ -148,11 +149,9 @@ render state =
             [ HH.text "The Source Code" ]
         , HH.p_
             [ HH.text "Here's a simple example using our PureScript D3 DSL - the most basic example imaginable, three circles:" ]
-        , HH.pre
-            [ HP.classes [ HH.ClassName "code-block" ] ]
-            [ HH.code_
-                [ HH.text $ fromMaybe "-- Snippet not defined: TLCSimple.purs" state.exampleSnippet ]
-            ]
+        , renderCodeExampleSimple
+            (fromMaybe "-- Snippet not defined: TLCSimple.purs" state.exampleSnippet)
+            "TLCSimple"
         ]
 
     -- Selected interpreter output

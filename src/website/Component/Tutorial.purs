@@ -23,11 +23,11 @@ import Effect.Random (random)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.CodeExample (renderCodeExampleSimple)
 import PSD3.RHSNavigation as RHSNav
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.TOC (renderTOC)
 import PSD3.Types (Route(..))
-import PSD3.Utilities (syntaxHighlightedCode)
 import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))
 
@@ -121,9 +121,9 @@ render state =
                 [ HP.classes [ HH.ClassName "three-circles-viz" ] ]
                 []
             ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            (syntaxHighlightedCode $ fromMaybe "-- Snippet not defined: TLCSimple.purs" state.threeCirclesSnippet)
+        , renderCodeExampleSimple
+            (fromMaybe "-- Snippet not defined: TLCSimple.purs" state.threeCirclesSnippet)
+            "TLCSimple"
         ]
 
     -- Section 2: General Update Pattern
@@ -144,9 +144,9 @@ render state =
                 [ HP.classes [ HH.ClassName "gup-viz" ] ]
                 []
             ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            (syntaxHighlightedCode $ fromMaybe "-- Snippet not defined: GUP.purs" state.gupSnippet)
+        , renderCodeExampleSimple
+            (fromMaybe "-- Snippet not defined: GUP.purs" state.gupSnippet)
+            "GUP"
         ]
 
     -- Section 3: Parabola of Circles
@@ -165,9 +165,9 @@ render state =
                 [ HP.classes [ HH.ClassName "parabola-viz" ] ]
                 []
             ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            (syntaxHighlightedCode $ fromMaybe "-- Snippet not defined: TLCParabola.purs" state.parabolaSnippet)
+        , renderCodeExampleSimple
+            (fromMaybe "-- Snippet not defined: TLCParabola.purs" state.parabolaSnippet)
+            "TLCParabola"
         ]
 
     -- Section 4: Bar Chart
@@ -188,9 +188,9 @@ render state =
                 [ HP.classes [ HH.ClassName "barchart-viz" ] ]
                 []
             ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            (syntaxHighlightedCode $ fromMaybe "-- Snippet not defined: BarChartDraw.purs" state.barChartSnippet)
+        , renderCodeExampleSimple
+            (fromMaybe "-- Snippet not defined: BarChartDraw.purs" state.barChartSnippet)
+            "BarChartDraw"
         ]
 
     -- Section 5: Line Chart
@@ -211,9 +211,9 @@ render state =
                 [ HP.classes [ HH.ClassName "linechart-viz" ] ]
                 []
             ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            (syntaxHighlightedCode $ fromMaybe "-- Snippet not defined: LineChartDraw.purs" state.lineChartSnippet)
+        , renderCodeExampleSimple
+            (fromMaybe "-- Snippet not defined: LineChartDraw.purs" state.lineChartSnippet)
+            "LineChartDraw"
         ]
 
     -- Section 6: Anscombe's Quartet
@@ -234,9 +234,9 @@ render state =
                 [ HP.classes [ HH.ClassName "quartet-viz" ] ]
                 []
             ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            (syntaxHighlightedCode $ fromMaybe "-- Snippet not defined: ScatterPlotQuartet.purs" state.quartetSnippet)
+        , renderCodeExampleSimple
+            (fromMaybe "-- Snippet not defined: ScatterPlotQuartet.purs" state.quartetSnippet)
+            "ScatterPlotQuartet"
         ]
 
     -- Section 7: Next Steps with margin links
