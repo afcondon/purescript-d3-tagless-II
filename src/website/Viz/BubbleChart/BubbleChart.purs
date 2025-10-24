@@ -18,6 +18,7 @@ import Effect.Class (class MonadEffect)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- Load flare data from JSON file
+-- TODO pull this out into utility function loadJSONFromFile :: String -> Aff Json, then add error handling 
 loadFlareData :: Aff Json
 loadFlareData = do
   result <- AJAX.get ResponseFormat.json "./data/flare-2.json"

@@ -580,6 +580,37 @@ export function packSetSize_(layout) { return width => height => { layout.size([
 export function packSetPadding_(layout) { return padding => { layout.padding(padding); return layout } }
 export function runPackLayout_(layout) { return root => layout(root) }
 export function hNodeR_(node) { return node.r }
+
+// *****************************************************************************************************************
+// ************************** functions from d3js Treemap module         *****************************************
+// *****************************************************************************************************************
+export function treemapLayout_() { return d3.treemap() }
+export function treemapSetSize_(layout) { return width => height => { layout.size([width, height]); return layout } }
+export function treemapSetPadding_(layout) { return padding => { layout.padding(padding); return layout } }
+export function runTreemapLayout_(layout) { return root => layout(root) }
+// Accessor functions for treemap nodes
+export function hNodeX0_(node) { return node.x0 }
+export function hNodeY0_(node) { return node.y0 }
+export function hNodeX1_(node) { return node.x1 }
+export function hNodeY1_(node) { return node.y1 }
+
+// *****************************************************************************************************************
+// ************************** functions from d3js Partition (icicle/sunburst) module  ******************************
+// *****************************************************************************************************************
+export function partitionLayout_() { return d3.partition() }
+export function partitionSetSize_(layout) { return width => height => { layout.size([width, height]); return layout } }
+export function partitionSetPadding_(layout) { return padding => { layout.padding(padding); return layout } }
+export function runPartitionLayout_(layout) { return root => layout(root) }
+export function treeSortForPartition_(root) {
+  return root
+    .sum(function (d) {
+      return d.value
+    })
+    .sort(function (a, b) {
+      return b.height - a.height || b.value - a.value
+    })
+}
+
 // *****************************************************************************************************************
 // ************************** functions from d3js zoom module         *****************************************
 // *****************************************************************************************************************

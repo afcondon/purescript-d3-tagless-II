@@ -2,6 +2,13 @@ module PSD3.Hierarchies where
 
 import Prelude
 
+import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
+import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
+import D3.Viz.Hierarchies (drawCirclePacking, drawIcicle, drawTreemap)
+import D3.Viz.Tree.Configure as Tree
+import D3Tagless.Instance.Selection (eval_D3M)
+import D3Tagless.Utility (removeExistingSVG)
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Halogen as H
@@ -14,33 +21,49 @@ import Type.Proxy (Proxy(..))
 
 -- | Hierarchies page state
 type State = {
-  currentLayout :: HierarchyLayout
+  currentLayout :: HierarchyLayout,
+  tree :: Maybe TreeModel
 }
 
 -- | Available hierarchy layouts
 data HierarchyLayout
-  = HorizontalTree
-  | VerticalTree
-  | RadialTree
+  -- Node-Link Diagrams
+  = HorizontalTidy
+  | HorizontalDendrogram
+  | VerticalTidy
+  | VerticalDendrogram
+  | RadialTidy
+  | RadialDendrogram
+  -- Adjacency Diagrams
+  | Icicle
+  -- Enclosure Diagrams
   | CirclePacking
   | Treemap
 
 derive instance eqHierarchyLayout :: Eq HierarchyLayout
 
 instance showHierarchyLayout :: Show HierarchyLayout where
-  show HorizontalTree = "Horizontal Tree"
-  show VerticalTree = "Vertical Tree"
-  show RadialTree = "Radial Tree"
+  show HorizontalTidy = "Horizontal Tidy Tree"
+  show HorizontalDendrogram = "Horizontal Dendrogram"
+  show VerticalTidy = "Vertical Tidy Tree"
+  show VerticalDendrogram = "Vertical Dendrogram"
+  show RadialTidy = "Radial Tidy Tree"
+  show RadialDendrogram = "Radial Dendrogram"
+  show Icicle = "Icicle"
   show CirclePacking = "Circle Packing"
   show Treemap = "Treemap"
 
 layoutDescription :: HierarchyLayout -> String
 layoutDescription = case _ of
-  HorizontalTree -> "Classic left-to-right tree layout showing parent-child relationships. Root on the left, leaves on the right."
-  VerticalTree -> "Top-down tree layout with root at the top. Common in organizational charts and file system visualizations."
-  RadialTree -> "Circular tree layout emanating from center. Space-efficient and visually striking for large hierarchies."
-  CirclePacking -> "Nested circles where size represents values. Each circle contains its children, creating an intuitive part-whole relationship."
-  Treemap -> "Space-filling rectangular layout. Area of each rectangle is proportional to its value, excellent for showing proportions."
+  HorizontalTidy -> "Node-link diagram: Compact tidy tree with left-to-right orientation. Root on the left, efficiently uses space."
+  HorizontalDendrogram -> "Node-link diagram: Horizontal dendrogram with all leaves aligned at the same level on the right."
+  VerticalTidy -> "Node-link diagram: Compact tidy tree with top-down orientation. Common in organizational charts."
+  VerticalDendrogram -> "Node-link diagram: Vertical dendrogram with all leaves aligned at the same level at the bottom."
+  RadialTidy -> "Node-link diagram: Compact tidy tree in polar coordinates, emanating from center. Space-efficient for large hierarchies."
+  RadialDendrogram -> "Node-link diagram: Radial dendrogram with all leaves at equal distance from center."
+  Icicle -> "Adjacency diagram: Rectangular subdivisions showing hierarchy through relative placement. Area encodes quantitative values."
+  CirclePacking -> "Enclosure diagram: Tightly nested circles showing hierarchy through containment. Area encodes values, readily shows topology."
+  Treemap -> "Enclosure diagram: Space-efficient rectangular subdivisions. Area is proportional to value, shows hierarchy through nesting."
 
 -- | Hierarchies page actions
 data Action
@@ -55,7 +78,7 @@ _rhsNav = Proxy :: Proxy "rhsNav"
 -- | Hierarchies page component
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
-  { initialState: \_ -> { currentLayout: HorizontalTree }
+  { initialState: \_ -> { currentLayout: HorizontalTidy, tree: Nothing }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -94,19 +117,32 @@ render state =
                     [ HP.classes [ HH.ClassName "control-panel__section" ] ]
                     [ HH.h4
                         [ HP.classes [ HH.ClassName "control-panel__section-title" ] ]
-                        [ HH.text "Tree Layouts" ]
+                        [ HH.text "Node-Link Diagrams" ]
                     , HH.div
                         [ HP.classes [ HH.ClassName "control-panel__options" ] ]
-                        [ renderLayoutOption HorizontalTree "Horizontal" state.currentLayout
-                        , renderLayoutOption VerticalTree "Vertical" state.currentLayout
-                        , renderLayoutOption RadialTree "Radial" state.currentLayout
+                        [ renderLayoutOption HorizontalTidy "H-Tidy" state.currentLayout
+                        , renderLayoutOption HorizontalDendrogram "H-Dendro" state.currentLayout
+                        , renderLayoutOption VerticalTidy "V-Tidy" state.currentLayout
+                        , renderLayoutOption VerticalDendrogram "V-Dendro" state.currentLayout
+                        , renderLayoutOption RadialTidy "R-Tidy" state.currentLayout
+                        , renderLayoutOption RadialDendrogram "R-Dendro" state.currentLayout
                         ]
                     ]
                 , HH.div
                     [ HP.classes [ HH.ClassName "control-panel__section" ] ]
                     [ HH.h4
                         [ HP.classes [ HH.ClassName "control-panel__section-title" ] ]
-                        [ HH.text "Space-Filling" ]
+                        [ HH.text "Adjacency Diagrams" ]
+                    , HH.div
+                        [ HP.classes [ HH.ClassName "control-panel__options" ] ]
+                        [ renderLayoutOption Icicle "Icicle" state.currentLayout
+                        ]
+                    ]
+                , HH.div
+                    [ HP.classes [ HH.ClassName "control-panel__section" ] ]
+                    [ HH.h4
+                        [ HP.classes [ HH.ClassName "control-panel__section-title" ] ]
+                        [ HH.text "Enclosure Diagrams" ]
                     , HH.div
                         [ HP.classes [ HH.ClassName "control-panel__options" ] ]
                         [ renderLayoutOption CirclePacking "Circle Pack" state.currentLayout
@@ -192,18 +228,71 @@ renderLayoutOption layout label currentLayout =
     ]
     [ HH.text label ]
 
--- | Placeholder for each layout (to be implemented)
+-- | Container for D3 visualization (D3 will attach to this)
 renderLayoutPlaceholder :: forall w i. HierarchyLayout -> HH.HTML w i
-renderLayoutPlaceholder layout =
-  HH.div
-    [ HP.classes [ HH.ClassName "layout-placeholder" ] ]
-    [ HH.text $ "Placeholder for " <> show layout <> " layout"
-    , HH.p_ [ HH.text "Visualization will be implemented here" ]
-    ]
+renderLayoutPlaceholder _ =
+  HH.div_ []  -- Empty div for D3 to populate
 
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
-  Initialize -> pure unit
+  Initialize -> do
+    -- Clear any existing viz
+    _ <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.hierarchies-viz"
 
-  SelectLayout layout ->
+    -- Load Flare data
+    treeJSON <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+
+    -- Draw initial visualization
+    case treeJSON of
+      (Left err) -> pure unit
+      (Right (json :: TreeJson_)) -> do
+        model <- H.liftAff $ makeModel TidyTree Horizontal json
+        _     <- H.liftAff $ drawLayoutViz HorizontalTidy model
+        H.modify_ (\st -> st { tree = Just model } )
+        pure unit
+
+  SelectLayout layout -> do
+    -- Clear existing viz
+    _ <- H.liftEffect $ eval_D3M $ removeExistingSVG "div.hierarchies-viz"
+
+    -- Update state
     H.modify_ _ { currentLayout = layout }
+
+    -- Redraw visualization with new layout
+    state <- H.get
+    case state.tree of
+      Nothing -> pure unit
+      (Just tree) -> do
+        -- Redraw with new layout
+        _ <- H.liftAff $ drawLayoutViz layout tree
+        pure unit
+
+-- | Helper to call the appropriate draw function based on layout
+drawLayoutViz :: HierarchyLayout -> TreeModel -> Aff Unit
+drawLayoutViz layout model =
+  let selector = "div.hierarchies-viz"
+  in case layout of
+    -- Node-Link Diagrams
+    HorizontalTidy -> do
+      let updated = model { treeLayout = Horizontal, treeType = TidyTree }
+      Tree.drawTree updated selector
+    HorizontalDendrogram -> do
+      let updated = model { treeLayout = Horizontal, treeType = Dendrogram }
+      Tree.drawTree updated selector
+    VerticalTidy -> do
+      let updated = model { treeLayout = Vertical, treeType = TidyTree }
+      Tree.drawTree updated selector
+    VerticalDendrogram -> do
+      let updated = model { treeLayout = Vertical, treeType = Dendrogram }
+      Tree.drawTree updated selector
+    RadialTidy -> do
+      let updated = model { treeLayout = Radial, treeType = TidyTree }
+      Tree.drawTree updated selector
+    RadialDendrogram -> do
+      let updated = model { treeLayout = Radial, treeType = Dendrogram }
+      Tree.drawTree updated selector
+    -- Adjacency Diagrams
+    Icicle -> drawIcicle model.json selector
+    -- Enclosure Diagrams
+    CirclePacking -> drawCirclePacking model.json selector
+    Treemap -> drawTreemap model.json selector

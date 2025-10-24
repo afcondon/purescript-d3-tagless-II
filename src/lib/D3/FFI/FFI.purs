@@ -325,3 +325,30 @@ foreign import packLayout_      :: Unit -> PackLayout_
 foreign import packSetSize_     :: PackLayout_ -> Number -> Number -> PackLayout_
 foreign import packSetPadding_  :: PackLayout_ -> Number -> PackLayout_
 foreign import runPackLayout_   :: forall r. PackLayout_ -> D3_TreeNode r -> D3_TreeNode r
+
+-- | *********************************************************************************************************************
+-- | ***************************   FFI signatures for D3js Treemap module  *********************************************
+-- | *********************************************************************************************************************
+foreign import data TreemapLayout_ :: Type
+
+foreign import treemapLayout_      :: Unit -> TreemapLayout_
+foreign import treemapSetSize_     :: TreemapLayout_ -> Number -> Number -> TreemapLayout_
+foreign import treemapSetPadding_  :: TreemapLayout_ -> Number -> TreemapLayout_
+foreign import runTreemapLayout_   :: forall r. TreemapLayout_ -> D3_TreeNode r -> D3_TreeNode r
+
+-- Accessor functions for treemap node bounds
+foreign import hNodeX0_ :: forall r. D3_TreeNode r -> Number
+foreign import hNodeY0_ :: forall r. D3_TreeNode r -> Number
+foreign import hNodeX1_ :: forall r. D3_TreeNode r -> Number
+foreign import hNodeY1_ :: forall r. D3_TreeNode r -> Number
+
+-- | *********************************************************************************************************************
+-- | ***************************   FFI signatures for D3js Partition (icicle/sunburst) module  **************************
+-- | *********************************************************************************************************************
+foreign import data PartitionLayout_ :: Type
+
+foreign import partitionLayout_      :: Unit -> PartitionLayout_
+foreign import partitionSetSize_     :: PartitionLayout_ -> Number -> Number -> PartitionLayout_
+foreign import partitionSetPadding_  :: PartitionLayout_ -> Number -> PartitionLayout_
+foreign import runPartitionLayout_   :: forall r. PartitionLayout_ -> D3_TreeNode r -> D3_TreeNode r
+foreign import treeSortForPartition_ :: forall d. D3_TreeNode d -> D3_TreeNode d
