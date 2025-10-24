@@ -8,12 +8,12 @@
 
 code[class*="language-"],
 pre[class*="language-"] {
-  color: #333333; /* Dark text for readability */
+  color: #1a1a1a; /* Very dark text for high contrast */
   background: none;
   font-family: 'Courier New', 'Courier', Monaco, monospace;
-  font-size: 0.5625rem; /* 9px - editorial small size */
-  line-height: 1.8;
-  letter-spacing: 0.0625rem; /* 1px */
+  font-size: 0.6875rem; /* 11px - slightly larger for better readability */
+  line-height: 1.7;
+  letter-spacing: 0.03rem;
   text-align: left;
   white-space: pre;
   word-spacing: normal;
@@ -44,21 +44,21 @@ pre[class*="language-"] {
    TOKEN COLORS - Editorial Palette
    ======================================== */
 
-/* Comments - muted gray */
+/* Comments - darker gray for better contrast */
 .token.comment,
 .token.prolog,
 .token.doctype,
 .token.cdata {
-  color: #999999;
+  color: #777777;
   font-style: italic;
 }
 
-/* Punctuation - medium gray */
+/* Punctuation - darker gray */
 .token.punctuation {
-  color: #666666;
+  color: #444444;
 }
 
-/* Property, tag, boolean, number, constant - teal */
+/* Property, tag, boolean, number, constant - darker teal */
 .token.property,
 .token.tag,
 .token.boolean,
@@ -66,49 +66,49 @@ pre[class*="language-"] {
 .token.constant,
 .token.symbol,
 .token.deleted {
-  color: #5A8A8A; /* var(--color-teal) */
+  color: #3d7070; /* Darker, more saturated teal */
 }
 
-/* Selector, attr-name, string, char, builtin, inserted - coral */
+/* Selector, attr-name, string, char, builtin, inserted - darker coral */
 .token.selector,
 .token.attr-name,
 .token.string,
 .token.char,
 .token.builtin,
 .token.inserted {
-  color: #D97560; /* var(--color-coral) */
+  color: #c55a45; /* Darker coral for better contrast */
 }
 
-/* Operator, entity, url - dark text */
+/* Operator, entity, url - very dark text */
 .token.operator,
 .token.entity,
 .token.url,
 .language-css .token.string,
 .style .token.string {
-  color: #333333;
+  color: #1a1a1a;
   background: transparent;
 }
 
-/* Atrule, attr-value, keyword - red accent */
+/* Atrule, attr-value, keyword - darker red accent */
 .token.atrule,
 .token.attr-value,
 .token.keyword {
-  color: #E63946; /* var(--color-red-accent) */
+  color: #d32f3d; /* Darker red for higher contrast */
   font-weight: bold;
 }
 
-/* Function, class-name - darker teal/blue-gray */
+/* Function, class-name - much darker teal/blue-gray */
 .token.function,
 .token.class-name {
-  color: #4A6B6B;
+  color: #2d5050;
   font-weight: bold;
 }
 
-/* Regex, important, variable - peach */
+/* Regex, important, variable - darker orange/brown */
 .token.regex,
 .token.important,
 .token.variable {
-  color: #E8B8A0; /* var(--color-peach) */
+  color: #b87d5a; /* Darker, more muted for contrast */
 }
 
 .token.important,
@@ -211,17 +211,17 @@ pre[class*="language-"] ::selection {
 /* Type signatures - emphasize with darker color */
 .language-haskell .token.operator.double-colon,
 .language-haskell .token.class-name {
-  color: #4A6B6B;
+  color: #2d5050;
   font-weight: bold;
 }
 
 /* Data constructors */
 .language-haskell .token.constant {
-  color: #5A8A8A;
+  color: #3d7070;
   font-weight: normal;
 }
 
 /* Module names */
 .language-haskell .token.namespace {
-  color: #666666;
+  color: #444444;
 }

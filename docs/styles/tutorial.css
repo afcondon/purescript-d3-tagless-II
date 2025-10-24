@@ -8,10 +8,12 @@
 }
 
 /* TOC Floating Panel - Left side */
+/* Positioned relative to center column (52rem wide) */
 .toc-panel {
   position: fixed;
   top: 2rem;
-  left: 2rem;
+  /* Position to left of center column: 50% - half column width - panel width - gap */
+  left: calc(50% - 26rem - 360px - 2rem);
   width: 360px;
   max-height: calc(100vh - 4rem);
   display: flex;
@@ -123,11 +125,94 @@
   color: var(--color-gray-medium);
 }
 
-/* Navigation Panel (RHS) - using same styles as About page */
+/* Control Panel - Alternative to TOC for interactive pages */
+/* Unlike TOC which has bookmark on the side, control panel is just the main box */
+.control-panel.toc-panel {
+  /* Control panel doesn't use the bookmark/main layout */
+  display: block;
+}
+
+.control-panel__main {
+  width: 100%;
+}
+
+.control-panel__icon {
+  width: 50%; /* Half the panel width */
+  max-width: 180px;
+  height: auto;
+  margin: 1rem 0 1rem 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.control-panel__content {
+  padding: 1rem;
+}
+
+.control-panel__section {
+  margin-bottom: 1.5rem;
+}
+
+.control-panel__section:last-child {
+  margin-bottom: 0;
+}
+
+.control-panel__section-title {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray-medium);
+  margin: 0 0 0.75rem 0;
+}
+
+.control-panel__options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-panel__option {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  background-color: transparent;
+  border: 1px solid var(--color-gray-medium);
+  border-left: 3px solid transparent;
+  color: var(--color-gray-darker);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.control-panel__option:hover {
+  background-color: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+}
+
+.control-panel__option--active {
+  background-color: var(--color-beige-base);
+  border-left-color: var(--color-red-accent);
+  font-weight: bold;
+  color: var(--color-gray-darker);
+}
+
+.control-panel__current {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-gray-light);
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-gray-darker);
+}
+
+/* Navigation Panel (RHS) */
+/* Positioned relative to center column (52rem wide) */
 .tutorial-page__nav-panel {
   position: fixed;
   top: 2rem;
-  right: 2rem;
+  /* Position to right of center column: 50% - half column width - panel width - gap */
+  right: calc(50% - 26rem - 240px - 2rem);
   width: 240px;
   background-color: var(--color-beige-light);
   border: 2px solid var(--color-gray-medium);
@@ -375,14 +460,65 @@
 .tutorial-viz-container .barchart-viz,
 .tutorial-viz-container .linechart-viz,
 .tutorial-viz-container .quartet-viz {
-  min-height: 150px;
-  max-height: 200px;
   width: 100%;
+  /* Let SVG determine height naturally based on viewBox aspect ratio */
 }
 
+/* Make SVG responsive - scales to fit container while maintaining aspect ratio */
 .tutorial-viz-container svg {
   display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
   margin: 0 auto;
+}
+
+/* Specific sizing for small examples to keep them readable */
+.tutorial-viz-container .three-circles-viz svg,
+.tutorial-viz-container .parabola-viz svg {
+  max-width: 600px; /* Keep small examples from getting too large */
+  min-height: 100px; /* Ensure minimum readable size */
+}
+
+/* GUP needs more vertical space for animation */
+.tutorial-viz-container .gup-viz svg {
+  max-width: 600px;
+  min-height: 200px;
+}
+
+/* Chart examples can be larger */
+.tutorial-viz-container .barchart-viz svg,
+.tutorial-viz-container .linechart-viz svg {
+  max-width: 800px;
+}
+
+/* Quartet needs full width for side-by-side charts */
+.tutorial-viz-container .quartet-viz svg {
+  max-width: 100%;
+  min-height: 300px;
+}
+
+/* Hierarchies visualization - full width for tree layouts */
+.tutorial-viz-container .hierarchies-viz {
+  width: 100%;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tutorial-viz-container .hierarchies-viz svg {
+  max-width: 100%;
+  min-height: 400px;
+}
+
+/* Layout placeholder styling */
+.layout-placeholder {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-gray-medium);
+  text-align: center;
+  padding: 3rem;
 }
 
 /* Code blocks in tutorial - use existing Prism editorial theme */
@@ -392,10 +528,25 @@
 
 .tutorial-code-block pre {
   margin: 0;
+  overflow-x: auto; /* Allow horizontal scroll for long lines */
 }
 
 .tutorial-code-block code {
-  font-size: 0.8125rem;
+  /* Font size defined in prism-editorial.css (0.6875rem / 11px) */
+  line-height: 1.7;
+  white-space: pre; /* Preserve formatting, don't wrap */
+}
+
+/* Ensure Prism styles apply correctly */
+.tutorial-code-block pre[class*="language-"] {
+  /* Font size defined in prism-editorial.css */
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.tutorial-code-block code[class*="language-"] {
+  /* Font size defined in prism-editorial.css */
+  white-space: pre;
 }
 
 /* Margin Notes */
@@ -438,9 +589,23 @@
 }
 
 /* Responsive */
+/* On narrower screens, fall back to edge-based positioning */
+@media (max-width: 1600px) {
+  .toc-panel {
+    /* Switch to edge positioning when viewport is too narrow */
+    left: 2rem;
+  }
+
+  .tutorial-page__nav-panel {
+    /* Switch to edge positioning when viewport is too narrow */
+    right: 2rem;
+  }
+}
+
 @media (max-width: 1400px) {
   .toc-panel {
     width: 320px;
+    left: 1.5rem;
   }
 
   .toc-panel__bookmark-pin {
@@ -449,7 +614,7 @@
 
   .tutorial-page__nav-panel {
     width: 200px;
-    right: 1rem;
+    right: 1.5rem;
   }
 
   .tutorial-section {
@@ -500,6 +665,27 @@
 
   .tutorial-viz-container {
     padding: 1rem;
+  }
+
+  /* Reduce code font size slightly on mobile */
+  .tutorial-code-block code,
+  .tutorial-code-block pre[class*="language-"],
+  .tutorial-code-block code[class*="language-"] {
+    font-size: 0.625rem; /* 10px on mobile */
+  }
+
+  /* Adjust min heights for mobile */
+  .tutorial-viz-container .three-circles-viz svg,
+  .tutorial-viz-container .parabola-viz svg {
+    min-height: 80px;
+  }
+
+  .tutorial-viz-container .gup-viz svg {
+    min-height: 150px;
+  }
+
+  .tutorial-viz-container .quartet-viz svg {
+    min-height: 200px;
   }
 
   /* Hide TOC and Nav panel on mobile */

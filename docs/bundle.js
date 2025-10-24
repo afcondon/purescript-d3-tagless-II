@@ -288,11 +288,11 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq5) {
+    return function(eq6) {
       return function(gt) {
         return function(x16) {
           return function(y15) {
-            return x16 < y15 ? lt : x16 === y15 ? eq5 : gt;
+            return x16 < y15 ? lt : x16 === y15 ? eq6 : gt;
           };
         };
       };
@@ -734,12 +734,12 @@
     return dict.append;
   };
   var semigroupFn = function(dictSemigroup) {
-    var append16 = append(dictSemigroup);
+    var append17 = append(dictSemigroup);
     return {
       append: function(f) {
         return function(g) {
           return function(x16) {
-            return append16(f(x16))(g(x16));
+            return append17(f(x16))(g(x16));
           };
         };
       }
@@ -803,13 +803,13 @@
     return v.value0;
   };
   var eqTuple = function(dictEq) {
-    var eq5 = eq(dictEq);
+    var eq6 = eq(dictEq);
     return function(dictEq1) {
       var eq13 = eq(dictEq1);
       return {
         eq: function(x16) {
           return function(y15) {
-            return eq5(x16.value0)(y15.value0) && eq13(x16.value1)(y15.value1);
+            return eq6(x16.value0)(y15.value0) && eq13(x16.value1)(y15.value1);
           };
         }
       };
@@ -2505,7 +2505,7 @@
     };
   };
   var altExceptT = function(dictSemigroup) {
-    var append16 = append(dictSemigroup);
+    var append17 = append(dictSemigroup);
     return function(dictMonad) {
       var Bind1 = dictMonad.Bind1();
       var bind24 = bind(Bind1);
@@ -2526,7 +2526,7 @@
                   }
                   ;
                   if (rn instanceof Left) {
-                    return pure32(new Left(append16(rm.value0)(rn.value0)));
+                    return pure32(new Left(append17(rm.value0)(rn.value0)));
                   }
                   ;
                   throw new Error("Failed pattern match at Control.Monad.Except.Trans (line 86, column 9 - line 88, column 49): " + [rn.constructor.name]);
@@ -2745,7 +2745,7 @@
   var intercalate2 = function(dictFoldable) {
     var foldl22 = foldl(dictFoldable);
     return function(dictMonoid) {
-      var append16 = append(dictMonoid.Semigroup0());
+      var append17 = append(dictMonoid.Semigroup0());
       var mempty2 = mempty(dictMonoid);
       return function(sep) {
         return function(xs) {
@@ -2760,7 +2760,7 @@
               ;
               return {
                 init: false,
-                acc: append16(v.acc)(append16(sep)(v1))
+                acc: append17(v.acc)(append17(sep)(v1))
               };
             };
           };
@@ -2941,12 +2941,12 @@
   var foldMapDefaultR = function(dictFoldable) {
     var foldr22 = foldr(dictFoldable);
     return function(dictMonoid) {
-      var append16 = append(dictMonoid.Semigroup0());
+      var append17 = append(dictMonoid.Semigroup0());
       var mempty2 = mempty(dictMonoid);
       return function(f) {
         return foldr22(function(x16) {
           return function(acc) {
-            return append16(f(x16))(acc);
+            return append17(f(x16))(acc);
           };
         })(mempty2);
       };
@@ -3970,13 +3970,13 @@
   var foldMapWithIndexDefaultR = function(dictFoldableWithIndex) {
     var foldrWithIndex1 = foldrWithIndex(dictFoldableWithIndex);
     return function(dictMonoid) {
-      var append16 = append(dictMonoid.Semigroup0());
+      var append17 = append(dictMonoid.Semigroup0());
       var mempty2 = mempty(dictMonoid);
       return function(f) {
         return foldrWithIndex1(function(i2) {
           return function(x16) {
             return function(acc) {
-              return append16(f(i2)(x16))(acc);
+              return append17(f(i2)(x16))(acc);
             };
           };
         })(mempty2);
@@ -14259,10 +14259,10 @@
     return new Tuple(toNumber(w), toNumber(h));
   };
   var equalSnd = function(dictEq) {
-    var eq5 = eq(dictEq);
+    var eq6 = eq(dictEq);
     return function(a2) {
       return function(b2) {
-        return eq5(snd(a2))(snd(b2));
+        return eq6(snd(a2))(snd(b2));
       };
     };
   };
@@ -18078,6 +18078,8 @@
   // output/PSD3.Hierarchies/index.js
   var pure27 = /* @__PURE__ */ pure(applicativeHalogenM);
   var modify_3 = /* @__PURE__ */ modify_(monadStateHalogenM);
+  var append16 = /* @__PURE__ */ append(semigroupArray);
+  var type_23 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_6 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "rhsNav";
@@ -18125,15 +18127,15 @@
     Initialize11.value = new Initialize11();
     return Initialize11;
   })();
-  var SwitchLayout = /* @__PURE__ */ (function() {
-    function SwitchLayout2(value0) {
+  var SelectLayout = /* @__PURE__ */ (function() {
+    function SelectLayout2(value0) {
       this.value0 = value0;
     }
     ;
-    SwitchLayout2.create = function(value0) {
-      return new SwitchLayout2(value0);
+    SelectLayout2.create = function(value0) {
+      return new SelectLayout2(value0);
     };
-    return SwitchLayout2;
+    return SelectLayout2;
   })();
   var showHierarchyLayout = {
     show: function(v) {
@@ -18157,40 +18159,105 @@
         return "Treemap";
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Hierarchies (line 31, column 1 - line 36, column 27): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Hierarchies (line 30, column 1 - line 35, column 27): " + [v.constructor.name]);
     }
   };
   var show11 = /* @__PURE__ */ show(showHierarchyLayout);
   var renderLayoutPlaceholder = function(layout) {
     return div2([classes(["layout-placeholder"])])([text5("Placeholder for " + (show11(layout) + " layout")), p_([text5("Visualization will be implemented here")])]);
   };
+  var layoutDescription = function(v) {
+    if (v instanceof HorizontalTree) {
+      return "Classic left-to-right tree layout showing parent-child relationships. Root on the left, leaves on the right.";
+    }
+    ;
+    if (v instanceof VerticalTree) {
+      return "Top-down tree layout with root at the top. Common in organizational charts and file system visualizations.";
+    }
+    ;
+    if (v instanceof RadialTree) {
+      return "Circular tree layout emanating from center. Space-efficient and visually striking for large hierarchies.";
+    }
+    ;
+    if (v instanceof CirclePacking) {
+      return "Nested circles where size represents values. Each circle contains its children, creating an intuitive part-whole relationship.";
+    }
+    ;
+    if (v instanceof Treemap) {
+      return "Space-filling rectangular layout. Area of each rectangle is proportional to its value, excellent for showing proportions.";
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Hierarchies (line 38, column 21 - line 43, column 137): " + [v.constructor.name]);
+  };
   var handleAction5 = function(v) {
     if (v instanceof Initialize6) {
       return pure27(unit);
     }
     ;
-    if (v instanceof SwitchLayout) {
+    if (v instanceof SelectLayout) {
       return modify_3(function(v1) {
-        var $17 = {};
-        for (var $18 in v1) {
-          if ({}.hasOwnProperty.call(v1, $18)) {
-            $17[$18] = v1[$18];
+        var $22 = {};
+        for (var $23 in v1) {
+          if ({}.hasOwnProperty.call(v1, $23)) {
+            $22[$23] = v1[$23];
           }
           ;
         }
         ;
-        $17.currentLayout = v.value0;
-        return $17;
+        $22.currentLayout = v.value0;
+        return $22;
       });
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Hierarchies (line 120, column 16 - line 124, column 43): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Hierarchies (line 205, column 16 - line 209, column 43): " + [v.constructor.name]);
+  };
+  var eqHierarchyLayout = {
+    eq: function(x16) {
+      return function(y15) {
+        if (x16 instanceof HorizontalTree && y15 instanceof HorizontalTree) {
+          return true;
+        }
+        ;
+        if (x16 instanceof VerticalTree && y15 instanceof VerticalTree) {
+          return true;
+        }
+        ;
+        if (x16 instanceof RadialTree && y15 instanceof RadialTree) {
+          return true;
+        }
+        ;
+        if (x16 instanceof CirclePacking && y15 instanceof CirclePacking) {
+          return true;
+        }
+        ;
+        if (x16 instanceof Treemap && y15 instanceof Treemap) {
+          return true;
+        }
+        ;
+        return false;
+      };
+    }
+  };
+  var eq5 = /* @__PURE__ */ eq(eqHierarchyLayout);
+  var renderLayoutOption = function(layout) {
+    return function(label5) {
+      return function(currentLayout) {
+        return button([classes(append16(["control-panel__option"])((function() {
+          var $28 = eq5(layout)(currentLayout);
+          if ($28) {
+            return ["control-panel__option--active"];
+          }
+          ;
+          return [];
+        })())), onClick($$const(new SelectLayout(layout))), type_23(ButtonButton.value)])([text5(label5)]);
+      };
+    };
   };
   var _rhsNav4 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
   var render7 = function(state3) {
-    return div2([classes(["fullscreen-container", "hierarchies-page"])])([slot_6(_rhsNav4)(unit)(component)(Hierarchies.value), div2([classes(["floating-panel", "floating-panel--top-left", "hierarchies-controls"])])([h2([classes(["floating-panel__title"])])([text5("Hierarchy Layouts")]), p([classes(["hierarchies-description"])])([text5("Explore different ways to visualize the same hierarchical data from our codebase.")]), div2([classes(["layout-controls"])])([h3_([text5("Tree Layouts")]), buttonGroup_([buttonLeft([onClick($$const(new SwitchLayout(HorizontalTree.value)))])([text5("Horizontal")]), buttonCenter([onClick($$const(new SwitchLayout(VerticalTree.value)))])([text5("Vertical")]), buttonRight([onClick($$const(new SwitchLayout(RadialTree.value)))])([text5("Radial")])]), h3_([text5("Other Layouts")]), buttonGroup_([buttonLeft([onClick($$const(new SwitchLayout(CirclePacking.value)))])([text5("Circle Packing")]), buttonRight([onClick($$const(new SwitchLayout(Treemap.value)))])([text5("Treemap")])])]), div2([classes(["current-layout-info"])])([p_([text5("Current: " + show11(state3.currentLayout))])])]), div2([classes(["svg-container", "fullscreen-viz", "hierarchies-viz"])])([renderLayoutPlaceholder(state3.currentLayout)])]);
+    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel", "control-panel"])])([div2([classes(["toc-panel__main", "control-panel__main"])])([img([src9("controller.jpeg"), alt5(""), classes(["control-panel__icon"])]), div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Layout Controls")]), button([classes(["floating-panel__toggle"]), type_23(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "control-panel__content"])])([div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Tree Layouts")]), div2([classes(["control-panel__options"])])([renderLayoutOption(HorizontalTree.value)("Horizontal")(state3.currentLayout), renderLayoutOption(VerticalTree.value)("Vertical")(state3.currentLayout), renderLayoutOption(RadialTree.value)("Radial")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Space-Filling")]), div2([classes(["control-panel__options"])])([renderLayoutOption(CirclePacking.value)("Circle Pack")(state3.currentLayout), renderLayoutOption(Treemap.value)("Treemap")(state3.currentLayout)])]), div2([classes(["control-panel__current"])])([strong_([text5("Current:")]), text5(" "), text5(show11(state3.currentLayout))])])])]), slot_6(_rhsNav4)(unit)(component)(Hierarchies.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Hierarchical Layouts")]), p_([text5("Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data.")]), p_([text5("This page demonstrates five different ways to visualize the same hierarchical dataset. Use the controls on the left to switch between layouts and explore how each representation emphasizes different relationships in the data.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5(show11(state3.currentLayout))]), p_([text5(layoutDescription(state3.currentLayout))]), div2([classes(["tutorial-viz-container"])])([div2([classes(["hierarchies-viz"])])([renderLayoutPlaceholder(state3.currentLayout)])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Implementation")]), p_([text5("The visualization code for "), strong_([text5(show11(state3.currentLayout))]), text5(" demonstrates how D3's hierarchical layout algorithms transform tree data into visual coordinates.")]), div2([classes(["tutorial-code-block"])])([pre_([code_([text5("-- Code for "), text5(show11(state3.currentLayout)), text5(" layout will go here\n"), text5("-- Demonstrates D3 hierarchy layout with PureScript DSL")])])])])]);
   };
   var component7 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -22798,7 +22865,7 @@
   // output/PSD3.SankeyDiagram/index.js
   var runWithD3_Sankey2 = /* @__PURE__ */ runWithD3_Sankey(bindHalogenM)(monadStateHalogenM)(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var draw6 = /* @__PURE__ */ draw5(bindD3SankeyM)(monadEffD3SankeyM)(monadStateD3SankeyM)(sankeyMD3Selection_D3Sank);
-  var type_23 = /* @__PURE__ */ type_17(isPropButtonType);
+  var type_24 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_8 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "rhsNav";
@@ -22818,7 +22885,7 @@
     return $$Proxy.value;
   })();
   var render9 = function(v) {
-    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_23(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. UK Energy Flows")])])])])]), slot_8(_rhsNav6)(unit)(component)(SankeyDiagram.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Sankey Diagram: Flow Visualization")]), p_([text5("Sankey diagrams visualize the flow of resources, energy, costs, or other quantities through a system. The width of each connection is proportional to the flow quantity, making it easy to identify dominant flows and inefficiencies.")]), p_([text5("These diagrams are particularly effective for showing how quantities are distributed, transformed, and consumed across multiple stages of a process.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. UK Energy System Flows")]), p_([text5("This Sankey diagram shows energy flows in the UK energy system, from primary energy sources through transformation and distribution to final consumption. The diagram uses D3's Sankey layout algorithm to automatically position nodes and create smooth flow paths.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["sankey-viz"])])([])]), p_([text5("The width of each flow represents the quantity of energy. Notice how the diagram reveals energy losses in transformation processes and highlights which sources contribute most to final consumption.")])])]);
+    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_24(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. UK Energy Flows")])])])])]), slot_8(_rhsNav6)(unit)(component)(SankeyDiagram.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Sankey Diagram: Flow Visualization")]), p_([text5("Sankey diagrams visualize the flow of resources, energy, costs, or other quantities through a system. The width of each connection is proportional to the flow quantity, making it easy to identify dominant flows and inefficiencies.")]), p_([text5("These diagrams are particularly effective for showing how quantities are distributed, transformed, and consumed across multiple stages of a process.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. UK Energy System Flows")]), p_([text5("This Sankey diagram shows energy flows in the UK energy system, from primary energy sources through transformation and distribution to final consumption. The diagram uses D3's Sankey layout algorithm to automatically position nodes and create smooth flow paths.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["sankey-viz"])])([])]), p_([text5("The width of each flow represents the quantity of energy. Notice how the diagram reveals energy losses in transformation processes and highlights which sources contribute most to final consumption.")])])]);
   };
   var component9 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -23397,7 +23464,7 @@
   var draw1 = /* @__PURE__ */ draw7(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var drawQuartet2 = /* @__PURE__ */ drawQuartet(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var pure28 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var type_24 = /* @__PURE__ */ type_17(isPropButtonType);
+  var type_25 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_9 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "rhsNav";
@@ -23423,7 +23490,7 @@
     return $$Proxy.value;
   })();
   var render10 = function(v) {
-    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_24(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. Multi-Line Chart")]), a([href4("#section-2"), classes(["toc-nav__item"])])([text5("2. Bar Chart")]), a([href4("#section-3"), classes(["toc-nav__item"])])([text5("3. Anscombe's Quartet")])])])])]), slot_9(_rhsNav7)(unit)(component)(SimpleCharts.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Simple Charts: Production-Ready Examples")]), p_([text5("Polished, production-ready examples of common chart types with interesting data. These examples demonstrate best practices for building interactive visualizations with proper axes, legends, and hover interactions.")]), p_([text5("Each chart includes features like responsive design, smooth transitions, and clear labeling to make them suitable for real-world applications.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Multi-Line Chart")]), p_([text5("A clean line chart showing multiple data series with smooth curves. This example uses sine wave data to demonstrate how to create flowing visualizations with proper scaling and axes.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["linechart-viz"])])([])]), p_([text5("This chart uses D3's line generators with linear scales for both x and y axes. The visualization includes properly positioned axes with tick marks and labels for easy data interpretation.")])]), section([id2("section-2"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("2. Bar Chart")]), p_([text5("A classic bar chart with properly aligned bars and clean styling. This example shows monthly sales data with each bar representing a data point. Note the careful attention to bar positioning and width calculations.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["barchart-viz"])])([])]), p_([text5("Bar charts are fundamental for comparing discrete values. This implementation includes proper spacing between bars and uses a linear scale for accurate height representation.")])]), section([id2("section-3"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("3. Anscombe's Quartet")]), p_([text5("The famous Anscombe's Quartet demonstrates why visualization matters. These four datasets have nearly identical statistical properties (mean, variance, correlation) but look completely different when plotted.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), p_([text5("This small multiples display shows all four datasets in a 2x2 grid, making it easy to compare them. Each subplot uses the same scale for valid comparison, highlighting how identical summary statistics can mask very different underlying patterns.")])])]);
+    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_25(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. Multi-Line Chart")]), a([href4("#section-2"), classes(["toc-nav__item"])])([text5("2. Bar Chart")]), a([href4("#section-3"), classes(["toc-nav__item"])])([text5("3. Anscombe's Quartet")])])])])]), slot_9(_rhsNav7)(unit)(component)(SimpleCharts.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Simple Charts: Production-Ready Examples")]), p_([text5("Polished, production-ready examples of common chart types with interesting data. These examples demonstrate best practices for building interactive visualizations with proper axes, legends, and hover interactions.")]), p_([text5("Each chart includes features like responsive design, smooth transitions, and clear labeling to make them suitable for real-world applications.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Multi-Line Chart")]), p_([text5("A clean line chart showing multiple data series with smooth curves. This example uses sine wave data to demonstrate how to create flowing visualizations with proper scaling and axes.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["linechart-viz"])])([])]), p_([text5("This chart uses D3's line generators with linear scales for both x and y axes. The visualization includes properly positioned axes with tick marks and labels for easy data interpretation.")])]), section([id2("section-2"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("2. Bar Chart")]), p_([text5("A classic bar chart with properly aligned bars and clean styling. This example shows monthly sales data with each bar representing a data point. Note the careful attention to bar positioning and width calculations.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["barchart-viz"])])([])]), p_([text5("Bar charts are fundamental for comparing discrete values. This implementation includes proper spacing between bars and uses a linear scale for accurate height representation.")])]), section([id2("section-3"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("3. Anscombe's Quartet")]), p_([text5("The famous Anscombe's Quartet demonstrates why visualization matters. These four datasets have nearly identical statistical properties (mean, variance, correlation) but look completely different when plotted.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), p_([text5("This small multiples display shows all four datasets in a 2x2 grid, making it easy to compare them. Each subplot uses the same scale for valid comparison, highlighting how identical summary statistics can mask very different underlying patterns.")])])]);
   };
   var component10 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -23813,7 +23880,7 @@
   var drawQuartet3 = /* @__PURE__ */ drawQuartet(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var pure111 = /* @__PURE__ */ pure(applicativeHalogenM);
   var gets2 = /* @__PURE__ */ gets(monadStateHalogenM);
-  var type_25 = /* @__PURE__ */ type_17(isPropButtonType);
+  var type_26 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_10 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "rhsNav";
@@ -23933,7 +24000,7 @@
     return $$Proxy.value;
   })();
   var render12 = function(v) {
-    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_25(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. Three Little Circles")]), a([href4("#section-2"), classes(["toc-nav__item"])])([text5("2. General Update Pattern")]), a([href4("#section-3"), classes(["toc-nav__item"])])([text5("3. Data-Driven Positioning")]), a([href4("#section-4"), classes(["toc-nav__item"])])([text5("4. Bar Charts with Scales")]), a([href4("#section-5"), classes(["toc-nav__item"])])([text5("5. Line Charts and Paths")]), a([href4("#section-6"), classes(["toc-nav__item"])])([text5("6. Anscombe's Quartet")]), a([href4("#section-7"), classes(["toc-nav__item"])])([text5("7. Next Steps")])])])])]), slot_10(_rhsNav8)(unit)(component)(Tutorial.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Tutorial: Building Visualizations with PureScript D3")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.")]), p_([text5("Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")])]), section([classes(["tutorial-section"]), id2("section-1")])([h2([classes(["tutorial-section-title"])])([text5("1. Three Little Circles")]), p_([text5("Simplest possible example, just to show syntax.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["three-circles-viz"])])([])]), div2([classes(["tutorial-code-block"])])(syntaxHighlightedCode(threeCirclesCode))]), section([classes(["tutorial-section"]), id2("section-2")])([h2([classes(["tutorial-section-title"])])([text5("2. The General Update Pattern")]), p_([text5("This deceptively simple example shows off an aspect of screen-based data visualization that has no analogue in paper visualizations: the ability to specify how updates to the data should be represented.")]), p_([text5("In this example, some letters of the alphabet are presented and then constantly updated. When a letter enters at first, it falls in from the top and it is green. If it's still present in the next set of letters it stays on the screen, but it turns gray and moves to an alphabetically correct new position. And if it's not present in the new data, it turns red and falls out before disappearing.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["gup-viz"])])([])]), div2([classes(["tutorial-code-block"])])(syntaxHighlightedCode(gupCode))]), section([classes(["tutorial-section"]), id2("section-3")])([h2([classes(["tutorial-section-title"])])([text5("3. Data-Driven Positioning")]), p_([text5("This extends the super-simple model in the direction one would go for a more real-world example. In this example, the data is passed in and must match the type specified in the Model. Because the data loses its type information when joined to the DOM elements, we use the datum_ record to provide typed accessors for extracting values.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["parabola-viz"])])([])]), div2([classes(["tutorial-code-block"])])(syntaxHighlightedCode(parabolaCode))]), section([classes(["tutorial-section"]), id2("section-4")])([h2([classes(["tutorial-section-title"])])([text5("4. Bar Charts with Scales")]), p_([text5("Bar charts are ideal for comparing discrete categories or showing changes across time periods. They use rectangular bars with heights or lengths proportional to the values they represent.")]), p_([text5("This example shows monthly sales data using a vertical bar chart. Each bar represents a month, and the height indicates the sales value. The implementation uses D3 scales to map data values to pixel coordinates.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["barchart-viz"])])([])]), div2([classes(["tutorial-code-block"])])(syntaxHighlightedCode(barChartCode))]), section([classes(["tutorial-section"]), id2("section-5")])([h2([classes(["tutorial-section-title"])])([text5("5. Line Charts and Paths")]), p_([text5("Line charts are one of the most fundamental visualizations for showing trends over time or continuous data. They excel at displaying patterns, trends, and changes in data series.")]), p_([text5("This example demonstrates a simple line chart showing a sine wave pattern. The implementation uses D3's scale functions to map data values to pixel coordinates, and a line generator to create the SVG path.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["linechart-viz"])])([])]), div2([classes(["tutorial-code-block"])])(syntaxHighlightedCode(lineChartCode))]), section([classes(["tutorial-section"]), id2("section-6")])([h2([classes(["tutorial-section-title"])])([text5("6. Anscombe's Quartet")]), p_([text5("This example demonstrates Anscombe's Quartet, a famous dataset created by statistician Francis Anscombe in 1973. All four datasets have nearly identical statistical properties (same mean, variance, correlation, and linear regression line), yet when visualized they reveal completely different patterns.")]), p_([text5("The quartet powerfully illustrates why data visualization is essential. Summary statistics alone can be misleading - you need to look at the data to understand its true structure. This implementation uses a 'small multiples' layout, displaying the four related charts side-by-side for easy comparison.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), div2([classes(["tutorial-code-block"])])(syntaxHighlightedCode(quartetCode))]), section([classes(["tutorial-section", "tutorial-conclusion"]), id2("section-7")])([h2([classes(["tutorial-section-title"])])([text5("Next Steps")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien.")]), aside([classes(["tutorial-margin-note"])])([p([classes(["tutorial-margin-note__label"])])([text5("Learn More")]), a([href4("#" + routeToPath(Hierarchies.value)), classes(["tutorial-margin-note__link"])])([text5("Hierarchies \u2192")])]), ul_([li_([text5("Explore hierarchical data visualizations")]), li_([text5("Learn about the Finally Tagless pattern with interpreters")]), li_([text5("Dive into the Code Explorer for complex applications")])]), aside([classes(["tutorial-margin-note"])])([a([href4("#" + routeToPath(Interpreters.value)), classes(["tutorial-margin-note__link"])])([text5("Interpreters \u2192")]), a([href4("#" + routeToPath(CodeExplorer.value)), classes(["tutorial-margin-note__link"])])([text5("Code Explorer \u2192")])])])]);
+    return div2([classes(["tutorial-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_26(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. Three Little Circles")]), a([href4("#section-2"), classes(["toc-nav__item"])])([text5("2. General Update Pattern")]), a([href4("#section-3"), classes(["toc-nav__item"])])([text5("3. Data-Driven Positioning")]), a([href4("#section-4"), classes(["toc-nav__item"])])([text5("4. Bar Charts with Scales")]), a([href4("#section-5"), classes(["toc-nav__item"])])([text5("5. Line Charts and Paths")]), a([href4("#section-6"), classes(["toc-nav__item"])])([text5("6. Anscombe's Quartet")]), a([href4("#section-7"), classes(["toc-nav__item"])])([text5("7. Next Steps")])])])])]), slot_10(_rhsNav8)(unit)(component)(Tutorial.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Tutorial: Building Visualizations with PureScript D3")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.")]), p_([text5("Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.")])]), section([classes(["tutorial-section"]), id2("section-1")])([h2([classes(["tutorial-section-title"])])([text5("1. Three Little Circles")]), p_([text5("Simplest possible example, just to show syntax.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["three-circles-viz"])])([])]), div2([classes(["tutorial-code-block"])])(syntaxHighlightedCode(threeCirclesCode))]), section([classes(["tutorial-section"]), id2("section-2")])([h2([classes(["tutorial-section-title"])])([text5("2. The General Update Pattern")]), p_([text5("This deceptively simple example shows off an aspect of screen-based data visualization that has no analogue in paper visualizations: the ability to specify how updates to the data should be represented.")]), p_([text5("In this example, some letters of the alphabet are presented and then constantly updated. When a letter enters at first, it falls in from the top and it is green. If it's still present in the next set of letters it stays on the screen, but it turns gray and moves to an alphabetically correct new position. And if it's not present in the new data, it turns red and falls out before disappearing.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["gup-viz"])])([])]), div2([classes(["tutorial-code-block"])])(syntaxHighlightedCode(gupCode))]), section([classes(["tutorial-section"]), id2("section-3")])([h2([classes(["tutorial-section-title"])])([text5("3. Data-Driven Positioning")]), p_([text5("This extends the super-simple model in the direction one would go for a more real-world example. In this example, the data is passed in and must match the type specified in the Model. Because the data loses its type information when joined to the DOM elements, we use the datum_ record to provide typed accessors for extracting values.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["parabola-viz"])])([])]), div2([classes(["tutorial-code-block"])])(syntaxHighlightedCode(parabolaCode))]), section([classes(["tutorial-section"]), id2("section-4")])([h2([classes(["tutorial-section-title"])])([text5("4. Bar Charts with Scales")]), p_([text5("Bar charts are ideal for comparing discrete categories or showing changes across time periods. They use rectangular bars with heights or lengths proportional to the values they represent.")]), p_([text5("This example shows monthly sales data using a vertical bar chart. Each bar represents a month, and the height indicates the sales value. The implementation uses D3 scales to map data values to pixel coordinates.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["barchart-viz"])])([])]), div2([classes(["tutorial-code-block"])])(syntaxHighlightedCode(barChartCode))]), section([classes(["tutorial-section"]), id2("section-5")])([h2([classes(["tutorial-section-title"])])([text5("5. Line Charts and Paths")]), p_([text5("Line charts are one of the most fundamental visualizations for showing trends over time or continuous data. They excel at displaying patterns, trends, and changes in data series.")]), p_([text5("This example demonstrates a simple line chart showing a sine wave pattern. The implementation uses D3's scale functions to map data values to pixel coordinates, and a line generator to create the SVG path.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["linechart-viz"])])([])]), div2([classes(["tutorial-code-block"])])(syntaxHighlightedCode(lineChartCode))]), section([classes(["tutorial-section"]), id2("section-6")])([h2([classes(["tutorial-section-title"])])([text5("6. Anscombe's Quartet")]), p_([text5("This example demonstrates Anscombe's Quartet, a famous dataset created by statistician Francis Anscombe in 1973. All four datasets have nearly identical statistical properties (same mean, variance, correlation, and linear regression line), yet when visualized they reveal completely different patterns.")]), p_([text5("The quartet powerfully illustrates why data visualization is essential. Summary statistics alone can be misleading - you need to look at the data to understand its true structure. This implementation uses a 'small multiples' layout, displaying the four related charts side-by-side for easy comparison.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), div2([classes(["tutorial-code-block"])])(syntaxHighlightedCode(quartetCode))]), section([classes(["tutorial-section", "tutorial-conclusion"]), id2("section-7")])([h2([classes(["tutorial-section-title"])])([text5("Next Steps")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien.")]), aside([classes(["tutorial-margin-note"])])([p([classes(["tutorial-margin-note__label"])])([text5("Learn More")]), a([href4("#" + routeToPath(Hierarchies.value)), classes(["tutorial-margin-note__link"])])([text5("Hierarchies \u2192")])]), ul_([li_([text5("Explore hierarchical data visualizations")]), li_([text5("Learn about the Finally Tagless pattern with interpreters")]), li_([text5("Dive into the Code Explorer for complex applications")])]), aside([classes(["tutorial-margin-note"])])([a([href4("#" + routeToPath(Interpreters.value)), classes(["tutorial-margin-note__link"])])([text5("Interpreters \u2192")]), a([href4("#" + routeToPath(CodeExplorer.value)), classes(["tutorial-margin-note__link"])])([text5("Code Explorer \u2192")])])])]);
   };
   var component11 = /* @__PURE__ */ (function() {
     return mkComponent({
