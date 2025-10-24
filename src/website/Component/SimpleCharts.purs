@@ -59,6 +59,7 @@ render _ =
             , { anchor: "multi-line", label: "2. Multi-Line Chart", level: 0 }
             , { anchor: "radial-stacked", label: "3. Radial Stacked Bar Chart", level: 0 }
             ]
+        , image: Nothing
         }
 
     -- Navigation Panel (RHS)

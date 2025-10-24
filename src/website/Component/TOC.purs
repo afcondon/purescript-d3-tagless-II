@@ -2,6 +2,7 @@ module PSD3.TOC where
 
 import Prelude
 
+import Data.Maybe (Maybe(..), fromMaybe)
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 
@@ -16,6 +17,7 @@ type TOCItem =
 type TOCConfig =
   { title :: String           -- Title for the TOC (e.g., "Contents", "Interpreters")
   , items :: Array TOCItem    -- The navigation items
+  , image :: Maybe String     -- Optional image to use instead of bookmark.jpeg
   }
 
 -- | Render a table of contents panel
@@ -25,7 +27,7 @@ renderTOC config =
   HH.div
     [ HP.classes [ HH.ClassName "toc-panel" ] ]
     [ HH.img
-        [ HP.src "bookmark.jpeg"
+        [ HP.src $ fromMaybe "bookmark.jpeg" config.image
         , HP.alt ""
         , HP.classes [ HH.ClassName "toc-panel__bookmark-pin" ]
         ]

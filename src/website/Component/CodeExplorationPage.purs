@@ -82,26 +82,11 @@ render state =
             , { anchor: "reference", label: "API Reference", level: 0 }
             , { anchor: "related", label: "Related Examples", level: 0 }
             ]
+        , image: Just "cogs.jpeg"
         }
 
     -- Navigation Panel (RHS)
     , HH.slot_ _rhsNav unit RHSNav.component (Explore state.snippetId)
-
-    -- Back button and themed header
-    , HH.div
-        [ HP.classes [ HH.ClassName "exploration-header" ] ]
-        [ HH.button
-            [ HP.classes [ HH.ClassName "exploration-back-btn" ]
-            , HE.onClick \_ -> GoBack
-            ]
-            [ HH.text "← Back" ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "exploration-artwork" ] ]
-            [ HH.div
-                [ HP.classes [ HH.ClassName "exploration-artwork__placeholder" ] ]
-                [ HH.text "[ Themed artwork: gears/cogs/mechanisms ]" ]
-            ]
-        ]
 
     -- Page introduction
     , HH.section
@@ -115,6 +100,15 @@ render state =
             [ HH.text "Welcome to the code exploration zone. Here we'll disassemble every aspect of this code snippet, explain the concepts behind it, and connect you to the library reference documentation." ]
         , HH.p_
             [ HH.text "This is your deep dive into PureScript D3 programming - understanding not just what the code does, but why it's written this way, what each function means, and where to learn more." ]
+        , HH.p_
+            [ HH.text "When you've finished exploring this code, "
+            , HH.a
+                [ HP.classes [ HH.ClassName "exploration-back-link" ]
+                , HE.onClick \_ -> GoBack
+                ]
+                [ HH.text "this link" ]
+            , HH.text " will take you back to the example you came from."
+            ]
         ]
 
     -- The Code section
