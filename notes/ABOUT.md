@@ -1,16 +1,17 @@
-# PS<$>D3: Interactive Data Visualization in PureScript
+# PS<$>D3
+## Interactive Data Visualization in PureScript
 
-A PureScript embedded DSL for building interactive data visualizations, using D3.js both as inspiration and as an implementation layer under the Foreign Function Interface (FFI).
+A PureScript embedded *DSL* for building *interactive data visualizations*, using *D3.js* both as inspiration and as an implementation layer under the Foreign Function Interface (FFI).
 
-**Demo**: [https://afcondon.github.io/purescript-d3-tagless-II/](https://afcondon.github.io/purescript-d3-tagless-II/)
+This repo also contains documentation and examples using a website built with PureScript Halogen and the PS<$>D3 library. Here is a link to this website, hosted under GitHub Pages - [https://afcondon.github.io/purescript-d3-tagless-II/](https://afcondon.github.io/purescript-d3-tagless-II/)
 
 ## What is This Project?
 
-This project demonstrates an embedded DSL for building interactive data visualizations with PureScript. The DSL uses a Finally Tagless approach that allows multiple implementations for the "language" which permits both alternative implementations (only one, D3, is currently shown) but also alternative interpreters which generate code, documentation or even further "meta" visualizations to allow one to manipulate the DSL syntax tree.
+This project demonstrates an embedded DSL for building interactive data visualizations with PureScript. The DSL uses a Finally Tagless approach that allows multiple interpreters for the same "language" which allows us to generate working code using an FFI to D3 or documentation and other more complex uses which will be discussed below. 
 
 ## The Data Visualization Process
 
-Data visualization transforms boring tables of data into perceivable patterns:
+Data visualization transforms "boring" - but more importantly _less informative_ tables of data into perceivable patterns. We can think of this as a pipeline in which steps 2 and 3 are the purpose of this library. 
 
 1. **Data** - Raw data structures (tables, JSON, etc.)
 2. **Data structure** - Relationships between data elements
@@ -19,41 +20,55 @@ Data visualization transforms boring tables of data into perceivable patterns:
 
 The goal is to make relationships in data visible through appropriate visual encoding, enabling the human visual system to process patterns that would be difficult or impossible to perceive in tabular form.
 
-### Diverse visuals... but structural similarity
+### Design philosophy of D3*
+* (as I understand it)
 
-D3 enables an enormous range of visualizations - from simple bar charts to complex hierarchical layouts, force-directed graphs, geographic projections, and interactive dashboards. Despite their visual diversity, these visualizations share common structural patterns: data is bound to DOM elements, attributes are computed from data, and layouts determine spatial positioning.
-
-## Project Goals (and non-Goals)
-
-### Two #1 priorities, necessitates trade-offs
-
-| Primary | Non-goals | Sub-goals |
-|---------|-----------|-----------|
-| **Expressivity:** fully equivalent to D3.js | **Completeness:** not all D3.js API surface is needed | Prefer idiomatic PureScript to exposing D3 APIs directly |
-| **Readability:** ideally *more* readable than JS equivalent | **Modelling** of D3 state complexity thru type-system | Design for progressive enhancement |
-| **Composable:** suitable for "programming in the large" | **Performance** equality to D3 | Showcase PureScript ecosystem and libraries |
-
-### Expressivity
+D3's great innovation was to enable an enormous range of visualizations using some simple fundamental concepts and a small core API. It supports dataviz from simple bar charts to complex hierarchical layouts, force-directed graphs, geographic projections, and interactive dashboards. Despite their visual diversity, these visualizations share common structural patterns: data is bound to DOM elements, attributes are computed from data, and layouts determine spatial positioning.
 
 Something that people with limited prior knowledge / experience of data visualisation often seem to find surprising is the degree to which D3 is *fundamentally different* from "a charting library". While the library has some affordances that make it very easy to do common visualisations it is not in any way about "canned visualisations". Rather, it is a language for describing a relationship between arrays of data and arbitrary constructions of DOM (HTML or SVG) element or marks on Canvas, and it could in principle be used to do auditory "visualisation" or, who knows, maybe olfactory "visualisation" or drone displays or whatever.
 
+Another revolutionary aspect of D3 was that it was *screen/web native* - right from the beginning it supported responsive design, transitions, animations, force-layouts all of which are completely distinct from data visualisation on paper.
+
 You can get a greater sense of the potential of D3 and the range of things that have thus far been produced using it at [ObservableHQ](https://observablehq.com/).
 
-So when we talk about expressability as a goal for this PureScript eDSL, we're not talking about working at the level of "make me a bar graph", "make me a scatterplot", we're talking about retaining the expressability of that translation from array to, for example, SVG.
+### Design philosophy of PS<$>D3
 
-Furthermore, I am especially interested in, and an advocate for, interactive data visualisations that act as control elements for other aspects of applications. It's worth calling this out here because "interactive visualisation" very often means "explorable" visualisation, ie one in which you can interact with the elements *but only to manipulate the visualisation itself*. That is a different, and more limited, sense of interaction from what i intend.
+This library presents a slighly more formal grammar embedded in a language that is a lot better suited to larger and more long-lived projects. Whereas D3 has patterns of use that you learn, in PS<$>D3 the pattern is formalised into a grammar with an interpreter. Moreover, the same grammar can be interpreted by different interpreters directly *in* PureScript, which, as we will see creates some powerful new uses.
 
-### Readability
+Where D3 enabled data visualisers to create movement and responsiveness, PS<$>D3 seeks to enable something that's theoretically possible in D3 but not much seen in practice and that is using the data visualisation as the user interface.  This is not the same thing as "interactive visualisation" in the sense of "explorable" visualisation, ie one in which you can interact with the elements *but only to manipulate the visualisation itself*. That is a different, and more limited, sense of interaction. What we are talking about when building UI with data visualisation is leveraging the information density of data visualisation to provide direct manipulation of complex or large systems. 
 
-If we look at D3.js as a kind of embedded DSL in JavaScript it is certainly clear and readable in it's core feature: declaratively associating some array(s) of data with some elements in the DOM and attributes of those elements. While it is definitely not a goal to reproduce the structures of D3js own language, it's also unwise to change it arbitrarily because there's a very large amount of real world experience to be leveraged or at least not shunned. So that's one kind of readability concern - can it be somewhat isomorphic to the equivalent JavaScript where that's appropriate?
+This is actually not a revolutionary idea - think how much of an improvement over the initial "folders of icons" on the Mac the NeXT column browser was. But it is a direction of travel that has been effectively lost during the web UI revolution of the past 20 years.
 
-A second form of readability is concerned with the places where - for me - the D3 / JavaScript approach breaks down, which is in roles and responsabilities of different parts of the code. This is related pretty closely to composability (see next goal for more on this).
+This repo and website contains one example of how this might work, the Code Explorer.
+ 
+## Project Goals (and non-Goals)
 
-Ideally, i would like the person coding the data layer and data model to be somewhat insulated from the concerns of the person using that data model to create a visualisation. And likewise, i would like the person developing the data visualisation to be somewhat insulated from the concerns of a web app developer. Now, these might very well all be the *same person* but separating the concerns like this makes it easier to evolve the code and, crucially, makes it all a little less brittle.
+### Priorities and Trade-offs
 
-### Composability
+We have two principal priorities in writing this library and since you can't have two number one priorities, some trade-offs are inevitable which we will discuss here. 
 
-There is an additional important goal which is *composability*, if you are a PureScript or Haskell programmer you probably know what i mean by this and if you are, say, a JavaScript D3 programmer perhaps that will seem odd or even contentious.
+| Primary                                                 | Non-goals                                             | Sub-goals                                                |
+|---------------------------------------------------------|-------------------------------------------------------|----------------------------------------------------------|
+| **Expressivity:** fully equivalent to D3.js             | **Completeness:** not all D3.js API surface is needed | Prefer idiomatic PureScript to exposing D3 APIs directly |
+| **Readability:** as readable as D3.js equivalent        | **Modelling** of D3 state complexity thru type-system | Design for progressive enhancement                       |
+| **Composable:** suitable for "programming in the large" | **Performance** equality to D3                        | Showcase PureScript ecosystem and libraries              |
+
+### Goals: details
+#### Expressivity
+
+As alluded to above, expressivity is a key to D3's success - it's not limited to some library of canned visualisations and it's far, far more than even the most parameterized control of colours and symbols. It's important not to lose that in making D3 available directly in PureScript. 
+
+#### Readability
+
+If we look at D3.js as a kind of embedded DSL in JavaScript it is certainly clear and readable in its core feature: declaratively associating some array(s) of data with some elements in the DOM and attributes of those elements. While it is definitely not a goal to reproduce the structures of D3js own language in PureScript per se, the goal is to have the same readability, leverage the good work that Mike Bostock did in developing it. At the same time the library should be as idiomatically PureScript / Haskell style as possible.
+
+#### Composability
+
+A related concern to readability is composability, the separation of concerns that makes componentisation possible and which makes possible programming in the large. 
+
+YMMV but for me this is where the D3 / JavaScript approach breaks down. 
+
+If you are a PureScript or Haskell programmer you probably know what i mean by this and if you are, say, a JavaScript D3 programmer perhaps that will seem odd or even contentious.
 
 The benefits we seek from composability include:
 
@@ -62,21 +77,28 @@ The benefits we seek from composability include:
 * better correctness in implementations (ie fewer bugs)
 * better ability to evolve programs due to shifting requirements (re-factoring)
 
-### Non-goal: Complete API coverage
+Ideally, i would like the person coding the data layer and data model to be somewhat insulated from the concerns of the person using that data model to create a visualisation. And likewise, i would like the person developing the data visualisation to be somewhat insulated from the concerns of a web app developer. Now, these might very well all be the *same person* but separating the concerns like this makes it easier to evolve the code and, crucially, makes it all a little less brittle.
+
+### Non-goals: details 
+#### Complete API coverage
 
 As alluded to above, there's lots of API in D3 that needs nothing more than an FFI wrapper to be accessible from a PureScript eDSL. D3 is both modular and somewhat functional in style (in the JavaScript sense of functional programming, to be clear). So it was from the start a non-goal to completely expose all of D3 as *idiomatic* PureScript where a simple wrapper was sufficient.
 
 Furthermore, i have only written those wrappers *as I needed them* to there are still *many* parts of D3 that are not covered by this eDSL.
 
-### Non-goal: Modelling of D3 State
+Addendum 2025 - the advent of LLMs and coding assistance agents means that perhaps complete API coverage might arrive sooner than expected.
+
+#### Modelling of D3 State
 
 This might seem like a surprising choice - D3 is inherently _very_ stateful, there's state in D3, there's state in the DOM, there's statefulness in your (pure) data after you give it to D3. State everywhere. In many cases in functional programming you might try to ameliorate the dangers of this by explicitly modelling the state, using a State Monad or marking everything that changes or depends upon state as "Effect"-full.
 
-Indeed i have tried this approach in the past. In this library i have instead striven to isolate the statefulness to only the code that uses eDSL represented by the `Selection` and `Simulation` monads. This *significantly* removes but cannot fully eliminate the issues associated with state. However, i believe it is a good compromise although much more could be said on the matter.
+Indeed i have tried this approach in the past. In this library i have instead striven to isolate the statefulness to only the code that uses eDSL represented by the `Selection` and `Simulation` monads. This *significantly* removes but cannot fully eliminate the issues associated with state. 
 
-### Non-goal: performance optimisation that compromise readability
+#### Performance equality with D3
 
-The performance bottlenecks in a D3 visualisation are, by their nature, going to be the assignment of attributes to (potentially millions of) DOM elements. It is likely that this code will always have to have a native implementation, ie FFI, *or* it would have to be re-written in a way that was as performant as possible in PureScript. I have chosen to use D3 for this as a low-level, well-tested, optimised layer in order to preserve readability of the visualisation code.
+While this was a non-goal in practice it doesn't seem to have been a problem. Essentially, this is because PS<$>D3 simply leverages D3.js for all the performance critical aspects and because the FFI has been kept simple by the decision described in the previous section. 
+
+The performance bottlenecks in a web data visualisation are, by their nature, going to be the assignment of potentially millions of attributes to potentially millions of DOM elements. D3.js does this extremely well and the PureScript layer doesn't compromise it much, if at all.
 
 ## What's a DSL? and what's an eDSL?
 
@@ -106,13 +128,17 @@ Analyse the *implicit* grammar of D3...
 
 **This is much simpler than D3's actual AST would be (if it had one) but it is sufficient to express a LOT of D3 scripts.**
 
-| Name | Symbol | Function | Notes |
-|------|--------|----------|-------|
-| attach | a | Select an entry point (or points) in the DOM | Simply uses a CSS type selector to identify the target. Resulting selection can then be used for append / join in order to build up a visualisation from HTML, SVG or Canvas elements. |
-| appendTo | + | Add some DOM element **e** to a selection | Each element can have attributes. If data has been bound higher up in the AST then that data is available in this element's attributes |
-| join | <+> | For every *datum* **d** in some array, insert an element **e** | We'll run the visualisation with some data model which can be arbitrary in structure, but at every point where we want to append *multiple* elements we need to have a function that yields a simple array.<br><br>Each element can have attributes that are derived from the datum with which it is associated.<br><br>The datum at each element is inherited by its children, so any subsequent join starts with the structure of this datum. |
+| Name       | Function                                                       | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+|------------|----------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| *attach*   | Select an entry point (or points) in the DOM                   | Simply uses a CSS type selector to identify the target. Resulting selection can then be used for append / join in order to build up a visualisation from HTML, SVG or Canvas elements.                                                                                                                                                                                                                                                          |
+| *appendTo* | Add some DOM element **e** to a selection                      | Each element can have attributes. If data has been bound higher up in the AST then that data is available in this element's attributes                                                                                                                                                                                                                                                                                                          |
+| *join*     | For every *datum* **d** in some array, insert an element **e** | We'll run the visualisation with some data model which can be arbitrary in structure, but at every point where we want to append *multiple* elements we need to have a function that yields a simple array.<br><br>Each element can have attributes that are derived from the datum with which it is associated.<br><br>The datum at each element is inherited by its children, so any subsequent join starts with the structure of this datum. |
 
-### 3 Little Circles: A canonical simplest example
+### Grammar diagrams
+
+#### 3 Little Circles: the canonical simplest example
+
+Insert Mermaid diagram here
 
 ```
     a        "div#hook"
@@ -126,7 +152,7 @@ Analyse the *implicit* grammar of D3...
 
 https://bost.ocks.org/mike/circles/
 
-### Radial Tree: A more complex example
+#### Radial Tree: A more complex example
 
 The Radial Tree and Cluster Dendrogram visualizations share the exact same structure:
 
@@ -144,9 +170,11 @@ The Radial Tree and Cluster Dendrogram visualizations share the exact same struc
 
 All the differences are in details of how the node attributes are calculated from the data.
 
-### Even complex examples structurally simple
+#### Even complex examples structurally simple
 
 Even highly complex visualizations like [Nadieh Bremer's Top 2000 visualization](https://top2000.visualcinnamon.com) can be expressed with this simple grammar - the complexity lies in the data transformations and attribute calculations, not in the fundamental structure.
+
+# Move the rest to different documents
 
 ## Interpreter for Selections
 

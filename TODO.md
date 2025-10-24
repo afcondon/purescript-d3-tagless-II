@@ -1,4 +1,4 @@
-# TODO - Organized by Pages/Work Packages
+'''# TODO - Organized by Pages/Work Packages
 
 This TODO is derived from `notes/VISION.md` and organized by the major pages and features that will comprise the finished demo site.
 
@@ -9,18 +9,18 @@ This TODO is derived from `notes/VISION.md` and organized by the major pages and
 **Goal:** Progressive learning from simplest examples to more complex patterns, embedded directly in explanatory text.
 
 ### Examples to include:
-- [ ] **Three Little Circles** - Move from current Stories to About page
-- [ ] **Small parabola of circles** - Create simple parametric example
-- [ ] **General Update Pattern** - Fix (currently broken, stops after three updates) and move to About page
-- [ ] **Simple line chart** - Single line, basic example
-- [ ] **Simple bar chart** - Fix first bar offset issue
-- [ ] **Anscombe's Quartet** - Keep as scatter plot example (remove basic scatter)
+- [x] **Three Little Circles** - Move from current Stories to About page
+- [x] **Small parabola of circles** - Create simple parametric example
+- [x] **General Update Pattern** - Fix (currently broken, stops after three updates) and move to About page
+- [x] **Simple line chart** - Single line, basic example
+- [x] **Simple bar chart** - Fix first bar offset issue
+- [x] **Anscombe's Quartet** - Keep as scatter plot example (remove basic scatter)
 
 ### Requirements:
-- [ ] Each example shows code snippet inline with rendered viz
-- [ ] Progressive complexity: start with Three Little Circles, build up
+- [x] Each example shows code snippet inline with rendered viz
+- [x] Progressive complexity: start with Three Little Circles, build up
 - [ ] Good responsive CSS for readability across screen sizes
-- [ ] Consider adding collapsible code sections with syntax highlighting
+- [x] Consider adding collapsible code sections with syntax highlighting
 
 ---
 
