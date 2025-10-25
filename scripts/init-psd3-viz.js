@@ -311,7 +311,7 @@ async function main() {
 
   const outputDir = await question(`Output directory (default: src/viz/${vizName}): `) || `src/viz/${vizName}`;
 
-  const includeMain = await question('Generate Main.purs? (y/n, default: n): ');
+  const includeMain = await question('Generate Main.purs? (y/n, default: y): ');
   const includeHTML = await question('Generate index.html? (y/n, default: y): ');
 
   rl.close();
@@ -341,7 +341,7 @@ async function main() {
   fs.writeFileSync(path.join(fullOutputDir, 'Draw.purs'), drawContent);
   console.log(`✓ Created ${outputDir}/Draw.purs`);
 
-  if (includeMain.toLowerCase() === 'y') {
+  if (!includeMain || includeMain.toLowerCase() !== 'n') {
     const mainContent = generateMainModule(vizName, dataTypeName);
     fs.writeFileSync(path.join(fullOutputDir, 'Main.purs'), mainContent);
     console.log(`✓ Created ${outputDir}/Main.purs`);

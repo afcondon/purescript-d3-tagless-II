@@ -155,7 +155,7 @@ spago build""" ]
                 ]
             , HH.li_
                 [ HH.strong_ [ HH.text "Generate Main.purs?" ]
-                , HH.text " - (y/n, default: n)"
+                , HH.text " - Entry point for standalone viewing (y/n, default: y)"
                 ]
             , HH.li_
                 [ HH.strong_ [ HH.text "Generate index.html?" ]

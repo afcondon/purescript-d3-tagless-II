@@ -15,7 +15,7 @@ The wizard will prompt you for:
 1. **Visualization module name** - Must start with an uppercase letter (e.g., `MyBarChart`, `NetworkGraph`)
 2. **Data record fields** - Comma-separated field definitions (e.g., `x:Number,y:Number,label:String`)
 3. **Output directory** - Where to create the files (default: `src/viz/YourModuleName`)
-4. **Generate Main.purs?** - Optional entry point module (y/n, default: n)
+4. **Generate Main.purs?** - Entry point module for standalone viewing (y/n, default: y)
 5. **Generate index.html?** - HTML page with D3.js loaded (y/n, default: y)
 
 ## Example Session
