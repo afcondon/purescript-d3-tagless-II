@@ -6,6 +6,9 @@ import Data.Maybe (Maybe(..))
 import Debug (spy)
 import Effect (Effect)
 import Effect.Aff (Aff)
+import Web.HTML (window)
+import Web.HTML.Location as Web.HTML.Location
+import Web.HTML.Window as Web.HTML.Window
 import Halogen as H
 import Halogen.Aff as HA
 import Halogen.HTML as HH
@@ -157,7 +160,8 @@ handleAction = case _ of
     -- Subscribe to route changes using purescript-routing
     -- This handles both initial route and hash changes (back/forward buttons)
     _ <- H.subscribe $ HS.makeEmitter \push -> do
-      matches routing \_ newRoute -> push (RouteChanged (Just newRoute))
+      matches routing \_ newRoute -> do
+        push (RouteChanged (Just newRoute))
     pure unit
 
   Navigate route -> do
@@ -168,7 +172,16 @@ handleAction = case _ of
   RouteChanged maybeRoute -> do
     -- When route changes (initial load, back/forward, or manual navigation)
     case maybeRoute of
-      Just route -> H.modify_ _ { currentRoute = route }
+      Just route -> do
+        H.modify_ _ { currentRoute = route }
+        -- Ensure Home route has a hash in URL for browser history
+        when (route == Home) $ do
+          currentHash <- H.liftEffect $ do
+            w <- window
+            loc <- Web.HTML.Window.location w
+            Web.HTML.Location.hash loc
+          when (currentHash == "") $ do
+            H.liftEffect $ setHash "/"
       Nothing -> H.modify_ _ { currentRoute = NotFound } -- Fallback if route doesn't match
 
 -- | Entry point

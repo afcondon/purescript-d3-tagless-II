@@ -56,9 +56,13 @@
 
 .home-docs__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
   gap: 2rem;
   margin-bottom: 2rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 /* Documentation Category Boxes */
@@ -68,8 +72,9 @@
   border: 2px solid var(--color-gray-medium);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
-  min-height: 200px;
   position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
 }
 
 .home-doc-box:hover {
@@ -99,6 +104,19 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+.home-doc-box__image {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 50%;
+  height: 50%;
+  object-fit: cover;
+  opacity: 0.3;
+  z-index: 0;
 }
 
 .home-doc-box__title {
@@ -198,12 +216,17 @@
     font-size: 1.25rem;
   }
 
-  .home-docs__grid,
-  .home-examples__grid {
+  .home-docs__grid {
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
   }
 
   .home-doc-box {
-    min-height: auto;
+    aspect-ratio: auto;
+    min-height: 180px;
+  }
+
+  .home-examples__grid {
+    grid-template-columns: 1fr;
   }
 }

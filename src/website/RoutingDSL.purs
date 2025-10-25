@@ -95,7 +95,7 @@ notFound = pure NotFound
 
 -- | Convert a Route back to a URL path (for links and navigation)
 -- |
--- | These paths no longer use hash fragments (#) - they are clean URLs
+-- | These paths are used with hash-based routing (e.g., /#/about, /#/tutorial)
 routeToPath :: Route -> String
 routeToPath Home = "/"
 routeToPath GettingStarted = "/getting-started"

@@ -60,6 +60,7 @@ render _ =
                 "Installation, setup, and your first visualization"
                 (routeToPath GettingStarted)
                 "Start Here →"
+                Nothing
 
             -- How-to box (light blue)
             , renderDocBox
@@ -68,6 +69,7 @@ render _ =
                 "Step-by-step instructions for building specific visualizations"
                 (routeToPath HowtoIndex)
                 "Browse Guides →"
+                (Just "cogs.jpeg")
 
             -- Reference box (white)
             , renderDocBox
@@ -76,6 +78,7 @@ render _ =
                 "Complete technical documentation with type signatures"
                 (routeToPath Reference)
                 "View API →"
+                Nothing
 
             -- Explanation box (beige)
             , renderDocBox
@@ -84,6 +87,7 @@ render _ =
                 "Concepts, patterns, and design philosophy"
                 (routeToPath About)
                 "Learn More →"
+                (Just "bookmark.jpeg")
             ]
         ]
 
@@ -116,13 +120,21 @@ render _ =
     ]
 
 -- | Render a documentation category box
-renderDocBox :: forall w i. String -> String -> String -> String -> String -> HH.HTML w i
-renderDocBox category title description path linkText =
+renderDocBox :: forall w i. String -> String -> String -> String -> String -> Maybe String -> HH.HTML w i
+renderDocBox category title description path linkText maybeImage =
   HH.a
     [ HP.href $ "#" <> path
     , HP.classes [ HH.ClassName "home-doc-box", HH.ClassName $ "home-doc-box--" <> category ]
     ]
-    [ HH.div
+    [ case maybeImage of
+        Just imageSrc ->
+          HH.img
+            [ HP.src imageSrc
+            , HP.alt ""
+            , HP.classes [ HH.ClassName "home-doc-box__image" ]
+            ]
+        Nothing -> HH.text ""
+    , HH.div
         [ HP.classes [ HH.ClassName "home-doc-box__content" ] ]
         [ HH.h3
             [ HP.classes [ HH.ClassName "home-doc-box__title" ] ]

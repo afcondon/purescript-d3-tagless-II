@@ -288,11 +288,11 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq8) {
+    return function(eq9) {
       return function(gt) {
         return function(x23) {
           return function(y20) {
-            return x23 < y20 ? lt : x23 === y20 ? eq8 : gt;
+            return x23 < y20 ? lt : x23 === y20 ? eq9 : gt;
           };
         };
       };
@@ -860,13 +860,13 @@
     return v.value0;
   };
   var eqTuple = function(dictEq) {
-    var eq8 = eq(dictEq);
+    var eq9 = eq(dictEq);
     return function(dictEq1) {
       var eq14 = eq(dictEq1);
       return {
         eq: function(x23) {
           return function(y20) {
-            return eq8(x23.value0)(y20.value0) && eq14(x23.value1)(y20.value1);
+            return eq9(x23.value0)(y20.value0) && eq14(x23.value1)(y20.value1);
           };
         }
       };
@@ -17756,7 +17756,7 @@
     var discard111 = discard7(dictBind);
     return function(dictMonadEffect) {
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
-      var when5 = when(Applicative0);
+      var when6 = when(Applicative0);
       var pure113 = pure(Applicative0);
       var traverse_7 = traverse_(Applicative0)(foldableArray);
       return function(dictSelectionM) {
@@ -17784,8 +17784,8 @@
                     var r = hNodeR_(node);
                     var depth = hNodeDepth_(node);
                     var name16 = getName(node);
-                    return when5(r > 0)(bind32(appendTo2(chartGroup)(Circle.value)([cx3(xPos), cy3(yPos), radius3(r), fill3(depthColor(round2(depth))), fillOpacity2(0.7), strokeColor3("#ffffff"), strokeWidth3(1), classed3("bubble")]))(function() {
-                      return discard111(when5(r > 20)(bind32(appendTo2(chartGroup)(Text2.value)([x5(xPos), y5(yPos), text8(name16), textAnchor3("middle"), fontSize3(min7(12)(r / 3)), fill3("#ffffff"), classed3("bubble-label")]))(function() {
+                    return when6(r > 0)(bind32(appendTo2(chartGroup)(Circle.value)([cx3(xPos), cy3(yPos), radius3(r), fill3(depthColor(round2(depth))), fillOpacity2(0.7), strokeColor3("#ffffff"), strokeWidth3(1), classed3("bubble")]))(function() {
+                      return discard111(when6(r > 20)(bind32(appendTo2(chartGroup)(Text2.value)([x5(xPos), y5(yPos), text8(name16), textAnchor3("middle"), fontSize3(min7(12)(r / 3)), fill3("#ffffff"), classed3("bubble-label")]))(function() {
                         return pure113(unit);
                       })))(function() {
                         return pure113(unit);
@@ -19348,10 +19348,10 @@
     return new Tuple(toNumber(w), toNumber(h));
   };
   var equalSnd = function(dictEq) {
-    var eq8 = eq(dictEq);
+    var eq9 = eq(dictEq);
     return function(a2) {
       return function(b2) {
-        return eq8(snd(a2))(snd(b2));
+        return eq9(snd(a2))(snd(b2));
       };
     };
   };
@@ -23261,7 +23261,7 @@
     var discard111 = discard13(dictBind);
     return function(dictMonadEffect) {
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
-      var when5 = when(Applicative0);
+      var when6 = when(Applicative0);
       var pure39 = pure(Applicative0);
       var traverse_7 = traverse_(Applicative0)(foldableArray);
       return function(dictSelectionM) {
@@ -23292,8 +23292,8 @@
                     var partHeight = y110 - y0;
                     var depth = hNodeDepth_(node);
                     var name16 = getName2(node);
-                    return when5(partWidth > 0 && partHeight > 0)(bind32(appendTo2(chartGroup)(Rect.value)([x10(x0), y9(y0), width13(partWidth), height13(partHeight), fill6(depthColor2(round2(depth))), fillOpacity4(0.7), strokeColor7("#ffffff"), strokeWidth6(1), classed7("partition")]))(function() {
-                      return discard111(when5(partWidth > 60 && partHeight > 15)(bind32(appendTo2(chartGroup)(Text2.value)([x10(x0 + 4), y9(y0 + partHeight / 2 + 4), text10(name16), textAnchor5("start"), fontSize4(10), fill6("#ffffff"), classed7("partition-label")]))(function() {
+                    return when6(partWidth > 0 && partHeight > 0)(bind32(appendTo2(chartGroup)(Rect.value)([x10(x0), y9(y0), width13(partWidth), height13(partHeight), fill6(depthColor2(round2(depth))), fillOpacity4(0.7), strokeColor7("#ffffff"), strokeWidth6(1), classed7("partition")]))(function() {
+                      return discard111(when6(partWidth > 60 && partHeight > 15)(bind32(appendTo2(chartGroup)(Text2.value)([x10(x0 + 4), y9(y0 + partHeight / 2 + 4), text10(name16), textAnchor5("start"), fontSize4(10), fill6("#ffffff"), classed7("partition-label")]))(function() {
                         return pure39(unit);
                       })))(function() {
                         return pure39(unit);
@@ -23357,7 +23357,7 @@
     var discard111 = discard14(dictBind);
     return function(dictMonadEffect) {
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
-      var when5 = when(Applicative0);
+      var when6 = when(Applicative0);
       var pure39 = pure(Applicative0);
       var traverse_7 = traverse_(Applicative0)(foldableArray);
       return function(dictSelectionM) {
@@ -23388,8 +23388,8 @@
                     var tileHeight = y110 - y0;
                     var depth = hNodeDepth_(node);
                     var name16 = getName3(node);
-                    return when5(tileWidth > 0 && tileHeight > 0)(bind32(appendTo2(chartGroup)(Rect.value)([x11(x0), y10(y0), width14(tileWidth), height14(tileHeight), fill7(depthColor3(round2(depth))), fillOpacity5(0.6), strokeColor8("#ffffff"), strokeWidth7(1), classed8("tile")]))(function() {
-                      return discard111(when5(tileWidth > 30 && tileHeight > 20)(bind32(appendTo2(chartGroup)(Text2.value)([x11(x0 + 2), y10(y0 + 12), text11(name16), textAnchor6("start"), fontSize5(10), fill7("#ffffff"), classed8("tile-label")]))(function() {
+                    return when6(tileWidth > 0 && tileHeight > 0)(bind32(appendTo2(chartGroup)(Rect.value)([x11(x0), y10(y0), width14(tileWidth), height14(tileHeight), fill7(depthColor3(round2(depth))), fillOpacity5(0.6), strokeColor8("#ffffff"), strokeWidth7(1), classed8("tile")]))(function() {
+                      return discard111(when6(tileWidth > 30 && tileHeight > 20)(bind32(appendTo2(chartGroup)(Text2.value)([x11(x0 + 2), y10(y0 + 12), text11(name16), textAnchor6("start"), fontSize5(10), fill7("#ffffff"), classed8("tile-label")]))(function() {
                         return pure39(unit);
                       })))(function() {
                         return pure39(unit);
@@ -24752,14 +24752,26 @@
       return function(description) {
         return function(path3) {
           return function(linkText) {
-            return a([href4("#" + path3), classes(["home-doc-box", "home-doc-box--" + category])])([div2([classes(["home-doc-box__content"])])([h3([classes(["home-doc-box__title"])])([text5(title4)]), p([classes(["home-doc-box__description"])])([text5(description)]), span3([classes(["home-doc-box__link"])])([text5(linkText)])])]);
+            return function(maybeImage) {
+              return a([href4("#" + path3), classes(["home-doc-box", "home-doc-box--" + category])])([(function() {
+                if (maybeImage instanceof Just) {
+                  return img([src9(maybeImage.value0), alt5(""), classes(["home-doc-box__image"])]);
+                }
+                ;
+                if (maybeImage instanceof Nothing) {
+                  return text5("");
+                }
+                ;
+                throw new Error("Failed pattern match at PSD3.Home (line 129, column 7 - line 136, column 30): " + [maybeImage.constructor.name]);
+              })(), div2([classes(["home-doc-box__content"])])([h3([classes(["home-doc-box__title"])])([text5(title4)]), p([classes(["home-doc-box__description"])])([text5(description)]), span3([classes(["home-doc-box__link"])])([text5(linkText)])])]);
+            };
           };
         };
       };
     };
   };
   var render11 = function(v) {
-    return div2([classes(["home-page"])])([section([classes(["home-hero"])])([h1([classes(["home-hero__title"])])([text5("PS<$>D3")]), p([classes(["home-hero__subtitle"])])([text5("Type-safe, composable data visualization with PureScript and D3")]), p([classes(["home-hero__description"])])([text5("Finally Tagless design, functional programming principles, and the power of D3.js combined into an elegant, type-safe visualization library.")])]), section([classes(["home-docs"])])([h2([classes(["home-docs__title"])])([text5("Documentation")]), div2([classes(["home-docs__grid"])])([renderDocBox("tutorial")("Getting Started")("Installation, setup, and your first visualization")(routeToPath(GettingStarted.value))("Start Here \u2192"), renderDocBox("howto")("How-to Guides")("Step-by-step instructions for building specific visualizations")(routeToPath(HowtoIndex.value))("Browse Guides \u2192"), renderDocBox("reference")("API Reference")("Complete technical documentation with type signatures")(routeToPath(Reference.value))("View API \u2192"), renderDocBox("explanation")("Understanding")("Concepts, patterns, and design philosophy")(routeToPath(About.value))("Learn More \u2192")])]), section([classes(["home-examples"])])([h2([classes(["home-examples__title"])])([text5("Example Visualizations")]), div2([classes(["home-examples__grid"])])([renderExampleCard("Basic Charts")("Bar charts, line charts, and scatter plots")(routeToPath(Tutorial.value)), renderExampleCard("Hierarchies")("Trees, dendrograms, circle packing, and treemaps")(routeToPath(Hierarchies.value)), renderExampleCard("Network Diagrams")("Chord diagrams, Sankey diagrams, and force layouts")(routeToPath(ChordDiagram.value)), renderExampleCard("Code Explorer")("Interactive exploration of visualization code")(routeToPath(CodeExplorer.value))])])]);
+    return div2([classes(["home-page"])])([section([classes(["home-hero"])])([h1([classes(["home-hero__title"])])([text5("PS<$>D3")]), p([classes(["home-hero__subtitle"])])([text5("Type-safe, composable data visualization with PureScript and D3")]), p([classes(["home-hero__description"])])([text5("Finally Tagless design, functional programming principles, and the power of D3.js combined into an elegant, type-safe visualization library.")])]), section([classes(["home-docs"])])([h2([classes(["home-docs__title"])])([text5("Documentation")]), div2([classes(["home-docs__grid"])])([renderDocBox("tutorial")("Getting Started")("Installation, setup, and your first visualization")(routeToPath(GettingStarted.value))("Start Here \u2192")(Nothing.value), renderDocBox("howto")("How-to Guides")("Step-by-step instructions for building specific visualizations")(routeToPath(HowtoIndex.value))("Browse Guides \u2192")(new Just("cogs.jpeg")), renderDocBox("reference")("API Reference")("Complete technical documentation with type signatures")(routeToPath(Reference.value))("View API \u2192")(Nothing.value), renderDocBox("explanation")("Understanding")("Concepts, patterns, and design philosophy")(routeToPath(About.value))("Learn More \u2192")(new Just("bookmark.jpeg"))])]), section([classes(["home-examples"])])([h2([classes(["home-examples__title"])])([text5("Example Visualizations")]), div2([classes(["home-examples__grid"])])([renderExampleCard("Basic Charts")("Bar charts, line charts, and scatter plots")(routeToPath(Tutorial.value)), renderExampleCard("Hierarchies")("Trees, dendrograms, circle packing, and treemaps")(routeToPath(Hierarchies.value)), renderExampleCard("Network Diagrams")("Chord diagrams, Sankey diagrams, and force layouts")(routeToPath(ChordDiagram.value)), renderExampleCard("Code Explorer")("Interactive exploration of visualization code")(routeToPath(CodeExplorer.value))])])]);
   };
   var handleAction8 = function(v) {
     return pure32(unit);
@@ -27918,7 +27930,10 @@
   var bind31 = /* @__PURE__ */ bind(bindHalogenM);
   var pure38 = /* @__PURE__ */ pure(applicativeHalogenM);
   var liftEffect19 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
+  var discard26 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_8 = /* @__PURE__ */ modify_(monadStateHalogenM);
+  var when5 = /* @__PURE__ */ when(applicativeHalogenM);
+  var eq8 = /* @__PURE__ */ eq(eqRoute);
   var spy6 = /* @__PURE__ */ spy();
   var slot_15 = /* @__PURE__ */ slot_();
   var slot_1 = /* @__PURE__ */ slot_15({
@@ -28038,39 +28053,47 @@
     ;
     if (v instanceof RouteChanged) {
       if (v.value0 instanceof Just) {
-        return modify_8(function(v1) {
-          var $62 = {};
-          for (var $63 in v1) {
-            if ({}.hasOwnProperty.call(v1, $63)) {
-              $62[$63] = v1[$63];
+        return discard26(modify_8(function(v1) {
+          var $68 = {};
+          for (var $69 in v1) {
+            if ({}.hasOwnProperty.call(v1, $69)) {
+              $68[$69] = v1[$69];
             }
             ;
           }
           ;
-          $62.currentRoute = v.value0.value0;
-          return $62;
+          $68.currentRoute = v.value0.value0;
+          return $68;
+        }))(function() {
+          return when5(eq8(v.value0.value0)(Home.value))(bind31(liftEffect19(function __do4() {
+            var w = windowImpl();
+            var loc = location(w)();
+            return hash(loc)();
+          }))(function(currentHash) {
+            return when5(currentHash === "")(liftEffect19(setHash2("/")));
+          }));
         });
       }
       ;
       if (v.value0 instanceof Nothing) {
         return modify_8(function(v1) {
-          var $66 = {};
-          for (var $67 in v1) {
-            if ({}.hasOwnProperty.call(v1, $67)) {
-              $66[$67] = v1[$67];
+          var $72 = {};
+          for (var $73 in v1) {
+            if ({}.hasOwnProperty.call(v1, $73)) {
+              $72[$73] = v1[$73];
             }
             ;
           }
           ;
-          $66.currentRoute = NotFound.value;
-          return $66;
+          $72.currentRoute = NotFound.value;
+          return $72;
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Main (line 170, column 5 - line 172, column 57): " + [v.value0.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Main (line 174, column 5 - line 185, column 57): " + [v.value0.constructor.name]);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Main (line 155, column 16 - line 172, column 57): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Main (line 158, column 16 - line 185, column 57): " + [v.constructor.name]);
   };
   var _tutorial = /* @__PURE__ */ (function() {
     return $$Proxy.value;
@@ -28176,7 +28199,7 @@
       return div2([classes(["not-found"])])([h1_([text5("404 - Page Not Found")]), p_([text5("The page you're looking for doesn't exist.")]), a([href4("#" + routeToPath(Home.value))])([text5("Go to Home")])]);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Main (line 101, column 20 - line 152, column 8): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Main (line 104, column 20 - line 155, column 8): " + [v.constructor.name]);
   };
   var render18 = function(state3) {
     return div2([classes(["app"])])([main([classes(["app__main"])])([renderPage(state3.currentRoute)])]);
