@@ -82,7 +82,7 @@ lhsNav = renderTOC
       , { anchor: "section-6", label: "6. Anscombe's Quartet", level: 0 }
       , { anchor: "section-7", label: "7. Next Steps", level: 0 }
       ]
-  , image: Nothing
+  , image: Just "images/understanding-bookmark-trees.jpeg"
   }
 
 

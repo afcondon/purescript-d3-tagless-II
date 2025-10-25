@@ -82,7 +82,7 @@ render state =
             , { anchor: "reference", label: "API Reference", level: 0 }
             , { anchor: "related", label: "Related Examples", level: 0 }
             ]
-        , image: Just "cogs.jpeg"
+        , image: Just "images/howto-bookmark-volcano.jpeg"
         }
 
     -- Navigation Panel (RHS)

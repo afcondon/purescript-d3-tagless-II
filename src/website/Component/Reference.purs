@@ -51,7 +51,7 @@ render _ =
             , { anchor: "scales", label: "Scales", level: 0 }
             , { anchor: "axes", label: "Axes", level: 0 }
             ]
-        , image: Nothing
+        , image: Just "images/reference-bookmark-deepseavent.jpeg"
         }
 
     -- Navigation Panel (RHS)

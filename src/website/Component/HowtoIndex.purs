@@ -49,7 +49,7 @@ render _ =
             , { anchor: "interaction", label: "Interactivity", level: 0 }
             , { anchor: "advanced", label: "Advanced Techniques", level: 0 }
             ]
-        , image: Nothing
+        , image: Just "images/howto-bookmark-volcano.jpeg"
         }
 
     -- Navigation Panel (RHS)

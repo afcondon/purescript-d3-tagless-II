@@ -48,7 +48,7 @@ render _ =
             , { anchor: "first-viz", label: "Your First Visualization", level: 0 }
             , { anchor: "next-steps", label: "Next Steps", level: 0 }
             ]
-        , image: Nothing
+        , image: Just "images/tutorial-bookmark-balloons.jpeg"
         }
 
     -- Navigation Panel (RHS)

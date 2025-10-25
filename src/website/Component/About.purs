@@ -58,7 +58,7 @@ render _ =
             , { anchor: "heading-17", label: "What's a DSL? and what's an eDSL?", level: 1 }
             , { anchor: "heading-20", label: "The grammar of D3...", level: 1 }
             ]
-        , image: Nothing
+        , image: Just "images/understanding-bookmark-trees.jpeg"
         }
 
     -- Navigation Panel (RHS)
