@@ -1,8 +1,8 @@
-/* Tutorial Page Styles - Getting Started guides */
+/* Explanation Page Styles - Also used by About page */
 
-.tutorial-page {
+.explanation-page {
   min-height: 100vh;
-  background-color: #fffdf7; /* Light cream - warm and welcoming */
+  background-color: var(--color-beige-base);
   padding: 2rem 1rem;
   position: relative;
 }
@@ -208,7 +208,7 @@
 
 /* Navigation Panel (RHS) */
 /* Positioned relative to center column (52rem wide) */
-.tutorial-page__nav-panel {
+.explanation-page__nav-panel {
   position: fixed;
   top: 2rem;
   /* Position to right of center column: 50% - half column width - panel width - gap */
@@ -221,7 +221,7 @@
   z-index: 1000;
 }
 
-.tutorial-page__nav-title {
+.explanation-page__nav-title {
   font-family: var(--font-mono);
   font-size: 0.875rem;
   font-weight: bold;
@@ -233,13 +233,13 @@
   border-bottom: 2px solid var(--color-red-accent);
 }
 
-.tutorial-page__nav-links {
+.explanation-page__nav-links {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.tutorial-page__nav-link {
+.explanation-page__nav-link {
   display: block;
   font-family: var(--font-mono);
   font-size: 0.875rem;
@@ -250,13 +250,13 @@
   transition: all 0.15s ease;
 }
 
-.tutorial-page__nav-link:hover {
+.explanation-page__nav-link:hover {
   background-color: var(--color-beige-base);
   border-left-color: var(--color-red-accent);
   color: var(--color-gray-darker);
 }
 
-.tutorial-page__nav-link--active {
+.explanation-page__nav-link--active {
   background-color: var(--color-beige-base);
   border-left-color: var(--color-red-accent);
   font-weight: bold;
@@ -264,11 +264,11 @@
   cursor: default;
 }
 
-.tutorial-page__nav-link--external {
+.explanation-page__nav-link--external {
   color: var(--color-teal);
 }
 
-.tutorial-page__nav-link--external:hover {
+.explanation-page__nav-link--external:hover {
   color: var(--color-teal);
   border-left-color: var(--color-teal);
 }
@@ -596,7 +596,7 @@
     left: 2rem;
   }
 
-  .tutorial-page__nav-panel {
+  .explanation-page__nav-panel {
     /* Switch to edge positioning when viewport is too narrow */
     right: 2rem;
   }
@@ -612,7 +612,7 @@
     width: 60px;
   }
 
-  .tutorial-page__nav-panel {
+  .explanation-page__nav-panel {
     width: 200px;
     right: 1.5rem;
   }
@@ -690,7 +690,7 @@
 
   /* Hide TOC and Nav panel on mobile */
   .toc-panel,
-  .tutorial-page__nav-panel {
+  .explanation-page__nav-panel {
     display: none;
   }
 }

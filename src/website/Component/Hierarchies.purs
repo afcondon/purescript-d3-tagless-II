@@ -89,7 +89,7 @@ component = H.mkComponent
 render :: State -> H.ComponentHTML Action Slots Aff
 render state =
   HH.div
-    [ HP.classes [ HH.ClassName "tutorial-page" ] ]
+    [ HP.classes [ HH.ClassName "explanation-page" ] ]
     [ -- Control Panel (LHS)
       HH.div
         [ HP.classes [ HH.ClassName "toc-panel", HH.ClassName "control-panel" ] ]

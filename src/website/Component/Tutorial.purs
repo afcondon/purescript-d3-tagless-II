@@ -89,7 +89,7 @@ lhsNav = renderTOC
 render :: State -> H.ComponentHTML Action Slots Aff
 render state =
   HH.div
-    [ HP.classes [ HH.ClassName "tutorial-page" ] ]
+    [ HP.classes [ HH.ClassName "explanation-page" ] ]
     [ lhsNav
     -- Navigation Panel (RHS)
     , HH.slot_ _rhsNav unit RHSNav.component Tutorial

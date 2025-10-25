@@ -70,7 +70,7 @@ handleAction = case _ of
 render :: State -> H.ComponentHTML Action Slots Aff
 render state =
   HH.div
-    [ HP.classes [ HH.ClassName "tutorial-page", HH.ClassName "exploration-page" ] ]
+    [ HP.classes [ HH.ClassName "explanation-page", HH.ClassName "exploration-page" ] ]
     [ -- TOC Panel (LHS) - sections for this breakdown
       renderTOC
         { title: "Breakdown"

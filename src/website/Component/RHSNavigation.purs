@@ -13,7 +13,7 @@ type Input = Route
 type Slots :: forall k. Row k
 type Slots = ()
 
--- | RHS navigation panel component for tutorial-style pages
+-- | RHS navigation panel component for explanation-style pages
 component :: forall q o m. H.Component q Input o m
 component = H.mkComponent
   { initialState: identity
@@ -24,12 +24,12 @@ component = H.mkComponent
 render :: forall m. Route -> H.ComponentHTML Unit Slots m
 render currentRoute =
   HH.div
-    [ HP.classes [ HH.ClassName "tutorial-page__nav-panel" ] ]
+    [ HP.classes [ HH.ClassName "explanation-page__nav-panel" ] ]
     [ HH.h3
-        [ HP.classes [ HH.ClassName "tutorial-page__nav-title" ] ]
+        [ HP.classes [ HH.ClassName "explanation-page__nav-title" ] ]
         [ HH.text "Explore" ]
     , HH.nav
-        [ HP.classes [ HH.ClassName "tutorial-page__nav-links" ] ]
+        [ HP.classes [ HH.ClassName "explanation-page__nav-links" ] ]
         [ navLink About "About" currentRoute
         , navLink Tutorial "Tutorial" currentRoute
         , navLink SimpleCharts "Simple Charts" currentRoute
@@ -43,7 +43,7 @@ render currentRoute =
             [ HP.href "https://github.com/afcondon/purescript-d3-tagless"
             , HP.target "_blank"
             , HP.rel "noopener noreferrer"
-            , HP.classes [ HH.ClassName "tutorial-page__nav-link", HH.ClassName "tutorial-page__nav-link--external" ]
+            , HP.classes [ HH.ClassName "explanation-page__nav-link", HH.ClassName "explanation-page__nav-link--external" ]
             ]
             [ HH.text "GitHub ↗" ]
         ]
@@ -57,12 +57,12 @@ navLink route label currentRoute =
     then
       -- Current page: highlighted, non-clickable
       HH.span
-        [ HP.classes [ HH.ClassName "tutorial-page__nav-link", HH.ClassName "tutorial-page__nav-link--active" ] ]
+        [ HP.classes [ HH.ClassName "explanation-page__nav-link", HH.ClassName "explanation-page__nav-link--active" ] ]
         [ HH.text label ]
     else
       -- Other pages: normal clickable link
       HH.a
         [ HP.href $ "#" <> routeToPath route
-        , HP.classes [ HH.ClassName "tutorial-page__nav-link" ]
+        , HP.classes [ HH.ClassName "explanation-page__nav-link" ]
         ]
         [ HH.text (label <> " →") ]

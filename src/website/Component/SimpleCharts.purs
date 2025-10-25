@@ -50,7 +50,7 @@ handleAction = case _ of
 render :: State -> H.ComponentHTML Action Slots Aff
 render _ =
   HH.div
-    [ HP.classes [ HH.ClassName "tutorial-page" ] ]
+    [ HP.classes [ HH.ClassName "explanation-page" ] ]
     [ -- TOC Panel (LHS)
       renderTOC
         { title: "Contents"
