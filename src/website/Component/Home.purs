@@ -50,41 +50,37 @@ render _ =
         [ HP.classes [ HH.ClassName "home-docs" ] ]
         [ HH.div
             [ HP.classes [ HH.ClassName "home-docs__grid" ] ]
-            [ -- Tutorial box (cream)
+            [ -- Tutorial box (air themed)
               renderDocBox
-                "tutorial"
                 "Getting Started"
                 "Installation, setup, and your first visualization"
                 (routeToPath GettingStarted)
                 "Start Here →"
-                Nothing
+                (Just "air.jpeg")
 
-            -- How-to box (light blue)
+            -- How-to box (fire themed)
             , renderDocBox
-                "howto"
                 "How-to Guides"
                 "Step-by-step instructions for building specific visualizations"
                 (routeToPath HowtoIndex)
                 "Browse Guides →"
-                (Just "cogs.jpeg")
+                (Just "fire.jpeg")
 
-            -- Reference box (white)
+            -- Reference box (water themed)
             , renderDocBox
-                "reference"
                 "API Reference"
                 "Complete technical documentation with type signatures"
                 (routeToPath Reference)
                 "View API →"
-                Nothing
+                (Just "water.jpeg")
 
-            -- Explanation box (beige)
+            -- Explanation box (earth themed)
             , renderDocBox
-                "explanation"
                 "Understanding"
                 "Concepts, patterns, and design philosophy"
                 (routeToPath About)
                 "Learn More →"
-                (Just "bookmark.jpeg")
+                (Just "earth.jpeg")
             ]
         ]
 
@@ -117,20 +113,28 @@ render _ =
     ]
 
 -- | Render a documentation category box
-renderDocBox :: forall w i. String -> String -> String -> String -> String -> Maybe String -> HH.HTML w i
-renderDocBox category title description path linkText maybeImage =
+renderDocBox :: forall w i. String -> String -> String -> String -> Maybe String -> HH.HTML w i
+renderDocBox title description path linkText maybeImage =
   HH.a
     [ HP.href $ "#" <> path
-    , HP.classes [ HH.ClassName "home-doc-box", HH.ClassName $ "home-doc-box--" <> category ]
+    , HP.classes [ HH.ClassName "home-doc-box" ]
     ]
-    [ case maybeImage of
+    [ -- Left side: bookmark image (1/8th width)
+      case maybeImage of
         Just imageSrc ->
-          HH.img
-            [ HP.src imageSrc
-            , HP.alt ""
-            , HP.classes [ HH.ClassName "home-doc-box__image" ]
+          HH.div
+            [ HP.classes [ HH.ClassName "home-doc-box__image-container" ] ]
+            [ HH.img
+                [ HP.src imageSrc
+                , HP.alt ""
+                , HP.classes [ HH.ClassName "home-doc-box__image" ]
+                ]
             ]
-        Nothing -> HH.text ""
+        Nothing ->
+          HH.div
+            [ HP.classes [ HH.ClassName "home-doc-box__image-container" ] ]
+            []
+    -- Right side: content (7/8ths width, center-justified)
     , HH.div
         [ HP.classes [ HH.ClassName "home-doc-box__content" ] ]
         [ HH.h3

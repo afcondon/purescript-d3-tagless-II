@@ -2,7 +2,7 @@
 
 .home-page {
   min-height: 100vh;
-  background-color: var(--color-beige-base);
+  background-color: #fafafa; /* Off-white background */
   font-family: var(--font-mono);
 }
 
@@ -67,56 +67,46 @@
 
 /* Documentation Category Boxes */
 .home-doc-box {
-  display: block;
+  display: flex;
+  flex-direction: row;
   text-decoration: none;
-  border: 2px solid var(--color-gray-medium);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border: 1px solid #000000; /* Thin black border */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.2s ease;
   position: relative;
   aspect-ratio: 1 / 1;
   overflow: hidden;
+  background-color: #ffffff; /* White background */
 }
 
 .home-doc-box:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  border-color: var(--color-gray-darker);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-.home-doc-box--tutorial {
-  background-color: #fffdf7; /* Light cream */
-}
-
-.home-doc-box--howto {
-  background-color: #f0f8ff; /* Light blue */
-}
-
-.home-doc-box--reference {
-  background-color: #ffffff; /* White */
-}
-
-.home-doc-box--explanation {
-  background-color: var(--color-beige-base); /* Beige */
-}
-
-.home-doc-box__content {
-  padding: 1.5rem;
+/* Bookmark image on left side - 1/8th width */
+.home-doc-box__image-container {
+  width: 12.5%; /* 1/8th */
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  z-index: 1;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 .home-doc-box__image {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 50%;
-  height: 50%;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  opacity: 0.3;
-  z-index: 0;
+  object-position: center;
+}
+
+/* Content on right side - 7/8ths width */
+.home-doc-box__content {
+  width: 87.5%; /* 7/8ths */
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center-justify vertically */
+  align-items: flex-start;
 }
 
 .home-doc-box__title {
@@ -125,27 +115,26 @@
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin: 0 0 0.75rem 0;
-  color: var(--color-gray-darker);
+  color: #000000; /* Black text */
 }
 
 .home-doc-box__description {
   font-size: 0.8125rem;
   line-height: 1.5;
-  color: var(--color-gray-medium);
+  color: #000000; /* Black text */
   margin: 0 0 1rem 0;
-  flex: 1;
 }
 
 .home-doc-box__link {
   font-size: 0.875rem;
   font-weight: bold;
-  color: var(--color-red-accent);
+  color: #000000; /* Black text */
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
 
 .home-doc-box:hover .home-doc-box__link {
-  color: var(--color-coral);
+  text-decoration: underline;
 }
 
 /* Examples Section */
