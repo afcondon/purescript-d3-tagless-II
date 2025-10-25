@@ -50,37 +50,37 @@ render _ =
         [ HP.classes [ HH.ClassName "home-docs" ] ]
         [ HH.div
             [ HP.classes [ HH.ClassName "home-docs__grid" ] ]
-            [ -- Tutorial box (air themed)
+            [ -- Tutorial box (air themed - balloons)
               renderDocBox
                 "Getting Started"
                 "Installation, setup, and your first visualization"
                 (routeToPath GettingStarted)
                 "Start Here →"
-                (Just "air.jpeg")
+                (Just "images/tutorial-bookmark-balloons.jpeg")
 
-            -- How-to box (fire themed)
+            -- How-to box (fire themed - volcano)
             , renderDocBox
                 "How-to Guides"
                 "Step-by-step instructions for building specific visualizations"
                 (routeToPath HowtoIndex)
                 "Browse Guides →"
-                (Just "fire.jpeg")
+                (Just "images/howto-bookmark-volcano.jpeg")
 
-            -- Reference box (water themed)
+            -- Reference box (water themed - deep sea vent)
             , renderDocBox
                 "API Reference"
                 "Complete technical documentation with type signatures"
                 (routeToPath Reference)
                 "View API →"
-                (Just "water.jpeg")
+                (Just "images/reference-bookmark-deepseavent.jpeg")
 
-            -- Explanation box (earth themed)
+            -- Explanation box (earth themed - trees)
             , renderDocBox
                 "Understanding"
                 "Concepts, patterns, and design philosophy"
                 (routeToPath About)
                 "Learn More →"
-                (Just "earth.jpeg")
+                (Just "images/understanding-bookmark-trees.jpeg")
             ]
         ]
 
