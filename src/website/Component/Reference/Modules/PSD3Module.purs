@@ -1,4 +1,91 @@
--- | PSD3: PureScript D3 - Type-safe, composable data visualization
+module PSD3.Reference.Modules.PSD3Module where
+
+import Prelude
+
+import Data.Maybe (Maybe(..))
+import Data.String as String
+import Effect.Aff (Aff)
+import Halogen as H
+import Halogen.HTML as HH
+import Halogen.HTML.Properties as HP
+import PSD3.Shared.DocParser as DocParser
+import PSD3.Shared.RHSNavigation as RHSNav
+import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Website.Types (Route(..))
+import Type.Proxy (Proxy(..))
+
+type State = Unit
+data Action = Initialize
+
+type Slots = ( rhsNav :: forall q. H.Slot q Void Unit )
+_rhsNav = Proxy :: Proxy "rhsNav"
+
+component :: forall q i. H.Component q i Void Aff
+component = H.mkComponent
+  { initialState: \_ -> unit
+  , render
+  , eval: H.mkEval H.defaultEval
+      { handleAction = handleAction
+      , initialize = Just Initialize
+      }
+  }
+
+render :: State -> H.ComponentHTML Action Slots Aff
+render _ =
+  let
+    parsed = DocParser.parseDocumentation sourceCode
+  in
+  HH.div
+    [ HP.classes [ HH.ClassName "reference-page" ] ]
+    [ renderTOC
+        { title: "PSD3"
+        , items:
+            [ { anchor: "overview", label: "PSD3 Module", level: 0 }
+            ]
+        , image: Just "images/reference-bookmark-trees.jpeg"
+        }
+
+    , HH.slot_ _rhsNav unit RHSNav.component Reference
+
+    -- Module info box
+    , HH.div
+        [ HP.classes [ HH.ClassName "module-info-box" ] ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "module-info-left" ] ]
+            [ HH.strong_ [ HH.text "Module: " ]
+            , HH.code_ [ HH.text "PSD3" ]
+            ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "module-info-right" ] ]
+            [ HH.strong_ [ HH.text "File: " ]
+            , HH.code_ [ HH.text "src/lib/PSD3.purs" ]
+            ]
+        ]
+
+    -- Documentation section
+    , HH.div
+        [ HP.classes [ HH.ClassName "reference-content" ]
+        , HP.id "overview"
+        ]
+        (DocParser.markdownToHtml parsed.docLines)
+
+    -- Source code section
+    , HH.div
+        [ HP.classes [ HH.ClassName "reference-code-section" ] ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "reference-code-title" ] ]
+            [ HH.text "Source Code" ]
+        , HH.pre_
+            [ HH.code
+                [ HP.classes [ HH.ClassName "language-haskell" ] ]
+                [ HH.text (String.joinWith "\n" parsed.codeLines) ]
+            ]
+        ]
+    ]
+
+-- The complete source code
+sourceCode :: String
+sourceCode = """-- | PSD3: PureScript D3 - Type-safe, composable data visualization
 -- |
 -- | PSD3 is a PureScript library for creating D3.js visualizations using a type-safe,
 -- | functional API. It wraps D3's selection, simulation, and layout APIs in a monadic
@@ -64,17 +151,17 @@
 -- |
 -- | barChart :: forall m. SelectionM D3Selection_ m => Array Number -> m Unit
 -- | barChart data = do
--- |   svg <- attach "#chart" >>= \r -> appendTo r Svg [A.width 500.0, A.height 300.0]
+-- |   svg <- attach "#chart" >>= \\r -> appendTo r Svg [A.width 500.0, A.height 300.0]
 -- |
 -- |   -- Data join: bind array to rectangles
--- |   bars <- simpleJoin svg Rect data keyIsID_
+-- |   bars <- simpleJoin svg Rect data (\\d -> unsafeCoerce d)
 -- |
 -- |   -- Set attributes from data
 -- |   setAttributes bars
--- |     [ A.x (\d i -> i * 25.0)          -- Position by index
--- |     , A.y (\d -> 300.0 - d)           -- Height from data value
+-- |     [ A.x (\\d i -> i * 25.0)          -- Position by index
+-- |     , A.y (\\d -> 300.0 - d)           -- Height from data value
 -- |     , A.width 20.0
--- |     , A.height (\d -> d)              -- Bar height = data value
+-- |     , A.height (\\d -> d)              -- Bar height = data value
 -- |     , A.fill "steelblue"
 -- |     ]
 -- |
@@ -98,7 +185,7 @@
 -- |   GraphData ->
 -- |   m Unit
 -- | forceGraph graph = do
--- |   svg <- attach "#chart" >>= \r -> appendTo r Svg [A.width 800.0, A.height 600.0]
+-- |   svg <- attach "#chart" >>= \\r -> appendTo r Svg [A.width 800.0, A.height 600.0]
 -- |
 -- |   -- Load data into simulation
 -- |   nodesInSim <- setNodes graph.nodes
@@ -135,7 +222,7 @@
 -- |   FlowData ->
 -- |   m Unit
 -- | sankeyDiagram data = do
--- |   svg <- attach "#chart" >>= \r -> appendTo r Svg [A.width 1000.0, A.height 600.0]
+-- |   svg <- attach "#chart" >>= \\r -> appendTo r Svg [A.width 1000.0, A.height 600.0]
 -- |
 -- |   -- Compute layout
 -- |   layoutResult <- setSankeyData data 1000.0 600.0
@@ -154,8 +241,8 @@
 -- |   setAttributes nodes
 -- |     [ A.x node_.x0
 -- |     , A.y node_.y0
--- |     , A.width (\n -> node_.x1 n - node_.x0 n)
--- |     , A.height (\n -> node_.y1 n - node_.y0 n)
+-- |     , A.width (\\n -> node_.x1 n - node_.x0 n)
+-- |     , A.height (\\n -> node_.y1 n - node_.y0 n)
 -- |     , A.fill node_.color
 -- |     ]
 -- | ```
@@ -289,3 +376,8 @@ import PSD3.Interpreter.D3 (D3M, D3SankeyM, D3SimM, eval_D3M, evalEffectSankey, 
 
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector) as X
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute) as X
+"""
+
+handleAction :: forall m. Action -> H.HalogenM State Action Slots Void m Unit
+handleAction = case _ of
+  Initialize -> pure unit

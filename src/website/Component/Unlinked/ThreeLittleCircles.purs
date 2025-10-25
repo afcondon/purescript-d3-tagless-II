@@ -4,6 +4,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState, modify_)
 import D3.Viz.ThreeLittleCircles as Circles
+import D3.Viz.Parabola as Parabola
 import PSD3.Button as Button
 import PSD3.Expandable as Expandable
 import PSD3.FormField as FormField
@@ -106,7 +107,7 @@ handleAction = case _ of
     void $ H.liftEffect $ eval_D3M $ 
       if toggle'
       then Circles.drawThreeCircles container
-      else Circles.drawWithData [310, 474, 613, 726, 814, 877, 914, 926, 914, 877, 814, 726, 613, 474, 310] container
+      else Parabola.drawWithData [310, 474, 613, 726, 814, 877, 914, 926, 914, 877, 814, 726, 613, 474, 310] container
     modify_ (\s -> s { toggle = toggle' })
 
   Finalize -> pure unit

@@ -4,6 +4,7 @@ import Prelude
 
 import Control.Monad.Rec.Class (forever)
 import D3.Viz.ThreeLittleCircles as Circles
+import D3.Viz.Parabola as Parabola
 import D3.Viz.GUP as GUP
 import D3.Viz.BarChart as BarChart
 import D3.Viz.LineChart as LineChart
@@ -315,7 +316,7 @@ handleAction = case _ of
     H.modify_ (\state -> state { gupFiber = Just fiber })
 
     -- Draw Parabola of Circles
-    _ <- H.liftEffect $ eval_D3M $ Circles.drawWithData [310, 474, 613, 726, 814, 877, 914, 926, 914, 877, 814, 726, 613, 474, 310] "div.parabola-viz"
+    _ <- H.liftEffect $ eval_D3M $ Parabola.drawWithData [310, 474, 613, 726, 814, 877, 914, 926, 914, 877, 814, 726, 613, 474, 310] "div.parabola-viz"
 
     -- Draw Bar Chart
     _ <- H.liftEffect $ eval_D3M $ BarChart.draw monthlySales "div.barchart-viz"

@@ -5,10 +5,10 @@ import PSD3.Internal.Attributes.Sugar
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSelection, setAttributes, updateJoin)
+import D3.Viz.GUP.Unsafe (coerceDatumToChar, coerceIndexToNumber, coerceDatumToKey)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))
 import Prelude (bind, discard, pure, ($), (*), (+), (<<<))
-import Unsafe.Coerce (unsafeCoerce)
 
 -- | ====================================================================================
 -- | Simple-as-can-be example of the more complex Join which allows for new data to be
@@ -18,16 +18,15 @@ import Unsafe.Coerce (unsafeCoerce)
 -- Name: GUP
 type Model = Array Char
 
--- in the interests of brevity these unsafe functions are defined here with the "script"
--- however, in a larger program both Model and Unsafe would be their own modules
-datumIsChar :: Datum_ -> Char
-datumIsChar = unsafeCoerce
-
-indexIsNumber :: Index_ -> Number
-indexIsNumber = unsafeCoerce
-
-keyFunction :: Datum_ -> Index_ -- for this very simple example, the data (Char) can be used directly as the key
-keyFunction = unsafeCoerce
+-- | Accessor record for working with bound data
+datum_ ::
+  { char :: Datum_ -> Char
+  , indexNum :: Index_ -> Number
+  }
+datum_ =
+  { char: coerceDatumToChar
+  , indexNum: coerceIndexToNumber
+  }
 
 exGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
 exGeneralUpdatePattern selector = do 
@@ -37,33 +36,33 @@ exGeneralUpdatePattern selector = do
   
   pure $ \letters -> do
     enterSelection   <- openSelection letterGroup "text"
-    updateSelections <- updateJoin enterSelection Text letters keyFunction
+    updateSelections <- updateJoin enterSelection Text letters coerceDatumToKey
     setAttributes updateSelections.exit exit
     setAttributes updateSelections.update update
 
     newlyEntered     <- appendTo updateSelections.enter Text []
     setAttributes newlyEntered enter
-    
+
     pure newlyEntered
 
-  where 
+  where
     transition :: SelectionAttribute
     transition = transitionWithDuration $ Milliseconds 2000.0
 
     xFromIndex :: Datum_ -> Index_ -> Number
-    xFromIndex _ i = 50.0 + ((indexIsNumber i) * 48.0) -- letters enter at this position, and then must transition to new position on each update
+    xFromIndex _ i = 50.0 + (datum_.indexNum i * 48.0) -- letters enter at this position, and then must transition to new position on each update
 
     enter = [ classed  "enter"
             , fill     "green"
             , x        xFromIndex
             , y        0.0
-            , text     (singleton <<< datumIsChar)
-            , fontSize 60.0 ]  
-          `andThen` (transition `to` [ y 200.0 ]) 
+            , text     (singleton <<< datum_.char)
+            , fontSize 60.0 ]
+          `andThen` (transition `to` [ y 200.0 ])
 
-    update =  [ classed "update", fill "gray", y 200.0 ] 
-              `andThen` (transition `to` [ x xFromIndex ] ) 
+    update =  [ classed "update", fill "gray", y 200.0 ]
+              `andThen` (transition `to` [ x xFromIndex ] )
 
-    exit =  [ classed "exit", fill "brown"] 
+    exit =  [ classed "exit", fill "brown"]
             `andThen` (transition `to` [ y 400.0, remove ])
 -- Snippet_End

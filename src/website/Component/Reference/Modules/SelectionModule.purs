@@ -1,4 +1,64 @@
--- | PSD3.Capabilities.Selection - Core D3 selection operations
+module PSD3.Reference.Modules.SelectionModule where
+
+import Prelude
+import Data.Maybe (Maybe(..))
+import Data.String as String
+import Effect.Aff (Aff)
+import Halogen as H
+import Halogen.HTML as HH
+import Halogen.HTML.Properties as HP
+import PSD3.Shared.DocParser as DocParser
+import PSD3.Shared.RHSNavigation as RHSNav
+import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Website.Types (Route(..))
+import Type.Proxy (Proxy(..))
+
+type State = Unit
+data Action = Initialize
+type Slots = ( rhsNav :: forall q. H.Slot q Void Unit )
+_rhsNav = Proxy :: Proxy "rhsNav"
+
+component :: forall q i. H.Component q i Void Aff
+component = H.mkComponent
+  { initialState: \_ -> unit
+  , render
+  , eval: H.mkEval H.defaultEval { handleAction = handleAction, initialize = Just Initialize }
+  }
+
+render :: State -> H.ComponentHTML Action Slots Aff
+render _ =
+  let
+    parsed = DocParser.parseDocumentation sourceCode
+  in
+  HH.div
+    [ HP.classes [ HH.ClassName "reference-page" ] ]
+    [ renderTOC
+        { title: "Selection"
+        , items: [ { anchor: "overview", label: "Selection Capability", level: 0 } ]
+        , image: Just "images/reference-bookmark-trees.jpeg"
+        }
+    , HH.slot_ _rhsNav unit RHSNav.component Reference
+    , HH.div
+        [ HP.classes [ HH.ClassName "module-info-box" ] ]
+        [ HH.div [ HP.classes [ HH.ClassName "module-info-left" ] ]
+            [ HH.strong_ [ HH.text "Module: " ], HH.code_ [ HH.text "PSD3.Capabilities.Selection" ] ]
+        , HH.div [ HP.classes [ HH.ClassName "module-info-right" ] ]
+            [ HH.strong_ [ HH.text "File: " ], HH.code_ [ HH.text "src/lib/PSD3/Capabilities/Selection.purs" ] ]
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "reference-content" ], HP.id "overview" ]
+        (DocParser.markdownToHtml parsed.docLines)
+    , HH.div
+        [ HP.classes [ HH.ClassName "reference-code-section" ] ]
+        [ HH.h2 [ HP.classes [ HH.ClassName "reference-code-title" ] ]
+            [ HH.text "Source Code" ]
+        , HH.pre_ [ HH.code [ HP.classes [ HH.ClassName "language-haskell" ] ]
+            [ HH.text (String.joinWith "\n" parsed.codeLines) ] ]
+        ]
+    ]
+
+sourceCode :: String
+sourceCode = """-- | PSD3.Capabilities.Selection - Core D3 selection operations
 -- |
 -- | This module defines the `SelectionM` type class, which provides the fundamental
 -- | operations for creating and manipulating D3 selections. It abstracts over D3's
@@ -184,7 +244,7 @@ class (Monad m) <= SelectionM selection m where
   -- |
   -- | ```purescript
   -- | let data = [1, 2, 3, 4, 5]
-  -- | circles <- simpleJoin svg Circle data keyIsID_
+  -- | circles <- simpleJoin svg Circle data (\\d -> unsafeCoerce d)
   -- | setAttributes circles [cy 50.0, radius 10.0]
   -- | ```
   -- |
@@ -219,3 +279,8 @@ class (Monad m) <= SelectionM selection m where
   -- | See https://d3js.org/d3-selection#joining-data for the General Update Pattern.
   updateJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_)
     -> m { enter :: selection, exit :: selection, update :: selection }
+"""
+
+handleAction :: forall m. Action -> H.HalogenM State Action Slots Void m Unit
+handleAction = case _ of
+  Initialize -> pure unit

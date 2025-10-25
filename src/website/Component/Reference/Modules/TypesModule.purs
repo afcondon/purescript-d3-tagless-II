@@ -1,4 +1,64 @@
--- | PSD3.Types - Common type definitions
+module PSD3.Reference.Modules.TypesModule where
+
+import Prelude
+import Data.Maybe (Maybe(..))
+import Data.String as String
+import Effect.Aff (Aff)
+import Halogen as H
+import Halogen.HTML as HH
+import Halogen.HTML.Properties as HP
+import PSD3.Shared.DocParser as DocParser
+import PSD3.Shared.RHSNavigation as RHSNav
+import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Website.Types (Route(..))
+import Type.Proxy (Proxy(..))
+
+type State = Unit
+data Action = Initialize
+type Slots = ( rhsNav :: forall q. H.Slot q Void Unit )
+_rhsNav = Proxy :: Proxy "rhsNav"
+
+component :: forall q i. H.Component q i Void Aff
+component = H.mkComponent
+  { initialState: \_ -> unit
+  , render
+  , eval: H.mkEval H.defaultEval { handleAction = handleAction, initialize = Just Initialize }
+  }
+
+render :: State -> H.ComponentHTML Action Slots Aff
+render _ =
+  let
+    parsed = DocParser.parseDocumentation sourceCode
+  in
+  HH.div
+    [ HP.classes [ HH.ClassName "reference-page" ] ]
+    [ renderTOC
+        { title: "Types"
+        , items: [ { anchor: "overview", label: "Types Module", level: 0 } ]
+        , image: Just "images/reference-bookmark-trees.jpeg"
+        }
+    , HH.slot_ _rhsNav unit RHSNav.component Reference
+    , HH.div
+        [ HP.classes [ HH.ClassName "module-info-box" ] ]
+        [ HH.div [ HP.classes [ HH.ClassName "module-info-left" ] ]
+            [ HH.strong_ [ HH.text "Module: " ], HH.code_ [ HH.text "PSD3.Types" ] ]
+        , HH.div [ HP.classes [ HH.ClassName "module-info-right" ] ]
+            [ HH.strong_ [ HH.text "File: " ], HH.code_ [ HH.text "src/lib/PSD3/Types.purs" ] ]
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "reference-content" ], HP.id "overview" ]
+        (DocParser.markdownToHtml parsed.docLines)
+    , HH.div
+        [ HP.classes [ HH.ClassName "reference-code-section" ] ]
+        [ HH.h2 [ HP.classes [ HH.ClassName "reference-code-title" ] ]
+            [ HH.text "Source Code" ]
+        , HH.pre_ [ HH.code [ HP.classes [ HH.ClassName "language-haskell" ] ]
+            [ HH.text (String.joinWith "\n" parsed.codeLines) ] ]
+        ]
+    ]
+
+sourceCode :: String
+sourceCode = """-- | PSD3.Types - Common type definitions
 -- |
 -- | This module re-exports type definitions used throughout PSD3. These types
 -- | represent DOM elements, selections, simulation state, mouse events, and more.
@@ -31,7 +91,7 @@
 -- | **Datum_**
 -- | - Opaque type representing data bound to DOM elements
 -- | - D3's internal representation of your data
--- | - Create coercion functions in an `Unsafe.purs` module (see wizard-generated examples)
+-- | - Use `unsafeCoerce` to convert to your actual data type (requires care)
 -- |
 -- | **Index_**
 -- | - Element index in D3's internal representation
@@ -72,8 +132,8 @@
 -- |
 -- | Used with event handlers:
 -- | ```purescript
--- | onMouseEvent MouseClick (\d i el -> trace ("Clicked: " <> show d))
--- | onMouseEventEffectful MouseEnter (\d i el -> do
+-- | onMouseEvent MouseClick (\\d i el -> trace ("Clicked: " <> show d))
+-- | onMouseEventEffectful MouseEnter (\\d i el -> do
 -- |   log "Mouse entered element"
 -- | )
 -- | ```
@@ -239,3 +299,8 @@ import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionA
 import PSD3.Internal.Simulation.Types (D3SimulationState_, SimVariable(..), Step(..)) as X
 import PSD3.Internal.Sankey.Types (SankeyConfig, SankeyLayoutState_, SankeyLink_, SankeyNode_) as X
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomConfig, ZoomExtent(..)) as X
+"""
+
+handleAction :: forall m. Action -> H.HalogenM State Action Slots Void m Unit
+handleAction = case _ of
+  Initialize -> pure unit

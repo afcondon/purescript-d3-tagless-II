@@ -1,0 +1,303 @@
+module PSD3.Reference.Modules.SankeyModule where
+
+import Prelude
+import Data.Maybe (Maybe(..))
+import Data.String as String
+import Effect.Aff (Aff)
+import Halogen as H
+import Halogen.HTML as HH
+import Halogen.HTML.Properties as HP
+import PSD3.Shared.DocParser as DocParser
+import PSD3.Shared.RHSNavigation as RHSNav
+import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Website.Types (Route(..))
+import Type.Proxy (Proxy(..))
+
+type State = Unit
+data Action = Initialize
+type Slots = ( rhsNav :: forall q. H.Slot q Void Unit )
+_rhsNav = Proxy :: Proxy "rhsNav"
+
+component :: forall q i. H.Component q i Void Aff
+component = H.mkComponent
+  { initialState: \_ -> unit
+  , render
+  , eval: H.mkEval H.defaultEval { handleAction = handleAction, initialize = Just Initialize }
+  }
+
+render :: State -> H.ComponentHTML Action Slots Aff
+render _ =
+  let
+    parsed = DocParser.parseDocumentation sourceCode
+  in
+  HH.div
+    [ HP.classes [ HH.ClassName "reference-page" ] ]
+    [ renderTOC
+        { title: "Sankey"
+        , items: [ { anchor: "overview", label: "Sankey Capability", level: 0 } ]
+        , image: Just "images/reference-bookmark-trees.jpeg"
+        }
+    , HH.slot_ _rhsNav unit RHSNav.component Reference
+    , HH.div
+        [ HP.classes [ HH.ClassName "module-info-box" ] ]
+        [ HH.div [ HP.classes [ HH.ClassName "module-info-left" ] ]
+            [ HH.strong_ [ HH.text "Module: " ], HH.code_ [ HH.text "PSD3.Capabilities.Sankey" ] ]
+        , HH.div [ HP.classes [ HH.ClassName "module-info-right" ] ]
+            [ HH.strong_ [ HH.text "File: " ], HH.code_ [ HH.text "src/lib/PSD3/Capabilities/Sankey.purs" ] ]
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "reference-content" ], HP.id "overview" ]
+        (DocParser.markdownToHtml parsed.docLines)
+    , HH.div
+        [ HP.classes [ HH.ClassName "reference-code-section" ] ]
+        [ HH.h2 [ HP.classes [ HH.ClassName "reference-code-title" ] ]
+            [ HH.text "Source Code" ]
+        , HH.pre_ [ HH.code [ HP.classes [ HH.ClassName "language-haskell" ] ]
+            [ HH.text (String.joinWith "\n" parsed.codeLines) ] ]
+        ]
+    ]
+
+sourceCode :: String
+sourceCode = """-- | PSD3.Capabilities.Sankey - Sankey diagram layouts
+-- |
+-- | This module defines the `SankeyM` type class for creating Sankey diagrams,
+-- | which visualize flow between nodes. Sankey diagrams are particularly effective
+-- | for showing how quantities (energy, money, materials, etc.) flow through a system.
+-- |
+-- | ## What are Sankey Diagrams?
+-- |
+-- | Sankey diagrams are flow diagrams where:
+-- | - **Nodes** are rectangular boxes representing entities or stages
+-- | - **Links** are paths between nodes, with width proportional to flow quantity
+-- | - **Layout** is computed statically (unlike force simulations which animate)
+-- |
+-- | Common use cases:
+-- | - Energy flow and transformations
+-- | - Material flows in manufacturing
+-- | - Budget allocations and spending
+-- | - Website traffic and user journeys
+-- |
+-- | ## Sankey vs. Force Simulations
+-- |
+-- | **Sankey** (this module):
+-- | - Static layout computed once
+-- | - Nodes arranged in vertical columns (layers)
+-- | - Link width represents flow quantity
+-- | - Use for directional flow visualization
+-- |
+-- | **Force Simulations** (SimulationM):
+-- | - Dynamic layout that animates over time
+-- | - Nodes positioned by physical forces
+-- | - Link length can vary
+-- | - Use for network/relationship visualization
+-- |
+-- | ## Basic Usage Pattern
+-- |
+-- | ```purescript
+-- | import PSD3
+-- | import PSD3.Attributes (x, y, width, height, fill, strokeWidth)
+-- |
+-- | mySankeyDiagram :: forall m.
+-- |   SankeyM D3Selection_ m =>
+-- |   MonadState { sankeyLayout :: SankeyLayoutState_ } m =>
+-- |   m Unit
+-- | mySankeyDiagram = do
+-- |   -- 1. Create SVG container
+-- |   root <- attach "#chart"
+-- |   svg <- appendTo root Svg [width 800.0, height 600.0]
+-- |
+-- |   -- 2. Prepare groups for rendering order
+-- |   linksGroup <- appendTo svg Group []
+-- |   nodesGroup <- appendTo svg Group []
+-- |
+-- |   -- 3. Define your flow data
+-- |   let data = {
+-- |     nodes: [
+-- |       { name: "Source A" },
+-- |       { name: "Target B" }
+-- |     ],
+-- |     links: [
+-- |       { source: 0, target: 1, value: 100.0 }
+-- |     ]
+-- |   }
+-- |
+-- |   -- 4. Compute layout (this adds position and dimension properties)
+-- |   layoutResult <- setSankeyData data 800.0 600.0
+-- |
+-- |   -- 5. Render links (order matters - links behind nodes)
+-- |   links <- simpleJoin linksGroup Path layoutResult.links keyFn
+-- |   setAttributes links [
+-- |     d sankeyLinkPath_,
+-- |     strokeWidth link_.width,
+-- |     fill "none"
+-- |   ]
+-- |
+-- |   -- 6. Render nodes
+-- |   nodes <- simpleJoin nodesGroup Rect layoutResult.nodes keyFn
+-- |   setAttributes nodes [
+-- |     x node_.x0,
+-- |     y node_.y0,
+-- |     width (\n -> node_.x1 n - node_.x0 n),
+-- |     height (\n -> node_.y1 n - node_.y0 n),
+-- |     fill "steelblue"
+-- |   ]
+-- | ```
+-- |
+-- | ## Layout Configuration
+-- |
+-- | Use `setSankeyDataWithConfig` for custom layouts:
+-- |
+-- | ```purescript
+-- | let config = {
+-- |   alignment: "left",        -- "justify", "left", "right", "center"
+-- |   linkColorMode: "source",  -- "source", "target", "source-target", "static"
+-- |   nodeWidth: 15.0,          -- Width of node rectangles
+-- |   nodePadding: 10.0         -- Vertical spacing between nodes
+-- | }
+-- |
+-- | layoutResult <- setSankeyDataWithConfig data 800.0 600.0 config
+-- | ```
+-- |
+-- | ## Data Format
+-- |
+-- | Input data must have this structure:
+-- | - `nodes`: Array of node records (each needs at least a `name` field)
+-- | - `links`: Array of link records with:
+-- |   - `source`: Index of source node in nodes array
+-- |   - `target`: Index of target node in nodes array
+-- |   - `value`: Flow quantity (determines link width)
+-- |
+-- | After layout computation, nodes and links gain additional properties:
+-- | - Nodes: `x0`, `y0`, `x1`, `y1` (rectangle boundaries), `color`
+-- | - Links: `width`, `color`, plus source/target node references
+-- |
+-- | ## See Also
+-- |
+-- | - `PSD3.Internal.Sankey.Types` for `SankeyConfig` and layout types
+-- | - `PSD3.Capabilities.Selection` for rendering operations
+-- | - [D3 Sankey](https://github.com/d3/d3-sankey) for the underlying D3.js concepts
+module PSD3.Capabilities.Sankey where
+
+import PSD3.Capabilities.Selection (class SelectionM)
+import PSD3.Internal.Sankey.Types (SankeyConfig, SankeyLink_, SankeyNode_)
+import Prelude (class Monad)
+
+-- | SankeyM extends SelectionM with Sankey diagram layout capabilities.
+-- |
+-- | This type class provides operations for computing Sankey layouts, which
+-- | transform raw node and link data into positioned elements ready for rendering.
+-- |
+-- | Unlike SimulationM (which computes dynamic animated layouts), SankeyM computes
+-- | static layouts in a single pass. The layout algorithm arranges nodes into
+-- | vertical layers and positions links to show flow between them.
+-- |
+-- | The functional dependency `m -> selection` means the monad determines
+-- | the selection type (e.g., `D3SankeyM` uses `D3Selection_`).
+class (Monad m, SelectionM selection m) <= SankeyM selection m | m -> selection where
+  -- | Compute Sankey layout with default configuration.
+  -- |
+  -- | This is the primary function for creating Sankey diagrams. It takes your
+  -- | raw node and link data and computes the position and dimensions for each
+  -- | element based on the flow values.
+  -- |
+  -- | **Input data format**:
+  -- | ```purescript
+  -- | let data = {
+  -- |   nodes: [
+  -- |     { name: "Coal" },
+  -- |     { name: "Electricity" },
+  -- |     { name: "Residential" }
+  -- |   ],
+  -- |   links: [
+  -- |     { source: 0, target: 1, value: 50.0 },  -- Coal -> Electricity: 50 units
+  -- |     { source: 1, target: 2, value: 45.0 }   -- Electricity -> Residential: 45 units
+  -- |   ]
+  -- | }
+  -- | ```
+  -- |
+  -- | **Returns**: Nodes and links with computed layout properties:
+  -- | - Nodes gain: `x0`, `y0`, `x1`, `y1` (rectangle bounds), `color`
+  -- | - Links gain: `width` (proportional to value), `color`, source/target references
+  -- |
+  -- | **Example**:
+  -- | ```purescript
+  -- | layoutResult <- setSankeyData energyFlowData 1000.0 600.0
+  -- |
+  -- | -- Render nodes as rectangles
+  -- | nodes <- simpleJoin svg Rect layoutResult.nodes keyFn
+  -- | setAttributes nodes [
+  -- |   x node_.x0,
+  -- |   y node_.y0,
+  -- |   width (\n -> node_.x1 n - node_.x0 n),
+  -- |   height (\n -> node_.y1 n - node_.y0 n)
+  -- | ]
+  -- |
+  -- | -- Render links as paths
+  -- | links <- simpleJoin svg Path layoutResult.links keyFn
+  -- | setAttributes links [
+  -- |   d sankeyLinkPath_,  -- Special path generator for Sankey curves
+  -- |   strokeWidth link_.width
+  -- | ]
+  -- | ```
+  -- |
+  -- | **Default configuration**:
+  -- | - Alignment: "justify" (spreads nodes evenly across width)
+  -- | - Node width: 24 pixels
+  -- | - Node padding: 8 pixels
+  -- | - Link color mode: "source" (links colored by source node)
+  setSankeyData :: forall nodeData linkData.
+    { nodes :: Array nodeData, links :: Array linkData } ->
+    Number -> -- SVG width
+    Number -> -- SVG height
+    m { nodes :: Array SankeyNode_, links :: Array SankeyLink_ }
+
+  -- | Compute Sankey layout with custom configuration.
+  -- |
+  -- | Use this when you need to customize the layout algorithm. The configuration
+  -- | controls visual properties and positioning logic.
+  -- |
+  -- | **Configuration options**:
+  -- |
+  -- | - `alignment :: String`
+  -- |   - "justify" (default) - Spread nodes evenly to fill width
+  -- |   - "left" - Align all nodes to the left
+  -- |   - "right" - Align all nodes to the right
+  -- |   - "center" - Center nodes within their layer
+  -- |
+  -- | - `linkColorMode :: String`
+  -- |   - "source" - Color links by their source node
+  -- |   - "target" - Color links by their target node
+  -- |   - "source-target" - Gradient from source to target color
+  -- |   - "static" - Use a single color for all links
+  -- |
+  -- | - `nodeWidth :: Number`
+  -- |   - Width of node rectangles in pixels (default: 24)
+  -- |
+  -- | - `nodePadding :: Number`
+  -- |   - Vertical spacing between nodes in same layer (default: 8)
+  -- |
+  -- | **Example**:
+  -- | ```purescript
+  -- | let config = {
+  -- |   alignment: "left",        -- Stack nodes on left side
+  -- |   linkColorMode: "target",  -- Color by destination
+  -- |   nodeWidth: 30.0,          -- Wider nodes
+  -- |   nodePadding: 15.0         -- More spacing
+  -- | }
+  -- |
+  -- | layoutResult <- setSankeyDataWithConfig data 1200.0 800.0 config
+  -- | ```
+  -- |
+  -- | This produces the same output structure as `setSankeyData`, but with
+  -- | layout computed using your custom parameters.
+  setSankeyDataWithConfig :: forall nodeData linkData.
+    { nodes :: Array nodeData, links :: Array linkData } ->
+    Number -> -- SVG width
+    Number -> -- SVG height
+    SankeyConfig ->
+    m { nodes :: Array SankeyNode_, links :: Array SankeyLink_ }
+"""
+
+handleAction :: forall m. Action -> H.HalogenM State Action Slots Void m Unit
+handleAction = case _ of
+  Initialize -> pure unit
