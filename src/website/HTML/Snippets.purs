@@ -14,7 +14,7 @@ import Effect.Aff.Class as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Html.Renderer.Halogen as RH
-import PSD3.Utilities (highlightString_)
+import PSD3.Shared.Utilities (highlightString_)
 
 data Cell state w i = 
     Blurb String

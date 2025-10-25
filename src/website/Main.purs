@@ -16,20 +16,20 @@ import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
 import Halogen.VDom.Driver (runUI)
 import PSD3.Home as Home
-import PSD3.GettingStarted as GettingStarted
-import PSD3.HowtoIndex as HowtoIndex
-import PSD3.Reference as Reference
-import PSD3.About as About
-import PSD3.Tutorial as Tutorial
-import PSD3.SimpleCharts as SimpleCharts
-import PSD3.ChordDiagram as ChordDiagram
-import PSD3.BubbleChart as BubbleChart
-import PSD3.SankeyDiagram as SankeyDiagram
-import PSD3.Hierarchies as Hierarchies
-import PSD3.Interpreters as Interpreters
-import PSD3.CodeExplorationPage as CodeExplorationPage
+import PSD3.Tutorial.GettingStarted as GettingStarted
+import PSD3.HowTo.HowtoIndex as HowtoIndex
+import PSD3.Reference.Reference as Reference
+import PSD3.Understanding.About as About
+import PSD3.Understanding.Tutorial as Tutorial
+import PSD3.Understanding.SimpleCharts as SimpleCharts
+import PSD3.Understanding.ChordDiagram as ChordDiagram
+import PSD3.Understanding.BubbleChart as BubbleChart
+import PSD3.Understanding.SankeyDiagram as SankeyDiagram
+import PSD3.Understanding.Hierarchies as Hierarchies
+import PSD3.Understanding.Interpreters as Interpreters
+import PSD3.CodeExplorer.CodeExplorationPage as CodeExplorationPage
 import PSD3.RoutingDSL (routing, routeToPath)
-import PSD3.CodeExplorerWrapper as CodeExplorer
+import PSD3.CodeExplorer.CodeExplorerWrapper as CodeExplorer
 import PSD3.Website.Types (Route(..))
 import Routing.Hash (matches, setHash)
 import Type.Proxy (Proxy(..))

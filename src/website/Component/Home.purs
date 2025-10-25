@@ -1,4 +1,4 @@
-module PSD3.Home where
+module PSD3.Home where -- stays at top level
 
 import Prelude
 
