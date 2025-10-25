@@ -48,10 +48,7 @@ render _ =
     -- Four documentation category boxes
     , HH.section
         [ HP.classes [ HH.ClassName "home-docs" ] ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "home-docs__title" ] ]
-            [ HH.text "Documentation" ]
-        , HH.div
+        [ HH.div
             [ HP.classes [ HH.ClassName "home-docs__grid" ] ]
             [ -- Tutorial box (cream)
               renderDocBox

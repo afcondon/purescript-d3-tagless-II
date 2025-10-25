@@ -10,7 +10,7 @@
 .home-hero {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 6rem 2rem 4rem 2rem;
+  padding: 3rem 2rem 2rem 2rem;
   text-align: center;
 }
 
@@ -23,15 +23,15 @@
 }
 
 .home-hero__subtitle {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   color: var(--color-gray-darker);
-  margin: 0 0 2rem 0;
+  margin: 0 0 1.5rem 0;
   letter-spacing: 0.02em;
 }
 
 .home-hero__description {
-  font-size: 1rem;
-  line-height: 1.8;
+  font-size: 0.9375rem;
+  line-height: 1.6;
   color: var(--color-gray-medium);
   max-width: 800px;
   margin: 0 auto;
@@ -41,7 +41,7 @@
 .home-docs {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 4rem 2rem;
+  padding: 2rem 2rem;
 }
 
 .home-docs__title {
@@ -58,8 +58,8 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(2, 1fr);
-  gap: 2rem;
-  margin-bottom: 2rem;
+  gap: 1.5rem;
+  margin-bottom: 0;
   max-width: 800px;
   margin-left: auto;
   margin-right: auto;
@@ -100,7 +100,7 @@
 }
 
 .home-doc-box__content {
-  padding: 2rem;
+  padding: 1.5rem;
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -120,19 +120,19 @@
 }
 
 .home-doc-box__title {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
   font-weight: bold;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin: 0 0 1rem 0;
+  margin: 0 0 0.75rem 0;
   color: var(--color-gray-darker);
 }
 
 .home-doc-box__description {
-  font-size: 0.875rem;
-  line-height: 1.6;
+  font-size: 0.8125rem;
+  line-height: 1.5;
   color: var(--color-gray-medium);
-  margin: 0 0 1.5rem 0;
+  margin: 0 0 1rem 0;
   flex: 1;
 }
 
