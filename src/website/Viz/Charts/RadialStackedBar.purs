@@ -2,10 +2,10 @@ module D3.Viz.RadialStackedBar where
 
 import Prelude
 
-import D3.Attributes.Sugar (classed, d, fill, fillOpacity, height, strokeColor, text, textAnchor, transform, width, x, y)
-import D3.Data.Types (D3Selection_, Element(..), Selector)
+import PSD3.Internal.Attributes.Sugar (classed, d, fill, fillOpacity, height, strokeColor, text, textAnchor, transform, width, x, y)
+import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.Charts.Model (GroupedBarData)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
 import Data.Array (filter, findIndex, index, length, mapWithIndex, nub, sortBy)
 import Data.Foldable (foldl, maximum, traverse_)
 import Data.Int (toNumber)

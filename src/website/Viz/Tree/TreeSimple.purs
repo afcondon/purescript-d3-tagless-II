@@ -2,15 +2,15 @@ module D3.Viz.TreeSimple where
 
 import Prelude
 
-import D3.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), preserveAspectRatio, transform, viewBox)
-import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..))
-import D3.Data.Types (D3Selection_, Datum_, Selector)
+import PSD3.Internal.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), preserveAspectRatio, transform, viewBox)
+import PSD3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..))
+import PSD3.Internal.Types (D3Selection_, Datum_, Selector)
 import D3.Viz.Tree.Draw (draw) as Tree
 import D3.Viz.Tree.Draw (treeDatum_)
-import D3.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
-import D3.Layouts.Hierarchical (horizontalLink, radialLink, radialSeparation, verticalLink)
-import D3.Scales (d3SchemeCategory10N_)
-import D3Tagless.Capabilities (class SelectionM)
+import PSD3.Internal.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
+import PSD3.Internal.Hierarchical (horizontalLink, radialLink, radialSeparation, verticalLink)
+import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
+import PSD3.Capabilities.Selection (class SelectionM)
 import Data.Number (pi, abs)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)

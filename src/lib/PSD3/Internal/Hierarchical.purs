@@ -1,15 +1,15 @@
-module D3.Layouts.Hierarchical where
+module PSD3.Internal.Hierarchical where
 
-import D3.Node
+import PSD3.Data.Node
 
 import Affjax.Web (Error, URL)
 import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
-import D3.Attributes.Instances (AttributeSetter(..), toAttr)
-import D3.Data.Tree (TreeJson_, TreeLayout, TreeModel, TreeType)
-import D3.Data.Types (Datum_)
-import D3.FFI (find_, getLayout, hNodeDepth_, linkClusterHorizontal_, linkClusterVertical_, linkHorizontal2_, linkHorizontal_, linkRadial_, linkVertical_, sharesParent_)
-import D3.Selection (SelectionAttribute(..))
+import PSD3.Internal.Attributes.Instances (AttributeSetter(..), toAttr)
+import PSD3.Data.Tree (TreeJson_, TreeLayout, TreeModel, TreeType)
+import PSD3.Internal.Types (Datum_)
+import PSD3.Internal.FFI (find_, getLayout, hNodeDepth_, linkClusterHorizontal_, linkClusterVertical_, linkHorizontal2_, linkHorizontal_, linkRadial_, linkVertical_, sharesParent_)
+import PSD3.Internal.Selection.Types (SelectionAttribute(..))
 import Data.Bifunctor (rmap)
 import Data.Either (Either)
 import Data.Function.Uncurried (Fn2, mkFn2)

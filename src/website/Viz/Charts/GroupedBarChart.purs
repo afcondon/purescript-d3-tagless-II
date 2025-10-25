@@ -2,10 +2,10 @@ module D3.Viz.GroupedBarChart where
 
 import Prelude
 
-import D3.Attributes.Sugar (classed, fill, height, strokeColor, text, textAnchor, transform, width, x, y)
-import D3.Data.Types (D3Selection_, Element(..), Selector)
+import PSD3.Internal.Attributes.Sugar (classed, fill, height, strokeColor, text, textAnchor, transform, width, x, y)
+import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.Charts.Model (GroupedBarData)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
 import Data.Array (filter, groupBy, nub, length, findIndex, index)
 import Data.Foldable (traverse_, foldr, maximum)
 import Data.Int (round, toNumber)

@@ -1,13 +1,13 @@
-module D3Tagless.Capabilities.MetaTree where
+module PSD3.Interpreter.MetaTree where
 
-import D3.Node
+import PSD3.Data.Node
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
-import D3.Data.Tree (TreeJson_)
-import D3.Data.Types (Element, MouseEvent, Transition, Selector)
-import D3.FFI (ComputeKeyFunction_)
-import D3.Selection (Behavior(..), SelectionAttribute(..), OrderingAttribute(..))
-import D3Tagless.Capabilities (class SelectionM)
+import PSD3.Data.Tree (TreeJson_)
+import PSD3.Internal.Types (Element, MouseEvent, Transition, Selector)
+import PSD3.Internal.FFI (ComputeKeyFunction_)
+import PSD3.Internal.Selection.Types (Behavior(..), SelectionAttribute(..), OrderingAttribute(..))
+import PSD3.Capabilities.Selection (class SelectionM)
 import Data.Array (filter, (:))
 import Data.Map (Map, empty, insert, lookup)
 import Data.Maybe (fromMaybe)

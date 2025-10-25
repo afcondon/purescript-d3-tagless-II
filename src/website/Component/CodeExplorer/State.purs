@@ -2,15 +2,15 @@ module PSD3.CodeExplorer.State where
 
 import Prelude
 
-import D3.Attributes.Instances (Label)
-import D3.Data.Types (D3Selection_, Datum_)
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Internal.Types (D3Selection_, Datum_)
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, clusterSceneAttributes)
 import D3.Viz.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
-import D3.FFI (SimulationVariables, readSimulationVariables)
-import D3.Node (NodeID)
-import D3.Simulation.Types (D3SimulationState_, Force, _handle)
-import D3Tagless.Capabilities (Staging)
+import PSD3.Internal.FFI (SimulationVariables, readSimulationVariables)
+import PSD3.Data.Node (NodeID)
+import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, _handle)
+import PSD3.Capabilities.Simulation (Staging)
 import Data.Lens (Lens', _Just, view)
 import Data.Lens.At (at)
 import Data.Lens.Record (prop)

@@ -2,11 +2,11 @@ module PSD3.CodeExplorer.Forces where
 
 import Prelude
 
-import D3.Attributes.Instances (Label)
+import PSD3.Internal.Attributes.Instances (Label)
 import D3.Viz.Spago.Model (datum_)
-import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce, createLinkForce, initialize)
-import D3.Simulation.Types (Force, ForceFilter(..), ForceType(..), RegularForceType(..), allNodes) 
+import PSD3.Internal.Simulation.Config as F
+import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize)
+import PSD3.Internal.Simulation.Types (Force, ForceFilter(..), ForceType(..), RegularForceType(..), allNodes) 
 import Data.Int (toNumber)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))

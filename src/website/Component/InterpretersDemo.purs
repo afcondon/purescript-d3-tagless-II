@@ -2,14 +2,14 @@ module PSD3.InterpretersDemo where
 
 import Prelude
 
-import D3.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, height, radius, viewBox, width)
-import D3.Data.Tree (TreeJson_)
-import D3.Data.Types (D3Selection_, Element(..))
-import D3.Node (NodeID)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach)
-import D3Tagless.Capabilities.MetaTree (D3MetaTreeM, runMetaTree, scriptTreeToJSON)
-import D3Tagless.Capabilities.String (D3PrinterM, runPrinter)
-import D3Tagless.Instance.Selection (eval_D3M)
+import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, height, radius, viewBox, width)
+import PSD3.Data.Tree (TreeJson_)
+import PSD3.Internal.Types (D3Selection_, Element(..))
+import PSD3.Data.Node (NodeID)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
+import PSD3.Interpreter.MetaTree (D3MetaTreeM, runMetaTree, scriptTreeToJSON)
+import PSD3.Interpreter.String (D3PrinterM, runPrinter)
+import PSD3.Interpreter.D3 (eval_D3M)
 import Data.Foldable (traverse_)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..), fst)

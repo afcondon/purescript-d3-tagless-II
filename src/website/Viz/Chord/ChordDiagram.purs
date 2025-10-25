@@ -2,10 +2,10 @@ module D3.Viz.ChordDiagram where
 
 import Prelude
 
-import D3.Attributes.Sugar (classed, d, fill, fillOpacity, fontSize, height, strokeColor, strokeWidth, text, textAnchor, transform, viewBox, width)
-import D3.Data.Types (D3Selection_, Datum_, Element(..), Selector)
-import D3.FFI (arcGenerator_, arcPath_, chordArray_, chordGroups_, chordLayout_, keyIsID_, ribbonGenerator_, ribbonPath_, setArcInnerRadius_, setArcOuterRadius_, setRibbonRadius_)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach, simpleJoin)
+import PSD3.Internal.Attributes.Sugar (classed, d, fill, fillOpacity, fontSize, height, strokeColor, strokeWidth, text, textAnchor, transform, viewBox, width)
+import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Selector)
+import PSD3.Internal.FFI (arcGenerator_, arcPath_, chordArray_, chordGroups_, chordLayout_, keyIsID_, ribbonGenerator_, ribbonPath_, setArcInnerRadius_, setArcOuterRadius_, setRibbonRadius_)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, simpleJoin)
 import Data.Array (length, (!!), (..))
 import Data.Foldable (traverse_)
 import Data.Maybe (Maybe(..))

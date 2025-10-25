@@ -1,11 +1,11 @@
 module D3.Viz.ThreeLittleCircles where
 
-import D3.Attributes.Sugar
+import PSD3.Internal.Attributes.Sugar
 
-import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
-import D3.FFI (keyIsID_)
-import D3.Scales (d3SchemePairedN_)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
+import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
+import PSD3.Internal.FFI (keyIsID_)
+import PSD3.Internal.Scales.Scales (d3SchemePairedN_)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import Data.Int (toNumber)
 import Prelude (bind, discard, negate, pure, ($), (*), (+), (-), (/))
 import Unsafe.Coerce (unsafeCoerce)

@@ -9,7 +9,7 @@ import D3.Viz.BarChart as BarChart
 import D3.Viz.LineChart as LineChart
 import D3.Viz.ScatterPlot as ScatterPlot
 import D3.Viz.Charts.Model (monthlySales, sineWaveData, anscombesQuartet)
-import D3Tagless.Instance.Selection (eval_D3M, runD3M)
+import PSD3.Interpreter.D3 (eval_D3M, runD3M)
 import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String.CodeUnits (toCharArray)

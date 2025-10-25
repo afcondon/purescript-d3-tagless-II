@@ -2,12 +2,12 @@ module PSD3.Hierarchies where
 
 import Prelude
 
-import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
-import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
+import PSD3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
+import PSD3.Internal.Hierarchical (getTreeViaAJAX, makeModel)
 import D3.Viz.Hierarchies (drawCirclePacking, drawIcicle, drawTreemap)
 import D3.Viz.Tree.Configure as Tree
-import D3Tagless.Instance.Selection (eval_D3M)
-import D3Tagless.Utility (removeExistingSVG)
+import PSD3.Interpreter.D3 (eval_D3M)
+import PSD3.Internal.Utility (removeExistingSVG)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)

@@ -1,14 +1,14 @@
 module PSD3.CodeExplorer.Actions where
 
 
-import D3.Attributes.Instances (Label)
-import D3.Data.Tree (TreeLayout)
-import D3.Data.Types (Datum_)
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Data.Tree (TreeLayout)
+import PSD3.Internal.Types (Datum_)
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes)
 import D3.Viz.Spago.Files (NodeType, SpagoGraphLinkID)
 import D3.Viz.Spago.Model (SpagoSimNode)
-import D3.Node (NodeID)
-import D3.Simulation.Types (SimVariable)
+import PSD3.Data.Node (NodeID)
+import PSD3.Internal.Simulation.Types (SimVariable)
 
 data Scene = PackageGrid | PackageGraph | ModuleTree TreeLayout | LayerSwarm
 data StyleChange = TopLevelCSS String | GraphStyle SpagoSceneAttributes

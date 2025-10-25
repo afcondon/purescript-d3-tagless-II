@@ -1,9 +1,9 @@
-module D3.Layouts.Sankey.Functions where
+module PSD3.Internal.Sankey.Functions where
 
 import Prelude
 
-import D3.Data.Types (Datum_)
-import D3.Layouts.Sankey.Types (SankeyConfig, SankeyLink_, SankeyNode_)
+import PSD3.Internal.Types (Datum_)
+import PSD3.Internal.Sankey.Types (SankeyConfig, SankeyLink_, SankeyNode_)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 

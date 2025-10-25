@@ -9,7 +9,7 @@ import PSD3.Button as Button
 import PSD3.Expandable as Expandable
 import PSD3.FormField as FormField
 import PSD3.Toggle as Toggle
-import D3Tagless.Instance.Selection (eval_D3M, runD3M)
+import PSD3.Interpreter.D3 (eval_D3M, runD3M)
 import Data.Array (catMaybes)
 import Data.Lens (Lens', view, (%=), (.=))
 import Data.Lens.Record (prop)

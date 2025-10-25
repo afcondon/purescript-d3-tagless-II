@@ -1,16 +1,16 @@
 module D3.Viz.MetaTree where
 
-import D3.Attributes.Sugar
+import PSD3.Internal.Attributes.Sugar
 import Prelude
 
-import D3.Data.Tree (TreeModel, TreeType(..))
-import D3.Data.Types (D3Selection_, Datum_, Element(..))
+import PSD3.Data.Tree (TreeModel, TreeType(..))
+import PSD3.Internal.Types (D3Selection_, Datum_, Element(..))
 import D3.Viz.MetaTree.Model (MetaTreeNode)
 import D3.Viz.MetaTree.Unsafe (coerceToTreeNode, unboxD3TreeNode)
-import D3.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, keyIsID_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
-import D3.Layouts.Hierarchical (verticalLink)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
-import D3Tagless.Instance.Selection (runD3M)
+import PSD3.Internal.FFI (descendants_, getLayout, hNodeHeight_, hierarchyFromJSON_, keyIsID_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
+import PSD3.Internal.Hierarchical (verticalLink)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
+import PSD3.Interpreter.D3 (runD3M)
 import Data.Number (abs)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)

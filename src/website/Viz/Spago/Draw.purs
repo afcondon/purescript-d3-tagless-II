@@ -2,15 +2,16 @@ module D3.Viz.Spago.Draw where
 
 import Prelude
 
-import D3.Attributes.Sugar (classed, remove, strokeColor, transform', x1, x2, y1, y2)
-import D3.Data.Types (D3Selection_, D3This_, Datum_, Element(..))
+import PSD3.Internal.Attributes.Sugar (classed, remove, strokeColor, transform', x1, x2, y1, y2)
+import PSD3.Internal.Types (D3Selection_, D3This_, Datum_, Element(..))
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, svgAttrs, updateAttrs)
 import D3.Viz.Spago.Model (datum_, link_)
-import D3.FFI (keyIsID_, simdrag)
-import D3.Selection (Behavior(..), DragBehavior(..))
-import D3.Simulation.Types (Step(..))
-import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM, class SimulationM, Staging, addTickFunction, appendTo, attach, mergeNewDataWithSim, mergeSelections, on, openSelection, selectUnder, setAttributes, setLinksFromSelection, setNodesFromSelection, updateJoin)
+import PSD3.Internal.FFI (keyIsID_, simdrag)
+import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
+import PSD3.Internal.Simulation.Types (Step(..))
+import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, updateJoin)
+import PSD3.Capabilities.Simulation (class SimulationM, Staging, addTickFunction, mergeNewDataWithSim, setLinksFromSelection, setNodesFromSelection)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)

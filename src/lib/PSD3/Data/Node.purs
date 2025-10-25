@@ -1,4 +1,4 @@
-module D3.Node where
+module PSD3.Data.Node where
 
 import Data.Nullable (Nullable)
 import Type.Row (type (+))

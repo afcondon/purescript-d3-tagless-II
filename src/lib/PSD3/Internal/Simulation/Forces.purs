@@ -1,11 +1,11 @@
-module D3.Simulation.Forces where
+module PSD3.Internal.Simulation.Forces where
 
 import Prelude
 
-import D3.Attributes.Instances (Attr(..), AttrBuilder(..), AttributeSetter(..), Label, unboxAttr)
-import D3.Data.Types (D3Simulation_, Datum_)
-import D3.FFI (D3ForceHandle_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, linksForceName, putForceInSimulation_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
-import D3.Simulation.Types (ChainableF, Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), LinkForceType(..), RegularForceType(..), _name, _status, toggleForceStatus)
+import PSD3.Internal.Attributes.Instances (Attr(..), AttrBuilder(..), AttributeSetter(..), Label, unboxAttr)
+import PSD3.Internal.Types (D3Simulation_, Datum_)
+import PSD3.Internal.FFI (D3ForceHandle_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, linksForceName, putForceInSimulation_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
+import PSD3.Internal.Simulation.Types (ChainableF, Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), LinkForceType(..), RegularForceType(..), _name, _status, toggleForceStatus)
 import Data.Array (elem)
 import Data.Foldable (class Foldable)
 import Data.Lens (over, set, view)

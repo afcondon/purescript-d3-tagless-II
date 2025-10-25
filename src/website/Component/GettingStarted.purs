@@ -154,7 +154,7 @@ spago install purescript-d3-tagless""" ]
 
 import Prelude
 import Effect (Effect)
-import D3Tagless.Instance.Selection (eval_D3M)
+import PSD3.Interpreter.D3 (eval_D3M)
 
 main :: Effect Unit
 main = do

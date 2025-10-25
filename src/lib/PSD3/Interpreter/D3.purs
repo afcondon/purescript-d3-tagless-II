@@ -141,7 +141,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   addTickFunction _ (StepTransformFFI _ _) = do
     pure unit
   addTickFunction label (Step selection chain) = do
-    handle <- simulationHandle
+    handle <- use _handle
     let makeTick _ = do
           -- TODO this coerce is forced upon us here due to forall selection in SimulationM
           let _ = chain <#> applySelectionAttributeD3 (unsafeCoerce selection)
@@ -150,7 +150,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     pure unit
 
   removeTickFunction label = do
-    handle <- simulationHandle
+    handle <- use _handle
     -- TODO delete the tick function from the state
     let _ = disableTick_ handle label
     pure unit

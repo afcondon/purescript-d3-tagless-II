@@ -5,11 +5,11 @@ import Prelude
 import Affjax.ResponseFormat as ResponseFormat
 import Affjax.Web as AJAX
 import Data.Argonaut.Core (Json)
-import D3.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, fontSize, height, radius, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, y)
-import D3.Data.Types (D3Selection_, Element(..), Selector)
-import D3.FFI (descendants_, hNodeDepth_, hNodeR_, hNodeX_, hNodeY_, hierarchyFromJSON_, packLayout_, packSetPadding_, packSetSize_, runPackLayout_, treeSortForCirclePack_)
-import D3.Node (D3_TreeNode)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach)
+import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, fontSize, height, radius, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, y)
+import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
+import PSD3.Internal.FFI (descendants_, hNodeDepth_, hNodeR_, hNodeX_, hNodeY_, hierarchyFromJSON_, packLayout_, packSetPadding_, packSetSize_, runPackLayout_, treeSortForCirclePack_)
+import PSD3.Data.Node (D3_TreeNode)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
 import Data.Either (Either(..))
 import Data.Foldable (traverse_)
 import Data.Int (round)

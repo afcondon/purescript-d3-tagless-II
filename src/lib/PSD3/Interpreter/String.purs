@@ -1,12 +1,12 @@
-module D3Tagless.Capabilities.String where
+module PSD3.Interpreter.String where
 
-import D3.Selection
+import PSD3.Internal.Selection.Types
 
 import Control.Monad.State (class MonadState, StateT, modify_, runStateT)
-import D3.Attributes.Instances (AttributeSetter(..), unboxAttr)
-import D3.Data.Types (D3Selection_, Element, Selector, Transition)
-import D3.FFI (ComputeKeyFunction_, D3Attr)
-import D3Tagless.Capabilities (class SelectionM)
+import PSD3.Internal.Attributes.Instances (AttributeSetter(..), unboxAttr)
+import PSD3.Internal.Types (D3Selection_, Element, Selector, Transition)
+import PSD3.Internal.FFI (ComputeKeyFunction_, D3Attr)
+import PSD3.Capabilities.Selection (class SelectionM)
 import Data.Array (foldl)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String (Pattern(..), indexOf, drop)

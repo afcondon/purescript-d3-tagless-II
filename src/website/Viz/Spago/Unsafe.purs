@@ -2,10 +2,10 @@ module D3.Viz.Spago.Unsafe where
 
 import Prelude
 
-import D3.Data.Types (Datum_, Index_)
+import PSD3.Internal.Types (Datum_, Index_)
 import D3.Viz.Spago.Files (NodeType, SpagoDataRecord, SpagoLinkData, SpagoNodeRow, SpagoTreeObj)
-import D3.Node (D3Link(..), D3LinkSwizzled, D3_FocusXY, D3_ID, D3_Radius, D3_TreeNode(..), D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
-import D3.Node (D3LinkDatum, D3LinkSwizzled(..), D3_SimulationNode(..), D3_TreeNode(..))
+import PSD3.Data.Node (D3Link(..), D3LinkSwizzled, D3_FocusXY, D3_ID, D3_Radius, D3_TreeNode(..), D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
+import PSD3.Data.Node (D3LinkDatum, D3LinkSwizzled(..), D3_SimulationNode(..), D3_TreeNode(..))
 import Data.Nullable (Nullable)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)

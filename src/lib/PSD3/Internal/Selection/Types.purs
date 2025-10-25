@@ -1,10 +1,10 @@
-module D3.Selection where
+module PSD3.Internal.Selection.Types where
 
-import D3.FFI
+import PSD3.Internal.FFI
 
-import D3.Attributes.Instances (AttributeSetter(..), Label, Listener_, EffectfulListener_, attributeLabel, unboxAttr)
-import D3.Data.Types (D3Selection_, Datum_, MouseEvent, Transition)
-import D3.Zoom (ZoomConfig)
+import PSD3.Internal.Attributes.Instances (AttributeSetter(..), Label, Listener_, EffectfulListener_, attributeLabel, unboxAttr)
+import PSD3.Internal.Types (D3Selection_, Datum_, MouseEvent, Transition)
+import PSD3.Internal.Zoom (ZoomConfig)
 import Data.Array (foldl)
 import Prelude (class Eq, class Ord, class Show, show, (<>))
 

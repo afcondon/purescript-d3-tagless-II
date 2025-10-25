@@ -1,6 +1,6 @@
-module D3.Zoom where
+module PSD3.Internal.Zoom where
 
-import D3.FFI (ZoomBehavior_)
+import PSD3.Internal.FFI (ZoomBehavior_)
 import Web.Event.Internal.Types (Event)
 
 -- stuff related to zoom functionality

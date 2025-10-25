@@ -1,9 +1,9 @@
-module D3.Attributes.Sugar where
+module PSD3.Internal.Attributes.Sugar where
 
-import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), Listener, EffectfulListener, toAttr)
-import D3.Data.Types (Datum_, EasingFunction(..), MouseEvent, Transition, PointXY)
-import D3.FFI (autoBox_)
-import D3.Selection (SelectionAttribute(..), OrderingAttribute(..))
+import PSD3.Internal.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), Listener, EffectfulListener, toAttr)
+import PSD3.Internal.Types (Datum_, EasingFunction(..), MouseEvent, Transition, PointXY)
+import PSD3.Internal.FFI (autoBox_)
+import PSD3.Internal.Selection.Types (SelectionAttribute(..), OrderingAttribute(..))
 import Data.Array (intercalate, (:))
 import Data.Function.Uncurried (mkFn3)
 import Effect.Aff (Milliseconds(..))

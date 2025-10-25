@@ -2,13 +2,13 @@ module D3.Viz.Spago.Model where
 
 import Prelude
 
-import D3.Attributes.Instances (Label)
-import D3.Data.Types (D3Simulation_, Datum_, PointXY)
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Internal.Types (D3Simulation_, Datum_, PointXY)
 import D3.Viz.Spago.Files (LinkType(..), NodeType(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Viz.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode)
-import D3.FFI (getIndexFromDatum_, setInSimNodeFlag)
-import D3.Node (D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
-import D3.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_)
+import PSD3.Internal.FFI (getIndexFromDatum_, setInSimNodeFlag)
+import PSD3.Data.Node (D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
+import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_)
 import Data.Array (foldl, length, mapWithIndex, partition, (:))
 import Data.Array (null) as A
 import Data.FoldableWithIndex (foldlWithIndex)

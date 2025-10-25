@@ -4,8 +4,8 @@ import Prelude
 
 import D3.Viz.Sankey.Model as Sankey
 import D3.Viz.SankeyDiagram as SankeyViz
-import D3.Layouts.Sankey.Types (initialSankeyLayoutState, SankeyLayoutState_)
-import D3Tagless.Instance.Sankey (runWithD3_Sankey)
+import PSD3.Internal.Sankey.Types (initialSankeyLayoutState, SankeyLayoutState_)
+import PSD3.Interpreter.D3 (runWithD3_Sankey)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Halogen as H

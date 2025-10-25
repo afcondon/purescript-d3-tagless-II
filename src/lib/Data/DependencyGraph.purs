@@ -1,4 +1,4 @@
-module D3.Data.Graph where
+module Data.DependencyGraph where
 
 import Data.Array (elem, head, null, partition, uncons, (:))
 import Data.Graph (Graph)

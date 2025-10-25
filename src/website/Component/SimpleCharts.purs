@@ -6,7 +6,7 @@ import D3.Viz.GroupedBarChart as GroupedBarChart
 import D3.Viz.MultiLineChart as MultiLineChart
 import D3.Viz.RadialStackedBar as RadialStackedBar
 import D3.Viz.Charts.Model (groupedBarData, multiLineData)
-import D3Tagless.Instance.Selection (eval_D3M)
+import PSD3.Interpreter.D3 (eval_D3M)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Halogen as H

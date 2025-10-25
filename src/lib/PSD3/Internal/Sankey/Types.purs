@@ -1,4 +1,4 @@
-module D3.Layouts.Sankey.Types where
+module PSD3.Internal.Sankey.Types where
 
 import Prelude
 

@@ -1,6 +1,6 @@
 module D3.Viz.MetaTree.Model where
 
-import D3.Node (D3TreeRow, D3Link, EmbeddedData, NodeID)
+import PSD3.Data.Node (D3TreeRow, D3Link, EmbeddedData, NodeID)
 
 import Type.Row (type (+))
 

@@ -5,12 +5,12 @@ import Prelude
 import Control.Monad.State (class MonadState, get)
 import D3.Viz.Sankey.Model as Sankey
 import D3.Viz.SankeyDiagram as SankeyDiagram
-import D3.Layouts.Sankey.Types (SankeyLayoutState_, initialSankeyLayoutState)
-import D3Tagless.Instance.Selection (eval_D3M)
-import D3Tagless.Utility (removeExistingSVG)
+import PSD3.Internal.Sankey.Types (SankeyLayoutState_, initialSankeyLayoutState)
+import PSD3.Interpreter.D3 (eval_D3M)
+import PSD3.Internal.Utility (removeExistingSVG)
 import PSD3.Expandable as Expandable
 import PSD3.Toggle as Toggle
-import D3Tagless.Instance.Sankey (runWithD3_Sankey)
+import PSD3.Interpreter.D3 (runWithD3_Sankey)
 import Data.Lens (Lens', view, (%=), (.=))
 import Data.Lens.Record (prop)
 import Effect.Aff.Class (class MonadAff)

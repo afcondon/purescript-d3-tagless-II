@@ -2,10 +2,10 @@ module D3.Viz.MultiLineChart where
 
 import Prelude
 
-import D3.Attributes.Sugar (classed, d, fill, height, strokeColor, strokeWidth, text, textAnchor, transform, viewBox, width, x, y)
-import D3.Data.Types (D3Selection_, Element(..), Selector)
+import PSD3.Internal.Attributes.Sugar (classed, d, fill, height, strokeColor, strokeWidth, text, textAnchor, transform, viewBox, width, x, y)
+import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.Charts.Model (MultiLineData)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
 import Data.Array (filter, findIndex, head, index, last, length, mapWithIndex, nub)
 import Data.Foldable (foldl, maximum, minimum, traverse_)
 import Data.FoldableWithIndex (foldlWithIndex)

@@ -1,17 +1,17 @@
-module D3.Simulation.Functions where
+module PSD3.Internal.Simulation.Functions where
 
-import D3.FFI
-import D3.Simulation.Forces
+import PSD3.Internal.FFI
+import PSD3.Internal.Simulation.Forces
 import Prelude
 
 import Control.Monad.State (class MonadState)
-import D3.Attributes.Instances (Label)
-import D3.Data.Types (D3Selection_, Datum_, Index_)
-import D3.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
-import D3.Selection (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
-import D3.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _handle, _status, _tick, _velocityDecay)
-import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (RawData)
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Internal.Types (D3Selection_, Datum_, Index_)
+import PSD3.Data.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
+import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
+import PSD3.Internal.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _handle, _status, _tick, _velocityDecay)
+import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
+import PSD3.Capabilities.Simulation (RawData)
 import Data.Array (elem, filter, intercalate)
 import Data.Array as A
 import Data.Lens (modifying, set, use, view, (%=))

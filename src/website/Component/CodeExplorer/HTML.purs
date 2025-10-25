@@ -2,14 +2,14 @@ module PSD3.CodeExplorer.HTML where
 
 import Prelude
 
-import D3.Data.Tree (TreeLayout(..))
+import PSD3.Data.Tree (TreeLayout(..))
 import D3.Viz.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Viz.Spago.Files (isM2M_Graph_Link, isM2M_Tree_Link, isM2P_Link, isP2P_Link, NodeType(..))
 import D3.Viz.Spago.Model (SpagoSimNode, isM2M_Graph_Link_, isM2M_Tree_Link_, isM2P_Link_, isP2P_Link_, isPackage, isUsedModule)
-import D3.Node (D3_SimulationNode(..))
+import PSD3.Data.Node (D3_SimulationNode(..))
 import Data.String.CodeUnits (take)
-import D3.Simulation.Forces (showType)
-import D3.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), _forceLibrary, showForceFilter)
+import PSD3.Internal.Simulation.Forces (showType)
+import PSD3.Internal.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), _forceLibrary, showForceFilter)
 import PSD3.Button as Button
 import PSD3.Checkbox as Checkbox
 import PSD3.Format as Format

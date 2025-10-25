@@ -2,13 +2,13 @@ module D3.Viz.LineChart where
 
 import Prelude
 
-import D3.Attributes.Sugar (classed, d, fill, radius, strokeColor, strokeWidth, transform, viewBox, width, height)
-import D3.Axes (Axis, axisBottom, axisLeft, callAxis)
-import D3.Data.Types (D3Selection_, Element(..), Selector)
+import PSD3.Internal.Attributes.Sugar (classed, d, fill, radius, strokeColor, strokeWidth, transform, viewBox, width, height)
+import PSD3.Internal.Axes (Axis, axisBottom, axisLeft, callAxis)
+import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.Charts.Model (DataPoint, sineWaveData)
-import D3.Generators.Line (createLineGenerator, generateLinePath)
-import D3.Scales.Linear (LinearScale, createLinearScale)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes)
+import PSD3.Internal.Generators.Line (createLineGenerator, generateLinePath)
+import PSD3.Internal.Scales.Linear (LinearScale, createLinearScale)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes)
 import Data.Array (length)
 import Data.Foldable (maximum, minimum)
 import Data.Maybe (fromMaybe)

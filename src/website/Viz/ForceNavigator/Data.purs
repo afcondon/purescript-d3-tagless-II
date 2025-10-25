@@ -1,7 +1,7 @@
 module D3.Viz.ForceNavigator.Data where
 
 import D3.Viz.ForceNavigator.Model (Category(..), NavigationRawModel, NodeType(..))
-import D3.Node (D3Link(..), D3_SimulationNode(..))
+import PSD3.Data.Node (D3Link(..), D3_SimulationNode(..))
 import Data.Maybe (Maybe(..))
 import Data.Nullable (notNull, null)
 

@@ -2,7 +2,7 @@ module PSD3.Visualization where
 
 import Prelude
 
-import D3.Data.Tree (TreeLayout(..), TreeType(..))
+import PSD3.Data.Tree (TreeLayout(..), TreeType(..))
 import D3.Viz.Charts.Model as Charts
 import D3.Viz.LineChart as LineChart
 import D3.Viz.BarChart as BarChart
@@ -15,10 +15,10 @@ import D3.Viz.GUP as GUP
 import D3.Viz.ThreeLittleCircles as ThreeLittleCircles
 import D3.Viz.Tree.Configure as Tree
 import D3.Viz.TreeSimple as TreeSimple
-import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
-import D3.Layouts.Sankey.Types (initialSankeyLayoutState)
-import D3Tagless.Instance.Selection (eval_D3M, runD3M)
-import D3Tagless.Instance.Sankey (eval_D3M_Sankey)
+import PSD3.Internal.Hierarchical (getTreeViaAJAX, makeModel)
+import PSD3.Internal.Sankey.Types (initialSankeyLayoutState)
+import PSD3.Interpreter.D3 (eval_D3M, runD3M)
+import PSD3.Interpreter.D3 (eval_D3M_Sankey)
 import Data.Array (catMaybes)
 import Data.Either (Either(..))
 import Data.Foldable (traverse_)

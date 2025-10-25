@@ -1,9 +1,9 @@
-module D3.Axes where
+module PSD3.Internal.Axes where
 
 import Prelude
 
-import D3.Data.Types (D3Selection_)
-import D3.Scales.Linear (LinearScale)
+import PSD3.Internal.Types (D3Selection_)
+import PSD3.Internal.Scales.Linear (LinearScale)
 import Effect (Effect)
 
 -- Opaque type for D3 axis

@@ -1,10 +1,10 @@
-module D3.Selection.Functions where
+module PSD3.Internal.Selection.Functions where
 
-import D3.Data.Types (D3Selection_, Datum_, Element, Index_, Selector)
-import D3.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3DataWithKeyFunction_, d3EnterAndAppend_, d3FilterSelection_, d3GetEnterSelection_, d3GetExitSelection_, d3MergeSelectionWith_, d3SelectAllInDOM_, d3SelectionSelectAll_)
-import D3.Selection (Behavior(..), SelectionAttribute, applySelectionAttributeD3)
-import D3.Zoom (ScaleExtent(..), ZoomExtent(..))
-import D3Tagless.Capabilities (class SelectionM)
+import PSD3.Internal.Types (D3Selection_, Datum_, Element, Index_, Selector)
+import PSD3.Internal.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3DataWithKeyFunction_, d3EnterAndAppend_, d3FilterSelection_, d3GetEnterSelection_, d3GetExitSelection_, d3MergeSelectionWith_, d3SelectAllInDOM_, d3SelectionSelectAll_)
+import PSD3.Internal.Selection.Types (Behavior(..), SelectionAttribute, applySelectionAttributeD3)
+import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
+import PSD3.Capabilities.Selection (class SelectionM)
 import Data.Foldable (foldl)
 import Debug (spy)
 import Prelude (Unit, discard, pure, show, unit, ($))

@@ -2,10 +2,10 @@ module PSD3.ForceNavigator.State where
 
 import Prelude
 
-import D3.Attributes.Instances (Label)
-import D3.Data.Types (D3Selection_)
-import D3.Node (D3Link(..), D3_SimulationNode(..))
-import D3.Simulation.Types (D3SimulationState_, Force, initialSimulationState)
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Internal.Types (D3Selection_)
+import PSD3.Data.Node (D3Link(..), D3_SimulationNode(..))
+import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, initialSimulationState)
 import D3.Viz.ForceNavigator.Model (NavigationSimNode, NodeType(..))
 import Data.Array (elem, filter, length) as Array
 import Data.Lens (Lens')

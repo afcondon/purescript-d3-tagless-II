@@ -1,8 +1,8 @@
-module D3.Attributes.Instances where
+module PSD3.Internal.Attributes.Instances where
 
 import Prelude
 
-import D3.Data.Types (D3This_, Datum_, Index_)
+import PSD3.Internal.Types (D3This_, Datum_, Index_)
 import Data.Function.Uncurried (Fn2, Fn3, mkFn2)
 import Effect (Effect)
 import Effect.Uncurried (EffectFn3)

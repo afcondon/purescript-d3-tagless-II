@@ -1,6 +1,6 @@
 module D3.Viz.Sankey.Unsafe where
 
-import D3.Data.Types (Datum_)
+import PSD3.Internal.Types (Datum_)
 import D3.Viz.Sankey.Model (SankeyLink, SankeyNode)
 import Unsafe.Coerce (unsafeCoerce)
 

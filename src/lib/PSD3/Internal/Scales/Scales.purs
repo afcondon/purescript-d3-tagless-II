@@ -1,4 +1,4 @@
-module D3.Scales where
+module PSD3.Internal.Scales.Scales where
 
 -- TODO much more to be ported over / wrapped here
 

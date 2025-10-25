@@ -12,15 +12,15 @@ module PSD3.ForceNavigator where
 import Prelude
 
 import Control.Monad.State (get)
-import D3.Attributes.Sugar (onMouseEventEffectful, x)
+import PSD3.Internal.Attributes.Sugar (onMouseEventEffectful, x)
 import Debug (spy)
-import D3.Data.Types (MouseEvent(..))
-import D3.Simulation.Types (SimVariable(..))
+import PSD3.Internal.Types (MouseEvent(..))
+import PSD3.Internal.Simulation.Types (SimVariable(..))
 import D3.Viz.ForceNavigator.Data (navigationData)
 import D3.Viz.ForceNavigator.Draw as Draw
 import D3.Viz.ForceNavigator.Model (NodeType(..))
-import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start, stop)
-import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
+import PSD3.Capabilities.Simulation (actualizeForces, setConfigVariable, start, stop)
+import PSD3.Interpreter.D3 (evalEffectSimulation, runWithD3_Simulation)
 import Data.Lens (use, (.=), (%=))
 import Data.Maybe (Maybe(..))
 import Data.Set as Set

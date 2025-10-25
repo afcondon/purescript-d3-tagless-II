@@ -1,10 +1,10 @@
 module D3.Viz.GUP where
 
-import D3.Attributes.Sugar
+import PSD3.Internal.Attributes.Sugar
 
-import D3.Data.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
-import D3.Selection (SelectionAttribute)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach, openSelection, setAttributes, updateJoin)
+import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
+import PSD3.Internal.Selection.Types (SelectionAttribute)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSelection, setAttributes, updateJoin)
 import Data.String.CodeUnits (singleton)
 import Effect.Aff (Milliseconds(..))
 import Prelude (bind, discard, pure, ($), (*), (+), (<<<))

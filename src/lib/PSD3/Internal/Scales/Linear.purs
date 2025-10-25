@@ -1,4 +1,4 @@
-module D3.Scales.Linear where
+module PSD3.Internal.Scales.Linear where
 
 import Effect (Effect)
 

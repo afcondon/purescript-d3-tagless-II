@@ -1,10 +1,10 @@
 module D3.Viz.Spago.Draw.Attributes where
 
-import D3.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, opacity, radius, rotate, strokeColor, strokeWidth, text, textAnchor, transform, transform', viewBox, width, x, y)
-import D3.Data.Tree (TreeLayout(..))
-import D3.Data.Types (D3Simulation_, MouseEvent(..))
+import PSD3.Internal.Attributes.Sugar (classed, cursor, fill, height, onMouseEvent, opacity, radius, rotate, strokeColor, strokeWidth, text, textAnchor, transform, transform', viewBox, width, x, y)
+import PSD3.Data.Tree (TreeLayout(..))
+import PSD3.Internal.Types (D3Simulation_, MouseEvent(..))
 import D3.Viz.Spago.Model (datum_)
-import D3.Selection (SelectionAttribute)
+import PSD3.Internal.Selection.Types (SelectionAttribute)
 import Data.Maybe (Maybe)
 import Prelude (negate, (/), (<>))
 

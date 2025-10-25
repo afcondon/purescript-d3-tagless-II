@@ -1,9 +1,9 @@
 module D3.Viz.Tree.Unsafe where
 
 
-import D3.Data.Types (Datum_)
+import PSD3.Internal.Types (Datum_)
 import D3.Viz.Tree.Model (FlareLinkObj, FlareNodeRow)
-import D3.Node (D3_ID, D3LinkSwizzled(..), D3_TreeNode(..), D3_TreeRow, D3_XY, EmbeddedData)
+import PSD3.Data.Node (D3_ID, D3LinkSwizzled(..), D3_TreeNode(..), D3_TreeRow, D3_XY, EmbeddedData)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 

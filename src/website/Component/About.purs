@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Viz.ScatterPlot as ScatterPlot
 import D3.Viz.Charts.Model (anscombesQuartet)
-import D3Tagless.Instance.Selection (eval_D3M)
+import PSD3.Interpreter.D3 (eval_D3M)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Halogen as H

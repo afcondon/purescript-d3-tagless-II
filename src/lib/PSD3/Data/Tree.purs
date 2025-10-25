@@ -1,9 +1,9 @@
-module D3.Data.Tree (
+module PSD3.Data.Tree (
     TreeJson_, TreeLayoutFn_, TreeType(..), TreeModel, TreeLayout(..)
   , makeD3TreeJSONFromTreeID -- notably this is only used by Spago example right now
 )where
 
-import D3.Node (NodeID)
+import PSD3.Data.Node (NodeID)
 import Data.Array as A
 import Data.List (List(..))
 import Data.Map as M

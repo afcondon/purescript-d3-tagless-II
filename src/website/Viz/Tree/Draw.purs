@@ -2,14 +2,14 @@ module D3.Viz.Tree.Draw where
 
 import Prelude
 
-import D3.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, width, x)
-import D3.Data.Tree (TreeLayout(..))
-import D3.Data.Types (Datum_, Element(..), Selector)
+import PSD3.Internal.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, width, x)
+import PSD3.Data.Tree (TreeLayout(..))
+import PSD3.Internal.Types (Datum_, Element(..), Selector)
 import D3.Viz.MetaTree.Unsafe (coerceToTreeNode, unboxD3TreeNode)
 import D3.Viz.Tree.Model (FlareTreeNode)
-import D3.FFI (descendants_, getHierarchyValue_, hasChildren_, keyIsID_, links_)
-import D3.Selection (SelectionAttribute)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
+import PSD3.Internal.FFI (descendants_, getHierarchyValue_, hasChildren_, keyIsID_, links_)
+import PSD3.Internal.Selection.Types (SelectionAttribute)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import Data.Nullable (Nullable)
 import Data.Number (pi)
 

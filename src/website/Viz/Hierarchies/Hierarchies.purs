@@ -2,13 +2,13 @@ module D3.Viz.Hierarchies where
 
 import Prelude
 
-import D3.Data.Tree (TreeJson_)
-import D3.Data.Types (D3Selection_, Selector)
+import PSD3.Data.Tree (TreeJson_)
+import PSD3.Internal.Types (D3Selection_, Selector)
 import D3.Viz.BubbleChart (draw) as Bubble
 import D3.Viz.Icicle (draw) as Icicle
 import D3.Viz.Treemap (draw) as Treemap
 import Data.Tuple (Tuple)
-import D3Tagless.Instance.Selection (runD3M)
+import PSD3.Interpreter.D3 (runD3M)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)

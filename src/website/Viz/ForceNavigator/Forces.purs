@@ -2,13 +2,13 @@ module D3.Viz.ForceNavigator.Forces where
 
 import Prelude
 
-import D3.Attributes.Instances (Label)
-import D3.Data.Types (Datum_)
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Internal.Types (Datum_)
 import D3.Viz.ForceNavigator.Model (NodeType(..))
 import D3.Viz.ForceNavigator.Unsafe (unboxD3SimNode)
-import D3.Simulation.Config as F
-import D3.Simulation.Forces (createForce, createLinkForce, initialize)
-import D3.Simulation.Types (Force, ForceType(..), RegularForceType(..), allNodes)
+import PSD3.Internal.Simulation.Config as F
+import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize)
+import PSD3.Internal.Simulation.Types (Force, ForceType(..), RegularForceType(..), allNodes)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
 import Data.Number (infinity)

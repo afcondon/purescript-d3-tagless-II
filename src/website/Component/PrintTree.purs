@@ -3,13 +3,13 @@ module PSD3.PrintTree where
 import Prelude
 
 import Control.Monad.State (class MonadState)
-import D3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..))
+import PSD3.Data.Tree (TreeJson_, TreeLayout(..), TreeType(..))
 import D3.Viz.Tree.Configure as Tree
-import D3.Layouts.Hierarchical (getTreeViaAJAX, makeModel)
+import PSD3.Internal.Hierarchical (getTreeViaAJAX, makeModel)
 import PSD3.Expandable as Expandable
 import PSD3.Toggle as Toggle
-import D3Tagless.Instance.Selection (eval_D3M)
-import D3Tagless.Utility (removeExistingSVG)
+import PSD3.Interpreter.D3 (eval_D3M)
+import PSD3.Internal.Utility (removeExistingSVG)
 import Data.Either (Either(..)) as E
 import Data.Lens (Lens', view, (%=), (.=))
 import Data.Lens.Record (prop)

@@ -1,11 +1,11 @@
-module D3.Simulation.Types where
+module PSD3.Internal.Simulation.Types where
 
 import Prelude
 
-import D3.Attributes.Instances (AttributeSetter, Label)
-import D3.Data.Types (D3Selection_, D3Simulation_, Datum_, Index_)
-import D3.FFI (D3ForceHandle_, SimulationVariables, initSimulation_, keyIsID_)
-import D3.Selection (SelectionAttribute)
+import PSD3.Internal.Attributes.Instances (AttributeSetter, Label)
+import PSD3.Internal.Types (D3Selection_, D3Simulation_, Datum_, Index_)
+import PSD3.Internal.FFI (D3ForceHandle_, SimulationVariables, initSimulation_, keyIsID_)
+import PSD3.Internal.Selection.Types (SelectionAttribute)
 import Data.Array (intercalate)
 import Data.Foldable (class Foldable)
 import Data.Lens (Lens', Prism', _Just, lens', prism', view)

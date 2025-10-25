@@ -1,4 +1,4 @@
-module D3.Data.Types where
+module PSD3.Internal.Types where
 
 import Data.Time.Duration (Milliseconds)
 import Prelude (class Show)

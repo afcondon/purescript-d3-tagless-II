@@ -1,6 +1,6 @@
-module D3.Generators.Line where
+module PSD3.Internal.Generators.Line where
 
-import D3.Scales.Linear (LinearScale)
+import PSD3.Internal.Scales.Linear (LinearScale)
 import Effect (Effect)
 
 -- Opaque type for D3 line generator

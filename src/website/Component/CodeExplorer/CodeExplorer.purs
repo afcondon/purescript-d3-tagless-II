@@ -32,20 +32,20 @@ module PSD3.Spago where
 import Prelude
 
 import Control.Monad.State (class MonadState, get)
-import D3.Attributes.Sugar (onMouseEventEffectful, x)
-import D3.Data.Tree (TreeLayout(..))
-import D3.Data.Types (MouseEvent(..))
+import PSD3.Internal.Attributes.Sugar (onMouseEventEffectful, x)
+import PSD3.Data.Tree (TreeLayout(..))
+import PSD3.Internal.Types (MouseEvent(..))
 import D3.Viz.Spago.Draw (getVizEventFromClick)
 import D3.Viz.Spago.Draw as Graph
 import D3.Viz.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Viz.Spago.Files (NodeType(..), isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Viz.Spago.Model (SpagoModel, allNodes, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_R, unpinAllNodes)
-import D3.FFI (linksForceName)
-import D3.Selection (SelectionAttribute)
-import D3.Simulation.Types (SimVariable(..), initialSimulationState)
+import PSD3.Internal.FFI (linksForceName)
+import PSD3.Internal.Selection.Types (SelectionAttribute)
+import PSD3.Internal.Simulation.Types (SimVariable(..), initialSimulationState)
 import Data.Set as Set
-import D3Tagless.Capabilities (actualizeForces, setConfigVariable, start, stop)
-import D3Tagless.Instance.Simulation (evalEffectSimulation, runWithD3_Simulation)
+import PSD3.Capabilities.Simulation (actualizeForces, setConfigVariable, start, stop)
+import PSD3.Interpreter.D3 (evalEffectSimulation, runWithD3_Simulation)
 import Data.Array (filter, foldl, (:))
 import Data.Lens (use, view, (%=), (.=))
 import Data.Maybe (Maybe(..))

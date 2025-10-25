@@ -1,7 +1,7 @@
 module D3.Viz.ForceNavigator.Model where
 
 import Prelude
-import D3.Node (D3Link, D3_SimulationNode, D3_VxyFxy, D3_XY)
+import PSD3.Data.Node (D3Link, D3_SimulationNode, D3_VxyFxy, D3_XY)
 import Data.Maybe (Maybe)
 import Type.Row (type (+))
 

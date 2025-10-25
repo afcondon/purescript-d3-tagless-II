@@ -1,8 +1,8 @@
-module D3.Simulation.Config where
+module PSD3.Internal.Simulation.Config where
 
-import D3.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), toAttr)
-import D3.Data.Types (Datum_, Index_)
-import D3.Simulation.Types (ChainableF(..))
+import PSD3.Internal.Attributes.Instances (class ToAttr, Attr(..), AttrBuilder(..), AttributeSetter(..), toAttr)
+import PSD3.Internal.Types (Datum_, Index_)
+import PSD3.Internal.Simulation.Types (ChainableF(..))
 import Data.Number (infinity)
 import Prelude (negate, (<<<))
 

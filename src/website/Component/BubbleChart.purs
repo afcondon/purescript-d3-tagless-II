@@ -3,7 +3,7 @@ module PSD3.BubbleChart where
 import Prelude
 
 import D3.Viz.BubbleChart as Bubble
-import D3Tagless.Instance.Selection (eval_D3M)
+import PSD3.Interpreter.D3 (eval_D3M)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Halogen as H

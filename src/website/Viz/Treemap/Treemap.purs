@@ -2,12 +2,12 @@ module D3.Viz.Treemap where
 
 import Prelude
 
-import D3.Attributes.Sugar (classed, fill, fillOpacity, fontSize, height, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, y)
-import D3.Data.Tree (TreeJson_)
-import D3.Data.Types (D3Selection_, Element(..), Selector)
-import D3.FFI (descendants_, hNodeDepth_, hNodeX0_, hNodeX1_, hNodeY0_, hNodeY1_, hierarchyFromJSON_, runTreemapLayout_, treeSortForTreeMap_, treemapLayout_, treemapSetPadding_, treemapSetSize_)
-import D3.Node (D3_TreeNode)
-import D3Tagless.Capabilities (class SelectionM, appendTo, attach)
+import PSD3.Internal.Attributes.Sugar (classed, fill, fillOpacity, fontSize, height, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, y)
+import PSD3.Data.Tree (TreeJson_)
+import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
+import PSD3.Internal.FFI (descendants_, hNodeDepth_, hNodeX0_, hNodeX1_, hNodeY0_, hNodeY1_, hierarchyFromJSON_, runTreemapLayout_, treeSortForTreeMap_, treemapLayout_, treemapSetPadding_, treemapSetSize_)
+import PSD3.Data.Node (D3_TreeNode)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
 import Data.Foldable (traverse_)
 import Data.Int (round)
 import Effect.Class (class MonadEffect)

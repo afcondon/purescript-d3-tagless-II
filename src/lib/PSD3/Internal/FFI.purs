@@ -1,12 +1,12 @@
-module D3.FFI where
+module PSD3.Internal.FFI where
 
 -- brings together ALL of the wrapped D3js functions and FFI / native types
 -- probably should break it up again when it's more feature complete (ie to match D3 modules). Maybe.
 
-import D3.Node
+import PSD3.Data.Node
 
-import D3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
-import D3.Data.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
+import PSD3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
+import PSD3.Internal.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
 import Data.Function.Uncurried (Fn2)
 import Data.Nullable (Nullable)
 import Prelude (Unit, unit)
