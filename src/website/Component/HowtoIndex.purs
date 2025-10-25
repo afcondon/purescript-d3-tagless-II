@@ -11,7 +11,7 @@ import Halogen.HTML.Properties as HP
 import PSD3.RHSNavigation as RHSNav
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.TOC (renderTOC)
-import PSD3.Types (Route(..))
+import PSD3.Website.Types (Route(..))
 import Type.Proxy (Proxy(..))
 
 -- | Howto Index page state

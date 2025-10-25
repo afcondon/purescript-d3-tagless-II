@@ -2,7 +2,7 @@ module PSD3.RoutingDSL where
 
 import Prelude hiding ((/))
 
-import PSD3.Types (Route(..))
+import PSD3.Website.Types (Route(..))
 import Routing.Match (Match, lit, str, end)
 import Routing.Match (root) as Match
 import Control.Alt ((<|>))

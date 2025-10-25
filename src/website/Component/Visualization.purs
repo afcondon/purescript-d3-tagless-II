@@ -32,7 +32,7 @@ import Effect.Random (random)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Types (ExampleId)
+import PSD3.Website.Types (ExampleId)
 import Data.Maybe (Maybe(..))
 import Web.DOM.Document (toNonElementParentNode)
 import Web.DOM.NonElementParentNode (getElementById)

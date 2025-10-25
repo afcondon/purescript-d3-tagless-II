@@ -2,7 +2,7 @@ module PSD3.Navigation where
 
 import Prelude
 
-import PSD3.Types (Route(..))
+import PSD3.Website.Types (Route(..))
 import PSD3.RoutingDSL (routeToPath)
 import Halogen as H
 import Halogen.HTML as HH

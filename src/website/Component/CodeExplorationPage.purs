@@ -14,7 +14,7 @@ import Web.HTML.History (back)
 import Web.HTML.Window (history)
 import PSD3.RHSNavigation as RHSNav
 import PSD3.TOC (renderTOC)
-import PSD3.Types (Route(..))
+import PSD3.Website.Types (Route(..))
 import PSD3.Utilities (syntaxHighlightedCode)
 import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))

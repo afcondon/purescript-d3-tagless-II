@@ -5,7 +5,7 @@ import Prelude
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
-import PSD3.Types (Route(..))
+import PSD3.Website.Types (Route(..))
 import PSD3.Utilities (syntaxHighlightedCode)
 
 -- | Configuration for a code example display

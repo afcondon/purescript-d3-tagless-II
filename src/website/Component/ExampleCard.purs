@@ -2,7 +2,7 @@ module PSD3.ExampleCard where
 
 import Prelude
 
-import PSD3.Types (ExampleMetadata, difficultyEmoji, categoryToString)
+import PSD3.Website.Types (ExampleMetadata, difficultyEmoji, categoryToString)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP

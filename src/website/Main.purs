@@ -30,7 +30,7 @@ import PSD3.Interpreters as Interpreters
 import PSD3.CodeExplorationPage as CodeExplorationPage
 import PSD3.RoutingDSL (routing, routeToPath)
 import PSD3.CodeExplorerWrapper as CodeExplorer
-import PSD3.Types (Route(..))
+import PSD3.Website.Types (Route(..))
 import Routing.Hash (matches, setHash)
 import Type.Proxy (Proxy(..))
 

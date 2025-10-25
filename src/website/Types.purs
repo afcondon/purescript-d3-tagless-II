@@ -1,4 +1,4 @@
-module PSD3.Types where
+module PSD3.Website.Types where
 
 import Prelude
 

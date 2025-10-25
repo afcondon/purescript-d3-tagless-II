@@ -27,7 +27,7 @@ import PSD3.CodeExample (renderCodeExampleSimple)
 import PSD3.RHSNavigation as RHSNav
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.TOC (renderTOC)
-import PSD3.Types (Route(..))
+import PSD3.Website.Types (Route(..))
 import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))
 

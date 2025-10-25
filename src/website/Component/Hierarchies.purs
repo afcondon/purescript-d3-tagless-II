@@ -16,7 +16,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.RHSNavigation as RHSNav
-import PSD3.Types (Route(..))
+import PSD3.Website.Types (Route(..))
 import Type.Proxy (Proxy(..))
 
 -- | Hierarchies page state
