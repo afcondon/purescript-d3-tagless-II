@@ -5,7 +5,7 @@ import PSD3.Internal.Selection.Types
 import Control.Monad.State (class MonadState, StateT, modify_, runStateT)
 import PSD3.Internal.Attributes.Instances (AttributeSetter(..), unboxAttr)
 import PSD3.Internal.Types (D3Selection_, Element, Selector, Transition)
-import PSD3.Internal.FFI (ComputeKeyFunction_, D3Attr)
+import PSD3.Internal.FFI (ComputeKeyFunction_, D3Attr_)
 import PSD3.Capabilities.Selection (class SelectionM)
 import Data.Array (foldl)
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -129,8 +129,8 @@ foreign import showRemoveSelection_ :: String -> String
 foreign import showAppend_          :: Element -> String -> String
 foreign import showKeyFunction_     :: forall d. Array d -> ComputeKeyFunction_ -> String -> String
 foreign import showData_            :: forall d. Array d -> String -> String
-foreign import showSetAttr_         :: String -> D3Attr -> String -> String
-foreign import showSetText_         :: D3Attr -> String -> String
-foreign import showSetHTML_         :: D3Attr -> String -> String
-foreign import showSetProperty_     :: D3Attr -> String -> String
+foreign import showSetAttr_         :: String -> D3Attr_ -> String -> String
+foreign import showSetText_         :: D3Attr_ -> String -> String
+foreign import showSetHTML_         :: D3Attr_ -> String -> String
+foreign import showSetProperty_     :: D3Attr_ -> String -> String
 foreign import showSetOrdering_     :: String -> String -> String

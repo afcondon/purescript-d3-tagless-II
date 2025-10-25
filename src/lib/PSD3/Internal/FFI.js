@@ -51,7 +51,7 @@ export function d3AddTransition_(selection) {
 // *****  CONCRETE EXAMPLE: this defaults to updating fx but in Spago example position is on parent, using   *******
 // *****  transforms to move both circle and label together (only way to position a <group> in SVG)
 // *****************************************************************************************************************
-export function simdrag(label, simulation) {
+export function simdrag_(label, simulation) {
   function dragstarted(event) {
     if (!event.active) simulation.alphaTarget(0.3).restart();
     event.subject.fx = event.subject.x;
@@ -71,7 +71,7 @@ export function simdrag(label, simulation) {
     .on('drag.' + label, dragged)
     .on('end.' + label, dragended);
 }
-export const linksForceName = "links"
+export const linksForceName_ = "links"
 export const dummyForceHandle_ = null
 export function disableTick_(simulation) { return name => { return simulation.on('tick.' + name, () => null) } }
 export function forceCenter_() { return d3.forceCenter() }
@@ -124,7 +124,7 @@ export function initSimulation_(config) {
   return keyFn => {
     const simulation = d3
       .forceSimulation([])
-      .force(linksForceName, d3.forceLink([]).id(keyFn))
+      .force(linksForceName_, d3.forceLink([]).id(keyFn))
       .alpha(config.alpha) // default is 1
       .alphaTarget(config.alphaTarget) // default is 0
       .alphaMin(config.alphaMin) // default is 0.0001
@@ -150,7 +150,7 @@ export function configSimulation_(simulation) {
     return simulation
   }
 }
-export function readSimulationVariables(simulation) {
+export function readSimulationVariables_(simulation) {
   return {
     alpha: simulation.alpha(),
     alphaTarget: simulation.alphaTarget(),
@@ -235,7 +235,7 @@ export function setNodes_(simulation) {
 export function setLinks_(simulation) {
   return links => {
     console.log(`FFI: setting links in simulation, there are ${links.length} links`);
-    simulation.force(linksForceName).links(links)
+    simulation.force(linksForceName_).links(links)
   }
 }
 // returns array of links with ids replaced by object references, invalid links are discarded
@@ -272,7 +272,7 @@ export function swizzleLinks_(links) {
 export function unsetLinks_(simulation) {
   const linkForce = d3.forceLink([])
   console.log('FFI: removing all links from simulation');
-  simulation.force(linksForceName, linkForce)
+  simulation.force(linksForceName_, linkForce)
   return simulation
 }
 // this will work on both swizzled and unswizzled links
@@ -291,7 +291,7 @@ export function getLinkIDs_(keyFn) {
   }
 }
 export function getLinksFromSimulation_(simulation) {
-  linksForce = simulation.force(linksForceName)
+  linksForce = simulation.force(linksForceName_)
   if (typeof linksForce === `undefined`) {
     return [] // either the force wasn't found, or the force wasn't a links force
   }
@@ -490,7 +490,7 @@ export function treeSortForTree_(root) {
       return b.height - a.height || a.id.localeCompare(b.id)
     })
 }
-export function treeSortForTree_Spago(root) {
+export function treeSortForTree_Spago_(root) {
   return root
     .sum(function (d) {
       return d.value

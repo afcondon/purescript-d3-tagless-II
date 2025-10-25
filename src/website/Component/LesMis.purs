@@ -8,7 +8,7 @@ import Control.Monad.State (class MonadState, get, put)
 import PSD3.Internal.Attributes.Instances (Label)
 import D3.Viz.LesMiserables as LesMis
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
-import PSD3.Internal.FFI (linksForceName)
+import PSD3.Internal.FFI (linksForceName_)
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), SimVariable(..), allNodes, initialSimulationState)
@@ -67,7 +67,7 @@ forceNames = {
   , manyBodyPos: "many body positive"
   , collision: "collision"
   , center: "center"
-  , links: linksForceName
+  , links: linksForceName_
 }
 
 -- Note: Cannot use lens due to forall in notebook field, use direct field access instead

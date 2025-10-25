@@ -3,11 +3,11 @@ module D3.Viz.LineChart where
 import Prelude
 
 import PSD3.Internal.Attributes.Sugar (classed, d, fill, radius, strokeColor, strokeWidth, transform, viewBox, width, height)
-import PSD3.Internal.Axes (Axis, axisBottom, axisLeft, callAxis)
+import PSD3.Internal.Axes (Axis_, axisBottom_, axisLeft_, callAxis_)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.Charts.Model (DataPoint, sineWaveData)
-import PSD3.Internal.Generators.Line (createLineGenerator, generateLinePath)
-import PSD3.Internal.Scales.Linear (LinearScale, createLinearScale)
+import PSD3.Internal.Generators.Line (createLineGenerator_, generateLinePath_)
+import PSD3.Internal.Scales.Linear (LinearScale_, createLinearScale_)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes)
 import Data.Array (length)
 import Data.Foldable (maximum, minimum)
@@ -72,8 +72,8 @@ draw dataPoints selector = do
     ]
 
   -- Create scales
-  xScale <- liftEffect $ createLinearScale { domain: [minX, maxX], range: [0.0, iWidth] }
-  yScale <- liftEffect $ createLinearScale { domain: [minY, maxY], range: [iHeight, 0.0] }
+  xScale <- liftEffect $ createLinearScale_ { domain: [minX, maxX], range: [0.0, iWidth] }
+  yScale <- liftEffect $ createLinearScale_ { domain: [minY, maxY], range: [iHeight, 0.0] }
 
   -- Add axes
   xAxisGroup <- appendTo chartGroup Group [
@@ -82,12 +82,12 @@ draw dataPoints selector = do
     ]
   yAxisGroup <- appendTo chartGroup Group [ classed "y-axis" ]
 
-  _ <- liftEffect $ callAxis xAxisGroup (axisBottom xScale)
-  _ <- liftEffect $ callAxis yAxisGroup (axisLeft yScale)
+  _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)
+  _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)
 
   -- Create line generator and add the line path
-  lineGen <- liftEffect $ createLineGenerator { xScale, yScale }
-  let pathData = generateLinePath lineGen dataPoints
+  lineGen <- liftEffect $ createLineGenerator_ { xScale, yScale }
+  let pathData = generateLinePath_ lineGen dataPoints
 
   _ <- appendTo chartGroup Path [
       d pathData

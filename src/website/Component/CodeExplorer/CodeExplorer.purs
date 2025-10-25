@@ -40,7 +40,7 @@ import D3.Viz.Spago.Draw as Graph
 import D3.Viz.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Viz.Spago.Files (NodeType(..), isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Viz.Spago.Model (SpagoModel, allNodes, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_R, unpinAllNodes)
-import PSD3.Internal.FFI (linksForceName)
+import PSD3.Internal.FFI (linksForceName_)
 import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Internal.Simulation.Types (SimVariable(..), initialSimulationState)
 import Data.Set as Set
@@ -147,7 +147,7 @@ handleAction = case _ of
     _chooseNodes     .= isPackage
     _linksShown      .= isP2P_Link
     _linksActive     .= (sourcePackageIs "my-project")
-    _activeForces    .= Set.fromFoldable ["center", "collide2", "charge2", "packageOrbit", linksForceName ]
+    _activeForces    .= Set.fromFoldable ["center", "collide2", "charge2", "packageOrbit", linksForceName_ ]
     _cssClass        .= "graph"
     _sceneAttributes .= graphSceneAttributes
     _nodeInitializerFunctions .= [ unpinAllNodes, packagesNodesToPhyllotaxis, fixNamedNodeTo "my-project" { x: 0.0, y: 0.0 } ]
@@ -159,7 +159,7 @@ handleAction = case _ of
     _linksActive     .= const true
     _cssClass        .= "tree"
     _sceneAttributes .= treeSceneAttributes
-    _activeForces    .= Set.fromFoldable [ "htreeNodesX", "collide1", "y", linksForceName ]
+    _activeForces    .= Set.fromFoldable [ "htreeNodesX", "collide1", "y", linksForceName_ ]
     _nodeInitializerFunctions .= [ unpinAllNodes ]
     runSimulation
 
@@ -169,7 +169,7 @@ handleAction = case _ of
     _linksActive     .= const true
     _cssClass        .= "tree radial"
     _sceneAttributes .= treeSceneAttributes
-    _activeForces    .= Set.fromFoldable [ "center", "collide2", "chargetree", "charge2", linksForceName ]
+    _activeForces    .= Set.fromFoldable [ "center", "collide2", "chargetree", "charge2", linksForceName_ ]
     _nodeInitializerFunctions .= [ unpinAllNodes, treeNodesToTreeXY_R, fixNamedNodeTo "Main" { x: 0.0, y: 0.0 } ]
     runSimulation
 

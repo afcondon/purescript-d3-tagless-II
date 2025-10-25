@@ -3,10 +3,10 @@ module D3.Viz.ScatterPlot where
 import Prelude
 
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fontSize, height, radius, strokeColor, strokeWidth, text, textAnchor, transform, viewBox, width, x, y)
-import PSD3.Internal.Axes (axisBottom, axisLeft, callAxis)
+import PSD3.Internal.Axes (axisBottom_, axisLeft_, callAxis_)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.Charts.Model (DataPoint, QuartetData, anscombesQuartet, scatterData)
-import PSD3.Internal.Scales.Linear (applyScale, createLinearScale)
+import PSD3.Internal.Scales.Linear (applyScale_, createLinearScale_)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
 import Data.Foldable (maximum, minimum, traverse_)
 import Data.Maybe (fromMaybe)
@@ -68,8 +68,8 @@ draw dataPoints selector = do
     ]
 
   -- Create scales
-  xScale <- liftEffect $ createLinearScale { domain: [minX, maxX], range: [0.0, iWidth] }
-  yScale <- liftEffect $ createLinearScale { domain: [minY, maxY], range: [iHeight, 0.0] }
+  xScale <- liftEffect $ createLinearScale_ { domain: [minX, maxX], range: [0.0, iWidth] }
+  yScale <- liftEffect $ createLinearScale_ { domain: [minY, maxY], range: [iHeight, 0.0] }
 
   -- Add axes
   xAxisGroup <- appendTo chartGroup Group [
@@ -78,14 +78,14 @@ draw dataPoints selector = do
     ]
   yAxisGroup <- appendTo chartGroup Group [ classed "y-axis" ]
 
-  _ <- liftEffect $ callAxis xAxisGroup (axisBottom xScale)
-  _ <- liftEffect $ callAxis yAxisGroup (axisLeft yScale)
+  _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)
+  _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)
 
   -- Add data points as circles
   let addPoint :: DataPoint -> m Unit
       addPoint point = do
-        let xPos = applyScale xScale point.x
-        let yPos = applyScale yScale point.y
+        let xPos = applyScale_ xScale point.x
+        let yPos = applyScale_ yScale point.y
         _ <- appendTo chartGroup Circle [
             cx xPos
           , cy yPos
@@ -155,8 +155,8 @@ drawQuartet quartet selector = do
           ]
 
         -- Create scales
-        xScale <- liftEffect $ createLinearScale { domain: xDomain, range: [0.0, iWidth] }
-        yScale <- liftEffect $ createLinearScale { domain: yDomain, range: [iHeight, 0.0] }
+        xScale <- liftEffect $ createLinearScale_ { domain: xDomain, range: [0.0, iWidth] }
+        yScale <- liftEffect $ createLinearScale_ { domain: yDomain, range: [iHeight, 0.0] }
 
         -- Add axes
         xAxisGroup <- appendTo subplotGroup Group [
@@ -165,14 +165,14 @@ drawQuartet quartet selector = do
           ]
         yAxisGroup <- appendTo subplotGroup Group [ classed "y-axis" ]
 
-        _ <- liftEffect $ callAxis xAxisGroup (axisBottom xScale)
-        _ <- liftEffect $ callAxis yAxisGroup (axisLeft yScale)
+        _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)
+        _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)
 
         -- Add data points
         let addPoint :: DataPoint -> m Unit
             addPoint point = do
-              let xPos = applyScale xScale point.x
-              let yPos = applyScale yScale point.y
+              let xPos = applyScale_ xScale point.x
+              let yPos = applyScale_ yScale point.y
               _ <- appendTo subplotGroup Circle [
                   cx xPos
                 , cy yPos

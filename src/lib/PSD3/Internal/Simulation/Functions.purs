@@ -303,7 +303,7 @@ simulationOn :: forall row m.
 simulationOn selection (Drag drag) = do
   handle <- use _handle
   let _ = case drag of 
-            DefaultDrag      -> simulationDrag_ "default" selection handle simdrag
+            DefaultDrag      -> simulationDrag_ "default" selection handle simdrag_
             NoDrag           -> disableDrag_ selection
             (CustomDrag name fn)  -> simulationDrag_ name selection handle fn
   pure unit

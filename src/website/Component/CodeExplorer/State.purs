@@ -7,7 +7,7 @@ import PSD3.Internal.Types (D3Selection_, Datum_)
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, clusterSceneAttributes)
 import D3.Viz.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
-import PSD3.Internal.FFI (SimulationVariables, readSimulationVariables)
+import PSD3.Internal.FFI (SimulationVariables, readSimulationVariables_)
 import PSD3.Data.Node (NodeID)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, _handle)
 import PSD3.Capabilities.Simulation (Staging)
@@ -123,7 +123,7 @@ _nodeInitializerFunctions = _scene <<< prop (Proxy :: Proxy "nodeInitializerFunc
 getSimulationVariables :: State -> SimulationVariables
 getSimulationVariables state = do
   let handle = view _handle state
-  readSimulationVariables handle
+  readSimulationVariables_ handle
 
 _modelNodes :: forall p. 
      Strong p

@@ -4,7 +4,7 @@ import Prelude
 
 import D3.Viz.Sankey.Model as Sankey
 import D3.Viz.SankeyDiagram as SankeyViz
-import PSD3.Internal.Sankey.Types (initialSankeyLayoutState, SankeyLayoutState_)
+import PSD3.Internal.Sankey.Types (initialSankeyLayoutState_, SankeyLayoutState_)
 import PSD3.Interpreter.D3 (runWithD3_Sankey)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
@@ -31,7 +31,7 @@ _rhsNav = Proxy :: Proxy "rhsNav"
 -- | SankeyDiagram page component
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
-  { initialState: \_ -> { sankeyLayout: initialSankeyLayoutState }
+  { initialState: \_ -> { sankeyLayout: initialSankeyLayoutState_ }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction

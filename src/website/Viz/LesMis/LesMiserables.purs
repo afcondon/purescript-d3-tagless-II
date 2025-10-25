@@ -5,7 +5,7 @@ import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColo
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Viz.LesMiserables.Model (LesMisRawModel)
-import PSD3.Internal.FFI (keyIsID_, simdrag)
+import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Simulation.Types (D3SimulationState_, SimVariable(..), Step(..))
@@ -79,7 +79,7 @@ draw model selector = do
                                                 , y2 (_.y <<< link_.target)
                                                 ]
   -- use default drag function (simply drags the element that's clicked on)                                              
-  _ <- nodesSelection `on` Drag (CustomDrag "lesmis" simdrag)
+  _ <- nodesSelection `on` Drag (CustomDrag "lesmis" simdrag_)
   -- TODO create inner <g> and apply the zoom functionality to it
   _ <- svg `on`  Zoom { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
                       , scale  : ScaleExtent 1.0 4.0 -- wonder if ScaleExtent ctor could be range operator `..`

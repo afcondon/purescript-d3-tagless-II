@@ -16,7 +16,7 @@ import D3.Viz.ThreeLittleCircles as ThreeLittleCircles
 import D3.Viz.Tree.Configure as Tree
 import D3.Viz.TreeSimple as TreeSimple
 import PSD3.Internal.Hierarchical (getTreeViaAJAX, makeModel)
-import PSD3.Internal.Sankey.Types (initialSankeyLayoutState)
+import PSD3.Internal.Sankey.Types (initialSankeyLayoutState_)
 import PSD3.Interpreter.D3 (eval_D3M, runD3M)
 import PSD3.Interpreter.D3 (eval_D3M_Sankey)
 import Data.Array (catMaybes)
@@ -135,7 +135,7 @@ handleAction = case _ of
         pure unit
 
       "sankey" -> do
-        let sankeyState = { sankeyLayout: initialSankeyLayoutState }
+        let sankeyState = { sankeyLayout: initialSankeyLayoutState_ }
         _ <- liftEffect $ eval_D3M_Sankey sankeyState $ SankeyDiagram.draw Sankey.energyData selector
         pure unit
 

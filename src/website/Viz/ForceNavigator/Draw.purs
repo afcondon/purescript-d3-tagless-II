@@ -7,7 +7,7 @@ import PSD3.Internal.Types (D3Selection_, D3This_, Datum_, Element(..))
 import PSD3.Internal.Selection.Types (SelectionAttribute)
 import D3.Viz.ForceNavigator.Model (Category(..), NavigationRawModel, NodeType(..))
 import D3.Viz.ForceNavigator.Unsafe (unboxD3SimLink, unboxD3SimNode)
-import PSD3.Internal.FFI (keyIsID_, simdrag)
+import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Simulation.Types (Step(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -174,7 +174,7 @@ update clickCallback model = do
   mergedNodes <- mergeSelections nodeEnter node'.update
 
   -- Apply drag behavior to merged selection (both new and existing nodes)
-  _ <- mergedNodes `on` Drag (CustomDrag "navigation" simdrag)
+  _ <- mergedNodes `on` Drag (CustomDrag "navigation" simdrag_)
 
   -- LINKS: Update using General Update Pattern
   link' <- updateJoin link Line merged.links keyIsID_

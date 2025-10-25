@@ -1,14 +1,14 @@
 import * as d3 from "d3";
 
-export function axisBottom(scale) {
+export function axisBottom_(scale) {
   return d3.axisBottom(scale);
 }
 
-export function axisLeft(scale) {
+export function axisLeft_(scale) {
   return d3.axisLeft(scale);
 }
 
-export function callAxis(selection) {
+export function callAxis_(selection) {
   return (axis) => () => {
     selection.call(axis);
   };

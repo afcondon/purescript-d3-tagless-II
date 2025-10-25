@@ -4,7 +4,7 @@ import Prelude
 
 import PSD3.Internal.Attributes.Instances (Attr(..), AttrBuilder(..), AttributeSetter(..), Label, unboxAttr)
 import PSD3.Internal.Types (D3Simulation_, Datum_)
-import PSD3.Internal.FFI (D3ForceHandle_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, linksForceName, putForceInSimulation_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
+import PSD3.Internal.FFI (D3ForceHandle_, forceCenter_, forceCollideFn_, forceLink_, forceMany_, forceRadial_, forceX_, forceY_, linksForceName_, putForceInSimulation_, setAsNullForceInSimulation_, setForceDistanceMax_, setForceDistanceMin_, setForceDistance_, setForceIterations_, setForceRadius_, setForceStrength_, setForceTheta_, setForceX_, setForceY_, unsetLinks_)
 import PSD3.Internal.Simulation.Types (ChainableF, Force(..), ForceFilter(..), ForceStatus(..), ForceType(..), LinkForceType(..), RegularForceType(..), _name, _status, toggleForceStatus)
 import Data.Array (elem)
 import Data.Foldable (class Foldable)
@@ -46,7 +46,7 @@ createForce l t f cs = Force {
 createLinkForce :: Maybe ForceFilter -> Array ChainableF -> Force
 createLinkForce f cs = Force {
     "type": LinkForce
-  , name: linksForceName
+  , name: linksForceName_
   , status: ForceDisabled
   , filter: f
   , attributes: cs

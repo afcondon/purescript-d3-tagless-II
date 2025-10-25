@@ -5,7 +5,7 @@ import Prelude
 import Control.Monad.State (class MonadState, get)
 import D3.Viz.Sankey.Model as Sankey
 import D3.Viz.SankeyDiagram as SankeyDiagram
-import PSD3.Internal.Sankey.Types (SankeyLayoutState_, initialSankeyLayoutState)
+import PSD3.Internal.Sankey.Types (SankeyLayoutState_, initialSankeyLayoutState_)
 import PSD3.Interpreter.D3 (eval_D3M)
 import PSD3.Internal.Utility (removeExistingSVG)
 import PSD3.Expandable as Expandable
@@ -93,7 +93,7 @@ component = H.mkComponent
   where
   initialState :: State
   initialState = {
-      sankeyLayout: initialSankeyLayoutState
+      sankeyLayout: initialSankeyLayoutState_
     , alignment: AlignJustify
     , linkColorMode: ColorBySource
     , nodeWidth: 15.0

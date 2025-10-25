@@ -7,7 +7,7 @@ import PSD3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
 import PSD3.Internal.Types (PointXY)
 import D3.Viz.Spago.Files (LinkType(..), isP2P_Link)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, TreeFields, setTreeXYExceptLeaves, setTreeXYIncludingLeaves)
-import PSD3.Internal.FFI (descendants_, getHierarchyChildren_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, runLayoutFn_, treeSetNodeSize_, treeSortForTree_Spago)
+import PSD3.Internal.FFI (descendants_, getHierarchyChildren_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, runLayoutFn_, treeSetNodeSize_, treeSortForTree_Spago_)
 import PSD3.Data.Node (D3Link(..), D3_SimulationNode(..), D3_TreeNode(..), NodeID)
 import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
 import Data.List (List(..), (:))
@@ -59,7 +59,7 @@ treeReduction rootID model = do
           idTree            = buildTree rootID treelinks
           jsontree          = makeD3TreeJSONFromTreeID idTree model.maps.id2Node
           rootTree          = hierarchyFromJSON_       jsontree
-          sortedTree        = treeSortForTree_Spago    rootTree
+          sortedTree        = treeSortForTree_Spago_    rootTree
           laidOutRoot_      = (runLayoutFn_ layout)    sortedTree
           treeDerivedDataMap = getTreeDerivedData      laidOutRoot_
           -- positionedNodes   = setNodeXY_ForRadialTree   treenodes.yes treeDerivedDataMap

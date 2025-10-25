@@ -3,10 +3,10 @@ module D3.Viz.BarChart where
 import Prelude
 
 import PSD3.Internal.Attributes.Sugar (classed, fill, height, strokeColor, strokeWidth, transform, viewBox, width, x, y)
-import PSD3.Internal.Axes (axisBottom, axisLeft, callAxis)
+import PSD3.Internal.Axes (axisBottom_, axisLeft_, callAxis_)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.Charts.Model (DataPoint)
-import PSD3.Internal.Scales.Linear (applyScale, createLinearScale)
+import PSD3.Internal.Scales.Linear (applyScale_, createLinearScale_)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
 import Data.Array (length)
 import Data.Foldable (maximum, minimum, traverse_)
@@ -74,8 +74,8 @@ draw dataPoints selector = do
     ]
 
   -- Create scales
-  xScale <- liftEffect $ createLinearScale { domain: [minX, maxX], range: [0.0, iWidth] }
-  yScale <- liftEffect $ createLinearScale { domain: [minY, maxY], range: [iHeight, 0.0] }
+  xScale <- liftEffect $ createLinearScale_ { domain: [minX, maxX], range: [0.0, iWidth] }
+  yScale <- liftEffect $ createLinearScale_ { domain: [minY, maxY], range: [iHeight, 0.0] }
 
   -- Add <g> elements to hold each of the axes
   xAxisGroup <- appendTo chartGroup Group [
@@ -87,14 +87,14 @@ draw dataPoints selector = do
     , transform [ \_ -> "translate(" <> show ((barWidth / 2.0 * -1.0) - 5.0) <> ",0)" ]
   ]
   -- Draw the axes into the SVG, inside their respective <g> group elements
-  _ <- liftEffect $ callAxis xAxisGroup (axisBottom xScale)
-  _ <- liftEffect $ callAxis yAxisGroup (axisLeft yScale)
+  _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)
+  _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)
 
   -- Add bars
   let addBar :: DataPoint -> m Unit
       addBar point = do
-        let xPos = applyScale xScale point.x - (barWidth / 2.0)
-        let yPos = applyScale yScale point.y
+        let xPos = applyScale_ xScale point.x - (barWidth / 2.0)
+        let yPos = applyScale_ yScale point.y
         let barHeight = iHeight - yPos
         _ <- appendTo chartGroup Rect [
             x xPos

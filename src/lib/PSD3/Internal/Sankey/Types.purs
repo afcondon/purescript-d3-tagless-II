@@ -28,4 +28,4 @@ foreign import data SankeyLink_ :: Type
 
 -- Initial state for Sankey layout
 -- This will be created by the FFI layer
-foreign import initialSankeyLayoutState :: SankeyLayoutState_
+foreign import initialSankeyLayoutState_ :: SankeyLayoutState_

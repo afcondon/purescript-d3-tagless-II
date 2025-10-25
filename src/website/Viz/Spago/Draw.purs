@@ -6,7 +6,7 @@ import PSD3.Internal.Attributes.Sugar (classed, remove, strokeColor, transform',
 import PSD3.Internal.Types (D3Selection_, D3This_, Datum_, Element(..))
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, svgAttrs, updateAttrs)
 import D3.Viz.Spago.Model (datum_, link_)
-import PSD3.Internal.FFI (keyIsID_, simdrag)
+import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Simulation.Types (Step(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -82,8 +82,8 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
   -- now merge the update selection into the enter selection (NB other way round doesn't work)
   mergedNodeSelection   <- mergeSelections nodeEnter node'.update  -- merged enter and update becomes the `node` selection for next pass
 
-  -- Apply drag behavior (simdrag integrates with D3 simulation for smooth physics)
-  void $ mergedNodeSelection `on` Drag (CustomDrag "spago" simdrag) 
+  -- Apply drag behavior (simdrag_ integrates with D3 simulation for smooth physics)
+  void $ mergedNodeSelection `on` Drag (CustomDrag "spago" simdrag_) 
   
   -- now the linkData
   -- after merging data with existing data in sim, keyIsID_ is correct key function on links

@@ -63,22 +63,22 @@ foreign import d3DataWithKeyFunction_ :: forall d. Array d -> ComputeKeyFunction
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
-foreign import data D3Attr :: Type 
+foreign import data D3Attr_ :: Type 
 -- NB D3 returns the selection after setting an Attr but we will only capture Selections that are 
 -- meaningfully different _as_ selections, we're not chaining them in the same way
 -- foreign import d3GetAttr_ :: String -> D3Selection -> ???? -- solve the ???? as needed later
 foreign import d3AddTransition_ :: D3Selection_ -> Transition -> D3Selection_ -- this is the PS transition record
 
-foreign import d3SetAttr_       :: String -> D3Attr -> D3Selection_ -> D3Selection_
-foreign import d3SetText_       :: D3Attr -> D3Selection_ -> D3Selection_
-foreign import d3SetProperty_   :: D3Attr -> D3Selection_ -> D3Selection_
-foreign import d3SetHTML_       :: D3Attr -> D3Selection_ -> D3Selection_
+foreign import d3SetAttr_       :: String -> D3Attr_ -> D3Selection_ -> D3Selection_
+foreign import d3SetText_       :: D3Attr_ -> D3Selection_ -> D3Selection_
+foreign import d3SetProperty_   :: D3Attr_ -> D3Selection_ -> D3Selection_
+foreign import d3SetHTML_       :: D3Attr_ -> D3Selection_ -> D3Selection_
 
 foreign import emptyD3Data_ :: D3Data_ -- probably just null, could this be monoid too??? ie Last (Maybe D3Data_)
 
 foreign import data D3DragFunction_ :: Type
 foreign import simulationDrag_ :: String -> D3Selection_ -> D3Simulation_ -> D3DragFunction_ -> D3Selection_
-foreign import simdrag  :: D3DragFunction_
+foreign import simdrag_  :: D3DragFunction_
 foreign import disableDrag_ :: D3Selection_ -> D3Selection_
 
 foreign import selectionOn_         :: forall selection callback. selection -> String -> callback -> selection  
@@ -90,7 +90,7 @@ foreign import selectionOn_         :: forall selection callback. selection -> S
 
 -- links force is very special, can't (easily) manage multiple named versions. 
 -- consistency of naming of link force is established with top level name
-foreign import linksForceName :: String
+foreign import linksForceName_ :: String
 
 -- | foreign types associated with Force Layout Simulation
 type GraphModel_ link node = { links :: Array link, nodes :: Array node }
@@ -108,7 +108,7 @@ type SimulationVariables = {
 
 foreign import initSimulation_         ::                  SimulationVariables -> (Datum_ -> Index_) -> D3Simulation_
 foreign import configSimulation_       :: D3Simulation_ -> SimulationVariables -> D3Simulation_
-foreign import readSimulationVariables :: D3Simulation_ -> SimulationVariables
+foreign import readSimulationVariables_ :: D3Simulation_ -> SimulationVariables
 
 foreign import d3PreserveSimulationPositions_ :: 
   forall d. 
@@ -175,7 +175,7 @@ unsetInSimNodeFlag node = do
 
 -- TODO this all has to change completely to work within Tagless 
 -- foreign import data NativeSelection :: Type -- just temporarily defined to allow foreign functions to pass
--- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr -> Unit
+-- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr_ -> Unit
 foreign import onTick_                :: D3Simulation_ -> String -> (Unit -> Unit) -> Unit
 foreign import disableTick_           :: D3Simulation_ -> String -> Unit
 foreign import defaultNodeTick_       :: String -> D3Simulation_ -> D3Selection_ -> Unit
@@ -197,18 +197,18 @@ foreign import forceLink_         :: Unit -> D3ForceHandle_ -- actually created 
 foreign import forceCustom_       :: Unit -> D3ForceHandle_
 foreign import dummyForceHandle_  :: D3ForceHandle_ -- used for fixed "forces", is null under the hood
 
-foreign import setForceRadius_      :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
-foreign import setForceStrength_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
-foreign import setForceCx_          :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
-foreign import setForceCy_          :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
-foreign import setForceTheta_       :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
-foreign import setForceDistanceMin_ :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
-foreign import setForceDistanceMax_ :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
-foreign import setForceIterations_  :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
-foreign import setForceX_           :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
-foreign import setForceY_           :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
-foreign import setForceDistance_    :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
-foreign import setLinksKeyFunction_ :: D3ForceHandle_ -> D3Attr -> D3ForceHandle_
+foreign import setForceRadius_      :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandle_
+foreign import setForceStrength_    :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandle_
+foreign import setForceCx_          :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandle_
+foreign import setForceCy_          :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandle_
+foreign import setForceTheta_       :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandle_
+foreign import setForceDistanceMin_ :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandle_
+foreign import setForceDistanceMax_ :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandle_
+foreign import setForceIterations_  :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandle_
+foreign import setForceX_           :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandle_
+foreign import setForceY_           :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandle_
+foreign import setForceDistance_    :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandle_
+foreign import setLinksKeyFunction_ :: D3ForceHandle_ -> D3Attr_ -> D3ForceHandle_
 
 foreign import putForceInSimulation_        :: D3Simulation_ -> String -> D3ForceHandle_ -> D3Simulation_
 -- foreign import restartLinksForceInSimulation_ :: D3Simulation_ -> D3ForceHandle_ -> Array Datum_ -> D3Simulation_
@@ -226,7 +226,7 @@ foreign import setAsNullForceInSimulation_  :: D3Simulation_ -> String -> D3Simu
 -- | *********************************************************************************************************************
 
 -- this is an opaque type behind which hides the data type of the Purescript tree that was converted
-foreign import data RecursiveD3TreeNode :: Type
+foreign import data RecursiveD3TreeNode_ :: Type
 -- this is the Purescript Tree after processing in JS to remove empty child fields from leaves etc
 -- need to ensure that this structure is encapsulated in libraries (ie by moving this code)
 foreign import data D3TreeLike_         :: Type -- covers both trees and clusters
@@ -238,7 +238,7 @@ foreign import hierarchyFromJSON_       :: forall d. TreeJson_ -> D3_TreeNode d
 foreign import treeSortForCirclePack_   :: forall d. D3CirclePackRow d -> D3CirclePackRow d
 foreign import treeSortForTreeMap_      :: forall d. D3TreeMapRow d -> D3TreeMapRow d
 foreign import treeSortForTree_         :: forall d. D3_TreeNode d -> D3_TreeNode d
-foreign import treeSortForTree_Spago    :: forall d. D3_TreeNode d -> D3_TreeNode d
+foreign import treeSortForTree_Spago_    :: forall d. D3_TreeNode d -> D3_TreeNode d
 
 -- next some functions to make attributes, types are a bit sloppy here, parent and child fields do not appear in PureScript
 foreign import hasChildren_             :: forall r. D3_TreeNode r -> Boolean
