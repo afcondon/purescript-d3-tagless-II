@@ -694,3 +694,82 @@
     display: none;
   }
 }
+
+/* How-to Item List Styles */
+.howto-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.howto-item {
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  border-left: 4px solid var(--color-red-accent);
+  padding: 1.5rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.howto-item:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  transform: translateX(4px);
+}
+
+.howto-item__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  gap: 1rem;
+}
+
+.howto-item__title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: bold;
+  flex: 1;
+}
+
+.howto-item__link {
+  color: var(--color-gray-darker);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.howto-item__link:hover {
+  color: var(--color-red-accent);
+}
+
+.howto-item__difficulty {
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.375rem 0.75rem;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.howto-item__difficulty--beginner {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.howto-item__difficulty--intermediate {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.howto-item__difficulty--advanced {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.howto-item__description {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-gray-medium);
+  margin: 0;
+}
+

@@ -17,7 +17,10 @@ routing =
 
 routes :: Match Route
 routes =
-  tutorial        -- Must come before 'about' because it's more specific
+  gettingStarted  -- Must come early - specific routes before general
+  <|> howtoIndex
+  <|> reference
+  <|> tutorial
   <|> simpleCharts
   <|> chordDiagram
   <|> bubbleChart
@@ -30,13 +33,25 @@ routes =
   <|> rootRedirect
   <|> notFound
 
+-- | Match: / (home/landing page)
+rootRedirect :: Match Route
+rootRedirect = Home <$ end
+
+-- | Match: /getting-started
+gettingStarted :: Match Route
+gettingStarted = GettingStarted <$ lit "getting-started" <* end
+
+-- | Match: /howto
+howtoIndex :: Match Route
+howtoIndex = HowtoIndex <$ lit "howto" <* end
+
+-- | Match: /reference
+reference :: Match Route
+reference = Reference <$ lit "reference" <* end
+
 -- | Match: /about
 about :: Match Route
 about = About <$ lit "about" <* end
-
--- | Match: / (redirect to /about)
-rootRedirect :: Match Route
-rootRedirect = About <$ end
 
 -- | Match: /tutorial
 tutorial :: Match Route
@@ -82,6 +97,10 @@ notFound = pure NotFound
 -- |
 -- | These paths no longer use hash fragments (#) - they are clean URLs
 routeToPath :: Route -> String
+routeToPath Home = "/"
+routeToPath GettingStarted = "/getting-started"
+routeToPath HowtoIndex = "/howto"
+routeToPath Reference = "/reference"
 routeToPath About = "/about"
 routeToPath Tutorial = "/tutorial"
 routeToPath SimpleCharts = "/simple-charts"

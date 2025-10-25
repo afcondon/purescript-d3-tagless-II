@@ -1,0 +1,209 @@
+/* Home/Landing Page Styles */
+
+.home-page {
+  min-height: 100vh;
+  background-color: var(--color-beige-base);
+  font-family: var(--font-mono);
+}
+
+/* Hero Section */
+.home-hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 6rem 2rem 4rem 2rem;
+  text-align: center;
+}
+
+.home-hero__title {
+  font-size: 4rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  margin: 0 0 1rem 0;
+  color: var(--color-gray-darker);
+}
+
+.home-hero__subtitle {
+  font-size: 1.5rem;
+  color: var(--color-gray-darker);
+  margin: 0 0 2rem 0;
+  letter-spacing: 0.02em;
+}
+
+.home-hero__description {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--color-gray-medium);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* Documentation Section */
+.home-docs {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+}
+
+.home-docs__title {
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  margin: 0 0 3rem 0;
+  color: var(--color-gray-darker);
+}
+
+.home-docs__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+/* Documentation Category Boxes */
+.home-doc-box {
+  display: block;
+  text-decoration: none;
+  border: 2px solid var(--color-gray-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  min-height: 200px;
+  position: relative;
+}
+
+.home-doc-box:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  border-color: var(--color-gray-darker);
+}
+
+.home-doc-box--tutorial {
+  background-color: #fffdf7; /* Light cream */
+}
+
+.home-doc-box--howto {
+  background-color: #f0f8ff; /* Light blue */
+}
+
+.home-doc-box--reference {
+  background-color: #ffffff; /* White */
+}
+
+.home-doc-box--explanation {
+  background-color: var(--color-beige-base); /* Beige */
+}
+
+.home-doc-box__content {
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.home-doc-box__title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 1rem 0;
+  color: var(--color-gray-darker);
+}
+
+.home-doc-box__description {
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: var(--color-gray-medium);
+  margin: 0 0 1.5rem 0;
+  flex: 1;
+}
+
+.home-doc-box__link {
+  font-size: 0.875rem;
+  font-weight: bold;
+  color: var(--color-red-accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.home-doc-box:hover .home-doc-box__link {
+  color: var(--color-coral);
+}
+
+/* Examples Section */
+.home-examples {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 4rem 2rem 6rem 2rem;
+}
+
+.home-examples__title {
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  margin: 0 0 3rem 0;
+  color: var(--color-gray-darker);
+}
+
+.home-examples__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Example Cards */
+.home-example-card {
+  display: block;
+  text-decoration: none;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+}
+
+.home-example-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  border-color: var(--color-red-accent);
+}
+
+.home-example-card__title {
+  font-size: 1.125rem;
+  font-weight: bold;
+  margin: 0 0 0.75rem 0;
+  color: var(--color-gray-darker);
+}
+
+.home-example-card__description {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--color-gray-medium);
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .home-hero {
+    padding: 4rem 1.5rem 3rem 1.5rem;
+  }
+
+  .home-hero__title {
+    font-size: 2.5rem;
+  }
+
+  .home-hero__subtitle {
+    font-size: 1.25rem;
+  }
+
+  .home-docs__grid,
+  .home-examples__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-doc-box {
+    min-height: auto;
+  }
+}

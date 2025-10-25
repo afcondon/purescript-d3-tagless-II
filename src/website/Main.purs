@@ -12,6 +12,10 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
 import Halogen.VDom.Driver (runUI)
+import PSD3.Home as Home
+import PSD3.GettingStarted as GettingStarted
+import PSD3.HowtoIndex as HowtoIndex
+import PSD3.Reference as Reference
 import PSD3.About as About
 import PSD3.Tutorial as Tutorial
 import PSD3.SimpleCharts as SimpleCharts
@@ -40,7 +44,11 @@ data Action
 
 -- | Child component slots
 type Slots =
-  ( about :: forall q. H.Slot q Void Unit
+  ( home :: forall q. H.Slot q Void Unit
+  , gettingStarted :: forall q. H.Slot q Void Unit
+  , howtoIndex :: forall q. H.Slot q Void Unit
+  , reference :: forall q. H.Slot q Void Unit
+  , about :: forall q. H.Slot q Void Unit
   , tutorial :: forall q. H.Slot q Void Unit
   , simpleCharts :: forall q. H.Slot q Void Unit
   , chordDiagram :: forall q. H.Slot q Void Unit
@@ -52,6 +60,10 @@ type Slots =
   , codeExploration :: forall q. H.Slot q Void Unit
   )
 
+_home = Proxy :: Proxy "home"
+_gettingStarted = Proxy :: Proxy "gettingStarted"
+_howtoIndex = Proxy :: Proxy "howtoIndex"
+_reference = Proxy :: Proxy "reference"
 _about = Proxy :: Proxy "about"
 _tutorial = Proxy :: Proxy "tutorial"
 _simpleCharts = Proxy :: Proxy "simpleCharts"
@@ -66,7 +78,7 @@ _codeExploration = Proxy :: Proxy "codeExploration"
 -- | Main application component
 component :: forall q i. H.Component q i Void Aff
 component = H.mkComponent
-  { initialState: \_ -> { currentRoute: About } -- note, it really doesn't matter what's initialized here as Initialize reads the route from the hash
+  { initialState: \_ -> { currentRoute: Home } -- note, it really doesn't matter what's initialized here as Initialize reads the route from the hash
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -87,6 +99,18 @@ render state =
 -- | Render the current page based on route
 renderPage :: Route -> H.ComponentHTML Action Slots Aff
 renderPage route = case spy "Route is" route of
+  Home ->
+    HH.slot_ _home unit Home.component unit
+
+  GettingStarted ->
+    HH.slot_ _gettingStarted unit GettingStarted.component unit
+
+  HowtoIndex ->
+    HH.slot_ _howtoIndex unit HowtoIndex.component unit
+
+  Reference ->
+    HH.slot_ _reference unit Reference.component unit
+
   About ->
     HH.slot_ _about unit About.component unit
 
@@ -123,8 +147,8 @@ renderPage route = case spy "Route is" route of
       [ HH.h1_ [ HH.text "404 - Page Not Found" ]
       , HH.p_ [ HH.text "The page you're looking for doesn't exist." ]
       , HH.a
-          [ HP.href $ "#" <> routeToPath About ]
-          [ HH.text "Go to About" ]
+          [ HP.href $ "#" <> routeToPath Home ]
+          [ HH.text "Go to Home" ]
       ]
 
 handleAction :: Action -> H.HalogenM State Action Slots Void Aff Unit

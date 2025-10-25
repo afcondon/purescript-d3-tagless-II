@@ -64,7 +64,11 @@ type ExampleMetadata = {
 
 -- | Route in the application
 data Route
-  = About
+  = Home            -- Landing page with four documentation categories
+  | GettingStarted  -- Tutorial: installation, setup, first project
+  | HowtoIndex      -- How-to: index of all step-by-step guides
+  | Reference       -- Reference: API documentation
+  | About
   | Tutorial
   | SimpleCharts
   | ChordDiagram
@@ -79,6 +83,10 @@ data Route
 derive instance eqRoute :: Eq Route
 
 instance showRoute :: Show Route where
+  show Home = "Home"
+  show GettingStarted = "Getting Started"
+  show HowtoIndex = "How-to Guides"
+  show Reference = "API Reference"
   show About = "About"
   show Tutorial = "Tutorial"
   show SimpleCharts = "Simple Charts"
