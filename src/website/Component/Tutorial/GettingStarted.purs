@@ -45,7 +45,9 @@ render _ =
             [ { anchor: "installation", label: "Installation", level: 0 }
             , { anchor: "prerequisites", label: "Prerequisites", level: 1 }
             , { anchor: "setup", label: "Project Setup", level: 0 }
-            , { anchor: "first-viz", label: "Your First Visualization", level: 0 }
+            , { anchor: "wizard", label: "Using the Wizard", level: 0 }
+            , { anchor: "understanding", label: "Understanding the Code", level: 0 }
+            , { anchor: "datum-pattern", label: "The Datum_ Pattern", level: 1 }
             , { anchor: "next-steps", label: "Next Steps", level: 0 }
             ]
         , image: Just "images/tutorial-bookmark-balloons.jpeg"
@@ -61,7 +63,7 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
             [ HH.text "Getting Started with PS<$>D3" ]
         , HH.p_
-            [ HH.text "Welcome! This guide will help you install PS<$>D3, set up your first project, and create your first data visualization. By the end, you'll have a working PureScript project with a simple D3 visualization." ]
+            [ HH.text "Welcome! This guide will help you install PSD3, set up your first project, and create your first data visualization using our scaffold wizard. By the end, you'll have a working visualization that you can view in your browser." ]
         ]
 
     -- Installation section
@@ -102,76 +104,169 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
             [ HH.text "Project Setup" ]
         , HH.p_
-            [ HH.text "Create a new PureScript project and add PS<$>D3 as a dependency:" ]
+            [ HH.text "Clone the PSD3 repository which includes the visualization wizard:" ]
         , HH.pre_
             [ HH.code_
-                [ HH.text """# Create a new directory for your project
-mkdir my-d3-viz
-cd my-d3-viz
+                [ HH.text """# Clone the PSD3 repository
+git clone https://github.com/afcondon/PureScript-Tagless-D3.git
+cd PureScript-Tagless-D3
 
-# Initialize a new Spago project
-spago init
-
-# Add PS<$>D3 dependencies
-# Note: Replace with actual package names once published
-spago install purescript-d3-tagless""" ]
+# Install dependencies
+npm install
+spago build""" ]
             ]
         , HH.p_
-            [ HH.text "You'll also need to include D3.js in your HTML file. Create an " ]
-        , HH.code_ [ HH.text "index.html" ]
-        , HH.text " file:"
-        , HH.pre_
-            [ HH.code_
-                [ HH.text """<!DOCTYPE html>
-<html>
-<head>
-    <title>My D3 Visualization</title>
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-</head>
-<body>
-    <div id="viz"></div>
-    <script src="index.js"></script>
-</body>
-</html>""" ]
-            ]
+            [ HH.text "The wizard is located in " ]
+        , HH.code_ [ HH.text "scripts/init-psd3-viz.js" ]
+        , HH.text " and will generate all the files you need to get started."
         ]
 
-    -- First Visualization section
+    -- Using the Wizard section
     , HH.section
         [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "first-viz"
+        , HP.id "wizard"
         ]
         [ HH.h2
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Your First Visualization" ]
+            [ HH.text "Using the Wizard" ]
         , HH.p_
-            [ HH.text "Let's create a simple bar chart. Create a file " ]
-        , HH.code_ [ HH.text "src/Main.purs" ]
-        , HH.text ":"
+            [ HH.text "The wizard will generate a complete visualization scaffold for you. Run it from the project root:" ]
         , HH.pre_
             [ HH.code_
-                [ HH.text """module Main where
-
-import Prelude
-import Effect (Effect)
-import PSD3.Interpreter.D3 (eval_D3M)
-
-main :: Effect Unit
-main = do
-  -- Your first D3 visualization code will go here
-  pure unit""" ]
+                [ HH.text "node scripts/init-psd3-viz.js" ]
             ]
         , HH.p_
-            [ HH.text "Build and bundle your project:" ]
+            [ HH.text "You'll be prompted for:" ]
+        , HH.ul_
+            [ HH.li_
+                [ HH.strong_ [ HH.text "Visualization module name" ]
+                , HH.text " - e.g., "
+                , HH.code_ [ HH.text "MyFirstChart" ]
+                ]
+            , HH.li_
+                [ HH.strong_ [ HH.text "Data record fields" ]
+                , HH.text " - e.g., "
+                , HH.code_ [ HH.text "x:Number,y:Number,label:String" ]
+                ]
+            , HH.li_
+                [ HH.strong_ [ HH.text "Output directory" ]
+                , HH.text " - default: "
+                , HH.code_ [ HH.text "src/viz/YourModuleName" ]
+                ]
+            , HH.li_
+                [ HH.strong_ [ HH.text "Generate Main.purs?" ]
+                , HH.text " - (y/n, default: n)"
+                ]
+            , HH.li_
+                [ HH.strong_ [ HH.text "Generate index.html?" ]
+                , HH.text " - (y/n, default: y)"
+                ]
+            ]
+        , HH.h3_ [ HH.text "Example Session" ]
         , HH.pre_
             [ HH.code_
-                [ HH.text """spago build
-spago bundle --to index.js""" ]
+                [ HH.text """Visualization module name: ParabolaChart
+Data record fields: x:Number,y:Number
+Output directory: src/viz/ParabolaChart
+Generate Main.purs? (y/n): y
+Generate index.html? (y/n): y
+
+✓ Created src/viz/ParabolaChart/Unsafe.purs
+✓ Created src/viz/ParabolaChart/Model.purs
+✓ Created src/viz/ParabolaChart/Draw.purs
+✓ Created src/viz/ParabolaChart/Main.purs
+✓ Created src/viz/ParabolaChart/index.html
+✓ Created src/viz/ParabolaChart/README.md""" ]
+            ]
+        , HH.h3_ [ HH.text "Build and View" ]
+        , HH.p_
+            [ HH.text "Now build and bundle your visualization:" ]
+        , HH.pre_
+            [ HH.code_
+                [ HH.text """# Compile the PureScript
+spago build
+
+# Bundle for the browser
+spago bundle --module Main --outfile src/viz/ParabolaChart/bundle.js
+
+# Open in browser
+open src/viz/ParabolaChart/index.html""" ]
+            ]
+        ]
+
+    -- Understanding the Code section
+    , HH.section
+        [ HP.classes [ HH.ClassName "tutorial-section" ]
+        , HP.id "understanding"
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+            [ HH.text "Understanding the Generated Code" ]
+        , HH.p_
+            [ HH.text "The wizard generates several files following PSD3 best practices:" ]
+        , HH.ul_
+            [ HH.li_
+                [ HH.strong_ [ HH.text "Unsafe.purs" ]
+                , HH.text " - Contains type coercion functions that bridge PureScript's type system with D3's untyped JavaScript data"
+                ]
+            , HH.li_
+                [ HH.strong_ [ HH.text "Model.purs" ]
+                , HH.text " - Defines your data type and provides a placeholder for example data"
+                ]
+            , HH.li_
+                [ HH.strong_ [ HH.text "Draw.purs" ]
+                , HH.text " - Contains the visualization code with the "
+                , HH.code_ [ HH.text "datum_" ]
+                , HH.text " accessor pattern"
+                ]
+            , HH.li_
+                [ HH.strong_ [ HH.text "index.html" ]
+                , HH.text " - Pre-configured HTML with D3.js loaded from CDN and the correct "
+                , HH.code_ [ HH.text "#chart" ]
+                , HH.text " div"
+                ]
+            , HH.li_
+                [ HH.strong_ [ HH.text "README.md" ]
+                , HH.text " - Quick reference specific to your visualization"
+                ]
+            ]
+
+        , HH.h3
+            [ HP.id "datum-pattern" ]
+            [ HH.text "The Datum_ Pattern" ]
+        , HH.p_
+            [ HH.text "D3.js works with untyped JavaScript data, but PureScript is strongly typed. The "
+            , HH.code_ [ HH.text "datum_" ]
+            , HH.text " accessor pattern solves this by isolating type coercion in the "
+            , HH.code_ [ HH.text "Unsafe.purs" ]
+            , HH.text " module while providing typed accessors everywhere else."
             ]
         , HH.p_
-            [ HH.text "Open " ]
-        , HH.code_ [ HH.text "index.html" ]
-        , HH.text " in your browser to see your visualization!"
+            [ HH.text "In your "
+            , HH.code_ [ HH.text "Draw.purs" ]
+            , HH.text ", you'll use type-annotated lambdas to work with your data:"
+            ]
+        , HH.pre_
+            [ HH.code_
+                [ HH.text """-- Use data in attributes
+A.cx (\\(d :: Datum_) _ -> datum_.x d)
+
+-- Use both data and index
+A.fill (\\(d :: Datum_) (i :: Index_) ->
+  if datum_.index i > 5 then "red" else "blue")
+
+-- Scale by data value
+A.radius (\\(d :: Datum_) _ -> datum_.y d * 2.0)""" ]
+            ]
+        , HH.p_
+            [ HH.text "The type annotations "
+            , HH.code_ [ HH.text "(d :: Datum_)" ]
+            , HH.text " and "
+            , HH.code_ [ HH.text "(i :: Index_)" ]
+            , HH.text " are required to help PureScript's type checker find the correct "
+            , HH.code_ [ HH.text "ToAttr" ]
+            , HH.text " instance."
+            ]
         ]
 
     -- Next Steps section
