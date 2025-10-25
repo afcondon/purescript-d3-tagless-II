@@ -15,7 +15,8 @@ The wizard will prompt you for:
 1. **Visualization module name** - Must start with an uppercase letter (e.g., `MyBarChart`, `NetworkGraph`)
 2. **Data record fields** - Comma-separated field definitions (e.g., `x:Number,y:Number,label:String`)
 3. **Output directory** - Where to create the files (default: `src/viz/YourModuleName`)
-4. **Generate Main.purs?** - Optional entry point module (y/n)
+4. **Generate Main.purs?** - Optional entry point module (y/n, default: n)
+5. **Generate index.html?** - HTML page with D3.js loaded (y/n, default: y)
 
 ## Example Session
 
@@ -23,12 +24,20 @@ The wizard will prompt you for:
 Visualization module name: ParabolaChart
 Data record fields: x:Number,y:Number
 Output directory: src/viz/ParabolaChart
-Generate Main.purs? (y/n): n
+Generate Main.purs? (y/n, default: n): y
+Generate index.html? (y/n, default: y): y
 ```
 
 ## Generated Files
 
-The wizard creates three PureScript modules:
+The wizard creates the following files:
+
+- **Unsafe.purs** - Type coercion functions
+- **Model.purs** - Data type definitions
+- **Draw.purs** - Visualization code
+- **README.md** - Quick start guide for your visualization
+- **index.html** - HTML page with D3.js from CDN (optional)
+- **Main.purs** - Entry point module (optional)
 
 ### 1. Unsafe.purs
 
@@ -152,6 +161,46 @@ A.cx (\(_ :: Datum_) (i :: Index_) -> toNumber (datum_.index i) * 50.0)
 
 **Type annotations are required** in the lambda parameters (`(d :: Datum_)`, `(i :: Index_)`) to help PureScript's type inference find the correct `ToAttr` instance.
 
+### 4. index.html (Optional)
+
+A minimal HTML page ready to display your visualization:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YourViz - PSD3 Visualization</title>
+  <style>
+    /* Basic styling for the visualization container */
+    #chart { margin: 20px 0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>YourViz</h1>
+    <div id="chart"></div>
+  </div>
+
+  <!-- D3.js v7.9.0 from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+
+  <!-- Your bundled PureScript code -->
+  <script src="./bundle.js"></script>
+</body>
+</html>
+```
+
+The `#chart` div matches the selector in your `Draw.purs` file, and D3.js is loaded from a CDN so you don't need to install it locally.
+
+### 5. README.md
+
+A quick reference guide specific to your visualization, including:
+- File descriptions
+- Your data type definition
+- Build and run instructions
+- Examples of using the `datum_` pattern
+
 ## Next Steps
 
 After running the wizard:
@@ -159,7 +208,16 @@ After running the wizard:
 1. **Add your data** - Fill in the `exampleData` array in `Model.purs`
 2. **Customize the visualization** - Modify the `draw` function in `Draw.purs` to create your desired chart
 3. **Build** - Run `spago build` to compile
-4. **Use it** - Import and call the `run` function from your application
+4. **Bundle for browser** (if you generated Main.purs and index.html):
+   ```bash
+   spago bundle --module Main --outfile bundle.js
+   open index.html
+   ```
+5. **Or import in your app**:
+   ```purescript
+   import YourViz.Draw (run)
+   import YourViz.Model (exampleData)
+   ```
 
 ## Common Data Types
 
