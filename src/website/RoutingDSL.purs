@@ -17,7 +17,8 @@ routing =
 
 routes :: Match Route
 routes =
-  gettingStarted  -- Must come early - specific routes before general
+  home            -- Explicit home route
+  <|> gettingStarted  -- Must come early - specific routes before general
   <|> wizard
   <|> howtoIndex
   <|> referenceModule  -- Must come before reference (more specific)
@@ -35,7 +36,11 @@ routes =
   <|> rootRedirect
   <|> notFound
 
--- | Match: / (home/landing page)
+-- | Match: /home (landing page)
+home :: Match Route
+home = Home <$ lit "home" <* end
+
+-- | Match: / (redirect to home)
 rootRedirect :: Match Route
 rootRedirect = Home <$ end
 
@@ -107,7 +112,7 @@ notFound = pure NotFound
 -- |
 -- | These paths are used with hash-based routing (e.g., /#/about, /#/tutorial)
 routeToPath :: Route -> String
-routeToPath Home = "/"
+routeToPath Home = "/home"
 routeToPath GettingStarted = "/getting-started"
 routeToPath Wizard = "/wizard"
 routeToPath HowtoIndex = "/howto"

@@ -36,13 +36,13 @@ render :: forall m. Input -> H.ComponentHTML Unit Slots m
 render { currentSection, currentRoute, sectionPages, moduleCategories } =
   HH.div
     [ HP.classes [ HH.ClassName "section-nav" ] ]
-    [ -- Quadrant switcher
+    [ -- Quadrant switcher (matches home page layout: TL=Tutorial, TR=HowTo, BL=API, BR=Understanding)
       HH.div
         [ HP.classes [ HH.ClassName "section-nav__quadrant" ] ]
-        [ renderQuadrant UnderstandingSection currentSection
-        , renderQuadrant TutorialSection currentSection
-        , renderQuadrant HowToSection currentSection
-        , renderQuadrant APISection currentSection
+        [ renderQuadrant TutorialSection currentSection      -- Top left
+        , renderQuadrant HowToSection currentSection         -- Top right
+        , renderQuadrant APISection currentSection           -- Bottom left
+        , renderQuadrant UnderstandingSection currentSection -- Bottom right
         ]
 
     -- Section title
