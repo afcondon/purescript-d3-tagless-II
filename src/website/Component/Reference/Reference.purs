@@ -2,31 +2,44 @@ module PSD3.Reference.Reference where -- Reference
 
 import Prelude
 
-import Data.Maybe (Maybe(..))
+import Data.Array (find, (!!))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import Halogen.HTML.Events as HE
+import PSD3.Reference.ModuleRegistry (ModuleInfo, moduleCategories, allModules)
+import PSD3.Reference.ModuleViewer as ModuleViewer
 import PSD3.Shared.SectionNav as SectionNav
-import PSD3.Understanding.TOC (renderTOC)
 import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
 
 -- | Reference page state
-type State = Unit
+type State =
+  { selectedModule :: Maybe ModuleInfo
+  }
 
 -- | Reference page actions
-data Action = Initialize
+data Action
+  = Initialize
+  | SelectModule ModuleInfo
 
 -- | Child component slots
-type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
+type Slots =
+  ( sectionNav :: forall q. H.Slot q Void Unit
+  , moduleViewer :: forall q. H.Slot q Void Unit
+  )
 
 _sectionNav = Proxy :: Proxy "sectionNav"
+_moduleViewer = Proxy :: Proxy "moduleViewer"
 
 -- | Reference page component
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
-  { initialState: \_ -> unit
+  { initialState: \_ ->
+      { selectedModule: allModules !! 0  -- Default to first module (PSD3.Types)
+      }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -35,26 +48,13 @@ component = H.mkComponent
   }
 
 render :: State -> H.ComponentHTML Action Slots Aff
-render _ =
+render state =
   HH.div
     [ HP.classes [ HH.ClassName "reference-page" ] ]
-    [ -- TOC Panel (LHS)
-      renderTOC
-        { title: "Page Contents"
-        , items:
-            [ { anchor: "core", label: "Core Concepts", level: 0 }
-            , { anchor: "selection", label: "Selection", level: 0 }
-            , { anchor: "attach", label: "attach", level: 1 }
-            , { anchor: "appendTo", label: "appendTo", level: 1 }
-            , { anchor: "selectAll", label: "selectAll", level: 1 }
-            , { anchor: "data", label: "Data Binding", level: 0 }
-            , { anchor: "scales", label: "Scales", level: 0 }
-            , { anchor: "axes", label: "Axes", level: 0 }
-            ]
-        , image: Just "images/reference-bookmark-deepseavent.jpeg"
-        }
+    [ -- Module List Panel (LHS)
+      renderModuleList state.selectedModule
 
-    -- Navigation Panel (RHS)
+    -- Section Navigation (RHS)
     , HH.slot_ _sectionNav unit SectionNav.component
         { currentSection: APISection
         , currentRoute: Reference
@@ -63,199 +63,94 @@ render _ =
             ]
         }
 
-    -- Page introduction
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
-        [ HH.h1
-            [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-            [ HH.text "API Reference" ]
-        , HH.p_
-            [ HH.text "Complete technical documentation for the PS<$>D3 library. This reference provides detailed information about every function, type, and type class in the library." ]
-        ]
-
-    -- Core Concepts section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "core"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Core Concepts" ]
-        , HH.p_
-            [ HH.text "PS<$>D3 is built on the Finally Tagless pattern, which allows you to write visualization code once and interpret it in multiple ways. The core abstraction is the "
-            , HH.code_ [ HH.text "SelectionM" ]
-            , HH.text " type class."
-            ]
-        , HH.h3_ [ HH.text "The SelectionM Type Class" ]
-        , HH.pre_
-            [ HH.code_
-                [ HH.text """class Monad m <= SelectionM s m | m -> s where
-  attach :: Selector s -> m s
-  appendTo :: s -> Element -> Array (Attr s) -> m s
-  selectAll :: s -> Selector s -> m s
-  -- ... and many more operations""" ]
-            ]
-        , HH.p_
-            [ HH.text "This type class defines the operations you can perform on D3 selections. The "
-            , HH.code_ [ HH.text "s" ]
-            , HH.text " type parameter represents a selection, and "
-            , HH.code_ [ HH.text "m" ]
-            , HH.text " is the monad in which these operations run."
-            ]
-        ]
-
-    -- Selection section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "selection"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Selection Operations" ]
-        , HH.p_
-            [ HH.text "These functions form the core of PS<$>D3's selection API, allowing you to create, modify, and manipulate DOM elements." ]
-
-        -- attach function
-        , HH.h3
-            [ HP.id "attach" ]
-            [ HH.text "attach" ]
-        , HH.pre_
-            [ HH.code_
-                [ HH.text "attach :: forall s m. SelectionM s m => Selector s -> m s" ]
-            ]
-        , HH.p_
-            [ HH.text "Attaches to an existing DOM element using a CSS selector. This is typically the first operation in any D3 visualization." ]
-        , HH.p_
-            [ HH.strong_ [ HH.text "Parameters:" ] ]
-        , HH.ul_
-            [ HH.li_
-                [ HH.code_ [ HH.text "Selector s" ]
-                , HH.text " - A CSS selector string (e.g., \"div.chart\", \"#visualization\")"
-                ]
-            ]
-        , HH.p_
-            [ HH.strong_ [ HH.text "Returns:" ] ]
-        , HH.ul_
-            [ HH.li_ [ HH.text "A selection containing the matched element" ] ]
-        , HH.p_
-            [ HH.strong_ [ HH.text "Example:" ] ]
-        , HH.pre_
-            [ HH.code_
-                [ HH.text "root <- attach \"div.my-chart\"" ]
+    -- Main content area
+    , HH.main
+        [ HP.classes [ HH.ClassName "reference-main" ] ]
+        [ -- Page introduction
+          HH.section
+            [ HP.classes [ HH.ClassName "reference-intro" ] ]
+            [ HH.h1
+                [ HP.classes [ HH.ClassName "reference-title" ] ]
+                [ HH.text "PS<$>D3 API Reference" ]
+            , HH.p
+                [ HP.classes [ HH.ClassName "reference-description" ] ]
+                [ HH.text "Browse the PSD3 library source code module by module. Select a module from the left panel to view its complete source." ]
             ]
 
-        -- appendTo function
-        , HH.h3
-            [ HP.id "appendTo" ]
-            [ HH.text "appendTo" ]
-        , HH.pre_
-            [ HH.code_
-                [ HH.text "appendTo :: forall s m. SelectionM s m => s -> Element -> Array (Attr s) -> m s" ]
-            ]
-        , HH.p_
-            [ HH.text "Appends a new element to an existing selection with specified attributes." ]
-        , HH.p_
-            [ HH.strong_ [ HH.text "Parameters:" ] ]
-        , HH.ul_
-            [ HH.li_
-                [ HH.code_ [ HH.text "s" ]
-                , HH.text " - The parent selection to append to"
-                ]
-            , HH.li_
-                [ HH.code_ [ HH.text "Element" ]
-                , HH.text " - The type of element to create (Svg, Rect, Circle, etc.)"
-                ]
-            , HH.li_
-                [ HH.code_ [ HH.text "Array (Attr s)" ]
-                , HH.text " - Array of attributes to apply to the new element"
-                ]
-            ]
-        , HH.p_
-            [ HH.strong_ [ HH.text "Returns:" ] ]
-        , HH.ul_
-            [ HH.li_ [ HH.text "A selection containing the newly created element" ] ]
-        , HH.p_
-            [ HH.strong_ [ HH.text "Example:" ] ]
-        , HH.pre_
-            [ HH.code_
-                [ HH.text """svg <- appendTo root Svg
-  [ Width 400.0
-  , Height 300.0
-  , ViewBox 0.0 0.0 400.0 300.0
-  ]""" ]
-            ]
-
-        -- selectAll function
-        , HH.h3
-            [ HP.id "selectAll" ]
-            [ HH.text "selectAll" ]
-        , HH.pre_
-            [ HH.code_
-                [ HH.text "selectAll :: forall s m. SelectionM s m => s -> Selector s -> m s" ]
-            ]
-        , HH.p_
-            [ HH.text "Selects all descendant elements matching the given selector within a selection." ]
-        , HH.p_
-            [ HH.strong_ [ HH.text "Parameters:" ] ]
-        , HH.ul_
-            [ HH.li_
-                [ HH.code_ [ HH.text "s" ]
-                , HH.text " - The parent selection to search within"
-                ]
-            , HH.li_
-                [ HH.code_ [ HH.text "Selector s" ]
-                , HH.text " - CSS selector for the elements to find"
-                ]
-            ]
-        , HH.p_
-            [ HH.strong_ [ HH.text "Returns:" ] ]
-        , HH.ul_
-            [ HH.li_ [ HH.text "A selection containing all matched elements" ] ]
-        , HH.p_
-            [ HH.strong_ [ HH.text "Example:" ] ]
-        , HH.pre_
-            [ HH.code_
-                [ HH.text "circles <- selectAll svg \"circle\"" ]
-            ]
-        ]
-
-    -- Data Binding section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "data"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Data Binding" ]
-        , HH.p_
-            [ HH.text "Documentation for data binding functions coming soon..." ]
-        ]
-
-    -- Scales section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "scales"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Scales" ]
-        , HH.p_
-            [ HH.text "Documentation for scale functions coming soon..." ]
-        ]
-
-    -- Axes section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "axes"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Axes" ]
-        , HH.p_
-            [ HH.text "Documentation for axis functions coming soon..." ]
+        -- Module viewer
+        , case state.selectedModule of
+            Nothing ->
+              HH.div
+                [ HP.classes [ HH.ClassName "reference-no-selection" ] ]
+                [ HH.text "Select a module from the list to view its source code." ]
+            Just moduleInfo ->
+              HH.slot _moduleViewer unit ModuleViewer.component moduleInfo absurd
         ]
     ]
+
+-- | Render the module list in the LHS panel
+renderModuleList :: forall w. Maybe ModuleInfo -> HH.HTML w Action
+renderModuleList selectedModule =
+  HH.div
+    [ HP.classes [ HH.ClassName "module-list-panel" ] ]
+    [ HH.div
+        [ HP.classes [ HH.ClassName "module-list-panel__bookmark-pin" ] ]
+        [ HH.img
+            [ HP.src "images/reference-bookmark-deepseavent.jpeg"
+            , HP.alt "Modules"
+            ]
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "module-list-panel__main" ] ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "module-list-panel__header" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "module-list-panel__title" ] ]
+                [ HH.text "Modules" ]
+            ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "module-list-panel__content" ] ]
+            (map (renderCategory selectedModule) moduleCategories)
+        ]
+    ]
+
+-- | Render a module category
+renderCategory :: forall w. Maybe ModuleInfo -> _ -> HH.HTML w Action
+renderCategory selectedModule category =
+  HH.div
+    [ HP.classes [ HH.ClassName "module-category" ] ]
+    [ HH.h3
+        [ HP.classes [ HH.ClassName "module-category__title" ] ]
+        [ HH.text category.title ]
+    , HH.ul
+        [ HP.classes [ HH.ClassName "module-list" ] ]
+        (map (renderModuleItem selectedModule) category.modules)
+    ]
+
+-- | Render a single module list item
+renderModuleItem :: forall w. Maybe ModuleInfo -> ModuleInfo -> HH.HTML w Action
+renderModuleItem selectedModule moduleInfo =
+  HH.li
+    [ HP.classes
+        [ HH.ClassName "module-list__item"
+        , HH.ClassName if isSelected then "module-list__item--selected" else ""
+        ]
+    ]
+    [ HH.a
+        [ HP.classes [ HH.ClassName "module-list__link" ]
+        , HE.onClick \_ -> SelectModule moduleInfo
+        , HP.href "#"
+        ]
+        [ HH.text moduleInfo.name ]
+    ]
+  where
+    isSelected = case selectedModule of
+      Nothing -> false
+      Just selected -> selected.name == moduleInfo.name
 
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
   Initialize -> pure unit
+
+  SelectModule moduleInfo -> do
+    H.modify_ _ { selectedModule = Just moduleInfo }
