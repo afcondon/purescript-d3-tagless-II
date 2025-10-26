@@ -13,9 +13,9 @@ import Data.Ord (comparing)
 import Effect.Aff (Aff)
 import PSD3.WealthHealth.Types (NationData, NationPoint, Region(..), WealthHealthModel)
 
--- | URL for the nations.json data from Observable
+-- | URL for the nations.json data (hosted locally)
 nationsDataUrl :: String
-nationsDataUrl = "https://gist.githubusercontent.com/mbostock/9511ae067889eefa5537eedcbbf87dab/raw/nations.json"
+nationsDataUrl = "data/nations.json"
 
 -- | Foreign import to parse JSON data
 foreign import parseNationsJSON :: String -> Array NationData
