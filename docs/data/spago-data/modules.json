@@ -915,283 +915,15 @@
     "package": "prelude",
     "path": ".spago/p/prelude/32787f4399c92459c41602131a5858559eb868c5/src/Control/Semigroupoid.purs"
   },
-  "D3.Attributes.Instances": {
-    "depends": [
-      "Prelude",
-      "D3.Data.Types",
-      "Data.Function.Uncurried",
-      "Effect",
-      "Effect.Uncurried",
-      "Unsafe.Coerce",
-      "Web.Event.Internal.Types"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Attributes/Instances.purs"
-  },
-  "D3.Attributes.Sugar": {
-    "depends": [
-      "D3.Attributes.Instances",
-      "D3.Data.Types",
-      "D3.FFI",
-      "D3.Selection",
-      "Data.Array",
-      "Data.Function.Uncurried",
-      "Effect.Aff",
-      "Effect.Uncurried",
-      "Prelude",
-      "Unsafe.Coerce"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Attributes/Sugar.purs"
-  },
-  "D3.Axes": {
-    "depends": [
-      "Prelude",
-      "D3.Data.Types",
-      "D3.Scales.Linear",
-      "Effect"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Axes/Axes.purs"
-  },
-  "D3.Data.Graph": {
-    "depends": [
-      "Data.Array",
-      "Data.Graph",
-      "Data.Graph",
-      "Data.Maybe",
-      "Data.Tree",
-      "Data.Tuple",
-      "Prelude"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Data/Graph.purs"
-  },
-  "D3.Data.Tree": {
-    "depends": [
-      "D3.Node",
-      "Data.Array",
-      "Data.List",
-      "Data.Map",
-      "Data.Maybe",
-      "Data.Tree",
-      "Prelude"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Data/Tree.purs"
-  },
-  "D3.Data.Types": {
-    "depends": [
-      "Data.Time.Duration",
-      "Prelude",
-      "Unsafe.Coerce"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Data/Types.purs"
-  },
-  "D3.FFI": {
-    "depends": [
-      "D3.Node",
-      "D3.Data.Tree",
-      "D3.Data.Types",
-      "Data.Function.Uncurried",
-      "Data.Nullable",
-      "Prelude"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/FFI/FFI.purs"
-  },
-  "D3.Generators.Line": {
-    "depends": [
-      "D3.Scales.Linear",
-      "Effect"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Generators/Line.purs"
-  },
-  "D3.Layouts.Hierarchical": {
-    "depends": [
-      "D3.Node",
-      "Affjax.Web",
-      "Affjax.Web",
-      "Affjax.ResponseFormat",
-      "D3.Attributes.Instances",
-      "D3.Data.Tree",
-      "D3.Data.Types",
-      "D3.FFI",
-      "D3.Selection",
-      "Data.Bifunctor",
-      "Data.Either",
-      "Data.Function.Uncurried",
-      "Data.Maybe",
-      "Data.Nullable",
-      "Effect.Aff",
-      "Effect.Class",
-      "Prelude"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Layouts/Hierarchical/Hierarchical.purs"
-  },
-  "D3.Layouts.Sankey.Functions": {
-    "depends": [
-      "Prelude",
-      "D3.Data.Types",
-      "D3.Layouts.Sankey.Types",
-      "Effect",
-      "Effect.Class"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Layouts/Sankey/Functions.purs"
-  },
-  "D3.Layouts.Sankey.Types": {
-    "depends": [
-      "Prelude"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Layouts/Sankey/Types.purs"
-  },
-  "D3.Node": {
-    "depends": [
-      "Data.Nullable",
-      "Type.Row"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Data/Node.purs"
-  },
-  "D3.Scales": {
-    "depends": [],
-    "package": "my-project",
-    "path": "src/lib/D3/Scales/Scales.purs"
-  },
-  "D3.Scales.Linear": {
-    "depends": [
-      "Effect"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Scales/Linear.purs"
-  },
-  "D3.Selection": {
-    "depends": [
-      "D3.FFI",
-      "D3.Attributes.Instances",
-      "D3.Data.Types",
-      "D3.Zoom",
-      "Data.Array",
-      "Prelude"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Selection/Selection.purs"
-  },
-  "D3.Selection.Functions": {
-    "depends": [
-      "D3.Data.Types",
-      "D3.FFI",
-      "D3.Selection",
-      "D3.Zoom",
-      "D3Tagless.Capabilities",
-      "Data.Foldable",
-      "Debug",
-      "Prelude"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Selection/Functions.purs"
-  },
-  "D3.Simulation.Config": {
-    "depends": [
-      "D3.Attributes.Instances",
-      "D3.Data.Types",
-      "D3.Simulation.Types",
-      "Data.Number",
-      "Prelude"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Layouts/Simulation/Config.purs"
-  },
-  "D3.Simulation.Forces": {
-    "depends": [
-      "Prelude",
-      "D3.Attributes.Instances",
-      "D3.Data.Types",
-      "D3.FFI",
-      "D3.Simulation.Types",
-      "Data.Array",
-      "Data.Foldable",
-      "Data.Lens",
-      "Data.Lens.At",
-      "Data.Map",
-      "Data.Maybe",
-      "Data.Newtype",
-      "Data.Tuple"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Layouts/Simulation/Forces.purs"
-  },
-  "D3.Simulation.Functions": {
-    "depends": [
-      "D3.FFI",
-      "D3.Simulation.Forces",
-      "Prelude",
-      "Control.Monad.State",
-      "D3.Attributes.Instances",
-      "D3.Data.Types",
-      "D3.Node",
-      "D3.Selection",
-      "D3.Simulation.Types",
-      "D3.Zoom",
-      "D3Tagless.Capabilities",
-      "Data.Array",
-      "Data.Array",
-      "Data.Lens",
-      "Data.Map",
-      "Data.Map",
-      "Data.Maybe",
-      "Data.Set",
-      "Data.Set",
-      "Data.Tuple",
-      "Debug",
-      "Unsafe.Coerce"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Layouts/Simulation/Functions.purs"
-  },
-  "D3.Simulation.Types": {
-    "depends": [
-      "Prelude",
-      "D3.Attributes.Instances",
-      "D3.Data.Types",
-      "D3.FFI",
-      "D3.Selection",
-      "Data.Array",
-      "Data.Foldable",
-      "Data.Lens",
-      "Data.Lens.At",
-      "Data.Lens.Iso.Newtype",
-      "Data.Lens.Record",
-      "Data.Map",
-      "Data.Map",
-      "Data.Maybe",
-      "Data.Newtype",
-      "Data.Nullable",
-      "Data.Nullable",
-      "Data.Profunctor",
-      "Data.Profunctor.Choice",
-      "Data.Profunctor.Strong",
-      "Data.Tuple",
-      "Debug",
-      "Type.Proxy"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Layouts/Simulation/Types.purs"
-  },
   "D3.Viz.BarChart": {
     "depends": [
       "Prelude",
-      "D3.Attributes.Sugar",
-      "D3.Axes",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Axes",
+      "PSD3.Internal.Types",
       "D3.Viz.Charts.Model",
-      "D3.Scales.Linear",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.Scales.Linear",
+      "PSD3.Capabilities.Selection",
       "Data.Array",
       "Data.Foldable",
       "Data.Int",
@@ -1207,11 +939,11 @@
       "Affjax.ResponseFormat",
       "Affjax.Web",
       "Data.Argonaut.Core",
-      "D3.Attributes.Sugar",
-      "D3.Data.Types",
-      "D3.FFI",
-      "D3.Node",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Data.Node",
+      "PSD3.Capabilities.Selection",
       "Data.Either",
       "Data.Foldable",
       "Data.Int",
@@ -1233,10 +965,10 @@
   "D3.Viz.ChordDiagram": {
     "depends": [
       "Prelude",
-      "D3.Attributes.Sugar",
-      "D3.Data.Types",
-      "D3.FFI",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Capabilities.Selection",
       "Data.Array",
       "Data.Foldable",
       "Data.Maybe",
@@ -1249,7 +981,7 @@
   "D3.Viz.ForceNavigator.Data": {
     "depends": [
       "D3.Viz.ForceNavigator.Model",
-      "D3.Node",
+      "PSD3.Data.Node",
       "Data.Maybe",
       "Data.Nullable"
     ],
@@ -1259,16 +991,17 @@
   "D3.Viz.ForceNavigator.Draw": {
     "depends": [
       "Prelude",
-      "D3.Attributes.Sugar",
-      "D3.Data.Types",
-      "D3.Selection",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.Selection.Types",
       "D3.Viz.ForceNavigator.Model",
       "D3.Viz.ForceNavigator.Unsafe",
-      "D3.FFI",
-      "D3.Selection",
-      "D3.Simulation.Types",
-      "D3.Zoom",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Selection.Types",
+      "PSD3.Internal.Simulation.Types",
+      "PSD3.Internal.Zoom",
+      "PSD3.Capabilities.Selection",
+      "PSD3.Capabilities.Simulation",
       "Data.Maybe",
       "Data.Tuple",
       "Effect.Class",
@@ -1281,13 +1014,13 @@
   "D3.Viz.ForceNavigator.Forces": {
     "depends": [
       "Prelude",
-      "D3.Attributes.Instances",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Types",
       "D3.Viz.ForceNavigator.Model",
       "D3.Viz.ForceNavigator.Unsafe",
-      "D3.Simulation.Config",
-      "D3.Simulation.Forces",
-      "D3.Simulation.Types",
+      "PSD3.Internal.Simulation.Config",
+      "PSD3.Internal.Simulation.Forces",
+      "PSD3.Internal.Simulation.Types",
       "Data.Map",
       "Data.Maybe",
       "Data.Number"
@@ -1298,7 +1031,7 @@
   "D3.Viz.ForceNavigator.Model": {
     "depends": [
       "Prelude",
-      "D3.Node",
+      "PSD3.Data.Node",
       "Data.Maybe",
       "Type.Row"
     ],
@@ -1307,9 +1040,9 @@
   },
   "D3.Viz.ForceNavigator.Unsafe": {
     "depends": [
-      "D3.Data.Types",
+      "PSD3.Internal.Types",
       "D3.Viz.ForceNavigator.Model",
-      "D3.Node",
+      "PSD3.Data.Node",
       "Unsafe.Coerce"
     ],
     "package": "my-project",
@@ -1317,23 +1050,83 @@
   },
   "D3.Viz.GUP": {
     "depends": [
-      "D3.Attributes.Sugar",
-      "D3.Data.Types",
-      "D3.Selection",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.Selection.Types",
+      "PSD3.Capabilities.Selection",
+      "D3.Viz.GUP.Unsafe",
       "Data.String.CodeUnits",
       "Effect.Aff",
-      "Prelude",
-      "Unsafe.Coerce"
+      "Prelude"
     ],
     "package": "my-project",
     "path": "src/website/Viz/GUP.purs"
   },
+  "D3.Viz.GUP.Unsafe": {
+    "depends": [
+      "PSD3.Internal.Types",
+      "Unsafe.Coerce"
+    ],
+    "package": "my-project",
+    "path": "src/website/Viz/GUP/Unsafe.purs"
+  },
+  "D3.Viz.GroupedBarChart": {
+    "depends": [
+      "Prelude",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Types",
+      "D3.Viz.Charts.Model",
+      "PSD3.Capabilities.Selection",
+      "Data.Array",
+      "Data.Foldable",
+      "Data.Int",
+      "Data.Maybe",
+      "Data.Number.Format",
+      "Effect.Class"
+    ],
+    "package": "my-project",
+    "path": "src/website/Viz/Charts/GroupedBarChart.purs"
+  },
+  "D3.Viz.Hierarchies": {
+    "depends": [
+      "Prelude",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
+      "D3.Viz.BubbleChart",
+      "D3.Viz.Icicle",
+      "D3.Viz.Treemap",
+      "Data.Tuple",
+      "PSD3.Interpreter.D3",
+      "Effect",
+      "Effect.Aff",
+      "Effect.Class",
+      "Unsafe.Coerce"
+    ],
+    "package": "my-project",
+    "path": "src/website/Viz/Hierarchies/Hierarchies.purs"
+  },
+  "D3.Viz.Icicle": {
+    "depends": [
+      "Prelude",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Data.Node",
+      "PSD3.Capabilities.Selection",
+      "Data.Foldable",
+      "Data.Int",
+      "Effect.Class",
+      "Unsafe.Coerce"
+    ],
+    "package": "my-project",
+    "path": "src/website/Viz/Icicle/Icicle.purs"
+  },
   "D3.Viz.LesMis.Unsafe": {
     "depends": [
-      "D3.Data.Types",
+      "PSD3.Internal.Types",
       "D3.Viz.LesMiserables.Model",
-      "D3.Node",
+      "PSD3.Data.Node",
       "Unsafe.Coerce"
     ],
     "package": "my-project",
@@ -1342,16 +1135,17 @@
   "D3.Viz.LesMiserables": {
     "depends": [
       "Control.Monad.State",
-      "D3.Attributes.Sugar",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Types",
       "D3.Viz.LesMis.Unsafe",
       "D3.Viz.LesMiserables.Model",
-      "D3.FFI",
-      "D3.Scales",
-      "D3.Selection",
-      "D3.Simulation.Types",
-      "D3.Zoom",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Scales.Scales",
+      "PSD3.Internal.Selection.Types",
+      "PSD3.Internal.Simulation.Types",
+      "PSD3.Internal.Zoom",
+      "PSD3.Capabilities.Selection",
+      "PSD3.Capabilities.Simulation",
       "Data.Int",
       "Data.Number",
       "Data.Tuple",
@@ -1373,7 +1167,7 @@
   },
   "D3.Viz.LesMiserables.Model": {
     "depends": [
-      "D3.Node",
+      "PSD3.Data.Node",
       "Type.Row"
     ],
     "package": "my-project",
@@ -1382,13 +1176,13 @@
   "D3.Viz.LineChart": {
     "depends": [
       "Prelude",
-      "D3.Attributes.Sugar",
-      "D3.Axes",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Axes",
+      "PSD3.Internal.Types",
       "D3.Viz.Charts.Model",
-      "D3.Generators.Line",
-      "D3.Scales.Linear",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.Generators.Line",
+      "PSD3.Internal.Scales.Linear",
+      "PSD3.Capabilities.Selection",
       "Data.Array",
       "Data.Foldable",
       "Data.Maybe",
@@ -1401,16 +1195,16 @@
   },
   "D3.Viz.MetaTree": {
     "depends": [
-      "D3.Attributes.Sugar",
+      "PSD3.Internal.Attributes.Sugar",
       "Prelude",
-      "D3.Data.Tree",
-      "D3.Data.Types",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
       "D3.Viz.MetaTree.Model",
       "D3.Viz.MetaTree.Unsafe",
-      "D3.FFI",
-      "D3.Layouts.Hierarchical",
-      "D3Tagless.Capabilities",
-      "D3Tagless.Instance.Selection",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Hierarchical",
+      "PSD3.Capabilities.Selection",
+      "PSD3.Interpreter.D3",
       "Data.Number",
       "Data.Tuple",
       "Effect.Aff",
@@ -1422,7 +1216,7 @@
   },
   "D3.Viz.MetaTree.Model": {
     "depends": [
-      "D3.Node",
+      "PSD3.Data.Node",
       "Type.Row"
     ],
     "package": "my-project",
@@ -1430,9 +1224,9 @@
   },
   "D3.Viz.MetaTree.Unsafe": {
     "depends": [
-      "D3.Data.Types",
+      "PSD3.Internal.Types",
       "D3.Viz.MetaTree.Model",
-      "D3.Node",
+      "PSD3.Data.Node",
       "Data.Nullable",
       "Halogen.Svg.Attributes",
       "Type.Row",
@@ -1441,6 +1235,66 @@
     "package": "my-project",
     "path": "src/website/Viz/MetaTree/Unsafe.purs"
   },
+  "D3.Viz.MultiLineChart": {
+    "depends": [
+      "Prelude",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Types",
+      "D3.Viz.Charts.Model",
+      "PSD3.Capabilities.Selection",
+      "Data.Array",
+      "Data.Foldable",
+      "Data.FoldableWithIndex",
+      "Data.Int",
+      "Data.Maybe",
+      "Data.Number.Format",
+      "Data.Tuple",
+      "Effect.Class"
+    ],
+    "package": "my-project",
+    "path": "src/website/Viz/Charts/MultiLineChart.purs"
+  },
+  "D3.Viz.Parabola": {
+    "depends": [
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Scales.Scales",
+      "PSD3.Capabilities.Selection",
+      "D3.Viz.Parabola.Unsafe",
+      "Data.Int",
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/website/Viz/Parabola/Parabola.purs"
+  },
+  "D3.Viz.Parabola.Unsafe": {
+    "depends": [
+      "PSD3.Internal.Types",
+      "Unsafe.Coerce"
+    ],
+    "package": "my-project",
+    "path": "src/website/Viz/Parabola/Unsafe.purs"
+  },
+  "D3.Viz.RadialStackedBar": {
+    "depends": [
+      "Prelude",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Types",
+      "D3.Viz.Charts.Model",
+      "PSD3.Capabilities.Selection",
+      "Data.Array",
+      "Data.Foldable",
+      "Data.Int",
+      "Data.Maybe",
+      "Data.Number",
+      "Data.Number.Format",
+      "Data.Tuple",
+      "Effect.Class"
+    ],
+    "package": "my-project",
+    "path": "src/website/Viz/Charts/RadialStackedBar.purs"
+  },
   "D3.Viz.Sankey.Model": {
     "depends": [],
     "package": "my-project",
@@ -1448,7 +1302,7 @@
   },
   "D3.Viz.Sankey.Unsafe": {
     "depends": [
-      "D3.Data.Types",
+      "PSD3.Internal.Types",
       "D3.Viz.Sankey.Model",
       "Unsafe.Coerce"
     ],
@@ -1459,15 +1313,16 @@
     "depends": [
       "Prelude",
       "Control.Monad.State",
-      "D3.Attributes.Instances",
-      "D3.Attributes.Sugar",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Types",
       "D3.Viz.Sankey.Model",
       "D3.Viz.Sankey.Unsafe",
-      "D3.Layouts.Sankey.Functions",
-      "D3.Layouts.Sankey.Types",
-      "D3.Selection",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.Sankey.Functions",
+      "PSD3.Internal.Sankey.Types",
+      "PSD3.Internal.Selection.Types",
+      "PSD3.Capabilities.Selection",
+      "PSD3.Capabilities.Sankey",
       "Data.Tuple",
       "Effect.Class",
       "Unsafe.Coerce",
@@ -1479,12 +1334,12 @@
   "D3.Viz.ScatterPlot": {
     "depends": [
       "Prelude",
-      "D3.Attributes.Sugar",
-      "D3.Axes",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Axes",
+      "PSD3.Internal.Types",
       "D3.Viz.Charts.Model",
-      "D3.Scales.Linear",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.Scales.Linear",
+      "PSD3.Capabilities.Selection",
       "Data.Foldable",
       "Data.Maybe",
       "Effect.Class"
@@ -1495,15 +1350,16 @@
   "D3.Viz.Spago.Draw": {
     "depends": [
       "Prelude",
-      "D3.Attributes.Sugar",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Types",
       "D3.Viz.Spago.Draw.Attributes",
       "D3.Viz.Spago.Model",
-      "D3.FFI",
-      "D3.Selection",
-      "D3.Simulation.Types",
-      "D3.Zoom",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Selection.Types",
+      "PSD3.Internal.Simulation.Types",
+      "PSD3.Internal.Zoom",
+      "PSD3.Capabilities.Selection",
+      "PSD3.Capabilities.Simulation",
       "Data.Maybe",
       "Data.Tuple",
       "Effect.Class",
@@ -1516,11 +1372,11 @@
   },
   "D3.Viz.Spago.Draw.Attributes": {
     "depends": [
-      "D3.Attributes.Sugar",
-      "D3.Data.Tree",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
       "D3.Viz.Spago.Model",
-      "D3.Selection",
+      "PSD3.Internal.Selection.Types",
       "Data.Maybe",
       "Prelude"
     ],
@@ -1531,8 +1387,8 @@
     "depends": [
       "Prelude",
       "Affjax",
-      "D3.Data.Types",
-      "D3.Node",
+      "PSD3.Internal.Types",
+      "PSD3.Data.Node",
       "Data.Array",
       "Data.Foldable",
       "Data.Map",
@@ -1549,13 +1405,13 @@
   "D3.Viz.Spago.Model": {
     "depends": [
       "Prelude",
-      "D3.Attributes.Instances",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Types",
       "D3.Viz.Spago.Files",
       "D3.Viz.Spago.Unsafe",
-      "D3.FFI",
-      "D3.Node",
-      "D3.Scales",
+      "PSD3.Internal.FFI",
+      "PSD3.Data.Node",
+      "PSD3.Internal.Scales.Scales",
       "Data.Array",
       "Data.Array",
       "Data.FoldableWithIndex",
@@ -1580,13 +1436,13 @@
   "D3.Viz.Spago.Tree": {
     "depends": [
       "Prelude",
-      "D3.Data.Graph",
-      "D3.Data.Tree",
-      "D3.Data.Types",
+      "Data.DependencyGraph",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
       "D3.Viz.Spago.Files",
       "D3.Viz.Spago.Model",
-      "D3.FFI",
-      "D3.Node",
+      "PSD3.Internal.FFI",
+      "PSD3.Data.Node",
       "Data.Array",
       "Data.List",
       "Data.List",
@@ -1604,10 +1460,10 @@
   "D3.Viz.Spago.Unsafe": {
     "depends": [
       "Prelude",
-      "D3.Data.Types",
+      "PSD3.Internal.Types",
       "D3.Viz.Spago.Files",
-      "D3.Node",
-      "D3.Node",
+      "PSD3.Data.Node",
+      "PSD3.Data.Node",
       "Data.Nullable",
       "Type.Row",
       "Unsafe.Coerce"
@@ -1617,33 +1473,40 @@
   },
   "D3.Viz.ThreeLittleCircles": {
     "depends": [
-      "D3.Attributes.Sugar",
-      "D3.Data.Types",
-      "D3.FFI",
-      "D3.Scales",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Capabilities.Selection",
+      "D3.Viz.ThreeLittleCircles.Unsafe",
       "Data.Int",
-      "Prelude",
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/website/Viz/ThreeLittleCircles/ThreeLittleCircles.purs"
+  },
+  "D3.Viz.ThreeLittleCircles.Unsafe": {
+    "depends": [
+      "PSD3.Internal.Types",
       "Unsafe.Coerce"
     ],
     "package": "my-project",
-    "path": "src/website/Viz/ThreeLittleCircles.purs"
+    "path": "src/website/Viz/ThreeLittleCircles/Unsafe.purs"
   },
   "D3.Viz.Tree.Configure": {
     "depends": [
       "D3.Viz.Tree.Model",
-      "D3.Attributes.Sugar",
-      "D3.Data.Tree",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
       "D3.Viz.Tree.Draw",
       "D3.Viz.Tree.Draw",
-      "D3.FFI",
-      "D3.Layouts.Hierarchical",
-      "D3.Scales",
-      "D3Tagless.Capabilities",
-      "D3Tagless.Capabilities.MetaTree",
-      "D3Tagless.Capabilities.String",
-      "D3Tagless.Instance.Selection",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Hierarchical",
+      "PSD3.Internal.Scales.Scales",
+      "PSD3.Capabilities.Selection",
+      "PSD3.Interpreter.MetaTree",
+      "PSD3.Interpreter.String",
+      "PSD3.Interpreter.D3",
       "Data.Map",
       "Data.Number",
       "Data.Tuple",
@@ -1658,14 +1521,14 @@
   "D3.Viz.Tree.Draw": {
     "depends": [
       "Prelude",
-      "D3.Attributes.Sugar",
-      "D3.Data.Tree",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
       "D3.Viz.MetaTree.Unsafe",
       "D3.Viz.Tree.Model",
-      "D3.FFI",
-      "D3.Selection",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Selection.Types",
+      "PSD3.Capabilities.Selection",
       "Data.Nullable",
       "Data.Number"
     ],
@@ -1674,7 +1537,7 @@
   },
   "D3.Viz.Tree.Model": {
     "depends": [
-      "D3.Node",
+      "PSD3.Data.Node",
       "Type.Row"
     ],
     "package": "my-project",
@@ -1682,9 +1545,9 @@
   },
   "D3.Viz.Tree.Unsafe": {
     "depends": [
-      "D3.Data.Types",
+      "PSD3.Internal.Types",
       "D3.Viz.Tree.Model",
-      "D3.Node",
+      "PSD3.Data.Node",
       "Type.Row",
       "Unsafe.Coerce"
     ],
@@ -1694,15 +1557,15 @@
   "D3.Viz.TreeSimple": {
     "depends": [
       "Prelude",
-      "D3.Attributes.Sugar",
-      "D3.Data.Tree",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
       "D3.Viz.Tree.Draw",
       "D3.Viz.Tree.Draw",
-      "D3.FFI",
-      "D3.Layouts.Hierarchical",
-      "D3.Scales",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Hierarchical",
+      "PSD3.Internal.Scales.Scales",
+      "PSD3.Capabilities.Selection",
       "Data.Number",
       "Data.Tuple",
       "Effect.Class",
@@ -1711,143 +1574,43 @@
     "package": "my-project",
     "path": "src/website/Viz/Tree/TreeSimple.purs"
   },
-  "D3.Zoom": {
-    "depends": [
-      "D3.FFI",
-      "Web.Event.Internal.Types"
-    ],
-    "package": "my-project",
-    "path": "src/lib/D3/Selection/Zoom.purs"
-  },
-  "D3Tagless.App.Routes.Types": {
+  "D3.Viz.Treemap": {
     "depends": [
       "Prelude",
-      "D3.Simulation.Types",
-      "Data.Const",
-      "Effect.Aff",
-      "Halogen"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/Types.purs"
-  },
-  "D3Tagless.Capabilities": {
-    "depends": [
-      "D3.Attributes.Instances",
-      "D3.Data.Types",
-      "D3.Layouts.Sankey.Types",
-      "D3.Node",
-      "D3.Selection",
-      "D3.Simulation.Types",
-      "Data.Map",
-      "Data.Maybe",
-      "Data.Set",
-      "Prelude"
-    ],
-    "package": "my-project",
-    "path": "src/lib/Interpreters/Capabilities.purs"
-  },
-  "D3Tagless.Capabilities.MetaTree": {
-    "depends": [
-      "D3.Node",
-      "Control.Monad.State",
-      "D3.Data.Tree",
-      "D3.Data.Types",
-      "D3.FFI",
-      "D3.Selection",
-      "D3Tagless.Capabilities",
-      "Data.Array",
-      "Data.Map",
-      "Data.Maybe",
-      "Data.Tuple",
-      "Effect",
-      "Effect.Class",
-      "Prelude"
-    ],
-    "package": "my-project",
-    "path": "src/lib/Interpreters/MetaTree/Meta.purs"
-  },
-  "D3Tagless.Capabilities.String": {
-    "depends": [
-      "D3.Selection",
-      "Control.Monad.State",
-      "D3.Attributes.Instances",
-      "D3.Data.Types",
-      "D3.FFI",
-      "D3Tagless.Capabilities",
-      "Data.Array",
-      "Data.Maybe",
-      "Data.String",
-      "Data.String.CodeUnits",
-      "Data.Tuple",
-      "Effect",
-      "Effect.Class",
-      "Prelude"
-    ],
-    "package": "my-project",
-    "path": "src/lib/Interpreters/String/String.purs"
-  },
-  "D3Tagless.Instance.Sankey": {
-    "depends": [
-      "Prelude",
-      "Control.Monad.State",
-      "D3.Data.Types",
-      "D3.Layouts.Sankey.Functions",
-      "D3.Layouts.Sankey.Types",
-      "D3.Selection.Functions",
-      "D3Tagless.Capabilities",
-      "Data.Tuple",
-      "Effect",
-      "Effect.Class"
-    ],
-    "package": "my-project",
-    "path": "src/lib/Interpreters/D3/Sankey.purs"
-  },
-  "D3Tagless.Instance.Selection": {
-    "depends": [
-      "Control.Monad.State",
-      "D3.Data.Types",
-      "D3.Selection.Functions",
-      "D3Tagless.Capabilities",
-      "Data.Tuple",
-      "Effect",
-      "Effect.Class",
-      "Prelude"
-    ],
-    "package": "my-project",
-    "path": "src/lib/Interpreters/D3/Selection.purs"
-  },
-  "D3Tagless.Instance.Simulation": {
-    "depends": [
-      "D3.Simulation.Functions",
-      "Prelude",
-      "Control.Monad.State",
-      "D3.Data.Types",
-      "D3.FFI",
-      "D3.Selection",
-      "D3.Selection.Functions",
-      "D3.Simulation.Types",
-      "D3Tagless.Capabilities",
-      "Data.Array",
-      "Data.Lens",
-      "Data.Map",
-      "Data.Tuple",
-      "Effect",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Data.Node",
+      "PSD3.Capabilities.Selection",
+      "Data.Foldable",
+      "Data.Int",
       "Effect.Class",
       "Unsafe.Coerce"
     ],
     "package": "my-project",
-    "path": "src/lib/Interpreters/D3/Simulation.purs"
+    "path": "src/website/Viz/Treemap/Treemap.purs"
   },
-  "D3Tagless.Utility": {
+  "D3.Viz.WealthHealth.Draw": {
     "depends": [
-      "D3.Data.Types",
-      "D3.FFI",
       "Prelude",
-      "D3Tagless.Capabilities",
-      "Debug"
+      "D3.Viz.WealthHealth.Unsafe",
+      "Data.Number",
+      "PSD3.Capabilities.Selection",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Internal.Types"
     ],
     "package": "my-project",
-    "path": "src/lib/Interpreters/D3/Utility.purs"
+    "path": "src/website/Viz/WealthHealth/Draw.purs"
+  },
+  "D3.Viz.WealthHealth.Unsafe": {
+    "depends": [
+      "Prelude",
+      "PSD3.Internal.Types",
+      "Unsafe.Coerce"
+    ],
+    "package": "my-project",
+    "path": "src/website/Viz/WealthHealth/Unsafe.purs"
   },
   "DOM.HTML.Indexed": {
     "depends": [
@@ -2450,6 +2213,19 @@
     ],
     "package": "contravariant",
     "path": ".spago/p/contravariant/9ad3e105b8855bcc25f4e0893c784789d05a58de/src/Data/Decide.purs"
+  },
+  "Data.DependencyGraph": {
+    "depends": [
+      "Data.Array",
+      "Data.Graph",
+      "Data.Graph",
+      "Data.Maybe",
+      "Data.Tree",
+      "Data.Tuple",
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/lib/Data/DependencyGraph.purs"
   },
   "Data.Distributive": {
     "depends": [
@@ -5995,22 +5771,25 @@
     "package": "psci-support",
     "path": ".spago/p/psci-support/897cdb543548cb6078d69b6413b54841404eda72/src/PSCI/Support.purs"
   },
-  "PSD3.About": {
+  "PSD3": {
     "depends": [
       "Prelude",
-      "Affjax.ResponseFormat",
-      "Affjax.Web",
-      "Data.Either",
-      "Data.Maybe",
-      "Effect.Aff.Class",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Properties",
-      "PSD3.RoutingDSL",
-      "PSD3.Types"
+      "PSD3.Capabilities.Selection",
+      "PSD3.Capabilities.Simulation",
+      "PSD3.Capabilities.Sankey",
+      "PSD3.Interpreter.D3",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.Selection.Types"
     ],
     "package": "my-project",
-    "path": "src/website/Component/About.purs"
+    "path": "src/lib/PSD3.purs"
+  },
+  "PSD3.Attributes": {
+    "depends": [
+      "PSD3.Internal.Attributes.Sugar"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Attributes.purs"
   },
   "PSD3.Backdrop": {
     "depends": [
@@ -6022,57 +5801,6 @@
     ],
     "package": "my-project",
     "path": "src/website/HTML/Backdrop.purs"
-  },
-  "PSD3.BarChart": {
-    "depends": [
-      "Prelude",
-      "Control.Monad.State",
-      "D3.Viz.Charts.Model",
-      "D3.Viz.BarChart",
-      "PSD3.Expandable",
-      "PSD3.Toggle",
-      "D3Tagless.Instance.Selection",
-      "Data.Lens",
-      "Data.Lens.Record",
-      "Data.Maybe",
-      "PSD3.FormField",
-      "Effect.Aff.Class",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Events",
-      "Halogen.HTML.Properties",
-      "Snippets",
-      "PSD3.Utilities",
-      "PSD3.Utilities",
-      "Type.Proxy"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/BarChart.purs"
-  },
-  "PSD3.BubbleChart": {
-    "depends": [
-      "Prelude",
-      "Control.Monad.State",
-      "D3.Viz.BubbleChart",
-      "D3Tagless.Instance.Selection",
-      "Data.Lens",
-      "Data.Lens.Record",
-      "Data.Maybe",
-      "Effect.Aff.Class",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Events",
-      "Halogen.HTML.Properties",
-      "PSD3.Expandable",
-      "PSD3.FormField",
-      "PSD3.Toggle",
-      "PSD3.Utilities",
-      "PSD3.Utilities",
-      "Snippets",
-      "Type.Proxy"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/BubbleChart.purs"
   },
   "PSD3.Builder": {
     "depends": [
@@ -6094,6 +5822,39 @@
     ],
     "package": "my-project",
     "path": "src/website/HTML/Button.purs"
+  },
+  "PSD3.Capabilities.Sankey": {
+    "depends": [
+      "PSD3.Capabilities.Selection",
+      "PSD3.Internal.Sankey.Types",
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Capabilities/Sankey.purs"
+  },
+  "PSD3.Capabilities.Selection": {
+    "depends": [
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.Selection.Types",
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Capabilities/Selection.purs"
+  },
+  "PSD3.Capabilities.Simulation": {
+    "depends": [
+      "PSD3.Capabilities.Selection",
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Types",
+      "PSD3.Data.Node",
+      "PSD3.Internal.Simulation.Types",
+      "Data.Maybe",
+      "Data.Set",
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Capabilities/Simulation.purs"
   },
   "PSD3.Card": {
     "depends": [
@@ -6118,44 +5879,55 @@
     "package": "my-project",
     "path": "src/website/HTML/Checkbox.purs"
   },
-  "PSD3.ChordDiagram": {
+  "PSD3.CodeExplorer.Actions": {
+    "depends": [
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
+      "D3.Viz.Spago.Draw.Attributes",
+      "D3.Viz.Spago.Files",
+      "D3.Viz.Spago.Model",
+      "PSD3.Data.Node",
+      "PSD3.Internal.Simulation.Types"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/CodeExplorer/Actions.purs"
+  },
+  "PSD3.CodeExplorer.CodeExplorationPage": {
     "depends": [
       "Prelude",
-      "Control.Monad.State",
-      "D3.Viz.ChordDiagram",
-      "PSD3.Expandable",
-      "PSD3.Toggle",
-      "D3Tagless.Instance.Selection",
-      "Data.Lens",
-      "Data.Lens.Record",
       "Data.Maybe",
-      "PSD3.FormField",
-      "Effect.Aff.Class",
+      "Effect.Aff",
+      "Effect.Class",
       "Halogen",
       "Halogen.HTML",
       "Halogen.HTML.Events",
       "Halogen.HTML.Properties",
+      "Web.HTML",
+      "Web.HTML.History",
+      "Web.HTML.Window",
+      "PSD3.Shared.RHSNavigation",
+      "PSD3.Understanding.TOC",
+      "PSD3.Website.Types",
+      "PSD3.Shared.Utilities",
       "Snippets",
-      "PSD3.Utilities",
-      "PSD3.Utilities",
       "Type.Proxy"
     ],
     "package": "my-project",
-    "path": "src/website/Component/ChordDiagram.purs"
+    "path": "src/website/Component/CodeExplorer/CodeExplorationPage.purs"
   },
-  "PSD3.CodeExplorer.Actions": {
+  "PSD3.CodeExplorer.CodeExplorerWrapper": {
     "depends": [
-      "D3.Attributes.Instances",
-      "D3.Data.Tree",
-      "D3.Data.Types",
-      "D3.Viz.Spago.Draw.Attributes",
-      "D3.Viz.Spago.Files",
-      "D3.Viz.Spago.Model",
-      "D3.Node",
-      "D3.Simulation.Types"
+      "Prelude",
+      "PSD3.Spago",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "Effect.Aff.Class",
+      "Type.Proxy"
     ],
     "package": "my-project",
-    "path": "src/website/Component/CodeExplorer/Actions.purs"
+    "path": "src/website/Component/CodeExplorer/CodeExplorerWrapper.purs"
   },
   "PSD3.CodeExplorer.Data": {
     "depends": [
@@ -6175,11 +5947,11 @@
   "PSD3.CodeExplorer.Forces": {
     "depends": [
       "Prelude",
-      "D3.Attributes.Instances",
+      "PSD3.Internal.Attributes.Instances",
       "D3.Viz.Spago.Model",
-      "D3.Simulation.Config",
-      "D3.Simulation.Forces",
-      "D3.Simulation.Types",
+      "PSD3.Internal.Simulation.Config",
+      "PSD3.Internal.Simulation.Forces",
+      "PSD3.Internal.Simulation.Types",
       "Data.Int",
       "Data.Map",
       "Data.Maybe",
@@ -6191,14 +5963,14 @@
   "PSD3.CodeExplorer.HTML": {
     "depends": [
       "Prelude",
-      "D3.Data.Tree",
+      "PSD3.Data.Tree",
       "D3.Viz.Spago.Draw.Attributes",
       "D3.Viz.Spago.Files",
       "D3.Viz.Spago.Model",
-      "D3.Node",
+      "PSD3.Data.Node",
       "Data.String.CodeUnits",
-      "D3.Simulation.Forces",
-      "D3.Simulation.Types",
+      "PSD3.Internal.Simulation.Forces",
+      "PSD3.Internal.Simulation.Types",
       "PSD3.Button",
       "PSD3.Checkbox",
       "PSD3.Format",
@@ -6225,15 +5997,15 @@
   "PSD3.CodeExplorer.State": {
     "depends": [
       "Prelude",
-      "D3.Attributes.Instances",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Types",
       "D3.Viz.Spago.Draw.Attributes",
       "D3.Viz.Spago.Files",
       "D3.Viz.Spago.Model",
-      "D3.FFI",
-      "D3.Node",
-      "D3.Simulation.Types",
-      "D3Tagless.Capabilities",
+      "PSD3.Internal.FFI",
+      "PSD3.Data.Node",
+      "PSD3.Internal.Simulation.Types",
+      "PSD3.Capabilities.Simulation",
       "Data.Lens",
       "Data.Lens.At",
       "Data.Lens.Record",
@@ -6250,30 +6022,26 @@
     "package": "my-project",
     "path": "src/website/Component/CodeExplorer/State.purs"
   },
-  "PSD3.CodeExplorerWrapper": {
+  "PSD3.Data.Node": {
     "depends": [
-      "Prelude",
-      "PSD3.Spago",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Properties",
-      "Effect.Aff.Class",
-      "Type.Proxy"
+      "Data.Nullable",
+      "Type.Row"
     ],
     "package": "my-project",
-    "path": "src/website/Component/CodeExplorerWrapper.purs"
+    "path": "src/lib/PSD3/Data/Node.purs"
   },
-  "PSD3.ExampleCard": {
+  "PSD3.Data.Tree": {
     "depends": [
-      "Prelude",
-      "PSD3.Types",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Properties",
-      "Halogen.HTML.Events"
+      "PSD3.Data.Node",
+      "Data.Array",
+      "Data.List",
+      "Data.Map",
+      "Data.Maybe",
+      "Data.Tree",
+      "Prelude"
     ],
     "package": "my-project",
-    "path": "src/website/Component/ExampleCard.purs"
+    "path": "src/lib/PSD3/Data/Tree.purs"
   },
   "PSD3.Expandable": {
     "depends": [
@@ -6296,32 +6064,19 @@
     "package": "my-project",
     "path": "src/website/HTML/Expandable.purs"
   },
-  "PSD3.FloatingPanel": {
-    "depends": [
-      "Prelude",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Events",
-      "Halogen.HTML.Properties",
-      "Data.Maybe",
-      "Effect.Aff.Class"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/FloatingPanel.purs"
-  },
   "PSD3.ForceNavigator": {
     "depends": [
       "Prelude",
       "Control.Monad.State",
-      "D3.Attributes.Sugar",
+      "PSD3.Internal.Attributes.Sugar",
       "Debug",
-      "D3.Data.Types",
-      "D3.Simulation.Types",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.Simulation.Types",
       "D3.Viz.ForceNavigator.Data",
       "D3.Viz.ForceNavigator.Draw",
       "D3.Viz.ForceNavigator.Model",
-      "D3Tagless.Capabilities",
-      "D3Tagless.Instance.Simulation",
+      "PSD3.Capabilities.Simulation",
+      "PSD3.Interpreter.D3",
       "Data.Lens",
       "Data.Maybe",
       "Data.Set",
@@ -6355,10 +6110,10 @@
   "PSD3.ForceNavigator.State": {
     "depends": [
       "Prelude",
-      "D3.Attributes.Instances",
-      "D3.Data.Types",
-      "D3.Node",
-      "D3.Simulation.Types",
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Types",
+      "PSD3.Data.Node",
+      "PSD3.Internal.Simulation.Types",
       "D3.Viz.ForceNavigator.Model",
       "Data.Array",
       "Data.Lens",
@@ -6398,157 +6153,356 @@
     "package": "my-project",
     "path": "src/website/HTML/Format.purs"
   },
-  "PSD3.GUP": {
-    "depends": [
-      "Prelude",
-      "Control.Monad.Rec.Class",
-      "Control.Monad.State",
-      "D3.Viz.GUP",
-      "PSD3.Button",
-      "PSD3.Expandable",
-      "PSD3.FormField",
-      "PSD3.Toggle",
-      "D3Tagless.Instance.Selection",
-      "Data.Array",
-      "Data.Lens",
-      "Data.Lens.Record",
-      "Data.Maybe",
-      "Data.String.CodeUnits",
-      "Data.Traversable",
-      "Effect",
-      "Effect.Aff",
-      "Effect.Aff.Class",
-      "Effect.Class",
-      "Effect.Class.Console",
-      "Effect.Exception",
-      "Effect.Random",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Events",
-      "Halogen.HTML.Properties",
-      "Snippets",
-      "PSD3.Utilities",
-      "PSD3.Utilities",
-      "Type.Proxy"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/GUP.purs"
-  },
-  "PSD3.Hierarchies": {
-    "depends": [
-      "Prelude",
-      "D3.Data.Tree",
-      "Data.Maybe",
-      "Effect.Aff",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Events",
-      "Halogen.HTML.Properties",
-      "PSD3.Button"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/Hierarchies.purs"
-  },
   "PSD3.Home": {
     "depends": [
       "Prelude",
-      "PSD3.HomeForceLayout",
+      "Data.Maybe",
+      "Effect.Aff",
       "Halogen",
       "Halogen.HTML",
-      "Type.Proxy",
-      "Effect.Aff.Class"
+      "Halogen.HTML.Properties",
+      "PSD3.RoutingDSL",
+      "PSD3.Website.Types"
     ],
     "package": "my-project",
     "path": "src/website/Component/Home.purs"
   },
-  "PSD3.HomeForceLayout": {
+  "PSD3.HowTo.HowtoIndex": {
     "depends": [
       "Prelude",
-      "Effect.Aff.Class",
+      "Data.Maybe",
+      "Data.String",
+      "Effect.Aff",
       "Halogen",
       "Halogen.HTML",
       "Halogen.HTML.Properties",
-      "PSD3.ForceNavigator",
+      "PSD3.Shared.SectionNav",
+      "PSD3.RoutingDSL",
+      "PSD3.Understanding.TOC",
+      "PSD3.Website.Types",
       "Type.Proxy"
     ],
     "package": "my-project",
-    "path": "src/website/Component/HomeForceLayout.purs"
+    "path": "src/website/Component/HowTo/HowtoIndex.purs"
   },
-  "PSD3.Interpreters": {
+  "PSD3.Internal.Attributes.Instances": {
     "depends": [
       "Prelude",
-      "PSD3.RoutingDSL",
-      "PSD3.Types",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Properties"
+      "PSD3.Internal.Types",
+      "Data.Function.Uncurried",
+      "Effect",
+      "Effect.Uncurried",
+      "Unsafe.Coerce",
+      "Web.Event.Internal.Types"
     ],
     "package": "my-project",
-    "path": "src/website/Component/Interpreters.purs"
+    "path": "src/lib/PSD3/Internal/Attributes/Instances.purs"
   },
-  "PSD3.LesMis": {
+  "PSD3.Internal.Attributes.Sugar": {
+    "depends": [
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Selection.Types",
+      "Data.Array",
+      "Data.Function.Uncurried",
+      "Effect.Aff",
+      "Effect.Uncurried",
+      "Prelude",
+      "Unsafe.Coerce"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Attributes/Sugar.purs"
+  },
+  "PSD3.Internal.Axes": {
     "depends": [
       "Prelude",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.Scales.Linear",
+      "Effect"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Axes.purs"
+  },
+  "PSD3.Internal.FFI": {
+    "depends": [
+      "PSD3.Data.Node",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
+      "Data.Function.Uncurried",
+      "Data.Nullable",
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/FFI.purs"
+  },
+  "PSD3.Internal.Generators.Line": {
+    "depends": [
+      "PSD3.Internal.Scales.Linear",
+      "Effect"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Generators/Line.purs"
+  },
+  "PSD3.Internal.Hierarchical": {
+    "depends": [
+      "PSD3.Data.Node",
+      "Affjax.Web",
       "Affjax.Web",
       "Affjax.ResponseFormat",
-      "Control.Monad.State",
-      "D3.Attributes.Instances",
-      "D3.Viz.LesMiserables",
-      "D3.Viz.LesMiserables.File",
-      "D3.FFI",
-      "D3.Simulation.Config",
-      "D3.Simulation.Forces",
-      "D3.Simulation.Types",
-      "PSD3.Button",
-      "PSD3.Expandable",
-      "PSD3.Toggle",
-      "D3Tagless.Capabilities",
-      "D3Tagless.Instance.Simulation",
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Selection.Types",
+      "Data.Bifunctor",
+      "Data.Either",
+      "Data.Function.Uncurried",
+      "Data.Maybe",
+      "Data.Nullable",
+      "Effect.Aff",
+      "Effect.Class",
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Hierarchical.purs"
+  },
+  "PSD3.Internal.Sankey.Functions": {
+    "depends": [
+      "Prelude",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.Sankey.Types",
+      "Effect",
+      "Effect.Class"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Sankey/Functions.purs"
+  },
+  "PSD3.Internal.Sankey.Types": {
+    "depends": [
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Sankey/Types.purs"
+  },
+  "PSD3.Internal.Scales.Linear": {
+    "depends": [
+      "Effect"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Scales/Linear.purs"
+  },
+  "PSD3.Internal.Scales.Scales": {
+    "depends": [],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Scales/Scales.purs"
+  },
+  "PSD3.Internal.Selection.Functions": {
+    "depends": [
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Selection.Types",
+      "PSD3.Internal.Zoom",
+      "PSD3.Capabilities.Selection",
+      "Data.Foldable",
+      "Debug",
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Selection/Functions.purs"
+  },
+  "PSD3.Internal.Selection.Types": {
+    "depends": [
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.Zoom",
+      "Data.Array",
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Selection/Types.purs"
+  },
+  "PSD3.Internal.Simulation.Config": {
+    "depends": [
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.Simulation.Types",
+      "Data.Number",
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Simulation/Config.purs"
+  },
+  "PSD3.Internal.Simulation.Forces": {
+    "depends": [
+      "Prelude",
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Simulation.Types",
+      "Data.Array",
+      "Data.Foldable",
       "Data.Lens",
-      "Data.Lens.Record",
+      "Data.Lens.At",
+      "Data.Map",
+      "Data.Maybe",
+      "Data.Newtype",
+      "Data.Tuple"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Simulation/Forces.purs"
+  },
+  "PSD3.Internal.Simulation.Functions": {
+    "depends": [
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Simulation.Forces",
+      "Prelude",
+      "Control.Monad.State",
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Types",
+      "PSD3.Data.Node",
+      "PSD3.Internal.Selection.Types",
+      "PSD3.Internal.Simulation.Types",
+      "PSD3.Internal.Zoom",
+      "PSD3.Capabilities.Simulation",
+      "Data.Array",
+      "Data.Array",
+      "Data.Lens",
+      "Data.Map",
       "Data.Map",
       "Data.Maybe",
       "Data.Set",
       "Data.Set",
-      "Data.Traversable",
-      "Effect.Aff.Class",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Events",
-      "Halogen.HTML.Properties",
-      "PSD3.FormField",
-      "Snippets",
-      "PSD3.Utilities",
+      "Data.Tuple",
+      "Debug",
+      "Unsafe.Coerce"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Simulation/Functions.purs"
+  },
+  "PSD3.Internal.Simulation.Types": {
+    "depends": [
+      "Prelude",
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Selection.Types",
+      "Data.Array",
+      "Data.Foldable",
+      "Data.Lens",
+      "Data.Lens.At",
+      "Data.Lens.Iso.Newtype",
+      "Data.Lens.Record",
+      "Data.Map",
+      "Data.Map",
+      "Data.Maybe",
+      "Data.Newtype",
+      "Data.Nullable",
+      "Data.Nullable",
+      "Data.Profunctor",
+      "Data.Profunctor.Choice",
+      "Data.Profunctor.Strong",
+      "Data.Tuple",
+      "Debug",
       "Type.Proxy"
     ],
     "package": "my-project",
-    "path": "src/website/Component/LesMis.purs"
+    "path": "src/lib/PSD3/Internal/Simulation/Types.purs"
   },
-  "PSD3.LineChart": {
+  "PSD3.Internal.Types": {
+    "depends": [
+      "Data.Time.Duration",
+      "Prelude",
+      "Unsafe.Coerce"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Types.purs"
+  },
+  "PSD3.Internal.Utility": {
+    "depends": [
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "Prelude",
+      "PSD3.Capabilities.Selection",
+      "Debug"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Utility.purs"
+  },
+  "PSD3.Internal.Zoom": {
+    "depends": [
+      "PSD3.Internal.FFI",
+      "Web.Event.Internal.Types"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Internal/Zoom.purs"
+  },
+  "PSD3.Interpreter.D3": {
     "depends": [
       "Prelude",
       "Control.Monad.State",
-      "D3.Viz.Charts.Model",
-      "D3.Viz.LineChart",
-      "PSD3.Expandable",
-      "PSD3.Toggle",
-      "D3Tagless.Instance.Selection",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Selection.Types",
+      "PSD3.Internal.Selection.Functions",
+      "PSD3.Internal.Simulation.Types",
+      "PSD3.Internal.Simulation.Functions",
+      "PSD3.Internal.Sankey.Types",
+      "PSD3.Internal.Sankey.Functions",
+      "PSD3.Capabilities.Selection",
+      "PSD3.Capabilities.Simulation",
+      "PSD3.Capabilities.Sankey",
+      "Data.Array",
       "Data.Lens",
-      "Data.Lens.Record",
-      "Data.Maybe",
-      "PSD3.FormField",
-      "Effect.Aff.Class",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Events",
-      "Halogen.HTML.Properties",
-      "Snippets",
-      "PSD3.Utilities",
-      "PSD3.Utilities",
-      "Type.Proxy"
+      "Data.Map",
+      "Data.Tuple",
+      "Effect",
+      "Effect.Class",
+      "Unsafe.Coerce"
     ],
     "package": "my-project",
-    "path": "src/website/Component/LineChart.purs"
+    "path": "src/lib/PSD3/Interpreter/D3.purs"
+  },
+  "PSD3.Interpreter.MetaTree": {
+    "depends": [
+      "PSD3.Data.Node",
+      "Control.Monad.State",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Selection.Types",
+      "PSD3.Capabilities.Selection",
+      "Data.Array",
+      "Data.Map",
+      "Data.Maybe",
+      "Data.Tuple",
+      "Effect",
+      "Effect.Class",
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Interpreter/MetaTree.purs"
+  },
+  "PSD3.Interpreter.String": {
+    "depends": [
+      "PSD3.Internal.Selection.Types",
+      "Control.Monad.State",
+      "PSD3.Internal.Attributes.Instances",
+      "PSD3.Internal.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Capabilities.Selection",
+      "Data.Array",
+      "Data.Maybe",
+      "Data.String",
+      "Data.String.CodeUnits",
+      "Data.Tuple",
+      "Effect",
+      "Effect.Class",
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Interpreter/String.purs"
   },
   "PSD3.Main": {
     "depends": [
@@ -6557,96 +6511,48 @@
       "Debug",
       "Effect",
       "Effect.Aff",
+      "Web.HTML",
+      "Web.HTML.Location",
+      "Web.HTML.Window",
       "Halogen",
       "Halogen.Aff",
       "Halogen.HTML",
       "Halogen.HTML.Properties",
       "Halogen.Subscription",
       "Halogen.VDom.Driver",
-      "PSD3.About",
-      "PSD3.Tutorial",
-      "PSD3.Hierarchies",
-      "PSD3.Interpreters",
+      "PSD3.Home",
+      "PSD3.Tutorial.GettingStarted",
+      "PSD3.Wizard.Wizard",
+      "PSD3.HowTo.HowtoIndex",
+      "PSD3.Reference.Reference",
+      "PSD3.Understanding.About",
+      "PSD3.Understanding.Concepts",
+      "PSD3.Understanding.Patterns",
+      "PSD3.Understanding.Tutorial",
+      "PSD3.Understanding.SimpleCharts",
+      "PSD3.Understanding.ChordDiagram",
+      "PSD3.Understanding.BubbleChart",
+      "PSD3.Understanding.SankeyDiagram",
+      "PSD3.Understanding.Hierarchies",
+      "PSD3.Understanding.Interpreters",
+      "PSD3.CodeExplorer.CodeExplorationPage",
       "PSD3.RoutingDSL",
-      "PSD3.CodeExplorerWrapper",
-      "PSD3.Types",
+      "PSD3.CodeExplorer.CodeExplorerWrapper",
+      "PSD3.WealthHealth.WealthHealthWrapper",
+      "PSD3.Website.Types",
       "Routing.Hash",
       "Type.Proxy"
     ],
     "package": "my-project",
     "path": "src/website/Main.purs"
   },
-  "PSD3.MetaTree": {
-    "depends": [
-      "Data.Lens",
-      "Prelude",
-      "Control.Monad.State",
-      "D3.Data.Tree",
-      "D3.Viz.MetaTree",
-      "D3.Viz.Tree.Configure",
-      "D3.Layouts.Hierarchical",
-      "PSD3.Expandable",
-      "PSD3.Toggle",
-      "D3Tagless.Instance.Selection",
-      "D3Tagless.Utility",
-      "Data.Either",
-      "Data.Lens.Record",
-      "Data.Maybe",
-      "Effect.Aff",
-      "Effect.Aff.Class",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Events",
-      "Halogen.HTML.Properties",
-      "PSD3.FormField",
-      "Snippets",
-      "PSD3.Utilities",
-      "PSD3.Utilities",
-      "Type.Proxy"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/MetaTree.purs"
-  },
-  "PSD3.Navigation": {
+  "PSD3.PrismJS": {
     "depends": [
       "Prelude",
-      "PSD3.Types",
-      "PSD3.RoutingDSL",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Properties"
+      "Effect"
     ],
     "package": "my-project",
-    "path": "src/website/Component/Navigation.purs"
-  },
-  "PSD3.PrintTree": {
-    "depends": [
-      "Prelude",
-      "Control.Monad.State",
-      "D3.Data.Tree",
-      "D3.Viz.Tree.Configure",
-      "D3.Layouts.Hierarchical",
-      "PSD3.Expandable",
-      "PSD3.Toggle",
-      "D3Tagless.Instance.Selection",
-      "D3Tagless.Utility",
-      "Data.Either",
-      "Data.Lens",
-      "Data.Lens.Record",
-      "Data.Maybe",
-      "Effect.Aff.Class",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Events",
-      "Halogen.HTML.Properties",
-      "PSD3.FormField",
-      "Snippets",
-      "PSD3.Utilities",
-      "PSD3.Utilities",
-      "Type.Proxy"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/PrintTree.purs"
+    "path": "src/website/Component/PrismJS.purs"
   },
   "PSD3.Properties": {
     "depends": [
@@ -6680,10 +6586,603 @@
     "package": "my-project",
     "path": "src/website/HTML/Radio.purs"
   },
+  "PSD3.Reference.ModuleRegistry": {
+    "depends": [
+      "Prelude",
+      "Data.Array"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/ModuleRegistry.purs"
+  },
+  "PSD3.Reference.ModuleViewer": {
+    "depends": [
+      "Prelude",
+      "Data.Maybe",
+      "Effect",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.Reference.ModuleRegistry"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/ModuleViewer.purs"
+  },
+  "PSD3.Reference.Modules.Attributes": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Attributes.purs"
+  },
+  "PSD3.Reference.Modules.Capabilities.Sankey": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Capabilities/Sankey.purs"
+  },
+  "PSD3.Reference.Modules.Capabilities.Selection": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Capabilities/Selection.purs"
+  },
+  "PSD3.Reference.Modules.Capabilities.Simulation": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Capabilities/Simulation.purs"
+  },
+  "PSD3.Reference.Modules.Data.Node": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Data/Node.purs"
+  },
+  "PSD3.Reference.Modules.Data.Tree": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Data/Tree.purs"
+  },
+  "PSD3.Reference.Modules.Data.Utility": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Data/Utility.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Attributes.Instances": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Attributes/Instances.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Attributes.Sugar": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Attributes/Sugar.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Axes": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Axes.purs"
+  },
+  "PSD3.Reference.Modules.Internal.FFI": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/FFI.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Generators.Line": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Generators/Line.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Hierarchical": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Hierarchical.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Sankey.Functions": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Sankey/Functions.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Sankey.Types": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Sankey/Types.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Scales.Linear": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Scales/Linear.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Scales.Scales": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Scales/Scales.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Selection.Functions": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Selection/Functions.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Selection.Types": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Selection/Types.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Simulation.Config": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Simulation/Config.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Simulation.Forces": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Simulation/Forces.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Simulation.Functions": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Simulation/Functions.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Simulation.Types": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Simulation/Types.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Types": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Types.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Utility": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Utility.purs"
+  },
+  "PSD3.Reference.Modules.Internal.Zoom": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Internal/Zoom.purs"
+  },
+  "PSD3.Reference.Modules.Interpreter.D3": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Interpreter/D3.purs"
+  },
+  "PSD3.Reference.Modules.Interpreter.MetaTree": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Interpreter/MetaTree.purs"
+  },
+  "PSD3.Reference.Modules.Interpreter.String": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Interpreter/String.purs"
+  },
+  "PSD3.Reference.Modules.Types": {
+    "depends": [
+      "Prelude",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.PrismJS",
+      "PSD3.Reference.SourceLoader"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Modules/Types.purs"
+  },
+  "PSD3.Reference.Reference": {
+    "depends": [
+      "Prelude",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.Reference.ModuleRegistry",
+      "PSD3.Shared.SectionNav",
+      "PSD3.Understanding.TOC",
+      "PSD3.Website.Types",
+      "Type.Proxy",
+      "PSD3.Reference.Modules.Types",
+      "PSD3.Reference.Modules.Attributes",
+      "PSD3.Reference.Modules.Capabilities.Selection",
+      "PSD3.Reference.Modules.Capabilities.Simulation",
+      "PSD3.Reference.Modules.Capabilities.Sankey",
+      "PSD3.Reference.Modules.Interpreter.D3",
+      "PSD3.Reference.Modules.Interpreter.String",
+      "PSD3.Reference.Modules.Interpreter.MetaTree",
+      "PSD3.Reference.Modules.Data.Tree",
+      "PSD3.Reference.Modules.Data.Node",
+      "PSD3.Reference.Modules.Data.Utility",
+      "PSD3.Reference.Modules.Internal.Selection.Types",
+      "PSD3.Reference.Modules.Internal.Selection.Functions",
+      "PSD3.Reference.Modules.Internal.Simulation.Types",
+      "PSD3.Reference.Modules.Internal.Simulation.Functions",
+      "PSD3.Reference.Modules.Internal.Simulation.Forces",
+      "PSD3.Reference.Modules.Internal.Simulation.Config",
+      "PSD3.Reference.Modules.Internal.Types",
+      "PSD3.Reference.Modules.Internal.FFI",
+      "PSD3.Reference.Modules.Internal.Attributes.Instances",
+      "PSD3.Reference.Modules.Internal.Attributes.Sugar",
+      "PSD3.Reference.Modules.Internal.Axes",
+      "PSD3.Reference.Modules.Internal.Hierarchical",
+      "PSD3.Reference.Modules.Internal.Generators.Line",
+      "PSD3.Reference.Modules.Internal.Scales.Scales",
+      "PSD3.Reference.Modules.Internal.Scales.Linear",
+      "PSD3.Reference.Modules.Internal.Sankey.Types",
+      "PSD3.Reference.Modules.Internal.Sankey.Functions",
+      "PSD3.Reference.Modules.Internal.Utility",
+      "PSD3.Reference.Modules.Internal.Zoom"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/Reference.purs"
+  },
+  "PSD3.Reference.ReferenceNav": {
+    "depends": [
+      "Prelude",
+      "Data.Array",
+      "Data.Maybe",
+      "Data.String",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.Reference.ModuleRegistry",
+      "PSD3.RoutingDSL",
+      "PSD3.Website.Types"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/ReferenceNav.purs"
+  },
+  "PSD3.Reference.ReferenceOld": {
+    "depends": [
+      "Prelude",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.Shared.SectionNav",
+      "PSD3.Understanding.TOC",
+      "PSD3.Website.Types",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/ReferenceOld.purs"
+  },
+  "PSD3.Reference.SourceLoader": {
+    "depends": [
+      "Prelude",
+      "Affjax.Web",
+      "Affjax.ResponseFormat",
+      "Data.Either",
+      "Effect.Aff"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Reference/SourceLoader.purs"
+  },
   "PSD3.RoutingDSL": {
     "depends": [
       "Prelude",
-      "PSD3.Types",
+      "PSD3.Website.Types",
       "Routing.Match",
       "Routing.Match",
       "Control.Alt"
@@ -6691,81 +7190,85 @@
     "package": "my-project",
     "path": "src/website/RoutingDSL.purs"
   },
-  "PSD3.Sankey": {
+  "PSD3.Shared.CodeExample": {
     "depends": [
       "Prelude",
-      "Control.Monad.State",
-      "D3.Viz.Sankey.Model",
-      "D3.Viz.SankeyDiagram",
-      "D3.Layouts.Sankey.Types",
-      "D3Tagless.Instance.Selection",
-      "D3Tagless.Utility",
-      "PSD3.Expandable",
-      "PSD3.Toggle",
-      "D3Tagless.Instance.Sankey",
-      "Data.Lens",
-      "Data.Lens.Record",
-      "Effect.Aff.Class",
-      "Halogen",
       "Halogen.HTML",
-      "Halogen.HTML.Events",
       "Halogen.HTML.Properties",
-      "PSD3.FormField",
-      "PSD3.Radio",
-      "PSD3.Properties",
-      "Snippets",
-      "PSD3.Utilities",
-      "PSD3.Utilities",
-      "Data.Maybe",
-      "Type.Proxy"
+      "PSD3.RoutingDSL",
+      "PSD3.Website.Types",
+      "PSD3.Shared.Utilities"
     ],
     "package": "my-project",
-    "path": "src/website/Component/Sankey.purs"
+    "path": "src/website/Component/Shared/CodeExample.purs"
   },
-  "PSD3.ScatterPlot": {
+  "PSD3.Shared.DocParser": {
     "depends": [
       "Prelude",
-      "Control.Monad.State",
-      "D3.Viz.Charts.Model",
-      "D3.Viz.ScatterPlot",
-      "PSD3.Expandable",
-      "PSD3.Toggle",
-      "D3Tagless.Instance.Selection",
-      "Data.Lens",
-      "Data.Lens.Record",
+      "Data.Array",
+      "Data.String",
       "Data.Maybe",
-      "PSD3.FormField",
-      "Effect.Aff.Class",
-      "Halogen",
       "Halogen.HTML",
-      "Halogen.HTML.Events",
-      "Halogen.HTML.Properties",
-      "Snippets",
-      "PSD3.Utilities",
-      "PSD3.Utilities",
-      "Type.Proxy"
+      "Halogen.HTML.Properties"
     ],
     "package": "my-project",
-    "path": "src/website/Component/ScatterPlot.purs"
+    "path": "src/website/Component/Shared/DocParser.purs"
+  },
+  "PSD3.Shared.RHSNavigation": {
+    "depends": [
+      "Prelude",
+      "PSD3.Website.Types",
+      "PSD3.RoutingDSL",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Shared/RHSNavigation.purs"
+  },
+  "PSD3.Shared.SectionNav": {
+    "depends": [
+      "Prelude",
+      "Data.Maybe",
+      "PSD3.Website.Types",
+      "PSD3.RoutingDSL",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Shared/SectionNav.purs"
+  },
+  "PSD3.Shared.Utilities": {
+    "depends": [
+      "Prelude",
+      "Data.Array",
+      "Halogen.HTML",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "Html.Renderer.Halogen"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Shared/Utilities.purs"
   },
   "PSD3.Spago": {
     "depends": [
       "Prelude",
       "Control.Monad.State",
-      "D3.Attributes.Sugar",
-      "D3.Data.Tree",
-      "D3.Data.Types",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
       "D3.Viz.Spago.Draw",
       "D3.Viz.Spago.Draw",
       "D3.Viz.Spago.Draw.Attributes",
       "D3.Viz.Spago.Files",
       "D3.Viz.Spago.Model",
-      "D3.FFI",
-      "D3.Selection",
-      "D3.Simulation.Types",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Selection.Types",
+      "PSD3.Internal.Simulation.Types",
       "Data.Set",
-      "D3Tagless.Capabilities",
-      "D3Tagless.Instance.Simulation",
+      "PSD3.Capabilities.Simulation",
+      "PSD3.Interpreter.D3",
       "Data.Array",
       "Data.Lens",
       "Data.Maybe",
@@ -6794,33 +7297,6 @@
     "package": "my-project",
     "path": "src/website/HTML/Table.purs"
   },
-  "PSD3.ThreeLittleCircles": {
-    "depends": [
-      "Prelude",
-      "Control.Monad.State",
-      "D3.Viz.ThreeLittleCircles",
-      "PSD3.Button",
-      "PSD3.Expandable",
-      "PSD3.FormField",
-      "PSD3.Toggle",
-      "D3Tagless.Instance.Selection",
-      "D3Tagless.Utility",
-      "Data.Lens",
-      "Data.Lens.Record",
-      "Data.Maybe",
-      "Data.Traversable",
-      "Effect.Aff.Class",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Events",
-      "Halogen.HTML.Properties",
-      "Snippets",
-      "PSD3.Utilities",
-      "Type.Proxy"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/ThreeLittleCircles.purs"
-  },
   "PSD3.Toggle": {
     "depends": [
       "Prelude",
@@ -6832,17 +7308,612 @@
     "package": "my-project",
     "path": "src/website/HTML/Toggle.purs"
   },
-  "PSD3.Trees": {
+  "PSD3.Tutorial.GettingStarted": {
+    "depends": [
+      "Prelude",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.Shared.SectionNav",
+      "PSD3.Understanding.TOC",
+      "PSD3.Website.Types",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Tutorial/GettingStarted.purs"
+  },
+  "PSD3.Types": {
+    "depends": [
+      "PSD3.Internal.Types",
+      "PSD3.Internal.Selection.Types",
+      "PSD3.Internal.Simulation.Types",
+      "PSD3.Internal.Sankey.Types",
+      "PSD3.Internal.Zoom"
+    ],
+    "package": "my-project",
+    "path": "src/lib/PSD3/Types.purs"
+  },
+  "PSD3.Understanding.About": {
+    "depends": [
+      "Prelude",
+      "D3.Viz.ScatterPlot",
+      "D3.Viz.Charts.Model",
+      "PSD3.Interpreter.D3",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.Shared.SectionNav",
+      "PSD3.Understanding.TOC",
+      "PSD3.Understanding.UnderstandingTabs",
+      "PSD3.Website.Types",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Understanding/About.purs"
+  },
+  "PSD3.Understanding.BubbleChart": {
+    "depends": [
+      "Prelude",
+      "D3.Viz.BubbleChart",
+      "PSD3.Interpreter.D3",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.Shared.SectionNav",
+      "PSD3.Website.Types",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Understanding/BubbleChart.purs"
+  },
+  "PSD3.Understanding.ChordDiagram": {
+    "depends": [
+      "Prelude",
+      "D3.Viz.ChordDiagram",
+      "PSD3.Interpreter.D3",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.Shared.SectionNav",
+      "PSD3.Website.Types",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Understanding/ChordDiagram.purs"
+  },
+  "PSD3.Understanding.Concepts": {
+    "depends": [
+      "Prelude",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.Shared.SectionNav",
+      "PSD3.Understanding.TOC",
+      "PSD3.Understanding.UnderstandingTabs",
+      "PSD3.Website.Types",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Understanding/Concepts.purs"
+  },
+  "PSD3.Understanding.Hierarchies": {
+    "depends": [
+      "Prelude",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Hierarchical",
+      "D3.Viz.Hierarchies",
+      "D3.Viz.Tree.Configure",
+      "PSD3.Interpreter.D3",
+      "PSD3.Internal.Utility",
+      "Data.Either",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "PSD3.Shared.SectionNav",
+      "PSD3.Website.Types",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Understanding/Hierarchies.purs"
+  },
+  "PSD3.Understanding.Interpreters": {
+    "depends": [
+      "Prelude",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "PSD3.Shared.CodeExample",
+      "PSD3.Understanding.InterpretersDemo",
+      "PSD3.Shared.SectionNav",
+      "PSD3.Website.Types",
+      "Snippets",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Understanding/Interpreters.purs"
+  },
+  "PSD3.Understanding.InterpretersDemo": {
+    "depends": [
+      "Prelude",
+      "PSD3.Internal.Attributes.Sugar",
+      "PSD3.Data.Tree",
+      "PSD3.Internal.Types",
+      "PSD3.Data.Node",
+      "PSD3.Capabilities.Selection",
+      "PSD3.Interpreter.MetaTree",
+      "PSD3.Interpreter.String",
+      "Data.Foldable",
+      "Data.Tuple",
+      "Effect",
+      "Effect.Class"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Understanding/InterpretersDemo.purs"
+  },
+  "PSD3.Understanding.Patterns": {
+    "depends": [
+      "Prelude",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.Shared.SectionNav",
+      "PSD3.Understanding.TOC",
+      "PSD3.Understanding.UnderstandingTabs",
+      "PSD3.Website.Types",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Understanding/Patterns.purs"
+  },
+  "PSD3.Understanding.SankeyDiagram": {
+    "depends": [
+      "Prelude",
+      "D3.Viz.Sankey.Model",
+      "D3.Viz.SankeyDiagram",
+      "PSD3.Internal.Sankey.Types",
+      "PSD3.Interpreter.D3",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.Shared.SectionNav",
+      "PSD3.Website.Types",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Understanding/SankeyDiagram.purs"
+  },
+  "PSD3.Understanding.SimpleCharts": {
+    "depends": [
+      "Prelude",
+      "D3.Viz.GroupedBarChart",
+      "D3.Viz.MultiLineChart",
+      "D3.Viz.RadialStackedBar",
+      "D3.Viz.Charts.Model",
+      "PSD3.Interpreter.D3",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.Shared.SectionNav",
+      "PSD3.Understanding.TOC",
+      "PSD3.Website.Types",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Understanding/SimpleCharts.purs"
+  },
+  "PSD3.Understanding.TOC": {
+    "depends": [
+      "Prelude",
+      "Data.Maybe",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Understanding/TOC.purs"
+  },
+  "PSD3.Understanding.Tutorial": {
+    "depends": [
+      "Prelude",
+      "Control.Monad.Rec.Class",
+      "D3.Viz.ThreeLittleCircles",
+      "D3.Viz.Parabola",
+      "D3.Viz.GUP",
+      "D3.Viz.BarChart",
+      "D3.Viz.LineChart",
+      "D3.Viz.ScatterPlot",
+      "D3.Viz.Charts.Model",
+      "PSD3.Interpreter.D3",
+      "Data.Array",
+      "Data.Maybe",
+      "Data.String.CodeUnits",
+      "Data.Traversable",
+      "Effect",
+      "Effect.Aff",
+      "Effect.Class",
+      "Effect.Class.Console",
+      "Effect.Exception",
+      "Effect.Random",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.Shared.CodeExample",
+      "PSD3.Shared.SectionNav",
+      "PSD3.RoutingDSL",
+      "PSD3.Understanding.TOC",
+      "PSD3.Website.Types",
+      "Snippets",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Understanding/Tutorial.purs"
+  },
+  "PSD3.Understanding.UnderstandingTabs": {
+    "depends": [
+      "Prelude",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.RoutingDSL",
+      "PSD3.Website.Types"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Understanding/UnderstandingTabs.purs"
+  },
+  "PSD3.Unlinked.BarChart": {
     "depends": [
       "Prelude",
       "Control.Monad.State",
-      "D3.Data.Tree",
-      "D3.Viz.Tree.Configure",
-      "D3.Layouts.Hierarchical",
+      "D3.Viz.Charts.Model",
+      "D3.Viz.BarChart",
       "PSD3.Expandable",
       "PSD3.Toggle",
-      "D3Tagless.Instance.Selection",
-      "D3Tagless.Utility",
+      "PSD3.Interpreter.D3",
+      "Data.Lens",
+      "Data.Lens.Record",
+      "Data.Maybe",
+      "PSD3.FormField",
+      "Effect.Aff.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "Snippets",
+      "PSD3.Shared.Utilities",
+      "PSD3.Shared.Utilities",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Unlinked/BarChart.purs"
+  },
+  "PSD3.Unlinked.ExampleCard": {
+    "depends": [
+      "Prelude",
+      "PSD3.Website.Types",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "Halogen.HTML.Events"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Unlinked/ExampleCard.purs"
+  },
+  "PSD3.Unlinked.FloatingPanel": {
+    "depends": [
+      "Prelude",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "Data.Maybe",
+      "Effect.Aff.Class"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Unlinked/FloatingPanel.purs"
+  },
+  "PSD3.Unlinked.GUP": {
+    "depends": [
+      "Prelude",
+      "Control.Monad.Rec.Class",
+      "Control.Monad.State",
+      "D3.Viz.GUP",
+      "PSD3.Button",
+      "PSD3.Expandable",
+      "PSD3.FormField",
+      "PSD3.Toggle",
+      "PSD3.Interpreter.D3",
+      "Data.Array",
+      "Data.Lens",
+      "Data.Lens.Record",
+      "Data.Maybe",
+      "Data.String.CodeUnits",
+      "Data.Traversable",
+      "Effect",
+      "Effect.Aff",
+      "Effect.Aff.Class",
+      "Effect.Class",
+      "Effect.Class.Console",
+      "Effect.Exception",
+      "Effect.Random",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "Snippets",
+      "PSD3.Shared.Utilities",
+      "PSD3.Shared.Utilities",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Unlinked/GUP.purs"
+  },
+  "PSD3.Unlinked.HomeForceLayout": {
+    "depends": [
+      "Prelude",
+      "Effect.Aff.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.ForceNavigator",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Unlinked/HomeForceLayout.purs"
+  },
+  "PSD3.Unlinked.LesMis": {
+    "depends": [
+      "Prelude",
+      "Affjax.Web",
+      "Affjax.ResponseFormat",
+      "Control.Monad.State",
+      "PSD3.Internal.Attributes.Instances",
+      "D3.Viz.LesMiserables",
+      "D3.Viz.LesMiserables.File",
+      "PSD3.Internal.FFI",
+      "PSD3.Internal.Simulation.Config",
+      "PSD3.Internal.Simulation.Forces",
+      "PSD3.Internal.Simulation.Types",
+      "PSD3.Button",
+      "PSD3.Expandable",
+      "PSD3.Toggle",
+      "PSD3.Capabilities.Simulation",
+      "PSD3.Interpreter.D3",
+      "Data.Lens",
+      "Data.Lens.Record",
+      "Data.Map",
+      "Data.Maybe",
+      "Data.Set",
+      "Data.Set",
+      "Data.Traversable",
+      "Effect.Aff.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "PSD3.FormField",
+      "Snippets",
+      "PSD3.Shared.Utilities",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Unlinked/LesMis.purs"
+  },
+  "PSD3.Unlinked.LineChart": {
+    "depends": [
+      "Prelude",
+      "Control.Monad.State",
+      "D3.Viz.Charts.Model",
+      "D3.Viz.LineChart",
+      "PSD3.Expandable",
+      "PSD3.Toggle",
+      "PSD3.Interpreter.D3",
+      "Data.Lens",
+      "Data.Lens.Record",
+      "Data.Maybe",
+      "PSD3.FormField",
+      "Effect.Aff.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "Snippets",
+      "PSD3.Shared.Utilities",
+      "PSD3.Shared.Utilities",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Unlinked/LineChart.purs"
+  },
+  "PSD3.Unlinked.MetaTree": {
+    "depends": [
+      "Data.Lens",
+      "Prelude",
+      "Control.Monad.State",
+      "PSD3.Data.Tree",
+      "D3.Viz.MetaTree",
+      "D3.Viz.Tree.Configure",
+      "PSD3.Internal.Hierarchical",
+      "PSD3.Expandable",
+      "PSD3.Toggle",
+      "PSD3.Interpreter.D3",
+      "PSD3.Internal.Utility",
+      "Data.Either",
+      "Data.Lens.Record",
+      "Data.Maybe",
+      "Effect.Aff",
+      "Effect.Aff.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "PSD3.FormField",
+      "Snippets",
+      "PSD3.Shared.Utilities",
+      "PSD3.Shared.Utilities",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Unlinked/MetaTree.purs"
+  },
+  "PSD3.Unlinked.Navigation": {
+    "depends": [
+      "Prelude",
+      "PSD3.Website.Types",
+      "PSD3.RoutingDSL",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Unlinked/Navigation.purs"
+  },
+  "PSD3.Unlinked.PrintTree": {
+    "depends": [
+      "Prelude",
+      "Control.Monad.State",
+      "PSD3.Data.Tree",
+      "D3.Viz.Tree.Configure",
+      "PSD3.Internal.Hierarchical",
+      "PSD3.Expandable",
+      "PSD3.Toggle",
+      "PSD3.Interpreter.D3",
+      "PSD3.Internal.Utility",
+      "Data.Either",
+      "Data.Lens",
+      "Data.Lens.Record",
+      "Data.Maybe",
+      "Effect.Aff.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "PSD3.FormField",
+      "Snippets",
+      "PSD3.Shared.Utilities",
+      "PSD3.Shared.Utilities",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Unlinked/PrintTree.purs"
+  },
+  "PSD3.Unlinked.Sankey": {
+    "depends": [
+      "Prelude",
+      "Control.Monad.State",
+      "D3.Viz.Sankey.Model",
+      "D3.Viz.SankeyDiagram",
+      "PSD3.Internal.Sankey.Types",
+      "PSD3.Interpreter.D3",
+      "PSD3.Internal.Utility",
+      "PSD3.Expandable",
+      "PSD3.Toggle",
+      "PSD3.Interpreter.D3",
+      "Data.Lens",
+      "Data.Lens.Record",
+      "Effect.Aff.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "PSD3.FormField",
+      "PSD3.Radio",
+      "PSD3.Properties",
+      "Snippets",
+      "PSD3.Shared.Utilities",
+      "PSD3.Shared.Utilities",
+      "Data.Maybe",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Unlinked/Sankey.purs"
+  },
+  "PSD3.Unlinked.ScatterPlot": {
+    "depends": [
+      "Prelude",
+      "Control.Monad.State",
+      "D3.Viz.Charts.Model",
+      "D3.Viz.ScatterPlot",
+      "PSD3.Expandable",
+      "PSD3.Toggle",
+      "PSD3.Interpreter.D3",
+      "Data.Lens",
+      "Data.Lens.Record",
+      "Data.Maybe",
+      "PSD3.FormField",
+      "Effect.Aff.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "Snippets",
+      "PSD3.Shared.Utilities",
+      "PSD3.Shared.Utilities",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Unlinked/ScatterPlot.purs"
+  },
+  "PSD3.Unlinked.ThreeLittleCircles": {
+    "depends": [
+      "Prelude",
+      "Control.Monad.State",
+      "D3.Viz.ThreeLittleCircles",
+      "D3.Viz.Parabola",
+      "PSD3.Button",
+      "PSD3.Expandable",
+      "PSD3.FormField",
+      "PSD3.Toggle",
+      "PSD3.Interpreter.D3",
+      "PSD3.Internal.Utility",
+      "Data.Lens",
+      "Data.Lens.Record",
+      "Data.Maybe",
+      "Data.Traversable",
+      "Effect.Aff.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "Snippets",
+      "PSD3.Shared.Utilities",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Unlinked/ThreeLittleCircles.purs"
+  },
+  "PSD3.Unlinked.Trees": {
+    "depends": [
+      "Prelude",
+      "Control.Monad.State",
+      "PSD3.Data.Tree",
+      "D3.Viz.Tree.Configure",
+      "PSD3.Internal.Hierarchical",
+      "PSD3.Expandable",
+      "PSD3.Toggle",
+      "PSD3.Interpreter.D3",
+      "PSD3.Internal.Utility",
       "Data.Either",
       "Data.Lens",
       "Data.Lens.Record",
@@ -6856,54 +7927,28 @@
       "PSD3.Radio",
       "PSD3.Properties",
       "Snippets",
-      "PSD3.Utilities",
-      "PSD3.Utilities",
+      "PSD3.Shared.Utilities",
+      "PSD3.Shared.Utilities",
       "Type.Proxy"
     ],
     "package": "my-project",
-    "path": "src/website/Component/Trees.purs"
+    "path": "src/website/Component/Unlinked/Trees.purs"
   },
-  "PSD3.Tutorial": {
+  "PSD3.Unlinked.Types": {
     "depends": [
       "Prelude",
-      "Data.Maybe",
+      "PSD3.Internal.Simulation.Types",
+      "Data.Const",
       "Effect.Aff",
-      "Halogen",
-      "Halogen.HTML",
-      "Halogen.HTML.Properties",
-      "PSD3.GUP",
-      "PSD3.ThreeLittleCircles",
-      "PSD3.GUP",
-      "PSD3.RoutingDSL",
-      "PSD3.Types",
-      "Type.Proxy"
+      "Halogen"
     ],
     "package": "my-project",
-    "path": "src/website/Component/Tutorial.purs"
+    "path": "src/website/Component/Unlinked/Types.purs"
   },
-  "PSD3.Types": {
-    "depends": [
-      "Prelude"
-    ],
-    "package": "my-project",
-    "path": "src/website/Types.purs"
-  },
-  "PSD3.Utilities": {
+  "PSD3.Unlinked.Visualization": {
     "depends": [
       "Prelude",
-      "Data.Array",
-      "Halogen.HTML",
-      "Halogen.HTML",
-      "Halogen.HTML.Properties",
-      "Html.Renderer.Halogen"
-    ],
-    "package": "my-project",
-    "path": "src/website/Component/Utilities.purs"
-  },
-  "PSD3.Visualization": {
-    "depends": [
-      "Prelude",
-      "D3.Data.Tree",
+      "PSD3.Data.Tree",
       "D3.Viz.Charts.Model",
       "D3.Viz.LineChart",
       "D3.Viz.BarChart",
@@ -6916,10 +7961,10 @@
       "D3.Viz.ThreeLittleCircles",
       "D3.Viz.Tree.Configure",
       "D3.Viz.TreeSimple",
-      "D3.Layouts.Hierarchical",
-      "D3.Layouts.Sankey.Types",
-      "D3Tagless.Instance.Selection",
-      "D3Tagless.Instance.Sankey",
+      "PSD3.Internal.Hierarchical",
+      "PSD3.Internal.Sankey.Types",
+      "PSD3.Interpreter.D3",
+      "PSD3.Interpreter.D3",
       "Data.Array",
       "Data.Either",
       "Data.Foldable",
@@ -6933,7 +7978,7 @@
       "Halogen",
       "Halogen.HTML",
       "Halogen.HTML.Properties",
-      "PSD3.Types",
+      "PSD3.Website.Types",
       "Data.Maybe",
       "Web.DOM.Document",
       "Web.DOM.NonElementParentNode",
@@ -6942,7 +7987,218 @@
       "Web.HTML.Window"
     ],
     "package": "my-project",
-    "path": "src/website/Component/Visualization.purs"
+    "path": "src/website/Component/Unlinked/Visualization.purs"
+  },
+  "PSD3.WealthHealth.Actions": {
+    "depends": [
+      "Prelude",
+      "Data.Maybe",
+      "PSD3.WealthHealth.Types"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/WealthHealth/Actions.purs"
+  },
+  "PSD3.WealthHealth.Data": {
+    "depends": [
+      "Prelude",
+      "Affjax.Web",
+      "Affjax.ResponseFormat",
+      "Data.Array",
+      "Data.Either",
+      "Data.Foldable",
+      "Data.Int",
+      "Data.Maybe",
+      "Data.Ord",
+      "Effect.Aff",
+      "PSD3.WealthHealth.Types"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/WealthHealth/Data.purs"
+  },
+  "PSD3.WealthHealth.HTML": {
+    "depends": [
+      "Prelude",
+      "Data.Int",
+      "Data.Maybe",
+      "Data.Number",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "PSD3.WealthHealth.Actions",
+      "PSD3.WealthHealth.State",
+      "PSD3.WealthHealth.Types"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/WealthHealth/HTML.purs"
+  },
+  "PSD3.WealthHealth.State": {
+    "depends": [
+      "D3.Viz.WealthHealth.Draw",
+      "Data.Maybe",
+      "Data.Unit",
+      "Data.Set",
+      "Data.Set",
+      "Halogen",
+      "PSD3.Interpreter.D3",
+      "PSD3.Internal.Types",
+      "PSD3.WealthHealth.Types"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/WealthHealth/State.purs"
+  },
+  "PSD3.WealthHealth.Types": {
+    "depends": [
+      "Prelude",
+      "Data.Generic.Rep",
+      "Data.Show.Generic"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/WealthHealth/Types.purs"
+  },
+  "PSD3.WealthHealth.WealthHealth": {
+    "depends": [
+      "Prelude",
+      "Control.Monad.Rec.Class",
+      "D3.Viz.WealthHealth.Draw",
+      "Data.Array",
+      "Data.Either",
+      "Data.Int",
+      "Data.Maybe",
+      "Data.Set",
+      "Effect",
+      "Effect.Aff",
+      "Effect.Aff",
+      "Effect.Aff.Class",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "Halogen.Subscription",
+      "PSD3.Interpreter.D3",
+      "PSD3.Internal.Types",
+      "PSD3.WealthHealth.Actions",
+      "PSD3.WealthHealth.Data",
+      "PSD3.WealthHealth.HTML",
+      "PSD3.WealthHealth.State",
+      "PSD3.WealthHealth.Types"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/WealthHealth/WealthHealth.purs"
+  },
+  "PSD3.WealthHealth.WealthHealthWrapper": {
+    "depends": [
+      "Prelude",
+      "Effect.Aff.Class",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Properties",
+      "PSD3.WealthHealth.WealthHealth",
+      "Type.Proxy"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/WealthHealth/WealthHealthWrapper.purs"
+  },
+  "PSD3.Website.Types": {
+    "depends": [
+      "Prelude"
+    ],
+    "package": "my-project",
+    "path": "src/website/Types.purs"
+  },
+  "PSD3.Wizard.Datasets": {
+    "depends": [
+      "Prelude",
+      "Data.Array"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Wizard/Datasets.purs"
+  },
+  "PSD3.Wizard.FileDownload": {
+    "depends": [
+      "Prelude",
+      "Data.Array",
+      "Data.Foldable",
+      "Data.Maybe",
+      "Effect",
+      "Effect.Aff",
+      "Effect.Aff.Compat",
+      "Effect.Class",
+      "PSD3.Wizard.Generator"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Wizard/FileDownload.purs"
+  },
+  "PSD3.Wizard.Generator": {
+    "depends": [
+      "Prelude",
+      "Data.Array",
+      "Data.String",
+      "PSD3.Wizard.Datasets",
+      "PSD3.Wizard.Templates"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Wizard/Generator.purs"
+  },
+  "PSD3.Wizard.Templates": {
+    "depends": [
+      "Prelude",
+      "Data.Array",
+      "Data.Maybe",
+      "Data.String",
+      "PSD3.Wizard.Datasets"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Wizard/Templates.purs"
+  },
+  "PSD3.Wizard.Wizard": {
+    "depends": [
+      "Prelude",
+      "Data.Array",
+      "Data.Maybe",
+      "Data.String",
+      "Data.String.CodeUnits",
+      "Data.Char",
+      "Effect.Aff",
+      "Effect.Aff.Class",
+      "Effect.Class",
+      "Halogen",
+      "Halogen.HTML",
+      "Halogen.HTML.Events",
+      "Halogen.HTML.Properties",
+      "PSD3.Wizard.Datasets",
+      "PSD3.Wizard.Generator",
+      "PSD3.Wizard.FileDownload"
+    ],
+    "package": "my-project",
+    "path": "src/website/Component/Wizard/Wizard.purs"
+  },
+  "ParabolaTest.Draw": {
+    "depends": [
+      "Prelude",
+      "PSD3",
+      "PSD3.Attributes",
+      "PSD3.Internal.FFI",
+      "ParabolaTest.Unsafe",
+      "ParabolaTest.Model",
+      "Data.Int",
+      "Effect"
+    ],
+    "package": "my-project",
+    "path": "src/test/ParabolaTest/Draw.purs"
+  },
+  "ParabolaTest.Model": {
+    "depends": [],
+    "package": "my-project",
+    "path": "src/test/ParabolaTest/Model.purs"
+  },
+  "ParabolaTest.Unsafe": {
+    "depends": [
+      "PSD3.Internal.Types",
+      "Unsafe.Coerce"
+    ],
+    "package": "my-project",
+    "path": "src/test/ParabolaTest/Unsafe.purs"
   },
   "Partial": {
     "depends": [],
@@ -7166,7 +8422,7 @@
       "Halogen.HTML",
       "Halogen.HTML.Properties",
       "Html.Renderer.Halogen",
-      "PSD3.Utilities"
+      "PSD3.Shared.Utilities"
     ],
     "package": "my-project",
     "path": "src/website/HTML/Snippets.purs"
@@ -7366,7 +8622,7 @@
       "Web.HTML.Window"
     ],
     "package": "my-project",
-    "path": "src/lib/D3/Data/Utility.purs"
+    "path": "src/lib/PSD3/Data/Utility.purs"
   },
   "Web.Clipboard.ClipboardEvent": {
     "depends": [
