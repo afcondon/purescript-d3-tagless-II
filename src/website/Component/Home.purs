@@ -73,7 +73,7 @@ render _ =
             , renderDocBox
                 "Understanding"
                 "Concepts, patterns, and design philosophy"
-                (routeToPath About)
+                (routeToPath UnderstandingConcepts)
                 "Learn More →"
                 (Just "images/understanding-bookmark-trees.jpeg")
             ]

@@ -105,7 +105,7 @@ renderPageLink currentRoute { route, label } =
 -- | Get default route for a section
 sectionDefaultRoute :: Section -> Route
 sectionDefaultRoute = case _ of
-  UnderstandingSection -> UnderstandingPhilosophy
+  UnderstandingSection -> UnderstandingConcepts
   TutorialSection -> GettingStarted
   HowToSection -> HowtoIndex
   APISection -> Reference

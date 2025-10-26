@@ -22993,7 +22993,7 @@
     };
   };
   var render6 = function(v) {
-    return div2([classes(["home-page"])])([section([classes(["home-hero"])])([h1([classes(["home-hero__title"])])([text5("PS<$>D3")]), p([classes(["home-hero__subtitle"])])([text5("Type-safe, composable data visualization with PureScript and D3")]), p([classes(["home-hero__description"])])([text5("Finally Tagless design, functional programming principles, and the power of D3.js combined into an elegant, type-safe visualization library.")])]), section([classes(["home-docs"])])([div2([classes(["home-docs__grid"])])([renderGettingStartedBox, renderDocBox("How-to Guides")("Step-by-step instructions for building specific visualizations")(routeToPath(HowtoIndex.value))("Browse Guides \u2192")(new Just("images/howto-bookmark-volcano.jpeg")), renderDocBox("API Reference")("Complete technical documentation with type signatures")(routeToPath(Reference.value))("View API \u2192")(new Just("images/reference-bookmark-deepseavent.jpeg")), renderDocBox("Understanding")("Concepts, patterns, and design philosophy")(routeToPath(About.value))("Learn More \u2192")(new Just("images/understanding-bookmark-trees.jpeg"))])]), section([classes(["home-examples"])])([h2([classes(["home-examples__title"])])([text5("Example Visualizations")]), div2([classes(["home-examples__grid"])])([renderExampleCard("Basic Charts")("Bar charts, line charts, and scatter plots")(routeToPath(Tutorial.value)), renderExampleCard("Hierarchies")("Trees, dendrograms, circle packing, and treemaps")(routeToPath(Hierarchies.value)), renderExampleCard("Network Diagrams")("Chord diagrams, Sankey diagrams, and force layouts")(routeToPath(ChordDiagram.value)), renderExampleCard("Code Explorer")("Interactive exploration of visualization code")(routeToPath(CodeExplorer.value))])])]);
+    return div2([classes(["home-page"])])([section([classes(["home-hero"])])([h1([classes(["home-hero__title"])])([text5("PS<$>D3")]), p([classes(["home-hero__subtitle"])])([text5("Type-safe, composable data visualization with PureScript and D3")]), p([classes(["home-hero__description"])])([text5("Finally Tagless design, functional programming principles, and the power of D3.js combined into an elegant, type-safe visualization library.")])]), section([classes(["home-docs"])])([div2([classes(["home-docs__grid"])])([renderGettingStartedBox, renderDocBox("How-to Guides")("Step-by-step instructions for building specific visualizations")(routeToPath(HowtoIndex.value))("Browse Guides \u2192")(new Just("images/howto-bookmark-volcano.jpeg")), renderDocBox("API Reference")("Complete technical documentation with type signatures")(routeToPath(Reference.value))("View API \u2192")(new Just("images/reference-bookmark-deepseavent.jpeg")), renderDocBox("Understanding")("Concepts, patterns, and design philosophy")(routeToPath(UnderstandingConcepts.value))("Learn More \u2192")(new Just("images/understanding-bookmark-trees.jpeg"))])]), section([classes(["home-examples"])])([h2([classes(["home-examples__title"])])([text5("Example Visualizations")]), div2([classes(["home-examples__grid"])])([renderExampleCard("Basic Charts")("Bar charts, line charts, and scatter plots")(routeToPath(Tutorial.value)), renderExampleCard("Hierarchies")("Trees, dendrograms, circle packing, and treemaps")(routeToPath(Hierarchies.value)), renderExampleCard("Network Diagrams")("Chord diagrams, Sankey diagrams, and force layouts")(routeToPath(ChordDiagram.value)), renderExampleCard("Code Explorer")("Interactive exploration of visualization code")(routeToPath(CodeExplorer.value))])])]);
   };
   var handleAction3 = function(v) {
     return pure24(unit);
@@ -23039,7 +23039,7 @@
   };
   var sectionDefaultRoute = function(v) {
     if (v instanceof UnderstandingSection) {
-      return UnderstandingPhilosophy.value;
+      return UnderstandingConcepts.value;
     }
     ;
     if (v instanceof TutorialSection) {
@@ -28413,7 +28413,27 @@
     return $$Proxy.value;
   })();
   var render45 = function(v) {
-    return div2([classes(["explanation-page"])])([slot_12(_sectionNav7)(unit)(component6)({
+    return div2([classes(["explanation-page"])])([renderTOC({
+      title: "Page Contents",
+      items: [{
+        anchor: "heading-finally-tagless",
+        label: "Finally Tagless",
+        level: 0
+      }, {
+        anchor: "heading-selectionm",
+        label: "The SelectionM Monad",
+        level: 0
+      }, {
+        anchor: "heading-capabilities",
+        label: "Capabilities & Interpreters",
+        level: 0
+      }, {
+        anchor: "heading-type-safe",
+        label: "Type-Safe Attribute System",
+        level: 0
+      }],
+      image: new Just("images/understanding-bookmark-trees.jpeg")
+    }), slot_12(_sectionNav7)(unit)(component6)({
       currentSection: UnderstandingSection.value,
       currentRoute: UnderstandingConcepts.value,
       sectionPages: [{
@@ -28427,7 +28447,7 @@
         label: "Philosophy"
       }],
       moduleCategories: Nothing.value
-    }), div2([classes(["explanation-content"])])([slot_23(_tabs2)(unit)(component40)(UnderstandingConcepts.value), h1([classes(["explanation-title"])])([text5("Core Concepts")]), section([classes(["concept-section"])])([h2_([text5("Finally Tagless")]), p_([text5("Placeholder: 1-2 paragraphs explaining Finally Tagless pattern")])]), section([classes(["concept-section"])])([h2_([text5("The SelectionM Monad")]), p_([text5("Placeholder: 1-2 paragraphs explaining SelectionM")])]), section([classes(["concept-section"])])([h2_([text5("Capabilities & Interpreters")]), p_([text5("Placeholder: 1-2 paragraphs explaining the interpreter pattern")])]), section([classes(["concept-section"])])([h2_([text5("Type-Safe Attribute System")]), p_([text5("Placeholder: 1-2 paragraphs explaining the ToAttr typeclass")])])])]);
+    }), div2([classes(["explanation-content"])])([slot_23(_tabs2)(unit)(component40)(UnderstandingConcepts.value), h1([classes(["explanation-title"])])([text5("Core Concepts")]), section([classes(["concept-section"])])([h2([id2("heading-finally-tagless")])([text5("Finally Tagless")]), p_([text5("Placeholder: 1-2 paragraphs explaining Finally Tagless pattern")])]), section([classes(["concept-section"])])([h2([id2("heading-selectionm")])([text5("The SelectionM Monad")]), p_([text5("Placeholder: 1-2 paragraphs explaining SelectionM")])]), section([classes(["concept-section"])])([h2([id2("heading-capabilities")])([text5("Capabilities & Interpreters")]), p_([text5("Placeholder: 1-2 paragraphs explaining the interpreter pattern")])]), section([classes(["concept-section"])])([h2([id2("heading-type-safe")])([text5("Type-Safe Attribute System")]), p_([text5("Placeholder: 1-2 paragraphs explaining the ToAttr typeclass")])])])]);
   };
   var component44 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -30450,7 +30470,23 @@
     return $$Proxy.value;
   })();
   var render48 = function(v) {
-    return div2([classes(["explanation-page"])])([slot_15(_sectionNav10)(unit)(component6)({
+    return div2([classes(["explanation-page"])])([renderTOC({
+      title: "Page Contents",
+      items: [{
+        anchor: "heading-datum-pattern",
+        label: "The datum_ / Datum_ Pattern",
+        level: 0
+      }, {
+        anchor: "heading-grammar",
+        label: "The Grammar of D3 in SelectionM",
+        level: 0
+      }, {
+        anchor: "heading-dom-to-viz",
+        label: "From DOM to Visualization Elements",
+        level: 0
+      }],
+      image: new Just("images/understanding-bookmark-trees.jpeg")
+    }), slot_15(_sectionNav10)(unit)(component6)({
       currentSection: UnderstandingSection.value,
       currentRoute: UnderstandingPatterns.value,
       sectionPages: [{
@@ -30464,7 +30500,7 @@
         label: "Philosophy"
       }],
       moduleCategories: Nothing.value
-    }), div2([classes(["explanation-content"])])([slot_24(_tabs3)(unit)(component40)(UnderstandingPatterns.value), h1([classes(["explanation-title"])])([text5("Practical Patterns")]), section([classes(["concept-section"])])([h2_([text5("The datum_ / Datum_ Pattern")]), p_([text5("Placeholder: Explanation of the datum_ accessor pattern for type-safe data access")])]), section([classes(["concept-section"])])([h2_([text5("The Grammar of D3 in SelectionM")]), p_([text5("Placeholder: How SelectionM expresses D3's grammar of graphics")])]), section([classes(["concept-section"])])([h2_([text5("From DOM to Visualization Elements")]), p_([text5("Placeholder: The flow from attachment \u2192 nodes \u2192 data joins \u2192 bulk enter")])])])]);
+    }), div2([classes(["explanation-content"])])([slot_24(_tabs3)(unit)(component40)(UnderstandingPatterns.value), h1([classes(["explanation-title"])])([text5("Practical Patterns")]), section([classes(["concept-section"])])([h2([id2("heading-datum-pattern")])([text5("The datum_ / Datum_ Pattern")]), p_([text5("Placeholder: Explanation of the datum_ accessor pattern for type-safe data access")])]), section([classes(["concept-section"])])([h2([id2("heading-grammar")])([text5("The Grammar of D3 in SelectionM")]), p_([text5("Placeholder: How SelectionM expresses D3's grammar of graphics")])]), section([classes(["concept-section"])])([h2([id2("heading-dom-to-viz")])([text5("From DOM to Visualization Elements")]), p_([text5("Placeholder: The flow from attachment \u2192 nodes \u2192 data joins \u2192 bulk enter")])])])]);
   };
   var component47 = /* @__PURE__ */ (function() {
     return mkComponent({
