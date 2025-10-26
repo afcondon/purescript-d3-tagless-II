@@ -48,6 +48,22 @@ instance showCategory :: Show Category where
 categoryToString :: Category -> String
 categoryToString = show
 
+-- | Main documentation sections
+data Section
+  = UnderstandingSection  -- Explanation/concept pages
+  | TutorialSection       -- Getting started tutorial
+  | HowToSection          -- Step-by-step guides
+  | APISection            -- API documentation
+
+derive instance eqSection :: Eq Section
+derive instance ordSection :: Ord Section
+
+instance showSection :: Show Section where
+  show UnderstandingSection = "Understanding"
+  show TutorialSection = "Tutorial"
+  show HowToSection = "How-To"
+  show APISection = "API"
+
 -- | Metadata for a single example
 type ExampleMetadata = {
   id :: ExampleId

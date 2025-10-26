@@ -8,10 +8,10 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.RHSNavigation as RHSNav
+import PSD3.Shared.SectionNav as SectionNav
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Understanding.TOC (renderTOC)
-import PSD3.Website.Types (Route(..))
+import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
 
 -- | Howto Index page state
@@ -21,9 +21,9 @@ type State = Unit
 data Action = Initialize
 
 -- | Child component slots
-type Slots = ( rhsNav :: forall q. H.Slot q Void Unit )
+type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
 
-_rhsNav = Proxy :: Proxy "rhsNav"
+_sectionNav = Proxy :: Proxy "sectionNav"
 
 -- | Howto Index page component
 component :: forall q i o. H.Component q i o Aff
@@ -42,7 +42,7 @@ render _ =
     [ HP.classes [ HH.ClassName "howto-page" ] ]
     [ -- TOC Panel (LHS)
       renderTOC
-        { title: "Categories"
+        { title: "Page Contents"
         , items:
             [ { anchor: "basic", label: "Basic Visualizations", level: 0 }
             , { anchor: "data", label: "Data & Scales", level: 0 }
@@ -53,7 +53,13 @@ render _ =
         }
 
     -- Navigation Panel (RHS)
-    , HH.slot_ _rhsNav unit RHSNav.component HowtoIndex
+    , HH.slot_ _sectionNav unit SectionNav.component
+        { currentSection: HowToSection
+        , currentRoute: HowtoIndex
+        , sectionPages:
+            [ { route: HowtoIndex, label: "How-to Guides" }
+            ]
+        }
 
     -- Page introduction
     , HH.section

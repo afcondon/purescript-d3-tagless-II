@@ -7,9 +7,9 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.RHSNavigation as RHSNav
+import PSD3.Shared.SectionNav as SectionNav
 import PSD3.Understanding.TOC (renderTOC)
-import PSD3.Website.Types (Route(..))
+import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
 
 -- | Getting Started page state
@@ -19,9 +19,9 @@ type State = Unit
 data Action = Initialize
 
 -- | Child component slots
-type Slots = ( rhsNav :: forall q. H.Slot q Void Unit )
+type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
 
-_rhsNav = Proxy :: Proxy "rhsNav"
+_sectionNav = Proxy :: Proxy "sectionNav"
 
 -- | Getting Started page component
 component :: forall q i o. H.Component q i o Aff
@@ -40,7 +40,7 @@ render _ =
     [ HP.classes [ HH.ClassName "tutorial-page" ] ]
     [ -- TOC Panel (LHS)
       renderTOC
-        { title: "Contents"
+        { title: "Page Contents"
         , items:
             [ { anchor: "installation", label: "Installation", level: 0 }
             , { anchor: "prerequisites", label: "Prerequisites", level: 1 }
@@ -54,7 +54,13 @@ render _ =
         }
 
     -- Navigation Panel (RHS)
-    , HH.slot_ _rhsNav unit RHSNav.component GettingStarted
+    , HH.slot_ _sectionNav unit SectionNav.component
+        { currentSection: TutorialSection
+        , currentRoute: GettingStarted
+        , sectionPages:
+            [ { route: GettingStarted, label: "Getting Started" }
+            ]
+        }
 
     -- Page introduction
     , HH.section

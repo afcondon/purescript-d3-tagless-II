@@ -147,19 +147,19 @@
   };
   var applyFirst = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map54 = map(dictApply.Functor0());
+    var map55 = map(dictApply.Functor0());
     return function(a2) {
       return function(b2) {
-        return apply1(map54($$const)(a2))(b2);
+        return apply1(map55($$const)(a2))(b2);
       };
     };
   };
   var applySecond = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map54 = map(dictApply.Functor0());
+    var map55 = map(dictApply.Functor0());
     return function(a2) {
       return function(b2) {
-        return apply1(map54($$const(identity2))(a2))(b2);
+        return apply1(map55($$const(identity2))(a2))(b2);
       };
     };
   };
@@ -288,11 +288,11 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq9) {
+    return function(eq10) {
       return function(gt) {
         return function(x23) {
           return function(y20) {
-            return x23 < y20 ? lt : x23 === y20 ? eq9 : gt;
+            return x23 < y20 ? lt : x23 === y20 ? eq10 : gt;
           };
         };
       };
@@ -860,13 +860,13 @@
     return v.value0;
   };
   var eqTuple = function(dictEq) {
-    var eq9 = eq(dictEq);
+    var eq10 = eq(dictEq);
     return function(dictEq1) {
-      var eq14 = eq(dictEq1);
+      var eq15 = eq(dictEq1);
       return {
         eq: function(x23) {
           return function(y20) {
-            return eq9(x23.value0)(y20.value0) && eq14(x23.value1)(y20.value1);
+            return eq10(x23.value0)(y20.value0) && eq15(x23.value1)(y20.value1);
           };
         }
       };
@@ -2267,10 +2267,10 @@
   var $$try = function(dictMonadError) {
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
-    var map54 = map(Monad0.Bind1().Apply0().Functor0());
+    var map55 = map(Monad0.Bind1().Apply0().Functor0());
     var pure39 = pure(Monad0.Applicative0());
     return function(a2) {
-      return catchError1(map54(Right.create)(a2))(function($52) {
+      return catchError1(map55(Right.create)(a2))(function($52) {
         return pure39(Left.create($52));
       });
     };
@@ -3066,7 +3066,7 @@
       };
     }
     return function(apply6) {
-      return function(map54) {
+      return function(map55) {
         return function(pure39) {
           return function(f) {
             return function(array4) {
@@ -3075,14 +3075,14 @@
                   case 0:
                     return pure39([]);
                   case 1:
-                    return map54(array1)(f(array4[bot]));
+                    return map55(array1)(f(array4[bot]));
                   case 2:
-                    return apply6(map54(array2)(f(array4[bot])))(f(array4[bot + 1]));
+                    return apply6(map55(array2)(f(array4[bot])))(f(array4[bot + 1]));
                   case 3:
-                    return apply6(apply6(map54(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
+                    return apply6(apply6(map55(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
                   default:
                     var pivot = bot + Math.floor((top5 - bot) / 4) * 2;
-                    return apply6(map54(concat2)(go2(bot, pivot)))(go2(pivot, top5));
+                    return apply6(map55(concat2)(go2(bot, pivot)))(go2(pivot, top5));
                 }
               }
               return go2(0, array4.length);
@@ -3437,12 +3437,12 @@
   };
   var lift3 = /* @__PURE__ */ lift(monadTransStateT);
   var functorStateT = function(dictFunctor) {
-    var map54 = map(dictFunctor);
+    var map55 = map(dictFunctor);
     return {
       map: function(f) {
         return function(v) {
           return function(s) {
-            return map54(function(v1) {
+            return map55(function(v1) {
               return new Tuple(f(v1.value0), v1.value1);
             })(v(s));
           };
@@ -9037,6 +9037,7 @@
   var src9 = /* @__PURE__ */ prop22("src");
   var step4 = /* @__PURE__ */ prop2(isPropStepValue)("step");
   var target5 = /* @__PURE__ */ prop22("target");
+  var title3 = /* @__PURE__ */ prop22("title");
   var type_17 = function(dictIsProp) {
     return prop2(dictIsProp)("type");
   };
@@ -9075,9 +9076,9 @@
         var componentSlot22 = componentSlot1(dictOrd);
         return function(label5) {
           return function(p2) {
-            return function(component18) {
+            return function(component19) {
               return function(input3) {
-                return widget(new ComponentSlot(componentSlot22(label5)(p2)(component18)(input3)($$const(Nothing.value))));
+                return widget(new ComponentSlot(componentSlot22(label5)(p2)(component19)(input3)($$const(Nothing.value))));
               };
             };
           };
@@ -9139,7 +9140,7 @@
       return f(v);
     };
   };
-  var initDriverState = function(component18) {
+  var initDriverState = function(component19) {
     return function(input3) {
       return function(handler3) {
         return function(lchs) {
@@ -9155,8 +9156,8 @@
             var subscriptions = $$new(new Just(empty2))();
             var forks = $$new(empty2)();
             var ds = {
-              component: component18,
-              state: component18.initialState(input3),
+              component: component19,
+              state: component19.initialState(input3),
               refs: empty2,
               children: empty3,
               childrenIn,
@@ -9263,16 +9264,16 @@
       });
     };
   };
-  var evalQ = function(render19) {
+  var evalQ = function(render20) {
     return function(ref2) {
       return function(q2) {
         return bind12(liftEffect4(read(ref2)))(function(v) {
-          return evalM(render19)(ref2)(v["component"]["eval"](new Query(map20(Just.create)(liftCoyoneda(q2)), $$const(Nothing.value))));
+          return evalM(render20)(ref2)(v["component"]["eval"](new Query(map20(Just.create)(liftCoyoneda(q2)), $$const(Nothing.value))));
         });
       };
     };
   };
-  var evalM = function(render19) {
+  var evalM = function(render20) {
     return function(initRef) {
       return function(v) {
         var evalChildQuery = function(ref2) {
@@ -9282,7 +9283,7 @@
                 var evalChild = function(v3) {
                   return parallel2(bind12(liftEffect4(read(v3)))(function(dsx) {
                     return unDriverStateX(function(ds) {
-                      return evalQ(render19)(ds.selfRef)(v2.value1);
+                      return evalQ(render20)(ds.selfRef)(v2.value1);
                     })(dsx);
                   }));
                 };
@@ -9319,7 +9320,7 @@
                     lifecycleHandlers: v2.lifecycleHandlers,
                     state: v3.value1
                   })(ref2)))(function() {
-                    return discard1(handleLifecycle(v2.lifecycleHandlers)(render19(v2.lifecycleHandlers)(ref2)))(function() {
+                    return discard1(handleLifecycle(v2.lifecycleHandlers)(render20(v2.lifecycleHandlers)(ref2)))(function() {
                       return pure8(v3.value0);
                     });
                   });
@@ -9332,7 +9333,7 @@
             if (v1 instanceof Subscribe) {
               return bind12(fresh(SubscriptionId)(ref2))(function(sid) {
                 return bind12(liftEffect4(subscribe(v1.value0(sid))(function(act) {
-                  return handleAff(evalF(render19)(ref2)(new Action(act)));
+                  return handleAff(evalF(render20)(ref2)(new Action(act)));
                 })))(function(finalize) {
                   return bind12(liftEffect4(read(ref2)))(function(v2) {
                     return discard1(liftEffect4(modify_2(map23(insert4(sid)(finalize)))(v2.subscriptions)))(function() {
@@ -9369,7 +9370,7 @@
             ;
             if (v1 instanceof Par) {
               return sequential2(retractFreeAp2(hoistFreeAp((function() {
-                var $118 = evalM(render19)(ref2);
+                var $118 = evalM(render20)(ref2);
                 return function($119) {
                   return parallel2($118($119));
                 };
@@ -9383,7 +9384,7 @@
                     return bind12(fork3($$finally(liftEffect4(function __do4() {
                       modify_2($$delete2(fid))(v2.forks)();
                       return write(true)(doneRef)();
-                    }))(evalM(render19)(ref2)(v1.value0))))(function(fiber) {
+                    }))(evalM(render20)(ref2)(v1.value0))))(function(fiber) {
                       return discard1(liftEffect4(unlessM2(read(doneRef))(modify_2(insert12(fid)(fiber))(v2.forks))))(function() {
                         return pure8(v1.value1(fid));
                       });
@@ -9426,7 +9427,7 @@
       };
     };
   };
-  var evalF = function(render19) {
+  var evalF = function(render20) {
     return function(ref2) {
       return function(v) {
         if (v instanceof RefUpdate) {
@@ -9454,7 +9455,7 @@
         ;
         if (v instanceof Action) {
           return bind12(liftEffect4(read(ref2)))(function(v1) {
-            return evalM(render19)(ref2)(v1["component"]["eval"](new Action2(v.value0, unit)));
+            return evalM(render20)(ref2)(v1["component"]["eval"](new Action2(v.value0, unit)));
           });
         }
         ;
@@ -9520,12 +9521,12 @@
     };
   };
   var runUI = function(renderSpec2) {
-    return function(component18) {
+    return function(component19) {
       return function(i2) {
         var squashChildInitializers = function(lchs) {
           return function(preInits) {
             return unDriverStateX(function(st) {
-              var parentInitializer = evalM(render19)(st.selfRef)(st["component"]["eval"](new Initialize(unit)));
+              var parentInitializer = evalM(render20)(st.selfRef)(st["component"]["eval"](new Initialize(unit)));
               return modify_2(function(handlers) {
                 return {
                   initializers: new Cons(discard22(parSequence_3(reverse(handlers.initializers)))(function() {
@@ -9555,7 +9556,7 @@
                     finalizers: pre2.finalizers
                   })(lchs)();
                   bindFlipped7(unDriverStateX((function() {
-                    var $62 = render19(lchs);
+                    var $62 = render20(lchs);
                     return function($63) {
                       return $62((function(v) {
                         return v.selfRef;
@@ -9588,7 +9589,7 @@
                                 return $64(slot.output($65));
                               };
                             })())();
-                            return handleAff(evalM(render19)(st.selfRef)(st["component"]["eval"](new Receive(slot.input, unit))))();
+                            return handleAff(evalM(render20)(st.selfRef)(st["component"]["eval"](new Receive(slot.input, unit))))();
                           };
                         })(dsx)();
                         return childrenIn.value0.value0;
@@ -9627,7 +9628,7 @@
             };
           };
         };
-        var render19 = function(lchs) {
+        var render20 = function(lchs) {
           return function($$var2) {
             return function __do4() {
               var v = read($$var2)();
@@ -9637,7 +9638,7 @@
               write(v.children)(v.childrenIn)();
               var handler3 = (function() {
                 var $69 = queueOrRun(v.pendingHandlers);
-                var $70 = evalF(render19)(v.selfRef);
+                var $70 = evalF(render20)(v.selfRef);
                 return function($71) {
                   return $69($$void8($70($71)));
                 };
@@ -9706,7 +9707,7 @@
           return unDriverStateX(function(st) {
             return function __do4() {
               cleanupSubscriptionsAndForks(st)();
-              var f = evalM(render19)(st.selfRef)(st["component"]["eval"](new Finalize(unit)));
+              var f = evalM(render20)(st.selfRef)(st["component"]["eval"](new Finalize(unit)));
               modify_2(function(handlers) {
                 return {
                   initializers: handlers.initializers,
@@ -9730,7 +9731,7 @@
                   return pure12(Nothing.value);
                 }
                 ;
-                return evalQ(render19)(ref2)(q2);
+                return evalQ(render20)(ref2)(q2);
               });
             };
           };
@@ -9765,7 +9766,7 @@
                 return function($78) {
                   return liftEffect5($77($78));
                 };
-              })())(i2)(component18))();
+              })())(i2)(component19))();
               return unDriverStateX(function(st) {
                 return pure9({
                   query: evalDriver(disposed)(st.selfRef),
@@ -9942,9 +9943,9 @@
             };
           });
           var patch2 = $lazy_patch(91);
-          var render19 = $lazy_render(82);
+          var render20 = $lazy_render(82);
           var renderComponentSlot = $lazy_renderComponentSlot(109);
-          return render19;
+          return render20;
         };
         var buildAttributes = buildProp(handler3);
         return {
@@ -9957,7 +9958,7 @@
   };
   var renderSpec = function(document3) {
     return function(container) {
-      var render19 = function(handler3) {
+      var render20 = function(handler3) {
         return function(child) {
           return function(v) {
             return function(v1) {
@@ -9998,18 +9999,18 @@
         };
       };
       return {
-        render: render19,
+        render: render20,
         renderChild: identity11,
         removeChild: removeChild3,
         dispose: removeChild3
       };
     };
   };
-  var runUI2 = function(component18) {
+  var runUI2 = function(component19) {
     return function(i2) {
       return function(element3) {
         return bind14(liftEffect6(map25(toDocument)(bindFlipped8(document2)(windowImpl))))(function(document3) {
-          return runUI(renderSpec(document3)(element3))(component18)(i2);
+          return runUI(renderSpec(document3)(element3))(component19)(i2);
         });
       };
     };
@@ -10099,6 +10100,34 @@
   var onValueInput = /* @__PURE__ */ addForeignPropHandler(input)("value")(readString2);
 
   // output/PSD3.Website.Types/index.js
+  var UnderstandingSection = /* @__PURE__ */ (function() {
+    function UnderstandingSection2() {
+    }
+    ;
+    UnderstandingSection2.value = new UnderstandingSection2();
+    return UnderstandingSection2;
+  })();
+  var TutorialSection = /* @__PURE__ */ (function() {
+    function TutorialSection2() {
+    }
+    ;
+    TutorialSection2.value = new TutorialSection2();
+    return TutorialSection2;
+  })();
+  var HowToSection = /* @__PURE__ */ (function() {
+    function HowToSection2() {
+    }
+    ;
+    HowToSection2.value = new HowToSection2();
+    return HowToSection2;
+  })();
+  var APISection = /* @__PURE__ */ (function() {
+    function APISection2() {
+    }
+    ;
+    APISection2.value = new APISection2();
+    return APISection2;
+  })();
   var Home = /* @__PURE__ */ (function() {
     function Home2() {
     }
@@ -10207,6 +10236,29 @@
     NotFound2.value = new NotFound2();
     return NotFound2;
   })();
+  var eqSection = {
+    eq: function(x23) {
+      return function(y20) {
+        if (x23 instanceof UnderstandingSection && y20 instanceof UnderstandingSection) {
+          return true;
+        }
+        ;
+        if (x23 instanceof TutorialSection && y20 instanceof TutorialSection) {
+          return true;
+        }
+        ;
+        if (x23 instanceof HowToSection && y20 instanceof HowToSection) {
+          return true;
+        }
+        ;
+        if (x23 instanceof APISection && y20 instanceof APISection) {
+          return true;
+        }
+        ;
+        return false;
+      };
+    }
+  };
   var eqRoute = {
     eq: function(x23) {
       return function(y20) {
@@ -12201,10 +12253,10 @@
     return new Tuple(toNumber(w), toNumber(h));
   };
   var equalSnd = function(dictEq) {
-    var eq9 = eq(dictEq);
+    var eq10 = eq(dictEq);
     return function(a2) {
       return function(b2) {
-        return eq9(snd(a2))(snd(b2));
+        return eq10(snd(a2))(snd(b2));
       };
     };
   };
@@ -22689,9 +22741,9 @@
     return $$Proxy.value;
   })();
   var render5 = function(dictMonadAff) {
-    var component18 = component3(dictMonadAff);
+    var component19 = component3(dictMonadAff);
     return function(v) {
-      return div2([classes(["fullscreen-page-wrapper", "spago-page-wrapper"])])([slot_3(_spagoComponent)(unit)(component18)(unit)]);
+      return div2([classes(["fullscreen-page-wrapper", "spago-page-wrapper"])])([slot_3(_spagoComponent)(unit)(component19)(unit)]);
     };
   };
   var component4 = function(dictMonadAff) {
@@ -22711,14 +22763,14 @@
     Initialize17.value = new Initialize17();
     return Initialize17;
   })();
-  var renderExampleCard = function(title4) {
+  var renderExampleCard = function(title5) {
     return function(description) {
       return function(path3) {
-        return a([href4("#" + path3), classes(["home-example-card"])])([h3([classes(["home-example-card__title"])])([text5(title4)]), p([classes(["home-example-card__description"])])([text5(description)])]);
+        return a([href4("#" + path3), classes(["home-example-card"])])([h3([classes(["home-example-card__title"])])([text5(title5)]), p([classes(["home-example-card__description"])])([text5(description)])]);
       };
     };
   };
-  var renderDocBox = function(title4) {
+  var renderDocBox = function(title5) {
     return function(description) {
       return function(path3) {
         return function(linkText) {
@@ -22733,7 +22785,7 @@
               }
               ;
               throw new Error("Failed pattern match at PSD3.Home (line 123, column 7 - line 136, column 15): " + [maybeImage.constructor.name]);
-            })(), div2([classes(["home-doc-box__content"])])([h3([classes(["home-doc-box__title"])])([text5(title4)]), p([classes(["home-doc-box__description"])])([text5(description)]), span3([classes(["home-doc-box__link"])])([text5(linkText)])])]);
+            })(), div2([classes(["home-doc-box__content"])])([h3([classes(["home-doc-box__title"])])([text5(title5)]), p([classes(["home-doc-box__description"])])([text5(description)]), span3([classes(["home-doc-box__link"])])([text5(linkText)])])]);
           };
         };
       };
@@ -22761,11 +22813,84 @@
     });
   })();
 
+  // output/PSD3.Shared.SectionNav/index.js
+  var eq6 = /* @__PURE__ */ eq(eqSection);
+  var eq13 = /* @__PURE__ */ eq(eqRoute);
+  var map45 = /* @__PURE__ */ map(functorArray);
+  var sectionTitle = function(v) {
+    if (v instanceof UnderstandingSection) {
+      return "Understanding";
+    }
+    ;
+    if (v instanceof TutorialSection) {
+      return "Getting Started";
+    }
+    ;
+    if (v instanceof HowToSection) {
+      return "How-To Guides";
+    }
+    ;
+    if (v instanceof APISection) {
+      return "API Reference";
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Shared.SectionNav (line 100, column 16 - line 104, column 32): " + [v.constructor.name]);
+  };
+  var sectionDefaultRoute = function(v) {
+    if (v instanceof UnderstandingSection) {
+      return About.value;
+    }
+    ;
+    if (v instanceof TutorialSection) {
+      return GettingStarted.value;
+    }
+    ;
+    if (v instanceof HowToSection) {
+      return HowtoIndex.value;
+    }
+    ;
+    if (v instanceof APISection) {
+      return Reference.value;
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Shared.SectionNav (line 92, column 23 - line 96, column 26): " + [v.constructor.name]);
+  };
+  var renderQuadrant = function(targetSection) {
+    return function(currentSection) {
+      return a([href4("#" + routeToPath(sectionDefaultRoute(targetSection))), classes(["section-nav__quadrant-box", (function() {
+        var $11 = eq6(targetSection)(currentSection);
+        if ($11) {
+          return "section-nav__quadrant-box--active";
+        }
+        ;
+        return "section-nav__quadrant-box--inactive";
+      })()]), title3(sectionTitle(targetSection))])([]);
+    };
+  };
+  var renderPageLink = function(currentRoute) {
+    return function(v) {
+      var $14 = eq13(v.route)(currentRoute);
+      if ($14) {
+        return span3([classes(["section-nav__page-link", "section-nav__page-link--active"])])([text5(v.label)]);
+      }
+      ;
+      return a([href4("#" + routeToPath(v.route)), classes(["section-nav__page-link"])])([text5(v.label), text5(" \u2192")]);
+    };
+  };
+  var render7 = function(v) {
+    return div2([classes(["section-nav"])])([div2([classes(["section-nav__quadrant"])])([renderQuadrant(UnderstandingSection.value)(v.currentSection), renderQuadrant(TutorialSection.value)(v.currentSection), renderQuadrant(HowToSection.value)(v.currentSection), renderQuadrant(APISection.value)(v.currentSection)]), h3([classes(["section-nav__title"])])([text5(sectionTitle(v.currentSection))]), nav([classes(["section-nav__pages"])])(map45(renderPageLink(v.currentRoute))(v.sectionPages))]);
+  };
+  var component6 = /* @__PURE__ */ mkComponent({
+    initialState: /* @__PURE__ */ identity(categoryFn),
+    render: render7,
+    "eval": /* @__PURE__ */ mkEval(defaultEval)
+  });
+
   // output/PSD3.HowTo.HowtoIndex/index.js
   var pure25 = /* @__PURE__ */ pure(applicativeHalogenM);
   var slot_4 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "rhsNav";
+      return "sectionNav";
     }
   })(ordUnit);
   var Initialize5 = /* @__PURE__ */ (function() {
@@ -22776,10 +22901,10 @@
     return Initialize17;
   })();
   var renderHowtoItem = function(snippetId) {
-    return function(title4) {
+    return function(title5) {
       return function(description) {
         return function(difficulty) {
-          return div2([classes(["howto-item"])])([div2([classes(["howto-item__header"])])([h3([classes(["howto-item__title"])])([a([href4("#" + routeToPath(new Explore(snippetId))), classes(["howto-item__link"])])([text5(title4)])]), span3([classes(["howto-item__difficulty", "howto-item__difficulty--" + toLower(difficulty)])])([text5(difficulty)])]), p([classes(["howto-item__description"])])([text5(description)])]);
+          return div2([classes(["howto-item"])])([div2([classes(["howto-item__header"])])([h3([classes(["howto-item__title"])])([a([href4("#" + routeToPath(new Explore(snippetId))), classes(["howto-item__link"])])([text5(title5)])]), span3([classes(["howto-item__difficulty", "howto-item__difficulty--" + toLower(difficulty)])])([text5(difficulty)])]), p([classes(["howto-item__description"])])([text5(description)])]);
         };
       };
     };
@@ -22787,12 +22912,12 @@
   var handleAction4 = function(v) {
     return pure25(unit);
   };
-  var _rhsNav2 = /* @__PURE__ */ (function() {
+  var _sectionNav = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render7 = function(v) {
+  var render8 = function(v) {
     return div2([classes(["howto-page"])])([renderTOC({
-      title: "Categories",
+      title: "Page Contents",
       items: [{
         anchor: "basic",
         label: "Basic Visualizations",
@@ -22811,14 +22936,21 @@
         level: 0
       }],
       image: new Just("images/howto-bookmark-volcano.jpeg")
-    }), slot_4(_rhsNav2)(unit)(component)(HowtoIndex.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("How-to Guides")]), p_([text5("Step-by-step guides for building specific visualizations and accomplishing common tasks. Each guide includes complete code examples with detailed explanations.")]), p_([text5("These guides assume you're already familiar with the basics. If you're new to PS<$>D3, start with the ")]), a([href4("#" + routeToPath(GettingStarted.value))])([text5("Getting Started")]), text5(" guide.")]), section([classes(["tutorial-section"]), id2("basic")])([h2([classes(["tutorial-section-title"])])([text5("Basic Visualizations")]), p_([text5("Learn to build fundamental chart types from scratch.")]), div2([classes(["howto-list"])])([renderHowtoItem("TLCSimple")("Three Little Circles")("The simplest possible D3 example - create three circles. Perfect first example.")("Beginner"), renderHowtoItem("GUP")("General Update Pattern")("Master the enter/update/exit pattern for animated data updates.")("Intermediate"), renderHowtoItem("TLCParabola")("Data-Driven Positioning")("Position elements based on data values with type-safe accessors.")("Beginner"), renderHowtoItem("BarChartDraw")("Build a Bar Chart")("Create a bar chart with scales and axes from monthly sales data.")("Beginner"), renderHowtoItem("LineChartDraw")("Build a Line Chart")("Draw smooth lines through data points with path generators.")("Beginner"), renderHowtoItem("ScatterPlotQuartet")("Anscombe's Quartet")("Create small multiples showing why visualization matters.")("Intermediate")])]), section([classes(["tutorial-section"]), id2("data")])([h2([classes(["tutorial-section-title"])])([text5("Data & Scales")]), p_([text5("Coming soon: guides for data loading, transformation, and scale configuration.")])]), section([classes(["tutorial-section"]), id2("interaction")])([h2([classes(["tutorial-section-title"])])([text5("Interactivity")]), p_([text5("Coming soon: guides for tooltips, zooming, panning, and user interactions.")])]), section([classes(["tutorial-section"]), id2("advanced")])([h2([classes(["tutorial-section-title"])])([text5("Advanced Techniques")]), p_([text5("Coming soon: guides for custom interpreters, complex layouts, and performance optimization.")])])]);
+    }), slot_4(_sectionNav)(unit)(component6)({
+      currentSection: HowToSection.value,
+      currentRoute: HowtoIndex.value,
+      sectionPages: [{
+        route: HowtoIndex.value,
+        label: "How-to Guides"
+      }]
+    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("How-to Guides")]), p_([text5("Step-by-step guides for building specific visualizations and accomplishing common tasks. Each guide includes complete code examples with detailed explanations.")]), p_([text5("These guides assume you're already familiar with the basics. If you're new to PS<$>D3, start with the ")]), a([href4("#" + routeToPath(GettingStarted.value))])([text5("Getting Started")]), text5(" guide.")]), section([classes(["tutorial-section"]), id2("basic")])([h2([classes(["tutorial-section-title"])])([text5("Basic Visualizations")]), p_([text5("Learn to build fundamental chart types from scratch.")]), div2([classes(["howto-list"])])([renderHowtoItem("TLCSimple")("Three Little Circles")("The simplest possible D3 example - create three circles. Perfect first example.")("Beginner"), renderHowtoItem("GUP")("General Update Pattern")("Master the enter/update/exit pattern for animated data updates.")("Intermediate"), renderHowtoItem("TLCParabola")("Data-Driven Positioning")("Position elements based on data values with type-safe accessors.")("Beginner"), renderHowtoItem("BarChartDraw")("Build a Bar Chart")("Create a bar chart with scales and axes from monthly sales data.")("Beginner"), renderHowtoItem("LineChartDraw")("Build a Line Chart")("Draw smooth lines through data points with path generators.")("Beginner"), renderHowtoItem("ScatterPlotQuartet")("Anscombe's Quartet")("Create small multiples showing why visualization matters.")("Intermediate")])]), section([classes(["tutorial-section"]), id2("data")])([h2([classes(["tutorial-section-title"])])([text5("Data & Scales")]), p_([text5("Coming soon: guides for data loading, transformation, and scale configuration.")])]), section([classes(["tutorial-section"]), id2("interaction")])([h2([classes(["tutorial-section-title"])])([text5("Interactivity")]), p_([text5("Coming soon: guides for tooltips, zooming, panning, and user interactions.")])]), section([classes(["tutorial-section"]), id2("advanced")])([h2([classes(["tutorial-section-title"])])([text5("Advanced Techniques")]), p_([text5("Coming soon: guides for custom interpreters, complex layouts, and performance optimization.")])])]);
   };
-  var component6 = /* @__PURE__ */ (function() {
+  var component7 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return unit;
       },
-      render: render7,
+      render: render8,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -22833,7 +22965,7 @@
   var pure26 = /* @__PURE__ */ pure(applicativeHalogenM);
   var slot_5 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "rhsNav";
+      return "sectionNav";
     }
   })(ordUnit);
   var Initialize6 = /* @__PURE__ */ (function() {
@@ -22846,12 +22978,12 @@
   var handleAction5 = function(v) {
     return pure26(unit);
   };
-  var _rhsNav3 = /* @__PURE__ */ (function() {
+  var _sectionNav2 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render8 = function(v) {
+  var render9 = function(v) {
     return div2([classes(["reference-page"])])([renderTOC({
-      title: "API Reference",
+      title: "Page Contents",
       items: [{
         anchor: "core",
         label: "Core Concepts",
@@ -22886,14 +23018,21 @@
         level: 0
       }],
       image: new Just("images/reference-bookmark-deepseavent.jpeg")
-    }), slot_5(_rhsNav3)(unit)(component)(Reference.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("API Reference")]), p_([text5("Complete technical documentation for the PS<$>D3 library. This reference provides detailed information about every function, type, and type class in the library.")])]), section([classes(["tutorial-section"]), id2("core")])([h2([classes(["tutorial-section-title"])])([text5("Core Concepts")]), p_([text5("PS<$>D3 is built on the Finally Tagless pattern, which allows you to write visualization code once and interpret it in multiple ways. The core abstraction is the "), code_([text5("SelectionM")]), text5(" type class.")]), h3_([text5("The SelectionM Type Class")]), pre_([code_([text5("class Monad m <= SelectionM s m | m -> s where\n  attach :: Selector s -> m s\n  appendTo :: s -> Element -> Array (Attr s) -> m s\n  selectAll :: s -> Selector s -> m s\n  -- ... and many more operations")])]), p_([text5("This type class defines the operations you can perform on D3 selections. The "), code_([text5("s")]), text5(" type parameter represents a selection, and "), code_([text5("m")]), text5(" is the monad in which these operations run.")])]), section([classes(["tutorial-section"]), id2("selection")])([h2([classes(["tutorial-section-title"])])([text5("Selection Operations")]), p_([text5("These functions form the core of PS<$>D3's selection API, allowing you to create, modify, and manipulate DOM elements.")]), h3([id2("attach")])([text5("attach")]), pre_([code_([text5("attach :: forall s m. SelectionM s m => Selector s -> m s")])]), p_([text5("Attaches to an existing DOM element using a CSS selector. This is typically the first operation in any D3 visualization.")]), p_([strong_([text5("Parameters:")])]), ul_([li_([code_([text5("Selector s")]), text5(' - A CSS selector string (e.g., "div.chart", "#visualization")')])]), p_([strong_([text5("Returns:")])]), ul_([li_([text5("A selection containing the matched element")])]), p_([strong_([text5("Example:")])]), pre_([code_([text5('root <- attach "div.my-chart"')])]), h3([id2("appendTo")])([text5("appendTo")]), pre_([code_([text5("appendTo :: forall s m. SelectionM s m => s -> Element -> Array (Attr s) -> m s")])]), p_([text5("Appends a new element to an existing selection with specified attributes.")]), p_([strong_([text5("Parameters:")])]), ul_([li_([code_([text5("s")]), text5(" - The parent selection to append to")]), li_([code_([text5("Element")]), text5(" - The type of element to create (Svg, Rect, Circle, etc.)")]), li_([code_([text5("Array (Attr s)")]), text5(" - Array of attributes to apply to the new element")])]), p_([strong_([text5("Returns:")])]), ul_([li_([text5("A selection containing the newly created element")])]), p_([strong_([text5("Example:")])]), pre_([code_([text5("svg <- appendTo root Svg\n  [ Width 400.0\n  , Height 300.0\n  , ViewBox 0.0 0.0 400.0 300.0\n  ]")])]), h3([id2("selectAll")])([text5("selectAll")]), pre_([code_([text5("selectAll :: forall s m. SelectionM s m => s -> Selector s -> m s")])]), p_([text5("Selects all descendant elements matching the given selector within a selection.")]), p_([strong_([text5("Parameters:")])]), ul_([li_([code_([text5("s")]), text5(" - The parent selection to search within")]), li_([code_([text5("Selector s")]), text5(" - CSS selector for the elements to find")])]), p_([strong_([text5("Returns:")])]), ul_([li_([text5("A selection containing all matched elements")])]), p_([strong_([text5("Example:")])]), pre_([code_([text5('circles <- selectAll svg "circle"')])])]), section([classes(["tutorial-section"]), id2("data")])([h2([classes(["tutorial-section-title"])])([text5("Data Binding")]), p_([text5("Documentation for data binding functions coming soon...")])]), section([classes(["tutorial-section"]), id2("scales")])([h2([classes(["tutorial-section-title"])])([text5("Scales")]), p_([text5("Documentation for scale functions coming soon...")])]), section([classes(["tutorial-section"]), id2("axes")])([h2([classes(["tutorial-section-title"])])([text5("Axes")]), p_([text5("Documentation for axis functions coming soon...")])])]);
+    }), slot_5(_sectionNav2)(unit)(component6)({
+      currentSection: APISection.value,
+      currentRoute: Reference.value,
+      sectionPages: [{
+        route: Reference.value,
+        label: "API Reference"
+      }]
+    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("API Reference")]), p_([text5("Complete technical documentation for the PS<$>D3 library. This reference provides detailed information about every function, type, and type class in the library.")])]), section([classes(["tutorial-section"]), id2("core")])([h2([classes(["tutorial-section-title"])])([text5("Core Concepts")]), p_([text5("PS<$>D3 is built on the Finally Tagless pattern, which allows you to write visualization code once and interpret it in multiple ways. The core abstraction is the "), code_([text5("SelectionM")]), text5(" type class.")]), h3_([text5("The SelectionM Type Class")]), pre_([code_([text5("class Monad m <= SelectionM s m | m -> s where\n  attach :: Selector s -> m s\n  appendTo :: s -> Element -> Array (Attr s) -> m s\n  selectAll :: s -> Selector s -> m s\n  -- ... and many more operations")])]), p_([text5("This type class defines the operations you can perform on D3 selections. The "), code_([text5("s")]), text5(" type parameter represents a selection, and "), code_([text5("m")]), text5(" is the monad in which these operations run.")])]), section([classes(["tutorial-section"]), id2("selection")])([h2([classes(["tutorial-section-title"])])([text5("Selection Operations")]), p_([text5("These functions form the core of PS<$>D3's selection API, allowing you to create, modify, and manipulate DOM elements.")]), h3([id2("attach")])([text5("attach")]), pre_([code_([text5("attach :: forall s m. SelectionM s m => Selector s -> m s")])]), p_([text5("Attaches to an existing DOM element using a CSS selector. This is typically the first operation in any D3 visualization.")]), p_([strong_([text5("Parameters:")])]), ul_([li_([code_([text5("Selector s")]), text5(' - A CSS selector string (e.g., "div.chart", "#visualization")')])]), p_([strong_([text5("Returns:")])]), ul_([li_([text5("A selection containing the matched element")])]), p_([strong_([text5("Example:")])]), pre_([code_([text5('root <- attach "div.my-chart"')])]), h3([id2("appendTo")])([text5("appendTo")]), pre_([code_([text5("appendTo :: forall s m. SelectionM s m => s -> Element -> Array (Attr s) -> m s")])]), p_([text5("Appends a new element to an existing selection with specified attributes.")]), p_([strong_([text5("Parameters:")])]), ul_([li_([code_([text5("s")]), text5(" - The parent selection to append to")]), li_([code_([text5("Element")]), text5(" - The type of element to create (Svg, Rect, Circle, etc.)")]), li_([code_([text5("Array (Attr s)")]), text5(" - Array of attributes to apply to the new element")])]), p_([strong_([text5("Returns:")])]), ul_([li_([text5("A selection containing the newly created element")])]), p_([strong_([text5("Example:")])]), pre_([code_([text5("svg <- appendTo root Svg\n  [ Width 400.0\n  , Height 300.0\n  , ViewBox 0.0 0.0 400.0 300.0\n  ]")])]), h3([id2("selectAll")])([text5("selectAll")]), pre_([code_([text5("selectAll :: forall s m. SelectionM s m => s -> Selector s -> m s")])]), p_([text5("Selects all descendant elements matching the given selector within a selection.")]), p_([strong_([text5("Parameters:")])]), ul_([li_([code_([text5("s")]), text5(" - The parent selection to search within")]), li_([code_([text5("Selector s")]), text5(" - CSS selector for the elements to find")])]), p_([strong_([text5("Returns:")])]), ul_([li_([text5("A selection containing all matched elements")])]), p_([strong_([text5("Example:")])]), pre_([code_([text5('circles <- selectAll svg "circle"')])])]), section([classes(["tutorial-section"]), id2("data")])([h2([classes(["tutorial-section-title"])])([text5("Data Binding")]), p_([text5("Documentation for data binding functions coming soon...")])]), section([classes(["tutorial-section"]), id2("scales")])([h2([classes(["tutorial-section-title"])])([text5("Scales")]), p_([text5("Documentation for scale functions coming soon...")])]), section([classes(["tutorial-section"]), id2("axes")])([h2([classes(["tutorial-section-title"])])([text5("Axes")]), p_([text5("Documentation for axis functions coming soon...")])])]);
   };
-  var component7 = /* @__PURE__ */ (function() {
+  var component8 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return unit;
       },
-      render: render8,
+      render: render9,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -22908,7 +23047,7 @@
   var pure27 = /* @__PURE__ */ pure(applicativeHalogenM);
   var slot_6 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "rhsNav";
+      return "sectionNav";
     }
   })(ordUnit);
   var Initialize7 = /* @__PURE__ */ (function() {
@@ -22921,12 +23060,12 @@
   var handleAction6 = function(v) {
     return pure27(unit);
   };
-  var _rhsNav4 = /* @__PURE__ */ (function() {
+  var _sectionNav3 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render9 = function(v) {
+  var render10 = function(v) {
     return div2([classes(["tutorial-page"])])([renderTOC({
-      title: "Contents",
+      title: "Page Contents",
       items: [{
         anchor: "installation",
         label: "Installation",
@@ -22957,14 +23096,21 @@
         level: 0
       }],
       image: new Just("images/tutorial-bookmark-balloons.jpeg")
-    }), slot_6(_rhsNav4)(unit)(component)(GettingStarted.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Getting Started with PS<$>D3")]), p_([text5("Welcome! This guide will help you install PSD3, set up your first project, and create your first data visualization using our scaffold wizard. By the end, you'll have a working visualization that you can view in your browser.")])]), section([classes(["tutorial-section"]), id2("installation")])([h2([classes(["tutorial-section-title"])])([text5("Installation")]), p_([text5("Before we begin, ensure you have the following installed on your system:")]), h3([id2("prerequisites")])([text5("Prerequisites")]), ul_([li_([text5("Node.js (version 18 or higher)")]), li_([text5("npm or yarn package manager")]), li_([text5("PureScript compiler (purs)")]), li_([text5("Spago (PureScript package manager and build tool)")])]), p_([text5("If you don't have PureScript and Spago installed, you can install them globally:")]), pre_([code_([text5("npm install -g purescript spago")])])]), section([classes(["tutorial-section"]), id2("setup")])([h2([classes(["tutorial-section-title"])])([text5("Project Setup")]), p_([text5("Clone the PSD3 repository which includes the visualization wizard:")]), pre_([code_([text5("# Clone the PSD3 repository\ngit clone https://github.com/afcondon/PureScript-Tagless-D3.git\ncd PureScript-Tagless-D3\n\n# Install dependencies\nnpm install\nspago build")])]), p_([text5("The wizard is located in ")]), code_([text5("scripts/init-psd3-viz.js")]), text5(" and will generate all the files you need to get started.")]), section([classes(["tutorial-section"]), id2("wizard")])([h2([classes(["tutorial-section-title"])])([text5("Using the Wizard")]), p_([text5("The wizard will generate a complete visualization scaffold for you. Run it from the project root:")]), pre_([code_([text5("node scripts/init-psd3-viz.js")])]), p_([text5("You'll be prompted for:")]), ul_([li_([strong_([text5("Visualization module name")]), text5(" - e.g., "), code_([text5("MyFirstChart")])]), li_([strong_([text5("Data record fields")]), text5(" - e.g., "), code_([text5("x:Number,y:Number,label:String")])]), li_([strong_([text5("Output directory")]), text5(" - default: "), code_([text5("src/viz/YourModuleName")])]), li_([strong_([text5("Generate Main.purs?")]), text5(" - (y/n, default: n)")]), li_([strong_([text5("Generate index.html?")]), text5(" - (y/n, default: y)")])]), h3_([text5("Example Session")]), pre_([code_([text5("Visualization module name: ParabolaChart\nData record fields: x:Number,y:Number\nOutput directory: src/viz/ParabolaChart\nGenerate Main.purs? (y/n): y\nGenerate index.html? (y/n): y\n\n\u2713 Created src/viz/ParabolaChart/Unsafe.purs\n\u2713 Created src/viz/ParabolaChart/Model.purs\n\u2713 Created src/viz/ParabolaChart/Draw.purs\n\u2713 Created src/viz/ParabolaChart/Main.purs\n\u2713 Created src/viz/ParabolaChart/index.html\n\u2713 Created src/viz/ParabolaChart/README.md")])]), h3_([text5("Build and View")]), p_([text5("Now build and bundle your visualization:")]), pre_([code_([text5("# Compile the PureScript\nspago build\n\n# Bundle for the browser\nspago bundle --module Main --outfile src/viz/ParabolaChart/bundle.js\n\n# Open in browser\nopen src/viz/ParabolaChart/index.html")])])]), section([classes(["tutorial-section"]), id2("understanding")])([h2([classes(["tutorial-section-title"])])([text5("Understanding the Generated Code")]), p_([text5("The wizard generates several files following PSD3 best practices:")]), ul_([li_([strong_([text5("Unsafe.purs")]), text5(" - Contains type coercion functions that bridge PureScript's type system with D3's untyped JavaScript data")]), li_([strong_([text5("Model.purs")]), text5(" - Defines your data type and provides a placeholder for example data")]), li_([strong_([text5("Draw.purs")]), text5(" - Contains the visualization code with the "), code_([text5("datum_")]), text5(" accessor pattern")]), li_([strong_([text5("index.html")]), text5(" - Pre-configured HTML with D3.js loaded from CDN and the correct "), code_([text5("#chart")]), text5(" div")]), li_([strong_([text5("README.md")]), text5(" - Quick reference specific to your visualization")])]), h3([id2("datum-pattern")])([text5("The Datum_ Pattern")]), p_([text5("D3.js works with untyped JavaScript data, but PureScript is strongly typed. The "), code_([text5("datum_")]), text5(" accessor pattern solves this by isolating type coercion in the "), code_([text5("Unsafe.purs")]), text5(" module while providing typed accessors everywhere else.")]), p_([text5("In your "), code_([text5("Draw.purs")]), text5(", you'll use type-annotated lambdas to work with your data:")]), pre_([code_([text5('-- Use data in attributes\nA.cx (\\\\(d :: Datum_) _ -> datum_.x d)\n\n-- Use both data and index\nA.fill (\\\\(d :: Datum_) (i :: Index_) ->\n  if datum_.index i > 5 then "red" else "blue")\n\n-- Scale by data value\nA.radius (\\\\(d :: Datum_) _ -> datum_.y d * 2.0)')])]), p_([text5("The type annotations "), code_([text5("(d :: Datum_)")]), text5(" and "), code_([text5("(i :: Index_)")]), text5(" are required to help PureScript's type checker find the correct "), code_([text5("ToAttr")]), text5(" instance.")])]), section([classes(["tutorial-section"]), id2("next-steps")])([h2([classes(["tutorial-section-title"])])([text5("Next Steps")]), p_([text5("Now that you have PS<$>D3 installed and working, explore these resources:")]), ul_([li_([text5("Check out the "), a([href4("#/howto")])([text5("How-to Guides")]), text5(" for step-by-step instructions on building specific visualizations")]), li_([text5("Read the "), a([href4("#/about")])([text5("Explanation pages")]), text5(" to understand the concepts behind PS<$>D3")]), li_([text5("Browse the "), a([href4("#/reference")])([text5("API Reference")]), text5(" for detailed documentation of all functions and types")])])])]);
+    }), slot_6(_sectionNav3)(unit)(component6)({
+      currentSection: TutorialSection.value,
+      currentRoute: GettingStarted.value,
+      sectionPages: [{
+        route: GettingStarted.value,
+        label: "Getting Started"
+      }]
+    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Getting Started with PS<$>D3")]), p_([text5("Welcome! This guide will help you install PSD3, set up your first project, and create your first data visualization using our scaffold wizard. By the end, you'll have a working visualization that you can view in your browser.")])]), section([classes(["tutorial-section"]), id2("installation")])([h2([classes(["tutorial-section-title"])])([text5("Installation")]), p_([text5("Before we begin, ensure you have the following installed on your system:")]), h3([id2("prerequisites")])([text5("Prerequisites")]), ul_([li_([text5("Node.js (version 18 or higher)")]), li_([text5("npm or yarn package manager")]), li_([text5("PureScript compiler (purs)")]), li_([text5("Spago (PureScript package manager and build tool)")])]), p_([text5("If you don't have PureScript and Spago installed, you can install them globally:")]), pre_([code_([text5("npm install -g purescript spago")])])]), section([classes(["tutorial-section"]), id2("setup")])([h2([classes(["tutorial-section-title"])])([text5("Project Setup")]), p_([text5("Clone the PSD3 repository which includes the visualization wizard:")]), pre_([code_([text5("# Clone the PSD3 repository\ngit clone https://github.com/afcondon/PureScript-Tagless-D3.git\ncd PureScript-Tagless-D3\n\n# Install dependencies\nnpm install\nspago build")])]), p_([text5("The wizard is located in ")]), code_([text5("scripts/init-psd3-viz.js")]), text5(" and will generate all the files you need to get started.")]), section([classes(["tutorial-section"]), id2("wizard")])([h2([classes(["tutorial-section-title"])])([text5("Using the Wizard")]), p_([text5("The wizard will generate a complete visualization scaffold for you. Run it from the project root:")]), pre_([code_([text5("node scripts/init-psd3-viz.js")])]), p_([text5("You'll be prompted for:")]), ul_([li_([strong_([text5("Visualization module name")]), text5(" - e.g., "), code_([text5("MyFirstChart")])]), li_([strong_([text5("Data record fields")]), text5(" - e.g., "), code_([text5("x:Number,y:Number,label:String")])]), li_([strong_([text5("Output directory")]), text5(" - default: "), code_([text5("src/viz/YourModuleName")])]), li_([strong_([text5("Generate Main.purs?")]), text5(" - Entry point for standalone viewing (y/n, default: y)")]), li_([strong_([text5("Generate index.html?")]), text5(" - (y/n, default: y)")])]), h3_([text5("Example Session")]), pre_([code_([text5("Visualization module name: ParabolaChart\nData record fields: x:Number,y:Number\nOutput directory: src/viz/ParabolaChart\nGenerate Main.purs? (y/n): y\nGenerate index.html? (y/n): y\n\n\u2713 Created src/viz/ParabolaChart/Unsafe.purs\n\u2713 Created src/viz/ParabolaChart/Model.purs\n\u2713 Created src/viz/ParabolaChart/Draw.purs\n\u2713 Created src/viz/ParabolaChart/Main.purs\n\u2713 Created src/viz/ParabolaChart/index.html\n\u2713 Created src/viz/ParabolaChart/README.md")])]), h3_([text5("Build and View")]), p_([text5("Now build and bundle your visualization:")]), pre_([code_([text5("# Compile the PureScript\nspago build\n\n# Bundle for the browser\nspago bundle --module Main --outfile src/viz/ParabolaChart/bundle.js\n\n# Open in browser\nopen src/viz/ParabolaChart/index.html")])])]), section([classes(["tutorial-section"]), id2("understanding")])([h2([classes(["tutorial-section-title"])])([text5("Understanding the Generated Code")]), p_([text5("The wizard generates several files following PSD3 best practices:")]), ul_([li_([strong_([text5("Unsafe.purs")]), text5(" - Contains type coercion functions that bridge PureScript's type system with D3's untyped JavaScript data")]), li_([strong_([text5("Model.purs")]), text5(" - Defines your data type and provides a placeholder for example data")]), li_([strong_([text5("Draw.purs")]), text5(" - Contains the visualization code with the "), code_([text5("datum_")]), text5(" accessor pattern")]), li_([strong_([text5("index.html")]), text5(" - Pre-configured HTML with D3.js loaded from CDN and the correct "), code_([text5("#chart")]), text5(" div")]), li_([strong_([text5("README.md")]), text5(" - Quick reference specific to your visualization")])]), h3([id2("datum-pattern")])([text5("The Datum_ Pattern")]), p_([text5("D3.js works with untyped JavaScript data, but PureScript is strongly typed. The "), code_([text5("datum_")]), text5(" accessor pattern solves this by isolating type coercion in the "), code_([text5("Unsafe.purs")]), text5(" module while providing typed accessors everywhere else.")]), p_([text5("In your "), code_([text5("Draw.purs")]), text5(", you'll use type-annotated lambdas to work with your data:")]), pre_([code_([text5('-- Use data in attributes\nA.cx (\\\\(d :: Datum_) _ -> datum_.x d)\n\n-- Use both data and index\nA.fill (\\\\(d :: Datum_) (i :: Index_) ->\n  if datum_.index i > 5 then "red" else "blue")\n\n-- Scale by data value\nA.radius (\\\\(d :: Datum_) _ -> datum_.y d * 2.0)')])]), p_([text5("The type annotations "), code_([text5("(d :: Datum_)")]), text5(" and "), code_([text5("(i :: Index_)")]), text5(" are required to help PureScript's type checker find the correct "), code_([text5("ToAttr")]), text5(" instance.")])]), section([classes(["tutorial-section"]), id2("next-steps")])([h2([classes(["tutorial-section-title"])])([text5("Next Steps")]), p_([text5("Now that you have PS<$>D3 installed and working, explore these resources:")]), ul_([li_([text5("Check out the "), a([href4("#/howto")])([text5("How-to Guides")]), text5(" for step-by-step instructions on building specific visualizations")]), li_([text5("Read the "), a([href4("#/about")])([text5("Explanation pages")]), text5(" to understand the concepts behind PS<$>D3")]), li_([text5("Browse the "), a([href4("#/reference")])([text5("API Reference")]), text5(" for detailed documentation of all functions and types")])])])]);
   };
-  var component8 = /* @__PURE__ */ (function() {
+  var component9 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return unit;
       },
-      render: render9,
+      render: render10,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -23603,14 +23749,14 @@
             var yDomain = [0, 14];
             return bind32(attach2(selector))(function(v) {
               return bind32(appendTo2(v)(Svg.value)([viewBox(0)(0)(900)(700), classed4("scatter-quartet"), width10(900), height10(700)]))(function(svg2) {
-                var drawSubplot = function(title4) {
+                var drawSubplot = function(title5) {
                   return function(dataPoints) {
                     return function(xOffset) {
                       return function(yOffset) {
                         return bind32(appendTo2(svg2)(Group.value)([classed4("subplot"), transform([function(v1) {
                           return "translate(" + (show15(xOffset + margin.left) + ("," + (show15(yOffset + margin.top) + ")")));
                         }])]))(function(subplotGroup) {
-                          return bind32(appendTo2(svg2)(Text2.value)([x9(xOffset + plotWidth / 2), y8(yOffset + 15), text8(title4), textAnchor3("middle"), fontSize2(16), classed4("subplot-title")]))(function() {
+                          return bind32(appendTo2(svg2)(Text2.value)([x9(xOffset + plotWidth / 2), y8(yOffset + 15), text8(title5), textAnchor3("middle"), fontSize2(16), classed4("subplot-title")]))(function() {
                             return bind32(liftEffect20(createLinearScale_({
                               domain: xDomain,
                               range: [0, iWidth]
@@ -23671,7 +23817,7 @@
   var pure28 = /* @__PURE__ */ pure(applicativeHalogenM);
   var slot_7 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "rhsNav";
+      return "sectionNav";
     }
   })(ordUnit);
   var Initialize8 = /* @__PURE__ */ (function() {
@@ -23686,12 +23832,12 @@
       return pure28(unit);
     });
   };
-  var _rhsNav5 = /* @__PURE__ */ (function() {
+  var _sectionNav4 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render10 = function(v) {
+  var render11 = function(v) {
     return div2([classes(["explanation-page"])])([renderTOC({
-      title: "Contents",
+      title: "Page Contents",
       items: [{
         anchor: "heading-0",
         label: "PS<$>D3",
@@ -23742,14 +23888,45 @@
         level: 1
       }],
       image: new Just("images/understanding-bookmark-trees.jpeg")
-    }), slot_7(_rhsNav5)(unit)(component)(About.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"]), id2("heading-0")])([text5("PS<$>D3")]), h2([id2("heading-1")])([text5("Interactive Data Visualization in PureScript")]), p_([text5("A PureScript embedded "), em_([text5("DSL")]), text5(" for building "), em_([text5("interactive data visualizations")]), text5(", using "), em_([text5("D3.js")]), text5(" both as inspiration and as an implementation layer under the Foreign Function Interface (FFI).")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-2")])([text5("What is This Project?")]), p_([text5('This project demonstrates an embedded DSL for building interactive data visualizations with PureScript. The DSL uses a Finally Tagless approach that allows multiple interpreters for the same "language" which allows us to generate working code using an FFI to D3 or documentation and other more complex uses which will be discussed below.')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-3")])([text5("Motivation")]), p_([text5('I have built moderately complex, custom interactive data visualisations in the past both in JavaScript and PureScript, using D3.js. I found that JavaScript generally, and D3 in particular, seemed to work best for visualisations that were less "app-like" and more "chart-like". What i mean by this is that when the complexity started to rise to the level of a small application and when multiple programmers were involved, or if one had to return to some code after time had elapsed, the whole thing was very brittle and refactoring of it prohibitively difficult.')]), p_([text5('This could certainly be a "feature, not a bug" for some domains of application such as building a big beautiful rich visualisation for a one-off publication such as a New York Times feature. However, when the visualisation is used to '), em_([text5("control")]), text5(" application behaviour or the visualisation begins to approach the complexity and multi-layered-ness of an app...this all in one single script language is a real problem, at least in my experience.")]), p_([text5("In PureScript it is common, and easy, to use JavaScript libraries via the FFI initially as it is a very quick way to get access to the enormous world of functionality that exists in open source JavaScript libraries. Sometimes this can be sufficient, you wrap a component or a function and its abstractions never leak and all is well. Other times, you wrap something but there's a kind of impedance mismatch with the way the JavaScript abstraction work and the way you'd like to handle, and particularly to compose, things in the purely functional world. D3.js was definitely the latter, for me.")]), p_([text5("D3.js is a big library with thousands of API end-points but, crucially, not all of those end-points are problematic for composing larger scale applications or weaving visualisations into PureScript web applications. Instead, its is primarily two core areas of the API, Selection and Simulation (more details on these later) which tend to actually "), em_([text5("structure")]), text5(" programs in a characteristic D3 / JavaScript vernacular. It is these APIs that are first wrapped (by FFI) and then made available in purely functional idiomatic way by this library.")]), p_([text5("A secondary, but also very important, consideration is the ability to design and work with Algebraic Data Types (ADTs) and the rich container libraries that are available in PureScript while building and implementing visualisations and especially the code that surrounds the visualization. While D3 ultimately is a kind of array programming DSL "), em_([text5("within")]), text5(' JavaScript and our PureScript eDSL is going to bottom out to some sort of "arrays mapped over the DOM" too, we want to be able to create data models that are more sophisticated and have better invariants as these are keys to both composability and maintainable, long-lived programs.')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-4")])([text5("The Data Visualization Process")]), h3([id2("anscombe")])([text5("Why Visualize? Anscombe's Quartet")]), p_([text5("The famous Anscombe's Quartet demonstrates why visualization is essential. These four datasets have nearly identical statistical properties - same mean, variance, correlation, and linear regression line - yet reveal completely different patterns when visualized:")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), p_([text5("Summary statistics alone would suggest these datasets are interchangeable, but the visualizations tell a very different story: linear relationship, curved relationship, linear with outlier, and vertical with outlier. This perfectly illustrates why we need visualization - numbers hide patterns that become immediately obvious when seen.")]), p_([text5('Data visualization transforms "boring" - but more importantly '), em_([text5("less informative")]), text5(" tables of data into perceivable patterns. We can think of this as a pipeline in which steps 2 and 3 are the purpose of this library.")]), ol_([li_([strong_([text5("Data")]), text5(" - Raw data structures (tables, JSON, etc.)")]), li_([strong_([text5("Data structure")]), text5(" - Relationships between data elements")]), li_([strong_([text5("Data presentation")]), text5(" - Visual encoding (HTML/SVG/Canvas)")]), li_([strong_([text5("Perception")]), text5(" - Human insight and understanding")])]), p_([text5("The goal is to make relationships in data visible through appropriate visual encoding, enabling the human visual system to process patterns that would be difficult or impossible to perceive in tabular form.")]), h3([id2("heading-5")])([text5("Design philosophy of D3*")]), ul_([li_([text5("(as I understand it)")])]), p_([text5("D3's great innovation was to enable an enormous range of visualizations using some simple fundamental concepts and a small core API. It supports dataviz from simple bar charts to complex hierarchical layouts, force-directed graphs, geographic projections, and interactive dashboards. Despite their visual diversity, these visualizations share common structural patterns: data is bound to DOM elements, attributes are computed from data, and layouts determine spatial positioning.")]), p_([text5("Something that people with limited prior knowledge / experience of data visualisation often seem to find surprising is the degree to which D3 is "), em_([text5("fundamentally different")]), text5(' from "a charting library". While the library has some affordances that make it very easy to do common visualisations it is not in any way about "canned visualisations". Rather, it is a language for describing a relationship between arrays of data and arbitrary constructions of DOM (HTML or SVG) element or marks on Canvas, and it could in principle be used to do auditory "visualisation" or, who knows, maybe olfactory "visualisation" or drone displays or whatever.')]), p_([text5("Another revolutionary aspect of D3 was that it was "), em_([text5("screen/web native")]), text5(" - right from the beginning it supported responsive design, transitions, animations, force-layouts all of which are completely distinct from data visualisation on paper.")]), p_([text5("You can get a greater sense of the potential of D3 and the range of things that have thus far been produced using it at "), a([href4("https://observablehq.com/")])([text5("ObservableHQ")]), text5(".")]), h3([id2("heading-6")])([text5("Design philosophy of PS<$>D3")]), p_([text5("This library presents a slighly more formal grammar embedded in a language that is a lot better suited to larger and more long-lived projects. Whereas D3 has patterns of use that you learn, in PS<$>D3 the pattern is formalised into a grammar with an interpreter. Moreover, the same grammar can be interpreted by different interpreters directly "), em_([text5("in")]), text5(" PureScript, which, as we will see creates some powerful new uses.")]), p_([text5(`Where D3 enabled data visualisers to create movement and responsiveness, PS<$>D3 seeks to enable something that's theoretically possible in D3 but not much seen in practice and that is using the data visualisation as the user interface. This is not the same thing as "interactive visualisation" in the sense of "explorable" visualisation, ie one in which you can interact with the elements `), em_([text5("but only to manipulate the visualisation itself")]), text5(". That is a different, and more limited, sense of interaction. What we are talking about when building UI with data visualisation is leveraging the information density of data visualisation to provide direct manipulation of complex or large systems.")]), p_([text5('This is actually not a revolutionary idea - think how much of an improvement over the initial "folders of icons" on the Mac the NeXT column browser was. But it is a direction of travel that has been effectively lost during the web UI revolution of the past 20 years.')]), p_([text5("This repo and website contains one example of how this might work, the Code Explorer.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-7")])([text5("Project Goals (and non-Goals)")]), h3([id2("heading-8")])([text5("Priorities and Trade-offs")]), p_([text5("We have two principal priorities in writing this library and since you can't have two number one priorities, some trade-offs are inevitable which we will discuss here.")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Primary")]), th_([text5("Non-goals")]), th_([text5("Sub-goals")])])]), tbody_([tr_([td_([strong_([text5("Expressivity:")]), text5(" fully equivalent to D3.js")]), td_([strong_([text5("Completeness:")]), text5(" not all D3.js API surface is needed")]), td_([text5("Prefer idiomatic PureScript to exposing D3 APIs directly")])]), tr_([td_([strong_([text5("Readability:")]), text5(" as readable as D3.js equivalent")]), td_([strong_([text5("Modelling")]), text5(" of D3 state complexity thru type-system")]), td_([text5("Design for progressive enhancement")])]), tr_([td_([strong_([text5("Composable:")]), text5(' suitable for "programming in the large"')]), td_([strong_([text5("Performance")]), text5(" equality to D3")]), td_([text5("Showcase PureScript ecosystem and libraries")])])])]), h3([id2("heading-9")])([text5("Goals: details")]), h4([id2("heading-10")])([text5("Expressivity")]), p_([text5("As alluded to above, expressivity is a key to D3's success - it's not limited to some library of canned visualisations and it's far, far more than even the most parameterized control of colours and symbols. It's important not to lose that in making D3 available directly in PureScript.")]), h4([id2("heading-11")])([text5("Readability")]), p_([text5("If we look at D3.js as a kind of embedded DSL in JavaScript it is certainly clear and readable in its core feature: declaratively associating some array(s) of data with some elements in the DOM and attributes of those elements. While it is definitely not a goal to reproduce the structures of D3js own language in PureScript per se, the goal is to have the same readability, leverage the good work that Mike Bostock did in developing it. At the same time the library should be as idiomatically PureScript / Haskell style as possible.")]), h4([id2("heading-12")])([text5("Composability")]), p_([text5("A related concern to readability is composability, the separation of concerns that makes componentisation possible and which makes possible programming in the large.")]), p_([text5("YMMV but for me this is where the D3 / JavaScript approach breaks down.")]), p_([text5("If you are a PureScript or Haskell programmer you probably know what i mean by this and if you are, say, a JavaScript D3 programmer perhaps that will seem odd or even contentious.")]), p_([text5("The benefits we seek from composability include:")]), ul_([li_([text5("better composability of sub-programs")]), li_([text5("better expressiveness in describing the problem domain")]), li_([text5("better correctness in implementations (ie fewer bugs)")]), li_([text5("better ability to evolve programs due to shifting requirements (re-factoring)")])]), p_([text5("Ideally, i would like the person coding the data layer and data model to be somewhat insulated from the concerns of the person using that data model to create a visualisation. And likewise, i would like the person developing the data visualisation to be somewhat insulated from the concerns of a web app developer. Now, these might very well all be the "), em_([text5("same person")]), text5(" but separating the concerns like this makes it easier to evolve the code and, crucially, makes it all a little less brittle.")]), h3([id2("heading-13")])([text5("Non-goals: details")]), h4([id2("heading-14")])([text5("Complete API coverage")]), p_([text5("As alluded to above, there's lots of API in D3 that needs nothing more than an FFI wrapper to be accessible from a PureScript eDSL. D3 is both modular and somewhat functional in style (in the JavaScript sense of functional programming, to be clear). So it was from the start a non-goal to completely expose all of D3 as "), em_([text5("idiomatic")]), text5(" PureScript where a simple wrapper was sufficient.")]), p_([text5("Furthermore, i have only written those wrappers "), em_([text5("as I needed them")]), text5(" to there are still "), em_([text5("many")]), text5(" parts of D3 that are not covered by this eDSL.")]), p_([text5("Addendum 2025 - the advent of LLMs and coding assistance agents means that perhaps complete API coverage might arrive sooner than expected.")]), h4([id2("heading-15")])([text5("Modelling of D3 State")]), p_([text5("This might seem like a surprising choice - D3 is inherently "), em_([text5("very")]), text5(` stateful, there's state in D3, there's state in the DOM, there's statefulness in your (pure) data after you give it to D3. State everywhere. In many cases in functional programming you might try to ameliorate the dangers of this by explicitly modelling the state, using a State Monad or marking everything that changes or depends upon state as "Effect"-full.`)]), p_([text5("Indeed i have tried this approach in the past. In this library i have instead striven to isolate the statefulness to only the code that uses eDSL represented by the "), code_([text5("Selection")]), text5(" and "), code_([text5("Simulation")]), text5(" monads. This "), em_([text5("significantly")]), text5(" removes but cannot fully eliminate the issues associated with state.")]), h4([id2("heading-16")])([text5("Performance equality with D3")]), p_([text5("While this was a non-goal in practice it doesn't seem to have been a problem. Essentially, this is because PS<$>D3 simply leverages D3.js for all the performance critical aspects and because the FFI has been kept simple by the decision described in the previous section.")]), p_([text5("The performance bottlenecks in a web data visualisation are, by their nature, going to be the assignment of potentially millions of attributes to potentially millions of DOM elements. D3.js does this extremely well and the PureScript layer doesn't compromise it much, if at all.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-17")])([text5("What's a DSL? and what's an eDSL?")]), h3([id2("heading-18")])([text5("Domain Specific Language")]), p_([text5("Programming language tailored to a particular domain.")]), p_([text5("Might be limited compared to general purpose programming language.")]), p_([text5("But, may also be easier for novices, domain experts, non-programmers to use.")]), h3([id2("heading-19")])([text5("Embedded Domain Specific Language")]), p_([text5("Embedded Domain Specific Language makes domain specific tasks easier "), em_([text5("without")]), text5(" limiting the programmer in any way - they still have access to all parts of the host language.")]), p_([text5("This has Pros & Cons")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-20")])([text5("The grammar of D3...")]), p_([text5("Analyse the "), em_([text5("implicit")]), text5(" grammar of D3...")]), p_([text5("...in order to define a "), em_([text5("minimal")]), text5(" grammar for our PureScript eDSL")]), p_([text5("(consistent with priority goals of readability and expressiveness)")]), h3([id2("heading-21")])([text5("A Visual D3 Grammar")]), p_([strong_([text5("This is much simpler than D3's actual AST would be (if it had one) but it is sufficient to express a LOT of D3 scripts.")])]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Name")]), th_([text5("Function")]), th_([text5("Notes")])])]), tbody_([tr_([td_([em_([text5("attach")])]), td_([text5("Select an entry point (or points) in the DOM")]), td_([text5("Simply uses a CSS type selector to identify the target. Resulting selection can then be used for append / join in order to build up a visualisation from HTML, SVG or Canvas elements.")])]), tr_([td_([em_([text5("appendTo")])]), td_([text5("Add some DOM element "), strong_([text5("e")]), text5(" to a selection")]), td_([text5("Each element can have attributes. If data has been bound higher up in the AST then that data is available in this element's attributes")])]), tr_([td_([em_([text5("join")])]), td_([text5("For every "), em_([text5("datum")]), text5(" "), strong_([text5("d")]), text5(" in some array, insert an element "), strong_([text5("e")])]), td_([text5("We'll run the visualisation with some data model which can be arbitrary in structure, but at every point where we want to append "), em_([text5("multiple")]), text5(" elements we need to have a function that yields a simple array."), br_, br_, text5("Each element can have attributes that are derived from the datum with which it is associated."), br_, br_, text5("The datum at each element is inherited by its children, so any subsequent join starts with the structure of this datum.")])])])]), h3([id2("heading-22")])([text5("Grammar diagrams")]), h4([id2("heading-23")])([text5("3 Little Circles: the canonical simplest example")]), p_([text5("Insert Mermaid diagram here")]), pre_([code_([text5('    a        "div#hook"\n    \u2193\n    +        <svg>\n    \u2193\n    +        <g>\n    \u2193\n   <+>       [1,2,3] \u2192 <circle>')])]), p_([a([href4("https://bost.ocks.org/mike/circles/")])([text5("https://bost.ocks.org/mike/circles/")])]), h4([id2("heading-24")])([text5("Radial Tree: A more complex example")]), p_([text5("The Radial Tree and Cluster Dendrogram visualizations share the exact same structure:")]), pre_([code_([text5('    a          "div#hook"\n    \u2193\n    +          <svg>\n    \u2193\n    +          <g.links>    +          <g.nodes>    +          <g.labels>\n    \u2193                       \u2193                       \u2193\n   <+>         <path>      <+>         <circle>    <+>         <text>\n               \u2191                       \u2191                       \u2191\n            m->m.links              m->m.nodes              m->m.nodes')])]), p_([text5("All the differences are in details of how the node attributes are calculated from the data.")]), h4([id2("heading-25")])([text5("Even complex examples structurally simple")]), p_([text5("Even highly complex visualizations like "), a([href4("https://top2000.visualcinnamon.com")])([text5("Nadieh Bremer's Top 2000 visualization")]), text5(" can be expressed with this simple grammar - the complexity lies in the data transformations and attribute calculations, not in the fundamental structure.")])])]);
+    }), slot_7(_sectionNav4)(unit)(component6)({
+      currentSection: UnderstandingSection.value,
+      currentRoute: About.value,
+      sectionPages: [{
+        route: About.value,
+        label: "About"
+      }, {
+        route: Tutorial.value,
+        label: "Tutorial"
+      }, {
+        route: SimpleCharts.value,
+        label: "Simple Charts"
+      }, {
+        route: ChordDiagram.value,
+        label: "Chord Diagram"
+      }, {
+        route: BubbleChart.value,
+        label: "Bubble Chart"
+      }, {
+        route: SankeyDiagram.value,
+        label: "Sankey Diagram"
+      }, {
+        route: Hierarchies.value,
+        label: "Hierarchies"
+      }, {
+        route: Interpreters.value,
+        label: "Interpreters"
+      }, {
+        route: CodeExplorer.value,
+        label: "Code Explorer"
+      }]
+    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"]), id2("heading-0")])([text5("PS<$>D3")]), h2([id2("heading-1")])([text5("Interactive Data Visualization in PureScript")]), p_([text5("A PureScript embedded "), em_([text5("DSL")]), text5(" for building "), em_([text5("interactive data visualizations")]), text5(", using "), em_([text5("D3.js")]), text5(" both as inspiration and as an implementation layer under the Foreign Function Interface (FFI).")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-2")])([text5("What is This Project?")]), p_([text5('This project demonstrates an embedded DSL for building interactive data visualizations with PureScript. The DSL uses a Finally Tagless approach that allows multiple interpreters for the same "language" which allows us to generate working code using an FFI to D3 or documentation and other more complex uses which will be discussed below.')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-3")])([text5("Motivation")]), p_([text5('I have built moderately complex, custom interactive data visualisations in the past both in JavaScript and PureScript, using D3.js. I found that JavaScript generally, and D3 in particular, seemed to work best for visualisations that were less "app-like" and more "chart-like". What i mean by this is that when the complexity started to rise to the level of a small application and when multiple programmers were involved, or if one had to return to some code after time had elapsed, the whole thing was very brittle and refactoring of it prohibitively difficult.')]), p_([text5('This could certainly be a "feature, not a bug" for some domains of application such as building a big beautiful rich visualisation for a one-off publication such as a New York Times feature. However, when the visualisation is used to '), em_([text5("control")]), text5(" application behaviour or the visualisation begins to approach the complexity and multi-layered-ness of an app...this all in one single script language is a real problem, at least in my experience.")]), p_([text5("In PureScript it is common, and easy, to use JavaScript libraries via the FFI initially as it is a very quick way to get access to the enormous world of functionality that exists in open source JavaScript libraries. Sometimes this can be sufficient, you wrap a component or a function and its abstractions never leak and all is well. Other times, you wrap something but there's a kind of impedance mismatch with the way the JavaScript abstraction work and the way you'd like to handle, and particularly to compose, things in the purely functional world. D3.js was definitely the latter, for me.")]), p_([text5("D3.js is a big library with thousands of API end-points but, crucially, not all of those end-points are problematic for composing larger scale applications or weaving visualisations into PureScript web applications. Instead, its is primarily two core areas of the API, Selection and Simulation (more details on these later) which tend to actually "), em_([text5("structure")]), text5(" programs in a characteristic D3 / JavaScript vernacular. It is these APIs that are first wrapped (by FFI) and then made available in purely functional idiomatic way by this library.")]), p_([text5("A secondary, but also very important, consideration is the ability to design and work with Algebraic Data Types (ADTs) and the rich container libraries that are available in PureScript while building and implementing visualisations and especially the code that surrounds the visualization. While D3 ultimately is a kind of array programming DSL "), em_([text5("within")]), text5(' JavaScript and our PureScript eDSL is going to bottom out to some sort of "arrays mapped over the DOM" too, we want to be able to create data models that are more sophisticated and have better invariants as these are keys to both composability and maintainable, long-lived programs.')])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-4")])([text5("The Data Visualization Process")]), h3([id2("anscombe")])([text5("Why Visualize? Anscombe's Quartet")]), p_([text5("The famous Anscombe's Quartet demonstrates why visualization is essential. These four datasets have nearly identical statistical properties - same mean, variance, correlation, and linear regression line - yet reveal completely different patterns when visualized:")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), p_([text5("Summary statistics alone would suggest these datasets are interchangeable, but the visualizations tell a very different story: linear relationship, curved relationship, linear with outlier, and vertical with outlier. This perfectly illustrates why we need visualization - numbers hide patterns that become immediately obvious when seen.")]), p_([text5('Data visualization transforms "boring" - but more importantly '), em_([text5("less informative")]), text5(" tables of data into perceivable patterns. We can think of this as a pipeline in which steps 2 and 3 are the purpose of this library.")]), ol_([li_([strong_([text5("Data")]), text5(" - Raw data structures (tables, JSON, etc.)")]), li_([strong_([text5("Data structure")]), text5(" - Relationships between data elements")]), li_([strong_([text5("Data presentation")]), text5(" - Visual encoding (HTML/SVG/Canvas)")]), li_([strong_([text5("Perception")]), text5(" - Human insight and understanding")])]), p_([text5("The goal is to make relationships in data visible through appropriate visual encoding, enabling the human visual system to process patterns that would be difficult or impossible to perceive in tabular form.")]), h3([id2("heading-5")])([text5("Design philosophy of D3*")]), ul_([li_([text5("(as I understand it)")])]), p_([text5("D3's great innovation was to enable an enormous range of visualizations using some simple fundamental concepts and a small core API. It supports dataviz from simple bar charts to complex hierarchical layouts, force-directed graphs, geographic projections, and interactive dashboards. Despite their visual diversity, these visualizations share common structural patterns: data is bound to DOM elements, attributes are computed from data, and layouts determine spatial positioning.")]), p_([text5("Something that people with limited prior knowledge / experience of data visualisation often seem to find surprising is the degree to which D3 is "), em_([text5("fundamentally different")]), text5(' from "a charting library". While the library has some affordances that make it very easy to do common visualisations it is not in any way about "canned visualisations". Rather, it is a language for describing a relationship between arrays of data and arbitrary constructions of DOM (HTML or SVG) element or marks on Canvas, and it could in principle be used to do auditory "visualisation" or, who knows, maybe olfactory "visualisation" or drone displays or whatever.')]), p_([text5("Another revolutionary aspect of D3 was that it was "), em_([text5("screen/web native")]), text5(" - right from the beginning it supported responsive design, transitions, animations, force-layouts all of which are completely distinct from data visualisation on paper.")]), p_([text5("You can get a greater sense of the potential of D3 and the range of things that have thus far been produced using it at "), a([href4("https://observablehq.com/")])([text5("ObservableHQ")]), text5(".")]), h3([id2("heading-6")])([text5("Design philosophy of PS<$>D3")]), p_([text5("This library presents a slighly more formal grammar embedded in a language that is a lot better suited to larger and more long-lived projects. Whereas D3 has patterns of use that you learn, in PS<$>D3 the pattern is formalised into a grammar with an interpreter. Moreover, the same grammar can be interpreted by different interpreters directly "), em_([text5("in")]), text5(" PureScript, which, as we will see creates some powerful new uses.")]), p_([text5(`Where D3 enabled data visualisers to create movement and responsiveness, PS<$>D3 seeks to enable something that's theoretically possible in D3 but not much seen in practice and that is using the data visualisation as the user interface. This is not the same thing as "interactive visualisation" in the sense of "explorable" visualisation, ie one in which you can interact with the elements `), em_([text5("but only to manipulate the visualisation itself")]), text5(". That is a different, and more limited, sense of interaction. What we are talking about when building UI with data visualisation is leveraging the information density of data visualisation to provide direct manipulation of complex or large systems.")]), p_([text5('This is actually not a revolutionary idea - think how much of an improvement over the initial "folders of icons" on the Mac the NeXT column browser was. But it is a direction of travel that has been effectively lost during the web UI revolution of the past 20 years.')]), p_([text5("This repo and website contains one example of how this might work, the Code Explorer.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-7")])([text5("Project Goals (and non-Goals)")]), h3([id2("heading-8")])([text5("Priorities and Trade-offs")]), p_([text5("We have two principal priorities in writing this library and since you can't have two number one priorities, some trade-offs are inevitable which we will discuss here.")]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Primary")]), th_([text5("Non-goals")]), th_([text5("Sub-goals")])])]), tbody_([tr_([td_([strong_([text5("Expressivity:")]), text5(" fully equivalent to D3.js")]), td_([strong_([text5("Completeness:")]), text5(" not all D3.js API surface is needed")]), td_([text5("Prefer idiomatic PureScript to exposing D3 APIs directly")])]), tr_([td_([strong_([text5("Readability:")]), text5(" as readable as D3.js equivalent")]), td_([strong_([text5("Modelling")]), text5(" of D3 state complexity thru type-system")]), td_([text5("Design for progressive enhancement")])]), tr_([td_([strong_([text5("Composable:")]), text5(' suitable for "programming in the large"')]), td_([strong_([text5("Performance")]), text5(" equality to D3")]), td_([text5("Showcase PureScript ecosystem and libraries")])])])]), h3([id2("heading-9")])([text5("Goals: details")]), h4([id2("heading-10")])([text5("Expressivity")]), p_([text5("As alluded to above, expressivity is a key to D3's success - it's not limited to some library of canned visualisations and it's far, far more than even the most parameterized control of colours and symbols. It's important not to lose that in making D3 available directly in PureScript.")]), h4([id2("heading-11")])([text5("Readability")]), p_([text5("If we look at D3.js as a kind of embedded DSL in JavaScript it is certainly clear and readable in its core feature: declaratively associating some array(s) of data with some elements in the DOM and attributes of those elements. While it is definitely not a goal to reproduce the structures of D3js own language in PureScript per se, the goal is to have the same readability, leverage the good work that Mike Bostock did in developing it. At the same time the library should be as idiomatically PureScript / Haskell style as possible.")]), h4([id2("heading-12")])([text5("Composability")]), p_([text5("A related concern to readability is composability, the separation of concerns that makes componentisation possible and which makes possible programming in the large.")]), p_([text5("YMMV but for me this is where the D3 / JavaScript approach breaks down.")]), p_([text5("If you are a PureScript or Haskell programmer you probably know what i mean by this and if you are, say, a JavaScript D3 programmer perhaps that will seem odd or even contentious.")]), p_([text5("The benefits we seek from composability include:")]), ul_([li_([text5("better composability of sub-programs")]), li_([text5("better expressiveness in describing the problem domain")]), li_([text5("better correctness in implementations (ie fewer bugs)")]), li_([text5("better ability to evolve programs due to shifting requirements (re-factoring)")])]), p_([text5("Ideally, i would like the person coding the data layer and data model to be somewhat insulated from the concerns of the person using that data model to create a visualisation. And likewise, i would like the person developing the data visualisation to be somewhat insulated from the concerns of a web app developer. Now, these might very well all be the "), em_([text5("same person")]), text5(" but separating the concerns like this makes it easier to evolve the code and, crucially, makes it all a little less brittle.")]), h3([id2("heading-13")])([text5("Non-goals: details")]), h4([id2("heading-14")])([text5("Complete API coverage")]), p_([text5("As alluded to above, there's lots of API in D3 that needs nothing more than an FFI wrapper to be accessible from a PureScript eDSL. D3 is both modular and somewhat functional in style (in the JavaScript sense of functional programming, to be clear). So it was from the start a non-goal to completely expose all of D3 as "), em_([text5("idiomatic")]), text5(" PureScript where a simple wrapper was sufficient.")]), p_([text5("Furthermore, i have only written those wrappers "), em_([text5("as I needed them")]), text5(" to there are still "), em_([text5("many")]), text5(" parts of D3 that are not covered by this eDSL.")]), p_([text5("Addendum 2025 - the advent of LLMs and coding assistance agents means that perhaps complete API coverage might arrive sooner than expected.")]), h4([id2("heading-15")])([text5("Modelling of D3 State")]), p_([text5("This might seem like a surprising choice - D3 is inherently "), em_([text5("very")]), text5(` stateful, there's state in D3, there's state in the DOM, there's statefulness in your (pure) data after you give it to D3. State everywhere. In many cases in functional programming you might try to ameliorate the dangers of this by explicitly modelling the state, using a State Monad or marking everything that changes or depends upon state as "Effect"-full.`)]), p_([text5("Indeed i have tried this approach in the past. In this library i have instead striven to isolate the statefulness to only the code that uses eDSL represented by the "), code_([text5("Selection")]), text5(" and "), code_([text5("Simulation")]), text5(" monads. This "), em_([text5("significantly")]), text5(" removes but cannot fully eliminate the issues associated with state.")]), h4([id2("heading-16")])([text5("Performance equality with D3")]), p_([text5("While this was a non-goal in practice it doesn't seem to have been a problem. Essentially, this is because PS<$>D3 simply leverages D3.js for all the performance critical aspects and because the FFI has been kept simple by the decision described in the previous section.")]), p_([text5("The performance bottlenecks in a web data visualisation are, by their nature, going to be the assignment of potentially millions of attributes to potentially millions of DOM elements. D3.js does this extremely well and the PureScript layer doesn't compromise it much, if at all.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-17")])([text5("What's a DSL? and what's an eDSL?")]), h3([id2("heading-18")])([text5("Domain Specific Language")]), p_([text5("Programming language tailored to a particular domain.")]), p_([text5("Might be limited compared to general purpose programming language.")]), p_([text5("But, may also be easier for novices, domain experts, non-programmers to use.")]), h3([id2("heading-19")])([text5("Embedded Domain Specific Language")]), p_([text5("Embedded Domain Specific Language makes domain specific tasks easier "), em_([text5("without")]), text5(" limiting the programmer in any way - they still have access to all parts of the host language.")]), p_([text5("This has Pros & Cons")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"]), id2("heading-20")])([text5("The grammar of D3...")]), p_([text5("Analyse the "), em_([text5("implicit")]), text5(" grammar of D3...")]), p_([text5("...in order to define a "), em_([text5("minimal")]), text5(" grammar for our PureScript eDSL")]), p_([text5("(consistent with priority goals of readability and expressiveness)")]), h3([id2("heading-21")])([text5("A Visual D3 Grammar")]), p_([strong_([text5("This is much simpler than D3's actual AST would be (if it had one) but it is sufficient to express a LOT of D3 scripts.")])]), table([classes(["tutorial-table"])])([thead_([tr_([th_([text5("Name")]), th_([text5("Function")]), th_([text5("Notes")])])]), tbody_([tr_([td_([em_([text5("attach")])]), td_([text5("Select an entry point (or points) in the DOM")]), td_([text5("Simply uses a CSS type selector to identify the target. Resulting selection can then be used for append / join in order to build up a visualisation from HTML, SVG or Canvas elements.")])]), tr_([td_([em_([text5("appendTo")])]), td_([text5("Add some DOM element "), strong_([text5("e")]), text5(" to a selection")]), td_([text5("Each element can have attributes. If data has been bound higher up in the AST then that data is available in this element's attributes")])]), tr_([td_([em_([text5("join")])]), td_([text5("For every "), em_([text5("datum")]), text5(" "), strong_([text5("d")]), text5(" in some array, insert an element "), strong_([text5("e")])]), td_([text5("We'll run the visualisation with some data model which can be arbitrary in structure, but at every point where we want to append "), em_([text5("multiple")]), text5(" elements we need to have a function that yields a simple array."), br_, br_, text5("Each element can have attributes that are derived from the datum with which it is associated."), br_, br_, text5("The datum at each element is inherited by its children, so any subsequent join starts with the structure of this datum.")])])])]), h3([id2("heading-22")])([text5("Grammar diagrams")]), h4([id2("heading-23")])([text5("3 Little Circles: the canonical simplest example")]), p_([text5("Insert Mermaid diagram here")]), pre_([code_([text5('    a        "div#hook"\n    \u2193\n    +        <svg>\n    \u2193\n    +        <g>\n    \u2193\n   <+>       [1,2,3] \u2192 <circle>')])]), p_([a([href4("https://bost.ocks.org/mike/circles/")])([text5("https://bost.ocks.org/mike/circles/")])]), h4([id2("heading-24")])([text5("Radial Tree: A more complex example")]), p_([text5("The Radial Tree and Cluster Dendrogram visualizations share the exact same structure:")]), pre_([code_([text5('    a          "div#hook"\n    \u2193\n    +          <svg>\n    \u2193\n    +          <g.links>    +          <g.nodes>    +          <g.labels>\n    \u2193                       \u2193                       \u2193\n   <+>         <path>      <+>         <circle>    <+>         <text>\n               \u2191                       \u2191                       \u2191\n            m->m.links              m->m.nodes              m->m.nodes')])]), p_([text5("All the differences are in details of how the node attributes are calculated from the data.")]), h4([id2("heading-25")])([text5("Even complex examples structurally simple")]), p_([text5("Even highly complex visualizations like "), a([href4("https://top2000.visualcinnamon.com")])([text5("Nadieh Bremer's Top 2000 visualization")]), text5(" can be expressed with this simple grammar - the complexity lies in the data transformations and attribute calculations, not in the fundamental structure.")])])]);
   };
-  var component9 = /* @__PURE__ */ (function() {
+  var component10 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return unit;
       },
-      render: render10,
+      render: render11,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -23881,7 +24058,7 @@
   var type_21 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_8 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "rhsNav";
+      return "sectionNav";
     }
   })(ordUnit);
   var Initialize9 = /* @__PURE__ */ (function() {
@@ -23898,18 +24075,49 @@
       });
     });
   };
-  var _rhsNav6 = /* @__PURE__ */ (function() {
+  var _sectionNav5 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render11 = function(v) {
-    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_21(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. Hierarchical Data")])])])])]), slot_8(_rhsNav6)(unit)(component)(BubbleChart.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Bubble Chart: Circle Packing Layout")]), p_([text5("Circle packing displays hierarchical data as nested circles, where the size of each circle represents a quantitative value. It's an efficient way to visualize part-to-whole relationships in hierarchical structures.")]), p_([text5("This layout is particularly effective for showing relative sizes at multiple levels of hierarchy, making it easy to spot dominant elements and compare proportions across branches.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Flare Visualization Library Structure")]), p_([text5("This bubble chart shows the structure of the Flare visualization library. Each circle represents a class or package, with the size proportional to the lines of code. Nested circles show the package hierarchy.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["bubble-viz"])])([])]), p_([text5("The circle packing algorithm automatically arranges circles to minimize wasted space while maintaining the hierarchical relationships. Colors indicate the depth level in the hierarchy.")])])]);
+  var render12 = function(v) {
+    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_21(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. Hierarchical Data")])])])])]), slot_8(_sectionNav5)(unit)(component6)({
+      currentSection: UnderstandingSection.value,
+      currentRoute: BubbleChart.value,
+      sectionPages: [{
+        route: About.value,
+        label: "About"
+      }, {
+        route: Tutorial.value,
+        label: "Tutorial"
+      }, {
+        route: SimpleCharts.value,
+        label: "Simple Charts"
+      }, {
+        route: ChordDiagram.value,
+        label: "Chord Diagram"
+      }, {
+        route: BubbleChart.value,
+        label: "Bubble Chart"
+      }, {
+        route: SankeyDiagram.value,
+        label: "Sankey Diagram"
+      }, {
+        route: Hierarchies.value,
+        label: "Hierarchies"
+      }, {
+        route: Interpreters.value,
+        label: "Interpreters"
+      }, {
+        route: CodeExplorer.value,
+        label: "Code Explorer"
+      }]
+    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Bubble Chart: Circle Packing Layout")]), p_([text5("Circle packing displays hierarchical data as nested circles, where the size of each circle represents a quantitative value. It's an efficient way to visualize part-to-whole relationships in hierarchical structures.")]), p_([text5("This layout is particularly effective for showing relative sizes at multiple levels of hierarchy, making it easy to spot dominant elements and compare proportions across branches.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Flare Visualization Library Structure")]), p_([text5("This bubble chart shows the structure of the Flare visualization library. Each circle represents a class or package, with the size proportional to the lines of code. Nested circles show the package hierarchy.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["bubble-viz"])])([])]), p_([text5("The circle packing algorithm automatically arranges circles to minimize wasted space while maintaining the hierarchical relationships. Colors indicate the depth level in the hierarchy.")])])]);
   };
-  var component10 = /* @__PURE__ */ (function() {
+  var component11 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return unit;
       },
-      render: render11,
+      render: render12,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -24047,7 +24255,7 @@
   var type_22 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_9 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "rhsNav";
+      return "sectionNav";
     }
   })(ordUnit);
   var Initialize10 = /* @__PURE__ */ (function() {
@@ -24062,18 +24270,49 @@
       return pure31(unit);
     });
   };
-  var _rhsNav7 = /* @__PURE__ */ (function() {
+  var _sectionNav6 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render12 = function(v) {
-    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_22(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. Programming Concepts")])])])])]), slot_9(_rhsNav7)(unit)(component)(ChordDiagram.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Chord Diagram: Visualizing Relationships")]), p_([text5("Chord diagrams show relationships and flows between entities in a circular layout. They're particularly effective for displaying interconnected systems, dependencies, or flows between groups.")]), p_([text5("The thickness of each chord represents the strength of the relationship, while colors help distinguish between different entities or groups.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Programming Concepts Dependencies")]), p_([text5("This chord diagram visualizes the dependencies between fundamental programming concepts. Each arc represents a concept, and the ribbons show how strongly they depend on each other.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["chord-viz"])])([])]), p_([text5("The circular layout makes it easy to see both direct dependencies (following a single chord) and the overall pattern of interconnections in the system. Thicker chords indicate stronger dependencies.")])])]);
+  var render13 = function(v) {
+    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_22(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. Programming Concepts")])])])])]), slot_9(_sectionNav6)(unit)(component6)({
+      currentSection: UnderstandingSection.value,
+      currentRoute: ChordDiagram.value,
+      sectionPages: [{
+        route: About.value,
+        label: "About"
+      }, {
+        route: Tutorial.value,
+        label: "Tutorial"
+      }, {
+        route: SimpleCharts.value,
+        label: "Simple Charts"
+      }, {
+        route: ChordDiagram.value,
+        label: "Chord Diagram"
+      }, {
+        route: BubbleChart.value,
+        label: "Bubble Chart"
+      }, {
+        route: SankeyDiagram.value,
+        label: "Sankey Diagram"
+      }, {
+        route: Hierarchies.value,
+        label: "Hierarchies"
+      }, {
+        route: Interpreters.value,
+        label: "Interpreters"
+      }, {
+        route: CodeExplorer.value,
+        label: "Code Explorer"
+      }]
+    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Chord Diagram: Visualizing Relationships")]), p_([text5("Chord diagrams show relationships and flows between entities in a circular layout. They're particularly effective for displaying interconnected systems, dependencies, or flows between groups.")]), p_([text5("The thickness of each chord represents the strength of the relationship, while colors help distinguish between different entities or groups.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Programming Concepts Dependencies")]), p_([text5("This chord diagram visualizes the dependencies between fundamental programming concepts. Each arc represents a concept, and the ribbons show how strongly they depend on each other.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["chord-viz"])])([])]), p_([text5("The circular layout makes it easy to see both direct dependencies (following a single chord) and the overall pattern of interconnections in the system. Thicker chords indicate stronger dependencies.")])])]);
   };
-  var component11 = /* @__PURE__ */ (function() {
+  var component12 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return unit;
       },
-      render: render12,
+      render: render13,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -24313,7 +24552,7 @@
   var coerceToTreeNode = unsafeCoerce2;
 
   // output/D3.Viz.Tree.Draw/index.js
-  var eq13 = /* @__PURE__ */ eq(eqTreeLayout);
+  var eq14 = /* @__PURE__ */ eq(eqTreeLayout);
   var append11 = /* @__PURE__ */ append(semigroupArray);
   var classed9 = /* @__PURE__ */ classed(toAttrString);
   var width15 = /* @__PURE__ */ width8(toAttrNumber);
@@ -24403,7 +24642,7 @@
     },
     onRHS: function(l) {
       return function(d9) {
-        var $47 = eq13(l)(Radial.value) && treeDatum_.x(d9) >= pi;
+        var $47 = eq14(l)(Radial.value) && treeDatum_.x(d9) >= pi;
         if ($47) {
           return true;
         }
@@ -24666,7 +24905,7 @@
 
   // output/Data.String.CodePoints/index.js
   var fromEnum2 = /* @__PURE__ */ fromEnum(boundedEnumChar);
-  var map45 = /* @__PURE__ */ map(functorMaybe);
+  var map46 = /* @__PURE__ */ map(functorMaybe);
   var unfoldr2 = /* @__PURE__ */ unfoldr(unfoldableArray);
   var div3 = /* @__PURE__ */ div(euclideanRingInt);
   var mod2 = /* @__PURE__ */ mod(euclideanRingInt);
@@ -24710,7 +24949,7 @@
     });
   };
   var unconsButWithTuple = function(s) {
-    return map45(function(v) {
+    return map46(function(v) {
       return new Tuple(v.head, v.tail);
     })(uncons5(s));
   };
@@ -24739,7 +24978,7 @@
   };
   var indexOf2 = function(p2) {
     return function(s) {
-      return map45(function(i2) {
+      return map46(function(i2) {
         return length8(take2(i2)(s));
       })(indexOf(p2)(s));
     };
@@ -25005,7 +25244,7 @@
 
   // output/D3.Viz.Tree.Configure/index.js
   var show19 = /* @__PURE__ */ show(showNumber);
-  var eq6 = /* @__PURE__ */ eq(eqTreeLayout);
+  var eq7 = /* @__PURE__ */ eq(eqTreeLayout);
   var liftEffect13 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var rotateRadialLabels = function(d9) {
     return "rotate(" + ((function() {
@@ -25091,7 +25330,7 @@
               throw new Error("Failed pattern match at D3.Viz.Tree.Configure (line 67, column 7 - line 74, column 71): " + [model.treeType.constructor.name, model.treeLayout.constructor.name]);
             })();
             var layout = (function() {
-              var $33 = eq6(model.treeLayout)(Radial.value);
+              var $33 = eq7(model.treeLayout)(Radial.value);
               if ($33) {
                 return treeSetSeparation_(treeSetSize_(getLayout(model.treeType))([2 * pi, svg2.width / 2 - 100]))(radialSeparation);
               }
@@ -25265,7 +25504,7 @@
   var get8 = /* @__PURE__ */ get(monadStateHalogenM);
   var slot_10 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "rhsNav";
+      return "sectionNav";
     }
   })(ordUnit);
   var HorizontalTidy = /* @__PURE__ */ (function() {
@@ -25475,12 +25714,12 @@
       };
     }
   };
-  var eq7 = /* @__PURE__ */ eq(eqHierarchyLayout);
+  var eq8 = /* @__PURE__ */ eq(eqHierarchyLayout);
   var renderLayoutOption = function(layout) {
     return function(label5) {
       return function(currentLayout) {
         return button([classes(append17(["control-panel__option"])((function() {
-          var $41 = eq7(layout)(currentLayout);
+          var $41 = eq8(layout)(currentLayout);
           if ($41) {
             return ["control-panel__option--active"];
           }
@@ -25570,7 +25809,7 @@
         return drawTreemap(model.json)("div.hierarchies-viz");
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 274, column 6 - line 298, column 47): " + [layout.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 288, column 6 - line 312, column 47): " + [layout.constructor.name]);
     };
   };
   var handleAction10 = function(v) {
@@ -25602,7 +25841,7 @@
             });
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 246, column 5 - line 252, column 18): " + [treeJSON.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 260, column 5 - line 266, column 18): " + [treeJSON.constructor.name]);
         });
       });
     }
@@ -25632,21 +25871,52 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 263, column 5 - line 268, column 18): " + [state3.tree.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 277, column 5 - line 282, column 18): " + [state3.tree.constructor.name]);
           });
         });
       });
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 237, column 16 - line 268, column 18): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 251, column 16 - line 282, column 18): " + [v.constructor.name]);
   };
-  var _rhsNav8 = /* @__PURE__ */ (function() {
+  var _sectionNav7 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render13 = function(state3) {
-    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel", "control-panel"])])([div2([classes(["toc-panel__main", "control-panel__main"])])([img([src9("controller.jpeg"), alt5(""), classes(["control-panel__icon"])]), div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Layout Controls")]), button([classes(["floating-panel__toggle"]), type_23(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "control-panel__content"])])([div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Node-Link Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(HorizontalTidy.value)("H-Tidy")(state3.currentLayout), renderLayoutOption(HorizontalDendrogram.value)("H-Dendro")(state3.currentLayout), renderLayoutOption(VerticalTidy.value)("V-Tidy")(state3.currentLayout), renderLayoutOption(VerticalDendrogram.value)("V-Dendro")(state3.currentLayout), renderLayoutOption(RadialTidy.value)("R-Tidy")(state3.currentLayout), renderLayoutOption(RadialDendrogram.value)("R-Dendro")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Adjacency Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(Icicle.value)("Icicle")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Enclosure Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(CirclePacking.value)("Circle Pack")(state3.currentLayout), renderLayoutOption(Treemap.value)("Treemap")(state3.currentLayout)])]), div2([classes(["control-panel__current"])])([strong_([text5("Current:")]), text5(" "), text5(show20(state3.currentLayout))])])])]), slot_10(_rhsNav8)(unit)(component)(Hierarchies.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Hierarchical Layouts")]), p_([text5("Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data.")]), p_([text5("This page demonstrates five different ways to visualize the same hierarchical dataset. Use the controls on the left to switch between layouts and explore how each representation emphasizes different relationships in the data.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5(show20(state3.currentLayout))]), p_([text5(layoutDescription(state3.currentLayout))]), div2([classes(["tutorial-viz-container"])])([div2([classes(["hierarchies-viz"])])([renderLayoutPlaceholder(state3.currentLayout)])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Implementation")]), p_([text5("The visualization code for "), strong_([text5(show20(state3.currentLayout))]), text5(" demonstrates how D3's hierarchical layout algorithms transform tree data into visual coordinates.")]), div2([classes(["tutorial-code-block"])])([pre_([code_([text5("-- Code for "), text5(show20(state3.currentLayout)), text5(" layout will go here\n"), text5("-- Demonstrates D3 hierarchy layout with PureScript DSL")])])])])]);
+  var render14 = function(state3) {
+    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel", "control-panel"])])([div2([classes(["toc-panel__main", "control-panel__main"])])([img([src9("controller.jpeg"), alt5(""), classes(["control-panel__icon"])]), div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Layout Controls")]), button([classes(["floating-panel__toggle"]), type_23(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "control-panel__content"])])([div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Node-Link Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(HorizontalTidy.value)("H-Tidy")(state3.currentLayout), renderLayoutOption(HorizontalDendrogram.value)("H-Dendro")(state3.currentLayout), renderLayoutOption(VerticalTidy.value)("V-Tidy")(state3.currentLayout), renderLayoutOption(VerticalDendrogram.value)("V-Dendro")(state3.currentLayout), renderLayoutOption(RadialTidy.value)("R-Tidy")(state3.currentLayout), renderLayoutOption(RadialDendrogram.value)("R-Dendro")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Adjacency Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(Icicle.value)("Icicle")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Enclosure Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(CirclePacking.value)("Circle Pack")(state3.currentLayout), renderLayoutOption(Treemap.value)("Treemap")(state3.currentLayout)])]), div2([classes(["control-panel__current"])])([strong_([text5("Current:")]), text5(" "), text5(show20(state3.currentLayout))])])])]), slot_10(_sectionNav7)(unit)(component6)({
+      currentSection: UnderstandingSection.value,
+      currentRoute: Hierarchies.value,
+      sectionPages: [{
+        route: About.value,
+        label: "About"
+      }, {
+        route: Tutorial.value,
+        label: "Tutorial"
+      }, {
+        route: SimpleCharts.value,
+        label: "Simple Charts"
+      }, {
+        route: ChordDiagram.value,
+        label: "Chord Diagram"
+      }, {
+        route: BubbleChart.value,
+        label: "Bubble Chart"
+      }, {
+        route: SankeyDiagram.value,
+        label: "Sankey Diagram"
+      }, {
+        route: Hierarchies.value,
+        label: "Hierarchies"
+      }, {
+        route: Interpreters.value,
+        label: "Interpreters"
+      }, {
+        route: CodeExplorer.value,
+        label: "Code Explorer"
+      }]
+    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Hierarchical Layouts")]), p_([text5("Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data.")]), p_([text5("This page demonstrates five different ways to visualize the same hierarchical dataset. Use the controls on the left to switch between layouts and explore how each representation emphasizes different relationships in the data.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5(show20(state3.currentLayout))]), p_([text5(layoutDescription(state3.currentLayout))]), div2([classes(["tutorial-viz-container"])])([div2([classes(["hierarchies-viz"])])([renderLayoutPlaceholder(state3.currentLayout)])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Implementation")]), p_([text5("The visualization code for "), strong_([text5(show20(state3.currentLayout))]), text5(" demonstrates how D3's hierarchical layout algorithms transform tree data into visual coordinates.")]), div2([classes(["tutorial-code-block"])])([pre_([code_([text5("-- Code for "), text5(show20(state3.currentLayout)), text5(" layout will go here\n"), text5("-- Demonstrates D3 hierarchy layout with PureScript DSL")])])])])]);
   };
-  var component12 = /* @__PURE__ */ (function() {
+  var component13 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return {
@@ -25654,7 +25924,7 @@
           tree: Nothing.value
         };
       },
-      render: render13,
+      render: render14,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -25786,7 +26056,7 @@
   var type_24 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_11 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "rhsNav";
+      return "sectionNav";
     }
   })(ordUnit);
   var EnglishDescription = /* @__PURE__ */ (function() {
@@ -25870,7 +26140,7 @@
         return div2([classes(["interpreter-output"])])([div2([classes(["metatree-viz"])])([text5("[AST Tree visualization will be rendered here]")])]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 210, column 34 - line 270, column 8): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 224, column 34 - line 284, column 8): " + [v.constructor.name]);
     };
   };
   var interpreterTitle = function(v) {
@@ -25894,7 +26164,7 @@
       return "5. Meta Tree - Abstract Syntax Tree";
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 187, column 20 - line 192, column 55): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 201, column 20 - line 206, column 55): " + [v.constructor.name]);
   };
   var interpreterDescription = function(v) {
     if (v instanceof EnglishDescription) {
@@ -25917,7 +26187,7 @@
       return "This interpreter visualizes the abstract syntax tree of the visualization code itself. It creates a tree diagram showing the structure of DSL operations, demonstrating meta-programming capabilities.";
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 196, column 26 - line 206, column 205): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 210, column 26 - line 220, column 205): " + [v.constructor.name]);
   };
   var renderInterpreterOutput = function(state3) {
     return function(interpreter) {
@@ -25968,13 +26238,44 @@
     ;
     throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 68, column 16 - line 84, column 54): " + [v.constructor.name]);
   };
-  var _rhsNav9 = /* @__PURE__ */ (function() {
+  var _sectionNav8 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render14 = function(state3) {
-    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Interpreters")]), button([classes(["floating-panel__toggle"]), type_24(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([renderInterpreterLink(EnglishDescription.value)("1. English Description"), renderInterpreterLink(D3Code.value)("2. D3 JavaScript"), renderInterpreterLink(VegaLite.value)("3. Vega-Lite JSON"), renderInterpreterLink(MermaidJS.value)("4. Mermaid Diagram"), renderInterpreterLink(MetaTreeAST.value)("5. Meta Tree (AST)")])])])]), slot_11(_rhsNav9)(unit)(component)(Interpreters.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Alternative Interpreters")]), p_([text5("The Finally Tagless pattern allows us to write visualization code once and interpret it in multiple ways. The same DSL code can produce an actual visualization, generate equivalent code in other languages, create documentation, or even visualize its own structure.")]), p_([text5("This flexibility comes from separating the ")]), em_([text5("structure")]), text5(" of our visualization (what operations we want to perform) from the "), em_([text5("interpretation")]), text5(" (how those operations are executed). Each interpreter below provides a different view of the same underlying code.")]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("The Source Code")]), p_([text5("Here's a simple example using our PureScript D3 DSL - the most basic example imaginable, three circles:")]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCSimple.purs")(state3.exampleSnippet))("TLCSimple")]), renderInterpreterOutput(state3)(state3.selectedInterpreter)]);
+  var render15 = function(state3) {
+    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Interpreters")]), button([classes(["floating-panel__toggle"]), type_24(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([renderInterpreterLink(EnglishDescription.value)("1. English Description"), renderInterpreterLink(D3Code.value)("2. D3 JavaScript"), renderInterpreterLink(VegaLite.value)("3. Vega-Lite JSON"), renderInterpreterLink(MermaidJS.value)("4. Mermaid Diagram"), renderInterpreterLink(MetaTreeAST.value)("5. Meta Tree (AST)")])])])]), slot_11(_sectionNav8)(unit)(component6)({
+      currentSection: UnderstandingSection.value,
+      currentRoute: Interpreters.value,
+      sectionPages: [{
+        route: About.value,
+        label: "About"
+      }, {
+        route: Tutorial.value,
+        label: "Tutorial"
+      }, {
+        route: SimpleCharts.value,
+        label: "Simple Charts"
+      }, {
+        route: ChordDiagram.value,
+        label: "Chord Diagram"
+      }, {
+        route: BubbleChart.value,
+        label: "Bubble Chart"
+      }, {
+        route: SankeyDiagram.value,
+        label: "Sankey Diagram"
+      }, {
+        route: Hierarchies.value,
+        label: "Hierarchies"
+      }, {
+        route: Interpreters.value,
+        label: "Interpreters"
+      }, {
+        route: CodeExplorer.value,
+        label: "Code Explorer"
+      }]
+    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Alternative Interpreters")]), p_([text5("The Finally Tagless pattern allows us to write visualization code once and interpret it in multiple ways. The same DSL code can produce an actual visualization, generate equivalent code in other languages, create documentation, or even visualize its own structure.")]), p_([text5("This flexibility comes from separating the ")]), em_([text5("structure")]), text5(" of our visualization (what operations we want to perform) from the "), em_([text5("interpretation")]), text5(" (how those operations are executed). Each interpreter below provides a different view of the same underlying code.")]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("The Source Code")]), p_([text5("Here's a simple example using our PureScript D3 DSL - the most basic example imaginable, three circles:")]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCSimple.purs")(state3.exampleSnippet))("TLCSimple")]), renderInterpreterOutput(state3)(state3.selectedInterpreter)]);
   };
-  var component13 = /* @__PURE__ */ (function() {
+  var component14 = /* @__PURE__ */ (function() {
     var initialState = {
       selectedInterpreter: EnglishDescription.value,
       generatedD3Code: Nothing.value,
@@ -25984,7 +26285,7 @@
     };
     return mkComponent({
       initialState: $$const(initialState),
-      render: render14,
+      render: render15,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -26549,7 +26850,7 @@
   var type_25 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_12 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "rhsNav";
+      return "sectionNav";
     }
   })(ordUnit);
   var Initialize13 = /* @__PURE__ */ (function() {
@@ -26562,20 +26863,51 @@
   var handleAction12 = function(v) {
     return runWithD3_Sankey2(draw10(energyData)("div.sankey-viz"));
   };
-  var _rhsNav10 = /* @__PURE__ */ (function() {
+  var _sectionNav9 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render15 = function(v) {
-    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_25(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. UK Energy Flows")])])])])]), slot_12(_rhsNav10)(unit)(component)(SankeyDiagram.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Sankey Diagram: Flow Visualization")]), p_([text5("Sankey diagrams visualize the flow of resources, energy, costs, or other quantities through a system. The width of each connection is proportional to the flow quantity, making it easy to identify dominant flows and inefficiencies.")]), p_([text5("These diagrams are particularly effective for showing how quantities are distributed, transformed, and consumed across multiple stages of a process.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. UK Energy System Flows")]), p_([text5("This Sankey diagram shows energy flows in the UK energy system, from primary energy sources through transformation and distribution to final consumption. The diagram uses D3's Sankey layout algorithm to automatically position nodes and create smooth flow paths.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["sankey-viz"])])([])]), p_([text5("The width of each flow represents the quantity of energy. Notice how the diagram reveals energy losses in transformation processes and highlights which sources contribute most to final consumption.")])])]);
+  var render16 = function(v) {
+    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_25(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. UK Energy Flows")])])])])]), slot_12(_sectionNav9)(unit)(component6)({
+      currentSection: UnderstandingSection.value,
+      currentRoute: SankeyDiagram.value,
+      sectionPages: [{
+        route: About.value,
+        label: "About"
+      }, {
+        route: Tutorial.value,
+        label: "Tutorial"
+      }, {
+        route: SimpleCharts.value,
+        label: "Simple Charts"
+      }, {
+        route: ChordDiagram.value,
+        label: "Chord Diagram"
+      }, {
+        route: BubbleChart.value,
+        label: "Bubble Chart"
+      }, {
+        route: SankeyDiagram.value,
+        label: "Sankey Diagram"
+      }, {
+        route: Hierarchies.value,
+        label: "Hierarchies"
+      }, {
+        route: Interpreters.value,
+        label: "Interpreters"
+      }, {
+        route: CodeExplorer.value,
+        label: "Code Explorer"
+      }]
+    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Sankey Diagram: Flow Visualization")]), p_([text5("Sankey diagrams visualize the flow of resources, energy, costs, or other quantities through a system. The width of each connection is proportional to the flow quantity, making it easy to identify dominant flows and inefficiencies.")]), p_([text5("These diagrams are particularly effective for showing how quantities are distributed, transformed, and consumed across multiple stages of a process.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. UK Energy System Flows")]), p_([text5("This Sankey diagram shows energy flows in the UK energy system, from primary energy sources through transformation and distribution to final consumption. The diagram uses D3's Sankey layout algorithm to automatically position nodes and create smooth flow paths.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["sankey-viz"])])([])]), p_([text5("The width of each flow represents the quantity of energy. Notice how the diagram reveals energy losses in transformation processes and highlights which sources contribute most to final consumption.")])])]);
   };
-  var component14 = /* @__PURE__ */ (function() {
+  var component15 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return {
           sankeyLayout: initialSankeyLayoutState_
         };
       },
-      render: render15,
+      render: render16,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -26603,7 +26935,7 @@
 
   // output/D3.Viz.GroupedBarChart/index.js
   var nub3 = /* @__PURE__ */ nub2(ordString);
-  var map46 = /* @__PURE__ */ map(functorArray);
+  var map47 = /* @__PURE__ */ map(functorArray);
   var maximum2 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var map115 = /* @__PURE__ */ map(functorMaybe);
   var bind26 = /* @__PURE__ */ bind(bindMaybe);
@@ -26618,7 +26950,7 @@
   var text14 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor9 = /* @__PURE__ */ textAnchor(toAttrString);
   var getStates = /* @__PURE__ */ (function() {
-    var $45 = map46(function(v) {
+    var $45 = map47(function(v) {
       return v.state;
     });
     return function($46) {
@@ -26626,7 +26958,7 @@
     };
   })();
   var getAges = /* @__PURE__ */ (function() {
-    var $47 = map46(function(v) {
+    var $47 = map47(function(v) {
       return v.age;
     });
     return function($48) {
@@ -26664,7 +26996,7 @@
             var chartHeight = dims.height - dims.marginTop - dims.marginBottom;
             var states = getStates(data$prime);
             var ages = getAges(data$prime);
-            var maxPop = fromMaybe(0)(maximum2(map46(function(v) {
+            var maxPop = fromMaybe(0)(maximum2(map47(function(v) {
               return v.population;
             })(data$prime)));
             var stateCount = toNumber(length4(states));
@@ -26745,7 +27077,7 @@
   // output/D3.Viz.MultiLineChart/index.js
   var foldlWithIndex3 = /* @__PURE__ */ foldlWithIndex(foldableWithIndexArray);
   var nub4 = /* @__PURE__ */ nub2(ordString);
-  var map47 = /* @__PURE__ */ map(functorArray);
+  var map48 = /* @__PURE__ */ map(functorArray);
   var maximum3 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var minimum2 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var bind27 = /* @__PURE__ */ bind(bindMaybe);
@@ -26802,7 +27134,7 @@
     };
   };
   var groupBySeries = function(data$prime) {
-    var series = nub4(map47(function(v) {
+    var series = nub4(map48(function(v) {
       return v.series;
     })(data$prime));
     var getSeriesData = function(s) {
@@ -26810,10 +27142,10 @@
         return d1.series === s;
       })(data$prime);
     };
-    return map47(getSeriesData)(series);
+    return map48(getSeriesData)(series);
   };
   var getSeries = /* @__PURE__ */ (function() {
-    var $53 = map47(function(v) {
+    var $53 = map48(function(v) {
       return v.series;
     });
     return function($54) {
@@ -26841,7 +27173,7 @@
             };
             var chartWidth = dims.width - dims.marginLeft - dims.marginRight;
             var chartHeight = dims.height - dims.marginTop - dims.marginBottom;
-            var allValues = map47(function(v) {
+            var allValues = map48(function(v) {
               return v.value;
             })(data$prime);
             var maxValue = fromMaybe(0)(maximum3(allValues));
@@ -26930,7 +27262,7 @@
   var append18 = /* @__PURE__ */ append(semigroupArray);
   var foldl7 = /* @__PURE__ */ foldl(foldableArray);
   var nub5 = /* @__PURE__ */ nub2(ordString);
-  var map48 = /* @__PURE__ */ map(functorArray);
+  var map49 = /* @__PURE__ */ map(functorArray);
   var compare2 = /* @__PURE__ */ compare(ordString);
   var maximum4 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var bind28 = /* @__PURE__ */ bind(bindMaybe);
@@ -26982,7 +27314,7 @@
     return result.stack;
   };
   var getStates2 = /* @__PURE__ */ (function() {
-    var $53 = map48(function(v) {
+    var $53 = map49(function(v) {
       return v.state;
     });
     return function($54) {
@@ -27001,7 +27333,7 @@
     };
   };
   var getAges2 = /* @__PURE__ */ (function() {
-    var $55 = map48(function(v) {
+    var $55 = map49(function(v) {
       return v.age;
     });
     return function($56) {
@@ -27062,7 +27394,7 @@
                 };
               })(0)(getStateData(state$prime)(data$prime));
             };
-            var maxTotal = fromMaybe(0)(maximum4(map48(getStateTotal)(states)));
+            var maxTotal = fromMaybe(0)(maximum4(map49(getStateTotal)(states)));
             var anglePerState = 2 * pi / stateCount;
             var anglepadding = 0.02 * anglePerState;
             var ageColors = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf", "#999999"];
@@ -27081,7 +27413,7 @@
                   var drawStateBar = function(stateIdx) {
                     return function(state$prime) {
                       var stateData = getStateData(state$prime)(data$prime);
-                      var values2 = map48(function(v1) {
+                      var values2 = map49(function(v1) {
                         return v1.population;
                       })(stateData);
                       var stacked = stackData(values2);
@@ -27159,7 +27491,7 @@
   var pure35 = /* @__PURE__ */ pure(applicativeHalogenM);
   var slot_13 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "rhsNav";
+      return "sectionNav";
     }
   })(ordUnit);
   var Initialize14 = /* @__PURE__ */ (function() {
@@ -27178,12 +27510,12 @@
       });
     });
   };
-  var _rhsNav11 = /* @__PURE__ */ (function() {
+  var _sectionNav10 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render16 = function(v) {
+  var render17 = function(v) {
     return div2([classes(["explanation-page"])])([renderTOC({
-      title: "Contents",
+      title: "Page Contents",
       items: [{
         anchor: "grouped-bar",
         label: "1. Grouped Bar Chart",
@@ -27198,14 +27530,45 @@
         level: 0
       }],
       image: new Just("images/understanding-bookmark-trees.jpeg")
-    }), slot_13(_rhsNav11)(unit)(component)(SimpleCharts.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Simple Charts")]), p_([text5(`Real-world examples of common chart types showing state-level US population data and economic indicators. These charts are "simple" not because the visualizations are trivial, but because they don't include hierarchies, animations, transitions, or physical simulations.`)]), p_([text5("Each example demonstrates best practices for scales, axes, legends, and color coding to create clear and informative visualizations.")])]), section([id2("grouped-bar"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Grouped Bar Chart")]), p_([text5("US population by state and age group. This grouped bar chart shows population distribution across 6 states (CA, TX, FL, NY, PA, IL) broken down into 9 age groups. Each state has its own cluster of bars, with colors representing different age groups.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["grouped-bar-viz"])])([])]), p_([text5("The chart uses nested band scales: an outer scale positions each state cluster, and an inner scale positions individual bars within each cluster. The population values are scaled linearly to bar heights, with colors from the Spectral color scheme to distinguish age groups.")])]), section([id2("multi-line"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("2. Multi-Line Chart")]), p_([text5("Unemployment rates over time for four major US metro areas: San Francisco, New York, Detroit, and Miami. This chart shows how unemployment fluctuated from 2000 to 2013, clearly illustrating the impact of the 2008 financial crisis and subsequent recovery.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["multi-line-viz"])])([])]), p_([text5("Each city is represented by a colored line, with a legend on the right for identification. The chart uses SVG path elements for smooth lines, linear scales for time (x-axis) and unemployment percentage (y-axis), and includes axis labels for context.")])]), section([id2("radial-stacked"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("3. Radial Stacked Bar Chart")]), p_([text5('The same US state population data as the grouped bar chart, but visualized in polar coordinates. Each state gets a wedge around the circle, with age groups stacked radially from the center outward. This "sunburst-like" layout efficiently uses space and creates an aesthetically pleasing circular composition.')]), div2([classes(["tutorial-viz-container"])])([div2([classes(["radial-stacked-viz"])])([])]), p_([text5("The chart uses polar coordinates with an angular scale (\u03B8) dividing the circle by states and a radial scale (r) for population. Arc paths are generated for each segment, with the same color scheme as the grouped bar chart for consistency. State labels are positioned around the perimeter.")])])]);
+    }), slot_13(_sectionNav10)(unit)(component6)({
+      currentSection: UnderstandingSection.value,
+      currentRoute: SimpleCharts.value,
+      sectionPages: [{
+        route: About.value,
+        label: "About"
+      }, {
+        route: Tutorial.value,
+        label: "Tutorial"
+      }, {
+        route: SimpleCharts.value,
+        label: "Simple Charts"
+      }, {
+        route: ChordDiagram.value,
+        label: "Chord Diagram"
+      }, {
+        route: BubbleChart.value,
+        label: "Bubble Chart"
+      }, {
+        route: SankeyDiagram.value,
+        label: "Sankey Diagram"
+      }, {
+        route: Hierarchies.value,
+        label: "Hierarchies"
+      }, {
+        route: Interpreters.value,
+        label: "Interpreters"
+      }, {
+        route: CodeExplorer.value,
+        label: "Code Explorer"
+      }]
+    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Simple Charts")]), p_([text5(`Real-world examples of common chart types showing state-level US population data and economic indicators. These charts are "simple" not because the visualizations are trivial, but because they don't include hierarchies, animations, transitions, or physical simulations.`)]), p_([text5("Each example demonstrates best practices for scales, axes, legends, and color coding to create clear and informative visualizations.")])]), section([id2("grouped-bar"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Grouped Bar Chart")]), p_([text5("US population by state and age group. This grouped bar chart shows population distribution across 6 states (CA, TX, FL, NY, PA, IL) broken down into 9 age groups. Each state has its own cluster of bars, with colors representing different age groups.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["grouped-bar-viz"])])([])]), p_([text5("The chart uses nested band scales: an outer scale positions each state cluster, and an inner scale positions individual bars within each cluster. The population values are scaled linearly to bar heights, with colors from the Spectral color scheme to distinguish age groups.")])]), section([id2("multi-line"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("2. Multi-Line Chart")]), p_([text5("Unemployment rates over time for four major US metro areas: San Francisco, New York, Detroit, and Miami. This chart shows how unemployment fluctuated from 2000 to 2013, clearly illustrating the impact of the 2008 financial crisis and subsequent recovery.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["multi-line-viz"])])([])]), p_([text5("Each city is represented by a colored line, with a legend on the right for identification. The chart uses SVG path elements for smooth lines, linear scales for time (x-axis) and unemployment percentage (y-axis), and includes axis labels for context.")])]), section([id2("radial-stacked"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("3. Radial Stacked Bar Chart")]), p_([text5('The same US state population data as the grouped bar chart, but visualized in polar coordinates. Each state gets a wedge around the circle, with age groups stacked radially from the center outward. This "sunburst-like" layout efficiently uses space and creates an aesthetically pleasing circular composition.')]), div2([classes(["tutorial-viz-container"])])([div2([classes(["radial-stacked-viz"])])([])]), p_([text5("The chart uses polar coordinates with an angular scale (\u03B8) dividing the circle by states and a radial scale (r) for population. Arc paths are generated for each segment, with the same color scheme as the grouped bar chart for consistency. State labels are positioned around the perimeter.")])])]);
   };
-  var component15 = /* @__PURE__ */ (function() {
+  var component16 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return unit;
       },
-      render: render16,
+      render: render17,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -27217,7 +27580,7 @@
   })();
 
   // output/D3.Viz.BarChart/index.js
-  var map49 = /* @__PURE__ */ map(functorArray);
+  var map50 = /* @__PURE__ */ map(functorArray);
   var minimum3 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var maximum5 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var classed16 = /* @__PURE__ */ classed(toAttrString);
@@ -27259,10 +27622,10 @@
           return function(selector) {
             var iWidth = innerWidth2(defaultDimensions);
             var iHeight = innerHeight2(defaultDimensions);
-            var xValues = map49(function(v) {
+            var xValues = map50(function(v) {
               return v.x;
             })(dataPoints);
-            var yValues = map49(function(v) {
+            var yValues = map50(function(v) {
               return v.y;
             })(dataPoints);
             var minX = fromMaybe(0)(minimum3(xValues));
@@ -27400,7 +27763,7 @@
   }
 
   // output/D3.Viz.LineChart/index.js
-  var map50 = /* @__PURE__ */ map(functorArray);
+  var map51 = /* @__PURE__ */ map(functorArray);
   var minimum4 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var maximum6 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var classed18 = /* @__PURE__ */ classed(toAttrString);
@@ -27439,10 +27802,10 @@
           return function(selector) {
             var iWidth = innerWidth3(defaultDimensions2);
             var iHeight = innerHeight3(defaultDimensions2);
-            var xValues = map50(function(v) {
+            var xValues = map51(function(v) {
               return v.x;
             })(dataPoints);
-            var yValues = map50(function(v) {
+            var yValues = map51(function(v) {
               return v.y;
             })(dataPoints);
             var minX = fromMaybe(0)(minimum4(xValues));
@@ -27599,7 +27962,7 @@
   // output/PSD3.Understanding.Tutorial/index.js
   var pure36 = /* @__PURE__ */ pure(applicativeEffect);
   var sequence2 = /* @__PURE__ */ sequence(traversableArray)(applicativeEffect);
-  var map51 = /* @__PURE__ */ map(functorArray);
+  var map52 = /* @__PURE__ */ map(functorArray);
   var bind111 = /* @__PURE__ */ bind(bindAff);
   var liftEffect17 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var discard24 = /* @__PURE__ */ discard(discardUnit);
@@ -27622,7 +27985,7 @@
   var gets2 = /* @__PURE__ */ gets(monadStateHalogenM);
   var slot_14 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "rhsNav";
+      return "sectionNav";
     }
   })(ordUnit);
   var Initialize15 = /* @__PURE__ */ (function() {
@@ -27654,7 +28017,7 @@
         };
       };
       return function __do4() {
-        var choices = sequence2(map51(coinToss)(letters))();
+        var choices = sequence2(map52(coinToss)(letters))();
         return catMaybes(choices);
       };
     })();
@@ -27681,7 +28044,7 @@
   var runGeneralUpdatePattern1 = /* @__PURE__ */ runGeneralUpdatePattern(monadEffectHalogenM2);
   var lhsNav = /* @__PURE__ */ (function() {
     return renderTOC({
-      title: "Contents",
+      title: "Page Contents",
       items: [{
         anchor: "section-1",
         label: "1. Three Little Circles",
@@ -27788,19 +28151,50 @@
           return liftAff6(killFiber(error("Cancelling GUP animation"))(maybeFiber.value0));
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Understanding.Tutorial (line 335, column 5 - line 337, column 83): " + [maybeFiber.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Understanding.Tutorial (line 349, column 5 - line 351, column 83): " + [maybeFiber.constructor.name]);
       });
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Understanding.Tutorial (line 292, column 16 - line 337, column 83): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Understanding.Tutorial (line 306, column 16 - line 351, column 83): " + [v.constructor.name]);
   };
-  var _rhsNav12 = /* @__PURE__ */ (function() {
+  var _sectionNav11 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render17 = function(state3) {
-    return div2([classes(["explanation-page"])])([lhsNav, slot_14(_rhsNav12)(unit)(component)(Tutorial.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Tutorial: Building Visualizations with PureScript D3")]), p_([text5("We'll show just the very simplest examples of putting elements in the DOM, in this case into an SVG, using the PS<$>D3 grammar.")]), p_([text5("In the How-to manual we'll explain in detail what each of these lines means, but if you're already familiar with D3.js the shape of the code should look very familiar.")])]), section([classes(["tutorial-section"]), id2("section-1")])([h2([classes(["tutorial-section-title"])])([text5("1. Three Little Circles")]), p_([text5("Simplest possible example, just to show syntax.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["three-circles-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCSimple.purs")(state3.threeCirclesSnippet))("TLCSimple")]), section([classes(["tutorial-section"]), id2("section-2")])([h2([classes(["tutorial-section-title"])])([text5("2. The General Update Pattern")]), p_([text5("This deceptively simple example shows off an aspect of screen-based data visualization that has no analogue in paper visualizations: the ability to specify how updates to the data should be represented.")]), p_([text5("In this example, some letters of the alphabet are presented and then constantly updated. When a letter enters at first, it falls in from the top and it is green. If it's still present in the next set of letters it stays on the screen, but it turns gray and moves to an alphabetically correct new position. And if it's not present in the new data, it turns red and falls out before disappearing.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["gup-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: GUP.purs")(state3.gupSnippet))("GUP")]), section([classes(["tutorial-section"]), id2("section-3")])([h2([classes(["tutorial-section-title"])])([text5("3. Data-Driven Positioning")]), p_([text5("This extends the super-simple model in the direction one would go for a more real-world example. In this example, the data is passed in and must match the type specified in the Model. Because the data loses its type information when joined to the DOM elements, we use the datum_ record to provide typed accessors for extracting values.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["parabola-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCParabola.purs")(state3.parabolaSnippet))("TLCParabola")]), section([classes(["tutorial-section"]), id2("section-4")])([h2([classes(["tutorial-section-title"])])([text5("4. Bar Charts with Scales")]), p_([text5("Bar charts are ideal for comparing discrete categories or showing changes across time periods. They use rectangular bars with heights or lengths proportional to the values they represent.")]), p_([text5("This example shows monthly sales data using a vertical bar chart. Each bar represents a month, and the height indicates the sales value. The implementation uses D3 scales to map data values to pixel coordinates.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["barchart-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: BarChartDraw.purs")(state3.barChartSnippet))("BarChartDraw")]), section([classes(["tutorial-section"]), id2("section-5")])([h2([classes(["tutorial-section-title"])])([text5("5. Line Charts and Paths")]), p_([text5("Line charts are one of the most fundamental visualizations for showing trends over time or continuous data. They excel at displaying patterns, trends, and changes in data series.")]), p_([text5("This example demonstrates a simple line chart showing a sine wave pattern. The implementation uses D3's scale functions to map data values to pixel coordinates, and a line generator to create the SVG path.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["linechart-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: LineChartDraw.purs")(state3.lineChartSnippet))("LineChartDraw")]), section([classes(["tutorial-section"]), id2("section-6")])([h2([classes(["tutorial-section-title"])])([text5("6. Anscombe's Quartet")]), p_([text5("This example demonstrates Anscombe's Quartet, a famous dataset created by statistician Francis Anscombe in 1973. All four datasets have nearly identical statistical properties (same mean, variance, correlation, and linear regression line), yet when visualized they reveal completely different patterns.")]), p_([text5("The quartet powerfully illustrates why data visualization is essential. Summary statistics alone can be misleading - you need to look at the data to understand its true structure. This implementation uses a 'small multiples' layout, displaying the four related charts side-by-side for easy comparison.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: ScatterPlotQuartet.purs")(state3.quartetSnippet))("ScatterPlotQuartet")]), section([classes(["tutorial-section", "tutorial-conclusion"]), id2("section-7")])([h2([classes(["tutorial-section-title"])])([text5("Next Steps")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien.")]), aside([classes(["tutorial-margin-note"])])([p([classes(["tutorial-margin-note__label"])])([text5("Learn More")]), a([href4("#" + routeToPath(Hierarchies.value)), classes(["tutorial-margin-note__link"])])([text5("Hierarchies \u2192")])]), ul_([li_([text5("Explore hierarchical data visualizations")]), li_([text5("Learn about the Finally Tagless pattern with interpreters")]), li_([text5("Dive into the Code Explorer for complex applications")])]), aside([classes(["tutorial-margin-note"])])([a([href4("#" + routeToPath(Interpreters.value)), classes(["tutorial-margin-note__link"])])([text5("Interpreters \u2192")]), a([href4("#" + routeToPath(CodeExplorer.value)), classes(["tutorial-margin-note__link"])])([text5("Code Explorer \u2192")])])])]);
+  var render18 = function(state3) {
+    return div2([classes(["explanation-page"])])([lhsNav, slot_14(_sectionNav11)(unit)(component6)({
+      currentSection: UnderstandingSection.value,
+      currentRoute: Tutorial.value,
+      sectionPages: [{
+        route: About.value,
+        label: "About"
+      }, {
+        route: Tutorial.value,
+        label: "Tutorial"
+      }, {
+        route: SimpleCharts.value,
+        label: "Simple Charts"
+      }, {
+        route: ChordDiagram.value,
+        label: "Chord Diagram"
+      }, {
+        route: BubbleChart.value,
+        label: "Bubble Chart"
+      }, {
+        route: SankeyDiagram.value,
+        label: "Sankey Diagram"
+      }, {
+        route: Hierarchies.value,
+        label: "Hierarchies"
+      }, {
+        route: Interpreters.value,
+        label: "Interpreters"
+      }, {
+        route: CodeExplorer.value,
+        label: "Code Explorer"
+      }]
+    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Tutorial: Building Visualizations with PureScript D3")]), p_([text5("We'll show just the very simplest examples of putting elements in the DOM, in this case into an SVG, using the PS<$>D3 grammar.")]), p_([text5("In the How-to manual we'll explain in detail what each of these lines means, but if you're already familiar with D3.js the shape of the code should look very familiar.")])]), section([classes(["tutorial-section"]), id2("section-1")])([h2([classes(["tutorial-section-title"])])([text5("1. Three Little Circles")]), p_([text5("Simplest possible example, just to show syntax.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["three-circles-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCSimple.purs")(state3.threeCirclesSnippet))("TLCSimple")]), section([classes(["tutorial-section"]), id2("section-2")])([h2([classes(["tutorial-section-title"])])([text5("2. The General Update Pattern")]), p_([text5("This deceptively simple example shows off an aspect of screen-based data visualization that has no analogue in paper visualizations: the ability to specify how updates to the data should be represented.")]), p_([text5("In this example, some letters of the alphabet are presented and then constantly updated. When a letter enters at first, it falls in from the top and it is green. If it's still present in the next set of letters it stays on the screen, but it turns gray and moves to an alphabetically correct new position. And if it's not present in the new data, it turns red and falls out before disappearing.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["gup-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: GUP.purs")(state3.gupSnippet))("GUP")]), section([classes(["tutorial-section"]), id2("section-3")])([h2([classes(["tutorial-section-title"])])([text5("3. Data-Driven Positioning")]), p_([text5("This extends the super-simple model in the direction one would go for a more real-world example. In this example, the data is passed in and must match the type specified in the Model. Because the data loses its type information when joined to the DOM elements, we use the datum_ record to provide typed accessors for extracting values.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["parabola-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCParabola.purs")(state3.parabolaSnippet))("TLCParabola")]), section([classes(["tutorial-section"]), id2("section-4")])([h2([classes(["tutorial-section-title"])])([text5("4. Bar Charts with Scales")]), p_([text5("Bar charts are ideal for comparing discrete categories or showing changes across time periods. They use rectangular bars with heights or lengths proportional to the values they represent.")]), p_([text5("This example shows monthly sales data using a vertical bar chart. Each bar represents a month, and the height indicates the sales value. The implementation uses D3 scales to map data values to pixel coordinates.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["barchart-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: BarChartDraw.purs")(state3.barChartSnippet))("BarChartDraw")]), section([classes(["tutorial-section"]), id2("section-5")])([h2([classes(["tutorial-section-title"])])([text5("5. Line Charts and Paths")]), p_([text5("Line charts are one of the most fundamental visualizations for showing trends over time or continuous data. They excel at displaying patterns, trends, and changes in data series.")]), p_([text5("This example demonstrates a simple line chart showing a sine wave pattern. The implementation uses D3's scale functions to map data values to pixel coordinates, and a line generator to create the SVG path.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["linechart-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: LineChartDraw.purs")(state3.lineChartSnippet))("LineChartDraw")]), section([classes(["tutorial-section"]), id2("section-6")])([h2([classes(["tutorial-section-title"])])([text5("6. Anscombe's Quartet")]), p_([text5("This example demonstrates Anscombe's Quartet, a famous dataset created by statistician Francis Anscombe in 1973. All four datasets have nearly identical statistical properties (same mean, variance, correlation, and linear regression line), yet when visualized they reveal completely different patterns.")]), p_([text5("The quartet powerfully illustrates why data visualization is essential. Summary statistics alone can be misleading - you need to look at the data to understand its true structure. This implementation uses a 'small multiples' layout, displaying the four related charts side-by-side for easy comparison.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: ScatterPlotQuartet.purs")(state3.quartetSnippet))("ScatterPlotQuartet")]), section([classes(["tutorial-section", "tutorial-conclusion"]), id2("section-7")])([h2([classes(["tutorial-section-title"])])([text5("Next Steps")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien.")]), aside([classes(["tutorial-margin-note"])])([p([classes(["tutorial-margin-note__label"])])([text5("Learn More")]), a([href4("#" + routeToPath(Hierarchies.value)), classes(["tutorial-margin-note__link"])])([text5("Hierarchies \u2192")])]), ul_([li_([text5("Explore hierarchical data visualizations")]), li_([text5("Learn about the Finally Tagless pattern with interpreters")]), li_([text5("Dive into the Code Explorer for complex applications")])]), aside([classes(["tutorial-margin-note"])])([a([href4("#" + routeToPath(Interpreters.value)), classes(["tutorial-margin-note__link"])])([text5("Interpreters \u2192")]), a([href4("#" + routeToPath(CodeExplorer.value)), classes(["tutorial-margin-note__link"])])([text5("Code Explorer \u2192")])])])]);
   };
-  var component16 = /* @__PURE__ */ (function() {
+  var component17 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return {
@@ -27813,7 +28207,7 @@
           quartetSnippet: Nothing.value
         };
       },
-      render: render17,
+      render: render18,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -27825,7 +28219,7 @@
   })();
 
   // output/Routing.Parser/index.js
-  var map52 = /* @__PURE__ */ map(functorArray);
+  var map53 = /* @__PURE__ */ map(functorArray);
   var discard26 = /* @__PURE__ */ discard(discardUnit)(bindMaybe);
   var guard2 = /* @__PURE__ */ guard(alternativeMaybe);
   var apply4 = /* @__PURE__ */ apply(applyMaybe);
@@ -27838,7 +28232,7 @@
   var fromFoldable24 = /* @__PURE__ */ fromFoldable(foldableMaybe);
   var parseQueryPart = function(decoder) {
     var part2tuple = function(input3) {
-      var keyVal = map52(decoder)(split("=")(input3));
+      var keyVal = map53(decoder)(split("=")(input3));
       return discard26(guard2(length4(keyVal) <= 2))(function() {
         return apply4(map116(Tuple.create)(head2(keyVal)))(index2(keyVal)(1));
       });
@@ -27853,7 +28247,7 @@
   var parse7 = function(decoder) {
     return function(hash2) {
       var pathParts = function(str2) {
-        var parts = fromFoldable110(map52(function($31) {
+        var parts = fromFoldable110(map53(function($31) {
           return Path.create(decoder($31));
         })(split("/")(str2)));
         var v2 = unsnoc(parts);
@@ -27896,7 +28290,7 @@
 
   // output/Routing.Hash/index.js
   var bind30 = /* @__PURE__ */ bind(bindEffect);
-  var map53 = /* @__PURE__ */ map(functorEffect);
+  var map54 = /* @__PURE__ */ map(functorEffect);
   var bindFlipped10 = /* @__PURE__ */ bindFlipped(bindEffect);
   var join3 = /* @__PURE__ */ join(bindEffect);
   var apply5 = /* @__PURE__ */ apply(applyEffect);
@@ -27906,7 +28300,7 @@
     return bind30(bind30(windowImpl)(location))(setHash(h));
   };
   var getHash = /* @__PURE__ */ bind30(/* @__PURE__ */ bind30(windowImpl)(location))(/* @__PURE__ */ (function() {
-    var $16 = map53((function() {
+    var $16 = map54((function() {
       var $18 = fromMaybe("");
       var $19 = stripPrefix("#");
       return function($20) {
@@ -27921,9 +28315,9 @@
     return function(init4) {
       return function __do4() {
         var ref2 = bindFlipped10($$new)(bindFlipped10(init4)(getHash))();
-        var win = map53(toEventTarget)(windowImpl)();
+        var win = map54(toEventTarget)(windowImpl)();
         var listener = eventListener(function(v) {
-          return bindFlipped10(flip(write)(ref2))(join3(apply5(map53(cb)(read(ref2)))(getHash)));
+          return bindFlipped10(flip(write)(ref2))(join3(apply5(map54(cb)(read(ref2)))(getHash)));
         })();
         addEventListener(hashchange)(listener)(false)(win)();
         return removeEventListener(hashchange)(listener)(false)(win);
@@ -27961,7 +28355,7 @@
   var discard27 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_8 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var when5 = /* @__PURE__ */ when(applicativeHalogenM);
-  var eq8 = /* @__PURE__ */ eq(eqRoute);
+  var eq9 = /* @__PURE__ */ eq(eqRoute);
   var spy6 = /* @__PURE__ */ spy();
   var slot_15 = /* @__PURE__ */ slot_();
   var slot_1 = /* @__PURE__ */ slot_15({
@@ -28093,7 +28487,7 @@
           $68.currentRoute = v.value0.value0;
           return $68;
         }))(function() {
-          return when5(eq8(v.value0.value0)(Home.value))(bind31(liftEffect19(function __do4() {
+          return when5(eq9(v.value0.value0)(Home.value))(bind31(liftEffect19(function __do4() {
             var w = windowImpl();
             var loc = location(w)();
             return hash(loc)();
@@ -28172,47 +28566,47 @@
     }
     ;
     if (v instanceof GettingStarted) {
-      return slot_22(_gettingStarted)(unit)(component8)(unit);
+      return slot_22(_gettingStarted)(unit)(component9)(unit);
     }
     ;
     if (v instanceof HowtoIndex) {
-      return slot_32(_howtoIndex)(unit)(component6)(unit);
+      return slot_32(_howtoIndex)(unit)(component7)(unit);
     }
     ;
     if (v instanceof Reference) {
-      return slot_42(_reference)(unit)(component7)(unit);
+      return slot_42(_reference)(unit)(component8)(unit);
     }
     ;
     if (v instanceof About) {
-      return slot_52(_about)(unit)(component9)(unit);
+      return slot_52(_about)(unit)(component10)(unit);
     }
     ;
     if (v instanceof Tutorial) {
-      return slot_62(_tutorial)(unit)(component16)(unit);
+      return slot_62(_tutorial)(unit)(component17)(unit);
     }
     ;
     if (v instanceof SimpleCharts) {
-      return slot_72(_simpleCharts)(unit)(component15)(unit);
+      return slot_72(_simpleCharts)(unit)(component16)(unit);
     }
     ;
     if (v instanceof ChordDiagram) {
-      return slot_82(_chordDiagram)(unit)(component11)(unit);
+      return slot_82(_chordDiagram)(unit)(component12)(unit);
     }
     ;
     if (v instanceof BubbleChart) {
-      return slot_92(_bubbleChart)(unit)(component10)(unit);
+      return slot_92(_bubbleChart)(unit)(component11)(unit);
     }
     ;
     if (v instanceof SankeyDiagram) {
-      return slot_102(_sankeyDiagram)(unit)(component14)(unit);
+      return slot_102(_sankeyDiagram)(unit)(component15)(unit);
     }
     ;
     if (v instanceof Hierarchies) {
-      return slot_112(_hierarchies)(unit)(component12)(unit);
+      return slot_112(_hierarchies)(unit)(component13)(unit);
     }
     ;
     if (v instanceof Interpreters) {
-      return slot_122(_interpreters)(unit)(component13)(unit);
+      return slot_122(_interpreters)(unit)(component14)(unit);
     }
     ;
     if (v instanceof CodeExplorer) {
@@ -28229,17 +28623,17 @@
     ;
     throw new Error("Failed pattern match at PSD3.Main (line 104, column 20 - line 155, column 8): " + [v.constructor.name]);
   };
-  var render18 = function(state3) {
+  var render19 = function(state3) {
     return div2([classes(["app"])])([main([classes(["app__main"])])([renderPage(state3.currentRoute)])]);
   };
-  var component17 = /* @__PURE__ */ (function() {
+  var component18 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return {
           currentRoute: Home.value
         };
       },
-      render: render18,
+      render: render19,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -28250,7 +28644,7 @@
     });
   })();
   var main2 = /* @__PURE__ */ runHalogenAff(/* @__PURE__ */ bind(bindAff)(awaitBody)(function(body2) {
-    return runUI2(component17)(unit)(body2);
+    return runUI2(component18)(unit)(body2);
   }));
 
   // <stdin>

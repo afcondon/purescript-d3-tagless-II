@@ -10,9 +10,9 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.RHSNavigation as RHSNav
+import PSD3.Shared.SectionNav as SectionNav
 import PSD3.Understanding.TOC (renderTOC)
-import PSD3.Website.Types (Route(..))
+import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
 
 -- | About page state
@@ -22,9 +22,9 @@ type State = Unit
 data Action = Initialize
 
 -- | Child component slots
-type Slots = ( rhsNav :: forall q. H.Slot q Void Unit )
+type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
 
-_rhsNav = Proxy :: Proxy "rhsNav"
+_sectionNav = Proxy :: Proxy "sectionNav"
 
 -- | About page component
 component :: forall q i o. H.Component q i o Aff
@@ -43,7 +43,7 @@ render _ =
     [ HP.classes [ HH.ClassName "explanation-page" ] ]
     [ -- TOC Panel (LHS)
       renderTOC
-        { title: "Contents"
+        { title: "Page Contents"
         , items:
             [ { anchor: "heading-0", label: "PS<$>D3", level: 0 }
             , { anchor: "heading-2", label: "What is This Project?", level: 1 }
@@ -61,8 +61,22 @@ render _ =
         , image: Just "images/understanding-bookmark-trees.jpeg"
         }
 
-    -- Navigation Panel (RHS)
-    , HH.slot_ _rhsNav unit RHSNav.component About
+    -- Section Navigation (RHS)
+    , HH.slot_ _sectionNav unit SectionNav.component
+        { currentSection: UnderstandingSection
+        , currentRoute: About
+        , sectionPages:
+            [ { route: About, label: "About" }
+            , { route: Tutorial, label: "Tutorial" }
+            , { route: SimpleCharts, label: "Simple Charts" }
+            , { route: ChordDiagram, label: "Chord Diagram" }
+            , { route: BubbleChart, label: "Bubble Chart" }
+            , { route: SankeyDiagram, label: "Sankey Diagram" }
+            , { route: Hierarchies, label: "Hierarchies" }
+            , { route: Interpreters, label: "Interpreters" }
+            , { route: CodeExplorer, label: "Code Explorer" }
+            ]
+        }
 
     -- Page content
     , HH.section

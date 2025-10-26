@@ -25,10 +25,10 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.CodeExample (renderCodeExampleSimple)
-import PSD3.Shared.RHSNavigation as RHSNav
+import PSD3.Shared.SectionNav as SectionNav
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Understanding.TOC (renderTOC)
-import PSD3.Website.Types (Route(..))
+import PSD3.Website.Types (Route(..), Section(..))
 import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))
 
@@ -47,9 +47,9 @@ type State = {
 data Action = Initialize | Finalize
 
 -- | Child component slots
-type Slots = ( rhsNav :: forall q. H.Slot q Void Unit )
+type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
 
-_rhsNav = Proxy :: Proxy "rhsNav"
+_sectionNav = Proxy :: Proxy "sectionNav"
 
 -- | Tutorial page component
 component :: forall q i o. H.Component q i o Aff
@@ -73,7 +73,7 @@ component = H.mkComponent
 
 lhsNav :: H.ComponentHTML Action Slots Aff
 lhsNav = renderTOC
-  { title: "Contents"
+  { title: "Page Contents"
   , items:
       [ { anchor: "section-1", label: "1. Three Little Circles", level: 0 }
       , { anchor: "section-2", label: "2. General Update Pattern", level: 0 }
@@ -93,7 +93,21 @@ render state =
     [ HP.classes [ HH.ClassName "explanation-page" ] ]
     [ lhsNav
     -- Navigation Panel (RHS)
-    , HH.slot_ _rhsNav unit RHSNav.component Tutorial
+    , HH.slot_ _sectionNav unit SectionNav.component
+        { currentSection: UnderstandingSection
+        , currentRoute: Tutorial
+        , sectionPages:
+            [ { route: About, label: "About" }
+            , { route: Tutorial, label: "Tutorial" }
+            , { route: SimpleCharts, label: "Simple Charts" }
+            , { route: ChordDiagram, label: "Chord Diagram" }
+            , { route: BubbleChart, label: "Bubble Chart" }
+            , { route: SankeyDiagram, label: "Sankey Diagram" }
+            , { route: Hierarchies, label: "Hierarchies" }
+            , { route: Interpreters, label: "Interpreters" }
+            , { route: CodeExplorer, label: "Code Explorer" }
+            ]
+        }
 
     -- Tutorial introduction
     , HH.section

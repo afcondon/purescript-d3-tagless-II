@@ -15,8 +15,8 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.RHSNavigation as RHSNav
-import PSD3.Website.Types (Route(..))
+import PSD3.Shared.SectionNav as SectionNav
+import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
 
 -- | Hierarchies page state
@@ -71,9 +71,9 @@ data Action
   | SelectLayout HierarchyLayout
 
 -- | Child component slots
-type Slots = ( rhsNav :: forall q. H.Slot q Void Unit )
+type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
 
-_rhsNav = Proxy :: Proxy "rhsNav"
+_sectionNav = Proxy :: Proxy "sectionNav"
 
 -- | Hierarchies page component
 component :: forall q i o. H.Component q i o Aff
@@ -160,7 +160,21 @@ render state =
         ]
 
     -- Navigation Panel (RHS)
-    , HH.slot_ _rhsNav unit RHSNav.component Hierarchies
+    , HH.slot_ _sectionNav unit SectionNav.component
+        { currentSection: UnderstandingSection
+        , currentRoute: Hierarchies
+        , sectionPages:
+            [ { route: About, label: "About" }
+            , { route: Tutorial, label: "Tutorial" }
+            , { route: SimpleCharts, label: "Simple Charts" }
+            , { route: ChordDiagram, label: "Chord Diagram" }
+            , { route: BubbleChart, label: "Bubble Chart" }
+            , { route: SankeyDiagram, label: "Sankey Diagram" }
+            , { route: Hierarchies, label: "Hierarchies" }
+            , { route: Interpreters, label: "Interpreters" }
+            , { route: CodeExplorer, label: "Code Explorer" }
+            ]
+        }
 
     -- Page introduction
     , HH.section
