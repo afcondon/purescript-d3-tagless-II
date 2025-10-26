@@ -219,3 +219,114 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Hero Action Buttons */
+.home-hero__actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.home-hero__button {
+  display: inline-block;
+  padding: 0.875rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  font-size: 1.125rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.home-hero__button--primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.home-hero__button--primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.home-hero__button--secondary {
+  background: white;
+  color: var(--color-red-accent);
+  border: 2px solid var(--color-red-accent);
+}
+
+.home-hero__button--secondary:hover {
+  background: var(--color-red-accent);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+}
+
+@media (max-width: 768px) {
+  .home-hero__actions {
+    flex-direction: column;
+  }
+
+  .home-hero__button {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* Getting Started Box - Special styling for action buttons */
+.home-doc-box--getting-started {
+  cursor: default;
+}
+
+.home-doc-box__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.home-doc-box__action-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: white;
+  border: 2px solid var(--color-gray-light);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--color-gray-darker);
+  transition: all 0.3s ease;
+}
+
+.home-doc-box__action-link:hover {
+  border-color: var(--color-red-accent);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.15);
+}
+
+.home-doc-box__action-link--primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+}
+
+.home-doc-box__action-link--primary:hover {
+  border-color: #5568d3;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.home-doc-box__action-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .home-doc-box__action-link {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .home-doc-box__action-icon {
+    font-size: 1.25rem;
+  }
+}

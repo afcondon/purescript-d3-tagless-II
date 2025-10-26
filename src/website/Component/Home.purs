@@ -50,13 +50,8 @@ render _ =
         [ HP.classes [ HH.ClassName "home-docs" ] ]
         [ HH.div
             [ HP.classes [ HH.ClassName "home-docs__grid" ] ]
-            [ -- Tutorial box (air themed - balloons)
-              renderDocBox
-                "Getting Started"
-                "Installation, setup, and your first visualization"
-                (routeToPath GettingStarted)
-                "Start Here →"
-                (Just "images/tutorial-bookmark-balloons.jpeg")
+            [ -- Tutorial box (air themed - balloons) - with two action buttons
+              renderGettingStartedBox
 
             -- How-to box (fire themed - volcano)
             , renderDocBox
@@ -108,6 +103,52 @@ render _ =
                 "Code Explorer"
                 "Interactive exploration of visualization code"
                 (routeToPath CodeExplorer)
+            ]
+        ]
+    ]
+
+-- | Render the Getting Started box with two action buttons
+renderGettingStartedBox :: forall w i. HH.HTML w i
+renderGettingStartedBox =
+  HH.div
+    [ HP.classes [ HH.ClassName "home-doc-box home-doc-box--getting-started" ] ]
+    [ -- Left side: bookmark image (1/8th width)
+      HH.div
+        [ HP.classes [ HH.ClassName "home-doc-box__image-container" ] ]
+        [ HH.img
+            [ HP.src "images/tutorial-bookmark-balloons.jpeg"
+            , HP.alt ""
+            , HP.classes [ HH.ClassName "home-doc-box__image" ]
+            ]
+        ]
+    -- Right side: content (7/8ths width, center-justified)
+    , HH.div
+        [ HP.classes [ HH.ClassName "home-doc-box__content" ] ]
+        [ HH.h3
+            [ HP.classes [ HH.ClassName "home-doc-box__title" ] ]
+            [ HH.text "Getting Started" ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "home-doc-box__actions" ] ]
+            [ HH.a
+                [ HP.href $ "#" <> routeToPath GettingStarted
+                , HP.classes [ HH.ClassName "home-doc-box__action-link" ]
+                ]
+                [ HH.span
+                    [ HP.classes [ HH.ClassName "home-doc-box__action-icon" ] ]
+                    [ HH.text "📖" ]
+                , HH.span_
+                    [ HH.text "See how to get set up to use this library on your own system" ]
+                ]
+            , HH.a
+                [ HP.href $ "#" <> routeToPath Wizard
+                , HP.classes [ HH.ClassName "home-doc-box__action-link home-doc-box__action-link--primary" ]
+                ]
+                [ HH.span
+                    [ HP.classes [ HH.ClassName "home-doc-box__action-icon" ] ]
+                    [ HH.text "🚀" ]
+                , HH.span_
+                    [ HH.text "Use interactive wizard to generate and, optionally, download working code" ]
+                ]
             ]
         ]
     ]

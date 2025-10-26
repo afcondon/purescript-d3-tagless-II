@@ -696,3 +696,46 @@
     display: none;
   }
 }
+
+/* Wizard Callout Box */
+.tutorial-callout {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 2rem;
+  border-radius: 8px;
+  margin: 2rem 0;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.tutorial-callout h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+.tutorial-callout p {
+  margin-bottom: 0.75rem;
+}
+
+/* Wizard Launch Button */
+.tutorial-button {
+  display: inline-block;
+  padding: 0.875rem 1.75rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 1.125rem;
+}
+
+.tutorial-button--primary {
+  background: white;
+  color: #667eea;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.tutorial-button--primary:hover {
+  background: #f8f9fa;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}

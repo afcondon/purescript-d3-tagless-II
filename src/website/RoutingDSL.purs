@@ -18,6 +18,7 @@ routing =
 routes :: Match Route
 routes =
   gettingStarted  -- Must come early - specific routes before general
+  <|> wizard
   <|> howtoIndex
   <|> referenceModule  -- Must come before reference (more specific)
   <|> reference
@@ -41,6 +42,10 @@ rootRedirect = Home <$ end
 -- | Match: /getting-started
 gettingStarted :: Match Route
 gettingStarted = GettingStarted <$ lit "getting-started" <* end
+
+-- | Match: /wizard
+wizard :: Match Route
+wizard = Wizard <$ lit "wizard" <* end
 
 -- | Match: /howto
 howtoIndex :: Match Route
@@ -104,6 +109,7 @@ notFound = pure NotFound
 routeToPath :: Route -> String
 routeToPath Home = "/"
 routeToPath GettingStarted = "/getting-started"
+routeToPath Wizard = "/wizard"
 routeToPath HowtoIndex = "/howto"
 routeToPath Reference = "/reference"
 routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName

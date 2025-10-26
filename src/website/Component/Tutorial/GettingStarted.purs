@@ -71,6 +71,19 @@ render _ =
             [ HH.text "Getting Started with PS<$>D3" ]
         , HH.p_
             [ HH.text "Welcome! This guide will help you install PSD3, set up your first project, and create your first data visualization using our scaffold wizard. By the end, you'll have a working visualization that you can view in your browser." ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "tutorial-callout" ] ]
+            [ HH.h3_ [ HH.text "🚀 Try the Interactive Wizard" ]
+            , HH.p_
+                [ HH.text "Want to skip the command line? Use our interactive web wizard to generate a complete visualization project right in your browser:" ]
+            , HH.p_
+                [ HH.a
+                    [ HP.href "#/wizard"
+                    , HP.classes [ HH.ClassName "tutorial-button tutorial-button--primary" ]
+                    ]
+                    [ HH.text "Launch Interactive Wizard →" ]
+                ]
+            ]
         ]
 
     -- Installation section
@@ -137,7 +150,29 @@ spago build""" ]
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
             [ HH.text "Using the Wizard" ]
         , HH.p_
-            [ HH.text "The wizard will generate a complete visualization scaffold for you. Run it from the project root:" ]
+            [ HH.text "PSD3 provides two ways to generate a visualization scaffold:" ]
+        , HH.h3_ [ HH.text "Option 1: Interactive Web Wizard (Recommended)" ]
+        , HH.p_
+            [ HH.text "The easiest way to get started is with our "
+            , HH.a [ HP.href "#/wizard" ] [ HH.text "interactive web wizard" ]
+            , HH.text ". It provides:"
+            ]
+        , HH.ul_
+            [ HH.li_ [ HH.text "Choose from pre-configured example datasets (Anscombe's Quartet, scatter plots, sine waves, etc.)" ]
+            , HH.li_ [ HH.text "Educational tips and explanations at each step" ]
+            , HH.li_ [ HH.text "Preview generated files before downloading" ]
+            , HH.li_ [ HH.text "Download as a .zip file or copy to clipboard" ]
+            ]
+        , HH.p_
+            [ HH.a
+                [ HP.href "#/wizard"
+                , HP.classes [ HH.ClassName "tutorial-button tutorial-button--primary" ]
+                ]
+                [ HH.text "Launch Interactive Wizard →" ]
+            ]
+        , HH.h3_ [ HH.text "Option 2: Command-Line Wizard" ]
+        , HH.p_
+            [ HH.text "If you prefer working from the command line, use the CLI wizard. Run it from the project root:" ]
         , HH.pre_
             [ HH.code_
                 [ HH.text "node scripts/init-psd3-viz.js" ]

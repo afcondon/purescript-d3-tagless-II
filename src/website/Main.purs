@@ -17,6 +17,7 @@ import Halogen.Subscription as HS
 import Halogen.VDom.Driver (runUI)
 import PSD3.Home as Home
 import PSD3.Tutorial.GettingStarted as GettingStarted
+import PSD3.Wizard.Wizard as Wizard
 import PSD3.HowTo.HowtoIndex as HowtoIndex
 import PSD3.Reference.Reference as Reference
 import PSD3.Understanding.About as About
@@ -49,6 +50,7 @@ data Action
 type Slots =
   ( home :: forall q. H.Slot q Void Unit
   , gettingStarted :: forall q. H.Slot q Void Unit
+  , wizard :: forall q. H.Slot q Void Unit
   , howtoIndex :: forall q. H.Slot q Void Unit
   , reference :: forall q. H.Slot q Void Unit
   , about :: forall q. H.Slot q Void Unit
@@ -65,6 +67,7 @@ type Slots =
 
 _home = Proxy :: Proxy "home"
 _gettingStarted = Proxy :: Proxy "gettingStarted"
+_wizard = Proxy :: Proxy "wizard"
 _howtoIndex = Proxy :: Proxy "howtoIndex"
 _reference = Proxy :: Proxy "reference"
 _about = Proxy :: Proxy "about"
@@ -107,6 +110,9 @@ renderPage route = case spy "Route is" route of
 
   GettingStarted ->
     HH.slot_ _gettingStarted unit GettingStarted.component unit
+
+  Wizard ->
+    HH.slot_ _wizard unit Wizard.component unit
 
   HowtoIndex ->
     HH.slot_ _howtoIndex unit HowtoIndex.component unit
