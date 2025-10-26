@@ -1392,6 +1392,148 @@
     display: none;
   }
 }
+
+/* Module categories in section nav (for Reference) */
+.section-nav__modules {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.section-nav__module-category {
+  margin-bottom: var(--spacing-sm);
+}
+
+.section-nav__category-title {
+  font-family: var(--font-mono);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-gray-darker);
+  margin: 0 0 var(--spacing-sm) 0;
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.section-nav__module-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.section-nav__module-item {
+  margin: 0;
+  padding: 0;
+}
+
+.section-nav__module-link {
+  display: block;
+  padding: var(--spacing-xs) var(--spacing-sm);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-text-dark);
+  text-decoration: none;
+  border-left: 2px solid transparent;
+  transition: all var(--transition-base);
+}
+
+.section-nav__module-link:hover {
+  border-left-color: var(--color-teal);
+  padding-left: var(--spacing-md);
+  color: var(--color-teal);
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.section-nav__module-link--active {
+  border-left-color: var(--color-teal);
+  background-color: rgba(0, 0, 0, 0.05);
+  font-weight: 600;
+  color: var(--color-teal);
+  cursor: default;
+}
+/* ============================================
+   Module Page (Individual module documentation)
+   ============================================ */
+
+.module-page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
+
+.module-page__header {
+  margin-bottom: var(--spacing-2xl);
+  padding-bottom: var(--spacing-lg);
+  border-bottom: 2px solid var(--color-line);
+}
+
+.module-page__title {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.module-page__description {
+  font-family: var(--font-sans);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--color-gray-darker);
+  margin: 0;
+  font-style: italic;
+}
+
+.module-page__content {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.module-page__source {
+  background: white;
+  padding: var(--spacing-xl);
+  border: 1px solid var(--color-line);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.module-page__source-title {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin: 0 0 var(--spacing-lg) 0;
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.module-page__code {
+  background-color: var(--color-beige-light);
+  border: 1px solid var(--color-line);
+  border-radius: 0;
+  overflow-x: auto;
+}
+
+.module-page__code pre {
+  margin: 0;
+  background: transparent;
+}
+
+.module-page__loading,
+.module-page__error {
+  padding: var(--spacing-xl);
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-gray-darker);
+}
+
+.module-page__error {
+  color: #a94442;
+  background-color: #f2dede;
+  border: 1px solid #ebccd1;
+  border-radius: var(--radius-sm);
+}
+
 /* ============================================
    Module List Panel (Reference Section - LHS)
    ============================================ */
@@ -1399,7 +1541,8 @@
 .module-list-panel {
   position: fixed;
   top: 2rem;
-  left: 2rem;
+  /* Position to left of center column: 50% - half column width - panel width - gap */
+  left: calc(50% - 26rem - 320px - 2rem);
   width: 320px;
   max-height: calc(100vh - 4rem);
   display: flex;
@@ -1621,6 +1764,7 @@
 /* Responsive */
 @media (max-width: 1600px) {
   .module-list-panel {
+    /* Switch to edge positioning when viewport is too narrow */
     left: 2rem;
   }
 }

@@ -59,6 +59,7 @@ render _ =
         , sectionPages:
             [ { route: HowtoIndex, label: "How-to Guides" }
             ]
+        , moduleCategories: Nothing
         }
 
     -- Page introduction

@@ -112,7 +112,10 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _howtoIndex unit HowtoIndex.component unit
 
   Reference ->
-    HH.slot_ _reference unit Reference.component unit
+    HH.slot_ _reference unit Reference.component Reference
+
+  ReferenceModule moduleName ->
+    HH.slot_ _reference unit Reference.component (ReferenceModule moduleName)
 
   About ->
     HH.slot_ _about unit About.component unit

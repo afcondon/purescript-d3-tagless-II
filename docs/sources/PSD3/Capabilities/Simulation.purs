@@ -1,64 +1,4 @@
-module PSD3.Reference.Modules.SimulationModule where
-
-import Prelude
-import Data.Maybe (Maybe(..))
-import Data.String as String
-import Effect.Aff (Aff)
-import Halogen as H
-import Halogen.HTML as HH
-import Halogen.HTML.Properties as HP
-import PSD3.Shared.DocParser as DocParser
-import PSD3.Shared.RHSNavigation as RHSNav
-import PSD3.Understanding.TOC (renderTOC)
-import PSD3.Website.Types (Route(..))
-import Type.Proxy (Proxy(..))
-
-type State = Unit
-data Action = Initialize
-type Slots = ( rhsNav :: forall q. H.Slot q Void Unit )
-_rhsNav = Proxy :: Proxy "rhsNav"
-
-component :: forall q i. H.Component q i Void Aff
-component = H.mkComponent
-  { initialState: \_ -> unit
-  , render
-  , eval: H.mkEval H.defaultEval { handleAction = handleAction, initialize = Just Initialize }
-  }
-
-render :: State -> H.ComponentHTML Action Slots Aff
-render _ =
-  let
-    parsed = DocParser.parseDocumentation sourceCode
-  in
-  HH.div
-    [ HP.classes [ HH.ClassName "reference-page" ] ]
-    [ renderTOC
-        { title: "Simulation"
-        , items: [ { anchor: "overview", label: "Simulation Capability", level: 0 } ]
-        , image: Just "images/reference-bookmark-trees.jpeg"
-        }
-    , HH.slot_ _rhsNav unit RHSNav.component Reference
-    , HH.div
-        [ HP.classes [ HH.ClassName "module-info-box" ] ]
-        [ HH.div [ HP.classes [ HH.ClassName "module-info-left" ] ]
-            [ HH.strong_ [ HH.text "Module: " ], HH.code_ [ HH.text "PSD3.Capabilities.Simulation" ] ]
-        , HH.div [ HP.classes [ HH.ClassName "module-info-right" ] ]
-            [ HH.strong_ [ HH.text "File: " ], HH.code_ [ HH.text "src/lib/PSD3/Capabilities/Simulation.purs" ] ]
-        ]
-    , HH.div
-        [ HP.classes [ HH.ClassName "reference-content" ], HP.id "overview" ]
-        (DocParser.markdownToHtml parsed.docLines)
-    , HH.div
-        [ HP.classes [ HH.ClassName "reference-code-section" ] ]
-        [ HH.h2 [ HP.classes [ HH.ClassName "reference-code-title" ] ]
-            [ HH.text "Source Code" ]
-        , HH.pre_ [ HH.code [ HP.classes [ HH.ClassName "language-haskell" ] ]
-            [ HH.text (String.joinWith "\n" parsed.codeLines) ] ]
-        ]
-    ]
-
-sourceCode :: String
-sourceCode = """-- | PSD3.Capabilities.Simulation - Force-directed graph simulations
+-- | PSD3.Capabilities.Simulation - Force-directed graph simulations
 -- |
 -- | This module defines the `SimulationM` type class for creating animated,
 -- | force-directed visualizations. Force simulations are physics-based layouts
@@ -88,7 +28,7 @@ sourceCode = """-- | PSD3.Capabilities.Simulation - Force-directed graph simulat
 -- |   m Unit
 -- | myForceGraph = do
 -- |   -- 1. Create SVG container
--- |   svg <- attach \"#chart\" >>= \\r -> appendTo r Svg [width 800.0, height 600.0]
+-- |   svg <- attach "#chart" >>= \r -> appendTo r Svg [width 800.0, height 600.0]
 -- |
 -- |   -- 2. Load nodes and links into simulation
 -- |   nodesInSim <- setNodes myNodeData
@@ -99,8 +39,8 @@ sourceCode = """-- | PSD3.Capabilities.Simulation - Force-directed graph simulat
 -- |   lines <- simpleJoin svg Line linksInSim keyFn
 -- |
 -- |   -- 4. Set up tick function to update positions on each frame
--- |   addTickFunction \"nodes\" $ Step circles [cx nodeX, cy nodeY]
--- |   addTickFunction \"links\" $ Step lines [x1 linkSourceX, y1 linkSourceY, ...]
+-- |   addTickFunction "nodes" $ Step circles [cx nodeX, cy nodeY]
+-- |   addTickFunction "links" $ Step lines [x1 linkSourceX, y1 linkSourceY, ...]
 -- |
 -- |   -- 5. Start the simulation
 -- |   start
@@ -151,7 +91,7 @@ import Data.Maybe (Maybe)
 import Data.Set (Set)
 import Prelude (class Eq, class Monad, Unit)
 
--- | Prevents \"boolean blindness\" when enabling/disabling forces.
+-- | Prevents "boolean blindness" when enabling/disabling forces.
 -- |
 -- | Instead of passing booleans, pass lists of force labels.
 type ForceConfigLists = { enable :: Array Label, disable :: Array Label }
@@ -194,7 +134,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- |
   -- | These control the simulation's behavior:
   -- | - `Alpha` - Current animation progress (1.0 = full energy, 0.0 = stopped)
-  -- | - `AlphaTarget` - Minimum alpha to maintain (keeps simulation \"warm\")
+  -- | - `AlphaTarget` - Minimum alpha to maintain (keeps simulation "warm")
   -- | - `AlphaDecay` - How quickly simulation cools down
   -- | - `VelocityDecay` - Friction applied to node movement
   -- |
@@ -208,12 +148,12 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
 
   -- | Enable only the specified forces, disable all others.
   -- |
-  -- | Forces are identified by labels like \"center\", \"charge\", \"link\", etc.
+  -- | Forces are identified by labels like "center", "charge", "link", etc.
   -- | This completely replaces the active force set.
   -- |
   -- | ```purescript
   -- | -- Enable only center and charge forces
-  -- | actualizeForces $ Set.fromFoldable [\"center\", \"charge\"]
+  -- | actualizeForces $ Set.fromFoldable ["center", "charge"]
   -- | ```
   -- |
   -- | See `PSD3.Internal.Simulation.Forces` for force definitions.
@@ -227,7 +167,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- | where you load data once at initialization.
   -- |
   -- | ```purescript
-  -- | let nodes = [{ id: \"a\", ... }, { id: \"b\", ... }]
+  -- | let nodes = [{ id: "a", ... }, { id: "b", ... }]
   -- | nodesInSim <- setNodes nodes
   -- | circles <- simpleJoin svg Circle nodesInSim keyFn
   -- | ```
@@ -238,17 +178,17 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- | Load link data into the simulation, validating against nodes.
   -- |
   -- | This is the **type-safe** way to set links. Links reference nodes by ID,
-  -- | and this function \"swizzles\" those IDs into object references that D3 needs.
+  -- | and this function "swizzles" those IDs into object references that D3 needs.
   -- |
   -- | ```purescript
-  -- | let links = [{ source: \"a\", target: \"b\", ... }]
+  -- | let links = [{ source: "a", target: "b", ... }]
   -- | linksInSim <- setLinks links nodes keyFn
   -- | lines <- simpleJoin svg Line linksInSim keyFn
   -- | ```
   -- |
   -- | Invalid links (referencing non-existent nodes) are filtered out.
   -- |
-  -- | Returns \"swizzled\" links where source/target are object references.
+  -- | Returns "swizzled" links where source/target are object references.
   setLinks :: forall d r id. (Eq id) => Array (D3Link id r) -> Array (D3_SimulationNode d) -> (Datum_ -> Index_ ) -> m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
 
   -- ** Data Management - Selection-Based (For Updates) **
@@ -272,7 +212,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- | which links should exert force (some links might be visual only).
   -- |
   -- | ```purescript
-  -- | setLinksFromSelection mergedLines (\\_ -> true)  -- All links have force
+  -- | setLinksFromSelection mergedLines (\_ -> true)  -- All links have force
   -- | ```
   -- |
   -- | **Warning**: No compile-time type checking. Ensure selection data is correct.
@@ -292,7 +232,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- |   { nodes: newNodes, links: newLinks }
   -- |
   -- | setNodesFromSelection merged.nodes
-  -- | setLinksFromSelection merged.links (\\_ -> true)
+  -- | setLinksFromSelection merged.links (\_ -> true)
   -- | ```
   -- |
   -- | This preserves the physical simulation state across data updates.
@@ -319,10 +259,10 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- |
   -- | ```purescript
   -- | -- Update circle positions on each tick
-  -- | addTickFunction \"nodes\" $ Step circles [cx datum_.x, cy datum_.y]
+  -- | addTickFunction "nodes" $ Step circles [cx datum_.x, cy datum_.y]
   -- |
   -- | -- Update link positions on each tick
-  -- | addTickFunction \"links\" $ Step lines [
+  -- | addTickFunction "links" $ Step lines [
   -- |   x1 (_.x <<< link_.source),
   -- |   y1 (_.y <<< link_.source),
   -- |   x2 (_.x <<< link_.target),
@@ -336,7 +276,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- | Remove a tick function by its label.
   -- |
   -- | ```purescript
-  -- | removeTickFunction \"nodes\"  -- Stop updating node positions
+  -- | removeTickFunction "nodes"  -- Stop updating node positions
   -- | ```
   removeTickFunction :: Label                   -> m Unit
 
@@ -354,8 +294,4 @@ type Staging selection d r id = {
    -- filter for links given to simulation engine, you don't necessarily want all links to be exerting force
   , linksWithForce :: Datum_ -> Boolean
   , rawdata :: RawData d r id
-}"""
-
-handleAction :: forall m. Action -> H.HalogenM State Action Slots Void m Unit
-handleAction = case _ of
-  Initialize -> pure unit
+}

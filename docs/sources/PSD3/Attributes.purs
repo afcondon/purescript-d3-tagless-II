@@ -1,90 +1,4 @@
-module PSD3.Reference.Modules.AttributesModule where
-
-import Prelude
-
-import Data.Maybe (Maybe(..))
-import Data.String as String
-import Effect.Aff (Aff)
-import Halogen as H
-import Halogen.HTML as HH
-import Halogen.HTML.Properties as HP
-import PSD3.Shared.DocParser as DocParser
-import PSD3.Shared.RHSNavigation as RHSNav
-import PSD3.Understanding.TOC (renderTOC)
-import PSD3.Website.Types (Route(..))
-import Type.Proxy (Proxy(..))
-
-type State = Unit
-data Action = Initialize
-
-type Slots = ( rhsNav :: forall q. H.Slot q Void Unit )
-_rhsNav = Proxy :: Proxy "rhsNav"
-
-component :: forall q i. H.Component q i Void Aff
-component = H.mkComponent
-  { initialState: \_ -> unit
-  , render
-  , eval: H.mkEval H.defaultEval
-      { handleAction = handleAction
-      , initialize = Just Initialize
-      }
-  }
-
-render :: State -> H.ComponentHTML Action Slots Aff
-render _ =
-  let
-    parsed = DocParser.parseDocumentation sourceCode
-  in
-  HH.div
-    [ HP.classes [ HH.ClassName "reference-page" ] ]
-    [ renderTOC
-        { title: "Attributes"
-        , items:
-            [ { anchor: "overview", label: "Attributes Module", level: 0 }
-            ]
-        , image: Just "images/reference-bookmark-trees.jpeg"
-        }
-
-    , HH.slot_ _rhsNav unit RHSNav.component Reference
-
-    -- Module info box
-    , HH.div
-        [ HP.classes [ HH.ClassName "module-info-box" ] ]
-        [ HH.div
-            [ HP.classes [ HH.ClassName "module-info-left" ] ]
-            [ HH.strong_ [ HH.text "Module: " ]
-            , HH.code_ [ HH.text "PSD3.Attributes" ]
-            ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "module-info-right" ] ]
-            [ HH.strong_ [ HH.text "File: " ]
-            , HH.code_ [ HH.text "src/lib/PSD3/Attributes.purs" ]
-            ]
-        ]
-
-    -- Documentation section
-    , HH.div
-        [ HP.classes [ HH.ClassName "reference-content" ]
-        , HP.id "overview"
-        ]
-        (DocParser.markdownToHtml parsed.docLines)
-
-    -- Source code section
-    , HH.div
-        [ HP.classes [ HH.ClassName "reference-code-section" ] ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "reference-code-title" ] ]
-            [ HH.text "Source Code" ]
-        , HH.pre_
-            [ HH.code
-                [ HP.classes [ HH.ClassName "language-haskell" ] ]
-                [ HH.text (String.joinWith "\n" parsed.codeLines) ]
-            ]
-        ]
-    ]
-
-sourceCode :: String
-sourceCode = """-- | PSD3.Attributes - All attribute functions for D3 selections
+-- | PSD3.Attributes - All attribute functions for D3 selections
 -- |
 -- | This module provides functions for setting visual properties on D3 selections.
 -- | Attributes control how SVG elements look and behave - their position, size,
@@ -98,8 +12,8 @@ sourceCode = """-- | PSD3.Attributes - All attribute functions for D3 selections
 -- |
 -- | Attributes can be:
 -- | - **Static**: Same value for all elements (e.g., `fill "red"`)
--- | - **Dynamic**: Computed from bound data (e.g., `fill (\\d -> d.color)`)
--- | - **Indexed**: Computed from data and index (e.g., `x (\\d i -> i * 10.0)`)
+-- | - **Dynamic**: Computed from bound data (e.g., `fill (\d -> d.color)`)
+-- | - **Indexed**: Computed from data and index (e.g., `x (\d i -> i * 10.0)`)
 -- |
 -- | The `ToAttr` type class automatically handles all three cases, so you can use
 -- | literals or functions interchangeably.
@@ -128,10 +42,10 @@ sourceCode = """-- | PSD3.Attributes - All attribute functions for D3 selections
 -- | -- Assuming data is Array { x :: Number, y :: Number, color :: String }
 -- | circles <- simpleJoin svg Circle data keyFn
 -- | setAttributes circles
--- |   [ cx (\\d -> d.x)           -- Function of datum
--- |   , cy (\\d -> d.y)
+-- |   [ cx (\d -> d.x)           -- Function of datum
+-- |   , cy (\d -> d.y)
 -- |   , radius 5.0               -- Static value
--- |   , fill (\\d -> d.color)
+-- |   , fill (\d -> d.color)
 -- |   ]
 -- | ```
 -- |
@@ -139,10 +53,10 @@ sourceCode = """-- | PSD3.Attributes - All attribute functions for D3 selections
 -- | ```purescript
 -- | bars <- simpleJoin svg Rect data keyFn
 -- | setAttributes bars
--- |   [ x (\\d i -> i * 20.0)     -- Function of datum and index
--- |   , y (\\d -> 100.0 - d.value)
+-- |   [ x (\d i -> i * 20.0)     -- Function of datum and index
+-- |   , y (\d -> 100.0 - d.value)
 -- |   , width 18.0
--- |   , height (\\d -> d.value)
+-- |   , height (\d -> d.value)
 -- |   ]
 -- | ```
 -- |
@@ -247,10 +161,10 @@ sourceCode = """-- | PSD3.Attributes - All attribute functions for D3 selections
 -- |
 -- | circles <- simpleJoin svg Circle myData keyFn
 -- | setAttributes circles
--- |   [ cx (\\d -> d.value * 10.0)            -- Scale value to position
--- |   , cy (\\d i -> i * 20.0)                -- Use index for vertical spacing
--- |   , radius (\\d -> sqrt d.value)          -- Size proportional to sqrt
--- |   , fill (\\d -> categoryColor d.category) -- Color by category
+-- |   [ cx (\d -> d.value * 10.0)            -- Scale value to position
+-- |   , cy (\d i -> i * 20.0)                -- Use index for vertical spacing
+-- |   , radius (\d -> sqrt d.value)          -- Size proportional to sqrt
+-- |   , fill (\d -> categoryColor d.category) -- Color by category
 -- |   ]
 -- | ```
 -- |
@@ -262,8 +176,8 @@ sourceCode = """-- | PSD3.Attributes - All attribute functions for D3 selections
 -- |
 -- | This allows:
 -- | - Literals: `fill "red"`, `radius 50.0`
--- | - Functions: `fill (\\d -> d.color)`, `radius (\\d -> d.size)`
--- | - Indexed functions: `x (\\d i -> i * 10.0)`
+-- | - Functions: `fill (\d -> d.color)`, `radius (\d -> d.size)`
+-- | - Indexed functions: `x (\d i -> i * 10.0)`
 -- |
 -- | ## See Also
 -- |
@@ -275,8 +189,3 @@ module PSD3.Attributes
   ) where
 
 import PSD3.Internal.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), andThen, assembleTransforms, autoBox, backgroundColor, classed, cursor, cx, cy, d, defaultTransition, dx, dy, fill, fillOpacity, fontFamily, fontSize, height, height100, namedTransition, onMouseEvent, onMouseEventEffectful, opacity, originX, originY, pointXY, preserveAspectRatio, radius, remove, rotate, strokeColor, strokeLineJoin, strokeOpacity, strokeWidth, strength, text, textAnchor, to, transform, transform', transition, transitionWithDuration, viewBox, width, width100, x, x1, x2, y, y1, y2) as Sugar
-"""
-
-handleAction :: forall m. Action -> H.HalogenM State Action Slots Void m Unit
-handleAction = case _ of
-  Initialize -> pure unit

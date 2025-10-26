@@ -60,6 +60,7 @@ render _ =
         , sectionPages:
             [ { route: GettingStarted, label: "Getting Started" }
             ]
+        , moduleCategories: Nothing
         }
 
     -- Page introduction

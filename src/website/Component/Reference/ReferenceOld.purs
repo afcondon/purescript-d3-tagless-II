@@ -55,13 +55,13 @@ render _ =
         }
 
     -- Navigation Panel (RHS)
-    , HH.slot_ _sectionNav unit SectionNav.component
-        { currentSection: APISection
-        , currentRoute: Reference
-        , sectionPages:
-            [ { route: Reference, label: "API Reference" }
-            ]
-        }
+    -- , HH.slot_ _sectionNav unit SectionNav.component
+    --     { currentSection: APISection
+    --     , currentRoute: Reference
+    --     , sectionPages:
+    --         [ { route: Reference, label: "API Reference" }
+    --         ]
+    --     }
 
     -- Page introduction
     , HH.section

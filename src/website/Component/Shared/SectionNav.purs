@@ -2,16 +2,23 @@ module PSD3.Shared.SectionNav where
 
 import Prelude
 
+import Data.Maybe (Maybe(..))
 import PSD3.Website.Types (Route(..), Section(..))
 import PSD3.RoutingDSL (routeToPath)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 
+type ModuleCategory =
+  { title :: String
+  , modules :: Array { name :: String, description :: String }
+  }
+
 type Input =
   { currentSection :: Section
   , currentRoute :: Route
   , sectionPages :: Array { route :: Route, label :: String }
+  , moduleCategories :: Maybe (Array ModuleCategory)
   }
 
 type Slots :: forall k. Row k
@@ -26,7 +33,7 @@ component = H.mkComponent
   }
 
 render :: forall m. Input -> H.ComponentHTML Unit Slots m
-render { currentSection, currentRoute, sectionPages } =
+render { currentSection, currentRoute, sectionPages, moduleCategories } =
   HH.div
     [ HP.classes [ HH.ClassName "section-nav" ] ]
     [ -- Quadrant switcher
@@ -43,10 +50,18 @@ render { currentSection, currentRoute, sectionPages } =
         [ HP.classes [ HH.ClassName "section-nav__title" ] ]
         [ HH.text $ sectionTitle currentSection ]
 
-    -- Page navigation within section
-    , HH.nav
-        [ HP.classes [ HH.ClassName "section-nav__pages" ] ]
-        (map (renderPageLink currentRoute) sectionPages)
+    -- Content: either module categories or page links
+    , case moduleCategories of
+        Just categories ->
+          -- Render module categories (for Reference section)
+          HH.nav
+            [ HP.classes [ HH.ClassName "section-nav__modules" ] ]
+            (map (renderModuleCategory currentRoute) categories)
+        Nothing ->
+          -- Render page links (for other sections)
+          HH.nav
+            [ HP.classes [ HH.ClassName "section-nav__pages" ] ]
+            (map (renderPageLink currentRoute) sectionPages)
     ]
 
 -- | Render a single quadrant box
@@ -102,3 +117,44 @@ sectionTitle = case _ of
   TutorialSection -> "Getting Started"
   HowToSection -> "How-To Guides"
   APISection -> "API Reference"
+
+-- | Render a module category with its modules
+renderModuleCategory :: forall m. Route -> ModuleCategory -> H.ComponentHTML Unit Slots m
+renderModuleCategory currentRoute category =
+  HH.div
+    [ HP.classes [ HH.ClassName "section-nav__module-category" ] ]
+    [ HH.h4
+        [ HP.classes [ HH.ClassName "section-nav__category-title" ] ]
+        [ HH.text category.title ]
+    , HH.ul
+        [ HP.classes [ HH.ClassName "section-nav__module-list" ] ]
+        (map (renderModuleLink currentRoute) category.modules)
+    ]
+
+-- | Render a single module link
+renderModuleLink :: forall m. Route -> { name :: String, description :: String } -> H.ComponentHTML Unit Slots m
+renderModuleLink currentRoute moduleInfo =
+  let
+    moduleRoute = ReferenceModule moduleInfo.name
+    isActive = currentRoute == moduleRoute
+  in
+    HH.li
+      [ HP.classes [ HH.ClassName "section-nav__module-item" ] ]
+      [ if isActive
+          then
+            HH.span
+              [ HP.classes
+                  [ HH.ClassName "section-nav__module-link"
+                  , HH.ClassName "section-nav__module-link--active"
+                  ]
+              , HP.title moduleInfo.description
+              ]
+              [ HH.text moduleInfo.name ]
+          else
+            HH.a
+              [ HP.href $ "#" <> routeToPath moduleRoute
+              , HP.classes [ HH.ClassName "section-nav__module-link" ]
+              , HP.title moduleInfo.description
+              ]
+              [ HH.text moduleInfo.name ]
+      ]

@@ -19,6 +19,7 @@ routes :: Match Route
 routes =
   gettingStarted  -- Must come early - specific routes before general
   <|> howtoIndex
+  <|> referenceModule  -- Must come before reference (more specific)
   <|> reference
   <|> tutorial
   <|> simpleCharts
@@ -44,6 +45,10 @@ gettingStarted = GettingStarted <$ lit "getting-started" <* end
 -- | Match: /howto
 howtoIndex :: Match Route
 howtoIndex = HowtoIndex <$ lit "howto" <* end
+
+-- | Match: /reference/:moduleName
+referenceModule :: Match Route
+referenceModule = ReferenceModule <$> (lit "reference" *> str) <* end
 
 -- | Match: /reference
 reference :: Match Route
@@ -101,6 +106,7 @@ routeToPath Home = "/"
 routeToPath GettingStarted = "/getting-started"
 routeToPath HowtoIndex = "/howto"
 routeToPath Reference = "/reference"
+routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName
 routeToPath About = "/about"
 routeToPath Tutorial = "/tutorial"
 routeToPath SimpleCharts = "/simple-charts"

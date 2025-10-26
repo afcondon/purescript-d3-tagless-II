@@ -107,6 +107,7 @@ render state =
             , { route: Interpreters, label: "Interpreters" }
             , { route: CodeExplorer, label: "Code Explorer" }
             ]
+        , moduleCategories: Nothing
         }
 
     -- Tutorial introduction

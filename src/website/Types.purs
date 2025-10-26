@@ -83,7 +83,8 @@ data Route
   = Home            -- Landing page with four documentation categories
   | GettingStarted  -- Tutorial: installation, setup, first project
   | HowtoIndex      -- How-to: index of all step-by-step guides
-  | Reference       -- Reference: API documentation
+  | Reference       -- Reference: API documentation index
+  | ReferenceModule String  -- Reference: individual module page (e.g., "PSD3.Types")
   | About
   | Tutorial
   | SimpleCharts
@@ -103,6 +104,7 @@ instance showRoute :: Show Route where
   show GettingStarted = "Getting Started"
   show HowtoIndex = "How-to Guides"
   show Reference = "API Reference"
+  show (ReferenceModule moduleName) = "Module: " <> moduleName
   show About = "About"
   show Tutorial = "Tutorial"
   show SimpleCharts = "Simple Charts"
