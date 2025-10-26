@@ -189,8 +189,8 @@ handleAction = case _ of
             w <- window
             loc <- Web.HTML.Window.location w
             Web.HTML.Location.hash loc
-          when (currentHash == "") $ do
-            H.liftEffect $ setHash "/"
+          when (currentHash == "" || currentHash == "#" || currentHash == "#/") $ do
+            H.liftEffect $ setHash (routeToPath Home)
       Nothing -> H.modify_ _ { currentRoute = NotFound } -- Fallback if route doesn't match
 
 -- | Entry point
