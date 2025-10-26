@@ -3,11 +3,7 @@ module D3.Viz.WealthHealth.Draw where
 import Prelude
 
 import D3.Viz.WealthHealth.Unsafe (coerceDatumToKey, datum_)
-import Data.Array (range)
-import Data.Foldable (traverse_)
-import Data.Int (toNumber)
 import Data.Number (log, sqrt)
-import Effect.Aff (Milliseconds(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSelection, setAttributes, updateJoin)
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, height, radius, strokeColor, strokeWidth, viewBox, width)
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
@@ -162,17 +158,73 @@ updateVisualization chartGroup nations = do
 
   pure unit
 
--- | Main draw function - initialize and render first frame
+-- | Main draw function - render the complete visualization
 draw :: forall m.
   SelectionM D3Selection_ m =>
   Selector D3Selection_ ->
   Array NationPoint ->
-  m (Array NationPoint -> m Unit)
-draw selector initialData = do
-  { svg, chartGroup } <- initializeVisualization selector
+  m Unit
+draw selector nations = do
+  let config = defaultConfig
 
-  -- Render initial data
-  updateVisualization chartGroup initialData
+  (root :: D3Selection_) <- attach selector
+  svg <- appendTo root Svg
+    [ viewBox 0.0 0.0 config.width config.height
+    , width config.width
+    , height config.height
+    , classed "wealth-health-viz"
+    ]
 
-  -- Return update function
-  pure $ updateVisualization chartGroup
+  chartGroup <- appendTo svg Group [ classed "nations" ]
+
+  -- Calculate position and size for each nation
+  let calculateAttrs :: Datum_ -> Index_ ->
+        { x :: Number
+        , y :: Number
+        , r :: Number
+        , color :: String
+        }
+      calculateAttrs d _ =
+        let
+          income = datum_.income d
+          life = datum_.lifeExpectancy d
+          pop = datum_.population d
+          color = datum_.regionColor d
+        in
+          { x: scaleX config income
+          , y: scaleY config life
+          , r: scaleRadius pop
+          , color
+          }
+
+  -- Use General Update Pattern for data binding
+  enterSelection <- openSelection chartGroup "circle"
+  updateSelections <- updateJoin enterSelection Circle nations coerceDatumToKey
+
+  -- Exit: remove circles for nations that disappeared
+  setAttributes updateSelections.exit
+    [ classed "exit" ]
+
+  -- Update: move existing circles to new positions
+  setAttributes updateSelections.update
+    [ cx \d i -> (calculateAttrs d i).x
+    , cy \d i -> (calculateAttrs d i).y
+    , radius \d i -> (calculateAttrs d i).r
+    , fill \d i -> (calculateAttrs d i).color
+    , classed "update"
+    ]
+
+  -- Enter: create new circles
+  newCircles <- appendTo updateSelections.enter Circle []
+  setAttributes newCircles
+    [ cx \d i -> (calculateAttrs d i).x
+    , cy \d i -> (calculateAttrs d i).y
+    , radius \d i -> (calculateAttrs d i).r
+    , fill \d i -> (calculateAttrs d i).color
+    , fillOpacity 0.7
+    , strokeColor "#333"
+    , strokeWidth 0.5
+    , classed "nation-circle enter"
+    ]
+
+  pure unit

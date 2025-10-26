@@ -143,12 +143,8 @@ handleAction = case _ of
     H.modify_ _ { model = Just model }
     H.modify_ _ { currentYear = model.yearRange.min }
 
-    -- Initialize visualization using PS<$>D3
-    let nations = getAllNationsAtYear model.yearRange.min model
-    let drawData = map nationPointToDrawData nations
-
-    updateFn <- liftEffect <<< eval_D3M $ Draw.draw "#wealth-health-viz" drawData
-    H.modify_ _ { vizUpdateFn = Just updateFn }
+    -- Draw initial visualization
+    handleAction Render
 
   DataLoadFailed err -> do
     liftEffect $ log $ "Data load failed: " <> err
@@ -212,14 +208,12 @@ handleAction = case _ of
 
   Render -> do
     state <- H.get
-    case state.model, state.vizUpdateFn of
-      Just model, Just updateFn -> do
+    case state.model of
+      Just model -> do
         let nations = getAllNationsAtYear state.currentYear model
         let drawData = map nationPointToDrawData nations
-        liftEffect <<< eval_D3M $ updateFn drawData
-      _, _ -> pure unit
-
--- | Run a D3 computation
+        liftEffect $ eval_D3M $ Draw.draw "#wealth-health-viz" drawData
+      Nothing -> pure unit
 
 -- FFI imports
 foreign import log :: String -> Effect Unit
