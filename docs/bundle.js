@@ -33684,39 +33684,39 @@
     if (v instanceof RouteChanged) {
       if (v.value0 instanceof Just) {
         return discard58(modify_40(function(v1) {
-          var $71 = {};
-          for (var $72 in v1) {
-            if ({}.hasOwnProperty.call(v1, $72)) {
-              $71[$72] = v1[$72];
+          var $72 = {};
+          for (var $73 in v1) {
+            if ({}.hasOwnProperty.call(v1, $73)) {
+              $72[$73] = v1[$73];
             }
             ;
           }
           ;
-          $71.currentRoute = v.value0.value0;
-          return $71;
+          $72.currentRoute = v.value0.value0;
+          return $72;
         }))(function() {
           return when6(eq11(v.value0.value0)(Home.value))(bind64(liftEffect49(function __do4() {
             var w = windowImpl();
             var loc = location(w)();
             return hash(loc)();
           }))(function(currentHash) {
-            return when6(currentHash === "")(liftEffect49(setHash2("/")));
+            return when6(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect49(setHash2(routeToPath(Home.value))));
           }));
         });
       }
       ;
       if (v.value0 instanceof Nothing) {
         return modify_40(function(v1) {
-          var $75 = {};
-          for (var $76 in v1) {
-            if ({}.hasOwnProperty.call(v1, $76)) {
-              $75[$76] = v1[$76];
+          var $76 = {};
+          for (var $77 in v1) {
+            if ({}.hasOwnProperty.call(v1, $77)) {
+              $76[$77] = v1[$77];
             }
             ;
           }
           ;
-          $75.currentRoute = NotFound.value;
-          return $75;
+          $76.currentRoute = NotFound.value;
+          return $76;
         });
       }
       ;

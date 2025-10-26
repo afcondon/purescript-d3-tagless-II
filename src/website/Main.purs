@@ -166,6 +166,14 @@ renderPage route = case spy "Route is" route of
 handleAction :: Action -> H.HalogenM State Action Slots Void Aff Unit
 handleAction = case _ of
   Initialize -> do
+    -- Check if we're at root and redirect to /home for proper history
+    currentHash <- H.liftEffect $ do
+      w <- window
+      loc <- Web.HTML.Window.location w
+      Web.HTML.Location.hash loc
+    when (currentHash == "" || currentHash == "#" || currentHash == "#/") $ do
+      H.liftEffect $ setHash (routeToPath Home)
+
     -- Subscribe to route changes using purescript-routing
     -- This handles both initial route and hash changes (back/forward buttons)
     _ <- H.subscribe $ HS.makeEmitter \push -> do
@@ -183,14 +191,6 @@ handleAction = case _ of
     case maybeRoute of
       Just route -> do
         H.modify_ _ { currentRoute = route }
-        -- Ensure Home route has a hash in URL for browser history
-        when (route == Home) $ do
-          currentHash <- H.liftEffect $ do
-            w <- window
-            loc <- Web.HTML.Window.location w
-            Web.HTML.Location.hash loc
-          when (currentHash == "" || currentHash == "#" || currentHash == "#/") $ do
-            H.liftEffect $ setHash (routeToPath Home)
       Nothing -> H.modify_ _ { currentRoute = NotFound } -- Fallback if route doesn't match
 
 -- | Entry point
