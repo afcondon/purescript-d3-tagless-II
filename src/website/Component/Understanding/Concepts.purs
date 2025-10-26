@@ -8,6 +8,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SectionNav as SectionNav
+import PSD3.Understanding.TOC (renderTOC)
 import PSD3.Understanding.UnderstandingTabs as UnderstandingTabs
 import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
@@ -38,8 +39,20 @@ render :: State -> H.ComponentHTML Action Slots Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "explanation-page" ] ]
-    [ -- Navigation Panel (RHS)
-      HH.slot_ _sectionNav unit SectionNav.component
+    [ -- TOC Panel (LHS)
+      renderTOC
+        { title: "Page Contents"
+        , items:
+            [ { anchor: "heading-finally-tagless", label: "Finally Tagless", level: 0 }
+            , { anchor: "heading-selectionm", label: "The SelectionM Monad", level: 0 }
+            , { anchor: "heading-capabilities", label: "Capabilities & Interpreters", level: 0 }
+            , { anchor: "heading-type-safe", label: "Type-Safe Attribute System", level: 0 }
+            ]
+        , image: Just "images/understanding-bookmark-trees.jpeg"
+        }
+
+    -- Navigation Panel (RHS)
+    , HH.slot_ _sectionNav unit SectionNav.component
         { currentSection: UnderstandingSection
         , currentRoute: UnderstandingConcepts
         , sectionPages:
@@ -64,28 +77,36 @@ render _ =
         -- Finally Tagless
         , HH.section
             [ HP.classes [ HH.ClassName "concept-section" ] ]
-            [ HH.h2_ [ HH.text "Finally Tagless" ]
+            [ HH.h2
+                [ HP.id "heading-finally-tagless" ]
+                [ HH.text "Finally Tagless" ]
             , HH.p_ [ HH.text "Placeholder: 1-2 paragraphs explaining Finally Tagless pattern" ]
             ]
 
         -- SelectionM Monad
         , HH.section
             [ HP.classes [ HH.ClassName "concept-section" ] ]
-            [ HH.h2_ [ HH.text "The SelectionM Monad" ]
+            [ HH.h2
+                [ HP.id "heading-selectionm" ]
+                [ HH.text "The SelectionM Monad" ]
             , HH.p_ [ HH.text "Placeholder: 1-2 paragraphs explaining SelectionM" ]
             ]
 
         -- Capabilities/Interpreters
         , HH.section
             [ HP.classes [ HH.ClassName "concept-section" ] ]
-            [ HH.h2_ [ HH.text "Capabilities & Interpreters" ]
+            [ HH.h2
+                [ HP.id "heading-capabilities" ]
+                [ HH.text "Capabilities & Interpreters" ]
             , HH.p_ [ HH.text "Placeholder: 1-2 paragraphs explaining the interpreter pattern" ]
             ]
 
         -- Type-safe Attributes
         , HH.section
             [ HP.classes [ HH.ClassName "concept-section" ] ]
-            [ HH.h2_ [ HH.text "Type-Safe Attribute System" ]
+            [ HH.h2
+                [ HP.id "heading-type-safe" ]
+                [ HH.text "Type-Safe Attribute System" ]
             , HH.p_ [ HH.text "Placeholder: 1-2 paragraphs explaining the ToAttr typeclass" ]
             ]
         ]
