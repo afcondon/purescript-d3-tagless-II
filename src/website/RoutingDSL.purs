@@ -23,6 +23,10 @@ routes =
   <|> howtoIndex
   <|> referenceModule  -- Must come before reference (more specific)
   <|> reference
+  <|> understandingConcepts
+  <|> understandingPatterns
+  <|> understandingPhilosophy
+  <|> about       -- Legacy redirect to philosophy
   <|> tutorial
   <|> simpleCharts
   <|> chordDiagram
@@ -32,7 +36,6 @@ routes =
   <|> interpreters
   <|> codeExplorer
   <|> explore
-  <|> about
   <|> rootRedirect
   <|> notFound
 
@@ -64,9 +67,21 @@ referenceModule = ReferenceModule <$> (lit "reference" *> str) <* end
 reference :: Match Route
 reference = Reference <$ lit "reference" <* end
 
--- | Match: /about
+-- | Match: /understanding/concepts
+understandingConcepts :: Match Route
+understandingConcepts = UnderstandingConcepts <$ lit "understanding" <* lit "concepts" <* end
+
+-- | Match: /understanding/patterns
+understandingPatterns :: Match Route
+understandingPatterns = UnderstandingPatterns <$ lit "understanding" <* lit "patterns" <* end
+
+-- | Match: /understanding/philosophy
+understandingPhilosophy :: Match Route
+understandingPhilosophy = UnderstandingPhilosophy <$ lit "understanding" <* lit "philosophy" <* end
+
+-- | Match: /about (legacy redirect to philosophy)
 about :: Match Route
-about = About <$ lit "about" <* end
+about = UnderstandingPhilosophy <$ lit "about" <* end
 
 -- | Match: /tutorial
 tutorial :: Match Route
@@ -118,7 +133,10 @@ routeToPath Wizard = "/wizard"
 routeToPath HowtoIndex = "/howto"
 routeToPath Reference = "/reference"
 routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName
-routeToPath About = "/about"
+routeToPath About = "/understanding/philosophy"  -- Redirect to philosophy
+routeToPath UnderstandingConcepts = "/understanding/concepts"
+routeToPath UnderstandingPatterns = "/understanding/patterns"
+routeToPath UnderstandingPhilosophy = "/understanding/philosophy"
 routeToPath Tutorial = "/tutorial"
 routeToPath SimpleCharts = "/simple-charts"
 routeToPath ChordDiagram = "/chord-diagram"

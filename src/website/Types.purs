@@ -86,7 +86,10 @@ data Route
   | HowtoIndex      -- How-to: index of all step-by-step guides
   | Reference       -- Reference: API documentation index
   | ReferenceModule String  -- Reference: individual module page (e.g., "PSD3.Types")
-  | About
+  | About           -- Legacy route, redirects to UnderstandingPhilosophy
+  | UnderstandingConcepts    -- Understanding: core concepts (Finally Tagless, SelectionM, etc.)
+  | UnderstandingPatterns    -- Understanding: practical patterns (datum_, data joins, etc.)
+  | UnderstandingPhilosophy  -- Understanding: design philosophy
   | Tutorial
   | SimpleCharts
   | ChordDiagram
@@ -108,6 +111,9 @@ instance showRoute :: Show Route where
   show Reference = "API Reference"
   show (ReferenceModule moduleName) = "Module: " <> moduleName
   show About = "About"
+  show UnderstandingConcepts = "Understanding: Concepts"
+  show UnderstandingPatterns = "Understanding: Patterns"
+  show UnderstandingPhilosophy = "Understanding: Philosophy"
   show Tutorial = "Tutorial"
   show SimpleCharts = "Simple Charts"
   show ChordDiagram = "Chord Diagram"

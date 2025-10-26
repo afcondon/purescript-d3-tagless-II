@@ -21,6 +21,8 @@ import PSD3.Wizard.Wizard as Wizard
 import PSD3.HowTo.HowtoIndex as HowtoIndex
 import PSD3.Reference.Reference as Reference
 import PSD3.Understanding.About as About
+import PSD3.Understanding.Concepts as Concepts
+import PSD3.Understanding.Patterns as Patterns
 import PSD3.Understanding.Tutorial as Tutorial
 import PSD3.Understanding.SimpleCharts as SimpleCharts
 import PSD3.Understanding.ChordDiagram as ChordDiagram
@@ -54,6 +56,8 @@ type Slots =
   , howtoIndex :: forall q. H.Slot q Void Unit
   , reference :: forall q. H.Slot q Void Unit
   , about :: forall q. H.Slot q Void Unit
+  , concepts :: forall q. H.Slot q Void Unit
+  , patterns :: forall q. H.Slot q Void Unit
   , tutorial :: forall q. H.Slot q Void Unit
   , simpleCharts :: forall q. H.Slot q Void Unit
   , chordDiagram :: forall q. H.Slot q Void Unit
@@ -71,6 +75,8 @@ _wizard = Proxy :: Proxy "wizard"
 _howtoIndex = Proxy :: Proxy "howtoIndex"
 _reference = Proxy :: Proxy "reference"
 _about = Proxy :: Proxy "about"
+_concepts = Proxy :: Proxy "concepts"
+_patterns = Proxy :: Proxy "patterns"
 _tutorial = Proxy :: Proxy "tutorial"
 _simpleCharts = Proxy :: Proxy "simpleCharts"
 _chordDiagram = Proxy :: Proxy "chordDiagram"
@@ -124,6 +130,15 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _reference unit Reference.component (ReferenceModule moduleName)
 
   About ->
+    HH.slot_ _about unit About.component unit
+
+  UnderstandingConcepts ->
+    HH.slot_ _concepts unit Concepts.component unit
+
+  UnderstandingPatterns ->
+    HH.slot_ _patterns unit Patterns.component unit
+
+  UnderstandingPhilosophy ->
     HH.slot_ _about unit About.component unit
 
   Tutorial ->

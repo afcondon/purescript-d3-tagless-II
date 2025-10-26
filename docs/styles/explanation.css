@@ -7,6 +7,90 @@
   position: relative;
 }
 
+/* Main content wrapper */
+.explanation-content {
+  max-width: 52rem;
+  margin: 0 auto;
+}
+
+/* Understanding Section Tab Navigation */
+.understanding-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0 auto 2rem auto;
+  max-width: 52rem;
+  padding: 0 3rem;
+}
+
+.understanding-tab {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  color: var(--color-gray-darker);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  flex: 1;
+  text-align: center;
+}
+
+.understanding-tab:hover {
+  background-color: var(--color-beige-base);
+  border-color: var(--color-red-accent);
+}
+
+.understanding-tab--active {
+  background-color: var(--color-red-accent);
+  color: var(--color-beige-light);
+  border-color: var(--color-red-accent);
+  cursor: default;
+}
+
+/* Concept sections within Understanding pages */
+.concept-section {
+  max-width: 52rem;
+  margin: 0 auto 2rem auto;
+  background-color: #F5F1E8;
+  padding: 2rem 3rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.concept-section h2 {
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.75rem 0;
+  color: var(--color-gray-darker);
+}
+
+.concept-section p {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.8;
+  color: #2A2A2A;
+  margin-bottom: 1rem;
+}
+
+.explanation-title {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 auto 2rem auto;
+  max-width: 52rem;
+  padding: 0 3rem 0.75rem 3rem;
+  border-bottom: 3px solid var(--color-red-accent);
+  color: var(--color-gray-darker);
+}
+
 /* TOC Floating Panel - Left side */
 /* Positioned relative to center column (52rem wide) */
 .toc-panel {

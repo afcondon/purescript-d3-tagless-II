@@ -288,11 +288,11 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq15) {
+    return function(eq11) {
       return function(gt) {
         return function(x23) {
           return function(y20) {
-            return x23 < y20 ? lt : x23 === y20 ? eq15 : gt;
+            return x23 < y20 ? lt : x23 === y20 ? eq11 : gt;
           };
         };
       };
@@ -894,13 +894,13 @@
     return v.value0;
   };
   var eqTuple = function(dictEq) {
-    var eq15 = eq(dictEq);
+    var eq11 = eq(dictEq);
     return function(dictEq1) {
-      var eq16 = eq(dictEq1);
+      var eq15 = eq(dictEq1);
       return {
         eq: function(x23) {
           return function(y20) {
-            return eq15(x23.value0)(y20.value0) && eq16(x23.value1)(y20.value1);
+            return eq11(x23.value0)(y20.value0) && eq15(x23.value1)(y20.value1);
           };
         }
       };
@@ -1035,7 +1035,7 @@
     };
   };
   var eqMaybe = function(dictEq) {
-    var eq15 = eq(dictEq);
+    var eq11 = eq(dictEq);
     return {
       eq: function(x23) {
         return function(y20) {
@@ -1044,7 +1044,7 @@
           }
           ;
           if (x23 instanceof Just && y20 instanceof Just) {
-            return eq15(x23.value0)(y20.value0);
+            return eq11(x23.value0)(y20.value0);
           }
           ;
           return false;
@@ -12397,10 +12397,10 @@
     return new Tuple(toNumber(w), toNumber(h));
   };
   var equalSnd = function(dictEq) {
-    var eq15 = eq(dictEq);
+    var eq11 = eq(dictEq);
     return function(a2) {
       return function(b2) {
-        return eq15(snd(a2))(snd(b2));
+        return eq11(snd(a2))(snd(b2));
       };
     };
   };
@@ -33553,12 +33553,11 @@
 
   // output/PSD3.Main/index.js
   var bind64 = /* @__PURE__ */ bind(bindHalogenM);
-  var pure40 = /* @__PURE__ */ pure(applicativeHalogenM);
   var liftEffect49 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var discard58 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
-  var modify_40 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var when6 = /* @__PURE__ */ when(applicativeHalogenM);
-  var eq11 = /* @__PURE__ */ eq(eqRoute);
+  var pure40 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var modify_40 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var spy6 = /* @__PURE__ */ spy();
   var slot_15 = /* @__PURE__ */ slot_();
   var slot_1 = /* @__PURE__ */ slot_15({
@@ -33666,14 +33665,22 @@
   })();
   var handleAction46 = function(v) {
     if (v instanceof Initialize46) {
-      return bind64(subscribe2(makeEmitter(function(push2) {
-        return matches2(routing)(function(v1) {
-          return function(newRoute) {
-            return push2(new RouteChanged(new Just(newRoute)));
-          };
+      return bind64(liftEffect49(function __do4() {
+        var w = windowImpl();
+        var loc = location(w)();
+        return hash(loc)();
+      }))(function(currentHash) {
+        return discard58(when6(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect49(setHash2(routeToPath(Home.value)))))(function() {
+          return bind64(subscribe2(makeEmitter(function(push2) {
+            return matches2(routing)(function(v1) {
+              return function(newRoute) {
+                return push2(new RouteChanged(new Just(newRoute)));
+              };
+            });
+          })))(function() {
+            return pure40(unit);
+          });
         });
-      })))(function() {
-        return pure40(unit);
       });
     }
     ;
@@ -33683,44 +33690,36 @@
     ;
     if (v instanceof RouteChanged) {
       if (v.value0 instanceof Just) {
-        return discard58(modify_40(function(v1) {
-          var $72 = {};
-          for (var $73 in v1) {
-            if ({}.hasOwnProperty.call(v1, $73)) {
-              $72[$73] = v1[$73];
+        return modify_40(function(v1) {
+          var $71 = {};
+          for (var $72 in v1) {
+            if ({}.hasOwnProperty.call(v1, $72)) {
+              $71[$72] = v1[$72];
             }
             ;
           }
           ;
-          $72.currentRoute = v.value0.value0;
-          return $72;
-        }))(function() {
-          return when6(eq11(v.value0.value0)(Home.value))(bind64(liftEffect49(function __do4() {
-            var w = windowImpl();
-            var loc = location(w)();
-            return hash(loc)();
-          }))(function(currentHash) {
-            return when6(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect49(setHash2(routeToPath(Home.value))));
-          }));
+          $71.currentRoute = v.value0.value0;
+          return $71;
         });
       }
       ;
       if (v.value0 instanceof Nothing) {
         return modify_40(function(v1) {
-          var $76 = {};
-          for (var $77 in v1) {
-            if ({}.hasOwnProperty.call(v1, $77)) {
-              $76[$77] = v1[$77];
+          var $75 = {};
+          for (var $76 in v1) {
+            if ({}.hasOwnProperty.call(v1, $76)) {
+              $75[$76] = v1[$76];
             }
             ;
           }
           ;
-          $76.currentRoute = NotFound.value;
-          return $76;
+          $75.currentRoute = NotFound.value;
+          return $75;
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Main (line 183, column 5 - line 194, column 57): " + [v.value0.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Main (line 191, column 5 - line 194, column 57): " + [v.value0.constructor.name]);
     }
     ;
     throw new Error("Failed pattern match at PSD3.Main (line 167, column 16 - line 194, column 57): " + [v.constructor.name]);

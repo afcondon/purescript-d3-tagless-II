@@ -12,6 +12,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SectionNav as SectionNav
 import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Understanding.UnderstandingTabs as UnderstandingTabs
 import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
 
@@ -22,9 +23,13 @@ type State = Unit
 data Action = Initialize
 
 -- | Child component slots
-type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
+type Slots =
+  ( sectionNav :: forall q. H.Slot q Void Unit
+  , tabs :: forall q. H.Slot q Void Unit
+  )
 
 _sectionNav = Proxy :: Proxy "sectionNav"
+_tabs = Proxy :: Proxy "tabs"
 
 -- | About page component
 component :: forall q i o. H.Component q i o Aff
@@ -64,23 +69,23 @@ render _ =
     -- Section Navigation (RHS)
     , HH.slot_ _sectionNav unit SectionNav.component
         { currentSection: UnderstandingSection
-        , currentRoute: About
+        , currentRoute: UnderstandingPhilosophy
         , sectionPages:
-            [ { route: About, label: "About" }
-            , { route: Tutorial, label: "Tutorial" }
-            , { route: SimpleCharts, label: "Simple Charts" }
-            , { route: ChordDiagram, label: "Chord Diagram" }
-            , { route: BubbleChart, label: "Bubble Chart" }
-            , { route: SankeyDiagram, label: "Sankey Diagram" }
-            , { route: Hierarchies, label: "Hierarchies" }
-            , { route: Interpreters, label: "Interpreters" }
-            , { route: CodeExplorer, label: "Code Explorer" }
+            [ { route: UnderstandingConcepts, label: "Concepts" }
+            , { route: UnderstandingPatterns, label: "Patterns" }
+            , { route: UnderstandingPhilosophy, label: "Philosophy" }
             ]
         , moduleCategories: Nothing
         }
 
-    -- Page content
-    , HH.section
+    -- Main content
+    , HH.div
+        [ HP.classes [ HH.ClassName "explanation-content" ] ]
+        [ -- Tab navigation
+          HH.slot_ _tabs unit UnderstandingTabs.component UnderstandingPhilosophy
+
+        -- Page content
+        , HH.section
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "tutorial-title" ]
@@ -507,6 +512,7 @@ render _ =
             , HH.a [ HP.href "https://top2000.visualcinnamon.com" ] [ HH.text "Nadieh Bremer's Top 2000 visualization" ]
             , HH.text " can be expressed with this simple grammar - the complexity lies in the data transformations and attribute calculations, not in the fundamental structure."
             ]
+        ]
         ]
     ]
 
