@@ -33,6 +33,7 @@ import PSD3.Understanding.Interpreters as Interpreters
 import PSD3.CodeExplorer.CodeExplorationPage as CodeExplorationPage
 import PSD3.RoutingDSL (routing, routeToPath)
 import PSD3.CodeExplorer.CodeExplorerWrapper as CodeExplorer
+import PSD3.WealthHealth.WealthHealthWrapper as WealthHealth
 import PSD3.Website.Types (Route(..))
 import Routing.Hash (matches, setHash)
 import Type.Proxy (Proxy(..))
@@ -67,6 +68,7 @@ type Slots =
   , interpreters :: forall q. H.Slot q Void Unit
   , codeExplorer :: forall q. H.Slot q Void Unit
   , codeExploration :: forall q. H.Slot q Void Unit
+  , wealthHealth :: forall q. H.Slot q Void Unit
   )
 
 _home = Proxy :: Proxy "home"
@@ -86,6 +88,7 @@ _hierarchies = Proxy :: Proxy "hierarchies"
 _interpreters = Proxy :: Proxy "interpreters"
 _codeExplorer = Proxy :: Proxy "codeExplorer"
 _codeExploration = Proxy :: Proxy "codeExploration"
+_wealthHealth = Proxy :: Proxy "wealthHealth"
 
 -- | Main application component
 component :: forall q i. H.Component q i Void Aff
@@ -167,6 +170,9 @@ renderPage route = case spy "Route is" route of
 
   Explore snippetId ->
     HH.slot_ _codeExploration unit CodeExplorationPage.component snippetId
+
+  WealthHealth ->
+    HH.slot_ _wealthHealth unit WealthHealth.component unit
 
   NotFound ->
     HH.div

@@ -36,6 +36,7 @@ routes =
   <|> interpreters
   <|> codeExplorer
   <|> explore
+  <|> wealthHealth
   <|> rootRedirect
   <|> notFound
 
@@ -119,6 +120,10 @@ codeExplorer = CodeExplorer <$ lit "code-explorer" <* end
 explore :: Match Route
 explore = Explore <$> (lit "explore" *> str) <* end
 
+-- | Match: /wealth-health
+wealthHealth :: Match Route
+wealthHealth = WealthHealth <$ lit "wealth-health" <* end
+
 -- | Fallback: everything else is NotFound
 notFound :: Match Route
 notFound = pure NotFound
@@ -146,4 +151,5 @@ routeToPath Hierarchies = "/hierarchies"
 routeToPath Interpreters = "/interpreters"
 routeToPath CodeExplorer = "/code-explorer"
 routeToPath (Explore snippetId) = "/explore/" <> snippetId
+routeToPath WealthHealth = "/wealth-health"
 routeToPath NotFound = "/not-found"

@@ -99,6 +99,7 @@ data Route
   | Interpreters
   | CodeExplorer
   | Explore String  -- Code exploration page for a specific snippet
+  | WealthHealth    -- Wealth & Health of Nations visualization
   | NotFound
 
 derive instance eqRoute :: Eq Route
@@ -123,4 +124,5 @@ instance showRoute :: Show Route where
   show Interpreters = "Interpreters"
   show CodeExplorer = "Code Explorer"
   show (Explore snippetId) = "Explore: " <> snippetId
+  show WealthHealth = "Wealth & Health of Nations"
   show NotFound = "Not Found"

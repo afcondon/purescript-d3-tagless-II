@@ -103,6 +103,10 @@ render _ =
                 "Code Explorer"
                 "Interactive exploration of visualization code"
                 (routeToPath CodeExplorer)
+            , renderExampleCard
+                "Wealth & Health of Nations"
+                "Hans Rosling's animated exploration of income and life expectancy"
+                (routeToPath WealthHealth)
             ]
         ]
     ]
