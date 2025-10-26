@@ -32896,7 +32896,7 @@
   var maximum7 = /* @__PURE__ */ maximum(ordInt)(foldableArray);
   var minimum5 = /* @__PURE__ */ minimum(ordInt)(foldableArray);
   var pure210 = /* @__PURE__ */ pure(applicativeAff);
-  var nationsDataUrl = "https://gist.githubusercontent.com/mbostock/9511ae067889eefa5537eedcbbf87dab/raw/nations.json";
+  var nationsDataUrl = "data/nations.json";
   var findBefore = function(targetYear) {
     return function(points) {
       var candidates = find2(function(point) {

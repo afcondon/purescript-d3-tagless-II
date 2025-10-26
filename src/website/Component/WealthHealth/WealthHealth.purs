@@ -3,6 +3,7 @@ module PSD3.WealthHealth.WealthHealth where
 import Prelude
 
 import Control.Monad.Rec.Class (forever)
+import D3.Viz.WealthHealth.Draw as Draw
 import Data.Array (find)
 import Data.Either (Either(..))
 import Data.Int (floor)
@@ -17,12 +18,13 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
+import PSD3.Interpreter.D3 (eval_D3M)
+import PSD3.Internal.Types (D3Selection_, Element(..), Selector(..))
 import PSD3.WealthHealth.Actions (Action(..))
-import PSD3.WealthHealth.Data (loadNationsData, getNationAtYear)
+import PSD3.WealthHealth.Data (getAllNationsAtYear, getNationAtYear, loadNationsData)
 import PSD3.WealthHealth.HTML (renderControlPanel, renderLegend)
-import PSD3.WealthHealth.Rendering (renderVisualization, updateVisualization)
 import PSD3.WealthHealth.State (State, initialState)
-import PSD3.WealthHealth.Types (WealthHealthModel, NationPoint, regionName)
+import PSD3.WealthHealth.Types (NationPoint, WealthHealthModel, regionColor, regionName)
 
 -- | Wealth & Health visualization component
 component :: forall q i o m. MonadAff m => MonadEffect m => H.Component q i o m
@@ -71,7 +73,7 @@ render state =
                     [ HH.div
                         [ HP.id "wealth-health-viz"
                         , HP.classes [ HH.ClassName "wealth-health-viz-container" ] ]
-                        []  -- D3 will render SVG here
+                        []  -- PS<$>D3 will render SVG here
                     , renderTooltip state model
                     ]
             ]
@@ -106,13 +108,23 @@ getNationData nationName year model = do
 -- | Format a number with commas
 formatNumber :: Number -> String
 formatNumber n =
-  show $ floor n  -- TODO: Add proper formatting with commas
+  show $ floor n
 
 -- | Format population (in millions)
 formatPopulation :: Number -> String
 formatPopulation n =
   let millions = n / 1000000.0
   in show (floor millions) <> "M"
+
+-- | Convert NationPoint to visualization data with color
+nationPointToDrawData :: NationPoint -> Draw.NationPoint
+nationPointToDrawData np =
+  { name: np.name
+  , income: np.income
+  , population: np.population
+  , lifeExpectancy: np.lifeExpectancy
+  , regionColor: regionColor np.region
+  }
 
 -- | Handle actions
 handleAction :: forall o m. MonadAff m => MonadEffect m => Action -> H.HalogenM State Action () o m Unit
@@ -122,35 +134,23 @@ handleAction = case _ of
     result <- H.liftAff loadNationsData
     case result of
       Left err -> do
-        -- TODO: Show error to user
         liftEffect $ log $ "Error loading data: " <> err
         pure unit
       Right model -> do
-        -- Create hover event subscriptions
-        { emitter: hoverEmitter, listener: hoverListener } <- H.liftEffect HS.create
-        void $ H.subscribe hoverEmitter
-
-        -- Store the listener for use by JavaScript callbacks
-        H.modify_ _ { hoverListener = Just hoverListener }
-
         handleAction (DataLoaded model)
 
   DataLoaded model -> do
-    state <- H.get
     H.modify_ _ { model = Just model }
-    -- Set initial year to the minimum year in the dataset
     H.modify_ _ { currentYear = model.yearRange.min }
 
-    -- Create hover callbacks that notify the subscription
-    case state.hoverListener of
-      Nothing -> pure unit
-      Just listener -> do
-        let onHover = \name -> HS.notify listener (HoverNation (Just name))
-        let onLeave = \_ -> HS.notify listener (HoverNation Nothing)
-        liftEffect $ renderVisualization "wealth-health-viz" model.yearRange.min model onHover onLeave
+    -- Initialize visualization using PS<$>D3
+    let nations = getAllNationsAtYear model.yearRange.min model
+    let drawData = map nationPointToDrawData nations
+
+    updateFn <- liftEffect <<< eval_D3M $ Draw.draw "#wealth-health-viz" drawData
+    H.modify_ _ { vizUpdateFn = Just updateFn }
 
   DataLoadFailed err -> do
-    -- TODO: Show error message in UI
     liftEffect $ log $ "Data load failed: " <> err
     pure unit
 
@@ -164,24 +164,16 @@ handleAction = case _ of
     H.modify_ _ { playing = newPlaying }
 
     when newPlaying do
-      -- Calculate interval based on animation speed (years per second)
-      -- If speed is 5 years/sec, interval should be 200ms per year
       let intervalMs = 1000.0 / state.animationSpeed
-
-      -- Subscribe to timer
       { emitter, listener } <- H.liftEffect HS.create
       subscriptionId <- H.subscribe emitter
-
-      -- Store subscription ID so we can unsubscribe later
       H.modify_ _ { animationSubscriptionId = Just subscriptionId }
 
-      -- Start the timer
       void $ H.liftAff $ Aff.forkAff $ forever do
         Aff.delay (Milliseconds intervalMs)
         H.liftEffect $ HS.notify listener Tick
 
     when (not newPlaying) do
-      -- Unsubscribe from timer
       state' <- H.get
       case state'.animationSubscriptionId of
         Nothing -> pure unit
@@ -196,7 +188,6 @@ handleAction = case _ of
       Just model -> do
         let nextYear = state.currentYear + 1
         if nextYear > model.yearRange.max then
-          -- Loop back to beginning
           H.modify_ _ { currentYear = model.yearRange.min }
         else
           H.modify_ _ { currentYear = nextYear }
@@ -220,14 +211,15 @@ handleAction = case _ of
     H.modify_ _ { animationSpeed = speed }
 
   Render -> do
-    -- Update D3 visualization with transitions
     state <- H.get
-    case state.model, state.hoverListener of
-      Just model, Just listener -> do
-        let onHover = \name -> HS.notify listener (HoverNation (Just name))
-        let onLeave = \_ -> HS.notify listener (HoverNation Nothing)
-        liftEffect $ updateVisualization "wealth-health-viz" state.currentYear model onHover onLeave
+    case state.model, state.vizUpdateFn of
+      Just model, Just updateFn -> do
+        let nations = getAllNationsAtYear state.currentYear model
+        let drawData = map nationPointToDrawData nations
+        liftEffect <<< eval_D3M $ updateFn drawData
       _, _ -> pure unit
 
--- FFI imports that would be needed for D3 rendering
+-- | Run a D3 computation
+
+-- FFI imports
 foreign import log :: String -> Effect Unit
