@@ -18,8 +18,8 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
-import PSD3.Interpreter.D3 (eval_D3M)
-import PSD3.Internal.Types (D3Selection_, Element(..), Selector(..))
+import PSD3.Interpreter.D3 (D3M, eval_D3M)
+import PSD3.Internal.Types (D3Selection_)
 import PSD3.WealthHealth.Actions (Action(..))
 import PSD3.WealthHealth.Data (getAllNationsAtYear, getNationAtYear, loadNationsData)
 import PSD3.WealthHealth.HTML (renderControlPanel, renderLegend)
@@ -143,6 +143,10 @@ handleAction = case _ of
     H.modify_ _ { model = Just model }
     H.modify_ _ { currentYear = model.yearRange.min }
 
+    -- Initialize visualization once and store update function
+    (updateFn :: Array Draw.NationPoint -> D3M Unit D3Selection_ D3Selection_) <- liftEffect $ eval_D3M $ Draw.draw "#wealth-health-viz"
+    H.modify_ _ { vizUpdateFn = Just updateFn }
+
     -- Draw initial visualization
     handleAction Render
 
@@ -208,12 +212,13 @@ handleAction = case _ of
 
   Render -> do
     state <- H.get
-    case state.model of
-      Just model -> do
+    case state.model, state.vizUpdateFn of
+      Just model, Just updateFn -> do
         let nations = getAllNationsAtYear state.currentYear model
         let drawData = map nationPointToDrawData nations
-        liftEffect $ eval_D3M $ Draw.draw "#wealth-health-viz" drawData
-      Nothing -> pure unit
+        _ <- liftEffect $ eval_D3M $ updateFn drawData
+        pure unit
+      _, _ -> pure unit
 
 -- FFI imports
 foreign import log :: String -> Effect Unit

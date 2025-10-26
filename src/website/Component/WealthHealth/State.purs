@@ -1,9 +1,13 @@
 module PSD3.WealthHealth.State where
 
+import D3.Viz.WealthHealth.Draw as Draw
 import Data.Maybe (Maybe(..))
+import Data.Unit (Unit)
 import Data.Set (Set)
 import Data.Set as Set
 import Halogen as H
+import PSD3.Interpreter.D3 (D3M)
+import PSD3.Internal.Types (D3Selection_)
 import PSD3.WealthHealth.Types (WealthHealthModel)
 
 -- | Component state for the Wealth & Health visualization
@@ -15,6 +19,7 @@ type State =
   , selectedNations :: Set String        -- Nations selected for highlighting/tracking
   , animationSpeed :: Number             -- Years per second during playback
   , animationSubscriptionId :: Maybe H.SubscriptionId  -- Timer subscription for animation
+  , vizUpdateFn :: Maybe (Array Draw.NationPoint -> D3M Unit D3Selection_ D3Selection_)  -- Visualization update function
   }
 
 -- | Initial state before data is loaded
@@ -27,4 +32,5 @@ initialState _ =
   , selectedNations: Set.empty
   , animationSpeed: 5.0  -- 5 years per second (reasonable default)
   , animationSubscriptionId: Nothing
+  , vizUpdateFn: Nothing
   }

@@ -147,19 +147,19 @@
   };
   var applyFirst = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map63 = map(dictApply.Functor0());
+    var map64 = map(dictApply.Functor0());
     return function(a2) {
       return function(b2) {
-        return apply1(map63($$const)(a2))(b2);
+        return apply1(map64($$const)(a2))(b2);
       };
     };
   };
   var applySecond = function(dictApply) {
     var apply1 = apply(dictApply);
-    var map63 = map(dictApply.Functor0());
+    var map64 = map(dictApply.Functor0());
     return function(a2) {
       return function(b2) {
-        return apply1(map63($$const(identity2))(a2))(b2);
+        return apply1(map64($$const(identity2))(a2))(b2);
       };
     };
   };
@@ -2319,10 +2319,10 @@
   var $$try = function(dictMonadError) {
     var catchError1 = catchError(dictMonadError);
     var Monad0 = dictMonadError.MonadThrow0().Monad0();
-    var map63 = map(Monad0.Bind1().Apply0().Functor0());
+    var map64 = map(Monad0.Bind1().Apply0().Functor0());
     var pure45 = pure(Monad0.Applicative0());
     return function(a2) {
-      return catchError1(map63(Right.create)(a2))(function($52) {
+      return catchError1(map64(Right.create)(a2))(function($52) {
         return pure45(Left.create($52));
       });
     };
@@ -3118,7 +3118,7 @@
       };
     }
     return function(apply6) {
-      return function(map63) {
+      return function(map64) {
         return function(pure45) {
           return function(f) {
             return function(array4) {
@@ -3127,14 +3127,14 @@
                   case 0:
                     return pure45([]);
                   case 1:
-                    return map63(array1)(f(array4[bot]));
+                    return map64(array1)(f(array4[bot]));
                   case 2:
-                    return apply6(map63(array2)(f(array4[bot])))(f(array4[bot + 1]));
+                    return apply6(map64(array2)(f(array4[bot])))(f(array4[bot + 1]));
                   case 3:
-                    return apply6(apply6(map63(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
+                    return apply6(apply6(map64(array3)(f(array4[bot])))(f(array4[bot + 1])))(f(array4[bot + 2]));
                   default:
                     var pivot = bot + Math.floor((top5 - bot) / 4) * 2;
-                    return apply6(map63(concat2)(go2(bot, pivot)))(go2(pivot, top5));
+                    return apply6(map64(concat2)(go2(bot, pivot)))(go2(pivot, top5));
                 }
               }
               return go2(0, array4.length);
@@ -3489,12 +3489,12 @@
   };
   var lift3 = /* @__PURE__ */ lift(monadTransStateT);
   var functorStateT = function(dictFunctor) {
-    var map63 = map(dictFunctor);
+    var map64 = map(dictFunctor);
     return {
       map: function(f) {
         return function(v) {
           return function(s) {
-            return map63(function(v1) {
+            return map64(function(v1) {
               return new Tuple(f(v1.value0), v1.value1);
             })(v(s));
           };
@@ -7400,6 +7400,7 @@
   var ceil = Math.ceil;
   var cos = Math.cos;
   var floor = Math.floor;
+  var log = Math.log;
   var remainder = function(n) {
     return function(m) {
       return n % m;
@@ -13387,20 +13388,20 @@
     return (group3) => generator(group3);
   }
   function setRibbonRadius_(generator) {
-    return (radius11) => {
-      generator.radius(radius11);
+    return (radius12) => {
+      generator.radius(radius12);
       return generator;
     };
   }
   function setArcInnerRadius_(generator) {
-    return (radius11) => {
-      generator.innerRadius(radius11);
+    return (radius12) => {
+      generator.innerRadius(radius12);
       return generator;
     };
   }
   function setArcOuterRadius_(generator) {
-    return (radius11) => {
-      generator.outerRadius(radius11);
+    return (radius12) => {
+      generator.outerRadius(radius12);
       return generator;
     };
   }
@@ -13408,8 +13409,8 @@
     return d3.pack();
   }
   function packSetSize_(layout) {
-    return (width23) => (height23) => {
-      layout.size([width23, height23]);
+    return (width24) => (height24) => {
+      layout.size([width24, height24]);
       return layout;
     };
   }
@@ -13429,8 +13430,8 @@
     return d3.treemap();
   }
   function treemapSetSize_(layout) {
-    return (width23) => (height23) => {
-      layout.size([width23, height23]);
+    return (width24) => (height24) => {
+      layout.size([width24, height24]);
       return layout;
     };
   }
@@ -13459,8 +13460,8 @@
     return d3.partition();
   }
   function partitionSetSize_(layout) {
-    return (width23) => (height23) => {
-      layout.size([width23, height23]);
+    return (width24) => (height24) => {
+      layout.size([width24, height24]);
       return layout;
     };
   }
@@ -14076,7 +14077,7 @@
   var setForPhyllotaxis = function(index5) {
     return function(v) {
       var i2 = toNumber(index5);
-      var radius11 = initialRadius * sqrt(0.5 + i2);
+      var radius12 = initialRadius * sqrt(0.5 + i2);
       var angle = i2 * initialAngle;
       return {
         id: v.id,
@@ -14101,8 +14102,8 @@
         focusX: v.focusX,
         focusY: v.focusY,
         r: v.r,
-        x: radius11 * cos(angle),
-        y: radius11 * sin(angle)
+        x: radius12 * cos(angle),
+        y: radius12 * sin(angle)
       };
     };
   };
@@ -14573,6 +14574,11 @@
     }
     ;
     throw new Error("Failed pattern match at PSD3.Internal.Attributes.Instances (line 49, column 3 - line 60, column 46): " + [v.constructor.name]);
+  };
+  var toAttrStringFnI = {
+    toAttr: function($35) {
+      return StringAttr.create(FnI.create(mkFn2($35)));
+    }
   };
   var toAttrStringFn = {
     toAttr: function($36) {
@@ -19012,11 +19018,6 @@
   };
   var selection_default = selection;
 
-  // node_modules/d3-selection/src/select.js
-  function select_default2(selector) {
-    return typeof selector === "string" ? new Selection([[document.querySelector(selector)]], [document.documentElement]) : new Selection([[selector]], root2);
-  }
-
   // node_modules/d3-color/src/define.js
   function define_default(constructor, factory, prototype) {
     constructor.prototype = factory.prototype = prototype;
@@ -19574,18 +19575,18 @@
     scaleY: 1
   };
   function decompose_default(a2, b2, c, d9, e, f) {
-    var scaleX, scaleY, skewX;
-    if (scaleX = Math.sqrt(a2 * a2 + b2 * b2)) a2 /= scaleX, b2 /= scaleX;
+    var scaleX2, scaleY2, skewX;
+    if (scaleX2 = Math.sqrt(a2 * a2 + b2 * b2)) a2 /= scaleX2, b2 /= scaleX2;
     if (skewX = a2 * c + b2 * d9) c -= a2 * skewX, d9 -= b2 * skewX;
-    if (scaleY = Math.sqrt(c * c + d9 * d9)) c /= scaleY, d9 /= scaleY, skewX /= scaleY;
-    if (a2 * d9 < b2 * c) a2 = -a2, b2 = -b2, skewX = -skewX, scaleX = -scaleX;
+    if (scaleY2 = Math.sqrt(c * c + d9 * d9)) c /= scaleY2, d9 /= scaleY2, skewX /= scaleY2;
+    if (a2 * d9 < b2 * c) a2 = -a2, b2 = -b2, skewX = -skewX, scaleX2 = -scaleX2;
     return {
       translateX: e,
       translateY: f,
       rotate: Math.atan2(b2, a2) * degrees,
       skewX: Math.atan(skewX) * degrees,
-      scaleX,
-      scaleY
+      scaleX: scaleX2,
+      scaleY: scaleY2
     };
   }
 
@@ -20186,7 +20187,7 @@
   }
 
   // node_modules/d3-transition/src/transition/select.js
-  function select_default3(select5) {
+  function select_default2(select5) {
     var name16 = this._name, id5 = this._id;
     if (typeof select5 !== "function") select5 = selector_default(select5);
     for (var groups = this._groups, m = groups.length, subgroups = new Array(m), j = 0; j < m; ++j) {
@@ -20389,7 +20390,7 @@
   var selection_prototype = selection_default.prototype;
   Transition.prototype = transition.prototype = {
     constructor: Transition,
-    select: select_default3,
+    select: select_default2,
     selectAll: selectAll_default2,
     selectChild: selection_prototype.selectChild,
     selectChildren: selection_prototype.selectChildren,
@@ -20601,12 +20602,12 @@
 
   // node_modules/d3-format/src/formatGroup.js
   function formatGroup_default(grouping, thousands) {
-    return function(value18, width23) {
+    return function(value18, width24) {
       var i2 = value18.length, t = [], j = 0, g = grouping[0], length9 = 0;
       while (i2 > 0 && g > 0) {
-        if (length9 + g + 1 > width23) g = Math.max(1, width23 - length9);
+        if (length9 + g + 1 > width24) g = Math.max(1, width24 - length9);
         t.push(value18.substring(i2 -= g, i2 + g));
-        if ((length9 += g + 1) > width23) break;
+        if ((length9 += g + 1) > width24) break;
         g = grouping[j = (j + 1) % grouping.length];
       }
       return t.reverse().join(thousands);
@@ -20723,10 +20724,10 @@
     var group3 = locale2.grouping === void 0 || locale2.thousands === void 0 ? identity_default2 : formatGroup_default(map44.call(locale2.grouping, Number), locale2.thousands + ""), currencyPrefix = locale2.currency === void 0 ? "" : locale2.currency[0] + "", currencySuffix = locale2.currency === void 0 ? "" : locale2.currency[1] + "", decimal = locale2.decimal === void 0 ? "." : locale2.decimal + "", numerals = locale2.numerals === void 0 ? identity_default2 : formatNumerals_default(map44.call(locale2.numerals, String)), percent = locale2.percent === void 0 ? "%" : locale2.percent + "", minus = locale2.minus === void 0 ? "\u2212" : locale2.minus + "", nan2 = locale2.nan === void 0 ? "NaN" : locale2.nan + "";
     function newFormat(specifier) {
       specifier = formatSpecifier(specifier);
-      var fill20 = specifier.fill, align = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero4 = specifier.zero, width23 = specifier.width, comma = specifier.comma, precision = specifier.precision, trim2 = specifier.trim, type2 = specifier.type;
+      var fill21 = specifier.fill, align = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero4 = specifier.zero, width24 = specifier.width, comma = specifier.comma, precision = specifier.precision, trim2 = specifier.trim, type2 = specifier.type;
       if (type2 === "n") comma = true, type2 = "g";
       else if (!formatTypes_default[type2]) precision === void 0 && (precision = 12), trim2 = true, type2 = "g";
-      if (zero4 || fill20 === "0" && align === "=") zero4 = true, fill20 = "0", align = "=";
+      if (zero4 || fill21 === "0" && align === "=") zero4 = true, fill21 = "0", align = "=";
       var prefix = symbol === "$" ? currencyPrefix : symbol === "#" && /[boxX]/.test(type2) ? "0" + type2.toLowerCase() : "", suffix = symbol === "$" ? currencySuffix : /[%p]/.test(type2) ? percent : "";
       var formatType = formatTypes_default[type2], maybeSuffix = /[defgprs%]/.test(type2);
       precision = precision === void 0 ? 6 : /[gprs]/.test(type2) ? Math.max(1, Math.min(21, precision)) : Math.max(0, Math.min(20, precision));
@@ -20755,8 +20756,8 @@
           }
         }
         if (comma && !zero4) value18 = group3(value18, Infinity);
-        var length9 = valuePrefix.length + value18.length + valueSuffix.length, padding = length9 < width23 ? new Array(width23 - length9 + 1).join(fill20) : "";
-        if (comma && zero4) value18 = group3(padding + value18, padding.length ? width23 - valueSuffix.length : Infinity), padding = "";
+        var length9 = valuePrefix.length + value18.length + valueSuffix.length, padding = length9 < width24 ? new Array(width24 - length9 + 1).join(fill21) : "";
+        if (comma && zero4) value18 = group3(padding + value18, padding.length ? width24 - valueSuffix.length : Infinity), padding = "";
         switch (align) {
           case "<":
             value18 = valuePrefix + value18 + valueSuffix + padding;
@@ -21048,166 +21049,6 @@
     };
     initRange.apply(scale, arguments);
     return linearish(scale);
-  }
-
-  // node_modules/d3-scale/src/nice.js
-  function nice(domain, interval2) {
-    domain = domain.slice();
-    var i0 = 0, i1 = domain.length - 1, x0 = domain[i0], x110 = domain[i1], t;
-    if (x110 < x0) {
-      t = i0, i0 = i1, i1 = t;
-      t = x0, x0 = x110, x110 = t;
-    }
-    domain[i0] = interval2.floor(x0);
-    domain[i1] = interval2.ceil(x110);
-    return domain;
-  }
-
-  // node_modules/d3-scale/src/log.js
-  function transformLog(x23) {
-    return Math.log(x23);
-  }
-  function transformExp(x23) {
-    return Math.exp(x23);
-  }
-  function transformLogn(x23) {
-    return -Math.log(-x23);
-  }
-  function transformExpn(x23) {
-    return -Math.exp(-x23);
-  }
-  function pow10(x23) {
-    return isFinite(x23) ? +("1e" + x23) : x23 < 0 ? 0 : x23;
-  }
-  function powp(base2) {
-    return base2 === 10 ? pow10 : base2 === Math.E ? Math.exp : (x23) => Math.pow(base2, x23);
-  }
-  function logp(base2) {
-    return base2 === Math.E ? Math.log : base2 === 10 && Math.log10 || base2 === 2 && Math.log2 || (base2 = Math.log(base2), (x23) => Math.log(x23) / base2);
-  }
-  function reflect(f) {
-    return (x23, k) => -f(-x23, k);
-  }
-  function loggish(transform3) {
-    const scale = transform3(transformLog, transformExp);
-    const domain = scale.domain;
-    let base2 = 10;
-    let logs;
-    let pows;
-    function rescale() {
-      logs = logp(base2), pows = powp(base2);
-      if (domain()[0] < 0) {
-        logs = reflect(logs), pows = reflect(pows);
-        transform3(transformLogn, transformExpn);
-      } else {
-        transform3(transformLog, transformExp);
-      }
-      return scale;
-    }
-    scale.base = function(_) {
-      return arguments.length ? (base2 = +_, rescale()) : base2;
-    };
-    scale.domain = function(_) {
-      return arguments.length ? (domain(_), rescale()) : domain();
-    };
-    scale.ticks = (count) => {
-      const d9 = domain();
-      let u2 = d9[0];
-      let v = d9[d9.length - 1];
-      const r = v < u2;
-      if (r) [u2, v] = [v, u2];
-      let i2 = logs(u2);
-      let j = logs(v);
-      let k;
-      let t;
-      const n = count == null ? 10 : +count;
-      let z = [];
-      if (!(base2 % 1) && j - i2 < n) {
-        i2 = Math.floor(i2), j = Math.ceil(j);
-        if (u2 > 0) for (; i2 <= j; ++i2) {
-          for (k = 1; k < base2; ++k) {
-            t = i2 < 0 ? k / pows(-i2) : k * pows(i2);
-            if (t < u2) continue;
-            if (t > v) break;
-            z.push(t);
-          }
-        }
-        else for (; i2 <= j; ++i2) {
-          for (k = base2 - 1; k >= 1; --k) {
-            t = i2 > 0 ? k / pows(-i2) : k * pows(i2);
-            if (t < u2) continue;
-            if (t > v) break;
-            z.push(t);
-          }
-        }
-        if (z.length * 2 < n) z = ticks(u2, v, n);
-      } else {
-        z = ticks(i2, j, Math.min(j - i2, n)).map(pows);
-      }
-      return r ? z.reverse() : z;
-    };
-    scale.tickFormat = (count, specifier) => {
-      if (count == null) count = 10;
-      if (specifier == null) specifier = base2 === 10 ? "s" : ",";
-      if (typeof specifier !== "function") {
-        if (!(base2 % 1) && (specifier = formatSpecifier(specifier)).precision == null) specifier.trim = true;
-        specifier = format(specifier);
-      }
-      if (count === Infinity) return specifier;
-      const k = Math.max(1, base2 * count / scale.ticks().length);
-      return (d9) => {
-        let i2 = d9 / pows(Math.round(logs(d9)));
-        if (i2 * base2 < base2 - 0.5) i2 *= base2;
-        return i2 <= k ? specifier(d9) : "";
-      };
-    };
-    scale.nice = () => {
-      return domain(nice(domain(), {
-        floor: (x23) => pows(Math.floor(logs(x23))),
-        ceil: (x23) => pows(Math.ceil(logs(x23)))
-      }));
-    };
-    return scale;
-  }
-  function log3() {
-    const scale = loggish(transformer()).domain([1, 10]);
-    scale.copy = () => copy2(scale, log3()).base(scale.base());
-    initRange.apply(scale, arguments);
-    return scale;
-  }
-
-  // node_modules/d3-scale/src/pow.js
-  function transformPow(exponent) {
-    return function(x23) {
-      return x23 < 0 ? -Math.pow(-x23, exponent) : Math.pow(x23, exponent);
-    };
-  }
-  function transformSqrt(x23) {
-    return x23 < 0 ? -Math.sqrt(-x23) : Math.sqrt(x23);
-  }
-  function transformSquare(x23) {
-    return x23 < 0 ? -x23 * x23 : x23 * x23;
-  }
-  function powish(transform3) {
-    var scale = transform3(identity17, identity17), exponent = 1;
-    function rescale() {
-      return exponent === 1 ? transform3(identity17, identity17) : exponent === 0.5 ? transform3(transformSqrt, transformSquare) : transform3(transformPow(exponent), transformPow(1 / exponent));
-    }
-    scale.exponent = function(_) {
-      return arguments.length ? (exponent = +_, rescale()) : exponent;
-    };
-    return linearish(scale);
-  }
-  function pow3() {
-    var scale = powish(transformer());
-    scale.copy = function() {
-      return copy2(scale, pow3()).exponent(scale.exponent());
-    };
-    initRange.apply(scale, arguments);
-    return scale;
-  }
-  function sqrt2() {
-    return pow3.apply(null, arguments).exponent(0.5);
   }
 
   // node_modules/d3-scale-chromatic/src/colors.js
@@ -21742,25 +21583,25 @@
     }
     function targetTop(source2, target7) {
       let y20 = source2.y0 - (source2.sourceLinks.length - 1) * py / 2;
-      for (const { target: node, width: width23 } of source2.sourceLinks) {
+      for (const { target: node, width: width24 } of source2.sourceLinks) {
         if (node === target7) break;
-        y20 += width23 + py;
+        y20 += width24 + py;
       }
-      for (const { source: node, width: width23 } of target7.targetLinks) {
+      for (const { source: node, width: width24 } of target7.targetLinks) {
         if (node === source2) break;
-        y20 -= width23;
+        y20 -= width24;
       }
       return y20;
     }
     function sourceTop(source2, target7) {
       let y20 = target7.y0 - (target7.targetLinks.length - 1) * py / 2;
-      for (const { source: node, width: width23 } of target7.targetLinks) {
+      for (const { source: node, width: width24 } of target7.targetLinks) {
         if (node === source2) break;
-        y20 += width23 + py;
+        y20 += width24 + py;
       }
-      for (const { target: node, width: width23 } of source2.sourceLinks) {
+      for (const { target: node, width: width24 } of source2.sourceLinks) {
         if (node === target7) break;
-        y20 -= width23;
+        y20 -= width24;
       }
       return y20;
     }
@@ -21926,8 +21767,8 @@
         return justify;
     }
   };
-  var sankeySetDataWithConfig_ = (data) => (width23) => (height23) => (config) => () => {
-    const sankeyGenerator = Sankey().nodeWidth(config.nodeWidth).nodePadding(config.nodePadding).nodeAlign(getAlignmentFunction(config.alignment)).extent([[1, 1], [width23 - 1, height23 - 5]]);
+  var sankeySetDataWithConfig_ = (data) => (width24) => (height24) => (config) => () => {
+    const sankeyGenerator = Sankey().nodeWidth(config.nodeWidth).nodePadding(config.nodePadding).nodeAlign(getAlignmentFunction(config.alignment)).extent([[1, 1], [width24 - 1, height24 - 5]]);
     const dataCopy = {
       nodes: data.nodes.map((n) => ({ ...n })),
       links: data.links.map((l) => ({ ...l }))
@@ -21964,8 +21805,8 @@
     });
     return graph;
   };
-  var sankeySetData_ = (data) => (width23) => (height23) => () => {
-    return sankeySetDataWithConfig_(data)(width23)(height23)({
+  var sankeySetData_ = (data) => (width24) => (height24) => () => {
+    return sankeySetDataWithConfig_(data)(width24)(height24)({
       alignment: "justify",
       linkColorMode: "source",
       nodeWidth: 15,
@@ -21978,10 +21819,10 @@
   var sankeySetDataWithConfig = function(dictMonadEffect) {
     var liftEffect51 = liftEffect(dictMonadEffect);
     return function(data_2) {
-      return function(width23) {
-        return function(height23) {
+      return function(width24) {
+        return function(height24) {
           return function(config) {
-            return liftEffect51(sankeySetDataWithConfig_(data_2)(width23)(height23)(config));
+            return liftEffect51(sankeySetDataWithConfig_(data_2)(width24)(height24)(config));
           };
         };
       };
@@ -21990,9 +21831,9 @@
   var sankeySetData = function(dictMonadEffect) {
     var liftEffect51 = liftEffect(dictMonadEffect);
     return function(data_2) {
-      return function(width23) {
-        return function(height23) {
-          return liftEffect51(sankeySetData_(data_2)(width23)(height23));
+      return function(width24) {
+        return function(height24) {
+          return liftEffect51(sankeySetData_(data_2)(width24)(height24));
         };
       };
     };
@@ -22528,17 +22369,17 @@
   };
   var sankeyMD3Selection_D3Sank = {
     setSankeyData: function(data_2) {
-      return function(width23) {
-        return function(height23) {
-          return sankeySetData2(data_2)(width23)(height23);
+      return function(width24) {
+        return function(height24) {
+          return sankeySetData2(data_2)(width24)(height24);
         };
       };
     },
     setSankeyDataWithConfig: function(data_2) {
-      return function(width23) {
-        return function(height23) {
+      return function(width24) {
+        return function(height24) {
           return function(config) {
-            return sankeySetDataWithConfig2(data_2)(width23)(height23)(config);
+            return sankeySetDataWithConfig2(data_2)(width24)(height24)(config);
           };
         };
       };
@@ -29612,9 +29453,9 @@
     return "translate(" + (show19(treeDatum_.x(d9)) + ("," + (show19(treeDatum_.y(d9)) + ")")));
   };
   var configureAndRunScript = function(dictBind) {
-    var draw20 = draw8(dictBind);
+    var draw24 = draw8(dictBind);
     return function(dictSelectionM) {
-      var draw110 = draw20(dictSelectionM);
+      var draw110 = draw24(dictSelectionM);
       return function(v) {
         return function(model) {
           return function(selector) {
@@ -32371,7 +32212,7 @@
   };
 
   // output/Effect.Class.Console/index.js
-  var log4 = function(dictMonadEffect) {
+  var log3 = function(dictMonadEffect) {
     var $51 = liftEffect(dictMonadEffect);
     return function($52) {
       return $51(log2($52));
@@ -32455,7 +32296,7 @@
     var bind310 = bind(Bind1);
     var liftEffect210 = liftEffect(dictMonadEffect);
     var pure211 = pure(Monad0.Applicative0());
-    return discard54(Bind1)(log4(dictMonadEffect)("General Update Pattern example"))(function() {
+    return discard54(Bind1)(log3(dictMonadEffect)("General Update Pattern example"))(function() {
       return bind310(liftEffect210(eval_D3M(exGeneralUpdatePattern2("div.gup-viz"))))(function(update3) {
         return pure211(function(letters) {
           return liftEffect47(applySecond3(runD3M(update3(letters)))(pure39(unit)));
@@ -32642,9 +32483,162 @@
   })();
 
   // output/PSD3.WealthHealth.WealthHealth/foreign.js
-  function log5(message2) {
+  function log4(message2) {
     console.log(message2);
   }
+
+  // output/D3.Viz.WealthHealth.Unsafe/index.js
+  var datum_4 = {
+    name: function(d9) {
+      return d9.name;
+    },
+    income: function(d9) {
+      return d9.income;
+    },
+    population: function(d9) {
+      return d9.population;
+    },
+    lifeExpectancy: function(d9) {
+      return d9.lifeExpectancy;
+    },
+    regionColor: function(d9) {
+      return d9.regionColor;
+    },
+    indexNum: function(i2) {
+      return i2;
+    }
+  };
+  var coerceDatumToKey2 = function(d9) {
+    return datum_4.name(d9);
+  };
+
+  // output/D3.Viz.WealthHealth.Draw/index.js
+  var width23 = /* @__PURE__ */ width8(toAttrNumber);
+  var height23 = /* @__PURE__ */ height8(toAttrNumber);
+  var classed21 = /* @__PURE__ */ classed(toAttrString);
+  var discard55 = /* @__PURE__ */ discard(discardUnit);
+  var cx7 = /* @__PURE__ */ cx(toAttrNumberFnI);
+  var cy7 = /* @__PURE__ */ cy(toAttrNumberFnI);
+  var radius11 = /* @__PURE__ */ radius(toAttrNumberFnI);
+  var fill20 = /* @__PURE__ */ fill(toAttrStringFnI);
+  var fillOpacity9 = /* @__PURE__ */ fillOpacity(toAttrNumber);
+  var strokeColor17 = /* @__PURE__ */ strokeColor(toAttrString);
+  var strokeWidth14 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var scaleY = function(config) {
+    return function(lifeExpectancy) {
+      var rangeHeight = config.height - config.marginTop - config.marginBottom;
+      var normalized = (lifeExpectancy - 14) / (86 - 14);
+      return config.height - config.marginBottom - normalized * rangeHeight;
+    };
+  };
+  var scaleX = function(config) {
+    return function(income) {
+      var rangeWidth = config.width - config.marginLeft - config.marginRight;
+      var logIncome = (function() {
+        var $50 = income > 0;
+        if ($50) {
+          return log(income);
+        }
+        ;
+        return 5.298317;
+      })();
+      var normalized = (logIncome - 5.298317) / (11.512925 - 5.298317);
+      return config.marginLeft + normalized * rangeWidth;
+    };
+  };
+  var scaleRadius = function(population) {
+    var normalized = population / 5e9;
+    return sqrt(normalized) * 40;
+  };
+  var defaultConfig = {
+    width: 1e3,
+    height: 600,
+    marginTop: 20,
+    marginRight: 20,
+    marginBottom: 35,
+    marginLeft: 40
+  };
+  var draw20 = function(dictSelectionM) {
+    var Monad0 = dictSelectionM.Monad0();
+    var Bind1 = Monad0.Bind1();
+    var bind67 = bind(Bind1);
+    var attach2 = attach(dictSelectionM);
+    var appendTo2 = appendTo(dictSelectionM);
+    var openSelection2 = openSelection(dictSelectionM);
+    var updateJoin2 = updateJoin(dictSelectionM);
+    var discard112 = discard55(Bind1);
+    var setAttributes2 = setAttributes(dictSelectionM);
+    var pure45 = pure(Monad0.Applicative0());
+    return function(selector) {
+      return function(nations) {
+        return bind67(attach2(selector))(function(v) {
+          return bind67(appendTo2(v)(Svg.value)([viewBox(0)(0)(defaultConfig.width)(defaultConfig.height), width23(defaultConfig.width), height23(defaultConfig.height), classed21("wealth-health-viz")]))(function(svg2) {
+            return bind67(appendTo2(svg2)(Group.value)([classed21("nations")]))(function(chartGroup) {
+              var calculateAttrs = function(d9) {
+                return function(v1) {
+                  var pop4 = datum_4.population(d9);
+                  var life = datum_4.lifeExpectancy(d9);
+                  var income = datum_4.income(d9);
+                  var color2 = datum_4.regionColor(d9);
+                  return {
+                    x: scaleX(defaultConfig)(income),
+                    y: scaleY(defaultConfig)(life),
+                    r: scaleRadius(pop4),
+                    color: color2
+                  };
+                };
+              };
+              return bind67(openSelection2(chartGroup)("circle"))(function(enterSelection) {
+                return bind67(updateJoin2(enterSelection)(Circle.value)(nations)(coerceDatumToKey2))(function(updateSelections) {
+                  return discard112(setAttributes2(updateSelections.exit)([classed21("exit")]))(function() {
+                    return discard112(setAttributes2(updateSelections.update)([cx7(function(d9) {
+                      return function(i2) {
+                        return calculateAttrs(d9)(i2).x;
+                      };
+                    }), cy7(function(d9) {
+                      return function(i2) {
+                        return calculateAttrs(d9)(i2).y;
+                      };
+                    }), radius11(function(d9) {
+                      return function(i2) {
+                        return calculateAttrs(d9)(i2).r;
+                      };
+                    }), fill20(function(d9) {
+                      return function(i2) {
+                        return calculateAttrs(d9)(i2).color;
+                      };
+                    }), classed21("update")]))(function() {
+                      return bind67(appendTo2(updateSelections.enter)(Circle.value)([]))(function(newCircles) {
+                        return discard112(setAttributes2(newCircles)([cx7(function(d9) {
+                          return function(i2) {
+                            return calculateAttrs(d9)(i2).x;
+                          };
+                        }), cy7(function(d9) {
+                          return function(i2) {
+                            return calculateAttrs(d9)(i2).y;
+                          };
+                        }), radius11(function(d9) {
+                          return function(i2) {
+                            return calculateAttrs(d9)(i2).r;
+                          };
+                        }), fill20(function(d9) {
+                          return function(i2) {
+                            return calculateAttrs(d9)(i2).color;
+                          };
+                        }), fillOpacity9(0.7), strokeColor17("#333"), strokeWidth14(0.5), classed21("nation-circle enter")]))(function() {
+                          return pure45(unit);
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      };
+    };
+  };
 
   // output/PSD3.WealthHealth.Types/index.js
   var EastAsiaAndPacific = /* @__PURE__ */ (function() {
@@ -33104,271 +33098,6 @@
   })();
   var renderLegend = /* @__PURE__ */ div2([/* @__PURE__ */ classes(["wealth-health-legend"])])([/* @__PURE__ */ h3_([/* @__PURE__ */ text5("Regions")]), /* @__PURE__ */ div2([/* @__PURE__ */ classes(["wealth-health-legend__items"])])(/* @__PURE__ */ map(functorArray)(renderLegendItem)(allRegions))]);
 
-  // output/PSD3.WealthHealth.Rendering/foreign.js
-  function clearContainer(containerId) {
-    return function() {
-      const container = document.getElementById(containerId);
-      if (container) {
-        container.innerHTML = "";
-      }
-    };
-  }
-  function createSVG(containerId) {
-    return function(width23) {
-      return function(height23) {
-        return function() {
-          const container = document.getElementById(containerId);
-          if (!container) {
-            console.error(`Container ${containerId} not found`);
-            return null;
-          }
-          const svg2 = select_default2(container).append("svg").attr("width", width23).attr("height", height23).attr("viewBox", [0, 0, width23, height23]).attr("style", "max-width: 100%; height: auto;");
-          return svg2.node();
-        };
-      };
-    };
-  }
-  function createLogScale(domainMin) {
-    return function(domainMax) {
-      return function(rangeMin) {
-        return function(rangeMax) {
-          return log3().domain([domainMin, domainMax]).range([rangeMin, rangeMax]);
-        };
-      };
-    };
-  }
-  function createLinearScale(domainMin) {
-    return function(domainMax) {
-      return function(rangeMin) {
-        return function(rangeMax) {
-          return linear2().domain([domainMin, domainMax]).range([rangeMin, rangeMax]);
-        };
-      };
-    };
-  }
-  function createSqrtScale(domainMin) {
-    return function(domainMax) {
-      return function(rangeMin) {
-        return function(rangeMax) {
-          return sqrt2().domain([domainMin, domainMax]).range([rangeMin, rangeMax]);
-        };
-      };
-    };
-  }
-  function applyScale(scale) {
-    return function(value18) {
-      return scale(value18);
-    };
-  }
-  function renderXAxis(svg2) {
-    return function(xScale) {
-      return function(yPosition) {
-        return function(xMin) {
-          return function(xMax) {
-            return function() {
-              const svgSelection = select_default2(svg2);
-              const xAxis = axisBottom(xScale).ticks(10, ",.0f").tickSizeOuter(0);
-              svgSelection.append("g").attr("class", "x-axis").attr("transform", `translate(0,${yPosition})`).call(xAxis).call((g) => g.select(".domain").remove());
-            };
-          };
-        };
-      };
-    };
-  }
-  function renderYAxis(svg2) {
-    return function(yScale) {
-      return function(yMin) {
-        return function(yMax) {
-          return function(xPosition) {
-            return function() {
-              const svgSelection = select_default2(svg2);
-              const yAxis = axisLeft(yScale).ticks(10).tickSizeOuter(0);
-              svgSelection.append("g").attr("class", "y-axis").attr("transform", `translate(${xPosition},0)`).call(yAxis).call((g) => g.select(".domain").remove());
-            };
-          };
-        };
-      };
-    };
-  }
-  function renderXAxisLabel(svg2) {
-    return function(label5) {
-      return function(width23) {
-        return function(yPosition) {
-          return function() {
-            const svgSelection = select_default2(svg2);
-            svgSelection.append("text").attr("class", "x-axis-label").attr("text-anchor", "middle").attr("x", width23 / 2).attr("y", yPosition + 30).attr("fill", "currentColor").text(label5);
-          };
-        };
-      };
-    };
-  }
-  function renderYAxisLabel(svg2) {
-    return function(label5) {
-      return function(xPosition) {
-        return function(height23) {
-          return function() {
-            const svgSelection = select_default2(svg2);
-            svgSelection.append("text").attr("class", "y-axis-label").attr("text-anchor", "middle").attr("transform", `rotate(-90)`).attr("x", -height23 / 2).attr("y", xPosition - 30).attr("fill", "currentColor").text(label5);
-          };
-        };
-      };
-    };
-  }
-  function renderGridlines(svg2) {
-    return function(xScale) {
-      return function(yScale) {
-        return function(config) {
-          return function() {
-            const svgSelection = select_default2(svg2);
-            const xTicks = xScale.ticks(10);
-            svgSelection.append("g").attr("class", "grid-lines-x").selectAll("line").data(xTicks).join("line").attr("x1", (d9) => xScale(d9)).attr("x2", (d9) => xScale(d9)).attr("y1", config.marginTop).attr("y2", config.height - config.marginBottom).attr("stroke", "#ccc").attr("stroke-opacity", 0.3).attr("stroke-dasharray", "2,2");
-            const yTicks = yScale.ticks(10);
-            svgSelection.append("g").attr("class", "grid-lines-y").selectAll("line").data(yTicks).join("line").attr("x1", config.marginLeft).attr("x2", config.width - config.marginRight).attr("y1", (d9) => yScale(d9)).attr("y2", (d9) => yScale(d9)).attr("stroke", "#ccc").attr("stroke-opacity", 0.3).attr("stroke-dasharray", "2,2");
-          };
-        };
-      };
-    };
-  }
-  function addCircle(svg2) {
-    return function(x23) {
-      return function(y20) {
-        return function(r) {
-          return function(color2) {
-            return function(name16) {
-              return function(onHover) {
-                return function(onLeave) {
-                  return function() {
-                    const svgSelection = select_default2(svg2);
-                    svgSelection.append("circle").attr("class", "nation-circle").attr("cx", x23).attr("cy", y20).attr("r", r).attr("fill", color2).attr("fill-opacity", 0.7).attr("stroke", "#333").attr("stroke-width", 0.5).attr("data-nation", name16).on("mouseenter", function() {
-                      onHover(name16)();
-                    }).on("mouseleave", function() {
-                      onLeave()();
-                    });
-                  };
-                };
-              };
-            };
-          };
-        };
-      };
-    };
-  }
-  function updateCircles(containerId) {
-    return function(nations) {
-      return function(xScale) {
-        return function(yScale) {
-          return function(rScale) {
-            return function(onHover) {
-              return function(onLeave) {
-                return function() {
-                  const container = document.getElementById(containerId);
-                  if (!container) return;
-                  const svg2 = select_default2(container).select("svg");
-                  svg2.selectAll(".nation-circle").data(nations, (d9) => d9 ? d9.name : this.getAttribute("data-nation")).join(
-                    (enter) => enter.append("circle").attr("class", "nation-circle").attr("data-nation", (d9) => d9.name).attr("cx", (d9) => xScale(d9.income)).attr("cy", (d9) => yScale(d9.lifeExpectancy)).attr("r", 0).attr("fill", (d9) => getRegionColor(d9.region)).attr("fill-opacity", 0.7).attr("stroke", "#333").attr("stroke-width", 0.5).on("mouseenter", function(event, d9) {
-                      onHover(d9.name)();
-                    }).on("mouseleave", function() {
-                      onLeave()();
-                    }).call((enter2) => enter2.transition().duration(300).attr("r", (d9) => rScale(d9.population))),
-                    (update3) => update3.on("mouseenter", function(event, d9) {
-                      onHover(d9.name)();
-                    }).on("mouseleave", function() {
-                      onLeave()();
-                    }).call((update4) => update4.transition().duration(300).attr("cx", (d9) => xScale(d9.income)).attr("cy", (d9) => yScale(d9.lifeExpectancy)).attr("r", (d9) => rScale(d9.population)).attr("fill", (d9) => getRegionColor(d9.region))),
-                    (exit) => exit.call((exit2) => exit2.transition().duration(300).attr("r", 0).remove())
-                  );
-                };
-              };
-            };
-          };
-        };
-      };
-    };
-  }
-  function getRegionColor(region) {
-    const colorMap = {
-      "EastAsiaAndPacific": "#5ab4ac",
-      "Europe": "#d8b365",
-      "LatinAmericaAndCaribbean": "#8c510a",
-      "MiddleEastAndNorthAfrica": "#f6e8c3",
-      "SouthAsia": "#c7eae5",
-      "SubSaharanAfrica": "#01665e",
-      "NorthAmerica": "#dfc27d"
-    };
-    return colorMap[region.constructor] || "#999";
-  }
-
-  // output/PSD3.WealthHealth.Rendering/index.js
-  var for_3 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
-  var renderNation = function(svg2) {
-    return function(xScale) {
-      return function(yScale) {
-        return function(rScale) {
-          return function(nation) {
-            return function(onHover) {
-              return function(onLeave) {
-                var x23 = applyScale(xScale)(nation.income);
-                var y20 = applyScale(yScale)(nation.lifeExpectancy);
-                var r = applyScale(rScale)(nation.population);
-                var color2 = regionColor(nation.region);
-                return addCircle(svg2)(x23)(y20)(r)(color2)(nation.name)(onHover)(onLeave);
-              };
-            };
-          };
-        };
-      };
-    };
-  };
-  var defaultConfig = {
-    width: 1e3,
-    height: 600,
-    marginTop: 20,
-    marginRight: 20,
-    marginBottom: 35,
-    marginLeft: 40
-  };
-  var renderVisualization = function(containerId) {
-    return function(year) {
-      return function(model) {
-        return function(onHover) {
-          return function(onLeave) {
-            var nations = getAllNationsAtYear(year)(model);
-            return function __do4() {
-              clearContainer(containerId)();
-              var svg2 = createSVG(containerId)(defaultConfig.width)(defaultConfig.height)();
-              var xScale = createLogScale(200)(1e5)(defaultConfig.marginLeft)(defaultConfig.width - defaultConfig.marginRight);
-              var yScale = createLinearScale(14)(86)(defaultConfig.height - defaultConfig.marginBottom)(defaultConfig.marginTop);
-              var rScale = createSqrtScale(0)(5e9)(0)(40);
-              renderXAxis(svg2)(xScale)(defaultConfig.height - defaultConfig.marginBottom)(defaultConfig.marginLeft)(defaultConfig.width - defaultConfig.marginRight)();
-              renderYAxis(svg2)(yScale)(defaultConfig.marginTop)(defaultConfig.height - defaultConfig.marginBottom)(defaultConfig.marginLeft)();
-              renderXAxisLabel(svg2)("Income per capita (dollars)")(defaultConfig.width)(defaultConfig.height - defaultConfig.marginBottom)();
-              renderYAxisLabel(svg2)("Life expectancy (years)")(defaultConfig.marginLeft)(defaultConfig.height)();
-              renderGridlines(svg2)(xScale)(yScale)(defaultConfig)();
-              return for_3(nations)(function(nation) {
-                return renderNation(svg2)(xScale)(yScale)(rScale)(nation)(onHover)(onLeave);
-              })();
-            };
-          };
-        };
-      };
-    };
-  };
-  var updateVisualization = function(containerId) {
-    return function(year) {
-      return function(model) {
-        return function(onHover) {
-          return function(onLeave) {
-            var nations = getAllNationsAtYear(year)(model);
-            var xScale = createLogScale(200)(1e5)(defaultConfig.marginLeft)(defaultConfig.width - defaultConfig.marginRight);
-            var yScale = createLinearScale(14)(86)(defaultConfig.height - defaultConfig.marginBottom)(defaultConfig.marginTop);
-            var rScale = createSqrtScale(0)(5e9)(0)(40);
-            return updateCircles(containerId)(nations)(xScale)(yScale)(rScale)(onHover)(onLeave);
-          };
-        };
-      };
-    };
-  };
-
   // output/PSD3.WealthHealth.State/index.js
   var initialState = function(v) {
     return {
@@ -33378,28 +33107,38 @@
       hoveredNation: Nothing.value,
       selectedNations: empty7,
       animationSpeed: 5,
-      animationSubscriptionId: Nothing.value,
-      hoverListener: Nothing.value
+      animationSubscriptionId: Nothing.value
     };
   };
 
   // output/PSD3.WealthHealth.WealthHealth/index.js
   var bind62 = /* @__PURE__ */ bind(bindHalogenM);
-  var discard55 = /* @__PURE__ */ discard(discardUnit);
-  var discard111 = /* @__PURE__ */ discard55(bindHalogenM);
+  var discard56 = /* @__PURE__ */ discard(discardUnit);
+  var discard111 = /* @__PURE__ */ discard56(bindHalogenM);
   var pure41 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var $$void11 = /* @__PURE__ */ $$void(functorHalogenM);
   var modify_39 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var get9 = /* @__PURE__ */ get(monadStateHalogenM);
   var when5 = /* @__PURE__ */ when(applicativeHalogenM);
+  var $$void11 = /* @__PURE__ */ $$void(functorHalogenM);
   var forever3 = /* @__PURE__ */ forever(monadRecAff);
-  var discard211 = /* @__PURE__ */ discard55(bindAff);
+  var discard211 = /* @__PURE__ */ discard56(bindAff);
   var liftEffect48 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var member4 = /* @__PURE__ */ member2(ordString);
   var $$delete8 = /* @__PURE__ */ $$delete5(ordString);
   var insert11 = /* @__PURE__ */ insert7(ordString);
+  var map57 = /* @__PURE__ */ map(functorArray);
+  var draw21 = /* @__PURE__ */ draw20(d3TaglessD3M);
   var bind113 = /* @__PURE__ */ bind(bindMaybe);
   var show30 = /* @__PURE__ */ show(showInt);
+  var nationPointToDrawData = function(np) {
+    return {
+      name: np.name,
+      income: np.income,
+      population: np.population,
+      lifeExpectancy: np.lifeExpectancy,
+      regionColor: regionColor(np.region)
+    };
+  };
   var handleAction47 = function(dictMonadAff) {
     var liftAff37 = liftAff(monadAffHalogenM(dictMonadAff));
     var MonadEffect0 = dictMonadAff.MonadEffect0();
@@ -33409,100 +33148,67 @@
         if (v instanceof Initialize48) {
           return bind62(liftAff37(loadNationsData))(function(result) {
             if (result instanceof Left) {
-              return discard111(liftEffect111(log5("Error loading data: " + result.value0)))(function() {
+              return discard111(liftEffect111(log4("Error loading data: " + result.value0)))(function() {
                 return pure41(unit);
               });
             }
             ;
             if (result instanceof Right) {
-              return bind62(liftEffect111(create3))(function(v1) {
-                return discard111($$void11(subscribe2(v1.emitter)))(function() {
-                  return discard111(modify_39(function(v2) {
-                    var $57 = {};
-                    for (var $58 in v2) {
-                      if ({}.hasOwnProperty.call(v2, $58)) {
-                        $57[$58] = v2[$58];
-                      }
-                      ;
-                    }
-                    ;
-                    $57.hoverListener = new Just(v1.listener);
-                    return $57;
-                  }))(function() {
-                    return handleAction47(dictMonadAff)(MonadEffect0)(new DataLoaded(result.value0));
-                  });
-                });
-              });
+              return handleAction47(dictMonadAff)(MonadEffect0)(new DataLoaded(result.value0));
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 123, column 5 - line 136, column 40): " + [result.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 135, column 5 - line 140, column 40): " + [result.constructor.name]);
           });
         }
         ;
         if (v instanceof DataLoaded) {
-          return bind62(get9)(function(state3) {
+          return discard111(modify_39(function(v1) {
+            var $55 = {};
+            for (var $56 in v1) {
+              if ({}.hasOwnProperty.call(v1, $56)) {
+                $55[$56] = v1[$56];
+              }
+              ;
+            }
+            ;
+            $55.model = new Just(v.value0);
+            return $55;
+          }))(function() {
             return discard111(modify_39(function(v1) {
-              var $63 = {};
-              for (var $64 in v1) {
-                if ({}.hasOwnProperty.call(v1, $64)) {
-                  $63[$64] = v1[$64];
+              var $58 = {};
+              for (var $59 in v1) {
+                if ({}.hasOwnProperty.call(v1, $59)) {
+                  $58[$59] = v1[$59];
                 }
                 ;
               }
               ;
-              $63.model = new Just(v.value0);
-              return $63;
+              $58.currentYear = v.value0.yearRange.min;
+              return $58;
             }))(function() {
-              return discard111(modify_39(function(v1) {
-                var $66 = {};
-                for (var $67 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $67)) {
-                    $66[$67] = v1[$67];
-                  }
-                  ;
-                }
-                ;
-                $66.currentYear = v.value0.yearRange.min;
-                return $66;
-              }))(function() {
-                if (state3.hoverListener instanceof Nothing) {
-                  return pure41(unit);
-                }
-                ;
-                if (state3.hoverListener instanceof Just) {
-                  var onHover = function(name16) {
-                    return notify(state3.hoverListener.value0)(new HoverNation(new Just(name16)));
-                  };
-                  var onLeave = function(v1) {
-                    return notify(state3.hoverListener.value0)(new HoverNation(Nothing.value));
-                  };
-                  return liftEffect111(renderVisualization("wealth-health-viz")(v.value0.yearRange.min)(v.value0)(onHover)(onLeave));
-                }
-                ;
-                throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 145, column 5 - line 150, column 103): " + [state3.hoverListener.constructor.name]);
-              });
+              return handleAction47(dictMonadAff)(MonadEffect0)(Render.value);
             });
           });
         }
         ;
         if (v instanceof DataLoadFailed) {
-          return discard111(liftEffect111(log5("Data load failed: " + v.value0)))(function() {
+          return discard111(liftEffect111(log4("Data load failed: " + v.value0)))(function() {
             return pure41(unit);
           });
         }
         ;
         if (v instanceof SetYear) {
           return discard111(modify_39(function(v1) {
-            var $73 = {};
-            for (var $74 in v1) {
-              if ({}.hasOwnProperty.call(v1, $74)) {
-                $73[$74] = v1[$74];
+            var $63 = {};
+            for (var $64 in v1) {
+              if ({}.hasOwnProperty.call(v1, $64)) {
+                $63[$64] = v1[$64];
               }
               ;
             }
             ;
-            $73.currentYear = v.value0;
-            return $73;
+            $63.currentYear = v.value0;
+            return $63;
           }))(function() {
             return handleAction47(dictMonadAff)(MonadEffect0)(Render.value);
           });
@@ -33512,32 +33218,32 @@
           return bind62(get9)(function(state3) {
             var newPlaying = !state3.playing;
             return discard111(modify_39(function(v1) {
-              var $77 = {};
-              for (var $78 in v1) {
-                if ({}.hasOwnProperty.call(v1, $78)) {
-                  $77[$78] = v1[$78];
+              var $67 = {};
+              for (var $68 in v1) {
+                if ({}.hasOwnProperty.call(v1, $68)) {
+                  $67[$68] = v1[$68];
                 }
                 ;
               }
               ;
-              $77.playing = newPlaying;
-              return $77;
+              $67.playing = newPlaying;
+              return $67;
             }))(function() {
               return discard111(when5(newPlaying)((function() {
                 var intervalMs = 1e3 / state3.animationSpeed;
                 return bind62(liftEffect111(create3))(function(v1) {
                   return bind62(subscribe2(v1.emitter))(function(subscriptionId) {
                     return discard111(modify_39(function(v2) {
-                      var $81 = {};
-                      for (var $82 in v2) {
-                        if ({}.hasOwnProperty.call(v2, $82)) {
-                          $81[$82] = v2[$82];
+                      var $71 = {};
+                      for (var $72 in v2) {
+                        if ({}.hasOwnProperty.call(v2, $72)) {
+                          $71[$72] = v2[$72];
                         }
                         ;
                       }
                       ;
-                      $81.animationSubscriptionId = new Just(subscriptionId);
-                      return $81;
+                      $71.animationSubscriptionId = new Just(subscriptionId);
+                      return $71;
                     }))(function() {
                       return $$void11(liftAff37(forkAff(forever3(discard211(delay(intervalMs))(function() {
                         return liftEffect48(notify(v1.listener)(Tick.value));
@@ -33554,21 +33260,21 @@
                   if (state$prime.animationSubscriptionId instanceof Just) {
                     return discard111(unsubscribe2(state$prime.animationSubscriptionId.value0))(function() {
                       return modify_39(function(v1) {
-                        var $87 = {};
-                        for (var $88 in v1) {
-                          if ({}.hasOwnProperty.call(v1, $88)) {
-                            $87[$88] = v1[$88];
+                        var $77 = {};
+                        for (var $78 in v1) {
+                          if ({}.hasOwnProperty.call(v1, $78)) {
+                            $77[$78] = v1[$78];
                           }
                           ;
                         }
                         ;
-                        $87.animationSubscriptionId = Nothing.value;
-                        return $87;
+                        $77.animationSubscriptionId = Nothing.value;
+                        return $77;
                       });
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 186, column 7 - line 190, column 60): " + [state$prime.animationSubscriptionId.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 174, column 7 - line 178, column 60): " + [state$prime.animationSubscriptionId.constructor.name]);
                 }));
               });
             });
@@ -33584,113 +33290,113 @@
             if (state3.model instanceof Just) {
               var nextYear = state3.currentYear + 1 | 0;
               return discard111((function() {
-                var $92 = nextYear > state3.model.value0.yearRange.max;
-                if ($92) {
+                var $82 = nextYear > state3.model.value0.yearRange.max;
+                if ($82) {
                   return modify_39(function(v1) {
-                    var $93 = {};
-                    for (var $94 in v1) {
-                      if ({}.hasOwnProperty.call(v1, $94)) {
-                        $93[$94] = v1[$94];
+                    var $83 = {};
+                    for (var $84 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $84)) {
+                        $83[$84] = v1[$84];
                       }
                       ;
                     }
                     ;
-                    $93.currentYear = state3.model.value0.yearRange.min;
-                    return $93;
+                    $83.currentYear = state3.model.value0.yearRange.min;
+                    return $83;
                   });
                 }
                 ;
                 return modify_39(function(v1) {
-                  var $96 = {};
-                  for (var $97 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $97)) {
-                      $96[$97] = v1[$97];
+                  var $86 = {};
+                  for (var $87 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $87)) {
+                      $86[$87] = v1[$87];
                     }
                     ;
                   }
                   ;
-                  $96.currentYear = nextYear;
-                  return $96;
+                  $86.currentYear = nextYear;
+                  return $86;
                 });
               })())(function() {
                 return handleAction47(dictMonadAff)(MonadEffect0)(Render.value);
               });
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 194, column 5 - line 204, column 28): " + [state3.model.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 182, column 5 - line 191, column 28): " + [state3.model.constructor.name]);
           });
         }
         ;
         if (v instanceof HoverNation) {
           return modify_39(function(v1) {
-            var $100 = {};
-            for (var $101 in v1) {
-              if ({}.hasOwnProperty.call(v1, $101)) {
-                $100[$101] = v1[$101];
+            var $90 = {};
+            for (var $91 in v1) {
+              if ({}.hasOwnProperty.call(v1, $91)) {
+                $90[$91] = v1[$91];
               }
               ;
             }
             ;
-            $100.hoveredNation = v.value0;
-            return $100;
+            $90.hoveredNation = v.value0;
+            return $90;
           });
         }
         ;
         if (v instanceof ToggleNationSelection) {
           return modify_39(function(s) {
             var newSelected = (function() {
-              var $104 = member4(v.value0)(s.selectedNations);
-              if ($104) {
+              var $94 = member4(v.value0)(s.selectedNations);
+              if ($94) {
                 return $$delete8(v.value0)(s.selectedNations);
               }
               ;
               return insert11(v.value0)(s.selectedNations);
             })();
-            var $105 = {};
-            for (var $106 in s) {
-              if ({}.hasOwnProperty.call(s, $106)) {
-                $105[$106] = s[$106];
+            var $95 = {};
+            for (var $96 in s) {
+              if ({}.hasOwnProperty.call(s, $96)) {
+                $95[$96] = s[$96];
               }
               ;
             }
             ;
-            $105.selectedNations = newSelected;
-            return $105;
+            $95.selectedNations = newSelected;
+            return $95;
           });
         }
         ;
         if (v instanceof SetAnimationSpeed) {
           return modify_39(function(v1) {
-            var $109 = {};
-            for (var $110 in v1) {
-              if ({}.hasOwnProperty.call(v1, $110)) {
-                $109[$110] = v1[$110];
+            var $99 = {};
+            for (var $100 in v1) {
+              if ({}.hasOwnProperty.call(v1, $100)) {
+                $99[$100] = v1[$100];
               }
               ;
             }
             ;
-            $109.animationSpeed = v.value0;
-            return $109;
+            $99.animationSpeed = v.value0;
+            return $99;
           });
         }
         ;
         if (v instanceof Render) {
           return bind62(get9)(function(state3) {
-            if (state3.model instanceof Just && state3.hoverListener instanceof Just) {
-              var onHover = function(name16) {
-                return notify(state3.hoverListener.value0)(new HoverNation(new Just(name16)));
-              };
-              var onLeave = function(v1) {
-                return notify(state3.hoverListener.value0)(new HoverNation(Nothing.value));
-              };
-              return liftEffect111(updateVisualization("wealth-health-viz")(state3.currentYear)(state3.model.value0)(onHover)(onLeave));
+            if (state3.model instanceof Just) {
+              var nations = getAllNationsAtYear(state3.currentYear)(state3.model.value0);
+              var drawData = map57(nationPointToDrawData)(nations);
+              return liftEffect111(eval_D3M(draw21("#wealth-health-viz")(drawData)));
             }
             ;
-            return pure41(unit);
+            if (state3.model instanceof Nothing) {
+              return pure41(unit);
+            }
+            ;
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 211, column 5 - line 216, column 27): " + [state3.model.constructor.name]);
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 119, column 16 - line 230, column 24): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 131, column 16 - line 216, column 27): " + [v.constructor.name]);
       };
     };
   };
@@ -33728,10 +33434,10 @@
           return div2([classes(["wealth-health-tooltip"])])([h4_([text5(v.value0.name)]), div_([text5("Region: " + regionName(v.value0.region))]), div_([text5("Income: $" + formatNumber(v.value0.income))]), div_([text5("Population: " + formatPopulation(v.value0.population))]), div_([text5("Life Expectancy: " + (formatNumber(v.value0.lifeExpectancy) + " years"))])]);
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 88, column 7 - line 98, column 14): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 90, column 7 - line 100, column 14): " + [v.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 84, column 3 - line 98, column 14): " + [state3.hoveredNation.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 86, column 3 - line 100, column 14): " + [state3.hoveredNation.constructor.name]);
     };
   };
   var render52 = function(state3) {
@@ -33744,7 +33450,7 @@
         return div2([classes(["wealth-health-viz-wrapper"])])([div2([id2("wealth-health-viz"), classes(["wealth-health-viz-container"])])([]), renderTooltip(state3)(state3.model.value0)]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 63, column 15 - line 76, column 22): " + [state3.model.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 65, column 15 - line 78, column 22): " + [state3.model.constructor.name]);
     })()])])]);
   };
   var component51 = function(dictMonadAff) {
@@ -34039,11 +33745,11 @@
   var append20 = /* @__PURE__ */ append(semigroupArray);
   var eq10 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
   var append110 = /* @__PURE__ */ append(semigroupString);
-  var map57 = /* @__PURE__ */ map(functorArray);
+  var map58 = /* @__PURE__ */ map(functorArray);
   var bind63 = /* @__PURE__ */ bind(bindAff);
   var liftEffect49 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var discard56 = /* @__PURE__ */ discard(discardUnit)(bindAff);
-  var for_4 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
+  var discard57 = /* @__PURE__ */ discard(discardUnit)(bindAff);
+  var for_3 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
   var formatFilesForClipboard = function(files2) {
     var replicateArray = function(n) {
       return function(x23) {
@@ -34076,13 +33782,13 @@
     var formatFile = function(file) {
       return "File: " + (file.filename + ("\n" + (repeatString("-")(80) + ("\n" + file.content))));
     };
-    var fileTexts = map57(formatFile)(files2);
+    var fileTexts = map58(formatFile)(files2);
     return intercalateArray(separator)(fileTexts);
   };
   var downloadAsZip = function(projectName) {
     return function(files2) {
       return bind63(liftEffect49(createZip))(function(zip2) {
-        return discard56(liftEffect49(for_4(files2)(function(file) {
+        return discard57(liftEffect49(for_3(files2)(function(file) {
           return addFile(zip2)(file.filename)(file.content);
         })))(function() {
           return fromEffectFnAff(downloadZipImpl(zip2)(projectName + ".zip"));
@@ -34096,11 +33802,11 @@
   };
 
   // output/PSD3.Wizard.Templates/index.js
-  var map58 = /* @__PURE__ */ map(functorArray);
+  var map59 = /* @__PURE__ */ map(functorArray);
   var map116 = /* @__PURE__ */ map(functorMaybe);
   var intercalate7 = /* @__PURE__ */ intercalate3(monoidString);
   var generateRecordType = function(fields) {
-    var fieldLines = map58(function(f) {
+    var fieldLines = map59(function(f) {
       return f.name + (" :: " + f.fieldType);
     })(fields);
     return joinWith("\n  , ")(fieldLines);
@@ -34144,7 +33850,7 @@
 `)));
   };
   var generateDatumType = function(fields) {
-    var typeLines = map58(function(f) {
+    var typeLines = map59(function(f) {
       return f.name + (" :: Datum_ -> " + f.fieldType);
     })(fields);
     return joinWith("\n  , ")(typeLines);
@@ -34155,10 +33861,10 @@
         var firstField = fromMaybe("x")(map116(function(f) {
           return f.name;
         })(head2(fields)));
-        var fieldList = intercalate7("\n")(map58(function(f) {
+        var fieldList = intercalate7("\n")(map59(function(f) {
           return "- " + (f.name + (": " + f.fieldType));
         })(fields));
-        var exampleFields = intercalate7(", ")(map58(function(f) {
+        var exampleFields = intercalate7(", ")(map59(function(f) {
           return f.name + ": 0.0";
         })(fields));
         var datumType = generateDatumType(fields);
@@ -34168,7 +33874,7 @@
   };
   var generateAccessors = function(fields) {
     return function(coerceFnName) {
-      var accessorLines = map58(function(f) {
+      var accessorLines = map59(function(f) {
         return f.name + (": _." + (f.name + (" <<< " + coerceFnName)));
       })(fields);
       return joinWith("\n  , ")(accessorLines);
@@ -34191,7 +33897,7 @@
 
   // output/PSD3.Wizard.Generator/index.js
   var intercalate8 = /* @__PURE__ */ intercalate3(monoidString);
-  var map59 = /* @__PURE__ */ map(functorArray);
+  var map60 = /* @__PURE__ */ map(functorArray);
   var append111 = /* @__PURE__ */ append(semigroupArray);
   var sineWaveData2 = "[ { x: 0.0, y: 100.0 }\n  , { x: 5.0, y: 125.0 }\n  , { x: 10.0, y: 145.0 }\n  , { x: 15.0, y: 159.0 }\n  , { x: 20.0, y: 165.0 }\n  , { x: 25.0, y: 159.0 }\n  , { x: 30.0, y: 145.0 }\n  , { x: 35.0, y: 125.0 }\n  , { x: 40.0, y: 100.0 }\n  , { x: 45.0, y: 75.0 }\n  , { x: 50.0, y: 55.0 }\n  , { x: 55.0, y: 41.0 }\n  , { x: 60.0, y: 35.0 }\n  , { x: 65.0, y: 41.0 }\n  , { x: 70.0, y: 55.0 }\n  , { x: 75.0, y: 75.0 }\n  , { x: 80.0, y: 100.0 }\n  ]";
   var scatterData = "[ { x: 10.0, y: 20.0 }\n  , { x: 25.0, y: 45.0 }\n  , { x: 40.0, y: 30.0 }\n  , { x: 55.0, y: 60.0 }\n  , { x: 70.0, y: 40.0 }\n  , { x: 85.0, y: 70.0 }\n  , { x: 100.0, y: 55.0 }\n  , { x: 115.0, y: 80.0 }\n  , { x: 130.0, y: 65.0 }\n  , { x: 145.0, y: 90.0 }\n  ]";
@@ -34213,7 +33919,7 @@
       ;
       return field.name + ": 0.0";
     };
-    var sampleRow = "{ " + (intercalate8(", ")(map59(generateFieldValue)(fields)) + " }");
+    var sampleRow = "{ " + (intercalate8(", ")(map60(generateFieldValue)(fields)) + " }");
     var rows4 = intercalate8("\n  , ")([sampleRow, sampleRow, sampleRow]);
     return "[ " + (rows4 + "\n  ]");
   };
@@ -34280,7 +33986,7 @@
   };
 
   // output/PSD3.Wizard.Wizard/index.js
-  var map60 = /* @__PURE__ */ map(functorArray);
+  var map61 = /* @__PURE__ */ map(functorArray);
   var eq11 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
   var show31 = /* @__PURE__ */ show(showDifficulty);
   var eq23 = /* @__PURE__ */ eq(eqDifficulty);
@@ -34292,7 +33998,7 @@
   var modify_40 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var bind114 = /* @__PURE__ */ bind(bindHalogenM);
   var get10 = /* @__PURE__ */ get(monadStateHalogenM);
-  var discard57 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard58 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure114 = /* @__PURE__ */ pure(applicativeHalogenM);
   var when6 = /* @__PURE__ */ when(applicativeHalogenM);
   var ChooseDataset = /* @__PURE__ */ (function() {
@@ -34409,7 +34115,7 @@
     var renderFile = function(file) {
       return details([classes(["wizard__file"])])([summary_([text5(file.filename)]), pre([classes(["wizard__code"])])([code_([text5(file.content)])])]);
     };
-    return div2([classes(["wizard__step-content"])])([h2_([text5("Review Generated Files")]), p_([text5("Preview the files that will be generated for your project.")]), div2([classes(["wizard__file-list"])])(map60(renderFile)(state3.generatedFiles))]);
+    return div2([classes(["wizard__step-content"])])([h2_([text5("Review Generated Files")]), p_([text5("Preview the files that will be generated for your project.")]), div2([classes(["wizard__file-list"])])(map61(renderFile)(state3.generatedFiles))]);
   };
   var renderHeader = function(state3) {
     return header([classes(["wizard__header"])])([h1_([text5("PSD3 Visualization Wizard")]), p([classes(["wizard__subtitle"])])([text5("Create a new PSD3 visualization project in 4 easy steps")])]);
@@ -34431,7 +34137,7 @@
         ;
         return c;
       };
-      var $151 = map60(toLower2);
+      var $151 = map61(toLower2);
       return function($152) {
         return fromCharArray($151(toCharArray($152)));
       };
@@ -34469,7 +34175,7 @@
       })();
       return div2([classes([cardClass]), onClick(function(v) {
         return new SelectDataset(dataset);
-      })])([div2([classes(["dataset-card__header"])])([h3_([text5(dataset.name)]), span3([classes(["difficulty-badge difficulty-badge--" + toLowerCase(show31(dataset.difficulty))])])([text5(show31(dataset.difficulty))])]), p([classes(["dataset-card__description"])])([text5(dataset.description)]), div2([classes(["dataset-card__info"])])([strong_([text5("Fields: ")]), text5(intercalate9(", ")(map60(function(f) {
+      })])([div2([classes(["dataset-card__header"])])([h3_([text5(dataset.name)]), span3([classes(["difficulty-badge difficulty-badge--" + toLowerCase(show31(dataset.difficulty))])])([text5(show31(dataset.difficulty))])]), p([classes(["dataset-card__description"])])([text5(dataset.description)]), div2([classes(["dataset-card__info"])])([strong_([text5("Fields: ")]), text5(intercalate9(", ")(map61(function(f) {
         return f.name + (": " + f.fieldType);
       })(dataset.fields)))]), div2([classes(["dataset-card__viz"])])([strong_([text5("Suggested: ")]), text5(dataset.suggestedViz)]), div2([classes(["dataset-card__note"])])([text5(dataset.educationalNote)])]);
     };
@@ -34513,7 +34219,7 @@
       return "";
     })()]), onClick(function(v) {
       return new SetDifficultyFilter(new Just(Intermediate.value));
-    })])([text5("Intermediate")])]), div2([classes(["wizard__dataset-grid"])])(map60(renderDatasetCard)(filteredDatasets))]);
+    })])([text5("Intermediate")])]), div2([classes(["wizard__dataset-grid"])])(map61(renderDatasetCard)(filteredDatasets))]);
   };
   var isValidModuleName = function(name16) {
     var all4 = function(pred) {
@@ -34809,7 +34515,7 @@
           }
           ;
           if (state3.currentStep instanceof NameModule) {
-            return discard57(handleAction48(dictMonadAff)(GenerateFiles.value))(function() {
+            return discard58(handleAction48(dictMonadAff)(GenerateFiles.value))(function() {
               return modify_40(function(v1) {
                 var $119 = {};
                 for (var $120 in v1) {
@@ -35009,8 +34715,8 @@
   })();
 
   // output/Routing.Parser/index.js
-  var map61 = /* @__PURE__ */ map(functorArray);
-  var discard58 = /* @__PURE__ */ discard(discardUnit)(bindMaybe);
+  var map62 = /* @__PURE__ */ map(functorArray);
+  var discard59 = /* @__PURE__ */ discard(discardUnit)(bindMaybe);
   var guard2 = /* @__PURE__ */ guard(alternativeMaybe);
   var apply4 = /* @__PURE__ */ apply(applyMaybe);
   var map117 = /* @__PURE__ */ map(functorMaybe);
@@ -35022,8 +34728,8 @@
   var fromFoldable24 = /* @__PURE__ */ fromFoldable(foldableMaybe);
   var parseQueryPart = function(decoder) {
     var part2tuple = function(input3) {
-      var keyVal = map61(decoder)(split("=")(input3));
-      return discard58(guard2(length4(keyVal) <= 2))(function() {
+      var keyVal = map62(decoder)(split("=")(input3));
+      return discard59(guard2(length4(keyVal) <= 2))(function() {
         return apply4(map117(Tuple.create)(head2(keyVal)))(index2(keyVal)(1));
       });
     };
@@ -35037,7 +34743,7 @@
   var parse7 = function(decoder) {
     return function(hash2) {
       var pathParts = function(str2) {
-        var parts = fromFoldable110(map61(function($31) {
+        var parts = fromFoldable110(map62(function($31) {
           return Path.create(decoder($31));
         })(split("/")(str2)));
         var v2 = unsnoc(parts);
@@ -35080,7 +34786,7 @@
 
   // output/Routing.Hash/index.js
   var bind65 = /* @__PURE__ */ bind(bindEffect);
-  var map62 = /* @__PURE__ */ map(functorEffect);
+  var map63 = /* @__PURE__ */ map(functorEffect);
   var bindFlipped10 = /* @__PURE__ */ bindFlipped(bindEffect);
   var join3 = /* @__PURE__ */ join(bindEffect);
   var apply5 = /* @__PURE__ */ apply(applyEffect);
@@ -35090,7 +34796,7 @@
     return bind65(bind65(windowImpl)(location))(setHash(h));
   };
   var getHash = /* @__PURE__ */ bind65(/* @__PURE__ */ bind65(windowImpl)(location))(/* @__PURE__ */ (function() {
-    var $16 = map62((function() {
+    var $16 = map63((function() {
       var $18 = fromMaybe("");
       var $19 = stripPrefix("#");
       return function($20) {
@@ -35105,9 +34811,9 @@
     return function(init4) {
       return function __do4() {
         var ref2 = bindFlipped10($$new)(bindFlipped10(init4)(getHash))();
-        var win = map62(toEventTarget)(windowImpl)();
+        var win = map63(toEventTarget)(windowImpl)();
         var listener = eventListener(function(v) {
-          return bindFlipped10(flip(write)(ref2))(join3(apply5(map62(cb)(read(ref2)))(getHash)));
+          return bindFlipped10(flip(write)(ref2))(join3(apply5(map63(cb)(read(ref2)))(getHash)));
         })();
         addEventListener(hashchange)(listener)(false)(win)();
         return removeEventListener(hashchange)(listener)(false)(win);
@@ -35141,7 +34847,7 @@
   // output/PSD3.Main/index.js
   var bind66 = /* @__PURE__ */ bind(bindHalogenM);
   var liftEffect50 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var discard59 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard60 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var when7 = /* @__PURE__ */ when(applicativeHalogenM);
   var pure44 = /* @__PURE__ */ pure(applicativeHalogenM);
   var modify_41 = /* @__PURE__ */ modify_(monadStateHalogenM);
@@ -35273,7 +34979,7 @@
         var loc = location(w)();
         return hash(loc)();
       }))(function(currentHash) {
-        return discard59(when7(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect50(setHash2(routeToPath(Home.value)))))(function() {
+        return discard60(when7(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect50(setHash2(routeToPath(Home.value)))))(function() {
           return bind66(subscribe2(makeEmitter(function(push2) {
             return matches2(routing)(function(v1) {
               return function(newRoute) {
