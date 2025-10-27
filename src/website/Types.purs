@@ -100,6 +100,7 @@ data Route
   | CodeExplorer
   | Explore String  -- Code exploration page for a specific snippet
   | WealthHealth    -- Wealth & Health of Nations visualization
+  | CodeAtlas       -- Code Atlas: codebase analysis and visualization
   | NotFound
 
 derive instance eqRoute :: Eq Route
@@ -125,4 +126,5 @@ instance showRoute :: Show Route where
   show CodeExplorer = "Code Explorer"
   show (Explore snippetId) = "Explore: " <> snippetId
   show WealthHealth = "Wealth & Health of Nations"
+  show CodeAtlas = "Code Atlas"
   show NotFound = "Not Found"
