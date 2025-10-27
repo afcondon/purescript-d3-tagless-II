@@ -79,3 +79,28 @@ type FunctionCallsData =
       , crossModuleCalls :: Int
       }
   }
+
+-- | Module dependency data from modules.json
+type ModuleInfo =
+  { name :: String
+  , depends :: Array String
+  , package :: String
+  , path :: String
+  , loc :: Int  -- Lines of code
+  }
+
+-- | Complete module graph data structure
+type ModuleGraphData =
+  { modules :: Array ModuleInfo
+  , stats ::
+      { totalModules :: Int
+      , sourceModules :: Int
+      , packageModules :: Int
+      }
+  }
+
+-- | LOC (lines of code) data from LOC.json
+type LOCEntry =
+  { loc :: Int
+  , path :: String
+  }

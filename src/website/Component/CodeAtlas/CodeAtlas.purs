@@ -10,10 +10,12 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.CodeAtlas.Actions (Action(..))
-import PSD3.CodeAtlas.Data (loadDeclarations, loadFunctionCalls)
+import PSD3.CodeAtlas.Data (loadDeclarations, loadFunctionCalls, loadModules)
 import PSD3.CodeAtlas.State (State, initialState)
 import PSD3.CodeAtlas.Tabs.Declarations as DeclarationsTab
+import PSD3.CodeAtlas.Tabs.ModuleGraph as ModuleGraphTab
 import PSD3.CodeAtlas.Types (AtlasTab(..))
+import PSD3.Interpreter.D3 (runWithD3_Simulation)
 
 -- | Code Atlas component
 component :: forall q i o m. MonadAff m => H.Component q i o m
@@ -72,9 +74,10 @@ render state =
 
                 VisualizationTab ->
                   HH.div
-                    [ HP.classes [ HH.ClassName "visualization-placeholder" ] ]
-                    [ HH.h2_ [ HH.text "Visualization" ]
-                    , HH.p_ [ HH.text "Static graph visualization coming soon..." ]
+                    [ HP.classes [ HH.ClassName "module-graph-container" ] ]
+                    [ HH.div
+                        [ HP.classes [ HH.ClassName "svg-container" ] ]
+                        []
                     ]
         ]
     ]
@@ -95,25 +98,30 @@ renderTab tab activeTab =
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    -- Load both data files in parallel
+    -- Load all three data files in parallel
     declarationsResult <- H.liftAff loadDeclarations
     functionCallsResult <- H.liftAff loadFunctionCalls
+    modulesResult <- H.liftAff loadModules
 
-    case declarationsResult, functionCallsResult of
-      Right decls, Right calls -> do
+    case declarationsResult, functionCallsResult, modulesResult of
+      Right decls, Right calls, Right modules -> do
         H.modify_ _ { loading = false }
-        handleAction (DataLoaded decls calls)
+        handleAction (DataLoaded decls calls modules)
 
-      Left err, _ -> do
+      Left err, _, _ -> do
         H.modify_ _ { loading = false, error = Just err }
 
-      _, Left err -> do
+      _, Left err, _ -> do
         H.modify_ _ { loading = false, error = Just err }
 
-  DataLoaded declarationsData functionCallsData -> do
+      _, _, Left err -> do
+        H.modify_ _ { loading = false, error = Just err }
+
+  DataLoaded declarationsData functionCallsData moduleGraphData -> do
     H.modify_ _
       { declarationsData = Just declarationsData
       , functionCallsData = Just functionCallsData
+      , moduleGraphData = Just moduleGraphData
       }
 
   DataLoadFailed err -> do
@@ -121,6 +129,17 @@ handleAction = case _ of
 
   SetActiveTab tab -> do
     H.modify_ _ { activeTab = tab }
+
+    -- Draw the module graph when switching to Visualization tab
+    case tab of
+      VisualizationTab -> do
+        state <- H.get
+        case state.moduleGraphData of
+          Just graphData ->
+            runWithD3_Simulation do
+              ModuleGraphTab.drawModuleGraph graphData "div.svg-container"
+          Nothing -> pure unit
+      _ -> pure unit
 
   SetSearchQuery query -> do
     H.modify_ _ { searchQuery = query }

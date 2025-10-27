@@ -5,15 +5,19 @@ import Prelude
 import Affjax.Web as Affjax
 import Affjax.ResponseFormat as ResponseFormat
 import Data.Argonaut.Core (Json, toObject, toString, toNumber, toArray, toBoolean)
-import Data.Array (catMaybes)
+import Data.Array (catMaybes, filter, length)
+import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Int (floor)
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.String as String
 import Data.Traversable (traverse)
 import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
 import Foreign.Object as Object
-import PSD3.CodeAtlas.Types (Declaration, DeclarationsData, FunctionCall, FunctionCallsData, FunctionInfo, KindStat, ModuleDeclarations)
+import PSD3.CodeAtlas.Types (Declaration, DeclarationsData, FunctionCall, FunctionCallsData, FunctionInfo, KindStat, LOCEntry, ModuleDeclarations, ModuleGraphData, ModuleInfo)
+import Data.Map (Map)
+import Data.Map as Map
 
 -- | Load declarations.json
 loadDeclarations :: Aff (Either String DeclarationsData)
@@ -30,6 +34,26 @@ loadFunctionCalls = do
   case result of
     Left err -> pure $ Left $ "Failed to load function-calls.json"
     Right response -> pure $ parseFunctionCalls response.body
+
+-- | Load LOC.json
+loadLOC :: Aff (Either String (Map String Int))
+loadLOC = do
+  result <- Affjax.get ResponseFormat.json "data/spago-data/LOC.json"
+  case result of
+    Left err -> pure $ Left $ "Failed to load LOC.json"
+    Right response -> pure $ parseLOC response.body
+
+-- | Load modules.json and merge with LOC data
+loadModules :: Aff (Either String ModuleGraphData)
+loadModules = do
+  modulesResult <- Affjax.get ResponseFormat.json "data/spago-data/modules.json"
+  locResult <- loadLOC
+
+  case modulesResult, locResult of
+    Right modulesResponse, Right locMap ->
+      pure $ parseModulesWithLOC modulesResponse.body locMap
+    Left err, _ -> pure $ Left $ "Failed to load modules.json"
+    _, Left err -> pure $ Left err
 
 -- | Parse declarations JSON
 parseDeclarations :: Json -> Either String DeclarationsData
@@ -172,6 +196,79 @@ parseFunctionCall json = do
       , isCrossModule: icm
       }
     _, _, _, _ -> pure Nothing
+
+-- | Parse LOC JSON
+parseLOC :: Json -> Either String (Map String Int)
+parseLOC json = do
+  obj <- note "Root not an object" $ toObject json
+  locArray <- note "Missing loc array" $ Object.lookup "loc" obj >>= toArray
+
+  entries <- catMaybes <$> traverse parseLOCEntry locArray
+
+  -- Create map from path to LOC
+  pure $ Map.fromFoldable $ entries <#> \entry -> Tuple entry.path entry.loc
+
+-- | Parse a single LOC entry
+parseLOCEntry :: Json -> Either String (Maybe LOCEntry)
+parseLOCEntry json = do
+  obj <- note "LOC entry not an object" $ toObject json
+  loc <- note "Missing loc" $ Object.lookup "loc" obj >>= toNumber <#> floor
+  path <- note "Missing path" $ Object.lookup "path" obj >>= toString
+  pure $ Just { loc, path }
+
+-- | Parse modules JSON with LOC data merged in
+parseModulesWithLOC :: Json -> Map String Int -> Either String ModuleGraphData
+parseModulesWithLOC json locMap = do
+  obj <- note "Root not an object" $ toObject json
+
+  -- Convert object to array of modules
+  let modulesArray = Object.toUnfoldable obj :: Array (Tuple String Json)
+  modules <- catMaybes <$> traverse (parseModuleInfoWithLOC locMap) modulesArray
+
+  -- Calculate stats
+  let totalModules = length modules
+      sourceModules = length $ filter (\m -> isSourceModule m.path) modules
+      packageModules = totalModules - sourceModules
+
+  pure
+    { modules
+    , stats:
+        { totalModules
+        , sourceModules
+        , packageModules
+        }
+    }
+
+-- | Parse a single module info with LOC data
+parseModuleInfoWithLOC :: Map String Int -> Tuple String Json -> Either String (Maybe ModuleInfo)
+parseModuleInfoWithLOC locMap (Tuple name json) = do
+  obj <- note "Module not an object" $ toObject json
+
+  dependsJson <- note "Missing depends" $ Object.lookup "depends" obj
+  dependsArray <- note "Depends not an array" $ toArray dependsJson
+  depends <- traverse (\j -> note "Depend not string" $ toString j) dependsArray
+
+  package <- note "Missing package" $ Object.lookup "package" obj >>= toString
+  path <- note "Missing path" $ Object.lookup "path" obj >>= toString
+
+  -- Look up LOC for this path, default to 100 if not found
+  let loc = fromMaybe 100 $ Map.lookup path locMap
+
+  pure $ Just { name, depends, package, path, loc }
+
+-- | Check if a module path is from source (not a package)
+isSourceModule :: String -> Boolean
+isSourceModule path =
+  -- Source modules are in src/, not .spago/
+  case take 4 path of
+    "src/" -> true
+    _ -> false
+  where
+    take n str =
+      let chars = toCharArray str
+      in fromCharArray $ Array.take n chars
+    toCharArray = String.toCodePointArray >>> map String.singleton
+    fromCharArray = String.joinWith ""
 
 -- Helper functions
 

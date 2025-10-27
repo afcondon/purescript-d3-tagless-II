@@ -79,6 +79,7 @@ foreign import emptyD3Data_ :: D3Data_ -- probably just null, could this be mono
 foreign import data D3DragFunction_ :: Type
 foreign import simulationDrag_ :: String -> D3Selection_ -> D3Simulation_ -> D3DragFunction_ -> D3Selection_
 foreign import simdrag_  :: D3DragFunction_
+foreign import simdragHorizontal_ :: D3DragFunction_
 foreign import disableDrag_ :: D3Selection_ -> D3Selection_
 
 foreign import selectionOn_         :: forall selection callback. selection -> String -> callback -> selection  

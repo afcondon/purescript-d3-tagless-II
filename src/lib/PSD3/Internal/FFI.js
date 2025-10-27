@@ -71,6 +71,28 @@ export function simdrag_(label, simulation) {
     .on('drag.' + label, dragged)
     .on('end.' + label, dragended);
 }
+
+// Drag that only allows horizontal movement (preserves fy)
+export function simdragHorizontal_(label, simulation) {
+  function dragstarted(event) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    event.subject.fx = event.subject.x;
+    // Don't touch fy - keep it pinned
+  }
+  function dragged(event) {
+    event.subject.fx = event.x;
+    // Don't touch fy - keep it pinned
+  }
+  function dragended(event) {
+    if (!event.active) simulation.alphaTarget(0);
+    event.subject.fx = null;
+    // Don't touch fy - keep it pinned
+  }
+  return d3.drag()
+    .on('start.' + label, dragstarted)
+    .on('drag.' + label, dragged)
+    .on('end.' + label, dragended);
+}
 export const linksForceName_ = "links"
 export const dummyForceHandle_ = null
 export function disableTick_(simulation) { return name => { return simulation.on('tick.' + name, () => null) } }
