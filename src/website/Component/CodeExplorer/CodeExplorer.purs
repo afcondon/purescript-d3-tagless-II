@@ -265,7 +265,11 @@ runSimulation :: forall m.
   m Unit
 runSimulation = do
   stageDataFromModel
-  staging         <- use _staging
+  state           <- get
+  let staging = view _staging state
+      stagingNodes = view _stagingNodes state
+      stagingLinks = view _stagingLinks state
+      stagingLinkFilter = view _stagingLinkFilter state
   maybeListener   <- use _eventListener
   sceneAttributes <- use _sceneAttributes
   activeForces    <- use _activeForces
@@ -278,8 +282,13 @@ runSimulation = do
 
   runWithD3_Simulation do
     stop
-    -- TODO: Use update API for forces
-    -- actualizeForces activeForces
-    -- Graph.updateSimulation staging attributesWithCallback
-    -- setConfigVariable $ Alpha 1.0
+    -- Use the new declarative update API
+    Graph.updateSimulation
+      staging.selections  -- Pass the node/link group selections
+      { nodes: stagingNodes
+      , links: stagingLinks
+      , activeForces: activeForces
+      , linksWithForce: stagingLinkFilter
+      }
+      attributesWithCallback
     start

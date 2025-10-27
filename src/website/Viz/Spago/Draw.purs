@@ -12,7 +12,11 @@ import PSD3.Internal.Simulation.Types (Step(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, updateJoin)
 import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate, addTickFunction, update)
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Data.Node (D3_SimulationNode, D3Link, D3LinkSwizzled)
+import Data.Array (filter)
 import Data.Maybe (Maybe(..))
+import Data.Set (Set)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import PSD3.CodeExplorer.Actions (VizEvent(..))
@@ -49,69 +53,91 @@ initialize = do
 
   pure { nodes: Just nodesGroup, links: Just linksGroup }
 
-{- TODO: Refactor to use new SimulationM2 update API
-updateSimulation :: forall m d r id. 
+-- | Update simulation using the new declarative update API
+-- |
+-- | This replaces the old updateSimulation that manually managed data merging,
+-- | link swizzling, and force engagement. Now the `update` function handles all
+-- | internal complexity, we just do DOM operations and tick functions.
+updateSimulation :: forall m d r id.
   Eq id =>
-  Bind m => 
+  Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
   SimulationM2 D3Selection_ m =>
-  (Staging D3Selection_ d r id) ->
-  SpagoSceneAttributes -> 
+  { nodes :: Maybe D3Selection_
+  , links :: Maybe D3Selection_
+  } ->
+  { nodes :: Array (D3_SimulationNode d)
+  , links :: Array (D3Link id r)
+  , activeForces :: Set Label
+  , linksWithForce :: Datum_ -> Boolean
+  } ->
+  SpagoSceneAttributes ->
   m Unit
-updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just linksGroup }} attrs = do
-  -- Open the selections for updating. Element type must match between:
-  -- openSelection (Group/Line), updateJoin (Group/Line), and appendTo (Group/Line)
-  node                  <- openSelection nodesGroup (show Group)
-  link                  <- openSelection linksGroup (show Line)
-  -- Merge new data with simulation (creates defensive copy for D3's join pattern)
-  merged <- mergeNewDataWithSim node keyIsID_ link keyIsID_ staging.rawdata 
-  -- first the nodedata
-  node'                 <- updateJoin node Group merged.nodes keyIsID_
-  -- put new elements (g, g.circle & g.text) into the DOM
-  nodeEnter             <- appendTo node'.enter Group enterAttrs
+updateSimulation { nodes: Just nodesGroup, links: Just linksGroup } dataConfig attrs = do
+  -- Step 1: Use the new update API to handle data merging, swizzling, and force engagement
+  -- This returns enhanced data with swizzled links ready for DOM binding
+  enhanced <- update
+    { nodes: Just dataConfig.nodes
+    , links: Just dataConfig.links
+    , activeForces: Just dataConfig.activeForces
+    , config: Nothing
+    , keyFn: keyIsID_
+    }
+
+  -- Step 2: Open the selections for DOM operations
+  node <- openSelection nodesGroup (show Group)
+  link <- openSelection linksGroup (show Line)
+
+  -- Step 3: Apply General Update Pattern to nodes
+  node' <- updateJoin node Group enhanced.nodes keyIsID_
+
+  -- Enter: create new groups with circles and text
+  nodeEnter <- appendTo node'.enter Group enterAttrs
   _ <- appendTo nodeEnter Circle attrs.circles
   void $ appendTo nodeEnter Text attrs.labels
-  -- remove elements corresponding to exiting data
+
+  -- Exit: remove old nodes
   setAttributes node'.exit [ remove ]
-  -- change anything that needs changing on the continuing elements
-  setAttributes node'.update updateAttrs 
+
+  -- Update: modify existing nodes
+  setAttributes node'.update updateAttrs
   updateCirclesSelection <- selectUnder node'.update (show Circle)
   setAttributes updateCirclesSelection attrs.circles
   updateLabelsSelection <- selectUnder node'.update (show Text)
   setAttributes updateLabelsSelection attrs.labels
-  -- now merge the update selection into the enter selection (NB other way round doesn't work)
-  mergedNodeSelection   <- mergeSelections nodeEnter node'.update  -- merged enter and update becomes the `node` selection for next pass
 
-  -- Apply drag behavior (simdrag_ integrates with D3 simulation for smooth physics)
-  void $ mergedNodeSelection `on` Drag (CustomDrag "spago" simdrag_) 
-  
-  -- now the linkData
-  -- after merging data with existing data in sim, keyIsID_ is correct key function on links
-  -- the id would be "5-8" if keyFn(link.source) == 5 && keyFn(link.target) == 8, for example
-  link'                 <- updateJoin link Line merged.links keyIsID_
-  -- put new element (line) into the DOM
-  linkEnter             <- appendTo link'.enter Line [ classed link_.linkClass, strokeColor link_.color ]
-  setAttributes linkEnter  [ classed "enter" ]
-  -- remove links that are leaving
-  setAttributes link'.exit    [ remove ]  
-  -- update links that are staying
-  setAttributes link'.update  [ classed "update" ]
-  -- merge the update and enter selections for the links
-  mergedlinksShown   <- mergeSelections linkEnter link'.update  -- merged enter and update becomes the `node` selection for next pass
+  -- Merge enter and update selections
+  mergedNodeSelection <- mergeSelections nodeEnter node'.update
 
+  -- Apply drag behavior
+  void $ mergedNodeSelection `on` Drag (CustomDrag "spago" simdrag_)
 
-  -- Put nodes and links into the simulation
-  setNodesFromSelection mergedNodeSelection
-  setLinksFromSelection mergedlinksShown staging.linksWithForce
-  
-  -- tick functions for each selection
-  addTickFunction "nodes" $ -- NB the position of the <g> is updated, not the <circle> and <text> within it
+  -- Step 4: Apply General Update Pattern to links
+  -- NOTE: enhanced.links are D3LinkSwizzled, not Datum_, so we can't apply dataConfig.linksWithForce here
+  -- TODO: In future, implement fine-grained link force filtering in the update API
+  -- For now, all swizzled links are displayed
+  link' <- updateJoin link Line enhanced.links keyIsID_
+
+  -- Enter: create new lines
+  linkEnter <- appendTo link'.enter Line [ classed link_.linkClass, strokeColor link_.color ]
+  setAttributes linkEnter [ classed "enter" ]
+
+  -- Exit: remove old links
+  setAttributes link'.exit [ remove ]
+
+  -- Update: modify existing links
+  setAttributes link'.update [ classed "update" ]
+
+  -- Merge enter and update selections
+  mergedLinksShown <- mergeSelections linkEnter link'.update
+
+  -- Step 5: Set up tick functions for animation
+  addTickFunction "nodes" $
     Step mergedNodeSelection [ transform' datum_.translateNode ]
   addTickFunction "links" $
-    Step mergedlinksShown [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
+    Step mergedLinksShown [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
 
--- alternate path, should never be used, if we can't match the selections
-updateSimulation _ _ = pure unit -- something's gone badly wrong, one or both open selections (for updates) are missing
--}
+-- Fallback when selections are missing
+updateSimulation _ _ _ = pure unit
 

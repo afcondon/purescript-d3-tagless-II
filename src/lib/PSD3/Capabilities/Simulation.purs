@@ -180,9 +180,9 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
 -- |   , keyFn: keyIsID_
 -- |   }
 -- | ```
-type SimulationUpdate d r =
+type SimulationUpdate d r id =
   { nodes :: Maybe (Array (D3_SimulationNode d))  -- New node data (replaces existing)
-  , links :: Maybe (Array (D3Link String r))      -- New link data (replaces existing)
+  , links :: Maybe (Array (D3Link id r))          -- New link data (replaces existing)
   , activeForces :: Maybe (Set Label)             -- Which forces to enable (replaces active set)
   , config :: Maybe SimulationVariables           -- Simulation config to update
   , keyFn :: Datum_ -> Index_                     -- Key function for data binding
@@ -234,7 +234,7 @@ class (Monad m, SimulationM selection m) <= SimulationM2 selection m | m -> sele
   -- | ```
   -- |
   -- | Returns simulation-enhanced nodes and links for joining to DOM.
-  update :: forall d r. SimulationUpdate d r -> m { nodes :: Array (D3_SimulationNode d), links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
+  update :: forall d r id. Eq id => SimulationUpdate d r id -> m { nodes :: Array (D3_SimulationNode d), links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
 
   -- ** Animation (Tick Functions) **
 
