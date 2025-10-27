@@ -16776,20 +16776,17 @@
   var setNodesFromSelection = function(dict) {
     return dict.setNodesFromSelection;
   };
-  var setNodes = function(dict) {
-    return dict.setNodes;
-  };
   var setLinksFromSelection = function(dict) {
     return dict.setLinksFromSelection;
-  };
-  var setLinks = function(dict) {
-    return dict.setLinks;
   };
   var setConfigVariable = function(dict) {
     return dict.setConfigVariable;
   };
   var mergeNewDataWithSim = function(dict) {
     return dict.mergeNewDataWithSim;
+  };
+  var init3 = function(dict) {
+    return dict.init;
   };
   var addTickFunction = function(dict) {
     return dict.addTickFunction;
@@ -21082,7 +21079,7 @@
       state: CREATED
     });
   }
-  function init3(node, id5) {
+  function init4(node, id5) {
     var schedule = get7(node, id5);
     if (schedule.state > CREATED) throw new Error("too late; already scheduled");
     return schedule;
@@ -21349,12 +21346,12 @@
   // node_modules/d3-transition/src/transition/delay.js
   function delayFunction(id5, value19) {
     return function() {
-      init3(this, id5).delay = +value19.apply(this, arguments);
+      init4(this, id5).delay = +value19.apply(this, arguments);
     };
   }
   function delayConstant(id5, value19) {
     return value19 = +value19, function() {
-      init3(this, id5).delay = value19;
+      init4(this, id5).delay = value19;
     };
   }
   function delay_default(value19) {
@@ -21441,7 +21438,7 @@
     });
   }
   function onFunction(id5, name16, listener) {
-    var on0, on1, sit = start3(name16) ? init3 : set4;
+    var on0, on1, sit = start3(name16) ? init4 : set4;
     return function() {
       var schedule = sit(this, id5), on3 = schedule.on;
       if (on3 !== on0) (on1 = (on0 = on3).copy()).on(name16, listener);
@@ -30622,9 +30619,9 @@
     return "translate(" + (show20(treeDatum_.x(d9)) + ("," + (show20(treeDatum_.y(d9)) + ")")));
   };
   var configureAndRunScript = function(dictBind) {
-    var draw26 = draw8(dictBind);
+    var draw24 = draw8(dictBind);
     return function(dictSelectionM) {
-      var draw110 = draw26(dictSelectionM);
+      var draw110 = draw24(dictSelectionM);
       return function(v) {
         return function(model) {
           return function(selector) {
@@ -33674,6 +33671,7 @@
   var y110 = /* @__PURE__ */ y1(toAttrNumberFn);
   var x23 = /* @__PURE__ */ x2(toAttrNumberFn);
   var y23 = /* @__PURE__ */ y2(toAttrNumberFn);
+  var fromFoldable19 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
   var link_3 = {
     source: function($88) {
       return (function(v) {
@@ -33723,72 +33721,82 @@
       })(unboxD3SimNode2($96))));
     }
   };
-  var draw20 = function(dictBind) {
+  var drawSimplified = function(dictBind) {
     var bind71 = bind(dictBind);
     var discard113 = discard57(dictBind);
     return function(dictMonadEffect) {
       var liftEffect51 = liftEffect(dictMonadEffect);
       var pure47 = pure(dictMonadEffect.Monad0().Applicative0());
       return function(dictMonadState) {
-        return function(dictSimulationM2) {
-          var SelectionM1 = dictSimulationM2.SimulationM1().SelectionM1();
+        return function(dictSimulationM) {
+          var SelectionM1 = dictSimulationM.SelectionM1();
           var attach2 = attach(SelectionM1);
           var appendTo2 = appendTo(SelectionM1);
-          var setNodes2 = setNodes(dictSimulationM2);
-          var setLinks2 = setLinks(dictSimulationM2)(eqString);
           var simpleJoin2 = simpleJoin(SelectionM1);
           var setAttributes2 = setAttributes(SelectionM1);
-          var addTickFunction2 = addTickFunction(dictSimulationM2);
+          var init5 = init3(dictSimulationM);
           var on3 = on2(SelectionM1);
-          var setConfigVariable4 = setConfigVariable(dictSimulationM2);
-          return function(model) {
-            return function(selector) {
-              return bind71(liftEffect51(getWindowWidthHeight))(function(v) {
-                return bind71(attach2(selector))(function(v1) {
-                  return bind71(appendTo2(v1)(Svg.value)([viewBox(-v.value0 / 2)(-v.value1 / 2)(v.value0)(v.value1), classed22("lesmis")]))(function(svg2) {
-                    return bind71(appendTo2(svg2)(Group.value)([classed22("link"), strokeColor17("#999"), strokeOpacity4(0.6)]))(function(linksGroup) {
-                      return bind71(appendTo2(svg2)(Group.value)([classed22("node"), strokeColor17("#fff"), strokeOpacity4(1.5)]))(function(nodesGroup) {
-                        return bind71(setNodes2(model.nodes))(function(nodesInSim) {
-                          return bind71(setLinks2(model.links)(model.nodes)(keyIsID_))(function(linksInSim) {
-                            return bind71(simpleJoin2(nodesGroup)(Circle.value)(nodesInSim)(keyIsID_))(function(nodesSelection) {
+          var start6 = start2(dictSimulationM);
+          return function(forceLibrary3) {
+            return function(activeForces) {
+              return function(model) {
+                return function(selector) {
+                  return bind71(liftEffect51(getWindowWidthHeight))(function(v) {
+                    return bind71(attach2(selector))(function(v1) {
+                      return bind71(appendTo2(v1)(Svg.value)([viewBox(-v.value0 / 2)(-v.value1 / 2)(v.value0)(v.value1), classed22("lesmis")]))(function(svg2) {
+                        return bind71(appendTo2(svg2)(Group.value)([classed22("link"), strokeColor17("#999"), strokeOpacity4(0.6)]))(function(linksGroup) {
+                          return bind71(appendTo2(svg2)(Group.value)([classed22("node"), strokeColor17("#fff"), strokeOpacity4(1.5)]))(function(nodesGroup) {
+                            return bind71(simpleJoin2(nodesGroup)(Circle.value)(model.nodes)(keyIsID_))(function(nodesSelection) {
                               return discard113(setAttributes2(nodesSelection)([radius11(5), fill20(datum_4.colorByGroup)]))(function() {
-                                return bind71(simpleJoin2(linksGroup)(Line.value)(linksInSim)(keyIsID_))(function(linksSelection) {
-                                  return discard113(setAttributes2(linksSelection)([strokeWidth14(function($97) {
-                                    return sqrt(link_3.value($97));
+                                return bind71(simpleJoin2(linksGroup)(Line.value)(model.links)(keyIsID_))(function(linksSelection) {
+                                  return discard113(setAttributes2(linksSelection)([strokeWidth14(function($102) {
+                                    return sqrt(link_3.value($102));
                                   }), strokeColor1(link_3.color)]))(function() {
-                                    return discard113(addTickFunction2("nodes")(new Step3(nodesSelection, [cx7(datum_4.x), cy7(datum_4.y)])))(function() {
-                                      return discard113(addTickFunction2("links")(new Step3(linksSelection, [x110(function($98) {
+                                    return discard113(init5({
+                                      nodes: model.nodes,
+                                      links: model.links,
+                                      forces: forceLibrary3,
+                                      activeForces,
+                                      config: {
+                                        alpha: 1,
+                                        alphaTarget: 0,
+                                        alphaMin: 1e-3,
+                                        alphaDecay: 0.0228,
+                                        velocityDecay: 0.4
+                                      },
+                                      keyFn: keyIsID_,
+                                      ticks: fromFoldable19([new Tuple("nodes", new Step3(nodesSelection, [cx7(datum_4.x), cy7(datum_4.y)])), new Tuple("links", new Step3(linksSelection, [x110(function($103) {
                                         return (function(v2) {
                                           return v2.x;
-                                        })(link_3.source($98));
-                                      }), y110(function($99) {
+                                        })(link_3.source($103));
+                                      }), y110(function($104) {
                                         return (function(v2) {
                                           return v2.y;
-                                        })(link_3.source($99));
-                                      }), x23(function($100) {
+                                        })(link_3.source($104));
+                                      }), x23(function($105) {
                                         return (function(v2) {
                                           return v2.x;
-                                        })(link_3.target($100));
-                                      }), y23(function($101) {
+                                        })(link_3.target($105));
+                                      }), y23(function($106) {
                                         return (function(v2) {
                                           return v2.y;
-                                        })(link_3.target($101));
-                                      })])))(function() {
-                                        return bind71(on3(nodesSelection)(new Drag(new CustomDrag("lesmis", simdrag_))))(function() {
-                                          return bind71(on3(svg2)(new Zoom({
-                                            extent: new ZoomExtent({
-                                              top: 0,
-                                              left: 0,
-                                              bottom: v.value1,
-                                              right: v.value0
-                                            }),
-                                            scale: new ScaleExtent(1, 4),
-                                            name: "LesMis",
-                                            target: svg2
-                                          })))(function() {
-                                            return discard113(setConfigVariable4(new Alpha(1)))(function() {
-                                              return pure47(unit);
-                                            });
+                                        })(link_3.target($106));
+                                      })]))])
+                                    }))(function() {
+                                      return bind71(on3(nodesSelection)(new Drag(new CustomDrag("lesmis", simdrag_))))(function() {
+                                        return bind71(on3(svg2)(new Zoom({
+                                          extent: new ZoomExtent({
+                                            top: 0,
+                                            left: 0,
+                                            bottom: v.value1,
+                                            right: v.value0
+                                          }),
+                                          scale: new ScaleExtent(1, 4),
+                                          name: "LesMis",
+                                          target: svg2
+                                        })))(function() {
+                                          return discard113(start6)(function() {
+                                            return pure47(unit);
                                           });
                                         });
                                       });
@@ -33802,8 +33810,8 @@
                       });
                     });
                   });
-                });
-              });
+                };
+              };
             };
           };
         };
@@ -33984,9 +33992,9 @@
   var not5 = /* @__PURE__ */ not(heytingAlgebraStatus);
   var traverse4 = /* @__PURE__ */ traverse(traversableArray);
   var discard58 = /* @__PURE__ */ discard(discardUnit);
+  var drawSimplified2 = /* @__PURE__ */ drawSimplified(bindD3SimM)(monadEffD3SimM)(monadStateD3SimM)(simulationMD3Selection_D3);
   var discard111 = /* @__PURE__ */ discard58(bindD3SimM);
   var actualizeForces3 = /* @__PURE__ */ actualizeForces(simulationM2D3Selection_D);
-  var draw21 = /* @__PURE__ */ draw20(bindD3SimM)(monadEffD3SimM)(monadStateD3SimM)(simulationM2D3Selection_D);
   var setConfigVariable3 = /* @__PURE__ */ setConfigVariable(simulationM2D3Selection_D);
   var start5 = /* @__PURE__ */ start2(simulationMD3Selection_D3);
   var prop19 = /* @__PURE__ */ prop3({
@@ -33994,7 +34002,7 @@
       return "code";
     }
   })()();
-  var fromFoldable19 = /* @__PURE__ */ fromFoldable9(foldableArray)(ordString);
+  var fromFoldable20 = /* @__PURE__ */ fromFoldable9(foldableArray)(ordString);
   var Initialize49 = /* @__PURE__ */ (function() {
     function Initialize52() {
     }
@@ -34170,9 +34178,8 @@
                 return bind71(liftAff37(get3(string)("./data/miserables.json")))(function(response) {
                   var graph = readGraphFromFileContents(response);
                   return bind71(get11)(function(state3) {
-                    return runWithD3_Simulation1(discard111(actualizeForces3(state3.activeForces))(function() {
-                      return draw21(graph)("div.svg-container");
-                    }));
+                    var forcesArray = [forces.manyBodyNeg, forces.manyBodyPos, forces.collision, forces.center, forces.links];
+                    return runWithD3_Simulation1(drawSimplified2(forcesArray)(state3.activeForces)(graph)("div.svg-container"));
                   });
                 });
               });
@@ -34238,7 +34245,7 @@
         code: Expanded.value
       },
       notebook: lesMisNotebook,
-      activeForces: fromFoldable19([forceNames.center, forceNames.manyBodyNeg, forceNames.collision, forceNames.links])
+      activeForces: fromFoldable20([forceNames.center, forceNames.manyBodyNeg, forceNames.collision, forceNames.links])
     };
     return mkComponent({
       initialState: $$const(initialState4),
@@ -34329,7 +34336,7 @@
     marginBottom: 35,
     marginLeft: 40
   };
-  var draw24 = function(dictSelectionM) {
+  var draw20 = function(dictSelectionM) {
     var Monad0 = dictSelectionM.Monad0();
     var Bind1 = Monad0.Bind1();
     var bind71 = bind(Bind1);
@@ -34889,7 +34896,7 @@
   var discard112 = /* @__PURE__ */ discard60(bindHalogenM);
   var pure43 = /* @__PURE__ */ pure(applicativeHalogenM);
   var modify_40 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var draw25 = /* @__PURE__ */ draw24(d3TaglessD3M);
+  var draw21 = /* @__PURE__ */ draw20(d3TaglessD3M);
   var get9 = /* @__PURE__ */ get(monadStateHalogenM);
   var when5 = /* @__PURE__ */ when(applicativeHalogenM);
   var $$void11 = /* @__PURE__ */ $$void(functorHalogenM);
@@ -34958,7 +34965,7 @@
               $60.currentYear = v.value0.yearRange.min;
               return $60;
             }))(function() {
-              return bind66(liftEffect111(eval_D3M(draw25("#wealth-health-viz"))))(function(v1) {
+              return bind66(liftEffect111(eval_D3M(draw21("#wealth-health-viz"))))(function(v1) {
                 return discard112(modify_40(function(v2) {
                   var $64 = {};
                   for (var $65 in v2) {
@@ -36505,7 +36512,7 @@
   var guard2 = /* @__PURE__ */ guard(alternativeMaybe);
   var apply4 = /* @__PURE__ */ apply(applyMaybe);
   var map117 = /* @__PURE__ */ map(functorMaybe);
-  var fromFoldable20 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
+  var fromFoldable21 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
   var traverse5 = /* @__PURE__ */ traverse(traversableArray)(applicativeMaybe);
   var fromFoldable110 = /* @__PURE__ */ fromFoldable(foldableArray);
   var append24 = /* @__PURE__ */ append(semigroupList);
@@ -36518,7 +36525,7 @@
         return apply4(map117(Tuple.create)(head2(keyVal)))(index2(keyVal)(1));
       });
     };
-    var $27 = map117(fromFoldable20);
+    var $27 = map117(fromFoldable21);
     var $28 = traverse5(part2tuple);
     var $29 = split("&");
     return function($30) {
