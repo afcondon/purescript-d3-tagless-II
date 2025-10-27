@@ -7,16 +7,18 @@ import PSD3.Internal.Types (D3Selection_, D3Simulation_)
 import PSD3.Internal.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, onTick_)
 import PSD3.Internal.Selection.Types (applySelectionAttributeD3)
 import PSD3.Internal.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionOn, selectionOpenSelection, selectionSelectUnder, selectionUpdateJoin)
-import PSD3.Internal.Simulation.Types (D3SimulationState_, Step(..), _handle)
+import PSD3.Internal.Simulation.Types (D3SimulationState_, Step(..), SimVariable(..), _handle)
 import PSD3.Internal.Simulation.Functions (simulationActualizeForces, simulationMergeNewData, simulationOn, simulationSetLinks, simulationSetLinksFromSelection, simulationSetNodes, simulationSetNodesFromSelection, simulationSetVariable, simulationStart, simulationStop)
 import PSD3.Internal.Sankey.Types (SankeyLayoutState_)
 import PSD3.Internal.Sankey.Functions (sankeySetData, sankeySetDataWithConfig)
 import PSD3.Capabilities.Selection (class SelectionM)
-import PSD3.Capabilities.Simulation (class SimulationM2)
+import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2)
 import PSD3.Capabilities.Sankey (class SankeyM)
 import Data.Array (partition)
 import Data.Lens (use)
 import Data.Map (filter, toUnfoldable)
+import Data.Map as Map
+import Data.Traversable (sequence)
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -120,12 +122,43 @@ instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
   simpleJoin s_      = selectionJoin s_
   updateJoin s_      = selectionUpdateJoin s_
 
+-- | Simplified SimulationM instance - record-based initialization
+instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
+  init config = do
+    -- 1. Set up nodes and links
+    _ <- simulationSetNodes config.nodes
+    _ <- simulationSetLinks config.links config.nodes config.keyFn
+
+    -- 2. Initialize forces and activate specified ones
+    simulationActualizeForces config.activeForces
+
+    -- 3. Set configuration variables
+    simulationSetVariable $ Alpha config.config.alpha
+    simulationSetVariable $ AlphaTarget config.config.alphaTarget
+    simulationSetVariable $ AlphaMin config.config.alphaMin
+    simulationSetVariable $ AlphaDecay config.config.alphaDecay
+    simulationSetVariable $ VelocityDecay config.config.velocityDecay
+
+    -- 4. Add tick functions
+    handle <- use _handle
+    let addTick label step = case step of
+          StepTransformFFI _ _ -> pure unit
+          Step selection chain -> do
+            let makeTick _ = do
+                  let _ = chain <#> applySelectionAttributeD3 (unsafeCoerce selection)
+                  unit
+                _ = onTick_ handle label makeTick
+            pure unit
+    _ <- sequence $ Map.toUnfoldable config.ticks <#> \(Tuple label step) -> addTick label step
+
+    pure unit
+
+  start = simulationStart
+  stop  = simulationStop
+
 -- TODO should each of these facets (stop/go, forces, data, selections, tick functions)
 instance SimulationM2 D3Selection_ (D3SimM row D3Selection_) where
--- stop and go
-  start                 = simulationStart
-  stop                  = simulationStop
--- management of simulation variables
+-- management of simulation variables (start/stop inherited from SimulationM)
   setConfigVariable v   = simulationSetVariable v
 -- management of forces
   actualizeForces       = simulationActualizeForces

@@ -86,48 +86,96 @@ import PSD3.Capabilities.Selection (class SelectionM)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (D3Simulation_, Datum_, Index_)
 import PSD3.Data.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
-import PSD3.Internal.Simulation.Types (SimVariable, Step)
+import PSD3.Internal.Simulation.Types (SimVariable, Step, Force)
+import PSD3.Internal.FFI (SimulationVariables)
 import Data.Maybe (Maybe)
 import Data.Set (Set)
+import Data.Map (Map)
 import Prelude (class Eq, class Monad, Unit)
+
+-- | ========================================================================================================
+-- | Simplified SimulationM - Record-based initialization for static simulations
+-- | ========================================================================================================
+
+-- | Configuration record for initializing a force simulation.
+-- |
+-- | This provides a simplified, all-in-one initialization approach for static
+-- | simulations (where data doesn't change after initialization).
+-- |
+-- | ## Example Usage
+-- |
+-- | ```purescript
+-- | draw model selector = do
+-- |   -- Create DOM structure and join data
+-- |   svg <- attach selector >>= appendTo _ Svg [...]
+-- |   nodesSelection <- simpleJoin svg Circle model.nodes keyIsID_
+-- |   linksSelection <- simpleJoin svg Line model.links keyIsID_
+-- |
+-- |   -- Initialize simulation with everything at once
+-- |   init
+-- |     { nodes: model.nodes
+-- |     , links: model.links
+-- |     , forces: forceLibrary
+-- |     , activeForces: Set.fromFoldable ["center", "charge", "collision"]
+-- |     , config: defaultConfigSimulation
+-- |     , keyFn: keyIsID_
+-- |     , ticks: Map.fromFoldable
+-- |         [ Tuple "nodes" $ Step nodesSelection [cx datum_.x, cy datum_.y]
+-- |         , Tuple "links" $ Step linksSelection [x1 link_.source.x, ...]
+-- |         ]
+-- |     }
+-- |
+-- |   start
+-- | ```
+type SimulationConfig selection node link =
+  { nodes :: Array node                    -- Node data
+  , links :: Array link                    -- Link data
+  , forces :: Array Force                  -- Force library (all available forces)
+  , activeForces :: Set Label              -- Which forces to enable initially
+  , config :: SimulationVariables          -- Simulation parameters (alpha, decay, etc.)
+  , keyFn :: Datum_ -> Index_              -- Key function for data binding
+  , ticks :: Map Label (Step selection)    -- Tick functions to update DOM on each frame
+  }
+
+-- | Simplified SimulationM - Single init() call for static simulations.
+-- |
+-- | This type class provides a minimal API for force simulations with static data.
+-- | All configuration happens in one `init` call with a record parameter.
+-- |
+-- | For dynamic simulations with data updates, use SimulationM2 instead.
+class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> selection where
+  -- | Initialize the simulation with all configuration at once.
+  -- |
+  -- | This sets up nodes, links, forces, and tick functions in a single call.
+  -- | No need to worry about ordering - everything is provided together.
+  init :: forall node link. SimulationConfig selection node link -> m Unit
+
+  -- | Start the simulation animation.
+  start :: m Unit
+
+  -- | Stop the simulation animation.
+  stop  :: m Unit
+
+-- | ========================================================================================================
+-- | SimulationM2 - Full-featured API with incremental updates (legacy)
+-- | ========================================================================================================
 
 -- | Prevents "boolean blindness" when enabling/disabling forces.
 -- |
 -- | Instead of passing booleans, pass lists of force labels.
 type ForceConfigLists = { enable :: Array Label, disable :: Array Label }
 
--- | SimulationM2 extends SelectionM with force simulation capabilities.
+-- | SimulationM2 extends SimulationM with incremental update capabilities.
 -- |
--- | This type class manages the simulation state, forces, and animation loop.
--- | It requires SelectionM because simulations render to selections.
+-- | This type class adds methods for updating simulation data dynamically.
+-- | It inherits start/stop from SimulationM and adds methods for:
+-- | - Setting configuration variables during simulation
+-- | - Dynamically enabling/disabling forces
+-- | - Updating nodes and links from selections
+-- | - Managing tick functions incrementally
 -- |
--- | The functional dependency `m -> selection` means the monad determines
--- | the selection type (e.g., `D3SimM` always uses `D3Selection_`).
-class (Monad m, SelectionM selection m) <= SimulationM2 selection m | m -> selection where
-  -- ** Simulation Control **
-
-  -- | Start the simulation animation.
-  -- |
-  -- | This begins the iterative force calculation process. The simulation will
-  -- | run for several hundred ticks, gradually slowing down as it reaches equilibrium.
-  -- |
-  -- | ```purescript
-  -- | start  -- Animation begins, tick functions fire on each frame
-  -- | ```
-  -- |
-  -- | The simulation automatically stops when alpha (animation progress) reaches alphaMin.
-  start :: m Unit
-
-  -- | Stop the simulation animation.
-  -- |
-  -- | Freezes the simulation at its current state. Nodes stop moving.
-  -- | Call `start` again to resume.
-  -- |
-  -- | ```purescript
-  -- | stop  -- Freeze the current layout
-  -- | ```
-  stop  :: m Unit
-
+-- | For static simulations, prefer the simpler SimulationM with record-based init.
+class (Monad m, SimulationM selection m) <= SimulationM2 selection m | m -> selection where
   -- ** Simulation Configuration **
 
   -- | Set a simulation variable (alpha, alphaTarget, velocityDecay, etc.).
