@@ -174,6 +174,9 @@ purescript-code-atlas/
 ## Usage
 
 ### Regenerate Data
+
+**Important:** The large data files (`declarations.json`, `function-calls.json`, `type-dependencies.json`) are **not committed to git** (they total ~56MB). You must regenerate them after cloning:
+
 ```bash
 npm run build              # Compile PureScript first
 node scripts/generate-spago-data.js
