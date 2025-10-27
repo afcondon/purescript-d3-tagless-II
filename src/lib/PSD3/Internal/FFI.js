@@ -110,6 +110,15 @@ export function clearHighlights_(selection) {
     .classed('dimmed', false);
 }
 
+// Unpin all nodes by setting fy to null
+export function unpinAllNodes_(simulation) {
+  simulation.nodes().forEach(node => {
+    node.fy = null;
+  });
+  // Reheat the simulation to see the effect
+  simulation.alpha(0.3).restart();
+}
+
 export const linksForceName_ = "links"
 export const dummyForceHandle_ = null
 export function disableTick_(simulation) { return name => { return simulation.on('tick.' + name, () => null) } }

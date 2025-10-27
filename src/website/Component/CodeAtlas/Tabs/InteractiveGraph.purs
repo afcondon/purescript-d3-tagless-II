@@ -1,4 +1,4 @@
-module PSD3.CodeAtlas.Tabs.ModuleGraph where
+module PSD3.CodeAtlas.Tabs.InteractiveGraph where
 
 import Prelude
 
@@ -186,15 +186,15 @@ modulesToLinks modules =
            else Nothing
        ) m.depends
 
--- | Draw the module graph visualization
-drawModuleGraph :: forall row m.
+-- | Draw the interactive graph visualization (using SimulationM2 for updates)
+drawInteractiveGraph :: forall row m.
   Bind m =>
   MonadEffect m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
   SelectionM D3Selection_ m =>
   SimulationM2 D3Selection_ m =>
   ModuleGraphData -> String -> m Unit
-drawModuleGraph graphData selector = do
+drawInteractiveGraph graphData selector = do
   -- Filter to source modules only
   let sourceModules = filter (\m -> String.take 4 m.path == "src/") graphData.modules
       nodes = modulesToNodes sourceModules

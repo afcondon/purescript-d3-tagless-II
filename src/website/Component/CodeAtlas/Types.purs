@@ -4,14 +4,16 @@ import Prelude
 
 -- | Active tab in Code Atlas
 data AtlasTab
-  = DeclarationsTab    -- Table browser with search/filters
-  | VisualizationTab   -- Static graph visualization (TBD)
+  = DeclarationsTab      -- Table browser with search/filters
+  | VisualizationTab     -- Static graph visualization
+  | InteractiveGraphTab  -- Interactive graph with updates
 
 derive instance eqAtlasTab :: Eq AtlasTab
 
 instance showAtlasTab :: Show AtlasTab where
   show DeclarationsTab = "Declarations"
   show VisualizationTab = "Visualization"
+  show InteractiveGraphTab = "Interactive"
 
 -- | Source type for filtering
 data SourceType

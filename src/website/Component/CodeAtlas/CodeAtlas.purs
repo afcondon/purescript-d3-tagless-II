@@ -14,6 +14,7 @@ import PSD3.CodeAtlas.Data (loadDeclarations, loadFunctionCalls, loadModules)
 import PSD3.CodeAtlas.State (State, initialState)
 import PSD3.CodeAtlas.Tabs.Declarations as DeclarationsTab
 import PSD3.CodeAtlas.Tabs.ModuleGraph as ModuleGraphTab
+import PSD3.CodeAtlas.Tabs.InteractiveGraph as InteractiveGraphTab
 import PSD3.CodeAtlas.Types (AtlasTab(..))
 import PSD3.Interpreter.D3 (runWithD3_Simulation)
 
@@ -47,6 +48,7 @@ render state =
         [ HP.classes [ HH.ClassName "code-atlas-tabs" ] ]
         [ renderTab DeclarationsTab state.activeTab
         , renderTab VisualizationTab state.activeTab
+        , renderTab InteractiveGraphTab state.activeTab
         ]
 
     -- Content
@@ -75,6 +77,14 @@ render state =
                 VisualizationTab ->
                   HH.div
                     [ HP.classes [ HH.ClassName "module-graph-container" ] ]
+                    [ HH.div
+                        [ HP.classes [ HH.ClassName "svg-container" ] ]
+                        []
+                    ]
+
+                InteractiveGraphTab ->
+                  HH.div
+                    [ HP.classes [ HH.ClassName "interactive-graph-container" ] ]
                     [ HH.div
                         [ HP.classes [ HH.ClassName "svg-container" ] ]
                         []
@@ -130,7 +140,7 @@ handleAction = case _ of
   SetActiveTab tab -> do
     H.modify_ _ { activeTab = tab }
 
-    -- Draw the module graph when switching to Visualization tab
+    -- Draw visualizations when switching tabs
     case tab of
       VisualizationTab -> do
         state <- H.get
@@ -139,6 +149,15 @@ handleAction = case _ of
             runWithD3_Simulation do
               ModuleGraphTab.drawModuleGraph graphData "div.svg-container"
           Nothing -> pure unit
+
+      InteractiveGraphTab -> do
+        state <- H.get
+        case state.moduleGraphData of
+          Just graphData ->
+            runWithD3_Simulation do
+              InteractiveGraphTab.drawInteractiveGraph graphData "div.svg-container"
+          Nothing -> pure unit
+
       _ -> pure unit
 
   SetSearchQuery query -> do

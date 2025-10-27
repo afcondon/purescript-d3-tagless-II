@@ -84,6 +84,7 @@ foreign import disableDrag_ :: D3Selection_ -> D3Selection_
 
 foreign import highlightConnectedNodes_ :: D3Selection_ -> Array String -> Unit
 foreign import clearHighlights_ :: D3Selection_ -> Unit
+foreign import unpinAllNodes_ :: D3Simulation_ -> Unit
 
 foreign import selectionOn_         :: forall selection callback. selection -> String -> callback -> selection  
 

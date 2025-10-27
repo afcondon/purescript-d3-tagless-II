@@ -254,6 +254,29 @@ code, pre {
   opacity: 1;
 }
 
+/* Unpin button */
+.unpin-button {
+  cursor: pointer;
+}
+
+.unpin-button-bg {
+  rx: 5;
+  ry: 5;
+}
+
+.unpin-button:hover .unpin-button-bg {
+  fill: #e67e22;
+}
+
+.unpin-button-text {
+  text-anchor: middle;
+  dominant-baseline: middle;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: none;
+}
+
 /* Dark Mode Support (future) */
 @media (prefers-color-scheme: dark) {
   /* Dark mode variables will go here */
