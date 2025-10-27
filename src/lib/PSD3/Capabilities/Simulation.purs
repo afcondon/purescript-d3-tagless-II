@@ -127,14 +127,14 @@ import Prelude (class Eq, class Monad, Unit)
 -- |
 -- |   start
 -- | ```
-type SimulationConfig selection node link =
-  { nodes :: Array node                    -- Node data
-  , links :: Array link                    -- Link data
-  , forces :: Array Force                  -- Force library (all available forces)
-  , activeForces :: Set Label              -- Which forces to enable initially
-  , config :: SimulationVariables          -- Simulation parameters (alpha, decay, etc.)
-  , keyFn :: Datum_ -> Index_              -- Key function for data binding
-  , ticks :: Map Label (Step selection)    -- Tick functions to update DOM on each frame
+type SimulationConfig selection d r =
+  { nodes :: Array (D3_SimulationNode d)                    -- Node data
+  , links :: Array (D3Link String r)                        -- Link data (with String IDs)
+  , forces :: Array Force                                   -- Force library (all available forces)
+  , activeForces :: Set Label                               -- Which forces to enable initially
+  , config :: SimulationVariables                           -- Simulation parameters (alpha, decay, etc.)
+  , keyFn :: Datum_ -> Index_                               -- Key function for data binding
+  , ticks :: Map Label (Step selection)                     -- Tick functions to update DOM on each frame
   }
 
 -- | Simplified SimulationM - Single init() call for static simulations.
@@ -148,7 +148,7 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- |
   -- | This sets up nodes, links, forces, and tick functions in a single call.
   -- | No need to worry about ordering - everything is provided together.
-  init :: forall node link. SimulationConfig selection node link -> m Unit
+  init :: forall d r. SimulationConfig selection d r -> m Unit
 
   -- | Start the simulation animation.
   start :: m Unit

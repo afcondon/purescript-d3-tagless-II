@@ -8,12 +8,14 @@ import D3.Viz.LesMiserables.Model (LesMisRawModel)
 import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
-import PSD3.Internal.Simulation.Types (D3SimulationState_, SimVariable(..), Step(..))
+import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, SimVariable(..), Step(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
-import PSD3.Capabilities.Simulation (class SimulationM2, addTickFunction, setConfigVariable, setLinks, setNodes)
+import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, setConfigVariable, setLinks, setNodes, start)
 import Data.Int (toNumber)
+import Data.Map as Map
 import Data.Number (sqrt)
+import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
@@ -87,5 +89,60 @@ draw model selector = do
                       , target : svg
                       }
   setConfigVariable $ Alpha 1.0
+  pure unit
+-- Snippet_End
+
+-- Snippet_Start
+-- Name: LesMisSimplified
+-- | Simplified version using SimulationM with record-based init
+drawSimplified :: forall row m.
+  Bind m =>
+  MonadEffect m =>
+  MonadState { simulation :: D3SimulationState_ | row } m =>
+  SimulationM D3Selection_ m =>
+  Array Force -> Set.Set String -> LesMisRawModel -> Selector D3Selection_ -> m Unit
+drawSimplified forceLibrary activeForces model selector = do
+  (Tuple w h) <- liftEffect getWindowWidthHeight
+  (root :: D3Selection_) <- attach selector
+  svg        <- appendTo root Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "lesmis" ]
+  linksGroup <- appendTo svg Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ]
+  nodesGroup <- appendTo svg Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ]
+
+  -- Join data to DOM FIRST (before simulation init)
+  nodesSelection <- simpleJoin nodesGroup Circle model.nodes keyIsID_
+  setAttributes nodesSelection [ radius 5.0, fill datum_.colorByGroup ]
+  linksSelection <- simpleJoin linksGroup Line model.links keyIsID_
+  setAttributes linksSelection [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
+
+  -- Initialize simulation with everything at once!
+  init
+    { nodes: model.nodes
+    , links: model.links
+    , forces: forceLibrary
+    , activeForces: activeForces
+    , config: { alpha: 1.0, alphaTarget: 0.0, alphaMin: 0.001, alphaDecay: 0.0228, velocityDecay: 0.4 }
+    , keyFn: keyIsID_
+    , ticks: Map.fromFoldable
+        [ Tuple "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y ]
+        , Tuple "links" $ Step linksSelection
+            [ x1 (_.x <<< link_.source)
+            , y1 (_.y <<< link_.source)
+            , x2 (_.x <<< link_.target)
+            , y2 (_.y <<< link_.target)
+            ]
+        ]
+    }
+
+  -- Add interactions
+  _ <- nodesSelection `on` Drag (CustomDrag "lesmis" simdrag_)
+  _ <- svg `on` Zoom
+        { extent: ZoomExtent { top: 0.0, left: 0.0, bottom: h, right: w }
+        , scale: ScaleExtent 1.0 4.0
+        , name: "LesMis"
+        , target: svg
+        }
+
+  -- Start the simulation!
+  start
   pure unit
 -- Snippet_End

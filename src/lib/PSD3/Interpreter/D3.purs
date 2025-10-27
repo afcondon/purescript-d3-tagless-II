@@ -149,7 +149,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
                   unit
                 _ = onTick_ handle label makeTick
             pure unit
-    _ <- sequence $ Map.toUnfoldable config.ticks <#> \(Tuple label step) -> addTick label step
+    _ <- (sequence :: Array (D3SimM row D3Selection_ Unit) -> D3SimM row D3Selection_ (Array Unit)) $ Map.toUnfoldable config.ticks <#> \(Tuple label step) -> addTick label step
 
     pure unit
 
