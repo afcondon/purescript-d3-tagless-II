@@ -12,7 +12,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.CodeAtlas.Actions (Action(..))
 import PSD3.CodeAtlas.State (State)
-import PSD3.CodeAtlas.Types (Declaration, DeclarationsData)
+import PSD3.CodeAtlas.Types (Declaration, DeclarationsData, SourceType(..))
 
 -- | Render the Declarations tab
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -92,11 +92,30 @@ renderFilters state data_ =
              ))
         ]
 
+    -- Source filter
+    , HH.div
+        [ HP.classes [ HH.ClassName "filter-group" ] ]
+        [ HH.label_ [ HH.text "Source" ]
+        , HH.select
+            [ HE.onValueChange \val -> SetSourceFilter (
+                case val of
+                  "project" -> Just ProjectCode
+                  "library" -> Just LibraryCode
+                  _ -> Nothing
+              )
+            , HP.classes [ HH.ClassName "filter-select" ]
+            ]
+            [ HH.option [ HP.value "", HP.selected (state.selectedSourceFilter == Nothing) ] [ HH.text "All" ]
+            , HH.option [ HP.value "project", HP.selected (state.selectedSourceFilter == Just ProjectCode) ] [ HH.text "Project Code" ]
+            , HH.option [ HP.value "library", HP.selected (state.selectedSourceFilter == Just LibraryCode) ] [ HH.text "Library Code" ]
+            ]
+        ]
+
     -- Clear filters button
     , HH.button
         [ HE.onClick \_ -> ClearFilters
         , HP.classes [ HH.ClassName "clear-filters-btn" ]
-        , HP.disabled (state.searchQuery == "" && state.selectedKindFilter == Nothing)
+        , HP.disabled (state.searchQuery == "" && state.selectedKindFilter == Nothing && state.selectedSourceFilter == Nothing)
         ]
         [ HH.text "Clear Filters" ]
     ]
@@ -113,6 +132,7 @@ renderDeclarationsTable state data_ =
     filtered = allDeclarations
       # filterBySearch state.searchQuery
       # filterByKind state.selectedKindFilter
+      # filterBySource state.selectedSourceFilter
       # sortBy compareDeclarations
       # take 1000  -- Limit to first 1000 for performance
 
@@ -184,6 +204,19 @@ filterByKind :: Maybe String -> Array Declaration -> Array Declaration
 filterByKind Nothing decls = decls
 filterByKind (Just kind) decls =
   filter (\decl -> decl.kind == kind) decls
+
+-- | Filter by source type (project vs library code)
+filterBySource :: Maybe SourceType -> Array Declaration -> Array Declaration
+filterBySource Nothing decls = decls
+filterBySource (Just sourceType) decls =
+  filter (\decl -> getSourceType decl == sourceType) decls
+
+-- | Determine source type from declaration's source path
+getSourceType :: Declaration -> SourceType
+getSourceType decl =
+  if String.take 4 decl.sourceSpan.name == "src/"
+    then ProjectCode
+    else LibraryCode
 
 -- | Compare declarations for sorting (by module, then name)
 compareDeclarations :: Declaration -> Declaration -> Ordering

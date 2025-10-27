@@ -13,13 +13,24 @@ instance showAtlasTab :: Show AtlasTab where
   show DeclarationsTab = "Declarations"
   show VisualizationTab = "Visualization"
 
+-- | Source type for filtering
+data SourceType
+  = ProjectCode    -- Code in src/ (your code)
+  | LibraryCode    -- Code in .spago/ (dependencies)
+
+derive instance eqSourceType :: Eq SourceType
+
+instance showSourceType :: Show SourceType where
+  show ProjectCode = "Project"
+  show LibraryCode = "Library"
+
 -- | Declaration metadata from declarations.json
 type Declaration =
   { title :: String
   , kind :: String  -- value | data | typeClass | typeSynonym | alias | externData
   , module :: String
   , comments :: String
-  , sourceSpan :: { start :: Array Int, end :: Array Int }
+  , sourceSpan :: { start :: Array Int, end :: Array Int, name :: String }
   }
 
 -- | Module with its declarations

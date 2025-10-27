@@ -3,7 +3,7 @@ module PSD3.CodeAtlas.Actions where
 import Prelude
 
 import Data.Maybe (Maybe)
-import PSD3.CodeAtlas.Types (AtlasTab, DeclarationsData, FunctionCallsData)
+import PSD3.CodeAtlas.Types (AtlasTab, DeclarationsData, FunctionCallsData, SourceType)
 
 -- | User actions
 data Action
@@ -14,4 +14,5 @@ data Action
   | SetSearchQuery String
   | SetKindFilter (Maybe String)
   | SetModuleFilter (Maybe String)
+  | SetSourceFilter (Maybe SourceType)
   | ClearFilters

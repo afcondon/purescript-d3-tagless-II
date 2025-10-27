@@ -90,10 +90,11 @@ parseDeclaration moduleName json = do
         Just spanObj -> do
           startArray <- note "Missing start" $ Object.lookup "start" spanObj >>= toArray
           endArray <- note "Missing end" $ Object.lookup "end" spanObj >>= toArray
+          name <- note "Missing name" $ Object.lookup "name" spanObj >>= toString
           start <- note "Invalid start array" $ traverse (\j -> toNumber j <#> floor) startArray
           end <- note "Invalid end array" $ traverse (\j -> toNumber j <#> floor) endArray
-          pure { start, end }
-        Nothing -> pure { start: [0, 0], end: [0, 0] }
+          pure { start, end, name }
+        Nothing -> pure { start: [0, 0], end: [0, 0], name: "" }
 
       pure $ Just
         { title: t

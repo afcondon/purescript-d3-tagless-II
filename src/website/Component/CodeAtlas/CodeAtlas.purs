@@ -131,9 +131,13 @@ handleAction = case _ of
   SetModuleFilter filter -> do
     H.modify_ _ { selectedModuleFilter = filter }
 
+  SetSourceFilter filter -> do
+    H.modify_ _ { selectedSourceFilter = filter }
+
   ClearFilters -> do
     H.modify_ _
       { searchQuery = ""
       , selectedKindFilter = Nothing
       , selectedModuleFilter = Nothing
+      , selectedSourceFilter = Nothing
       }
