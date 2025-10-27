@@ -26,7 +26,7 @@ import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setA
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start)
 import PSD3.CodeAtlas.Types (ModuleGraphData, ModuleInfo)
 import PSD3.Data.Node (D3Link(..), D3LinkSwizzled(..), D3_SimulationNode(..), D3_VxyFxy, D3_XY)
-import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
+import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, x1, x2, y1, y2)
 import Type.Row (type (+))
 import PSD3.Internal.FFI (keyIsID_, simdragHorizontal_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
@@ -140,17 +140,22 @@ modulesToNodes modules =
   let
     layers = computeLayers modules
     layerSpacing = 150.0  -- vertical space between layers
+    -- Calculate max layer for centering
+    layerValues = Map.values layers # Array.fromFoldable
+    maxLayer = fromMaybe 0 $ maximum layerValues
+    -- Vertical offset to center the graph (move it down so it's centered at y=0)
+    verticalOffset = toNumber maxLayer * layerSpacing * 0.5
+    toNumber = Data.Int.toNumber
   in
     Array.mapWithIndex (\i m ->
       let
         layer = fromMaybe 0 $ Map.lookup m.name layers
         -- Pin y-coordinate based on layer (fy = fixed y)
-        -- Negative so layer 0 is at top, higher layers below
-        yPos = toNumber layer * layerSpacing * (-1.0)
+        -- Start from verticalOffset, go down by layer * spacing
+        yPos = verticalOffset - (toNumber layer * layerSpacing)
         -- Use spiral for x-coordinate within layer
         theta = toNumber i * 0.5
         r = 50.0 + toNumber i * 2.0
-        toNumber = Data.Int.toNumber
       in
         D3SimNode
           { id: m.name
@@ -195,26 +200,29 @@ drawModuleGraph graphData selector = do
   -- Debug: log LOC and layer values
   let layers = computeLayers sourceModules
       layerValues = Map.values layers # Array.fromFoldable
+      maxLayer = fromMaybe 0 $ maximum layerValues
   liftEffect $ Console.log $ "Sample module LOCs: " <> show (map _.loc $ Array.take 5 sourceModules)
   liftEffect $ Console.log $ "Total source modules: " <> show (Array.length sourceModules)
-  liftEffect $ Console.log $ "Max layer: " <> show (maximum layerValues)
+  liftEffect $ Console.log $ "Max layer: " <> show maxLayer
   liftEffect $ Console.log $ "Sample layers: " <> show (Array.take 10 layerValues)
 
   (Tuple w h) <- liftEffect getWindowWidthHeight
   (root :: D3Selection_) <- attach selector
   svg <- appendTo root Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "module-graph" ]
-  linksGroup <- appendTo svg Group [ classed "link", strokeColor "#999", strokeOpacity 0.4 ]
-  nodesGroup <- appendTo svg Group [ classed "node", strokeColor "#fff", strokeWidth 1.5 ]
+  -- Create a group to be the zoom target
+  zoomGroup <- appendTo svg Group [ classed "zoom-group" ]
+  linksGroup <- appendTo zoomGroup Group [ classed "link", strokeColor "#999", strokeOpacity 0.4 ]
+  nodesGroup <- appendTo zoomGroup Group [ classed "node", strokeColor "#fff", strokeWidth 1.5 ]
 
   -- Define forces
   -- Note: collision force needs dynamic radius based on LOC
   let collisionRadius :: Datum_ -> Index_ -> Number
       collisionRadius datum idx = nodeRadius (_.loc (unsafeCoerce datum))
       forces =
-        [ createForce "manyBody" (RegularForce ForceManyBody) allNodes [ F.strength (-80.0) ]
+        [ createForce "manyBody" (RegularForce ForceManyBody) allNodes [ F.strength (-150.0), F.theta 0.9, F.distanceMin 1.0 ]
         , createForce "collision" (RegularForce ForceCollide) allNodes [ F.radius collisionRadius ]
-        , createForce "center" (RegularForce ForceCenter) allNodes [ F.x 0.0, F.y 0.0, F.strength 1.0 ]
-        , createLinkForce Nothing [ F.distance 80.0 ]
+        , createForce "center" (RegularForce ForceCenter) allNodes [ F.x 0.0, F.y 0.0, F.strength 0.3 ]
+        , createLinkForce Nothing [ F.distance 100.0 ]
         ]
       activeForces = Set.fromFoldable [ "manyBody", "collision", "center", "links" ]
 
@@ -230,17 +238,30 @@ drawModuleGraph graphData selector = do
     }
 
   -- Join data to DOM
-  nodesSelection <- simpleJoin nodesGroup Circle nodesInSim keyIsID_
-  setAttributes nodesSelection
+  -- Create a group for each node
+  nodeGroups <- simpleJoin nodesGroup Group nodesInSim keyIsID_
+  setAttributes nodeGroups [ classed "node-group" ]
+
+  -- Append circle to each group
+  circles <- appendTo nodeGroups Circle
     [ radius (nodeRadius <<< datum_.loc)
     , fill (nodeColor <<< datum_.path)
+    , classed "node-circle"
+    ]
+
+  -- Append text label to each group
+  labels <- appendTo nodeGroups Text
+    [ text datum_.name
+    , classed "node-label"
     ]
 
   linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_
   setAttributes linksSelection [ strokeWidth 1.5, strokeColor "#999" ]
 
-  -- Add tick functions
-  addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y ]
+  -- Add tick functions - position the groups using transform
+  let translateNode :: Datum_ -> String
+      translateNode d = "translate(" <> show (datum_.x d) <> "," <> show (datum_.y d) <> ")"
+  addTickFunction "nodes" $ Step nodeGroups [ transform' translateNode ]
   addTickFunction "links" $ Step linksSelection
     [ x1 (_.x <<< link_.source)
     , y1 (_.y <<< link_.source)
@@ -249,12 +270,12 @@ drawModuleGraph graphData selector = do
     ]
 
   -- Add interactions
-  _ <- nodesSelection `on` Drag (CustomDrag "moduleGraph" simdragHorizontal_)
+  _ <- nodeGroups `on` Drag (CustomDrag "moduleGraph" simdragHorizontal_)
   _ <- svg `on` Zoom
     { extent: ZoomExtent { top: 0.0, left: 0.0, bottom: h, right: w }
     , scale: ScaleExtent 0.1 4.0
     , name: "ModuleGraph"
-    , target: svg
+    , target: zoomGroup
     }
 
   -- Start the simulation

@@ -203,6 +203,42 @@ code, pre {
   }
 }
 
+/* Module Graph Styles */
+.node-label {
+  opacity: 0;
+  pointer-events: none;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  fill: #000;
+  stroke: #fff;
+  stroke-width: 3px;
+  paint-order: stroke;
+  text-anchor: middle;
+  dominant-baseline: middle;
+  transition: opacity 0.2s ease;
+}
+
+.node-group:hover .node-label {
+  opacity: 1;
+}
+
+/* Ensure hovered node group is on top */
+.node-group:hover {
+  cursor: pointer;
+}
+
+.node-circle {
+  cursor: pointer;
+  stroke: #fff;
+  stroke-width: 1.5;
+  transition: stroke-width 0.2s ease;
+}
+
+.node-group:hover .node-circle {
+  stroke-width: 2.5;
+}
+
 /* Dark Mode Support (future) */
 @media (prefers-color-scheme: dark) {
   /* Dark mode variables will go here */
