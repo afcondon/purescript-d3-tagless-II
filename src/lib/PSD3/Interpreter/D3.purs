@@ -133,14 +133,19 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     let forcesMap = Map.fromFoldable $ config.forces <#> \f -> Tuple (view _name f) f
     modify_ \state -> state { simulation = state.simulation # (_Newtype <<< prop (Proxy :: Proxy "forceLibrary")) .~ forcesMap }
 
-    -- 2. Set up nodes and links (returns simulation-enhanced data)
+    -- 2. Set up nodes first (must come before forces)
     nodesInSim <- simulationSetNodes config.nodes
-    linksInSim <- simulationSetLinks config.links config.nodes config.keyFn
 
-    -- 3. Activate specified forces
+    -- 3. Activate specified forces (must come BEFORE setting links!)
+    -- The link force needs to be active in the simulation before links are added
     simulationActualizeForces config.activeForces
 
-    -- 4. Set configuration variables (except Alpha - that starts the simulation!)
+    -- 4. NOW set links (returns simulation-enhanced data)
+    -- This must come after activating forces because the link force needs to be
+    -- registered in the D3 simulation before we can add links to it
+    linksInSim <- simulationSetLinks config.links config.nodes config.keyFn
+
+    -- 5. Set configuration variables (except Alpha - that starts the simulation!)
     -- We skip Alpha here because setting it auto-starts the simulation in D3.
     -- The caller should use start() after adding tick functions.
     simulationSetVariable $ AlphaTarget config.config.alphaTarget
@@ -148,7 +153,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     simulationSetVariable $ AlphaDecay config.config.alphaDecay
     simulationSetVariable $ VelocityDecay config.config.velocityDecay
 
-    -- 5. Add tick functions
+    -- 6. Add tick functions
     handle <- use _handle
     let addTick label step = case step of
           StepTransformFFI _ _ -> pure unit
@@ -160,7 +165,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
             pure unit
     _ <- (sequence :: Array (D3SimM row D3Selection_ Unit) -> D3SimM row D3Selection_ (Array Unit)) $ Map.toUnfoldable config.ticks <#> \(Tuple label step) -> addTick label step
 
-    -- 6. Return enhanced data for joining to DOM
+    -- 7. Return enhanced data for joining to DOM
     pure { nodes: nodesInSim, links: linksInSim }
 
   start = simulationStart
