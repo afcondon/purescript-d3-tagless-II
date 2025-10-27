@@ -596,6 +596,42 @@
   min-height: 400px;
 }
 
+/* Les Misérables force-directed graph */
+.lesmis-container {
+  width: 100%;
+  min-height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-light);
+  border-radius: 4px;
+}
+
+.lesmis-container svg {
+  max-width: 100%;
+  height: 600px;
+  cursor: grab;
+}
+
+.lesmis-container svg:active {
+  cursor: grabbing;
+}
+
+/* Les Mis specific styling for nodes and links */
+.lesmis circle {
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.lesmis circle:hover {
+  opacity: 0.8;
+}
+
+.lesmis line {
+  pointer-events: none;
+}
+
 /* Layout placeholder styling */
 .layout-placeholder {
   font-family: var(--font-mono);

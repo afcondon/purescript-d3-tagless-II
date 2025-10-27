@@ -30,11 +30,11 @@ import PSD3.Understanding.BubbleChart as BubbleChart
 import PSD3.Understanding.SankeyDiagram as SankeyDiagram
 import PSD3.Understanding.Hierarchies as Hierarchies
 import PSD3.Understanding.Interpreters as Interpreters
+import PSD3.Understanding.LesMiserables as LesMiserables
 import PSD3.CodeExplorer.CodeExplorationPage as CodeExplorationPage
 import PSD3.RoutingDSL (routing, routeToPath)
 import PSD3.CodeExplorer.CodeExplorerWrapper as CodeExplorer
 import PSD3.WealthHealth.WealthHealthWrapper as WealthHealth
-import PSD3.Unlinked.LesMis as LesMis
 import PSD3.CodeAtlas.CodeAtlasWrapper as CodeAtlas
 import PSD3.Website.Types (Route(..))
 import Routing.Hash (matches, setHash)
@@ -181,7 +181,7 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _wealthHealth unit WealthHealth.component unit
 
   LesMiserables ->
-    HH.slot_ _lesMiserables unit LesMis.component unit
+    HH.slot_ _lesMiserables unit LesMiserables.component unit
 
   CodeAtlas ->
     HH.slot_ _codeAtlas unit CodeAtlas.component unit

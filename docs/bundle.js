@@ -23823,8 +23823,8 @@
         return $147;
       }))(function() {
         return bind21(simulationSetNodes2(config.nodes))(function(nodesInSim) {
-          return bind21(simulationSetLinks2(config.links)(config.nodes)(config.keyFn))(function(linksInSim) {
-            return discard12(simulationActualizeForces2(config.activeForces))(function() {
+          return discard12(simulationActualizeForces2(config.activeForces))(function() {
+            return bind21(simulationSetLinks2(config.links)(config.nodes)(config.keyFn))(function(linksInSim) {
               return discard12(simulationSetVariable2(new AlphaTarget(config.config.alphaTarget)))(function() {
                 return discard12(simulationSetVariable2(new AlphaMin(config.config.alphaMin)))(function() {
                   return discard12(simulationSetVariable2(new AlphaDecay(config.config.alphaDecay)))(function() {
@@ -23845,7 +23845,7 @@
                               return pure24(unit);
                             }
                             ;
-                            throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 153, column 30 - line 160, column 22): " + [step5.constructor.name]);
+                            throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 158, column 30 - line 165, column 22): " + [step5.constructor.name]);
                           };
                         };
                         return bind21(sequence2(mapFlipped9(toUnfoldable7(config.ticks))(function(v) {
@@ -23913,7 +23913,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 170, column 1 - line 202, column 33): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 175, column 1 - line 207, column 33): " + [v.constructor.name, v1.constructor.name]);
       };
     },
     removeTickFunction: function(label5) {
