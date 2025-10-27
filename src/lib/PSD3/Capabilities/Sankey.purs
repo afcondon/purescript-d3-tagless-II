@@ -25,7 +25,7 @@
 -- | - Link width represents flow quantity
 -- | - Use for directional flow visualization
 -- |
--- | **Force Simulations** (SimulationM):
+-- | **Force Simulations** (SimulationM2):
 -- | - Dynamic layout that animates over time
 -- | - Nodes positioned by physical forces
 -- | - Link length can vary
@@ -127,7 +127,7 @@ import Prelude (class Monad)
 -- | This type class provides operations for computing Sankey layouts, which
 -- | transform raw node and link data into positioned elements ready for rendering.
 -- |
--- | Unlike SimulationM (which computes dynamic animated layouts), SankeyM computes
+-- | Unlike SimulationM2 (which computes dynamic animated layouts), SankeyM computes
 -- | static layouts in a single pass. The layout algorithm arranges nodes into
 -- | vertical layers and positions links to show flow between them.
 -- |

@@ -206,7 +206,7 @@ lesMisNotebook :: forall w. Notebook (Set Label) w Action
 lesMisNotebook = [
     Blurb 
 
-    """This example introduces a new capability, signalled by the SimulationM
+    """This example introduces a new capability, signalled by the SimulationM2
     constraint on the function. This monad runs with a D3 Simulation engine in its
     State. This allows us to let the simulation engine do the layout, we provide
     the nodes and (optionally) links and configure the simulation with additional

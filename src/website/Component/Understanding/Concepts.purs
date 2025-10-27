@@ -88,7 +88,7 @@ render _ =
             , HH.p_
                 [ HH.text "Furthermore, using this pattern, we can now "
                 , HH.em_ [ HH.text "extend" ]
-                , HH.text " the SelectionM monad as can be seen in the library where we provide a SimulationM monad which extends the our static DOM element visualizations by allowing them to move under the control of a Force Layout algorithm."
+                , HH.text " the SelectionM monad as can be seen in the library where we provide a SimulationM2 monad which extends the our static DOM element visualizations by allowing them to move under the control of a Force Layout algorithm."
                 ]
             ]
 
@@ -140,10 +140,10 @@ render _ =
             [ HH.h2
                 [ HP.id "heading-capabilities" ]
                 [ HH.text "Capabilities & Interpreters" ]
-            , HH.p_ [ HH.text "The SimulationM monad looks like:" ]
+            , HH.p_ [ HH.text "The SimulationM2 monad looks like:" ]
             , HH.pre_
                 [ HH.code_
-                    [ HH.text """class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> selection where
+                    [ HH.text """class (Monad m, SelectionM selection m) <= SimulationM2 selection m | m -> selection where
   start :: m Unit
   stop  :: m Unit
   setConfigVariable    :: SimVariable -> m Unit

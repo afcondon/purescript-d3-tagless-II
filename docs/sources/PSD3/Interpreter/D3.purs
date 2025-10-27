@@ -12,7 +12,7 @@ import PSD3.Internal.Simulation.Functions (simulationActualizeForces, simulation
 import PSD3.Internal.Sankey.Types (SankeyLayoutState_)
 import PSD3.Internal.Sankey.Functions (sankeySetData, sankeySetDataWithConfig)
 import PSD3.Capabilities.Selection (class SelectionM)
-import PSD3.Capabilities.Simulation (class SimulationM)
+import PSD3.Capabilities.Simulation (class SimulationM2)
 import PSD3.Capabilities.Sankey (class SankeyM)
 import Data.Array (partition)
 import Data.Lens (use)
@@ -121,7 +121,7 @@ instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
   updateJoin s_      = selectionUpdateJoin s_
 
 -- TODO should each of these facets (stop/go, forces, data, selections, tick functions)
-instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
+instance SimulationM2 D3Selection_ (D3SimM row D3Selection_) where
 -- stop and go
   start                 = simulationStart
   stop                  = simulationStop
@@ -143,7 +143,7 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   addTickFunction label (Step selection chain) = do
     handle <- use _handle
     let makeTick _ = do
-          -- TODO this coerce is forced upon us here due to forall selection in SimulationM
+          -- TODO this coerce is forced upon us here due to forall selection in SimulationM2
           let _ = chain <#> applySelectionAttributeD3 (unsafeCoerce selection)
           unit
         _ = onTick_ handle label makeTick

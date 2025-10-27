@@ -20,7 +20,7 @@
 -- |
 -- | **D3Simulation_**
 -- | - Handle to a D3 force simulation engine
--- | - Managed internally by SimulationM operations
+-- | - Managed internally by SimulationM2 operations
 -- | - Advanced users can access via `simulationHandle`
 -- |
 -- | **D3SimulationState_**
@@ -218,7 +218,7 @@
 -- | **Simulation with full type signature**:
 -- | ```purescript
 -- | forceGraph :: forall m.
--- |   SimulationM D3Selection_ m =>
+-- |   SimulationM2 D3Selection_ m =>
 -- |   MonadState { simulation :: D3SimulationState_ } m =>
 -- |   GraphData ->
 -- |   m Unit

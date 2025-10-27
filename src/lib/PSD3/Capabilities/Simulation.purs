@@ -1,6 +1,6 @@
 -- | PSD3.Capabilities.Simulation - Force-directed graph simulations
 -- |
--- | This module defines the `SimulationM` type class for creating animated,
+-- | This module defines the `SimulationM2` type class for creating animated,
 -- | force-directed visualizations. Force simulations are physics-based layouts
 -- | where nodes and links are positioned through iterative calculations of forces
 -- | (gravity, charge, collision, etc.).
@@ -23,7 +23,7 @@
 -- | import PSD3.Attributes (cx, cy, radius, fill)
 -- |
 -- | myForceGraph :: forall row m.
--- |   SimulationM D3Selection_ m =>
+-- |   SimulationM2 D3Selection_ m =>
 -- |   MonadState { simulation :: D3SimulationState_ | row } m =>
 -- |   m Unit
 -- | myForceGraph = do
@@ -96,14 +96,14 @@ import Prelude (class Eq, class Monad, Unit)
 -- | Instead of passing booleans, pass lists of force labels.
 type ForceConfigLists = { enable :: Array Label, disable :: Array Label }
 
--- | SimulationM extends SelectionM with force simulation capabilities.
+-- | SimulationM2 extends SelectionM with force simulation capabilities.
 -- |
 -- | This type class manages the simulation state, forces, and animation loop.
 -- | It requires SelectionM because simulations render to selections.
 -- |
 -- | The functional dependency `m -> selection` means the monad determines
 -- | the selection type (e.g., `D3SimM` always uses `D3Selection_`).
-class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> selection where
+class (Monad m, SelectionM selection m) <= SimulationM2 selection m | m -> selection where
   -- ** Simulation Control **
 
   -- | Start the simulation animation.

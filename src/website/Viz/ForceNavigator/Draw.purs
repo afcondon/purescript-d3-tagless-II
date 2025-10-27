@@ -12,7 +12,7 @@ import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Simulation.Types (Step(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, simpleJoin, updateJoin)
-import PSD3.Capabilities.Simulation (class SimulationM, RawData, addTickFunction, mergeNewDataWithSim, setLinksFromSelection, setNodesFromSelection)
+import PSD3.Capabilities.Simulation (class SimulationM2, RawData, addTickFunction, mergeNewDataWithSim, setLinksFromSelection, setNodesFromSelection)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
@@ -76,7 +76,7 @@ datum_ = {
 initialize :: forall row m.
   Bind m =>
   MonadEffect m =>
-  SimulationM D3Selection_ m =>
+  SimulationM2 D3Selection_ m =>
   m { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
 initialize = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
@@ -103,7 +103,7 @@ initialize = do
 update :: forall row m.
   Bind m =>
   MonadEffect m =>
-  SimulationM D3Selection_ m =>
+  SimulationM2 D3Selection_ m =>
   SelectionAttribute ->
   NavigationRawModel ->
   m Unit

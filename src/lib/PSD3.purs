@@ -17,7 +17,7 @@
 -- | PSD3 uses a **finally tagless encoding** with three main capability type classes:
 -- |
 -- | 1. **SelectionM** - Core D3 operations (select, append, set attributes, data joins)
--- | 2. **SimulationM** - Force-directed graph simulations (extends SelectionM)
+-- | 2. **SimulationM2** - Force-directed graph simulations (extends SelectionM)
 -- | 3. **SankeyM** - Sankey diagram layouts (extends SelectionM)
 -- |
 -- | Each capability has multiple interpreters:
@@ -93,7 +93,7 @@
 -- | import PSD3.Internal.Simulation.Types (D3SimulationState_)
 -- |
 -- | forceGraph :: forall m.
--- |   SimulationM D3Selection_ m =>
+-- |   SimulationM2 D3Selection_ m =>
 -- |   MonadState { simulation :: D3SimulationState_ } m =>
 -- |   GraphData ->
 -- |   m Unit
@@ -247,7 +247,7 @@
 -- |
 -- | **Type Classes** (capabilities):
 -- | - `SelectionM` - Basic selection operations
--- | - `SimulationM` - Force simulation operations
+-- | - `SimulationM2` - Force simulation operations
 -- | - `SankeyM` - Sankey layout operations
 -- |
 -- | **Type Class Methods**:
@@ -282,7 +282,7 @@ module PSD3 (module X) where
 import Prelude as X
 
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, filterSelection, mergeSelections, on, openSelection, selectUnder, setAttributes, simpleJoin, updateJoin) as X
-import PSD3.Capabilities.Simulation (class SimulationM, actualizeForces, addTickFunction, mergeNewDataWithSim, removeTickFunction, setConfigVariable, setLinks, setLinksFromSelection, setNodes, setNodesFromSelection, simulationHandle, start, stop) as X
+import PSD3.Capabilities.Simulation (class SimulationM2, actualizeForces, addTickFunction, mergeNewDataWithSim, removeTickFunction, setConfigVariable, setLinks, setLinksFromSelection, setNodes, setNodesFromSelection, simulationHandle, start, stop) as X
 import PSD3.Capabilities.Sankey (class SankeyM, setSankeyData, setSankeyDataWithConfig) as X
 
 import PSD3.Interpreter.D3 (D3M, D3SankeyM, D3SimM, eval_D3M, evalEffectSankey, evalEffectSimulation, eval_D3M_Sankey, eval_D3M_Simulation, exec_D3M, exec_D3M_Sankey, exec_D3M_Simulation, runD3M, runWithD3_Sankey, runWithD3_Simulation, run_D3M_Sankey, run_D3M_Simulation) as X

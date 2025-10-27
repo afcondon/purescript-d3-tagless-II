@@ -11,7 +11,7 @@ import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Simulation.Types (Step(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, updateJoin)
-import PSD3.Capabilities.Simulation (class SimulationM, Staging, addTickFunction, mergeNewDataWithSim, setLinksFromSelection, setNodesFromSelection)
+import PSD3.Capabilities.Simulation (class SimulationM2, Staging, addTickFunction, mergeNewDataWithSim, setLinksFromSelection, setNodesFromSelection)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
@@ -26,12 +26,12 @@ getVizEventFromClick e d t = NodeClick (datum_.nodetype d) (datum_.id d)
 initialize :: forall m.
   Bind m =>
   MonadEffect m =>
-  SimulationM D3Selection_ m =>
+  SimulationM2 D3Selection_ m =>
   SelectionM D3Selection_ m =>
   m { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
 initialize = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
-  root  <- attach "div.svg-container" -- typeclass here determined by D3Selection_ in SimulationM
+  root  <- attach "div.svg-container" -- typeclass here determined by D3Selection_ in SimulationM2
 
   svg   <- appendTo root Svg (svgAttrs w h) 
   inner <- appendTo svg  Group []
@@ -54,7 +54,7 @@ updateSimulation :: forall m d r id.
   Bind m => 
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  SimulationM D3Selection_ m =>
+  SimulationM2 D3Selection_ m =>
   (Staging D3Selection_ d r id) ->
   SpagoSceneAttributes -> 
   m Unit

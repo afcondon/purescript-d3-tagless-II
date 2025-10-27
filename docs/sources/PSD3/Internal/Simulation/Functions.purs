@@ -286,7 +286,7 @@ simulationCreateTickFunction label tick@(Step selection chain) = do
   handle <- use _handle
   let 
     makeTick _ = do
-      -- TODO this coerce is forced upon us here due to forall selection in SimulationM
+      -- TODO this coerce is forced upon us here due to forall selection in SimulationM2
       -- going to have to parameterize simulation with selection or hide the type dep somehow
       let _ = (applySelectionAttributeD3 (unsafeCoerce selection)) <$> chain
       unit
@@ -295,7 +295,7 @@ simulationCreateTickFunction label tick@(Step selection chain) = do
   -- finally, update the State to track this tick function (not actually used for anything at present, tho)
   modifying (_d3Simulation <<< _tick label) (liftA1 $ const tick')
   
--- the price of being able to treat Drag, Zoom, Click etc the same in SimulationM and SelectionM instances is some duplication here
+-- the price of being able to treat Drag, Zoom, Click etc the same in SimulationM2 and SelectionM instances is some duplication here
 -- Drag has to behave differently in the simulation case
 simulationOn :: forall row m. 
   (MonadState { simulation :: D3SimulationState_ | row } m) =>

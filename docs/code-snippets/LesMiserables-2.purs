@@ -3,7 +3,7 @@ draw :: forall row m.
   Bind m => 
   MonadEffect m =>
   MonadState { simulation :: D3SimulationState_ | row } m => 
-  SimulationM D3Selection_ m =>
+  SimulationM2 D3Selection_ m =>
   LesMisRawModel -> Selector D3Selection_ -> m Unit
 draw model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight

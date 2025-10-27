@@ -11,7 +11,7 @@ import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Simulation.Types (D3SimulationState_, SimVariable(..), Step(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
-import PSD3.Capabilities.Simulation (class SimulationM, addTickFunction, setConfigVariable, setLinks, setNodes)
+import PSD3.Capabilities.Simulation (class SimulationM2, addTickFunction, setConfigVariable, setLinks, setNodes)
 import Data.Int (toNumber)
 import Data.Number (sqrt)
 import Data.Tuple (Tuple(..))
@@ -49,7 +49,7 @@ draw :: forall row m.
   Bind m => 
   MonadEffect m =>
   MonadState { simulation :: D3SimulationState_ | row } m => 
-  SimulationM D3Selection_ m =>
+  SimulationM2 D3Selection_ m =>
   LesMisRawModel -> Selector D3Selection_ -> m Unit
 draw model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
