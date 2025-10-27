@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import PSD3.Internal.Types (D3Selection_, D3Simulation_)
-import PSD3.Internal.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, onTick_)
+import PSD3.Internal.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, getLinksFromSimulation_, getNodes_, onTick_)
 import PSD3.Internal.Selection.Types (applySelectionAttributeD3)
 import PSD3.Internal.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionOn, selectionOpenSelection, selectionSelectUnder, selectionUpdateJoin)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Step(..), SimVariable(..), _handle, _name)
@@ -23,6 +23,7 @@ import Data.Map as Map
 import Data.Newtype (class Newtype)
 import Data.Traversable (sequence)
 import Type.Proxy (Proxy(..))
+import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
@@ -171,27 +172,46 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   start = simulationStart
   stop  = simulationStop
 
--- TODO should each of these facets (stop/go, forces, data, selections, tick functions)
+-- | SimulationM2 instance - Declarative updates for dynamic simulations
 instance SimulationM2 D3Selection_ (D3SimM row D3Selection_) where
--- management of simulation variables (start/stop inherited from SimulationM)
-  setConfigVariable v   = simulationSetVariable v
--- management of forces
-  actualizeForces       = simulationActualizeForces
--- management of data
-  setNodes = simulationSetNodes
-  setLinks = simulationSetLinks
-  mergeNewDataWithSim selection   = simulationMergeNewData selection
-  setNodesFromSelection selection = simulationSetNodesFromSelection selection
-  setLinksFromSelection selection = simulationSetLinksFromSelection selection
+  update config = do
+    -- Get current simulation state
+    handle <- use _handle
+    currentNodes <- pure $ getNodes_ handle
 
--- management of tick functions, what to do with the selection on each step of simulation
-    -- TODO this would be the more efficient but less attractive route to defining a Tick function
-  addTickFunction _ (StepTransformFFI _ _) = do
-    pure unit
+    -- Step 1: Update configuration variables if provided
+    case config.config of
+      Nothing -> pure unit
+      Just simConfig -> do
+        simulationSetVariable $ AlphaTarget simConfig.alphaTarget
+        simulationSetVariable $ AlphaMin simConfig.alphaMin
+        simulationSetVariable $ AlphaDecay simConfig.alphaDecay
+        simulationSetVariable $ VelocityDecay simConfig.velocityDecay
+        -- Note: Don't set Alpha here - caller uses start() to begin animation
+
+    -- Step 2: Determine nodes (new or existing)
+    nodesInSim <- case config.nodes of
+      Nothing -> pure currentNodes  -- Keep existing nodes
+      Just newNodes -> simulationSetNodes newNodes  -- Replace with new nodes
+
+    -- Step 3: Update active forces if provided (must come BEFORE setting links!)
+    case config.activeForces of
+      Nothing -> pure unit
+      Just forces -> simulationActualizeForces forces
+
+    -- Step 4: Update links if provided (must come AFTER force activation)
+    linksInSim <- case config.links of
+      Nothing -> pure $ getLinksFromSimulation_ handle  -- Keep existing links
+      Just newLinks -> simulationSetLinks newLinks nodesInSim config.keyFn
+
+    -- Step 5: Return enhanced data for DOM binding
+    pure { nodes: nodesInSim, links: linksInSim }
+
+  -- Tick function management
+  addTickFunction _ (StepTransformFFI _ _) = pure unit
   addTickFunction label (Step selection chain) = do
     handle <- use _handle
     let makeTick _ = do
-          -- TODO this coerce is forced upon us here due to forall selection in SimulationM2
           let _ = chain <#> applySelectionAttributeD3 (unsafeCoerce selection)
           unit
         _ = onTick_ handle label makeTick
@@ -199,13 +219,8 @@ instance SimulationM2 D3Selection_ (D3SimM row D3Selection_) where
 
   removeTickFunction label = do
     handle <- use _handle
-    -- TODO delete the tick function from the state
     let _ = disableTick_ handle label
     pure unit
-
--- get the underlying simulation handle out of the simulation (necessary for tick functions? )
-  simulationHandle = use _handle
--- TODO is this really necessary tho? couldn't it be added to the tick function
 
 -- ====================================================
 -- Sankey Monad (with sankey layout state)

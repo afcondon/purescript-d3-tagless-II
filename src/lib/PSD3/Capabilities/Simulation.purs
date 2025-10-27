@@ -157,148 +157,86 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   stop  :: m Unit
 
 -- | ========================================================================================================
--- | SimulationM2 - Full-featured API with incremental updates (legacy)
+-- | SimulationM2 - Declarative API for dynamic simulation updates
 -- | ========================================================================================================
 
--- | Prevents "boolean blindness" when enabling/disabling forces.
+-- | Configuration for updating a running simulation.
 -- |
--- | Instead of passing booleans, pass lists of force labels.
-type ForceConfigLists = { enable :: Array Label, disable :: Array Label }
+-- | All fields are optional (Maybe). Only provide the fields you want to update.
+-- | The update function handles all ordering, swizzling, and force management internally.
+-- |
+-- | ## Example Usage
+-- |
+-- | ```purescript
+-- | -- Update just the active forces
+-- | update { nodes: Nothing, links: Nothing, activeForces: Just newForces, config: Nothing, keyFn: keyIsID_ }
+-- |
+-- | -- Update nodes and links together
+-- | { nodes: updatedNodes, links: updatedLinks } <- update
+-- |   { nodes: Just newNodeData
+-- |   , links: Just newLinkData
+-- |   , activeForces: Nothing
+-- |   , config: Nothing
+-- |   , keyFn: keyIsID_
+-- |   }
+-- | ```
+type SimulationUpdate d r =
+  { nodes :: Maybe (Array (D3_SimulationNode d))  -- New node data (replaces existing)
+  , links :: Maybe (Array (D3Link String r))      -- New link data (replaces existing)
+  , activeForces :: Maybe (Set Label)             -- Which forces to enable (replaces active set)
+  , config :: Maybe SimulationVariables           -- Simulation config to update
+  , keyFn :: Datum_ -> Index_                     -- Key function for data binding
+  }
 
--- | SimulationM2 extends SimulationM with incremental update capabilities.
+-- | SimulationM2 extends SimulationM with declarative update capabilities.
 -- |
--- | This type class adds methods for updating simulation data dynamically.
--- | It inherits start/stop from SimulationM and adds methods for:
--- | - Setting configuration variables during simulation
--- | - Dynamically enabling/disabling forces
--- | - Updating nodes and links from selections
--- | - Managing tick functions incrementally
+-- | Instead of multiple order-dependent methods, SimulationM2 provides a single
+-- | `update` function that handles all complexity internally.
 -- |
--- | For static simulations, prefer the simpler SimulationM with record-based init.
+-- | The update function:
+-- | - Handles proper ordering (forces before links, etc.)
+-- | - Manages link swizzling automatically
+-- | - Preserves node positions when updating data
+-- | - Activates/deactivates forces correctly
+-- |
+-- | For static simulations, use SimulationM's `init`. For dynamic updates, use SimulationM2's `update`.
 class (Monad m, SimulationM selection m) <= SimulationM2 selection m | m -> selection where
-  -- ** Simulation Configuration **
+  -- ** Dynamic Updates **
 
-  -- | Set a simulation variable (alpha, alphaTarget, velocityDecay, etc.).
+  -- | Update a running simulation declaratively.
   -- |
-  -- | These control the simulation's behavior:
-  -- | - `Alpha` - Current animation progress (1.0 = full energy, 0.0 = stopped)
-  -- | - `AlphaTarget` - Minimum alpha to maintain (keeps simulation "warm")
-  -- | - `AlphaDecay` - How quickly simulation cools down
-  -- | - `VelocityDecay` - Friction applied to node movement
+  -- | This is the primary method for updating simulations. It handles all complexity:
+  -- | - Proper ordering (activates forces before setting links)
+  -- | - Link swizzling (converts IDs to object references)
+  -- | - Position preservation (maintains x, y when updating data)
+  -- | - Force management (enables/disables forces correctly)
+  -- |
+  -- | All fields in SimulationUpdate are optional. Only provide what you want to change.
   -- |
   -- | ```purescript
-  -- | setConfigVariable $ Alpha 1.0  -- Reheat simulation
-  -- | setConfigVariable $ AlphaTarget 0.3  -- Keep simulation running
-  -- | ```
-  setConfigVariable    :: SimVariable -> m Unit
-
-  -- ** Force Management **
-
-  -- | Enable only the specified forces, disable all others.
+  -- | -- Example 1: Toggle forces (e.g., user clicks button)
+  -- | update { nodes: Nothing, links: Nothing, activeForces: Just newForceSet, config: Nothing, keyFn: keyIsID_ }
   -- |
-  -- | Forces are identified by labels like "center", "charge", "link", etc.
-  -- | This completely replaces the active force set.
+  -- | -- Example 2: Update data (e.g., new data arrives)
+  -- | { nodes: nodesInSim, links: linksInSim } <- update
+  -- |   { nodes: Just newNodeArray
+  -- |   , links: Just newLinkArray
+  -- |   , activeForces: Nothing  -- Keep current forces
+  -- |   , config: Nothing         -- Keep current config
+  -- |   , keyFn: keyIsID_
+  -- |   }
+  -- | -- Now rejoin to DOM with simulation-enhanced data
+  -- | result <- updateJoin svg Circle nodesInSim keyIsID_
   -- |
-  -- | ```purescript
-  -- | -- Enable only center and charge forces
-  -- | actualizeForces $ Set.fromFoldable ["center", "charge"]
-  -- | ```
-  -- |
-  -- | See `PSD3.Internal.Simulation.Forces` for force definitions.
-  actualizeForces:: Set Label -> m Unit
-
-  -- ** Data Management - Type-Safe (Preferred) **
-
-  -- | Load node data into the simulation.
-  -- |
-  -- | This is the **type-safe** way to set nodes. Use this for static simulations
-  -- | where you load data once at initialization.
-  -- |
-  -- | ```purescript
-  -- | let nodes = [{ id: "a", ... }, { id: "b", ... }]
-  -- | nodesInSim <- setNodes nodes
-  -- | circles <- simpleJoin svg Circle nodesInSim keyFn
+  -- | -- Example 3: Reheat simulation
+  -- | update { nodes: Nothing, links: Nothing, activeForces: Nothing, config: Just { alpha: 0.7, ... }, keyFn: keyIsID_ }
+  -- | start
   -- | ```
   -- |
-  -- | Returns the nodes with simulation properties added (x, y, vx, vy, etc.).
-  setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
-
-  -- | Load link data into the simulation, validating against nodes.
-  -- |
-  -- | This is the **type-safe** way to set links. Links reference nodes by ID,
-  -- | and this function "swizzles" those IDs into object references that D3 needs.
-  -- |
-  -- | ```purescript
-  -- | let links = [{ source: "a", target: "b", ... }]
-  -- | linksInSim <- setLinks links nodes keyFn
-  -- | lines <- simpleJoin svg Line linksInSim keyFn
-  -- | ```
-  -- |
-  -- | Invalid links (referencing non-existent nodes) are filtered out.
-  -- |
-  -- | Returns "swizzled" links where source/target are object references.
-  setLinks :: forall d r id. (Eq id) => Array (D3Link id r) -> Array (D3_SimulationNode d) -> (Datum_ -> Index_ ) -> m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
-
-  -- ** Data Management - Selection-Based (For Updates) **
-
-  -- | Update simulation nodes from a selection (less type-safe).
-  -- |
-  -- | Use this for **dynamic simulations** where data changes over time.
-  -- | The selection must contain data matching the simulation node format.
-  -- |
-  -- | ```purescript
-  -- | -- After updating selection with new data
-  -- | setNodesFromSelection mergedCircles
-  -- | ```
-  -- |
-  -- | **Warning**: No compile-time type checking. Ensure selection data is correct.
-  setNodesFromSelection :: selection -> m Unit
-
-  -- | Update simulation links from a selection (less type-safe).
-  -- |
-  -- | Use this for **dynamic simulations**. The boolean function filters
-  -- | which links should exert force (some links might be visual only).
-  -- |
-  -- | ```purescript
-  -- | setLinksFromSelection mergedLines (\_ -> true)  -- All links have force
-  -- | ```
-  -- |
-  -- | **Warning**: No compile-time type checking. Ensure selection data is correct.
-  setLinksFromSelection :: selection -> (Datum_ -> Boolean) -> m Unit
-
-  -- | Merge new data with simulation state, preserving positions.
-  -- |
-  -- | This is the **key function for dynamic simulations**. It handles the complex
-  -- | task of updating simulation data while preserving node positions from the
-  -- | previous state (critical for smooth animations).
-  -- |
-  -- | ```purescript
-  -- | -- After general update pattern on selections
-  -- | merged <- mergeNewDataWithSim
-  -- |   nodeSelection keyFn
-  -- |   linkSelection linkKeyFn
-  -- |   { nodes: newNodes, links: newLinks }
-  -- |
-  -- | setNodesFromSelection merged.nodes
-  -- | setLinksFromSelection merged.links (\_ -> true)
-  -- | ```
-  -- |
-  -- | This preserves the physical simulation state across data updates.
-  mergeNewDataWithSim :: forall d r id. (Eq id) =>
-    selection -> -- nodes selection
-    (Datum_ -> Index_) -> -- nodes keyFn
-    selection -> -- links selection
-    (Datum_ -> Index_) -> -- links KeyFn
-    RawData d r id -> -- links and nodes raw data
-    m { links :: (Array (D3LinkSwizzled (D3_SimulationNode d) r)), nodes :: (Array (D3_SimulationNode d))}
+  -- | Returns simulation-enhanced nodes and links for joining to DOM.
+  update :: forall d r. SimulationUpdate d r -> m { nodes :: Array (D3_SimulationNode d), links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
 
   -- ** Animation (Tick Functions) **
-
-  -- | Get the underlying D3 simulation handle.
-  -- |
-  -- | Advanced operation - most users won't need this. Used internally
-  -- | by tick functions to access simulation properties.
-  simulationHandle :: m D3Simulation_
 
   -- | Register a function to run on every simulation tick (frame).
   -- |

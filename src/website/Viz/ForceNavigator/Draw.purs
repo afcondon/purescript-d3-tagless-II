@@ -12,7 +12,7 @@ import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Simulation.Types (Step(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, simpleJoin, updateJoin)
-import PSD3.Capabilities.Simulation (class SimulationM2, RawData, addTickFunction, mergeNewDataWithSim, setLinksFromSelection, setNodesFromSelection)
+import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate, addTickFunction, update)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
@@ -99,7 +99,9 @@ initialize = do
 
 -- | Update the visualization with new visible nodes/links
 -- | Uses General Update Pattern (enter/update/exit) following Spago pattern
+-- | TODO: Update to use new SimulationM2 update API
 -- | CRITICAL: Must use mergeNewDataWithSim to preserve positions and link references
+{- TEMPORARILY COMMENTED OUT - needs refactoring for new API
 update :: forall row m.
   Bind m =>
   MonadEffect m =>
@@ -202,3 +204,4 @@ update clickCallback model = do
     ]
 
   pure unit
+-}

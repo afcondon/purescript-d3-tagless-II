@@ -282,7 +282,7 @@ module PSD3 (module X) where
 import Prelude as X
 
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, filterSelection, mergeSelections, on, openSelection, selectUnder, setAttributes, simpleJoin, updateJoin) as X
-import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate, addTickFunction, removeTickFunction, update, start, stop) as X
+import PSD3.Capabilities.Simulation (class SimulationM2, actualizeForces, addTickFunction, mergeNewDataWithSim, removeTickFunction, setConfigVariable, setLinks, setLinksFromSelection, setNodes, setNodesFromSelection, simulationHandle, start, stop) as X
 import PSD3.Capabilities.Sankey (class SankeyM, setSankeyData, setSankeyDataWithConfig) as X
 
 import PSD3.Interpreter.D3 (D3M, D3SankeyM, D3SimM, eval_D3M, evalEffectSankey, evalEffectSimulation, eval_D3M_Sankey, eval_D3M_Simulation, exec_D3M, exec_D3M_Sankey, exec_D3M_Simulation, runD3M, runWithD3_Sankey, runWithD3_Simulation, run_D3M_Sankey, run_D3M_Simulation) as X

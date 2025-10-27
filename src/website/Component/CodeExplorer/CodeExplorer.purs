@@ -44,7 +44,8 @@ import PSD3.Internal.FFI (linksForceName_)
 import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Internal.Simulation.Types (SimVariable(..), initialSimulationState)
 import Data.Set as Set
-import PSD3.Capabilities.Simulation (actualizeForces, setConfigVariable, start, stop)
+import PSD3.Capabilities.Simulation (SimulationUpdate, start, stop, update)
+-- TODO: Refactor to use new update API instead of setConfigVariable/actualizeForces
 import PSD3.Interpreter.D3 (evalEffectSimulation, runWithD3_Simulation)
 import Data.Array (filter, foldl, (:))
 import Data.Lens (use, view, (%=), (.=))
@@ -220,17 +221,14 @@ handleAction = case _ of
     runSimulation
 
   ChangeSimConfig c -> do
-    runWithD3_Simulation $ setConfigVariable c
+    -- TODO: Use update API
+    pure unit -- runWithD3_Simulation $ setConfigVariable c
 
   StartSim -> do
-    runWithD3_Simulation do
-      setConfigVariable $ Alpha 1.0
-      start
+    runWithD3_Simulation start
+    -- TODO: Use update to set alpha first
 
-  StopSim -> runWithD3_Simulation $
-    do
-      setConfigVariable $ Alpha 0.0
-      stop
+  StopSim -> runWithD3_Simulation stop
 
 -- | Prepare model data for visualization by applying filters and transformations
 -- | This is the bridge between immutable model data and mutable staging data
@@ -280,7 +278,8 @@ runSimulation = do
 
   runWithD3_Simulation do
     stop
-    actualizeForces activeForces
-    Graph.updateSimulation staging attributesWithCallback
-    setConfigVariable $ Alpha 1.0
+    -- TODO: Use update API for forces
+    -- actualizeForces activeForces
+    -- Graph.updateSimulation staging attributesWithCallback
+    -- setConfigVariable $ Alpha 1.0
     start

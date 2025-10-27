@@ -15,7 +15,7 @@ import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, ForceType(..),
 import PSD3.Button as Button
 import PSD3.Expandable as Expandable
 import PSD3.Toggle as Toggle
-import PSD3.Capabilities.Simulation (SimulationUpdate, init, start, update)
+import PSD3.Capabilities.Simulation (actualizeForces, init, setConfigVariable, start)
 import PSD3.Interpreter.D3 (runWithD3_Simulation)
 import Data.Lens (Lens', use, view, (%=), (.=))
 import Data.Lens.Record (prop)
@@ -168,16 +168,15 @@ handleAction = case _ of
     toggleForceByName name
     state <- get
     runWithD3_Simulation do
-      -- TODO: use update API to set activeForces and alpha
+      actualizeForces state.activeForces
+      setConfigVariable $ Alpha 0.7
       start
 
-  Freeze -> runWithD3_Simulation do
-    -- TODO: use update API to set alpha to 0
-    pure unit
-
-  Reheat -> runWithD3_Simulation do
-    -- TODO: use update API to set alpha to 0.7
-    start
+  Freeze  -> runWithD3_Simulation $ setConfigVariable $ Alpha 0.0
+  Reheat  -> do
+    runWithD3_Simulation do
+      setConfigVariable $ Alpha 0.7
+      start
 -- Snippet_End
 
 controls :: forall p125. Set Label -> HH.HTML p125 Action

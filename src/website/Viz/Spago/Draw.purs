@@ -11,7 +11,7 @@ import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Simulation.Types (Step(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, updateJoin)
-import PSD3.Capabilities.Simulation (class SimulationM2, Staging, addTickFunction, mergeNewDataWithSim, setLinksFromSelection, setNodesFromSelection)
+import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate, addTickFunction, update)
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
@@ -48,7 +48,8 @@ initialize = do
   nodesGroup <- appendTo inner Group [ classed "nodes" ]
 
   pure { nodes: Just nodesGroup, links: Just linksGroup }
-  
+
+{- TODO: Refactor to use new SimulationM2 update API
 updateSimulation :: forall m d r id. 
   Eq id =>
   Bind m => 
@@ -112,4 +113,5 @@ updateSimulation staging@{ selections: { nodes: Just nodesGroup, links: Just lin
 
 -- alternate path, should never be used, if we can't match the selections
 updateSimulation _ _ = pure unit -- something's gone badly wrong, one or both open selections (for updates) are missing
+-}
 

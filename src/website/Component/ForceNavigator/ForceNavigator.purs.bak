@@ -19,7 +19,7 @@ import PSD3.Internal.Simulation.Types (SimVariable(..))
 import D3.Viz.ForceNavigator.Data (navigationData)
 import D3.Viz.ForceNavigator.Draw as Draw
 import D3.Viz.ForceNavigator.Model (NodeType(..))
-import PSD3.Capabilities.Simulation (SimulationUpdate, start, stop, update)
+import PSD3.Capabilities.Simulation (actualizeForces, setConfigVariable, start, stop)
 import PSD3.Interpreter.D3 (evalEffectSimulation, runWithD3_Simulation)
 import Data.Lens (use, (.=), (%=))
 import Data.Maybe (Maybe(..))
@@ -78,10 +78,10 @@ runSimulation = do
   activeLabels <- use _activeForces
   evalEffectSimulation $ do
     -- Enable only the forces in the Set, disable all others
-    -- TODO: use update API --     actualizeForces activeLabels
-    -- TODO: use update API --     -- Configure slower cooling for better settling
-    -- TODO: use update API --     setConfigVariable $ AlphaDecay 0.01  -- Slower decay (default is ~0.023)
-    -- TODO: use update API --     setConfigVariable $ Alpha 1.0        -- Full heat
+    actualizeForces activeLabels
+    -- Configure slower cooling for better settling
+    setConfigVariable $ AlphaDecay 0.01  -- Slower decay (default is ~0.023)
+    setConfigVariable $ Alpha 1.0        -- Full heat
     -- Start the simulation (or restart if already running, reheating the physics)
     start
 
@@ -110,8 +110,7 @@ handleAction = case _ of
     let visibleLinksArray = visibleLinks visibleNodesArray navigationData.links
     let initialModel = { nodes: visibleNodesArray, links: visibleLinksArray }
 
-    -- TODO: refactor Draw.update for new API
-    -- evalEffectSimulation $ Draw.update callback initialModel
+    evalEffectSimulation $ Draw.update callback initialModel
 
     -- 4. Start the simulation with forces from the force library
     runSimulation
@@ -143,7 +142,7 @@ handleAction = case _ of
         case maybeListener of
           Just listener -> do
             let callback = simulationEvent listener
-            pure unit -- TODO: evalEffectSimulation $ Draw.update callback updatedModel
+            evalEffectSimulation $ Draw.update callback updatedModel
             -- Restart simulation with new nodes/links (heats up the simulation)
             runSimulation
           Nothing -> pure unit
