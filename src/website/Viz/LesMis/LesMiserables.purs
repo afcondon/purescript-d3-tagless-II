@@ -12,6 +12,7 @@ import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, SimVariable(..
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, setConfigVariable, setLinks, setNodes, start)
+import PSD3.Data.Node (D3LinkSwizzled, D3_SimulationNode)
 import Data.Int (toNumber)
 import Data.Map as Map
 import Data.Number (sqrt)
@@ -99,7 +100,7 @@ drawSimplified :: forall row m.
   Bind m =>
   MonadEffect m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
-  SimulationM D3Selection_ m =>
+  SimulationM2 D3Selection_ m =>
   Array Force -> Set.Set String -> LesMisRawModel -> Selector D3Selection_ -> m Unit
 drawSimplified forceLibrary activeForces model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
@@ -108,30 +109,31 @@ drawSimplified forceLibrary activeForces model selector = do
   linksGroup <- appendTo svg Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ]
   nodesGroup <- appendTo svg Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ]
 
-  -- Join data to DOM FIRST (before simulation init)
-  nodesSelection <- simpleJoin nodesGroup Circle model.nodes keyIsID_
-  setAttributes nodesSelection [ radius 5.0, fill datum_.colorByGroup ]
-  linksSelection <- simpleJoin linksGroup Line model.links keyIsID_
-  setAttributes linksSelection [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
-
-  -- Initialize simulation with everything at once!
-  init
+  -- Initialize simulation to get enhanced data back
+  { nodes: nodesInSim, links: linksInSim } <- init
     { nodes: model.nodes
     , links: model.links
     , forces: forceLibrary
     , activeForces: activeForces
     , config: { alpha: 1.0, alphaTarget: 0.0, alphaMin: 0.001, alphaDecay: 0.0228, velocityDecay: 0.4 }
     , keyFn: keyIsID_
-    , ticks: Map.fromFoldable
-        [ Tuple "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y ]
-        , Tuple "links" $ Step linksSelection
-            [ x1 (_.x <<< link_.source)
-            , y1 (_.y <<< link_.source)
-            , x2 (_.x <<< link_.target)
-            , y2 (_.y <<< link_.target)
-            ]
-        ]
+    , ticks: Map.fromFoldable []  -- Will add ticks after we have selections
     }
+
+  -- NOW join the simulation-enhanced data to DOM
+  nodesSelection <- simpleJoin nodesGroup Circle nodesInSim keyIsID_
+  setAttributes nodesSelection [ radius 5.0, fill datum_.colorByGroup ]
+  linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_
+  setAttributes linksSelection [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
+
+  -- Add tick functions with the selections (using SimulationM2 for now)
+  addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y ]
+  addTickFunction "links" $ Step linksSelection
+      [ x1 (_.x <<< link_.source)
+      , y1 (_.y <<< link_.source)
+      , x2 (_.x <<< link_.target)
+      , y2 (_.y <<< link_.target)
+      ]
 
   -- Add interactions
   _ <- nodesSelection `on` Drag (CustomDrag "lesmis" simdrag_)

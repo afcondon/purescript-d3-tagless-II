@@ -146,9 +146,9 @@ type SimulationConfig selection d r =
 class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> selection where
   -- | Initialize the simulation with all configuration at once.
   -- |
-  -- | This sets up nodes, links, forces, and tick functions in a single call.
-  -- | No need to worry about ordering - everything is provided together.
-  init :: forall d r. SimulationConfig selection d r -> m Unit
+  -- | Returns the simulation-enhanced nodes and links (with x, y, vx, vy added).
+  -- | Use these to create DOM selections, then add tick functions separately.
+  init :: forall d r. SimulationConfig selection d r -> m { nodes :: Array (D3_SimulationNode d), links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
 
   -- | Start the simulation animation.
   start :: m Unit

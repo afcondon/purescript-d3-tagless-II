@@ -133,9 +133,9 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     let forcesMap = Map.fromFoldable $ config.forces <#> \f -> Tuple (view _name f) f
     modify_ \state -> state { simulation = state.simulation # (_Newtype <<< prop (Proxy :: Proxy "forceLibrary")) .~ forcesMap }
 
-    -- 2. Set up nodes and links
-    _ <- simulationSetNodes config.nodes
-    _ <- simulationSetLinks config.links config.nodes config.keyFn
+    -- 2. Set up nodes and links (returns simulation-enhanced data)
+    nodesInSim <- simulationSetNodes config.nodes
+    linksInSim <- simulationSetLinks config.links config.nodes config.keyFn
 
     -- 3. Activate specified forces
     simulationActualizeForces config.activeForces
@@ -159,7 +159,8 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
             pure unit
     _ <- (sequence :: Array (D3SimM row D3Selection_ Unit) -> D3SimM row D3Selection_ (Array Unit)) $ Map.toUnfoldable config.ticks <#> \(Tuple label step) -> addTick label step
 
-    pure unit
+    -- 6. Return enhanced data for joining to DOM
+    pure { nodes: nodesInSim, links: linksInSim }
 
   start = simulationStart
   stop  = simulationStop
