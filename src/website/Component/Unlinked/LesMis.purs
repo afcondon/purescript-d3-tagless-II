@@ -15,7 +15,7 @@ import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, ForceType(..),
 import PSD3.Button as Button
 import PSD3.Expandable as Expandable
 import PSD3.Toggle as Toggle
-import PSD3.Capabilities.Simulation (actualizeForces, setConfigVariable, start)
+import PSD3.Capabilities.Simulation (actualizeForces, init, setConfigVariable, start)
 import PSD3.Interpreter.D3 (runWithD3_Simulation)
 import Data.Lens (Lens', use, view, (%=), (.=))
 import Data.Lens.Record (prop)
@@ -158,9 +158,9 @@ handleAction = case _ of
     let graph = readGraphFromFileContents response
 
     state <- get
+    let forcesArray = [ forces.manyBodyNeg, forces.manyBodyPos, forces.collision, forces.center, forces.links ]
     runWithD3_Simulation do
-      actualizeForces state.activeForces
-      LesMis.draw graph "div.svg-container"
+      LesMis.drawSimplified forcesArray state.activeForces graph "div.svg-container"
 
   Finalize ->  pure unit
 
