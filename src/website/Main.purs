@@ -34,6 +34,7 @@ import PSD3.CodeExplorer.CodeExplorationPage as CodeExplorationPage
 import PSD3.RoutingDSL (routing, routeToPath)
 import PSD3.CodeExplorer.CodeExplorerWrapper as CodeExplorer
 import PSD3.WealthHealth.WealthHealthWrapper as WealthHealth
+import PSD3.Unlinked.LesMis as LesMis
 import PSD3.CodeAtlas.CodeAtlasWrapper as CodeAtlas
 import PSD3.Website.Types (Route(..))
 import Routing.Hash (matches, setHash)
@@ -70,6 +71,7 @@ type Slots =
   , codeExplorer :: forall q. H.Slot q Void Unit
   , codeExploration :: forall q. H.Slot q Void Unit
   , wealthHealth :: forall q. H.Slot q Void Unit
+  , lesMiserables :: forall q. H.Slot q Void Unit
   , codeAtlas :: forall q. H.Slot q Void Unit
   )
 
@@ -91,6 +93,7 @@ _interpreters = Proxy :: Proxy "interpreters"
 _codeExplorer = Proxy :: Proxy "codeExplorer"
 _codeExploration = Proxy :: Proxy "codeExploration"
 _wealthHealth = Proxy :: Proxy "wealthHealth"
+_lesMiserables = Proxy :: Proxy "lesMiserables"
 _codeAtlas = Proxy :: Proxy "codeAtlas"
 
 -- | Main application component
@@ -176,6 +179,9 @@ renderPage route = case spy "Route is" route of
 
   WealthHealth ->
     HH.slot_ _wealthHealth unit WealthHealth.component unit
+
+  LesMiserables ->
+    HH.slot_ _lesMiserables unit LesMis.component unit
 
   CodeAtlas ->
     HH.slot_ _codeAtlas unit CodeAtlas.component unit

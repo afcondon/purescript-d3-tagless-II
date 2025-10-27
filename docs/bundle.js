@@ -23409,6 +23409,7 @@
   var applicativeStateT2 = /* @__PURE__ */ applicativeStateT(monadEffect);
   var _handle4 = /* @__PURE__ */ _handle(strongForget);
   var mapFlipped9 = /* @__PURE__ */ mapFlipped(functorArray);
+  var toUnfoldable7 = /* @__PURE__ */ toUnfoldable(unfoldableArray);
   var run_D3M_Simulation = function(simulation) {
     return function(v) {
       return runStateT(v)(simulation);
@@ -23419,6 +23420,7 @@
   };
   var monadStateD3SimM = monadStateStateT2;
   var simulationOn2 = /* @__PURE__ */ simulationOn(monadStateD3SimM);
+  var simulationActualizeForces2 = /* @__PURE__ */ simulationActualizeForces(monadStateD3SimM);
   var simulationSetVariable2 = /* @__PURE__ */ simulationSetVariable(monadStateD3SimM);
   var use2 = /* @__PURE__ */ use(monadStateD3SimM);
   var monadStateD3SankeyM = monadStateStateT2;
@@ -23577,7 +23579,7 @@
   };
   var evalEffectSimulation = function(dictBind) {
     var bind116 = bind(dictBind);
-    var discard112 = discard10(dictBind);
+    var discard212 = discard10(dictBind);
     return function(dictMonadState) {
       var get11 = get(dictMonadState);
       var modify_43 = modify_(dictMonadState);
@@ -23587,7 +23589,7 @@
         return function(state_T) {
           return bind116(get11)(function(state3) {
             return bind116(liftEffect51(run_D3M_Simulation(state3)(state_T)))(function(v) {
-              return discard112(modify_43(function(v1) {
+              return discard212(modify_43(function(v1) {
                 return v.value1;
               }))(function() {
                 return pure115(v.value0);
@@ -23634,21 +23636,76 @@
     }
   };
   var bindD3SimM = bindStateT2;
+  var bind21 = /* @__PURE__ */ bind(bindD3SimM);
+  var simulationSetNodes2 = /* @__PURE__ */ simulationSetNodes(bindD3SimM)(monadStateD3SimM);
+  var simulationSetLinks2 = /* @__PURE__ */ simulationSetLinks(eqString)(bindD3SimM)(monadStateD3SimM);
+  var discard12 = /* @__PURE__ */ discard10(bindD3SimM);
   var simulationSetNodesFromSelection2 = /* @__PURE__ */ simulationSetNodesFromSelection(bindD3SimM)(monadStateD3SimM);
   var simulationSetLinksFromSelection2 = /* @__PURE__ */ simulationSetLinksFromSelection(bindD3SimM)(monadStateD3SimM);
-  var bind21 = /* @__PURE__ */ bind(bindD3SimM);
   var bindD3SankeyM = bindStateT2;
   var bindD3M = bindStateT2;
   var applicativeD3SimM = applicativeStateT2;
   var pure24 = /* @__PURE__ */ pure(applicativeD3SimM);
-  var simulationM2D3Selection_D = {
+  var sequence2 = /* @__PURE__ */ sequence(traversableArray)(applicativeD3SimM);
+  var simulationMD3Selection_D3 = {
+    init: function(config) {
+      return bind21(simulationSetNodes2(config.nodes))(function() {
+        return bind21(simulationSetLinks2(config.links)(config.nodes)(config.keyFn))(function() {
+          return discard12(simulationActualizeForces2(config.activeForces))(function() {
+            return discard12(simulationSetVariable2(new Alpha(config.config.alpha)))(function() {
+              return discard12(simulationSetVariable2(new AlphaTarget(config.config.alphaTarget)))(function() {
+                return discard12(simulationSetVariable2(new AlphaMin(config.config.alphaMin)))(function() {
+                  return discard12(simulationSetVariable2(new AlphaDecay(config.config.alphaDecay)))(function() {
+                    return discard12(simulationSetVariable2(new VelocityDecay(config.config.velocityDecay)))(function() {
+                      return bind21(use2(_handle4))(function(handle) {
+                        var addTick = function(label5) {
+                          return function(step5) {
+                            if (step5 instanceof StepTransformFFI) {
+                              return pure24(unit);
+                            }
+                            ;
+                            if (step5 instanceof Step3) {
+                              var makeTick = function(v2) {
+                                var v1 = mapFlipped9(step5.value1)(applySelectionAttributeD3(step5.value0));
+                                return unit;
+                              };
+                              var v = onTick_(handle)(label5)(makeTick);
+                              return pure24(unit);
+                            }
+                            ;
+                            throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 144, column 30 - line 151, column 22): " + [step5.constructor.name]);
+                          };
+                        };
+                        return bind21(sequence2(mapFlipped9(toUnfoldable7(config.ticks))(function(v) {
+                          return addTick(v.value0)(v.value1);
+                        })))(function() {
+                          return pure24(unit);
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      });
+    },
     start: /* @__PURE__ */ simulationStart(monadStateD3SimM),
     stop: /* @__PURE__ */ simulationStop(monadStateD3SimM),
+    Monad0: function() {
+      return monadD3SimM;
+    },
+    SelectionM1: function() {
+      return selectionMD3Selection_D3S;
+    }
+  };
+  var simulationM2D3Selection_D = {
     setConfigVariable: function(v) {
       return simulationSetVariable2(v);
     },
-    actualizeForces: /* @__PURE__ */ simulationActualizeForces(monadStateD3SimM),
-    setNodes: /* @__PURE__ */ simulationSetNodes(bindD3SimM)(monadStateD3SimM),
+    actualizeForces: simulationActualizeForces2,
+    setNodes: simulationSetNodes2,
     setLinks: function(dictEq) {
       return simulationSetLinks(dictEq)(bindD3SimM)(monadStateD3SimM);
     },
@@ -23681,7 +23738,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 124, column 1 - line 159, column 33): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 160, column 1 - line 192, column 33): " + [v.constructor.name, v1.constructor.name]);
       };
     },
     removeTickFunction: function(label5) {
@@ -23694,8 +23751,8 @@
     Monad0: function() {
       return monadD3SimM;
     },
-    SelectionM1: function() {
-      return selectionMD3Selection_D3S;
+    SimulationM1: function() {
+      return simulationMD3Selection_D3;
     }
   };
 
@@ -23717,12 +23774,12 @@
   var _sceneAttributes2 = /* @__PURE__ */ _sceneAttributes(strongForget);
   var _activeForces2 = /* @__PURE__ */ _activeForces(strongForget);
   var x8 = /* @__PURE__ */ x(toAttrNumber);
-  var discard12 = /* @__PURE__ */ discard11(bindD3SimM);
-  var stop2 = /* @__PURE__ */ stop(simulationM2D3Selection_D);
+  var discard13 = /* @__PURE__ */ discard11(bindD3SimM);
+  var stop2 = /* @__PURE__ */ stop(simulationMD3Selection_D3);
   var actualizeForces2 = /* @__PURE__ */ actualizeForces(simulationM2D3Selection_D);
   var updateSimulation2 = /* @__PURE__ */ updateSimulation(eqInt)(bindD3SimM)(monadEffD3SimM)(selectionMD3Selection_D3S)(simulationM2D3Selection_D);
   var setConfigVariable2 = /* @__PURE__ */ setConfigVariable(simulationM2D3Selection_D);
-  var start4 = /* @__PURE__ */ start2(simulationM2D3Selection_D);
+  var start4 = /* @__PURE__ */ start2(simulationMD3Selection_D3);
   var bind23 = /* @__PURE__ */ bind(bindHalogenM);
   var discard23 = /* @__PURE__ */ discard11(bindHalogenM);
   var modifying2 = /* @__PURE__ */ modifying(monadStateHalogenM);
@@ -23814,10 +23871,10 @@
                   labels: sceneAttributes.labels,
                   circles: cons3(callback)(sceneAttributes.circles)
                 };
-                return runWithD3_Simulation22(discard12(stop2)(function() {
-                  return discard12(actualizeForces2(activeForces))(function() {
-                    return discard12(updateSimulation2(staging)(attributesWithCallback))(function() {
-                      return discard12(setConfigVariable2(new Alpha(1)))(function() {
+                return runWithD3_Simulation22(discard13(stop2)(function() {
+                  return discard13(actualizeForces2(activeForces))(function() {
+                    return discard13(updateSimulation2(staging)(attributesWithCallback))(function() {
+                      return discard13(setConfigVariable2(new Alpha(1)))(function() {
                         return start4;
                       });
                     });
@@ -24054,13 +24111,13 @@
       }
       ;
       if (v instanceof StartSim) {
-        return runWithD3_Simulation1(discard12(setConfigVariable2(new Alpha(1)))(function() {
+        return runWithD3_Simulation1(discard13(setConfigVariable2(new Alpha(1)))(function() {
           return start4;
         }));
       }
       ;
       if (v instanceof StopSim) {
-        return runWithD3_Simulation1(discard12(setConfigVariable2(new Alpha(0)))(function() {
+        return runWithD3_Simulation1(discard13(setConfigVariable2(new Alpha(0)))(function() {
           return stop2;
         }));
       }
@@ -24537,7 +24594,7 @@
   var bind25 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff3 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_5 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard13 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard14 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect9 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize7 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -24606,7 +24663,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard13(modify_5(function(v1) {
+        return discard14(modify_5(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -24653,7 +24710,7 @@
   var bind26 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff4 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_6 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard14 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard15 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect10 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize8 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -24722,7 +24779,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard14(modify_6(function(v1) {
+        return discard15(modify_6(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -24769,7 +24826,7 @@
   var bind27 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff5 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_7 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard15 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard16 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect11 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize9 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -24838,7 +24895,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard15(modify_7(function(v1) {
+        return discard16(modify_7(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -24885,7 +24942,7 @@
   var bind28 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff6 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_8 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard16 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard17 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect12 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize10 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -24954,7 +25011,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard16(modify_8(function(v1) {
+        return discard17(modify_8(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -25001,7 +25058,7 @@
   var bind29 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff7 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_9 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard17 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard18 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect13 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize11 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -25070,7 +25127,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard17(modify_9(function(v1) {
+        return discard18(modify_9(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -25117,7 +25174,7 @@
   var bind30 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff8 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_10 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard18 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard19 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect14 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize12 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -25186,7 +25243,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard18(modify_10(function(v1) {
+        return discard19(modify_10(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -25233,7 +25290,7 @@
   var bind31 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff9 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_11 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard19 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard20 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect15 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize13 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -25302,7 +25359,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard19(modify_11(function(v1) {
+        return discard20(modify_11(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -25349,7 +25406,7 @@
   var bind32 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff10 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_12 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard20 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard21 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect16 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize14 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -25418,7 +25475,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard20(modify_12(function(v1) {
+        return discard21(modify_12(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -25465,7 +25522,7 @@
   var bind33 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff11 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_13 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard21 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard24 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect17 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize15 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -25534,7 +25591,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard21(modify_13(function(v1) {
+        return discard24(modify_13(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -25581,7 +25638,7 @@
   var bind34 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff12 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_14 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard24 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard25 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect18 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize16 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -25650,7 +25707,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard24(modify_14(function(v1) {
+        return discard25(modify_14(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -25697,7 +25754,7 @@
   var bind35 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff13 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_15 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard25 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard26 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect19 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize17 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -25766,7 +25823,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard25(modify_15(function(v1) {
+        return discard26(modify_15(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -25813,7 +25870,7 @@
   var bind36 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff14 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_16 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard26 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard27 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect20 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize18 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -25882,7 +25939,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard26(modify_16(function(v1) {
+        return discard27(modify_16(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -25929,7 +25986,7 @@
   var bind37 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff15 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_17 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard27 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard28 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect21 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize19 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -25998,7 +26055,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard27(modify_17(function(v1) {
+        return discard28(modify_17(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -26045,7 +26102,7 @@
   var bind38 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff16 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_18 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard28 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard29 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect22 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize20 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -26114,7 +26171,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard28(modify_18(function(v1) {
+        return discard29(modify_18(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -26161,7 +26218,7 @@
   var bind39 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff17 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_19 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard29 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard30 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect23 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize21 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -26230,7 +26287,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard29(modify_19(function(v1) {
+        return discard30(modify_19(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -26277,7 +26334,7 @@
   var bind40 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff18 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_20 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard30 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard31 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect24 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize22 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -26346,7 +26403,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard30(modify_20(function(v1) {
+        return discard31(modify_20(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -26393,7 +26450,7 @@
   var bind41 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff19 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_21 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard31 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard32 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect25 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize23 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -26462,7 +26519,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard31(modify_21(function(v1) {
+        return discard32(modify_21(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -26509,7 +26566,7 @@
   var bind42 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff20 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_22 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard32 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard33 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect26 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize24 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -26578,7 +26635,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard32(modify_22(function(v1) {
+        return discard33(modify_22(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -26625,7 +26682,7 @@
   var bind43 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff21 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_23 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard33 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard34 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect27 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize25 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -26694,7 +26751,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard33(modify_23(function(v1) {
+        return discard34(modify_23(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -26741,7 +26798,7 @@
   var bind44 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff22 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_24 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard34 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard35 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect28 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize26 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -26810,7 +26867,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard34(modify_24(function(v1) {
+        return discard35(modify_24(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -26857,7 +26914,7 @@
   var bind45 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff23 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_25 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard35 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard36 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect29 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize27 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -26926,7 +26983,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard35(modify_25(function(v1) {
+        return discard36(modify_25(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -26973,7 +27030,7 @@
   var bind46 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff24 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_26 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard36 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard37 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect30 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize28 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -27042,7 +27099,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard36(modify_26(function(v1) {
+        return discard37(modify_26(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -27089,7 +27146,7 @@
   var bind47 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff25 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_27 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard37 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard38 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect31 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize29 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -27158,7 +27215,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard37(modify_27(function(v1) {
+        return discard38(modify_27(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -27205,7 +27262,7 @@
   var bind48 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff26 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_28 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard38 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard39 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect32 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize30 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -27274,7 +27331,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard38(modify_28(function(v1) {
+        return discard39(modify_28(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -27321,7 +27378,7 @@
   var bind49 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff27 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_29 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard39 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard40 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect33 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize31 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -27390,7 +27447,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard39(modify_29(function(v1) {
+        return discard40(modify_29(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -27437,7 +27494,7 @@
   var bind50 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff28 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_30 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard40 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard41 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect34 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize32 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -27506,7 +27563,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard40(modify_30(function(v1) {
+        return discard41(modify_30(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -27553,7 +27610,7 @@
   var bind51 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff29 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_31 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard41 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard42 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect35 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize33 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -27622,7 +27679,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard41(modify_31(function(v1) {
+        return discard42(modify_31(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -27669,7 +27726,7 @@
   var bind52 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff30 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_32 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard42 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard43 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect36 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize34 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -27738,7 +27795,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard42(modify_32(function(v1) {
+        return discard43(modify_32(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -27785,7 +27842,7 @@
   var bind53 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff31 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_33 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard43 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard44 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect37 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize35 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -27854,7 +27911,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard43(modify_33(function(v1) {
+        return discard44(modify_33(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -27901,7 +27958,7 @@
   var bind54 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff32 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_34 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var discard44 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard45 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var liftEffect38 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var Initialize36 = /* @__PURE__ */ (function() {
     function Initialize51() {
@@ -27970,7 +28027,7 @@
       }
       ;
       if (v.value0 instanceof Right) {
-        return discard44(modify_34(function(v1) {
+        return discard45(modify_34(function(v1) {
           var $24 = {};
           for (var $25 in v1) {
             if ({}.hasOwnProperty.call(v1, $25)) {
@@ -29178,7 +29235,7 @@
   var fillOpacity2 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var strokeColor5 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth4 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var discard45 = /* @__PURE__ */ discard(discardUnit);
+  var discard46 = /* @__PURE__ */ discard(discardUnit);
   var x10 = /* @__PURE__ */ x(toAttrNumber);
   var y9 = /* @__PURE__ */ y(toAttrNumber);
   var text9 = /* @__PURE__ */ text6(toAttrString);
@@ -29227,7 +29284,7 @@
   };
   var draw = function(dictBind) {
     var bind71 = bind(dictBind);
-    var discard112 = discard45(dictBind);
+    var discard112 = discard46(dictBind);
     return function(dictMonadEffect) {
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
       var when8 = when(Applicative0);
@@ -29646,7 +29703,7 @@
   var fillOpacity4 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var strokeColor7 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth6 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var discard46 = /* @__PURE__ */ discard(discardUnit);
+  var discard47 = /* @__PURE__ */ discard(discardUnit);
   var text10 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor5 = /* @__PURE__ */ textAnchor(toAttrString);
   var fontSize4 = /* @__PURE__ */ fontSize(toAttrNumber);
@@ -29678,7 +29735,7 @@
   };
   var draw5 = function(dictBind) {
     var bind71 = bind(dictBind);
-    var discard112 = discard46(dictBind);
+    var discard112 = discard47(dictBind);
     return function(dictMonadEffect) {
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
       var when8 = when(Applicative0);
@@ -29742,7 +29799,7 @@
   var fillOpacity5 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var strokeColor8 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth7 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var discard47 = /* @__PURE__ */ discard(discardUnit);
+  var discard48 = /* @__PURE__ */ discard(discardUnit);
   var text11 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor6 = /* @__PURE__ */ textAnchor(toAttrString);
   var fontSize5 = /* @__PURE__ */ fontSize(toAttrNumber);
@@ -29774,7 +29831,7 @@
   };
   var draw6 = function(dictBind) {
     var bind71 = bind(dictBind);
-    var discard112 = discard47(dictBind);
+    var discard112 = discard48(dictBind);
     return function(dictMonadEffect) {
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
       var when8 = when(Applicative0);
@@ -29872,7 +29929,7 @@
   var height15 = /* @__PURE__ */ height8(toAttrNumber);
   var fontFamily2 = /* @__PURE__ */ fontFamily(toAttrString);
   var fontSize6 = /* @__PURE__ */ fontSize(toAttrNumber);
-  var discard48 = /* @__PURE__ */ discard(discardUnit);
+  var discard49 = /* @__PURE__ */ discard(discardUnit);
   var strokeWidth8 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var strokeColor9 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeOpacity2 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
@@ -29966,7 +30023,7 @@
   };
   var draw8 = function(dictBind) {
     var bind71 = bind(dictBind);
-    var discard112 = discard48(dictBind);
+    var discard112 = discard49(dictBind);
     return function(dictSelectionM) {
       var attach2 = attach(dictSelectionM);
       var appendTo2 = appendTo(dictSelectionM);
@@ -30201,7 +30258,7 @@
   var modify_36 = /* @__PURE__ */ modify_(monadStateD3PrinterM);
   var monadD3PrinterM = /* @__PURE__ */ monadStateT(monadEffect);
   var bindD3PrinterM = /* @__PURE__ */ bindStateT(monadEffect);
-  var discard49 = /* @__PURE__ */ discard(discardUnit)(bindD3PrinterM);
+  var discard50 = /* @__PURE__ */ discard(discardUnit)(bindD3PrinterM);
   var applySelectionAttributeString = function(selection2) {
     return function(v) {
       if (v instanceof AttrT) {
@@ -30254,7 +30311,7 @@
   var d3Tagless = {
     attach: function(selector) {
       var code2 = showSelectAllInDOM_(selector);
-      return discard49(modify_36(function(s) {
+      return discard50(modify_36(function(s) {
         return s + code2;
       }))(function() {
         return pure37(code2);
@@ -30263,7 +30320,7 @@
     selectUnder: function(selection2) {
       return function(selector) {
         var code2 = showSelectAll_(selector)(selection2);
-        return discard49(modify_36(function(s) {
+        return discard50(modify_36(function(s) {
           return s + ("\n  ." + code2);
         }))(function() {
           return pure37(code2);
@@ -30275,7 +30332,7 @@
         return function(attributes) {
           var appendCode = showAppend_(element3)(selection2);
           var attributeString = foldl2(applySelectionAttributeString)(appendCode)(attributes);
-          return discard49(modify_36(function(s) {
+          return discard50(modify_36(function(s) {
             return s + ("\n\nconst /* TODO: varName */ = " + (appendCode + (attributeString + ";")));
           }))(function() {
             return pure37(appendCode);
@@ -30286,7 +30343,7 @@
     filterSelection: function(selection2) {
       return function(selector) {
         var code2 = selection2 + (".filter(" + (show24(selector) + ")"));
-        return discard49(modify_36(function(s) {
+        return discard50(modify_36(function(s) {
           return s + ("\n  ." + code2);
         }))(function() {
           return pure37(code2);
@@ -30296,7 +30353,7 @@
     mergeSelections: function(a2) {
       return function(b2) {
         var code2 = a2 + (".merge(" + (b2 + ")"));
-        return discard49(modify_36(function(s) {
+        return discard50(modify_36(function(s) {
           return s + ("\n  ." + code2);
         }))(function() {
           return pure37(code2);
@@ -30310,7 +30367,7 @@
             return acc + ("\n  ." + applySelectionAttributeString(selection2)(attr3));
           };
         })("")(attributes);
-        return discard49(modify_36(function(s) {
+        return discard50(modify_36(function(s) {
           return s + attributeString;
         }))(function() {
           return pure37(unit);
@@ -30320,7 +30377,7 @@
     on: function(v) {
       return function(v1) {
         if (v1 instanceof Drag) {
-          return discard49(modify_36(function(s) {
+          return discard50(modify_36(function(s) {
             return s + "\n  .call(d3.drag())";
           }))(function() {
             return pure37(unit);
@@ -30328,7 +30385,7 @@
         }
         ;
         if (v1 instanceof Zoom) {
-          return discard49(modify_36(function(s) {
+          return discard50(modify_36(function(s) {
             return s + "\n  .call(d3.zoom())";
           }))(function() {
             return pure37(unit);
@@ -30341,7 +30398,7 @@
     openSelection: function(selection2) {
       return function(selector) {
         var code2 = showSelectAll_(selector)(selection2);
-        return discard49(modify_36(function(s) {
+        return discard50(modify_36(function(s) {
           return s + ("\n\nconst /* TODO: varName */ = " + (code2 + ";"));
         }))(function() {
           return pure37(code2);
@@ -30354,7 +30411,7 @@
           return function(k) {
             var dataCode = showData_(ds)(selection2);
             var joinCode = dataCode + ("\n  .join(" + (show34(e) + ")"));
-            return discard49(modify_36(function(s) {
+            return discard50(modify_36(function(s) {
               return s + ("\n\nconst /* TODO: varName */ = " + (joinCode + ";"));
             }))(function() {
               return pure37(joinCode);
@@ -30370,7 +30427,7 @@
             var dataCode = showData_(ds)(selection2);
             var enterCode = dataCode + ("\n  .enter().append(" + (show34(e) + ")"));
             var exitCode = dataCode + "\n  .exit().remove()";
-            return discard49(modify_36(function(s) {
+            return discard50(modify_36(function(s) {
               return s + ("\n\n// Update pattern\nconst update = " + (dataCode + (";\nconst enter = " + (enterCode + (";\nconst exit = " + (exitCode + ";"))))));
             }))(function() {
               return pure37({
@@ -30645,7 +30702,7 @@
   var liftAff34 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var pure38 = /* @__PURE__ */ pure(applicativeHalogenM);
   var makeModel2 = /* @__PURE__ */ makeModel(bindAff)(monadEffectAff);
-  var discard50 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard51 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_37 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var get8 = /* @__PURE__ */ get(monadStateHalogenM);
   var slot_11 = /* @__PURE__ */ slot_()({
@@ -30969,7 +31026,7 @@
           if (treeJSON instanceof Right) {
             return bind59(liftAff34(makeModel2(TidyTree.value)(Horizontal.value)(treeJSON.value0)))(function(model) {
               return bind59(liftAff34(drawLayoutViz(HorizontalTidy.value)(model)))(function() {
-                return discard50(modify_37(function(st) {
+                return discard51(modify_37(function(st) {
                   var $46 = {};
                   for (var $47 in st) {
                     if ({}.hasOwnProperty.call(st, $47)) {
@@ -30994,7 +31051,7 @@
     ;
     if (v instanceof SelectLayout) {
       return bind59(liftEffect44(eval_D3M(removeExistingSVG2("div.hierarchies-viz"))))(function() {
-        return discard50(modify_37(function(v1) {
+        return discard51(modify_37(function(v1) {
           var $50 = {};
           for (var $51 in v1) {
             if ({}.hasOwnProperty.call(v1, $51)) {
@@ -31907,7 +31964,7 @@
 
   // output/D3.Viz.SankeyDiagram/index.js
   var classed11 = /* @__PURE__ */ classed(toAttrString);
-  var discard51 = /* @__PURE__ */ discard(discardUnit);
+  var discard52 = /* @__PURE__ */ discard(discardUnit);
   var fill10 = /* @__PURE__ */ fill(toAttrString);
   var strokeWidth9 = /* @__PURE__ */ strokeWidth(toAttrNumberFn);
   var strokeOpacity3 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
@@ -31999,7 +32056,7 @@
   };
   var draw9 = function(dictBind) {
     var bind71 = bind(dictBind);
-    var discard112 = discard51(dictBind);
+    var discard112 = discard52(dictBind);
     return function(dictMonadEffect) {
       var liftEffect51 = liftEffect(dictMonadEffect);
       var pure47 = pure(dictMonadEffect.Monad0().Applicative0());
@@ -32928,7 +32985,7 @@
   var x21 = /* @__PURE__ */ x(toAttrNumberFnI);
   var text17 = /* @__PURE__ */ text6(toAttrStringFn);
   var fontSize7 = /* @__PURE__ */ fontSize(toAttrNumber);
-  var discard52 = /* @__PURE__ */ discard(discardUnit);
+  var discard53 = /* @__PURE__ */ discard(discardUnit);
   var datum_2 = {
     "char": coerceDatumToChar,
     indexNum: coerceIndexToNumber
@@ -32942,7 +32999,7 @@
     var pure47 = pure(Monad0.Applicative0());
     var openSelection2 = openSelection(dictSelectionM);
     var updateJoin2 = updateJoin(dictSelectionM);
-    var discard112 = discard52(Bind1);
+    var discard112 = discard53(Bind1);
     var setAttributes2 = setAttributes(dictSelectionM);
     return function(selector) {
       var xFromIndex = function(v) {
@@ -33089,7 +33146,7 @@
 
   // output/D3.Viz.Parabola/index.js
   var classed19 = /* @__PURE__ */ classed(toAttrString);
-  var discard53 = /* @__PURE__ */ discard(discardUnit);
+  var discard54 = /* @__PURE__ */ discard(discardUnit);
   var strokeColor16 = /* @__PURE__ */ strokeColor(toAttrStringFn);
   var strokeWidth13 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var fill18 = /* @__PURE__ */ fill(toAttrString);
@@ -33117,7 +33174,7 @@
     var attach2 = attach(dictSelectionM);
     var appendTo2 = appendTo(dictSelectionM);
     var simpleJoin2 = simpleJoin(dictSelectionM);
-    var discard112 = discard53(Bind1);
+    var discard112 = discard54(Bind1);
     var setAttributes2 = setAttributes(dictSelectionM);
     var pure47 = pure(Monad0.Applicative0());
     return function(circleData) {
@@ -33142,7 +33199,7 @@
 
   // output/D3.Viz.ThreeLittleCircles/index.js
   var classed20 = /* @__PURE__ */ classed(toAttrString);
-  var discard54 = /* @__PURE__ */ discard(discardUnit);
+  var discard55 = /* @__PURE__ */ discard(discardUnit);
   var fill19 = /* @__PURE__ */ fill(toAttrString);
   var cx6 = /* @__PURE__ */ cx(toAttrNumberFnI);
   var cy6 = /* @__PURE__ */ cy(toAttrNumber);
@@ -33154,7 +33211,7 @@
     var attach2 = attach(dictSelectionM);
     var appendTo2 = appendTo(dictSelectionM);
     var simpleJoin2 = simpleJoin(dictSelectionM);
-    var discard112 = discard54(Bind1);
+    var discard112 = discard55(Bind1);
     var setAttributes2 = setAttributes(dictSelectionM);
     var pure47 = pure(Monad0.Applicative0());
     return function(selector) {
@@ -33189,17 +33246,17 @@
 
   // output/PSD3.Understanding.Tutorial/index.js
   var pure41 = /* @__PURE__ */ pure(applicativeEffect);
-  var sequence2 = /* @__PURE__ */ sequence(traversableArray)(applicativeEffect);
+  var sequence3 = /* @__PURE__ */ sequence(traversableArray)(applicativeEffect);
   var map55 = /* @__PURE__ */ map(functorArray);
   var bind112 = /* @__PURE__ */ bind(bindAff);
   var liftEffect47 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var discard55 = /* @__PURE__ */ discard(discardUnit);
-  var discard110 = /* @__PURE__ */ discard55(bindAff);
+  var discard56 = /* @__PURE__ */ discard(discardUnit);
+  var discard110 = /* @__PURE__ */ discard56(bindAff);
   var exGeneralUpdatePattern2 = /* @__PURE__ */ exGeneralUpdatePattern(d3TaglessD3M);
   var applySecond3 = /* @__PURE__ */ applySecond(applyEffect);
   var bind210 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff36 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var discard210 = /* @__PURE__ */ discard55(bindHalogenM);
+  var discard210 = /* @__PURE__ */ discard56(bindHalogenM);
   var modify_39 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var monadEffectHalogenM2 = /* @__PURE__ */ monadEffectHalogenM(monadEffectAff);
   var liftEffect110 = /* @__PURE__ */ liftEffect(monadEffectHalogenM2);
@@ -33245,7 +33302,7 @@
         };
       };
       return function __do4() {
-        var choices = sequence2(map55(coinToss)(letters))();
+        var choices = sequence3(map55(coinToss)(letters))();
         return catMaybes(choices);
       };
     })();
@@ -33261,7 +33318,7 @@
     var bind310 = bind(Bind1);
     var liftEffect210 = liftEffect(dictMonadEffect);
     var pure211 = pure(Monad0.Applicative0());
-    return discard55(Bind1)(log3(dictMonadEffect)("General Update Pattern example"))(function() {
+    return discard56(Bind1)(log3(dictMonadEffect)("General Update Pattern example"))(function() {
       return bind310(liftEffect210(eval_D3M(exGeneralUpdatePattern2("div.gup-viz"))))(function(update3) {
         return pure211(function(letters) {
           return liftEffect47(applySecond3(runD3M(update3(letters)))(pure41(unit)));
@@ -33481,7 +33538,7 @@
   var width23 = /* @__PURE__ */ width8(toAttrNumber);
   var height23 = /* @__PURE__ */ height8(toAttrNumber);
   var classed21 = /* @__PURE__ */ classed(toAttrString);
-  var discard56 = /* @__PURE__ */ discard(discardUnit);
+  var discard57 = /* @__PURE__ */ discard(discardUnit);
   var cx7 = /* @__PURE__ */ cx(toAttrNumberFnI);
   var cy7 = /* @__PURE__ */ cy(toAttrNumberFnI);
   var radius11 = /* @__PURE__ */ radius(toAttrNumberFnI);
@@ -33532,7 +33589,7 @@
     var pure47 = pure(Monad0.Applicative0());
     var openSelection2 = openSelection(dictSelectionM);
     var updateJoin2 = updateJoin(dictSelectionM);
-    var discard112 = discard56(Bind1);
+    var discard112 = discard57(Bind1);
     var setAttributes2 = setAttributes(dictSelectionM);
     return function(selector) {
       return bind71(attach2(selector))(function(v) {
@@ -34079,8 +34136,8 @@
 
   // output/PSD3.WealthHealth.WealthHealth/index.js
   var bind66 = /* @__PURE__ */ bind(bindHalogenM);
-  var discard57 = /* @__PURE__ */ discard(discardUnit);
-  var discard111 = /* @__PURE__ */ discard57(bindHalogenM);
+  var discard58 = /* @__PURE__ */ discard(discardUnit);
+  var discard111 = /* @__PURE__ */ discard58(bindHalogenM);
   var pure43 = /* @__PURE__ */ pure(applicativeHalogenM);
   var modify_40 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var draw21 = /* @__PURE__ */ draw20(d3TaglessD3M);
@@ -34088,7 +34145,7 @@
   var when5 = /* @__PURE__ */ when(applicativeHalogenM);
   var $$void11 = /* @__PURE__ */ $$void(functorHalogenM);
   var forever3 = /* @__PURE__ */ forever(monadRecAff);
-  var discard211 = /* @__PURE__ */ discard57(bindAff);
+  var discard211 = /* @__PURE__ */ discard58(bindAff);
   var liftEffect48 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var member4 = /* @__PURE__ */ member2(ordString);
   var $$delete8 = /* @__PURE__ */ $$delete5(ordString);
@@ -34727,7 +34784,7 @@
   var map59 = /* @__PURE__ */ map(functorArray);
   var bind67 = /* @__PURE__ */ bind(bindAff);
   var liftEffect49 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var discard58 = /* @__PURE__ */ discard(discardUnit)(bindAff);
+  var discard59 = /* @__PURE__ */ discard(discardUnit)(bindAff);
   var for_3 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
   var formatFilesForClipboard = function(files2) {
     var replicateArray = function(n) {
@@ -34767,7 +34824,7 @@
   var downloadAsZip = function(projectName) {
     return function(files2) {
       return bind67(liftEffect49(createZip))(function(zip2) {
-        return discard58(liftEffect49(for_3(files2)(function(file) {
+        return discard59(liftEffect49(for_3(files2)(function(file) {
           return addFile(zip2)(file.filename)(file.content);
         })))(function() {
           return fromEffectFnAff(downloadZipImpl(zip2)(projectName + ".zip"));
@@ -34977,7 +35034,7 @@
   var modify_41 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var bind115 = /* @__PURE__ */ bind(bindHalogenM);
   var get10 = /* @__PURE__ */ get(monadStateHalogenM);
-  var discard59 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard60 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure114 = /* @__PURE__ */ pure(applicativeHalogenM);
   var when6 = /* @__PURE__ */ when(applicativeHalogenM);
   var ChooseDataset = /* @__PURE__ */ (function() {
@@ -35494,7 +35551,7 @@
           }
           ;
           if (state3.currentStep instanceof NameModule) {
-            return discard59(handleAction49(dictMonadAff)(GenerateFiles.value))(function() {
+            return discard60(handleAction49(dictMonadAff)(GenerateFiles.value))(function() {
               return modify_41(function(v1) {
                 var $119 = {};
                 for (var $120 in v1) {
@@ -35695,7 +35752,7 @@
 
   // output/Routing.Parser/index.js
   var map63 = /* @__PURE__ */ map(functorArray);
-  var discard60 = /* @__PURE__ */ discard(discardUnit)(bindMaybe);
+  var discard61 = /* @__PURE__ */ discard(discardUnit)(bindMaybe);
   var guard2 = /* @__PURE__ */ guard(alternativeMaybe);
   var apply4 = /* @__PURE__ */ apply(applyMaybe);
   var map117 = /* @__PURE__ */ map(functorMaybe);
@@ -35708,7 +35765,7 @@
   var parseQueryPart = function(decoder) {
     var part2tuple = function(input3) {
       var keyVal = map63(decoder)(split("=")(input3));
-      return discard60(guard2(length4(keyVal) <= 2))(function() {
+      return discard61(guard2(length4(keyVal) <= 2))(function() {
         return apply4(map117(Tuple.create)(head2(keyVal)))(index2(keyVal)(1));
       });
     };
@@ -35826,7 +35883,7 @@
   // output/PSD3.Main/index.js
   var bind70 = /* @__PURE__ */ bind(bindHalogenM);
   var liftEffect50 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var discard61 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard62 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var when7 = /* @__PURE__ */ when(applicativeHalogenM);
   var pure46 = /* @__PURE__ */ pure(applicativeHalogenM);
   var modify_42 = /* @__PURE__ */ modify_(monadStateHalogenM);
@@ -35963,7 +36020,7 @@
         var loc = location(w)();
         return hash(loc)();
       }))(function(currentHash) {
-        return discard61(when7(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect50(setHash2(routeToPath(Home.value)))))(function() {
+        return discard62(when7(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect50(setHash2(routeToPath(Home.value)))))(function() {
           return bind70(subscribe2(makeEmitter(function(push2) {
             return matches2(routing)(function(v1) {
               return function(newRoute) {

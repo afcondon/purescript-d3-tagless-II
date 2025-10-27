@@ -100,6 +100,7 @@ data Route
   | CodeExplorer
   | Explore String  -- Code exploration page for a specific snippet
   | WealthHealth    -- Wealth & Health of Nations visualization
+  | LesMiserables   -- Les Misérables force-directed graph
   | CodeAtlas       -- Code Atlas: codebase analysis and visualization
   | NotFound
 
@@ -126,5 +127,6 @@ instance showRoute :: Show Route where
   show CodeExplorer = "Code Explorer"
   show (Explore snippetId) = "Explore: " <> snippetId
   show WealthHealth = "Wealth & Health of Nations"
+  show LesMiserables = "Les Misérables"
   show CodeAtlas = "Code Atlas"
   show NotFound = "Not Found"
