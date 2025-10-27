@@ -21,3 +21,8 @@
 /dist/PSD3-logo-4.psd
 /TaglessD3.key
 /TaglessD3.pdf
+
+# Code Atlas generated data files (regenerate with: node scripts/generate-spago-data.js)
+/docs/data/spago-data/declarations.json
+/docs/data/spago-data/function-calls.json
+/docs/data/spago-data/type-dependencies.json
