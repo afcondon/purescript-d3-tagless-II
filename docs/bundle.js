@@ -23822,37 +23822,38 @@
         })())(forcesMap)(state3.simulation);
         return $147;
       }))(function() {
-        return bind21(simulationSetNodes2(config.nodes))(function() {
-          return bind21(simulationSetLinks2(config.links)(config.nodes)(config.keyFn))(function() {
+        return bind21(simulationSetNodes2(config.nodes))(function(nodesInSim) {
+          return bind21(simulationSetLinks2(config.links)(config.nodes)(config.keyFn))(function(linksInSim) {
             return discard12(simulationActualizeForces2(config.activeForces))(function() {
-              return discard12(simulationSetVariable2(new Alpha(config.config.alpha)))(function() {
-                return discard12(simulationSetVariable2(new AlphaTarget(config.config.alphaTarget)))(function() {
-                  return discard12(simulationSetVariable2(new AlphaMin(config.config.alphaMin)))(function() {
-                    return discard12(simulationSetVariable2(new AlphaDecay(config.config.alphaDecay)))(function() {
-                      return discard12(simulationSetVariable2(new VelocityDecay(config.config.velocityDecay)))(function() {
-                        return bind21(use2(_handle4))(function(handle) {
-                          var addTick = function(label5) {
-                            return function(step5) {
-                              if (step5 instanceof StepTransformFFI) {
-                                return pure24(unit);
-                              }
-                              ;
-                              if (step5 instanceof Step3) {
-                                var makeTick = function(v2) {
-                                  var v1 = mapFlipped9(step5.value1)(applySelectionAttributeD3(step5.value0));
-                                  return unit;
-                                };
-                                var v = onTick_(handle)(label5)(makeTick);
-                                return pure24(unit);
-                              }
-                              ;
-                              throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 152, column 30 - line 159, column 22): " + [step5.constructor.name]);
-                            };
+              return discard12(simulationSetVariable2(new AlphaTarget(config.config.alphaTarget)))(function() {
+                return discard12(simulationSetVariable2(new AlphaMin(config.config.alphaMin)))(function() {
+                  return discard12(simulationSetVariable2(new AlphaDecay(config.config.alphaDecay)))(function() {
+                    return discard12(simulationSetVariable2(new VelocityDecay(config.config.velocityDecay)))(function() {
+                      return bind21(use2(_handle4))(function(handle) {
+                        var addTick = function(label5) {
+                          return function(step5) {
+                            if (step5 instanceof StepTransformFFI) {
+                              return pure24(unit);
+                            }
+                            ;
+                            if (step5 instanceof Step3) {
+                              var makeTick = function(v2) {
+                                var v1 = mapFlipped9(step5.value1)(applySelectionAttributeD3(step5.value0));
+                                return unit;
+                              };
+                              var v = onTick_(handle)(label5)(makeTick);
+                              return pure24(unit);
+                            }
+                            ;
+                            throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 153, column 30 - line 160, column 22): " + [step5.constructor.name]);
                           };
-                          return bind21(sequence2(mapFlipped9(toUnfoldable7(config.ticks))(function(v) {
-                            return addTick(v.value0)(v.value1);
-                          })))(function() {
-                            return pure24(unit);
+                        };
+                        return bind21(sequence2(mapFlipped9(toUnfoldable7(config.ticks))(function(v) {
+                          return addTick(v.value0)(v.value1);
+                        })))(function() {
+                          return pure24({
+                            nodes: nodesInSim,
+                            links: linksInSim
                           });
                         });
                       });
@@ -23912,7 +23913,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 168, column 1 - line 200, column 33): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 170, column 1 - line 202, column 33): " + [v.constructor.name, v1.constructor.name]);
       };
     },
     removeTickFunction: function(label5) {
@@ -33703,52 +33704,52 @@
   var y23 = /* @__PURE__ */ y2(toAttrNumberFn);
   var fromFoldable20 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
   var link_3 = {
-    source: function($88) {
+    source: function($94) {
       return (function(v) {
         return v.source;
-      })(unboxD3SimLink2($88));
+      })(unboxD3SimLink2($94));
     },
-    target: function($89) {
+    target: function($95) {
       return (function(v) {
         return v.target;
-      })(unboxD3SimLink2($89));
+      })(unboxD3SimLink2($95));
     },
-    value: function($90) {
+    value: function($96) {
       return (function(v) {
         return v.value;
-      })(unboxD3SimLink2($90));
+      })(unboxD3SimLink2($96));
     },
-    color: function($91) {
+    color: function($97) {
       return d3SchemeCategory10N_(toNumber((function(v) {
         return v.target.group;
-      })(unboxD3SimLink2($91))));
+      })(unboxD3SimLink2($97))));
     }
   };
   var datum_4 = {
-    id: function($92) {
+    id: function($98) {
       return (function(v) {
         return v.id;
-      })(unboxD3SimNode2($92));
+      })(unboxD3SimNode2($98));
     },
-    x: function($93) {
+    x: function($99) {
       return (function(v) {
         return v.x;
-      })(unboxD3SimNode2($93));
+      })(unboxD3SimNode2($99));
     },
-    y: function($94) {
+    y: function($100) {
       return (function(v) {
         return v.y;
-      })(unboxD3SimNode2($94));
+      })(unboxD3SimNode2($100));
     },
-    group: function($95) {
+    group: function($101) {
       return (function(v) {
         return v.group;
-      })(unboxD3SimNode2($95));
+      })(unboxD3SimNode2($101));
     },
-    colorByGroup: function($96) {
+    colorByGroup: function($102) {
       return d3SchemeCategory10N_(toNumber((function(v) {
         return v.group;
-      })(unboxD3SimNode2($96))));
+      })(unboxD3SimNode2($102))));
     }
   };
   var drawSimplified = function(dictBind) {
@@ -33758,15 +33759,17 @@
       var liftEffect51 = liftEffect(dictMonadEffect);
       var pure47 = pure(dictMonadEffect.Monad0().Applicative0());
       return function(dictMonadState) {
-        return function(dictSimulationM) {
-          var SelectionM1 = dictSimulationM.SelectionM1();
+        return function(dictSimulationM2) {
+          var SimulationM1 = dictSimulationM2.SimulationM1();
+          var SelectionM1 = SimulationM1.SelectionM1();
           var attach2 = attach(SelectionM1);
           var appendTo2 = appendTo(SelectionM1);
+          var init5 = init3(SimulationM1);
           var simpleJoin2 = simpleJoin(SelectionM1);
           var setAttributes2 = setAttributes(SelectionM1);
-          var init5 = init3(dictSimulationM);
+          var addTickFunction2 = addTickFunction(dictSimulationM2);
           var on3 = on2(SelectionM1);
-          var start6 = start2(dictSimulationM);
+          var start6 = start2(SimulationM1);
           return function(forceLibrary3) {
             return function(activeForces) {
               return function(model) {
@@ -33776,57 +33779,61 @@
                       return bind71(appendTo2(v1)(Svg.value)([viewBox(-v.value0 / 2)(-v.value1 / 2)(v.value0)(v.value1), classed22("lesmis")]))(function(svg2) {
                         return bind71(appendTo2(svg2)(Group.value)([classed22("link"), strokeColor17("#999"), strokeOpacity4(0.6)]))(function(linksGroup) {
                           return bind71(appendTo2(svg2)(Group.value)([classed22("node"), strokeColor17("#fff"), strokeOpacity4(1.5)]))(function(nodesGroup) {
-                            return bind71(simpleJoin2(nodesGroup)(Circle.value)(model.nodes)(keyIsID_))(function(nodesSelection) {
-                              return discard113(setAttributes2(nodesSelection)([radius11(5), fill20(datum_4.colorByGroup)]))(function() {
-                                return bind71(simpleJoin2(linksGroup)(Line.value)(model.links)(keyIsID_))(function(linksSelection) {
-                                  return discard113(setAttributes2(linksSelection)([strokeWidth14(function($102) {
-                                    return sqrt(link_3.value($102));
-                                  }), strokeColor1(link_3.color)]))(function() {
-                                    return discard113(init5({
-                                      nodes: model.nodes,
-                                      links: model.links,
-                                      forces: forceLibrary3,
-                                      activeForces,
-                                      config: {
-                                        alpha: 1,
-                                        alphaTarget: 0,
-                                        alphaMin: 1e-3,
-                                        alphaDecay: 0.0228,
-                                        velocityDecay: 0.4
-                                      },
-                                      keyFn: keyIsID_,
-                                      ticks: fromFoldable20([new Tuple("nodes", new Step3(nodesSelection, [cx7(datum_4.x), cy7(datum_4.y)])), new Tuple("links", new Step3(linksSelection, [x110(function($103) {
-                                        return (function(v2) {
-                                          return v2.x;
-                                        })(link_3.source($103));
-                                      }), y110(function($104) {
-                                        return (function(v2) {
-                                          return v2.y;
-                                        })(link_3.source($104));
-                                      }), x23(function($105) {
-                                        return (function(v2) {
-                                          return v2.x;
-                                        })(link_3.target($105));
-                                      }), y23(function($106) {
-                                        return (function(v2) {
-                                          return v2.y;
-                                        })(link_3.target($106));
-                                      })]))])
-                                    }))(function() {
-                                      return bind71(on3(nodesSelection)(new Drag(new CustomDrag("lesmis", simdrag_))))(function() {
-                                        return bind71(on3(svg2)(new Zoom({
-                                          extent: new ZoomExtent({
-                                            top: 0,
-                                            left: 0,
-                                            bottom: v.value1,
-                                            right: v.value0
-                                          }),
-                                          scale: new ScaleExtent(1, 4),
-                                          name: "LesMis",
-                                          target: svg2
-                                        })))(function() {
-                                          return discard113(start6)(function() {
-                                            return pure47(unit);
+                            return bind71(init5({
+                              nodes: model.nodes,
+                              links: model.links,
+                              forces: forceLibrary3,
+                              activeForces,
+                              config: {
+                                alpha: 1,
+                                alphaTarget: 0,
+                                alphaMin: 1e-3,
+                                alphaDecay: 0.0228,
+                                velocityDecay: 0.4
+                              },
+                              keyFn: keyIsID_,
+                              ticks: fromFoldable20([])
+                            }))(function(v2) {
+                              return bind71(simpleJoin2(nodesGroup)(Circle.value)(v2.nodes)(keyIsID_))(function(nodesSelection) {
+                                return discard113(setAttributes2(nodesSelection)([radius11(5), fill20(datum_4.colorByGroup)]))(function() {
+                                  return bind71(simpleJoin2(linksGroup)(Line.value)(v2.links)(keyIsID_))(function(linksSelection) {
+                                    return discard113(setAttributes2(linksSelection)([strokeWidth14(function($108) {
+                                      return sqrt(link_3.value($108));
+                                    }), strokeColor1(link_3.color)]))(function() {
+                                      return discard113(addTickFunction2("nodes")(new Step3(nodesSelection, [cx7(datum_4.x), cy7(datum_4.y)])))(function() {
+                                        return discard113(addTickFunction2("links")(new Step3(linksSelection, [x110(function($109) {
+                                          return (function(v3) {
+                                            return v3.x;
+                                          })(link_3.source($109));
+                                        }), y110(function($110) {
+                                          return (function(v3) {
+                                            return v3.y;
+                                          })(link_3.source($110));
+                                        }), x23(function($111) {
+                                          return (function(v3) {
+                                            return v3.x;
+                                          })(link_3.target($111));
+                                        }), y23(function($112) {
+                                          return (function(v3) {
+                                            return v3.y;
+                                          })(link_3.target($112));
+                                        })])))(function() {
+                                          return bind71(on3(nodesSelection)(new Drag(new CustomDrag("lesmis", simdrag_))))(function() {
+                                            return bind71(on3(svg2)(new Zoom({
+                                              extent: new ZoomExtent({
+                                                top: 0,
+                                                left: 0,
+                                                bottom: v.value1,
+                                                right: v.value0
+                                              }),
+                                              scale: new ScaleExtent(1, 4),
+                                              name: "LesMis",
+                                              target: svg2
+                                            })))(function() {
+                                              return discard113(start6)(function() {
+                                                return pure47(unit);
+                                              });
+                                            });
                                           });
                                         });
                                       });
@@ -34022,7 +34029,7 @@
   var not5 = /* @__PURE__ */ not(heytingAlgebraStatus);
   var traverse4 = /* @__PURE__ */ traverse(traversableArray);
   var discard58 = /* @__PURE__ */ discard(discardUnit);
-  var drawSimplified2 = /* @__PURE__ */ drawSimplified(bindD3SimM)(monadEffD3SimM)(monadStateD3SimM)(simulationMD3Selection_D3);
+  var drawSimplified2 = /* @__PURE__ */ drawSimplified(bindD3SimM)(monadEffD3SimM)(monadStateD3SimM)(simulationM2D3Selection_D);
   var discard111 = /* @__PURE__ */ discard58(bindD3SimM);
   var actualizeForces3 = /* @__PURE__ */ actualizeForces(simulationM2D3Selection_D);
   var setConfigVariable3 = /* @__PURE__ */ setConfigVariable(simulationM2D3Selection_D);

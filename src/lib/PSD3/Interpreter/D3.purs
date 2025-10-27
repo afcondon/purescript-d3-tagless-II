@@ -140,8 +140,9 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
     -- 3. Activate specified forces
     simulationActualizeForces config.activeForces
 
-    -- 4. Set configuration variables
-    simulationSetVariable $ Alpha config.config.alpha
+    -- 4. Set configuration variables (except Alpha - that starts the simulation!)
+    -- We skip Alpha here because setting it auto-starts the simulation in D3.
+    -- The caller should use start() after adding tick functions.
     simulationSetVariable $ AlphaTarget config.config.alphaTarget
     simulationSetVariable $ AlphaMin config.config.alphaMin
     simulationSetVariable $ AlphaDecay config.config.alphaDecay
