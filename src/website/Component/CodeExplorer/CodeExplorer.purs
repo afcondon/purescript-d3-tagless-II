@@ -40,7 +40,7 @@ import D3.Viz.Spago.Draw as Graph
 import D3.Viz.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Viz.Spago.Files (NodeType(..), isM2M_Tree_Link, isM2P_Link, isP2P_Link)
 import D3.Viz.Spago.Model (SpagoModel, allNodes, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_R, unpinAllNodes)
-import PSD3.Internal.FFI (linksForceName_)
+import PSD3.Internal.FFI (SimulationVariables, linksForceName_)
 import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Internal.Simulation.Types (SimVariable(..), initialSimulationState)
 import Data.Set as Set
