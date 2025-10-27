@@ -2,7 +2,8 @@ module PSD3.CodeAtlas.Tabs.ModuleGraph where
 
 import Prelude
 
-import Control.Monad.State (class MonadState, get)
+import Control.Monad.State (class MonadState)
+import Effect.Uncurried (mkEffectFn3)
 import Data.Array (filter, mapMaybe, length, group)
 import Data.Array as Array
 import Data.Foldable (maximum)
@@ -28,12 +29,12 @@ import PSD3.CodeAtlas.Types (ModuleGraphData, ModuleInfo)
 import PSD3.Data.Node (D3Link(..), D3LinkSwizzled(..), D3_SimulationNode(..), D3_VxyFxy, D3_XY)
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, x1, x2, y1, y2)
 import Type.Row (type (+))
-import PSD3.Internal.FFI (keyIsID_, simdragHorizontal_)
-import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
+import PSD3.Internal.FFI (clearHighlights_, highlightConnectedNodes_, keyIsID_, simdragHorizontal_)
+import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute(..))
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), SimVariable(..), Step(..), allNodes)
-import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
+import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), Selector)
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Utility (getWindowWidthHeight)
 import Unsafe.Coerce (unsafeCoerce)
@@ -197,6 +198,17 @@ drawModuleGraph graphData selector = do
       nodes = modulesToNodes sourceModules
       links = modulesToLinks sourceModules
 
+      -- Build adjacency map for highlighting connected nodes
+      -- Maps node ID to set of connected node IDs (both incoming and outgoing)
+      adjacencyMap :: Map.Map String (Set.Set String)
+      adjacencyMap =
+        let addEdge acc (D3LinkID link) =
+              let sourceSet = fromMaybe Set.empty $ Map.lookup link.source acc
+                  targetSet = fromMaybe Set.empty $ Map.lookup link.target acc
+              in Map.insert link.source (Set.insert link.target sourceSet)
+                   $ Map.insert link.target (Set.insert link.source targetSet) acc
+        in Array.foldl addEdge Map.empty links
+
   -- Debug: log LOC and layer values
   let layers = computeLayers sourceModules
       layerValues = Map.values layers # Array.fromFoldable
@@ -253,6 +265,23 @@ drawModuleGraph graphData selector = do
   labels <- appendTo nodeGroups Text
     [ text datum_.name
     , classed "node-label"
+    ]
+
+  -- Add hover handlers for highlighting connected nodes
+  let onMouseEnter = mkEffectFn3 \event datum this -> do
+        let nodeId = datum_.id datum
+            connected = fromMaybe Set.empty $ Map.lookup nodeId adjacencyMap
+            connectedIds = Set.toUnfoldable connected :: Array String
+            -- Include the hovered node itself in the highlight
+            allHighlighted = Array.cons nodeId connectedIds
+        pure $ highlightConnectedNodes_ zoomGroup allHighlighted
+
+      onMouseLeave = mkEffectFn3 \event datum this -> do
+        pure $ clearHighlights_ zoomGroup
+
+  setAttributes nodeGroups
+    [ OnT' MouseEnter onMouseEnter
+    , OnT' MouseLeave onMouseLeave
     ]
 
   linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_

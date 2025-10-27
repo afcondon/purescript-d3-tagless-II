@@ -93,6 +93,23 @@ export function simdragHorizontal_(label, simulation) {
     .on('drag.' + label, dragged)
     .on('end.' + label, dragended);
 }
+// Helper functions for highlighting connected nodes
+export function highlightConnectedNodes_(selection) {
+  return connectedIds => {
+    // Convert PureScript array to Set for fast lookup
+    const connectedSet = new Set(connectedIds);
+    selection.selectAll('.node-group')
+      .classed('highlighted', d => connectedSet.has(d.id))
+      .classed('dimmed', d => !connectedSet.has(d.id));
+  };
+}
+
+export function clearHighlights_(selection) {
+  selection.selectAll('.node-group')
+    .classed('highlighted', false)
+    .classed('dimmed', false);
+}
+
 export const linksForceName_ = "links"
 export const dummyForceHandle_ = null
 export function disableTick_(simulation) { return name => { return simulation.on('tick.' + name, () => null) } }

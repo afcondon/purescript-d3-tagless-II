@@ -239,6 +239,21 @@ code, pre {
   stroke-width: 2.5;
 }
 
+/* Highlighting connected nodes */
+.node-group.dimmed {
+  opacity: 0.2;
+  transition: opacity 0.3s ease;
+}
+
+.node-group.highlighted .node-circle {
+  stroke: #f39c12;
+  stroke-width: 3;
+}
+
+.node-group.highlighted {
+  opacity: 1;
+}
+
 /* Dark Mode Support (future) */
 @media (prefers-color-scheme: dark) {
   /* Dark mode variables will go here */
