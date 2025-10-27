@@ -281,7 +281,6 @@ runSimulation = do
       attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles }
 
   runWithD3_Simulation do
-    stop
     -- Use the new declarative update API
     Graph.updateSimulation
       staging.selections  -- Pass the node/link group selections
@@ -291,4 +290,6 @@ runSimulation = do
       , linksWithForce: stagingLinkFilter
       }
       attributesWithCallback
+    -- Explicitly reheat with full alpha
+    -- This ensures the simulation runs long enough to settle
     start

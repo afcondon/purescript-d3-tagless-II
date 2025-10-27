@@ -16608,6 +16608,9 @@
   var start2 = function(dict) {
     return dict.start;
   };
+  var removeTickFunction = function(dict) {
+    return dict.removeTickFunction;
+  };
   var init3 = function(dict) {
     return dict.init;
   };
@@ -17652,6 +17655,7 @@
           var on3 = on2(dictSelectionM);
           return function(dictSimulationM2) {
             var update4 = update(dictSimulationM2)(dictEq);
+            var removeTickFunction2 = removeTickFunction(dictSimulationM2);
             var addTickFunction2 = addTickFunction(dictSimulationM2);
             return function(v) {
               return function(v1) {
@@ -17684,24 +17688,28 @@
                                                         return discard112(setAttributes2(link$prime.exit)([remove]))(function() {
                                                           return discard112(setAttributes2(link$prime.update)([classed12("update")]))(function() {
                                                             return bind71(mergeSelections2(linkEnter)(link$prime.update))(function(mergedLinksShown) {
-                                                              return discard112(addTickFunction2("nodes")(new Step3(mergedNodeSelection, [transform$prime(datum_.translateNode)])))(function() {
-                                                                return addTickFunction2("links")(new Step3(mergedLinksShown, [x12(function($63) {
-                                                                  return (function(v3) {
-                                                                    return v3.x;
-                                                                  })(link_.source($63));
-                                                                }), y12(function($64) {
-                                                                  return (function(v3) {
-                                                                    return v3.y;
-                                                                  })(link_.source($64));
-                                                                }), x22(function($65) {
-                                                                  return (function(v3) {
-                                                                    return v3.x;
-                                                                  })(link_.target($65));
-                                                                }), y22(function($66) {
-                                                                  return (function(v3) {
-                                                                    return v3.y;
-                                                                  })(link_.target($66));
-                                                                })]));
+                                                              return discard112(removeTickFunction2("nodes"))(function() {
+                                                                return discard112(removeTickFunction2("links"))(function() {
+                                                                  return discard112(addTickFunction2("nodes")(new Step3(mergedNodeSelection, [transform$prime(datum_.translateNode)])))(function() {
+                                                                    return addTickFunction2("links")(new Step3(mergedLinksShown, [x12(function($64) {
+                                                                      return (function(v3) {
+                                                                        return v3.x;
+                                                                      })(link_.source($64));
+                                                                    }), y12(function($65) {
+                                                                      return (function(v3) {
+                                                                        return v3.y;
+                                                                      })(link_.source($65));
+                                                                    }), x22(function($66) {
+                                                                      return (function(v3) {
+                                                                        return v3.x;
+                                                                      })(link_.target($66));
+                                                                    }), y22(function($67) {
+                                                                      return (function(v3) {
+                                                                        return v3.y;
+                                                                      })(link_.target($67));
+                                                                    })]));
+                                                                  });
+                                                                });
                                                               });
                                                             });
                                                           });
@@ -23754,7 +23762,6 @@
   var _activeForces2 = /* @__PURE__ */ _activeForces(strongForget);
   var x8 = /* @__PURE__ */ x(toAttrNumber);
   var discard13 = /* @__PURE__ */ discard11(bindD3SimM);
-  var stop2 = /* @__PURE__ */ stop(simulationMD3Selection_D3);
   var updateSimulation2 = /* @__PURE__ */ updateSimulation(eqInt)(bindD3SimM)(monadEffD3SimM)(selectionMD3Selection_D3S)(simulationM2D3Selection_D);
   var start4 = /* @__PURE__ */ start2(simulationMD3Selection_D3);
   var bind23 = /* @__PURE__ */ bind(bindHalogenM);
@@ -23773,6 +23780,7 @@
   var pure25 = /* @__PURE__ */ pure(applicativeHalogenM);
   var _chooseNodes1 = /* @__PURE__ */ _chooseNodes(strongFn);
   var runWithD3_Simulation2 = /* @__PURE__ */ runWithD3_Simulation(bindHalogenM)(monadStateHalogenM);
+  var stop2 = /* @__PURE__ */ stop(simulationMD3Selection_D3);
   var _linksShown1 = /* @__PURE__ */ _linksShown(strongFn);
   var _linksActive1 = /* @__PURE__ */ _linksActive(strongFn);
   var _cssClass3 = /* @__PURE__ */ _cssClass(strongFn);
@@ -23853,15 +23861,13 @@
                   labels: sceneAttributes.labels,
                   circles: cons3(callback)(sceneAttributes.circles)
                 };
-                return runWithD3_Simulation22(discard13(stop2)(function() {
-                  return discard13(updateSimulation2(staging.selections)({
-                    nodes: stagingNodes,
-                    links: stagingLinks,
-                    activeForces,
-                    linksWithForce: stagingLinkFilter
-                  })(attributesWithCallback))(function() {
-                    return start4;
-                  });
+                return runWithD3_Simulation22(discard13(updateSimulation2(staging.selections)({
+                  nodes: stagingNodes,
+                  links: stagingLinks,
+                  activeForces,
+                  linksWithForce: stagingLinkFilter
+                })(attributesWithCallback))(function() {
+                  return start4;
                 }));
               });
             });
