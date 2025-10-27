@@ -173,6 +173,11 @@ instance SimulationM D3Selection_ (D3SimM row D3Selection_) where
   stop  = simulationStop
 
 -- | SimulationM2 instance - Declarative updates for dynamic simulations
+-- |
+-- | TODO: There's an intermittent bug when toggling node filters in CodeExplorer
+-- | where the simulation sometimes doesn't run properly. Unable to reproduce
+-- | consistently. May be related to timing of DOM updates vs simulation updates,
+-- | or possibly an issue with how filters affect the data flow.
 instance SimulationM2 D3Selection_ (D3SimM row D3Selection_) where
   update config = do
     -- Get current simulation state

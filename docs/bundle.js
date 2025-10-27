@@ -14250,8 +14250,9 @@
     return (velocityDecay) => simulation.velocityDecay(velocityDecay);
   }
   function startSimulation_(simulation) {
-    console.log(`FFI: restarting the simulation, alpha is: ${simulation.alpha()}`);
-    simulation.restart();
+    console.log(`FFI: restarting the simulation, alpha before: ${simulation.alpha()}`);
+    simulation.alpha(1).restart();
+    console.log(`FFI: restarted simulation, alpha after: ${simulation.alpha()}`);
   }
   function stopSimulation_(simulation) {
     return simulation.stop();
@@ -14296,7 +14297,24 @@
   function setNodes_(simulation) {
     return (nodes) => {
       console.log(`FFI: setting nodes in simulation, there are ${nodes.length} nodes`);
-      simulation.nodes(nodes);
+      const oldNodes = simulation.nodes();
+      const oldNodeMap = new Map(oldNodes.map((d9) => [d9.id, d9]));
+      const nodesWithPositions = nodes.map((newNode) => {
+        const oldNode = oldNodeMap.get(newNode.id);
+        if (oldNode) {
+          return Object.assign({}, newNode, {
+            x: oldNode.x,
+            y: oldNode.y,
+            vx: oldNode.vx,
+            vy: oldNode.vy,
+            // Only override fx/fy if new node has them explicitly set
+            fx: newNode.fx !== void 0 ? newNode.fx : oldNode.fx,
+            fy: newNode.fy !== void 0 ? newNode.fy : oldNode.fy
+          });
+        }
+        return newNode;
+      });
+      simulation.nodes(nodesWithPositions);
       return simulation.nodes();
     };
   }
@@ -16608,9 +16626,6 @@
   var start2 = function(dict) {
     return dict.start;
   };
-  var removeTickFunction = function(dict) {
-    return dict.removeTickFunction;
-  };
   var init3 = function(dict) {
     return dict.init;
   };
@@ -17655,7 +17670,6 @@
           var on3 = on2(dictSelectionM);
           return function(dictSimulationM2) {
             var update4 = update(dictSimulationM2)(dictEq);
-            var removeTickFunction2 = removeTickFunction(dictSimulationM2);
             var addTickFunction2 = addTickFunction(dictSimulationM2);
             return function(v) {
               return function(v1) {
@@ -17688,28 +17702,24 @@
                                                         return discard112(setAttributes2(link$prime.exit)([remove]))(function() {
                                                           return discard112(setAttributes2(link$prime.update)([classed12("update")]))(function() {
                                                             return bind71(mergeSelections2(linkEnter)(link$prime.update))(function(mergedLinksShown) {
-                                                              return discard112(removeTickFunction2("nodes"))(function() {
-                                                                return discard112(removeTickFunction2("links"))(function() {
-                                                                  return discard112(addTickFunction2("nodes")(new Step3(mergedNodeSelection, [transform$prime(datum_.translateNode)])))(function() {
-                                                                    return addTickFunction2("links")(new Step3(mergedLinksShown, [x12(function($64) {
-                                                                      return (function(v3) {
-                                                                        return v3.x;
-                                                                      })(link_.source($64));
-                                                                    }), y12(function($65) {
-                                                                      return (function(v3) {
-                                                                        return v3.y;
-                                                                      })(link_.source($65));
-                                                                    }), x22(function($66) {
-                                                                      return (function(v3) {
-                                                                        return v3.x;
-                                                                      })(link_.target($66));
-                                                                    }), y22(function($67) {
-                                                                      return (function(v3) {
-                                                                        return v3.y;
-                                                                      })(link_.target($67));
-                                                                    })]));
-                                                                  });
-                                                                });
+                                                              return discard112(addTickFunction2("nodes")(new Step3(mergedNodeSelection, [transform$prime(datum_.translateNode)])))(function() {
+                                                                return addTickFunction2("links")(new Step3(mergedLinksShown, [x12(function($63) {
+                                                                  return (function(v3) {
+                                                                    return v3.x;
+                                                                  })(link_.source($63));
+                                                                }), y12(function($64) {
+                                                                  return (function(v3) {
+                                                                    return v3.y;
+                                                                  })(link_.source($64));
+                                                                }), x22(function($65) {
+                                                                  return (function(v3) {
+                                                                    return v3.x;
+                                                                  })(link_.target($65));
+                                                                }), y22(function($66) {
+                                                                  return (function(v3) {
+                                                                    return v3.y;
+                                                                  })(link_.target($66));
+                                                                })]));
                                                               });
                                                             });
                                                           });

@@ -116,8 +116,10 @@ export function setForceY_(force) { return attr => force.y(attr) }
 export function setLinksKeyFunction_(force) { return attr => force.id(attr) }
 export function setVelocityDecay_(simulation) { return velocityDecay => simulation.velocityDecay(velocityDecay) }
 export function startSimulation_(simulation) {
-  console.log(`FFI: restarting the simulation, alpha is: ${simulation.alpha()}`);
-  simulation.restart()
+  console.log(`FFI: restarting the simulation, alpha before: ${simulation.alpha()}`);
+  // IMPORTANT: restart() alone doesn't reset alpha - we need to set it to 1.0 first
+  simulation.alpha(1.0).restart();
+  console.log(`FFI: restarted simulation, alpha after: ${simulation.alpha()}`);
 }
 export function stopSimulation_(simulation) { return simulation.stop() }
 export function initSimulation_(config) {
@@ -227,8 +229,34 @@ export function getIDsFromNodes_(nodes) {
 export function setNodes_(simulation) {
   return nodes => {
     console.log(`FFI: setting nodes in simulation, there are ${nodes.length} nodes`);
-    simulation.nodes(nodes)
-    return simulation.nodes()
+
+    // Get old nodes from simulation to preserve their positions
+    const oldNodes = simulation.nodes();
+
+    // Create map of old nodes by ID for O(1) lookup
+    const oldNodeMap = new Map(oldNodes.map(d => [d.id, d]));
+
+    // Merge positions from old nodes into new nodes
+    const nodesWithPositions = nodes.map(newNode => {
+      const oldNode = oldNodeMap.get(newNode.id);
+      if (oldNode) {
+        // Preserve simulation state (position, velocity) from old node
+        // But keep any explicitly set fx/fy from new node (for pinning)
+        return Object.assign({}, newNode, {
+          x: oldNode.x,
+          y: oldNode.y,
+          vx: oldNode.vx,
+          vy: oldNode.vy,
+          // Only override fx/fy if new node has them explicitly set
+          fx: newNode.fx !== undefined ? newNode.fx : oldNode.fx,
+          fy: newNode.fy !== undefined ? newNode.fy : oldNode.fy
+        });
+      }
+      return newNode; // New node, no position to preserve
+    });
+
+    simulation.nodes(nodesWithPositions);
+    return simulation.nodes();
   }
 }
 // we're going to always use the same name for the links force denominated by the linksForceName string

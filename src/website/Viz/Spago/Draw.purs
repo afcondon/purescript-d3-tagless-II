@@ -11,7 +11,7 @@ import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Simulation.Types (Step(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, updateJoin)
-import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate, addTickFunction, removeTickFunction, update)
+import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate, addTickFunction, update)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Data.Node (D3_SimulationNode, D3Link, D3LinkSwizzled)
 import Data.Array (filter)
@@ -133,10 +133,8 @@ updateSimulation { nodes: Just nodesGroup, links: Just linksGroup } dataConfig a
   mergedLinksShown <- mergeSelections linkEnter link'.update
 
   -- Step 5: Set up tick functions for animation
-  -- Remove old tick functions first to ensure clean state
-  removeTickFunction "nodes"
-  removeTickFunction "links"
-
+  -- Note: We always add tick functions with the same labels, which replaces them
+  -- This is necessary because selections change when doing enter/update/exit
   addTickFunction "nodes" $
     Step mergedNodeSelection [ transform' datum_.translateNode ]
   addTickFunction "links" $
