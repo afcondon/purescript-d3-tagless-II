@@ -35238,6 +35238,7 @@
   var discard62 = /* @__PURE__ */ discard(discardUnit);
   var discard111 = /* @__PURE__ */ discard62(bindHalogenM);
   var pure41 = /* @__PURE__ */ pure(applicativeHalogenM);
+  var show40 = /* @__PURE__ */ show(showInt);
   var modify_42 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var draw20 = /* @__PURE__ */ draw19(d3TaglessD3M);
   var get11 = /* @__PURE__ */ get(monadStateHalogenM);
@@ -35251,7 +35252,6 @@
   var insert16 = /* @__PURE__ */ insert6(ordString);
   var map60 = /* @__PURE__ */ map(functorArray);
   var bind114 = /* @__PURE__ */ bind(bindMaybe);
-  var show40 = /* @__PURE__ */ show(showInt);
   var nationPointToDrawData = function(np) {
     return {
       name: np.name,
@@ -35284,44 +35284,52 @@
         }
         ;
         if (v instanceof DataLoaded2) {
-          return discard111(modify_42(function(v1) {
-            var $57 = {};
-            for (var $58 in v1) {
-              if ({}.hasOwnProperty.call(v1, $58)) {
-                $57[$58] = v1[$58];
-              }
-              ;
-            }
-            ;
-            $57.model = new Just(v.value0);
-            return $57;
-          }))(function() {
+          return discard111(liftEffect110(log4("Data loaded: " + (show40(length4(v.value0.nations)) + (" nations, years " + (show40(v.value0.yearRange.min) + ("-" + show40(v.value0.yearRange.max))))))))(function() {
             return discard111(modify_42(function(v1) {
-              var $60 = {};
-              for (var $61 in v1) {
-                if ({}.hasOwnProperty.call(v1, $61)) {
-                  $60[$61] = v1[$61];
+              var $57 = {};
+              for (var $58 in v1) {
+                if ({}.hasOwnProperty.call(v1, $58)) {
+                  $57[$58] = v1[$58];
                 }
                 ;
               }
               ;
-              $60.currentYear = v.value0.yearRange.min;
-              return $60;
+              $57.model = new Just(v.value0);
+              return $57;
             }))(function() {
-              return bind66(liftEffect110(eval_D3M(draw20("#wealth-health-viz"))))(function(v1) {
-                return discard111(modify_42(function(v2) {
-                  var $64 = {};
-                  for (var $65 in v2) {
-                    if ({}.hasOwnProperty.call(v2, $65)) {
-                      $64[$65] = v2[$65];
-                    }
-                    ;
+              return discard111(modify_42(function(v1) {
+                var $60 = {};
+                for (var $61 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $61)) {
+                    $60[$61] = v1[$61];
                   }
                   ;
-                  $64.vizUpdateFn = new Just(v1);
-                  return $64;
-                }))(function() {
-                  return handleAction47(dictMonadAff)(MonadEffect0)(Render.value);
+                }
+                ;
+                $60.currentYear = v.value0.yearRange.min;
+                return $60;
+              }))(function() {
+                return discard111(liftAff36(delay(100)))(function() {
+                  return discard111(liftEffect110(log4("Initializing visualization...")))(function() {
+                    return bind66(liftEffect110(eval_D3M(draw20("#wealth-health-viz"))))(function(v1) {
+                      return discard111(modify_42(function(v2) {
+                        var $64 = {};
+                        for (var $65 in v2) {
+                          if ({}.hasOwnProperty.call(v2, $65)) {
+                            $64[$65] = v2[$65];
+                          }
+                          ;
+                        }
+                        ;
+                        $64.vizUpdateFn = new Just(v1);
+                        return $64;
+                      }))(function() {
+                        return discard111(liftEffect110(log4("Visualization initialized, rendering initial frame...")))(function() {
+                          return handleAction47(dictMonadAff)(MonadEffect0)(Render.value);
+                        });
+                      });
+                    });
+                  });
                 });
               });
             });
@@ -35411,7 +35419,7 @@
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 178, column 7 - line 182, column 60): " + [state$prime.animationSubscriptionId.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 184, column 7 - line 188, column 60): " + [state$prime.animationSubscriptionId.constructor.name]);
                 }));
               });
             });
@@ -35460,7 +35468,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 186, column 5 - line 195, column 28): " + [state3.model.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 192, column 5 - line 201, column 28): " + [state3.model.constructor.name]);
           });
         }
         ;
@@ -35521,17 +35529,27 @@
           return bind66(get11)(function(state3) {
             if (state3.model instanceof Just && state3.vizUpdateFn instanceof Just) {
               var nations = getAllNationsAtYear(state3.currentYear)(state3.model.value0);
-              var drawData = map60(nationPointToDrawData)(nations);
-              return bind66(liftEffect110(eval_D3M(state3.vizUpdateFn.value0(drawData))))(function() {
-                return pure41(unit);
+              return discard111(liftEffect110(log4("Rendering " + (show40(length4(nations)) + (" nations for year " + show40(state3.currentYear))))))(function() {
+                var drawData = map60(nationPointToDrawData)(nations);
+                return bind66(liftEffect110(eval_D3M(state3.vizUpdateFn.value0(drawData))))(function() {
+                  return pure41(unit);
+                });
               });
             }
             ;
-            return pure41(unit);
+            if (state3.model instanceof Nothing) {
+              return liftEffect110(log4("No model available for rendering"));
+            }
+            ;
+            if (state3.vizUpdateFn instanceof Nothing) {
+              return liftEffect110(log4("No update function available"));
+            }
+            ;
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 221, column 5 - line 229, column 68): " + [state3.model.constructor.name, state3.vizUpdateFn.constructor.name]);
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 131, column 16 - line 221, column 24): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 131, column 16 - line 229, column 68): " + [v.constructor.name]);
       };
     };
   };
