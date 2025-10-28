@@ -554,6 +554,27 @@
       };
     };
   };
+  var max = function(dictOrd) {
+    var compare32 = compare(dictOrd);
+    return function(x31) {
+      return function(y30) {
+        var v = compare32(x31)(y30);
+        if (v instanceof LT) {
+          return y30;
+        }
+        ;
+        if (v instanceof EQ) {
+          return x31;
+        }
+        ;
+        if (v instanceof GT) {
+          return x31;
+        }
+        ;
+        throw new Error("Failed pattern match at Data.Ord (line 181, column 3 - line 184, column 12): " + [v.constructor.name]);
+      };
+    };
+  };
   var min = function(dictOrd) {
     var compare32 = compare(dictOrd);
     return function(x31) {
@@ -5287,9 +5308,9 @@
               }
               ;
               if (v instanceof EQ) {
-                var max9 = maxNode(m.value0);
+                var max10 = maxNode(m.value0);
                 $tco_done3 = true;
-                return new Just(new Tuple(m.value2, removeMaxNode(new Cons(new TwoLeft(max9.key, max9.value, m.value3), ctx))(m.value0)));
+                return new Just(new Tuple(m.value2, removeMaxNode(new Cons(new TwoLeft(max10.key, max10.value, m.value3), ctx))(m.value0)));
               }
               ;
               if (v instanceof LT) {
@@ -5324,15 +5345,15 @@
               }
               ;
               if (v3 instanceof EQ) {
-                var max9 = maxNode(m.value0);
+                var max10 = maxNode(m.value0);
                 $tco_done3 = true;
-                return new Just(new Tuple(m.value2, removeMaxNode(new Cons(new ThreeLeft(max9.key, max9.value, m.value3, m.value4, m.value5, m.value6), ctx))(m.value0)));
+                return new Just(new Tuple(m.value2, removeMaxNode(new Cons(new ThreeLeft(max10.key, max10.value, m.value3, m.value4, m.value5, m.value6), ctx))(m.value0)));
               }
               ;
               if (v instanceof EQ) {
-                var max9 = maxNode(m.value3);
+                var max10 = maxNode(m.value3);
                 $tco_done3 = true;
-                return new Just(new Tuple(m.value5, removeMaxNode(new Cons(new ThreeMiddle(m.value0, m.value1, m.value2, max9.key, max9.value, m.value6), ctx))(m.value3)));
+                return new Just(new Tuple(m.value5, removeMaxNode(new Cons(new ThreeMiddle(m.value0, m.value1, m.value2, max10.key, max10.value, m.value6), ctx))(m.value3)));
               }
               ;
               if (v3 instanceof LT) {
@@ -17411,12 +17432,12 @@
     if (!o) return new Hsl();
     if (o instanceof Hsl) return o;
     o = o.rgb();
-    var r = o.r / 255, g = o.g / 255, b2 = o.b / 255, min9 = Math.min(r, g, b2), max9 = Math.max(r, g, b2), h = NaN, s = max9 - min9, l = (max9 + min9) / 2;
+    var r = o.r / 255, g = o.g / 255, b2 = o.b / 255, min9 = Math.min(r, g, b2), max10 = Math.max(r, g, b2), h = NaN, s = max10 - min9, l = (max10 + min9) / 2;
     if (s) {
-      if (r === max9) h = (g - b2) / s + (g < b2) * 6;
-      else if (g === max9) h = (b2 - r) / s + 2;
+      if (r === max10) h = (g - b2) / s + (g < b2) * 6;
+      else if (g === max10) h = (b2 - r) / s + 2;
       else h = (r - g) / s + 4;
-      s /= l < 0.5 ? max9 + min9 : 2 - max9 - min9;
+      s /= l < 0.5 ? max10 + min9 : 2 - max10 - min9;
       h *= 60;
     } else {
       s = l > 0 && l < 1 ? 0 : h;
@@ -18924,9 +18945,9 @@
   }
 
   // node_modules/d3-format/src/precisionRound.js
-  function precisionRound_default(step5, max9) {
-    step5 = Math.abs(step5), max9 = Math.abs(max9) - step5;
-    return Math.max(0, exponent_default(max9) - exponent_default(step5)) + 1;
+  function precisionRound_default(step5, max10) {
+    step5 = Math.abs(step5), max10 = Math.abs(max10) - step5;
+    return Math.max(0, exponent_default(max10) - exponent_default(step5)) + 1;
   }
 
   // node_modules/d3-scale/src/init.js
@@ -19312,22 +19333,22 @@
 
   // node_modules/d3-sankey/node_modules/d3-array/src/max.js
   function max8(values2, valueof) {
-    let max9;
+    let max10;
     if (valueof === void 0) {
       for (const value19 of values2) {
-        if (value19 != null && (max9 < value19 || max9 === void 0 && value19 >= value19)) {
-          max9 = value19;
+        if (value19 != null && (max10 < value19 || max10 === void 0 && value19 >= value19)) {
+          max10 = value19;
         }
       }
     } else {
       let index5 = -1;
       for (let value19 of values2) {
-        if ((value19 = valueof(value19, ++index5, values2)) != null && (max9 < value19 || max9 === void 0 && value19 >= value19)) {
-          max9 = value19;
+        if ((value19 = valueof(value19, ++index5, values2)) != null && (max10 < value19 || max10 === void 0 && value19 >= value19)) {
+          max10 = value19;
         }
       }
     }
-    return max9;
+    return max10;
   }
 
   // node_modules/d3-sankey/node_modules/d3-array/src/min.js
@@ -34629,6 +34650,7 @@
   };
 
   // output/D3.Viz.WealthHealth.Draw/index.js
+  var max9 = /* @__PURE__ */ max(ordNumber);
   var width25 = /* @__PURE__ */ width8(toAttrNumber);
   var height25 = /* @__PURE__ */ height8(toAttrNumber);
   var classed24 = /* @__PURE__ */ classed(toAttrString);
@@ -34664,8 +34686,8 @@
     return function(income) {
       var rangeWidth = config.width - config.marginLeft - config.marginRight;
       var logIncome = (function() {
-        var $63 = income > 0;
-        if ($63) {
+        var $64 = income > 0;
+        if ($64) {
           return log(income);
         }
         ;
@@ -34677,7 +34699,8 @@
   };
   var scaleRadius = function(population) {
     var normalized = population / 5e9;
-    return sqrt(normalized) * 80;
+    var scaled = sqrt(normalized) * 80;
+    return max9(3)(scaled);
   };
   var defaultConfig = {
     width: 1e3,

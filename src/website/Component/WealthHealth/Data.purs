@@ -4,7 +4,7 @@ import Prelude
 
 import Affjax.Web as AX
 import Affjax.ResponseFormat as ResponseFormat
-import Data.Array (catMaybes, find, head, last, sortBy, (!!))
+import Data.Array (catMaybes, find, head, last, range, sortBy, (!!))
 import Data.Either (Either(..))
 import Data.Foldable (minimum, maximum)
 import Data.Int (floor, toNumber)
@@ -53,6 +53,30 @@ parseNationData raw = do
 -- | Foreign import to parse JSON data (returns raw data with string regions)
 foreign import parseNationsJSON :: String -> Array NationDataRaw
 
+-- | Fill in missing years in a time series by interpolating from neighboring points
+fillMissingYears :: { min :: Int, max :: Int } -> Array (Array Number) -> Array (Array Number)
+fillMissingYears yearRange dataPoints =
+  let
+    -- Generate all years in range
+    allYears = map toNumber $ range yearRange.min yearRange.max
+
+    -- For each year, either use existing data or interpolate
+    fillYear year = case interpolateValue (floor year) dataPoints of
+      Just value -> [year, value]
+      Nothing -> [year, 0.0]  -- Fallback (shouldn't happen with good interpolation)
+  in
+    map fillYear allYears
+
+-- | Fill missing data for a nation across all metrics
+fillNationData :: { min :: Int, max :: Int } -> NationData -> NationData
+fillNationData yearRange nation =
+  { name: nation.name
+  , region: nation.region
+  , income: fillMissingYears yearRange nation.income
+  , population: fillMissingYears yearRange nation.population
+  , lifeExpectancy: fillMissingYears yearRange nation.lifeExpectancy
+  }
+
 -- | Load nations data from the Observable CDN
 loadNationsData :: Aff (Either String WealthHealthModel)
 loadNationsData = do
@@ -65,7 +89,9 @@ loadNationsData = do
       -- Parse regions from strings to ADTs, filtering out any that fail
       let nations = catMaybes $ map parseNationData rawNations
       let yearRange = calculateYearRange nations
-      Right { nations, yearRange }
+      -- Fill in missing years by interpolating from neighboring data
+      let filledNations = map (fillNationData yearRange) nations
+      Right { nations: filledNations, yearRange }
 
 -- | Calculate the min and max years available in the dataset
 calculateYearRange :: Array NationData -> { min :: Int, max :: Int }
