@@ -35,11 +35,13 @@ import Control.Monad.State (class MonadState, get)
 import Data.Array (filter, foldl, (:))
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
+import Data.String as String
 import PSD3.Data.Tree (TreeLayout(..))
 import D3.Viz.Spago.Draw (getVizEventFromClick)
 import D3.Viz.Spago.Draw as Graph
 import D3.Viz.Spago.Files (NodeType(..))
 import D3.Viz.Spago.Model (SpagoModel, isPackage, isPackageOrVisibleModule)
+import PSD3.Data.Node (D3_SimulationNode(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect)
 import Halogen (HalogenM, liftEffect)
@@ -56,7 +58,7 @@ import PSD3.CodeExplorer.Data (readModelData)
 import PSD3.CodeExplorer.Forces (forceLibrary)
 import PSD3.CodeExplorer.HTML (render)
 import PSD3.CodeExplorer.Scenes (horizontalTreeScene, layerSwarmScene, packageGraphScene, packageGridScene, radialTreeScene, verticalTreeScene)
-import PSD3.CodeExplorer.State (State, SceneConfig, applySceneConfig, getModelLinks, getModelNodes, getStagingLinkFilter, getStagingLinks, getStagingNodes, setCssClass, setChooseNodes, setLinksActive, setLinksShown, setSceneAttributes, setStagingLinkFilter, setStagingLinks, setStagingNodes, toggleForce, _enterselections, _eventListener, _links, _model, _nodes, _staging, initialScene)
+import PSD3.CodeExplorer.State (State, SceneConfig, applySceneConfig, clearAllTags, getModelLinks, getModelNodes, getStagingLinkFilter, getStagingLinks, getStagingNodes, setCssClass, setChooseNodes, setLinksActive, setLinksShown, setSceneAttributes, setStagingLinkFilter, setStagingLinks, setStagingNodes, tagNodes, toggleForce, _enterselections, _eventListener, _links, _model, _nodes, _staging, initialScene)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -199,6 +201,20 @@ handleAction = case _ of
     -- TODO: Use update to set alpha first
 
   StopSim -> runWithD3_Simulation stop
+
+  TagHalogen -> do
+    state <- H.get
+    let allNodes = getModelNodes state
+        -- Tag all packages whose name contains "halogen"
+        isHalogenPackage (D3SimNode n) = case n.nodetype of
+          IsPackage _ -> String.contains (String.Pattern "halogen") (String.toLower n.name)
+          _ -> false
+    H.modify_ $ tagNodes "halogen" isHalogenPackage allNodes
+    runSimulation
+
+  ClearTags -> do
+    H.modify_ clearAllTags
+    runSimulation
 
 -- | The core simulation orchestrator - bridges Halogen state to D3 rendering
 -- |

@@ -29,6 +29,8 @@ data Action
   | ToggleChildrenOfNode NodeID
   | SpotlightNode NodeID
   | UnToggleChildrenOfNode NodeID
+  | TagHalogen  -- Tag all Halogen-related packages
+  | ClearTags   -- Clear all tags
 
 data VizEvent = NodeClick NodeType NodeID 
 -- to be added:

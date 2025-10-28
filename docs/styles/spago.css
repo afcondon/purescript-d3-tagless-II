@@ -131,6 +131,13 @@
   stroke-opacity: 0.4;
 }
 
+/* Tag-based styling - Halogen packages */
+.node.halogen circle {
+  fill: #1e3a8a !important;  /* Dark blue - overrides scene colors */
+  stroke: #60a5fa !important; /* Light blue stroke */
+  stroke-width: 3px !important;
+}
+
 /* Print Styles - Hide Panels */
 @media print {
   .spago-controls-panel,

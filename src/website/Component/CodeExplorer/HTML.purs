@@ -122,6 +122,18 @@ renderSimControls state = do
           ]
         ]
 
+    , Format.subHeading_ [ HH.text "Tagging (Demo)" ]
+    , HH.div [ HP.classes [ HH.ClassName "control-group"]]
+        [ Button.buttonGroup_
+          [ Button.buttonPrimaryLeft
+              [ HE.onClick $ const TagHalogen ]
+              [ HH.text "Tag Halogen" ]
+          , Button.buttonPrimaryRight
+              [ HE.onClick $ const ClearTags ]
+              [ HH.text "Clear Tags" ]
+          ]
+        ]
+
     , Format.subHeading_ [ HH.text "Simulation Control" ]
     , HH.div [ HP.classes [ HH.ClassName "control-group"]]
         [ HH.input $ slider { var: Alpha, id: "alpha-slider", min: 0.0, max: 100.0, step: 10.0, value: params.alpha * 100.0 }
