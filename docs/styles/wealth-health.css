@@ -373,9 +373,12 @@
   opacity: 0.7;
 }
 
-/* Nation circles and labels */
-.nation-circle {
+/* Nation groups, circles and labels */
+.nation-group {
   cursor: pointer;
+}
+
+.nation-circle {
   transition: opacity 0.2s ease;
 }
 
@@ -386,13 +389,7 @@
   font-weight: 500;
 }
 
-/* Show label on circle hover */
-.nation-circle:hover + .nation-label {
-  opacity: 1 !important;
-}
-
-/* Also show label when hovering the label itself */
-.nation-label:hover {
-  pointer-events: all;
+/* Show label on group hover */
+.nation-group:hover .nation-label {
   opacity: 1 !important;
 }
