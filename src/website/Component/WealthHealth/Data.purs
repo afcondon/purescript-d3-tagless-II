@@ -17,6 +17,28 @@ import PSD3.WealthHealth.Types (NationData, NationPoint, Region(..), WealthHealt
 nationsDataUrl :: String
 nationsDataUrl = "data/nations.json"
 
+-- | Region constructors for FFI use
+eastAsiaAndPacific :: Region
+eastAsiaAndPacific = EastAsiaAndPacific
+
+europe :: Region
+europe = Europe
+
+latinAmericaAndCaribbean :: Region
+latinAmericaAndCaribbean = LatinAmericaAndCaribbean
+
+middleEastAndNorthAfrica :: Region
+middleEastAndNorthAfrica = MiddleEastAndNorthAfrica
+
+southAsia :: Region
+southAsia = SouthAsia
+
+subSaharanAfrica :: Region
+subSaharanAfrica = SubSaharanAfrica
+
+northAmerica :: Region
+northAmerica = NorthAmerica
+
 -- | Foreign import to parse JSON data
 foreign import parseNationsJSON :: String -> Array NationData
 

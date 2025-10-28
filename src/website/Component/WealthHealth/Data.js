@@ -1,28 +1,31 @@
 // FFI for parsing nations.json data
 
+// Import the actual PureScript Region constructors
+import * as Data from './Data.purs';
+
 // Map region names from the JSON to our PureScript Region type
-// In PureScript, simple ADT constructors are represented as strings
+// Use the actual PureScript ADT constructors, not fake objects
 function parseRegion(regionName) {
   switch (regionName) {
     case "East Asia & Pacific":
-      return "EastAsiaAndPacific";
+      return Data.eastAsiaAndPacific;
     case "Europe & Central Asia":
-      return "Europe";
+      return Data.europe;
     case "Latin America & Caribbean":
-      return "LatinAmericaAndCaribbean";
+      return Data.latinAmericaAndCaribbean;
     case "Middle East & North Africa":
-      return "MiddleEastAndNorthAfrica";
+      return Data.middleEastAndNorthAfrica;
     case "South Asia":
-      return "SouthAsia";
+      return Data.southAsia;
     case "Sub-Saharan Africa":
-      return "SubSaharanAfrica";
+      return Data.subSaharanAfrica;
     case "North America":
     case "America":  // Handle both "America" and "North America"
-      return "NorthAmerica";
+      return Data.northAmerica;
     default:
       // Default to Sub-Saharan Africa if unknown
       console.warn("Unknown region:", regionName, "defaulting to SubSaharanAfrica");
-      return "SubSaharanAfrica";
+      return Data.subSaharanAfrica;
   }
 }
 

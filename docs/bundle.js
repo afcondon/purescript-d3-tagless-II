@@ -34963,21 +34963,23 @@
   function parseRegion(regionName2) {
     switch (regionName2) {
       case "East Asia & Pacific":
-        return { constructor: "EastAsiaAndPacific" };
+        return "EastAsiaAndPacific";
       case "Europe & Central Asia":
-        return { constructor: "Europe" };
+        return "Europe";
       case "Latin America & Caribbean":
-        return { constructor: "LatinAmericaAndCaribbean" };
+        return "LatinAmericaAndCaribbean";
       case "Middle East & North Africa":
-        return { constructor: "MiddleEastAndNorthAfrica" };
+        return "MiddleEastAndNorthAfrica";
       case "South Asia":
-        return { constructor: "SouthAsia" };
+        return "SouthAsia";
       case "Sub-Saharan Africa":
-        return { constructor: "SubSaharanAfrica" };
+        return "SubSaharanAfrica";
       case "North America":
-        return { constructor: "NorthAmerica" };
+      case "America":
+        return "NorthAmerica";
       default:
-        return { constructor: "SubSaharanAfrica" };
+        console.warn("Unknown region:", regionName2, "defaulting to SubSaharanAfrica");
+        return "SubSaharanAfrica";
     }
   }
   function parseNationsJSON(jsonString) {
@@ -35276,7 +35278,7 @@
               return handleAction47(dictMonadAff)(MonadEffect0)(new DataLoaded2(result.value0));
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 135, column 5 - line 140, column 40): " + [result.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 146, column 5 - line 151, column 40): " + [result.constructor.name]);
           });
         }
         ;
@@ -35298,7 +35300,7 @@
                 return liftEffect110(log2("No nations in model!"));
               }
               ;
-              throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 145, column 5 - line 151, column 65): " + [v1.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 156, column 5 - line 162, column 65): " + [v1.constructor.name]);
             })())(function() {
               return discard111(modify_42(function(v1) {
                 var $66 = {};
@@ -35435,7 +35437,7 @@
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 192, column 7 - line 196, column 60): " + [state$prime.animationSubscriptionId.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 203, column 7 - line 207, column 60): " + [state$prime.animationSubscriptionId.constructor.name]);
                 }));
               });
             });
@@ -35484,7 +35486,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 200, column 5 - line 209, column 28): " + [state3.model.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 211, column 5 - line 220, column 28): " + [state3.model.constructor.name]);
           });
         }
         ;
@@ -35562,7 +35564,7 @@
                       return liftEffect110(log2("USA not found, trying first nation..."));
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 237, column 9 - line 239, column 86): " + [v1.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 248, column 9 - line 250, column 86): " + [v1.constructor.name]);
                   })())(function() {
                     return discard111((function() {
                       var v1 = head2(nations);
@@ -35574,7 +35576,7 @@
                         return liftEffect110(log2("No nations at all!"));
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 241, column 9 - line 243, column 67): " + [v1.constructor.name]);
+                      throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 252, column 9 - line 254, column 67): " + [v1.constructor.name]);
                     })())(function() {
                       var drawData = map60(nationPointToDrawData)(nations);
                       return bind66(liftEffect110(eval_D3M(state3.vizUpdateFn.value0(drawData))))(function() {
@@ -35594,11 +35596,11 @@
               return liftEffect110(log2("No update function available"));
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 229, column 5 - line 248, column 76): " + [state3.model.constructor.name, state3.vizUpdateFn.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 240, column 5 - line 259, column 76): " + [state3.model.constructor.name, state3.vizUpdateFn.constructor.name]);
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 131, column 16 - line 248, column 76): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 142, column 16 - line 259, column 76): " + [v.constructor.name]);
       };
     };
   };
