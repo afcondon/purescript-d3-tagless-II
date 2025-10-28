@@ -265,9 +265,25 @@ draw selector = do
     setAttributes groupUpdateSelections.exit
       [ classed "exit" ]
 
-    -- Update: update existing groups (data is already bound to the group)
+    -- Update: update existing groups and their children
     setAttributes groupUpdateSelections.update
       [ classed "nation-group update" ]
+
+    -- Update circles within existing groups
+    updateCircles <- openSelection groupUpdateSelections.update "circle"
+    setAttributes updateCircles
+      [ cx \d i -> (calculateAttrs d i).x
+      , cy \d i -> (calculateAttrs d i).y
+      , radius \d i -> (calculateAttrs d i).r
+      , fill \d i -> (calculateAttrs d i).color
+      ]
+
+    -- Update labels within existing groups
+    updateLabels <- openSelection groupUpdateSelections.update "text"
+    setAttributes updateLabels
+      [ x \d i -> (calculateAttrs d i).x
+      , y \d i -> (calculateAttrs d i).y - (calculateAttrs d i).r - 5.0
+      ]
 
     -- Enter: create new groups
     newGroups <- appendTo groupUpdateSelections.enter Group []
@@ -298,26 +314,6 @@ draw selector = do
       , fillOpacity 0.0  -- Initially hidden
       , text datum_.name
       , classed "nation-label"
-      ]
-
-    -- Update all circles (including both new and existing)
-    -- We need to select within each group and update based on the group's data
-    allGroups <- openSelection chartGroup ".nation-group"
-
-    -- Select circles within groups and update their attributes
-    circlesInGroups <- openSelection allGroups "circle"
-    setAttributes circlesInGroups
-      [ cx \d i -> (calculateAttrs d i).x
-      , cy \d i -> (calculateAttrs d i).y
-      , radius \d i -> (calculateAttrs d i).r
-      , fill \d i -> (calculateAttrs d i).color
-      ]
-
-    -- Select labels within groups and update their attributes
-    labelsInGroups <- openSelection allGroups "text"
-    setAttributes labelsInGroups
-      [ x \d i -> (calculateAttrs d i).x
-      , y \d i -> (calculateAttrs d i).y - (calculateAttrs d i).r - 5.0
       ]
 
     pure newGroups

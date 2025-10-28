@@ -34745,48 +34745,32 @@
                             };
                           };
                         };
-                        return bind71(openSelection2(chartGroup)("circle"))(function(circleEnterSelection) {
-                          return bind71(updateJoin2(circleEnterSelection)(Circle.value)(nations)(coerceDatumToKey2))(function(circleUpdateSelections) {
-                            return discard112(setAttributes2(circleUpdateSelections.exit)([classed24("exit")]))(function() {
-                              return discard112(setAttributes2(circleUpdateSelections.update)([cx8(function(d9) {
-                                return function(i2) {
-                                  return calculateAttrs(d9)(i2).x;
-                                };
-                              }), cy8(function(d9) {
-                                return function(i2) {
-                                  return calculateAttrs(d9)(i2).y;
-                                };
-                              }), radius16(function(d9) {
-                                return function(i2) {
-                                  return calculateAttrs(d9)(i2).r;
-                                };
-                              }), fill110(function(d9) {
-                                return function(i2) {
-                                  return calculateAttrs(d9)(i2).color;
-                                };
-                              }), classed24("nation-circle update")]))(function() {
-                                return bind71(appendTo2(circleUpdateSelections.enter)(Circle.value)([]))(function(newCircles) {
-                                  return discard112(setAttributes2(newCircles)([cx8(function(d9) {
-                                    return function(i2) {
-                                      return calculateAttrs(d9)(i2).x;
-                                    };
-                                  }), cy8(function(d9) {
-                                    return function(i2) {
-                                      return calculateAttrs(d9)(i2).y;
-                                    };
-                                  }), radius16(function(d9) {
-                                    return function(i2) {
-                                      return calculateAttrs(d9)(i2).r;
-                                    };
-                                  }), fill110(function(d9) {
-                                    return function(i2) {
-                                      return calculateAttrs(d9)(i2).color;
-                                    };
-                                  }), fillOpacity9(0.7), strokeColor20("#333"), strokeWidth17(0.5), classed24("nation-circle enter")]))(function() {
-                                    return bind71(openSelection2(chartGroup)("text"))(function(labelEnterSelection) {
-                                      return bind71(updateJoin2(labelEnterSelection)(Text2.value)(nations)(coerceDatumToKey2))(function(labelUpdateSelections) {
-                                        return discard112(setAttributes2(labelUpdateSelections.exit)([classed24("exit")]))(function() {
-                                          return discard112(setAttributes2(labelUpdateSelections.update)([x34(function(d9) {
+                        return bind71(openSelection2(chartGroup)("g"))(function(groupEnterSelection) {
+                          return bind71(updateJoin2(groupEnterSelection)(Group.value)(nations)(coerceDatumToKey2))(function(groupUpdateSelections) {
+                            return discard112(setAttributes2(groupUpdateSelections.exit)([classed24("exit")]))(function() {
+                              return discard112(setAttributes2(groupUpdateSelections.update)([classed24("nation-group update")]))(function() {
+                                return bind71(appendTo2(groupUpdateSelections.enter)(Group.value)([]))(function(newGroups) {
+                                  return discard112(setAttributes2(newGroups)([classed24("nation-group enter")]))(function() {
+                                    return bind71(appendTo2(newGroups)(Circle.value)([]))(function(newCircles) {
+                                      return discard112(setAttributes2(newCircles)([cx8(function(d9) {
+                                        return function(i2) {
+                                          return calculateAttrs(d9)(i2).x;
+                                        };
+                                      }), cy8(function(d9) {
+                                        return function(i2) {
+                                          return calculateAttrs(d9)(i2).y;
+                                        };
+                                      }), radius16(function(d9) {
+                                        return function(i2) {
+                                          return calculateAttrs(d9)(i2).r;
+                                        };
+                                      }), fill110(function(d9) {
+                                        return function(i2) {
+                                          return calculateAttrs(d9)(i2).color;
+                                        };
+                                      }), fillOpacity9(0.7), strokeColor20("#333"), strokeWidth17(0.5), classed24("nation-circle")]))(function() {
+                                        return bind71(appendTo2(newGroups)(Text2.value)([]))(function(newLabels) {
+                                          return discard112(setAttributes2(newLabels)([x34(function(d9) {
                                             return function(i2) {
                                               return calculateAttrs(d9)(i2).x;
                                             };
@@ -34794,18 +34778,40 @@
                                             return function(i2) {
                                               return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
                                             };
-                                          }), classed24("nation-label update")]))(function() {
-                                            return bind71(appendTo2(labelUpdateSelections.enter)(Text2.value)([]))(function(newLabels) {
-                                              return discard112(setAttributes2(newLabels)([x34(function(d9) {
-                                                return function(i2) {
-                                                  return calculateAttrs(d9)(i2).x;
-                                                };
-                                              }), y34(function(d9) {
-                                                return function(i2) {
-                                                  return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
-                                                };
-                                              }), textAnchor12("middle"), fontSize8(11), fill25("#333"), fillOpacity9(0), text110(datum_7.name), classed24("nation-label enter")]))(function() {
-                                                return pure45(newCircles);
+                                          }), textAnchor12("middle"), fontSize8(11), fill25("#333"), fillOpacity9(0), text110(datum_7.name), classed24("nation-label")]))(function() {
+                                            return bind71(openSelection2(chartGroup)(".nation-group"))(function(allGroups) {
+                                              return bind71(openSelection2(allGroups)("circle"))(function(circlesInGroups) {
+                                                return discard112(setAttributes2(circlesInGroups)([cx8(function(d9) {
+                                                  return function(i2) {
+                                                    return calculateAttrs(d9)(i2).x;
+                                                  };
+                                                }), cy8(function(d9) {
+                                                  return function(i2) {
+                                                    return calculateAttrs(d9)(i2).y;
+                                                  };
+                                                }), radius16(function(d9) {
+                                                  return function(i2) {
+                                                    return calculateAttrs(d9)(i2).r;
+                                                  };
+                                                }), fill110(function(d9) {
+                                                  return function(i2) {
+                                                    return calculateAttrs(d9)(i2).color;
+                                                  };
+                                                })]))(function() {
+                                                  return bind71(openSelection2(allGroups)("text"))(function(labelsInGroups) {
+                                                    return discard112(setAttributes2(labelsInGroups)([x34(function(d9) {
+                                                      return function(i2) {
+                                                        return calculateAttrs(d9)(i2).x;
+                                                      };
+                                                    }), y34(function(d9) {
+                                                      return function(i2) {
+                                                        return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
+                                                      };
+                                                    })]))(function() {
+                                                      return pure45(newGroups);
+                                                    });
+                                                  });
+                                                });
                                               });
                                             });
                                           });
@@ -35137,7 +35143,7 @@
           return false;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 165, column 7 - line 167, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 180, column 7 - line 182, column 25): " + [v.constructor.name]);
       })(points);
       if (candidates instanceof Nothing) {
         return head2(points);
@@ -35147,7 +35153,7 @@
         return new Just(candidates.value0);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 171, column 5 - line 173, column 23): " + [candidates.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 186, column 5 - line 188, column 23): " + [candidates.constructor.name]);
     };
   };
   var findAfter = function(targetYear) {
@@ -35162,7 +35168,7 @@
           return false;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 180, column 7 - line 182, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 195, column 7 - line 197, column 25): " + [v.constructor.name]);
       })(points);
       if (candidates instanceof Nothing) {
         return last(points);
@@ -35172,7 +35178,7 @@
         return new Just(candidates.value0);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 186, column 5 - line 188, column 23): " + [candidates.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 201, column 5 - line 203, column 23): " + [candidates.constructor.name]);
     };
   };
   var interpolateValue = function(targetYear) {
@@ -35216,7 +35222,7 @@
         return Nothing.value;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 141, column 7 - line 158, column 36): " + [before.constructor.name, after.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 156, column 7 - line 173, column 36): " + [before.constructor.name, after.constructor.name]);
     };
   };
   var getNationAtYear = function(year) {
@@ -35244,6 +35250,23 @@
   };
   var fillMissingYears = function(yearRange) {
     return function(dataPoints) {
+      var $$null5 = function(arr) {
+        var v = head2(arr);
+        if (v instanceof Nothing) {
+          return true;
+        }
+        ;
+        if (v instanceof Just) {
+          return false;
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 75, column 16 - line 77, column 22): " + [v.constructor.name]);
+      };
+      var $47 = $$null5(dataPoints);
+      if ($47) {
+        return Nothing.value;
+      }
+      ;
       var fillYear = function(year) {
         var v = interpolateValue(floor2(year))(dataPoints);
         if (v instanceof Just) {
@@ -35254,21 +35277,27 @@
           return [year, 0];
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 64, column 21 - line 66, column 29): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 69, column 23 - line 71, column 31): " + [v.constructor.name]);
       };
       var allYears = map58(toNumber)(range2(yearRange.min)(yearRange.max));
-      return map58(fillYear)(allYears);
+      return new Just(map58(fillYear)(allYears));
     };
   };
   var fillNationData = function(yearRange) {
     return function(nation) {
-      return {
-        name: nation.name,
-        region: nation.region,
-        income: fillMissingYears(yearRange)(nation.income),
-        population: fillMissingYears(yearRange)(nation.population),
-        lifeExpectancy: fillMissingYears(yearRange)(nation.lifeExpectancy)
-      };
+      return bind65(fillMissingYears(yearRange)(nation.income))(function(filledIncome) {
+        return bind65(fillMissingYears(yearRange)(nation.population))(function(filledPopulation) {
+          return bind65(fillMissingYears(yearRange)(nation.lifeExpectancy))(function(filledLifeExpectancy) {
+            return pure40({
+              name: nation.name,
+              region: nation.region,
+              income: filledIncome,
+              population: filledPopulation,
+              lifeExpectancy: filledLifeExpectancy
+            });
+          });
+        });
+      });
     };
   };
   var calculateYearRange = function(nations) {
@@ -35283,7 +35312,7 @@
           return [];
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 103, column 7 - line 105, column 22): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 118, column 7 - line 120, column 22): " + [v.constructor.name]);
       });
     });
     var maxYear = fromMaybe(2009)(maximum9(allYears));
@@ -35303,14 +35332,14 @@
         var rawNations = parseNationsJSON(result.value0.body);
         var nations = catMaybes(map58(parseNationData)(rawNations));
         var yearRange = calculateYearRange(nations);
-        var filledNations = map58(fillNationData(yearRange))(nations);
+        var filledNations = catMaybes(map58(fillNationData(yearRange))(nations));
         return new Right({
           nations: filledNations,
           yearRange
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 84, column 8 - line 94, column 50): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 98, column 8 - line 109, column 50): " + [result.constructor.name]);
     })());
   });
 
