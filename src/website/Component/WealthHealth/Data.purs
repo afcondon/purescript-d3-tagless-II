@@ -4,7 +4,7 @@ import Prelude
 
 import Affjax.Web as AX
 import Affjax.ResponseFormat as ResponseFormat
-import Data.Array (find, head, last, sortBy, (!!))
+import Data.Array (catMaybes, find, head, last, sortBy, (!!))
 import Data.Either (Either(..))
 import Data.Foldable (minimum, maximum)
 import Data.Int (floor, toNumber)
@@ -17,30 +17,41 @@ import PSD3.WealthHealth.Types (NationData, NationPoint, Region(..), WealthHealt
 nationsDataUrl :: String
 nationsDataUrl = "data/nations.json"
 
--- | Region constructors for FFI use
-eastAsiaAndPacific :: Region
-eastAsiaAndPacific = EastAsiaAndPacific
+-- | Raw nation data from FFI (region is still a string)
+type NationDataRaw =
+  { name :: String
+  , region :: String  -- Will be parsed to Region ADT
+  , income :: Array (Array Number)
+  , population :: Array (Array Number)
+  , lifeExpectancy :: Array (Array Number)
+  }
 
-europe :: Region
-europe = Europe
+-- | Parse a region string to a Region ADT
+parseRegionString :: String -> Maybe Region
+parseRegionString = case _ of
+  "EastAsiaAndPacific" -> Just EastAsiaAndPacific
+  "Europe" -> Just Europe
+  "LatinAmericaAndCaribbean" -> Just LatinAmericaAndCaribbean
+  "MiddleEastAndNorthAfrica" -> Just MiddleEastAndNorthAfrica
+  "SouthAsia" -> Just SouthAsia
+  "SubSaharanAfrica" -> Just SubSaharanAfrica
+  "NorthAmerica" -> Just NorthAmerica
+  _ -> Nothing
 
-latinAmericaAndCaribbean :: Region
-latinAmericaAndCaribbean = LatinAmericaAndCaribbean
+-- | Convert raw nation data to proper NationData with parsed Region
+parseNationData :: NationDataRaw -> Maybe NationData
+parseNationData raw = do
+  region <- parseRegionString raw.region
+  pure
+    { name: raw.name
+    , region
+    , income: raw.income
+    , population: raw.population
+    , lifeExpectancy: raw.lifeExpectancy
+    }
 
-middleEastAndNorthAfrica :: Region
-middleEastAndNorthAfrica = MiddleEastAndNorthAfrica
-
-southAsia :: Region
-southAsia = SouthAsia
-
-subSaharanAfrica :: Region
-subSaharanAfrica = SubSaharanAfrica
-
-northAmerica :: Region
-northAmerica = NorthAmerica
-
--- | Foreign import to parse JSON data
-foreign import parseNationsJSON :: String -> Array NationData
+-- | Foreign import to parse JSON data (returns raw data with string regions)
+foreign import parseNationsJSON :: String -> Array NationDataRaw
 
 -- | Load nations data from the Observable CDN
 loadNationsData :: Aff (Either String WealthHealthModel)
@@ -50,7 +61,9 @@ loadNationsData = do
     Left err ->
       Left $ "Failed to load nations data: " <> AX.printError err
     Right response -> do
-      let nations = parseNationsJSON response.body
+      let rawNations = parseNationsJSON response.body
+      -- Parse regions from strings to ADTs, filtering out any that fail
+      let nations = catMaybes $ map parseNationData rawNations
       let yearRange = calculateYearRange nations
       Right { nations, yearRange }
 
