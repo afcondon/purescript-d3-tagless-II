@@ -33,6 +33,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState, get)
 import Data.Array (filter, foldl, (:))
+import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import PSD3.Data.Tree (TreeLayout(..))
 import D3.Viz.Spago.Draw (getVizEventFromClick)
@@ -75,6 +76,7 @@ component = H.mkComponent
     , simulation: initialSimulationState forceLibrary
     , scene: initialScene forceLibrary
     , eventListener: Nothing
+    , tags: Map.empty
     }
 
 simulationEvent :: HS.Listener Action -> SelectionAttribute
@@ -293,7 +295,11 @@ runSimulation = do
   let callback = case maybeListener of
         Just listener -> simulationEvent listener
         Nothing -> x 0.0  -- dummy during initialization
-      attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles }
+      -- Add callback and tagMap to scene attributes
+      attributesWithCallback = sceneAttributes {
+        circles = callback : sceneAttributes.circles
+      , tagMap = Just state.tags  -- Pass tags for automatic CSS class propagation
+      }
 
   -- STEP 3: Simulate - Pass initialized nodes to SimulationM2
   -- We pass nodeFilter: Nothing because filtering already happened in Step 1

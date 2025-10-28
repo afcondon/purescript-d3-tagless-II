@@ -7,16 +7,21 @@ import PSD3.Internal.Types (D3Selection_, D3This_, Datum_, Element(..))
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, svgAttrs, updateAttrs)
 import D3.Viz.Spago.Model (datum_, link_)
 import PSD3.Internal.FFI (keyIsID_, simdrag_)
-import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
+import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute)
 import PSD3.Internal.Simulation.Types (Step(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, updateJoin)
 import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate, addTickFunction, update)
 import PSD3.Internal.Attributes.Instances (Label)
-import PSD3.Data.Node (D3_SimulationNode, D3Link_Unswizzled, D3Link_Swizzled)
-import Data.Array (filter)
-import Data.Maybe (Maybe(..))
+import PSD3.Data.Node (D3_SimulationNode, D3Link_Unswizzled, D3Link_Swizzled, NodeID)
+import Data.Array (filter, (:))
+import Data.Array as Array
+import Data.Map (Map)
+import Data.Map as Map
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set (Set)
+import Data.Set as Set
+import Data.String as String
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import PSD3.CodeExplorer.Actions (VizEvent(..))
@@ -25,6 +30,19 @@ import Web.Event.Internal.Types (Event)
 
 getVizEventFromClick :: Event -> Datum_ -> D3This_ -> VizEvent
 getVizEventFromClick e d t = NodeClick (datum_.nodetype d) (datum_.id d)
+
+-- | Create a CSS class attribute from tags
+-- | Tags from the tag map are joined with spaces and added as CSS classes
+-- | This allows tags to automatically affect node styling via CSS
+makeTagClassesAttr :: Maybe (Map NodeID (Set String)) -> SelectionAttribute
+makeTagClassesAttr Nothing = classed ""
+makeTagClassesAttr (Just tagMap) = classed tagClassesFn
+  where
+    tagClassesFn :: Datum_ -> String
+    tagClassesFn d =
+      let nodeId = datum_.id d
+          tags = fromMaybe Set.empty $ Map.lookup nodeId tagMap
+      in String.joinWith " " $ Array.fromFoldable tags
 
 -- | recipe for this force layout graph
 initialize :: forall m.
@@ -96,16 +114,21 @@ updateSimulation { nodes: Just nodesGroup, links: Just linksGroup } dataConfig a
   -- Step 3: Apply General Update Pattern to nodes
   node' <- updateJoin node Group enhanced.nodes keyIsID_
 
+  -- Create tag-based CSS class attribute
+  let tagClassesAttr = makeTagClassesAttr attrs.tagMap
+      enterAttrsWithTags = tagClassesAttr : enterAttrs
+      updateAttrsWithTags = tagClassesAttr : updateAttrs
+
   -- Enter: create new groups with circles and text
-  nodeEnter <- appendTo node'.enter Group enterAttrs
+  nodeEnter <- appendTo node'.enter Group enterAttrsWithTags
   _ <- appendTo nodeEnter Circle attrs.circles
   void $ appendTo nodeEnter Text attrs.labels
 
   -- Exit: remove old nodes
   setAttributes node'.exit [ remove ]
 
-  -- Update: modify existing nodes
-  setAttributes node'.update updateAttrs
+  -- Update: modify existing nodes (including tag classes)
+  setAttributes node'.update updateAttrsWithTags
   updateCirclesSelection <- selectUnder node'.update (show Circle)
   setAttributes updateCirclesSelection attrs.circles
   updateLabelsSelection <- selectUnder node'.update (show Text)

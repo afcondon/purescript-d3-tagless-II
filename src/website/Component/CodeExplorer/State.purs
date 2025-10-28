@@ -16,13 +16,15 @@ import Data.Lens (Lens', _Just, view)
 import Data.Lens.At (at)
 import Data.Lens.Record (prop)
 import Data.Map (Map, keys) as M
-import Data.Maybe (Maybe(..))
+import Data.Map as Map
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
 import Data.Set (Set)
 import Data.Set as Set
 import Halogen.Subscription as HS
 import PSD3.CodeExplorer.Actions (Action)
+import PSD3.Data.Node (D3_SimulationNode(..))
 import Type.Proxy (Proxy(..))
   
 type State = {
@@ -37,6 +39,10 @@ type State = {
   , scene        :: MiseEnScene
 -- | Event listener for D3→Halogen event flow (component infrastructure, not scene config)
   , eventListener :: Maybe (HS.Listener Action)
+-- | Tags for nodes - persistent across scenes, set by ad-hoc predicates
+-- | Maps NodeID to a set of tag strings. Tags automatically propagate to CSS classes.
+-- | Example: Map.fromFoldable [(0, Set.fromFoldable ["package", "recent"]), (1, Set.fromFoldable ["module", "hot"])]
+  , tags :: Map.Map NodeID (Set String)
 }
 
 -- | Configuration for a visualization "scene" - a complete specification of:
@@ -239,4 +245,93 @@ setStagingLinkFilter fn state = state { staging = state.staging { linksWithForce
 -- | tree scenes where initializers need access to the full dataset.
 applySceneConfig :: SceneConfig -> State -> State
 applySceneConfig config state = state { scene = config }
+
+-- ============================================================================
+-- Tag Management - Ad-hoc, imperative tagging for flexible visualization
+-- ============================================================================
+-- |
+-- | The tagging system provides a flexible way to attach metadata to nodes
+-- | based on arbitrary predicates. Tags are:
+-- |
+-- | - **Persistent**: Once set, they remain until explicitly cleared
+-- | - **Accumulative**: Multiple tags can be applied to the same node
+-- | - **Ad-hoc**: Applied via lambdas when needed, not predefined
+-- | - **Automatic CSS**: Tags propagate to DOM as CSS classes
+-- |
+-- | ## Use Cases
+-- |
+-- | - Color coding by git activity (recent, stale, hot, cold)
+-- | - Highlighting commit changesets (in-commit, modified, added)
+-- | - Filtering by author, date, LOC, dependencies
+-- | - Custom visual treatments (important, deprecated, experimental)
+-- |
+-- | ## Example Usage
+-- |
+-- | ```purescript
+-- | -- Tag nodes based on git blame data
+-- | state' <- tagNodes "recent" (\(D3SimNode n) -> n.lastEditDays < 30) allNodes state
+-- | state'' <- tagNodes "hot" (\(D3SimNode n) -> n.editsLastMonth > 10) allNodes state'
+-- |
+-- | -- Clear all tags before applying new scheme
+-- | state''' <- clearAllTags state''
+-- |
+-- | -- Tag specific commit changeset
+-- | changeSet <- getCommitDiff "abc123"
+-- | state'''' <- tagNodes "in-commit" (\(D3SimNode n) ->
+-- |   case n.nodetype of
+-- |     IsModule path -> elem path changeSet
+-- |     _ -> false
+-- | ) allNodes state'''
+-- | ```
+-- |
+-- | Tags automatically become CSS classes on nodes, so you can style them:
+-- |
+-- | ```css
+-- | .node.recent { fill: #00ff00; }
+-- | .node.hot { stroke: #ff0000; stroke-width: 3px; }
+-- | .node.in-commit { filter: brightness(1.5); }
+-- | ```
+
+-- | Apply a tag to nodes matching a predicate
+-- | Tags accumulate - calling this multiple times adds more tags
+tagNodes :: String -> (SpagoSimNode -> Boolean) -> Array SpagoSimNode -> State -> State
+tagNodes label predicate nodes state =
+  let newTags = foldl (\acc node@(D3SimNode n) ->
+        if predicate node
+        then Map.alter (addTag label) n.id acc
+        else acc
+      ) state.tags nodes
+  in state { tags = newTags }
+  where
+    addTag :: String -> Maybe (Set String) -> Maybe (Set String)
+    addTag tag Nothing = Just $ Set.singleton tag
+    addTag tag (Just tags) = Just $ Set.insert tag tags
+
+-- | Remove a specific tag from nodes
+-- | If a node has no tags remaining after removal, it's removed from the map
+untagNodes :: String -> Array SpagoSimNode -> State -> State
+untagNodes label nodes state =
+  let nodeIds = Set.fromFoldable $ (\(D3SimNode n) -> n.id) <$> nodes
+      newTags = Map.mapMaybeWithKey (\id tags ->
+        if Set.member id nodeIds
+        then let tags' = Set.delete label tags
+             in if Set.isEmpty tags' then Nothing else Just tags'
+        else Just tags
+      ) state.tags
+  in state { tags = newTags }
+
+-- | Clear all tags from all nodes
+clearAllTags :: State -> State
+clearAllTags state = state { tags = Map.empty }
+
+-- | Get all tags for a specific node
+getNodeTags :: NodeID -> State -> Set String
+getNodeTags id state = fromMaybe Set.empty $ Map.lookup id state.tags
+
+-- | Check if a node has a specific tag
+nodeHasTag :: String -> NodeID -> State -> Boolean
+nodeHasTag label id state =
+  case Map.lookup id state.tags of
+    Nothing -> false
+    Just tags -> Set.member label tags
 
