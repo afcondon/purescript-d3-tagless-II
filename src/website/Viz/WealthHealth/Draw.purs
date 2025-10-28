@@ -66,10 +66,13 @@ scaleRadius :: Number -> Number
 scaleRadius population =
   let
     -- Square root scale for population (area proportional to population)
+    minRadius = 3.0  -- Minimum radius for visibility
+    maxRadius = 80.0
     maxPop = 5000000000.0  -- 5 billion
     normalized = population / maxPop
+    scaled = sqrt normalized * maxRadius
   in
-    sqrt normalized * 80.0  -- Max radius of 80px
+    max minRadius scaled
 
 -- | Initialize the visualization structure (SVG, axes, etc.)
 initializeVisualization :: forall m.

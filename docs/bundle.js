@@ -35214,19 +35214,9 @@
       });
     };
   };
-  var dummyNationPoint = function(year) {
-    return {
-      name: "Unknown",
-      region: SubSaharanAfrica.value,
-      year,
-      income: 1e3,
-      population: 1e6,
-      lifeExpectancy: 50
-    };
-  };
   var getAllNationsAtYear = function(year) {
     return function(model) {
-      return map58(fromMaybe(dummyNationPoint(year)))(map58(getNationAtYear(year))(model.nations));
+      return catMaybes(map58(getNationAtYear(year))(model.nations));
     };
   };
   var calculateYearRange = function(nations) {
