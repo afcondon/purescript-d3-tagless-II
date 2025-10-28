@@ -222,6 +222,13 @@ handleAction = case _ of
       Just model, Just updateFn -> do
         let nations = getAllNationsAtYear state.currentYear model
         liftEffect $ Console.log $ "Rendering " <> show (length nations) <> " nations for year " <> show state.currentYear
+        -- Debug: log first few nations to see their data
+        case find (\n -> n.name == "United States") nations of
+          Just usa -> liftEffect $ Console.log $ "USA: income=" <> show usa.income <> " life=" <> show usa.lifeExpectancy <> " pop=" <> show usa.population
+          Nothing -> liftEffect $ Console.log "USA not found"
+        case find (\n -> n.name == "China") nations of
+          Just china -> liftEffect $ Console.log $ "China: income=" <> show china.income <> " life=" <> show china.lifeExpectancy <> " pop=" <> show china.population
+          Nothing -> liftEffect $ Console.log "China not found"
         let drawData = map nationPointToDrawData nations
         _ <- liftEffect $ eval_D3M $ updateFn drawData
         pure unit

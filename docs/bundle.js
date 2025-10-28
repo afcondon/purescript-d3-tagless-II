@@ -34603,13 +34603,6 @@
     });
   })();
 
-  // output/PSD3.WealthHealth.WealthHealth/foreign.js
-  function log4(message2) {
-    return function() {
-      console.log(message2);
-    };
-  }
-
   // output/D3.Viz.WealthHealth.Unsafe/index.js
   var datum_7 = {
     name: function(d9) {
@@ -35272,7 +35265,7 @@
         if (v instanceof Initialize48) {
           return bind66(liftAff36(loadNationsData))(function(result) {
             if (result instanceof Left) {
-              return discard111(liftEffect110(log4("Error loading data: " + result.value0)))(function() {
+              return discard111(liftEffect110(log2("Error loading data: " + result.value0)))(function() {
                 return pure41(unit);
               });
             }
@@ -35286,7 +35279,7 @@
         }
         ;
         if (v instanceof DataLoaded2) {
-          return discard111(liftEffect110(log4("Data loaded: " + (show40(length4(v.value0.nations)) + (" nations, years " + (show40(v.value0.yearRange.min) + ("-" + show40(v.value0.yearRange.max))))))))(function() {
+          return discard111(liftEffect110(log2("Data loaded: " + (show40(length4(v.value0.nations)) + (" nations, years " + (show40(v.value0.yearRange.min) + ("-" + show40(v.value0.yearRange.max))))))))(function() {
             return discard111(modify_42(function(v1) {
               var $57 = {};
               for (var $58 in v1) {
@@ -35312,7 +35305,7 @@
                 return $60;
               }))(function() {
                 return discard111(liftAff36(delay(100)))(function() {
-                  return discard111(liftEffect110(log4("Initializing visualization...")))(function() {
+                  return discard111(liftEffect110(log2("Initializing visualization...")))(function() {
                     return bind66(liftEffect110(eval_D3M(draw20("#wealth-health-viz"))))(function(v1) {
                       return discard111(modify_42(function(v2) {
                         var $64 = {};
@@ -35326,7 +35319,7 @@
                         $64.vizUpdateFn = new Just(v1);
                         return $64;
                       }))(function() {
-                        return discard111(liftEffect110(log4("Visualization initialized, rendering initial frame...")))(function() {
+                        return discard111(liftEffect110(log2("Visualization initialized, rendering initial frame...")))(function() {
                           return handleAction47(dictMonadAff)(MonadEffect0)(Render.value);
                         });
                       });
@@ -35339,7 +35332,7 @@
         }
         ;
         if (v instanceof DataLoadFailed2) {
-          return discard111(liftEffect110(log4("Data load failed: " + v.value0)))(function() {
+          return discard111(liftEffect110(log2("Data load failed: " + v.value0)))(function() {
             return pure41(unit);
           });
         }
@@ -35531,7 +35524,7 @@
           return bind66(get11)(function(state3) {
             if (state3.model instanceof Just && state3.vizUpdateFn instanceof Just) {
               var nations = getAllNationsAtYear(state3.currentYear)(state3.model.value0);
-              return discard111(liftEffect110(log4("Rendering " + (show40(length4(nations)) + (" nations for year " + show40(state3.currentYear))))))(function() {
+              return discard111(liftEffect110(log2("Rendering " + (show40(length4(nations)) + (" nations for year " + show40(state3.currentYear))))))(function() {
                 var drawData = map60(nationPointToDrawData)(nations);
                 return bind66(liftEffect110(eval_D3M(state3.vizUpdateFn.value0(drawData))))(function() {
                   return pure41(unit);
@@ -35540,18 +35533,18 @@
             }
             ;
             if (state3.model instanceof Nothing) {
-              return liftEffect110(log4("No model available for rendering"));
+              return liftEffect110(log2("No model available for rendering"));
             }
             ;
             if (state3.vizUpdateFn instanceof Nothing) {
-              return liftEffect110(log4("No update function available"));
+              return liftEffect110(log2("No update function available"));
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 221, column 5 - line 229, column 68): " + [state3.model.constructor.name, state3.vizUpdateFn.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 221, column 5 - line 229, column 76): " + [state3.model.constructor.name, state3.vizUpdateFn.constructor.name]);
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 131, column 16 - line 229, column 68): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 131, column 16 - line 229, column 76): " + [v.constructor.name]);
       };
     };
   };
