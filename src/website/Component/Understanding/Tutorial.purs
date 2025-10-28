@@ -2,28 +2,18 @@ module PSD3.Understanding.SimpleCharts1 where -- Understanding
 
 import Prelude
 
-import Control.Monad.Rec.Class (forever)
 import D3.Viz.BarChart as BarChart
 import D3.Viz.Charts.Model (monthlySales, sineWaveData, anscombesQuartet)
-import D3.Viz.GUP as GUP
 import D3.Viz.LineChart as LineChart
 import D3.Viz.Parabola as Parabola
 import D3.Viz.ScatterPlot as ScatterPlot
 import D3.Viz.ThreeLittleCircles as Circles
-import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.String.CodeUnits (toCharArray)
-import Data.Traversable (sequence)
-import Effect (Effect)
-import Effect.Aff (Aff, Fiber, Milliseconds(..), delay, forkAff, killFiber)
-import Effect.Class (class MonadEffect)
-import Effect.Class.Console (log)
-import Effect.Exception (error)
-import Effect.Random (random)
+import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Interpreter.D3 (eval_D3M, runD3M)
+import PSD3.Interpreter.D3 (eval_D3M)
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Shared.CodeExample (renderCodeExampleSimple)
 import PSD3.Shared.ExamplesNav as ExamplesNav
@@ -34,9 +24,7 @@ import Type.Proxy (Proxy(..))
 
 -- | Tutorial page state
 type State = {
-  gupFiber :: Maybe (Fiber Unit)
-, threeCirclesSnippet :: Maybe String
-, gupSnippet :: Maybe String
+  threeCirclesSnippet :: Maybe String
 , parabolaSnippet :: Maybe String
 , barChartSnippet :: Maybe String
 , lineChartSnippet :: Maybe String
@@ -44,7 +32,7 @@ type State = {
 }
 
 -- | Tutorial page actions
-data Action = Initialize | Finalize
+data Action = Initialize
 
 -- | Child component slots
 type Slots = ( examplesNav :: forall q. H.Slot q Void Unit )
@@ -55,9 +43,7 @@ _examplesNav = Proxy :: Proxy "examplesNav"
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
   { initialState: \_ ->
-      { gupFiber: Nothing
-      , threeCirclesSnippet: Nothing
-      , gupSnippet: Nothing
+      { threeCirclesSnippet: Nothing
       , parabolaSnippet: Nothing
       , barChartSnippet: Nothing
       , lineChartSnippet: Nothing
@@ -67,7 +53,6 @@ component = H.mkComponent
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
       , initialize = Just Initialize
-      , finalize = Just Finalize
       }
   }
 
@@ -77,17 +62,15 @@ lhsNav = renderTOC
   , items:
       [ tocAnchor "section-1" "1. Three Little Circles" 0
       , tocRoute (Explore "TLCSimple") "→ How-to guide" 1
-      , tocAnchor "section-2" "2. General Update Pattern" 0
-      , tocRoute (Explore "GUP") "→ How-to guide" 1
-      , tocAnchor "section-3" "3. Data-Driven Positioning" 0
+      , tocAnchor "section-2" "2. Data-Driven Positioning" 0
       , tocRoute (Explore "TLCParabola") "→ How-to guide" 1
-      , tocAnchor "section-4" "4. Bar Charts with Scales" 0
+      , tocAnchor "section-3" "3. Bar Charts with Scales" 0
       , tocRoute (Explore "BarChartDraw") "→ How-to guide" 1
-      , tocAnchor "section-5" "5. Line Charts and Paths" 0
+      , tocAnchor "section-4" "4. Line Charts and Paths" 0
       , tocRoute (Explore "LineChartDraw") "→ How-to guide" 1
-      , tocAnchor "section-6" "6. Anscombe's Quartet" 0
+      , tocAnchor "section-5" "5. Anscombe's Quartet" 0
       , tocRoute (Explore "ScatterPlotQuartet") "→ How-to guide" 1
-      , tocAnchor "section-7" "7. Next Steps" 0
+      , tocAnchor "section-6" "6. Next Steps" 0
       ]
   , image: Just "images/understanding-bookmark-trees.jpeg"
   }
@@ -134,37 +117,14 @@ render state =
             "TLCSimple"
         ]
 
-    -- Section 2: General Update Pattern
+    -- Section 2: Parabola of Circles
     , HH.section
         [ HP.classes [ HH.ClassName "tutorial-section" ]
         , HP.id "section-2"
         ]
         [ HH.h2
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "2. The General Update Pattern" ]
-        , HH.p_
-            [ HH.text "This deceptively simple example shows off an aspect of screen-based data visualization that has no analogue in paper visualizations: the ability to specify how updates to the data should be represented." ]
-        , HH.p_
-            [ HH.text "In this example, some letters of the alphabet are presented and then constantly updated. When a letter enters at first, it falls in from the top and it is green. If it's still present in the next set of letters it stays on the screen, but it turns gray and moves to an alphabetically correct new position. And if it's not present in the new data, it turns red and falls out before disappearing." ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
-            [ HH.div
-                [ HP.classes [ HH.ClassName "gup-viz" ] ]
-                []
-            ]
-        , renderCodeExampleSimple
-            (fromMaybe "-- Snippet not defined: GUP.purs" state.gupSnippet)
-            "GUP"
-        ]
-
-    -- Section 3: Parabola of Circles
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "section-3"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "3. Data-Driven Positioning" ]
+            [ HH.text "2. Data-Driven Positioning" ]
         , HH.p_
             [ HH.text "This extends the super-simple model in the direction one would go for a more real-world example. In this example, the data is passed in and must match the type specified in the Model. Because the data loses its type information when joined to the DOM elements, we use the datum_ record to provide typed accessors for extracting values." ]
         , HH.div
@@ -178,14 +138,14 @@ render state =
             "TLCParabola"
         ]
 
-    -- Section 4: Bar Chart
+    -- Section 3: Bar Chart
     , HH.section
         [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "section-4"
+        , HP.id "section-3"
         ]
         [ HH.h2
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "4. Bar Charts with Scales" ]
+            [ HH.text "3. Bar Charts with Scales" ]
         , HH.p_
             [ HH.text "Bar charts are ideal for comparing discrete categories or showing changes across time periods. They use rectangular bars with heights or lengths proportional to the values they represent." ]
         , HH.p_
@@ -201,14 +161,14 @@ render state =
             "BarChartDraw"
         ]
 
-    -- Section 5: Line Chart
+    -- Section 4: Line Chart
     , HH.section
         [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "section-5"
+        , HP.id "section-4"
         ]
         [ HH.h2
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "5. Line Charts and Paths" ]
+            [ HH.text "4. Line Charts and Paths" ]
         , HH.p_
             [ HH.text "Line charts are one of the most fundamental visualizations for showing trends over time or continuous data. They excel at displaying patterns, trends, and changes in data series." ]
         , HH.p_
@@ -224,14 +184,14 @@ render state =
             "LineChartDraw"
         ]
 
-    -- Section 6: Anscombe's Quartet
+    -- Section 5: Anscombe's Quartet
     , HH.section
         [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "section-6"
+        , HP.id "section-5"
         ]
         [ HH.h2
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "6. Anscombe's Quartet" ]
+            [ HH.text "5. Anscombe's Quartet" ]
         , HH.p_
             [ HH.text "This example demonstrates Anscombe's Quartet, a famous dataset created by statistician Francis Anscombe in 1973. All four datasets have nearly identical statistical properties (same mean, variance, correlation, and linear regression line), yet when visualized they reveal completely different patterns." ]
         , HH.p_
@@ -247,14 +207,14 @@ render state =
             "ScatterPlotQuartet"
         ]
 
-    -- Section 7: Next Steps with margin links
+    -- Section 6: Next Steps with margin links
     , HH.section
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-conclusion" ]
-        , HP.id "section-7"
+        , HP.id "section-6"
         ]
         [ HH.h2
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Next Steps" ]
+            [ HH.text "6. Next Steps" ]
         , HH.p_
             [ HH.text "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien." ]
 
@@ -299,14 +259,12 @@ handleAction = case _ of
   Initialize -> do
     -- Load code snippets
     threeCircles <- H.liftAff $ readSnippetFiles "TLCSimple.purs"
-    gup <- H.liftAff $ readSnippetFiles "GUP.purs"
     parabola <- H.liftAff $ readSnippetFiles "TLCParabola.purs"
     barChart <- H.liftAff $ readSnippetFiles "BarChartDraw.purs"
     lineChart <- H.liftAff $ readSnippetFiles "LineChartDraw.purs"
     quartet <- H.liftAff $ readSnippetFiles "ScatterPlotQuartet.purs"
 
     H.modify_ _ { threeCirclesSnippet = Just threeCircles
-                , gupSnippet = Just gup
                 , parabolaSnippet = Just parabola
                 , barChartSnippet = Just barChart
                 , lineChartSnippet = Just lineChart
@@ -315,11 +273,6 @@ handleAction = case _ of
 
     -- Draw Three Little Circles
     _ <- H.liftEffect $ eval_D3M $ Circles.drawThreeCircles "div.three-circles-viz"
-
-    -- Set up General Update Pattern animation
-    updateFn <- runGeneralUpdatePattern
-    fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
-    H.modify_ (\state -> state { gupFiber = Just fiber })
 
     -- Draw Parabola of Circles
     _ <- H.liftEffect $ eval_D3M $ Parabola.drawWithData [310, 474, 613, 726, 814, 877, 914, 926, 914, 877, 814, 726, 613, 474, 310] "div.parabola-viz"
@@ -334,37 +287,4 @@ handleAction = case _ of
     _ <- H.liftEffect $ eval_D3M $ ScatterPlot.drawQuartet anscombesQuartet "div.quartet-viz"
 
     pure unit
-
-  Finalize -> do
-    -- Kill the GUP animation fiber
-    maybeFiber <- H.gets _.gupFiber
-    case maybeFiber of
-      Nothing -> pure unit
-      Just fiber -> H.liftAff $ killFiber (error "Cancelling GUP animation") fiber
-
--- Helper functions for GUP animation
-runGeneralUpdatePattern :: forall m. MonadEffect m => m (Array Char -> Aff Unit)
-runGeneralUpdatePattern = do
-  log "General Update Pattern example"
-  update <- H.liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern "div.gup-viz"
-  pure (\letters -> H.liftEffect $ runD3M (update letters) *> pure unit)
-
-runUpdate :: (Array Char -> Aff Unit) -> Aff Unit
-runUpdate update = do
-  letters <- H.liftEffect $ getLetters
-  update letters
-  delay (Milliseconds 2300.0)
-  where
-    -- | choose a string of random letters (no duplicates), ordered alphabetically
-    getLetters :: Effect (Array Char)
-    getLetters = do
-      let
-        letters = toCharArray "abcdefghijklmnopqrstuvwxyz"
-        coinToss :: Char -> Effect (Maybe Char)
-        coinToss c = do
-          n <- random
-          pure $ if n > 0.6 then Just c else Nothing
-
-      choices <- sequence $ coinToss <$> letters
-      pure $ catMaybes choices
 

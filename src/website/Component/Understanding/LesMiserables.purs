@@ -4,33 +4,48 @@ import Prelude
 
 import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
+import Control.Monad.Rec.Class (forever)
 import Control.Monad.State (class MonadState, get)
+import D3.Viz.GUP as GUP
 import D3.Viz.LesMiserables as LesMis
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
+import Data.Array (catMaybes)
+import Data.String.CodeUnits (toCharArray)
+import Data.Traversable (sequence)
 import PSD3.Internal.FFI (linksForceName_)
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), allNodes, initialSimulationState)
-import PSD3.Interpreter.D3 (runWithD3_Simulation)
+import PSD3.Interpreter.D3 (eval_D3M, runD3M, runWithD3_Simulation)
+import PSD3.Shared.CodeExample (renderCodeExampleSimple)
+import PSD3.Understanding.TOC (renderTOC, tocAnchor, tocRoute)
 import Data.Map (Map)
-import Data.Maybe (Maybe(..))
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set as Set
-import Effect.Aff (Aff)
+import Effect (Effect)
+import Effect.Aff (Aff, Fiber, Milliseconds(..), delay, forkAff, killFiber)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (class MonadEffect)
+import Effect.Class.Console (log)
+import Effect.Exception (error)
+import Effect.Random (random)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.ExamplesNav as ExamplesNav
 import PSD3.Website.Types (Route(..))
+import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))
 
 -- | State
 type State = {
   simulation :: D3SimulationState_
+, gupFiber :: Maybe (Fiber Unit)
+, gupSnippet :: Maybe String
 }
 
 -- | Actions
-data Action = Initialize
+data Action = Initialize | Finalize
 
 -- | Child component slots
 type Slots = ( examplesNav :: forall q. H.Slot q Void Unit )
@@ -52,49 +67,35 @@ forces = {
 -- | Component
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
-  { initialState: \_ -> { simulation: initialSimulationState forceLibrary }
+  { initialState: \_ ->
+      { simulation: initialSimulationState forceLibrary
+      , gupFiber: Nothing
+      , gupSnippet: Nothing
+      }
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
       , initialize = Just Initialize
+      , finalize = Just Finalize
       }
   }
 
 render :: State -> H.ComponentHTML Action Slots Aff
-render _ =
+render state =
   HH.div
     [ HP.classes [ HH.ClassName "explanation-page" ] ]
     [ -- TOC Panel (LHS)
-      HH.div
-        [ HP.classes [ HH.ClassName "toc-panel" ] ]
-        [ HH.img
-            [ HP.src "bookmark.jpeg"
-            , HP.alt ""
-            , HP.classes [ HH.ClassName "toc-panel__bookmark-pin" ]
+      renderTOC
+        { title: "Page Contents"
+        , items:
+            [ tocAnchor "section-1" "1. General Update Pattern" 0
+            , tocRoute (Explore "GUP") "→ How-to guide" 1
+            , tocAnchor "section-2" "2. Force-Directed Graph" 0
+            , tocAnchor "example" "2a. Interactive Layout" 1
+            , tocAnchor "code" "2b. Implementation" 1
             ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "toc-panel__main" ] ]
-            [ HH.div
-                [ HP.classes [ HH.ClassName "floating-panel__header" ] ]
-                [ HH.h3
-                    [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
-                    [ HH.text "Contents" ]
-                , HH.button
-                    [ HP.classes [ HH.ClassName "floating-panel__toggle" ]
-                    , HP.type_ HP.ButtonButton
-                    ]
-                    [ HH.text "−" ]
-                ]
-            , HH.div
-                [ HP.classes [ HH.ClassName "floating-panel__content", HH.ClassName "toc-panel__content" ] ]
-                [ HH.nav
-                    [ HP.classes [ HH.ClassName "toc-nav" ] ]
-                    [ HH.a [ HP.href "#example", HP.classes [ HH.ClassName "toc-nav__item" ] ] [ HH.text "1. Example" ]
-                    , HH.a [ HP.href "#code", HP.classes [ HH.ClassName "toc-nav__item" ] ] [ HH.text "2. Code" ]
-                    ]
-                ]
-            ]
-        ]
+        , image: Just "images/understanding-bookmark-trees.jpeg"
+        }
 
     -- Navigation Panel (RHS)
     , HH.slot_ _examplesNav unit ExamplesNav.component Movement
@@ -104,7 +105,42 @@ render _ =
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-            [ HH.text "Force-Directed Graph: Les Misérables Character Network" ]
+            [ HH.text "Movement & Transition" ]
+        , HH.p_
+            [ HH.text "This page explores two key aspects of data visualization: the General Update Pattern for managing enter/update/exit transitions, and force-directed layouts that use physics simulation to position nodes and links." ]
+        ]
+
+    -- Section 1: General Update Pattern
+    , HH.section
+        [ HP.classes [ HH.ClassName "tutorial-section" ]
+        , HP.id "section-1"
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+            [ HH.text "1. The General Update Pattern" ]
+        , HH.p_
+            [ HH.text "This deceptively simple example shows off an aspect of screen-based data visualization that has no analogue in paper visualizations: the ability to specify how updates to the data should be represented." ]
+        , HH.p_
+            [ HH.text "In this example, some letters of the alphabet are presented and then constantly updated. When a letter enters at first, it falls in from the top and it is green. If it's still present in the next set of letters it stays on the screen, but it turns gray and moves to an alphabetically correct new position. And if it's not present in the new data, it turns red and falls out before disappearing." ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
+            [ HH.div
+                [ HP.classes [ HH.ClassName "gup-viz" ] ]
+                []
+            ]
+        , renderCodeExampleSimple
+            (fromMaybe "-- Snippet not defined: GUP.purs" state.gupSnippet)
+            "GUP"
+        ]
+
+    -- Section 2: Les Misérables Force Layout
+    , HH.section
+        [ HP.classes [ HH.ClassName "tutorial-section" ]
+        , HP.id "section-2"
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+            [ HH.text "2. Force-Directed Graph: Les Misérables" ]
         , HH.p_
             [ HH.text "Force-directed graphs use physics simulation to position nodes and links. Nodes repel each other like charged particles, while links act as springs pulling connected nodes together. The simulation finds an equilibrium that naturally reveals the structure of the network." ]
         , HH.p_
@@ -123,7 +159,7 @@ render _ =
         ]
         [ HH.h2
             [ HP.classes [ HH.ClassName "section-title" ] ]
-            [ HH.text "1. Interactive Force Layout" ]
+            [ HH.text "2a. Interactive Force Layout" ]
         , HH.p_
             [ HH.text "Drag nodes to see the force simulation respond. The simulation applies multiple forces: center (pulls toward middle), charge (nodes repel), collision (prevents overlap), and link (pulls connected nodes together)." ]
         , HH.div
@@ -138,7 +174,7 @@ render _ =
         ]
         [ HH.h2
             [ HP.classes [ HH.ClassName "section-title" ] ]
-            [ HH.text "2. Implementation with Simplified SimulationM" ]
+            [ HH.text "2b. Implementation with Simplified SimulationM" ]
         , HH.p_
             [ HH.text "The new SimulationM API simplifies force layout creation. Instead of manually calling multiple setup functions, pass everything to "
             , HH.code_ [ HH.text "init" ]
@@ -187,6 +223,15 @@ handleAction :: forall m.
   Action -> m Unit
 handleAction = case _ of
   Initialize -> do
+    -- Load GUP code snippet
+    gup <- H.liftAff $ readSnippetFiles "GUP.purs"
+    H.modify_ _ { gupSnippet = Just gup }
+
+    -- Set up General Update Pattern animation
+    updateFn <- runGeneralUpdatePattern
+    fiber <- H.liftAff $ forkAff $ forever $ runUpdate updateFn
+    H.modify_ (\state -> state { gupFiber = Just fiber })
+
     -- Load data
     response <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
     let graph = readGraphFromFileContents response
@@ -198,3 +243,36 @@ handleAction = case _ of
     -- Draw visualization
     runWithD3_Simulation do
       LesMis.drawSimplified forcesArray activeForces graph "div.lesmis-container"
+
+  Finalize -> do
+    -- Kill the GUP animation fiber
+    maybeFiber <- H.gets _.gupFiber
+    case maybeFiber of
+      Nothing -> pure unit
+      Just fiber -> H.liftAff $ killFiber (error "Cancelling GUP animation") fiber
+
+-- Helper functions for GUP animation
+runGeneralUpdatePattern :: forall m. MonadEffect m => m (Array Char -> Aff Unit)
+runGeneralUpdatePattern = do
+  log "General Update Pattern example"
+  update <- H.liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern "div.gup-viz"
+  pure (\letters -> H.liftEffect $ runD3M (update letters) *> pure unit)
+
+runUpdate :: (Array Char -> Aff Unit) -> Aff Unit
+runUpdate update = do
+  letters <- H.liftEffect $ getLetters
+  update letters
+  delay (Milliseconds 2300.0)
+  where
+    -- | choose a string of random letters (no duplicates), ordered alphabetically
+    getLetters :: Effect (Array Char)
+    getLetters = do
+      let
+        letters = toCharArray "abcdefghijklmnopqrstuvwxyz"
+        coinToss :: Char -> Effect (Maybe Char)
+        coinToss c = do
+          n <- random
+          pure $ if n > 0.6 then Just c else Nothing
+
+      choices <- sequence $ coinToss <$> letters
+      pure $ catMaybes choices

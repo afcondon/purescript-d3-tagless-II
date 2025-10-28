@@ -118,7 +118,7 @@ instance showRoute :: Show Route where
   show SimpleCharts1 = "Simplest Charts"
   show SimpleCharts2 = "Lines and Bars"
   show DataFlowViz = "Data Flow Visualizations"
-  show Movement = "Les Misérables"
+  show Movement = "Movement & Transition"
   show Hierarchies = "Hierarchies"
   show Interpreters = "Interpreters"
   show CodeExplorer = "Code Explorer"
