@@ -254,26 +254,26 @@ draw selector = do
             , color
             }
 
-    -- Use General Update Pattern for nation groups (each contains circle + label)
-    enterSelection <- openSelection chartGroup "g"
-    updateSelections <- updateJoin enterSelection Group nations coerceDatumToKey
+    -- Use General Update Pattern for circles
+    circleEnterSelection <- openSelection chartGroup "circle"
+    circleUpdateSelections <- updateJoin circleEnterSelection Circle nations coerceDatumToKey
 
-    -- Exit: remove groups for nations that disappeared
-    setAttributes updateSelections.exit
+    -- Exit: remove circles for nations that disappeared
+    setAttributes circleUpdateSelections.exit
       [ classed "exit" ]
 
-    -- Update: update existing nation groups
-    setAttributes updateSelections.update
-      [ classed "nation-group update" ]
+    -- Update: move existing circles to new positions
+    setAttributes circleUpdateSelections.update
+      [ cx \d i -> (calculateAttrs d i).x
+      , cy \d i -> (calculateAttrs d i).y
+      , radius \d i -> (calculateAttrs d i).r
+      , fill \d i -> (calculateAttrs d i).color
+      , classed "nation-circle update"
+      ]
 
-    -- Enter: create new nation groups
-    newGroups <- appendTo updateSelections.enter Group []
-    setAttributes newGroups
-      [ classed "nation-group enter" ]
-
-    -- Add circles to new groups
-    circles <- appendTo newGroups Circle []
-    setAttributes circles
+    -- Enter: create new circles
+    newCircles <- appendTo circleUpdateSelections.enter Circle []
+    setAttributes newCircles
       [ cx \d i -> (calculateAttrs d i).x
       , cy \d i -> (calculateAttrs d i).y
       , radius \d i -> (calculateAttrs d i).r
@@ -281,11 +281,27 @@ draw selector = do
       , fillOpacity 0.7
       , strokeColor "#333"
       , strokeWidth 0.5
-      , classed "nation-circle"
+      , classed "nation-circle enter"
       ]
 
-    -- Add labels to new groups
-    labels <- appendTo newGroups Text
+    -- Use General Update Pattern for labels
+    labelEnterSelection <- openSelection chartGroup "text"
+    labelUpdateSelections <- updateJoin labelEnterSelection Text nations coerceDatumToKey
+
+    -- Exit: remove labels for nations that disappeared
+    setAttributes labelUpdateSelections.exit
+      [ classed "exit" ]
+
+    -- Update: move existing labels to new positions
+    setAttributes labelUpdateSelections.update
+      [ x \d i -> (calculateAttrs d i).x
+      , y \d i -> (calculateAttrs d i).y - (calculateAttrs d i).r - 5.0
+      , classed "nation-label update"
+      ]
+
+    -- Enter: create new labels
+    newLabels <- appendTo labelUpdateSelections.enter Text []
+    setAttributes newLabels
       [ x \d i -> (calculateAttrs d i).x
       , y \d i -> (calculateAttrs d i).y - (calculateAttrs d i).r - 5.0
       , textAnchor "middle"
@@ -293,23 +309,7 @@ draw selector = do
       , fill "#333"
       , fillOpacity 0.0  -- Initially hidden
       , text datum_.name
-      , classed "nation-label"
+      , classed "nation-label enter"
       ]
 
-    -- Update circles in all groups (both new and existing)
-    allCircles <- openSelection chartGroup ".nation-circle"
-    setAttributes allCircles
-      [ cx \d i -> (calculateAttrs d i).x
-      , cy \d i -> (calculateAttrs d i).y
-      , radius \d i -> (calculateAttrs d i).r
-      , fill \d i -> (calculateAttrs d i).color
-      ]
-
-    -- Update labels in all groups (both new and existing)
-    allLabels <- openSelection chartGroup ".nation-label"
-    setAttributes allLabels
-      [ x \d i -> (calculateAttrs d i).x
-      , y \d i -> (calculateAttrs d i).y - (calculateAttrs d i).r - 5.0
-      ]
-
-    pure newGroups
+    pure newCircles
