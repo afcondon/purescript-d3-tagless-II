@@ -5,7 +5,7 @@ import Prelude
 import D3.Viz.WealthHealth.Unsafe (coerceDatumToKey, datum_)
 import Data.Number (log, sqrt)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSelection, setAttributes, updateJoin)
-import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, height, radius, strokeColor, strokeWidth, viewBox, width)
+import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, fontSize, height, radius, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 
 -- | Type alias for a nation data point ready for visualization
@@ -173,6 +173,61 @@ draw selector = do
     , width config.width
     , height config.height
     , classed "wealth-health-viz"
+    ]
+
+  -- Add X-axis (bottom)
+  xAxisLine <- appendTo svg Line
+    [ x1 0.0
+    , y1 config.height
+    , x2 config.width
+    , y2 config.height
+    , strokeColor "#333"
+    , strokeWidth 2.0
+    , classed "x-axis"
+    ]
+
+  -- Add X-axis label (Wealth)
+  xAxisLabel <- appendTo svg Text
+    [ x (config.width / 2.0)
+    , y (config.height - 10.0)
+    , textAnchor "middle"
+    , fontSize 14.0
+    , fill "#333"
+    , classed "x-axis-label"
+    , text "Wealth"
+    ]
+
+  -- Add Y-axis (left)
+  yAxisLine <- appendTo svg Line
+    [ x1 0.0
+    , y1 0.0
+    , x2 0.0
+    , y2 config.height
+    , strokeColor "#333"
+    , strokeWidth 2.0
+    , classed "y-axis"
+    ]
+
+  -- Add Y-axis label (Health) - rotated
+  yAxisLabel <- appendTo svg Text
+    [ x 15.0
+    , y (config.height / 2.0)
+    , textAnchor "middle"
+    , fontSize 14.0
+    , fill "#333"
+    , classed "y-axis-label"
+    , text "Health"
+    ]
+
+  -- Add Hans Rosling tribute
+  tribute <- appendTo svg Text
+    [ x (config.width / 2.0)
+    , y (config.height - 30.0)
+    , textAnchor "middle"
+    , fontSize 11.0
+    , fill "#666"
+    , classed "tribute"
+    , text "RIP Hans Rosling 1948-2017"
     ]
 
   chartGroup <- appendTo svg Group [ classed "nations" ]

@@ -361,3 +361,14 @@
   width: 100%;
   height: 100%;
 }
+
+/* Axes and labels */
+.y-axis-label {
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+.tribute {
+  font-style: italic;
+  opacity: 0.7;
+}
