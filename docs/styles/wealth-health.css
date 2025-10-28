@@ -372,3 +372,20 @@
   font-style: italic;
   opacity: 0.7;
 }
+
+/* Nation groups and labels */
+.nation-group {
+  cursor: pointer;
+}
+
+.nation-label {
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  font-family: var(--font-mono);
+  font-weight: 500;
+}
+
+/* Show label on group hover */
+.nation-group:hover .nation-label {
+  opacity: 1 !important;
+}
