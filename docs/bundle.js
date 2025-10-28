@@ -34671,9 +34671,9 @@
   var cy8 = /* @__PURE__ */ cy(toAttrNumberFnI);
   var radius16 = /* @__PURE__ */ radius(toAttrNumberFnI);
   var fill110 = /* @__PURE__ */ fill(toAttrStringFnI);
-  var fillOpacity9 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var x34 = /* @__PURE__ */ x(toAttrNumberFnI);
   var y34 = /* @__PURE__ */ y(toAttrNumberFnI);
+  var fillOpacity9 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var text110 = /* @__PURE__ */ text6(toAttrStringFn);
   var scaleY = function(config) {
     return function(lifeExpectancy) {
@@ -34749,67 +34749,65 @@
                           return bind71(updateJoin2(groupEnterSelection)(Group.value)(nations)(coerceDatumToKey2))(function(groupUpdateSelections) {
                             return discard112(setAttributes2(groupUpdateSelections.exit)([classed24("exit")]))(function() {
                               return discard112(setAttributes2(groupUpdateSelections.update)([classed24("nation-group update")]))(function() {
-                                return bind71(appendTo2(groupUpdateSelections.enter)(Group.value)([]))(function(newGroups) {
-                                  return discard112(setAttributes2(newGroups)([classed24("nation-group enter")]))(function() {
-                                    return bind71(appendTo2(newGroups)(Circle.value)([]))(function(newCircles) {
-                                      return discard112(setAttributes2(newCircles)([cx8(function(d9) {
+                                return bind71(openSelection2(groupUpdateSelections.update)("circle"))(function(updateCircles) {
+                                  return discard112(setAttributes2(updateCircles)([cx8(function(d9) {
+                                    return function(i2) {
+                                      return calculateAttrs(d9)(i2).x;
+                                    };
+                                  }), cy8(function(d9) {
+                                    return function(i2) {
+                                      return calculateAttrs(d9)(i2).y;
+                                    };
+                                  }), radius16(function(d9) {
+                                    return function(i2) {
+                                      return calculateAttrs(d9)(i2).r;
+                                    };
+                                  }), fill110(function(d9) {
+                                    return function(i2) {
+                                      return calculateAttrs(d9)(i2).color;
+                                    };
+                                  })]))(function() {
+                                    return bind71(openSelection2(groupUpdateSelections.update)("text"))(function(updateLabels) {
+                                      return discard112(setAttributes2(updateLabels)([x34(function(d9) {
                                         return function(i2) {
                                           return calculateAttrs(d9)(i2).x;
                                         };
-                                      }), cy8(function(d9) {
+                                      }), y34(function(d9) {
                                         return function(i2) {
-                                          return calculateAttrs(d9)(i2).y;
+                                          return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
                                         };
-                                      }), radius16(function(d9) {
-                                        return function(i2) {
-                                          return calculateAttrs(d9)(i2).r;
-                                        };
-                                      }), fill110(function(d9) {
-                                        return function(i2) {
-                                          return calculateAttrs(d9)(i2).color;
-                                        };
-                                      }), fillOpacity9(0.7), strokeColor20("#333"), strokeWidth17(0.5), classed24("nation-circle")]))(function() {
-                                        return bind71(appendTo2(newGroups)(Text2.value)([]))(function(newLabels) {
-                                          return discard112(setAttributes2(newLabels)([x34(function(d9) {
-                                            return function(i2) {
-                                              return calculateAttrs(d9)(i2).x;
-                                            };
-                                          }), y34(function(d9) {
-                                            return function(i2) {
-                                              return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
-                                            };
-                                          }), textAnchor12("middle"), fontSize8(11), fill25("#333"), fillOpacity9(0), text110(datum_7.name), classed24("nation-label")]))(function() {
-                                            return bind71(openSelection2(chartGroup)(".nation-group"))(function(allGroups) {
-                                              return bind71(openSelection2(allGroups)("circle"))(function(circlesInGroups) {
-                                                return discard112(setAttributes2(circlesInGroups)([cx8(function(d9) {
-                                                  return function(i2) {
-                                                    return calculateAttrs(d9)(i2).x;
-                                                  };
-                                                }), cy8(function(d9) {
-                                                  return function(i2) {
-                                                    return calculateAttrs(d9)(i2).y;
-                                                  };
-                                                }), radius16(function(d9) {
-                                                  return function(i2) {
-                                                    return calculateAttrs(d9)(i2).r;
-                                                  };
-                                                }), fill110(function(d9) {
-                                                  return function(i2) {
-                                                    return calculateAttrs(d9)(i2).color;
-                                                  };
-                                                })]))(function() {
-                                                  return bind71(openSelection2(allGroups)("text"))(function(labelsInGroups) {
-                                                    return discard112(setAttributes2(labelsInGroups)([x34(function(d9) {
-                                                      return function(i2) {
-                                                        return calculateAttrs(d9)(i2).x;
-                                                      };
-                                                    }), y34(function(d9) {
-                                                      return function(i2) {
-                                                        return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
-                                                      };
-                                                    })]))(function() {
-                                                      return pure45(newGroups);
-                                                    });
+                                      })]))(function() {
+                                        return bind71(appendTo2(groupUpdateSelections.enter)(Group.value)([]))(function(newGroups) {
+                                          return discard112(setAttributes2(newGroups)([classed24("nation-group enter")]))(function() {
+                                            return bind71(appendTo2(newGroups)(Circle.value)([]))(function(newCircles) {
+                                              return discard112(setAttributes2(newCircles)([cx8(function(d9) {
+                                                return function(i2) {
+                                                  return calculateAttrs(d9)(i2).x;
+                                                };
+                                              }), cy8(function(d9) {
+                                                return function(i2) {
+                                                  return calculateAttrs(d9)(i2).y;
+                                                };
+                                              }), radius16(function(d9) {
+                                                return function(i2) {
+                                                  return calculateAttrs(d9)(i2).r;
+                                                };
+                                              }), fill110(function(d9) {
+                                                return function(i2) {
+                                                  return calculateAttrs(d9)(i2).color;
+                                                };
+                                              }), fillOpacity9(0.7), strokeColor20("#333"), strokeWidth17(0.5), classed24("nation-circle")]))(function() {
+                                                return bind71(appendTo2(newGroups)(Text2.value)([]))(function(newLabels) {
+                                                  return discard112(setAttributes2(newLabels)([x34(function(d9) {
+                                                    return function(i2) {
+                                                      return calculateAttrs(d9)(i2).x;
+                                                    };
+                                                  }), y34(function(d9) {
+                                                    return function(i2) {
+                                                      return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
+                                                    };
+                                                  }), textAnchor12("middle"), fontSize8(11), fill25("#333"), fillOpacity9(0), text110(datum_7.name), classed24("nation-label")]))(function() {
+                                                    return pure45(newGroups);
                                                   });
                                                 });
                                               });
