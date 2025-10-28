@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Monad.Rec.Class (forever)
 import D3.Viz.WealthHealth.Draw as Draw
-import Data.Array (find)
+import Data.Array (find, length)
 import Data.Either (Either(..))
 import Data.Int (floor)
 import Data.Maybe (Maybe(..))
@@ -140,12 +140,18 @@ handleAction = case _ of
         handleAction (DataLoaded model)
 
   DataLoaded model -> do
+    liftEffect $ log $ "Data loaded: " <> show (length model.nations) <> " nations, years " <> show model.yearRange.min <> "-" <> show model.yearRange.max
     H.modify_ _ { model = Just model }
     H.modify_ _ { currentYear = model.yearRange.min }
 
+    -- Give Halogen time to render the DOM with the viz container
+    H.liftAff $ Aff.delay (Milliseconds 100.0)
+
     -- Initialize visualization once and store update function
+    liftEffect $ log "Initializing visualization..."
     (updateFn :: Array Draw.NationPoint -> D3M Unit D3Selection_ D3Selection_) <- liftEffect $ eval_D3M $ Draw.draw "#wealth-health-viz"
     H.modify_ _ { vizUpdateFn = Just updateFn }
+    liftEffect $ log "Visualization initialized, rendering initial frame..."
 
     -- Draw initial visualization
     handleAction Render
@@ -215,10 +221,12 @@ handleAction = case _ of
     case state.model, state.vizUpdateFn of
       Just model, Just updateFn -> do
         let nations = getAllNationsAtYear state.currentYear model
+        liftEffect $ log $ "Rendering " <> show (length nations) <> " nations for year " <> show state.currentYear
         let drawData = map nationPointToDrawData nations
         _ <- liftEffect $ eval_D3M $ updateFn drawData
         pure unit
-      _, _ -> pure unit
+      Nothing, _ -> liftEffect $ log "No model available for rendering"
+      _, Nothing -> liftEffect $ log "No update function available"
 
 -- FFI imports
 foreign import log :: String -> Effect Unit
