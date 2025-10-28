@@ -132,9 +132,19 @@
 }
 
 /* Tag-based styling - Halogen packages */
-.node.halogen circle {
+/* Note: Need to override inline fill attributes set by D3 */
+.node.halogen circle,
+g.halogen circle {
   fill: #1e3a8a !important;  /* Dark blue - overrides scene colors */
   stroke: #60a5fa !important; /* Light blue stroke */
+  stroke-width: 3px !important;
+}
+
+/* Also try targeting by the full class chain */
+g.module.halogen circle,
+g.package.halogen circle {
+  fill: #1e3a8a !important;
+  stroke: #60a5fa !important;
   stroke-width: 3px !important;
 }
 
