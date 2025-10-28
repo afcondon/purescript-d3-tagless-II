@@ -34,7 +34,7 @@ export function parseNationsJSON(jsonString) {
       region: parseRegion(nation.region),
       income: nation.income || [],
       population: nation.population || [],
-      lifeExpectancy: nation.life_expectancy || []
+      lifeExpectancy: nation.lifeExpectancy || []
     }));
   } catch (error) {
     console.error("Failed to parse nations JSON:", error);

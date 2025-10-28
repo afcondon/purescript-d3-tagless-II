@@ -35282,18 +35282,24 @@
         ;
         if (v instanceof DataLoaded2) {
           return discard111(liftEffect110(log2("Data loaded: " + (show40(length4(v.value0.nations)) + (" nations, years " + (show40(v.value0.yearRange.min) + ("-" + show40(v.value0.yearRange.max))))))))(function() {
-            return discard111(modify_42(function(v1) {
-              var $63 = {};
-              for (var $64 in v1) {
-                if ({}.hasOwnProperty.call(v1, $64)) {
-                  $63[$64] = v1[$64];
-                }
-                ;
+            return discard111((function() {
+              var v1 = head2(v.value0.nations);
+              if (v1 instanceof Just) {
+                return discard111(liftEffect110(log2("First raw nation: " + v1.value0.name)))(function() {
+                  return discard111(liftEffect110(log2("  Income data points: " + show40(length4(v1.value0.income)))))(function() {
+                    return discard111(liftEffect110(log2("  Population data points: " + show40(length4(v1.value0.population)))))(function() {
+                      return liftEffect110(log2("  Life expectancy data points: " + show40(length4(v1.value0.lifeExpectancy))));
+                    });
+                  });
+                });
               }
               ;
-              $63.model = new Just(v.value0);
-              return $63;
-            }))(function() {
+              if (v1 instanceof Nothing) {
+                return liftEffect110(log2("No nations in model!"));
+              }
+              ;
+              throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 145, column 5 - line 151, column 65): " + [v1.constructor.name]);
+            })())(function() {
               return discard111(modify_42(function(v1) {
                 var $66 = {};
                 for (var $67 in v1) {
@@ -35303,26 +35309,39 @@
                   ;
                 }
                 ;
-                $66.currentYear = v.value0.yearRange.min;
+                $66.model = new Just(v.value0);
                 return $66;
               }))(function() {
-                return discard111(liftAff36(delay(100)))(function() {
-                  return discard111(liftEffect110(log2("Initializing visualization...")))(function() {
-                    return bind66(liftEffect110(eval_D3M(draw20("#wealth-health-viz"))))(function(v1) {
-                      return discard111(modify_42(function(v2) {
-                        var $70 = {};
-                        for (var $71 in v2) {
-                          if ({}.hasOwnProperty.call(v2, $71)) {
-                            $70[$71] = v2[$71];
+                return discard111(modify_42(function(v1) {
+                  var $69 = {};
+                  for (var $70 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $70)) {
+                      $69[$70] = v1[$70];
+                    }
+                    ;
+                  }
+                  ;
+                  $69.currentYear = v.value0.yearRange.min;
+                  return $69;
+                }))(function() {
+                  return discard111(liftAff36(delay(100)))(function() {
+                    return discard111(liftEffect110(log2("Initializing visualization...")))(function() {
+                      return bind66(liftEffect110(eval_D3M(draw20("#wealth-health-viz"))))(function(v1) {
+                        return discard111(modify_42(function(v2) {
+                          var $73 = {};
+                          for (var $74 in v2) {
+                            if ({}.hasOwnProperty.call(v2, $74)) {
+                              $73[$74] = v2[$74];
+                            }
+                            ;
                           }
                           ;
-                        }
-                        ;
-                        $70.vizUpdateFn = new Just(v1);
-                        return $70;
-                      }))(function() {
-                        return discard111(liftEffect110(log2("Visualization initialized, rendering initial frame...")))(function() {
-                          return handleAction47(dictMonadAff)(MonadEffect0)(Render.value);
+                          $73.vizUpdateFn = new Just(v1);
+                          return $73;
+                        }))(function() {
+                          return discard111(liftEffect110(log2("Visualization initialized, rendering initial frame...")))(function() {
+                            return handleAction47(dictMonadAff)(MonadEffect0)(Render.value);
+                          });
                         });
                       });
                     });
@@ -35341,16 +35360,16 @@
         ;
         if (v instanceof SetYear) {
           return discard111(modify_42(function(v1) {
-            var $75 = {};
-            for (var $76 in v1) {
-              if ({}.hasOwnProperty.call(v1, $76)) {
-                $75[$76] = v1[$76];
+            var $78 = {};
+            for (var $79 in v1) {
+              if ({}.hasOwnProperty.call(v1, $79)) {
+                $78[$79] = v1[$79];
               }
               ;
             }
             ;
-            $75.currentYear = v.value0;
-            return $75;
+            $78.currentYear = v.value0;
+            return $78;
           }))(function() {
             return handleAction47(dictMonadAff)(MonadEffect0)(Render.value);
           });
@@ -35360,32 +35379,32 @@
           return bind66(get11)(function(state3) {
             var newPlaying = !state3.playing;
             return discard111(modify_42(function(v1) {
-              var $79 = {};
-              for (var $80 in v1) {
-                if ({}.hasOwnProperty.call(v1, $80)) {
-                  $79[$80] = v1[$80];
+              var $82 = {};
+              for (var $83 in v1) {
+                if ({}.hasOwnProperty.call(v1, $83)) {
+                  $82[$83] = v1[$83];
                 }
                 ;
               }
               ;
-              $79.playing = newPlaying;
-              return $79;
+              $82.playing = newPlaying;
+              return $82;
             }))(function() {
               return discard111(when5(newPlaying)((function() {
                 var intervalMs = 1e3 / state3.animationSpeed;
                 return bind66(liftEffect110(create3))(function(v1) {
                   return bind66(subscribe2(v1.emitter))(function(subscriptionId) {
                     return discard111(modify_42(function(v2) {
-                      var $83 = {};
-                      for (var $84 in v2) {
-                        if ({}.hasOwnProperty.call(v2, $84)) {
-                          $83[$84] = v2[$84];
+                      var $86 = {};
+                      for (var $87 in v2) {
+                        if ({}.hasOwnProperty.call(v2, $87)) {
+                          $86[$87] = v2[$87];
                         }
                         ;
                       }
                       ;
-                      $83.animationSubscriptionId = new Just(subscriptionId);
-                      return $83;
+                      $86.animationSubscriptionId = new Just(subscriptionId);
+                      return $86;
                     }))(function() {
                       return $$void11(liftAff36(forkAff(forever3(discard210(delay(intervalMs))(function() {
                         return liftEffect48(notify(v1.listener)(Tick.value));
@@ -35402,21 +35421,21 @@
                   if (state$prime.animationSubscriptionId instanceof Just) {
                     return discard111(unsubscribe2(state$prime.animationSubscriptionId.value0))(function() {
                       return modify_42(function(v1) {
-                        var $89 = {};
-                        for (var $90 in v1) {
-                          if ({}.hasOwnProperty.call(v1, $90)) {
-                            $89[$90] = v1[$90];
+                        var $92 = {};
+                        for (var $93 in v1) {
+                          if ({}.hasOwnProperty.call(v1, $93)) {
+                            $92[$93] = v1[$93];
                           }
                           ;
                         }
                         ;
-                        $89.animationSubscriptionId = Nothing.value;
-                        return $89;
+                        $92.animationSubscriptionId = Nothing.value;
+                        return $92;
                       });
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 184, column 7 - line 188, column 60): " + [state$prime.animationSubscriptionId.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 192, column 7 - line 196, column 60): " + [state$prime.animationSubscriptionId.constructor.name]);
                 }));
               });
             });
@@ -35432,93 +35451,93 @@
             if (state3.model instanceof Just) {
               var nextYear = state3.currentYear + 1 | 0;
               return discard111((function() {
-                var $94 = nextYear > state3.model.value0.yearRange.max;
-                if ($94) {
+                var $97 = nextYear > state3.model.value0.yearRange.max;
+                if ($97) {
                   return modify_42(function(v1) {
-                    var $95 = {};
-                    for (var $96 in v1) {
-                      if ({}.hasOwnProperty.call(v1, $96)) {
-                        $95[$96] = v1[$96];
+                    var $98 = {};
+                    for (var $99 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $99)) {
+                        $98[$99] = v1[$99];
                       }
                       ;
                     }
                     ;
-                    $95.currentYear = state3.model.value0.yearRange.min;
-                    return $95;
+                    $98.currentYear = state3.model.value0.yearRange.min;
+                    return $98;
                   });
                 }
                 ;
                 return modify_42(function(v1) {
-                  var $98 = {};
-                  for (var $99 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $99)) {
-                      $98[$99] = v1[$99];
+                  var $101 = {};
+                  for (var $102 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $102)) {
+                      $101[$102] = v1[$102];
                     }
                     ;
                   }
                   ;
-                  $98.currentYear = nextYear;
-                  return $98;
+                  $101.currentYear = nextYear;
+                  return $101;
                 });
               })())(function() {
                 return handleAction47(dictMonadAff)(MonadEffect0)(Render.value);
               });
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 192, column 5 - line 201, column 28): " + [state3.model.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 200, column 5 - line 209, column 28): " + [state3.model.constructor.name]);
           });
         }
         ;
         if (v instanceof HoverNation) {
           return modify_42(function(v1) {
-            var $102 = {};
-            for (var $103 in v1) {
-              if ({}.hasOwnProperty.call(v1, $103)) {
-                $102[$103] = v1[$103];
+            var $105 = {};
+            for (var $106 in v1) {
+              if ({}.hasOwnProperty.call(v1, $106)) {
+                $105[$106] = v1[$106];
               }
               ;
             }
             ;
-            $102.hoveredNation = v.value0;
-            return $102;
+            $105.hoveredNation = v.value0;
+            return $105;
           });
         }
         ;
         if (v instanceof ToggleNationSelection) {
           return modify_42(function(s) {
             var newSelected = (function() {
-              var $106 = member5(v.value0)(s.selectedNations);
-              if ($106) {
+              var $109 = member5(v.value0)(s.selectedNations);
+              if ($109) {
                 return $$delete8(v.value0)(s.selectedNations);
               }
               ;
               return insert16(v.value0)(s.selectedNations);
             })();
-            var $107 = {};
-            for (var $108 in s) {
-              if ({}.hasOwnProperty.call(s, $108)) {
-                $107[$108] = s[$108];
+            var $110 = {};
+            for (var $111 in s) {
+              if ({}.hasOwnProperty.call(s, $111)) {
+                $110[$111] = s[$111];
               }
               ;
             }
             ;
-            $107.selectedNations = newSelected;
-            return $107;
+            $110.selectedNations = newSelected;
+            return $110;
           });
         }
         ;
         if (v instanceof SetAnimationSpeed) {
           return modify_42(function(v1) {
-            var $111 = {};
-            for (var $112 in v1) {
-              if ({}.hasOwnProperty.call(v1, $112)) {
-                $111[$112] = v1[$112];
+            var $114 = {};
+            for (var $115 in v1) {
+              if ({}.hasOwnProperty.call(v1, $115)) {
+                $114[$115] = v1[$115];
               }
               ;
             }
             ;
-            $111.animationSpeed = v.value0;
-            return $111;
+            $114.animationSpeed = v.value0;
+            return $114;
           });
         }
         ;
@@ -35543,7 +35562,7 @@
                       return liftEffect110(log2("USA not found, trying first nation..."));
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 229, column 9 - line 231, column 86): " + [v1.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 237, column 9 - line 239, column 86): " + [v1.constructor.name]);
                   })())(function() {
                     return discard111((function() {
                       var v1 = head2(nations);
@@ -35555,7 +35574,7 @@
                         return liftEffect110(log2("No nations at all!"));
                       }
                       ;
-                      throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 233, column 9 - line 235, column 67): " + [v1.constructor.name]);
+                      throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 241, column 9 - line 243, column 67): " + [v1.constructor.name]);
                     })())(function() {
                       var drawData = map60(nationPointToDrawData)(nations);
                       return bind66(liftEffect110(eval_D3M(state3.vizUpdateFn.value0(drawData))))(function() {
@@ -35575,11 +35594,11 @@
               return liftEffect110(log2("No update function available"));
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 221, column 5 - line 240, column 76): " + [state3.model.constructor.name, state3.vizUpdateFn.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 229, column 5 - line 248, column 76): " + [state3.model.constructor.name, state3.vizUpdateFn.constructor.name]);
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 131, column 16 - line 240, column 76): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 131, column 16 - line 248, column 76): " + [v.constructor.name]);
       };
     };
   };
