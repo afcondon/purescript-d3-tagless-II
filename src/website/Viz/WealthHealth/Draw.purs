@@ -31,10 +31,10 @@ defaultConfig :: VizConfig
 defaultConfig =
   { width: 1000.0
   , height: 600.0
-  , marginTop: 20.0
-  , marginRight: 20.0
-  , marginBottom: 35.0
-  , marginLeft: 40.0
+  , marginTop: 0.0
+  , marginRight: 0.0
+  , marginBottom: 0.0
+  , marginLeft: 0.0
   }
 
 -- | Scale functions (simple linear/log approximations)
@@ -69,7 +69,7 @@ scaleRadius population =
     maxPop = 5000000000.0  -- 5 billion
     normalized = population / maxPop
   in
-    sqrt normalized * 40.0  -- Max radius of 40px
+    sqrt normalized * 80.0  -- Max radius of 80px
 
 -- | Initialize the visualization structure (SVG, axes, etc.)
 initializeVisualization :: forall m.
