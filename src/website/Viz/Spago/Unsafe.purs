@@ -4,8 +4,8 @@ import Prelude
 
 import PSD3.Internal.Types (Datum_, Index_)
 import D3.Viz.Spago.Files (NodeType, SpagoDataRecord, SpagoLinkData, SpagoNodeRow, SpagoTreeObj)
-import PSD3.Data.Node (D3Link(..), D3LinkSwizzled, D3_FocusXY, D3_ID, D3_Radius, D3_TreeNode(..), D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
-import PSD3.Data.Node (D3LinkDatum, D3LinkSwizzled(..), D3_SimulationNode(..), D3_TreeNode(..))
+import PSD3.Data.Node (D3_FocusXY, D3_ID, D3_Radius, D3_TreeNode(..), D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
+import PSD3.Data.Node (D3_SimulationNode(..), D3_TreeNode(..))
 import Data.Nullable (Nullable)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
@@ -15,10 +15,8 @@ unboxD3SimNode :: Datum_ -> SpagoDataRecord
 unboxD3SimNode datum = d
   where (D3SimNode d) = unsafeCoerce datum
   
-unboxD3SimLink :: Datum_ -> D3LinkDatum SpagoDataRecord SpagoLinkData
-unboxD3SimLink datum = l
-  where
-    (D3LinkObj l) = unsafeCoerce datum
+unboxD3SimLink :: Datum_ -> { source :: SpagoDataRecord, target :: SpagoDataRecord | SpagoLinkData }
+unboxD3SimLink datum = unsafeCoerce datum
 
 coerceToIndex_ :: forall a. (Ord a) => a -> Index_
 coerceToIndex_ = unsafeCoerce

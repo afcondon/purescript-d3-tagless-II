@@ -8,7 +8,8 @@ import PSD3.Internal.Types (PointXY)
 import D3.Viz.Spago.Files (LinkType(..), isP2P_Link)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, TreeFields, setTreeXYExceptLeaves, setTreeXYIncludingLeaves)
 import PSD3.Internal.FFI (descendants_, getHierarchyChildren_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, runLayoutFn_, treeSetNodeSize_, treeSortForTree_Spago_)
-import PSD3.Data.Node (D3Link(..), D3_SimulationNode(..), D3_TreeNode(..), NodeID)
+import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode(..), D3_TreeNode(..), NodeID)
+import Unsafe.Coerce (unsafeCoerce)
 import Data.Array (elem, filter, foldl, fromFoldable, partition, reverse)
 import Data.List (List(..), (:))
 import Data.List as L
@@ -23,22 +24,14 @@ import Data.Tuple (Tuple(..))
 tupleToLink :: forall t1 t6.
   t1
   -> Tuple t6 t6
-     -> D3Link t6
-          ( inSim :: Boolean
-          , linktype :: t1
-          )
-tupleToLink linktype (Tuple source target) = D3LinkID { source, target, linktype, inSim: true }
-changeLinkType :: forall t149 t154 t158.
+     -> D3Link_Unswizzled
+tupleToLink linktype (Tuple source target) = unsafeCoerce { source, target, linktype, inSim: true }
+
+changeLinkType :: forall t149.
   t149
-  -> D3Link t154
-       ( linktype :: t149
-       | t158
-       )
-     -> D3Link t154
-          ( linktype :: t149
-          | t158
-          )
-changeLinkType linktype (D3LinkID l) = D3LinkID l { linktype = linktype }
+  -> D3Link_Unswizzled
+     -> D3Link_Unswizzled
+changeLinkType linktype link = unsafeCoerce $ (unsafeCoerce link :: { linktype :: t149 }) { linktype = linktype }
 
 -- TODO make this generic and extract from Spago example to library
 treeReduction :: NodeID -> SpagoModel -> SpagoModel
@@ -47,7 +40,9 @@ treeReduction rootID model = do
           onlyPackageLinks  = filter isP2P_Link model.links
           onlyTreelinks     = makeTreeLinkTuples (pathsAsLists reachable.closedDepPaths)
           prunedTreeLinks   = (tupleToLink M2M_Graph ) <$> reachable.redundantLinks
-          partitionedLinks  = partition (\(D3LinkID l) -> (Tuple l.source l.target) `elem` onlyTreelinks) model.links
+          unpackLink :: D3Link_Unswizzled -> { source :: NodeID, target :: NodeID }
+          unpackLink = unsafeCoerce
+          partitionedLinks  = partition (\link -> let l = unpackLink link in (Tuple l.source l.target) `elem` onlyTreelinks) model.links
           treelinks         = (changeLinkType M2M_Tree) <$> partitionedLinks.yes
           treenodes         = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
 
@@ -128,11 +123,11 @@ getTreeDerivedData root =
         empty
         (descendants_ root) 
 
-buildTree :: forall r. NodeID -> Array (D3Link NodeID r) -> Tree NodeID
+buildTree :: NodeID -> Array D3Link_Unswizzled -> Tree NodeID
 buildTree rootID treelinks = do
-  let 
-    unwrap :: D3Link NodeID r -> { source :: NodeID, target :: NodeID | r }
-    unwrap (D3LinkID d) = d
+  let
+    unwrap :: D3Link_Unswizzled -> { source :: NodeID, target :: NodeID }
+    unwrap = unsafeCoerce
     linksWhoseSourceIs :: NodeID -> L.List NodeID
     linksWhoseSourceIs id = L.fromFoldable $ (_.target) <$> (filter (\l -> l.source == id) (unwrap <$> treelinks))
 

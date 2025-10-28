@@ -13,10 +13,22 @@ import Type.Row (type (+))
 -- | Links
 -- ============================================================================================================================
 type NodeID = Int -- REVIEW won't always be an Int, could be a String, but why complicate the types prematurely
--- a link specialized to a particular type of object, it can be initialized using IDs for objects of that type
-type D3LinkDatum       l row = Record    ( source :: l, target :: l | row )
-newtype D3Link         l row = D3LinkID  { source :: l, target :: l | row }
-newtype D3LinkSwizzled l row = D3LinkObj { source :: l, target :: l | row }
+
+-- | Opaque foreign types that distinguish swizzled from unswizzled links at compile time.
+-- |
+-- | **D3Link_Unswizzled**: Links where source/target are IDs (String, Int, etc.)
+-- | - Used as INPUT to simulation init/update
+-- | - Can be constructed from your data
+-- | - Example: { source: "moduleA", target: "moduleB", id: "moduleA->moduleB" }
+-- |
+-- | **D3Link_Swizzled**: Links where source/target are node object references
+-- | - RETURNED from simulation init/update after swizzling
+-- | - Used for rendering (accessing node positions via link.source.x, etc.)
+-- | - Cannot be constructed manually - only created by D3 during swizzling
+-- |
+-- | The type system prevents you from passing the wrong form to functions that expect the other.
+foreign import data D3Link_Unswizzled :: Type
+foreign import data D3Link_Swizzled :: Type
 
 -- ============================================================================================================================
 -- | Standard Graph node rows

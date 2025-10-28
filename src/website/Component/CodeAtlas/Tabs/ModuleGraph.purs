@@ -27,7 +27,7 @@ import Halogen as H
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start)
 import PSD3.CodeAtlas.Types (ModuleGraphData, ModuleInfo)
-import PSD3.Data.Node (D3Link(..), D3LinkSwizzled(..), D3_SimulationNode(..), D3_VxyFxy, D3_XY)
+import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode(..), D3_VxyFxy, D3_XY)
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, width, x, x1, x2, y, y1, y2)
 import Type.Row (type (+))
 import PSD3.Internal.FFI (clearHighlights_, highlightConnectedNodes_, keyIsID_, simdragHorizontal_, unpinAllNodes_)
@@ -57,9 +57,7 @@ unboxModuleNode datum =
   in d
 
 unboxModuleLink :: Datum_ -> ModuleLinkSwizzled
-unboxModuleLink datum =
-  let (D3LinkObj l) = unsafeCoerce datum
-  in l
+unboxModuleLink datum = unsafeCoerce datum
 
 -- | Accessor functions for module node data
 datum_ = {
@@ -175,14 +173,16 @@ modulesToNodes modules =
     ) modules
 
 -- | Convert module dependencies to simulation links
-modulesToLinks :: Array ModuleInfo -> Array (D3Link String ( id :: String ))
+modulesToLinks :: Array ModuleInfo -> Array D3Link_Unswizzled
 modulesToLinks modules =
   let sourceModuleNames = Set.fromFoldable $ modules <#> _.name
+      packLink :: { id :: String, source :: String, target :: String } -> D3Link_Unswizzled
+      packLink = unsafeCoerce
   in Array.concat $ modules <#> \m ->
        -- Only create links to dependencies that are also in our source module set
        mapMaybe (\dep ->
          if Set.member dep sourceModuleNames
-           then Just $ D3LinkID { id: m.name <> "->" <> dep, source: m.name, target: dep }
+           then Just $ packLink { id: m.name <> "->" <> dep, source: m.name, target: dep }
            else Nothing
        ) m.depends
 
@@ -204,11 +204,14 @@ drawModuleGraph graphData selector = do
       -- Maps node ID to set of connected node IDs (both incoming and outgoing)
       adjacencyMap :: Map.Map String (Set.Set String)
       adjacencyMap =
-        let addEdge acc (D3LinkID link) =
-              let sourceSet = fromMaybe Set.empty $ Map.lookup link.source acc
-                  targetSet = fromMaybe Set.empty $ Map.lookup link.target acc
-              in Map.insert link.source (Set.insert link.target sourceSet)
-                   $ Map.insert link.target (Set.insert link.source targetSet) acc
+        let unpackLink :: D3Link_Unswizzled -> { source :: String, target :: String }
+            unpackLink = unsafeCoerce
+            addEdge acc link =
+              let linkRec = unpackLink link
+                  sourceSet = fromMaybe Set.empty $ Map.lookup linkRec.source acc
+                  targetSet = fromMaybe Set.empty $ Map.lookup linkRec.target acc
+              in Map.insert linkRec.source (Set.insert linkRec.target sourceSet)
+                   $ Map.insert linkRec.target (Set.insert linkRec.source targetSet) acc
         in Array.foldl addEdge Map.empty links
 
   -- Debug: log LOC and layer values

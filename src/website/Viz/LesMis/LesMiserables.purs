@@ -12,7 +12,7 @@ import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, SimVariable(..
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start, update)
-import PSD3.Data.Node (D3LinkSwizzled, D3_SimulationNode)
+import PSD3.Data.Node (D3Link_Swizzled, D3_SimulationNode)
 import Data.Int (toNumber)
 import Data.Map as Map
 import Data.Number (sqrt)

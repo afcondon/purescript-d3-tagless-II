@@ -1,9 +1,14 @@
 module D3.Viz.ForceNavigator.Data where
 
 import D3.Viz.ForceNavigator.Model (Category(..), NavigationRawModel, NodeType(..))
-import PSD3.Data.Node (D3Link(..), D3_SimulationNode(..))
+import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode(..))
+import Unsafe.Coerce (unsafeCoerce)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (notNull, null)
+
+-- | Helper to construct unswizzled links
+packLink :: forall r. { source :: String, target :: String | r } -> D3Link_Unswizzled
+packLink = unsafeCoerce
 
 -- | All navigation nodes
 navigationData :: NavigationRawModel
@@ -500,38 +505,38 @@ navigationData = {
 
   links: [
     -- Center to sections
-    D3LinkID { source: "purescript-d3", target: "gallery" }
-  , D3LinkID { source: "purescript-d3", target: "about" }
-  , D3LinkID { source: "purescript-d3", target: "spago" }
-  , D3LinkID { source: "purescript-d3", target: "interpreters" }
-  , D3LinkID { source: "purescript-d3", target: "github" }
+    packLink { source: "purescript-d3", target: "gallery" }
+  , packLink { source: "purescript-d3", target: "about" }
+  , packLink { source: "purescript-d3", target: "spago" }
+  , packLink { source: "purescript-d3", target: "interpreters" }
+  , packLink { source: "purescript-d3", target: "github" }
 
     -- Gallery to examples
-  , D3LinkID { source: "gallery", target: "line-chart" }
-  , D3LinkID { source: "gallery", target: "bar-chart" }
-  , D3LinkID { source: "gallery", target: "scatter-plot" }
-  , D3LinkID { source: "gallery", target: "scatter-quartet" }
-  , D3LinkID { source: "gallery", target: "chord-diagram" }
-  , D3LinkID { source: "gallery", target: "bubble-chart" }
-  , D3LinkID { source: "gallery", target: "sankey" }
-  , D3LinkID { source: "gallery", target: "tree" }
-  , D3LinkID { source: "gallery", target: "tree-horizontal" }
-  , D3LinkID { source: "gallery", target: "tree-vertical" }
-  , D3LinkID { source: "gallery", target: "tree-radial" }
-  , D3LinkID { source: "gallery", target: "three-little-circles" }
-  , D3LinkID { source: "gallery", target: "gup" }
-  , D3LinkID { source: "gallery", target: "les-mis" }
+  , packLink { source: "gallery", target: "line-chart" }
+  , packLink { source: "gallery", target: "bar-chart" }
+  , packLink { source: "gallery", target: "scatter-plot" }
+  , packLink { source: "gallery", target: "scatter-quartet" }
+  , packLink { source: "gallery", target: "chord-diagram" }
+  , packLink { source: "gallery", target: "bubble-chart" }
+  , packLink { source: "gallery", target: "sankey" }
+  , packLink { source: "gallery", target: "tree" }
+  , packLink { source: "gallery", target: "tree-horizontal" }
+  , packLink { source: "gallery", target: "tree-vertical" }
+  , packLink { source: "gallery", target: "tree-radial" }
+  , packLink { source: "gallery", target: "three-little-circles" }
+  , packLink { source: "gallery", target: "gup" }
+  , packLink { source: "gallery", target: "les-mis" }
 
     -- About to features
-  , D3LinkID { source: "about", target: "type-safe" }
-  , D3LinkID { source: "about", target: "composable" }
-  , D3LinkID { source: "about", target: "interpreters-feature" }
-  , D3LinkID { source: "about", target: "d3-powered" }
-  , D3LinkID { source: "about", target: "interactive-feature" }
-  , D3LinkID { source: "about", target: "documented" }
+  , packLink { source: "about", target: "type-safe" }
+  , packLink { source: "about", target: "composable" }
+  , packLink { source: "about", target: "interpreters-feature" }
+  , packLink { source: "about", target: "d3-powered" }
+  , packLink { source: "about", target: "interactive-feature" }
+  , packLink { source: "about", target: "documented" }
 
     -- Interpreters to examples
-  , D3LinkID { source: "interpreters", target: "meta-tree" }
-  , D3LinkID { source: "interpreters", target: "print-tree" }
+  , packLink { source: "interpreters", target: "meta-tree" }
+  , packLink { source: "interpreters", target: "print-tree" }
   ]
 }

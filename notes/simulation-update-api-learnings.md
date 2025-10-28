@@ -214,11 +214,46 @@ update ::
 - The PureScript type system ensures you can't mix them up
 - Helper functions could convert between forms if needed (e.g., `unswizzle :: D3Link_Swizzled -> D3Link_Unswizzled`)
 
+## Status: Typed Links Implementation (feature/typed-swizzled-links)
+
+### ✅ Completed
+1. **Foreign types added**: `D3Link_Unswizzled` and `D3Link_Swizzled` are now distinct opaque types
+2. **Backward compatibility**: Old `D3Link`/`D3LinkSwizzled` newtypes remain as deprecated
+3. **New API types**: `SimulationConfig2` and `SimulationUpdate2` use typed links
+4. **Migration helpers**: `toUnswizzled`, `toSwizzled`, `fromUnswizzled`, `fromSwizzled` for gradual migration
+5. **Enhanced documentation**: Clear explanations of swizzling transformation in API docs
+
+### Remaining Limitations
+
+The `Datum_` type remains opaque, so extracting link data still requires `unsafeCoerce`. This is unavoidable given D3's design:
+```purescript
+-- Still needed for tick functions:
+unboxLink :: Datum_ -> { source :: NodeRecord, target :: NodeRecord | r }
+unboxLink = unsafeCoerce  -- Unavoidable - Datum_ is opaque
+```
+
+However, this is acceptable because:
+1. **The unsafe code is localized** - only in extractor functions
+2. **The API boundary is type-safe** - can't pass wrong link type to init/update
+3. **Clear documentation** - users know what they're getting
+4. **Morally safe** - D3 guarantees the data is there, we're just accessing it
+
+### Next Steps for Full Migration
+
+To fully eliminate the old types:
+1. Add typed variants of instance methods (e.g., `init2`, `update2`)
+2. Migrate all application code to use new types
+3. Deprecate old instances in major version
+4. Remove old types in next breaking change
+
+For now, the hybrid approach works well - new code can use typed links, old code continues to work.
+
 ## Action Items
 
+- [x] **Model Swizzled vs Unswizzled links as distinct foreign types** ⭐ DONE!
 - [ ] Rename SimulationM/SimulationM2 to clearer names
 - [ ] Add "Common Patterns" cookbook to docs
 - [ ] Consider helper utilities for simulation data manipulation
 - [ ] Consider scaffolding for common event handler patterns
 - [ ] Add custom type error hints for common mistakes
-- [ ] **Model Swizzled vs Unswizzled links as distinct foreign types** ⭐ High priority - would have prevented the error we hit!
+- [ ] Consider extending typed approach to SimulationNode and TreeNode
