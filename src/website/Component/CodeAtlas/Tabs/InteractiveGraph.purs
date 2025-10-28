@@ -26,7 +26,7 @@ import Halogen as H
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, updateJoin)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start, update)
 import PSD3.CodeAtlas.Types (ModuleGraphData, ModuleInfo)
-import PSD3.Data.Node (D3Link(..), D3_SimulationNode(..), D3_VxyFxy, D3_XY)
+import PSD3.Data.Node (D3Link(..), D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode(..), D3_VxyFxy, D3_XY, toUnswizzled)
 import PSD3.Internal.Attributes.Sugar (classed, fill, radius, remove, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, width, height, x, x1, x2, y, y1, y2)
 import Type.Row (type (+))
 import PSD3.Internal.FFI (clearHighlights_, filterToConnectedNodes_, highlightConnectedNodes_, keyIsID_, simdragHorizontal_, unpinAllNodes_)
@@ -158,7 +158,8 @@ modulesToNodes modules =
           }
     ) modules
 
--- | Convert module dependencies to simulation links
+-- | Convert module dependencies to simulation links (UNSWIZZLED: IDs only)
+-- | These will be passed to the simulation which will swizzle them (replace IDs with node references)
 modulesToLinks :: Array ModuleInfo -> Array (D3Link String ( id :: String ))
 modulesToLinks modules =
   let sourceModuleNames = Set.fromFoldable $ modules <#> _.name
@@ -167,6 +168,7 @@ modulesToLinks modules =
          (m.depends <#> \dep -> D3LinkID { id: m.name <> "->" <> dep, source: m.name, target: dep })
 
 -- | Build adjacency map for connected nodes lookup
+-- | Works with UNSWIZZLED links (IDs only) since we're just mapping ID relationships
 buildAdjacencyMap :: forall r. Array (D3Link String r) -> Map String (Set String)
 buildAdjacencyMap links =
   let addEdge acc (D3LinkID link) =

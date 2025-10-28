@@ -2,6 +2,7 @@ module PSD3.Data.Node where
 
 import Data.Nullable (Nullable)
 import Type.Row (type (+))
+import Unsafe.Coerce (unsafeCoerce)
 
 -- ============================================================================================================================
 -- | Types for working with D3 Trees and Graphs, to try to smooth the moving between them. 
@@ -35,6 +36,29 @@ newtype D3LinkSwizzled l row = D3LinkObj { source :: l, target :: l | row }
 -- | The type system prevents you from passing the wrong form to functions that expect the other.
 foreign import data D3Link_Unswizzled :: Type
 foreign import data D3Link_Swizzled :: Type
+
+-- | MIGRATION HELPERS: Convert between old newtypes and new foreign types
+-- | These are morally safe because the foreign types are just opaque wrappers
+
+-- | Convert old-style D3Link newtype to new opaque unswizzled type
+-- | Safe because both represent the same data (source/target are IDs)
+toUnswizzled :: forall id r. D3Link id r -> D3Link_Unswizzled
+toUnswizzled (D3LinkID link) = unsafeCoerce link
+
+-- | Convert old-style D3LinkSwizzled newtype to new opaque swizzled type
+-- | Safe because both represent the same data (source/target are node objects)
+toSwizzled :: forall node r. D3LinkSwizzled node r -> D3Link_Swizzled
+toSwizzled (D3LinkObj link) = unsafeCoerce link
+
+-- | Convert new opaque unswizzled type back to old newtype
+-- | Useful during migration when interfacing with old code
+fromUnswizzled :: forall id r. D3Link_Unswizzled -> D3Link id r
+fromUnswizzled link = D3LinkID (unsafeCoerce link)
+
+-- | Convert new opaque swizzled type back to old newtype
+-- | Useful during migration when interfacing with old code
+fromSwizzled :: forall node r. D3Link_Swizzled -> D3LinkSwizzled node r
+fromSwizzled link = D3LinkObj (unsafeCoerce link)
 
 -- ============================================================================================================================
 -- | Standard Graph node rows
