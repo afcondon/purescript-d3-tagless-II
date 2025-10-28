@@ -426,6 +426,18 @@
   margin: 0.5rem 0 0.25rem 0.75rem;
 }
 
+.explanation-page__nav-link--howto {
+  font-size: 0.75rem;
+  color: var(--color-teal);
+  padding-left: 1.5rem;
+  font-style: italic;
+}
+
+.explanation-page__nav-link--howto:hover {
+  color: var(--color-teal);
+  border-left-color: var(--color-teal);
+}
+
 .tutorial-section {
   max-width: 52rem;
   margin: 0 auto 3rem auto;

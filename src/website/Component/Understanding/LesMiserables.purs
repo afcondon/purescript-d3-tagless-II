@@ -20,8 +20,8 @@ import Effect.Aff.Class (class MonadAff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.SectionNav as SectionNav
-import PSD3.Website.Types (Route(..), Section(..))
+import PSD3.Shared.ExamplesNav as ExamplesNav
+import PSD3.Website.Types (Route(..))
 import Type.Proxy (Proxy(..))
 
 -- | State
@@ -33,9 +33,9 @@ type State = {
 data Action = Initialize
 
 -- | Child component slots
-type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
+type Slots = ( examplesNav :: forall q. H.Slot q Void Unit )
 
-_sectionNav = Proxy :: Proxy "sectionNav"
+_examplesNav = Proxy :: Proxy "examplesNav"
 
 -- | Forces configuration
 forceLibrary :: Map String Force
@@ -97,25 +97,7 @@ render _ =
         ]
 
     -- Navigation Panel (RHS)
-    , HH.slot_ _sectionNav unit SectionNav.component
-        { currentSection: UnderstandingSection
-        , currentRoute: LesMiserables
-        , sectionPages:
-            [ { route: UnderstandingConcepts, label: "Concepts" }
-            , { route: UnderstandingPatterns, label: "Patterns" }
-            , { route: UnderstandingPhilosophy, label: "Philosophy" }
-            , { route: Tutorial, label: "Tutorial" }
-            , { route: SimpleCharts, label: "Simple Charts" }
-            , { route: ChordDiagram, label: "Chord Diagram" }
-            , { route: BubbleChart, label: "Bubble Chart" }
-            , { route: SankeyDiagram, label: "Sankey Diagram" }
-            , { route: LesMiserables, label: "Les Misérables" }
-            , { route: Hierarchies, label: "Hierarchies" }
-            , { route: Interpreters, label: "Interpreters" }
-            , { route: CodeExplorer, label: "Code Explorer" }
-            ]
-        , moduleCategories: Nothing
-        }
+    , HH.slot_ _examplesNav unit ExamplesNav.component LesMiserables
 
     -- Page introduction
     , HH.section

@@ -11,8 +11,8 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.CodeExample (renderCodeExampleSimple)
 import PSD3.Understanding.InterpretersDemo (generateD3Code)
-import PSD3.Shared.SectionNav as SectionNav
-import PSD3.Website.Types (Route(..), Section(..))
+import PSD3.Shared.ExamplesNav as ExamplesNav
+import PSD3.Website.Types (Route(..))
 import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))
 
@@ -40,9 +40,9 @@ data Action
   = Initialize
   | SelectInterpreter InterpreterType
 
-type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
+type Slots = ( examplesNav :: forall q. H.Slot q Void Unit )
 
-_sectionNav = Proxy :: Proxy "sectionNav"
+_examplesNav = Proxy :: Proxy "examplesNav"
 
 -- | Interpreters page component
 component :: forall q i o. H.Component q i o Aff
@@ -123,22 +123,7 @@ render state =
         ]
 
     -- Navigation Panel (RHS)
-    , HH.slot_ _sectionNav unit SectionNav.component
-        { currentSection: UnderstandingSection
-        , currentRoute: Interpreters
-        , sectionPages:
-            [ { route: About, label: "About" }
-            , { route: Tutorial, label: "Tutorial" }
-            , { route: SimpleCharts, label: "Simple Charts" }
-            , { route: ChordDiagram, label: "Chord Diagram" }
-            , { route: BubbleChart, label: "Bubble Chart" }
-            , { route: SankeyDiagram, label: "Sankey Diagram" }
-            , { route: Hierarchies, label: "Hierarchies" }
-            , { route: Interpreters, label: "Interpreters" }
-            , { route: CodeExplorer, label: "Code Explorer" }
-            ]
-        , moduleCategories: Nothing
-        }
+    , HH.slot_ _examplesNav unit ExamplesNav.component Interpreters
 
     -- Page introduction
     , HH.section
