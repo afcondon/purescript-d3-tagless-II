@@ -45,6 +45,29 @@ render _ =
             [ HH.text "Finally Tagless design, functional programming principles, and the power of D3.js combined into an elegant, type-safe visualization library." ]
         ]
 
+    -- Call to action buttons
+    , HH.section
+        [ HP.classes [ HH.ClassName "home-cta" ] ]
+        [ HH.a
+            [ HP.href $ "#" <> routeToPath Wizard
+            , HP.classes [ HH.ClassName "home-cta__button home-cta__button--primary" ]
+            ]
+            [ HH.span
+                [ HP.classes [ HH.ClassName "home-cta__icon" ] ]
+                [ HH.text "🚀" ]
+            , HH.span_ [ HH.text "Start the Wizard" ]
+            ]
+        , HH.a
+            [ HP.href "#examples"
+            , HP.classes [ HH.ClassName "home-cta__button home-cta__button--secondary" ]
+            ]
+            [ HH.span
+                [ HP.classes [ HH.ClassName "home-cta__icon" ] ]
+                [ HH.text "✨" ]
+            , HH.span_ [ HH.text "View Examples" ]
+            ]
+        ]
+
     -- Four documentation category boxes
     , HH.section
         [ HP.classes [ HH.ClassName "home-docs" ] ]
@@ -81,81 +104,63 @@ render _ =
 
     -- Examples section
     , HH.section
-        [ HP.classes [ HH.ClassName "home-examples" ] ]
+        [ HP.id "examples"
+        , HP.classes [ HH.ClassName "home-examples" ]
+        ]
         [ HH.h2
             [ HP.classes [ HH.ClassName "home-examples__title" ] ]
             [ HH.text "Example Visualizations" ]
         , HH.div
             [ HP.classes [ HH.ClassName "home-examples__grid" ] ]
             [ renderExampleCard
-                "Basic Charts"
+                "Simple Charts"
                 "Bar charts, line charts, and scatter plots"
                 (routeToPath Tutorial)
+            , renderExampleCard
+                "Bubble Chart"
+                "Animated bubble chart with transitions"
+                (routeToPath BubbleChart)
             , renderExampleCard
                 "Hierarchies"
                 "Trees, dendrograms, circle packing, and treemaps"
                 (routeToPath Hierarchies)
             , renderExampleCard
-                "Network Diagrams"
-                "Chord diagrams, Sankey diagrams, and force layouts"
+                "Sankey Diagram"
+                "Flow diagram showing energy transitions"
+                (routeToPath SankeyDiagram)
+            , renderExampleCard
+                "Chord Diagram"
+                "Circular relationship visualization"
                 (routeToPath ChordDiagram)
             , renderExampleCard
+                "Les Misérables"
+                "Character co-occurrence force-directed graph"
+                (routeToPath LesMiserables)
+            , renderExampleCard
+                "Interpreters"
+                "Alternative interpreters: String and MetaTree"
+                (routeToPath Interpreters)
+            , renderExampleCard
                 "Code Explorer"
-                "Interactive exploration of visualization code"
+                "Interactive dependency graph of PureScript code"
                 (routeToPath CodeExplorer)
             , renderExampleCard
-                "Wealth & Health of Nations"
-                "Hans Rosling's animated exploration of income and life expectancy"
+                "Wealth & Health"
+                "Hans Rosling's animated exploration (1800-2020)"
                 (routeToPath WealthHealth)
             ]
         ]
     ]
 
--- | Render the Getting Started box with two action buttons
+-- | Render the Getting Started box (now just links to the page, wizard is in CTAs)
 renderGettingStartedBox :: forall w i. HH.HTML w i
 renderGettingStartedBox =
-  HH.div
-    [ HP.classes [ HH.ClassName "home-doc-box home-doc-box--getting-started" ] ]
-    [ -- Left side: bookmark image (1/8th width)
-      HH.div
-        [ HP.classes [ HH.ClassName "home-doc-box__image-container" ] ]
-        [ HH.img
-            [ HP.src "images/tutorial-bookmark-balloons.jpeg"
-            , HP.alt ""
-            , HP.classes [ HH.ClassName "home-doc-box__image" ]
-            ]
-        ]
-    -- Right side: content (7/8ths width, center-justified)
-    , HH.div
-        [ HP.classes [ HH.ClassName "home-doc-box__content" ] ]
-        [ HH.h3
-            [ HP.classes [ HH.ClassName "home-doc-box__title" ] ]
-            [ HH.text "Getting Started" ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "home-doc-box__actions" ] ]
-            [ HH.a
-                [ HP.href $ "#" <> routeToPath GettingStarted
-                , HP.classes [ HH.ClassName "home-doc-box__action-link" ]
-                ]
-                [ HH.span
-                    [ HP.classes [ HH.ClassName "home-doc-box__action-icon" ] ]
-                    [ HH.text "📖" ]
-                , HH.span_
-                    [ HH.text "See how to get set up to use this library on your own system" ]
-                ]
-            , HH.a
-                [ HP.href $ "#" <> routeToPath Wizard
-                , HP.classes [ HH.ClassName "home-doc-box__action-link home-doc-box__action-link--primary" ]
-                ]
-                [ HH.span
-                    [ HP.classes [ HH.ClassName "home-doc-box__action-icon" ] ]
-                    [ HH.text "🚀" ]
-                , HH.span_
-                    [ HH.text "Use interactive wizard to generate and, optionally, download working code" ]
-                ]
-            ]
-        ]
-    ]
+  renderDocBox
+    "Getting Started"
+    "Installation, setup, and your first visualization"
+    (routeToPath GettingStarted)
+    "Get Started →"
+    (Just "images/tutorial-bookmark-balloons.jpeg")
 
 -- | Render a documentation category box
 renderDocBox :: forall w i. String -> String -> String -> String -> Maybe String -> HH.HTML w i
