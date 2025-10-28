@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Monad.Rec.Class (forever)
 import D3.Viz.WealthHealth.Draw as Draw
-import Data.Array (find, head, length, take)
+import Data.Array (find)
 import Data.Either (Either(..))
 import Data.Int (floor)
 import Data.Maybe (Maybe(..))
@@ -151,15 +151,6 @@ handleAction = case _ of
         handleAction (DataLoaded model)
 
   DataLoaded model -> do
-    liftEffect $ Console.log $ "Data loaded: " <> show (length model.nations) <> " nations, years " <> show model.yearRange.min <> "-" <> show model.yearRange.max
-    -- Debug: check raw nation data
-    case head model.nations of
-      Just firstNation -> do
-        liftEffect $ Console.log $ "First raw nation: " <> firstNation.name
-        liftEffect $ Console.log $ "  Income data points: " <> show (length firstNation.income)
-        liftEffect $ Console.log $ "  Population data points: " <> show (length firstNation.population)
-        liftEffect $ Console.log $ "  Life expectancy data points: " <> show (length firstNation.lifeExpectancy)
-      Nothing -> liftEffect $ Console.log "No nations in model!"
     H.modify_ _ { model = Just model }
     H.modify_ _ { currentYear = model.yearRange.min }
 
@@ -167,10 +158,8 @@ handleAction = case _ of
     H.liftAff $ Aff.delay (Milliseconds 100.0)
 
     -- Initialize visualization once and store update function
-    liftEffect $ Console.log "Initializing visualization..."
     (updateFn :: Array Draw.NationPoint -> D3M Unit D3Selection_ D3Selection_) <- liftEffect $ eval_D3M $ Draw.draw "#wealth-health-viz"
     H.modify_ _ { vizUpdateFn = Just updateFn }
-    liftEffect $ Console.log "Visualization initialized, rendering initial frame..."
 
     -- Draw initial visualization
     handleAction Render
@@ -240,20 +229,7 @@ handleAction = case _ of
     case state.model, state.vizUpdateFn of
       Just model, Just updateFn -> do
         let nations = getAllNationsAtYear state.currentYear model
-        liftEffect $ Console.log $ "Rendering " <> show (length nations) <> " nations for year " <> show state.currentYear
-        -- Debug: log actual nation names to see what we have
-        let firstFiveNames = map _.name $ take 5 nations
-        liftEffect $ Console.log $ "First 5 nation names: " <> show firstFiveNames
-        -- Try to find a specific nation
-        case find (\n -> n.name == "United States") nations of
-          Just usa -> liftEffect $ Console.log $ "USA: income=" <> show usa.income <> " life=" <> show usa.lifeExpectancy <> " pop=" <> show usa.population
-          Nothing -> liftEffect $ Console.log "USA not found, trying first nation..."
-        -- Log first nation regardless of name
-        case head nations of
-          Just first -> liftEffect $ Console.log $ first.name <> ": income=" <> show first.income <> " life=" <> show first.lifeExpectancy <> " pop=" <> show first.population
-          Nothing -> liftEffect $ Console.log "No nations at all!"
         let drawData = map nationPointToDrawData nations
         _ <- liftEffect $ eval_D3M $ updateFn drawData
         pure unit
-      Nothing, _ -> liftEffect $ Console.log "No model available for rendering"
-      _, Nothing -> liftEffect $ Console.log "No update function available"
+      _, _ -> pure unit
