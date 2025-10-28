@@ -40,16 +40,17 @@ render currentRoute =
         , HH.hr [ HP.classes [ HH.ClassName "explanation-page__nav-divider" ] ]
 
         -- Simplest Examples
-        , sectionTitle "Simplest Examples"
-        , navLink Tutorial "Tutorial" currentRoute
-
-        -- Typical Charts
-        , sectionTitle "Typical Charts"
-        , navLink SimpleCharts "Simple Charts" currentRoute
+        , sectionTitle "Simple Charts"
+        , navLink SimpleCharts1 "Simplest Examples" currentRoute
+        , navLink SimpleCharts2 "Simple Charts" currentRoute
 
         -- Data Flow Visualizations
         , sectionTitle "Data Flow"
         , navLink DataFlowViz "Chord & Sankey" currentRoute
+
+        -- Movement, transitions and simulations
+        , sectionTitle "Movement"
+        , navLink Movement "Movement & Transition" currentRoute
 
         -- Hierarchies
         , sectionTitle "Hierarchies"
@@ -59,7 +60,6 @@ render currentRoute =
         , sectionTitle "Applications"
         , navLink CodeExplorer "Code Explorer" currentRoute
         , navLink WealthHealth "Wealth & Health" currentRoute
-        , navLink LesMiserables "Les Misérables" currentRoute
 
         -- Interpreters
         , sectionTitle "Alternative Interpreters"

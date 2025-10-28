@@ -23,12 +23,12 @@ import PSD3.Reference.Reference as Reference
 import PSD3.Understanding.About as About
 import PSD3.Understanding.Concepts as Concepts
 import PSD3.Understanding.Patterns as Patterns
-import PSD3.Understanding.Tutorial as Tutorial
-import PSD3.Understanding.SimpleCharts as SimpleCharts
+import PSD3.Understanding.SimpleCharts1 as SimpleCharts1
+import PSD3.Understanding.SimpleCharts2 as SimpleCharts2
 import PSD3.Understanding.DataFlowViz as DataFlowViz
 import PSD3.Understanding.Hierarchies as Hierarchies
 import PSD3.Understanding.Interpreters as Interpreters
-import PSD3.Understanding.LesMiserables as LesMiserables
+import PSD3.Understanding.Movement as Movement
 import PSD3.CodeExplorer.CodeExplorationPage as CodeExplorationPage
 import PSD3.RoutingDSL (routing, routeToPath)
 import PSD3.CodeExplorer.CodeExplorerWrapper as CodeExplorer
@@ -59,15 +59,15 @@ type Slots =
   , about :: forall q. H.Slot q Void Unit
   , concepts :: forall q. H.Slot q Void Unit
   , patterns :: forall q. H.Slot q Void Unit
-  , tutorial :: forall q. H.Slot q Void Unit
-  , simpleCharts :: forall q. H.Slot q Void Unit
+  , simpleCharts1 :: forall q. H.Slot q Void Unit
+  , simpleCharts2 :: forall q. H.Slot q Void Unit
   , dataFlowViz :: forall q. H.Slot q Void Unit
+  , movement :: forall q. H.Slot q Void Unit
   , hierarchies :: forall q. H.Slot q Void Unit
   , interpreters :: forall q. H.Slot q Void Unit
   , codeExplorer :: forall q. H.Slot q Void Unit
   , codeExploration :: forall q. H.Slot q Void Unit
   , wealthHealth :: forall q. H.Slot q Void Unit
-  , lesMiserables :: forall q. H.Slot q Void Unit
   , codeAtlas :: forall q. H.Slot q Void Unit
   )
 
@@ -79,15 +79,15 @@ _reference = Proxy :: Proxy "reference"
 _about = Proxy :: Proxy "about"
 _concepts = Proxy :: Proxy "concepts"
 _patterns = Proxy :: Proxy "patterns"
-_tutorial = Proxy :: Proxy "tutorial"
-_simpleCharts = Proxy :: Proxy "simpleCharts"
+_simpleCharts1 = Proxy :: Proxy "simpleCharts1"
+_simpleCharts2 = Proxy :: Proxy "simpleCharts2"
 _dataFlowViz = Proxy :: Proxy "dataFlowViz"
+_movement = Proxy :: Proxy "movement"
 _hierarchies = Proxy :: Proxy "hierarchies"
 _interpreters = Proxy :: Proxy "interpreters"
 _codeExplorer = Proxy :: Proxy "codeExplorer"
 _codeExploration = Proxy :: Proxy "codeExploration"
 _wealthHealth = Proxy :: Proxy "wealthHealth"
-_lesMiserables = Proxy :: Proxy "lesMiserables"
 _codeAtlas = Proxy :: Proxy "codeAtlas"
 
 -- | Main application component
@@ -144,14 +144,17 @@ renderPage route = case spy "Route is" route of
   UnderstandingPhilosophy ->
     HH.slot_ _about unit About.component unit
 
-  Tutorial ->
-    HH.slot_ _tutorial unit Tutorial.component unit
+  SimpleCharts1 ->
+    HH.slot_ _simpleCharts1 unit SimpleCharts1.component unit
 
-  SimpleCharts ->
-    HH.slot_ _simpleCharts unit SimpleCharts.component unit
+  SimpleCharts2 ->
+    HH.slot_ _simpleCharts2 unit SimpleCharts2.component unit
 
   DataFlowViz ->
     HH.slot_ _dataFlowViz unit DataFlowViz.component unit
+
+  Movement ->
+    HH.slot_ _movement unit Movement.component unit
 
   Hierarchies ->
     HH.slot_ _hierarchies unit Hierarchies.component unit
@@ -167,9 +170,6 @@ renderPage route = case spy "Route is" route of
 
   WealthHealth ->
     HH.slot_ _wealthHealth unit WealthHealth.component unit
-
-  LesMiserables ->
-    HH.slot_ _lesMiserables unit LesMiserables.component unit
 
   CodeAtlas ->
     HH.slot_ _codeAtlas unit CodeAtlas.component unit

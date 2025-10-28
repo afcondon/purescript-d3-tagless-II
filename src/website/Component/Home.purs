@@ -115,7 +115,7 @@ render _ =
             [ renderExampleCard
                 "Simple Charts"
                 "Bar charts, line charts, and scatter plots"
-                (routeToPath Tutorial)
+                (routeToPath SimpleCharts1)
             , renderExampleCard
                 "Data Flow Visualizations"
                 "Chord and Sankey diagrams for relationships and flows"
@@ -125,9 +125,9 @@ render _ =
                 "Trees, dendrograms, circle packing, and treemaps"
                 (routeToPath Hierarchies)
             , renderExampleCard
-                "Les Misérables"
-                "Character co-occurrence force-directed graph"
-                (routeToPath LesMiserables)
+                "Movement"
+                "Movement, animation and transitions"
+                (routeToPath Movement)
             , renderExampleCard
                 "Interpreters"
                 "Alternative interpreters: String and MetaTree"

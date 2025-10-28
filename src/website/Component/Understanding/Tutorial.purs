@@ -1,16 +1,15 @@
-module PSD3.Understanding.Tutorial where -- Understanding
+module PSD3.Understanding.SimpleCharts1 where -- Understanding
 
 import Prelude
 
 import Control.Monad.Rec.Class (forever)
-import D3.Viz.ThreeLittleCircles as Circles
-import D3.Viz.Parabola as Parabola
-import D3.Viz.GUP as GUP
 import D3.Viz.BarChart as BarChart
-import D3.Viz.LineChart as LineChart
-import D3.Viz.ScatterPlot as ScatterPlot
 import D3.Viz.Charts.Model (monthlySales, sineWaveData, anscombesQuartet)
-import PSD3.Interpreter.D3 (eval_D3M, runD3M)
+import D3.Viz.GUP as GUP
+import D3.Viz.LineChart as LineChart
+import D3.Viz.Parabola as Parabola
+import D3.Viz.ScatterPlot as ScatterPlot
+import D3.Viz.ThreeLittleCircles as Circles
 import Data.Array (catMaybes)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.String.CodeUnits (toCharArray)
@@ -24,9 +23,10 @@ import Effect.Random (random)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.Interpreter.D3 (eval_D3M, runD3M)
+import PSD3.RoutingDSL (routeToPath)
 import PSD3.Shared.CodeExample (renderCodeExampleSimple)
 import PSD3.Shared.ExamplesNav as ExamplesNav
-import PSD3.RoutingDSL (routeToPath)
 import PSD3.Understanding.TOC (renderTOC, tocAnchor, tocRoute)
 import PSD3.Website.Types (Route(..))
 import Snippets (readSnippetFiles)
@@ -99,7 +99,7 @@ render state =
     [ HP.classes [ HH.ClassName "explanation-page" ] ]
     [ lhsNav
     -- Navigation Panel (RHS) - unified examples navigation
-    , HH.slot_ _examplesNav unit ExamplesNav.component Tutorial
+    , HH.slot_ _examplesNav unit ExamplesNav.component SimpleCharts1
 
     -- Tutorial introduction
     , HH.section

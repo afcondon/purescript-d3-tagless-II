@@ -46,7 +46,7 @@ render currentRoute =
           HH.ul
             [ HP.classes [ HH.ClassName "navigation__links" ] ]
             [ navLink About "About" currentRoute
-            , navLink Tutorial "Tutorial" currentRoute
+            , navLink SimpleCharts1 "SimpleCharts1" currentRoute
             , navLink Hierarchies "Hierarchies" currentRoute
             , navLink Interpreters "Interpreters" currentRoute
             , navLink CodeExplorer "Code Explorer" currentRoute

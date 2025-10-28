@@ -1,4 +1,4 @@
-module PSD3.Understanding.LesMiserables where
+module PSD3.Understanding.Movement where -- TODO add additional movement examples on this page
 
 import Prelude
 
@@ -97,7 +97,7 @@ render _ =
         ]
 
     -- Navigation Panel (RHS)
-    , HH.slot_ _examplesNav unit ExamplesNav.component LesMiserables
+    , HH.slot_ _examplesNav unit ExamplesNav.component Movement
 
     -- Page introduction
     , HH.section

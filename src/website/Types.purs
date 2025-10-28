@@ -90,15 +90,15 @@ data Route
   | UnderstandingConcepts    -- Understanding: core concepts (Finally Tagless, SelectionM, etc.)
   | UnderstandingPatterns    -- Understanding: practical patterns (datum_, data joins, etc.)
   | UnderstandingPhilosophy  -- Understanding: design philosophy
-  | Tutorial
-  | SimpleCharts
+  | SimpleCharts1
+  | SimpleCharts2
   | DataFlowViz
+  | Movement
   | Hierarchies
   | Interpreters
   | CodeExplorer
   | Explore String  -- Code exploration page for a specific snippet
   | WealthHealth    -- Wealth & Health of Nations visualization
-  | LesMiserables   -- Les Misérables force-directed graph
   | CodeAtlas       -- Code Atlas: codebase analysis and visualization
   | NotFound
 
@@ -115,14 +115,14 @@ instance showRoute :: Show Route where
   show UnderstandingConcepts = "Understanding: Concepts"
   show UnderstandingPatterns = "Understanding: Patterns"
   show UnderstandingPhilosophy = "Understanding: Philosophy"
-  show Tutorial = "Tutorial"
-  show SimpleCharts = "Simple Charts"
+  show SimpleCharts1 = "Simplest Charts"
+  show SimpleCharts2 = "Lines and Bars"
   show DataFlowViz = "Data Flow Visualizations"
+  show Movement = "Les Misérables"
   show Hierarchies = "Hierarchies"
   show Interpreters = "Interpreters"
   show CodeExplorer = "Code Explorer"
   show (Explore snippetId) = "Explore: " <> snippetId
   show WealthHealth = "Wealth & Health of Nations"
-  show LesMiserables = "Les Misérables"
   show CodeAtlas = "Code Atlas"
   show NotFound = "Not Found"

@@ -1,4 +1,4 @@
-module PSD3.Understanding.SimpleCharts where -- Understanding
+module PSD3.Understanding.SimpleCharts2 where -- Understanding
 
 import Prelude
 
@@ -63,7 +63,7 @@ render _ =
         }
 
     -- Navigation Panel (RHS) - unified examples navigation
-    , HH.slot_ _examplesNav unit ExamplesNav.component SimpleCharts
+    , HH.slot_ _examplesNav unit ExamplesNav.component SimpleCharts2
 
     -- Page introduction
     , HH.section

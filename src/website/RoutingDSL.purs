@@ -27,15 +27,15 @@ routes =
   <|> understandingPatterns
   <|> understandingPhilosophy
   <|> about       -- Legacy redirect to philosophy
-  <|> tutorial
-  <|> simpleCharts
+  <|> simpleCharts1
+  <|> simpleCharts2
   <|> dataFlowViz
+  <|> movement
   <|> hierarchies
   <|> interpreters
   <|> codeExplorer
   <|> explore
   <|> wealthHealth
-  <|> lesMiserables
   <|> codeAtlas
   <|> rootRedirect
   <|> notFound
@@ -84,17 +84,21 @@ understandingPhilosophy = UnderstandingPhilosophy <$ lit "understanding" <* lit 
 about :: Match Route
 about = UnderstandingPhilosophy <$ lit "about" <* end
 
--- | Match: /tutorial
-tutorial :: Match Route
-tutorial = Tutorial <$ lit "tutorial" <* end
+-- | Match: /simple-charts-1
+simpleCharts1 :: Match Route
+simpleCharts1 = SimpleCharts1 <$ lit "simple-charts-1" <* end
 
--- | Match: /simple-charts
-simpleCharts :: Match Route
-simpleCharts = SimpleCharts <$ lit "simple-charts" <* end
+-- | Match: /simple-charts-2
+simpleCharts2 :: Match Route
+simpleCharts2 = SimpleCharts2 <$ lit "simple-charts-2" <* end
 
 -- | Match: /data-flow
 dataFlowViz :: Match Route
 dataFlowViz = DataFlowViz <$ lit "data-flow" <* end
+
+-- | Match: /movement
+movement :: Match Route
+movement = Movement <$ lit "movement" <* end
 
 -- | Match: /hierarchies
 hierarchies :: Match Route
@@ -115,10 +119,6 @@ explore = Explore <$> (lit "explore" *> str) <* end
 -- | Match: /wealth-health
 wealthHealth :: Match Route
 wealthHealth = WealthHealth <$ lit "wealth-health" <* end
-
--- | Match: /les-miserables
-lesMiserables :: Match Route
-lesMiserables = LesMiserables <$ lit "les-miserables" <* end
 
 -- | Match: /code-atlas
 codeAtlas :: Match Route
@@ -142,14 +142,14 @@ routeToPath About = "/understanding/philosophy"  -- Redirect to philosophy
 routeToPath UnderstandingConcepts = "/understanding/concepts"
 routeToPath UnderstandingPatterns = "/understanding/patterns"
 routeToPath UnderstandingPhilosophy = "/understanding/philosophy"
-routeToPath Tutorial = "/tutorial"
-routeToPath SimpleCharts = "/simple-charts"
+routeToPath SimpleCharts1 = "/simple-charts-1"
+routeToPath SimpleCharts2 = "/simple-charts-2"
 routeToPath DataFlowViz = "/data-flow"
+routeToPath Movement = "/movement"
 routeToPath Hierarchies = "/hierarchies"
 routeToPath Interpreters = "/interpreters"
 routeToPath CodeExplorer = "/code-explorer"
 routeToPath (Explore snippetId) = "/explore/" <> snippetId
 routeToPath WealthHealth = "/wealth-health"
-routeToPath LesMiserables = "/les-miserables"
 routeToPath CodeAtlas = "/code-atlas"
 routeToPath NotFound = "/not-found"
