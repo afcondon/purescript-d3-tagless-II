@@ -13,7 +13,7 @@ import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, updateJoin)
 import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate, addTickFunction, update)
 import PSD3.Internal.Attributes.Instances (Label)
-import PSD3.Data.Node (D3_SimulationNode, D3Link, D3LinkSwizzled)
+import PSD3.Data.Node (D3_SimulationNode, D3Link_Unswizzled, D3Link_Swizzled)
 import Data.Array (filter)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
@@ -58,8 +58,7 @@ initialize = do
 -- | This replaces the old updateSimulation that manually managed data merging,
 -- | link swizzling, and force engagement. Now the `update` function handles all
 -- | internal complexity, we just do DOM operations and tick functions.
-updateSimulation :: forall m d r id.
-  Eq id =>
+updateSimulation :: forall m d.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
@@ -68,7 +67,7 @@ updateSimulation :: forall m d r id.
   , links :: Maybe D3Selection_
   } ->
   { nodes :: Array (D3_SimulationNode d)
-  , links :: Array (D3Link id r)
+  , links :: Array D3Link_Unswizzled
   , activeForces :: Set Label
   , linksWithForce :: Datum_ -> Boolean
   } ->

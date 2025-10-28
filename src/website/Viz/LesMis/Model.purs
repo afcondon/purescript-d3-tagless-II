@@ -1,6 +1,6 @@
 module D3.Viz.LesMiserables.Model where
 
-import PSD3.Data.Node (D3TreeRow, D3Link, D3_SimulationNode, D3_VxyFxy, D3_XY, EmbeddedData)
+import PSD3.Data.Node (D3TreeRow, D3Link_Unswizzled, D3_SimulationNode, D3_VxyFxy, D3_XY, EmbeddedData)
 import Type.Row (type (+))
 
 -- | ==========================================================================================
@@ -18,8 +18,8 @@ type LesMisGraphLinkObj = { source :: LesMisSimRecord, target :: LesMisSimRecord
 
 
 -- we make the model like so, but D3 then swizzles it to the "cooked" model below
--- the source and target in the links are given as "String" to match id in the node data
-type LesMisRawModel    = { links :: Array (D3Link String LesMisLinkData), nodes :: Array LesMisSimNode  }
+-- the source and target in the links are given as "String" to match id in the node data (UNSWIZZLED)
+type LesMisRawModel    = { links :: Array D3Link_Unswizzled, nodes :: Array LesMisSimNode  }
 
 -- same as above but as a bare record, this is the "datum" that D3 sees and which it returns to you for attr setting:
 type LesMisSimRecord   = Record (D3_XY + D3_VxyFxy + LesMisNodeData  + ()) 

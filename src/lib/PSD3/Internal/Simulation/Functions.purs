@@ -7,7 +7,7 @@ import Prelude
 import Control.Monad.State (class MonadState)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (D3Selection_, Datum_, Index_)
-import PSD3.Data.Node (D3Link, D3LinkSwizzled, D3_SimulationNode)
+import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _handle, _status, _tick, _velocityDecay)
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
@@ -155,11 +155,11 @@ simulationShowForces = do
   pure $ intercalate "\n" $ showTuple <$> forceTuples
 
 simulationPreservePositions ::
-  forall id d r m row. 
+  forall d m row.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
   D3Selection_ ->
-  RawData d r id -> 
+  RawData d ->
   (Datum_ -> Index_) ->
   m (Array (D3_SimulationNode d))
 simulationPreservePositions selection rawdata key = do
@@ -167,34 +167,35 @@ simulationPreservePositions selection rawdata key = do
   pure updatedData
 
 simulationPreserveLinkReferences ::
-  forall d id r m row. 
-  Eq id => 
+  forall d id m row.
+  Eq id =>
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
   D3Selection_ ->
-  RawData d r id -> 
+  Array D3Link_Unswizzled ->
+  Array (D3_SimulationNode d) ->
   (Datum_ -> Index_) ->
-  m (Array (D3Link id r))
-simulationPreserveLinkReferences selection rawdata keyFn = do
+  m (Array D3Link_Unswizzled)
+simulationPreserveLinkReferences selection links nodes keyFn = do
   let
-    nodeIDs :: Array id 
-    nodeIDs       = getIDsFromNodes_ rawdata.nodes keyFn
-    validLink :: D3Link id r -> Boolean
+    nodeIDs :: Array id
+    nodeIDs       = getIDsFromNodes_ nodes keyFn
+    validLink :: D3Link_Unswizzled -> Boolean
     validLink l = do
       let { sourceID, targetID } = getLinkIDs_ keyFn l
       (sourceID `elem` nodeIDs) && (targetID `elem` nodeIDs)
-    validNewLinks = filter validLink rawdata.links 
+    validNewLinks = filter validLink links
     updatedData = d3PreserveLinkReferences_ selection validNewLinks
   pure updatedData
 
 simulationSwizzleLinks ::
-  forall d r row id m. 
+  forall d m row.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
-  Array (D3Link id r) ->
+  Array D3Link_Unswizzled ->
   Array (D3_SimulationNode d) ->
   (Datum_ -> Index_) ->
-  m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
+  m (Array D3Link_Swizzled)
 simulationSwizzleLinks links nodes keyFn = do
   handle <- use _handle
   pure $ swizzleLinks_ links nodes keyFn 
@@ -202,7 +203,7 @@ simulationSwizzleLinks links nodes keyFn = do
 -- | the situation with General Update Pattern for simulations is MUCH more complicated than for non-simulation data
 -- | this function takes care of all that complexity and adds both links and nodes and takes care of ensuring that
 -- | existing nodes preserve their positions and that all links are to nodes that are still in the simulation
-simulationMergeNewData :: forall d r row id m.
+simulationMergeNewData :: forall d id m row.
   Eq id =>
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
@@ -210,17 +211,18 @@ simulationMergeNewData :: forall d r row id m.
   (Datum_ -> Index_) -> -- nodes keyFn
   D3Selection_ -> -- links selection
   (Datum_ -> Index_) -> -- links KeyFn
-  RawData d r id -> -- links and nodes raw data
-  m { links :: (Array (D3LinkSwizzled (D3_SimulationNode d) r)), nodes :: (Array (D3_SimulationNode d))}
-simulationMergeNewData nodeSelection nodeKeyFn linkSelection linkKeyFn rawdata = do
-  let updatedNodeData = d3PreserveSimulationPositions_ nodeSelection rawdata.nodes nodeKeyFn
-      nodeIDs :: Array id 
-      nodeIDs       = getIDsFromNodes_ rawdata.nodes nodeKeyFn
-      validLink :: D3Link id r -> Boolean
+  Array D3Link_Unswizzled -> -- links raw data
+  Array (D3_SimulationNode d) -> -- nodes raw data
+  m { links :: Array D3Link_Swizzled, nodes :: Array (D3_SimulationNode d)}
+simulationMergeNewData nodeSelection nodeKeyFn linkSelection linkKeyFn links nodes = do
+  let updatedNodeData = d3PreserveSimulationPositions_ nodeSelection nodes nodeKeyFn
+      nodeIDs :: Array id
+      nodeIDs       = getIDsFromNodes_ nodes nodeKeyFn
+      validLink :: D3Link_Unswizzled -> Boolean
       validLink l = do
         let { sourceID, targetID } = getLinkIDs_ linkKeyFn l
         (sourceID `elem` nodeIDs) && (targetID `elem` nodeIDs)
-      validNewLinks = filter validLink rawdata.links 
+      validNewLinks = filter validLink links
       updatedLinkData  = d3PreserveLinkReferences_ linkSelection validNewLinks
       swizzledLinkData = swizzleLinks_ updatedLinkData updatedNodeData nodeKeyFn
 
@@ -245,12 +247,11 @@ simulationSetNodes nodes = do
   pure $ unsafeCoerce opaqueNodes
 
 simulationSetLinks :: -- now with 100% more swizzling!!
-  forall d r id row m. -- TODO might need to check whether _unnecessary swizzle_ breaks things?
-  Eq id =>
+  forall d m row.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
-  Array (D3Link id r) -> Array (D3_SimulationNode d) -> (Datum_ -> Index_ ) ->
-  m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
+  Array D3Link_Unswizzled -> Array (D3_SimulationNode d) -> (Datum_ -> Index_ ) ->
+  m (Array D3Link_Swizzled)
 simulationSetLinks links nodes keyFn = do
   handle <- use _handle
   let _ = setLinks_ handle (swizzleLinks_ links nodes keyFn)

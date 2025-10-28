@@ -85,7 +85,7 @@ module PSD3.Capabilities.Simulation where
 import PSD3.Capabilities.Selection (class SelectionM)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (D3Simulation_, Datum_, Index_)
-import PSD3.Data.Node (D3Link, D3LinkSwizzled, D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode)
+import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode)
 import PSD3.Internal.Simulation.Types (SimVariable, Step, Force)
 import PSD3.Internal.FFI (SimulationVariables)
 import Data.Maybe (Maybe)
@@ -127,18 +127,8 @@ import Prelude (class Eq, class Monad, Unit)
 -- |
 -- |   start
 -- | ```
-type SimulationConfig selection d r =
-  { nodes :: Array (D3_SimulationNode d)                    -- Node data
-  , links :: Array (D3Link String r)                        -- Link data (DEPRECATED: use D3Link_Unswizzled in new code)
-  , forces :: Array Force                                   -- Force library (all available forces)
-  , activeForces :: Set Label                               -- Which forces to enable initially
-  , config :: SimulationVariables                           -- Simulation parameters (alpha, decay, etc.)
-  , keyFn :: Datum_ -> Index_                               -- Key function for data binding
-  , ticks :: Map Label (Step selection)                     -- Tick functions to update DOM on each frame
-  }
-
--- | New version of SimulationConfig using typed links
-type SimulationConfig2 selection d =
+-- | Configuration record for initializing a force simulation.
+type SimulationConfig selection d =
   { nodes :: Array (D3_SimulationNode d)                    -- Node data
   , links :: Array D3Link_Unswizzled                        -- Link data (UNSWIZZLED: source/target are IDs)
   , forces :: Array Force                                   -- Force library (all available forces)
@@ -158,10 +148,10 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
   -- | Initialize the simulation with all configuration at once.
   -- |
   -- | Returns the simulation-enhanced nodes and SWIZZLED links.
-  -- | - Input links have IDs for source/target
-  -- | - Output links have actual node object references for source/target
+  -- | - Input links have IDs for source/target (UNSWIZZLED)
+  -- | - Output links have actual node object references for source/target (SWIZZLED)
   -- | Use these to create DOM selections, then add tick functions separately.
-  init :: forall d r. SimulationConfig selection d r -> m { nodes :: Array (D3_SimulationNode d), links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
+  init :: forall d. SimulationConfig selection d -> m { nodes :: Array (D3_SimulationNode d), links :: Array D3Link_Swizzled }
 
   -- | Start the simulation animation.
   start :: m Unit
@@ -193,18 +183,9 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
 -- |   , keyFn: keyIsID_
 -- |   }
 -- | ```
--- | DEPRECATED: Old SimulationUpdate using untyped links
-type SimulationUpdate d r id =
-  { nodes :: Maybe (Array (D3_SimulationNode d))  -- New node data (replaces existing)
-  , links :: Maybe (Array (D3Link id r))          -- New link data (DEPRECATED: untyped)
-  , activeForces :: Maybe (Set Label)             -- Which forces to enable (replaces active set)
-  , config :: Maybe SimulationVariables           -- Simulation config to update
-  , keyFn :: Datum_ -> Index_                     -- Key function for data binding
-  }
-
--- | New SimulationUpdate using typed links
+-- | Configuration for updating a running simulation.
 -- | Note: Input links are UNSWIZZLED (IDs), output links will be SWIZZLED (object references)
-type SimulationUpdate2 d =
+type SimulationUpdate d =
   { nodes :: Maybe (Array (D3_SimulationNode d))  -- New node data (replaces existing)
   , links :: Maybe (Array D3Link_Unswizzled)      -- New link data (UNSWIZZLED: source/target are IDs)
   , activeForces :: Maybe (Set Label)             -- Which forces to enable (replaces active set)
@@ -260,7 +241,7 @@ class (Monad m, SimulationM selection m) <= SimulationM2 selection m | m -> sele
   -- | ```
   -- |
   -- | Returns simulation-enhanced nodes and SWIZZLED links for joining to DOM.
-  update :: forall d r id. Eq id => SimulationUpdate d r id -> m { nodes :: Array (D3_SimulationNode d), links :: Array (D3LinkSwizzled (D3_SimulationNode d) r) }
+  update :: forall d. SimulationUpdate d -> m { nodes :: Array (D3_SimulationNode d), links :: Array D3Link_Swizzled }
 
   -- ** Animation (Tick Functions) **
 
@@ -293,17 +274,17 @@ class (Monad m, SimulationM selection m) <= SimulationM2 selection m | m -> sele
   removeTickFunction :: Label                   -> m Unit
 
 -- RawData type exists to clean up types of mergeNewDataWithSim
-type RawData d r id = {
+type RawData d = {
   nodes :: Array (D3_SimulationNode d)
-, links :: Array (D3Link id r)
+, links :: Array D3Link_Unswizzled
 }
 
-type Staging selection d r id = {
+type Staging selection d = {
     selections :: {
       nodes :: Maybe selection
     , links :: Maybe selection
     }
    -- filter for links given to simulation engine, you don't necessarily want all links to be exerting force
   , linksWithForce :: Datum_ -> Boolean
-  , rawdata :: RawData d r id
+  , rawdata :: RawData d
 }

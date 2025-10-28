@@ -26,7 +26,7 @@ import Halogen as H
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, updateJoin)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start, update)
 import PSD3.CodeAtlas.Types (ModuleGraphData, ModuleInfo)
-import PSD3.Data.Node (D3Link(..), D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode(..), D3_VxyFxy, D3_XY, toUnswizzled)
+import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode(..), D3_VxyFxy, D3_XY)
 import PSD3.Internal.Attributes.Sugar (classed, fill, radius, remove, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, width, height, x, x1, x2, y, y1, y2)
 import Type.Row (type (+))
 import PSD3.Internal.FFI (clearHighlights_, filterToConnectedNodes_, highlightConnectedNodes_, keyIsID_, simdragHorizontal_, unpinAllNodes_)
@@ -160,22 +160,31 @@ modulesToNodes modules =
 
 -- | Convert module dependencies to simulation links (UNSWIZZLED: IDs only)
 -- | These will be passed to the simulation which will swizzle them (replace IDs with node references)
-modulesToLinks :: Array ModuleInfo -> Array (D3Link String ( id :: String ))
+modulesToLinks :: Array ModuleInfo -> Array D3Link_Unswizzled
 modulesToLinks modules =
   let sourceModuleNames = Set.fromFoldable $ modules <#> _.name
+      -- Helper to extract link record from opaque type
+      unpackLink :: D3Link_Unswizzled -> { id :: String, source :: String, target :: String }
+      unpackLink = unsafeCoerce
+      -- Helper to construct opaque type from record
+      packLink :: { id :: String, source :: String, target :: String } -> D3Link_Unswizzled
+      packLink = unsafeCoerce
   in Array.concat $ modules <#> \m ->
-       filter (\(D3LinkID link) -> Set.member link.target sourceModuleNames)
-         (m.depends <#> \dep -> D3LinkID { id: m.name <> "->" <> dep, source: m.name, target: dep })
+       filter (\link -> Set.member (unpackLink link).target sourceModuleNames)
+         (m.depends <#> \dep -> packLink { id: m.name <> "->" <> dep, source: m.name, target: dep })
 
 -- | Build adjacency map for connected nodes lookup
 -- | Works with UNSWIZZLED links (IDs only) since we're just mapping ID relationships
-buildAdjacencyMap :: forall r. Array (D3Link String r) -> Map String (Set String)
+buildAdjacencyMap :: Array D3Link_Unswizzled -> Map String (Set String)
 buildAdjacencyMap links =
-  let addEdge acc (D3LinkID link) =
-        let sourceSet = fromMaybe Set.empty $ Map.lookup link.source acc
-            targetSet = fromMaybe Set.empty $ Map.lookup link.target acc
-        in Map.insert link.source (Set.insert link.target sourceSet)
-             $ Map.insert link.target (Set.insert link.source targetSet) acc
+  let unpackLink :: D3Link_Unswizzled -> { source :: String, target :: String }
+      unpackLink = unsafeCoerce
+      addEdge acc link =
+        let linkRec = unpackLink link
+            sourceSet = fromMaybe Set.empty $ Map.lookup linkRec.source acc
+            targetSet = fromMaybe Set.empty $ Map.lookup linkRec.target acc
+        in Map.insert linkRec.source (Set.insert linkRec.target sourceSet)
+             $ Map.insert linkRec.target (Set.insert linkRec.source targetSet) acc
   in Array.foldl addEdge Map.empty links
 
 -- | Initialize the interactive graph (called once)
@@ -191,7 +200,7 @@ initialize :: forall row m.
     , nodesGroup :: D3Selection_
     , linksGroup :: D3Selection_
     , moduleNodes :: Array ModuleNode
-    , moduleLinks :: Array (D3Link String ( id :: String ))
+    , moduleLinks :: Array D3Link_Unswizzled
     , adjacencyMap :: Map String (Set String)
     }
 initialize graphData = do
@@ -279,7 +288,7 @@ updateGraph :: forall row m.
   , linksGroup :: D3Selection_
   , zoomGroup :: D3Selection_
   , filteredNodes :: Array ModuleNode
-  , filteredLinks :: Array (D3Link String ( id :: String ))
+  , filteredLinks :: Array D3Link_Unswizzled
   , adjacencyMap :: Map String (Set String)
   } ->
   m Unit

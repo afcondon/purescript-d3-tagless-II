@@ -4,7 +4,8 @@ import Prelude
 
 import Affjax (URL)
 import PSD3.Internal.Types (PointXY)
-import PSD3.Data.Node (D3Link(..), D3LinkSwizzled, D3_FocusXY, D3_ID, D3_Radius, D3_TreeNode, D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
+import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_FocusXY, D3_ID, D3_Radius, D3_TreeNode, D3_TreeRow, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
+import Unsafe.Coerce (unsafeCoerce)
 import Data.Array (catMaybes, foldl, groupBy, length, range, sortBy, zip, (!!), (:))
 import Data.Foldable (sum)
 import Data.Map as M
@@ -72,8 +73,8 @@ data NodeType        = IsModule ModulePath | IsPackage PackageInfo
 type Dependencies    = Array NodeID
 
 type SpagoLinkData        = ( linktype :: LinkType, inSim :: Boolean )
-type SpagoGraphLinkID     = D3Link NodeID SpagoLinkData
-type SpagoGraphLinkRecord = D3LinkSwizzled SpagoDataRecord SpagoLinkData 
+type SpagoGraphLinkID     = D3Link_Unswizzled
+type SpagoGraphLinkRecord = D3Link_Swizzled 
 
 type SpagoTreeObj = D3_TreeNode (D3_XY  + (EmbeddedData { | SpagoNodeRow () }) + () )
 
@@ -232,20 +233,23 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     moduleNodes        = makeNodeFromModuleJSONPL  <$> modulesPL
     packageNodes       = makeNodeFromPackageJSONCL <$> packagesCL
 
+    packLink :: forall r. { source :: NodeID, target :: NodeID | r } -> SpagoGraphLinkID
+    packLink = unsafeCoerce
+
     makeLink :: LinkType -> Tuple NodeID NodeID -> SpagoGraphLinkID
-    makeLink linktype (Tuple source target) = D3LinkID { source, target, linktype, inSim: true }
+    makeLink linktype (Tuple source target) = packLink { source, target, linktype, inSim: true }
 
     foldDepends :: forall r. Array (Tuple NodeID NodeID) -> { key :: String, depends :: Array String | r } -> Array (Tuple NodeID NodeID)
-    foldDepends b a = (makeTuple <$> a.depends) <> b    
-      where id = getId a.key 
+    foldDepends b a = (makeTuple <$> a.depends) <> b
+      where id = getId a.key
             makeTuple :: String -> Tuple NodeID NodeID
-            makeTuple s = Tuple id (getId s)  
+            makeTuple s = Tuple id (getId s)
 
-    moduleLinks  = (makeLink M2M_Graph) <$> (foldl foldDepends [] modules)             
+    moduleLinks  = (makeLink M2M_Graph) <$> (foldl foldDepends [] modules)
     packageLinks = (makeLink P2P)       <$> (foldl foldDepends [] packages)
 
     makeModuleToPackageLink :: SpagoNodeData -> SpagoGraphLinkID
-    makeModuleToPackageLink m = D3LinkID { source: m.id, target: m.containerID, linktype: M2P, inSim: true }
+    makeModuleToPackageLink m = packLink { source: m.id, target: m.containerID, linktype: M2P, inSim: true }
 
     modulePackageLinks = makeModuleToPackageLink <$> moduleNodes
     
@@ -255,10 +259,13 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
     id2Node = M.fromFoldable $
               nodes <#> \node -> Tuple node.id node
 
+    unpackLink :: SpagoGraphLinkID -> { source :: NodeID, target :: NodeID, linktype :: LinkType, inSim :: Boolean }
+    unpackLink = unsafeCoerce
+
     getSourceLinks :: SpagoNodeData -> Tuple NodeID (Array NodeID)
     getSourceLinks { id } = Tuple id sources
       where
-        sources = foldl (\acc (D3LinkID l) -> if id == l.target then (l.source:acc) else acc ) [] links
+        sources = foldl (\acc link -> let l = unpackLink link in if id == l.target then (l.source:acc) else acc ) [] links
 
     -- | we make a map so that we can look up the links.sources in each node
     sourceLinksMap = M.fromFoldable $ getSourceLinks <$> nodes
@@ -278,14 +285,17 @@ getGraphJSONData { packages, modules, lsDeps, loc } = do
   , id2LOC    : M.empty
   }
 
+unpackLink' :: SpagoGraphLinkID -> { linktype :: LinkType }
+unpackLink' = unsafeCoerce
+
 isP2P_Link :: SpagoGraphLinkID -> Boolean
-isP2P_Link (D3LinkID { linktype }) = linktype == P2P
+isP2P_Link link = (unpackLink' link).linktype == P2P
 isM2M_Graph_Link :: SpagoGraphLinkID -> Boolean
-isM2M_Graph_Link (D3LinkID { linktype }) = linktype == M2M_Graph
+isM2M_Graph_Link link = (unpackLink' link).linktype == M2M_Graph
 isM2P_Link :: SpagoGraphLinkID -> Boolean
-isM2P_Link (D3LinkID { linktype }) = linktype == M2P
+isM2P_Link link = (unpackLink' link).linktype == M2P
 isM2M_Tree_Link :: SpagoGraphLinkID -> Boolean
-isM2M_Tree_Link (D3LinkID { linktype }) = linktype == M2M_Tree
+isM2M_Tree_Link link = (unpackLink' link).linktype == M2M_Tree
 
 
 -- | boilerplate

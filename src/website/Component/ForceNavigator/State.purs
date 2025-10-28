@@ -4,7 +4,8 @@ import Prelude
 
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (D3Selection_)
-import PSD3.Data.Node (D3Link(..), D3_SimulationNode(..))
+import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode(..))
+import Unsafe.Coerce (unsafeCoerce)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, initialSimulationState)
 import D3.Viz.ForceNavigator.Model (NavigationSimNode, NodeType(..))
 import Data.Array (elem, filter, length) as Array
@@ -59,18 +60,22 @@ visibleNodes expanded allNodes =
 
 -- | Clone a link to create a fresh object (prevents mutation of static data)
 -- | Specific to String IDs with no extra fields for NavigationRawModel
-cloneLink :: D3Link String () -> D3Link String ()
-cloneLink (D3LinkID link) = D3LinkID { source: link.source, target: link.target }
+cloneLink :: D3Link_Unswizzled -> D3Link_Unswizzled
+cloneLink link =
+  let { source, target } = (unsafeCoerce link :: { source :: String, target :: String })
+  in unsafeCoerce { source, target }
 
 -- | Get the visible links based on which nodes are visible
 -- | CRITICAL: Must clone links to prevent FFI swizzling from mutating static navigationData
-visibleLinks :: Array NavigationSimNode -> Array (D3Link String ()) -> Array (D3Link String ())
+visibleLinks :: Array NavigationSimNode -> Array D3Link_Unswizzled -> Array D3Link_Unswizzled
 visibleLinks nodes allLinks =
   let
     visibleIds = Set.fromFoldable $ map (\(D3SimNode n) -> n.id) nodes
+    unpackLink :: D3Link_Unswizzled -> { source :: String, target :: String }
+    unpackLink = unsafeCoerce
 
     -- Show ALL links in the input to see if skeleton links are even there
-    _ = Debug.spy "📊 ALL INPUT LINKS" $ map (\(D3LinkID l) -> l.source <> " → " <> l.target) allLinks
+    _ = Debug.spy "📊 ALL INPUT LINKS" $ map (\l -> let link = unpackLink l in link.source <> " → " <> link.target) allLinks
 
     -- Test the skeleton links specifically
     skeletonTests = map (\target ->
@@ -80,9 +85,10 @@ visibleLinks nodes allLinks =
     ) ["gallery", "about", "spago", "interpreters", "github"]
     _ = Debug.spy "🔍 Skeleton link tests" skeletonTests
 
-    isVisible (D3LinkID link) =
-      let sourceIn = Set.member link.source visibleIds
-          targetIn = Set.member link.target visibleIds
+    isVisible link =
+      let linkRec = unpackLink link
+          sourceIn = Set.member linkRec.source visibleIds
+          targetIn = Set.member linkRec.target visibleIds
           visible = sourceIn && targetIn
       in visible
 
@@ -92,7 +98,7 @@ visibleLinks nodes allLinks =
 
     _ = Debug.spy "📊 Total links in navigationData" $ Array.length allLinks
     _ = Debug.spy "📊 visibleNodes IDs" $ Set.toUnfoldable visibleIds :: Array String
-    _ = Debug.spy "📊 visibleLinks (filtered)" $ map (\(D3LinkID l) -> l.source <> " → " <> l.target) result
+    _ = Debug.spy "📊 visibleLinks (filtered)" $ map (\l -> let link = unpackLink l in link.source <> " → " <> link.target) result
     _ = Debug.spy "📊 visibleLinks count" $ Array.length result
   in
     result

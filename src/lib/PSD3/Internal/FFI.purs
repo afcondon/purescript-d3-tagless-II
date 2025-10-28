@@ -123,34 +123,32 @@ foreign import d3PreserveSimulationPositions_ ::
   (Datum_ -> Index_) -> 
   Array (D3_SimulationNode d)
 foreign import d3PreserveLinkReferences_ ::
-  forall id r. 
   D3Selection_ ->
-  Array (D3Link id r) -> -- Array (D3LinkSwizzled (D3_SimulationNode d) r) ->
-  Array (D3Link id r)    -- Array (D3LinkSwizzled (D3_SimulationNode d) r) ->
+  Array D3Link_Unswizzled ->
+  Array D3Link_Unswizzled
 
 foreign import getIDsFromNodes_ :: forall d id. Array (D3_SimulationNode d) -> (Datum_ -> Index_) -> Array id
 
 foreign import getNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d)
 foreign import setNodes_ :: forall d.   D3Simulation_ -> Array (D3_SimulationNode d) -> Array (D3_SimulationNode d)
 -- setLinks will do the swizzling AND prune any links that have source or target that is not in [nodes]
-foreign import setLinks_ :: 
-  forall d r. 
+foreign import setLinks_ ::
   D3Simulation_ ->
-  Array (D3LinkSwizzled (D3_SimulationNode d) r) ->
+  Array D3Link_Swizzled ->
   Unit
-foreign import swizzleLinks_ :: 
-  forall r d id. 
-  Array (D3Link id r) ->
+foreign import swizzleLinks_ ::
+  forall d.
+  Array D3Link_Unswizzled ->
   Array (D3_SimulationNode d) ->
-  (Datum_ -> Index_) -> 
-  Array (D3LinkSwizzled (D3_SimulationNode d) r)
+  (Datum_ -> Index_) ->
+  Array D3Link_Swizzled
 
 foreign import getLinkID_              :: (Datum_ -> Index_) -> Datum_ -> Index_
-foreign import getLinkIDs_             :: forall d r id. (Datum_ -> Index_) -> D3Link d r -> { sourceID :: id, targetID :: id }
+foreign import getLinkIDs_             :: forall id. (Datum_ -> Index_) -> D3Link_Unswizzled -> { sourceID :: id, targetID :: id }
 foreign import unsetLinks_             :: D3Simulation_ -> D3Simulation_
 
-foreign import getLinksFromForce_      :: forall d r. D3ForceHandle_ -> Array (D3Link d r)
-foreign import getLinksFromSimulation_ :: forall d r. D3Simulation_ -> Array (D3LinkSwizzled (D3_SimulationNode d) r)
+foreign import getLinksFromForce_      :: D3ForceHandle_ -> Array D3Link_Unswizzled
+foreign import getLinksFromSimulation_ :: D3Simulation_ -> Array D3Link_Swizzled
 
 foreign import startSimulation_        :: D3Simulation_ -> Unit
 foreign import stopSimulation_         :: D3Simulation_ -> Unit
@@ -256,7 +254,7 @@ foreign import getHierarchyParent_      :: forall r. D3_TreeNode r -> D3_TreeNod
 -- TODO these should all be operating on cooked tree type, however that is to be done
 foreign import descendants_     :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
 foreign import find_            :: forall r. D3_TreeNode r -> (Datum_ -> Boolean) -> Nullable (D3_TreeNode r)
-foreign import links_           :: forall d r1 r2. D3_TreeNode r1 -> Array (D3Link d r2)
+foreign import links_           :: forall r. D3_TreeNode r -> Array D3Link_Unswizzled
 foreign import ancestors_       :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
 foreign import leaves_          :: forall r. D3_TreeNode r -> Array (D3_TreeNode r)
 foreign import path_            :: forall r. D3_TreeNode r -> D3_TreeNode r -> Array (D3_TreeNode r)

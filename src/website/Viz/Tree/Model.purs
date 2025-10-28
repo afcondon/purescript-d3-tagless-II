@@ -1,7 +1,7 @@
 module D3.Viz.Tree.Model where
 
 
-import PSD3.Data.Node (D3TreeRow, D3Link, D3_SimulationNode, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
+import PSD3.Data.Node (D3TreeRow, D3Link_Unswizzled, D3_SimulationNode, D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import Type.Row (type (+))
 
 
@@ -17,12 +17,12 @@ type FlareLinkData  = ( value :: Number )
 type FlareSimRecord = Record (FlareNodeRow  + ()) 
 type FlareLinkObj   =  { source :: FlareSimRecord, target :: FlareSimRecord | FlareLinkData }
 
-type FlareRawModel = { 
-    links :: Array (D3Link NodeID FlareLinkData)
+type FlareRawModel = {
+    links :: Array D3Link_Unswizzled
   , nodes :: Array FlareNodeData
 }
 
-type FlareCookedModel = { 
-    links :: Array (D3Link NodeID FlareLinkData)
+type FlareCookedModel = {
+    links :: Array D3Link_Unswizzled
   , nodes :: Array FlareNodeData
 }

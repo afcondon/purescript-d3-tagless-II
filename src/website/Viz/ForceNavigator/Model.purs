@@ -1,7 +1,7 @@
 module D3.Viz.ForceNavigator.Model where
 
 import Prelude
-import PSD3.Data.Node (D3Link, D3_SimulationNode, D3_VxyFxy, D3_XY)
+import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode, D3_VxyFxy, D3_XY)
 import Data.Maybe (Maybe)
 import Type.Row (type (+))
 
@@ -55,8 +55,8 @@ type NavigationLinkData = ()
 -- | Link between nodes
 type NavigationGraphLinkObj = { source :: NavigationSimRecord, target :: NavigationSimRecord | NavigationLinkData }
 
--- | The raw model with string-based links
+-- | The raw model with string-based links (UNSWIZZLED)
 type NavigationRawModel = {
-  links :: Array (D3Link String NavigationLinkData)
+  links :: Array D3Link_Unswizzled
 , nodes :: Array NavigationSimNode
 }

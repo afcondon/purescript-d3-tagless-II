@@ -31,7 +31,7 @@ type State = {
   , model        :: Maybe SpagoModel
   -- we'll filter nodes/links to staging and then, if staging is valid (has selections) we will put this staging data in the simulation
   -- if there are updates to data they will be detected and handled by defensive copying in the FFI to ensure continuity of object references from links
-  , staging      :: Staging D3Selection_ SpagoDataRow SpagoLinkData NodeID
+  , staging      :: Staging D3Selection_ SpagoDataRow
 -- | Contains all the settings necessary to call the Draw function
   , scene        :: MiseEnScene
 -- | Event listener for D3→Halogen event flow (component infrastructure, not scene config)

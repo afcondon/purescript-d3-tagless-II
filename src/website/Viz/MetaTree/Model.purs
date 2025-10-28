@@ -1,6 +1,6 @@
 module D3.Viz.MetaTree.Model where
 
-import PSD3.Data.Node (D3TreeRow, D3Link, EmbeddedData, NodeID)
+import PSD3.Data.Node (D3TreeRow, D3Link_Unswizzled, EmbeddedData, NodeID)
 
 import Type.Row (type (+))
 
@@ -19,12 +19,12 @@ type MetaTreeLinkData  = ( example :: Number )
 type MetaTreeSimRecord = Record (MetaTreeNodeRow  + ()) 
 type MetaTreeLinkObj   =  { source :: MetaTreeSimRecord, target :: MetaTreeSimRecord | MetaTreeLinkData }
 
-type MetaTreeRawModel = { 
-    links :: Array (D3Link NodeID MetaTreeLinkData)
+type MetaTreeRawModel = {
+    links :: Array D3Link_Unswizzled
   , nodes :: Array MetaTreeNodeData
 }
 
-type MetaTreeCookedModel = { 
-    links :: Array (D3Link NodeID MetaTreeLinkData)
+type MetaTreeCookedModel = {
+    links :: Array D3Link_Unswizzled
   , nodes :: Array MetaTreeNodeData
 }
