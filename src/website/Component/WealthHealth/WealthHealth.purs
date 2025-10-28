@@ -126,6 +126,17 @@ nationPointToDrawData np =
   , regionColor: regionColor np.region
   }
 
+-- Debug version that logs the region
+nationPointToDrawDataDebug :: NationPoint -> Draw.NationPoint
+nationPointToDrawDataDebug np =
+  let color = regionColor np.region
+  in { name: np.name
+     , income: np.income
+     , population: np.population
+     , lifeExpectancy: np.lifeExpectancy
+     , regionColor: color
+     }
+
 -- | Handle actions
 handleAction :: forall o m. MonadAff m => MonadEffect m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of

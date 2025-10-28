@@ -34988,7 +34988,7 @@
         region: parseRegion(nation.region),
         income: nation.income || [],
         population: nation.population || [],
-        lifeExpectancy: nation.life_expectancy || []
+        lifeExpectancy: nation.lifeExpectancy || []
       }));
     } catch (error4) {
       console.error("Failed to parse nations JSON:", error4);
