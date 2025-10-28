@@ -141,6 +141,14 @@ handleAction = case _ of
 
   DataLoaded model -> do
     liftEffect $ Console.log $ "Data loaded: " <> show (length model.nations) <> " nations, years " <> show model.yearRange.min <> "-" <> show model.yearRange.max
+    -- Debug: check raw nation data
+    case head model.nations of
+      Just firstNation -> do
+        liftEffect $ Console.log $ "First raw nation: " <> firstNation.name
+        liftEffect $ Console.log $ "  Income data points: " <> show (length firstNation.income)
+        liftEffect $ Console.log $ "  Population data points: " <> show (length firstNation.population)
+        liftEffect $ Console.log $ "  Life expectancy data points: " <> show (length firstNation.lifeExpectancy)
+      Nothing -> liftEffect $ Console.log "No nations in model!"
     H.modify_ _ { model = Just model }
     H.modify_ _ { currentYear = model.yearRange.min }
 
