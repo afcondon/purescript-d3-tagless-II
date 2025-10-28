@@ -9,7 +9,7 @@
 .wealth-health-page {
   min-height: 100vh;
   background-color: var(--color-beige-base);
-  padding: 2rem;
+  padding: 0;
 }
 
 /* Header */
@@ -237,7 +237,7 @@
   background-color: white;
   border: 2px solid var(--color-gray-medium);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  padding: 2rem;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;

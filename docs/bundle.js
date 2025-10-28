@@ -34664,15 +34664,15 @@
   };
   var scaleRadius = function(population) {
     var normalized = population / 5e9;
-    return sqrt(normalized) * 40;
+    return sqrt(normalized) * 80;
   };
   var defaultConfig = {
     width: 1e3,
     height: 600,
-    marginTop: 20,
-    marginRight: 20,
-    marginBottom: 35,
-    marginLeft: 40
+    marginTop: 0,
+    marginRight: 0,
+    marginBottom: 0,
+    marginLeft: 0
   };
   var draw19 = function(dictSelectionM) {
     var Monad0 = dictSelectionM.Monad0();
