@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Monad.Rec.Class (forever)
 import D3.Viz.WealthHealth.Draw as Draw
-import Data.Array (find, length)
+import Data.Array (find, head, length, take)
 import Data.Either (Either(..))
 import Data.Int (floor)
 import Data.Maybe (Maybe(..))
@@ -222,13 +222,17 @@ handleAction = case _ of
       Just model, Just updateFn -> do
         let nations = getAllNationsAtYear state.currentYear model
         liftEffect $ Console.log $ "Rendering " <> show (length nations) <> " nations for year " <> show state.currentYear
-        -- Debug: log first few nations to see their data
+        -- Debug: log actual nation names to see what we have
+        let firstFiveNames = map _.name $ take 5 nations
+        liftEffect $ Console.log $ "First 5 nation names: " <> show firstFiveNames
+        -- Try to find a specific nation
         case find (\n -> n.name == "United States") nations of
           Just usa -> liftEffect $ Console.log $ "USA: income=" <> show usa.income <> " life=" <> show usa.lifeExpectancy <> " pop=" <> show usa.population
-          Nothing -> liftEffect $ Console.log "USA not found"
-        case find (\n -> n.name == "China") nations of
-          Just china -> liftEffect $ Console.log $ "China: income=" <> show china.income <> " life=" <> show china.lifeExpectancy <> " pop=" <> show china.population
-          Nothing -> liftEffect $ Console.log "China not found"
+          Nothing -> liftEffect $ Console.log "USA not found, trying first nation..."
+        -- Log first nation regardless of name
+        case head nations of
+          Just first -> liftEffect $ Console.log $ first.name <> ": income=" <> show first.income <> " life=" <> show first.lifeExpectancy <> " pop=" <> show first.population
+          Nothing -> liftEffect $ Console.log "No nations at all!"
         let drawData = map nationPointToDrawData nations
         _ <- liftEffect $ eval_D3M $ updateFn drawData
         pure unit

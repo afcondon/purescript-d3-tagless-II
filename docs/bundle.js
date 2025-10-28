@@ -35245,6 +35245,7 @@
   var member5 = /* @__PURE__ */ member2(ordString);
   var $$delete8 = /* @__PURE__ */ $$delete5(ordString);
   var insert16 = /* @__PURE__ */ insert6(ordString);
+  var show113 = /* @__PURE__ */ show(showNumber);
   var map60 = /* @__PURE__ */ map(functorArray);
   var bind114 = /* @__PURE__ */ bind(bindMaybe);
   var nationPointToDrawData = function(np) {
@@ -35281,43 +35282,43 @@
         if (v instanceof DataLoaded2) {
           return discard111(liftEffect110(log2("Data loaded: " + (show40(length4(v.value0.nations)) + (" nations, years " + (show40(v.value0.yearRange.min) + ("-" + show40(v.value0.yearRange.max))))))))(function() {
             return discard111(modify_42(function(v1) {
-              var $57 = {};
-              for (var $58 in v1) {
-                if ({}.hasOwnProperty.call(v1, $58)) {
-                  $57[$58] = v1[$58];
+              var $60 = {};
+              for (var $61 in v1) {
+                if ({}.hasOwnProperty.call(v1, $61)) {
+                  $60[$61] = v1[$61];
                 }
                 ;
               }
               ;
-              $57.model = new Just(v.value0);
-              return $57;
+              $60.model = new Just(v.value0);
+              return $60;
             }))(function() {
               return discard111(modify_42(function(v1) {
-                var $60 = {};
-                for (var $61 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $61)) {
-                    $60[$61] = v1[$61];
+                var $63 = {};
+                for (var $64 in v1) {
+                  if ({}.hasOwnProperty.call(v1, $64)) {
+                    $63[$64] = v1[$64];
                   }
                   ;
                 }
                 ;
-                $60.currentYear = v.value0.yearRange.min;
-                return $60;
+                $63.currentYear = v.value0.yearRange.min;
+                return $63;
               }))(function() {
                 return discard111(liftAff36(delay(100)))(function() {
                   return discard111(liftEffect110(log2("Initializing visualization...")))(function() {
                     return bind66(liftEffect110(eval_D3M(draw20("#wealth-health-viz"))))(function(v1) {
                       return discard111(modify_42(function(v2) {
-                        var $64 = {};
-                        for (var $65 in v2) {
-                          if ({}.hasOwnProperty.call(v2, $65)) {
-                            $64[$65] = v2[$65];
+                        var $67 = {};
+                        for (var $68 in v2) {
+                          if ({}.hasOwnProperty.call(v2, $68)) {
+                            $67[$68] = v2[$68];
                           }
                           ;
                         }
                         ;
-                        $64.vizUpdateFn = new Just(v1);
-                        return $64;
+                        $67.vizUpdateFn = new Just(v1);
+                        return $67;
                       }))(function() {
                         return discard111(liftEffect110(log2("Visualization initialized, rendering initial frame...")))(function() {
                           return handleAction47(dictMonadAff)(MonadEffect0)(Render.value);
@@ -35339,16 +35340,16 @@
         ;
         if (v instanceof SetYear) {
           return discard111(modify_42(function(v1) {
-            var $69 = {};
-            for (var $70 in v1) {
-              if ({}.hasOwnProperty.call(v1, $70)) {
-                $69[$70] = v1[$70];
+            var $72 = {};
+            for (var $73 in v1) {
+              if ({}.hasOwnProperty.call(v1, $73)) {
+                $72[$73] = v1[$73];
               }
               ;
             }
             ;
-            $69.currentYear = v.value0;
-            return $69;
+            $72.currentYear = v.value0;
+            return $72;
           }))(function() {
             return handleAction47(dictMonadAff)(MonadEffect0)(Render.value);
           });
@@ -35358,32 +35359,32 @@
           return bind66(get11)(function(state3) {
             var newPlaying = !state3.playing;
             return discard111(modify_42(function(v1) {
-              var $73 = {};
-              for (var $74 in v1) {
-                if ({}.hasOwnProperty.call(v1, $74)) {
-                  $73[$74] = v1[$74];
+              var $76 = {};
+              for (var $77 in v1) {
+                if ({}.hasOwnProperty.call(v1, $77)) {
+                  $76[$77] = v1[$77];
                 }
                 ;
               }
               ;
-              $73.playing = newPlaying;
-              return $73;
+              $76.playing = newPlaying;
+              return $76;
             }))(function() {
               return discard111(when5(newPlaying)((function() {
                 var intervalMs = 1e3 / state3.animationSpeed;
                 return bind66(liftEffect110(create3))(function(v1) {
                   return bind66(subscribe2(v1.emitter))(function(subscriptionId) {
                     return discard111(modify_42(function(v2) {
-                      var $77 = {};
-                      for (var $78 in v2) {
-                        if ({}.hasOwnProperty.call(v2, $78)) {
-                          $77[$78] = v2[$78];
+                      var $80 = {};
+                      for (var $81 in v2) {
+                        if ({}.hasOwnProperty.call(v2, $81)) {
+                          $80[$81] = v2[$81];
                         }
                         ;
                       }
                       ;
-                      $77.animationSubscriptionId = new Just(subscriptionId);
-                      return $77;
+                      $80.animationSubscriptionId = new Just(subscriptionId);
+                      return $80;
                     }))(function() {
                       return $$void11(liftAff36(forkAff(forever3(discard210(delay(intervalMs))(function() {
                         return liftEffect48(notify(v1.listener)(Tick.value));
@@ -35400,16 +35401,16 @@
                   if (state$prime.animationSubscriptionId instanceof Just) {
                     return discard111(unsubscribe2(state$prime.animationSubscriptionId.value0))(function() {
                       return modify_42(function(v1) {
-                        var $83 = {};
-                        for (var $84 in v1) {
-                          if ({}.hasOwnProperty.call(v1, $84)) {
-                            $83[$84] = v1[$84];
+                        var $86 = {};
+                        for (var $87 in v1) {
+                          if ({}.hasOwnProperty.call(v1, $87)) {
+                            $86[$87] = v1[$87];
                           }
                           ;
                         }
                         ;
-                        $83.animationSubscriptionId = Nothing.value;
-                        return $83;
+                        $86.animationSubscriptionId = Nothing.value;
+                        return $86;
                       });
                     });
                   }
@@ -35430,33 +35431,33 @@
             if (state3.model instanceof Just) {
               var nextYear = state3.currentYear + 1 | 0;
               return discard111((function() {
-                var $88 = nextYear > state3.model.value0.yearRange.max;
-                if ($88) {
+                var $91 = nextYear > state3.model.value0.yearRange.max;
+                if ($91) {
                   return modify_42(function(v1) {
-                    var $89 = {};
-                    for (var $90 in v1) {
-                      if ({}.hasOwnProperty.call(v1, $90)) {
-                        $89[$90] = v1[$90];
+                    var $92 = {};
+                    for (var $93 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $93)) {
+                        $92[$93] = v1[$93];
                       }
                       ;
                     }
                     ;
-                    $89.currentYear = state3.model.value0.yearRange.min;
-                    return $89;
+                    $92.currentYear = state3.model.value0.yearRange.min;
+                    return $92;
                   });
                 }
                 ;
                 return modify_42(function(v1) {
-                  var $92 = {};
-                  for (var $93 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $93)) {
-                      $92[$93] = v1[$93];
+                  var $95 = {};
+                  for (var $96 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $96)) {
+                      $95[$96] = v1[$96];
                     }
                     ;
                   }
                   ;
-                  $92.currentYear = nextYear;
-                  return $92;
+                  $95.currentYear = nextYear;
+                  return $95;
                 });
               })())(function() {
                 return handleAction47(dictMonadAff)(MonadEffect0)(Render.value);
@@ -35469,54 +35470,54 @@
         ;
         if (v instanceof HoverNation) {
           return modify_42(function(v1) {
-            var $96 = {};
-            for (var $97 in v1) {
-              if ({}.hasOwnProperty.call(v1, $97)) {
-                $96[$97] = v1[$97];
+            var $99 = {};
+            for (var $100 in v1) {
+              if ({}.hasOwnProperty.call(v1, $100)) {
+                $99[$100] = v1[$100];
               }
               ;
             }
             ;
-            $96.hoveredNation = v.value0;
-            return $96;
+            $99.hoveredNation = v.value0;
+            return $99;
           });
         }
         ;
         if (v instanceof ToggleNationSelection) {
           return modify_42(function(s) {
             var newSelected = (function() {
-              var $100 = member5(v.value0)(s.selectedNations);
-              if ($100) {
+              var $103 = member5(v.value0)(s.selectedNations);
+              if ($103) {
                 return $$delete8(v.value0)(s.selectedNations);
               }
               ;
               return insert16(v.value0)(s.selectedNations);
             })();
-            var $101 = {};
-            for (var $102 in s) {
-              if ({}.hasOwnProperty.call(s, $102)) {
-                $101[$102] = s[$102];
+            var $104 = {};
+            for (var $105 in s) {
+              if ({}.hasOwnProperty.call(s, $105)) {
+                $104[$105] = s[$105];
               }
               ;
             }
             ;
-            $101.selectedNations = newSelected;
-            return $101;
+            $104.selectedNations = newSelected;
+            return $104;
           });
         }
         ;
         if (v instanceof SetAnimationSpeed) {
           return modify_42(function(v1) {
-            var $105 = {};
-            for (var $106 in v1) {
-              if ({}.hasOwnProperty.call(v1, $106)) {
-                $105[$106] = v1[$106];
+            var $108 = {};
+            for (var $109 in v1) {
+              if ({}.hasOwnProperty.call(v1, $109)) {
+                $108[$109] = v1[$109];
               }
               ;
             }
             ;
-            $105.animationSpeed = v.value0;
-            return $105;
+            $108.animationSpeed = v.value0;
+            return $108;
           });
         }
         ;
@@ -35525,9 +35526,39 @@
             if (state3.model instanceof Just && state3.vizUpdateFn instanceof Just) {
               var nations = getAllNationsAtYear(state3.currentYear)(state3.model.value0);
               return discard111(liftEffect110(log2("Rendering " + (show40(length4(nations)) + (" nations for year " + show40(state3.currentYear))))))(function() {
-                var drawData = map60(nationPointToDrawData)(nations);
-                return bind66(liftEffect110(eval_D3M(state3.vizUpdateFn.value0(drawData))))(function() {
-                  return pure41(unit);
+                return discard111((function() {
+                  var v1 = find2(function(n) {
+                    return n.name === "United States";
+                  })(nations);
+                  if (v1 instanceof Just) {
+                    return liftEffect110(log2("USA: income=" + (show113(v1.value0.income) + (" life=" + (show113(v1.value0.lifeExpectancy) + (" pop=" + show113(v1.value0.population)))))));
+                  }
+                  ;
+                  if (v1 instanceof Nothing) {
+                    return liftEffect110(log2("USA not found"));
+                  }
+                  ;
+                  throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 226, column 9 - line 228, column 62): " + [v1.constructor.name]);
+                })())(function() {
+                  return discard111((function() {
+                    var v1 = find2(function(n) {
+                      return n.name === "China";
+                    })(nations);
+                    if (v1 instanceof Just) {
+                      return liftEffect110(log2("China: income=" + (show113(v1.value0.income) + (" life=" + (show113(v1.value0.lifeExpectancy) + (" pop=" + show113(v1.value0.population)))))));
+                    }
+                    ;
+                    if (v1 instanceof Nothing) {
+                      return liftEffect110(log2("China not found"));
+                    }
+                    ;
+                    throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 229, column 9 - line 231, column 64): " + [v1.constructor.name]);
+                  })())(function() {
+                    var drawData = map60(nationPointToDrawData)(nations);
+                    return bind66(liftEffect110(eval_D3M(state3.vizUpdateFn.value0(drawData))))(function() {
+                      return pure41(unit);
+                    });
+                  });
                 });
               });
             }
@@ -35540,11 +35571,11 @@
               return liftEffect110(log2("No update function available"));
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 221, column 5 - line 229, column 76): " + [state3.model.constructor.name, state3.vizUpdateFn.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 221, column 5 - line 236, column 76): " + [state3.model.constructor.name, state3.vizUpdateFn.constructor.name]);
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 131, column 16 - line 229, column 76): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 131, column 16 - line 236, column 76): " + [v.constructor.name]);
       };
     };
   };
