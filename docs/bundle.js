@@ -34722,69 +34722,67 @@
                             };
                           };
                         };
-                        return bind71(openSelection2(chartGroup)("g"))(function(enterSelection) {
-                          return bind71(updateJoin2(enterSelection)(Group.value)(nations)(coerceDatumToKey2))(function(updateSelections) {
-                            return discard112(setAttributes2(updateSelections.exit)([classed24("exit")]))(function() {
-                              return discard112(setAttributes2(updateSelections.update)([classed24("nation-group update")]))(function() {
-                                return bind71(appendTo2(updateSelections.enter)(Group.value)([]))(function(newGroups) {
-                                  return discard112(setAttributes2(newGroups)([classed24("nation-group enter")]))(function() {
-                                    return bind71(appendTo2(newGroups)(Circle.value)([]))(function(circles) {
-                                      return discard112(setAttributes2(circles)([cx8(function(d9) {
-                                        return function(i2) {
-                                          return calculateAttrs(d9)(i2).x;
-                                        };
-                                      }), cy8(function(d9) {
-                                        return function(i2) {
-                                          return calculateAttrs(d9)(i2).y;
-                                        };
-                                      }), radius16(function(d9) {
-                                        return function(i2) {
-                                          return calculateAttrs(d9)(i2).r;
-                                        };
-                                      }), fill110(function(d9) {
-                                        return function(i2) {
-                                          return calculateAttrs(d9)(i2).color;
-                                        };
-                                      }), fillOpacity9(0.7), strokeColor20("#333"), strokeWidth17(0.5), classed24("nation-circle")]))(function() {
-                                        return bind71(appendTo2(newGroups)(Text2.value)([x34(function(d9) {
-                                          return function(i2) {
-                                            return calculateAttrs(d9)(i2).x;
-                                          };
-                                        }), y34(function(d9) {
-                                          return function(i2) {
-                                            return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
-                                          };
-                                        }), textAnchor12("middle"), fontSize8(11), fill25("#333"), fillOpacity9(0), text110(datum_7.name), classed24("nation-label")]))(function(labels9) {
-                                          return bind71(openSelection2(chartGroup)(".nation-circle"))(function(allCircles) {
-                                            return discard112(setAttributes2(allCircles)([cx8(function(d9) {
-                                              return function(i2) {
-                                                return calculateAttrs(d9)(i2).x;
-                                              };
-                                            }), cy8(function(d9) {
-                                              return function(i2) {
-                                                return calculateAttrs(d9)(i2).y;
-                                              };
-                                            }), radius16(function(d9) {
-                                              return function(i2) {
-                                                return calculateAttrs(d9)(i2).r;
-                                              };
-                                            }), fill110(function(d9) {
-                                              return function(i2) {
-                                                return calculateAttrs(d9)(i2).color;
-                                              };
-                                            })]))(function() {
-                                              return bind71(openSelection2(chartGroup)(".nation-label"))(function(allLabels) {
-                                                return discard112(setAttributes2(allLabels)([x34(function(d9) {
-                                                  return function(i2) {
-                                                    return calculateAttrs(d9)(i2).x;
-                                                  };
-                                                }), y34(function(d9) {
-                                                  return function(i2) {
-                                                    return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
-                                                  };
-                                                })]))(function() {
-                                                  return pure45(newGroups);
-                                                });
+                        return bind71(openSelection2(chartGroup)("circle"))(function(circleEnterSelection) {
+                          return bind71(updateJoin2(circleEnterSelection)(Circle.value)(nations)(coerceDatumToKey2))(function(circleUpdateSelections) {
+                            return discard112(setAttributes2(circleUpdateSelections.exit)([classed24("exit")]))(function() {
+                              return discard112(setAttributes2(circleUpdateSelections.update)([cx8(function(d9) {
+                                return function(i2) {
+                                  return calculateAttrs(d9)(i2).x;
+                                };
+                              }), cy8(function(d9) {
+                                return function(i2) {
+                                  return calculateAttrs(d9)(i2).y;
+                                };
+                              }), radius16(function(d9) {
+                                return function(i2) {
+                                  return calculateAttrs(d9)(i2).r;
+                                };
+                              }), fill110(function(d9) {
+                                return function(i2) {
+                                  return calculateAttrs(d9)(i2).color;
+                                };
+                              }), classed24("nation-circle update")]))(function() {
+                                return bind71(appendTo2(circleUpdateSelections.enter)(Circle.value)([]))(function(newCircles) {
+                                  return discard112(setAttributes2(newCircles)([cx8(function(d9) {
+                                    return function(i2) {
+                                      return calculateAttrs(d9)(i2).x;
+                                    };
+                                  }), cy8(function(d9) {
+                                    return function(i2) {
+                                      return calculateAttrs(d9)(i2).y;
+                                    };
+                                  }), radius16(function(d9) {
+                                    return function(i2) {
+                                      return calculateAttrs(d9)(i2).r;
+                                    };
+                                  }), fill110(function(d9) {
+                                    return function(i2) {
+                                      return calculateAttrs(d9)(i2).color;
+                                    };
+                                  }), fillOpacity9(0.7), strokeColor20("#333"), strokeWidth17(0.5), classed24("nation-circle enter")]))(function() {
+                                    return bind71(openSelection2(chartGroup)("text"))(function(labelEnterSelection) {
+                                      return bind71(updateJoin2(labelEnterSelection)(Text2.value)(nations)(coerceDatumToKey2))(function(labelUpdateSelections) {
+                                        return discard112(setAttributes2(labelUpdateSelections.exit)([classed24("exit")]))(function() {
+                                          return discard112(setAttributes2(labelUpdateSelections.update)([x34(function(d9) {
+                                            return function(i2) {
+                                              return calculateAttrs(d9)(i2).x;
+                                            };
+                                          }), y34(function(d9) {
+                                            return function(i2) {
+                                              return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
+                                            };
+                                          }), classed24("nation-label update")]))(function() {
+                                            return bind71(appendTo2(labelUpdateSelections.enter)(Text2.value)([]))(function(newLabels) {
+                                              return discard112(setAttributes2(newLabels)([x34(function(d9) {
+                                                return function(i2) {
+                                                  return calculateAttrs(d9)(i2).x;
+                                                };
+                                              }), y34(function(d9) {
+                                                return function(i2) {
+                                                  return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
+                                                };
+                                              }), textAnchor12("middle"), fontSize8(11), fill25("#333"), fillOpacity9(0), text110(datum_7.name), classed24("nation-label enter")]))(function() {
+                                                return pure45(newCircles);
                                               });
                                             });
                                           });

@@ -162,20 +162,10 @@ findAfter targetYear points =
       Just p -> Just p
 
 -- | Get all nations' data for a specific year
+-- | Filters out nations with incomplete data for the given year
 getAllNationsAtYear :: Int -> WealthHealthModel -> Array NationPoint
 getAllNationsAtYear year model =
   model.nations
     # map (getNationAtYear year)
-    # map (fromMaybe $ dummyNationPoint year)  -- Filter out failed interpolations
-    # identity  -- This will need better error handling in production
+    # catMaybes  -- Filter out nations with incomplete data
 
--- | Dummy nation point for error cases (should not happen with good data)
-dummyNationPoint :: Int -> NationPoint
-dummyNationPoint year =
-  { name: "Unknown"
-  , region: SubSaharanAfrica
-  , year
-  , income: 1000.0
-  , population: 1000000.0
-  , lifeExpectancy: 50.0
-  }
