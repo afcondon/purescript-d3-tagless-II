@@ -54,28 +54,42 @@ parseNationData raw = do
 foreign import parseNationsJSON :: String -> Array NationDataRaw
 
 -- | Fill in missing years in a time series by interpolating from neighboring points
-fillMissingYears :: { min :: Int, max :: Int } -> Array (Array Number) -> Array (Array Number)
+-- | Returns Nothing if the data array is completely empty
+fillMissingYears :: { min :: Int, max :: Int } -> Array (Array Number) -> Maybe (Array (Array Number))
 fillMissingYears yearRange dataPoints =
-  let
-    -- Generate all years in range
-    allYears = map toNumber $ range yearRange.min yearRange.max
+  -- Can't interpolate from no data
+  if null dataPoints then
+    Nothing
+  else
+    let
+      -- Generate all years in range
+      allYears = map toNumber $ range yearRange.min yearRange.max
 
-    -- For each year, either use existing data or interpolate
-    fillYear year = case interpolateValue (floor year) dataPoints of
-      Just value -> [year, value]
-      Nothing -> [year, 0.0]  -- Fallback (shouldn't happen with good interpolation)
-  in
-    map fillYear allYears
+      -- For each year, either use existing data or interpolate
+      fillYear year = case interpolateValue (floor year) dataPoints of
+        Just value -> [year, value]
+        Nothing -> [year, 0.0]  -- Should rarely happen with good data
+    in
+      Just $ map fillYear allYears
+  where
+    null arr = case head arr of
+      Nothing -> true
+      Just _ -> false
 
 -- | Fill missing data for a nation across all metrics
-fillNationData :: { min :: Int, max :: Int } -> NationData -> NationData
-fillNationData yearRange nation =
-  { name: nation.name
-  , region: nation.region
-  , income: fillMissingYears yearRange nation.income
-  , population: fillMissingYears yearRange nation.population
-  , lifeExpectancy: fillMissingYears yearRange nation.lifeExpectancy
-  }
+-- | Returns Nothing if any metric is completely empty
+fillNationData :: { min :: Int, max :: Int } -> NationData -> Maybe NationData
+fillNationData yearRange nation = do
+  filledIncome <- fillMissingYears yearRange nation.income
+  filledPopulation <- fillMissingYears yearRange nation.population
+  filledLifeExpectancy <- fillMissingYears yearRange nation.lifeExpectancy
+  pure
+    { name: nation.name
+    , region: nation.region
+    , income: filledIncome
+    , population: filledPopulation
+    , lifeExpectancy: filledLifeExpectancy
+    }
 
 -- | Load nations data from the Observable CDN
 loadNationsData :: Aff (Either String WealthHealthModel)
@@ -90,7 +104,8 @@ loadNationsData = do
       let nations = catMaybes $ map parseNationData rawNations
       let yearRange = calculateYearRange nations
       -- Fill in missing years by interpolating from neighboring data
-      let filledNations = map (fillNationData yearRange) nations
+      -- Filter out nations with completely missing metrics
+      let filledNations = catMaybes $ map (fillNationData yearRange) nations
       Right { nations: filledNations, yearRange }
 
 -- | Calculate the min and max years available in the dataset

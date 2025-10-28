@@ -35137,7 +35137,7 @@
           return false;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 139, column 7 - line 141, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 165, column 7 - line 167, column 25): " + [v.constructor.name]);
       })(points);
       if (candidates instanceof Nothing) {
         return head2(points);
@@ -35147,7 +35147,7 @@
         return new Just(candidates.value0);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 145, column 5 - line 147, column 23): " + [candidates.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 171, column 5 - line 173, column 23): " + [candidates.constructor.name]);
     };
   };
   var findAfter = function(targetYear) {
@@ -35162,7 +35162,7 @@
           return false;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 154, column 7 - line 156, column 25): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 180, column 7 - line 182, column 25): " + [v.constructor.name]);
       })(points);
       if (candidates instanceof Nothing) {
         return last(points);
@@ -35172,7 +35172,7 @@
         return new Just(candidates.value0);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 160, column 5 - line 162, column 23): " + [candidates.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 186, column 5 - line 188, column 23): " + [candidates.constructor.name]);
     };
   };
   var interpolateValue = function(targetYear) {
@@ -35216,7 +35216,7 @@
         return Nothing.value;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 115, column 7 - line 132, column 36): " + [before.constructor.name, after.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 141, column 7 - line 158, column 36): " + [before.constructor.name, after.constructor.name]);
     };
   };
   var getNationAtYear = function(year) {
@@ -35242,6 +35242,35 @@
       return catMaybes(map58(getNationAtYear(year))(model.nations));
     };
   };
+  var fillMissingYears = function(yearRange) {
+    return function(dataPoints) {
+      var fillYear = function(year) {
+        var v = interpolateValue(floor2(year))(dataPoints);
+        if (v instanceof Just) {
+          return [year, v.value0];
+        }
+        ;
+        if (v instanceof Nothing) {
+          return [year, 0];
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 64, column 21 - line 66, column 29): " + [v.constructor.name]);
+      };
+      var allYears = map58(toNumber)(range2(yearRange.min)(yearRange.max));
+      return map58(fillYear)(allYears);
+    };
+  };
+  var fillNationData = function(yearRange) {
+    return function(nation) {
+      return {
+        name: nation.name,
+        region: nation.region,
+        income: fillMissingYears(yearRange)(nation.income),
+        population: fillMissingYears(yearRange)(nation.population),
+        lifeExpectancy: fillMissingYears(yearRange)(nation.lifeExpectancy)
+      };
+    };
+  };
   var calculateYearRange = function(nations) {
     var allYears = bind113(nations)(function(nation) {
       return bind113(nation.income)(function(yearValue) {
@@ -35254,7 +35283,7 @@
           return [];
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 77, column 7 - line 79, column 22): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 103, column 7 - line 105, column 22): " + [v.constructor.name]);
       });
     });
     var maxYear = fromMaybe(2009)(maximum9(allYears));
@@ -35274,13 +35303,14 @@
         var rawNations = parseNationsJSON(result.value0.body);
         var nations = catMaybes(map58(parseNationData)(rawNations));
         var yearRange = calculateYearRange(nations);
+        var filledNations = map58(fillNationData(yearRange))(nations);
         return new Right({
-          nations,
+          nations: filledNations,
           yearRange
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 60, column 8 - line 68, column 35): " + [result.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 84, column 8 - line 94, column 50): " + [result.constructor.name]);
     })());
   });
 
