@@ -119,6 +119,56 @@ export function unpinAllNodes_(simulation) {
   simulation.alpha(0.3).restart();
 }
 
+// Filter simulation to only keep nodes with IDs in the provided set
+// Also updates the DOM by removing filtered-out nodes and links
+export function filterToConnectedNodes_(simulation) {
+  return keyFn => nodeIds => {
+    // Get current nodes and links
+    const allNodes = simulation.nodes();
+    const linkForce = simulation.force(linksForceName_);
+    const allLinks = linkForce ? linkForce.links() : [];
+
+    // Create a Set for faster lookup
+    const idSet = new Set(nodeIds);
+
+    // Filter nodes - keep only those with IDs in the set
+    const filteredNodes = allNodes.filter(node => idSet.has(keyFn(node)));
+
+    // Filter links - keep only those where both source and target are in the set
+    const filteredLinks = allLinks.filter(link => {
+      const sourceId = typeof link.source === 'object' ? keyFn(link.source) : link.source;
+      const targetId = typeof link.target === 'object' ? keyFn(link.target) : link.target;
+      return idSet.has(sourceId) && idSet.has(targetId);
+    });
+
+    // Update simulation with filtered data
+    simulation.nodes(filteredNodes);
+    if (linkForce) {
+      linkForce.links(filteredLinks);
+    }
+
+    // Update DOM - remove nodes that aren't in the filtered set
+    // Find all node groups and filter them
+    d3.select('div.svg-container')
+      .selectAll('g.node g.node-group')
+      .filter(d => !idSet.has(keyFn(d)))
+      .remove();
+
+    // Update DOM - remove links that aren't in the filtered set
+    d3.select('div.svg-container')
+      .selectAll('g.link line')
+      .filter(d => {
+        const sourceId = typeof d.source === 'object' ? keyFn(d.source) : d.source;
+        const targetId = typeof d.target === 'object' ? keyFn(d.target) : d.target;
+        return !idSet.has(sourceId) || !idSet.has(targetId);
+      })
+      .remove();
+
+    // Reheat and restart
+    simulation.alpha(0.5).restart();
+  };
+}
+
 export const linksForceName_ = "links"
 export const dummyForceHandle_ = null
 export function disableTick_(simulation) { return name => { return simulation.on('tick.' + name, () => null) } }
