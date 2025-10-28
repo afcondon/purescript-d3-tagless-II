@@ -47,11 +47,9 @@ render currentRoute =
         , sectionTitle "Typical Charts"
         , navLink SimpleCharts "Simple Charts" currentRoute
 
-        -- Data Visualizations
-        , sectionTitle "Data Visualizations"
-        , navLink BubbleChart "Bubble Chart" currentRoute
-        , navLink ChordDiagram "Chord Diagram" currentRoute
-        , navLink SankeyDiagram "Sankey Diagram" currentRoute
+        -- Data Flow Visualizations
+        , sectionTitle "Data Flow"
+        , navLink DataFlowViz "Chord & Sankey" currentRoute
 
         -- Hierarchies
         , sectionTitle "Hierarchies"

@@ -117,21 +117,13 @@ render _ =
                 "Bar charts, line charts, and scatter plots"
                 (routeToPath Tutorial)
             , renderExampleCard
-                "Bubble Chart"
-                "Animated bubble chart with transitions"
-                (routeToPath BubbleChart)
+                "Data Flow Visualizations"
+                "Chord and Sankey diagrams for relationships and flows"
+                (routeToPath DataFlowViz)
             , renderExampleCard
                 "Hierarchies"
                 "Trees, dendrograms, circle packing, and treemaps"
                 (routeToPath Hierarchies)
-            , renderExampleCard
-                "Sankey Diagram"
-                "Flow diagram showing energy transitions"
-                (routeToPath SankeyDiagram)
-            , renderExampleCard
-                "Chord Diagram"
-                "Circular relationship visualization"
-                (routeToPath ChordDiagram)
             , renderExampleCard
                 "Les Misérables"
                 "Character co-occurrence force-directed graph"

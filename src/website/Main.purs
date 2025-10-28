@@ -25,9 +25,7 @@ import PSD3.Understanding.Concepts as Concepts
 import PSD3.Understanding.Patterns as Patterns
 import PSD3.Understanding.Tutorial as Tutorial
 import PSD3.Understanding.SimpleCharts as SimpleCharts
-import PSD3.Understanding.ChordDiagram as ChordDiagram
-import PSD3.Understanding.BubbleChart as BubbleChart
-import PSD3.Understanding.SankeyDiagram as SankeyDiagram
+import PSD3.Understanding.DataFlowViz as DataFlowViz
 import PSD3.Understanding.Hierarchies as Hierarchies
 import PSD3.Understanding.Interpreters as Interpreters
 import PSD3.Understanding.LesMiserables as LesMiserables
@@ -63,9 +61,7 @@ type Slots =
   , patterns :: forall q. H.Slot q Void Unit
   , tutorial :: forall q. H.Slot q Void Unit
   , simpleCharts :: forall q. H.Slot q Void Unit
-  , chordDiagram :: forall q. H.Slot q Void Unit
-  , bubbleChart :: forall q. H.Slot q Void Unit
-  , sankeyDiagram :: forall q. H.Slot q Void Unit
+  , dataFlowViz :: forall q. H.Slot q Void Unit
   , hierarchies :: forall q. H.Slot q Void Unit
   , interpreters :: forall q. H.Slot q Void Unit
   , codeExplorer :: forall q. H.Slot q Void Unit
@@ -85,9 +81,7 @@ _concepts = Proxy :: Proxy "concepts"
 _patterns = Proxy :: Proxy "patterns"
 _tutorial = Proxy :: Proxy "tutorial"
 _simpleCharts = Proxy :: Proxy "simpleCharts"
-_chordDiagram = Proxy :: Proxy "chordDiagram"
-_bubbleChart = Proxy :: Proxy "bubbleChart"
-_sankeyDiagram = Proxy :: Proxy "sankeyDiagram"
+_dataFlowViz = Proxy :: Proxy "dataFlowViz"
 _hierarchies = Proxy :: Proxy "hierarchies"
 _interpreters = Proxy :: Proxy "interpreters"
 _codeExplorer = Proxy :: Proxy "codeExplorer"
@@ -156,14 +150,8 @@ renderPage route = case spy "Route is" route of
   SimpleCharts ->
     HH.slot_ _simpleCharts unit SimpleCharts.component unit
 
-  ChordDiagram ->
-    HH.slot_ _chordDiagram unit ChordDiagram.component unit
-
-  BubbleChart ->
-    HH.slot_ _bubbleChart unit BubbleChart.component unit
-
-  SankeyDiagram ->
-    HH.slot_ _sankeyDiagram unit SankeyDiagram.component unit
+  DataFlowViz ->
+    HH.slot_ _dataFlowViz unit DataFlowViz.component unit
 
   Hierarchies ->
     HH.slot_ _hierarchies unit Hierarchies.component unit

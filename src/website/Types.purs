@@ -92,9 +92,7 @@ data Route
   | UnderstandingPhilosophy  -- Understanding: design philosophy
   | Tutorial
   | SimpleCharts
-  | ChordDiagram
-  | BubbleChart
-  | SankeyDiagram
+  | DataFlowViz
   | Hierarchies
   | Interpreters
   | CodeExplorer
@@ -119,9 +117,7 @@ instance showRoute :: Show Route where
   show UnderstandingPhilosophy = "Understanding: Philosophy"
   show Tutorial = "Tutorial"
   show SimpleCharts = "Simple Charts"
-  show ChordDiagram = "Chord Diagram"
-  show BubbleChart = "Bubble Chart"
-  show SankeyDiagram = "Sankey Diagram"
+  show DataFlowViz = "Data Flow Visualizations"
   show Hierarchies = "Hierarchies"
   show Interpreters = "Interpreters"
   show CodeExplorer = "Code Explorer"

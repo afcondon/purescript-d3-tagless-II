@@ -29,9 +29,7 @@ routes =
   <|> about       -- Legacy redirect to philosophy
   <|> tutorial
   <|> simpleCharts
-  <|> chordDiagram
-  <|> bubbleChart
-  <|> sankeyDiagram
+  <|> dataFlowViz
   <|> hierarchies
   <|> interpreters
   <|> codeExplorer
@@ -94,17 +92,9 @@ tutorial = Tutorial <$ lit "tutorial" <* end
 simpleCharts :: Match Route
 simpleCharts = SimpleCharts <$ lit "simple-charts" <* end
 
--- | Match: /chord-diagram
-chordDiagram :: Match Route
-chordDiagram = ChordDiagram <$ lit "chord-diagram" <* end
-
--- | Match: /bubble-chart
-bubbleChart :: Match Route
-bubbleChart = BubbleChart <$ lit "bubble-chart" <* end
-
--- | Match: /sankey-diagram
-sankeyDiagram :: Match Route
-sankeyDiagram = SankeyDiagram <$ lit "sankey-diagram" <* end
+-- | Match: /data-flow
+dataFlowViz :: Match Route
+dataFlowViz = DataFlowViz <$ lit "data-flow" <* end
 
 -- | Match: /hierarchies
 hierarchies :: Match Route
@@ -154,9 +144,7 @@ routeToPath UnderstandingPatterns = "/understanding/patterns"
 routeToPath UnderstandingPhilosophy = "/understanding/philosophy"
 routeToPath Tutorial = "/tutorial"
 routeToPath SimpleCharts = "/simple-charts"
-routeToPath ChordDiagram = "/chord-diagram"
-routeToPath BubbleChart = "/bubble-chart"
-routeToPath SankeyDiagram = "/sankey-diagram"
+routeToPath DataFlowViz = "/data-flow"
 routeToPath Hierarchies = "/hierarchies"
 routeToPath Interpreters = "/interpreters"
 routeToPath CodeExplorer = "/code-explorer"
