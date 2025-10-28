@@ -68,6 +68,8 @@ updateSimulation :: forall m d.
   } ->
   { nodes :: Array (D3_SimulationNode d)
   , links :: Array D3Link_Unswizzled
+  , nodeFilter :: Maybe (D3_SimulationNode d -> Boolean)  -- Optional node predicate filter
+  , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)    -- Optional link predicate filter
   , activeForces :: Set Label
   , linksWithForce :: Datum_ -> Boolean
   } ->
@@ -75,10 +77,13 @@ updateSimulation :: forall m d.
   m Unit
 updateSimulation { nodes: Just nodesGroup, links: Just linksGroup } dataConfig attrs = do
   -- Step 1: Use the new update API to handle data merging, swizzling, and force engagement
+  -- Now with predicate filters, the update function handles filtering internally
   -- This returns enhanced data with swizzled links ready for DOM binding
   enhanced <- update
     { nodes: Just dataConfig.nodes
     , links: Just dataConfig.links
+    , nodeFilter: dataConfig.nodeFilter  -- Pass through node filter
+    , linkFilter: dataConfig.linkFilter  -- Pass through link filter
     , activeForces: Just dataConfig.activeForces
     , config: Nothing
     , keyFn: keyIsID_

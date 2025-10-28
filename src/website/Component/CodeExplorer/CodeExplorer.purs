@@ -32,34 +32,30 @@ module PSD3.Spago where
 import Prelude
 
 import Control.Monad.State (class MonadState, get)
-import PSD3.Internal.Attributes.Sugar (onMouseEventEffectful, x)
+import Data.Array (filter, foldl, (:))
+import Data.Maybe (Maybe(..))
 import PSD3.Data.Tree (TreeLayout(..))
-import PSD3.Internal.Types (MouseEvent(..))
 import D3.Viz.Spago.Draw (getVizEventFromClick)
 import D3.Viz.Spago.Draw as Graph
-import D3.Viz.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
-import D3.Viz.Spago.Files (NodeType(..), isM2M_Tree_Link, isM2P_Link, isP2P_Link)
-import D3.Viz.Spago.Model (SpagoModel, allNodes, fixNamedNodeTo, isPackage, isPackageOrVisibleModule, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_R, unpinAllNodes)
-import PSD3.Internal.FFI (SimulationVariables, linksForceName_)
-import PSD3.Internal.Selection.Types (SelectionAttribute)
-import PSD3.Internal.Simulation.Types (SimVariable(..), initialSimulationState)
-import Data.Set as Set
-import PSD3.Capabilities.Simulation (SimulationUpdate, start, stop, update)
--- TODO: Refactor to use new update API instead of setConfigVariable/actualizeForces
-import PSD3.Interpreter.D3 (evalEffectSimulation, runWithD3_Simulation)
-import Data.Array (filter, foldl, (:))
-import Data.Lens (use, view, (%=), (.=))
-import Data.Maybe (Maybe(..))
+import D3.Viz.Spago.Files (NodeType(..))
+import D3.Viz.Spago.Model (SpagoModel, isPackage, isPackageOrVisibleModule)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect)
 import Halogen (HalogenM, liftEffect)
 import Halogen as H
 import Halogen.Subscription as HS
+import PSD3.Capabilities.Simulation (start, stop)
+import PSD3.Internal.Attributes.Sugar (onMouseEventEffectful, x)
+import PSD3.Internal.Selection.Types (SelectionAttribute)
+import PSD3.Internal.Simulation.Types (initialSimulationState)
+import PSD3.Internal.Types (MouseEvent(..))
+import PSD3.Interpreter.D3 (evalEffectSimulation, runWithD3_Simulation)
 import PSD3.CodeExplorer.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..), VizEvent(..))
 import PSD3.CodeExplorer.Data (readModelData)
 import PSD3.CodeExplorer.Forces (forceLibrary)
 import PSD3.CodeExplorer.HTML (render)
-import PSD3.CodeExplorer.State (State, _activeForces, _chooseNodes, _cssClass, _enterselections, _eventListener, _links, _linksActive, _linksShown, _model, _modelLinks, _modelNodes, _nodeInitializerFunctions, _nodes, _sceneAttributes, _staging, _stagingLinkFilter, _stagingLinks, _stagingNodes, initialScene)
+import PSD3.CodeExplorer.Scenes (horizontalTreeScene, layerSwarmScene, packageGraphScene, packageGridScene, radialTreeScene, verticalTreeScene)
+import PSD3.CodeExplorer.State (State, SceneConfig, applySceneConfig, getModelLinks, getModelNodes, getStagingLinkFilter, getStagingLinks, getStagingNodes, setCssClass, setChooseNodes, setLinksActive, setLinksShown, setSceneAttributes, setStagingLinkFilter, setStagingLinks, setStagingNodes, toggleForce, _enterselections, _eventListener, _links, _model, _nodes, _staging, initialScene)
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -93,20 +89,25 @@ handleAction = case _ of
 
   Initialize -> do
     -- 1. Load model data from JSON files (async)
-    -- read various JSON files and synthesize a Model
     (maybeModel :: Maybe SpagoModel) <- H.liftAff readModelData
-    _model %= (const maybeModel)
+    H.modify_ _ { model = maybeModel }
 
     -- 2. Initialize D3 structure (one-time SVG setup)
     openSelections <- evalEffectSimulation Graph.initialize
-    (_staging <<< _enterselections <<< _nodes) %= (const $ openSelections.nodes)
-    (_staging <<< _enterselections <<< _links) %= (const $ openSelections.links)
+    H.modify_ \s -> s {
+      staging = s.staging {
+        selections = {
+          nodes: openSelections.nodes
+        , links: openSelections.links
+        }
+      }
+    }
 
     -- 3. Set up bidirectional event flow: D3 → Halogen
     -- Create emitter/listener pair for D3 click events to trigger Halogen actions
     { emitter, listener } <- liftEffect $ HS.create
     void $ H.subscribe emitter  -- Subscribe Halogen to the emitter
-    _eventListener .= Just listener  -- Store listener in component state (not scene config)
+    H.modify_ _ { eventListener = Just listener }
 
     pure unit
 
@@ -118,106 +119,73 @@ handleAction = case _ of
       NodeClick (IsModule _)  id -> handleAction $ SpotlightNode id
 
   ToggleChildrenOfNode id -> do
-    _chooseNodes .= (isPackageOrVisibleModule id)
+    H.modify_ $ setChooseNodes (isPackageOrVisibleModule id)
     runSimulation
 
   UnToggleChildrenOfNode _ -> do
-    _chooseNodes .= isPackage
+    H.modify_ $ setChooseNodes isPackage
     runSimulation
 
   SpotlightNode _ -> runWithD3_Simulation stop
 
-  -- | Scene Switching Pattern - demonstrates the MiseEnScene approach
-  -- | Each scene handler:
-  -- | 1. Sets node/link filters (_chooseNodes, _linksShown, _linksActive)
-  -- | 2. Configures forces (_activeForces: Set of force labels to enable)
-  -- | 3. Sets visual style (_cssClass, _sceneAttributes)
-  -- | 4. Specifies initialization functions (_nodeInitializerFunctions)
-  -- | 5. Calls runSimulation to apply the configuration
+  -- | Scene Switching Pattern - Declarative Scene Configuration
+  -- |
+  -- | NEW SIMPLIFIED APPROACH: Scene definitions live in Scenes.purs as constants.
+  -- | Scene handlers simply apply the pre-defined configuration.
+  -- | This eliminates:
+  -- | - Lens imports and operators
+  -- | - State mutation boilerplate
+  -- | - Duplication of scene configuration
+  -- |
+  -- | Benefits:
+  -- | - Scenes can be easily shared, tested, or composed
+  -- | - Scene configuration is declarative and self-documenting
+  -- | - No lens knowledge required
   Scene PackageGrid -> do
-    _chooseNodes     .= allNodes
-    _linksShown      .= isM2P_Link
-    _linksActive     .= const true
-    _cssClass        .= "cluster"
-    _sceneAttributes .= clusterSceneAttributes
-    _activeForces    .= Set.fromFoldable [ "clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide2" ]
-    _nodeInitializerFunctions .= [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
+    H.modify_ $ applySceneConfig packageGridScene
     runSimulation
 
   Scene PackageGraph -> do
-    _chooseNodes     .= isPackage
-    _linksShown      .= isP2P_Link
-    _linksActive     .= (sourcePackageIs "my-project")
-    _activeForces    .= Set.fromFoldable ["center", "collide2", "charge2", "packageOrbit", linksForceName_ ]
-    _cssClass        .= "graph"
-    _sceneAttributes .= graphSceneAttributes
-    _nodeInitializerFunctions .= [ unpinAllNodes, packagesNodesToPhyllotaxis, fixNamedNodeTo "my-project" { x: 0.0, y: 0.0 } ]
+    H.modify_ $ applySceneConfig packageGraphScene
     runSimulation
 
   Scene LayerSwarm -> do
-    _chooseNodes     .= isUsedModule
-    _linksShown      .= isM2M_Tree_Link
-    _linksActive     .= const true
-    _cssClass        .= "tree"
-    _sceneAttributes .= treeSceneAttributes
-    _activeForces    .= Set.fromFoldable [ "htreeNodesX", "collide1", "y", linksForceName_ ]
-    _nodeInitializerFunctions .= [ unpinAllNodes ]
+    H.modify_ $ applySceneConfig layerSwarmScene
     runSimulation
 
   Scene (ModuleTree Radial) -> do
-    _chooseNodes     .= isUsedModule
-    _linksShown      .= isM2M_Tree_Link
-    _linksActive     .= const true
-    _cssClass        .= "tree radial"
-    _sceneAttributes .= treeSceneAttributes
-    _activeForces    .= Set.fromFoldable [ "center", "collide2", "chargetree", "charge2", linksForceName_ ]
-    _nodeInitializerFunctions .= [ unpinAllNodes, treeNodesToTreeXY_R, fixNamedNodeTo "Main" { x: 0.0, y: 0.0 } ]
+    H.modify_ $ applySceneConfig radialTreeScene
     runSimulation
 
   Scene (ModuleTree Horizontal) -> do
-    _chooseNodes     .= isUsedModule
-    _linksShown      .= isM2M_Tree_Link
-    _linksActive     .= const false
-    _cssClass        .= "tree horizontal"
-    _sceneAttributes .= treeSceneAttributes
-    _activeForces    .= Set.fromFoldable [ "htreeNodesX", "htreeNodesY", "charge1", "collide2" ]
-    _nodeInitializerFunctions .= [ unpinAllNodes ]
+    H.modify_ $ applySceneConfig horizontalTreeScene
     runSimulation
 
   Scene (ModuleTree Vertical) -> do
-    _chooseNodes     .= isUsedModule
-    _linksShown      .= isM2M_Tree_Link
-    _linksActive     .=  const false
-    _cssClass        .= "tree vertical"
-    _sceneAttributes .= treeSceneAttributes
-    _activeForces    .= Set.fromFoldable [ "vtreeNodesX", "vtreeNodesY", "charge1", "collide2" ]
-    _nodeInitializerFunctions .= [ unpinAllNodes ]
+    H.modify_ $ applySceneConfig verticalTreeScene
     runSimulation
 
   ToggleForce label -> do
-    _activeForces %= \forces ->
-      if Set.member label forces
-        then Set.delete label forces
-        else Set.insert label forces
+    H.modify_ $ toggleForce label
     runSimulation
 
   Filter (LinkShowFilter filterFn) -> do
-    _linksShown .= filterFn
+    H.modify_ $ setLinksShown filterFn
     runSimulation
 
   Filter (LinkForceFilter filterFn) -> do
-    _linksActive .= filterFn
+    H.modify_ $ setLinksActive filterFn
     runSimulation
 
   Filter (NodeFilter filterFn) -> do
-    _chooseNodes .= filterFn
+    H.modify_ $ setChooseNodes filterFn
     runSimulation
 
   ChangeStyling (TopLevelCSS style) -> do
-    _cssClass .= style
+    H.modify_ $ setCssClass style
 
   ChangeStyling (GraphStyle attributes) -> do
-    _sceneAttributes .= attributes
+    H.modify_ $ setSceneAttributes attributes
     runSimulation
 
   ChangeSimConfig c -> do
@@ -230,49 +198,96 @@ handleAction = case _ of
 
   StopSim -> runWithD3_Simulation stop
 
--- | Prepare model data for visualization by applying filters and transformations
--- | This is the bridge between immutable model data and mutable staging data
-stageDataFromModel :: forall m.
-  MonadState State m =>
-  m Unit
-stageDataFromModel = do
-  state       <- get
-  linksShown  <- use _linksShown
-  linksActive <- use _linksActive
-  chooseNodes <- use _chooseNodes
-  nodeInitializerFunctions <- use _nodeInitializerFunctions
-
-  _stagingLinks      .= (filter linksShown $ view _modelLinks state)
-  _stagingLinkFilter .= linksActive
-  let rawnodes = filter chooseNodes $ view _modelNodes state
-      initializedNodes = foldl (\b a -> a b) rawnodes nodeInitializerFunctions
-
-  _stagingNodes      .= initializedNodes
-
 -- | The core simulation orchestrator - bridges Halogen state to D3 rendering
 -- |
--- | This is the key pattern for updating force simulations:
--- | 1. Stage data from model (apply filters, run initializers)
--- | 2. Stop the running simulation
--- | 3. Activate/deactivate forces based on scene config
--- | 4. Update D3 visualization (General Update Pattern)
--- | 5. Restart simulation with new alpha
+-- | ## The Filter → Initialize → Simulate Pipeline
 -- |
--- | Called whenever scene configuration changes or data is filtered
+-- | This function implements the correct ordering for complex force simulations
+-- | that use alternative layout algorithms (trees, grids, etc.):
+-- |
+-- | **Step 1: Filter** - Apply scene's node filter predicate to model data
+-- | ```purescript
+-- | let filteredNodes = filter nodeFilter allModelNodes  -- e.g., only modules in tree
+-- | ```
+-- |
+-- | **Step 2: Initialize** - Run node initializers on filtered data
+-- | ```purescript
+-- | let initializedNodes = foldl (\nodes fn -> fn nodes) filteredNodes [
+-- |       unpinAllNodes,           -- Clear any previous pins
+-- |       treeNodesToTreeXY_H,     -- Position nodes via tree layout
+-- |       fixNamedNodeTo "Main"    -- Pin root node
+-- |     ]
+-- | ```
+-- |
+-- | **Step 3: Simulate** - Pass initialized nodes to SimulationM2
+-- | ```purescript
+-- | update
+-- |   { nodes: Just initializedNodes   -- Already filtered and initialized
+-- |   , nodeFilter: Nothing             -- Don't filter again!
+-- |   , ...
+-- |   }
+-- | ```
+-- |
+-- | ## Why This Order Matters
+-- |
+-- | Node initializers (especially tree layouts) expect homogeneous, pre-filtered data.
+-- | For example, `treeNodesToTreeXY_H` expects only the nodes in the dependency tree,
+-- | not the full 884-node mixed dataset of modules and packages.
+-- |
+-- | During debugging, we discovered that when filtering moved into SimulationM2
+-- | (after initializers), the tree layout received unfiltered data. The layout algorithm
+-- | couldn't handle the mixed data and only generated coordinates for 1 node (the root),
+-- | causing tree scenes to render only 1 node instead of ~90.
+-- |
+-- | ## The Fix
+-- |
+-- | The solution was to restore the original ordering: filter first, initialize second,
+-- | then pass to SimulationM2. This is why we pass `nodeFilter: Nothing` to SimulationM2 -
+-- | the filtering has already happened, and we don't want to filter again.
+-- |
+-- | ## Related Bug: changeLinkType
+-- |
+-- | Another bug was discovered at the same time: the `changeLinkType` function in Tree.purs
+-- | was using incorrect PureScript record update syntax, creating new objects with ONLY
+-- | the `linktype` field and losing `source` and `target`. This prevented tree building:
+-- |
+-- | ```purescript
+-- | -- BROKEN (lost source/target):
+-- | changeLinkType linktype link =
+-- |   unsafeCoerce $ (unsafeCoerce link :: { linktype :: t }) { linktype = linktype }
+-- |
+-- | -- FIXED (preserves all fields):
+-- | changeLinkType newLinktype link =
+-- |   let oldLink = unsafeCoerce link :: { source :: Int, target :: Int, linktype :: t, inSim :: Boolean }
+-- |   in unsafeCoerce $ oldLink { linktype = newLinktype }
+-- | ```
+-- |
+-- | Without source/target, `buildTree` couldn't build the dependency tree, the tree layout
+-- | only generated data for 1 node, and only 1 node got `connected: true` set.
 runSimulation :: forall m.
   MonadEffect m =>
   MonadState State m =>
   m Unit
 runSimulation = do
-  stageDataFromModel
-  state           <- get
-  let staging = view _staging state
-      stagingNodes = view _stagingNodes state
-      stagingLinks = view _stagingLinks state
-      stagingLinkFilter = view _stagingLinkFilter state
-  maybeListener   <- use _eventListener
-  sceneAttributes <- use _sceneAttributes
-  activeForces    <- use _activeForces
+  state <- get
+  let staging = state.staging
+      allModelNodes = getModelNodes state  -- Full dataset, NOT pre-filtered
+      allModelLinks = getModelLinks state  -- Full dataset, NOT pre-filtered
+      nodeFilter = state.scene.chooseNodes  -- Filter predicate
+      linkFilter = state.scene.linksShown   -- Filter predicate
+      linkForce = state.scene.linksActive   -- Which links exert force
+      maybeListener = state.eventListener
+      sceneAttributes = state.scene.attributes
+      activeForces = state.scene.activeForces
+      nodeInitializers = state.scene.nodeInitializerFunctions
+
+  -- STEP 1: Filter - Apply scene's node filter predicate
+  -- Tree scenes need only modules in the dependency tree, not all 884 mixed nodes/packages
+  let filteredNodes = filter nodeFilter allModelNodes
+
+  -- STEP 2: Initialize - Run initializers on filtered data
+  -- Tree layouts expect homogeneous pre-filtered data, not mixed datasets
+  let initializedNodes = foldl (\nodes fn -> fn nodes) filteredNodes nodeInitializers
 
   -- Construct callback from listener (or dummy if not yet initialized)
   let callback = case maybeListener of
@@ -280,16 +295,17 @@ runSimulation = do
         Nothing -> x 0.0  -- dummy during initialization
       attributesWithCallback = sceneAttributes { circles = callback : sceneAttributes.circles }
 
+  -- STEP 3: Simulate - Pass initialized nodes to SimulationM2
+  -- We pass nodeFilter: Nothing because filtering already happened in Step 1
   runWithD3_Simulation do
-    -- Use the new declarative update API
     Graph.updateSimulation
-      staging.selections  -- Pass the node/link group selections
-      { nodes: stagingNodes
-      , links: stagingLinks
-      , activeForces: activeForces
-      , linksWithForce: stagingLinkFilter
+      staging.selections
+      { nodes: initializedNodes          -- Already filtered (Step 1) and initialized (Step 2)
+      , links: allModelLinks             -- Full link dataset
+      , nodeFilter: Nothing              -- Don't filter again - already done in Step 1
+      , linkFilter: Just linkFilter      -- Links still need filtering (no initializers for links)
+      , activeForces: activeForces       -- Which forces to enable
+      , linksWithForce: linkForce        -- Which links should exert force
       }
       attributesWithCallback
-    -- Explicitly reheat with full alpha
-    -- This ensures the simulation runs long enough to settle
     start

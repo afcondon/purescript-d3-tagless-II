@@ -1,0 +1,236 @@
+  Key Takeaways
+
+  1. Filter Timing Matters for Composed Transformations
+
+  The biggest lesson: initializers expect pre-filtered data, not raw data. The tree initializers like treeNodesToTreeXY_H internally call partition isUsedModule - they're
+  designed to work on a filtered subset.
+
+  Current approach (works):
+  filteredNodes = filter nodeFilter allModelNodes
+  initializedNodes = foldl (\nodes fn -> fn nodes) filteredNodes nodeInitializers
+  -- Pass to simulation WITHOUT re-filtering
+
+  Broken approach we tried:
+  initializedNodes = foldl (\nodes fn -> fn nodes) allModelNodes nodeInitializers
+  -- Then filter in SimulationM2 - but initializers already assumed filtering!
+
+  Implication for SimulationM2: If we want predicate filtering in SimulationM2.update, we need to be explicit about whether it happens before or after initializers. Perhaps:
+
+  type SimulationUpdate d =
+    { nodes :: Maybe (Array (D3_SimulationNode d))
+    , preInitFilter :: Maybe (D3_SimulationNode d -> Boolean)  -- Applied BEFORE initializers
+    , initializers :: Array (Array (D3_SimulationNode d) -> Array (D3_SimulationNode d))
+    , postInitFilter :: Maybe (D3_SimulationNode d -> Boolean) -- Applied AFTER initializers
+    , ...
+    }
+
+  2. Tree Layouts Are Special - They Need "Two-Phase" Data
+
+  Tree layouts fundamentally differ from force layouts:
+
+  Force layouts: Start with chaos, let physics settle nodes
+  Tree layouts: Pre-compute positions algorithmically, then optionally apply forces
+
+  The tree workflow is:
+  1. Model loading: Run tree algorithm (treeReduction), store results in node fields (treeXY, connected)
+  2. Scene initialization: Read stored data, apply to simulation
+
+  This is a metadata/tagging pattern - the tree algorithm "tags" nodes with layout data that later stages consume.
+
+  Implication: Your tagging idea is spot-on! Tree layouts naturally suggest:
+
+  type TaggedNode metadata d =
+    { node :: D3_SimulationNode d
+    , tags :: metadata  -- Could be { treeXY :: Maybe PointXY, connected :: Boolean, ... }
+    }
+
+  3. Force vs Layout Participation Are Separate Concerns
+
+  We discovered that links need to be present for display even when they shouldn't exert force. Currently this is handled awkwardly:
+
+  - linksShown - which links to display
+  - linksActive - which links exert force
+  - activeForces must include "links" even when we want links without force
+
+  Better approach: Separate "what exists in the simulation" from "what forces apply":
+
+  type SimulationUpdate d =
+    { nodes :: Array (D3_SimulationNode d)
+    , links :: Array D3Link_Unswizzled
+    , activeForces :: Set Label
+    , forceStrengthOverrides :: Map Label Number  -- NEW: override force strengths
+    , ...
+    }
+
+  Then tree scenes could keep link force active but with strength: 0.
+
+  4. unsafeCoerce with Record Updates Is Dangerous
+
+  The bug that broke everything:
+  -- WRONG - creates NEW object with only one field:
+  (unsafeCoerce link :: { linktype :: t }) { linktype = newType }
+
+  -- RIGHT - updates existing object preserving all fields:
+  let old = unsafeCoerce link :: { source :: Int, target :: Int, linktype :: t }
+  in unsafeCoerce $ old { linktype = newType }
+
+  Implication: When using opaque types with unsafeCoerce, always explicitly type the full record structure before updating.
+
+  5. Scenes Want Self-Contained Declarative Configs
+
+  The SceneConfig pattern worked great:
+  horizontalTreeScene :: SceneConfig
+  horizontalTreeScene = {
+    chooseNodes: isUsedModule
+  , linksShown: isM2M_Tree_Link
+  , linksActive: const false
+  , cssClass: "tree horizontal"
+  , attributes: treeSceneAttributes
+  , activeForces: Set.fromFoldable [ "htreeNodesX", "htreeNodesY", "charge1", "collide2", linksForceName_ ]
+  , nodeInitializerFunctions: [ unpinAllNodes, treeNodesToTreeXY_H, fixNamedNodeTo "PSD3.Main" { x: 0.0, y: 0.0 } ]
+  }
+
+  This is declarative, composable, and discoverable. Scenes are just data.
+
+  Proposed Enhanced Architecture
+
+  Based on these lessons, here's what I'd suggest:
+
+  A. Richer Node Metadata / Tagging System
+
+  type NodeMetadata =
+    { -- Tree layout data
+      treeXY :: Maybe PointXY
+    , treeDepth :: Maybe Int
+    , connected :: Boolean
+
+    -- Layout hints
+    , layoutAlgorithm :: Maybe LayoutType  -- Tree | Force | Grid | Radial | ...
+    , layerIndex :: Maybe Int
+
+    -- User tags
+    , customTags :: Set String  -- e.g., "highlighted", "selected", "collapsed"
+
+    -- Styling hints
+    , cssClasses :: Array String
+    }
+
+  -- Nodes carry metadata
+  type EnhancedNode d = D3_SimulationNode (d + NodeMetadata)
+
+  Usage:
+  -- Tag nodes by predicate
+  tagNodesByPredicate :: String -> (Node -> Boolean) -> Array Node -> Array Node
+  tagNodesByPredicate tag pred nodes =
+    nodes <#> \node@(D3SimNode n) ->
+      if pred node
+      then D3SimNode $ n { customTags = Set.insert tag n.customTags }
+      else node
+
+  -- Filter by tag
+  filterByTag :: String -> Array Node -> Array Node
+  filterByTag tag = filter (\(D3SimNode n) -> tag `Set.member` n.customTags)
+
+  -- Apply CSS classes based on tags
+  applyCssFromTags :: Node -> Array String
+  applyCssFromTags (D3SimNode n) =
+    n.cssClasses <> (Set.toUnfoldable n.customTags)
+
+  B. Explicit Layout Pipeline
+
+  Instead of hiding everything in initializers, make the pipeline explicit:
+
+  type LayoutPipeline d =
+    { -- Phase 1: Compute layout (pure function, doesn't modify simulation)
+      computeLayout :: Maybe (Array (D3_SimulationNode d) -> Array D3Link_Unswizzled -> LayoutResult d)
+
+    , -- Phase 2: Filter what goes into simulation
+      preSimFilter :: Maybe (D3_SimulationNode d -> Boolean)
+
+    , -- Phase 3: Apply layout to simulation (positions, forces, etc.)
+      applyLayout :: LayoutResult d -> SimulationConfig
+    }
+
+  type LayoutResult d =
+    { nodes :: Array (D3_SimulationNode d)  -- With positions/metadata set
+    , additionalForces :: Map Label Force    -- Layout-specific forces
+    , forceConfig :: Map Label Number        -- Force strength overrides
+    }
+
+  Example usage:
+  treeLayout :: LayoutPipeline SpagoData
+  treeLayout =
+    { computeLayout: Just $ \nodes links ->
+        let tree = buildTreeFromLinks "PSD3.Main" links
+            positioned = applyTreePositions tree nodes
+        in { nodes: positioned
+           , additionalForces: Map.fromFoldable
+               [ Tuple "treeX" (forceX treeXPosition)
+               , Tuple "treeY" (forceY treeYPosition)
+               ]
+           , forceConfig: Map.fromFoldable
+               [ Tuple "links" 0.0  -- Links visible but no force
+               , Tuple "treeX" 0.4
+               , Tuple "treeY" 0.4
+               ]
+           }
+
+    , preSimFilter: Just isUsedModule
+
+    , applyLayout: \result -> { ... }
+    }
+
+  C. Force Configuration as First-Class
+
+  type ForceConfig =
+    { enabled :: Boolean
+    , strength :: Number
+    , filter :: Maybe (Datum_ -> Boolean)  -- Which data items this force applies to
+    }
+
+  type SceneConfig =
+    { chooseNodes :: SpagoSimNode -> Boolean
+    , linksShown :: SpagoGraphLinkID -> Boolean
+    , forces :: Map Label ForceConfig  -- Unified force configuration
+    , layout :: Maybe (LayoutPipeline SpagoData)
+    , cssClass :: String
+    , attributes :: SpagoSceneAttributes
+    }
+
+  D. Composable Scene Transformations
+
+  Since scenes are just data, you can compose them:
+
+  -- Scene combinators
+  withHighlight :: String -> SceneConfig -> SceneConfig
+  withHighlight nodeId scene =
+    scene { chooseNodes = \n -> scene.chooseNodes n || (nodeId == getId n) }
+
+  withAdditionalForce :: Label -> Force -> SceneConfig -> SceneConfig
+  withAdditionalForce label force scene =
+    scene { forces = Map.insert label force scene.forces }
+
+  -- Example
+  highlightedTreeScene :: SceneConfig
+  highlightedTreeScene =
+    horizontalTreeScene
+      # withHighlight "PSD3.Main"
+      # withAdditionalForce "spotlight" (forceRadial centerOn "PSD3.Main")
+
+  Specific Questions to Consider
+
+  1. Should tagging happen at model-load time or scene-switch time?
+    - Tree data is computed once at load (expensive D3 algorithm)
+    - But custom tags like "highlighted" are scene-specific
+    - Maybe: persistent tags in model, ephemeral tags in scene state?
+  2. Should SimulationM2 know about layouts, or stay generic?
+    - Pro generic: Library stays focused
+    - Pro layout-aware: Could optimize (e.g., skip simulation ticks for fully-fixed layouts)
+  3. How to handle "hybrid" layouts? (tree positions + force refinement)
+    - Tree scenes use tree XY but also collision forces
+    - Need to specify which forces are "soft suggestions" vs "hard constraints"
+  4. Should filtering be part of SimulationM2 or stay in application code?
+    - Current approach (app filters before SimulationM2) works but isn't DRY
+    - Could SimulationM2 offer a "filterAndUpdate" convenience?
+
+  What aspects of this interest you most? The tagging system? The layout pipeline? Force configuration? Or something else entirely?

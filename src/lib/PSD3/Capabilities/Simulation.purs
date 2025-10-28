@@ -172,22 +172,68 @@ class (Monad m, SelectionM selection m) <= SimulationM selection m | m -> select
 -- |
 -- | ```purescript
 -- | -- Update just the active forces
--- | update { nodes: Nothing, links: Nothing, activeForces: Just newForces, config: Nothing, keyFn: keyIsID_ }
+-- | update { nodes: Nothing, links: Nothing, nodeFilter: Nothing, linkFilter: Nothing, activeForces: Just newForces, config: Nothing, keyFn: keyIsID_ }
 -- |
 -- | -- Update nodes and links together
 -- | { nodes: updatedNodes, links: updatedLinks } <- update
 -- |   { nodes: Just newNodeData
 -- |   , links: Just newLinkData
+-- |   , nodeFilter: Nothing
+-- |   , linkFilter: Nothing
 -- |   , activeForces: Nothing
 -- |   , config: Nothing
 -- |   , keyFn: keyIsID_
 -- |   }
 -- | ```
+-- |
+-- | ## When to Filter: nodeFilter vs Pre-filtering
+-- |
+-- | SimulationM2 provides optional `nodeFilter` and `linkFilter` fields for convenience.
+-- | However, for complex applications with node initialization functions (positioning,
+-- | pinning, layout algorithms), you should filter BEFORE calling update:
+-- |
+-- | ```purescript
+-- | -- SIMPLE CASE: Use SimulationM2 filtering for basic filtering
+-- | update
+-- |   { nodes: Just allNodes
+-- |   , nodeFilter: Just (\n -> n.active)  -- Filter inside SimulationM2
+-- |   , linkFilter: Just (\l -> l.visible)
+-- |   , ...
+-- |   }
+-- |
+-- | -- COMPLEX CASE: Pre-filter when using initializers
+-- | let filteredNodes = filter myPredicate allNodes
+-- |     initializedNodes = foldl (\nodes fn -> fn nodes) filteredNodes [
+-- |       treeLayoutFn,      -- These expect pre-filtered data!
+-- |       pinRootNode,
+-- |       unpinLeaves
+-- |     ]
+-- | update
+-- |   { nodes: Just initializedNodes  -- Already filtered and initialized
+-- |   , nodeFilter: Nothing              -- Don't filter again
+-- |   , ...
+-- |   }
+-- | ```
+-- |
+-- | **Why this matters:** Initialization functions (like tree layout algorithms) typically
+-- | expect homogeneous, pre-filtered data. For example, a tree layout expects only the nodes
+-- | in the tree, not a mixed array of all nodes including those outside the tree.
+-- |
+-- | **Key insight from debugging:** When tree scenes were broken, the issue was that
+-- | initializers were receiving unfiltered data (884 mixed nodes/packages) instead of
+-- | pre-filtered data (91 nodes in the tree). The tree layout only generated coordinates
+-- | for the root node, causing only 1 node to render.
+-- |
+-- | **Rule of thumb:**
+-- | - Simple filtering (active/inactive, visible/hidden) → use nodeFilter/linkFilter
+-- | - Complex pipelines with initializers → pre-filter in application code
 -- | Configuration for updating a running simulation.
 -- | Note: Input links are UNSWIZZLED (IDs), output links will be SWIZZLED (object references)
 type SimulationUpdate d =
   { nodes :: Maybe (Array (D3_SimulationNode d))  -- New node data (replaces existing)
   , links :: Maybe (Array D3Link_Unswizzled)      -- New link data (UNSWIZZLED: source/target are IDs)
+  , nodeFilter :: Maybe (D3_SimulationNode d -> Boolean)  -- Optional predicate to filter nodes before update
+  , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)    -- Optional predicate to filter links before update
   , activeForces :: Maybe (Set Label)             -- Which forces to enable (replaces active set)
   , config :: Maybe SimulationVariables           -- Simulation config to update
   , keyFn :: Datum_ -> Index_                     -- Key function for data binding

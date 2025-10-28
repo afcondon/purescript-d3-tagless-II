@@ -396,9 +396,10 @@ export function swizzleLinks_(links) {
   }
 }
 export function unsetLinks_(simulation) {
-  const linkForce = d3.forceLink([])
-  console.log('FFI: removing all links from simulation');
-  simulation.force(linksForceName_, linkForce)
+  // Set link force to null - this is now only called when links shouldn't be displayed at all
+  // Scenes that need links displayed should keep the link force in their activeForces
+  simulation.force(linksForceName_, null)
+  console.log('FFI: disabled link force (set to null)');
   return simulation
 }
 // this will work on both swizzled and unswizzled links

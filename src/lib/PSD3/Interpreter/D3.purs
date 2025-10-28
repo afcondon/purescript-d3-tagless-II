@@ -14,11 +14,10 @@ import PSD3.Internal.Sankey.Functions (sankeySetData, sankeySetDataWithConfig)
 import PSD3.Capabilities.Selection (class SelectionM)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2)
 import PSD3.Capabilities.Sankey (class SankeyM)
-import Data.Array (partition)
+import Data.Array as Array
 import Data.Lens (use, view, (.~))
 import Data.Lens.Iso.Newtype (_Newtype)
 import Data.Lens.Record (prop)
-import Data.Map (filter, toUnfoldable)
 import Data.Map as Map
 import Data.Newtype (class Newtype)
 import Data.Traversable (sequence)
@@ -194,20 +193,29 @@ instance SimulationM2 D3Selection_ (D3SimM row D3Selection_) where
         simulationSetVariable $ VelocityDecay simConfig.velocityDecay
         -- Note: Don't set Alpha here - caller uses start() to begin animation
 
-    -- Step 2: Determine nodes (new or existing)
-    nodesInSim <- case config.nodes of
+    -- Step 2: Determine nodes (new or existing), applying optional filter
+    nodesBeforeFilter <- case config.nodes of
       Nothing -> pure currentNodes  -- Keep existing nodes
-      Just newNodes -> simulationSetNodes newNodes  -- Replace with new nodes
+      Just newNodes -> pure newNodes  -- Use new nodes
+    let nodesFiltered = case config.nodeFilter of
+          Nothing -> nodesBeforeFilter  -- No filter, use all nodes
+          Just predicate -> Array.filter predicate nodesBeforeFilter  -- Apply filter
+    nodesInSim <- simulationSetNodes nodesFiltered
 
     -- Step 3: Update active forces if provided (must come BEFORE setting links!)
     case config.activeForces of
       Nothing -> pure unit
       Just forces -> simulationActualizeForces forces
 
-    -- Step 4: Update links if provided (must come AFTER force activation)
+    -- Step 4: Update links if provided (must come AFTER force activation), applying optional filter
     linksInSim <- case config.links of
-      Nothing -> pure $ getLinksFromSimulation_ handle  -- Keep existing links
-      Just newLinks -> simulationSetLinks newLinks nodesInSim config.keyFn
+      Nothing -> pure $ getLinksFromSimulation_ handle  -- Keep existing swizzled links as-is
+      Just newLinks -> do
+        -- Apply filter to new unswizzled links if provided
+        let linksFiltered = case config.linkFilter of
+              Nothing -> newLinks  -- No filter, use all new links
+              Just predicate -> Array.filter predicate newLinks  -- Apply filter
+        simulationSetLinks linksFiltered nodesInSim config.keyFn  -- Swizzle and set
 
     -- Step 5: Return enhanced data for DOM binding
     pure { nodes: nodesInSim, links: linksInSim }

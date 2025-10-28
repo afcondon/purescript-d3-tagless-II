@@ -31,7 +31,9 @@ changeLinkType :: forall t149.
   t149
   -> D3Link_Unswizzled
      -> D3Link_Unswizzled
-changeLinkType linktype link = unsafeCoerce $ (unsafeCoerce link :: { linktype :: t149 }) { linktype = linktype }
+changeLinkType newLinktype link =
+  let oldLink = unsafeCoerce link :: { source :: Int, target :: Int, linktype :: t149, inSim :: Boolean }
+  in unsafeCoerce $ oldLink { linktype = newLinktype }
 
 -- TODO make this generic and extract from Spago example to library
 treeReduction :: NodeID -> SpagoModel -> SpagoModel
@@ -56,7 +58,7 @@ treeReduction rootID model = do
           rootTree          = hierarchyFromJSON_       jsontree
           sortedTree        = treeSortForTree_Spago_    rootTree
           laidOutRoot_      = (runLayoutFn_ layout)    sortedTree
-          treeDerivedDataMap = getTreeDerivedData      laidOutRoot_
+          treeDerivedDataMap = getTreeDerivedData laidOutRoot_
           -- positionedNodes   = setNodeXY_ForRadialTree   treenodes.yes treeDerivedDataMap
           positionedNodes   = setNodeXY_ForHorizontalTree   treenodes.yes treeDerivedDataMap
           -- TODO seems we can't position for Phyllotaxis here because we need to put nodes into the DOM before putting them into simulation (to support update pattern)
@@ -64,9 +66,13 @@ treeReduction rootID model = do
           unpositionedNodes = treenodes.no
           tree              = Tuple rootID laidOutRoot_
 
-          links = treelinks <> prunedTreeLinks <> onlyPackageLinks -- now all the links should have the right type, M2M_Graph / M2M_Tree / P2P 
+          links = treelinks <> prunedTreeLinks <> onlyPackageLinks -- now all the links should have the right type, M2M_Graph / M2M_Tree / P2P
 
-      model { links = links, nodes = positionedNodes <> unpositionedNodes, tree = Just tree, maps { id2TreeData = treeDerivedDataMap } }
+      model { links = links
+            , nodes = positionedNodes <> unpositionedNodes
+            , tree = Just tree
+            , maps { id2TreeData = treeDerivedDataMap }
+            }
 
 -- for radial positioning we treat x as angle and y as radius
 radialTranslate :: PointXY -> PointXY -- TODO move this to more basic library so it can be used without cycles

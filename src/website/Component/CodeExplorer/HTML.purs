@@ -28,7 +28,7 @@ import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties (StepValue(..))
 import Halogen.HTML.Properties as HP
 import PSD3.CodeExplorer.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..))
-import PSD3.CodeExplorer.State (State, _cssClass, _stagingLinkFilter, _stagingLinks, _stagingNodes, getSimulationVariables)
+import PSD3.CodeExplorer.State (State, getStagingLinks, getStagingNodes, getSimulationVariables)
 
 -- | Filter for project modules only (from src/ directory), but keep all packages
 isProjectModule :: SpagoSimNode -> Boolean
@@ -67,7 +67,7 @@ render state =
 
       , -- Main visualization area (full screen)
         HH.div
-          [ HP.classes [ HH.ClassName "svg-container", HH.ClassName "fullscreen-viz", HH.ClassName "spago-viz-container", HH.ClassName (view _cssClass state) ] ]
+          [ HP.classes [ HH.ClassName "svg-container", HH.ClassName "fullscreen-viz", HH.ClassName "spago-viz-container", HH.ClassName state.scene.cssClass ] ]
           [ ]
       ]
 
@@ -77,11 +77,11 @@ renderSimState state =
     [ HP.classes [ HH.ClassName "spago-sim-state" ]]
     [ Format.caption_ [ HH.text "Simulation state" ]
     , HH.p_
-        [ HH.text $ "CSS Class: " <> (view _cssClass state) ]
+        [ HH.text $ "CSS Class: " <> state.scene.cssClass ]
     , HH.p_
-        [ HH.text $ "Links: " <> show (length $ view _stagingLinks state) ]
+        [ HH.text $ "Links: " <> show (length $ getStagingLinks state) ]
     , HH.p_
-        [ HH.text $ "Nodes: " <> show (length $ view _stagingNodes state)]
+        [ HH.text $ "Nodes: " <> show (length $ getStagingNodes state)]
     ]
 
 renderSimControls :: forall p. State -> HH.HTML p Action

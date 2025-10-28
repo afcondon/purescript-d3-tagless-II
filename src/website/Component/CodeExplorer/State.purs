@@ -11,11 +11,12 @@ import PSD3.Internal.FFI (SimulationVariables, readSimulationVariables_)
 import PSD3.Data.Node (NodeID)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, _handle)
 import PSD3.Capabilities.Simulation (Staging)
+import Data.Array (filter, foldl)
 import Data.Lens (Lens', _Just, view)
 import Data.Lens.At (at)
 import Data.Lens.Record (prop)
 import Data.Map (Map, keys) as M
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
 import Data.Set (Set)
@@ -44,9 +45,9 @@ type State = {
 -- | - visual appearance (CSS class, attributes)
 -- | - initialization (node positioning functions)
 -- |
--- | This pattern could be generalized into a library by parameterizing over
--- | the specific node and link types, but for now it's specialized to Spago.
-type MiseEnScene = {
+-- | This is now a self-contained configuration that can be passed directly
+-- | to applyScene, eliminating the need for lens-based state mutation.
+type SceneConfig = {
 -- first: filter functions for nodes and links (both what links are shown and which ones exert force)
     chooseNodes     :: (SpagoSimNode -> Boolean)
   , linksShown      :: (SpagoGraphLinkID -> Boolean)
@@ -60,7 +61,11 @@ type MiseEnScene = {
   , nodeInitializerFunctions :: Array (Array SpagoSimNode -> Array SpagoSimNode)
   -- could add the simulation variables here too?
 }
-initialScene :: M.Map Label Force -> MiseEnScene
+
+-- | DEPRECATED: Old name for SceneConfig, kept for backwards compatibility during refactor
+type MiseEnScene = SceneConfig
+
+initialScene :: M.Map Label Force -> SceneConfig
 initialScene forceLibrary = {
     chooseNodes: isPackage -- chooses all nodes
   , linksShown:  const false
@@ -120,33 +125,28 @@ _nodeInitializerFunctions :: forall p.
   p State State
 _nodeInitializerFunctions = _scene <<< prop (Proxy :: Proxy "nodeInitializerFunctions")
 
-getSimulationVariables :: State -> SimulationVariables
-getSimulationVariables state = do
-  let handle = view _handle state
-  readSimulationVariables_ handle
-
-_modelNodes :: forall p. 
+_modelNodes :: forall p.
      Strong p
   => Choice p
   => p (Array SpagoSimNode) (Array SpagoSimNode)
-  -> p State State 
+  -> p State State
 _modelNodes = _model <<< _Just <<< _nodes
 
-_modelLinks :: forall p. 
+_modelLinks :: forall p.
      Strong p
   => Choice p
   => p (Array SpagoGraphLinkID) (Array SpagoGraphLinkID)
   -> p State State
 _modelLinks = _model <<< _Just <<< _links
 
-_stagingNodes :: forall p. 
+_stagingNodes :: forall p.
      Strong p
   => Choice p
   => p (Array SpagoSimNode) (Array SpagoSimNode)
-  -> p State State 
+  -> p State State
 _stagingNodes = _staging <<< _rawdata <<< _nodes
 
-_stagingLinks :: forall p. 
+_stagingLinks :: forall p.
      Strong p
   => Choice p
   => p (Array SpagoGraphLinkID) (Array SpagoGraphLinkID)
@@ -154,8 +154,89 @@ _stagingLinks :: forall p.
 _stagingLinks = _staging <<< _rawdata <<< _links
 
 _stagingLinkFilter :: forall p.
-  Strong p => 
+  Strong p =>
   p (Datum_ -> Boolean) (Datum_ -> Boolean) ->
   p State State
 _stagingLinkFilter = _staging <<< _linksWithForce
+
+getSimulationVariables :: State -> SimulationVariables
+getSimulationVariables state = do
+  let handle = view _handle state
+  readSimulationVariables_ handle
+
+-- Helper functions to replace lens-based scene configuration
+-- These provide a simpler API without requiring lens knowledge
+
+-- Update the entire scene configuration at once
+updateScene :: (MiseEnScene -> MiseEnScene) -> State -> State
+updateScene f state = state { scene = f state.scene }
+
+-- Individual scene field updaters
+setChooseNodes :: (SpagoSimNode -> Boolean) -> State -> State
+setChooseNodes fn = updateScene (\s -> s { chooseNodes = fn })
+
+setLinksShown :: (SpagoGraphLinkID -> Boolean) -> State -> State
+setLinksShown fn = updateScene (\s -> s { linksShown = fn })
+
+setLinksActive :: (Datum_ -> Boolean) -> State -> State
+setLinksActive fn = updateScene (\s -> s { linksActive = fn })
+
+setActiveForces :: Set Label -> State -> State
+setActiveForces forces = updateScene (\s -> s { activeForces = forces })
+
+setCssClass :: String -> State -> State
+setCssClass css = updateScene (\s -> s { cssClass = css })
+
+setSceneAttributes :: SpagoSceneAttributes -> State -> State
+setSceneAttributes attrs = updateScene (\s -> s { attributes = attrs })
+
+setNodeInitializers :: Array (Array SpagoSimNode -> Array SpagoSimNode) -> State -> State
+setNodeInitializers fns = updateScene (\s -> s { nodeInitializerFunctions = fns })
+
+toggleForce :: Label -> State -> State
+toggleForce label = updateScene \s -> s {
+  activeForces = if Set.member label s.activeForces
+                 then Set.delete label s.activeForces
+                 else Set.insert label s.activeForces
+}
+
+-- Getters for accessing nested state
+getModelNodes :: State -> Array SpagoSimNode
+getModelNodes state = case state.model of
+  Just m -> m.nodes
+  Nothing -> []
+
+getModelLinks :: State -> Array SpagoGraphLinkID
+getModelLinks state = case state.model of
+  Just m -> m.links
+  Nothing -> []
+
+getStagingNodes :: State -> Array SpagoSimNode
+getStagingNodes state = state.staging.rawdata.nodes
+
+getStagingLinks :: State -> Array SpagoGraphLinkID
+getStagingLinks state = state.staging.rawdata.links
+
+getStagingLinkFilter :: State -> (Datum_ -> Boolean)
+getStagingLinkFilter state = state.staging.linksWithForce
+
+-- Update staging data
+setStagingNodes :: Array SpagoSimNode -> State -> State
+setStagingNodes nodes state = state { staging = state.staging { rawdata = state.staging.rawdata { nodes = nodes } } }
+
+setStagingLinks :: Array SpagoGraphLinkID -> State -> State
+setStagingLinks links state = state { staging = state.staging { rawdata = state.staging.rawdata { links = links } } }
+
+setStagingLinkFilter :: (Datum_ -> Boolean) -> State -> State
+setStagingLinkFilter fn state = state { staging = state.staging { linksWithForce = fn } }
+
+-- | Apply a complete scene configuration in one step
+-- | This is the new simplified API that eliminates the need for lens-based mutations.
+-- |
+-- | NOTE: This now just updates the scene configuration in state.
+-- | Filtering and initialization happen inside runSimulation → SimulationM2.update.
+-- | The old approach of pre-filtering in applySceneConfig was causing issues with
+-- | tree scenes where initializers need access to the full dataset.
+applySceneConfig :: SceneConfig -> State -> State
+applySceneConfig config state = state { scene = config }
 

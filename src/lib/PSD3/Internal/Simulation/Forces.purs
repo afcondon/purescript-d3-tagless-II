@@ -111,7 +111,7 @@ removeForceFromSimulation (Force force) simulation_ = do
   case force.type of
     -- CustomForce   -> simulation_ -- REVIEW not implemented or even designed yet
     RegularForce _ -> setAsNullForceInSimulation_ simulation_ force.name
-    LinkForce      -> unsetLinks_ simulation_ -- NB we don't want to null out the links force, just remove all the links
+    LinkForce      -> setAsNullForceInSimulation_ simulation_ force.name -- Setting to null is safe now that all scenes include link force when they need links displayed
 
 forceDescription :: RegularForceType -> String
 forceDescription = case _ of

@@ -294,9 +294,12 @@ updateGraph :: forall row m.
   m Unit
 updateGraph { nodesGroup, linksGroup, zoomGroup, filteredNodes, filteredLinks, adjacencyMap } = do
   -- Step 1: Use update API to handle simulation data merging and link swizzling
+  -- Data is already filtered, so we pass Nothing for the filter predicates
   enhanced <- update
     { nodes: Just filteredNodes
     , links: Just filteredLinks
+    , nodeFilter: Nothing  -- Data already filtered
+    , linkFilter: Nothing  -- Data already filtered
     , activeForces: Nothing
     , config: Nothing
     , keyFn: keyIsID_
