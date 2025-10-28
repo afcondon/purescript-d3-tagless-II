@@ -9,11 +9,11 @@ import Data.Either (Either(..))
 import Data.Int (floor)
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
-import Effect (Effect)
 import Effect.Aff (Milliseconds(..))
 import Effect.Aff as Aff
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect, liftEffect)
+import Effect.Console as Console
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -134,13 +134,13 @@ handleAction = case _ of
     result <- H.liftAff loadNationsData
     case result of
       Left err -> do
-        liftEffect $ log $ "Error loading data: " <> err
+        liftEffect $ Console.log $ "Error loading data: " <> err
         pure unit
       Right model -> do
         handleAction (DataLoaded model)
 
   DataLoaded model -> do
-    liftEffect $ log $ "Data loaded: " <> show (length model.nations) <> " nations, years " <> show model.yearRange.min <> "-" <> show model.yearRange.max
+    liftEffect $ Console.log $ "Data loaded: " <> show (length model.nations) <> " nations, years " <> show model.yearRange.min <> "-" <> show model.yearRange.max
     H.modify_ _ { model = Just model }
     H.modify_ _ { currentYear = model.yearRange.min }
 
@@ -148,16 +148,16 @@ handleAction = case _ of
     H.liftAff $ Aff.delay (Milliseconds 100.0)
 
     -- Initialize visualization once and store update function
-    liftEffect $ log "Initializing visualization..."
+    liftEffect $ Console.log "Initializing visualization..."
     (updateFn :: Array Draw.NationPoint -> D3M Unit D3Selection_ D3Selection_) <- liftEffect $ eval_D3M $ Draw.draw "#wealth-health-viz"
     H.modify_ _ { vizUpdateFn = Just updateFn }
-    liftEffect $ log "Visualization initialized, rendering initial frame..."
+    liftEffect $ Console.log "Visualization initialized, rendering initial frame..."
 
     -- Draw initial visualization
     handleAction Render
 
   DataLoadFailed err -> do
-    liftEffect $ log $ "Data load failed: " <> err
+    liftEffect $ Console.log $ "Data load failed: " <> err
     pure unit
 
   SetYear year -> do
@@ -221,12 +221,9 @@ handleAction = case _ of
     case state.model, state.vizUpdateFn of
       Just model, Just updateFn -> do
         let nations = getAllNationsAtYear state.currentYear model
-        liftEffect $ log $ "Rendering " <> show (length nations) <> " nations for year " <> show state.currentYear
+        liftEffect $ Console.log $ "Rendering " <> show (length nations) <> " nations for year " <> show state.currentYear
         let drawData = map nationPointToDrawData nations
         _ <- liftEffect $ eval_D3M $ updateFn drawData
         pure unit
-      Nothing, _ -> liftEffect $ log "No model available for rendering"
-      _, Nothing -> liftEffect $ log "No update function available"
-
--- FFI imports
-foreign import log :: String -> Effect Unit
+      Nothing, _ -> liftEffect $ Console.log "No model available for rendering"
+      _, Nothing -> liftEffect $ Console.log "No update function available"

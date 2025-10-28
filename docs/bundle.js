@@ -34605,7 +34605,9 @@
 
   // output/PSD3.WealthHealth.WealthHealth/foreign.js
   function log4(message2) {
-    console.log(message2);
+    return function() {
+      console.log(message2);
+    };
   }
 
   // output/D3.Viz.WealthHealth.Unsafe/index.js
