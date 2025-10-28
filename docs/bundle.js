@@ -288,11 +288,11 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq17) {
+    return function(eq18) {
       return function(gt) {
         return function(x30) {
           return function(y29) {
-            return x30 < y29 ? lt : x30 === y29 ? eq17 : gt;
+            return x30 < y29 ? lt : x30 === y29 ? eq18 : gt;
           };
         };
       };
@@ -878,13 +878,13 @@
     return v.value0;
   };
   var eqTuple = function(dictEq) {
-    var eq17 = eq(dictEq);
+    var eq18 = eq(dictEq);
     return function(dictEq1) {
-      var eq18 = eq(dictEq1);
+      var eq19 = eq(dictEq1);
       return {
         eq: function(x30) {
           return function(y29) {
-            return eq17(x30.value0)(y29.value0) && eq18(x30.value1)(y29.value1);
+            return eq18(x30.value0)(y29.value0) && eq19(x30.value1)(y29.value1);
           };
         }
       };
@@ -1019,7 +1019,7 @@
     };
   };
   var eqMaybe = function(dictEq) {
-    var eq17 = eq(dictEq);
+    var eq18 = eq(dictEq);
     return {
       eq: function(x30) {
         return function(y29) {
@@ -1028,7 +1028,7 @@
           }
           ;
           if (x30 instanceof Just && y29 instanceof Just) {
-            return eq17(x30.value0)(y29.value0);
+            return eq18(x30.value0)(y29.value0);
           }
           ;
           return false;
@@ -9155,6 +9155,9 @@
   var h4 = /* @__PURE__ */ element2("h4");
   var h4_ = /* @__PURE__ */ h4([]);
   var header = /* @__PURE__ */ element2("header");
+  var hr = function(props) {
+    return element2("hr")(props)([]);
+  };
   var img = function(props) {
     return element2("img")(props)([]);
   };
@@ -9265,9 +9268,9 @@
         var componentSlot22 = componentSlot1(dictOrd);
         return function(label5) {
           return function(p2) {
-            return function(component58) {
+            return function(component59) {
               return function(input3) {
-                return widget(new ComponentSlot(componentSlot22(label5)(p2)(component58)(input3)($$const(Nothing.value))));
+                return widget(new ComponentSlot(componentSlot22(label5)(p2)(component59)(input3)($$const(Nothing.value))));
               };
             };
           };
@@ -9282,10 +9285,10 @@
         var componentSlot22 = componentSlot1(dictOrd);
         return function(label5) {
           return function(p2) {
-            return function(component58) {
+            return function(component59) {
               return function(input3) {
                 return function(outputQuery) {
-                  return widget(new ComponentSlot(componentSlot22(label5)(p2)(component58)(input3)(function($11) {
+                  return widget(new ComponentSlot(componentSlot22(label5)(p2)(component59)(input3)(function($11) {
                     return Just.create(outputQuery($11));
                   })));
                 };
@@ -9350,7 +9353,7 @@
       return f(v);
     };
   };
-  var initDriverState = function(component58) {
+  var initDriverState = function(component59) {
     return function(input3) {
       return function(handler3) {
         return function(lchs) {
@@ -9366,8 +9369,8 @@
             var subscriptions = $$new(new Just(empty2))();
             var forks = $$new(empty2)();
             var ds = {
-              component: component58,
-              state: component58.initialState(input3),
+              component: component59,
+              state: component59.initialState(input3),
               refs: empty2,
               children: empty3,
               childrenIn,
@@ -9474,16 +9477,16 @@
       });
     };
   };
-  var evalQ = function(render59) {
+  var evalQ = function(render60) {
     return function(ref2) {
       return function(q2) {
         return bind12(liftEffect4(read(ref2)))(function(v) {
-          return evalM(render59)(ref2)(v["component"]["eval"](new Query(map20(Just.create)(liftCoyoneda(q2)), $$const(Nothing.value))));
+          return evalM(render60)(ref2)(v["component"]["eval"](new Query(map20(Just.create)(liftCoyoneda(q2)), $$const(Nothing.value))));
         });
       };
     };
   };
-  var evalM = function(render59) {
+  var evalM = function(render60) {
     return function(initRef) {
       return function(v) {
         var evalChildQuery = function(ref2) {
@@ -9493,7 +9496,7 @@
                 var evalChild = function(v3) {
                   return parallel2(bind12(liftEffect4(read(v3)))(function(dsx) {
                     return unDriverStateX(function(ds) {
-                      return evalQ(render59)(ds.selfRef)(v2.value1);
+                      return evalQ(render60)(ds.selfRef)(v2.value1);
                     })(dsx);
                   }));
                 };
@@ -9530,7 +9533,7 @@
                     lifecycleHandlers: v2.lifecycleHandlers,
                     state: v3.value1
                   })(ref2)))(function() {
-                    return discard1(handleLifecycle(v2.lifecycleHandlers)(render59(v2.lifecycleHandlers)(ref2)))(function() {
+                    return discard1(handleLifecycle(v2.lifecycleHandlers)(render60(v2.lifecycleHandlers)(ref2)))(function() {
                       return pure8(v3.value0);
                     });
                   });
@@ -9543,7 +9546,7 @@
             if (v1 instanceof Subscribe) {
               return bind12(fresh(SubscriptionId)(ref2))(function(sid) {
                 return bind12(liftEffect4(subscribe(v1.value0(sid))(function(act) {
-                  return handleAff(evalF(render59)(ref2)(new Action(act)));
+                  return handleAff(evalF(render60)(ref2)(new Action(act)));
                 })))(function(finalize) {
                   return bind12(liftEffect4(read(ref2)))(function(v2) {
                     return discard1(liftEffect4(modify_2(map23(insert4(sid)(finalize)))(v2.subscriptions)))(function() {
@@ -9580,7 +9583,7 @@
             ;
             if (v1 instanceof Par) {
               return sequential2(retractFreeAp2(hoistFreeAp((function() {
-                var $118 = evalM(render59)(ref2);
+                var $118 = evalM(render60)(ref2);
                 return function($119) {
                   return parallel2($118($119));
                 };
@@ -9594,7 +9597,7 @@
                     return bind12(fork3($$finally(liftEffect4(function __do4() {
                       modify_2($$delete2(fid))(v2.forks)();
                       return write(true)(doneRef)();
-                    }))(evalM(render59)(ref2)(v1.value0))))(function(fiber) {
+                    }))(evalM(render60)(ref2)(v1.value0))))(function(fiber) {
                       return discard1(liftEffect4(unlessM2(read(doneRef))(modify_2(insert12(fid)(fiber))(v2.forks))))(function() {
                         return pure8(v1.value1(fid));
                       });
@@ -9637,7 +9640,7 @@
       };
     };
   };
-  var evalF = function(render59) {
+  var evalF = function(render60) {
     return function(ref2) {
       return function(v) {
         if (v instanceof RefUpdate) {
@@ -9665,7 +9668,7 @@
         ;
         if (v instanceof Action) {
           return bind12(liftEffect4(read(ref2)))(function(v1) {
-            return evalM(render59)(ref2)(v1["component"]["eval"](new Action2(v.value0, unit)));
+            return evalM(render60)(ref2)(v1["component"]["eval"](new Action2(v.value0, unit)));
           });
         }
         ;
@@ -9731,12 +9734,12 @@
     };
   };
   var runUI = function(renderSpec2) {
-    return function(component58) {
+    return function(component59) {
       return function(i2) {
         var squashChildInitializers = function(lchs) {
           return function(preInits) {
             return unDriverStateX(function(st) {
-              var parentInitializer = evalM(render59)(st.selfRef)(st["component"]["eval"](new Initialize(unit)));
+              var parentInitializer = evalM(render60)(st.selfRef)(st["component"]["eval"](new Initialize(unit)));
               return modify_2(function(handlers) {
                 return {
                   initializers: new Cons(discard22(parSequence_3(reverse(handlers.initializers)))(function() {
@@ -9766,7 +9769,7 @@
                     finalizers: pre2.finalizers
                   })(lchs)();
                   bindFlipped7(unDriverStateX((function() {
-                    var $62 = render59(lchs);
+                    var $62 = render60(lchs);
                     return function($63) {
                       return $62((function(v) {
                         return v.selfRef;
@@ -9799,7 +9802,7 @@
                                 return $64(slot3.output($65));
                               };
                             })())();
-                            return handleAff(evalM(render59)(st.selfRef)(st["component"]["eval"](new Receive(slot3.input, unit))))();
+                            return handleAff(evalM(render60)(st.selfRef)(st["component"]["eval"](new Receive(slot3.input, unit))))();
                           };
                         })(dsx)();
                         return childrenIn.value0.value0;
@@ -9838,7 +9841,7 @@
             };
           };
         };
-        var render59 = function(lchs) {
+        var render60 = function(lchs) {
           return function($$var2) {
             return function __do4() {
               var v = read($$var2)();
@@ -9848,7 +9851,7 @@
               write(v.children)(v.childrenIn)();
               var handler3 = (function() {
                 var $69 = queueOrRun(v.pendingHandlers);
-                var $70 = evalF(render59)(v.selfRef);
+                var $70 = evalF(render60)(v.selfRef);
                 return function($71) {
                   return $69($$void8($70($71)));
                 };
@@ -9917,7 +9920,7 @@
           return unDriverStateX(function(st) {
             return function __do4() {
               cleanupSubscriptionsAndForks(st)();
-              var f = evalM(render59)(st.selfRef)(st["component"]["eval"](new Finalize(unit)));
+              var f = evalM(render60)(st.selfRef)(st["component"]["eval"](new Finalize(unit)));
               modify_2(function(handlers) {
                 return {
                   initializers: handlers.initializers,
@@ -9941,7 +9944,7 @@
                   return pure12(Nothing.value);
                 }
                 ;
-                return evalQ(render59)(ref2)(q2);
+                return evalQ(render60)(ref2)(q2);
               });
             };
           };
@@ -9976,7 +9979,7 @@
                 return function($78) {
                   return liftEffect5($77($78));
                 };
-              })())(i2)(component58))();
+              })())(i2)(component59))();
               return unDriverStateX(function(st) {
                 return pure9({
                   query: evalDriver(disposed)(st.selfRef),
@@ -10153,9 +10156,9 @@
             };
           });
           var patch2 = $lazy_patch(91);
-          var render59 = $lazy_render(82);
+          var render60 = $lazy_render(82);
           var renderComponentSlot = $lazy_renderComponentSlot(109);
-          return render59;
+          return render60;
         };
         var buildAttributes = buildProp(handler3);
         return {
@@ -10168,7 +10171,7 @@
   };
   var renderSpec = function(document3) {
     return function(container) {
-      var render59 = function(handler3) {
+      var render60 = function(handler3) {
         return function(child) {
           return function(v) {
             return function(v1) {
@@ -10209,18 +10212,18 @@
         };
       };
       return {
-        render: render59,
+        render: render60,
         renderChild: identity10,
         removeChild: removeChild3,
         dispose: removeChild3
       };
     };
   };
-  var runUI2 = function(component58) {
+  var runUI2 = function(component59) {
     return function(i2) {
       return function(element3) {
         return bind14(liftEffect6(map25(toDocument)(bindFlipped8(document2)(windowImpl))))(function(document3) {
-          return runUI(renderSpec(document3)(element3))(component58)(i2);
+          return runUI(renderSpec(document3)(element3))(component59)(i2);
         });
       };
     };
@@ -15024,10 +15027,10 @@
     return new Tuple(toNumber(w), toNumber(h));
   };
   var equalSnd = function(dictEq) {
-    var eq17 = eq(dictEq);
+    var eq18 = eq(dictEq);
     return function(a2) {
       return function(b2) {
-        return eq17(snd(a2))(snd(b2));
+        return eq18(snd(a2))(snd(b2));
       };
     };
   };
@@ -21971,7 +21974,7 @@
     };
   };
   var render3 = function(currentRoute) {
-    return div2([classes(["explanation-page__nav-panel"])])([h3([classes(["explanation-page__nav-title"])])([text5("Explore")]), nav([classes(["explanation-page__nav-links"])])([navLink(About.value)("About")(currentRoute), navLink(Tutorial.value)("Tutorial")(currentRoute), navLink(SimpleCharts.value)("Simple Charts")(currentRoute), navLink(ChordDiagram.value)("Chord Diagram")(currentRoute), navLink(BubbleChart.value)("Bubble Chart")(currentRoute), navLink(SankeyDiagram.value)("Sankey Diagram")(currentRoute), navLink(Hierarchies.value)("Hierarchies")(currentRoute), navLink(Interpreters.value)("Interpreters")(currentRoute), navLink(CodeExplorer.value)("Code Explorer")(currentRoute), a([href4("https://github.com/afcondon/purescript-d3-tagless"), target5("_blank"), rel4("noopener noreferrer"), classes(["explanation-page__nav-link", "explanation-page__nav-link--external"])])([text5("GitHub \u2197")])])]);
+    return div2([classes(["explanation-page__nav-panel"])])([h3([classes(["explanation-page__nav-title"])])([text5("How-to Guides")]), nav([classes(["explanation-page__nav-links"])])([navLink(HowtoIndex.value)("\u2190 All Guides")(currentRoute), hr([classes(["explanation-page__nav-divider"])]), p([classes(["explanation-page__nav-section-title"])])([text5("Basic Visualizations")]), navLink(new Explore("TLCSimple"))("Three Little Circles")(currentRoute), navLink(new Explore("GUP"))("General Update Pattern")(currentRoute), navLink(new Explore("TLCParabola"))("Data-Driven Positioning")(currentRoute), navLink(new Explore("BarChartDraw"))("Build a Bar Chart")(currentRoute), navLink(new Explore("LineChartDraw"))("Build a Line Chart")(currentRoute), navLink(new Explore("ScatterPlotQuartet"))("Anscombe's Quartet")(currentRoute), hr([classes(["explanation-page__nav-divider"])]), a([href4("https://github.com/afcondon/purescript-d3-tagless"), target5("_blank"), rel4("noopener noreferrer"), classes(["explanation-page__nav-link", "explanation-page__nav-link--external"])])([text5("GitHub \u2197")])])]);
   };
   var component3 = /* @__PURE__ */ mkComponent({
     initialState: /* @__PURE__ */ identity(categoryFn),
@@ -22181,7 +22184,56 @@
   var append15 = /* @__PURE__ */ append(semigroupArray);
   var type_20 = /* @__PURE__ */ type_17(isPropButtonType);
   var map41 = /* @__PURE__ */ map(functorArray);
+  var AnchorLink = /* @__PURE__ */ (function() {
+    function AnchorLink2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    AnchorLink2.create = function(value0) {
+      return new AnchorLink2(value0);
+    };
+    return AnchorLink2;
+  })();
+  var RouteLink = /* @__PURE__ */ (function() {
+    function RouteLink2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    RouteLink2.create = function(value0) {
+      return new RouteLink2(value0);
+    };
+    return RouteLink2;
+  })();
+  var tocRoute = function(route) {
+    return function(label5) {
+      return function(level) {
+        return {
+          target: new RouteLink(route),
+          label: label5,
+          level
+        };
+      };
+    };
+  };
+  var tocAnchor = function(anchor) {
+    return function(label5) {
+      return function(level) {
+        return {
+          target: new AnchorLink(anchor),
+          label: label5,
+          level
+        };
+      };
+    };
+  };
   var renderTOCItem = function(item) {
+    var routeLinkClass = (function() {
+      if (item.target instanceof RouteLink) {
+        return ["toc-nav__item--route-link"];
+      }
+      ;
+      return [];
+    })();
     var levelClass = (function() {
       if (item.level === 0) {
         return [];
@@ -22189,8 +22241,19 @@
       ;
       return ["toc-nav__item--level-" + show15(item.level + 1 | 0)];
     })();
-    var classes2 = append15(["toc-nav__item"])(levelClass);
-    return a([href4("#" + item.anchor), classes(classes2)])([text5(item.label)]);
+    var href5 = (function() {
+      if (item.target instanceof AnchorLink) {
+        return "#" + item.target.value0;
+      }
+      ;
+      if (item.target instanceof RouteLink) {
+        return "#" + routeToPath(item.target.value0);
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.Understanding.TOC (line 75, column 12 - line 77, column 50): " + [item.target.constructor.name]);
+    })();
+    var classes2 = append15(["toc-nav__item"])(append15(levelClass)(routeLinkClass));
+    return a([href4(href5), classes(classes2)])([text5(item.label)]);
   };
   var renderTOC = function(config) {
     return div2([classes(["toc-panel"])])([img([src9(fromMaybe("bookmark.jpeg")(config.image)), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5(config.title)]), button([classes(["floating-panel__toggle"]), type_20(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])(map41(renderTOCItem)(config.items))])])]);
@@ -22275,31 +22338,7 @@
   var render5 = function(state3) {
     return div2([classes(["howto-page", "exploration-page"])])([renderTOC({
       title: "Breakdown",
-      items: [{
-        anchor: "overview",
-        label: "Overview",
-        level: 0
-      }, {
-        anchor: "code",
-        label: "The Code",
-        level: 0
-      }, {
-        anchor: "line-by-line",
-        label: "Line by Line",
-        level: 0
-      }, {
-        anchor: "concepts",
-        label: "Key Concepts",
-        level: 0
-      }, {
-        anchor: "reference",
-        label: "API Reference",
-        level: 0
-      }, {
-        anchor: "related",
-        label: "Related Examples",
-        level: 0
-      }],
+      items: [tocAnchor("overview")("Overview")(0), tocAnchor("code")("The Code")(0), tocAnchor("line-by-line")("Line by Line")(0), tocAnchor("concepts")("Key Concepts")(0), tocAnchor("reference")("API Reference")(0), tocAnchor("related")("Related Examples")(0)],
       image: new Just("images/howto-bookmark-volcano.jpeg")
     }), slot_2(_rhsNav)(unit)(component3)(new Explore(state3.snippetId)), section([classes(["tutorial-section", "tutorial-intro", "exploration-intro"]), id2("overview")])([h1([classes(["tutorial-title", "exploration-title"])])([text5("Exploring: " + state3.snippetId)]), p_([text5("Welcome to the code exploration zone. Here we'll disassemble every aspect of this code snippet, explain the concepts behind it, and connect you to the library reference documentation.")]), p_([text5("This is your deep dive into PureScript D3 programming - understanding not just what the code does, but why it's written this way, what each function means, and where to learn more.")]), p_([text5("When you've finished exploring this code, "), a([classes(["exploration-back-link"]), onClick(function(v) {
       return GoBack.value;
@@ -25638,23 +25677,7 @@
   var render10 = function(v) {
     return div2([classes(["howto-page"])])([renderTOC({
       title: "Page Contents",
-      items: [{
-        anchor: "basic",
-        label: "Basic Visualizations",
-        level: 0
-      }, {
-        anchor: "data",
-        label: "Data & Scales",
-        level: 0
-      }, {
-        anchor: "interaction",
-        label: "Interactivity",
-        level: 0
-      }, {
-        anchor: "advanced",
-        label: "Advanced Techniques",
-        level: 0
-      }],
+      items: [tocAnchor("basic")("Basic Visualizations")(0), tocAnchor("data")("Data & Scales")(0), tocAnchor("interaction")("Interactivity")(0), tocAnchor("advanced")("Advanced Techniques")(0)],
       image: new Just("images/howto-bookmark-volcano.jpeg")
     }), slot_4(_sectionNav)(unit)(component8)({
       currentSection: HowToSection.value,
@@ -29591,35 +29614,7 @@
   var render42 = function(v) {
     return div2([classes(["tutorial-page"])])([renderTOC({
       title: "Page Contents",
-      items: [{
-        anchor: "installation",
-        label: "Installation",
-        level: 0
-      }, {
-        anchor: "prerequisites",
-        label: "Prerequisites",
-        level: 1
-      }, {
-        anchor: "setup",
-        label: "Project Setup",
-        level: 0
-      }, {
-        anchor: "wizard",
-        label: "Using the Wizard",
-        level: 0
-      }, {
-        anchor: "understanding",
-        label: "Understanding the Code",
-        level: 0
-      }, {
-        anchor: "datum-pattern",
-        label: "The Datum_ Pattern",
-        level: 1
-      }, {
-        anchor: "next-steps",
-        label: "Next Steps",
-        level: 0
-      }],
+      items: [tocAnchor("installation")("Installation")(0), tocAnchor("prerequisites")("Prerequisites")(1), tocAnchor("setup")("Project Setup")(0), tocAnchor("wizard")("Using the Wizard")(0), tocAnchor("understanding")("Understanding the Code")(0), tocAnchor("datum-pattern")("The Datum_ Pattern")(1), tocAnchor("next-steps")("Next Steps")(0)],
       image: new Just("images/tutorial-bookmark-balloons.jpeg")
     }), slot_6(_sectionNav3)(unit)(component8)({
       currentSection: TutorialSection.value,
@@ -30404,55 +30399,7 @@
   var render44 = function(v) {
     return div2([classes(["explanation-page"])])([renderTOC({
       title: "Page Contents",
-      items: [{
-        anchor: "heading-0",
-        label: "PS<$>D3",
-        level: 0
-      }, {
-        anchor: "heading-2",
-        label: "What is This Project?",
-        level: 1
-      }, {
-        anchor: "heading-3",
-        label: "Motivation",
-        level: 1
-      }, {
-        anchor: "heading-4",
-        label: "The Data Visualization Process",
-        level: 1
-      }, {
-        anchor: "anscombe",
-        label: "Why Visualize? Anscombe's Quartet",
-        level: 2
-      }, {
-        anchor: "heading-5",
-        label: "Design philosophy of D3*",
-        level: 2
-      }, {
-        anchor: "heading-6",
-        label: "Design philosophy of PS<$>D3",
-        level: 2
-      }, {
-        anchor: "heading-7",
-        label: "Project Goals (and non-Goals)",
-        level: 1
-      }, {
-        anchor: "heading-9",
-        label: "Goals: details",
-        level: 2
-      }, {
-        anchor: "heading-13",
-        label: "Non-goals: details",
-        level: 2
-      }, {
-        anchor: "heading-17",
-        label: "What's a DSL? and what's an eDSL?",
-        level: 1
-      }, {
-        anchor: "heading-20",
-        label: "The grammar of D3...",
-        level: 1
-      }],
+      items: [tocAnchor("heading-0")("PS<$>D3")(0), tocAnchor("heading-2")("What is This Project?")(1), tocAnchor("heading-3")("Motivation")(1), tocAnchor("heading-4")("The Data Visualization Process")(1), tocAnchor("anscombe")("Why Visualize? Anscombe's Quartet")(2), tocAnchor("heading-5")("Design philosophy of D3*")(2), tocAnchor("heading-6")("Design philosophy of PS<$>D3")(2), tocAnchor("heading-7")("Project Goals (and non-Goals)")(1), tocAnchor("heading-9")("Goals: details")(2), tocAnchor("heading-13")("Non-goals: details")(2), tocAnchor("heading-17")("What's a DSL? and what's an eDSL?")(1), tocAnchor("heading-20")("The grammar of D3...")(1)],
       image: new Just("images/understanding-bookmark-trees.jpeg")
     }), slot_1(_sectionNav4)(unit)(component8)({
       currentSection: UnderstandingSection.value,
@@ -30598,6 +30545,32 @@
     };
   };
 
+  // output/PSD3.Shared.ExamplesNav/index.js
+  var eq9 = /* @__PURE__ */ eq(eqRoute);
+  var sectionTitle2 = function(title5) {
+    return p([classes(["explanation-page__nav-section-title"])])([text5(title5)]);
+  };
+  var navLink2 = function(route) {
+    return function(label5) {
+      return function(currentRoute) {
+        var $3 = eq9(route)(currentRoute);
+        if ($3) {
+          return span3([classes(["explanation-page__nav-link", "explanation-page__nav-link--active"])])([text5(label5)]);
+        }
+        ;
+        return a([href4("#" + routeToPath(route)), classes(["explanation-page__nav-link"])])([text5(label5 + " \u2192")]);
+      };
+    };
+  };
+  var render45 = function(currentRoute) {
+    return div2([classes(["explanation-page__nav-panel"])])([h3([classes(["explanation-page__nav-title"])])([text5("Examples")]), nav([classes(["explanation-page__nav-links"])])([a([href4("#" + routeToPath(Home.value)), classes(["explanation-page__nav-link"])])([text5("\u2190 Home")]), hr([classes(["explanation-page__nav-divider"])]), sectionTitle2("Simplest Examples"), navLink2(Tutorial.value)("Tutorial")(currentRoute), sectionTitle2("Typical Charts"), navLink2(SimpleCharts.value)("Simple Charts")(currentRoute), sectionTitle2("Data Visualizations"), navLink2(BubbleChart.value)("Bubble Chart")(currentRoute), navLink2(ChordDiagram.value)("Chord Diagram")(currentRoute), navLink2(SankeyDiagram.value)("Sankey Diagram")(currentRoute), sectionTitle2("Hierarchies"), navLink2(Hierarchies.value)("Hierarchies")(currentRoute), sectionTitle2("Applications"), navLink2(CodeExplorer.value)("Code Explorer")(currentRoute), navLink2(WealthHealth.value)("Wealth & Health")(currentRoute), navLink2(LesMiserables.value)("Les Mis\xE9rables")(currentRoute), sectionTitle2("Alternative Interpreters"), navLink2(Interpreters.value)("Interpreters")(currentRoute), hr([classes(["explanation-page__nav-divider"])]), a([href4("https://github.com/afcondon/purescript-d3-tagless"), target5("_blank"), rel4("noopener noreferrer"), classes(["explanation-page__nav-link", "explanation-page__nav-link--external"])])([text5("GitHub \u2197")])])]);
+  };
+  var component44 = /* @__PURE__ */ mkComponent({
+    initialState: /* @__PURE__ */ identity(categoryFn),
+    render: render45,
+    "eval": /* @__PURE__ */ mkEval(defaultEval)
+  });
+
   // output/PSD3.Understanding.BubbleChart/index.js
   var bind56 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff33 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
@@ -30607,7 +30580,7 @@
   var type_22 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_8 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "sectionNav";
+      return "examplesNav";
     }
   })(ordUnit);
   var Initialize40 = /* @__PURE__ */ (function() {
@@ -30624,50 +30597,18 @@
       });
     });
   };
-  var _sectionNav5 = /* @__PURE__ */ (function() {
+  var _examplesNav = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render45 = function(v) {
-    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_22(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. Hierarchical Data")])])])])]), slot_8(_sectionNav5)(unit)(component8)({
-      currentSection: UnderstandingSection.value,
-      currentRoute: BubbleChart.value,
-      sectionPages: [{
-        route: About.value,
-        label: "About"
-      }, {
-        route: Tutorial.value,
-        label: "Tutorial"
-      }, {
-        route: SimpleCharts.value,
-        label: "Simple Charts"
-      }, {
-        route: ChordDiagram.value,
-        label: "Chord Diagram"
-      }, {
-        route: BubbleChart.value,
-        label: "Bubble Chart"
-      }, {
-        route: SankeyDiagram.value,
-        label: "Sankey Diagram"
-      }, {
-        route: Hierarchies.value,
-        label: "Hierarchies"
-      }, {
-        route: Interpreters.value,
-        label: "Interpreters"
-      }, {
-        route: CodeExplorer.value,
-        label: "Code Explorer"
-      }],
-      moduleCategories: Nothing.value
-    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Bubble Chart: Circle Packing Layout")]), p_([text5("Circle packing displays hierarchical data as nested circles, where the size of each circle represents a quantitative value. It's an efficient way to visualize part-to-whole relationships in hierarchical structures.")]), p_([text5("This layout is particularly effective for showing relative sizes at multiple levels of hierarchy, making it easy to spot dominant elements and compare proportions across branches.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Flare Visualization Library Structure")]), p_([text5("This bubble chart shows the structure of the Flare visualization library. Each circle represents a class or package, with the size proportional to the lines of code. Nested circles show the package hierarchy.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["bubble-viz"])])([])]), p_([text5("The circle packing algorithm automatically arranges circles to minimize wasted space while maintaining the hierarchical relationships. Colors indicate the depth level in the hierarchy.")])])]);
+  var render46 = function(v) {
+    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_22(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. Hierarchical Data")])])])])]), slot_8(_examplesNav)(unit)(component44)(BubbleChart.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Bubble Chart: Circle Packing Layout")]), p_([text5("Circle packing displays hierarchical data as nested circles, where the size of each circle represents a quantitative value. It's an efficient way to visualize part-to-whole relationships in hierarchical structures.")]), p_([text5("This layout is particularly effective for showing relative sizes at multiple levels of hierarchy, making it easy to spot dominant elements and compare proportions across branches.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Flare Visualization Library Structure")]), p_([text5("This bubble chart shows the structure of the Flare visualization library. Each circle represents a class or package, with the size proportional to the lines of code. Nested circles show the package hierarchy.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["bubble-viz"])])([])]), p_([text5("The circle packing algorithm automatically arranges circles to minimize wasted space while maintaining the hierarchical relationships. Colors indicate the depth level in the hierarchy.")])])]);
   };
-  var component44 = /* @__PURE__ */ (function() {
+  var component45 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return unit;
       },
-      render: render45,
+      render: render46,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -30805,7 +30746,7 @@
   var type_23 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_9 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "sectionNav";
+      return "examplesNav";
     }
   })(ordUnit);
   var Initialize41 = /* @__PURE__ */ (function() {
@@ -30820,50 +30761,18 @@
       return pure34(unit);
     });
   };
-  var _sectionNav6 = /* @__PURE__ */ (function() {
+  var _examplesNav2 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render46 = function(v) {
-    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_23(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. Programming Concepts")])])])])]), slot_9(_sectionNav6)(unit)(component8)({
-      currentSection: UnderstandingSection.value,
-      currentRoute: ChordDiagram.value,
-      sectionPages: [{
-        route: About.value,
-        label: "About"
-      }, {
-        route: Tutorial.value,
-        label: "Tutorial"
-      }, {
-        route: SimpleCharts.value,
-        label: "Simple Charts"
-      }, {
-        route: ChordDiagram.value,
-        label: "Chord Diagram"
-      }, {
-        route: BubbleChart.value,
-        label: "Bubble Chart"
-      }, {
-        route: SankeyDiagram.value,
-        label: "Sankey Diagram"
-      }, {
-        route: Hierarchies.value,
-        label: "Hierarchies"
-      }, {
-        route: Interpreters.value,
-        label: "Interpreters"
-      }, {
-        route: CodeExplorer.value,
-        label: "Code Explorer"
-      }],
-      moduleCategories: Nothing.value
-    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Chord Diagram: Visualizing Relationships")]), p_([text5("Chord diagrams show relationships and flows between entities in a circular layout. They're particularly effective for displaying interconnected systems, dependencies, or flows between groups.")]), p_([text5("The thickness of each chord represents the strength of the relationship, while colors help distinguish between different entities or groups.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Programming Concepts Dependencies")]), p_([text5("This chord diagram visualizes the dependencies between fundamental programming concepts. Each arc represents a concept, and the ribbons show how strongly they depend on each other.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["chord-viz"])])([])]), p_([text5("The circular layout makes it easy to see both direct dependencies (following a single chord) and the overall pattern of interconnections in the system. Thicker chords indicate stronger dependencies.")])])]);
+  var render47 = function(v) {
+    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_23(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. Programming Concepts")])])])])]), slot_9(_examplesNav2)(unit)(component44)(ChordDiagram.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Chord Diagram: Visualizing Relationships")]), p_([text5("Chord diagrams show relationships and flows between entities in a circular layout. They're particularly effective for displaying interconnected systems, dependencies, or flows between groups.")]), p_([text5("The thickness of each chord represents the strength of the relationship, while colors help distinguish between different entities or groups.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Programming Concepts Dependencies")]), p_([text5("This chord diagram visualizes the dependencies between fundamental programming concepts. Each arc represents a concept, and the ribbons show how strongly they depend on each other.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["chord-viz"])])([])]), p_([text5("The circular layout makes it easy to see both direct dependencies (following a single chord) and the overall pattern of interconnections in the system. Thicker chords indicate stronger dependencies.")])])]);
   };
-  var component45 = /* @__PURE__ */ (function() {
+  var component46 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return unit;
       },
-      render: render46,
+      render: render47,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -30900,31 +30809,15 @@
   var _tabs2 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var _sectionNav7 = /* @__PURE__ */ (function() {
+  var _sectionNav5 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render47 = function(v) {
+  var render48 = function(v) {
     return div2([classes(["explanation-page"])])([renderTOC({
       title: "Page Contents",
-      items: [{
-        anchor: "heading-finally-tagless",
-        label: "Finally Tagless",
-        level: 0
-      }, {
-        anchor: "heading-selectionm",
-        label: "The SelectionM Monad",
-        level: 0
-      }, {
-        anchor: "heading-capabilities",
-        label: "Capabilities & Interpreters",
-        level: 0
-      }, {
-        anchor: "heading-type-safe",
-        label: "Type-Safe Attribute System",
-        level: 0
-      }],
+      items: [tocAnchor("heading-finally-tagless")("Finally Tagless")(0), tocAnchor("heading-selectionm")("The SelectionM Monad")(0), tocAnchor("heading-capabilities")("Capabilities & Interpreters")(0), tocAnchor("heading-type-safe")("Type-Safe Attribute System")(0)],
       image: new Just("images/understanding-bookmark-trees.jpeg")
-    }), slot_12(_sectionNav7)(unit)(component8)({
+    }), slot_12(_sectionNav5)(unit)(component8)({
       currentSection: UnderstandingSection.value,
       currentRoute: UnderstandingConcepts.value,
       sectionPages: [{
@@ -30940,12 +30833,12 @@
       moduleCategories: Nothing.value
     }), div2([classes(["explanation-content"])])([slot_23(_tabs2)(unit)(component42)(UnderstandingConcepts.value), h1([classes(["explanation-title"])])([text5("Core Concepts")]), section([classes(["concept-section"])])([h2([id2("heading-finally-tagless")])([text5("Finally Tagless")]), p_([text5("We want the library to be extensible and, in fact, D3 while it's the inspiration and a core target, is not the only possible implementation of the SelectionM monad. For this reason we choose the design pattern called Finally Tagless encoding and implement "), em_([text5("interpreters")]), text5(" for the SelectionM.")]), p_([text5("Furthermore, using this pattern, we can now "), em_([text5("extend")]), text5(" the SelectionM monad as can be seen in the library where we provide a SimulationM2 monad which extends the our static DOM element visualizations by allowing them to move under the control of a Force Layout algorithm.")])]), section([classes(["concept-section"])])([h2([id2("heading-selectionm")])([text5("The SelectionM Monad")]), h3_([text5("Grammar")]), p_([text5("D3.js is, naturally, a JavaScript idiomatic library, making use of function chaining as a readable and easily-learnt API.")]), p_([text5("PS<$>D3 formalizes this slightly while retaining the general shape of the pattern and core concepts such as Selection, Attribute.")]), p_([text5("The basic grammar of PS<$>D3 is just this:")]), ul_([li_([text5("we can "), em_([text5("attach")]), text5(' our visualisation into the DOM, typically hooking into something like <div id="viz">')]), li_([text5("we can build up whatever additional structure we want inside that, using "), em_([text5("appendTo")]), text5(` to for example put an <svg> with some <g>'s inside the <div id="viz">`)]), li_([text5("we can apply "), em_([text5("attributes")]), text5(" to the elements we've created: styles, ids, css classes and such")]), li_([text5("we can apply "), em_([text5("behaviors")]), text5(" to the elements we've created: things like zoom, drag and click event-handlers")]), li_([text5("we can "), em_([text5("join")]), text5(" some array of data at this point, such that when we next "), em_([text5("add")]), text5(" something, say a <circle>, we will put "), em_([text5("n")]), text5(" <circle>s in, not just one.")])]), p_([text5("In D3 the thing that is being acted on in this chain of functions is The Selection...")]), h3_([text5("The SelectionM Monad")]), p_([text5("Where functions would be chained in JavaScript, the natural counterpart in PureScript is a Monad, specifically the SelectionM Monad which embodies the core functions above and a few others.")]), p_([text5("It looks like this:")]), pre_([code_([text5("class (Monad m) <= SelectionM selection m where\n  attach          :: Selector selection -> m selection\n  appendTo        :: selection -> Element -> Array (SelectionAttribute) -> m selection\n  setAttributes   :: selection -> Array (SelectionAttribute) -> m Unit\n  on              :: selection -> Behavior selection -> m Unit\n  simpleJoin      :: \u2200 datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_) -> m selection\n  updateJoin      :: \u2200 datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_) -> m { enter :: selection, exit :: selection, update :: selection }\n\n  selectUnder     :: selection -> Selector selection -> m selection\n  filterSelection :: selection -> Selector selection -> m selection\n  mergeSelections :: selection -> selection -> m selection\n  openSelection   :: selection -> Selector selection -> m selection")])])]), section([classes(["concept-section"])])([h2([id2("heading-capabilities")])([text5("Capabilities & Interpreters")]), p_([text5("The SimulationM2 monad looks like:")]), pre_([code_([text5("class (Monad m, SelectionM selection m) <= SimulationM2 selection m | m -> selection where\n  start :: m Unit\n  stop  :: m Unit\n  setConfigVariable    :: SimVariable -> m Unit\n  actualizeForces:: Set Label -> m Unit\n  setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))\n  setLinks :: forall d r id. (Eq id) => Array (D3Link id r) -> Array (D3_SimulationNode d) -> (Datum_ -> Index_ ) -> m (Array (D3LinkSwizzled (D3_SimulationNode d) r))\n  setNodesFromSelection :: selection -> m Unit\n  setLinksFromSelection :: selection -> (Datum_ -> Boolean) -> m Unit\n  mergeNewDataWithSim :: forall d r id. (Eq id) =>\n    selection -> -- nodes selection\n    (Datum_ -> Index_) -> -- nodes keyFn\n    selection -> -- links selection\n    (Datum_ -> Index_) -> -- links KeyFn\n    RawData d r id -> -- links and nodes raw data\n    m { links :: (Array (D3LinkSwizzled (D3_SimulationNode d) r)), nodes :: (Array (D3_SimulationNode d))}\n  simulationHandle :: m D3Simulation_\n  addTickFunction    :: Label -> Step selection -> m Unit\n  removeTickFunction :: Label                   -> m Unit")])])]), section([classes(["concept-section"])])([h2([id2("heading-type-safe")])([text5("Type-Safe Attribute System")]), p_([text5("A key innovation of D3 is the easy, natural way one can go from static to data-driven attributes, for example going from putting "), em_([text5("n")]), text5(" identical circles into the DOM vs putting "), em_([text5("n")]), text5(" circles of differing colours and sizes into the DOM. This is the essence (with join/simulation) of Data Drive Documents, ie D3.")]), p_([text5("In PureScript we need a little bit of typeclass trickery to get the same clean syntax, and we use it to enable interchangeable, type-safe attribute setters. For example, we can use an attribute "), em_([text5("cx")]), text5(" (the center x position of a circle) which can take:")]), ul_([li_([text5("a numeric value OR,")]), li_([text5("a lambda function which takes the datum we are using to a numeric value OR,")]), li_([text5("a lambda function which takes the datum AND the index of that datum in the selection")])])])])]);
   };
-  var component46 = /* @__PURE__ */ (function() {
+  var component47 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return unit;
       },
-      render: render47,
+      render: render48,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -31710,7 +31603,7 @@
 
   // output/D3.Viz.Tree.Configure/index.js
   var show28 = /* @__PURE__ */ show(showNumber);
-  var eq9 = /* @__PURE__ */ eq(eqTreeLayout);
+  var eq10 = /* @__PURE__ */ eq(eqTreeLayout);
   var liftEffect43 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var rotateRadialLabels = function(d9) {
     return "rotate(" + ((function() {
@@ -31796,7 +31689,7 @@
               throw new Error("Failed pattern match at D3.Viz.Tree.Configure (line 67, column 7 - line 74, column 71): " + [model.treeType.constructor.name, model.treeLayout.constructor.name]);
             })();
             var layout = (function() {
-              var $33 = eq9(model.treeLayout)(Radial.value);
+              var $33 = eq10(model.treeLayout)(Radial.value);
               if ($33) {
                 return treeSetSeparation_(treeSetSize_(getLayout(model.treeType))([2 * pi, svg2.width / 2 - 100]))(radialSeparation);
               }
@@ -31970,7 +31863,7 @@
   var get10 = /* @__PURE__ */ get(monadStateHalogenM);
   var slot_11 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "sectionNav";
+      return "examplesNav";
     }
   })(ordUnit);
   var HorizontalTidy = /* @__PURE__ */ (function() {
@@ -32180,12 +32073,12 @@
       };
     }
   };
-  var eq10 = /* @__PURE__ */ eq(eqHierarchyLayout);
+  var eq11 = /* @__PURE__ */ eq(eqHierarchyLayout);
   var renderLayoutOption = function(layout) {
     return function(label5) {
       return function(currentLayout) {
         return button([classes(append19(["control-panel__option"])((function() {
-          var $41 = eq10(layout)(currentLayout);
+          var $41 = eq11(layout)(currentLayout);
           if ($41) {
             return ["control-panel__option--active"];
           }
@@ -32275,7 +32168,7 @@
         return drawTreemap(model.json)("div.hierarchies-viz");
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 289, column 6 - line 313, column 47): " + [layout.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 274, column 6 - line 298, column 47): " + [layout.constructor.name]);
     };
   };
   var handleAction42 = function(v) {
@@ -32307,7 +32200,7 @@
             });
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 261, column 5 - line 267, column 18): " + [treeJSON.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 246, column 5 - line 252, column 18): " + [treeJSON.constructor.name]);
         });
       });
     }
@@ -32337,53 +32230,21 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 278, column 5 - line 283, column 18): " + [state3.tree.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 263, column 5 - line 268, column 18): " + [state3.tree.constructor.name]);
           });
         });
       });
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 252, column 16 - line 283, column 18): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 237, column 16 - line 268, column 18): " + [v.constructor.name]);
   };
-  var _sectionNav8 = /* @__PURE__ */ (function() {
+  var _examplesNav3 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render48 = function(state3) {
-    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel", "control-panel"])])([div2([classes(["toc-panel__main", "control-panel__main"])])([img([src9("controller.jpeg"), alt5(""), classes(["control-panel__icon"])]), div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Layout Controls")]), button([classes(["floating-panel__toggle"]), type_24(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "control-panel__content"])])([div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Node-Link Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(HorizontalTidy.value)("H-Tidy")(state3.currentLayout), renderLayoutOption(HorizontalDendrogram.value)("H-Dendro")(state3.currentLayout), renderLayoutOption(VerticalTidy.value)("V-Tidy")(state3.currentLayout), renderLayoutOption(VerticalDendrogram.value)("V-Dendro")(state3.currentLayout), renderLayoutOption(RadialTidy.value)("R-Tidy")(state3.currentLayout), renderLayoutOption(RadialDendrogram.value)("R-Dendro")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Adjacency Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(Icicle.value)("Icicle")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Enclosure Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(CirclePacking.value)("Circle Pack")(state3.currentLayout), renderLayoutOption(Treemap.value)("Treemap")(state3.currentLayout)])]), div2([classes(["control-panel__current"])])([strong_([text5("Current:")]), text5(" "), text5(show29(state3.currentLayout))])])])]), slot_11(_sectionNav8)(unit)(component8)({
-      currentSection: UnderstandingSection.value,
-      currentRoute: Hierarchies.value,
-      sectionPages: [{
-        route: About.value,
-        label: "About"
-      }, {
-        route: Tutorial.value,
-        label: "Tutorial"
-      }, {
-        route: SimpleCharts.value,
-        label: "Simple Charts"
-      }, {
-        route: ChordDiagram.value,
-        label: "Chord Diagram"
-      }, {
-        route: BubbleChart.value,
-        label: "Bubble Chart"
-      }, {
-        route: SankeyDiagram.value,
-        label: "Sankey Diagram"
-      }, {
-        route: Hierarchies.value,
-        label: "Hierarchies"
-      }, {
-        route: Interpreters.value,
-        label: "Interpreters"
-      }, {
-        route: CodeExplorer.value,
-        label: "Code Explorer"
-      }],
-      moduleCategories: Nothing.value
-    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Hierarchical Layouts")]), p_([text5("Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data.")]), p_([text5("This page demonstrates five different ways to visualize the same hierarchical dataset. Use the controls on the left to switch between layouts and explore how each representation emphasizes different relationships in the data.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5(show29(state3.currentLayout))]), p_([text5(layoutDescription(state3.currentLayout))]), div2([classes(["tutorial-viz-container"])])([div2([classes(["hierarchies-viz"])])([renderLayoutPlaceholder(state3.currentLayout)])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Implementation")]), p_([text5("The visualization code for "), strong_([text5(show29(state3.currentLayout))]), text5(" demonstrates how D3's hierarchical layout algorithms transform tree data into visual coordinates.")]), div2([classes(["tutorial-code-block"])])([pre_([code_([text5("-- Code for "), text5(show29(state3.currentLayout)), text5(" layout will go here\n"), text5("-- Demonstrates D3 hierarchy layout with PureScript DSL")])])])])]);
+  var render49 = function(state3) {
+    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel", "control-panel"])])([div2([classes(["toc-panel__main", "control-panel__main"])])([img([src9("controller.jpeg"), alt5(""), classes(["control-panel__icon"])]), div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Layout Controls")]), button([classes(["floating-panel__toggle"]), type_24(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "control-panel__content"])])([div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Node-Link Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(HorizontalTidy.value)("H-Tidy")(state3.currentLayout), renderLayoutOption(HorizontalDendrogram.value)("H-Dendro")(state3.currentLayout), renderLayoutOption(VerticalTidy.value)("V-Tidy")(state3.currentLayout), renderLayoutOption(VerticalDendrogram.value)("V-Dendro")(state3.currentLayout), renderLayoutOption(RadialTidy.value)("R-Tidy")(state3.currentLayout), renderLayoutOption(RadialDendrogram.value)("R-Dendro")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Adjacency Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(Icicle.value)("Icicle")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Enclosure Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(CirclePacking.value)("Circle Pack")(state3.currentLayout), renderLayoutOption(Treemap.value)("Treemap")(state3.currentLayout)])]), div2([classes(["control-panel__current"])])([strong_([text5("Current:")]), text5(" "), text5(show29(state3.currentLayout))])])])]), slot_11(_examplesNav3)(unit)(component44)(Hierarchies.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Hierarchical Layouts")]), p_([text5("Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data.")]), p_([text5("This page demonstrates five different ways to visualize the same hierarchical dataset. Use the controls on the left to switch between layouts and explore how each representation emphasizes different relationships in the data.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5(show29(state3.currentLayout))]), p_([text5(layoutDescription(state3.currentLayout))]), div2([classes(["tutorial-viz-container"])])([div2([classes(["hierarchies-viz"])])([renderLayoutPlaceholder(state3.currentLayout)])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Implementation")]), p_([text5("The visualization code for "), strong_([text5(show29(state3.currentLayout))]), text5(" demonstrates how D3's hierarchical layout algorithms transform tree data into visual coordinates.")]), div2([classes(["tutorial-code-block"])])([pre_([code_([text5("-- Code for "), text5(show29(state3.currentLayout)), text5(" layout will go here\n"), text5("-- Demonstrates D3 hierarchy layout with PureScript DSL")])])])])]);
   };
-  var component47 = /* @__PURE__ */ (function() {
+  var component48 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return {
@@ -32391,7 +32252,7 @@
           tree: Nothing.value
         };
       },
-      render: render48,
+      render: render49,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -32523,7 +32384,7 @@
   var type_25 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_13 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "sectionNav";
+      return "examplesNav";
     }
   })(ordUnit);
   var EnglishDescription = /* @__PURE__ */ (function() {
@@ -32607,7 +32468,7 @@
         return div2([classes(["interpreter-output"])])([div2([classes(["metatree-viz"])])([text5("[AST Tree visualization will be rendered here]")])]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 225, column 34 - line 285, column 8): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 210, column 34 - line 270, column 8): " + [v.constructor.name]);
     };
   };
   var interpreterTitle = function(v) {
@@ -32631,7 +32492,7 @@
       return "5. Meta Tree - Abstract Syntax Tree";
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 202, column 20 - line 207, column 55): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 187, column 20 - line 192, column 55): " + [v.constructor.name]);
   };
   var interpreterDescription = function(v) {
     if (v instanceof EnglishDescription) {
@@ -32654,7 +32515,7 @@
       return "This interpreter visualizes the abstract syntax tree of the visualization code itself. It creates a tree diagram showing the structure of DSL operations, demonstrating meta-programming capabilities.";
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 211, column 26 - line 221, column 205): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 196, column 26 - line 206, column 205): " + [v.constructor.name]);
   };
   var renderInterpreterOutput = function(state3) {
     return function(interpreter) {
@@ -32705,45 +32566,13 @@
     ;
     throw new Error("Failed pattern match at PSD3.Understanding.Interpreters (line 68, column 16 - line 84, column 54): " + [v.constructor.name]);
   };
-  var _sectionNav9 = /* @__PURE__ */ (function() {
+  var _examplesNav4 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render49 = function(state3) {
-    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Interpreters")]), button([classes(["floating-panel__toggle"]), type_25(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([renderInterpreterLink(EnglishDescription.value)("1. English Description"), renderInterpreterLink(D3Code.value)("2. D3 JavaScript"), renderInterpreterLink(VegaLite.value)("3. Vega-Lite JSON"), renderInterpreterLink(MermaidJS.value)("4. Mermaid Diagram"), renderInterpreterLink(MetaTreeAST.value)("5. Meta Tree (AST)")])])])]), slot_13(_sectionNav9)(unit)(component8)({
-      currentSection: UnderstandingSection.value,
-      currentRoute: Interpreters.value,
-      sectionPages: [{
-        route: About.value,
-        label: "About"
-      }, {
-        route: Tutorial.value,
-        label: "Tutorial"
-      }, {
-        route: SimpleCharts.value,
-        label: "Simple Charts"
-      }, {
-        route: ChordDiagram.value,
-        label: "Chord Diagram"
-      }, {
-        route: BubbleChart.value,
-        label: "Bubble Chart"
-      }, {
-        route: SankeyDiagram.value,
-        label: "Sankey Diagram"
-      }, {
-        route: Hierarchies.value,
-        label: "Hierarchies"
-      }, {
-        route: Interpreters.value,
-        label: "Interpreters"
-      }, {
-        route: CodeExplorer.value,
-        label: "Code Explorer"
-      }],
-      moduleCategories: Nothing.value
-    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Alternative Interpreters")]), p_([text5("The Finally Tagless pattern allows us to write visualization code once and interpret it in multiple ways. The same DSL code can produce an actual visualization, generate equivalent code in other languages, create documentation, or even visualize its own structure.")]), p_([text5("This flexibility comes from separating the ")]), em_([text5("structure")]), text5(" of our visualization (what operations we want to perform) from the "), em_([text5("interpretation")]), text5(" (how those operations are executed). Each interpreter below provides a different view of the same underlying code.")]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("The Source Code")]), p_([text5("Here's a simple example using our PureScript D3 DSL - the most basic example imaginable, three circles:")]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCSimple.purs")(state3.exampleSnippet))("TLCSimple")]), renderInterpreterOutput(state3)(state3.selectedInterpreter)]);
+  var render50 = function(state3) {
+    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Interpreters")]), button([classes(["floating-panel__toggle"]), type_25(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([renderInterpreterLink(EnglishDescription.value)("1. English Description"), renderInterpreterLink(D3Code.value)("2. D3 JavaScript"), renderInterpreterLink(VegaLite.value)("3. Vega-Lite JSON"), renderInterpreterLink(MermaidJS.value)("4. Mermaid Diagram"), renderInterpreterLink(MetaTreeAST.value)("5. Meta Tree (AST)")])])])]), slot_13(_examplesNav4)(unit)(component44)(Interpreters.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Alternative Interpreters")]), p_([text5("The Finally Tagless pattern allows us to write visualization code once and interpret it in multiple ways. The same DSL code can produce an actual visualization, generate equivalent code in other languages, create documentation, or even visualize its own structure.")]), p_([text5("This flexibility comes from separating the ")]), em_([text5("structure")]), text5(" of our visualization (what operations we want to perform) from the "), em_([text5("interpretation")]), text5(" (how those operations are executed). Each interpreter below provides a different view of the same underlying code.")]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("The Source Code")]), p_([text5("Here's a simple example using our PureScript D3 DSL - the most basic example imaginable, three circles:")]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCSimple.purs")(state3.exampleSnippet))("TLCSimple")]), renderInterpreterOutput(state3)(state3.selectedInterpreter)]);
   };
-  var component48 = /* @__PURE__ */ (function() {
+  var component49 = /* @__PURE__ */ (function() {
     var initialState4 = {
       selectedInterpreter: EnglishDescription.value,
       generatedD3Code: Nothing.value,
@@ -32753,7 +32582,7 @@
     };
     return mkComponent({
       initialState: $$const(initialState4),
-      render: render49,
+      render: render50,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -32974,7 +32803,7 @@
   var type_26 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_14 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "sectionNav";
+      return "examplesNav";
     }
   })(ordUnit);
   var Initialize45 = /* @__PURE__ */ (function() {
@@ -33012,61 +32841,20 @@
   var forceLibrary2 = /* @__PURE__ */ (function() {
     return initialize(foldableArray)(functorArray)([forces.manyBodyNeg, forces.collision, forces.center, forces.links]);
   })();
-  var _sectionNav10 = /* @__PURE__ */ (function() {
+  var _examplesNav5 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render50 = function(v) {
-    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_26(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#example"), classes(["toc-nav__item"])])([text5("1. Example")]), a([href4("#code"), classes(["toc-nav__item"])])([text5("2. Code")])])])])]), slot_14(_sectionNav10)(unit)(component8)({
-      currentSection: UnderstandingSection.value,
-      currentRoute: LesMiserables.value,
-      sectionPages: [{
-        route: UnderstandingConcepts.value,
-        label: "Concepts"
-      }, {
-        route: UnderstandingPatterns.value,
-        label: "Patterns"
-      }, {
-        route: UnderstandingPhilosophy.value,
-        label: "Philosophy"
-      }, {
-        route: Tutorial.value,
-        label: "Tutorial"
-      }, {
-        route: SimpleCharts.value,
-        label: "Simple Charts"
-      }, {
-        route: ChordDiagram.value,
-        label: "Chord Diagram"
-      }, {
-        route: BubbleChart.value,
-        label: "Bubble Chart"
-      }, {
-        route: SankeyDiagram.value,
-        label: "Sankey Diagram"
-      }, {
-        route: LesMiserables.value,
-        label: "Les Mis\xE9rables"
-      }, {
-        route: Hierarchies.value,
-        label: "Hierarchies"
-      }, {
-        route: Interpreters.value,
-        label: "Interpreters"
-      }, {
-        route: CodeExplorer.value,
-        label: "Code Explorer"
-      }],
-      moduleCategories: Nothing.value
-    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Force-Directed Graph: Les Mis\xE9rables Character Network")]), p_([text5("Force-directed graphs use physics simulation to position nodes and links. Nodes repel each other like charged particles, while links act as springs pulling connected nodes together. The simulation finds an equilibrium that naturally reveals the structure of the network.")]), p_([text5("This example uses the simplified SimulationM API - a single "), code_([text5("init")]), text5(" call with a configuration record, followed by "), code_([text5("start")]), text5(". The graph shows character co-occurrence in Victor Hugo's Les Mis\xE9rables, where node size represents importance and link thickness shows the strength of connections.")])]), section([id2("example"), classes(["tutorial-section"])])([h2([classes(["section-title"])])([text5("1. Interactive Force Layout")]), p_([text5("Drag nodes to see the force simulation respond. The simulation applies multiple forces: center (pulls toward middle), charge (nodes repel), collision (prevents overlap), and link (pulls connected nodes together).")]), div2([classes(["viz-container"])])([div2([classes(["lesmis-container"])])([])])]), section([id2("code"), classes(["tutorial-section"])])([h2([classes(["section-title"])])([text5("2. Implementation with Simplified SimulationM")]), p_([text5("The new SimulationM API simplifies force layout creation. Instead of manually calling multiple setup functions, pass everything to "), code_([text5("init")]), text5(" as a configuration record:")]), pre([classes(["code-block"])])([code_([text5('drawSimplified forceLibrary activeForces model selector = do\n  (Tuple w h) <- liftEffect getWindowWidthHeight\n  svg <- attach selector >>= appendTo _ Svg [viewBox ...]\n\n  -- Initialize simulation with config record\n  { nodes: nodesInSim, links: linksInSim } <- init\n    { nodes: model.nodes\n    , links: model.links\n    , forces: forceLibrary        -- All available forces\n    , activeForces: activeForces  -- Which ones to enable\n    , config: { alpha: 1.0, alphaTarget: 0.0, ... }\n    , keyFn: keyIsID_\n    , ticks: Map.fromFoldable []  -- Empty for now\n    }\n\n  -- Join simulation-enhanced data to DOM\n  nodesSelection <- simpleJoin svg Circle nodesInSim keyIsID_\n  linksSelection <- simpleJoin svg Line linksInSim keyIsID_\n\n  -- Add tick functions to update positions\n  addTickFunction "nodes" $ Step nodesSelection [cx datum_.x, cy datum_.y]\n  addTickFunction "links" $ Step linksSelection [x1 link_.source.x, ...]\n\n  -- Start the animation\n  start')])]), p_([text5("Key insight: "), code_([text5("init")]), text5(" returns simulation-enhanced data (nodes with x, y, vx, vy properties). Join this enhanced data to DOM, not the raw input data. This ensures tick functions can access the simulation state.")])])]);
+  var render51 = function(v) {
+    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_26(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#example"), classes(["toc-nav__item"])])([text5("1. Example")]), a([href4("#code"), classes(["toc-nav__item"])])([text5("2. Code")])])])])]), slot_14(_examplesNav5)(unit)(component44)(LesMiserables.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Force-Directed Graph: Les Mis\xE9rables Character Network")]), p_([text5("Force-directed graphs use physics simulation to position nodes and links. Nodes repel each other like charged particles, while links act as springs pulling connected nodes together. The simulation finds an equilibrium that naturally reveals the structure of the network.")]), p_([text5("This example uses the simplified SimulationM API - a single "), code_([text5("init")]), text5(" call with a configuration record, followed by "), code_([text5("start")]), text5(". The graph shows character co-occurrence in Victor Hugo's Les Mis\xE9rables, where node size represents importance and link thickness shows the strength of connections.")])]), section([id2("example"), classes(["tutorial-section"])])([h2([classes(["section-title"])])([text5("1. Interactive Force Layout")]), p_([text5("Drag nodes to see the force simulation respond. The simulation applies multiple forces: center (pulls toward middle), charge (nodes repel), collision (prevents overlap), and link (pulls connected nodes together).")]), div2([classes(["viz-container"])])([div2([classes(["lesmis-container"])])([])])]), section([id2("code"), classes(["tutorial-section"])])([h2([classes(["section-title"])])([text5("2. Implementation with Simplified SimulationM")]), p_([text5("The new SimulationM API simplifies force layout creation. Instead of manually calling multiple setup functions, pass everything to "), code_([text5("init")]), text5(" as a configuration record:")]), pre([classes(["code-block"])])([code_([text5('drawSimplified forceLibrary activeForces model selector = do\n  (Tuple w h) <- liftEffect getWindowWidthHeight\n  svg <- attach selector >>= appendTo _ Svg [viewBox ...]\n\n  -- Initialize simulation with config record\n  { nodes: nodesInSim, links: linksInSim } <- init\n    { nodes: model.nodes\n    , links: model.links\n    , forces: forceLibrary        -- All available forces\n    , activeForces: activeForces  -- Which ones to enable\n    , config: { alpha: 1.0, alphaTarget: 0.0, ... }\n    , keyFn: keyIsID_\n    , ticks: Map.fromFoldable []  -- Empty for now\n    }\n\n  -- Join simulation-enhanced data to DOM\n  nodesSelection <- simpleJoin svg Circle nodesInSim keyIsID_\n  linksSelection <- simpleJoin svg Line linksInSim keyIsID_\n\n  -- Add tick functions to update positions\n  addTickFunction "nodes" $ Step nodesSelection [cx datum_.x, cy datum_.y]\n  addTickFunction "links" $ Step linksSelection [x1 link_.source.x, ...]\n\n  -- Start the animation\n  start')])]), p_([text5("Key insight: "), code_([text5("init")]), text5(" returns simulation-enhanced data (nodes with x, y, vx, vy properties). Join this enhanced data to DOM, not the raw input data. This ensures tick functions can access the simulation state.")])])]);
   };
-  var component49 = /* @__PURE__ */ (function() {
+  var component50 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return {
           simulation: initialSimulationState(forceLibrary2)
         };
       },
-      render: render50,
+      render: render51,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -33103,27 +32891,15 @@
   var _tabs3 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var _sectionNav11 = /* @__PURE__ */ (function() {
+  var _sectionNav6 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render51 = function(v) {
+  var render52 = function(v) {
     return div2([classes(["explanation-page"])])([renderTOC({
       title: "Page Contents",
-      items: [{
-        anchor: "heading-datum-pattern",
-        label: "The datum_ / Datum_ Pattern",
-        level: 0
-      }, {
-        anchor: "heading-grammar",
-        label: "The Grammar of D3 in SelectionM",
-        level: 0
-      }, {
-        anchor: "heading-dom-to-viz",
-        label: "From DOM to Visualization Elements",
-        level: 0
-      }],
+      items: [tocAnchor("heading-datum-pattern")("The datum_ / Datum_ Pattern")(0), tocAnchor("heading-grammar")("The Grammar of D3 in SelectionM")(0), tocAnchor("heading-dom-to-viz")("From DOM to Visualization Elements")(0)],
       image: new Just("images/understanding-bookmark-trees.jpeg")
-    }), slot_16(_sectionNav11)(unit)(component8)({
+    }), slot_16(_sectionNav6)(unit)(component8)({
       currentSection: UnderstandingSection.value,
       currentRoute: UnderstandingPatterns.value,
       sectionPages: [{
@@ -33139,12 +32915,12 @@
       moduleCategories: Nothing.value
     }), div2([classes(["explanation-content"])])([slot_24(_tabs3)(unit)(component42)(UnderstandingPatterns.value), h1([classes(["explanation-title"])])([text5("Practical Patterns")]), section([classes(["concept-section"])])([h2([id2("heading-datum-pattern")])([text5("The datum_ / Datum_ Pattern")]), p_([text5("Placeholder: Explanation of the datum_ accessor pattern for type-safe data access")])]), section([classes(["concept-section"])])([h2([id2("heading-grammar")])([text5("The Grammar of D3 in SelectionM")]), p_([text5("Placeholder: How SelectionM expresses D3's grammar of graphics")])]), section([classes(["concept-section"])])([h2([id2("heading-dom-to-viz")])([text5("From DOM to Visualization Elements")]), p_([text5("Placeholder: The flow from attachment \u2192 nodes \u2192 data joins \u2192 bulk enter")])])])]);
   };
-  var component50 = /* @__PURE__ */ (function() {
+  var component51 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return unit;
       },
-      render: render51,
+      render: render52,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -33709,7 +33485,7 @@
   var type_27 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_17 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "sectionNav";
+      return "examplesNav";
     }
   })(ordUnit);
   var Initialize47 = /* @__PURE__ */ (function() {
@@ -33722,52 +33498,20 @@
   var handleAction46 = function(v) {
     return runWithD3_Sankey2(draw10(energyData)("div.sankey-viz"));
   };
-  var _sectionNav12 = /* @__PURE__ */ (function() {
+  var _examplesNav6 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render52 = function(v) {
-    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_27(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. UK Energy Flows")])])])])]), slot_17(_sectionNav12)(unit)(component8)({
-      currentSection: UnderstandingSection.value,
-      currentRoute: SankeyDiagram.value,
-      sectionPages: [{
-        route: About.value,
-        label: "About"
-      }, {
-        route: Tutorial.value,
-        label: "Tutorial"
-      }, {
-        route: SimpleCharts.value,
-        label: "Simple Charts"
-      }, {
-        route: ChordDiagram.value,
-        label: "Chord Diagram"
-      }, {
-        route: BubbleChart.value,
-        label: "Bubble Chart"
-      }, {
-        route: SankeyDiagram.value,
-        label: "Sankey Diagram"
-      }, {
-        route: Hierarchies.value,
-        label: "Hierarchies"
-      }, {
-        route: Interpreters.value,
-        label: "Interpreters"
-      }, {
-        route: CodeExplorer.value,
-        label: "Code Explorer"
-      }],
-      moduleCategories: Nothing.value
-    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Sankey Diagram: Flow Visualization")]), p_([text5("Sankey diagrams visualize the flow of resources, energy, costs, or other quantities through a system. The width of each connection is proportional to the flow quantity, making it easy to identify dominant flows and inefficiencies.")]), p_([text5("These diagrams are particularly effective for showing how quantities are distributed, transformed, and consumed across multiple stages of a process.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. UK Energy System Flows")]), p_([text5("This Sankey diagram shows energy flows in the UK energy system, from primary energy sources through transformation and distribution to final consumption. The diagram uses D3's Sankey layout algorithm to automatically position nodes and create smooth flow paths.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["sankey-viz"])])([])]), p_([text5("The width of each flow represents the quantity of energy. Notice how the diagram reveals energy losses in transformation processes and highlights which sources contribute most to final consumption.")])])]);
+  var render53 = function(v) {
+    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Contents")]), button([classes(["floating-panel__toggle"]), type_27(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([a([href4("#section-1"), classes(["toc-nav__item"])])([text5("1. UK Energy Flows")])])])])]), slot_17(_examplesNav6)(unit)(component44)(SankeyDiagram.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Sankey Diagram: Flow Visualization")]), p_([text5("Sankey diagrams visualize the flow of resources, energy, costs, or other quantities through a system. The width of each connection is proportional to the flow quantity, making it easy to identify dominant flows and inefficiencies.")]), p_([text5("These diagrams are particularly effective for showing how quantities are distributed, transformed, and consumed across multiple stages of a process.")])]), section([id2("section-1"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. UK Energy System Flows")]), p_([text5("This Sankey diagram shows energy flows in the UK energy system, from primary energy sources through transformation and distribution to final consumption. The diagram uses D3's Sankey layout algorithm to automatically position nodes and create smooth flow paths.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["sankey-viz"])])([])]), p_([text5("The width of each flow represents the quantity of energy. Notice how the diagram reveals energy losses in transformation processes and highlights which sources contribute most to final consumption.")])])]);
   };
-  var component51 = /* @__PURE__ */ (function() {
+  var component52 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return {
           sankeyLayout: initialSankeyLayoutState_
         };
       },
-      render: render52,
+      render: render53,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -34351,7 +34095,7 @@
   var pure40 = /* @__PURE__ */ pure(applicativeHalogenM);
   var slot_18 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "sectionNav";
+      return "examplesNav";
     }
   })(ordUnit);
   var Initialize48 = /* @__PURE__ */ (function() {
@@ -34370,66 +34114,22 @@
       });
     });
   };
-  var _sectionNav13 = /* @__PURE__ */ (function() {
+  var _examplesNav7 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render53 = function(v) {
+  var render54 = function(v) {
     return div2([classes(["explanation-page"])])([renderTOC({
       title: "Page Contents",
-      items: [{
-        anchor: "grouped-bar",
-        label: "1. Grouped Bar Chart",
-        level: 0
-      }, {
-        anchor: "multi-line",
-        label: "2. Multi-Line Chart",
-        level: 0
-      }, {
-        anchor: "radial-stacked",
-        label: "3. Radial Stacked Bar Chart",
-        level: 0
-      }],
+      items: [tocAnchor("grouped-bar")("1. Grouped Bar Chart")(0), tocAnchor("multi-line")("2. Multi-Line Chart")(0), tocAnchor("radial-stacked")("3. Radial Stacked Bar Chart")(0)],
       image: new Just("images/understanding-bookmark-trees.jpeg")
-    }), slot_18(_sectionNav13)(unit)(component8)({
-      currentSection: UnderstandingSection.value,
-      currentRoute: SimpleCharts.value,
-      sectionPages: [{
-        route: About.value,
-        label: "About"
-      }, {
-        route: Tutorial.value,
-        label: "Tutorial"
-      }, {
-        route: SimpleCharts.value,
-        label: "Simple Charts"
-      }, {
-        route: ChordDiagram.value,
-        label: "Chord Diagram"
-      }, {
-        route: BubbleChart.value,
-        label: "Bubble Chart"
-      }, {
-        route: SankeyDiagram.value,
-        label: "Sankey Diagram"
-      }, {
-        route: Hierarchies.value,
-        label: "Hierarchies"
-      }, {
-        route: Interpreters.value,
-        label: "Interpreters"
-      }, {
-        route: CodeExplorer.value,
-        label: "Code Explorer"
-      }],
-      moduleCategories: Nothing.value
-    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Simple Charts")]), p_([text5(`Real-world examples of common chart types showing state-level US population data and economic indicators. These charts are "simple" not because the visualizations are trivial, but because they don't include hierarchies, animations, transitions, or physical simulations.`)]), p_([text5("Each example demonstrates best practices for scales, axes, legends, and color coding to create clear and informative visualizations.")])]), section([id2("grouped-bar"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Grouped Bar Chart")]), p_([text5("US population by state and age group. This grouped bar chart shows population distribution across 6 states (CA, TX, FL, NY, PA, IL) broken down into 9 age groups. Each state has its own cluster of bars, with colors representing different age groups.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["grouped-bar-viz"])])([])]), p_([text5("The chart uses nested band scales: an outer scale positions each state cluster, and an inner scale positions individual bars within each cluster. The population values are scaled linearly to bar heights, with colors from the Spectral color scheme to distinguish age groups.")])]), section([id2("multi-line"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("2. Multi-Line Chart")]), p_([text5("Unemployment rates over time for four major US metro areas: San Francisco, New York, Detroit, and Miami. This chart shows how unemployment fluctuated from 2000 to 2013, clearly illustrating the impact of the 2008 financial crisis and subsequent recovery.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["multi-line-viz"])])([])]), p_([text5("Each city is represented by a colored line, with a legend on the right for identification. The chart uses SVG path elements for smooth lines, linear scales for time (x-axis) and unemployment percentage (y-axis), and includes axis labels for context.")])]), section([id2("radial-stacked"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("3. Radial Stacked Bar Chart")]), p_([text5('The same US state population data as the grouped bar chart, but visualized in polar coordinates. Each state gets a wedge around the circle, with age groups stacked radially from the center outward. This "sunburst-like" layout efficiently uses space and creates an aesthetically pleasing circular composition.')]), div2([classes(["tutorial-viz-container"])])([div2([classes(["radial-stacked-viz"])])([])]), p_([text5("The chart uses polar coordinates with an angular scale (\u03B8) dividing the circle by states and a radial scale (r) for population. Arc paths are generated for each segment, with the same color scheme as the grouped bar chart for consistency. State labels are positioned around the perimeter.")])])]);
+    }), slot_18(_examplesNav7)(unit)(component44)(SimpleCharts.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Simple Charts")]), p_([text5(`Real-world examples of common chart types showing state-level US population data and economic indicators. These charts are "simple" not because the visualizations are trivial, but because they don't include hierarchies, animations, transitions, or physical simulations.`)]), p_([text5("Each example demonstrates best practices for scales, axes, legends, and color coding to create clear and informative visualizations.")])]), section([id2("grouped-bar"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("1. Grouped Bar Chart")]), p_([text5("US population by state and age group. This grouped bar chart shows population distribution across 6 states (CA, TX, FL, NY, PA, IL) broken down into 9 age groups. Each state has its own cluster of bars, with colors representing different age groups.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["grouped-bar-viz"])])([])]), p_([text5("The chart uses nested band scales: an outer scale positions each state cluster, and an inner scale positions individual bars within each cluster. The population values are scaled linearly to bar heights, with colors from the Spectral color scheme to distinguish age groups.")])]), section([id2("multi-line"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("2. Multi-Line Chart")]), p_([text5("Unemployment rates over time for four major US metro areas: San Francisco, New York, Detroit, and Miami. This chart shows how unemployment fluctuated from 2000 to 2013, clearly illustrating the impact of the 2008 financial crisis and subsequent recovery.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["multi-line-viz"])])([])]), p_([text5("Each city is represented by a colored line, with a legend on the right for identification. The chart uses SVG path elements for smooth lines, linear scales for time (x-axis) and unemployment percentage (y-axis), and includes axis labels for context.")])]), section([id2("radial-stacked"), classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("3. Radial Stacked Bar Chart")]), p_([text5('The same US state population data as the grouped bar chart, but visualized in polar coordinates. Each state gets a wedge around the circle, with age groups stacked radially from the center outward. This "sunburst-like" layout efficiently uses space and creates an aesthetically pleasing circular composition.')]), div2([classes(["tutorial-viz-container"])])([div2([classes(["radial-stacked-viz"])])([])]), p_([text5("The chart uses polar coordinates with an angular scale (\u03B8) dividing the circle by states and a radial scale (r) for population. Arc paths are generated for each segment, with the same color scheme as the grouped bar chart for consistency. State labels are positioned around the perimeter.")])])]);
   };
-  var component52 = /* @__PURE__ */ (function() {
+  var component53 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return unit;
       },
-      render: render53,
+      render: render54,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -34846,7 +34546,7 @@
   var gets2 = /* @__PURE__ */ gets(monadStateHalogenM);
   var slot_19 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
-      return "sectionNav";
+      return "examplesNav";
     }
   })(ordUnit);
   var Initialize49 = /* @__PURE__ */ (function() {
@@ -34906,35 +34606,7 @@
   var lhsNav = /* @__PURE__ */ (function() {
     return renderTOC({
       title: "Page Contents",
-      items: [{
-        anchor: "section-1",
-        label: "1. Three Little Circles",
-        level: 0
-      }, {
-        anchor: "section-2",
-        label: "2. General Update Pattern",
-        level: 0
-      }, {
-        anchor: "section-3",
-        label: "3. Data-Driven Positioning",
-        level: 0
-      }, {
-        anchor: "section-4",
-        label: "4. Bar Charts with Scales",
-        level: 0
-      }, {
-        anchor: "section-5",
-        label: "5. Line Charts and Paths",
-        level: 0
-      }, {
-        anchor: "section-6",
-        label: "6. Anscombe's Quartet",
-        level: 0
-      }, {
-        anchor: "section-7",
-        label: "7. Next Steps",
-        level: 0
-      }],
+      items: [tocAnchor("section-1")("1. Three Little Circles")(0), tocRoute(new Explore("TLCSimple"))("\u2192 How-to guide")(1), tocAnchor("section-2")("2. General Update Pattern")(0), tocRoute(new Explore("GUP"))("\u2192 How-to guide")(1), tocAnchor("section-3")("3. Data-Driven Positioning")(0), tocRoute(new Explore("TLCParabola"))("\u2192 How-to guide")(1), tocAnchor("section-4")("4. Bar Charts with Scales")(0), tocRoute(new Explore("BarChartDraw"))("\u2192 How-to guide")(1), tocAnchor("section-5")("5. Line Charts and Paths")(0), tocRoute(new Explore("LineChartDraw"))("\u2192 How-to guide")(1), tocAnchor("section-6")("6. Anscombe's Quartet")(0), tocRoute(new Explore("ScatterPlotQuartet"))("\u2192 How-to guide")(1), tocAnchor("section-7")("7. Next Steps")(0)],
       image: new Just("images/understanding-bookmark-trees.jpeg")
     });
   })();
@@ -35012,51 +34684,19 @@
           return liftAff36(killFiber(error("Cancelling GUP animation"))(maybeFiber.value0));
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Understanding.Tutorial (line 350, column 5 - line 352, column 83): " + [maybeFiber.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Understanding.Tutorial (line 341, column 5 - line 343, column 83): " + [maybeFiber.constructor.name]);
       });
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Understanding.Tutorial (line 307, column 16 - line 352, column 83): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Understanding.Tutorial (line 298, column 16 - line 343, column 83): " + [v.constructor.name]);
   };
-  var _sectionNav14 = /* @__PURE__ */ (function() {
+  var _examplesNav8 = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render54 = function(state3) {
-    return div2([classes(["explanation-page"])])([lhsNav, slot_19(_sectionNav14)(unit)(component8)({
-      currentSection: UnderstandingSection.value,
-      currentRoute: Tutorial.value,
-      sectionPages: [{
-        route: About.value,
-        label: "About"
-      }, {
-        route: Tutorial.value,
-        label: "Tutorial"
-      }, {
-        route: SimpleCharts.value,
-        label: "Simple Charts"
-      }, {
-        route: ChordDiagram.value,
-        label: "Chord Diagram"
-      }, {
-        route: BubbleChart.value,
-        label: "Bubble Chart"
-      }, {
-        route: SankeyDiagram.value,
-        label: "Sankey Diagram"
-      }, {
-        route: Hierarchies.value,
-        label: "Hierarchies"
-      }, {
-        route: Interpreters.value,
-        label: "Interpreters"
-      }, {
-        route: CodeExplorer.value,
-        label: "Code Explorer"
-      }],
-      moduleCategories: Nothing.value
-    }), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Tutorial: Building Visualizations with PureScript D3")]), p_([text5("We'll show just the very simplest examples of putting elements in the DOM, in this case into an SVG, using the PS<$>D3 grammar.")]), p_([text5("In the How-to manual we'll explain in detail what each of these lines means, but if you're already familiar with D3.js the shape of the code should look very familiar.")])]), section([classes(["tutorial-section"]), id2("section-1")])([h2([classes(["tutorial-section-title"])])([text5("1. Three Little Circles")]), p_([text5("Simplest possible example, just to show syntax.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["three-circles-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCSimple.purs")(state3.threeCirclesSnippet))("TLCSimple")]), section([classes(["tutorial-section"]), id2("section-2")])([h2([classes(["tutorial-section-title"])])([text5("2. The General Update Pattern")]), p_([text5("This deceptively simple example shows off an aspect of screen-based data visualization that has no analogue in paper visualizations: the ability to specify how updates to the data should be represented.")]), p_([text5("In this example, some letters of the alphabet are presented and then constantly updated. When a letter enters at first, it falls in from the top and it is green. If it's still present in the next set of letters it stays on the screen, but it turns gray and moves to an alphabetically correct new position. And if it's not present in the new data, it turns red and falls out before disappearing.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["gup-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: GUP.purs")(state3.gupSnippet))("GUP")]), section([classes(["tutorial-section"]), id2("section-3")])([h2([classes(["tutorial-section-title"])])([text5("3. Data-Driven Positioning")]), p_([text5("This extends the super-simple model in the direction one would go for a more real-world example. In this example, the data is passed in and must match the type specified in the Model. Because the data loses its type information when joined to the DOM elements, we use the datum_ record to provide typed accessors for extracting values.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["parabola-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCParabola.purs")(state3.parabolaSnippet))("TLCParabola")]), section([classes(["tutorial-section"]), id2("section-4")])([h2([classes(["tutorial-section-title"])])([text5("4. Bar Charts with Scales")]), p_([text5("Bar charts are ideal for comparing discrete categories or showing changes across time periods. They use rectangular bars with heights or lengths proportional to the values they represent.")]), p_([text5("This example shows monthly sales data using a vertical bar chart. Each bar represents a month, and the height indicates the sales value. The implementation uses D3 scales to map data values to pixel coordinates.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["barchart-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: BarChartDraw.purs")(state3.barChartSnippet))("BarChartDraw")]), section([classes(["tutorial-section"]), id2("section-5")])([h2([classes(["tutorial-section-title"])])([text5("5. Line Charts and Paths")]), p_([text5("Line charts are one of the most fundamental visualizations for showing trends over time or continuous data. They excel at displaying patterns, trends, and changes in data series.")]), p_([text5("This example demonstrates a simple line chart showing a sine wave pattern. The implementation uses D3's scale functions to map data values to pixel coordinates, and a line generator to create the SVG path.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["linechart-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: LineChartDraw.purs")(state3.lineChartSnippet))("LineChartDraw")]), section([classes(["tutorial-section"]), id2("section-6")])([h2([classes(["tutorial-section-title"])])([text5("6. Anscombe's Quartet")]), p_([text5("This example demonstrates Anscombe's Quartet, a famous dataset created by statistician Francis Anscombe in 1973. All four datasets have nearly identical statistical properties (same mean, variance, correlation, and linear regression line), yet when visualized they reveal completely different patterns.")]), p_([text5("The quartet powerfully illustrates why data visualization is essential. Summary statistics alone can be misleading - you need to look at the data to understand its true structure. This implementation uses a 'small multiples' layout, displaying the four related charts side-by-side for easy comparison.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: ScatterPlotQuartet.purs")(state3.quartetSnippet))("ScatterPlotQuartet")]), section([classes(["tutorial-section", "tutorial-conclusion"]), id2("section-7")])([h2([classes(["tutorial-section-title"])])([text5("Next Steps")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien.")]), aside([classes(["tutorial-margin-note"])])([p([classes(["tutorial-margin-note__label"])])([text5("Learn More")]), a([href4("#" + routeToPath(Hierarchies.value)), classes(["tutorial-margin-note__link"])])([text5("Hierarchies \u2192")])]), ul_([li_([text5("Explore hierarchical data visualizations")]), li_([text5("Learn about the Finally Tagless pattern with interpreters")]), li_([text5("Dive into the Code Explorer for complex applications")])]), aside([classes(["tutorial-margin-note"])])([a([href4("#" + routeToPath(Interpreters.value)), classes(["tutorial-margin-note__link"])])([text5("Interpreters \u2192")]), a([href4("#" + routeToPath(CodeExplorer.value)), classes(["tutorial-margin-note__link"])])([text5("Code Explorer \u2192")])])])]);
+  var render55 = function(state3) {
+    return div2([classes(["explanation-page"])])([lhsNav, slot_19(_examplesNav8)(unit)(component44)(Tutorial.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Tutorial: Building Visualizations with PureScript D3")]), p_([text5("We'll show just the very simplest examples of putting elements in the DOM, in this case into an SVG, using the PS<$>D3 grammar.")]), p_([text5("In the How-to manual we'll explain in detail what each of these lines means, but if you're already familiar with D3.js the shape of the code should look very familiar.")])]), section([classes(["tutorial-section"]), id2("section-1")])([h2([classes(["tutorial-section-title"])])([text5("1. Three Little Circles")]), p_([text5("Simplest possible example, just to show syntax.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["three-circles-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCSimple.purs")(state3.threeCirclesSnippet))("TLCSimple")]), section([classes(["tutorial-section"]), id2("section-2")])([h2([classes(["tutorial-section-title"])])([text5("2. The General Update Pattern")]), p_([text5("This deceptively simple example shows off an aspect of screen-based data visualization that has no analogue in paper visualizations: the ability to specify how updates to the data should be represented.")]), p_([text5("In this example, some letters of the alphabet are presented and then constantly updated. When a letter enters at first, it falls in from the top and it is green. If it's still present in the next set of letters it stays on the screen, but it turns gray and moves to an alphabetically correct new position. And if it's not present in the new data, it turns red and falls out before disappearing.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["gup-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: GUP.purs")(state3.gupSnippet))("GUP")]), section([classes(["tutorial-section"]), id2("section-3")])([h2([classes(["tutorial-section-title"])])([text5("3. Data-Driven Positioning")]), p_([text5("This extends the super-simple model in the direction one would go for a more real-world example. In this example, the data is passed in and must match the type specified in the Model. Because the data loses its type information when joined to the DOM elements, we use the datum_ record to provide typed accessors for extracting values.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["parabola-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCParabola.purs")(state3.parabolaSnippet))("TLCParabola")]), section([classes(["tutorial-section"]), id2("section-4")])([h2([classes(["tutorial-section-title"])])([text5("4. Bar Charts with Scales")]), p_([text5("Bar charts are ideal for comparing discrete categories or showing changes across time periods. They use rectangular bars with heights or lengths proportional to the values they represent.")]), p_([text5("This example shows monthly sales data using a vertical bar chart. Each bar represents a month, and the height indicates the sales value. The implementation uses D3 scales to map data values to pixel coordinates.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["barchart-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: BarChartDraw.purs")(state3.barChartSnippet))("BarChartDraw")]), section([classes(["tutorial-section"]), id2("section-5")])([h2([classes(["tutorial-section-title"])])([text5("5. Line Charts and Paths")]), p_([text5("Line charts are one of the most fundamental visualizations for showing trends over time or continuous data. They excel at displaying patterns, trends, and changes in data series.")]), p_([text5("This example demonstrates a simple line chart showing a sine wave pattern. The implementation uses D3's scale functions to map data values to pixel coordinates, and a line generator to create the SVG path.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["linechart-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: LineChartDraw.purs")(state3.lineChartSnippet))("LineChartDraw")]), section([classes(["tutorial-section"]), id2("section-6")])([h2([classes(["tutorial-section-title"])])([text5("6. Anscombe's Quartet")]), p_([text5("This example demonstrates Anscombe's Quartet, a famous dataset created by statistician Francis Anscombe in 1973. All four datasets have nearly identical statistical properties (same mean, variance, correlation, and linear regression line), yet when visualized they reveal completely different patterns.")]), p_([text5("The quartet powerfully illustrates why data visualization is essential. Summary statistics alone can be misleading - you need to look at the data to understand its true structure. This implementation uses a 'small multiples' layout, displaying the four related charts side-by-side for easy comparison.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: ScatterPlotQuartet.purs")(state3.quartetSnippet))("ScatterPlotQuartet")]), section([classes(["tutorial-section", "tutorial-conclusion"]), id2("section-7")])([h2([classes(["tutorial-section-title"])])([text5("Next Steps")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien.")]), aside([classes(["tutorial-margin-note"])])([p([classes(["tutorial-margin-note__label"])])([text5("Learn More")]), a([href4("#" + routeToPath(Hierarchies.value)), classes(["tutorial-margin-note__link"])])([text5("Hierarchies \u2192")])]), ul_([li_([text5("Explore hierarchical data visualizations")]), li_([text5("Learn about the Finally Tagless pattern with interpreters")]), li_([text5("Dive into the Code Explorer for complex applications")])]), aside([classes(["tutorial-margin-note"])])([a([href4("#" + routeToPath(Interpreters.value)), classes(["tutorial-margin-note__link"])])([text5("Interpreters \u2192")]), a([href4("#" + routeToPath(CodeExplorer.value)), classes(["tutorial-margin-note__link"])])([text5("Code Explorer \u2192")])])])]);
   };
-  var component53 = /* @__PURE__ */ (function() {
+  var component54 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return {
@@ -35069,7 +34709,7 @@
           quartetSnippet: Nothing.value
         };
       },
-      render: render54,
+      render: render55,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -36052,7 +35692,7 @@
       throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 86, column 3 - line 100, column 14): " + [state3.hoveredNation.constructor.name]);
     };
   };
-  var render55 = function(state3) {
+  var render56 = function(state3) {
     return div2([classes(["wealth-health-page"])])([header([classes(["wealth-health-header"])])([h1_([text5("The Wealth & Health of Nations")]), p_([text5("An animated exploration of income, life expectancy, and population across 180 nations from 1800 to 2009")])]), div2([classes(["wealth-health-content"])])([aside([classes(["wealth-health-sidebar"])])([renderControlPanel(state3), renderLegend]), main([classes(["wealth-health-visualization"])])([(function() {
       if (state3.model instanceof Nothing) {
         return div2([classes(["wealth-health-loading"])])([text5("Loading data...")]);
@@ -36065,12 +35705,12 @@
       throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 65, column 15 - line 78, column 22): " + [state3.model.constructor.name]);
     })()])])]);
   };
-  var component54 = function(dictMonadAff) {
+  var component55 = function(dictMonadAff) {
     var handleAction1 = handleAction49(dictMonadAff)(dictMonadAff.MonadEffect0());
     return function(dictMonadEffect) {
       return mkComponent({
         initialState: initialState2,
-        render: render55,
+        render: render56,
         "eval": mkEval({
           handleQuery: defaultEval.handleQuery,
           receive: defaultEval.receive,
@@ -36091,16 +35731,16 @@
   var _wealthHealth = /* @__PURE__ */ (function() {
     return $$Proxy.value;
   })();
-  var render56 = function(dictMonadAff) {
-    var component110 = component54(dictMonadAff)(dictMonadAff.MonadEffect0());
+  var render57 = function(dictMonadAff) {
+    var component110 = component55(dictMonadAff)(dictMonadAff.MonadEffect0());
     return function(dictMonadEffect) {
       return function(v) {
         return div2([classes(["wealth-health-wrapper"])])([slot_20(_wealthHealth)(unit)(component110)(unit)]);
       };
     };
   };
-  var component55 = function(dictMonadAff) {
-    var render1 = render56(dictMonadAff)(dictMonadAff.MonadEffect0());
+  var component56 = function(dictMonadAff) {
+    var render1 = render57(dictMonadAff)(dictMonadAff.MonadEffect0());
     return function(dictMonadEffect) {
       return mkComponent({
         initialState: function(v) {
@@ -36355,7 +35995,7 @@
 
   // output/PSD3.Wizard.FileDownload/index.js
   var append21 = /* @__PURE__ */ append(semigroupArray);
-  var eq11 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
+  var eq16 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
   var append110 = /* @__PURE__ */ append(semigroupString);
   var map61 = /* @__PURE__ */ map(functorArray);
   var bind67 = /* @__PURE__ */ bind(bindAff);
@@ -36376,7 +36016,7 @@
     var intercalateArray = function(sep) {
       return function(arr) {
         return maybe("")(function(v) {
-          var $16 = eq11(v.tail)([]);
+          var $16 = eq16(v.tail)([]);
           if ($16) {
             return v.head;
           }
@@ -36599,7 +36239,7 @@
 
   // output/PSD3.Wizard.Wizard/index.js
   var map64 = /* @__PURE__ */ map(functorArray);
-  var eq16 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
+  var eq17 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
   var show41 = /* @__PURE__ */ show(showDifficulty);
   var eq24 = /* @__PURE__ */ eq(eqDifficulty);
   var eq33 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqDifficulty));
@@ -36757,7 +36397,7 @@
     var intercalate9 = function(sep) {
       return function(arr) {
         return maybe("")(function(v) {
-          var $75 = eq16(v.tail)([]);
+          var $75 = eq17(v.tail)([]);
           if ($75) {
             return v.head;
           }
@@ -37033,7 +36673,7 @@
     };
     return div2([classes(["wizard__progress"])])([renderStep(ChooseDataset.value)("1")("Choose Dataset"), renderStep(NameModule.value)("2")("Name Module"), renderStep(ReviewFiles.value)("3")("Review Files"), renderStep(Download.value)("4")("Download")]);
   };
-  var render57 = function(dictMonadAff) {
+  var render58 = function(dictMonadAff) {
     var renderStepContent1 = renderStepContent(dictMonadAff);
     return function(state3) {
       return div2([classes(["wizard"])])([renderHeader(state3), renderProgressBar(state3), renderStepContent1(state3), renderNavigation(state3)]);
@@ -37312,10 +36952,10 @@
       throw new Error("Failed pattern match at PSD3.Wizard.Wizard (line 371, column 16 - line 431, column 50): " + [v.constructor.name]);
     };
   };
-  var component56 = /* @__PURE__ */ (function() {
+  var component57 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: $$const(initialState3),
-      render: render57(monadAffAff),
+      render: render58(monadAffAff),
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -37556,7 +37196,7 @@
       return "wealthHealth";
     }
   })(ordUnit);
-  var component210 = /* @__PURE__ */ component55(monadAffAff)(monadEffectAff);
+  var component210 = /* @__PURE__ */ component56(monadAffAff)(monadEffectAff);
   var slot_192 = /* @__PURE__ */ slot_21({
     reflectSymbol: function() {
       return "lesMiserables";
@@ -37726,7 +37366,7 @@
     }
     ;
     if (v instanceof Wizard) {
-      return slot_32(_wizard)(unit)(component56)(unit);
+      return slot_32(_wizard)(unit)(component57)(unit);
     }
     ;
     if (v instanceof HowtoIndex) {
@@ -37746,11 +37386,11 @@
     }
     ;
     if (v instanceof UnderstandingConcepts) {
-      return slot_72(_concepts)(unit)(component46)(unit);
+      return slot_72(_concepts)(unit)(component47)(unit);
     }
     ;
     if (v instanceof UnderstandingPatterns) {
-      return slot_82(_patterns)(unit)(component50)(unit);
+      return slot_82(_patterns)(unit)(component51)(unit);
     }
     ;
     if (v instanceof UnderstandingPhilosophy) {
@@ -37758,31 +37398,31 @@
     }
     ;
     if (v instanceof Tutorial) {
-      return slot_92(_tutorial)(unit)(component53)(unit);
+      return slot_92(_tutorial)(unit)(component54)(unit);
     }
     ;
     if (v instanceof SimpleCharts) {
-      return slot_102(_simpleCharts)(unit)(component52)(unit);
+      return slot_102(_simpleCharts)(unit)(component53)(unit);
     }
     ;
     if (v instanceof ChordDiagram) {
-      return slot_112(_chordDiagram)(unit)(component45)(unit);
+      return slot_112(_chordDiagram)(unit)(component46)(unit);
     }
     ;
     if (v instanceof BubbleChart) {
-      return slot_122(_bubbleChart)(unit)(component44)(unit);
+      return slot_122(_bubbleChart)(unit)(component45)(unit);
     }
     ;
     if (v instanceof SankeyDiagram) {
-      return slot_132(_sankeyDiagram)(unit)(component51)(unit);
+      return slot_132(_sankeyDiagram)(unit)(component52)(unit);
     }
     ;
     if (v instanceof Hierarchies) {
-      return slot_142(_hierarchies)(unit)(component47)(unit);
+      return slot_142(_hierarchies)(unit)(component48)(unit);
     }
     ;
     if (v instanceof Interpreters) {
-      return slot_152(_interpreters)(unit)(component48)(unit);
+      return slot_152(_interpreters)(unit)(component49)(unit);
     }
     ;
     if (v instanceof CodeExplorer) {
@@ -37798,7 +37438,7 @@
     }
     ;
     if (v instanceof LesMiserables) {
-      return slot_192(_lesMiserables)(unit)(component49)(unit);
+      return slot_192(_lesMiserables)(unit)(component50)(unit);
     }
     ;
     if (v instanceof CodeAtlas) {
@@ -37811,17 +37451,17 @@
     ;
     throw new Error("Failed pattern match at PSD3.Main (line 122, column 20 - line 197, column 8): " + [v.constructor.name]);
   };
-  var render58 = function(state3) {
+  var render59 = function(state3) {
     return div2([classes(["app"])])([main([classes(["app__main"])])([renderPage(state3.currentRoute)])]);
   };
-  var component57 = /* @__PURE__ */ (function() {
+  var component58 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return {
           currentRoute: Home.value
         };
       },
-      render: render58,
+      render: render59,
       "eval": mkEval({
         handleQuery: defaultEval.handleQuery,
         receive: defaultEval.receive,
@@ -37832,7 +37472,7 @@
     });
   })();
   var main2 = /* @__PURE__ */ runHalogenAff(/* @__PURE__ */ bind(bindAff)(awaitBody)(function(body2) {
-    return runUI2(component57)(unit)(body2);
+    return runUI2(component58)(unit)(body2);
   }));
 
   // <stdin>

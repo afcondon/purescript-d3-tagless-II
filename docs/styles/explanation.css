@@ -262,6 +262,16 @@
   color: var(--color-gray-medium);
 }
 
+.toc-nav__item--route-link {
+  color: var(--color-teal);
+  font-style: italic;
+}
+
+.toc-nav__item--route-link:hover {
+  border-left-color: var(--color-teal);
+  color: var(--color-teal);
+}
+
 /* Control Panel - Alternative to TOC for interactive pages */
 /* Unlike TOC which has bookmark on the side, control panel is just the main box */
 .control-panel.toc-panel {

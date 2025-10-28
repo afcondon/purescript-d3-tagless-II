@@ -8,7 +8,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SectionNav as SectionNav
-import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Understanding.UnderstandingTabs as UnderstandingTabs
 import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
@@ -43,10 +43,10 @@ render _ =
       renderTOC
         { title: "Page Contents"
         , items:
-            [ { anchor: "heading-finally-tagless", label: "Finally Tagless", level: 0 }
-            , { anchor: "heading-selectionm", label: "The SelectionM Monad", level: 0 }
-            , { anchor: "heading-capabilities", label: "Capabilities & Interpreters", level: 0 }
-            , { anchor: "heading-type-safe", label: "Type-Safe Attribute System", level: 0 }
+            [ tocAnchor "heading-finally-tagless" "Finally Tagless" 0
+            , tocAnchor "heading-selectionm" "The SelectionM Monad" 0
+            , tocAnchor "heading-capabilities" "Capabilities & Interpreters" 0
+            , tocAnchor "heading-type-safe" "Type-Safe Attribute System" 0
             ]
         , image: Just "images/understanding-bookmark-trees.jpeg"
         }

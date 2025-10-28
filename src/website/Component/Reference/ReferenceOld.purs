@@ -8,7 +8,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SectionNav as SectionNav
-import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
 
@@ -42,14 +42,14 @@ render _ =
       renderTOC
         { title: "Page Contents"
         , items:
-            [ { anchor: "core", label: "Core Concepts", level: 0 }
-            , { anchor: "selection", label: "Selection", level: 0 }
-            , { anchor: "attach", label: "attach", level: 1 }
-            , { anchor: "appendTo", label: "appendTo", level: 1 }
-            , { anchor: "selectAll", label: "selectAll", level: 1 }
-            , { anchor: "data", label: "Data Binding", level: 0 }
-            , { anchor: "scales", label: "Scales", level: 0 }
-            , { anchor: "axes", label: "Axes", level: 0 }
+            [ tocAnchor "core" "Core Concepts" 0
+            , tocAnchor "selection" "Selection" 0
+            , tocAnchor "attach" "attach" 1
+            , tocAnchor "appendTo" "appendTo" 1
+            , tocAnchor "selectAll" "selectAll" 1
+            , tocAnchor "data" "Data Binding" 0
+            , tocAnchor "scales" "Scales" 0
+            , tocAnchor "axes" "Axes" 0
             ]
         , image: Just "images/reference-bookmark-deepseavent.jpeg"
         }

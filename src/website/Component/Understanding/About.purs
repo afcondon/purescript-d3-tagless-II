@@ -11,7 +11,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SectionNav as SectionNav
-import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Understanding.UnderstandingTabs as UnderstandingTabs
 import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
@@ -50,18 +50,18 @@ render _ =
       renderTOC
         { title: "Page Contents"
         , items:
-            [ { anchor: "heading-0", label: "PS<$>D3", level: 0 }
-            , { anchor: "heading-2", label: "What is This Project?", level: 1 }
-            , { anchor: "heading-3", label: "Motivation", level: 1 }
-            , { anchor: "heading-4", label: "The Data Visualization Process", level: 1 }
-            , { anchor: "anscombe", label: "Why Visualize? Anscombe's Quartet", level: 2 }
-            , { anchor: "heading-5", label: "Design philosophy of D3*", level: 2 }
-            , { anchor: "heading-6", label: "Design philosophy of PS<$>D3", level: 2 }
-            , { anchor: "heading-7", label: "Project Goals (and non-Goals)", level: 1 }
-            , { anchor: "heading-9", label: "Goals: details", level: 2 }
-            , { anchor: "heading-13", label: "Non-goals: details", level: 2 }
-            , { anchor: "heading-17", label: "What's a DSL? and what's an eDSL?", level: 1 }
-            , { anchor: "heading-20", label: "The grammar of D3...", level: 1 }
+            [ tocAnchor "heading-0" "PS<$>D3" 0
+            , tocAnchor "heading-2" "What is This Project?" 1
+            , tocAnchor "heading-3" "Motivation" 1
+            , tocAnchor "heading-4" "The Data Visualization Process" 1
+            , tocAnchor "anscombe" "Why Visualize? Anscombe's Quartet" 2
+            , tocAnchor "heading-5" "Design philosophy of D3*" 2
+            , tocAnchor "heading-6" "Design philosophy of PS<$>D3" 2
+            , tocAnchor "heading-7" "Project Goals (and non-Goals)" 1
+            , tocAnchor "heading-9" "Goals: details" 2
+            , tocAnchor "heading-13" "Non-goals: details" 2
+            , tocAnchor "heading-17" "What's a DSL? and what's an eDSL?" 1
+            , tocAnchor "heading-20" "The grammar of D3..." 1
             ]
         , image: Just "images/understanding-bookmark-trees.jpeg"
         }

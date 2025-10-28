@@ -42,26 +42,20 @@ render currentRoute =
         -- Simplest Examples
         , sectionTitle "Simplest Examples"
         , navLink Tutorial "Tutorial" currentRoute
-        , withHowtoLink (Explore "TLCSimple")
 
         -- Typical Charts
         , sectionTitle "Typical Charts"
         , navLink SimpleCharts "Simple Charts" currentRoute
-        , withHowtoLink (Explore "BarChartDraw")
 
         -- Data Visualizations
         , sectionTitle "Data Visualizations"
         , navLink BubbleChart "Bubble Chart" currentRoute
-        , withHowtoLink (Explore "BubbleChartDraw")
         , navLink ChordDiagram "Chord Diagram" currentRoute
-        , withHowtoLink (Explore "ChordDiagramDraw")
         , navLink SankeyDiagram "Sankey Diagram" currentRoute
-        , withHowtoLink (Explore "SankeyDraw")
 
         -- Hierarchies
         , sectionTitle "Hierarchies"
         , navLink Hierarchies "Hierarchies" currentRoute
-        , withHowtoLink (Explore "TreeDraw")
 
         -- Applications
         , sectionTitle "Applications"
@@ -72,7 +66,6 @@ render currentRoute =
         -- Interpreters
         , sectionTitle "Alternative Interpreters"
         , navLink Interpreters "Interpreters" currentRoute
-        , withHowtoLink (Explore "MetaTreeDraw")
 
         , HH.hr [ HP.classes [ HH.ClassName "explanation-page__nav-divider" ] ]
         , HH.a
@@ -108,12 +101,3 @@ navLink route label currentRoute =
         , HP.classes [ HH.ClassName "explanation-page__nav-link" ]
         ]
         [ HH.text (label <> " →") ]
-
--- | Render a small "How-to" link that goes to the code breakdown
-withHowtoLink :: forall w i. Route -> HH.HTML w i
-withHowtoLink howtoRoute =
-  HH.a
-    [ HP.href $ "#" <> routeToPath howtoRoute
-    , HP.classes [ HH.ClassName "explanation-page__nav-link", HH.ClassName "explanation-page__nav-link--howto" ]
-    ]
-    [ HH.text "  ↳ How-to guide" ]

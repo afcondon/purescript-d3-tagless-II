@@ -8,7 +8,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SectionNav as SectionNav
-import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Understanding.UnderstandingTabs as UnderstandingTabs
 import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
@@ -43,9 +43,9 @@ render _ =
       renderTOC
         { title: "Page Contents"
         , items:
-            [ { anchor: "heading-datum-pattern", label: "The datum_ / Datum_ Pattern", level: 0 }
-            , { anchor: "heading-grammar", label: "The Grammar of D3 in SelectionM", level: 0 }
-            , { anchor: "heading-dom-to-viz", label: "From DOM to Visualization Elements", level: 0 }
+            [ tocAnchor "heading-datum-pattern" "The datum_ / Datum_ Pattern" 0
+            , tocAnchor "heading-grammar" "The Grammar of D3 in SelectionM" 0
+            , tocAnchor "heading-dom-to-viz" "From DOM to Visualization Elements" 0
             ]
         , image: Just "images/understanding-bookmark-trees.jpeg"
         }

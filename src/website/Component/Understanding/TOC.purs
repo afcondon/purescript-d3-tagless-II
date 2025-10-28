@@ -5,12 +5,19 @@ import Prelude
 import Data.Maybe (Maybe(..), fromMaybe)
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.Website.Types (Route)
+import PSD3.RoutingDSL (routeToPath)
+
+-- | Link target - either an anchor on the same page or a route to another page
+data TOCLinkTarget
+  = AnchorLink String  -- #anchor on the current page
+  | RouteLink Route    -- Link to another route
 
 -- | A single item in the table of contents
 type TOCItem =
-  { anchor :: String  -- The #id to link to (without the #)
-  , label :: String   -- The display text for the link
-  , level :: Int      -- Indentation level (0 = top level, 1 = level-2, 2 = level-3, etc.)
+  { target :: TOCLinkTarget  -- Where the link goes
+  , label :: String          -- The display text for the link
+  , level :: Int             -- Indentation level (0 = top level, 1 = level-2, 2 = level-3, etc.)
   }
 
 -- | Configuration for the TOC panel
@@ -61,10 +68,32 @@ renderTOCItem item =
     levelClass = case item.level of
       0 -> []
       n -> [ HH.ClassName $ "toc-nav__item--level-" <> show (n + 1) ]
-    classes = [ baseClass ] <> levelClass
+    routeLinkClass = case item.target of
+      RouteLink _ -> [ HH.ClassName "toc-nav__item--route-link" ]
+      _ -> []
+    classes = [ baseClass ] <> levelClass <> routeLinkClass
+    href = case item.target of
+      AnchorLink anchor -> "#" <> anchor
+      RouteLink route -> "#" <> routeToPath route
   in
     HH.a
-      [ HP.href $ "#" <> item.anchor
+      [ HP.href href
       , HP.classes classes
       ]
       [ HH.text item.label ]
+
+-- | Helper: Create a TOC item that links to an anchor on the current page
+tocAnchor :: String -> String -> Int -> TOCItem
+tocAnchor anchor label level =
+  { target: AnchorLink anchor
+  , label
+  , level
+  }
+
+-- | Helper: Create a TOC item that links to another route (e.g., How-to guide)
+tocRoute :: Route -> String -> Int -> TOCItem
+tocRoute route label level =
+  { target: RouteLink route
+  , label
+  , level
+  }

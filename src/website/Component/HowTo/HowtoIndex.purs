@@ -10,7 +10,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SectionNav as SectionNav
 import PSD3.RoutingDSL (routeToPath)
-import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
 
@@ -44,10 +44,10 @@ render _ =
       renderTOC
         { title: "Page Contents"
         , items:
-            [ { anchor: "basic", label: "Basic Visualizations", level: 0 }
-            , { anchor: "data", label: "Data & Scales", level: 0 }
-            , { anchor: "interaction", label: "Interactivity", level: 0 }
-            , { anchor: "advanced", label: "Advanced Techniques", level: 0 }
+            [ tocAnchor "basic" "Basic Visualizations" 0
+            , tocAnchor "data" "Data & Scales" 0
+            , tocAnchor "interaction" "Interactivity" 0
+            , tocAnchor "advanced" "Advanced Techniques" 0
             ]
         , image: Just "images/howto-bookmark-volcano.jpeg"
         }

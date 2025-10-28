@@ -27,7 +27,7 @@ import Halogen.HTML.Properties as HP
 import PSD3.Shared.CodeExample (renderCodeExampleSimple)
 import PSD3.Shared.ExamplesNav as ExamplesNav
 import PSD3.RoutingDSL (routeToPath)
-import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Understanding.TOC (renderTOC, tocAnchor, tocRoute)
 import PSD3.Website.Types (Route(..))
 import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))
@@ -75,13 +75,19 @@ lhsNav :: H.ComponentHTML Action Slots Aff
 lhsNav = renderTOC
   { title: "Page Contents"
   , items:
-      [ { anchor: "section-1", label: "1. Three Little Circles", level: 0 }
-      , { anchor: "section-2", label: "2. General Update Pattern", level: 0 }
-      , { anchor: "section-3", label: "3. Data-Driven Positioning", level: 0 }
-      , { anchor: "section-4", label: "4. Bar Charts with Scales", level: 0 }
-      , { anchor: "section-5", label: "5. Line Charts and Paths", level: 0 }
-      , { anchor: "section-6", label: "6. Anscombe's Quartet", level: 0 }
-      , { anchor: "section-7", label: "7. Next Steps", level: 0 }
+      [ tocAnchor "section-1" "1. Three Little Circles" 0
+      , tocRoute (Explore "TLCSimple") "→ How-to guide" 1
+      , tocAnchor "section-2" "2. General Update Pattern" 0
+      , tocRoute (Explore "GUP") "→ How-to guide" 1
+      , tocAnchor "section-3" "3. Data-Driven Positioning" 0
+      , tocRoute (Explore "TLCParabola") "→ How-to guide" 1
+      , tocAnchor "section-4" "4. Bar Charts with Scales" 0
+      , tocRoute (Explore "BarChartDraw") "→ How-to guide" 1
+      , tocAnchor "section-5" "5. Line Charts and Paths" 0
+      , tocRoute (Explore "LineChartDraw") "→ How-to guide" 1
+      , tocAnchor "section-6" "6. Anscombe's Quartet" 0
+      , tocRoute (Explore "ScatterPlotQuartet") "→ How-to guide" 1
+      , tocAnchor "section-7" "7. Next Steps" 0
       ]
   , image: Just "images/understanding-bookmark-trees.jpeg"
   }

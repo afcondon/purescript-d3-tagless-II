@@ -13,7 +13,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.ExamplesNav as ExamplesNav
-import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Website.Types (Route(..))
 import Type.Proxy (Proxy(..))
 
@@ -55,9 +55,9 @@ render _ =
       renderTOC
         { title: "Page Contents"
         , items:
-            [ { anchor: "grouped-bar", label: "1. Grouped Bar Chart", level: 0 }
-            , { anchor: "multi-line", label: "2. Multi-Line Chart", level: 0 }
-            , { anchor: "radial-stacked", label: "3. Radial Stacked Bar Chart", level: 0 }
+            [ tocAnchor "grouped-bar" "1. Grouped Bar Chart" 0
+            , tocAnchor "multi-line" "2. Multi-Line Chart" 0
+            , tocAnchor "radial-stacked" "3. Radial Stacked Bar Chart" 0
             ]
         , image: Just "images/understanding-bookmark-trees.jpeg"
         }

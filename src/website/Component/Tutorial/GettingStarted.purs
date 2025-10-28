@@ -8,7 +8,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SectionNav as SectionNav
-import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
 
@@ -42,13 +42,13 @@ render _ =
       renderTOC
         { title: "Page Contents"
         , items:
-            [ { anchor: "installation", label: "Installation", level: 0 }
-            , { anchor: "prerequisites", label: "Prerequisites", level: 1 }
-            , { anchor: "setup", label: "Project Setup", level: 0 }
-            , { anchor: "wizard", label: "Using the Wizard", level: 0 }
-            , { anchor: "understanding", label: "Understanding the Code", level: 0 }
-            , { anchor: "datum-pattern", label: "The Datum_ Pattern", level: 1 }
-            , { anchor: "next-steps", label: "Next Steps", level: 0 }
+            [ tocAnchor "installation" "Installation" 0
+            , tocAnchor "prerequisites" "Prerequisites" 1
+            , tocAnchor "setup" "Project Setup" 0
+            , tocAnchor "wizard" "Using the Wizard" 0
+            , tocAnchor "understanding" "Understanding the Code" 0
+            , tocAnchor "datum-pattern" "The Datum_ Pattern" 1
+            , tocAnchor "next-steps" "Next Steps" 0
             ]
         , image: Just "images/tutorial-bookmark-balloons.jpeg"
         }

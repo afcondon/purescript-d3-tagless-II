@@ -12,7 +12,7 @@ import Web.HTML (window)
 import Web.HTML.History (back)
 import Web.HTML.Window (history)
 import PSD3.Shared.RHSNavigation as RHSNav
-import PSD3.Understanding.TOC (renderTOC)
+import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Website.Types (Route(..))
 import PSD3.Shared.Utilities (syntaxHighlightedCode)
 import Snippets (readSnippetFiles)
@@ -74,12 +74,12 @@ render state =
       renderTOC
         { title: "Breakdown"
         , items:
-            [ { anchor: "overview", label: "Overview", level: 0 }
-            , { anchor: "code", label: "The Code", level: 0 }
-            , { anchor: "line-by-line", label: "Line by Line", level: 0 }
-            , { anchor: "concepts", label: "Key Concepts", level: 0 }
-            , { anchor: "reference", label: "API Reference", level: 0 }
-            , { anchor: "related", label: "Related Examples", level: 0 }
+            [ tocAnchor "overview" "Overview" 0
+            , tocAnchor "code" "The Code" 0
+            , tocAnchor "line-by-line" "Line by Line" 0
+            , tocAnchor "concepts" "Key Concepts" 0
+            , tocAnchor "reference" "API Reference" 0
+            , tocAnchor "related" "Related Examples" 0
             ]
         , image: Just "images/howto-bookmark-volcano.jpeg"
         }
