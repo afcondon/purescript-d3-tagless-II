@@ -15,6 +15,7 @@ import PSD3.CodeAtlas.State (State, initialState)
 import PSD3.CodeAtlas.Tabs.Declarations as DeclarationsTab
 import PSD3.CodeAtlas.Tabs.ModuleGraph as ModuleGraphTab
 import PSD3.CodeAtlas.Tabs.InteractiveGraph as InteractiveGraphTab
+import PSD3.CodeAtlas.Tabs.ExpandableBubbles as ExpandableBubblesTab
 import PSD3.CodeAtlas.Types (AtlasTab(..))
 import PSD3.Interpreter.D3 (runWithD3_Simulation)
 
@@ -49,6 +50,7 @@ render state =
         [ renderTab DeclarationsTab state.activeTab
         , renderTab VisualizationTab state.activeTab
         , renderTab InteractiveGraphTab state.activeTab
+        , renderTab ExpandableBubblesTab state.activeTab
         ]
 
     -- Content
@@ -85,6 +87,14 @@ render state =
                 InteractiveGraphTab ->
                   HH.div
                     [ HP.classes [ HH.ClassName "interactive-graph-container" ] ]
+                    [ HH.div
+                        [ HP.classes [ HH.ClassName "svg-container" ] ]
+                        []
+                    ]
+
+                ExpandableBubblesTab ->
+                  HH.div
+                    [ HP.classes [ HH.ClassName "expandable-bubbles-container" ] ]
                     [ HH.div
                         [ HP.classes [ HH.ClassName "svg-container" ] ]
                         []
@@ -157,6 +167,14 @@ handleAction = case _ of
             runWithD3_Simulation do
               InteractiveGraphTab.drawInteractiveGraph graphData "div.svg-container"
           Nothing -> pure unit
+
+      ExpandableBubblesTab -> do
+        state <- H.get
+        case state.moduleGraphData, state.declarationsData, state.functionCallsData of
+          Just graphData, Just declsData, Just callsData ->
+            runWithD3_Simulation do
+              ExpandableBubblesTab.drawExpandableBubbles graphData declsData callsData "div.svg-container"
+          _, _, _ -> pure unit
 
       _ -> pure unit
 

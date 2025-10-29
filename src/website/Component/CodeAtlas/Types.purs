@@ -7,6 +7,7 @@ data AtlasTab
   = DeclarationsTab      -- Table browser with search/filters
   | VisualizationTab     -- Static graph visualization
   | InteractiveGraphTab  -- Interactive graph with updates
+  | ExpandableBubblesTab -- Expandable circle packing in force layout
 
 derive instance eqAtlasTab :: Eq AtlasTab
 
@@ -14,6 +15,7 @@ instance showAtlasTab :: Show AtlasTab where
   show DeclarationsTab = "Declarations"
   show VisualizationTab = "Visualization"
   show InteractiveGraphTab = "Interactive"
+  show ExpandableBubblesTab = "Bubbles"
 
 -- | Source type for filtering
 data SourceType

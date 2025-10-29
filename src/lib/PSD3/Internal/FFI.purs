@@ -9,6 +9,7 @@ import PSD3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
 import PSD3.Internal.Types (D3Data_, D3Selection_, D3Simulation_, Datum_, Index_, PointXY, Selector, Transition, ZoomConfigDefault_, ZoomConfig_)
 import Data.Function.Uncurried (Fn2)
 import Data.Nullable (Nullable)
+import Effect (Effect)
 import Prelude (Unit, unit)
 
 -- | *********************************************************************************************************************
@@ -86,6 +87,11 @@ foreign import disableDrag_ :: D3Selection_ -> D3Selection_
 foreign import highlightConnectedNodes_ :: D3Selection_ -> Array String -> Unit
 foreign import clearHighlights_ :: D3Selection_ -> Unit
 foreign import unpinAllNodes_ :: D3Simulation_ -> Unit
+foreign import updateBubbleRadii_ :: D3Simulation_ -> (Boolean -> Int -> Number) -> Unit
+foreign import updateNodeExpansion_ :: forall declsData callsData. D3Simulation_ -> (Boolean -> Int -> Number) -> declsData -> callsData -> Datum_ -> Unit
+foreign import unsafeSetField_ :: forall a. String -> a -> Datum_ -> Effect Unit
+foreign import addModuleArrowMarker_ :: D3Selection_ -> Effect Unit
+foreign import drawInterModuleDeclarationLinks_ :: forall declsData callsData. D3Selection_ -> (Boolean -> Int -> Number) -> declsData -> callsData -> Effect Unit
 foreign import filterToConnectedNodes_ :: D3Simulation_ -> (Datum_ -> Index_) -> Array String -> Unit
 
 foreign import selectionOn_         :: forall selection callback. selection -> String -> callback -> selection  
