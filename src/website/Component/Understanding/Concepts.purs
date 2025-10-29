@@ -133,22 +133,7 @@ render _ =
                     [ HH.text """class (Monad m, SelectionM selection m) <= SimulationM2 selection m | m -> selection where
   start :: m Unit
   stop  :: m Unit
-  setConfigVariable    :: SimVariable -> m Unit
-  actualizeForces:: Set Label -> m Unit
-  setNodes :: forall d.   Array (D3_SimulationNode d) -> m (Array (D3_SimulationNode d))
-  setLinks :: forall d r id. (Eq id) => Array (D3Link id r) -> Array (D3_SimulationNode d) -> (Datum_ -> Index_ ) -> m (Array (D3LinkSwizzled (D3_SimulationNode d) r))
-  setNodesFromSelection :: selection -> m Unit
-  setLinksFromSelection :: selection -> (Datum_ -> Boolean) -> m Unit
-  mergeNewDataWithSim :: forall d r id. (Eq id) =>
-    selection -> -- nodes selection
-    (Datum_ -> Index_) -> -- nodes keyFn
-    selection -> -- links selection
-    (Datum_ -> Index_) -> -- links KeyFn
-    RawData d r id -> -- links and nodes raw data
-    m { links :: (Array (D3LinkSwizzled (D3_SimulationNode d) r)), nodes :: (Array (D3_SimulationNode d))}
-  simulationHandle :: m D3Simulation_
-  addTickFunction    :: Label -> Step selection -> m Unit
-  removeTickFunction :: Label                   -> m Unit"""
+  ...(see full definition in source)"""
                     ]
                 ]
             ]
