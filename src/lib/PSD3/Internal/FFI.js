@@ -120,6 +120,359 @@ export function unpinAllNodes_(simulation) {
   simulation.alpha(0.3).restart();
 }
 
+// Update bubble node radii based on expanded state and reheat simulation
+export function updateBubbleRadii_(simulation) {
+  return nodeRadiusFn => {
+    // Select all circles and update their radius
+    d3.selectAll('.bubble-graph .node-group circle.node-circle')
+      .attr('r', d => nodeRadiusFn(d.expanded)(d.loc))
+
+    // Reheat the simulation so collision forces update
+    simulation.alpha(0.3).restart()
+  }
+}
+
+// Color mapping for declaration kinds
+function declarationColor(kind) {
+  switch(kind) {
+    case 'value':         return '#2196F3'  // Blue - functions/values
+    case 'data':          return '#4CAF50'  // Green - data types
+    case 'typeClass':     return '#9C27B0'  // Purple - type classes
+    case 'typeSynonym':   return '#FF9800'  // Orange - type synonyms
+    case 'alias':         return '#FF9800'  // Orange - aliases
+    case 'externData':    return '#F44336'  // Red - foreign data
+    default:              return '#757575'  // Gray - unknown
+  }
+}
+
+// Update node expansion state - show/hide declaration circles
+export function updateNodeExpansion_(simulation) {
+  return nodeRadiusFn => declarationsData => functionCallsData => clickedNodeData => {
+    const moduleName = clickedNodeData.name
+    const isExpanded = clickedNodeData.expanded
+
+    // Find the node group for this module
+    const nodeGroup = d3.selectAll('.bubble-graph .node-group')
+      .filter(d => d.id === moduleName)
+
+    if (isExpanded) {
+      // Find declarations for this module
+      const moduleDecls = declarationsData.modules.find(m => m.name === moduleName)
+      if (!moduleDecls || !moduleDecls.declarations || moduleDecls.declarations.length === 0) {
+        console.log(`No declarations found for ${moduleName}`)
+        return
+      }
+
+      const declarations = moduleDecls.declarations
+      console.log(`Expanding ${moduleName} with ${declarations.length} declarations`)
+
+      // Create hierarchy for pack layout
+      const hierarchyData = {
+        name: moduleName,
+        children: declarations.map(d => ({
+          name: d.title,
+          kind: d.kind,
+          value: 1  // All declarations same size for now
+        }))
+      }
+
+      const root = d3.hierarchy(hierarchyData)
+        .sum(d => d.value)
+
+      // Compute pack layout (size based on expanded radius)
+      const expandedRadius = nodeRadiusFn(true)(clickedNodeData.loc)
+      const packLayout = d3.pack()
+        .size([expandedRadius * 2, expandedRadius * 2])
+        .padding(3)  // More padding for labels
+
+      packLayout(root)
+
+      // Get leaf nodes (the declarations)
+      const leaves = root.leaves()
+
+      // Create a map from declaration name to position for link drawing
+      const declPositions = new Map()
+      leaves.forEach(leaf => {
+        declPositions.set(leaf.data.name, {
+          x: leaf.x - expandedRadius,
+          y: leaf.y - expandedRadius
+        })
+      })
+
+      // Find intra-module function calls
+      const intraModuleLinks = []
+      if (functionCallsData && functionCallsData.functions) {
+        functionCallsData.functions.forEach(fn => {
+          const funcInfo = fn.value
+          if (funcInfo.module === moduleName) {
+            funcInfo.calls.forEach(call => {
+              // Only show links within the same module
+              if (call.targetModule === moduleName && !call.isCrossModule) {
+                const sourceName = funcInfo.name
+                const targetName = call.target
+
+                const sourcePos = declPositions.get(sourceName)
+                const targetPos = declPositions.get(targetName)
+
+                if (sourcePos && targetPos && sourceName !== targetName) {
+                  intraModuleLinks.push({
+                    source: sourceName,
+                    target: targetName,
+                    sourcePos,
+                    targetPos
+                  })
+                }
+              }
+            })
+          }
+        })
+      }
+
+      console.log(`Found ${intraModuleLinks.length} intra-module links for ${moduleName}`)
+
+      // Add dependency arrows before circles (so they're behind)
+      const linksGroup = nodeGroup.selectAll('g.decl-links')
+        .data([0])  // Single element to create the group once
+        .enter()
+        .append('g')
+        .attr('class', 'decl-links')
+        .lower()  // Put links behind circles
+
+      const arrows = nodeGroup.select('g.decl-links')
+        .selectAll('path.decl-link')
+        .data(intraModuleLinks, d => `${d.source}-${d.target}`)
+
+      arrows.enter()
+        .append('path')
+        .attr('class', 'decl-link')
+        .attr('d', d => {
+          // Create a curved path from source to target
+          const dx = d.targetPos.x - d.sourcePos.x
+          const dy = d.targetPos.y - d.sourcePos.y
+          const dr = Math.sqrt(dx * dx + dy * dy) * 0.7  // Curve factor
+          return `M${d.sourcePos.x},${d.sourcePos.y}A${dr},${dr} 0 0,1 ${d.targetPos.x},${d.targetPos.y}`
+        })
+        .attr('stroke', '#666')
+        .attr('stroke-width', 1)
+        .attr('stroke-opacity', 0.4)
+        .attr('fill', 'none')
+        .attr('marker-end', 'url(#arrowhead)')
+
+      // Add declaration circle groups (for circle + text)
+      const declGroups = nodeGroup.selectAll('g.decl-group')
+        .data(leaves, d => d.data.name)
+
+      const declGroupsEnter = declGroups.enter()
+        .append('g')
+        .attr('class', 'decl-group')
+        .attr('transform', d => `translate(${d.x - expandedRadius}, ${d.y - expandedRadius})`)
+
+      // Add circles
+      declGroupsEnter.append('circle')
+        .attr('class', 'decl-circle')
+        .attr('r', d => d.r)
+        .attr('fill', d => declarationColor(d.data.kind))
+        .attr('opacity', 0.8)
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 1)
+        .append('title')
+        .text(d => `${d.data.name} (${d.data.kind})`)
+
+      // Add text labels
+      declGroupsEnter.append('text')
+        .attr('class', 'decl-label')
+        .attr('text-anchor', 'middle')
+        .attr('dy', '0.35em')
+        .attr('font-size', d => Math.min(d.r / 3, 10) + 'px')  // Scale font with circle size
+        .attr('fill', '#fff')
+        .attr('pointer-events', 'none')
+        .text(d => {
+          // Truncate long names to fit in circle
+          const maxChars = Math.floor(d.r / 3)
+          return d.data.name.length > maxChars
+            ? d.data.name.substring(0, maxChars) + '...'
+            : d.data.name
+        })
+
+      // Add arrowhead marker definition (if not already defined)
+      if (!d3.select('defs marker#arrowhead').node()) {
+        d3.select('.bubble-graph').append('defs')
+          .append('marker')
+          .attr('id', 'arrowhead')
+          .attr('viewBox', '0 -5 10 10')
+          .attr('refX', 5)
+          .attr('refY', 0)
+          .attr('markerWidth', 6)
+          .attr('markerHeight', 6)
+          .attr('orient', 'auto')
+          .append('path')
+          .attr('d', 'M0,-5L10,0L0,5')
+          .attr('fill', '#666')
+      }
+
+    } else {
+      // Remove declaration groups and links
+      nodeGroup.selectAll('g.decl-group').remove()
+      nodeGroup.selectAll('g.decl-links').remove()
+    }
+
+    // Update main circle radius
+    nodeGroup.select('circle.node-circle')
+      .attr('r', nodeRadiusFn(isExpanded)(clickedNodeData.loc))
+
+    // Reheat simulation
+    simulation.alpha(0.3).restart()
+  }
+}
+
+// Unsafe helper to set a field on a JavaScript object
+export function unsafeSetField_(field) {
+  return value => obj => () => {
+    obj[field] = value
+  }
+}
+
+// Add arrow marker definition for module-level links
+export function addModuleArrowMarker_(svgSelection) {
+  return () => {
+    // Check if marker already exists
+    // Note: svgSelection is already a D3 selection, don't wrap it again
+    if (!svgSelection.select('defs marker#module-arrow').node()) {
+      svgSelection.append('defs')
+        .append('marker')
+        .attr('id', 'module-arrow')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 15)
+        .attr('refY', 0)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M0,-5L10,0L0,5')
+        .attr('fill', '#999')
+    }
+  }
+}
+
+// Draw inter-module declaration links between expanded modules
+export function drawInterModuleDeclarationLinks_(zoomGroupSelection) {
+  return nodeRadiusFn => declarationsData => functionCallsData => () => {
+    // Find all expanded module nodes
+    const expandedModules = []
+    d3.selectAll('.bubble-graph .node-group').each(function(d) {
+      if (d && d.expanded) {
+        const moduleDecls = declarationsData.modules.find(m => m.name === d.name)
+        if (moduleDecls && moduleDecls.declarations) {
+          const expandedRadius = nodeRadiusFn(true)(d.loc)
+
+          // Build declaration position map for this module
+          const hierarchyData = {
+            name: d.name,
+            children: moduleDecls.declarations.map(decl => ({
+              name: decl.title,
+              kind: decl.kind,
+              value: 1
+            }))
+          }
+
+          const root = d3.hierarchy(hierarchyData).sum(node => node.value)
+          const packLayout = d3.pack()
+            .size([expandedRadius * 2, expandedRadius * 2])
+            .padding(3)
+          packLayout(root)
+
+          const declPositions = new Map()
+          root.leaves().forEach(leaf => {
+            declPositions.set(leaf.data.name, {
+              x: leaf.x - expandedRadius,
+              y: leaf.y - expandedRadius
+            })
+          })
+
+          expandedModules.push({
+            moduleName: d.name,
+            moduleX: d.x,
+            moduleY: d.y,
+            declPositions
+          })
+        }
+      }
+    })
+
+    console.log(`Found ${expandedModules.length} expanded modules`)
+
+    // Find all cross-module links between expanded modules
+    const interModuleLinks = []
+    if (functionCallsData && functionCallsData.functions) {
+      functionCallsData.functions.forEach(fn => {
+        const funcInfo = fn.value
+        const sourceModule = expandedModules.find(m => m.moduleName === funcInfo.module)
+
+        if (sourceModule) {
+          funcInfo.calls.forEach(call => {
+            if (call.isCrossModule) {
+              const targetModule = expandedModules.find(m => m.moduleName === call.targetModule)
+
+              if (targetModule) {
+                const sourcePos = sourceModule.declPositions.get(funcInfo.name)
+                const targetPos = targetModule.declPositions.get(call.target)
+
+                if (sourcePos && targetPos) {
+                  interModuleLinks.push({
+                    sourceModule: funcInfo.module,
+                    targetModule: call.targetModule,
+                    source: funcInfo.name,
+                    target: call.target,
+                    sourceX: sourceModule.moduleX + sourcePos.x,
+                    sourceY: sourceModule.moduleY + sourcePos.y,
+                    targetX: targetModule.moduleX + targetPos.x,
+                    targetY: targetModule.moduleY + targetPos.y
+                  })
+                }
+              }
+            }
+          })
+        }
+      })
+    }
+
+    console.log(`Found ${interModuleLinks.length} inter-module declaration links`)
+
+    // Create or update inter-module links group
+    // Note: zoomGroupSelection is already a D3 selection, don't wrap it again
+    let linksGroup = zoomGroupSelection.select('g.inter-module-decl-links')
+    if (linksGroup.empty()) {
+      linksGroup = zoomGroupSelection
+        .insert('g', 'g.link')  // Insert before module-level links
+        .attr('class', 'inter-module-decl-links')
+    }
+
+    // Bind data and update links
+    const paths = linksGroup.selectAll('path.inter-decl-link')
+      .data(interModuleLinks, d => `${d.sourceModule}:${d.source}-${d.targetModule}:${d.target}`)
+
+    // Remove old links
+    paths.exit().remove()
+
+    // Add new links
+    paths.enter()
+      .append('path')
+      .attr('class', 'inter-decl-link')
+      .attr('stroke', '#e91e63')  // Pink color to distinguish from module links
+      .attr('stroke-width', 2)
+      .attr('stroke-opacity', 0.6)
+      .attr('fill', 'none')
+      .attr('marker-end', 'url(#module-arrow)')
+      .merge(paths)
+      .attr('d', d => {
+        const dx = d.targetX - d.sourceX
+        const dy = d.targetY - d.sourceY
+        const dr = Math.sqrt(dx * dx + dy * dy) * 0.5
+        return `M${d.sourceX},${d.sourceY}A${dr},${dr} 0 0,1 ${d.targetX},${d.targetY}`
+      })
+  }
+}
+
 // Filter simulation to only keep nodes with IDs in the provided set
 // Also updates the DOM by removing filtered-out nodes and links
 export function filterToConnectedNodes_(simulation) {
