@@ -42,7 +42,7 @@
 -- |
 -- | **Element** - SVG and HTML element types:
 -- | ```purescript
--- | data Element = Div | Svg | Circle | Line | Group | Text | Path | Rect
+-- | data Element = Div | Svg | Circle | Line | Group | Text | Path | Rect | Title | Span | Table | Tr | Td
 -- | ```
 -- |
 -- | Used when creating elements with `appendTo`:

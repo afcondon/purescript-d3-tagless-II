@@ -1,6 +1,7 @@
 module D3.Viz.ThreeLittleDimensions.Unsafe where
 
 import PSD3.Internal.Types (Datum_, Index_)
+import Data.Set (Set)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | Coerce Datum_ to Array Int
@@ -12,6 +13,15 @@ coerceDatumToArray = unsafeCoerce
 -- | Coerce Datum_ to Int (for nested data)
 coerceDatumToInt :: Datum_ -> Int
 coerceDatumToInt = unsafeCoerce
+
+-- | Coerce Datum_ to a Set of Strings
+-- Used when cells contain Sets (unordered, unique collections)
+coerceDatumToSet :: forall a. Datum_ -> Set a
+coerceDatumToSet = unsafeCoerce
+
+-- | Coerce Datum_ to String (for text content)
+coerceDatumToString :: Datum_ -> String
+coerceDatumToString = unsafeCoerce
 
 -- | Coerce Index_ to Int (always provided by D3)
 coerceIndex :: Index_ -> Int

@@ -8,6 +8,7 @@ import D3.Viz.LineChart as LineChart
 import D3.Viz.Parabola as Parabola
 import D3.Viz.ScatterPlot as ScatterPlot
 import D3.Viz.ThreeLittleCircles as Circles
+import D3.Viz.ThreeLittleDimensions as Dimensions
 import Data.Maybe (Maybe(..), fromMaybe)
 import Effect.Aff (Aff)
 import Halogen as H
@@ -25,6 +26,8 @@ import Type.Proxy (Proxy(..))
 -- | Tutorial page state
 type State = {
   threeCirclesSnippet :: Maybe String
+, threeDimensionsSnippet :: Maybe String
+, threeDimensionsSetsSnippet :: Maybe String
 , parabolaSnippet :: Maybe String
 , barChartSnippet :: Maybe String
 , lineChartSnippet :: Maybe String
@@ -44,6 +47,8 @@ component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
   { initialState: \_ ->
       { threeCirclesSnippet: Nothing
+      , threeDimensionsSnippet: Nothing
+      , threeDimensionsSetsSnippet: Nothing
       , parabolaSnippet: Nothing
       , barChartSnippet: Nothing
       , lineChartSnippet: Nothing
@@ -115,6 +120,42 @@ render state =
         , renderCodeExampleSimple
             (fromMaybe "-- Snippet not defined: TLCSimple.purs" state.threeCirclesSnippet)
             "TLCSimple"
+        ]
+
+    -- Section 1b: Three Little Dimensions (Nested Data Binding)
+    , HH.section
+        [ HP.classes [ HH.ClassName "tutorial-section" ]
+        , HP.id "section-1b"
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+            [ HH.text "1b. Nested Data Binding: Three Little Dimensions" ]
+        , HH.p_
+            [ HH.text "This example demonstrates nested data binding, where child elements derive their data from the parent element's bound datum. We take a 2D array [[1,2,3],[4,5,6],[7,8,9]] and create a nested structure using a proper HTML table: rows bound to outer arrays, cells bound to inner arrays." ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
+            [ HH.div
+                [ HP.classes [ HH.ClassName "three-dimensions-viz" ] ]
+                []
+            ]
+        , renderCodeExampleSimple
+            (fromMaybe "-- Snippet not defined: ThreeDimensions.purs" state.threeDimensionsSnippet)
+            "ThreeDimensions"
+        , HH.h3_
+            [ HH.text "Beyond Arrays: Working with Sets" ]
+        , HH.p_
+            [ HH.text "The real power of PS<$>D3's nestedJoin is its Foldable constraint. This means you can use ANY Foldable type for nested data, not just Arrays. Below, we use Sets (unordered, unique collections) to represent product categories or tags. Notice how some products have many tags, some have few, and some have none - the library handles all cases gracefully." ]
+        , HH.p_
+            [ HH.text "This flexibility goes far beyond standard D3.js, where nested selections only work with arrays. With PureScript's type classes, the same visualization code works with Sets, Lists, Maps, or any custom Foldable you define." ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
+            [ HH.div
+                [ HP.classes [ HH.ClassName "three-dimensions-sets-viz" ] ]
+                []
+            ]
+        , renderCodeExampleSimple
+            (fromMaybe "-- Snippet not defined: ThreeDimensionsSets.purs" state.threeDimensionsSetsSnippet)
+            "ThreeDimensionsSets"
         ]
 
     -- Section 2: Parabola of Circles
@@ -259,12 +300,16 @@ handleAction = case _ of
   Initialize -> do
     -- Load code snippets
     threeCircles <- H.liftAff $ readSnippetFiles "TLCSimple.purs"
+    threeDimensions <- H.liftAff $ readSnippetFiles "ThreeDimensions.purs"
+    threeDimensionsSets <- H.liftAff $ readSnippetFiles "ThreeDimensionsSets.purs"
     parabola <- H.liftAff $ readSnippetFiles "TLCParabola.purs"
     barChart <- H.liftAff $ readSnippetFiles "BarChartDraw.purs"
     lineChart <- H.liftAff $ readSnippetFiles "LineChartDraw.purs"
     quartet <- H.liftAff $ readSnippetFiles "ScatterPlotQuartet.purs"
 
     H.modify_ _ { threeCirclesSnippet = Just threeCircles
+                , threeDimensionsSnippet = Just threeDimensions
+                , threeDimensionsSetsSnippet = Just threeDimensionsSets
                 , parabolaSnippet = Just parabola
                 , barChartSnippet = Just barChart
                 , lineChartSnippet = Just lineChart
@@ -273,6 +318,12 @@ handleAction = case _ of
 
     -- Draw Three Little Circles
     _ <- H.liftEffect $ eval_D3M $ Circles.drawThreeCircles "div.three-circles-viz"
+
+    -- Draw Three Little Dimensions
+    _ <- H.liftEffect $ eval_D3M $ Dimensions.drawThreeDimensions "div.three-dimensions-viz"
+
+    -- Draw Three Little Dimensions with Sets
+    _ <- H.liftEffect $ eval_D3M $ Dimensions.drawThreeDimensionsSets "div.three-dimensions-sets-viz"
 
     -- Draw Parabola of Circles
     _ <- H.liftEffect $ eval_D3M $ Parabola.drawWithData [310, 474, 613, 726, 814, 877, 914, 926, 914, 877, 814, 726, 613, 474, 310] "div.parabola-viz"

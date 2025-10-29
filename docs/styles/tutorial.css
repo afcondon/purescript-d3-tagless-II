@@ -739,3 +739,98 @@
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
+
+/* Nested Data Table - Three Little Dimensions */
+.three-dimensions-viz {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.nested-data-table {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--color-gray-medium);
+}
+
+.nested-data-table tr {
+  background-color: white;
+}
+
+.nested-data-table tr:nth-child(odd) {
+  background-color: var(--color-beige-light);
+}
+
+.nested-data-table tr:hover {
+  background-color: #f0ead6;
+}
+
+.nested-data-table td {
+  padding: 1rem 1.5rem;
+  text-align: center;
+  border-right: 1px solid var(--color-gray-light);
+  border-bottom: 1px solid var(--color-gray-light);
+  color: var(--color-gray-darker);
+  font-weight: 500;
+  min-width: 60px;
+}
+
+.nested-data-table td:last-child {
+  border-right: none;
+}
+
+.nested-data-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Sets table - variable width cells for tag display */
+.three-dimensions-sets-viz {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.5rem;
+}
+
+.nested-data-table--sets {
+  font-size: 0.9rem;
+}
+
+.nested-data-table--sets td {
+  padding: 0.75rem 1rem;
+  min-width: auto;
+  max-width: 200px;
+}
+
+.nested-data-table--sets .tag-cell {
+  background-color: var(--color-teal);
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  margin: 0.25rem;
+  border-radius: 4px;
+  border: none !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  display: inline-block;
+  white-space: nowrap;
+}
+
+/* Empty cells in sets table */
+.nested-data-table--sets td:empty {
+  background-color: #f9f9f9;
+  position: relative;
+}
+
+.nested-data-table--sets td:empty::after {
+  content: '∅';
+  color: var(--color-gray-light);
+  font-size: 1.5rem;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

@@ -12365,6 +12365,11 @@
       return selection2.data(data, keyFn);
     };
   }
+  function d3DataWithFunction_(extractFn) {
+    return (keyFn) => (selection2) => {
+      return selection2.data(extractFn, keyFn);
+    };
+  }
   function d3EnterAndAppend_(element3) {
     return (selection2) => {
       return selection2.enter().append(element3);
@@ -13091,7 +13096,7 @@
       return getClusterLayoutFn_(unit);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Internal.FFI (line 264, column 3 - line 266, column 43): " + [layout.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Internal.FFI (line 265, column 3 - line 267, column 43): " + [layout.constructor.name]);
   };
 
   // output/PSD3.Internal.Simulation.Types/index.js
@@ -13498,13 +13503,13 @@
   var compare2 = /* @__PURE__ */ compare(ordString);
   var bind8 = /* @__PURE__ */ bind(bindArray);
   var truncate = function(maxLen) {
-    return function(text22) {
-      var $28 = length8(text22) > maxLen;
+    return function(text23) {
+      var $28 = length8(text23) > maxLen;
       if ($28) {
-        return take4(maxLen - 3 | 0)(text22) + "...";
+        return take4(maxLen - 3 | 0)(text23) + "...";
       }
       ;
-      return text22;
+      return text23;
     };
   };
   var renderStats = function(stats) {
@@ -13659,6 +13664,9 @@
   };
   var on2 = function(dict) {
     return dict.on;
+  };
+  var nestedJoin = function(dict) {
+    return dict.nestedJoin;
   };
   var mergeSelections = function(dict) {
     return dict.mergeSelections;
@@ -13933,6 +13941,34 @@
     Title2.value = new Title2();
     return Title2;
   })();
+  var Span = /* @__PURE__ */ (function() {
+    function Span2() {
+    }
+    ;
+    Span2.value = new Span2();
+    return Span2;
+  })();
+  var Table = /* @__PURE__ */ (function() {
+    function Table2() {
+    }
+    ;
+    Table2.value = new Table2();
+    return Table2;
+  })();
+  var Tr = /* @__PURE__ */ (function() {
+    function Tr2() {
+    }
+    ;
+    Tr2.value = new Tr2();
+    return Tr2;
+  })();
+  var Td = /* @__PURE__ */ (function() {
+    function Td2() {
+    }
+    ;
+    Td2.value = new Td2();
+    return Td2;
+  })();
   var DefaultCubic = /* @__PURE__ */ (function() {
     function DefaultCubic2() {
     }
@@ -13962,7 +13998,7 @@
         return "mouseup";
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Internal.Types (line 47, column 1 - line 52, column 30): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Internal.Types (line 51, column 1 - line 56, column 30): " + [v.constructor.name]);
     }
   };
   var showElement = {
@@ -14003,7 +14039,23 @@
         return "title";
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Internal.Types (line 25, column 1 - line 34, column 24): " + [v.constructor.name]);
+      if (v instanceof Span) {
+        return "span";
+      }
+      ;
+      if (v instanceof Table) {
+        return "table";
+      }
+      ;
+      if (v instanceof Tr) {
+        return "tr";
+      }
+      ;
+      if (v instanceof Td) {
+        return "td";
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.Internal.Types (line 25, column 1 - line 38, column 21): " + [v.constructor.name]);
     }
   };
 
@@ -16238,16 +16290,16 @@
   function axis(orient, scale) {
     var tickArguments = [], tickValues = null, tickFormat2 = null, tickSizeInner = 6, tickSizeOuter = 6, tickPadding = 3, offset = typeof window !== "undefined" && window.devicePixelRatio > 1 ? 0 : 0.5, k = orient === top4 || orient === left2 ? -1 : 1, x31 = orient === left2 || orient === right2 ? "x" : "y", transform3 = orient === top4 || orient === bottom4 ? translateX : translateY;
     function axis2(context) {
-      var values2 = tickValues == null ? scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain() : tickValues, format2 = tickFormat2 == null ? scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity_default : tickFormat2, spacing = Math.max(tickSizeInner, 0) + tickPadding, range3 = scale.range(), range0 = +range3[0] + offset, range1 = +range3[range3.length - 1] + offset, position2 = (scale.bandwidth ? center : number2)(scale.copy(), offset), selection2 = context.selection ? context.selection() : context, path3 = selection2.selectAll(".domain").data([null]), tick = selection2.selectAll(".tick").data(values2, scale).order(), tickExit = tick.exit(), tickEnter = tick.enter().append("g").attr("class", "tick"), line = tick.select("line"), text22 = tick.select("text");
+      var values2 = tickValues == null ? scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain() : tickValues, format2 = tickFormat2 == null ? scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity_default : tickFormat2, spacing = Math.max(tickSizeInner, 0) + tickPadding, range3 = scale.range(), range0 = +range3[0] + offset, range1 = +range3[range3.length - 1] + offset, position2 = (scale.bandwidth ? center : number2)(scale.copy(), offset), selection2 = context.selection ? context.selection() : context, path3 = selection2.selectAll(".domain").data([null]), tick = selection2.selectAll(".tick").data(values2, scale).order(), tickExit = tick.exit(), tickEnter = tick.enter().append("g").attr("class", "tick"), line = tick.select("line"), text23 = tick.select("text");
       path3 = path3.merge(path3.enter().insert("path", ".tick").attr("class", "domain").attr("stroke", "currentColor"));
       tick = tick.merge(tickEnter);
       line = line.merge(tickEnter.append("line").attr("stroke", "currentColor").attr(x31 + "2", k * tickSizeInner));
-      text22 = text22.merge(tickEnter.append("text").attr("fill", "currentColor").attr(x31, k * spacing).attr("dy", orient === top4 ? "0em" : orient === bottom4 ? "0.71em" : "0.32em"));
+      text23 = text23.merge(tickEnter.append("text").attr("fill", "currentColor").attr(x31, k * spacing).attr("dy", orient === top4 ? "0em" : orient === bottom4 ? "0.71em" : "0.32em"));
       if (context !== selection2) {
         path3 = path3.transition(context);
         tick = tick.transition(context);
         line = line.transition(context);
-        text22 = text22.transition(context);
+        text23 = text23.transition(context);
         tickExit = tickExit.transition(context).attr("opacity", epsilon).attr("transform", function(d9) {
           return isFinite(d9 = position2(d9)) ? transform3(d9 + offset) : this.getAttribute("transform");
         });
@@ -16262,7 +16314,7 @@
         return transform3(position2(d9) + offset);
       });
       line.attr(x31 + "2", k * tickSizeInner);
-      text22.attr(x31, k * spacing).text(format2);
+      text23.attr(x31, k * spacing).text(format2);
       selection2.filter(entering).attr("fill", "none").attr("font-size", 10).attr("font-family", "sans-serif").attr("text-anchor", orient === right2 ? "start" : orient === left2 ? "end" : "middle");
       selection2.each(function() {
         this.__axis = position2;
@@ -19983,8 +20035,8 @@
 
   // output/PSD3.Internal.Selection.Functions/index.js
   var spy2 = /* @__PURE__ */ spy();
-  var foldl4 = /* @__PURE__ */ foldl(foldableArray);
   var show10 = /* @__PURE__ */ show(showElement);
+  var foldl4 = /* @__PURE__ */ foldl(foldableArray);
   var discard8 = /* @__PURE__ */ discard(discardUnit);
   var selectionUpdateJoin = function(dictSelectionM) {
     var pure45 = pure(dictSelectionM.Monad0().Applicative0());
@@ -20049,12 +20101,34 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Internal.Selection.Functions (line 82, column 9 - line 96, column 14): " + [v1.value0.extent.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Internal.Selection.Functions (line 96, column 9 - line 110, column 14): " + [v1.value0.extent.constructor.name]);
           })();
           return pure45(unit);
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Internal.Selection.Functions (line 65, column 1 - line 65, column 104): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Internal.Selection.Functions (line 79, column 1 - line 79, column 104): " + [v.constructor.name, v1.constructor.name]);
+      };
+    };
+  };
+  var selectionNestedJoin = function(dictFoldable) {
+    var fromFoldable31 = fromFoldable3(dictFoldable);
+    return function(dictSelectionM) {
+      var pure45 = pure(dictSelectionM.Monad0().Applicative0());
+      return function(selection2) {
+        return function(e) {
+          return function(extractChildren) {
+            return function(keyFn) {
+              var extractFn = function($68) {
+                return fromFoldable31(extractChildren($68));
+              };
+              var element3 = spy2("NestedJoin: ")(show10(e));
+              var selectS = d3SelectionSelectAll_(element3)(selection2);
+              var dataSelection = d3DataWithFunction_(extractFn)(keyFn)(selectS);
+              var enterSelection = d3EnterAndAppend_(element3)(dataSelection);
+              return pure45(enterSelection);
+            };
+          };
+        };
       };
     };
   };
@@ -20424,6 +20498,12 @@
     simpleJoin: function(s_) {
       return selectionJoin(selectionMD3Selection_D3S)(s_);
     },
+    nestedJoin: function(dictFoldable) {
+      var selectionNestedJoin2 = selectionNestedJoin(dictFoldable);
+      return function(s_) {
+        return selectionNestedJoin2(selectionMD3Selection_D3S)(s_);
+      };
+    },
     updateJoin: function(s_) {
       return selectionUpdateJoin(selectionMD3Selection_D3S)(s_);
     },
@@ -20459,6 +20539,12 @@
     },
     simpleJoin: function(s_) {
       return selectionJoin(selectionMD3Selection_D3S1)(s_);
+    },
+    nestedJoin: function(dictFoldable) {
+      var selectionNestedJoin2 = selectionNestedJoin(dictFoldable);
+      return function(s_) {
+        return selectionNestedJoin2(selectionMD3Selection_D3S1)(s_);
+      };
     },
     updateJoin: function(s_) {
       return selectionUpdateJoin(selectionMD3Selection_D3S1)(s_);
@@ -20591,6 +20677,12 @@
     simpleJoin: function(s_) {
       return selectionJoin(d3TaglessD3M)(s_);
     },
+    nestedJoin: function(dictFoldable) {
+      var selectionNestedJoin2 = selectionNestedJoin(dictFoldable);
+      return function(s_) {
+        return selectionNestedJoin2(d3TaglessD3M)(s_);
+      };
+    },
     updateJoin: function(s_) {
       return selectionUpdateJoin(d3TaglessD3M)(s_);
     },
@@ -20617,21 +20709,21 @@
         return new Tuple(view(_name3)(f), f);
       }));
       return discard12(modify_3(function(state3) {
-        var $134 = {};
-        for (var $135 in state3) {
-          if ({}.hasOwnProperty.call(state3, $135)) {
-            $134[$135] = state3[$135];
+        var $140 = {};
+        for (var $141 in state3) {
+          if ({}.hasOwnProperty.call(state3, $141)) {
+            $140[$141] = state3[$141];
           }
           ;
         }
         ;
-        $134.simulation = set((function() {
-          var $163 = prop6($$Proxy.value)(strongFn);
-          return function($164) {
-            return _Newtype3($163($164));
+        $140.simulation = set((function() {
+          var $169 = prop6($$Proxy.value)(strongFn);
+          return function($170) {
+            return _Newtype3($169($170));
           };
         })())(forcesMap)(state3.simulation);
-        return $134;
+        return $140;
       }))(function() {
         return bind9(simulationSetNodes2(config.nodes))(function(nodesInSim) {
           return discard12(simulationActualizeForces2(config.activeForces))(function() {
@@ -20656,7 +20748,7 @@
                               return pure17(unit);
                             }
                             ;
-                            throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 158, column 30 - line 165, column 22): " + [step5.constructor.name]);
+                            throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 160, column 30 - line 167, column 22): " + [step5.constructor.name]);
                           };
                         };
                         return bind9(sequence2(mapFlipped7(toUnfoldable9(config.ticks))(function(v) {
@@ -20705,7 +20797,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 187, column 5 - line 193, column 70): " + [config.config.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 189, column 5 - line 195, column 70): " + [config.config.constructor.name]);
           })())(function() {
             return bind9((function() {
               if (config.nodes instanceof Nothing) {
@@ -20716,7 +20808,7 @@
                 return pure17(config.nodes.value0);
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 197, column 26 - line 199, column 37): " + [config.nodes.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 199, column 26 - line 201, column 37): " + [config.nodes.constructor.name]);
             })())(function(nodesBeforeFilter) {
               var nodesFiltered = (function() {
                 if (config.nodeFilter instanceof Nothing) {
@@ -20727,7 +20819,7 @@
                   return filter2(config.nodeFilter.value0)(nodesBeforeFilter);
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 200, column 25 - line 202, column 69): " + [config.nodeFilter.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 202, column 25 - line 204, column 69): " + [config.nodeFilter.constructor.name]);
               })();
               return bind9(simulationSetNodes2(nodesFiltered))(function(nodesInSim) {
                 return discard12((function() {
@@ -20739,7 +20831,7 @@
                     return simulationActualizeForces2(config.activeForces.value0);
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 206, column 5 - line 208, column 54): " + [config.activeForces.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 208, column 5 - line 210, column 54): " + [config.activeForces.constructor.name]);
                 })())(function() {
                   return bind9((function() {
                     if (config.links instanceof Nothing) {
@@ -20756,12 +20848,12 @@
                           return filter2(config.linkFilter.value0)(config.links.value0);
                         }
                         ;
-                        throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 215, column 29 - line 217, column 64): " + [config.linkFilter.constructor.name]);
+                        throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 217, column 29 - line 219, column 64): " + [config.linkFilter.constructor.name]);
                       })();
                       return simulationSetLinks2(linksFiltered)(nodesInSim)(config.keyFn);
                     }
                     ;
-                    throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 211, column 19 - line 218, column 65): " + [config.links.constructor.name]);
+                    throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 213, column 19 - line 220, column 65): " + [config.links.constructor.name]);
                   })())(function(linksInSim) {
                     return pure17({
                       nodes: nodesInSim,
@@ -20792,7 +20884,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 180, column 1 - line 236, column 14): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Interpreter.D3 (line 182, column 1 - line 238, column 14): " + [v.constructor.name, v1.constructor.name]);
       };
     },
     removeTickFunction: function(label5) {
@@ -22001,11 +22093,11 @@
     var nodes = [];
     function handleNode(node) {
       if (["#comment", "#text"].includes(node.nodeName)) {
-        var text22 = node.textContent;
-        if (text22) {
+        var text23 = node.textContent;
+        if (text23) {
           nodes.push({
             type: node.nodeName.slice(1),
-            text: text22
+            text: text23
           });
         }
       } else {
@@ -31895,7 +31987,7 @@
       return str2;
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Interpreter.String (line 118, column 3 - line 120, column 19): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Interpreter.String (line 124, column 3 - line 126, column 19): " + [v.constructor.name]);
   };
   var runPrinter = function(v) {
     return function(initialString) {
@@ -31951,7 +32043,7 @@
         return "on(" + (show111(v.value0) + ", function(d) { /* event handler */ })");
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Interpreter.String (line 94, column 3 - line 113, column 70): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Interpreter.String (line 100, column 3 - line 119, column 70): " + [v.constructor.name]);
     };
   };
   var applicativeD3PrinterM = /* @__PURE__ */ applicativeStateT(monadEffect);
@@ -32040,7 +32132,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Interpreter.String (line 33, column 1 - line 88, column 64): " + [v.constructor.name, v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Interpreter.String (line 33, column 1 - line 94, column 64): " + [v.constructor.name, v1.constructor.name]);
       };
     },
     openSelection: function(selection2) {
@@ -32064,6 +32156,23 @@
             }))(function() {
               return pure34(joinCode);
             });
+          };
+        };
+      };
+    },
+    nestedJoin: function(dictFoldable) {
+      return function(selection2) {
+        return function(e) {
+          return function(extractChildren) {
+            return function(k) {
+              var dataCode = selection2 + "\n  .data(d => extractChildren(d))";
+              var joinCode = dataCode + ("\n  .join(" + (show35(e) + ")"));
+              return discard53(modify_38(function(s) {
+                return s + ("\n\nconst /* TODO: varName */ = " + (joinCode + ";"));
+              }))(function() {
+                return pure34(joinCode);
+              });
+            };
           };
         };
       };
@@ -33922,13 +34031,83 @@
     };
   };
 
+  // output/D3.Viz.ThreeLittleDimensions.Unsafe/index.js
+  var coerceDatumToString = unsafeCoerce2;
+  var coerceDatumToSet = unsafeCoerce2;
+  var coerceDatumToInt2 = unsafeCoerce2;
+  var coerceDatumToArray = unsafeCoerce2;
+
+  // output/D3.Viz.ThreeLittleDimensions/index.js
+  var fromFoldable29 = /* @__PURE__ */ fromFoldable5(foldableArray)(ordString);
+  var classed21 = /* @__PURE__ */ classed(toAttrString);
+  var discard60 = /* @__PURE__ */ discard(discardUnit);
+  var text18 = /* @__PURE__ */ text6(toAttrStringFn);
+  var show36 = /* @__PURE__ */ show(showInt);
+  var drawThreeDimensionsSets = function(dictSelectionM) {
+    var Monad0 = dictSelectionM.Monad0();
+    var Bind1 = Monad0.Bind1();
+    var bind71 = bind(Bind1);
+    var attach2 = attach(dictSelectionM);
+    var appendTo2 = appendTo(dictSelectionM);
+    var simpleJoin2 = simpleJoin(dictSelectionM);
+    var nestedJoin2 = nestedJoin(dictSelectionM)(foldableSet);
+    var discard112 = discard60(Bind1);
+    var setAttributes2 = setAttributes(dictSelectionM);
+    var pure45 = pure(Monad0.Applicative0());
+    return function(selector) {
+      var productCategories = [fromFoldable29(["web", "frontend", "javascript"]), fromFoldable29(["database", "backend"]), empty7, fromFoldable29(["api", "rest", "graphql", "backend"]), fromFoldable29(["mobile"])];
+      return bind71(attach2(selector))(function(root3) {
+        return bind71(appendTo2(root3)(Table.value)([classed21("nested-data-table nested-data-table--sets")]))(function(table2) {
+          return bind71(simpleJoin2(table2)(Tr.value)(productCategories)(keyIsID_))(function(rows4) {
+            return bind71(nestedJoin2(rows4)(Td.value)(coerceDatumToSet)(keyIsID_))(function(cells2) {
+              return discard112(setAttributes2(cells2)([text18(coerceDatumToString), classed21("tag-cell")]))(function() {
+                return pure45(cells2);
+              });
+            });
+          });
+        });
+      });
+    };
+  };
+  var drawThreeDimensions = function(dictSelectionM) {
+    var Monad0 = dictSelectionM.Monad0();
+    var Bind1 = Monad0.Bind1();
+    var bind71 = bind(Bind1);
+    var attach2 = attach(dictSelectionM);
+    var appendTo2 = appendTo(dictSelectionM);
+    var simpleJoin2 = simpleJoin(dictSelectionM);
+    var nestedJoin2 = nestedJoin(dictSelectionM)(foldableArray);
+    var discard112 = discard60(Bind1);
+    var setAttributes2 = setAttributes(dictSelectionM);
+    var pure45 = pure(Monad0.Applicative0());
+    return function(selector) {
+      var data2D = [[1, 2, 3], [4, 5, 6], [7, 8, 9]];
+      return bind71(attach2(selector))(function(root3) {
+        return bind71(appendTo2(root3)(Table.value)([classed21("nested-data-table")]))(function(table2) {
+          return bind71(simpleJoin2(table2)(Tr.value)(data2D)(keyIsID_))(function(rows4) {
+            var cellText = function(d9) {
+              return show36(coerceDatumToInt2(d9));
+            };
+            return bind71(nestedJoin2(rows4)(Td.value)(coerceDatumToArray)(keyIsID_))(function(cells2) {
+              return discard112(setAttributes2(cells2)([text18(cellText)]))(function() {
+                return pure45(cells2);
+              });
+            });
+          });
+        });
+      });
+    };
+  };
+
   // output/PSD3.Understanding.SimpleCharts1/index.js
   var bind60 = /* @__PURE__ */ bind(bindHalogenM);
   var liftAff35 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
-  var discard60 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard61 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_41 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var liftEffect46 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var drawThreeCircles2 = /* @__PURE__ */ drawThreeCircles(d3TaglessD3M);
+  var drawThreeDimensions2 = /* @__PURE__ */ drawThreeDimensions(d3TaglessD3M);
+  var drawThreeDimensionsSets2 = /* @__PURE__ */ drawThreeDimensionsSets(d3TaglessD3M);
   var drawWithData2 = /* @__PURE__ */ drawWithData(d3TaglessD3M);
   var draw11 = /* @__PURE__ */ draw9(bindD3M)(monadEffD3M)(d3TaglessD3M);
   var draw13 = /* @__PURE__ */ draw10(bindD3M)(monadEffD3M)(d3TaglessD3M);
@@ -33955,32 +34134,42 @@
   })();
   var handleAction45 = function(v) {
     return bind60(liftAff35(readSnippetFiles("TLCSimple.purs")))(function(threeCircles) {
-      return bind60(liftAff35(readSnippetFiles("TLCParabola.purs")))(function(parabola) {
-        return bind60(liftAff35(readSnippetFiles("BarChartDraw.purs")))(function(barChart) {
-          return bind60(liftAff35(readSnippetFiles("LineChartDraw.purs")))(function(lineChart) {
-            return bind60(liftAff35(readSnippetFiles("ScatterPlotQuartet.purs")))(function(quartet) {
-              return discard60(modify_41(function(v1) {
-                var $30 = {};
-                for (var $31 in v1) {
-                  if ({}.hasOwnProperty.call(v1, $31)) {
-                    $30[$31] = v1[$31];
-                  }
-                  ;
-                }
-                ;
-                $30.threeCirclesSnippet = new Just(threeCircles);
-                $30.parabolaSnippet = new Just(parabola);
-                $30.barChartSnippet = new Just(barChart);
-                $30.lineChartSnippet = new Just(lineChart);
-                $30.quartetSnippet = new Just(quartet);
-                return $30;
-              }))(function() {
-                return bind60(liftEffect46(eval_D3M(drawThreeCircles2("div.three-circles-viz"))))(function() {
-                  return bind60(liftEffect46(eval_D3M(drawWithData2([310, 474, 613, 726, 814, 877, 914, 926, 914, 877, 814, 726, 613, 474, 310])("div.parabola-viz"))))(function() {
-                    return bind60(liftEffect46(eval_D3M(draw11(monthlySales)("div.barchart-viz"))))(function() {
-                      return bind60(liftEffect46(eval_D3M(draw13(sineWaveData)("div.linechart-viz"))))(function() {
-                        return bind60(liftEffect46(eval_D3M(drawQuartet3(anscombesQuartet)("div.quartet-viz"))))(function() {
-                          return pure38(unit);
+      return bind60(liftAff35(readSnippetFiles("ThreeDimensions.purs")))(function(threeDimensions) {
+        return bind60(liftAff35(readSnippetFiles("ThreeDimensionsSets.purs")))(function(threeDimensionsSets) {
+          return bind60(liftAff35(readSnippetFiles("TLCParabola.purs")))(function(parabola) {
+            return bind60(liftAff35(readSnippetFiles("BarChartDraw.purs")))(function(barChart) {
+              return bind60(liftAff35(readSnippetFiles("LineChartDraw.purs")))(function(lineChart) {
+                return bind60(liftAff35(readSnippetFiles("ScatterPlotQuartet.purs")))(function(quartet) {
+                  return discard61(modify_41(function(v1) {
+                    var $32 = {};
+                    for (var $33 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $33)) {
+                        $32[$33] = v1[$33];
+                      }
+                      ;
+                    }
+                    ;
+                    $32.threeCirclesSnippet = new Just(threeCircles);
+                    $32.threeDimensionsSnippet = new Just(threeDimensions);
+                    $32.threeDimensionsSetsSnippet = new Just(threeDimensionsSets);
+                    $32.parabolaSnippet = new Just(parabola);
+                    $32.barChartSnippet = new Just(barChart);
+                    $32.lineChartSnippet = new Just(lineChart);
+                    $32.quartetSnippet = new Just(quartet);
+                    return $32;
+                  }))(function() {
+                    return bind60(liftEffect46(eval_D3M(drawThreeCircles2("div.three-circles-viz"))))(function() {
+                      return bind60(liftEffect46(eval_D3M(drawThreeDimensions2("div.three-dimensions-viz"))))(function() {
+                        return bind60(liftEffect46(eval_D3M(drawThreeDimensionsSets2("div.three-dimensions-sets-viz"))))(function() {
+                          return bind60(liftEffect46(eval_D3M(drawWithData2([310, 474, 613, 726, 814, 877, 914, 926, 914, 877, 814, 726, 613, 474, 310])("div.parabola-viz"))))(function() {
+                            return bind60(liftEffect46(eval_D3M(draw11(monthlySales)("div.barchart-viz"))))(function() {
+                              return bind60(liftEffect46(eval_D3M(draw13(sineWaveData)("div.linechart-viz"))))(function() {
+                                return bind60(liftEffect46(eval_D3M(drawQuartet3(anscombesQuartet)("div.quartet-viz"))))(function() {
+                                  return pure38(unit);
+                                });
+                              });
+                            });
+                          });
                         });
                       });
                     });
@@ -33997,13 +34186,15 @@
     return $$Proxy.value;
   })();
   var render52 = function(state3) {
-    return div2([classes(["explanation-page"])])([lhsNav, slot_16(_examplesNav5)(unit)(component45)(SimpleCharts1.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Tutorial: Building Visualizations with PureScript D3")]), p_([text5("We'll show just the very simplest examples of putting elements in the DOM, in this case into an SVG, using the PS<$>D3 grammar.")]), p_([text5("In the How-to manual we'll explain in detail what each of these lines means, but if you're already familiar with D3.js the shape of the code should look very familiar.")])]), section([classes(["tutorial-section"]), id2("section-1")])([h2([classes(["tutorial-section-title"])])([text5("1. Three Little Circles")]), p_([text5("Simplest possible example, just to show syntax.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["three-circles-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCSimple.purs")(state3.threeCirclesSnippet))("TLCSimple")]), section([classes(["tutorial-section"]), id2("section-2")])([h2([classes(["tutorial-section-title"])])([text5("2. Data-Driven Positioning")]), p_([text5("This extends the super-simple model in the direction one would go for a more real-world example. In this example, the data is passed in and must match the type specified in the Model. Because the data loses its type information when joined to the DOM elements, we use the datum_ record to provide typed accessors for extracting values.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["parabola-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCParabola.purs")(state3.parabolaSnippet))("TLCParabola")]), section([classes(["tutorial-section"]), id2("section-3")])([h2([classes(["tutorial-section-title"])])([text5("3. Bar Charts with Scales")]), p_([text5("Bar charts are ideal for comparing discrete categories or showing changes across time periods. They use rectangular bars with heights or lengths proportional to the values they represent.")]), p_([text5("This example shows monthly sales data using a vertical bar chart. Each bar represents a month, and the height indicates the sales value. The implementation uses D3 scales to map data values to pixel coordinates.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["barchart-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: BarChartDraw.purs")(state3.barChartSnippet))("BarChartDraw")]), section([classes(["tutorial-section"]), id2("section-4")])([h2([classes(["tutorial-section-title"])])([text5("4. Line Charts and Paths")]), p_([text5("Line charts are one of the most fundamental visualizations for showing trends over time or continuous data. They excel at displaying patterns, trends, and changes in data series.")]), p_([text5("This example demonstrates a simple line chart showing a sine wave pattern. The implementation uses D3's scale functions to map data values to pixel coordinates, and a line generator to create the SVG path.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["linechart-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: LineChartDraw.purs")(state3.lineChartSnippet))("LineChartDraw")]), section([classes(["tutorial-section"]), id2("section-5")])([h2([classes(["tutorial-section-title"])])([text5("5. Anscombe's Quartet")]), p_([text5("This example demonstrates Anscombe's Quartet, a famous dataset created by statistician Francis Anscombe in 1973. All four datasets have nearly identical statistical properties (same mean, variance, correlation, and linear regression line), yet when visualized they reveal completely different patterns.")]), p_([text5("The quartet powerfully illustrates why data visualization is essential. Summary statistics alone can be misleading - you need to look at the data to understand its true structure. This implementation uses a 'small multiples' layout, displaying the four related charts side-by-side for easy comparison.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: ScatterPlotQuartet.purs")(state3.quartetSnippet))("ScatterPlotQuartet")]), section([classes(["tutorial-section", "tutorial-conclusion"]), id2("section-6")])([h2([classes(["tutorial-section-title"])])([text5("6. Next Steps")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien.")]), aside([classes(["tutorial-margin-note"])])([p([classes(["tutorial-margin-note__label"])])([text5("Learn More")]), a([href4("#" + routeToPath(Hierarchies.value)), classes(["tutorial-margin-note__link"])])([text5("Hierarchies \u2192")])]), ul_([li_([text5("Explore hierarchical data visualizations")]), li_([text5("Learn about the Finally Tagless pattern with interpreters")]), li_([text5("Dive into the Code Explorer for complex applications")])]), aside([classes(["tutorial-margin-note"])])([a([href4("#" + routeToPath(Interpreters.value)), classes(["tutorial-margin-note__link"])])([text5("Interpreters \u2192")]), a([href4("#" + routeToPath(CodeExplorer.value)), classes(["tutorial-margin-note__link"])])([text5("Code Explorer \u2192")])])])]);
+    return div2([classes(["explanation-page"])])([lhsNav, slot_16(_examplesNav5)(unit)(component45)(SimpleCharts1.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Tutorial: Building Visualizations with PureScript D3")]), p_([text5("We'll show just the very simplest examples of putting elements in the DOM, in this case into an SVG, using the PS<$>D3 grammar.")]), p_([text5("In the How-to manual we'll explain in detail what each of these lines means, but if you're already familiar with D3.js the shape of the code should look very familiar.")])]), section([classes(["tutorial-section"]), id2("section-1")])([h2([classes(["tutorial-section-title"])])([text5("1. Three Little Circles")]), p_([text5("Simplest possible example, just to show syntax.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["three-circles-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCSimple.purs")(state3.threeCirclesSnippet))("TLCSimple")]), section([classes(["tutorial-section"]), id2("section-1b")])([h2([classes(["tutorial-section-title"])])([text5("1b. Nested Data Binding: Three Little Dimensions")]), p_([text5("This example demonstrates nested data binding, where child elements derive their data from the parent element's bound datum. We take a 2D array [[1,2,3],[4,5,6],[7,8,9]] and create a nested structure using a proper HTML table: rows bound to outer arrays, cells bound to inner arrays.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["three-dimensions-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: ThreeDimensions.purs")(state3.threeDimensionsSnippet))("ThreeDimensions"), h3_([text5("Beyond Arrays: Working with Sets")]), p_([text5("The real power of PS<$>D3's nestedJoin is its Foldable constraint. This means you can use ANY Foldable type for nested data, not just Arrays. Below, we use Sets (unordered, unique collections) to represent product categories or tags. Notice how some products have many tags, some have few, and some have none - the library handles all cases gracefully.")]), p_([text5("This flexibility goes far beyond standard D3.js, where nested selections only work with arrays. With PureScript's type classes, the same visualization code works with Sets, Lists, Maps, or any custom Foldable you define.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["three-dimensions-sets-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: ThreeDimensionsSets.purs")(state3.threeDimensionsSetsSnippet))("ThreeDimensionsSets")]), section([classes(["tutorial-section"]), id2("section-2")])([h2([classes(["tutorial-section-title"])])([text5("2. Data-Driven Positioning")]), p_([text5("This extends the super-simple model in the direction one would go for a more real-world example. In this example, the data is passed in and must match the type specified in the Model. Because the data loses its type information when joined to the DOM elements, we use the datum_ record to provide typed accessors for extracting values.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["parabola-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: TLCParabola.purs")(state3.parabolaSnippet))("TLCParabola")]), section([classes(["tutorial-section"]), id2("section-3")])([h2([classes(["tutorial-section-title"])])([text5("3. Bar Charts with Scales")]), p_([text5("Bar charts are ideal for comparing discrete categories or showing changes across time periods. They use rectangular bars with heights or lengths proportional to the values they represent.")]), p_([text5("This example shows monthly sales data using a vertical bar chart. Each bar represents a month, and the height indicates the sales value. The implementation uses D3 scales to map data values to pixel coordinates.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["barchart-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: BarChartDraw.purs")(state3.barChartSnippet))("BarChartDraw")]), section([classes(["tutorial-section"]), id2("section-4")])([h2([classes(["tutorial-section-title"])])([text5("4. Line Charts and Paths")]), p_([text5("Line charts are one of the most fundamental visualizations for showing trends over time or continuous data. They excel at displaying patterns, trends, and changes in data series.")]), p_([text5("This example demonstrates a simple line chart showing a sine wave pattern. The implementation uses D3's scale functions to map data values to pixel coordinates, and a line generator to create the SVG path.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["linechart-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: LineChartDraw.purs")(state3.lineChartSnippet))("LineChartDraw")]), section([classes(["tutorial-section"]), id2("section-5")])([h2([classes(["tutorial-section-title"])])([text5("5. Anscombe's Quartet")]), p_([text5("This example demonstrates Anscombe's Quartet, a famous dataset created by statistician Francis Anscombe in 1973. All four datasets have nearly identical statistical properties (same mean, variance, correlation, and linear regression line), yet when visualized they reveal completely different patterns.")]), p_([text5("The quartet powerfully illustrates why data visualization is essential. Summary statistics alone can be misleading - you need to look at the data to understand its true structure. This implementation uses a 'small multiples' layout, displaying the four related charts side-by-side for easy comparison.")]), div2([classes(["tutorial-viz-container"])])([div2([classes(["quartet-viz"])])([])]), renderCodeExampleSimple(fromMaybe("-- Snippet not defined: ScatterPlotQuartet.purs")(state3.quartetSnippet))("ScatterPlotQuartet")]), section([classes(["tutorial-section", "tutorial-conclusion"]), id2("section-6")])([h2([classes(["tutorial-section-title"])])([text5("6. Next Steps")]), p_([text5("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien.")]), aside([classes(["tutorial-margin-note"])])([p([classes(["tutorial-margin-note__label"])])([text5("Learn More")]), a([href4("#" + routeToPath(Hierarchies.value)), classes(["tutorial-margin-note__link"])])([text5("Hierarchies \u2192")])]), ul_([li_([text5("Explore hierarchical data visualizations")]), li_([text5("Learn about the Finally Tagless pattern with interpreters")]), li_([text5("Dive into the Code Explorer for complex applications")])]), aside([classes(["tutorial-margin-note"])])([a([href4("#" + routeToPath(Interpreters.value)), classes(["tutorial-margin-note__link"])])([text5("Interpreters \u2192")]), a([href4("#" + routeToPath(CodeExplorer.value)), classes(["tutorial-margin-note__link"])])([text5("Code Explorer \u2192")])])])]);
   };
   var component51 = /* @__PURE__ */ (function() {
     return mkComponent({
       initialState: function(v) {
         return {
           threeCirclesSnippet: Nothing.value,
+          threeDimensionsSnippet: Nothing.value,
+          threeDimensionsSetsSnippet: Nothing.value,
           parabolaSnippet: Nothing.value,
           barChartSnippet: Nothing.value,
           lineChartSnippet: Nothing.value,
@@ -34042,15 +34233,15 @@
   var maximum6 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var map116 = /* @__PURE__ */ map(functorMaybe);
   var bind61 = /* @__PURE__ */ bind(bindMaybe);
-  var classed21 = /* @__PURE__ */ classed(toAttrString);
+  var classed22 = /* @__PURE__ */ classed(toAttrString);
   var width22 = /* @__PURE__ */ width8(toAttrNumber);
   var height22 = /* @__PURE__ */ height8(toAttrNumber);
-  var show36 = /* @__PURE__ */ show(showNumber);
+  var show37 = /* @__PURE__ */ show(showNumber);
   var x27 = /* @__PURE__ */ x(toAttrNumber);
   var y21 = /* @__PURE__ */ y(toAttrNumber);
   var fill22 = /* @__PURE__ */ fill(toAttrString);
   var strokeColor17 = /* @__PURE__ */ strokeColor(toAttrString);
-  var text18 = /* @__PURE__ */ text6(toAttrString);
+  var text19 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor9 = /* @__PURE__ */ textAnchor(toAttrString);
   var getStates = /* @__PURE__ */ (function() {
     var $45 = map55(function(v) {
@@ -34130,34 +34321,34 @@
               }));
             };
             return bind116(attach2(selector))(function(v) {
-              return bind116(appendTo2(v)(Svg.value)([classed21("grouped-bar-chart"), width22(dims.width), height22(dims.height)]))(function(svg2) {
+              return bind116(appendTo2(v)(Svg.value)([classed22("grouped-bar-chart"), width22(dims.width), height22(dims.height)]))(function(svg2) {
                 return bind116(appendTo2(svg2)(Group.value)([transform([function(v1) {
-                  return "translate(" + (show36(dims.marginLeft) + ("," + (show36(dims.marginTop) + ")")));
-                }]), classed21("chart")]))(function(chartGroup) {
+                  return "translate(" + (show37(dims.marginLeft) + ("," + (show37(dims.marginTop) + ")")));
+                }]), classed22("chart")]))(function(chartGroup) {
                   var drawBar = function(d9) {
                     var barHeight = d9.population / maxPop * chartHeight;
                     var barX = getStateX(d9.state) + getAgeOffset(d9.age);
                     var barY = chartHeight - barHeight;
-                    return bind116(appendTo2(chartGroup)(Rect.value)([x27(barX), y21(barY), width22(barWidth), height22(barHeight), fill22(getAgeColor(d9.age)), strokeColor17("white"), classed21("bar")]))(function() {
+                    return bind116(appendTo2(chartGroup)(Rect.value)([x27(barX), y21(barY), width22(barWidth), height22(barHeight), fill22(getAgeColor(d9.age)), strokeColor17("white"), classed22("bar")]))(function() {
                       return pure45(unit);
                     });
                   };
                   return bind116(traverse_7(drawBar)(data$prime))(function() {
                     return bind116(appendTo2(chartGroup)(Group.value)([transform([function(v1) {
-                      return "translate(0," + (show36(chartHeight) + ")");
-                    }]), classed21("x-axis")]))(function(xAxis) {
+                      return "translate(0," + (show37(chartHeight) + ")");
+                    }]), classed22("x-axis")]))(function(xAxis) {
                       var drawStateLabel = function(state$prime) {
                         var labelX = getStateX(state$prime) + stateWidth / 2;
-                        return bind116(appendTo2(xAxis)(Text2.value)([x27(labelX), y21(20), text18(state$prime), textAnchor9("middle"), classed21("axis-label")]))(function() {
+                        return bind116(appendTo2(xAxis)(Text2.value)([x27(labelX), y21(20), text19(state$prime), textAnchor9("middle"), classed22("axis-label")]))(function() {
                           return pure45(unit);
                         });
                       };
                       return bind116(traverse_7(drawStateLabel)(states))(function() {
-                        return bind116(appendTo2(chartGroup)(Group.value)([classed21("y-axis")]))(function(yAxis) {
+                        return bind116(appendTo2(chartGroup)(Group.value)([classed22("y-axis")]))(function(yAxis) {
                           var yTicks2 = [0, maxPop / 4, maxPop / 2, 3 * maxPop / 4, maxPop];
                           var drawYTick = function(value19) {
                             var tickY = chartHeight - value19 / maxPop * chartHeight;
-                            return bind116(appendTo2(yAxis)(Text2.value)([x27(-10), y21(tickY + 4), text18(formatSI(value19)), textAnchor9("end"), classed21("axis-label")]))(function() {
+                            return bind116(appendTo2(yAxis)(Text2.value)([x27(-10), y21(tickY + 4), text19(formatSI(value19)), textAnchor9("end"), classed22("axis-label")]))(function() {
                               return pure45(unit);
                             });
                           };
@@ -34184,17 +34375,17 @@
   var maximum7 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var minimum4 = /* @__PURE__ */ minimum(ordNumber)(foldableArray);
   var bind62 = /* @__PURE__ */ bind(bindMaybe);
-  var classed22 = /* @__PURE__ */ classed(toAttrString);
+  var classed23 = /* @__PURE__ */ classed(toAttrString);
   var width23 = /* @__PURE__ */ width8(toAttrNumber);
   var height23 = /* @__PURE__ */ height8(toAttrNumber);
-  var show37 = /* @__PURE__ */ show(showNumber);
+  var show38 = /* @__PURE__ */ show(showNumber);
   var d7 = /* @__PURE__ */ d2(toAttrString);
   var strokeColor18 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth16 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var fill23 = /* @__PURE__ */ fill(toAttrString);
   var x28 = /* @__PURE__ */ x(toAttrNumber);
   var y26 = /* @__PURE__ */ y(toAttrNumber);
-  var text19 = /* @__PURE__ */ text6(toAttrString);
+  var text20 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor10 = /* @__PURE__ */ textAnchor(toAttrString);
   var linePath = function(chartWidth) {
     return function(chartHeight) {
@@ -34291,10 +34482,10 @@
               }));
             };
             return bind116(attach2(selector))(function(v) {
-              return bind116(appendTo2(v)(Svg.value)([classed22("multi-line-chart"), width23(dims.width), height23(dims.height)]))(function(svg2) {
+              return bind116(appendTo2(v)(Svg.value)([classed23("multi-line-chart"), width23(dims.width), height23(dims.height)]))(function(svg2) {
                 return bind116(appendTo2(svg2)(Group.value)([transform([function(v1) {
-                  return "translate(" + (show37(dims.marginLeft) + ("," + (show37(dims.marginTop) + ")")));
-                }]), classed22("chart")]))(function(chartGroup) {
+                  return "translate(" + (show38(dims.marginLeft) + ("," + (show38(dims.marginTop) + ")")));
+                }]), classed23("chart")]))(function(chartGroup) {
                   var drawLine = function(points) {
                     var v1 = head2(points);
                     if (v1 instanceof Nothing) {
@@ -34304,7 +34495,7 @@
                     if (v1 instanceof Just) {
                       var pathData = linePath(chartWidth)(chartHeight)(maxValue)(minValue)(points);
                       var color2 = getSeriesColor(v1.value0.series);
-                      return bind116(appendTo2(chartGroup)(Path.value)([d7(pathData), strokeColor18(color2), strokeWidth16(2), fill23("none"), classed22("line")]))(function() {
+                      return bind116(appendTo2(chartGroup)(Path.value)([d7(pathData), strokeColor18(color2), strokeWidth16(2), fill23("none"), classed23("line")]))(function() {
                         return pure45(unit);
                       });
                     }
@@ -34313,27 +34504,27 @@
                   };
                   var groupedData = groupBySeries(data$prime);
                   return bind116(traverse_7(drawLine)(groupedData))(function() {
-                    return bind116(appendTo2(chartGroup)(Group.value)([classed22("y-axis")]))(function(yAxis) {
+                    return bind116(appendTo2(chartGroup)(Group.value)([classed23("y-axis")]))(function(yAxis) {
                       var yTicks2 = [0, 5, 10, 15];
                       var yScale = function(v1) {
                         return chartHeight - (v1 - minValue) / (maxValue - minValue) * chartHeight;
                       };
                       var drawYTick = function(value19) {
                         var tickY = yScale(value19);
-                        return bind116(appendTo2(yAxis)(Text2.value)([x28(-10), y26(tickY + 4), text19(toString2(value19) + "%"), textAnchor10("end"), classed22("axis-label")]))(function() {
+                        return bind116(appendTo2(yAxis)(Text2.value)([x28(-10), y26(tickY + 4), text20(toString2(value19) + "%"), textAnchor10("end"), classed23("axis-label")]))(function() {
                           return pure45(unit);
                         });
                       };
                       return bind116(traverse_7(drawYTick)(yTicks2))(function() {
                         return bind116(appendTo2(chartGroup)(Group.value)([transform([function(v1) {
-                          return "translate(" + (show37(chartWidth + 20) + ", 0)");
-                        }]), classed22("legend")]))(function(legend2) {
+                          return "translate(" + (show38(chartWidth + 20) + ", 0)");
+                        }]), classed23("legend")]))(function(legend2) {
                           var drawLegendItem = function(idx) {
                             return function(series$prime) {
                               var yPos = toNumber(idx) * 25;
                               var color2 = getSeriesColor(series$prime);
                               return bind116(appendTo2(legend2)(Rect.value)([x28(0), y26(yPos), width23(15), height23(15), fill23(color2)]))(function() {
-                                return bind116(appendTo2(legend2)(Text2.value)([x28(20), y26(yPos + 12), text19(series$prime), textAnchor10("start"), classed22("legend-label")]))(function() {
+                                return bind116(appendTo2(legend2)(Text2.value)([x28(20), y26(yPos + 12), text20(series$prime), textAnchor10("start"), classed23("legend-label")]))(function() {
                                   return pure45(unit);
                                 });
                               });
@@ -34369,17 +34560,17 @@
   var compare3 = /* @__PURE__ */ compare(ordString);
   var maximum8 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var bind63 = /* @__PURE__ */ bind(bindMaybe);
-  var classed23 = /* @__PURE__ */ classed(toAttrString);
+  var classed24 = /* @__PURE__ */ classed(toAttrString);
   var width24 = /* @__PURE__ */ width8(toAttrNumber);
   var height24 = /* @__PURE__ */ height8(toAttrNumber);
-  var show38 = /* @__PURE__ */ show(showNumber);
+  var show39 = /* @__PURE__ */ show(showNumber);
   var d8 = /* @__PURE__ */ d2(toAttrString);
   var fill24 = /* @__PURE__ */ fill(toAttrString);
   var fillOpacity8 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var strokeColor19 = /* @__PURE__ */ strokeColor(toAttrString);
   var x29 = /* @__PURE__ */ x(toAttrNumber);
   var y27 = /* @__PURE__ */ y(toAttrNumber);
-  var text20 = /* @__PURE__ */ text6(toAttrString);
+  var text21 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor11 = /* @__PURE__ */ textAnchor(toAttrString);
   var stackData = function(values2) {
     var folder = function(acc) {
@@ -34509,10 +34700,10 @@
               }));
             };
             return bind116(attach2(selector))(function(v) {
-              return bind116(appendTo2(v)(Svg.value)([classed23("radial-stacked-bar"), width24(dims.width), height24(dims.height)]))(function(svg2) {
+              return bind116(appendTo2(v)(Svg.value)([classed24("radial-stacked-bar"), width24(dims.width), height24(dims.height)]))(function(svg2) {
                 return bind116(appendTo2(svg2)(Group.value)([transform([function(v1) {
-                  return "translate(" + (show38(centerX) + ("," + (show38(centerY) + ")")));
-                }]), classed23("chart")]))(function(chartGroup) {
+                  return "translate(" + (show39(centerX) + ("," + (show39(centerY) + ")")));
+                }]), classed24("chart")]))(function(chartGroup) {
                   var drawStateBar = function(stateIdx) {
                     return function(state$prime) {
                       var stateData = getStateData(state$prime)(data$prime);
@@ -34538,7 +34729,7 @@
                             var outerR = radiusScale(seg.end);
                             var pathData = arcPath(innerR)(outerR)(startAngle)(endAngle);
                             var color2 = getAgeColor(v1.value0.age);
-                            return bind116(appendTo2(chartGroup)(Path.value)([d8(pathData), fill24(color2), fillOpacity8(0.8), strokeColor19("#ffffff"), classed23("segment")]))(function() {
+                            return bind116(appendTo2(chartGroup)(Path.value)([d8(pathData), fill24(color2), fillOpacity8(0.8), strokeColor19("#ffffff"), classed24("segment")]))(function() {
                               return pure45(unit);
                             });
                           }
@@ -34563,9 +34754,9 @@
                         var labelX = labelRadius * cos(angle);
                         var labelY = labelRadius * sin(angle);
                         var rotation = angle * 180 / pi;
-                        return bind116(appendTo2(chartGroup)(Text2.value)([x29(labelX), y27(labelY), text20(state$prime), textAnchor11("middle"), transform([function(v1) {
+                        return bind116(appendTo2(chartGroup)(Text2.value)([x29(labelX), y27(labelY), text21(state$prime), textAnchor11("middle"), transform([function(v1) {
                           return "rotate(" + (toString2(rotation) + (" " + (toString2(labelX) + (" " + (toString2(labelY) + ")")))));
-                        }]), classed23("state-label")]))(function() {
+                        }]), classed24("state-label")]))(function() {
                           return pure45(unit);
                         });
                       };
@@ -34669,13 +34860,13 @@
 
   // output/D3.Viz.WealthHealth.Draw/index.js
   var max9 = /* @__PURE__ */ max(ordNumber);
-  var show39 = /* @__PURE__ */ show(showInt);
+  var show40 = /* @__PURE__ */ show(showInt);
   var width25 = /* @__PURE__ */ width8(toAttrNumber);
   var height25 = /* @__PURE__ */ height8(toAttrNumber);
-  var classed24 = /* @__PURE__ */ classed(toAttrString);
+  var classed25 = /* @__PURE__ */ classed(toAttrString);
   var strokeColor20 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeOpacity7 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
-  var discard61 = /* @__PURE__ */ discard(discardUnit);
+  var discard62 = /* @__PURE__ */ discard(discardUnit);
   var x111 = /* @__PURE__ */ x1(toAttrNumber);
   var x210 = /* @__PURE__ */ x2(toAttrNumber);
   var y111 = /* @__PURE__ */ y1(toAttrNumber);
@@ -34687,7 +34878,7 @@
   var textAnchor12 = /* @__PURE__ */ textAnchor(toAttrString);
   var fontSize8 = /* @__PURE__ */ fontSize(toAttrNumber);
   var fill25 = /* @__PURE__ */ fill(toAttrString);
-  var text21 = /* @__PURE__ */ text6(toAttrString);
+  var text22 = /* @__PURE__ */ text6(toAttrString);
   var compare4 = /* @__PURE__ */ compare(ordNumber);
   var cx8 = /* @__PURE__ */ cx(toAttrNumberFnI);
   var cy8 = /* @__PURE__ */ cy(toAttrNumberFnI);
@@ -34743,11 +34934,11 @@
   };
   var formatIncome = function(value19) {
     if (value19 >= 1e3) {
-      return "$" + (show39(floor2(value19 / 1e3)) + "k");
+      return "$" + (show40(floor2(value19 / 1e3)) + "k");
     }
     ;
     if (otherwise) {
-      return "$" + show39(floor2(value19));
+      return "$" + show40(floor2(value19));
     }
     ;
     throw new Error("Failed pattern match at D3.Viz.WealthHealth.Draw (line 81, column 1 - line 81, column 33): " + [value19.constructor.name]);
@@ -34766,7 +34957,7 @@
     var bind71 = bind(Bind1);
     var attach2 = attach(dictSelectionM);
     var appendTo2 = appendTo(dictSelectionM);
-    var discard112 = discard61(Bind1);
+    var discard112 = discard62(Bind1);
     var setAttributes2 = setAttributes(dictSelectionM);
     var Applicative0 = Monad0.Applicative0();
     var pure45 = pure(Applicative0);
@@ -34775,8 +34966,8 @@
     var updateJoin2 = updateJoin(dictSelectionM);
     return function(selector) {
       return bind71(attach2(selector))(function(v) {
-        return bind71(appendTo2(v)(Svg.value)([viewBox(0)(0)(defaultConfig.width)(defaultConfig.height), width25(defaultConfig.width), height25(defaultConfig.height), classed24("wealth-health-viz")]))(function(svg2) {
-          return bind71(appendTo2(svg2)(Group.value)([strokeColor20("currentColor"), strokeOpacity7(0.1), classed24("grid")]))(function(gridGroup) {
+        return bind71(appendTo2(v)(Svg.value)([viewBox(0)(0)(defaultConfig.width)(defaultConfig.height), width25(defaultConfig.width), height25(defaultConfig.height), classed25("wealth-health-viz")]))(function(svg2) {
+          return bind71(appendTo2(svg2)(Group.value)([strokeColor20("currentColor"), strokeOpacity7(0.1), classed25("grid")]))(function(gridGroup) {
             var createVerticalLine = function(tickValue) {
               return bind71(appendTo2(gridGroup)(Line.value)([]))(function(line) {
                 return discard112(setAttributes2(line)([x111(0.5 + scaleX(defaultConfig)(tickValue)), x210(0.5 + scaleX(defaultConfig)(tickValue)), y111(defaultConfig.marginTop), y28(defaultConfig.height - defaultConfig.marginBottom)]))(function() {
@@ -34793,12 +34984,12 @@
                 });
               };
               return bind71(traverse13(createHorizontalLine)(yTicks))(function() {
-                return bind71(appendTo2(svg2)(Line.value)([x111(defaultConfig.marginLeft), y111(defaultConfig.height - defaultConfig.marginBottom), x210(defaultConfig.width - defaultConfig.marginRight), y28(defaultConfig.height - defaultConfig.marginBottom), strokeColor20("#333"), strokeWidth17(1.5), classed24("x-axis")]))(function(xAxisLine) {
+                return bind71(appendTo2(svg2)(Line.value)([x111(defaultConfig.marginLeft), y111(defaultConfig.height - defaultConfig.marginBottom), x210(defaultConfig.width - defaultConfig.marginRight), y28(defaultConfig.height - defaultConfig.marginBottom), strokeColor20("#333"), strokeWidth17(1.5), classed25("x-axis")]))(function(xAxisLine) {
                   var createXTick = function(tickValue) {
                     return bind71(appendTo2(svg2)(Line.value)([]))(function(tickMark) {
                       return discard112(setAttributes2(tickMark)([x111(scaleX(defaultConfig)(tickValue)), x210(scaleX(defaultConfig)(tickValue)), y111(defaultConfig.height - defaultConfig.marginBottom), y28(defaultConfig.height - defaultConfig.marginBottom + 6), strokeColor20("#333"), strokeWidth17(1)]))(function() {
                         return bind71(appendTo2(svg2)(Text2.value)([]))(function(tickLabel) {
-                          return discard112(setAttributes2(tickLabel)([x30(scaleX(defaultConfig)(tickValue)), y29(defaultConfig.height - defaultConfig.marginBottom + 15), textAnchor12("middle"), fontSize8(10), fill25("#333"), text21(formatIncome(tickValue))]))(function() {
+                          return discard112(setAttributes2(tickLabel)([x30(scaleX(defaultConfig)(tickValue)), y29(defaultConfig.height - defaultConfig.marginBottom + 15), textAnchor12("middle"), fontSize8(10), fill25("#333"), text22(formatIncome(tickValue))]))(function() {
                             return pure45(unit);
                           });
                         });
@@ -34806,13 +34997,13 @@
                     });
                   };
                   return bind71(traverse13(createXTick)(xTicks))(function() {
-                    return bind71(appendTo2(svg2)(Text2.value)([x30(defaultConfig.width / 2), y29(defaultConfig.height - 5), textAnchor12("middle"), fontSize8(14), fill25("#333"), classed24("x-axis-label"), text21("Wealth")]))(function(xAxisLabel) {
-                      return bind71(appendTo2(svg2)(Line.value)([x111(defaultConfig.marginLeft), y111(defaultConfig.marginTop), x210(defaultConfig.marginLeft), y28(defaultConfig.height - defaultConfig.marginBottom), strokeColor20("#333"), strokeWidth17(1.5), classed24("y-axis")]))(function(yAxisLine) {
+                    return bind71(appendTo2(svg2)(Text2.value)([x30(defaultConfig.width / 2), y29(defaultConfig.height - 5), textAnchor12("middle"), fontSize8(14), fill25("#333"), classed25("x-axis-label"), text22("Wealth")]))(function(xAxisLabel) {
+                      return bind71(appendTo2(svg2)(Line.value)([x111(defaultConfig.marginLeft), y111(defaultConfig.marginTop), x210(defaultConfig.marginLeft), y28(defaultConfig.height - defaultConfig.marginBottom), strokeColor20("#333"), strokeWidth17(1.5), classed25("y-axis")]))(function(yAxisLine) {
                         var createYTick = function(tickValue) {
                           return bind71(appendTo2(svg2)(Line.value)([]))(function(tickMark) {
                             return discard112(setAttributes2(tickMark)([x111(defaultConfig.marginLeft - 6), x210(defaultConfig.marginLeft), y111(scaleY(defaultConfig)(tickValue)), y28(scaleY(defaultConfig)(tickValue)), strokeColor20("#333"), strokeWidth17(1)]))(function() {
                               return bind71(appendTo2(svg2)(Text2.value)([]))(function(tickLabel) {
-                                return discard112(setAttributes2(tickLabel)([x30(defaultConfig.marginLeft - 10), y29(scaleY(defaultConfig)(tickValue) + 3), textAnchor12("end"), fontSize8(10), fill25("#333"), text21(show39(floor2(tickValue)))]))(function() {
+                                return discard112(setAttributes2(tickLabel)([x30(defaultConfig.marginLeft - 10), y29(scaleY(defaultConfig)(tickValue) + 3), textAnchor12("end"), fontSize8(10), fill25("#333"), text22(show40(floor2(tickValue)))]))(function() {
                                   return pure45(unit);
                                 });
                               });
@@ -34820,8 +35011,8 @@
                           });
                         };
                         return bind71(traverse13(createYTick)(yTicks))(function() {
-                          return bind71(appendTo2(svg2)(Text2.value)([x30(15), y29(defaultConfig.height / 2), textAnchor12("middle"), fontSize8(14), fill25("#333"), classed24("y-axis-label"), text21("Health")]))(function(yAxisLabel) {
-                            return bind71(appendTo2(svg2)(Group.value)([classed24("nations")]))(function(chartGroup) {
+                          return bind71(appendTo2(svg2)(Text2.value)([x30(15), y29(defaultConfig.height / 2), textAnchor12("middle"), fontSize8(14), fill25("#333"), classed25("y-axis-label"), text22("Health")]))(function(yAxisLabel) {
+                            return bind71(appendTo2(svg2)(Group.value)([classed25("nations")]))(function(chartGroup) {
                               return pure45(function(nations) {
                                 var calculateAttrs = function(d9) {
                                   return function(v1) {
@@ -34839,7 +35030,7 @@
                                 };
                                 return bind71(openSelection2(chartGroup)("circle"))(function(circleEnterSelection) {
                                   return bind71(updateJoin2(circleEnterSelection)(Circle.value)(nations)(coerceDatumToKey2))(function(circleUpdateSelections) {
-                                    return discard112(setAttributes2(circleUpdateSelections.exit)([classed24("exit")]))(function() {
+                                    return discard112(setAttributes2(circleUpdateSelections.exit)([classed25("exit")]))(function() {
                                       return discard112(setAttributes2(circleUpdateSelections.update)([sortSelection(function(a2) {
                                         return function(b2) {
                                           var popB = datum_7.population(b2);
@@ -34862,7 +35053,7 @@
                                         return function(i2) {
                                           return calculateAttrs(d9)(i2).color;
                                         };
-                                      }), classed24("nation-circle update")]))(function() {
+                                      }), classed25("nation-circle update")]))(function() {
                                         return bind71(appendTo2(circleUpdateSelections.enter)(Circle.value)([]))(function(newCircles) {
                                           return discard112(setAttributes2(newCircles)([sortSelection(function(a2) {
                                             return function(b2) {
@@ -34886,7 +35077,7 @@
                                             return function(i2) {
                                               return calculateAttrs(d9)(i2).color;
                                             };
-                                          }), fillOpacity9(0.7), strokeColor20("#333"), strokeWidth17(0.5), classed24("nation-circle enter")]))(function() {
+                                          }), fillOpacity9(0.7), strokeColor20("#333"), strokeWidth17(0.5), classed25("nation-circle enter")]))(function() {
                                             var tooltipText = function(d9) {
                                               return datum_7.name(d9) + ("\n" + datum_7.region(d9));
                                             };
@@ -34894,7 +35085,7 @@
                                               return discard112(setAttributes2(newTitles)([text110(tooltipText)]))(function() {
                                                 return bind71(openSelection2(chartGroup)("text"))(function(labelEnterSelection) {
                                                   return bind71(updateJoin2(labelEnterSelection)(Text2.value)(nations)(coerceDatumToKey2))(function(labelUpdateSelections) {
-                                                    return discard112(setAttributes2(labelUpdateSelections.exit)([classed24("exit")]))(function() {
+                                                    return discard112(setAttributes2(labelUpdateSelections.exit)([classed25("exit")]))(function() {
                                                       return discard112(setAttributes2(labelUpdateSelections.update)([x34(function(d9) {
                                                         return function(i2) {
                                                           return calculateAttrs(d9)(i2).x;
@@ -34903,7 +35094,7 @@
                                                         return function(i2) {
                                                           return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
                                                         };
-                                                      }), classed24("nation-label update")]))(function() {
+                                                      }), classed25("nation-label update")]))(function() {
                                                         return bind71(appendTo2(labelUpdateSelections.enter)(Text2.value)([]))(function(newLabels) {
                                                           return discard112(setAttributes2(newLabels)([x34(function(d9) {
                                                             return function(i2) {
@@ -34913,7 +35104,7 @@
                                                             return function(i2) {
                                                               return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
                                                             };
-                                                          }), textAnchor12("middle"), fontSize8(11), fill25("#333"), fillOpacity9(0), text110(datum_7.name), classed24("nation-label enter")]))(function() {
+                                                          }), textAnchor12("middle"), fontSize8(11), fill25("#333"), fillOpacity9(0), text110(datum_7.name), classed25("nation-label enter")]))(function() {
                                                             return pure45(newCircles);
                                                           });
                                                         });
@@ -35436,7 +35627,7 @@
 
   // output/PSD3.WealthHealth.HTML/index.js
   var map59 = /* @__PURE__ */ map(functorMaybe);
-  var show40 = /* @__PURE__ */ show(showInt);
+  var show41 = /* @__PURE__ */ show(showInt);
   var type_24 = /* @__PURE__ */ type_17(isPropInputType);
   var value17 = /* @__PURE__ */ value12(isPropString);
   var show112 = /* @__PURE__ */ show(showNumber);
@@ -35450,11 +35641,11 @@
     var toInt = function(s) {
       return map59(floor2)(toNum(s));
     };
-    return div2([classes(["wealth-health-controls"])])([div2([classes(["wealth-health-year-display"])])([text5(show40(state3.currentYear))]), div2([classes(["wealth-health-scrubber"])])([label_([text5("Year")]), input2([type_24(InputRange.value), min5(toNumber(fromMaybe(1800)(map59(function(v) {
+    return div2([classes(["wealth-health-controls"])])([div2([classes(["wealth-health-year-display"])])([text5(show41(state3.currentYear))]), div2([classes(["wealth-health-scrubber"])])([label_([text5("Year")]), input2([type_24(InputRange.value), min5(toNumber(fromMaybe(1800)(map59(function(v) {
       return v.yearRange.min;
     })(state3.model)))), max6(toNumber(fromMaybe(2009)(map59(function(v) {
       return v.yearRange.max;
-    })(state3.model)))), value17(show40(state3.currentYear)), step4(new Step(1)), onValueInput(function(val) {
+    })(state3.model)))), value17(show41(state3.currentYear)), step4(new Step(1)), onValueInput(function(val) {
       return new SetYear(fromMaybe(state3.currentYear)(toInt(val)));
     }), classes(["wealth-health-scrubber__slider"])])]), div2([classes(["wealth-health-playback"])])([button([classes(["wealth-health-playback__button"]), onClick(function(v) {
       return TogglePlay.value;
@@ -35489,8 +35680,8 @@
 
   // output/PSD3.WealthHealth.WealthHealth/index.js
   var bind66 = /* @__PURE__ */ bind(bindHalogenM);
-  var discard62 = /* @__PURE__ */ discard(discardUnit);
-  var discard111 = /* @__PURE__ */ discard62(bindHalogenM);
+  var discard63 = /* @__PURE__ */ discard(discardUnit);
+  var discard111 = /* @__PURE__ */ discard63(bindHalogenM);
   var pure41 = /* @__PURE__ */ pure(applicativeHalogenM);
   var modify_42 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var draw20 = /* @__PURE__ */ draw19(d3TaglessD3M);
@@ -35498,14 +35689,14 @@
   var when5 = /* @__PURE__ */ when(applicativeHalogenM);
   var $$void11 = /* @__PURE__ */ $$void(functorHalogenM);
   var forever3 = /* @__PURE__ */ forever(monadRecAff);
-  var discard210 = /* @__PURE__ */ discard62(bindAff);
+  var discard210 = /* @__PURE__ */ discard63(bindAff);
   var liftEffect48 = /* @__PURE__ */ liftEffect(monadEffectAff);
   var member5 = /* @__PURE__ */ member2(ordString);
   var $$delete8 = /* @__PURE__ */ $$delete5(ordString);
   var insert16 = /* @__PURE__ */ insert6(ordString);
   var map60 = /* @__PURE__ */ map(functorArray);
   var bind114 = /* @__PURE__ */ bind(bindMaybe);
-  var show41 = /* @__PURE__ */ show(showInt);
+  var show42 = /* @__PURE__ */ show(showInt);
   var nationPointToDrawData = function(np) {
     return {
       name: np.name,
@@ -35805,10 +35996,10 @@
   };
   var formatPopulation = function(n) {
     var millions = n / 1e6;
-    return show41(floor2(millions)) + "M";
+    return show42(floor2(millions)) + "M";
   };
   var formatNumber = function(n) {
-    return show41(floor2(n));
+    return show42(floor2(n));
   };
   var renderTooltip = function(state3) {
     return function(model) {
@@ -36107,15 +36298,15 @@
       };
     };
   };
-  var copyToClipboard = function(text22) {
+  var copyToClipboard = function(text23) {
     return function() {
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(text22);
+          navigator.clipboard.writeText(text23);
           return true;
         } else {
           const textArea = document.createElement("textarea");
-          textArea.value = text22;
+          textArea.value = text23;
           textArea.style.position = "fixed";
           textArea.style.left = "-999999px";
           textArea.style.top = "-999999px";
@@ -36140,7 +36331,7 @@
   var map61 = /* @__PURE__ */ map(functorArray);
   var bind67 = /* @__PURE__ */ bind(bindAff);
   var liftEffect49 = /* @__PURE__ */ liftEffect(monadEffectAff);
-  var discard63 = /* @__PURE__ */ discard(discardUnit)(bindAff);
+  var discard64 = /* @__PURE__ */ discard(discardUnit)(bindAff);
   var for_3 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
   var formatFilesForClipboard = function(files2) {
     var replicateArray = function(n) {
@@ -36180,7 +36371,7 @@
   var downloadAsZip = function(projectName) {
     return function(files2) {
       return bind67(liftEffect49(createZip))(function(zip2) {
-        return discard63(liftEffect49(for_3(files2)(function(file) {
+        return discard64(liftEffect49(for_3(files2)(function(file) {
           return addFile(zip2)(file.filename)(file.content);
         })))(function() {
           return fromEffectFnAff(downloadZipImpl(zip2)(projectName + ".zip"));
@@ -36380,7 +36571,7 @@
   // output/PSD3.Wizard.Wizard/index.js
   var map64 = /* @__PURE__ */ map(functorArray);
   var eq17 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
-  var show42 = /* @__PURE__ */ show(showDifficulty);
+  var show43 = /* @__PURE__ */ show(showDifficulty);
   var eq24 = /* @__PURE__ */ eq(eqDifficulty);
   var eq33 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqDifficulty));
   var bind68 = /* @__PURE__ */ bind(bindMaybe);
@@ -36390,7 +36581,7 @@
   var modify_43 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var bind115 = /* @__PURE__ */ bind(bindHalogenM);
   var get12 = /* @__PURE__ */ get(monadStateHalogenM);
-  var discard64 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard65 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var pure114 = /* @__PURE__ */ pure(applicativeHalogenM);
   var when6 = /* @__PURE__ */ when(applicativeHalogenM);
   var ChooseDataset = /* @__PURE__ */ (function() {
@@ -36567,7 +36758,7 @@
       })();
       return div2([classes([cardClass]), onClick(function(v) {
         return new SelectDataset(dataset);
-      })])([div2([classes(["dataset-card__header"])])([h3_([text5(dataset.name)]), span3([classes(["difficulty-badge difficulty-badge--" + toLowerCase(show42(dataset.difficulty))])])([text5(show42(dataset.difficulty))])]), p([classes(["dataset-card__description"])])([text5(dataset.description)]), div2([classes(["dataset-card__info"])])([strong_([text5("Fields: ")]), text5(intercalate9(", ")(map64(function(f) {
+      })])([div2([classes(["dataset-card__header"])])([h3_([text5(dataset.name)]), span3([classes(["difficulty-badge difficulty-badge--" + toLowerCase(show43(dataset.difficulty))])])([text5(show43(dataset.difficulty))])]), p([classes(["dataset-card__description"])])([text5(dataset.description)]), div2([classes(["dataset-card__info"])])([strong_([text5("Fields: ")]), text5(intercalate9(", ")(map64(function(f) {
         return f.name + (": " + f.fieldType);
       })(dataset.fields)))]), div2([classes(["dataset-card__viz"])])([strong_([text5("Suggested: ")]), text5(dataset.suggestedViz)]), div2([classes(["dataset-card__note"])])([text5(dataset.educationalNote)])]);
     };
@@ -36907,7 +37098,7 @@
           }
           ;
           if (state3.currentStep instanceof NameModule) {
-            return discard64(handleAction48(dictMonadAff)(GenerateFiles.value))(function() {
+            return discard65(handleAction48(dictMonadAff)(GenerateFiles.value))(function() {
               return modify_43(function(v1) {
                 var $119 = {};
                 for (var $120 in v1) {
@@ -37108,11 +37299,11 @@
 
   // output/Routing.Parser/index.js
   var map65 = /* @__PURE__ */ map(functorArray);
-  var discard65 = /* @__PURE__ */ discard(discardUnit)(bindMaybe);
+  var discard66 = /* @__PURE__ */ discard(discardUnit)(bindMaybe);
   var guard2 = /* @__PURE__ */ guard(alternativeMaybe);
   var apply4 = /* @__PURE__ */ apply(applyMaybe);
   var map118 = /* @__PURE__ */ map(functorMaybe);
-  var fromFoldable29 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
+  var fromFoldable30 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
   var traverse5 = /* @__PURE__ */ traverse(traversableArray)(applicativeMaybe);
   var fromFoldable113 = /* @__PURE__ */ fromFoldable(foldableArray);
   var append22 = /* @__PURE__ */ append(semigroupList);
@@ -37121,11 +37312,11 @@
   var parseQueryPart = function(decoder) {
     var part2tuple = function(input3) {
       var keyVal = map65(decoder)(split("=")(input3));
-      return discard65(guard2(length4(keyVal) <= 2))(function() {
+      return discard66(guard2(length4(keyVal) <= 2))(function() {
         return apply4(map118(Tuple.create)(head2(keyVal)))(index2(keyVal)(1));
       });
     };
-    var $27 = map118(fromFoldable29);
+    var $27 = map118(fromFoldable30);
     var $28 = traverse5(part2tuple);
     var $29 = split("&");
     return function($30) {
@@ -37239,7 +37430,7 @@
   // output/PSD3.Main/index.js
   var bind70 = /* @__PURE__ */ bind(bindHalogenM);
   var liftEffect50 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
-  var discard66 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var discard67 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var when7 = /* @__PURE__ */ when(applicativeHalogenM);
   var pure44 = /* @__PURE__ */ pure(applicativeHalogenM);
   var modify_44 = /* @__PURE__ */ modify_(monadStateHalogenM);
@@ -37371,7 +37562,7 @@
         var loc = location(w)();
         return hash(loc)();
       }))(function(currentHash) {
-        return discard66(when7(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect50(setHash2(routeToPath(Home.value)))))(function() {
+        return discard67(when7(currentHash === "" || (currentHash === "#" || currentHash === "#/"))(liftEffect50(setHash2(routeToPath(Home.value)))))(function() {
           return bind70(subscribe2(makeEmitter(function(push2) {
             return matches2(routing)(function(v1) {
               return function(newRoute) {
