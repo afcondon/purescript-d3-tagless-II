@@ -4,8 +4,9 @@ import Prelude
 
 import D3.Viz.WealthHealth.Unsafe (coerceDatumToKey, datum_)
 import Data.Number (log, sqrt)
+import Data.Traversable (traverse)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSelection, setAttributes, updateJoin)
-import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, fontSize, height, radius, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
+import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, fontSize, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 
 -- | Type alias for a nation data point ready for visualization
@@ -31,10 +32,10 @@ defaultConfig :: VizConfig
 defaultConfig =
   { width: 1000.0
   , height: 600.0
-  , marginTop: 0.0
-  , marginRight: 0.0
-  , marginBottom: 0.0
-  , marginLeft: 0.0
+  , marginTop: 20.0
+  , marginRight: 20.0
+  , marginBottom: 35.0
+  , marginLeft: 40.0
   }
 
 -- | Scale functions (simple linear/log approximations)
@@ -73,6 +74,16 @@ scaleRadius population =
     scaled = sqrt normalized * maxRadius
   in
     max minRadius scaled
+
+-- | Generate tick values for logarithmic income scale
+-- | Similar to D3's x.ticks() for log scale
+xTicks :: Array Number
+xTicks = [200.0, 500.0, 1000.0, 2000.0, 5000.0, 10000.0, 20000.0, 50000.0, 100000.0]
+
+-- | Generate tick values for linear life expectancy scale
+-- | Similar to D3's y.ticks() for linear scale
+yTicks :: Array Number
+yTicks = [20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0]
 
 -- | Initialize the visualization structure (SVG, axes, etc.)
 initializeVisualization :: forall m.
@@ -177,6 +188,41 @@ draw selector = do
     , height config.height
     , classed "wealth-health-viz"
     ]
+
+  -- Add grid lines (matching Mike Bostock's approach)
+  gridGroup <- appendTo svg Group
+    [ strokeColor "currentColor"
+    , strokeOpacity 0.1
+    , classed "grid"
+    ]
+
+  -- Vertical grid lines at x ticks (create manually for each tick)
+  let
+    createVerticalLine tickValue = do
+      line <- appendTo gridGroup Line []
+      setAttributes line
+        [ x1 (0.5 + scaleX config tickValue)
+        , x2 (0.5 + scaleX config tickValue)
+        , y1 config.marginTop
+        , y2 (config.height - config.marginBottom)
+        ]
+      pure line
+
+  _ <- traverse createVerticalLine xTicks
+
+  -- Horizontal grid lines at y ticks (create manually for each tick)
+  let
+    createHorizontalLine tickValue = do
+      line <- appendTo gridGroup Line []
+      setAttributes line
+        [ y1 (0.5 + scaleY config tickValue)
+        , y2 (0.5 + scaleY config tickValue)
+        , x1 config.marginLeft
+        , x2 (config.width - config.marginRight)
+        ]
+      pure line
+
+  _ <- traverse createHorizontalLine yTicks
 
   -- Add X-axis (bottom)
   xAxisLine <- appendTo svg Line

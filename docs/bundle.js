@@ -35075,12 +35075,13 @@
   // output/PSD3.WealthHealth.Data/index.js
   var bind65 = /* @__PURE__ */ bind(bindMaybe);
   var pure40 = /* @__PURE__ */ pure(applicativeMaybe);
-  var comparing2 = /* @__PURE__ */ comparing(ordNumber);
-  var map58 = /* @__PURE__ */ map(functorArray);
   var bind113 = /* @__PURE__ */ bind(bindArray);
   var pure113 = /* @__PURE__ */ pure(applicativeArray);
   var maximum9 = /* @__PURE__ */ maximum(ordInt)(foldableArray);
   var minimum5 = /* @__PURE__ */ minimum(ordInt)(foldableArray);
+  var div4 = /* @__PURE__ */ div(euclideanRingInt);
+  var comparing2 = /* @__PURE__ */ comparing(ordNumber);
+  var map58 = /* @__PURE__ */ map(functorArray);
   var pure210 = /* @__PURE__ */ pure(applicativeAff);
   var parseRegionString = function(v) {
     if (v === "EastAsiaAndPacific") {
@@ -35125,54 +35126,68 @@
     });
   };
   var nationsDataUrl = "data/nations.json";
-  var findBefore = function(targetYear) {
-    return function(points) {
-      var candidates = find2(function(point) {
-        var v = index2(point)(0);
+  var calculateYearRange = function(nations) {
+    var allYears = bind113(nations)(function(nation) {
+      return bind113(nation.income)(function(yearValue) {
+        var v = index2(yearValue)(0);
         if (v instanceof Just) {
-          return v.value0 <= targetYear;
+          return pure113(floor2(v.value0));
         }
         ;
         if (v instanceof Nothing) {
-          return false;
+          return [];
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 180, column 7 - line 182, column 25): " + [v.constructor.name]);
-      })(points);
-      if (candidates instanceof Nothing) {
-        return head2(points);
-      }
-      ;
-      if (candidates instanceof Just) {
-        return new Just(candidates.value0);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 186, column 5 - line 188, column 23): " + [candidates.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 124, column 7 - line 126, column 22): " + [v.constructor.name]);
+      });
+    });
+    var maxYear = fromMaybe(2009)(maximum9(allYears));
+    var minYear = fromMaybe(1800)(minimum5(allYears));
+    return {
+      min: minYear,
+      max: maxYear
     };
   };
-  var findAfter = function(targetYear) {
-    return function(points) {
-      var candidates = find2(function(point) {
-        var v = index2(point)(0);
-        if (v instanceof Just) {
-          return v.value0 >= targetYear;
-        }
-        ;
-        if (v instanceof Nothing) {
-          return false;
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 195, column 7 - line 197, column 25): " + [v.constructor.name]);
-      })(points);
-      if (candidates instanceof Nothing) {
-        return last(points);
-      }
-      ;
-      if (candidates instanceof Just) {
-        return new Just(candidates.value0);
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 201, column 5 - line 203, column 23): " + [candidates.constructor.name]);
+  var bisectLeft2 = function(target7) {
+    return function(arr) {
+      var go2 = function($copy_low) {
+        return function($copy_high) {
+          var $tco_var_low = $copy_low;
+          var $tco_done = false;
+          var $tco_result;
+          function $tco_loop(low2, high2) {
+            if (low2 >= high2) {
+              $tco_done = true;
+              return low2;
+            }
+            ;
+            if (otherwise) {
+              var mid = div4(low2 + high2 | 0)(2);
+              var v = bind65(index2(arr)(mid))(function(v1) {
+                return index2(v1)(0);
+              });
+              if (v instanceof Just && v.value0 < target7) {
+                $tco_var_low = mid + 1 | 0;
+                $copy_high = high2;
+                return;
+              }
+              ;
+              $tco_var_low = low2;
+              $copy_high = mid;
+              return;
+            }
+            ;
+            throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 155, column 5 - line 161, column 28): " + [low2.constructor.name, high2.constructor.name]);
+          }
+          ;
+          while (!$tco_done) {
+            $tco_result = $tco_loop($tco_var_low, $copy_high);
+          }
+          ;
+          return $tco_result;
+        };
+      };
+      return go2(0)(length4(arr));
     };
   };
   var interpolateValue = function(targetYear) {
@@ -35185,40 +35200,100 @@
       }
       ;
       var yearNum = toNumber(targetYear);
-      var before = findBefore(yearNum)(v);
-      var after = findAfter(yearNum)(v);
-      if (before instanceof Just && (after instanceof Just && fromMaybe(0)(index2(before.value0)(0)) === yearNum)) {
-        return index2(before.value0)(1);
-      }
-      ;
-      if (before instanceof Just && after instanceof Just) {
-        return bind65(index2(before.value0)(0))(function(y0) {
-          return bind65(index2(after.value0)(0))(function(y112) {
-            return bind65(index2(before.value0)(1))(function(v0) {
-              return bind65(index2(after.value0)(1))(function(v1) {
-                var t = (yearNum - y0) / (y112 - y0);
-                return pure40(v0 + t * (v1 - v0));
+      var i2 = bisectLeft2(yearNum)(v);
+      return bind65(index2(v)(i2))(function(a2) {
+        return bind65(index2(a2)(0))(function(aYear) {
+          return bind65(index2(a2)(1))(function(aValue) {
+            var $38 = i2 > 0;
+            if ($38) {
+              return bind65(index2(v)(i2 - 1 | 0))(function(b2) {
+                return bind65(index2(b2)(0))(function(bYear) {
+                  return bind65(index2(b2)(1))(function(bValue) {
+                    var t = (yearNum - aYear) / (bYear - aYear);
+                    return pure40(aValue * (1 - t) + bValue * t);
+                  });
+                });
               });
-            });
+            }
+            ;
+            return pure40(aValue);
           });
         });
-      }
-      ;
-      if (before instanceof Just && after instanceof Nothing) {
-        return index2(before.value0)(1);
-      }
-      ;
-      if (before instanceof Nothing && after instanceof Just) {
-        return index2(after.value0)(1);
-      }
-      ;
-      if (before instanceof Nothing && after instanceof Nothing) {
+      });
+    };
+  };
+  var fillMissingYears = function(yearRange) {
+    return function(dataPoints) {
+      var $$null5 = function(arr) {
+        var v = head2(arr);
+        if (v instanceof Nothing) {
+          return true;
+        }
+        ;
+        if (v instanceof Just) {
+          return false;
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 81, column 16 - line 83, column 22): " + [v.constructor.name]);
+      };
+      var $41 = $$null5(dataPoints);
+      if ($41) {
         return Nothing.value;
       }
       ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 156, column 7 - line 173, column 36): " + [before.constructor.name, after.constructor.name]);
+      var fillYear = function(year) {
+        var v = interpolateValue(floor2(year))(dataPoints);
+        if (v instanceof Just) {
+          return [year, v.value0];
+        }
+        ;
+        if (v instanceof Nothing) {
+          return [year, 0];
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 75, column 23 - line 77, column 31): " + [v.constructor.name]);
+      };
+      var allYears = map58(toNumber)(range2(yearRange.min)(yearRange.max));
+      return new Just(map58(fillYear)(allYears));
     };
   };
+  var fillNationData = function(yearRange) {
+    return function(nation) {
+      return bind65(fillMissingYears(yearRange)(nation.income))(function(filledIncome) {
+        return bind65(fillMissingYears(yearRange)(nation.population))(function(filledPopulation) {
+          return bind65(fillMissingYears(yearRange)(nation.lifeExpectancy))(function(filledLifeExpectancy) {
+            return pure40({
+              name: nation.name,
+              region: nation.region,
+              income: filledIncome,
+              population: filledPopulation,
+              lifeExpectancy: filledLifeExpectancy
+            });
+          });
+        });
+      });
+    };
+  };
+  var loadNationsData = /* @__PURE__ */ bind(bindAff)(/* @__PURE__ */ get3(string)(nationsDataUrl))(function(result) {
+    return pure210((function() {
+      if (result instanceof Left) {
+        return new Left("Failed to load nations data: " + printError(result.value0));
+      }
+      ;
+      if (result instanceof Right) {
+        var rawNations = parseNationsJSON(result.value0.body);
+        var nations = catMaybes(map58(parseNationData)(rawNations));
+        var yearRange = calculateYearRange(nations);
+        var filledNations = catMaybes(map58(fillNationData(yearRange))(nations));
+        return new Right({
+          nations: filledNations,
+          yearRange
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 104, column 8 - line 115, column 50): " + [result.constructor.name]);
+    })());
+  });
   var getNationAtYear = function(year) {
     return function(nation) {
       return bind65(interpolateValue(year)(nation.income))(function(income) {
@@ -35242,100 +35317,6 @@
       return catMaybes(map58(getNationAtYear(year))(model.nations));
     };
   };
-  var fillMissingYears = function(yearRange) {
-    return function(dataPoints) {
-      var $$null5 = function(arr) {
-        var v = head2(arr);
-        if (v instanceof Nothing) {
-          return true;
-        }
-        ;
-        if (v instanceof Just) {
-          return false;
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 75, column 16 - line 77, column 22): " + [v.constructor.name]);
-      };
-      var $47 = $$null5(dataPoints);
-      if ($47) {
-        return Nothing.value;
-      }
-      ;
-      var fillYear = function(year) {
-        var v = interpolateValue(floor2(year))(dataPoints);
-        if (v instanceof Just) {
-          return [year, v.value0];
-        }
-        ;
-        if (v instanceof Nothing) {
-          return [year, 0];
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 69, column 23 - line 71, column 31): " + [v.constructor.name]);
-      };
-      var allYears = map58(toNumber)(range2(yearRange.min)(yearRange.max));
-      return new Just(map58(fillYear)(allYears));
-    };
-  };
-  var fillNationData = function(yearRange) {
-    return function(nation) {
-      return bind65(fillMissingYears(yearRange)(nation.income))(function(filledIncome) {
-        return bind65(fillMissingYears(yearRange)(nation.population))(function(filledPopulation) {
-          return bind65(fillMissingYears(yearRange)(nation.lifeExpectancy))(function(filledLifeExpectancy) {
-            return pure40({
-              name: nation.name,
-              region: nation.region,
-              income: filledIncome,
-              population: filledPopulation,
-              lifeExpectancy: filledLifeExpectancy
-            });
-          });
-        });
-      });
-    };
-  };
-  var calculateYearRange = function(nations) {
-    var allYears = bind113(nations)(function(nation) {
-      return bind113(nation.income)(function(yearValue) {
-        var v = index2(yearValue)(0);
-        if (v instanceof Just) {
-          return pure113(floor2(v.value0));
-        }
-        ;
-        if (v instanceof Nothing) {
-          return [];
-        }
-        ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 118, column 7 - line 120, column 22): " + [v.constructor.name]);
-      });
-    });
-    var maxYear = fromMaybe(2009)(maximum9(allYears));
-    var minYear = fromMaybe(1800)(minimum5(allYears));
-    return {
-      min: minYear,
-      max: maxYear
-    };
-  };
-  var loadNationsData = /* @__PURE__ */ bind(bindAff)(/* @__PURE__ */ get3(string)(nationsDataUrl))(function(result) {
-    return pure210((function() {
-      if (result instanceof Left) {
-        return new Left("Failed to load nations data: " + printError(result.value0));
-      }
-      ;
-      if (result instanceof Right) {
-        var rawNations = parseNationsJSON(result.value0.body);
-        var nations = catMaybes(map58(parseNationData)(rawNations));
-        var yearRange = calculateYearRange(nations);
-        var filledNations = catMaybes(map58(fillNationData(yearRange))(nations));
-        return new Right({
-          nations: filledNations,
-          yearRange
-        });
-      }
-      ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 98, column 8 - line 109, column 50): " + [result.constructor.name]);
-    })());
-  });
 
   // output/PSD3.WealthHealth.HTML/index.js
   var map59 = /* @__PURE__ */ map(functorMaybe);
