@@ -16297,18 +16297,18 @@
   };
   var nodeColor = function(path3) {
     if (take4(4)(path3) === "src/") {
-      var $132 = contains("src/lib/PSD3")(path3);
-      if ($132) {
+      var $130 = contains("src/lib/PSD3")(path3);
+      if ($130) {
         return "#2E7D32";
       }
       ;
-      var $133 = contains("src/lib/")(path3);
-      if ($133) {
+      var $131 = contains("src/lib/")(path3);
+      if ($131) {
         return "#4CAF50";
       }
       ;
-      var $134 = contains("src/website/")(path3);
-      if ($134) {
+      var $132 = contains("src/website/")(path3);
+      if ($132) {
         return "#D32F2F";
       }
       ;
@@ -16359,52 +16359,52 @@
     })(modules);
   };
   var link_ = {
-    source: function($153) {
+    source: function($151) {
       return (function(v) {
         return v.source;
-      })(unboxLink($153));
+      })(unboxLink($151));
     },
-    target: function($154) {
+    target: function($152) {
       return (function(v) {
         return v.target;
-      })(unboxLink($154));
+      })(unboxLink($152));
     }
   };
   var datum_ = {
-    id: function($155) {
+    id: function($153) {
       return (function(v) {
         return v.id;
-      })(unboxBubbleNode($155));
+      })(unboxBubbleNode($153));
     },
-    x: function($156) {
+    x: function($154) {
       return (function(v) {
         return v.x;
-      })(unboxBubbleNode($156));
+      })(unboxBubbleNode($154));
     },
-    y: function($157) {
+    y: function($155) {
       return (function(v) {
         return v.y;
-      })(unboxBubbleNode($157));
+      })(unboxBubbleNode($155));
     },
-    name: function($158) {
+    name: function($156) {
       return (function(v) {
         return v.name;
-      })(unboxBubbleNode($158));
+      })(unboxBubbleNode($156));
     },
-    loc: function($159) {
+    loc: function($157) {
       return (function(v) {
         return v.loc;
-      })(unboxBubbleNode($159));
+      })(unboxBubbleNode($157));
     },
-    path: function($160) {
+    path: function($158) {
       return (function(v) {
         return v.path;
-      })(unboxBubbleNode($160));
+      })(unboxBubbleNode($158));
     },
-    expanded: function($161) {
+    expanded: function($159) {
       return (function(v) {
         return v.expanded;
-      })(unboxBubbleNode($161));
+      })(unboxBubbleNode($159));
     }
   };
   var updateGraph = function(dictBind) {
@@ -16439,8 +16439,8 @@
                       return bind116(appendTo2(node$prime.enter)(Group.value)([classed2("node-group")]))(function(nodeEnter) {
                         return bind116(appendTo2(nodeEnter)(Circle.value)([radius3(function(d9) {
                           return nodeRadius(datum_.expanded(d9))(datum_.loc(d9));
-                        }), fill2(function($162) {
-                          return nodeColor(datum_.path($162));
+                        }), fill2(function($160) {
+                          return nodeColor(datum_.path($160));
                         }), classed2("node-circle")]))(function() {
                           return bind116(appendTo2(nodeEnter)(Text2.value)([text7(datum_.name), classed2("node-label")]))(function() {
                             return discard211(setAttributes2(node$prime.exit)([remove]))(function() {
@@ -16448,8 +16448,8 @@
                                 return bind116(selectUnder2(node$prime.update)(show8(Circle.value)))(function(updateCircles) {
                                   return discard211(setAttributes2(updateCircles)([radius3(function(d9) {
                                     return nodeRadius(datum_.expanded(d9))(datum_.loc(d9));
-                                  }), fill2(function($163) {
-                                    return nodeColor(datum_.path($163));
+                                  }), fill2(function($161) {
+                                    return nodeColor(datum_.path($161));
                                   })]))(function() {
                                     return bind116(selectUnder2(node$prime.update)(show8(Text2.value)))(function(updateLabels) {
                                       return discard211(setAttributes2(updateLabels)([text7(datum_.name)]))(function() {
@@ -16464,22 +16464,22 @@
                                                         return "translate(" + (show13(datum_.x(d9)) + ("," + (show13(datum_.y(d9)) + ")")));
                                                       };
                                                       return discard211(addTickFunction2("nodes")(new Step3(mergedNodes, [transform$prime(translateNode)])))(function() {
-                                                        return addTickFunction2("links")(new Step3(mergedLinks, [x12(function($164) {
+                                                        return addTickFunction2("links")(new Step3(mergedLinks, [x12(function($162) {
                                                           return (function(v1) {
                                                             return v1.x;
-                                                          })(link_.source($164));
-                                                        }), y12(function($165) {
+                                                          })(link_.source($162));
+                                                        }), y12(function($163) {
                                                           return (function(v1) {
                                                             return v1.y;
-                                                          })(link_.source($165));
-                                                        }), x22(function($166) {
+                                                          })(link_.source($163));
+                                                        }), x22(function($164) {
                                                           return (function(v1) {
                                                             return v1.x;
-                                                          })(link_.target($166));
-                                                        }), y22(function($167) {
+                                                          })(link_.target($164));
+                                                        }), y22(function($165) {
                                                           return (function(v1) {
                                                             return v1.y;
-                                                          })(link_.target($167));
+                                                          })(link_.target($165));
                                                         })]));
                                                       });
                                                     });
@@ -16661,7 +16661,7 @@
                                       };
                                     })())();
                                     var newExpanded = !clickedNode.expanded;
-                                    var v3 = unsafeSetField_("expanded")(newExpanded)(datum2);
+                                    unsafeSetField_("expanded")(newExpanded)(datum2)();
                                     log2(clickedId + (function() {
                                       if (newExpanded) {
                                         return " expanded";
@@ -16669,7 +16669,7 @@
                                       ;
                                       return " collapsed";
                                     })())();
-                                    var v4 = updateNodeExpansion_(simHandle)(nodeRadius)(v.declarationsData)(callsData)(datum2);
+                                    updateNodeExpansion_(simHandle)(nodeRadius)(v.declarationsData)(callsData)(datum2);
                                     return drawInterModuleDeclarationLinks_(v.zoomGroup)(nodeRadius)(v.declarationsData)(callsData)();
                                   };
                                 };
