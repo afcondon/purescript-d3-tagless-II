@@ -13614,9 +13614,9 @@
         });
       }
       console.log(`Found ${interModuleLinks.length} inter-module declaration links`);
-      let linksGroup = d3.select(zoomGroupSelection).select("g.inter-module-decl-links");
+      let linksGroup = zoomGroupSelection.select("g.inter-module-decl-links");
       if (linksGroup.empty()) {
-        linksGroup = d3.select(zoomGroupSelection).insert("g", "g.link").attr("class", "inter-module-decl-links");
+        linksGroup = zoomGroupSelection.insert("g", "g.link").attr("class", "inter-module-decl-links");
       }
       const paths = linksGroup.selectAll("path.inter-decl-link").data(interModuleLinks, (d9) => `${d9.sourceModule}:${d9.source}-${d9.targetModule}:${d9.target}`);
       paths.exit().remove();

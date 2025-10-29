@@ -336,8 +336,9 @@ export function unsafeSetField_(field) {
 export function addModuleArrowMarker_(svgSelection) {
   return () => {
     // Check if marker already exists
-    if (!d3.select(svgSelection).select('defs marker#module-arrow').node()) {
-      d3.select(svgSelection).append('defs')
+    // Note: svgSelection is already a D3 selection, don't wrap it again
+    if (!svgSelection.select('defs marker#module-arrow').node()) {
+      svgSelection.append('defs')
         .append('marker')
         .attr('id', 'module-arrow')
         .attr('viewBox', '0 -5 10 10')
