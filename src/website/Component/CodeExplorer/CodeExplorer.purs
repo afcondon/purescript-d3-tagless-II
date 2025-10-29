@@ -79,6 +79,7 @@ component = H.mkComponent
     , scene: initialScene forceLibrary
     , eventListener: Nothing
     , tags: Map.empty
+    , showWelcome: true
     }
 
 simulationEvent :: HS.Listener Action -> SelectionAttribute
@@ -215,6 +216,9 @@ handleAction = case _ of
   ClearTags -> do
     H.modify_ clearAllTags
     runSimulation
+
+  DismissWelcome -> do
+    H.modify_ _ { showWelcome = false }
 
 -- | The core simulation orchestrator - bridges Halogen state to D3 rendering
 -- |

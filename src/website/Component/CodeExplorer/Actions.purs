@@ -31,6 +31,7 @@ data Action
   | UnToggleChildrenOfNode NodeID
   | TagHalogen  -- Tag all Halogen-related packages
   | ClearTags   -- Clear all tags
+  | DismissWelcome  -- Dismiss welcome overlay
 
 data VizEvent = NodeClick NodeType NodeID 
 -- to be added:

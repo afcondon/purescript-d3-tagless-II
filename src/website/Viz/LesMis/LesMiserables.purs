@@ -82,8 +82,9 @@ drawSimplified forceLibrary activeForces model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   (root :: D3Selection_) <- attach selector
   svg        <- appendTo root Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "lesmis" ]
-  linksGroup <- appendTo svg Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ]
-  nodesGroup <- appendTo svg Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ]
+  zoomGroup  <- appendTo svg Group [ classed "zoom-group" ]
+  linksGroup <- appendTo zoomGroup Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ]
+  nodesGroup <- appendTo zoomGroup Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ]
 
   -- Initialize simulation to get enhanced data back
   { nodes: nodesInSim, links: linksInSim } <- init
@@ -117,7 +118,7 @@ drawSimplified forceLibrary activeForces model selector = do
         { extent: ZoomExtent { top: 0.0, left: 0.0, bottom: h, right: w }
         , scale: ScaleExtent 1.0 4.0
         , name: "LesMis"
-        , target: svg
+        , target: zoomGroup
         }
 
   -- Start the simulation!

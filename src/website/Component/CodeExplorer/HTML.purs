@@ -29,6 +29,8 @@ import Halogen.HTML.Properties (StepValue(..))
 import Halogen.HTML.Properties as HP
 import PSD3.CodeExplorer.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..))
 import PSD3.CodeExplorer.State (State, getStagingLinks, getStagingNodes, getSimulationVariables)
+import PSD3.Shared.ZoomSticker as ZoomSticker
+import PSD3.CodeExplorer.WelcomeOverlay as WelcomeOverlay
 
 -- | Filter for project modules only (from src/ directory), but keep all packages
 isProjectModule :: SpagoSimNode -> Boolean
@@ -68,7 +70,12 @@ render state =
       , -- Main visualization area (full screen)
         HH.div
           [ HP.classes [ HH.ClassName "svg-container", HH.ClassName "fullscreen-viz", HH.ClassName "spago-viz-container", HH.ClassName state.scene.cssClass ] ]
-          [ ]
+          [ ZoomSticker.render ]
+
+      , -- Welcome overlay (conditional)
+        if state.showWelcome
+           then WelcomeOverlay.render DismissWelcome
+           else HH.text ""
       ]
 
 renderSimState :: forall p. State -> HH.HTML p Action

@@ -72,7 +72,10 @@ render _ =
                 , HH.text ", for his presentation and example of finally tagless encodings in PureScript which provided the spark for this library's architecture."
                 ]
             , HH.p_
-                [ HH.text "The PureScript Core Team members, past, present and future and the wider PureScript community for building this incredibly nice language and ecosystem."
+                [ HH.text "Ian Ross, for his solution to the polymorphic attribute architecture with typeclasses, so neat."
+                ]
+            , HH.p_
+                [ HH.text "The PureScript Core Team members, past, present and future and the wider PureScript community for building this incredibly nice language and ecosystem. I'd particularly like to single out Mike Solomon, Jordan Martinez, Thomas Honeyman, Fabrizio Ferrai who listened to me drone on about this on conference calls."
                 ]
             ]
 

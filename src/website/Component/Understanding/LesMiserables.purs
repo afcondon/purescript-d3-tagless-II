@@ -33,6 +33,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.ExamplesNav as ExamplesNav
+import PSD3.Shared.ZoomSticker as ZoomSticker
 import PSD3.Website.Types (Route(..))
 import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))
@@ -164,7 +165,9 @@ render state =
             [ HH.text "Drag nodes to see the force simulation respond. The simulation applies multiple forces: center (pulls toward middle), charge (nodes repel), collision (prevents overlap), and link (pulls connected nodes together)." ]
         , HH.div
             [ HP.classes [ HH.ClassName "viz-container" ] ]
-            [ HH.div [ HP.classes [ HH.ClassName "lesmis-container" ] ] [] ]
+            [ ZoomSticker.render
+            , HH.div [ HP.classes [ HH.ClassName "lesmis-container" ] ] []
+            ]
         ]
 
     -- Code section

@@ -43,6 +43,8 @@ type State = {
 -- | Maps NodeID to a set of tag strings. Tags automatically propagate to CSS classes.
 -- | Example: Map.fromFoldable [(0, Set.fromFoldable ["package", "recent"]), (1, Set.fromFoldable ["module", "hot"])]
   , tags :: Map.Map NodeID (Set String)
+-- | Show welcome overlay on first load
+  , showWelcome :: Boolean
 }
 
 -- | Configuration for a visualization "scene" - a complete specification of:
