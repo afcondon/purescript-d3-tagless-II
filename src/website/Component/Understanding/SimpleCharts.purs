@@ -5,7 +5,8 @@ import Prelude
 import D3.Viz.GroupedBarChart as GroupedBarChart
 import D3.Viz.MultiLineChart as MultiLineChart
 import D3.Viz.RadialStackedBar as RadialStackedBar
-import D3.Viz.Charts.Model (groupedBarData, multiLineData)
+import D3.Viz.Charts.Model (groupedBarData)
+import PSD3.Data.Loaders (loadCSV)
 import PSD3.Interpreter.D3 (eval_D3M)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
@@ -42,8 +43,12 @@ component = H.mkComponent
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
   Initialize -> do
+    -- Load unemployment data from CSV
+    unemploymentData <- H.liftAff $ loadCSV "data/bls-metro-unemployment.csv"
+
+    -- Draw charts
     _ <- H.liftEffect $ eval_D3M $ GroupedBarChart.draw groupedBarData "div.grouped-bar-viz"
-    _ <- H.liftEffect $ eval_D3M $ MultiLineChart.draw multiLineData "div.multi-line-viz"
+    _ <- H.liftEffect $ eval_D3M $ MultiLineChart.drawFromCSV unemploymentData "div.multi-line-viz"
     _ <- H.liftEffect $ eval_D3M $ RadialStackedBar.draw groupedBarData "div.radial-stacked-viz"
     pure unit
 

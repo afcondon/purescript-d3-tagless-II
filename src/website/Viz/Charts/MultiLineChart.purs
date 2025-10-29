@@ -11,13 +11,18 @@ import PSD3.Internal.Attributes.Sugar (classed, d, fill, height, strokeColor, st
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.Charts.Model (MultiLineData)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
-import Data.Array (filter, head, length, nub)
+import Data.Array (filter, head, length, mapMaybe, nub)
 import Data.Foldable (maximum, minimum, traverse_)
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Number (fromString)
 import Data.Number.Format (toString)
 import Effect.Class (class MonadEffect)
+import Control.Monad.Except (runExcept)
+import Data.Either (hush)
+import Foreign (Foreign, readString)
+import Foreign.Index (readProp)
 
 -- Group data by series
 groupBySeries :: Array MultiLineData -> Array (Array MultiLineData)
@@ -33,6 +38,28 @@ getSeries = nub <<< map _.series
 -- Get all unique dates
 getDates :: Array MultiLineData -> Array String
 getDates = nub <<< map _.date
+
+-- | Parse CSV row from Foreign
+-- | Expected format: { division: String, date: String, unemployment: String }
+parseCSVRow :: Foreign -> Maybe MultiLineData
+parseCSVRow row = do
+  divisionF <- hush $ runExcept $ readProp "division" row
+  division <- hush $ runExcept $ readString divisionF
+  dateF <- hush $ runExcept $ readProp "date" row
+  date <- hush $ runExcept $ readString dateF
+  unemploymentF <- hush $ runExcept $ readProp "unemployment" row
+  unemploymentStr <- hush $ runExcept $ readString unemploymentF
+  unemployment <- fromString unemploymentStr
+  pure { series: division, date, value: unemployment }
+
+-- | Draw multi-line chart from CSV data
+drawFromCSV :: forall m.
+  Bind m =>
+  MonadEffect m =>
+  SelectionM D3Selection_ m =>
+  Array Foreign -> Selector D3Selection_ -> m Unit
+drawFromCSV csvData selector =
+  draw (mapMaybe parseCSVRow csvData) selector
 
 -- Create SVG path data for a line
 linePath :: Number -> Number -> Number -> Number -> Array MultiLineData -> String
