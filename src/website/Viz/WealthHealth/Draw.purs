@@ -3,6 +3,7 @@ module D3.Viz.WealthHealth.Draw where
 import Prelude
 
 import D3.Viz.WealthHealth.Unsafe (coerceDatumToKey, datum_)
+import Data.Int (floor)
 import Data.Number (log, sqrt)
 import Data.Traversable (traverse)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSelection, setAttributes, updateJoin)
@@ -75,6 +76,12 @@ scaleRadius population =
     scaled = sqrt normalized * maxRadius
   in
     max minRadius scaled
+
+-- | Format income values for axis labels
+formatIncome :: Number -> String
+formatIncome value
+  | value >= 1000.0 = "$" <> show (floor (value / 1000.0)) <> "k"
+  | otherwise = "$" <> show (floor value)
 
 -- | Generate tick values for logarithmic income scale
 -- | Similar to D3's x.ticks() for log scale
@@ -233,19 +240,46 @@ draw selector = do
 
   -- Add X-axis (bottom)
   xAxisLine <- appendTo svg Line
-    [ x1 0.0
-    , y1 config.height
-    , x2 config.width
-    , y2 config.height
+    [ x1 config.marginLeft
+    , y1 (config.height - config.marginBottom)
+    , x2 (config.width - config.marginRight)
+    , y2 (config.height - config.marginBottom)
     , strokeColor "#333"
-    , strokeWidth 2.0
+    , strokeWidth 1.5
     , classed "x-axis"
     ]
+
+  -- Add X-axis tick marks and labels
+  let
+    createXTick tickValue = do
+      -- Tick mark (short vertical line)
+      tickMark <- appendTo svg Line []
+      setAttributes tickMark
+        [ x1 (scaleX config tickValue)
+        , x2 (scaleX config tickValue)
+        , y1 (config.height - config.marginBottom)
+        , y2 (config.height - config.marginBottom + 6.0)
+        , strokeColor "#333"
+        , strokeWidth 1.0
+        ]
+      -- Tick label (formatted income value)
+      tickLabel <- appendTo svg Text []
+      setAttributes tickLabel
+        [ x (scaleX config tickValue)
+        , y (config.height - config.marginBottom + 15.0)
+        , textAnchor "middle"
+        , fontSize 10.0
+        , fill "#333"
+        , text $ formatIncome tickValue
+        ]
+      pure unit
+
+  _ <- traverse createXTick xTicks
 
   -- Add X-axis label (Wealth)
   xAxisLabel <- appendTo svg Text
     [ x (config.width / 2.0)
-    , y (config.height - 10.0)
+    , y (config.height - 5.0)
     , textAnchor "middle"
     , fontSize 14.0
     , fill "#333"
@@ -255,14 +289,41 @@ draw selector = do
 
   -- Add Y-axis (left)
   yAxisLine <- appendTo svg Line
-    [ x1 0.0
-    , y1 0.0
-    , x2 0.0
-    , y2 config.height
+    [ x1 config.marginLeft
+    , y1 config.marginTop
+    , x2 config.marginLeft
+    , y2 (config.height - config.marginBottom)
     , strokeColor "#333"
-    , strokeWidth 2.0
+    , strokeWidth 1.5
     , classed "y-axis"
     ]
+
+  -- Add Y-axis tick marks and labels
+  let
+    createYTick tickValue = do
+      -- Tick mark (short horizontal line)
+      tickMark <- appendTo svg Line []
+      setAttributes tickMark
+        [ x1 (config.marginLeft - 6.0)
+        , x2 config.marginLeft
+        , y1 (scaleY config tickValue)
+        , y2 (scaleY config tickValue)
+        , strokeColor "#333"
+        , strokeWidth 1.0
+        ]
+      -- Tick label (life expectancy value)
+      tickLabel <- appendTo svg Text []
+      setAttributes tickLabel
+        [ x (config.marginLeft - 10.0)
+        , y (scaleY config tickValue + 3.0)
+        , textAnchor "end"
+        , fontSize 10.0
+        , fill "#333"
+        , text $ show $ floor tickValue
+        ]
+      pure unit
+
+  _ <- traverse createYTick yTicks
 
   -- Add Y-axis label (Health) - rotated
   yAxisLabel <- appendTo svg Text
