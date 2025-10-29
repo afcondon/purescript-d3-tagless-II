@@ -438,9 +438,10 @@ export function drawInterModuleDeclarationLinks_(zoomGroupSelection) {
     console.log(`Found ${interModuleLinks.length} inter-module declaration links`)
 
     // Create or update inter-module links group
-    let linksGroup = d3.select(zoomGroupSelection).select('g.inter-module-decl-links')
+    // Note: zoomGroupSelection is already a D3 selection, don't wrap it again
+    let linksGroup = zoomGroupSelection.select('g.inter-module-decl-links')
     if (linksGroup.empty()) {
-      linksGroup = d3.select(zoomGroupSelection)
+      linksGroup = zoomGroupSelection
         .insert('g', 'g.link')  // Insert before module-level links
         .attr('class', 'inter-module-decl-links')
     }
