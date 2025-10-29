@@ -7,16 +7,22 @@ module D3.Viz.GroupedBarChart where
 
 import Prelude
 
-import PSD3.Internal.Attributes.Sugar (classed, fill, height, strokeColor, text, textAnchor, transform, width, x, y)
+import PSD3.Internal.Attributes.Sugar (classed, fill, height, strokeColor, text, textAnchor, transform, viewBox, width, x, y)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.Charts.Model (GroupedBarData)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
-import Data.Array (filter, groupBy, nub, length, findIndex, index)
+import Data.Array (catMaybes, concat, filter, groupBy, nub, length, findIndex, index, take)
+import Data.Array as Data.Array
 import Data.Foldable (traverse_, foldr, maximum)
 import Data.Int (round, toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Number (fromString)
 import Data.Number.Format (toString)
 import Effect.Class (class MonadEffect)
+import Control.Monad.Except (runExcept)
+import Data.Either (hush)
+import Foreign (Foreign, readString, readNumber)
+import Foreign.Index (readProp)
 
 -- Group data by state
 groupByState :: Array GroupedBarData -> Array (Array GroupedBarData)
@@ -32,6 +38,40 @@ getStates = nub <<< map _.state
 -- Get all unique age groups
 getAges :: Array GroupedBarData -> Array String
 getAges = nub <<< map _.age
+
+-- Parse CSV row from Foreign (wide format to long format)
+-- Expected columns: State, Under 5 Years, 5 to 13 Years, 14 to 17 Years, 18 to 24 Years, 25 to 44 Years, 45 to 64 Years, 65 Years and Over
+parseCSVRow :: Foreign -> Maybe (Array GroupedBarData)
+parseCSVRow row = do
+  stateF <- hush $ runExcept $ readProp "State" row
+  state <- hush $ runExcept $ readString stateF
+
+  -- Parse each age column
+  let ageColumns =
+        [ {name: "Under 5 Years", label: "Under 5"}
+        , {name: "5 to 13 Years", label: "5 to 13"}
+        , {name: "14 to 17 Years", label: "14 to 17"}
+        , {name: "18 to 24 Years", label: "18 to 24"}
+        , {name: "25 to 44 Years", label: "25 to 44"}
+        , {name: "45 to 64 Years", label: "45 to 64"}
+        , {name: "65 Years and Over", label: "65+"}
+        ]
+
+  let parseAge col = do
+        valF <- hush $ runExcept $ readProp col.name row
+        -- Try reading as number first, then as string
+        population <- case hush $ runExcept $ readNumber valF of
+          Just n -> Just n
+          Nothing -> do
+            str <- hush $ runExcept $ readString valF
+            fromString str
+        pure { state, age: col.label, population }
+
+  pure $ catMaybes $ map parseAge ageColumns
+
+-- Parse entire CSV and flatten to single array
+parsePopulationCSV :: Array Foreign -> Array GroupedBarData
+parsePopulationCSV rows = concat $ catMaybes $ map parseCSVRow rows
 
 -- Draw grouped bar chart
 -- Matches Observable implementation with 928x600 dimensions
@@ -86,6 +126,7 @@ draw data' selector = do
       classed "grouped-bar-chart"
     , width dims.width
     , height dims.height
+    , viewBox 0.0 0.0 dims.width dims.height
     ]
 
   chartGroup <- appendTo svg Group [

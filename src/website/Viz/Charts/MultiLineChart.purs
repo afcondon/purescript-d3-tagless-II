@@ -7,17 +7,19 @@ module D3.Viz.MultiLineChart where
 
 import Prelude
 
-import PSD3.Internal.Attributes.Sugar (classed, d, fill, height, strokeColor, strokeWidth, text, textAnchor, transform, width, x, y)
+import PSD3.Internal.Attributes.Sugar (classed, d, fill, height, strokeColor, strokeWidth, text, textAnchor, transform, viewBox, width, x, y)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.Charts.Model (MultiLineData)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
-import Data.Array (filter, head, length, mapMaybe, nub)
+import Data.Array (filter, findIndex, head, length, mapMaybe, nub, sortBy)
+import Data.Array as Data.Array
 import Data.Foldable (maximum, minimum, traverse_)
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Number (fromString)
 import Data.Number.Format (toString)
+import Data.String.CodeUnits as Data.String.CodeUnits
 import Effect.Class (class MonadEffect)
 import Control.Monad.Except (runExcept)
 import Data.Either (hush)
@@ -38,6 +40,13 @@ getSeries = nub <<< map _.series
 -- Get all unique dates
 getDates :: Array MultiLineData -> Array String
 getDates = nub <<< map _.date
+
+-- Extract year from date string (YYYY-MM-DD format)
+getYear :: String -> Maybe String
+getYear dateStr =
+  case Data.String.CodeUnits.take 4 dateStr of
+    year | Data.String.CodeUnits.length year == 4 -> Just year
+    _ -> Nothing
 
 -- | Parse CSV row from Foreign
 -- | Expected format: { division: String, date: String, unemployment: String }
@@ -102,6 +111,7 @@ draw data' selector = do
       classed "multi-line-chart"
     , width dims.width
     , height dims.height
+    , viewBox 0.0 0.0 dims.width dims.height
     ]
 
   chartGroup <- appendTo svg Group [
@@ -140,7 +150,7 @@ draw data' selector = do
       drawYTick value = do
         let tickY = yScale value
         _ <- appendTo yAxis Text [
-            x (-10.0)
+            x (-5.0)  -- Moved closer to avoid truncation
           , y (tickY + 4.0)
           , text (toString value <> "%")
           , textAnchor "end"
@@ -149,6 +159,44 @@ draw data' selector = do
         pure unit
 
   _ <- traverse_ drawYTick yTicks
+
+  -- Draw x-axis (years)
+  xAxis <- appendTo chartGroup Group [
+      transform [ \_ -> "translate(0," <> show chartHeight <> ")" ]
+    , classed "x-axis"
+    ]
+
+  -- Get unique years from data for x-axis labels
+  let allDates = sortBy compare $ getDates data'
+  let dateCount = toNumber $ length allDates
+  let xScale i = (toNumber i) * (chartWidth / (dateCount - 1.0))
+
+  -- Sample years to avoid overcrowding - show every 2nd year
+  let yearsToShow = ["2000", "2002", "2004", "2006", "2008", "2010", "2012"]
+  let drawXTick :: String -> m Unit
+      drawXTick year = do
+        -- Find the first date index that matches this year
+        case filter (\d -> case getYear d of
+                            Just y -> y == year
+                            Nothing -> false) allDates of
+          [] -> pure unit
+          dates -> case head dates of
+            Nothing -> pure unit
+            Just firstDate ->
+              case Data.Array.findIndex (\d -> d == firstDate) allDates of
+                Nothing -> pure unit
+                Just idx -> do
+                  let tickX = xScale idx
+                  _ <- appendTo xAxis Text [
+                      x tickX
+                    , y 20.0
+                    , text year
+                    , textAnchor "middle"
+                    , classed "axis-label"
+                    ]
+                  pure unit
+
+  _ <- traverse_ drawXTick yearsToShow
 
   -- Note: Observable version uses hover interaction to show series labels
   -- rather than a static legend. The interactivity is handled via CSS/JS

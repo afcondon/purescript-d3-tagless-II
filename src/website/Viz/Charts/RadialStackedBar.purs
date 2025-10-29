@@ -8,7 +8,7 @@ module D3.Viz.RadialStackedBar where
 
 import Prelude
 
-import PSD3.Internal.Attributes.Sugar (classed, d, fill, fillOpacity, height, strokeColor, text, textAnchor, transform, width, x, y)
+import PSD3.Internal.Attributes.Sugar (classed, d, dy, fill, fillOpacity, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, viewBox, width, x, y)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.Charts.Model (GroupedBarData)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
@@ -108,11 +108,11 @@ draw data' selector = do
       classed "radial-stacked-bar"
     , width dims.width
     , height dims.height
+    , viewBox (negate centerX) (negate centerY) dims.width dims.height
     ]
 
   chartGroup <- appendTo svg Group [
-      transform [ \_ -> "translate(" <> show centerX <> "," <> show centerY <> ")" ]
-    , classed "chart"
+      classed "chart"
     ]
 
   -- Draw each state's stacked bar
@@ -152,6 +152,97 @@ draw data' selector = do
 
   _ <- traverse_ (\t -> drawStateBar (fst t) (snd t)) $ mapWithIndex Tuple states
 
+  -- Draw circular grid lines (y-axis)
+  yAxisGroup <- appendTo chartGroup Group [
+      classed "y-axis"
+    , textAnchor "middle"
+    ]
+
+  -- Add "Population" label at the top
+  _ <- appendTo yAxisGroup Text [
+      y (negate dims.outerRadius - 10.0)
+      , dy (-16.0)  -- Approximately -1em
+      , text "Population"
+      , classed "axis-label"
+    ]
+
+  -- Draw circular grid lines at regular intervals
+  let yTicks = [0.25 * maxTotal, 0.5 * maxTotal, 0.75 * maxTotal, maxTotal]
+  let radiusScale v = dims.innerRadius + (v / maxTotal) * (dims.outerRadius - dims.innerRadius)
+
+  let drawCircularGrid :: Number -> m Unit
+      drawCircularGrid value = do
+        let gridRadius = radiusScale value
+        gridGroup <- appendTo yAxisGroup Group [
+            fill "none"
+          , classed "grid-line"
+          ]
+
+        -- Draw circle
+        _ <- appendTo gridGroup Circle [
+            radius gridRadius
+          , strokeColor "#000000"
+          , strokeOpacity 0.5
+          , fill "none"
+          ]
+
+        -- Draw label with white outline (stroke) and black fill
+        textBg <- appendTo gridGroup Text [
+            y (negate gridRadius)
+          , dy 5.6  -- Approximately 0.35em
+          , text (formatSI value)
+          , strokeColor "#ffffff"
+          , strokeWidth 5.0
+          , fill "none"
+          , classed "grid-label-bg"
+          ]
+
+        textFg <- appendTo gridGroup Text [
+            y (negate gridRadius)
+          , dy 5.6  -- Approximately 0.35em
+          , text (formatSI value)
+          , fill "#000000"
+          , classed "grid-label"
+          ]
+
+        pure unit
+
+  _ <- traverse_ drawCircularGrid yTicks
+
+  -- Draw color legend
+  legendGroup <- appendTo chartGroup Group [
+      classed "legend"
+    ]
+
+  let ageCount = length ages
+  let drawLegendItem :: Int -> String -> m Unit
+      drawLegendItem idx age' = do
+        let yOffset = (toNumber ageCount / 2.0 - toNumber idx - 1.0) * 20.0
+        itemGroup <- appendTo legendGroup Group [
+            transform [ \_ -> "translate(-40," <> toString yOffset <> ")" ]
+          , classed "legend-item"
+          ]
+
+        -- Color rectangle
+        _ <- appendTo itemGroup Rect [
+            width 18.0
+          , height 18.0
+          , fill (getAgeColor age')
+          ]
+
+        -- Age label
+        _ <- appendTo itemGroup Text [
+            x 24.0
+          , y 9.0
+          , dy 5.6  -- Approximately 0.35em
+          , text age'
+          , classed "legend-label"
+          ]
+
+        pure unit
+
+  _ <- traverse_ (\t -> drawLegendItem (fst t) (snd t)) $ mapWithIndex Tuple ages
+
   -- Draw state labels around the perimeter
   let drawStateLabel :: Int -> String -> m Unit
       drawStateLabel stateIdx state' = do
@@ -174,3 +265,10 @@ draw data' selector = do
   _ <- traverse_ (\t -> drawStateLabel (fst t) (snd t)) $ mapWithIndex Tuple states
 
   pure unit
+
+-- Format large numbers with SI prefix (millions)
+formatSI :: Number -> String
+formatSI n =
+  if n >= 1000000.0
+    then toString (n / 1000000.0) <> "M"
+    else toString n
