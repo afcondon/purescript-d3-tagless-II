@@ -60,6 +60,7 @@ foreign import keyIsSourceTarget_ :: ComputeKeyFunction_ -- used for links in si
 -- which we haven't really modelled in PureScript (opaque type) but maybe it will turn out that we 
 -- needed to all along
 foreign import d3DataWithKeyFunction_ :: forall d. Array d -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
+foreign import d3DataWithFunction_ :: (Datum_ -> Array Datum_) -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care

@@ -3,6 +3,7 @@ export const emptyD3Data_ = null
 export function d3Append_(element) { return selection => { return selection.append(element) } }
 export function d3Data_(data) { return selection => { return selection.data(data) } }
 export function d3DataWithKeyFunction_(data) { return keyFn => selection => { return selection.data(data, keyFn) } }
+export function d3DataWithFunction_(extractFn) { return keyFn => selection => { return selection.data(extractFn, keyFn) } }
 export function d3EnterAndAppend_(element) { return selection => { return selection.enter().append(element) } }
 export function d3GetExitSelection_(selection) { return selection.exit() }
 export function d3GetEnterSelection_(selection) { return selection.enter() }

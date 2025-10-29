@@ -6,7 +6,7 @@ import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import PSD3.Internal.Types (D3Selection_, D3Simulation_)
 import PSD3.Internal.FFI (defaultLinkTick_, defaultNodeTick_, disableTick_, getLinksFromSimulation_, getNodes_, onTick_)
 import PSD3.Internal.Selection.Types (applySelectionAttributeD3)
-import PSD3.Internal.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionOn, selectionOpenSelection, selectionSelectUnder, selectionUpdateJoin)
+import PSD3.Internal.Selection.Functions (selectionAppendElement, selectionAttach, selectionFilterSelection, selectionJoin, selectionMergeSelections, selectionModifySelection, selectionNestedJoin, selectionOn, selectionOpenSelection, selectionSelectUnder, selectionUpdateJoin)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Step(..), SimVariable(..), _handle, _name)
 import PSD3.Internal.Simulation.Functions (simulationActualizeForces, simulationMergeNewData, simulationOn, simulationSetLinks, simulationSetLinksFromSelection, simulationSetNodes, simulationSetNodesFromSelection, simulationSetVariable, simulationStart, simulationStop)
 import PSD3.Internal.Sankey.Types (SankeyLayoutState_)
@@ -54,6 +54,7 @@ instance d3TaglessD3M :: SelectionM D3Selection_ (D3M state D3Selection_) where
   mergeSelections s_ = selectionMergeSelections s_
   setAttributes s_   = selectionModifySelection s_
   simpleJoin s_      = selectionJoin s_
+  nestedJoin s_      = selectionNestedJoin s_
   updateJoin s_      = selectionUpdateJoin s_
   on s_              = selectionOn s_
 
@@ -124,6 +125,7 @@ instance SelectionM D3Selection_ (D3SimM row D3Selection_) where
   on s_              = simulationOn s_ -- NB simulation "on" is handled differently from selectionOn
   openSelection s_   = selectionOpenSelection s_
   simpleJoin s_      = selectionJoin s_
+  nestedJoin s_      = selectionNestedJoin s_
   updateJoin s_      = selectionUpdateJoin s_
 
 -- | Simplified SimulationM instance - record-based initialization
@@ -294,6 +296,7 @@ instance SelectionM D3Selection_ (D3SankeyM row D3Selection_) where
   on s_              = selectionOn s_
   openSelection s_   = selectionOpenSelection s_
   simpleJoin s_      = selectionJoin s_
+  nestedJoin s_      = selectionNestedJoin s_
   updateJoin s_      = selectionUpdateJoin s_
 
 -- SankeyM instance - Sankey-specific operations

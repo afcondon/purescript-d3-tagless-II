@@ -68,6 +68,7 @@
 -- | - [D3 Selections](https://d3js.org/d3-selection) for the underlying D3.js concepts
 module PSD3.Capabilities.Selection where
 
+import Data.Foldable (class Foldable)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (Datum_, Element, Index_, Selector)
 import PSD3.Internal.Selection.Types (Behavior, SelectionAttribute)
@@ -192,6 +193,42 @@ class (Monad m) <= SelectionM selection m where
   -- |
   -- | Maps to D3's data join - see https://d3js.org/d3-selection#joining-data
   simpleJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_) -> m selection
+
+  -- | Bind data to elements using nested selections where child data is extracted from parent datum.
+  -- |
+  -- | Use this for **hierarchical data structures** where child elements need data derived from
+  -- | their parent element's bound datum. This enables patterns like tables (rows → cells) or
+  -- | nested visualizations (groups → elements).
+  -- |
+  -- | ```purescript
+  -- | let matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+  -- |
+  -- | -- First join: bind rows to outer array
+  -- | rows <- simpleJoin tbody Tr matrix keyIsID_
+  -- |
+  -- | -- Second join: bind cells to each row's inner array
+  -- | cellSelection <- openSelection rows "td"
+  -- | cells <- nestedJoin cellSelection Td
+  -- |            (\d -> coerceDatumToArray d)  -- Extract array from parent datum
+  -- |            keyIsID_
+  -- | ```
+  -- |
+  -- | The extraction function receives the parent element's datum and returns any `Foldable`
+  -- | container (Array, List, Map.values, etc.). This is automatically converted to an Array
+  -- | for D3's use.
+  -- |
+  -- | **Type flexibility:** The `Foldable` constraint means you can extract from:
+  -- | - Arrays: `\d -> coerceDatumToArray d`
+  -- | - Lists: `\d -> coerceDatumToList d`
+  -- | - Map values: `\d -> Map.values (coerceDatumToMap d)`
+  -- | - Lenses: `\d -> view (_record <<< _children) d`
+  -- | - Transformed data: `\d -> filter p >>> map f $ extractData d`
+  -- |
+  -- | See Mike Bostock's [Nested Selections](https://bost.ocks.org/mike/nest/) for more on this pattern.
+  -- |
+  -- | Maps to D3's `.data(function(d) { return d; })` pattern.
+  nestedJoin      :: ∀ f datum. Foldable f =>
+                     selection -> Element -> (Datum_ -> f datum) -> (Datum_ -> Index_) -> m selection
 
   -- | Bind data to elements using the General Update Pattern (enter/update/exit).
   -- |
