@@ -4,6 +4,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState, modify_)
 import D3.Viz.ThreeLittleCircles as Circles
+import D3.Viz.ThreeLittleDimensions as Dimensions
 import D3.Viz.Parabola as Parabola
 import PSD3.Button as Button
 import PSD3.Expandable as Expandable
@@ -79,11 +80,21 @@ component = H.mkComponent
                 ]
               ]
             , Expandable.content_ state.code $ 
-                if state.toggle 
+                if state.toggle
                 then renderNotebook_ (view _simple state)
                 else renderNotebook_ (view _parabola state)
-            ]  
+            ]
       , HH.div [ Utils.tailwindClass "svg-container" ] []
+      , HH.div
+            [ Utils.tailwindClass "story-panel-extra" ]
+            [ HH.h3_ [ HH.text "Nested Data Binding" ]
+            , HH.p_ [ HH.text "Demonstrates three dimensions of data: 2D array → rows → cells" ]
+            , HH.div
+                [ Utils.tailwindClass "nested-dimensions-container"
+                , HP.id "nested-dimensions"
+                ]
+                []
+            ]
       ]
         
 handleAction :: forall m. Bind m => MonadAff m => MonadState State m => 
@@ -97,6 +108,7 @@ handleAction = case _ of
     parabola' <- traverse substituteSnippetCells parabola
     _parabola .= parabola'
     _ <- H.liftEffect $ eval_D3M $ Circles.drawThreeCircles "div.svg-container"
+    _ <- H.liftEffect $ eval_D3M $ Dimensions.drawThreeDimensions "#nested-dimensions"
     pure unit
 
   ToggleExample -> do

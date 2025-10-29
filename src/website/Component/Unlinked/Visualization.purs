@@ -13,6 +13,7 @@ import D3.Viz.Sankey.Model as Sankey
 import D3.Viz.SankeyDiagram as SankeyDiagram
 import D3.Viz.GUP as GUP
 import D3.Viz.ThreeLittleCircles as ThreeLittleCircles
+import D3.Viz.ThreeLittleDimensions as ThreeLittleDimensions
 import D3.Viz.Tree.Configure as Tree
 import D3.Viz.TreeSimple as TreeSimple
 import PSD3.Internal.Hierarchical (getTreeViaAJAX, makeModel)
@@ -166,6 +167,10 @@ handleAction = case _ of
       -- Interactive Examples
       "three-little-circles" -> do
         _ <- liftEffect $ eval_D3M $ ThreeLittleCircles.drawThreeCircles selector
+        pure unit
+
+      "three-little-dimensions" -> do
+        _ <- liftEffect $ eval_D3M $ ThreeLittleDimensions.drawThreeDimensions selector
         pure unit
 
       -- General Update Pattern (animated)
