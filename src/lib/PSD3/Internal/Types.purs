@@ -21,7 +21,7 @@ foreign import data D3DomNode_    :: Type
 type Selector :: forall k. k -> Type
 type Selector selection = String 
 
-data Element = Div | Svg | Circle | Line | Group | Text | Path | Rect
+data Element = Div | Svg | Circle | Line | Group | Text | Path | Rect | Title
 instance showElement :: Show Element where
   show Div    = "div"
   show Svg    = "svg"
@@ -31,6 +31,7 @@ instance showElement :: Show Element where
   show Text   = "text"
   show Path   = "path"
   show Rect   = "rect"
+  show Title  = "title"
   
 -- TODO find a way to get units back in without making DSL hideous
 data UnitType = Px | Pt | Em | Rem | Percent

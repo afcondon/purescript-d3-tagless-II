@@ -16,6 +16,7 @@ type NationPoint =
   , population :: Number
   , lifeExpectancy :: Number
   , regionColor :: String
+  , region :: String
   }
 
 -- | Configuration for visualization dimensions and margins
@@ -347,6 +348,12 @@ draw selector = do
       , strokeWidth 0.5
       , classed "nation-circle enter"
       ]
+
+    -- Add title tooltips to entering circles (browser-native hover)
+    let tooltipText d = datum_.name d <> "\n" <> datum_.region d
+    newTitles <- appendTo newCircles Title []
+    setAttributes newTitles
+      [ text tooltipText ]
 
     -- Use General Update Pattern for labels (parallel join)
     labelEnterSelection <- openSelection chartGroup "text"

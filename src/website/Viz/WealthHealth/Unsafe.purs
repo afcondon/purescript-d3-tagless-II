@@ -12,6 +12,7 @@ datum_ ::
   , population :: Datum_ -> Number
   , lifeExpectancy :: Datum_ -> Number
   , regionColor :: Datum_ -> String
+  , region :: Datum_ -> String
   , indexNum :: Index_ -> Number
   }
 datum_ =
@@ -20,6 +21,7 @@ datum_ =
   , population: \d -> (unsafeCoerce d).population
   , lifeExpectancy: \d -> (unsafeCoerce d).lifeExpectancy
   , regionColor: \d -> (unsafeCoerce d).regionColor
+  , region: \d -> (unsafeCoerce d).region
   , indexNum: \i -> unsafeCoerce i
   }
 

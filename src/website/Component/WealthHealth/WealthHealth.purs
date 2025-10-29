@@ -124,6 +124,7 @@ nationPointToDrawData np =
   , population: np.population
   , lifeExpectancy: np.lifeExpectancy
   , regionColor: regionColor np.region
+  , region: regionName np.region
   }
 
 -- Debug version that logs the region
@@ -135,6 +136,7 @@ nationPointToDrawDataDebug np =
      , population: np.population
      , lifeExpectancy: np.lifeExpectancy
      , regionColor: color
+     , region: regionName np.region
      }
 
 -- | Handle actions
