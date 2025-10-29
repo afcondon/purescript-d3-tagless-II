@@ -5,6 +5,8 @@ import Prelude
 import Data.Maybe (Maybe(..), fromMaybe)
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import Halogen.HTML.Properties (attr)
+import Halogen.HTML.Core (AttrName(..))
 import PSD3.Website.Types (Route)
 import PSD3.RoutingDSL (routeToPath)
 
@@ -72,15 +74,23 @@ renderTOCItem item =
       RouteLink _ -> [ HH.ClassName "toc-nav__item--route-link" ]
       _ -> []
     classes = [ baseClass ] <> levelClass <> routeLinkClass
-    href = case item.target of
-      AnchorLink anchor -> "#" <> anchor
-      RouteLink route -> "#" <> routeToPath route
   in
-    HH.a
-      [ HP.href href
-      , HP.classes classes
-      ]
-      [ HH.text item.label ]
+    case item.target of
+      -- For anchor links, use data attribute for JavaScript handling
+      AnchorLink anchor ->
+        HH.a
+          [ HP.href $ "#" <> anchor  -- Keep href for accessibility
+          , HP.classes classes
+          , attr (AttrName "data-anchor-link") anchor  -- Mark as anchor link
+          ]
+          [ HH.text item.label ]
+      -- For route links, use normal navigation
+      RouteLink route ->
+        HH.a
+          [ HP.href $ "#" <> routeToPath route
+          , HP.classes classes
+          ]
+          [ HH.text item.label ]
 
 -- | Helper: Create a TOC item that links to an anchor on the current page
 tocAnchor :: String -> String -> Int -> TOCItem
@@ -97,3 +107,7 @@ tocRoute route label level =
   , label
   , level
   }
+
+-- | This import ensures the JavaScript anchor handling code is loaded
+-- | The JS file contains a self-executing function that sets up click handlers
+foreign import initAnchorLinks :: Unit

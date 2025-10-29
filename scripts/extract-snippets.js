@@ -88,7 +88,7 @@ class SnippetExtractor {
     });
   }
 
-  // Extract specific lines from a file
+  // Extract specific lines from a file and compact them
   extractLines(filePath, startLine, endLine) {
     const content = fs.readFileSync(filePath, 'utf8');
     const lines = content.split('\n');
@@ -96,8 +96,38 @@ class SnippetExtractor {
     // Line numbers are 1-indexed, array is 0-indexed
     const extracted = lines.slice(startLine - 1, endLine);
 
+    // Filter out documentation comments and excessive blank lines
+    const compacted = [];
+    let lastWasBlank = false;
+
+    for (const line of extracted) {
+      const trimmed = line.trim();
+
+      // Skip PureScript doc comments (-- |)
+      if (trimmed.startsWith('-- |')) {
+        continue;
+      }
+
+      // Skip example code blocks in comments (-- | ```)
+      if (trimmed === '-- | ```purescript' || trimmed === '-- | ```') {
+        continue;
+      }
+
+      // Keep at most one consecutive blank line
+      if (trimmed.length === 0) {
+        if (!lastWasBlank) {
+          compacted.push(line);
+          lastWasBlank = true;
+        }
+        continue;
+      }
+
+      compacted.push(line);
+      lastWasBlank = false;
+    }
+
     // Find minimum indentation to normalize
-    const minIndent = extracted
+    const minIndent = compacted
       .filter(line => line.trim().length > 0)
       .reduce((min, line) => {
         const match = line.match(/^(\s*)/);
@@ -106,9 +136,14 @@ class SnippetExtractor {
       }, Infinity);
 
     // Remove common indentation
-    const normalized = extracted.map(line =>
+    const normalized = compacted.map(line =>
       line.substring(Math.min(minIndent, line.length))
     );
+
+    // Trim trailing blank lines
+    while (normalized.length > 0 && normalized[normalized.length - 1].trim() === '') {
+      normalized.pop();
+    }
 
     return normalized.join('\n');
   }
@@ -191,7 +226,7 @@ ${snippetArray.length === 0 ? '  []' : '  [ ' + snippetArray.map(s => `{ name: "
 -- | Look up a snippet by name
 getSnippet :: String -> String
 getSnippet name = case name of
-${snippetArray.map(s => `  "${s.name}" -> snippet_${s.name}_content`).join('\n  ')}
+${snippetArray.map(s => `  "${s.name}" -> snippet_${s.name}_content`).join('\n')}
   _ -> "Snippet not found: " <> name
 
 -- | Get snippet info by name
@@ -202,7 +237,7 @@ ${snippetArray.map(s => `  "${s.name}" ->
     , content: snippet_${s.name}_content
     , source: "${s.source}"
     , lines: "${s.lines}"
-    }`).join('\n  ')}
+    }`).join('\n')}
   _ ->
     { name: "not-found"
     , content: "Snippet not found: " <> name

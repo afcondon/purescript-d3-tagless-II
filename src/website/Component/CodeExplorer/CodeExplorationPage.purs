@@ -1,7 +1,8 @@
 module PSD3.CodeExplorer.CodeExplorationPage where -- CodeExplorer
 import Prelude
 
-import Data.Maybe (Maybe(..), fromMaybe)
+import CodeSnippet (codeSnippet, triggerPrismHighlighting)
+import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
 import Halogen as H
@@ -14,14 +15,11 @@ import Web.HTML.Window (history)
 import PSD3.Shared.RHSNavigation as RHSNav
 import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Website.Types (Route(..))
-import PSD3.Shared.Utilities (syntaxHighlightedCode)
-import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))
 
 -- | State for code exploration page
 type State =
   { snippetId :: String
-  , snippetCode :: Maybe String
   }
 
 -- | Input parameter - which snippet to explore
@@ -42,7 +40,6 @@ component :: forall q o. H.Component q Input o Aff
 component = H.mkComponent
   { initialState: \snippetId ->
       { snippetId
-      , snippetCode: Nothing
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -53,11 +50,7 @@ component = H.mkComponent
 
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
-  Initialize -> do
-    state <- H.get
-    -- Load the snippet code
-    code <- H.liftAff $ readSnippetFiles (state.snippetId <> ".purs")
-    H.modify_ _ { snippetCode = Just code }
+  Initialize -> triggerPrismHighlighting
 
   GoBack -> do
     -- Navigate back using browser history
@@ -120,9 +113,7 @@ render state =
             [ HH.text "The Code" ]
         , HH.p_
             [ HH.text "Here's the complete code for this example:" ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            (syntaxHighlightedCode $ fromMaybe ("-- Snippet not found: " <> state.snippetId <> ".purs") state.snippetCode)
+        , codeSnippet state.snippetId "haskell"
         ]
 
     -- Line by line breakdown with function references

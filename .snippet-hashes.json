@@ -1,4 +1,12 @@
 {
-  "selectionMClass": "ba125456",
-  "simulationM2Class": "f36e4606"
+  "selectionMClass": "de0ccb2b",
+  "simulationM2Class": "276d7bf1",
+  "TLCSimple": "c0a13158",
+  "GUP": "59d08dfd",
+  "ThreeDimensions": "9847a3d9",
+  "ThreeDimensionsSets": "24bcbb43",
+  "TLCParabola": "1335306a",
+  "BarChartDraw": "8753e869",
+  "LineChartDraw": "911bdb12",
+  "ScatterPlotQuartet": "645e893b"
 }

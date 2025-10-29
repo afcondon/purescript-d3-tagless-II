@@ -13,8 +13,6 @@ import D3.Viz.ThreeLittleCircles.Unsafe (coerceIndex)
 import Data.Int (toNumber)
 import Prelude (bind, discard, negate, pure, (*), (+))
 
--- Snippet_Start
--- Name: TLCSimple
 -- | Pretty much the most basic example imaginable, three ints represented by three circles
 drawThreeCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_
 drawThreeCircles selector = do
@@ -28,4 +26,3 @@ drawThreeCircles selector = do
                         , radius 10.0 ]
 
   pure circles
--- Snippet_End

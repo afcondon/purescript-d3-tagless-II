@@ -15,33 +15,168 @@ type SnippetInfo =
 
 -- ** Snippet Content Constants **
 
+snippet_BarChartDraw_content :: String
+snippet_BarChartDraw_content = "-- Name: BarChartDraw\n-- Main drawing function for bar chart\ndraw :: forall m.\n  Bind m =>\n  MonadEffect m =>\n  SelectionM D3Selection_ m =>\n  Array DataPoint -> Selector D3Selection_ -> m Unit\ndraw dataPoints selector = do\n  let dims = defaultDimensions\n  let iWidth = innerWidth dims\n  let iHeight = innerHeight dims\n\n  -- Calculate data extents\n  let xValues = map _.x dataPoints\n  let yValues = map _.y dataPoints\n  let minX = fromMaybe 0.0 $ minimum xValues\n  let maxX = fromMaybe 100.0 $ maximum xValues\n  let minY = 0.0  -- Start bars from zero\n  let maxY = fromMaybe 100.0 $ maximum yValues\n\n  (root :: D3Selection_) <- attach selector\n  svg <- appendTo root Svg [\n      viewBox 0.0 0.0 dims.width dims.height\n    , classed \"bar-chart\"\n    , width dims.width\n    , height dims.height\n    ]\n\n  -- Calculate bar width (with padding)\n  let numBars = length dataPoints\n  let barWidth = if numBars > 0 then (iWidth / (Int.toNumber numBars)) * 0.8 else 0.0\n\n  -- Create a group for the chart content (offset by margins)\n  chartGroup <- appendTo svg Group [\n      transform [ \\_ -> \"translate(\" <> show dims.margin.left <> \",\" <> show dims.margin.top <> \")\" ]\n    ]\n\n  -- Create scales\n  xScale <- liftEffect $ createLinearScale_ { domain: [minX, maxX], range: [0.0, iWidth] }\n  yScale <- liftEffect $ createLinearScale_ { domain: [minY, maxY], range: [iHeight, 0.0] }\n\n  -- Add <g> elements to hold each of the axes\n  xAxisGroup <- appendTo chartGroup Group [\n      classed \"x-axis\"\n    , transform [ \\_ -> \"translate(0,\" <> show iHeight <> \")\" ]\n    ]\n  yAxisGroup <- appendTo chartGroup Group [ \n      classed \"y-axis\"\n    , transform [ \\_ -> \"translate(\" <> show ((barWidth / 2.0 * -1.0) - 5.0) <> \",0)\" ]\n  ]\n  -- Draw the axes into the SVG, inside their respective <g> group elements\n  _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)\n  _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)\n\n  -- Add bars\n  let addBar :: DataPoint -> m Unit\n      addBar point = do\n        let xPos = applyScale_ xScale point.x - (barWidth / 2.0)\n        let yPos = applyScale_ yScale point.y\n        let barHeight = iHeight - yPos\n        _ <- appendTo chartGroup Rect [\n            x xPos\n          , y yPos\n          , width barWidth\n          , height barHeight\n          , fill \"#4a90e2\"\n          , strokeColor \"#357abd\"\n          , strokeWidth 1.0\n          , classed \"bar\"\n          ]\n        pure unit\n\n  _ <- traverse_ addBar dataPoints\n\n  pure unit\n-- Snippet_End"
+
+snippet_GUP_content :: String
+snippet_GUP_content = "-- Snippet_Start\n-- Name: GUP\ntype Model = Array Char\n\ndatum_ ::\n  { char :: Datum_ -> Char\n  , indexNum :: Index_ -> Number\n  }\ndatum_ =\n  { char: coerceDatumToChar\n  , indexNum: coerceIndexToNumber\n  }\n\nexGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)\nexGeneralUpdatePattern selector = do \n  root           <- attach selector\n  svg            <- appendTo root Svg [ viewBox 0.0 100.0 800.0 350.0, classed \"d3svg gup\" ]\n  letterGroup    <- appendTo svg Group []\n  \n  pure $ \\letters -> do\n    enterSelection   <- openSelection letterGroup \"text\"\n    updateSelections <- updateJoin enterSelection Text letters coerceDatumToKey\n    setAttributes updateSelections.exit exit\n    setAttributes updateSelections.update update\n\n    newlyEntered     <- appendTo updateSelections.enter Text []\n    setAttributes newlyEntered enter\n\n    pure newlyEntered\n\n  where\n    transition :: SelectionAttribute\n    transition = transitionWithDuration $ Milliseconds 2000.0\n\n    xFromIndex :: Datum_ -> Index_ -> Number\n    xFromIndex _ i = 50.0 + (datum_.indexNum i * 48.0) -- letters enter at this position, and then must transition to new position on each update\n\n    enter = [ classed  \"enter\"\n            , fill     \"green\"\n            , x        xFromIndex\n            , y        0.0\n            , text     (singleton <<< datum_.char)\n            , fontSize 60.0 ]\n          `andThen` (transition `to` [ y 200.0 ])\n\n    update =  [ classed \"update\", fill \"gray\", y 200.0 ]\n              `andThen` (transition `to` [ x xFromIndex ] )\n\n    exit =  [ classed \"exit\", fill \"brown\"]\n            `andThen` (transition `to` [ y 400.0, remove ])\n-- Snippet_End"
+
+snippet_LineChartDraw_content :: String
+snippet_LineChartDraw_content = "-- Name: LineChartDraw\n-- Main drawing function for line chart\ndraw :: forall m.\n  Bind m =>\n  MonadEffect m =>\n  SelectionM D3Selection_ m =>\n  Array DataPoint -> Selector D3Selection_ -> m Unit\ndraw dataPoints selector = do\n  let dims = defaultDimensions\n  let iWidth = innerWidth dims\n  let iHeight = innerHeight dims\n\n  -- Calculate data extents\n  let xValues = map _.x dataPoints\n  let yValues = map _.y dataPoints\n  let minX = fromMaybe 0.0 $ minimum xValues\n  let maxX = fromMaybe 100.0 $ maximum xValues\n  let minY = fromMaybe 0.0 $ minimum yValues\n  let maxY = fromMaybe 100.0 $ maximum yValues\n\n  (root :: D3Selection_) <- attach selector\n  svg <- appendTo root Svg [\n      viewBox 0.0 0.0 dims.width dims.height\n    , classed \"line-chart\"\n    , width dims.width\n    , height dims.height\n    ]\n\n  -- Create a group for the chart content (offset by margins)\n  chartGroup <- appendTo svg Group [\n      transform [ \\_ -> \"translate(\" <> show dims.margin.left <> \",\" <> show dims.margin.top <> \")\" ]\n    ]\n\n  -- Create scales\n  xScale <- liftEffect $ createLinearScale_ { domain: [minX, maxX], range: [0.0, iWidth] }\n  yScale <- liftEffect $ createLinearScale_ { domain: [minY, maxY], range: [iHeight, 0.0] }\n\n  -- Add axes\n  xAxisGroup <- appendTo chartGroup Group [\n      classed \"x-axis\"\n    , transform [ \\_ -> \"translate(0,\" <> show iHeight <> \")\" ]\n    ]\n  yAxisGroup <- appendTo chartGroup Group [ classed \"y-axis\" ]\n\n  _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)\n  _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)\n\n  -- Create line generator and add the line path\n  lineGen <- liftEffect $ createLineGenerator_ { xScale, yScale }\n  let pathData = generateLinePath_ lineGen dataPoints\n\n  _ <- appendTo chartGroup Path [\n      d pathData\n    , fill \"none\"\n    , strokeColor \"#4a90e2\"\n    , strokeWidth 2.0\n    , classed \"line\"\n    ]\n\n  pure unit\n-- Snippet_End"
+
+snippet_ScatterPlotQuartet_content :: String
+snippet_ScatterPlotQuartet_content = "-- Name: ScatterPlotQuartet\n-- Draw Anscombe's Quartet as small multiples (2x2 grid)\ndrawQuartet :: forall m.\n  Bind m =>\n  MonadEffect m =>\n  SelectionM D3Selection_ m =>\n  QuartetData -> Selector D3Selection_ -> m Unit\ndrawQuartet quartet selector = do\n  -- Overall dimensions for the quartet display\n  let totalWidth = 900.0\n  let totalHeight = 700.0\n  let padding = 60.0\n\n  -- Calculate dimensions for each subplot\n  let plotWidth = (totalWidth - padding * 3.0) / 2.0\n  let plotHeight = (totalHeight - padding * 3.0) / 2.0\n  let margin = { top: 30.0, right: 20.0, bottom: 40.0, left: 50.0 }\n  let iWidth = plotWidth - margin.left - margin.right\n  let iHeight = plotHeight - margin.top - margin.bottom\n\n  -- Use fixed scale domains for all four plots (for valid comparison)\n  let xDomain = [0.0, 20.0]\n  let yDomain = [0.0, 14.0]\n\n  (root :: D3Selection_) <- attach selector\n  svg <- appendTo root Svg [\n      viewBox 0.0 0.0 totalWidth totalHeight\n    , classed \"scatter-quartet\"\n    , width totalWidth\n    , height totalHeight\n    ]\n\n  -- Helper function to draw a single subplot\n  let drawSubplot :: String -> Array DataPoint -> Number -> Number -> m Unit\n      drawSubplot title dataPoints xOffset yOffset = do\n        -- Create group for this subplot\n        subplotGroup <- appendTo svg Group [\n            classed \"subplot\"\n          , transform [ \\_ -> \"translate(\" <> show (xOffset + margin.left) <> \",\" <> show (yOffset + margin.top) <> \")\" ]\n          ]\n\n        -- Add title\n        _ <- appendTo svg Text [\n            x (xOffset + plotWidth / 2.0)\n          , y (yOffset + 15.0)\n          , text title\n          , textAnchor \"middle\"\n          , fontSize 16.0\n          , classed \"subplot-title\"\n          ]\n\n        -- Create scales\n        xScale <- liftEffect $ createLinearScale_ { domain: xDomain, range: [0.0, iWidth] }\n        yScale <- liftEffect $ createLinearScale_ { domain: yDomain, range: [iHeight, 0.0] }\n\n        -- Add axes\n        xAxisGroup <- appendTo subplotGroup Group [\n            classed \"x-axis\"\n          , transform [ \\_ -> \"translate(0,\" <> show iHeight <> \")\" ]\n          ]\n        yAxisGroup <- appendTo subplotGroup Group [ classed \"y-axis\" ]\n\n        _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)\n        _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)\n\n        -- Add data points\n        let addPoint :: DataPoint -> m Unit\n            addPoint point = do\n              let xPos = applyScale_ xScale point.x\n              let yPos = applyScale_ yScale point.y\n              _ <- appendTo subplotGroup Circle [\n                  cx xPos\n                , cy yPos\n                , radius 4.0\n                , fill \"#e74c3c\"\n                , strokeColor \"#c0392b\"\n                , strokeWidth 1.5\n                , classed \"scatter-point\"\n                ]\n              pure unit\n\n        _ <- traverse_ addPoint dataPoints\n        pure unit\n\n  -- Draw all four subplots in a 2x2 grid\n  _ <- drawSubplot \"Dataset I\" quartet.dataset1 padding (padding)\n  _ <- drawSubplot \"Dataset II\" quartet.dataset2 (padding + plotWidth + padding) (padding)\n  _ <- drawSubplot \"Dataset III\" quartet.dataset3 padding (padding + plotHeight + padding)\n  _ <- drawSubplot \"Dataset IV\" quartet.dataset4 (padding + plotWidth + padding) (padding + plotHeight + padding)\n\n  pure unit\n-- Snippet_End"
+
 snippet_selectionMClass_content :: String
-snippet_selectionMClass_content = "class (Monad m) <= SelectionM selection m where\n  -- | Append a new element to a selection and return the new element.\n  -- |\n  -- | This is the primary way to build up a visualization by adding elements\n  -- | to a container. Each element can have attributes applied immediately.\n  -- |\n  -- | ```purescript\n  -- | svg <- appendTo root Svg [width 800.0, height 600.0]\n  -- | circle <- appendTo svg Circle [cx 50.0, cy 50.0, radius 25.0]\n  -- | ```\n  -- |\n  -- | Maps to D3's `selection.append()` - see https://d3js.org/d3-selection#selection_append\n  appendTo        :: selection -> Element -> Array (SelectionAttribute) -> m selection\n\n  -- | Select descendant elements matching a selector within a selection.\n  -- |\n  -- | This allows you to select elements that are children of the current selection,\n  -- | useful for working with structured SVG groups or HTML layouts.\n  -- |\n  -- | ```purescript\n  -- | groups <- selectUnder svg \"g.data-group\"\n  -- | circles <- selectUnder groups \"circle\"\n  -- | ```\n  -- |\n  -- | Maps to D3's `selection.selectAll()` - see https://d3js.org/d3-selection#selection_selectAll\n  selectUnder     :: selection -> Selector selection -> m selection\n\n  -- | Attach to an existing DOM element using a CSS selector.\n  -- |\n  -- | This is typically the **first operation** in any visualization - it selects\n  -- | the container element where your visualization will be rendered.\n  -- |\n  -- | ```purescript\n  -- | root <- attach \"#chart\"  -- Selects <div id=\"chart\"></div>\n  -- | ```\n  -- |\n  -- | Maps to D3's `d3.select()` - see https://d3js.org/d3-selection#select\n  attach          :: Selector selection -> m selection\n\n  -- | Filter a selection to only elements matching a selector.\n  -- |\n  -- | Useful for narrowing down selections based on classes or other attributes.\n  -- |\n  -- | ```purescript\n  -- | allCircles <- selectUnder svg \"circle\"\n  -- | redCircles <- filterSelection allCircles \".red\"\n  -- | ```\n  -- |\n  -- | Maps to D3's `selection.filter()` - see https://d3js.org/d3-selection#selection_filter\n  filterSelection :: selection -> Selector selection -> m selection\n\n  -- | Merge two selections into one.\n  -- |\n  -- | Commonly used to merge enter and update selections after a data join\n  -- | so you can apply the same attributes to both.\n  -- |\n  -- | ```purescript\n  -- | result <- updateJoin svg Circle data keyFn\n  -- | merged <- mergeSelections result.enter result.update\n  -- | setAttributes merged [fill \"blue\", radius 5.0]\n  -- | ```\n  -- |\n  -- | Maps to D3's `selection.merge()` - see https://d3js.org/d3-selection#selection_merge\n  mergeSelections :: selection -> selection -> m selection\n\n  -- | Apply attributes to a selection.\n  -- |\n  -- | This is how you style and position elements. Attributes are applied in order.\n  -- |\n  -- | ```purescript\n  -- | setAttributes circle [fill \"red\", stroke \"black\", strokeWidth 2.0]\n  -- | ```\n  -- |\n  -- | See `PSD3.Attributes` for the full list of available attributes.\n  setAttributes   :: selection -> Array (SelectionAttribute) -> m Unit\n\n  -- | Attach behavior (drag, zoom) to a selection.\n  -- |\n  -- | This enables interactivity by attaching event handlers.\n  -- |\n  -- | ```purescript\n  -- | on circles (Drag DefaultDrag)\n  -- | on svg (Zoom { extent: ..., scale: ..., name: \"chart\", target: svg })\n  -- | ```\n  -- |\n  -- | See `PSD3.Internal.Selection.Types` for available behaviors.\n  on              :: selection -> Behavior selection -> m Unit\n\n  -- | Open a selection for data binding.\n  -- |\n  -- | This is an advanced operation used internally by the update join pattern.\n  -- | Most users won't need to call this directly.\n  -- |\n  -- | **Note**: This operation may be refactored in future versions.\n  openSelection   :: selection -> Selector selection -> m selection\n\n  -- | Bind data to elements using a simple join (enter-only pattern).\n  -- |\n  -- | Use this when you have **static data** that doesn't change. It's simpler\n  -- | than `updateJoin` and only handles the \"enter\" case.\n  -- |\n  -- | ```purescript\n  -- | let data = [1, 2, 3, 4, 5]\n  -- | circles <- simpleJoin svg Circle data keyIsID_\n  -- | setAttributes circles [cy 50.0, radius 10.0]\n  -- | ```\n  -- |\n  -- | The key function identifies each datum uniquely for D3's internal tracking.\n  -- |\n  -- | Maps to D3's data join - see https://d3js.org/d3-selection#joining-data\n  simpleJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_) -> m selection\n\n  -- | Bind data to elements using nested selections where child data is extracted from parent datum.\n  -- |\n  -- | Use this for **hierarchical data structures** where child elements need data derived from\n  -- | their parent element's bound datum. This enables patterns like tables (rows → cells) or\n  -- | nested visualizations (groups → elements).\n  -- |\n  -- | ```purescript\n  -- | let matrix = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]\n  -- |\n  -- | -- First join: bind rows to outer array\n  -- | rows <- simpleJoin tbody Tr matrix keyIsID_\n  -- |\n  -- | -- Second join: bind cells to each row's inner array\n  -- | cellSelection <- openSelection rows \"td\"\n  -- | cells <- nestedJoin cellSelection Td\n  -- |            (\\d -> coerceDatumToArray d)  -- Extract array from parent datum\n  -- |            keyIsID_\n  -- | ```\n  -- |\n  -- | The extraction function receives the parent element's datum and returns any `Foldable`\n  -- | container (Array, List, Map.values, etc.). This is automatically converted to an Array\n  -- | for D3's use.\n  -- |\n  -- | **Type flexibility:** The `Foldable` constraint means you can extract from:\n  -- | - Arrays: `\\d -> coerceDatumToArray d`\n  -- | - Lists: `\\d -> coerceDatumToList d`\n  -- | - Map values: `\\d -> Map.values (coerceDatumToMap d)`\n  -- | - Lenses: `\\d -> view (_record <<< _children) d`\n  -- | - Transformed data: `\\d -> filter p >>> map f $ extractData d`\n  -- |\n  -- | See Mike Bostock's [Nested Selections](https://bost.ocks.org/mike/nest/) for more on this pattern.\n  -- |\n  -- | Maps to D3's `.data(function(d) { return d; })` pattern.\n  nestedJoin      :: ∀ f datum. Foldable f =>\n                     selection -> Element -> (Datum_ -> f datum) -> (Datum_ -> Index_) -> m selection\n\n  -- | Bind data to elements using the General Update Pattern (enter/update/exit).\n  -- |\n  -- | Use this when you have **dynamic data** that changes over time. It returns\n  -- | three selections so you can handle each case differently:\n  -- |\n  -- | - `enter`: New data points that need elements created\n  -- | - `update`: Existing data points that need updates\n  -- | - `exit`: Old elements whose data was removed\n  -- |\n  -- | ```purescript\n  -- | result <- updateJoin svg Circle data keyFn\n  -- |\n  -- | -- Create new elements\n  -- | newCircles <- appendTo result.enter Circle []\n  -- | setAttributes newCircles [fill \"green\", radius 5.0]\n  -- |\n  -- | -- Update existing elements\n  -- | setAttributes result.update [fill \"blue\"]\n  -- |\n  -- | -- Remove old elements\n  -- | setAttributes result.exit [remove]\n  -- | ```\n  -- |\n  -- | See https://d3js.org/d3-selection#joining-data for the General Update Pattern.\n  updateJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_)\n    -> m { enter :: selection, exit :: selection, update :: selection }"
+snippet_selectionMClass_content = "class (Monad m) <= SelectionM selection m where\n  appendTo        :: selection -> Element -> Array (SelectionAttribute) -> m selection\n\n  selectUnder     :: selection -> Selector selection -> m selection\n\n  attach          :: Selector selection -> m selection\n\n  filterSelection :: selection -> Selector selection -> m selection\n\n  mergeSelections :: selection -> selection -> m selection\n\n  setAttributes   :: selection -> Array (SelectionAttribute) -> m Unit\n\n  on              :: selection -> Behavior selection -> m Unit\n\n  openSelection   :: selection -> Selector selection -> m selection\n\n  simpleJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_) -> m selection\n\n  nestedJoin      :: ∀ f datum. Foldable f =>\n                     selection -> Element -> (Datum_ -> f datum) -> (Datum_ -> Index_) -> m selection\n\n  updateJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_)\n    -> m { enter :: selection, exit :: selection, update :: selection }"
+
+snippet_simulationM2Class_content :: String
+snippet_simulationM2Class_content = "class (Monad m, SimulationM selection m) <= SimulationM2 selection m | m -> selection where\n  -- ** Dynamic Updates **\n\n  update :: forall d. SimulationUpdate d -> m { nodes :: Array (D3_SimulationNode d), links :: Array D3Link_Swizzled }\n\n  -- ** Animation (Tick Functions) **\n\n  addTickFunction    :: Label -> Step selection -> m Unit\n\n  removeTickFunction :: Label                   -> m Unit"
+
+snippet_ThreeDimensions_content :: String
+snippet_ThreeDimensions_content = "-- Snippet_Start\n-- Name: ThreeDimensions\ndrawThreeDimensions :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_\ndrawThreeDimensions selector = do\n  -- Three rows of data - uniform structure\n  let data2D = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]\n\n  root <- attach selector\n  table <- appendTo root Table [ classed \"nested-data-table\" ]\n\n  -- Create table rows for each array\n  rows <- simpleJoin table Tr data2D keyIsID_\n\n  -- For each row, create table cells using nested data binding\n  -- This demonstrates the new nestedJoin function with Foldable constraint\n  let cellText d = show (coerceDatumToInt d)\n  cells <- nestedJoin rows Td coerceDatumToArray keyIsID_\n  setAttributes cells [ text cellText ]\n\n  pure cells\n-- Snippet_End"
+
+snippet_ThreeDimensionsSets_content :: String
+snippet_ThreeDimensionsSets_content = "-- Snippet_Start\n-- Name: ThreeDimensionsSets\ndrawThreeDimensionsSets :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_\ndrawThreeDimensionsSets selector = do\n  -- Three \"products\" with their category tags (as Sets)\n  -- Sets are Foldable, so nestedJoin works seamlessly!\n  let productCategories =\n        [ Set.fromFoldable [\"web\", \"frontend\", \"javascript\"]\n        , Set.fromFoldable [\"database\", \"backend\"]\n        , Set.empty  -- Product with no categories\n        , Set.fromFoldable [\"api\", \"rest\", \"graphql\", \"backend\"]\n        , Set.fromFoldable [\"mobile\"]\n        ]\n\n  root <- attach selector\n  table <- appendTo root Table [ classed \"nested-data-table nested-data-table--sets\" ]\n\n  -- Create table rows for each product\n  rows <- simpleJoin table Tr productCategories keyIsID_\n\n  -- For each row, create table cells using nested data binding\n  -- The Foldable constraint means we can extract from Sets just like Arrays!\n  -- nestedJoin calls Set.toUnfoldable internally via fromFoldable\n  cells <- nestedJoin rows Td coerceDatumToSet keyIsID_\n  setAttributes cells\n    [ text coerceDatumToString  -- Each datum is already a String from the Set\n    , classed \"tag-cell\"\n    ]\n\n  pure cells\n-- Snippet_End"
+
+snippet_TLCParabola_content :: String
+snippet_TLCParabola_content = "-- Name: TLCParabola\ndrawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_\ndrawWithData circleData selector = do\n  root        <- attach selector\n  svg         <- appendTo root Svg [ viewBox (-10.0) (-100.0) 320.0 160.0, classed \"d3svg gup\" ]\n  circleGroup <- appendTo svg  Group []\n\n  circles     <- simpleJoin circleGroup Circle circleData keyIsID_ \n  setAttributes circles [ strokeColor datum_.color\n                        , strokeWidth 3.0\n                        , fill \"none\"\n                        , cx datum_.x\n                        , cy datum_.y\n                        , radius 10.0 ]\n  pure circles\n-- Snippet_End"
+
+snippet_TLCSimple_content :: String
+snippet_TLCSimple_content = "drawThreeCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_\ndrawThreeCircles selector = do\n  root        <- attach selector\n  svg         <- appendTo root Svg [ viewBox (-10.0) 20.0 120.0 60.0, classed \"d3svg gup\" ]\n  circleGroup <- appendTo svg  Group []\n  circles     <- simpleJoin circleGroup Circle [32, 57, 293] keyIsID_ \n  setAttributes circles [ fill \"green\"\n                        , cx (\\(d :: Datum_) i -> (toNumber (coerceIndex i)) * 30.0 + 10.0)\n                        , cy 50.0\n                        , radius 10.0 ]\n\n  pure circles"
 
 -- | All available snippets
 snippets :: Array SnippetInfo
 snippets =
-  [ { name: "selectionMClass"
+  [ { name: "BarChartDraw"
+    , content: snippet_BarChartDraw_content
+    , source: "src/website/Viz/Charts/BarChart.purs"
+    , lines: "39-115"
+    }
+  , { name: "GUP"
+    , content: snippet_GUP_content
+    , source: "src/website/Viz/GUP.purs"
+    , lines: "17-68"
+    }
+  , { name: "LineChartDraw"
+    , content: snippet_LineChartDraw_content
+    , source: "src/website/Viz/Charts/LineChart.purs"
+    , lines: "41-101"
+    }
+  , { name: "ScatterPlotQuartet"
+    , content: snippet_ScatterPlotQuartet_content
+    , source: "src/website/Viz/Charts/ScatterPlot.purs"
+    , lines: "106-197"
+    }
+  , { name: "selectionMClass"
     , content: snippet_selectionMClass_content
     , source: "src/lib/PSD3/Capabilities/Selection.purs"
     , lines: "85-258"
+    }
+  , { name: "simulationM2Class"
+    , content: snippet_simulationM2Class_content
+    , source: "src/lib/PSD3/Capabilities/Simulation.purs"
+    , lines: "254-320"
+    }
+  , { name: "ThreeDimensions"
+    , content: snippet_ThreeDimensions_content
+    , source: "src/website/Viz/ThreeLittleDimensions/ThreeLittleDimensions.purs"
+    , lines: "16-38"
+    }
+  , { name: "ThreeDimensionsSets"
+    , content: snippet_ThreeDimensionsSets_content
+    , source: "src/website/Viz/ThreeLittleDimensions/ThreeLittleDimensions.purs"
+    , lines: "40-73"
+    }
+  , { name: "TLCParabola"
+    , content: snippet_TLCParabola_content
+    , source: "src/website/Viz/Parabola/Parabola.purs"
+    , lines: "33-48"
+    }
+  , { name: "TLCSimple"
+    , content: snippet_TLCSimple_content
+    , source: "src/website/Viz/ThreeLittleCircles/ThreeLittleCircles.purs"
+    , lines: "16-31"
     }
   ]
 
 -- | Look up a snippet by name
 getSnippet :: String -> String
 getSnippet name = case name of
+  "BarChartDraw" -> snippet_BarChartDraw_content
+  "GUP" -> snippet_GUP_content
+  "LineChartDraw" -> snippet_LineChartDraw_content
+  "ScatterPlotQuartet" -> snippet_ScatterPlotQuartet_content
   "selectionMClass" -> snippet_selectionMClass_content
+  "simulationM2Class" -> snippet_simulationM2Class_content
+  "ThreeDimensions" -> snippet_ThreeDimensions_content
+  "ThreeDimensionsSets" -> snippet_ThreeDimensionsSets_content
+  "TLCParabola" -> snippet_TLCParabola_content
+  "TLCSimple" -> snippet_TLCSimple_content
   _ -> "Snippet not found: " <> name
 
 -- | Get snippet info by name
 getSnippetInfo :: String -> SnippetInfo
 getSnippetInfo name = case name of
+  "BarChartDraw" ->
+    { name: "BarChartDraw"
+    , content: snippet_BarChartDraw_content
+    , source: "src/website/Viz/Charts/BarChart.purs"
+    , lines: "39-115"
+    }
+  "GUP" ->
+    { name: "GUP"
+    , content: snippet_GUP_content
+    , source: "src/website/Viz/GUP.purs"
+    , lines: "17-68"
+    }
+  "LineChartDraw" ->
+    { name: "LineChartDraw"
+    , content: snippet_LineChartDraw_content
+    , source: "src/website/Viz/Charts/LineChart.purs"
+    , lines: "41-101"
+    }
+  "ScatterPlotQuartet" ->
+    { name: "ScatterPlotQuartet"
+    , content: snippet_ScatterPlotQuartet_content
+    , source: "src/website/Viz/Charts/ScatterPlot.purs"
+    , lines: "106-197"
+    }
   "selectionMClass" ->
     { name: "selectionMClass"
     , content: snippet_selectionMClass_content
     , source: "src/lib/PSD3/Capabilities/Selection.purs"
     , lines: "85-258"
+    }
+  "simulationM2Class" ->
+    { name: "simulationM2Class"
+    , content: snippet_simulationM2Class_content
+    , source: "src/lib/PSD3/Capabilities/Simulation.purs"
+    , lines: "254-320"
+    }
+  "ThreeDimensions" ->
+    { name: "ThreeDimensions"
+    , content: snippet_ThreeDimensions_content
+    , source: "src/website/Viz/ThreeLittleDimensions/ThreeLittleDimensions.purs"
+    , lines: "16-38"
+    }
+  "ThreeDimensionsSets" ->
+    { name: "ThreeDimensionsSets"
+    , content: snippet_ThreeDimensionsSets_content
+    , source: "src/website/Viz/ThreeLittleDimensions/ThreeLittleDimensions.purs"
+    , lines: "40-73"
+    }
+  "TLCParabola" ->
+    { name: "TLCParabola"
+    , content: snippet_TLCParabola_content
+    , source: "src/website/Viz/Parabola/Parabola.purs"
+    , lines: "33-48"
+    }
+  "TLCSimple" ->
+    { name: "TLCSimple"
+    , content: snippet_TLCSimple_content
+    , source: "src/website/Viz/ThreeLittleCircles/ThreeLittleCircles.purs"
+    , lines: "16-31"
     }
   _ ->
     { name: "not-found"

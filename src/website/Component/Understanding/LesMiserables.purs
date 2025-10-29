@@ -5,7 +5,7 @@ import Prelude
 import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.Rec.Class (forever)
-import Control.Monad.State (class MonadState, get)
+import Control.Monad.State (class MonadState)
 import D3.Viz.GUP as GUP
 import D3.Viz.LesMiserables as LesMis
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
@@ -17,10 +17,10 @@ import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), allNodes, initialSimulationState)
 import PSD3.Interpreter.D3 (eval_D3M, runD3M, runWithD3_Simulation)
-import PSD3.Shared.CodeExample (renderCodeExampleSimple)
+import CodeSnippet (codeSnippet, triggerPrismHighlighting)
 import PSD3.Understanding.TOC (renderTOC, tocAnchor, tocRoute)
 import Data.Map (Map)
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Data.Set as Set
 import Effect (Effect)
 import Effect.Aff (Aff, Fiber, Milliseconds(..), delay, forkAff, killFiber)
@@ -35,14 +35,12 @@ import Halogen.HTML.Properties as HP
 import PSD3.Shared.ExamplesNav as ExamplesNav
 import PSD3.Shared.ZoomSticker as ZoomSticker
 import PSD3.Website.Types (Route(..))
-import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))
 
 -- | State
 type State = {
   simulation :: D3SimulationState_
 , gupFiber :: Maybe (Fiber Unit)
-, gupSnippet :: Maybe String
 }
 
 -- | Actions
@@ -71,7 +69,6 @@ component = H.mkComponent
   { initialState: \_ ->
       { simulation: initialSimulationState forceLibrary
       , gupFiber: Nothing
-      , gupSnippet: Nothing
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -82,7 +79,7 @@ component = H.mkComponent
   }
 
 render :: State -> H.ComponentHTML Action Slots Aff
-render state =
+render _ =
   HH.div
     [ HP.classes [ HH.ClassName "explanation-page" ] ]
     [ -- TOC Panel (LHS)
@@ -129,9 +126,8 @@ render state =
                 [ HP.classes [ HH.ClassName "gup-viz" ] ]
                 []
             ]
-        , renderCodeExampleSimple
-            (fromMaybe "-- Snippet not defined: GUP.purs" state.gupSnippet)
-            "GUP"
+        -- SNIPPET: GUP src/website/Viz/GUP.purs 17-68
+        , codeSnippet "GUP" "haskell"
         ]
 
     -- Section 2: Les Misérables Force Layout
@@ -226,9 +222,8 @@ handleAction :: forall m.
   Action -> m Unit
 handleAction = case _ of
   Initialize -> do
-    -- Load GUP code snippet
-    gup <- H.liftAff $ readSnippetFiles "GUP.purs"
-    H.modify_ _ { gupSnippet = Just gup }
+    -- Trigger Prism highlighting for code snippets
+    triggerPrismHighlighting
 
     -- Set up General Update Pattern animation
     updateFn <- runGeneralUpdatePattern

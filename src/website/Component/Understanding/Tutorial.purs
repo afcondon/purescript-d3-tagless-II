@@ -9,30 +9,21 @@ import D3.Viz.Parabola as Parabola
 import D3.Viz.ScatterPlot as ScatterPlot
 import D3.Viz.ThreeLittleCircles as Circles
 import D3.Viz.ThreeLittleDimensions as Dimensions
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Interpreter.D3 (eval_D3M)
 import PSD3.RoutingDSL (routeToPath)
-import PSD3.Shared.CodeExample (renderCodeExampleSimple)
+import CodeSnippet (codeSnippet, triggerPrismHighlighting)
 import PSD3.Shared.ExamplesNav as ExamplesNav
 import PSD3.Understanding.TOC (renderTOC, tocAnchor, tocRoute)
 import PSD3.Website.Types (Route(..))
-import Snippets (readSnippetFiles)
 import Type.Proxy (Proxy(..))
 
 -- | Tutorial page state
-type State = {
-  threeCirclesSnippet :: Maybe String
-, threeDimensionsSnippet :: Maybe String
-, threeDimensionsSetsSnippet :: Maybe String
-, parabolaSnippet :: Maybe String
-, barChartSnippet :: Maybe String
-, lineChartSnippet :: Maybe String
-, quartetSnippet :: Maybe String
-}
+type State = Unit
 
 -- | Tutorial page actions
 data Action = Initialize
@@ -45,15 +36,7 @@ _examplesNav = Proxy :: Proxy "examplesNav"
 -- | Tutorial page component
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
-  { initialState: \_ ->
-      { threeCirclesSnippet: Nothing
-      , threeDimensionsSnippet: Nothing
-      , threeDimensionsSetsSnippet: Nothing
-      , parabolaSnippet: Nothing
-      , barChartSnippet: Nothing
-      , lineChartSnippet: Nothing
-      , quartetSnippet: Nothing
-      }
+  { initialState: \_ -> unit
   , render
   , eval: H.mkEval H.defaultEval
       { handleAction = handleAction
@@ -82,7 +65,7 @@ lhsNav = renderTOC
 
 
 render :: State -> H.ComponentHTML Action Slots Aff
-render state =
+render _ =
   HH.div
     [ HP.classes [ HH.ClassName "explanation-page" ] ]
     [ lhsNav
@@ -117,9 +100,8 @@ render state =
                 [ HP.classes [ HH.ClassName "three-circles-viz" ] ]
                 []
             ]
-        , renderCodeExampleSimple
-            (fromMaybe "-- Snippet not defined: TLCSimple.purs" state.threeCirclesSnippet)
-            "TLCSimple"
+        -- SNIPPET: TLCSimple src/website/Viz/ThreeLittleCircles/ThreeLittleCircles.purs 16-31
+        , codeSnippet "TLCSimple" "haskell"
         ]
 
     -- Section 1b: Three Little Dimensions (Nested Data Binding)
@@ -138,9 +120,8 @@ render state =
                 [ HP.classes [ HH.ClassName "three-dimensions-viz" ] ]
                 []
             ]
-        , renderCodeExampleSimple
-            (fromMaybe "-- Snippet not defined: ThreeDimensions.purs" state.threeDimensionsSnippet)
-            "ThreeDimensions"
+        -- SNIPPET: ThreeDimensions src/website/Viz/ThreeLittleDimensions/ThreeLittleDimensions.purs 16-38
+        , codeSnippet "ThreeDimensions" "haskell"
         , HH.h3_
             [ HH.text "Beyond Arrays: Working with Sets" ]
         , HH.p_
@@ -153,9 +134,8 @@ render state =
                 [ HP.classes [ HH.ClassName "three-dimensions-sets-viz" ] ]
                 []
             ]
-        , renderCodeExampleSimple
-            (fromMaybe "-- Snippet not defined: ThreeDimensionsSets.purs" state.threeDimensionsSetsSnippet)
-            "ThreeDimensionsSets"
+        -- SNIPPET: ThreeDimensionsSets src/website/Viz/ThreeLittleDimensions/ThreeLittleDimensions.purs 40-73
+        , codeSnippet "ThreeDimensionsSets" "haskell"
         ]
 
     -- Section 2: Parabola of Circles
@@ -174,9 +154,8 @@ render state =
                 [ HP.classes [ HH.ClassName "parabola-viz" ] ]
                 []
             ]
-        , renderCodeExampleSimple
-            (fromMaybe "-- Snippet not defined: TLCParabola.purs" state.parabolaSnippet)
-            "TLCParabola"
+        -- SNIPPET: TLCParabola src/website/Viz/Parabola/Parabola.purs 33-48
+        , codeSnippet "TLCParabola" "haskell"
         ]
 
     -- Section 3: Bar Chart
@@ -197,9 +176,8 @@ render state =
                 [ HP.classes [ HH.ClassName "barchart-viz" ] ]
                 []
             ]
-        , renderCodeExampleSimple
-            (fromMaybe "-- Snippet not defined: BarChartDraw.purs" state.barChartSnippet)
-            "BarChartDraw"
+        -- SNIPPET: BarChartDraw src/website/Viz/Charts/BarChart.purs 39-115
+        , codeSnippet "BarChartDraw" "haskell"
         ]
 
     -- Section 4: Line Chart
@@ -220,9 +198,8 @@ render state =
                 [ HP.classes [ HH.ClassName "linechart-viz" ] ]
                 []
             ]
-        , renderCodeExampleSimple
-            (fromMaybe "-- Snippet not defined: LineChartDraw.purs" state.lineChartSnippet)
-            "LineChartDraw"
+        -- SNIPPET: LineChartDraw src/website/Viz/Charts/LineChart.purs 41-101
+        , codeSnippet "LineChartDraw" "haskell"
         ]
 
     -- Section 5: Anscombe's Quartet
@@ -243,9 +220,8 @@ render state =
                 [ HP.classes [ HH.ClassName "quartet-viz" ] ]
                 []
             ]
-        , renderCodeExampleSimple
-            (fromMaybe "-- Snippet not defined: ScatterPlotQuartet.purs" state.quartetSnippet)
-            "ScatterPlotQuartet"
+        -- SNIPPET: ScatterPlotQuartet src/website/Viz/Charts/ScatterPlot.purs 106-197
+        , codeSnippet "ScatterPlotQuartet" "haskell"
         ]
 
     -- Section 6: Next Steps with margin links
@@ -298,23 +274,8 @@ render state =
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
   Initialize -> do
-    -- Load code snippets
-    threeCircles <- H.liftAff $ readSnippetFiles "TLCSimple.purs"
-    threeDimensions <- H.liftAff $ readSnippetFiles "ThreeDimensions.purs"
-    threeDimensionsSets <- H.liftAff $ readSnippetFiles "ThreeDimensionsSets.purs"
-    parabola <- H.liftAff $ readSnippetFiles "TLCParabola.purs"
-    barChart <- H.liftAff $ readSnippetFiles "BarChartDraw.purs"
-    lineChart <- H.liftAff $ readSnippetFiles "LineChartDraw.purs"
-    quartet <- H.liftAff $ readSnippetFiles "ScatterPlotQuartet.purs"
-
-    H.modify_ _ { threeCirclesSnippet = Just threeCircles
-                , threeDimensionsSnippet = Just threeDimensions
-                , threeDimensionsSetsSnippet = Just threeDimensionsSets
-                , parabolaSnippet = Just parabola
-                , barChartSnippet = Just barChart
-                , lineChartSnippet = Just lineChart
-                , quartetSnippet = Just quartet
-                }
+    -- Trigger Prism highlighting for code snippets
+    triggerPrismHighlighting
 
     -- Draw Three Little Circles
     _ <- H.liftEffect $ eval_D3M $ Circles.drawThreeCircles "div.three-circles-viz"

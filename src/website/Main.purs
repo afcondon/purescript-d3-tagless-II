@@ -67,7 +67,7 @@ type Slots =
   , hierarchies :: forall q. H.Slot q Void Unit
   , interpreters :: forall q. H.Slot q Void Unit
   , codeExplorer :: forall q. H.Slot q Void Unit
-  , codeExploration :: forall q. H.Slot q Void Unit
+  , codeExploration :: forall q. H.Slot q Void String
   , wealthHealth :: forall q. H.Slot q Void Unit
   , codeAtlas :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
@@ -169,7 +169,7 @@ renderPage route = case spy "Route is" route of
     HH.slot_ _codeExplorer unit CodeExplorer.component unit
 
   Explore snippetId ->
-    HH.slot_ _codeExploration unit CodeExplorationPage.component snippetId
+    HH.slot_ _codeExploration snippetId CodeExplorationPage.component snippetId
 
   WealthHealth ->
     HH.slot_ _wealthHealth unit WealthHealth.component unit

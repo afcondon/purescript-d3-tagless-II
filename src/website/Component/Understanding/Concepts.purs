@@ -2,7 +2,7 @@ module PSD3.Understanding.Concepts where
 
 import Prelude
 
-import CodeSnippet (codeSnippet)
+import CodeSnippet (codeSnippet, triggerPrismHighlighting)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Halogen as H
@@ -128,14 +128,8 @@ render _ =
                 [ HP.id "heading-capabilities" ]
                 [ HH.text "Capabilities & Interpreters" ]
             , HH.p_ [ HH.text "The SimulationM2 monad looks like:" ]
-            , HH.pre_
-                [ HH.code_
-                    [ HH.text """class (Monad m, SelectionM selection m) <= SimulationM2 selection m | m -> selection where
-  start :: m Unit
-  stop  :: m Unit
-  ...(see full definition in source)"""
-                    ]
-                ]
+            -- SNIPPET: simulationM2Class src/lib/PSD3/Capabilities/Simulation.purs 254-320
+            , codeSnippet "simulationM2Class" "haskell"
             ]
 
         -- Type-safe Attributes
@@ -167,4 +161,4 @@ render _ =
 
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
-  Initialize -> pure unit
+  Initialize -> triggerPrismHighlighting

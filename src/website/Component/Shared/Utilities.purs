@@ -3,6 +3,7 @@ module PSD3.Shared.Utilities where -- shared
 import Prelude
 
 import Data.Array (singleton)
+import Effect (Effect)
 import Halogen.HTML (HTML)
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -28,5 +29,11 @@ syntaxHighlightedCode codetext =
 highlightBlockSynchronous :: String -> Unit
 highlightBlockSynchronous selector = highlightBlock_ selector false
 
+-- | Highlight all code blocks with the .line-numbers class
+-- | This triggers Prism's line-numbers plugin
+highlightAllLineNumbers :: Effect Unit
+highlightAllLineNumbers = highlightAllLineNumbers_
+
 foreign import highlightBlock_ :: String -> Boolean -> Unit
 foreign import highlightString_ :: String -> String
+foreign import highlightAllLineNumbers_ :: Effect Unit

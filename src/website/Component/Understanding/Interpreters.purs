@@ -9,7 +9,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.CodeExample (renderCodeExampleSimple)
+import CodeSnippet (codeSnippet, triggerPrismHighlighting)
 import PSD3.Understanding.InterpretersDemo (generateD3Code)
 import PSD3.Shared.ExamplesNav as ExamplesNav
 import PSD3.Website.Types (Route(..))
@@ -30,7 +30,6 @@ derive instance eqInterpreterType :: Eq InterpreterType
 type State =
   { selectedInterpreter :: InterpreterType
   , generatedD3Code :: Maybe String
-  , exampleSnippet :: Maybe String
   , vegaLiteSnippet :: Maybe String
   , mermaidSnippet :: Maybe String
   }
@@ -59,7 +58,6 @@ component = H.mkComponent
     initialState =
       { selectedInterpreter: EnglishDescription
       , generatedD3Code: Nothing
-      , exampleSnippet: Nothing
       , vegaLiteSnippet: Nothing
       , mermaidSnippet: Nothing
       }
@@ -67,16 +65,17 @@ component = H.mkComponent
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
   Initialize -> do
+    -- Trigger Prism highlighting for code snippets
+    triggerPrismHighlighting
+
     -- Generate D3 code on initialization
     d3Code <- liftEffect generateD3Code
 
     -- Load code snippets
-    exampleCode <- H.liftAff $ readSnippetFiles "TLCSimple.purs"
     vegaCode <- H.liftAff $ readSnippetFiles "VegaLiteExample.purs"
     mermaidCode <- H.liftAff $ readSnippetFiles "MermaidExample.purs"
 
     H.modify_ _ { generatedD3Code = Just d3Code
-                , exampleSnippet = Just exampleCode
                 , vegaLiteSnippet = Just vegaCode
                 , mermaidSnippet = Just mermaidCode
                 }
@@ -149,9 +148,8 @@ render state =
             [ HH.text "The Source Code" ]
         , HH.p_
             [ HH.text "Here's a simple example using our PureScript D3 DSL - the most basic example imaginable, three circles:" ]
-        , renderCodeExampleSimple
-            (fromMaybe "-- Snippet not defined: TLCSimple.purs" state.exampleSnippet)
-            "TLCSimple"
+        -- SNIPPET: TLCSimple src/website/Viz/ThreeLittleCircles/ThreeLittleCircles.purs 16-31
+        , codeSnippet "TLCSimple" "haskell"
         ]
 
     -- Selected interpreter output
