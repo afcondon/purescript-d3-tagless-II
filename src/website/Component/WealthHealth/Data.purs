@@ -1,10 +1,16 @@
+-- | Data loading and interpolation for Wealth & Health visualization
+-- |
+-- | Interpolation approach based on Mike Bostock's "The Wealth & Health of Nations"
+-- | https://observablehq.com/@mbostock/the-wealth-health-of-nations
+-- | Copyright (c) 2018 Mike Bostock
+-- | ISC License: https://opensource.org/licenses/ISC
 module PSD3.WealthHealth.Data where
 
 import Prelude
 
 import Affjax.Web as AX
 import Affjax.ResponseFormat as ResponseFormat
-import Data.Array (catMaybes, find, head, last, range, sortBy, (!!))
+import Data.Array (catMaybes, find, head, last, length, range, sortBy, (!!))
 import Data.Either (Either(..))
 import Data.Foldable (minimum, maximum)
 import Data.Int (floor, toNumber)
@@ -140,67 +146,49 @@ getNationAtYear year nation = do
     , lifeExpectancy
     }
 
+-- | Bisect left: find the insertion point for a value in a sorted array
+-- | Returns the index where value would be inserted to maintain sort order
+-- | This matches D3's bisector([date]).left behavior
+bisectLeft :: Number -> Array (Array Number) -> Int
+bisectLeft target arr = go 0 (length arr)
+  where
+    go low high
+      | low >= high = low
+      | otherwise =
+          let mid = (low + high) / 2
+          in case arr !! mid >>= (_ !! 0) of
+            Just midVal | midVal < target -> go (mid + 1) high
+            _ -> go low mid
+
 -- | Interpolate a value for a given year from an array of [year, value] pairs
--- | Uses bisection and linear interpolation like the Observable notebook
+-- | Matches Mike Bostock's valueAt function from the Observable notebook
+-- | Copyright (c) 2018 Mike Bostock, ISC License
 interpolateValue :: Int -> Array (Array Number) -> Maybe Number
 interpolateValue targetYear dataPoints =
   case sortBy (comparing (\arr -> fromMaybe 0.0 (arr !! 0))) dataPoints of
     [] -> Nothing
     sorted -> do
-      -- Find the surrounding points
       let
         yearNum = toNumber targetYear
-        before = findBefore yearNum sorted
-        after = findAfter yearNum sorted
+        i = bisectLeft yearNum sorted
 
-      case before, after of
-        -- Exact match
-        Just b, Just a | fromMaybe 0.0 (b !! 0) == yearNum -> b !! 1
-        -- Interpolate between two points
-        Just b, Just a -> do
-          y0 <- b !! 0
-          y1 <- a !! 0
-          v0 <- b !! 1
-          v1 <- a !! 1
+      -- Get point at index i (at or after target)
+      a <- sorted !! i
+      aYear <- a !! 0
+      aValue <- a !! 1
 
-          -- Linear interpolation
-          let t = (yearNum - y0) / (y1 - y0)
-          pure $ v0 + t * (v1 - v0)
+      -- If we can interpolate with previous point
+      if i > 0 then do
+        b <- sorted !! (i - 1)
+        bYear <- b !! 0
+        bValue <- b !! 1
 
-        -- Use the closest available point if we're at the edges
-        Just b, Nothing -> b !! 1
-        Nothing, Just a -> a !! 1
-        Nothing, Nothing -> Nothing
-
--- | Find the data point at or before the target year
-findBefore :: Number -> Array (Array Number) -> Maybe (Array Number)
-findBefore targetYear points =
-  let
-    candidates = find (\point ->
-      case point !! 0 of
-        Just year -> year <= targetYear
-        Nothing -> false
-    ) points
-  in
-    -- If no point before, use the first point
-    case candidates of
-      Nothing -> head points
-      Just p -> Just p
-
--- | Find the data point at or after the target year
-findAfter :: Number -> Array (Array Number) -> Maybe (Array Number)
-findAfter targetYear points =
-  let
-    candidates = find (\point ->
-      case point !! 0 of
-        Just year -> year >= targetYear
-        Nothing -> false
-    ) points
-  in
-    -- If no point after, use the last point
-    case candidates of
-      Nothing -> last points
-      Just p -> Just p
+        -- Linear interpolation: a[1] * (1 - t) + b[1] * t
+        let t = (yearNum - aYear) / (bYear - aYear)
+        pure $ aValue * (1.0 - t) + bValue * t
+      else
+        -- Just return the value at index i
+        pure aValue
 
 -- | Get all nations' data for a specific year
 -- | Filters out nations with incomplete data for the given year
