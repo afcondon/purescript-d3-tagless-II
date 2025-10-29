@@ -1,5 +1,9 @@
 module D3.Viz.ThreeLittleCircles where
 
+-- | Basic data binding demonstration
+-- | Based on Mike Bostock's "Three Little Circles" (https://bost.ocks.org/mike/circles/)
+-- | See Acknowledgements page for full credits
+
 import PSD3.Internal.Attributes.Sugar
 
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Selector)

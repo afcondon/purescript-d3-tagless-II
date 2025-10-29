@@ -9,6 +9,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Website.Types (Route(..))
+import PSD3.Shared.Footer as Footer
 
 -- | Home page state
 type State = Unit
@@ -142,6 +143,9 @@ render _ =
                 (routeToPath WealthHealth)
             ]
         ]
+
+    -- Footer
+    , Footer.render
     ]
 
 -- | Render the Getting Started box (now just links to the page, wizard is in CTAs)

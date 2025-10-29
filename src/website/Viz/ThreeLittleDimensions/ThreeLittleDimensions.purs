@@ -1,5 +1,9 @@
 module D3.Viz.ThreeLittleDimensions where
 
+-- | Nested data binding demonstration
+-- | Based on Mike Bostock's "Nested Selections" (https://bost.ocks.org/mike/nest/)
+-- | See Acknowledgements page for full credits
+
 import PSD3.Internal.Attributes.Sugar
 
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)

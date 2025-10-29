@@ -1,5 +1,10 @@
 module D3.Viz.LesMiserables where
 
+-- | Force-directed graph visualization
+-- | Based on Mike Bostock's Les Misérables character network
+-- | Original: https://observablehq.com/@d3/force-directed-graph
+-- | See Acknowledgements page for full credits
+
 import Control.Monad.State (class MonadState)
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)

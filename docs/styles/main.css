@@ -277,6 +277,37 @@ code, pre {
   pointer-events: none;
 }
 
+/* Site Footer */
+.site-footer {
+  margin-top: 4rem;
+  padding: 2rem 1rem 3rem;
+}
+
+.site-footer__rule {
+  width: 80%;
+  margin: 0 auto;
+  border: none;
+  border-top: 1px solid var(--color-gray-medium);
+}
+
+.site-footer__content {
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.site-footer__link {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  color: var(--color-red-accent);
+  text-decoration: none;
+  letter-spacing: 0.05em;
+}
+
+.site-footer__link:hover {
+  text-decoration: underline;
+  color: var(--color-coral);
+}
+
 /* Dark Mode Support (future) */
 @media (prefers-color-scheme: dark) {
   /* Dark mode variables will go here */

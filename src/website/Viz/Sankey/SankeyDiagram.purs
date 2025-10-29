@@ -1,5 +1,10 @@
 module D3.Viz.SankeyDiagram where
 
+-- | Sankey diagram visualization
+-- | Based on Mike Bostock's Sankey diagram layouts
+-- | Original: https://observablehq.com/@d3/sankey
+-- | See Acknowledgements page for full credits
+
 import Prelude
 
 import Control.Monad.State (class MonadState)

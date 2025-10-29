@@ -8,6 +8,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SectionNav as SectionNav
+import PSD3.Shared.Footer as Footer
 import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
@@ -339,6 +340,9 @@ A.radius (\\(d :: Datum_) _ -> datum_.y d * 2.0)""" ]
                 ]
             ]
         ]
+
+    -- Footer
+    , Footer.render
     ]
 
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
