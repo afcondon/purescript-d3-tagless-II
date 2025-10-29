@@ -6,7 +6,7 @@ import D3.Viz.WealthHealth.Unsafe (coerceDatumToKey, datum_)
 import Data.Number (log, sqrt)
 import Data.Traversable (traverse)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, openSelection, setAttributes, updateJoin)
-import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, fontSize, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
+import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, fontSize, height, radius, sortSelection, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, viewBox, width, x, x1, x2, y, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
 
 -- | Type alias for a nation data point ready for visualization
@@ -84,6 +84,12 @@ xTicks = [200.0, 500.0, 1000.0, 2000.0, 5000.0, 10000.0, 20000.0, 50000.0, 10000
 -- | Similar to D3's y.ticks() for linear scale
 yTicks :: Array Number
 yTicks = [20.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0]
+
+-- | Convert Ordering to Int for D3 sort function
+orderingToInt :: Ordering -> Int
+orderingToInt LT = -1
+orderingToInt EQ = 0
+orderingToInt GT = 1
 
 -- | Initialize the visualization structure (SVG, axes, etc.)
 initializeVisualization :: forall m.
@@ -312,8 +318,13 @@ draw selector = do
       [ classed "exit" ]
 
     -- Update: move existing circles to new positions
+    -- Sort by population (descending) so largest circles are drawn last
     setAttributes circleUpdateSelections.update
-      [ cx \d i -> (calculateAttrs d i).x
+      [ sortSelection \a b ->
+          let popA = datum_.population a
+              popB = datum_.population b
+          in orderingToInt $ compare popB popA  -- Descending order
+      , cx \d i -> (calculateAttrs d i).x
       , cy \d i -> (calculateAttrs d i).y
       , radius \d i -> (calculateAttrs d i).r
       , fill \d i -> (calculateAttrs d i).color
@@ -323,7 +334,11 @@ draw selector = do
     -- Enter: create new circles
     newCircles <- appendTo circleUpdateSelections.enter Circle []
     setAttributes newCircles
-      [ cx \d i -> (calculateAttrs d i).x
+      [ sortSelection \a b ->
+          let popA = datum_.population a
+              popB = datum_.population b
+          in orderingToInt $ compare popB popA  -- Descending order
+      , cx \d i -> (calculateAttrs d i).x
       , cy \d i -> (calculateAttrs d i).y
       , radius \d i -> (calculateAttrs d i).r
       , fill \d i -> (calculateAttrs d i).color
