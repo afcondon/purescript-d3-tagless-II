@@ -3,11 +3,11 @@
   "version": "0.30.0",
   "private": true,
   "scripts": {
-    "build": "spago build",
+    "extract-snippets": "node scripts/extract-snippets.js",
+    "build": "npm run extract-snippets && spago build",
     "clean-build": "rm -rf output/D3.* output/PSD3.* && spago build",
     "install": "spago install",
     "upgrade-set": "spago upgrade-set",
-    "snippets": "node src/scripts/extract-snippets.js",
     "convert-about": "node scripts/convert-about.js",
     "generate-spago-data": "node scripts/generate-spago-data.js",
     "copy-sources": "mkdir -p docs/sources && cp -r src/lib/PSD3 docs/sources/",
