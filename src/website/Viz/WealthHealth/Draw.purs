@@ -336,17 +336,6 @@ draw selector = do
     , text "Health"
     ]
 
-  -- Add Hans Rosling tribute
-  tribute <- appendTo svg Text
-    [ x (config.width / 2.0)
-    , y (config.height - 30.0)
-    , textAnchor "middle"
-    , fontSize 11.0
-    , fill "#666"
-    , classed "tribute"
-    , text "RIP Hans Rosling 1948-2017"
-    ]
-
   chartGroup <- appendTo svg Group [ classed "nations" ]
 
   -- Return update function

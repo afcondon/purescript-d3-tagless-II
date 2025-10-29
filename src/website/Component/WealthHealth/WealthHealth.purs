@@ -78,6 +78,40 @@ render state =
                     ]
             ]
         ]
+
+    -- Credits section
+    , HH.footer
+        [ HP.classes [ HH.ClassName "wealth-health-credits" ] ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "wealth-health-credits__tribute" ] ]
+            [ HH.text "In memory of "
+            , HH.a
+                [ HP.href "https://youtu.be/usdJgEwMinM"
+                , HP.target "_blank"
+                , HP.classes [ HH.ClassName "wealth-health-credits__link" ]
+                ]
+                [ HH.text "Hans Rosling" ]
+            , HH.text " (1948-2017), whose "
+            , HH.a
+                [ HP.href "https://youtu.be/usdJgEwMinM"
+                , HP.target "_blank"
+                , HP.classes [ HH.ClassName "wealth-health-credits__link" ]
+                ]
+                [ HH.text "famous TED talk" ]
+            , HH.text " inspired this visualization."
+            ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "wealth-health-credits__adaptation" ] ]
+            [ HH.text "D3 adaptation by "
+            , HH.a
+                [ HP.href "https://observablehq.com/@mbostock/the-wealth-health-of-nations"
+                , HP.target "_blank"
+                , HP.classes [ HH.ClassName "wealth-health-credits__link" ]
+                ]
+                [ HH.text "Mike Bostock" ]
+            , HH.text ". PureScript implementation demonstrates the PS<$>D3 library."
+            ]
+        ]
     ]
 
 -- | Render tooltip for hovered nation

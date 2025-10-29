@@ -9167,6 +9167,7 @@
   })();
   var em = /* @__PURE__ */ element2("em");
   var em_ = /* @__PURE__ */ em([]);
+  var footer = /* @__PURE__ */ element2("footer");
   var h1 = /* @__PURE__ */ element2("h1");
   var h1_ = /* @__PURE__ */ h1([]);
   var h2 = /* @__PURE__ */ element2("h2");
@@ -17446,12 +17447,12 @@
     if (!o) return new Hsl();
     if (o instanceof Hsl) return o;
     o = o.rgb();
-    var r = o.r / 255, g = o.g / 255, b2 = o.b / 255, min9 = Math.min(r, g, b2), max10 = Math.max(r, g, b2), h = NaN, s = max10 - min9, l = (max10 + min9) / 2;
+    var r = o.r / 255, g = o.g / 255, b2 = o.b / 255, min10 = Math.min(r, g, b2), max10 = Math.max(r, g, b2), h = NaN, s = max10 - min10, l = (max10 + min10) / 2;
     if (s) {
       if (r === max10) h = (g - b2) / s + (g < b2) * 6;
       else if (g === max10) h = (b2 - r) / s + 2;
       else h = (r - g) / s + 4;
-      s /= l < 0.5 ? max10 + min9 : 2 - max10 - min9;
+      s /= l < 0.5 ? max10 + min10 : 2 - max10 - min10;
       h *= 60;
     } else {
       s = l > 0 && l < 1 ? 0 : h;
@@ -19367,22 +19368,22 @@
 
   // node_modules/d3-sankey/node_modules/d3-array/src/min.js
   function min7(values2, valueof) {
-    let min9;
+    let min10;
     if (valueof === void 0) {
       for (const value19 of values2) {
-        if (value19 != null && (min9 > value19 || min9 === void 0 && value19 >= value19)) {
-          min9 = value19;
+        if (value19 != null && (min10 > value19 || min10 === void 0 && value19 >= value19)) {
+          min10 = value19;
         }
       }
     } else {
       let index5 = -1;
       for (let value19 of values2) {
-        if ((value19 = valueof(value19, ++index5, values2)) != null && (min9 > value19 || min9 === void 0 && value19 >= value19)) {
-          min9 = value19;
+        if ((value19 = valueof(value19, ++index5, values2)) != null && (min10 > value19 || min10 === void 0 && value19 >= value19)) {
+          min10 = value19;
         }
       }
     }
-    return min9;
+    return min10;
   }
 
   // node_modules/d3-sankey/node_modules/d3-array/src/sum.js
@@ -34820,102 +34821,100 @@
                         };
                         return bind71(traverse13(createYTick)(yTicks))(function() {
                           return bind71(appendTo2(svg2)(Text2.value)([x30(15), y29(defaultConfig.height / 2), textAnchor12("middle"), fontSize8(14), fill25("#333"), classed24("y-axis-label"), text21("Health")]))(function(yAxisLabel) {
-                            return bind71(appendTo2(svg2)(Text2.value)([x30(defaultConfig.width / 2), y29(defaultConfig.height - 30), textAnchor12("middle"), fontSize8(11), fill25("#666"), classed24("tribute"), text21("RIP Hans Rosling 1948-2017")]))(function(tribute) {
-                              return bind71(appendTo2(svg2)(Group.value)([classed24("nations")]))(function(chartGroup) {
-                                return pure45(function(nations) {
-                                  var calculateAttrs = function(d9) {
-                                    return function(v1) {
-                                      var pop4 = datum_7.population(d9);
-                                      var life = datum_7.lifeExpectancy(d9);
-                                      var income = datum_7.income(d9);
-                                      var color2 = datum_7.regionColor(d9);
-                                      return {
-                                        x: scaleX(defaultConfig)(income),
-                                        y: scaleY(defaultConfig)(life),
-                                        r: scaleRadius(pop4),
-                                        color: color2
-                                      };
+                            return bind71(appendTo2(svg2)(Group.value)([classed24("nations")]))(function(chartGroup) {
+                              return pure45(function(nations) {
+                                var calculateAttrs = function(d9) {
+                                  return function(v1) {
+                                    var pop4 = datum_7.population(d9);
+                                    var life = datum_7.lifeExpectancy(d9);
+                                    var income = datum_7.income(d9);
+                                    var color2 = datum_7.regionColor(d9);
+                                    return {
+                                      x: scaleX(defaultConfig)(income),
+                                      y: scaleY(defaultConfig)(life),
+                                      r: scaleRadius(pop4),
+                                      color: color2
                                     };
                                   };
-                                  return bind71(openSelection2(chartGroup)("circle"))(function(circleEnterSelection) {
-                                    return bind71(updateJoin2(circleEnterSelection)(Circle.value)(nations)(coerceDatumToKey2))(function(circleUpdateSelections) {
-                                      return discard112(setAttributes2(circleUpdateSelections.exit)([classed24("exit")]))(function() {
-                                        return discard112(setAttributes2(circleUpdateSelections.update)([sortSelection(function(a2) {
-                                          return function(b2) {
-                                            var popB = datum_7.population(b2);
-                                            var popA = datum_7.population(a2);
-                                            return orderingToInt(compare4(popB)(popA));
-                                          };
-                                        }), cx8(function(d9) {
-                                          return function(i2) {
-                                            return calculateAttrs(d9)(i2).x;
-                                          };
-                                        }), cy8(function(d9) {
-                                          return function(i2) {
-                                            return calculateAttrs(d9)(i2).y;
-                                          };
-                                        }), radius16(function(d9) {
-                                          return function(i2) {
-                                            return calculateAttrs(d9)(i2).r;
-                                          };
-                                        }), fill110(function(d9) {
-                                          return function(i2) {
-                                            return calculateAttrs(d9)(i2).color;
-                                          };
-                                        }), classed24("nation-circle update")]))(function() {
-                                          return bind71(appendTo2(circleUpdateSelections.enter)(Circle.value)([]))(function(newCircles) {
-                                            return discard112(setAttributes2(newCircles)([sortSelection(function(a2) {
-                                              return function(b2) {
-                                                var popB = datum_7.population(b2);
-                                                var popA = datum_7.population(a2);
-                                                return orderingToInt(compare4(popB)(popA));
-                                              };
-                                            }), cx8(function(d9) {
-                                              return function(i2) {
-                                                return calculateAttrs(d9)(i2).x;
-                                              };
-                                            }), cy8(function(d9) {
-                                              return function(i2) {
-                                                return calculateAttrs(d9)(i2).y;
-                                              };
-                                            }), radius16(function(d9) {
-                                              return function(i2) {
-                                                return calculateAttrs(d9)(i2).r;
-                                              };
-                                            }), fill110(function(d9) {
-                                              return function(i2) {
-                                                return calculateAttrs(d9)(i2).color;
-                                              };
-                                            }), fillOpacity9(0.7), strokeColor20("#333"), strokeWidth17(0.5), classed24("nation-circle enter")]))(function() {
-                                              var tooltipText = function(d9) {
-                                                return datum_7.name(d9) + ("\n" + datum_7.region(d9));
-                                              };
-                                              return bind71(appendTo2(newCircles)(Title.value)([]))(function(newTitles) {
-                                                return discard112(setAttributes2(newTitles)([text110(tooltipText)]))(function() {
-                                                  return bind71(openSelection2(chartGroup)("text"))(function(labelEnterSelection) {
-                                                    return bind71(updateJoin2(labelEnterSelection)(Text2.value)(nations)(coerceDatumToKey2))(function(labelUpdateSelections) {
-                                                      return discard112(setAttributes2(labelUpdateSelections.exit)([classed24("exit")]))(function() {
-                                                        return discard112(setAttributes2(labelUpdateSelections.update)([x34(function(d9) {
-                                                          return function(i2) {
-                                                            return calculateAttrs(d9)(i2).x;
-                                                          };
-                                                        }), y34(function(d9) {
-                                                          return function(i2) {
-                                                            return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
-                                                          };
-                                                        }), classed24("nation-label update")]))(function() {
-                                                          return bind71(appendTo2(labelUpdateSelections.enter)(Text2.value)([]))(function(newLabels) {
-                                                            return discard112(setAttributes2(newLabels)([x34(function(d9) {
-                                                              return function(i2) {
-                                                                return calculateAttrs(d9)(i2).x;
-                                                              };
-                                                            }), y34(function(d9) {
-                                                              return function(i2) {
-                                                                return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
-                                                              };
-                                                            }), textAnchor12("middle"), fontSize8(11), fill25("#333"), fillOpacity9(0), text110(datum_7.name), classed24("nation-label enter")]))(function() {
-                                                              return pure45(newCircles);
-                                                            });
+                                };
+                                return bind71(openSelection2(chartGroup)("circle"))(function(circleEnterSelection) {
+                                  return bind71(updateJoin2(circleEnterSelection)(Circle.value)(nations)(coerceDatumToKey2))(function(circleUpdateSelections) {
+                                    return discard112(setAttributes2(circleUpdateSelections.exit)([classed24("exit")]))(function() {
+                                      return discard112(setAttributes2(circleUpdateSelections.update)([sortSelection(function(a2) {
+                                        return function(b2) {
+                                          var popB = datum_7.population(b2);
+                                          var popA = datum_7.population(a2);
+                                          return orderingToInt(compare4(popB)(popA));
+                                        };
+                                      }), cx8(function(d9) {
+                                        return function(i2) {
+                                          return calculateAttrs(d9)(i2).x;
+                                        };
+                                      }), cy8(function(d9) {
+                                        return function(i2) {
+                                          return calculateAttrs(d9)(i2).y;
+                                        };
+                                      }), radius16(function(d9) {
+                                        return function(i2) {
+                                          return calculateAttrs(d9)(i2).r;
+                                        };
+                                      }), fill110(function(d9) {
+                                        return function(i2) {
+                                          return calculateAttrs(d9)(i2).color;
+                                        };
+                                      }), classed24("nation-circle update")]))(function() {
+                                        return bind71(appendTo2(circleUpdateSelections.enter)(Circle.value)([]))(function(newCircles) {
+                                          return discard112(setAttributes2(newCircles)([sortSelection(function(a2) {
+                                            return function(b2) {
+                                              var popB = datum_7.population(b2);
+                                              var popA = datum_7.population(a2);
+                                              return orderingToInt(compare4(popB)(popA));
+                                            };
+                                          }), cx8(function(d9) {
+                                            return function(i2) {
+                                              return calculateAttrs(d9)(i2).x;
+                                            };
+                                          }), cy8(function(d9) {
+                                            return function(i2) {
+                                              return calculateAttrs(d9)(i2).y;
+                                            };
+                                          }), radius16(function(d9) {
+                                            return function(i2) {
+                                              return calculateAttrs(d9)(i2).r;
+                                            };
+                                          }), fill110(function(d9) {
+                                            return function(i2) {
+                                              return calculateAttrs(d9)(i2).color;
+                                            };
+                                          }), fillOpacity9(0.7), strokeColor20("#333"), strokeWidth17(0.5), classed24("nation-circle enter")]))(function() {
+                                            var tooltipText = function(d9) {
+                                              return datum_7.name(d9) + ("\n" + datum_7.region(d9));
+                                            };
+                                            return bind71(appendTo2(newCircles)(Title.value)([]))(function(newTitles) {
+                                              return discard112(setAttributes2(newTitles)([text110(tooltipText)]))(function() {
+                                                return bind71(openSelection2(chartGroup)("text"))(function(labelEnterSelection) {
+                                                  return bind71(updateJoin2(labelEnterSelection)(Text2.value)(nations)(coerceDatumToKey2))(function(labelUpdateSelections) {
+                                                    return discard112(setAttributes2(labelUpdateSelections.exit)([classed24("exit")]))(function() {
+                                                      return discard112(setAttributes2(labelUpdateSelections.update)([x34(function(d9) {
+                                                        return function(i2) {
+                                                          return calculateAttrs(d9)(i2).x;
+                                                        };
+                                                      }), y34(function(d9) {
+                                                        return function(i2) {
+                                                          return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
+                                                        };
+                                                      }), classed24("nation-label update")]))(function() {
+                                                        return bind71(appendTo2(labelUpdateSelections.enter)(Text2.value)([]))(function(newLabels) {
+                                                          return discard112(setAttributes2(newLabels)([x34(function(d9) {
+                                                            return function(i2) {
+                                                              return calculateAttrs(d9)(i2).x;
+                                                            };
+                                                          }), y34(function(d9) {
+                                                            return function(i2) {
+                                                              return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
+                                                            };
+                                                          }), textAnchor12("middle"), fontSize8(11), fill25("#333"), fillOpacity9(0), text110(datum_7.name), classed24("nation-label enter")]))(function() {
+                                                            return pure45(newCircles);
                                                           });
                                                         });
                                                       });
@@ -35193,6 +35192,7 @@
   var pure40 = /* @__PURE__ */ pure(applicativeMaybe);
   var bind113 = /* @__PURE__ */ bind(bindArray);
   var pure113 = /* @__PURE__ */ pure(applicativeArray);
+  var min9 = /* @__PURE__ */ min(ordInt);
   var maximum9 = /* @__PURE__ */ maximum(ordInt)(foldableArray);
   var minimum5 = /* @__PURE__ */ minimum(ordInt)(foldableArray);
   var div4 = /* @__PURE__ */ div(euclideanRingInt);
@@ -35254,10 +35254,10 @@
           return [];
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 124, column 7 - line 126, column 22): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 125, column 7 - line 127, column 22): " + [v.constructor.name]);
       });
     });
-    var maxYear = fromMaybe(2009)(maximum9(allYears));
+    var maxYear = min9(2005)(fromMaybe(2009)(maximum9(allYears)));
     var minYear = fromMaybe(1800)(minimum5(allYears));
     return {
       min: minYear,
@@ -35293,7 +35293,7 @@
               return;
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 155, column 5 - line 161, column 28): " + [low2.constructor.name, high2.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 157, column 5 - line 163, column 28): " + [low2.constructor.name, high2.constructor.name]);
           }
           ;
           while (!$tco_done) {
@@ -35320,8 +35320,8 @@
       return bind65(index2(v)(i2))(function(a2) {
         return bind65(index2(a2)(0))(function(aYear) {
           return bind65(index2(a2)(1))(function(aValue) {
-            var $38 = i2 > 0;
-            if ($38) {
+            var $39 = i2 > 0;
+            if ($39) {
               return bind65(index2(v)(i2 - 1 | 0))(function(b2) {
                 return bind65(index2(b2)(0))(function(bYear) {
                   return bind65(index2(b2)(1))(function(bValue) {
@@ -35352,8 +35352,8 @@
         ;
         throw new Error("Failed pattern match at PSD3.WealthHealth.Data (line 81, column 16 - line 83, column 22): " + [v.constructor.name]);
       };
-      var $41 = $$null5(dataPoints);
-      if ($41) {
+      var $42 = $$null5(dataPoints);
+      if ($42) {
         return Nothing.value;
       }
       ;
@@ -35534,7 +35534,7 @@
               return handleAction47(dictMonadAff)(MonadEffect0)(new DataLoaded2(result.value0));
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 148, column 5 - line 153, column 40): " + [result.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 182, column 5 - line 187, column 40): " + [result.constructor.name]);
           });
         }
         ;
@@ -35668,7 +35668,7 @@
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 194, column 7 - line 198, column 60): " + [state$prime.animationSubscriptionId.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 228, column 7 - line 232, column 60): " + [state$prime.animationSubscriptionId.constructor.name]);
                 }));
               });
             });
@@ -35717,7 +35717,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 202, column 5 - line 211, column 28): " + [state3.model.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 236, column 5 - line 245, column 28): " + [state3.model.constructor.name]);
           });
         }
         ;
@@ -35788,7 +35788,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 144, column 16 - line 237, column 24): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 178, column 16 - line 271, column 24): " + [v.constructor.name]);
       };
     };
   };
@@ -35826,10 +35826,10 @@
           return div2([classes(["wealth-health-tooltip"])])([h4_([text5(v.value0.name)]), div_([text5("Region: " + regionName(v.value0.region))]), div_([text5("Income: $" + formatNumber(v.value0.income))]), div_([text5("Population: " + formatPopulation(v.value0.population))]), div_([text5("Life Expectancy: " + (formatNumber(v.value0.lifeExpectancy) + " years"))])]);
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 90, column 7 - line 100, column 14): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 124, column 7 - line 134, column 14): " + [v.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 86, column 3 - line 100, column 14): " + [state3.hoveredNation.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 120, column 3 - line 134, column 14): " + [state3.hoveredNation.constructor.name]);
     };
   };
   var render54 = function(state3) {
@@ -35843,7 +35843,7 @@
       }
       ;
       throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 65, column 15 - line 78, column 22): " + [state3.model.constructor.name]);
-    })()])])]);
+    })()])]), footer([classes(["wealth-health-credits"])])([div2([classes(["wealth-health-credits__tribute"])])([text5("In memory of "), a([href4("https://youtu.be/usdJgEwMinM"), target5("_blank"), classes(["wealth-health-credits__link"])])([text5("Hans Rosling")]), text5(" (1948-2017), whose "), a([href4("https://youtu.be/usdJgEwMinM"), target5("_blank"), classes(["wealth-health-credits__link"])])([text5("famous TED talk")]), text5(" inspired this visualization.")]), div2([classes(["wealth-health-credits__adaptation"])])([text5("D3 adaptation by "), a([href4("https://observablehq.com/@mbostock/the-wealth-health-of-nations"), target5("_blank"), classes(["wealth-health-credits__link"])])([text5("Mike Bostock")]), text5(". PureScript implementation demonstrates the PS<$>D3 library.")])])]);
   };
   var component53 = function(dictMonadAff) {
     var handleAction1 = handleAction47(dictMonadAff)(dictMonadAff.MonadEffect0());

@@ -393,3 +393,39 @@
 .nation-group:hover .nation-label {
   opacity: 1 !important;
 }
+
+/* Credits section */
+.wealth-health-credits {
+  max-width: 1400px;
+  margin: 2rem auto 0 auto;
+  padding: 1.5rem;
+  background-color: var(--color-beige-light);
+  border: 2px solid var(--color-gray-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: var(--font-mono);
+}
+
+.wealth-health-credits__tribute {
+  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-gray-darker);
+}
+
+.wealth-health-credits__adaptation {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--color-gray-darker);
+}
+
+.wealth-health-credits__link {
+  color: var(--color-red-accent);
+  text-decoration: none;
+  font-weight: bold;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom-color 0.2s ease;
+}
+
+.wealth-health-credits__link:hover {
+  border-bottom-color: var(--color-red-accent);
+}
