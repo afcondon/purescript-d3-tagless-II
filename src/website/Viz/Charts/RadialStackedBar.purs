@@ -1,5 +1,11 @@
 module D3.Viz.RadialStackedBar where
 
+-- | Radial Stacked Bar Chart
+-- | Based on https://observablehq.com/@d3/radial-stacked-bar-chart/2
+-- | Copyright 2019–2023 Observable, Inc.
+-- | Created by Mike Bostock (@mbostock)
+-- | ISC License
+
 import Prelude
 
 import PSD3.Internal.Attributes.Sugar (classed, d, fill, fillOpacity, height, strokeColor, text, textAnchor, transform, width, x, y)
@@ -62,13 +68,14 @@ arcPath innerRadius outerRadius startAngle endAngle =
      " Z"
 
 -- Draw radial stacked bar chart
+-- Matches Observable implementation with 928x928 dimensions and 180px inner radius
 draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
   Array GroupedBarData -> Selector D3Selection_ -> m Unit
 draw data' selector = do
-  let dims = { width: 900.0, height: 900.0, innerRadius: 100.0, outerRadius: 400.0 }
+  let dims = { width: 928.0, height: 928.0, innerRadius: 180.0, outerRadius: 400.0 }
   let centerX = dims.width / 2.0
   let centerY = dims.height / 2.0
 
@@ -86,10 +93,10 @@ draw data' selector = do
   let anglePerState = (2.0 * pi) / stateCount
   let anglepadding = 0.02 * anglePerState
 
-  -- Color scale for ages
+  -- Color scale using d3.schemeSpectral (Observable's choice)
   let ageColors =
-        [ "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00"
-        , "#ffff33", "#a65628", "#f781bf", "#999999"
+        [ "#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b"
+        , "#e6f598", "#abdda4", "#66c2a5", "#3288bd"
         ]
   let getAgeColor age' =
         fromMaybe "#999999" $ do
@@ -114,7 +121,6 @@ draw data' selector = do
         let stateData = getStateData state' data'
         let values = map _.population stateData
         let stacked = stackData values
-        let stateTotal = getStateTotal state'
 
         -- Calculate angles for this state
         let startAngle = toNumber stateIdx * anglePerState + anglepadding

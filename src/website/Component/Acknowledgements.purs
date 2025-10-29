@@ -53,6 +53,33 @@ render _ =
 
         , HH.section
             [ HP.classes [ HH.ClassName "acknowledgements-section" ] ]
+            [ HH.h2_ [ HH.text "Observable Examples (ISC License)" ]
+            , HH.p_
+                [ HH.text "Several chart examples in PS<$>D3 are based on visualizations from "
+                , HH.a [ HP.href "https://observablehq.com/" ] [ HH.text "Observable" ]
+                , HH.text ", licensed under the ISC License. These include:"
+                ]
+            , HH.ul_
+                [ HH.li_
+                    [ HH.a [ HP.href "https://observablehq.com/@d3/grouped-bar-chart/2" ] [ HH.text "Grouped Bar Chart" ]
+                    , HH.text " (Copyright 2018–2020 Observable, Inc.)"
+                    ]
+                , HH.li_
+                    [ HH.a [ HP.href "https://observablehq.com/@d3/multi-line-chart/2" ] [ HH.text "Multi-Line Chart" ]
+                    , HH.text " (Copyright 2018–2023 Observable, Inc.)"
+                    ]
+                , HH.li_
+                    [ HH.a [ HP.href "https://observablehq.com/@d3/radial-stacked-bar-chart/2" ] [ HH.text "Radial Stacked Bar Chart" ]
+                    , HH.text " (Copyright 2019–2023 Observable, Inc., created by Mike Bostock)"
+                    ]
+                ]
+            , HH.p_
+                [ HH.text "These examples have been reimplemented in PureScript to demonstrate the PS<$>D3 library's capabilities while faithfully reproducing the original visualizations' dimensions, scales, and styling."
+                ]
+            ]
+
+        , HH.section
+            [ HP.classes [ HH.ClassName "acknowledgements-section" ] ]
             [ HH.h2_ [ HH.text "Data Visualization Pioneers" ]
             , HH.p_
                 [ HH.a [ HP.href "https://www.edwardtufte.com/" ] [ HH.text "Edward Tufte" ]

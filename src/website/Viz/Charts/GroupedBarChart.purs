@@ -1,5 +1,10 @@
 module D3.Viz.GroupedBarChart where
 
+-- | Grouped Bar Chart
+-- | Based on https://observablehq.com/@d3/grouped-bar-chart/2
+-- | Copyright 2018–2020 Observable, Inc.
+-- | ISC License
+
 import Prelude
 
 import PSD3.Internal.Attributes.Sugar (classed, fill, height, strokeColor, text, textAnchor, transform, width, x, y)
@@ -29,13 +34,14 @@ getAges :: Array GroupedBarData -> Array String
 getAges = nub <<< map _.age
 
 -- Draw grouped bar chart
+-- Matches Observable implementation with 928x600 dimensions
 draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
   Array GroupedBarData -> Selector D3Selection_ -> m Unit
 draw data' selector = do
-  let dims = { width: 900.0, height: 500.0, marginTop: 30.0, marginRight: 10.0, marginBottom: 30.0, marginLeft: 40.0 }
+  let dims = { width: 928.0, height: 600.0, marginTop: 10.0, marginRight: 10.0, marginBottom: 20.0, marginLeft: 40.0 }
   let chartWidth = dims.width - dims.marginLeft - dims.marginRight
   let chartHeight = dims.height - dims.marginTop - dims.marginBottom
 
@@ -44,25 +50,31 @@ draw data' selector = do
   let ages = getAges data'
   let maxPop = fromMaybe 0.0 $ maximum $ map _.population data'
 
-  -- Calculate scales
+  -- Calculate scales with Observable's padding values
+  -- fx scale: 0.1 padding between state groups
+  -- x scale: 0.05 internal padding between age bars
   let stateCount = toNumber $ length states
   let ageCount = toNumber $ length ages
-  let stateWidth = chartWidth / stateCount
-  let barWidth = (stateWidth * 0.9) / ageCount
-  let barPadding = stateWidth * 0.1
+  let fxPadding = 0.1  -- Band scale padding between state groups
+  let xPadding = 0.05  -- Band scale padding within age groups
+  let stateWidth = chartWidth / (stateCount + fxPadding * (stateCount - 1.0))
+  let barWidth = (stateWidth * (1.0 - fxPadding)) / (ageCount + xPadding * (ageCount - 1.0))
+  let stateSpacing = stateWidth * (1.0 + fxPadding)
 
-  -- Helper to get state x position
+  -- Helper to get state x position (with band scale padding)
   let getStateX state' =
-        fromMaybe 0.0 $ map (\i -> toNumber i * stateWidth) $ findIndex (\s -> s == state') states
+        fromMaybe 0.0 $ map (\i -> toNumber i * stateSpacing) $ findIndex (\s -> s == state') states
 
-  -- Helper to get age x offset within state
+  -- Helper to get age x offset within state (with internal padding)
   let getAgeOffset age' =
-        fromMaybe 0.0 $ map (\i -> toNumber i * barWidth + barPadding / 2.0) $ findIndex (\a -> a == age') ages
+        let barSpacing = barWidth * (1.0 + xPadding)
+        in fromMaybe 0.0 $ map (\i -> toNumber i * barSpacing) $ findIndex (\a -> a == age') ages
 
-  -- Color scale for ages (using spectral-like colors)
+  -- Color scale using d3.schemeSpectral (Observable's choice)
+  -- These are the Spectral colors from ColorBrewer
   let ageColors =
-        [ "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00"
-        , "#ffff33", "#a65628", "#f781bf", "#999999"
+        [ "#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b"
+        , "#e6f598", "#abdda4", "#66c2a5", "#3288bd"
         ]
   let getAgeColor age' =
         fromMaybe "#999999" $ do

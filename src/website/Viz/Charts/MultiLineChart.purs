@@ -1,5 +1,10 @@
 module D3.Viz.MultiLineChart where
 
+-- | Multi-Line Chart
+-- | Based on https://observablehq.com/@d3/multi-line-chart/2
+-- | Copyright 2018–2023 Observable, Inc.
+-- | ISC License
+
 import Prelude
 
 import PSD3.Internal.Attributes.Sugar (classed, d, fill, height, strokeColor, strokeWidth, text, textAnchor, transform, viewBox, width, x, y)
@@ -7,7 +12,7 @@ import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.Charts.Model (MultiLineData)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
 import Data.Array (filter, findIndex, head, index, last, length, mapWithIndex, nub)
-import Data.Foldable (foldl, maximum, minimum, traverse_)
+import Data.Foldable (maximum, minimum, traverse_)
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..), fromMaybe)
@@ -50,13 +55,14 @@ linePath chartWidth chartHeight maxValue minValue points =
 
 
 -- Draw multi-line chart
+-- Matches Observable implementation with 928x600 dimensions
 draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
   Array MultiLineData -> Selector D3Selection_ -> m Unit
 draw data' selector = do
-  let dims = { width: 900.0, height: 500.0, marginTop: 30.0, marginRight: 150.0, marginBottom: 30.0, marginLeft: 40.0 }
+  let dims = { width: 928.0, height: 600.0, marginTop: 20.0, marginRight: 20.0, marginBottom: 30.0, marginLeft: 30.0 }
   let chartWidth = dims.width - dims.marginLeft - dims.marginRight
   let chartHeight = dims.height - dims.marginTop - dims.marginBottom
 
@@ -66,13 +72,14 @@ draw data' selector = do
   let minValue = fromMaybe 0.0 $ minimum allValues
   let seriesList = getSeries data'
 
-  -- Color scale for series
+  -- Color scale for series (using steelblue as Observable default)
   let seriesColors =
-        [ "#e41a1c", "#377eb8", "#4daf4a", "#984ea3"
-        , "#ff7f00", "#ffff33", "#a65628", "#f781bf"
+        [ "#4682b4"  -- steelblue (Observable's choice)
+        , "#e41a1c", "#377eb8", "#4daf4a"
+        , "#984ea3", "#ff7f00", "#ffff33", "#a65628"
         ]
   let getSeriesColor s =
-        fromMaybe "#999999" $ do
+        fromMaybe "#4682b4" $ do
           i <- findIndex (\x -> x == s) seriesList
           index seriesColors i
 
@@ -98,7 +105,7 @@ draw data' selector = do
           _ <- appendTo chartGroup Path [
               d pathData
             , strokeColor color
-            , strokeWidth 2.0
+            , strokeWidth 1.5  -- Observable uses 1.5px
             , fill "none"
             , classed "line"
             ]

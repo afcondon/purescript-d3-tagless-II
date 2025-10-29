@@ -11117,7 +11117,7 @@
     return Initialize51;
   })();
   var render2 = function(v) {
-    return div2([classes(["acknowledgements-page"])])([div2([classes(["acknowledgements-content"])])([h1([classes(["acknowledgements-title"])])([text5("Acknowledgements")]), section([classes(["acknowledgements-section"])])([h2_([text5("D3.js and Data Visualization")]), p_([text5("This project would not exist without "), a([href4("https://d3js.org/")])([text5("D3.js")]), text5(", created by "), a([href4("https://bost.ocks.org/mike/")])([text5("Mike Bostock")]), text5(". D3 revolutionized web-based data visualization and established patterns that have become fundamental to the field. Many of the examples in PS<$>D3 are adapted from Mike's extensive collection of examples and tutorials.")]), p_([text5("Thanks so much to Mike for creating D3, for his clear documentation and examples, and for making the library open source. His work on Observable and continued contributions to visualization continue to inspire.")])]), section([classes(["acknowledgements-section"])])([h2_([text5("Data Visualization Pioneers")]), p_([a([href4("https://www.edwardtufte.com/")])([text5("Edward Tufte")]), text5("'s work on information design and visual communication established many of the principles we follow today. His books remain essential reading for anyone interested in effective data presentation.")]), p_([a([href4("https://www.gapminder.org/about/hans-rosling/")])([text5("Hans Rosling")]), text5("'s passionate advocacy for data literacy and his innovative animated visualizations (particularly the Gapminder World visualization) showed how data can tell compelling stories. The Wealth & Health example in this project is inspired by his work.")])]), section([classes(["acknowledgements-section"])])([h2_([text5("PureScript and Functional Programming")]), p_([a([href4("http://functorial.com/")])([text5("Phil Freeman")]), text5(", for his presentation and example of finally tagless encodings in PureScript which provided the spark for this library's architecture.")]), p_([text5("Ian Ross, for his solution to the polymorphic attribute architecture with typeclasses, so neat.")]), p_([text5("The PureScript Core Team members, past, present and future and the wider PureScript community for building this incredibly nice language and ecosystem. I'd particularly like to single out Mike Solomon, Jordan Martinez, Thomas Honeyman, Fabrizio Ferrai who listened to me drone on about this on conference calls.")])]), section([classes(["acknowledgements-section"])])([h2_([text5("About This Project")]), p_([text5("PS<$>D3 is an experimental exploration of what data visualization APIs might look like in a strongly-typed functional programming language. It aims to preserve D3's flexibility while adding type safety and composability.")]), p_([text5("This project is open source and available on GitHub. Contributions, feedback, and suggestions are always welcome.")])])]), render]);
+    return div2([classes(["acknowledgements-page"])])([div2([classes(["acknowledgements-content"])])([h1([classes(["acknowledgements-title"])])([text5("Acknowledgements")]), section([classes(["acknowledgements-section"])])([h2_([text5("D3.js and Data Visualization")]), p_([text5("This project would not exist without "), a([href4("https://d3js.org/")])([text5("D3.js")]), text5(", created by "), a([href4("https://bost.ocks.org/mike/")])([text5("Mike Bostock")]), text5(". D3 revolutionized web-based data visualization and established patterns that have become fundamental to the field. Many of the examples in PS<$>D3 are adapted from Mike's extensive collection of examples and tutorials.")]), p_([text5("Thanks so much to Mike for creating D3, for his clear documentation and examples, and for making the library open source. His work on Observable and continued contributions to visualization continue to inspire.")])]), section([classes(["acknowledgements-section"])])([h2_([text5("Observable Examples (ISC License)")]), p_([text5("Several chart examples in PS<$>D3 are based on visualizations from "), a([href4("https://observablehq.com/")])([text5("Observable")]), text5(", licensed under the ISC License. These include:")]), ul_([li_([a([href4("https://observablehq.com/@d3/grouped-bar-chart/2")])([text5("Grouped Bar Chart")]), text5(" (Copyright 2018\u20132020 Observable, Inc.)")]), li_([a([href4("https://observablehq.com/@d3/multi-line-chart/2")])([text5("Multi-Line Chart")]), text5(" (Copyright 2018\u20132023 Observable, Inc.)")]), li_([a([href4("https://observablehq.com/@d3/radial-stacked-bar-chart/2")])([text5("Radial Stacked Bar Chart")]), text5(" (Copyright 2019\u20132023 Observable, Inc., created by Mike Bostock)")])]), p_([text5("These examples have been reimplemented in PureScript to demonstrate the PS<$>D3 library's capabilities while faithfully reproducing the original visualizations' dimensions, scales, and styling.")])]), section([classes(["acknowledgements-section"])])([h2_([text5("Data Visualization Pioneers")]), p_([a([href4("https://www.edwardtufte.com/")])([text5("Edward Tufte")]), text5("'s work on information design and visual communication established many of the principles we follow today. His books remain essential reading for anyone interested in effective data presentation.")]), p_([a([href4("https://www.gapminder.org/about/hans-rosling/")])([text5("Hans Rosling")]), text5("'s passionate advocacy for data literacy and his innovative animated visualizations (particularly the Gapminder World visualization) showed how data can tell compelling stories. The Wealth & Health example in this project is inspired by his work.")])]), section([classes(["acknowledgements-section"])])([h2_([text5("PureScript and Functional Programming")]), p_([a([href4("http://functorial.com/")])([text5("Phil Freeman")]), text5(", for his presentation and example of finally tagless encodings in PureScript which provided the spark for this library's architecture.")]), p_([text5("Ian Ross, for his solution to the polymorphic attribute architecture with typeclasses, so neat.")]), p_([text5("The PureScript Core Team members, past, present and future and the wider PureScript community for building this incredibly nice language and ecosystem. I'd particularly like to single out Mike Solomon, Jordan Martinez, Thomas Honeyman, Fabrizio Ferrai who listened to me drone on about this on conference calls.")])]), section([classes(["acknowledgements-section"])])([h2_([text5("About This Project")]), p_([text5("PS<$>D3 is an experimental exploration of what data visualization APIs might look like in a strongly-typed functional programming language. It aims to preserve D3's flexibility while adding type safety and composability.")]), p_([text5("This project is open source and available on GitHub. Contributions, feedback, and suggestions are always welcome.")])])]), render]);
   };
   var handleAction = function(v) {
     return pure14(unit);
@@ -35032,11 +35032,11 @@ drawQuartet quartet selector = do
         return function(data$prime) {
           return function(selector) {
             var dims = {
-              width: 900,
-              height: 500,
-              marginTop: 30,
+              width: 928,
+              height: 600,
+              marginTop: 10,
               marginRight: 10,
-              marginBottom: 30,
+              marginBottom: 20,
               marginLeft: 40
             };
             var chartWidth = dims.width - dims.marginLeft - dims.marginRight;
@@ -35048,24 +35048,25 @@ drawQuartet quartet selector = do
             })(data$prime)));
             var stateCount = toNumber(length4(states));
             var ageCount = toNumber(length4(ages));
-            var stateWidth = chartWidth / stateCount;
-            var barWidth = stateWidth * 0.9 / ageCount;
-            var barPadding = stateWidth * 0.1;
+            var stateWidth = chartWidth / (stateCount + 0.1 * (stateCount - 1));
+            var barWidth = stateWidth * (1 - 0.1) / (ageCount + 0.05 * (ageCount - 1));
+            var stateSpacing = stateWidth * (1 + 0.1);
             var getStateX = function(state$prime) {
               return fromMaybe(0)(map116(function(i2) {
-                return toNumber(i2) * stateWidth;
+                return toNumber(i2) * stateSpacing;
               })(findIndex(function(s) {
                 return s === state$prime;
               })(states)));
             };
             var getAgeOffset = function(age$prime) {
+              var barSpacing = barWidth * (1 + 0.05);
               return fromMaybe(0)(map116(function(i2) {
-                return toNumber(i2) * barWidth + barPadding / 2;
+                return toNumber(i2) * barSpacing;
               })(findIndex(function(a2) {
                 return a2 === age$prime;
               })(ages)));
             };
-            var ageColors = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf", "#999999"];
+            var ageColors = ["#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#e6f598", "#abdda4", "#66c2a5", "#3288bd"];
             var getAgeColor = function(age$prime) {
               return fromMaybe("#999999")(bind60(findIndex(function(a2) {
                 return a2 === age$prime;
@@ -35211,12 +35212,12 @@ drawQuartet quartet selector = do
         return function(data$prime) {
           return function(selector) {
             var dims = {
-              width: 900,
-              height: 500,
-              marginTop: 30,
-              marginRight: 150,
+              width: 928,
+              height: 600,
+              marginTop: 20,
+              marginRight: 20,
               marginBottom: 30,
-              marginLeft: 40
+              marginLeft: 30
             };
             var chartWidth = dims.width - dims.marginLeft - dims.marginRight;
             var chartHeight = dims.height - dims.marginTop - dims.marginBottom;
@@ -35226,9 +35227,9 @@ drawQuartet quartet selector = do
             var maxValue = fromMaybe(0)(maximum7(allValues));
             var minValue = fromMaybe(0)(minimum4(allValues));
             var seriesList = getSeries(data$prime);
-            var seriesColors = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf"];
+            var seriesColors = ["#4682b4", "#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628"];
             var getSeriesColor = function(s) {
-              return fromMaybe("#999999")(bind61(findIndex(function(x112) {
+              return fromMaybe("#4682b4")(bind61(findIndex(function(x112) {
                 return x112 === s;
               })(seriesList))(function(i2) {
                 return index2(seriesColors)(i2);
@@ -35248,12 +35249,12 @@ drawQuartet quartet selector = do
                     if (v1 instanceof Just) {
                       var pathData = linePath(chartWidth)(chartHeight)(maxValue)(minValue)(points);
                       var color2 = getSeriesColor(v1.value0.series);
-                      return bind116(appendTo2(chartGroup)(Path2.value)([d7(pathData), strokeColor19(color2), strokeWidth17(2), fill24("none"), classed24("line")]))(function() {
+                      return bind116(appendTo2(chartGroup)(Path2.value)([d7(pathData), strokeColor19(color2), strokeWidth17(1.5), fill24("none"), classed24("line")]))(function() {
                         return pure46(unit);
                       });
                     }
                     ;
-                    throw new Error("Failed pattern match at D3.Viz.MultiLineChart (line 93, column 25 - line 105, column 20): " + [v1.constructor.name]);
+                    throw new Error("Failed pattern match at D3.Viz.MultiLineChart (line 100, column 25 - line 112, column 20): " + [v1.constructor.name]);
                   };
                   var groupedData = groupBySeries(data$prime);
                   return bind116(traverse_8(drawLine)(groupedData))(function() {
@@ -35351,7 +35352,7 @@ drawQuartet quartet selector = do
           };
         }
         ;
-        throw new Error("Failed pattern match at D3.Viz.RadialStackedBar (line 35, column 9 - line 39, column 95): " + [acc.last.constructor.name]);
+        throw new Error("Failed pattern match at D3.Viz.RadialStackedBar (line 41, column 9 - line 45, column 95): " + [acc.last.constructor.name]);
       };
     };
     var result = foldl9(folder)({
@@ -35424,9 +35425,9 @@ drawQuartet quartet selector = do
         return function(data$prime) {
           return function(selector) {
             var dims = {
-              width: 900,
-              height: 900,
-              innerRadius: 100,
+              width: 928,
+              height: 928,
+              innerRadius: 180,
               outerRadius: 400
             };
             var centerX = dims.width / 2;
@@ -35444,7 +35445,7 @@ drawQuartet quartet selector = do
             var maxTotal = fromMaybe(0)(maximum8(map56(getStateTotal)(states)));
             var anglePerState = 2 * pi / stateCount;
             var anglepadding = 0.02 * anglePerState;
-            var ageColors = ["#e41a1c", "#377eb8", "#4daf4a", "#984ea3", "#ff7f00", "#ffff33", "#a65628", "#f781bf", "#999999"];
+            var ageColors = ["#9e0142", "#d53e4f", "#f46d43", "#fdae61", "#fee08b", "#e6f598", "#abdda4", "#66c2a5", "#3288bd"];
             var getAgeColor = function(age$prime) {
               return fromMaybe("#999999")(bind62(findIndex(function(a2) {
                 return a2 === age$prime;
@@ -35464,7 +35465,6 @@ drawQuartet quartet selector = do
                         return v1.population;
                       })(stateData);
                       var stacked = stackData(values2);
-                      var stateTotal = getStateTotal(state$prime);
                       var startAngle = toNumber(stateIdx) * anglePerState + anglepadding;
                       var endAngle = toNumber(stateIdx + 1 | 0) * anglePerState - anglepadding;
                       var drawSegment = function(ageIdx) {
@@ -35487,7 +35487,7 @@ drawQuartet quartet selector = do
                             });
                           }
                           ;
-                          throw new Error("Failed pattern match at D3.Viz.RadialStackedBar (line 125, column 38 - line 142, column 26): " + [v1.constructor.name]);
+                          throw new Error("Failed pattern match at D3.Viz.RadialStackedBar (line 131, column 38 - line 148, column 26): " + [v1.constructor.name]);
                         };
                       };
                       return bind116(traverse_8(function(t) {
