@@ -888,3 +888,20 @@ pre.line-numbers > code {
   padding-right: 0.8em;
   text-align: right;
 }
+
+/* Multi-Line Chart - Observable style with blend mode */
+.multi-line-chart .line {
+  mix-blend-mode: multiply;
+}
+
+/* On hover, dim all lines except the hovered one */
+.multi-line-chart:hover .line {
+  stroke: #ddd;
+  mix-blend-mode: normal;
+}
+
+.multi-line-chart:hover .line:hover {
+  stroke: #4682b4;
+  stroke-width: 2;
+  z-index: 1;
+}
