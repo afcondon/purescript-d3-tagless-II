@@ -13542,8 +13542,8 @@
   }
   function addModuleArrowMarker_(svgSelection) {
     return () => {
-      if (!d3.select(svgSelection).select("defs marker#module-arrow").node()) {
-        d3.select(svgSelection).append("defs").append("marker").attr("id", "module-arrow").attr("viewBox", "0 -5 10 10").attr("refX", 15).attr("refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto").append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#999");
+      if (!svgSelection.select("defs marker#module-arrow").node()) {
+        svgSelection.append("defs").append("marker").attr("id", "module-arrow").attr("viewBox", "0 -5 10 10").attr("refX", 15).attr("refY", 0).attr("markerWidth", 6).attr("markerHeight", 6).attr("orient", "auto").append("path").attr("d", "M0,-5L10,0L0,5").attr("fill", "#999");
       }
     };
   }

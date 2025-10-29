@@ -367,12 +367,12 @@ drawExpandableBubbles graphData declsData callsData selector = do
 
         -- Toggle the expanded field directly on the node (it's a mutable JS object)
         let newExpanded = not clickedNode.expanded
-            _ = unsafeSetField_ "expanded" newExpanded datum
+        unsafeSetField_ "expanded" newExpanded datum
 
         Console.log $ clickedId <> if newExpanded then " expanded" else " collapsed"
 
         -- Expand/collapse with internal structure
-        let _ = updateNodeExpansion_ simHandle nodeRadius declarationsData callsData datum
+        pure $ updateNodeExpansion_ simHandle nodeRadius declarationsData callsData datum
 
         -- Update inter-module declaration links
         drawInterModuleDeclarationLinks_ zoomGroup nodeRadius declarationsData callsData
