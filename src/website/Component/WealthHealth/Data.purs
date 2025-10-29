@@ -115,6 +115,7 @@ loadNationsData = do
       Right { nations: filledNations, yearRange }
 
 -- | Calculate the min and max years available in the dataset
+-- | Capped at 2005 to match Mike Bostock's example (data quality issues in later years)
 calculateYearRange :: Array NationData -> { min :: Int, max :: Int }
 calculateYearRange nations =
   let
@@ -126,7 +127,8 @@ calculateYearRange nations =
         Nothing -> []
 
     minYear = fromMaybe 1800 (minimum allYears)
-    maxYear = fromMaybe 2009 (maximum allYears)
+    -- Cap at 2005 as in the original Observable notebook
+    maxYear = min 2005 (fromMaybe 2009 (maximum allYears))
   in
     { min: minYear, max: maxYear }
 

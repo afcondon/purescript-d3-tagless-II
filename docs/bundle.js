@@ -912,7 +912,7 @@
     };
   };
   var ordTuple = function(dictOrd) {
-    var compare4 = compare(dictOrd);
+    var compare5 = compare(dictOrd);
     var eqTuple1 = eqTuple(dictOrd.Eq0());
     return function(dictOrd1) {
       var compare12 = compare(dictOrd1);
@@ -920,7 +920,7 @@
       return {
         compare: function(x31) {
           return function(y30) {
-            var v = compare4(x31.value0)(y30.value0);
+            var v = compare5(x31.value0)(y30.value0);
             if (v instanceof LT) {
               return LT.value;
             }
@@ -2945,9 +2945,9 @@
     };
   };
   var maximum = function(dictOrd) {
-    var compare4 = compare(dictOrd);
+    var compare5 = compare(dictOrd);
     return function(dictFoldable) {
-      return maximumBy(dictFoldable)(compare4);
+      return maximumBy(dictFoldable)(compare5);
     };
   };
   var minimumBy = function(dictFoldable) {
@@ -2977,9 +2977,9 @@
     };
   };
   var minimum = function(dictOrd) {
-    var compare4 = compare(dictOrd);
+    var compare5 = compare(dictOrd);
     return function(dictFoldable) {
-      return minimumBy(dictFoldable)(compare4);
+      return minimumBy(dictFoldable)(compare5);
     };
   };
   var sum = function(dictFoldable) {
@@ -4799,7 +4799,7 @@
     };
   };
   var lookup = function(dictOrd) {
-    var compare4 = compare(dictOrd);
+    var compare5 = compare(dictOrd);
     return function(k) {
       var go2 = function($copy_v) {
         var $tco_done = false;
@@ -4811,7 +4811,7 @@
           }
           ;
           if (v instanceof Two) {
-            var v2 = compare4(k)(v.value1);
+            var v2 = compare5(k)(v.value1);
             if (v2 instanceof EQ) {
               $tco_done = true;
               return new Just(v.value2);
@@ -4827,13 +4827,13 @@
           }
           ;
           if (v instanceof Three) {
-            var v3 = compare4(k)(v.value1);
+            var v3 = compare5(k)(v.value1);
             if (v3 instanceof EQ) {
               $tco_done = true;
               return new Just(v.value2);
             }
             ;
-            var v4 = compare4(k)(v.value4);
+            var v4 = compare5(k)(v.value4);
             if (v4 instanceof EQ) {
               $tco_done = true;
               return new Just(v.value5);
@@ -4964,7 +4964,7 @@
   };
   var insert = function(dictOrd) {
     var fromZipper1 = fromZipper(dictOrd);
-    var compare4 = compare(dictOrd);
+    var compare5 = compare(dictOrd);
     return function(k) {
       return function(v) {
         var up = function($copy_v1) {
@@ -5032,7 +5032,7 @@
               }
               ;
               if (v2 instanceof Two) {
-                var v3 = compare4(k)(v2.value1);
+                var v3 = compare5(k)(v2.value1);
                 if (v3 instanceof EQ) {
                   $tco_done1 = true;
                   return fromZipper1(v1)(new Two(v2.value0, k, v, v2.value3));
@@ -5050,13 +5050,13 @@
               }
               ;
               if (v2 instanceof Three) {
-                var v3 = compare4(k)(v2.value1);
+                var v3 = compare5(k)(v2.value1);
                 if (v3 instanceof EQ) {
                   $tco_done1 = true;
                   return fromZipper1(v1)(new Three(v2.value0, k, v, v2.value3, v2.value4, v2.value5, v2.value6));
                 }
                 ;
-                var v4 = compare4(k)(v2.value4);
+                var v4 = compare5(k)(v2.value4);
                 if (v4 instanceof EQ) {
                   $tco_done1 = true;
                   return fromZipper1(v1)(new Three(v2.value0, v2.value1, v2.value2, v2.value3, k, v, v2.value6));
@@ -5095,7 +5095,7 @@
   };
   var pop = function(dictOrd) {
     var fromZipper1 = fromZipper(dictOrd);
-    var compare4 = compare(dictOrd);
+    var compare5 = compare(dictOrd);
     return function(k) {
       var up = function($copy_ctxs) {
         return function($copy_tree) {
@@ -5301,7 +5301,7 @@
             }
             ;
             if (m instanceof Two) {
-              var v = compare4(k)(m.value1);
+              var v = compare5(k)(m.value1);
               if (m.value3 instanceof Leaf && v instanceof EQ) {
                 $tco_done3 = true;
                 return new Just(new Tuple(m.value2, up(ctx)(Leaf.value)));
@@ -5332,8 +5332,8 @@
                 ;
                 return false;
               })();
-              var v = compare4(k)(m.value4);
-              var v3 = compare4(k)(m.value1);
+              var v = compare5(k)(m.value4);
+              var v3 = compare5(k)(m.value1);
               if (leaves && v3 instanceof EQ) {
                 $tco_done3 = true;
                 return new Just(new Tuple(m.value2, fromZipper1(ctx)(new Two(Leaf.value, m.value4, m.value5, Leaf.value))));
@@ -6199,7 +6199,7 @@
     };
   };
   var sortByImpl = /* @__PURE__ */ (function() {
-    function mergeFromTo(compare4, fromOrdering, xs1, xs2, from3, to2) {
+    function mergeFromTo(compare5, fromOrdering, xs1, xs2, from3, to2) {
       var mid;
       var i2;
       var j;
@@ -6208,15 +6208,15 @@
       var y30;
       var c;
       mid = from3 + (to2 - from3 >> 1);
-      if (mid - from3 > 1) mergeFromTo(compare4, fromOrdering, xs2, xs1, from3, mid);
-      if (to2 - mid > 1) mergeFromTo(compare4, fromOrdering, xs2, xs1, mid, to2);
+      if (mid - from3 > 1) mergeFromTo(compare5, fromOrdering, xs2, xs1, from3, mid);
+      if (to2 - mid > 1) mergeFromTo(compare5, fromOrdering, xs2, xs1, mid, to2);
       i2 = from3;
       j = mid;
       k = from3;
       while (i2 < mid && j < to2) {
         x31 = xs2[i2];
         y30 = xs2[j];
-        c = fromOrdering(compare4(x31)(y30));
+        c = fromOrdering(compare5(x31)(y30));
         if (c > 0) {
           xs1[k++] = y30;
           ++j;
@@ -6232,13 +6232,13 @@
         xs1[k++] = xs2[j++];
       }
     }
-    return function(compare4) {
+    return function(compare5) {
       return function(fromOrdering) {
         return function(xs) {
           var out;
           if (xs.length < 2) return xs;
           out = xs.slice(0);
-          mergeFromTo(compare4, fromOrdering, out, xs.slice(0), 0, xs.length);
+          mergeFromTo(compare5, fromOrdering, out, xs.slice(0), 0, xs.length);
           return out;
         };
       };
@@ -12203,7 +12203,7 @@
   };
   var fromFoldable22 = /* @__PURE__ */ fromFoldable5(foldableArray);
   var intersection = function(dictOrd) {
-    var compare4 = compare(dictOrd);
+    var compare5 = compare(dictOrd);
     var fromFoldable34 = fromFoldable22(dictOrd);
     return function(s1) {
       return function(s2) {
@@ -12219,7 +12219,7 @@
             return function(r) {
               var $122 = l < ll && r < rl;
               if ($122) {
-                var v = compare4(unsafeIndex2(ls)(l))(unsafeIndex2(rs)(r));
+                var v = compare5(unsafeIndex2(ls)(l))(unsafeIndex2(rs)(r));
                 if (v instanceof EQ) {
                   return function __do4() {
                     push(unsafeIndex2(ls)(l))(acc)();
@@ -12435,7 +12435,7 @@
     };
   }
   function d3SortSelection_(selection2) {
-    return (compare4) => selection2.sort(compare4);
+    return (compare5) => selection2.sort(compare5);
   }
   function simulationDrag_(label5) {
     return (selection2) => (simulation) => (dragFn) => selection2.call(dragFn(label5, simulation));
@@ -13925,6 +13925,13 @@
     Rect2.value = new Rect2();
     return Rect2;
   })();
+  var Title = /* @__PURE__ */ (function() {
+    function Title2() {
+    }
+    ;
+    Title2.value = new Title2();
+    return Title2;
+  })();
   var DefaultCubic = /* @__PURE__ */ (function() {
     function DefaultCubic2() {
     }
@@ -13954,7 +13961,7 @@
         return "mouseup";
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Internal.Types (line 46, column 1 - line 51, column 30): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Internal.Types (line 47, column 1 - line 52, column 30): " + [v.constructor.name]);
     }
   };
   var showElement = {
@@ -13991,7 +13998,11 @@
         return "rect";
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Internal.Types (line 25, column 1 - line 33, column 23): " + [v.constructor.name]);
+      if (v instanceof Title) {
+        return "title";
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.Internal.Types (line 25, column 1 - line 34, column 24): " + [v.constructor.name]);
     }
   };
 
@@ -14514,6 +14525,9 @@
     return function($146) {
       return AttrT.create($144($145($146)));
     };
+  };
+  var sortSelection = function(compare5) {
+    return new OrderingT(new Sort(compare5));
   };
   var remove = /* @__PURE__ */ (function() {
     return RemoveT.value;
@@ -15056,10 +15070,10 @@
     };
   };
   var compareSnd = function(dictOrd) {
-    var compare4 = compare(dictOrd);
+    var compare5 = compare(dictOrd);
     return function(a2) {
       return function(b2) {
-        return compare4(snd(a2))(snd(b2));
+        return compare5(snd(a2))(snd(b2));
       };
     };
   };
@@ -16671,10 +16685,10 @@
   }
 
   // node_modules/d3-selection/src/selection/sort.js
-  function sort_default(compare4) {
-    if (!compare4) compare4 = ascending2;
+  function sort_default(compare5) {
+    if (!compare5) compare5 = ascending2;
     function compareNode(a2, b2) {
-      return a2 && b2 ? compare4(a2.__data__, b2.__data__) : !a2 - !b2;
+      return a2 && b2 ? compare5(a2.__data__, b2.__data__) : !a2 - !b2;
     }
     for (var groups = this._groups, m = groups.length, sortgroups = new Array(m), j = 0; j < m; ++j) {
       for (var group3 = groups[j], n = group3.length, sortgroup = sortgroups[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
@@ -34139,14 +34153,14 @@
                       };
                       return bind116(traverse_7(drawStateLabel)(states))(function() {
                         return bind116(appendTo2(chartGroup)(Group.value)([classed21("y-axis")]))(function(yAxis) {
-                          var yTicks = [0, maxPop / 4, maxPop / 2, 3 * maxPop / 4, maxPop];
+                          var yTicks2 = [0, maxPop / 4, maxPop / 2, 3 * maxPop / 4, maxPop];
                           var drawYTick = function(value19) {
                             var tickY = chartHeight - value19 / maxPop * chartHeight;
                             return bind116(appendTo2(yAxis)(Text2.value)([x27(-10), y21(tickY + 4), text18(formatSI(value19)), textAnchor9("end"), classed21("axis-label")]))(function() {
                               return pure45(unit);
                             });
                           };
-                          return bind116(traverse_7(drawYTick)(yTicks))(function() {
+                          return bind116(traverse_7(drawYTick)(yTicks2))(function() {
                             return pure45(unit);
                           });
                         });
@@ -34299,7 +34313,7 @@
                   var groupedData = groupBySeries(data$prime);
                   return bind116(traverse_7(drawLine)(groupedData))(function() {
                     return bind116(appendTo2(chartGroup)(Group.value)([classed22("y-axis")]))(function(yAxis) {
-                      var yTicks = [0, 5, 10, 15];
+                      var yTicks2 = [0, 5, 10, 15];
                       var yScale = function(v1) {
                         return chartHeight - (v1 - minValue) / (maxValue - minValue) * chartHeight;
                       };
@@ -34309,7 +34323,7 @@
                           return pure45(unit);
                         });
                       };
-                      return bind116(traverse_7(drawYTick)(yTicks))(function() {
+                      return bind116(traverse_7(drawYTick)(yTicks2))(function() {
                         return bind116(appendTo2(chartGroup)(Group.value)([transform([function(v1) {
                           return "translate(" + (show37(chartWidth + 20) + ", 0)");
                         }]), classed22("legend")]))(function(legend2) {
@@ -34641,6 +34655,9 @@
     regionColor: function(d9) {
       return d9.regionColor;
     },
+    region: function(d9) {
+      return d9.region;
+    },
     indexNum: function(i2) {
       return i2;
     }
@@ -34651,14 +34668,18 @@
 
   // output/D3.Viz.WealthHealth.Draw/index.js
   var max9 = /* @__PURE__ */ max(ordNumber);
+  var show39 = /* @__PURE__ */ show(showInt);
   var width25 = /* @__PURE__ */ width8(toAttrNumber);
   var height25 = /* @__PURE__ */ height8(toAttrNumber);
   var classed24 = /* @__PURE__ */ classed(toAttrString);
-  var x111 = /* @__PURE__ */ x1(toAttrNumber);
-  var y111 = /* @__PURE__ */ y1(toAttrNumber);
-  var x210 = /* @__PURE__ */ x2(toAttrNumber);
-  var y28 = /* @__PURE__ */ y2(toAttrNumber);
   var strokeColor20 = /* @__PURE__ */ strokeColor(toAttrString);
+  var strokeOpacity7 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
+  var discard61 = /* @__PURE__ */ discard(discardUnit);
+  var x111 = /* @__PURE__ */ x1(toAttrNumber);
+  var x210 = /* @__PURE__ */ x2(toAttrNumber);
+  var y111 = /* @__PURE__ */ y1(toAttrNumber);
+  var y28 = /* @__PURE__ */ y2(toAttrNumber);
+  var traverse4 = /* @__PURE__ */ traverse(traversableArray);
   var strokeWidth17 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var x30 = /* @__PURE__ */ x(toAttrNumber);
   var y29 = /* @__PURE__ */ y(toAttrNumber);
@@ -34666,15 +34687,17 @@
   var fontSize8 = /* @__PURE__ */ fontSize(toAttrNumber);
   var fill25 = /* @__PURE__ */ fill(toAttrString);
   var text21 = /* @__PURE__ */ text6(toAttrString);
-  var discard61 = /* @__PURE__ */ discard(discardUnit);
+  var compare4 = /* @__PURE__ */ compare(ordNumber);
   var cx8 = /* @__PURE__ */ cx(toAttrNumberFnI);
   var cy8 = /* @__PURE__ */ cy(toAttrNumberFnI);
   var radius16 = /* @__PURE__ */ radius(toAttrNumberFnI);
   var fill110 = /* @__PURE__ */ fill(toAttrStringFnI);
   var fillOpacity9 = /* @__PURE__ */ fillOpacity(toAttrNumber);
+  var text110 = /* @__PURE__ */ text6(toAttrStringFn);
   var x34 = /* @__PURE__ */ x(toAttrNumberFnI);
   var y34 = /* @__PURE__ */ y(toAttrNumberFnI);
-  var text110 = /* @__PURE__ */ text6(toAttrStringFn);
+  var yTicks = [20, 30, 40, 50, 60, 70, 80];
+  var xTicks = [200, 500, 1e3, 2e3, 5e3, 1e4, 2e4, 5e4, 1e5];
   var scaleY = function(config) {
     return function(lifeExpectancy) {
       var rangeHeight = config.height - config.marginTop - config.marginBottom;
@@ -34686,8 +34709,8 @@
     return function(income) {
       var rangeWidth = config.width - config.marginLeft - config.marginRight;
       var logIncome = (function() {
-        var $64 = income > 0;
-        if ($64) {
+        var $73 = income > 0;
+        if ($73) {
           return log(income);
         }
         ;
@@ -34702,13 +34725,39 @@
     var scaled = sqrt(normalized) * 80;
     return max9(3)(scaled);
   };
+  var orderingToInt = function(v) {
+    if (v instanceof LT) {
+      return -1 | 0;
+    }
+    ;
+    if (v instanceof EQ) {
+      return 0;
+    }
+    ;
+    if (v instanceof GT) {
+      return 1;
+    }
+    ;
+    throw new Error("Failed pattern match at D3.Viz.WealthHealth.Draw (line 97, column 1 - line 97, column 33): " + [v.constructor.name]);
+  };
+  var formatIncome = function(value19) {
+    if (value19 >= 1e3) {
+      return "$" + (show39(floor2(value19 / 1e3)) + "k");
+    }
+    ;
+    if (otherwise) {
+      return "$" + show39(floor2(value19));
+    }
+    ;
+    throw new Error("Failed pattern match at D3.Viz.WealthHealth.Draw (line 81, column 1 - line 81, column 33): " + [value19.constructor.name]);
+  };
   var defaultConfig = {
     width: 1e3,
     height: 600,
-    marginTop: 0,
-    marginRight: 0,
-    marginBottom: 0,
-    marginLeft: 0
+    marginTop: 20,
+    marginRight: 20,
+    marginBottom: 35,
+    marginLeft: 40
   };
   var draw19 = function(dictSelectionM) {
     var Monad0 = dictSelectionM.Monad0();
@@ -34716,96 +34765,163 @@
     var bind71 = bind(Bind1);
     var attach2 = attach(dictSelectionM);
     var appendTo2 = appendTo(dictSelectionM);
-    var pure45 = pure(Monad0.Applicative0());
-    var openSelection2 = openSelection(dictSelectionM);
-    var updateJoin2 = updateJoin(dictSelectionM);
     var discard112 = discard61(Bind1);
     var setAttributes2 = setAttributes(dictSelectionM);
+    var Applicative0 = Monad0.Applicative0();
+    var pure45 = pure(Applicative0);
+    var traverse13 = traverse4(Applicative0);
+    var openSelection2 = openSelection(dictSelectionM);
+    var updateJoin2 = updateJoin(dictSelectionM);
     return function(selector) {
       return bind71(attach2(selector))(function(v) {
         return bind71(appendTo2(v)(Svg.value)([viewBox(0)(0)(defaultConfig.width)(defaultConfig.height), width25(defaultConfig.width), height25(defaultConfig.height), classed24("wealth-health-viz")]))(function(svg2) {
-          return bind71(appendTo2(svg2)(Line.value)([x111(0), y111(defaultConfig.height), x210(defaultConfig.width), y28(defaultConfig.height), strokeColor20("#333"), strokeWidth17(2), classed24("x-axis")]))(function(xAxisLine) {
-            return bind71(appendTo2(svg2)(Text2.value)([x30(defaultConfig.width / 2), y29(defaultConfig.height - 10), textAnchor12("middle"), fontSize8(14), fill25("#333"), classed24("x-axis-label"), text21("Wealth")]))(function(xAxisLabel) {
-              return bind71(appendTo2(svg2)(Line.value)([x111(0), y111(0), x210(0), y28(defaultConfig.height), strokeColor20("#333"), strokeWidth17(2), classed24("y-axis")]))(function(yAxisLine) {
-                return bind71(appendTo2(svg2)(Text2.value)([x30(15), y29(defaultConfig.height / 2), textAnchor12("middle"), fontSize8(14), fill25("#333"), classed24("y-axis-label"), text21("Health")]))(function(yAxisLabel) {
-                  return bind71(appendTo2(svg2)(Text2.value)([x30(defaultConfig.width / 2), y29(defaultConfig.height - 30), textAnchor12("middle"), fontSize8(11), fill25("#666"), classed24("tribute"), text21("RIP Hans Rosling 1948-2017")]))(function(tribute) {
-                    return bind71(appendTo2(svg2)(Group.value)([classed24("nations")]))(function(chartGroup) {
-                      return pure45(function(nations) {
-                        var calculateAttrs = function(d9) {
-                          return function(v1) {
-                            var pop4 = datum_7.population(d9);
-                            var life = datum_7.lifeExpectancy(d9);
-                            var income = datum_7.income(d9);
-                            var color2 = datum_7.regionColor(d9);
-                            return {
-                              x: scaleX(defaultConfig)(income),
-                              y: scaleY(defaultConfig)(life),
-                              r: scaleRadius(pop4),
-                              color: color2
-                            };
-                          };
+          return bind71(appendTo2(svg2)(Group.value)([strokeColor20("currentColor"), strokeOpacity7(0.1), classed24("grid")]))(function(gridGroup) {
+            var createVerticalLine = function(tickValue) {
+              return bind71(appendTo2(gridGroup)(Line.value)([]))(function(line) {
+                return discard112(setAttributes2(line)([x111(0.5 + scaleX(defaultConfig)(tickValue)), x210(0.5 + scaleX(defaultConfig)(tickValue)), y111(defaultConfig.marginTop), y28(defaultConfig.height - defaultConfig.marginBottom)]))(function() {
+                  return pure45(line);
+                });
+              });
+            };
+            return bind71(traverse13(createVerticalLine)(xTicks))(function() {
+              var createHorizontalLine = function(tickValue) {
+                return bind71(appendTo2(gridGroup)(Line.value)([]))(function(line) {
+                  return discard112(setAttributes2(line)([y111(0.5 + scaleY(defaultConfig)(tickValue)), y28(0.5 + scaleY(defaultConfig)(tickValue)), x111(defaultConfig.marginLeft), x210(defaultConfig.width - defaultConfig.marginRight)]))(function() {
+                    return pure45(line);
+                  });
+                });
+              };
+              return bind71(traverse13(createHorizontalLine)(yTicks))(function() {
+                return bind71(appendTo2(svg2)(Line.value)([x111(defaultConfig.marginLeft), y111(defaultConfig.height - defaultConfig.marginBottom), x210(defaultConfig.width - defaultConfig.marginRight), y28(defaultConfig.height - defaultConfig.marginBottom), strokeColor20("#333"), strokeWidth17(1.5), classed24("x-axis")]))(function(xAxisLine) {
+                  var createXTick = function(tickValue) {
+                    return bind71(appendTo2(svg2)(Line.value)([]))(function(tickMark) {
+                      return discard112(setAttributes2(tickMark)([x111(scaleX(defaultConfig)(tickValue)), x210(scaleX(defaultConfig)(tickValue)), y111(defaultConfig.height - defaultConfig.marginBottom), y28(defaultConfig.height - defaultConfig.marginBottom + 6), strokeColor20("#333"), strokeWidth17(1)]))(function() {
+                        return bind71(appendTo2(svg2)(Text2.value)([]))(function(tickLabel) {
+                          return discard112(setAttributes2(tickLabel)([x30(scaleX(defaultConfig)(tickValue)), y29(defaultConfig.height - defaultConfig.marginBottom + 15), textAnchor12("middle"), fontSize8(10), fill25("#333"), text21(formatIncome(tickValue))]))(function() {
+                            return pure45(unit);
+                          });
+                        });
+                      });
+                    });
+                  };
+                  return bind71(traverse13(createXTick)(xTicks))(function() {
+                    return bind71(appendTo2(svg2)(Text2.value)([x30(defaultConfig.width / 2), y29(defaultConfig.height - 5), textAnchor12("middle"), fontSize8(14), fill25("#333"), classed24("x-axis-label"), text21("Wealth")]))(function(xAxisLabel) {
+                      return bind71(appendTo2(svg2)(Line.value)([x111(defaultConfig.marginLeft), y111(defaultConfig.marginTop), x210(defaultConfig.marginLeft), y28(defaultConfig.height - defaultConfig.marginBottom), strokeColor20("#333"), strokeWidth17(1.5), classed24("y-axis")]))(function(yAxisLine) {
+                        var createYTick = function(tickValue) {
+                          return bind71(appendTo2(svg2)(Line.value)([]))(function(tickMark) {
+                            return discard112(setAttributes2(tickMark)([x111(defaultConfig.marginLeft - 6), x210(defaultConfig.marginLeft), y111(scaleY(defaultConfig)(tickValue)), y28(scaleY(defaultConfig)(tickValue)), strokeColor20("#333"), strokeWidth17(1)]))(function() {
+                              return bind71(appendTo2(svg2)(Text2.value)([]))(function(tickLabel) {
+                                return discard112(setAttributes2(tickLabel)([x30(defaultConfig.marginLeft - 10), y29(scaleY(defaultConfig)(tickValue) + 3), textAnchor12("end"), fontSize8(10), fill25("#333"), text21(show39(floor2(tickValue)))]))(function() {
+                                  return pure45(unit);
+                                });
+                              });
+                            });
+                          });
                         };
-                        return bind71(openSelection2(chartGroup)("circle"))(function(circleEnterSelection) {
-                          return bind71(updateJoin2(circleEnterSelection)(Circle.value)(nations)(coerceDatumToKey2))(function(circleUpdateSelections) {
-                            return discard112(setAttributes2(circleUpdateSelections.exit)([classed24("exit")]))(function() {
-                              return discard112(setAttributes2(circleUpdateSelections.update)([cx8(function(d9) {
-                                return function(i2) {
-                                  return calculateAttrs(d9)(i2).x;
-                                };
-                              }), cy8(function(d9) {
-                                return function(i2) {
-                                  return calculateAttrs(d9)(i2).y;
-                                };
-                              }), radius16(function(d9) {
-                                return function(i2) {
-                                  return calculateAttrs(d9)(i2).r;
-                                };
-                              }), fill110(function(d9) {
-                                return function(i2) {
-                                  return calculateAttrs(d9)(i2).color;
-                                };
-                              }), classed24("nation-circle update")]))(function() {
-                                return bind71(appendTo2(circleUpdateSelections.enter)(Circle.value)([]))(function(newCircles) {
-                                  return discard112(setAttributes2(newCircles)([cx8(function(d9) {
-                                    return function(i2) {
-                                      return calculateAttrs(d9)(i2).x;
+                        return bind71(traverse13(createYTick)(yTicks))(function() {
+                          return bind71(appendTo2(svg2)(Text2.value)([x30(15), y29(defaultConfig.height / 2), textAnchor12("middle"), fontSize8(14), fill25("#333"), classed24("y-axis-label"), text21("Health")]))(function(yAxisLabel) {
+                            return bind71(appendTo2(svg2)(Text2.value)([x30(defaultConfig.width / 2), y29(defaultConfig.height - 30), textAnchor12("middle"), fontSize8(11), fill25("#666"), classed24("tribute"), text21("RIP Hans Rosling 1948-2017")]))(function(tribute) {
+                              return bind71(appendTo2(svg2)(Group.value)([classed24("nations")]))(function(chartGroup) {
+                                return pure45(function(nations) {
+                                  var calculateAttrs = function(d9) {
+                                    return function(v1) {
+                                      var pop4 = datum_7.population(d9);
+                                      var life = datum_7.lifeExpectancy(d9);
+                                      var income = datum_7.income(d9);
+                                      var color2 = datum_7.regionColor(d9);
+                                      return {
+                                        x: scaleX(defaultConfig)(income),
+                                        y: scaleY(defaultConfig)(life),
+                                        r: scaleRadius(pop4),
+                                        color: color2
+                                      };
                                     };
-                                  }), cy8(function(d9) {
-                                    return function(i2) {
-                                      return calculateAttrs(d9)(i2).y;
-                                    };
-                                  }), radius16(function(d9) {
-                                    return function(i2) {
-                                      return calculateAttrs(d9)(i2).r;
-                                    };
-                                  }), fill110(function(d9) {
-                                    return function(i2) {
-                                      return calculateAttrs(d9)(i2).color;
-                                    };
-                                  }), fillOpacity9(0.7), strokeColor20("#333"), strokeWidth17(0.5), classed24("nation-circle enter")]))(function() {
-                                    return bind71(openSelection2(chartGroup)("text"))(function(labelEnterSelection) {
-                                      return bind71(updateJoin2(labelEnterSelection)(Text2.value)(nations)(coerceDatumToKey2))(function(labelUpdateSelections) {
-                                        return discard112(setAttributes2(labelUpdateSelections.exit)([classed24("exit")]))(function() {
-                                          return discard112(setAttributes2(labelUpdateSelections.update)([x34(function(d9) {
-                                            return function(i2) {
-                                              return calculateAttrs(d9)(i2).x;
-                                            };
-                                          }), y34(function(d9) {
-                                            return function(i2) {
-                                              return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
-                                            };
-                                          }), classed24("nation-label update")]))(function() {
-                                            return bind71(appendTo2(labelUpdateSelections.enter)(Text2.value)([]))(function(newLabels) {
-                                              return discard112(setAttributes2(newLabels)([x34(function(d9) {
-                                                return function(i2) {
-                                                  return calculateAttrs(d9)(i2).x;
-                                                };
-                                              }), y34(function(d9) {
-                                                return function(i2) {
-                                                  return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
-                                                };
-                                              }), textAnchor12("middle"), fontSize8(11), fill25("#333"), fillOpacity9(0), text110(datum_7.name), classed24("nation-label enter")]))(function() {
-                                                return pure45(newCircles);
+                                  };
+                                  return bind71(openSelection2(chartGroup)("circle"))(function(circleEnterSelection) {
+                                    return bind71(updateJoin2(circleEnterSelection)(Circle.value)(nations)(coerceDatumToKey2))(function(circleUpdateSelections) {
+                                      return discard112(setAttributes2(circleUpdateSelections.exit)([classed24("exit")]))(function() {
+                                        return discard112(setAttributes2(circleUpdateSelections.update)([sortSelection(function(a2) {
+                                          return function(b2) {
+                                            var popB = datum_7.population(b2);
+                                            var popA = datum_7.population(a2);
+                                            return orderingToInt(compare4(popB)(popA));
+                                          };
+                                        }), cx8(function(d9) {
+                                          return function(i2) {
+                                            return calculateAttrs(d9)(i2).x;
+                                          };
+                                        }), cy8(function(d9) {
+                                          return function(i2) {
+                                            return calculateAttrs(d9)(i2).y;
+                                          };
+                                        }), radius16(function(d9) {
+                                          return function(i2) {
+                                            return calculateAttrs(d9)(i2).r;
+                                          };
+                                        }), fill110(function(d9) {
+                                          return function(i2) {
+                                            return calculateAttrs(d9)(i2).color;
+                                          };
+                                        }), classed24("nation-circle update")]))(function() {
+                                          return bind71(appendTo2(circleUpdateSelections.enter)(Circle.value)([]))(function(newCircles) {
+                                            return discard112(setAttributes2(newCircles)([sortSelection(function(a2) {
+                                              return function(b2) {
+                                                var popB = datum_7.population(b2);
+                                                var popA = datum_7.population(a2);
+                                                return orderingToInt(compare4(popB)(popA));
+                                              };
+                                            }), cx8(function(d9) {
+                                              return function(i2) {
+                                                return calculateAttrs(d9)(i2).x;
+                                              };
+                                            }), cy8(function(d9) {
+                                              return function(i2) {
+                                                return calculateAttrs(d9)(i2).y;
+                                              };
+                                            }), radius16(function(d9) {
+                                              return function(i2) {
+                                                return calculateAttrs(d9)(i2).r;
+                                              };
+                                            }), fill110(function(d9) {
+                                              return function(i2) {
+                                                return calculateAttrs(d9)(i2).color;
+                                              };
+                                            }), fillOpacity9(0.7), strokeColor20("#333"), strokeWidth17(0.5), classed24("nation-circle enter")]))(function() {
+                                              var tooltipText = function(d9) {
+                                                return datum_7.name(d9) + ("\n" + datum_7.region(d9));
+                                              };
+                                              return bind71(appendTo2(newCircles)(Title.value)([]))(function(newTitles) {
+                                                return discard112(setAttributes2(newTitles)([text110(tooltipText)]))(function() {
+                                                  return bind71(openSelection2(chartGroup)("text"))(function(labelEnterSelection) {
+                                                    return bind71(updateJoin2(labelEnterSelection)(Text2.value)(nations)(coerceDatumToKey2))(function(labelUpdateSelections) {
+                                                      return discard112(setAttributes2(labelUpdateSelections.exit)([classed24("exit")]))(function() {
+                                                        return discard112(setAttributes2(labelUpdateSelections.update)([x34(function(d9) {
+                                                          return function(i2) {
+                                                            return calculateAttrs(d9)(i2).x;
+                                                          };
+                                                        }), y34(function(d9) {
+                                                          return function(i2) {
+                                                            return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
+                                                          };
+                                                        }), classed24("nation-label update")]))(function() {
+                                                          return bind71(appendTo2(labelUpdateSelections.enter)(Text2.value)([]))(function(newLabels) {
+                                                            return discard112(setAttributes2(newLabels)([x34(function(d9) {
+                                                              return function(i2) {
+                                                                return calculateAttrs(d9)(i2).x;
+                                                              };
+                                                            }), y34(function(d9) {
+                                                              return function(i2) {
+                                                                return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
+                                                              };
+                                                            }), textAnchor12("middle"), fontSize8(11), fill25("#333"), fillOpacity9(0), text110(datum_7.name), classed24("nation-label enter")]))(function() {
+                                                              return pure45(newCircles);
+                                                            });
+                                                          });
+                                                        });
+                                                      });
+                                                    });
+                                                  });
+                                                });
                                               });
                                             });
                                           });
@@ -35320,7 +35436,7 @@
 
   // output/PSD3.WealthHealth.HTML/index.js
   var map59 = /* @__PURE__ */ map(functorMaybe);
-  var show39 = /* @__PURE__ */ show(showInt);
+  var show40 = /* @__PURE__ */ show(showInt);
   var type_24 = /* @__PURE__ */ type_17(isPropInputType);
   var value17 = /* @__PURE__ */ value12(isPropString);
   var show112 = /* @__PURE__ */ show(showNumber);
@@ -35334,11 +35450,11 @@
     var toInt = function(s) {
       return map59(floor2)(toNum(s));
     };
-    return div2([classes(["wealth-health-controls"])])([div2([classes(["wealth-health-year-display"])])([text5(show39(state3.currentYear))]), div2([classes(["wealth-health-scrubber"])])([label_([text5("Year")]), input2([type_24(InputRange.value), min5(toNumber(fromMaybe(1800)(map59(function(v) {
+    return div2([classes(["wealth-health-controls"])])([div2([classes(["wealth-health-year-display"])])([text5(show40(state3.currentYear))]), div2([classes(["wealth-health-scrubber"])])([label_([text5("Year")]), input2([type_24(InputRange.value), min5(toNumber(fromMaybe(1800)(map59(function(v) {
       return v.yearRange.min;
     })(state3.model)))), max6(toNumber(fromMaybe(2009)(map59(function(v) {
       return v.yearRange.max;
-    })(state3.model)))), value17(show39(state3.currentYear)), step4(new Step(1)), onValueInput(function(val) {
+    })(state3.model)))), value17(show40(state3.currentYear)), step4(new Step(1)), onValueInput(function(val) {
       return new SetYear(fromMaybe(state3.currentYear)(toInt(val)));
     }), classes(["wealth-health-scrubber__slider"])])]), div2([classes(["wealth-health-playback"])])([button([classes(["wealth-health-playback__button"]), onClick(function(v) {
       return TogglePlay.value;
@@ -35389,14 +35505,15 @@
   var insert16 = /* @__PURE__ */ insert6(ordString);
   var map60 = /* @__PURE__ */ map(functorArray);
   var bind114 = /* @__PURE__ */ bind(bindMaybe);
-  var show40 = /* @__PURE__ */ show(showInt);
+  var show41 = /* @__PURE__ */ show(showInt);
   var nationPointToDrawData = function(np) {
     return {
       name: np.name,
       income: np.income,
       population: np.population,
       lifeExpectancy: np.lifeExpectancy,
-      regionColor: regionColor(np.region)
+      regionColor: regionColor(np.region),
+      region: regionName(np.region)
     };
   };
   var handleAction47 = function(dictMonadAff) {
@@ -35417,7 +35534,7 @@
               return handleAction47(dictMonadAff)(MonadEffect0)(new DataLoaded2(result.value0));
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 146, column 5 - line 151, column 40): " + [result.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 148, column 5 - line 153, column 40): " + [result.constructor.name]);
           });
         }
         ;
@@ -35551,7 +35668,7 @@
                     });
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 192, column 7 - line 196, column 60): " + [state$prime.animationSubscriptionId.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 194, column 7 - line 198, column 60): " + [state$prime.animationSubscriptionId.constructor.name]);
                 }));
               });
             });
@@ -35600,7 +35717,7 @@
               });
             }
             ;
-            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 200, column 5 - line 209, column 28): " + [state3.model.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 202, column 5 - line 211, column 28): " + [state3.model.constructor.name]);
           });
         }
         ;
@@ -35671,7 +35788,7 @@
           });
         }
         ;
-        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 142, column 16 - line 235, column 24): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.WealthHealth.WealthHealth (line 144, column 16 - line 237, column 24): " + [v.constructor.name]);
       };
     };
   };
@@ -35688,10 +35805,10 @@
   };
   var formatPopulation = function(n) {
     var millions = n / 1e6;
-    return show40(floor2(millions)) + "M";
+    return show41(floor2(millions)) + "M";
   };
   var formatNumber = function(n) {
-    return show40(floor2(n));
+    return show41(floor2(n));
   };
   var renderTooltip = function(state3) {
     return function(model) {
@@ -36263,7 +36380,7 @@
   // output/PSD3.Wizard.Wizard/index.js
   var map64 = /* @__PURE__ */ map(functorArray);
   var eq17 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
-  var show41 = /* @__PURE__ */ show(showDifficulty);
+  var show42 = /* @__PURE__ */ show(showDifficulty);
   var eq24 = /* @__PURE__ */ eq(eqDifficulty);
   var eq33 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqDifficulty));
   var bind68 = /* @__PURE__ */ bind(bindMaybe);
@@ -36450,7 +36567,7 @@
       })();
       return div2([classes([cardClass]), onClick(function(v) {
         return new SelectDataset(dataset);
-      })])([div2([classes(["dataset-card__header"])])([h3_([text5(dataset.name)]), span3([classes(["difficulty-badge difficulty-badge--" + toLowerCase(show41(dataset.difficulty))])])([text5(show41(dataset.difficulty))])]), p([classes(["dataset-card__description"])])([text5(dataset.description)]), div2([classes(["dataset-card__info"])])([strong_([text5("Fields: ")]), text5(intercalate9(", ")(map64(function(f) {
+      })])([div2([classes(["dataset-card__header"])])([h3_([text5(dataset.name)]), span3([classes(["difficulty-badge difficulty-badge--" + toLowerCase(show42(dataset.difficulty))])])([text5(show42(dataset.difficulty))])]), p([classes(["dataset-card__description"])])([text5(dataset.description)]), div2([classes(["dataset-card__info"])])([strong_([text5("Fields: ")]), text5(intercalate9(", ")(map64(function(f) {
         return f.name + (": " + f.fieldType);
       })(dataset.fields)))]), div2([classes(["dataset-card__viz"])])([strong_([text5("Suggested: ")]), text5(dataset.suggestedViz)]), div2([classes(["dataset-card__note"])])([text5(dataset.educationalNote)])]);
     };
@@ -36996,7 +37113,7 @@
   var apply4 = /* @__PURE__ */ apply(applyMaybe);
   var map118 = /* @__PURE__ */ map(functorMaybe);
   var fromFoldable29 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
-  var traverse4 = /* @__PURE__ */ traverse(traversableArray)(applicativeMaybe);
+  var traverse5 = /* @__PURE__ */ traverse(traversableArray)(applicativeMaybe);
   var fromFoldable113 = /* @__PURE__ */ fromFoldable(foldableArray);
   var append22 = /* @__PURE__ */ append(semigroupList);
   var map210 = /* @__PURE__ */ map(functorList);
@@ -37009,7 +37126,7 @@
       });
     };
     var $27 = map118(fromFoldable29);
-    var $28 = traverse4(part2tuple);
+    var $28 = traverse5(part2tuple);
     var $29 = split("&");
     return function($30) {
       return $27($28($29($30)));
