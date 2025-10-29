@@ -2,6 +2,7 @@ module PSD3.Understanding.Concepts where
 
 import Prelude
 
+import CodeSnippet (codeSnippet)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
 import Halogen as H
@@ -116,22 +117,8 @@ render _ =
             , HH.p_
                 [ HH.text "Where functions would be chained in JavaScript, the natural counterpart in PureScript is a Monad, specifically the SelectionM Monad which embodies the core functions above and a few others." ]
             , HH.p_ [ HH.text "It looks like this:" ]
-            , HH.pre_
-                [ HH.code_
-                    [ HH.text """class (Monad m) <= SelectionM selection m where
-  attach          :: Selector selection -> m selection
-  appendTo        :: selection -> Element -> Array (SelectionAttribute) -> m selection
-  setAttributes   :: selection -> Array (SelectionAttribute) -> m Unit
-  on              :: selection -> Behavior selection -> m Unit
-  simpleJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_) -> m selection
-  updateJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_) -> m { enter :: selection, exit :: selection, update :: selection }
-
-  selectUnder     :: selection -> Selector selection -> m selection
-  filterSelection :: selection -> Selector selection -> m selection
-  mergeSelections :: selection -> selection -> m selection
-  openSelection   :: selection -> Selector selection -> m selection"""
-                    ]
-                ]
+            -- SNIPPET: selectionMClass src/lib/PSD3/Capabilities/Selection.purs 85-258
+            , codeSnippet "selectionMClass" "haskell"
             ]
 
         -- Capabilities/Interpreters
