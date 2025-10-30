@@ -1,4 +1,6 @@
 package:
+  name: psd3
+  description: a library for building data driven documents
   dependencies:
   - aff
   - affjax
@@ -44,14 +46,13 @@ package:
   - unsafe-coerce
   - web-events
   - web-html
-  name: my-project
 workspace:
-  extra_packages:
+  packageSet:
+    registry: 67.0.1
+  extraPackages: 
     html-parser-halogen:
       dependencies:
       - halogen
       - string-parsers
       git: https://github.com/afcondon/purescript-html-parser-halogen.git
       ref: esmodules
-  package_set:
-    url: https://raw.githubusercontent.com/purescript/package-sets/psc-0.15.2-20220624/packages.json
