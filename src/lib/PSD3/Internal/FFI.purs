@@ -373,3 +373,5 @@ foreign import showDetailsPanel_ :: D3Selection_ -> Effect Unit
 foreign import hideDetailsPanel_ :: D3Selection_ -> Effect Unit
 foreign import setDetailsModuleName_ :: D3Selection_ -> String -> Effect Unit
 foreign import populateDetailsList_ :: D3Selection_ -> Array String -> Effect Unit
+foreign import showModuleLabels_ :: D3Selection_ -> Effect Unit
+foreign import switchToSpotlightForces_ :: D3Simulation_ -> Effect Unit

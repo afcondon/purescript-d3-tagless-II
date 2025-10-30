@@ -4740,6 +4740,21 @@
     };
     return KickUp2;
   })();
+  var size3 = function(v) {
+    if (v instanceof Leaf) {
+      return 0;
+    }
+    ;
+    if (v instanceof Two) {
+      return (1 + size3(v.value0) | 0) + size3(v.value3) | 0;
+    }
+    ;
+    if (v instanceof Three) {
+      return ((2 + size3(v.value0) | 0) + size3(v.value3) | 0) + size3(v.value6) | 0;
+    }
+    ;
+    throw new Error("Failed pattern match at Data.Map.Internal (line 705, column 1 - line 705, column 35): " + [v.constructor.name]);
+  };
   var singleton4 = function(k) {
     return function(v) {
       return new Two(Leaf.value, k, v, Leaf.value);
@@ -6646,6 +6661,12 @@
     };
   };
   var sortWith1 = /* @__PURE__ */ sortWith(ordInt);
+  var sort = function(dictOrd) {
+    var compare6 = compare(dictOrd);
+    return function(xs) {
+      return sortBy(compare6)(xs);
+    };
+  };
   var snoc = function(xs) {
     return function(x38) {
       return withArray(push(x38))(xs)();
@@ -14218,21 +14239,26 @@
   }
   function showDetailsPanel_(selection2) {
     return () => {
+      console.log("showDetailsPanel_ called", selection2, selection2.node());
       selection2.classed("hidden", false);
+      console.log("Panel should now be visible, class:", selection2.attr("class"));
     };
   }
   function hideDetailsPanel_(selection2) {
     return () => {
+      console.log("hideDetailsPanel_ called");
       selection2.classed("hidden", true);
     };
   }
   function setDetailsModuleName_(selection2) {
     return (moduleName) => () => {
+      console.log("setDetailsModuleName_ called", moduleName);
       selection2.html(`<h3>${moduleName}</h3>`);
     };
   }
   function populateDetailsList_(selection2) {
     return (items2) => () => {
+      console.log("populateDetailsList_ called", selection2.attr("class"), items2);
       selection2.html("");
       const classList3 = selection2.attr("class");
       let title5 = "";
@@ -14252,6 +14278,42 @@
           ul2.append("li").text(item);
         });
       }
+    };
+  }
+  function showModuleLabels_(nodesGroup) {
+    return () => {
+      console.log("showModuleLabels_ called");
+      const labels9 = nodesGroup.selectAll(".node-label");
+      console.log("Found labels:", labels9.size());
+      labels9.attr("fill", "#555");
+      labels9.each(function(d9) {
+        const expanded = d9.expanded || false;
+        const loc = d9.loc || 100;
+        const baseRadius = Math.sqrt(loc) * 0.15 + 2;
+        const radius20 = expanded ? baseRadius * 4 : baseRadius;
+        console.log("Setting label y for", d9.name, "to", -radius20);
+        d3.select(this).attr("y", -radius20);
+      });
+      console.log("showModuleLabels_ done");
+    };
+  }
+  function switchToSpotlightForces_(simulation) {
+    return () => {
+      console.log("Switching to spotlight forces");
+      const spotlightCollision = simulation.force("collision-spotlight");
+      const spotlightManyBody = simulation.force("manyBody-spotlight");
+      console.log("spotlight collision force:", spotlightCollision);
+      console.log("spotlight manyBody force:", spotlightManyBody);
+      simulation.force("collision-compact", null);
+      simulation.force("manyBody-compact", null);
+      if (spotlightCollision) {
+        simulation.force("collision-spotlight", spotlightCollision);
+      }
+      if (spotlightManyBody) {
+        simulation.force("manyBody-spotlight", spotlightManyBody);
+      }
+      simulation.alpha(0.3).restart();
+      console.log("Switched to spotlight forces, restarted simulation");
     };
   }
 
@@ -16417,8 +16479,10 @@
   var radius3 = /* @__PURE__ */ radius(toAttrNumberFn);
   var fill2 = /* @__PURE__ */ fill(toAttrStringFn);
   var text7 = /* @__PURE__ */ text6(toAttrStringFn);
-  var discard6 = /* @__PURE__ */ discard(discardUnit);
+  var y4 = /* @__PURE__ */ y(toAttrNumberFn);
+  var fill1 = /* @__PURE__ */ fill(toAttrString);
   var strokeWidth2 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var discard6 = /* @__PURE__ */ discard(discardUnit);
   var strokeColor2 = /* @__PURE__ */ strokeColor(toAttrString);
   var show13 = /* @__PURE__ */ show(showNumber);
   var x12 = /* @__PURE__ */ x1(toAttrNumberFn);
@@ -16429,35 +16493,35 @@
   var lookup8 = /* @__PURE__ */ lookup(ordString);
   var insert8 = /* @__PURE__ */ insert6(ordString);
   var insert13 = /* @__PURE__ */ insert(ordString);
-  var fromFoldable12 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
   var show23 = /* @__PURE__ */ show(showInt);
+  var fromFoldable12 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
   var traverse_7 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableArray);
   var strokeOpacity2 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
   var text1 = /* @__PURE__ */ text6(toAttrString);
   var x4 = /* @__PURE__ */ x(toAttrNumber);
-  var y4 = /* @__PURE__ */ y(toAttrNumber);
+  var y32 = /* @__PURE__ */ y(toAttrNumber);
   var radius1 = /* @__PURE__ */ radius(toAttrNumber);
-  var fill1 = /* @__PURE__ */ fill(toAttrString);
   var strength2 = /* @__PURE__ */ strength(toAttrNumber);
   var theta2 = /* @__PURE__ */ theta(toAttrNumber);
   var distanceMin2 = /* @__PURE__ */ distanceMin(toAttrNumber);
   var radius22 = /* @__PURE__ */ radius2(toAttrNumberFnI);
   var iterations2 = /* @__PURE__ */ iterations(toAttrNumber);
   var x32 = /* @__PURE__ */ x3(toAttrNumber);
-  var y32 = /* @__PURE__ */ y3(toAttrNumber);
+  var y42 = /* @__PURE__ */ y3(toAttrNumber);
   var distance2 = /* @__PURE__ */ distance(toAttrNumber);
   var _handle2 = /* @__PURE__ */ _handle(strongForget);
   var when5 = /* @__PURE__ */ when(applicativeEffect);
   var toUnfoldable7 = /* @__PURE__ */ toUnfoldable6(unfoldableArray);
   var liftEffect7 = /* @__PURE__ */ liftEffect(monadEffectEffect);
   var pure20 = /* @__PURE__ */ pure(applicativeEffect);
+  var sort2 = /* @__PURE__ */ sort(ordString);
   var unboxLink = unsafeCoerce2;
   var unboxBubbleNode = function(datum2) {
     return datum2;
   };
   var nodeRadius = function(expanded) {
     return function(loc) {
-      var baseRadius = sqrt(toNumber(loc)) * 0.3 + 5;
+      var baseRadius = sqrt(toNumber(loc)) * 0.15 + 2;
       if (expanded) {
         return baseRadius * 4;
       }
@@ -16467,18 +16531,18 @@
   };
   var nodeColor = function(path3) {
     if (take4(4)(path3) === "src/") {
-      var $146 = contains("src/lib/PSD3")(path3);
-      if ($146) {
+      var $149 = contains("src/lib/PSD3")(path3);
+      if ($149) {
         return "#2E7D32";
       }
       ;
-      var $147 = contains("src/lib/")(path3);
-      if ($147) {
+      var $150 = contains("src/lib/")(path3);
+      if ($150) {
         return "#4CAF50";
       }
       ;
-      var $148 = contains("src/website/")(path3);
-      if ($148) {
+      var $151 = contains("src/website/")(path3);
+      if ($151) {
         return "#D32F2F";
       }
       ;
@@ -16529,52 +16593,52 @@
     })(modules);
   };
   var link_ = {
-    source: function($176) {
+    source: function($182) {
       return (function(v) {
         return v.source;
-      })(unboxLink($176));
+      })(unboxLink($182));
     },
-    target: function($177) {
+    target: function($183) {
       return (function(v) {
         return v.target;
-      })(unboxLink($177));
+      })(unboxLink($183));
     }
   };
   var datum_ = {
-    id: function($178) {
+    id: function($184) {
       return (function(v) {
         return v.id;
-      })(unboxBubbleNode($178));
+      })(unboxBubbleNode($184));
     },
-    x: function($179) {
+    x: function($185) {
       return (function(v) {
         return v.x;
-      })(unboxBubbleNode($179));
+      })(unboxBubbleNode($185));
     },
-    y: function($180) {
+    y: function($186) {
       return (function(v) {
         return v.y;
-      })(unboxBubbleNode($180));
+      })(unboxBubbleNode($186));
     },
-    name: function($181) {
+    name: function($187) {
       return (function(v) {
         return v.name;
-      })(unboxBubbleNode($181));
+      })(unboxBubbleNode($187));
     },
-    loc: function($182) {
+    loc: function($188) {
       return (function(v) {
         return v.loc;
-      })(unboxBubbleNode($182));
+      })(unboxBubbleNode($188));
     },
-    path: function($183) {
+    path: function($189) {
       return (function(v) {
         return v.path;
-      })(unboxBubbleNode($183));
+      })(unboxBubbleNode($189));
     },
-    expanded: function($184) {
+    expanded: function($190) {
       return (function(v) {
         return v.expanded;
-      })(unboxBubbleNode($184));
+      })(unboxBubbleNode($190));
     }
   };
   var updateGraph = function(dictBind) {
@@ -16609,20 +16673,36 @@
                       return bind116(appendTo2(node$prime.enter)(Group.value)([classed2("node-group")]))(function(nodeEnter) {
                         return bind116(appendTo2(nodeEnter)(Circle.value)([radius3(function(d9) {
                           return nodeRadius(datum_.expanded(d9))(datum_.loc(d9));
-                        }), fill2(function($185) {
-                          return nodeColor(datum_.path($185));
+                        }), fill2(function($191) {
+                          return nodeColor(datum_.path($191));
                         }), classed2("node-circle")]))(function() {
-                          return bind116(appendTo2(nodeEnter)(Text2.value)([text7(datum_.name), classed2("node-label")]))(function() {
+                          return bind116(appendTo2(nodeEnter)(Text2.value)([text7(datum_.name), classed2("node-label"), y4(function(d9) {
+                            return -nodeRadius(datum_.expanded(d9))(datum_.loc(d9));
+                          }), fill1((function() {
+                            if (v.inSpotlightMode) {
+                              return "#555";
+                            }
+                            ;
+                            return "transparent";
+                          })()), strokeWidth2(0), new AttrT(new AttributeSetter("text-anchor", new StringAttr(new Static("middle")))), new AttrT(new AttributeSetter("dominant-baseline", new StringAttr(new Static("baseline"))))]))(function() {
                             return discard211(setAttributes2(node$prime.exit)([remove]))(function() {
                               return discard211(setAttributes2(node$prime.update)([classed2("node-group")]))(function() {
                                 return bind116(selectUnder2(node$prime.update)(show8(Circle.value)))(function(updateCircles) {
                                   return discard211(setAttributes2(updateCircles)([radius3(function(d9) {
                                     return nodeRadius(datum_.expanded(d9))(datum_.loc(d9));
-                                  }), fill2(function($186) {
-                                    return nodeColor(datum_.path($186));
+                                  }), fill2(function($192) {
+                                    return nodeColor(datum_.path($192));
                                   })]))(function() {
                                     return bind116(selectUnder2(node$prime.update)(show8(Text2.value)))(function(updateLabels) {
-                                      return discard211(setAttributes2(updateLabels)([text7(datum_.name)]))(function() {
+                                      return discard211(setAttributes2(updateLabels)([text7(datum_.name), y4(function(d9) {
+                                        return -nodeRadius(datum_.expanded(d9))(datum_.loc(d9));
+                                      }), fill1((function() {
+                                        if (v.inSpotlightMode) {
+                                          return "#555";
+                                        }
+                                        ;
+                                        return "transparent";
+                                      })())]))(function() {
                                         return bind116(mergeSelections2(nodeEnter)(node$prime.update))(function(mergedNodes) {
                                           return bind116(on3(mergedNodes)(new Drag(new CustomDrag("bubbleGraph", simdragHorizontal_))))(function() {
                                             return bind116(updateJoin2(link4)(Line.value)(enhanced.links)(keyIsID_))(function(link$prime) {
@@ -16634,22 +16714,22 @@
                                                         return "translate(" + (show13(datum_.x(d9)) + ("," + (show13(datum_.y(d9)) + ")")));
                                                       };
                                                       return discard211(addTickFunction2("nodes")(new Step3(mergedNodes, [transform$prime(translateNode)])))(function() {
-                                                        return addTickFunction2("links")(new Step3(mergedLinks, [x12(function($187) {
+                                                        return addTickFunction2("links")(new Step3(mergedLinks, [x12(function($193) {
                                                           return (function(v1) {
                                                             return v1.x;
-                                                          })(link_.source($187));
-                                                        }), y12(function($188) {
+                                                          })(link_.source($193));
+                                                        }), y12(function($194) {
                                                           return (function(v1) {
                                                             return v1.y;
-                                                          })(link_.source($188));
-                                                        }), x22(function($189) {
+                                                          })(link_.source($194));
+                                                        }), x22(function($195) {
                                                           return (function(v1) {
                                                             return v1.x;
-                                                          })(link_.target($189));
-                                                        }), y22(function($190) {
+                                                          })(link_.target($195));
+                                                        }), y22(function($196) {
                                                           return (function(v1) {
                                                             return v1.y;
-                                                          })(link_.target($190));
+                                                          })(link_.target($196));
                                                         })]));
                                                       });
                                                     });
@@ -16719,129 +16799,163 @@
             var init5 = init3(dictSimulationM);
             return function(graphData) {
               return function(declsData) {
-                var sourceModules = filter2(function(m) {
-                  return take4(4)(m.path) === "src/";
-                })(graphData.modules);
-                var modulesMap = fromFoldable12(mapFlipped5(sourceModules)(function(m) {
-                  return new Tuple(m.name, m);
-                }));
-                var dependedOnByMap = buildDependedOnByMap(sourceModules);
-                var bubbleNodes = modulesToBubbleNodes(sourceModules);
-                var bubbleLinks = modulesToLinks(sourceModules);
-                var adjacencyMap = buildAdjacencyMap(bubbleLinks);
-                return discard211(liftEffect110(log2("Expandable Bubbles initialized with " + (show23(length4(sourceModules)) + " modules"))))(function() {
-                  return discard211(liftEffect110(traverse_7(function(m) {
-                    var r = nodeRadius(false)(m.loc);
-                    return log2(m.name + (" - LOC: " + (show23(m.loc) + (", radius: " + show13(r)))));
-                  })(take(5)(sourceModules))))(function() {
-                    return bind116(liftEffect110(getWindowWidthHeight))(function(v) {
-                      return bind116(attach2("div.svg-container"))(function(root3) {
-                        return bind116(appendTo2(root3)(Svg.value)([viewBox(-v.value0 / 2)(-v.value1 / 2)(v.value0)(v.value1), classed2("bubble-graph")]))(function(svg2) {
-                          return bind116(attach2("div.expandable-bubbles-container"))(function(container) {
-                            return bind116(appendTo2(container)(Div.value)([classed2("hover-details-panel hidden")]))(function(detailsPanel) {
-                              return bind116(appendTo2(detailsPanel)(Div.value)([classed2("details-module-name")]))(function(detailsModuleName) {
-                                return bind116(appendTo2(detailsPanel)(Div.value)([classed2("details-list dependencies-list")]))(function(dependenciesList) {
-                                  return bind116(appendTo2(detailsPanel)(Div.value)([classed2("details-list depended-on-by-list")]))(function(dependedOnByList) {
-                                    return discard211(liftEffect110(addModuleArrowMarker_(svg2)))(function() {
-                                      return bind116(appendTo2(svg2)(Group.value)([classed2("zoom-group")]))(function(zoomGroup) {
-                                        return bind116(appendTo2(zoomGroup)(Group.value)([classed2("link"), strokeColor2("#999"), strokeOpacity2(0.4)]))(function(linksGroup) {
-                                          return bind116(appendTo2(zoomGroup)(Group.value)([classed2("node"), strokeColor2("#fff"), strokeWidth2(1.5)]))(function(nodesGroup) {
-                                            return bind116(appendTo2(svg2)(Group.value)([classed2("legend"), transform$prime(function(v1) {
-                                              return "translate(" + (show13(v.value0 / 2 - 150) + ("," + (show13(-v.value1 / 2 + 30) + ")")));
-                                            })]))(function(legendGroup) {
-                                              return bind116(appendTo2(legendGroup)(Text2.value)([text1("Declaration Types"), x4(0), y4(0), classed2("legend-title")]))(function() {
-                                                var legendItems = [{
-                                                  name: "Functions/Values",
-                                                  color: "#2196F3",
-                                                  yOffset: 25
-                                                }, {
-                                                  name: "Foreign Functions",
-                                                  color: "#00BCD4",
-                                                  yOffset: 50
-                                                }, {
-                                                  name: "Data Types",
-                                                  color: "#4CAF50",
-                                                  yOffset: 75
-                                                }, {
-                                                  name: "Type Classes",
-                                                  color: "#9C27B0",
-                                                  yOffset: 100
-                                                }, {
-                                                  name: "Type Synonyms",
-                                                  color: "#FF9800",
-                                                  yOffset: 125
-                                                }, {
-                                                  name: "Instances",
-                                                  color: "#E91E63",
-                                                  yOffset: 150
-                                                }];
-                                                return bind116(traverse_15(function(item) {
-                                                  return bind116(appendTo2(legendGroup)(Group.value)([transform$prime(function(v1) {
-                                                    return "translate(0," + (show13(item.yOffset) + ")");
-                                                  }), classed2("legend-item")]))(function(itemGroup) {
-                                                    return bind116(appendTo2(itemGroup)(Circle.value)([radius1(8), fill1(item.color), x4(0), y4(0)]))(function() {
-                                                      return bind116(appendTo2(itemGroup)(Text2.value)([text1(item.name), x4(15), y4(5), classed2("legend-label")]))(function() {
-                                                        return pure114(unit);
-                                                      });
-                                                    });
-                                                  });
-                                                })(legendItems))(function() {
-                                                  var collisionRadius = function(datum2) {
-                                                    return function(v1) {
-                                                      var padding = (function() {
-                                                        if (datum2.expanded) {
-                                                          return 30;
-                                                        }
-                                                        ;
-                                                        return 10;
-                                                      })();
-                                                      var baseRadius = nodeRadius(datum2.expanded)(datum2.loc);
-                                                      return baseRadius + padding;
-                                                    };
-                                                  };
-                                                  var forces2 = [createForce("manyBody")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-300), theta2(0.9), distanceMin2(1)]), createForce("collision")(new RegularForce(ForceCollide.value))(allNodes)([radius22(collisionRadius), strength2(0.9), iterations2(3)]), createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([x32(0), y32(0), strength2(0.2)]), createLinkForce(Nothing.value)([distance2(150)])];
-                                                  var activeForces = fromFoldable8(["manyBody", "collision", "center", "links"]);
-                                                  return bind116(init5({
-                                                    nodes: bubbleNodes,
-                                                    links: bubbleLinks,
-                                                    forces: forces2,
-                                                    activeForces,
-                                                    config: {
-                                                      alpha: 1,
-                                                      alphaTarget: 0,
-                                                      alphaMin: 1e-3,
-                                                      alphaDecay: 0.0228,
-                                                      velocityDecay: 0.4
-                                                    },
-                                                    keyFn: keyIsID_,
-                                                    ticks: fromFoldable12([])
-                                                  }))(function() {
-                                                    return bind116(on3(svg2)(new Zoom({
-                                                      extent: new ZoomExtent({
-                                                        top: 0,
-                                                        left: 0,
-                                                        bottom: v.value1,
-                                                        right: v.value0
-                                                      }),
-                                                      scale: new ScaleExtent(0.1, 4),
-                                                      name: "BubbleGraph",
-                                                      target: zoomGroup
-                                                    })))(function() {
-                                                      return pure114({
-                                                        svg: svg2,
-                                                        zoomGroup,
-                                                        nodesGroup,
-                                                        linksGroup,
-                                                        bubbleNodes,
-                                                        bubbleLinks,
-                                                        declarationsData: declsData,
-                                                        adjacencyMap,
-                                                        modulesMap,
-                                                        dependedOnByMap,
-                                                        detailsPanel,
-                                                        detailsModuleName,
-                                                        dependenciesList,
-                                                        dependedOnByList
+                return discard211(liftEffect110(log2("=== INITIALIZE START ===")))(function() {
+                  var sourceModules = filter2(function(m) {
+                    return take4(4)(m.path) === "src/";
+                  })(graphData.modules);
+                  return discard211(liftEffect110(log2("Found " + (show23(length4(sourceModules)) + " source modules"))))(function() {
+                    var bubbleNodes = modulesToBubbleNodes(sourceModules);
+                    return discard211(liftEffect110(log2("Created " + (show23(length4(bubbleNodes)) + " bubble nodes"))))(function() {
+                      var bubbleLinks = modulesToLinks(sourceModules);
+                      return discard211(liftEffect110(log2("Created " + (show23(length4(bubbleLinks)) + " links"))))(function() {
+                        var adjacencyMap = buildAdjacencyMap(bubbleLinks);
+                        return discard211(liftEffect110(log2("Built adjacency map with " + (show23(size3(adjacencyMap)) + " entries"))))(function() {
+                          var modulesMap = fromFoldable12(mapFlipped5(sourceModules)(function(m) {
+                            return new Tuple(m.name, m);
+                          }));
+                          return discard211(liftEffect110(log2("Built modules map with " + (show23(size3(modulesMap)) + " entries"))))(function() {
+                            var dependedOnByMap = buildDependedOnByMap(sourceModules);
+                            return discard211(liftEffect110(log2("Built dependedOnBy map with " + (show23(size3(dependedOnByMap)) + " entries"))))(function() {
+                              return discard211(liftEffect110(log2("Expandable Bubbles initialized with " + (show23(length4(sourceModules)) + " modules"))))(function() {
+                                return discard211(liftEffect110(traverse_7(function(m) {
+                                  var r = nodeRadius(false)(m.loc);
+                                  return log2(m.name + (" - LOC: " + (show23(m.loc) + (", radius: " + show13(r)))));
+                                })(take(5)(sourceModules))))(function() {
+                                  return bind116(liftEffect110(getWindowWidthHeight))(function(v) {
+                                    return discard211(liftEffect110(log2("Window size: " + (show13(v.value0) + ("x" + show13(v.value1))))))(function() {
+                                      return bind116(attach2("div.svg-container"))(function(root3) {
+                                        return discard211(liftEffect110(log2("Attached to svg-container")))(function() {
+                                          return bind116(appendTo2(root3)(Svg.value)([viewBox(-v.value0 / 2)(-v.value1 / 2)(v.value0)(v.value1), classed2("bubble-graph")]))(function(svg2) {
+                                            return discard211(liftEffect110(log2("Created SVG")))(function() {
+                                              return discard211(liftEffect110(log2("About to attach to expandable-bubbles-container")))(function() {
+                                                return bind116(attach2("div.expandable-bubbles-container"))(function(container) {
+                                                  return discard211(liftEffect110(log2("Attached to expandable-bubbles-container")))(function() {
+                                                    return bind116(appendTo2(container)(Div.value)([classed2("hover-details-panel hidden")]))(function(detailsPanel) {
+                                                      return discard211(liftEffect110(log2("Created details panel")))(function() {
+                                                        return bind116(appendTo2(detailsPanel)(Div.value)([classed2("details-module-name")]))(function(detailsModuleName) {
+                                                          return bind116(appendTo2(detailsPanel)(Div.value)([classed2("details-list dependencies-list")]))(function(dependenciesList) {
+                                                            return bind116(appendTo2(detailsPanel)(Div.value)([classed2("details-list depended-on-by-list")]))(function(dependedOnByList) {
+                                                              return discard211(liftEffect110(log2("Created panel sections")))(function() {
+                                                                return discard211(liftEffect110(addModuleArrowMarker_(svg2)))(function() {
+                                                                  return bind116(appendTo2(svg2)(Group.value)([classed2("zoom-group")]))(function(zoomGroup) {
+                                                                    return bind116(appendTo2(zoomGroup)(Group.value)([classed2("link"), strokeColor2("#999"), strokeOpacity2(0.4)]))(function(linksGroup) {
+                                                                      return bind116(appendTo2(zoomGroup)(Group.value)([classed2("node"), strokeColor2("#fff"), strokeWidth2(1.5)]))(function(nodesGroup) {
+                                                                        return bind116(appendTo2(svg2)(Group.value)([classed2("legend"), transform$prime(function(v1) {
+                                                                          return "translate(" + (show13(v.value0 / 2 - 150) + ("," + (show13(-v.value1 / 2 + 30) + ")")));
+                                                                        })]))(function(legendGroup) {
+                                                                          return bind116(appendTo2(legendGroup)(Text2.value)([text1("Declaration Types"), x4(0), y32(0), classed2("legend-title")]))(function() {
+                                                                            var legendItems = [{
+                                                                              name: "Functions/Values",
+                                                                              color: "#2196F3",
+                                                                              yOffset: 25
+                                                                            }, {
+                                                                              name: "Foreign Functions",
+                                                                              color: "#00BCD4",
+                                                                              yOffset: 50
+                                                                            }, {
+                                                                              name: "Data Types",
+                                                                              color: "#4CAF50",
+                                                                              yOffset: 75
+                                                                            }, {
+                                                                              name: "Type Classes",
+                                                                              color: "#9C27B0",
+                                                                              yOffset: 100
+                                                                            }, {
+                                                                              name: "Type Synonyms",
+                                                                              color: "#FF9800",
+                                                                              yOffset: 125
+                                                                            }, {
+                                                                              name: "Instances",
+                                                                              color: "#E91E63",
+                                                                              yOffset: 150
+                                                                            }];
+                                                                            return bind116(traverse_15(function(item) {
+                                                                              return bind116(appendTo2(legendGroup)(Group.value)([transform$prime(function(v1) {
+                                                                                return "translate(0," + (show13(item.yOffset) + ")");
+                                                                              }), classed2("legend-item")]))(function(itemGroup) {
+                                                                                return bind116(appendTo2(itemGroup)(Circle.value)([radius1(8), fill1(item.color), x4(0), y32(0)]))(function() {
+                                                                                  return bind116(appendTo2(itemGroup)(Text2.value)([text1(item.name), x4(15), y32(5), classed2("legend-label")]))(function() {
+                                                                                    return pure114(unit);
+                                                                                  });
+                                                                                });
+                                                                              });
+                                                                            })(legendItems))(function() {
+                                                                              var spotlightCollisionRadius = function(datum2) {
+                                                                                return function(v1) {
+                                                                                  var padding = (function() {
+                                                                                    if (datum2.expanded) {
+                                                                                      return 25;
+                                                                                    }
+                                                                                    ;
+                                                                                    return 5;
+                                                                                  })();
+                                                                                  var baseRadius = nodeRadius(datum2.expanded)(datum2.loc);
+                                                                                  return baseRadius + padding;
+                                                                                };
+                                                                              };
+                                                                              var compactCollisionRadius = function(datum2) {
+                                                                                return function(v1) {
+                                                                                  var baseRadius = nodeRadius(false)(datum2.loc);
+                                                                                  return baseRadius + 2;
+                                                                                };
+                                                                              };
+                                                                              var forces2 = [createForce("manyBody-compact")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-50), theta2(0.9), distanceMin2(1)]), createForce("manyBody-spotlight")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-150), theta2(0.9), distanceMin2(1)]), createForce("collision-compact")(new RegularForce(ForceCollide.value))(allNodes)([radius22(compactCollisionRadius), strength2(0.9), iterations2(3)]), createForce("collision-spotlight")(new RegularForce(ForceCollide.value))(allNodes)([radius22(spotlightCollisionRadius), strength2(0.9), iterations2(3)]), createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([x32(0), y42(0), strength2(0.2)]), createLinkForce(Nothing.value)([distance2(100)])];
+                                                                              var activeForces = fromFoldable8(["manyBody-compact", "collision-compact", "center", "links"]);
+                                                                              return bind116(init5({
+                                                                                nodes: bubbleNodes,
+                                                                                links: bubbleLinks,
+                                                                                forces: forces2,
+                                                                                activeForces,
+                                                                                config: {
+                                                                                  alpha: 1,
+                                                                                  alphaTarget: 0,
+                                                                                  alphaMin: 1e-3,
+                                                                                  alphaDecay: 0.0228,
+                                                                                  velocityDecay: 0.4
+                                                                                },
+                                                                                keyFn: keyIsID_,
+                                                                                ticks: fromFoldable12([])
+                                                                              }))(function() {
+                                                                                return bind116(on3(svg2)(new Zoom({
+                                                                                  extent: new ZoomExtent({
+                                                                                    top: 0,
+                                                                                    left: 0,
+                                                                                    bottom: v.value1,
+                                                                                    right: v.value0
+                                                                                  }),
+                                                                                  scale: new ScaleExtent(0.1, 4),
+                                                                                  name: "BubbleGraph",
+                                                                                  target: zoomGroup
+                                                                                })))(function() {
+                                                                                  return pure114({
+                                                                                    svg: svg2,
+                                                                                    zoomGroup,
+                                                                                    nodesGroup,
+                                                                                    linksGroup,
+                                                                                    bubbleNodes,
+                                                                                    bubbleLinks,
+                                                                                    declarationsData: declsData,
+                                                                                    adjacencyMap,
+                                                                                    modulesMap,
+                                                                                    dependedOnByMap,
+                                                                                    detailsPanel,
+                                                                                    detailsModuleName,
+                                                                                    dependenciesList,
+                                                                                    dependedOnByList
+                                                                                  });
+                                                                                });
+                                                                              });
+                                                                            });
+                                                                          });
+                                                                        });
+                                                                      });
+                                                                    });
+                                                                  });
+                                                                });
+                                                              });
+                                                            });
+                                                          });
+                                                        });
                                                       });
                                                     });
                                                   });
@@ -16870,13 +16984,13 @@
     };
   };
   var drawExpandableBubbles = function(dictBind) {
+    var discard211 = discard6(dictBind);
     var bind116 = bind(dictBind);
     var initialize1 = initialize2(dictBind);
-    var discard211 = discard6(dictBind);
     var updateGraph1 = updateGraph(dictBind);
     return function(dictMonadEffect) {
-      var initialize22 = initialize1(dictMonadEffect);
       var liftEffect110 = liftEffect(dictMonadEffect);
+      var initialize22 = initialize1(dictMonadEffect);
       var updateGraph22 = updateGraph1(dictMonadEffect);
       var pure114 = pure(dictMonadEffect.Monad0().Applicative0());
       return function(dictMonadState) {
@@ -16897,88 +17011,100 @@
                 return function(declsData) {
                   return function(callsData) {
                     return function(selector) {
-                      return bind116(initialize52(graphData)(declsData))(function(initResult) {
-                        return bind116(use3(_handle2))(function(simHandle) {
-                          return bind116(liftEffect110($$new(false)))(function(hasFilteredRef) {
-                            var onClick2 = function(v) {
-                              return function(datum2) {
-                                return function(v1) {
-                                  var clickedNode = unboxBubbleNode(datum2);
-                                  var clickedId = datum_.id(datum2);
-                                  return function __do4() {
-                                    var hasFiltered = read(hasFilteredRef)();
-                                    when5(!hasFiltered)((function() {
-                                      var connected2 = fromMaybe(empty7)(lookup8(clickedId)(initResult.adjacencyMap));
-                                      var connectedIds2 = toUnfoldable7(connected2);
-                                      var allConnected = cons3(clickedId)(connectedIds2);
-                                      return function __do5() {
-                                        log2("First click: filtering to " + (show23(length4(allConnected)) + " connected modules"))();
-                                        liftEffect7(pure20(filterToConnectedNodes_(simHandle)(keyIsID_)(allConnected)))();
-                                        return write(true)(hasFilteredRef)();
-                                      };
-                                    })())();
-                                    var newExpanded = !clickedNode.expanded;
-                                    unsafeSetField_("expanded")(newExpanded)(datum2)();
-                                    log2(clickedId + (function() {
-                                      if (newExpanded) {
-                                        return " expanded";
-                                      }
-                                      ;
-                                      return " collapsed";
-                                    })())();
-                                    updateNodeExpansion_(simHandle)(nodeRadius)(initResult.declarationsData)(callsData)(datum2);
-                                    var connected = fromMaybe(empty7)(lookup8(clickedId)(initResult.adjacencyMap));
-                                    var connectedIds = toUnfoldable7(connected);
-                                    log2("Expanding " + (show23(length4(connectedIds)) + " connected modules"))();
-                                    traverse_7(function(connectedId) {
-                                      return expandNodeById_(simHandle)(nodeRadius)(initResult.declarationsData)(callsData)(connectedId)(newExpanded);
-                                    })(connectedIds)();
-                                    return drawInterModuleDeclarationLinks_(initResult.zoomGroup)(nodeRadius)(initResult.declarationsData)(callsData)();
-                                  };
-                                };
-                              };
-                            };
-                            return discard211(updateGraph5({
-                              nodesGroup: initResult.nodesGroup,
-                              linksGroup: initResult.linksGroup,
-                              nodes: initResult.bubbleNodes,
-                              links: initResult.bubbleLinks
-                            }))(function() {
-                              var onMouseOver = function(v) {
-                                return function(datum2) {
-                                  return function(v1) {
-                                    var hoveredId = datum_.id(datum2);
-                                    var v2 = lookup8(hoveredId)(initResult.modulesMap);
-                                    if (v2 instanceof Nothing) {
-                                      return pure20(unit);
-                                    }
-                                    ;
-                                    if (v2 instanceof Just) {
+                      return discard211(liftEffect110(log2("=== drawExpandableBubbles called ===")))(function() {
+                        return bind116(initialize52(graphData)(declsData))(function(initResult) {
+                          return discard211(liftEffect110(log2("=== initialize returned ===")))(function() {
+                            return bind116(use3(_handle2))(function(simHandle) {
+                              return bind116(liftEffect110($$new(false)))(function(hasFilteredRef) {
+                                var onClick2 = function(v) {
+                                  return function(datum2) {
+                                    return function(v1) {
+                                      var clickedNode = unboxBubbleNode(datum2);
+                                      var clickedId = datum_.id(datum2);
                                       return function __do4() {
-                                        showDetailsPanel_(initResult.detailsPanel)();
-                                        setDetailsModuleName_(initResult.detailsModuleName)(v2.value0.name)();
-                                        populateDetailsList_(initResult.dependenciesList)(v2.value0.depends)();
-                                        var dependedOnBy = fromMaybe(empty7)(lookup8(hoveredId)(initResult.dependedOnByMap));
-                                        var dependedOnByList$prime = toUnfoldable7(dependedOnBy);
-                                        return populateDetailsList_(initResult.dependedOnByList)(dependedOnByList$prime)();
+                                        var hasFiltered = read(hasFilteredRef)();
+                                        when5(!hasFiltered)((function() {
+                                          var connected2 = fromMaybe(empty7)(lookup8(clickedId)(initResult.adjacencyMap));
+                                          var connectedIds2 = toUnfoldable7(connected2);
+                                          var allConnected = cons3(clickedId)(connectedIds2);
+                                          return function __do5() {
+                                            log2("First click: filtering to " + (show23(length4(allConnected)) + " connected modules"))();
+                                            liftEffect7(pure20(filterToConnectedNodes_(simHandle)(keyIsID_)(allConnected)))();
+                                            write(true)(hasFilteredRef)();
+                                            log2("About to call showModuleLabels_")();
+                                            liftEffect7(showModuleLabels_(initResult.nodesGroup))();
+                                            log2("Called showModuleLabels_")();
+                                            log2("Switching to spotlight collision force")();
+                                            return switchToSpotlightForces_(simHandle)();
+                                          };
+                                        })())();
+                                        var newExpanded = !clickedNode.expanded;
+                                        unsafeSetField_("expanded")(newExpanded)(datum2)();
+                                        log2(clickedId + (function() {
+                                          if (newExpanded) {
+                                            return " expanded";
+                                          }
+                                          ;
+                                          return " collapsed";
+                                        })())();
+                                        updateNodeExpansion_(simHandle)(nodeRadius)(initResult.declarationsData)(callsData)(datum2);
+                                        var connected = fromMaybe(empty7)(lookup8(clickedId)(initResult.adjacencyMap));
+                                        var connectedIds = toUnfoldable7(connected);
+                                        log2("Expanding " + (show23(length4(connectedIds)) + " connected modules"))();
+                                        traverse_7(function(connectedId) {
+                                          return expandNodeById_(simHandle)(nodeRadius)(initResult.declarationsData)(callsData)(connectedId)(newExpanded);
+                                        })(connectedIds)();
+                                        return drawInterModuleDeclarationLinks_(initResult.zoomGroup)(nodeRadius)(initResult.declarationsData)(callsData)();
                                       };
-                                    }
-                                    ;
-                                    throw new Error("Failed pattern match at PSD3.CodeAtlas.Tabs.ExpandableBubbles (line 512, column 9 - line 527, column 68): " + [v2.constructor.name]);
+                                    };
                                   };
                                 };
-                              };
-                              var onMouseOut = function(v) {
-                                return function(v1) {
-                                  return function(v2) {
-                                    return hideDetailsPanel_(initResult.detailsPanel);
+                                return discard211(updateGraph5({
+                                  nodesGroup: initResult.nodesGroup,
+                                  linksGroup: initResult.linksGroup,
+                                  nodes: initResult.bubbleNodes,
+                                  links: initResult.bubbleLinks,
+                                  inSpotlightMode: false
+                                }))(function() {
+                                  var onMouseOver = function(v) {
+                                    return function(datum2) {
+                                      return function(v1) {
+                                        var hoveredId = datum_.id(datum2);
+                                        return function __do4() {
+                                          log2("Mouse over: " + hoveredId)();
+                                          var v2 = lookup8(hoveredId)(initResult.modulesMap);
+                                          if (v2 instanceof Nothing) {
+                                            return log2("Module not found in map: " + hoveredId)();
+                                          }
+                                          ;
+                                          if (v2 instanceof Just) {
+                                            log2("Found module info, showing panel for: " + v2.value0.name)();
+                                            showDetailsPanel_(initResult.detailsPanel)();
+                                            setDetailsModuleName_(initResult.detailsModuleName)(v2.value0.name)();
+                                            populateDetailsList_(initResult.dependenciesList)(sort2(v2.value0.depends))();
+                                            var dependedOnBy = fromMaybe(empty7)(lookup8(hoveredId)(initResult.dependedOnByMap));
+                                            var dependedOnByList$prime = sort2(toUnfoldable7(dependedOnBy));
+                                            return populateDetailsList_(initResult.dependedOnByList)(dependedOnByList$prime)();
+                                          }
+                                          ;
+                                          throw new Error("Failed pattern match at PSD3.CodeAtlas.Tabs.ExpandableBubbles (line 564, column 9 - line 580, column 68): " + [v2.constructor.name]);
+                                        };
+                                      };
+                                    };
                                   };
-                                };
-                              };
-                              return bind116(openSelection2(initResult.nodesGroup)(show8(Group.value)))(function(initialNodes) {
-                                return discard211(setAttributes2(initialNodes)([onMouseEventEffectful(MouseClick.value)(onClick2), onMouseEventEffectful(MouseEnter.value)(onMouseOver), onMouseEventEffectful(MouseLeave.value)(onMouseOut)]))(function() {
-                                  return discard211(start5)(function() {
-                                    return pure114(unit);
+                                  var onMouseOut = function(v) {
+                                    return function(v1) {
+                                      return function(v2) {
+                                        return hideDetailsPanel_(initResult.detailsPanel);
+                                      };
+                                    };
+                                  };
+                                  return bind116(openSelection2(initResult.nodesGroup)(show8(Group.value)))(function(initialNodes) {
+                                    return discard211(setAttributes2(initialNodes)([onMouseEventEffectful(MouseClick.value)(onClick2), onMouseEventEffectful(MouseEnter.value)(onMouseOver), onMouseEventEffectful(MouseLeave.value)(onMouseOut)]))(function() {
+                                      return discard211(start5)(function() {
+                                        return pure114(unit);
+                                      });
+                                    });
                                   });
                                 });
                               });
@@ -21390,7 +21516,7 @@
     let dy5 = 8, py;
     let id5 = defaultId;
     let align = justify;
-    let sort2;
+    let sort3;
     let linkSort;
     let nodes = defaultNodes;
     let links = defaultLinks;
@@ -21416,7 +21542,7 @@
       return arguments.length ? (align = typeof _ === "function" ? _ : constant(_), sankey) : align;
     };
     sankey.nodeSort = function(_) {
-      return arguments.length ? (sort2 = _, sankey) : sort2;
+      return arguments.length ? (sort3 = _, sankey) : sort3;
     };
     sankey.nodeWidth = function(_) {
       return arguments.length ? (dx = +_, sankey) : dx;
@@ -21515,8 +21641,8 @@
         if (columns[i2]) columns[i2].push(node);
         else columns[i2] = [node];
       }
-      if (sort2) for (const column of columns) {
-        column.sort(sort2);
+      if (sort3) for (const column of columns) {
+        column.sort(sort3);
       }
       return columns;
     }
@@ -21569,7 +21695,7 @@
           target7.y1 += dy6;
           reorderNodeLinks(target7);
         }
-        if (sort2 === void 0) column.sort(ascendingBreadth);
+        if (sort3 === void 0) column.sort(ascendingBreadth);
         resolveCollisions(column, beta);
       }
     }
@@ -21590,7 +21716,7 @@
           source2.y1 += dy6;
           reorderNodeLinks(source2);
         }
-        if (sort2 === void 0) column.sort(ascendingBreadth);
+        if (sort3 === void 0) column.sort(ascendingBreadth);
         resolveCollisions(column, beta);
       }
     }
@@ -22905,7 +23031,7 @@
       }
       ;
       if (v instanceof DataLoaded) {
-        return modify_4(function(v1) {
+        return discard13(modify_4(function(v1) {
           var $77 = {};
           for (var $78 in v1) {
             if ({}.hasOwnProperty.call(v1, $78)) {
@@ -22918,6 +23044,10 @@
           $77.functionCallsData = new Just(v.value1);
           $77.moduleGraphData = new Just(v.value2);
           return $77;
+        }))(function() {
+          return bind16(get7)(function(state3) {
+            return handleAction2(dictMonadAff)(new SetActiveTab(state3.activeTab));
+          });
         });
       }
       ;
@@ -22960,7 +23090,7 @@
                 return pure23(unit);
               }
               ;
-              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 157, column 9 - line 161, column 31): " + [state3.moduleGraphData.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 161, column 9 - line 165, column 31): " + [state3.moduleGraphData.constructor.name]);
             });
           }
           ;
@@ -22974,7 +23104,7 @@
                 return pure23(unit);
               }
               ;
-              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 165, column 9 - line 169, column 31): " + [state3.moduleGraphData.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 169, column 9 - line 173, column 31): " + [state3.moduleGraphData.constructor.name]);
             });
           }
           ;
@@ -23070,7 +23200,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 119, column 16 - line 199, column 8): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 119, column 16 - line 203, column 8): " + [v.constructor.name]);
     };
   };
   var component2 = function(dictMonadAff) {

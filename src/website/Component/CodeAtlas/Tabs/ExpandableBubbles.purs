@@ -4,7 +4,7 @@ import Prelude
 
 import Control.Monad.State (class MonadState)
 import Control.Monad (when)
-import Data.Array (filter)
+import Data.Array (filter, sort)
 import Data.Array as Array
 import Data.Foldable (maximum, traverse_)
 import Data.Int as Data.Int
@@ -32,7 +32,7 @@ import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addT
 import PSD3.CodeAtlas.Types (DeclarationsData, FunctionCallsData, ModuleGraphData, ModuleInfo)
 import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode(..), D3_VxyFxy, D3_XY)
 import PSD3.Internal.Attributes.Sugar (classed, fill, onMouseEventEffectful, radius, remove, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, width, height, x, x1, x2, y, y1, y2)
-import PSD3.Internal.FFI (addModuleArrowMarker_, clearHighlights_, drawInterModuleDeclarationLinks_, expandNodeById_, filterToConnectedNodes_, hideDetailsPanel_, highlightConnectedNodes_, keyIsID_, populateDetailsList_, setDetailsModuleName_, showDetailsPanel_, simdragHorizontal_, unpinAllNodes_, unsafeSetField_, updateBubbleRadii_, updateNodeExpansion_)
+import PSD3.Internal.FFI (addModuleArrowMarker_, clearHighlights_, d3SelectionSelectAll_, drawInterModuleDeclarationLinks_, expandNodeById_, filterToConnectedNodes_, hideDetailsPanel_, highlightConnectedNodes_, keyIsID_, populateDetailsList_, setDetailsModuleName_, showDetailsPanel_, showModuleLabels_, simdragHorizontal_, switchToSpotlightForces_, unpinAllNodes_, unsafeSetField_, updateBubbleRadii_, updateNodeExpansion_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute(..))
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce)
@@ -78,7 +78,7 @@ datum_ = {
 -- | When expanded, we'll multiply this by a factor
 nodeRadius :: Boolean -> Int -> Number
 nodeRadius expanded loc =
-  let baseRadius = (sqrt (Data.Int.toNumber loc)) * 0.3 + 5.0
+  let baseRadius = (sqrt (Data.Int.toNumber loc)) * 0.15 + 2.0  -- Reduced even more
   in if expanded
      then baseRadius * 4.0  -- Expanded nodes are 4x larger to show labeled declarations
      else baseRadius
@@ -188,12 +188,24 @@ initialize :: forall row m.
     , dependedOnByList :: D3Selection_
     }
 initialize graphData declsData = do
+  liftEffect $ Console.log "=== INITIALIZE START ==="
   let sourceModules = filter (\m -> String.take 4 m.path == "src/") graphData.modules
-      bubbleNodes = modulesToBubbleNodes sourceModules
-      bubbleLinks = modulesToLinks sourceModules
-      adjacencyMap = buildAdjacencyMap bubbleLinks
-      modulesMap = Map.fromFoldable $ sourceModules <#> \m -> Tuple m.name m
-      dependedOnByMap = buildDependedOnByMap sourceModules
+  liftEffect $ Console.log $ "Found " <> show (Array.length sourceModules) <> " source modules"
+
+  let bubbleNodes = modulesToBubbleNodes sourceModules
+  liftEffect $ Console.log $ "Created " <> show (Array.length bubbleNodes) <> " bubble nodes"
+
+  let bubbleLinks = modulesToLinks sourceModules
+  liftEffect $ Console.log $ "Created " <> show (Array.length bubbleLinks) <> " links"
+
+  let adjacencyMap = buildAdjacencyMap bubbleLinks
+  liftEffect $ Console.log $ "Built adjacency map with " <> show (Map.size adjacencyMap) <> " entries"
+
+  let modulesMap = Map.fromFoldable $ sourceModules <#> \m -> Tuple m.name m
+  liftEffect $ Console.log $ "Built modules map with " <> show (Map.size modulesMap) <> " entries"
+
+  let dependedOnByMap = buildDependedOnByMap sourceModules
+  liftEffect $ Console.log $ "Built dependedOnBy map with " <> show (Map.size dependedOnByMap) <> " entries"
 
   liftEffect $ Console.log $ "Expandable Bubbles initialized with " <> show (Array.length sourceModules) <> " modules"
 
@@ -203,17 +215,27 @@ initialize graphData declsData = do
     Console.log $ m.name <> " - LOC: " <> show m.loc <> ", radius: " <> show r
 
   (Tuple w h) <- liftEffect getWindowWidthHeight
+  liftEffect $ Console.log $ "Window size: " <> show w <> "x" <> show h
+
   root <- attach "div.svg-container"
+  liftEffect $ Console.log "Attached to svg-container"
+
   svg <- appendTo root Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "bubble-graph" ]
+  liftEffect $ Console.log "Created SVG"
 
   -- Add details panel (outside SVG, as sibling)
+  liftEffect $ Console.log "About to attach to expandable-bubbles-container"
   container <- attach "div.expandable-bubbles-container"
+  liftEffect $ Console.log "Attached to expandable-bubbles-container"
+
   detailsPanel <- appendTo container Div [ classed "hover-details-panel hidden" ]
+  liftEffect $ Console.log "Created details panel"
 
   -- Panel sections - content will be populated by FFI functions
   detailsModuleName <- appendTo detailsPanel Div [ classed "details-module-name" ]
   dependenciesList <- appendTo detailsPanel Div [ classed "details-list dependencies-list" ]
   dependedOnByList <- appendTo detailsPanel Div [ classed "details-list depended-on-by-list" ]
+  liftEffect $ Console.log "Created panel sections"
 
   -- Add arrowhead marker definition for module links via FFI
   liftEffect $ addModuleArrowMarker_ svg
@@ -272,22 +294,29 @@ initialize graphData declsData = do
     pure unit
   ) legendItems
 
-  -- Define forces (collision will need to be dynamic based on expansion)
-  let collisionRadius :: Datum_ -> Index_ -> Number
-      collisionRadius datum _ =
+  -- Define forces - we have TWO collision forces that we toggle between
+  let compactCollisionRadius :: Datum_ -> Index_ -> Number
+      compactCollisionRadius datum _ =
+        let node = unsafeCoerce datum :: BubbleNodeRecord
+            baseRadius = nodeRadius false node.loc  -- Always use collapsed size
+        in baseRadius + 2.0  -- Minimal padding for compact view
+
+      spotlightCollisionRadius :: Datum_ -> Index_ -> Number
+      spotlightCollisionRadius datum _ =
         let node = unsafeCoerce datum :: BubbleNodeRecord
             baseRadius = nodeRadius node.expanded node.loc
-            -- Add extra padding when expanded to prevent overlap
-            padding = if node.expanded then 30.0 else 10.0
+            padding = if node.expanded then 25.0 else 5.0
         in baseRadius + padding
 
       forces =
-        [ createForce "manyBody" (RegularForce ForceManyBody) allNodes [ F.strength (-300.0), F.theta 0.9, F.distanceMin 1.0 ]  -- Doubled repulsion
-        , createForce "collision" (RegularForce ForceCollide) allNodes [ F.radius collisionRadius, F.strength 0.9, F.iterations 3.0 ]  -- Stronger collision
-        , createForce "center" (RegularForce ForceCenter) allNodes [ F.x 0.0, F.y 0.0, F.strength 0.2 ]  -- Weaker centering
-        , createLinkForce Nothing [ F.distance 150.0 ]  -- Longer links
+        [ createForce "manyBody-compact" (RegularForce ForceManyBody) allNodes [ F.strength (-50.0), F.theta 0.9, F.distanceMin 1.0 ]  -- Weak repulsion for compact
+        , createForce "manyBody-spotlight" (RegularForce ForceManyBody) allNodes [ F.strength (-150.0), F.theta 0.9, F.distanceMin 1.0 ]  -- Moderate repulsion for spotlight
+        , createForce "collision-compact" (RegularForce ForceCollide) allNodes [ F.radius compactCollisionRadius, F.strength 0.9, F.iterations 3.0 ]  -- Initial compact view
+        , createForce "collision-spotlight" (RegularForce ForceCollide) allNodes [ F.radius spotlightCollisionRadius, F.strength 0.9, F.iterations 3.0 ]  -- Spotlight mode
+        , createForce "center" (RegularForce ForceCenter) allNodes [ F.x 0.0, F.y 0.0, F.strength 0.2 ]
+        , createLinkForce Nothing [ F.distance 100.0 ]  -- Shorter links
         ]
-      activeForces = Set.fromFoldable [ "manyBody", "collision", "center", "links" ]
+      activeForces = Set.fromFoldable [ "manyBody-compact", "collision-compact", "center", "links" ]  -- Start with compact forces
 
   -- Initialize simulation
   _ <- init
@@ -336,9 +365,10 @@ updateGraph :: forall row m.
   , linksGroup :: D3Selection_
   , nodes :: Array BubbleNode
   , links :: Array D3Link_Unswizzled
+  , inSpotlightMode :: Boolean
   } ->
   m Unit
-updateGraph { nodesGroup, linksGroup, nodes, links } = do
+updateGraph { nodesGroup, linksGroup, nodes, links, inSpotlightMode } = do
   -- Update simulation data
   enhanced <- update
     { nodes: Just nodes
@@ -367,6 +397,11 @@ updateGraph { nodesGroup, linksGroup, nodes, links } = do
   _ <- appendTo nodeEnter Text
     [ text datum_.name
     , classed "node-label"
+    , y (\d -> negate $ nodeRadius (datum_.expanded d) (datum_.loc d))  -- Position at top edge
+    , fill (if inSpotlightMode then "#555" else "transparent")  -- Dark gray in spotlight mode
+    , strokeWidth 0.0  -- No stroke
+    , AttrT (AttributeSetter "text-anchor" (StringAttr (Static "middle")))  -- Center horizontally
+    , AttrT (AttributeSetter "dominant-baseline" (StringAttr (Static "baseline")))  -- Align to bottom of text
     ]
 
   -- Exit: remove old nodes
@@ -380,7 +415,11 @@ updateGraph { nodesGroup, linksGroup, nodes, links } = do
     , fill (nodeColor <<< datum_.path)
     ]
   updateLabels <- selectUnder node'.update (show Text)
-  setAttributes updateLabels [ text datum_.name ]
+  setAttributes updateLabels
+    [ text datum_.name
+    , y (\d -> negate $ nodeRadius (datum_.expanded d) (datum_.loc d))  -- Position at top edge
+    , fill (if inSpotlightMode then "#555" else "transparent")  -- Dark gray in spotlight mode
+    ]
 
   -- Merge enter and update selections
   mergedNodes <- mergeSelections nodeEnter node'.update
@@ -436,8 +475,10 @@ drawExpandableBubbles :: forall row m.
   String ->
   m Unit
 drawExpandableBubbles graphData declsData callsData selector = do
+  liftEffect $ Console.log "=== drawExpandableBubbles called ==="
   -- Initialize the graph
   initResult <- initialize graphData declsData
+  liftEffect $ Console.log "=== initialize returned ==="
   let { svg
       , zoomGroup
       , nodesGroup
@@ -477,6 +518,15 @@ drawExpandableBubbles graphData declsData callsData selector = do
           liftEffect $ pure $ filterToConnectedNodes_ simHandle keyIsID_ allConnected
           Ref.write true hasFilteredRef
 
+          -- Enter spotlight mode: show all labels
+          Console.log "About to call showModuleLabels_"
+          liftEffect $ showModuleLabels_ nodesGroup
+          Console.log "Called showModuleLabels_"
+
+          -- Switch from compact collision force to spotlight collision force
+          Console.log "Switching to spotlight collision force"
+          switchToSpotlightForces_ simHandle
+
         -- Toggle the expanded field directly on the node (it's a mutable JS object)
         let newExpanded = not clickedNode.expanded
         unsafeSetField_ "expanded" newExpanded datum
@@ -504,26 +554,29 @@ drawExpandableBubbles graphData declsData callsData selector = do
     , linksGroup
     , nodes: bubbleNodes
     , links: bubbleLinks
+    , inSpotlightMode: false
     }
 
   -- Mouseover handler: show module details
   let onMouseOver _ datum _ = do
         let hoveredId = datum_.id datum
+        Console.log $ "Mouse over: " <> hoveredId
         case Map.lookup hoveredId modulesMap of
-          Nothing -> pure unit
+          Nothing -> Console.log $ "Module not found in map: " <> hoveredId
           Just moduleInfo -> do
+            Console.log $ "Found module info, showing panel for: " <> moduleInfo.name
             -- Show the panel
             showDetailsPanel_ detailsPanel
 
             -- Set module name
             setDetailsModuleName_ detailsModuleName moduleInfo.name
 
-            -- Populate dependencies list
-            populateDetailsList_ dependenciesList moduleInfo.depends
+            -- Populate dependencies list (sorted alphabetically)
+            populateDetailsList_ dependenciesList (sort moduleInfo.depends)
 
-            -- Populate depended-on-by list
+            -- Populate depended-on-by list (sorted alphabetically)
             let dependedOnBy = fromMaybe Set.empty $ Map.lookup hoveredId dependedOnByMap
-                dependedOnByList' = Set.toUnfoldable dependedOnBy :: Array String
+                dependedOnByList' = sort $ Set.toUnfoldable dependedOnBy :: Array String
             populateDetailsList_ dependedOnByList dependedOnByList'
 
   -- Mouseout handler: hide module details

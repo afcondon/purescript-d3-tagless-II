@@ -1280,24 +1280,29 @@ export function showAttachZoom_(selection) {
 
 export function showDetailsPanel_(selection) {
   return () => {
+    console.log('showDetailsPanel_ called', selection, selection.node())
     selection.classed('hidden', false)
+    console.log('Panel should now be visible, class:', selection.attr('class'))
   }
 }
 
 export function hideDetailsPanel_(selection) {
   return () => {
+    console.log('hideDetailsPanel_ called')
     selection.classed('hidden', true)
   }
 }
 
 export function setDetailsModuleName_(selection) {
   return moduleName => () => {
+    console.log('setDetailsModuleName_ called', moduleName)
     selection.html(`<h3>${moduleName}</h3>`)
   }
 }
 
 export function populateDetailsList_(selection) {
   return items => () => {
+    console.log('populateDetailsList_ called', selection.attr('class'), items)
     // Clear existing content
     selection.html('')
 
@@ -1325,5 +1330,54 @@ export function populateDetailsList_(selection) {
         ul.append('li').text(item)
       })
     }
+  }
+}
+
+export function showModuleLabels_(nodesGroup) {
+  return () => {
+    console.log('showModuleLabels_ called')
+    const labels = nodesGroup.selectAll('.node-label')
+    console.log('Found labels:', labels.size())
+    labels.attr('fill', '#555')
+    // Update y position for each label based on its node's radius
+    labels.each(function(d) {
+      const expanded = d.expanded || false
+      const loc = d.loc || 100
+      const baseRadius = (Math.sqrt(loc)) * 0.15 + 2.0  // Match PureScript formula
+      const radius = expanded ? baseRadius * 4.0 : baseRadius
+      console.log('Setting label y for', d.name, 'to', -radius)
+      d3.select(this).attr('y', -radius)
+    })
+    console.log('showModuleLabels_ done')
+  }
+}
+
+export function switchToSpotlightForces_(simulation) {
+  return () => {
+    console.log('Switching to spotlight forces')
+
+    // Get the spotlight forces (they were registered but not active)
+    const spotlightCollision = simulation.force('collision-spotlight')
+    const spotlightManyBody = simulation.force('manyBody-spotlight')
+
+    console.log('spotlight collision force:', spotlightCollision)
+    console.log('spotlight manyBody force:', spotlightManyBody)
+
+    // Remove compact forces
+    simulation.force('collision-compact', null)
+    simulation.force('manyBody-compact', null)
+
+    // The spotlight forces should already be there, but let's make sure they're active
+    // by re-registering them (this is safe - if they're already there, it just updates)
+    if (spotlightCollision) {
+      simulation.force('collision-spotlight', spotlightCollision)
+    }
+    if (spotlightManyBody) {
+      simulation.force('manyBody-spotlight', spotlightManyBody)
+    }
+
+    // Restart the simulation to apply the new forces
+    simulation.alpha(0.3).restart()
+    console.log('Switched to spotlight forces, restarted simulation')
   }
 }

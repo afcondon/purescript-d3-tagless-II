@@ -7,6 +7,13 @@ import Data.Maybe (Maybe(..))
 import PSD3.CodeAtlas.Types (AtlasTab(..), DeclarationsData, FunctionCallsData, ModuleGraphData, SourceType)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, initialSimulationState)
 
+-- | Hovered module details for the details panel
+type HoveredModuleInfo =
+  { moduleName :: String
+  , dependencies :: Array String
+  , dependedOnBy :: Array String
+  }
+
 -- | Component state
 type State =
   { activeTab :: AtlasTab
@@ -20,6 +27,7 @@ type State =
   , selectedSourceFilter :: Maybe SourceType  -- Filter by project vs library code
   , loading :: Boolean
   , error :: Maybe String
+  , hoveredModule :: Maybe HoveredModuleInfo  -- For the details panel
   }
 
 -- | Initial state
@@ -36,4 +44,5 @@ initialState _ =
   , selectedSourceFilter: Nothing
   , loading: true
   , error: Nothing
+  , hoveredModule: Nothing
   }

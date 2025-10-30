@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Maybe (Maybe)
 import PSD3.CodeAtlas.Types (AtlasTab, DeclarationsData, FunctionCallsData, ModuleGraphData, SourceType)
+import PSD3.CodeAtlas.State (HoveredModuleInfo)
 
 -- | User actions
 data Action
@@ -16,3 +17,5 @@ data Action
   | SetModuleFilter (Maybe String)
   | SetSourceFilter (Maybe SourceType)
   | ClearFilters
+  | ShowModuleDetails HoveredModuleInfo
+  | HideModuleDetails

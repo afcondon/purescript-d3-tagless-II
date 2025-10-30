@@ -144,6 +144,10 @@ handleAction = case _ of
       , moduleGraphData = Just moduleGraphData
       }
 
+    -- Trigger visualization for the active tab
+    state <- H.get
+    handleAction (SetActiveTab state.activeTab)
+
   DataLoadFailed err -> do
     H.modify_ _ { error = Just err, loading = false }
 
@@ -197,3 +201,9 @@ handleAction = case _ of
       , selectedModuleFilter = Nothing
       , selectedSourceFilter = Nothing
       }
+
+  ShowModuleDetails info -> do
+    H.modify_ _ { hoveredModule = Just info }
+
+  HideModuleDetails -> do
+    H.modify_ _ { hoveredModule = Nothing }
