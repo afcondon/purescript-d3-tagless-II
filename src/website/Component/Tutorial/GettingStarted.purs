@@ -7,6 +7,7 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.SectionNav as SectionNav
 import PSD3.Shared.Footer as Footer
 import PSD3.Understanding.TOC (renderTOC, tocAnchor)
@@ -23,6 +24,38 @@ data Action = Initialize
 type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
 
 _sectionNav = Proxy :: Proxy "sectionNav"
+
+-- | Mermaid diagram for the wizard workflow decision tree
+wizardWorkflowDiagram :: String
+wizardWorkflowDiagram = """
+flowchart TD
+    Start([Start Wizard]) --> Choice{Choose Method}
+
+    Choice -->|Web| WebWizard[Web-based Wizard]
+    Choice -->|CLI| CLIWizard[CLI Wizard]
+
+    WebWizard --> WebOptions{Select Options}
+    WebOptions --> Dataset[Choose Dataset<br/>• Anscombe's Quartet<br/>• Scatter Plot<br/>• Sine Wave]
+    Dataset --> WebPreview[Preview Files]
+    WebPreview --> WebDownload[Download .zip]
+
+    CLIWizard --> CLIRun[Run: node scripts/init-psd3-viz.js]
+    CLIRun --> CLIOptions{Configure}
+    CLIOptions --> VizName[Enter Visualization Name]
+    VizName --> VizType[Select Type<br/>• Static<br/>• Interactive]
+    VizType --> DataChoice[Choose Data<br/>• Example<br/>• Custom JSON]
+    DataChoice --> CLIGenerate[Generate Files]
+
+    WebDownload --> Extract[Extract Files]
+    CLIGenerate --> Build[Build & Run]
+    Extract --> Build
+    Build --> Success([Visualization Ready!])
+
+    style Start fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
+    style Success fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
+    style WebWizard fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
+    style CLIWizard fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
+"""
 
 -- | Getting Started page component
 component :: forall q i o. H.Component q i o Aff
@@ -152,6 +185,12 @@ spago build""" ]
             [ HH.text "Using the Wizard" ]
         , HH.p_
             [ HH.text "PSD3 provides two ways to generate a visualization scaffold:" ]
+
+        -- Wizard Workflow Decision Tree Diagram
+        , HH.div
+            [ HP.classes [ HH.ClassName "diagram-container" ] ]
+            [ mermaidDiagram wizardWorkflowDiagram (Just "wizard-workflow-diagram") ]
+
         , HH.h3_ [ HH.text "Option 1: Interactive Web Wizard (Recommended)" ]
         , HH.p_
             [ HH.text "The easiest way to get started is with our "
@@ -347,4 +386,4 @@ A.radius (\\(d :: Datum_) _ -> datum_.y d * 2.0)""" ]
 
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
-  Initialize -> pure unit
+  Initialize -> triggerMermaidRendering

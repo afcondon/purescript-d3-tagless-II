@@ -82,6 +82,82 @@ All FFI that is concerned with the underlying D3.js library should be in the /li
 
 It's acceptable during development to accumulate some technical debt here with short-lived .js FFI files on an ad-hoc basis but these should be periodically reviewed and swept up into cleaner abstractions which are then used and the small local .js FFI files excised.
 
+#### Examples of JavaScript called via the FFI from Jordan's Reference
+```
+export const basicValue = 4.0;
+
+export function basicEffect() {
+  return 4.0;
+}
+
+export function basicCurriedFunction(number) {
+  return number * 4.0;
+}
+
+export function threeArgCurriedFunction(arg1) {
+  return function(arg2) {
+    return function(arg3) {
+      // body of function
+      return arg1 * arg2 * arg3;
+    };
+  };
+}
+
+export function curriedFunctionProducingEffect(string) {
+  return function() {
+    return string;
+  };
+}
+
+export function threeArgUncurriedFunction(a, b, c) {
+  return a + b + c;
+}
+
+export function twoArgUncurriedEffectfulFunction(a, b) {
+  return a + b + ((Math.random() * 10) | 0);
+}
+
+var twoArgFunction = function(arg1, arg2) {
+  console.log(arg1 + " " + arg2);
+};
+
+export {twoArgFunction as twoArgCurriedFunctionImpl};
+```
+
+#### Counterpart examples of declarations in PureScript from Jordan's Reference
+```
+module Syntax.FFI.Simple where
+
+import Prelude
+
+import Data.Function.Uncurried (Fn3)
+import Effect (Effect)
+import Effect.Uncurried (EffectFn2, runEffectFn2)
+
+foreign import data DataType :: Type
+
+foreign import data HigherKindedType :: Type -> Type
+
+foreign import basicValue :: Number
+
+foreign import basicEffect :: Effect Number
+
+foreign import basicCurriedFunction :: Number -> Number
+
+foreign import threeArgCurriedFunction :: Number -> Number -> Number -> Number
+
+foreign import curriedFunctionProducingEffect :: String -> Effect String
+
+foreign import threeArgUncurriedFunction :: Fn3 Int Int Int Int
+
+foreign import twoArgUncurriedEffectfulFunction :: EffectFn2 Number Number Number
+
+foreign import twoArgCurriedFunctionImpl :: EffectFn2 String String Unit
+
+twoArgFunction :: String -> String -> Effect Unit
+twoArgFunction = runEffectFn2 twoArgCurriedFunctionImpl
+```
+
 ### Debug and Console
 For console debugging it is preferred to use the purescript-debug library as this generates a custom warning on the function which uses it, aiding us not to ship production code with debug statements in it. Generally usage of the form `x = spy "what's going on here?" $ functionWhichGivesUsX` is preferred. 
 

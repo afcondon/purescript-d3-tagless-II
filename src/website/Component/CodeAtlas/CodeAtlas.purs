@@ -14,6 +14,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import Web.UIEvent.KeyboardEvent as KE
 import Halogen.Subscription as HS
 import PSD3.CodeAtlas.Actions (Action(..))
@@ -25,6 +26,35 @@ import PSD3.CodeAtlas.Tabs.InteractiveGraph as InteractiveGraphTab
 import PSD3.CodeAtlas.Tabs.ExpandableBubbles as ExpandableBubblesTab
 import PSD3.CodeAtlas.Types (AtlasTab(..))
 import PSD3.Interpreter.D3 (runWithD3_Simulation)
+
+-- | Mermaid diagram for Code Atlas module dependencies legend
+codeAtlasLegendDiagram :: String
+codeAtlasLegendDiagram = """
+graph LR
+    subgraph Legend
+        ModuleA[Module]
+        ModuleB[Module]
+        ModuleA -->|imports| ModuleB
+    end
+
+    subgraph "Color Meanings"
+        Core[Core Library<br/>PSD3.* modules]
+        Website[Website Code<br/>Components & Pages]
+        Viz[Visualizations<br/>Example code]
+        External[External<br/>Dependencies]
+    end
+
+    subgraph "Interactions"
+        Click[Click: View details]
+        Hover[Hover: Show connections]
+        RightClick[Right-click: Context menu]
+    end
+
+    style Core fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
+    style Website fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
+    style Viz fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
+    style External fill:#faf8f5,stroke:#8b7355,stroke-width:1px
+"""
 
 -- | Code Atlas component
 component :: forall q i o m. MonadAff m => H.Component q i o m
@@ -48,6 +78,15 @@ render state =
         [ HH.p
             [ HP.classes [ HH.ClassName "code-atlas-subtitle" ] ]
             [ HH.text "Explore the codebase through declarations, function calls, and type dependencies" ]
+
+        -- Code Atlas Legend Diagram
+        , HH.details
+            [ HP.classes [ HH.ClassName "code-atlas-legend" ] ]
+            [ HH.summary_ [ HH.text "📊 View Legend" ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "diagram-container" ] ]
+                [ mermaidDiagram codeAtlasLegendDiagram (Just "code-atlas-legend-diagram") ]
+            ]
         ]
 
     -- Content
@@ -337,6 +376,9 @@ renderTab tab activeTab =
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
+    -- Trigger Mermaid rendering for the legend
+    triggerMermaidRendering
+
     -- Load all three data files in parallel
     declarationsResult <- H.liftAff loadDeclarations
     functionCallsResult <- H.liftAff loadFunctionCalls

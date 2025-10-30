@@ -8,6 +8,7 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.SectionNav as SectionNav
 import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Understanding.UnderstandingTabs as UnderstandingTabs
@@ -25,6 +26,126 @@ type Slots =
 
 _sectionNav = Proxy :: Proxy "sectionNav"
 _tabs = Proxy :: Proxy "tabs"
+
+-- | Mermaid diagram for the Type-Safe Attribute System
+typeSafeAttributeDiagram :: String
+typeSafeAttributeDiagram = """
+graph TB
+    subgraph "Attribute Types"
+        Static["Static Value<br/>cx = 50<br/><i>attr 'cx' 50</i>"]
+        Datum["Datum Function<br/>cx = λd → d.x<br/><i>attr 'cx' (datum_ _.x)</i>"]
+        DatumIdx["Datum+Index Function<br/>cx = λd i → d.x + i * 10<br/><i>attr 'cx' (\\d i -> ...)</i>"]
+    end
+
+    subgraph "Type Classes"
+        AttrClass[IsAttribute typeclass]
+        SetAttr[SetAttribute instance]
+    end
+
+    subgraph "Runtime"
+        Resolve[Type Resolution]
+        Apply[Apply to Elements]
+    end
+
+    Static --> AttrClass
+    Datum --> AttrClass
+    DatumIdx --> AttrClass
+
+    AttrClass --> SetAttr
+    SetAttr --> Resolve
+    Resolve --> Apply
+
+    style Static fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
+    style Datum fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
+    style DatumIdx fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
+
+    classDef typesafe fill:#e8dcc6,stroke:#8b7355,stroke-width:3px,color:#2c1810
+    class AttrClass,SetAttr typesafe
+"""
+
+-- | Mermaid diagram for the Finally Tagless architecture
+finallyTaglessArchDiagram :: String
+finallyTaglessArchDiagram = """
+graph TB
+    subgraph "User Code"
+        UC[Visualization Code]
+    end
+
+    subgraph "Finally Tagless DSL"
+        SM[SelectionM Monad]
+        CM[Capabilities]
+    end
+
+    subgraph "Interpreters"
+        D3I[D3 Interpreter]
+        STI[String Interpreter]
+        MTI[MetaTree Interpreter]
+    end
+
+    subgraph "Outputs"
+        D3O[D3.js Visualization]
+        STO[Debug String]
+        MTO[AST Visualization]
+    end
+
+    UC --> SM
+    SM --> CM
+    CM --> D3I
+    CM --> STI
+    CM --> MTI
+    D3I --> D3O
+    STI --> STO
+    MTI --> MTO
+
+    style UC fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
+    style SM fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
+    style CM fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
+    style D3I fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
+    style STI fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
+    style MTI fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
+
+    classDef tagless fill:#e8dcc6,stroke:#8b7355,stroke-width:3px,color:#2c1810
+    class SM,CM tagless
+"""
+
+-- | Mermaid diagram for the SelectionM grammar state machine
+selectionMGrammarDiagram :: String
+selectionMGrammarDiagram = """
+stateDiagram-v2
+    [*] --> Attach: attach
+    Attach --> Build: appendTo
+    Build --> Build: appendTo
+    Build --> Attributes: attr/style
+    Attributes --> Attributes: attr/style
+    Attributes --> Behaviors: on/drag/zoom
+    Behaviors --> Behaviors: on/drag/zoom
+    Build --> DataJoin: join
+    Attributes --> DataJoin: join
+    Behaviors --> DataJoin: join
+    DataJoin --> Enter: enter
+    Enter --> Build: append
+    Enter --> Attributes: attr/style
+    DataJoin --> Update: selectAll
+    Update --> Attributes: attr/style
+    DataJoin --> Exit: exit
+    Exit --> Remove: remove
+    Remove --> [*]
+
+    note right of Attach
+        Hook into DOM element
+        e.g., div#viz
+    end note
+
+    note right of Build
+        Create structure
+        svg, g, etc.
+    end note
+
+    note right of DataJoin
+        Bind data array
+        Creates enter/update/exit
+    end note
+"""
 
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
@@ -86,6 +207,12 @@ render _ =
                 , HH.em_ [ HH.text "interpreters" ]
                 , HH.text " for the SelectionM."
                 ]
+
+            -- Finally Tagless Architecture Diagram
+            , HH.div
+                [ HP.classes [ HH.ClassName "diagram-container" ] ]
+                [ mermaidDiagram finallyTaglessArchDiagram (Just "finally-tagless-diagram") ]
+
             , HH.p_
                 [ HH.text "Furthermore, using this pattern, we can now "
                 , HH.em_ [ HH.text "extend" ]
@@ -112,6 +239,12 @@ render _ =
                 , HH.li_ [ HH.text "we can apply ", HH.em_ [ HH.text "behaviors" ], HH.text " to the elements we've created: things like zoom, drag and click event-handlers" ]
                 , HH.li_ [ HH.text "we can ", HH.em_ [ HH.text "join" ], HH.text " some array of data at this point, such that when we next ", HH.em_ [ HH.text "add" ], HH.text " something, say a <circle>, we will put ", HH.em_ [ HH.text "n" ], HH.text " <circle>s in, not just one." ]
                 ]
+
+            -- SelectionM Grammar State Machine Diagram
+            , HH.div
+                [ HP.classes [ HH.ClassName "diagram-container" ] ]
+                [ mermaidDiagram selectionMGrammarDiagram (Just "selectionm-grammar-diagram") ]
+
             , HH.p_ [ HH.text "In D3 the thing that is being acted on in this chain of functions is The Selection..." ]
             , HH.h3_ [ HH.text "The SelectionM Monad" ]
             , HH.p_
@@ -155,10 +288,20 @@ render _ =
                 , HH.li_ [ HH.text "a lambda function which takes the datum we are using to a numeric value OR," ]
                 , HH.li_ [ HH.text "a lambda function which takes the datum AND the index of that datum in the selection" ]
                 ]
+
+            -- Type-Safe Attribute System Diagram
+            , HH.div
+                [ HP.classes [ HH.ClassName "diagram-container" ] ]
+                [ mermaidDiagram typeSafeAttributeDiagram (Just "type-safe-attribute-diagram") ]
+
+            , HH.p_
+                [ HH.text "This type system ensures that attributes are always used correctly at compile time, preventing runtime errors while maintaining the flexibility that makes D3 so powerful." ]
             ]
         ]
     ]
 
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
-  Initialize -> triggerPrismHighlighting
+  Initialize -> do
+    triggerPrismHighlighting
+    triggerMermaidRendering

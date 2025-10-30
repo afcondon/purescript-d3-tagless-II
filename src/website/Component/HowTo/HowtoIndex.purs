@@ -8,6 +8,7 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.SectionNav as SectionNav
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Understanding.TOC (renderTOC, tocAnchor)
@@ -24,6 +25,52 @@ data Action = Initialize
 type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
 
 _sectionNav = Proxy :: Proxy "sectionNav"
+
+-- | Mermaid diagram for the General Update Pattern (GUP)
+gupDiagram :: String
+gupDiagram = """
+stateDiagram-v2
+    [*] --> NewData: Data arrives
+
+    NewData --> Join: selectAll().data()
+
+    Join --> Enter: New elements
+    Join --> Update: Existing elements
+    Join --> Exit: Removed elements
+
+    Enter --> Append: append()
+    Append --> SetAttrs: Set initial attributes
+    SetAttrs --> Merge: merge()
+
+    Update --> Merge: Continue
+
+    Merge --> Transition: transition()
+    Transition --> UpdateAttrs: Update attributes
+    UpdateAttrs --> [*]
+
+    Exit --> Remove: remove()
+    Remove --> [*]
+
+    note right of Enter
+        Elements in data
+        but not in DOM
+    end note
+
+    note right of Update
+        Elements in both
+        data and DOM
+    end note
+
+    note right of Exit
+        Elements in DOM
+        but not in data
+    end note
+
+    note right of Merge
+        Combine enter + update
+        for shared operations
+    end note
+"""
 
 -- | Howto Index page component
 component :: forall q i o. H.Component q i o Aff
@@ -121,6 +168,26 @@ render _ =
             ]
         ]
 
+    -- General Update Pattern explanation section
+    , HH.section
+        [ HP.classes [ HH.ClassName "tutorial-section" ]
+        , HP.id "gup-explanation"
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+            [ HH.text "Understanding the General Update Pattern" ]
+        , HH.p_
+            [ HH.text "The General Update Pattern (GUP) is the heart of D3's data binding system. It elegantly handles the three states of data-to-DOM synchronization: enter (new elements), update (existing elements), and exit (removed elements)." ]
+
+        -- GUP State Machine Diagram
+        , HH.div
+            [ HP.classes [ HH.ClassName "diagram-container" ] ]
+            [ mermaidDiagram gupDiagram (Just "gup-diagram") ]
+
+        , HH.p_
+            [ HH.text "This pattern enables smooth transitions when data changes, whether you're adding new elements, updating existing ones, or removing obsolete ones. The merge() operation is particularly powerful, allowing you to apply the same operations to both entering and updating elements." ]
+        ]
+
     -- Data & Scales section
     , HH.section
         [ HP.classes [ HH.ClassName "tutorial-section" ]
@@ -184,4 +251,4 @@ renderHowtoItem snippetId title description difficulty =
 
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
-  Initialize -> pure unit
+  Initialize -> triggerMermaidRendering

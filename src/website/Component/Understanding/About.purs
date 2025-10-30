@@ -11,6 +11,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.SectionNav as SectionNav
+import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Understanding.UnderstandingTabs as UnderstandingTabs
 import PSD3.Website.Types (Route(..), Section(..))
@@ -30,6 +31,23 @@ type Slots =
 
 _sectionNav = Proxy :: Proxy "sectionNav"
 _tabs = Proxy :: Proxy "tabs"
+
+-- | Mermaid diagram for the data visualization pipeline
+pipelineDiagram :: String
+pipelineDiagram = """
+graph LR
+    A[Data<br/>Raw structures] -->|Transform| B[Data Structure<br/>Relationships]
+    B -->|Encode| C[Data Presentation<br/>Visual marks]
+    C -->|Process| D[Perception<br/>Human insight]
+
+    style A fill:#faf8f5,stroke:#8b7355,stroke-width:2px
+    style B fill:#f5e6d3,stroke:#8b7355,stroke-width:2px
+    style C fill:#e8dcc6,stroke:#8b7355,stroke-width:2px
+    style D fill:#d4c4b0,stroke:#8b7355,stroke-width:2px
+
+    classDef psdLibrary fill:#f5e6d3,stroke:#8b7355,stroke-width:3px,color:#2c1810
+    class B,C psdLibrary
+"""
 
 -- | About page component
 component :: forall q i o. H.Component q i o Aff
@@ -182,6 +200,12 @@ render _ =
             , HH.li_ [ HH.strong_ [ HH.text "Data presentation" ], HH.text " - Visual encoding (HTML/SVG/Canvas)" ]
             , HH.li_ [ HH.strong_ [ HH.text "Perception" ], HH.text " - Human insight and understanding" ]
             ]
+
+        -- Data Visualization Pipeline Diagram
+        , HH.div
+            [ HP.classes [ HH.ClassName "diagram-container" ] ]
+            [ mermaidDiagram pipelineDiagram (Just "pipeline-diagram") ]
+
         , HH.p_
             [ HH.text "The goal is to make relationships in data visible through appropriate visual encoding, enabling the human visual system to process patterns that would be difficult or impossible to perceive in tabular form." ]
 
@@ -521,4 +545,5 @@ handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
   Initialize -> do
     _ <- H.liftEffect $ eval_D3M $ ScatterPlot.drawQuartet anscombesQuartet "div.quartet-viz"
+    triggerMermaidRendering
     pure unit

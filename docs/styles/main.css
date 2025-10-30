@@ -312,3 +312,44 @@ code, pre {
 @media (prefers-color-scheme: dark) {
   /* Dark mode variables will go here */
 }
+
+/* Mermaid Diagram Styles */
+.mermaid-container {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  background-color: #faf8f5;
+  border: 1px solid var(--color-beige-dark);
+  border-radius: 4px;
+  overflow-x: auto;
+}
+
+.mermaid {
+  display: flex;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.mermaid svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Specific diagram styles */
+.pipeline-diagram {
+  margin: 2rem 0;
+}
+
+.diagram-container {
+  position: relative;
+  margin: 2rem 0;
+}
+
+.mermaid-error {
+  padding: 1rem;
+  background-color: #fee;
+  border: 1px solid #fcc;
+  border-radius: 4px;
+  color: #c33;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}

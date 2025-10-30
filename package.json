@@ -35,6 +35,7 @@
     "d3-sankey": "^0.12.3",
     "d3-scale-chromatic": "^3.1.0",
     "esbuild": "^0.25.10",
+    "mermaid": "^11.12.1",
     "purescript": "^0.15.15",
     "spago": "^0.93.44"
   }
