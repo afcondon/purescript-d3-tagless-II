@@ -63,13 +63,15 @@
 }
 
 .home-cta__button--primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #e8dcc6 0%, #d4c4b0 100%);
+  color: var(--color-gray-darker);
+  border: 2px solid var(--color-gray-medium);
 }
 
 .home-cta__button--primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 6px 16px rgba(139, 115, 85, 0.25);
+  border-color: var(--color-red-accent);
 }
 
 .home-cta__button--secondary {
@@ -305,13 +307,15 @@
 }
 
 .home-hero__button--primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #e8dcc6 0%, #d4c4b0 100%);
+  color: var(--color-gray-darker);
+  border: 2px solid var(--color-gray-medium);
 }
 
 .home-hero__button--primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 4px 12px rgba(139, 115, 85, 0.25);
+  border-color: var(--color-red-accent);
 }
 
 .home-hero__button--secondary {
