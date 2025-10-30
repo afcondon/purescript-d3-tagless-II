@@ -108,45 +108,6 @@ graph TB
     class SM,CM tagless
 """
 
--- | Mermaid diagram for the SelectionM grammar state machine
-selectionMGrammarDiagram :: String
-selectionMGrammarDiagram = """
-stateDiagram-v2
-    [*] --> Attach: attach
-    Attach --> Build: appendTo
-    Build --> Build: appendTo
-    Build --> Attributes: attr/style
-    Attributes --> Attributes: attr/style
-    Attributes --> Behaviors: on/drag/zoom
-    Behaviors --> Behaviors: on/drag/zoom
-    Build --> DataJoin: join
-    Attributes --> DataJoin: join
-    Behaviors --> DataJoin: join
-    DataJoin --> Enter: enter
-    Enter --> Build: append
-    Enter --> Attributes: attr/style
-    DataJoin --> Update: selectAll
-    Update --> Attributes: attr/style
-    DataJoin --> Exit: exit
-    Exit --> Remove: remove
-    Remove --> [*]
-
-    note right of Attach
-        Hook into DOM element
-        e.g., div#viz
-    end note
-
-    note right of Build
-        Create structure
-        svg, g, etc.
-    end note
-
-    note right of DataJoin
-        Bind data array
-        Creates enter/update/exit
-    end note
-"""
-
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
   { initialState: \_ -> unit
@@ -239,12 +200,6 @@ render _ =
                 , HH.li_ [ HH.text "we can apply ", HH.em_ [ HH.text "behaviors" ], HH.text " to the elements we've created: things like zoom, drag and click event-handlers" ]
                 , HH.li_ [ HH.text "we can ", HH.em_ [ HH.text "join" ], HH.text " some array of data at this point, such that when we next ", HH.em_ [ HH.text "add" ], HH.text " something, say a <circle>, we will put ", HH.em_ [ HH.text "n" ], HH.text " <circle>s in, not just one." ]
                 ]
-
-            -- SelectionM Grammar State Machine Diagram
-            , HH.div
-                [ HP.classes [ HH.ClassName "diagram-container" ] ]
-                [ mermaidDiagram selectionMGrammarDiagram (Just "selectionm-grammar-diagram") ]
-
             , HH.p_ [ HH.text "In D3 the thing that is being acted on in this chain of functions is The Selection..." ]
             , HH.h3_ [ HH.text "The SelectionM Monad" ]
             , HH.p_
