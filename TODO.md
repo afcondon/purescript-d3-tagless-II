@@ -139,17 +139,26 @@ This TODO is derived from `notes/VISION.md` and organized by the major pages and
 
 ---
 
-## 9. Code Explorer (formerly "Spago")
+## 9. Code Atlas (formerly "Code Explorer"/"Spago")
 
-**Status:** Semi-standalone app, currently working but needs enhancements
+**Status:** Working with multiple visualization views and interactive features
 
-### Current repo goals (visualization and filtering):
-- [ ] Rename from "Spago" to "Code Explorer" throughout
+### Completed:
+- [x] Rename from "Spago" to "Code Atlas" throughout
+- [x] Declarations tab with filtering by module, type, and source
+- [x] Module graph visualization (force-directed layout)
+- [x] Interactive graph with drag and zoom
+- [x] Expandable bubbles view with nested module/declaration structure
+- [x] Spotlight mode for focusing on module dependencies
+- [x] Context menu with keyboard shortcuts
+- [x] Floating panels for controls, legend, and details
+- [x] Multiple interaction patterns: filter, drag, spotlight, context menu
+
+### Current repo goals (enhancements):
 - [ ] Add module cohesion metrics visualization
 - [ ] Add package coupling visualization
 - [ ] Highlight "candidate for extraction" functions (functions that might belong elsewhere)
 - [ ] Demonstrate at least one concrete insight about the codebase (TBD which insight)
-- [ ] Show multiple interaction patterns: filter, zoom, pan, select, highlight
 - [ ] **"Blueprint" CSS style** - Add architectural drawing aesthetic as neutral/default view when not highlighting anything particular
 
 ### Long-term vision (for standalone app):
@@ -161,7 +170,60 @@ This TODO is derived from `notes/VISION.md` and organized by the major pages and
 
 ---
 
-## 10. Meta-Tree Page
+## 10. Understanding Section (Documentation Pages)
+
+**Status:** Core pages created with diagrams and explanations
+
+### Completed:
+- [x] Create Understanding section with tabbed navigation
+- [x] Concepts page with core architectural concepts
+  - [x] Finally Tagless architecture diagram
+  - [x] Type-safe attribute system explanation
+  - [x] SelectionM monad overview
+  - [x] Capabilities & Interpreters explanation
+- [x] Patterns page with practical patterns
+  - [x] datum_/Datum_ pattern explanation with diagram
+  - [x] Placeholder sections for additional patterns
+- [x] Philosophy page (former About page)
+- [x] Mermaid diagram integration for visual explanations
+- [x] TOC panels with bookmark imagery
+- [x] Section navigation (RHS panel)
+
+### TODO:
+- [ ] Complete "Grammar of D3 in SelectionM" section in Patterns page
+- [ ] Complete "From DOM to Visualization Elements" section in Patterns page
+- [ ] Add more practical examples to Patterns page
+- [ ] Create simpler, more beginner-friendly diagrams for:
+  - [ ] SelectionM grammar flow (replace removed complex state machine)
+  - [ ] General Update Pattern (replace removed complex state machine)
+- [ ] Add interactive code examples to Understanding pages
+- [ ] Link Understanding pages to relevant Tutorial and How-to examples
+
+---
+
+## 11. API Reference Section
+
+**Status:** Basic structure created with module browser
+
+### Completed:
+- [x] Create Reference section with Pursuit-style module browser
+- [x] Generate individual pages for all 30 PSD3 library modules
+- [x] Implement source code display with syntax highlighting
+- [x] Module categories in RHS navigation
+- [x] Shared PrismJS module for FFI
+- [x] Source file loading system
+
+### TODO:
+- [ ] Add detailed explanations/prose for each module
+- [ ] Add usage examples for key functions
+- [ ] Add diagrams showing relationships between modules
+- [ ] Add "See Also" links between related modules
+- [ ] Generate API documentation from source code comments
+- [ ] Add search functionality across all modules
+
+---
+
+## 12. Meta-Tree Page
 
 **Goal:** Description of interactive AST editor concept (separate repo in future)
 
@@ -179,16 +241,23 @@ This TODO is derived from `notes/VISION.md` and organized by the major pages and
 
 ---
 
-## 11. Site Infrastructure
+## 13. Site Infrastructure
 
-### Remove Gallery indirection:
-- [ ] Eliminate Gallery routing layer
-- [ ] Direct navigation to individual example pages
-- [ ] Simplify routing (see also: make routing fully idiomatic using `purescript-routing`)
+### Routing and Navigation:
+- [x] Section-based routing (Tutorial, How-to, Understanding, Reference, Code Atlas)
+- [x] Direct navigation to individual example and documentation pages
+- [ ] Eliminate Gallery routing layer (if still present)
+- [ ] Make routing fully idiomatic using `purescript-routing`
 
-### CSS and layout:
-- [ ] Replace Ocelot-derived components with modern CSS
-- [ ] Responsive design for all screen sizes
+### CSS and Layout:
+- [x] Editorial/academic aesthetic with beige/brown color palette
+- [x] Consistent styling across all sections
+- [x] Floating TOC panels with bookmark imagery
+- [x] Section navigation (RHS panels)
+- [x] Code snippet styling with Prism.js
+- [x] Subtle gradients for CTAs matching site style
+- [ ] Replace remaining Ocelot-derived components with modern CSS
+- [ ] Responsive design improvements for all screen sizes
 - [ ] Consider thumbnail navigation for examples
 - [ ] Clean up and possibly delete Ocelot-derived code
 
@@ -198,32 +267,44 @@ This TODO is derived from `notes/VISION.md` and organized by the major pages and
 - [ ] Explain what sighted users see/do for non-visual users
 - [ ] **Stretch goal:** Sonic "visualizations" or audio descriptions
 
-### Home page overhaul:
-- [ ] Key sections: what, why, how, code, examples, apps, Finally Tagless
-- [ ] Consider generating from markdown
-- [ ] Clean, modern design
-- [ ] Clear calls to action (view examples, read docs, see code)
+### Home Page:
+- [x] Clean, modern design with editorial aesthetic
+- [x] Quadrant-based navigation to main sections
+- [x] Clear calls to action (Getting Started, Launch Wizard)
+- [x] Bookmark images for each section
+- [ ] Add "Why PS<$>D3?" section explaining Finally Tagless benefits
+- [ ] Add quick code example on home page
+- [ ] Consider generating sections from markdown
 
 ---
 
-## 12. Documentation (Separate from examples)
+## 14. Documentation Improvements
 
-### Four types of documentation:
-1. [ ] **API/Reference** - Complete module and function documentation
-2. [ ] **Overview** - Architecture, Finally Tagless pattern, interpreter pattern
-3. [ ] **Tutorial** - Progressive learning (covered by About page examples)
-4. [ ] **Cookbook** - Common patterns and recipes
+### Four types of documentation (status):
+1. [x] **API/Reference** - Basic structure created (see Section 11)
+2. [x] **Overview** - Architecture, Finally Tagless pattern (see Section 10 - Understanding)
+3. [x] **Tutorial** - Getting Started page with embedded examples
+4. [ ] **How-to/Cookbook** - Common patterns and recipes (partially complete)
 
-### Specific improvements:
-- [ ] Document datum_ pattern thoroughly and rationalize across ALL examples
+### Completed:
+- [x] Create Understanding section with Concepts, Patterns, Philosophy pages
+- [x] Create Reference section with module browser
+- [x] Create Getting Started tutorial page
+- [x] Document datum_ pattern with diagram in Patterns page
+- [x] Code snippet extraction and display system
+
+### TODO:
+- [ ] Complete How-to guides for all common patterns
 - [ ] Add module-level documentation to all core modules
-- [ ] Document capability/interpreter relationship
+- [ ] Document capability/interpreter relationship in more depth
 - [ ] Add inline comments for complex FFI interactions
 - [ ] Consider hover-over comments or 'i' icons for code sections
+- [ ] Add more code examples throughout documentation
+- [ ] Create "migration guide" for D3.js users
 
 ---
 
-## 13. Data and Build Pipeline
+## 15. Data and Build Pipeline
 
 ### Spago data generation:
 - [x] ~~Replace Perl scripts with PureScript~~ (using Node.js scripts now)
@@ -238,7 +319,7 @@ This TODO is derived from `notes/VISION.md` and organized by the major pages and
 
 ---
 
-## 14. Library API Improvements
+## 16. Library API Improvements
 
 ### SimulationM Refactoring
 **Goal:** Offer two levels of SimulationM API for different use cases
@@ -263,12 +344,55 @@ This TODO is derived from `notes/VISION.md` and organized by the major pages and
 
 ---
 
-## 15. Stretch Goals / Future Considerations
+## 17. Interactive Wizard
+
+**Status:** Basic structure exists, needs content
+
+### TODO:
+- [ ] Design wizard flow for beginners
+- [ ] Create step-by-step guided tour through library concepts
+- [ ] Add interactive code editing/playground
+- [ ] Implement "Choose Your Own Adventure" style branching
+- [ ] Add progress tracking
+- [ ] Link wizard completions to relevant documentation sections
+
+---
+
+## 18. Stretch Goals / Future Considerations
 
 - [ ] Add e-charts support (existing PureScript wrapper available)
 - [ ] Parser to convert markdown to tree data (display as text, tree layout, or force layout)
 - [ ] Additional advanced visualizations (parallel coordinates, hexbin, etc.)
 - [ ] Explore other interpreters beyond visualization (data validation, accessibility descriptions)
+- [ ] Video tutorials for complex topics
+- [ ] Interactive playground with live code editing
+- [ ] Performance benchmarking suite
+
+---
+
+## Recent Accomplishments (2025)
+
+### Documentation Infrastructure (January 2025):
+- [x] Created Understanding section with Concepts, Patterns, and Philosophy pages
+- [x] Created Reference section with 30 module pages and source display
+- [x] Integrated Mermaid.js for diagram rendering
+- [x] Built code snippet extraction and display system
+- [x] Added TOC panels with bookmark imagery across all documentation pages
+- [x] Implemented tabbed navigation for Understanding section
+
+### Code Atlas Enhancements (January 2025):
+- [x] Renamed from "Spago" to "Code Atlas"
+- [x] Added Expandable Bubbles visualization with nested structure
+- [x] Implemented Spotlight Mode for dependency exploration
+- [x] Added context menus with keyboard shortcuts
+- [x] Created floating control panels, legend, and details panels
+- [x] Added multiple visualization views (Declarations, Module Graph, Interactive Graph)
+
+### Visual Design (January 2025):
+- [x] Established editorial/academic aesthetic with beige/brown palette
+- [x] Made all gradients subtle to match site style
+- [x] Unified styling across all sections
+- [x] Added bookmark pin imagery for navigation panels
 
 ---
 
@@ -277,3 +401,4 @@ This TODO is derived from `notes/VISION.md` and organized by the major pages and
 - Priorities can be adjusted based on what's most impactful for demonstrating the library
 - "Stretch goals" within sections can be deferred to later phases
 - Focus on polish and education: each example should be both impressive and instructive
+- Recent work has focused on documentation infrastructure and Code Atlas features
