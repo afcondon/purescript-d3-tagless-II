@@ -5,7 +5,7 @@ import Prelude
 import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
-import Effect.Aff (launchAff_)
+import Effect.Aff (Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Effect.Ref as Ref
@@ -13,6 +13,7 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Halogen.Subscription as HS
 import PSD3.CodeAtlas.Actions (Action(..))
 import PSD3.CodeAtlas.Data (loadDeclarations, loadFunctionCalls, loadModules)
 import PSD3.CodeAtlas.State (State, initialState)
@@ -265,31 +266,43 @@ handleAction = case _ of
         state <- H.get
         case state.moduleGraphData, state.declarationsData, state.functionCallsData of
           Just graphData, Just declsData, Just callsData -> do
-            -- Create a Ref to store pending actions
-            pendingRef <- liftEffect $ Ref.new Nothing
+            -- Create a Ref to hold pending actions from D3 event handlers
+            pendingActionRef <- liftEffect $ Ref.new Nothing
 
+            -- Create callbacks that write to the Ref
             let callbacks =
                   { onShowModuleDetails: \moduleName dependencies dependedOnBy ->
-                      Ref.write (Just $ ShowModuleDetails { moduleName, dependencies, dependedOnBy }) pendingRef
+                      Ref.write (Just $ ShowModuleDetails { moduleName, dependencies, dependedOnBy }) pendingActionRef
                   , onHideModuleDetails:
-                      Ref.write (Just HideModuleDetails) pendingRef
+                      Ref.write (Just HideModuleDetails) pendingActionRef
                   }
+
+            -- Create a subscription that polls the Ref for pending actions
+            { emitter, listener } <- liftEffect HS.create
+            _ <- H.subscribe emitter
+
+            -- Start polling loop in background
+            void $ H.fork $ H.liftAff $ pollForActions pendingActionRef listener
 
             -- Draw the visualization
             runWithD3_Simulation do
               ExpandableBubblesTab.drawExpandableBubbles graphData declsData callsData "div.svg-container" callbacks
 
-            -- Check for pending actions (called by D3 event handlers)
-            pendingAction <- liftEffect $ Ref.read pendingRef
-            case pendingAction of
-              Just action -> do
-                liftEffect $ Ref.write Nothing pendingRef
-                handleAction action
-              Nothing -> pure unit
-
           _, _, _ -> pure unit
 
       _ -> pure unit
+
+    where
+      -- Poll the Ref for pending actions and emit them
+      pollForActions ref listener = do
+        delay (Milliseconds 16.0)  -- Poll at ~60fps
+        pendingAction <- liftEffect $ Ref.read ref
+        case pendingAction of
+          Just action -> do
+            liftEffect $ Ref.write Nothing ref
+            liftEffect $ HS.notify listener action
+          Nothing -> pure unit
+        pollForActions ref listener  -- Continue polling
 
   SetSearchQuery query -> do
     H.modify_ _ { searchQuery = query }

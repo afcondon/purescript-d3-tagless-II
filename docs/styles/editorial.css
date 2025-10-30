@@ -411,3 +411,69 @@ button.editorial--active {
     font-size: 0.75rem; /* 12px instead of 11px */
   }
 }
+
+/* ========================================
+   LEGEND ITEMS (for Code Atlas bubbles)
+   ======================================== */
+
+.legend-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-small);
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--color-line);
+  flex-shrink: 0;
+}
+
+.legend-label {
+  font-family: var(--font-mono);
+  color: var(--color-text-dark);
+}
+
+/* ========================================
+   DETAILS PANEL (for Code Atlas hover)
+   ======================================== */
+
+.details-section {
+  margin-top: var(--spacing-md);
+}
+
+.details-section h4 {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-label);
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  color: var(--color-text-dark);
+  margin: 0 0 var(--spacing-sm) 0;
+}
+
+.details-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  font-size: var(--font-size-small);
+}
+
+.details-section li {
+  padding: 2px 0;
+  font-family: var(--font-mono);
+  color: var(--color-text-dark);
+}
+
+.details-section .empty-list {
+  font-style: italic;
+  color: var(--color-text-light);
+  margin: 0;
+}
