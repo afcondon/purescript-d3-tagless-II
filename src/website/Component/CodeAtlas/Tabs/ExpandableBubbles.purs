@@ -32,7 +32,7 @@ import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addT
 import PSD3.CodeAtlas.Types (DeclarationsData, FunctionCallsData, ModuleGraphData, ModuleInfo)
 import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode(..), D3_VxyFxy, D3_XY)
 import PSD3.Internal.Attributes.Sugar (classed, fill, onMouseEventEffectful, radius, remove, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, width, height, x, x1, x2, y, y1, y2)
-import PSD3.Internal.FFI (addModuleArrowMarker_, clearHighlights_, drawInterModuleDeclarationLinks_, expandNodeById_, filterToConnectedNodes_, highlightConnectedNodes_, keyIsID_, simdragHorizontal_, unpinAllNodes_, unsafeSetField_, updateBubbleRadii_, updateNodeExpansion_)
+import PSD3.Internal.FFI (addModuleArrowMarker_, clearHighlights_, drawInterModuleDeclarationLinks_, expandNodeById_, filterToConnectedNodes_, hideDetailsPanel_, highlightConnectedNodes_, keyIsID_, populateDetailsList_, setDetailsModuleName_, showDetailsPanel_, simdragHorizontal_, unpinAllNodes_, unsafeSetField_, updateBubbleRadii_, updateNodeExpansion_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute(..))
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce)
@@ -151,6 +151,18 @@ buildAdjacencyMap links =
            # Map.insert linkRec.target (Set.insert linkRec.source targetSet)
   in foldl addEdge Map.empty links
 
+-- | Build "depended on by" map - for each module, list modules that depend on it
+-- | If A depends on B, then B is "depended on by" A
+buildDependedOnByMap :: Array ModuleInfo -> Map String (Set String)
+buildDependedOnByMap modules =
+  let addDependencies acc m =
+        foldl (\acc' dep ->
+          let existingSet = fromMaybe Set.empty $ Map.lookup dep acc'
+              newSet = Set.insert m.name existingSet
+          in Map.insert dep newSet acc'
+        ) acc m.depends
+  in foldl addDependencies Map.empty modules
+
 -- | Initialize the expandable bubbles graph
 initialize :: forall row m.
   Bind m =>
@@ -168,12 +180,20 @@ initialize :: forall row m.
     , bubbleLinks :: Array D3Link_Unswizzled
     , declarationsData :: DeclarationsData
     , adjacencyMap :: Map String (Set String)
+    , modulesMap :: Map String ModuleInfo
+    , dependedOnByMap :: Map String (Set String)
+    , detailsPanel :: D3Selection_
+    , detailsModuleName :: D3Selection_
+    , dependenciesList :: D3Selection_
+    , dependedOnByList :: D3Selection_
     }
 initialize graphData declsData = do
   let sourceModules = filter (\m -> String.take 4 m.path == "src/") graphData.modules
       bubbleNodes = modulesToBubbleNodes sourceModules
       bubbleLinks = modulesToLinks sourceModules
       adjacencyMap = buildAdjacencyMap bubbleLinks
+      modulesMap = Map.fromFoldable $ sourceModules <#> \m -> Tuple m.name m
+      dependedOnByMap = buildDependedOnByMap sourceModules
 
   liftEffect $ Console.log $ "Expandable Bubbles initialized with " <> show (Array.length sourceModules) <> " modules"
 
@@ -185,6 +205,15 @@ initialize graphData declsData = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   root <- attach "div.svg-container"
   svg <- appendTo root Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "bubble-graph" ]
+
+  -- Add details panel (outside SVG, as sibling)
+  container <- attach "div.expandable-bubbles-container"
+  detailsPanel <- appendTo container Div [ classed "hover-details-panel hidden" ]
+
+  -- Panel sections - content will be populated by FFI functions
+  detailsModuleName <- appendTo detailsPanel Div [ classed "details-module-name" ]
+  dependenciesList <- appendTo detailsPanel Div [ classed "details-list dependencies-list" ]
+  dependedOnByList <- appendTo detailsPanel Div [ classed "details-list depended-on-by-list" ]
 
   -- Add arrowhead marker definition for module links via FFI
   liftEffect $ addModuleArrowMarker_ svg
@@ -279,7 +308,22 @@ initialize graphData declsData = do
     , target: zoomGroup
     }
 
-  pure { svg, zoomGroup, nodesGroup, linksGroup, bubbleNodes, bubbleLinks, declarationsData: declsData, adjacencyMap }
+  pure
+    { svg
+    , zoomGroup
+    , nodesGroup
+    , linksGroup
+    , bubbleNodes
+    , bubbleLinks
+    , declarationsData: declsData
+    , adjacencyMap
+    , modulesMap
+    , dependedOnByMap
+    , detailsPanel
+    , detailsModuleName
+    , dependenciesList
+    , dependedOnByList
+    }
 
 -- | Update the graph with new data (including expansion states)
 updateGraph :: forall row m.
@@ -393,7 +437,22 @@ drawExpandableBubbles :: forall row m.
   m Unit
 drawExpandableBubbles graphData declsData callsData selector = do
   -- Initialize the graph
-  { svg, zoomGroup, nodesGroup, linksGroup, bubbleNodes, bubbleLinks, declarationsData, adjacencyMap } <- initialize graphData declsData
+  initResult <- initialize graphData declsData
+  let { svg
+      , zoomGroup
+      , nodesGroup
+      , linksGroup
+      , bubbleNodes
+      , bubbleLinks
+      , declarationsData
+      , adjacencyMap
+      , modulesMap
+      , dependedOnByMap
+      , detailsPanel
+      , detailsModuleName
+      , dependenciesList
+      , dependedOnByList
+      } = initResult
 
   -- Get simulation handle for reheating
   simHandle <- use _handle
@@ -447,9 +506,36 @@ drawExpandableBubbles graphData declsData callsData selector = do
     , links: bubbleLinks
     }
 
-  -- Add click handlers to node groups
+  -- Mouseover handler: show module details
+  let onMouseOver _ datum _ = do
+        let hoveredId = datum_.id datum
+        case Map.lookup hoveredId modulesMap of
+          Nothing -> pure unit
+          Just moduleInfo -> do
+            -- Show the panel
+            showDetailsPanel_ detailsPanel
+
+            -- Set module name
+            setDetailsModuleName_ detailsModuleName moduleInfo.name
+
+            -- Populate dependencies list
+            populateDetailsList_ dependenciesList moduleInfo.depends
+
+            -- Populate depended-on-by list
+            let dependedOnBy = fromMaybe Set.empty $ Map.lookup hoveredId dependedOnByMap
+                dependedOnByList' = Set.toUnfoldable dependedOnBy :: Array String
+            populateDetailsList_ dependedOnByList dependedOnByList'
+
+  -- Mouseout handler: hide module details
+  let onMouseOut _ _ _ = hideDetailsPanel_ detailsPanel
+
+  -- Add event handlers to node groups
   initialNodes <- openSelection nodesGroup (show Group)
-  setAttributes initialNodes [ onMouseEventEffectful MouseClick onClick ]
+  setAttributes initialNodes
+    [ onMouseEventEffectful MouseClick onClick
+    , onMouseEventEffectful MouseEnter onMouseOver
+    , onMouseEventEffectful MouseLeave onMouseOut
+    ]
 
   -- Start the simulation
   start

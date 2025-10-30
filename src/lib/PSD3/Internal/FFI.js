@@ -1275,3 +1275,55 @@ export function showAttachZoom_(selection) {
     return `\t${selection}.call(zoom ${config})`
   }
 }
+
+// ==================== Details Panel Helpers ====================
+
+export function showDetailsPanel_(selection) {
+  return () => {
+    selection.classed('hidden', false)
+  }
+}
+
+export function hideDetailsPanel_(selection) {
+  return () => {
+    selection.classed('hidden', true)
+  }
+}
+
+export function setDetailsModuleName_(selection) {
+  return moduleName => () => {
+    selection.html(`<h3>${moduleName}</h3>`)
+  }
+}
+
+export function populateDetailsList_(selection) {
+  return items => () => {
+    // Clear existing content
+    selection.html('')
+
+    // Add section title based on class
+    const classList = selection.attr('class')
+    let title = ''
+    if (classList.includes('dependencies-list')) {
+      title = 'Dependencies:'
+    } else if (classList.includes('depended-on-by-list')) {
+      title = 'Depended On By:'
+    }
+
+    if (title) {
+      selection.append('h4').text(title)
+    }
+
+    // Add list container
+    const ul = selection.append('ul')
+
+    // Add list items
+    if (items.length === 0) {
+      ul.append('li').text('(none)').classed('empty-item', true)
+    } else {
+      items.forEach(item => {
+        ul.append('li').text(item)
+      })
+    }
+  }
+}

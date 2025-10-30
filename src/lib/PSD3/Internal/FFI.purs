@@ -365,3 +365,11 @@ foreign import partitionSetSize_     :: PartitionLayout_ -> Number -> Number -> 
 foreign import partitionSetPadding_  :: PartitionLayout_ -> Number -> PartitionLayout_
 foreign import runPartitionLayout_   :: forall r. PartitionLayout_ -> D3_TreeNode r -> D3_TreeNode r
 foreign import treeSortForPartition_ :: forall d. D3_TreeNode d -> D3_TreeNode d
+
+-- | *********************************************************************************************************************
+-- | ***************************   FFI signatures for Details Panel manipulation  *************************************
+-- | *********************************************************************************************************************
+foreign import showDetailsPanel_ :: D3Selection_ -> Effect Unit
+foreign import hideDetailsPanel_ :: D3Selection_ -> Effect Unit
+foreign import setDetailsModuleName_ :: D3Selection_ -> String -> Effect Unit
+foreign import populateDetailsList_ :: D3Selection_ -> Array String -> Effect Unit
