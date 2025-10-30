@@ -4,6 +4,7 @@ import Prelude
 
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
+import Effect (Effect)
 import PSD3.CodeAtlas.Types (AtlasTab(..), DeclarationsData, FunctionCallsData, ModuleGraphData, SourceType)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, initialSimulationState)
 
@@ -12,6 +13,13 @@ type HoveredModuleInfo =
   { moduleName :: String
   , dependencies :: Array String
   , dependedOnBy :: Array String
+  }
+
+-- | Context menu for module interactions
+type ContextMenuInfo =
+  { moduleName :: String
+  , x :: Number  -- Screen position
+  , y :: Number
   }
 
 -- | Component state
@@ -29,6 +37,11 @@ type State =
   , error :: Maybe String
   , hoveredModule :: Maybe HoveredModuleInfo  -- For the details panel
   , spotlightModeActive :: Boolean  -- Whether spotlight mode is currently active
+  , currentSpotlightModule :: Maybe String  -- The module currently being spotlighted
+  , contextMenu :: Maybe ContextMenuInfo  -- Context menu state
+  , spotlightFunction :: Maybe (String -> Effect Unit)  -- Function to spotlight a module
+  , addDepsFunction :: Maybe (String -> Effect Unit)  -- Function to add module deps to spotlight
+  , makeFocusFunction :: Maybe (String -> Effect Unit)  -- Function to make module the focus
   }
 
 -- | Initial state
@@ -47,4 +60,9 @@ initialState _ =
   , error: Nothing
   , hoveredModule: Nothing
   , spotlightModeActive: false
+  , currentSpotlightModule: Nothing
+  , contextMenu: Nothing
+  , spotlightFunction: Nothing
+  , addDepsFunction: Nothing
+  , makeFocusFunction: Nothing
   }

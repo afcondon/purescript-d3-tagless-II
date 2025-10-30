@@ -147,6 +147,73 @@ function declarationColor(kind) {
   }
 }
 
+// Highlight dependencies when hovering over a declaration
+function highlightDependencies(qualifiedName, functionCallsData, isHighlighted) {
+  if (!functionCallsData || !functionCallsData.functions) {
+    console.log('No function calls data available')
+    return
+  }
+
+  // Find the function in the call graph
+  const funcEntry = functionCallsData.functions.find(f => f.key === qualifiedName)
+
+  if (!funcEntry) {
+    console.log(`Function ${qualifiedName} not found in call graph`)
+    return
+  }
+
+  const funcInfo = funcEntry.value
+  const relatedNames = new Set()
+
+  // Add all functions this function calls (outbound)
+  if (funcInfo.calls) {
+    funcInfo.calls.forEach(call => {
+      const targetQualifiedName = `${call.targetModule}.${call.target}`
+      relatedNames.add(targetQualifiedName)
+    })
+  }
+
+  // Add all functions that call this function (inbound)
+  if (funcInfo.calledBy) {
+    funcInfo.calledBy.forEach(callerName => {
+      relatedNames.add(callerName)
+    })
+  }
+
+  console.log(`Highlighting ${relatedNames.size} related functions for ${qualifiedName}`)
+
+  // Highlight all related declaration circles
+  relatedNames.forEach(name => {
+    const selector = `.decl-circle[data-qualified-name="${name}"]`
+    d3.selectAll(selector)
+      .classed('dep-highlighted', true)
+      .attr('stroke', '#FFD700')  // Gold stroke
+      .attr('stroke-width', 3)
+      .raise()  // Bring to front
+  })
+
+  // Also highlight the hovered circle itself with a different style
+  const hoveredSelector = `.decl-circle[data-qualified-name="${qualifiedName}"]`
+  d3.selectAll(hoveredSelector)
+    .classed('dep-source', true)
+    .attr('stroke', '#FF4500')  // Orange-red stroke
+    .attr('stroke-width', 4)
+    .raise()
+}
+
+// Clear dependency highlights
+function clearDependencyHighlights() {
+  d3.selectAll('.decl-circle.dep-highlighted')
+    .classed('dep-highlighted', false)
+    .attr('stroke', '#fff')
+    .attr('stroke-width', 1)
+
+  d3.selectAll('.decl-circle.dep-source')
+    .classed('dep-source', false)
+    .attr('stroke', '#fff')
+    .attr('stroke-width', 1)
+}
+
 // Categorize declarations into groups
 function categorizeDeclarations(declarations) {
   const categories = {
@@ -328,7 +395,6 @@ export function updateNodeExpansion_(simulation) {
         .attr('stroke-width', 1)
         .attr('stroke-opacity', 0.4)
         .attr('fill', 'none')
-        .attr('marker-end', 'url(#arrowhead)')
 
       // Get ALL nodes (not just leaves) - this includes category bubbles
       const allNodes = root.descendants().filter(d => d.depth > 0) // Skip root module node
@@ -343,7 +409,7 @@ export function updateNodeExpansion_(simulation) {
         .attr('transform', d => `translate(${d.x - expandedRadius}, ${d.y - expandedRadius})`)
 
       // Add circles (styled differently for categories vs declarations)
-      nodeGroupsEnter.append('circle')
+      const circles = nodeGroupsEnter.append('circle')
         .attr('class', d => d.data.isCategory ? 'category-circle' : 'decl-circle')
         .attr('r', d => d.r)
         .attr('fill', d => {
@@ -354,7 +420,22 @@ export function updateNodeExpansion_(simulation) {
         .attr('opacity', d => d.data.isCategory ? 0.3 : 0.8)  // Categories more transparent
         .attr('stroke', '#fff')
         .attr('stroke-width', 1)
-        .append('title')
+
+      // Add data attribute with qualified name for declarations (module.name)
+      circles.filter(d => !d.data.isCategory)
+        .attr('data-qualified-name', d => `${moduleName}.${d.data.name}`)
+
+      // Add hover handlers to declaration circles
+      circles.filter(d => !d.data.isCategory)
+        .on('mouseenter', function(event, d) {
+          const qualifiedName = `${moduleName}.${d.data.name}`
+          highlightDependencies(qualifiedName, functionCallsData, true)
+        })
+        .on('mouseleave', function(event, d) {
+          clearDependencyHighlights()
+        })
+
+      circles.append('title')
         .text(d => d.data.isCategory
           ? d.data.name  // Category name only
           : `${d.data.name} (${d.data.kind})`  // Declaration with kind
@@ -606,7 +687,6 @@ export function drawInterModuleDeclarationLinks_(zoomGroupSelection) {
       .attr('stroke-width', 2)
       .attr('stroke-opacity', 0.6)
       .attr('fill', 'none')
-      .attr('marker-end', 'url(#module-arrow)')
       .merge(paths)
       .attr('d', d => {
         const dx = d.targetX - d.sourceX

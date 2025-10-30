@@ -21,6 +21,8 @@ import Data.String as String
 import Data.String.Pattern (Pattern(..))
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
+import Effect.Aff (Milliseconds(..), delay, forkAff)
+import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Console as Console
 import Effect.Ref (Ref)
@@ -455,6 +457,9 @@ drawExpandableBubbles :: forall row m.
   { onShowModuleDetails :: String -> Array String -> Array String -> Effect Unit
   , onHideModuleDetails :: Effect Unit
   , onEnableSpotlightMode :: Effect Unit
+  , onShowContextMenu :: String -> Number -> Number -> Effect Unit
+  , onSpotlightFunctionsReady :: (String -> Effect Unit) -> (String -> Effect Unit) -> (String -> Effect Unit) -> Effect Unit
+  , onSetCurrentSpotlightModule :: Maybe String -> Effect Unit
   } ->
   m Unit
 drawExpandableBubbles graphData declsData callsData selector callbacks = do
@@ -480,65 +485,150 @@ drawExpandableBubbles graphData declsData callsData selector callbacks = do
   -- Track whether we've already filtered to a subgraph and which module is spotlighted
   hasFilteredRef <- liftEffect $ Ref.new false
   currentSpotlightRef <- liftEffect $ Ref.new (Nothing :: Maybe String)
+  -- Track the set of modules currently in the spotlight view
+  spotlightSetRef <- liftEffect $ Ref.new (Set.empty :: Set String)
 
-  -- Click handler: spotlight the clicked module's neighborhood
-  let onClick _ datum _ = do
-        let clickedId = datum_.id datum
-            clickedNode = unboxBubbleNode datum
-
-        -- Update details panel with clicked module info
-        case Map.lookup clickedId modulesMap of
-          Nothing -> Console.log $ "Module not found in map: " <> clickedId
-          Just moduleInfo -> do
-            let dependedOnBy = fromMaybe Set.empty $ Map.lookup clickedId dependedOnByMap
-                dependedOnByList = sort $ Set.toUnfoldable dependedOnBy :: Array String
-                dependencies = sort moduleInfo.depends
-            callbacks.onShowModuleDetails moduleInfo.name dependencies dependedOnByList
+  -- Function to spotlight a module by ID
+  let spotlightModule moduleId = do
+        Console.log $ "Spotlighting module: " <> moduleId
 
         hasFiltered <- Ref.read hasFilteredRef
         currentSpotlight <- Ref.read currentSpotlightRef
 
-        -- Filter if this is a new module being spotlighted (first click or different module)
-        when (not hasFiltered || currentSpotlight /= Just clickedId) do
-          let connected = fromMaybe Set.empty $ Map.lookup clickedId adjacencyMap
-              connectedIds = Set.toUnfoldable connected :: Array String
-              allConnected = Array.cons clickedId connectedIds
+        -- Update details panel with clicked module info
+        case Map.lookup moduleId modulesMap of
+          Nothing -> Console.log $ "Module not found in map: " <> moduleId
+          Just moduleInfo -> do
+            let dependedOnBy = fromMaybe Set.empty $ Map.lookup moduleId dependedOnByMap
+                dependedOnByList = sort $ Set.toUnfoldable dependedOnBy :: Array String
+                dependencies = sort moduleInfo.depends
+            callbacks.onShowModuleDetails moduleInfo.name dependencies dependedOnByList
 
-          Console.log $ "Spotlighting module: " <> clickedId <> " with " <> show (Array.length allConnected) <> " connected modules"
+        -- Filter if this is a new module being spotlighted (first click or different module)
+        when (not hasFiltered || currentSpotlight /= Just moduleId) do
+          let connected = fromMaybe Set.empty $ Map.lookup moduleId adjacencyMap
+              connectedIds = Set.toUnfoldable connected :: Array String
+              allConnected = Array.cons moduleId connectedIds
+
+          Console.log $ "Filtering to " <> show (Array.length allConnected) <> " connected modules"
           liftEffect $ pure $ filterToConnectedNodes_ simHandle keyIsID_ allConnected
           Ref.write true hasFilteredRef
-          Ref.write (Just clickedId) currentSpotlightRef
+          Ref.write (Just moduleId) currentSpotlightRef
+          Ref.write (Set.fromFoldable allConnected) spotlightSetRef
+          callbacks.onSetCurrentSpotlightModule (Just moduleId)
 
           -- Enter spotlight mode: show all labels
           if not hasFiltered then do
-            Console.log "First click - entering spotlight mode"
+            Console.log "First spotlight - entering spotlight mode"
             liftEffect $ showModuleLabels_ nodesGroup
             switchToSpotlightForces_ simHandle
             callbacks.onEnableSpotlightMode
           else
             Console.log "Re-spotlighting different module"
 
-        -- Only toggle expansion on first click (entering spotlight mode)
-        -- Subsequent clicks just update the panel and re-filter nodes
+        -- Only expand on first spotlight (entering spotlight mode)
         when (not hasFiltered) do
-          -- Expand the clicked node and all its neighbors
-          unsafeSetField_ "expanded" true datum
-          Console.log $ clickedId <> " expanded"
-
-          -- Expand with internal structure
-          liftEffect $ pure $ updateNodeExpansion_ simHandle nodeRadius declarationsData callsData datum
+          -- Find and expand the module node
+          Console.log $ "Expanding " <> moduleId <> " and neighbors"
+          liftEffect $ expandNodeById_ simHandle nodeRadius declarationsData callsData moduleId true
 
           -- ALSO expand all directly connected nodes (1-hop neighbors)
-          let connected = fromMaybe Set.empty $ Map.lookup clickedId adjacencyMap
+          let connected = fromMaybe Set.empty $ Map.lookup moduleId adjacencyMap
               connectedIds = Set.toUnfoldable connected :: Array String
 
           Console.log $ "Expanding " <> show (Array.length connectedIds) <> " connected modules"
           traverse_ (\connectedId ->
-            expandNodeById_ simHandle nodeRadius declarationsData callsData connectedId true
+            liftEffect $ expandNodeById_ simHandle nodeRadius declarationsData callsData connectedId true
           ) connectedIds
 
+          -- Update inter-module declaration links
+          liftEffect $ drawInterModuleDeclarationLinks_ zoomGroup nodeRadius declarationsData callsData
+
+  -- Function to add a module's deps to the current spotlight
+  let addDepsToSpotlight moduleId = do
+        Console.log $ "Adding deps for module: " <> moduleId
+
+        currentSet <- Ref.read spotlightSetRef
+
+        -- Get the new module's connected nodes
+        let newConnected = fromMaybe Set.empty $ Map.lookup moduleId adjacencyMap
+            newModules = Set.insert moduleId newConnected
+            -- Union with the existing spotlight set
+            combinedSet = Set.union currentSet newModules
+            combinedArray = Set.toUnfoldable combinedSet :: Array String
+
+        Console.log $ "Adding " <> show (Set.size newModules) <> " modules to spotlight (" <> show (Set.size combinedSet) <> " total)"
+
+        -- Update the filtered set
+        liftEffect $ pure $ filterToConnectedNodes_ simHandle keyIsID_ combinedArray
+        Ref.write combinedSet spotlightSetRef
+
+        -- Expand the newly added module and its neighbors
+        liftEffect $ expandNodeById_ simHandle nodeRadius declarationsData callsData moduleId true
+        traverse_ (\connectedId ->
+          when (not $ Set.member connectedId currentSet) do  -- Only expand if not already in set
+            liftEffect $ expandNodeById_ simHandle nodeRadius declarationsData callsData connectedId true
+        ) (Set.toUnfoldable newConnected :: Array String)
+
         -- Update inter-module declaration links
-        drawInterModuleDeclarationLinks_ zoomGroup nodeRadius declarationsData callsData
+        liftEffect $ drawInterModuleDeclarationLinks_ zoomGroup nodeRadius declarationsData callsData
+
+        -- Update details panel
+        case Map.lookup moduleId modulesMap of
+          Nothing -> Console.log $ "Module not found in map: " <> moduleId
+          Just moduleInfo -> do
+            let dependedOnBy = fromMaybe Set.empty $ Map.lookup moduleId dependedOnByMap
+                dependedOnByList = sort $ Set.toUnfoldable dependedOnBy :: Array String
+                dependencies = sort moduleInfo.depends
+            callbacks.onShowModuleDetails moduleInfo.name dependencies dependedOnByList
+
+  -- Function to make a module the new focus (replaces current spotlight)
+  let makeFocus moduleId = do
+        Console.log $ "Making focus: " <> moduleId
+
+        -- Get the new module's connected nodes
+        let connected = fromMaybe Set.empty $ Map.lookup moduleId adjacencyMap
+            connectedIds = Set.toUnfoldable connected :: Array String
+            allConnected = Array.cons moduleId connectedIds
+
+        Console.log $ "Switching focus to " <> show (Array.length allConnected) <> " connected modules"
+
+        -- Update the filtered set (replacing the old one)
+        liftEffect $ pure $ filterToConnectedNodes_ simHandle keyIsID_ allConnected
+        Ref.write (Just moduleId) currentSpotlightRef
+        Ref.write (Set.fromFoldable allConnected) spotlightSetRef
+        callbacks.onSetCurrentSpotlightModule (Just moduleId)
+
+        -- Expand the new focus module and its neighbors
+        liftEffect $ expandNodeById_ simHandle nodeRadius declarationsData callsData moduleId true
+        traverse_ (\connectedId ->
+          liftEffect $ expandNodeById_ simHandle nodeRadius declarationsData callsData connectedId true
+        ) connectedIds
+
+        -- Update inter-module declaration links
+        liftEffect $ drawInterModuleDeclarationLinks_ zoomGroup nodeRadius declarationsData callsData
+
+        -- Update details panel
+        case Map.lookup moduleId modulesMap of
+          Nothing -> Console.log $ "Module not found in map: " <> moduleId
+          Just moduleInfo -> do
+            let dependedOnBy = fromMaybe Set.empty $ Map.lookup moduleId dependedOnByMap
+                dependedOnByList = sort $ Set.toUnfoldable dependedOnBy :: Array String
+                dependencies = sort moduleInfo.depends
+            callbacks.onShowModuleDetails moduleInfo.name dependencies dependedOnByList
+
+  -- Export all functions via a single callback for Halogen to use
+  liftEffect $ callbacks.onSpotlightFunctionsReady spotlightModule addDepsToSpotlight makeFocus
+
+  -- Click handler: show context menu for module interaction
+  let onClick event datum _ = do
+        let clickedId = datum_.id datum
+            mouseEvent = unsafeCoerce event :: { clientX :: Number, clientY :: Number }
+
+        Console.log $ "Module clicked: " <> clickedId <> " at (" <> show mouseEvent.clientX <> ", " <> show mouseEvent.clientY <> ")"
+
+        -- Show context menu at click position
+        callbacks.onShowContextMenu clickedId mouseEvent.clientX mouseEvent.clientY
 
   -- Render initial state with all nodes collapsed
   updateGraph

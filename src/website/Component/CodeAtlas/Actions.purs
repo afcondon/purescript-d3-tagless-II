@@ -3,8 +3,9 @@ module PSD3.CodeAtlas.Actions where
 import Prelude
 
 import Data.Maybe (Maybe)
+import Effect (Effect)
 import PSD3.CodeAtlas.Types (AtlasTab, DeclarationsData, FunctionCallsData, ModuleGraphData, SourceType)
-import PSD3.CodeAtlas.State (HoveredModuleInfo)
+import PSD3.CodeAtlas.State (HoveredModuleInfo, ContextMenuInfo)
 
 -- | User actions
 data Action
@@ -21,3 +22,14 @@ data Action
   | HideModuleDetails
   | ResetToOverview
   | EnableSpotlightMode
+  | ShowContextMenu ContextMenuInfo
+  | HideContextMenu
+  | SpotlightModuleFromMenu String
+  | AddDepsToSpotlight String
+  | MakeFocusModule String
+  | SpotlightFunctionsReady
+      { spotlight :: String -> Effect Unit
+      , addDeps :: String -> Effect Unit
+      , makeFocus :: String -> Effect Unit
+      }
+  | SetCurrentSpotlightModule (Maybe String)

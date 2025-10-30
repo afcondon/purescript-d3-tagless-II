@@ -8,11 +8,13 @@ import Data.Maybe (Maybe(..))
 import Effect.Aff (Milliseconds(..), delay)
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
+import Effect.Console as Console
 import Effect.Ref as Ref
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import Web.UIEvent.KeyboardEvent as KE
 import Halogen.Subscription as HS
 import PSD3.CodeAtlas.Actions (Action(..))
 import PSD3.CodeAtlas.Data (loadDeclarations, loadFunctionCalls, loadModules)
@@ -117,6 +119,7 @@ renderFloatingPanels state =
           , renderDetailsPanel state
           ]
         else HH.text ""
+    , renderContextMenu state
     ]
 
 -- | Render the control panel (top-left) with view tabs
@@ -230,6 +233,94 @@ renderDetailsPanel state =
             ]
         ]
 
+-- | Render the context menu (conditional, positioned at click)
+renderContextMenu :: forall m. State -> H.ComponentHTML Action () m
+renderContextMenu state =
+  case state.contextMenu of
+    Nothing -> HH.text ""
+    Just info ->
+      let
+        isCurrentSpotlight = state.currentSpotlightModule == Just info.moduleName
+        inSpotlightMode = state.spotlightModeActive
+
+        -- Determine keyboard handler based on context
+        keyHandler = case inSpotlightMode, isCurrentSpotlight of
+          false, _ -> \event ->  -- Not in spotlight mode
+            case KE.key event of
+              "s" -> SpotlightModuleFromMenu info.moduleName
+              "S" -> SpotlightModuleFromMenu info.moduleName
+              "Escape" -> HideContextMenu
+              _ -> HideContextMenu
+
+          true, true -> \event ->  -- In spotlight mode, clicking current spotlight module
+            case KE.key event of
+              "b" -> ResetToOverview
+              "B" -> ResetToOverview
+              "Escape" -> HideContextMenu
+              _ -> HideContextMenu
+
+          true, false -> \event ->  -- In spotlight mode, clicking different module
+            case KE.key event of
+              "a" -> AddDepsToSpotlight info.moduleName
+              "A" -> AddDepsToSpotlight info.moduleName
+              "f" -> MakeFocusModule info.moduleName
+              "F" -> MakeFocusModule info.moduleName
+              "Escape" -> HideContextMenu
+              _ -> HideContextMenu
+
+        -- Determine menu items based on context
+        menuItems = case inSpotlightMode, isCurrentSpotlight of
+          false, _ ->  -- Not in spotlight mode
+            [ renderContextMenuItem "Spotlight Module" "S" (SpotlightModuleFromMenu info.moduleName)
+            ]
+
+          true, true ->  -- In spotlight mode, clicking current spotlight module
+            [ renderContextMenuItem "Back to Overview" "B" ResetToOverview
+            ]
+
+          true, false ->  -- In spotlight mode, clicking different module
+            [ renderContextMenuItem "Add Deps" "A" (AddDepsToSpotlight info.moduleName)
+            , renderContextMenuItem "Make Focus" "F" (MakeFocusModule info.moduleName)
+            ]
+      in
+        HH.div_
+          [ -- Transparent overlay to capture clicks outside the menu
+            HH.div
+              [ HP.classes [ HH.ClassName "context-menu-overlay" ]
+              , HE.onClick \_ -> HideContextMenu
+              ]
+              []
+          , -- The actual context menu
+            HH.div
+              [ HP.classes [ HH.ClassName "context-menu", HH.ClassName "editorial" ]
+              , HP.style $ "left: " <> show info.x <> "px; top: " <> show info.y <> "px"
+              , HP.tabIndex 0  -- Make focusable for keyboard events
+              , HE.onKeyDown keyHandler
+              ]
+              [ HH.div
+                  [ HP.classes [ HH.ClassName "context-menu__header" ] ]
+                  [ HH.text info.moduleName ]
+              , HH.div
+                  [ HP.classes [ HH.ClassName "context-menu__items" ] ]
+                  menuItems
+              ]
+          ]
+
+-- | Render a single context menu item
+renderContextMenuItem :: forall m. String -> String -> Action -> H.ComponentHTML Action () m
+renderContextMenuItem label shortcut action =
+  HH.button
+    [ HP.classes [ HH.ClassName "context-menu__item" ]
+    , HE.onClick \_ -> action
+    ]
+    [ HH.span
+        [ HP.classes [ HH.ClassName "context-menu__label" ] ]
+        [ HH.text label ]
+    , HH.span
+        [ HP.classes [ HH.ClassName "context-menu__shortcut" ] ]
+        [ HH.text shortcut ]
+    ]
+
 -- | Render a single tab
 renderTab :: forall m. AtlasTab -> AtlasTab -> H.ComponentHTML Action () m
 renderTab tab activeTab =
@@ -315,6 +406,12 @@ handleAction = case _ of
                       Ref.write (Just HideModuleDetails) pendingActionRef
                   , onEnableSpotlightMode:
                       Ref.write (Just EnableSpotlightMode) pendingActionRef
+                  , onShowContextMenu: \moduleName x y ->
+                      Ref.write (Just $ ShowContextMenu { moduleName, x, y }) pendingActionRef
+                  , onSpotlightFunctionsReady: \spotlightFn addDepsFn makeFocusFn ->
+                      Ref.write (Just $ SpotlightFunctionsReady { spotlight: spotlightFn, addDeps: addDepsFn, makeFocus: makeFocusFn }) pendingActionRef
+                  , onSetCurrentSpotlightModule: \moduleId ->
+                      Ref.write (Just $ SetCurrentSpotlightModule moduleId) pendingActionRef
                   }
 
             -- Create a subscription that polls the Ref for pending actions
@@ -327,6 +424,18 @@ handleAction = case _ of
             -- Draw the visualization
             runWithD3_Simulation do
               ExpandableBubblesTab.drawExpandableBubbles graphData declsData callsData "div.svg-container" callbacks
+
+            -- Process all pending actions that were queued during visualization setup
+            -- This ensures functions are registered before user interaction
+            let processAllPending = do
+                  pendingAction <- liftEffect $ Ref.read pendingActionRef
+                  case pendingAction of
+                    Just action -> do
+                      liftEffect $ Ref.write Nothing pendingActionRef
+                      handleAction action
+                      processAllPending  -- Process next action
+                    Nothing -> pure unit
+            processAllPending
 
           _, _, _ -> pure unit
 
@@ -371,11 +480,54 @@ handleAction = case _ of
     H.modify_ _ { hoveredModule = Nothing }
 
   ResetToOverview -> do
-    -- Clear the details panel and disable spotlight mode
-    H.modify_ _ { hoveredModule = Nothing, spotlightModeActive = false }
+    -- Clear the details panel, current spotlight, and disable spotlight mode
+    H.modify_ _ { hoveredModule = Nothing, spotlightModeActive = false, currentSpotlightModule = Nothing }
     -- Redraw the visualization to reset to overview state
     state <- H.get
     handleAction (SetActiveTab state.activeTab)
 
   EnableSpotlightMode -> do
     H.modify_ _ { spotlightModeActive = true }
+
+  ShowContextMenu info -> do
+    H.modify_ _ { contextMenu = Just info }
+
+  HideContextMenu -> do
+    H.modify_ _ { contextMenu = Nothing }
+
+  SpotlightModuleFromMenu moduleName -> do
+    -- Close the context menu
+    H.modify_ _ { contextMenu = Nothing }
+    -- Trigger spotlight by calling the spotlight function
+    state <- H.get
+    case state.spotlightFunction of
+      Nothing -> liftEffect $ Console.log "Spotlight function not ready yet"
+      Just spotlightFn -> liftEffect $ spotlightFn moduleName
+
+  AddDepsToSpotlight moduleName -> do
+    -- Close the context menu
+    H.modify_ _ { contextMenu = Nothing }
+    -- Add deps by calling the add deps function
+    state <- H.get
+    case state.addDepsFunction of
+      Nothing -> liftEffect $ Console.log "Add deps function not ready yet"
+      Just addDepsFn -> liftEffect $ addDepsFn moduleName
+
+  MakeFocusModule moduleName -> do
+    -- Close the context menu
+    H.modify_ _ { contextMenu = Nothing }
+    -- Make focus by calling the make focus function
+    state <- H.get
+    case state.makeFocusFunction of
+      Nothing -> liftEffect $ Console.log "Make focus function not ready yet"
+      Just makeFocusFn -> liftEffect $ makeFocusFn moduleName
+
+  SpotlightFunctionsReady fns -> do
+    H.modify_ _
+      { spotlightFunction = Just fns.spotlight
+      , addDepsFunction = Just fns.addDeps
+      , makeFocusFunction = Just fns.makeFocus
+      }
+
+  SetCurrentSpotlightModule moduleId -> do
+    H.modify_ _ { currentSpotlightModule = moduleId }
