@@ -8,7 +8,6 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.Mermaid (triggerMermaidRendering)
 import PSD3.Shared.SectionNav as SectionNav
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Understanding.TOC (renderTOC, tocAnchor)
@@ -185,4 +184,4 @@ renderHowtoItem snippetId title description difficulty =
 
 handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
-  Initialize -> triggerMermaidRendering
+  Initialize -> pure unit
