@@ -18,7 +18,7 @@ import Data.Map (toUnfoldable)
 import Data.Number (pi, abs)
 import Data.Tuple (Tuple(..), snd)
 import Effect.Aff (Aff)
-import Effect.Class (liftEffect)
+import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, negate, pure, show, unit, ($), (*), (+), (-), (/), (<>), (==))
 import Utility (getWindowWidthHeight)
 
@@ -52,9 +52,10 @@ drawTree treeModel selector = liftEffect $ do
 
 
 -- | configure function which enables Tree.script to be run for different layouts - WIP
-configureAndRunScript :: forall m selection. 
-  Bind m => 
-  SelectionM selection m => 
+configureAndRunScript :: forall m selection.
+  Bind m =>
+  MonadEffect m =>
+  SelectionM selection m =>
   Tuple Number Number -> TreeModel -> Selector selection -> m selection
 configureAndRunScript (Tuple width height ) model selector = 
   Tree.draw { spacing, viewbox, selector, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_

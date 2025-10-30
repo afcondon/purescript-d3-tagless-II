@@ -12,6 +12,8 @@ import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import Data.Nullable (Nullable)
 import Data.Number (pi)
+import Effect.Class (class MonadEffect)
+import PSD3.Shared.ZoomableViewbox (addStandardZoom)
 
 treeDatum_ :: 
   { hasChildren :: Datum_ -> Boolean
@@ -86,13 +88,14 @@ type ScriptConfig = {
 
 -- Snippet_Start
 -- Name: TreeDraw
-draw :: forall m selection. Bind m => SelectionM selection m => 
+draw :: forall m selection. Bind m => MonadEffect m => SelectionM selection m =>
   ScriptConfig -> FlareTreeNode ->  m selection
 draw config tree = do
-  root       <- attach config.selector  
-  svg        <- appendTo root Svg (config.viewbox <> 
-                                    [ classed "tree", width config.svg.width, height config.svg.height ]) 
-  container  <- appendTo svg  Group [ fontFamily      "sans-serif", fontSize 10.0 ]
+  root       <- attach config.selector
+  svg        <- appendTo root Svg (config.viewbox <>
+                                    [ classed "tree", width config.svg.width, height config.svg.height ])
+  zoomGroup  <- appendTo svg Group [ classed "zoom-group" ]
+  container  <- appendTo zoomGroup Group [ fontFamily "sans-serif", fontSize 10.0 ]
   links      <- appendTo container Group [ classed "links"]
   nodes      <- appendTo container Group [ classed "nodes"]
 
@@ -100,21 +103,25 @@ draw config tree = do
   setAttributes theLinks_ [ strokeWidth 1.5, strokeColor config.color, strokeOpacity 0.4, fill "none", config.linkPath ]
 
   -- we make a group to hold the node circle and the label text
-  nodeJoin_  <- simpleJoin nodes Group (descendants_ tree) keyIsID_ 
+  nodeJoin_  <- simpleJoin nodes Group (descendants_ tree) keyIsID_
   setAttributes nodeJoin_ config.nodeTransform
 
-  theNodes <- appendTo nodeJoin_ Circle
-                [ fill         (\(d :: Datum_) -> if treeDatum_.hasChildren d then "#999" else "#555")
-                , radius       2.5
-                , strokeColor "white"
-                ]
+  _ <- appendTo nodeJoin_ Circle
+         [ fill         (\(d :: Datum_) -> if treeDatum_.hasChildren d then "#999" else "#555")
+         , radius       2.5
+         , strokeColor "white"
+         ]
 
-  theLabels <- appendTo nodeJoin_ Text
-                [ dy         0.31
-                , x          (treeDatum_.textX config.layout)
-                , textAnchor (treeDatum_.textAnchor config.layout)
-                , text       treeDatum_.name
-                , fill       config.color
-                ]               
+  _ <- appendTo nodeJoin_ Text
+         [ dy         0.31
+         , x          (treeDatum_.textX config.layout)
+         , textAnchor (treeDatum_.textAnchor config.layout)
+         , text       treeDatum_.name
+         , fill       config.color
+         ]
+
+  -- Add standard zoom and pan behavior
+  addStandardZoom svg zoomGroup
+
   pure svg
 -- Snippet_End
