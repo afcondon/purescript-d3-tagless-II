@@ -1794,3 +1794,194 @@
     margin: var(--spacing-lg) 0;
   }
 }
+
+/* ============================================
+   Code Atlas Component
+   ============================================ */
+
+.code-atlas-page {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--color-light);
+}
+
+.code-atlas-header {
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background-color: white;
+  border-bottom: 1px solid var(--color-border);
+  z-index: 10;
+  position: relative;
+}
+
+.code-atlas-subtitle {
+  color: var(--color-text-light);
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+/* Content Area */
+.code-atlas-content {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 50px); /* Subtract smaller header height */
+  overflow: hidden;
+}
+
+/* Container that holds the visualization and floating panels */
+.code-atlas-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Tabs in Control Panel */
+.control-panel-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.code-atlas-tab {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: 1px solid var(--color-line);
+  background-color: transparent;
+  color: var(--color-text-dark);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-small);
+  font-weight: bold;
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+  transition: all var(--transition-fast);
+  text-align: left;
+}
+
+.code-atlas-tab:hover {
+  background-color: var(--color-beige-light);
+  border-color: var(--color-text-dark);
+}
+
+.code-atlas-tab--active {
+  background-color: var(--color-red-accent);
+  color: white;
+  border-color: var(--color-red-accent);
+}
+
+/* Top panels need extra spacing for the header */
+.code-atlas-page .floating-panel--top-left,
+.code-atlas-page .floating-panel--top-right {
+  top: calc(50px + var(--spacing-md)); /* Header height + spacing */
+}
+
+/* Visualization Containers */
+.module-graph-container,
+.interactive-graph-container,
+.expandable-bubbles-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.code-atlas-content .svg-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1; /* Below floating panels (z-index: 100) and tabs (z-index: 20) */
+}
+
+/* Loading & Error States */
+.code-atlas-loading,
+.code-atlas-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.code-atlas-error {
+  color: var(--color-red-accent);
+}
+
+.code-atlas-error h3 {
+  margin-bottom: var(--spacing-md);
+}
+
+.code-atlas-error pre {
+  background-color: var(--color-dark);
+  color: var(--color-light);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  margin-top: var(--spacing-md);
+}
+
+/* Spotlight Mode Toggle */
+.spotlight-toggle-container {
+  margin-top: var(--spacing-sm);
+}
+
+.spotlight-toggle {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.spotlight-toggle input[type="checkbox"] {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-line);
+  transition: 0.4s;
+  border: 1px solid var(--color-line);
+}
+
+.toggle-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: white;
+  transition: 0.4s;
+}
+
+.spotlight-toggle input:checked + .toggle-slider {
+  background-color: var(--color-red-accent);
+  border-color: var(--color-red-accent);
+}
+
+.spotlight-toggle input:checked + .toggle-slider:before {
+  transform: translateX(20px);
+}
+
+.spotlight-toggle input:disabled + .toggle-slider {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.helper-text {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-tiny);
+  color: var(--color-text-muted);
+  margin-top: var(--spacing-xs);
+  font-style: italic;
+}

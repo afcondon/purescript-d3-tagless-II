@@ -226,55 +226,55 @@ initialize graphData declsData = do
   linksGroup <- appendTo zoomGroup Group [ classed "link", strokeColor "#999", strokeOpacity 0.4 ]
   nodesGroup <- appendTo zoomGroup Group [ classed "node", strokeColor "#fff", strokeWidth 1.5 ]
 
-  -- Add fixed legend (outside zoom group so it stays fixed)
-  legendGroup <- appendTo svg Group [
-      classed "legend"
-    , transform' (\_ -> "translate(" <> show (w/2.0 - 150.0) <> "," <> show (-h/2.0 + 30.0) <> ")")
-    ]
+  -- -- Add fixed legend (outside zoom group so it stays fixed)
+  -- legendGroup <- appendTo svg Group [
+  --     classed "legend"
+  --   , transform' (\_ -> "translate(" <> show (w/2.0 - 150.0) <> "," <> show (-h/2.0 + 30.0) <> ")")
+  --   ]
 
-  -- Legend title
-  _ <- appendTo legendGroup Text [
-      text "Declaration Types"
-    , x 0.0
-    , y 0.0
-    , classed "legend-title"
-    ]
+  -- -- Legend title
+  -- _ <- appendTo legendGroup Text [
+  --     text "Declaration Types"
+  --   , x 0.0
+  --   , y 0.0
+  --   , classed "legend-title"
+  --   ]
 
-  -- Legend items
-  let legendItems =
-        [ {name: "Functions/Values", color: "#2196F3", yOffset: 25.0}
-        , {name: "Foreign Functions", color: "#00BCD4", yOffset: 50.0}
-        , {name: "Data Types", color: "#4CAF50", yOffset: 75.0}
-        , {name: "Type Classes", color: "#9C27B0", yOffset: 100.0}
-        , {name: "Type Synonyms", color: "#FF9800", yOffset: 125.0}
-        , {name: "Instances", color: "#E91E63", yOffset: 150.0}
-        ]
+  -- -- Legend items
+  -- let legendItems =
+  --       [ {name: "Functions/Values", color: "#2196F3", yOffset: 25.0}
+  --       , {name: "Foreign Functions", color: "#00BCD4", yOffset: 50.0}
+  --       , {name: "Data Types", color: "#4CAF50", yOffset: 75.0}
+  --       , {name: "Type Classes", color: "#9C27B0", yOffset: 100.0}
+  --       , {name: "Type Synonyms", color: "#FF9800", yOffset: 125.0}
+  --       , {name: "Instances", color: "#E91E63", yOffset: 150.0}
+  --       ]
 
-  -- Draw each legend item
-  _ <- traverse_ (\item -> do
-    itemGroup <- appendTo legendGroup Group [
-        transform' (\_ -> "translate(0," <> show item.yOffset <> ")")
-      , classed "legend-item"
-      ]
+  -- -- Draw each legend item
+  -- _ <- traverse_ (\item -> do
+  --   itemGroup <- appendTo legendGroup Group [
+  --       transform' (\_ -> "translate(0," <> show item.yOffset <> ")")
+  --     , classed "legend-item"
+  --     ]
 
-    -- Color circle
-    _ <- appendTo itemGroup Circle [
-        radius 8.0
-      , fill item.color
-      , x 0.0
-      , y 0.0
-      ]
+  --   -- Color circle
+  --   _ <- appendTo itemGroup Circle [
+  --       radius 8.0
+  --     , fill item.color
+  --     , x 0.0
+  --     , y 0.0
+  --     ]
 
-    -- Label
-    _ <- appendTo itemGroup Text [
-        text item.name
-      , x 15.0
-      , y 5.0
-      , classed "legend-label"
-      ]
+  --   -- Label
+  --   _ <- appendTo itemGroup Text [
+  --       text item.name
+  --     , x 15.0
+  --     , y 5.0
+  --     , classed "legend-label"
+  --     ]
 
-    pure unit
-  ) legendItems
+  --   pure unit
+  -- ) legendItems
 
   -- Define forces - we have TWO collision forces that we toggle between
   let compactCollisionRadius :: Datum_ -> Index_ -> Number
@@ -287,7 +287,8 @@ initialize graphData declsData = do
       spotlightCollisionRadius datum _ =
         let node = unsafeCoerce datum :: BubbleNodeRecord
             baseRadius = nodeRadius node.expanded node.loc
-            padding = if node.expanded then 25.0 else 5.0
+            -- Use significantly more padding for expanded nodes to prevent overlap
+            padding = if node.expanded then baseRadius * 0.3 else 5.0  -- 30% padding for expanded
         in baseRadius + padding
 
       forces =
@@ -296,7 +297,7 @@ initialize graphData declsData = do
         , createForce "collision-compact" (RegularForce ForceCollide) allNodes [ F.radius compactCollisionRadius, F.strength 0.9, F.iterations 3.0 ]  -- Initial compact view
         , createForce "collision-spotlight" (RegularForce ForceCollide) allNodes [ F.radius spotlightCollisionRadius, F.strength 0.9, F.iterations 3.0 ]  -- Spotlight mode
         , createForce "center" (RegularForce ForceCenter) allNodes [ F.x 0.0, F.y 0.0, F.strength 0.2 ]
-        , createLinkForce Nothing [ F.distance 100.0 ]  -- Shorter links
+        , createLinkForce Nothing [ F.distance 150.0, F.strength 0.3 ]  -- Weaker link force to reduce pulling
         ]
       activeForces = Set.fromFoldable [ "manyBody-compact", "collision-compact", "center", "links" ]  -- Start with compact forces
 
@@ -453,6 +454,7 @@ drawExpandableBubbles :: forall row m.
   String ->
   { onShowModuleDetails :: String -> Array String -> Array String -> Effect Unit
   , onHideModuleDetails :: Effect Unit
+  , onEnableSpotlightMode :: Effect Unit
   } ->
   m Unit
 drawExpandableBubbles graphData declsData callsData selector callbacks = do
@@ -475,52 +477,65 @@ drawExpandableBubbles graphData declsData callsData selector callbacks = do
   -- Get simulation handle for reheating
   simHandle <- use _handle
 
-  -- Track whether we've already filtered to a subgraph
+  -- Track whether we've already filtered to a subgraph and which module is spotlighted
   hasFilteredRef <- liftEffect $ Ref.new false
+  currentSpotlightRef <- liftEffect $ Ref.new (Nothing :: Maybe String)
 
-  -- Click handler: first click prunes + expands, subsequent clicks just expand/collapse
+  -- Click handler: spotlight the clicked module's neighborhood
   let onClick _ datum _ = do
         let clickedId = datum_.id datum
             clickedNode = unboxBubbleNode datum
 
-        hasFiltered <- Ref.read hasFilteredRef
+        -- Update details panel with clicked module info
+        case Map.lookup clickedId modulesMap of
+          Nothing -> Console.log $ "Module not found in map: " <> clickedId
+          Just moduleInfo -> do
+            let dependedOnBy = fromMaybe Set.empty $ Map.lookup clickedId dependedOnByMap
+                dependedOnByList = sort $ Set.toUnfoldable dependedOnBy :: Array String
+                dependencies = sort moduleInfo.depends
+            callbacks.onShowModuleDetails moduleInfo.name dependencies dependedOnByList
 
-        -- Only filter on the first click
-        when (not hasFiltered) do
+        hasFiltered <- Ref.read hasFilteredRef
+        currentSpotlight <- Ref.read currentSpotlightRef
+
+        -- Filter if this is a new module being spotlighted (first click or different module)
+        when (not hasFiltered || currentSpotlight /= Just clickedId) do
           let connected = fromMaybe Set.empty $ Map.lookup clickedId adjacencyMap
               connectedIds = Set.toUnfoldable connected :: Array String
               allConnected = Array.cons clickedId connectedIds
 
-          Console.log $ "First click: filtering to " <> show (Array.length allConnected) <> " connected modules"
+          Console.log $ "Spotlighting module: " <> clickedId <> " with " <> show (Array.length allConnected) <> " connected modules"
           liftEffect $ pure $ filterToConnectedNodes_ simHandle keyIsID_ allConnected
           Ref.write true hasFilteredRef
+          Ref.write (Just clickedId) currentSpotlightRef
 
           -- Enter spotlight mode: show all labels
-          Console.log "About to call showModuleLabels_"
-          liftEffect $ showModuleLabels_ nodesGroup
-          Console.log "Called showModuleLabels_"
+          if not hasFiltered then do
+            Console.log "First click - entering spotlight mode"
+            liftEffect $ showModuleLabels_ nodesGroup
+            switchToSpotlightForces_ simHandle
+            callbacks.onEnableSpotlightMode
+          else
+            Console.log "Re-spotlighting different module"
 
-          -- Switch from compact collision force to spotlight collision force
-          Console.log "Switching to spotlight collision force"
-          switchToSpotlightForces_ simHandle
+        -- Only toggle expansion on first click (entering spotlight mode)
+        -- Subsequent clicks just update the panel and re-filter nodes
+        when (not hasFiltered) do
+          -- Expand the clicked node and all its neighbors
+          unsafeSetField_ "expanded" true datum
+          Console.log $ clickedId <> " expanded"
 
-        -- Toggle the expanded field directly on the node (it's a mutable JS object)
-        let newExpanded = not clickedNode.expanded
-        unsafeSetField_ "expanded" newExpanded datum
+          -- Expand with internal structure
+          liftEffect $ pure $ updateNodeExpansion_ simHandle nodeRadius declarationsData callsData datum
 
-        Console.log $ clickedId <> if newExpanded then " expanded" else " collapsed"
+          -- ALSO expand all directly connected nodes (1-hop neighbors)
+          let connected = fromMaybe Set.empty $ Map.lookup clickedId adjacencyMap
+              connectedIds = Set.toUnfoldable connected :: Array String
 
-        -- Expand/collapse with internal structure
-        pure $ updateNodeExpansion_ simHandle nodeRadius declarationsData callsData datum
-
-        -- ALSO expand all directly connected nodes (1-hop neighbors)
-        let connected = fromMaybe Set.empty $ Map.lookup clickedId adjacencyMap
-            connectedIds = Set.toUnfoldable connected :: Array String
-
-        Console.log $ "Expanding " <> show (Array.length connectedIds) <> " connected modules"
-        traverse_ (\connectedId ->
-          expandNodeById_ simHandle nodeRadius declarationsData callsData connectedId newExpanded
-        ) connectedIds
+          Console.log $ "Expanding " <> show (Array.length connectedIds) <> " connected modules"
+          traverse_ (\connectedId ->
+            expandNodeById_ simHandle nodeRadius declarationsData callsData connectedId true
+          ) connectedIds
 
         -- Update inter-module declaration links
         drawInterModuleDeclarationLinks_ zoomGroup nodeRadius declarationsData callsData
@@ -534,22 +549,12 @@ drawExpandableBubbles graphData declsData callsData selector callbacks = do
     , inSpotlightMode: false
     }
 
-  -- Mouseover handler: show module details
+  -- Mouseover handler: reserved for future use (e.g., hover highlights)
   let onMouseOver _ datum _ = do
-        let hoveredId = datum_.id datum
-        Console.log $ "Mouse over: " <> hoveredId
-        case Map.lookup hoveredId modulesMap of
-          Nothing -> Console.log $ "Module not found in map: " <> hoveredId
-          Just moduleInfo -> do
-            Console.log $ "Found module info, showing panel for: " <> moduleInfo.name
-            -- Call the callback to show details in Halogen
-            let dependedOnBy = fromMaybe Set.empty $ Map.lookup hoveredId dependedOnByMap
-                dependedOnByList = sort $ Set.toUnfoldable dependedOnBy :: Array String
-                dependencies = sort moduleInfo.depends
-            callbacks.onShowModuleDetails moduleInfo.name dependencies dependedOnByList
+        pure unit  -- Placeholder for future hover behavior
 
-  -- Mouseout handler: hide module details
-  let onMouseOut _ _ _ = callbacks.onHideModuleDetails
+  -- Mouseout handler: reserved for future use
+  let onMouseOut _ _ _ = pure unit
 
   -- Add event handlers to node groups
   initialNodes <- openSelection nodesGroup (show Group)

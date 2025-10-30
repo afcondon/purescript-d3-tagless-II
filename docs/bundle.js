@@ -21,8 +21,8 @@
   var semigroupoidFn = {
     compose: function(f) {
       return function(g) {
-        return function(x38) {
-          return f(g(x38));
+        return function(x37) {
+          return f(g(x37));
         };
       };
     }
@@ -33,8 +33,8 @@
     return dict.identity;
   };
   var categoryFn = {
-    identity: function(x38) {
-      return x38;
+    identity: function(x37) {
+      return x37;
     },
     Semigroupoid0: function() {
       return semigroupoidFn;
@@ -47,9 +47,9 @@
   // output/Data.Function/index.js
   var on = function(f) {
     return function(g) {
-      return function(x38) {
+      return function(x37) {
         return function(y36) {
-          return f(g(x38))(g(y36));
+          return f(g(x37))(g(y36));
         };
       };
     };
@@ -109,15 +109,15 @@
   var voidLeft = function(dictFunctor) {
     var map119 = map(dictFunctor);
     return function(f) {
-      return function(x38) {
-        return map119($$const(x38))(f);
+      return function(x37) {
+        return map119($$const(x37))(f);
       };
     };
   };
   var voidRight = function(dictFunctor) {
     var map119 = map(dictFunctor);
-    return function(x38) {
-      return map119($$const(x38));
+    return function(x37) {
+      return map119($$const(x37));
     };
   };
   var functorArray = {
@@ -126,9 +126,9 @@
   var flap = function(dictFunctor) {
     var map119 = map(dictFunctor);
     return function(ff2) {
-      return function(x38) {
+      return function(x37) {
         return map119(function(f) {
-          return f(x38);
+          return f(x37);
         })(ff2);
       };
     };
@@ -210,8 +210,8 @@
     };
   };
   var applicativeArray = {
-    pure: function(x38) {
-      return [x38];
+    pure: function(x37) {
+      return [x37];
     },
     Apply0: function() {
       return applyArray;
@@ -290,9 +290,9 @@
   var unsafeCompareImpl = function(lt) {
     return function(eq18) {
       return function(gt) {
-        return function(x38) {
+        return function(x37) {
           return function(y36) {
-            return x38 < y36 ? lt : x38 === y36 ? eq18 : gt;
+            return x37 < y36 ? lt : x37 === y36 ? eq18 : gt;
           };
         };
       };
@@ -386,9 +386,9 @@
   };
   var notEq = function(dictEq) {
     var eq34 = eq(dictEq);
-    return function(x38) {
+    return function(x37) {
       return function(y36) {
-        return eq2(eq34(x38)(y36))(false);
+        return eq2(eq34(x37)(y36))(false);
       };
     };
   };
@@ -436,21 +436,21 @@
   };
 
   // output/Data.Ring/foreign.js
-  var intSub = function(x38) {
+  var intSub = function(x37) {
     return function(y36) {
-      return x38 - y36 | 0;
+      return x37 - y36 | 0;
     };
   };
 
   // output/Data.Semiring/foreign.js
-  var intAdd = function(x38) {
+  var intAdd = function(x37) {
     return function(y36) {
-      return x38 + y36 | 0;
+      return x37 + y36 | 0;
     };
   };
-  var intMul = function(x38) {
+  var intMul = function(x37) {
     return function(y36) {
-      return x38 * y36 | 0;
+      return x37 * y36 | 0;
     };
   };
   var numAdd = function(n1) {
@@ -547,28 +547,28 @@
   var comparing = function(dictOrd) {
     var compare32 = compare(dictOrd);
     return function(f) {
-      return function(x38) {
+      return function(x37) {
         return function(y36) {
-          return compare32(f(x38))(f(y36));
+          return compare32(f(x37))(f(y36));
         };
       };
     };
   };
   var max = function(dictOrd) {
     var compare32 = compare(dictOrd);
-    return function(x38) {
+    return function(x37) {
       return function(y36) {
-        var v = compare32(x38)(y36);
+        var v = compare32(x37)(y36);
         if (v instanceof LT) {
           return y36;
         }
         ;
         if (v instanceof EQ) {
-          return x38;
+          return x37;
         }
         ;
         if (v instanceof GT) {
-          return x38;
+          return x37;
         }
         ;
         throw new Error("Failed pattern match at Data.Ord (line 181, column 3 - line 184, column 12): " + [v.constructor.name]);
@@ -577,15 +577,15 @@
   };
   var min = function(dictOrd) {
     var compare32 = compare(dictOrd);
-    return function(x38) {
+    return function(x37) {
       return function(y36) {
-        var v = compare32(x38)(y36);
+        var v = compare32(x37)(y36);
         if (v instanceof LT) {
-          return x38;
+          return x37;
         }
         ;
         if (v instanceof EQ) {
-          return x38;
+          return x37;
         }
         ;
         if (v instanceof GT) {
@@ -777,20 +777,20 @@
   };
 
   // output/Data.EuclideanRing/foreign.js
-  var intDegree = function(x38) {
-    return Math.min(Math.abs(x38), 2147483647);
+  var intDegree = function(x37) {
+    return Math.min(Math.abs(x37), 2147483647);
   };
-  var intDiv = function(x38) {
+  var intDiv = function(x37) {
     return function(y36) {
       if (y36 === 0) return 0;
-      return y36 > 0 ? Math.floor(x38 / y36) : -Math.floor(x38 / -y36);
+      return y36 > 0 ? Math.floor(x37 / y36) : -Math.floor(x37 / -y36);
     };
   };
-  var intMod = function(x38) {
+  var intMod = function(x37) {
     return function(y36) {
       if (y36 === 0) return 0;
       var yy = Math.abs(y36);
-      return (x38 % yy + yy) % yy;
+      return (x37 % yy + yy) % yy;
     };
   };
 
@@ -903,9 +903,9 @@
     return function(dictEq1) {
       var eq19 = eq(dictEq1);
       return {
-        eq: function(x38) {
+        eq: function(x37) {
           return function(y36) {
-            return eq18(x38.value0)(y36.value0) && eq19(x38.value1)(y36.value1);
+            return eq18(x37.value0)(y36.value0) && eq19(x37.value1)(y36.value1);
           };
         }
       };
@@ -918,9 +918,9 @@
       var compare12 = compare(dictOrd1);
       var eqTuple2 = eqTuple1(dictOrd1.Eq0());
       return {
-        compare: function(x38) {
+        compare: function(x37) {
           return function(y36) {
-            var v = compare6(x38.value0)(y36.value0);
+            var v = compare6(x37.value0)(y36.value0);
             if (v instanceof LT) {
               return LT.value;
             }
@@ -929,7 +929,7 @@
               return GT.value;
             }
             ;
-            return compare12(x38.value1)(y36.value1);
+            return compare12(x37.value1)(y36.value1);
           };
         },
         Eq0: function() {
@@ -1042,14 +1042,14 @@
   var eqMaybe = function(dictEq) {
     var eq18 = eq(dictEq);
     return {
-      eq: function(x38) {
+      eq: function(x37) {
         return function(y36) {
-          if (x38 instanceof Nothing && y36 instanceof Nothing) {
+          if (x37 instanceof Nothing && y36 instanceof Nothing) {
             return true;
           }
           ;
-          if (x38 instanceof Just && y36 instanceof Just) {
-            return eq18(x38.value0)(y36.value0);
+          if (x37 instanceof Just && y36 instanceof Just) {
+            return eq18(x37.value0)(y36.value0);
           }
           ;
           return false;
@@ -1141,21 +1141,21 @@
       return void 0;
     }
   })();
-  function _trace(x38, k) {
+  function _trace(x37, k) {
     if (util !== void 0) {
-      console.log(util.inspect(x38, { depth: null, colors: true }));
+      console.log(util.inspect(x37, { depth: null, colors: true }));
     } else {
-      console.log(x38);
+      console.log(x37);
     }
     return k({});
   }
-  function _spy(tag, x38) {
+  function _spy(tag, x37) {
     if (util !== void 0) {
-      console.log(tag + ":", util.inspect(x38, { depth: null, colors: true }));
+      console.log(tag + ":", util.inspect(x37, { depth: null, colors: true }));
     } else {
-      console.log(tag + ":", x38);
+      console.log(tag + ":", x37);
     }
-    return x38;
+    return x37;
   }
   var now = (function() {
     var perf;
@@ -2356,8 +2356,8 @@
   };
 
   // output/Data.Identity/index.js
-  var Identity = function(x38) {
-    return x38;
+  var Identity = function(x37) {
+    return x37;
   };
   var functorIdentity = {
     map: function(f) {
@@ -2556,8 +2556,8 @@
 
   // output/Control.Monad.Except.Trans/index.js
   var map5 = /* @__PURE__ */ map(functorEither);
-  var ExceptT = function(x38) {
-    return x38;
+  var ExceptT = function(x37) {
+    return x37;
   };
   var runExceptT = function(v) {
     return v;
@@ -2686,8 +2686,8 @@
   };
 
   // output/Unsafe.Coerce/foreign.js
-  var unsafeCoerce2 = function(x38) {
-    return x38;
+  var unsafeCoerce2 = function(x37) {
+    return x37;
   };
 
   // output/Safe.Coerce/index.js
@@ -2804,8 +2804,8 @@
   };
 
   // output/Data.Monoid.Disj/index.js
-  var Disj = function(x38) {
-    return x38;
+  var Disj = function(x37) {
+    return x37;
   };
   var semigroupDisj = function(dictHeytingAlgebra) {
     var disj2 = disj(dictHeytingAlgebra);
@@ -3090,9 +3090,9 @@
       var append23 = append(dictMonoid.Semigroup0());
       var mempty2 = mempty(dictMonoid);
       return function(f) {
-        return foldr22(function(x38) {
+        return foldr22(function(x37) {
           return function(acc) {
-            return append23(f(x38))(acc);
+            return append23(f(x37))(acc);
           };
         })(mempty2);
       };
@@ -3265,8 +3265,8 @@
   var pure2 = /* @__PURE__ */ pure(applicativeEffect);
   var $$void3 = /* @__PURE__ */ $$void(functorEffect);
   var map6 = /* @__PURE__ */ map(functorEffect);
-  var Canceler = function(x38) {
-    return x38;
+  var Canceler = function(x37) {
+    return x37;
   };
   var suspendAff = /* @__PURE__ */ _fork(false);
   var functorParAff = {
@@ -3500,8 +3500,8 @@
       var pure48 = pure(dictMonad.Applicative0());
       return function(m) {
         return function(s) {
-          return bind71(m)(function(x38) {
-            return pure48(new Tuple(x38, s));
+          return bind71(m)(function(x37) {
+            return pure48(new Tuple(x37, s));
           });
         };
       };
@@ -3639,8 +3639,8 @@
   function nullable(a2, r, f) {
     return a2 == null ? r : f(a2);
   }
-  function notNull(x38) {
-    return x38;
+  function notNull(x37) {
+    return x37;
   }
 
   // output/Data.Nullable/index.js
@@ -3696,8 +3696,8 @@
   };
 
   // output/Web.HTML.Common/index.js
-  var ClassName = function(x38) {
-    return x38;
+  var ClassName = function(x37) {
+    return x37;
   };
 
   // output/Web.HTML.HTMLDocument/foreign.js
@@ -3773,8 +3773,8 @@
 
   // output/Web.HTML.HTMLElement/index.js
   var toNode = unsafeCoerce2;
-  var fromElement = function(x38) {
-    return _read(Nothing.value, Just.create, x38);
+  var fromElement = function(x37) {
+    return _read(Nothing.value, Just.create, x37);
   };
 
   // output/Effect.Uncurried/foreign.js
@@ -3888,14 +3888,14 @@
     var bottom1 = bottom(dictBoundedEnum.Bounded0());
     return function(low2) {
       return function(high2) {
-        return function(x38) {
-          var v = toEnum1(x38);
+        return function(x37) {
+          var v = toEnum1(x37);
           if (v instanceof Just) {
             return v.value0;
           }
           ;
           if (v instanceof Nothing) {
-            var $140 = x38 < fromEnum1(bottom1);
+            var $140 = x37 < fromEnum1(bottom1);
             if ($140) {
               return low2;
             }
@@ -4133,9 +4133,9 @@
       var mempty2 = mempty(dictMonoid);
       return function(f) {
         return foldrWithIndex1(function(i2) {
-          return function(x38) {
+          return function(x37) {
             return function(acc) {
-              return append23(f(i2)(x38))(acc);
+              return append23(f(i2)(x37))(acc);
             };
           };
         })(mempty2);
@@ -4222,8 +4222,8 @@
     };
     return Cons3;
   })();
-  var NonEmptyList = function(x38) {
-    return x38;
+  var NonEmptyList = function(x37) {
+    return x37;
   };
   var toList = function(v) {
     return new Cons(v.value0, v.value1);
@@ -6204,11 +6204,11 @@
       var yes = [];
       var no = [];
       for (var i2 = 0; i2 < xs.length; i2++) {
-        var x38 = xs[i2];
-        if (f(x38))
-          yes.push(x38);
+        var x37 = xs[i2];
+        if (f(x37))
+          yes.push(x37);
         else
-          no.push(x38);
+          no.push(x37);
       }
       return { yes, no };
     };
@@ -6219,7 +6219,7 @@
       var i2;
       var j;
       var k;
-      var x38;
+      var x37;
       var y36;
       var c;
       mid = from3 + (to2 - from3 >> 1);
@@ -6229,14 +6229,14 @@
       j = mid;
       k = from3;
       while (i2 < mid && j < to2) {
-        x38 = xs2[i2];
+        x37 = xs2[i2];
         y36 = xs2[j];
-        c = fromOrdering(compare6(x38)(y36));
+        c = fromOrdering(compare6(x37)(y36));
         if (c > 0) {
           xs1[k++] = y36;
           ++j;
         } else {
-          xs1[k++] = x38;
+          xs1[k++] = x37;
           ++i2;
         }
       }
@@ -6600,10 +6600,10 @@
   };
   var unsafeIndex1 = /* @__PURE__ */ unsafeIndex();
   var uncons2 = /* @__PURE__ */ (function() {
-    return unconsImpl($$const(Nothing.value))(function(x38) {
+    return unconsImpl($$const(Nothing.value))(function(x37) {
       return function(xs) {
         return new Just({
-          head: x38,
+          head: x37,
           tail: xs
         });
       };
@@ -6668,8 +6668,8 @@
     };
   };
   var snoc = function(xs) {
-    return function(x38) {
-      return withArray(push(x38))(xs)();
+    return function(x37) {
+      return withArray(push(x37))(xs)();
     };
   };
   var singleton5 = function(a2) {
@@ -6682,17 +6682,17 @@
     return function(xs) {
       return (function __do4() {
         var arr = newSTArray();
-        foreach(xs)(function(x38) {
+        foreach(xs)(function(x37) {
           return function __do5() {
             var e = map14((function() {
               var $179 = any2(function(v) {
-                return eq25(v)(x38);
+                return eq25(v)(x37);
               });
               return function($180) {
                 return !$179($180);
               };
             })())(unsafeFreeze(arr))();
-            return when2(e)($$void6(push(x38)(arr)))();
+            return when2(e)($$void6(push(x37)(arr)))();
           };
         })();
         return unsafeFreeze(arr)();
@@ -6718,9 +6718,9 @@
   };
   var nubBy = function(comp) {
     return function(xs) {
-      var indexedAndSorted = sortBy(function(x38) {
+      var indexedAndSorted = sortBy(function(x37) {
         return function(y36) {
-          return comp(snd(x38))(snd(y36));
+          return comp(snd(x37))(snd(y36));
         };
       })(mapWithIndex3(Tuple.create)(xs));
       var v = head2(indexedAndSorted);
@@ -6761,11 +6761,11 @@
         var iter = iterator(function(v) {
           return index2(xs)(v);
         })();
-        iterate(iter)(function(x38) {
+        iterate(iter)(function(x37) {
           return $$void6(function __do5() {
             var sub1 = newSTArray();
-            push(x38)(sub1)();
-            pushWhile(op(x38))(iter)(sub1)();
+            push(x37)(sub1)();
+            pushWhile(op(x37))(iter)(sub1)();
             var grp = unsafeFreeze(sub1)();
             return push(grp)(result)();
           });
@@ -6788,9 +6788,9 @@
   };
   var elemIndex = function(dictEq) {
     var eq25 = eq(dictEq);
-    return function(x38) {
+    return function(x37) {
       return findIndex(function(v) {
-        return eq25(v)(x38);
+        return eq25(v)(x37);
       });
     };
   };
@@ -6818,9 +6818,9 @@
       };
     };
   };
-  var cons3 = function(x38) {
+  var cons3 = function(x37) {
     return function(xs) {
-      return append2([x38])(xs);
+      return append2([x37])(xs);
     };
   };
   var concatMap = /* @__PURE__ */ flip(/* @__PURE__ */ bind(bindArray));
@@ -7546,24 +7546,24 @@
   var fromNumber = /* @__PURE__ */ (function() {
     return fromNumberImpl(Just.create)(Nothing.value);
   })();
-  var unsafeClamp = function(x38) {
-    if (!isFiniteImpl(x38)) {
+  var unsafeClamp = function(x37) {
+    if (!isFiniteImpl(x37)) {
       return 0;
     }
     ;
-    if (x38 >= toNumber(top3)) {
+    if (x37 >= toNumber(top3)) {
       return top3;
     }
     ;
-    if (x38 <= toNumber(bottom3)) {
+    if (x37 <= toNumber(bottom3)) {
       return bottom3;
     }
     ;
     if (otherwise) {
-      return fromMaybe(0)(fromNumber(x38));
+      return fromMaybe(0)(fromNumber(x37));
     }
     ;
-    throw new Error("Failed pattern match at Data.Int (line 72, column 1 - line 72, column 29): " + [x38.constructor.name]);
+    throw new Error("Failed pattern match at Data.Int (line 72, column 1 - line 72, column 29): " + [x37.constructor.name]);
   };
   var round2 = function($37) {
     return unsafeClamp(round($37));
@@ -7603,9 +7603,9 @@
   };
   var _indexOf = function(just) {
     return function(nothing) {
-      return function(x38) {
+      return function(x37) {
         return function(s) {
-          var i2 = s.indexOf(x38);
+          var i2 = s.indexOf(x37);
           return i2 === -1 ? nothing : just(i2);
         };
       };
@@ -8081,8 +8081,8 @@
   };
 
   // output/Halogen.HTML.Core/index.js
-  var HTML = function(x38) {
-    return x38;
+  var HTML = function(x37) {
+    return x37;
   };
   var widget = function($28) {
     return HTML(Widget.create($28));
@@ -8260,8 +8260,8 @@
   };
   var functorFreeAp = {
     map: function(f) {
-      return function(x38) {
-        return mkAp(new Pure(f))(x38);
+      return function(x37) {
+        return mkAp(new Pure(f))(x37);
       };
     }
   };
@@ -8491,9 +8491,9 @@
               var v = uncons3(xs);
               if (v instanceof Nothing) {
                 $tco_done1 = true;
-                return foldl10(function(x38) {
+                return foldl10(function(x37) {
                   return function(i2) {
-                    return i2(x38);
+                    return i2(x37);
                   };
                 })(b2)(ys);
               }
@@ -8778,11 +8778,11 @@
 
   // output/Halogen.Query.HalogenM/index.js
   var identity9 = /* @__PURE__ */ identity(categoryFn);
-  var SubscriptionId = function(x38) {
-    return x38;
+  var SubscriptionId = function(x37) {
+    return x37;
   };
-  var ForkId = function(x38) {
-    return x38;
+  var ForkId = function(x37) {
+    return x37;
   };
   var State = /* @__PURE__ */ (function() {
     function State2(value0) {
@@ -8915,8 +8915,8 @@
     };
     return GetRef2;
   })();
-  var HalogenM = function(x38) {
-    return x38;
+  var HalogenM = function(x37) {
+    return x37;
   };
   var unsubscribe2 = function(sid) {
     return liftF(new Unsubscribe(sid, unit));
@@ -10464,21 +10464,21 @@
     return NotFound2;
   })();
   var eqSection = {
-    eq: function(x38) {
+    eq: function(x37) {
       return function(y36) {
-        if (x38 instanceof UnderstandingSection && y36 instanceof UnderstandingSection) {
+        if (x37 instanceof UnderstandingSection && y36 instanceof UnderstandingSection) {
           return true;
         }
         ;
-        if (x38 instanceof TutorialSection && y36 instanceof TutorialSection) {
+        if (x37 instanceof TutorialSection && y36 instanceof TutorialSection) {
           return true;
         }
         ;
-        if (x38 instanceof HowToSection && y36 instanceof HowToSection) {
+        if (x37 instanceof HowToSection && y36 instanceof HowToSection) {
           return true;
         }
         ;
-        if (x38 instanceof APISection && y36 instanceof APISection) {
+        if (x37 instanceof APISection && y36 instanceof APISection) {
           return true;
         }
         ;
@@ -10487,93 +10487,93 @@
     }
   };
   var eqRoute = {
-    eq: function(x38) {
+    eq: function(x37) {
       return function(y36) {
-        if (x38 instanceof Home && y36 instanceof Home) {
+        if (x37 instanceof Home && y36 instanceof Home) {
           return true;
         }
         ;
-        if (x38 instanceof GettingStarted && y36 instanceof GettingStarted) {
+        if (x37 instanceof GettingStarted && y36 instanceof GettingStarted) {
           return true;
         }
         ;
-        if (x38 instanceof Wizard && y36 instanceof Wizard) {
+        if (x37 instanceof Wizard && y36 instanceof Wizard) {
           return true;
         }
         ;
-        if (x38 instanceof HowtoIndex && y36 instanceof HowtoIndex) {
+        if (x37 instanceof HowtoIndex && y36 instanceof HowtoIndex) {
           return true;
         }
         ;
-        if (x38 instanceof Reference && y36 instanceof Reference) {
+        if (x37 instanceof Reference && y36 instanceof Reference) {
           return true;
         }
         ;
-        if (x38 instanceof ReferenceModule && y36 instanceof ReferenceModule) {
-          return x38.value0 === y36.value0;
+        if (x37 instanceof ReferenceModule && y36 instanceof ReferenceModule) {
+          return x37.value0 === y36.value0;
         }
         ;
-        if (x38 instanceof About && y36 instanceof About) {
+        if (x37 instanceof About && y36 instanceof About) {
           return true;
         }
         ;
-        if (x38 instanceof UnderstandingConcepts && y36 instanceof UnderstandingConcepts) {
+        if (x37 instanceof UnderstandingConcepts && y36 instanceof UnderstandingConcepts) {
           return true;
         }
         ;
-        if (x38 instanceof UnderstandingPatterns && y36 instanceof UnderstandingPatterns) {
+        if (x37 instanceof UnderstandingPatterns && y36 instanceof UnderstandingPatterns) {
           return true;
         }
         ;
-        if (x38 instanceof UnderstandingPhilosophy && y36 instanceof UnderstandingPhilosophy) {
+        if (x37 instanceof UnderstandingPhilosophy && y36 instanceof UnderstandingPhilosophy) {
           return true;
         }
         ;
-        if (x38 instanceof SimpleCharts1 && y36 instanceof SimpleCharts1) {
+        if (x37 instanceof SimpleCharts1 && y36 instanceof SimpleCharts1) {
           return true;
         }
         ;
-        if (x38 instanceof SimpleCharts2 && y36 instanceof SimpleCharts2) {
+        if (x37 instanceof SimpleCharts2 && y36 instanceof SimpleCharts2) {
           return true;
         }
         ;
-        if (x38 instanceof DataFlowViz && y36 instanceof DataFlowViz) {
+        if (x37 instanceof DataFlowViz && y36 instanceof DataFlowViz) {
           return true;
         }
         ;
-        if (x38 instanceof Movement && y36 instanceof Movement) {
+        if (x37 instanceof Movement && y36 instanceof Movement) {
           return true;
         }
         ;
-        if (x38 instanceof Hierarchies && y36 instanceof Hierarchies) {
+        if (x37 instanceof Hierarchies && y36 instanceof Hierarchies) {
           return true;
         }
         ;
-        if (x38 instanceof Interpreters && y36 instanceof Interpreters) {
+        if (x37 instanceof Interpreters && y36 instanceof Interpreters) {
           return true;
         }
         ;
-        if (x38 instanceof CodeExplorer && y36 instanceof CodeExplorer) {
+        if (x37 instanceof CodeExplorer && y36 instanceof CodeExplorer) {
           return true;
         }
         ;
-        if (x38 instanceof Explore && y36 instanceof Explore) {
-          return x38.value0 === y36.value0;
+        if (x37 instanceof Explore && y36 instanceof Explore) {
+          return x37.value0 === y36.value0;
         }
         ;
-        if (x38 instanceof WealthHealth && y36 instanceof WealthHealth) {
+        if (x37 instanceof WealthHealth && y36 instanceof WealthHealth) {
           return true;
         }
         ;
-        if (x38 instanceof CodeAtlas && y36 instanceof CodeAtlas) {
+        if (x37 instanceof CodeAtlas && y36 instanceof CodeAtlas) {
           return true;
         }
         ;
-        if (x38 instanceof Acknowledgements && y36 instanceof Acknowledgements) {
+        if (x37 instanceof Acknowledgements && y36 instanceof Acknowledgements) {
           return true;
         }
         ;
-        if (x38 instanceof NotFound && y36 instanceof NotFound) {
+        if (x37 instanceof NotFound && y36 instanceof NotFound) {
           return true;
         }
         ;
@@ -10611,8 +10611,8 @@
   };
 
   // output/Data.Validation.Semiring/index.js
-  var V = function(x38) {
-    return x38;
+  var V = function(x37) {
+    return x37;
   };
   var validation = function(v) {
     return function(v1) {
@@ -11358,6 +11358,20 @@
     HideModuleDetails2.value = new HideModuleDetails2();
     return HideModuleDetails2;
   })();
+  var ResetToOverview = /* @__PURE__ */ (function() {
+    function ResetToOverview2() {
+    }
+    ;
+    ResetToOverview2.value = new ResetToOverview2();
+    return ResetToOverview2;
+  })();
+  var EnableSpotlightMode = /* @__PURE__ */ (function() {
+    function EnableSpotlightMode2() {
+    }
+    ;
+    EnableSpotlightMode2.value = new EnableSpotlightMode2();
+    return EnableSpotlightMode2;
+  })();
 
   // output/Data.MediaType.Common/index.js
   var applicationJSON = "application/json";
@@ -11694,8 +11708,8 @@
   })();
 
   // output/Data.Argonaut.Core/foreign.js
-  function id3(x38) {
-    return x38;
+  function id3(x37) {
+    return x37;
   }
   function stringify(j) {
     return JSON.stringify(j);
@@ -12130,8 +12144,8 @@
         }
         ;
         if (req2.responseFormat instanceof Document) {
-          return function(x38) {
-            return alt8(unsafeReadTagged2("Document")(x38))(alt8(unsafeReadTagged2("XMLDocument")(x38))(unsafeReadTagged2("HTMLDocument")(x38)));
+          return function(x37) {
+            return alt8(unsafeReadTagged2("Document")(x37))(alt8(unsafeReadTagged2("XMLDocument")(x37))(unsafeReadTagged2("HTMLDocument")(x37)));
           };
         }
         ;
@@ -12914,13 +12928,13 @@
     }
   };
   var eqSourceType = {
-    eq: function(x38) {
+    eq: function(x37) {
       return function(y36) {
-        if (x38 instanceof ProjectCode && y36 instanceof ProjectCode) {
+        if (x37 instanceof ProjectCode && y36 instanceof ProjectCode) {
           return true;
         }
         ;
-        if (x38 instanceof LibraryCode && y36 instanceof LibraryCode) {
+        if (x37 instanceof LibraryCode && y36 instanceof LibraryCode) {
           return true;
         }
         ;
@@ -12929,21 +12943,21 @@
     }
   };
   var eqAtlasTab = {
-    eq: function(x38) {
+    eq: function(x37) {
       return function(y36) {
-        if (x38 instanceof DeclarationsTab && y36 instanceof DeclarationsTab) {
+        if (x37 instanceof DeclarationsTab && y36 instanceof DeclarationsTab) {
           return true;
         }
         ;
-        if (x38 instanceof VisualizationTab && y36 instanceof VisualizationTab) {
+        if (x37 instanceof VisualizationTab && y36 instanceof VisualizationTab) {
           return true;
         }
         ;
-        if (x38 instanceof InteractiveGraphTab && y36 instanceof InteractiveGraphTab) {
+        if (x37 instanceof InteractiveGraphTab && y36 instanceof InteractiveGraphTab) {
           return true;
         }
         ;
-        if (x38 instanceof ExpandableBubblesTab && y36 instanceof ExpandableBubblesTab) {
+        if (x37 instanceof ExpandableBubblesTab && y36 instanceof ExpandableBubblesTab) {
           return true;
         }
         ;
@@ -13074,8 +13088,8 @@
   var bind9 = /* @__PURE__ */ bind(bindST);
   var pure19 = /* @__PURE__ */ pure(applicativeST);
   var tailRecM22 = /* @__PURE__ */ tailRecM2(monadRecST);
-  var $$Set = function(x38) {
-    return x38;
+  var $$Set = function(x37) {
+    return x37;
   };
   var toList2 = function(v) {
     return keys(v);
@@ -13120,16 +13134,16 @@
       };
     },
     foldl: function(f) {
-      return function(x38) {
-        var $131 = foldl4(f)(x38);
+      return function(x37) {
+        var $131 = foldl4(f)(x37);
         return function($132) {
           return $131(toList2($132));
         };
       };
     },
     foldr: function(f) {
-      return function(x38) {
-        var $133 = foldr4(f)(x38);
+      return function(x37) {
+        var $133 = foldr4(f)(x37);
         return function($134) {
           return $133(toList2($134));
         };
@@ -14371,17 +14385,17 @@
     };
   };
   var eqTreeLayout = {
-    eq: function(x38) {
+    eq: function(x37) {
       return function(y36) {
-        if (x38 instanceof Radial && y36 instanceof Radial) {
+        if (x37 instanceof Radial && y36 instanceof Radial) {
           return true;
         }
         ;
-        if (x38 instanceof Horizontal && y36 instanceof Horizontal) {
+        if (x37 instanceof Horizontal && y36 instanceof Horizontal) {
           return true;
         }
         ;
-        if (x38 instanceof Vertical && y36 instanceof Vertical) {
+        if (x37 instanceof Vertical && y36 instanceof Vertical) {
           return true;
         }
         ;
@@ -14618,8 +14632,8 @@
     };
     return ForceFilter2;
   })();
-  var ForceT = function(x38) {
-    return x38;
+  var ForceT = function(x37) {
+    return x37;
   };
   var showRegularForceType = {
     show: function(v) {
@@ -14662,13 +14676,13 @@
     throw new Error("Failed pattern match at PSD3.Internal.Simulation.Types (line 203, column 1 - line 203, column 47): " + [v.constructor.name]);
   };
   var eqForceStatus = {
-    eq: function(x38) {
+    eq: function(x37) {
       return function(y36) {
-        if (x38 instanceof ForceActive && y36 instanceof ForceActive) {
+        if (x37 instanceof ForceActive && y36 instanceof ForceActive) {
           return true;
         }
         ;
-        if (x38 instanceof ForceDisabled && y36 instanceof ForceDisabled) {
+        if (x37 instanceof ForceDisabled && y36 instanceof ForceDisabled) {
           return true;
         }
         ;
@@ -14792,7 +14806,8 @@
       selectedSourceFilter: Nothing.value,
       loading: true,
       error: Nothing.value,
-      hoveredModule: Nothing.value
+      hoveredModule: Nothing.value,
+      spotlightModeActive: false
     };
   };
 
@@ -14808,13 +14823,13 @@
   var compare2 = /* @__PURE__ */ compare(ordString);
   var bind10 = /* @__PURE__ */ bind(bindArray);
   var truncate = function(maxLen) {
-    return function(text25) {
-      var $28 = length8(text25) > maxLen;
+    return function(text24) {
+      var $28 = length8(text24) > maxLen;
       if ($28) {
-        return take4(maxLen - 3 | 0)(text25) + "...";
+        return take4(maxLen - 3 | 0)(text24) + "...";
       }
       ;
-      return text25;
+      return text24;
     };
   };
   var renderStats = function(stats) {
@@ -16475,24 +16490,21 @@
   var fromFoldable12 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
   var traverse_7 = /* @__PURE__ */ traverse_(applicativeEffect)(foldableArray);
   var strokeOpacity2 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
-  var text1 = /* @__PURE__ */ text6(toAttrString);
-  var x4 = /* @__PURE__ */ x(toAttrNumber);
-  var y32 = /* @__PURE__ */ y(toAttrNumber);
-  var radius1 = /* @__PURE__ */ radius(toAttrNumber);
   var strength2 = /* @__PURE__ */ strength(toAttrNumber);
   var theta2 = /* @__PURE__ */ theta(toAttrNumber);
   var distanceMin2 = /* @__PURE__ */ distanceMin(toAttrNumber);
-  var radius22 = /* @__PURE__ */ radius2(toAttrNumberFnI);
+  var radius1 = /* @__PURE__ */ radius2(toAttrNumberFnI);
   var iterations2 = /* @__PURE__ */ iterations(toAttrNumber);
-  var x32 = /* @__PURE__ */ x3(toAttrNumber);
-  var y42 = /* @__PURE__ */ y3(toAttrNumber);
+  var x4 = /* @__PURE__ */ x3(toAttrNumber);
+  var y32 = /* @__PURE__ */ y3(toAttrNumber);
   var distance2 = /* @__PURE__ */ distance(toAttrNumber);
   var _handle2 = /* @__PURE__ */ _handle(strongForget);
-  var when5 = /* @__PURE__ */ when(applicativeEffect);
+  var sort2 = /* @__PURE__ */ sort(ordString);
   var toUnfoldable7 = /* @__PURE__ */ toUnfoldable6(unfoldableArray);
+  var when5 = /* @__PURE__ */ when(applicativeEffect);
+  var notEq3 = /* @__PURE__ */ notEq(/* @__PURE__ */ eqMaybe(eqString));
   var liftEffect7 = /* @__PURE__ */ liftEffect(monadEffectEffect);
   var pure20 = /* @__PURE__ */ pure(applicativeEffect);
-  var sort2 = /* @__PURE__ */ sort(ordString);
   var unboxLink = unsafeCoerce2;
   var unboxBubbleNode = function(datum2) {
     return datum2;
@@ -16509,18 +16521,18 @@
   };
   var nodeColor = function(path3) {
     if (take4(4)(path3) === "src/") {
-      var $149 = contains("src/lib/PSD3")(path3);
-      if ($149) {
+      var $143 = contains("src/lib/PSD3")(path3);
+      if ($143) {
         return "#2E7D32";
       }
       ;
-      var $150 = contains("src/lib/")(path3);
-      if ($150) {
+      var $144 = contains("src/lib/")(path3);
+      if ($144) {
         return "#4CAF50";
       }
       ;
-      var $151 = contains("src/website/")(path3);
-      if ($151) {
+      var $145 = contains("src/website/")(path3);
+      if ($145) {
         return "#D32F2F";
       }
       ;
@@ -16571,52 +16583,52 @@
     })(modules);
   };
   var link_ = {
-    source: function($178) {
+    source: function($172) {
       return (function(v) {
         return v.source;
-      })(unboxLink($178));
+      })(unboxLink($172));
     },
-    target: function($179) {
+    target: function($173) {
       return (function(v) {
         return v.target;
-      })(unboxLink($179));
+      })(unboxLink($173));
     }
   };
   var datum_ = {
-    id: function($180) {
+    id: function($174) {
       return (function(v) {
         return v.id;
-      })(unboxBubbleNode($180));
+      })(unboxBubbleNode($174));
     },
-    x: function($181) {
+    x: function($175) {
       return (function(v) {
         return v.x;
-      })(unboxBubbleNode($181));
+      })(unboxBubbleNode($175));
     },
-    y: function($182) {
+    y: function($176) {
       return (function(v) {
         return v.y;
-      })(unboxBubbleNode($182));
+      })(unboxBubbleNode($176));
     },
-    name: function($183) {
+    name: function($177) {
       return (function(v) {
         return v.name;
-      })(unboxBubbleNode($183));
+      })(unboxBubbleNode($177));
     },
-    loc: function($184) {
+    loc: function($178) {
       return (function(v) {
         return v.loc;
-      })(unboxBubbleNode($184));
+      })(unboxBubbleNode($178));
     },
-    path: function($185) {
+    path: function($179) {
       return (function(v) {
         return v.path;
-      })(unboxBubbleNode($185));
+      })(unboxBubbleNode($179));
     },
-    expanded: function($186) {
+    expanded: function($180) {
       return (function(v) {
         return v.expanded;
-      })(unboxBubbleNode($186));
+      })(unboxBubbleNode($180));
     }
   };
   var updateGraph = function(dictBind) {
@@ -16651,8 +16663,8 @@
                       return bind116(appendTo2(node$prime.enter)(Group.value)([classed2("node-group")]))(function(nodeEnter) {
                         return bind116(appendTo2(nodeEnter)(Circle.value)([radius3(function(d9) {
                           return nodeRadius(datum_.expanded(d9))(datum_.loc(d9));
-                        }), fill2(function($187) {
-                          return nodeColor(datum_.path($187));
+                        }), fill2(function($181) {
+                          return nodeColor(datum_.path($181));
                         }), classed2("node-circle")]))(function() {
                           return bind116(appendTo2(nodeEnter)(Text2.value)([text7(datum_.name), classed2("node-label"), y4(function(d9) {
                             return -nodeRadius(datum_.expanded(d9))(datum_.loc(d9));
@@ -16668,8 +16680,8 @@
                                 return bind116(selectUnder2(node$prime.update)(show8(Circle.value)))(function(updateCircles) {
                                   return discard211(setAttributes2(updateCircles)([radius3(function(d9) {
                                     return nodeRadius(datum_.expanded(d9))(datum_.loc(d9));
-                                  }), fill2(function($188) {
-                                    return nodeColor(datum_.path($188));
+                                  }), fill2(function($182) {
+                                    return nodeColor(datum_.path($182));
                                   })]))(function() {
                                     return bind116(selectUnder2(node$prime.update)(show8(Text2.value)))(function(updateLabels) {
                                       return discard211(setAttributes2(updateLabels)([text7(datum_.name), y4(function(d9) {
@@ -16692,22 +16704,22 @@
                                                         return "translate(" + (show13(datum_.x(d9)) + ("," + (show13(datum_.y(d9)) + ")")));
                                                       };
                                                       return discard211(addTickFunction2("nodes")(new Step3(mergedNodes, [transform$prime(translateNode)])))(function() {
-                                                        return addTickFunction2("links")(new Step3(mergedLinks, [x12(function($189) {
+                                                        return addTickFunction2("links")(new Step3(mergedLinks, [x12(function($183) {
                                                           return (function(v1) {
                                                             return v1.x;
-                                                          })(link_.source($189));
-                                                        }), y12(function($190) {
+                                                          })(link_.source($183));
+                                                        }), y12(function($184) {
                                                           return (function(v1) {
                                                             return v1.y;
-                                                          })(link_.source($190));
-                                                        }), x22(function($191) {
+                                                          })(link_.source($184));
+                                                        }), x22(function($185) {
                                                           return (function(v1) {
                                                             return v1.x;
-                                                          })(link_.target($191));
-                                                        }), y22(function($192) {
+                                                          })(link_.target($185));
+                                                        }), y22(function($186) {
                                                           return (function(v1) {
                                                             return v1.y;
-                                                          })(link_.target($192));
+                                                          })(link_.target($186));
                                                         })]));
                                                       });
                                                     });
@@ -16765,9 +16777,7 @@
     var bind116 = bind(dictBind);
     return function(dictMonadEffect) {
       var liftEffect110 = liftEffect(dictMonadEffect);
-      var Applicative0 = dictMonadEffect.Monad0().Applicative0();
-      var traverse_15 = traverse_(Applicative0)(foldableArray);
-      var pure115 = pure(Applicative0);
+      var pure115 = pure(dictMonadEffect.Monad0().Applicative0());
       return function(dictMonadState) {
         return function(dictSelectionM) {
           var attach2 = attach(dictSelectionM);
@@ -16809,107 +16819,64 @@
                                                 return bind116(appendTo2(svg2)(Group.value)([classed2("zoom-group")]))(function(zoomGroup) {
                                                   return bind116(appendTo2(zoomGroup)(Group.value)([classed2("link"), strokeColor2("#999"), strokeOpacity2(0.4)]))(function(linksGroup) {
                                                     return bind116(appendTo2(zoomGroup)(Group.value)([classed2("node"), strokeColor2("#fff"), strokeWidth2(1.5)]))(function(nodesGroup) {
-                                                      return bind116(appendTo2(svg2)(Group.value)([classed2("legend"), transform$prime(function(v1) {
-                                                        return "translate(" + (show13(v.value0 / 2 - 150) + ("," + (show13(-v.value1 / 2 + 30) + ")")));
-                                                      })]))(function(legendGroup) {
-                                                        return bind116(appendTo2(legendGroup)(Text2.value)([text1("Declaration Types"), x4(0), y32(0), classed2("legend-title")]))(function() {
-                                                          var legendItems = [{
-                                                            name: "Functions/Values",
-                                                            color: "#2196F3",
-                                                            yOffset: 25
-                                                          }, {
-                                                            name: "Foreign Functions",
-                                                            color: "#00BCD4",
-                                                            yOffset: 50
-                                                          }, {
-                                                            name: "Data Types",
-                                                            color: "#4CAF50",
-                                                            yOffset: 75
-                                                          }, {
-                                                            name: "Type Classes",
-                                                            color: "#9C27B0",
-                                                            yOffset: 100
-                                                          }, {
-                                                            name: "Type Synonyms",
-                                                            color: "#FF9800",
-                                                            yOffset: 125
-                                                          }, {
-                                                            name: "Instances",
-                                                            color: "#E91E63",
-                                                            yOffset: 150
-                                                          }];
-                                                          return bind116(traverse_15(function(item) {
-                                                            return bind116(appendTo2(legendGroup)(Group.value)([transform$prime(function(v1) {
-                                                              return "translate(0," + (show13(item.yOffset) + ")");
-                                                            }), classed2("legend-item")]))(function(itemGroup) {
-                                                              return bind116(appendTo2(itemGroup)(Circle.value)([radius1(8), fill1(item.color), x4(0), y32(0)]))(function() {
-                                                                return bind116(appendTo2(itemGroup)(Text2.value)([text1(item.name), x4(15), y32(5), classed2("legend-label")]))(function() {
-                                                                  return pure115(unit);
-                                                                });
-                                                              });
-                                                            });
-                                                          })(legendItems))(function() {
-                                                            var spotlightCollisionRadius = function(datum2) {
-                                                              return function(v1) {
-                                                                var padding = (function() {
-                                                                  if (datum2.expanded) {
-                                                                    return 25;
-                                                                  }
-                                                                  ;
-                                                                  return 5;
-                                                                })();
-                                                                var baseRadius = nodeRadius(datum2.expanded)(datum2.loc);
-                                                                return baseRadius + padding;
-                                                              };
-                                                            };
-                                                            var compactCollisionRadius = function(datum2) {
-                                                              return function(v1) {
-                                                                var baseRadius = nodeRadius(false)(datum2.loc);
-                                                                return baseRadius + 2;
-                                                              };
-                                                            };
-                                                            var forces2 = [createForce("manyBody-compact")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-50), theta2(0.9), distanceMin2(1)]), createForce("manyBody-spotlight")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-150), theta2(0.9), distanceMin2(1)]), createForce("collision-compact")(new RegularForce(ForceCollide.value))(allNodes)([radius22(compactCollisionRadius), strength2(0.9), iterations2(3)]), createForce("collision-spotlight")(new RegularForce(ForceCollide.value))(allNodes)([radius22(spotlightCollisionRadius), strength2(0.9), iterations2(3)]), createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([x32(0), y42(0), strength2(0.2)]), createLinkForce(Nothing.value)([distance2(100)])];
-                                                            var activeForces = fromFoldable8(["manyBody-compact", "collision-compact", "center", "links"]);
-                                                            return bind116(init5({
-                                                              nodes: bubbleNodes,
-                                                              links: bubbleLinks,
-                                                              forces: forces2,
-                                                              activeForces,
-                                                              config: {
-                                                                alpha: 1,
-                                                                alphaTarget: 0,
-                                                                alphaMin: 1e-3,
-                                                                alphaDecay: 0.0228,
-                                                                velocityDecay: 0.4
-                                                              },
-                                                              keyFn: keyIsID_,
-                                                              ticks: fromFoldable12([])
-                                                            }))(function() {
-                                                              return bind116(on3(svg2)(new Zoom({
-                                                                extent: new ZoomExtent({
-                                                                  top: 0,
-                                                                  left: 0,
-                                                                  bottom: v.value1,
-                                                                  right: v.value0
-                                                                }),
-                                                                scale: new ScaleExtent(0.1, 4),
-                                                                name: "BubbleGraph",
-                                                                target: zoomGroup
-                                                              })))(function() {
-                                                                return pure115({
-                                                                  svg: svg2,
-                                                                  zoomGroup,
-                                                                  nodesGroup,
-                                                                  linksGroup,
-                                                                  bubbleNodes,
-                                                                  bubbleLinks,
-                                                                  declarationsData: declsData,
-                                                                  adjacencyMap,
-                                                                  modulesMap,
-                                                                  dependedOnByMap
-                                                                });
-                                                              });
-                                                            });
+                                                      var spotlightCollisionRadius = function(datum2) {
+                                                        return function(v1) {
+                                                          var baseRadius = nodeRadius(datum2.expanded)(datum2.loc);
+                                                          var padding = (function() {
+                                                            if (datum2.expanded) {
+                                                              return baseRadius * 0.3;
+                                                            }
+                                                            ;
+                                                            return 5;
+                                                          })();
+                                                          return baseRadius + padding;
+                                                        };
+                                                      };
+                                                      var compactCollisionRadius = function(datum2) {
+                                                        return function(v1) {
+                                                          var baseRadius = nodeRadius(false)(datum2.loc);
+                                                          return baseRadius + 2;
+                                                        };
+                                                      };
+                                                      var forces2 = [createForce("manyBody-compact")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-50), theta2(0.9), distanceMin2(1)]), createForce("manyBody-spotlight")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-150), theta2(0.9), distanceMin2(1)]), createForce("collision-compact")(new RegularForce(ForceCollide.value))(allNodes)([radius1(compactCollisionRadius), strength2(0.9), iterations2(3)]), createForce("collision-spotlight")(new RegularForce(ForceCollide.value))(allNodes)([radius1(spotlightCollisionRadius), strength2(0.9), iterations2(3)]), createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([x4(0), y32(0), strength2(0.2)]), createLinkForce(Nothing.value)([distance2(150), strength2(0.3)])];
+                                                      var activeForces = fromFoldable8(["manyBody-compact", "collision-compact", "center", "links"]);
+                                                      return bind116(init5({
+                                                        nodes: bubbleNodes,
+                                                        links: bubbleLinks,
+                                                        forces: forces2,
+                                                        activeForces,
+                                                        config: {
+                                                          alpha: 1,
+                                                          alphaTarget: 0,
+                                                          alphaMin: 1e-3,
+                                                          alphaDecay: 0.0228,
+                                                          velocityDecay: 0.4
+                                                        },
+                                                        keyFn: keyIsID_,
+                                                        ticks: fromFoldable12([])
+                                                      }))(function() {
+                                                        return bind116(on3(svg2)(new Zoom({
+                                                          extent: new ZoomExtent({
+                                                            top: 0,
+                                                            left: 0,
+                                                            bottom: v.value1,
+                                                            right: v.value0
+                                                          }),
+                                                          scale: new ScaleExtent(0.1, 4),
+                                                          name: "BubbleGraph",
+                                                          target: zoomGroup
+                                                        })))(function() {
+                                                          return pure115({
+                                                            svg: svg2,
+                                                            zoomGroup,
+                                                            nodesGroup,
+                                                            linksGroup,
+                                                            bubbleNodes,
+                                                            bubbleLinks,
+                                                            declarationsData: declsData,
+                                                            adjacencyMap,
+                                                            modulesMap,
+                                                            dependedOnByMap
                                                           });
                                                         });
                                                       });
@@ -16973,91 +16940,92 @@
                             return discard211(liftEffect110(log2("=== initialize returned ===")))(function() {
                               return bind116(use3(_handle2))(function(simHandle) {
                                 return bind116(liftEffect110($$new(false)))(function(hasFilteredRef) {
-                                  var onClick2 = function(v) {
-                                    return function(datum2) {
-                                      return function(v1) {
-                                        var clickedNode = unboxBubbleNode(datum2);
-                                        var clickedId = datum_.id(datum2);
-                                        return function __do4() {
-                                          var hasFiltered = read(hasFilteredRef)();
-                                          when5(!hasFiltered)((function() {
-                                            var connected2 = fromMaybe(empty7)(lookup8(clickedId)(initResult.adjacencyMap));
-                                            var connectedIds2 = toUnfoldable7(connected2);
-                                            var allConnected = cons3(clickedId)(connectedIds2);
-                                            return function __do5() {
-                                              log2("First click: filtering to " + (show23(length4(allConnected)) + " connected modules"))();
-                                              liftEffect7(pure20(filterToConnectedNodes_(simHandle)(keyIsID_)(allConnected)))();
-                                              write(true)(hasFilteredRef)();
-                                              log2("About to call showModuleLabels_")();
-                                              liftEffect7(showModuleLabels_(initResult.nodesGroup))();
-                                              log2("Called showModuleLabels_")();
-                                              log2("Switching to spotlight collision force")();
-                                              return switchToSpotlightForces_(simHandle)();
-                                            };
-                                          })())();
-                                          var newExpanded = !clickedNode.expanded;
-                                          unsafeSetField_("expanded")(newExpanded)(datum2)();
-                                          log2(clickedId + (function() {
-                                            if (newExpanded) {
-                                              return " expanded";
-                                            }
-                                            ;
-                                            return " collapsed";
-                                          })())();
-                                          updateNodeExpansion_(simHandle)(nodeRadius)(initResult.declarationsData)(callsData)(datum2);
-                                          var connected = fromMaybe(empty7)(lookup8(clickedId)(initResult.adjacencyMap));
-                                          var connectedIds = toUnfoldable7(connected);
-                                          log2("Expanding " + (show23(length4(connectedIds)) + " connected modules"))();
-                                          traverse_7(function(connectedId) {
-                                            return expandNodeById_(simHandle)(nodeRadius)(initResult.declarationsData)(callsData)(connectedId)(newExpanded);
-                                          })(connectedIds)();
-                                          return drawInterModuleDeclarationLinks_(initResult.zoomGroup)(nodeRadius)(initResult.declarationsData)(callsData)();
-                                        };
-                                      };
-                                    };
-                                  };
-                                  return discard211(updateGraph5({
-                                    nodesGroup: initResult.nodesGroup,
-                                    linksGroup: initResult.linksGroup,
-                                    nodes: initResult.bubbleNodes,
-                                    links: initResult.bubbleLinks,
-                                    inSpotlightMode: false
-                                  }))(function() {
-                                    var onMouseOver = function(v) {
+                                  return bind116(liftEffect110($$new(Nothing.value)))(function(currentSpotlightRef) {
+                                    var onClick2 = function(v) {
                                       return function(datum2) {
                                         return function(v1) {
-                                          var hoveredId = datum_.id(datum2);
+                                          var clickedNode = unboxBubbleNode(datum2);
+                                          var clickedId = datum_.id(datum2);
                                           return function __do4() {
-                                            log2("Mouse over: " + hoveredId)();
-                                            var v2 = lookup8(hoveredId)(initResult.modulesMap);
-                                            if (v2 instanceof Nothing) {
-                                              return log2("Module not found in map: " + hoveredId)();
-                                            }
-                                            ;
-                                            if (v2 instanceof Just) {
-                                              log2("Found module info, showing panel for: " + v2.value0.name)();
-                                              var dependencies = sort2(v2.value0.depends);
-                                              var dependedOnBy = fromMaybe(empty7)(lookup8(hoveredId)(initResult.dependedOnByMap));
-                                              var dependedOnByList = sort2(toUnfoldable7(dependedOnBy));
-                                              return callbacks.onShowModuleDetails(v2.value0.name)(dependencies)(dependedOnByList)();
-                                            }
-                                            ;
-                                            throw new Error("Failed pattern match at PSD3.CodeAtlas.Tabs.ExpandableBubbles (line 541, column 9 - line 549, column 88): " + [v2.constructor.name]);
+                                            (function() {
+                                              var v2 = lookup8(clickedId)(initResult.modulesMap);
+                                              if (v2 instanceof Nothing) {
+                                                return log2("Module not found in map: " + clickedId)();
+                                              }
+                                              ;
+                                              if (v2 instanceof Just) {
+                                                var dependencies = sort2(v2.value0.depends);
+                                                var dependedOnBy = fromMaybe(empty7)(lookup8(clickedId)(initResult.dependedOnByMap));
+                                                var dependedOnByList = sort2(toUnfoldable7(dependedOnBy));
+                                                return callbacks.onShowModuleDetails(v2.value0.name)(dependencies)(dependedOnByList)();
+                                              }
+                                              ;
+                                              throw new Error("Failed pattern match at PSD3.CodeAtlas.Tabs.ExpandableBubbles (line 490, column 9 - line 496, column 88): " + [v2.constructor.name]);
+                                            })();
+                                            var hasFiltered = read(hasFilteredRef)();
+                                            var currentSpotlight = read(currentSpotlightRef)();
+                                            when5(!hasFiltered || notEq3(currentSpotlight)(new Just(clickedId)))((function() {
+                                              var connected = fromMaybe(empty7)(lookup8(clickedId)(initResult.adjacencyMap));
+                                              var connectedIds = toUnfoldable7(connected);
+                                              var allConnected = cons3(clickedId)(connectedIds);
+                                              return function __do5() {
+                                                log2("Spotlighting module: " + (clickedId + (" with " + (show23(length4(allConnected)) + " connected modules"))))();
+                                                liftEffect7(pure20(filterToConnectedNodes_(simHandle)(keyIsID_)(allConnected)))();
+                                                write(true)(hasFilteredRef)();
+                                                write(new Just(clickedId))(currentSpotlightRef)();
+                                                var $161 = !hasFiltered;
+                                                if ($161) {
+                                                  log2("First click - entering spotlight mode")();
+                                                  liftEffect7(showModuleLabels_(initResult.nodesGroup))();
+                                                  switchToSpotlightForces_(simHandle)();
+                                                  return callbacks.onEnableSpotlightMode();
+                                                }
+                                                ;
+                                                return log2("Re-spotlighting different module")();
+                                              };
+                                            })())();
+                                            when5(!hasFiltered)(function __do5() {
+                                              unsafeSetField_("expanded")(true)(datum2)();
+                                              log2(clickedId + " expanded")();
+                                              liftEffect7(pure20(updateNodeExpansion_(simHandle)(nodeRadius)(initResult.declarationsData)(callsData)(datum2)))();
+                                              var connected = fromMaybe(empty7)(lookup8(clickedId)(initResult.adjacencyMap));
+                                              var connectedIds = toUnfoldable7(connected);
+                                              log2("Expanding " + (show23(length4(connectedIds)) + " connected modules"))();
+                                              return traverse_7(function(connectedId) {
+                                                return expandNodeById_(simHandle)(nodeRadius)(initResult.declarationsData)(callsData)(connectedId)(true);
+                                              })(connectedIds)();
+                                            })();
+                                            return drawInterModuleDeclarationLinks_(initResult.zoomGroup)(nodeRadius)(initResult.declarationsData)(callsData)();
                                           };
                                         };
                                       };
                                     };
-                                    var onMouseOut = function(v) {
-                                      return function(v1) {
-                                        return function(v2) {
-                                          return callbacks.onHideModuleDetails;
+                                    return discard211(updateGraph5({
+                                      nodesGroup: initResult.nodesGroup,
+                                      linksGroup: initResult.linksGroup,
+                                      nodes: initResult.bubbleNodes,
+                                      links: initResult.bubbleLinks,
+                                      inSpotlightMode: false
+                                    }))(function() {
+                                      var onMouseOver = function(v) {
+                                        return function(datum2) {
+                                          return function(v1) {
+                                            return pure20(unit);
+                                          };
                                         };
                                       };
-                                    };
-                                    return bind116(openSelection2(initResult.nodesGroup)(show8(Group.value)))(function(initialNodes) {
-                                      return discard211(setAttributes2(initialNodes)([onMouseEventEffectful(MouseClick.value)(onClick2), onMouseEventEffectful(MouseEnter.value)(onMouseOver), onMouseEventEffectful(MouseLeave.value)(onMouseOut)]))(function() {
-                                        return discard211(start5)(function() {
-                                          return pure115(unit);
+                                      var onMouseOut = function(v) {
+                                        return function(v1) {
+                                          return function(v2) {
+                                            return pure20(unit);
+                                          };
+                                        };
+                                      };
+                                      return bind116(openSelection2(initResult.nodesGroup)(show8(Group.value)))(function(initialNodes) {
+                                        return discard211(setAttributes2(initialNodes)([onMouseEventEffectful(MouseClick.value)(onClick2), onMouseEventEffectful(MouseEnter.value)(onMouseOver), onMouseEventEffectful(MouseLeave.value)(onMouseOut)]))(function() {
+                                          return discard211(start5)(function() {
+                                            return pure115(unit);
+                                          });
                                         });
                                       });
                                     });
@@ -17116,13 +17084,13 @@
   var y5 = /* @__PURE__ */ y3(toAttrNumber);
   var distance3 = /* @__PURE__ */ distance(toAttrNumber);
   var _handle3 = /* @__PURE__ */ _handle(strongForget);
-  var x33 = /* @__PURE__ */ x(toAttrNumber);
+  var x32 = /* @__PURE__ */ x(toAttrNumber);
   var y33 = /* @__PURE__ */ y(toAttrNumber);
   var width9 = /* @__PURE__ */ width8(toAttrNumber);
   var height9 = /* @__PURE__ */ height8(toAttrNumber);
   var fill12 = /* @__PURE__ */ fill(toAttrString);
-  var radius23 = /* @__PURE__ */ radius(toAttrNumber);
-  var text12 = /* @__PURE__ */ text6(toAttrString);
+  var radius22 = /* @__PURE__ */ radius(toAttrNumber);
+  var text1 = /* @__PURE__ */ text6(toAttrString);
   var unboxModuleNode = function(datum2) {
     return datum2;
   };
@@ -17524,8 +17492,8 @@
                                         return unpinAllNodes_(simHandle);
                                       };
                                       return bind71(appendTo2(svg2)(Group.value)([classed3("unpin-button")]))(function(unpinButton) {
-                                        return bind71(appendTo2(unpinButton)(Rect.value)([x33(-v.value0 / 2 + 10), y33(-v.value1 / 2 + 10), width9(80), height9(30), fill12("#f39c12"), radius23(5), classed3("unpin-button-bg")]))(function() {
-                                          return bind71(appendTo2(unpinButton)(Text2.value)([x33(-v.value0 / 2 + 50), y33(-v.value1 / 2 + 25), text12("Unpin All"), fill12("#fff"), classed3("unpin-button-text")]))(function() {
+                                        return bind71(appendTo2(unpinButton)(Rect.value)([x32(-v.value0 / 2 + 10), y33(-v.value1 / 2 + 10), width9(80), height9(30), fill12("#f39c12"), radius22(5), classed3("unpin-button-bg")]))(function() {
+                                          return bind71(appendTo2(unpinButton)(Text2.value)([x32(-v.value0 / 2 + 50), y33(-v.value1 / 2 + 25), text1("Unpin All"), fill12("#fff"), classed3("unpin-button-text")]))(function() {
                                             return discard112(setAttributes2(unpinButton)([new OnT$prime(MouseClick.value, unpinHandler)]))(function() {
                                               return pure115({
                                                 svg: svg2,
@@ -17655,13 +17623,13 @@
   var x24 = /* @__PURE__ */ x2(toAttrNumberFn);
   var y24 = /* @__PURE__ */ y2(toAttrNumberFn);
   var _handle4 = /* @__PURE__ */ _handle(strongForget);
-  var x34 = /* @__PURE__ */ x(toAttrNumber);
+  var x33 = /* @__PURE__ */ x(toAttrNumber);
   var y34 = /* @__PURE__ */ y(toAttrNumber);
   var width10 = /* @__PURE__ */ width8(toAttrNumber);
   var height10 = /* @__PURE__ */ height8(toAttrNumber);
   var fill13 = /* @__PURE__ */ fill(toAttrString);
-  var radius24 = /* @__PURE__ */ radius(toAttrNumber);
-  var text13 = /* @__PURE__ */ text6(toAttrString);
+  var radius23 = /* @__PURE__ */ radius(toAttrNumber);
+  var text12 = /* @__PURE__ */ text6(toAttrString);
   var unboxModuleNode2 = function(datum2) {
     return datum2;
   };
@@ -18003,8 +17971,8 @@
                                                                 return unpinAllNodes_(simHandle);
                                                               };
                                                               return bind71(appendTo2(svg2)(Group.value)([classed4("unpin-button")]))(function(unpinButton) {
-                                                                return bind71(appendTo2(unpinButton)(Rect.value)([x34(-v.value0 / 2 + 10), y34(-v.value1 / 2 + 10), width10(80), height10(30), fill13("#f39c12"), radius24(5), classed4("unpin-button-bg")]))(function() {
-                                                                  return bind71(appendTo2(unpinButton)(Text2.value)([x34(-v.value0 / 2 + 50), y34(-v.value1 / 2 + 25), text13("Unpin All"), fill13("#fff"), classed4("unpin-button-text")]))(function(unpinText) {
+                                                                return bind71(appendTo2(unpinButton)(Rect.value)([x33(-v.value0 / 2 + 10), y34(-v.value1 / 2 + 10), width10(80), height10(30), fill13("#f39c12"), radius23(5), classed4("unpin-button-bg")]))(function() {
+                                                                  return bind71(appendTo2(unpinButton)(Text2.value)([x33(-v.value0 / 2 + 50), y34(-v.value1 / 2 + 25), text12("Unpin All"), fill13("#fff"), classed4("unpin-button-text")]))(function(unpinText) {
                                                                     return discard112(setAttributes2(unpinButton)([new OnT$prime(MouseClick.value, unpinHandler)]))(function() {
                                                                       return discard112(start5)(function() {
                                                                         return pure115(unit);
@@ -18059,38 +18027,38 @@
     let compare12, compare22, delta;
     if (f.length !== 2) {
       compare12 = ascending;
-      compare22 = (d9, x38) => ascending(f(d9), x38);
-      delta = (d9, x38) => f(d9) - x38;
+      compare22 = (d9, x37) => ascending(f(d9), x37);
+      delta = (d9, x37) => f(d9) - x37;
     } else {
       compare12 = f === ascending || f === descending ? f : zero2;
       compare22 = f;
       delta = f;
     }
-    function left4(a2, x38, lo = 0, hi = a2.length) {
+    function left4(a2, x37, lo = 0, hi = a2.length) {
       if (lo < hi) {
-        if (compare12(x38, x38) !== 0) return hi;
+        if (compare12(x37, x37) !== 0) return hi;
         do {
           const mid = lo + hi >>> 1;
-          if (compare22(a2[mid], x38) < 0) lo = mid + 1;
+          if (compare22(a2[mid], x37) < 0) lo = mid + 1;
           else hi = mid;
         } while (lo < hi);
       }
       return lo;
     }
-    function right4(a2, x38, lo = 0, hi = a2.length) {
+    function right4(a2, x37, lo = 0, hi = a2.length) {
       if (lo < hi) {
-        if (compare12(x38, x38) !== 0) return hi;
+        if (compare12(x37, x37) !== 0) return hi;
         do {
           const mid = lo + hi >>> 1;
-          if (compare22(a2[mid], x38) <= 0) lo = mid + 1;
+          if (compare22(a2[mid], x37) <= 0) lo = mid + 1;
           else hi = mid;
         } while (lo < hi);
       }
       return lo;
     }
-    function center3(a2, x38, lo = 0, hi = a2.length) {
-      const i2 = left4(a2, x38, lo, hi - 1);
-      return i2 > lo && delta(a2[i2 - 1], x38) > -delta(a2[i2], x38) ? i2 - 1 : i2;
+    function center3(a2, x37, lo = 0, hi = a2.length) {
+      const i2 = left4(a2, x37, lo, hi - 1);
+      return i2 > lo && delta(a2[i2 - 1], x37) > -delta(a2[i2], x37) ? i2 - 1 : i2;
     }
     return { left: left4, center: center3, right: right4 };
   }
@@ -18099,8 +18067,8 @@
   }
 
   // node_modules/d3-array/src/number.js
-  function number(x38) {
-    return x38 === null ? NaN : +x38;
+  function number(x37) {
+    return x37 === null ? NaN : +x37;
   }
 
   // node_modules/d3-array/src/bisect.js
@@ -18203,8 +18171,8 @@
   }
 
   // node_modules/d3-axis/src/identity.js
-  function identity_default(x38) {
-    return x38;
+  function identity_default(x37) {
+    return x37;
   }
 
   // node_modules/d3-axis/src/axis.js
@@ -18213,8 +18181,8 @@
   var bottom4 = 3;
   var left2 = 4;
   var epsilon = 1e-6;
-  function translateX(x38) {
-    return "translate(" + x38 + ",0)";
+  function translateX(x37) {
+    return "translate(" + x37 + ",0)";
   }
   function translateY(y36) {
     return "translate(0," + y36 + ")";
@@ -18231,18 +18199,18 @@
     return !this.__axis;
   }
   function axis(orient, scale) {
-    var tickArguments = [], tickValues = null, tickFormat2 = null, tickSizeInner = 6, tickSizeOuter = 6, tickPadding = 3, offset = typeof window !== "undefined" && window.devicePixelRatio > 1 ? 0 : 0.5, k = orient === top4 || orient === left2 ? -1 : 1, x38 = orient === left2 || orient === right2 ? "x" : "y", transform3 = orient === top4 || orient === bottom4 ? translateX : translateY;
+    var tickArguments = [], tickValues = null, tickFormat2 = null, tickSizeInner = 6, tickSizeOuter = 6, tickPadding = 3, offset = typeof window !== "undefined" && window.devicePixelRatio > 1 ? 0 : 0.5, k = orient === top4 || orient === left2 ? -1 : 1, x37 = orient === left2 || orient === right2 ? "x" : "y", transform3 = orient === top4 || orient === bottom4 ? translateX : translateY;
     function axis2(context) {
-      var values2 = tickValues == null ? scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain() : tickValues, format2 = tickFormat2 == null ? scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity_default : tickFormat2, spacing = Math.max(tickSizeInner, 0) + tickPadding, range3 = scale.range(), range0 = +range3[0] + offset, range1 = +range3[range3.length - 1] + offset, position2 = (scale.bandwidth ? center : number2)(scale.copy(), offset), selection2 = context.selection ? context.selection() : context, path3 = selection2.selectAll(".domain").data([null]), tick = selection2.selectAll(".tick").data(values2, scale).order(), tickExit = tick.exit(), tickEnter = tick.enter().append("g").attr("class", "tick"), line = tick.select("line"), text25 = tick.select("text");
+      var values2 = tickValues == null ? scale.ticks ? scale.ticks.apply(scale, tickArguments) : scale.domain() : tickValues, format2 = tickFormat2 == null ? scale.tickFormat ? scale.tickFormat.apply(scale, tickArguments) : identity_default : tickFormat2, spacing = Math.max(tickSizeInner, 0) + tickPadding, range3 = scale.range(), range0 = +range3[0] + offset, range1 = +range3[range3.length - 1] + offset, position2 = (scale.bandwidth ? center : number2)(scale.copy(), offset), selection2 = context.selection ? context.selection() : context, path3 = selection2.selectAll(".domain").data([null]), tick = selection2.selectAll(".tick").data(values2, scale).order(), tickExit = tick.exit(), tickEnter = tick.enter().append("g").attr("class", "tick"), line = tick.select("line"), text24 = tick.select("text");
       path3 = path3.merge(path3.enter().insert("path", ".tick").attr("class", "domain").attr("stroke", "currentColor"));
       tick = tick.merge(tickEnter);
-      line = line.merge(tickEnter.append("line").attr("stroke", "currentColor").attr(x38 + "2", k * tickSizeInner));
-      text25 = text25.merge(tickEnter.append("text").attr("fill", "currentColor").attr(x38, k * spacing).attr("dy", orient === top4 ? "0em" : orient === bottom4 ? "0.71em" : "0.32em"));
+      line = line.merge(tickEnter.append("line").attr("stroke", "currentColor").attr(x37 + "2", k * tickSizeInner));
+      text24 = text24.merge(tickEnter.append("text").attr("fill", "currentColor").attr(x37, k * spacing).attr("dy", orient === top4 ? "0em" : orient === bottom4 ? "0.71em" : "0.32em"));
       if (context !== selection2) {
         path3 = path3.transition(context);
         tick = tick.transition(context);
         line = line.transition(context);
-        text25 = text25.transition(context);
+        text24 = text24.transition(context);
         tickExit = tickExit.transition(context).attr("opacity", epsilon).attr("transform", function(d9) {
           return isFinite(d9 = position2(d9)) ? transform3(d9 + offset) : this.getAttribute("transform");
         });
@@ -18256,8 +18224,8 @@
       tick.attr("opacity", 1).attr("transform", function(d9) {
         return transform3(position2(d9) + offset);
       });
-      line.attr(x38 + "2", k * tickSizeInner);
-      text25.attr(x38, k * spacing).text(format2);
+      line.attr(x37 + "2", k * tickSizeInner);
+      text24.attr(x37, k * spacing).text(format2);
       selection2.filter(entering).attr("fill", "none").attr("font-size", 10).attr("font-family", "sans-serif").attr("text-anchor", orient === right2 ? "start" : orient === left2 ? "end" : "middle");
       selection2.each(function() {
         this.__axis = position2;
@@ -18430,8 +18398,8 @@
   }
 
   // node_modules/d3-selection/src/array.js
-  function array(x38) {
-    return x38 == null ? [] : Array.isArray(x38) ? x38 : Array.from(x38);
+  function array(x37) {
+    return x37 == null ? [] : Array.isArray(x37) ? x37 : Array.from(x37);
   }
 
   // node_modules/d3-selection/src/selectorAll.js
@@ -18550,9 +18518,9 @@
   };
 
   // node_modules/d3-selection/src/constant.js
-  function constant_default(x38) {
+  function constant_default(x37) {
     return function() {
-      return x38;
+      return x37;
     };
   }
 
@@ -19526,7 +19494,7 @@
   }
 
   // node_modules/d3-interpolate/src/constant.js
-  var constant_default2 = (x38) => () => x38;
+  var constant_default2 = (x37) => () => x37;
 
   // node_modules/d3-interpolate/src/color.js
   function linear(a2, d9) {
@@ -19598,17 +19566,17 @@
       return c;
     };
   }
-  function isNumberArray(x38) {
-    return ArrayBuffer.isView(x38) && !(x38 instanceof DataView);
+  function isNumberArray(x37) {
+    return ArrayBuffer.isView(x37) && !(x37 instanceof DataView);
   }
 
   // node_modules/d3-interpolate/src/array.js
   function genericArray(a2, b2) {
-    var nb = b2 ? b2.length : 0, na = a2 ? Math.min(nb, a2.length) : 0, x38 = new Array(na), c = new Array(nb), i2;
-    for (i2 = 0; i2 < na; ++i2) x38[i2] = value_default(a2[i2], b2[i2]);
+    var nb = b2 ? b2.length : 0, na = a2 ? Math.min(nb, a2.length) : 0, x37 = new Array(na), c = new Array(nb), i2;
+    for (i2 = 0; i2 < na; ++i2) x37[i2] = value_default(a2[i2], b2[i2]);
     for (; i2 < nb; ++i2) c[i2] = b2[i2];
     return function(t) {
-      for (i2 = 0; i2 < na; ++i2) c[i2] = x38[i2](t);
+      for (i2 = 0; i2 < na; ++i2) c[i2] = x37[i2](t);
       return c;
     };
   }
@@ -20612,8 +20580,8 @@
   var X = {
     name: "x",
     handles: ["w", "e"].map(type),
-    input: function(x38, e) {
-      return x38 == null ? null : [[+x38[0], e[0][1]], [+x38[1], e[1][1]]];
+    input: function(x37, e) {
+      return x37 == null ? null : [[+x37[0], e[0][1]], [+x37[1], e[1][1]]];
     },
     output: function(xy) {
       return xy && [xy[0][0], xy[1][0]];
@@ -20658,8 +20626,8 @@
   }
   Path3.prototype = path.prototype = {
     constructor: Path3,
-    moveTo: function(x38, y36) {
-      this._ += "M" + (this._x0 = this._x1 = +x38) + "," + (this._y0 = this._y1 = +y36);
+    moveTo: function(x37, y36) {
+      this._ += "M" + (this._x0 = this._x1 = +x37) + "," + (this._y0 = this._y1 = +y36);
     },
     closePath: function() {
       if (this._x1 !== null) {
@@ -20667,14 +20635,14 @@
         this._ += "Z";
       }
     },
-    lineTo: function(x38, y36) {
-      this._ += "L" + (this._x1 = +x38) + "," + (this._y1 = +y36);
+    lineTo: function(x37, y36) {
+      this._ += "L" + (this._x1 = +x37) + "," + (this._y1 = +y36);
     },
-    quadraticCurveTo: function(x112, y112, x38, y36) {
-      this._ += "Q" + +x112 + "," + +y112 + "," + (this._x1 = +x38) + "," + (this._y1 = +y36);
+    quadraticCurveTo: function(x112, y112, x37, y36) {
+      this._ += "Q" + +x112 + "," + +y112 + "," + (this._x1 = +x37) + "," + (this._y1 = +y36);
     },
-    bezierCurveTo: function(x112, y112, x211, y211, x38, y36) {
-      this._ += "C" + +x112 + "," + +y112 + "," + +x211 + "," + +y211 + "," + (this._x1 = +x38) + "," + (this._y1 = +y36);
+    bezierCurveTo: function(x112, y112, x211, y211, x37, y36) {
+      this._ += "C" + +x112 + "," + +y112 + "," + +x211 + "," + +y211 + "," + (this._x1 = +x37) + "," + (this._y1 = +y36);
     },
     arcTo: function(x112, y112, x211, y211, r) {
       x112 = +x112, y112 = +y112, x211 = +x211, y211 = +y211, r = +r;
@@ -20693,9 +20661,9 @@
         this._ += "A" + r + "," + r + ",0,0," + +(y01 * x202 > x01 * y202) + "," + (this._x1 = x112 + t21 * x212) + "," + (this._y1 = y112 + t21 * y212);
       }
     },
-    arc: function(x38, y36, r, a0, a1, ccw) {
-      x38 = +x38, y36 = +y36, r = +r, ccw = !!ccw;
-      var dx = r * Math.cos(a0), dy5 = r * Math.sin(a0), x0 = x38 + dx, y0 = y36 + dy5, cw = 1 ^ ccw, da = ccw ? a0 - a1 : a1 - a0;
+    arc: function(x37, y36, r, a0, a1, ccw) {
+      x37 = +x37, y36 = +y36, r = +r, ccw = !!ccw;
+      var dx = r * Math.cos(a0), dy5 = r * Math.sin(a0), x0 = x37 + dx, y0 = y36 + dy5, cw = 1 ^ ccw, da = ccw ? a0 - a1 : a1 - a0;
       if (r < 0) throw new Error("negative radius: " + r);
       if (this._x1 === null) {
         this._ += "M" + x0 + "," + y0;
@@ -20705,13 +20673,13 @@
       if (!r) return;
       if (da < 0) da = da % tau + tau;
       if (da > tauEpsilon) {
-        this._ += "A" + r + "," + r + ",0,1," + cw + "," + (x38 - dx) + "," + (y36 - dy5) + "A" + r + "," + r + ",0,1," + cw + "," + (this._x1 = x0) + "," + (this._y1 = y0);
+        this._ += "A" + r + "," + r + ",0,1," + cw + "," + (x37 - dx) + "," + (y36 - dy5) + "A" + r + "," + r + ",0,1," + cw + "," + (this._x1 = x0) + "," + (this._y1 = y0);
       } else if (da > epsilon2) {
-        this._ += "A" + r + "," + r + ",0," + +(da >= pi2) + "," + cw + "," + (this._x1 = x38 + r * Math.cos(a1)) + "," + (this._y1 = y36 + r * Math.sin(a1));
+        this._ += "A" + r + "," + r + ",0," + +(da >= pi2) + "," + cw + "," + (this._x1 = x37 + r * Math.cos(a1)) + "," + (this._y1 = y36 + r * Math.sin(a1));
       }
     },
-    rect: function(x38, y36, w, h) {
-      this._ += "M" + (this._x0 = this._x1 = +x38) + "," + (this._y0 = this._y1 = +y36) + "h" + +w + "v" + +h + "h" + -w + "Z";
+    rect: function(x37, y36, w, h) {
+      this._ += "M" + (this._x0 = this._x1 = +x37) + "," + (this._y0 = this._y1 = +y36) + "h" + +w + "v" + +h + "h" + -w + "Z";
     },
     toString: function() {
       return this._;
@@ -20720,21 +20688,21 @@
   var path_default = path;
 
   // node_modules/d3-format/src/formatDecimal.js
-  function formatDecimal_default(x38) {
-    return Math.abs(x38 = Math.round(x38)) >= 1e21 ? x38.toLocaleString("en").replace(/,/g, "") : x38.toString(10);
+  function formatDecimal_default(x37) {
+    return Math.abs(x37 = Math.round(x37)) >= 1e21 ? x37.toLocaleString("en").replace(/,/g, "") : x37.toString(10);
   }
-  function formatDecimalParts(x38, p2) {
-    if ((i2 = (x38 = p2 ? x38.toExponential(p2 - 1) : x38.toExponential()).indexOf("e")) < 0) return null;
-    var i2, coefficient = x38.slice(0, i2);
+  function formatDecimalParts(x37, p2) {
+    if ((i2 = (x37 = p2 ? x37.toExponential(p2 - 1) : x37.toExponential()).indexOf("e")) < 0) return null;
+    var i2, coefficient = x37.slice(0, i2);
     return [
       coefficient.length > 1 ? coefficient[0] + coefficient.slice(2) : coefficient,
-      +x38.slice(i2 + 1)
+      +x37.slice(i2 + 1)
     ];
   }
 
   // node_modules/d3-format/src/exponent.js
-  function exponent_default(x38) {
-    return x38 = formatDecimalParts(Math.abs(x38)), x38 ? x38[1] : NaN;
+  function exponent_default(x37) {
+    return x37 = formatDecimalParts(Math.abs(x37)), x37 ? x37[1] : NaN;
   }
 
   // node_modules/d3-format/src/formatGroup.js
@@ -20817,41 +20785,41 @@
 
   // node_modules/d3-format/src/formatPrefixAuto.js
   var prefixExponent;
-  function formatPrefixAuto_default(x38, p2) {
-    var d9 = formatDecimalParts(x38, p2);
-    if (!d9) return x38 + "";
+  function formatPrefixAuto_default(x37, p2) {
+    var d9 = formatDecimalParts(x37, p2);
+    if (!d9) return x37 + "";
     var coefficient = d9[0], exponent = d9[1], i2 = exponent - (prefixExponent = Math.max(-8, Math.min(8, Math.floor(exponent / 3))) * 3) + 1, n = coefficient.length;
-    return i2 === n ? coefficient : i2 > n ? coefficient + new Array(i2 - n + 1).join("0") : i2 > 0 ? coefficient.slice(0, i2) + "." + coefficient.slice(i2) : "0." + new Array(1 - i2).join("0") + formatDecimalParts(x38, Math.max(0, p2 + i2 - 1))[0];
+    return i2 === n ? coefficient : i2 > n ? coefficient + new Array(i2 - n + 1).join("0") : i2 > 0 ? coefficient.slice(0, i2) + "." + coefficient.slice(i2) : "0." + new Array(1 - i2).join("0") + formatDecimalParts(x37, Math.max(0, p2 + i2 - 1))[0];
   }
 
   // node_modules/d3-format/src/formatRounded.js
-  function formatRounded_default(x38, p2) {
-    var d9 = formatDecimalParts(x38, p2);
-    if (!d9) return x38 + "";
+  function formatRounded_default(x37, p2) {
+    var d9 = formatDecimalParts(x37, p2);
+    if (!d9) return x37 + "";
     var coefficient = d9[0], exponent = d9[1];
     return exponent < 0 ? "0." + new Array(-exponent).join("0") + coefficient : coefficient.length > exponent + 1 ? coefficient.slice(0, exponent + 1) + "." + coefficient.slice(exponent + 1) : coefficient + new Array(exponent - coefficient.length + 2).join("0");
   }
 
   // node_modules/d3-format/src/formatTypes.js
   var formatTypes_default = {
-    "%": (x38, p2) => (x38 * 100).toFixed(p2),
-    "b": (x38) => Math.round(x38).toString(2),
-    "c": (x38) => x38 + "",
+    "%": (x37, p2) => (x37 * 100).toFixed(p2),
+    "b": (x37) => Math.round(x37).toString(2),
+    "c": (x37) => x37 + "",
     "d": formatDecimal_default,
-    "e": (x38, p2) => x38.toExponential(p2),
-    "f": (x38, p2) => x38.toFixed(p2),
-    "g": (x38, p2) => x38.toPrecision(p2),
-    "o": (x38) => Math.round(x38).toString(8),
-    "p": (x38, p2) => formatRounded_default(x38 * 100, p2),
+    "e": (x37, p2) => x37.toExponential(p2),
+    "f": (x37, p2) => x37.toFixed(p2),
+    "g": (x37, p2) => x37.toPrecision(p2),
+    "o": (x37) => Math.round(x37).toString(8),
+    "p": (x37, p2) => formatRounded_default(x37 * 100, p2),
     "r": formatRounded_default,
     "s": formatPrefixAuto_default,
-    "X": (x38) => Math.round(x38).toString(16).toUpperCase(),
-    "x": (x38) => Math.round(x38).toString(16)
+    "X": (x37) => Math.round(x37).toString(16).toUpperCase(),
+    "x": (x37) => Math.round(x37).toString(16)
   };
 
   // node_modules/d3-format/src/identity.js
-  function identity_default2(x38) {
-    return x38;
+  function identity_default2(x37) {
+    return x37;
   }
 
   // node_modules/d3-format/src/locale.js
@@ -21010,40 +20978,40 @@
   }
 
   // node_modules/d3-scale/src/constant.js
-  function constants(x38) {
+  function constants(x37) {
     return function() {
-      return x38;
+      return x37;
     };
   }
 
   // node_modules/d3-scale/src/number.js
-  function number3(x38) {
-    return +x38;
+  function number3(x37) {
+    return +x37;
   }
 
   // node_modules/d3-scale/src/continuous.js
   var unit2 = [0, 1];
-  function identity15(x38) {
-    return x38;
+  function identity15(x37) {
+    return x37;
   }
   function normalize2(a2, b2) {
-    return (b2 -= a2 = +a2) ? function(x38) {
-      return (x38 - a2) / b2;
+    return (b2 -= a2 = +a2) ? function(x37) {
+      return (x37 - a2) / b2;
     } : constants(isNaN(b2) ? NaN : 0.5);
   }
   function clamper(a2, b2) {
     var t;
     if (a2 > b2) t = a2, a2 = b2, b2 = t;
-    return function(x38) {
-      return Math.max(a2, Math.min(b2, x38));
+    return function(x37) {
+      return Math.max(a2, Math.min(b2, x37));
     };
   }
   function bimap3(domain, range3, interpolate) {
     var d0 = domain[0], d1 = domain[1], r0 = range3[0], r1 = range3[1];
     if (d1 < d0) d0 = normalize2(d1, d0), r0 = interpolate(r1, r0);
     else d0 = normalize2(d0, d1), r0 = interpolate(r0, r1);
-    return function(x38) {
-      return r0(d0(x38));
+    return function(x37) {
+      return r0(d0(x37));
     };
   }
   function polymap(domain, range3, interpolate) {
@@ -21056,9 +21024,9 @@
       d9[i2] = normalize2(domain[i2], domain[i2 + 1]);
       r[i2] = interpolate(range3[i2], range3[i2 + 1]);
     }
-    return function(x38) {
-      var i3 = bisect_default(domain, x38, 1, j) - 1;
-      return r[i3](d9[i3](x38));
+    return function(x37) {
+      var i3 = bisect_default(domain, x37, 1, j) - 1;
+      return r[i3](d9[i3](x37));
     };
   }
   function copy2(source2, target7) {
@@ -21073,8 +21041,8 @@
       output2 = input3 = null;
       return scale;
     }
-    function scale(x38) {
-      return x38 == null || isNaN(x38 = +x38) ? unknown : (output2 || (output2 = piecewise(domain.map(transform3), range3, interpolate)))(transform3(clamp2(x38)));
+    function scale(x37) {
+      return x37 == null || isNaN(x37 = +x37) ? unknown : (output2 || (output2 = piecewise(domain.map(transform3), range3, interpolate)))(transform3(clamp2(x37)));
     }
     scale.invert = function(y36) {
       return clamp2(untransform((input3 || (input3 = piecewise(range3, domain.map(transform3), number_default)))(y36)));
@@ -21199,16 +21167,16 @@
   var category10_default = colors_default("1f77b4ff7f0e2ca02cd627289467bd8c564be377c27f7f7fbcbd2217becf");
 
   // node_modules/d3-shape/src/constant.js
-  function constant_default4(x38) {
+  function constant_default4(x37) {
     return function constant2() {
-      return x38;
+      return x37;
     };
   }
 
   // node_modules/d3-shape/src/array.js
   var slice3 = Array.prototype.slice;
-  function array_default(x38) {
-    return typeof x38 === "object" && "length" in x38 ? x38 : Array.from(x38);
+  function array_default(x37) {
+    return typeof x37 === "object" && "length" in x37 ? x37 : Array.from(x37);
   }
 
   // node_modules/d3-shape/src/curve/linear.js
@@ -21229,18 +21197,18 @@
       if (this._line || this._line !== 0 && this._point === 1) this._context.closePath();
       this._line = 1 - this._line;
     },
-    point: function(x38, y36) {
-      x38 = +x38, y36 = +y36;
+    point: function(x37, y36) {
+      x37 = +x37, y36 = +y36;
       switch (this._point) {
         case 0:
           this._point = 1;
-          this._line ? this._context.lineTo(x38, y36) : this._context.moveTo(x38, y36);
+          this._line ? this._context.lineTo(x37, y36) : this._context.moveTo(x37, y36);
           break;
         case 1:
           this._point = 2;
         // falls through
         default:
-          this._context.lineTo(x38, y36);
+          this._context.lineTo(x37, y36);
           break;
       }
     }
@@ -21258,9 +21226,9 @@
   }
 
   // node_modules/d3-shape/src/line.js
-  function line_default(x38, y36) {
+  function line_default(x37, y36) {
     var defined = constant_default4(true), context = null, curve = linear_default, output2 = null;
-    x38 = typeof x38 === "function" ? x38 : x38 === void 0 ? x7 : constant_default4(x38);
+    x37 = typeof x37 === "function" ? x37 : x37 === void 0 ? x7 : constant_default4(x37);
     y36 = typeof y36 === "function" ? y36 : y36 === void 0 ? y7 : constant_default4(y36);
     function line(data) {
       var i2, n = (data = array_default(data)).length, d9, defined0 = false, buffer;
@@ -21270,12 +21238,12 @@
           if (defined0 = !defined0) output2.lineStart();
           else output2.lineEnd();
         }
-        if (defined0) output2.point(+x38(d9, i2, data), +y36(d9, i2, data));
+        if (defined0) output2.point(+x37(d9, i2, data), +y36(d9, i2, data));
       }
       if (buffer) return output2 = null, buffer + "" || null;
     }
     line.x = function(_) {
-      return arguments.length ? (x38 = typeof _ === "function" ? _ : constant_default4(+_), line) : x38;
+      return arguments.length ? (x37 = typeof _ === "function" ? _ : constant_default4(+_), line) : x37;
     };
     line.y = function(_) {
       return arguments.length ? (y36 = typeof _ === "function" ? _ : constant_default4(+_), line) : y36;
@@ -21293,9 +21261,9 @@
   }
 
   // node_modules/d3-zoom/src/transform.js
-  function Transform(k, x38, y36) {
+  function Transform(k, x37, y36) {
     this.k = k;
-    this.x = x38;
+    this.x = x37;
     this.y = y36;
   }
   Transform.prototype = {
@@ -21303,14 +21271,14 @@
     scale: function(k) {
       return k === 1 ? this : new Transform(this.k * k, this.x, this.y);
     },
-    translate: function(x38, y36) {
-      return x38 === 0 & y36 === 0 ? this : new Transform(this.k, this.x + this.k * x38, this.y + this.k * y36);
+    translate: function(x37, y36) {
+      return x37 === 0 & y36 === 0 ? this : new Transform(this.k, this.x + this.k * x37, this.y + this.k * y36);
     },
     apply: function(point) {
       return [point[0] * this.k + this.x, point[1] * this.k + this.y];
     },
-    applyX: function(x38) {
-      return x38 * this.k + this.x;
+    applyX: function(x37) {
+      return x37 * this.k + this.x;
     },
     applyY: function(y36) {
       return y36 * this.k + this.y;
@@ -21318,14 +21286,14 @@
     invert: function(location2) {
       return [(location2[0] - this.x) / this.k, (location2[1] - this.y) / this.k];
     },
-    invertX: function(x38) {
-      return (x38 - this.x) / this.k;
+    invertX: function(x37) {
+      return (x37 - this.x) / this.k;
     },
     invertY: function(y36) {
       return (y36 - this.y) / this.k;
     },
-    rescaleX: function(x38) {
-      return x38.copy().domain(x38.range().map(this.invertX, this).map(x38.invert, x38));
+    rescaleX: function(x37) {
+      return x37.copy().domain(x37.range().map(this.invertX, this).map(x37.invert, x37));
     },
     rescaleY: function(y36) {
       return y36.copy().domain(y36.range().map(this.invertY, this).map(y36.invert, y36));
@@ -21419,9 +21387,9 @@
   }
 
   // node_modules/d3-sankey/src/constant.js
-  function constant(x38) {
+  function constant(x37) {
     return function() {
-      return x38;
+      return x37;
     };
   }
 
@@ -21555,15 +21523,15 @@
       const n = nodes2.length;
       let current = new Set(nodes2);
       let next2 = /* @__PURE__ */ new Set();
-      let x38 = 0;
+      let x37 = 0;
       while (current.size) {
         for (const node of current) {
-          node.depth = x38;
+          node.depth = x37;
           for (const { target: target7 } of node.sourceLinks) {
             next2.add(target7);
           }
         }
-        if (++x38 > n) throw new Error("circular link");
+        if (++x37 > n) throw new Error("circular link");
         current = next2;
         next2 = /* @__PURE__ */ new Set();
       }
@@ -21572,25 +21540,25 @@
       const n = nodes2.length;
       let current = new Set(nodes2);
       let next2 = /* @__PURE__ */ new Set();
-      let x38 = 0;
+      let x37 = 0;
       while (current.size) {
         for (const node of current) {
-          node.height = x38;
+          node.height = x37;
           for (const { source: source2 } of node.targetLinks) {
             next2.add(source2);
           }
         }
-        if (++x38 > n) throw new Error("circular link");
+        if (++x37 > n) throw new Error("circular link");
         current = next2;
         next2 = /* @__PURE__ */ new Set();
       }
     }
     function computeNodeLayers({ nodes: nodes2 }) {
-      const x38 = max8(nodes2, (d9) => d9.depth) + 1;
-      const kx = (x112 - x0 - dx) / (x38 - 1);
-      const columns = new Array(x38);
+      const x37 = max8(nodes2, (d9) => d9.depth) + 1;
+      const kx = (x112 - x0 - dx) / (x37 - 1);
+      const columns = new Array(x37);
       for (const node of nodes2) {
-        const i2 = Math.max(0, Math.min(x38 - 1, Math.floor(align.call(null, node, x38))));
+        const i2 = Math.max(0, Math.min(x37 - 1, Math.floor(align.call(null, node, x37))));
         node.layer = i2;
         node.x0 = x0 + i2 * kx;
         node.x1 = node.x0 + dx;
@@ -21760,8 +21728,8 @@
   }
   Path4.prototype = path2.prototype = {
     constructor: Path4,
-    moveTo: function(x38, y36) {
-      this._ += "M" + (this._x0 = this._x1 = +x38) + "," + (this._y0 = this._y1 = +y36);
+    moveTo: function(x37, y36) {
+      this._ += "M" + (this._x0 = this._x1 = +x37) + "," + (this._y0 = this._y1 = +y36);
     },
     closePath: function() {
       if (this._x1 !== null) {
@@ -21769,14 +21737,14 @@
         this._ += "Z";
       }
     },
-    lineTo: function(x38, y36) {
-      this._ += "L" + (this._x1 = +x38) + "," + (this._y1 = +y36);
+    lineTo: function(x37, y36) {
+      this._ += "L" + (this._x1 = +x37) + "," + (this._y1 = +y36);
     },
-    quadraticCurveTo: function(x112, y112, x38, y36) {
-      this._ += "Q" + +x112 + "," + +y112 + "," + (this._x1 = +x38) + "," + (this._y1 = +y36);
+    quadraticCurveTo: function(x112, y112, x37, y36) {
+      this._ += "Q" + +x112 + "," + +y112 + "," + (this._x1 = +x37) + "," + (this._y1 = +y36);
     },
-    bezierCurveTo: function(x112, y112, x211, y211, x38, y36) {
-      this._ += "C" + +x112 + "," + +y112 + "," + +x211 + "," + +y211 + "," + (this._x1 = +x38) + "," + (this._y1 = +y36);
+    bezierCurveTo: function(x112, y112, x211, y211, x37, y36) {
+      this._ += "C" + +x112 + "," + +y112 + "," + +x211 + "," + +y211 + "," + (this._x1 = +x37) + "," + (this._y1 = +y36);
     },
     arcTo: function(x112, y112, x211, y211, r) {
       x112 = +x112, y112 = +y112, x211 = +x211, y211 = +y211, r = +r;
@@ -21795,9 +21763,9 @@
         this._ += "A" + r + "," + r + ",0,0," + +(y01 * x202 > x01 * y202) + "," + (this._x1 = x112 + t21 * x212) + "," + (this._y1 = y112 + t21 * y212);
       }
     },
-    arc: function(x38, y36, r, a0, a1, ccw) {
-      x38 = +x38, y36 = +y36, r = +r, ccw = !!ccw;
-      var dx = r * Math.cos(a0), dy5 = r * Math.sin(a0), x0 = x38 + dx, y0 = y36 + dy5, cw = 1 ^ ccw, da = ccw ? a0 - a1 : a1 - a0;
+    arc: function(x37, y36, r, a0, a1, ccw) {
+      x37 = +x37, y36 = +y36, r = +r, ccw = !!ccw;
+      var dx = r * Math.cos(a0), dy5 = r * Math.sin(a0), x0 = x37 + dx, y0 = y36 + dy5, cw = 1 ^ ccw, da = ccw ? a0 - a1 : a1 - a0;
       if (r < 0) throw new Error("negative radius: " + r);
       if (this._x1 === null) {
         this._ += "M" + x0 + "," + y0;
@@ -21807,13 +21775,13 @@
       if (!r) return;
       if (da < 0) da = da % tau2 + tau2;
       if (da > tauEpsilon2) {
-        this._ += "A" + r + "," + r + ",0,1," + cw + "," + (x38 - dx) + "," + (y36 - dy5) + "A" + r + "," + r + ",0,1," + cw + "," + (this._x1 = x0) + "," + (this._y1 = y0);
+        this._ += "A" + r + "," + r + ",0,1," + cw + "," + (x37 - dx) + "," + (y36 - dy5) + "A" + r + "," + r + ",0,1," + cw + "," + (this._x1 = x0) + "," + (this._y1 = y0);
       } else if (da > epsilon3) {
-        this._ += "A" + r + "," + r + ",0," + +(da >= pi3) + "," + cw + "," + (this._x1 = x38 + r * Math.cos(a1)) + "," + (this._y1 = y36 + r * Math.sin(a1));
+        this._ += "A" + r + "," + r + ",0," + +(da >= pi3) + "," + cw + "," + (this._x1 = x37 + r * Math.cos(a1)) + "," + (this._y1 = y36 + r * Math.sin(a1));
       }
     },
-    rect: function(x38, y36, w, h) {
-      this._ += "M" + (this._x0 = this._x1 = +x38) + "," + (this._y0 = this._y1 = +y36) + "h" + +w + "v" + +h + "h" + -w + "Z";
+    rect: function(x37, y36, w, h) {
+      this._ += "M" + (this._x0 = this._x1 = +x37) + "," + (this._y0 = this._y1 = +y36) + "h" + +w + "v" + +h + "h" + -w + "Z";
     },
     toString: function() {
       return this._;
@@ -21822,9 +21790,9 @@
   var path_default2 = path2;
 
   // node_modules/d3-sankey/node_modules/d3-shape/src/constant.js
-  function constant_default6(x38) {
+  function constant_default6(x37) {
     return function constant2() {
-      return x38;
+      return x37;
     };
   }
 
@@ -21847,11 +21815,11 @@
     return d9.target;
   }
   function link3(curve) {
-    var source2 = linkSource, target7 = linkTarget, x38 = x8, y36 = y8, context = null;
+    var source2 = linkSource, target7 = linkTarget, x37 = x8, y36 = y8, context = null;
     function link4() {
       var buffer, argv = slice4.call(arguments), s = source2.apply(this, argv), t = target7.apply(this, argv);
       if (!context) context = buffer = path_default2();
-      curve(context, +x38.apply(this, (argv[0] = s, argv)), +y36.apply(this, argv), +x38.apply(this, (argv[0] = t, argv)), +y36.apply(this, argv));
+      curve(context, +x37.apply(this, (argv[0] = s, argv)), +y36.apply(this, argv), +x37.apply(this, (argv[0] = t, argv)), +y36.apply(this, argv));
       if (buffer) return context = null, buffer + "" || null;
     }
     link4.source = function(_) {
@@ -21861,7 +21829,7 @@
       return arguments.length ? (target7 = _, link4) : target7;
     };
     link4.x = function(_) {
-      return arguments.length ? (x38 = typeof _ === "function" ? _ : constant_default6(+_), link4) : x38;
+      return arguments.length ? (x37 = typeof _ === "function" ? _ : constant_default6(+_), link4) : x37;
     };
     link4.y = function(_) {
       return arguments.length ? (y36 = typeof _ === "function" ? _ : constant_default6(+_), link4) : y36;
@@ -22848,6 +22816,7 @@
   var eq4 = /* @__PURE__ */ eq(eqAtlasTab);
   var show16 = /* @__PURE__ */ show(showAtlasTab);
   var mapFlipped9 = /* @__PURE__ */ mapFlipped(functorArray);
+  var type_20 = /* @__PURE__ */ type_17(isPropInputType);
   var bind16 = /* @__PURE__ */ bind(bindHalogenM);
   var discard13 = /* @__PURE__ */ discard(discardUnit);
   var discard14 = /* @__PURE__ */ discard13(bindHalogenM);
@@ -22880,13 +22849,13 @@
       return div2([classes(["expandable-bubbles-container"])])([div2([classes(["svg-container"])])([])]);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 90, column 3 - line 116, column 10): " + [state3.activeTab.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 81, column 3 - line 107, column 10): " + [state3.activeTab.constructor.name]);
   };
   var renderTab = function(tab) {
     return function(activeTab) {
       return button([classes(["code-atlas-tab", (function() {
-        var $63 = eq4(tab)(activeTab);
-        if ($63) {
+        var $68 = eq4(tab)(activeTab);
+        if ($68) {
           return "code-atlas-tab--active";
         }
         ;
@@ -22901,16 +22870,16 @@
       return div2([classes(["legend-item"])])([div2([classes(["legend-color"]), style("background-color: " + color2)])([]), span3([classes(["legend-label"])])([text5(label5)])]);
     };
   };
-  var renderLegendPanel = /* @__PURE__ */ div2([/* @__PURE__ */ classes(["floating-panel", "floating-panel--top-right", "editorial"])])([/* @__PURE__ */ h3([/* @__PURE__ */ classes(["floating-panel__title"])])([/* @__PURE__ */ text5("Declaration Types")]), /* @__PURE__ */ div2([/* @__PURE__ */ classes(["legend-items"])])([/* @__PURE__ */ renderLegendItem("Functions/Values")("#2196F3"), /* @__PURE__ */ renderLegendItem("Foreign Functions")("#00BCD4"), /* @__PURE__ */ renderLegendItem("Data Types")("#4CAF50"), /* @__PURE__ */ renderLegendItem("Type Classes")("#9C27B0"), /* @__PURE__ */ renderLegendItem("Type Synonyms")("#FF9800"), /* @__PURE__ */ renderLegendItem("Instances")("#E91E63")])]);
+  var renderLegendPanel = /* @__PURE__ */ div2([/* @__PURE__ */ classes(["floating-panel", "floating-panel--bottom-right", "editorial"])])([/* @__PURE__ */ h3([/* @__PURE__ */ classes(["floating-panel__title"])])([/* @__PURE__ */ text5("Declaration Types")]), /* @__PURE__ */ div2([/* @__PURE__ */ classes(["legend-items"])])([/* @__PURE__ */ renderLegendItem("Functions/Values")("#2196F3"), /* @__PURE__ */ renderLegendItem("Foreign Functions")("#00BCD4"), /* @__PURE__ */ renderLegendItem("Data Types")("#4CAF50"), /* @__PURE__ */ renderLegendItem("Type Classes")("#9C27B0"), /* @__PURE__ */ renderLegendItem("Type Synonyms")("#FF9800"), /* @__PURE__ */ renderLegendItem("Instances")("#E91E63")])]);
   var renderDetailsPanel = function(state3) {
     if (state3.hoveredModule instanceof Nothing) {
       return text5("");
     }
     ;
     if (state3.hoveredModule instanceof Just) {
-      return div2([classes(["floating-panel", "floating-panel--bottom-right", "editorial"])])([h3([classes(["floating-panel__title"])])([text5(state3.hoveredModule.value0.moduleName)]), div2([classes(["details-section"])])([h4_([text5("Dependencies")]), (function() {
-        var $65 = length4(state3.hoveredModule.value0.dependencies) === 0;
-        if ($65) {
+      return div2([classes(["floating-panel", "floating-panel--top-right", "editorial"])])([h3([classes(["floating-panel__title"])])([text5(state3.hoveredModule.value0.moduleName)]), div2([classes(["details-section"])])([h4_([text5("Dependencies")]), (function() {
+        var $70 = length4(state3.hoveredModule.value0.dependencies) === 0;
+        if ($70) {
           return p([classes(["empty-list"])])([text5("(none)")]);
         }
         ;
@@ -22918,8 +22887,8 @@
           return li_([text5(dep)]);
         }));
       })()]), div2([classes(["details-section"])])([h4_([text5("Depended On By")]), (function() {
-        var $66 = length4(state3.hoveredModule.value0.dependedOnBy) === 0;
-        if ($66) {
+        var $71 = length4(state3.hoveredModule.value0.dependedOnBy) === 0;
+        if ($71) {
           return p([classes(["empty-list"])])([text5("(none)")]);
         }
         ;
@@ -22929,18 +22898,38 @@
       })()])]);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 165, column 3 - line 193, column 10): " + [state3.hoveredModule.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 203, column 3 - line 231, column 10): " + [state3.hoveredModule.constructor.name]);
+  };
+  var renderControlPanel = function(state3) {
+    return div2([classes(["floating-panel", "floating-panel--top-left", "editorial"])])([h3([classes(["floating-panel__title"])])([text5("Views")]), div2([classes(["control-panel-tabs"])])([renderTab(DeclarationsTab.value)(state3.activeTab), renderTab(VisualizationTab.value)(state3.activeTab), renderTab(InteractiveGraphTab.value)(state3.activeTab), renderTab(ExpandableBubblesTab.value)(state3.activeTab)]), (function() {
+      var $73 = eq4(state3.activeTab)(ExpandableBubblesTab.value);
+      if ($73) {
+        return div2([classes(["control-group"])])([h4_([text5("Spotlight Mode")]), div2([classes(["spotlight-toggle-container"])])([label4([classes(["spotlight-toggle"])])([input2([type_20(InputCheckbox.value), checked2(state3.spotlightModeActive), disabled10(!state3.spotlightModeActive), onClick(function(v) {
+          return ResetToOverview.value;
+        })]), span3([classes(["toggle-slider"])])([])]), p([classes(["helper-text"])])([text5((function() {
+          if (state3.spotlightModeActive) {
+            return "Click to return to overview";
+          }
+          ;
+          return "Click a module to spotlight its dependencies";
+        })())])])]);
+      }
+      ;
+      return text5("");
+    })()]);
   };
   var renderFloatingPanels = function(state3) {
-    var $68 = eq4(state3.activeTab)(ExpandableBubblesTab.value);
-    if ($68) {
-      return div_([renderLegendPanel, renderDetailsPanel(state3)]);
-    }
-    ;
-    return text5("");
+    return div_([renderControlPanel(state3), (function() {
+      var $75 = eq4(state3.activeTab)(ExpandableBubblesTab.value);
+      if ($75) {
+        return div_([renderLegendPanel, renderDetailsPanel(state3)]);
+      }
+      ;
+      return text5("");
+    })()]);
   };
   var render4 = function(state3) {
-    return div2([classes(["code-atlas-page"])])([header([classes(["code-atlas-header"])])([h1_([text5("Code Atlas")]), p([classes(["code-atlas-subtitle"])])([text5("Explore the codebase through declarations, function calls, and type dependencies")])]), div2([classes(["code-atlas-tabs"])])([renderTab(DeclarationsTab.value)(state3.activeTab), renderTab(VisualizationTab.value)(state3.activeTab), renderTab(InteractiveGraphTab.value)(state3.activeTab), renderTab(ExpandableBubblesTab.value)(state3.activeTab)]), div2([classes(["code-atlas-content"])])([(function() {
+    return div2([classes(["code-atlas-page"])])([header([classes(["code-atlas-header"])])([p([classes(["code-atlas-subtitle"])])([text5("Explore the codebase through declarations, function calls, and type dependencies")])]), div2([classes(["code-atlas-content"])])([(function() {
       if (state3.loading) {
         return div2([classes(["code-atlas-loading"])])([text5("Loading codebase data...")]);
       }
@@ -22951,13 +22940,13 @@
         }
         ;
         if (state3.error instanceof Nothing) {
-          return div2([])([renderTabContent(state3), renderFloatingPanels(state3)]);
+          return div2([classes(["code-atlas-container"])])([renderTabContent(state3), renderFloatingPanels(state3)]);
         }
         ;
-        throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 70, column 22 - line 84, column 20): " + [state3.error.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 60, column 22 - line 75, column 20): " + [state3.error.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 64, column 11 - line 84, column 20): " + [state3.loading.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 54, column 11 - line 75, column 20): " + [state3.loading.constructor.name]);
     })()])]);
   };
   var handleAction2 = function(dictMonadAff) {
@@ -22972,16 +22961,16 @@
             return bind16(liftAff35(loadModules))(function(modulesResult) {
               if (declarationsResult instanceof Right && (functionCallsResult instanceof Right && modulesResult instanceof Right)) {
                 return discard14(modify_4(function(v1) {
-                  var $76 = {};
-                  for (var $77 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $77)) {
-                      $76[$77] = v1[$77];
+                  var $83 = {};
+                  for (var $84 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $84)) {
+                      $83[$84] = v1[$84];
                     }
                     ;
                   }
                   ;
-                  $76.loading = false;
-                  return $76;
+                  $83.loading = false;
+                  return $83;
                 }))(function() {
                   return handleAction2(dictMonadAff)(new DataLoaded(declarationsResult.value0, functionCallsResult.value0, modulesResult.value0));
                 });
@@ -22989,53 +22978,53 @@
               ;
               if (declarationsResult instanceof Left) {
                 return modify_4(function(v1) {
-                  var $82 = {};
-                  for (var $83 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $83)) {
-                      $82[$83] = v1[$83];
+                  var $89 = {};
+                  for (var $90 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $90)) {
+                      $89[$90] = v1[$90];
                     }
                     ;
                   }
                   ;
-                  $82.loading = false;
-                  $82.error = new Just(declarationsResult.value0);
-                  return $82;
+                  $89.loading = false;
+                  $89.error = new Just(declarationsResult.value0);
+                  return $89;
                 });
               }
               ;
               if (functionCallsResult instanceof Left) {
                 return modify_4(function(v1) {
-                  var $86 = {};
-                  for (var $87 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $87)) {
-                      $86[$87] = v1[$87];
+                  var $93 = {};
+                  for (var $94 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $94)) {
+                      $93[$94] = v1[$94];
                     }
                     ;
                   }
                   ;
-                  $86.loading = false;
-                  $86.error = new Just(functionCallsResult.value0);
-                  return $86;
+                  $93.loading = false;
+                  $93.error = new Just(functionCallsResult.value0);
+                  return $93;
                 });
               }
               ;
               if (modulesResult instanceof Left) {
                 return modify_4(function(v1) {
-                  var $90 = {};
-                  for (var $91 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $91)) {
-                      $90[$91] = v1[$91];
+                  var $97 = {};
+                  for (var $98 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $98)) {
+                      $97[$98] = v1[$98];
                     }
                     ;
                   }
                   ;
-                  $90.loading = false;
-                  $90.error = new Just(modulesResult.value0);
-                  return $90;
+                  $97.loading = false;
+                  $97.error = new Just(modulesResult.value0);
+                  return $97;
                 });
               }
               ;
-              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 216, column 5 - line 228, column 58): " + [declarationsResult.constructor.name, functionCallsResult.constructor.name, modulesResult.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 254, column 5 - line 266, column 58): " + [declarationsResult.constructor.name, functionCallsResult.constructor.name, modulesResult.constructor.name]);
             });
           });
         });
@@ -23043,18 +23032,18 @@
       ;
       if (v instanceof DataLoaded) {
         return discard14(modify_4(function(v1) {
-          var $94 = {};
-          for (var $95 in v1) {
-            if ({}.hasOwnProperty.call(v1, $95)) {
-              $94[$95] = v1[$95];
+          var $101 = {};
+          for (var $102 in v1) {
+            if ({}.hasOwnProperty.call(v1, $102)) {
+              $101[$102] = v1[$102];
             }
             ;
           }
           ;
-          $94.declarationsData = new Just(v.value0);
-          $94.functionCallsData = new Just(v.value1);
-          $94.moduleGraphData = new Just(v.value2);
-          return $94;
+          $101.declarationsData = new Just(v.value0);
+          $101.functionCallsData = new Just(v.value1);
+          $101.moduleGraphData = new Just(v.value2);
+          return $101;
         }))(function() {
           return bind16(get7)(function(state3) {
             return handleAction2(dictMonadAff)(new SetActiveTab(state3.activeTab));
@@ -23064,17 +23053,17 @@
       ;
       if (v instanceof DataLoadFailed) {
         return modify_4(function(v1) {
-          var $100 = {};
-          for (var $101 in v1) {
-            if ({}.hasOwnProperty.call(v1, $101)) {
-              $100[$101] = v1[$101];
+          var $107 = {};
+          for (var $108 in v1) {
+            if ({}.hasOwnProperty.call(v1, $108)) {
+              $107[$108] = v1[$108];
             }
             ;
           }
           ;
-          $100.error = new Just(v.value0);
-          $100.loading = false;
-          return $100;
+          $107.error = new Just(v.value0);
+          $107.loading = false;
+          return $107;
         });
       }
       ;
@@ -23094,7 +23083,7 @@
                     return pure23(unit);
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 300, column 9 - line 304, column 31): " + [pendingAction.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 340, column 9 - line 344, column 31): " + [pendingAction.constructor.name]);
                 })())(function() {
                   return pollForActions(ref2)(listener);
                 });
@@ -23103,16 +23092,16 @@
           };
         };
         return discard14(modify_4(function(v1) {
-          var $106 = {};
-          for (var $107 in v1) {
-            if ({}.hasOwnProperty.call(v1, $107)) {
-              $106[$107] = v1[$107];
+          var $113 = {};
+          for (var $114 in v1) {
+            if ({}.hasOwnProperty.call(v1, $114)) {
+              $113[$114] = v1[$114];
             }
             ;
           }
           ;
-          $106.activeTab = v.value0;
-          return $106;
+          $113.activeTab = v.value0;
+          return $113;
         }))(function() {
           if (v.value0 instanceof VisualizationTab) {
             return bind16(get7)(function(state3) {
@@ -23124,7 +23113,7 @@
                 return pure110(unit);
               }
               ;
-              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 251, column 9 - line 255, column 31): " + [state3.moduleGraphData.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 289, column 9 - line 293, column 31): " + [state3.moduleGraphData.constructor.name]);
             });
           }
           ;
@@ -23138,7 +23127,7 @@
                 return pure110(unit);
               }
               ;
-              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 259, column 9 - line 263, column 31): " + [state3.moduleGraphData.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 297, column 9 - line 301, column 31): " + [state3.moduleGraphData.constructor.name]);
             });
           }
           ;
@@ -23158,7 +23147,8 @@
                         };
                       };
                     },
-                    onHideModuleDetails: write(new Just(HideModuleDetails.value))(pendingActionRef)
+                    onHideModuleDetails: write(new Just(HideModuleDetails.value))(pendingActionRef),
+                    onEnableSpotlightMode: write(new Just(EnableSpotlightMode.value))(pendingActionRef)
                   };
                   return bind16(liftEffect110(create3))(function(v1) {
                     return bind16(subscribe2(v1.emitter))(function() {
@@ -23180,83 +23170,50 @@
       ;
       if (v instanceof SetSearchQuery) {
         return modify_4(function(v1) {
-          var $124 = {};
-          for (var $125 in v1) {
-            if ({}.hasOwnProperty.call(v1, $125)) {
-              $124[$125] = v1[$125];
+          var $131 = {};
+          for (var $132 in v1) {
+            if ({}.hasOwnProperty.call(v1, $132)) {
+              $131[$132] = v1[$132];
             }
             ;
           }
           ;
-          $124.searchQuery = v.value0;
-          return $124;
+          $131.searchQuery = v.value0;
+          return $131;
         });
       }
       ;
       if (v instanceof SetKindFilter) {
         return modify_4(function(v1) {
-          var $128 = {};
-          for (var $129 in v1) {
-            if ({}.hasOwnProperty.call(v1, $129)) {
-              $128[$129] = v1[$129];
+          var $135 = {};
+          for (var $136 in v1) {
+            if ({}.hasOwnProperty.call(v1, $136)) {
+              $135[$136] = v1[$136];
             }
             ;
           }
           ;
-          $128.selectedKindFilter = v.value0;
-          return $128;
+          $135.selectedKindFilter = v.value0;
+          return $135;
         });
       }
       ;
       if (v instanceof SetModuleFilter) {
         return modify_4(function(v1) {
-          var $132 = {};
-          for (var $133 in v1) {
-            if ({}.hasOwnProperty.call(v1, $133)) {
-              $132[$133] = v1[$133];
+          var $139 = {};
+          for (var $140 in v1) {
+            if ({}.hasOwnProperty.call(v1, $140)) {
+              $139[$140] = v1[$140];
             }
             ;
           }
           ;
-          $132.selectedModuleFilter = v.value0;
-          return $132;
+          $139.selectedModuleFilter = v.value0;
+          return $139;
         });
       }
       ;
       if (v instanceof SetSourceFilter) {
-        return modify_4(function(v1) {
-          var $136 = {};
-          for (var $137 in v1) {
-            if ({}.hasOwnProperty.call(v1, $137)) {
-              $136[$137] = v1[$137];
-            }
-            ;
-          }
-          ;
-          $136.selectedSourceFilter = v.value0;
-          return $136;
-        });
-      }
-      ;
-      if (v instanceof ClearFilters) {
-        return modify_4(function(v1) {
-          var $140 = {};
-          for (var $141 in v1) {
-            if ({}.hasOwnProperty.call(v1, $141)) {
-              $140[$141] = v1[$141];
-            }
-            ;
-          }
-          ;
-          $140.searchQuery = "";
-          $140.selectedKindFilter = Nothing.value;
-          $140.selectedModuleFilter = Nothing.value;
-          $140.selectedSourceFilter = Nothing.value;
-          return $140;
-        });
-      }
-      ;
-      if (v instanceof ShowModuleDetails) {
         return modify_4(function(v1) {
           var $143 = {};
           for (var $144 in v1) {
@@ -23266,12 +23223,12 @@
             ;
           }
           ;
-          $143.hoveredModule = new Just(v.value0);
+          $143.selectedSourceFilter = v.value0;
           return $143;
         });
       }
       ;
-      if (v instanceof HideModuleDetails) {
+      if (v instanceof ClearFilters) {
         return modify_4(function(v1) {
           var $147 = {};
           for (var $148 in v1) {
@@ -23281,12 +23238,80 @@
             ;
           }
           ;
-          $147.hoveredModule = Nothing.value;
+          $147.searchQuery = "";
+          $147.selectedKindFilter = Nothing.value;
+          $147.selectedModuleFilter = Nothing.value;
+          $147.selectedSourceFilter = Nothing.value;
           return $147;
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 209, column 16 - line 331, column 44): " + [v.constructor.name]);
+      if (v instanceof ShowModuleDetails) {
+        return modify_4(function(v1) {
+          var $150 = {};
+          for (var $151 in v1) {
+            if ({}.hasOwnProperty.call(v1, $151)) {
+              $150[$151] = v1[$151];
+            }
+            ;
+          }
+          ;
+          $150.hoveredModule = new Just(v.value0);
+          return $150;
+        });
+      }
+      ;
+      if (v instanceof HideModuleDetails) {
+        return modify_4(function(v1) {
+          var $154 = {};
+          for (var $155 in v1) {
+            if ({}.hasOwnProperty.call(v1, $155)) {
+              $154[$155] = v1[$155];
+            }
+            ;
+          }
+          ;
+          $154.hoveredModule = Nothing.value;
+          return $154;
+        });
+      }
+      ;
+      if (v instanceof ResetToOverview) {
+        return discard14(modify_4(function(v1) {
+          var $157 = {};
+          for (var $158 in v1) {
+            if ({}.hasOwnProperty.call(v1, $158)) {
+              $157[$158] = v1[$158];
+            }
+            ;
+          }
+          ;
+          $157.hoveredModule = Nothing.value;
+          $157.spotlightModeActive = false;
+          return $157;
+        }))(function() {
+          return bind16(get7)(function(state3) {
+            return handleAction2(dictMonadAff)(new SetActiveTab(state3.activeTab));
+          });
+        });
+      }
+      ;
+      if (v instanceof EnableSpotlightMode) {
+        return modify_4(function(v1) {
+          var $160 = {};
+          for (var $161 in v1) {
+            if ({}.hasOwnProperty.call(v1, $161)) {
+              $160[$161] = v1[$161];
+            }
+            ;
+          }
+          ;
+          $160.spotlightModeActive = true;
+          return $160;
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 247, column 16 - line 381, column 47): " + [v.constructor.name]);
     };
   };
   var component2 = function(dictMonadAff) {
@@ -23591,7 +23616,7 @@ drawQuartet quartet selector = do
   // output/PSD3.Understanding.TOC/index.js
   var show18 = /* @__PURE__ */ show(showInt);
   var append15 = /* @__PURE__ */ append(semigroupArray);
-  var type_20 = /* @__PURE__ */ type_17(isPropButtonType);
+  var type_21 = /* @__PURE__ */ type_17(isPropButtonType);
   var map40 = /* @__PURE__ */ map(functorArray);
   var AnchorLink = /* @__PURE__ */ (function() {
     function AnchorLink2(value0) {
@@ -23662,7 +23687,7 @@ drawQuartet quartet selector = do
     throw new Error("Failed pattern match at PSD3.Understanding.TOC (line 78, column 5 - line 93, column 33): " + [item.target.constructor.name]);
   };
   var renderTOC = function(config) {
-    return div2([classes(["toc-panel"])])([img([src9(fromMaybe("bookmark.jpeg")(config.image)), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5(config.title)]), button([classes(["floating-panel__toggle"]), type_20(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])(map40(renderTOCItem)(config.items))])])]);
+    return div2([classes(["toc-panel"])])([img([src9(fromMaybe("bookmark.jpeg")(config.image)), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5(config.title)]), button([classes(["floating-panel__toggle"]), type_21(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])(map40(renderTOCItem)(config.items))])])]);
   };
 
   // output/PSD3.CodeExplorer.CodeExplorationPage/index.js
@@ -23931,21 +23956,21 @@ drawQuartet quartet selector = do
     return M2P2;
   })();
   var eqLinkType = {
-    eq: function(x38) {
+    eq: function(x37) {
       return function(y36) {
-        if (x38 instanceof M2M_Tree && y36 instanceof M2M_Tree) {
+        if (x37 instanceof M2M_Tree && y36 instanceof M2M_Tree) {
           return true;
         }
         ;
-        if (x38 instanceof M2M_Graph && y36 instanceof M2M_Graph) {
+        if (x37 instanceof M2M_Graph && y36 instanceof M2M_Graph) {
           return true;
         }
         ;
-        if (x38 instanceof P2P && y36 instanceof P2P) {
+        if (x37 instanceof P2P && y36 instanceof P2P) {
           return true;
         }
         ;
-        if (x38 instanceof M2P && y36 instanceof M2P) {
+        if (x37 instanceof M2P && y36 instanceof M2P) {
           return true;
         }
         ;
@@ -24228,8 +24253,8 @@ drawQuartet quartet selector = do
 
   // output/Data.Graph/index.js
   var map114 = /* @__PURE__ */ map(functorMaybe);
-  var Graph = function(x38) {
-    return x38;
+  var Graph = function(x37) {
+    return x37;
   };
   var lookup13 = function(dictOrd) {
     var lookup18 = lookup(dictOrd);
@@ -24410,10 +24435,10 @@ drawQuartet quartet selector = do
     return function(i2) {
       var d9 = toNumber(i2);
       var c = toNumber(columns);
-      var x38 = remainder(d9)(c);
+      var x37 = remainder(d9)(c);
       var y36 = floor(d9 / c);
       return {
-        x: x38,
+        x: x37,
         y: y36
       };
     };
@@ -24543,10 +24568,10 @@ drawQuartet quartet selector = do
         y: v.y
       })(toMaybe(v.treeXY));
       var radialTranslate2 = function(p2) {
-        var x38 = p2.x * cos(p2.y);
+        var x37 = p2.x * cos(p2.y);
         var y36 = p2.x * sin(p2.y);
         return {
-          x: x38,
+          x: x37,
           y: y36
         };
       };
@@ -25640,14 +25665,14 @@ drawQuartet quartet selector = do
     return function(id5) {
       return function(graph) {
         var processNextOpenDepPath = function(searchRecord) {
-          return bind19(uncons2(searchRecord.openDepPaths))(function(x38) {
-            return bind19(head2(x38.head))(function(firstID) {
+          return bind19(uncons2(searchRecord.openDepPaths))(function(x37) {
+            return bind19(head2(x37.head))(function(firstID) {
               return bind19(lookup18(firstID)(graph))(function(firstNode) {
                 var newDeps = partition(function(d9) {
                   return !elem6(d9)(searchRecord.nodes);
                 })(firstNode.links.targets);
                 var newOpenDepPaths = mapFlipped12(newDeps.yes)(function(d9) {
-                  return cons3(d9)(x38.head);
+                  return cons3(d9)(x37.head);
                 });
                 var prunedLinks = mapFlipped12(newDeps.no)(function(d9) {
                   return new Tuple(firstID, d9);
@@ -25657,8 +25682,8 @@ drawQuartet quartet selector = do
                   return new Just({
                     dependencyTree: searchRecord.dependencyTree,
                     nodes: searchRecord.nodes,
-                    openDepPaths: x38.tail,
-                    closedDepPaths: cons3(x38.head)(searchRecord.closedDepPaths),
+                    openDepPaths: x37.tail,
+                    closedDepPaths: cons3(x37.head)(searchRecord.closedDepPaths),
                     redundantLinks: append8(searchRecord.redundantLinks)(prunedLinks)
                   });
                 }
@@ -25666,7 +25691,7 @@ drawQuartet quartet selector = do
                 return new Just({
                   closedDepPaths: searchRecord.closedDepPaths,
                   dependencyTree: searchRecord.dependencyTree,
-                  openDepPaths: append8(x38.tail)(newOpenDepPaths),
+                  openDepPaths: append8(x37.tail)(newOpenDepPaths),
                   nodes: append8(searchRecord.nodes)(newDeps.yes),
                   redundantLinks: append8(searchRecord.redundantLinks)(prunedLinks)
                 });
@@ -26398,7 +26423,7 @@ drawQuartet quartet selector = do
   var render8 = /* @__PURE__ */ div2([/* @__PURE__ */ classes(["zoom-sticker"])])([/* @__PURE__ */ span3([/* @__PURE__ */ classes(["zoom-sticker__icon"])])([/* @__PURE__ */ text5("\u{1F50D}")]), /* @__PURE__ */ span3([/* @__PURE__ */ classes(["zoom-sticker__text"])])([/* @__PURE__ */ text5("Try zooming!")])]);
 
   // output/PSD3.CodeExplorer.HTML/index.js
-  var type_21 = /* @__PURE__ */ type_17(isPropInputType);
+  var type_22 = /* @__PURE__ */ type_17(isPropInputType);
   var value16 = /* @__PURE__ */ value12(isPropString);
   var show21 = /* @__PURE__ */ show(showNumber);
   var eq6 = /* @__PURE__ */ eq(eqForceStatus);
@@ -26412,7 +26437,7 @@ drawQuartet quartet selector = do
     };
     return [onValueInput(function($22) {
       return ChangeSimConfig.create(config["var"](toScale($22)));
-    }), type_21(InputRange.value), id2(config.id), class_("range-slider scaling-slider"), min5(config.min), max6(config.max), step4(new Step(config.step)), value16(show21(config.value))];
+    }), type_22(InputRange.value), id2(config.id), class_("range-slider scaling-slider"), min5(config.min), max6(config.max), step4(new Step(config.step)), value16(show21(config.value))];
   };
   var renderTableForces = function(state3) {
     var renderForceItem = function(v) {
@@ -32082,7 +32107,7 @@ drawQuartet quartet selector = do
   var fillOpacity3 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var dy2 = /* @__PURE__ */ dy(toAttrNumber);
   var textAnchor4 = /* @__PURE__ */ textAnchor(toAttrStringFn);
-  var text14 = /* @__PURE__ */ text6(toAttrStringFn);
+  var text13 = /* @__PURE__ */ text6(toAttrStringFn);
   var node_ = {
     name: function($83) {
       return (function(v) {
@@ -32206,7 +32231,7 @@ drawQuartet quartet selector = do
                                         }
                                         ;
                                         return "end";
-                                      }), text14(node_.name)]))(function() {
+                                      }), text13(node_.name)]))(function() {
                                         return pure48(unit);
                                       });
                                     });
@@ -32323,7 +32348,7 @@ drawQuartet quartet selector = do
   var discard52 = /* @__PURE__ */ discard(discardUnit);
   var x19 = /* @__PURE__ */ x(toAttrNumber);
   var y18 = /* @__PURE__ */ y(toAttrNumber);
-  var text15 = /* @__PURE__ */ text6(toAttrString);
+  var text14 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor5 = /* @__PURE__ */ textAnchor(toAttrString);
   var fontSize3 = /* @__PURE__ */ fontSize(toAttrNumber);
   var min8 = /* @__PURE__ */ min(ordNumber);
@@ -32387,7 +32412,7 @@ drawQuartet quartet selector = do
                     var depth = hNodeDepth_(node);
                     var name16 = getName(node);
                     return when9(r > 0)(bind71(appendTo2(chartGroup)(Circle.value)([cx3(xPos), cy3(yPos), radius9(r), fill9(depthColor(round2(depth))), fillOpacity4(0.7), strokeColor10("#ffffff"), strokeWidth9(1), classed10("bubble")]))(function() {
-                      return discard112(when9(r > 20)(bind71(appendTo2(chartGroup)(Text2.value)([x19(xPos), y18(yPos), text15(name16), textAnchor5("middle"), fontSize3(min8(12)(r / 3)), fill9("#ffffff"), classed10("bubble-label")]))(function() {
+                      return discard112(when9(r > 20)(bind71(appendTo2(chartGroup)(Text2.value)([x19(xPos), y18(yPos), text14(name16), textAnchor5("middle"), fontSize3(min8(12)(r / 3)), fill9("#ffffff"), classed10("bubble-label")]))(function() {
                         return pure115(unit);
                       })))(function() {
                         return pure115(unit);
@@ -32417,7 +32442,7 @@ drawQuartet quartet selector = do
   var strokeColor11 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth10 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var discard53 = /* @__PURE__ */ discard(discardUnit);
-  var text16 = /* @__PURE__ */ text6(toAttrString);
+  var text15 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor6 = /* @__PURE__ */ textAnchor(toAttrString);
   var fontSize4 = /* @__PURE__ */ fontSize(toAttrNumber);
   var getName2 = function(node) {
@@ -32483,7 +32508,7 @@ drawQuartet quartet selector = do
                     var depth = hNodeDepth_(node);
                     var name16 = getName2(node);
                     return when9(partWidth > 0 && partHeight > 0)(bind71(appendTo2(chartGroup)(Rect.value)([x20(x0), y19(y0), width16(partWidth), height16(partHeight), fill10(depthColor2(round2(depth))), fillOpacity5(0.7), strokeColor11("#ffffff"), strokeWidth10(1), classed11("partition")]))(function() {
-                      return discard112(when9(partWidth > 60 && partHeight > 15)(bind71(appendTo2(chartGroup)(Text2.value)([x20(x0 + 4), y19(y0 + partHeight / 2 + 4), text16(name16), textAnchor6("start"), fontSize4(10), fill10("#ffffff"), classed11("partition-label")]))(function() {
+                      return discard112(when9(partWidth > 60 && partHeight > 15)(bind71(appendTo2(chartGroup)(Text2.value)([x20(x0 + 4), y19(y0 + partHeight / 2 + 4), text15(name16), textAnchor6("start"), fontSize4(10), fill10("#ffffff"), classed11("partition-label")]))(function() {
                         return pure48(unit);
                       })))(function() {
                         return pure48(unit);
@@ -32513,7 +32538,7 @@ drawQuartet quartet selector = do
   var strokeColor12 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth11 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var discard54 = /* @__PURE__ */ discard(discardUnit);
-  var text17 = /* @__PURE__ */ text6(toAttrString);
+  var text16 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor7 = /* @__PURE__ */ textAnchor(toAttrString);
   var fontSize5 = /* @__PURE__ */ fontSize(toAttrNumber);
   var getName3 = function(node) {
@@ -32579,7 +32604,7 @@ drawQuartet quartet selector = do
                     var depth = hNodeDepth_(node);
                     var name16 = getName3(node);
                     return when9(tileWidth > 0 && tileHeight > 0)(bind71(appendTo2(chartGroup)(Rect.value)([x21(x0), y20(y0), width17(tileWidth), height17(tileHeight), fill11(depthColor3(round2(depth))), fillOpacity6(0.6), strokeColor12("#ffffff"), strokeWidth11(1), classed13("tile")]))(function() {
-                      return discard112(when9(tileWidth > 30 && tileHeight > 20)(bind71(appendTo2(chartGroup)(Text2.value)([x21(x0 + 2), y20(y0 + 12), text17(name16), textAnchor7("start"), fontSize5(10), fill11("#ffffff"), classed13("tile-label")]))(function() {
+                      return discard112(when9(tileWidth > 30 && tileHeight > 20)(bind71(appendTo2(chartGroup)(Text2.value)([x21(x0 + 2), y20(y0 + 12), text16(name16), textAnchor7("start"), fontSize5(10), fill11("#ffffff"), classed13("tile-label")]))(function() {
                         return pure48(unit);
                       })))(function() {
                         return pure48(unit);
@@ -32652,7 +32677,7 @@ drawQuartet quartet selector = do
   var dy3 = /* @__PURE__ */ dy(toAttrNumber);
   var x26 = /* @__PURE__ */ x(toAttrNumberFn);
   var textAnchor8 = /* @__PURE__ */ textAnchor(toAttrStringFn);
-  var text18 = /* @__PURE__ */ text6(toAttrStringFn);
+  var text17 = /* @__PURE__ */ text6(toAttrStringFn);
   var treeDatum_ = {
     depth: function($50) {
       return (function(v) {
@@ -32762,7 +32787,7 @@ drawQuartet quartet selector = do
                               ;
                               return "#555";
                             }), radius10(2.5), strokeColor13("white")]))(function(theNodes) {
-                              return bind71(appendTo2(nodeJoin_)(Text2.value)([dy3(0.31), x26(treeDatum_.textX(config.layout)), textAnchor8(treeDatum_.textAnchor(config.layout)), text18(treeDatum_.name), fill15(config.color)]))(function(theLabels) {
+                              return bind71(appendTo2(nodeJoin_)(Text2.value)([dy3(0.31), x26(treeDatum_.textX(config.layout)), textAnchor8(treeDatum_.textAnchor(config.layout)), text17(treeDatum_.name), fill15(config.color)]))(function(theLabels) {
                                 return pure48(svg2);
                               });
                             });
@@ -33192,8 +33217,8 @@ drawQuartet quartet selector = do
   var radialTranslate = function(d9) {
     return "translate(" + (show30(treeDatum_.y(d9)) + ",0)");
   };
-  var radialRotate = function(x38) {
-    return show30(x38 * 180 / pi - 90);
+  var radialRotate = function(x37) {
+    return show30(x37 * 180 / pi - 90);
   };
   var radialRotateCommon = function(d9) {
     return "rotate(" + (radialRotate(treeDatum_.x(d9)) + ")");
@@ -33425,7 +33450,7 @@ drawQuartet quartet selector = do
 
   // output/PSD3.Understanding.Hierarchies/index.js
   var append19 = /* @__PURE__ */ append(semigroupArray);
-  var type_22 = /* @__PURE__ */ type_17(isPropButtonType);
+  var type_23 = /* @__PURE__ */ type_17(isPropButtonType);
   var bind57 = /* @__PURE__ */ bind(bindHalogenM);
   var liftEffect45 = /* @__PURE__ */ liftEffect(/* @__PURE__ */ monadEffectHalogenM(monadEffectAff));
   var removeExistingSVG2 = /* @__PURE__ */ removeExistingSVG(d3TaglessD3M);
@@ -33605,41 +33630,41 @@ drawQuartet quartet selector = do
     throw new Error("Failed pattern match at PSD3.Understanding.Hierarchies (line 57, column 21 - line 66, column 140): " + [v.constructor.name]);
   };
   var eqHierarchyLayout = {
-    eq: function(x38) {
+    eq: function(x37) {
       return function(y36) {
-        if (x38 instanceof HorizontalTidy && y36 instanceof HorizontalTidy) {
+        if (x37 instanceof HorizontalTidy && y36 instanceof HorizontalTidy) {
           return true;
         }
         ;
-        if (x38 instanceof HorizontalDendrogram && y36 instanceof HorizontalDendrogram) {
+        if (x37 instanceof HorizontalDendrogram && y36 instanceof HorizontalDendrogram) {
           return true;
         }
         ;
-        if (x38 instanceof VerticalTidy && y36 instanceof VerticalTidy) {
+        if (x37 instanceof VerticalTidy && y36 instanceof VerticalTidy) {
           return true;
         }
         ;
-        if (x38 instanceof VerticalDendrogram && y36 instanceof VerticalDendrogram) {
+        if (x37 instanceof VerticalDendrogram && y36 instanceof VerticalDendrogram) {
           return true;
         }
         ;
-        if (x38 instanceof RadialTidy && y36 instanceof RadialTidy) {
+        if (x37 instanceof RadialTidy && y36 instanceof RadialTidy) {
           return true;
         }
         ;
-        if (x38 instanceof RadialDendrogram && y36 instanceof RadialDendrogram) {
+        if (x37 instanceof RadialDendrogram && y36 instanceof RadialDendrogram) {
           return true;
         }
         ;
-        if (x38 instanceof Icicle && y36 instanceof Icicle) {
+        if (x37 instanceof Icicle && y36 instanceof Icicle) {
           return true;
         }
         ;
-        if (x38 instanceof CirclePacking && y36 instanceof CirclePacking) {
+        if (x37 instanceof CirclePacking && y36 instanceof CirclePacking) {
           return true;
         }
         ;
-        if (x38 instanceof Treemap && y36 instanceof Treemap) {
+        if (x37 instanceof Treemap && y36 instanceof Treemap) {
           return true;
         }
         ;
@@ -33658,7 +33683,7 @@ drawQuartet quartet selector = do
           }
           ;
           return [];
-        })())), onClick($$const(new SelectLayout(layout))), type_22(ButtonButton.value)])([text5(label5)]);
+        })())), onClick($$const(new SelectLayout(layout))), type_23(ButtonButton.value)])([text5(label5)]);
       };
     };
   };
@@ -33816,7 +33841,7 @@ drawQuartet quartet selector = do
     return $$Proxy.value;
   })();
   var render51 = function(state3) {
-    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel", "control-panel"])])([div2([classes(["toc-panel__main", "control-panel__main"])])([img([src9("controller.jpeg"), alt5(""), classes(["control-panel__icon"])]), div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Layout Controls")]), button([classes(["floating-panel__toggle"]), type_22(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "control-panel__content"])])([div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Node-Link Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(HorizontalTidy.value)("H-Tidy")(state3.currentLayout), renderLayoutOption(HorizontalDendrogram.value)("H-Dendro")(state3.currentLayout), renderLayoutOption(VerticalTidy.value)("V-Tidy")(state3.currentLayout), renderLayoutOption(VerticalDendrogram.value)("V-Dendro")(state3.currentLayout), renderLayoutOption(RadialTidy.value)("R-Tidy")(state3.currentLayout), renderLayoutOption(RadialDendrogram.value)("R-Dendro")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Adjacency Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(Icicle.value)("Icicle")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Enclosure Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(CirclePacking.value)("Circle Pack")(state3.currentLayout), renderLayoutOption(Treemap.value)("Treemap")(state3.currentLayout)])]), div2([classes(["control-panel__current"])])([strong_([text5("Current:")]), text5(" "), text5(show31(state3.currentLayout))])])])]), slot_10(_examplesNav2)(unit)(component46)(Hierarchies.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Hierarchical Layouts")]), p_([text5("Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data.")]), p_([text5("This page demonstrates five different ways to visualize the same hierarchical dataset. Use the controls on the left to switch between layouts and explore how each representation emphasizes different relationships in the data.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5(show31(state3.currentLayout))]), p_([text5(layoutDescription(state3.currentLayout))]), div2([classes(["tutorial-viz-container"])])([div2([classes(["hierarchies-viz"])])([renderLayoutPlaceholder(state3.currentLayout)])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Implementation")]), p_([text5("The visualization code for "), strong_([text5(show31(state3.currentLayout))]), text5(" demonstrates how D3's hierarchical layout algorithms transform tree data into visual coordinates.")]), div2([classes(["tutorial-code-block"])])([pre_([code_([text5("-- Code for "), text5(show31(state3.currentLayout)), text5(" layout will go here\n"), text5("-- Demonstrates D3 hierarchy layout with PureScript DSL")])])])])]);
+    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel", "control-panel"])])([div2([classes(["toc-panel__main", "control-panel__main"])])([img([src9("controller.jpeg"), alt5(""), classes(["control-panel__icon"])]), div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Layout Controls")]), button([classes(["floating-panel__toggle"]), type_23(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "control-panel__content"])])([div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Node-Link Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(HorizontalTidy.value)("H-Tidy")(state3.currentLayout), renderLayoutOption(HorizontalDendrogram.value)("H-Dendro")(state3.currentLayout), renderLayoutOption(VerticalTidy.value)("V-Tidy")(state3.currentLayout), renderLayoutOption(VerticalDendrogram.value)("V-Dendro")(state3.currentLayout), renderLayoutOption(RadialTidy.value)("R-Tidy")(state3.currentLayout), renderLayoutOption(RadialDendrogram.value)("R-Dendro")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Adjacency Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(Icicle.value)("Icicle")(state3.currentLayout)])]), div2([classes(["control-panel__section"])])([h4([classes(["control-panel__section-title"])])([text5("Enclosure Diagrams")]), div2([classes(["control-panel__options"])])([renderLayoutOption(CirclePacking.value)("Circle Pack")(state3.currentLayout), renderLayoutOption(Treemap.value)("Treemap")(state3.currentLayout)])]), div2([classes(["control-panel__current"])])([strong_([text5("Current:")]), text5(" "), text5(show31(state3.currentLayout))])])])]), slot_10(_examplesNav2)(unit)(component46)(Hierarchies.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Hierarchical Layouts")]), p_([text5("Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data.")]), p_([text5("This page demonstrates five different ways to visualize the same hierarchical dataset. Use the controls on the left to switch between layouts and explore how each representation emphasizes different relationships in the data.")])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5(show31(state3.currentLayout))]), p_([text5(layoutDescription(state3.currentLayout))]), div2([classes(["tutorial-viz-container"])])([div2([classes(["hierarchies-viz"])])([renderLayoutPlaceholder(state3.currentLayout)])])]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("Implementation")]), p_([text5("The visualization code for "), strong_([text5(show31(state3.currentLayout))]), text5(" demonstrates how D3's hierarchical layout algorithms transform tree data into visual coordinates.")]), div2([classes(["tutorial-code-block"])])([pre_([code_([text5("-- Code for "), text5(show31(state3.currentLayout)), text5(" layout will go here\n"), text5("-- Demonstrates D3 hierarchy layout with PureScript DSL")])])])])]);
   };
   var component48 = /* @__PURE__ */ (function() {
     return mkComponent({
@@ -33955,7 +33980,7 @@ drawQuartet quartet selector = do
   var liftEffect46 = /* @__PURE__ */ liftEffect(monadEffectHalogenM4);
   var liftAff33 = /* @__PURE__ */ liftAff(/* @__PURE__ */ monadAffHalogenM(monadAffAff));
   var modify_39 = /* @__PURE__ */ modify_(monadStateHalogenM);
-  var type_23 = /* @__PURE__ */ type_17(isPropButtonType);
+  var type_24 = /* @__PURE__ */ type_17(isPropButtonType);
   var slot_11 = /* @__PURE__ */ slot_()({
     reflectSymbol: function() {
       return "examplesNav";
@@ -34143,7 +34168,7 @@ drawQuartet quartet selector = do
     return $$Proxy.value;
   })();
   var render52 = function(state3) {
-    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Interpreters")]), button([classes(["floating-panel__toggle"]), type_23(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([renderInterpreterLink(EnglishDescription.value)("1. English Description"), renderInterpreterLink(D3Code.value)("2. D3 JavaScript"), renderInterpreterLink(VegaLite.value)("3. Vega-Lite JSON"), renderInterpreterLink(MermaidJS.value)("4. Mermaid Diagram"), renderInterpreterLink(MetaTreeAST.value)("5. Meta Tree (AST)")])])])]), slot_11(_examplesNav3)(unit)(component46)(Interpreters.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Alternative Interpreters")]), p_([text5("The Finally Tagless pattern allows us to write visualization code once and interpret it in multiple ways. The same DSL code can produce an actual visualization, generate equivalent code in other languages, create documentation, or even visualize its own structure.")]), p_([text5("This flexibility comes from separating the ")]), em_([text5("structure")]), text5(" of our visualization (what operations we want to perform) from the "), em_([text5("interpretation")]), text5(" (how those operations are executed). Each interpreter below provides a different view of the same underlying code.")]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("The Source Code")]), p_([text5("Here's a simple example using our PureScript D3 DSL - the most basic example imaginable, three circles:")]), codeSnippet("TLCSimple")("haskell")]), renderInterpreterOutput(state3)(state3.selectedInterpreter)]);
+    return div2([classes(["explanation-page"])])([div2([classes(["toc-panel"])])([img([src9("bookmark.jpeg"), alt5(""), classes(["toc-panel__bookmark-pin"])]), div2([classes(["toc-panel__main"])])([div2([classes(["floating-panel__header"])])([h3([classes(["floating-panel__title"])])([text5("Interpreters")]), button([classes(["floating-panel__toggle"]), type_24(ButtonButton.value)])([text5("\u2212")])]), div2([classes(["floating-panel__content", "toc-panel__content"])])([nav([classes(["toc-nav"])])([renderInterpreterLink(EnglishDescription.value)("1. English Description"), renderInterpreterLink(D3Code.value)("2. D3 JavaScript"), renderInterpreterLink(VegaLite.value)("3. Vega-Lite JSON"), renderInterpreterLink(MermaidJS.value)("4. Mermaid Diagram"), renderInterpreterLink(MetaTreeAST.value)("5. Meta Tree (AST)")])])])]), slot_11(_examplesNav3)(unit)(component46)(Interpreters.value), section([classes(["tutorial-section", "tutorial-intro"])])([h1([classes(["tutorial-title"])])([text5("Alternative Interpreters")]), p_([text5("The Finally Tagless pattern allows us to write visualization code once and interpret it in multiple ways. The same DSL code can produce an actual visualization, generate equivalent code in other languages, create documentation, or even visualize its own structure.")]), p_([text5("This flexibility comes from separating the ")]), em_([text5("structure")]), text5(" of our visualization (what operations we want to perform) from the "), em_([text5("interpretation")]), text5(" (how those operations are executed). Each interpreter below provides a different view of the same underlying code.")]), section([classes(["tutorial-section"])])([h2([classes(["tutorial-section-title"])])([text5("The Source Code")]), p_([text5("Here's a simple example using our PureScript D3 DSL - the most basic example imaginable, three circles:")]), codeSnippet("TLCSimple")("haskell")]), renderInterpreterOutput(state3)(state3.selectedInterpreter)]);
   };
   var component49 = /* @__PURE__ */ (function() {
     var initialState4 = {
@@ -34176,7 +34201,7 @@ drawQuartet quartet selector = do
   var fill18 = /* @__PURE__ */ fill(toAttrString);
   var y21 = /* @__PURE__ */ y(toAttrNumber);
   var x27 = /* @__PURE__ */ x(toAttrNumberFnI);
-  var text19 = /* @__PURE__ */ text6(toAttrStringFn);
+  var text18 = /* @__PURE__ */ text6(toAttrStringFn);
   var fontSize7 = /* @__PURE__ */ fontSize(toAttrNumber);
   var discard59 = /* @__PURE__ */ discard(discardUnit);
   var datum_5 = {
@@ -34203,7 +34228,7 @@ drawQuartet quartet selector = do
       var transition2 = transitionWithDuration(2e3);
       var update4 = andThen2([classed16("update"), fill18("gray"), y21(200)])(to(transition2)([x27(xFromIndex)]));
       var exit = andThen2([classed16("exit"), fill18("brown")])(to(transition2)([y21(400), remove]));
-      var enter = andThen2([classed16("enter"), fill18("green"), x27(xFromIndex), y21(0), text19(function($24) {
+      var enter = andThen2([classed16("enter"), fill18("green"), x27(xFromIndex), y21(0), text18(function($24) {
         return singleton7(datum_5["char"]($24));
       }), fontSize7(60)])(to(transition2)([y21(200)]));
       return bind71(attach2(selector))(function(root3) {
@@ -35001,7 +35026,7 @@ drawQuartet quartet selector = do
   var fromFoldable30 = /* @__PURE__ */ fromFoldable5(foldableArray)(ordString);
   var classed22 = /* @__PURE__ */ classed(toAttrString);
   var discard64 = /* @__PURE__ */ discard(discardUnit);
-  var text20 = /* @__PURE__ */ text6(toAttrStringFn);
+  var text19 = /* @__PURE__ */ text6(toAttrStringFn);
   var show38 = /* @__PURE__ */ show(showInt);
   var drawThreeDimensionsSets = function(dictSelectionM) {
     var Monad0 = dictSelectionM.Monad0();
@@ -35020,7 +35045,7 @@ drawQuartet quartet selector = do
         return bind71(appendTo2(root3)(Table.value)([classed22("nested-data-table nested-data-table--sets")]))(function(table2) {
           return bind71(simpleJoin2(table2)(Tr.value)(productCategories)(keyIsID_))(function(rows4) {
             return bind71(nestedJoin2(rows4)(Td.value)(coerceDatumToSet)(keyIsID_))(function(cells2) {
-              return discard112(setAttributes2(cells2)([text20(coerceDatumToString), classed22("tag-cell")]))(function() {
+              return discard112(setAttributes2(cells2)([text19(coerceDatumToString), classed22("tag-cell")]))(function() {
                 return pure48(cells2);
               });
             });
@@ -35049,7 +35074,7 @@ drawQuartet quartet selector = do
               return show38(coerceDatumToInt2(d9));
             };
             return bind71(nestedJoin2(rows4)(Td.value)(coerceDatumToArray)(keyIsID_))(function(cells2) {
-              return discard112(setAttributes2(cells2)([text20(cellText)]))(function() {
+              return discard112(setAttributes2(cells2)([text19(cellText)]))(function() {
                 return pure48(cells2);
               });
             });
@@ -35166,7 +35191,7 @@ drawQuartet quartet selector = do
   var y28 = /* @__PURE__ */ y(toAttrNumber);
   var fill24 = /* @__PURE__ */ fill(toAttrString);
   var strokeColor18 = /* @__PURE__ */ strokeColor(toAttrString);
-  var text21 = /* @__PURE__ */ text6(toAttrString);
+  var text20 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor9 = /* @__PURE__ */ textAnchor(toAttrString);
   var parseCSVRow = function(row) {
     return bind61(hush(runExcept(readProp3("State")(row))))(function(stateF) {
@@ -35321,7 +35346,7 @@ drawQuartet quartet selector = do
                     }]), classed23("x-axis")]))(function(xAxis) {
                       var drawStateLabel = function(state$prime) {
                         var labelX = getStateX(state$prime) + stateWidth / 2;
-                        return bind116(appendTo2(xAxis)(Text2.value)([x30(labelX), y28(20), text21(state$prime), textAnchor9("middle"), classed23("axis-label")]))(function() {
+                        return bind116(appendTo2(xAxis)(Text2.value)([x30(labelX), y28(20), text20(state$prime), textAnchor9("middle"), classed23("axis-label")]))(function() {
                           return pure115(unit);
                         });
                       };
@@ -35330,7 +35355,7 @@ drawQuartet quartet selector = do
                           var yTicks2 = [0, maxPop / 4, maxPop / 2, 3 * maxPop / 4, maxPop];
                           var drawYTick = function(value19) {
                             var tickY = chartHeight - value19 / maxPop * chartHeight;
-                            return bind116(appendTo2(yAxis)(Text2.value)([x30(-10), y28(tickY + 4), text21(formatSI(value19)), textAnchor9("end"), classed23("axis-label")]))(function() {
+                            return bind116(appendTo2(yAxis)(Text2.value)([x30(-10), y28(tickY + 4), text20(formatSI(value19)), textAnchor9("end"), classed23("axis-label")]))(function() {
                               return pure115(unit);
                             });
                           };
@@ -35370,7 +35395,7 @@ drawQuartet quartet selector = do
   var fill25 = /* @__PURE__ */ fill(toAttrString);
   var x31 = /* @__PURE__ */ x(toAttrNumber);
   var y29 = /* @__PURE__ */ y(toAttrNumber);
-  var text22 = /* @__PURE__ */ text6(toAttrString);
+  var text21 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor10 = /* @__PURE__ */ textAnchor(toAttrString);
   var compare3 = /* @__PURE__ */ compare(ordString);
   var parseCSVRow2 = function(row) {
@@ -35516,7 +35541,7 @@ drawQuartet quartet selector = do
                       };
                       var drawYTick = function(value19) {
                         var tickY = yScale(value19);
-                        return bind116(appendTo2(yAxis)(Text2.value)([x31(-5), y29(tickY + 4), text22(toString2(value19) + "%"), textAnchor10("end"), classed24("axis-label")]))(function() {
+                        return bind116(appendTo2(yAxis)(Text2.value)([x31(-5), y29(tickY + 4), text21(toString2(value19) + "%"), textAnchor10("end"), classed24("axis-label")]))(function() {
                           return pure115(unit);
                         });
                       };
@@ -35562,7 +35587,7 @@ drawQuartet quartet selector = do
                               ;
                               if (v3 instanceof Just) {
                                 var tickX = xScale(v3.value0);
-                                return bind116(appendTo2(xAxis)(Text2.value)([x31(tickX), y29(20), text22(year), textAnchor10("middle"), classed24("axis-label")]))(function() {
+                                return bind116(appendTo2(xAxis)(Text2.value)([x31(tickX), y29(20), text21(year), textAnchor10("middle"), classed24("axis-label")]))(function() {
                                   return pure115(unit);
                                 });
                               }
@@ -35620,11 +35645,11 @@ drawQuartet quartet selector = do
   var textAnchor11 = /* @__PURE__ */ textAnchor(toAttrString);
   var y30 = /* @__PURE__ */ y(toAttrNumber);
   var dy4 = /* @__PURE__ */ dy(toAttrNumber);
-  var text23 = /* @__PURE__ */ text6(toAttrString);
+  var text22 = /* @__PURE__ */ text6(toAttrString);
   var radius18 = /* @__PURE__ */ radius(toAttrNumber);
   var strokeOpacity8 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
   var strokeWidth18 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var x35 = /* @__PURE__ */ x(toAttrNumber);
+  var x34 = /* @__PURE__ */ x(toAttrNumber);
   var stackData = function(values2) {
     var folder = function(acc) {
       return function(v) {
@@ -35703,7 +35728,7 @@ drawQuartet quartet selector = do
           var y211 = outerRadius * sin(endAngle);
           var y112 = outerRadius * sin(startAngle);
           var y0 = innerRadius * sin(startAngle);
-          var x38 = innerRadius * cos(endAngle);
+          var x37 = innerRadius * cos(endAngle);
           var x211 = outerRadius * cos(endAngle);
           var x112 = outerRadius * cos(startAngle);
           var x0 = innerRadius * cos(startAngle);
@@ -35715,7 +35740,7 @@ drawQuartet quartet selector = do
             ;
             return "0";
           })();
-          return "M " + (toString2(x0) + (" " + (toString2(y0) + (" L " + (toString2(x112) + (" " + (toString2(y112) + (" A " + (toString2(outerRadius) + (" " + (toString2(outerRadius) + (" 0 " + (largeArc + (" 1 " + (toString2(x211) + (" " + (toString2(y211) + (" L " + (toString2(x38) + (" " + (toString2(y36) + (" A " + (toString2(innerRadius) + (" " + (toString2(innerRadius) + (" 0 " + (largeArc + (" 0 " + (toString2(x0) + (" " + (toString2(y0) + " Z")))))))))))))))))))))))))))))));
+          return "M " + (toString2(x0) + (" " + (toString2(y0) + (" L " + (toString2(x112) + (" " + (toString2(y112) + (" A " + (toString2(outerRadius) + (" " + (toString2(outerRadius) + (" 0 " + (largeArc + (" 1 " + (toString2(x211) + (" " + (toString2(y211) + (" L " + (toString2(x37) + (" " + (toString2(y36) + (" A " + (toString2(innerRadius) + (" " + (toString2(innerRadius) + (" 0 " + (largeArc + (" 0 " + (toString2(x0) + (" " + (toString2(y0) + " Z")))))))))))))))))))))))))))))));
         };
       };
     };
@@ -35806,7 +35831,7 @@ drawQuartet quartet selector = do
                     return drawStateBar(fst(t))(snd(t));
                   })(mapWithIndex3(Tuple.create)(states)))(function() {
                     return bind116(appendTo2(chartGroup)(Group.value)([classed25("y-axis"), textAnchor11("middle")]))(function(yAxisGroup) {
-                      return bind116(appendTo2(yAxisGroup)(Text2.value)([y30(-dims.outerRadius - 10), dy4(-16), text23("Population"), classed25("axis-label")]))(function() {
+                      return bind116(appendTo2(yAxisGroup)(Text2.value)([y30(-dims.outerRadius - 10), dy4(-16), text22("Population"), classed25("axis-label")]))(function() {
                         var yTicks2 = [0.25 * maxTotal, 0.5 * maxTotal, 0.75 * maxTotal, maxTotal];
                         var radiusScale = function(v1) {
                           return dims.innerRadius + v1 / maxTotal * (dims.outerRadius - dims.innerRadius);
@@ -35815,8 +35840,8 @@ drawQuartet quartet selector = do
                           var gridRadius = radiusScale(value19);
                           return bind116(appendTo2(yAxisGroup)(Group.value)([fill26("none"), classed25("grid-line")]))(function(gridGroup) {
                             return bind116(appendTo2(gridGroup)(Circle.value)([radius18(gridRadius), strokeColor20("#000000"), strokeOpacity8(0.5), fill26("none")]))(function() {
-                              return bind116(appendTo2(gridGroup)(Text2.value)([y30(-gridRadius), dy4(5.6), text23(formatSI2(value19)), strokeColor20("#ffffff"), strokeWidth18(5), fill26("none"), classed25("grid-label-bg")]))(function(textBg) {
-                                return bind116(appendTo2(gridGroup)(Text2.value)([y30(-gridRadius), dy4(5.6), text23(formatSI2(value19)), fill26("#000000"), classed25("grid-label")]))(function(textFg) {
+                              return bind116(appendTo2(gridGroup)(Text2.value)([y30(-gridRadius), dy4(5.6), text22(formatSI2(value19)), strokeColor20("#ffffff"), strokeWidth18(5), fill26("none"), classed25("grid-label-bg")]))(function(textBg) {
+                                return bind116(appendTo2(gridGroup)(Text2.value)([y30(-gridRadius), dy4(5.6), text22(formatSI2(value19)), fill26("#000000"), classed25("grid-label")]))(function(textFg) {
                                   return pure48(unit);
                                 });
                               });
@@ -35833,7 +35858,7 @@ drawQuartet quartet selector = do
                                   return "translate(-40," + (toString2(yOffset) + ")");
                                 }]), classed25("legend-item")]))(function(itemGroup) {
                                   return bind116(appendTo2(itemGroup)(Rect.value)([width24(18), height24(18), fill26(getAgeColor(age$prime))]))(function() {
-                                    return bind116(appendTo2(itemGroup)(Text2.value)([x35(24), y30(9), dy4(5.6), text23(age$prime), classed25("legend-label")]))(function() {
+                                    return bind116(appendTo2(itemGroup)(Text2.value)([x34(24), y30(9), dy4(5.6), text22(age$prime), classed25("legend-label")]))(function() {
                                       return pure48(unit);
                                     });
                                   });
@@ -35850,7 +35875,7 @@ drawQuartet quartet selector = do
                                   var labelX = labelRadius * cos(angle);
                                   var labelY = labelRadius * sin(angle);
                                   var rotation = angle * 180 / pi;
-                                  return bind116(appendTo2(chartGroup)(Text2.value)([x35(labelX), y30(labelY), text23(state$prime), textAnchor11("middle"), transform([function(v1) {
+                                  return bind116(appendTo2(chartGroup)(Text2.value)([x34(labelX), y30(labelY), text22(state$prime), textAnchor11("middle"), transform([function(v1) {
                                     return "rotate(" + (toString2(rotation) + (" " + (toString2(labelX) + (" " + (toString2(labelY) + ")")))));
                                   }]), classed25("state-label")]))(function() {
                                     return pure48(unit);
@@ -35893,8 +35918,8 @@ drawQuartet quartet selector = do
           if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          const text25 = await response.text();
-          const lines = text25.trim().split("\n");
+          const text24 = await response.text();
+          const lines = text24.trim().split("\n");
           const headers = lines[0].split(",").map((h) => h.replace(/^"|"$/g, "").trim());
           const data = lines.slice(1).map((line) => {
             const values2 = line.match(/(".*?"|[^,]+)(?=\s*,|\s*$)/g) || [];
@@ -36059,12 +36084,12 @@ drawQuartet quartet selector = do
   var y210 = /* @__PURE__ */ y2(toAttrNumber);
   var traverse4 = /* @__PURE__ */ traverse(traversableArray);
   var strokeWidth19 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var x36 = /* @__PURE__ */ x(toAttrNumber);
+  var x35 = /* @__PURE__ */ x(toAttrNumber);
   var y31 = /* @__PURE__ */ y(toAttrNumber);
   var textAnchor12 = /* @__PURE__ */ textAnchor(toAttrString);
   var fontSize8 = /* @__PURE__ */ fontSize(toAttrNumber);
   var fill27 = /* @__PURE__ */ fill(toAttrString);
-  var text24 = /* @__PURE__ */ text6(toAttrString);
+  var text23 = /* @__PURE__ */ text6(toAttrString);
   var compare5 = /* @__PURE__ */ compare(ordNumber);
   var cx8 = /* @__PURE__ */ cx(toAttrNumberFnI);
   var cy8 = /* @__PURE__ */ cy(toAttrNumberFnI);
@@ -36072,7 +36097,7 @@ drawQuartet quartet selector = do
   var fill110 = /* @__PURE__ */ fill(toAttrStringFnI);
   var fillOpacity9 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var text110 = /* @__PURE__ */ text6(toAttrStringFn);
-  var x37 = /* @__PURE__ */ x(toAttrNumberFnI);
+  var x36 = /* @__PURE__ */ x(toAttrNumberFnI);
   var y35 = /* @__PURE__ */ y(toAttrNumberFnI);
   var yTicks = [20, 30, 40, 50, 60, 70, 80];
   var xTicks = [200, 500, 1e3, 2e3, 5e3, 1e4, 2e4, 5e4, 1e5];
@@ -36175,7 +36200,7 @@ drawQuartet quartet selector = do
                     return bind71(appendTo2(svg2)(Line.value)([]))(function(tickMark) {
                       return discard112(setAttributes2(tickMark)([x111(scaleX(defaultConfig)(tickValue)), x210(scaleX(defaultConfig)(tickValue)), y111(defaultConfig.height - defaultConfig.marginBottom), y210(defaultConfig.height - defaultConfig.marginBottom + 6), strokeColor21("#333"), strokeWidth19(1)]))(function() {
                         return bind71(appendTo2(svg2)(Text2.value)([]))(function(tickLabel) {
-                          return discard112(setAttributes2(tickLabel)([x36(scaleX(defaultConfig)(tickValue)), y31(defaultConfig.height - defaultConfig.marginBottom + 15), textAnchor12("middle"), fontSize8(10), fill27("#333"), text24(formatIncome(tickValue))]))(function() {
+                          return discard112(setAttributes2(tickLabel)([x35(scaleX(defaultConfig)(tickValue)), y31(defaultConfig.height - defaultConfig.marginBottom + 15), textAnchor12("middle"), fontSize8(10), fill27("#333"), text23(formatIncome(tickValue))]))(function() {
                             return pure48(unit);
                           });
                         });
@@ -36183,13 +36208,13 @@ drawQuartet quartet selector = do
                     });
                   };
                   return bind71(traverse13(createXTick)(xTicks))(function() {
-                    return bind71(appendTo2(svg2)(Text2.value)([x36(defaultConfig.width / 2), y31(defaultConfig.height - 5), textAnchor12("middle"), fontSize8(14), fill27("#333"), classed26("x-axis-label"), text24("Wealth")]))(function(xAxisLabel) {
+                    return bind71(appendTo2(svg2)(Text2.value)([x35(defaultConfig.width / 2), y31(defaultConfig.height - 5), textAnchor12("middle"), fontSize8(14), fill27("#333"), classed26("x-axis-label"), text23("Wealth")]))(function(xAxisLabel) {
                       return bind71(appendTo2(svg2)(Line.value)([x111(defaultConfig.marginLeft), y111(defaultConfig.marginTop), x210(defaultConfig.marginLeft), y210(defaultConfig.height - defaultConfig.marginBottom), strokeColor21("#333"), strokeWidth19(1.5), classed26("y-axis")]))(function(yAxisLine) {
                         var createYTick = function(tickValue) {
                           return bind71(appendTo2(svg2)(Line.value)([]))(function(tickMark) {
                             return discard112(setAttributes2(tickMark)([x111(defaultConfig.marginLeft - 6), x210(defaultConfig.marginLeft), y111(scaleY(defaultConfig)(tickValue)), y210(scaleY(defaultConfig)(tickValue)), strokeColor21("#333"), strokeWidth19(1)]))(function() {
                               return bind71(appendTo2(svg2)(Text2.value)([]))(function(tickLabel) {
-                                return discard112(setAttributes2(tickLabel)([x36(defaultConfig.marginLeft - 10), y31(scaleY(defaultConfig)(tickValue) + 3), textAnchor12("end"), fontSize8(10), fill27("#333"), text24(show42(floor2(tickValue)))]))(function() {
+                                return discard112(setAttributes2(tickLabel)([x35(defaultConfig.marginLeft - 10), y31(scaleY(defaultConfig)(tickValue) + 3), textAnchor12("end"), fontSize8(10), fill27("#333"), text23(show42(floor2(tickValue)))]))(function() {
                                   return pure48(unit);
                                 });
                               });
@@ -36197,7 +36222,7 @@ drawQuartet quartet selector = do
                           });
                         };
                         return bind71(traverse13(createYTick)(yTicks))(function() {
-                          return bind71(appendTo2(svg2)(Text2.value)([x36(15), y31(defaultConfig.height / 2), textAnchor12("middle"), fontSize8(14), fill27("#333"), classed26("y-axis-label"), text24("Health")]))(function(yAxisLabel) {
+                          return bind71(appendTo2(svg2)(Text2.value)([x35(15), y31(defaultConfig.height / 2), textAnchor12("middle"), fontSize8(14), fill27("#333"), classed26("y-axis-label"), text23("Health")]))(function(yAxisLabel) {
                             return bind71(appendTo2(svg2)(Group.value)([classed26("nations")]))(function(chartGroup) {
                               return pure48(function(nations) {
                                 var calculateAttrs = function(d9) {
@@ -36272,7 +36297,7 @@ drawQuartet quartet selector = do
                                                 return bind71(openSelection2(chartGroup)("text"))(function(labelEnterSelection) {
                                                   return bind71(updateJoin2(labelEnterSelection)(Text2.value)(nations)(coerceDatumToKey2))(function(labelUpdateSelections) {
                                                     return discard112(setAttributes2(labelUpdateSelections.exit)([classed26("exit")]))(function() {
-                                                      return discard112(setAttributes2(labelUpdateSelections.update)([x37(function(d9) {
+                                                      return discard112(setAttributes2(labelUpdateSelections.update)([x36(function(d9) {
                                                         return function(i2) {
                                                           return calculateAttrs(d9)(i2).x;
                                                         };
@@ -36282,7 +36307,7 @@ drawQuartet quartet selector = do
                                                         };
                                                       }), classed26("nation-label update")]))(function() {
                                                         return bind71(appendTo2(labelUpdateSelections.enter)(Text2.value)([]))(function(newLabels) {
-                                                          return discard112(setAttributes2(newLabels)([x37(function(d9) {
+                                                          return discard112(setAttributes2(newLabels)([x36(function(d9) {
                                                             return function(i2) {
                                                               return calculateAttrs(d9)(i2).x;
                                                             };
@@ -36814,20 +36839,20 @@ drawQuartet quartet selector = do
   // output/PSD3.WealthHealth.HTML/index.js
   var map58 = /* @__PURE__ */ map(functorMaybe);
   var show43 = /* @__PURE__ */ show(showInt);
-  var type_24 = /* @__PURE__ */ type_17(isPropInputType);
+  var type_25 = /* @__PURE__ */ type_17(isPropInputType);
   var value17 = /* @__PURE__ */ value12(isPropString);
   var show113 = /* @__PURE__ */ show(showNumber);
   var renderLegendItem2 = function(region) {
     return div2([classes(["wealth-health-legend__item"])])([span3([classes(["wealth-health-legend__color"]), style("background-color: " + regionColor(region))])([]), span3([classes(["wealth-health-legend__label"])])([text5(regionName(region))])]);
   };
-  var renderControlPanel = function(state3) {
+  var renderControlPanel2 = function(state3) {
     var toNum = function(s) {
       return fromString(s);
     };
     var toInt = function(s) {
       return map58(floor2)(toNum(s));
     };
-    return div2([classes(["wealth-health-controls"])])([div2([classes(["wealth-health-year-display"])])([text5(show43(state3.currentYear))]), div2([classes(["wealth-health-scrubber"])])([label_([text5("Year")]), input2([type_24(InputRange.value), min5(toNumber(fromMaybe(1800)(map58(function(v) {
+    return div2([classes(["wealth-health-controls"])])([div2([classes(["wealth-health-year-display"])])([text5(show43(state3.currentYear))]), div2([classes(["wealth-health-scrubber"])])([label_([text5("Year")]), input2([type_25(InputRange.value), min5(toNumber(fromMaybe(1800)(map58(function(v) {
       return v.yearRange.min;
     })(state3.model)))), max6(toNumber(fromMaybe(2009)(map58(function(v) {
       return v.yearRange.max;
@@ -36841,7 +36866,7 @@ drawQuartet quartet selector = do
       }
       ;
       return "\u25B6 Play";
-    })())])]), div2([classes(["wealth-health-speed"])])([label_([text5("Speed")]), input2([type_24(InputRange.value), min5(1), max6(10), value17(show113(state3.animationSpeed)), step4(new Step(0.5)), onValueInput(function(val) {
+    })())])]), div2([classes(["wealth-health-speed"])])([label_([text5("Speed")]), input2([type_25(InputRange.value), min5(1), max6(10), value17(show113(state3.animationSpeed)), step4(new Step(0.5)), onValueInput(function(val) {
       return new SetAnimationSpeed(fromMaybe(5)(toNum(val)));
     }), classes(["wealth-health-speed__slider"])]), span3([classes(["wealth-health-speed__value"])])([text5(show113(state3.animationSpeed) + " years/sec")])])]);
   };
@@ -37210,7 +37235,7 @@ drawQuartet quartet selector = do
     };
   };
   var render57 = function(state3) {
-    return div2([classes(["wealth-health-page"])])([header([classes(["wealth-health-header"])])([h1_([text5("The Wealth & Health of Nations")]), p_([text5("An animated exploration of income, life expectancy, and population across 180 nations from 1800 to 2009")])]), div2([classes(["wealth-health-content"])])([aside([classes(["wealth-health-sidebar"])])([renderControlPanel(state3), renderLegend]), main([classes(["wealth-health-visualization"])])([(function() {
+    return div2([classes(["wealth-health-page"])])([header([classes(["wealth-health-header"])])([h1_([text5("The Wealth & Health of Nations")]), p_([text5("An animated exploration of income, life expectancy, and population across 180 nations from 1800 to 2009")])]), div2([classes(["wealth-health-content"])])([aside([classes(["wealth-health-sidebar"])])([renderControlPanel2(state3), renderLegend]), main([classes(["wealth-health-visualization"])])([(function() {
       if (state3.model instanceof Nothing) {
         return div2([classes(["wealth-health-loading"])])([text5("Loading data...")]);
       }
@@ -37391,17 +37416,17 @@ drawQuartet quartet selector = do
     };
   })();
   var eqDifficulty = {
-    eq: function(x38) {
+    eq: function(x37) {
       return function(y36) {
-        if (x38 instanceof Beginner && y36 instanceof Beginner) {
+        if (x37 instanceof Beginner && y36 instanceof Beginner) {
           return true;
         }
         ;
-        if (x38 instanceof Intermediate && y36 instanceof Intermediate) {
+        if (x37 instanceof Intermediate && y36 instanceof Intermediate) {
           return true;
         }
         ;
-        if (x38 instanceof Advanced && y36 instanceof Advanced) {
+        if (x37 instanceof Advanced && y36 instanceof Advanced) {
           return true;
         }
         ;
@@ -37484,15 +37509,15 @@ drawQuartet quartet selector = do
       };
     };
   };
-  var copyToClipboard = function(text25) {
+  var copyToClipboard = function(text24) {
     return function() {
       try {
         if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(text25);
+          navigator.clipboard.writeText(text24);
           return true;
         } else {
           const textArea = document.createElement("textarea");
-          textArea.value = text25;
+          textArea.value = text24;
           textArea.style.position = "fixed";
           textArea.style.left = "-999999px";
           textArea.style.top = "-999999px";
@@ -37521,13 +37546,13 @@ drawQuartet quartet selector = do
   var for_3 = /* @__PURE__ */ for_(applicativeEffect)(foldableArray);
   var formatFilesForClipboard = function(files2) {
     var replicateArray = function(n) {
-      return function(x38) {
+      return function(x37) {
         var $14 = n <= 0;
         if ($14) {
           return [];
         }
         ;
-        return append21([x38])(replicateArray(n - 1 | 0)(x38));
+        return append21([x37])(replicateArray(n - 1 | 0)(x37));
       };
     };
     var intercalateArray = function(sep) {
@@ -37762,7 +37787,7 @@ drawQuartet quartet selector = do
   var eq33 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqDifficulty));
   var bind68 = /* @__PURE__ */ bind(bindMaybe);
   var pure45 = /* @__PURE__ */ pure(applicativeMaybe);
-  var type_25 = /* @__PURE__ */ type_17(isPropInputType);
+  var type_26 = /* @__PURE__ */ type_17(isPropInputType);
   var value18 = /* @__PURE__ */ value12(isPropString);
   var modify_41 = /* @__PURE__ */ modify_(monadStateHalogenM);
   var bind115 = /* @__PURE__ */ bind(bindHalogenM);
@@ -38030,14 +38055,14 @@ drawQuartet quartet selector = do
     }));
   };
   var renderNameModule = function(state3) {
-    return div2([classes(["wizard__step-content"])])([h2_([text5("Name Your Visualization")]), p_([text5("Choose a name for your visualization module. It should be a valid PureScript module name (CamelCase, starting with uppercase).")]), div2([classes(["wizard__form-group"])])([label4([$$for("viz-name")])([text5("Visualization Name")]), input2([type_25(InputText.value), id2("viz-name"), value18(state3.vizName), placeholder3("e.g., MyScatterPlot"), onValueInput(SetVizName.create), classes(["wizard__input"])]), (function() {
+    return div2([classes(["wizard__step-content"])])([h2_([text5("Name Your Visualization")]), p_([text5("Choose a name for your visualization module. It should be a valid PureScript module name (CamelCase, starting with uppercase).")]), div2([classes(["wizard__form-group"])])([label4([$$for("viz-name")])([text5("Visualization Name")]), input2([type_26(InputText.value), id2("viz-name"), value18(state3.vizName), placeholder3("e.g., MyScatterPlot"), onValueInput(SetVizName.create), classes(["wizard__input"])]), (function() {
       var $91 = isValidModuleName(state3.vizName) || state3.vizName === "";
       if ($91) {
         return div_([]);
       }
       ;
       return div2([classes(["wizard__error"])])([text5("Module name must start with uppercase and contain only letters and numbers")]);
-    })()]), div2([classes(["wizard__form-group"])])([label_([input2([type_25(InputCheckbox.value), checked2(state3.includeMain), onChecked(function(v) {
+    })()]), div2([classes(["wizard__form-group"])])([label_([input2([type_26(InputCheckbox.value), checked2(state3.includeMain), onChecked(function(v) {
       return ToggleIncludeMain.value;
     })]), text5(" Include Main.purs (for bundling with spago)")]), p([classes(["wizard__help-text"])])([text5("Main.purs provides an entry point for bundling your visualization. Check this if you plan to use 'spago bundle'.")])]), (function() {
       var $92 = state3.vizName !== "" && isValidModuleName(state3.vizName);
@@ -38088,21 +38113,21 @@ drawQuartet quartet selector = do
     };
   })();
   var eqWizardStep = {
-    eq: function(x38) {
+    eq: function(x37) {
       return function(y36) {
-        if (x38 instanceof ChooseDataset && y36 instanceof ChooseDataset) {
+        if (x37 instanceof ChooseDataset && y36 instanceof ChooseDataset) {
           return true;
         }
         ;
-        if (x38 instanceof NameModule && y36 instanceof NameModule) {
+        if (x37 instanceof NameModule && y36 instanceof NameModule) {
           return true;
         }
         ;
-        if (x38 instanceof ReviewFiles && y36 instanceof ReviewFiles) {
+        if (x37 instanceof ReviewFiles && y36 instanceof ReviewFiles) {
           return true;
         }
         ;
-        if (x38 instanceof Download && y36 instanceof Download) {
+        if (x37 instanceof Download && y36 instanceof Download) {
           return true;
         }
         ;

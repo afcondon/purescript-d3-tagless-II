@@ -19,3 +19,5 @@ data Action
   | ClearFilters
   | ShowModuleDetails HoveredModuleInfo
   | HideModuleDetails
+  | ResetToOverview
+  | EnableSpotlightMode

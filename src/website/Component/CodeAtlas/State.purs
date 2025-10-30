@@ -28,6 +28,7 @@ type State =
   , loading :: Boolean
   , error :: Maybe String
   , hoveredModule :: Maybe HoveredModuleInfo  -- For the details panel
+  , spotlightModeActive :: Boolean  -- Whether spotlight mode is currently active
   }
 
 -- | Initial state
@@ -45,4 +46,5 @@ initialState _ =
   , loading: true
   , error: Nothing
   , hoveredModule: Nothing
+  , spotlightModeActive: false
   }

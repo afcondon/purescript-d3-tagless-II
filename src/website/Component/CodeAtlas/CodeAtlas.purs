@@ -43,19 +43,9 @@ render state =
     [ -- Header
       HH.header
         [ HP.classes [ HH.ClassName "code-atlas-header" ] ]
-        [ HH.h1_ [ HH.text "Code Atlas" ]
-        , HH.p
+        [ HH.p
             [ HP.classes [ HH.ClassName "code-atlas-subtitle" ] ]
             [ HH.text "Explore the codebase through declarations, function calls, and type dependencies" ]
-        ]
-
-    -- Tabs
-    , HH.div
-        [ HP.classes [ HH.ClassName "code-atlas-tabs" ] ]
-        [ renderTab DeclarationsTab state.activeTab
-        , renderTab VisualizationTab state.activeTab
-        , renderTab InteractiveGraphTab state.activeTab
-        , renderTab ExpandableBubblesTab state.activeTab
         ]
 
     -- Content
@@ -78,7 +68,8 @@ render state =
                   ]
 
               Nothing ->
-                HH.div []
+                HH.div
+                  [ HP.classes [ HH.ClassName "code-atlas-container" ] ]
                   [ renderTabContent state
                   , renderFloatingPanels state
                   ]
@@ -115,21 +106,68 @@ renderTabContent state =
             []
         ]
 
--- | Render floating panels (only for ExpandableBubblesTab)
+-- | Render floating panels (always show control panel, conditionally show others)
 renderFloatingPanels :: forall m. State -> H.ComponentHTML Action () m
 renderFloatingPanels state =
-  if state.activeTab == ExpandableBubblesTab
-    then HH.div_
-      [ renderLegendPanel
-      , renderDetailsPanel state
-      ]
-    else HH.text ""
+  HH.div_
+    [ renderControlPanel state
+    , if state.activeTab == ExpandableBubblesTab
+        then HH.div_
+          [ renderLegendPanel
+          , renderDetailsPanel state
+          ]
+        else HH.text ""
+    ]
 
--- | Render the legend panel (top-right)
+-- | Render the control panel (top-left) with view tabs
+renderControlPanel :: forall m. State -> H.ComponentHTML Action () m
+renderControlPanel state =
+  HH.div
+    [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left", HH.ClassName "editorial" ] ]
+    [ HH.h3
+        [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
+        [ HH.text "Views" ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "control-panel-tabs" ] ]
+        [ renderTab DeclarationsTab state.activeTab
+        , renderTab VisualizationTab state.activeTab
+        , renderTab InteractiveGraphTab state.activeTab
+        , renderTab ExpandableBubblesTab state.activeTab
+        ]
+    , if state.activeTab == ExpandableBubblesTab
+        then HH.div
+          [ HP.classes [ HH.ClassName "control-group" ] ]
+          [ HH.h4_ [ HH.text "Spotlight Mode" ]
+          , HH.div
+              [ HP.classes [ HH.ClassName "spotlight-toggle-container" ] ]
+              [ HH.label
+                  [ HP.classes [ HH.ClassName "spotlight-toggle" ] ]
+                  [ HH.input
+                      [ HP.type_ HP.InputCheckbox
+                      , HP.checked state.spotlightModeActive
+                      , HP.disabled (not state.spotlightModeActive)
+                      , HE.onClick \_ -> ResetToOverview
+                      ]
+                  , HH.span
+                      [ HP.classes [ HH.ClassName "toggle-slider" ] ]
+                      []
+                  ]
+              , HH.p
+                  [ HP.classes [ HH.ClassName "helper-text" ] ]
+                  [ HH.text if state.spotlightModeActive
+                      then "Click to return to overview"
+                      else "Click a module to spotlight its dependencies"
+                  ]
+              ]
+          ]
+        else HH.text ""
+    ]
+
+-- | Render the legend panel (bottom-right)
 renderLegendPanel :: forall m. H.ComponentHTML Action () m
 renderLegendPanel =
   HH.div
-    [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-right", HH.ClassName "editorial" ] ]
+    [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--bottom-right", HH.ClassName "editorial" ] ]
     [ HH.h3
         [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
         [ HH.text "Declaration Types" ]
@@ -159,14 +197,14 @@ renderLegendItem label color =
         [ HH.text label ]
     ]
 
--- | Render the details panel (bottom-right, conditional)
+-- | Render the details panel (top-right, conditional)
 renderDetailsPanel :: forall m. State -> H.ComponentHTML Action () m
 renderDetailsPanel state =
   case state.hoveredModule of
     Nothing -> HH.text ""
     Just info ->
       HH.div
-        [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--bottom-right", HH.ClassName "editorial" ] ]
+        [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-right", HH.ClassName "editorial" ] ]
         [ HH.h3
             [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
             [ HH.text info.moduleName ]
@@ -275,6 +313,8 @@ handleAction = case _ of
                       Ref.write (Just $ ShowModuleDetails { moduleName, dependencies, dependedOnBy }) pendingActionRef
                   , onHideModuleDetails:
                       Ref.write (Just HideModuleDetails) pendingActionRef
+                  , onEnableSpotlightMode:
+                      Ref.write (Just EnableSpotlightMode) pendingActionRef
                   }
 
             -- Create a subscription that polls the Ref for pending actions
@@ -329,3 +369,13 @@ handleAction = case _ of
 
   HideModuleDetails -> do
     H.modify_ _ { hoveredModule = Nothing }
+
+  ResetToOverview -> do
+    -- Clear the details panel and disable spotlight mode
+    H.modify_ _ { hoveredModule = Nothing, spotlightModeActive = false }
+    -- Redraw the visualization to reset to overview state
+    state <- H.get
+    handleAction (SetActiveTab state.activeTab)
+
+  EnableSpotlightMode -> do
+    H.modify_ _ { spotlightModeActive = true }
