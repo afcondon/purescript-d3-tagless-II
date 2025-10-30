@@ -25,7 +25,7 @@ type State =
 -- | Initial state
 initialState :: forall i. i -> State
 initialState _ =
-  { activeTab: DeclarationsTab
+  { activeTab: ExpandableBubblesTab
   , declarationsData: Nothing
   , functionCallsData: Nothing
   , moduleGraphData: Nothing

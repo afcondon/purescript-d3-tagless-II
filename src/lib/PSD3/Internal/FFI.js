@@ -136,13 +136,45 @@ export function updateBubbleRadii_(simulation) {
 function declarationColor(kind) {
   switch(kind) {
     case 'value':         return '#2196F3'  // Blue - functions/values
+    case 'externValue':   return '#00BCD4'  // Cyan - foreign functions
     case 'data':          return '#4CAF50'  // Green - data types
     case 'typeClass':     return '#9C27B0'  // Purple - type classes
     case 'typeSynonym':   return '#FF9800'  // Orange - type synonyms
     case 'alias':         return '#FF9800'  // Orange - aliases
     case 'externData':    return '#F44336'  // Red - foreign data
+    case 'typeClassInstance': return '#E91E63'  // Pink - instances
     default:              return '#757575'  // Gray - unknown
   }
+}
+
+// Categorize declarations into groups
+function categorizeDeclarations(declarations) {
+  const categories = {
+    dataTypes: [],
+    instances: [],
+    functions: []
+  }
+
+  declarations.forEach(decl => {
+    switch(decl.kind) {
+      case 'data':
+      case 'typeSynonym':
+      case 'alias':
+      case 'externData':
+        categories.dataTypes.push(decl)
+        break
+      case 'typeClassInstance':
+        categories.instances.push(decl)
+        break
+      case 'value':
+      case 'typeClass':
+      default:
+        categories.functions.push(decl)
+        break
+    }
+  })
+
+  return categories
 }
 
 // Update node expansion state - show/hide declaration circles
@@ -166,14 +198,54 @@ export function updateNodeExpansion_(simulation) {
       const declarations = moduleDecls.declarations
       console.log(`Expanding ${moduleName} with ${declarations.length} declarations`)
 
-      // Create hierarchy for pack layout
+      // Categorize declarations into groups
+      const categories = categorizeDeclarations(declarations)
+
+      // Create three-layer hierarchy: Module → Categories → Items
+      const categoryChildren = []
+
+      if (categories.dataTypes.length > 0) {
+        categoryChildren.push({
+          name: 'Data Types',
+          isCategory: true,
+          children: categories.dataTypes.map(d => ({
+            name: d.title,
+            kind: d.kind,
+            isCategory: false,
+            value: 1
+          }))
+        })
+      }
+
+      if (categories.instances.length > 0) {
+        categoryChildren.push({
+          name: 'Instances',
+          isCategory: true,
+          children: categories.instances.map(d => ({
+            name: d.title,
+            kind: d.kind,
+            isCategory: false,
+            value: 1
+          }))
+        })
+      }
+
+      if (categories.functions.length > 0) {
+        categoryChildren.push({
+          name: 'Functions',
+          isCategory: true,
+          children: categories.functions.map(d => ({
+            name: d.title,
+            kind: d.kind,
+            isCategory: false,
+            value: 1
+          }))
+        })
+      }
+
       const hierarchyData = {
         name: moduleName,
-        children: declarations.map(d => ({
-          name: d.title,
-          kind: d.kind,
-          value: 1  // All declarations same size for now
-        }))
+        children: categoryChildren
       }
 
       const root = d3.hierarchy(hierarchyData)
@@ -258,28 +330,39 @@ export function updateNodeExpansion_(simulation) {
         .attr('fill', 'none')
         .attr('marker-end', 'url(#arrowhead)')
 
-      // Add declaration circle groups (for circle + text)
-      const declGroups = nodeGroup.selectAll('g.decl-group')
-        .data(leaves, d => d.data.name)
+      // Get ALL nodes (not just leaves) - this includes category bubbles
+      const allNodes = root.descendants().filter(d => d.depth > 0) // Skip root module node
 
-      const declGroupsEnter = declGroups.enter()
+      // Add groups for both category bubbles and declaration circles
+      const nodeGroups = nodeGroup.selectAll('g.decl-group')
+        .data(allNodes, d => d.data.name)
+
+      const nodeGroupsEnter = nodeGroups.enter()
         .append('g')
-        .attr('class', 'decl-group')
+        .attr('class', d => d.data.isCategory ? 'category-group' : 'decl-group')
         .attr('transform', d => `translate(${d.x - expandedRadius}, ${d.y - expandedRadius})`)
 
-      // Add circles
-      declGroupsEnter.append('circle')
-        .attr('class', 'decl-circle')
+      // Add circles (styled differently for categories vs declarations)
+      nodeGroupsEnter.append('circle')
+        .attr('class', d => d.data.isCategory ? 'category-circle' : 'decl-circle')
         .attr('r', d => d.r)
-        .attr('fill', d => declarationColor(d.data.kind))
-        .attr('opacity', 0.8)
+        .attr('fill', d => {
+          // Category bubbles: neutral gray
+          // Declaration circles: colored by kind
+          return d.data.isCategory ? '#e0e0e0' : declarationColor(d.data.kind)
+        })
+        .attr('opacity', d => d.data.isCategory ? 0.3 : 0.8)  // Categories more transparent
         .attr('stroke', '#fff')
         .attr('stroke-width', 1)
         .append('title')
-        .text(d => `${d.data.name} (${d.data.kind})`)
+        .text(d => d.data.isCategory
+          ? d.data.name  // Category name only
+          : `${d.data.name} (${d.data.kind})`  // Declaration with kind
+        )
 
-      // Add text labels
-      declGroupsEnter.append('text')
+      // Add text labels ONLY for declarations (not categories)
+      nodeGroupsEnter.filter(d => !d.data.isCategory)
+        .append('text')
         .attr('class', 'decl-label')
         .attr('text-anchor', 'middle')
         .attr('dy', '0.35em')
@@ -332,6 +415,29 @@ export function unsafeSetField_(field) {
   }
 }
 
+// Expand a node by its ID (used for expanding connected nodes)
+export function expandNodeById_(simulation) {
+  return nodeRadiusFn => declarationsData => functionCallsData => nodeId => shouldExpand => () => {
+    // Find the node in the simulation
+    const nodes = simulation.nodes()
+    const node = nodes.find(n => n.id === nodeId)
+
+    if (!node) {
+      console.log(`Node ${nodeId} not found in simulation`)
+      return
+    }
+
+    // Only toggle if the current state is different from desired state
+    if (node.expanded !== shouldExpand) {
+      node.expanded = shouldExpand
+      console.log(`${nodeId} ${shouldExpand ? 'expanded' : 'collapsed'} via expandNodeById`)
+
+      // Call the expansion update
+      updateNodeExpansion_(simulation)(nodeRadiusFn)(declarationsData)(functionCallsData)(node)
+    }
+  }
+}
+
 // Add arrow marker definition for module-level links
 export function addModuleArrowMarker_(svgSelection) {
   return () => {
@@ -365,14 +471,52 @@ export function drawInterModuleDeclarationLinks_(zoomGroupSelection) {
         if (moduleDecls && moduleDecls.declarations) {
           const expandedRadius = nodeRadiusFn(true)(d.loc)
 
-          // Build declaration position map for this module
+          // Build declaration position map for this module (using same three-layer structure)
+          const categories = categorizeDeclarations(moduleDecls.declarations)
+          const categoryChildren = []
+
+          if (categories.dataTypes.length > 0) {
+            categoryChildren.push({
+              name: 'Data Types',
+              isCategory: true,
+              children: categories.dataTypes.map(decl => ({
+                name: decl.title,
+                kind: decl.kind,
+                isCategory: false,
+                value: 1
+              }))
+            })
+          }
+
+          if (categories.instances.length > 0) {
+            categoryChildren.push({
+              name: 'Instances',
+              isCategory: true,
+              children: categories.instances.map(decl => ({
+                name: decl.title,
+                kind: decl.kind,
+                isCategory: false,
+                value: 1
+              }))
+            })
+          }
+
+          if (categories.functions.length > 0) {
+            categoryChildren.push({
+              name: 'Functions',
+              isCategory: true,
+              children: categories.functions.map(decl => ({
+                name: decl.title,
+                kind: decl.kind,
+                isCategory: false,
+                value: 1
+              }))
+            })
+          }
+
           const hierarchyData = {
             name: d.name,
-            children: moduleDecls.declarations.map(decl => ({
-              name: decl.title,
-              kind: decl.kind,
-              value: 1
-            }))
+            children: categoryChildren
           }
 
           const root = d3.hierarchy(hierarchyData).sum(node => node.value)

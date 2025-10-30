@@ -32,7 +32,7 @@ import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addT
 import PSD3.CodeAtlas.Types (DeclarationsData, FunctionCallsData, ModuleGraphData, ModuleInfo)
 import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode(..), D3_VxyFxy, D3_XY)
 import PSD3.Internal.Attributes.Sugar (classed, fill, onMouseEventEffectful, radius, remove, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, width, height, x, x1, x2, y, y1, y2)
-import PSD3.Internal.FFI (addModuleArrowMarker_, clearHighlights_, drawInterModuleDeclarationLinks_, filterToConnectedNodes_, highlightConnectedNodes_, keyIsID_, simdragHorizontal_, unpinAllNodes_, unsafeSetField_, updateBubbleRadii_, updateNodeExpansion_)
+import PSD3.Internal.FFI (addModuleArrowMarker_, clearHighlights_, drawInterModuleDeclarationLinks_, expandNodeById_, filterToConnectedNodes_, highlightConnectedNodes_, keyIsID_, simdragHorizontal_, unpinAllNodes_, unsafeSetField_, updateBubbleRadii_, updateNodeExpansion_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute(..))
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce)
@@ -193,17 +193,70 @@ initialize graphData declsData = do
   linksGroup <- appendTo zoomGroup Group [ classed "link", strokeColor "#999", strokeOpacity 0.4 ]
   nodesGroup <- appendTo zoomGroup Group [ classed "node", strokeColor "#fff", strokeWidth 1.5 ]
 
+  -- Add fixed legend (outside zoom group so it stays fixed)
+  legendGroup <- appendTo svg Group [
+      classed "legend"
+    , transform' (\_ -> "translate(" <> show (w/2.0 - 150.0) <> "," <> show (-h/2.0 + 30.0) <> ")")
+    ]
+
+  -- Legend title
+  _ <- appendTo legendGroup Text [
+      text "Declaration Types"
+    , x 0.0
+    , y 0.0
+    , classed "legend-title"
+    ]
+
+  -- Legend items
+  let legendItems =
+        [ {name: "Functions/Values", color: "#2196F3", yOffset: 25.0}
+        , {name: "Foreign Functions", color: "#00BCD4", yOffset: 50.0}
+        , {name: "Data Types", color: "#4CAF50", yOffset: 75.0}
+        , {name: "Type Classes", color: "#9C27B0", yOffset: 100.0}
+        , {name: "Type Synonyms", color: "#FF9800", yOffset: 125.0}
+        , {name: "Instances", color: "#E91E63", yOffset: 150.0}
+        ]
+
+  -- Draw each legend item
+  _ <- traverse_ (\item -> do
+    itemGroup <- appendTo legendGroup Group [
+        transform' (\_ -> "translate(0," <> show item.yOffset <> ")")
+      , classed "legend-item"
+      ]
+
+    -- Color circle
+    _ <- appendTo itemGroup Circle [
+        radius 8.0
+      , fill item.color
+      , x 0.0
+      , y 0.0
+      ]
+
+    -- Label
+    _ <- appendTo itemGroup Text [
+        text item.name
+      , x 15.0
+      , y 5.0
+      , classed "legend-label"
+      ]
+
+    pure unit
+  ) legendItems
+
   -- Define forces (collision will need to be dynamic based on expansion)
   let collisionRadius :: Datum_ -> Index_ -> Number
       collisionRadius datum _ =
         let node = unsafeCoerce datum :: BubbleNodeRecord
-        in nodeRadius node.expanded node.loc
+            baseRadius = nodeRadius node.expanded node.loc
+            -- Add extra padding when expanded to prevent overlap
+            padding = if node.expanded then 30.0 else 10.0
+        in baseRadius + padding
 
       forces =
-        [ createForce "manyBody" (RegularForce ForceManyBody) allNodes [ F.strength (-150.0), F.theta 0.9, F.distanceMin 1.0 ]
-        , createForce "collision" (RegularForce ForceCollide) allNodes [ F.radius collisionRadius ]
-        , createForce "center" (RegularForce ForceCenter) allNodes [ F.x 0.0, F.y 0.0, F.strength 0.3 ]
-        , createLinkForce Nothing [ F.distance 100.0 ]
+        [ createForce "manyBody" (RegularForce ForceManyBody) allNodes [ F.strength (-300.0), F.theta 0.9, F.distanceMin 1.0 ]  -- Doubled repulsion
+        , createForce "collision" (RegularForce ForceCollide) allNodes [ F.radius collisionRadius, F.strength 0.9, F.iterations 3.0 ]  -- Stronger collision
+        , createForce "center" (RegularForce ForceCenter) allNodes [ F.x 0.0, F.y 0.0, F.strength 0.2 ]  -- Weaker centering
+        , createLinkForce Nothing [ F.distance 150.0 ]  -- Longer links
         ]
       activeForces = Set.fromFoldable [ "manyBody", "collision", "center", "links" ]
 
@@ -373,6 +426,15 @@ drawExpandableBubbles graphData declsData callsData selector = do
 
         -- Expand/collapse with internal structure
         pure $ updateNodeExpansion_ simHandle nodeRadius declarationsData callsData datum
+
+        -- ALSO expand all directly connected nodes (1-hop neighbors)
+        let connected = fromMaybe Set.empty $ Map.lookup clickedId adjacencyMap
+            connectedIds = Set.toUnfoldable connected :: Array String
+
+        Console.log $ "Expanding " <> show (Array.length connectedIds) <> " connected modules"
+        traverse_ (\connectedId ->
+          expandNodeById_ simHandle nodeRadius declarationsData callsData connectedId newExpanded
+        ) connectedIds
 
         -- Update inter-module declaration links
         drawInterModuleDeclarationLinks_ zoomGroup nodeRadius declarationsData callsData
