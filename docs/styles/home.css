@@ -370,14 +370,14 @@
 }
 
 .home-doc-box__action-link--primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-color: #667eea;
+  background: linear-gradient(135deg, #e8dcc6 0%, #d4c4b0 100%);
+  color: var(--color-gray-darker);
+  border-color: var(--color-gray-medium);
 }
 
 .home-doc-box__action-link--primary:hover {
-  border-color: #5568d3;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  border-color: var(--color-red-accent);
+  box-shadow: 0 4px 12px rgba(139, 115, 85, 0.2);
 }
 
 .home-doc-box__action-icon {

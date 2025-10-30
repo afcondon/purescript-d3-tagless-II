@@ -699,12 +699,13 @@
 
 /* Wizard Callout Box */
 .tutorial-callout {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: linear-gradient(135deg, #e8dcc6 0%, #d4c4b0 100%);
+  color: var(--color-gray-darker);
   padding: 2rem;
   border-radius: 8px;
   margin: 2rem 0;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 4px 12px rgba(139, 115, 85, 0.2);
+  border: 2px solid var(--color-gray-medium);
 }
 
 .tutorial-callout h3 {
@@ -730,14 +731,16 @@
 
 .tutorial-button--primary {
   background: white;
-  color: #667eea;
+  color: var(--color-red-accent);
+  border: 2px solid var(--color-red-accent);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 .tutorial-button--primary:hover {
-  background: #f8f9fa;
+  background: var(--color-red-accent);
+  color: white;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
 }
 
 /* Nested Data Table - Three Little Dimensions */
