@@ -11338,6 +11338,23 @@
     ClearFilters2.value = new ClearFilters2();
     return ClearFilters2;
   })();
+  var ShowModuleDetails = /* @__PURE__ */ (function() {
+    function ShowModuleDetails2(value0) {
+      this.value0 = value0;
+    }
+    ;
+    ShowModuleDetails2.create = function(value0) {
+      return new ShowModuleDetails2(value0);
+    };
+    return ShowModuleDetails2;
+  })();
+  var HideModuleDetails = /* @__PURE__ */ (function() {
+    function HideModuleDetails2() {
+    }
+    ;
+    HideModuleDetails2.value = new HideModuleDetails2();
+    return HideModuleDetails2;
+  })();
 
   // output/Data.MediaType.Common/index.js
   var applicationJSON = "application/json";
@@ -14237,49 +14254,6 @@
       return selection2;
     };
   }
-  function showDetailsPanel_(selection2) {
-    return () => {
-      console.log("showDetailsPanel_ called", selection2, selection2.node());
-      selection2.classed("hidden", false);
-      console.log("Panel should now be visible, class:", selection2.attr("class"));
-    };
-  }
-  function hideDetailsPanel_(selection2) {
-    return () => {
-      console.log("hideDetailsPanel_ called");
-      selection2.classed("hidden", true);
-    };
-  }
-  function setDetailsModuleName_(selection2) {
-    return (moduleName) => () => {
-      console.log("setDetailsModuleName_ called", moduleName);
-      selection2.html(`<h3>${moduleName}</h3>`);
-    };
-  }
-  function populateDetailsList_(selection2) {
-    return (items2) => () => {
-      console.log("populateDetailsList_ called", selection2.attr("class"), items2);
-      selection2.html("");
-      const classList3 = selection2.attr("class");
-      let title5 = "";
-      if (classList3.includes("dependencies-list")) {
-        title5 = "Dependencies:";
-      } else if (classList3.includes("depended-on-by-list")) {
-        title5 = "Depended On By:";
-      }
-      if (title5) {
-        selection2.append("h4").text(title5);
-      }
-      const ul2 = selection2.append("ul");
-      if (items2.length === 0) {
-        ul2.append("li").text("(none)").classed("empty-item", true);
-      } else {
-        items2.forEach((item) => {
-          ul2.append("li").text(item);
-        });
-      }
-    };
-  }
   function showModuleLabels_(nodesGroup) {
     return () => {
       console.log("showModuleLabels_ called");
@@ -14814,7 +14788,8 @@
       selectedModuleFilter: Nothing.value,
       selectedSourceFilter: Nothing.value,
       loading: true,
-      error: Nothing.value
+      error: Nothing.value,
+      hoveredModule: Nothing.value
     };
   };
 
@@ -16593,52 +16568,52 @@
     })(modules);
   };
   var link_ = {
-    source: function($182) {
+    source: function($178) {
       return (function(v) {
         return v.source;
-      })(unboxLink($182));
+      })(unboxLink($178));
     },
-    target: function($183) {
+    target: function($179) {
       return (function(v) {
         return v.target;
-      })(unboxLink($183));
+      })(unboxLink($179));
     }
   };
   var datum_ = {
-    id: function($184) {
+    id: function($180) {
       return (function(v) {
         return v.id;
-      })(unboxBubbleNode($184));
+      })(unboxBubbleNode($180));
     },
-    x: function($185) {
+    x: function($181) {
       return (function(v) {
         return v.x;
-      })(unboxBubbleNode($185));
+      })(unboxBubbleNode($181));
     },
-    y: function($186) {
+    y: function($182) {
       return (function(v) {
         return v.y;
-      })(unboxBubbleNode($186));
+      })(unboxBubbleNode($182));
     },
-    name: function($187) {
+    name: function($183) {
       return (function(v) {
         return v.name;
-      })(unboxBubbleNode($187));
+      })(unboxBubbleNode($183));
     },
-    loc: function($188) {
+    loc: function($184) {
       return (function(v) {
         return v.loc;
-      })(unboxBubbleNode($188));
+      })(unboxBubbleNode($184));
     },
-    path: function($189) {
+    path: function($185) {
       return (function(v) {
         return v.path;
-      })(unboxBubbleNode($189));
+      })(unboxBubbleNode($185));
     },
-    expanded: function($190) {
+    expanded: function($186) {
       return (function(v) {
         return v.expanded;
-      })(unboxBubbleNode($190));
+      })(unboxBubbleNode($186));
     }
   };
   var updateGraph = function(dictBind) {
@@ -16673,8 +16648,8 @@
                       return bind116(appendTo2(node$prime.enter)(Group.value)([classed2("node-group")]))(function(nodeEnter) {
                         return bind116(appendTo2(nodeEnter)(Circle.value)([radius3(function(d9) {
                           return nodeRadius(datum_.expanded(d9))(datum_.loc(d9));
-                        }), fill2(function($191) {
-                          return nodeColor(datum_.path($191));
+                        }), fill2(function($187) {
+                          return nodeColor(datum_.path($187));
                         }), classed2("node-circle")]))(function() {
                           return bind116(appendTo2(nodeEnter)(Text2.value)([text7(datum_.name), classed2("node-label"), y4(function(d9) {
                             return -nodeRadius(datum_.expanded(d9))(datum_.loc(d9));
@@ -16690,8 +16665,8 @@
                                 return bind116(selectUnder2(node$prime.update)(show8(Circle.value)))(function(updateCircles) {
                                   return discard211(setAttributes2(updateCircles)([radius3(function(d9) {
                                     return nodeRadius(datum_.expanded(d9))(datum_.loc(d9));
-                                  }), fill2(function($192) {
-                                    return nodeColor(datum_.path($192));
+                                  }), fill2(function($188) {
+                                    return nodeColor(datum_.path($188));
                                   })]))(function() {
                                     return bind116(selectUnder2(node$prime.update)(show8(Text2.value)))(function(updateLabels) {
                                       return discard211(setAttributes2(updateLabels)([text7(datum_.name), y4(function(d9) {
@@ -16714,22 +16689,22 @@
                                                         return "translate(" + (show13(datum_.x(d9)) + ("," + (show13(datum_.y(d9)) + ")")));
                                                       };
                                                       return discard211(addTickFunction2("nodes")(new Step3(mergedNodes, [transform$prime(translateNode)])))(function() {
-                                                        return addTickFunction2("links")(new Step3(mergedLinks, [x12(function($193) {
+                                                        return addTickFunction2("links")(new Step3(mergedLinks, [x12(function($189) {
                                                           return (function(v1) {
                                                             return v1.x;
-                                                          })(link_.source($193));
-                                                        }), y12(function($194) {
+                                                          })(link_.source($189));
+                                                        }), y12(function($190) {
                                                           return (function(v1) {
                                                             return v1.y;
-                                                          })(link_.source($194));
-                                                        }), x22(function($195) {
+                                                          })(link_.source($190));
+                                                        }), x22(function($191) {
                                                           return (function(v1) {
                                                             return v1.x;
-                                                          })(link_.target($195));
-                                                        }), y22(function($196) {
+                                                          })(link_.target($191));
+                                                        }), y22(function($192) {
                                                           return (function(v1) {
                                                             return v1.y;
-                                                          })(link_.target($196));
+                                                          })(link_.target($192));
                                                         })]));
                                                       });
                                                     });
@@ -16827,130 +16802,108 @@
                                         return discard211(liftEffect110(log2("Attached to svg-container")))(function() {
                                           return bind116(appendTo2(root3)(Svg.value)([viewBox(-v.value0 / 2)(-v.value1 / 2)(v.value0)(v.value1), classed2("bubble-graph")]))(function(svg2) {
                                             return discard211(liftEffect110(log2("Created SVG")))(function() {
-                                              return discard211(liftEffect110(log2("About to attach to expandable-bubbles-container")))(function() {
-                                                return bind116(attach2("div.expandable-bubbles-container"))(function(container) {
-                                                  return discard211(liftEffect110(log2("Attached to expandable-bubbles-container")))(function() {
-                                                    return bind116(appendTo2(container)(Div.value)([classed2("hover-details-panel hidden")]))(function(detailsPanel) {
-                                                      return discard211(liftEffect110(log2("Created details panel")))(function() {
-                                                        return bind116(appendTo2(detailsPanel)(Div.value)([classed2("details-module-name")]))(function(detailsModuleName) {
-                                                          return bind116(appendTo2(detailsPanel)(Div.value)([classed2("details-list dependencies-list")]))(function(dependenciesList) {
-                                                            return bind116(appendTo2(detailsPanel)(Div.value)([classed2("details-list depended-on-by-list")]))(function(dependedOnByList) {
-                                                              return discard211(liftEffect110(log2("Created panel sections")))(function() {
-                                                                return discard211(liftEffect110(addModuleArrowMarker_(svg2)))(function() {
-                                                                  return bind116(appendTo2(svg2)(Group.value)([classed2("zoom-group")]))(function(zoomGroup) {
-                                                                    return bind116(appendTo2(zoomGroup)(Group.value)([classed2("link"), strokeColor2("#999"), strokeOpacity2(0.4)]))(function(linksGroup) {
-                                                                      return bind116(appendTo2(zoomGroup)(Group.value)([classed2("node"), strokeColor2("#fff"), strokeWidth2(1.5)]))(function(nodesGroup) {
-                                                                        return bind116(appendTo2(svg2)(Group.value)([classed2("legend"), transform$prime(function(v1) {
-                                                                          return "translate(" + (show13(v.value0 / 2 - 150) + ("," + (show13(-v.value1 / 2 + 30) + ")")));
-                                                                        })]))(function(legendGroup) {
-                                                                          return bind116(appendTo2(legendGroup)(Text2.value)([text1("Declaration Types"), x4(0), y32(0), classed2("legend-title")]))(function() {
-                                                                            var legendItems = [{
-                                                                              name: "Functions/Values",
-                                                                              color: "#2196F3",
-                                                                              yOffset: 25
-                                                                            }, {
-                                                                              name: "Foreign Functions",
-                                                                              color: "#00BCD4",
-                                                                              yOffset: 50
-                                                                            }, {
-                                                                              name: "Data Types",
-                                                                              color: "#4CAF50",
-                                                                              yOffset: 75
-                                                                            }, {
-                                                                              name: "Type Classes",
-                                                                              color: "#9C27B0",
-                                                                              yOffset: 100
-                                                                            }, {
-                                                                              name: "Type Synonyms",
-                                                                              color: "#FF9800",
-                                                                              yOffset: 125
-                                                                            }, {
-                                                                              name: "Instances",
-                                                                              color: "#E91E63",
-                                                                              yOffset: 150
-                                                                            }];
-                                                                            return bind116(traverse_15(function(item) {
-                                                                              return bind116(appendTo2(legendGroup)(Group.value)([transform$prime(function(v1) {
-                                                                                return "translate(0," + (show13(item.yOffset) + ")");
-                                                                              }), classed2("legend-item")]))(function(itemGroup) {
-                                                                                return bind116(appendTo2(itemGroup)(Circle.value)([radius1(8), fill1(item.color), x4(0), y32(0)]))(function() {
-                                                                                  return bind116(appendTo2(itemGroup)(Text2.value)([text1(item.name), x4(15), y32(5), classed2("legend-label")]))(function() {
-                                                                                    return pure114(unit);
-                                                                                  });
-                                                                                });
-                                                                              });
-                                                                            })(legendItems))(function() {
-                                                                              var spotlightCollisionRadius = function(datum2) {
-                                                                                return function(v1) {
-                                                                                  var padding = (function() {
-                                                                                    if (datum2.expanded) {
-                                                                                      return 25;
-                                                                                    }
-                                                                                    ;
-                                                                                    return 5;
-                                                                                  })();
-                                                                                  var baseRadius = nodeRadius(datum2.expanded)(datum2.loc);
-                                                                                  return baseRadius + padding;
-                                                                                };
-                                                                              };
-                                                                              var compactCollisionRadius = function(datum2) {
-                                                                                return function(v1) {
-                                                                                  var baseRadius = nodeRadius(false)(datum2.loc);
-                                                                                  return baseRadius + 2;
-                                                                                };
-                                                                              };
-                                                                              var forces2 = [createForce("manyBody-compact")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-50), theta2(0.9), distanceMin2(1)]), createForce("manyBody-spotlight")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-150), theta2(0.9), distanceMin2(1)]), createForce("collision-compact")(new RegularForce(ForceCollide.value))(allNodes)([radius22(compactCollisionRadius), strength2(0.9), iterations2(3)]), createForce("collision-spotlight")(new RegularForce(ForceCollide.value))(allNodes)([radius22(spotlightCollisionRadius), strength2(0.9), iterations2(3)]), createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([x32(0), y42(0), strength2(0.2)]), createLinkForce(Nothing.value)([distance2(100)])];
-                                                                              var activeForces = fromFoldable8(["manyBody-compact", "collision-compact", "center", "links"]);
-                                                                              return bind116(init5({
-                                                                                nodes: bubbleNodes,
-                                                                                links: bubbleLinks,
-                                                                                forces: forces2,
-                                                                                activeForces,
-                                                                                config: {
-                                                                                  alpha: 1,
-                                                                                  alphaTarget: 0,
-                                                                                  alphaMin: 1e-3,
-                                                                                  alphaDecay: 0.0228,
-                                                                                  velocityDecay: 0.4
-                                                                                },
-                                                                                keyFn: keyIsID_,
-                                                                                ticks: fromFoldable12([])
-                                                                              }))(function() {
-                                                                                return bind116(on3(svg2)(new Zoom({
-                                                                                  extent: new ZoomExtent({
-                                                                                    top: 0,
-                                                                                    left: 0,
-                                                                                    bottom: v.value1,
-                                                                                    right: v.value0
-                                                                                  }),
-                                                                                  scale: new ScaleExtent(0.1, 4),
-                                                                                  name: "BubbleGraph",
-                                                                                  target: zoomGroup
-                                                                                })))(function() {
-                                                                                  return pure114({
-                                                                                    svg: svg2,
-                                                                                    zoomGroup,
-                                                                                    nodesGroup,
-                                                                                    linksGroup,
-                                                                                    bubbleNodes,
-                                                                                    bubbleLinks,
-                                                                                    declarationsData: declsData,
-                                                                                    adjacencyMap,
-                                                                                    modulesMap,
-                                                                                    dependedOnByMap,
-                                                                                    detailsPanel,
-                                                                                    detailsModuleName,
-                                                                                    dependenciesList,
-                                                                                    dependedOnByList
-                                                                                  });
-                                                                                });
-                                                                              });
-                                                                            });
-                                                                          });
-                                                                        });
-                                                                      });
-                                                                    });
-                                                                  });
+                                              return discard211(liftEffect110(addModuleArrowMarker_(svg2)))(function() {
+                                                return bind116(appendTo2(svg2)(Group.value)([classed2("zoom-group")]))(function(zoomGroup) {
+                                                  return bind116(appendTo2(zoomGroup)(Group.value)([classed2("link"), strokeColor2("#999"), strokeOpacity2(0.4)]))(function(linksGroup) {
+                                                    return bind116(appendTo2(zoomGroup)(Group.value)([classed2("node"), strokeColor2("#fff"), strokeWidth2(1.5)]))(function(nodesGroup) {
+                                                      return bind116(appendTo2(svg2)(Group.value)([classed2("legend"), transform$prime(function(v1) {
+                                                        return "translate(" + (show13(v.value0 / 2 - 150) + ("," + (show13(-v.value1 / 2 + 30) + ")")));
+                                                      })]))(function(legendGroup) {
+                                                        return bind116(appendTo2(legendGroup)(Text2.value)([text1("Declaration Types"), x4(0), y32(0), classed2("legend-title")]))(function() {
+                                                          var legendItems = [{
+                                                            name: "Functions/Values",
+                                                            color: "#2196F3",
+                                                            yOffset: 25
+                                                          }, {
+                                                            name: "Foreign Functions",
+                                                            color: "#00BCD4",
+                                                            yOffset: 50
+                                                          }, {
+                                                            name: "Data Types",
+                                                            color: "#4CAF50",
+                                                            yOffset: 75
+                                                          }, {
+                                                            name: "Type Classes",
+                                                            color: "#9C27B0",
+                                                            yOffset: 100
+                                                          }, {
+                                                            name: "Type Synonyms",
+                                                            color: "#FF9800",
+                                                            yOffset: 125
+                                                          }, {
+                                                            name: "Instances",
+                                                            color: "#E91E63",
+                                                            yOffset: 150
+                                                          }];
+                                                          return bind116(traverse_15(function(item) {
+                                                            return bind116(appendTo2(legendGroup)(Group.value)([transform$prime(function(v1) {
+                                                              return "translate(0," + (show13(item.yOffset) + ")");
+                                                            }), classed2("legend-item")]))(function(itemGroup) {
+                                                              return bind116(appendTo2(itemGroup)(Circle.value)([radius1(8), fill1(item.color), x4(0), y32(0)]))(function() {
+                                                                return bind116(appendTo2(itemGroup)(Text2.value)([text1(item.name), x4(15), y32(5), classed2("legend-label")]))(function() {
+                                                                  return pure114(unit);
+                                                                });
+                                                              });
+                                                            });
+                                                          })(legendItems))(function() {
+                                                            var spotlightCollisionRadius = function(datum2) {
+                                                              return function(v1) {
+                                                                var padding = (function() {
+                                                                  if (datum2.expanded) {
+                                                                    return 25;
+                                                                  }
+                                                                  ;
+                                                                  return 5;
+                                                                })();
+                                                                var baseRadius = nodeRadius(datum2.expanded)(datum2.loc);
+                                                                return baseRadius + padding;
+                                                              };
+                                                            };
+                                                            var compactCollisionRadius = function(datum2) {
+                                                              return function(v1) {
+                                                                var baseRadius = nodeRadius(false)(datum2.loc);
+                                                                return baseRadius + 2;
+                                                              };
+                                                            };
+                                                            var forces2 = [createForce("manyBody-compact")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-50), theta2(0.9), distanceMin2(1)]), createForce("manyBody-spotlight")(new RegularForce(ForceManyBody.value))(allNodes)([strength2(-150), theta2(0.9), distanceMin2(1)]), createForce("collision-compact")(new RegularForce(ForceCollide.value))(allNodes)([radius22(compactCollisionRadius), strength2(0.9), iterations2(3)]), createForce("collision-spotlight")(new RegularForce(ForceCollide.value))(allNodes)([radius22(spotlightCollisionRadius), strength2(0.9), iterations2(3)]), createForce("center")(new RegularForce(ForceCenter.value))(allNodes)([x32(0), y42(0), strength2(0.2)]), createLinkForce(Nothing.value)([distance2(100)])];
+                                                            var activeForces = fromFoldable8(["manyBody-compact", "collision-compact", "center", "links"]);
+                                                            return bind116(init5({
+                                                              nodes: bubbleNodes,
+                                                              links: bubbleLinks,
+                                                              forces: forces2,
+                                                              activeForces,
+                                                              config: {
+                                                                alpha: 1,
+                                                                alphaTarget: 0,
+                                                                alphaMin: 1e-3,
+                                                                alphaDecay: 0.0228,
+                                                                velocityDecay: 0.4
+                                                              },
+                                                              keyFn: keyIsID_,
+                                                              ticks: fromFoldable12([])
+                                                            }))(function() {
+                                                              return bind116(on3(svg2)(new Zoom({
+                                                                extent: new ZoomExtent({
+                                                                  top: 0,
+                                                                  left: 0,
+                                                                  bottom: v.value1,
+                                                                  right: v.value0
+                                                                }),
+                                                                scale: new ScaleExtent(0.1, 4),
+                                                                name: "BubbleGraph",
+                                                                target: zoomGroup
+                                                              })))(function() {
+                                                                return pure114({
+                                                                  svg: svg2,
+                                                                  zoomGroup,
+                                                                  nodesGroup,
+                                                                  linksGroup,
+                                                                  bubbleNodes,
+                                                                  bubbleLinks,
+                                                                  declarationsData: declsData,
+                                                                  adjacencyMap,
+                                                                  modulesMap,
+                                                                  dependedOnByMap
                                                                 });
                                                               });
                                                             });
@@ -17011,98 +16964,98 @@
                 return function(declsData) {
                   return function(callsData) {
                     return function(selector) {
-                      return discard211(liftEffect110(log2("=== drawExpandableBubbles called ===")))(function() {
-                        return bind116(initialize52(graphData)(declsData))(function(initResult) {
-                          return discard211(liftEffect110(log2("=== initialize returned ===")))(function() {
-                            return bind116(use3(_handle2))(function(simHandle) {
-                              return bind116(liftEffect110($$new(false)))(function(hasFilteredRef) {
-                                var onClick2 = function(v) {
-                                  return function(datum2) {
-                                    return function(v1) {
-                                      var clickedNode = unboxBubbleNode(datum2);
-                                      var clickedId = datum_.id(datum2);
-                                      return function __do4() {
-                                        var hasFiltered = read(hasFilteredRef)();
-                                        when5(!hasFiltered)((function() {
-                                          var connected2 = fromMaybe(empty7)(lookup8(clickedId)(initResult.adjacencyMap));
-                                          var connectedIds2 = toUnfoldable7(connected2);
-                                          var allConnected = cons3(clickedId)(connectedIds2);
-                                          return function __do5() {
-                                            log2("First click: filtering to " + (show23(length4(allConnected)) + " connected modules"))();
-                                            liftEffect7(pure20(filterToConnectedNodes_(simHandle)(keyIsID_)(allConnected)))();
-                                            write(true)(hasFilteredRef)();
-                                            log2("About to call showModuleLabels_")();
-                                            liftEffect7(showModuleLabels_(initResult.nodesGroup))();
-                                            log2("Called showModuleLabels_")();
-                                            log2("Switching to spotlight collision force")();
-                                            return switchToSpotlightForces_(simHandle)();
-                                          };
-                                        })())();
-                                        var newExpanded = !clickedNode.expanded;
-                                        unsafeSetField_("expanded")(newExpanded)(datum2)();
-                                        log2(clickedId + (function() {
-                                          if (newExpanded) {
-                                            return " expanded";
-                                          }
-                                          ;
-                                          return " collapsed";
-                                        })())();
-                                        updateNodeExpansion_(simHandle)(nodeRadius)(initResult.declarationsData)(callsData)(datum2);
-                                        var connected = fromMaybe(empty7)(lookup8(clickedId)(initResult.adjacencyMap));
-                                        var connectedIds = toUnfoldable7(connected);
-                                        log2("Expanding " + (show23(length4(connectedIds)) + " connected modules"))();
-                                        traverse_7(function(connectedId) {
-                                          return expandNodeById_(simHandle)(nodeRadius)(initResult.declarationsData)(callsData)(connectedId)(newExpanded);
-                                        })(connectedIds)();
-                                        return drawInterModuleDeclarationLinks_(initResult.zoomGroup)(nodeRadius)(initResult.declarationsData)(callsData)();
-                                      };
-                                    };
-                                  };
-                                };
-                                return discard211(updateGraph5({
-                                  nodesGroup: initResult.nodesGroup,
-                                  linksGroup: initResult.linksGroup,
-                                  nodes: initResult.bubbleNodes,
-                                  links: initResult.bubbleLinks,
-                                  inSpotlightMode: false
-                                }))(function() {
-                                  var onMouseOver = function(v) {
+                      return function(callbacks) {
+                        return discard211(liftEffect110(log2("=== drawExpandableBubbles called ===")))(function() {
+                          return bind116(initialize52(graphData)(declsData))(function(initResult) {
+                            return discard211(liftEffect110(log2("=== initialize returned ===")))(function() {
+                              return bind116(use3(_handle2))(function(simHandle) {
+                                return bind116(liftEffect110($$new(false)))(function(hasFilteredRef) {
+                                  var onClick2 = function(v) {
                                     return function(datum2) {
                                       return function(v1) {
-                                        var hoveredId = datum_.id(datum2);
+                                        var clickedNode = unboxBubbleNode(datum2);
+                                        var clickedId = datum_.id(datum2);
                                         return function __do4() {
-                                          log2("Mouse over: " + hoveredId)();
-                                          var v2 = lookup8(hoveredId)(initResult.modulesMap);
-                                          if (v2 instanceof Nothing) {
-                                            return log2("Module not found in map: " + hoveredId)();
-                                          }
-                                          ;
-                                          if (v2 instanceof Just) {
-                                            log2("Found module info, showing panel for: " + v2.value0.name)();
-                                            showDetailsPanel_(initResult.detailsPanel)();
-                                            setDetailsModuleName_(initResult.detailsModuleName)(v2.value0.name)();
-                                            populateDetailsList_(initResult.dependenciesList)(sort2(v2.value0.depends))();
-                                            var dependedOnBy = fromMaybe(empty7)(lookup8(hoveredId)(initResult.dependedOnByMap));
-                                            var dependedOnByList$prime = sort2(toUnfoldable7(dependedOnBy));
-                                            return populateDetailsList_(initResult.dependedOnByList)(dependedOnByList$prime)();
-                                          }
-                                          ;
-                                          throw new Error("Failed pattern match at PSD3.CodeAtlas.Tabs.ExpandableBubbles (line 564, column 9 - line 580, column 68): " + [v2.constructor.name]);
+                                          var hasFiltered = read(hasFilteredRef)();
+                                          when5(!hasFiltered)((function() {
+                                            var connected2 = fromMaybe(empty7)(lookup8(clickedId)(initResult.adjacencyMap));
+                                            var connectedIds2 = toUnfoldable7(connected2);
+                                            var allConnected = cons3(clickedId)(connectedIds2);
+                                            return function __do5() {
+                                              log2("First click: filtering to " + (show23(length4(allConnected)) + " connected modules"))();
+                                              liftEffect7(pure20(filterToConnectedNodes_(simHandle)(keyIsID_)(allConnected)))();
+                                              write(true)(hasFilteredRef)();
+                                              log2("About to call showModuleLabels_")();
+                                              liftEffect7(showModuleLabels_(initResult.nodesGroup))();
+                                              log2("Called showModuleLabels_")();
+                                              log2("Switching to spotlight collision force")();
+                                              return switchToSpotlightForces_(simHandle)();
+                                            };
+                                          })())();
+                                          var newExpanded = !clickedNode.expanded;
+                                          unsafeSetField_("expanded")(newExpanded)(datum2)();
+                                          log2(clickedId + (function() {
+                                            if (newExpanded) {
+                                              return " expanded";
+                                            }
+                                            ;
+                                            return " collapsed";
+                                          })())();
+                                          updateNodeExpansion_(simHandle)(nodeRadius)(initResult.declarationsData)(callsData)(datum2);
+                                          var connected = fromMaybe(empty7)(lookup8(clickedId)(initResult.adjacencyMap));
+                                          var connectedIds = toUnfoldable7(connected);
+                                          log2("Expanding " + (show23(length4(connectedIds)) + " connected modules"))();
+                                          traverse_7(function(connectedId) {
+                                            return expandNodeById_(simHandle)(nodeRadius)(initResult.declarationsData)(callsData)(connectedId)(newExpanded);
+                                          })(connectedIds)();
+                                          return drawInterModuleDeclarationLinks_(initResult.zoomGroup)(nodeRadius)(initResult.declarationsData)(callsData)();
                                         };
                                       };
                                     };
                                   };
-                                  var onMouseOut = function(v) {
-                                    return function(v1) {
-                                      return function(v2) {
-                                        return hideDetailsPanel_(initResult.detailsPanel);
+                                  return discard211(updateGraph5({
+                                    nodesGroup: initResult.nodesGroup,
+                                    linksGroup: initResult.linksGroup,
+                                    nodes: initResult.bubbleNodes,
+                                    links: initResult.bubbleLinks,
+                                    inSpotlightMode: false
+                                  }))(function() {
+                                    var onMouseOver = function(v) {
+                                      return function(datum2) {
+                                        return function(v1) {
+                                          var hoveredId = datum_.id(datum2);
+                                          return function __do4() {
+                                            log2("Mouse over: " + hoveredId)();
+                                            var v2 = lookup8(hoveredId)(initResult.modulesMap);
+                                            if (v2 instanceof Nothing) {
+                                              return log2("Module not found in map: " + hoveredId)();
+                                            }
+                                            ;
+                                            if (v2 instanceof Just) {
+                                              log2("Found module info, showing panel for: " + v2.value0.name)();
+                                              var dependencies = sort2(v2.value0.depends);
+                                              var dependedOnBy = fromMaybe(empty7)(lookup8(hoveredId)(initResult.dependedOnByMap));
+                                              var dependedOnByList = sort2(toUnfoldable7(dependedOnBy));
+                                              return callbacks.onShowModuleDetails(v2.value0.name)(dependencies)(dependedOnByList)();
+                                            }
+                                            ;
+                                            throw new Error("Failed pattern match at PSD3.CodeAtlas.Tabs.ExpandableBubbles (line 541, column 9 - line 549, column 88): " + [v2.constructor.name]);
+                                          };
+                                        };
                                       };
                                     };
-                                  };
-                                  return bind116(openSelection2(initResult.nodesGroup)(show8(Group.value)))(function(initialNodes) {
-                                    return discard211(setAttributes2(initialNodes)([onMouseEventEffectful(MouseClick.value)(onClick2), onMouseEventEffectful(MouseEnter.value)(onMouseOver), onMouseEventEffectful(MouseLeave.value)(onMouseOut)]))(function() {
-                                      return discard211(start5)(function() {
-                                        return pure114(unit);
+                                    var onMouseOut = function(v) {
+                                      return function(v1) {
+                                        return function(v2) {
+                                          return callbacks.onHideModuleDetails;
+                                        };
+                                      };
+                                    };
+                                    return bind116(openSelection2(initResult.nodesGroup)(show8(Group.value)))(function(initialNodes) {
+                                      return discard211(setAttributes2(initialNodes)([onMouseEventEffectful(MouseClick.value)(onClick2), onMouseEventEffectful(MouseEnter.value)(onMouseOver), onMouseEventEffectful(MouseLeave.value)(onMouseOut)]))(function() {
+                                        return discard211(start5)(function() {
+                                          return pure114(unit);
+                                        });
                                       });
                                     });
                                   });
@@ -17111,7 +17064,7 @@
                             });
                           });
                         });
-                      });
+                      };
                     };
                   };
                 };
@@ -22891,6 +22844,7 @@
   // output/PSD3.CodeAtlas.CodeAtlas/index.js
   var eq4 = /* @__PURE__ */ eq(eqAtlasTab);
   var show16 = /* @__PURE__ */ show(showAtlasTab);
+  var mapFlipped9 = /* @__PURE__ */ mapFlipped(functorArray);
   var bind16 = /* @__PURE__ */ bind(bindHalogenM);
   var discard13 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
   var modify_4 = /* @__PURE__ */ modify_(monadStateHalogenM);
@@ -22900,11 +22854,30 @@
   var pure23 = /* @__PURE__ */ pure(applicativeHalogenM);
   var drawInteractiveGraph2 = /* @__PURE__ */ drawInteractiveGraph(bindD3SimM)(monadEffD3SimM)(monadStateD3SimM)(selectionMD3Selection_D3S)(simulationMD3Selection_D3)(simulationM2D3Selection_D);
   var drawExpandableBubbles2 = /* @__PURE__ */ drawExpandableBubbles(bindD3SimM)(monadEffD3SimM)(monadStateD3SimM)(selectionMD3Selection_D3S)(simulationMD3Selection_D3)(simulationM2D3Selection_D);
+  var renderTabContent = function(state3) {
+    if (state3.activeTab instanceof DeclarationsTab) {
+      return render3(state3);
+    }
+    ;
+    if (state3.activeTab instanceof VisualizationTab) {
+      return div2([classes(["module-graph-container"])])([div2([classes(["svg-container"])])([])]);
+    }
+    ;
+    if (state3.activeTab instanceof InteractiveGraphTab) {
+      return div2([classes(["interactive-graph-container"])])([div2([classes(["svg-container"])])([])]);
+    }
+    ;
+    if (state3.activeTab instanceof ExpandableBubblesTab) {
+      return div2([classes(["expandable-bubbles-container"])])([div2([classes(["svg-container"])])([])]);
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 89, column 3 - line 115, column 10): " + [state3.activeTab.constructor.name]);
+  };
   var renderTab = function(tab) {
     return function(activeTab) {
       return button([classes(["code-atlas-tab", (function() {
-        var $50 = eq4(tab)(activeTab);
-        if ($50) {
+        var $57 = eq4(tab)(activeTab);
+        if ($57) {
           return "code-atlas-tab--active";
         }
         ;
@@ -22913,6 +22886,49 @@
         return new SetActiveTab(tab);
       })])([text5(show16(tab))]);
     };
+  };
+  var renderLegendItem = function(label5) {
+    return function(color2) {
+      return div2([classes(["legend-item"])])([div2([classes(["legend-color"]), style("background-color: " + color2)])([]), span3([classes(["legend-label"])])([text5(label5)])]);
+    };
+  };
+  var renderLegendPanel = /* @__PURE__ */ div2([/* @__PURE__ */ classes(["floating-panel", "floating-panel--top-right", "editorial"])])([/* @__PURE__ */ h3([/* @__PURE__ */ classes(["floating-panel__title"])])([/* @__PURE__ */ text5("Declaration Types")]), /* @__PURE__ */ div2([/* @__PURE__ */ classes(["legend-items"])])([/* @__PURE__ */ renderLegendItem("Functions/Values")("#2196F3"), /* @__PURE__ */ renderLegendItem("Foreign Functions")("#00BCD4"), /* @__PURE__ */ renderLegendItem("Data Types")("#4CAF50"), /* @__PURE__ */ renderLegendItem("Type Classes")("#9C27B0"), /* @__PURE__ */ renderLegendItem("Type Synonyms")("#FF9800"), /* @__PURE__ */ renderLegendItem("Instances")("#E91E63")])]);
+  var renderDetailsPanel = function(state3) {
+    if (state3.hoveredModule instanceof Nothing) {
+      return text5("");
+    }
+    ;
+    if (state3.hoveredModule instanceof Just) {
+      return div2([classes(["floating-panel", "floating-panel--bottom-right", "editorial"])])([h3([classes(["floating-panel__title"])])([text5(state3.hoveredModule.value0.moduleName)]), div2([classes(["details-section"])])([h4_([text5("Dependencies")]), (function() {
+        var $59 = length4(state3.hoveredModule.value0.dependencies) === 0;
+        if ($59) {
+          return p([classes(["empty-list"])])([text5("(none)")]);
+        }
+        ;
+        return ul_(mapFlipped9(state3.hoveredModule.value0.dependencies)(function(dep) {
+          return li_([text5(dep)]);
+        }));
+      })()]), div2([classes(["details-section"])])([h4_([text5("Depended On By")]), (function() {
+        var $60 = length4(state3.hoveredModule.value0.dependedOnBy) === 0;
+        if ($60) {
+          return p([classes(["empty-list"])])([text5("(none)")]);
+        }
+        ;
+        return ul_(mapFlipped9(state3.hoveredModule.value0.dependedOnBy)(function(dep) {
+          return li_([text5(dep)]);
+        }));
+      })()])]);
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 164, column 3 - line 192, column 10): " + [state3.hoveredModule.constructor.name]);
+  };
+  var renderFloatingPanels = function(state3) {
+    var $62 = eq4(state3.activeTab)(ExpandableBubblesTab.value);
+    if ($62) {
+      return div_([renderLegendPanel, renderDetailsPanel(state3)]);
+    }
+    ;
+    return text5("");
   };
   var render4 = function(state3) {
     return div2([classes(["code-atlas-page"])])([header([classes(["code-atlas-header"])])([h1_([text5("Code Atlas")]), p([classes(["code-atlas-subtitle"])])([text5("Explore the codebase through declarations, function calls, and type dependencies")])]), div2([classes(["code-atlas-tabs"])])([renderTab(DeclarationsTab.value)(state3.activeTab), renderTab(VisualizationTab.value)(state3.activeTab), renderTab(InteractiveGraphTab.value)(state3.activeTab), renderTab(ExpandableBubblesTab.value)(state3.activeTab)]), div2([classes(["code-atlas-content"])])([(function() {
@@ -22926,34 +22942,20 @@
         }
         ;
         if (state3.error instanceof Nothing) {
-          if (state3.activeTab instanceof DeclarationsTab) {
-            return render3(state3);
-          }
-          ;
-          if (state3.activeTab instanceof VisualizationTab) {
-            return div2([classes(["module-graph-container"])])([div2([classes(["svg-container"])])([])]);
-          }
-          ;
-          if (state3.activeTab instanceof InteractiveGraphTab) {
-            return div2([classes(["interactive-graph-container"])])([div2([classes(["svg-container"])])([])]);
-          }
-          ;
-          if (state3.activeTab instanceof ExpandableBubblesTab) {
-            return div2([classes(["expandable-bubbles-container"])])([div2([classes(["svg-container"])])([])]);
-          }
-          ;
-          throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 75, column 26 - line 101, column 22): " + [state3.activeTab.constructor.name]);
+          return div2([])([renderTabContent(state3), renderFloatingPanels(state3)]);
         }
         ;
-        throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 65, column 22 - line 101, column 22): " + [state3.error.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 69, column 22 - line 83, column 20): " + [state3.error.constructor.name]);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 59, column 11 - line 101, column 22): " + [state3.loading.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 63, column 11 - line 83, column 20): " + [state3.loading.constructor.name]);
     })()])]);
   };
   var handleAction2 = function(dictMonadAff) {
     var liftAff35 = liftAff(monadAffHalogenM(dictMonadAff));
-    var runWithD3_Simulation1 = runWithD3_Simulation2(monadEffectHalogenM(dictMonadAff.MonadEffect0()));
+    var monadEffectHalogenM7 = monadEffectHalogenM(dictMonadAff.MonadEffect0());
+    var runWithD3_Simulation1 = runWithD3_Simulation2(monadEffectHalogenM7);
+    var liftEffect52 = liftEffect(monadEffectHalogenM7);
     return function(v) {
       if (v instanceof Initialize3) {
         return bind16(liftAff35(loadDeclarations))(function(declarationsResult) {
@@ -22961,16 +22963,16 @@
             return bind16(liftAff35(loadModules))(function(modulesResult) {
               if (declarationsResult instanceof Right && (functionCallsResult instanceof Right && modulesResult instanceof Right)) {
                 return discard13(modify_4(function(v1) {
-                  var $59 = {};
-                  for (var $60 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $60)) {
-                      $59[$60] = v1[$60];
+                  var $70 = {};
+                  for (var $71 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $71)) {
+                      $70[$71] = v1[$71];
                     }
                     ;
                   }
                   ;
-                  $59.loading = false;
-                  return $59;
+                  $70.loading = false;
+                  return $70;
                 }))(function() {
                   return handleAction2(dictMonadAff)(new DataLoaded(declarationsResult.value0, functionCallsResult.value0, modulesResult.value0));
                 });
@@ -22978,53 +22980,53 @@
               ;
               if (declarationsResult instanceof Left) {
                 return modify_4(function(v1) {
-                  var $65 = {};
-                  for (var $66 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $66)) {
-                      $65[$66] = v1[$66];
+                  var $76 = {};
+                  for (var $77 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $77)) {
+                      $76[$77] = v1[$77];
                     }
                     ;
                   }
                   ;
-                  $65.loading = false;
-                  $65.error = new Just(declarationsResult.value0);
-                  return $65;
+                  $76.loading = false;
+                  $76.error = new Just(declarationsResult.value0);
+                  return $76;
                 });
               }
               ;
               if (functionCallsResult instanceof Left) {
                 return modify_4(function(v1) {
-                  var $69 = {};
-                  for (var $70 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $70)) {
-                      $69[$70] = v1[$70];
+                  var $80 = {};
+                  for (var $81 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $81)) {
+                      $80[$81] = v1[$81];
                     }
                     ;
                   }
                   ;
-                  $69.loading = false;
-                  $69.error = new Just(functionCallsResult.value0);
-                  return $69;
+                  $80.loading = false;
+                  $80.error = new Just(functionCallsResult.value0);
+                  return $80;
                 });
               }
               ;
               if (modulesResult instanceof Left) {
                 return modify_4(function(v1) {
-                  var $73 = {};
-                  for (var $74 in v1) {
-                    if ({}.hasOwnProperty.call(v1, $74)) {
-                      $73[$74] = v1[$74];
+                  var $84 = {};
+                  for (var $85 in v1) {
+                    if ({}.hasOwnProperty.call(v1, $85)) {
+                      $84[$85] = v1[$85];
                     }
                     ;
                   }
                   ;
-                  $73.loading = false;
-                  $73.error = new Just(modulesResult.value0);
-                  return $73;
+                  $84.loading = false;
+                  $84.error = new Just(modulesResult.value0);
+                  return $84;
                 });
               }
               ;
-              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 126, column 5 - line 138, column 58): " + [declarationsResult.constructor.name, functionCallsResult.constructor.name, modulesResult.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 215, column 5 - line 227, column 58): " + [declarationsResult.constructor.name, functionCallsResult.constructor.name, modulesResult.constructor.name]);
             });
           });
         });
@@ -23032,18 +23034,18 @@
       ;
       if (v instanceof DataLoaded) {
         return discard13(modify_4(function(v1) {
-          var $77 = {};
-          for (var $78 in v1) {
-            if ({}.hasOwnProperty.call(v1, $78)) {
-              $77[$78] = v1[$78];
+          var $88 = {};
+          for (var $89 in v1) {
+            if ({}.hasOwnProperty.call(v1, $89)) {
+              $88[$89] = v1[$89];
             }
             ;
           }
           ;
-          $77.declarationsData = new Just(v.value0);
-          $77.functionCallsData = new Just(v.value1);
-          $77.moduleGraphData = new Just(v.value2);
-          return $77;
+          $88.declarationsData = new Just(v.value0);
+          $88.functionCallsData = new Just(v.value1);
+          $88.moduleGraphData = new Just(v.value2);
+          return $88;
         }))(function() {
           return bind16(get7)(function(state3) {
             return handleAction2(dictMonadAff)(new SetActiveTab(state3.activeTab));
@@ -23053,32 +23055,32 @@
       ;
       if (v instanceof DataLoadFailed) {
         return modify_4(function(v1) {
-          var $83 = {};
-          for (var $84 in v1) {
-            if ({}.hasOwnProperty.call(v1, $84)) {
-              $83[$84] = v1[$84];
+          var $94 = {};
+          for (var $95 in v1) {
+            if ({}.hasOwnProperty.call(v1, $95)) {
+              $94[$95] = v1[$95];
             }
             ;
           }
           ;
-          $83.error = new Just(v.value0);
-          $83.loading = false;
-          return $83;
+          $94.error = new Just(v.value0);
+          $94.loading = false;
+          return $94;
         });
       }
       ;
       if (v instanceof SetActiveTab) {
         return discard13(modify_4(function(v1) {
-          var $87 = {};
-          for (var $88 in v1) {
-            if ({}.hasOwnProperty.call(v1, $88)) {
-              $87[$88] = v1[$88];
+          var $98 = {};
+          for (var $99 in v1) {
+            if ({}.hasOwnProperty.call(v1, $99)) {
+              $98[$99] = v1[$99];
             }
             ;
           }
           ;
-          $87.activeTab = v.value0;
-          return $87;
+          $98.activeTab = v.value0;
+          return $98;
         }))(function() {
           if (v.value0 instanceof VisualizationTab) {
             return bind16(get7)(function(state3) {
@@ -23090,7 +23092,7 @@
                 return pure23(unit);
               }
               ;
-              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 161, column 9 - line 165, column 31): " + [state3.moduleGraphData.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 250, column 9 - line 254, column 31): " + [state3.moduleGraphData.constructor.name]);
             });
           }
           ;
@@ -23104,14 +23106,44 @@
                 return pure23(unit);
               }
               ;
-              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 169, column 9 - line 173, column 31): " + [state3.moduleGraphData.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 258, column 9 - line 262, column 31): " + [state3.moduleGraphData.constructor.name]);
             });
           }
           ;
           if (v.value0 instanceof ExpandableBubblesTab) {
             return bind16(get7)(function(state3) {
               if (state3.moduleGraphData instanceof Just && (state3.declarationsData instanceof Just && state3.functionCallsData instanceof Just)) {
-                return runWithD3_Simulation1(drawExpandableBubbles2(state3.moduleGraphData.value0)(state3.declarationsData.value0)(state3.functionCallsData.value0)("div.svg-container"));
+                return bind16(liftEffect52($$new(Nothing.value)))(function(pendingRef) {
+                  var callbacks = {
+                    onShowModuleDetails: function(moduleName) {
+                      return function(dependencies) {
+                        return function(dependedOnBy) {
+                          return write(new Just(new ShowModuleDetails({
+                            moduleName,
+                            dependencies,
+                            dependedOnBy
+                          })))(pendingRef);
+                        };
+                      };
+                    },
+                    onHideModuleDetails: write(new Just(HideModuleDetails.value))(pendingRef)
+                  };
+                  return discard13(runWithD3_Simulation1(drawExpandableBubbles2(state3.moduleGraphData.value0)(state3.declarationsData.value0)(state3.functionCallsData.value0)("div.svg-container")(callbacks)))(function() {
+                    return bind16(liftEffect52(read(pendingRef)))(function(pendingAction) {
+                      if (pendingAction instanceof Just) {
+                        return discard13(liftEffect52(write(Nothing.value)(pendingRef)))(function() {
+                          return handleAction2(dictMonadAff)(pendingAction.value0);
+                        });
+                      }
+                      ;
+                      if (pendingAction instanceof Nothing) {
+                        return pure23(unit);
+                      }
+                      ;
+                      throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 284, column 13 - line 288, column 35): " + [pendingAction.constructor.name]);
+                    });
+                  });
+                });
               }
               ;
               return pure23(unit);
@@ -23124,83 +23156,113 @@
       ;
       if (v instanceof SetSearchQuery) {
         return modify_4(function(v1) {
-          var $102 = {};
-          for (var $103 in v1) {
-            if ({}.hasOwnProperty.call(v1, $103)) {
-              $102[$103] = v1[$103];
+          var $115 = {};
+          for (var $116 in v1) {
+            if ({}.hasOwnProperty.call(v1, $116)) {
+              $115[$116] = v1[$116];
             }
             ;
           }
           ;
-          $102.searchQuery = v.value0;
-          return $102;
+          $115.searchQuery = v.value0;
+          return $115;
         });
       }
       ;
       if (v instanceof SetKindFilter) {
         return modify_4(function(v1) {
-          var $106 = {};
-          for (var $107 in v1) {
-            if ({}.hasOwnProperty.call(v1, $107)) {
-              $106[$107] = v1[$107];
+          var $119 = {};
+          for (var $120 in v1) {
+            if ({}.hasOwnProperty.call(v1, $120)) {
+              $119[$120] = v1[$120];
             }
             ;
           }
           ;
-          $106.selectedKindFilter = v.value0;
-          return $106;
+          $119.selectedKindFilter = v.value0;
+          return $119;
         });
       }
       ;
       if (v instanceof SetModuleFilter) {
         return modify_4(function(v1) {
-          var $110 = {};
-          for (var $111 in v1) {
-            if ({}.hasOwnProperty.call(v1, $111)) {
-              $110[$111] = v1[$111];
+          var $123 = {};
+          for (var $124 in v1) {
+            if ({}.hasOwnProperty.call(v1, $124)) {
+              $123[$124] = v1[$124];
             }
             ;
           }
           ;
-          $110.selectedModuleFilter = v.value0;
-          return $110;
+          $123.selectedModuleFilter = v.value0;
+          return $123;
         });
       }
       ;
       if (v instanceof SetSourceFilter) {
         return modify_4(function(v1) {
-          var $114 = {};
-          for (var $115 in v1) {
-            if ({}.hasOwnProperty.call(v1, $115)) {
-              $114[$115] = v1[$115];
+          var $127 = {};
+          for (var $128 in v1) {
+            if ({}.hasOwnProperty.call(v1, $128)) {
+              $127[$128] = v1[$128];
             }
             ;
           }
           ;
-          $114.selectedSourceFilter = v.value0;
-          return $114;
+          $127.selectedSourceFilter = v.value0;
+          return $127;
         });
       }
       ;
       if (v instanceof ClearFilters) {
         return modify_4(function(v1) {
-          var $118 = {};
-          for (var $119 in v1) {
-            if ({}.hasOwnProperty.call(v1, $119)) {
-              $118[$119] = v1[$119];
+          var $131 = {};
+          for (var $132 in v1) {
+            if ({}.hasOwnProperty.call(v1, $132)) {
+              $131[$132] = v1[$132];
             }
             ;
           }
           ;
-          $118.searchQuery = "";
-          $118.selectedKindFilter = Nothing.value;
-          $118.selectedModuleFilter = Nothing.value;
-          $118.selectedSourceFilter = Nothing.value;
-          return $118;
+          $131.searchQuery = "";
+          $131.selectedKindFilter = Nothing.value;
+          $131.selectedModuleFilter = Nothing.value;
+          $131.selectedSourceFilter = Nothing.value;
+          return $131;
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 119, column 16 - line 203, column 8): " + [v.constructor.name]);
+      if (v instanceof ShowModuleDetails) {
+        return modify_4(function(v1) {
+          var $134 = {};
+          for (var $135 in v1) {
+            if ({}.hasOwnProperty.call(v1, $135)) {
+              $134[$135] = v1[$135];
+            }
+            ;
+          }
+          ;
+          $134.hoveredModule = new Just(v.value0);
+          return $134;
+        });
+      }
+      ;
+      if (v instanceof HideModuleDetails) {
+        return modify_4(function(v1) {
+          var $138 = {};
+          for (var $139 in v1) {
+            if ({}.hasOwnProperty.call(v1, $139)) {
+              $138[$139] = v1[$139];
+            }
+            ;
+          }
+          ;
+          $138.hoveredModule = Nothing.value;
+          return $138;
+        });
+      }
+      ;
+      throw new Error("Failed pattern match at PSD3.CodeAtlas.CodeAtlas (line 208, column 16 - line 318, column 44): " + [v.constructor.name]);
     };
   };
   var component2 = function(dictMonadAff) {
@@ -23780,7 +23842,7 @@ drawQuartet quartet selector = do
   var fromFoldableWith2 = /* @__PURE__ */ fromFoldableWith(ordString)(foldableArray);
   var lookup11 = /* @__PURE__ */ lookup(ordString);
   var fromFoldable17 = /* @__PURE__ */ fromFoldable2(ordString)(foldableArray);
-  var mapFlipped9 = /* @__PURE__ */ mapFlipped(functorArray);
+  var mapFlipped10 = /* @__PURE__ */ mapFlipped(functorArray);
   var bind17 = /* @__PURE__ */ bind(bindMaybe);
   var sum3 = /* @__PURE__ */ sum(foldableArray)(semiringNumber);
   var equalSnd2 = /* @__PURE__ */ equalSnd(eqString);
@@ -23985,7 +24047,7 @@ drawQuartet quartet selector = do
     };
     var moduleLinks = map41(makeLink(M2M_Graph.value))(foldl2(foldDepends)([])(v.modules));
     var packageLinks = map41(makeLink(P2P.value))(foldl2(foldDepends)([])(v.packages));
-    var depsMap = fromFoldable17(mapFlipped9(v.lsDeps)(function(d9) {
+    var depsMap = fromFoldable17(mapFlipped10(v.lsDeps)(function(d9) {
       return new Tuple(d9.packageName, {
         version: d9.version,
         repo: d9.repo.contents
@@ -24111,7 +24173,7 @@ drawQuartet quartet selector = do
     })(v.packages);
     var packageNodes = map41(makeNodeFromPackageJSONCL)(packagesCL);
     var nodes = append6(moduleNodes)(packageNodes);
-    var id2Node = fromFoldable18(mapFlipped9(nodes)(function(node) {
+    var id2Node = fromFoldable18(mapFlipped10(nodes)(function(node) {
       return new Tuple(node.id, node);
     }));
     var sourceLinksMap = fromFoldable18(map41(getSourceLinks)(nodes));
@@ -24176,7 +24238,7 @@ drawQuartet quartet selector = do
   var append7 = /* @__PURE__ */ append(semigroupArray);
   var fromFoldable20 = /* @__PURE__ */ fromFoldable(foldableArray);
   var insert11 = /* @__PURE__ */ insert(ordInt);
-  var mapFlipped10 = /* @__PURE__ */ mapFlipped(functorArray);
+  var mapFlipped11 = /* @__PURE__ */ mapFlipped(functorArray);
   var show19 = /* @__PURE__ */ show(showLinkType);
   var append16 = /* @__PURE__ */ append(semigroupString);
   var fromFoldable110 = /* @__PURE__ */ fromFoldable2(ordInt)(foldableArray);
@@ -24346,7 +24408,7 @@ drawQuartet quartet selector = do
     var v = getGraphJSONData(json2);
     return {
       links: v.links,
-      nodes: mapFlipped10(v.nodes)(upgradeSpagoNodeData(v.sourceLinksMap)),
+      nodes: mapFlipped11(v.nodes)(upgradeSpagoNodeData(v.sourceLinksMap)),
       graph: makeGraph(v.nodes),
       tree: Nothing.value,
       maps: {
@@ -25546,7 +25608,7 @@ drawQuartet quartet selector = do
 
   // output/Data.DependencyGraph/index.js
   var bind18 = /* @__PURE__ */ bind(bindMaybe);
-  var mapFlipped11 = /* @__PURE__ */ mapFlipped(functorArray);
+  var mapFlipped12 = /* @__PURE__ */ mapFlipped(functorArray);
   var append8 = /* @__PURE__ */ append(semigroupArray);
   var getReachableNodes = function(dictOrd) {
     var lookup18 = lookup13(dictOrd);
@@ -25560,10 +25622,10 @@ drawQuartet quartet selector = do
                 var newDeps = partition(function(d9) {
                   return !elem6(d9)(searchRecord.nodes);
                 })(firstNode.links.targets);
-                var newOpenDepPaths = mapFlipped11(newDeps.yes)(function(d9) {
+                var newOpenDepPaths = mapFlipped12(newDeps.yes)(function(d9) {
                   return cons3(d9)(x38.head);
                 });
-                var prunedLinks = mapFlipped11(newDeps.no)(function(d9) {
+                var prunedLinks = mapFlipped12(newDeps.no)(function(d9) {
                   return new Tuple(firstID, d9);
                 });
                 var $12 = $$null3(newOpenDepPaths);
@@ -36731,7 +36793,7 @@ drawQuartet quartet selector = do
   var type_24 = /* @__PURE__ */ type_17(isPropInputType);
   var value17 = /* @__PURE__ */ value12(isPropString);
   var show113 = /* @__PURE__ */ show(showNumber);
-  var renderLegendItem = function(region) {
+  var renderLegendItem2 = function(region) {
     return div2([classes(["wealth-health-legend__item"])])([span3([classes(["wealth-health-legend__color"]), style("background-color: " + regionColor(region))])([]), span3([classes(["wealth-health-legend__label"])])([text5(regionName(region))])]);
   };
   var renderControlPanel = function(state3) {
@@ -36762,7 +36824,7 @@ drawQuartet quartet selector = do
   var allRegions = /* @__PURE__ */ (function() {
     return [EastAsiaAndPacific.value, Europe.value, LatinAmericaAndCaribbean.value, MiddleEastAndNorthAfrica.value, SouthAsia.value, SubSaharanAfrica.value, NorthAmerica.value];
   })();
-  var renderLegend = /* @__PURE__ */ div2([/* @__PURE__ */ classes(["wealth-health-legend"])])([/* @__PURE__ */ h3_([/* @__PURE__ */ text5("Regions")]), /* @__PURE__ */ div2([/* @__PURE__ */ classes(["wealth-health-legend__items"])])(/* @__PURE__ */ map(functorArray)(renderLegendItem)(allRegions))]);
+  var renderLegend = /* @__PURE__ */ div2([/* @__PURE__ */ classes(["wealth-health-legend"])])([/* @__PURE__ */ h3_([/* @__PURE__ */ text5("Regions")]), /* @__PURE__ */ div2([/* @__PURE__ */ classes(["wealth-health-legend__items"])])(/* @__PURE__ */ map(functorArray)(renderLegendItem2)(allRegions))]);
 
   // output/PSD3.WealthHealth.State/index.js
   var initialState2 = function(v) {

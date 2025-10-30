@@ -32,7 +32,7 @@ import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addT
 import PSD3.CodeAtlas.Types (DeclarationsData, FunctionCallsData, ModuleGraphData, ModuleInfo)
 import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode(..), D3_VxyFxy, D3_XY)
 import PSD3.Internal.Attributes.Sugar (classed, fill, onMouseEventEffectful, radius, remove, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, width, height, x, x1, x2, y, y1, y2)
-import PSD3.Internal.FFI (addModuleArrowMarker_, clearHighlights_, d3SelectionSelectAll_, drawInterModuleDeclarationLinks_, expandNodeById_, filterToConnectedNodes_, hideDetailsPanel_, highlightConnectedNodes_, keyIsID_, populateDetailsList_, setDetailsModuleName_, showDetailsPanel_, showModuleLabels_, simdragHorizontal_, switchToSpotlightForces_, unpinAllNodes_, unsafeSetField_, updateBubbleRadii_, updateNodeExpansion_)
+import PSD3.Internal.FFI (addModuleArrowMarker_, drawInterModuleDeclarationLinks_, expandNodeById_, filterToConnectedNodes_, keyIsID_, showModuleLabels_, simdragHorizontal_, switchToSpotlightForces_, unsafeSetField_, updateNodeExpansion_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute(..))
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce)
@@ -182,10 +182,6 @@ initialize :: forall row m.
     , adjacencyMap :: Map String (Set String)
     , modulesMap :: Map String ModuleInfo
     , dependedOnByMap :: Map String (Set String)
-    , detailsPanel :: D3Selection_
-    , detailsModuleName :: D3Selection_
-    , dependenciesList :: D3Selection_
-    , dependedOnByList :: D3Selection_
     }
 initialize graphData declsData = do
   liftEffect $ Console.log "=== INITIALIZE START ==="
@@ -222,20 +218,6 @@ initialize graphData declsData = do
 
   svg <- appendTo root Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "bubble-graph" ]
   liftEffect $ Console.log "Created SVG"
-
-  -- Add details panel (outside SVG, as sibling)
-  liftEffect $ Console.log "About to attach to expandable-bubbles-container"
-  container <- attach "div.expandable-bubbles-container"
-  liftEffect $ Console.log "Attached to expandable-bubbles-container"
-
-  detailsPanel <- appendTo container Div [ classed "hover-details-panel hidden" ]
-  liftEffect $ Console.log "Created details panel"
-
-  -- Panel sections - content will be populated by FFI functions
-  detailsModuleName <- appendTo detailsPanel Div [ classed "details-module-name" ]
-  dependenciesList <- appendTo detailsPanel Div [ classed "details-list dependencies-list" ]
-  dependedOnByList <- appendTo detailsPanel Div [ classed "details-list depended-on-by-list" ]
-  liftEffect $ Console.log "Created panel sections"
 
   -- Add arrowhead marker definition for module links via FFI
   liftEffect $ addModuleArrowMarker_ svg
@@ -348,10 +330,6 @@ initialize graphData declsData = do
     , adjacencyMap
     , modulesMap
     , dependedOnByMap
-    , detailsPanel
-    , detailsModuleName
-    , dependenciesList
-    , dependedOnByList
     }
 
 -- | Update the graph with new data (including expansion states)
@@ -473,8 +451,11 @@ drawExpandableBubbles :: forall row m.
   DeclarationsData ->
   FunctionCallsData ->
   String ->
+  { onShowModuleDetails :: String -> Array String -> Array String -> Effect Unit
+  , onHideModuleDetails :: Effect Unit
+  } ->
   m Unit
-drawExpandableBubbles graphData declsData callsData selector = do
+drawExpandableBubbles graphData declsData callsData selector callbacks = do
   liftEffect $ Console.log "=== drawExpandableBubbles called ==="
   -- Initialize the graph
   initResult <- initialize graphData declsData
@@ -489,10 +470,6 @@ drawExpandableBubbles graphData declsData callsData selector = do
       , adjacencyMap
       , modulesMap
       , dependedOnByMap
-      , detailsPanel
-      , detailsModuleName
-      , dependenciesList
-      , dependedOnByList
       } = initResult
 
   -- Get simulation handle for reheating
@@ -565,22 +542,14 @@ drawExpandableBubbles graphData declsData callsData selector = do
           Nothing -> Console.log $ "Module not found in map: " <> hoveredId
           Just moduleInfo -> do
             Console.log $ "Found module info, showing panel for: " <> moduleInfo.name
-            -- Show the panel
-            showDetailsPanel_ detailsPanel
-
-            -- Set module name
-            setDetailsModuleName_ detailsModuleName moduleInfo.name
-
-            -- Populate dependencies list (sorted alphabetically)
-            populateDetailsList_ dependenciesList (sort moduleInfo.depends)
-
-            -- Populate depended-on-by list (sorted alphabetically)
+            -- Call the callback to show details in Halogen
             let dependedOnBy = fromMaybe Set.empty $ Map.lookup hoveredId dependedOnByMap
-                dependedOnByList' = sort $ Set.toUnfoldable dependedOnBy :: Array String
-            populateDetailsList_ dependedOnByList dependedOnByList'
+                dependedOnByList = sort $ Set.toUnfoldable dependedOnBy :: Array String
+                dependencies = sort moduleInfo.depends
+            callbacks.onShowModuleDetails moduleInfo.name dependencies dependedOnByList
 
   -- Mouseout handler: hide module details
-  let onMouseOut _ _ _ = hideDetailsPanel_ detailsPanel
+  let onMouseOut _ _ _ = callbacks.onHideModuleDetails
 
   -- Add event handlers to node groups
   initialNodes <- openSelection nodesGroup (show Group)

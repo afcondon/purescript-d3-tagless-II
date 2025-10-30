@@ -2,9 +2,13 @@ module PSD3.CodeAtlas.CodeAtlas where
 
 import Prelude
 
+import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
+import Effect.Aff (launchAff_)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (liftEffect)
+import Effect.Ref as Ref
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -72,35 +76,120 @@ render state =
                   , HH.pre_ [ HH.text "npm run build\nnode scripts/generate-spago-data.js" ]
                   ]
 
-              Nothing -> case state.activeTab of
-                DeclarationsTab ->
-                  DeclarationsTab.render state
-
-                VisualizationTab ->
-                  HH.div
-                    [ HP.classes [ HH.ClassName "module-graph-container" ] ]
-                    [ HH.div
-                        [ HP.classes [ HH.ClassName "svg-container" ] ]
-                        []
-                    ]
-
-                InteractiveGraphTab ->
-                  HH.div
-                    [ HP.classes [ HH.ClassName "interactive-graph-container" ] ]
-                    [ HH.div
-                        [ HP.classes [ HH.ClassName "svg-container" ] ]
-                        []
-                    ]
-
-                ExpandableBubblesTab ->
-                  HH.div
-                    [ HP.classes [ HH.ClassName "expandable-bubbles-container" ] ]
-                    [ HH.div
-                        [ HP.classes [ HH.ClassName "svg-container" ] ]
-                        []
-                    ]
+              Nothing ->
+                HH.div []
+                  [ renderTabContent state
+                  , renderFloatingPanels state
+                  ]
         ]
     ]
+
+renderTabContent :: forall m. State -> H.ComponentHTML Action () m
+renderTabContent state =
+  case state.activeTab of
+    DeclarationsTab ->
+      DeclarationsTab.render state
+
+    VisualizationTab ->
+      HH.div
+        [ HP.classes [ HH.ClassName "module-graph-container" ] ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "svg-container" ] ]
+            []
+        ]
+
+    InteractiveGraphTab ->
+      HH.div
+        [ HP.classes [ HH.ClassName "interactive-graph-container" ] ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "svg-container" ] ]
+            []
+        ]
+
+    ExpandableBubblesTab ->
+      HH.div
+        [ HP.classes [ HH.ClassName "expandable-bubbles-container" ] ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "svg-container" ] ]
+            []
+        ]
+
+-- | Render floating panels (only for ExpandableBubblesTab)
+renderFloatingPanels :: forall m. State -> H.ComponentHTML Action () m
+renderFloatingPanels state =
+  if state.activeTab == ExpandableBubblesTab
+    then HH.div_
+      [ renderLegendPanel
+      , renderDetailsPanel state
+      ]
+    else HH.text ""
+
+-- | Render the legend panel (top-right)
+renderLegendPanel :: forall m. H.ComponentHTML Action () m
+renderLegendPanel =
+  HH.div
+    [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-right", HH.ClassName "editorial" ] ]
+    [ HH.h3
+        [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
+        [ HH.text "Declaration Types" ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "legend-items" ] ]
+        [ renderLegendItem "Functions/Values" "#2196F3"
+        , renderLegendItem "Foreign Functions" "#00BCD4"
+        , renderLegendItem "Data Types" "#4CAF50"
+        , renderLegendItem "Type Classes" "#9C27B0"
+        , renderLegendItem "Type Synonyms" "#FF9800"
+        , renderLegendItem "Instances" "#E91E63"
+        ]
+    ]
+
+-- | Render a single legend item
+renderLegendItem :: forall m. String -> String -> H.ComponentHTML Action () m
+renderLegendItem label color =
+  HH.div
+    [ HP.classes [ HH.ClassName "legend-item" ] ]
+    [ HH.div
+        [ HP.classes [ HH.ClassName "legend-color" ]
+        , HP.style $ "background-color: " <> color
+        ]
+        []
+    , HH.span
+        [ HP.classes [ HH.ClassName "legend-label" ] ]
+        [ HH.text label ]
+    ]
+
+-- | Render the details panel (bottom-right, conditional)
+renderDetailsPanel :: forall m. State -> H.ComponentHTML Action () m
+renderDetailsPanel state =
+  case state.hoveredModule of
+    Nothing -> HH.text ""
+    Just info ->
+      HH.div
+        [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--bottom-right", HH.ClassName "editorial" ] ]
+        [ HH.h3
+            [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
+            [ HH.text info.moduleName ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "details-section" ] ]
+            [ HH.h4_ [ HH.text "Dependencies" ]
+            , if Array.length info.dependencies == 0
+                then HH.p [ HP.classes [ HH.ClassName "empty-list" ] ] [ HH.text "(none)" ]
+                else HH.ul_
+                  (info.dependencies <#> \dep ->
+                    HH.li_ [ HH.text dep ]
+                  )
+            ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "details-section" ] ]
+            [ HH.h4_ [ HH.text "Depended On By" ]
+            , if Array.length info.dependedOnBy == 0
+                then HH.p [ HP.classes [ HH.ClassName "empty-list" ] ] [ HH.text "(none)" ]
+                else HH.ul_
+                  (info.dependedOnBy <#> \dep ->
+                    HH.li_ [ HH.text dep ]
+                  )
+            ]
+        ]
 
 -- | Render a single tab
 renderTab :: forall m. AtlasTab -> AtlasTab -> H.ComponentHTML Action () m
@@ -175,9 +264,29 @@ handleAction = case _ of
       ExpandableBubblesTab -> do
         state <- H.get
         case state.moduleGraphData, state.declarationsData, state.functionCallsData of
-          Just graphData, Just declsData, Just callsData ->
+          Just graphData, Just declsData, Just callsData -> do
+            -- Create a Ref to store pending actions
+            pendingRef <- liftEffect $ Ref.new Nothing
+
+            let callbacks =
+                  { onShowModuleDetails: \moduleName dependencies dependedOnBy ->
+                      Ref.write (Just $ ShowModuleDetails { moduleName, dependencies, dependedOnBy }) pendingRef
+                  , onHideModuleDetails:
+                      Ref.write (Just HideModuleDetails) pendingRef
+                  }
+
+            -- Draw the visualization
             runWithD3_Simulation do
-              ExpandableBubblesTab.drawExpandableBubbles graphData declsData callsData "div.svg-container"
+              ExpandableBubblesTab.drawExpandableBubbles graphData declsData callsData "div.svg-container" callbacks
+
+            -- Check for pending actions (called by D3 event handlers)
+            pendingAction <- liftEffect $ Ref.read pendingRef
+            case pendingAction of
+              Just action -> do
+                liftEffect $ Ref.write Nothing pendingRef
+                handleAction action
+              Nothing -> pure unit
+
           _, _, _ -> pure unit
 
       _ -> pure unit
