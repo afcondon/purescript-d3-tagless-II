@@ -5,33 +5,13 @@ import Prelude
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fontSize, height, radius, strokeColor, strokeWidth, text, textAnchor, transform, viewBox, width, x, y)
 import PSD3.Internal.Axes (axisBottom_, axisLeft_, callAxis_)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
-import D3.Viz.Charts.Model (DataPoint, QuartetData, anscombesQuartet, scatterData)
+import D3.Viz.Charts.Model (DataPoint, QuartetData)
 import PSD3.Internal.Scales.Linear (applyScale_, createLinearScale_)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
+import PSD3.Shared.ChartDimensions (defaultDimensions, innerWidth, innerHeight)
 import Data.Foldable (maximum, minimum, traverse_)
 import Data.Maybe (fromMaybe)
 import Effect.Class (class MonadEffect, liftEffect)
-
--- Chart dimensions and margins
-type ChartDimensions = {
-    width :: Number
-  , height :: Number
-  , margin :: { top :: Number, right :: Number, bottom :: Number, left :: Number }
-}
-
-defaultDimensions :: ChartDimensions
-defaultDimensions = {
-    width: 800.0
-  , height: 400.0
-  , margin: { top: 20.0, right: 30.0, bottom: 30.0, left: 40.0 }
-}
-
--- Calculate inner dimensions (accounting for margins)
-innerWidth :: ChartDimensions -> Number
-innerWidth dims = dims.width - dims.margin.left - dims.margin.right
-
-innerHeight :: ChartDimensions -> Number
-innerHeight dims = dims.height - dims.margin.top - dims.margin.bottom
 
 -- Snippet_Start
 -- Name: ScatterPlotDraw
