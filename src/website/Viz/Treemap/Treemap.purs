@@ -5,28 +5,12 @@ import Prelude
 import PSD3.Internal.Attributes.Sugar (classed, fill, fillOpacity, fontSize, height, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, y)
 import PSD3.Data.Tree (TreeJson_)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
-import PSD3.Internal.FFI (descendants_, hNodeDepth_, hNodeX0_, hNodeX1_, hNodeY0_, hNodeY1_, hierarchyFromJSON_, runTreemapLayout_, treeSortForTreeMap_, treemapLayout_, treemapSetPadding_, treemapSetSize_)
+import PSD3.Internal.FFI (descendants_, hierarchyFromJSON_, runTreemapLayout_, treeSortForTreeMap_, treemapLayout_, treemapSetPadding_, treemapSetSize_)
 import PSD3.Data.Node (D3_TreeNode)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
+import PSD3.Shared.HierarchyHelpers (hierarchyNode_, canShowLabel)
 import Data.Foldable (traverse_)
-import Data.Int (round)
 import Effect.Class (class MonadEffect)
-import Unsafe.Coerce (unsafeCoerce)
-
--- Color scale based on depth
-depthColor :: Int -> String
-depthColor depth = case depth of
-  0 -> "#e74c3c"  -- red
-  1 -> "#3498db"  -- blue
-  2 -> "#2ecc71"  -- green
-  3 -> "#f39c12"  -- orange
-  4 -> "#9b59b6"  -- purple
-  _ -> "#95a5a6"  -- gray
-
--- Accessor helpers for hierarchy data
-getName :: forall r. D3_TreeNode r -> String
-getName node = case unsafeCoerce (unsafeCoerce node).data.name of
-  n -> n
 
 -- Main drawing function for treemap
 draw :: forall m.
@@ -68,24 +52,23 @@ draw treeJson selector = do
   -- Draw each treemap tile
   let drawTile :: forall r. D3_TreeNode r -> m Unit
       drawTile node = do
-        let x0 = hNodeX0_ node
-        let y0 = hNodeY0_ node
-        let x1 = hNodeX1_ node
-        let y1 = hNodeY1_ node
-        let tileWidth = x1 - x0
-        let tileHeight = y1 - y0
-        let depth = hNodeDepth_ node
-        let name = getName node
+        let node' = hierarchyNode_
+        let x0 = node'.x0 node
+        let y0 = node'.y0 node
+        let tileWidth = node'.rectWidth node
+        let tileHeight = node'.rectHeight node
+        let name = node'.name node
+        let color = node'.color node
 
         -- Only draw tiles with area > 0 (leaf nodes typically)
-        when (tileWidth > 0.0 && tileHeight > 0.0) do
+        when (node'.hasArea node) do
           -- Draw rectangle
           _ <- appendTo chartGroup Rect [
               x x0
             , y y0
             , width tileWidth
             , height tileHeight
-            , fill (depthColor $ round depth)
+            , fill color
             , fillOpacity 0.6
             , strokeColor "#ffffff"
             , strokeWidth 1.0
@@ -93,7 +76,7 @@ draw treeJson selector = do
             ]
 
           -- Add label for larger tiles
-          when (tileWidth > 30.0 && tileHeight > 20.0) do
+          when (canShowLabel { minWidth: 30.0, minHeight: 20.0 } node) do
             _ <- appendTo chartGroup Text [
                 x (x0 + 2.0)
               , y (y0 + 12.0)

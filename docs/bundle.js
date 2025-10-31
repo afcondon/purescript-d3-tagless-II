@@ -23407,7 +23407,7 @@
   var snippet_TLCSimple_content = 'drawThreeCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_\ndrawThreeCircles selector = do\n  root        <- attach selector\n  svg         <- appendTo root Svg [ viewBox (-10.0) 20.0 120.0 60.0, classed "d3svg gup" ]\n  circleGroup <- appendTo svg  Group []\n  circles     <- simpleJoin circleGroup Circle [32, 57, 293] keyIsID_ \n  setAttributes circles [ fill "green"\n                        , cx (\\(d :: Datum_) i -> (toNumber (coerceIndex i)) * 30.0 + 10.0)\n                        , cy 50.0\n                        , radius 10.0 ]\n\n  pure circles';
   var snippet_TLCParabola_content = '-- Name: TLCParabola\ndrawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_\ndrawWithData circleData selector = do\n  root        <- attach selector\n  svg         <- appendTo root Svg [ viewBox (-10.0) (-100.0) 320.0 160.0, classed "d3svg gup" ]\n  circleGroup <- appendTo svg  Group []\n\n  circles     <- simpleJoin circleGroup Circle circleData keyIsID_ \n  setAttributes circles [ strokeColor datum_.color\n                        , strokeWidth 3.0\n                        , fill "none"\n                        , cx datum_.x\n                        , cy datum_.y\n                        , radius 10.0 ]\n  pure circles\n-- Snippet_End';
   var snippet_ScatterPlotQuartet_content = '  -- Use fixed scale domains for all four plots (for valid comparison)\n  let xDomain = [0.0, 20.0]\n  let yDomain = [0.0, 14.0]\n\n  (root :: D3Selection_) <- attach selector\n  svg <- appendTo root Svg [\n      viewBox 0.0 0.0 totalWidth totalHeight\n    , classed "scatter-quartet"\n    , width totalWidth\n    , height totalHeight\n    ]\n\n  -- Helper function to draw a single subplot\n  let drawSubplot :: String -> Array DataPoint -> Number -> Number -> m Unit\n      drawSubplot title dataPoints xOffset yOffset = do\n        -- Create group for this subplot\n        subplotGroup <- appendTo svg Group [\n            classed "subplot"\n          , transform [ \\_ -> "translate(" <> show (xOffset + margin.left) <> "," <> show (yOffset + margin.top) <> ")" ]\n          ]\n\n        -- Add title\n        _ <- appendTo svg Text [\n            x (xOffset + plotWidth / 2.0)\n          , y (yOffset + 15.0)\n          , text title\n          , textAnchor "middle"\n          , fontSize 16.0\n          , classed "subplot-title"\n          ]\n\n        -- Create scales\n        xScale <- liftEffect $ createLinearScale_ { domain: xDomain, range: [0.0, iWidth] }\n        yScale <- liftEffect $ createLinearScale_ { domain: yDomain, range: [iHeight, 0.0] }\n\n        -- Add axes\n        xAxisGroup <- appendTo subplotGroup Group [\n            classed "x-axis"\n          , transform [ \\_ -> "translate(0," <> show iHeight <> ")" ]\n          ]\n        yAxisGroup <- appendTo subplotGroup Group [ classed "y-axis" ]\n\n        _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)\n        _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)\n\n        -- Add data points\n        let addPoint :: DataPoint -> m Unit\n            addPoint point = do\n              let xPos = applyScale_ xScale point.x\n              let yPos = applyScale_ yScale point.y\n              _ <- appendTo subplotGroup Circle [\n                  cx xPos\n                , cy yPos\n                , radius 4.0\n                , fill "#e74c3c"\n                , strokeColor "#c0392b"\n                , strokeWidth 1.5\n                , classed "scatter-point"\n                ]\n              pure unit\n\n        _ <- traverse_ addPoint dataPoints\n        pure unit\n\n  -- Draw all four subplots in a 2x2 grid\n  _ <- drawSubplot "Dataset I" quartet.dataset1 padding (padding)\n  _ <- drawSubplot "Dataset II" quartet.dataset2 (padding + plotWidth + padding) (padding)\n  _ <- drawSubplot "Dataset III" quartet.dataset3 padding (padding + plotHeight + padding)\n  _ <- drawSubplot "Dataset IV" quartet.dataset4 (padding + plotWidth + padding) (padding + plotHeight + padding)\n\n  pure unit\n-- Snippet_End';
-  var snippet_LineChartDraw_content = '  (root :: D3Selection_) <- attach selector\n  svg <- appendTo root Svg [\n      viewBox 0.0 0.0 dims.width dims.height\n    , classed "line-chart"\n    , width dims.width\n    , height dims.height\n    ]\n\n  -- Create a group for the chart content (offset by margins)\n  chartGroup <- appendTo svg Group [\n      transform [ \\_ -> "translate(" <> show dims.margin.left <> "," <> show dims.margin.top <> ")" ]\n    ]\n\n  -- Create scales\n  xScale <- liftEffect $ createLinearScale_ { domain: [minX, maxX], range: [0.0, iWidth] }\n  yScale <- liftEffect $ createLinearScale_ { domain: [minY, maxY], range: [iHeight, 0.0] }\n\n  -- Add axes\n  xAxisGroup <- appendTo chartGroup Group [\n      classed "x-axis"\n    , transform [ \\_ -> "translate(0," <> show iHeight <> ")" ]\n    ]\n  yAxisGroup <- appendTo chartGroup Group [ classed "y-axis" ]\n\n  _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)\n  _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)\n\n  -- Create line generator and add the line path\n  lineGen <- liftEffect $ createLineGenerator_ { xScale, yScale }\n  let pathData = generateLinePath_ lineGen dataPoints\n\n  _ <- appendTo chartGroup Path [\n      d pathData\n    , fill "none"\n    , strokeColor "#4a90e2"\n    , strokeWidth 2.0\n    , classed "line"\n    ]\n\n  pure unit\n-- Snippet_End';
+  var snippet_LineChartDraw_content = '    , classed "line-chart"\n    , width dims.width\n    , height dims.height\n    ]\n\n  -- Create a group for the chart content (offset by margins)\n  chartGroup <- appendTo svg Group [\n      transform [ \\_ -> "translate(" <> show dims.margin.left <> "," <> show dims.margin.top <> ")" ]\n    ]\n\n  -- Create scales\n  xScale <- liftEffect $ createLinearScale_ { domain: [minX, maxX], range: [0.0, iWidth] }\n  yScale <- liftEffect $ createLinearScale_ { domain: [minY, maxY], range: [iHeight, 0.0] }\n\n  -- Add axes\n  xAxisGroup <- appendTo chartGroup Group [\n      classed "x-axis"\n    , transform [ \\_ -> "translate(0," <> show iHeight <> ")" ]\n    ]\n  yAxisGroup <- appendTo chartGroup Group [ classed "y-axis" ]\n\n  _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)\n  _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)\n\n  -- Create line generator and add the line path\n  lineGen <- liftEffect $ createLineGenerator_ { xScale, yScale }\n  let pathData = generateLinePath_ lineGen dataPoints\n\n  _ <- appendTo chartGroup Path [\n      d pathData\n    , fill "none"\n    , strokeColor "#4a90e2"\n    , strokeWidth 2.0\n    , classed "line"\n    ]\n\n  pure unit\n-- Snippet_End';
   var snippet_GUP_content = '-- Snippet_Start\n-- Name: GUP\ntype Model = Array Char\n\ndatum_ ::\n  { char :: Datum_ -> Char\n  , indexNum :: Index_ -> Number\n  }\ndatum_ =\n  { char: coerceDatumToChar\n  , indexNum: coerceIndexToNumber\n  }\n\nexGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)\nexGeneralUpdatePattern selector = do \n  root           <- attach selector\n  svg            <- appendTo root Svg [ viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup" ]\n  letterGroup    <- appendTo svg Group []\n  \n  pure $ \\letters -> do\n    enterSelection   <- openSelection letterGroup "text"\n    updateSelections <- updateJoin enterSelection Text letters coerceDatumToKey\n    setAttributes updateSelections.exit exit\n    setAttributes updateSelections.update update\n\n    newlyEntered     <- appendTo updateSelections.enter Text []\n    setAttributes newlyEntered enter\n\n    pure newlyEntered\n\n  where\n    transition :: SelectionAttribute\n    transition = transitionWithDuration $ Milliseconds 2000.0\n\n    xFromIndex :: Datum_ -> Index_ -> Number\n    xFromIndex _ i = 50.0 + (datum_.indexNum i * 48.0) -- letters enter at this position, and then must transition to new position on each update\n\n    enter = [ classed  "enter"\n            , fill     "green"\n            , x        xFromIndex\n            , y        0.0\n            , text     (singleton <<< datum_.char)\n            , fontSize 60.0 ]\n          `andThen` (transition `to` [ y 200.0 ])\n\n    update =  [ classed "update", fill "gray", y 200.0 ]\n              `andThen` (transition `to` [ x xFromIndex ] )\n\n    exit =  [ classed "exit", fill "brown"]\n            `andThen` (transition `to` [ y 400.0, remove ])\n-- Snippet_End';
   var snippet_BarChartDraw_content = '  (root :: D3Selection_) <- attach selector\n  svg <- appendTo root Svg [\n      viewBox 0.0 0.0 dims.width dims.height\n    , classed "bar-chart"\n    , width dims.width\n    , height dims.height\n    ]\n\n  -- Calculate bar width (with padding)\n  let numBars = length dataPoints\n  let barWidth = if numBars > 0 then (iWidth / (Int.toNumber numBars)) * 0.8 else 0.0\n\n  -- Create a group for the chart content (offset by margins)\n  chartGroup <- appendTo svg Group [\n      transform [ \\_ -> "translate(" <> show dims.margin.left <> "," <> show dims.margin.top <> ")" ]\n    ]\n\n  -- Create scales\n  xScale <- liftEffect $ createLinearScale_ { domain: [minX, maxX], range: [0.0, iWidth] }\n  yScale <- liftEffect $ createLinearScale_ { domain: [minY, maxY], range: [iHeight, 0.0] }\n\n  -- Add <g> elements to hold each of the axes\n  xAxisGroup <- appendTo chartGroup Group [\n      classed "x-axis"\n    , transform [ \\_ -> "translate(0," <> show iHeight <> ")" ]\n    ]\n  yAxisGroup <- appendTo chartGroup Group [ \n      classed "y-axis"\n    , transform [ \\_ -> "translate(" <> show ((barWidth / 2.0 * -1.0) - 5.0) <> ",0)" ]\n  ]\n  -- Draw the axes into the SVG, inside their respective <g> group elements\n  _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)\n  _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)\n\n  -- Add bars\n  let addBar :: DataPoint -> m Unit\n      addBar point = do\n        let xPos = applyScale_ xScale point.x - (barWidth / 2.0)\n        let yPos = applyScale_ yScale point.y\n        let barHeight = iHeight - yPos\n        _ <- appendTo chartGroup Rect [\n            x xPos\n          , y yPos\n          , width barWidth\n          , height barHeight\n          , fill "#4a90e2"\n          , strokeColor "#357abd"\n          , strokeWidth 1.0\n          , classed "bar"\n          ]\n        pure unit\n\n  _ <- traverse_ addBar dataPoints\n\n  pure unit\n-- Snippet_End';
   var getSnippetInfo = function(name16) {
@@ -32444,24 +32444,7 @@ graph TB
     });
   })();
 
-  // output/D3.Viz.BubbleChart/index.js
-  var classed11 = /* @__PURE__ */ classed(toAttrString);
-  var width15 = /* @__PURE__ */ width8(toAttrNumber);
-  var height15 = /* @__PURE__ */ height8(toAttrNumber);
-  var cx3 = /* @__PURE__ */ cx(toAttrNumber);
-  var cy3 = /* @__PURE__ */ cy(toAttrNumber);
-  var radius9 = /* @__PURE__ */ radius(toAttrNumber);
-  var fill9 = /* @__PURE__ */ fill(toAttrString);
-  var fillOpacity4 = /* @__PURE__ */ fillOpacity(toAttrNumber);
-  var strokeColor10 = /* @__PURE__ */ strokeColor(toAttrString);
-  var strokeWidth9 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var discard54 = /* @__PURE__ */ discard(discardUnit);
-  var x19 = /* @__PURE__ */ x(toAttrNumber);
-  var y18 = /* @__PURE__ */ y(toAttrNumber);
-  var text14 = /* @__PURE__ */ text6(toAttrString);
-  var textAnchor5 = /* @__PURE__ */ textAnchor(toAttrString);
-  var fontSize3 = /* @__PURE__ */ fontSize(toAttrNumber);
-  var min8 = /* @__PURE__ */ min(ordNumber);
+  // output/PSD3.Shared.HierarchyHelpers/index.js
   var getName = function(node) {
     return node.data.name;
   };
@@ -32488,13 +32471,74 @@ graph TB
     ;
     return "#95a5a6";
   };
+  var hierarchyNode_ = {
+    name: getName,
+    depth: hNodeDepth_,
+    depthInt: function(node) {
+      return round2(hNodeDepth_(node));
+    },
+    height: hNodeHeight_,
+    x0: hNodeX0_,
+    y0: hNodeY0_,
+    x1: hNodeX1_,
+    y1: hNodeY1_,
+    rectWidth: function(node) {
+      return hNodeX1_(node) - hNodeX0_(node);
+    },
+    rectHeight: function(node) {
+      return hNodeY1_(node) - hNodeY0_(node);
+    },
+    x: hNodeX_,
+    y: hNodeY_,
+    r: hNodeR_,
+    color: function(node) {
+      return depthColor(round2(hNodeDepth_(node)));
+    },
+    hasArea: function(node) {
+      var w = hNodeX1_(node) - hNodeX0_(node);
+      var h = hNodeY1_(node) - hNodeY0_(node);
+      return w > 0 && h > 0;
+    },
+    hasCircleArea: function(node) {
+      return hNodeR_(node) > 0;
+    }
+  };
+  var canShowLabel = function(v) {
+    return function(node) {
+      return hierarchyNode_.rectWidth(node) > v.minWidth && hierarchyNode_.rectHeight(node) > v.minHeight;
+    };
+  };
+  var canShowCircleLabel = function(v) {
+    return function(node) {
+      return hierarchyNode_.r(node) > v.minRadius;
+    };
+  };
+
+  // output/D3.Viz.BubbleChart/index.js
+  var classed11 = /* @__PURE__ */ classed(toAttrString);
+  var width15 = /* @__PURE__ */ width8(toAttrNumber);
+  var height15 = /* @__PURE__ */ height8(toAttrNumber);
+  var cx3 = /* @__PURE__ */ cx(toAttrNumber);
+  var cy3 = /* @__PURE__ */ cy(toAttrNumber);
+  var radius9 = /* @__PURE__ */ radius(toAttrNumber);
+  var fill9 = /* @__PURE__ */ fill(toAttrString);
+  var fillOpacity4 = /* @__PURE__ */ fillOpacity(toAttrNumber);
+  var strokeColor10 = /* @__PURE__ */ strokeColor(toAttrString);
+  var strokeWidth9 = /* @__PURE__ */ strokeWidth(toAttrNumber);
+  var discard54 = /* @__PURE__ */ discard(discardUnit);
+  var x19 = /* @__PURE__ */ x(toAttrNumber);
+  var y18 = /* @__PURE__ */ y(toAttrNumber);
+  var text14 = /* @__PURE__ */ text6(toAttrString);
+  var textAnchor5 = /* @__PURE__ */ textAnchor(toAttrString);
+  var fontSize3 = /* @__PURE__ */ fontSize(toAttrNumber);
+  var min8 = /* @__PURE__ */ min(ordNumber);
   var draw4 = function(dictBind) {
     var bind70 = bind(dictBind);
     var discard112 = discard54(dictBind);
     return function(dictMonadEffect) {
       var Applicative0 = dictMonadEffect.Monad0().Applicative0();
       var when9 = when(Applicative0);
-      var pure115 = pure(Applicative0);
+      var pure44 = pure(Applicative0);
       var traverse_8 = traverse_(Applicative0)(foldableArray);
       return function(dictSelectionM) {
         var attach2 = attach(dictSelectionM);
@@ -32516,21 +32560,23 @@ graph TB
                   var packedRoot = runPackLayout_(packLayout)(sortedHierarchy);
                   var nodes = descendants_(packedRoot);
                   var drawBubble = function(node) {
-                    var xPos = hNodeX_(node);
-                    var yPos = hNodeY_(node);
-                    var r = hNodeR_(node);
-                    var depth = hNodeDepth_(node);
-                    var name16 = getName(node);
-                    return when9(r > 0)(bind70(appendTo2(chartGroup)(Circle.value)([cx3(xPos), cy3(yPos), radius9(r), fill9(depthColor(round2(depth))), fillOpacity4(0.7), strokeColor10("#ffffff"), strokeWidth9(1), classed11("bubble")]))(function() {
-                      return discard112(when9(r > 20)(bind70(appendTo2(chartGroup)(Text2.value)([x19(xPos), y18(yPos), text14(name16), textAnchor5("middle"), fontSize3(min8(12)(r / 3)), fill9("#ffffff"), classed11("bubble-label")]))(function() {
-                        return pure115(unit);
+                    var xPos = hierarchyNode_.x(node);
+                    var yPos = hierarchyNode_.y(node);
+                    var r = hierarchyNode_.r(node);
+                    var name16 = hierarchyNode_.name(node);
+                    var color2 = hierarchyNode_.color(node);
+                    return when9(hierarchyNode_.hasCircleArea(node))(bind70(appendTo2(chartGroup)(Circle.value)([cx3(xPos), cy3(yPos), radius9(r), fill9(color2), fillOpacity4(0.7), strokeColor10("#ffffff"), strokeWidth9(1), classed11("bubble")]))(function() {
+                      return discard112(when9(canShowCircleLabel({
+                        minRadius: 20
+                      })(node))(bind70(appendTo2(chartGroup)(Text2.value)([x19(xPos), y18(yPos), text14(name16), textAnchor5("middle"), fontSize3(min8(12)(r / 3)), fill9("#ffffff"), classed11("bubble-label")]))(function() {
+                        return pure44(unit);
                       })))(function() {
-                        return pure115(unit);
+                        return pure44(unit);
                       });
                     }));
                   };
                   return bind70(traverse_8(drawBubble)(nodes))(function() {
-                    return pure115(unit);
+                    return pure44(unit);
                   });
                 });
               });
@@ -32555,32 +32601,6 @@ graph TB
   var text15 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor6 = /* @__PURE__ */ textAnchor(toAttrString);
   var fontSize4 = /* @__PURE__ */ fontSize(toAttrNumber);
-  var getName2 = function(node) {
-    return node.data.name;
-  };
-  var depthColor2 = function(depth) {
-    if (depth === 0) {
-      return "#e74c3c";
-    }
-    ;
-    if (depth === 1) {
-      return "#3498db";
-    }
-    ;
-    if (depth === 2) {
-      return "#2ecc71";
-    }
-    ;
-    if (depth === 3) {
-      return "#f39c12";
-    }
-    ;
-    if (depth === 4) {
-      return "#9b59b6";
-    }
-    ;
-    return "#95a5a6";
-  };
   var draw5 = function(dictBind) {
     var bind70 = bind(dictBind);
     var discard112 = discard55(dictBind);
@@ -32609,16 +32629,17 @@ graph TB
                   var partitionRoot = runPartitionLayout_(partitionLayout)(sortedHierarchy);
                   var nodes = descendants_(partitionRoot);
                   var drawPartition = function(node) {
-                    var x0 = hNodeX0_(node);
-                    var y0 = hNodeY0_(node);
-                    var x112 = hNodeX1_(node);
-                    var y112 = hNodeY1_(node);
-                    var partWidth = x112 - x0;
-                    var partHeight = y112 - y0;
-                    var depth = hNodeDepth_(node);
-                    var name16 = getName2(node);
-                    return when9(partWidth > 0 && partHeight > 0)(bind70(appendTo2(chartGroup)(Rect.value)([x20(x0), y19(y0), width16(partWidth), height16(partHeight), fill10(depthColor2(round2(depth))), fillOpacity5(0.7), strokeColor11("#ffffff"), strokeWidth10(1), classed13("partition")]))(function() {
-                      return discard112(when9(partWidth > 60 && partHeight > 15)(bind70(appendTo2(chartGroup)(Text2.value)([x20(x0 + 4), y19(y0 + partHeight / 2 + 4), text15(name16), textAnchor6("start"), fontSize4(10), fill10("#ffffff"), classed13("partition-label")]))(function() {
+                    var x0 = hierarchyNode_.x0(node);
+                    var y0 = hierarchyNode_.y0(node);
+                    var partWidth = hierarchyNode_.rectWidth(node);
+                    var partHeight = hierarchyNode_.rectHeight(node);
+                    var name16 = hierarchyNode_.name(node);
+                    var color2 = hierarchyNode_.color(node);
+                    return when9(hierarchyNode_.hasArea(node))(bind70(appendTo2(chartGroup)(Rect.value)([x20(x0), y19(y0), width16(partWidth), height16(partHeight), fill10(color2), fillOpacity5(0.7), strokeColor11("#ffffff"), strokeWidth10(1), classed13("partition")]))(function() {
+                      return discard112(when9(canShowLabel({
+                        minWidth: 60,
+                        minHeight: 15
+                      })(node))(bind70(appendTo2(chartGroup)(Text2.value)([x20(x0 + 4), y19(y0 + partHeight / 2 + 4), text15(name16), textAnchor6("start"), fontSize4(10), fill10("#ffffff"), classed13("partition-label")]))(function() {
                         return pure44(unit);
                       })))(function() {
                         return pure44(unit);
@@ -32651,32 +32672,6 @@ graph TB
   var text16 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor7 = /* @__PURE__ */ textAnchor(toAttrString);
   var fontSize5 = /* @__PURE__ */ fontSize(toAttrNumber);
-  var getName3 = function(node) {
-    return node.data.name;
-  };
-  var depthColor3 = function(depth) {
-    if (depth === 0) {
-      return "#e74c3c";
-    }
-    ;
-    if (depth === 1) {
-      return "#3498db";
-    }
-    ;
-    if (depth === 2) {
-      return "#2ecc71";
-    }
-    ;
-    if (depth === 3) {
-      return "#f39c12";
-    }
-    ;
-    if (depth === 4) {
-      return "#9b59b6";
-    }
-    ;
-    return "#95a5a6";
-  };
   var draw6 = function(dictBind) {
     var bind70 = bind(dictBind);
     var discard112 = discard56(dictBind);
@@ -32705,16 +32700,17 @@ graph TB
                   var treemapRoot = runTreemapLayout_(treemapLayout)(sortedHierarchy);
                   var nodes = descendants_(treemapRoot);
                   var drawTile = function(node) {
-                    var x0 = hNodeX0_(node);
-                    var y0 = hNodeY0_(node);
-                    var x112 = hNodeX1_(node);
-                    var y112 = hNodeY1_(node);
-                    var tileWidth = x112 - x0;
-                    var tileHeight = y112 - y0;
-                    var depth = hNodeDepth_(node);
-                    var name16 = getName3(node);
-                    return when9(tileWidth > 0 && tileHeight > 0)(bind70(appendTo2(chartGroup)(Rect.value)([x21(x0), y20(y0), width17(tileWidth), height17(tileHeight), fill11(depthColor3(round2(depth))), fillOpacity6(0.6), strokeColor12("#ffffff"), strokeWidth11(1), classed14("tile")]))(function() {
-                      return discard112(when9(tileWidth > 30 && tileHeight > 20)(bind70(appendTo2(chartGroup)(Text2.value)([x21(x0 + 2), y20(y0 + 12), text16(name16), textAnchor7("start"), fontSize5(10), fill11("#ffffff"), classed14("tile-label")]))(function() {
+                    var x0 = hierarchyNode_.x0(node);
+                    var y0 = hierarchyNode_.y0(node);
+                    var tileWidth = hierarchyNode_.rectWidth(node);
+                    var tileHeight = hierarchyNode_.rectHeight(node);
+                    var name16 = hierarchyNode_.name(node);
+                    var color2 = hierarchyNode_.color(node);
+                    return when9(hierarchyNode_.hasArea(node))(bind70(appendTo2(chartGroup)(Rect.value)([x21(x0), y20(y0), width17(tileWidth), height17(tileHeight), fill11(color2), fillOpacity6(0.6), strokeColor12("#ffffff"), strokeWidth11(1), classed14("tile")]))(function() {
+                      return discard112(when9(canShowLabel({
+                        minWidth: 30,
+                        minHeight: 20
+                      })(node))(bind70(appendTo2(chartGroup)(Text2.value)([x21(x0 + 2), y20(y0 + 12), text16(name16), textAnchor7("start"), fontSize5(10), fill11("#ffffff"), classed14("tile-label")]))(function() {
                         return pure44(unit);
                       })))(function() {
                         return pure44(unit);
