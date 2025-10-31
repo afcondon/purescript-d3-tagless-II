@@ -86,23 +86,24 @@ selectionOn selection (Drag drag) = do
   pure unit
 
 selectionOn selection (Zoom config) = do
-  let 
+  let
     (ScaleExtent smallest largest) = config.scale
-    target = selection
-    -- TODO recover the ability to "direct" the zoom to element other than the one receiving the event
-    -- ie for controllers, containers etc
+    -- Use the target from config to "direct" the zoom to a specific element
+    -- This allows zoom to be attached to one element (e.g., svg) while transforms
+    -- are applied to a different element (e.g., inner group)
+    target = config.target
 
   -- sticking to the rules of no ADT's on the JS side we case on the ZoomExtent here
     _ = case config.extent of
-          DefaultZoomExtent -> 
+          DefaultZoomExtent ->
             d3AttachZoomDefaultExtent_ selection {
               scaleExtent: [ smallest, largest ]
             , name  : config.name
             , target
-            } 
+            }
 
           (ZoomExtent ze)   -> do
-            d3AttachZoom_ selection { 
+            d3AttachZoom_ selection {
               extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
             , scaleExtent: [ smallest, largest ]
             , name  : config.name

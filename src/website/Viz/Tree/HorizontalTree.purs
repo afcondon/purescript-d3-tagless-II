@@ -74,14 +74,15 @@ drawHorizontalTree treeType json selector = do
         svgClass: "tree horizontal-tree",
         innerClass: "tree-container",
         innerWidth: w,
-        innerHeight: h
+        innerHeight: h,
+        scaleMin: 0.1,
+        scaleMax: 4.0
       }
   { svg, zoomGroup } <- zoomableSVG rootSel zoomConfig
 
-  -- Create container for tree elements
-  container <- appendTo zoomGroup Group [ fontFamily "sans-serif", fontSize 10.0 ]
-  linksGroup <- appendTo container Group [ classed "links" ]
-  nodesGroup <- appendTo container Group [ classed "nodes" ]
+  -- Create groups directly in zoomGroup (no intermediate container)
+  linksGroup <- appendTo zoomGroup Group [ classed "links", fontFamily "sans-serif", fontSize 10.0 ]
+  nodesGroup <- appendTo zoomGroup Group [ classed "nodes", fontFamily "sans-serif", fontSize 10.0 ]
 
   -- Draw links (paths between nodes)
   theLinks <- simpleJoin linksGroup Path (links_ laidOutRoot) keyIsID_

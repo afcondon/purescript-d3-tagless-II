@@ -10,7 +10,7 @@ import PSD3.Internal.Selection.Types (Behavior(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 
 type ZoomableSVGConfig = {
-    minX :: Number  
+    minX :: Number
   , minY :: Number
   , width :: Number
   , height :: Number
@@ -18,6 +18,8 @@ type ZoomableSVGConfig = {
   , innerClass :: String
   , innerWidth :: Number
   , innerHeight :: Number
+  , scaleMin :: Number  -- Minimum zoom scale (e.g., 0.1 for 10%, 1.0 for 100%)
+  , scaleMax :: Number  -- Maximum zoom scale (e.g., 4.0 for 400%)
 }
 
 -- | Add an SVG with standard zoom and pan behavior
@@ -36,7 +38,7 @@ zoomableSVG root config = do
   -- Use DefaultZoomExtent so D3 automatically uses the viewBox for zoom extent
   _ <- svg `on` Zoom
         { extent: DefaultZoomExtent
-        , scale: ScaleExtent 0.1 4.0
+        , scale: ScaleExtent config.scaleMin config.scaleMax
         , name: "zoom"
         , target: zoomGroup
         }

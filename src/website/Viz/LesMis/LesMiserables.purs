@@ -6,7 +6,7 @@ module D3.Viz.LesMiserables where
 -- | See Acknowledgements page for full credits
 
 import Control.Monad.State (class MonadState)
-import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, viewBox, x1, x2, y1, y2)
+import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, x1, x2, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.LesMis.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Viz.LesMiserables.Model (LesMisRawModel)
@@ -14,10 +14,11 @@ import PSD3.Internal.FFI (keyIsID_, simdrag_)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, SimVariable(..), Step(..))
-import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
+import PSD3.Internal.Zoom (ScaleExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start, update)
 import PSD3.Data.Node (D3Link_Swizzled, D3_SimulationNode)
+import PSD3.Shared.ZoomableViewbox (zoomableSVG)
 import Data.Int (toNumber)
 import Data.Map as Map
 import Data.Number (sqrt)
@@ -80,11 +81,24 @@ drawSimplified :: forall row m.
   Array Force -> Set.Set String -> LesMisRawModel -> Selector D3Selection_ -> m Unit
 drawSimplified forceLibrary activeForces model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
-  (root :: D3Selection_) <- attach selector
-  svg        <- appendTo root Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "lesmis" ]
-  zoomGroup  <- appendTo svg Group [ classed "zoom-group" ]
-  linksGroup <- appendTo zoomGroup Group  [ classed "link", strokeColor "#999", strokeOpacity 0.6 ]
-  nodesGroup <- appendTo zoomGroup Group  [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ]
+  rootSel <- attach selector
+
+  -- Use zoomableSVG helper for consistent zoom/pan behavior
+  { svg, zoomGroup } <- zoomableSVG rootSel
+    { minX: -w / 2.0
+    , minY: -h / 2.0
+    , width: w
+    , height: h
+    , svgClass: "lesmis"
+    , innerClass: "zoom-group"
+    , innerWidth: w
+    , innerHeight: h
+    , scaleMin: 1.0  -- No zoom out (100% minimum)
+    , scaleMax: 4.0  -- 400% maximum zoom
+    }
+
+  linksGroup <- appendTo zoomGroup Group [ classed "link", strokeColor "#999", strokeOpacity 0.6 ]
+  nodesGroup <- appendTo zoomGroup Group [ classed "node", strokeColor "#fff", strokeOpacity 1.5 ]
 
   -- Initialize simulation to get enhanced data back
   { nodes: nodesInSim, links: linksInSim } <- init
@@ -112,14 +126,9 @@ drawSimplified forceLibrary activeForces model selector = do
       , y2 (_.y <<< link_.target)
       ]
 
-  -- Add interactions
+  -- Add drag interaction for nodes
+  -- Note: zoom is already configured by zoomableSVG helper
   _ <- nodesSelection `on` Drag (CustomDrag "lesmis" simdrag_)
-  _ <- svg `on` Zoom
-        { extent: ZoomExtent { top: 0.0, left: 0.0, bottom: h, right: w }
-        , scale: ScaleExtent 1.0 4.0
-        , name: "LesMis"
-        , target: zoomGroup
-        }
 
   -- Start the simulation!
   start

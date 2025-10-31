@@ -16078,7 +16078,7 @@
               return bind70(on3(zoomGroup)(new Drag(DefaultDrag.value)))(function() {
                 return bind70(on3(svg2)(new Zoom({
                   extent: DefaultZoomExtent.value,
-                  scale: new ScaleExtent(0.1, 4),
+                  scale: new ScaleExtent(config.scaleMin, config.scaleMax),
                   name: "zoom",
                   target: zoomGroup
                 })))(function() {
@@ -16486,7 +16486,9 @@
                                             svgClass: "bubble-graph",
                                             innerClass: "zoom-group",
                                             innerWidth: v.value0,
-                                            innerHeight: v.value1
+                                            innerHeight: v.value1,
+                                            scaleMin: 0.1,
+                                            scaleMax: 4
                                           }))(function(v1) {
                                             return discard211(liftEffect111(log2("Created zoomable SVG")))(function() {
                                               return discard211(liftEffect111(addModuleArrowMarker_(v1.svg)))(function() {
@@ -16632,7 +16634,7 @@
                                               return callbacks.onShowModuleDetails(v.value0.name)(dependencies)(dependedOnByList)();
                                             }
                                             ;
-                                            throw new Error("Failed pattern match at PSD3.CodeAtlas.Tabs.ExpandableBubbles (line 507, column 9 - line 513, column 88): " + [v.constructor.name]);
+                                            throw new Error("Failed pattern match at PSD3.CodeAtlas.Tabs.ExpandableBubbles (line 509, column 9 - line 515, column 88): " + [v.constructor.name]);
                                           })();
                                           when5(!hasFiltered || notEq3(currentSpotlight)(new Just(moduleId)))((function() {
                                             var connected = fromMaybe(empty7)(lookup8(moduleId)(initResult.adjacencyMap));
@@ -16697,7 +16699,7 @@
                                             return callbacks.onShowModuleDetails(v.value0.name)(dependencies)(dependedOnByList)();
                                           }
                                           ;
-                                          throw new Error("Failed pattern match at PSD3.CodeAtlas.Tabs.ExpandableBubbles (line 585, column 9 - line 591, column 88): " + [v.constructor.name]);
+                                          throw new Error("Failed pattern match at PSD3.CodeAtlas.Tabs.ExpandableBubbles (line 587, column 9 - line 593, column 88): " + [v.constructor.name]);
                                         };
                                       };
                                       var makeFocus = function(moduleId) {
@@ -16728,7 +16730,7 @@
                                             return callbacks.onShowModuleDetails(v.value0.name)(dependencies)(dependedOnByList)();
                                           }
                                           ;
-                                          throw new Error("Failed pattern match at PSD3.CodeAtlas.Tabs.ExpandableBubbles (line 620, column 9 - line 626, column 88): " + [v.constructor.name]);
+                                          throw new Error("Failed pattern match at PSD3.CodeAtlas.Tabs.ExpandableBubbles (line 622, column 9 - line 628, column 88): " + [v.constructor.name]);
                                         };
                                       };
                                       return discard211(liftEffect111(callbacks.onSpotlightFunctionsReady(spotlightModule)(addDepsToSpotlight)(makeFocus)))(function() {
@@ -21744,7 +21746,7 @@
               return d3AttachZoomDefaultExtent_(v)({
                 scaleExtent: [v1.value0.scale.value0, v1.value0.scale.value1],
                 name: v1.value0.name,
-                target: v
+                target: v1.value0.target
               });
             }
             ;
@@ -21753,11 +21755,11 @@
                 extent: [[v1.value0.extent.value0.left, v1.value0.extent.value0.top], [v1.value0.extent.value0.right, v1.value0.extent.value0.bottom]],
                 scaleExtent: [v1.value0.scale.value0, v1.value0.scale.value1],
                 name: v1.value0.name,
-                target: v
+                target: v1.value0.target
               });
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Internal.Selection.Functions (line 96, column 9 - line 110, column 14): " + [v1.value0.extent.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Internal.Selection.Functions (line 97, column 9 - line 111, column 14): " + [v1.value0.extent.constructor.name]);
           })();
           return pure44(unit);
         }
@@ -32887,9 +32889,9 @@ graph TB
 
   // output/D3.Viz.Tree.HorizontalTree/index.js
   var show28 = /* @__PURE__ */ show(showNumber);
+  var classed15 = /* @__PURE__ */ classed(toAttrString);
   var fontFamily2 = /* @__PURE__ */ fontFamily(toAttrString);
   var fontSize6 = /* @__PURE__ */ fontSize(toAttrNumber);
-  var classed15 = /* @__PURE__ */ classed(toAttrString);
   var discard57 = /* @__PURE__ */ discard(discardUnit);
   var strokeWidth12 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var strokeColor13 = /* @__PURE__ */ strokeColor(toAttrString);
@@ -32954,34 +32956,34 @@ graph TB
                     svgClass: "tree horizontal-tree",
                     innerClass: "tree-container",
                     innerWidth: v.value0,
-                    innerHeight: v.value1
+                    innerHeight: v.value1,
+                    scaleMin: 0.1,
+                    scaleMax: 4
                   };
                   return bind70(zoomableSVG1(rootSel)(zoomConfig))(function(v2) {
-                    return bind70(appendTo2(v2.zoomGroup)(Group.value)([fontFamily2("sans-serif"), fontSize6(10)]))(function(container) {
-                      return bind70(appendTo2(container)(Group.value)([classed15("links")]))(function(linksGroup) {
-                        return bind70(appendTo2(container)(Group.value)([classed15("nodes")]))(function(nodesGroup) {
-                          return bind70(simpleJoin2(linksGroup)(Path2.value)(links_(laidOutRoot))(keyIsID_))(function(theLinks) {
-                            return discard112(setAttributes2(theLinks)([strokeWidth12(1.5), strokeColor13("#94a3b8"), strokeOpacity6(0.6), fill18("none"), linkPath]))(function() {
-                              return bind70(simpleJoin2(nodesGroup)(Group.value)(descendants_(laidOutRoot))(keyIsID_))(function(nodeGroups) {
-                                return discard112(setAttributes2(nodeGroups)([transform([positionXYreflected])]))(function() {
-                                  return bind70(appendTo2(nodeGroups)(Circle.value)([fill18("#0ea5e9"), radius10(3), strokeColor13("white"), strokeWidth12(1.5)]))(function() {
-                                    return bind70(appendTo2(nodeGroups)(Text2.value)([dy3(0.31), x26(function(d9) {
-                                      var $42 = treeDatum_.hasChildren(d9);
-                                      if ($42) {
-                                        return 8;
-                                      }
-                                      ;
-                                      return -8;
-                                    }), textAnchor8(function(d9) {
-                                      var $43 = treeDatum_.hasChildren(d9);
-                                      if ($43) {
-                                        return "start";
-                                      }
-                                      ;
-                                      return "end";
-                                    }), text17(treeDatum_.name), fill18("#0c4a6e"), fontSize6(11)]))(function() {
-                                      return pure44(v2.svg);
-                                    });
+                    return bind70(appendTo2(v2.zoomGroup)(Group.value)([classed15("links"), fontFamily2("sans-serif"), fontSize6(10)]))(function(linksGroup) {
+                      return bind70(appendTo2(v2.zoomGroup)(Group.value)([classed15("nodes"), fontFamily2("sans-serif"), fontSize6(10)]))(function(nodesGroup) {
+                        return bind70(simpleJoin2(linksGroup)(Path2.value)(links_(laidOutRoot))(keyIsID_))(function(theLinks) {
+                          return discard112(setAttributes2(theLinks)([strokeWidth12(1.5), strokeColor13("#94a3b8"), strokeOpacity6(0.6), fill18("none"), linkPath]))(function() {
+                            return bind70(simpleJoin2(nodesGroup)(Group.value)(descendants_(laidOutRoot))(keyIsID_))(function(nodeGroups) {
+                              return discard112(setAttributes2(nodeGroups)([transform([positionXYreflected])]))(function() {
+                                return bind70(appendTo2(nodeGroups)(Circle.value)([fill18("#0ea5e9"), radius10(3), strokeColor13("white"), strokeWidth12(1.5)]))(function() {
+                                  return bind70(appendTo2(nodeGroups)(Text2.value)([dy3(0.31), x26(function(d9) {
+                                    var $42 = treeDatum_.hasChildren(d9);
+                                    if ($42) {
+                                      return 8;
+                                    }
+                                    ;
+                                    return -8;
+                                  }), textAnchor8(function(d9) {
+                                    var $43 = treeDatum_.hasChildren(d9);
+                                    if ($43) {
+                                      return "start";
+                                    }
+                                    ;
+                                    return "end";
+                                  }), text17(treeDatum_.name), fill18("#0c4a6e"), fontSize6(11)]))(function() {
+                                    return pure44(v2.svg);
                                   });
                                 });
                               });
@@ -33011,9 +33013,9 @@ graph TB
 
   // output/D3.Viz.Tree.RadialTree/index.js
   var show29 = /* @__PURE__ */ show(showNumber);
+  var classed16 = /* @__PURE__ */ classed(toAttrString);
   var fontFamily3 = /* @__PURE__ */ fontFamily(toAttrString);
   var fontSize7 = /* @__PURE__ */ fontSize(toAttrNumber);
-  var classed16 = /* @__PURE__ */ classed(toAttrString);
   var discard58 = /* @__PURE__ */ discard(discardUnit);
   var strokeWidth13 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var strokeColor14 = /* @__PURE__ */ strokeColor(toAttrString);
@@ -33074,34 +33076,34 @@ graph TB
                     svgClass: "tree radial-tree",
                     innerClass: "tree-container",
                     innerWidth: v.value0,
-                    innerHeight: v.value1
+                    innerHeight: v.value1,
+                    scaleMin: 0.1,
+                    scaleMax: 4
                   };
                   return bind70(zoomableSVG1(rootSel)(zoomConfig))(function(v2) {
-                    return bind70(appendTo2(v2.zoomGroup)(Group.value)([fontFamily3("sans-serif"), fontSize7(10)]))(function(container) {
-                      return bind70(appendTo2(container)(Group.value)([classed16("links")]))(function(linksGroup) {
-                        return bind70(appendTo2(container)(Group.value)([classed16("nodes")]))(function(nodesGroup) {
-                          return bind70(simpleJoin2(linksGroup)(Path2.value)(links_(laidOutRoot))(keyIsID_))(function(theLinks) {
-                            return discard112(setAttributes2(theLinks)([strokeWidth13(1.5), strokeColor14("#94a3b8"), strokeOpacity7(0.6), fill19("none"), radialLink(treeDatum_.x)(treeDatum_.y)]))(function() {
-                              return bind70(simpleJoin2(nodesGroup)(Group.value)(descendants_(laidOutRoot))(keyIsID_))(function(nodeGroups) {
-                                return discard112(setAttributes2(nodeGroups)([transform([radialRotateCommon, radialTranslate, rotateRadialLabels])]))(function() {
-                                  return bind70(appendTo2(nodeGroups)(Circle.value)([fill19("#0ea5e9"), radius11(3), strokeColor14("white"), strokeWidth13(1.5)]))(function() {
-                                    return bind70(appendTo2(nodeGroups)(Text2.value)([dy4(0.31), x27(function(d9) {
-                                      var $44 = treeDatum_.hasChildren(d9) === treeDatum_.x(d9) < pi;
-                                      if ($44) {
-                                        return 8;
-                                      }
-                                      ;
-                                      return -8;
-                                    }), textAnchor9(function(d9) {
-                                      var $45 = treeDatum_.hasChildren(d9) === treeDatum_.x(d9) < pi;
-                                      if ($45) {
-                                        return "start";
-                                      }
-                                      ;
-                                      return "end";
-                                    }), text18(treeDatum_.name), fill19("#0c4a6e"), fontSize7(11)]))(function() {
-                                      return pure44(v2.svg);
-                                    });
+                    return bind70(appendTo2(v2.zoomGroup)(Group.value)([classed16("links"), fontFamily3("sans-serif"), fontSize7(10)]))(function(linksGroup) {
+                      return bind70(appendTo2(v2.zoomGroup)(Group.value)([classed16("nodes"), fontFamily3("sans-serif"), fontSize7(10)]))(function(nodesGroup) {
+                        return bind70(simpleJoin2(linksGroup)(Path2.value)(links_(laidOutRoot))(keyIsID_))(function(theLinks) {
+                          return discard112(setAttributes2(theLinks)([strokeWidth13(1.5), strokeColor14("#94a3b8"), strokeOpacity7(0.6), fill19("none"), radialLink(treeDatum_.x)(treeDatum_.y)]))(function() {
+                            return bind70(simpleJoin2(nodesGroup)(Group.value)(descendants_(laidOutRoot))(keyIsID_))(function(nodeGroups) {
+                              return discard112(setAttributes2(nodeGroups)([transform([radialRotateCommon, radialTranslate, rotateRadialLabels])]))(function() {
+                                return bind70(appendTo2(nodeGroups)(Circle.value)([fill19("#0ea5e9"), radius11(3), strokeColor14("white"), strokeWidth13(1.5)]))(function() {
+                                  return bind70(appendTo2(nodeGroups)(Text2.value)([dy4(0.31), x27(function(d9) {
+                                    var $44 = treeDatum_.hasChildren(d9) === treeDatum_.x(d9) < pi;
+                                    if ($44) {
+                                      return 8;
+                                    }
+                                    ;
+                                    return -8;
+                                  }), textAnchor9(function(d9) {
+                                    var $45 = treeDatum_.hasChildren(d9) === treeDatum_.x(d9) < pi;
+                                    if ($45) {
+                                      return "start";
+                                    }
+                                    ;
+                                    return "end";
+                                  }), text18(treeDatum_.name), fill19("#0c4a6e"), fontSize7(11)]))(function() {
+                                    return pure44(v2.svg);
                                   });
                                 });
                               });
@@ -33131,9 +33133,9 @@ graph TB
 
   // output/D3.Viz.Tree.VerticalTree/index.js
   var show30 = /* @__PURE__ */ show(showNumber);
+  var classed17 = /* @__PURE__ */ classed(toAttrString);
   var fontFamily4 = /* @__PURE__ */ fontFamily(toAttrString);
   var fontSize8 = /* @__PURE__ */ fontSize(toAttrNumber);
-  var classed17 = /* @__PURE__ */ classed(toAttrString);
   var discard59 = /* @__PURE__ */ discard(discardUnit);
   var strokeWidth14 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var strokeColor15 = /* @__PURE__ */ strokeColor(toAttrString);
@@ -33199,34 +33201,34 @@ graph TB
                     svgClass: "tree vertical-tree",
                     innerClass: "tree-container",
                     innerWidth: v.value0,
-                    innerHeight: v.value1
+                    innerHeight: v.value1,
+                    scaleMin: 0.1,
+                    scaleMax: 4
                   };
                   return bind70(zoomableSVG1(rootSel)(zoomConfig))(function(v2) {
-                    return bind70(appendTo2(v2.zoomGroup)(Group.value)([fontFamily4("sans-serif"), fontSize8(10)]))(function(container) {
-                      return bind70(appendTo2(container)(Group.value)([classed17("links")]))(function(linksGroup) {
-                        return bind70(appendTo2(container)(Group.value)([classed17("nodes")]))(function(nodesGroup) {
-                          return bind70(simpleJoin2(linksGroup)(Path2.value)(links_(laidOutRoot))(keyIsID_))(function(theLinks) {
-                            return discard112(setAttributes2(theLinks)([strokeWidth14(1.5), strokeColor15("#94a3b8"), strokeOpacity8(0.6), fill20("none"), linkPath]))(function() {
-                              return bind70(simpleJoin2(nodesGroup)(Group.value)(descendants_(laidOutRoot))(keyIsID_))(function(nodeGroups) {
-                                return discard112(setAttributes2(nodeGroups)([transform([positionXY])]))(function() {
-                                  return bind70(appendTo2(nodeGroups)(Circle.value)([fill20("#0ea5e9"), radius15(3), strokeColor15("white"), strokeWidth14(1.5)]))(function() {
-                                    return bind70(appendTo2(nodeGroups)(Text2.value)([dy5(0.31), x28(function(d9) {
-                                      var $42 = treeDatum_.hasChildren(d9);
-                                      if ($42) {
-                                        return 8;
-                                      }
-                                      ;
-                                      return -8;
-                                    }), textAnchor10(function(d9) {
-                                      var $43 = treeDatum_.hasChildren(d9);
-                                      if ($43) {
-                                        return "start";
-                                      }
-                                      ;
-                                      return "end";
-                                    }), text19(treeDatum_.name), fill20("#0c4a6e"), fontSize8(11)]))(function() {
-                                      return pure44(v2.svg);
-                                    });
+                    return bind70(appendTo2(v2.zoomGroup)(Group.value)([classed17("links"), fontFamily4("sans-serif"), fontSize8(10)]))(function(linksGroup) {
+                      return bind70(appendTo2(v2.zoomGroup)(Group.value)([classed17("nodes"), fontFamily4("sans-serif"), fontSize8(10)]))(function(nodesGroup) {
+                        return bind70(simpleJoin2(linksGroup)(Path2.value)(links_(laidOutRoot))(keyIsID_))(function(theLinks) {
+                          return discard112(setAttributes2(theLinks)([strokeWidth14(1.5), strokeColor15("#94a3b8"), strokeOpacity8(0.6), fill20("none"), linkPath]))(function() {
+                            return bind70(simpleJoin2(nodesGroup)(Group.value)(descendants_(laidOutRoot))(keyIsID_))(function(nodeGroups) {
+                              return discard112(setAttributes2(nodeGroups)([transform([positionXY])]))(function() {
+                                return bind70(appendTo2(nodeGroups)(Circle.value)([fill20("#0ea5e9"), radius15(3), strokeColor15("white"), strokeWidth14(1.5)]))(function() {
+                                  return bind70(appendTo2(nodeGroups)(Text2.value)([dy5(0.31), x28(function(d9) {
+                                    var $42 = treeDatum_.hasChildren(d9);
+                                    if ($42) {
+                                      return 8;
+                                    }
+                                    ;
+                                    return -8;
+                                  }), textAnchor10(function(d9) {
+                                    var $43 = treeDatum_.hasChildren(d9);
+                                    if ($43) {
+                                      return "start";
+                                    }
+                                    ;
+                                    return "end";
+                                  }), text19(treeDatum_.name), fill20("#0c4a6e"), fontSize8(11)]))(function() {
+                                    return pure44(v2.svg);
                                   });
                                 });
                               });
@@ -34388,52 +34390,52 @@ graph TB
   var x210 = /* @__PURE__ */ x2(toAttrNumberFn);
   var y26 = /* @__PURE__ */ y2(toAttrNumberFn);
   var link_6 = {
-    source: function($62) {
+    source: function($66) {
       return (function(v) {
         return v.source;
-      })(unboxD3SimLink2($62));
+      })(unboxD3SimLink2($66));
     },
-    target: function($63) {
+    target: function($67) {
       return (function(v) {
         return v.target;
-      })(unboxD3SimLink2($63));
+      })(unboxD3SimLink2($67));
     },
-    value: function($64) {
+    value: function($68) {
       return (function(v) {
         return v.value;
-      })(unboxD3SimLink2($64));
+      })(unboxD3SimLink2($68));
     },
-    color: function($65) {
+    color: function($69) {
       return d3SchemeCategory10N_(toNumber((function(v) {
         return v.target.group;
-      })(unboxD3SimLink2($65))));
+      })(unboxD3SimLink2($69))));
     }
   };
   var datum_6 = {
-    id: function($66) {
+    id: function($70) {
       return (function(v) {
         return v.id;
-      })(unboxD3SimNode2($66));
+      })(unboxD3SimNode2($70));
     },
-    x: function($67) {
+    x: function($71) {
       return (function(v) {
         return v.x;
-      })(unboxD3SimNode2($67));
+      })(unboxD3SimNode2($71));
     },
-    y: function($68) {
+    y: function($72) {
       return (function(v) {
         return v.y;
-      })(unboxD3SimNode2($68));
+      })(unboxD3SimNode2($72));
     },
-    group: function($69) {
+    group: function($73) {
       return (function(v) {
         return v.group;
-      })(unboxD3SimNode2($69));
+      })(unboxD3SimNode2($73));
     },
-    colorByGroup: function($70) {
+    colorByGroup: function($74) {
       return d3SchemeCategory10N_(toNumber((function(v) {
         return v.group;
-      })(unboxD3SimNode2($70))));
+      })(unboxD3SimNode2($74))));
     }
   };
   var drawSimplified = function(dictBind) {
@@ -34441,12 +34443,14 @@ graph TB
     var discard112 = discard64(dictBind);
     return function(dictMonadEffect) {
       var liftEffect52 = liftEffect(dictMonadEffect);
+      var zoomableSVG2 = zoomableSVG(dictMonadEffect);
       var pure44 = pure(dictMonadEffect.Monad0().Applicative0());
       return function(dictMonadState) {
         return function(dictSimulationM2) {
           var SimulationM1 = dictSimulationM2.SimulationM1();
           var SelectionM1 = SimulationM1.SelectionM1();
           var attach2 = attach(SelectionM1);
+          var zoomableSVG1 = zoomableSVG2(SelectionM1);
           var appendTo2 = appendTo(SelectionM1);
           var init5 = init3(SimulationM1);
           var simpleJoin2 = simpleJoin(SelectionM1);
@@ -34459,66 +34463,63 @@ graph TB
               return function(model) {
                 return function(selector) {
                   return bind70(liftEffect52(getWindowWidthHeight))(function(v) {
-                    return bind70(attach2(selector))(function(v1) {
-                      return bind70(appendTo2(v1)(Svg.value)([viewBox(-v.value0 / 2)(-v.value1 / 2)(v.value0)(v.value1), classed20("lesmis")]))(function(svg2) {
-                        return bind70(appendTo2(svg2)(Group.value)([classed20("zoom-group")]))(function(zoomGroup) {
-                          return bind70(appendTo2(zoomGroup)(Group.value)([classed20("link"), strokeColor16("#999"), strokeOpacity9(0.6)]))(function(linksGroup) {
-                            return bind70(appendTo2(zoomGroup)(Group.value)([classed20("node"), strokeColor16("#fff"), strokeOpacity9(1.5)]))(function(nodesGroup) {
-                              return bind70(init5({
-                                nodes: model.nodes,
-                                links: model.links,
-                                forces: forceLibrary3,
-                                activeForces,
-                                config: {
-                                  alpha: 1,
-                                  alphaTarget: 0,
-                                  alphaMin: 1e-3,
-                                  alphaDecay: 0.0228,
-                                  velocityDecay: 0.4
-                                },
-                                keyFn: keyIsID_,
-                                ticks: fromFoldable26([])
-                              }))(function(v2) {
-                                return bind70(simpleJoin2(nodesGroup)(Circle.value)(v2.nodes)(keyIsID_))(function(nodesSelection) {
-                                  return discard112(setAttributes2(nodesSelection)([radius17(5), fill23(datum_6.colorByGroup)]))(function() {
-                                    return bind70(simpleJoin2(linksGroup)(Line.value)(v2.links)(keyIsID_))(function(linksSelection) {
-                                      return discard112(setAttributes2(linksSelection)([strokeWidth15(function($71) {
-                                        return sqrt(link_6.value($71));
-                                      }), strokeColor1(link_6.color)]))(function() {
-                                        return discard112(addTickFunction2("nodes")(new Step3(nodesSelection, [cx5(datum_6.x), cy5(datum_6.y)])))(function() {
-                                          return discard112(addTickFunction2("links")(new Step3(linksSelection, [x110(function($72) {
-                                            return (function(v3) {
-                                              return v3.x;
-                                            })(link_6.source($72));
-                                          }), y110(function($73) {
-                                            return (function(v3) {
-                                              return v3.y;
-                                            })(link_6.source($73));
-                                          }), x210(function($74) {
-                                            return (function(v3) {
-                                              return v3.x;
-                                            })(link_6.target($74));
-                                          }), y26(function($75) {
-                                            return (function(v3) {
-                                              return v3.y;
-                                            })(link_6.target($75));
-                                          })])))(function() {
-                                            return bind70(on3(nodesSelection)(new Drag(new CustomDrag("lesmis", simdrag_))))(function() {
-                                              return bind70(on3(svg2)(new Zoom({
-                                                extent: new ZoomExtent({
-                                                  top: 0,
-                                                  left: 0,
-                                                  bottom: v.value1,
-                                                  right: v.value0
-                                                }),
-                                                scale: new ScaleExtent(1, 4),
-                                                name: "LesMis",
-                                                target: zoomGroup
-                                              })))(function() {
-                                                return discard112(start5)(function() {
-                                                  return pure44(unit);
-                                                });
-                                              });
+                    return bind70(attach2(selector))(function(rootSel) {
+                      return bind70(zoomableSVG1(rootSel)({
+                        minX: -v.value0 / 2,
+                        minY: -v.value1 / 2,
+                        width: v.value0,
+                        height: v.value1,
+                        svgClass: "lesmis",
+                        innerClass: "zoom-group",
+                        innerWidth: v.value0,
+                        innerHeight: v.value1,
+                        scaleMin: 1,
+                        scaleMax: 4
+                      }))(function(v1) {
+                        return bind70(appendTo2(v1.zoomGroup)(Group.value)([classed20("link"), strokeColor16("#999"), strokeOpacity9(0.6)]))(function(linksGroup) {
+                          return bind70(appendTo2(v1.zoomGroup)(Group.value)([classed20("node"), strokeColor16("#fff"), strokeOpacity9(1.5)]))(function(nodesGroup) {
+                            return bind70(init5({
+                              nodes: model.nodes,
+                              links: model.links,
+                              forces: forceLibrary3,
+                              activeForces,
+                              config: {
+                                alpha: 1,
+                                alphaTarget: 0,
+                                alphaMin: 1e-3,
+                                alphaDecay: 0.0228,
+                                velocityDecay: 0.4
+                              },
+                              keyFn: keyIsID_,
+                              ticks: fromFoldable26([])
+                            }))(function(v2) {
+                              return bind70(simpleJoin2(nodesGroup)(Circle.value)(v2.nodes)(keyIsID_))(function(nodesSelection) {
+                                return discard112(setAttributes2(nodesSelection)([radius17(5), fill23(datum_6.colorByGroup)]))(function() {
+                                  return bind70(simpleJoin2(linksGroup)(Line.value)(v2.links)(keyIsID_))(function(linksSelection) {
+                                    return discard112(setAttributes2(linksSelection)([strokeWidth15(function($75) {
+                                      return sqrt(link_6.value($75));
+                                    }), strokeColor1(link_6.color)]))(function() {
+                                      return discard112(addTickFunction2("nodes")(new Step3(nodesSelection, [cx5(datum_6.x), cy5(datum_6.y)])))(function() {
+                                        return discard112(addTickFunction2("links")(new Step3(linksSelection, [x110(function($76) {
+                                          return (function(v3) {
+                                            return v3.x;
+                                          })(link_6.source($76));
+                                        }), y110(function($77) {
+                                          return (function(v3) {
+                                            return v3.y;
+                                          })(link_6.source($77));
+                                        }), x210(function($78) {
+                                          return (function(v3) {
+                                            return v3.x;
+                                          })(link_6.target($78));
+                                        }), y26(function($79) {
+                                          return (function(v3) {
+                                            return v3.y;
+                                          })(link_6.target($79));
+                                        })])))(function() {
+                                          return bind70(on3(nodesSelection)(new Drag(new CustomDrag("lesmis", simdrag_))))(function() {
+                                            return discard112(start5)(function() {
+                                              return pure44(unit);
                                             });
                                           });
                                         });

@@ -227,7 +227,9 @@ initialize graphData declsData = do
                                        , svgClass: "bubble-graph"
                                        , innerClass: "zoom-group"
                                        , innerWidth: w
-                                       , innerHeight: h }
+                                       , innerHeight: h
+                                       , scaleMin: 0.1
+                                       , scaleMax: 4.0 }
   liftEffect $ Console.log "Created zoomable SVG"
 
   -- Add arrowhead marker definition for module links via FFI
