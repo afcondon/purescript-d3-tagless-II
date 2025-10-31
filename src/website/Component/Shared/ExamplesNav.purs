@@ -2,11 +2,11 @@ module PSD3.Shared.ExamplesNav where
 
 import Prelude
 
-import PSD3.Website.Types (Route(..))
-import PSD3.RoutingDSL (routeToPath)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.RoutingDSL (routeToPath)
+import PSD3.Website.Types (Route(..))
 
 type Input = Route
 
@@ -58,8 +58,9 @@ render currentRoute =
 
         -- Applications
         , sectionTitle "Applications"
-        , navLink CodeExplorer "Code Explorer" currentRoute
+        , navLink CodeExplorer "Package Explorer" currentRoute
         , navLink WealthHealth "Wealth & Health" currentRoute
+        , navLink CodeAtlas "Module Explorer" currentRoute
 
         -- Interpreters
         , sectionTitle "Alternative Interpreters"

@@ -18,9 +18,6 @@ type SnippetInfo =
 snippet_BarChartDraw_content :: String
 snippet_BarChartDraw_content = "  (root :: D3Selection_) <- attach selector\n  svg <- appendTo root Svg [\n      viewBox 0.0 0.0 dims.width dims.height\n    , classed \"bar-chart\"\n    , width dims.width\n    , height dims.height\n    ]\n\n  -- Calculate bar width (with padding)\n  let numBars = length dataPoints\n  let barWidth = if numBars > 0 then (iWidth / (Int.toNumber numBars)) * 0.8 else 0.0\n\n  -- Create a group for the chart content (offset by margins)\n  chartGroup <- appendTo svg Group [\n      transform [ \\_ -> \"translate(\" <> show dims.margin.left <> \",\" <> show dims.margin.top <> \")\" ]\n    ]\n\n  -- Create scales\n  xScale <- liftEffect $ createLinearScale_ { domain: [minX, maxX], range: [0.0, iWidth] }\n  yScale <- liftEffect $ createLinearScale_ { domain: [minY, maxY], range: [iHeight, 0.0] }\n\n  -- Add <g> elements to hold each of the axes\n  xAxisGroup <- appendTo chartGroup Group [\n      classed \"x-axis\"\n    , transform [ \\_ -> \"translate(0,\" <> show iHeight <> \")\" ]\n    ]\n  yAxisGroup <- appendTo chartGroup Group [ \n      classed \"y-axis\"\n    , transform [ \\_ -> \"translate(\" <> show ((barWidth / 2.0 * -1.0) - 5.0) <> \",0)\" ]\n  ]\n  -- Draw the axes into the SVG, inside their respective <g> group elements\n  _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)\n  _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)\n\n  -- Add bars\n  let addBar :: DataPoint -> m Unit\n      addBar point = do\n        let xPos = applyScale_ xScale point.x - (barWidth / 2.0)\n        let yPos = applyScale_ yScale point.y\n        let barHeight = iHeight - yPos\n        _ <- appendTo chartGroup Rect [\n            x xPos\n          , y yPos\n          , width barWidth\n          , height barHeight\n          , fill \"#4a90e2\"\n          , strokeColor \"#357abd\"\n          , strokeWidth 1.0\n          , classed \"bar\"\n          ]\n        pure unit\n\n  _ <- traverse_ addBar dataPoints\n\n  pure unit\n-- Snippet_End"
 
-snippet_GUP_content :: String
-snippet_GUP_content = "-- Snippet_Start\n-- Name: GUP\ntype Model = Array Char\n\ndatum_ ::\n  { char :: Datum_ -> Char\n  , indexNum :: Index_ -> Number\n  }\ndatum_ =\n  { char: coerceDatumToChar\n  , indexNum: coerceIndexToNumber\n  }\n\nexGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)\nexGeneralUpdatePattern selector = do \n  root           <- attach selector\n  svg            <- appendTo root Svg [ viewBox 0.0 100.0 800.0 350.0, classed \"d3svg gup\" ]\n  letterGroup    <- appendTo svg Group []\n  \n  pure $ \\letters -> do\n    enterSelection   <- openSelection letterGroup \"text\"\n    updateSelections <- updateJoin enterSelection Text letters coerceDatumToKey\n    setAttributes updateSelections.exit exit\n    setAttributes updateSelections.update update\n\n    newlyEntered     <- appendTo updateSelections.enter Text []\n    setAttributes newlyEntered enter\n\n    pure newlyEntered\n\n  where\n    transition :: SelectionAttribute\n    transition = transitionWithDuration $ Milliseconds 2000.0\n\n    xFromIndex :: Datum_ -> Index_ -> Number\n    xFromIndex _ i = 50.0 + (datum_.indexNum i * 48.0) -- letters enter at this position, and then must transition to new position on each update\n\n    enter = [ classed  \"enter\"\n            , fill     \"green\"\n            , x        xFromIndex\n            , y        0.0\n            , text     (singleton <<< datum_.char)\n            , fontSize 60.0 ]\n          `andThen` (transition `to` [ y 200.0 ])\n\n    update =  [ classed \"update\", fill \"gray\", y 200.0 ]\n              `andThen` (transition `to` [ x xFromIndex ] )\n\n    exit =  [ classed \"exit\", fill \"brown\"]\n            `andThen` (transition `to` [ y 400.0, remove ])\n-- Snippet_End"
-
 snippet_LineChartDraw_content :: String
 snippet_LineChartDraw_content = "    , classed \"line-chart\"\n    , width dims.width\n    , height dims.height\n    ]\n\n  -- Create a group for the chart content (offset by margins)\n  chartGroup <- appendTo svg Group [\n      transform [ \\_ -> \"translate(\" <> show dims.margin.left <> \",\" <> show dims.margin.top <> \")\" ]\n    ]\n\n  -- Create scales\n  xScale <- liftEffect $ createLinearScale_ { domain: [minX, maxX], range: [0.0, iWidth] }\n  yScale <- liftEffect $ createLinearScale_ { domain: [minY, maxY], range: [iHeight, 0.0] }\n\n  -- Add axes\n  xAxisGroup <- appendTo chartGroup Group [\n      classed \"x-axis\"\n    , transform [ \\_ -> \"translate(0,\" <> show iHeight <> \")\" ]\n    ]\n  yAxisGroup <- appendTo chartGroup Group [ classed \"y-axis\" ]\n\n  _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)\n  _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)\n\n  -- Create line generator and add the line path\n  lineGen <- liftEffect $ createLineGenerator_ { xScale, yScale }\n  let pathData = generateLinePath_ lineGen dataPoints\n\n  _ <- appendTo chartGroup Path [\n      d pathData\n    , fill \"none\"\n    , strokeColor \"#4a90e2\"\n    , strokeWidth 2.0\n    , classed \"line\"\n    ]\n\n  pure unit\n-- Snippet_End"
 
@@ -52,11 +49,6 @@ snippets =
     , content: snippet_BarChartDraw_content
     , source: "src/website/Viz/Charts/BarChart.purs"
     , lines: "39-115"
-    }
-  , { name: "GUP"
-    , content: snippet_GUP_content
-    , source: "src/website/Viz/GUP.purs"
-    , lines: "17-68"
     }
   , { name: "LineChartDraw"
     , content: snippet_LineChartDraw_content
@@ -104,7 +96,6 @@ snippets =
 getSnippet :: String -> String
 getSnippet name = case name of
   "BarChartDraw" -> snippet_BarChartDraw_content
-  "GUP" -> snippet_GUP_content
   "LineChartDraw" -> snippet_LineChartDraw_content
   "ScatterPlotQuartet" -> snippet_ScatterPlotQuartet_content
   "selectionMClass" -> snippet_selectionMClass_content
@@ -123,12 +114,6 @@ getSnippetInfo name = case name of
     , content: snippet_BarChartDraw_content
     , source: "src/website/Viz/Charts/BarChart.purs"
     , lines: "39-115"
-    }
-  "GUP" ->
-    { name: "GUP"
-    , content: snippet_GUP_content
-    , source: "src/website/Viz/GUP.purs"
-    , lines: "17-68"
     }
   "LineChartDraw" ->
     { name: "LineChartDraw"

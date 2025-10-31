@@ -15,7 +15,7 @@ import PSD3.CodeAtlas.State (State)
 import PSD3.CodeAtlas.Types (Declaration, DeclarationsData, SourceType(..))
 
 -- | Render the Declarations tab
-render :: forall m. State -> H.ComponentHTML Action () m
+render :: forall slots m. State -> H.ComponentHTML Action slots m
 render state =
   case state.declarationsData of
     Nothing ->

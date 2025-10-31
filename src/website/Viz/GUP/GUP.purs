@@ -28,6 +28,8 @@ datum_ =
   , indexNum: coerceIndexToNumber
   }
 
+-- | creates the SVG and a <g> within it to hold the letters
+-- | returns a function which can be called repeatedly to generate each sequence of new and exiting letters
 exGeneralUpdatePattern :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m ((Array Char) -> m D3Selection_)
 exGeneralUpdatePattern selector = do 
   root           <- attach selector
