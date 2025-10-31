@@ -2,17 +2,17 @@ module PSD3.CodeAtlas.Tabs.ExpandableBubbles where
 
 import Prelude
 
-import Control.Monad.State (class MonadState)
 import Control.Monad (when)
+import Control.Monad.State (class MonadState)
 import Data.Array (filter, sort)
 import Data.Array as Array
+import Data.Foldable (foldl)
 import Data.Foldable (maximum, traverse_)
 import Data.Int as Data.Int
 import Data.Lens (use)
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
-import Data.Foldable (foldl)
 import Data.Nullable (null, toNullable)
 import Data.Number (cos, log, sqrt)
 import Data.Set (Set)
@@ -33,6 +33,7 @@ import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSel
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start, update)
 import PSD3.CodeAtlas.Types (DeclarationsData, FunctionCallsData, ModuleGraphData, ModuleInfo)
 import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode(..), D3_VxyFxy, D3_XY)
+import PSD3.Internal.Attributes.Instances (AttributeSetter(..), Attr(..), AttrBuilder(..))
 import PSD3.Internal.Attributes.Sugar (classed, fill, onMouseEventEffectful, radius, remove, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, width, height, x, x1, x2, y, y1, y2)
 import PSD3.Internal.FFI (addModuleArrowMarker_, drawInterModuleDeclarationLinks_, expandNodeById_, filterToConnectedNodes_, keyIsID_, showModuleLabels_, simdragHorizontal_, switchToSpotlightForces_, unsafeSetField_, updateNodeExpansion_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute(..))
@@ -40,8 +41,8 @@ import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, ForceType(..), RegularForceType(..), Step(..), allNodes, _handle)
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..))
-import PSD3.Internal.Attributes.Instances (AttributeSetter(..), Attr(..), AttrBuilder(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
+import PSD3.Shared.ZoomableViewbox (zoomableSVG)
 import Type.Row (type (+))
 import Unsafe.Coerce (unsafeCoerce)
 import Utility (getWindowWidthHeight)
@@ -218,13 +219,20 @@ initialize graphData declsData = do
   root <- attach "div.svg-container"
   liftEffect $ Console.log "Attached to svg-container"
 
-  svg <- appendTo root Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "bubble-graph" ]
-  liftEffect $ Console.log "Created SVG"
+  -- svg <- appendTo root Svg [ viewBox (-w / 2.0) (-h / 2.0) w h, classed "bubble-graph" ]
+  {svg, zoomGroup} <- zoomableSVG root { minX: (-w / 2.0)
+                                       , minY: (-h / 2.0)
+                                       , width: w
+                                       , height: h
+                                       , svgClass: "bubble-graph"
+                                       , innerClass: "zoom-group"
+                                       , innerWidth: w
+                                       , innerHeight: h }
+  liftEffect $ Console.log "Created zoomable SVG"
 
   -- Add arrowhead marker definition for module links via FFI
   liftEffect $ addModuleArrowMarker_ svg
 
-  zoomGroup <- appendTo svg Group [ classed "zoom-group" ]
   linksGroup <- appendTo zoomGroup Group [ classed "link", strokeColor "#999", strokeOpacity 0.4 ]
   nodesGroup <- appendTo zoomGroup Group [ classed "node", strokeColor "#fff", strokeWidth 1.5 ]
 
@@ -314,7 +322,7 @@ initialize graphData declsData = do
     , ticks: Map.fromFoldable []
     }
 
-  -- Add zoom behavior
+  -- Add zoom behavior, zoom on the svg will target the inner group
   _ <- svg `on` Zoom
     { extent: ZoomExtent { top: 0.0, left: 0.0, bottom: h, right: w }
     , scale: ScaleExtent 0.1 4.0

@@ -2,18 +2,17 @@ module D3.Viz.Tree.Draw where
 
 import Prelude
 
-import PSD3.Internal.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, width, x)
-import PSD3.Data.Tree (TreeLayout(..))
-import PSD3.Internal.Types (Datum_, Element(..), Selector)
 import D3.Viz.MetaTree.Unsafe (coerceToTreeNode, unboxD3TreeNode)
 import D3.Viz.Tree.Model (FlareTreeNode)
-import PSD3.Internal.FFI (descendants_, getHierarchyValue_, hasChildren_, keyIsID_, links_)
-import PSD3.Internal.Selection.Types (SelectionAttribute)
-import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
 import Data.Nullable (Nullable)
 import Data.Number (pi)
 import Effect.Class (class MonadEffect)
-import PSD3.Shared.ZoomableViewbox (addStandardZoom)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
+import PSD3.Data.Tree (TreeLayout(..))
+import PSD3.Internal.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, height, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, width, x)
+import PSD3.Internal.FFI (descendants_, getHierarchyValue_, hasChildren_, keyIsID_, links_)
+import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute, defaultZoomConfig)
+import PSD3.Internal.Types (Datum_, Element(..), Selector)
 
 treeDatum_ :: 
   { hasChildren :: Datum_ -> Boolean
@@ -121,7 +120,8 @@ draw config tree = do
          ]
 
   -- Add standard zoom and pan behavior
-  addStandardZoom svg zoomGroup
+  _ <- zoomGroup `on` Drag DefaultDrag
+  _ <- svg   `on` (Zoom $ defaultZoomConfig config.svg.width config.svg.height zoomGroup)
 
   pure svg
 -- Snippet_End

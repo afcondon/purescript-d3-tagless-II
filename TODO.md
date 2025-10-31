@@ -29,20 +29,19 @@ This TODO is derived from `notes/VISION.md` and organized by the major pages and
 **Goal:** Polished, production-ready examples of common chart types with interesting data.
 
 ### Line Chart
-- [ ] Multi-line chart with interesting dataset (suggestions: temperature trends, stock prices, COVID data)
-- [ ] Hover interaction to highlight individual lines
-- [ ] Legend with hover coordination
-- [ ] Proper axes and labels
+- [x] Multi-line chart with interesting dataset (suggestions: temperature trends, stock prices, COVID data)
+- [x] Hover interaction to highlight individual lines
+- [x] Legend with hover coordination
+- [x] Proper axes and labels
 
 ### Bar Chart
-- [ ] Fix first bar offset issue
-- [ ] Find interesting dataset (suggestions: top programming languages by year, renewable energy adoption, GitHub stars)
-- [ ] Add stacked bar variant or grouped bar variant
-- [ ] Smooth transitions on data updates
+- [x] Fix first bar offset issue
+- [x] Find interesting dataset (suggestions: top programming languages by year, renewable energy adoption, GitHub stars)
+- [x] Add stacked bar variant or grouped bar variant
 
 ### Anscombe's Quartet
-- [ ] Keep current implementation (good scatter plot example)
-- [ ] Minor polish: ensure all four charts are clearly labeled
+- [x] Keep current implementation (good scatter plot example)
+- [x] Minor polish: ensure all four charts are clearly labeled
 - [ ] Show summary statistics alongside charts
 
 ---
@@ -130,12 +129,10 @@ This TODO is derived from `notes/VISION.md` and organized by the major pages and
 
 **Status:** Currently broken, needs rewrite with new SimulationM API
 
-- [ ] Rewrite using current SimulationM API
-- [ ] Ensure drag interactions work smoothly
-- [ ] Add hover highlighting for connected nodes
-- [ ] Color by community detection or node degree
-- [ ] Control panel for force parameters
-- [ ] Demonstrate the MiseEnScene pattern if applicable
+- [x] Rewrite using current SimulationM API
+- [x] Ensure drag interactions work smoothly
+- [x] Add hover highlighting for connected nodes
+- [x] Color by community detection or node degree
 
 ---
 
@@ -157,6 +154,9 @@ This TODO is derived from `notes/VISION.md` and organized by the major pages and
 ### Current repo goals (enhancements):
 - [ ] Add module cohesion metrics visualization
 - [ ] Add package coupling visualization
+- [ ] Evolve "code-explorer" into package set explorer
+- [ ] Evolve "code-atlas" into project explorer
+- [ ] Mock up an AWS or Kubernetes explorer
 - [ ] Highlight "candidate for extraction" functions (functions that might belong elsewhere)
 - [ ] Demonstrate at least one concrete insight about the codebase (TBD which insight)
 - [ ] **"Blueprint" CSS style** - Add architectural drawing aesthetic as neutral/default view when not highlighting anything particular

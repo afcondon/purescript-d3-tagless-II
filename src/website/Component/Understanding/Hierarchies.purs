@@ -2,22 +2,33 @@ module PSD3.Understanding.Hierarchies where -- understanding
 
 import Prelude
 
-import PSD3.Data.Tree (TreeJson_, TreeLayout(..), TreeModel, TreeType(..))
-import PSD3.Internal.Hierarchical (getTreeViaAJAX, makeModel)
 import D3.Viz.Hierarchies (drawCirclePacking, drawIcicle, drawTreemap)
-import D3.Viz.Tree.Configure as Tree
-import PSD3.Interpreter.D3 (eval_D3M)
-import PSD3.Internal.Utility (removeExistingSVG)
+import D3.Viz.Tree.Draw (draw) as Tree
+import D3.Viz.Tree.Draw (treeDatum_)
+import D3.Viz.Tree.Model (FlareTreeNode)
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
+import Data.Number (abs, pi)
+import Data.Tuple (Tuple(..))
 import Effect.Aff (Aff)
+import Effect.Class (class MonadEffect)
+import Halogen (liftEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
+import PSD3 (class SelectionM, D3Selection_, Datum_, Selector, runD3M)
+import PSD3.Data.Tree (TreeJson_, TreeLayout(..), TreeLayoutFn_, TreeModel, TreeType(..))
+import PSD3.Internal.Attributes.Sugar (AlignAspectRatio_X(..), AlignAspectRatio_Y(..), AspectRatioPreserve(..), AspectRatioSpec(..), preserveAspectRatio, transform, viewBox)
+import PSD3.Internal.FFI (getLayout, hNodeHeight_, hierarchyFromJSON_, runLayoutFn_, treeMinMax_, treeSetNodeSize_, treeSetSeparation_, treeSetSize_)
+import PSD3.Internal.Hierarchical (getTreeViaAJAX, horizontalClusterLink, horizontalLink, makeModel, radialLink, radialSeparation, verticalClusterLink, verticalLink)
+import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
+import PSD3.Internal.Utility (removeExistingSVG)
+import PSD3.Interpreter.D3 (eval_D3M)
 import PSD3.Shared.ExamplesNav as ExamplesNav
 import PSD3.Website.Types (Route(..))
 import Type.Proxy (Proxy(..))
+import Utility (getWindowWidthHeight)
 
 -- | Hierarchies page state
 type State = {
@@ -275,24 +286,153 @@ drawLayoutViz layout model =
     -- Node-Link Diagrams
     HorizontalTidy -> do
       let updated = model { treeLayout = Horizontal, treeType = TidyTree }
-      Tree.drawTree updated selector
+      drawTree updated selector
     HorizontalDendrogram -> do
       let updated = model { treeLayout = Horizontal, treeType = Dendrogram }
-      Tree.drawTree updated selector
+      drawTree updated selector
     VerticalTidy -> do
       let updated = model { treeLayout = Vertical, treeType = TidyTree }
-      Tree.drawTree updated selector
+      drawTree updated selector
     VerticalDendrogram -> do
       let updated = model { treeLayout = Vertical, treeType = Dendrogram }
-      Tree.drawTree updated selector
+      drawTree updated selector
     RadialTidy -> do
       let updated = model { treeLayout = Radial, treeType = TidyTree }
-      Tree.drawTree updated selector
+      drawTree updated selector
     RadialDendrogram -> do
       let updated = model { treeLayout = Radial, treeType = Dendrogram }
-      Tree.drawTree updated selector
+      drawTree updated selector
     -- Adjacency Diagrams
     Icicle -> drawIcicle model.json selector
     -- Enclosure Diagrams
     CirclePacking -> drawCirclePacking model.json selector
     Treemap -> drawTreemap model.json selector
+
+-- | Code from old TreeConfigure file, enables a single entry point to render any of the six forms
+-- | TECHNICAL DEBT Something like this should be added to the library and this removed at some point
+-- | Note the presence of a lot of library internal types and functions, doesn't belong in user code
+
+-- | Evaluate the tree drawing script in the "d3" monad which will render it in SVG
+-- TODO specialize runD3M so that this function isn't necessary
+drawTree :: forall selection. TreeModel -> Selector selection -> Aff Unit
+drawTree treeModel selector = liftEffect $ do
+  widthHeight <- getWindowWidthHeight
+  (_ :: Tuple D3Selection_ Unit) <- runD3M (configureAndRunScript widthHeight treeModel selector)
+  pure unit
+
+
+-- | configure function which enables Tree.script to be run for different layouts - WIP
+configureAndRunScript :: forall m selection.
+  Bind m =>
+  MonadEffect m =>
+  SelectionM selection m =>
+  Tuple Number Number -> TreeModel -> Selector selection -> m selection
+configureAndRunScript (Tuple width height ) model selector = 
+  Tree.draw { spacing, viewbox, selector, linkPath, nodeTransform, color, layout: model.treeLayout, svg } laidOutRoot_
+  where
+    svg = { width, height }
+
+    root    = hierarchyFromJSON_ model.json
+    numberOfLevels = (hNodeHeight_ root) + 1.0
+    spacing =
+      case model.treeType, model.treeLayout of
+        Dendrogram, Horizontal -> { interChild: 10.0, interLevel: svg.width / numberOfLevels }
+        Dendrogram, Vertical   -> { interChild: 10.0, interLevel: svg.height / numberOfLevels }
+        Dendrogram, Radial     -> { interChild: 0.0,  interLevel: 0.0} -- not sure this is used in radial case
+
+        TidyTree, Horizontal   -> { interChild: 10.0, interLevel: svg.width / numberOfLevels }
+        TidyTree, Vertical     -> { interChild: 10.0, interLevel: svg.height / numberOfLevels}
+        TidyTree, Radial       -> { interChild: 0.0,  interLevel: 0.0} -- not sure this is used in radial case
+
+    classed =
+      case model.treeType, model.treeLayout of
+        Dendrogram, Horizontal -> "dendrogram-horizontal"
+        Dendrogram, Vertical   -> "dendrogram-vertical"
+        Dendrogram, Radial     -> "dendrogram-radial"
+
+        TidyTree, Horizontal   -> "tidytree-horizontal"
+        TidyTree, Vertical     -> "tidytree-vertical"
+        TidyTree, Radial       -> "tidytree-radial"
+
+    layout :: TreeLayoutFn_
+    layout = 
+      if model.treeLayout == Radial
+      then ((getLayout model.treeType)  `treeSetSize_`       [ 2.0 * pi, (svg.width / 2.0) - 100.0 ]) 
+                                        `treeSetSeparation_` radialSeparation
+      else
+        (getLayout model.treeType)   `treeSetNodeSize_`   [ spacing.interChild, spacing.interLevel ]
+
+    laidOutRoot_ :: FlareTreeNode
+    laidOutRoot_ = layout `runLayoutFn_` root
+
+    { xMin, xMax, yMin, yMax } = treeMinMax_ laidOutRoot_
+    xExtent = abs $ xMax - xMin -- ie if tree spans from -50 to 200, it's extent is 250
+    yExtent = abs $ yMax - yMin -- ie if tree spans from -50 to 200, it's extent is 250
+    radialRadius = yMax  -- on the radial tree the y is the distance from origin, ie yMax == radius
+    radialExtent       = 2.0 * radialRadius
+    pad n = n * 1.2
+    vtreeYOffset = (abs (height - yExtent)) / 2.0
+    vtreeXOffset = xMin -- the left and right sides might be different so (xExtent / 2) would not necessarily be right
+    htreeYOffset = xMin
+
+    viewbox =
+      case model.treeType, model.treeLayout of
+        _, Vertical   -> [ viewBox vtreeXOffset (-vtreeYOffset) (pad xExtent) (pad yExtent) -- 
+                         , preserveAspectRatio $ AspectRatio XMid YMid Meet ]
+        _, Horizontal -> [ viewBox (-xExtent * 0.1) (pad htreeYOffset) (pad yExtent) (pad xExtent)
+                         , preserveAspectRatio $ AspectRatio XMin YMid Meet ] -- x and y are reversed in horizontal layouts
+        _, Radial     -> [ viewBox (-radialRadius * 1.2) (-radialRadius * 1.2)  (radialExtent * 1.2)    (radialExtent * 1.2)
+                         , preserveAspectRatio $ AspectRatio XMin YMin Meet ]
+      
+    linkPath =
+      case model.treeType, model.treeLayout of
+        Dendrogram, Horizontal -> horizontalClusterLink spacing.interLevel
+        Dendrogram, Vertical   -> verticalClusterLink   spacing.interLevel 
+        Dendrogram, Radial     -> radialLink treeDatum_.x treeDatum_.y
+
+        TidyTree, Horizontal   -> horizontalLink
+        TidyTree, Vertical     -> verticalLink
+        TidyTree, Radial       -> radialLink treeDatum_.x treeDatum_.y
+
+    nodeTransform =
+      case model.treeType, model.treeLayout of
+        Dendrogram, Horizontal -> [ transform [ positionXYreflected ] ]
+        Dendrogram, Vertical   -> [ transform [ positionXY ] ]
+        Dendrogram, Radial     -> [ transform [ radialRotateCommon, radialTranslate, rotateRadialLabels ] ]
+
+        TidyTree, Horizontal   -> [ transform [ positionXYreflected ] ]
+        TidyTree, Vertical     -> [ transform [ positionXY ] ]
+        TidyTree, Radial       -> [ transform [ radialRotateCommon, radialTranslate, rotateRadialLabels ] ]
+
+    color = d3SchemeCategory10N_ $
+      case model.treeType, model.treeLayout of
+        Dendrogram, Horizontal -> 1.0
+        Dendrogram, Vertical   -> 2.0
+        Dendrogram, Radial     -> 3.0
+
+        TidyTree, Horizontal   -> 4.0
+        TidyTree, Vertical     -> 5.0
+        TidyTree, Radial       -> 6.0
+
+radialRotate :: Number -> String
+radialRotate x = show $ (x * 180.0 / pi - 90.0)
+
+radialRotateCommon :: Datum_ -> String
+radialRotateCommon d = "rotate(" <> radialRotate (treeDatum_.x d) <> ")"
+
+radialTranslate :: Datum_ -> String
+radialTranslate d = "translate(" <> show (treeDatum_.y d) <> ",0)"
+
+rotateRadialLabels :: Datum_ -> String
+rotateRadialLabels d = -- TODO replace with nodeIsOnRHS 
+  "rotate(" <> 
+    (if (treeDatum_.onRHS Radial d) 
+    then "180"
+    else "0")
+    <> ")"
+
+positionXYreflected :: Datum_ -> String  
+positionXYreflected d = "translate("  <> show (treeDatum_.y d) <> "," <> show (treeDatum_.x d) <>")"
+
+positionXY :: Datum_ -> String  
+positionXY d = "translate(" <> show (treeDatum_.x d) <> "," <> show (treeDatum_.y d) <>")"

@@ -46,6 +46,7 @@ pointXY point =
   , AttrT <<< AttributeSetter "y" $ toAttr point.y ]
 
 -- preserveAspectRatio as an attribute only applies to viewBox
+-- | Aspect ratio stuff could be shared with Halogen when it is present TODO
 preserveAspectRatio :: AspectRatioSpec -> SelectionAttribute
 preserveAspectRatio = AttrT <<< AttributeSetter "preserveAspectRatio" <<< toAttr <<< show
 
