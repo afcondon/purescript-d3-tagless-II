@@ -1,6 +1,6 @@
 {
-  "name": "purescript-ocelot",
-  "version": "0.30.0",
+  "name": "purescript-d3-dataviz",
+  "version": "0.4.0",
   "private": true,
   "scripts": {
     "extract-snippets": "node scripts/extract-snippets.js",

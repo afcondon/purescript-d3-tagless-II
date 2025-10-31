@@ -11,7 +11,6 @@ import PSD3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
 import PSD3.Internal.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, x)
 import PSD3.Internal.FFI (descendants_, hierarchyFromJSON_, hNodeHeight_, keyIsID_, links_, runLayoutFn_, treeMinMax_, treeSetNodeSize_)
 import PSD3.Internal.Hierarchical (horizontalClusterLink, horizontalLink)
-import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
 import PSD3.Shared.ZoomableViewbox (ZoomableSVGConfig, zoomableSVG)
 import Utility (getWindowWidthHeight)
 
@@ -54,13 +53,15 @@ drawHorizontalTree treeType json selector = do
       pad n = n * 1.2
       htreeYOffset = xMin
 
-      -- Choose link style and color based on tree type
+      -- Choose link style based on tree type
       linkPath = case treeType of
         Dendrogram -> horizontalClusterLink spacing.interLevel
         TidyTree -> horizontalLink
-      color = case treeType of
-        Dendrogram -> d3SchemeCategory10N_ 1.0
-        TidyTree -> d3SchemeCategory10N_ 4.0
+
+      -- Consistent colors across all tree layouts
+      linkColor = "#94a3b8"      -- Slate gray for links
+      nodeColor = "#0ea5e9"      -- Sky blue for nodes
+      textColor = "#0c4a6e"      -- Dark blue for text
 
   -- Build the SVG structure with zoom
   rootSel <- attach selector
@@ -86,8 +87,8 @@ drawHorizontalTree treeType json selector = do
   theLinks <- simpleJoin linksGroup Path (links_ laidOutRoot) keyIsID_
   setAttributes theLinks
     [ strokeWidth 1.5
-    , strokeColor color
-    , strokeOpacity 0.4
+    , strokeColor linkColor
+    , strokeOpacity 0.6
     , fill "none"
     , linkPath
     ]
@@ -99,18 +100,20 @@ drawHorizontalTree treeType json selector = do
 
   -- Add circles to nodes
   _ <- appendTo nodeGroups Circle
-    [ fill (\d -> if treeDatum_.hasChildren d then "#999" else "#555")
-    , radius 2.5
+    [ fill nodeColor
+    , radius 3.0
     , strokeColor "white"
+    , strokeWidth 1.5
     ]
 
   -- Add text labels to nodes
   _ <- appendTo nodeGroups Text
     [ dy 0.31
-    , x (\d -> if treeDatum_.hasChildren d then 6.0 else (-6.0))
+    , x (\d -> if treeDatum_.hasChildren d then 8.0 else (-8.0))
     , textAnchor (\d -> if treeDatum_.hasChildren d then "start" else "end")
     , text treeDatum_.name
-    , fill color
+    , fill textColor
+    , fontSize 11.0
     ]
 
   pure svg

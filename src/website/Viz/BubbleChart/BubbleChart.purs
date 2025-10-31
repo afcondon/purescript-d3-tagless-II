@@ -76,9 +76,9 @@ draw jsonData selector = do
             , cy yPos
             , radius r
             , fill color
-            , fillOpacity 0.7
+            , fillOpacity 0.8
             , strokeColor "#ffffff"
-            , strokeWidth 1.0
+            , strokeWidth 2.0
             , classed "bubble"
             ]
 

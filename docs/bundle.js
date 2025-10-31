@@ -20583,10 +20583,10 @@
     var group4 = locale2.grouping === void 0 || locale2.thousands === void 0 ? identity_default2 : formatGroup_default(map38.call(locale2.grouping, Number), locale2.thousands + ""), currencyPrefix = locale2.currency === void 0 ? "" : locale2.currency[0] + "", currencySuffix = locale2.currency === void 0 ? "" : locale2.currency[1] + "", decimal = locale2.decimal === void 0 ? "." : locale2.decimal + "", numerals = locale2.numerals === void 0 ? identity_default2 : formatNumerals_default(map38.call(locale2.numerals, String)), percent = locale2.percent === void 0 ? "%" : locale2.percent + "", minus = locale2.minus === void 0 ? "\u2212" : locale2.minus + "", nan2 = locale2.nan === void 0 ? "NaN" : locale2.nan + "";
     function newFormat(specifier) {
       specifier = formatSpecifier(specifier);
-      var fill31 = specifier.fill, align = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero4 = specifier.zero, width25 = specifier.width, comma = specifier.comma, precision = specifier.precision, trim2 = specifier.trim, type2 = specifier.type;
+      var fill29 = specifier.fill, align = specifier.align, sign2 = specifier.sign, symbol = specifier.symbol, zero4 = specifier.zero, width25 = specifier.width, comma = specifier.comma, precision = specifier.precision, trim2 = specifier.trim, type2 = specifier.type;
       if (type2 === "n") comma = true, type2 = "g";
       else if (!formatTypes_default[type2]) precision === void 0 && (precision = 12), trim2 = true, type2 = "g";
-      if (zero4 || fill31 === "0" && align === "=") zero4 = true, fill31 = "0", align = "=";
+      if (zero4 || fill29 === "0" && align === "=") zero4 = true, fill29 = "0", align = "=";
       var prefix = symbol === "$" ? currencyPrefix : symbol === "#" && /[boxX]/.test(type2) ? "0" + type2.toLowerCase() : "", suffix = symbol === "$" ? currencySuffix : /[%p]/.test(type2) ? percent : "";
       var formatType = formatTypes_default[type2], maybeSuffix = /[defgprs%]/.test(type2);
       precision = precision === void 0 ? 6 : /[gprs]/.test(type2) ? Math.max(1, Math.min(21, precision)) : Math.max(0, Math.min(20, precision));
@@ -20615,7 +20615,7 @@
           }
         }
         if (comma && !zero4) value19 = group4(value19, Infinity);
-        var length9 = valuePrefix.length + value19.length + valueSuffix.length, padding = length9 < width25 ? new Array(width25 - length9 + 1).join(fill31) : "";
+        var length9 = valuePrefix.length + value19.length + valueSuffix.length, padding = length9 < width25 ? new Array(width25 - length9 + 1).join(fill29) : "";
         if (comma && zero4) value19 = group4(padding + value19, padding.length ? width25 - valueSuffix.length : Infinity), padding = "";
         switch (align) {
           case "<":
@@ -32448,26 +32448,34 @@ graph TB
   };
   var depthColor = function(depth) {
     if (depth === 0) {
-      return "#e74c3c";
+      return "#0ea5e9";
     }
     ;
     if (depth === 1) {
-      return "#3498db";
+      return "#8b5cf6";
     }
     ;
     if (depth === 2) {
-      return "#2ecc71";
+      return "#ec4899";
     }
     ;
     if (depth === 3) {
-      return "#f39c12";
+      return "#f59e0b";
     }
     ;
     if (depth === 4) {
-      return "#9b59b6";
+      return "#10b981";
     }
     ;
-    return "#95a5a6";
+    if (depth === 5) {
+      return "#f97316";
+    }
+    ;
+    if (depth === 6) {
+      return "#06b6d4";
+    }
+    ;
+    return "#64748b";
   };
   var hierarchyNode_ = {
     name: getName,
@@ -32563,7 +32571,7 @@ graph TB
                     var r = hierarchyNode_.r(node);
                     var name16 = hierarchyNode_.name(node);
                     var color2 = hierarchyNode_.color(node);
-                    return when9(hierarchyNode_.hasCircleArea(node))(bind70(appendTo2(chartGroup)(Circle.value)([cx3(xPos), cy3(yPos), radius9(r), fill9(color2), fillOpacity4(0.7), strokeColor10("#ffffff"), strokeWidth9(1), classed11("bubble")]))(function() {
+                    return when9(hierarchyNode_.hasCircleArea(node))(bind70(appendTo2(chartGroup)(Circle.value)([cx3(xPos), cy3(yPos), radius9(r), fill9(color2), fillOpacity4(0.8), strokeColor10("#ffffff"), strokeWidth9(2), classed11("bubble")]))(function() {
                       return discard112(when9(canShowCircleLabel({
                         minRadius: 20
                       })(node))(bind70(appendTo2(chartGroup)(Text2.value)([x19(xPos), y18(yPos), text14(name16), textAnchor5("middle"), fontSize3(min8(12)(r / 3)), fill9("#ffffff"), classed11("bubble-label")]))(function() {
@@ -32633,7 +32641,7 @@ graph TB
                     var partHeight = hierarchyNode_.rectHeight(node);
                     var name16 = hierarchyNode_.name(node);
                     var color2 = hierarchyNode_.color(node);
-                    return when9(hierarchyNode_.hasArea(node))(bind70(appendTo2(chartGroup)(Rect.value)([x20(x0), y19(y0), width16(partWidth), height16(partHeight), fill10(color2), fillOpacity5(0.7), strokeColor11("#ffffff"), strokeWidth10(1), classed13("partition")]))(function() {
+                    return when9(hierarchyNode_.hasArea(node))(bind70(appendTo2(chartGroup)(Rect.value)([x20(x0), y19(y0), width16(partWidth), height16(partHeight), fill10(color2), fillOpacity5(0.85), strokeColor11("#ffffff"), strokeWidth10(2), classed13("partition")]))(function() {
                       return discard112(when9(canShowLabel({
                         minWidth: 60,
                         minHeight: 15
@@ -32704,7 +32712,7 @@ graph TB
                     var tileHeight = hierarchyNode_.rectHeight(node);
                     var name16 = hierarchyNode_.name(node);
                     var color2 = hierarchyNode_.color(node);
-                    return when9(hierarchyNode_.hasArea(node))(bind70(appendTo2(chartGroup)(Rect.value)([x21(x0), y20(y0), width17(tileWidth), height17(tileHeight), fill11(color2), fillOpacity6(0.6), strokeColor12("#ffffff"), strokeWidth11(1), classed14("tile")]))(function() {
+                    return when9(hierarchyNode_.hasArea(node))(bind70(appendTo2(chartGroup)(Rect.value)([x21(x0), y20(y0), width17(tileWidth), height17(tileHeight), fill11(color2), fillOpacity6(0.85), strokeColor12("#ffffff"), strokeWidth11(2), classed14("tile")]))(function() {
                       return discard112(when9(canShowLabel({
                         minWidth: 30,
                         minHeight: 20
@@ -32843,7 +32851,6 @@ graph TB
   var strokeColor13 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeOpacity6 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
   var fill15 = /* @__PURE__ */ fill(toAttrString);
-  var fill16 = /* @__PURE__ */ fill(toAttrStringFn);
   var radius10 = /* @__PURE__ */ radius(toAttrNumber);
   var dy3 = /* @__PURE__ */ dy(toAttrNumber);
   var x26 = /* @__PURE__ */ x(toAttrNumberFn);
@@ -32894,17 +32901,6 @@ graph TB
                   ;
                   throw new Error("Failed pattern match at D3.Viz.Tree.HorizontalTree (line 58, column 18 - line 60, column 35): " + [treeType.constructor.name]);
                 })();
-                var color2 = (function() {
-                  if (treeType instanceof Dendrogram) {
-                    return d3SchemeCategory10N_(1);
-                  }
-                  ;
-                  if (treeType instanceof TidyTree) {
-                    return d3SchemeCategory10N_(4);
-                  }
-                  ;
-                  throw new Error("Failed pattern match at D3.Viz.Tree.HorizontalTree (line 61, column 15 - line 63, column 45): " + [treeType.constructor.name]);
-                })();
                 return bind70(attach2(selector))(function(rootSel) {
                   var zoomConfig = {
                     minX: -xExtent * 0.1,
@@ -32921,32 +32917,25 @@ graph TB
                       return bind70(appendTo2(container)(Group.value)([classed15("links")]))(function(linksGroup) {
                         return bind70(appendTo2(container)(Group.value)([classed15("nodes")]))(function(nodesGroup) {
                           return bind70(simpleJoin2(linksGroup)(Path2.value)(links_(laidOutRoot))(keyIsID_))(function(theLinks) {
-                            return discard112(setAttributes2(theLinks)([strokeWidth12(1.5), strokeColor13(color2), strokeOpacity6(0.4), fill15("none"), linkPath]))(function() {
+                            return discard112(setAttributes2(theLinks)([strokeWidth12(1.5), strokeColor13("#94a3b8"), strokeOpacity6(0.6), fill15("none"), linkPath]))(function() {
                               return bind70(simpleJoin2(nodesGroup)(Group.value)(descendants_(laidOutRoot))(keyIsID_))(function(nodeGroups) {
                                 return discard112(setAttributes2(nodeGroups)([transform([positionXYreflected])]))(function() {
-                                  return bind70(appendTo2(nodeGroups)(Circle.value)([fill16(function(d9) {
-                                    var $44 = treeDatum_.hasChildren(d9);
-                                    if ($44) {
-                                      return "#999";
-                                    }
-                                    ;
-                                    return "#555";
-                                  }), radius10(2.5), strokeColor13("white")]))(function() {
+                                  return bind70(appendTo2(nodeGroups)(Circle.value)([fill15("#0ea5e9"), radius10(3), strokeColor13("white"), strokeWidth12(1.5)]))(function() {
                                     return bind70(appendTo2(nodeGroups)(Text2.value)([dy3(0.31), x26(function(d9) {
-                                      var $45 = treeDatum_.hasChildren(d9);
-                                      if ($45) {
-                                        return 6;
+                                      var $42 = treeDatum_.hasChildren(d9);
+                                      if ($42) {
+                                        return 8;
                                       }
                                       ;
-                                      return -6;
+                                      return -8;
                                     }), textAnchor8(function(d9) {
-                                      var $46 = treeDatum_.hasChildren(d9);
-                                      if ($46) {
+                                      var $43 = treeDatum_.hasChildren(d9);
+                                      if ($43) {
                                         return "start";
                                       }
                                       ;
                                       return "end";
-                                    }), text17(treeDatum_.name), fill15(color2)]))(function() {
+                                    }), text17(treeDatum_.name), fill15("#0c4a6e"), fontSize6(11)]))(function() {
                                       return pure44(v2.svg);
                                     });
                                   });
@@ -32985,8 +32974,7 @@ graph TB
   var strokeWidth13 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var strokeColor14 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeOpacity7 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
-  var fill17 = /* @__PURE__ */ fill(toAttrString);
-  var fill18 = /* @__PURE__ */ fill(toAttrStringFn);
+  var fill16 = /* @__PURE__ */ fill(toAttrString);
   var radius11 = /* @__PURE__ */ radius(toAttrNumber);
   var dy4 = /* @__PURE__ */ dy(toAttrNumber);
   var x27 = /* @__PURE__ */ x(toAttrNumberFn);
@@ -32994,8 +32982,8 @@ graph TB
   var text18 = /* @__PURE__ */ text6(toAttrStringFn);
   var rotateRadialLabels = function(d9) {
     return "rotate(" + ((function() {
-      var $41 = treeDatum_.x(d9) >= pi;
-      if ($41) {
+      var $40 = treeDatum_.x(d9) >= pi;
+      if ($40) {
         return "180";
       }
       ;
@@ -33033,17 +33021,6 @@ graph TB
                 var laidOutRoot = runLayoutFn_(layout)(root3);
                 var v1 = treeMinMax_(laidOutRoot);
                 var radialExtent = 2 * v1.yMax;
-                var color2 = (function() {
-                  if (treeType instanceof Dendrogram) {
-                    return d3SchemeCategory10N_(3);
-                  }
-                  ;
-                  if (treeType instanceof TidyTree) {
-                    return d3SchemeCategory10N_(6);
-                  }
-                  ;
-                  throw new Error("Failed pattern match at D3.Viz.Tree.RadialTree (line 69, column 15 - line 71, column 45): " + [treeType.constructor.name]);
-                })();
                 return bind70(attach2(selector))(function(rootSel) {
                   var zoomConfig = {
                     minX: -v1.yMax * 1.2,
@@ -33060,32 +33037,25 @@ graph TB
                       return bind70(appendTo2(container)(Group.value)([classed16("links")]))(function(linksGroup) {
                         return bind70(appendTo2(container)(Group.value)([classed16("nodes")]))(function(nodesGroup) {
                           return bind70(simpleJoin2(linksGroup)(Path2.value)(links_(laidOutRoot))(keyIsID_))(function(theLinks) {
-                            return discard112(setAttributes2(theLinks)([strokeWidth13(1.5), strokeColor14(color2), strokeOpacity7(0.4), fill17("none"), radialLink(treeDatum_.x)(treeDatum_.y)]))(function() {
+                            return discard112(setAttributes2(theLinks)([strokeWidth13(1.5), strokeColor14("#94a3b8"), strokeOpacity7(0.6), fill16("none"), radialLink(treeDatum_.x)(treeDatum_.y)]))(function() {
                               return bind70(simpleJoin2(nodesGroup)(Group.value)(descendants_(laidOutRoot))(keyIsID_))(function(nodeGroups) {
                                 return discard112(setAttributes2(nodeGroups)([transform([radialRotateCommon, radialTranslate, rotateRadialLabels])]))(function() {
-                                  return bind70(appendTo2(nodeGroups)(Circle.value)([fill18(function(d9) {
-                                    var $46 = treeDatum_.hasChildren(d9);
-                                    if ($46) {
-                                      return "#999";
-                                    }
-                                    ;
-                                    return "#555";
-                                  }), radius11(2.5), strokeColor14("white")]))(function() {
+                                  return bind70(appendTo2(nodeGroups)(Circle.value)([fill16("#0ea5e9"), radius11(3), strokeColor14("white"), strokeWidth13(1.5)]))(function() {
                                     return bind70(appendTo2(nodeGroups)(Text2.value)([dy4(0.31), x27(function(d9) {
-                                      var $47 = treeDatum_.hasChildren(d9) === treeDatum_.x(d9) < pi;
-                                      if ($47) {
-                                        return 6;
+                                      var $44 = treeDatum_.hasChildren(d9) === treeDatum_.x(d9) < pi;
+                                      if ($44) {
+                                        return 8;
                                       }
                                       ;
-                                      return -6;
+                                      return -8;
                                     }), textAnchor9(function(d9) {
-                                      var $48 = treeDatum_.hasChildren(d9) === treeDatum_.x(d9) < pi;
-                                      if ($48) {
+                                      var $45 = treeDatum_.hasChildren(d9) === treeDatum_.x(d9) < pi;
+                                      if ($45) {
                                         return "start";
                                       }
                                       ;
                                       return "end";
-                                    }), text18(treeDatum_.name), fill17(color2)]))(function() {
+                                    }), text18(treeDatum_.name), fill16("#0c4a6e"), fontSize7(11)]))(function() {
                                       return pure44(v2.svg);
                                     });
                                   });
@@ -33124,8 +33094,7 @@ graph TB
   var strokeWidth14 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var strokeColor15 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeOpacity8 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
-  var fill19 = /* @__PURE__ */ fill(toAttrString);
-  var fill110 = /* @__PURE__ */ fill(toAttrStringFn);
+  var fill17 = /* @__PURE__ */ fill(toAttrString);
   var radius15 = /* @__PURE__ */ radius(toAttrNumber);
   var dy5 = /* @__PURE__ */ dy(toAttrNumber);
   var x28 = /* @__PURE__ */ x(toAttrNumberFn);
@@ -33177,17 +33146,6 @@ graph TB
                   ;
                   throw new Error("Failed pattern match at D3.Viz.Tree.VerticalTree (line 59, column 18 - line 61, column 33): " + [treeType.constructor.name]);
                 })();
-                var color2 = (function() {
-                  if (treeType instanceof Dendrogram) {
-                    return d3SchemeCategory10N_(2);
-                  }
-                  ;
-                  if (treeType instanceof TidyTree) {
-                    return d3SchemeCategory10N_(5);
-                  }
-                  ;
-                  throw new Error("Failed pattern match at D3.Viz.Tree.VerticalTree (line 62, column 15 - line 64, column 45): " + [treeType.constructor.name]);
-                })();
                 return bind70(attach2(selector))(function(rootSel) {
                   var zoomConfig = {
                     minX: v1.xMin,
@@ -33204,32 +33162,25 @@ graph TB
                       return bind70(appendTo2(container)(Group.value)([classed17("links")]))(function(linksGroup) {
                         return bind70(appendTo2(container)(Group.value)([classed17("nodes")]))(function(nodesGroup) {
                           return bind70(simpleJoin2(linksGroup)(Path2.value)(links_(laidOutRoot))(keyIsID_))(function(theLinks) {
-                            return discard112(setAttributes2(theLinks)([strokeWidth14(1.5), strokeColor15(color2), strokeOpacity8(0.4), fill19("none"), linkPath]))(function() {
+                            return discard112(setAttributes2(theLinks)([strokeWidth14(1.5), strokeColor15("#94a3b8"), strokeOpacity8(0.6), fill17("none"), linkPath]))(function() {
                               return bind70(simpleJoin2(nodesGroup)(Group.value)(descendants_(laidOutRoot))(keyIsID_))(function(nodeGroups) {
                                 return discard112(setAttributes2(nodeGroups)([transform([positionXY])]))(function() {
-                                  return bind70(appendTo2(nodeGroups)(Circle.value)([fill110(function(d9) {
-                                    var $44 = treeDatum_.hasChildren(d9);
-                                    if ($44) {
-                                      return "#999";
-                                    }
-                                    ;
-                                    return "#555";
-                                  }), radius15(2.5), strokeColor15("white")]))(function() {
+                                  return bind70(appendTo2(nodeGroups)(Circle.value)([fill17("#0ea5e9"), radius15(3), strokeColor15("white"), strokeWidth14(1.5)]))(function() {
                                     return bind70(appendTo2(nodeGroups)(Text2.value)([dy5(0.31), x28(function(d9) {
-                                      var $45 = treeDatum_.hasChildren(d9);
-                                      if ($45) {
-                                        return 6;
+                                      var $42 = treeDatum_.hasChildren(d9);
+                                      if ($42) {
+                                        return 8;
                                       }
                                       ;
-                                      return -6;
+                                      return -8;
                                     }), textAnchor10(function(d9) {
-                                      var $46 = treeDatum_.hasChildren(d9);
-                                      if ($46) {
+                                      var $43 = treeDatum_.hasChildren(d9);
+                                      if ($43) {
                                         return "start";
                                       }
                                       ;
                                       return "end";
-                                    }), text19(treeDatum_.name), fill19(color2)]))(function() {
+                                    }), text19(treeDatum_.name), fill17("#0c4a6e"), fontSize8(11)]))(function() {
                                       return pure44(v2.svg);
                                     });
                                   });
@@ -33982,7 +33933,7 @@ graph TB
   var cx4 = /* @__PURE__ */ cx(toAttrNumber);
   var cy4 = /* @__PURE__ */ cy(toAttrNumber);
   var radius16 = /* @__PURE__ */ radius(toAttrNumber);
-  var fill20 = /* @__PURE__ */ fill(toAttrString);
+  var fill18 = /* @__PURE__ */ fill(toAttrString);
   var fillOpacity7 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var bind110 = /* @__PURE__ */ bind(bindD3PrinterM);
   var appendTo1 = /* @__PURE__ */ appendTo(d3Tagless);
@@ -34053,7 +34004,7 @@ graph TB
     return bind110(appendTo1(v)(Svg.value)([classed18("simple-scatterplot"), width18(400), height18(300), viewBox(0)(0)(400)(300)]))(function(svg2) {
       return bind110(appendTo1(svg2)(Group.value)([classed18("dots")]))(function(dotsGroup) {
         return bind110(traverse_14(function(pt) {
-          return bind110(appendTo1(dotsGroup)(Circle.value)([cx4(pt.x), cy4(pt.y), radius16(4), fill20("steelblue"), fillOpacity7(0.7)]))(function() {
+          return bind110(appendTo1(dotsGroup)(Circle.value)([cx4(pt.x), cy4(pt.y), radius16(4), fill18("steelblue"), fillOpacity7(0.7)]))(function() {
             return pure112(unit);
           });
         })(sampleData))(function() {
@@ -34311,7 +34262,7 @@ graph TB
   // output/D3.Viz.GUP/index.js
   var andThen2 = /* @__PURE__ */ andThen(semigroupArray);
   var classed19 = /* @__PURE__ */ classed(toAttrString);
-  var fill21 = /* @__PURE__ */ fill(toAttrString);
+  var fill19 = /* @__PURE__ */ fill(toAttrString);
   var y21 = /* @__PURE__ */ y(toAttrNumber);
   var x29 = /* @__PURE__ */ x(toAttrNumberFnI);
   var text20 = /* @__PURE__ */ text6(toAttrStringFn);
@@ -34339,9 +34290,9 @@ graph TB
         };
       };
       var transition2 = transitionWithDuration(2e3);
-      var update4 = andThen2([classed19("update"), fill21("gray"), y21(200)])(to(transition2)([x29(xFromIndex)]));
-      var exit = andThen2([classed19("exit"), fill21("brown")])(to(transition2)([y21(400), remove]));
-      var enter = andThen2([classed19("enter"), fill21("green"), x29(xFromIndex), y21(0), text20(function($24) {
+      var update4 = andThen2([classed19("update"), fill19("gray"), y21(200)])(to(transition2)([x29(xFromIndex)]));
+      var exit = andThen2([classed19("exit"), fill19("brown")])(to(transition2)([y21(400), remove]));
+      var enter = andThen2([classed19("enter"), fill19("green"), x29(xFromIndex), y21(0), text20(function($24) {
         return singleton7(datum_5["char"]($24));
       }), fontSize9(60)])(to(transition2)([y21(200)]));
       return bind70(attach2(selector))(function(root3) {
@@ -34383,7 +34334,7 @@ graph TB
   var fromFoldable26 = /* @__PURE__ */ fromFoldable(ordString)(foldableArray);
   var discard64 = /* @__PURE__ */ discard(discardUnit);
   var radius17 = /* @__PURE__ */ radius(toAttrNumber);
-  var fill22 = /* @__PURE__ */ fill(toAttrStringFn);
+  var fill20 = /* @__PURE__ */ fill(toAttrStringFn);
   var strokeWidth15 = /* @__PURE__ */ strokeWidth(toAttrNumberFn);
   var strokeColor1 = /* @__PURE__ */ strokeColor(toAttrStringFn);
   var cx5 = /* @__PURE__ */ cx(toAttrNumberFn);
@@ -34485,7 +34436,7 @@ graph TB
                                 ticks: fromFoldable26([])
                               }))(function(v2) {
                                 return bind70(simpleJoin2(nodesGroup)(Circle.value)(v2.nodes)(keyIsID_))(function(nodesSelection) {
-                                  return discard112(setAttributes2(nodesSelection)([radius17(5), fill22(datum_6.colorByGroup)]))(function() {
+                                  return discard112(setAttributes2(nodesSelection)([radius17(5), fill20(datum_6.colorByGroup)]))(function() {
                                     return bind70(simpleJoin2(linksGroup)(Line.value)(v2.links)(keyIsID_))(function(linksSelection) {
                                       return discard112(setAttributes2(linksSelection)([strokeWidth15(function($71) {
                                         return sqrt(link_6.value($71));
@@ -34836,7 +34787,7 @@ graph TB
   var show36 = /* @__PURE__ */ show(showNumber);
   var x30 = /* @__PURE__ */ x(toAttrNumber);
   var y27 = /* @__PURE__ */ y(toAttrNumber);
-  var fill23 = /* @__PURE__ */ fill(toAttrString);
+  var fill21 = /* @__PURE__ */ fill(toAttrString);
   var strokeColor17 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth16 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var draw8 = function(dictBind) {
@@ -34896,7 +34847,7 @@ graph TB
                                 var xPos = applyScale_(xScale)(point.x) - barWidth / 2;
                                 var yPos = applyScale_(yScale)(point.y);
                                 var barHeight = iHeight - yPos;
-                                return bind70(appendTo2(chartGroup)(Rect.value)([x30(xPos), y27(yPos), width19(barWidth), height19(barHeight), fill23("#4a90e2"), strokeColor17("#357abd"), strokeWidth16(1), classed21("bar")]))(function() {
+                                return bind70(appendTo2(chartGroup)(Rect.value)([x30(xPos), y27(yPos), width19(barWidth), height19(barHeight), fill21("#4a90e2"), strokeColor17("#357abd"), strokeWidth16(1), classed21("bar")]))(function() {
                                   return pure44(unit);
                                 });
                               };
@@ -34937,7 +34888,7 @@ graph TB
   var height20 = /* @__PURE__ */ height8(toAttrNumber);
   var show37 = /* @__PURE__ */ show(showNumber);
   var d6 = /* @__PURE__ */ d2(toAttrString);
-  var fill24 = /* @__PURE__ */ fill(toAttrString);
+  var fill22 = /* @__PURE__ */ fill(toAttrString);
   var strokeColor18 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth17 = /* @__PURE__ */ strokeWidth(toAttrNumber);
   var draw9 = function(dictBind) {
@@ -34986,7 +34937,7 @@ graph TB
                                 yScale
                               })))(function(lineGen) {
                                 var pathData = generateLinePath_(lineGen)(dataPoints);
-                                return bind70(appendTo2(chartGroup)(Path2.value)([d6(pathData), fill24("none"), strokeColor18("#4a90e2"), strokeWidth17(2), classed22("line")]))(function() {
+                                return bind70(appendTo2(chartGroup)(Path2.value)([d6(pathData), fill22("none"), strokeColor18("#4a90e2"), strokeWidth17(2), classed22("line")]))(function() {
                                   return pure44(unit);
                                 });
                               });
@@ -35014,7 +34965,7 @@ graph TB
   var discard66 = /* @__PURE__ */ discard(discardUnit);
   var strokeColor19 = /* @__PURE__ */ strokeColor(toAttrStringFn);
   var strokeWidth18 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var fill25 = /* @__PURE__ */ fill(toAttrString);
+  var fill23 = /* @__PURE__ */ fill(toAttrString);
   var cx6 = /* @__PURE__ */ cx(toAttrNumberFnI);
   var cy6 = /* @__PURE__ */ cy(toAttrNumberFn);
   var radius18 = /* @__PURE__ */ radius(toAttrNumber);
@@ -35048,7 +34999,7 @@ graph TB
           return bind70(appendTo2(root3)(Svg.value)([viewBox(-10)(-100)(320)(160), classed23("d3svg gup")]))(function(svg2) {
             return bind70(appendTo2(svg2)(Group.value)([]))(function(circleGroup) {
               return bind70(simpleJoin2(circleGroup)(Circle.value)(circleData)(keyIsID_))(function(circles) {
-                return discard112(setAttributes2(circles)([strokeColor19(datum_7.color), strokeWidth18(3), fill25("none"), cx6(datum_7.x), cy6(datum_7.y), radius18(10)]))(function() {
+                return discard112(setAttributes2(circles)([strokeColor19(datum_7.color), strokeWidth18(3), fill23("none"), cx6(datum_7.x), cy6(datum_7.y), radius18(10)]))(function() {
                   return pure44(circles);
                 });
               });
@@ -35065,7 +35016,7 @@ graph TB
   // output/D3.Viz.ThreeLittleCircles/index.js
   var classed24 = /* @__PURE__ */ classed(toAttrString);
   var discard67 = /* @__PURE__ */ discard(discardUnit);
-  var fill26 = /* @__PURE__ */ fill(toAttrString);
+  var fill24 = /* @__PURE__ */ fill(toAttrString);
   var cx7 = /* @__PURE__ */ cx(toAttrNumberFnI);
   var cy7 = /* @__PURE__ */ cy(toAttrNumber);
   var radius19 = /* @__PURE__ */ radius(toAttrNumber);
@@ -35084,7 +35035,7 @@ graph TB
         return bind70(appendTo2(root3)(Svg.value)([viewBox(-10)(20)(120)(60), classed24("d3svg gup")]))(function(svg2) {
           return bind70(appendTo2(svg2)(Group.value)([]))(function(circleGroup) {
             return bind70(simpleJoin2(circleGroup)(Circle.value)([32, 57, 293])(keyIsID_))(function(circles) {
-              return discard112(setAttributes2(circles)([fill26("green"), cx7(function(v) {
+              return discard112(setAttributes2(circles)([fill24("green"), cx7(function(v) {
                 return function(i2) {
                   return toNumber(coerceIndex2(i2)) * 30 + 10;
                 };
@@ -35271,7 +35222,7 @@ graph TB
   var show39 = /* @__PURE__ */ show(showNumber);
   var x31 = /* @__PURE__ */ x(toAttrNumber);
   var y28 = /* @__PURE__ */ y(toAttrNumber);
-  var fill27 = /* @__PURE__ */ fill(toAttrString);
+  var fill25 = /* @__PURE__ */ fill(toAttrString);
   var strokeColor20 = /* @__PURE__ */ strokeColor(toAttrString);
   var text22 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor11 = /* @__PURE__ */ textAnchor(toAttrString);
@@ -35418,7 +35369,7 @@ graph TB
                     var barHeight = d9.population / maxPop * chartHeight;
                     var barX = getStateX(d9.state) + getAgeOffset(d9.age);
                     var barY = chartHeight - barHeight;
-                    return bind115(appendTo2(chartGroup)(Rect.value)([x31(barX), y28(barY), width21(barWidth), height21(barHeight), fill27(getAgeColor(d9.age)), strokeColor20("white"), classed26("bar")]))(function() {
+                    return bind115(appendTo2(chartGroup)(Rect.value)([x31(barX), y28(barY), width21(barWidth), height21(barHeight), fill25(getAgeColor(d9.age)), strokeColor20("white"), classed26("bar")]))(function() {
                       return pure115(unit);
                     });
                   };
@@ -35474,7 +35425,7 @@ graph TB
   var d7 = /* @__PURE__ */ d2(toAttrString);
   var strokeColor21 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeWidth19 = /* @__PURE__ */ strokeWidth(toAttrNumber);
-  var fill28 = /* @__PURE__ */ fill(toAttrString);
+  var fill26 = /* @__PURE__ */ fill(toAttrString);
   var x34 = /* @__PURE__ */ x(toAttrNumber);
   var y29 = /* @__PURE__ */ y(toAttrNumber);
   var text23 = /* @__PURE__ */ text6(toAttrString);
@@ -35607,7 +35558,7 @@ graph TB
                     ;
                     if (v1 instanceof Just) {
                       var pathData = linePath(chartWidth)(chartHeight)(maxValue)(minValue)(points);
-                      return bind115(appendTo2(chartGroup)(Path2.value)([d7(pathData), strokeColor21("#4682b4"), strokeWidth19(1.5), fill28("none"), classed27("line series-" + v1.value0.series)]))(function() {
+                      return bind115(appendTo2(chartGroup)(Path2.value)([d7(pathData), strokeColor21("#4682b4"), strokeWidth19(1.5), fill26("none"), classed27("line series-" + v1.value0.series)]))(function() {
                         return pure115(unit);
                       });
                     }
@@ -35721,7 +35672,7 @@ graph TB
   var width23 = /* @__PURE__ */ width8(toAttrNumber);
   var height23 = /* @__PURE__ */ height8(toAttrNumber);
   var d8 = /* @__PURE__ */ d2(toAttrString);
-  var fill29 = /* @__PURE__ */ fill(toAttrString);
+  var fill27 = /* @__PURE__ */ fill(toAttrString);
   var fillOpacity8 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var strokeColor22 = /* @__PURE__ */ strokeColor(toAttrString);
   var textAnchor13 = /* @__PURE__ */ textAnchor(toAttrString);
@@ -35894,7 +35845,7 @@ graph TB
                             var outerR = radiusScale(seg.end);
                             var pathData = arcPath(innerR)(outerR)(startAngle)(endAngle);
                             var color2 = getAgeColor(v1.value0.age);
-                            return bind115(appendTo2(chartGroup)(Path2.value)([d8(pathData), fill29(color2), fillOpacity8(0.8), strokeColor22("#ffffff"), classed28("segment")]))(function() {
+                            return bind115(appendTo2(chartGroup)(Path2.value)([d8(pathData), fill27(color2), fillOpacity8(0.8), strokeColor22("#ffffff"), classed28("segment")]))(function() {
                               return pure44(unit);
                             });
                           }
@@ -35920,10 +35871,10 @@ graph TB
                         };
                         var drawCircularGrid = function(value19) {
                           var gridRadius = radiusScale(value19);
-                          return bind115(appendTo2(yAxisGroup)(Group.value)([fill29("none"), classed28("grid-line")]))(function(gridGroup) {
-                            return bind115(appendTo2(gridGroup)(Circle.value)([radius20(gridRadius), strokeColor22("#000000"), strokeOpacity10(0.5), fill29("none")]))(function() {
-                              return bind115(appendTo2(gridGroup)(Text2.value)([y30(-gridRadius), dy6(5.6), text24(formatSI2(value19)), strokeColor22("#ffffff"), strokeWidth20(5), fill29("none"), classed28("grid-label-bg")]))(function(textBg) {
-                                return bind115(appendTo2(gridGroup)(Text2.value)([y30(-gridRadius), dy6(5.6), text24(formatSI2(value19)), fill29("#000000"), classed28("grid-label")]))(function(textFg) {
+                          return bind115(appendTo2(yAxisGroup)(Group.value)([fill27("none"), classed28("grid-line")]))(function(gridGroup) {
+                            return bind115(appendTo2(gridGroup)(Circle.value)([radius20(gridRadius), strokeColor22("#000000"), strokeOpacity10(0.5), fill27("none")]))(function() {
+                              return bind115(appendTo2(gridGroup)(Text2.value)([y30(-gridRadius), dy6(5.6), text24(formatSI2(value19)), strokeColor22("#ffffff"), strokeWidth20(5), fill27("none"), classed28("grid-label-bg")]))(function(textBg) {
+                                return bind115(appendTo2(gridGroup)(Text2.value)([y30(-gridRadius), dy6(5.6), text24(formatSI2(value19)), fill27("#000000"), classed28("grid-label")]))(function(textFg) {
                                   return pure44(unit);
                                 });
                               });
@@ -35939,7 +35890,7 @@ graph TB
                                 return bind115(appendTo2(legendGroup)(Group.value)([transform([function(v1) {
                                   return "translate(-40," + (toString2(yOffset) + ")");
                                 }]), classed28("legend-item")]))(function(itemGroup) {
-                                  return bind115(appendTo2(itemGroup)(Rect.value)([width23(18), height23(18), fill29(getAgeColor(age$prime))]))(function() {
+                                  return bind115(appendTo2(itemGroup)(Rect.value)([width23(18), height23(18), fill27(getAgeColor(age$prime))]))(function() {
                                     return bind115(appendTo2(itemGroup)(Text2.value)([x35(24), y30(9), dy6(5.6), text24(age$prime), classed28("legend-label")]))(function() {
                                       return pure44(unit);
                                     });
@@ -36170,13 +36121,13 @@ graph TB
   var y31 = /* @__PURE__ */ y(toAttrNumber);
   var textAnchor14 = /* @__PURE__ */ textAnchor(toAttrString);
   var fontSize10 = /* @__PURE__ */ fontSize(toAttrNumber);
-  var fill30 = /* @__PURE__ */ fill(toAttrString);
+  var fill28 = /* @__PURE__ */ fill(toAttrString);
   var text25 = /* @__PURE__ */ text6(toAttrString);
   var compare5 = /* @__PURE__ */ compare(ordNumber);
   var cx8 = /* @__PURE__ */ cx(toAttrNumberFnI);
   var cy8 = /* @__PURE__ */ cy(toAttrNumberFnI);
   var radius21 = /* @__PURE__ */ radius(toAttrNumberFnI);
-  var fill111 = /* @__PURE__ */ fill(toAttrStringFnI);
+  var fill110 = /* @__PURE__ */ fill(toAttrStringFnI);
   var fillOpacity9 = /* @__PURE__ */ fillOpacity(toAttrNumber);
   var text110 = /* @__PURE__ */ text6(toAttrStringFn);
   var x37 = /* @__PURE__ */ x(toAttrNumberFnI);
@@ -36282,7 +36233,7 @@ graph TB
                     return bind70(appendTo2(svg2)(Line.value)([]))(function(tickMark) {
                       return discard112(setAttributes2(tickMark)([x111(scaleX(defaultConfig)(tickValue)), x211(scaleX(defaultConfig)(tickValue)), y111(defaultConfig.height - defaultConfig.marginBottom), y210(defaultConfig.height - defaultConfig.marginBottom + 6), strokeColor23("#333"), strokeWidth21(1)]))(function() {
                         return bind70(appendTo2(svg2)(Text2.value)([]))(function(tickLabel) {
-                          return discard112(setAttributes2(tickLabel)([x36(scaleX(defaultConfig)(tickValue)), y31(defaultConfig.height - defaultConfig.marginBottom + 15), textAnchor14("middle"), fontSize10(10), fill30("#333"), text25(formatIncome(tickValue))]))(function() {
+                          return discard112(setAttributes2(tickLabel)([x36(scaleX(defaultConfig)(tickValue)), y31(defaultConfig.height - defaultConfig.marginBottom + 15), textAnchor14("middle"), fontSize10(10), fill28("#333"), text25(formatIncome(tickValue))]))(function() {
                             return pure44(unit);
                           });
                         });
@@ -36290,13 +36241,13 @@ graph TB
                     });
                   };
                   return bind70(traverse13(createXTick)(xTicks))(function() {
-                    return bind70(appendTo2(svg2)(Text2.value)([x36(defaultConfig.width / 2), y31(defaultConfig.height - 5), textAnchor14("middle"), fontSize10(14), fill30("#333"), classed29("x-axis-label"), text25("Wealth")]))(function(xAxisLabel) {
+                    return bind70(appendTo2(svg2)(Text2.value)([x36(defaultConfig.width / 2), y31(defaultConfig.height - 5), textAnchor14("middle"), fontSize10(14), fill28("#333"), classed29("x-axis-label"), text25("Wealth")]))(function(xAxisLabel) {
                       return bind70(appendTo2(svg2)(Line.value)([x111(defaultConfig.marginLeft), y111(defaultConfig.marginTop), x211(defaultConfig.marginLeft), y210(defaultConfig.height - defaultConfig.marginBottom), strokeColor23("#333"), strokeWidth21(1.5), classed29("y-axis")]))(function(yAxisLine) {
                         var createYTick = function(tickValue) {
                           return bind70(appendTo2(svg2)(Line.value)([]))(function(tickMark) {
                             return discard112(setAttributes2(tickMark)([x111(defaultConfig.marginLeft - 6), x211(defaultConfig.marginLeft), y111(scaleY(defaultConfig)(tickValue)), y210(scaleY(defaultConfig)(tickValue)), strokeColor23("#333"), strokeWidth21(1)]))(function() {
                               return bind70(appendTo2(svg2)(Text2.value)([]))(function(tickLabel) {
-                                return discard112(setAttributes2(tickLabel)([x36(defaultConfig.marginLeft - 10), y31(scaleY(defaultConfig)(tickValue) + 3), textAnchor14("end"), fontSize10(10), fill30("#333"), text25(show42(floor2(tickValue)))]))(function() {
+                                return discard112(setAttributes2(tickLabel)([x36(defaultConfig.marginLeft - 10), y31(scaleY(defaultConfig)(tickValue) + 3), textAnchor14("end"), fontSize10(10), fill28("#333"), text25(show42(floor2(tickValue)))]))(function() {
                                   return pure44(unit);
                                 });
                               });
@@ -36304,7 +36255,7 @@ graph TB
                           });
                         };
                         return bind70(traverse13(createYTick)(yTicks))(function() {
-                          return bind70(appendTo2(svg2)(Text2.value)([x36(15), y31(defaultConfig.height / 2), textAnchor14("middle"), fontSize10(14), fill30("#333"), classed29("y-axis-label"), text25("Health")]))(function(yAxisLabel) {
+                          return bind70(appendTo2(svg2)(Text2.value)([x36(15), y31(defaultConfig.height / 2), textAnchor14("middle"), fontSize10(14), fill28("#333"), classed29("y-axis-label"), text25("Health")]))(function(yAxisLabel) {
                             return bind70(appendTo2(svg2)(Group.value)([classed29("nations")]))(function(chartGroup) {
                               return pure44(function(nations) {
                                 var calculateAttrs = function(d9) {
@@ -36342,7 +36293,7 @@ graph TB
                                         return function(i2) {
                                           return calculateAttrs(d9)(i2).r;
                                         };
-                                      }), fill111(function(d9) {
+                                      }), fill110(function(d9) {
                                         return function(i2) {
                                           return calculateAttrs(d9)(i2).color;
                                         };
@@ -36366,7 +36317,7 @@ graph TB
                                             return function(i2) {
                                               return calculateAttrs(d9)(i2).r;
                                             };
-                                          }), fill111(function(d9) {
+                                          }), fill110(function(d9) {
                                             return function(i2) {
                                               return calculateAttrs(d9)(i2).color;
                                             };
@@ -36397,7 +36348,7 @@ graph TB
                                                             return function(i2) {
                                                               return calculateAttrs(d9)(i2).y - calculateAttrs(d9)(i2).r - 5;
                                                             };
-                                                          }), textAnchor14("middle"), fontSize10(11), fill30("#333"), fillOpacity9(0), text110(datum_8.name), classed29("nation-label enter")]))(function() {
+                                                          }), textAnchor14("middle"), fontSize10(11), fill28("#333"), fillOpacity9(0), text110(datum_8.name), classed29("nation-label enter")]))(function() {
                                                             return pure44(newCircles);
                                                           });
                                                         });

@@ -69,9 +69,9 @@ draw treeJson selector = do
             , width tileWidth
             , height tileHeight
             , fill color
-            , fillOpacity 0.6
+            , fillOpacity 0.85
             , strokeColor "#ffffff"
-            , strokeWidth 1.0
+            , strokeWidth 2.0
             , classed "tile"
             ]
 
