@@ -4,13 +4,14 @@ import Prelude
 
 import PSD3.Internal.Attributes.Sugar (classed, fill, fillOpacity, fontSize, height, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, y)
 import PSD3.Data.Tree (TreeJson_)
-import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
-import PSD3.Internal.FFI (descendants_, hierarchyFromJSON_, runPartitionLayout_, treeSortForPartition_, partitionLayout_, partitionSetSize_, partitionSetPadding_)
+import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Selector)
+import PSD3.Internal.FFI (cloneTreeJson_, descendants_, hierarchyFromJSON_, runPartitionLayout_, treeSortForPartition_, partitionLayout_, partitionSetSize_, partitionSetPadding_)
 import PSD3.Data.Node (D3_TreeNode)
-import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
-import PSD3.Shared.HierarchyHelpers (hierarchyNode_, canShowLabel)
-import Data.Foldable (traverse_)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
+import PSD3.Shared.HierarchyHelpers (hierarchyNode_, canShowLabel, depthColor)
 import Effect.Class (class MonadEffect)
+import PSD3.Internal.FFI (keyIsID_)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- Main drawing function for icicle chart
 draw :: forall m.
@@ -34,8 +35,11 @@ draw treeJson selector = do
       classed "partitions"
     ]
 
+  -- Clone the TreeJson_ to prevent D3 layout mutations from affecting other visualizations
+  let treeJsonClone = cloneTreeJson_ treeJson
+
   -- Create hierarchy from TreeJson_
-  let hierarchy = hierarchyFromJSON_ treeJson
+  let hierarchy = hierarchyFromJSON_ treeJsonClone
   let sortedHierarchy = treeSortForPartition_ hierarchy
 
   -- Create and configure partition layout
@@ -46,50 +50,35 @@ draw treeJson selector = do
   -- Apply partition layout to hierarchy
   let partitionRoot = runPartitionLayout_ partitionLayout sortedHierarchy
 
-  -- Get all nodes (descendants)
+  -- Get all nodes (descendants) and use simpleJoin to bind data
   let nodes = descendants_ partitionRoot
+      node' = hierarchyNode_
 
-  -- Draw each icicle partition
-  let drawPartition :: forall r. D3_TreeNode r -> m Unit
-      drawPartition node = do
-        let node' = hierarchyNode_
-        let x0 = node'.x0 node
-        let y0 = node'.y0 node
-        let partWidth = node'.rectWidth node
-        let partHeight = node'.rectHeight node
-        let name = node'.name node
-        let color = node'.color node
+  -- Draw partitions using simpleJoin for proper data binding
+  partitions <- simpleJoin chartGroup Rect nodes keyIsID_
+  setAttributes partitions
+    [ x (\(d :: Datum_) -> node'.x0 (unsafeCoerce d))
+    , y (\(d :: Datum_) -> node'.y0 (unsafeCoerce d))
+    , width (\(d :: Datum_) -> node'.rectWidth (unsafeCoerce d))
+    , height (\(d :: Datum_) -> node'.rectHeight (unsafeCoerce d))
+    , fill (\(d :: Datum_) -> depthColor (node'.depthInt (unsafeCoerce d)))
+    , fillOpacity 0.85
+    , strokeColor "#ffffff"
+    , strokeWidth 2.0
+    , classed "partition"
+    ]
 
-        -- Only draw partitions with area > 0
-        when (node'.hasArea node) do
-          -- Draw rectangle
-          _ <- appendTo chartGroup Rect [
-              x x0
-            , y y0
-            , width partWidth
-            , height partHeight
-            , fill color
-            , fillOpacity 0.85
-            , strokeColor "#ffffff"
-            , strokeWidth 2.0
-            , classed "partition"
-            ]
-
-          -- Add label for wider partitions
-          when (canShowLabel { minWidth: 60.0, minHeight: 15.0 } node) do
-            _ <- appendTo chartGroup Text [
-                x (x0 + 4.0)
-              , y (y0 + partHeight / 2.0 + 4.0)
-              , text name
-              , textAnchor "start"
-              , fontSize 10.0
-              , fill "#ffffff"
-              , classed "partition-label"
-              ]
-            pure unit
-
-          pure unit
-
-  _ <- traverse_ drawPartition nodes
+  -- Draw labels using simpleJoin for proper data binding
+  partitionLabels <- simpleJoin chartGroup Text nodes keyIsID_
+  setAttributes partitionLabels
+    [ x (\(d :: Datum_) -> node'.x0 (unsafeCoerce d) + 4.0)
+    , y (\(d :: Datum_) -> node'.y0 (unsafeCoerce d) + node'.rectHeight (unsafeCoerce d) / 2.0 + 4.0)
+    , text (\(d :: Datum_) -> node'.name (unsafeCoerce d))
+    , textAnchor "start"
+    , fontSize 10.0
+    , fill "#ffffff"
+    , fillOpacity (\(d :: Datum_) -> if canShowLabel { minWidth: 60.0, minHeight: 15.0 } (unsafeCoerce d) then 1.0 else 0.0)
+    , classed "partition-label"
+    ]
 
   pure unit

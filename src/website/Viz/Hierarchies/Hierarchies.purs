@@ -12,7 +12,6 @@ import PSD3.Interpreter.D3 (runD3M)
 import Effect (Effect)
 import Effect.Aff (Aff)
 import Effect.Class (liftEffect)
-import Unsafe.Coerce (unsafeCoerce)
 
 -- | FFI: Clear the visualization container
 foreign import clearContainer_ :: Selector D3Selection_ -> Effect Unit
@@ -24,9 +23,7 @@ clearViz = clearContainer_
 -- | Draw circle packing layout
 drawCirclePacking :: TreeJson_ -> Selector D3Selection_ -> Aff Unit
 drawCirclePacking treeJson selector = liftEffect $ do
-  -- Convert TreeJson_ to Json format for BubbleChart
-  let jsonData = unsafeCoerce treeJson
-  (_ :: Tuple Unit Unit) <- runD3M (Bubble.draw jsonData selector)
+  (_ :: Tuple Unit Unit) <- runD3M (Bubble.draw treeJson selector)
   pure unit
 
 -- | Draw icicle layout

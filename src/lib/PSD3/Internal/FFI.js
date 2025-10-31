@@ -1156,6 +1156,7 @@ export function getHierarchyValue_(d) { return (d.value === 'undefined') ? null 
 export function getHierarchyChildren_(d) { return !d.children ? [] : d.children }
 export function getHierarchyParent_(d) { return !d.parent ? [] : d.parent } // don't think this can ever be null in valid hierarchy node but this gives us confidence that PureScript type is right 
 export function hierarchyFromJSON_(json) { return d3.hierarchy(json) }
+export function cloneTreeJson_(json) { return structuredClone(json) }
 export function hNodeDepth_(node) { return node.depth }
 export function hNodeHeight_(node) { return node.height }
 export function hNodeX_(node) { return node.x }

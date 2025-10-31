@@ -247,6 +247,7 @@ foreign import data D3SortComparator_   :: Type -- a number such that n < 0 => a
 foreign import data D3Hierarchical_     :: Type
 
 foreign import hierarchyFromJSON_       :: forall d. TreeJson_ -> D3_TreeNode d
+foreign import cloneTreeJson_           :: TreeJson_ -> TreeJson_
 -- TODO now that these different hierarchy rows are composed at type level, polymorphic functions should be written
 foreign import treeSortForCirclePack_   :: forall d. D3CirclePackRow d -> D3CirclePackRow d
 foreign import treeSortForTreeMap_      :: forall d. D3TreeMapRow d -> D3TreeMapRow d

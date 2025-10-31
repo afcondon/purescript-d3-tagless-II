@@ -6,7 +6,8 @@ import Effect.Class (class MonadEffect)
 import PSD3 (DragBehavior(..), Element(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, on)
 import PSD3.Internal.Attributes.Sugar (classed, viewBox)
-import PSD3.Internal.Selection.Types (Behavior(..), defaultZoomConfig)
+import PSD3.Internal.Selection.Types (Behavior(..))
+import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 
 type ZoomableSVGConfig = {
     minX :: Number  
@@ -20,17 +21,23 @@ type ZoomableSVGConfig = {
 }
 
 -- | Add an SVG with standard zoom and pan behavior
--- | based on window dimensions and standard scale extents.
+-- | Uses DefaultZoomExtent so D3 automatically uses the viewBox for zoom coordinates
 -- | It returns the inner <g> that it adds. Your contents should go in this group
 zoomableSVG :: forall selection m.
   MonadEffect m =>
   SelectionM selection m =>
   selection -> -- the attach point
-  ZoomableSVGConfig -> 
+  ZoomableSVGConfig ->
   m { svg :: selection, zoomGroup :: selection }
-zoomableSVG root config = do 
-  svg       <- appendTo root Svg [ viewBox config.minX config.minY config.width config.height, classed "classed" ]
-  zoomGroup <- appendTo svg  Group [ classed "zoom-group"]
+zoomableSVG root config = do
+  svg       <- appendTo root Svg [ viewBox config.minX config.minY config.width config.height, classed config.svgClass ]
+  zoomGroup <- appendTo svg  Group [ classed config.innerClass ]
   _ <- zoomGroup `on` Drag DefaultDrag
-  _ <- svg   `on` (Zoom $ defaultZoomConfig config.innerWidth config.innerHeight zoomGroup)
+  -- Use DefaultZoomExtent so D3 automatically uses the viewBox for zoom extent
+  _ <- svg `on` Zoom
+        { extent: DefaultZoomExtent
+        , scale: ScaleExtent 0.1 4.0
+        , name: "zoom"
+        , target: zoomGroup
+        }
   pure {svg, zoomGroup}

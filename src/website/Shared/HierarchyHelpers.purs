@@ -15,17 +15,17 @@ getName node = case unsafeCoerce (unsafeCoerce node).data.name of
 
 -- | Standard depth-based color scheme for hierarchy visualizations
 -- | Provides consistent colors across treemap, icicle, bubble chart, etc.
--- | Uses a vibrant, harmonious color palette
+-- | Uses a subdued, harmonious color palette
 depthColor :: Int -> String
 depthColor depth = case depth of
-  0 -> "#0ea5e9"  -- Sky blue (root level)
-  1 -> "#8b5cf6"  -- Purple
-  2 -> "#ec4899"  -- Pink
-  3 -> "#f59e0b"  -- Amber
-  4 -> "#10b981"  -- Emerald
-  5 -> "#f97316"  -- Orange
-  6 -> "#06b6d4"  -- Cyan
-  _ -> "#64748b"  -- Slate gray (very deep levels)
+  0 -> "#2c7bb6"  -- Dark blue (root level)
+  1 -> "#abd9e9"  -- Light blue
+  2 -> "#ffffbf"  -- Pale yellow
+  3 -> "#fdae61"  -- Orange
+  4 -> "#d7191c"  -- Red
+  5 -> "#2c7bb6"  -- Dark blue (cycling)
+  6 -> "#abd9e9"  -- Light blue (cycling)
+  _ -> "#999999"  -- Gray (very deep levels)
 
 -- | Type-safe accessor record for D3 hierarchy nodes
 -- | Provides consistent, computed access to node properties across all hierarchy layouts

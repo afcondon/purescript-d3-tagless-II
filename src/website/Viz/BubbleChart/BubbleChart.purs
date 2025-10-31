@@ -2,22 +2,16 @@ module D3.Viz.BubbleChart where
 
 import Prelude
 
-import Data.Argonaut.Core (Json)
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, fontSize, height, radius, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, y)
-import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
-import PSD3.Internal.FFI (descendants_, hierarchyFromJSON_, packLayout_, packSetPadding_, packSetSize_, runPackLayout_, treeSortForCirclePack_)
+import PSD3.Data.Tree (TreeJson_)
+import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Selector)
+import PSD3.Internal.FFI (cloneTreeJson_, descendants_, hierarchyFromJSON_, packLayout_, packSetPadding_, packSetSize_, runPackLayout_, treeSortForCirclePack_)
 import PSD3.Data.Node (D3_TreeNode)
-import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
-import PSD3.Shared.HierarchyHelpers (hierarchyNode_, canShowCircleLabel)
-import PSD3.Shared.DataLoader (simpleLoadJSON)
-import Data.Foldable (traverse_)
-import Effect.Aff (Aff)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
+import PSD3.Shared.HierarchyHelpers (hierarchyNode_, canShowCircleLabel, depthColor)
 import Effect.Class (class MonadEffect)
+import PSD3.Internal.FFI (keyIsID_)
 import Unsafe.Coerce (unsafeCoerce)
-
--- Load flare data from JSON file using DataLoader utility
-loadFlareData :: Aff Json
-loadFlareData = simpleLoadJSON "./data/flare-2.json"
 
 -- Snippet_Start
 -- Name: BubbleChartDraw
@@ -26,8 +20,8 @@ draw :: forall m.
   Bind m =>
   MonadEffect m =>
   SelectionM D3Selection_ m =>
-  Json -> Selector D3Selection_ -> m Unit
-draw jsonData selector = do
+  TreeJson_ -> Selector D3Selection_ -> m Unit
+draw treeJson selector = do
   let dims = { width: 900.0, height: 900.0 }
 
   (root :: D3Selection_) <- attach selector
@@ -43,8 +37,11 @@ draw jsonData selector = do
       classed "bubbles"
     ]
 
-  -- Create hierarchy from parsed JSON
-  let hierarchy = hierarchyFromJSON_ (unsafeCoerce jsonData)
+  -- Clone the TreeJson_ to prevent D3 layout mutations from affecting other visualizations
+  let treeJsonClone = cloneTreeJson_ treeJson
+
+  -- Create hierarchy from TreeJson_
+  let hierarchy = hierarchyFromJSON_ treeJsonClone
   let sortedHierarchy = treeSortForCirclePack_ hierarchy
 
   -- Create and configure pack layout
@@ -55,49 +52,35 @@ draw jsonData selector = do
   -- Apply pack layout to hierarchy
   let packedRoot = runPackLayout_ packLayout sortedHierarchy
 
-  -- Get all nodes (descendants)
+  -- Get all nodes (descendants) and use simpleJoin to bind data
   let nodes = descendants_ packedRoot
+      node' = hierarchyNode_
 
-  -- Draw each bubble
-  let drawBubble :: forall r. D3_TreeNode r -> m Unit
-      drawBubble node = do
-        let node' = hierarchyNode_
-        let xPos = node'.x node
-        let yPos = node'.y node
-        let r = node'.r node
-        let name = node'.name node
-        let color = node'.color node
+  -- Draw bubbles using simpleJoin for proper data binding
+  bubbles <- simpleJoin chartGroup Circle nodes keyIsID_
+  setAttributes bubbles
+    [ cx (\(d :: Datum_) -> node'.x (unsafeCoerce d))
+    , cy (\(d :: Datum_) -> node'.y (unsafeCoerce d))
+    , radius (\(d :: Datum_) -> node'.r (unsafeCoerce d))
+    , fill (\(d :: Datum_) -> depthColor (node'.depthInt (unsafeCoerce d)))
+    , fillOpacity 0.8
+    , strokeColor "#ffffff"
+    , strokeWidth 2.0
+    , classed "bubble"
+    ]
 
-        -- Only draw bubbles with radius > 0
-        when (node'.hasCircleArea node) do
-          -- Draw circle
-          _ <- appendTo chartGroup Circle [
-              cx xPos
-            , cy yPos
-            , radius r
-            , fill color
-            , fillOpacity 0.8
-            , strokeColor "#ffffff"
-            , strokeWidth 2.0
-            , classed "bubble"
-            ]
-
-          -- Add label for larger bubbles
-          when (canShowCircleLabel { minRadius: 20.0 } node) do
-            _ <- appendTo chartGroup Text [
-                x xPos
-              , y yPos
-              , text name
-              , textAnchor "middle"
-              , fontSize (min 12.0 (r / 3.0))
-              , fill "#ffffff"
-              , classed "bubble-label"
-              ]
-            pure unit
-
-          pure unit
-
-  _ <- traverse_ drawBubble nodes
+  -- Draw labels using simpleJoin for proper data binding
+  labels <- simpleJoin chartGroup Text nodes keyIsID_
+  setAttributes labels
+    [ x (\(d :: Datum_) -> node'.x (unsafeCoerce d))
+    , y (\(d :: Datum_) -> node'.y (unsafeCoerce d))
+    , text (\(d :: Datum_) -> node'.name (unsafeCoerce d))
+    , textAnchor "middle"
+    , fontSize (\(d :: Datum_) -> min 12.0 (node'.r (unsafeCoerce d) / 3.0))
+    , fill "#ffffff"
+    , fillOpacity (\(d :: Datum_) -> if canShowCircleLabel { minRadius: 20.0 } (unsafeCoerce d) then 1.0 else 0.0)
+    , classed "bubble-label"
+    ]
 
   pure unit
 -- Snippet_End

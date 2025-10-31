@@ -4,13 +4,14 @@ import Prelude
 
 import PSD3.Internal.Attributes.Sugar (classed, fill, fillOpacity, fontSize, height, strokeColor, strokeWidth, text, textAnchor, viewBox, width, x, y)
 import PSD3.Data.Tree (TreeJson_)
-import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
-import PSD3.Internal.FFI (descendants_, hierarchyFromJSON_, runTreemapLayout_, treeSortForTreeMap_, treemapLayout_, treemapSetPadding_, treemapSetSize_)
+import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Selector)
+import PSD3.Internal.FFI (cloneTreeJson_, descendants_, hierarchyFromJSON_, runTreemapLayout_, treeSortForTreeMap_, treemapLayout_, treemapSetPadding_, treemapSetSize_)
 import PSD3.Data.Node (D3_TreeNode)
-import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach)
-import PSD3.Shared.HierarchyHelpers (hierarchyNode_, canShowLabel)
-import Data.Foldable (traverse_)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
+import PSD3.Shared.HierarchyHelpers (hierarchyNode_, canShowLabel, depthColor)
 import Effect.Class (class MonadEffect)
+import PSD3.Internal.FFI (keyIsID_)
+import Unsafe.Coerce (unsafeCoerce)
 
 -- Main drawing function for treemap
 draw :: forall m.
@@ -34,8 +35,11 @@ draw treeJson selector = do
       classed "tiles"
     ]
 
+  -- Clone the TreeJson_ to prevent D3 layout mutations from affecting other visualizations
+  let treeJsonClone = cloneTreeJson_ treeJson
+
   -- Create hierarchy from TreeJson_
-  let hierarchy = hierarchyFromJSON_ treeJson
+  let hierarchy = hierarchyFromJSON_ treeJsonClone
   let sortedHierarchy = treeSortForTreeMap_ hierarchy
 
   -- Create and configure treemap layout
@@ -46,50 +50,35 @@ draw treeJson selector = do
   -- Apply treemap layout to hierarchy
   let treemapRoot = runTreemapLayout_ treemapLayout sortedHierarchy
 
-  -- Get all leaf nodes (descendants with no children)
+  -- Get all nodes (descendants) and use simpleJoin to bind data
   let nodes = descendants_ treemapRoot
+      node' = hierarchyNode_
 
-  -- Draw each treemap tile
-  let drawTile :: forall r. D3_TreeNode r -> m Unit
-      drawTile node = do
-        let node' = hierarchyNode_
-        let x0 = node'.x0 node
-        let y0 = node'.y0 node
-        let tileWidth = node'.rectWidth node
-        let tileHeight = node'.rectHeight node
-        let name = node'.name node
-        let color = node'.color node
+  -- Draw tiles using simpleJoin for proper data binding
+  tiles <- simpleJoin chartGroup Rect nodes keyIsID_
+  setAttributes tiles
+    [ x (\(d :: Datum_) -> node'.x0 (unsafeCoerce d))
+    , y (\(d :: Datum_) -> node'.y0 (unsafeCoerce d))
+    , width (\(d :: Datum_) -> node'.rectWidth (unsafeCoerce d))
+    , height (\(d :: Datum_) -> node'.rectHeight (unsafeCoerce d))
+    , fill (\(d :: Datum_) -> depthColor (node'.depthInt (unsafeCoerce d)))
+    , fillOpacity 0.85
+    , strokeColor "#ffffff"
+    , strokeWidth 2.0
+    , classed "tile"
+    ]
 
-        -- Only draw tiles with area > 0 (leaf nodes typically)
-        when (node'.hasArea node) do
-          -- Draw rectangle
-          _ <- appendTo chartGroup Rect [
-              x x0
-            , y y0
-            , width tileWidth
-            , height tileHeight
-            , fill color
-            , fillOpacity 0.85
-            , strokeColor "#ffffff"
-            , strokeWidth 2.0
-            , classed "tile"
-            ]
-
-          -- Add label for larger tiles
-          when (canShowLabel { minWidth: 30.0, minHeight: 20.0 } node) do
-            _ <- appendTo chartGroup Text [
-                x (x0 + 2.0)
-              , y (y0 + 12.0)
-              , text name
-              , textAnchor "start"
-              , fontSize 10.0
-              , fill "#ffffff"
-              , classed "tile-label"
-              ]
-            pure unit
-
-          pure unit
-
-  _ <- traverse_ drawTile nodes
+  -- Draw labels using simpleJoin for proper data binding
+  tileLabels <- simpleJoin chartGroup Text nodes keyIsID_
+  setAttributes tileLabels
+    [ x (\(d :: Datum_) -> node'.x0 (unsafeCoerce d) + 2.0)
+    , y (\(d :: Datum_) -> node'.y0 (unsafeCoerce d) + 12.0)
+    , text (\(d :: Datum_) -> node'.name (unsafeCoerce d))
+    , textAnchor "start"
+    , fontSize 10.0
+    , fill "#ffffff"
+    , fillOpacity (\(d :: Datum_) -> if canShowLabel { minWidth: 30.0, minHeight: 20.0 } (unsafeCoerce d) then 1.0 else 0.0)
+    , classed "tile-label"
+    ]
 
   pure unit
