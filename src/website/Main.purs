@@ -42,6 +42,20 @@ import PSD3.Examples.LineChart as LineChartExample
 import PSD3.Examples.ScatterPlot as ScatterPlotExample
 import PSD3.Examples.GroupedBarChart as GroupedBarChartExample
 import PSD3.Examples.MultiLineChart as MultiLineChartExample
+import PSD3.Examples.BubbleChart as BubbleChartExample
+import PSD3.Examples.ChordDiagram as ChordDiagramExample
+-- import PSD3.Examples.VerticalTree as VerticalTreeExample
+-- import PSD3.Examples.HorizontalTree as HorizontalTreeExample
+-- import PSD3.Examples.RadialTree as RadialTreeExample
+-- import PSD3.Examples.Treemap as TreemapExample
+-- import PSD3.Examples.Icicle as IcicleExample
+-- import PSD3.Examples.LesMisForce as LesMisForceExample
+-- import PSD3.Examples.TopologicalSort as TopologicalSortExample
+-- import PSD3.Examples.SankeyDiagram as SankeyDiagramExample
+-- import PSD3.Examples.MapQuartet as MapQuartetExample
+import PSD3.Examples.ThreeCirclesTransition as ThreeCirclesTransitionExample
+import PSD3.Examples.GeneralUpdatePattern as GeneralUpdatePatternExample
+-- import PSD3.Examples.AnimatedRadialTree as AnimatedRadialTreeExample
 import PSD3.Acknowledgements as Acknowledgements
 import PSD3.Website.Types (Route(..))
 import Routing.Hash (matches, setHash)
@@ -86,6 +100,20 @@ type Slots =
   , scatterPlotExample :: forall q. H.Slot q Void Unit
   , groupedBarChartExample :: forall q. H.Slot q Void Unit
   , multiLineChartExample :: forall q. H.Slot q Void Unit
+  , bubbleChartExample :: forall q. H.Slot q Void Unit
+  , chordDiagramExample :: forall q. H.Slot q Void Unit
+  -- , verticalTreeExample :: forall q. H.Slot q Void Unit
+  -- , horizontalTreeExample :: forall q. H.Slot q Void Unit
+  -- , radialTreeExample :: forall q. H.Slot q Void Unit
+  -- , treemapExample :: forall q. H.Slot q Void Unit
+  -- , icicleExample :: forall q. H.Slot q Void Unit
+  -- , lesMisForceExample :: forall q. H.Slot q Void Unit
+  -- , topologicalSortExample :: forall q. H.Slot q Void Unit
+  -- , sankeyDiagramExample :: forall q. H.Slot q Void Unit
+  -- , mapQuartetExample :: forall q. H.Slot q Void Unit
+  , threeCirclesTransitionExample :: forall q. H.Slot q Void Unit
+  , generalUpdatePatternExample :: forall q. H.Slot q Void Unit
+  -- , animatedRadialTreeExample :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -115,6 +143,20 @@ _lineChartExample = Proxy :: Proxy "lineChartExample"
 _scatterPlotExample = Proxy :: Proxy "scatterPlotExample"
 _groupedBarChartExample = Proxy :: Proxy "groupedBarChartExample"
 _multiLineChartExample = Proxy :: Proxy "multiLineChartExample"
+_bubbleChartExample = Proxy :: Proxy "bubbleChartExample"
+_chordDiagramExample = Proxy :: Proxy "chordDiagramExample"
+-- _verticalTreeExample = Proxy :: Proxy "verticalTreeExample"
+-- _horizontalTreeExample = Proxy :: Proxy "horizontalTreeExample"
+-- _radialTreeExample = Proxy :: Proxy "radialTreeExample"
+-- _treemapExample = Proxy :: Proxy "treemapExample"
+-- _icicleExample = Proxy :: Proxy "icicleExample"
+-- _lesMisForceExample = Proxy :: Proxy "lesMisForceExample"
+-- _topologicalSortExample = Proxy :: Proxy "topologicalSortExample"
+-- _sankeyDiagramExample = Proxy :: Proxy "sankeyDiagramExample"
+-- _mapQuartetExample = Proxy :: Proxy "mapQuartetExample"
+_threeCirclesTransitionExample = Proxy :: Proxy "threeCirclesTransitionExample"
+_generalUpdatePatternExample = Proxy :: Proxy "generalUpdatePatternExample"
+-- _animatedRadialTreeExample = Proxy :: Proxy "animatedRadialTreeExample"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -238,6 +280,25 @@ renderExamplePage exampleId = case exampleId of
     HH.slot_ _groupedBarChartExample unit GroupedBarChartExample.component unit
   "multi-line-chart" ->
     HH.slot_ _multiLineChartExample unit MultiLineChartExample.component unit
+  "bubble-chart" ->
+    HH.slot_ _bubbleChartExample unit BubbleChartExample.component unit
+  "chord-diagram" ->
+    HH.slot_ _chordDiagramExample unit ChordDiagramExample.component unit
+  "three-circles-transition" ->
+    HH.slot_ _threeCirclesTransitionExample unit ThreeCirclesTransitionExample.component unit
+  "general-update-pattern" ->
+    HH.slot_ _generalUpdatePatternExample unit GeneralUpdatePatternExample.component unit
+  -- TODO: Fix data loading for these examples
+  -- "vertical-tree" -> HH.slot_ _verticalTreeExample unit VerticalTreeExample.component unit
+  -- "horizontal-tree" -> HH.slot_ _horizontalTreeExample unit HorizontalTreeExample.component unit
+  -- "radial-tree" -> HH.slot_ _radialTreeExample unit RadialTreeExample.component unit
+  -- "treemap" -> HH.slot_ _treemapExample unit TreemapExample.component unit
+  -- "icicle" -> HH.slot_ _icicleExample unit IcicleExample.component unit
+  -- "lesmis-force" -> HH.slot_ _lesMisForceExample unit LesMisForceExample.component unit
+  -- "topological-sort" -> HH.slot_ _topologicalSortExample unit TopologicalSortExample.component unit
+  -- "sankey-diagram" -> HH.slot_ _sankeyDiagramExample unit SankeyDiagramExample.component unit
+  -- "map-quartet" -> HH.slot_ _mapQuartetExample unit MapQuartetExample.component unit
+  -- "animated-radial-tree" -> HH.slot_ _animatedRadialTreeExample unit AnimatedRadialTreeExample.component unit
   _ ->
     HH.div
       [ HP.classes [ HH.ClassName "not-found" ] ]
