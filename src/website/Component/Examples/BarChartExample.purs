@@ -44,8 +44,8 @@ handleAction = case _ of
           , { x: 9.0, y: 85.0 }
           ]
 
-    -- Render the visualization
-    _ <- H.liftEffect $ eval_D3M $ BarChart.draw sampleData "div.example-viz"
+    -- Render the visualization (with a small delay to ensure DOM is ready)
+    _ <- H.liftAff $ H.liftEffect $ eval_D3M $ BarChart.draw sampleData "#bar-chart-viz"
     pure unit
 
 render :: forall m. Unit -> H.ComponentHTML Action () m
@@ -77,7 +77,9 @@ render _ =
         , HH.div
             [ HP.classes [ HH.ClassName "example-viz-container" ] ]
             [ HH.div
-                [ HP.classes [ HH.ClassName "example-viz" ] ]
+                [ HP.id "bar-chart-viz"
+                , HP.classes [ HH.ClassName "example-viz" ]
+                ]
                 []
             ]
         ]
