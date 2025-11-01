@@ -16,6 +16,7 @@ data Action
   | HoverNation (Maybe String)          -- Mouse entered/left a nation circle
   | ToggleNationSelection String        -- User clicked a nation to highlight/track
   | SetAnimationSpeed Number            -- User adjusted animation speed
+  | ToggleLabels                        -- Toggle between always showing labels and only on hover
   | Render                              -- Trigger re-render of visualization
 
 derive instance eqAction :: Eq Action
@@ -32,4 +33,5 @@ instance showAction :: Show Action where
     HoverNation (Just nation) -> "HoverNation (Just " <> nation <> ")"
     ToggleNationSelection nation -> "ToggleNationSelection " <> nation
     SetAnimationSpeed speed -> "SetAnimationSpeed " <> show speed
+    ToggleLabels -> "ToggleLabels"
     Render -> "Render"

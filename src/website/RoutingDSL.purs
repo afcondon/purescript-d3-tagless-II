@@ -37,6 +37,7 @@ routes =
   <|> explore
   <|> wealthHealth
   <|> codeAtlas
+  <|> fpFtw
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -125,6 +126,10 @@ wealthHealth = WealthHealth <$ lit "wealth-health" <* end
 codeAtlas :: Match Route
 codeAtlas = CodeAtlas <$ lit "code-atlas" <* end
 
+-- | Match: /fp-ftw
+fpFtw :: Match Route
+fpFtw = FpFtw <$ lit "fp-ftw" <* end
+
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
 acknowledgements = Acknowledgements <$ lit "acknowledgements" <* end
@@ -157,5 +162,6 @@ routeToPath CodeExplorer = "/code-explorer"
 routeToPath (Explore snippetId) = "/explore/" <> snippetId
 routeToPath WealthHealth = "/wealth-health"
 routeToPath CodeAtlas = "/code-atlas"
+routeToPath FpFtw = "/fp-ftw"
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"

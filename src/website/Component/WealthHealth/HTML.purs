@@ -9,7 +9,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
 import PSD3.WealthHealth.Actions (Action(..))
-import PSD3.WealthHealth.State (State)
+import PSD3.WealthHealth.State (State, LabelMode(..))
 import PSD3.WealthHealth.Types (Region(..), regionName, regionColor)
 
 -- | Render the control panel with scrubber, play/pause, and other controls
@@ -65,6 +65,21 @@ renderControlPanel state =
         , HH.span
             [ HP.classes [ HH.ClassName "wealth-health-speed__value" ] ]
             [ HH.text $ show state.animationSpeed <> " years/sec" ]
+        ]
+
+    -- Label display toggle
+    , HH.div
+        [ HP.classes [ HH.ClassName "wealth-health-labels" ] ]
+        [ HH.label_
+            [ HH.text "Show labels:" ]
+        , HH.button
+            [ HP.classes [ HH.ClassName "wealth-health-labels__toggle" ]
+            , HE.onClick \_ -> ToggleLabels
+            ]
+            [ HH.text $ case state.labelMode of
+                AlwaysShow -> "Always"
+                OnHoverOnly -> "Only on hover"
+            ]
         ]
     ]
   where

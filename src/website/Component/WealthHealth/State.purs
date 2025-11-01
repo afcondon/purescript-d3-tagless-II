@@ -1,5 +1,7 @@
 module PSD3.WealthHealth.State where
 
+import Prelude
+
 import D3.Viz.WealthHealth.Draw as Draw
 import Data.Maybe (Maybe(..))
 import Data.Unit (Unit)
@@ -9,6 +11,11 @@ import Halogen as H
 import PSD3.Interpreter.D3 (D3M)
 import PSD3.Internal.Types (D3Selection_)
 import PSD3.WealthHealth.Types (WealthHealthModel)
+
+-- | Label display mode
+data LabelMode = AlwaysShow | OnHoverOnly
+
+derive instance eqLabelMode :: Eq LabelMode
 
 -- | Component state for the Wealth & Health visualization
 type State =
@@ -20,6 +27,7 @@ type State =
   , animationSpeed :: Number             -- Years per second during playback
   , animationSubscriptionId :: Maybe H.SubscriptionId  -- Timer subscription for animation
   , vizUpdateFn :: Maybe (Array Draw.NationPoint -> D3M Unit D3Selection_ D3Selection_)  -- Visualization update function
+  , labelMode :: LabelMode               -- How to display country labels
   }
 
 -- | Initial state before data is loaded
@@ -33,4 +41,5 @@ initialState _ =
   , animationSpeed: 5.0  -- 5 years per second (reasonable default)
   , animationSubscriptionId: Nothing
   , vizUpdateFn: Nothing
+  , labelMode: OnHoverOnly  -- Start with labels only on hover
   }

@@ -83,7 +83,7 @@ horizontalTreeScene = {
 , cssClass: "tree horizontal"
 , attributes: treeSceneAttributes
 , activeForces: Set.fromFoldable [ "htreeNodesX", "htreeNodesY", "charge1", "collide2", linksForceName_ ]
-, nodeInitializerFunctions: [ unpinAllNodes, treeNodesToTreeXY_H, fixNamedNodeTo "PSD3.Main" { x: 0.0, y: 0.0 } ]
+, nodeInitializerFunctions: [ unpinAllNodes, treeNodesToTreeXY_H ]
 }
 
 -- | Vertical Module Tree Scene - Tree layout flowing top to bottom
@@ -96,5 +96,5 @@ verticalTreeScene = {
 , cssClass: "tree vertical"
 , attributes: treeSceneAttributes
 , activeForces: Set.fromFoldable [ "vtreeNodesX", "vtreeNodesY", "charge1", "collide2", linksForceName_ ]
-, nodeInitializerFunctions: [ unpinAllNodes, treeNodesToTreeXY_V, fixNamedNodeTo "PSD3.Main" { x: 0.0, y: 0.0 } ]
+, nodeInitializerFunctions: [ unpinAllNodes, treeNodesToTreeXY_V ]
 }

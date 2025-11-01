@@ -189,6 +189,41 @@
   margin-top: 0.25rem;
 }
 
+/* Label toggle control */
+.wealth-health-labels {
+  margin-bottom: 1.5rem;
+}
+
+.wealth-health-labels label {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--color-gray-darker);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.wealth-health-labels__toggle {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: bold;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  background-color: var(--color-teal);
+  color: white;
+  border: 2px solid var(--color-teal);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-transform: none;
+}
+
+.wealth-health-labels__toggle:hover {
+  background-color: #4a7575;
+  border-color: #4a7575;
+}
+
 /* Legend */
 .wealth-health-legend {
   border-top: 2px solid var(--color-gray-light);
@@ -391,6 +426,13 @@
 
 /* Show label on group hover */
 .nation-group:hover .nation-label {
+  fill-opacity: 1 !important;
+  opacity: 1 !important;
+}
+
+/* Always show labels when in "always show" mode */
+.wealth-health-viz-container.labels-always-show .nation-label {
+  fill-opacity: 1 !important;
   opacity: 1 !important;
 }
 

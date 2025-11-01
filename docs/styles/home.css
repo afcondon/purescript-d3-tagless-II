@@ -14,6 +14,22 @@
   text-align: center;
 }
 
+.home-hero__logo {
+  margin-bottom: 1.5rem;
+}
+
+.home-hero__logo-image {
+  height: 8.75rem; /* 140px at default font size */
+  width: auto;
+  display: inline-block;
+}
+
+@media (max-width: 768px) {
+  .home-hero__logo-image {
+    height: 6rem; /* Smaller on mobile */
+  }
+}
+
 .home-hero__title {
   font-size: 4rem;
   font-weight: bold;

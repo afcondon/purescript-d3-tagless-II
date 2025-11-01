@@ -35,9 +35,14 @@ render _ =
     [ -- Hero section
       HH.section
         [ HP.classes [ HH.ClassName "home-hero" ] ]
-        [ HH.h1
-            [ HP.classes [ HH.ClassName "home-hero__title" ] ]
-            [ HH.text "PS<$>D3" ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "home-hero__logo" ] ]
+            [ HH.img
+                [ HP.src "assets/psd3-logo-color.svg"
+                , HP.alt "PSD3 Logo"
+                , HP.classes [ HH.ClassName "home-hero__logo-image" ]
+                ]
+            ]
         , HH.p
             [ HP.classes [ HH.ClassName "home-hero__subtitle" ] ]
             [ HH.text "Type-safe, composable data visualization with PureScript and D3" ]
@@ -141,6 +146,10 @@ render _ =
                 "Wealth & Health"
                 "Hans Rosling's animated exploration (1800-2020)"
                 (routeToPath WealthHealth)
+            , renderExampleCard
+                "FP FTW"
+                "Functional programming showcases - unique PSD3 capabilities"
+                (routeToPath FpFtw)
             ]
         ]
 

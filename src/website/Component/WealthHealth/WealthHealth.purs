@@ -23,7 +23,7 @@ import PSD3.Internal.Types (D3Selection_)
 import PSD3.WealthHealth.Actions (Action(..))
 import PSD3.WealthHealth.Data (getAllNationsAtYear, getNationAtYear, loadNationsData)
 import PSD3.WealthHealth.HTML (renderControlPanel, renderLegend)
-import PSD3.WealthHealth.State (State, initialState)
+import PSD3.WealthHealth.State (State, LabelMode(..), initialState)
 import PSD3.WealthHealth.Types (NationPoint, WealthHealthModel, regionColor, regionName)
 
 -- | Wealth & Health visualization component
@@ -72,7 +72,13 @@ render state =
                     [ HP.classes [ HH.ClassName "wealth-health-viz-wrapper" ] ]
                     [ HH.div
                         [ HP.id "wealth-health-viz"
-                        , HP.classes [ HH.ClassName "wealth-health-viz-container" ] ]
+                        , HP.classes
+                            [ HH.ClassName "wealth-health-viz-container"
+                            , HH.ClassName $ case state.labelMode of
+                                AlwaysShow -> "labels-always-show"
+                                OnHoverOnly -> ""
+                            ]
+                        ]
                         []  -- PS<$>D3 will render SVG here
                     , renderTooltip state model
                     ]
@@ -259,6 +265,14 @@ handleAction = case _ of
 
   SetAnimationSpeed speed -> do
     H.modify_ _ { animationSpeed = speed }
+
+  ToggleLabels -> do
+    H.modify_ \s ->
+      s { labelMode = case s.labelMode of
+            AlwaysShow -> OnHoverOnly
+            OnHoverOnly -> AlwaysShow
+        }
+    handleAction Render
 
   Render -> do
     state <- H.get

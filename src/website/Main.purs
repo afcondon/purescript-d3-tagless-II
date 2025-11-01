@@ -34,6 +34,7 @@ import PSD3.RoutingDSL (routing, routeToPath)
 import PSD3.CodeExplorer.CodeExplorerWrapper as CodeExplorer
 import PSD3.WealthHealth.WealthHealthWrapper as WealthHealth
 import PSD3.CodeAtlas.CodeAtlasWrapper as CodeAtlas
+import PSD3.FpFtw as FpFtw
 import PSD3.Acknowledgements as Acknowledgements
 import PSD3.Website.Types (Route(..))
 import Routing.Hash (matches, setHash)
@@ -70,6 +71,7 @@ type Slots =
   , codeExploration :: forall q. H.Slot q Void String
   , wealthHealth :: forall q. H.Slot q Void Unit
   , codeAtlas :: forall q. H.Slot q Void Unit
+  , fpFtw :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -91,6 +93,7 @@ _codeExplorer = Proxy :: Proxy "codeExplorer"
 _codeExploration = Proxy :: Proxy "codeExploration"
 _wealthHealth = Proxy :: Proxy "wealthHealth"
 _codeAtlas = Proxy :: Proxy "codeAtlas"
+_fpFtw = Proxy :: Proxy "fpFtw"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -176,6 +179,9 @@ renderPage route = case spy "Route is" route of
 
   CodeAtlas ->
     HH.slot_ _codeAtlas unit CodeAtlas.component unit
+
+  FpFtw ->
+    HH.slot_ _fpFtw unit FpFtw.component unit
 
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit

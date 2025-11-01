@@ -353,3 +353,41 @@ code, pre {
   font-family: var(--font-mono);
   font-size: 0.875rem;
 }
+
+/* Logo Watermark Background */
+.logo-watermark {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vw;
+  max-width: none;
+  height: auto;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+  user-select: none;
+}
+
+/* Utility class to add watermark to any page */
+.page-with-watermark {
+  position: relative;
+}
+
+.page-with-watermark::before {
+  content: '';
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100vw;
+  height: auto;
+  aspect-ratio: 840 / 360;
+  background-image: url('../assets/psd3-logo.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}

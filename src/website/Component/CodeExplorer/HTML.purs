@@ -43,7 +43,7 @@ render :: forall m.
   State -> HH.HTML (ComponentSlot () m Action) Action
 render state =
   HH.div
-      [ HP.classes [ HH.ClassName "fullscreen-container", HH.ClassName "spago-fullscreen" ] ]
+      [ HP.classes [ HH.ClassName "fullscreen-container", HH.ClassName "spago-fullscreen", HH.ClassName "page-with-watermark" ] ]
       [ -- Floating control panel (top-left) - with editorial styling
         HH.div
           [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left", HH.ClassName "floating-panel--small", HH.ClassName "spago-controls-panel", HH.ClassName "editorial" ] ]
