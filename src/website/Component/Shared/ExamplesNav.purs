@@ -56,6 +56,10 @@ render currentRoute =
         , sectionTitle "Hierarchies"
         , navLink Hierarchies "Hierarchies" currentRoute
 
+        -- Rich Data Structures
+        , sectionTitle "Rich Data Structures"
+        , navLink FpFtw "FP FTW" currentRoute
+
         -- Applications
         , sectionTitle "Applications"
         , navLink CodeExplorer "Package Explorer" currentRoute

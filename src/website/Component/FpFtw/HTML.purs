@@ -18,6 +18,7 @@ render _ =
         , items:
             [ tocAnchor "map-quartet" "1. Map-Based Quartet" 0
             , tocAnchor "topological-sort" "2. Topological Sort" 0
+            , tocAnchor "lesmis-layers" "3. Les Misérables Layers" 0
             ]
         , image: Just "images/understanding-bookmark-trees.jpeg"
         }
@@ -72,5 +73,25 @@ render _ =
             ]
         , HH.p_
             [ HH.text "Tasks are arranged in layers computed from the topological sort. Layer 0 contains tasks with no dependencies, Layer 1 contains tasks depending only on Layer 0, and so on. All tasks within a layer can be executed in parallel. The topologicalSort function handles cycle detection and returns tasks in a valid execution order - demonstrating how functional data structures and algorithms elegantly solve dependency resolution problems found in build systems, task schedulers, and module systems." ]
+        ]
+
+    -- Section 3: Les Misérables Topological Layers
+    , HH.section
+        [ HP.id "lesmis-layers"
+        , HP.classes [ HH.ClassName "tutorial-section" ]
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+            [ HH.text "3. Les Misérables Character Dependencies" ]
+        , HH.p_
+            [ HH.text "Applying topological sort to the Les Misérables character co-appearance graph reveals a surprising result: the graph is acyclic! With 77 characters arranged across 27 dependency layers (0-26), we can see the narrative structure of Victor Hugo's novel. Characters are positioned vertically by their dependency layer, showing which characters' storylines build upon others." ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
+            [ HH.div
+                [ HP.classes [ HH.ClassName "lesmis-layers-viz" ] ]
+                []
+            ]
+        , HH.p_
+            [ HH.text "This visualization uses the same Data.Graph topological sort, but on a much larger real-world dataset. Characters within the same layer have no dependencies on each other and represent parallel narrative threads. The layered structure reveals the hierarchical relationships in the story - from the foundational characters at layer 0 to the culminating interactions at layer 26." ]
         ]
     ]
