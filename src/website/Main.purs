@@ -37,6 +37,11 @@ import PSD3.CodeAtlas.CodeAtlasWrapper as CodeAtlas
 import PSD3.FpFtw as FpFtw
 import PSD3.ExamplesGallery as ExamplesGallery
 import PSD3.Examples.BarChart as BarChartExample
+import PSD3.Examples.ThreeLittleCircles as ThreeLittleCirclesExample
+import PSD3.Examples.LineChart as LineChartExample
+import PSD3.Examples.ScatterPlot as ScatterPlotExample
+import PSD3.Examples.GroupedBarChart as GroupedBarChartExample
+import PSD3.Examples.MultiLineChart as MultiLineChartExample
 import PSD3.Acknowledgements as Acknowledgements
 import PSD3.Website.Types (Route(..))
 import Routing.Hash (matches, setHash)
@@ -76,6 +81,11 @@ type Slots =
   , fpFtw :: forall q. H.Slot q Void Unit
   , examplesGallery :: forall q. H.Slot q Void Unit
   , barChartExample :: forall q. H.Slot q Void Unit
+  , threeLittleCirclesExample :: forall q. H.Slot q Void Unit
+  , lineChartExample :: forall q. H.Slot q Void Unit
+  , scatterPlotExample :: forall q. H.Slot q Void Unit
+  , groupedBarChartExample :: forall q. H.Slot q Void Unit
+  , multiLineChartExample :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -100,6 +110,11 @@ _codeAtlas = Proxy :: Proxy "codeAtlas"
 _fpFtw = Proxy :: Proxy "fpFtw"
 _examplesGallery = Proxy :: Proxy "examplesGallery"
 _barChartExample = Proxy :: Proxy "barChartExample"
+_threeLittleCirclesExample = Proxy :: Proxy "threeLittleCirclesExample"
+_lineChartExample = Proxy :: Proxy "lineChartExample"
+_scatterPlotExample = Proxy :: Proxy "scatterPlotExample"
+_groupedBarChartExample = Proxy :: Proxy "groupedBarChartExample"
+_multiLineChartExample = Proxy :: Proxy "multiLineChartExample"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -211,8 +226,18 @@ renderPage route = case spy "Route is" route of
 -- | Render individual example pages based on exampleId
 renderExamplePage :: String -> H.ComponentHTML Action Slots Aff
 renderExamplePage exampleId = case exampleId of
+  "three-little-circles" ->
+    HH.slot_ _threeLittleCirclesExample unit ThreeLittleCirclesExample.component unit
   "bar-chart" ->
     HH.slot_ _barChartExample unit BarChartExample.component unit
+  "line-chart" ->
+    HH.slot_ _lineChartExample unit LineChartExample.component unit
+  "scatter-plot" ->
+    HH.slot_ _scatterPlotExample unit ScatterPlotExample.component unit
+  "grouped-bar-chart" ->
+    HH.slot_ _groupedBarChartExample unit GroupedBarChartExample.component unit
+  "multi-line-chart" ->
+    HH.slot_ _multiLineChartExample unit MultiLineChartExample.component unit
   _ ->
     HH.div
       [ HP.classes [ HH.ClassName "not-found" ] ]
