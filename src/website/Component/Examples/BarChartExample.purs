@@ -6,7 +6,9 @@ import D3.Viz.BarChart as BarChart
 import D3.Viz.Charts.Model (DataPoint)
 import Data.Int (toNumber)
 import Data.Maybe (Maybe(..))
+import Effect.Aff (Aff)
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
@@ -20,7 +22,8 @@ component = H.mkComponent
   { initialState: \_ -> unit
   , render
   , eval: H.mkEval H.defaultEval
-      { initialize = Just Initialize
+      { handleAction = handleAction
+      , initialize = Just Initialize
       }
   }
 
@@ -29,6 +32,7 @@ data Action = Initialize
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM Unit Action () o m Unit
 handleAction = case _ of
   Initialize -> do
+    log "BarChartExample: Initialize action fired"
     -- Generate sample data
     let sampleData :: Array DataPoint
         sampleData =
@@ -44,8 +48,10 @@ handleAction = case _ of
           , { x: 9.0, y: 85.0 }
           ]
 
-    -- Render the visualization (with a small delay to ensure DOM is ready)
-    _ <- H.liftAff $ H.liftEffect $ eval_D3M $ BarChart.draw sampleData "#bar-chart-viz"
+    log "BarChartExample: About to draw bar chart to #bar-chart-viz"
+    -- Render the visualization
+    _ <- H.liftEffect $ eval_D3M $ BarChart.draw sampleData "#bar-chart-viz"
+    log "BarChartExample: Bar chart draw complete"
     pure unit
 
 render :: forall m. Unit -> H.ComponentHTML Action () m
