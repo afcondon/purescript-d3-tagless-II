@@ -14,8 +14,14 @@ import PSD3.Internal.Hierarchical (verticalClusterLink, verticalLink)
 import PSD3.Shared.ZoomableViewbox (ZoomableSVGConfig, zoomableSVG)
 import Utility (getWindowWidthHeight)
 
--- Get layout algorithm from D3 (from shared TreeHelpers)
-foreign import getLayout :: TreeType -> TreeLayoutFn_
+-- FFI imports for D3 layout algorithms
+foreign import d3Tree_ :: Unit -> TreeLayoutFn_
+foreign import d3Cluster_ :: Unit -> TreeLayoutFn_
+
+-- Type-safe layout selection using pattern matching
+getLayout :: TreeType -> TreeLayoutFn_
+getLayout TidyTree = d3Tree_ unit
+getLayout Dendrogram = d3Cluster_ unit
 
 -- Transform function for vertical trees (x and y are in normal positions)
 positionXY :: Datum_ -> String

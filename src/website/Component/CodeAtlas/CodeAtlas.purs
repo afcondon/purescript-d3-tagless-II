@@ -148,33 +148,49 @@ renderControlPanel state =
         , renderTab InteractiveGraphTab state.activeTab
         , renderTab ExpandableBubblesTab state.activeTab
         ]
-    , if state.activeTab == ExpandableBubblesTab
+    , if state.activeTab == VisualizationTab
         then HH.div
           [ HP.classes [ HH.ClassName "control-group" ] ]
-          [ HH.h4_ [ HH.text "Spotlight Mode" ]
+          [ HH.h4_ [ HH.text "Layout" ]
           , HH.div
-              [ HP.classes [ HH.ClassName "spotlight-toggle-container" ] ]
-              [ HH.label
-                  [ HP.classes [ HH.ClassName "spotlight-toggle" ] ]
-                  [ HH.input
-                      [ HP.type_ HP.InputCheckbox
-                      , HP.checked state.spotlightModeActive
-                      , HP.disabled (not state.spotlightModeActive)
-                      , HE.onClick \_ -> ResetToOverview
-                      ]
-                  , HH.span
-                      [ HP.classes [ HH.ClassName "toggle-slider" ] ]
-                      []
+              [ HP.classes [ HH.ClassName "layout-toggle-container" ] ]
+              [ HH.button
+                  [ HP.classes [ HH.ClassName "layout-toggle-button" ]
+                  , HE.onClick \_ -> ToggleGridLayout
                   ]
+                  [ HH.text if state.isGridLayout then "Switch to Force Layout" else "Switch to Grid Layout" ]
               , HH.p
                   [ HP.classes [ HH.ClassName "helper-text" ] ]
-                  [ HH.text if state.spotlightModeActive
-                      then "Click to return to overview"
-                      else "Click a module to spotlight its dependencies"
-                  ]
+                  [ HH.text "Toggle between force-directed and grid layouts" ]
               ]
           ]
-        else HH.text ""
+        else if state.activeTab == ExpandableBubblesTab
+          then HH.div
+            [ HP.classes [ HH.ClassName "control-group" ] ]
+            [ HH.h4_ [ HH.text "Spotlight Mode" ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "spotlight-toggle-container" ] ]
+                [ HH.label
+                    [ HP.classes [ HH.ClassName "spotlight-toggle" ] ]
+                    [ HH.input
+                        [ HP.type_ HP.InputCheckbox
+                        , HP.checked state.spotlightModeActive
+                        , HP.disabled (not state.spotlightModeActive)
+                        , HE.onClick \_ -> ResetToOverview
+                        ]
+                    , HH.span
+                        [ HP.classes [ HH.ClassName "toggle-slider" ] ]
+                        []
+                    ]
+                , HH.p
+                    [ HP.classes [ HH.ClassName "helper-text" ] ]
+                    [ HH.text if state.spotlightModeActive
+                        then "Click to return to overview"
+                        else "Click a module to spotlight its dependencies"
+                    ]
+                ]
+            ]
+          else HH.text ""
     ]
 
 -- | Render the legend panel (bottom-right)
@@ -542,3 +558,14 @@ handleAction = case _ of
 
   SetCurrentSpotlightModule moduleId -> do
     H.modify_ _ { currentSpotlightModule = moduleId }
+
+  ToggleGridLayout -> do
+    -- Toggle the grid layout state
+    state <- H.get
+    let newGridState = not state.isGridLayout
+    H.modify_ _ { isGridLayout = newGridState }
+    liftEffect $ Console.log $ "Grid layout toggled to: " <> show newGridState
+
+    -- Trigger the transition on the module graph
+    runWithD3_Simulation do
+      ModuleGraphTab.transitionToGridLayout newGridState

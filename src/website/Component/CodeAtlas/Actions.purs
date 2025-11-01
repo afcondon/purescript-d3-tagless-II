@@ -33,3 +33,4 @@ data Action
       , makeFocus :: String -> Effect Unit
       }
   | SetCurrentSpotlightModule (Maybe String)
+  | ToggleGridLayout

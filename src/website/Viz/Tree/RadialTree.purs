@@ -7,15 +7,21 @@ import Data.Number (pi)
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import PSD3 (class SelectionM, D3Selection_, Datum_, Selector, Element(..), appendTo, attach, setAttributes, simpleJoin)
-import PSD3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType)
+import PSD3.Data.Tree (TreeJson_, TreeLayoutFn_, TreeType(..))
 import PSD3.Internal.Attributes.Sugar (classed, dy, fill, fontFamily, fontSize, radius, strokeColor, strokeOpacity, strokeWidth, text, textAnchor, transform, x)
 import PSD3.Internal.FFI (descendants_, hierarchyFromJSON_, keyIsID_, links_, runLayoutFn_, treeMinMax_, treeSetSeparation_, treeSetSize_)
 import PSD3.Internal.Hierarchical (radialLink, radialSeparation)
 import PSD3.Shared.ZoomableViewbox (ZoomableSVGConfig, zoomableSVG)
 import Utility (getWindowWidthHeight)
 
--- Get layout algorithm from D3 (from shared TreeHelpers)
-foreign import getLayout :: TreeType -> TreeLayoutFn_
+-- FFI imports for D3 layout algorithms
+foreign import d3Tree_ :: Unit -> TreeLayoutFn_
+foreign import d3Cluster_ :: Unit -> TreeLayoutFn_
+
+-- Type-safe layout selection using pattern matching
+getLayout :: TreeType -> TreeLayoutFn_
+getLayout TidyTree = d3Tree_ unit
+getLayout Dendrogram = d3Cluster_ unit
 
 -- Radial transform functions
 radialRotate :: Number -> String

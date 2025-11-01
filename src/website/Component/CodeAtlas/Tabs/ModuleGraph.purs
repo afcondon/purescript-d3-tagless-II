@@ -2,44 +2,55 @@ module PSD3.CodeAtlas.Tabs.ModuleGraph where
 
 import Prelude
 
+import Data.Nullable (Nullable)
+
 import Control.Monad.State (class MonadState)
-import Control.Monad.State.Class (get)
+import Control.Monad.State.Class (get, modify_)
 import Data.Lens (use)
 import Effect.Uncurried (mkEffectFn3)
 import PSD3.Internal.Simulation.Types (_handle)
 import Data.Array (filter, mapMaybe, length, group)
 import Data.Array as Array
-import Data.Foldable (maximum)
+import Data.Foldable (maximum, traverse_)
 import Data.Int as Data.Int
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Nullable (null, toNullable)
-import Data.Number (cos, log, pow, sin)
+import Data.Number (ceil, cos, log, pow, sin, sqrt)
+import Data.Number as Number
 import Data.Set (Set)
 import Data.Set as Set
 import Data.String as String
 import Data.String.Pattern (Pattern(..))
 import Data.Tuple (Tuple(..))
+import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Console as Console
 import Halogen as H
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
-import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start)
+import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start, update)
+import PSD3.Internal.Simulation.Functions (simulationSetVariable)
 import PSD3.CodeAtlas.Types (ModuleGraphData, ModuleInfo)
 import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode(..), D3_VxyFxy, D3_XY)
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, height, radius, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, width, x, x1, x2, y, y1, y2)
 import Type.Row (type (+))
-import PSD3.Internal.FFI (clearHighlights_, highlightConnectedNodes_, keyIsID_, simdragHorizontal_, unpinAllNodes_)
+import PSD3.Internal.FFI (clearHighlights_, getNodes_, highlightConnectedNodes_, keyIsID_, simdragHorizontal_)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute(..))
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce)
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), SimVariable(..), Step(..), allNodes)
-import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..), Selector)
+import PSD3.Internal.Types (D3Selection_, D3Simulation_, Datum_, Element(..), Index_, MouseEvent(..), Selector)
 import PSD3.Internal.Simulation.Types as SimTypes
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import Utility (getWindowWidthHeight)
 import Unsafe.Coerce (unsafeCoerce)
+
+-- FFI for setting node positions and restarting simulation
+foreign import setNodePosition_ :: forall d. D3_SimulationNode d -> Nullable Number -> Nullable Number -> D3_SimulationNode d
+foreign import restartSimulationWithCurrentAlpha_ :: D3Simulation_ -> D3Simulation_
+foreign import unpinAllNodesCompletely_ :: D3Simulation_ -> D3Simulation_
+foreign import transitionNodesToGrid_ :: forall node. Array node -> Effect Unit -> Effect Unit
 
 -- | Module node data type (using row composition)
 type ModuleNodeData row = ( id :: String, name :: String, loc :: Int, path :: String | row )
@@ -171,6 +182,104 @@ modulesToNodes modules =
           , fy: toNullable (Just yPos)  -- y is pinned to layer
           }
     ) modules
+
+-- | Grid layout helper: convert index to grid coordinates
+numberToGridPoint :: Int -> Int -> { x :: Number, y :: Number }
+numberToGridPoint columns i =
+  let
+    col = Data.Int.toNumber (i `mod` columns)
+    row = Data.Int.toNumber (i / columns)
+  in { x: col, y: row }
+
+-- | Grid layout helper: offset coordinates
+offsetXY :: { x :: Number, y :: Number } -> { x :: Number, y :: Number } -> { x :: Number, y :: Number }
+offsetXY offset xy = { x: xy.x + offset.x, y: xy.y + offset.y }
+
+-- | Grid layout helper: scale coordinates
+scalePoint :: Number -> Number -> { x :: Number, y :: Number } -> { x :: Number, y :: Number }
+scalePoint xFactor yFactor xy = { x: xy.x * xFactor, y: xy.y * yFactor }
+
+-- | Calculate grid positions for modules
+-- | Returns modules with updated x, y, fx, fy for grid layout
+modulesToGridLayout :: Array ModuleNode -> Array ModuleNode
+modulesToGridLayout nodes =
+  let
+    moduleCount = length nodes
+    -- Calculate square grid dimensions
+    columns = Data.Int.floor $ ceil $ sqrt $ Data.Int.toNumber moduleCount
+    -- Center the grid
+    offset = -((Data.Int.toNumber columns) / 2.0)
+
+    -- Update each module with grid position
+    updateNode :: Int -> ModuleNode -> ModuleNode
+    updateNode i (D3SimNode node) =
+      let
+        gridXY = scalePoint 150.0 150.0 $ offsetXY { x: offset, y: offset } $ numberToGridPoint columns i
+      in
+        D3SimNode (node {
+          x = gridXY.x,
+          y = gridXY.y,
+          fx = toNullable (Just gridXY.x),  -- Pin to grid position
+          fy = toNullable (Just gridXY.y)
+        })
+  in
+    Array.mapWithIndex updateNode nodes
+
+-- | Transition nodes to grid layout with smooth animation
+-- | Call this to toggle between force layout and grid layout
+-- | Note: This is a placeholder - full implementation will require access to node selections
+transitionToGridLayout :: forall row m.
+  Bind m =>
+  MonadEffect m =>
+  MonadState { simulation :: D3SimulationState_ | row } m =>
+  SimulationM2 D3Selection_ m =>
+  Boolean -> m Unit
+transitionToGridLayout toGrid = do
+  simHandle <- use SimTypes._handle
+  let currentNodes = getNodes_ simHandle :: Array ModuleNode
+
+  if toGrid
+    then do
+      -- Transition TO grid layout
+      liftEffect $ Console.log "Transitioning TO grid layout"
+      liftEffect $ Console.log $ "Applying grid layout to " <> show (length currentNodes) <> " nodes"
+
+      -- Calculate grid positions
+      let gridNodes = modulesToGridLayout currentNodes
+
+      -- Stop simulation so tick doesn't fight the transition
+      simulationSetVariable $ Alpha 0.0
+
+      -- Start D3 transition with callback to pin nodes when done
+      liftEffect $ transitionNodesToGrid_ gridNodes do
+        Console.log "Transition complete, pinning nodes"
+        -- Set fx/fy on all nodes to lock them in grid positions
+        traverse_ identity $ Array.zipWith updateNodePosition currentNodes gridNodes
+        -- Restart simulation with low alpha
+        let _ = restartSimulationWithCurrentAlpha_ simHandle
+        pure unit
+
+      pure unit
+    else do
+      -- Transition FROM grid layout to force layout
+      liftEffect $ Console.log "Transitioning FROM grid to force layout"
+
+      -- Unpin all nodes (both fx and fy) so they can move freely
+      _ <- liftEffect $ pure $ unpinAllNodesCompletely_ simHandle
+
+      -- Reheat the simulation with full alpha for energetic return to force layout
+      simulationSetVariable $ Alpha 1.0
+      simulationSetVariable $ AlphaTarget 0.0
+      _ <- liftEffect $ pure $ restartSimulationWithCurrentAlpha_ simHandle
+
+      pure unit
+  where
+    -- Helper to update a node's position from source to target
+    updateNodePosition :: ModuleNode -> ModuleNode -> Effect Unit
+    updateNodePosition target (D3SimNode source) = do
+      -- Set fx and fy to pin the node to grid position (mutates in place)
+      let _ = setNodePosition_ target source.fx source.fy
+      pure unit
 
 -- | Convert module dependencies to simulation links
 modulesToLinks :: Array ModuleInfo -> Array D3Link_Unswizzled
@@ -315,7 +424,8 @@ drawModuleGraph graphData selector = do
   -- Add unpin button
   simHandle <- use _handle
   let unpinHandler = mkEffectFn3 \event datum this -> do
-        pure $ unpinAllNodes_ simHandle
+        let _ = unpinAllNodesCompletely_ simHandle
+        pure unit
 
   unpinButton <- appendTo svg Group [ classed "unpin-button" ]
   _ <- appendTo unpinButton Rect

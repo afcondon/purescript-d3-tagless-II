@@ -1,10 +1,7 @@
 // FFI for RadialTree module
 
-export const getLayout = (treeType) => {
-  // TreeType constructors from PureScript: TidyTree or Dendrogram
-  if (treeType.constructor.name === "TidyTree") {
-    return d3.tree();
-  } else {
-    return d3.cluster();
-  }
-};
+// Get d3.tree() layout (Tidy Tree algorithm)
+export const d3Tree_ = () => d3.tree();
+
+// Get d3.cluster() layout (Dendrogram algorithm)
+export const d3Cluster_ = () => d3.cluster();
