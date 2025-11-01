@@ -3,6 +3,7 @@ module PSD3.FpFtw where
 import Prelude
 
 import D3.Viz.FpFtw.MapQuartet as MapQuartet
+import D3.Viz.FpFtw.TopologicalSort as TopologicalSort
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
@@ -38,6 +39,11 @@ handleAction = case _ of
     log "FP FTW: Drawing Map quartet..."
     _ <- H.liftEffect $ eval_D3M $ MapQuartet.drawMapQuartet quartetData "div.map-quartet-viz"
     log "FP FTW: Map quartet drawn"
+
+    -- Draw the topological sort visualization
+    log "FP FTW: Drawing topological sort..."
+    _ <- H.liftEffect $ eval_D3M $ TopologicalSort.drawTopologicalSort TopologicalSort.buildPipelineTasks "div.topological-sort-viz"
+    log "FP FTW: Topological sort drawn"
 
     pure unit
 

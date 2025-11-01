@@ -17,6 +17,7 @@ render _ =
         { title: "Page Contents"
         , items:
             [ tocAnchor "map-quartet" "1. Map-Based Quartet" 0
+            , tocAnchor "topological-sort" "2. Topological Sort" 0
             ]
         , image: Just "images/understanding-bookmark-trees.jpeg"
         }
@@ -51,5 +52,25 @@ render _ =
             ]
         , HH.p_
             [ HH.text "Unlike arrays where all datasets would need 200 elements (with nulls or placeholder values for missing data), Maps only store the actual measurements. Each dataset has different randomly-selected keys, demonstrating that Maps naturally handle irregular sampling. This is particularly useful for time-series data with missing values, experimental data with different sample points, or any scenario where data is inherently sparse." ]
+        ]
+
+    -- Section 2: Topological Sort
+    , HH.section
+        [ HP.id "topological-sort"
+        , HP.classes [ HH.ClassName "tutorial-section" ]
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+            [ HH.text "2. Topological Sort with Data.Graph" ]
+        , HH.p_
+            [ HH.text "This visualization demonstrates PureScript's Data.Graph library and its topologicalSort function. The Graph type is elegantly defined as: Graph k v = Graph (Map k (Tuple v (List k))), where each key maps to its value and a list of dependencies. We build a build pipeline as a directed acyclic graph (DAG) and use topologicalSort to determine execution order." ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
+            [ HH.div
+                [ HP.classes [ HH.ClassName "topological-sort-viz" ] ]
+                []
+            ]
+        , HH.p_
+            [ HH.text "Tasks are arranged in layers computed from the topological sort. Layer 0 contains tasks with no dependencies, Layer 1 contains tasks depending only on Layer 0, and so on. All tasks within a layer can be executed in parallel. The topologicalSort function handles cycle detection and returns tasks in a valid execution order - demonstrating how functional data structures and algorithms elegantly solve dependency resolution problems found in build systems, task schedulers, and module systems." ]
         ]
     ]
