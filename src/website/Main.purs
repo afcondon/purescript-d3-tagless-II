@@ -35,6 +35,8 @@ import PSD3.CodeExplorer.CodeExplorerWrapper as CodeExplorer
 import PSD3.WealthHealth.WealthHealthWrapper as WealthHealth
 import PSD3.CodeAtlas.CodeAtlasWrapper as CodeAtlas
 import PSD3.FpFtw as FpFtw
+import PSD3.ExamplesGallery as ExamplesGallery
+import PSD3.Examples.BarChart as BarChartExample
 import PSD3.Acknowledgements as Acknowledgements
 import PSD3.Website.Types (Route(..))
 import Routing.Hash (matches, setHash)
@@ -72,6 +74,8 @@ type Slots =
   , wealthHealth :: forall q. H.Slot q Void Unit
   , codeAtlas :: forall q. H.Slot q Void Unit
   , fpFtw :: forall q. H.Slot q Void Unit
+  , examplesGallery :: forall q. H.Slot q Void Unit
+  , barChartExample :: forall q. H.Slot q Void Unit
   , acknowledgements :: forall q. H.Slot q Void Unit
   )
 
@@ -94,6 +98,8 @@ _codeExploration = Proxy :: Proxy "codeExploration"
 _wealthHealth = Proxy :: Proxy "wealthHealth"
 _codeAtlas = Proxy :: Proxy "codeAtlas"
 _fpFtw = Proxy :: Proxy "fpFtw"
+_examplesGallery = Proxy :: Proxy "examplesGallery"
+_barChartExample = Proxy :: Proxy "barChartExample"
 _acknowledgements = Proxy :: Proxy "acknowledgements"
 
 -- | Main application component
@@ -183,6 +189,12 @@ renderPage route = case spy "Route is" route of
   FpFtw ->
     HH.slot_ _fpFtw unit FpFtw.component unit
 
+  ExamplesGallery ->
+    HH.slot_ _examplesGallery unit ExamplesGallery.component unit
+
+  Example exampleId ->
+    renderExamplePage exampleId
+
   Acknowledgements ->
     HH.slot_ _acknowledgements unit Acknowledgements.component unit
 
@@ -194,6 +206,21 @@ renderPage route = case spy "Route is" route of
       , HH.a
           [ HP.href $ "#" <> routeToPath Home ]
           [ HH.text "Go to Home" ]
+      ]
+
+-- | Render individual example pages based on exampleId
+renderExamplePage :: String -> H.ComponentHTML Action Slots Aff
+renderExamplePage exampleId = case exampleId of
+  "bar-chart" ->
+    HH.slot_ _barChartExample unit BarChartExample.component unit
+  _ ->
+    HH.div
+      [ HP.classes [ HH.ClassName "not-found" ] ]
+      [ HH.h1_ [ HH.text "Example Not Found" ]
+      , HH.p_ [ HH.text $ "The example '" <> exampleId <> "' doesn't exist yet." ]
+      , HH.a
+          [ HP.href $ "#" <> routeToPath ExamplesGallery ]
+          [ HH.text "← Back to Examples Gallery" ]
       ]
 
 handleAction :: Action -> H.HalogenM State Action Slots Void Aff Unit

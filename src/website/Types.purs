@@ -101,6 +101,8 @@ data Route
   | WealthHealth    -- Wealth & Health of Nations visualization
   | CodeAtlas       -- Code Atlas: codebase analysis and visualization
   | FpFtw           -- FP FTW: Functional Programming examples
+  | ExamplesGallery -- Gallery: index of all visualization examples
+  | Example String  -- Individual example page (e.g., "bar-chart", "lesmis-force")
   | Acknowledgements -- Credits and acknowledgements
   | NotFound
 
@@ -128,5 +130,7 @@ instance showRoute :: Show Route where
   show WealthHealth = "Wealth & Health of Nations"
   show CodeAtlas = "Code Atlas"
   show FpFtw = "FP FTW"
+  show ExamplesGallery = "Examples Gallery"
+  show (Example exampleId) = "Example: " <> exampleId
   show Acknowledgements = "Acknowledgements"
   show NotFound = "Not Found"

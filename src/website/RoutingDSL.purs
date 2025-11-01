@@ -38,6 +38,8 @@ routes =
   <|> wealthHealth
   <|> codeAtlas
   <|> fpFtw
+  <|> examplesGallery
+  <|> example        -- Must come after examplesGallery (more specific)
   <|> acknowledgements
   <|> rootRedirect
   <|> notFound
@@ -130,6 +132,14 @@ codeAtlas = CodeAtlas <$ lit "code-atlas" <* end
 fpFtw :: Match Route
 fpFtw = FpFtw <$ lit "fp-ftw" <* end
 
+-- | Match: /examples
+examplesGallery :: Match Route
+examplesGallery = ExamplesGallery <$ lit "examples" <* end
+
+-- | Match: /example/:exampleId
+example :: Match Route
+example = Example <$> (lit "example" *> str) <* end
+
 -- | Match: /acknowledgements
 acknowledgements :: Match Route
 acknowledgements = Acknowledgements <$ lit "acknowledgements" <* end
@@ -163,5 +173,7 @@ routeToPath (Explore snippetId) = "/explore/" <> snippetId
 routeToPath WealthHealth = "/wealth-health"
 routeToPath CodeAtlas = "/code-atlas"
 routeToPath FpFtw = "/fp-ftw"
+routeToPath ExamplesGallery = "/examples"
+routeToPath (Example exampleId) = "/example/" <> exampleId
 routeToPath Acknowledgements = "/acknowledgements"
 routeToPath NotFound = "/not-found"
