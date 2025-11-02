@@ -26,6 +26,7 @@ import D3.Viz.ThreeLittleCirclesTransition as CirclesTransition
 import D3.Viz.Tree.HorizontalTree as HorizontalTree
 import D3.Viz.Tree.RadialTree as RadialTree
 import D3.Viz.Tree.VerticalTree as VerticalTree
+import Data.Array as Data.Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
@@ -206,6 +207,45 @@ type ExampleMeta =
   , category :: String
   }
 
+-- | All example IDs in order
+allExampleIds :: Array String
+allExampleIds =
+  [ "three-little-circles"
+  , "bar-chart"
+  , "line-chart"
+  , "scatter-plot"
+  , "grouped-bar-chart"
+  , "multi-line-chart"
+  , "bubble-chart"
+  , "vertical-tree"
+  , "horizontal-tree"
+  , "radial-tree"
+  , "animated-radial-tree"
+  , "treemap"
+  , "icicle"
+  , "lesmis-force"
+  , "topological-sort"
+  , "chord-diagram"
+  , "sankey-diagram"
+  , "map-quartet"
+  , "general-update-pattern"
+  , "three-circles-transition"
+  ]
+
+-- | Get next example ID
+getNextExampleId :: String -> Maybe String
+getNextExampleId currentId =
+  case Data.Array.findIndex (\id -> id == currentId) allExampleIds of
+    Nothing -> Nothing
+    Just idx -> allExampleIds Data.Array.!! (idx + 1)
+
+-- | Get previous example ID
+getPrevExampleId :: String -> Maybe String
+getPrevExampleId currentId =
+  case Data.Array.findIndex (\id -> id == currentId) allExampleIds of
+    Nothing -> Nothing
+    Just idx -> if idx > 0 then allExampleIds Data.Array.!! (idx - 1) else Nothing
+
 -- | Lookup example metadata by ID
 getExampleMeta :: String -> Maybe ExampleMeta
 getExampleMeta id = case id of
@@ -257,12 +297,10 @@ render state =
     Nothing ->
       HH.div
         [ HP.classes [ HH.ClassName "example-page" ] ]
-        [ HH.header
-            [ HP.classes [ HH.ClassName "example-header" ] ]
-            [ HH.a
-                [ HP.href $ "#" <> routeToPath ExamplesGallery ]
-                [ HH.text "← Examples Gallery" ]
-            , HH.h1_ [ HH.text "Example Not Found" ]
+        [ renderHeader state.exampleId Nothing
+        , HH.main
+            [ HP.classes [ HH.ClassName "example-content" ] ]
+            [ HH.h1_ [ HH.text "Example Not Found" ]
             , HH.p_ [ HH.text $ "No example found with ID: " <> state.exampleId ]
             ]
         ]
@@ -270,21 +308,103 @@ render state =
     Just meta ->
       HH.div
         [ HP.classes [ HH.ClassName "example-page" ] ]
-        [ HH.header
-            [ HP.classes [ HH.ClassName "example-header" ] ]
-            [ HH.a
-                [ HP.href $ "#" <> routeToPath ExamplesGallery ]
-                [ HH.text "← Examples Gallery" ]
-            , HH.h1_ [ HH.text meta.name ]
-            , HH.p_ [ HH.text meta.description ]
-            ]
-        , HH.section
-            [ HP.classes [ HH.ClassName "example-viz-section" ] ]
-            [ HH.h2_ [ HH.text "Visualization" ]
-            , HH.div
-                [ HP.id "example-viz"
-                , HP.classes [ HH.ClassName "example-viz" ]
+        [ renderHeader state.exampleId (Just meta)
+        , HH.main
+            [ HP.classes [ HH.ClassName "example-content" ] ]
+            [ HH.div
+                [ HP.classes [ HH.ClassName "example-viz-panel" ] ]
+                [ HH.div
+                    [ HP.id "example-viz"
+                    , HP.classes [ HH.ClassName "example-viz" ]
+                    ]
+                    []
                 ]
-                []
+            , HH.div
+                [ HP.classes [ HH.ClassName "example-code-panel" ] ]
+                [ HH.h2
+                    [ HP.classes [ HH.ClassName "code-panel-title" ] ]
+                    [ HH.text "Source Code" ]
+                , HH.pre
+                    [ HP.classes [ HH.ClassName "code-block" ] ]
+                    [ HH.code
+                        [ HP.classes [ HH.ClassName "language-haskell" ] ]
+                        [ HH.text $ getExampleCode state.exampleId ]
+                    ]
+                ]
             ]
         ]
+
+-- | Render the header with logo, navigation, and prev/next buttons
+renderHeader :: forall w i. String -> Maybe ExampleMeta -> HH.HTML w i
+renderHeader currentId maybeMeta =
+  HH.header
+    [ HP.classes [ HH.ClassName "example-header" ] ]
+    [ HH.div
+        [ HP.classes [ HH.ClassName "example-header-left" ] ]
+        [ HH.a
+            [ HP.href $ "#" <> routeToPath Home
+            , HP.classes [ HH.ClassName "example-logo-link" ]
+            ]
+            [ HH.img
+                [ HP.src "assets/psd3-logo-color.svg"
+                , HP.alt "PSD3 Logo"
+                , HP.classes [ HH.ClassName "example-logo" ]
+                ]
+            ]
+        , HH.a
+            [ HP.href $ "#" <> routeToPath ExamplesGallery
+            , HP.classes [ HH.ClassName "example-gallery-link" ]
+            ]
+            [ HH.text "Examples" ]
+        , case maybeMeta of
+            Just meta ->
+              HH.div
+                [ HP.classes [ HH.ClassName "example-title-container" ] ]
+                [ HH.h1
+                    [ HP.classes [ HH.ClassName "example-title" ] ]
+                    [ HH.text meta.name ]
+                ]
+            Nothing -> HH.text ""
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "example-header-right" ] ]
+        [ case getPrevExampleId currentId of
+            Nothing ->
+              HH.span
+                [ HP.classes [ HH.ClassName "example-nav-button", HH.ClassName "disabled" ] ]
+                [ HH.text "← Previous" ]
+            Just prevId ->
+              HH.a
+                [ HP.href $ "#" <> routeToPath (Example prevId)
+                , HP.classes [ HH.ClassName "example-nav-button" ]
+                ]
+                [ HH.text "← Previous" ]
+        , case getNextExampleId currentId of
+            Nothing ->
+              HH.span
+                [ HP.classes [ HH.ClassName "example-nav-button", HH.ClassName "disabled" ] ]
+                [ HH.text "Next →" ]
+            Just nextId ->
+              HH.a
+                [ HP.href $ "#" <> routeToPath (Example nextId)
+                , HP.classes [ HH.ClassName "example-nav-button" ]
+                ]
+                [ HH.text "Next →" ]
+        ]
+    ]
+
+-- | Get source code for an example (placeholder for now)
+getExampleCode :: String -> String
+getExampleCode exampleId =
+  "-- Source code for " <> exampleId <> "\n" <>
+  "-- This will be populated with actual code snippets\n" <>
+  "\n" <>
+  "draw :: forall m.\n" <>
+  "  Bind m =>\n" <>
+  "  MonadEffect m =>\n" <>
+  "  SelectionM D3Selection_ m =>\n" <>
+  "  Selector D3Selection_ -> m Unit\n" <>
+  "draw selector = do\n" <>
+  "  svg <- attach selector >>= appendTo _ Svg []\n" <>
+  "  -- visualization code here\n" <>
+  "  pure unit"
