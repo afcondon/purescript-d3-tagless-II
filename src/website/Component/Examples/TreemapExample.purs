@@ -2,8 +2,9 @@ module PSD3.Examples.Treemap where
 
 import Prelude
 
-import D3.Viz.Treemap as Treemap
+import D3.Viz.Hierarchies as Hierarchies
 import PSD3.Internal.Hierarchical (getTreeViaAJAX)
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
@@ -30,10 +31,13 @@ handleAction :: forall o m. MonadAff m => Action -> H.HalogenM Unit Action () o 
 handleAction = case _ of
   Initialize -> do
     log "TreemapExample: Loading data"
-    treeData <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
-    log "TreemapExample: Drawing"
-    _ <- H.liftEffect $ eval_D3M $ Treemap.drawTreemap treeData "#treemap-viz"
-    log "TreemapExample: Complete"
+    result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+    case result of
+      Left err -> log "TreemapExample: Failed to load data"
+      Right treeData -> do
+        log "TreemapExample: Drawing"
+        _ <- H.liftAff $ Hierarchies.drawTreemap treeData "#treemap-viz"
+        log "TreemapExample: Complete"
     pure unit
 
 render :: forall m. Unit -> H.ComponentHTML Action () m

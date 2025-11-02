@@ -3,7 +3,9 @@ module PSD3.Examples.RadialTree where
 import Prelude
 
 import D3.Viz.Tree.RadialTree as RadialTree
+import PSD3.Data.Tree (TreeType(..))
 import PSD3.Internal.Hierarchical (getTreeViaAJAX)
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
@@ -30,10 +32,13 @@ handleAction :: forall o m. MonadAff m => Action -> H.HalogenM Unit Action () o 
 handleAction = case _ of
   Initialize -> do
     log "RadialTreeExample: Loading data"
-    treeData <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
-    log "RadialTreeExample: Drawing"
-    _ <- H.liftEffect $ eval_D3M $ RadialTree.drawRadialTree "TidyTree" treeData "#radial-tree-viz"
-    log "RadialTreeExample: Complete"
+    result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+    case result of
+      Left err -> log "RadialTreeExample: Failed to load data"
+      Right treeData -> do
+        log "RadialTreeExample: Drawing"
+        _ <- H.liftEffect $ eval_D3M $ RadialTree.drawRadialTree TidyTree treeData "#radial-tree-viz"
+        log "RadialTreeExample: Complete"
     pure unit
 
 render :: forall m. Unit -> H.ComponentHTML Action () m

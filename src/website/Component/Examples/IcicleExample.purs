@@ -2,8 +2,9 @@ module PSD3.Examples.Icicle where
 
 import Prelude
 
-import D3.Viz.Icicle as Icicle
+import D3.Viz.Hierarchies as Hierarchies
 import PSD3.Internal.Hierarchical (getTreeViaAJAX)
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
@@ -30,10 +31,13 @@ handleAction :: forall o m. MonadAff m => Action -> H.HalogenM Unit Action () o 
 handleAction = case _ of
   Initialize -> do
     log "IcicleExample: Loading data"
-    treeData <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
-    log "IcicleExample: Drawing"
-    _ <- H.liftEffect $ eval_D3M $ Icicle.drawIcicle treeData "#icicle-viz"
-    log "IcicleExample: Complete"
+    result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+    case result of
+      Left err -> log "IcicleExample: Failed to load data"
+      Right treeData -> do
+        log "IcicleExample: Drawing"
+        _ <- H.liftAff $ Hierarchies.drawIcicle treeData "#icicle-viz"
+        log "IcicleExample: Complete"
     pure unit
 
 render :: forall m. Unit -> H.ComponentHTML Action () m

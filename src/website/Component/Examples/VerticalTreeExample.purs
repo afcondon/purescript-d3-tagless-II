@@ -3,7 +3,9 @@ module PSD3.Examples.VerticalTree where
 import Prelude
 
 import D3.Viz.Tree.VerticalTree as VerticalTree
+import PSD3.Data.Tree (TreeType(..))
 import PSD3.Internal.Hierarchical (getTreeViaAJAX)
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
@@ -30,10 +32,13 @@ handleAction :: forall o m. MonadAff m => Action -> H.HalogenM Unit Action () o 
 handleAction = case _ of
   Initialize -> do
     log "VerticalTreeExample: Loading data"
-    treeData <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
-    log "VerticalTreeExample: Drawing"
-    _ <- H.liftEffect $ eval_D3M $ VerticalTree.drawVerticalTree "TidyTree" treeData "#vertical-tree-viz"
-    log "VerticalTreeExample: Complete"
+    result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+    case result of
+      Left err -> log "VerticalTreeExample: Failed to load data"
+      Right treeData -> do
+        log "VerticalTreeExample: Drawing"
+        _ <- H.liftEffect $ eval_D3M $ VerticalTree.drawVerticalTree TidyTree treeData "#vertical-tree-viz"
+        log "VerticalTreeExample: Complete"
     pure unit
 
 render :: forall m. Unit -> H.ComponentHTML Action () m

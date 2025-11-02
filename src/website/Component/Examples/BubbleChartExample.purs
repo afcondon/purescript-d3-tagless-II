@@ -3,6 +3,8 @@ module PSD3.Examples.BubbleChart where
 import Prelude
 
 import D3.Viz.BubbleChart as BubbleChart
+import PSD3.Internal.Hierarchical (getTreeViaAJAX)
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class.Console (log)
@@ -28,9 +30,14 @@ data Action = Initialize
 handleAction :: forall o m. MonadAff m => Action -> H.HalogenM Unit Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    log "BubbleChartExample: Initialize"
-    _ <- H.liftEffect $ eval_D3M $ BubbleChart.draw "#bubble-chart-viz"
-    log "BubbleChartExample: Complete"
+    log "BubbleChartExample: Loading data"
+    result <- H.liftAff $ getTreeViaAJAX "./data/flare-2.json"
+    case result of
+      Left err -> log $ "BubbleChartExample: Failed to load data"
+      Right treeData -> do
+        log "BubbleChartExample: Drawing"
+        _ <- H.liftEffect $ eval_D3M $ BubbleChart.draw treeData "#bubble-chart-viz"
+        log "BubbleChartExample: Complete"
     pure unit
 
 render :: forall m. Unit -> H.ComponentHTML Action () m
