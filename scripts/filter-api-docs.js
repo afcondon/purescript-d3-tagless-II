@@ -1,16 +1,33 @@
 #!/usr/bin/env node
 
 /**
- * Filter API documentation to only include our own modules (PSD3.* and D3.*)
+ * Filter API documentation to only include library modules from src/lib
  * and replace external module links with a helpful explanation page.
  */
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const GENERATED_DOCS_DIR = 'generated-docs/html';
 const OUTPUT_DIR = 'docs/api';
-const OUR_MODULE_PREFIXES = ['PSD3.', 'D3.', 'CodeSnippet'];
+const LIB_SOURCE_DIR = 'src/lib';
+
+// Get all library module names from src/lib directory
+function getLibraryModules() {
+  try {
+    const output = execSync(
+      `find ${LIB_SOURCE_DIR} -type f -name "*.purs" | sed 's|${LIB_SOURCE_DIR}/||' | sed 's|/|.|g' | sed 's|.purs$||'`,
+      { encoding: 'utf8' }
+    );
+    return output.trim().split('\n').filter(Boolean);
+  } catch (error) {
+    console.error('Error reading library modules:', error);
+    return [];
+  }
+}
+
+const LIBRARY_MODULES = new Set(getLibraryModules());
 
 // Create the external link explanation page
 const EXTERNAL_LINK_PAGE = `<!DOCTYPE HTML>
@@ -49,7 +66,7 @@ const EXTERNAL_LINK_PAGE = `<!DOCTYPE HTML>
   <h1>External Module Documentation</h1>
   <div class="info-box">
     <p><strong>Note:</strong> To keep the documentation size manageable and avoid cluttering the repository,
-    we only include API documentation for PSD3's own modules (those starting with <code>PSD3.*</code> or <code>D3.*</code>).</p>
+    we only include API documentation for the library modules (those under <code>src/lib/</code>).</p>
 
     <p>For documentation on external dependencies from the PureScript ecosystem, please visit:</p>
     <ul>
@@ -69,8 +86,10 @@ function ensureDir(dir) {
   }
 }
 
-function isOurModule(filename) {
-  return OUR_MODULE_PREFIXES.some(prefix => filename.startsWith(prefix));
+function isLibraryModule(filename) {
+  // Convert filename (e.g., "PSD3.Attributes.html") to module name
+  const moduleName = filename.replace(/\.html$/, '');
+  return LIBRARY_MODULES.has(moduleName);
 }
 
 function processHtmlFile(content, filename) {
@@ -81,11 +100,11 @@ function processHtmlFile(content, filename) {
   const linkRegex = /<a href="([^"#]+\.html)([^"]*)"/g;
 
   processed = processed.replace(linkRegex, (match, linkedFile, fragment) => {
-    // If the linked file is not one of our modules, point to external.html
-    if (!isOurModule(linkedFile) && linkedFile !== 'index.html' && linkedFile !== 'external.html') {
+    // If the linked file is not a library module, point to external.html
+    if (!isLibraryModule(linkedFile) && linkedFile !== 'index.html' && linkedFile !== 'external.html') {
       return `<a href="external.html" title="External module - see Pursuit for docs"`;
     }
-    // Keep the link as-is if it's one of our modules
+    // Keep the link as-is if it's a library module
     return match;
   });
 
@@ -120,7 +139,7 @@ function copyAndFilterDocs() {
 
   // Process each HTML file
   htmlFiles.forEach(file => {
-    if (isOurModule(file)) {
+    if (isLibraryModule(file)) {
       const sourcePath = path.join(GENERATED_DOCS_DIR, file);
       const targetPath = path.join(OUTPUT_DIR, file);
 
@@ -135,8 +154,8 @@ function copyAndFilterDocs() {
   });
 
   console.log(`\nAPI documentation filtered successfully!`);
-  console.log(`- Copied ${copiedCount} module pages (PSD3.*, D3.*)`);
-  console.log(`- Skipped ${skippedCount} external module pages`);
+  console.log(`- Copied ${copiedCount} library module pages (from src/lib/)`);
+  console.log(`- Skipped ${skippedCount} non-library module pages`);
   console.log(`- Created external.html for external module links`);
   console.log(`\nDocumentation available at: ${OUTPUT_DIR}/index.html`);
 }
