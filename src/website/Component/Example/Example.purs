@@ -8,7 +8,9 @@ import D3.Viz.AnimatedRadialTree as AnimatedRadialTree
 import D3.Viz.BarChart as BarChart
 import D3.Viz.BubbleChart as BubbleChart
 import D3.Viz.Charts.Model as ChartModel
+import D3.Viz.ChordDiagram as ChordDiagram
 import D3.Viz.GroupedBarChart as GroupedBarChart
+import D3.Viz.GUP as GUP
 import D3.Viz.LineChart as LineChart
 import D3.Viz.MultiLineChart as MultiLineChart
 import D3.Viz.ScatterPlot as ScatterPlot
@@ -20,6 +22,7 @@ import D3.Viz.LesMiserables.File (readGraphFromFileContents)
 import D3.Viz.Sankey.Model (energyData)
 import D3.Viz.SankeyDiagram as Sankey
 import D3.Viz.ThreeLittleCircles as ThreeLittleCircles
+import D3.Viz.ThreeLittleCirclesTransition as CirclesTransition
 import D3.Viz.Tree.HorizontalTree as HorizontalTree
 import D3.Viz.Tree.RadialTree as RadialTree
 import D3.Viz.Tree.VerticalTree as VerticalTree
@@ -181,6 +184,18 @@ handleAction = case _ of
         _ <- H.liftEffect $ eval_D3M $ MapQuartet.drawMapQuartet quartet "#example-viz"
         pure unit
 
+      "chord-diagram" -> do
+        _ <- H.liftEffect $ eval_D3M $ ChordDiagram.draw ChordDiagram.exampleMatrix ChordDiagram.exampleLabels "#example-viz"
+        pure unit
+
+      "general-update-pattern" -> do
+        _ <- H.liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern "#example-viz"
+        pure unit
+
+      "three-circles-transition" -> do
+        _ <- H.liftEffect $ eval_D3M $ CirclesTransition.drawThreeCirclesTransition "#example-viz"
+        pure unit
+
       _ -> log $ "Example: Unknown example ID: " <> state.exampleId
 
 -- | Example metadata
@@ -228,6 +243,12 @@ getExampleMeta id = case id of
     { id, name: "Sankey Diagram", description: "Energy flow visualization showing sources, transformations, and destinations", category: "Data Flow" }
   "map-quartet" -> Just
     { id, name: "Map Quartet", description: "Four scatter plots demonstrating sparse data with PureScript Maps (15 points out of 200 possible x-values)", category: "Rich Data Structures" }
+  "chord-diagram" -> Just
+    { id, name: "Chord Diagram", description: "Circular flow diagram showing relationships between programming concepts", category: "Data Flow" }
+  "general-update-pattern" -> Just
+    { id, name: "General Update Pattern", description: "Enter, update, exit pattern visualization with animated letters", category: "Transitions" }
+  "three-circles-transition" -> Just
+    { id, name: "Color Mixing Transition", description: "RGB color mixing with smooth transitions demonstrating additive color", category: "Transitions" }
   _ -> Nothing
 
 render :: forall m. State -> H.ComponentHTML Action () m
