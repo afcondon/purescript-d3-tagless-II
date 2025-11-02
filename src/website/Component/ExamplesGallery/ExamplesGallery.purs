@@ -23,7 +23,7 @@ type ExampleMeta =
   , description :: String
   , category :: String
   , route :: Route
-  , thumbnailClass :: String  -- CSS class for thumbnail styling
+  , thumbnail :: String  -- Path to thumbnail image
   }
 
 -- | All available examples organized by category
@@ -32,153 +32,153 @@ allExamples =
   [ -- Simple Charts
     { id: "three-little-circles"
     , name: "Three Little Circles"
-    , description: "The simplest possible D3 example - three circles"
+    , description: "The simplest possible D3 example"
     , category: "Simple Charts"
     , route: Example "three-little-circles"
-    , thumbnailClass: "thumb-circles"
+    , thumbnail: "assets/example-thumbnails/three-little-circles.png"
     }
   , { id: "bar-chart"
     , name: "Bar Chart"
     , description: "Basic bar chart with axis and labels"
     , category: "Simple Charts"
     , route: Example "bar-chart"
-    , thumbnailClass: "thumb-bar"
+    , thumbnail: "assets/example-thumbnails/simple-bar-chart.png"
     }
   , { id: "line-chart"
     , name: "Line Chart"
     , description: "Line chart with time series data"
     , category: "Simple Charts"
     , route: Example "line-chart"
-    , thumbnailClass: "thumb-line"
+    , thumbnail: "assets/example-thumbnails/simple-line-chart.png"
     }
   , { id: "scatter-plot"
     , name: "Scatter Plot"
-    , description: "Scatter plot with Anscombe's Quartet"
+    , description: "Anscombe's Quartet visualization"
     , category: "Simple Charts"
     , route: Example "scatter-plot"
-    , thumbnailClass: "thumb-scatter"
+    , thumbnail: "assets/example-thumbnails/anscombes-quartet.png"
     }
   , { id: "grouped-bar-chart"
     , name: "Grouped Bar Chart"
     , description: "Bar chart with grouped categories"
     , category: "Simple Charts"
     , route: Example "grouped-bar-chart"
-    , thumbnailClass: "thumb-grouped-bar"
+    , thumbnail: "assets/example-thumbnails/grouped-bar-chart.png"
     }
   , { id: "multi-line-chart"
     , name: "Multi-Line Chart"
     , description: "Multiple line series on one chart"
     , category: "Simple Charts"
     , route: Example "multi-line-chart"
-    , thumbnailClass: "thumb-multi-line"
+    , thumbnail: "assets/example-thumbnails/multiline-chart.png"
     }
   , { id: "bubble-chart"
     , name: "Bubble Chart"
-    , description: "Scatter plot with sized bubbles"
-    , category: "Simple Charts"
+    , description: "Hierarchical circle packing layout"
+    , category: "Hierarchies"
     , route: Example "bubble-chart"
-    , thumbnailClass: "thumb-bubble"
+    , thumbnail: "assets/example-thumbnails/circle-packing.png"
     }
 
   -- Hierarchies
   , { id: "vertical-tree"
     , name: "Vertical Tree"
-    , description: "Top-down hierarchical tree layout"
+    , description: "Top-down tidy tree layout"
     , category: "Hierarchies"
     , route: Example "vertical-tree"
-    , thumbnailClass: "thumb-vtree"
+    , thumbnail: "assets/example-thumbnails/vertical-tidy-tree.png"
     }
   , { id: "horizontal-tree"
     , name: "Horizontal Tree"
-    , description: "Left-to-right hierarchical tree layout"
+    , description: "Left-to-right tidy tree layout"
     , category: "Hierarchies"
     , route: Example "horizontal-tree"
-    , thumbnailClass: "thumb-htree"
+    , thumbnail: "assets/example-thumbnails/horizontal-tidy-tree.png"
     }
   , { id: "radial-tree"
     , name: "Radial Tree"
-    , description: "Circular hierarchical tree layout"
+    , description: "Circular tidy tree layout"
     , category: "Hierarchies"
     , route: Example "radial-tree"
-    , thumbnailClass: "thumb-radial-tree"
+    , thumbnail: "assets/example-thumbnails/radial-tidy-tree.png"
     }
   , { id: "treemap"
     , name: "Treemap"
     , description: "Space-filling hierarchical visualization"
     , category: "Hierarchies"
     , route: Example "treemap"
-    , thumbnailClass: "thumb-treemap"
+    , thumbnail: "assets/example-thumbnails/treemap.png"
     }
   , { id: "icicle"
     , name: "Icicle Chart"
-    , description: "Hierarchical icicle/partition layout"
+    , description: "Hierarchical partition layout"
     , category: "Hierarchies"
     , route: Example "icicle"
-    , thumbnailClass: "thumb-icicle"
+    , thumbnail: "assets/example-thumbnails/icicle-chart.png"
     }
 
   -- Force-Directed
   , { id: "lesmis-force"
     , name: "Les Misérables Network"
-    , description: "Character co-occurrence force-directed graph"
+    , description: "Character co-occurrence graph"
     , category: "Force-Directed"
     , route: Example "lesmis-force"
-    , thumbnailClass: "thumb-lesmis"
+    , thumbnail: "assets/example-thumbnails/les-miserables.png"
     }
   , { id: "topological-sort"
-    , name: "Topological Sort Layers"
+    , name: "Topological Sort"
     , description: "Force layout with layer constraints"
     , category: "Force-Directed"
     , route: Example "topological-sort"
-    , thumbnailClass: "thumb-topo"
+    , thumbnail: "assets/example-thumbnails/working-with-graphs.png"
     }
 
   -- Data Flow
   , { id: "chord-diagram"
     , name: "Chord Diagram"
-    , description: "Circular flow diagram showing relationships"
+    , description: "Circular relationship diagram"
     , category: "Data Flow"
     , route: Example "chord-diagram"
-    , thumbnailClass: "thumb-chord"
+    , thumbnail: "assets/example-thumbnails/chord-diagram.png"
     }
   , { id: "sankey-diagram"
     , name: "Sankey Diagram"
     , description: "Flow diagram with proportional widths"
     , category: "Data Flow"
     , route: Example "sankey-diagram"
-    , thumbnailClass: "thumb-sankey"
+    , thumbnail: "assets/example-thumbnails/sankey-diagram.png"
     }
 
   -- Rich Data Structures
   , { id: "map-quartet"
-    , name: "Map-Based Quartet"
-    , description: "Scatter plots using Map data structures"
+    , name: "Map Quartet"
+    , description: "Sparse data with PureScript Maps"
     , category: "Rich Data Structures"
     , route: Example "map-quartet"
-    , thumbnailClass: "thumb-map-quartet"
+    , thumbnail: "assets/example-thumbnails/working-with-maps.png"
     }
 
   -- Transitions
   , { id: "three-circles-transition"
-    , name: "Color Mixing Transition"
-    , description: "RGB color mixing with transitions"
+    , name: "Color Mixing"
+    , description: "RGB color transitions"
     , category: "Transitions"
     , route: Example "three-circles-transition"
-    , thumbnailClass: "thumb-color-mix"
+    , thumbnail: "assets/example-thumbnails/three-little-circles.png"
     }
   , { id: "general-update-pattern"
     , name: "General Update Pattern"
-    , description: "Enter, update, exit pattern visualization"
+    , description: "Enter, update, exit pattern"
     , category: "Transitions"
     , route: Example "general-update-pattern"
-    , thumbnailClass: "thumb-gup"
+    , thumbnail: "assets/example-thumbnails/general-update-pattern.png"
     }
   , { id: "animated-radial-tree"
     , name: "Animated Radial Tree"
     , description: "Transitions between tree layouts"
     , category: "Transitions"
     , route: Example "animated-radial-tree"
-    , thumbnailClass: "thumb-anim-radial"
+    , thumbnail: "assets/example-thumbnails/animating-tree.png"
     }
   ]
 
@@ -188,17 +188,28 @@ render _ =
     [ HP.classes [ HH.ClassName "examples-gallery-page" ] ]
     [ HH.header
         [ HP.classes [ HH.ClassName "gallery-header" ] ]
-        [ HH.h1
-            [ HP.classes [ HH.ClassName "gallery-title" ] ]
-            [ HH.text "Examples Gallery" ]
-        , HH.p
-            [ HP.classes [ HH.ClassName "gallery-subtitle" ] ]
-            [ HH.text "Complete catalog of PSD3 visualization examples. Each example shows the visualization and its full source code." ]
-        , HH.a
-            [ HP.href $ "#" <> routeToPath Home
-            , HP.classes [ HH.ClassName "gallery-home-link" ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "gallery-header-content" ] ]
+            [ HH.a
+                [ HP.href $ "#" <> routeToPath Home
+                , HP.classes [ HH.ClassName "gallery-logo-link" ]
+                ]
+                [ HH.img
+                    [ HP.src "assets/psd3-logo-color.svg"
+                    , HP.alt "PSD3 Logo"
+                    , HP.classes [ HH.ClassName "gallery-logo" ]
+                    ]
+                ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "gallery-header-text" ] ]
+                [ HH.h1
+                    [ HP.classes [ HH.ClassName "gallery-title" ] ]
+                    [ HH.text "Examples" ]
+                , HH.p
+                    [ HP.classes [ HH.ClassName "gallery-subtitle" ] ]
+                    [ HH.text "Interactive visualizations with source code" ]
+                ]
             ]
-            [ HH.text "← Back to Home" ]
         ]
 
     , HH.main
@@ -237,8 +248,13 @@ renderExampleCard ex =
     , HP.classes [ HH.ClassName "example-card" ]
     ]
     [ HH.div
-        [ HP.classes [ HH.ClassName "example-thumbnail", HH.ClassName ex.thumbnailClass ] ]
-        []
+        [ HP.classes [ HH.ClassName "example-thumbnail" ] ]
+        [ HH.img
+            [ HP.src ex.thumbnail
+            , HP.alt ex.name
+            , HP.classes [ HH.ClassName "example-thumbnail-img" ]
+            ]
+        ]
     , HH.div
         [ HP.classes [ HH.ClassName "example-card-content" ] ]
         [ HH.h3

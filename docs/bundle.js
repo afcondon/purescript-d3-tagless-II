@@ -31841,17 +31841,8 @@
     ;
     return Nothing.value;
   };
-  var render12 = function(state3) {
-    var v = getExampleMeta(state3.exampleId);
-    if (v instanceof Nothing) {
-      return div2([classes(["example-page"])])([header([classes(["example-header"])])([a([href4("#" + routeToPath(ExamplesGallery.value))])([text5("\u2190 Examples Gallery")]), h1_([text5("Example Not Found")]), p_([text5("No example found with ID: " + state3.exampleId)])])]);
-    }
-    ;
-    if (v instanceof Just) {
-      return div2([classes(["example-page"])])([header([classes(["example-header"])])([a([href4("#" + routeToPath(ExamplesGallery.value))])([text5("\u2190 Examples Gallery")]), h1_([text5(v.value0.name)]), p_([text5(v.value0.description)])]), section([classes(["example-viz-section"])])([h2_([text5("Visualization")]), div2([id2("example-viz"), classes(["example-viz"])])([])])]);
-    }
-    ;
-    throw new Error("Failed pattern match at PSD3.Component.Example (line 256, column 3 - line 290, column 10): " + [v.constructor.name]);
+  var getExampleCode = function(exampleId) {
+    return "-- Source code for " + (exampleId + "\n-- This will be populated with actual code snippets\n\ndraw :: forall m.\n  Bind m =>\n  MonadEffect m =>\n  SelectionM D3Selection_ m =>\n  Selector D3Selection_ -> m Unit\ndraw selector = do\n  svg <- attach selector >>= appendTo _ Svg []\n  -- visualization code here\n  pure unit");
   };
   var forces = /* @__PURE__ */ (function() {
     return {
@@ -31919,7 +31910,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Component.Example (line 110, column 9 - line 114, column 22): " + [result.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Component.Example (line 111, column 9 - line 115, column 22): " + [result.constructor.name]);
             });
           }
           ;
@@ -31935,7 +31926,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Component.Example (line 118, column 9 - line 122, column 22): " + [result.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Component.Example (line 119, column 9 - line 123, column 22): " + [result.constructor.name]);
             });
           }
           ;
@@ -31951,7 +31942,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Component.Example (line 126, column 9 - line 130, column 22): " + [result.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Component.Example (line 127, column 9 - line 131, column 22): " + [result.constructor.name]);
             });
           }
           ;
@@ -31967,7 +31958,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Component.Example (line 134, column 9 - line 138, column 22): " + [result.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Component.Example (line 135, column 9 - line 139, column 22): " + [result.constructor.name]);
             });
           }
           ;
@@ -31983,7 +31974,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Component.Example (line 142, column 9 - line 146, column 22): " + [result.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Component.Example (line 143, column 9 - line 147, column 22): " + [result.constructor.name]);
             });
           }
           ;
@@ -31999,7 +31990,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Component.Example (line 150, column 9 - line 154, column 22): " + [result.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Component.Example (line 151, column 9 - line 155, column 22): " + [result.constructor.name]);
             });
           }
           ;
@@ -32015,7 +32006,7 @@
                 });
               }
               ;
-              throw new Error("Failed pattern match at PSD3.Component.Example (line 158, column 9 - line 162, column 22): " + [result.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.Component.Example (line 159, column 9 - line 163, column 22): " + [result.constructor.name]);
             });
           }
           ;
@@ -32073,6 +32064,89 @@
       });
     };
   };
+  var allExampleIds = ["three-little-circles", "bar-chart", "line-chart", "scatter-plot", "grouped-bar-chart", "multi-line-chart", "bubble-chart", "vertical-tree", "horizontal-tree", "radial-tree", "animated-radial-tree", "treemap", "icicle", "lesmis-force", "topological-sort", "chord-diagram", "sankey-diagram", "map-quartet", "general-update-pattern", "three-circles-transition"];
+  var getNextExampleId = function(currentId) {
+    var v = findIndex(function(id5) {
+      return id5 === currentId;
+    })(allExampleIds);
+    if (v instanceof Nothing) {
+      return Nothing.value;
+    }
+    ;
+    if (v instanceof Just) {
+      return index2(allExampleIds)(v.value0 + 1 | 0);
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Component.Example (line 238, column 3 - line 240, column 54): " + [v.constructor.name]);
+  };
+  var getPrevExampleId = function(currentId) {
+    var v = findIndex(function(id5) {
+      return id5 === currentId;
+    })(allExampleIds);
+    if (v instanceof Nothing) {
+      return Nothing.value;
+    }
+    ;
+    if (v instanceof Just) {
+      var $119 = v.value0 > 0;
+      if ($119) {
+        return index2(allExampleIds)(v.value0 - 1 | 0);
+      }
+      ;
+      return Nothing.value;
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Component.Example (line 245, column 3 - line 247, column 83): " + [v.constructor.name]);
+  };
+  var renderHeader = function(currentId) {
+    return function(maybeMeta) {
+      return header([classes(["example-header"])])([div2([classes(["example-header-left"])])([a([href4("#" + routeToPath(Home.value)), classes(["example-logo-link"])])([img([src9("assets/psd3-logo-color.svg"), alt5("PSD3 Logo"), classes(["example-logo"])])]), a([href4("#" + routeToPath(ExamplesGallery.value)), classes(["example-gallery-link"])])([text5("Examples")]), (function() {
+        if (maybeMeta instanceof Just) {
+          return div2([classes(["example-title-container"])])([h1([classes(["example-title"])])([text5(maybeMeta.value0.name)])]);
+        }
+        ;
+        if (maybeMeta instanceof Nothing) {
+          return text5("");
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.Component.Example (line 359, column 11 - line 367, column 34): " + [maybeMeta.constructor.name]);
+      })()]), div2([classes(["example-header-right"])])([(function() {
+        var v = getPrevExampleId(currentId);
+        if (v instanceof Nothing) {
+          return span3([classes(["example-nav-button", "disabled"])])([text5("\u2190 Previous")]);
+        }
+        ;
+        if (v instanceof Just) {
+          return a([href4("#" + routeToPath(new Example(v.value0))), classes(["example-nav-button"])])([text5("\u2190 Previous")]);
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.Component.Example (line 371, column 11 - line 381, column 41): " + [v.constructor.name]);
+      })(), (function() {
+        var v = getNextExampleId(currentId);
+        if (v instanceof Nothing) {
+          return span3([classes(["example-nav-button", "disabled"])])([text5("Next \u2192")]);
+        }
+        ;
+        if (v instanceof Just) {
+          return a([href4("#" + routeToPath(new Example(v.value0))), classes(["example-nav-button"])])([text5("Next \u2192")]);
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.Component.Example (line 382, column 11 - line 392, column 37): " + [v.constructor.name]);
+      })()])]);
+    };
+  };
+  var render12 = function(state3) {
+    var v = getExampleMeta(state3.exampleId);
+    if (v instanceof Nothing) {
+      return div2([classes(["example-page"])])([renderHeader(state3.exampleId)(Nothing.value), main([classes(["example-content"])])([h1_([text5("Example Not Found")]), p_([text5("No example found with ID: " + state3.exampleId)])])]);
+    }
+    ;
+    if (v instanceof Just) {
+      return div2([classes(["example-page"])])([renderHeader(state3.exampleId)(new Just(v.value0)), main([classes(["example-content"])])([div2([classes(["example-viz-panel"])])([div2([id2("example-viz"), classes(["example-viz"])])([])]), div2([classes(["example-code-panel"])])([h2([classes(["code-panel-title"])])([text5("Source Code")]), pre([classes(["code-block"])])([code([classes(["language-haskell"])])([text5(getExampleCode(state3.exampleId))])])])])]);
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Component.Example (line 296, column 3 - line 335, column 10): " + [v.constructor.name]);
+  };
   var component9 = function(dictMonadAff) {
     return mkComponent({
       initialState: function(exampleId) {
@@ -32099,7 +32173,7 @@
   // output/PSD3.ExamplesGallery/index.js
   var mapFlipped14 = /* @__PURE__ */ mapFlipped(functorArray);
   var renderExampleCard = function(ex) {
-    return a([href4("#" + routeToPath(ex.route)), classes(["example-card"])])([div2([classes(["example-thumbnail", ex.thumbnailClass])])([]), div2([classes(["example-card-content"])])([h3([classes(["example-card-title"])])([text5(ex.name)]), p([classes(["example-card-description"])])([text5(ex.description)])])]);
+    return a([href4("#" + routeToPath(ex.route)), classes(["example-card"])])([div2([classes(["example-thumbnail"])])([img([src9(ex.thumbnail), alt5(ex.name), classes(["example-thumbnail-img"])])]), div2([classes(["example-card-content"])])([h3([classes(["example-card-title"])])([text5(ex.name)]), p([classes(["example-card-description"])])([text5(ex.description)])])]);
   };
   var renderCategory = function(categoryName) {
     return function(examples) {
@@ -32120,147 +32194,147 @@
     return [{
       id: "three-little-circles",
       name: "Three Little Circles",
-      description: "The simplest possible D3 example - three circles",
+      description: "The simplest possible D3 example",
       category: "Simple Charts",
       route: new Example("three-little-circles"),
-      thumbnailClass: "thumb-circles"
+      thumbnail: "assets/example-thumbnails/three-little-circles.png"
     }, {
       id: "bar-chart",
       name: "Bar Chart",
       description: "Basic bar chart with axis and labels",
       category: "Simple Charts",
       route: new Example("bar-chart"),
-      thumbnailClass: "thumb-bar"
+      thumbnail: "assets/example-thumbnails/simple-bar-chart.png"
     }, {
       id: "line-chart",
       name: "Line Chart",
       description: "Line chart with time series data",
       category: "Simple Charts",
       route: new Example("line-chart"),
-      thumbnailClass: "thumb-line"
+      thumbnail: "assets/example-thumbnails/simple-line-chart.png"
     }, {
       id: "scatter-plot",
       name: "Scatter Plot",
-      description: "Scatter plot with Anscombe's Quartet",
+      description: "Anscombe's Quartet visualization",
       category: "Simple Charts",
       route: new Example("scatter-plot"),
-      thumbnailClass: "thumb-scatter"
+      thumbnail: "assets/example-thumbnails/anscombes-quartet.png"
     }, {
       id: "grouped-bar-chart",
       name: "Grouped Bar Chart",
       description: "Bar chart with grouped categories",
       category: "Simple Charts",
       route: new Example("grouped-bar-chart"),
-      thumbnailClass: "thumb-grouped-bar"
+      thumbnail: "assets/example-thumbnails/grouped-bar-chart.png"
     }, {
       id: "multi-line-chart",
       name: "Multi-Line Chart",
       description: "Multiple line series on one chart",
       category: "Simple Charts",
       route: new Example("multi-line-chart"),
-      thumbnailClass: "thumb-multi-line"
+      thumbnail: "assets/example-thumbnails/multiline-chart.png"
     }, {
       id: "bubble-chart",
       name: "Bubble Chart",
-      description: "Scatter plot with sized bubbles",
-      category: "Simple Charts",
+      description: "Hierarchical circle packing layout",
+      category: "Hierarchies",
       route: new Example("bubble-chart"),
-      thumbnailClass: "thumb-bubble"
+      thumbnail: "assets/example-thumbnails/circle-packing.png"
     }, {
       id: "vertical-tree",
       name: "Vertical Tree",
-      description: "Top-down hierarchical tree layout",
+      description: "Top-down tidy tree layout",
       category: "Hierarchies",
       route: new Example("vertical-tree"),
-      thumbnailClass: "thumb-vtree"
+      thumbnail: "assets/example-thumbnails/vertical-tidy-tree.png"
     }, {
       id: "horizontal-tree",
       name: "Horizontal Tree",
-      description: "Left-to-right hierarchical tree layout",
+      description: "Left-to-right tidy tree layout",
       category: "Hierarchies",
       route: new Example("horizontal-tree"),
-      thumbnailClass: "thumb-htree"
+      thumbnail: "assets/example-thumbnails/horizontal-tidy-tree.png"
     }, {
       id: "radial-tree",
       name: "Radial Tree",
-      description: "Circular hierarchical tree layout",
+      description: "Circular tidy tree layout",
       category: "Hierarchies",
       route: new Example("radial-tree"),
-      thumbnailClass: "thumb-radial-tree"
+      thumbnail: "assets/example-thumbnails/radial-tidy-tree.png"
     }, {
       id: "treemap",
       name: "Treemap",
       description: "Space-filling hierarchical visualization",
       category: "Hierarchies",
       route: new Example("treemap"),
-      thumbnailClass: "thumb-treemap"
+      thumbnail: "assets/example-thumbnails/treemap.png"
     }, {
       id: "icicle",
       name: "Icicle Chart",
-      description: "Hierarchical icicle/partition layout",
+      description: "Hierarchical partition layout",
       category: "Hierarchies",
       route: new Example("icicle"),
-      thumbnailClass: "thumb-icicle"
+      thumbnail: "assets/example-thumbnails/icicle-chart.png"
     }, {
       id: "lesmis-force",
       name: "Les Mis\xE9rables Network",
-      description: "Character co-occurrence force-directed graph",
+      description: "Character co-occurrence graph",
       category: "Force-Directed",
       route: new Example("lesmis-force"),
-      thumbnailClass: "thumb-lesmis"
+      thumbnail: "assets/example-thumbnails/les-miserables.png"
     }, {
       id: "topological-sort",
-      name: "Topological Sort Layers",
+      name: "Topological Sort",
       description: "Force layout with layer constraints",
       category: "Force-Directed",
       route: new Example("topological-sort"),
-      thumbnailClass: "thumb-topo"
+      thumbnail: "assets/example-thumbnails/working-with-graphs.png"
     }, {
       id: "chord-diagram",
       name: "Chord Diagram",
-      description: "Circular flow diagram showing relationships",
+      description: "Circular relationship diagram",
       category: "Data Flow",
       route: new Example("chord-diagram"),
-      thumbnailClass: "thumb-chord"
+      thumbnail: "assets/example-thumbnails/chord-diagram.png"
     }, {
       id: "sankey-diagram",
       name: "Sankey Diagram",
       description: "Flow diagram with proportional widths",
       category: "Data Flow",
       route: new Example("sankey-diagram"),
-      thumbnailClass: "thumb-sankey"
+      thumbnail: "assets/example-thumbnails/sankey-diagram.png"
     }, {
       id: "map-quartet",
-      name: "Map-Based Quartet",
-      description: "Scatter plots using Map data structures",
+      name: "Map Quartet",
+      description: "Sparse data with PureScript Maps",
       category: "Rich Data Structures",
       route: new Example("map-quartet"),
-      thumbnailClass: "thumb-map-quartet"
+      thumbnail: "assets/example-thumbnails/working-with-maps.png"
     }, {
       id: "three-circles-transition",
-      name: "Color Mixing Transition",
-      description: "RGB color mixing with transitions",
+      name: "Color Mixing",
+      description: "RGB color transitions",
       category: "Transitions",
       route: new Example("three-circles-transition"),
-      thumbnailClass: "thumb-color-mix"
+      thumbnail: "assets/example-thumbnails/three-little-circles.png"
     }, {
       id: "general-update-pattern",
       name: "General Update Pattern",
-      description: "Enter, update, exit pattern visualization",
+      description: "Enter, update, exit pattern",
       category: "Transitions",
       route: new Example("general-update-pattern"),
-      thumbnailClass: "thumb-gup"
+      thumbnail: "assets/example-thumbnails/general-update-pattern.png"
     }, {
       id: "animated-radial-tree",
       name: "Animated Radial Tree",
       description: "Transitions between tree layouts",
       category: "Transitions",
       route: new Example("animated-radial-tree"),
-      thumbnailClass: "thumb-anim-radial"
+      thumbnail: "assets/example-thumbnails/animating-tree.png"
     }];
   })();
   var render13 = function(v) {
-    return div2([classes(["examples-gallery-page"])])([header([classes(["gallery-header"])])([h1([classes(["gallery-title"])])([text5("Examples Gallery")]), p([classes(["gallery-subtitle"])])([text5("Complete catalog of PSD3 visualization examples. Each example shows the visualization and its full source code.")]), a([href4("#" + routeToPath(Home.value)), classes(["gallery-home-link"])])([text5("\u2190 Back to Home")])]), main([classes(["gallery-content"])])(renderCategories(allExamples))]);
+    return div2([classes(["examples-gallery-page"])])([header([classes(["gallery-header"])])([div2([classes(["gallery-header-content"])])([a([href4("#" + routeToPath(Home.value)), classes(["gallery-logo-link"])])([img([src9("assets/psd3-logo-color.svg"), alt5("PSD3 Logo"), classes(["gallery-logo"])])]), div2([classes(["gallery-header-text"])])([h1([classes(["gallery-title"])])([text5("Examples")]), p([classes(["gallery-subtitle"])])([text5("Interactive visualizations with source code")])])])]), main([classes(["gallery-content"])])(renderCategories(allExamples))]);
   };
   var component10 = /* @__PURE__ */ mkComponent({
     initialState: function(v) {
@@ -40919,7 +40993,7 @@ graph TB
     };
     return div2([classes(["wizard__step-content"])])([h2_([text5("Review Generated Files")]), p_([text5("Preview the files that will be generated for your project.")]), div2([classes(["wizard__file-list"])])(map65(renderFile)(state3.generatedFiles))]);
   };
-  var renderHeader = function(state3) {
+  var renderHeader2 = function(state3) {
     return header([classes(["wizard__header"])])([h1_([text5("PSD3 Visualization Wizard")]), p([classes(["wizard__subtitle"])])([text5("Create a new PSD3 visualization project in 4 easy steps")])]);
   };
   var renderDownload = function(state3) {
@@ -41226,7 +41300,7 @@ graph TB
   var render62 = function(dictMonadAff) {
     var renderStepContent1 = renderStepContent(dictMonadAff);
     return function(state3) {
-      return div2([classes(["wizard"])])([renderHeader(state3), renderProgressBar(state3), renderStepContent1(state3), renderNavigation(state3)]);
+      return div2([classes(["wizard"])])([renderHeader2(state3), renderProgressBar(state3), renderStepContent1(state3), renderNavigation(state3)]);
     };
   };
   var canGoToStep = function(state3) {
