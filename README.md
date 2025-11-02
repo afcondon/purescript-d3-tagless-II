@@ -367,3 +367,19 @@ Possibility of using GraphViz for layout, of writing a PureScript native Selecti
 ### Reference
 
 #### Library Architecture and API guide (probably just Pursuit once published)
+
+## API Documentation
+
+Generate Pursuit-style API documentation for the library:
+
+```bash
+npm run docs:api
+```
+
+This generates HTML documentation in `generated-docs/html/`. To generate and open in your browser:
+
+```bash
+npm run docs:api:open
+```
+
+The generated documentation is separate from the `/docs` folder which serves the GitHub Pages website.

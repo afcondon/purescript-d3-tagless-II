@@ -12,6 +12,8 @@
     "generate-spago-data": "node scripts/generate-spago-data.js",
     "copy-sources": "mkdir -p docs/sources && cp -r src/lib/PSD3 docs/sources/",
     "bundle": "spago bundle --module PSD3.Main --outfile docs/bundle.js",
+    "docs:api": "spago docs --format html",
+    "docs:api:open": "spago docs --format html --open",
     "graph-dot": "spago graph modules --dot",
     "graph-json": "spago graph modules --json && spago graph packages --json",
     "graph-topo": "spago graph modules --topo",
