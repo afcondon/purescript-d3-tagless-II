@@ -20,11 +20,13 @@ import Halogen.HTML.Properties as HP
 import Halogen.Subscription as HS
 import PSD3.Interpreter.D3 (D3M, eval_D3M)
 import PSD3.Internal.Types (D3Selection_)
+import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.WealthHealth.Actions (Action(..))
 import PSD3.WealthHealth.Data (getAllNationsAtYear, getNationAtYear, loadNationsData)
 import PSD3.WealthHealth.HTML (renderControlPanel, renderLegend)
 import PSD3.WealthHealth.State (State, LabelMode(..), initialState)
 import PSD3.WealthHealth.Types (NationPoint, WealthHealthModel, regionColor, regionName)
+import PSD3.Website.Types (Route(..))
 
 -- | Wealth & Health visualization component
 component :: forall q i o m. MonadAff m => MonadEffect m => H.Component q i o m
@@ -42,8 +44,11 @@ render :: forall m. State -> H.ComponentHTML Action () m
 render state =
   HH.div
     [ HP.classes [ HH.ClassName "wealth-health-page" ] ]
-    [ -- Header
-      HH.header
+    [ -- Navigation Header
+      TutorialNav.renderHeader WealthHealth
+
+    -- Page Header
+    , HH.header
         [ HP.classes [ HH.ClassName "wealth-health-header" ] ]
         [ HH.h1_ [ HH.text "The Wealth & Health of Nations" ]
         , HH.p_ [ HH.text "An animated exploration of income, life expectancy, and population across 180 nations from 1800 to 2009" ]

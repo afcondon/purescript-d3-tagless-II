@@ -15,21 +15,15 @@ import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.ExamplesNav as ExamplesNav
-import PSD3.Understanding.TOC (renderTOC, tocAnchor)
+import PSD3.RoutingDSL (routeToPath)
+import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
-import Type.Proxy (Proxy(..))
 
 -- | SimpleCharts page state
 type State = Unit
 
 -- | SimpleCharts page actions
 data Action = Initialize
-
--- | Child component slots
-type Slots = ( examplesNav :: forall q. H.Slot q Void Unit )
-
-_examplesNav = Proxy :: Proxy "examplesNav"
 
 -- | SimpleCharts page component
 component :: forall q i o. H.Component q i o Aff
@@ -42,7 +36,7 @@ component = H.mkComponent
       }
   }
 
-handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
+handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
 handleAction = case _ of
   Initialize -> do
     -- Load unemployment data from CSV
@@ -81,26 +75,15 @@ handleAction = case _ of
     log "All charts drawn"
     pure unit
 
-render :: State -> H.ComponentHTML Action Slots Aff
+render :: State -> H.ComponentHTML Action () Aff
 render _ =
   HH.div
-    [ HP.classes [ HH.ClassName "explanation-page" ] ]
-    [ -- TOC Panel (LHS)
-      renderTOC
-        { title: "Page Contents"
-        , items:
-            [ tocAnchor "grouped-bar" "1. Grouped Bar Chart" 0
-            , tocAnchor "multi-line" "2. Multi-Line Chart" 0
-            , tocAnchor "radial-stacked" "3. Radial Stacked Bar Chart" 0
-            ]
-        , image: Just "images/understanding-bookmark-trees.jpeg"
-        }
-
-    -- Navigation Panel (RHS) - unified examples navigation
-    , HH.slot_ _examplesNav unit ExamplesNav.component SimpleCharts2
-
-    -- Page introduction
-    , HH.section
+    [ HP.classes [ HH.ClassName "example-page" ] ]
+    [ TutorialNav.renderHeader SimpleCharts2
+    , HH.main
+        [ HP.classes [ HH.ClassName "tutorial-content" ] ]
+        [ -- Page introduction
+          HH.section
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
@@ -129,6 +112,15 @@ render _ =
             ]
         , HH.p_
             [ HH.text "The chart uses nested band scales: an outer scale positions each state cluster, and an inner scale positions individual bars within each cluster. The population values are scaled linearly to bar heights, with colors from the Spectral color scheme to distinguish age groups." ]
+        , HH.p_
+            [ HH.text "View this example "
+            , HH.a
+                [ HP.href $ "#" <> routeToPath (Example "grouped-bar-chart")
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "with full source code" ]
+            , HH.text "."
+            ]
         ]
 
     -- Section 2: Multi-Line Chart
@@ -149,6 +141,15 @@ render _ =
             ]
         , HH.p_
             [ HH.text "Each city is represented by a colored line, with a legend on the right for identification. The chart uses SVG path elements for smooth lines, linear scales for time (x-axis) and unemployment percentage (y-axis), and includes axis labels for context." ]
+        , HH.p_
+            [ HH.text "View this example "
+            , HH.a
+                [ HP.href $ "#" <> routeToPath (Example "multi-line-chart")
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "with full source code" ]
+            , HH.text "."
+            ]
         ]
 
     -- Section 3: Radial Stacked Bar Chart
@@ -169,5 +170,15 @@ render _ =
             ]
         , HH.p_
             [ HH.text "The chart uses polar coordinates with an angular scale (θ) dividing the circle by states and a radial scale (r) for population. Arc paths are generated for each segment, with the same color scheme as the grouped bar chart for consistency. State labels are positioned around the perimeter." ]
+        , HH.p_
+            [ HH.text "View this example "
+            , HH.a
+                [ HP.href $ "#" <> routeToPath (Example "radial-stacked-bar")
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "with full source code" ]
+            , HH.text "."
+            ]
+        ]
         ]
     ]

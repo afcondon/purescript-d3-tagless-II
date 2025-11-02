@@ -12,10 +12,8 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.ExamplesNav as ExamplesNav
-import PSD3.Understanding.TOC (renderTOC, tocAnchor, tocRoute)
+import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
-import Type.Proxy (Proxy(..))
 
 -- | DataFlowViz page state
 type State = {
@@ -25,10 +23,6 @@ type State = {
 -- | DataFlowViz page actions
 data Action = Initialize
 
--- | Child component slots
-type Slots = ( examplesNav :: forall q. H.Slot q Void Unit )
-
-_examplesNav = Proxy :: Proxy "examplesNav"
 
 -- | DataFlowViz page component
 component :: forall q i o. H.Component q i o Aff
@@ -41,27 +35,18 @@ component = H.mkComponent
       }
   }
 
-render :: State -> H.ComponentHTML Action Slots Aff
+render :: State -> H.ComponentHTML Action () Aff
 render _ =
   HH.div
-    [ HP.classes [ HH.ClassName "explanation-page" ] ]
-    [ -- TOC Panel (LHS)
-      renderTOC
-        { title: "Page Contents"
-        , items:
-            [ tocAnchor "chord" "1. Chord Diagram" 0
-            , tocRoute (Explore "ChordDiagramDraw") "→ How-to guide" 1
-            , tocAnchor "sankey" "2. Sankey Diagram" 0
-            , tocRoute (Explore "SankeyDraw") "→ How-to guide" 1
-            ]
-        , image: Just "images/understanding-bookmark-trees.jpeg"
-        }
+    [ HP.classes [ HH.ClassName "example-page" ] ]
+    [ -- Navigation Header
+      TutorialNav.renderHeader DataFlowViz
 
-    -- Navigation Panel (RHS)
-    , HH.slot_ _examplesNav unit ExamplesNav.component DataFlowViz
-
-    -- Page introduction
-    , HH.section
+    -- Page content
+    , HH.main
+        [ HP.classes [ HH.ClassName "tutorial-content" ] ]
+        [ -- Page introduction
+          HH.section
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
@@ -92,6 +77,13 @@ render _ =
             ]
         , HH.p_
             [ HH.text "The circular layout makes it easy to see both direct dependencies (following a single chord) and the overall pattern of interconnections in the system. The thickness of each chord represents the strength of the relationship." ]
+        , HH.p_
+            [ HH.a
+                [ HP.href "#/example/chord-diagram"
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "View interactive example with full source code →" ]
+            ]
         ]
 
     -- Section 2: Sankey Diagram
@@ -114,11 +106,19 @@ render _ =
             ]
         , HH.p_
             [ HH.text "The width of each flow represents the quantity of energy. Notice how the diagram reveals energy losses in transformation processes and highlights which sources contribute most to final consumption." ]
+        , HH.p_
+            [ HH.a
+                [ HP.href "#/example/sankey-diagram"
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "View interactive example with full source code →" ]
+            ]
         ]
+      ]
     ]
 
 -- Handle actions
-handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
+handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
 handleAction = case _ of
   Initialize -> do
     _ <- H.liftEffect $ eval_D3M $ Chord.draw Chord.exampleMatrix Chord.exampleLabels "div.chord-viz"

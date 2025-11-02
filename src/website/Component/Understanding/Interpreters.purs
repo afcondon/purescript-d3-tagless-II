@@ -9,12 +9,10 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import CodeSnippet (codeSnippet, triggerPrismHighlighting)
 import PSD3.Understanding.InterpretersDemo (generateD3Code)
-import PSD3.Shared.ExamplesNav as ExamplesNav
+import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
 import Snippets (readSnippetFiles)
-import Type.Proxy (Proxy(..))
 
 -- | Available interpreters
 data InterpreterType
@@ -39,9 +37,6 @@ data Action
   = Initialize
   | SelectInterpreter InterpreterType
 
-type Slots = ( examplesNav :: forall q. H.Slot q Void Unit )
-
-_examplesNav = Proxy :: Proxy "examplesNav"
 
 -- | Interpreters page component
 component :: forall q i o. H.Component q i o Aff
@@ -62,12 +57,9 @@ component = H.mkComponent
       , mermaidSnippet: Nothing
       }
 
-handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
+handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
 handleAction = case _ of
   Initialize -> do
-    -- Trigger Prism highlighting for code snippets
-    triggerPrismHighlighting
-
     -- Generate D3 code on initialization
     d3Code <- liftEffect generateD3Code
 
@@ -82,50 +74,17 @@ handleAction = case _ of
   SelectInterpreter interpreter -> do
     H.modify_ _ { selectedInterpreter = interpreter }
 
-render :: State -> H.ComponentHTML Action Slots Aff
+render :: State -> H.ComponentHTML Action () Aff
 render state =
   HH.div
-    [ HP.classes [ HH.ClassName "explanation-page" ] ]
-    [ -- TOC Panel (LHS)
-      HH.div
-        [ HP.classes [ HH.ClassName "toc-panel" ] ]
-        [ HH.img
-            [ HP.src "bookmark.jpeg"
-            , HP.alt ""
-            , HP.classes [ HH.ClassName "toc-panel__bookmark-pin" ]
-            ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "toc-panel__main" ] ]
-            [ HH.div
-                [ HP.classes [ HH.ClassName "floating-panel__header" ] ]
-                [ HH.h3
-                    [ HP.classes [ HH.ClassName "floating-panel__title" ] ]
-                    [ HH.text "Interpreters" ]
-                , HH.button
-                    [ HP.classes [ HH.ClassName "floating-panel__toggle" ]
-                    , HP.type_ HP.ButtonButton
-                    ]
-                    [ HH.text "−" ]
-                ]
-            , HH.div
-                [ HP.classes [ HH.ClassName "floating-panel__content", HH.ClassName "toc-panel__content" ] ]
-                [ HH.nav
-                    [ HP.classes [ HH.ClassName "toc-nav" ] ]
-                    [ renderInterpreterLink EnglishDescription "1. English Description"
-                    , renderInterpreterLink D3Code "2. D3 JavaScript"
-                    , renderInterpreterLink VegaLite "3. Vega-Lite JSON"
-                    , renderInterpreterLink MermaidJS "4. Mermaid Diagram"
-                    , renderInterpreterLink MetaTreeAST "5. Meta Tree (AST)"
-                    ]
-                ]
-            ]
-        ]
+    [ HP.classes [ HH.ClassName "example-page" ] ]
+    [ -- Navigation Header
+      TutorialNav.renderHeader Interpreters
 
-    -- Navigation Panel (RHS)
-    , HH.slot_ _examplesNav unit ExamplesNav.component Interpreters
-
-    -- Page introduction
-    , HH.section
+    -- Page content
+    , HH.main
+        [ HP.classes [ HH.ClassName "tutorial-content" ] ]
+        [ HH.section
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
@@ -147,17 +106,23 @@ render state =
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
             [ HH.text "The Source Code" ]
         , HH.p_
-            [ HH.text "Here's a simple example using our PureScript D3 DSL - the most basic example imaginable, three circles:" ]
-        -- SNIPPET: TLCSimple src/website/Viz/ThreeLittleCircles/ThreeLittleCircles.purs 16-31
-        , codeSnippet "TLCSimple" "haskell"
+            [ HH.text "Here's a simple example using our PureScript D3 DSL - the most basic example imaginable, three circles. The code demonstrates how the Finally Tagless pattern allows the same DSL code to be interpreted in multiple ways." ]
+        , HH.p_
+            [ HH.a
+                [ HP.href "#/example/three-little-circles"
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "View the Three Little Circles example with full source code →" ]
+            ]
         ]
 
     -- Selected interpreter output
     , renderInterpreterOutput state state.selectedInterpreter
+      ]
     ]
 
 -- | Render a clickable interpreter link in the TOC
-renderInterpreterLink :: InterpreterType -> String -> H.ComponentHTML Action Slots Aff
+renderInterpreterLink :: InterpreterType -> String -> H.ComponentHTML Action () Aff
 renderInterpreterLink interpreter label =
   HH.a
     [ HE.onClick \_ -> SelectInterpreter interpreter
@@ -166,7 +131,7 @@ renderInterpreterLink interpreter label =
     [ HH.text label ]
 
 -- | Render the output section for the selected interpreter
-renderInterpreterOutput :: State -> InterpreterType -> H.ComponentHTML Action Slots Aff
+renderInterpreterOutput :: State -> InterpreterType -> H.ComponentHTML Action () Aff
 renderInterpreterOutput state interpreter =
   HH.section
     [ HP.classes [ HH.ClassName "tutorial-section" ] ]
@@ -204,7 +169,7 @@ interpreterDescription = case _ of
     "This interpreter visualizes the abstract syntax tree of the visualization code itself. It creates a tree diagram showing the structure of DSL operations, demonstrating meta-programming capabilities."
 
 -- | Render the actual content/output for each interpreter
-renderInterpreterContent :: State -> InterpreterType -> H.ComponentHTML Action Slots Aff
+renderInterpreterContent :: State -> InterpreterType -> H.ComponentHTML Action () Aff
 renderInterpreterContent state = case _ of
   EnglishDescription ->
     HH.div

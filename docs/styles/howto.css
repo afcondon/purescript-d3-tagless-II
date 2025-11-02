@@ -1,10 +1,8 @@
-/* How-to Page Styles - Task-oriented step-by-step guides */
+/* How-to Page Styles - Clean, Minimal Design */
 
 .howto-page {
   min-height: 100vh;
-  background-color: #f0f8ff; /* Light blue - practical and action-oriented */
-  padding: 2rem 1rem;
-  position: relative;
+  background-color: #f5f1e8; /* Beige background */
 }
 
 /* TOC Floating Panel - Left side */
@@ -773,3 +771,271 @@
   margin: 0;
 }
 
+
+/* New Minimal How-to Page Styles */
+
+/* Header */
+.howto-header {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0ddd4;
+  padding: 2rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.howto-header-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.howto-logo-link {
+  display: flex;
+  align-items: center;
+}
+
+.howto-logo {
+  height: 36px;
+  width: auto;
+}
+
+.howto-nav {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.howto-nav-link {
+  font-size: 1rem;
+  color: #666;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.howto-nav-link:hover {
+  color: #333;
+}
+
+/* Hero Section */
+.howto-hero {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 4rem 3rem 3rem 3rem;
+}
+
+.howto-hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.howto-hero-title {
+  font-size: 2.5rem;
+  font-weight: 600;
+  color: #333;
+  line-height: 1.3;
+  margin: 0 0 1.5rem 0;
+  letter-spacing: -0.02em;
+}
+
+.howto-hero-description {
+  font-size: 1.1rem;
+  color: #666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* Sections */
+.howto-section {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 3rem 3rem;
+  background-color: #ffffff;
+  margin-bottom: 2rem;
+}
+
+.howto-section-title {
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.02em;
+}
+
+.howto-section-description {
+  font-size: 1rem;
+  color: #666;
+  margin: 0 0 2rem 0;
+  line-height: 1.6;
+}
+
+/* Grid */
+.howto-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Cards */
+.howto-card {
+  background-color: #fafaf8;
+  border: 1px solid #e0ddd4;
+  border-radius: 4px;
+  padding: 1.5rem;
+  text-decoration: none;
+  display: block;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.howto-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #007acc;
+}
+
+.howto-card--coming-soon {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.howto-card--coming-soon:hover {
+  transform: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border-color: #e0ddd4;
+}
+
+/* Card header with type badge */
+.howto-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.howto-card-type {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.howto-card--howto .howto-card-type {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.howto-card--best-practice .howto-card-type {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.howto-card-status {
+  font-size: 0.75rem;
+  color: #999;
+  font-weight: 500;
+}
+
+.howto-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 0.75rem 0;
+  line-height: 1.3;
+}
+
+.howto-card-description {
+  font-size: 0.95rem;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .howto-header-content {
+    padding: 0 2rem;
+  }
+
+  .howto-hero {
+    padding: 3rem 2rem 2rem 2rem;
+  }
+
+  .howto-section {
+    padding: 2rem 2rem;
+  }
+
+  .howto-hero-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .howto-header {
+    padding: 1.5rem 0;
+  }
+
+  .howto-header-content {
+    padding: 0 1.5rem;
+  }
+
+  .howto-logo {
+    height: 28px;
+  }
+
+  .howto-hero {
+    padding: 2rem 1.5rem;
+  }
+
+  .howto-hero-title {
+    font-size: 1.75rem;
+  }
+
+  .howto-hero-description {
+    font-size: 1rem;
+  }
+
+  .howto-section {
+    padding: 2rem 1.5rem;
+  }
+
+  .howto-section-title {
+    font-size: 1.5rem;
+  }
+
+  .howto-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .howto-card {
+    padding: 1.25rem;
+  }
+
+  .howto-card-title {
+    font-size: 1.1rem;
+  }
+
+  .howto-card-description {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .howto-hero-title {
+    font-size: 1.5rem;
+  }
+
+  .howto-section-title {
+    font-size: 1.25rem;
+  }
+}

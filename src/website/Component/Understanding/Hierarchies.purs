@@ -19,9 +19,8 @@ import PSD3.Data.Tree (TreeJson_, TreeType(..))
 import PSD3.Internal.Hierarchical (getTreeViaAJAX)
 import PSD3.Internal.Utility (removeExistingSVG)
 import PSD3.Interpreter.D3 (eval_D3M)
-import PSD3.Shared.ExamplesNav as ExamplesNav
+import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
-import Type.Proxy (Proxy(..))
 
 -- | Hierarchies page state
 type State = {
@@ -74,11 +73,6 @@ data Action
   = Initialize
   | SelectLayout HierarchyLayout
 
--- | Child component slots
-type Slots = ( examplesNav :: forall q. H.Slot q Void Unit )
-
-_examplesNav = Proxy :: Proxy "examplesNav"
-
 -- | Hierarchies page component
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
@@ -90,10 +84,10 @@ component = H.mkComponent
       }
   }
 
-render :: State -> H.ComponentHTML Action Slots Aff
+render :: State -> H.ComponentHTML Action () Aff
 render state =
   HH.div
-    [ HP.classes [ HH.ClassName "explanation-page" ] ]
+    [ HP.classes [ HH.ClassName "example-page" ] ]
     [ -- Control Panel (LHS)
       HH.div
         [ HP.classes [ HH.ClassName "toc-panel", HH.ClassName "control-panel" ] ]
@@ -164,56 +158,55 @@ render state =
         ]
 
     -- Navigation Panel (RHS)
-    , HH.slot_ _examplesNav unit ExamplesNav.component Hierarchies
+    , TutorialNav.renderHeader Hierarchies
 
-    -- Page introduction
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
-        [ HH.h1
-            [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-            [ HH.text "Hierarchical Layouts" ]
-        , HH.p_
-            [ HH.text "Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data." ]
-        , HH.p_
-            [ HH.text "This page demonstrates five different ways to visualize the same hierarchical dataset. Use the controls on the left to switch between layouts and explore how each representation emphasizes different relationships in the data." ]
-        ]
-
-    -- Visualization section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ] ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text $ show state.currentLayout ]
-        , HH.p_
-            [ HH.text $ layoutDescription state.currentLayout ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
-            [ HH.div
-                [ HP.classes [ HH.ClassName "hierarchies-viz" ] ]
-                [ renderLayoutPlaceholder state.currentLayout ]
+    -- Page content
+    , HH.main
+        [ HP.classes [ HH.ClassName "tutorial-content" ] ]
+        [ -- Page introduction
+          HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
+            [ HH.h1
+                [ HP.classes [ HH.ClassName "tutorial-title" ] ]
+                [ HH.text "Hierarchical Layouts" ]
+            , HH.p_
+                [ HH.text "Hierarchical data structures are everywhere in computing: file systems, organizational charts, taxonomies, JSON documents, and abstract syntax trees. Different visualization layouts reveal different aspects of the same hierarchical data." ]
+            , HH.p_
+                [ HH.text "This page demonstrates five different ways to visualize the same hierarchical dataset. Use the controls on the left to switch between layouts and explore how each representation emphasizes different relationships in the data." ]
             ]
-        ]
 
-    -- Code section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ] ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Implementation" ]
-        , HH.p_
-            [ HH.text "The visualization code for "
-            , HH.strong_ [ HH.text $ show state.currentLayout ]
-            , HH.text " demonstrates how D3's hierarchical layout algorithms transform tree data into visual coordinates."
+        -- Visualization section
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text $ show state.currentLayout ]
+            , HH.p_
+                [ HH.text $ layoutDescription state.currentLayout ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
+                [ HH.div
+                    [ HP.classes [ HH.ClassName "hierarchies-viz" ] ]
+                    [ renderLayoutPlaceholder state.currentLayout ]
+                ]
             ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "tutorial-code-block" ] ]
-            [ HH.pre_
-                [ HH.code_
-                    [ HH.text "-- Code for "
-                    , HH.text $ show state.currentLayout
-                    , HH.text " layout will go here\n"
-                    , HH.text "-- Demonstrates D3 hierarchy layout with PureScript DSL"
+
+        -- Interactive exploration note
+        , HH.section
+            [ HP.classes [ HH.ClassName "tutorial-section" ] ]
+            [ HH.h2
+                [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
+                [ HH.text "Interactive Exploration" ]
+            , HH.p_
+                [ HH.text "This page itself is the interactive example! Use the controls on the left to switch between different hierarchical layouts and observe how the same data can be visualized in multiple ways. Each layout reveals different aspects of the hierarchical structure." ]
+            , HH.p_
+                [ HH.text "To explore the implementation of each layout, visit the "
+                , HH.a
+                    [ HP.href "#/examples"
+                    , HP.classes [ HH.ClassName "tutorial-link" ]
                     ]
+                    [ HH.text "Examples Gallery" ]
+                , HH.text " where you can view the full source code for each visualization type."
                 ]
             ]
         ]
@@ -237,7 +230,7 @@ renderLayoutPlaceholder :: forall w i. HierarchyLayout -> HH.HTML w i
 renderLayoutPlaceholder _ =
   HH.div_ []  -- Empty div for D3 to populate
 
-handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
+handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
 handleAction = case _ of
   Initialize -> do
     -- Clear any existing viz

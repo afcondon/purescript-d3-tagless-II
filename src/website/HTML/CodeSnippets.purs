@@ -15,52 +15,16 @@ type SnippetInfo =
 
 -- ** Snippet Content Constants **
 
-snippet_BarChartDraw_content :: String
-snippet_BarChartDraw_content = "  (root :: D3Selection_) <- attach selector\n  svg <- appendTo root Svg [\n      viewBox 0.0 0.0 dims.width dims.height\n    , classed \"bar-chart\"\n    , width dims.width\n    , height dims.height\n    ]\n\n  -- Calculate bar width (with padding)\n  let numBars = length dataPoints\n  let barWidth = if numBars > 0 then (iWidth / (Int.toNumber numBars)) * 0.8 else 0.0\n\n  -- Create a group for the chart content (offset by margins)\n  chartGroup <- appendTo svg Group [\n      transform [ \\_ -> \"translate(\" <> show dims.margin.left <> \",\" <> show dims.margin.top <> \")\" ]\n    ]\n\n  -- Create scales\n  xScale <- liftEffect $ createLinearScale_ { domain: [minX, maxX], range: [0.0, iWidth] }\n  yScale <- liftEffect $ createLinearScale_ { domain: [minY, maxY], range: [iHeight, 0.0] }\n\n  -- Add <g> elements to hold each of the axes\n  xAxisGroup <- appendTo chartGroup Group [\n      classed \"x-axis\"\n    , transform [ \\_ -> \"translate(0,\" <> show iHeight <> \")\" ]\n    ]\n  yAxisGroup <- appendTo chartGroup Group [ \n      classed \"y-axis\"\n    , transform [ \\_ -> \"translate(\" <> show ((barWidth / 2.0 * -1.0) - 5.0) <> \",0)\" ]\n  ]\n  -- Draw the axes into the SVG, inside their respective <g> group elements\n  _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)\n  _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)\n\n  -- Add bars\n  let addBar :: DataPoint -> m Unit\n      addBar point = do\n        let xPos = applyScale_ xScale point.x - (barWidth / 2.0)\n        let yPos = applyScale_ yScale point.y\n        let barHeight = iHeight - yPos\n        _ <- appendTo chartGroup Rect [\n            x xPos\n          , y yPos\n          , width barWidth\n          , height barHeight\n          , fill \"#4a90e2\"\n          , strokeColor \"#357abd\"\n          , strokeWidth 1.0\n          , classed \"bar\"\n          ]\n        pure unit\n\n  _ <- traverse_ addBar dataPoints\n\n  pure unit\n-- Snippet_End"
-
-snippet_LineChartDraw_content :: String
-snippet_LineChartDraw_content = "    , classed \"line-chart\"\n    , width dims.width\n    , height dims.height\n    ]\n\n  -- Create a group for the chart content (offset by margins)\n  chartGroup <- appendTo svg Group [\n      transform [ \\_ -> \"translate(\" <> show dims.margin.left <> \",\" <> show dims.margin.top <> \")\" ]\n    ]\n\n  -- Create scales\n  xScale <- liftEffect $ createLinearScale_ { domain: [minX, maxX], range: [0.0, iWidth] }\n  yScale <- liftEffect $ createLinearScale_ { domain: [minY, maxY], range: [iHeight, 0.0] }\n\n  -- Add axes\n  xAxisGroup <- appendTo chartGroup Group [\n      classed \"x-axis\"\n    , transform [ \\_ -> \"translate(0,\" <> show iHeight <> \")\" ]\n    ]\n  yAxisGroup <- appendTo chartGroup Group [ classed \"y-axis\" ]\n\n  _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)\n  _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)\n\n  -- Create line generator and add the line path\n  lineGen <- liftEffect $ createLineGenerator_ { xScale, yScale }\n  let pathData = generateLinePath_ lineGen dataPoints\n\n  _ <- appendTo chartGroup Path [\n      d pathData\n    , fill \"none\"\n    , strokeColor \"#4a90e2\"\n    , strokeWidth 2.0\n    , classed \"line\"\n    ]\n\n  pure unit\n-- Snippet_End"
-
-snippet_ScatterPlotQuartet_content :: String
-snippet_ScatterPlotQuartet_content = "  -- Use fixed scale domains for all four plots (for valid comparison)\n  let xDomain = [0.0, 20.0]\n  let yDomain = [0.0, 14.0]\n\n  (root :: D3Selection_) <- attach selector\n  svg <- appendTo root Svg [\n      viewBox 0.0 0.0 totalWidth totalHeight\n    , classed \"scatter-quartet\"\n    , width totalWidth\n    , height totalHeight\n    ]\n\n  -- Helper function to draw a single subplot\n  let drawSubplot :: String -> Array DataPoint -> Number -> Number -> m Unit\n      drawSubplot title dataPoints xOffset yOffset = do\n        -- Create group for this subplot\n        subplotGroup <- appendTo svg Group [\n            classed \"subplot\"\n          , transform [ \\_ -> \"translate(\" <> show (xOffset + margin.left) <> \",\" <> show (yOffset + margin.top) <> \")\" ]\n          ]\n\n        -- Add title\n        _ <- appendTo svg Text [\n            x (xOffset + plotWidth / 2.0)\n          , y (yOffset + 15.0)\n          , text title\n          , textAnchor \"middle\"\n          , fontSize 16.0\n          , classed \"subplot-title\"\n          ]\n\n        -- Create scales\n        xScale <- liftEffect $ createLinearScale_ { domain: xDomain, range: [0.0, iWidth] }\n        yScale <- liftEffect $ createLinearScale_ { domain: yDomain, range: [iHeight, 0.0] }\n\n        -- Add axes\n        xAxisGroup <- appendTo subplotGroup Group [\n            classed \"x-axis\"\n          , transform [ \\_ -> \"translate(0,\" <> show iHeight <> \")\" ]\n          ]\n        yAxisGroup <- appendTo subplotGroup Group [ classed \"y-axis\" ]\n\n        _ <- liftEffect $ callAxis_ xAxisGroup (axisBottom_ xScale)\n        _ <- liftEffect $ callAxis_ yAxisGroup (axisLeft_ yScale)\n\n        -- Add data points\n        let addPoint :: DataPoint -> m Unit\n            addPoint point = do\n              let xPos = applyScale_ xScale point.x\n              let yPos = applyScale_ yScale point.y\n              _ <- appendTo subplotGroup Circle [\n                  cx xPos\n                , cy yPos\n                , radius 4.0\n                , fill \"#e74c3c\"\n                , strokeColor \"#c0392b\"\n                , strokeWidth 1.5\n                , classed \"scatter-point\"\n                ]\n              pure unit\n\n        _ <- traverse_ addPoint dataPoints\n        pure unit\n\n  -- Draw all four subplots in a 2x2 grid\n  _ <- drawSubplot \"Dataset I\" quartet.dataset1 padding (padding)\n  _ <- drawSubplot \"Dataset II\" quartet.dataset2 (padding + plotWidth + padding) (padding)\n  _ <- drawSubplot \"Dataset III\" quartet.dataset3 padding (padding + plotHeight + padding)\n  _ <- drawSubplot \"Dataset IV\" quartet.dataset4 (padding + plotWidth + padding) (padding + plotHeight + padding)\n\n  pure unit\n-- Snippet_End"
-
 snippet_selectionMClass_content :: String
 snippet_selectionMClass_content = "class (Monad m) <= SelectionM selection m where\n  appendTo        :: selection -> Element -> Array (SelectionAttribute) -> m selection\n\n  selectUnder     :: selection -> Selector selection -> m selection\n\n  attach          :: Selector selection -> m selection\n\n  filterSelection :: selection -> Selector selection -> m selection\n\n  mergeSelections :: selection -> selection -> m selection\n\n  setAttributes   :: selection -> Array (SelectionAttribute) -> m Unit\n\n  on              :: selection -> Behavior selection -> m Unit\n\n  openSelection   :: selection -> Selector selection -> m selection\n\n  simpleJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_) -> m selection\n\n  nestedJoin      :: ∀ f datum. Foldable f =>\n                     selection -> Element -> (Datum_ -> f datum) -> (Datum_ -> Index_) -> m selection\n\n  updateJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_)\n    -> m { enter :: selection, exit :: selection, update :: selection }"
 
 snippet_simulationM2Class_content :: String
 snippet_simulationM2Class_content = "class (Monad m, SimulationM selection m) <= SimulationM2 selection m | m -> selection where\n  -- ** Dynamic Updates **\n\n  update :: forall d. SimulationUpdate d -> m { nodes :: Array (D3_SimulationNode d), links :: Array D3Link_Swizzled }\n\n  -- ** Animation (Tick Functions) **\n\n  addTickFunction    :: Label -> Step selection -> m Unit\n\n  removeTickFunction :: Label                   -> m Unit"
 
-snippet_ThreeDimensions_content :: String
-snippet_ThreeDimensions_content = "-- Snippet_Start\n-- Name: ThreeDimensions\ndrawThreeDimensions :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_\ndrawThreeDimensions selector = do\n  -- Three rows of data - uniform structure\n  let data2D = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]\n\n  root <- attach selector\n  table <- appendTo root Table [ classed \"nested-data-table\" ]\n\n  -- Create table rows for each array\n  rows <- simpleJoin table Tr data2D keyIsID_\n\n  -- For each row, create table cells using nested data binding\n  -- This demonstrates the new nestedJoin function with Foldable constraint\n  let cellText d = show (coerceDatumToInt d)\n  cells <- nestedJoin rows Td coerceDatumToArray keyIsID_\n  setAttributes cells [ text cellText ]\n\n  pure cells\n-- Snippet_End"
-
-snippet_ThreeDimensionsSets_content :: String
-snippet_ThreeDimensionsSets_content = "-- Snippet_Start\n-- Name: ThreeDimensionsSets\ndrawThreeDimensionsSets :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_\ndrawThreeDimensionsSets selector = do\n  -- Three \"products\" with their category tags (as Sets)\n  -- Sets are Foldable, so nestedJoin works seamlessly!\n  let productCategories =\n        [ Set.fromFoldable [\"web\", \"frontend\", \"javascript\"]\n        , Set.fromFoldable [\"database\", \"backend\"]\n        , Set.empty  -- Product with no categories\n        , Set.fromFoldable [\"api\", \"rest\", \"graphql\", \"backend\"]\n        , Set.fromFoldable [\"mobile\"]\n        ]\n\n  root <- attach selector\n  table <- appendTo root Table [ classed \"nested-data-table nested-data-table--sets\" ]\n\n  -- Create table rows for each product\n  rows <- simpleJoin table Tr productCategories keyIsID_\n\n  -- For each row, create table cells using nested data binding\n  -- The Foldable constraint means we can extract from Sets just like Arrays!\n  -- nestedJoin calls Set.toUnfoldable internally via fromFoldable\n  cells <- nestedJoin rows Td coerceDatumToSet keyIsID_\n  setAttributes cells\n    [ text coerceDatumToString  -- Each datum is already a String from the Set\n    , classed \"tag-cell\"\n    ]\n\n  pure cells\n-- Snippet_End"
-
-snippet_TLCParabola_content :: String
-snippet_TLCParabola_content = "-- Name: TLCParabola\ndrawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_\ndrawWithData circleData selector = do\n  root        <- attach selector\n  svg         <- appendTo root Svg [ viewBox (-10.0) (-100.0) 320.0 160.0, classed \"d3svg gup\" ]\n  circleGroup <- appendTo svg  Group []\n\n  circles     <- simpleJoin circleGroup Circle circleData keyIsID_ \n  setAttributes circles [ strokeColor datum_.color\n                        , strokeWidth 3.0\n                        , fill \"none\"\n                        , cx datum_.x\n                        , cy datum_.y\n                        , radius 10.0 ]\n  pure circles\n-- Snippet_End"
-
-snippet_TLCSimple_content :: String
-snippet_TLCSimple_content = "drawThreeCircles :: forall m. SelectionM D3Selection_ m => Selector D3Selection_-> m D3Selection_\ndrawThreeCircles selector = do\n  root        <- attach selector\n  svg         <- appendTo root Svg [ viewBox (-10.0) 20.0 120.0 60.0, classed \"d3svg gup\" ]\n  circleGroup <- appendTo svg  Group []\n  circles     <- simpleJoin circleGroup Circle [32, 57, 293] keyIsID_ \n  setAttributes circles [ fill \"green\"\n                        , cx (\\(d :: Datum_) i -> (toNumber (coerceIndex i)) * 30.0 + 10.0)\n                        , cy 50.0\n                        , radius 10.0 ]\n\n  pure circles"
-
 -- | All available snippets
 snippets :: Array SnippetInfo
 snippets =
-  [ { name: "BarChartDraw"
-    , content: snippet_BarChartDraw_content
-    , source: "src/website/Viz/Charts/BarChart.purs"
-    , lines: "39-115"
-    }
-  , { name: "LineChartDraw"
-    , content: snippet_LineChartDraw_content
-    , source: "src/website/Viz/Charts/LineChart.purs"
-    , lines: "41-101"
-    }
-  , { name: "ScatterPlotQuartet"
-    , content: snippet_ScatterPlotQuartet_content
-    , source: "src/website/Viz/Charts/ScatterPlot.purs"
-    , lines: "106-197"
-    }
-  , { name: "selectionMClass"
+  [ { name: "selectionMClass"
     , content: snippet_selectionMClass_content
     , source: "src/lib/PSD3/Capabilities/Selection.purs"
     , lines: "85-258"
@@ -70,63 +34,18 @@ snippets =
     , source: "src/lib/PSD3/Capabilities/Simulation.purs"
     , lines: "254-320"
     }
-  , { name: "ThreeDimensions"
-    , content: snippet_ThreeDimensions_content
-    , source: "src/website/Viz/ThreeLittleDimensions/ThreeLittleDimensions.purs"
-    , lines: "16-38"
-    }
-  , { name: "ThreeDimensionsSets"
-    , content: snippet_ThreeDimensionsSets_content
-    , source: "src/website/Viz/ThreeLittleDimensions/ThreeLittleDimensions.purs"
-    , lines: "40-73"
-    }
-  , { name: "TLCParabola"
-    , content: snippet_TLCParabola_content
-    , source: "src/website/Viz/Parabola/Parabola.purs"
-    , lines: "33-48"
-    }
-  , { name: "TLCSimple"
-    , content: snippet_TLCSimple_content
-    , source: "src/website/Viz/ThreeLittleCircles/ThreeLittleCircles.purs"
-    , lines: "16-31"
-    }
   ]
 
 -- | Look up a snippet by name
 getSnippet :: String -> String
 getSnippet name = case name of
-  "BarChartDraw" -> snippet_BarChartDraw_content
-  "LineChartDraw" -> snippet_LineChartDraw_content
-  "ScatterPlotQuartet" -> snippet_ScatterPlotQuartet_content
   "selectionMClass" -> snippet_selectionMClass_content
   "simulationM2Class" -> snippet_simulationM2Class_content
-  "ThreeDimensions" -> snippet_ThreeDimensions_content
-  "ThreeDimensionsSets" -> snippet_ThreeDimensionsSets_content
-  "TLCParabola" -> snippet_TLCParabola_content
-  "TLCSimple" -> snippet_TLCSimple_content
   _ -> "Snippet not found: " <> name
 
 -- | Get snippet info by name
 getSnippetInfo :: String -> SnippetInfo
 getSnippetInfo name = case name of
-  "BarChartDraw" ->
-    { name: "BarChartDraw"
-    , content: snippet_BarChartDraw_content
-    , source: "src/website/Viz/Charts/BarChart.purs"
-    , lines: "39-115"
-    }
-  "LineChartDraw" ->
-    { name: "LineChartDraw"
-    , content: snippet_LineChartDraw_content
-    , source: "src/website/Viz/Charts/LineChart.purs"
-    , lines: "41-101"
-    }
-  "ScatterPlotQuartet" ->
-    { name: "ScatterPlotQuartet"
-    , content: snippet_ScatterPlotQuartet_content
-    , source: "src/website/Viz/Charts/ScatterPlot.purs"
-    , lines: "106-197"
-    }
   "selectionMClass" ->
     { name: "selectionMClass"
     , content: snippet_selectionMClass_content
@@ -138,30 +57,6 @@ getSnippetInfo name = case name of
     , content: snippet_simulationM2Class_content
     , source: "src/lib/PSD3/Capabilities/Simulation.purs"
     , lines: "254-320"
-    }
-  "ThreeDimensions" ->
-    { name: "ThreeDimensions"
-    , content: snippet_ThreeDimensions_content
-    , source: "src/website/Viz/ThreeLittleDimensions/ThreeLittleDimensions.purs"
-    , lines: "16-38"
-    }
-  "ThreeDimensionsSets" ->
-    { name: "ThreeDimensionsSets"
-    , content: snippet_ThreeDimensionsSets_content
-    , source: "src/website/Viz/ThreeLittleDimensions/ThreeLittleDimensions.purs"
-    , lines: "40-73"
-    }
-  "TLCParabola" ->
-    { name: "TLCParabola"
-    , content: snippet_TLCParabola_content
-    , source: "src/website/Viz/Parabola/Parabola.purs"
-    , lines: "33-48"
-    }
-  "TLCSimple" ->
-    { name: "TLCSimple"
-    , content: snippet_TLCSimple_content
-    , source: "src/website/Viz/ThreeLittleCircles/ThreeLittleCircles.purs"
-    , lines: "16-31"
     }
   _ ->
     { name: "not-found"

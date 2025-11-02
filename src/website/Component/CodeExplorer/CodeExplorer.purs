@@ -59,6 +59,8 @@ import PSD3.CodeExplorer.Forces (forceLibrary)
 import PSD3.CodeExplorer.HTML (render)
 import PSD3.CodeExplorer.Scenes (horizontalTreeScene, layerSwarmScene, packageGraphScene, packageGridScene, radialTreeScene, verticalTreeScene)
 import PSD3.CodeExplorer.State (State, SceneConfig, applySceneConfig, clearAllTags, getModelLinks, getModelNodes, getStagingLinkFilter, getStagingLinks, getStagingNodes, setCssClass, setChooseNodes, setLinksActive, setLinksShown, setSceneAttributes, setStagingLinkFilter, setStagingLinks, setStagingNodes, tagNodes, toggleForce, _enterselections, _eventListener, _links, _model, _nodes, _staging, initialScene)
+import PSD3.Shared.TutorialNav as TutorialNav
+import PSD3.Website.Types (Route(..))
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent

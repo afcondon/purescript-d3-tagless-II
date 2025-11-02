@@ -92,11 +92,35 @@
   pointer-events: none;
 }
 
-/* Main content area - split layout */
+/* Main content area - split layout for example pages */
 .example-content {
   display: flex;
   flex: 1;
   overflow: hidden;
+}
+
+/* Tutorial content area - scrollable, full width */
+.tutorial-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 2rem 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Tutorial links to example pages */
+.tutorial-link {
+  color: #007acc;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.tutorial-link:hover {
+  color: #005a9e;
+  text-decoration: underline;
 }
 
 /* Visualization panel - left side */

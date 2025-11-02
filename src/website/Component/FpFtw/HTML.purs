@@ -1,30 +1,24 @@
 module PSD3.FpFtw.HTML where
 
-import Data.Maybe (Maybe(..))
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.FpFtw.Actions (Action)
 import PSD3.FpFtw.State (State)
-import PSD3.Understanding.TOC (renderTOC, tocAnchor)
+import PSD3.Shared.TutorialNav as TutorialNav
+import PSD3.Website.Types (Route(..))
 
 -- | Render the FP FTW page
 render :: forall w. State -> HH.HTML w Action
 render _ =
   HH.div
-    [ HP.classes [ HH.ClassName "explanation-page" ] ]
-    [ -- TOC Panel (LHS)
-      renderTOC
-        { title: "Page Contents"
-        , items:
-            [ tocAnchor "map-quartet" "1. Map-Based Quartet" 0
-            , tocAnchor "topological-sort" "2. Topological Sort" 0
-            , tocAnchor "lesmis-layers" "3. Les Misérables Layers" 0
-            ]
-        , image: Just "images/understanding-bookmark-trees.jpeg"
-        }
+    [ HP.classes [ HH.ClassName "example-page" ] ]
+    [ -- Navigation Header
+      TutorialNav.renderHeader FpFtw
 
-    -- Page introduction
-    , HH.section
+    -- Page content
+    , HH.main
+        [ HP.classes [ HH.ClassName "tutorial-content" ] ]
+        [ HH.section
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
@@ -53,6 +47,13 @@ render _ =
             ]
         , HH.p_
             [ HH.text "Unlike arrays where all datasets would need 200 elements (with nulls or placeholder values for missing data), Maps only store the actual measurements. Each dataset has different randomly-selected keys, demonstrating that Maps naturally handle irregular sampling. This is particularly useful for time-series data with missing values, experimental data with different sample points, or any scenario where data is inherently sparse." ]
+        , HH.p_
+            [ HH.a
+                [ HP.href "#/example/map-quartet"
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "View interactive example with full source code →" ]
+            ]
         ]
 
     -- Section 2: Topological Sort
@@ -73,6 +74,13 @@ render _ =
             ]
         , HH.p_
             [ HH.text "Tasks are arranged in layers computed from the topological sort. Layer 0 contains tasks with no dependencies, Layer 1 contains tasks depending only on Layer 0, and so on. All tasks within a layer can be executed in parallel. The topologicalSort function handles cycle detection and returns tasks in a valid execution order - demonstrating how functional data structures and algorithms elegantly solve dependency resolution problems found in build systems, task schedulers, and module systems." ]
+        , HH.p_
+            [ HH.a
+                [ HP.href "#/example/topological-sort"
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "View interactive example with full source code →" ]
+            ]
         ]
 
     -- Section 3: Les Misérables Topological Layers
@@ -94,4 +102,5 @@ render _ =
         , HH.p_
             [ HH.text "This visualization uses the same Data.Graph topological sort, but on a much larger real-world dataset. Characters within the same layer have no dependencies on each other and represent parallel narrative threads. The layered structure reveals the hierarchical relationships in the story - from the foundational characters at layer 0 to the culminating interactions at layer 26." ]
         ]
+      ]
     ]

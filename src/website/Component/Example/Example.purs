@@ -13,6 +13,8 @@ import D3.Viz.GroupedBarChart as GroupedBarChart
 import D3.Viz.GUP as GUP
 import D3.Viz.LineChart as LineChart
 import D3.Viz.MultiLineChart as MultiLineChart
+import D3.Viz.Parabola as Parabola
+import D3.Viz.RadialStackedBar as RadialStackedBar
 import D3.Viz.ScatterPlot as ScatterPlot
 import D3.Viz.FpFtw.MapQuartet as MapQuartet
 import D3.Viz.FpFtw.TopologicalSort as TopologicalSort
@@ -23,9 +25,11 @@ import D3.Viz.Sankey.Model (energyData)
 import D3.Viz.SankeyDiagram as Sankey
 import D3.Viz.ThreeLittleCircles as ThreeLittleCircles
 import D3.Viz.ThreeLittleCirclesTransition as CirclesTransition
+import D3.Viz.ThreeLittleDimensions as ThreeLittleDimensions
 import D3.Viz.Tree.HorizontalTree as HorizontalTree
 import D3.Viz.Tree.RadialTree as RadialTree
 import D3.Viz.Tree.VerticalTree as VerticalTree
+import D3.Viz.WealthHealth.Draw as WealthHealth
 import Data.Array as Data.Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
@@ -190,11 +194,34 @@ handleAction = case _ of
         pure unit
 
       "general-update-pattern" -> do
-        _ <- H.liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern "#example-viz"
+        updateFn <- H.liftEffect $ eval_D3M $ GUP.exGeneralUpdatePattern "#example-viz"
+        _ <- H.liftEffect $ eval_D3M $ updateFn ['A', 'B', 'C', 'D', 'E']
         pure unit
 
       "three-circles-transition" -> do
         _ <- H.liftEffect $ eval_D3M $ CirclesTransition.drawThreeCirclesTransition "#example-viz"
+        pure unit
+
+      "parabola" -> do
+        let parabolaData = [310, 474, 613, 726, 814, 877, 914, 926, 914, 877, 814, 726, 613, 474, 310]
+        _ <- H.liftEffect $ eval_D3M $ Parabola.drawWithData parabolaData "#example-viz"
+        pure unit
+
+      "radial-stacked-bar" -> do
+        _ <- H.liftEffect $ eval_D3M $ RadialStackedBar.draw ChartModel.groupedBarData "#example-viz"
+        pure unit
+
+      "nested-data" -> do
+        _ <- H.liftEffect $ eval_D3M $ ThreeLittleDimensions.drawThreeDimensions "#example-viz"
+        pure unit
+
+      "working-with-sets" -> do
+        _ <- H.liftEffect $ eval_D3M $ ThreeLittleDimensions.drawThreeDimensionsSets "#example-viz"
+        pure unit
+
+      "wealth-health" -> do
+        -- TODO: This will need data loading and animation setup
+        log "Wealth & Health example not yet implemented"
         pure unit
 
       _ -> log $ "Example: Unknown example ID: " <> state.exampleId
@@ -216,6 +243,8 @@ allExampleIds =
   , "scatter-plot"
   , "grouped-bar-chart"
   , "multi-line-chart"
+  , "radial-stacked-bar"
+  , "parabola"
   , "bubble-chart"
   , "vertical-tree"
   , "horizontal-tree"
@@ -228,6 +257,9 @@ allExampleIds =
   , "chord-diagram"
   , "sankey-diagram"
   , "map-quartet"
+  , "nested-data"
+  , "working-with-sets"
+  , "wealth-health"
   , "general-update-pattern"
   , "three-circles-transition"
   ]
@@ -261,6 +293,10 @@ getExampleMeta id = case id of
     { id, name: "Grouped Bar Chart", description: "Bar chart with grouped categories", category: "Simple Charts" }
   "multi-line-chart" -> Just
     { id, name: "Multi-Line Chart", description: "Multiple line series on one chart", category: "Simple Charts" }
+  "radial-stacked-bar" -> Just
+    { id, name: "Radial Stacked Bar Chart", description: "Population by age and state in radial form", category: "Simple Charts" }
+  "parabola" -> Just
+    { id, name: "Parabola", description: "Colored circles in parabolic formation", category: "Simple Charts" }
   "bubble-chart" -> Just
     { id, name: "Bubble Chart", description: "Scatter plot with sized bubbles representing a third dimension of data", category: "Simple Charts" }
   "vertical-tree" -> Just
@@ -283,6 +319,12 @@ getExampleMeta id = case id of
     { id, name: "Sankey Diagram", description: "Energy flow visualization showing sources, transformations, and destinations", category: "Data Flow" }
   "map-quartet" -> Just
     { id, name: "Map Quartet", description: "Four scatter plots demonstrating sparse data with PureScript Maps (15 points out of 200 possible x-values)", category: "Rich Data Structures" }
+  "nested-data" -> Just
+    { id, name: "Nested Data", description: "Nested selections with 2D arrays", category: "Rich Data Structures" }
+  "working-with-sets" -> Just
+    { id, name: "Working with Sets", description: "Nested selections with Set data structures", category: "Rich Data Structures" }
+  "wealth-health" -> Just
+    { id, name: "Wealth & Health of Nations", description: "Animated scatterplot across time", category: "Animations" }
   "chord-diagram" -> Just
     { id, name: "Chord Diagram", description: "Circular flow diagram showing relationships between programming concepts", category: "Data Flow" }
   "general-update-pattern" -> Just

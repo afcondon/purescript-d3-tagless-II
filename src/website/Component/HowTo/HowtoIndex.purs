@@ -3,16 +3,12 @@ module PSD3.HowTo.HowtoIndex where -- howto
 import Prelude
 
 import Data.Maybe (Maybe(..))
-import Data.String (toLower)
 import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.SectionNav as SectionNav
 import PSD3.RoutingDSL (routeToPath)
-import PSD3.Understanding.TOC (renderTOC, tocAnchor)
-import PSD3.Website.Types (Route(..), Section(..))
-import Type.Proxy (Proxy(..))
+import PSD3.Website.Types (Route(..))
 
 -- | Howto Index page state
 type State = Unit
@@ -20,10 +16,8 @@ type State = Unit
 -- | Howto Index page actions
 data Action = Initialize
 
--- | Child component slots
-type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
-
-_sectionNav = Proxy :: Proxy "sectionNav"
+-- | Guide type to distinguish how-to from best practice
+data GuideType = HowTo | BestPractice
 
 -- | Howto Index page component
 component :: forall q i o. H.Component q i o Aff
@@ -36,152 +30,148 @@ component = H.mkComponent
       }
   }
 
-render :: State -> H.ComponentHTML Action Slots Aff
+render :: State -> H.ComponentHTML Action () Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "howto-page" ] ]
-    [ -- TOC Panel (LHS)
-      renderTOC
-        { title: "Page Contents"
-        , items:
-            [ tocAnchor "basic" "Basic Visualizations" 0
-            , tocAnchor "data" "Data & Scales" 0
-            , tocAnchor "interaction" "Interactivity" 0
-            , tocAnchor "advanced" "Advanced Techniques" 0
-            ]
-        , image: Just "images/howto-bookmark-volcano.jpeg"
-        }
-
-    -- Navigation Panel (RHS)
-    , HH.slot_ _sectionNav unit SectionNav.component
-        { currentSection: HowToSection
-        , currentRoute: HowtoIndex
-        , sectionPages:
-            [ { route: HowtoIndex, label: "How-to Guides" }
-            ]
-        , moduleCategories: Nothing
-        }
-
-    -- Page introduction
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
-        [ HH.h1
-            [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-            [ HH.text "How-to Guides" ]
-        , HH.p_
-            [ HH.text "Step-by-step guides for building specific visualizations and accomplishing common tasks. Each guide includes complete code examples with detailed explanations." ]
-        , HH.p_
-            [ HH.text "These guides assume you're already familiar with the basics. If you're new to PS<$>D3, start with the " ]
-        , HH.a [ HP.href $ "#" <> routeToPath GettingStarted ] [ HH.text "Getting Started" ]
-        , HH.text " guide."
-        ]
-
-    -- Basic Visualizations section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "basic"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Basic Visualizations" ]
-        , HH.p_
-            [ HH.text "Learn to build fundamental chart types from scratch." ]
-        , HH.div
-            [ HP.classes [ HH.ClassName "howto-list" ] ]
-            [ renderHowtoItem
-                "TLCSimple"
-                "Three Little Circles"
-                "The simplest possible D3 example - create three circles. Perfect first example."
-                "Beginner"
-            , renderHowtoItem
-                "GUP"
-                "General Update Pattern"
-                "Master the enter/update/exit pattern for animated data updates."
-                "Intermediate"
-            , renderHowtoItem
-                "TLCParabola"
-                "Data-Driven Positioning"
-                "Position elements based on data values with type-safe accessors."
-                "Beginner"
-            , renderHowtoItem
-                "BarChartDraw"
-                "Build a Bar Chart"
-                "Create a bar chart with scales and axes from monthly sales data."
-                "Beginner"
-            , renderHowtoItem
-                "LineChartDraw"
-                "Build a Line Chart"
-                "Draw smooth lines through data points with path generators."
-                "Beginner"
-            , renderHowtoItem
-                "ScatterPlotQuartet"
-                "Anscombe's Quartet"
-                "Create small multiples showing why visualization matters."
-                "Intermediate"
-            ]
-        ]
-
-    -- Data & Scales section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "data"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Data & Scales" ]
-        , HH.p_
-            [ HH.text "Coming soon: guides for data loading, transformation, and scale configuration." ]
-        ]
-
-    -- Interactivity section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "interaction"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Interactivity" ]
-        , HH.p_
-            [ HH.text "Coming soon: guides for tooltips, zooming, panning, and user interactions." ]
-        ]
-
-    -- Advanced Techniques section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "advanced"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Advanced Techniques" ]
-        , HH.p_
-            [ HH.text "Coming soon: guides for custom interpreters, complex layouts, and performance optimization." ]
-        ]
-    ]
-
--- | Render a single how-to guide item
-renderHowtoItem :: forall w i. String -> String -> String -> String -> HH.HTML w i
-renderHowtoItem snippetId title description difficulty =
-  HH.div
-    [ HP.classes [ HH.ClassName "howto-item" ] ]
-    [ HH.div
-        [ HP.classes [ HH.ClassName "howto-item__header" ] ]
-        [ HH.h3
-            [ HP.classes [ HH.ClassName "howto-item__title" ] ]
+    [ -- Header
+      HH.header
+        [ HP.classes [ HH.ClassName "howto-header" ] ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "howto-header-content" ] ]
             [ HH.a
-                [ HP.href $ "#" <> routeToPath (Explore snippetId)
-                , HP.classes [ HH.ClassName "howto-item__link" ]
+                [ HP.href $ "#" <> routeToPath Home
+                , HP.classes [ HH.ClassName "howto-logo-link" ]
                 ]
-                [ HH.text title ]
+                [ HH.img
+                    [ HP.src "assets/psd3-logo-color.svg"
+                    , HP.alt "PSD3 Logo"
+                    , HP.classes [ HH.ClassName "howto-logo" ]
+                    ]
+                ]
+            , HH.nav
+                [ HP.classes [ HH.ClassName "howto-nav" ] ]
+                [ HH.a
+                    [ HP.href $ "#" <> routeToPath Home
+                    , HP.classes [ HH.ClassName "howto-nav-link" ]
+                    ]
+                    [ HH.text "← Back to Home" ]
+                ]
             ]
-        , HH.span
-            [ HP.classes [ HH.ClassName "howto-item__difficulty", HH.ClassName $ "howto-item__difficulty--" <> toLower difficulty ] ]
-            [ HH.text difficulty ]
         ]
-    , HH.p
-        [ HP.classes [ HH.ClassName "howto-item__description" ] ]
-        [ HH.text description ]
+
+    -- Hero section
+    , HH.section
+        [ HP.classes [ HH.ClassName "howto-hero" ] ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "howto-hero-content" ] ]
+            [ HH.h1
+                [ HP.classes [ HH.ClassName "howto-hero-title" ] ]
+                [ HH.text "How-to Guides" ]
+            , HH.p
+                [ HP.classes [ HH.ClassName "howto-hero-description" ] ]
+                [ HH.text "Practical guides for accomplishing specific tasks with PureScript D3. Learn how to integrate with Halogen or React, add interactivity, work with color, and follow best practices for type-safe visualization development." ]
+            ]
+        ]
+
+    -- How-to Guides
+    , HH.section
+        [ HP.classes [ HH.ClassName "howto-section" ] ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "howto-section-title" ] ]
+            [ HH.text "How-to Guides" ]
+        , HH.p
+            [ HP.classes [ HH.ClassName "howto-section-description" ] ]
+            [ HH.text "Step-by-step instructions for specific tasks" ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "howto-grid" ] ]
+            [ renderGuideCard HowTo
+                "Getting Data on Screen"
+                "Learn the fundamentals of binding data to DOM elements and creating your first visualization"
+                Nothing
+            , renderGuideCard HowTo
+                "Structuring a Halogen App"
+                "Best practices for integrating PS<$>D3 with Halogen components and managing visualization state"
+                Nothing
+            , renderGuideCard HowTo
+                "Structuring a React App"
+                "How to use PS<$>D3 visualizations within React applications using FFI"
+                Nothing
+            , renderGuideCard HowTo
+                "Adding Drag and Zoom"
+                "Implement interactive pan and zoom behavior for exploring large datasets"
+                Nothing
+            , renderGuideCard HowTo
+                "Working with Color"
+                "Color scales, palettes, and accessibility considerations for effective visualizations"
+                Nothing
+            ]
+        ]
+
+    -- Best Practices
+    , HH.section
+        [ HP.classes [ HH.ClassName "howto-section" ] ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "howto-section-title" ] ]
+            [ HH.text "Best Practices" ]
+        , HH.p
+            [ HP.classes [ HH.ClassName "howto-section-description" ] ]
+            [ HH.text "Guidelines for writing maintainable, type-safe visualization code" ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "howto-grid" ] ]
+            [ renderGuideCard BestPractice
+                "Separating Safe from Unsafe Code"
+                "Architectural patterns for isolating FFI and maintaining type safety throughout your codebase"
+                Nothing
+            ]
+        ]
     ]
 
-handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
+-- | Render a guide card
+renderGuideCard :: forall w i. GuideType -> String -> String -> Maybe Route -> HH.HTML w i
+renderGuideCard guideType title description maybeRoute =
+  let
+    baseClasses = [ HH.ClassName "howto-card" ]
+    typeClass = case guideType of
+      HowTo -> HH.ClassName "howto-card--howto"
+      BestPractice -> HH.ClassName "howto-card--best-practice"
+    allClasses = baseClasses <> [ typeClass ]
+
+    typeLabel = case guideType of
+      HowTo -> "How-to"
+      BestPractice -> "Best Practice"
+
+    element = case maybeRoute of
+      Just route ->
+        HH.a
+          [ HP.href $ "#" <> routeToPath route
+          , HP.classes allClasses
+          ]
+      Nothing ->
+        HH.div
+          ([ HP.classes (allClasses <> [ HH.ClassName "howto-card--coming-soon" ]) ])
+  in
+    element
+      [ HH.div
+          [ HP.classes [ HH.ClassName "howto-card-header" ] ]
+          [ HH.span
+              [ HP.classes [ HH.ClassName "howto-card-type" ] ]
+              [ HH.text typeLabel ]
+          , case maybeRoute of
+              Nothing ->
+                HH.span
+                  [ HP.classes [ HH.ClassName "howto-card-status" ] ]
+                  [ HH.text "Coming Soon" ]
+              Just _ -> HH.text ""
+          ]
+      , HH.h3
+          [ HP.classes [ HH.ClassName "howto-card-title" ] ]
+          [ HH.text title ]
+      , HH.p
+          [ HP.classes [ HH.ClassName "howto-card-description" ] ]
+          [ HH.text description ]
+      ]
+
+handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
 handleAction = case _ of
   Initialize -> pure unit

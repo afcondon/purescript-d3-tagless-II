@@ -5,7 +5,6 @@ import Prelude
 import Affjax.Web as AJAX
 import Affjax.ResponseFormat as ResponseFormat
 import Control.Monad.Rec.Class (forever)
-import Control.Monad.State (class MonadState)
 import D3.Viz.AnimatedRadialTree as AnimatedRadialTree
 import D3.Viz.GUP as GUP
 import D3.Viz.LesMiserables as LesMis
@@ -23,8 +22,6 @@ import PSD3.Internal.Simulation.Forces (createForce, createLinkForce, initialize
 import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, ForceType(..), RegularForceType(..), allNodes, initialSimulationState)
 import PSD3.Internal.Types (D3Selection_, Datum_)
 import PSD3.Interpreter.D3 (eval_D3M, runD3M, runWithD3_Simulation)
-import CodeSnippet (codeSnippet, triggerPrismHighlighting)
-import PSD3.Understanding.TOC (renderTOC, tocAnchor, tocRoute)
 import Data.Map (Map)
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
@@ -39,10 +36,9 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
 import Halogen.HTML.Properties as HP
-import PSD3.Shared.ExamplesNav as ExamplesNav
+import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Shared.ZoomSticker as ZoomSticker
 import PSD3.Website.Types (Route(..))
-import Type.Proxy (Proxy(..))
 
 -- | State
 type State = {
@@ -66,10 +62,6 @@ data Action =
   | ToggleRadialTreeLayout
   | RotateRadialTree
 
--- | Child component slots
-type Slots = ( examplesNav :: forall q. H.Slot q Void Unit )
-
-_examplesNav = Proxy :: Proxy "examplesNav"
 
 -- | Forces configuration
 forceLibrary :: Map String Force
@@ -106,30 +98,17 @@ component = H.mkComponent
       }
   }
 
-render :: State -> H.ComponentHTML Action Slots Aff
+render :: State -> H.ComponentHTML Action () Aff
 render _ =
   HH.div
-    [ HP.classes [ HH.ClassName "explanation-page" ] ]
-    [ -- TOC Panel (LHS)
-      renderTOC
-        { title: "Page Contents"
-        , items:
-            [ tocAnchor "section-1" "1. Color Mixing" 0
-            , tocAnchor "section-2" "2. General Update Pattern" 0
-            , tocRoute (Explore "GUP") "→ How-to guide" 1
-            , tocAnchor "section-3" "3. Force-Directed Graph" 0
-            , tocAnchor "example" "3a. Interactive Layout" 1
-            , tocAnchor "code" "3b. Implementation" 1
-            , tocAnchor "section-4" "4. Animated Radial Tree" 0
-            ]
-        , image: Just "images/understanding-bookmark-trees.jpeg"
-        }
+    [ HP.classes [ HH.ClassName "example-page" ] ]
+    [ -- Navigation Header
+      TutorialNav.renderHeader Movement
 
-    -- Navigation Panel (RHS)
-    , HH.slot_ _examplesNav unit ExamplesNav.component Movement
-
-    -- Page introduction
-    , HH.section
+    -- Page content
+    , HH.main
+        [ HP.classes [ HH.ClassName "tutorial-content" ] ]
+        [ HH.section
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
@@ -179,8 +158,13 @@ render _ =
                 [ HP.classes [ HH.ClassName "gup-viz" ] ]
                 []
             ]
-        -- SNIPPET: GUP src/website/Viz/GUP.purs 17-68
-        , codeSnippet "GUP" "haskell"
+        , HH.p_
+            [ HH.a
+                [ HP.href "#/example/general-update-pattern"
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "View interactive example with full source code →" ]
+            ]
         ]
 
     -- Section 3: Les Misérables Force Layout
@@ -200,71 +184,19 @@ render _ =
             , HH.code_ [ HH.text "start" ]
             , HH.text ". The graph shows character co-occurrence in Victor Hugo's Les Misérables, where node size represents importance and link thickness shows the strength of connections."
             ]
-        ]
-
-    -- Visualization section
-    , HH.section
-        [ HP.id "example"
-        , HP.classes [ HH.ClassName "tutorial-section" ]
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "section-title" ] ]
-            [ HH.text "2a. Interactive Force Layout" ]
-        , HH.p_
-            [ HH.text "Drag nodes to see the force simulation respond. The simulation applies multiple forces: center (pulls toward middle), charge (nodes repel), collision (prevents overlap), and link (pulls connected nodes together)." ]
         , HH.div
-            [ HP.classes [ HH.ClassName "viz-container" ] ]
+            [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
             [ ZoomSticker.render
             , HH.div [ HP.classes [ HH.ClassName "lesmis-container" ] ] []
             ]
-        ]
-
-    -- Code section
-    , HH.section
-        [ HP.id "code"
-        , HP.classes [ HH.ClassName "tutorial-section" ]
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "section-title" ] ]
-            [ HH.text "2b. Implementation with Simplified SimulationM" ]
         , HH.p_
-            [ HH.text "The new SimulationM API simplifies force layout creation. Instead of manually calling multiple setup functions, pass everything to "
-            , HH.code_ [ HH.text "init" ]
-            , HH.text " as a configuration record:"
-            ]
-        , HH.pre
-            [ HP.classes [ HH.ClassName "code-block" ] ]
-            [ HH.code_
-                [ HH.text """drawSimplified forceLibrary activeForces model selector = do
-  (Tuple w h) <- liftEffect getWindowWidthHeight
-  svg <- attach selector >>= appendTo _ Svg [viewBox ...]
-
-  -- Initialize simulation with config record
-  { nodes: nodesInSim, links: linksInSim } <- init
-    { nodes: model.nodes
-    , links: model.links
-    , forces: forceLibrary        -- All available forces
-    , activeForces: activeForces  -- Which ones to enable
-    , config: { alpha: 1.0, alphaTarget: 0.0, ... }
-    , keyFn: keyIsID_
-    , ticks: Map.fromFoldable []  -- Empty for now
-    }
-
-  -- Join simulation-enhanced data to DOM
-  nodesSelection <- simpleJoin svg Circle nodesInSim keyIsID_
-  linksSelection <- simpleJoin svg Line linksInSim keyIsID_
-
-  -- Add tick functions to update positions
-  addTickFunction "nodes" $ Step nodesSelection [cx datum_.x, cy datum_.y]
-  addTickFunction "links" $ Step linksSelection [x1 link_.source.x, ...]
-
-  -- Start the animation
-  start""" ]
-            ]
+            [ HH.text "Drag nodes to see the force simulation respond. The simulation applies multiple forces: center (pulls toward middle), charge (nodes repel), collision (prevents overlap), and link (pulls connected nodes together)." ]
         , HH.p_
-            [ HH.text "Key insight: "
-            , HH.code_ [ HH.text "init" ]
-            , HH.text " returns simulation-enhanced data (nodes with x, y, vx, vy properties). Join this enhanced data to DOM, not the raw input data. This ensures tick functions can access the simulation state."
+            [ HH.a
+                [ HP.href "#/example/lesmis-force"
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "View interactive example with full source code →" ]
             ]
         ]
 
@@ -297,17 +229,14 @@ render _ =
                 [ HH.text "Rotate 90°" ]
             ]
         ]
+      ]
     ]
 
-handleAction :: forall m.
-  MonadState State m =>
+handleAction :: forall o m.
   MonadAff m =>
-  Action -> m Unit
+  Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
-    -- Trigger Prism highlighting for code snippets
-    triggerPrismHighlighting
-
     -- Initialize three circles transition example
     { circles } <- H.liftEffect $ eval_D3M $ CirclesTransition.drawThreeCirclesTransition "div.three-circles-viz"
     H.modify_ (\state -> state { circlesSelection = Just circles })

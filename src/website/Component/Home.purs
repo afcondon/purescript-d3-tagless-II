@@ -32,192 +32,496 @@ render :: State -> H.ComponentHTML Action () Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "home-page" ] ]
-    [ -- Hero section
-      HH.section
-        [ HP.classes [ HH.ClassName "home-hero" ] ]
+    [ -- Header with logo and navigation
+      HH.header
+        [ HP.classes [ HH.ClassName "home-header" ] ]
         [ HH.div
-            [ HP.classes [ HH.ClassName "home-hero__logo" ] ]
-            [ HH.img
-                [ HP.src "assets/psd3-logo-color.svg"
-                , HP.alt "PSD3 Logo"
-                , HP.classes [ HH.ClassName "home-hero__logo-image" ]
+            [ HP.classes [ HH.ClassName "home-header-content" ] ]
+            [ HH.a
+                [ HP.href "#hero"
+                , HP.classes [ HH.ClassName "home-logo-link" ]
+                ]
+                [ HH.img
+                    [ HP.src "assets/psd3-logo-color.svg"
+                    , HP.alt "PSD3 Logo"
+                    , HP.classes [ HH.ClassName "home-logo" ]
+                    ]
+                ]
+            , HH.nav
+                [ HP.classes [ HH.ClassName "home-nav" ] ]
+                [ HH.a
+                    [ HP.href "#docs"
+                    , HP.classes [ HH.ClassName "home-nav-link" ]
+                    ]
+                    [ HH.text "Docs" ]
+                , HH.a
+                    [ HP.href "#tutorials"
+                    , HP.classes [ HH.ClassName "home-nav-link" ]
+                    ]
+                    [ HH.text "Tour" ]
+                , HH.a
+                    [ HP.href "#examples"
+                    , HP.classes [ HH.ClassName "home-nav-link" ]
+                    ]
+                    [ HH.text "Examples' code" ]
+                , HH.a
+                    [ HP.href $ "#" <> routeToPath Wizard
+                    , HP.classes [ HH.ClassName "home-nav-link home-nav-link--cta" ]
+                    ]
+                    [ HH.text "Get Started" ]
                 ]
             ]
-        , HH.p
-            [ HP.classes [ HH.ClassName "home-hero__subtitle" ] ]
-            [ HH.text "Type-safe, composable data visualization with PureScript and D3" ]
-        , HH.p
-            [ HP.classes [ HH.ClassName "home-hero__description" ] ]
-            [ HH.text "Finally Tagless design, functional programming principles, and the power of D3.js combined into an elegant, type-safe visualization library." ]
         ]
 
-    -- Call to action buttons
+    -- Hero section
     , HH.section
-        [ HP.classes [ HH.ClassName "home-cta" ] ]
-        [ HH.a
-            [ HP.href $ "#" <> routeToPath Wizard
-            , HP.classes [ HH.ClassName "home-cta__button home-cta__button--primary" ]
-            ]
-            [ HH.span
-                [ HP.classes [ HH.ClassName "home-cta__icon" ] ]
-                [ HH.text "🚀" ]
-            , HH.span_ [ HH.text "Start the Wizard" ]
-            ]
-        , HH.a
-            [ HP.href "#examples"
-            , HP.classes [ HH.ClassName "home-cta__button home-cta__button--secondary" ]
-            ]
-            [ HH.span
-                [ HP.classes [ HH.ClassName "home-cta__icon" ] ]
-                [ HH.text "✨" ]
-            , HH.span_ [ HH.text "View Examples" ]
-            ]
+        [ HP.id "hero"
+        , HP.classes [ HH.ClassName "home-hero" ]
         ]
-
-    -- Four documentation category boxes
-    , HH.section
-        [ HP.classes [ HH.ClassName "home-docs" ] ]
         [ HH.div
-            [ HP.classes [ HH.ClassName "home-docs__grid" ] ]
-            [ -- Tutorial box (air themed - balloons) - with two action buttons
-              renderGettingStartedBox
+            [ HP.classes [ HH.ClassName "home-hero-content" ] ]
+            [ HH.h1
+                [ HP.classes [ HH.ClassName "home-hero-title" ] ]
+                [ HH.text "Type-safe, composable, maintainable, interactive data visualisation with PureScript and D3.js" ]
+            , HH.div
+                [ HP.classes [ HH.ClassName "home-hero-image" ] ]
+                [ HH.img
+                    [ HP.src "assets/example-thumbnails/code-explorer.png"
+                    , HP.alt "Code Explorer visualization"
+                    , HP.classes [ HH.ClassName "home-hero-img" ]
+                    ]
+                , HH.p
+                    [ HP.classes [ HH.ClassName "home-hero-caption" ] ]
+                    [ HH.text "Learn how to make powerful interactive data-driven apps like this "
+                    , HH.a
+                        [ HP.href $ "#" <> routeToPath CodeExplorer
+                        , HP.classes [ HH.ClassName "home-hero-link" ]
+                        ]
+                        [ HH.text "code explorer" ]
+                    ]
+                ]
+            ]
+        ]
 
-            -- How-to box (fire themed - volcano)
+    -- Documentation section
+    , HH.section
+        [ HP.id "docs"
+        , HP.classes [ HH.ClassName "home-docs" ]
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "home-section-title" ] ]
+            [ HH.text "Documentation" ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "home-docs-grid" ] ]
+            [ renderDocBox
+                "Getting Started"
+                "Installation, setup, and your first visualization"
+                (routeToPath GettingStarted)
             , renderDocBox
                 "How-to Guides"
-                "Step-by-step instructions for building specific visualizations"
+                "Step-by-step instructions for specific visualizations"
                 (routeToPath HowtoIndex)
-                "Browse Guides →"
-                (Just "images/howto-bookmark-volcano.jpeg")
-
-            -- Reference box (water themed - deep sea vent)
             , renderDocBox
                 "API Reference"
                 "Complete technical documentation with type signatures"
                 (routeToPath Reference)
-                "View API →"
-                (Just "images/reference-bookmark-deepseavent.jpeg")
-
-            -- Explanation box (earth themed - trees)
             , renderDocBox
                 "Understanding"
                 "Concepts, patterns, and design philosophy"
                 (routeToPath UnderstandingConcepts)
-                "Learn More →"
-                (Just "images/understanding-bookmark-trees.jpeg")
             ]
         ]
 
-    -- Examples section
+    -- Tutorials section (examples in context)
+    , HH.section
+        [ HP.id "tutorials"
+        , HP.classes [ HH.ClassName "home-tutorials" ]
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "home-section-title" ] ]
+            [ HH.text "Take the Tour" ]
+        , HH.p
+            [ HP.classes [ HH.ClassName "home-section-description" ] ]
+            [ HH.text "You can read through the following to progressively build up an understanding of the capabilities and concepts:" ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "home-tutorials-grid" ] ]
+            [ renderTutorialLink "1. Simplest Charts"
+                "Start with the basics: three circles, positioning, and data binding"
+                (routeToPath SimpleCharts1)
+            , renderTutorialLink "2. Lines and Bars"
+                "Create line and bar charts with scales, axes, and labels"
+                (routeToPath SimpleCharts2)
+            , renderTutorialLink "3. Hierarchies"
+                "Trees, treemaps, and circle packing for hierarchical data"
+                (routeToPath Hierarchies)
+            , renderTutorialLink "4. Data Flow Visualizations"
+                "Chord diagrams and Sankey charts for showing relationships and flows"
+                (routeToPath DataFlowViz)
+            , renderTutorialLink "5. Movement & Transition"
+                "Animations, transitions, and the general update pattern"
+                (routeToPath Movement)
+            , renderTutorialLink "6. FP FTW"
+                "Functional programming patterns with Maps, Sets, and type-safe graphs"
+                (routeToPath FpFtw)
+            , renderTutorialLink "7. Interpreters"
+                "How the tagless final pattern enables framework-independent code"
+                (routeToPath Interpreters)
+            ]
+        ]
+
+    -- Larger examples section
+    , HH.section
+        [ HP.id "apps"
+        , HP.classes [ HH.ClassName "home-tutorials" ]
+        ]
+        [ HH.h2
+            [ HP.classes [ HH.ClassName "home-section-title" ] ]
+            [ HH.text "Interactive, data-driven apps" ]
+        , HH.p
+            [ HP.classes [ HH.ClassName "home-section-description" ] ]
+            [ HH.text "These examples are more involved than a simple visualisation" ]
+        , HH.div
+            [ HP.classes [ HH.ClassName "home-tutorials-grid" ] ]
+            [ renderTutorialLink "Wealth & Health of Nations"
+                "Animated scatterplot showing global development over time"
+                (routeToPath WealthHealth)
+            , renderTutorialLink "Code Explorer"
+                "Interactive force-directed graph exploring PureScript dependencies"
+                (routeToPath CodeExplorer)
+            , renderTutorialLink "Code Atlas"
+                "Visualize codebase structure with multiple interactive views"
+                (routeToPath CodeAtlas)
+            ]
+        ]
+
+    -- Examples section (integrated gallery)
     , HH.section
         [ HP.id "examples"
         , HP.classes [ HH.ClassName "home-examples" ]
         ]
         [ HH.h2
-            [ HP.classes [ HH.ClassName "home-examples__title" ] ]
-            [ HH.text "Example Visualizations" ]
+            [ HP.classes [ HH.ClassName "home-section-title" ] ]
+            [ HH.text "Examples Side-by-side with their code" ]
+        , HH.p
+            [ HP.classes [ HH.ClassName "home-section-description" ] ]
+            [ HH.text "Browse all the visualizations used in the tour side-by-side with their full source code" ]
         , HH.div
-            [ HP.classes [ HH.ClassName "home-examples__grid" ] ]
-            [ renderExampleCard
-                "Simple Charts"
-                "Bar charts, line charts, and scatter plots"
-                (routeToPath SimpleCharts1)
-            , renderExampleCard
-                "Data Flow Visualizations"
-                "Chord and Sankey diagrams for relationships and flows"
-                (routeToPath DataFlowViz)
-            , renderExampleCard
-                "Hierarchies"
-                "Trees, dendrograms, circle packing, and treemaps"
-                (routeToPath Hierarchies)
-            , renderExampleCard
-                "Movement"
-                "Movement, animation and transitions"
-                (routeToPath Movement)
-            , renderExampleCard
-                "Interpreters"
-                "Alternative interpreters: String and MetaTree"
-                (routeToPath Interpreters)
-            , renderExampleCard
-                "Code Explorer"
-                "Interactive dependency graph of PureScript code"
-                (routeToPath CodeExplorer)
-            , renderExampleCard
-                "Wealth & Health"
-                "Hans Rosling's animated exploration (1800-2020)"
-                (routeToPath WealthHealth)
-            , renderExampleCard
-                "FP FTW"
-                "Functional programming showcases - unique PSD3 capabilities"
-                (routeToPath FpFtw)
-            ]
+            [ HP.classes [ HH.ClassName "home-examples-content" ] ]
+            (renderCategories allExamples)
         ]
 
     -- Footer
     , Footer.render
     ]
 
--- | Render the Getting Started box (now just links to the page, wizard is in CTAs)
-renderGettingStartedBox :: forall w i. HH.HTML w i
-renderGettingStartedBox =
-  renderDocBox
-    "Getting Started"
-    "Installation, setup, and your first visualization"
-    (routeToPath GettingStarted)
-    "Get Started →"
-    (Just "images/tutorial-bookmark-balloons.jpeg")
-
--- | Render a documentation category box
-renderDocBox :: forall w i. String -> String -> String -> String -> Maybe String -> HH.HTML w i
-renderDocBox title description path linkText maybeImage =
+-- | Render a documentation category box with bookmark
+renderDocBox :: forall w i. String -> String -> String -> HH.HTML w i
+renderDocBox title description path =
   HH.a
     [ HP.href $ "#" <> path
     , HP.classes [ HH.ClassName "home-doc-box" ]
     ]
-    [ -- Left side: bookmark image (1/8th width)
-      case maybeImage of
-        Just imageSrc ->
-          HH.div
-            [ HP.classes [ HH.ClassName "home-doc-box__image-container" ] ]
-            [ HH.img
-                [ HP.src imageSrc
-                , HP.alt ""
-                , HP.classes [ HH.ClassName "home-doc-box__image" ]
-                ]
+    [ HH.div
+        [ HP.classes [ HH.ClassName "home-doc-box__image-container" ] ]
+        [ HH.img
+            [ HP.src $ getBookmarkImage title
+            , HP.alt ""
+            , HP.classes [ HH.ClassName "home-doc-box__image" ]
             ]
-        Nothing ->
-          HH.div
-            [ HP.classes [ HH.ClassName "home-doc-box__image-container" ] ]
-            []
-    -- Right side: content (7/8ths width, center-justified)
+        ]
     , HH.div
         [ HP.classes [ HH.ClassName "home-doc-box__content" ] ]
         [ HH.h3
-            [ HP.classes [ HH.ClassName "home-doc-box__title" ] ]
+            [ HP.classes [ HH.ClassName "home-doc-box-title" ] ]
             [ HH.text title ]
         , HH.p
-            [ HP.classes [ HH.ClassName "home-doc-box__description" ] ]
+            [ HP.classes [ HH.ClassName "home-doc-box-description" ] ]
             [ HH.text description ]
-        , HH.span
-            [ HP.classes [ HH.ClassName "home-doc-box__link" ] ]
-            [ HH.text linkText ]
         ]
     ]
 
--- | Render an example card
-renderExampleCard :: forall w i. String -> String -> String -> HH.HTML w i
-renderExampleCard title description path =
+-- | Get bookmark image path based on title
+getBookmarkImage :: String -> String
+getBookmarkImage = case _ of
+  "Getting Started" -> "assets/bookmark-images/getting-started.jpeg"
+  "How-to Guides" -> "assets/bookmark-images/howto.jpeg"
+  "API Reference" -> "assets/bookmark-images/reference.jpeg"
+  "Understanding" -> "assets/bookmark-images/understanding.jpeg"
+  _ -> "assets/bookmark-images/howto.jpeg"
+
+-- | Render a tutorial link card
+renderTutorialLink :: forall w i. String -> String -> String -> HH.HTML w i
+renderTutorialLink title description path =
   HH.a
     [ HP.href $ "#" <> path
-    , HP.classes [ HH.ClassName "home-example-card" ] ]
+    , HP.classes [ HH.ClassName "home-tutorial-card" ]
+    ]
     [ HH.h3
-        [ HP.classes [ HH.ClassName "home-example-card__title" ] ]
+        [ HP.classes [ HH.ClassName "home-tutorial-card-title" ] ]
         [ HH.text title ]
     , HH.p
-        [ HP.classes [ HH.ClassName "home-example-card__description" ] ]
+        [ HP.classes [ HH.ClassName "home-tutorial-card-description" ] ]
         [ HH.text description ]
     ]
 
 handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
 handleAction = case _ of
   Initialize -> pure unit
+
+-- | Example metadata for the gallery
+type ExampleMeta =
+  { id :: String
+  , name :: String
+  , description :: String
+  , category :: String
+  , route :: Route
+  , thumbnail :: String
+  }
+
+-- | All available examples organized by category
+allExamples :: Array ExampleMeta
+allExamples =
+  [ -- Simple Charts
+    { id: "three-little-circles"
+    , name: "Three Little Circles"
+    , description: "The simplest possible D3 example"
+    , category: "Simple Charts"
+    , route: Example "three-little-circles"
+    , thumbnail: "assets/example-thumbnails/three-little-circles.png"
+    }
+  , { id: "bar-chart"
+    , name: "Bar Chart"
+    , description: "Basic bar chart with axis and labels"
+    , category: "Simple Charts"
+    , route: Example "bar-chart"
+    , thumbnail: "assets/example-thumbnails/simple-bar-chart.png"
+    }
+  , { id: "line-chart"
+    , name: "Line Chart"
+    , description: "Line chart with time series data"
+    , category: "Simple Charts"
+    , route: Example "line-chart"
+    , thumbnail: "assets/example-thumbnails/simple-line-chart.png"
+    }
+  , { id: "scatter-plot"
+    , name: "Scatter Plot"
+    , description: "Anscombe's Quartet visualization"
+    , category: "Simple Charts"
+    , route: Example "scatter-plot"
+    , thumbnail: "assets/example-thumbnails/anscombes-quartet.png"
+    }
+  , { id: "grouped-bar-chart"
+    , name: "Grouped Bar Chart"
+    , description: "Bar chart with grouped categories"
+    , category: "Simple Charts"
+    , route: Example "grouped-bar-chart"
+    , thumbnail: "assets/example-thumbnails/grouped-bar-chart.png"
+    }
+  , { id: "multi-line-chart"
+    , name: "Multi-Line Chart"
+    , description: "Multiple line series on one chart"
+    , category: "Simple Charts"
+    , route: Example "multi-line-chart"
+    , thumbnail: "assets/example-thumbnails/multiline-chart.png"
+    }
+  , { id: "radial-stacked-bar"
+    , name: "Radial Stacked Bar Chart"
+    , description: "Population by age and state in radial form"
+    , category: "Simple Charts"
+    , route: Example "radial-stacked-bar"
+    , thumbnail: "assets/example-thumbnails/stacked-radial-bar-chart.png"
+    }
+  , { id: "parabola"
+    , name: "Parabola"
+    , description: "Colored circles in parabolic formation"
+    , category: "Simple Charts"
+    , route: Example "parabola"
+    , thumbnail: "assets/example-thumbnails/parabola.png"
+    }
+  , { id: "bubble-chart"
+    , name: "Bubble Chart"
+    , description: "Hierarchical circle packing layout"
+    , category: "Hierarchies"
+    , route: Example "bubble-chart"
+    , thumbnail: "assets/example-thumbnails/circle-packing.png"
+    }
+
+  -- Hierarchies
+  , { id: "vertical-tree"
+    , name: "Vertical Tree"
+    , description: "Top-down tidy tree layout"
+    , category: "Hierarchies"
+    , route: Example "vertical-tree"
+    , thumbnail: "assets/example-thumbnails/vertical-tidy-tree.png"
+    }
+  , { id: "horizontal-tree"
+    , name: "Horizontal Tree"
+    , description: "Left-to-right tidy tree layout"
+    , category: "Hierarchies"
+    , route: Example "horizontal-tree"
+    , thumbnail: "assets/example-thumbnails/horizontal-tidy-tree.png"
+    }
+  , { id: "radial-tree"
+    , name: "Radial Tree"
+    , description: "Circular tidy tree layout"
+    , category: "Hierarchies"
+    , route: Example "radial-tree"
+    , thumbnail: "assets/example-thumbnails/radial-tidy-tree.png"
+    }
+  , { id: "treemap"
+    , name: "Treemap"
+    , description: "Space-filling hierarchical visualization"
+    , category: "Hierarchies"
+    , route: Example "treemap"
+    , thumbnail: "assets/example-thumbnails/treemap.png"
+    }
+  , { id: "icicle"
+    , name: "Icicle Chart"
+    , description: "Hierarchical partition layout"
+    , category: "Hierarchies"
+    , route: Example "icicle"
+    , thumbnail: "assets/example-thumbnails/icicle-chart.png"
+    }
+
+  -- Force-Directed
+  , { id: "lesmis-force"
+    , name: "Les Misérables Network"
+    , description: "Character co-occurrence graph"
+    , category: "Force-Directed"
+    , route: Example "lesmis-force"
+    , thumbnail: "assets/example-thumbnails/les-miserables.png"
+    }
+  , { id: "topological-sort"
+    , name: "Topological Sort"
+    , description: "Force layout with layer constraints"
+    , category: "Force-Directed"
+    , route: Example "topological-sort"
+    , thumbnail: "assets/example-thumbnails/working-with-graphs.png"
+    }
+
+  -- Data Flow
+  , { id: "chord-diagram"
+    , name: "Chord Diagram"
+    , description: "Circular relationship diagram"
+    , category: "Data Flow"
+    , route: Example "chord-diagram"
+    , thumbnail: "assets/example-thumbnails/chord-diagram.png"
+    }
+  , { id: "sankey-diagram"
+    , name: "Sankey Diagram"
+    , description: "Flow diagram with proportional widths"
+    , category: "Data Flow"
+    , route: Example "sankey-diagram"
+    , thumbnail: "assets/example-thumbnails/sankey-diagram.png"
+    }
+
+  -- Rich Data Structures
+  , { id: "map-quartet"
+    , name: "Map Quartet"
+    , description: "Sparse data with PureScript Maps"
+    , category: "Rich Data Structures"
+    , route: Example "map-quartet"
+    , thumbnail: "assets/example-thumbnails/working-with-maps.png"
+    }
+  , { id: "nested-data"
+    , name: "Nested Data"
+    , description: "Nested selections with 2D arrays"
+    , category: "Rich Data Structures"
+    , route: Example "nested-data"
+    , thumbnail: "assets/example-thumbnails/nested-data.png"
+    }
+  , { id: "working-with-sets"
+    , name: "Working with Sets"
+    , description: "Nested selections with Set data structures"
+    , category: "Rich Data Structures"
+    , route: Example "working-with-sets"
+    , thumbnail: "assets/example-thumbnails/working-with-sets.png"
+    }
+
+  -- Animations
+  , { id: "wealth-health"
+    , name: "Wealth & Health of Nations"
+    , description: "Animated scatterplot across time"
+    , category: "Animations"
+    , route: Example "wealth-health"
+    , thumbnail: "assets/example-thumbnails/wealth-and-health-of-nations.png"
+    }
+
+  -- Transitions
+  , { id: "three-circles-transition"
+    , name: "Color Mixing"
+    , description: "RGB color transitions"
+    , category: "Transitions"
+    , route: Example "three-circles-transition"
+    , thumbnail: "assets/example-thumbnails/three-little-circles.png"
+    }
+  , { id: "general-update-pattern"
+    , name: "General Update Pattern"
+    , description: "Enter, update, exit pattern"
+    , category: "Transitions"
+    , route: Example "general-update-pattern"
+    , thumbnail: "assets/example-thumbnails/general-update-pattern.png"
+    }
+  , { id: "animated-radial-tree"
+    , name: "Animated Radial Tree"
+    , description: "Transitions between tree layouts"
+    , category: "Transitions"
+    , route: Example "animated-radial-tree"
+    , thumbnail: "assets/example-thumbnails/animating-tree.png"
+    }
+  ]
+
+-- | Group examples by category and render
+renderCategories :: forall w i. Array ExampleMeta -> Array (HH.HTML w i)
+renderCategories examples =
+  let
+    categories = [ "Simple Charts", "Hierarchies", "Force-Directed", "Data Flow", "Rich Data Structures", "Animations", "Transitions" ]
+  in
+    categories <#> \category ->
+      let examplesInCategory = examples # filter (\ex -> ex.category == category)
+      in renderCategory category examplesInCategory
+
+-- | Render a category section
+renderCategory :: forall w i. String -> Array ExampleMeta -> HH.HTML w i
+renderCategory categoryName examples =
+  HH.div
+    [ HP.classes [ HH.ClassName "home-gallery-category" ] ]
+    [ HH.h3
+        [ HP.classes [ HH.ClassName "home-gallery-category-title" ] ]
+        [ HH.text categoryName ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "home-gallery-grid" ] ]
+        (examples <#> renderExampleCard)
+    ]
+
+-- | Render an individual example card
+renderExampleCard :: forall w i. ExampleMeta -> HH.HTML w i
+renderExampleCard ex =
+  HH.a
+    [ HP.href $ "#" <> routeToPath ex.route
+    , HP.classes [ HH.ClassName "home-example-card" ]
+    ]
+    [ HH.div
+        [ HP.classes [ HH.ClassName "home-example-thumbnail" ] ]
+        [ HH.img
+            [ HP.src ex.thumbnail
+            , HP.alt ex.name
+            , HP.classes [ HH.ClassName "home-example-thumbnail-img" ]
+            ]
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "home-example-card-content" ] ]
+        [ HH.h3
+            [ HP.classes [ HH.ClassName "home-example-card-title" ] ]
+            [ HH.text ex.name ]
+        , HH.p
+            [ HP.classes [ HH.ClassName "home-example-card-description" ] ]
+            [ HH.text ex.description ]
+        ]
+    ]
+
+-- | Filter examples
+filter :: forall a. (a -> Boolean) -> Array a -> Array a
+filter = filterImpl
+
+foreign import filterImpl :: forall a. (a -> Boolean) -> Array a -> Array a

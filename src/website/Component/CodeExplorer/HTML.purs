@@ -31,6 +31,8 @@ import PSD3.CodeExplorer.Actions (Action(..), FilterData(..), Scene(..), StyleCh
 import PSD3.CodeExplorer.State (State, getStagingLinks, getStagingNodes, getSimulationVariables)
 import PSD3.Shared.ZoomSticker as ZoomSticker
 import PSD3.CodeExplorer.WelcomeOverlay as WelcomeOverlay
+import PSD3.Shared.TutorialNav as TutorialNav
+import PSD3.Website.Types (Route(..))
 
 -- | Filter for project modules only (from src/ directory), but keep all packages
 isProjectModule :: SpagoSimNode -> Boolean
@@ -44,20 +46,15 @@ render :: forall m.
 render state =
   HH.div
       [ HP.classes [ HH.ClassName "fullscreen-container", HH.ClassName "spago-fullscreen", HH.ClassName "page-with-watermark" ] ]
-      [ -- Floating control panel (top-left) - with editorial styling
-        HH.div
+      [ -- Navigation Header
+        TutorialNav.renderHeader CodeExplorer
+
+      -- Floating control panel (top-left) - with editorial styling
+      , HH.div
           [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left", HH.ClassName "floating-panel--small", HH.ClassName "spago-controls-panel", HH.ClassName "editorial" ] ]
           [ HH.h2
               [ HP.classes [ HH.ClassName "floating-panel__title", HH.ClassName "spago-controls__title" ] ]
               [ HH.text "Controls" ]
-          , HH.div
-              [ HP.classes [ HH.ClassName "control-group", HH.ClassName "control-group--home" ] ]
-              [ HH.a
-                  [ HP.href "#/"
-                  , HP.classes [ HH.ClassName "button", HH.ClassName "button--primary" ]
-                  ]
-                  [ HH.text "← Home" ]
-              ]
           , renderSimControls state
           , renderSimState state
           ]

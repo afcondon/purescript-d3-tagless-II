@@ -25,14 +25,8 @@ import PSD3.CodeAtlas.Tabs.InteractiveGraph as InteractiveGraphTab
 import PSD3.CodeAtlas.Tabs.ExpandableBubbles as ExpandableBubblesTab
 import PSD3.CodeAtlas.Types (AtlasTab(..))
 import PSD3.Interpreter.D3 (runWithD3_Simulation)
-import PSD3.Shared.ExamplesNav as ExamplesNav
+import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
-import Type.Proxy (Proxy(..))
-
--- | Child component slots
-type Slots = ( examplesNav :: forall q. H.Slot q Void Unit )
-
-_examplesNav = Proxy :: Proxy "examplesNav"
 
 -- | Code Atlas component
 component :: forall q i o m. MonadAff m => H.Component q i o m
@@ -46,12 +40,12 @@ component = H.mkComponent
   }
 
 -- | Render the component
-render :: forall m. State -> H.ComponentHTML Action Slots m
+render :: forall m. State -> H.ComponentHTML Action () m
 render state =
   HH.div
     [ HP.classes [ HH.ClassName "code-atlas-page" ] ]
-    [ -- Navigation Panel (RHS)
-      HH.slot_ _examplesNav unit ExamplesNav.component CodeAtlas
+    [ -- Navigation Header
+      TutorialNav.renderHeader CodeAtlas
 
     -- Header
     , HH.header
@@ -89,7 +83,7 @@ render state =
         ]
     ]
 
-renderTabContent :: forall m. State -> H.ComponentHTML Action Slots m
+renderTabContent :: forall m. State -> H.ComponentHTML Action () m
 renderTabContent state =
   case state.activeTab of
     DeclarationsTab ->
@@ -120,7 +114,7 @@ renderTabContent state =
         ]
 
 -- | Render floating panels (always show control panel, conditionally show others)
-renderFloatingPanels :: forall m. State -> H.ComponentHTML Action Slots m
+renderFloatingPanels :: forall m. State -> H.ComponentHTML Action () m
 renderFloatingPanels state =
   HH.div_
     [ renderControlPanel state
@@ -134,7 +128,7 @@ renderFloatingPanels state =
     ]
 
 -- | Render the control panel (top-left) with view tabs
-renderControlPanel :: forall m. State -> H.ComponentHTML Action Slots m
+renderControlPanel :: forall m. State -> H.ComponentHTML Action () m
 renderControlPanel state =
   HH.div
     [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--top-left", HH.ClassName "editorial" ] ]
@@ -194,7 +188,7 @@ renderControlPanel state =
     ]
 
 -- | Render the legend panel (bottom-right)
-renderLegendPanel :: forall m. H.ComponentHTML Action Slots m
+renderLegendPanel :: forall m. H.ComponentHTML Action () m
 renderLegendPanel =
   HH.div
     [ HP.classes [ HH.ClassName "floating-panel", HH.ClassName "floating-panel--bottom-right", HH.ClassName "editorial" ] ]
@@ -213,7 +207,7 @@ renderLegendPanel =
     ]
 
 -- | Render a single legend item
-renderLegendItem :: forall m. String -> String -> H.ComponentHTML Action Slots m
+renderLegendItem :: forall m. String -> String -> H.ComponentHTML Action () m
 renderLegendItem label color =
   HH.div
     [ HP.classes [ HH.ClassName "legend-item" ] ]
@@ -228,7 +222,7 @@ renderLegendItem label color =
     ]
 
 -- | Render the details panel (top-right, conditional)
-renderDetailsPanel :: forall m. State -> H.ComponentHTML Action Slots m
+renderDetailsPanel :: forall m. State -> H.ComponentHTML Action () m
 renderDetailsPanel state =
   case state.hoveredModule of
     Nothing -> HH.text ""
@@ -261,7 +255,7 @@ renderDetailsPanel state =
         ]
 
 -- | Render the context menu (conditional, positioned at click)
-renderContextMenu :: forall m. State -> H.ComponentHTML Action Slots m
+renderContextMenu :: forall m. State -> H.ComponentHTML Action () m
 renderContextMenu state =
   case state.contextMenu of
     Nothing -> HH.text ""
@@ -334,7 +328,7 @@ renderContextMenu state =
           ]
 
 -- | Render a single context menu item
-renderContextMenuItem :: forall m. String -> String -> Action -> H.ComponentHTML Action Slots m
+renderContextMenuItem :: forall m. String -> String -> Action -> H.ComponentHTML Action () m
 renderContextMenuItem label shortcut action =
   HH.button
     [ HP.classes [ HH.ClassName "context-menu__item" ]
@@ -349,7 +343,7 @@ renderContextMenuItem label shortcut action =
     ]
 
 -- | Render a single tab
-renderTab :: forall m. AtlasTab -> AtlasTab -> H.ComponentHTML Action Slots m
+renderTab :: forall m. AtlasTab -> AtlasTab -> H.ComponentHTML Action () m
 renderTab tab activeTab =
   HH.button
     [ HP.classes
@@ -361,7 +355,7 @@ renderTab tab activeTab =
     [ HH.text $ show tab ]
 
 -- | Handle actions
-handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action Slots o m Unit
+handleAction :: forall o m. MonadAff m => Action -> H.HalogenM State Action () o m Unit
 handleAction = case _ of
   Initialize -> do
     -- Load all three data files in parallel

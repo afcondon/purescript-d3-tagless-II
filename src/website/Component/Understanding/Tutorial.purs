@@ -16,22 +16,14 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Interpreter.D3 (eval_D3M)
 import PSD3.RoutingDSL (routeToPath)
-import CodeSnippet (codeSnippet, triggerPrismHighlighting)
-import PSD3.Shared.ExamplesNav as ExamplesNav
-import PSD3.Understanding.TOC (renderTOC, tocAnchor, tocRoute)
+import PSD3.Shared.TutorialNav as TutorialNav
 import PSD3.Website.Types (Route(..))
-import Type.Proxy (Proxy(..))
 
 -- | Tutorial page state
 type State = Unit
 
 -- | Tutorial page actions
 data Action = Initialize
-
--- | Child component slots
-type Slots = ( examplesNav :: forall q. H.Slot q Void Unit )
-
-_examplesNav = Proxy :: Proxy "examplesNav"
 
 -- | Tutorial page component
 component :: forall q i o. H.Component q i o Aff
@@ -44,36 +36,15 @@ component = H.mkComponent
       }
   }
 
-lhsNav :: H.ComponentHTML Action Slots Aff
-lhsNav = renderTOC
-  { title: "Page Contents"
-  , items:
-      [ tocAnchor "section-1" "1. Three Little Circles" 0
-      , tocRoute (Explore "TLCSimple") "→ How-to guide" 1
-      , tocAnchor "section-2" "2. Data-Driven Positioning" 0
-      , tocRoute (Explore "TLCParabola") "→ How-to guide" 1
-      , tocAnchor "section-3" "3. Bar Charts with Scales" 0
-      , tocRoute (Explore "BarChartDraw") "→ How-to guide" 1
-      , tocAnchor "section-4" "4. Line Charts and Paths" 0
-      , tocRoute (Explore "LineChartDraw") "→ How-to guide" 1
-      , tocAnchor "section-5" "5. Anscombe's Quartet" 0
-      , tocRoute (Explore "ScatterPlotQuartet") "→ How-to guide" 1
-      , tocAnchor "section-6" "6. Next Steps" 0
-      ]
-  , image: Just "images/understanding-bookmark-trees.jpeg"
-  }
-
-
-render :: State -> H.ComponentHTML Action Slots Aff
+render :: State -> H.ComponentHTML Action () Aff
 render _ =
   HH.div
-    [ HP.classes [ HH.ClassName "explanation-page" ] ]
-    [ lhsNav
-    -- Navigation Panel (RHS) - unified examples navigation
-    , HH.slot_ _examplesNav unit ExamplesNav.component SimpleCharts1
-
-    -- Tutorial introduction
-    , HH.section
+    [ HP.classes [ HH.ClassName "example-page" ] ]
+    [ TutorialNav.renderHeader SimpleCharts1
+    , HH.main
+        [ HP.classes [ HH.ClassName "tutorial-content" ] ]
+        [ -- Tutorial introduction
+          HH.section
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
@@ -100,8 +71,15 @@ render _ =
                 [ HP.classes [ HH.ClassName "three-circles-viz" ] ]
                 []
             ]
-        -- SNIPPET: TLCSimple src/website/Viz/ThreeLittleCircles/ThreeLittleCircles.purs 16-31
-        , codeSnippet "TLCSimple" "haskell"
+        , HH.p_
+            [ HH.text "View this example "
+            , HH.a
+                [ HP.href $ "#" <> routeToPath (Example "three-little-circles")
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "with full source code" ]
+            , HH.text "."
+            ]
         ]
 
     -- Section 1b: Three Little Dimensions (Nested Data Binding)
@@ -120,8 +98,6 @@ render _ =
                 [ HP.classes [ HH.ClassName "three-dimensions-viz" ] ]
                 []
             ]
-        -- SNIPPET: ThreeDimensions src/website/Viz/ThreeLittleDimensions/ThreeLittleDimensions.purs 16-38
-        , codeSnippet "ThreeDimensions" "haskell"
         , HH.h3_
             [ HH.text "Beyond Arrays: Working with Sets" ]
         , HH.p_
@@ -134,8 +110,6 @@ render _ =
                 [ HP.classes [ HH.ClassName "three-dimensions-sets-viz" ] ]
                 []
             ]
-        -- SNIPPET: ThreeDimensionsSets src/website/Viz/ThreeLittleDimensions/ThreeLittleDimensions.purs 40-73
-        , codeSnippet "ThreeDimensionsSets" "haskell"
         ]
 
     -- Section 2: Parabola of Circles
@@ -154,8 +128,15 @@ render _ =
                 [ HP.classes [ HH.ClassName "parabola-viz" ] ]
                 []
             ]
-        -- SNIPPET: TLCParabola src/website/Viz/Parabola/Parabola.purs 33-48
-        , codeSnippet "TLCParabola" "haskell"
+        , HH.p_
+            [ HH.text "View this example "
+            , HH.a
+                [ HP.href $ "#" <> routeToPath (Example "parabola")
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "with full source code" ]
+            , HH.text "."
+            ]
         ]
 
     -- Section 3: Bar Chart
@@ -176,8 +157,15 @@ render _ =
                 [ HP.classes [ HH.ClassName "barchart-viz" ] ]
                 []
             ]
-        -- SNIPPET: BarChartDraw src/website/Viz/Charts/BarChart.purs 39-115
-        , codeSnippet "BarChartDraw" "haskell"
+        , HH.p_
+            [ HH.text "View this example "
+            , HH.a
+                [ HP.href $ "#" <> routeToPath (Example "bar-chart")
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "with full source code" ]
+            , HH.text "."
+            ]
         ]
 
     -- Section 4: Line Chart
@@ -198,8 +186,15 @@ render _ =
                 [ HP.classes [ HH.ClassName "linechart-viz" ] ]
                 []
             ]
-        -- SNIPPET: LineChartDraw src/website/Viz/Charts/LineChart.purs 41-101
-        , codeSnippet "LineChartDraw" "haskell"
+        , HH.p_
+            [ HH.text "View this example "
+            , HH.a
+                [ HP.href $ "#" <> routeToPath (Example "line-chart")
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "with full source code" ]
+            , HH.text "."
+            ]
         ]
 
     -- Section 5: Anscombe's Quartet
@@ -220,8 +215,15 @@ render _ =
                 [ HP.classes [ HH.ClassName "quartet-viz" ] ]
                 []
             ]
-        -- SNIPPET: ScatterPlotQuartet src/website/Viz/Charts/ScatterPlot.purs 106-197
-        , codeSnippet "ScatterPlotQuartet" "haskell"
+        , HH.p_
+            [ HH.text "View this example "
+            , HH.a
+                [ HP.href $ "#" <> routeToPath (Example "scatter-plot")
+                , HP.classes [ HH.ClassName "tutorial-link" ]
+                ]
+                [ HH.text "with full source code" ]
+            , HH.text "."
+            ]
         ]
 
     -- Section 6: Next Steps with margin links
@@ -269,14 +271,12 @@ render _ =
                 [ HH.text "Code Explorer →" ]
             ]
         ]
+        ]
     ]
 
-handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
+handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
 handleAction = case _ of
   Initialize -> do
-    -- Trigger Prism highlighting for code snippets
-    triggerPrismHighlighting
-
     -- Draw Three Little Circles
     _ <- H.liftEffect $ eval_D3M $ Circles.drawThreeCircles "div.three-circles-viz"
 
