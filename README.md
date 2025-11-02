@@ -376,9 +376,9 @@ Generate Pursuit-style API documentation for the library:
 npm run docs:api
 ```
 
-This generates HTML documentation for all PSD3 and D3 modules in `docs/api/`. The script:
+This generates HTML documentation for library modules in `docs/api/`. The script:
 1. Generates full docs (including dependencies) in `generated-docs/html/` using Spago
-2. Filters to only include PSD3.* and D3.* modules (210 modules)
+2. Filters to only include modules from `src/lib/` (the core library, excluding the website app)
 3. Replaces external module links with a helpful explanation page
 4. Copies the filtered docs to `docs/api/` for serving on GitHub Pages
 
