@@ -96,6 +96,18 @@ function processHtmlFile(content, filename) {
   // Replace links to external modules with link to external.html
   let processed = content;
 
+  // If this is the index page, filter out non-library modules from the list
+  if (filename === 'index.html') {
+    // Remove list items that link to non-library modules
+    processed = processed.replace(/<li><a href="([^"]+\.html)">([^<]+)<\/a><\/li>/g, (match, href, text) => {
+      // Keep library modules, remove everything else
+      if (isLibraryModule(href)) {
+        return match;
+      }
+      return ''; // Remove this list item
+    });
+  }
+
   // Find all links to .html files
   const linkRegex = /<a href="([^"#]+\.html)([^"]*)"/g;
 
@@ -130,6 +142,17 @@ function copyAndFilterDocs() {
   console.log('Creating external.html...');
   fs.writeFileSync(path.join(OUTPUT_DIR, 'external.html'), EXTERNAL_LINK_PAGE);
 
+  // Copy support files (JS, CSS, etc.)
+  console.log('Copying support files...');
+  const supportFiles = ['docs-search-app.js'];
+  supportFiles.forEach(file => {
+    const sourcePath = path.join(GENERATED_DOCS_DIR, file);
+    if (fs.existsSync(sourcePath)) {
+      const targetPath = path.join(OUTPUT_DIR, file);
+      fs.copyFileSync(sourcePath, targetPath);
+    }
+  });
+
   // Get all HTML files in generated-docs
   const allFiles = fs.readdirSync(GENERATED_DOCS_DIR);
   const htmlFiles = allFiles.filter(f => f.endsWith('.html') && f !== 'index.html');
@@ -156,6 +179,7 @@ function copyAndFilterDocs() {
   console.log(`\nAPI documentation filtered successfully!`);
   console.log(`- Copied ${copiedCount} library module pages (from src/lib/)`);
   console.log(`- Skipped ${skippedCount} non-library module pages`);
+  console.log(`- Filtered index.html to show only library modules`);
   console.log(`- Created external.html for external module links`);
   console.log(`\nDocumentation available at: ${OUTPUT_DIR}/index.html`);
 }
