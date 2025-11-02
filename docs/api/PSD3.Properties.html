@@ -1,0 +1,1359 @@
+<!DOCTYPE HTML>
+<html><head><meta charset="utf-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1"><title>PureScript: PSD3.Properties</title><link href="https://fonts.googleapis.com/css?family=Roboto+Mono|Roboto:300,400,400i,700,700i" type="text/css" rel="stylesheet"><style type="text/css">/*! normalize.css v3.0.2 | MIT License | git.io/normalize */
+
+/**
+ * 1. Set default font family to sans-serif.
+ * 2. Prevent iOS text size adjust after orientation change, without disabling
+ *    user zoom.
+ */
+
+html {
+  font-family: sans-serif; /* 1 */
+  -ms-text-size-adjust: 100%; /* 2 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+}
+
+/**
+ * Remove default margin.
+ */
+
+body {
+  margin: 0;
+}
+
+/* HTML5 display definitions
+   ========================================================================== */
+
+/**
+ * Correct `block` display not defined for any HTML5 element in IE 8/9.
+ * Correct `block` display not defined for `details` or `summary` in IE 10/11
+ * and Firefox.
+ * Correct `block` display not defined for `main` in IE 11.
+ */
+
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+main,
+menu,
+nav,
+section,
+summary {
+  display: block;
+}
+
+/**
+ * 1. Correct `inline-block` display not defined in IE 8/9.
+ * 2. Normalize vertical alignment of `progress` in Chrome, Firefox, and Opera.
+ */
+
+audio,
+canvas,
+progress,
+video {
+  display: inline-block; /* 1 */
+  vertical-align: baseline; /* 2 */
+}
+
+/**
+ * Prevent modern browsers from displaying `audio` without controls.
+ * Remove excess height in iOS 5 devices.
+ */
+
+audio:not([controls]) {
+  display: none;
+  height: 0;
+}
+
+/**
+ * Address `[hidden]` styling not present in IE 8/9/10.
+ * Hide the `template` element in IE 8/9/11, Safari, and Firefox < 22.
+ */
+
+[hidden],
+template {
+  display: none;
+}
+
+/* Links
+   ========================================================================== */
+
+/**
+ * Remove the gray background color from active links in IE 10.
+ */
+
+a {
+  background-color: transparent;
+}
+
+/**
+ * Improve readability when focused and also mouse hovered in all browsers.
+ */
+
+a:active,
+a:hover {
+  outline: 0;
+}
+
+/* Text-level semantics
+   ========================================================================== */
+
+/**
+ * Address styling not present in IE 8/9/10/11, Safari, and Chrome.
+ */
+
+abbr[title] {
+  border-bottom: 1px dotted;
+}
+
+/**
+ * Address style set to `bolder` in Firefox 4+, Safari, and Chrome.
+ */
+
+b,
+strong {
+  font-weight: bold;
+}
+
+/**
+ * Address styling not present in Safari and Chrome.
+ */
+
+dfn {
+  font-style: italic;
+}
+
+/**
+ * Address variable `h1` font-size and margin within `section` and `article`
+ * contexts in Firefox 4+, Safari, and Chrome.
+ */
+
+h1 {
+  font-size: 2em;
+  margin: 0.67em 0;
+}
+
+/**
+ * Address styling not present in IE 8/9.
+ */
+
+mark {
+  background: #ff0;
+  color: #000;
+}
+
+/**
+ * Address inconsistent and variable font size in all browsers.
+ */
+
+small {
+  font-size: 80%;
+}
+
+/**
+ * Prevent `sub` and `sup` affecting `line-height` in all browsers.
+ */
+
+sub,
+sup {
+  font-size: 75%;
+  line-height: 0;
+  position: relative;
+  vertical-align: baseline;
+}
+
+sup {
+  top: -0.5em;
+}
+
+sub {
+  bottom: -0.25em;
+}
+
+/* Embedded content
+   ========================================================================== */
+
+/**
+ * Remove border when inside `a` element in IE 8/9/10.
+ */
+
+img {
+  border: 0;
+}
+
+/**
+ * Correct overflow not hidden in IE 9/10/11.
+ */
+
+svg:not(:root) {
+  overflow: hidden;
+}
+
+/* Grouping content
+   ========================================================================== */
+
+/**
+ * Address margin not present in IE 8/9 and Safari.
+ */
+
+figure {
+  margin: 1em 40px;
+}
+
+/**
+ * Address differences between Firefox and other browsers.
+ */
+
+hr {
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+  height: 0;
+}
+
+/**
+ * Contain overflow in all browsers.
+ */
+
+pre {
+  overflow: auto;
+}
+
+/**
+ * Address odd `em`-unit font size rendering in all browsers.
+ */
+
+code,
+kbd,
+pre,
+samp {
+  font-family: monospace, monospace;
+  font-size: 1em;
+}
+
+/* Forms
+   ========================================================================== */
+
+/**
+ * Known limitation: by default, Chrome and Safari on OS X allow very limited
+ * styling of `select`, unless a `border` property is set.
+ */
+
+/**
+ * 1. Correct color not being inherited.
+ *    Known issue: affects color of disabled elements.
+ * 2. Correct font properties not being inherited.
+ * 3. Address margins set differently in Firefox 4+, Safari, and Chrome.
+ */
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  color: inherit; /* 1 */
+  font: inherit; /* 2 */
+  margin: 0; /* 3 */
+}
+
+/**
+ * Address `overflow` set to `hidden` in IE 8/9/10/11.
+ */
+
+button {
+  overflow: visible;
+}
+
+/**
+ * Address inconsistent `text-transform` inheritance for `button` and `select`.
+ * All other form control elements do not inherit `text-transform` values.
+ * Correct `button` style inheritance in Firefox, IE 8/9/10/11, and Opera.
+ * Correct `select` style inheritance in Firefox.
+ */
+
+button,
+select {
+  text-transform: none;
+}
+
+/**
+ * 1. Avoid the WebKit bug in Android 4.0.* where (2) destroys native `audio`
+ *    and `video` controls.
+ * 2. Correct inability to style clickable `input` types in iOS.
+ * 3. Improve usability and consistency of cursor style between image-type
+ *    `input` and others.
+ */
+
+button,
+html input[type="button"], /* 1 */
+input[type="reset"],
+input[type="submit"] {
+  -webkit-appearance: button; /* 2 */
+  cursor: pointer; /* 3 */
+}
+
+/**
+ * Re-set default cursor for disabled elements.
+ */
+
+button[disabled],
+html input[disabled] {
+  cursor: default;
+}
+
+/**
+ * Remove inner padding and border in Firefox 4+.
+ */
+
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+  border: 0;
+  padding: 0;
+}
+
+/**
+ * Address Firefox 4+ setting `line-height` on `input` using `!important` in
+ * the UA stylesheet.
+ */
+
+input {
+  line-height: normal;
+}
+
+/**
+ * It's recommended that you don't attempt to style these elements.
+ * Firefox's implementation doesn't respect box-sizing, padding, or width.
+ *
+ * 1. Address box sizing set to `content-box` in IE 8/9/10.
+ * 2. Remove excess padding in IE 8/9/10.
+ */
+
+input[type="checkbox"],
+input[type="radio"] {
+  box-sizing: border-box; /* 1 */
+  padding: 0; /* 2 */
+}
+
+/**
+ * Fix the cursor style for Chrome's increment/decrement buttons. For certain
+ * `font-size` values of the `input`, it causes the cursor style of the
+ * decrement button to change from `default` to `text`.
+ */
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  height: auto;
+}
+
+/**
+ * 1. Address `appearance` set to `searchfield` in Safari and Chrome.
+ * 2. Address `box-sizing` set to `border-box` in Safari and Chrome
+ *    (include `-moz` to future-proof).
+ */
+
+input[type="search"] {
+  -webkit-appearance: textfield; /* 1 */
+  -moz-box-sizing: content-box;
+  -webkit-box-sizing: content-box; /* 2 */
+  box-sizing: content-box;
+}
+
+/**
+ * Remove inner padding and search cancel button in Safari and Chrome on OS X.
+ * Safari (but not Chrome) clips the cancel button when the search input has
+ * padding (and `textfield` appearance).
+ */
+
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration {
+  -webkit-appearance: none;
+}
+
+/**
+ * Define consistent border, margin, and padding.
+ */
+
+fieldset {
+  border: 1px solid #c0c0c0;
+  margin: 0 2px;
+  padding: 0.35em 0.625em 0.75em;
+}
+
+/**
+ * 1. Correct `color` not being inherited in IE 8/9/10/11.
+ * 2. Remove padding so people aren't caught out if they zero out fieldsets.
+ */
+
+legend {
+  border: 0; /* 1 */
+  padding: 0; /* 2 */
+}
+
+/**
+ * Remove default vertical scrollbar in IE 8/9/10/11.
+ */
+
+textarea {
+  overflow: auto;
+}
+
+/**
+ * Don't inherit the `font-weight` (applied by a rule above).
+ * NOTE: the default cannot safely be changed in Chrome and Safari on OS X.
+ */
+
+optgroup {
+  font-weight: bold;
+}
+
+/* Tables
+   ========================================================================== */
+
+/**
+ * Remove most spacing between table cells.
+ */
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+td,
+th {
+  padding: 0;
+}
+</style><style type="text/css">/** ************************************************************************* *
+ ** CSS for HTML docs (e.g. Pursuit)
+ **
+ ** STRUCTURE
+ **
+ ** This CSS file is structured into several sections, from general to
+ ** specific, and (mostly) alphabetically within the sections.
+ **
+ ** Several global element styles are used. This is not encouraged and should
+ ** be kept to a minimum. If you want to add new styles you'll most likely
+ ** want to add a new CSS component. See the Components section for examples.
+ **
+ ** CSS components use three simple naming ideas from the BEM system:
+ **   - Block:    `.my-component`
+ **   - Element:  `.my-component__item`
+ **   - Modifier: `.my-component.my-component--highlighted`
+ **
+ **   Example:
+ **   <div .my-component>
+ **     <div .my-component__item>
+ **     <div .my-component__item>
+ **   ...
+ **   <div .my-component.my-component--highlighted>
+ **     <div .my-component__item>
+ **     <div .my-component__item>
+ **
+ ** Components can be nested.
+ **
+ **
+ ** TYPOGRAPHY
+ **
+ ** Typographic choices for sizes, line-heights and margins are based on a
+ ** musical major third scale (4:5). This gives us a way to find numbers
+ ** and relationships between them that are perceived as harmonic.
+ **
+ ** To make use of this modular scale, use a ratio of the form
+ **   (5/4)^n
+ ** where n ∈ ℤ, -6 ≤ n ≤ 8.
+ **
+ ** LESS
+ **
+ ** This CSS is generated by less. To compile it:
+ **
+ **   npm install [-g] less
+ **   lessc app/static/pursuit.less > app/static/pursuit.css
+ **
+ ** ************************************************************************* */
+/* Section: Variables
+ * ========================================================================== */
+/* Section: Document Styles
+ * ========================================================================== */
+:root {
+  color-scheme: light dark;
+}
+html {
+  box-sizing: border-box;
+  /* This overflow rule prevents everything from shifting slightly to the side
+     when moving from a page which isn't large enough to generate a scrollbar
+     to one that is. */
+  overflow-y: scroll;
+}
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+body {
+  background-color: #ffffff;
+  color: #000000;
+  font-family: "Roboto", sans-serif;
+  font-size: 87.5%;
+  line-height: 1.563;
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #141417;
+    color: #dedede;
+  }
+}
+@media (min-width: 38em) {
+  body {
+    font-size: 100%;
+  }
+}
+/* Section: Utility Classes
+ * ========================================================================== */
+.clear-floats {
+  clear: both;
+}
+.clearfix::before,
+.clearfix::after {
+  content: " ";
+  display: table;
+}
+.clearfix::after {
+  clear: both;
+}
+/* Content hidden like this will still be read by a screen reader */
+.hide-visually {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+/* Section: Layout
+ * ========================================================================== */
+.container {
+  display: block;
+  max-width: 66em;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+.col {
+  display: block;
+  position: relative;
+  width: 100%;
+}
+.col.col--main {
+  margin-bottom: 3.08em;
+}
+.col.col--aside {
+  margin-bottom: 2.44em;
+}
+@media (min-width: 52em) {
+  .container {
+    padding-left: 30px;
+    padding-right: 30px;
+  }
+  .col.col--main {
+    float: left;
+    width: 63.655%;
+    /* 66.6…% - 30px */
+  }
+  .col.col--aside {
+    float: right;
+    font-size: 87.5%;
+    width: 33.333333%;
+  }
+}
+@media (min-width: 66em) {
+  .col.col--aside {
+    font-size: inherit;
+  }
+}
+/* Footer
+ * Based on http://www.lwis.net/journal/2008/02/08/pure-css-sticky-footer/
+ * Except we don't support IE6
+ * -------------------------------------------------------------------------- */
+html,
+body {
+  height: 100%;
+}
+.everything-except-footer {
+  min-height: 100%;
+  padding-bottom: 3em;
+}
+.footer {
+  position: relative;
+  height: 3em;
+  margin-top: -3em;
+  width: 100%;
+  text-align: center;
+  background-color: #1d222d;
+  color: #f0f0f0;
+}
+@media (prefers-color-scheme: dark) {
+  .footer {
+    background-color: #1d222d;
+    color: #f0f0f0;
+  }
+}
+.footer * {
+  margin-bottom: 0;
+}
+/* Section: Element Styles
+ *
+ * Have as few of these as possible and keep them general, because they will
+ * influence every component hereafter.
+ * ========================================================================== */
+:target {
+  background-color: #f1f5f9;
+}
+@media (prefers-color-scheme: dark) {
+  :target {
+    background-color: #232327;
+  }
+}
+a,
+a:visited {
+  color: #c4953a;
+  text-decoration: none;
+  font-weight: bold;
+}
+@media (prefers-color-scheme: dark) {
+  a,
+  a:visited {
+    color: #d8ac55;
+  }
+}
+a:hover {
+  color: #7b5904;
+  text-decoration: none;
+}
+@media (prefers-color-scheme: dark) {
+  a:hover {
+    color: #f0dcab;
+  }
+}
+code,
+pre {
+  background-color: #f1f5f9;
+  border-radius: 3px;
+  color: #194a5b;
+  font-family: "Roboto Mono", monospace;
+  font-size: 87.5%;
+}
+@media (prefers-color-scheme: dark) {
+  code,
+  pre {
+    background-color: #232327;
+    color: #c1d3da;
+  }
+}
+:target code,
+:target pre {
+  background-color: #dfe8f1;
+}
+@media (prefers-color-scheme: dark) {
+  :target code,
+  :target pre {
+    background-color: #2f2f34;
+  }
+}
+code {
+  padding: 0.2em 0;
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+code::before,
+code::after {
+  letter-spacing: -0.2em;
+  content: "\00a0";
+}
+a > code {
+  font-weight: normal;
+}
+a > code::before {
+  content: "🡒";
+  letter-spacing: 0.33em;
+}
+a:hover > code {
+  color: #c4953a;
+}
+@media (prefers-color-scheme: dark) {
+  a:hover > code {
+    color: #d8ac55;
+  }
+}
+pre {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 1em 1.25rem;
+  /* Using rem here to align with lists etc. */
+  overflow: auto;
+  white-space: pre;
+  word-wrap: normal;
+}
+pre code {
+  background-color: transparent;
+  border: 0;
+  font-size: 100%;
+  max-width: auto;
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+  line-height: inherit;
+  white-space: pre;
+  word-break: normal;
+  word-wrap: normal;
+}
+pre code::before,
+pre code::after {
+  content: normal;
+}
+h1 {
+  font-size: 3.052em;
+  font-weight: 300;
+  letter-spacing: -0.5px;
+  line-height: 1.125;
+  margin-top: 1.563rem;
+  margin-bottom: 1.25rem;
+}
+@media (min-width: 52em) {
+  h1 {
+    font-size: 3.814em;
+    margin-top: 5.96rem;
+  }
+}
+h2 {
+  font-size: 1.953em;
+  font-weight: normal;
+  line-height: 1.25;
+  margin-top: 3.052rem;
+  margin-bottom: 1rem;
+}
+h3 {
+  font-size: 1.563em;
+  font-weight: normal;
+  line-height: 1.25;
+  margin-top: 2.441rem;
+  margin-bottom: 1rem;
+}
+h4 {
+  font-size: 1.25em;
+  font-weight: normal;
+  margin-top: 2.441rem;
+  margin-bottom: 1rem;
+}
+h1 + h2,
+h1 + h3,
+h1 + h4,
+h2 + h3,
+h2 + h4,
+h3 + h4 {
+  margin-top: 1rem;
+}
+hr {
+  border: none;
+  height: 1px;
+  background-color: #cccccc;
+}
+@media (prefers-color-scheme: dark) {
+  hr {
+    background-color: #43434e;
+  }
+}
+img {
+  border-style: none;
+  max-width: 100%;
+}
+p {
+  font-size: 1em;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+table {
+  border-bottom: 1px solid #cccccc;
+  border-collapse: collapse;
+  border-spacing: 0;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+@media (prefers-color-scheme: dark) {
+  table {
+    border-bottom-color: #43434e;
+  }
+}
+td,
+th {
+  text-align: left;
+  padding: 0.41em 0.51em;
+}
+td {
+  border-top: 1px solid #cccccc;
+}
+@media (prefers-color-scheme: dark) {
+  td {
+    border-top-color: #43434e;
+  }
+}
+td:first-child,
+th:first-child {
+  padding-left: 0;
+}
+td:last-child,
+th:last-child {
+  padding-right: 0;
+}
+ul {
+  list-style-type: none;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 0;
+}
+ul li {
+  position: relative;
+  padding-left: 1.25em;
+}
+ul li::before {
+  position: absolute;
+  color: #a0a0a0;
+  content: "–";
+  display: inline-block;
+  margin-left: -1.25em;
+  width: 1.25em;
+}
+@media (prefers-color-scheme: dark) {
+  ul li::before {
+    color: #a0a0a0;
+  }
+}
+/* Tying this tightly to ul at the moment because it's a slight variation thereof */
+ul.ul--search li::before {
+  content: "⚲";
+  top: -0.2em;
+  transform: rotate(-45deg);
+}
+ol {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  padding-left: 1.25em;
+}
+ol li {
+  position: relative;
+  padding-left: 0;
+}
+/* Section: Components
+ * ========================================================================== */
+/* Component: Badge
+ * -------------------------------------------------------------------------- */
+.badge {
+  position: relative;
+  top: -0.1em;
+  display: inline-block;
+  background-color: #000000;
+  border-radius: 1.3em;
+  color: #ffffff;
+  font-size: 77%;
+  font-weight: bold;
+  line-height: 1.563;
+  text-align: center;
+  height: 1.5em;
+  width: 1.5em;
+}
+@media (prefers-color-scheme: dark) {
+  .badge {
+    background-color: #dedede;
+    color: #141417;
+  }
+}
+.badge.badge--package {
+  background-color: #c4953a;
+  letter-spacing: -0.1em;
+}
+@media (prefers-color-scheme: dark) {
+  .badge.badge--package {
+    background-color: #d8ac55;
+  }
+}
+.badge.badge--module {
+  background-color: #75B134;
+}
+/* Component: Declarations
+ * -------------------------------------------------------------------------- */
+.decl__title {
+  position: relative;
+  padding-bottom: 0.328em;
+  margin-bottom: 0.262em;
+}
+.decl__source {
+  display: block;
+  float: right;
+  font-size: 64%;
+  position: relative;
+  top: 0.57em;
+}
+.decl__anchor,
+.decl__anchor:visited {
+  position: absolute;
+  left: -0.8em;
+  color: #bababa;
+}
+@media (prefers-color-scheme: dark) {
+  .decl__anchor,
+  .decl__anchor:visited {
+    color: #878787;
+  }
+}
+.decl__anchor:hover {
+  color: #c4953a;
+}
+@media (prefers-color-scheme: dark) {
+  .decl__anchor:hover {
+    color: #d8ac55;
+  }
+}
+.decl__signature {
+  background-color: transparent;
+  border-radius: 0;
+  border-top: 1px solid #cccccc;
+  border-bottom: 1px solid #cccccc;
+  padding: 0;
+}
+@media (prefers-color-scheme: dark) {
+  .decl__signature {
+    border-top-color: #43434e;
+    border-bottom-color: #43434e;
+  }
+}
+.decl__signature code {
+  display: block;
+  padding: 0.328em 0;
+  padding-left: 2.441em;
+  text-indent: -2.441em;
+  white-space: normal;
+}
+.decl__role {
+  font-family: "Roboto", sans-serif;
+  font-style: italic;
+  font-weight: normal;
+}
+/* See https://stackoverflow.com/a/32162038
+   Content licensed under CC BY-SA 3.0
+*/
+.decl__role_hover[title] {
+  /* Remove line that appears under abbr element */
+  border-bottom: none;
+  text-decoration: none;
+  /* Ensure cursor doesn't change to question mark */
+  cursor: inherit;
+}
+.decl__role_nominal::after {
+  content: "nominal";
+}
+.decl__role_phantom::after {
+  content: "phantom";
+}
+.decl__kind {
+  border-bottom: 1px solid #cccccc;
+}
+@media (prefers-color-scheme: dark) {
+  .decl__kind {
+    border-bottom-color: #43434e;
+  }
+}
+:target .decl__signature,
+:target .decl__signature code {
+  /* We want the background to be transparent, even when the parent is a target */
+  background-color: transparent;
+}
+.decl__body .keyword,
+.decl__body .syntax {
+  color: #0b71b4;
+}
+@media (prefers-color-scheme: dark) {
+  .decl__body .keyword,
+  .decl__body .syntax {
+    color: #3796d5;
+  }
+}
+.decl__child_comments {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+/* Component: Dependency Link
+ * -------------------------------------------------------------------------- */
+.deplink {
+  /* Currently no root styles, but keep the class as a namespace */
+}
+.deplink__link {
+  display: inline-block;
+  margin-right: 0.41em;
+}
+.deplink__version {
+  color: #666666;
+  display: inline-block;
+  font-size: 0.8em;
+  line-height: 1;
+}
+@media (prefers-color-scheme: dark) {
+  .deplink__version {
+    color: #a0a0a0;
+  }
+}
+/* Component: Grouped List
+ * -------------------------------------------------------------------------- */
+.grouped-list {
+  border-top: 1px solid #cccccc;
+  margin: 0 0 2.44em 0;
+}
+@media (prefers-color-scheme: dark) {
+  .grouped-list {
+    border-top-color: #43434e;
+  }
+}
+.grouped-list__title {
+  color: #666666;
+  font-size: 0.8em;
+  font-weight: 300;
+  letter-spacing: 1px;
+  margin: 0.8em 0 -0.1em 0;
+  text-transform: uppercase;
+}
+@media (prefers-color-scheme: dark) {
+  .grouped-list__title {
+    border-top-color: #a0a0a0;
+  }
+}
+.grouped-list__item {
+  margin: 0;
+}
+/* Component: Message
+ * -------------------------------------------------------------------------- */
+.message {
+  border: 5px solid;
+  border-radius: 5px;
+  padding: 1em !important;
+}
+.message.message--error {
+  background-color: #fff0f0;
+  border-color: #c85050;
+}
+@media (prefers-color-scheme: dark) {
+  .message.message--error {
+    background-color: #6b0e0e;
+    border-color: #c85050;
+  }
+}
+.message.message--not-available {
+  background-color: #f0f096;
+  border-color: #e3e33d;
+}
+@media (prefers-color-scheme: dark) {
+  .message.message--not-available {
+    background-color: #56560b;
+    border-color: #b0b017;
+  }
+}
+/* Component: Multi Col
+ * Multiple columns side by side
+ * -------------------------------------------------------------------------- */
+.multi-col {
+  margin-bottom: 2.44em;
+}
+.multi-col__col {
+  display: block;
+  padding-right: 1em;
+  position: relative;
+  width: 100%;
+}
+@media (min-width: 38em) and (max-width: 51.999999em) {
+  .multi-col__col {
+    float: left;
+    width: 50%;
+  }
+  .multi-col__col:nth-child(2n+3) {
+    clear: both;
+  }
+}
+@media (min-width: 52em) {
+  .multi-col__col {
+    float: left;
+    width: 33.333333%;
+  }
+  .multi-col__col:nth-child(3n+4) {
+    clear: both;
+  }
+}
+/* Component: Page Title
+ * -------------------------------------------------------------------------- */
+.page-title {
+  margin: 4.77em 0 1.56em;
+  padding-bottom: 1.25em;
+  position: relative;
+}
+.page-title__title {
+  margin: 0 0 0 -0.05em;
+  /* Visually align on left edge */
+}
+.page-title__label {
+  position: relative;
+  color: #666666;
+  font-size: 0.8rem;
+  font-weight: 300;
+  letter-spacing: 1px;
+  margin-bottom: -0.8em;
+  text-transform: uppercase;
+  z-index: 1;
+}
+@media (prefers-color-scheme: dark) {
+  .page-title__label {
+    color: #a0a0a0;
+  }
+}
+/* Component: Top Banner
+ * -------------------------------------------------------------------------- */
+.top-banner {
+  background-color: #1d222d;
+  color: #f0f0f0;
+  font-weight: normal;
+}
+@media (prefers-color-scheme: dark) {
+  .top-banner {
+    background-color: #1d222d;
+    color: #f0f0f0;
+  }
+}
+.top-banner__logo,
+.top-banner__logo:visited {
+  float: left;
+  color: #f0f0f0;
+  font-size: 2.44em;
+  font-weight: 300;
+  line-height: 90px;
+  margin: 0;
+}
+@media (prefers-color-scheme: dark) {
+  .top-banner__logo,
+  .top-banner__logo:visited {
+    color: #f0f0f0;
+  }
+}
+.top-banner__logo:hover {
+  color: #c4953a;
+  text-decoration: none;
+}
+.top-banner__form {
+  margin-bottom: 1.25em;
+}
+.top-banner__form input {
+  border: 1px solid #1d222d;
+  border-radius: 3px;
+  background-color: #ffffff;
+  color: #1d222d;
+  font-weight: 300;
+  line-height: 2;
+  padding: 0.21em 0.512em;
+  width: 100%;
+}
+@media (prefers-color-scheme: dark) {
+  .top-banner__form input {
+    border-color: #1d222d;
+    background-color: #141417;
+    color: #dedede;
+  }
+}
+.top-banner__actions {
+  float: right;
+  text-align: right;
+}
+.top-banner__actions__item {
+  display: inline-block;
+  line-height: 90px;
+  margin: 0;
+  padding-left: 1.25em;
+}
+.top-banner__actions__item:first-child {
+  padding-left: 0;
+}
+.top-banner__actions__item a,
+.top-banner__actions__item a:visited {
+  color: #f0f0f0;
+}
+@media (prefers-color-scheme: dark) {
+  .top-banner__actions__item a,
+  .top-banner__actions__item a:visited {
+    color: #f0f0f0;
+  }
+}
+.top-banner__actions__item a:hover {
+  color: #c4953a;
+}
+@media (prefers-color-scheme: dark) {
+  .top-banner__actions__item a:hover {
+    color: #d8ac55;
+  }
+}
+@media (min-width: 38em) {
+  .top-banner__logo {
+    float: left;
+    width: 25%;
+  }
+  .top-banner__form {
+    float: left;
+    line-height: 90px;
+    margin-bottom: 0;
+    width: 50%;
+  }
+  .top-banner__actions {
+    float: right;
+    width: 25%;
+  }
+}
+/* Component: Search Results
+ * -------------------------------------------------------------------------- */
+.result.result--empty {
+  font-size: 1.25em;
+}
+.result__title {
+  font-size: 1.25em;
+  margin-bottom: 0.2rem;
+}
+.result__badge {
+  margin-left: -0.1em;
+}
+.result__body > *:first-child {
+  margin-top: 0!important;
+}
+.result__body > *:last-child {
+  margin-bottom: 0!important;
+}
+.result__signature {
+  background-color: transparent;
+  border-radius: 0;
+  border-top: 1px solid #cccccc;
+  border-bottom: 1px solid #cccccc;
+  padding: 0.328em 0;
+}
+@media (prefers-color-scheme: dark) {
+  .result__signature {
+    border-top-color: #43434e;
+    border-bottom-color: #43434e;
+  }
+}
+.result__signature code {
+  display: block;
+  padding-left: 2.441em;
+  text-indent: -2.441em;
+  white-space: normal;
+}
+.result__actions {
+  margin-top: 0.2rem;
+}
+.result__actions__item {
+  font-size: 80%;
+}
+.result__actions__item + .result__actions__item {
+  margin-left: 0.65em;
+}
+/* Component: Version Selector
+ * -------------------------------------------------------------------------- */
+.version-selector {
+  margin-bottom: 0.8em;
+}
+@media (min-width: 38em) {
+  .version-selector {
+    position: absolute;
+    top: 0.8em;
+    right: 0;
+    margin-bottom: 0;
+  }
+}
+/* Section: FIXME
+ * These styles should be cleaned up
+ * ========================================================================== */
+/* Help paragraphs */
+.help {
+  padding: 5px 0;
+}
+.help h3 {
+  /* FIXME: target with class */
+  margin-top: 16px;
+}
+/* Section: Markdown
+ * Github rendered README
+ * ========================================================================== */
+.markdown-body {
+  /*
+  Useful for narrow screens, such as mobiles. Documentation often contains URLs
+  which would otherwise force the page to become wider, and force creation of
+  horizontal scrollbars. Yuck.
+  */
+  word-wrap: break-word;
+}
+.markdown-body > *:first-child {
+  margin-top: 0 !important;
+}
+.markdown-body > *:last-child {
+  margin-bottom: 0 !important;
+}
+.markdown-body a:not([href]) {
+  color: inherit;
+  text-decoration: none;
+}
+.markdown-body blockquote {
+  margin: 0;
+  padding: 0 1em;
+  color: #777;
+  border-left: 0.25em solid #ddd;
+}
+@media (prefers-color-scheme: dark) {
+  .markdown-body blockquote {
+    border-left-color: #444;
+  }
+}
+.markdown-body blockquote > :first-child {
+  margin-top: 0;
+}
+.markdown-body blockquote > :last-child {
+  margin-bottom: 0;
+}
+.markdown-body .anchor {
+  /* We hide the anchor because the link doesn't point to a valid location */
+  display: none;
+}
+.markdown-body .pl-k {
+  /* Keyword */
+  color: #a0a0a0;
+}
+@media (prefers-color-scheme: dark) {
+  .markdown-body .pl-k {
+    color: #676767;
+  }
+}
+.markdown-body .pl-c1,
+.markdown-body .pl-en {
+  /* Not really sure what this is */
+  color: #39d;
+}
+.markdown-body .pl-s {
+  /* String literals */
+  color: #1a1;
+}
+.markdown-body .pl-cce {
+  /* String literal escape sequences */
+  color: #921;
+}
+.markdown-body .pl-smi {
+  /* type variables? */
+  color: #62b;
+}
+</style></head><body><div class="everything-except-footer"><div class="top-banner clearfix"><div class="container clearfix"><div style="float: left; font-size: 2.44em; font-weight: 300; line-height: 90px; margin: 0">PureScript API documentation</div><div class="top-banner__actions"><div class="top-banner__actions__item"><a href="index.html">Index</a></div></div></div></div><main class="container clearfix" role="main"><div class="page-title clearfix"><div class="page-title__label">Module</div><h1 class="page-title__title">PSD3.Properties</h1></div><div class="col col--main"><p>This module contains UI utilities originally from the Ocelot library
+(<a href="https://github.com/citizennet/purescript-ocelot">https://github.com/citizennet/purescript-ocelot</a>). The code has been
+vendored into this project as Ocelot is no longer actively maintained.</p>
+<div class="decl" id="t:IProp"><h3 class="decl__title clearfix"><a class="decl__anchor" href="#t:IProp">#</a><span>IProp</span> </h3><div class="decl__body"><pre class="decl__signature"><code class="decl__kind"><span class="keyword">type</span> <a href="PSD3.Properties.html#t:IProp" title="PSD3.Properties.IProp"><span class="ctor">IProp</span></a> <span class="syntax">::</span> <a href="external.html" title="External module - see Pursuit for docs" title="Prim.Row"><span class="ctor">Row</span></a> <a href="external.html" title="External module - see Pursuit for docs" title="Prim.Type"><span class="ctor">Type</span></a> <span class="syntax">-&gt;</span> <a href="external.html" title="External module - see Pursuit for docs" title="Prim.Type"><span class="ctor">Type</span></a> <span class="syntax">-&gt;</span> <a href="external.html" title="External module - see Pursuit for docs" title="Prim.Type"><span class="ctor">Type</span></a></code><code><span class="keyword">type</span> <a href="PSD3.Properties.html#t:IProp" title="PSD3.Properties.IProp"><span class="ctor">IProp</span></a> r i <span class="syntax">=</span> <a href="external.html" title="External module - see Pursuit for docs" title="Halogen.HTML.Properties.IProp"><span class="ctor">IProp</span></a> <span class="syntax">(</span>class <span class="syntax">::</span> <a href="external.html" title="External module - see Pursuit for docs" title="Prim.String"><span class="ctor">String</span></a> <span class="syntax">|</span> r<span class="syntax">)</span> i</code></pre></div></div><div class="decl" id="v:appendIProps"><h3 class="decl__title clearfix"><a class="decl__anchor" href="#v:appendIProps">#</a><span>appendIProps</span> </h3><div class="decl__body"><pre class="decl__signature"><code><a href="PSD3.Properties.html#v:appendIProps" title="PSD3.Properties.appendIProps"><span class="ident">appendIProps</span></a> <span class="syntax">::</span> <span class="keyword">forall</span> <span class="syntax"></span>r <span class="syntax"></span>i<span class="syntax">.</span> <a href="external.html" title="External module - see Pursuit for docs" title="Prim.Array"><span class="ctor">Array</span></a> <span class="syntax">(</span><a href="PSD3.Properties.html#t:IProp" title="PSD3.Properties.IProp"><span class="ctor">IProp</span></a> r i<span class="syntax">)</span> <span class="syntax">-&gt;</span> <a href="external.html" title="External module - see Pursuit for docs" title="Prim.Array"><span class="ctor">Array</span></a> <span class="syntax">(</span><a href="PSD3.Properties.html#t:IProp" title="PSD3.Properties.IProp"><span class="ctor">IProp</span></a> r i<span class="syntax">)</span> <span class="syntax">-&gt;</span> <a href="external.html" title="External module - see Pursuit for docs" title="Prim.Array"><span class="ctor">Array</span></a> <span class="syntax">(</span><a href="PSD3.Properties.html#t:IProp" title="PSD3.Properties.IProp"><span class="ctor">IProp</span></a> r i<span class="syntax">)</span></code></pre></div></div><div class="decl" id="v:css"><h3 class="decl__title clearfix"><a class="decl__anchor" href="#v:css">#</a><span>css</span> </h3><div class="decl__body"><pre class="decl__signature"><code><a href="PSD3.Properties.html#v:css" title="PSD3.Properties.css"><span class="ident">css</span></a> <span class="syntax">::</span> <span class="keyword">forall</span> <span class="syntax"></span>r <span class="syntax"></span>i<span class="syntax">.</span> <a href="external.html" title="External module - see Pursuit for docs" title="Prim.String"><span class="ctor">String</span></a> <span class="syntax">-&gt;</span> <a href="PSD3.Properties.html#t:IProp" title="PSD3.Properties.IProp"><span class="ctor">IProp</span></a> r i</code></pre></div></div><div class="decl" id="v:extract"><h3 class="decl__title clearfix"><a class="decl__anchor" href="#v:extract">#</a><span>extract</span> </h3><div class="decl__body"><pre class="decl__signature"><code><a href="PSD3.Properties.html#v:extract" title="PSD3.Properties.extract"><span class="ident">extract</span></a> <span class="syntax">::</span> <span class="keyword">forall</span> <span class="syntax"></span>r <span class="syntax"></span>i<span class="syntax">.</span> <a href="external.html" title="External module - see Pursuit for docs" title="Prim.Array"><span class="ctor">Array</span></a> <span class="syntax">(</span><a href="PSD3.Properties.html#t:IProp" title="PSD3.Properties.IProp"><span class="ctor">IProp</span></a> r i<span class="syntax">)</span> <span class="syntax">-&gt;</span> <a href="external.html" title="External module - see Pursuit for docs" title="Data.Tuple.Tuple"><span class="ctor">Tuple</span></a> <span class="syntax">(</span><a href="external.html" title="External module - see Pursuit for docs" title="Prim.Array"><span class="ctor">Array</span></a> <a href="external.html" title="External module - see Pursuit for docs" title="Prim.String"><span class="ctor">String</span></a><span class="syntax">)</span> <span class="syntax">(</span><a href="external.html" title="External module - see Pursuit for docs" title="Prim.Array"><span class="ctor">Array</span></a> <span class="syntax">(</span><a href="PSD3.Properties.html#t:IProp" title="PSD3.Properties.IProp"><span class="ctor">IProp</span></a> r i<span class="syntax">)</span><span class="syntax">)</span></code></pre></div></div><div class="decl" id="v:style"><h3 class="decl__title clearfix"><a class="decl__anchor" href="#v:style">#</a><span>style</span> </h3><div class="decl__body"><pre class="decl__signature"><code><a href="PSD3.Properties.html#v:style" title="PSD3.Properties.style"><span class="ident">style</span></a> <span class="syntax">::</span> <span class="keyword">forall</span> <span class="syntax"></span>r <span class="syntax"></span>i<span class="syntax">.</span> <a href="external.html" title="External module - see Pursuit for docs" title="Foreign.Object.Object"><span class="ctor">Object</span></a> <a href="external.html" title="External module - see Pursuit for docs" title="Prim.String"><span class="ctor">String</span></a> <span class="syntax">-&gt;</span> <a href="PSD3.Properties.html#t:IProp" title="PSD3.Properties.IProp"><span class="ctor">IProp</span></a> r i</code></pre></div></div><div class="decl" id="v:testId"><h3 class="decl__title clearfix"><a class="decl__anchor" href="#v:testId">#</a><span>testId</span> </h3><div class="decl__body"><pre class="decl__signature"><code><a href="PSD3.Properties.html#v:testId" title="PSD3.Properties.testId"><span class="ident">testId</span></a> <span class="syntax">::</span> <span class="keyword">forall</span> <span class="syntax"></span>r <span class="syntax"></span>i<span class="syntax">.</span> <a href="external.html" title="External module - see Pursuit for docs" title="Prim.String"><span class="ctor">String</span></a> <span class="syntax">-&gt;</span> <a href="PSD3.Properties.html#t:IProp" title="PSD3.Properties.IProp"><span class="ctor">IProp</span></a> r i</code></pre></div></div><div class="decl" id="v:(&lt;&amp;&gt;)"><h3 class="decl__title clearfix"><a class="decl__anchor" href="#v:(&lt;&amp;&gt;)">#</a><span>(&lt;&amp;&gt;)</span> </h3><div class="decl__body"><p>Operator alias for PSD3.Properties.appendIProps <em>(right-associative / precedence 5)</em></p></div></div></div><div class="col col--aside"><h3>Modules</h3><ul><li><a href="external.html" title="External module - see Pursuit for docs">Affjax</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Affjax.RequestBody</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Affjax.RequestHeader</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Affjax.ResponseFormat</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Affjax.ResponseHeader</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Affjax.StatusCode</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Affjax.Web</a></li><li><a href="CodeSnippet.html">CodeSnippet</a></li><li><a href="CodeSnippets.html">CodeSnippets</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Alt</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Alternative</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Applicative</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Applicative.Free</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Applicative.Free.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Apply</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Biapplicative</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Biapply</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Bind</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Category</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Comonad</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Comonad.Cofree</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Comonad.Cofree.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Comonad.Env</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Comonad.Env.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Comonad.Env.Trans</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Comonad.Store</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Comonad.Store.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Comonad.Store.Trans</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Comonad.Traced</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Comonad.Traced.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Comonad.Traced.Trans</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Comonad.Trans.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Extend</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Lazy</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Cont</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Cont.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Cont.Trans</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Error.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Except</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Except.Trans</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Fork.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Free</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Free.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Gen.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Gen.Common</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Identity.Trans</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.List.Trans</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Maybe.Trans</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.RWS</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.RWS.Trans</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Reader</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Reader.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Reader.Trans</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Rec.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.ST</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.ST.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.ST.Global</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.ST.Internal</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.ST.Ref</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.ST.Uncurried</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.State</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.State.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.State.Trans</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Trampoline</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Trans.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Writer</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Writer.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Monad.Writer.Trans</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.MonadPlus</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Parallel</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Parallel.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Plus</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Control.Semigroupoid</a></li><li><a href="D3.Viz.AnimatedRadialTree.html">D3.Viz.AnimatedRadialTree</a></li><li><a href="D3.Viz.BarChart.html">D3.Viz.BarChart</a></li><li><a href="D3.Viz.BubbleChart.html">D3.Viz.BubbleChart</a></li><li><a href="D3.Viz.Charts.Model.html">D3.Viz.Charts.Model</a></li><li><a href="D3.Viz.ChordDiagram.html">D3.Viz.ChordDiagram</a></li><li><a href="D3.Viz.ForceNavigator.Data.html">D3.Viz.ForceNavigator.Data</a></li><li><a href="D3.Viz.ForceNavigator.Draw.html">D3.Viz.ForceNavigator.Draw</a></li><li><a href="D3.Viz.ForceNavigator.Forces.html">D3.Viz.ForceNavigator.Forces</a></li><li><a href="D3.Viz.ForceNavigator.Model.html">D3.Viz.ForceNavigator.Model</a></li><li><a href="D3.Viz.ForceNavigator.Unsafe.html">D3.Viz.ForceNavigator.Unsafe</a></li><li><a href="D3.Viz.FpFtw.MapQuartet.html">D3.Viz.FpFtw.MapQuartet</a></li><li><a href="D3.Viz.FpFtw.TopologicalSort.html">D3.Viz.FpFtw.TopologicalSort</a></li><li><a href="D3.Viz.GUP.html">D3.Viz.GUP</a></li><li><a href="D3.Viz.GUP.Unsafe.html">D3.Viz.GUP.Unsafe</a></li><li><a href="D3.Viz.GroupedBarChart.html">D3.Viz.GroupedBarChart</a></li><li><a href="D3.Viz.Hierarchies.html">D3.Viz.Hierarchies</a></li><li><a href="D3.Viz.Icicle.html">D3.Viz.Icicle</a></li><li><a href="D3.Viz.LesMis.Unsafe.html">D3.Viz.LesMis.Unsafe</a></li><li><a href="D3.Viz.LesMiserables.html">D3.Viz.LesMiserables</a></li><li><a href="D3.Viz.LesMiserables.File.html">D3.Viz.LesMiserables.File</a></li><li><a href="D3.Viz.LesMiserables.Model.html">D3.Viz.LesMiserables.Model</a></li><li><a href="D3.Viz.LineChart.html">D3.Viz.LineChart</a></li><li><a href="D3.Viz.MetaTree.html">D3.Viz.MetaTree</a></li><li><a href="D3.Viz.MetaTree.Model.html">D3.Viz.MetaTree.Model</a></li><li><a href="D3.Viz.MetaTree.Unsafe.html">D3.Viz.MetaTree.Unsafe</a></li><li><a href="D3.Viz.MultiLineChart.html">D3.Viz.MultiLineChart</a></li><li><a href="D3.Viz.Parabola.html">D3.Viz.Parabola</a></li><li><a href="D3.Viz.Parabola.Unsafe.html">D3.Viz.Parabola.Unsafe</a></li><li><a href="D3.Viz.RadialStackedBar.html">D3.Viz.RadialStackedBar</a></li><li><a href="D3.Viz.Sankey.Model.html">D3.Viz.Sankey.Model</a></li><li><a href="D3.Viz.Sankey.Unsafe.html">D3.Viz.Sankey.Unsafe</a></li><li><a href="D3.Viz.SankeyDiagram.html">D3.Viz.SankeyDiagram</a></li><li><a href="D3.Viz.ScatterPlot.html">D3.Viz.ScatterPlot</a></li><li><a href="D3.Viz.Spago.Draw.html">D3.Viz.Spago.Draw</a></li><li><a href="D3.Viz.Spago.Draw.Attributes.html">D3.Viz.Spago.Draw.Attributes</a></li><li><a href="D3.Viz.Spago.Files.html">D3.Viz.Spago.Files</a></li><li><a href="D3.Viz.Spago.Model.html">D3.Viz.Spago.Model</a></li><li><a href="D3.Viz.Spago.Tree.html">D3.Viz.Spago.Tree</a></li><li><a href="D3.Viz.Spago.Unsafe.html">D3.Viz.Spago.Unsafe</a></li><li><a href="D3.Viz.ThreeLittleCircles.html">D3.Viz.ThreeLittleCircles</a></li><li><a href="D3.Viz.ThreeLittleCircles.Unsafe.html">D3.Viz.ThreeLittleCircles.Unsafe</a></li><li><a href="D3.Viz.ThreeLittleCirclesTransition.html">D3.Viz.ThreeLittleCirclesTransition</a></li><li><a href="D3.Viz.ThreeLittleDimensions.html">D3.Viz.ThreeLittleDimensions</a></li><li><a href="D3.Viz.ThreeLittleDimensions.Unsafe.html">D3.Viz.ThreeLittleDimensions.Unsafe</a></li><li><a href="D3.Viz.Tree.HorizontalTree.html">D3.Viz.Tree.HorizontalTree</a></li><li><a href="D3.Viz.Tree.Model.html">D3.Viz.Tree.Model</a></li><li><a href="D3.Viz.Tree.RadialTree.html">D3.Viz.Tree.RadialTree</a></li><li><a href="D3.Viz.Tree.Unsafe.html">D3.Viz.Tree.Unsafe</a></li><li><a href="D3.Viz.Tree.VerticalTree.html">D3.Viz.Tree.VerticalTree</a></li><li><a href="D3.Viz.Treemap.html">D3.Viz.Treemap</a></li><li><a href="D3.Viz.WealthHealth.Draw.html">D3.Viz.WealthHealth.Draw</a></li><li><a href="D3.Viz.WealthHealth.Unsafe.html">D3.Viz.WealthHealth.Unsafe</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.AutocompleteType</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.ButtonType</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.CrossOriginValue</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.DirValue</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.FormMethod</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.InputAcceptType</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.InputType</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.KindValue</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.MenuType</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.MenuitemType</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.OrderedListType</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.PreloadValue</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.ScopeValue</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.StepValue</a></li><li><a href="external.html" title="External module - see Pursuit for docs">DOM.HTML.Indexed.WrapValue</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Argonaut.Core</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Argonaut.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Argonaut.Parser</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Array</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Array.NonEmpty</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Array.NonEmpty.Internal</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Array.Partial</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Array.ST</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Array.ST.Iterator</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Array.ST.Partial</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.ArrayBuffer.Types</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Bifoldable</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Bifunctor</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Bifunctor.Join</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Bitraversable</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Boolean</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.BooleanAlgebra</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Bounded</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Bounded.Generic</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.CatList</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.CatQueue</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Char</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Char.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.CommutativeRing</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Comparison</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Const</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Coyoneda</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Date</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Date.Component</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Date.Component.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Date.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.DateTime</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.DateTime.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.DateTime.Instant</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Decidable</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Decide</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.DependencyGraph</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Distributive</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Divide</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Divisible</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.DivisionRing</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Either</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Either.Inject</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Either.Nested</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Enum</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Enum.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Enum.Generic</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Eq</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Eq.Generic</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Equivalence</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.EuclideanRing</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Exists</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Field</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Foldable</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.FoldableWithIndex</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.FormURLEncoded</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Function</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Function.Uncurried</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.App</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.Clown</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.Compose</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.Contravariant</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.Coproduct</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.Coproduct.Inject</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.Coproduct.Nested</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.Costar</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.Flip</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.Invariant</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.Joker</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.Product</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.Product.Nested</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Functor.Product2</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.FunctorWithIndex</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Generic.Rep</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Graph</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.HTTP.Method</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.HeytingAlgebra</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.HeytingAlgebra.Generic</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Identity</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Int</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Int.Bits</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Interval</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Interval.Duration</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Interval.Duration.Iso</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.JSDate</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lazy</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.AffineTraversal</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.At</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Common</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Fold</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Fold.Partial</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Getter</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Grate</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Index</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Indexed</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Internal.Bazaar</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Internal.Exchange</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Internal.Focusing</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Internal.Forget</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Internal.Grating</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Internal.Indexed</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Internal.Market</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Internal.Re</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Internal.Shop</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Internal.Stall</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Internal.Tagged</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Internal.Wander</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Internal.Zipping</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Iso</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Iso.Newtype</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Lens</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Lens.Product</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Lens.Tuple</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Lens.Unit</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Lens.Void</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Prism</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Prism.Coproduct</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Prism.Either</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Prism.Maybe</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Record</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Setter</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Traversal</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Types</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Lens.Zoom</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.List</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.List.Internal</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.List.Lazy</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.List.Lazy.NonEmpty</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.List.Lazy.Types</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.List.NonEmpty</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.List.Partial</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.List.Types</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.List.ZipList</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Map</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Map.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Map.Internal</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Maybe</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Maybe.First</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Maybe.Last</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.MediaType</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.MediaType.Common</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Monoid</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Monoid.Additive</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Monoid.Alternate</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Monoid.Conj</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Monoid.Disj</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Monoid.Dual</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Monoid.Endo</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Monoid.Generic</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Monoid.Multiplicative</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.NaturalTransformation</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Newtype</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.NonEmpty</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Nullable</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Number</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Number.Approximate</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Number.Format</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Op</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Ord</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Ord.Down</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Ord.Generic</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Ord.Max</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Ord.Min</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Ordering</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Predicate</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Profunctor</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Profunctor.Choice</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Profunctor.Closed</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Profunctor.Cochoice</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Profunctor.Costrong</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Profunctor.Join</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Profunctor.Split</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Profunctor.Star</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Profunctor.Strong</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Reflectable</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Ring</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Ring.Generic</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Semigroup</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Semigroup.First</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Semigroup.Foldable</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Semigroup.Generic</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Semigroup.Last</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Semigroup.Traversable</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Semiring</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Semiring.Free</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Semiring.Generic</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Set</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Set.NonEmpty</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Show</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Show.Generic</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.CaseInsensitive</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.CodePoints</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.CodeUnits</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.Common</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.NonEmpty</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.NonEmpty.CaseInsensitive</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.NonEmpty.CodePoints</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.NonEmpty.CodeUnits</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.NonEmpty.Internal</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.Pattern</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.Read</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.Regex</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.Regex.Flags</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.Regex.Unsafe</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.String.Unsafe</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Symbol</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Time</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Time.Component</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Time.Component.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Time.Duration</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Time.Duration.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Time.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Traversable</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Traversable.Accum</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Traversable.Accum.Internal</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.TraversableWithIndex</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Tree</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Tuple</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Tuple.Nested</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Unfoldable</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Unfoldable1</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Unit</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Validation.Semigroup</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Validation.Semiring</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Void</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Data.Yoneda</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Debug</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.AVar</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Aff</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Aff.AVar</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Aff.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Aff.Compat</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Class</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Class.Console</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Console</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Exception</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Exception.Unsafe</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Now</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Random</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Ref</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Uncurried</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Effect.Unsafe</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Foreign</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Foreign.Index</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Foreign.Keys</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Foreign.Object</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Foreign.Object.Gen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Foreign.Object.ST</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Foreign.Object.ST.Unsafe</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Foreign.Object.Unsafe</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Aff</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Aff.Driver</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Aff.Driver.Eval</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Aff.Driver.State</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Aff.Util</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Component</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Component.Profunctor</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Data.OrdBox</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Data.Slot</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.HTML</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.HTML.Core</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.HTML.Elements</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.HTML.Elements.Keyed</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.HTML.Events</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.HTML.Properties</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.HTML.Properties.ARIA</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Query</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Query.ChildQuery</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Query.Event</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Query.HalogenM</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Query.HalogenQ</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Query.Input</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Subscription</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.Align</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.Baseline</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.CSSLength</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.Color</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.Duration</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.FillState</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.FontSize</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.FontStretch</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.FontStyle</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.FontWeight</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.MarkerUnit</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.MaskUnit</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.MeetOrSlice</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.Orient</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.Path</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.StrokeLineCap</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.StrokeLineJoin</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.TextAnchor</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Attributes.Transform</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Elements</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.Svg.Indexed</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.VDom</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.VDom.DOM</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.VDom.DOM.Prop</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.VDom.Driver</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.VDom.Machine</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.VDom.Thunk</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.VDom.Types</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Halogen.VDom.Util</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Html.Parser</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Html.Renderer.Halogen</a></li><li><a href="external.html" title="External module - see Pursuit for docs">JSURI</a></li><li><a href="external.html" title="External module - see Pursuit for docs">PSCI.Support</a></li><li><a href="PSD3.html">PSD3</a></li><li><a href="PSD3.Acknowledgements.html">PSD3.Acknowledgements</a></li><li><a href="PSD3.Attributes.html">PSD3.Attributes</a></li><li><a href="PSD3.Backdrop.html">PSD3.Backdrop</a></li><li><a href="PSD3.Builder.html">PSD3.Builder</a></li><li><a href="PSD3.Button.html">PSD3.Button</a></li><li><a href="PSD3.Capabilities.Sankey.html">PSD3.Capabilities.Sankey</a></li><li><a href="PSD3.Capabilities.Selection.html">PSD3.Capabilities.Selection</a></li><li><a href="PSD3.Capabilities.Simulation.html">PSD3.Capabilities.Simulation</a></li><li><a href="PSD3.Card.html">PSD3.Card</a></li><li><a href="PSD3.Checkbox.html">PSD3.Checkbox</a></li><li><a href="PSD3.CodeAtlas.Actions.html">PSD3.CodeAtlas.Actions</a></li><li><a href="PSD3.CodeAtlas.CodeAtlas.html">PSD3.CodeAtlas.CodeAtlas</a></li><li><a href="PSD3.CodeAtlas.CodeAtlasWrapper.html">PSD3.CodeAtlas.CodeAtlasWrapper</a></li><li><a href="PSD3.CodeAtlas.Data.html">PSD3.CodeAtlas.Data</a></li><li><a href="PSD3.CodeAtlas.State.html">PSD3.CodeAtlas.State</a></li><li><a href="PSD3.CodeAtlas.Tabs.Declarations.html">PSD3.CodeAtlas.Tabs.Declarations</a></li><li><a href="PSD3.CodeAtlas.Tabs.ExpandableBubbles.html">PSD3.CodeAtlas.Tabs.ExpandableBubbles</a></li><li><a href="PSD3.CodeAtlas.Tabs.InteractiveGraph.html">PSD3.CodeAtlas.Tabs.InteractiveGraph</a></li><li><a href="PSD3.CodeAtlas.Tabs.ModuleGraph.html">PSD3.CodeAtlas.Tabs.ModuleGraph</a></li><li><a href="PSD3.CodeAtlas.Types.html">PSD3.CodeAtlas.Types</a></li><li><a href="PSD3.CodeExplorer.Actions.html">PSD3.CodeExplorer.Actions</a></li><li><a href="PSD3.CodeExplorer.CodeExplorationPage.html">PSD3.CodeExplorer.CodeExplorationPage</a></li><li><a href="PSD3.CodeExplorer.CodeExplorerWrapper.html">PSD3.CodeExplorer.CodeExplorerWrapper</a></li><li><a href="PSD3.CodeExplorer.Data.html">PSD3.CodeExplorer.Data</a></li><li><a href="PSD3.CodeExplorer.Forces.html">PSD3.CodeExplorer.Forces</a></li><li><a href="PSD3.CodeExplorer.HTML.html">PSD3.CodeExplorer.HTML</a></li><li><a href="PSD3.CodeExplorer.Scenes.html">PSD3.CodeExplorer.Scenes</a></li><li><a href="PSD3.CodeExplorer.State.html">PSD3.CodeExplorer.State</a></li><li><a href="PSD3.CodeExplorer.WelcomeOverlay.html">PSD3.CodeExplorer.WelcomeOverlay</a></li><li><a href="PSD3.Component.Example.html">PSD3.Component.Example</a></li><li><a href="PSD3.Data.Loaders.html">PSD3.Data.Loaders</a></li><li><a href="PSD3.Data.Node.html">PSD3.Data.Node</a></li><li><a href="PSD3.Data.Tree.html">PSD3.Data.Tree</a></li><li><a href="PSD3.ExamplesGallery.html">PSD3.ExamplesGallery</a></li><li><a href="PSD3.Expandable.html">PSD3.Expandable</a></li><li><a href="PSD3.ForceNavigator.html">PSD3.ForceNavigator</a></li><li><a href="PSD3.ForceNavigator.Actions.html">PSD3.ForceNavigator.Actions</a></li><li><a href="PSD3.ForceNavigator.Forces.html">PSD3.ForceNavigator.Forces</a></li><li><a href="PSD3.ForceNavigator.State.html">PSD3.ForceNavigator.State</a></li><li><a href="PSD3.FormField.html">PSD3.FormField</a></li><li><a href="PSD3.Format.html">PSD3.Format</a></li><li><a href="PSD3.FpFtw.html">PSD3.FpFtw</a></li><li><a href="PSD3.FpFtw.Actions.html">PSD3.FpFtw.Actions</a></li><li><a href="PSD3.FpFtw.HTML.html">PSD3.FpFtw.HTML</a></li><li><a href="PSD3.FpFtw.State.html">PSD3.FpFtw.State</a></li><li><a href="PSD3.Home.html">PSD3.Home</a></li><li><a href="PSD3.HowTo.HowtoIndex.html">PSD3.HowTo.HowtoIndex</a></li><li><a href="PSD3.Internal.Attributes.Instances.html">PSD3.Internal.Attributes.Instances</a></li><li><a href="PSD3.Internal.Attributes.Sugar.html">PSD3.Internal.Attributes.Sugar</a></li><li><a href="PSD3.Internal.Axes.html">PSD3.Internal.Axes</a></li><li><a href="PSD3.Internal.FFI.html">PSD3.Internal.FFI</a></li><li><a href="PSD3.Internal.Generators.Line.html">PSD3.Internal.Generators.Line</a></li><li><a href="PSD3.Internal.Hierarchical.html">PSD3.Internal.Hierarchical</a></li><li><a href="PSD3.Internal.Sankey.Functions.html">PSD3.Internal.Sankey.Functions</a></li><li><a href="PSD3.Internal.Sankey.Types.html">PSD3.Internal.Sankey.Types</a></li><li><a href="PSD3.Internal.Scales.Linear.html">PSD3.Internal.Scales.Linear</a></li><li><a href="PSD3.Internal.Scales.Scales.html">PSD3.Internal.Scales.Scales</a></li><li><a href="PSD3.Internal.Selection.Functions.html">PSD3.Internal.Selection.Functions</a></li><li><a href="PSD3.Internal.Selection.Types.html">PSD3.Internal.Selection.Types</a></li><li><a href="PSD3.Internal.Simulation.Config.html">PSD3.Internal.Simulation.Config</a></li><li><a href="PSD3.Internal.Simulation.Forces.html">PSD3.Internal.Simulation.Forces</a></li><li><a href="PSD3.Internal.Simulation.Functions.html">PSD3.Internal.Simulation.Functions</a></li><li><a href="PSD3.Internal.Simulation.Types.html">PSD3.Internal.Simulation.Types</a></li><li><a href="PSD3.Internal.Types.html">PSD3.Internal.Types</a></li><li><a href="PSD3.Internal.Utility.html">PSD3.Internal.Utility</a></li><li><a href="PSD3.Internal.Zoom.html">PSD3.Internal.Zoom</a></li><li><a href="PSD3.Interpreter.D3.html">PSD3.Interpreter.D3</a></li><li><a href="PSD3.Interpreter.MetaTree.html">PSD3.Interpreter.MetaTree</a></li><li><a href="PSD3.Interpreter.String.html">PSD3.Interpreter.String</a></li><li><a href="PSD3.Main.html">PSD3.Main</a></li><li><a href="PSD3.PrismJS.html">PSD3.PrismJS</a></li><li><a href="PSD3.Properties.html">PSD3.Properties</a></li><li><a href="PSD3.Radio.html">PSD3.Radio</a></li><li><a href="PSD3.Reference.ModuleRegistry.html">PSD3.Reference.ModuleRegistry</a></li><li><a href="PSD3.Reference.ModuleViewer.html">PSD3.Reference.ModuleViewer</a></li><li><a href="PSD3.Reference.Modules.Attributes.html">PSD3.Reference.Modules.Attributes</a></li><li><a href="PSD3.Reference.Modules.Capabilities.Sankey.html">PSD3.Reference.Modules.Capabilities.Sankey</a></li><li><a href="PSD3.Reference.Modules.Capabilities.Selection.html">PSD3.Reference.Modules.Capabilities.Selection</a></li><li><a href="PSD3.Reference.Modules.Capabilities.Simulation.html">PSD3.Reference.Modules.Capabilities.Simulation</a></li><li><a href="PSD3.Reference.Modules.Data.Node.html">PSD3.Reference.Modules.Data.Node</a></li><li><a href="PSD3.Reference.Modules.Data.Tree.html">PSD3.Reference.Modules.Data.Tree</a></li><li><a href="PSD3.Reference.Modules.Data.Utility.html">PSD3.Reference.Modules.Data.Utility</a></li><li><a href="PSD3.Reference.Modules.Internal.Attributes.Instances.html">PSD3.Reference.Modules.Internal.Attributes.Instances</a></li><li><a href="PSD3.Reference.Modules.Internal.Attributes.Sugar.html">PSD3.Reference.Modules.Internal.Attributes.Sugar</a></li><li><a href="PSD3.Reference.Modules.Internal.Axes.html">PSD3.Reference.Modules.Internal.Axes</a></li><li><a href="PSD3.Reference.Modules.Internal.FFI.html">PSD3.Reference.Modules.Internal.FFI</a></li><li><a href="PSD3.Reference.Modules.Internal.Generators.Line.html">PSD3.Reference.Modules.Internal.Generators.Line</a></li><li><a href="PSD3.Reference.Modules.Internal.Hierarchical.html">PSD3.Reference.Modules.Internal.Hierarchical</a></li><li><a href="PSD3.Reference.Modules.Internal.Sankey.Functions.html">PSD3.Reference.Modules.Internal.Sankey.Functions</a></li><li><a href="PSD3.Reference.Modules.Internal.Sankey.Types.html">PSD3.Reference.Modules.Internal.Sankey.Types</a></li><li><a href="PSD3.Reference.Modules.Internal.Scales.Linear.html">PSD3.Reference.Modules.Internal.Scales.Linear</a></li><li><a href="PSD3.Reference.Modules.Internal.Scales.Scales.html">PSD3.Reference.Modules.Internal.Scales.Scales</a></li><li><a href="PSD3.Reference.Modules.Internal.Selection.Functions.html">PSD3.Reference.Modules.Internal.Selection.Functions</a></li><li><a href="PSD3.Reference.Modules.Internal.Selection.Types.html">PSD3.Reference.Modules.Internal.Selection.Types</a></li><li><a href="PSD3.Reference.Modules.Internal.Simulation.Config.html">PSD3.Reference.Modules.Internal.Simulation.Config</a></li><li><a href="PSD3.Reference.Modules.Internal.Simulation.Forces.html">PSD3.Reference.Modules.Internal.Simulation.Forces</a></li><li><a href="PSD3.Reference.Modules.Internal.Simulation.Functions.html">PSD3.Reference.Modules.Internal.Simulation.Functions</a></li><li><a href="PSD3.Reference.Modules.Internal.Simulation.Types.html">PSD3.Reference.Modules.Internal.Simulation.Types</a></li><li><a href="PSD3.Reference.Modules.Internal.Types.html">PSD3.Reference.Modules.Internal.Types</a></li><li><a href="PSD3.Reference.Modules.Internal.Utility.html">PSD3.Reference.Modules.Internal.Utility</a></li><li><a href="PSD3.Reference.Modules.Internal.Zoom.html">PSD3.Reference.Modules.Internal.Zoom</a></li><li><a href="PSD3.Reference.Modules.Interpreter.D3.html">PSD3.Reference.Modules.Interpreter.D3</a></li><li><a href="PSD3.Reference.Modules.Interpreter.MetaTree.html">PSD3.Reference.Modules.Interpreter.MetaTree</a></li><li><a href="PSD3.Reference.Modules.Interpreter.String.html">PSD3.Reference.Modules.Interpreter.String</a></li><li><a href="PSD3.Reference.Modules.Types.html">PSD3.Reference.Modules.Types</a></li><li><a href="PSD3.Reference.Reference.html">PSD3.Reference.Reference</a></li><li><a href="PSD3.Reference.ReferenceNav.html">PSD3.Reference.ReferenceNav</a></li><li><a href="PSD3.Reference.ReferenceOld.html">PSD3.Reference.ReferenceOld</a></li><li><a href="PSD3.Reference.SourceLoader.html">PSD3.Reference.SourceLoader</a></li><li><a href="PSD3.RoutingDSL.html">PSD3.RoutingDSL</a></li><li><a href="PSD3.Shared.ChartDimensions.html">PSD3.Shared.ChartDimensions</a></li><li><a href="PSD3.Shared.CodeExample.html">PSD3.Shared.CodeExample</a></li><li><a href="PSD3.Shared.DataLoader.html">PSD3.Shared.DataLoader</a></li><li><a href="PSD3.Shared.DocParser.html">PSD3.Shared.DocParser</a></li><li><a href="PSD3.Shared.ExamplesNav.html">PSD3.Shared.ExamplesNav</a></li><li><a href="PSD3.Shared.Footer.html">PSD3.Shared.Footer</a></li><li><a href="PSD3.Shared.HierarchyHelpers.html">PSD3.Shared.HierarchyHelpers</a></li><li><a href="PSD3.Shared.Mermaid.html">PSD3.Shared.Mermaid</a></li><li><a href="PSD3.Shared.RHSNavigation.html">PSD3.Shared.RHSNavigation</a></li><li><a href="PSD3.Shared.SectionNav.html">PSD3.Shared.SectionNav</a></li><li><a href="PSD3.Shared.TreeHelpers.html">PSD3.Shared.TreeHelpers</a></li><li><a href="PSD3.Shared.TutorialNav.html">PSD3.Shared.TutorialNav</a></li><li><a href="PSD3.Shared.Utilities.html">PSD3.Shared.Utilities</a></li><li><a href="PSD3.Shared.ZoomSticker.html">PSD3.Shared.ZoomSticker</a></li><li><a href="PSD3.Shared.ZoomableViewbox.html">PSD3.Shared.ZoomableViewbox</a></li><li><a href="PSD3.Spago.html">PSD3.Spago</a></li><li><a href="PSD3.Table.html">PSD3.Table</a></li><li><a href="PSD3.Toggle.html">PSD3.Toggle</a></li><li><a href="PSD3.Tutorial.GettingStarted.html">PSD3.Tutorial.GettingStarted</a></li><li><a href="PSD3.Types.html">PSD3.Types</a></li><li><a href="PSD3.Understanding.About.html">PSD3.Understanding.About</a></li><li><a href="PSD3.Understanding.Concepts.html">PSD3.Understanding.Concepts</a></li><li><a href="PSD3.Understanding.DataFlowViz.html">PSD3.Understanding.DataFlowViz</a></li><li><a href="PSD3.Understanding.Hierarchies.html">PSD3.Understanding.Hierarchies</a></li><li><a href="PSD3.Understanding.Interpreters.html">PSD3.Understanding.Interpreters</a></li><li><a href="PSD3.Understanding.InterpretersDemo.html">PSD3.Understanding.InterpretersDemo</a></li><li><a href="PSD3.Understanding.Movement.html">PSD3.Understanding.Movement</a></li><li><a href="PSD3.Understanding.Patterns.html">PSD3.Understanding.Patterns</a></li><li><a href="PSD3.Understanding.SimpleCharts1.html">PSD3.Understanding.SimpleCharts1</a></li><li><a href="PSD3.Understanding.SimpleCharts2.html">PSD3.Understanding.SimpleCharts2</a></li><li><a href="PSD3.Understanding.TOC.html">PSD3.Understanding.TOC</a></li><li><a href="PSD3.Understanding.UnderstandingTabs.html">PSD3.Understanding.UnderstandingTabs</a></li><li><a href="PSD3.WealthHealth.Actions.html">PSD3.WealthHealth.Actions</a></li><li><a href="PSD3.WealthHealth.Data.html">PSD3.WealthHealth.Data</a></li><li><a href="PSD3.WealthHealth.HTML.html">PSD3.WealthHealth.HTML</a></li><li><a href="PSD3.WealthHealth.State.html">PSD3.WealthHealth.State</a></li><li><a href="PSD3.WealthHealth.Types.html">PSD3.WealthHealth.Types</a></li><li><a href="PSD3.WealthHealth.WealthHealth.html">PSD3.WealthHealth.WealthHealth</a></li><li><a href="PSD3.WealthHealth.WealthHealthWrapper.html">PSD3.WealthHealth.WealthHealthWrapper</a></li><li><a href="PSD3.Website.Types.html">PSD3.Website.Types</a></li><li><a href="PSD3.Wizard.Datasets.html">PSD3.Wizard.Datasets</a></li><li><a href="PSD3.Wizard.FileDownload.html">PSD3.Wizard.FileDownload</a></li><li><a href="PSD3.Wizard.Generator.html">PSD3.Wizard.Generator</a></li><li><a href="PSD3.Wizard.Templates.html">PSD3.Wizard.Templates</a></li><li><a href="PSD3.Wizard.Wizard.html">PSD3.Wizard.Wizard</a></li><li><a href="external.html" title="External module - see Pursuit for docs">ParabolaTest.Draw</a></li><li><a href="external.html" title="External module - see Pursuit for docs">ParabolaTest.Model</a></li><li><a href="external.html" title="External module - see Pursuit for docs">ParabolaTest.Unsafe</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Partial</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Partial.Unsafe</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Prelude</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Prim</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Prim.Boolean</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Prim.Coerce</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Prim.Int</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Prim.Ordering</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Prim.Row</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Prim.RowList</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Prim.Symbol</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Prim.TypeError</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Promise</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Promise.Internal</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Promise.Lazy</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Promise.Rejection</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Record</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Record.Builder</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Record.Unsafe</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Record.Unsafe.Union</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Routing</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Routing.Hash</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Routing.Match</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Routing.Match.Error</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Routing.Parser</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Routing.PushState</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Routing.Types</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Safe.Coerce</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Snippets</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Spago.Generated.BuildInfo</a></li><li><a href="external.html" title="External module - see Pursuit for docs">StringParser</a></li><li><a href="external.html" title="External module - see Pursuit for docs">StringParser.CodePoints</a></li><li><a href="external.html" title="External module - see Pursuit for docs">StringParser.CodeUnits</a></li><li><a href="external.html" title="External module - see Pursuit for docs">StringParser.Combinators</a></li><li><a href="external.html" title="External module - see Pursuit for docs">StringParser.Expr</a></li><li><a href="external.html" title="External module - see Pursuit for docs">StringParser.Parser</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Test.Main</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Type.Data.Boolean</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Type.Data.Ordering</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Type.Data.Symbol</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Type.Equality</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Type.Function</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Type.Prelude</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Type.Proxy</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Type.Row</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Type.Row.Homogeneous</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Type.RowList</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Unsafe.Coerce</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Unsafe.Reference</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Utility</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.Clipboard</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.Clipboard.ClipboardEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.Clipboard.ClipboardEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.CharacterData</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.ChildNode</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.Comment</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.DOMTokenList</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.Document</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.DocumentFragment</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.DocumentType</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.Element</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.HTMLCollection</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.Internal.Types</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.MutationObserver</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.MutationRecord</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.Node</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.NodeList</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.NodeType</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.NonDocumentTypeChildNode</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.NonElementParentNode</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.ParentNode</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.ProcessingInstruction</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.ShadowRoot</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.DOM.Text</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.Event.CustomEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.Event.Event</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.Event.EventPhase</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.Event.EventTarget</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.Event.Internal.Types</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.File.Blob</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.File.File</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.File.FileList</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.File.FileReader</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.File.FileReader.ReadyState</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.File.Url</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Common</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.BeforeUnloadEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.BeforeUnloadEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.DataTransfer</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.DataTransfer.DataTransferItem</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.DragEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.DragEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.ErrorEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.HashChangeEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.HashChangeEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.PageTransitionEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.PageTransitionEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.PopStateEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.PopStateEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.TrackEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Event.TrackEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLAnchorElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLAreaElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLAudioElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLBRElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLBaseElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLBodyElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLButtonElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLCanvasElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLDListElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLDataElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLDataListElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLDivElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLDocument</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLDocument.ReadyState</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLDocument.VisibilityState</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLEmbedElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLFieldSetElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLFormElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLHRElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLHeadElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLHeadingElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLHtmlElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLHyperlinkElementUtils</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLIFrameElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLImageElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLImageElement.CORSMode</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLImageElement.DecodingHint</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLImageElement.Laziness</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLInputElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLKeygenElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLLIElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLLabelElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLLegendElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLLinkElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLMapElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLMediaElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLMediaElement.CanPlayType</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLMediaElement.NetworkState</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLMediaElement.ReadyState</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLMetaElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLMeterElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLModElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLOListElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLObjectElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLOptGroupElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLOptionElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLOutputElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLParagraphElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLParamElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLPreElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLProgressElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLQuoteElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLScriptElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLSelectElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLSourceElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLSpanElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLStyleElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTableCaptionElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTableCellElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTableColElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTableDataCellElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTableElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTableHeaderCellElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTableRowElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTableSectionElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTemplateElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTextAreaElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTimeElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTitleElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTrackElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLTrackElement.ReadyState</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLUListElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.HTMLVideoElement</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.History</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Location</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Navigator</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.SelectionMode</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.ValidityState</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.HTML.Window</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.Internal.FFI</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.PointerEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.PointerEvent.Element</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.PointerEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.PointerEvent.Navigator</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.PointerEvent.PointerEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.Storage.Event.StorageEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.Storage.Storage</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.TouchEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.TouchEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.TouchEvent.Touch</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.TouchEvent.TouchEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.TouchEvent.TouchList</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.CompositionEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.CompositionEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.FocusEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.FocusEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.InputEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.InputEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.InputEvent.InputType</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.KeyboardEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.KeyboardEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.MouseEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.MouseEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.UIEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.WheelEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.UIEvent.WheelEvent.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.XHR.EventTypes</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.XHR.FormData</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.XHR.ProgressEvent</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.XHR.ReadyState</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.XHR.ResponseType</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.XHR.XMLHttpRequest</a></li><li><a href="external.html" title="External module - see Pursuit for docs">Web.XHR.XMLHttpRequestUpload</a></li></ul></div></main></div><div class="footer clearfix"><p>Generated by purs 0.15.15</p></div><!-- Docs search index. --><script type="text/javascript" src="./docs-search-app.js"></script><script type="text/javascript">window.DocsSearchTypeIndex = {};window.DocsSearchIndex = {};</script></body></html>
