@@ -106,6 +106,13 @@ function processHtmlFile(content, filename) {
       }
       return ''; // Remove this list item
     });
+
+    // Remove the search JavaScript since we have a small, filtered list
+    // The search app expects a full index which we're not providing
+    processed = processed.replace(/<script[^>]*src="\.\/docs-search-app\.js"[^>]*><\/script>\s*/g, '');
+    processed = processed.replace(/<script[^>]*>window\.DocsSearchTypeIndex\s*=\s*\{\};?\s*window\.DocsSearchIndex\s*=\s*\{\};?\s*<\/script>/g, '');
+    // Also remove the comment before the scripts
+    processed = processed.replace(/<!--\s*Docs search index\.\s*-->/g, '');
   }
 
   // Find all links to .html files
