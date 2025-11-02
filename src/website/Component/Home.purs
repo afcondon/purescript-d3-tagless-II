@@ -121,10 +121,10 @@ render _ =
                 "How-to Guides"
                 "Step-by-step instructions for specific visualizations"
                 (routeToPath HowtoIndex)
-            , renderDocBox
+            , renderDocBoxExternal
                 "API Reference"
                 "Complete technical documentation with type signatures"
-                (routeToPath Reference)
+                "docs/api/index.html"
             , renderDocBox
                 "Understanding"
                 "Concepts, patterns, and design philosophy"
@@ -214,11 +214,37 @@ render _ =
     , Footer.render
     ]
 
--- | Render a documentation category box with bookmark
+-- | Render a documentation category box with bookmark (internal route)
 renderDocBox :: forall w i. String -> String -> String -> HH.HTML w i
 renderDocBox title description path =
   HH.a
     [ HP.href $ "#" <> path
+    , HP.classes [ HH.ClassName "home-doc-box" ]
+    ]
+    [ HH.div
+        [ HP.classes [ HH.ClassName "home-doc-box__image-container" ] ]
+        [ HH.img
+            [ HP.src $ getBookmarkImage title
+            , HP.alt ""
+            , HP.classes [ HH.ClassName "home-doc-box__image" ]
+            ]
+        ]
+    , HH.div
+        [ HP.classes [ HH.ClassName "home-doc-box__content" ] ]
+        [ HH.h3
+            [ HP.classes [ HH.ClassName "home-doc-box-title" ] ]
+            [ HH.text title ]
+        , HH.p
+            [ HP.classes [ HH.ClassName "home-doc-box-description" ] ]
+            [ HH.text description ]
+        ]
+    ]
+
+-- | Render a documentation category box with bookmark (external URL)
+renderDocBoxExternal :: forall w i. String -> String -> String -> HH.HTML w i
+renderDocBoxExternal title description url =
+  HH.a
+    [ HP.href url
     , HP.classes [ HH.ClassName "home-doc-box" ]
     ]
     [ HH.div
