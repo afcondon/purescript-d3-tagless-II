@@ -124,7 +124,7 @@ render _ =
             , renderDocBoxExternal
                 "API Reference"
                 "Complete technical documentation with type signatures"
-                "docs/api/index.html"
+                "api/index.html"
             , renderDocBox
                 "Understanding"
                 "Concepts, patterns, and design philosophy"
