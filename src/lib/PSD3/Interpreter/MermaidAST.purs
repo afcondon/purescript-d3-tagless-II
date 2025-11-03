@@ -76,8 +76,8 @@ instance mermaidTagless :: SelectionM NodeID MermaidASTM where
   appendTo parentId element attributes = do
     nodeId <- addNode ("append(\"" <> show element <> "\")")
     addEdge parentId nodeId "append"
-    -- Add attribute nodes
-    _ <- foldl (\acc attr -> acc *> addAttributeNode nodeId attr) (pure unit) attributes
+    -- Add coalesced attributes node
+    addAttributesNode nodeId attributes
     pure nodeId
 
   filterSelection selectionId selector = do
@@ -92,7 +92,7 @@ instance mermaidTagless :: SelectionM NodeID MermaidASTM where
     pure nodeId
 
   setAttributes selectionId attributes = do
-    _ <- foldl (\acc attr -> acc *> addAttributeNode selectionId attr) (pure unit) attributes
+    addAttributesNode selectionId attributes
     pure unit
 
   on selectionId (Drag _drag) = do
@@ -111,81 +111,62 @@ instance mermaidTagless :: SelectionM NodeID MermaidASTM where
     pure nodeId
 
   simpleJoin selectionId element ds _k = do
-    -- Data node
-    dataNodeId <- addNode ("data([" <> show (length ds) <> " items])")
-    addEdge selectionId dataNodeId "data"
-    -- Join node
-    joinNodeId <- addNode ("join(\"" <> show element <> "\")")
-    addEdge dataNodeId joinNodeId "join"
+    -- Collapsed simpleJoin node
+    joinNodeId <- addNode ("simpleJoin(\"" <> show element <> "\", [" <> show (length ds) <> " items])")
+    addEdge selectionId joinNodeId "join"
     pure joinNodeId
 
   nestedJoin selectionId element _extractChildren _k = do
-    -- Data node with nested function
-    dataNodeId <- addNode "data(fn)"
-    addEdge selectionId dataNodeId "data"
-    -- Join node
-    joinNodeId <- addNode ("join(\"" <> show element <> "\")")
-    addEdge dataNodeId joinNodeId "join"
+    -- Collapsed nestedJoin node
+    joinNodeId <- addNode ("nestedJoin(\"" <> show element <> "\", fn)")
+    addEdge selectionId joinNodeId "join"
     pure joinNodeId
 
   updateJoin selectionId element ds _k = do
-    -- Data node
-    dataNodeId <- addNode ("data([" <> show (length ds) <> " items])")
-    addEdge selectionId dataNodeId "data"
+    -- Collapsed updateJoin node
+    joinNodeId <- addNode ("updateJoin(\"" <> show element <> "\", [" <> show (length ds) <> " items])")
+    addEdge selectionId joinNodeId "join"
 
     -- Enter node
     enterNodeId <- addNode "enter()"
-    addEdge dataNodeId enterNodeId "enter"
+    addEdge joinNodeId enterNodeId "enter"
     enterAppendId <- addNode ("append(\"" <> show element <> "\")")
     addEdge enterNodeId enterAppendId "append"
 
     -- Exit node
     exitNodeId <- addNode "exit()"
-    addEdge dataNodeId exitNodeId "exit"
+    addEdge joinNodeId exitNodeId "exit"
     exitRemoveId <- addNode "remove()"
     addEdge exitNodeId exitRemoveId "remove"
 
-    pure { enter: enterAppendId, exit: exitRemoveId, update: dataNodeId }
+    pure { enter: enterAppendId, exit: exitRemoveId, update: joinNodeId }
 
--- | Add an attribute node to the diagram
-addAttributeNode :: NodeID -> SelectionAttribute -> MermaidASTM Unit
-addAttributeNode parentId attr = do
-  case attr of
-    (AttrT (AttributeSetter label _)) -> do
-      nodeId <- addNode ("attr(\"" <> label <> "\")")
-      addEdge parentId nodeId "attr"
+-- | Format a single attribute for display
+formatAttribute :: SelectionAttribute -> String
+formatAttribute attr = case attr of
+  (AttrT (AttributeSetter label _)) -> label
+  (TextT (AttributeSetter _label _)) -> "text"
+  (PropertyT (AttributeSetter label _)) -> "prop:" <> label
+  (HTMLT (AttributeSetter _label _)) -> "html"
+  RemoveT -> "remove"
+  (OrderingT o) -> show o
+  (TransitionT chain _transition) -> "transition -> [" <> formatAttributeList chain <> "]"
+  (OnT event _listener) -> "on(" <> show event <> ")"
+  (OnT' event _listener) -> "on(" <> show event <> ")"
 
-    (TextT (AttributeSetter _label _)) -> do
-      nodeId <- addNode "text(...)"
-      addEdge parentId nodeId "text"
+-- | Format a list of attributes as a comma-separated string
+formatAttributeList :: Array SelectionAttribute -> String
+formatAttributeList attrs =
+  case attrs of
+    [] -> ""
+    _ -> foldl (\acc attr -> if acc == "" then formatAttribute attr else acc <> ", " <> formatAttribute attr) "" attrs
 
-    (PropertyT (AttributeSetter label _)) -> do
-      nodeId <- addNode ("property(\"" <> label <> "\")")
-      addEdge parentId nodeId "property"
-
-    (HTMLT (AttributeSetter _label _)) -> do
-      nodeId <- addNode "html(...)"
-      addEdge parentId nodeId "html"
-
-    RemoveT -> do
-      nodeId <- addNode "remove()"
-      addEdge parentId nodeId "remove"
-
-    (OrderingT o) -> do
-      nodeId <- addNode (show o)
-      addEdge parentId nodeId "order"
-
-    (TransitionT chain _transition) -> do
-      nodeId <- addNode "transition()"
-      addEdge parentId nodeId "transition"
-      -- Add chained attributes
-      _ <- foldl (\acc a -> acc *> addAttributeNode nodeId a) (pure unit) chain
-      pure unit
-
-    (OnT event _listener) -> do
-      nodeId <- addNode ("on(\"" <> show event <> "\")")
-      addEdge parentId nodeId "on"
-
-    (OnT' event _listener) -> do
-      nodeId <- addNode ("on(\"" <> show event <> "\")")
-      addEdge parentId nodeId "on"
+-- | Add a coalesced attributes node to the diagram
+addAttributesNode :: NodeID -> Array SelectionAttribute -> MermaidASTM Unit
+addAttributesNode parentId attributes =
+  case attributes of
+    [] -> pure unit
+    _ -> do
+      let attrList = formatAttributeList attributes
+      nodeId <- addNode ("attrs: [" <> attrList <> "]")
+      addEdge parentId nodeId "attrs"

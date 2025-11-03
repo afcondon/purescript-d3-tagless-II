@@ -10,7 +10,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3 as D3
-import PSD3.Attributes (fill, fillOpacity, radius, cx, cy, width, height, strokeWidth, strokeColor, strokeOpacity, x, y, to, transitionWithDuration)
+import PSD3.Attributes (fill, fillOpacity, radius, cx, cy, width, height, strokeWidth, strokeColor, strokeOpacity, x, y, to, transitionWithDuration, classed, fontSize, viewBox, andThen, remove)
 import PSD3.Types (Element(..))
 import PSD3.Interpreter.MermaidAST (MermaidASTM, runMermaidAST)
 import PSD3.Data.Node (NodeID)
@@ -38,6 +38,7 @@ type State =
   , viz_bubbleChart :: String
   , viz_icicle :: String
   , viz_treemap :: String
+  , viz_gup :: String
   }
 
 data Action = Initialize
@@ -75,6 +76,7 @@ initialState _ =
   , viz_bubbleChart: "Loading..."
   , viz_icicle: "Loading..."
   , viz_treemap: "Loading..."
+  , viz_gup: "Loading..."
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -221,6 +223,12 @@ render state =
         , HH.p_ [ HH.text "Space-filling treemap with nested rectangular tiles" ]
         , mermaidDiagram state.viz_treemap (Just "viz-treemap")
         ]
+
+    , HH.section [ HP.class_ (HH.ClassName "example") ]
+        [ HH.h2_ [ HH.text "General Update Pattern (GUP)" ]
+        , HH.p_ [ HH.text "The classic D3 pattern showing enter/update/exit with transitions and openSelection" ]
+        , mermaidDiagram state.viz_gup (Just "viz-gup")
+        ]
     ]
 
 handleAction :: forall o m. MonadEffect m => Action -> H.HalogenM State Action () o m Unit
@@ -249,6 +257,7 @@ handleAction = case _ of
     vizBubble <- liftEffect $ runMermaidAST viz_BubbleChartAST
     vizIcicle <- liftEffect $ runMermaidAST viz_IcicleAST
     vizTreemap <- liftEffect $ runMermaidAST viz_TreemapAST
+    vizGup <- liftEffect $ runMermaidAST viz_GUPAST
 
     H.modify_ _
       { test1_simpleAppend = test1
@@ -271,6 +280,7 @@ handleAction = case _ of
       , viz_bubbleChart = vizBubble
       , viz_icicle = vizIcicle
       , viz_treemap = vizTreemap
+      , viz_gup = vizGup
       }
 
     -- Trigger Mermaid rendering after diagrams are in the DOM
@@ -661,3 +671,35 @@ viz_TreemapAST = do
     ]
 
   pure tileLabels
+
+-- General Update Pattern (GUP)
+viz_GUPAST :: MermaidASTM NodeID
+viz_GUPAST = do
+  root <- D3.attach "div"
+  svg <- D3.appendTo root Svg [viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup"]
+  letterGroup <- D3.appendTo svg Group []
+
+  -- Simulate the updateJoin call (this is what gets called repeatedly)
+  enterSelection <- D3.openSelection letterGroup "text"
+  { enter, update, exit } <- D3.updateJoin enterSelection Text [1, 2, 3] unsafeCoerce
+
+  -- Set attributes on exit selection with transition
+  let transition = transitionWithDuration $ Milliseconds 2000.0
+  let exitAttrs = [classed "exit", fill "brown"] `andThen` (transition `to` [y 400.0, remove])
+  D3.setAttributes exit exitAttrs
+
+  -- Set attributes on update selection with transition
+  let updateAttrs = [classed "update", fill "gray", y 200.0] `andThen` (transition `to` [x 50.0])
+  D3.setAttributes update updateAttrs
+
+  -- Append new text elements to enter selection
+  newlyEntered <- D3.appendTo enter Text []
+  let enterAttrs = [ classed "enter"
+                    , fill "green"
+                    , x 50.0
+                    , y 0.0
+                    , fontSize 60.0
+                    ] `andThen` (transition `to` [y 200.0])
+  D3.setAttributes newlyEntered enterAttrs
+
+  pure newlyEntered
