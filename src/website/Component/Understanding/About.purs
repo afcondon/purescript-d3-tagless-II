@@ -97,28 +97,6 @@ render _ =
         [ -- Tab navigation
           HH.slot_ _tabs unit UnderstandingTabs.component UnderstandingPhilosophy
 
-        -- Page content
-        , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
-        [ HH.h1
-            [ HP.classes [ HH.ClassName "tutorial-title" ]
-            , HP.id "heading-0"
-            ]
-            [ HH.text "PS<$>D3" ]
-        , HH.h2
-            [ HP.id "heading-1" ]
-            [ HH.text "Interactive Data Visualization in PureScript" ]
-        , HH.p_
-            [ HH.text "A PureScript embedded "
-            , HH.em_ [ HH.text "DSL" ]
-            , HH.text " for building "
-            , HH.em_ [ HH.text "interactive data visualizations" ]
-            , HH.text ", using "
-            , HH.em_ [ HH.text "D3.js" ]
-            , HH.text " both as inspiration and as an implementation layer under the Foreign Function Interface (FFI)."
-            ]
-        ]
-
     -- What is This Project?
     , HH.section
         [ HP.classes [ HH.ClassName "tutorial-section" ] ]
@@ -128,7 +106,7 @@ render _ =
             ]
             [ HH.text "What is This Project?" ]
         , HH.p_
-            [ HH.text "This project demonstrates an embedded DSL for building interactive data visualizations with PureScript. The DSL uses a Finally Tagless approach that allows multiple interpreters for the same \"language\" which allows us to generate working code using an FFI to D3 or documentation and other more complex uses which will be discussed below." ]
+            [ HH.text "This project demonstrates an embedded DSL for building interactive data visualizations with PureScript. The DSL uses a Finally Tagless approach that allows multiple interpreters for the same \"language\" which allows us to generate working code using an FFI to D3 or documentation and other more complex uses which will be discussed below.            It takes a pragmatic approach to type-safety and side-effects by corralling side-effecting code thru accessor records. This allows it to present to the PureScript programmer as typed, while still leveraging everything possible from the D3 implementation behind the Foreign Function Interface."]
         ]
 
     -- Motivation
