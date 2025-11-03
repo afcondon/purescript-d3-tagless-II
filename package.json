@@ -13,6 +13,7 @@
     "copy-sources": "mkdir -p docs/sources && cp -r src/lib/PSD3 docs/sources/",
     "bundle": "spago bundle --module PSD3.Main --outfile docs/bundle.js",
     "docs:api": "spago docs --format html && node scripts/filter-api-docs.js",
+    "docs:api:commit": "npm run docs:api && git add docs/api/ && echo 'API docs regenerated. Commit when library API changes significantly.'",
     "docs:api:open": "spago docs --format html --open",
     "docs:api:local": "npm run docs:api && open docs/api/index.html",
     "graph-dot": "spago graph modules --dot",
