@@ -1,13 +1,16 @@
 module PSD3.Internal.Types where
 
+import Data.Int (toNumber)
 import Data.Time.Duration (Milliseconds)
-import Prelude (class Show)
+import Prelude (class Show, ($))
 import Unsafe.Coerce (unsafeCoerce)
 
 foreign import data Datum_ :: Type
 foreign import data Index_ :: Type
 index_ToInt :: Index_ -> Int
 index_ToInt = unsafeCoerce
+index_ToNumber :: Index_ -> Number
+index_ToNumber i = toNumber $ index_ToInt i
 intToIndex_ :: Int -> Index_
 intToIndex_ = unsafeCoerce
 
@@ -21,7 +24,7 @@ foreign import data D3DomNode_    :: Type
 type Selector :: forall k. k -> Type
 type Selector selection = String 
 
-data Element = Div | Svg | Circle | Line | Group | Text | Path | Rect | Title
+data Element = Div | Svg | Circle | Line | Group | Text | Path | Rect | Title | Span | Table | Tr | Td
 instance showElement :: Show Element where
   show Div    = "div"
   show Svg    = "svg"
@@ -32,6 +35,10 @@ instance showElement :: Show Element where
   show Path   = "path"
   show Rect   = "rect"
   show Title  = "title"
+  show Span   = "span"
+  show Table  = "table"
+  show Tr     = "tr"
+  show Td     = "td"
   
 -- TODO find a way to get units back in without making DSL hideous
 data UnitType = Px | Pt | Em | Rem | Percent

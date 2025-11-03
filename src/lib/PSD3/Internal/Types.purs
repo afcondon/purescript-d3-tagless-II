@@ -1,13 +1,16 @@
 module PSD3.Internal.Types where
 
+import Data.Int (toNumber)
 import Data.Time.Duration (Milliseconds)
-import Prelude (class Show)
+import Prelude (class Show, ($))
 import Unsafe.Coerce (unsafeCoerce)
 
 foreign import data Datum_ :: Type
 foreign import data Index_ :: Type
 index_ToInt :: Index_ -> Int
 index_ToInt = unsafeCoerce
+index_ToNumber :: Index_ -> Number
+index_ToNumber i = toNumber $ index_ToInt i
 intToIndex_ :: Int -> Index_
 intToIndex_ = unsafeCoerce
 

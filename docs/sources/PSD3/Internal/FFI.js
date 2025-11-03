@@ -3,6 +3,7 @@ export const emptyD3Data_ = null
 export function d3Append_(element) { return selection => { return selection.append(element) } }
 export function d3Data_(data) { return selection => { return selection.data(data) } }
 export function d3DataWithKeyFunction_(data) { return keyFn => selection => { return selection.data(data, keyFn) } }
+export function d3DataWithFunction_(extractFn) { return keyFn => selection => { return selection.data(extractFn, keyFn) } }
 export function d3EnterAndAppend_(element) { return selection => { return selection.enter().append(element) } }
 export function d3GetExitSelection_(selection) { return selection.exit() }
 export function d3GetEnterSelection_(selection) { return selection.enter() }
@@ -71,6 +72,681 @@ export function simdrag_(label, simulation) {
     .on('drag.' + label, dragged)
     .on('end.' + label, dragended);
 }
+
+// Drag that only allows horizontal movement (preserves fy)
+export function simdragHorizontal_(label, simulation) {
+  function dragstarted(event) {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    event.subject.fx = event.subject.x;
+    // Don't touch fy - keep it pinned
+  }
+  function dragged(event) {
+    event.subject.fx = event.x;
+    // Don't touch fy - keep it pinned
+  }
+  function dragended(event) {
+    if (!event.active) simulation.alphaTarget(0);
+    event.subject.fx = null;
+    // Don't touch fy - keep it pinned
+  }
+  return d3.drag()
+    .on('start.' + label, dragstarted)
+    .on('drag.' + label, dragged)
+    .on('end.' + label, dragended);
+}
+// Helper functions for highlighting connected nodes
+export function highlightConnectedNodes_(selection) {
+  return connectedIds => {
+    // Convert PureScript array to Set for fast lookup
+    const connectedSet = new Set(connectedIds);
+    selection.selectAll('.node-group')
+      .classed('highlighted', d => connectedSet.has(d.id))
+      .classed('dimmed', d => !connectedSet.has(d.id));
+  };
+}
+
+export function clearHighlights_(selection) {
+  selection.selectAll('.node-group')
+    .classed('highlighted', false)
+    .classed('dimmed', false);
+}
+
+// Unpin all nodes by setting fy to null
+export function unpinAllNodes_(simulation) {
+  simulation.nodes().forEach(node => {
+    node.fy = null;
+  });
+  // Reheat the simulation to see the effect
+  simulation.alpha(0.3).restart();
+}
+
+// Update bubble node radii based on expanded state and reheat simulation
+export function updateBubbleRadii_(simulation) {
+  return nodeRadiusFn => {
+    // Select all circles and update their radius
+    d3.selectAll('.bubble-graph .node-group circle.node-circle')
+      .attr('r', d => nodeRadiusFn(d.expanded)(d.loc))
+
+    // Reheat the simulation so collision forces update
+    simulation.alpha(0.3).restart()
+  }
+}
+
+// Color mapping for declaration kinds
+function declarationColor(kind) {
+  switch(kind) {
+    case 'value':         return '#2196F3'  // Blue - functions/values
+    case 'externValue':   return '#00BCD4'  // Cyan - foreign functions
+    case 'data':          return '#4CAF50'  // Green - data types
+    case 'typeClass':     return '#9C27B0'  // Purple - type classes
+    case 'typeSynonym':   return '#FF9800'  // Orange - type synonyms
+    case 'alias':         return '#FF9800'  // Orange - aliases
+    case 'externData':    return '#F44336'  // Red - foreign data
+    case 'typeClassInstance': return '#E91E63'  // Pink - instances
+    default:              return '#757575'  // Gray - unknown
+  }
+}
+
+// Highlight dependencies when hovering over a declaration
+function highlightDependencies(qualifiedName, functionCallsData, isHighlighted) {
+  if (!functionCallsData || !functionCallsData.functions) {
+    console.log('No function calls data available')
+    return
+  }
+
+  // Find the function in the call graph
+  const funcEntry = functionCallsData.functions.find(f => f.key === qualifiedName)
+
+  if (!funcEntry) {
+    console.log(`Function ${qualifiedName} not found in call graph`)
+    return
+  }
+
+  const funcInfo = funcEntry.value
+  const relatedNames = new Set()
+
+  // Add all functions this function calls (outbound)
+  if (funcInfo.calls) {
+    funcInfo.calls.forEach(call => {
+      const targetQualifiedName = `${call.targetModule}.${call.target}`
+      relatedNames.add(targetQualifiedName)
+    })
+  }
+
+  // Add all functions that call this function (inbound)
+  if (funcInfo.calledBy) {
+    funcInfo.calledBy.forEach(callerName => {
+      relatedNames.add(callerName)
+    })
+  }
+
+  console.log(`Highlighting ${relatedNames.size} related functions for ${qualifiedName}`)
+
+  // Highlight all related declaration circles
+  relatedNames.forEach(name => {
+    const selector = `.decl-circle[data-qualified-name="${name}"]`
+    d3.selectAll(selector)
+      .classed('dep-highlighted', true)
+      .attr('stroke', '#FFD700')  // Gold stroke
+      .attr('stroke-width', 3)
+      .raise()  // Bring to front
+  })
+
+  // Also highlight the hovered circle itself with a different style
+  const hoveredSelector = `.decl-circle[data-qualified-name="${qualifiedName}"]`
+  d3.selectAll(hoveredSelector)
+    .classed('dep-source', true)
+    .attr('stroke', '#FF4500')  // Orange-red stroke
+    .attr('stroke-width', 4)
+    .raise()
+}
+
+// Clear dependency highlights
+function clearDependencyHighlights() {
+  d3.selectAll('.decl-circle.dep-highlighted')
+    .classed('dep-highlighted', false)
+    .attr('stroke', '#fff')
+    .attr('stroke-width', 1)
+
+  d3.selectAll('.decl-circle.dep-source')
+    .classed('dep-source', false)
+    .attr('stroke', '#fff')
+    .attr('stroke-width', 1)
+}
+
+// Categorize declarations into groups
+function categorizeDeclarations(declarations) {
+  const categories = {
+    dataTypes: [],
+    instances: [],
+    functions: []
+  }
+
+  declarations.forEach(decl => {
+    switch(decl.kind) {
+      case 'data':
+      case 'typeSynonym':
+      case 'alias':
+      case 'externData':
+        categories.dataTypes.push(decl)
+        break
+      case 'typeClassInstance':
+        categories.instances.push(decl)
+        break
+      case 'value':
+      case 'typeClass':
+      default:
+        categories.functions.push(decl)
+        break
+    }
+  })
+
+  return categories
+}
+
+// Update node expansion state - show/hide declaration circles
+export function updateNodeExpansion_(simulation) {
+  return nodeRadiusFn => declarationsData => functionCallsData => clickedNodeData => {
+    const moduleName = clickedNodeData.name
+    const isExpanded = clickedNodeData.expanded
+
+    // Find the node group for this module
+    const nodeGroup = d3.selectAll('.bubble-graph .node-group')
+      .filter(d => d.id === moduleName)
+
+    if (isExpanded) {
+      // Find declarations for this module
+      const moduleDecls = declarationsData.modules.find(m => m.name === moduleName)
+      if (!moduleDecls || !moduleDecls.declarations || moduleDecls.declarations.length === 0) {
+        console.log(`No declarations found for ${moduleName}`)
+        return
+      }
+
+      const declarations = moduleDecls.declarations
+      console.log(`Expanding ${moduleName} with ${declarations.length} declarations`)
+
+      // Categorize declarations into groups
+      const categories = categorizeDeclarations(declarations)
+
+      // Create three-layer hierarchy: Module → Categories → Items
+      const categoryChildren = []
+
+      if (categories.dataTypes.length > 0) {
+        categoryChildren.push({
+          name: 'Data Types',
+          isCategory: true,
+          children: categories.dataTypes.map(d => ({
+            name: d.title,
+            kind: d.kind,
+            isCategory: false,
+            value: 1
+          }))
+        })
+      }
+
+      if (categories.instances.length > 0) {
+        categoryChildren.push({
+          name: 'Instances',
+          isCategory: true,
+          children: categories.instances.map(d => ({
+            name: d.title,
+            kind: d.kind,
+            isCategory: false,
+            value: 1
+          }))
+        })
+      }
+
+      if (categories.functions.length > 0) {
+        categoryChildren.push({
+          name: 'Functions',
+          isCategory: true,
+          children: categories.functions.map(d => ({
+            name: d.title,
+            kind: d.kind,
+            isCategory: false,
+            value: 1
+          }))
+        })
+      }
+
+      const hierarchyData = {
+        name: moduleName,
+        children: categoryChildren
+      }
+
+      const root = d3.hierarchy(hierarchyData)
+        .sum(d => d.value)
+
+      // Compute pack layout (size based on expanded radius)
+      const expandedRadius = nodeRadiusFn(true)(clickedNodeData.loc)
+      const packLayout = d3.pack()
+        .size([expandedRadius * 2, expandedRadius * 2])
+        .padding(3)  // More padding for labels
+
+      packLayout(root)
+
+      // Get leaf nodes (the declarations)
+      const leaves = root.leaves()
+
+      // Create a map from declaration name to position for link drawing
+      const declPositions = new Map()
+      leaves.forEach(leaf => {
+        declPositions.set(leaf.data.name, {
+          x: leaf.x - expandedRadius,
+          y: leaf.y - expandedRadius
+        })
+      })
+
+      // Find intra-module function calls
+      const intraModuleLinks = []
+      if (functionCallsData && functionCallsData.functions) {
+        functionCallsData.functions.forEach(fn => {
+          const funcInfo = fn.value
+          if (funcInfo.module === moduleName) {
+            funcInfo.calls.forEach(call => {
+              // Only show links within the same module
+              if (call.targetModule === moduleName && !call.isCrossModule) {
+                const sourceName = funcInfo.name
+                const targetName = call.target
+
+                const sourcePos = declPositions.get(sourceName)
+                const targetPos = declPositions.get(targetName)
+
+                if (sourcePos && targetPos && sourceName !== targetName) {
+                  intraModuleLinks.push({
+                    source: sourceName,
+                    target: targetName,
+                    sourcePos,
+                    targetPos
+                  })
+                }
+              }
+            })
+          }
+        })
+      }
+
+      console.log(`Found ${intraModuleLinks.length} intra-module links for ${moduleName}`)
+
+      // Add dependency arrows before circles (so they're behind)
+      const linksGroup = nodeGroup.selectAll('g.decl-links')
+        .data([0])  // Single element to create the group once
+        .enter()
+        .append('g')
+        .attr('class', 'decl-links')
+        .lower()  // Put links behind circles
+
+      const arrows = nodeGroup.select('g.decl-links')
+        .selectAll('path.decl-link')
+        .data(intraModuleLinks, d => `${d.source}-${d.target}`)
+
+      arrows.enter()
+        .append('path')
+        .attr('class', 'decl-link')
+        .attr('d', d => {
+          // Create a curved path from source to target
+          const dx = d.targetPos.x - d.sourcePos.x
+          const dy = d.targetPos.y - d.sourcePos.y
+          const dr = Math.sqrt(dx * dx + dy * dy) * 0.7  // Curve factor
+          return `M${d.sourcePos.x},${d.sourcePos.y}A${dr},${dr} 0 0,1 ${d.targetPos.x},${d.targetPos.y}`
+        })
+        .attr('stroke', '#666')
+        .attr('stroke-width', 1)
+        .attr('stroke-opacity', 0.4)
+        .attr('fill', 'none')
+
+      // Get ALL nodes (not just leaves) - this includes category bubbles
+      const allNodes = root.descendants().filter(d => d.depth > 0) // Skip root module node
+
+      // Add groups for both category bubbles and declaration circles
+      const nodeGroups = nodeGroup.selectAll('g.decl-group')
+        .data(allNodes, d => d.data.name)
+
+      const nodeGroupsEnter = nodeGroups.enter()
+        .append('g')
+        .attr('class', d => d.data.isCategory ? 'category-group' : 'decl-group')
+        .attr('transform', d => `translate(${d.x - expandedRadius}, ${d.y - expandedRadius})`)
+
+      // Add circles (styled differently for categories vs declarations)
+      const circles = nodeGroupsEnter.append('circle')
+        .attr('class', d => d.data.isCategory ? 'category-circle' : 'decl-circle')
+        .attr('r', d => d.r)
+        .attr('fill', d => {
+          // Category bubbles: neutral gray
+          // Declaration circles: colored by kind
+          return d.data.isCategory ? '#e0e0e0' : declarationColor(d.data.kind)
+        })
+        .attr('opacity', d => d.data.isCategory ? 0.3 : 0.8)  // Categories more transparent
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 1)
+
+      // Add data attribute with qualified name for declarations (module.name)
+      circles.filter(d => !d.data.isCategory)
+        .attr('data-qualified-name', d => `${moduleName}.${d.data.name}`)
+
+      // Add hover handlers to declaration circles
+      circles.filter(d => !d.data.isCategory)
+        .on('mouseenter', function(event, d) {
+          const qualifiedName = `${moduleName}.${d.data.name}`
+          highlightDependencies(qualifiedName, functionCallsData, true)
+        })
+        .on('mouseleave', function(event, d) {
+          clearDependencyHighlights()
+        })
+
+      circles.append('title')
+        .text(d => d.data.isCategory
+          ? d.data.name  // Category name only
+          : `${d.data.name} (${d.data.kind})`  // Declaration with kind
+        )
+
+      // Add text labels ONLY for declarations (not categories)
+      nodeGroupsEnter.filter(d => !d.data.isCategory)
+        .append('text')
+        .attr('class', 'decl-label')
+        .attr('text-anchor', 'middle')
+        .attr('dy', '0.35em')
+        .attr('font-size', d => Math.min(d.r / 3, 10) + 'px')  // Scale font with circle size
+        .attr('fill', '#fff')
+        .attr('pointer-events', 'none')
+        .text(d => {
+          // Truncate long names to fit in circle
+          const maxChars = Math.floor(d.r / 3)
+          return d.data.name.length > maxChars
+            ? d.data.name.substring(0, maxChars) + '...'
+            : d.data.name
+        })
+
+      // Add arrowhead marker definition (if not already defined)
+      if (!d3.select('defs marker#arrowhead').node()) {
+        d3.select('.bubble-graph').append('defs')
+          .append('marker')
+          .attr('id', 'arrowhead')
+          .attr('viewBox', '0 -5 10 10')
+          .attr('refX', 5)
+          .attr('refY', 0)
+          .attr('markerWidth', 6)
+          .attr('markerHeight', 6)
+          .attr('orient', 'auto')
+          .append('path')
+          .attr('d', 'M0,-5L10,0L0,5')
+          .attr('fill', '#666')
+      }
+
+    } else {
+      // Remove declaration groups and links
+      nodeGroup.selectAll('g.decl-group').remove()
+      nodeGroup.selectAll('g.decl-links').remove()
+    }
+
+    // Update main circle radius
+    nodeGroup.select('circle.node-circle')
+      .attr('r', nodeRadiusFn(isExpanded)(clickedNodeData.loc))
+
+    // Reheat simulation
+    simulation.alpha(0.3).restart()
+  }
+}
+
+// Unsafe helper to set a field on a JavaScript object
+export function unsafeSetField_(field) {
+  return value => obj => () => {
+    obj[field] = value
+  }
+}
+
+// Expand a node by its ID (used for expanding connected nodes)
+export function expandNodeById_(simulation) {
+  return nodeRadiusFn => declarationsData => functionCallsData => nodeId => shouldExpand => () => {
+    // Find the node in the simulation
+    const nodes = simulation.nodes()
+    const node = nodes.find(n => n.id === nodeId)
+
+    if (!node) {
+      console.log(`Node ${nodeId} not found in simulation`)
+      return
+    }
+
+    // Only toggle if the current state is different from desired state
+    if (node.expanded !== shouldExpand) {
+      node.expanded = shouldExpand
+      console.log(`${nodeId} ${shouldExpand ? 'expanded' : 'collapsed'} via expandNodeById`)
+
+      // Call the expansion update
+      updateNodeExpansion_(simulation)(nodeRadiusFn)(declarationsData)(functionCallsData)(node)
+    }
+  }
+}
+
+// Add arrow marker definition for module-level links
+export function addModuleArrowMarker_(svgSelection) {
+  return () => {
+    // Check if marker already exists
+    // Note: svgSelection is already a D3 selection, don't wrap it again
+    if (!svgSelection.select('defs marker#module-arrow').node()) {
+      svgSelection.append('defs')
+        .append('marker')
+        .attr('id', 'module-arrow')
+        .attr('viewBox', '0 -5 10 10')
+        .attr('refX', 15)
+        .attr('refY', 0)
+        .attr('markerWidth', 6)
+        .attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M0,-5L10,0L0,5')
+        .attr('fill', '#999')
+    }
+  }
+}
+
+// Draw inter-module declaration links between expanded modules
+export function drawInterModuleDeclarationLinks_(zoomGroupSelection) {
+  return nodeRadiusFn => declarationsData => functionCallsData => () => {
+    // Find all expanded module nodes
+    const expandedModules = []
+    d3.selectAll('.bubble-graph .node-group').each(function(d) {
+      if (d && d.expanded) {
+        const moduleDecls = declarationsData.modules.find(m => m.name === d.name)
+        if (moduleDecls && moduleDecls.declarations) {
+          const expandedRadius = nodeRadiusFn(true)(d.loc)
+
+          // Build declaration position map for this module (using same three-layer structure)
+          const categories = categorizeDeclarations(moduleDecls.declarations)
+          const categoryChildren = []
+
+          if (categories.dataTypes.length > 0) {
+            categoryChildren.push({
+              name: 'Data Types',
+              isCategory: true,
+              children: categories.dataTypes.map(decl => ({
+                name: decl.title,
+                kind: decl.kind,
+                isCategory: false,
+                value: 1
+              }))
+            })
+          }
+
+          if (categories.instances.length > 0) {
+            categoryChildren.push({
+              name: 'Instances',
+              isCategory: true,
+              children: categories.instances.map(decl => ({
+                name: decl.title,
+                kind: decl.kind,
+                isCategory: false,
+                value: 1
+              }))
+            })
+          }
+
+          if (categories.functions.length > 0) {
+            categoryChildren.push({
+              name: 'Functions',
+              isCategory: true,
+              children: categories.functions.map(decl => ({
+                name: decl.title,
+                kind: decl.kind,
+                isCategory: false,
+                value: 1
+              }))
+            })
+          }
+
+          const hierarchyData = {
+            name: d.name,
+            children: categoryChildren
+          }
+
+          const root = d3.hierarchy(hierarchyData).sum(node => node.value)
+          const packLayout = d3.pack()
+            .size([expandedRadius * 2, expandedRadius * 2])
+            .padding(3)
+          packLayout(root)
+
+          const declPositions = new Map()
+          root.leaves().forEach(leaf => {
+            declPositions.set(leaf.data.name, {
+              x: leaf.x - expandedRadius,
+              y: leaf.y - expandedRadius
+            })
+          })
+
+          expandedModules.push({
+            moduleName: d.name,
+            moduleX: d.x,
+            moduleY: d.y,
+            declPositions
+          })
+        }
+      }
+    })
+
+    console.log(`Found ${expandedModules.length} expanded modules`)
+
+    // Find all cross-module links between expanded modules
+    const interModuleLinks = []
+    if (functionCallsData && functionCallsData.functions) {
+      functionCallsData.functions.forEach(fn => {
+        const funcInfo = fn.value
+        const sourceModule = expandedModules.find(m => m.moduleName === funcInfo.module)
+
+        if (sourceModule) {
+          funcInfo.calls.forEach(call => {
+            if (call.isCrossModule) {
+              const targetModule = expandedModules.find(m => m.moduleName === call.targetModule)
+
+              if (targetModule) {
+                const sourcePos = sourceModule.declPositions.get(funcInfo.name)
+                const targetPos = targetModule.declPositions.get(call.target)
+
+                if (sourcePos && targetPos) {
+                  interModuleLinks.push({
+                    sourceModule: funcInfo.module,
+                    targetModule: call.targetModule,
+                    source: funcInfo.name,
+                    target: call.target,
+                    sourceX: sourceModule.moduleX + sourcePos.x,
+                    sourceY: sourceModule.moduleY + sourcePos.y,
+                    targetX: targetModule.moduleX + targetPos.x,
+                    targetY: targetModule.moduleY + targetPos.y
+                  })
+                }
+              }
+            }
+          })
+        }
+      })
+    }
+
+    console.log(`Found ${interModuleLinks.length} inter-module declaration links`)
+
+    // Create or update inter-module links group
+    // Note: zoomGroupSelection is already a D3 selection, don't wrap it again
+    let linksGroup = zoomGroupSelection.select('g.inter-module-decl-links')
+    if (linksGroup.empty()) {
+      linksGroup = zoomGroupSelection
+        .insert('g', 'g.link')  // Insert before module-level links
+        .attr('class', 'inter-module-decl-links')
+    }
+
+    // Bind data and update links
+    const paths = linksGroup.selectAll('path.inter-decl-link')
+      .data(interModuleLinks, d => `${d.sourceModule}:${d.source}-${d.targetModule}:${d.target}`)
+
+    // Remove old links
+    paths.exit().remove()
+
+    // Add new links
+    paths.enter()
+      .append('path')
+      .attr('class', 'inter-decl-link')
+      .attr('stroke', '#e91e63')  // Pink color to distinguish from module links
+      .attr('stroke-width', 2)
+      .attr('stroke-opacity', 0.6)
+      .attr('fill', 'none')
+      .merge(paths)
+      .attr('d', d => {
+        const dx = d.targetX - d.sourceX
+        const dy = d.targetY - d.sourceY
+        const dr = Math.sqrt(dx * dx + dy * dy) * 0.5
+        return `M${d.sourceX},${d.sourceY}A${dr},${dr} 0 0,1 ${d.targetX},${d.targetY}`
+      })
+  }
+}
+
+// Filter simulation to only keep nodes with IDs in the provided set
+// Also updates the DOM by removing filtered-out nodes and links
+export function filterToConnectedNodes_(simulation) {
+  return keyFn => nodeIds => {
+    // Get current nodes and links
+    const allNodes = simulation.nodes();
+    const linkForce = simulation.force(linksForceName_);
+    const allLinks = linkForce ? linkForce.links() : [];
+
+    // Create a Set for faster lookup
+    const idSet = new Set(nodeIds);
+
+    // Filter nodes - keep only those with IDs in the set
+    const filteredNodes = allNodes.filter(node => idSet.has(keyFn(node)));
+
+    // Filter links - keep only those where both source and target are in the set
+    const filteredLinks = allLinks.filter(link => {
+      const sourceId = typeof link.source === 'object' ? keyFn(link.source) : link.source;
+      const targetId = typeof link.target === 'object' ? keyFn(link.target) : link.target;
+      return idSet.has(sourceId) && idSet.has(targetId);
+    });
+
+    // Update simulation with filtered data
+    simulation.nodes(filteredNodes);
+    if (linkForce) {
+      linkForce.links(filteredLinks);
+    }
+
+    // Update DOM - remove nodes that aren't in the filtered set
+    // Find all node groups and filter them
+    d3.select('div.svg-container')
+      .selectAll('g.node g.node-group')
+      .filter(d => !idSet.has(keyFn(d)))
+      .remove();
+
+    // Update DOM - remove links that aren't in the filtered set
+    d3.select('div.svg-container')
+      .selectAll('g.link line')
+      .filter(d => {
+        const sourceId = typeof d.source === 'object' ? keyFn(d.source) : d.source;
+        const targetId = typeof d.target === 'object' ? keyFn(d.target) : d.target;
+        return !idSet.has(sourceId) || !idSet.has(targetId);
+      })
+      .remove();
+
+    // Reheat and restart
+    simulation.alpha(0.5).restart();
+  };
+}
+
 export const linksForceName_ = "links"
 export const dummyForceHandle_ = null
 export function disableTick_(simulation) { return name => { return simulation.on('tick.' + name, () => null) } }
@@ -116,8 +792,10 @@ export function setForceY_(force) { return attr => force.y(attr) }
 export function setLinksKeyFunction_(force) { return attr => force.id(attr) }
 export function setVelocityDecay_(simulation) { return velocityDecay => simulation.velocityDecay(velocityDecay) }
 export function startSimulation_(simulation) {
-  console.log(`FFI: restarting the simulation, alpha is: ${simulation.alpha()}`);
-  simulation.restart()
+  console.log(`FFI: restarting the simulation, alpha before: ${simulation.alpha()}`);
+  // IMPORTANT: restart() alone doesn't reset alpha - we need to set it to 1.0 first
+  simulation.alpha(1.0).restart();
+  console.log(`FFI: restarted simulation, alpha after: ${simulation.alpha()}`);
 }
 export function stopSimulation_(simulation) { return simulation.stop() }
 export function initSimulation_(config) {
@@ -159,15 +837,10 @@ export function readSimulationVariables_(simulation) {
     velocityDecay: simulation.velocityDecay()
   }
 }
-unpin = d => {
-  d.fx = null
-  d.fy = null
-  return d;
-}
 // we create an object that contains only those fields that we want to override what was in the existing selection's data
 // concretely, if we want update to change fx/fy status then we put that data in here otherwise it will be unchanged
 // no matter what the incoming data object has for fx/fy
-getBaseForAssign = (newNodeMap, key) => {
+export const getBaseForAssign = (newNodeMap, key) => {
   let newnode = newNodeMap.get(key)
   if (newnode) {
     var updatedCount;
@@ -227,8 +900,34 @@ export function getIDsFromNodes_(nodes) {
 export function setNodes_(simulation) {
   return nodes => {
     console.log(`FFI: setting nodes in simulation, there are ${nodes.length} nodes`);
-    simulation.nodes(nodes)
-    return simulation.nodes()
+
+    // Get old nodes from simulation to preserve their positions
+    const oldNodes = simulation.nodes();
+
+    // Create map of old nodes by ID for O(1) lookup
+    const oldNodeMap = new Map(oldNodes.map(d => [d.id, d]));
+
+    // Merge positions from old nodes into new nodes
+    const nodesWithPositions = nodes.map(newNode => {
+      const oldNode = oldNodeMap.get(newNode.id);
+      if (oldNode) {
+        // Preserve simulation state (position, velocity) from old node
+        // But keep any explicitly set fx/fy from new node (for pinning)
+        return Object.assign({}, newNode, {
+          x: oldNode.x,
+          y: oldNode.y,
+          vx: oldNode.vx,
+          vy: oldNode.vy,
+          // Only override fx/fy if new node has them explicitly set
+          fx: newNode.fx !== undefined ? newNode.fx : oldNode.fx,
+          fy: newNode.fy !== undefined ? newNode.fy : oldNode.fy
+        });
+      }
+      return newNode; // New node, no position to preserve
+    });
+
+    simulation.nodes(nodesWithPositions);
+    return simulation.nodes();
   }
 }
 // we're going to always use the same name for the links force denominated by the linksForceName string
@@ -270,9 +969,10 @@ export function swizzleLinks_(links) {
   }
 }
 export function unsetLinks_(simulation) {
-  const linkForce = d3.forceLink([])
-  console.log('FFI: removing all links from simulation');
-  simulation.force(linksForceName_, linkForce)
+  // Set link force to null - this is now only called when links shouldn't be displayed at all
+  // Scenes that need links displayed should keep the link force in their activeForces
+  simulation.force(linksForceName_, null)
+  console.log('FFI: disabled link force (set to null)');
   return simulation
 }
 // this will work on both swizzled and unswizzled links
@@ -451,6 +1151,7 @@ export function getHierarchyValue_(d) { return (d.value === 'undefined') ? null 
 export function getHierarchyChildren_(d) { return !d.children ? [] : d.children }
 export function getHierarchyParent_(d) { return !d.parent ? [] : d.parent } // don't think this can ever be null in valid hierarchy node but this gives us confidence that PureScript type is right 
 export function hierarchyFromJSON_(json) { return d3.hierarchy(json) }
+export function cloneTreeJson_(json) { return structuredClone(json) }
 export function hNodeDepth_(node) { return node.depth }
 export function hNodeHeight_(node) { return node.height }
 export function hNodeX_(node) { return node.x }
@@ -648,5 +1349,111 @@ export function showAttachZoomDefaultExtent_(selection) { return config => { ret
 export function showAttachZoom_(selection) {
   return config => {
     return `\t${selection}.call(zoom ${config})`
+  }
+}
+
+// ==================== Details Panel Helpers ====================
+
+export function showDetailsPanel_(selection) {
+  return () => {
+    console.log('showDetailsPanel_ called', selection, selection.node())
+    selection.classed('hidden', false)
+    console.log('Panel should now be visible, class:', selection.attr('class'))
+  }
+}
+
+export function hideDetailsPanel_(selection) {
+  return () => {
+    console.log('hideDetailsPanel_ called')
+    selection.classed('hidden', true)
+  }
+}
+
+export function setDetailsModuleName_(selection) {
+  return moduleName => () => {
+    console.log('setDetailsModuleName_ called', moduleName)
+    selection.html(`<h3>${moduleName}</h3>`)
+  }
+}
+
+export function populateDetailsList_(selection) {
+  return items => () => {
+    console.log('populateDetailsList_ called', selection.attr('class'), items)
+    // Clear existing content
+    selection.html('')
+
+    // Add section title based on class
+    const classList = selection.attr('class')
+    let title = ''
+    if (classList.includes('dependencies-list')) {
+      title = 'Dependencies:'
+    } else if (classList.includes('depended-on-by-list')) {
+      title = 'Depended On By:'
+    }
+
+    if (title) {
+      selection.append('h4').text(title)
+    }
+
+    // Add list container
+    const ul = selection.append('ul')
+
+    // Add list items
+    if (items.length === 0) {
+      ul.append('li').text('(none)').classed('empty-item', true)
+    } else {
+      items.forEach(item => {
+        ul.append('li').text(item)
+      })
+    }
+  }
+}
+
+export function showModuleLabels_(nodesGroup) {
+  return () => {
+    console.log('showModuleLabels_ called')
+    const labels = nodesGroup.selectAll('.node-label')
+    console.log('Found labels:', labels.size())
+    labels.attr('fill', '#555')
+    // Update y position for each label based on its node's radius
+    labels.each(function(d) {
+      const expanded = d.expanded || false
+      const loc = d.loc || 100
+      const baseRadius = (Math.sqrt(loc)) * 0.15 + 2.0  // Match PureScript formula
+      const radius = expanded ? baseRadius * 4.0 : baseRadius
+      console.log('Setting label y for', d.name, 'to', -radius)
+      d3.select(this).attr('y', -radius)
+    })
+    console.log('showModuleLabels_ done')
+  }
+}
+
+export function switchToSpotlightForces_(simulation) {
+  return () => {
+    console.log('Switching to spotlight forces')
+
+    // Get the spotlight forces (they were registered but not active)
+    const spotlightCollision = simulation.force('collision-spotlight')
+    const spotlightManyBody = simulation.force('manyBody-spotlight')
+
+    console.log('spotlight collision force:', spotlightCollision)
+    console.log('spotlight manyBody force:', spotlightManyBody)
+
+    // Remove compact forces
+    simulation.force('collision-compact', null)
+    simulation.force('manyBody-compact', null)
+
+    // The spotlight forces should already be there, but let's make sure they're active
+    // by re-registering them (this is safe - if they're already there, it just updates)
+    if (spotlightCollision) {
+      simulation.force('collision-spotlight', spotlightCollision)
+    }
+    if (spotlightManyBody) {
+      simulation.force('manyBody-spotlight', spotlightManyBody)
+    }
+
+    // Restart the simulation to apply the new forces
+    simulation.alpha(0.3).restart()
+    console.log('Switched to spotlight forces, restarted simulation')
   }
 }

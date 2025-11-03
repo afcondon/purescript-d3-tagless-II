@@ -7,15 +7,14 @@ module D3.Viz.ThreeLittleCirclesTransition where
 
 import Prelude
 
-import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, radius, to, transitionWithDuration, viewBox)
-import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector)
-import PSD3.Internal.FFI (keyIsID_)
-import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
-import D3.Viz.ThreeLittleCircles.Unsafe (coerceDatumToInt, coerceIndex)
-import Data.Int (toNumber)
+import D3.Viz.ThreeLittleCircles.Unsafe (coerceDatumToInt)
+import Data.Time.Duration (Milliseconds(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Console (log)
-import Data.Time.Duration (Milliseconds(..))
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
+import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, fillOpacity, radius, to, transitionWithDuration, viewBox)
+import PSD3.Internal.FFI (keyIsID_)
+import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, Selector, index_ToNumber)
 
 -- | Draw three circles with initial green color and add transition button
 drawThreeCirclesTransition :: forall m. MonadEffect m => SelectionM D3Selection_ m => Selector D3Selection_ -> m { circles :: D3Selection_, svg :: D3Selection_ }
@@ -31,7 +30,7 @@ drawThreeCirclesTransition selector = do
   liftEffect $ log "=== Join complete, setting attributes ==="
   setAttributes circles
     [ fill "orange"  -- Changed to orange to make entering circles visible
-    , cx (\(d :: Datum_) i -> (toNumber (coerceIndex i)) * 30.0 + 20.0)
+    , cx (\(d :: Datum_) i -> (index_ToNumber i) * 30.0 + 20.0)
     , cy 30.0
     , radius 15.0
     , fillOpacity 1.0

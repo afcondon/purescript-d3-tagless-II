@@ -1,6 +1,6 @@
 module D3.Viz.ThreeLittleDimensions.Unsafe where
 
-import PSD3.Internal.Types (Datum_, Index_)
+import PSD3.Internal.Types (Datum_)
 import Data.Set (Set)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -22,7 +22,3 @@ coerceDatumToSet = unsafeCoerce
 -- | Coerce Datum_ to String (for text content)
 coerceDatumToString :: Datum_ -> String
 coerceDatumToString = unsafeCoerce
-
--- | Coerce Index_ to Int (always provided by D3)
-coerceIndex :: Index_ -> Int
-coerceIndex = unsafeCoerce

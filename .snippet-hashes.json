@@ -8,5 +8,8 @@
   "TLCParabola": "1335306a",
   "BarChartDraw": "c9d6d713",
   "LineChartDraw": "8d389051",
-  "ScatterPlotQuartet": "d8be773a"
+  "ScatterPlotQuartet": "d8be773a",
+  "parabolaDatum": "f078689e",
+  "parabolaUnsafe": "e50fbd78",
+  "parabolaDraw": "a2f2988d"
 }

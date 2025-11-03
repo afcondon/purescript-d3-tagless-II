@@ -6,11 +6,9 @@ module D3.Viz.ThreeLittleCircles where
 
 import PSD3.Internal.Attributes.Sugar
 
-import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Selector)
-import PSD3.Internal.FFI (keyIsID_)
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, setAttributes, simpleJoin)
-import D3.Viz.ThreeLittleCircles.Unsafe (coerceIndex)
-import Data.Int (toNumber)
+import PSD3.Internal.FFI (keyIsID_)
+import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Selector, index_ToNumber)
 import Prelude (bind, discard, negate, pure, (*), (+))
 
 -- | Pretty much the most basic example imaginable, three ints represented by three circles
@@ -21,7 +19,7 @@ drawThreeCircles selector = do
   circleGroup <- appendTo svg  Group []
   circles     <- simpleJoin circleGroup Circle [32, 57, 293] keyIsID_ 
   setAttributes circles [ fill "green"
-                        , cx (\(d :: Datum_) i -> (toNumber (coerceIndex i)) * 30.0 + 10.0)
+                        , cx (\(d :: Datum_) i -> (index_ToNumber i) * 30.0 + 10.0)
                         , cy 50.0
                         , radius 10.0 ]
 

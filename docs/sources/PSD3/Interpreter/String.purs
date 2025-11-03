@@ -80,6 +80,12 @@ instance d3Tagless :: SelectionM String D3PrinterM where
     modify_ (\s -> s <> "\n\nconst /* TODO: varName */ = " <> joinCode <> ";")
     pure joinCode
 
+  nestedJoin selection e extractChildren k = do
+    let dataCode = selection <> "\n  .data(d => extractChildren(d))"  -- Shows nested data function
+        joinCode = dataCode <> "\n  .join(" <> show e <> ")"
+    modify_ (\s -> s <> "\n\nconst /* TODO: varName */ = " <> joinCode <> ";")
+    pure joinCode
+
   updateJoin selection e ds k = do
     let dataCode = showData_ ds selection
         enterCode = dataCode <> "\n  .enter().append(" <> show e <> ")"

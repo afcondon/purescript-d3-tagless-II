@@ -15,6 +15,15 @@ type SnippetInfo =
 
 -- ** Snippet Content Constants **
 
+snippet_parabolaDatum_content :: String
+snippet_parabolaDatum_content = "type Model = Array Int  -- not strictly necessary in such a simple example, of course\n\ndatum_ ::\n  { color :: Datum_ -> String\n  , x :: Datum_ -> Index_ -> Number\n  , y :: Datum_ -> Number\n  }\ndatum_ =\n  { x:     \\_ i -> (index_ToNumber i) * 20.0\n  , y:     \\d   -> 100.0 - (toNumber $ coerceDatumToInt d) / 5.0\n  , color: \\d   -> d3SchemePairedN_ ((toNumber $ coerceDatumToInt d) / 100.0)\n  }"
+
+snippet_parabolaDraw_content :: String
+snippet_parabolaDraw_content = "drawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_\ndrawWithData circleData selector = do\n  root        <- attach selector\n  svg         <- appendTo root Svg [ viewBox (-10.0) (-100.0) 320.0 160.0, classed \"d3svg gup\" ]\n  circleGroup <- appendTo svg  Group []\n\n  circles     <- simpleJoin circleGroup Circle circleData keyIsID_ \n  setAttributes circles [ strokeColor datum_.color\n                        , strokeWidth 3.0\n                        , fill \"none\"\n                        , cx datum_.x\n                        , cy datum_.y\n                        , radius 10.0 ]"
+
+snippet_parabolaUnsafe_content :: String
+snippet_parabolaUnsafe_content = "module D3.Viz.Parabola.Unsafe where\n\nimport PSD3.Internal.Types (Datum_)\nimport Unsafe.Coerce (unsafeCoerce)\n\n-- This is safe in the context of the SelectionM monad because D3's data join ensures Datum_ contains\n-- the same data type we originally passed to simpleJoin\ncoerceDatumToInt :: Datum_ -> Int\ncoerceDatumToInt = unsafeCoerce"
+
 snippet_selectionMClass_content :: String
 snippet_selectionMClass_content = "class (Monad m) <= SelectionM selection m where\n  appendTo        :: selection -> Element -> Array (SelectionAttribute) -> m selection\n\n  selectUnder     :: selection -> Selector selection -> m selection\n\n  attach          :: Selector selection -> m selection\n\n  filterSelection :: selection -> Selector selection -> m selection\n\n  mergeSelections :: selection -> selection -> m selection\n\n  setAttributes   :: selection -> Array (SelectionAttribute) -> m Unit\n\n  on              :: selection -> Behavior selection -> m Unit\n\n  openSelection   :: selection -> Selector selection -> m selection\n\n  simpleJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_) -> m selection\n\n  nestedJoin      :: ∀ f datum. Foldable f =>\n                     selection -> Element -> (Datum_ -> f datum) -> (Datum_ -> Index_) -> m selection\n\n  updateJoin      :: ∀ datum.  selection -> Element -> (Array datum) -> (Datum_ -> Index_)\n    -> m { enter :: selection, exit :: selection, update :: selection }"
 
@@ -24,7 +33,22 @@ snippet_simulationM2Class_content = "class (Monad m, SimulationM selection m) <=
 -- | All available snippets
 snippets :: Array SnippetInfo
 snippets =
-  [ { name: "selectionMClass"
+  [ { name: "parabolaDatum"
+    , content: snippet_parabolaDatum_content
+    , source: "src/website/viz/Parabola/Parabola.purs"
+    , lines: "15-27"
+    }
+  , { name: "parabolaDraw"
+    , content: snippet_parabolaDraw_content
+    , source: "src/website/viz/Parabola/Parabola.purs"
+    , lines: "32-44"
+    }
+  , { name: "parabolaUnsafe"
+    , content: snippet_parabolaUnsafe_content
+    , source: "src/website/viz/Parabola/Unsafe.purs"
+    , lines: "1-10"
+    }
+  , { name: "selectionMClass"
     , content: snippet_selectionMClass_content
     , source: "src/lib/PSD3/Capabilities/Selection.purs"
     , lines: "85-258"
@@ -39,6 +63,9 @@ snippets =
 -- | Look up a snippet by name
 getSnippet :: String -> String
 getSnippet name = case name of
+  "parabolaDatum" -> snippet_parabolaDatum_content
+  "parabolaDraw" -> snippet_parabolaDraw_content
+  "parabolaUnsafe" -> snippet_parabolaUnsafe_content
   "selectionMClass" -> snippet_selectionMClass_content
   "simulationM2Class" -> snippet_simulationM2Class_content
   _ -> "Snippet not found: " <> name
@@ -46,6 +73,24 @@ getSnippet name = case name of
 -- | Get snippet info by name
 getSnippetInfo :: String -> SnippetInfo
 getSnippetInfo name = case name of
+  "parabolaDatum" ->
+    { name: "parabolaDatum"
+    , content: snippet_parabolaDatum_content
+    , source: "src/website/viz/Parabola/Parabola.purs"
+    , lines: "15-27"
+    }
+  "parabolaDraw" ->
+    { name: "parabolaDraw"
+    , content: snippet_parabolaDraw_content
+    , source: "src/website/viz/Parabola/Parabola.purs"
+    , lines: "32-44"
+    }
+  "parabolaUnsafe" ->
+    { name: "parabolaUnsafe"
+    , content: snippet_parabolaUnsafe_content
+    , source: "src/website/viz/Parabola/Unsafe.purs"
+    , lines: "1-10"
+    }
   "selectionMClass" ->
     { name: "selectionMClass"
     , content: snippet_selectionMClass_content

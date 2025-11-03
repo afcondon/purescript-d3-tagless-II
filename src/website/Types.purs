@@ -87,9 +87,17 @@ data Route
   | Reference       -- Reference: API documentation index
   | ReferenceModule String  -- Reference: individual module page (e.g., "PSD3.Types")
   | About           -- Legacy route, redirects to UnderstandingPhilosophy
-  | UnderstandingConcepts    -- Understanding: core concepts (Finally Tagless, SelectionM, etc.)
-  | UnderstandingPatterns    -- Understanding: practical patterns (datum_, data joins, etc.)
-  | UnderstandingPhilosophy  -- Understanding: design philosophy
+  | UnderstandingIndex       -- Understanding: index page with card grid
+  | UnderstandingFinallyTagless   -- Understanding: Finally Tagless pattern
+  | UnderstandingSelectionM       -- Understanding: SelectionM Monad
+  | UnderstandingCapabilities     -- Understanding: Capabilities & Interpreters
+  | UnderstandingTypeSystem       -- Understanding: Type-Safe Attribute System
+  | UnderstandingDatumPattern     -- Understanding: datum_/Datum_ Pattern
+  | UnderstandingGrammar          -- Understanding: Grammar of D3 in SelectionM
+  | UnderstandingPhilosophy       -- Understanding: design philosophy
+  -- Legacy routes (redirect to new structure)
+  | UnderstandingConcepts    -- Redirects to UnderstandingIndex
+  | UnderstandingPatterns    -- Redirects to UnderstandingIndex
   | SimpleCharts1
   | SimpleCharts2
   | DataFlowViz
@@ -117,6 +125,13 @@ instance showRoute :: Show Route where
   show Reference = "API Reference"
   show (ReferenceModule moduleName) = "Module: " <> moduleName
   show About = "About"
+  show UnderstandingIndex = "Understanding"
+  show UnderstandingFinallyTagless = "Understanding: Finally Tagless"
+  show UnderstandingSelectionM = "Understanding: SelectionM"
+  show UnderstandingCapabilities = "Understanding: Capabilities"
+  show UnderstandingTypeSystem = "Understanding: Type System"
+  show UnderstandingDatumPattern = "Understanding: Datum Pattern"
+  show UnderstandingGrammar = "Understanding: Grammar"
   show UnderstandingConcepts = "Understanding: Concepts"
   show UnderstandingPatterns = "Understanding: Patterns"
   show UnderstandingPhilosophy = "Understanding: Philosophy"

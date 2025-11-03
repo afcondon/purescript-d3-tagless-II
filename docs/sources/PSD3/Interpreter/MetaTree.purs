@@ -217,6 +217,10 @@ instance d3Tagless :: SelectionM NodeID D3MetaTreeM where
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e k)
     pure id
+  nestedJoin nodeID e extractChildren k = do
+    (ScriptTree id _ _) <- get
+    insertInScriptTree nodeID (JoinSimpleWithKeyFunctionNode e k)  -- Same as simpleJoin for now
+    pure id
   updateJoin nodeID e ds k          = do
     (ScriptTree id _ _) <- get
     insertInScriptTree nodeID (UpdateJoinNode e)

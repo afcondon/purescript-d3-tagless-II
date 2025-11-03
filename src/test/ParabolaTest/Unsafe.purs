@@ -1,6 +1,6 @@
 module ParabolaTest.Unsafe where
 
-import PSD3.Internal.Types (Datum_, Index_)
+import PSD3.Internal.Types (Datum_)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | Data type for this visualization
@@ -14,7 +14,3 @@ type ParabolaTestData =
 -- the data we originally passed to simpleJoin/updateJoin
 coerceToParabolaTestData :: Datum_ -> ParabolaTestData
 coerceToParabolaTestData = unsafeCoerce
-
--- | Coerce Index_ to Int (always provided by D3)
-coerceIndex :: Index_ -> Int
-coerceIndex = unsafeCoerce

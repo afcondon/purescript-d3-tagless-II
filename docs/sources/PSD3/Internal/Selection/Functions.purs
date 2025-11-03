@@ -1,13 +1,15 @@
 module PSD3.Internal.Selection.Functions where
 
 import PSD3.Internal.Types (D3Selection_, Datum_, Element, Index_, Selector)
-import PSD3.Internal.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3DataWithKeyFunction_, d3EnterAndAppend_, d3FilterSelection_, d3GetEnterSelection_, d3GetExitSelection_, d3MergeSelectionWith_, d3SelectAllInDOM_, d3SelectionSelectAll_)
+import PSD3.Internal.FFI (d3Append_, d3AttachZoomDefaultExtent_, d3AttachZoom_, d3DataWithFunction_, d3DataWithKeyFunction_, d3EnterAndAppend_, d3FilterSelection_, d3GetEnterSelection_, d3GetExitSelection_, d3MergeSelectionWith_, d3SelectAllInDOM_, d3SelectionSelectAll_)
 import PSD3.Internal.Selection.Types (Behavior(..), SelectionAttribute, applySelectionAttributeD3)
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM)
-import Data.Foldable (foldl)
+import Data.Array (fromFoldable)
+import Data.Foldable (class Foldable, foldl)
 import Debug (spy)
-import Prelude (Unit, discard, pure, show, unit, ($))
+import Prelude (Unit, discard, pure, show, unit, ($), (>>>))
+import Unsafe.Coerce (unsafeCoerce)
 
 
 selectionAttach :: forall m. (SelectionM D3Selection_ m) => Selector D3Selection_ -> m D3Selection_
@@ -32,11 +34,23 @@ selectionModifySelection selection_ attributes = do
 
 selectionJoin   :: forall datum m. (SelectionM D3Selection_ m) => D3Selection_ -> Element -> (Array datum) -> (Datum_ -> Index_) -> m D3Selection_
 selectionJoin selection e theData keyFn = do
-  let 
+  let
     element         = spy "Join: " $ show e
     selectS         = d3SelectionSelectAll_ element selection
-    dataSelection   = d3DataWithKeyFunction_ theData keyFn selectS 
+    dataSelection   = d3DataWithKeyFunction_ theData keyFn selectS
     enterSelection  = d3EnterAndAppend_ element dataSelection
+  pure enterSelection
+
+selectionNestedJoin :: forall f datum m. Foldable f => (SelectionM D3Selection_ m) =>
+  D3Selection_ -> Element -> (Datum_ -> f datum) -> (Datum_ -> Index_) -> m D3Selection_
+selectionNestedJoin selection e extractChildren keyFn = do
+  let
+    element = spy "NestedJoin: " $ show e
+    selectS = d3SelectionSelectAll_ element selection
+    -- Convert Foldable to Array and coerce datum to Datum_ for D3
+    extractFn = extractChildren >>> fromFoldable >>> unsafeCoerce
+    dataSelection = d3DataWithFunction_ extractFn keyFn selectS
+    enterSelection = d3EnterAndAppend_ element dataSelection
   pure enterSelection
 
 selectionUpdateJoin   :: forall datum m.
@@ -72,23 +86,24 @@ selectionOn selection (Drag drag) = do
   pure unit
 
 selectionOn selection (Zoom config) = do
-  let 
+  let
     (ScaleExtent smallest largest) = config.scale
-    target = selection
-    -- TODO recover the ability to "direct" the zoom to element other than the one receiving the event
-    -- ie for controllers, containers etc
+    -- Use the target from config to "direct" the zoom to a specific element
+    -- This allows zoom to be attached to one element (e.g., svg) while transforms
+    -- are applied to a different element (e.g., inner group)
+    target = config.target
 
   -- sticking to the rules of no ADT's on the JS side we case on the ZoomExtent here
     _ = case config.extent of
-          DefaultZoomExtent -> 
+          DefaultZoomExtent ->
             d3AttachZoomDefaultExtent_ selection {
               scaleExtent: [ smallest, largest ]
             , name  : config.name
             , target
-            } 
+            }
 
           (ZoomExtent ze)   -> do
-            d3AttachZoom_ selection { 
+            d3AttachZoom_ selection {
               extent     : [ [ ze.left, ze.top ], [ ze.right, ze.bottom ] ]
             , scaleExtent: [ smallest, largest ]
             , name  : config.name

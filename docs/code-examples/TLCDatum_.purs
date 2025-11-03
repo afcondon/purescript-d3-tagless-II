@@ -11,10 +11,8 @@ datum_ =
     -- in this simplest of examples, the index is also the datum itself
     getDatum :: Datum_ -> Int 
     getDatum = unsafeCoerce
-    getIndex :: Index_ -> Int
-    getIndex = unsafeCoerce
   in {
-    x :     \_ i -> (toNumber $ getIndex i) * 20.0
+    x :     \_ i -> (index_ToNumber i) * 20.0
   , y :     \d   -> 100.0 - (toNumber $ getDatum d) / 5.0
   , color : \d   -> d3SchemePairedN_ ((toNumber $ getDatum d) / 100.0)
 }

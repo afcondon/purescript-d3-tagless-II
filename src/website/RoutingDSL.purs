@@ -23,10 +23,17 @@ routes =
   <|> howtoIndex
   <|> referenceModule  -- Must come before reference (more specific)
   <|> reference
-  <|> understandingConcepts
-  <|> understandingPatterns
+  <|> understandingFinallyTagless
+  <|> understandingSelectionM
+  <|> understandingCapabilities
+  <|> understandingTypeSystem
+  <|> understandingDatumPattern
+  <|> understandingGrammar
   <|> understandingPhilosophy
-  <|> about       -- Legacy redirect to philosophy
+  <|> understandingIndex
+  <|> understandingConcepts   -- Legacy redirect to index
+  <|> understandingPatterns   -- Legacy redirect to index
+  <|> about                   -- Legacy redirect to philosophy
   <|> simpleCharts1
   <|> simpleCharts2
   <|> dataFlowViz
@@ -73,17 +80,45 @@ referenceModule = ReferenceModule <$> (lit "reference" *> str) <* end
 reference :: Match Route
 reference = Reference <$ lit "reference" <* end
 
--- | Match: /understanding/concepts
-understandingConcepts :: Match Route
-understandingConcepts = UnderstandingConcepts <$ lit "understanding" <* lit "concepts" <* end
+-- | Match: /understanding (index)
+understandingIndex :: Match Route
+understandingIndex = UnderstandingIndex <$ lit "understanding" <* end
 
--- | Match: /understanding/patterns
-understandingPatterns :: Match Route
-understandingPatterns = UnderstandingPatterns <$ lit "understanding" <* lit "patterns" <* end
+-- | Match: /understanding/finally-tagless
+understandingFinallyTagless :: Match Route
+understandingFinallyTagless = UnderstandingFinallyTagless <$ lit "understanding" <* lit "finally-tagless" <* end
+
+-- | Match: /understanding/selectionm
+understandingSelectionM :: Match Route
+understandingSelectionM = UnderstandingSelectionM <$ lit "understanding" <* lit "selectionm" <* end
+
+-- | Match: /understanding/capabilities
+understandingCapabilities :: Match Route
+understandingCapabilities = UnderstandingCapabilities <$ lit "understanding" <* lit "capabilities" <* end
+
+-- | Match: /understanding/type-system
+understandingTypeSystem :: Match Route
+understandingTypeSystem = UnderstandingTypeSystem <$ lit "understanding" <* lit "type-system" <* end
+
+-- | Match: /understanding/datum-pattern
+understandingDatumPattern :: Match Route
+understandingDatumPattern = UnderstandingDatumPattern <$ lit "understanding" <* lit "datum-pattern" <* end
+
+-- | Match: /understanding/grammar
+understandingGrammar :: Match Route
+understandingGrammar = UnderstandingGrammar <$ lit "understanding" <* lit "grammar" <* end
 
 -- | Match: /understanding/philosophy
 understandingPhilosophy :: Match Route
 understandingPhilosophy = UnderstandingPhilosophy <$ lit "understanding" <* lit "philosophy" <* end
+
+-- | Match: /understanding/concepts (legacy redirect to index)
+understandingConcepts :: Match Route
+understandingConcepts = UnderstandingIndex <$ lit "understanding" <* lit "concepts" <* end
+
+-- | Match: /understanding/patterns (legacy redirect to index)
+understandingPatterns :: Match Route
+understandingPatterns = UnderstandingIndex <$ lit "understanding" <* lit "patterns" <* end
 
 -- | Match: /about (legacy redirect to philosophy)
 about :: Match Route
@@ -164,9 +199,17 @@ routeToPath HowtoIndex = "/howto"
 routeToPath Reference = "/reference"
 routeToPath (ReferenceModule moduleName) = "/reference/" <> moduleName
 routeToPath About = "/understanding/philosophy"  -- Redirect to philosophy
-routeToPath UnderstandingConcepts = "/understanding/concepts"
-routeToPath UnderstandingPatterns = "/understanding/patterns"
+routeToPath UnderstandingIndex = "/understanding"
+routeToPath UnderstandingFinallyTagless = "/understanding/finally-tagless"
+routeToPath UnderstandingSelectionM = "/understanding/selectionm"
+routeToPath UnderstandingCapabilities = "/understanding/capabilities"
+routeToPath UnderstandingTypeSystem = "/understanding/type-system"
+routeToPath UnderstandingDatumPattern = "/understanding/datum-pattern"
+routeToPath UnderstandingGrammar = "/understanding/grammar"
 routeToPath UnderstandingPhilosophy = "/understanding/philosophy"
+-- Legacy redirects
+routeToPath UnderstandingConcepts = "/understanding"
+routeToPath UnderstandingPatterns = "/understanding"
 routeToPath SimpleCharts1 = "/simple-charts-1"
 routeToPath SimpleCharts2 = "/simple-charts-2"
 routeToPath DataFlowViz = "/data-flow"

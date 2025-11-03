@@ -2,10 +2,10 @@ module PSD3.Internal.Selection.Types where
 
 import PSD3.Internal.FFI
 
+import Data.Array (foldl)
 import PSD3.Internal.Attributes.Instances (AttributeSetter(..), Label, Listener_, EffectfulListener_, attributeLabel, unboxAttr)
 import PSD3.Internal.Types (D3Selection_, Datum_, MouseEvent, Transition)
-import PSD3.Internal.Zoom (ZoomConfig)
-import Data.Array (foldl)
+import PSD3.Internal.Zoom (ScaleExtent(..), ZoomConfig, ZoomExtent(..))
 import Prelude (class Eq, class Ord, class Show, show, (<>))
 
 -- type D3Selection  = Last D3Selection_
@@ -17,6 +17,16 @@ data DragBehavior =
 
 data Behavior selection = Drag DragBehavior
                         | Zoom (ZoomConfig selection)
+
+-- | Default zoom configuration
+-- | Allows zooming from 10% to 4x the original size
+defaultZoomConfig :: forall selection. Number -> Number -> selection -> ZoomConfig selection
+defaultZoomConfig w h target =
+  { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
+  , scale  : ScaleExtent 0.1 4.0 
+  , name   : "default"
+  , target
+  }
 
 newtype SelectionName = SelectionName String
 derive instance eqSelectionName  :: Eq SelectionName

@@ -23,6 +23,13 @@ import PSD3.Reference.Reference as Reference
 import PSD3.Understanding.About as About
 import PSD3.Understanding.Concepts as Concepts
 import PSD3.Understanding.Patterns as Patterns
+import PSD3.Understanding.UnderstandingIndex as UnderstandingIndex
+import PSD3.Understanding.UnderstandingFinallyTagless as UnderstandingFinallyTagless
+import PSD3.Understanding.UnderstandingSelectionM as UnderstandingSelectionM
+import PSD3.Understanding.UnderstandingCapabilities as UnderstandingCapabilities
+import PSD3.Understanding.UnderstandingTypeSystem as UnderstandingTypeSystem
+import PSD3.Understanding.UnderstandingDatumPattern as UnderstandingDatumPattern
+import PSD3.Understanding.UnderstandingGrammar as UnderstandingGrammar
 import PSD3.Understanding.SimpleCharts1 as SimpleCharts1
 import PSD3.Understanding.SimpleCharts2 as SimpleCharts2
 import PSD3.Understanding.DataFlowViz as DataFlowViz
@@ -64,6 +71,13 @@ type Slots =
   , about :: forall q. H.Slot q Void Unit
   , concepts :: forall q. H.Slot q Void Unit
   , patterns :: forall q. H.Slot q Void Unit
+  , understandingIndex :: forall q. H.Slot q Void Unit
+  , understandingFinallyTagless :: forall q. H.Slot q Void Unit
+  , understandingSelectionM :: forall q. H.Slot q Void Unit
+  , understandingCapabilities :: forall q. H.Slot q Void Unit
+  , understandingTypeSystem :: forall q. H.Slot q Void Unit
+  , understandingDatumPattern :: forall q. H.Slot q Void Unit
+  , understandingGrammar :: forall q. H.Slot q Void Unit
   , simpleCharts1 :: forall q. H.Slot q Void Unit
   , simpleCharts2 :: forall q. H.Slot q Void Unit
   , dataFlowViz :: forall q. H.Slot q Void Unit
@@ -89,6 +103,13 @@ _reference = Proxy :: Proxy "reference"
 _about = Proxy :: Proxy "about"
 _concepts = Proxy :: Proxy "concepts"
 _patterns = Proxy :: Proxy "patterns"
+_understandingIndex = Proxy :: Proxy "understandingIndex"
+_understandingFinallyTagless = Proxy :: Proxy "understandingFinallyTagless"
+_understandingSelectionM = Proxy :: Proxy "understandingSelectionM"
+_understandingCapabilities = Proxy :: Proxy "understandingCapabilities"
+_understandingTypeSystem = Proxy :: Proxy "understandingTypeSystem"
+_understandingDatumPattern = Proxy :: Proxy "understandingDatumPattern"
+_understandingGrammar = Proxy :: Proxy "understandingGrammar"
 _simpleCharts1 = Proxy :: Proxy "simpleCharts1"
 _simpleCharts2 = Proxy :: Proxy "simpleCharts2"
 _dataFlowViz = Proxy :: Proxy "dataFlowViz"
@@ -149,6 +170,27 @@ renderPage route = case spy "Route is" route of
 
   About ->
     HH.slot_ _about unit About.component unit
+
+  UnderstandingIndex ->
+    HH.slot_ _understandingIndex unit UnderstandingIndex.component unit
+
+  UnderstandingFinallyTagless ->
+    HH.slot_ _understandingFinallyTagless unit UnderstandingFinallyTagless.component unit
+
+  UnderstandingSelectionM ->
+    HH.slot_ _understandingSelectionM unit UnderstandingSelectionM.component unit
+
+  UnderstandingCapabilities ->
+    HH.slot_ _understandingCapabilities unit UnderstandingCapabilities.component unit
+
+  UnderstandingTypeSystem ->
+    HH.slot_ _understandingTypeSystem unit UnderstandingTypeSystem.component unit
+
+  UnderstandingDatumPattern ->
+    HH.slot_ _understandingDatumPattern unit UnderstandingDatumPattern.component unit
+
+  UnderstandingGrammar ->
+    HH.slot_ _understandingGrammar unit UnderstandingGrammar.component unit
 
   UnderstandingConcepts ->
     HH.slot_ _concepts unit Concepts.component unit
