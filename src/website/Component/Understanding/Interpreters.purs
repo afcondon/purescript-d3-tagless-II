@@ -88,7 +88,7 @@ render state =
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-            [ HH.text "Alternative Interpreters" ]
+            [ HH.text "7. Alternative Interpreters" ]
         , HH.p_
             [ HH.text "The Finally Tagless pattern allows us to write visualization code once and interpret it in multiple ways. The same DSL code can produce an actual visualization, generate equivalent code in other languages, create documentation, or even visualize its own structure." ]
         , HH.p_

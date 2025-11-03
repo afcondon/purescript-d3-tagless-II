@@ -22,7 +22,7 @@ render _ =
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-            [ HH.text "FP FTW" ]
+            [ HH.text "6. FP FTW" ]
         , HH.p_
             [ HH.text "Functional Programming For The Win! This page showcases PSD3's unique capabilities in handling different data structures through its Finally Tagless design." ]
         , HH.p_

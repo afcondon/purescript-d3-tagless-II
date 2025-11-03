@@ -48,11 +48,11 @@ render _ =
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-            [ HH.text "Tutorial: Building Visualizations with PureScript D3" ]
+            [ HH.text "1. Building Visualizations with PureScript" ]
         , HH.p_
-            [ HH.text "We'll show just the very simplest examples of putting elements in the DOM, in this case into an SVG, using the PS<$>D3 grammar." ]
+            [ HH.text "We'll show just the very simplest examples of putting elements in the DOM, in this case into an SVG, using the PS<$>D3 library. Then in the following pages, we'll look at progressively more complicated data visualizations and techniques that go well beyond simple static representations." ]
         , HH.p_
-            [ HH.text "In the How-to manual we'll explain in detail what each of these lines means, but if you're already familiar with D3.js the shape of the code should look very familiar." ]
+            [ HH.text "Each example has a link beneath it to see the full source code for the example, and if you're already familiar with D3.js the shape of the code should look very familiar." ]
         ]
 
     -- Section 1: Three Little Circles
@@ -64,7 +64,7 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
             [ HH.text "1. Three Little Circles" ]
         , HH.p_
-            [ HH.text "Simplest possible example, just to show syntax." ]
+            [ HH.text "Simplest possible example, we have three items of data and we put a green circle into an SVG for each one. We use the index of the datum to offset it so that they form a little line." ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
             [ HH.div
@@ -121,7 +121,7 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
             [ HH.text "2. Data-Driven Positioning" ]
         , HH.p_
-            [ HH.text "This extends the super-simple model in the direction one would go for a more real-world example. In this example, the data is passed in and must match the type specified in the Model. Because the data loses its type information when joined to the DOM elements, we use the datum_ record to provide typed accessors for extracting values." ]
+            [ HH.text "This extends the super-simple model of the three little circles for a slightly more real-world example. Now we're giving more circles and varying the y position with a function to a parabola." ]
         , HH.div
             [ HP.classes [ HH.ClassName "tutorial-viz-container" ] ]
             [ HH.div
@@ -148,7 +148,7 @@ render _ =
             [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
             [ HH.text "3. Bar Charts with Scales" ]
         , HH.p_
-            [ HH.text "Bar charts are ideal for comparing discrete categories or showing changes across time periods. They use rectangular bars with heights or lengths proportional to the values they represent." ]
+            [ HH.text "Bar charts are ideal for comparing discrete categories or showing changes across time periods. They're so familiar they there isn't much to say, just some rectangles strung along an axis. And, in fact the creation of the axes is a notable part of this example." ]
         , HH.p_
             [ HH.text "This example shows monthly sales data using a vertical bar chart. Each bar represents a month, and the height indicates the sales value. The implementation uses D3 scales to map data values to pixel coordinates." ]
         , HH.div
@@ -223,52 +223,6 @@ render _ =
                 ]
                 [ HH.text "with full source code" ]
             , HH.text "."
-            ]
-        ]
-
-    -- Section 6: Next Steps with margin links
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-conclusion" ]
-        , HP.id "section-6"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "6. Next Steps" ]
-        , HH.p_
-            [ HH.text "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, quis gravida magna mi a libero. Fusce vulputate eleifend sapien." ]
-
-        -- Contextual "learn more" links
-        , HH.aside
-            [ HP.classes [ HH.ClassName "tutorial-margin-note" ] ]
-            [ HH.p
-                [ HP.classes [ HH.ClassName "tutorial-margin-note__label" ] ]
-                [ HH.text "Learn More" ]
-            , HH.a
-                [ HP.href $ "#" <> routeToPath Hierarchies
-                , HP.classes [ HH.ClassName "tutorial-margin-note__link" ]
-                ]
-                [ HH.text "Hierarchies →" ]
-            ]
-
-        , HH.ul_
-            [ HH.li_ [ HH.text "Explore hierarchical data visualizations" ]
-            , HH.li_ [ HH.text "Learn about the Finally Tagless pattern with interpreters" ]
-            , HH.li_ [ HH.text "Dive into the Code Explorer for complex applications" ]
-            ]
-
-        -- More contextual links
-        , HH.aside
-            [ HP.classes [ HH.ClassName "tutorial-margin-note" ] ]
-            [ HH.a
-                [ HP.href $ "#" <> routeToPath Interpreters
-                , HP.classes [ HH.ClassName "tutorial-margin-note__link" ]
-                ]
-                [ HH.text "Interpreters →" ]
-            , HH.a
-                [ HP.href $ "#" <> routeToPath CodeExplorer
-                , HP.classes [ HH.ClassName "tutorial-margin-note__link" ]
-                ]
-                [ HH.text "Code Explorer →" ]
             ]
         ]
         ]

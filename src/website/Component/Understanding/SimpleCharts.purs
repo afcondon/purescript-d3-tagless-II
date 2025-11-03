@@ -87,9 +87,9 @@ render _ =
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-            [ HH.text "Simple Charts" ]
+            [ HH.text "2. Simple Charts" ]
         , HH.p_
-            [ HH.text "Real-world examples of common chart types showing state-level US population data and economic indicators. These charts are \"simple\" not because the visualizations are trivial, but because they don't include hierarchies, animations, transitions, or physical simulations." ]
+            [ HH.text "Real-world examples of common chart types showing state-level US population data and economic indicators. Compared to the previous page these charts are more complex, but we classify them as \"simple\" because they don't include hierarchies, animations, transitions, or physical simulations." ]
         , HH.p_
             [ HH.text "Each example demonstrates best practices for scales, axes, legends, and color coding to create clear and informative visualizations." ]
         ]
@@ -140,7 +140,7 @@ render _ =
                 []
             ]
         , HH.p_
-            [ HH.text "Each city is represented by a colored line, with a legend on the right for identification. The chart uses SVG path elements for smooth lines, linear scales for time (x-axis) and unemployment percentage (y-axis), and includes axis labels for context." ]
+            [ HH.text "Each city is represented by a colored line, with a legend on the right for identification. The chart uses SVG path elements for smooth lines, linear scales for time (x-axis) and unemployment percentage (y-axis), and includes axis labels for context. Significantly, it uses hover where available to help the reader pick out the details of an individual line, the first thing we've seen that has no print analog." ]
         , HH.p_
             [ HH.text "View this example "
             , HH.a
@@ -169,7 +169,7 @@ render _ =
                 []
             ]
         , HH.p_
-            [ HH.text "The chart uses polar coordinates with an angular scale (θ) dividing the circle by states and a radial scale (r) for population. Arc paths are generated for each segment, with the same color scheme as the grouped bar chart for consistency. State labels are positioned around the perimeter." ]
+            [ HH.text "Radial charts are good for repeating data, such as time or season, but that's not the case with this example which uses the same data as the first chart above to contrast the approaches. The chart uses polar coordinates with an angular scale (θ) dividing the circle by states and a radial scale (r) for population. Arc paths are generated for each segment, with the same color scheme as the grouped bar chart for consistency. State labels are positioned around the perimeter." ]
         , HH.p_
             [ HH.text "View this example "
             , HH.a

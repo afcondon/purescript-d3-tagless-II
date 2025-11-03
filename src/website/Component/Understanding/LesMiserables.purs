@@ -112,7 +112,7 @@ render _ =
         [ HP.classes [ HH.ClassName "tutorial-section", HH.ClassName "tutorial-intro" ] ]
         [ HH.h1
             [ HP.classes [ HH.ClassName "tutorial-title" ] ]
-            [ HH.text "Movement & Transition" ]
+            [ HH.text "5. Movement & Transition" ]
         , HH.p_
             [ HH.text "This page explores transitions and movement in D3 visualizations, from simple color and position changes to complex physics simulations with the General Update Pattern." ]
         ]
