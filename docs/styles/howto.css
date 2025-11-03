@@ -1,8 +1,9 @@
 /* How-to Page Styles - Clean, Minimal Design */
 
-.howto-page {
+.docs-page {
   min-height: 100vh;
-  background-color: #f5f1e8; /* Beige background */
+  background-color: #f5f1e8;
+  /* Beige background */
 }
 
 /* TOC Floating Panel - Left side */
@@ -135,7 +136,8 @@
 }
 
 .control-panel__icon {
-  width: 50%; /* Half the panel width */
+  width: 50%;
+  /* Half the panel width */
   max-width: 180px;
   height: auto;
   margin: 1rem 0 1rem 1rem;
@@ -206,7 +208,7 @@
 
 /* Navigation Panel (RHS) */
 /* Positioned relative to center column (52rem wide) */
-.howto-page__nav-panel {
+.docs-page__nav-panel {
   position: fixed;
   top: 2rem;
   /* Position to right of center column: 50% - half column width - panel width - gap */
@@ -219,7 +221,7 @@
   z-index: 1000;
 }
 
-.howto-page__nav-title {
+.docs-page__nav-title {
   font-family: var(--font-mono);
   font-size: 0.875rem;
   font-weight: bold;
@@ -231,13 +233,13 @@
   border-bottom: 2px solid var(--color-red-accent);
 }
 
-.howto-page__nav-links {
+.docs-page__nav-links {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
 
-.howto-page__nav-link {
+.docs-page__nav-link {
   display: block;
   font-family: var(--font-mono);
   font-size: 0.875rem;
@@ -248,13 +250,13 @@
   transition: all 0.15s ease;
 }
 
-.howto-page__nav-link:hover {
+.docs-page__nav-link:hover {
   background-color: var(--color-beige-base);
   border-left-color: var(--color-red-accent);
   color: var(--color-gray-darker);
 }
 
-.howto-page__nav-link--active {
+.docs-page__nav-link--active {
   background-color: var(--color-beige-base);
   border-left-color: var(--color-red-accent);
   font-weight: bold;
@@ -262,11 +264,11 @@
   cursor: default;
 }
 
-.howto-page__nav-link--external {
+.docs-page__nav-link--external {
   color: var(--color-teal);
 }
 
-.howto-page__nav-link--external:hover {
+.docs-page__nav-link--external:hover {
   color: var(--color-teal);
   border-left-color: var(--color-teal);
 }
@@ -277,7 +279,8 @@
   background-color: #F5F1E8;
   padding: 2rem 3rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-  position: relative; /* For positioning margin notes */
+  position: relative;
+  /* For positioning margin notes */
 }
 
 .tutorial-intro {
@@ -474,8 +477,10 @@
 /* Specific sizing for small examples to keep them readable */
 .tutorial-viz-container .three-circles-viz svg,
 .tutorial-viz-container .parabola-viz svg {
-  max-width: 600px; /* Keep small examples from getting too large */
-  min-height: 100px; /* Ensure minimum readable size */
+  max-width: 600px;
+  /* Keep small examples from getting too large */
+  min-height: 100px;
+  /* Ensure minimum readable size */
 }
 
 /* GUP needs more vertical space for animation */
@@ -526,13 +531,15 @@
 
 .tutorial-code-block pre {
   margin: 0;
-  overflow-x: auto; /* Allow horizontal scroll for long lines */
+  overflow-x: auto;
+  /* Allow horizontal scroll for long lines */
 }
 
 .tutorial-code-block code {
   /* Font size defined in prism-editorial.css (0.6875rem / 11px) */
   line-height: 1.7;
-  white-space: pre; /* Preserve formatting, don't wrap */
+  white-space: pre;
+  /* Preserve formatting, don't wrap */
 }
 
 /* Ensure Prism styles apply correctly */
@@ -550,13 +557,15 @@
 /* Margin Notes */
 .tutorial-margin-note {
   position: absolute;
-  right: -280px; /* Position outside the main content column */
+  right: -280px;
+  /* Position outside the main content column */
   width: 240px;
   background-color: var(--color-beige-light);
   border: 2px solid var(--color-gray-medium);
   padding: 1rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  margin-top: -1rem; /* Align with adjacent content */
+  margin-top: -1rem;
+  /* Align with adjacent content */
 }
 
 .tutorial-margin-note__label {
@@ -594,7 +603,7 @@
     left: 2rem;
   }
 
-  .howto-page__nav-panel {
+  .docs-page__nav-panel {
     /* Switch to edge positioning when viewport is too narrow */
     right: 2rem;
   }
@@ -610,7 +619,7 @@
     width: 60px;
   }
 
-  .howto-page__nav-panel {
+  .docs-page__nav-panel {
     width: 200px;
     right: 1.5rem;
   }
@@ -669,7 +678,8 @@
   .tutorial-code-block code,
   .tutorial-code-block pre[class*="language-"],
   .tutorial-code-block code[class*="language-"] {
-    font-size: 0.625rem; /* 10px on mobile */
+    font-size: 0.625rem;
+    /* 10px on mobile */
   }
 
   /* Adjust min heights for mobile */
@@ -688,7 +698,7 @@
 
   /* Hide TOC and Nav panel on mobile */
   .toc-panel,
-  .howto-page__nav-panel {
+  .docs-page__nav-panel {
     display: none;
   }
 }
@@ -823,19 +833,19 @@
 }
 
 /* Hero Section */
-.howto-hero {
+.docs-hero {
   max-width: 1400px;
   margin: 0 auto;
   padding: 4rem 3rem 3rem 3rem;
 }
 
-.howto-hero-content {
+.docs-hero-content {
   max-width: 800px;
   margin: 0 auto;
   text-align: center;
 }
 
-.howto-hero-title {
+.docs-hero-title {
   font-size: 2.5rem;
   font-weight: 600;
   color: #333;
@@ -844,7 +854,7 @@
   letter-spacing: -0.02em;
 }
 
-.howto-hero-description {
+.docs-hero-description {
   font-size: 1.1rem;
   color: #666;
   line-height: 1.6;
@@ -852,7 +862,7 @@
 }
 
 /* Sections */
-.howto-section {
+.docs-section {
   max-width: 1400px;
   margin: 0 auto;
   padding: 3rem 3rem;
@@ -860,7 +870,7 @@
   margin-bottom: 2rem;
 }
 
-.howto-section-title {
+.docs-section-title {
   font-size: 1.75rem;
   font-weight: 600;
   color: #333;
@@ -868,7 +878,7 @@
   letter-spacing: -0.02em;
 }
 
-.howto-section-description {
+.docs-section-description {
   font-size: 1rem;
   color: #666;
   margin: 0 0 2rem 0;
@@ -876,7 +886,7 @@
 }
 
 /* Grid */
-.howto-grid {
+.docs-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
@@ -966,15 +976,15 @@
     padding: 0 2rem;
   }
 
-  .howto-hero {
+  .docs-hero {
     padding: 3rem 2rem 2rem 2rem;
   }
 
-  .howto-section {
+  .docs-section {
     padding: 2rem 2rem;
   }
 
-  .howto-hero-title {
+  .docs-hero-title {
     font-size: 2rem;
   }
 }
@@ -992,27 +1002,27 @@
     height: 28px;
   }
 
-  .howto-hero {
+  .docs-hero {
     padding: 2rem 1.5rem;
   }
 
-  .howto-hero-title {
+  .docs-hero-title {
     font-size: 1.75rem;
   }
 
-  .howto-hero-description {
+  .docs-hero-description {
     font-size: 1rem;
   }
 
-  .howto-section {
+  .docs-section {
     padding: 2rem 1.5rem;
   }
 
-  .howto-section-title {
+  .docs-section-title {
     font-size: 1.5rem;
   }
 
-  .howto-grid {
+  .docs-grid {
     grid-template-columns: 1fr;
     gap: 1.25rem;
   }
@@ -1031,11 +1041,11 @@
 }
 
 @media (max-width: 480px) {
-  .howto-hero-title {
+  .docs-hero-title {
     font-size: 1.5rem;
   }
 
-  .howto-section-title {
+  .docs-section-title {
     font-size: 1.25rem;
   }
 }

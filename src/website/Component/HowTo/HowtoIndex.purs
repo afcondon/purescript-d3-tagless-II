@@ -42,36 +42,36 @@ component = H.mkComponent
 render :: State -> H.ComponentHTML Action Slots Aff
 render _ =
   HH.div
-    [ HP.classes [ HH.ClassName "howto-page" ] ]
+    [ HP.classes [ HH.ClassName "docs-page" ] ]
     [ -- Docs Header
       HH.slot_ _docsHeader unit DocsHeader.component
         { currentSection: Just HowToSection }
 
     -- Hero section
     , HH.section
-        [ HP.classes [ HH.ClassName "howto-hero" ] ]
+        [ HP.classes [ HH.ClassName "docs-hero" ] ]
         [ HH.div
-            [ HP.classes [ HH.ClassName "howto-hero-content" ] ]
+            [ HP.classes [ HH.ClassName "docs-hero-content" ] ]
             [ HH.h1
-                [ HP.classes [ HH.ClassName "howto-hero-title" ] ]
+                [ HP.classes [ HH.ClassName "docs-hero-title" ] ]
                 [ HH.text "How-to Guides" ]
             , HH.p
-                [ HP.classes [ HH.ClassName "howto-hero-description" ] ]
+                [ HP.classes [ HH.ClassName "docs-hero-description" ] ]
                 [ HH.text "Practical guides for accomplishing specific tasks with PureScript D3. Learn how to integrate with Halogen or React, add interactivity, work with color, and follow best practices for type-safe visualization development." ]
             ]
         ]
 
     -- How-to Guides
     , HH.section
-        [ HP.classes [ HH.ClassName "howto-section" ] ]
+        [ HP.classes [ HH.ClassName "docs-section" ] ]
         [ HH.h2
-            [ HP.classes [ HH.ClassName "howto-section-title" ] ]
+            [ HP.classes [ HH.ClassName "docs-section-title" ] ]
             [ HH.text "How-to Guides" ]
         , HH.p
-            [ HP.classes [ HH.ClassName "howto-section-description" ] ]
+            [ HP.classes [ HH.ClassName "docs-section-description" ] ]
             [ HH.text "Step-by-step instructions for specific tasks" ]
         , HH.div
-            [ HP.classes [ HH.ClassName "howto-grid" ] ]
+            [ HP.classes [ HH.ClassName "docs-grid" ] ]
             [ renderGuideCard HowTo
                 "Getting Data on Screen"
                 "Learn the fundamentals of binding data to DOM elements and creating your first visualization"
@@ -97,15 +97,15 @@ render _ =
 
     -- Best Practices
     , HH.section
-        [ HP.classes [ HH.ClassName "howto-section" ] ]
+        [ HP.classes [ HH.ClassName "docs-section" ] ]
         [ HH.h2
-            [ HP.classes [ HH.ClassName "howto-section-title" ] ]
+            [ HP.classes [ HH.ClassName "docs-section-title" ] ]
             [ HH.text "Best Practices" ]
         , HH.p
-            [ HP.classes [ HH.ClassName "howto-section-description" ] ]
+            [ HP.classes [ HH.ClassName "docs-section-description" ] ]
             [ HH.text "Guidelines for writing maintainable, type-safe visualization code" ]
         , HH.div
-            [ HP.classes [ HH.ClassName "howto-grid" ] ]
+            [ HP.classes [ HH.ClassName "docs-grid" ] ]
             [ renderGuideCard BestPractice
                 "Separating Safe from Unsafe Code"
                 "Architectural patterns for isolating FFI and maintaining type safety throughout your codebase"

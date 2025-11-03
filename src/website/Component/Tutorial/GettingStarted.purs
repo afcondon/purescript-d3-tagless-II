@@ -75,21 +75,21 @@ component = H.mkComponent
 render :: State -> H.ComponentHTML Action Slots Aff
 render _ =
   HH.div
-    [ HP.classes [ HH.ClassName "howto-page" ] ]
+    [ HP.classes [ HH.ClassName "docs-page" ] ]
     [ -- Docs Header
         HH.slot_ _docsHeader unit DocsHeader.component
             { currentSection: Just TutorialSection }
 
     -- Hero section
     , HH.section
-        [ HP.classes [ HH.ClassName "howto-hero" ] ]
+        [ HP.classes [ HH.ClassName "docs-hero" ] ]
         [ HH.div
-            [ HP.classes [ HH.ClassName "howto-hero-content" ] ]
+            [ HP.classes [ HH.ClassName "docs-hero-content" ] ]
             [ HH.h1
-                [ HP.classes [ HH.ClassName "howto-hero-title" ] ]
+                [ HP.classes [ HH.ClassName "docs-hero-title" ] ]
                 [ HH.text "Getting Started" ]
             , HH.p
-                [ HP.classes [ HH.ClassName "howto-hero-description" ] ]
+                [ HP.classes [ HH.ClassName "docs-hero-description" ] ]
                 [ HH.text "To get a feel for writing with this DSL we provide a command-line wizard bundled with the repo, a web-based wizard that you can run right here and you can also find instructions here to write your own visualizations from scratch." ]
             ]
         ]

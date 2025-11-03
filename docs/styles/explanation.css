@@ -2,7 +2,8 @@
 
 .explanation-page {
   min-height: 100vh;
-  background-color: #f5f1e8; /* Match howto-page background */
+  background-color: #f5f1e8;
+  /* Match docs-page background */
   padding: 0;
   position: relative;
 }
@@ -108,7 +109,8 @@
   background-color: var(--color-beige-dark);
   padding: 1rem;
   margin-bottom: 1rem;
-  overflow-x: auto;  /* Scroll horizontally instead of overflowing */
+  overflow-x: auto;
+  /* Scroll horizontally instead of overflowing */
   border-left: 3px solid var(--color-teal);
   line-height: 1.5;
 }
@@ -116,7 +118,8 @@
 .concept-section pre code {
   background-color: transparent;
   padding: 0;
-  white-space: pre;  /* Preserve formatting */
+  white-space: pre;
+  /* Preserve formatting */
 }
 
 .concept-section code {
@@ -285,7 +288,8 @@
 }
 
 .control-panel__icon {
-  width: 50%; /* Half the panel width */
+  width: 50%;
+  /* Half the panel width */
   max-width: 180px;
   height: auto;
   margin: 1rem 0 1rem 1rem;
@@ -455,7 +459,8 @@
   background-color: #F5F1E8;
   padding: 2rem 3rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-  position: relative; /* For positioning margin notes */
+  position: relative;
+  /* For positioning margin notes */
 }
 
 .tutorial-intro {
@@ -652,8 +657,10 @@
 /* Specific sizing for small examples to keep them readable */
 .tutorial-viz-container .three-circles-viz svg,
 .tutorial-viz-container .parabola-viz svg {
-  max-width: 600px; /* Keep small examples from getting too large */
-  min-height: 100px; /* Ensure minimum readable size */
+  max-width: 600px;
+  /* Keep small examples from getting too large */
+  min-height: 100px;
+  /* Ensure minimum readable size */
 }
 
 /* GUP needs more vertical space for animation */
@@ -740,13 +747,15 @@
 
 .tutorial-code-block pre {
   margin: 0;
-  overflow-x: auto; /* Allow horizontal scroll for long lines */
+  overflow-x: auto;
+  /* Allow horizontal scroll for long lines */
 }
 
 .tutorial-code-block code {
   /* Font size defined in prism-editorial.css (0.6875rem / 11px) */
   line-height: 1.7;
-  white-space: pre; /* Preserve formatting, don't wrap */
+  white-space: pre;
+  /* Preserve formatting, don't wrap */
 }
 
 /* Ensure Prism styles apply correctly */
@@ -764,13 +773,15 @@
 /* Margin Notes */
 .tutorial-margin-note {
   position: absolute;
-  right: -280px; /* Position outside the main content column */
+  right: -280px;
+  /* Position outside the main content column */
   width: 240px;
   background-color: var(--color-beige-light);
   border: 2px solid var(--color-gray-medium);
   padding: 1rem;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  margin-top: -1rem; /* Align with adjacent content */
+  margin-top: -1rem;
+  /* Align with adjacent content */
 }
 
 .tutorial-margin-note__label {
@@ -883,7 +894,8 @@
   .tutorial-code-block code,
   .tutorial-code-block pre[class*="language-"],
   .tutorial-code-block code[class*="language-"] {
-    font-size: 0.625rem; /* 10px on mobile */
+    font-size: 0.625rem;
+    /* 10px on mobile */
   }
 
   /* Adjust min heights for mobile */
