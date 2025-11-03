@@ -3,16 +3,24 @@ module PSD3.Understanding.Patterns where
 import Prelude
 
 import Data.Maybe (Maybe(..))
+import Data.Time.Duration (Milliseconds(..))
 import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3 as D3
+import PSD3.Attributes (classed, fill, fontSize, viewBox, x, y, andThen, to, remove, transitionWithDuration)
+import PSD3.Data.Node (NodeID)
+import PSD3.Interpreter.MermaidAST (MermaidASTM)
 import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
+import PSD3.Shared.MermaidAST as MermaidAST
 import PSD3.Shared.SectionNav as SectionNav
+import PSD3.Types (Element(..))
 import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Understanding.UnderstandingTabs as UnderstandingTabs
 import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
+import Unsafe.Coerce (unsafeCoerce)
 
 type State = Unit
 
@@ -21,6 +29,7 @@ data Action = Initialize
 type Slots =
   ( sectionNav :: forall q. H.Slot q Void Unit
   , tabs :: forall q. H.Slot q Void Unit
+  , mermaidAST :: MermaidAST.Slot Unit
   )
 
 _sectionNav = Proxy :: Proxy "sectionNav"
@@ -51,6 +60,38 @@ sequenceDiagram
 
     Note over PS,DOM: Bridges Type Safety and Dynamic Binding
 """
+
+-- | General Update Pattern (GUP) example showing enter/update/exit
+gupVisualization :: MermaidASTM NodeID
+gupVisualization = do
+  root <- D3.attach "div"
+  svg <- D3.appendTo root Svg [viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup"]
+  letterGroup <- D3.appendTo svg Group []
+
+  -- Simulate the updateJoin call (this is what gets called repeatedly)
+  enterSelection <- D3.openSelection letterGroup "text"
+  { enter, update, exit } <- D3.updateJoin enterSelection Text [1, 2, 3] unsafeCoerce
+
+  -- Set attributes on exit selection with transition
+  let transition = transitionWithDuration $ Milliseconds 2000.0
+  let exitAttrs = [classed "exit", fill "brown"] `andThen` (transition `to` [y 400.0, remove])
+  D3.setAttributes exit exitAttrs
+
+  -- Set attributes on update selection with transition
+  let updateAttrs = [classed "update", fill "gray", y 200.0] `andThen` (transition `to` [x 50.0])
+  D3.setAttributes update updateAttrs
+
+  -- Append new text elements to enter selection
+  newlyEntered <- D3.appendTo enter Text []
+  let enterAttrs = [ classed "enter"
+                    , fill "green"
+                    , x 50.0
+                    , y 0.0
+                    , fontSize 60.0
+                    ] `andThen` (transition `to` [y 200.0])
+  D3.setAttributes newlyEntered enterAttrs
+
+  pure newlyEntered
 
 component :: forall q i o. H.Component q i o Aff
 component = H.mkComponent
@@ -122,7 +163,16 @@ render _ =
             [ HH.h2
                 [ HP.id "heading-grammar" ]
                 [ HH.text "The Grammar of D3 in SelectionM" ]
-            , HH.p_ [ HH.text "Placeholder: How SelectionM expresses D3's grammar of graphics" ]
+            , HH.p_ [ HH.text "SelectionM provides a compositional grammar for expressing D3 visualizations. The General Update Pattern (GUP) below demonstrates how SelectionM captures the essential operations: openSelection for nested data joins, updateJoin for synchronizing data with DOM elements, and transitions for smooth animations." ]
+
+            -- GUP AST Diagram
+            , HH.div
+                [ HP.classes [ HH.ClassName "diagram-container" ] ]
+                [ HH.slot_ MermaidAST._mermaidAST unit MermaidAST.component
+                    (MermaidAST.mkInput gupVisualization)
+                ]
+
+            , HH.p_ [ HH.text "This AST diagram shows how the General Update Pattern expresses the classic D3 workflow: selecting existing elements, binding new data, handling enter/update/exit selections, and applying transitions. The same SelectionM code can be interpreted multiple ways - as live D3 visualizations, as static diagrams, or as English descriptions - demonstrating the power of the finally tagless pattern." ]
             ]
 
         -- DOM to Elements Flow
