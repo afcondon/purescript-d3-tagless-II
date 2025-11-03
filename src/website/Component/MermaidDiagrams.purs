@@ -10,7 +10,7 @@ import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3 as D3
-import PSD3.Attributes (fill, radius, cx, cy, width, height, strokeWidth, strokeColor, x, y, to, transitionWithDuration)
+import PSD3.Attributes (fill, fillOpacity, radius, cx, cy, width, height, strokeWidth, strokeColor, strokeOpacity, x, y, to, transitionWithDuration)
 import PSD3.Types (Element(..))
 import PSD3.Interpreter.MermaidAST (MermaidASTM, runMermaidAST)
 import PSD3.Data.Node (NodeID)
@@ -29,6 +29,15 @@ type State =
   , test9_openSelection :: String
   , test10_attributesOnly :: String
   , test11_transitions :: String
+  , viz_parabola :: String
+  , viz_multiLineChart :: String
+  , viz_stackedBar :: String
+  , viz_chordDiagram :: String
+  , viz_sankey :: String
+  , viz_tree :: String
+  , viz_bubbleChart :: String
+  , viz_icicle :: String
+  , viz_treemap :: String
   }
 
 data Action = Initialize
@@ -57,6 +66,15 @@ initialState _ =
   , test9_openSelection: "Loading..."
   , test10_attributesOnly: "Loading..."
   , test11_transitions: "Loading..."
+  , viz_parabola: "Loading..."
+  , viz_multiLineChart: "Loading..."
+  , viz_stackedBar: "Loading..."
+  , viz_chordDiagram: "Loading..."
+  , viz_sankey: "Loading..."
+  , viz_tree: "Loading..."
+  , viz_bubbleChart: "Loading..."
+  , viz_icicle: "Loading..."
+  , viz_treemap: "Loading..."
   }
 
 render :: forall m. State -> H.ComponentHTML Action () m
@@ -143,6 +161,66 @@ render state =
         , HH.p_ [ HH.text "Animating attribute changes with transitions" ]
         , mermaidDiagram state.test11_transitions (Just "test11")
         ]
+
+    -- Concrete Visualization Examples
+    , HH.h1 [ HP.class_ (HH.ClassName "section-break") ]
+        [ HH.text "Concrete Visualizations" ]
+    , HH.p_
+        [ HH.text "These diagrams show the AST structure of real visualization examples from the PSD3 library." ]
+
+    , HH.section [ HP.class_ (HH.ClassName "example") ]
+        [ HH.h2_ [ HH.text "Parabola" ]
+        , HH.p_ [ HH.text "Classic Three Little Circles pattern with data-driven positioning" ]
+        , mermaidDiagram state.viz_parabola (Just "viz-parabola")
+        ]
+
+    , HH.section [ HP.class_ (HH.ClassName "example") ]
+        [ HH.h2_ [ HH.text "Multi-Line Chart" ]
+        , HH.p_ [ HH.text "Time-series visualization with multiple data series as paths" ]
+        , mermaidDiagram state.viz_multiLineChart (Just "viz-multiline")
+        ]
+
+    , HH.section [ HP.class_ (HH.ClassName "example") ]
+        [ HH.h2_ [ HH.text "Radial Stacked Bar Chart" ]
+        , HH.p_ [ HH.text "Circular bar chart with radial layout and stacked segments" ]
+        , mermaidDiagram state.viz_stackedBar (Just "viz-stackedbar")
+        ]
+
+    , HH.section [ HP.class_ (HH.ClassName "example") ]
+        [ HH.h2_ [ HH.text "Chord Diagram" ]
+        , HH.p_ [ HH.text "Circular dependency visualization with ribbons and arc groups" ]
+        , mermaidDiagram state.viz_chordDiagram (Just "viz-chord")
+        ]
+
+    , HH.section [ HP.class_ (HH.ClassName "example") ]
+        [ HH.h2_ [ HH.text "Sankey Diagram" ]
+        , HH.p_ [ HH.text "Flow diagram with nodes, links, and labels showing value flows" ]
+        , mermaidDiagram state.viz_sankey (Just "viz-sankey")
+        ]
+
+    , HH.section [ HP.class_ (HH.ClassName "example") ]
+        [ HH.h2_ [ HH.text "Tree (Vertical)" ]
+        , HH.p_ [ HH.text "Hierarchical tree layout with links and node groups" ]
+        , mermaidDiagram state.viz_tree (Just "viz-tree")
+        ]
+
+    , HH.section [ HP.class_ (HH.ClassName "example") ]
+        [ HH.h2_ [ HH.text "Bubble Chart" ]
+        , HH.p_ [ HH.text "Circular packing layout showing hierarchical data as nested circles" ]
+        , mermaidDiagram state.viz_bubbleChart (Just "viz-bubble")
+        ]
+
+    , HH.section [ HP.class_ (HH.ClassName "example") ]
+        [ HH.h2_ [ HH.text "Icicle Chart" ]
+        , HH.p_ [ HH.text "Partition layout showing hierarchy as horizontal rectangles" ]
+        , mermaidDiagram state.viz_icicle (Just "viz-icicle")
+        ]
+
+    , HH.section [ HP.class_ (HH.ClassName "example") ]
+        [ HH.h2_ [ HH.text "Treemap" ]
+        , HH.p_ [ HH.text "Space-filling treemap with nested rectangular tiles" ]
+        , mermaidDiagram state.viz_treemap (Just "viz-treemap")
+        ]
     ]
 
 handleAction :: forall o m. MonadEffect m => Action -> H.HalogenM State Action () o m Unit
@@ -161,6 +239,17 @@ handleAction = case _ of
     test10 <- liftEffect $ runMermaidAST test10_AttributesOnly
     test11 <- liftEffect $ runMermaidAST test11_Transitions
 
+    -- Generate concrete visualization examples
+    vizParabola <- liftEffect $ runMermaidAST viz_ParabolaAST
+    vizMultiLine <- liftEffect $ runMermaidAST viz_MultiLineChartAST
+    vizStackedBar <- liftEffect $ runMermaidAST viz_StackedBarAST
+    vizChord <- liftEffect $ runMermaidAST viz_ChordDiagramAST
+    vizSankey <- liftEffect $ runMermaidAST viz_SankeyAST
+    vizTree <- liftEffect $ runMermaidAST viz_TreeAST
+    vizBubble <- liftEffect $ runMermaidAST viz_BubbleChartAST
+    vizIcicle <- liftEffect $ runMermaidAST viz_IcicleAST
+    vizTreemap <- liftEffect $ runMermaidAST viz_TreemapAST
+
     H.modify_ _
       { test1_simpleAppend = test1
       , test2_multipleAppends = test2
@@ -173,6 +262,15 @@ handleAction = case _ of
       , test9_openSelection = test9
       , test10_attributesOnly = test10
       , test11_transitions = test11
+      , viz_parabola = vizParabola
+      , viz_multiLineChart = vizMultiLine
+      , viz_stackedBar = vizStackedBar
+      , viz_chordDiagram = vizChord
+      , viz_sankey = vizSankey
+      , viz_tree = vizTree
+      , viz_bubbleChart = vizBubble
+      , viz_icicle = vizIcicle
+      , viz_treemap = vizTreemap
       }
 
     -- Trigger Mermaid rendering after diagrams are in the DOM
@@ -305,3 +403,261 @@ test11_Transitions = do
       , fill "blue"
       ]
   pure circle
+
+-- ============================================================================
+-- CONCRETE VISUALIZATION EXAMPLES
+-- ============================================================================
+
+-- Parabola (Three Little Circles with data-driven positioning)
+viz_ParabolaAST :: MermaidASTM NodeID
+viz_ParabolaAST = do
+  root <- D3.attach "div"
+  svg <- D3.appendTo root Svg []
+  circleGroup <- D3.appendTo svg Group []
+  circles <- D3.simpleJoin circleGroup Circle [32, 57, 112] unsafeCoerce
+  D3.setAttributes circles
+    [ strokeColor "steelblue"
+    , strokeWidth 3.0
+    , fill "none"
+    , cx 100.0
+    , cy 50.0
+    , radius 10.0
+    ]
+  pure circles
+
+-- Multi-Line Chart (time-series with multiple paths)
+viz_MultiLineChartAST :: MermaidASTM NodeID
+viz_MultiLineChartAST = do
+  root <- D3.attach "div"
+  svg <- D3.appendTo root Svg []
+  chartGroup <- D3.appendTo svg Group []
+
+  -- Draw y-axis
+  yAxis <- D3.appendTo chartGroup Group []
+  yTick1 <- D3.appendTo yAxis Text [y 0.0, x (-5.0), fill "black"]
+  yTick2 <- D3.appendTo yAxis Text [y 100.0, x (-5.0), fill "black"]
+
+  -- Draw x-axis
+  xAxis <- D3.appendTo chartGroup Group []
+  xTick1 <- D3.appendTo xAxis Text [x 0.0, y 20.0, fill "black"]
+  xTick2 <- D3.appendTo xAxis Text [x 200.0, y 20.0, fill "black"]
+
+  -- Draw line paths for each series
+  path1 <- D3.appendTo chartGroup Path [strokeColor "#4682b4", strokeWidth 1.5, fill "none"]
+  path2 <- D3.appendTo chartGroup Path [strokeColor "#4682b4", strokeWidth 1.5, fill "none"]
+  path3 <- D3.appendTo chartGroup Path [strokeColor "#4682b4", strokeWidth 1.5, fill "none"]
+
+  pure path3
+
+-- Radial Stacked Bar Chart
+viz_StackedBarAST :: MermaidASTM NodeID
+viz_StackedBarAST = do
+  root <- D3.attach "div"
+  svg <- D3.appendTo root Svg []
+  centerGroup <- D3.appendTo svg Group []
+
+  -- Create bars with data join
+  bars <- D3.simpleJoin centerGroup Path [1, 2, 3, 4, 5] unsafeCoerce
+  D3.setAttributes bars
+    [ fill "orange"
+    , strokeColor "#ffffff"
+    , strokeWidth 1.0
+    ]
+
+  -- Add labels
+  labels <- D3.simpleJoin centerGroup Text [1, 2, 3, 4, 5] unsafeCoerce
+  D3.setAttributes labels [fill "white", x 0.0, y 0.0]
+
+  pure labels
+
+-- Chord Diagram (circular dependency viz)
+viz_ChordDiagramAST :: MermaidASTM NodeID
+viz_ChordDiagramAST = do
+  root <- D3.attach "div"
+  svg <- D3.appendTo root Svg []
+  centerGroup <- D3.appendTo svg Group []
+
+  -- Draw ribbons (the chords)
+  ribbonsGroup <- D3.appendTo centerGroup Group []
+  ribbons <- D3.simpleJoin ribbonsGroup Path [1, 2, 3, 4, 5] unsafeCoerce
+  D3.setAttributes ribbons
+    [ fill "#e74c3c"
+    , fillOpacity 0.67
+    , strokeColor "#000000"
+    , strokeWidth 0.5
+    ]
+
+  -- Draw arcs (the groups)
+  arcsGroup <- D3.appendTo centerGroup Group []
+  arcGroups <- D3.simpleJoin arcsGroup Group [1, 2, 3, 4, 5] unsafeCoerce
+  arcPaths <- D3.appendTo arcGroups Path
+    [ fill "#3498db"
+    , strokeColor "#ffffff"
+    , strokeWidth 2.0
+    ]
+
+  pure arcPaths
+
+-- Sankey Diagram (flow diagram)
+viz_SankeyAST :: MermaidASTM NodeID
+viz_SankeyAST = do
+  root <- D3.attach "div"
+  svg <- D3.appendTo root Svg []
+
+  -- Create groups for links, nodes, and labels
+  linksGroup <- D3.appendTo svg Group []
+  nodesGroup <- D3.appendTo svg Group []
+  labelsGroup <- D3.appendTo svg Group []
+
+  -- Join and render links
+  links <- D3.simpleJoin linksGroup Path [1, 2, 3, 4] unsafeCoerce
+  D3.setAttributes links
+    [ fill "none"
+    , strokeWidth 5.0
+    , strokeOpacity 0.5
+    , strokeColor "#aaa"
+    ]
+
+  -- Join and render nodes
+  nodes <- D3.simpleJoin nodesGroup Rect [1, 2, 3] unsafeCoerce
+  D3.setAttributes nodes
+    [ x 0.0
+    , y 0.0
+    , width 20.0
+    , height 50.0
+    , fill "steelblue"
+    , fillOpacity 0.8
+    ]
+
+  -- Add labels
+  labels <- D3.simpleJoin labelsGroup Text [1, 2, 3] unsafeCoerce
+  D3.setAttributes labels [x 25.0, y 25.0, fill "black"]
+
+  pure labels
+
+-- Tree (Vertical hierarchical layout)
+viz_TreeAST :: MermaidASTM NodeID
+viz_TreeAST = do
+  root <- D3.attach "div"
+  svg <- D3.appendTo root Svg []
+  zoomGroup <- D3.appendTo svg Group []
+
+  -- Create groups for links and nodes
+  linksGroup <- D3.appendTo zoomGroup Group []
+  nodesGroup <- D3.appendTo zoomGroup Group []
+
+  -- Draw links (paths between nodes)
+  links <- D3.simpleJoin linksGroup Path [1, 2, 3, 4, 5] unsafeCoerce
+  D3.setAttributes links
+    [ strokeWidth 1.5
+    , strokeColor "#94a3b8"
+    , strokeOpacity 0.6
+    , fill "none"
+    ]
+
+  -- Draw node groups (circles + labels)
+  nodeGroups <- D3.simpleJoin nodesGroup Group [1, 2, 3, 4, 5, 6] unsafeCoerce
+  circles <- D3.appendTo nodeGroups Circle
+    [ fill "#0ea5e9"
+    , radius 3.0
+    , strokeColor "white"
+    , strokeWidth 1.5
+    , cx 0.0
+    , cy 0.0
+    ]
+  labels <- D3.appendTo nodeGroups Text
+    [ fill "#0c4a6e"
+    , x 8.0
+    , y 0.0
+    ]
+
+  pure labels
+
+-- Bubble Chart (circle pack hierarchy)
+viz_BubbleChartAST :: MermaidASTM NodeID
+viz_BubbleChartAST = do
+  root <- D3.attach "div"
+  svg <- D3.appendTo root Svg []
+  chartGroup <- D3.appendTo svg Group []
+
+  -- Draw bubbles (circles with hierarchical data)
+  bubbles <- D3.simpleJoin chartGroup Circle [1, 2, 3, 4, 5, 6, 7] unsafeCoerce
+  D3.setAttributes bubbles
+    [ cx 100.0
+    , cy 100.0
+    , radius 30.0
+    , fill "#e8dcc6"
+    , fillOpacity 0.8
+    , strokeColor "#ffffff"
+    , strokeWidth 2.0
+    ]
+
+  -- Draw labels
+  labels <- D3.simpleJoin chartGroup Text [1, 2, 3, 4, 5, 6, 7] unsafeCoerce
+  D3.setAttributes labels
+    [ x 100.0
+    , y 100.0
+    , fill "#ffffff"
+    ]
+
+  pure labels
+
+-- Icicle Chart (partition layout)
+viz_IcicleAST :: MermaidASTM NodeID
+viz_IcicleAST = do
+  root <- D3.attach "div"
+  svg <- D3.appendTo root Svg []
+  chartGroup <- D3.appendTo svg Group []
+
+  -- Draw partitions (rectangles)
+  partitions <- D3.simpleJoin chartGroup Rect [1, 2, 3, 4, 5, 6] unsafeCoerce
+  D3.setAttributes partitions
+    [ x 0.0
+    , y 0.0
+    , width 150.0
+    , height 100.0
+    , fill "#d4c4b0"
+    , fillOpacity 0.85
+    , strokeColor "#ffffff"
+    , strokeWidth 2.0
+    ]
+
+  -- Draw labels
+  labels <- D3.simpleJoin chartGroup Text [1, 2, 3, 4, 5, 6] unsafeCoerce
+  D3.setAttributes labels
+    [ x 4.0
+    , y 50.0
+    , fill "#ffffff"
+    ]
+
+  pure labels
+
+-- Treemap (space-filling hierarchy)
+viz_TreemapAST :: MermaidASTM NodeID
+viz_TreemapAST = do
+  root <- D3.attach "div"
+  svg <- D3.appendTo root Svg []
+  chartGroup <- D3.appendTo svg Group []
+
+  -- Draw tiles (rectangles)
+  tiles <- D3.simpleJoin chartGroup Rect [1, 2, 3, 4, 5, 6, 7] unsafeCoerce
+  D3.setAttributes tiles
+    [ x 0.0
+    , y 0.0
+    , width 120.0
+    , height 80.0
+    , fill "#d4c4b0"
+    , fillOpacity 0.85
+    , strokeColor "#ffffff"
+    , strokeWidth 2.0
+    ]
+
+  -- Draw labels
+  tileLabels <- D3.simpleJoin chartGroup Text [1, 2, 3, 4, 5, 6, 7] unsafeCoerce
+  D3.setAttributes tileLabels
+    [ x 2.0
+    , y 12.0
+    , fill "#ffffff"
+    ]
+
+  pure tileLabels
