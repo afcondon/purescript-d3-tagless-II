@@ -74,7 +74,7 @@ render state =
             , tocAnchor "reference" "API Reference" 0
             , tocAnchor "related" "Related Examples" 0
             ]
-        , image: Just "images/howto-bookmark-volcano.jpeg"
+        , image: Just "assets/bookmark-images/howto.jpeg"
         }
 
     -- Navigation Panel (RHS)

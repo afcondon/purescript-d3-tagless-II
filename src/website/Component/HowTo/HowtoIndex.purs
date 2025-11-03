@@ -8,13 +8,22 @@ import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
 import PSD3.RoutingDSL (routeToPath)
-import PSD3.Website.Types (Route(..))
+import PSD3.Shared.DocsHeader as DocsHeader
+import PSD3.Website.Types (Route(..), Section(..))
+import Type.Proxy (Proxy(..))
 
 -- | Howto Index page state
 type State = Unit
 
 -- | Howto Index page actions
 data Action = Initialize
+
+-- | Howto Index page slots
+type Slots =
+  ( docsHeader :: forall q. H.Slot q Void Unit
+  )
+
+_docsHeader = Proxy :: Proxy "docsHeader"
 
 -- | Guide type to distinguish how-to from best practice
 data GuideType = HowTo | BestPractice
@@ -30,35 +39,13 @@ component = H.mkComponent
       }
   }
 
-render :: State -> H.ComponentHTML Action () Aff
+render :: State -> H.ComponentHTML Action Slots Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "howto-page" ] ]
-    [ -- Header
-      HH.header
-        [ HP.classes [ HH.ClassName "howto-header" ] ]
-        [ HH.div
-            [ HP.classes [ HH.ClassName "howto-header-content" ] ]
-            [ HH.a
-                [ HP.href $ "#" <> routeToPath Home
-                , HP.classes [ HH.ClassName "howto-logo-link" ]
-                ]
-                [ HH.img
-                    [ HP.src "assets/psd3-logo-color.svg"
-                    , HP.alt "PSD3 Logo"
-                    , HP.classes [ HH.ClassName "howto-logo" ]
-                    ]
-                ]
-            , HH.nav
-                [ HP.classes [ HH.ClassName "howto-nav" ] ]
-                [ HH.a
-                    [ HP.href $ "#" <> routeToPath Home
-                    , HP.classes [ HH.ClassName "howto-nav-link" ]
-                    ]
-                    [ HH.text "← Back to Home" ]
-                ]
-            ]
-        ]
+    [ -- Docs Header
+      HH.slot_ _docsHeader unit DocsHeader.component
+        { currentSection: Just HowToSection }
 
     -- Hero section
     , HH.section
@@ -172,6 +159,6 @@ renderGuideCard guideType title description maybeRoute =
           [ HH.text description ]
       ]
 
-handleAction :: forall o. Action -> H.HalogenM State Action () o Aff Unit
+handleAction :: forall o. Action -> H.HalogenM State Action Slots o Aff Unit
 handleAction = case _ of
   Initialize -> pure unit

@@ -12,6 +12,7 @@ import PSD3 as D3
 import PSD3.Attributes (classed, fill, fontSize, viewBox, x, y, andThen, to, remove, transitionWithDuration)
 import PSD3.Data.Node (NodeID)
 import PSD3.Interpreter.MermaidAST (MermaidASTM)
+import PSD3.Shared.DocsHeader as DocsHeader
 import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.MermaidAST as MermaidAST
 import PSD3.Shared.SectionNav as SectionNav
@@ -30,10 +31,12 @@ type Slots =
   ( sectionNav :: forall q. H.Slot q Void Unit
   , tabs :: forall q. H.Slot q Void Unit
   , mermaidAST :: MermaidAST.Slot Unit
+  , docsHeader :: forall q. H.Slot q Void Unit
   )
 
 _sectionNav = Proxy :: Proxy "sectionNav"
 _tabs = Proxy :: Proxy "tabs"
+_docsHeader = Proxy :: Proxy "docsHeader"
 
 -- | Mermaid diagram for the Datum_ pattern flow
 datumPatternDiagram :: String
@@ -107,27 +110,19 @@ render :: State -> H.ComponentHTML Action Slots Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "explanation-page" ] ]
-    [ -- TOC Panel (LHS)
-      renderTOC
+    [ -- Docs Header
+      HH.slot_ _docsHeader unit DocsHeader.component
+        { currentSection: Just UnderstandingSection }
+
+    -- TOC Panel (LHS)
+    , renderTOC
         { title: "Page Contents"
         , items:
             [ tocAnchor "heading-datum-pattern" "The datum_ / Datum_ Pattern" 0
             , tocAnchor "heading-grammar" "The Grammar of D3 in SelectionM" 0
             , tocAnchor "heading-dom-to-viz" "From DOM to Visualization Elements" 0
             ]
-        , image: Just "images/understanding-bookmark-trees.jpeg"
-        }
-
-    -- Navigation Panel (RHS)
-    , HH.slot_ _sectionNav unit SectionNav.component
-        { currentSection: UnderstandingSection
-        , currentRoute: UnderstandingPatterns
-        , sectionPages:
-            [ { route: UnderstandingConcepts, label: "Concepts" }
-            , { route: UnderstandingPatterns, label: "Patterns" }
-            , { route: UnderstandingPhilosophy, label: "Philosophy" }
-            ]
-        , moduleCategories: Nothing
+        , image: Just "assets/bookmark-images/understanding.jpeg"
         }
 
     -- Main content

@@ -10,6 +10,7 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.Shared.DocsHeader as DocsHeader
 import PSD3.Shared.SectionNav as SectionNav
 import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Understanding.TOC (renderTOC, tocAnchor)
@@ -27,10 +28,12 @@ data Action = Initialize
 type Slots =
   ( sectionNav :: forall q. H.Slot q Void Unit
   , tabs :: forall q. H.Slot q Void Unit
+  , docsHeader :: forall q. H.Slot q Void Unit
   )
 
 _sectionNav = Proxy :: Proxy "sectionNav"
 _tabs = Proxy :: Proxy "tabs"
+_docsHeader = Proxy :: Proxy "docsHeader"
 
 -- | Mermaid diagram for the data visualization pipeline
 pipelineDiagram :: String
@@ -64,8 +67,12 @@ render :: State -> H.ComponentHTML Action Slots Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "explanation-page" ] ]
-    [ -- TOC Panel (LHS)
-      renderTOC
+    [ -- Docs Header
+      HH.slot_ _docsHeader unit DocsHeader.component
+        { currentSection: Just UnderstandingSection }
+
+    -- TOC Panel (LHS)
+    , renderTOC
         { title: "Page Contents"
         , items:
             [ tocAnchor "heading-0" "PS<$>D3" 0
@@ -81,19 +88,7 @@ render _ =
             , tocAnchor "heading-17" "What's a DSL? and what's an eDSL?" 1
             , tocAnchor "heading-20" "The grammar of D3..." 1
             ]
-        , image: Just "images/understanding-bookmark-trees.jpeg"
-        }
-
-    -- Section Navigation (RHS)
-    , HH.slot_ _sectionNav unit SectionNav.component
-        { currentSection: UnderstandingSection
-        , currentRoute: UnderstandingPhilosophy
-        , sectionPages:
-            [ { route: UnderstandingConcepts, label: "Concepts" }
-            , { route: UnderstandingPatterns, label: "Patterns" }
-            , { route: UnderstandingPhilosophy, label: "Philosophy" }
-            ]
-        , moduleCategories: Nothing
+        , image: Just "assets/bookmark-images/understanding.jpeg"
         }
 
     -- Main content

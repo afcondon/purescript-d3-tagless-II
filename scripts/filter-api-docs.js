@@ -92,9 +92,108 @@ function isLibraryModule(filename) {
   return LIBRARY_MODULES.has(moduleName);
 }
 
+// Quadrant navigation HTML to inject
+const QUADRANT_NAV_HTML = `
+<style>
+  .api-docs-header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0ddd4;
+    padding: 1rem 0;
+    margin-bottom: 2rem;
+  }
+  .api-docs-header-content {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+  .api-docs-header-logo {
+    height: 28px;
+    width: auto;
+  }
+  .api-docs-header-middle {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+    justify-content: center;
+  }
+  .api-docs-header-label {
+    font-family: 'Courier New', 'Courier', Monaco, monospace;
+    font-size: 0.875rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #2c1810;
+  }
+  .api-docs-header-quadrant {
+    display: grid;
+    grid-template-columns: repeat(2, 16px);
+    grid-template-rows: repeat(2, 16px);
+    gap: 4px;
+  }
+  .api-docs-header-quadrant-box {
+    width: 16px;
+    height: 16px;
+    border: 2px solid #8b7355;
+    background-color: transparent;
+    transition: all 0.2s ease;
+    cursor: pointer;
+  }
+  .api-docs-header-quadrant-box:hover {
+    background-color: #D4C9A8;
+    border-color: #E63946;
+  }
+  .api-docs-header-quadrant-box--active {
+    background-color: #E63946;
+    border-color: #E63946;
+  }
+  .api-docs-header-nav {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+  }
+  .api-docs-header-nav-link {
+    font-size: 1rem;
+    color: #666;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+  }
+  .api-docs-header-nav-link:hover {
+    color: #333;
+  }
+</style>
+<div class="api-docs-header">
+  <div class="api-docs-header-content">
+    <a href="../#/" style="display: flex; align-items: center;">
+      <img src="../assets/psd3-logo-color.svg" alt="PSD3 Logo" class="api-docs-header-logo">
+    </a>
+    <div class="api-docs-header-middle">
+      <span class="api-docs-header-label">Docs</span>
+      <div class="api-docs-header-quadrant">
+        <a href="../#/getting-started" class="api-docs-header-quadrant-box" title="Getting Started"></a>
+        <a href="../#/howto" class="api-docs-header-quadrant-box" title="How-To Guides"></a>
+        <a href="index.html" class="api-docs-header-quadrant-box api-docs-header-quadrant-box--active" title="API Reference"></a>
+        <a href="../#/understanding/concepts" class="api-docs-header-quadrant-box" title="Understanding"></a>
+      </div>
+    </div>
+    <nav class="api-docs-header-nav">
+      <a href="../#/" class="api-docs-header-nav-link">← Back to Home</a>
+    </nav>
+  </div>
+</div>
+`;
+
 function processHtmlFile(content, filename) {
   // Replace links to external modules with link to external.html
   let processed = content;
+
+  // Inject quadrant navigation after opening body tag
+  processed = processed.replace(/<body>/, `<body>${QUADRANT_NAV_HTML}`);
 
   // If this is the index page, filter out non-library modules from the list
   if (filename === 'index.html') {

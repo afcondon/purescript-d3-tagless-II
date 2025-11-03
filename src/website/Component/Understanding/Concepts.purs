@@ -8,6 +8,7 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.Shared.DocsHeader as DocsHeader
 import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.SectionNav as SectionNav
 import PSD3.Understanding.TOC (renderTOC, tocAnchor)
@@ -22,10 +23,12 @@ data Action = Initialize
 type Slots =
   ( sectionNav :: forall q. H.Slot q Void Unit
   , tabs :: forall q. H.Slot q Void Unit
+  , docsHeader :: forall q. H.Slot q Void Unit
   )
 
 _sectionNav = Proxy :: Proxy "sectionNav"
 _tabs = Proxy :: Proxy "tabs"
+_docsHeader = Proxy :: Proxy "docsHeader"
 
 -- | Mermaid diagram for the Type-Safe Attribute System
 typeSafeAttributeDiagram :: String
@@ -122,8 +125,12 @@ render :: State -> H.ComponentHTML Action Slots Aff
 render _ =
   HH.div
     [ HP.classes [ HH.ClassName "explanation-page" ] ]
-    [ -- TOC Panel (LHS)
-      renderTOC
+    [ -- Docs Header
+      HH.slot_ _docsHeader unit DocsHeader.component
+        { currentSection: Just UnderstandingSection }
+
+    -- TOC Panel (LHS)
+    , renderTOC
         { title: "Page Contents"
         , items:
             [ tocAnchor "heading-finally-tagless" "Finally Tagless" 0
@@ -131,19 +138,7 @@ render _ =
             , tocAnchor "heading-capabilities" "Capabilities & Interpreters" 0
             , tocAnchor "heading-type-safe" "Type-Safe Attribute System" 0
             ]
-        , image: Just "images/understanding-bookmark-trees.jpeg"
-        }
-
-    -- Navigation Panel (RHS)
-    , HH.slot_ _sectionNav unit SectionNav.component
-        { currentSection: UnderstandingSection
-        , currentRoute: UnderstandingConcepts
-        , sectionPages:
-            [ { route: UnderstandingConcepts, label: "Architecture" }
-            , { route: UnderstandingPatterns, label: "Patterns" }
-            , { route: UnderstandingPhilosophy, label: "Philosophy" }
-            ]
-        , moduleCategories: Nothing
+        , image: Just "assets/bookmark-images/understanding.jpeg"
         }
 
     -- Main content

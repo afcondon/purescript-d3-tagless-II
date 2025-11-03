@@ -123,7 +123,7 @@ render _ =
                 (routeToPath HowtoIndex)
             , renderDocBoxExternal
                 "API Reference"
-                "Complete technical documentation with type signatures"
+                "Pursuit-style documentation of the library with type signatures"
                 "api/index.html"
             , renderDocBox
                 "Understanding"

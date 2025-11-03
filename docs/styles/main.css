@@ -24,6 +24,12 @@
   --color-text-dark: #333333;       /* Primary text */
   --color-text-muted: #666666;      /* Secondary text */
 
+  /* Gray Scale */
+  --color-gray-darker: #2c1810;     /* Dark brown-gray for text */
+  --color-gray-dark: #4a3f35;       /* Medium brown-gray for text */
+  --color-gray-medium: #8b7355;     /* Medium brown-gray for borders */
+  --color-gray-light: #c9b8a0;      /* Light brown-gray for subtle borders */
+
   /* Typography */
   --font-headers: Inter, system-ui, -apple-system, sans-serif;
   --font-body: -apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', sans-serif;

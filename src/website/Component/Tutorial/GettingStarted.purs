@@ -7,9 +7,10 @@ import Effect.Aff (Aff)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Properties as HP
+import PSD3.Shared.DocsHeader as DocsHeader
+import PSD3.Shared.Footer as Footer
 import PSD3.Shared.Mermaid (mermaidDiagram, triggerMermaidRendering)
 import PSD3.Shared.SectionNav as SectionNav
-import PSD3.Shared.Footer as Footer
 import PSD3.Understanding.TOC (renderTOC, tocAnchor)
 import PSD3.Website.Types (Route(..), Section(..))
 import Type.Proxy (Proxy(..))
@@ -21,9 +22,12 @@ type State = Unit
 data Action = Initialize
 
 -- | Child component slots
-type Slots = ( sectionNav :: forall q. H.Slot q Void Unit )
+type Slots = ( sectionNav :: forall q. H.Slot q Void Unit
+             , docsHeader :: forall q. H.Slot q Void Unit
+   )
 
 _sectionNav = Proxy :: Proxy "sectionNav"
+_docsHeader = Proxy :: Proxy "docsHeader"
 
 -- | Mermaid diagram for the wizard workflow decision tree
 wizardWorkflowDiagram :: String
@@ -71,31 +75,25 @@ component = H.mkComponent
 render :: State -> H.ComponentHTML Action Slots Aff
 render _ =
   HH.div
-    [ HP.classes [ HH.ClassName "tutorial-page" ] ]
-    [ -- TOC Panel (LHS)
-      renderTOC
-        { title: "Page Contents"
-        , items:
-            [ tocAnchor "installation" "Installation" 0
-            , tocAnchor "prerequisites" "Prerequisites" 1
-            , tocAnchor "setup" "Project Setup" 0
-            , tocAnchor "wizard" "Using the Wizard" 0
-            , tocAnchor "understanding" "Understanding the Code" 0
-            , tocAnchor "datum-pattern" "The Datum_ Pattern" 1
-            , tocAnchor "next-steps" "Next Steps" 0
-            ]
-        , image: Just "images/tutorial-bookmark-balloons.jpeg"
-        }
+    [ HP.classes [ HH.ClassName "howto-page" ] ]
+    [ -- Docs Header
+        HH.slot_ _docsHeader unit DocsHeader.component
+            { currentSection: Just TutorialSection }
 
-    -- Navigation Panel (RHS)
-    , HH.slot_ _sectionNav unit SectionNav.component
-        { currentSection: TutorialSection
-        , currentRoute: GettingStarted
-        , sectionPages:
-            [ { route: GettingStarted, label: "Getting Started" }
+    -- Hero section
+    , HH.section
+        [ HP.classes [ HH.ClassName "howto-hero" ] ]
+        [ HH.div
+            [ HP.classes [ HH.ClassName "howto-hero-content" ] ]
+            [ HH.h1
+                [ HP.classes [ HH.ClassName "howto-hero-title" ] ]
+                [ HH.text "Getting Started" ]
+            , HH.p
+                [ HP.classes [ HH.ClassName "howto-hero-description" ] ]
+                [ HH.text "To get a feel for writing with this DSL we provide a command-line wizard bundled with the repo, a web-based wizard that you can run right here and you can also find instructions here to write your own visualizations from scratch." ]
             ]
-        , moduleCategories: Nothing
-        }
+        ]
+
 
     -- Page introduction
     , HH.section
@@ -348,35 +346,6 @@ A.radius (\\(d :: Datum_) _ -> datum_.y d * 2.0)""" ]
             , HH.text " are required to help PureScript's type checker find the correct "
             , HH.code_ [ HH.text "ToAttr" ]
             , HH.text " instance."
-            ]
-        ]
-
-    -- Next Steps section
-    , HH.section
-        [ HP.classes [ HH.ClassName "tutorial-section" ]
-        , HP.id "next-steps"
-        ]
-        [ HH.h2
-            [ HP.classes [ HH.ClassName "tutorial-section-title" ] ]
-            [ HH.text "Next Steps" ]
-        , HH.p_
-            [ HH.text "Now that you have PS<$>D3 installed and working, explore these resources:" ]
-        , HH.ul_
-            [ HH.li_
-                [ HH.text "Check out the "
-                , HH.a [ HP.href "#/howto" ] [ HH.text "How-to Guides" ]
-                , HH.text " for step-by-step instructions on building specific visualizations"
-                ]
-            , HH.li_
-                [ HH.text "Read the "
-                , HH.a [ HP.href "#/about" ] [ HH.text "Explanation pages" ]
-                , HH.text " to understand the concepts behind PS<$>D3"
-                ]
-            , HH.li_
-                [ HH.text "Browse the "
-                , HH.a [ HP.href "#/reference" ] [ HH.text "API Reference" ]
-                , HH.text " for detailed documentation of all functions and types"
-                ]
             ]
         ]
 

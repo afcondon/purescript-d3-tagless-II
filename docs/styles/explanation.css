@@ -2,8 +2,8 @@
 
 .explanation-page {
   min-height: 100vh;
-  background-color: var(--color-beige-base);
-  padding: 2rem 1rem;
+  background-color: #f5f1e8; /* Match howto-page background */
+  padding: 0;
   position: relative;
 }
 
@@ -11,6 +11,7 @@
 .explanation-content {
   max-width: 52rem;
   margin: 0 auto;
+  padding-top: 2rem;
 }
 
 /* Understanding Section Tab Navigation */
