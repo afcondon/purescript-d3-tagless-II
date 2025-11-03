@@ -28,6 +28,7 @@ import PSD3.Understanding.SimpleCharts2 as SimpleCharts2
 import PSD3.Understanding.DataFlowViz as DataFlowViz
 import PSD3.Understanding.Hierarchies as Hierarchies
 import PSD3.Understanding.Interpreters as Interpreters
+import PSD3.Component.MermaidDiagrams as MermaidDiagrams
 import PSD3.Understanding.Movement as Movement
 import PSD3.CodeExplorer.CodeExplorationPage as CodeExplorationPage
 import PSD3.RoutingDSL (routing, routeToPath)
@@ -69,6 +70,7 @@ type Slots =
   , movement :: forall q. H.Slot q Void Unit
   , hierarchies :: forall q. H.Slot q Void Unit
   , interpreters :: forall q. H.Slot q Void Unit
+  , mermaidDiagrams :: forall q. H.Slot q Void Unit
   , codeExplorer :: forall q. H.Slot q Void Unit
   , codeExploration :: forall q. H.Slot q Void String
   , wealthHealth :: forall q. H.Slot q Void Unit
@@ -93,6 +95,7 @@ _dataFlowViz = Proxy :: Proxy "dataFlowViz"
 _movement = Proxy :: Proxy "movement"
 _hierarchies = Proxy :: Proxy "hierarchies"
 _interpreters = Proxy :: Proxy "interpreters"
+_mermaidDiagrams = Proxy :: Proxy "mermaidDiagrams"
 _codeExplorer = Proxy :: Proxy "codeExplorer"
 _codeExploration = Proxy :: Proxy "codeExploration"
 _wealthHealth = Proxy :: Proxy "wealthHealth"
@@ -173,6 +176,9 @@ renderPage route = case spy "Route is" route of
 
   Interpreters ->
     HH.slot_ _interpreters unit Interpreters.component unit
+
+  MermaidDiagrams ->
+    HH.slot_ _mermaidDiagrams unit MermaidDiagrams.component unit
 
   CodeExplorer ->
     HH.slot_ _codeExplorer unit CodeExplorer.component unit

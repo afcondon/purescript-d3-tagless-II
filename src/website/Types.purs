@@ -96,6 +96,7 @@ data Route
   | Movement
   | Hierarchies
   | Interpreters
+  | MermaidDiagrams  -- Mermaid AST visualization examples
   | CodeExplorer
   | Explore String  -- Code exploration page for a specific snippet
   | WealthHealth    -- Wealth & Health of Nations visualization
@@ -125,6 +126,7 @@ instance showRoute :: Show Route where
   show Movement = "Movement & Transition"
   show Hierarchies = "Hierarchies"
   show Interpreters = "Interpreters"
+  show MermaidDiagrams = "Mermaid AST Diagrams"
   show CodeExplorer = "Code Explorer"
   show (Explore snippetId) = "Explore: " <> snippetId
   show WealthHealth = "Wealth & Health of Nations"

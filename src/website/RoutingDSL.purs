@@ -33,6 +33,7 @@ routes =
   <|> movement
   <|> hierarchies
   <|> interpreters
+  <|> mermaidDiagrams
   <|> codeExplorer
   <|> explore
   <|> wealthHealth
@@ -112,6 +113,10 @@ hierarchies = Hierarchies <$ lit "hierarchies" <* end
 interpreters :: Match Route
 interpreters = Interpreters <$ lit "interpreters" <* end
 
+-- | Match: /mermaid-diagrams
+mermaidDiagrams :: Match Route
+mermaidDiagrams = MermaidDiagrams <$ lit "mermaid-diagrams" <* end
+
 -- | Match: /code-explorer
 codeExplorer :: Match Route
 codeExplorer = CodeExplorer <$ lit "code-explorer" <* end
@@ -168,6 +173,7 @@ routeToPath DataFlowViz = "/data-flow"
 routeToPath Movement = "/movement"
 routeToPath Hierarchies = "/hierarchies"
 routeToPath Interpreters = "/interpreters"
+routeToPath MermaidDiagrams = "/mermaid-diagrams"
 routeToPath CodeExplorer = "/code-explorer"
 routeToPath (Explore snippetId) = "/explore/" <> snippetId
 routeToPath WealthHealth = "/wealth-health"

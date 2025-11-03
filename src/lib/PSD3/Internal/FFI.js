@@ -837,15 +837,10 @@ export function readSimulationVariables_(simulation) {
     velocityDecay: simulation.velocityDecay()
   }
 }
-unpin = d => {
-  d.fx = null
-  d.fy = null
-  return d;
-}
 // we create an object that contains only those fields that we want to override what was in the existing selection's data
 // concretely, if we want update to change fx/fy status then we put that data in here otherwise it will be unchanged
 // no matter what the incoming data object has for fx/fy
-getBaseForAssign = (newNodeMap, key) => {
+export const getBaseForAssign = (newNodeMap, key) => {
   let newnode = newNodeMap.get(key)
   if (newnode) {
     var updatedCount;

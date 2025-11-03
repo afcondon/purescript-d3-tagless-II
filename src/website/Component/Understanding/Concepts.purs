@@ -139,7 +139,7 @@ render _ =
         { currentSection: UnderstandingSection
         , currentRoute: UnderstandingConcepts
         , sectionPages:
-            [ { route: UnderstandingConcepts, label: "Concepts" }
+            [ { route: UnderstandingConcepts, label: "Architecture" }
             , { route: UnderstandingPatterns, label: "Patterns" }
             , { route: UnderstandingPhilosophy, label: "Philosophy" }
             ]
@@ -155,7 +155,7 @@ render _ =
         -- Page title
         , HH.h1
             [ HP.classes [ HH.ClassName "explanation-title" ] ]
-            [ HH.text "Core Concepts" ]
+            [ HH.text "Technical Architecture" ]
 
         -- Finally Tagless
         , HH.section
