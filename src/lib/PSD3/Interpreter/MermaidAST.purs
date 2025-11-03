@@ -33,8 +33,9 @@ escapeLabel = replaceAll (Pattern "\"") (Replacement "'")
 runMermaidAST :: MermaidASTM NodeID -> Effect String
 runMermaidAST (MermaidASTM state) = do
   Tuple _ finalState <- runStateT state initialState
+  let themeConfig = "%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'monospace'}, 'look':'handDrawn', 'flowchart':{'curve':'basis'}}}%%\n"
   let styleDefinitions = generateStyleDefinitions finalState.nodeStyles
-  pure $ "graph TD\n" <> finalState.mermaidCode <> styleDefinitions
+  pure $ themeConfig <> "graph TD\n" <> finalState.mermaidCode <> styleDefinitions
   where
     initialState = { nodeCounter: 0, mermaidCode: "", nodeStyles: [] }
 
@@ -67,15 +68,16 @@ addEdge fromId toId = do
   modify_ (\s -> s { mermaidCode = s.mermaidCode <> line })
 
 -- | Generate style class definitions for Mermaid
+-- | Using vibrant colors from Spectral scheme (matching grouped bar chart)
 generateStyleDefinitions :: Array (Tuple Int String) -> String
 generateStyleDefinitions _ =
   "\n    %% Style definitions\n" <>
-  "    classDef selectOp fill:#e8f4f8,stroke:#4a90a4,stroke-width:2px\n" <>
-  "    classDef appendOp fill:#f0f8e8,stroke:#6b9b4a,stroke-width:2px\n" <>
-  "    classDef joinOp fill:#fff4e6,stroke:#d4a574,stroke-width:2px\n" <>
-  "    classDef attrOp fill:#f8f0ff,stroke:#9b7ab8,stroke-width:2px\n" <>
-  "    classDef controlOp fill:#ffe8e8,stroke:#c47676,stroke-width:2px\n" <>
-  "    classDef transitionOp fill:#fff0f5,stroke:#b88ba4,stroke-width:2px\n"
+  "    classDef selectOp fill:#abdda4,stroke:#66c2a5,stroke-width:2px\n" <>
+  "    classDef appendOp fill:#fee08b,stroke:#fdae61,stroke-width:2px\n" <>
+  "    classDef joinOp fill:#f46d43,stroke:#d53e4f,stroke-width:2px\n" <>
+  "    classDef attrOp fill:#e6f598,stroke:#abdda4,stroke-width:2px\n" <>
+  "    classDef controlOp fill:#66c2a5,stroke:#3288bd,stroke-width:2px\n" <>
+  "    classDef transitionOp fill:#fdae61,stroke:#f46d43,stroke-width:2px\n"
 
 instance mermaidTagless :: SelectionM NodeID MermaidASTM where
   attach selector = do
