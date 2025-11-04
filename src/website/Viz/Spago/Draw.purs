@@ -2,26 +2,22 @@ module D3.Viz.Spago.Draw where
 
 import Prelude
 
-import PSD3.Internal.Attributes.Sugar (classed, remove, strokeColor, transform', x1, x2, y1, y2)
+import PSD3.Internal.Attributes.Sugar (classed)
 import PSD3.Internal.Types (D3Selection_, D3This_, Datum_, Element(..))
-import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, enterAttrs, svgAttrs, updateAttrs)
-import D3.Viz.Spago.Model (datum_, link_)
-import PSD3.Internal.FFI (keyIsID_, simdrag_)
-import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute)
-import PSD3.Internal.Simulation.Types (Step(..))
+import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, svgAttrs)
+import D3.Viz.Spago.Model (datum_)
+import D3.Viz.Spago.Render (spagoRenderCallbacks)
+import PSD3.Internal.FFI (keyIsID_)
+import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
-import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, updateJoin)
-import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate, addTickFunction, update)
+import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on)
+import PSD3.Capabilities.Simulation (class SimulationM2, SimulationUpdate)
+import PSD3.Simulation.Update (genericUpdateSimulation)
 import PSD3.Internal.Attributes.Instances (Label)
-import PSD3.Data.Node (D3_SimulationNode, D3Link_Unswizzled, D3Link_Swizzled, NodeID)
-import Data.Array (filter, (:))
-import Data.Array as Array
+import PSD3.Data.Node (D3_SimulationNode, D3Link_Unswizzled, NodeID)
 import Data.Map (Map)
-import Data.Map as Map
-import Data.Maybe (Maybe(..), fromMaybe)
+import Data.Maybe (Maybe(..))
 import Data.Set (Set)
-import Data.Set as Set
-import Data.String as String
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
 import PSD3.CodeExplorer.Actions (VizEvent(..))
@@ -31,20 +27,8 @@ import Web.Event.Internal.Types (Event)
 getVizEventFromClick :: Event -> Datum_ -> D3This_ -> VizEvent
 getVizEventFromClick e d t = NodeClick (datum_.nodetype d) (datum_.id d)
 
--- | Create a CSS class attribute from tags
--- | Tags from the tag map are joined with spaces and added as CSS classes
--- | This allows tags to automatically affect node styling via CSS
-makeTagClassesAttr :: Maybe (Map NodeID (Set String)) -> SelectionAttribute
-makeTagClassesAttr Nothing = classed ""
-makeTagClassesAttr (Just tagMap) = classed tagClassesFn
-  where
-    tagClassesFn :: Datum_ -> String
-    tagClassesFn d =
-      let nodeId = datum_.id d
-          tags = fromMaybe Set.empty $ Map.lookup nodeId tagMap
-      in String.joinWith " " $ Array.fromFoldable tags
-
--- | recipe for this force layout graph
+-- | Initialize the SVG structure for Spago visualization
+-- | Creates the zoom/pan container and group elements for nodes and links
 initialize :: forall m.
   Bind m =>
   MonadEffect m =>
@@ -53,29 +37,46 @@ initialize :: forall m.
   m { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
 initialize = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
-  root  <- attach "div.svg-container" -- typeclass here determined by D3Selection_ in SimulationM2
+  root  <- attach "div.svg-container"
 
-  svg   <- appendTo root Svg (svgAttrs w h) 
+  svg   <- appendTo root Svg (svgAttrs w h)
   inner <- appendTo svg  Group []
   _     <- inner `on` Drag DefaultDrag
   _     <- svg   `on` Zoom { extent : ZoomExtent { top: 0.0, left: 0.0 , bottom: h, right: w }
-                           , scale  : ScaleExtent 0.1 4.0 -- wonder if ScaleExtent ctor could be range operator `..`
+                           , scale  : ScaleExtent 0.1 4.0
                            , name   : "spago"
                            , target : inner
                            }
-  -- create the <g>'s to hold the nodes and links and pass these selection onward
-  -- so that the data can be joined here each time it is changed
-  -- NB links first because it looks best if links under nodes, but can be changed later with setAttributes linksGroup [ raise ] 
-  linksGroup <- appendTo inner Group [ classed "links" ] 
+  -- Create groups for nodes and links (links first so they render under nodes)
+  linksGroup <- appendTo inner Group [ classed "links" ]
   nodesGroup <- appendTo inner Group [ classed "nodes" ]
 
   pure { nodes: Just nodesGroup, links: Just linksGroup }
 
--- | Update simulation using the new declarative update API
+-- | Update simulation using the fully generic library updateSimulation
 -- |
--- | This replaces the old updateSimulation that manually managed data merging,
--- | link swizzling, and force engagement. Now the `update` function handles all
--- | internal complexity, we just do DOM operations and tick functions.
+-- | This is now a thin wrapper that delegates to the library's genericUpdateSimulation
+-- | with Spago-specific render callbacks. The library guarantees correct ordering and
+-- | state integrity.
+-- |
+-- | ## What this function does:
+-- | 1. Call library's genericUpdateSimulation with Spago render callbacks
+-- | 2. That's it! The library handles everything else:
+-- |    - SimulationM2 update API (data merging, swizzling, forces)
+-- |    - General Update Pattern (enter/update/exit/merge)
+-- |    - Tick function registration
+-- |
+-- | ## What the visualization provides (via spagoRenderCallbacks):
+-- | - How to create nodes (Group → Circle + Text)
+-- | - How to update nodes
+-- | - How to create/update links
+-- | - What attributes to apply on tick
+-- |
+-- | ## Impossible to mess up because:
+-- | - Library controls the flow
+-- | - Callbacks are declarative ("what" not "when")
+-- | - No direct access to simulation state
+-- | - No way to skip steps or call in wrong order
 updateSimulation :: forall m d.
   Bind m =>
   MonadEffect m =>
@@ -86,87 +87,27 @@ updateSimulation :: forall m d.
   } ->
   { nodes :: Array (D3_SimulationNode d)
   , links :: Array D3Link_Unswizzled
-  , nodeFilter :: Maybe (D3_SimulationNode d -> Boolean)  -- Optional node predicate filter
-  , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)    -- Optional link predicate filter
+  , nodeFilter :: Maybe (D3_SimulationNode d -> Boolean)
+  , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)
   , activeForces :: Set Label
   , linksWithForce :: Datum_ -> Boolean
   } ->
   SpagoSceneAttributes ->
   m Unit
-updateSimulation { nodes: Just nodesGroup, links: Just linksGroup } dataConfig attrs = do
-  -- Step 1: Use the new update API to handle data merging, swizzling, and force engagement
-  -- Now with predicate filters, the update function handles filtering internally
-  -- This returns enhanced data with swizzled links ready for DOM binding
-  enhanced <- update
+updateSimulation selections dataConfig attrs =
+  genericUpdateSimulation
+    selections
+    Group  -- Node element type
+    Line   -- Link element type
     { nodes: Just dataConfig.nodes
     , links: Just dataConfig.links
-    , nodeFilter: dataConfig.nodeFilter  -- Pass through node filter
-    , linkFilter: dataConfig.linkFilter  -- Pass through link filter
+    , nodeFilter: dataConfig.nodeFilter
+    , linkFilter: dataConfig.linkFilter
     , activeForces: Just dataConfig.activeForces
     , config: Nothing
     , keyFn: keyIsID_
     }
-
-  -- Step 2: Open the selections for DOM operations
-  node <- openSelection nodesGroup (show Group)
-  link <- openSelection linksGroup (show Line)
-
-  -- Step 3: Apply General Update Pattern to nodes
-  node' <- updateJoin node Group enhanced.nodes keyIsID_
-
-  -- Create tag-based CSS class attribute
-  let tagClassesAttr = makeTagClassesAttr attrs.tagMap
-      enterAttrsWithTags = tagClassesAttr : enterAttrs
-      updateAttrsWithTags = tagClassesAttr : updateAttrs
-
-  -- Enter: create new groups with circles and text
-  nodeEnter <- appendTo node'.enter Group enterAttrsWithTags
-  _ <- appendTo nodeEnter Circle attrs.circles
-  void $ appendTo nodeEnter Text attrs.labels
-
-  -- Exit: remove old nodes
-  setAttributes node'.exit [ remove ]
-
-  -- Update: modify existing nodes (including tag classes)
-  setAttributes node'.update updateAttrsWithTags
-  updateCirclesSelection <- selectUnder node'.update (show Circle)
-  setAttributes updateCirclesSelection attrs.circles
-  updateLabelsSelection <- selectUnder node'.update (show Text)
-  setAttributes updateLabelsSelection attrs.labels
-
-  -- Merge enter and update selections
-  mergedNodeSelection <- mergeSelections nodeEnter node'.update
-
-  -- Apply drag behavior
-  void $ mergedNodeSelection `on` Drag (CustomDrag "spago" simdrag_)
-
-  -- Step 4: Apply General Update Pattern to links
-  -- NOTE: enhanced.links are D3LinkSwizzled, not Datum_, so we can't apply dataConfig.linksWithForce here
-  -- TODO: In future, implement fine-grained link force filtering in the update API
-  -- For now, all swizzled links are displayed
-  link' <- updateJoin link Line enhanced.links keyIsID_
-
-  -- Enter: create new lines
-  linkEnter <- appendTo link'.enter Line [ classed link_.linkClass, strokeColor link_.color ]
-  setAttributes linkEnter [ classed "enter" ]
-
-  -- Exit: remove old links
-  setAttributes link'.exit [ remove ]
-
-  -- Update: modify existing links
-  setAttributes link'.update [ classed "update" ]
-
-  -- Merge enter and update selections
-  mergedLinksShown <- mergeSelections linkEnter link'.update
-
-  -- Step 5: Set up tick functions for animation
-  -- Note: We always add tick functions with the same labels, which replaces them
-  -- This is necessary because selections change when doing enter/update/exit
-  addTickFunction "nodes" $
-    Step mergedNodeSelection [ transform' datum_.translateNode ]
-  addTickFunction "links" $
-    Step mergedLinksShown [ x1 (_.x <<< link_.source), y1 (_.y <<< link_.source), x2 (_.x <<< link_.target), y2 (_.y <<< link_.target) ]
-
--- Fallback when selections are missing
-updateSimulation _ _ _ = pure unit
+    keyIsID_
+    attrs
+    spagoRenderCallbacks
 

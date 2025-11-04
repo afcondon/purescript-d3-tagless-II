@@ -31,8 +31,8 @@ module PSD3.CodeExplorer where
 
 import Prelude
 
-import Control.Monad.State (class MonadState, get)
-import Data.Array (filter, foldl, (:))
+import Control.Monad.State (class MonadState)
+import Data.Array ((:))
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.String as String
@@ -53,6 +53,7 @@ import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Internal.Simulation.Types (initialSimulationState)
 import PSD3.Internal.Types (MouseEvent(..))
 import PSD3.Interpreter.D3 (evalEffectSimulation, runWithD3_Simulation)
+import PSD3.Simulation.RunSimulation as LibRunSim
 import PSD3.CodeExplorer.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..), VizEvent(..))
 import PSD3.CodeExplorer.Data (readModelData)
 import PSD3.CodeExplorer.Forces (forceLibrary)
@@ -290,48 +291,25 @@ runSimulation :: forall m.
   MonadEffect m =>
   MonadState State m =>
   m Unit
-runSimulation = do
-  state <- get
-  let staging = state.staging
-      allModelNodes = getModelNodes state  -- Full dataset, NOT pre-filtered
-      allModelLinks = getModelLinks state  -- Full dataset, NOT pre-filtered
-      nodeFilter = state.scene.chooseNodes  -- Filter predicate
-      linkFilter = state.scene.linksShown   -- Filter predicate
-      linkForce = state.scene.linksActive   -- Which links exert force
-      maybeListener = state.eventListener
-      sceneAttributes = state.scene.attributes
-      activeForces = state.scene.activeForces
-      nodeInitializers = state.scene.nodeInitializerFunctions
-
-  -- STEP 1: Filter - Apply scene's node filter predicate
-  -- Tree scenes need only modules in the dependency tree, not all 884 mixed nodes/packages
-  let filteredNodes = filter nodeFilter allModelNodes
-
-  -- STEP 2: Initialize - Run initializers on filtered data
-  -- Tree layouts expect homogeneous pre-filtered data, not mixed datasets
-  let initializedNodes = foldl (\nodes fn -> fn nodes) filteredNodes nodeInitializers
-
-  -- Construct callback from listener (or dummy if not yet initialized)
-  let callback = case maybeListener of
-        Just listener -> simulationEvent listener
-        Nothing -> x 0.0  -- dummy during initialization
-      -- Add callback and tagMap to scene attributes
-      attributesWithCallback = sceneAttributes {
-        circles = callback : sceneAttributes.circles
+runSimulation = runWithD3_Simulation do
+  LibRunSim.runSimulationFromState
+    -- Extract selections from state
+    (_.staging.selections)
+    -- Extract scene configuration from state
+    (_.scene)
+    -- Extract model nodes from state
+    getModelNodes
+    -- Extract model links from state
+    getModelLinks
+    -- Enhance attributes with callbacks and tags
+    (\attrs state -> do
+      let callback = case state.eventListener of
+            Just listener -> simulationEvent listener
+            Nothing -> x 0.0  -- dummy during initialization
+      attrs {
+        circles = callback : attrs.circles
       , tagMap = Just state.tags  -- Pass tags for automatic CSS class propagation
       }
-
-  -- STEP 3: Simulate - Pass initialized nodes to SimulationM2
-  -- We pass nodeFilter: Nothing because filtering already happened in Step 1
-  runWithD3_Simulation do
+    )
+    -- Visualization-specific updateSimulation
     Graph.updateSimulation
-      staging.selections
-      { nodes: initializedNodes          -- Already filtered (Step 1) and initialized (Step 2)
-      , links: allModelLinks             -- Full link dataset
-      , nodeFilter: Nothing              -- Don't filter again - already done in Step 1
-      , linkFilter: Just linkFilter      -- Links still need filtering (no initializers for links)
-      , activeForces: activeForces       -- Which forces to enable
-      , linksWithForce: linkForce        -- Which links should exert force
-      }
-      attributesWithCallback
-    start
