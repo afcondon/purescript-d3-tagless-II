@@ -2,6 +2,8 @@ module PSD3.Component.Example where
 
 import Prelude
 
+import Control.Monad (void)
+
 import Affjax.ResponseFormat as ResponseFormat
 import Affjax.Web as AJAX
 import D3.Viz.AnimatedRadialTree as AnimatedRadialTree
@@ -21,6 +23,11 @@ import D3.Viz.FpFtw.TopologicalSort as TopologicalSort
 import D3.Viz.Hierarchies as Hierarchies
 import D3.Viz.LesMiserables as LesMis
 import D3.Viz.LesMiserablesGUP as LesMisGUP
+import D3.Viz.LesMiserablesGUP.Model (LesMisRawModel)
+import PSD3.Internal.Types as PSD3Types
+import PSD3.Data.Node (D3_SimulationNode(..))
+import PSD3.Capabilities.Selection as PSD3Selection
+import Halogen.HTML.Events as HE
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
 import D3.Viz.Sankey.Model (energyData)
 import D3.Viz.SankeyDiagram as Sankey
@@ -56,9 +63,16 @@ type State =
   { exampleId :: String
   , simulation :: D3SimulationState_
   , sankeyLayout :: SankeyLayoutState_
+  -- LesMisGUP-specific state for interactive controls
+  , lesMisData :: Maybe LesMisRawModel
+  , lesMisVisibleGroups :: Set.Set Int
+  , lesMisActiveForces :: Set.Set String
   }
 
-data Action = Initialize
+data Action
+  = Initialize
+  | ToggleGroup Int           -- Toggle visibility of a character group
+  | ToggleForce String        -- Toggle a force on/off
 
 forces = {
     manyBodyNeg: createForce "many body negative" (RegularForce ForceManyBody) allNodes [ F.strength (-40.0) ]
@@ -73,6 +87,10 @@ component = H.mkComponent
       { exampleId
       , simulation: initialSimulationState (initialize [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ])
       , sankeyLayout: initialSankeyLayoutState_
+      -- LesMisGUP initial state - all groups visible, all forces active
+      , lesMisData: Nothing
+      , lesMisVisibleGroups: Set.fromFoldable [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+      , lesMisActiveForces: Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -181,8 +199,13 @@ handleAction = case _ of
         let graph = readGraphFromFileContents response
         let forcesArray = [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
             activeForces = Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
+
+        -- Draw initial visualization
         runWithD3_Simulation do
-          LesMisGUP.drawSimplified forcesArray activeForces graph "#example-viz"
+          void $ LesMisGUP.drawSimplified forcesArray activeForces graph "#example-viz"
+
+        -- Store model data (selections will be queried from DOM when needed)
+        H.modify_ _ { lesMisData = Just graph }
         pure unit
 
       "topological-sort" -> do
@@ -235,6 +258,60 @@ handleAction = case _ of
         pure unit
 
       _ -> log $ "Example: Unknown example ID: " <> state.exampleId
+
+  ToggleGroup groupId -> do
+    state <- H.get
+    -- Toggle the group in/out of visible set
+    let newVisibleGroups = if Set.member groupId state.lesMisVisibleGroups
+                           then Set.delete groupId state.lesMisVisibleGroups
+                           else Set.insert groupId state.lesMisVisibleGroups
+    H.modify_ _ { lesMisVisibleGroups = newVisibleGroups }
+
+    -- Call updateSimulation with filtered data
+    case state.lesMisData of
+      Just model -> do
+        runWithD3_Simulation do
+          -- Get selections from DOM (they were created by drawSimplified)
+          root <- PSD3Selection.attach "#example-viz"
+          nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
+          linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
+
+          LesMisGUP.updateSimulation
+            { nodes: Just nodesGroup, links: Just linksGroup }
+            { nodes: model.nodes
+            , links: model.links
+            , nodeFilter: Just (\(D3SimNode node) -> Set.member node.group newVisibleGroups)
+            , linkFilter: Nothing
+            , activeForces: state.lesMisActiveForces
+            }
+      _ -> log "ToggleGroup: No model data available"
+
+  ToggleForce forceLabel -> do
+    state <- H.get
+    -- Toggle the force in/out of active set
+    let newActiveForces = if Set.member forceLabel state.lesMisActiveForces
+                          then Set.delete forceLabel state.lesMisActiveForces
+                          else Set.insert forceLabel state.lesMisActiveForces
+    H.modify_ _ { lesMisActiveForces = newActiveForces }
+
+    -- Call updateSimulation with new force configuration
+    case state.lesMisData of
+      Just model -> do
+        runWithD3_Simulation do
+          -- Get selections from DOM (they were created by drawSimplified)
+          root <- PSD3Selection.attach "#example-viz"
+          nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
+          linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
+
+          LesMisGUP.updateSimulation
+            { nodes: Just nodesGroup, links: Just linksGroup }
+            { nodes: model.nodes
+            , links: model.links
+            , nodeFilter: Just (\(D3SimNode node) -> Set.member node.group state.lesMisVisibleGroups)
+            , linkFilter: Nothing
+            , activeForces: newActiveForces
+            }
+      _ -> log "ToggleForce: No model data available"
 
 -- | Example metadata
 type ExampleMeta =
@@ -368,7 +445,8 @@ render state =
             [ HP.classes [ HH.ClassName "example-content" ] ]
             [ HH.div
                 [ HP.classes [ HH.ClassName "example-viz-panel" ] ]
-                [ HH.div
+                [ renderLesMisControls state  -- Controls for lesmisgup
+                , HH.div
                     [ HP.id "example-viz"
                     , HP.classes [ HH.ClassName "example-viz" ]
                     ]
@@ -388,6 +466,51 @@ render state =
                 ]
             ]
         ]
+
+-- | Render interactive controls for LesMisGUP example
+renderLesMisControls :: forall m. State -> H.ComponentHTML Action () m
+renderLesMisControls state =
+  if state.exampleId == "lesmisgup"
+  then
+    HH.div
+      [ HP.classes [ HH.ClassName "lesmis-controls" ] ]
+      [ HH.div
+          [ HP.classes [ HH.ClassName "control-section" ] ]
+          [ HH.h3_ [ HH.text "Character Groups" ]
+          , HH.div
+              [ HP.classes [ HH.ClassName "button-group" ] ]
+              (Data.Array.range 0 10 <#> \groupId ->
+                let isActive = Set.member groupId state.lesMisVisibleGroups
+                in HH.button
+                  [ HP.classes [ HH.ClassName if isActive then "active" else "inactive" ]
+                  , HE.onClick \_ -> ToggleGroup groupId
+                  ]
+                  [ HH.text $ "Group " <> show groupId ]
+              )
+          ]
+      , HH.div
+          [ HP.classes [ HH.ClassName "control-section" ] ]
+          [ HH.h3_ [ HH.text "Forces" ]
+          , HH.div
+              [ HP.classes [ HH.ClassName "button-group" ] ]
+              [ renderForceButton "many body negative" state.lesMisActiveForces
+              , renderForceButton "collision" state.lesMisActiveForces
+              , renderForceButton "center" state.lesMisActiveForces
+              , renderForceButton linksForceName_ state.lesMisActiveForces
+              ]
+          ]
+      ]
+  else
+    HH.text ""  -- No controls for other examples
+
+renderForceButton :: forall m. String -> Set.Set String -> H.ComponentHTML Action () m
+renderForceButton forceLabel activeForces =
+  let isActive = Set.member forceLabel activeForces
+  in HH.button
+    [ HP.classes [ HH.ClassName if isActive then "active" else "inactive" ]
+    , HE.onClick \_ -> ToggleForce forceLabel
+    ]
+    [ HH.text forceLabel ]
 
 -- | Render the header with logo, navigation, and prev/next buttons
 renderHeader :: forall w i. String -> Maybe ExampleMeta -> HH.HTML w i

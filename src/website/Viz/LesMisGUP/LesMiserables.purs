@@ -63,7 +63,7 @@ drawSimplified :: forall row m.
   MonadEffect m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
   SimulationM2 D3Selection_ m =>
-  Array Force -> Set.Set String -> LesMisRawModel -> Selector D3Selection_ -> m Unit
+  Array Force -> Set.Set String -> LesMisRawModel -> Selector D3Selection_ -> m { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }
 drawSimplified forceLibrary activeForces model selector = do
   (Tuple w h) <- liftEffect getWindowWidthHeight
   rootSel <- attach selector
@@ -117,7 +117,9 @@ drawSimplified forceLibrary activeForces model selector = do
 
   -- Start the simulation!
   start
-  pure unit
+
+  -- Return the selections for later updates
+  pure { nodes: Just nodesGroup, links: Just linksGroup }
 -- Snippet_End
 
 -- Snippet_Start
