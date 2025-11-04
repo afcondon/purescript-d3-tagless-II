@@ -1457,3 +1457,147 @@ export function switchToSpotlightForces_(simulation) {
     console.log('Switched to spotlight forces, restarted simulation')
   }
 }
+
+export function switchToCompactForces_(simulation) {
+  return () => {
+    console.log('Switching back to compact forces')
+
+    // Get the compact forces (they were registered but not active)
+    const compactCollision = simulation.force('collision-compact')
+    const compactManyBody = simulation.force('manyBody-compact')
+
+    console.log('compact collision force:', compactCollision)
+    console.log('compact manyBody force:', compactManyBody)
+
+    // Remove spotlight forces
+    simulation.force('collision-spotlight', null)
+    simulation.force('manyBody-spotlight', null)
+
+    // The compact forces should already be there, but let's make sure they're active
+    if (compactCollision) {
+      simulation.force('collision-compact', compactCollision)
+    }
+    if (compactManyBody) {
+      simulation.force('manyBody-compact', compactManyBody)
+    }
+
+    // Restart the simulation to apply the new forces
+    simulation.alpha(0.3).restart()
+    console.log('Switched to compact forces, restarted simulation')
+  }
+}
+
+export function hideModuleLabels_(nodesGroup) {
+  return () => {
+    console.log('hideModuleLabels_ called', nodesGroup)
+    // nodesGroup is already a D3 selection, don't wrap it again
+    const nodeGroups = nodesGroup.selectAll('g.node-group')
+    console.log('Found node groups:', nodeGroups.size())
+    nodeGroups.selectAll('text.node-label').attr('fill', 'transparent')
+    console.log('hideModuleLabels_ done')
+  }
+}
+
+export function resetNodeFilter_(simulation) {
+  return () => {
+    console.log('Resetting node filter to show all nodes')
+
+    // Get all nodes from simulation
+    const allNodes = simulation.nodes()
+    console.log('Total nodes:', allNodes.length)
+
+    // Clear any filtering by restoring all nodes
+    simulation.nodes(allNodes)
+
+    // Also need to restore all links
+    const linkForce = simulation.force('links')
+    if (linkForce && linkForce.links) {
+      // Get the original links (they're stored in the force)
+      const allLinks = linkForce.links()
+      linkForce.links(allLinks)
+      console.log('Reset links:', allLinks.length)
+    }
+
+    // Restart simulation
+    simulation.alpha(0.3).restart()
+    console.log('Node filter reset complete')
+  }
+}
+
+export function restoreAllNodes_(simulation) {
+  return nodesGroup => linksGroup => allNodes => allLinks => nodeRadiusFn => keyFn => () => {
+    console.log('Restoring all nodes and links to simulation and DOM')
+    console.log('Total nodes to restore:', allNodes.length)
+    console.log('Total links to restore:', allLinks.length)
+
+    // Restore nodes to simulation
+    simulation.nodes(allNodes)
+
+    // Restore links to simulation
+    const linkForce = simulation.force('links')
+    if (linkForce) {
+      linkForce.links(allLinks)
+    }
+
+    // Re-render all nodes in the DOM
+    const nodeSelection = nodesGroup
+      .selectAll('g.node-group')
+      .data(allNodes, keyFn)
+
+    // Remove any old nodes
+    nodeSelection.exit().remove()
+
+    // Add new nodes (these are the ones that were filtered out)
+    const nodeEnter = nodeSelection.enter()
+      .append('g')
+      .attr('class', 'node-group')
+
+    // Add the main circle for each node
+    nodeEnter.append('circle')
+      .attr('class', 'node-circle')
+      .attr('r', d => nodeRadiusFn(d.expanded)(d.loc))
+      .attr('fill', d => d.color || '#999')
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 1.5)
+
+    // Add label text (initially transparent)
+    nodeEnter.append('text')
+      .attr('class', 'node-label')
+      .attr('text-anchor', 'middle')
+      .attr('dy', '.3em')
+      .style('font-size', '10px')
+      .style('pointer-events', 'none')
+      .style('fill', 'transparent')
+      .text(d => d.name.split('.').pop())
+
+    // Merge enter and update selections
+    const nodeMerge = nodeEnter.merge(nodeSelection)
+
+    // Update positions for all nodes
+    nodeMerge
+      .attr('transform', d => `translate(${d.x || 0},${d.y || 0})`)
+
+    // Update circle radius in case expansion state changed
+    nodeMerge.select('circle.node-circle')
+      .attr('r', d => nodeRadiusFn(d.expanded)(d.loc))
+
+    // Re-render all links in the DOM
+    const linkSelection = linksGroup
+      .selectAll('line')
+      .data(allLinks, d => `${keyFn(d.source)}-${keyFn(d.target)}`)
+
+    // Remove old links
+    linkSelection.exit().remove()
+
+    // Add new links
+    linkSelection.enter()
+      .append('line')
+      .attr('stroke', '#999')
+      .attr('stroke-opacity', 0.6)
+      .attr('stroke-width', 1)
+
+    // Restart simulation
+    simulation.alpha(0.3).restart()
+    console.log('All nodes and links restored')
+  }
+}

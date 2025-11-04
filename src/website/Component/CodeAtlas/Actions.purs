@@ -22,6 +22,7 @@ data Action
   | HideModuleDetails
   | ResetToOverview
   | EnableSpotlightMode
+  | DisableSpotlightMode
   | ShowContextMenu ContextMenuInfo
   | HideContextMenu
   | SpotlightModuleFromMenu String
@@ -31,6 +32,7 @@ data Action
       { spotlight :: String -> Effect Unit
       , addDeps :: String -> Effect Unit
       , makeFocus :: String -> Effect Unit
+      , reset :: Effect Unit
       }
   | SetCurrentSpotlightModule (Maybe String)
   | ToggleGridLayout

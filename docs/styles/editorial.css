@@ -16,11 +16,12 @@
 /* Base editorial panel - overrides floating-panel defaults */
 .floating-panel.editorial,
 .editorial .floating-panel {
-  background-color: rgba(212, 201, 168, 0.95); /* var(--color-beige-base) with transparency */
+  background-color: rgba(212, 201, 168, 0.95);
+  /* var(--color-beige-base) with transparency */
   backdrop-filter: blur(12px);
   border: 1px solid var(--color-line);
-  border-radius: 0; /* No rounded corners - flat print aesthetic */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); /* Subtle shadow only */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  /* Subtle shadow only */
   padding: var(--spacing-lg);
   font-family: var(--font-mono);
 }
@@ -33,9 +34,11 @@
 .floating-panel.editorial h3,
 .editorial .floating-panel h3 {
   font-family: var(--font-mono);
-  font-size: var(--font-size-label); /* 11px */
+  font-size: var(--font-size-label);
+  /* 11px */
   font-weight: bold;
-  letter-spacing: var(--letter-spacing-wide); /* 2px */
+  letter-spacing: var(--letter-spacing-wide);
+  /* 2px */
   text-transform: uppercase;
   color: var(--color-text-dark);
   margin: 0 0 var(--spacing-md) 0;
@@ -49,7 +52,8 @@
 .editorial .floating-panel h4,
 .editorial .control-group h4 {
   font-family: var(--font-mono);
-  font-size: var(--font-size-small); /* 9px */
+  font-size: var(--font-size-small);
+  /* 9px */
   font-weight: bold;
   letter-spacing: var(--letter-spacing-wide);
   text-transform: uppercase;
@@ -64,8 +68,10 @@
 .floating-panel.editorial .small-text,
 .editorial .floating-panel .small-text {
   font-family: var(--font-mono);
-  font-size: var(--font-size-tiny); /* 8px */
-  letter-spacing: var(--letter-spacing-normal); /* 1px */
+  font-size: var(--font-size-tiny);
+  /* 8px */
+  letter-spacing: var(--letter-spacing-normal);
+  /* 1px */
   line-height: 1.8;
   color: var(--color-text-muted);
   margin: var(--spacing-xs) 0;
@@ -109,7 +115,8 @@
 .btn.editorial,
 button.editorial {
   font-family: var(--font-mono);
-  font-size: var(--font-size-small); /* 9px */
+  font-size: var(--font-size-small);
+  /* 9px */
   font-weight: bold;
   letter-spacing: var(--letter-spacing-wide);
   text-transform: uppercase;
@@ -119,7 +126,8 @@ button.editorial {
   color: var(--color-text-dark);
   cursor: pointer;
   transition: all var(--transition-fast);
-  border-radius: 0; /* Flat edges */
+  border-radius: 0;
+  /* Flat edges */
 }
 
 .editorial .btn:hover,
@@ -140,7 +148,8 @@ button.editorial--active {
 
 .editorial .btn--active:hover,
 .btn.editorial--active:hover {
-  background-color: #d62839; /* Darker red on hover */
+  background-color: #d62839;
+  /* Darker red on hover */
 }
 
 /* Secondary button variant */
@@ -156,7 +165,8 @@ button.editorial--active {
 
 .editorial-label {
   font-family: var(--font-mono);
-  font-size: var(--font-size-label); /* 11px */
+  font-size: var(--font-size-label);
+  /* 11px */
   font-weight: bold;
   letter-spacing: var(--letter-spacing-wide);
   text-transform: uppercase;
@@ -166,7 +176,8 @@ button.editorial--active {
 }
 
 .editorial-label--small {
-  font-size: var(--font-size-small); /* 9px */
+  font-size: var(--font-size-small);
+  /* 9px */
 }
 
 .editorial-label--accent {
@@ -182,7 +193,8 @@ button.editorial--active {
 }
 
 .editorial-text--small {
-  font-size: var(--font-size-tiny); /* 8px */
+  font-size: var(--font-size-tiny);
+  /* 8px */
   line-height: 1.8;
   color: var(--color-text-muted);
 }
@@ -220,18 +232,33 @@ button.editorial--active {
   border: 1px solid var(--color-line);
 }
 
-.editorial-color-swatch--teal { background-color: var(--color-teal); }
-.editorial-color-swatch--beige { background-color: var(--color-beige-dark); }
-.editorial-color-swatch--coral { background-color: var(--color-coral); }
-.editorial-color-swatch--light-beige { background-color: var(--color-beige-light); }
-.editorial-color-swatch--peach { background-color: var(--color-peach); }
+.editorial-color-swatch--teal {
+  background-color: var(--color-teal);
+}
+
+.editorial-color-swatch--beige {
+  background-color: var(--color-beige-dark);
+}
+
+.editorial-color-swatch--coral {
+  background-color: var(--color-coral);
+}
+
+.editorial-color-swatch--light-beige {
+  background-color: var(--color-beige-light);
+}
+
+.editorial-color-swatch--peach {
+  background-color: var(--color-peach);
+}
 
 /* ========================================
    EDITORIAL INFO BOXES
    ======================================== */
 
 .editorial-info-box {
-  background-color: rgba(217, 201, 184, 0.5); /* Lighter beige */
+  background-color: rgba(217, 201, 184, 0.5);
+  /* Lighter beige */
   border: 1px solid var(--color-line);
   padding: var(--spacing-sm) var(--spacing-md);
   margin: var(--spacing-md) 0;
@@ -252,7 +279,8 @@ button.editorial--active {
 /* Code panel with editorial styling */
 .floating-panel.editorial-code,
 .editorial .floating-panel--code {
-  background-color: rgba(212, 201, 168, 0.98); /* More opaque for readability */
+  background-color: rgba(212, 201, 168, 0.98);
+  /* More opaque for readability */
   border: 1px solid var(--color-line);
 }
 
@@ -401,14 +429,17 @@ button.editorial--active {
    ======================================== */
 
 @media (max-width: 768px) {
+
   /* Increase font sizes slightly on mobile for readability */
   .floating-panel.editorial,
   .editorial .floating-panel {
-    font-size: var(--font-size-small); /* 9px base instead of 8px */
+    font-size: var(--font-size-small);
+    /* 9px base instead of 8px */
   }
 
   .editorial-label {
-    font-size: 0.75rem; /* 12px instead of 11px */
+    font-size: 0.75rem;
+    /* 12px instead of 11px */
   }
 }
 

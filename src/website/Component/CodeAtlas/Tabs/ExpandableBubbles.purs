@@ -31,15 +31,18 @@ import Effect.Uncurried (mkEffectFn3)
 import Halogen as H
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, mergeSelections, on, openSelection, selectUnder, setAttributes, updateJoin)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start, update)
+import PSD3.CodeAtlas.Tabs.ExpandableBubblesForces (compactForces, spotlightForces)
 import PSD3.CodeAtlas.Types (DeclarationsData, FunctionCallsData, ModuleGraphData, ModuleInfo)
+import PSD3.Interpreter.D3 (exec_D3M_Simulation)
 import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode(..), D3_VxyFxy, D3_XY)
 import PSD3.Internal.Attributes.Instances (AttributeSetter(..), Attr(..), AttrBuilder(..))
 import PSD3.Internal.Attributes.Sugar (classed, fill, onMouseEventEffectful, radius, remove, strokeColor, strokeOpacity, strokeWidth, text, transform', viewBox, width, height, x, x1, x2, y, y1, y2)
-import PSD3.Internal.FFI (addModuleArrowMarker_, drawInterModuleDeclarationLinks_, expandNodeById_, filterToConnectedNodes_, keyIsID_, showModuleLabels_, simdragHorizontal_, switchToSpotlightForces_, unsafeSetField_, updateNodeExpansion_)
+import PSD3.Internal.FFI (addModuleArrowMarker_, drawInterModuleDeclarationLinks_, expandNodeById_, filterToConnectedNodes_, hideModuleLabels_, keyIsID_, resetNodeFilter_, restoreAllNodes_, showModuleLabels_, simdragHorizontal_, unsafeSetField_, updateNodeExpansion_)
+import PSD3.Internal.Simulation.Functions (actualizeForcesDirect, simulationActualizeForces)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), SelectionAttribute(..))
 import PSD3.Internal.Simulation.Config as F
 import PSD3.Internal.Simulation.Forces (createForce, createLinkForce)
-import PSD3.Internal.Simulation.Types (D3SimulationState_, ForceType(..), RegularForceType(..), Step(..), allNodes, _handle)
+import PSD3.Internal.Simulation.Types (D3SimulationState_, ForceType(..), RegularForceType(..), Step(..), allNodes, _d3Simulation, _handle)
 import PSD3.Internal.Types (D3Selection_, Datum_, Element(..), Index_, MouseEvent(..))
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Shared.ZoomableViewbox (zoomableSVG)
@@ -467,8 +470,9 @@ drawExpandableBubbles :: forall row m.
   { onShowModuleDetails :: String -> Array String -> Array String -> Effect Unit
   , onHideModuleDetails :: Effect Unit
   , onEnableSpotlightMode :: Effect Unit
+  , onDisableSpotlightMode :: Effect Unit
   , onShowContextMenu :: String -> Number -> Number -> Effect Unit
-  , onSpotlightFunctionsReady :: (String -> Effect Unit) -> (String -> Effect Unit) -> (String -> Effect Unit) -> Effect Unit
+  , onSpotlightFunctionsReady :: (String -> Effect Unit) -> (String -> Effect Unit) -> (String -> Effect Unit) -> (Effect Unit) -> Effect Unit
   , onSetCurrentSpotlightModule :: Maybe String -> Effect Unit
   } ->
   m Unit
@@ -489,8 +493,14 @@ drawExpandableBubbles graphData declsData callsData selector callbacks = do
       , dependedOnByMap
       } = initResult
 
-  -- Get simulation handle for reheating
+  -- Get simulation handle and full simulation state for force switching
   simHandle <- use _handle
+  simState <- use _d3Simulation
+  simStateRef <- liftEffect $ Ref.new simState
+
+  -- Store the original full node and link data so we can restore after filtering
+  allNodesRef <- liftEffect $ Ref.new bubbleNodes
+  allLinksRef <- liftEffect $ Ref.new bubbleLinks
 
   -- Track whether we've already filtered to a subgraph and which module is spotlighted
   hasFilteredRef <- liftEffect $ Ref.new false
@@ -519,19 +529,48 @@ drawExpandableBubbles graphData declsData callsData selector callbacks = do
           let connected = fromMaybe Set.empty $ Map.lookup moduleId adjacencyMap
               connectedIds = Set.toUnfoldable connected :: Array String
               allConnected = Array.cons moduleId connectedIds
+              connectedSet = Set.fromFoldable allConnected
 
           Console.log $ "Filtering to " <> show (Array.length allConnected) <> " connected modules"
-          liftEffect $ pure $ filterToConnectedNodes_ simHandle keyIsID_ allConnected
+
+          -- Get full data and filter it
+          allNodes <- Ref.read allNodesRef
+          allLinks <- Ref.read allLinksRef
+          simSt <- Ref.read simStateRef
+
+          let filteredNodes = filter (\n -> Set.member (unsafeCoerce n).id connectedSet) allNodes
+              filteredLinks = filter (\l ->
+                let src = (unsafeCoerce l).source
+                    tgt = (unsafeCoerce l).target
+                in Set.member src connectedSet && Set.member tgt connectedSet
+              ) allLinks
+
+          Console.log $ "Filtered to " <> show (Array.length filteredNodes) <> " nodes and " <> show (Array.length filteredLinks) <> " links"
+
+          -- Use proper simulation update AND restart simulation
+          updatedState <- liftEffect $ exec_D3M_Simulation { simulation: simSt } $ do
+            void $ update
+              { nodes: Just filteredNodes
+              , links: Just (unsafeCoerce filteredLinks :: Array D3Link_Unswizzled)
+              , nodeFilter: Nothing  -- Already filtered
+              , linkFilter: Nothing
+              , activeForces: Just spotlightForces  -- Switch to spotlight forces
+              , config: Nothing
+              , keyFn: keyIsID_
+              }
+            -- Restart the simulation so nodes move
+            start
+
+          Ref.write updatedState.simulation simStateRef
           Ref.write true hasFilteredRef
           Ref.write (Just moduleId) currentSpotlightRef
-          Ref.write (Set.fromFoldable allConnected) spotlightSetRef
+          Ref.write connectedSet spotlightSetRef
           callbacks.onSetCurrentSpotlightModule (Just moduleId)
 
           -- Enter spotlight mode: show all labels
           if not hasFiltered then do
             Console.log "First spotlight - entering spotlight mode"
             liftEffect $ showModuleLabels_ nodesGroup
-            switchToSpotlightForces_ simHandle
             callbacks.onEnableSpotlightMode
           else
             Console.log "Re-spotlighting different module"
@@ -627,8 +666,57 @@ drawExpandableBubbles graphData declsData callsData selector callbacks = do
                 dependencies = sort moduleInfo.depends
             callbacks.onShowModuleDetails moduleInfo.name dependencies dependedOnByList
 
+  -- Function to reset spotlight (return to overview)
+  let resetSpotlight = do
+        Console.log "Resetting spotlight to overview"
+
+        hasFiltered <- Ref.read hasFilteredRef
+
+        when hasFiltered do
+          -- Get the original full node and link data
+          allNodes <- Ref.read allNodesRef
+          allLinks <- Ref.read allLinksRef
+          simSt <- Ref.read simStateRef
+
+          -- Restore all nodes and links using proper SimulationM2 update function
+          Console.log $ "Restoring all nodes (" <> show (Array.length allNodes) <> ") and links (" <> show (Array.length allLinks) <> ")"
+
+          -- Run the update in the D3SimM monad and get back updated state
+          updatedState <- liftEffect $ exec_D3M_Simulation { simulation: simSt } $ do
+            void $ update
+              { nodes: Just allNodes
+              , links: Just (unsafeCoerce allLinks :: Array D3Link_Unswizzled)
+              , nodeFilter: Nothing  -- No filtering - show all nodes
+              , linkFilter: Nothing
+              , activeForces: Just compactForces  -- Switch to compact forces
+              , config: Nothing
+              , keyFn: keyIsID_
+              }
+            -- Restart the simulation so nodes move
+            start
+
+          -- Store the updated simulation state
+          Ref.write updatedState.simulation simStateRef
+
+          -- Hide module labels
+          liftEffect $ hideModuleLabels_ nodesGroup
+
+          -- Clear spotlight state
+          Ref.write false hasFilteredRef
+          Ref.write Nothing currentSpotlightRef
+          Ref.write Set.empty spotlightSetRef
+          callbacks.onSetCurrentSpotlightModule Nothing
+
+          -- Hide details panel
+          callbacks.onHideModuleDetails
+
+          -- Notify that spotlight mode is disabled
+          callbacks.onDisableSpotlightMode
+
+          Console.log "Spotlight reset complete"
+
   -- Export all functions via a single callback for Halogen to use
-  liftEffect $ callbacks.onSpotlightFunctionsReady spotlightModule addDepsToSpotlight makeFocus
+  liftEffect $ callbacks.onSpotlightFunctionsReady spotlightModule addDepsToSpotlight makeFocus resetSpotlight
 
   -- Click handler: show context menu for module interaction
   let onClick event datum _ = do

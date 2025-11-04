@@ -375,4 +375,8 @@ foreign import hideDetailsPanel_ :: D3Selection_ -> Effect Unit
 foreign import setDetailsModuleName_ :: D3Selection_ -> String -> Effect Unit
 foreign import populateDetailsList_ :: D3Selection_ -> Array String -> Effect Unit
 foreign import showModuleLabels_ :: D3Selection_ -> Effect Unit
+foreign import hideModuleLabels_ :: D3Selection_ -> Effect Unit
 foreign import switchToSpotlightForces_ :: D3Simulation_ -> Effect Unit
+foreign import switchToCompactForces_ :: D3Simulation_ -> Effect Unit
+foreign import resetNodeFilter_ :: D3Simulation_ -> Effect Unit
+foreign import restoreAllNodes_ :: D3Simulation_ -> D3Selection_ -> D3Selection_ -> Array Datum_ -> Array Datum_ -> (Boolean -> Int -> Number) -> (Datum_ -> Index_) -> Effect Unit

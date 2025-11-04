@@ -42,13 +42,14 @@ type State =
   , spotlightFunction :: Maybe (String -> Effect Unit)  -- Function to spotlight a module
   , addDepsFunction :: Maybe (String -> Effect Unit)  -- Function to add module deps to spotlight
   , makeFocusFunction :: Maybe (String -> Effect Unit)  -- Function to make module the focus
+  , resetSpotlightFunction :: Maybe (Effect Unit)  -- Function to reset spotlight to overview
   , isGridLayout :: Boolean  -- Whether nodes are in grid layout (true) or force layout (false)
   }
 
 -- | Initial state
 initialState :: forall i. i -> State
 initialState _ =
-  { activeTab: VisualizationTab
+  { activeTab: ExpandableBubblesTab
   , declarationsData: Nothing
   , functionCallsData: Nothing
   , moduleGraphData: Nothing
@@ -66,5 +67,6 @@ initialState _ =
   , spotlightFunction: Nothing
   , addDepsFunction: Nothing
   , makeFocusFunction: Nothing
+  , resetSpotlightFunction: Nothing
   , isGridLayout: false
   }

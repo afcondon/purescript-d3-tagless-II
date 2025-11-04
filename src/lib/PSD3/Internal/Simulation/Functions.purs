@@ -9,7 +9,7 @@ import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (D3Selection_, Datum_, Index_)
 import PSD3.Data.Node (D3Link_Unswizzled, D3Link_Swizzled, D3_SimulationNode)
 import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..), applySelectionAttributeD3)
-import PSD3.Internal.Simulation.Types (D3SimulationState_, Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _handle, _status, _tick, _velocityDecay)
+import PSD3.Internal.Simulation.Types (D3SimulationState_(..), Force(..), ForceStatus(..), SimVariable(..), Step(..), _alpha, _alphaDecay, _alphaMin, _alphaTarget, _d3Simulation, _force, _forceLibrary, _handle, _status, _tick, _velocityDecay)
 import PSD3.Internal.Zoom (ScaleExtent(..), ZoomExtent(..))
 import PSD3.Capabilities.Simulation (RawData)
 import Data.Array (elem, filter, intercalate)
@@ -29,6 +29,20 @@ import Unsafe.Coerce (unsafeCoerce)
 
 reheatSimulation :: D3SimulationState_ -> D3SimulationState_
 reheatSimulation = set _alpha 1.0
+
+-- | Actualize forces without MonadState - for use in Effect callbacks
+-- | This function updates the force library and syncs to the D3 simulation
+actualizeForcesDirect :: Set Label -> D3SimulationState_ -> D3SimulationState_
+actualizeForcesDirect activeForces simState =
+  let SimState_ record = simState
+      handle = record.handle_
+      library = record.forceLibrary
+      allLabels = M.keys library
+      enableLabels = A.fromFoldable $ Set.intersection activeForces (Set.fromFoldable allLabels)
+      disableLabels = A.fromFoldable $ Set.difference (Set.fromFoldable allLabels) activeForces
+      -- Update statuses in the force library using the existing helper functions
+      updatedLibrary = (enableByLabels handle enableLabels) <$> ((disableByLabels handle disableLabels) <$> library)
+  in SimState_ $ record { forceLibrary = updatedLibrary }
 
 simulationRemoveAllForces :: forall m row. 
   (MonadState { simulation :: D3SimulationState_ | row } m) => 

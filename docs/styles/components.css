@@ -412,7 +412,8 @@
 .split-pane {
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 72px - 4rem); /* viewport height minus nav and padding */
+  height: calc(100vh - 72px - 4rem);
+  /* viewport height minus nav and padding */
   min-height: 600px;
   background-color: white;
   border-radius: var(--radius-md);
@@ -478,7 +479,8 @@
 
 /* Code panel */
 .split-pane__panel--code {
-  background-color: #2d2d2d; /* Match Prism tomorrow theme */
+  background-color: #2d2d2d;
+  /* Match Prism tomorrow theme */
 }
 
 .split-pane__code-header {
@@ -563,7 +565,8 @@
 
 .visualization__text-output {
   /* Match the code panel styling for consistency */
-  background-color: #2d2d2d !important; /* Match Prism tomorrow theme */
+  background-color: #2d2d2d !important;
+  /* Match Prism tomorrow theme */
   border: none;
   border-radius: var(--radius-sm);
   padding: 0 !important;
@@ -611,7 +614,8 @@
 /* Desktop: side-by-side split view */
 @media (min-width: 768px) {
   .split-pane__tabs {
-    display: none; /* Hide tabs on desktop */
+    display: none;
+    /* Hide tabs on desktop */
   }
 
   .split-pane__content {
@@ -625,7 +629,8 @@
   }
 
   .split-pane__panel--hidden {
-    display: flex; /* Show both panels on desktop */
+    display: flex;
+    /* Show both panels on desktop */
   }
 
   /* Add a visual separator */
@@ -710,7 +715,8 @@
 .split-pane-fullscreen__code {
   /* Uses floating-panel classes from fullscreen.css */
   max-height: calc(100vh - 2 * var(--spacing-md));
-  background-color: #2d2d2d; /* Match Prism tomorrow theme */
+  background-color: #2d2d2d;
+  /* Match Prism tomorrow theme */
   color: #ccc;
 }
 
@@ -859,7 +865,8 @@
 /* Code panel - light mode, wider, on right */
 .example-fullscreen__code {
   /* Uses floating-panel classes */
-  width: 45vw;  /* Wider than default */
+  width: 45vw;
+  /* Wider than default */
   max-width: 800px;
   max-height: calc(100vh - 2 * var(--spacing-md));
   background-color: rgba(255, 255, 255, 0.95);
@@ -871,12 +878,14 @@
   border-bottom: 1px solid var(--color-border);
   padding-bottom: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
-  opacity: 1;  /* Title always solid */
+  opacity: 1;
+  /* Title always solid */
 }
 
 .example-fullscreen__code pre {
   margin: 0;
-  background: transparent !important;  /* Override Prism background */
+  background: transparent !important;
+  /* Override Prism background */
   overflow: auto;
   max-height: calc(100vh - 8rem);
 }
@@ -884,7 +893,8 @@
 .example-fullscreen__code code {
   font-size: 0.875rem;
   line-height: 1.6;
-  background: transparent !important;  /* Override Prism background */
+  background: transparent !important;
+  /* Override Prism background */
 }
 
 /* Ensure syntax highlighting stays opaque */
@@ -1286,7 +1296,8 @@
   right: calc(50% - 26rem - 240px - 2rem);
   width: 240px;
   max-height: calc(100vh - 4rem);
-  background-color: rgba(212, 201, 168, 0.95); /* Beige editorial background */
+  background-color: rgba(212, 201, 168, 0.95);
+  /* Beige editorial background */
   backdrop-filter: blur(12px);
   border: 1px solid var(--color-line);
   padding: var(--spacing-lg);
@@ -1452,6 +1463,7 @@
   color: var(--color-teal);
   cursor: default;
 }
+
 /* ============================================
    Module Page (Individual module documentation)
    ============================================ */
@@ -1825,7 +1837,8 @@
 .code-atlas-content {
   position: relative;
   width: 100%;
-  height: calc(100vh - 50px); /* Subtract smaller header height */
+  height: calc(100vh - 50px);
+  /* Subtract smaller header height */
   overflow: hidden;
 }
 
@@ -1873,7 +1886,8 @@
 /* Top panels need extra spacing for the header */
 .code-atlas-page .floating-panel--top-left,
 .code-atlas-page .floating-panel--top-right {
-  top: calc(50px + var(--spacing-md)); /* Header height + spacing */
+  top: calc(100px + var(--spacing-md));
+  /* Header height + spacing */
 }
 
 /* Visualization Containers */
@@ -1891,7 +1905,8 @@
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: 1; /* Below floating panels (z-index: 100) and tabs (z-index: 20) */
+  z-index: 1;
+  /* Below floating panels (z-index: 100) and tabs (z-index: 20) */
 }
 
 /* Loading & Error States */
@@ -1964,16 +1979,16 @@
   transition: 0.4s;
 }
 
-.spotlight-toggle input:checked + .toggle-slider {
+.spotlight-toggle input:checked+.toggle-slider {
   background-color: var(--color-red-accent);
   border-color: var(--color-red-accent);
 }
 
-.spotlight-toggle input:checked + .toggle-slider:before {
+.spotlight-toggle input:checked+.toggle-slider:before {
   transform: translateX(20px);
 }
 
-.spotlight-toggle input:disabled + .toggle-slider {
+.spotlight-toggle input:disabled+.toggle-slider {
   cursor: not-allowed;
   opacity: 0.5;
 }
@@ -2005,7 +2020,8 @@
   border: 1px solid var(--color-line);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   z-index: 1000;
-  outline: none;  /* Remove focus ring */
+  outline: none;
+  /* Remove focus ring */
 }
 
 .context-menu__header {

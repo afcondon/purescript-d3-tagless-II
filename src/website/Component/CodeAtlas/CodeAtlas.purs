@@ -10,6 +10,7 @@ import Effect.Aff.Class (class MonadAff)
 import Effect.Class (liftEffect)
 import Effect.Console as Console
 import Effect.Ref as Ref
+import Effect.Unsafe (unsafePerformEffect)
 import Halogen as H
 import Halogen.HTML as HH
 import Halogen.HTML.Events as HE
@@ -263,6 +264,7 @@ renderContextMenu state =
       let
         isCurrentSpotlight = state.currentSpotlightModule == Just info.moduleName
         inSpotlightMode = state.spotlightModeActive
+        _ = unsafePerformEffect $ Console.log $ "Context menu for " <> info.moduleName <> " - inSpotlightMode: " <> show inSpotlightMode <> ", isCurrentSpotlight: " <> show isCurrentSpotlight <> ", currentSpotlightModule: " <> show state.currentSpotlightModule
 
         -- Determine keyboard handler based on context
         keyHandler = case inSpotlightMode, isCurrentSpotlight of
@@ -296,7 +298,7 @@ renderContextMenu state =
             ]
 
           true, true ->  -- In spotlight mode, clicking current spotlight module
-            [ renderContextMenuItem "Back to Overview" "B" ResetToOverview
+            [ renderContextMenuItem "Unspotlight" "B" ResetToOverview
             ]
 
           true, false ->  -- In spotlight mode, clicking different module
@@ -416,23 +418,25 @@ handleAction = case _ of
         state <- H.get
         case state.moduleGraphData, state.declarationsData, state.functionCallsData of
           Just graphData, Just declsData, Just callsData -> do
-            -- Create a Ref to hold pending actions from D3 event handlers
-            pendingActionRef <- liftEffect $ Ref.new Nothing
+            -- Create a Ref to hold a queue of pending actions from D3 event handlers
+            pendingActionsRef <- liftEffect $ Ref.new ([] :: Array Action)
 
-            -- Create callbacks that write to the Ref
+            -- Create callbacks that append to the queue
             let callbacks =
                   { onShowModuleDetails: \moduleName dependencies dependedOnBy ->
-                      Ref.write (Just $ ShowModuleDetails { moduleName, dependencies, dependedOnBy }) pendingActionRef
+                      Ref.modify_ (_ <> [ShowModuleDetails { moduleName, dependencies, dependedOnBy }]) pendingActionsRef
                   , onHideModuleDetails:
-                      Ref.write (Just HideModuleDetails) pendingActionRef
+                      Ref.modify_ (_ <> [HideModuleDetails]) pendingActionsRef
                   , onEnableSpotlightMode:
-                      Ref.write (Just EnableSpotlightMode) pendingActionRef
+                      Ref.modify_ (_ <> [EnableSpotlightMode]) pendingActionsRef
+                  , onDisableSpotlightMode:
+                      Ref.modify_ (_ <> [DisableSpotlightMode]) pendingActionsRef
                   , onShowContextMenu: \moduleName x y ->
-                      Ref.write (Just $ ShowContextMenu { moduleName, x, y }) pendingActionRef
-                  , onSpotlightFunctionsReady: \spotlightFn addDepsFn makeFocusFn ->
-                      Ref.write (Just $ SpotlightFunctionsReady { spotlight: spotlightFn, addDeps: addDepsFn, makeFocus: makeFocusFn }) pendingActionRef
+                      Ref.modify_ (_ <> [ShowContextMenu { moduleName, x, y }]) pendingActionsRef
+                  , onSpotlightFunctionsReady: \spotlightFn addDepsFn makeFocusFn resetFn ->
+                      Ref.modify_ (_ <> [SpotlightFunctionsReady { spotlight: spotlightFn, addDeps: addDepsFn, makeFocus: makeFocusFn, reset: resetFn }]) pendingActionsRef
                   , onSetCurrentSpotlightModule: \moduleId ->
-                      Ref.write (Just $ SetCurrentSpotlightModule moduleId) pendingActionRef
+                      Ref.modify_ (_ <> [SetCurrentSpotlightModule moduleId]) pendingActionsRef
                   }
 
             -- Create a subscription that polls the Ref for pending actions
@@ -440,7 +444,7 @@ handleAction = case _ of
             _ <- H.subscribe emitter
 
             -- Start polling loop in background
-            void $ H.fork $ H.liftAff $ pollForActions pendingActionRef listener
+            void $ H.fork $ H.liftAff $ pollForActions pendingActionsRef listener
 
             -- Draw the visualization
             runWithD3_Simulation do
@@ -449,10 +453,10 @@ handleAction = case _ of
             -- Process all pending actions that were queued during visualization setup
             -- This ensures functions are registered before user interaction
             let processAllPending = do
-                  pendingAction <- liftEffect $ Ref.read pendingActionRef
-                  case pendingAction of
-                    Just action -> do
-                      liftEffect $ Ref.write Nothing pendingActionRef
+                  pendingActions <- liftEffect $ Ref.read pendingActionsRef
+                  case Array.uncons pendingActions of
+                    Just { head: action, tail: rest } -> do
+                      liftEffect $ Ref.write rest pendingActionsRef
                       handleAction action
                       processAllPending  -- Process next action
                     Nothing -> pure unit
@@ -466,10 +470,10 @@ handleAction = case _ of
       -- Poll the Ref for pending actions and emit them
       pollForActions ref listener = do
         delay (Milliseconds 16.0)  -- Poll at ~60fps
-        pendingAction <- liftEffect $ Ref.read ref
-        case pendingAction of
-          Just action -> do
-            liftEffect $ Ref.write Nothing ref
+        pendingActions <- liftEffect $ Ref.read ref
+        case Array.uncons pendingActions of
+          Just { head: action, tail: rest } -> do
+            liftEffect $ Ref.write rest ref
             liftEffect $ HS.notify listener action
           Nothing -> pure unit
         pollForActions ref listener  -- Continue polling
@@ -501,14 +505,26 @@ handleAction = case _ of
     H.modify_ _ { hoveredModule = Nothing }
 
   ResetToOverview -> do
-    -- Clear the details panel, current spotlight, and disable spotlight mode
-    H.modify_ _ { hoveredModule = Nothing, spotlightModeActive = false, currentSpotlightModule = Nothing }
-    -- Redraw the visualization to reset to overview state
+    -- Close the context menu immediately
+    H.modify_ _ { contextMenu = Nothing }
+    -- Call the reset spotlight function if available
     state <- H.get
-    handleAction (SetActiveTab state.activeTab)
+    case state.resetSpotlightFunction of
+      Nothing -> do
+        -- Fallback: just update state and redraw
+        liftEffect $ Console.log "Reset spotlight function not ready yet, using fallback"
+        H.modify_ _ { hoveredModule = Nothing, spotlightModeActive = false, currentSpotlightModule = Nothing }
+        handleAction (SetActiveTab state.activeTab)
+      Just resetFn -> do
+        liftEffect $ Console.log "Calling reset spotlight function"
+        liftEffect resetFn
+        -- State will be updated by the DisableSpotlightMode callback
 
   EnableSpotlightMode -> do
     H.modify_ _ { spotlightModeActive = true }
+
+  DisableSpotlightMode -> do
+    H.modify_ _ { spotlightModeActive = false, currentSpotlightModule = Nothing, hoveredModule = Nothing }
 
   ShowContextMenu info -> do
     H.modify_ _ { contextMenu = Just info }
@@ -548,10 +564,14 @@ handleAction = case _ of
       { spotlightFunction = Just fns.spotlight
       , addDepsFunction = Just fns.addDeps
       , makeFocusFunction = Just fns.makeFocus
+      , resetSpotlightFunction = Just fns.reset
       }
 
   SetCurrentSpotlightModule moduleId -> do
+    liftEffect $ Console.log $ "SetCurrentSpotlightModule called with: " <> show moduleId
     H.modify_ _ { currentSpotlightModule = moduleId }
+    state <- H.get
+    liftEffect $ Console.log $ "State after update - spotlightModeActive: " <> show state.spotlightModeActive <> ", currentSpotlightModule: " <> show state.currentSpotlightModule
 
   ToggleGridLayout -> do
     -- Toggle the grid layout state
