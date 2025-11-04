@@ -14170,6 +14170,15 @@
       velocityDecay: simulation.velocityDecay()
     };
   }
+  function getIDsFromNodes_(nodes) {
+    return (keyFn) => {
+      const keys4 = [];
+      for (let i2 = 0; i2 < nodes.length; i2++) {
+        keys4[i2] = keyFn(nodes[i2]);
+      }
+      return keys4;
+    };
+  }
   function setNodes_(simulation) {
     return (nodes) => {
       console.log(`FFI: setting nodes in simulation, there are ${nodes.length} nodes`);
@@ -14223,6 +14232,13 @@
         }
       });
       return swizzledLinks;
+    };
+  }
+  function getLinkIDs_(keyFn) {
+    return (link4) => {
+      const sourceID = typeof link4.source == `object` ? keyFn(link4.source) : link4.source;
+      const targetID = typeof link4.target == `object` ? keyFn(link4.target) : link4.target;
+      return { sourceID, targetID };
     };
   }
   function getLinksFromSimulation_(simulation) {
@@ -26621,7 +26637,7 @@
   var append9 = /* @__PURE__ */ append(semigroupArray);
   var getReachableNodes = function(dictOrd) {
     var lookup19 = lookup13(dictOrd);
-    var elem6 = elem2(dictOrd.Eq0());
+    var elem7 = elem2(dictOrd.Eq0());
     return function(id5) {
       return function(graph) {
         var processNextOpenDepPath = function(searchRecord) {
@@ -26629,7 +26645,7 @@
             return bind17(head(x45.head))(function(firstID) {
               return bind17(lookup19(firstID)(graph))(function(firstNode) {
                 var newDeps = partition(function(d9) {
-                  return !elem6(d9)(searchRecord.nodes);
+                  return !elem7(d9)(searchRecord.nodes);
                 })(firstNode.links.targets);
                 var newOpenDepPaths = mapFlipped12(newDeps.yes)(function(d9) {
                   return cons(d9)(x45.head);
@@ -32889,6 +32905,7 @@
   var drawThreeDimensionsSets2 = /* @__PURE__ */ drawThreeDimensionsSets(d3TaglessD3M);
   var $$delete8 = /* @__PURE__ */ $$delete5(ordInt);
   var insert19 = /* @__PURE__ */ insert6(ordInt);
+  var elem6 = /* @__PURE__ */ elem2(eqString);
   var bind110 = /* @__PURE__ */ bind(bindD3SimM);
   var attach2 = /* @__PURE__ */ attach(selectionMD3Selection_D3S);
   var selectUnder2 = /* @__PURE__ */ selectUnder(selectionMD3Selection_D3S);
@@ -32939,8 +32956,8 @@
     };
   };
   var renderLesMisControls = function(state3) {
-    var $129 = state3.exampleId === "lesmisgup";
-    if ($129) {
+    var $131 = state3.exampleId === "lesmisgup";
+    if ($131) {
       return div2([classes(["lesmis-controls"])])([div2([classes(["control-section"])])([h3_([text5("Character Groups")]), div2([classes(["button-group"])])(mapFlipped14(range2(0)(10))(function(groupId) {
         var isActive = member12(groupId)(state3.lesMisVisibleGroups);
         return button([classes([(function() {
@@ -33264,7 +33281,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 134, column 9 - line 138, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 135, column 9 - line 139, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -33280,7 +33297,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 142, column 9 - line 146, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 143, column 9 - line 147, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -33296,7 +33313,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 150, column 9 - line 154, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 151, column 9 - line 155, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -33312,7 +33329,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 158, column 9 - line 162, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 159, column 9 - line 163, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -33328,7 +33345,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 166, column 9 - line 170, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 167, column 9 - line 171, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -33344,7 +33361,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 174, column 9 - line 178, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 175, column 9 - line 179, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -33360,7 +33377,7 @@
                   });
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Component.Example (line 182, column 9 - line 186, column 22): " + [result.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Component.Example (line 183, column 9 - line 187, column 22): " + [result.constructor.name]);
               });
             }
             ;
@@ -33382,16 +33399,16 @@
                 var activeForces = fromFoldable115(["many body negative", "collision", "center", linksForceName_]);
                 return discard37(runWithD3_Simulation1($$void12(drawSimplified1(forcesArray)(activeForces)(graph)("#example-viz"))))(function() {
                   return discard37(modify_6(function(v1) {
-                    var $155 = {};
-                    for (var $156 in v1) {
-                      if ({}.hasOwnProperty.call(v1, $156)) {
-                        $155[$156] = v1[$156];
+                    var $157 = {};
+                    for (var $158 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $158)) {
+                        $157[$158] = v1[$158];
                       }
                       ;
                     }
                     ;
-                    $155.lesMisData = new Just(graph);
-                    return $155;
+                    $157.lesMisData = new Just(graph);
+                    return $157;
                   }))(function() {
                     return pure30(unit);
                   });
@@ -33478,26 +33495,35 @@
       if (v instanceof ToggleGroup) {
         return bind26(get9)(function(state3) {
           var newVisibleGroups = (function() {
-            var $158 = member12(v.value0)(state3.lesMisVisibleGroups);
-            if ($158) {
+            var $160 = member12(v.value0)(state3.lesMisVisibleGroups);
+            if ($160) {
               return $$delete8(v.value0)(state3.lesMisVisibleGroups);
             }
             ;
             return insert19(v.value0)(state3.lesMisVisibleGroups);
           })();
           return discard37(modify_6(function(v1) {
-            var $159 = {};
-            for (var $160 in v1) {
-              if ({}.hasOwnProperty.call(v1, $160)) {
-                $159[$160] = v1[$160];
+            var $161 = {};
+            for (var $162 in v1) {
+              if ({}.hasOwnProperty.call(v1, $162)) {
+                $161[$162] = v1[$162];
               }
               ;
             }
             ;
-            $159.lesMisVisibleGroups = newVisibleGroups;
-            return $159;
+            $161.lesMisVisibleGroups = newVisibleGroups;
+            return $161;
           }))(function() {
             if (state3.lesMisData instanceof Just) {
+              var filteredNodes = filter(function(v1) {
+                return member12(v1.group)(newVisibleGroups);
+              })(state3.lesMisData.value0.nodes);
+              var nodeIDs = getIDsFromNodes_(filteredNodes)(keyIsID_);
+              var validLink = function(link4) {
+                var linkIDs = getLinkIDs_(keyIsID_)(link4);
+                return elem6(linkIDs.sourceID)(nodeIDs) && elem6(linkIDs.targetID)(nodeIDs);
+              };
+              var filteredLinks = filter(validLink)(state3.lesMisData.value0.links);
               return runWithD3_Simulation1(bind110(attach2("#example-viz"))(function(root3) {
                 return bind110(selectUnder2(root3)(".zoom-group > .node"))(function(nodesGroup) {
                   return bind110(selectUnder2(root3)(".zoom-group > .link"))(function(linksGroup) {
@@ -33505,11 +33531,9 @@
                       nodes: new Just(nodesGroup),
                       links: new Just(linksGroup)
                     })({
-                      nodes: state3.lesMisData.value0.nodes,
-                      links: state3.lesMisData.value0.links,
-                      nodeFilter: new Just(function(v1) {
-                        return member12(v1.group)(newVisibleGroups);
-                      }),
+                      nodes: filteredNodes,
+                      links: filteredLinks,
+                      nodeFilter: Nothing.value,
                       linkFilter: Nothing.value,
                       activeForces: state3.lesMisActiveForces
                     });
@@ -33526,26 +33550,35 @@
       if (v instanceof ToggleForce2) {
         return bind26(get9)(function(state3) {
           var newActiveForces = (function() {
-            var $166 = member6(v.value0)(state3.lesMisActiveForces);
-            if ($166) {
+            var $168 = member6(v.value0)(state3.lesMisActiveForces);
+            if ($168) {
               return delete1(v.value0)(state3.lesMisActiveForces);
             }
             ;
             return insert110(v.value0)(state3.lesMisActiveForces);
           })();
           return discard37(modify_6(function(v1) {
-            var $167 = {};
-            for (var $168 in v1) {
-              if ({}.hasOwnProperty.call(v1, $168)) {
-                $167[$168] = v1[$168];
+            var $169 = {};
+            for (var $170 in v1) {
+              if ({}.hasOwnProperty.call(v1, $170)) {
+                $169[$170] = v1[$170];
               }
               ;
             }
             ;
-            $167.lesMisActiveForces = newActiveForces;
-            return $167;
+            $169.lesMisActiveForces = newActiveForces;
+            return $169;
           }))(function() {
             if (state3.lesMisData instanceof Just) {
+              var filteredNodes = filter(function(v1) {
+                return member12(v1.group)(state3.lesMisVisibleGroups);
+              })(state3.lesMisData.value0.nodes);
+              var nodeIDs = getIDsFromNodes_(filteredNodes)(keyIsID_);
+              var validLink = function(link4) {
+                var linkIDs = getLinkIDs_(keyIsID_)(link4);
+                return elem6(linkIDs.sourceID)(nodeIDs) && elem6(linkIDs.targetID)(nodeIDs);
+              };
+              var filteredLinks = filter(validLink)(state3.lesMisData.value0.links);
               return runWithD3_Simulation1(bind110(attach2("#example-viz"))(function(root3) {
                 return bind110(selectUnder2(root3)(".zoom-group > .node"))(function(nodesGroup) {
                   return bind110(selectUnder2(root3)(".zoom-group > .link"))(function(linksGroup) {
@@ -33553,11 +33586,9 @@
                       nodes: new Just(nodesGroup),
                       links: new Just(linksGroup)
                     })({
-                      nodes: state3.lesMisData.value0.nodes,
-                      links: state3.lesMisData.value0.links,
-                      nodeFilter: new Just(function(v1) {
-                        return member12(v1.group)(state3.lesMisVisibleGroups);
-                      }),
+                      nodes: filteredNodes,
+                      links: filteredLinks,
+                      nodeFilter: Nothing.value,
                       linkFilter: Nothing.value,
                       activeForces: newActiveForces
                     });
@@ -33571,7 +33602,7 @@
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Component.Example (line 103, column 16 - line 314, column 54): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Component.Example (line 104, column 16 - line 339, column 54): " + [v.constructor.name]);
     };
   };
   var allExampleIds = ["three-little-circles", "bar-chart", "line-chart", "scatter-plot", "grouped-bar-chart", "multi-line-chart", "radial-stacked-bar", "parabola", "bubble-chart", "vertical-tree", "horizontal-tree", "radial-tree", "animated-radial-tree", "treemap", "icicle", "lesmis-force", "lesmisgup", "topological-sort", "chord-diagram", "sankey-diagram", "map-quartet", "nested-data", "working-with-sets", "wealth-health", "general-update-pattern", "three-circles-transition"];
@@ -33587,7 +33618,7 @@
       return index2(allExampleIds)(v.value0 + 1 | 0);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Component.Example (line 358, column 3 - line 360, column 54): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Component.Example (line 383, column 3 - line 385, column 54): " + [v.constructor.name]);
   };
   var getPrevExampleId = function(currentId) {
     var v = findIndex(function(id5) {
@@ -33598,15 +33629,15 @@
     }
     ;
     if (v instanceof Just) {
-      var $177 = v.value0 > 0;
-      if ($177) {
+      var $179 = v.value0 > 0;
+      if ($179) {
         return index2(allExampleIds)(v.value0 - 1 | 0);
       }
       ;
       return Nothing.value;
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Component.Example (line 365, column 3 - line 367, column 83): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Component.Example (line 390, column 3 - line 392, column 83): " + [v.constructor.name]);
   };
   var renderHeader2 = function(currentId) {
     return function(maybeMeta) {
@@ -33619,7 +33650,7 @@
           return text5("");
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Component.Example (line 537, column 11 - line 545, column 34): " + [maybeMeta.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Component.Example (line 562, column 11 - line 570, column 34): " + [maybeMeta.constructor.name]);
       })()]), div2([classes(["example-header-right"])])([(function() {
         var v = getPrevExampleId(currentId);
         if (v instanceof Nothing) {
@@ -33630,7 +33661,7 @@
           return a([href4("#" + routeToPath(new Example(v.value0))), classes(["example-nav-button"])])([text5("\u2190 Previous")]);
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Component.Example (line 549, column 11 - line 559, column 41): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Component.Example (line 574, column 11 - line 584, column 41): " + [v.constructor.name]);
       })(), (function() {
         var v = getNextExampleId(currentId);
         if (v instanceof Nothing) {
@@ -33641,7 +33672,7 @@
           return a([href4("#" + routeToPath(new Example(v.value0))), classes(["example-nav-button"])])([text5("Next \u2192")]);
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Component.Example (line 560, column 11 - line 570, column 37): " + [v.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Component.Example (line 585, column 11 - line 595, column 37): " + [v.constructor.name]);
       })()])]);
     };
   };
@@ -33655,7 +33686,7 @@
       return div2([classes(["example-page"])])([renderHeader2(state3.exampleId)(new Just(v.value0)), main([classes(["example-content"])])([div2([classes(["example-viz-panel"])])([renderLesMisControls(state3), div2([id2("example-viz"), classes(["example-viz"])])([])]), div2([classes(["example-code-panel"])])([h2([classes(["code-panel-title"])])([text5("Source Code")]), pre([classes(["code-block"])])([code([classes(["language-haskell"])])([text5(getExampleCode(state3.exampleId))])])])])]);
     }
     ;
-    throw new Error("Failed pattern match at PSD3.Component.Example (line 428, column 3 - line 468, column 10): " + [v.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.Component.Example (line 453, column 3 - line 493, column 10): " + [v.constructor.name]);
   };
   var component8 = function(dictMonadAff) {
     return mkComponent({
