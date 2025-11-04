@@ -20,6 +20,7 @@ import D3.Viz.FpFtw.MapQuartet as MapQuartet
 import D3.Viz.FpFtw.TopologicalSort as TopologicalSort
 import D3.Viz.Hierarchies as Hierarchies
 import D3.Viz.LesMiserables as LesMis
+import D3.Viz.LesMiserablesGUP as LesMisGUP
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
 import D3.Viz.Sankey.Model (energyData)
 import D3.Viz.SankeyDiagram as Sankey
@@ -175,6 +176,15 @@ handleAction = case _ of
           LesMis.drawSimplified forcesArray activeForces graph "#example-viz"
         pure unit
 
+      "lesmisgup" -> do
+        response <- H.liftAff $ AJAX.get ResponseFormat.string "./data/miserables.json"
+        let graph = readGraphFromFileContents response
+        let forcesArray = [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ]
+            activeForces = Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
+        runWithD3_Simulation do
+          LesMisGUP.drawSimplified forcesArray activeForces graph "#example-viz"
+        pure unit
+
       "topological-sort" -> do
         _ <- H.liftEffect $ eval_D3M $ TopologicalSort.drawTopologicalSort TopologicalSort.buildPipelineTasks "#example-viz"
         pure unit
@@ -253,6 +263,7 @@ allExampleIds =
   , "treemap"
   , "icicle"
   , "lesmis-force"
+  , "lesmisgup"
   , "topological-sort"
   , "chord-diagram"
   , "sankey-diagram"
@@ -313,6 +324,8 @@ getExampleMeta id = case id of
     { id, name: "Icicle Chart", description: "Hierarchical icicle/partition layout visualization", category: "Hierarchies" }
   "lesmis-force" -> Just
     { id, name: "Les Misérables Network", description: "Character co-occurrence force-directed graph with physics simulation", category: "Force-Directed" }
+  "lesmisgup" -> Just
+    { id, name: "Les Misérables GUP", description: "Les Misérables network with General Update Pattern - filter groups dynamically", category: "Force-Directed" }
   "topological-sort" -> Just
     { id, name: "Topological Sort Layers", description: "Force layout with layer constraints for dependency graphs", category: "Force-Directed" }
   "sankey-diagram" -> Just
