@@ -44,7 +44,9 @@ import Data.Array as Data.Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
+import Data.Tuple (Tuple(..))
 import Effect.Aff.Class (class MonadAff)
+import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 import Halogen as H
 import Halogen.HTML as HH
@@ -59,6 +61,7 @@ import PSD3.Internal.Simulation.Types (D3SimulationState_, ForceType(..), Regula
 import PSD3.Interpreter.D3 (eval_D3M, runWithD3_Sankey, runWithD3_Simulation)
 import PSD3.RoutingDSL (routeToPath)
 import PSD3.Website.Types (Route(..))
+import Utility (getWindowWidthHeight)
 
 -- | Component state varies by example type
 type State =
@@ -75,6 +78,7 @@ data Action
   = Initialize
   | ToggleGroup Int           -- Toggle visibility of a character group
   | ToggleForce String        -- Toggle a force on/off
+  | MoveToGrid                -- Transition nodes to grid layout
 
 forces = {
     manyBodyNeg: createForce "many body negative" (RegularForce ForceManyBody) allNodes [ F.strength (-40.0) ]
@@ -331,6 +335,51 @@ handleAction = case _ of
           PSD3Simulation.start
       _ -> log "ToggleForce: No model data available"
 
+  MoveToGrid -> do
+    state <- H.get
+    case state.lesMisData of
+      Just model -> do
+        (Tuple w h) <- liftEffect getWindowWidthHeight
+
+        runWithD3_Simulation do
+          -- Get selections from DOM
+          root <- PSD3Selection.attach "#example-viz"
+          nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
+          linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
+
+          -- Stop simulation during transition (so tick doesn't fight the animation)
+          PSD3Simulation.stop
+
+          -- Calculate grid positions (60px spacing, centered on window)
+          let gridNodes = LesMisGUP.nodesToGridLayout model.nodes 60.0 w
+
+          -- Start D3 transition (animates nodes smoothly to grid over 1500ms)
+          -- Key: simulation is STOPPED so tick function doesn't interfere
+          liftEffect $ LesMisGUP.transitionNodesToGridPositions_
+            ".lesmis"                    -- SVG class
+            ".zoom-group > .node circle" -- Node selector
+            ".zoom-group > .link line"   -- Link selector
+            gridNodes
+            (log "Grid transition complete - nodes now at grid positions")
+
+          -- Update simulation data with pinned nodes (but DON'T start simulation yet!)
+          -- This sets fx/fy in the internal simulation data so nodes are "ready to be pinned"
+          -- But since simulation is stopped, tick function won't override the transition
+          LesMisGUP.updateSimulation
+            { nodes: Just nodesGroup, links: Just linksGroup }
+            { allNodes: gridNodes                      -- Nodes with fx/fy set
+            , allLinks: model.links
+            , nodeFilter: \(D3SimNode node) ->         -- Still apply group filter
+                Set.member node.group state.lesMisVisibleGroups
+            , activeForces: state.lesMisActiveForces
+            }
+
+          -- DON'T restart simulation yet - let the D3 transition complete first!
+          -- After transition finishes (1500ms), nodes will be visually at grid positions
+          -- User can manually restart by toggling a force
+          -- TODO: Use Aff.delay to auto-restart after 1500ms
+      _ -> log "MoveToGrid: No model data available"
+
 -- | Example metadata
 type ExampleMeta =
   { id :: String
@@ -515,6 +564,18 @@ renderLesMisControls state =
               , renderForceButton "collision" state.lesMisActiveForces
               , renderForceButton "center" state.lesMisActiveForces
               , renderForceButton linksForceName_ state.lesMisActiveForces
+              ]
+          ]
+      , HH.div
+          [ HP.classes [ HH.ClassName "control-section" ] ]
+          [ HH.h3_ [ HH.text "Layout" ]
+          , HH.div
+              [ HP.classes [ HH.ClassName "button-group" ] ]
+              [ HH.button
+                  [ HP.classes [ HH.ClassName "layout-button" ]
+                  , HE.onClick \_ -> MoveToGrid
+                  ]
+                  [ HH.text "Move to Grid" ]
               ]
           ]
       ]

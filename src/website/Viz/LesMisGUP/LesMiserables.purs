@@ -7,6 +7,8 @@ module D3.Viz.LesMiserablesGUP where
 -- | See Acknowledgements page for full credits
 
 import Control.Monad.State (class MonadState)
+import Data.Int as Int
+import Data.Nullable (Nullable, notNull, null)
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, x1, x2, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
 import D3.Viz.LesMiserablesGUP.Model (LesMisRawModel)
@@ -20,16 +22,20 @@ import PSD3.Internal.Zoom (ScaleExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
 import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start)
 import PSD3.Simulation.Update (genericUpdateSimulation)
-import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode)
+import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode(..))
 import PSD3.Shared.ZoomableViewbox (zoomableSVG)
+import Data.Array (length)
+import Data.Array as Array
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
-import Data.Number (sqrt)
+import Data.Number (sqrt, ceil, floor, (%))
+import Data.Number as Number
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
+import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import PSD3.Internal.Simulation.Types (Step(..))
-import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, void, ($), (/), (<<<))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, void, ($), (/), (*), (+), (<<<))
 import Utility (getWindowWidthHeight)
 
 -- | NOTE: Accessors (link_, datum_) are now in D3.Viz.LesMiserablesGUP.Render
@@ -162,4 +168,59 @@ updateSimulation selections dataConfig =
     keyIsID_
     defaultLesMisAttributes
     lesMisRenderCallbacks
+-- Snippet_End
+
+-- Snippet_Start
+-- Name: LesMisGridLayout
+-- | Grid layout helpers for gentle transition to grid positions
+-- |
+-- | These functions calculate grid positions for nodes and prepare them
+-- | for smooth D3 transitions followed by pinning.
+
+type PointXY = { x :: Number, y :: Number }
+
+-- | Calculate grid position from index
+numberToGridPoint :: Int -> Int -> PointXY
+numberToGridPoint columns i = do
+  let
+    c = Int.toNumber columns
+    d = Int.toNumber i
+    x = (d % c)
+    y = floor (d / c)
+  { x, y }
+
+-- | Scale and offset a point
+scaleAndOffset :: Number -> Number -> Number -> Number -> PointXY -> PointXY
+scaleAndOffset scaleX scaleY offsetX offsetY { x, y } =
+  { x: x * scaleX + offsetX, y: y * scaleY + offsetY }
+
+-- | Calculate grid positions for all nodes with fx/fy set
+-- | Returns array of nodes with fx/fy set to grid positions
+nodesToGridLayout :: forall r. Array (D3_SimulationNode (fx :: Nullable Number, fy :: Nullable Number | r)) -> Number -> Number -> Array (D3_SimulationNode (fx :: Nullable Number, fy :: Nullable Number | r))
+nodesToGridLayout nodes gridSpacing _windowSize =
+  Array.mapWithIndex setGridPosition nodes
+  where
+    nodeCount = length nodes
+    -- Calculate square grid dimensions
+    columns = Int.floor $ ceil $ sqrt $ Int.toNumber nodeCount
+    -- Center the grid
+    offset = -(Int.toNumber columns * gridSpacing) / 2.0
+
+    setGridPosition i (D3SimNode node) =
+      let gridPt = numberToGridPoint columns i
+          finalPt = scaleAndOffset gridSpacing gridSpacing offset offset gridPt
+      in D3SimNode (node { fx = notNull finalPt.x, fy = notNull finalPt.y })
+
+-- | FFI: Transition nodes to grid positions with smooth D3 animation
+-- | Selects elements by class, transitions their transform attribute
+-- | Calls completion callback when done
+foreign import transitionNodesToGridPositions_
+  :: forall d.
+     String                        -- SVG class selector
+  -> String                        -- Node class selector
+  -> String                        -- Link class selector
+  -> Array (D3_SimulationNode d)   -- Nodes with target fx/fy set
+  -> Effect Unit                   -- Completion callback
+  -> Effect Unit
+
 -- Snippet_End
