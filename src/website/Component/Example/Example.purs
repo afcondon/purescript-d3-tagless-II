@@ -28,6 +28,7 @@ import PSD3.Internal.Types as PSD3Types
 import PSD3.Internal.FFI as PSD3FFI
 import PSD3.Data.Node (D3_SimulationNode(..))
 import PSD3.Capabilities.Selection as PSD3Selection
+import PSD3.Capabilities.Simulation as PSD3Simulation
 import Halogen.HTML.Events as HE
 import D3.Viz.LesMiserables.File (readGraphFromFileContents)
 import D3.Viz.Sankey.Model (energyData)
@@ -268,35 +269,31 @@ handleAction = case _ of
                            else Set.insert groupId state.lesMisVisibleGroups
     H.modify_ _ { lesMisVisibleGroups = newVisibleGroups }
 
-    -- Call updateSimulation with filtered data
+    -- Call updateSimulation with DECLARATIVE API + re-heat
     case state.lesMisData of
       Just model -> do
-        -- Filter nodes by group membership
-        let filteredNodes = Data.Array.filter (\(D3SimNode node) -> Set.member node.group newVisibleGroups) model.nodes
-
-        -- Get IDs of filtered nodes so we can filter links
-        let nodeIDs = PSD3FFI.getIDsFromNodes_ filteredNodes PSD3FFI.keyIsID_
-
-        -- Filter links to only those connecting visible nodes
-        let validLink link = do
-              let linkIDs = PSD3FFI.getLinkIDs_ PSD3FFI.keyIsID_ link :: { sourceID :: String, targetID :: String }
-              (linkIDs.sourceID `Data.Array.elem` nodeIDs) && (linkIDs.targetID `Data.Array.elem` nodeIDs)
-            filteredLinks = Data.Array.filter validLink model.links
-
         runWithD3_Simulation do
           -- Get selections from DOM (they were created by drawSimplified)
           root <- PSD3Selection.attach "#example-viz"
           nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
           linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
 
+          -- Stop simulation to re-heat it
+          PSD3Simulation.stop
+
+          -- DECLARATIVE API: Pass full datasets + predicate
+          -- Library handles filtering AND automatic link filtering
           LesMisGUP.updateSimulation
             { nodes: Just nodesGroup, links: Just linksGroup }
-            { nodes: filteredNodes      -- Pre-filtered nodes
-            , links: filteredLinks      -- Pre-filtered links
-            , nodeFilter: Nothing       -- Already filtered
-            , linkFilter: Nothing       -- Already filtered
+            { allNodes: model.nodes                        -- FULL dataset!
+            , allLinks: model.links                        -- FULL dataset!
+            , nodeFilter: \(D3SimNode node) ->             -- Predicate (single source of truth)
+                Set.member node.group newVisibleGroups
             , activeForces: state.lesMisActiveForces
             }
+
+          -- Restart simulation (re-heats with full alpha)
+          PSD3Simulation.start
       _ -> log "ToggleGroup: No model data available"
 
   ToggleForce forceLabel -> do
@@ -307,35 +304,31 @@ handleAction = case _ of
                           else Set.insert forceLabel state.lesMisActiveForces
     H.modify_ _ { lesMisActiveForces = newActiveForces }
 
-    -- Call updateSimulation with new force configuration
+    -- Call updateSimulation with DECLARATIVE API + re-heat
     case state.lesMisData of
       Just model -> do
-        -- Filter nodes by group membership (same as ToggleGroup)
-        let filteredNodes = Data.Array.filter (\(D3SimNode node) -> Set.member node.group state.lesMisVisibleGroups) model.nodes
-
-        -- Get IDs of filtered nodes so we can filter links
-        let nodeIDs = PSD3FFI.getIDsFromNodes_ filteredNodes PSD3FFI.keyIsID_
-
-        -- Filter links to only those connecting visible nodes
-        let validLink link = do
-              let linkIDs = PSD3FFI.getLinkIDs_ PSD3FFI.keyIsID_ link :: { sourceID :: String, targetID :: String }
-              (linkIDs.sourceID `Data.Array.elem` nodeIDs) && (linkIDs.targetID `Data.Array.elem` nodeIDs)
-            filteredLinks = Data.Array.filter validLink model.links
-
         runWithD3_Simulation do
           -- Get selections from DOM (they were created by drawSimplified)
           root <- PSD3Selection.attach "#example-viz"
           nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
           linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
 
+          -- Stop simulation to re-heat it
+          PSD3Simulation.stop
+
+          -- DECLARATIVE API: Pass full datasets + predicate
+          -- Library handles filtering AND automatic link filtering
           LesMisGUP.updateSimulation
             { nodes: Just nodesGroup, links: Just linksGroup }
-            { nodes: filteredNodes      -- Pre-filtered nodes
-            , links: filteredLinks      -- Pre-filtered links
-            , nodeFilter: Nothing       -- Already filtered
-            , linkFilter: Nothing       -- Already filtered
+            { allNodes: model.nodes                        -- FULL dataset!
+            , allLinks: model.links                        -- FULL dataset!
+            , nodeFilter: \(D3SimNode node) ->             -- Predicate (single source of truth)
+                Set.member node.group state.lesMisVisibleGroups
             , activeForces: newActiveForces
             }
+
+          -- Restart simulation (re-heats with full alpha)
+          PSD3Simulation.start
       _ -> log "ToggleForce: No model data available"
 
 -- | Example metadata

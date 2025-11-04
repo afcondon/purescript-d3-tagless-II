@@ -75,8 +75,9 @@ initialize = do
 -- | ## Impossible to mess up because:
 -- | - Library controls the flow
 -- | - Callbacks are declarative ("what" not "when")
--- | - No direct access to simulation state
--- | - No way to skip steps or call in wrong order
+-- | - DECLARATIVE API: Provide full datasets + node filter predicate
+-- | - Library automatically filters links to match visible nodes
+-- | - No way to provide inconsistent data
 updateSimulation :: forall m d.
   Bind m =>
   MonadEffect m =>
@@ -85,10 +86,11 @@ updateSimulation :: forall m d.
   { nodes :: Maybe D3Selection_
   , links :: Maybe D3Selection_
   } ->
-  { nodes :: Array (D3_SimulationNode d)
-  , links :: Array D3Link_Unswizzled
-  , nodeFilter :: Maybe (D3_SimulationNode d -> Boolean)
-  , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)
+  { allNodes :: Array (D3_SimulationNode d)                                         -- FULL dataset
+  , allLinks :: Array D3Link_Unswizzled                                            -- FULL dataset
+  , nodeFilter :: D3_SimulationNode d -> Boolean                                   -- Which nodes to show
+  , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)                             -- Optional visual filtering (e.g., hide dev dependencies)
+  , nodeInitializers :: Array (Array (D3_SimulationNode d) -> Array (D3_SimulationNode d))  -- Tree layout, grid, pinning, etc.
   , activeForces :: Set Label
   , linksWithForce :: Datum_ -> Boolean
   } ->
@@ -99,13 +101,13 @@ updateSimulation selections dataConfig attrs =
     selections
     Group  -- Node element type
     Line   -- Link element type
-    { nodes: Just dataConfig.nodes
-    , links: Just dataConfig.links
-    , nodeFilter: dataConfig.nodeFilter
-    , linkFilter: dataConfig.linkFilter
+    { allNodes: dataConfig.allNodes           -- Full dataset
+    , allLinks: dataConfig.allLinks           -- Full dataset
+    , nodeFilter: dataConfig.nodeFilter       -- Single predicate (library filters links automatically!)
+    , linkFilter: dataConfig.linkFilter       -- Optional visual filtering (restored!)
+    , nodeInitializers: dataConfig.nodeInitializers  -- Passed from scene config
     , activeForces: Just dataConfig.activeForces
     , config: Nothing
-    , keyFn: keyIsID_
     }
     keyIsID_
     attrs

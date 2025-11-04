@@ -7,8 +7,7 @@ import PSD3.Internal.Types (D3Selection_, Datum_)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Simulation.Scene (SceneConfig)
 import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode)
-import PSD3.Capabilities.Simulation (class SimulationM, start)
-import Data.Array (filter, foldl)
+import PSD3.Capabilities.Simulation (class SimulationM, start, stop)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 
@@ -23,15 +22,20 @@ import Data.Set (Set)
 -- | Parameters:
 -- | - selections: DOM group selections for nodes and links
 -- | - scene: Scene configuration (filters, forces, attributes, initializers)
--- | - allNodes: Complete node dataset (before filtering)
--- | - allLinks: Complete link dataset (before filtering)
+-- | - allNodes: Complete node dataset (NO pre-filtering!)
+-- | - allLinks: Complete link dataset (NO pre-filtering!)
 -- | - updateSimFn: Visualization-specific update function (e.g., Spago's updateSimulation)
 -- |
--- | The updateSimFn should handle:
+-- | ## DECLARATIVE PATTERN:
+-- | We pass FULL datasets + scene config to updateSimFn.
+-- | The updateSimFn (via genericUpdateSimulation) handles:
+-- | - Filtering nodes using scene.chooseNodes
+-- | - Initializing filtered nodes using scene.nodeInitializerFunctions
+-- | - Automatically filtering links to match visible nodes
 -- | - Calling the SimulationM2 update() API
 -- | - DOM joins (enter/update/exit pattern)
 -- | - Setting tick functions
--- | But should NOT call start() - that's handled here
+-- | This function only handles start/stop lifecycle.
 runSimulation :: forall d attrs sel m.
   Monad m =>
   SimulationM sel m =>
@@ -39,28 +43,24 @@ runSimulation :: forall d attrs sel m.
   SceneConfig d attrs ->
   Array (D3_SimulationNode d) ->
   Array D3Link_Unswizzled ->
-  ({ nodes :: Array (D3_SimulationNode d)
-   , links :: Array D3Link_Unswizzled
+  ({ allNodes :: Array (D3_SimulationNode d)
+   , allLinks :: Array D3Link_Unswizzled
    , scene :: SceneConfig d attrs
    } -> m Unit) ->
   m Unit
 runSimulation selections scene allNodes allLinks updateSimFn = do
-  -- STEP 1: Filter - Apply scene's node filter predicate
-  let filteredNodes = filter scene.chooseNodes allNodes
+  -- STEP 1: Stop simulation before updating
+  stop
 
-  -- STEP 2: Initialize - Run initializers on filtered data
-  -- This is where tree layouts, pinning, positioning happen
-  let initializedNodes = foldl (\nodes fn -> fn nodes) filteredNodes scene.nodeInitializerFunctions
-
-  -- STEP 3: Delegate to visualization-specific update function
-  -- We pass the initialized nodes and ALL links (updateSimFn will filter links internally)
+  -- STEP 2: Delegate to visualization-specific update function
+  -- Pass FULL datasets - updateSimFn will filter/initialize declaratively
   updateSimFn
-    { nodes: initializedNodes
-    , links: allLinks
-    , scene: scene
+    { allNodes: allNodes  -- FULL dataset (no pre-filtering!)
+    , allLinks: allLinks  -- FULL dataset (no pre-filtering!)
+    , scene: scene        -- Contains filter predicate and initializers
     }
 
-  -- STEP 4: Restart simulation
+  -- STEP 3: Restart simulation
   start
 
 -- | High-level runSimulation that works with extensible state records
@@ -99,11 +99,12 @@ runSimulationFromState :: forall d attrs sel m row.
   ({ | row } -> Array (D3_SimulationNode d)) ->                                   -- Get model nodes
   ({ | row } -> Array D3Link_Unswizzled) ->                                       -- Get model links
   (attrs -> { | row } -> attrs) ->                                                -- Enhance attributes
-  ({ nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ } ->                -- UpdateSimulation function
-   { nodes :: Array (D3_SimulationNode d)
-   , links :: Array D3Link_Unswizzled
-   , nodeFilter :: Maybe (D3_SimulationNode d -> Boolean)
-   , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)
+  ({ nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ } ->                -- UpdateSimulation function (DECLARATIVE API)
+   { allNodes :: Array (D3_SimulationNode d)                                         -- FULL dataset
+   , allLinks :: Array D3Link_Unswizzled                                            -- FULL dataset
+   , nodeFilter :: D3_SimulationNode d -> Boolean                                   -- Which nodes to show
+   , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)                             -- Optional visual filtering
+   , nodeInitializers :: Array (Array (D3_SimulationNode d) -> Array (D3_SimulationNode d))  -- Tree layout, grid, etc.
    , activeForces :: Set Label
    , linksWithForce :: Datum_ -> Boolean
    } ->
@@ -119,12 +120,13 @@ runSimulationFromState getSelections getScene getNodes getLinks enhanceAttrs upd
       enhancedAttrs = enhanceAttrs scene.attributes state
 
   runSimulation selections scene allModelNodes allModelLinks
-    \{ nodes: initializedNodes, links: allLinks, scene: sceneConfig } ->
+    \{ allNodes, allLinks, scene: sceneConfig } ->
       updateSimFn selections
-        { nodes: initializedNodes
-        , links: allLinks
-        , nodeFilter: Nothing
-        , linkFilter: Just sceneConfig.linksShown
+        { allNodes: allNodes                           -- FULL dataset (declarative!)
+        , allLinks: allLinks                           -- FULL dataset (declarative!)
+        , nodeFilter: sceneConfig.chooseNodes          -- Node predicate
+        , linkFilter: Just sceneConfig.linksShown      -- Visual link filtering (restored!)
+        , nodeInitializers: sceneConfig.nodeInitializerFunctions  -- Tree layout, grid, pinning
         , activeForces: sceneConfig.activeForces
         , linksWithForce: sceneConfig.linksActive
         }

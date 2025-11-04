@@ -126,10 +126,11 @@ drawSimplified forceLibrary activeForces model selector = do
 -- Name: LesMisUpdatePattern
 -- | Update the visualization using the generic library updateSimulation
 -- |
--- | This demonstrates how clean the library makes updates:
--- | - Just call genericUpdateSimulation with callbacks
--- | - Library handles all the complexity
--- | - Impossible to mess up
+-- | This demonstrates how clean the DECLARATIVE API makes updates:
+-- | - Provide FULL datasets (allNodes, allLinks)
+-- | - Provide single node filter predicate
+-- | - Library automatically filters links to match
+-- | - Impossible to mess up (no way to provide inconsistent data)
 updateSimulation :: forall row m d.
   Bind m =>
   MonadEffect m =>
@@ -139,10 +140,9 @@ updateSimulation :: forall row m d.
   { nodes :: Maybe D3Selection_
   , links :: Maybe D3Selection_
   } ->
-  { nodes :: Array (D3_SimulationNode d)
-  , links :: Array D3Link_Unswizzled
-  , nodeFilter :: Maybe (D3_SimulationNode d -> Boolean)
-  , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)
+  { allNodes :: Array (D3_SimulationNode d)          -- FULL dataset
+  , allLinks :: Array D3Link_Unswizzled              -- FULL dataset
+  , nodeFilter :: D3_SimulationNode d -> Boolean     -- Which nodes to show
   , activeForces :: Set.Set Label
   } ->
   m Unit
@@ -151,13 +151,13 @@ updateSimulation selections dataConfig =
     selections
     Circle  -- Node element type (simple circles)
     Line    -- Link element type
-    { nodes: Just dataConfig.nodes
-    , links: Just dataConfig.links
-    , nodeFilter: dataConfig.nodeFilter
-    , linkFilter: dataConfig.linkFilter
+    { allNodes: dataConfig.allNodes           -- Full dataset
+    , allLinks: dataConfig.allLinks           -- Full dataset
+    , nodeFilter: dataConfig.nodeFilter       -- Single predicate (library filters links automatically!)
+    , linkFilter: Nothing                     -- No visual filtering needed (small price for safety)
+    , nodeInitializers: []                    -- No initializers needed for simple circles
     , activeForces: Just dataConfig.activeForces
     , config: Nothing
-    , keyFn: keyIsID_
     }
     keyIsID_
     defaultLesMisAttributes
