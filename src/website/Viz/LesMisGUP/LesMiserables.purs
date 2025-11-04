@@ -9,51 +9,31 @@ module D3.Viz.LesMiserablesGUP where
 import Control.Monad.State (class MonadState)
 import PSD3.Internal.Attributes.Sugar (classed, cx, cy, fill, radius, strokeColor, strokeOpacity, strokeWidth, x1, x2, y1, y2)
 import PSD3.Internal.Types (D3Selection_, Element(..), Selector)
-import D3.Viz.LesMiserablesGUP.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import D3.Viz.LesMiserablesGUP.Model (LesMisRawModel)
-import PSD3.Internal.FFI (getIDsFromNodes_, getLinkIDs_, keyIsID_, simdrag_)
-import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_)
-import PSD3.Internal.Selection.Types (Behavior(..), DragBehavior(..))
-import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, SimVariable(..), Step(..))
+import D3.Viz.LesMiserablesGUP.Render (datum_, defaultLesMisAttributes, lesMisRenderCallbacks, link_)
+import PSD3.Internal.FFI (keyIsID_, simdrag_)
+import PSD3.Internal.Selection.Types (DragBehavior(..))
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Internal.Selection.Types (Behavior(..))
+import PSD3.Internal.Simulation.Types (D3SimulationState_, Force)
 import PSD3.Internal.Zoom (ScaleExtent(..))
 import PSD3.Capabilities.Selection (class SelectionM, appendTo, attach, on, setAttributes, simpleJoin)
-import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start, update)
-import PSD3.Data.Node (D3Link_Swizzled, D3_SimulationNode(..))
+import PSD3.Capabilities.Simulation (class SimulationM, class SimulationM2, addTickFunction, init, start)
+import PSD3.Simulation.Update (genericUpdateSimulation)
+import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode)
 import PSD3.Shared.ZoomableViewbox (zoomableSVG)
-import Data.Array as Data.Array
-import Data.Array (elem)
-import Data.Int (toNumber)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Number (sqrt)
 import Data.Set as Set
 import Data.Tuple (Tuple(..))
 import Effect.Class (class MonadEffect, liftEffect)
-import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, void, ($), (&&), (/), (==), (<<<))
+import PSD3.Internal.Simulation.Types (Step(..))
+import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, void, ($), (/), (<<<))
 import Utility (getWindowWidthHeight)
 
--- type-safe(ish) accessors for the data that is given to D3
--- we lose the type information in callbacks from the FFI, such as for attributes
--- but since we know what we gave we can coerce it back to the initial type.
--- Snippet_Start
--- Name: LesMisAccessors
-link_ = {
-    source: _.source <<< unboxD3SimLink
-  , target: _.target <<< unboxD3SimLink
-  , value:  _.value <<< unboxD3SimLink
-  , color:  d3SchemeCategory10N_ <<< toNumber <<< _.target.group <<< unboxD3SimLink
-}
-
-datum_ = {
--- direct accessors to fields of the datum (BOILERPLATE)
-    id    : _.id <<< unboxD3SimNode -- NB the id in this case is a String
-  , x     : _.x <<< unboxD3SimNode
-  , y     : _.y <<< unboxD3SimNode
-  , group : _.group <<< unboxD3SimNode
-
-  , colorByGroup: d3SchemeCategory10N_ <<< toNumber <<< _.group <<< unboxD3SimNode
-}
--- Snippet_End
+-- | NOTE: Accessors (link_, datum_) are now in D3.Viz.LesMiserablesGUP.Render
+-- | This keeps the visualization code clean and focused on structure, not data access.
 
 -- Snippet_Start
 -- Name: LesMisScript
@@ -142,50 +122,42 @@ drawSimplified forceLibrary activeForces model selector = do
 
 -- Snippet_Start
 -- Name: LesMisUpdatePattern
--- | Update the visualization with filtered data using the General Update Pattern
--- | This demonstrates the SimulationM2 update pattern:
--- | 1. Filter data
--- | 2. Call update with filtered data
--- | 3. Restart simulation
-updateFiltered :: forall row m.
+-- | Update the visualization using the generic library updateSimulation
+-- |
+-- | This demonstrates how clean the library makes updates:
+-- | - Just call genericUpdateSimulation with callbacks
+-- | - Library handles all the complexity
+-- | - Impossible to mess up
+updateSimulation :: forall row m d.
   Bind m =>
   MonadEffect m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
+  SelectionM D3Selection_ m =>
   SimulationM2 D3Selection_ m =>
-  Set.Set Int ->            -- Which groups to show
-  LesMisRawModel ->         -- Full original data
+  { nodes :: Maybe D3Selection_
+  , links :: Maybe D3Selection_
+  } ->
+  { nodes :: Array (D3_SimulationNode d)
+  , links :: Array D3Link_Unswizzled
+  , nodeFilter :: Maybe (D3_SimulationNode d -> Boolean)
+  , linkFilter :: Maybe (D3Link_Unswizzled -> Boolean)
+  , activeForces :: Set.Set Label
+  } ->
   m Unit
-updateFiltered visibleGroups model = do
-  -- STEP 1: Filter data by group
-  let filteredNodes = Data.Array.filter (\(D3SimNode node) -> Set.member node.group visibleGroups) model.nodes
-      -- Get IDs of filtered nodes
-      nodeIDs :: Array String
-      nodeIDs = getIDsFromNodes_ filteredNodes keyIsID_
-      -- Filter links to only those connecting visible nodes
-      validLink link = do
-        let { sourceID, targetID } = getLinkIDs_ keyIsID_ link :: { sourceID :: String, targetID :: String }
-        (sourceID `elem` nodeIDs) && (targetID `elem` nodeIDs)
-      filteredLinks = Data.Array.filter validLink model.links
-
-  -- STEP 2: Call update with filtered data
-  -- The update function handles:
-  -- - Data merging (enter/update/exit)
-  -- - Link swizzling
-  -- - Force engagement
-  -- - DOM updates via tick functions
-  void $ update
-    { nodes: Just filteredNodes
-    , links: Just filteredLinks
-    , nodeFilter: Nothing     -- Already filtered in Step 1
-    , linkFilter: Nothing     -- Already filtered in Step 1
-    , activeForces: Nothing   -- Keep current forces
-    , config: Nothing         -- Keep current config
+updateSimulation selections dataConfig =
+  genericUpdateSimulation
+    selections
+    Circle  -- Node element type (simple circles)
+    Line    -- Link element type
+    { nodes: Just dataConfig.nodes
+    , links: Just dataConfig.links
+    , nodeFilter: dataConfig.nodeFilter
+    , linkFilter: dataConfig.linkFilter
+    , activeForces: Just dataConfig.activeForces
+    , config: Nothing
     , keyFn: keyIsID_
     }
-
-  -- STEP 3: Restart simulation so nodes animate to new positions
-  start
+    keyIsID_
+    defaultLesMisAttributes
+    lesMisRenderCallbacks
 -- Snippet_End
-
--- TODO: For now, this is just the update function. The UI will be added next.
--- The plan is to add simple checkboxes or buttons that call this function with different group sets.

@@ -30643,12 +30643,53 @@
     return datum2;
   };
 
+  // output/D3.Viz.LesMiserablesGUP.Render/index.js
+  var link_6 = {
+    source: function($34) {
+      return (function(v) {
+        return v.source;
+      })(unboxD3SimLink3($34));
+    },
+    target: function($35) {
+      return (function(v) {
+        return v.target;
+      })(unboxD3SimLink3($35));
+    },
+    value: function($36) {
+      return (function(v) {
+        return v.value;
+      })(unboxD3SimLink3($36));
+    },
+    color: function($37) {
+      return d3SchemeCategory10N_(toNumber((function(v) {
+        return v.target.group;
+      })(unboxD3SimLink3($37))));
+    }
+  };
+  var datum_7 = {
+    x: function($38) {
+      return (function(v) {
+        return v.x;
+      })(unboxD3SimNode3($38));
+    },
+    y: function($39) {
+      return (function(v) {
+        return v.y;
+      })(unboxD3SimNode3($39));
+    },
+    colorByGroup: function($40) {
+      return d3SchemeCategory10N_(toNumber((function(v) {
+        return v.group;
+      })(unboxD3SimNode3($40))));
+    }
+  };
+
   // output/D3.Viz.LesMiserablesGUP/index.js
-  var discard28 = /* @__PURE__ */ discard(discardUnit);
   var classed21 = /* @__PURE__ */ classed(toAttrString);
   var strokeColor17 = /* @__PURE__ */ strokeColor(toAttrString);
   var strokeOpacity7 = /* @__PURE__ */ strokeOpacity(toAttrNumber);
   var fromFoldable31 = /* @__PURE__ */ fromFoldable(ordString)(foldableArray);
+  var discard28 = /* @__PURE__ */ discard(discardUnit);
   var radius17 = /* @__PURE__ */ radius2(toAttrNumber);
   var fill22 = /* @__PURE__ */ fill(toAttrStringFn);
   var strokeWidth15 = /* @__PURE__ */ strokeWidth(toAttrNumberFn);
@@ -30659,55 +30700,6 @@
   var y111 = /* @__PURE__ */ y1(toAttrNumberFn);
   var x211 = /* @__PURE__ */ x2(toAttrNumberFn);
   var y211 = /* @__PURE__ */ y2(toAttrNumberFn);
-  var link_6 = {
-    source: function($86) {
-      return (function(v) {
-        return v.source;
-      })(unboxD3SimLink3($86));
-    },
-    target: function($87) {
-      return (function(v) {
-        return v.target;
-      })(unboxD3SimLink3($87));
-    },
-    value: function($88) {
-      return (function(v) {
-        return v.value;
-      })(unboxD3SimLink3($88));
-    },
-    color: function($89) {
-      return d3SchemeCategory10N_(toNumber((function(v) {
-        return v.target.group;
-      })(unboxD3SimLink3($89))));
-    }
-  };
-  var datum_7 = {
-    id: function($90) {
-      return (function(v) {
-        return v.id;
-      })(unboxD3SimNode3($90));
-    },
-    x: function($91) {
-      return (function(v) {
-        return v.x;
-      })(unboxD3SimNode3($91));
-    },
-    y: function($92) {
-      return (function(v) {
-        return v.y;
-      })(unboxD3SimNode3($92));
-    },
-    group: function($93) {
-      return (function(v) {
-        return v.group;
-      })(unboxD3SimNode3($93));
-    },
-    colorByGroup: function($94) {
-      return d3SchemeCategory10N_(toNumber((function(v) {
-        return v.group;
-      })(unboxD3SimNode3($94))));
-    }
-  };
   var drawSimplified2 = function(dictBind) {
     var bind76 = bind(dictBind);
     var discard113 = discard28(dictBind);
@@ -30766,26 +30758,26 @@
                               return bind76(simpleJoin4(nodesGroup)(Circle.value)(v2.nodes)(keyIsID_))(function(nodesSelection) {
                                 return discard113(setAttributes5(nodesSelection)([radius17(5), fill22(datum_7.colorByGroup)]))(function() {
                                   return bind76(simpleJoin4(linksGroup)(Line.value)(v2.links)(keyIsID_))(function(linksSelection) {
-                                    return discard113(setAttributes5(linksSelection)([strokeWidth15(function($95) {
-                                      return sqrt(link_6.value($95));
+                                    return discard113(setAttributes5(linksSelection)([strokeWidth15(function($68) {
+                                      return sqrt(link_6.value($68));
                                     }), strokeColor18(link_6.color)]))(function() {
                                       return discard113(addTickFunction2("nodes")(new Step3(nodesSelection, [cx6(datum_7.x), cy6(datum_7.y)])))(function() {
-                                        return discard113(addTickFunction2("links")(new Step3(linksSelection, [x113(function($96) {
+                                        return discard113(addTickFunction2("links")(new Step3(linksSelection, [x113(function($69) {
                                           return (function(v3) {
                                             return v3.x;
-                                          })(link_6.source($96));
-                                        }), y111(function($97) {
+                                          })(link_6.source($69));
+                                        }), y111(function($70) {
                                           return (function(v3) {
                                             return v3.y;
-                                          })(link_6.source($97));
-                                        }), x211(function($98) {
+                                          })(link_6.source($70));
+                                        }), x211(function($71) {
                                           return (function(v3) {
                                             return v3.x;
-                                          })(link_6.target($98));
-                                        }), y211(function($99) {
+                                          })(link_6.target($71));
+                                        }), y211(function($72) {
                                           return (function(v3) {
                                             return v3.y;
-                                          })(link_6.target($99));
+                                          })(link_6.target($72));
                                         })])))(function() {
                                           return bind76(on3(nodesSelection)(new Drag(new CustomDrag("lesmis", simdrag_))))(function() {
                                             return discard113(start6)(function() {
