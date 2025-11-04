@@ -4,6 +4,7 @@ import Prelude
 
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (D3Selection_, Datum_)
+import PSD3.Simulation.Scene as Scene
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, clusterSceneAttributes)
 import D3.Viz.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
@@ -47,28 +48,9 @@ type State = {
   , showWelcome :: Boolean
 }
 
--- | Configuration for a visualization "scene" - a complete specification of:
--- | - which data to show (node/link filters)
--- | - which forces to enable (Set of active force labels)
--- | - visual appearance (CSS class, attributes)
--- | - initialization (node positioning functions)
--- |
--- | This is now a self-contained configuration that can be passed directly
--- | to applyScene, eliminating the need for lens-based state mutation.
-type SceneConfig = {
--- first: filter functions for nodes and links (both what links are shown and which ones exert force)
-    chooseNodes     :: (SpagoSimNode -> Boolean)
-  , linksShown      :: (SpagoGraphLinkID -> Boolean)
-  , linksActive     :: (Datum_ -> Boolean) -- defined as Datum_ but it's really Link_, ugly
--- Set of force labels to activate (parallel to data filtering above)
-  , activeForces    :: Set Label
-  -- governing class on the SVG means we can completely change the look of the vis (and not have to think about this at D3 level)
-  , cssClass        :: String
-  , attributes      :: SpagoSceneAttributes
-  -- fix functions - run one after another on the data to set fixed nodes
-  , nodeInitializerFunctions :: Array (Array SpagoSimNode -> Array SpagoSimNode)
-  -- could add the simulation variables here too?
-}
+-- | CodeExplorer's scene configuration - specialized version of library's SceneConfig
+-- | Parameterized with Spago-specific node data (SpagoDataRow) and attributes (SpagoSceneAttributes)
+type SceneConfig = Scene.SceneConfig SpagoDataRow SpagoSceneAttributes
 
 -- | DEPRECATED: Old name for SceneConfig, kept for backwards compatibility during refactor
 type MiseEnScene = SceneConfig

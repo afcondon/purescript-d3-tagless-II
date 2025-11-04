@@ -27116,7 +27116,7 @@
                 return new Just(insert17(v)(v1.value0));
               }
               ;
-              throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 308, column 5 - line 308, column 65): " + [v.constructor.name, v1.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 290, column 5 - line 290, column 65): " + [v.constructor.name, v1.constructor.name]);
             };
           };
           var newTags = foldl2(function(acc) {
@@ -27237,7 +27237,7 @@
       return [];
     }
     ;
-    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 213, column 23 - line 215, column 16): " + [state3.model.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 195, column 23 - line 197, column 16): " + [state3.model.constructor.name]);
   };
   var getModelLinks = function(state3) {
     if (state3.model instanceof Just) {
@@ -27248,7 +27248,7 @@
       return [];
     }
     ;
-    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 218, column 23 - line 220, column 16): " + [state3.model.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 200, column 23 - line 202, column 16): " + [state3.model.constructor.name]);
   };
   var clearAllTags = function(state3) {
     return {
