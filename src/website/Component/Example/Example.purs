@@ -72,6 +72,7 @@ type State =
   , lesMisData :: Maybe LesMisRawModel
   , lesMisVisibleGroups :: Set.Set Int
   , lesMisActiveForces :: Set.Set String
+  , lesMisNodesPinned :: Boolean  -- Track if nodes are pinned to grid
   }
 
 data Action
@@ -79,6 +80,7 @@ data Action
   | ToggleGroup Int           -- Toggle visibility of a character group
   | ToggleForce String        -- Toggle a force on/off
   | MoveToGrid                -- Transition nodes to grid layout
+  | ReleaseFromGrid           -- Unpin nodes, return to force layout
 
 forces = {
     manyBodyNeg: createForce "many body negative" (RegularForce ForceManyBody) allNodes [ F.strength (-40.0) ]
@@ -93,10 +95,11 @@ component = H.mkComponent
       { exampleId
       , simulation: initialSimulationState (initialize [ forces.manyBodyNeg, forces.collision, forces.center, forces.links ])
       , sankeyLayout: initialSankeyLayoutState_
-      -- LesMisGUP initial state - all groups visible, all forces active
+      -- LesMisGUP initial state - all groups visible, all forces active, nodes not pinned
       , lesMisData: Nothing
       , lesMisVisibleGroups: Set.fromFoldable [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
       , lesMisActiveForces: Set.fromFoldable ["many body negative", "collision", "center", linksForceName_]
+      , lesMisNodesPinned: false
       }
   , render
   , eval: H.mkEval H.defaultEval
@@ -376,9 +379,40 @@ handleAction = case _ of
 
           -- DON'T restart simulation yet - let the D3 transition complete first!
           -- After transition finishes (1500ms), nodes will be visually at grid positions
-          -- User can manually restart by toggling a force
-          -- TODO: Use Aff.delay to auto-restart after 1500ms
+          -- Mark nodes as pinned in state
+          H.modify_ _ { lesMisNodesPinned = true }
       _ -> log "MoveToGrid: No model data available"
+
+  ReleaseFromGrid -> do
+    state <- H.get
+    case state.lesMisData of
+      Just model -> do
+        runWithD3_Simulation do
+          -- Get selections from DOM
+          root <- PSD3Selection.attach "#example-viz"
+          nodesGroup <- PSD3Selection.selectUnder root ".zoom-group > .node"
+          linksGroup <- PSD3Selection.selectUnder root ".zoom-group > .link"
+
+          -- Unpin all nodes (set fx/fy to null)
+          let unpinnedNodes = LesMisGUP.unpinAllNodes model.nodes
+
+          -- Update simulation with unpinned nodes
+          LesMisGUP.updateSimulation
+            { nodes: Just nodesGroup, links: Just linksGroup }
+            { allNodes: unpinnedNodes                  -- Nodes with fx/fy = null
+            , allLinks: model.links
+            , nodeFilter: \(D3SimNode node) ->
+                Set.member node.group state.lesMisVisibleGroups
+            , activeForces: state.lesMisActiveForces
+            }
+
+          -- Restart simulation with full alpha (re-heat)
+          PSD3Simulation.stop
+          PSD3Simulation.start
+
+          -- Mark nodes as unpinned in state
+          H.modify_ _ { lesMisNodesPinned = false }
+      _ -> log "ReleaseFromGrid: No model data available"
 
 -- | Example metadata
 type ExampleMeta =
@@ -571,11 +605,19 @@ renderLesMisControls state =
           [ HH.h3_ [ HH.text "Layout" ]
           , HH.div
               [ HP.classes [ HH.ClassName "button-group" ] ]
-              [ HH.button
-                  [ HP.classes [ HH.ClassName "layout-button" ]
-                  , HE.onClick \_ -> MoveToGrid
-                  ]
-                  [ HH.text "Move to Grid" ]
+              [ if state.lesMisNodesPinned
+                then
+                  HH.button
+                    [ HP.classes [ HH.ClassName "layout-button" ]
+                    , HE.onClick \_ -> ReleaseFromGrid
+                    ]
+                    [ HH.text "Release from Grid" ]
+                else
+                  HH.button
+                    [ HP.classes [ HH.ClassName "layout-button" ]
+                    , HE.onClick \_ -> MoveToGrid
+                    ]
+                    [ HH.text "Move to Grid" ]
               ]
           ]
       ]

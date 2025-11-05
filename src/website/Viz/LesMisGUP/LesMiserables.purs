@@ -35,7 +35,7 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class (class MonadEffect, liftEffect)
 import PSD3.Internal.Simulation.Types (Step(..))
-import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, void, ($), (/), (*), (+), (<<<))
+import Prelude (class Bind, Unit, bind, discard, map, negate, pure, unit, void, ($), (/), (*), (+), (<<<))
 import Utility (getWindowWidthHeight)
 
 -- | NOTE: Accessors (link_, datum_) are now in D3.Viz.LesMiserablesGUP.Render
@@ -210,6 +210,13 @@ nodesToGridLayout nodes gridSpacing _windowSize =
       let gridPt = numberToGridPoint columns i
           finalPt = scaleAndOffset gridSpacing gridSpacing offset offset gridPt
       in D3SimNode (node { fx = notNull finalPt.x, fy = notNull finalPt.y })
+
+-- | Unpin all nodes by setting fx/fy to null
+-- | This allows them to be controlled by forces again
+unpinAllNodes :: forall r. Array (D3_SimulationNode (fx :: Nullable Number, fy :: Nullable Number | r)) -> Array (D3_SimulationNode (fx :: Nullable Number, fy :: Nullable Number | r))
+unpinAllNodes nodes = map unpin nodes
+  where
+    unpin (D3SimNode node) = D3SimNode (node { fx = null, fy = null })
 
 -- | FFI: Transition nodes to grid positions with smooth D3 animation
 -- | Selects elements by class, transitions their transform attribute

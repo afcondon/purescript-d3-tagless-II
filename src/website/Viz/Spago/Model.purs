@@ -24,6 +24,7 @@ import Data.Nullable (Nullable, null) as N
 import Data.Number (ceil, cos, sin, sqrt, pi, (%))
 import Data.Number (floor) as Number
 import Data.Tuple (Tuple(..))
+import Effect (Effect)
 import Type.Row (type (+))
 import Web.Event.Internal.Types (Event)
 
@@ -446,6 +447,18 @@ makeGraph nodes = do
 foreign import explodePackages_ :: Event -> D3Simulation_ -> NodeID -> String -> Unit
 foreign import toggleSpotlight_ :: Event -> D3Simulation_ -> NodeID -> String -> Unit
 foreign import cancelSpotlight_ :: D3Simulation_ -> Unit
+
+-- | FFI: Transition nodes to pinned positions with smooth D3 animation
+-- | Works with Group elements positioned via transform attribute
+-- | Used for scene transitions to grid and tree layouts
+foreign import transitionNodesToPinnedPositions_
+  :: forall d.
+     String                        -- SVG selector
+  -> String                        -- Node selector (Groups)
+  -> String                        -- Link selector (Lines)
+  -> Array (D3_SimulationNode d)   -- Nodes with target fx/fy set
+  -> Effect Unit                   -- Completion callback
+  -> Effect Unit
 
 -- this is going to be another side-effecting function since it will change the fx/fy of selected nodes
 modifyModelNodesInPlace :: (SpagoSimNode -> SpagoSimNode) -> SpagoModel -> (SpagoSimNode -> Boolean) ->  SpagoModel
