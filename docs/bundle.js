@@ -27329,6 +27329,7 @@
         cssClass: s.cssClass,
         attributes: s.attributes,
         nodeInitializerFunctions: s.nodeInitializerFunctions,
+        transitionConfig: s.transitionConfig,
         activeForces: (function() {
           var $158 = member1(label5)(s.activeForces);
           if ($158) {
@@ -27354,7 +27355,7 @@
                 return new Just(insert17(v)(v1.value0));
               }
               ;
-              throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 292, column 5 - line 292, column 65): " + [v.constructor.name, v1.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 293, column 5 - line 293, column 65): " + [v.constructor.name, v1.constructor.name]);
             };
           };
           var newTags = foldl2(function(acc) {
@@ -27390,6 +27391,7 @@
         activeForces: s.activeForces,
         cssClass: s.cssClass,
         nodeInitializerFunctions: s.nodeInitializerFunctions,
+        transitionConfig: s.transitionConfig,
         attributes: attrs
       };
     });
@@ -27403,6 +27405,7 @@
         cssClass: s.cssClass,
         attributes: s.attributes,
         nodeInitializerFunctions: s.nodeInitializerFunctions,
+        transitionConfig: s.transitionConfig,
         linksShown: fn
       };
     });
@@ -27416,6 +27419,7 @@
         cssClass: s.cssClass,
         attributes: s.attributes,
         nodeInitializerFunctions: s.nodeInitializerFunctions,
+        transitionConfig: s.transitionConfig,
         linksActive: fn
       };
     });
@@ -27429,6 +27433,7 @@
         activeForces: s.activeForces,
         attributes: s.attributes,
         nodeInitializerFunctions: s.nodeInitializerFunctions,
+        transitionConfig: s.transitionConfig,
         cssClass: css
       };
     });
@@ -27442,6 +27447,7 @@
         cssClass: s.cssClass,
         attributes: s.attributes,
         nodeInitializerFunctions: s.nodeInitializerFunctions,
+        transitionConfig: s.transitionConfig,
         chooseNodes: fn
       };
     });
@@ -27454,7 +27460,8 @@
       activeForces: fromFoldable113(keys3(forceLibrary3)),
       cssClass: "",
       attributes: clusterSceneAttributes,
-      nodeInitializerFunctions: []
+      nodeInitializerFunctions: [],
+      transitionConfig: Nothing.value
     };
   };
   var getStagingNodes = function(state3) {
@@ -27476,7 +27483,7 @@
       return [];
     }
     ;
-    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 197, column 23 - line 199, column 16): " + [state3.model.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 198, column 23 - line 200, column 16): " + [state3.model.constructor.name]);
   };
   var getModelLinks = function(state3) {
     if (state3.model instanceof Just) {
@@ -27487,7 +27494,7 @@
       return [];
     }
     ;
-    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 202, column 23 - line 204, column 16): " + [state3.model.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 203, column 23 - line 205, column 16): " + [state3.model.constructor.name]);
   };
   var clearAllTags = function(state3) {
     return {
@@ -27617,68 +27624,117 @@
     })()]);
   };
 
+  // output/PSD3.Simulation.Scene/index.js
+  var TransitionMove = /* @__PURE__ */ (function() {
+    function TransitionMove2() {
+    }
+    ;
+    TransitionMove2.value = new TransitionMove2();
+    return TransitionMove2;
+  })();
+  var FadeOut = /* @__PURE__ */ (function() {
+    function FadeOut2() {
+    }
+    ;
+    FadeOut2.value = new FadeOut2();
+    return FadeOut2;
+  })();
+  var FadeIn = /* @__PURE__ */ (function() {
+    function FadeIn2() {
+    }
+    ;
+    FadeIn2.value = new FadeIn2();
+    return FadeIn2;
+  })();
+  var smoothTransition = /* @__PURE__ */ (function() {
+    return {
+      duration: 1500,
+      enterNodes: FadeIn.value,
+      exitNodes: FadeOut.value,
+      updateNodes: TransitionMove.value
+    };
+  })();
+
   // output/PSD3.CodeExplorer.Scenes/index.js
   var fromFoldable27 = /* @__PURE__ */ fromFoldable6(foldableArray)(ordString);
-  var verticalTreeScene = {
-    chooseNodes: isUsedModule,
-    linksShown: isM2M_Tree_Link,
-    linksActive: /* @__PURE__ */ $$const(false),
-    cssClass: "tree vertical",
-    attributes: treeSceneAttributes,
-    activeForces: /* @__PURE__ */ fromFoldable27(["vtreeNodesX", "vtreeNodesY", "charge1", "collide2", linksForceName_]),
-    nodeInitializerFunctions: [unpinAllNodes, treeNodesToTreeXY_V]
-  };
-  var radialTreeScene = {
-    chooseNodes: isUsedModule,
-    linksShown: isM2M_Tree_Link,
-    linksActive: /* @__PURE__ */ $$const(true),
-    cssClass: "tree radial",
-    attributes: treeSceneAttributes,
-    activeForces: /* @__PURE__ */ fromFoldable27(["center", "collide2", "chargetree", "charge2", linksForceName_]),
-    nodeInitializerFunctions: [unpinAllNodes, treeNodesToTreeXY_R, /* @__PURE__ */ fixNamedNodeTo("PSD3.Main")({
-      x: 0,
-      y: 0
-    })]
-  };
-  var packageGridScene = {
-    chooseNodes: allNodes2,
-    linksShown: isM2P_Link,
-    linksActive: /* @__PURE__ */ $$const(true),
-    cssClass: "cluster",
-    attributes: clusterSceneAttributes,
-    activeForces: /* @__PURE__ */ fromFoldable27(["clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide2", linksForceName_]),
-    nodeInitializerFunctions: [unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY]
-  };
-  var packageGraphScene = {
-    chooseNodes: isPackage,
-    linksShown: isP2P_Link,
-    linksActive: /* @__PURE__ */ sourcePackageIs("my-project"),
-    cssClass: "graph",
-    attributes: graphSceneAttributes,
-    activeForces: /* @__PURE__ */ fromFoldable27(["center", "collide2", "charge2", "packageOrbit", linksForceName_]),
-    nodeInitializerFunctions: [unpinAllNodes, packagesNodesToPhyllotaxis, /* @__PURE__ */ fixNamedNodeTo("my-project")({
-      x: 0,
-      y: 0
-    })]
-  };
-  var layerSwarmScene = {
-    chooseNodes: isUsedModule,
-    linksShown: isM2M_Tree_Link,
-    linksActive: /* @__PURE__ */ $$const(true),
-    cssClass: "tree",
-    attributes: treeSceneAttributes,
-    activeForces: /* @__PURE__ */ fromFoldable27(["htreeNodesX", "collide1", "y", linksForceName_]),
-    nodeInitializerFunctions: [unpinAllNodes]
-  };
-  var horizontalTreeScene = {
-    chooseNodes: isUsedModule,
-    linksShown: isM2M_Tree_Link,
-    linksActive: /* @__PURE__ */ $$const(false),
-    cssClass: "tree horizontal",
-    attributes: treeSceneAttributes,
-    activeForces: /* @__PURE__ */ fromFoldable27(["htreeNodesX", "htreeNodesY", "charge1", "collide2", linksForceName_]),
-    nodeInitializerFunctions: [unpinAllNodes, treeNodesToTreeXY_H]
-  };
+  var verticalTreeScene = /* @__PURE__ */ (function() {
+    return {
+      chooseNodes: isUsedModule,
+      linksShown: isM2M_Tree_Link,
+      linksActive: $$const(false),
+      cssClass: "tree vertical",
+      attributes: treeSceneAttributes,
+      activeForces: fromFoldable27(["vtreeNodesX", "vtreeNodesY", "charge1", "collide2", linksForceName_]),
+      nodeInitializerFunctions: [unpinAllNodes, treeNodesToTreeXY_V],
+      transitionConfig: new Just(smoothTransition)
+    };
+  })();
+  var radialTreeScene = /* @__PURE__ */ (function() {
+    return {
+      chooseNodes: isUsedModule,
+      linksShown: isM2M_Tree_Link,
+      linksActive: $$const(true),
+      cssClass: "tree radial",
+      attributes: treeSceneAttributes,
+      activeForces: fromFoldable27(["center", "collide2", "chargetree", "charge2", linksForceName_]),
+      nodeInitializerFunctions: [unpinAllNodes, treeNodesToTreeXY_R, fixNamedNodeTo("PSD3.Main")({
+        x: 0,
+        y: 0
+      })],
+      transitionConfig: new Just(smoothTransition)
+    };
+  })();
+  var packageGridScene = /* @__PURE__ */ (function() {
+    return {
+      chooseNodes: allNodes2,
+      linksShown: isM2P_Link,
+      linksActive: $$const(true),
+      cssClass: "cluster",
+      attributes: clusterSceneAttributes,
+      activeForces: fromFoldable27(["clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide2", linksForceName_]),
+      nodeInitializerFunctions: [unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY],
+      transitionConfig: new Just(smoothTransition)
+    };
+  })();
+  var packageGraphScene = /* @__PURE__ */ (function() {
+    return {
+      chooseNodes: isPackage,
+      linksShown: isP2P_Link,
+      linksActive: sourcePackageIs("my-project"),
+      cssClass: "graph",
+      attributes: graphSceneAttributes,
+      activeForces: fromFoldable27(["center", "collide2", "charge2", "packageOrbit", linksForceName_]),
+      nodeInitializerFunctions: [unpinAllNodes, packagesNodesToPhyllotaxis, fixNamedNodeTo("my-project")({
+        x: 0,
+        y: 0
+      })],
+      transitionConfig: Nothing.value
+    };
+  })();
+  var layerSwarmScene = /* @__PURE__ */ (function() {
+    return {
+      chooseNodes: isUsedModule,
+      linksShown: isM2M_Tree_Link,
+      linksActive: $$const(true),
+      cssClass: "tree",
+      attributes: treeSceneAttributes,
+      activeForces: fromFoldable27(["htreeNodesX", "collide1", "y", linksForceName_]),
+      nodeInitializerFunctions: [unpinAllNodes],
+      transitionConfig: Nothing.value
+    };
+  })();
+  var horizontalTreeScene = /* @__PURE__ */ (function() {
+    return {
+      chooseNodes: isUsedModule,
+      linksShown: isM2M_Tree_Link,
+      linksActive: $$const(false),
+      cssClass: "tree horizontal",
+      attributes: treeSceneAttributes,
+      activeForces: fromFoldable27(["htreeNodesX", "htreeNodesY", "charge1", "collide2", linksForceName_]),
+      nodeInitializerFunctions: [unpinAllNodes, treeNodesToTreeXY_H],
+      transitionConfig: new Just(smoothTransition)
+    };
+  })();
 
   // output/PSD3.Simulation.RunSimulation/index.js
   var discard16 = /* @__PURE__ */ discard(discardUnit);

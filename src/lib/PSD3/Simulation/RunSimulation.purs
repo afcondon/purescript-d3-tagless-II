@@ -21,7 +21,7 @@ import Data.Set (Set)
 -- |
 -- | Parameters:
 -- | - selections: DOM group selections for nodes and links
--- | - scene: Scene configuration (filters, forces, attributes, initializers)
+-- | - scene: Scene configuration (filters, forces, attributes, initializers, transitions)
 -- | - allNodes: Complete node dataset (NO pre-filtering!)
 -- | - allLinks: Complete link dataset (NO pre-filtering!)
 -- | - updateSimFn: Visualization-specific update function (e.g., Spago's updateSimulation)
@@ -36,6 +36,15 @@ import Data.Set (Set)
 -- | - DOM joins (enter/update/exit pattern)
 -- | - Setting tick functions
 -- | This function only handles start/stop lifecycle.
+-- |
+-- | ## TRANSITION HANDLING (TODO):
+-- | Currently this function ignores scene.transitionConfig.
+-- | Future enhancement: Check scene.transitionConfig and if Just:
+-- | 1. Phase 1: Stop simulation
+-- | 2. Phase 2: Apply enter/exit D3 transitions (fade/scale based on spec)
+-- | 3. Phase 3: Apply position transitions for updating nodes
+-- | 4. Phase 4: Start simulation when transitions complete
+-- | If Nothing: Use current instant behavior (backward compatible)
 runSimulation :: forall d attrs sel m.
   Monad m =>
   SimulationM sel m =>
