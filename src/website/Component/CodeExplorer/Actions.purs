@@ -1,5 +1,6 @@
 module PSD3.CodeExplorer.Actions where
 
+import Prelude (class Show, show, (<>))
 
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Data.Tree (TreeLayout)
@@ -11,6 +12,12 @@ import PSD3.Data.Node (NodeID)
 import PSD3.Internal.Simulation.Types (SimVariable)
 
 data Scene = PackageGrid | PackageGraph | ModuleTree TreeLayout | LayerSwarm
+
+instance showScene :: Show Scene where
+  show PackageGrid = "PackageGrid"
+  show PackageGraph = "PackageGraph"
+  show (ModuleTree layout) = "ModuleTree " <> show layout
+  show LayerSwarm = "LayerSwarm"
 data StyleChange = TopLevelCSS String | GraphStyle SpagoSceneAttributes
 data FilterData = LinkShowFilter (SpagoGraphLinkID -> Boolean)
                 | LinkForceFilter (Datum_ -> Boolean) -- because this is post- putting in the DOM, it's a filter on the opaque type
@@ -19,6 +26,7 @@ data Action
   = Initialize
   | Finalize
   | Scene Scene
+  | ActivateSceneAfterTransition Scene  -- Triggered after D3 transition completes
   | ToggleForce Label
   | Filter FilterData
   | ChangeStyling StyleChange

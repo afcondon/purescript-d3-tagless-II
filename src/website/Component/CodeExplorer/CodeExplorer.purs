@@ -84,6 +84,7 @@ component = H.mkComponent
     , simulation: initialSimulationState forceLibrary
     , scene: initialScene forceLibrary
     , eventListener: Nothing
+    , transitionListener: Nothing
     , tags: Map.empty
     , showWelcome: true
     }
@@ -120,6 +121,12 @@ handleAction = case _ of
     void $ H.subscribe emitter  -- Subscribe Halogen to the emitter
     H.modify_ _ { eventListener = Just listener }
 
+    -- 4. Set up transition completion flow: D3 transition → Halogen
+    -- Create separate emitter/listener pair for transition completion callbacks
+    { emitter: transEmitter, listener: transListener } <- liftEffect $ HS.create
+    void $ H.subscribe transEmitter  -- Subscribe Halogen to transition events
+    H.modify_ _ { transitionListener = Just transListener }
+
     pure unit
 
   Finalize -> pure unit
@@ -153,62 +160,41 @@ handleAction = case _ of
   -- | - Scene configuration is declarative and self-documenting
   -- | - No lens knowledge required
   Scene PackageGrid -> do
-    -- Apply scene configuration
+    -- TRANSITION SCENE PATTERN
+    -- Phase 1: Visual transition (simulation OFF)
+    -- Phase 2: Scene activation (simulation ON) - triggered by callback
+
+    -- Apply scene configuration to state
     H.modify_ $ applySceneConfig packageGridScene
     state <- H.get
 
-    -- Gentle transition pattern for pinned layouts
     case state.model of
       Just model -> runWithD3_Simulation do
-        -- STEP 1: Stop simulation (prevents tick from fighting transition)
+        -- PHASE 1: TRANSITION (Simulation OFF)
+        log "PackageGrid: Starting transition phase (sim OFF)"
+
+        -- Stop simulation - it stays OFF during entire transition
         PSD3Simulation.stop
 
-        -- STEP 2: Calculate pinned node positions
-        -- Apply filters and all node initializer functions from scene config
-        let filteredNodes = model.nodes  -- Start with all model nodes
-            -- Chain all initializers: unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY
-            pinnedNodes = foldr (\initFn nodes -> initFn nodes) filteredNodes state.scene.nodeInitializerFunctions
+        -- Calculate target pinned node positions
+        let pinnedNodes = foldr (\initFn nodes -> initFn nodes) model.nodes state.scene.nodeInitializerFunctions
 
-        -- STEP 3: Get DOM selections
-        root <- PSD3Selection.attach "div.svg-container"
-        nodesGroup <- PSD3Selection.selectUnder root "g.nodes"
-        linksGroup <- PSD3Selection.selectUnder root "g.links"
+        -- Start D3 visual transition (1500ms)
+        -- Callback triggers Phase 2 when animation completes
+        case state.transitionListener of
+          Just listener -> do
+            liftEffect $ transitionNodesToPinnedPositions_
+              "div.svg-container svg"
+              "g.nodes > g"
+              "g.links > line"
+              pinnedNodes
+              (HS.notify listener (ActivateSceneAfterTransition PackageGrid))  -- Phase 2 trigger
+          Nothing ->
+            log "PackageGrid: No transition listener available"
 
-        -- STEP 4: Start D3 transition (1500ms smooth animation)
-        liftEffect $ transitionNodesToPinnedPositions_
-          "div.svg-container svg"      -- SVG selector
-          "g.nodes > g"                 -- Node selector (Groups)
-          "g.links > line"              -- Link selector (Lines)
-          pinnedNodes
-          (log "PackageGrid transition complete")
+        -- DON'T call updateSimulation or start simulation here!
+        -- That happens in Phase 2 (ActivateSceneAfterTransition handler)
 
-        -- STEP 5: Update simulation with pinned nodes
-        -- Build the callback for event handling (use existing simulationEvent helper)
-        let callback = case state.eventListener of
-              Just listener -> simulationEvent listener
-              Nothing -> x 0.0  -- dummy during initialization
-            enhancedAttrs = state.scene.attributes {
-              circles = callback : state.scene.attributes.circles
-            , tagMap = Just state.tags
-            }
-
-        -- Call updateSimulation with pinned nodes
-        Graph.updateSimulation
-          { nodes: Just nodesGroup, links: Just linksGroup }
-          { allNodes: pinnedNodes                       -- Pinned positions
-          , allLinks: model.links
-          , nodeFilter: state.scene.chooseNodes         -- Filter predicate
-          , linkFilter: Just state.scene.linksShown     -- Visual link filter
-          , nodeInitializers: []                        -- Already applied above
-          , activeForces: state.scene.activeForces
-          , linksWithForce: state.scene.linksActive
-          }
-          enhancedAttrs
-
-        -- Restart simulation so tick function positions nodes
-        -- For scene switches (unlike LesMis), nodes may start at origin
-        -- so we need simulation running to position them
-        PSD3Simulation.start
       Nothing -> log "PackageGrid: No model data available"
 
   Scene PackageGraph -> do
@@ -365,6 +351,13 @@ handleAction = case _ of
         -- Restart simulation so tick function positions nodes
         PSD3Simulation.start
       Nothing -> log "VerticalTree: No model data available"
+
+  -- Activate scene after transition completes
+  -- This is triggered by the D3 transition completion callback
+  -- Scene config is already applied to state, just need to run simulation
+  ActivateSceneAfterTransition scene -> do
+    log $ "Activating scene after transition: " <> show scene
+    runSimulation
 
   ToggleForce label -> do
     H.modify_ $ toggleForce label

@@ -40,6 +40,8 @@ type State = {
   , scene        :: MiseEnScene
 -- | Event listener for D3→Halogen event flow (component infrastructure, not scene config)
   , eventListener :: Maybe (HS.Listener Action)
+-- | Transition listener for D3 transition completion → Halogen action flow
+  , transitionListener :: Maybe (HS.Listener Action)
 -- | Tags for nodes - persistent across scenes, set by ad-hoc predicates
 -- | Maps NodeID to a set of tag strings. Tags automatically propagate to CSS classes.
 -- | Example: Map.fromFoldable [(0, Set.fromFoldable ["package", "recent"]), (1, Set.fromFoldable ["module", "hot"])]
@@ -64,6 +66,7 @@ initialScene forceLibrary = {
   , cssClass: ""
   , attributes: clusterSceneAttributes
   , nodeInitializerFunctions: []
+  , transitionConfig: Nothing  -- Instant transition for initial scene
 }
 
 _model :: forall a r. Lens' { model :: a | r } a
