@@ -16,13 +16,16 @@ import Prelude
 
 import D3.Viz.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Viz.Spago.Files (isM2M_Tree_Link, isP2P_Link, isM2P_Link)
-import D3.Viz.Spago.Model (allNodes, fixNamedNodeTo, isPackage, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_H, treeNodesToTreeXY_R, treeNodesToTreeXY_V, unpinAllNodes)
+import D3.Viz.Spago.Model (allNodes, fixNamedNodeTo, isPackage, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToSwarmStart, treeNodesToTreeXY_H, treeNodesToTreeXY_R, treeNodesToTreeXY_V, unpinAllNodes)
 import PSD3.CodeExplorer.State (SceneConfig)
 import PSD3.Internal.FFI (linksForceName_)
+import PSD3.Simulation.Scene (smoothTransition)
+import Data.Maybe (Maybe(..))
 import Data.Set as Set
 
 -- | Package Grid Scene - Hierarchical clustering of packages and modules
 -- | Shows all nodes with packages arranged in a grid and modules clustered inside
+-- | Uses smooth animated transition for professional appearance
 packageGridScene :: SceneConfig
 packageGridScene = {
   chooseNodes: allNodes
@@ -32,10 +35,12 @@ packageGridScene = {
 , attributes: clusterSceneAttributes
 , activeForces: Set.fromFoldable [ "clusterx_P", "clustery_P", "clusterx_M", "clustery_M", "collide2", linksForceName_ ]
 , nodeInitializerFunctions: [ unpinAllNodes, packageNodesToGridXY, moduleNodesToContainerXY ]
+, transitionConfig: Just smoothTransition  -- Animated transition for pinned layout
 }
 
 -- | Package Graph Scene - Force-directed graph of package dependencies
 -- | Shows only packages with dependencies radiating from "my-project"
+-- | Uses instant transition since forces will animate nodes naturally
 packageGraphScene :: SceneConfig
 packageGraphScene = {
   chooseNodes: isPackage
@@ -45,10 +50,12 @@ packageGraphScene = {
 , attributes: graphSceneAttributes
 , activeForces: Set.fromFoldable ["center", "collide2", "charge2", "packageOrbit", linksForceName_ ]
 , nodeInitializerFunctions: [ unpinAllNodes, packagesNodesToPhyllotaxis, fixNamedNodeTo "my-project" { x: 0.0, y: 0.0 } ]
+, transitionConfig: Nothing  -- Instant transition, let forces animate
 }
 
 -- | Layer Swarm Scene - Tree links with horizontal layering forces
 -- | Shows module dependency tree with nodes arranged in horizontal layers
+-- | Uses instant transition since forces will animate nodes naturally
 layerSwarmScene :: SceneConfig
 layerSwarmScene = {
   chooseNodes: isUsedModule
@@ -57,11 +64,13 @@ layerSwarmScene = {
 , cssClass: "tree"
 , attributes: treeSceneAttributes
 , activeForces: Set.fromFoldable [ "htreeNodesX", "collide1", "y", linksForceName_ ]
-, nodeInitializerFunctions: [ unpinAllNodes ]
+, nodeInitializerFunctions: [ treeNodesToSwarmStart ]  -- Position at (treeX, 0) for swarm effect
+, transitionConfig: Nothing  -- Instant transition, let forces animate
 }
 
 -- | Radial Module Tree Scene - Tree layout with modules radiating from Main
 -- | Uses D3 tree layout in radial coordinates with Main at the center
+-- | Uses smooth animated transition for professional appearance
 radialTreeScene :: SceneConfig
 radialTreeScene = {
   chooseNodes: isUsedModule
@@ -71,10 +80,12 @@ radialTreeScene = {
 , attributes: treeSceneAttributes
 , activeForces: Set.fromFoldable [ "center", "collide2", "chargetree", "charge2", linksForceName_ ]
 , nodeInitializerFunctions: [ unpinAllNodes, treeNodesToTreeXY_R, fixNamedNodeTo "PSD3.Main" { x: 0.0, y: 0.0 } ]
+, transitionConfig: Just smoothTransition  -- Animated transition for pinned layout
 }
 
 -- | Horizontal Module Tree Scene - Tree layout flowing left to right
 -- | Uses D3 tree layout with strong positional forces, minimal link force
+-- | Uses smooth animated transition for professional appearance
 horizontalTreeScene :: SceneConfig
 horizontalTreeScene = {
   chooseNodes: isUsedModule
@@ -84,10 +95,12 @@ horizontalTreeScene = {
 , attributes: treeSceneAttributes
 , activeForces: Set.fromFoldable [ "htreeNodesX", "htreeNodesY", "charge1", "collide2", linksForceName_ ]
 , nodeInitializerFunctions: [ unpinAllNodes, treeNodesToTreeXY_H ]
+, transitionConfig: Just smoothTransition  -- Animated transition for pinned layout
 }
 
 -- | Vertical Module Tree Scene - Tree layout flowing top to bottom
 -- | Uses D3 tree layout with strong positional forces, minimal link force
+-- | Uses smooth animated transition for professional appearance
 verticalTreeScene :: SceneConfig
 verticalTreeScene = {
   chooseNodes: isUsedModule
@@ -97,4 +110,5 @@ verticalTreeScene = {
 , attributes: treeSceneAttributes
 , activeForces: Set.fromFoldable [ "vtreeNodesX", "vtreeNodesY", "charge1", "collide2", linksForceName_ ]
 , nodeInitializerFunctions: [ unpinAllNodes, treeNodesToTreeXY_V ]
+, transitionConfig: Just smoothTransition  -- Animated transition for pinned layout
 }

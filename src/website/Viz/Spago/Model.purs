@@ -24,6 +24,7 @@ import Data.Nullable (Nullable, null) as N
 import Data.Number (ceil, cos, sin, sqrt, pi, (%))
 import Data.Number (floor) as Number
 import Data.Tuple (Tuple(..))
+import Effect (Effect)
 import Type.Row (type (+))
 import Web.Event.Internal.Types (Event)
 
@@ -264,8 +265,10 @@ packageNodesToGridXY nodes = partitioned.no <> packagesWithGrid
     packagesWithGrid = foldlWithIndex (\i b a -> (setGridXY a i) : b) [] partitioned.yes
       where 
         setGridXY (D3SimNode p) i = do
-          let gridXY = scalePoint 200.0 200.0 $ offsetXY { x: offset, y: offset } $ numberToGridPoint columns i 
-          D3SimNode p { gridXY = notNull gridXY } -- , fx = notNull gridXY.x, fy = notNull gridXY.y }
+          let gridXY = scalePoint 200.0 200.0 $ offsetXY { x: offset, y: offset } $ numberToGridPoint columns i
+          -- Set x/y for transition, gridXY for cluster forces
+          -- Don't pin (fx/fy) - let forces position nodes during simulation
+          D3SimNode p { gridXY = notNull gridXY, x = gridXY.x, y = gridXY.y }
 
 moduleNodesToContainerXY :: Array SpagoSimNode -> Array SpagoSimNode
 moduleNodesToContainerXY nodes = modulesWithGrid <> partitioned.yes
@@ -317,7 +320,7 @@ treeNodesToTreeXY_H nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
   where
     partitioned = partition isUsedModule nodes
     setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
-    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { fx = notNull treeXY.x, fy = notNull treeXY.y }
+    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { treeXY = notNull treeXY, x = treeXY.x, y = treeXY.y }
       where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
 
 -- same as horizontal tree but uses x and y as polar coordinates, computes fx/fy from them
@@ -326,12 +329,12 @@ treeNodesToTreeXY_R nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
   where
     partitioned = partition isUsedModule nodes
     setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
-    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { fx = notNull radialXY.x, fy = notNull radialXY.y }
+    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { treeXY = notNull treeXY, x = radialXY.x, y = radialXY.y }
       where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
             radialXY = radialTranslate treeXY
             -- for radial positioning we treat x as angle and y as radius
             radialTranslate :: PointXY -> PointXY
-            radialTranslate p = 
+            radialTranslate p =
               let angle  = p.y -- reversed because horizontal tree is the default this should change
                   radius = p.x
                   x = radius * cos angle
@@ -344,8 +347,19 @@ treeNodesToTreeXY_V nodes = partitioned.no <> (setXYtoTreeXY <$> partitioned.yes
   where
     partitioned = partition isUsedModule nodes
     setXYtoTreeXY :: SpagoSimNode -> SpagoSimNode
-    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { fx = notNull treeXY.y, fy = notNull treeXY.x }
+    setXYtoTreeXY (D3SimNode d) = D3SimNode $ d { treeXY = notNull treeXY, x = treeXY.y, y = treeXY.x }
       where treeXY = fromMaybe { x: d.y, y: d.x } $ toMaybe d.treeXY
+
+-- | Set nodes to their tree X position with Y at 0 (for swarm diagrams)
+-- | This creates a starting line for the swarm effect where nodes begin
+-- | horizontally positioned and then spread vertically due to forces
+treeNodesToSwarmStart :: Array SpagoSimNode -> Array SpagoSimNode
+treeNodesToSwarmStart nodes = partitioned.no <> (setSwarmStart <$> partitioned.yes)
+  where
+    partitioned = partition isUsedModule nodes
+    setSwarmStart :: SpagoSimNode -> SpagoSimNode
+    setSwarmStart (D3SimNode d) = D3SimNode $ d { x = treeXY.x, y = 0.0, fx = null, fy = null }
+      where treeXY = fromMaybe { x: d.x, y: d.y } $ toMaybe d.treeXY
 
 fixNamedNodeTo :: Label -> PointXY -> Array SpagoSimNode -> Array SpagoSimNode
 fixNamedNodeTo label point nodes = fixNamedNode' <$> nodes
@@ -446,6 +460,18 @@ makeGraph nodes = do
 foreign import explodePackages_ :: Event -> D3Simulation_ -> NodeID -> String -> Unit
 foreign import toggleSpotlight_ :: Event -> D3Simulation_ -> NodeID -> String -> Unit
 foreign import cancelSpotlight_ :: D3Simulation_ -> Unit
+
+-- | FFI: Transition nodes to pinned positions with smooth D3 animation
+-- | Works with Group elements positioned via transform attribute
+-- | Used for scene transitions to grid and tree layouts
+foreign import transitionNodesToPinnedPositions_
+  :: forall d.
+     String                        -- SVG selector
+  -> String                        -- Node selector (Groups)
+  -> String                        -- Link selector (Lines)
+  -> Array (D3_SimulationNode d)   -- Nodes with target fx/fy set
+  -> Effect Unit                   -- Completion callback
+  -> Effect Unit
 
 -- this is going to be another side-effecting function since it will change the fx/fy of selected nodes
 modifyModelNodesInPlace :: (SpagoSimNode -> SpagoSimNode) -> SpagoModel -> (SpagoSimNode -> Boolean) ->  SpagoModel

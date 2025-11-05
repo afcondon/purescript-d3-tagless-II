@@ -21,7 +21,7 @@ import Data.String as String
 import Data.String.Pattern (Pattern(..))
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
-import Effect.Aff (Milliseconds(..), delay, forkAff)
+import Effect.Aff (Milliseconds(..), delay, forkAff, launchAff_)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Effect.Console as Console
@@ -548,24 +548,25 @@ drawExpandableBubbles graphData declsData callsData selector callbacks = do
           Console.log $ "Filtered to " <> show (Array.length filteredNodes) <> " nodes and " <> show (Array.length filteredLinks) <> " links"
 
           -- Use proper simulation update AND restart simulation
-          updatedState <- liftEffect $ exec_D3M_Simulation { simulation: simSt } $ do
-            void $ update
-              { nodes: Just filteredNodes
-              , links: Just (unsafeCoerce filteredLinks :: Array D3Link_Unswizzled)
-              , nodeFilter: Nothing  -- Already filtered
-              , linkFilter: Nothing
-              , activeForces: Just spotlightForces  -- Switch to spotlight forces
-              , config: Nothing
-              , keyFn: keyIsID_
-              }
-            -- Restart the simulation so nodes move
-            start
+          launchAff_ $ do
+            updatedState <- exec_D3M_Simulation { simulation: simSt } $ do
+              void $ update
+                { nodes: Just filteredNodes
+                , links: Just (unsafeCoerce filteredLinks :: Array D3Link_Unswizzled)
+                , nodeFilter: Nothing  -- Already filtered
+                , linkFilter: Nothing
+                , activeForces: Just spotlightForces  -- Switch to spotlight forces
+                , config: Nothing
+                , keyFn: keyIsID_
+                }
+              -- Restart the simulation so nodes move
+              start
 
-          Ref.write updatedState.simulation simStateRef
-          Ref.write true hasFilteredRef
-          Ref.write (Just moduleId) currentSpotlightRef
-          Ref.write connectedSet spotlightSetRef
-          callbacks.onSetCurrentSpotlightModule (Just moduleId)
+            liftEffect $ Ref.write updatedState.simulation simStateRef
+            liftEffect $ Ref.write true hasFilteredRef
+            liftEffect $ Ref.write (Just moduleId) currentSpotlightRef
+            liftEffect $ Ref.write connectedSet spotlightSetRef
+            liftEffect $ callbacks.onSetCurrentSpotlightModule (Just moduleId)
 
           -- Enter spotlight mode: show all labels
           if not hasFiltered then do
@@ -682,30 +683,31 @@ drawExpandableBubbles graphData declsData callsData selector callbacks = do
           Console.log $ "Restoring all nodes (" <> show (Array.length allNodes) <> ") and links (" <> show (Array.length allLinks) <> ")"
 
           -- Run the update in the D3SimM monad and get back updated state
-          updatedState <- liftEffect $ exec_D3M_Simulation { simulation: simSt } $ do
-            void $ update
-              { nodes: Just allNodes
-              , links: Just (unsafeCoerce allLinks :: Array D3Link_Unswizzled)
-              , nodeFilter: Nothing  -- No filtering - show all nodes
-              , linkFilter: Nothing
-              , activeForces: Just compactForces  -- Switch to compact forces
-              , config: Nothing
-              , keyFn: keyIsID_
-              }
-            -- Restart the simulation so nodes move
-            start
+          launchAff_ $ do
+            updatedState <- exec_D3M_Simulation { simulation: simSt } $ do
+              void $ update
+                { nodes: Just allNodes
+                , links: Just (unsafeCoerce allLinks :: Array D3Link_Unswizzled)
+                , nodeFilter: Nothing  -- No filtering - show all nodes
+                , linkFilter: Nothing
+                , activeForces: Just compactForces  -- Switch to compact forces
+                , config: Nothing
+                , keyFn: keyIsID_
+                }
+              -- Restart the simulation so nodes move
+              start
 
-          -- Store the updated simulation state
-          Ref.write updatedState.simulation simStateRef
+            -- Store the updated simulation state
+            liftEffect $ Ref.write updatedState.simulation simStateRef
 
-          -- Hide module labels
-          liftEffect $ hideModuleLabels_ nodesGroup
+            -- Hide module labels
+            liftEffect $ hideModuleLabels_ nodesGroup
 
-          -- Clear spotlight state
-          Ref.write false hasFilteredRef
-          Ref.write Nothing currentSpotlightRef
-          Ref.write Set.empty spotlightSetRef
-          callbacks.onSetCurrentSpotlightModule Nothing
+            -- Clear spotlight state
+            liftEffect $ Ref.write false hasFilteredRef
+            liftEffect $ Ref.write Nothing currentSpotlightRef
+            liftEffect $ Ref.write Set.empty spotlightSetRef
+            liftEffect $ callbacks.onSetCurrentSpotlightModule Nothing
 
           -- Hide details panel
           callbacks.onHideModuleDetails

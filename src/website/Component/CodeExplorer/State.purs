@@ -2,31 +2,43 @@ module PSD3.CodeExplorer.State where
 
 import Prelude
 
-import PSD3.Internal.Attributes.Instances (Label)
-import PSD3.Internal.Types (D3Selection_, Datum_)
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, clusterSceneAttributes)
 import D3.Viz.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
-import PSD3.Internal.FFI (SimulationVariables, readSimulationVariables_)
-import PSD3.Data.Node (NodeID)
-import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, _handle)
-import PSD3.Capabilities.Simulation (Staging)
 import Data.Array (filter, foldl)
 import Data.Lens (Lens', _Just, view)
 import Data.Lens.At (at)
 import Data.Lens.Record (prop)
-import Data.Map (Map, keys) as M
-import Data.Map as Map
+import Data.Map (Map, alter, empty, keys, lookup, mapMaybeWithKey) as M
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Profunctor.Choice (class Choice)
 import Data.Profunctor.Strong (class Strong)
 import Data.Set (Set)
 import Data.Set as Set
+import Data.Tuple (Tuple(..))
 import Halogen.Subscription as HS
-import PSD3.CodeExplorer.Actions (Action)
+import PSD3.Capabilities.Simulation (Staging)
+import PSD3.CodeExplorer.Actions (Action, Scene)
 import PSD3.Data.Node (D3_SimulationNode(..))
+import PSD3.Data.Node (NodeID)
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Internal.FFI (SimulationVariables, readSimulationVariables_)
+import PSD3.Internal.Simulation.Types (D3SimulationState_, Force, _handle)
+import PSD3.Internal.Types (D3Selection_, Datum_)
+import PSD3.Simulation.Scene as Scene
 import Type.Proxy (Proxy(..))
-  
+
+-- | Transition matrix: maps (fromScene, toScene) pairs to TransitionSpecs
+-- | Key: (Maybe Scene, Scene) where Nothing = initial/empty state
+-- | Value: TransitionSpec defining how to animate this scene change
+-- |
+-- | Only specify non-instant transitions; missing entries default to instant (no animation).
+-- | This enables declarative control of all scene choreography:
+-- | - Initial setup: (Nothing, SomeScene) → instant by default
+-- | - Symmetric transitions: (A, B) and (B, A) can have different animations
+-- | - Scene-specific: Some transitions smooth, others instant
+type TransitionMatrix = M.Map (Tuple Scene Scene) Scene.TransitionSpec
+
 type State = {
   -- the simulationState manages the Nodes, Links, Forces, Selections, Ticks & simulation parameters
     simulation   :: D3SimulationState_
@@ -37,38 +49,27 @@ type State = {
   , staging      :: Staging D3Selection_ SpagoDataRow
 -- | Contains all the settings necessary to call the Draw function
   , scene        :: MiseEnScene
+-- | Track current scene for transition matrix lookups
+-- | Nothing = initial state (no scene active yet)
+  , currentScene :: Scene
+-- | Transition matrix: declarative specification of all scene transitions
+-- | Lookup (currentScene, targetScene) to determine animation behavior
+  , transitionMatrix :: TransitionMatrix
 -- | Event listener for D3→Halogen event flow (component infrastructure, not scene config)
   , eventListener :: Maybe (HS.Listener Action)
+-- | Transition listener for D3 transition completion → Halogen action flow
+  , transitionListener :: Maybe (HS.Listener Action)
 -- | Tags for nodes - persistent across scenes, set by ad-hoc predicates
 -- | Maps NodeID to a set of tag strings. Tags automatically propagate to CSS classes.
 -- | Example: Map.fromFoldable [(0, Set.fromFoldable ["package", "recent"]), (1, Set.fromFoldable ["module", "hot"])]
-  , tags :: Map.Map NodeID (Set String)
+  , tags :: M.Map NodeID (Set String)
 -- | Show welcome overlay on first load
   , showWelcome :: Boolean
 }
 
--- | Configuration for a visualization "scene" - a complete specification of:
--- | - which data to show (node/link filters)
--- | - which forces to enable (Set of active force labels)
--- | - visual appearance (CSS class, attributes)
--- | - initialization (node positioning functions)
--- |
--- | This is now a self-contained configuration that can be passed directly
--- | to applyScene, eliminating the need for lens-based state mutation.
-type SceneConfig = {
--- first: filter functions for nodes and links (both what links are shown and which ones exert force)
-    chooseNodes     :: (SpagoSimNode -> Boolean)
-  , linksShown      :: (SpagoGraphLinkID -> Boolean)
-  , linksActive     :: (Datum_ -> Boolean) -- defined as Datum_ but it's really Link_, ugly
--- Set of force labels to activate (parallel to data filtering above)
-  , activeForces    :: Set Label
-  -- governing class on the SVG means we can completely change the look of the vis (and not have to think about this at D3 level)
-  , cssClass        :: String
-  , attributes      :: SpagoSceneAttributes
-  -- fix functions - run one after another on the data to set fixed nodes
-  , nodeInitializerFunctions :: Array (Array SpagoSimNode -> Array SpagoSimNode)
-  -- could add the simulation variables here too?
-}
+-- | CodeExplorer's scene configuration - specialized version of library's SceneConfig
+-- | Parameterized with Spago-specific node data (SpagoDataRow) and attributes (SpagoSceneAttributes)
+type SceneConfig = Scene.SceneConfig SpagoDataRow SpagoSceneAttributes
 
 -- | DEPRECATED: Old name for SceneConfig, kept for backwards compatibility during refactor
 type MiseEnScene = SceneConfig
@@ -82,6 +83,7 @@ initialScene forceLibrary = {
   , cssClass: ""
   , attributes: clusterSceneAttributes
   , nodeInitializerFunctions: []
+  , transitionConfig: Nothing  -- Instant transition for initial scene
 }
 
 _model :: forall a r. Lens' { model :: a | r } a
@@ -248,6 +250,32 @@ setStagingLinkFilter fn state = state { staging = state.staging { linksWithForce
 applySceneConfig :: SceneConfig -> State -> State
 applySceneConfig config state = state { scene = config }
 
+-- | Apply a scene configuration with transition matrix lookup
+-- |
+-- | This function implements declarative scene choreography via the transition matrix:
+-- | 1. Look up (currentScene, targetScene) in the matrix
+-- | 2. Get the base scene configuration for the target
+-- | 3. Override its transitionConfig with the looked-up value (or Nothing if not found)
+-- | 4. Apply the configured scene
+-- |
+-- | This enables:
+-- | - Instant initial setup: (Nothing, SomeScene) not in matrix → instant
+-- | - Asymmetric transitions: (A→B) smooth, (B→A) quick
+-- | - Per-transition control: Define only the transitions that need animation
+-- |
+-- | Usage:
+-- | ```
+-- | Scene PackageGrid -> do
+-- |   H.modify_ $ applySceneWithTransition PackageGrid packageGridScene
+-- |   runSimulation
+-- |   H.modify_ _ { currentScene = Just PackageGrid }
+-- | ```
+applySceneWithTransition :: Scene -> SceneConfig -> State -> State
+applySceneWithTransition targetScene baseConfig state =
+  let transitionSpec = M.lookup (Tuple state.currentScene targetScene) state.transitionMatrix
+      config = baseConfig { transitionConfig = transitionSpec }
+  in state { scene = config }
+
 -- ============================================================================
 -- Tag Management - Ad-hoc, imperative tagging for flexible visualization
 -- ============================================================================
@@ -300,7 +328,7 @@ tagNodes :: String -> (SpagoSimNode -> Boolean) -> Array SpagoSimNode -> State -
 tagNodes label predicate nodes state =
   let newTags = foldl (\acc node@(D3SimNode n) ->
         if predicate node
-        then Map.alter (addTag label) n.id acc
+        then M.alter (addTag label) n.id acc
         else acc
       ) state.tags nodes
   in state { tags = newTags }
@@ -314,7 +342,7 @@ tagNodes label predicate nodes state =
 untagNodes :: String -> Array SpagoSimNode -> State -> State
 untagNodes label nodes state =
   let nodeIds = Set.fromFoldable $ (\(D3SimNode n) -> n.id) <$> nodes
-      newTags = Map.mapMaybeWithKey (\id tags ->
+      newTags = M.mapMaybeWithKey (\id tags ->
         if Set.member id nodeIds
         then let tags' = Set.delete label tags
              in if Set.isEmpty tags' then Nothing else Just tags'
@@ -324,16 +352,16 @@ untagNodes label nodes state =
 
 -- | Clear all tags from all nodes
 clearAllTags :: State -> State
-clearAllTags state = state { tags = Map.empty }
+clearAllTags state = state { tags = M.empty }
 
 -- | Get all tags for a specific node
 getNodeTags :: NodeID -> State -> Set String
-getNodeTags id state = fromMaybe Set.empty $ Map.lookup id state.tags
+getNodeTags id state = fromMaybe Set.empty $ M.lookup id state.tags
 
 -- | Check if a node has a specific tag
 nodeHasTag :: String -> NodeID -> State -> Boolean
 nodeHasTag label id state =
-  case Map.lookup id state.tags of
+  case M.lookup id state.tags of
     Nothing -> false
     Just tags -> Set.member label tags
 

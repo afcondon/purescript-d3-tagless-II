@@ -100,3 +100,82 @@ unSpotlightNeighbours_ = (simulation) => {
   simulation.restart()
   spotlit = false
 }
+
+// ********************************************************************************
+// Gentle transition for pinned layouts (grid, trees)
+// ********************************************************************************
+// Transition nodes to pinned positions with smooth D3 animation
+// Works with Group elements positioned via transform attribute
+// Used for scene transitions: PackageGrid, RadialTree, HorizontalTree, VerticalTree
+export const transitionNodesToPinnedPositions_ = (svgSelector) => (nodeSelector) => (linkSelector) => (pinnedNodes) => (onComplete) => () => {
+  console.log(`Starting pinned layout transition for ${pinnedNodes.length} nodes`);
+  console.log(`SVG: ${svgSelector}, Nodes: ${nodeSelector}, Links: ${linkSelector}`);
+
+  // Select the SVG and node/link elements
+  const svg = d3.select(svgSelector);
+  const nodes = svg.selectAll(nodeSelector);
+  const links = svg.selectAll(linkSelector);
+
+  if (nodes.empty()) {
+    console.error(`Could not find ${nodeSelector} elements to transition`);
+    onComplete();
+    return;
+  }
+
+  console.log(`Found ${nodes.size()} nodes and ${links.size()} links to transition`);
+
+  // Create transition (1500ms duration)
+  const t = d3.transition().duration(1500);
+
+  // Transition nodes (Groups positioned via transform attribute)
+  nodes
+    .transition(t)
+    .attr('transform', (d, i) => {
+      const pinnedNode = pinnedNodes[i];
+      if (pinnedNode && pinnedNode.fx !== null && pinnedNode.fx !== undefined &&
+          pinnedNode.fy !== null && pinnedNode.fy !== undefined) {
+        return `translate(${pinnedNode.fx},${pinnedNode.fy})`;
+      }
+      // Fallback to current position
+      return `translate(${d.x},${d.y})`;
+    })
+    .on('end', function(d, i) {
+      // Call completion callback after last node finishes
+      if (i === pinnedNodes.length - 1) {
+        console.log('Pinned layout transition complete');
+        onComplete();
+      }
+    });
+
+  // Transition links (Lines with x1/y1/x2/y2 attributes)
+  links
+    .transition(t)
+    .attr('x1', function(d) {
+      const sourceIndex = pinnedNodes.findIndex(n => n.id === d.source.id);
+      if (sourceIndex >= 0 && pinnedNodes[sourceIndex].fx !== null) {
+        return pinnedNodes[sourceIndex].fx;
+      }
+      return d.source.x;
+    })
+    .attr('y1', function(d) {
+      const sourceIndex = pinnedNodes.findIndex(n => n.id === d.source.id);
+      if (sourceIndex >= 0 && pinnedNodes[sourceIndex].fy !== null) {
+        return pinnedNodes[sourceIndex].fy;
+      }
+      return d.source.y;
+    })
+    .attr('x2', function(d) {
+      const targetIndex = pinnedNodes.findIndex(n => n.id === d.target.id);
+      if (targetIndex >= 0 && pinnedNodes[targetIndex].fx !== null) {
+        return pinnedNodes[targetIndex].fx;
+      }
+      return d.target.x;
+    })
+    .attr('y2', function(d) {
+      const targetIndex = pinnedNodes.findIndex(n => n.id === d.target.id);
+      if (targetIndex >= 0 && pinnedNodes[targetIndex].fy !== null) {
+        return pinnedNodes[targetIndex].fy;
+      }
+      return d.target.y;
+    });
+};
