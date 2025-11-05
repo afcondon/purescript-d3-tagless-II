@@ -40,8 +40,8 @@ forceLibrary = initialize [
       , createForce "vtreeNodesY"  (RegularForce ForceY)  (Just $ ForceFilter "tree only" \d -> datum_.connected d)
           [ F.strength 0.4, F.y datum_.treePointX ] 
 
-      , createForce "packageOrbit" (RegularForce ForceRadial)   packagesOnly 
-                                   [ F.strength 0.7, F.x 0.0, F.y 0.0, F.radius 500.0 ]
+      , createForce "packageOrbit" (RegularForce ForceRadial)   packagesOnly
+                                   [ F.strength 0.7, F.x 0.0, F.y 0.0, F.radius 1200.0 ]
       , createForce "unusedOrbit" (RegularForce ForceRadial)   unusedModulesOnly 
                                    [ F.strength 0.8, F.x 0.0, F.y 0.0, F.radius 900.0 ]
       , createForce "moduleOrbit" (RegularForce ForceRadial)   usedModulesOnly

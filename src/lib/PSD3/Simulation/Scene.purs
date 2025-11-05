@@ -63,17 +63,31 @@ type TransitionSpec =
   , enterNodes :: EnterBehavior  -- How new nodes appear
   , exitNodes :: ExitBehavior    -- How old nodes disappear
   , updateNodes :: UpdateBehavior -- How existing nodes move to new positions
+  , pinAfterTransition :: Boolean -- Pin nodes at final positions after transition completes?
   }
 
 -- | Common transition presets
 
 -- | Smooth transition with fading and position animation (1.5 seconds)
+-- | Nodes are NOT pinned - forces will continue to act after transition
 smoothTransition :: TransitionSpec
 smoothTransition =
   { duration: 1500.0
   , enterNodes: FadeIn
   , exitNodes: FadeOut
   , updateNodes: TransitionMove
+  , pinAfterTransition: false  -- Let forces work after transition
+  }
+
+-- | Smooth transition that pins nodes at their final positions
+-- | Use this for tree layouts or other layouts where nodes should stay locked
+smoothTransitionPinned :: TransitionSpec
+smoothTransitionPinned =
+  { duration: 1500.0
+  , enterNodes: FadeIn
+  , exitNodes: FadeOut
+  , updateNodes: TransitionMove
+  , pinAfterTransition: true   -- Lock nodes at final positions
   }
 
 -- | Quick transition with scaling effects (0.5 seconds)
@@ -83,6 +97,7 @@ quickTransition =
   , enterNodes: ScaleUp
   , exitNodes: ScaleDown
   , updateNodes: TransitionMove
+  , pinAfterTransition: false
   }
 
 -- | Instant transition (no animation)
@@ -92,6 +107,7 @@ instantTransition =
   , enterNodes: InstantEnter
   , exitNodes: InstantExit
   , updateNodes: InstantMove
+  , pinAfterTransition: false
   }
 
 -- ============================================================================

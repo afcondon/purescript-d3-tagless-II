@@ -16,7 +16,7 @@ import Prelude
 
 import D3.Viz.Spago.Draw.Attributes (clusterSceneAttributes, graphSceneAttributes, treeSceneAttributes)
 import D3.Viz.Spago.Files (isM2M_Tree_Link, isP2P_Link, isM2P_Link)
-import D3.Viz.Spago.Model (allNodes, fixNamedNodeTo, isPackage, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToTreeXY_H, treeNodesToTreeXY_R, treeNodesToTreeXY_V, unpinAllNodes)
+import D3.Viz.Spago.Model (allNodes, fixNamedNodeTo, isPackage, isUsedModule, moduleNodesToContainerXY, packageNodesToGridXY, packagesNodesToPhyllotaxis, sourcePackageIs, treeNodesToSwarmStart, treeNodesToTreeXY_H, treeNodesToTreeXY_R, treeNodesToTreeXY_V, unpinAllNodes)
 import PSD3.CodeExplorer.State (SceneConfig)
 import PSD3.Internal.FFI (linksForceName_)
 import PSD3.Simulation.Scene (smoothTransition)
@@ -64,7 +64,7 @@ layerSwarmScene = {
 , cssClass: "tree"
 , attributes: treeSceneAttributes
 , activeForces: Set.fromFoldable [ "htreeNodesX", "collide1", "y", linksForceName_ ]
-, nodeInitializerFunctions: [ unpinAllNodes ]
+, nodeInitializerFunctions: [ treeNodesToSwarmStart ]  -- Position at (treeX, 0) for swarm effect
 , transitionConfig: Nothing  -- Instant transition, let forces animate
 }
 

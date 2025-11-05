@@ -83,15 +83,17 @@ function applyExitBehavior(selection, behaviorType, transition) {
 
 // Helper: Apply update behavior to a selection
 // behaviorType is a string: "TransitionMove" | "InstantMove"
-function applyUpdateBehavior(selection, behaviorType, transition, targetNodes) {
+// targetById is a Map from node ID to target node (for efficient lookup)
+function applyUpdateBehavior(selection, behaviorType, transition, targetById) {
 
   switch (behaviorType) {
     case "TransitionMove":
       // Smoothly animate to new positions
       selection
         .transition(transition)
-        .attr("transform", function(d, i) {
-          const target = targetNodes[i];
+        .attr("transform", function(d) {
+          // Match by ID, not array index (array order may differ from DOM order)
+          const target = targetById.get(d.id);
           if (target && target.fx !== null && target.fx !== undefined &&
               target.fy !== null && target.fy !== undefined) {
             // Use pinned positions (fx/fy)
@@ -106,8 +108,9 @@ function applyUpdateBehavior(selection, behaviorType, transition, targetNodes) {
 
     case "InstantMove":
       // Snap to new positions immediately
-      selection.attr("transform", function(d, i) {
-        const target = targetNodes[i];
+      selection.attr("transform", function(d) {
+        // Match by ID, not array index (array order may differ from DOM order)
+        const target = targetById.get(d.id);
         if (target && target.fx !== null && target.fx !== undefined &&
             target.fy !== null && target.fy !== undefined) {
           return `translate(${target.fx},${target.fy})`;
@@ -126,77 +129,107 @@ function applyUpdateBehavior(selection, behaviorType, transition, targetNodes) {
 // Main execution function: Execute scene transition by selector
 // spec contains string-encoded behaviors from PureScript
 export const executeSceneTransition_Impl = (spec) => (nodeSelector) => (linkSelector) => (targetNodes) => (onComplete) => () => {
-  console.log(`Executing scene transition: duration=${spec.duration}ms`);
-  console.log(`  Enter: ${spec.enterNodes}`);
-  console.log(`  Exit: ${spec.exitNodes}`);
-  console.log(`  Update: ${spec.updateNodes}`);
-
   // Select all nodes (will be split into enter/update/exit by D3's data join)
   const nodeSelection = d3.selectAll(nodeSelector);
   const linkSelection = d3.selectAll(linkSelector);
 
   if (nodeSelection.empty()) {
-    console.warn(`No nodes found for selector: ${nodeSelector}`);
     onComplete();
     return;
   }
 
-  console.log(`Found ${nodeSelection.size()} nodes and ${linkSelection.size()} links`);
-
   // Create shared transition
   const t = d3.transition().duration(spec.duration);
+
+  // Build ID lookup map for efficient node matching (used by both nodes and links)
+  const targetById = new Map(targetNodes.map(n => [n.id, n]));
 
   // Note: In this simplified version, we treat all nodes as "update" nodes
   // A full implementation would need to track enter/exit selections from the GUP
   // For now, we focus on the update behavior (position transitions)
-  applyUpdateBehavior(nodeSelection, spec.updateNodes, t, targetNodes);
+  applyUpdateBehavior(nodeSelection, spec.updateNodes, t, targetById);
 
   // TODO: Apply enter/exit behaviors when we have proper enter/exit tracking from GUP
 
-  // Transition links to follow nodes
+  // Transition links to follow nodes (using ID lookup for efficiency)
   linkSelection
     .transition(t)
     .attr('x1', function(d) {
-      const sourceIndex = targetNodes.findIndex(n => n.id === d.source.id);
-      if (sourceIndex >= 0) {
-        const source = targetNodes[sourceIndex];
+      const source = targetById.get(d.source.id);
+      if (source) {
         return source.fx !== null && source.fx !== undefined ? source.fx : source.x;
       }
       return d.source.x;
     })
     .attr('y1', function(d) {
-      const sourceIndex = targetNodes.findIndex(n => n.id === d.source.id);
-      if (sourceIndex >= 0) {
-        const source = targetNodes[sourceIndex];
+      const source = targetById.get(d.source.id);
+      if (source) {
         return source.fy !== null && source.fy !== undefined ? source.fy : source.y;
       }
       return d.source.y;
     })
     .attr('x2', function(d) {
-      const targetIndex = targetNodes.findIndex(n => n.id === d.target.id);
-      if (targetIndex >= 0) {
-        const target = targetNodes[targetIndex];
+      const target = targetById.get(d.target.id);
+      if (target) {
         return target.fx !== null && target.fx !== undefined ? target.fx : target.x;
       }
       return d.target.x;
     })
     .attr('y2', function(d) {
-      const targetIndex = targetNodes.findIndex(n => n.id === d.target.id);
-      if (targetIndex >= 0) {
-        const target = targetNodes[targetIndex];
+      const target = targetById.get(d.target.id);
+      if (target) {
         return target.fy !== null && target.fy !== undefined ? target.fy : target.y;
       }
       return d.target.y;
     });
 
   // Call completion callback after last node finishes
+  // Use nodeSelection.size() instead of targetNodes.length since DOM may have fewer nodes
   let completed = false;
+  const lastNodeIndex = nodeSelection.size() - 1;
   nodeSelection
     .transition(t)
     .on("end", function(d, i) {
-      if (!completed && i === targetNodes.length - 1) {
+      if (!completed && i === lastNodeIndex) {
         completed = true;
-        console.log("Scene transition complete");
+        // CRITICAL: Update internal node positions to match target positions
+        // This prevents the "jump" when simulation starts, because the simulation's
+        // internal state now matches where the DOM ended up after the transition
+        nodeSelection.each(function(d) {
+          const target = targetById.get(d.id);
+          if (target) {
+            // Always update internal x/y positions to match target
+            d.x = target.x || 0;
+            d.y = target.y || 0;
+
+            // Conditionally pin nodes based on scene configuration
+            if (spec.pinAfterTransition) {
+              // Pin nodes at their final positions to prevent forces from moving them
+              // (Used for tree layouts and other static layouts)
+              if (target.fx !== null && target.fx !== undefined) {
+                d.fx = target.fx;
+              } else {
+                d.fx = d.x;  // Pin at final x position
+              }
+              if (target.fy !== null && target.fy !== undefined) {
+                d.fy = target.fy;
+              } else {
+                d.fy = d.y;  // Pin at final y position
+              }
+            } else {
+              // Don't pin - let forces continue to act
+              // (Used for force-directed layouts like PackageGraph)
+              // Only set fx/fy if target explicitly had them
+              if (target.fx !== null && target.fx !== undefined) {
+                d.fx = target.fx;
+              }
+              if (target.fy !== null && target.fy !== undefined) {
+                d.fy = target.fy;
+              }
+            }
+          }
+        });
+
         onComplete();
       }
     });

@@ -69,7 +69,7 @@ import PSD3.Internal.Simulation.Types (initialSimulationState)
 import PSD3.Internal.Types (MouseEvent(..))
 import PSD3.Interpreter.D3 (evalEffectSimulation, runWithD3_Simulation)
 import PSD3.Simulation.RunSimulation as LibRunSim
-import PSD3.Simulation.Scene (smoothTransition)
+import PSD3.Simulation.Scene (smoothTransition, smoothTransitionPinned)
 
 -- | Default transition matrix: declarative specification of scene choreography
 -- |
@@ -96,18 +96,33 @@ defaultTransitionMatrix = Map.fromFoldable
   , Tuple (Tuple LayerSwarm PackageGrid) smoothTransition
   , Tuple (Tuple PackageGraph LayerSwarm) smoothTransition
   , Tuple (Tuple LayerSwarm PackageGraph) smoothTransition
-  , Tuple (Tuple PackageGrid (ModuleTree Radial)) smoothTransition
-  , Tuple (Tuple PackageGraph (ModuleTree Radial)) smoothTransition
-  , Tuple (Tuple LayerSwarm (ModuleTree Radial)) smoothTransition
+  -- To tree layouts: use pinned transition (nodes lock at tree positions)
+  , Tuple (Tuple PackageGrid (ModuleTree Radial)) smoothTransitionPinned
+  , Tuple (Tuple PackageGrid (ModuleTree Horizontal)) smoothTransitionPinned
+  , Tuple (Tuple PackageGrid (ModuleTree Vertical)) smoothTransitionPinned
+  , Tuple (Tuple PackageGraph (ModuleTree Radial)) smoothTransitionPinned
+  , Tuple (Tuple PackageGraph (ModuleTree Horizontal)) smoothTransitionPinned
+  , Tuple (Tuple PackageGraph (ModuleTree Vertical)) smoothTransitionPinned
+  , Tuple (Tuple LayerSwarm (ModuleTree Radial)) smoothTransitionPinned
+  , Tuple (Tuple LayerSwarm (ModuleTree Horizontal)) smoothTransitionPinned
+  , Tuple (Tuple LayerSwarm (ModuleTree Vertical)) smoothTransitionPinned
+  -- From tree layouts: use regular transition (nodes become unpinned, forces take over)
   , Tuple (Tuple (ModuleTree Radial) PackageGrid) smoothTransition
   , Tuple (Tuple (ModuleTree Radial) PackageGraph) smoothTransition
   , Tuple (Tuple (ModuleTree Radial) LayerSwarm) smoothTransition
-  , Tuple (Tuple (ModuleTree Radial) (ModuleTree Horizontal)) smoothTransition
-  , Tuple (Tuple (ModuleTree Radial) (ModuleTree Vertical)) smoothTransition
-  , Tuple (Tuple (ModuleTree Horizontal) (ModuleTree Radial)) smoothTransition
-  , Tuple (Tuple (ModuleTree Horizontal) (ModuleTree Vertical)) smoothTransition
-  , Tuple (Tuple (ModuleTree Vertical) (ModuleTree Radial)) smoothTransition
-  , Tuple (Tuple (ModuleTree Vertical) (ModuleTree Horizontal)) smoothTransition
+  , Tuple (Tuple (ModuleTree Horizontal) PackageGrid) smoothTransition
+  , Tuple (Tuple (ModuleTree Horizontal) PackageGraph) smoothTransition
+  , Tuple (Tuple (ModuleTree Horizontal) LayerSwarm) smoothTransition
+  , Tuple (Tuple (ModuleTree Vertical) PackageGrid) smoothTransition
+  , Tuple (Tuple (ModuleTree Vertical) PackageGraph) smoothTransition
+  , Tuple (Tuple (ModuleTree Vertical) LayerSwarm) smoothTransition
+  -- Between tree orientations: use pinned (trees stay locked)
+  , Tuple (Tuple (ModuleTree Radial) (ModuleTree Horizontal)) smoothTransitionPinned
+  , Tuple (Tuple (ModuleTree Radial) (ModuleTree Vertical)) smoothTransitionPinned
+  , Tuple (Tuple (ModuleTree Horizontal) (ModuleTree Radial)) smoothTransitionPinned
+  , Tuple (Tuple (ModuleTree Horizontal) (ModuleTree Vertical)) smoothTransitionPinned
+  , Tuple (Tuple (ModuleTree Vertical) (ModuleTree Radial)) smoothTransitionPinned
+  , Tuple (Tuple (ModuleTree Vertical) (ModuleTree Horizontal)) smoothTransitionPinned
   -- Initial setup: not specified, defaults to instant (no delay on first scene)
   ]
 

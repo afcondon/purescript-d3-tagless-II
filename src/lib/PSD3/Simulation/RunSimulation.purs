@@ -11,6 +11,7 @@ import Data.Set (Set)
 import Effect.Aff (makeAff, nonCanceler)
 import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (liftEffect)
+import Effect.Class.Console (log)
 import PSD3.Capabilities.Simulation (class SimulationM, start, stop)
 import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode)
 import PSD3.Internal.Attributes.Instances (Label)
@@ -71,9 +72,10 @@ runSimulation selections scene allNodes allLinks updateSimFn = do
   stop
 
   -- STEP 2: Compute target node positions for transitions
-  -- Filter nodes based on scene predicate, then apply initializers (tree layout, grid, pinning, etc.)
-  let filteredNodes = Array.filter scene.chooseNodes allNodes
-      targetNodes = foldl (\nodes fn -> fn nodes) filteredNodes scene.nodeInitializerFunctions
+  -- Apply initializers to ALL nodes (not just filtered ones)
+  -- This ensures indices match between DOM selection and targetNodes array
+  -- Note: Initializers should handle filtering internally if needed (e.g., tree layout only touches tree nodes)
+  let targetNodes = foldl (\nodes fn -> fn nodes) allNodes scene.nodeInitializerFunctions
 
   -- STEP 3: Delegate to visualization-specific update function
   -- This updates the DOM (GUP enter/exit/update), sets tick functions, and updates simulation state
