@@ -8,9 +8,19 @@
 // All transitions are coordinated with proper timing and completion callbacks.
 
 // Helper: Extract behavior type from PureScript ADT
-// PureScript ADTs compile to objects like { constructor: "FadeIn" }
+// PureScript nullary constructors compile to functions with names like "FadeIn2"
+// We need to extract the name and remove any compiler-added numeric suffix
 function getBehaviorType(behavior) {
-  return behavior.constructor;
+  // Check if it's an object with constructor field (old-style ADT)
+  if (behavior && typeof behavior === 'object' && typeof behavior.constructor === 'string') {
+    return behavior.constructor;
+  }
+  // Check if it's a function (new-style nullary constructor)
+  if (typeof behavior === 'function') {
+    // Remove compiler-added numeric suffix (e.g., "FadeIn2" -> "FadeIn")
+    return behavior.name.replace(/\d+$/, '');
+  }
+  return 'Unknown';
 }
 
 // Helper: Apply enter behavior to a selection
