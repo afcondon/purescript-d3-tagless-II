@@ -32,12 +32,15 @@ module PSD3.CodeExplorer where
 import Prelude
 
 import Control.Monad.State (class MonadState)
-import Data.Array ((:))
-import Data.Foldable (foldr)
+import Data.Array ((:), filter)
+import Data.Either (Either(..))
+import Data.Foldable (foldl, foldr)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
 import Data.String as String
+import Effect.Aff (makeAff, nonCanceler)
+import Effect.Aff.Class (liftAff)
 import Effect.Class.Console (log)
 import PSD3.Data.Tree (TreeLayout(..))
 import D3.Viz.Spago.Draw (getVizEventFromClick)
@@ -476,7 +479,7 @@ handleAction = case _ of
 -- | Without source/target, `buildTree` couldn't build the dependency tree, the tree layout
 -- | only generated data for 1 node, and only 1 node got `connected: true` set.
 runSimulation :: forall m.
-  MonadEffect m =>
+  MonadAff m =>
   MonadState State m =>
   m Unit
 runSimulation = runWithD3_Simulation do

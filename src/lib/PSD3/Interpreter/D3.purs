@@ -25,6 +25,8 @@ import Type.Proxy (Proxy(..))
 import Data.Maybe (Maybe(..))
 import Data.Tuple (Tuple(..), fst, snd)
 import Effect (Effect)
+import Effect.Aff (Aff)
+import Effect.Aff.Class (class MonadAff, liftAff)
 import Effect.Class (class MonadEffect, liftEffect)
 import Unsafe.Coerce (unsafeCoerce)
 
@@ -72,35 +74,35 @@ exec_D3M (D3M state_T) = liftA1 snd $ runStateT state_T unit
 -- ====================================================
 
 newtype D3SimM :: forall k. Row Type -> k -> Type -> Type
-newtype D3SimM row selection a = D3SimM (StateT { simulation :: D3SimulationState_ | row } Effect a)
+newtype D3SimM row selection a = D3SimM (StateT { simulation :: D3SimulationState_ | row } Aff a)
 
-run_D3M_Simulation :: forall a row. { simulation :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect (Tuple a ({ simulation :: D3SimulationState_ | row }))
+run_D3M_Simulation :: forall a row. { simulation :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Aff (Tuple a ({ simulation :: D3SimulationState_ | row }))
 run_D3M_Simulation simulation (D3SimM state_T) = runStateT state_T simulation
 
-exec_D3M_Simulation :: forall a row. { simulation :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect { simulation :: D3SimulationState_ | row }
+exec_D3M_Simulation :: forall a row. { simulation :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Aff { simulation :: D3SimulationState_ | row }
 exec_D3M_Simulation simulation (D3SimM state_T) = liftA1 snd $ runStateT state_T simulation
 
-eval_D3M_Simulation :: forall a row. { simulation :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Effect a
+eval_D3M_Simulation :: forall a row. { simulation :: D3SimulationState_ | row } -> D3SimM row D3Selection_ a -> Aff a
 eval_D3M_Simulation simulation (D3SimM state_T) = liftA1 fst $ runStateT state_T simulation
 
 runWithD3_Simulation :: forall m a row.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
-  MonadEffect m =>
+  MonadAff m =>
   D3SimM row D3Selection_ a -> m Unit
 runWithD3_Simulation state_T = do
     state <- get
-    state' <- liftEffect $ exec_D3M_Simulation state state_T
+    state' <- liftAff $ exec_D3M_Simulation state state_T
     modify_ (\_ -> state')
 
 evalEffectSimulation :: forall m a row.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ | row } m =>
-  MonadEffect m =>
+  MonadAff m =>
   D3SimM row D3Selection_ a -> m a
 evalEffectSimulation state_T = do
     state <- get
-    (Tuple a state') <- liftEffect $ run_D3M_Simulation state state_T
+    (Tuple a state') <- liftAff $ run_D3M_Simulation state state_T
     modify_ (\_ -> state')
     pure a
 
@@ -110,6 +112,7 @@ derive newtype instance applicativeD3SimM :: Applicative       (D3SimM row selec
 derive newtype instance bindD3SimM        :: Bind              (D3SimM row selection)
 derive newtype instance monadD3SimM       :: Monad             (D3SimM row selection)
 derive newtype instance monadEffD3SimM    :: MonadEffect       (D3SimM row selection)
+derive newtype instance monadAffD3SimM    :: MonadAff          (D3SimM row selection)
 derive newtype instance monadStateD3SimM  :: MonadState  { simulation :: D3SimulationState_ | row } (D3SimM row selection)
 
 instance showD3SimM :: Show (D3SimM row D3Selection_ a) where

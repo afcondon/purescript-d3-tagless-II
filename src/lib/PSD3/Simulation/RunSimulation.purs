@@ -3,21 +3,29 @@ module PSD3.Simulation.RunSimulation where
 import Prelude
 
 import Control.Monad.State (class MonadState, get)
-import PSD3.Internal.Types (D3Selection_, Datum_)
-import PSD3.Internal.Attributes.Instances (Label)
-import PSD3.Simulation.Scene (SceneConfig)
-import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode)
-import PSD3.Capabilities.Simulation (class SimulationM, start, stop)
+import Data.Array as Array
+import Data.Either (Either(..))
+import Data.Foldable (foldl)
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
+import Effect.Aff (makeAff, nonCanceler)
+import Effect.Aff.Class (class MonadAff, liftAff)
+import Effect.Class (liftEffect)
+import PSD3.Capabilities.Simulation (class SimulationM, start, stop)
+import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode)
+import PSD3.Internal.Attributes.Instances (Label)
+import PSD3.Internal.Types (D3Selection_, Datum_)
+import PSD3.Simulation.Scene (SceneConfig)
+import PSD3.Simulation.SceneTransition (executeSceneTransition_)
 
 -- | Low-level runSimulation pattern for force-directed visualizations
 -- |
--- | This function implements the standard update pattern:
--- | 1. Filter nodes/links based on scene predicates
--- | 2. Apply node initializers (positioning, pinning, etc.)
--- | 3. Delegate to visualization-specific updateSimulation
--- | 4. Restart the simulation
+-- | This function implements the standard update pattern with declarative scene transitions:
+-- | 1. Stop simulation
+-- | 2. Compute target node positions (filter + initialize)
+-- | 3. Update DOM via visualization-specific updateSimulation
+-- | 4. Execute scene transitions (if configured) with enter/exit/update behaviors
+-- | 5. Start simulation (immediately if no transitions, or after transition completion)
 -- |
 -- | Parameters:
 -- | - selections: DOM group selections for nodes and links
@@ -35,18 +43,19 @@ import Data.Set (Set)
 -- | - Calling the SimulationM2 update() API
 -- | - DOM joins (enter/update/exit pattern)
 -- | - Setting tick functions
--- | This function only handles start/stop lifecycle.
 -- |
--- | ## TRANSITION HANDLING (TODO):
--- | Currently this function ignores scene.transitionConfig.
--- | Future enhancement: Check scene.transitionConfig and if Just:
--- | 1. Phase 1: Stop simulation
--- | 2. Phase 2: Apply enter/exit D3 transitions (fade/scale based on spec)
--- | 3. Phase 3: Apply position transitions for updating nodes
--- | 4. Phase 4: Start simulation when transitions complete
--- | If Nothing: Use current instant behavior (backward compatible)
+-- | ## TRANSITION HANDLING:
+-- | If scene.transitionConfig is Nothing:
+-- | - Instant transition (backward compatible)
+-- | - Start simulation immediately after DOM update
+-- |
+-- | If scene.transitionConfig is Just spec:
+-- | - Execute declarative scene transition with enter/exit/update behaviors
+-- | - Wait for transition completion (uses Aff to make callback-based FFI awaitable)
+-- | - Start simulation only after transitions complete
+-- | - This prevents "nodes stuck at origin" issues during scene switches
 runSimulation :: forall d attrs sel m.
-  Monad m =>
+  MonadAff m =>
   SimulationM sel m =>
   { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ } ->
   SceneConfig d attrs ->
@@ -61,16 +70,39 @@ runSimulation selections scene allNodes allLinks updateSimFn = do
   -- STEP 1: Stop simulation before updating
   stop
 
-  -- STEP 2: Delegate to visualization-specific update function
-  -- Pass FULL datasets - updateSimFn will filter/initialize declaratively
+  -- STEP 2: Compute target node positions for transitions
+  -- Filter nodes based on scene predicate, then apply initializers (tree layout, grid, pinning, etc.)
+  let filteredNodes = Array.filter scene.chooseNodes allNodes
+      targetNodes = foldl (\nodes fn -> fn nodes) filteredNodes scene.nodeInitializerFunctions
+
+  -- STEP 3: Delegate to visualization-specific update function
+  -- This updates the DOM (GUP enter/exit/update), sets tick functions, and updates simulation state
   updateSimFn
-    { allNodes: allNodes  -- FULL dataset (no pre-filtering!)
-    , allLinks: allLinks  -- FULL dataset (no pre-filtering!)
-    , scene: scene        -- Contains filter predicate and initializers
+    { allNodes: allNodes
+    , allLinks: allLinks
+    , scene: scene
     }
 
-  -- STEP 3: Restart simulation
-  start
+  -- STEP 4: Handle transitions based on scene configuration (DECLARATIVE!)
+  case scene.transitionConfig of
+    Nothing ->
+      -- Instant transition (backward compatible)
+      start
+
+    Just spec -> do
+      -- Execute declarative scene transition
+      -- Use makeAff to wrap callback-based FFI into awaitable Aff action
+      liftAff $ makeAff \callback -> do
+        executeSceneTransition_
+          spec
+          "g.nodes > g"      -- Node selector (standard D3 hierarchy)
+          "g.links > line"   -- Link selector (standard D3 hierarchy)
+          targetNodes        -- Nodes with computed positions (fx/fy or x/y)
+          (callback (Right unit))  -- Signal completion when transition finishes
+        pure nonCanceler
+
+      -- STEP 5: Start simulation after transition completes
+      start
 
 -- | High-level runSimulation that works with extensible state records
 -- |
@@ -100,7 +132,7 @@ runSimulation selections scene allNodes allLinks updateSimFn = do
 -- |   Graph.updateSimulation                   -- viz-specific update
 -- | ```
 runSimulationFromState :: forall d attrs sel m row.
-  Monad m =>
+  MonadAff m =>
   SimulationM sel m =>
   MonadState { | row } m =>
   ({ | row } -> { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ }) ->  -- Get selections
