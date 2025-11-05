@@ -500,6 +500,184 @@ start
 runSimulation selections scene allNodes allLinks updateFn
 ```
 
+## Common Pitfalls and Solutions
+
+Lessons learned from building visualizations from scratch:
+
+### 1. Link Force Naming
+
+**Problem**: Link force not activating, error "Cannot read properties of undefined (reading 'links')"
+
+**Solution**: The link force is always named `"links"` (plural) in the library.
+
+```purescript
+-- ❌ WRONG
+activeForces: Set.fromFoldable ["link"]
+
+-- ✅ CORRECT
+activeForces: Set.fromFoldable ["links"]
+```
+
+The library uses `linksForceName_` from FFI which is hardcoded to `"links"`.
+
+### 2. ViewBox Centering for Force Layouts
+
+**Problem**: All nodes clustered in top-left corner
+
+**Solution**: Center the viewBox so (0,0) is in the middle of the screen
+
+```purescript
+initialize = do
+  (Tuple w h) <- liftEffect getWindowWidthHeight
+  let halfW = w / 2.0
+  let halfH = h / 2.0
+
+  svg <- appendTo root Svg
+    [ classed "my-viz-svg"
+    , viewBox (-halfW) (-halfH) w h  -- Center coordinate system
+    ]
+```
+
+This is essential for force layouts where nodes orbit around (0,0).
+
+### 3. Staging Type Requires Row Type
+
+**Problem**: Type error "Could not match kind Type with kind Row Type"
+
+**Solution**: `Staging` expects a row type (not concrete type) for its second parameter
+
+```purescript
+-- ❌ WRONG
+type MyNode = D3_SimulationNode MyDataRecord
+staging :: Staging D3Selection_ MyNode  -- Concrete type
+
+-- ✅ CORRECT
+type MyDataRow = (name :: String, value :: Number)
+staging :: Staging D3Selection_ MyDataRow  -- Row type
+```
+
+### 4. Simulation State Initialization
+
+**Problem**: Empty visualization, simulation not running
+
+**Solution**: Initialize simulation state with force library in component's `where` clause
+
+```purescript
+-- ❌ WRONG (in separate initialState)
+initialState :: State
+initialState = { simulation: unsafeCoerce unit, ... }
+
+-- ✅ CORRECT (in component's where clause)
+component = H.mkComponent { ... }
+  where
+    initialState :: State
+    initialState =
+      { simulation: initialSimulationState forceLibrary  -- Proper init
+      , scene: initialScene forceLibrary
+      , ...
+      }
+```
+
+### 5. Scene Filter Functions (Not Booleans)
+
+**Problem**: Type error on `linksShown` or `linksActive`
+
+**Solution**: These are functions, not boolean values
+
+```purescript
+-- ❌ WRONG
+sceneConfig =
+  { linksShown: true
+  , linksActive: true
+  }
+
+-- ✅ CORRECT
+sceneConfig =
+  { linksShown: const true    -- Function: link -> Boolean
+  , linksActive: const true   -- Function: datum -> Boolean
+  }
+```
+
+### 6. Force Parameter Syntax
+
+**Problem**: Type error "Could not match type { name :: String, value :: Number } with type ChainableF"
+
+**Solution**: Use chainable functions from `PSD3.Internal.Simulation.Config`, wrap in `initialize`
+
+```purescript
+import PSD3.Internal.Simulation.Config as F
+
+-- ❌ WRONG
+createForce "orbit" (RegularForce ForceRadial) Nothing
+  [{ name: "strength", value: 0.7 }]
+
+-- ✅ CORRECT
+createForce "orbit" (RegularForce ForceRadial) allNodes
+  [ F.strength 0.7
+  , F.radius 800.0
+  , F.x 0.0
+  , F.y 0.0
+  ]
+```
+
+### 7. Link Accessors Need Explicit Types
+
+**Problem**: Type error "No type class instance for ToAttr Number (linkDatum -> Number)"
+
+**Solution**: Add explicit type signature and use `unsafeCoerce` for foreign link types
+
+```purescript
+import Unsafe.Coerce (unsafeCoerce)
+
+link_ :: { sourceX :: Datum_ -> Number
+        , sourceY :: Datum_ -> Number
+        , targetX :: Datum_ -> Number
+        , targetY :: Datum_ -> Number
+        }
+link_ =
+  { sourceX: \d -> (unsafeCoerce d).source.x
+  , sourceY: \d -> (unsafeCoerce d).source.y
+  , targetX: \d -> (unsafeCoerce d).target.x
+  , targetY: \d -> (unsafeCoerce d).target.y
+  }
+```
+
+### 8. Filtering Links by Visible Nodes
+
+**Problem**: Links pointing to non-existent nodes cause errors
+
+**Solution**: Filter links to only those between visible nodes, use `unsafeCoerce` for ID access
+
+```purescript
+let nodeIds = Set.fromFoldable $ map (\(D3SimNode n) -> n.id) filteredNodes
+let filteredLinks = Array.filter
+      (\link ->
+        let l = unsafeCoerce link :: { source :: Int, target :: Int }
+        in Set.member l.source nodeIds && Set.member l.target nodeIds)
+      allLinks
+```
+
+### 9. Import Organization for Standalone Viz
+
+**Principle**: Borrow data types but implement logic locally
+
+```purescript
+-- ✅ GOOD: Borrow types
+import D3.Viz.Spago.Files (NodeType(..), SpagoDataRow)
+
+-- ✅ GOOD: Implement logic locally
+isPackage :: BubblePackNode -> Boolean
+isPackage (D3SimNode d) =
+  case d.nodetype of
+    (IsModule _) -> false
+    (IsPackage _) -> true
+
+-- ❌ AVOID: Borrowing logic from other viz
+import D3.Viz.OtherViz.Model (isPackage)  -- Don't do this
+```
+
+This makes your viz truly standalone and testable.
+
 ## Testing Checklist
 
 When implementing a new visualization, test these scenarios:
