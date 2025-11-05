@@ -6,26 +6,13 @@
 // 3. Update behavior (how existing nodes move to new positions)
 //
 // All transitions are coordinated with proper timing and completion callbacks.
-
-// Helper: Extract behavior type from PureScript ADT
-// PureScript nullary constructors compile to functions with names like "FadeIn2"
-// We need to extract the name and remove any compiler-added numeric suffix
-function getBehaviorType(behavior) {
-  // Check if it's an object with constructor field (old-style ADT)
-  if (behavior && typeof behavior === 'object' && typeof behavior.constructor === 'string') {
-    return behavior.constructor;
-  }
-  // Check if it's a function (new-style nullary constructor)
-  if (typeof behavior === 'function') {
-    // Remove compiler-added numeric suffix (e.g., "FadeIn2" -> "FadeIn")
-    return behavior.name.replace(/\d+$/, '');
-  }
-  return 'Unknown';
-}
+//
+// Behaviors are passed as explicit string constants from PureScript encoding functions,
+// ensuring we never rely on JavaScript decoding of ADT internals.
 
 // Helper: Apply enter behavior to a selection
-function applyEnterBehavior(selection, behavior, transition) {
-  const behaviorType = getBehaviorType(behavior);
+// behaviorType is a string: "FadeIn" | "ScaleUp" | "InstantEnter"
+function applyEnterBehavior(selection, behaviorType, transition) {
 
   switch (behaviorType) {
     case "FadeIn":
@@ -61,8 +48,8 @@ function applyEnterBehavior(selection, behavior, transition) {
 }
 
 // Helper: Apply exit behavior to a selection
-function applyExitBehavior(selection, behavior, transition) {
-  const behaviorType = getBehaviorType(behavior);
+// behaviorType is a string: "FadeOut" | "ScaleDown" | "InstantExit"
+function applyExitBehavior(selection, behaviorType, transition) {
 
   switch (behaviorType) {
     case "FadeOut":
@@ -95,8 +82,8 @@ function applyExitBehavior(selection, behavior, transition) {
 }
 
 // Helper: Apply update behavior to a selection
-function applyUpdateBehavior(selection, behavior, transition, targetNodes) {
-  const behaviorType = getBehaviorType(behavior);
+// behaviorType is a string: "TransitionMove" | "InstantMove"
+function applyUpdateBehavior(selection, behaviorType, transition, targetNodes) {
 
   switch (behaviorType) {
     case "TransitionMove":
@@ -137,11 +124,12 @@ function applyUpdateBehavior(selection, behavior, transition, targetNodes) {
 }
 
 // Main execution function: Execute scene transition by selector
-export const executeSceneTransition_ = (spec) => (nodeSelector) => (linkSelector) => (targetNodes) => (onComplete) => () => {
+// spec contains string-encoded behaviors from PureScript
+export const executeSceneTransition_Impl = (spec) => (nodeSelector) => (linkSelector) => (targetNodes) => (onComplete) => () => {
   console.log(`Executing scene transition: duration=${spec.duration}ms`);
-  console.log(`  Enter: ${getBehaviorType(spec.enterNodes)}`);
-  console.log(`  Exit: ${getBehaviorType(spec.exitNodes)}`);
-  console.log(`  Update: ${getBehaviorType(spec.updateNodes)}`);
+  console.log(`  Enter: ${spec.enterNodes}`);
+  console.log(`  Exit: ${spec.exitNodes}`);
+  console.log(`  Update: ${spec.updateNodes}`);
 
   // Select all nodes (will be split into enter/update/exit by D3's data join)
   const nodeSelection = d3.selectAll(nodeSelector);
@@ -204,30 +192,6 @@ export const executeSceneTransition_ = (spec) => (nodeSelector) => (linkSelector
   // Call completion callback after last node finishes
   let completed = false;
   nodeSelection
-    .transition(t)
-    .on("end", function(d, i) {
-      if (!completed && i === targetNodes.length - 1) {
-        completed = true;
-        console.log("Scene transition complete");
-        onComplete();
-      }
-    });
-};
-
-// Advanced: Execute on specific selections (for when you have enter/update/exit already separated)
-export const executeSceneTransitionOnSelections_ = (spec) => (enterSel) => (updateSel) => (exitSel) => (targetNodes) => (onComplete) => () => {
-  console.log(`Executing scene transition on selections`);
-
-  const t = d3.transition().duration(spec.duration);
-
-  // Apply behaviors to each selection type
-  applyEnterBehavior(enterSel, spec.enterNodes, t);
-  applyExitBehavior(exitSel, spec.exitNodes, t);
-  applyUpdateBehavior(updateSel, spec.updateNodes, t, targetNodes);
-
-  // Call completion callback
-  let completed = false;
-  updateSel
     .transition(t)
     .on("end", function(d, i) {
       if (!completed && i === targetNodes.length - 1) {

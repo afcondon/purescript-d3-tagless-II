@@ -32,6 +32,10 @@ module PSD3.CodeExplorer where
 import Prelude
 
 import Control.Monad.State (class MonadState)
+import D3.Viz.Spago.Draw (getVizEventFromClick)
+import D3.Viz.Spago.Draw as Graph
+import D3.Viz.Spago.Files (NodeType(..))
+import D3.Viz.Spago.Model (SpagoModel, isPackage, isPackageOrVisibleModule)
 import Data.Array ((:), filter)
 import Data.Either (Either(..))
 import Data.Foldable (foldl, foldr)
@@ -39,35 +43,73 @@ import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
 import Data.String as String
+import Data.Tuple (Tuple(..))
 import Effect.Aff (makeAff, nonCanceler)
-import Effect.Aff.Class (liftAff)
-import Effect.Class.Console (log)
-import PSD3.Data.Tree (TreeLayout(..))
-import D3.Viz.Spago.Draw (getVizEventFromClick)
-import D3.Viz.Spago.Draw as Graph
-import D3.Viz.Spago.Files (NodeType(..))
-import D3.Viz.Spago.Model (SpagoModel, isPackage, isPackageOrVisibleModule)
-import PSD3.Data.Node (D3_SimulationNode(..))
 import Effect.Aff.Class (class MonadAff)
+import Effect.Aff.Class (liftAff)
 import Effect.Class (class MonadEffect)
+import Effect.Class.Console (log)
 import Halogen (HalogenM, liftEffect)
 import Halogen as H
 import Halogen.Subscription as HS
 import PSD3.Capabilities.Selection as PSD3Selection
 import PSD3.Capabilities.Simulation (start, stop)
 import PSD3.Capabilities.Simulation as PSD3Simulation
+import PSD3.CodeExplorer.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..), VizEvent(..))
+import PSD3.CodeExplorer.Data (readModelData)
+import PSD3.CodeExplorer.Forces (forceLibrary)
+import PSD3.CodeExplorer.HTML (render)
+import PSD3.CodeExplorer.Scenes (horizontalTreeScene, layerSwarmScene, packageGraphScene, packageGridScene, radialTreeScene, verticalTreeScene)
+import PSD3.CodeExplorer.State (State, TransitionMatrix, applySceneConfig, applySceneWithTransition, clearAllTags, getModelLinks, getModelNodes, initialScene, setChooseNodes, setCssClass, setLinksActive, setLinksShown, setSceneAttributes, tagNodes, toggleForce)
+import PSD3.Data.Node (D3_SimulationNode(..))
+import PSD3.Data.Tree (TreeLayout(..))
 import PSD3.Internal.Attributes.Sugar (onMouseEventEffectful, x)
 import PSD3.Internal.Selection.Types (SelectionAttribute)
 import PSD3.Internal.Simulation.Types (initialSimulationState)
 import PSD3.Internal.Types (MouseEvent(..))
 import PSD3.Interpreter.D3 (evalEffectSimulation, runWithD3_Simulation)
 import PSD3.Simulation.RunSimulation as LibRunSim
-import PSD3.CodeExplorer.Actions (Action(..), FilterData(..), Scene(..), StyleChange(..), VizEvent(..))
-import PSD3.CodeExplorer.Data (readModelData)
-import PSD3.CodeExplorer.Forces (forceLibrary)
-import PSD3.CodeExplorer.HTML (render)
-import PSD3.CodeExplorer.Scenes (horizontalTreeScene, layerSwarmScene, packageGraphScene, packageGridScene, radialTreeScene, verticalTreeScene)
-import PSD3.CodeExplorer.State (State, applySceneConfig, clearAllTags, getModelLinks, getModelNodes, initialScene, setChooseNodes, setCssClass, setLinksActive, setLinksShown, setSceneAttributes, tagNodes, toggleForce)
+import PSD3.Simulation.Scene (smoothTransition)
+
+-- | Default transition matrix: declarative specification of scene choreography
+-- |
+-- | This matrix defines how scene transitions animate. Key design decisions:
+-- | - **Initial setup is instant**: (Nothing, _) transitions not specified → instant
+-- | - **Between-scene transitions are smooth**: Most scene switches use smoothTransition
+-- | - **Sparse specification**: Only define non-instant transitions
+-- |
+-- | The matrix enables asymmetric transitions. For example:
+-- | - PackageGrid → PackageGraph: smooth (expanding view)
+-- | - PackageGraph → PackageGrid: could be quick (collapsing view)
+-- |
+-- | Benefits:
+-- | - Fully declarative: No manual sequencing in action handlers
+-- | - Type-safe: Compiler ensures all scenes are valid
+-- | - Maintainable: All choreography in one place
+-- | - Testable: Matrix can be inspected and validated independently
+defaultTransitionMatrix :: TransitionMatrix
+defaultTransitionMatrix = Map.fromFoldable
+  -- Between-scene transitions: all smooth
+  [ Tuple (Tuple PackageGrid PackageGraph) smoothTransition
+  , Tuple (Tuple PackageGraph PackageGrid) smoothTransition
+  , Tuple (Tuple PackageGrid LayerSwarm) smoothTransition
+  , Tuple (Tuple LayerSwarm PackageGrid) smoothTransition
+  , Tuple (Tuple PackageGraph LayerSwarm) smoothTransition
+  , Tuple (Tuple LayerSwarm PackageGraph) smoothTransition
+  , Tuple (Tuple PackageGrid (ModuleTree Radial)) smoothTransition
+  , Tuple (Tuple PackageGraph (ModuleTree Radial)) smoothTransition
+  , Tuple (Tuple LayerSwarm (ModuleTree Radial)) smoothTransition
+  , Tuple (Tuple (ModuleTree Radial) PackageGrid) smoothTransition
+  , Tuple (Tuple (ModuleTree Radial) PackageGraph) smoothTransition
+  , Tuple (Tuple (ModuleTree Radial) LayerSwarm) smoothTransition
+  , Tuple (Tuple (ModuleTree Radial) (ModuleTree Horizontal)) smoothTransition
+  , Tuple (Tuple (ModuleTree Radial) (ModuleTree Vertical)) smoothTransition
+  , Tuple (Tuple (ModuleTree Horizontal) (ModuleTree Radial)) smoothTransition
+  , Tuple (Tuple (ModuleTree Horizontal) (ModuleTree Vertical)) smoothTransition
+  , Tuple (Tuple (ModuleTree Vertical) (ModuleTree Radial)) smoothTransition
+  , Tuple (Tuple (ModuleTree Vertical) (ModuleTree Horizontal)) smoothTransition
+  -- Initial setup: not specified, defaults to instant (no delay on first scene)
+  ]
 
 component :: forall query output m. MonadAff m => H.Component query Unit output m
 component = H.mkComponent
@@ -86,6 +128,8 @@ component = H.mkComponent
     , staging: { selections: { nodes: Nothing, links: Nothing }, linksWithForce: const true, rawdata: { nodes: [], links: [] } }
     , simulation: initialSimulationState forceLibrary
     , scene: initialScene forceLibrary
+    , currentScene: EmptyScene  -- No scene active initially
+    , transitionMatrix: defaultTransitionMatrix
     , eventListener: Nothing
     , transitionListener: Nothing
     , tags: Map.empty
@@ -149,42 +193,58 @@ handleAction = case _ of
 
   SpotlightNode _ -> runWithD3_Simulation stop
 
-  -- | Scene Switching Pattern - Declarative Scene Configuration
+  -- | Scene Switching Pattern - Declarative Scene Configuration with Transition Matrix
   -- |
-  -- | NEW SIMPLIFIED APPROACH: Scene definitions live in Scenes.purs as constants.
-  -- | Scene handlers simply apply the pre-defined configuration.
-  -- | This eliminates:
-  -- | - Lens imports and operators
-  -- | - State mutation boilerplate
-  -- | - Duplication of scene configuration
+  -- | TRANSITION MATRIX APPROACH: Each scene handler:
+  -- | 1. Looks up (currentScene, targetScene) in transition matrix
+  -- | 2. Applies scene config with appropriate transition
+  -- | 3. Runs simulation (which executes transition if specified)
+  -- | 4. Updates currentScene to track state
+  -- |
+  -- | This enables:
+  -- | - **Instant initial setup**: (Nothing, Scene) → instant (no delay on first scene)
+  -- | - **Smooth scene switching**: (Scene, Scene) → smooth transition
+  -- | - **Asymmetric choreography**: Different animations A→B vs B→A
+  -- | - **Fully declarative**: No manual sequencing, just lookup and apply
   -- |
   -- | Benefits:
-  -- | - Scenes can be easily shared, tested, or composed
-  -- | - Scene configuration is declarative and self-documenting
-  -- | - No lens knowledge required
+  -- | - Zero user orchestration: No stop/transition/start sequencing
+  -- | - Type-safe: Compiler ensures valid scene transitions
+  -- | - Maintainable: All choreography in defaultTransitionMatrix
+  -- | - Testable: Matrix can be validated independently
+
+  Scene EmptyScene -> do
+    pure unit
+
   Scene PackageGrid -> do
-    H.modify_ $ applySceneConfig packageGridScene
+    H.modify_ $ applySceneWithTransition PackageGrid packageGridScene
     runSimulation
+    H.modify_ _ { currentScene = PackageGrid }
 
   Scene PackageGraph -> do
-    H.modify_ $ applySceneConfig packageGraphScene
+    H.modify_ $ applySceneWithTransition PackageGraph packageGraphScene
     runSimulation
+    H.modify_ _ { currentScene = PackageGraph }
 
   Scene LayerSwarm -> do
-    H.modify_ $ applySceneConfig layerSwarmScene
+    H.modify_ $ applySceneWithTransition LayerSwarm layerSwarmScene
     runSimulation
+    H.modify_ _ { currentScene = LayerSwarm }
 
   Scene (ModuleTree Radial) -> do
-    H.modify_ $ applySceneConfig radialTreeScene
+    H.modify_ $ applySceneWithTransition (ModuleTree Radial) radialTreeScene
     runSimulation
+    H.modify_ _ { currentScene = (ModuleTree Radial) }
 
   Scene (ModuleTree Horizontal) -> do
-    H.modify_ $ applySceneConfig horizontalTreeScene
+    H.modify_ $ applySceneWithTransition (ModuleTree Horizontal) horizontalTreeScene
     runSimulation
+    H.modify_ _ { currentScene = (ModuleTree Horizontal) }
 
   Scene (ModuleTree Vertical) -> do
-    H.modify_ $ applySceneConfig verticalTreeScene
+    H.modify_ $ applySceneWithTransition (ModuleTree Vertical) verticalTreeScene
     runSimulation
+    H.modify_ _ { currentScene = (ModuleTree Vertical) }
 
   ToggleForce label -> do
     H.modify_ $ toggleForce label

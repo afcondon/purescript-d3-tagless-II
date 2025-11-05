@@ -3,13 +3,13 @@ module PSD3.Data.Tree (
   , makeD3TreeJSONFromTreeID -- notably this is only used by Spago example right now
 )where
 
-import PSD3.Data.Node (NodeID)
 import Data.Array as A
 import Data.List (List(..))
 import Data.Map as M
 import Data.Maybe (Maybe(..))
 import Data.Tree (Tree(..))
-import Prelude (class Eq, class Show, (<$>))
+import PSD3.Data.Node (NodeID)
+import Prelude (class Eq, class Ord, class Show, (<$>))
 
 foreign import data TreeJson_ :: Type
 foreign import emptyTreeJson_ :: TreeJson_
@@ -22,6 +22,7 @@ instance showTreeType :: Show TreeType where
 
 data TreeLayout = Radial | Horizontal | Vertical
 derive instance eqTreeLayout :: Eq TreeLayout
+derive instance ordTreeLayout :: Ord TreeLayout
 instance showTreeLayout :: Show TreeLayout where
   show Radial = "Radial"
   show Horizontal = "Horizontal"

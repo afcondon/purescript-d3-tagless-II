@@ -39,6 +39,22 @@ data UpdateBehavior
   = TransitionMove  -- Smoothly animate to new position over duration
   | InstantMove     -- Snap to new position immediately
 
+-- | Explicit encoding functions for FFI
+-- | These ensure we control the string constants passed to JavaScript
+encodeEnterBehavior :: EnterBehavior -> String
+encodeEnterBehavior FadeIn = "FadeIn"
+encodeEnterBehavior ScaleUp = "ScaleUp"
+encodeEnterBehavior InstantEnter = "InstantEnter"
+
+encodeExitBehavior :: ExitBehavior -> String
+encodeExitBehavior FadeOut = "FadeOut"
+encodeExitBehavior ScaleDown = "ScaleDown"
+encodeExitBehavior InstantExit = "InstantExit"
+
+encodeUpdateBehavior :: UpdateBehavior -> String
+encodeUpdateBehavior TransitionMove = "TransitionMove"
+encodeUpdateBehavior InstantMove = "InstantMove"
+
 -- | Complete transition specification for a scene
 -- | `Nothing` = instant/no transition (backward compatible)
 -- | `Just spec` = declarative transition behavior

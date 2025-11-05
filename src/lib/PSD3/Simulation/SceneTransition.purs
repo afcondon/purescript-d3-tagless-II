@@ -4,7 +4,7 @@ import Prelude
 
 import Effect (Effect)
 import PSD3.Internal.Types (D3Selection_)
-import PSD3.Simulation.Scene (TransitionSpec, EnterBehavior, ExitBehavior, UpdateBehavior)
+import PSD3.Simulation.Scene (TransitionSpec, encodeEnterBehavior, encodeExitBehavior, encodeUpdateBehavior)
 import PSD3.Data.Node (D3_SimulationNode)
 
 -- ============================================================================
@@ -21,6 +21,24 @@ import PSD3.Data.Node (D3_SimulationNode)
 -- |
 -- | These are choreographed together with proper timing and simulation lifecycle.
 
+-- | FFI-compatible transition spec with string-encoded behaviors
+-- | This ensures we control exactly what strings are passed to JavaScript
+type TransitionSpec_ =
+  { duration :: Number
+  , enterNodes :: String
+  , exitNodes :: String
+  , updateNodes :: String
+  }
+
+-- | Convert TransitionSpec with ADTs to FFI-compatible version with strings
+encodeTransitionSpec :: TransitionSpec -> TransitionSpec_
+encodeTransitionSpec spec =
+  { duration: spec.duration
+  , enterNodes: encodeEnterBehavior spec.enterNodes
+  , exitNodes: encodeExitBehavior spec.exitNodes
+  , updateNodes: encodeUpdateBehavior spec.updateNodes
+  }
+
 -- | Execute a complete scene transition
 -- |
 -- | This function coordinates the entire scene transition workflow:
@@ -35,7 +53,7 @@ import PSD3.Data.Node (D3_SimulationNode)
 -- | - linkSelector: CSS selector for link elements (e.g., "g.links > line")
 -- | - updatedNodes: Array of nodes with target positions set (fx/fy for pinned, x/y otherwise)
 -- | - onComplete: Effect to run when transition completes
-foreign import executeSceneTransition_
+executeSceneTransition_
   :: forall d.
      TransitionSpec
   -> String                        -- Node selector
@@ -43,19 +61,15 @@ foreign import executeSceneTransition_
   -> Array (D3_SimulationNode d)   -- Nodes with target positions
   -> Effect Unit                   -- Completion callback
   -> Effect Unit
+executeSceneTransition_ spec =
+  executeSceneTransition_Impl (encodeTransitionSpec spec)
 
--- | Execute a scene transition on specific selections (advanced usage)
--- |
--- | This variant gives you direct control over the selections, useful when
--- | you've already queried them or need to apply the transition to a subset.
--- |
--- | Note: This is lower-level API. Most users should use executeSceneTransition_.
-foreign import executeSceneTransitionOnSelections_
+-- | Internal FFI function - uses string-encoded behaviors
+foreign import executeSceneTransition_Impl
   :: forall d.
-     TransitionSpec
-  -> D3Selection_                  -- Enter selection
-  -> D3Selection_                  -- Update selection
-  -> D3Selection_                  -- Exit selection
+     TransitionSpec_
+  -> String                        -- Node selector
+  -> String                        -- Link selector
   -> Array (D3_SimulationNode d)   -- Nodes with target positions
   -> Effect Unit                   -- Completion callback
   -> Effect Unit

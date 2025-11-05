@@ -297,11 +297,11 @@
 
   // output/Data.Ord/foreign.js
   var unsafeCompareImpl = function(lt) {
-    return function(eq17) {
+    return function(eq18) {
       return function(gt) {
         return function(x45) {
           return function(y43) {
-            return x45 < y43 ? lt : x45 === y43 ? eq17 : gt;
+            return x45 < y43 ? lt : x45 === y43 ? eq18 : gt;
           };
         };
       };
@@ -921,20 +921,20 @@
     return v.value0;
   };
   var eqTuple = function(dictEq) {
-    var eq17 = eq(dictEq);
+    var eq18 = eq(dictEq);
     return function(dictEq1) {
-      var eq18 = eq(dictEq1);
+      var eq19 = eq(dictEq1);
       return {
         eq: function(x45) {
           return function(y43) {
-            return eq17(x45.value0)(y43.value0) && eq18(x45.value1)(y43.value1);
+            return eq18(x45.value0)(y43.value0) && eq19(x45.value1)(y43.value1);
           };
         }
       };
     };
   };
   var ordTuple = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     var eqTuple1 = eqTuple(dictOrd.Eq0());
     return function(dictOrd1) {
       var compare12 = compare(dictOrd1);
@@ -942,7 +942,7 @@
       return {
         compare: function(x45) {
           return function(y43) {
-            var v = compare6(x45.value0)(y43.value0);
+            var v = compare7(x45.value0)(y43.value0);
             if (v instanceof LT) {
               return LT.value;
             }
@@ -1078,7 +1078,7 @@
     };
   };
   var eqMaybe = function(dictEq) {
-    var eq17 = eq(dictEq);
+    var eq18 = eq(dictEq);
     return {
       eq: function(x45) {
         return function(y43) {
@@ -1087,7 +1087,7 @@
           }
           ;
           if (x45 instanceof Just && y43 instanceof Just) {
-            return eq17(x45.value0)(y43.value0);
+            return eq18(x45.value0)(y43.value0);
           }
           ;
           return false;
@@ -3086,9 +3086,9 @@
     };
   };
   var maximum = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(dictFoldable) {
-      return maximumBy(dictFoldable)(compare6);
+      return maximumBy(dictFoldable)(compare7);
     };
   };
   var minimumBy = function(dictFoldable) {
@@ -3118,9 +3118,9 @@
     };
   };
   var minimum = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(dictFoldable) {
-      return minimumBy(dictFoldable)(compare6);
+      return minimumBy(dictFoldable)(compare7);
     };
   };
   var sum = function(dictFoldable) {
@@ -5012,11 +5012,11 @@
   });
   var unsafeUnionWith = /* @__PURE__ */ $lazy_unsafeUnionWith(803);
   var unionWith = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(app) {
       return function(m1) {
         return function(m2) {
-          return unsafeUnionWith(compare6, app, m1, m2);
+          return unsafeUnionWith(compare7, app, m1, m2);
         };
       };
     };
@@ -5025,10 +5025,10 @@
     return unionWith(dictOrd)($$const);
   };
   var pop = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(k) {
       return function(m) {
-        var v = unsafeSplit(compare6, k, m);
+        var v = unsafeSplit(compare7, k, m);
         return map11(function(a2) {
           return new Tuple(a2, unsafeJoinNodes(v.value1, v.value2));
         })(v.value0);
@@ -5036,7 +5036,7 @@
     };
   };
   var member = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(k) {
       var go2 = function($copy_v) {
         var $tco_done = false;
@@ -5048,7 +5048,7 @@
           }
           ;
           if (v instanceof Node) {
-            var v1 = compare6(k)(v.value2);
+            var v1 = compare7(k)(v.value2);
             if (v1 instanceof LT) {
               $copy_v = v.value4;
               return;
@@ -5080,7 +5080,7 @@
     };
   };
   var lookup = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(k) {
       var go2 = function($copy_v) {
         var $tco_done = false;
@@ -5092,7 +5092,7 @@
           }
           ;
           if (v instanceof Node) {
-            var v1 = compare6(k)(v.value2);
+            var v1 = compare7(k)(v.value2);
             if (v1 instanceof LT) {
               $copy_v = v.value4;
               return;
@@ -5182,11 +5182,11 @@
     return false;
   };
   var intersectionWith = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(app) {
       return function(m1) {
         return function(m2) {
-          return unsafeIntersectionWith(compare6, app, m1, m2);
+          return unsafeIntersectionWith(compare7, app, m1, m2);
         };
       };
     };
@@ -5195,7 +5195,7 @@
     return intersectionWith(dictOrd)($$const);
   };
   var insertWith = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(app) {
       return function(k) {
         return function(v) {
@@ -5205,7 +5205,7 @@
             }
             ;
             if (v1 instanceof Node) {
-              var v2 = compare6(k)(v1.value2);
+              var v2 = compare7(k)(v1.value2);
               if (v2 instanceof LT) {
                 return unsafeBalancedNode(v1.value2, v1.value3, go2(v1.value4), v1.value5);
               }
@@ -5229,7 +5229,7 @@
     };
   };
   var insert = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(k) {
       return function(v) {
         var go2 = function(v1) {
@@ -5238,7 +5238,7 @@
           }
           ;
           if (v1 instanceof Node) {
-            var v2 = compare6(k)(v1.value2);
+            var v2 = compare7(k)(v1.value2);
             if (v2 instanceof LT) {
               return unsafeBalancedNode(v1.value2, v1.value3, go2(v1.value4), v1.value5);
             }
@@ -5474,15 +5474,15 @@
     };
   };
   var difference = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(m1) {
       return function(m2) {
-        return unsafeDifference(compare6, m1, m2);
+        return unsafeDifference(compare7, m1, m2);
       };
     };
   };
   var $$delete = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(k) {
       var go2 = function(v) {
         if (v instanceof Leaf) {
@@ -5490,7 +5490,7 @@
         }
         ;
         if (v instanceof Node) {
-          var v1 = compare6(k)(v.value2);
+          var v1 = compare7(k)(v.value2);
           if (v1 instanceof LT) {
             return unsafeBalancedNode(v.value2, v.value3, go2(v.value4), v.value5);
           }
@@ -5512,11 +5512,11 @@
     };
   };
   var alter = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(f) {
       return function(k) {
         return function(m) {
-          var v = unsafeSplit(compare6, k, m);
+          var v = unsafeSplit(compare7, k, m);
           var v2 = f(v.value0);
           if (v2 instanceof Nothing) {
             return unsafeJoinNodes(v.value1, v.value2);
@@ -6111,7 +6111,7 @@
     return { yes, no };
   };
   var sortByImpl = /* @__PURE__ */ (function() {
-    function mergeFromTo(compare6, fromOrdering, xs1, xs2, from3, to2) {
+    function mergeFromTo(compare7, fromOrdering, xs1, xs2, from3, to2) {
       var mid;
       var i2;
       var j;
@@ -6120,15 +6120,15 @@
       var y43;
       var c;
       mid = from3 + (to2 - from3 >> 1);
-      if (mid - from3 > 1) mergeFromTo(compare6, fromOrdering, xs2, xs1, from3, mid);
-      if (to2 - mid > 1) mergeFromTo(compare6, fromOrdering, xs2, xs1, mid, to2);
+      if (mid - from3 > 1) mergeFromTo(compare7, fromOrdering, xs2, xs1, from3, mid);
+      if (to2 - mid > 1) mergeFromTo(compare7, fromOrdering, xs2, xs1, mid, to2);
       i2 = from3;
       j = mid;
       k = from3;
       while (i2 < mid && j < to2) {
         x45 = xs2[i2];
         y43 = xs2[j];
-        c = fromOrdering(compare6(x45)(y43));
+        c = fromOrdering(compare7(x45)(y43));
         if (c > 0) {
           xs1[k++] = y43;
           ++j;
@@ -6144,11 +6144,11 @@
         xs1[k++] = xs2[j++];
       }
     }
-    return function(compare6, fromOrdering, xs) {
+    return function(compare7, fromOrdering, xs) {
       var out;
       if (xs.length < 2) return xs;
       out = xs.slice(0);
-      mergeFromTo(compare6, fromOrdering, out, xs.slice(0), 0, xs.length);
+      mergeFromTo(compare7, fromOrdering, out, xs.slice(0), 0, xs.length);
       return out;
     };
   })();
@@ -6376,9 +6376,9 @@
   };
   var sortWith1 = /* @__PURE__ */ sortWith(ordInt);
   var sort = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(xs) {
-      return sortBy(compare6)(xs);
+      return sortBy(compare7)(xs);
     };
   };
   var snoc = function(xs) {
@@ -9016,11 +9016,11 @@
   })();
   var componentSlot = function() {
     return function(dictIsSymbol) {
-      var lookup19 = lookup4(dictIsSymbol);
+      var lookup110 = lookup4(dictIsSymbol);
       var pop12 = pop3(dictIsSymbol);
       var insert111 = insert3(dictIsSymbol);
       return function(dictOrd) {
-        var lookup23 = lookup19(dictOrd);
+        var lookup23 = lookup110(dictOrd);
         var pop22 = pop12(dictOrd);
         var insert22 = insert111(dictOrd);
         return function(label5) {
@@ -13619,7 +13619,7 @@
     };
   }
   function d3SortSelection_(selection2) {
-    return (compare6) => selection2.sort(compare6);
+    return (compare7) => selection2.sort(compare7);
   }
   function simulationDrag_(label5) {
     return (selection2) => (simulation) => (dragFn) => selection2.call(dragFn(label5, simulation));
@@ -14635,10 +14635,67 @@
           return idTreeParent_(v1.value0)(map33(go2)(fromFoldable7(v.value1)));
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Data.Tree (line 49, column 7 - line 53, column 84): " + [v1.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Data.Tree (line 50, column 7 - line 54, column 84): " + [v1.constructor.name]);
       };
       return go2(root3);
     };
+  };
+  var eqTreeLayout = {
+    eq: function(x45) {
+      return function(y43) {
+        if (x45 instanceof Radial && y43 instanceof Radial) {
+          return true;
+        }
+        ;
+        if (x45 instanceof Horizontal && y43 instanceof Horizontal) {
+          return true;
+        }
+        ;
+        if (x45 instanceof Vertical && y43 instanceof Vertical) {
+          return true;
+        }
+        ;
+        return false;
+      };
+    }
+  };
+  var ordTreeLayout = {
+    compare: function(x45) {
+      return function(y43) {
+        if (x45 instanceof Radial && y43 instanceof Radial) {
+          return EQ.value;
+        }
+        ;
+        if (x45 instanceof Radial) {
+          return LT.value;
+        }
+        ;
+        if (y43 instanceof Radial) {
+          return GT.value;
+        }
+        ;
+        if (x45 instanceof Horizontal && y43 instanceof Horizontal) {
+          return EQ.value;
+        }
+        ;
+        if (x45 instanceof Horizontal) {
+          return LT.value;
+        }
+        ;
+        if (y43 instanceof Horizontal) {
+          return GT.value;
+        }
+        ;
+        if (x45 instanceof Vertical && y43 instanceof Vertical) {
+          return EQ.value;
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.Data.Tree (line 0, column 0 - line 0, column 0): " + [x45.constructor.name, y43.constructor.name]);
+      };
+    },
+    Eq0: function() {
+      return eqTreeLayout;
+    }
   };
 
   // output/PSD3.Internal.FFI/index.js
@@ -16410,8 +16467,8 @@
       return AttrT.create($144($145($146)));
     };
   };
-  var sortSelection = function(compare6) {
-    return new OrderingT(new Sort(compare6));
+  var sortSelection = function(compare7) {
+    return new OrderingT(new Sort(compare7));
   };
   var remove = /* @__PURE__ */ (function() {
     return RemoveT.value;
@@ -17177,10 +17234,10 @@
   }
 
   // node_modules/d3-selection/src/selection/sort.js
-  function sort_default(compare6) {
-    if (!compare6) compare6 = ascending2;
+  function sort_default(compare7) {
+    if (!compare7) compare7 = ascending2;
     function compareNode(a2, b2) {
-      return a2 && b2 ? compare6(a2.__data__, b2.__data__) : !a2 - !b2;
+      return a2 && b2 ? compare7(a2.__data__, b2.__data__) : !a2 - !b2;
     }
     for (var groups = this._groups, m = groups.length, sortgroups = new Array(m), j = 0; j < m; ++j) {
       for (var group4 = groups[j], n = group4.length, sortgroup = sortgroups[j] = new Array(n), node, i2 = 0; i2 < n; ++i2) {
@@ -21384,18 +21441,18 @@
     return new Tuple(toNumber(w), toNumber(h));
   };
   var equalSnd = function(dictEq) {
-    var eq17 = eq(dictEq);
+    var eq18 = eq(dictEq);
     return function(a2) {
       return function(b2) {
-        return eq17(snd(a2))(snd(b2));
+        return eq18(snd(a2))(snd(b2));
       };
     };
   };
   var compareSnd = function(dictOrd) {
-    var compare6 = compare(dictOrd);
+    var compare7 = compare(dictOrd);
     return function(a2) {
       return function(b2) {
-        return compare6(snd(a2))(snd(b2));
+        return compare7(snd(a2))(snd(b2));
       };
     };
   };
@@ -24642,17 +24699,17 @@
     };
   }
   function buildPathLookup(locArray) {
-    const lookup19 = {};
+    const lookup20 = {};
     for (const entry of locArray) {
-      lookup19[entry.path] = entry.loc;
+      lookup20[entry.path] = entry.loc;
       const parts = entry.path.split("/");
       if (parts[0] === ".spago" && parts.length >= 4) {
         const pkg = parts[1];
         const relPath = parts.slice(3).join("/");
-        lookup19[`${pkg}::${relPath}`] = entry.loc;
+        lookup20[`${pkg}::${relPath}`] = entry.loc;
       }
     }
-    return lookup19;
+    return lookup20;
   }
   function lookupLOC(modulePath, pathToLOC, locArray) {
     if (pathToLOC[modulePath]) {
@@ -25102,7 +25159,7 @@
   var topologicalSort = function(dictOrd) {
     var member8 = member(dictOrd);
     var $$delete10 = $$delete(dictOrd);
-    var lookup19 = lookup(dictOrd);
+    var lookup110 = lookup(dictOrd);
     return function(v) {
       var visit = function($copy_state) {
         return function($copy_stack) {
@@ -25132,7 +25189,7 @@
                   result: state3.result,
                   unvisited: $$delete10(v1.value0.value0.value0)(state3.unvisited)
                 };
-                var next2 = maybe(mempty2)(snd)(lookup19(v1.value0.value0.value0)(v));
+                var next2 = maybe(mempty2)(snd)(lookup110(v1.value0.value0.value0)(v));
                 $tco_var_state = start7;
                 $copy_stack = append7(fromFoldable20(map42(Visit.create)(next2)))(cons3(new Emit(v1.value0.value0.value0))(v1.value0.value1));
                 return;
@@ -25188,10 +25245,10 @@
     };
   };
   var lookup13 = function(dictOrd) {
-    var lookup19 = lookup(dictOrd);
+    var lookup110 = lookup(dictOrd);
     return function(k) {
       return function(v) {
-        return map114(fst)(lookup19(k)(v));
+        return map114(fst)(lookup110(k)(v));
       };
     };
   };
@@ -26280,6 +26337,8 @@
   };
 
   // output/PSD3.CodeExplorer.Actions/index.js
+  var eq7 = /* @__PURE__ */ eq(eqTreeLayout);
+  var compare3 = /* @__PURE__ */ compare(ordTreeLayout);
   var NodeClick = /* @__PURE__ */ (function() {
     function NodeClick2(value0, value1) {
       this.value0 = value0;
@@ -26312,6 +26371,13 @@
       return new GraphStyle2(value0);
     };
     return GraphStyle2;
+  })();
+  var EmptyScene = /* @__PURE__ */ (function() {
+    function EmptyScene2() {
+    }
+    ;
+    EmptyScene2.value = new EmptyScene2();
+    return EmptyScene2;
   })();
   var PackageGrid = /* @__PURE__ */ (function() {
     function PackageGrid2() {
@@ -26513,6 +26579,95 @@
     DismissWelcome2.value = new DismissWelcome2();
     return DismissWelcome2;
   })();
+  var eqScene = {
+    eq: function(x45) {
+      return function(y43) {
+        if (x45 instanceof EmptyScene && y43 instanceof EmptyScene) {
+          return true;
+        }
+        ;
+        if (x45 instanceof PackageGrid && y43 instanceof PackageGrid) {
+          return true;
+        }
+        ;
+        if (x45 instanceof PackageGraph && y43 instanceof PackageGraph) {
+          return true;
+        }
+        ;
+        if (x45 instanceof ModuleTree && y43 instanceof ModuleTree) {
+          return eq7(x45.value0)(y43.value0);
+        }
+        ;
+        if (x45 instanceof LayerSwarm && y43 instanceof LayerSwarm) {
+          return true;
+        }
+        ;
+        return false;
+      };
+    }
+  };
+  var ordScene = {
+    compare: function(x45) {
+      return function(y43) {
+        if (x45 instanceof EmptyScene && y43 instanceof EmptyScene) {
+          return EQ.value;
+        }
+        ;
+        if (x45 instanceof EmptyScene) {
+          return LT.value;
+        }
+        ;
+        if (y43 instanceof EmptyScene) {
+          return GT.value;
+        }
+        ;
+        if (x45 instanceof PackageGrid && y43 instanceof PackageGrid) {
+          return EQ.value;
+        }
+        ;
+        if (x45 instanceof PackageGrid) {
+          return LT.value;
+        }
+        ;
+        if (y43 instanceof PackageGrid) {
+          return GT.value;
+        }
+        ;
+        if (x45 instanceof PackageGraph && y43 instanceof PackageGraph) {
+          return EQ.value;
+        }
+        ;
+        if (x45 instanceof PackageGraph) {
+          return LT.value;
+        }
+        ;
+        if (y43 instanceof PackageGraph) {
+          return GT.value;
+        }
+        ;
+        if (x45 instanceof ModuleTree && y43 instanceof ModuleTree) {
+          return compare3(x45.value0)(y43.value0);
+        }
+        ;
+        if (x45 instanceof ModuleTree) {
+          return LT.value;
+        }
+        ;
+        if (y43 instanceof ModuleTree) {
+          return GT.value;
+        }
+        ;
+        if (x45 instanceof LayerSwarm && y43 instanceof LayerSwarm) {
+          return EQ.value;
+        }
+        ;
+        throw new Error("Failed pattern match at PSD3.CodeExplorer.Actions (line 0, column 0 - line 0, column 0): " + [x45.constructor.name, y43.constructor.name]);
+      };
+    },
+    Eq0: function() {
+      return eqScene;
+    }
+  };
 
   // output/PSD3.Simulation.Update/index.js
   var foldl7 = /* @__PURE__ */ foldl(foldableArray);
@@ -26704,14 +26859,14 @@
   var mapFlipped12 = /* @__PURE__ */ mapFlipped(functorArray);
   var append9 = /* @__PURE__ */ append(semigroupArray);
   var getReachableNodes = function(dictOrd) {
-    var lookup19 = lookup13(dictOrd);
+    var lookup20 = lookup13(dictOrd);
     var elem7 = elem2(dictOrd.Eq0());
     return function(id5) {
       return function(graph) {
         var processNextOpenDepPath = function(searchRecord) {
           return bind18(uncons(searchRecord.openDepPaths))(function(x45) {
             return bind18(head(x45.head))(function(firstID) {
-              return bind18(lookup19(firstID)(graph))(function(firstNode) {
+              return bind18(lookup20(firstID)(graph))(function(firstNode) {
                 var newDeps = partition(function(d9) {
                   return !elem7(d9)(searchRecord.nodes);
                 })(firstNode.links.targets);
@@ -27232,12 +27387,15 @@
   var alter3 = /* @__PURE__ */ alter(ordInt);
   var fromFoldable113 = /* @__PURE__ */ fromFoldable6(foldableSet)(ordString);
   var _handle7 = /* @__PURE__ */ _handle(strongForget);
+  var lookup18 = /* @__PURE__ */ lookup(/* @__PURE__ */ ordTuple(ordScene)(ordScene));
   var updateScene = function(f) {
     return function(state3) {
       return {
         simulation: state3.simulation,
         model: state3.model,
         staging: state3.staging,
+        currentScene: state3.currentScene,
+        transitionMatrix: state3.transitionMatrix,
         eventListener: state3.eventListener,
         transitionListener: state3.transitionListener,
         tags: state3.tags,
@@ -27257,8 +27415,8 @@
         nodeInitializerFunctions: s.nodeInitializerFunctions,
         transitionConfig: s.transitionConfig,
         activeForces: (function() {
-          var $158 = member1(label5)(s.activeForces);
-          if ($158) {
+          var $163 = member1(label5)(s.activeForces);
+          if ($163) {
             return $$delete7(label5)(s.activeForces);
           }
           ;
@@ -27281,13 +27439,13 @@
                 return new Just(insert17(v)(v1.value0));
               }
               ;
-              throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 293, column 5 - line 293, column 65): " + [v.constructor.name, v1.constructor.name]);
+              throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 336, column 5 - line 336, column 65): " + [v.constructor.name, v1.constructor.name]);
             };
           };
           var newTags = foldl2(function(acc) {
             return function(v) {
-              var $163 = predicate(v);
-              if ($163) {
+              var $168 = predicate(v);
+              if ($168) {
                 return alter3(addTag(label5))(v.id)(acc);
               }
               ;
@@ -27299,6 +27457,8 @@
             model: state3.model,
             staging: state3.staging,
             scene: state3.scene,
+            currentScene: state3.currentScene,
+            transitionMatrix: state3.transitionMatrix,
             eventListener: state3.eventListener,
             transitionListener: state3.transitionListener,
             showWelcome: state3.showWelcome,
@@ -27409,7 +27569,7 @@
       return [];
     }
     ;
-    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 198, column 23 - line 200, column 16): " + [state3.model.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 215, column 23 - line 217, column 16): " + [state3.model.constructor.name]);
   };
   var getModelLinks = function(state3) {
     if (state3.model instanceof Just) {
@@ -27420,7 +27580,7 @@
       return [];
     }
     ;
-    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 203, column 23 - line 205, column 16): " + [state3.model.constructor.name]);
+    throw new Error("Failed pattern match at PSD3.CodeExplorer.State (line 220, column 23 - line 222, column 16): " + [state3.model.constructor.name]);
   };
   var clearAllTags = function(state3) {
     return {
@@ -27428,23 +27588,40 @@
       model: state3.model,
       staging: state3.staging,
       scene: state3.scene,
+      currentScene: state3.currentScene,
+      transitionMatrix: state3.transitionMatrix,
       eventListener: state3.eventListener,
       transitionListener: state3.transitionListener,
       showWelcome: state3.showWelcome,
       tags: empty2
     };
   };
-  var applySceneConfig = function(config) {
-    return function(state3) {
-      return {
-        simulation: state3.simulation,
-        model: state3.model,
-        staging: state3.staging,
-        eventListener: state3.eventListener,
-        transitionListener: state3.transitionListener,
-        tags: state3.tags,
-        showWelcome: state3.showWelcome,
-        scene: config
+  var applySceneWithTransition = function(targetScene) {
+    return function(baseConfig) {
+      return function(state3) {
+        var transitionSpec = lookup18(new Tuple(state3.currentScene, targetScene))(state3.transitionMatrix);
+        var config = {
+          activeForces: baseConfig.activeForces,
+          attributes: baseConfig.attributes,
+          chooseNodes: baseConfig.chooseNodes,
+          cssClass: baseConfig.cssClass,
+          linksActive: baseConfig.linksActive,
+          linksShown: baseConfig.linksShown,
+          nodeInitializerFunctions: baseConfig.nodeInitializerFunctions,
+          transitionConfig: transitionSpec
+        };
+        return {
+          simulation: state3.simulation,
+          model: state3.model,
+          staging: state3.staging,
+          currentScene: state3.currentScene,
+          transitionMatrix: state3.transitionMatrix,
+          eventListener: state3.eventListener,
+          transitionListener: state3.transitionListener,
+          tags: state3.tags,
+          showWelcome: state3.showWelcome,
+          scene: config
+        };
       };
     };
   };
@@ -27481,7 +27658,7 @@
   var type_22 = /* @__PURE__ */ type_17(isPropInputType);
   var value16 = /* @__PURE__ */ value12(isPropString);
   var show28 = /* @__PURE__ */ show(showNumber);
-  var eq7 = /* @__PURE__ */ eq(eqForceStatus);
+  var eq8 = /* @__PURE__ */ eq(eqForceStatus);
   var map49 = /* @__PURE__ */ map(functorArray);
   var toUnfoldable11 = /* @__PURE__ */ toUnfoldable(unfoldableArray);
   var _forceLibrary3 = /* @__PURE__ */ _forceLibrary(strongForget);
@@ -27497,7 +27674,7 @@
   var renderTableForces = function(state3) {
     var renderForceItem = function(v) {
       return div2([classes(["force-item", (function() {
-        var $16 = eq7(v.status)(ForceActive.value);
+        var $16 = eq8(v.status)(ForceActive.value);
         if ($16) {
           return "force-active";
         }
@@ -27558,6 +27735,13 @@
     TransitionMove2.value = new TransitionMove2();
     return TransitionMove2;
   })();
+  var InstantMove = /* @__PURE__ */ (function() {
+    function InstantMove2() {
+    }
+    ;
+    InstantMove2.value = new InstantMove2();
+    return InstantMove2;
+  })();
   var FadeOut = /* @__PURE__ */ (function() {
     function FadeOut2() {
     }
@@ -27565,12 +27749,40 @@
     FadeOut2.value = new FadeOut2();
     return FadeOut2;
   })();
+  var ScaleDown = /* @__PURE__ */ (function() {
+    function ScaleDown2() {
+    }
+    ;
+    ScaleDown2.value = new ScaleDown2();
+    return ScaleDown2;
+  })();
+  var InstantExit = /* @__PURE__ */ (function() {
+    function InstantExit2() {
+    }
+    ;
+    InstantExit2.value = new InstantExit2();
+    return InstantExit2;
+  })();
   var FadeIn = /* @__PURE__ */ (function() {
     function FadeIn2() {
     }
     ;
     FadeIn2.value = new FadeIn2();
     return FadeIn2;
+  })();
+  var ScaleUp = /* @__PURE__ */ (function() {
+    function ScaleUp2() {
+    }
+    ;
+    ScaleUp2.value = new ScaleUp2();
+    return ScaleUp2;
+  })();
+  var InstantEnter = /* @__PURE__ */ (function() {
+    function InstantEnter2() {
+    }
+    ;
+    InstantEnter2.value = new InstantEnter2();
+    return InstantEnter2;
   })();
   var smoothTransition = /* @__PURE__ */ (function() {
     return {
@@ -27580,6 +27792,47 @@
       updateNodes: TransitionMove.value
     };
   })();
+  var encodeUpdateBehavior = function(v) {
+    if (v instanceof TransitionMove) {
+      return "TransitionMove";
+    }
+    ;
+    if (v instanceof InstantMove) {
+      return "InstantMove";
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Simulation.Scene (line 54, column 1 - line 54, column 49): " + [v.constructor.name]);
+  };
+  var encodeExitBehavior = function(v) {
+    if (v instanceof FadeOut) {
+      return "FadeOut";
+    }
+    ;
+    if (v instanceof ScaleDown) {
+      return "ScaleDown";
+    }
+    ;
+    if (v instanceof InstantExit) {
+      return "InstantExit";
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Simulation.Scene (line 49, column 1 - line 49, column 45): " + [v.constructor.name]);
+  };
+  var encodeEnterBehavior = function(v) {
+    if (v instanceof FadeIn) {
+      return "FadeIn";
+    }
+    ;
+    if (v instanceof ScaleUp) {
+      return "ScaleUp";
+    }
+    ;
+    if (v instanceof InstantEnter) {
+      return "InstantEnter";
+    }
+    ;
+    throw new Error("Failed pattern match at PSD3.Simulation.Scene (line 44, column 1 - line 44, column 47): " + [v.constructor.name]);
+  };
 
   // output/PSD3.CodeExplorer.Scenes/index.js
   var fromFoldable27 = /* @__PURE__ */ fromFoldable6(foldableArray)(ordString);
@@ -27663,17 +27916,7 @@
   })();
 
   // output/PSD3.Simulation.SceneTransition/foreign.js
-  function getBehaviorType(behavior) {
-    if (behavior && typeof behavior === "object" && typeof behavior.constructor === "string") {
-      return behavior.constructor;
-    }
-    if (typeof behavior === "function") {
-      return behavior.name.replace(/\d+$/, "");
-    }
-    return "Unknown";
-  }
-  function applyUpdateBehavior(selection2, behavior, transition2, targetNodes) {
-    const behaviorType = getBehaviorType(behavior);
+  function applyUpdateBehavior(selection2, behaviorType, transition2, targetNodes) {
     switch (behaviorType) {
       case "TransitionMove":
         selection2.transition(transition2).attr("transform", function(d9, i2) {
@@ -27701,11 +27944,11 @@
         console.warn(`Unknown update behavior: ${behaviorType}`);
     }
   }
-  var executeSceneTransition_ = (spec) => (nodeSelector) => (linkSelector) => (targetNodes) => (onComplete) => () => {
+  var executeSceneTransition_Impl = (spec) => (nodeSelector) => (linkSelector) => (targetNodes) => (onComplete) => () => {
     console.log(`Executing scene transition: duration=${spec.duration}ms`);
-    console.log(`  Enter: ${getBehaviorType(spec.enterNodes)}`);
-    console.log(`  Exit: ${getBehaviorType(spec.exitNodes)}`);
-    console.log(`  Update: ${getBehaviorType(spec.updateNodes)}`);
+    console.log(`  Enter: ${spec.enterNodes}`);
+    console.log(`  Exit: ${spec.exitNodes}`);
+    console.log(`  Update: ${spec.updateNodes}`);
     const nodeSelection2 = d3.selectAll(nodeSelector);
     const linkSelection = d3.selectAll(linkSelector);
     if (nodeSelection2.empty()) {
@@ -27753,6 +27996,19 @@
         onComplete();
       }
     });
+  };
+
+  // output/PSD3.Simulation.SceneTransition/index.js
+  var encodeTransitionSpec = function(spec) {
+    return {
+      duration: spec.duration,
+      enterNodes: encodeEnterBehavior(spec.enterNodes),
+      exitNodes: encodeExitBehavior(spec.exitNodes),
+      updateNodes: encodeUpdateBehavior(spec.updateNodes)
+    };
+  };
+  var executeSceneTransition_ = function(spec) {
+    return executeSceneTransition_Impl(encodeTransitionSpec(spec));
   };
 
   // output/PSD3.Simulation.RunSimulation/index.js
@@ -27890,7 +28146,7 @@
               return x11(0);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.CodeExplorer (line 321, column 22 - line 323, column 29): " + [state3.eventListener.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.CodeExplorer (line 381, column 22 - line 383, column 29): " + [state3.eventListener.constructor.name]);
           })();
           return {
             labels: attrs.labels,
@@ -27912,71 +28168,71 @@
       if (v instanceof Initialize5) {
         return bind20(liftAff35(readModelData))(function(v1) {
           return discard17(modify_5(function(v2) {
-            var $65 = {};
-            for (var $66 in v2) {
-              if ({}.hasOwnProperty.call(v2, $66)) {
-                $65[$66] = v2[$66];
+            var $75 = {};
+            for (var $76 in v2) {
+              if ({}.hasOwnProperty.call(v2, $76)) {
+                $75[$76] = v2[$76];
               }
               ;
             }
             ;
-            $65.model = v1;
-            return $65;
+            $75.model = v1;
+            return $75;
           }))(function() {
             return bind20(evalEffectSimulation1(initialize5))(function(openSelections) {
               return discard17(modify_5(function(s) {
-                var $71 = {};
-                for (var $72 in s) {
-                  if ({}.hasOwnProperty.call(s, $72)) {
-                    $71[$72] = s[$72];
+                var $81 = {};
+                for (var $82 in s) {
+                  if ({}.hasOwnProperty.call(s, $82)) {
+                    $81[$82] = s[$82];
                   }
                   ;
                 }
                 ;
-                $71.staging = (function() {
-                  var $68 = {};
-                  for (var $69 in s.staging) {
-                    if ({}.hasOwnProperty.call(s.staging, $69)) {
-                      $68[$69] = s["staging"][$69];
+                $81.staging = (function() {
+                  var $78 = {};
+                  for (var $79 in s.staging) {
+                    if ({}.hasOwnProperty.call(s.staging, $79)) {
+                      $78[$79] = s["staging"][$79];
                     }
                     ;
                   }
                   ;
-                  $68.selections = {
+                  $78.selections = {
                     nodes: openSelections.nodes,
                     links: openSelections.links
                   };
-                  return $68;
+                  return $78;
                 })();
-                return $71;
+                return $81;
               }))(function() {
                 return bind20(liftEffect111(create3))(function(v2) {
                   return discard17($$void11(subscribe2(v2.emitter)))(function() {
                     return discard17(modify_5(function(v3) {
-                      var $75 = {};
-                      for (var $76 in v3) {
-                        if ({}.hasOwnProperty.call(v3, $76)) {
-                          $75[$76] = v3[$76];
+                      var $85 = {};
+                      for (var $86 in v3) {
+                        if ({}.hasOwnProperty.call(v3, $86)) {
+                          $85[$86] = v3[$86];
                         }
                         ;
                       }
                       ;
-                      $75.eventListener = new Just(v2.listener);
-                      return $75;
+                      $85.eventListener = new Just(v2.listener);
+                      return $85;
                     }))(function() {
                       return bind20(liftEffect111(create3))(function(v3) {
                         return discard17($$void11(subscribe2(v3.emitter)))(function() {
                           return discard17(modify_5(function(v4) {
-                            var $79 = {};
-                            for (var $80 in v4) {
-                              if ({}.hasOwnProperty.call(v4, $80)) {
-                                $79[$80] = v4[$80];
+                            var $89 = {};
+                            for (var $90 in v4) {
+                              if ({}.hasOwnProperty.call(v4, $90)) {
+                                $89[$90] = v4[$90];
                               }
                               ;
                             }
                             ;
-                            $79.transitionListener = new Just(v3.listener);
-                            return $79;
+                            $89.transitionListener = new Just(v3.listener);
+                            return $89;
                           }))(function() {
                             return pure25(unit);
                           });
@@ -28004,7 +28260,7 @@
           return handleAction4(dictMonadAff)(new SpotlightNode(v.value0.value1));
         }
         ;
-        throw new Error("Failed pattern match at PSD3.CodeExplorer (line 138, column 5 - line 140, column 68): " + [v.value0.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.CodeExplorer (line 182, column 5 - line 184, column 68): " + [v.value0.constructor.name]);
       }
       ;
       if (v instanceof ToggleChildrenOfNode) {
@@ -28023,39 +28279,121 @@
         return runWithD3_Simulation1(stop2);
       }
       ;
+      if (v instanceof Scene && v.value0 instanceof EmptyScene) {
+        return pure25(unit);
+      }
+      ;
       if (v instanceof Scene && v.value0 instanceof PackageGrid) {
-        return discard17(modify_5(applySceneConfig(packageGridScene)))(function() {
-          return runSimulation1;
+        return discard17(modify_5(applySceneWithTransition(PackageGrid.value)(packageGridScene)))(function() {
+          return discard17(runSimulation1)(function() {
+            return modify_5(function(v1) {
+              var $108 = {};
+              for (var $109 in v1) {
+                if ({}.hasOwnProperty.call(v1, $109)) {
+                  $108[$109] = v1[$109];
+                }
+                ;
+              }
+              ;
+              $108.currentScene = PackageGrid.value;
+              return $108;
+            });
+          });
         });
       }
       ;
       if (v instanceof Scene && v.value0 instanceof PackageGraph) {
-        return discard17(modify_5(applySceneConfig(packageGraphScene)))(function() {
-          return runSimulation1;
+        return discard17(modify_5(applySceneWithTransition(PackageGraph.value)(packageGraphScene)))(function() {
+          return discard17(runSimulation1)(function() {
+            return modify_5(function(v1) {
+              var $112 = {};
+              for (var $113 in v1) {
+                if ({}.hasOwnProperty.call(v1, $113)) {
+                  $112[$113] = v1[$113];
+                }
+                ;
+              }
+              ;
+              $112.currentScene = PackageGraph.value;
+              return $112;
+            });
+          });
         });
       }
       ;
       if (v instanceof Scene && v.value0 instanceof LayerSwarm) {
-        return discard17(modify_5(applySceneConfig(layerSwarmScene)))(function() {
-          return runSimulation1;
+        return discard17(modify_5(applySceneWithTransition(LayerSwarm.value)(layerSwarmScene)))(function() {
+          return discard17(runSimulation1)(function() {
+            return modify_5(function(v1) {
+              var $116 = {};
+              for (var $117 in v1) {
+                if ({}.hasOwnProperty.call(v1, $117)) {
+                  $116[$117] = v1[$117];
+                }
+                ;
+              }
+              ;
+              $116.currentScene = LayerSwarm.value;
+              return $116;
+            });
+          });
         });
       }
       ;
       if (v instanceof Scene && (v.value0 instanceof ModuleTree && v.value0.value0 instanceof Radial)) {
-        return discard17(modify_5(applySceneConfig(radialTreeScene)))(function() {
-          return runSimulation1;
+        return discard17(modify_5(applySceneWithTransition(new ModuleTree(Radial.value))(radialTreeScene)))(function() {
+          return discard17(runSimulation1)(function() {
+            return modify_5(function(v1) {
+              var $120 = {};
+              for (var $121 in v1) {
+                if ({}.hasOwnProperty.call(v1, $121)) {
+                  $120[$121] = v1[$121];
+                }
+                ;
+              }
+              ;
+              $120.currentScene = new ModuleTree(Radial.value);
+              return $120;
+            });
+          });
         });
       }
       ;
       if (v instanceof Scene && (v.value0 instanceof ModuleTree && v.value0.value0 instanceof Horizontal)) {
-        return discard17(modify_5(applySceneConfig(horizontalTreeScene)))(function() {
-          return runSimulation1;
+        return discard17(modify_5(applySceneWithTransition(new ModuleTree(Horizontal.value))(horizontalTreeScene)))(function() {
+          return discard17(runSimulation1)(function() {
+            return modify_5(function(v1) {
+              var $125 = {};
+              for (var $126 in v1) {
+                if ({}.hasOwnProperty.call(v1, $126)) {
+                  $125[$126] = v1[$126];
+                }
+                ;
+              }
+              ;
+              $125.currentScene = new ModuleTree(Horizontal.value);
+              return $125;
+            });
+          });
         });
       }
       ;
       if (v instanceof Scene && (v.value0 instanceof ModuleTree && v.value0.value0 instanceof Vertical)) {
-        return discard17(modify_5(applySceneConfig(verticalTreeScene)))(function() {
-          return runSimulation1;
+        return discard17(modify_5(applySceneWithTransition(new ModuleTree(Vertical.value))(verticalTreeScene)))(function() {
+          return discard17(runSimulation1)(function() {
+            return modify_5(function(v1) {
+              var $130 = {};
+              for (var $131 in v1) {
+                if ({}.hasOwnProperty.call(v1, $131)) {
+                  $130[$131] = v1[$131];
+                }
+                ;
+              }
+              ;
+              $130.currentScene = new ModuleTree(Vertical.value);
+              return $130;
+            });
+          });
         });
       }
       ;
@@ -28129,22 +28467,25 @@
       ;
       if (v instanceof DismissWelcome) {
         return modify_5(function(v1) {
-          var $121 = {};
-          for (var $122 in v1) {
-            if ({}.hasOwnProperty.call(v1, $122)) {
-              $121[$122] = v1[$122];
+          var $150 = {};
+          for (var $151 in v1) {
+            if ({}.hasOwnProperty.call(v1, $151)) {
+              $150[$151] = v1[$151];
             }
             ;
           }
           ;
-          $121.showWelcome = false;
-          return $121;
+          $150.showWelcome = false;
+          return $150;
         });
       }
       ;
-      throw new Error("Failed pattern match at PSD3.CodeExplorer (line 103, column 16 - line 237, column 40): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.CodeExplorer (line 147, column 16 - line 297, column 40): " + [v.constructor.name]);
     };
   };
+  var defaultTransitionMatrix = /* @__PURE__ */ (function() {
+    return fromFoldable(ordTuple(ordScene)(ordScene))(foldableArray)([new Tuple(new Tuple(PackageGrid.value, PackageGraph.value), smoothTransition), new Tuple(new Tuple(PackageGraph.value, PackageGrid.value), smoothTransition), new Tuple(new Tuple(PackageGrid.value, LayerSwarm.value), smoothTransition), new Tuple(new Tuple(LayerSwarm.value, PackageGrid.value), smoothTransition), new Tuple(new Tuple(PackageGraph.value, LayerSwarm.value), smoothTransition), new Tuple(new Tuple(LayerSwarm.value, PackageGraph.value), smoothTransition), new Tuple(new Tuple(PackageGrid.value, new ModuleTree(Radial.value)), smoothTransition), new Tuple(new Tuple(PackageGraph.value, new ModuleTree(Radial.value)), smoothTransition), new Tuple(new Tuple(LayerSwarm.value, new ModuleTree(Radial.value)), smoothTransition), new Tuple(new Tuple(new ModuleTree(Radial.value), PackageGrid.value), smoothTransition), new Tuple(new Tuple(new ModuleTree(Radial.value), PackageGraph.value), smoothTransition), new Tuple(new Tuple(new ModuleTree(Radial.value), LayerSwarm.value), smoothTransition), new Tuple(new Tuple(new ModuleTree(Radial.value), new ModuleTree(Horizontal.value)), smoothTransition), new Tuple(new Tuple(new ModuleTree(Radial.value), new ModuleTree(Vertical.value)), smoothTransition), new Tuple(new Tuple(new ModuleTree(Horizontal.value), new ModuleTree(Radial.value)), smoothTransition), new Tuple(new Tuple(new ModuleTree(Horizontal.value), new ModuleTree(Vertical.value)), smoothTransition), new Tuple(new Tuple(new ModuleTree(Vertical.value), new ModuleTree(Radial.value)), smoothTransition), new Tuple(new Tuple(new ModuleTree(Vertical.value), new ModuleTree(Horizontal.value)), smoothTransition)]);
+  })();
   var component6 = function(dictMonadAff) {
     var initialState7 = {
       model: Nothing.value,
@@ -28161,6 +28502,8 @@
       },
       simulation: initialSimulationState(forceLibrary),
       scene: initialScene(forceLibrary),
+      currentScene: EmptyScene.value,
+      transitionMatrix: defaultTransitionMatrix,
       eventListener: Nothing.value,
       transitionListener: Nothing.value,
       tags: empty2,
@@ -29702,7 +30045,7 @@
   var insertWith2 = /* @__PURE__ */ insertWith(ordString);
   var append19 = /* @__PURE__ */ append(semigroupArray);
   var foldl11 = /* @__PURE__ */ foldl(foldableArray);
-  var lookup18 = /* @__PURE__ */ lookup(ordString);
+  var lookup19 = /* @__PURE__ */ lookup(ordString);
   var insert18 = /* @__PURE__ */ insert(ordString);
   var fromFoldable29 = /* @__PURE__ */ fromFoldable3(foldableArray);
   var topologicalSort2 = /* @__PURE__ */ topologicalSort(ordString);
@@ -29835,7 +30178,7 @@
       return {
         id: node.id,
         name: node.id,
-        depends: fromMaybe([])(lookup18(node.id)(dependenciesMap)),
+        depends: fromMaybe([])(lookup19(node.id)(dependenciesMap)),
         group: new Just(node.group)
       };
     };
@@ -29861,7 +30204,7 @@
     var sortedIds = reverse2(getTopologicalOrder(tasks));
     var processTask = function(accLayers) {
       return function(taskId) {
-        var v = lookup18(taskId)(taskMap);
+        var v = lookup19(taskId)(taskMap);
         if (v instanceof Nothing) {
           return accLayers;
         }
@@ -29874,7 +30217,7 @@
             }
             ;
             var depLayers = mapFlipped13(v.value0.depends)(function(depId) {
-              return fromMaybe(0)(lookup18(depId)(accLayers));
+              return fromMaybe(0)(lookup19(depId)(accLayers));
             });
             var v1 = maximum5(depLayers);
             if (v1 instanceof Just) {
@@ -29939,7 +30282,7 @@
       return {
         id: t.id,
         name: t.name,
-        layer: fromMaybe(0)(lookup18(t.id)(layers)),
+        layer: fromMaybe(0)(lookup19(t.id)(layers)),
         depends: t.depends,
         group: t.group
       };
@@ -31435,7 +31778,7 @@
   var y31 = /* @__PURE__ */ y3(toAttrNumber);
   var text21 = /* @__PURE__ */ text6(toAttrString);
   var textAnchor10 = /* @__PURE__ */ textAnchor(toAttrString);
-  var compare3 = /* @__PURE__ */ compare(ordString);
+  var compare4 = /* @__PURE__ */ compare(ordString);
   var parseCSVRow2 = function(row) {
     return bind24(hush(runExcept(readProp4("division")(row))))(function(divisionF) {
       return bind24(hush(runExcept(readString4(divisionF))))(function(division) {
@@ -31587,7 +31930,7 @@
                         return bind119(appendTo5(chartGroup)(Group.value)([transform([function(v1) {
                           return "translate(0," + (show39(chartHeight) + ")");
                         }]), classed24("x-axis")]))(function(xAxis) {
-                          var allDates = sortBy(compare3)(getDates(data$prime));
+                          var allDates = sortBy(compare4)(getDates(data$prime));
                           var dateCount = toNumber(length3(allDates));
                           var xScale = function(i2) {
                             return toNumber(i2) * (chartWidth / (dateCount - 1));
@@ -31722,7 +32065,7 @@
   var foldl12 = /* @__PURE__ */ foldl(foldableArray);
   var nub5 = /* @__PURE__ */ nub(ordString);
   var map56 = /* @__PURE__ */ map(functorArray);
-  var compare4 = /* @__PURE__ */ compare(ordString);
+  var compare5 = /* @__PURE__ */ compare(ordString);
   var maximum9 = /* @__PURE__ */ maximum(ordNumber)(foldableArray);
   var bind25 = /* @__PURE__ */ bind(bindMaybe);
   var classed26 = /* @__PURE__ */ classed(toAttrString);
@@ -31787,7 +32130,7 @@
     return function(data$prime) {
       return sortBy(function(a2) {
         return function(b2) {
-          return compare4(a2.age)(b2.age);
+          return compare5(a2.age)(b2.age);
         };
       })(filter(function(d1) {
         return d1.state === state$prime;
@@ -35712,7 +36055,7 @@
   };
 
   // output/PSD3.Shared.DocsHeader/index.js
-  var eq8 = /* @__PURE__ */ eq(eqSection);
+  var eq9 = /* @__PURE__ */ eq(eqSection);
   var sectionTitle = function(v) {
     if (v instanceof UnderstandingSection) {
       return "Understanding";
@@ -35754,14 +36097,14 @@
   var renderQuadrant = function(targetSection) {
     return function(currentSection) {
       return a([href4((function() {
-        var $8 = eq8(targetSection)(APISection.value);
+        var $8 = eq9(targetSection)(APISection.value);
         if ($8) {
           return "api/index.html";
         }
         ;
         return "#" + routeToPath(sectionDefaultRoute(targetSection));
       })()), classes(["docs-header-quadrant-box", (function() {
-        if (currentSection instanceof Just && eq8(currentSection.value0)(targetSection)) {
+        if (currentSection instanceof Just && eq9(currentSection.value0)(targetSection)) {
           return "docs-header-quadrant-box--active";
         }
         ;
@@ -39501,7 +39844,7 @@
   })();
 
   // output/PSD3.Shared.SectionNav/index.js
-  var eq9 = /* @__PURE__ */ eq(eqSection);
+  var eq10 = /* @__PURE__ */ eq(eqSection);
   var eq14 = /* @__PURE__ */ eq(eqRoute);
   var map58 = /* @__PURE__ */ map(functorArray);
   var sectionTitle2 = function(v) {
@@ -39545,7 +39888,7 @@
   var renderQuadrant2 = function(targetSection) {
     return function(currentSection) {
       return a([href4("#" + routeToPath(sectionDefaultRoute2(targetSection))), classes(["section-nav__quadrant-box", (function() {
-        var $11 = eq9(targetSection)(currentSection);
+        var $11 = eq10(targetSection)(currentSection);
         if ($11) {
           return "section-nav__quadrant-box--active";
         }
@@ -39931,12 +40274,12 @@
   })();
 
   // output/PSD3.Understanding.UnderstandingTabs/index.js
-  var eq10 = /* @__PURE__ */ eq(eqRoute);
+  var eq11 = /* @__PURE__ */ eq(eqRoute);
   var append23 = /* @__PURE__ */ append(semigroupArray);
   var renderTab2 = function(route) {
     return function(label5) {
       return function(currentRoute) {
-        var isActive = eq10(route)(currentRoute);
+        var isActive = eq11(route)(currentRoute);
         var classes2 = append23(["understanding-tab"])((function() {
           if (isActive) {
             return ["understanding-tab--active"];
@@ -40339,12 +40682,12 @@ graph TB
       };
     }
   };
-  var eq11 = /* @__PURE__ */ eq(eqHierarchyLayout);
+  var eq15 = /* @__PURE__ */ eq(eqHierarchyLayout);
   var renderLayoutOption = function(layout) {
     return function(label5) {
       return function(currentLayout) {
         return button([classes(append24(["control-panel__option"])((function() {
-          var $40 = eq11(layout)(currentLayout);
+          var $40 = eq15(layout)(currentLayout);
           if ($40) {
             return ["control-panel__option--active"];
           }
@@ -42255,7 +42598,7 @@ graph TB
   var fontSize16 = /* @__PURE__ */ fontSize(toAttrNumber);
   var fill39 = /* @__PURE__ */ fill(toAttrString);
   var text29 = /* @__PURE__ */ text6(toAttrString);
-  var compare5 = /* @__PURE__ */ compare(ordNumber);
+  var compare6 = /* @__PURE__ */ compare(ordNumber);
   var cx15 = /* @__PURE__ */ cx(toAttrNumberFnI);
   var cy16 = /* @__PURE__ */ cy(toAttrNumberFnI);
   var radius32 = /* @__PURE__ */ radius2(toAttrNumberFnI);
@@ -42411,7 +42754,7 @@ graph TB
                                         return function(b2) {
                                           var popB = datum_9.population(b2);
                                           var popA = datum_9.population(a2);
-                                          return orderingToInt(compare5(popB)(popA));
+                                          return orderingToInt(compare6(popB)(popA));
                                         };
                                       }), cx15(function(d9) {
                                         return function(i2) {
@@ -42435,7 +42778,7 @@ graph TB
                                             return function(b2) {
                                               var popB = datum_9.population(b2);
                                               var popA = datum_9.population(a2);
-                                              return orderingToInt(compare5(popB)(popA));
+                                              return orderingToInt(compare6(popB)(popA));
                                             };
                                           }), cx15(function(d9) {
                                             return function(i2) {
@@ -43773,7 +44116,7 @@ graph TB
 
   // output/PSD3.Wizard.FileDownload/index.js
   var append25 = /* @__PURE__ */ append(semigroupArray);
-  var eq15 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
+  var eq16 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
   var append110 = /* @__PURE__ */ append(semigroupString);
   var map64 = /* @__PURE__ */ map(functorArray);
   var bind72 = /* @__PURE__ */ bind(bindAff);
@@ -43794,7 +44137,7 @@ graph TB
     var intercalateArray = function(sep) {
       return function(arr) {
         return maybe("")(function(v) {
-          var $16 = eq15(v.tail)([]);
+          var $16 = eq16(v.tail)([]);
           if ($16) {
             return v.head;
           }
@@ -44017,7 +44360,7 @@ graph TB
 
   // output/PSD3.Wizard.Wizard/index.js
   var map67 = /* @__PURE__ */ map(functorArray);
-  var eq16 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
+  var eq17 = /* @__PURE__ */ eq(/* @__PURE__ */ eqArray(eqString));
   var show54 = /* @__PURE__ */ show(showDifficulty);
   var eq25 = /* @__PURE__ */ eq(eqDifficulty);
   var eq33 = /* @__PURE__ */ eq(/* @__PURE__ */ eqMaybe(eqDifficulty));
@@ -44175,7 +44518,7 @@ graph TB
     var intercalate8 = function(sep) {
       return function(arr) {
         return maybe("")(function(v) {
-          var $75 = eq16(v.tail)([]);
+          var $75 = eq17(v.tail)([]);
           if ($75) {
             return v.head;
           }
