@@ -46,7 +46,7 @@ import PSD3.Data.Tree (TreeLayout(..))
 import D3.Viz.Spago.Draw (getVizEventFromClick)
 import D3.Viz.Spago.Draw as Graph
 import D3.Viz.Spago.Files (NodeType(..))
-import D3.Viz.Spago.Model (SpagoModel, isPackage, isPackageOrVisibleModule, transitionNodesToPinnedPositions_)
+import D3.Viz.Spago.Model (SpagoModel, isPackage, isPackageOrVisibleModule)
 import PSD3.Data.Node (D3_SimulationNode(..))
 import Effect.Aff.Class (class MonadAff)
 import Effect.Class (class MonadEffect)
@@ -163,42 +163,8 @@ handleAction = case _ of
   -- | - Scene configuration is declarative and self-documenting
   -- | - No lens knowledge required
   Scene PackageGrid -> do
-    -- TRANSITION SCENE PATTERN
-    -- Phase 1: Visual transition (simulation OFF)
-    -- Phase 2: Scene activation (simulation ON) - triggered by callback
-
-    -- Apply scene configuration to state
     H.modify_ $ applySceneConfig packageGridScene
-    state <- H.get
-
-    case state.model of
-      Just model -> runWithD3_Simulation do
-        -- PHASE 1: TRANSITION (Simulation OFF)
-        log "PackageGrid: Starting transition phase (sim OFF)"
-
-        -- Stop simulation - it stays OFF during entire transition
-        PSD3Simulation.stop
-
-        -- Calculate target pinned node positions
-        let pinnedNodes = foldr (\initFn nodes -> initFn nodes) model.nodes state.scene.nodeInitializerFunctions
-
-        -- Start D3 visual transition (1500ms)
-        -- Callback triggers Phase 2 when animation completes
-        case state.transitionListener of
-          Just listener -> do
-            liftEffect $ transitionNodesToPinnedPositions_
-              "div.svg-container svg"
-              "g.nodes > g"
-              "g.links > line"
-              pinnedNodes
-              (HS.notify listener (ActivateSceneAfterTransition PackageGrid))  -- Phase 2 trigger
-          Nothing ->
-            log "PackageGrid: No transition listener available"
-
-        -- DON'T call updateSimulation or start simulation here!
-        -- That happens in Phase 2 (ActivateSceneAfterTransition handler)
-
-      Nothing -> log "PackageGrid: No model data available"
+    runSimulation
 
   Scene PackageGraph -> do
     H.modify_ $ applySceneConfig packageGraphScene
@@ -209,157 +175,15 @@ handleAction = case _ of
     runSimulation
 
   Scene (ModuleTree Radial) -> do
-    -- Apply scene configuration
     H.modify_ $ applySceneConfig radialTreeScene
-    state <- H.get
-
-    -- Gentle transition pattern for pinned tree layout
-    case state.model of
-      Just model -> runWithD3_Simulation do
-        PSD3Simulation.stop
-
-        -- Calculate pinned tree positions
-        let pinnedNodes = foldr (\initFn nodes -> initFn nodes) model.nodes state.scene.nodeInitializerFunctions
-
-        -- Get DOM selections
-        root <- PSD3Selection.attach "div.svg-container"
-        nodesGroup <- PSD3Selection.selectUnder root "g.nodes"
-        linksGroup <- PSD3Selection.selectUnder root "g.links"
-
-        -- Start D3 transition
-        liftEffect $ transitionNodesToPinnedPositions_
-          "div.svg-container svg" "g.nodes > g" "g.links > line"
-          pinnedNodes
-          (log "Radial tree transition complete")
-
-        -- Update simulation with pinned nodes
-        let callback = case state.eventListener of
-              Just listener -> simulationEvent listener
-              Nothing -> x 0.0
-            enhancedAttrs = state.scene.attributes {
-              circles = callback : state.scene.attributes.circles
-            , tagMap = Just state.tags
-            }
-
-        Graph.updateSimulation
-          { nodes: Just nodesGroup, links: Just linksGroup }
-          { allNodes: pinnedNodes
-          , allLinks: model.links
-          , nodeFilter: state.scene.chooseNodes
-          , linkFilter: Just state.scene.linksShown
-          , nodeInitializers: []
-          , activeForces: state.scene.activeForces
-          , linksWithForce: state.scene.linksActive
-          }
-          enhancedAttrs
-
-        -- Restart simulation so tick function positions nodes
-        PSD3Simulation.start
-      Nothing -> log "RadialTree: No model data available"
+    runSimulation
 
   Scene (ModuleTree Horizontal) -> do
-    -- Apply scene configuration
     H.modify_ $ applySceneConfig horizontalTreeScene
-    state <- H.get
-
-    -- Gentle transition pattern for pinned tree layout
-    case state.model of
-      Just model -> runWithD3_Simulation do
-        PSD3Simulation.stop
-
-        -- Calculate pinned tree positions
-        let pinnedNodes = foldr (\initFn nodes -> initFn nodes) model.nodes state.scene.nodeInitializerFunctions
-
-        -- Get DOM selections
-        root <- PSD3Selection.attach "div.svg-container"
-        nodesGroup <- PSD3Selection.selectUnder root "g.nodes"
-        linksGroup <- PSD3Selection.selectUnder root "g.links"
-
-        -- Start D3 transition
-        liftEffect $ transitionNodesToPinnedPositions_
-          "div.svg-container svg" "g.nodes > g" "g.links > line"
-          pinnedNodes
-          (log "Horizontal tree transition complete")
-
-        -- Update simulation with pinned nodes
-        let callback = case state.eventListener of
-              Just listener -> simulationEvent listener
-              Nothing -> x 0.0
-            enhancedAttrs = state.scene.attributes {
-              circles = callback : state.scene.attributes.circles
-            , tagMap = Just state.tags
-            }
-
-        Graph.updateSimulation
-          { nodes: Just nodesGroup, links: Just linksGroup }
-          { allNodes: pinnedNodes
-          , allLinks: model.links
-          , nodeFilter: state.scene.chooseNodes
-          , linkFilter: Just state.scene.linksShown
-          , nodeInitializers: []
-          , activeForces: state.scene.activeForces
-          , linksWithForce: state.scene.linksActive
-          }
-          enhancedAttrs
-
-        -- Restart simulation so tick function positions nodes
-        PSD3Simulation.start
-      Nothing -> log "HorizontalTree: No model data available"
+    runSimulation
 
   Scene (ModuleTree Vertical) -> do
-    -- Apply scene configuration
     H.modify_ $ applySceneConfig verticalTreeScene
-    state <- H.get
-
-    -- Gentle transition pattern for pinned tree layout
-    case state.model of
-      Just model -> runWithD3_Simulation do
-        PSD3Simulation.stop
-
-        -- Calculate pinned tree positions
-        let pinnedNodes = foldr (\initFn nodes -> initFn nodes) model.nodes state.scene.nodeInitializerFunctions
-
-        -- Get DOM selections
-        root <- PSD3Selection.attach "div.svg-container"
-        nodesGroup <- PSD3Selection.selectUnder root "g.nodes"
-        linksGroup <- PSD3Selection.selectUnder root "g.links"
-
-        -- Start D3 transition
-        liftEffect $ transitionNodesToPinnedPositions_
-          "div.svg-container svg" "g.nodes > g" "g.links > line"
-          pinnedNodes
-          (log "Vertical tree transition complete")
-
-        -- Update simulation with pinned nodes
-        let callback = case state.eventListener of
-              Just listener -> simulationEvent listener
-              Nothing -> x 0.0
-            enhancedAttrs = state.scene.attributes {
-              circles = callback : state.scene.attributes.circles
-            , tagMap = Just state.tags
-            }
-
-        Graph.updateSimulation
-          { nodes: Just nodesGroup, links: Just linksGroup }
-          { allNodes: pinnedNodes
-          , allLinks: model.links
-          , nodeFilter: state.scene.chooseNodes
-          , linkFilter: Just state.scene.linksShown
-          , nodeInitializers: []
-          , activeForces: state.scene.activeForces
-          , linksWithForce: state.scene.linksActive
-          }
-          enhancedAttrs
-
-        -- Restart simulation so tick function positions nodes
-        PSD3Simulation.start
-      Nothing -> log "VerticalTree: No model data available"
-
-  -- Activate scene after transition completes
-  -- This is triggered by the D3 transition completion callback
-  -- Scene config is already applied to state, just need to run simulation
-  ActivateSceneAfterTransition scene -> do
-    log $ "Activating scene after transition: " <> show scene
     runSimulation
 
   ToggleForce label -> do

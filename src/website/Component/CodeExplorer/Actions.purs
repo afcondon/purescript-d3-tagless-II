@@ -26,7 +26,6 @@ data Action
   = Initialize
   | Finalize
   | Scene Scene
-  | ActivateSceneAfterTransition Scene  -- Triggered after D3 transition completes
   | ToggleForce Label
   | Filter FilterData
   | ChangeStyling StyleChange
