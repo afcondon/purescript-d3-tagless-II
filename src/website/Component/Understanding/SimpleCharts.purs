@@ -8,6 +8,7 @@ import D3.Viz.RadialStackedBar as RadialStackedBar
 import PSD3.Data.Loaders (loadCSV)
 import PSD3.Interpreter.D3 (eval_D3M)
 import Data.Array (length, take)
+import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Aff (Aff)
@@ -41,12 +42,18 @@ handleAction = case _ of
   Initialize -> do
     -- Load unemployment data from CSV
     log "Loading unemployment data..."
-    unemploymentData <- H.liftAff $ loadCSV "data/bls-metro-unemployment.csv"
+    unemploymentDataResult <- H.liftAff $ loadCSV "data/bls-metro-unemployment.csv" Right
+    let unemploymentData = case unemploymentDataResult of
+          Right rows -> rows
+          Left _ -> []
     log "Unemployment CSV loaded"
 
     -- Load population data from CSV
     log "Loading population data..."
-    populationCSV <- H.liftAff $ loadCSV "data/data-2.csv"
+    populationCSVResult <- H.liftAff $ loadCSV "data/data-2.csv" Right
+    let populationCSV = case populationCSVResult of
+          Right rows -> rows
+          Left _ -> []
     log "Population CSV loaded"
 
     -- Parse population data

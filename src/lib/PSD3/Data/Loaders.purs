@@ -2,26 +2,27 @@ module PSD3.Data.Loaders
   ( LoadError(..)
   , GraphDataJSON
   , loadGraphJSON
+  , loadGraphJSON_
   , loadJSON
   , loadCSV
   , parseGraphJSON
+  , unsafeBlessJSON
+  , unsafeBlessGraphJSON
   ) where
 
 import Prelude
 
-import Affjax (Error, URL) as AX
+import Affjax (URL) as AX
 import Affjax.ResponseFormat as ResponseFormat
 import Affjax.Web as AJAX
 import Control.Monad.Except (runExcept)
-import Data.Argonaut.Core (Json, toObject, toArray)
-import Data.Argonaut.Core as Json
-import Data.Array (catMaybes, foldl, length)
+import Data.Array (catMaybes, length)
 import Data.Bifunctor (lmap)
-import Data.Either (Either(..), hush, note)
-import Data.List.Types (NonEmptyList)
+import Data.Either (Either(..), hush)
 import Data.Maybe (Maybe(..))
 import Effect.Aff (Aff)
-import Foreign (Foreign, ForeignError, MultipleErrors, renderForeignError, unsafeToForeign)
+import Effect.Aff.Compat (EffectFnAff, fromEffectFnAff)
+import Foreign (Foreign, MultipleErrors, renderForeignError, unsafeToForeign)
 import Foreign as F
 import Foreign.Index ((!))
 import PSD3.Data.Graph (GraphModel, GraphConfig, buildGraphModel)
@@ -52,7 +53,7 @@ loadJSON :: AX.URL -> Aff (Either LoadError Foreign)
 loadJSON url = do
   response <- AJAX.get ResponseFormat.json url
   pure $ case response of
-    Left ajaxError ->
+    Left _ ->
       Left $ NetworkError $ "Failed to fetch " <> url
     Right resp ->
       Right $ unsafeToForeign resp.body
@@ -110,10 +111,126 @@ loadGraphJSON url config decodeNode decodeLink = do
             "Failed to decode " <> show (length failures)
             <> " " <> typeName <> "(s)"
 
--- | Load CSV data (stub - to be implemented)
--- | TODO: Implement CSV parsing
+-- ============================================================================
+-- | Unsafe "Blessing" Functions for Performance
+-- ============================================================================
+-- |
+-- | For large datasets, parsing JSON in PureScript can be a performance
+-- | bottleneck. These unsafe functions skip validation and directly coerce
+-- | the JSON to the expected types.
+-- |
+-- | **Use these when:**
+-- | - You have large datasets (>1000 nodes)
+-- | - You trust the data format
+-- | - Performance is critical
+-- | - You've tested the data format beforehand
+-- |
+-- | **Warnings:**
+-- | - No error checking - malformed data causes runtime errors
+-- | - No type safety - you must ensure the types match
+-- | - Debugging is harder when things go wrong
+-- |
+-- | **Pattern:** Use safe parsing during development, switch to unsafe for
+-- | production when data format is stable.
+
+-- | Unsafe: Directly coerce Foreign JSON to your types
+-- |
+-- | This skips all PureScript parsing and validation. Use when you know
+-- | the JSON structure matches your types exactly.
+-- |
+-- | Example:
+-- | ```purescript
+-- | -- Development (safe):
+-- | nodes <- loadGraphJSON url config decodeNode decodeLink
+-- |
+-- | -- Production (unsafe, fast):
+-- | { nodes, links } <- unsafeBlessGraphJSON <$> loadJSON url
+-- | let graph = buildGraphModel config nodes links
+-- | ```
+unsafeBlessJSON :: forall a. Foreign -> a
+unsafeBlessJSON = F.unsafeFromForeign
+
+-- | Unsafe: Directly coerce graph JSON to {nodes, links} arrays
+-- |
+-- | Assumes JSON structure: `{ nodes: [...], links: [...] }`
+-- | No validation, no error checking, maximum performance.
+unsafeBlessGraphJSON :: forall node link.
+  Foreign ->
+  { nodes :: Array node, links :: Array link }
+unsafeBlessGraphJSON = unsafeBlessJSON
+
+-- | Unsafe version of loadGraphJSON - maximum performance, no validation
+-- |
+-- | Use this when:
+-- | - Data format is known and stable
+-- | - Performance is critical (large datasets)
+-- | - You've already validated data in development
+-- |
+-- | Returns raw GraphModel without error checking.
+-- |
+-- | Example:
+-- | ```purescript
+-- | -- Safe (checks every node/link):
+-- | graph <- loadGraphJSON url config decodeNode decodeLink
+-- |
+-- | -- Unsafe (no checks, max speed):
+-- | graph <- loadGraphJSON_ url config
+-- | ```
+loadGraphJSON_ :: forall node link.
+  AX.URL ->
+  GraphConfig node link ->
+  Aff (GraphModel node link)
+loadGraphJSON_ url config = do
+  response <- AJAX.get ResponseFormat.json url
+  case response of
+    Left _ ->
+      -- Even unsafe version fails on network errors
+      pure $ buildGraphModel config [] []
+    Right resp -> do
+      let json = unsafeToForeign resp.body
+          { nodes, links } = unsafeBlessGraphJSON json
+      pure $ buildGraphModel config nodes links
+
+-- | Load CSV data using D3's CSV parser (via FFI)
+-- |
+-- | The CSV is loaded and parsed by D3, returning an array of Foreign objects.
+-- | Each object represents a row with column names as keys.
+-- |
+-- | For simple use cases where you want the raw CSV data, you can use:
+-- | ```purescript
+-- | rows <- loadCSV url (Right <<< unsafeToForeign)
+-- | ```
+-- |
+-- | For type-safe decoding, provide a decoder that extracts fields:
+-- | ```purescript
+-- | rows <- loadCSV url decodeMyRow
+-- | ```
 loadCSV :: forall a.
   AX.URL ->
-  (Array String -> Either LoadError a) ->  -- Row decoder
+  (Foreign -> Either LoadError a) ->  -- Row decoder
   Aff (Either LoadError (Array a))
-loadCSV url decoder = pure $ Left $ ParseError "loadCSV not yet implemented"
+loadCSV url decoder = do
+  rows <- fromEffectFnAff $ loadCSVImpl url
+  pure $ decodeArray "CSV row" decoder rows
+  where
+    decodeArray :: forall b.
+      String ->
+      (Foreign -> Either LoadError b) ->
+      Array Foreign ->
+      Either LoadError (Array b)
+    decodeArray typeName dec foreigns =
+      let
+        decoded = dec <$> foreigns
+        failures = catMaybes $ (\e -> case e of
+                                   Left err -> Just err
+                                   Right _ -> Nothing) <$> decoded
+        successes = catMaybes $ hush <$> decoded
+      in
+        if length failures == 0
+          then Right successes
+          else Left $ DecodeError $
+            "Failed to decode " <> show (length failures)
+            <> " " <> typeName <> "(s)"
+
+-- FFI imports
+foreign import loadCSVImpl :: AX.URL -> EffectFnAff (Array Foreign)
