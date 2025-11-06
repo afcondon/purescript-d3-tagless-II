@@ -48,10 +48,10 @@ derive instance ordSelectionName :: Ord SelectionName
 data OrderingAttribute d = Order | Sort (d -> d -> Int) | Raise | Lower
 
 data SelectionAttribute d =
-    AttrT AttributeSetter
-  | TextT AttributeSetter -- we can't narrow it to String here but helper function will do that
-  | HTMLT AttributeSetter -- we can't narrow it to String here but helper function will do that
-  | PropertyT AttributeSetter -- this might motivate adding a Boolean flavor of Attribute, eg for checkbox "checked"
+    AttrT (AttributeSetter d)
+  | TextT (AttributeSetter d) -- we can't narrow it to String here but helper function will do that
+  | HTMLT (AttributeSetter d) -- we can't narrow it to String here but helper function will do that
+  | PropertyT (AttributeSetter d) -- this might motivate adding a Boolean flavor of Attribute, eg for checkbox "checked"
 
   | OrderingT (OrderingAttribute d)
 

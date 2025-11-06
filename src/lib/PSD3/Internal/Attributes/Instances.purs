@@ -17,75 +17,77 @@ type EffectfulListener  = (Event -> Datum_ -> D3This_ -> Effect Unit)
 type EffectfulListener_ = EffectFn3 Event Datum_ D3This_ Unit 
 type Label           = String
 
--- | Central feature of this module, 
-data AttributeSetter = AttributeSetter Label Attr
+-- | Central feature of this module,
+data AttributeSetter d = AttributeSetter Label (Attr d)
 
-attributeLabel :: AttributeSetter -> String
+attributeLabel :: forall d. AttributeSetter d -> String
 attributeLabel (AttributeSetter label _) = label
 
-attributeAttr :: AttributeSetter -> Attr
+attributeAttr :: forall d. AttributeSetter d -> Attr d
 attributeAttr (AttributeSetter _ a) = a
 
-data AttrBuilder a =
+data AttrBuilder a d =
     Static a
-  | Fn (Datum_ -> a)
-  | FnI (IndexedLambda a) 
+  | Fn (d -> a)
+  | FnI (d -> Index_ -> a) 
 
-data Attr = 
-    StringAttr (AttrBuilder String)
-  | NumberAttr (AttrBuilder Number)
-  | ArrayAttr  (AttrBuilder (Array Number))
+data Attr d =
+    StringAttr (AttrBuilder String d)
+  | NumberAttr (AttrBuilder Number d)
+  | ArrayAttr  (AttrBuilder (Array Number) d)
 
 -- Kind annotation to avoid "fun" with polykinds.
-class ToAttr :: Type -> Type -> Constraint
+class ToAttr :: Type -> Type -> Type -> Constraint
 -- | typeclass to enable polymorphic forms of the attribute setter
-class ToAttr to from | from -> to  where
-  toAttr :: from -> Attr
+class ToAttr to from d | from -> to  where
+  toAttr :: from -> Attr d
 
 -- | we only unbox the attr at the point where we ship it over the FFI to JavaScript
 -- | the JavaScript API (D3) is polymorphic in this sense, can accept any of AttrBuilder forms
-unboxAttr :: ∀ a. Attr -> a
-unboxAttr = 
+-- | NOTE: Coerces typed functions (d -> a) to untyped (Datum_ -> a) for FFI boundary
+unboxAttr :: ∀ a d. Attr d -> a
+unboxAttr =
   case _ of
     (StringAttr (Static a)) -> unsafeCoerce a
-    (StringAttr (Fn a))     -> unsafeCoerce a
-    (StringAttr (FnI a))    -> unsafeCoerce a
+    (StringAttr (Fn a))     -> unsafeCoerce a  -- Coerces (d -> a) to (Datum_ -> a)
+    (StringAttr (FnI a))    -> unsafeCoerce (mkFn2 a)  -- Coerces and wraps
 
     (NumberAttr (Static a)) -> unsafeCoerce a
-    (NumberAttr (Fn a))     -> unsafeCoerce a
-    (NumberAttr (FnI a))    -> unsafeCoerce a
+    (NumberAttr (Fn a))     -> unsafeCoerce a  -- Coerces (d -> a) to (Datum_ -> a)
+    (NumberAttr (FnI a))    -> unsafeCoerce (mkFn2 a)  -- Coerces and wraps
 
     (ArrayAttr (Static a))  -> unsafeCoerce a
-    (ArrayAttr (Fn a))      -> unsafeCoerce a
-    (ArrayAttr (FnI a))     -> unsafeCoerce a
+    (ArrayAttr (Fn a))      -> unsafeCoerce a  -- Coerces (d -> a) to (Datum_ -> a)
+    (ArrayAttr (FnI a))     -> unsafeCoerce (mkFn2 a)  -- Coerces and wraps
 
 -- | because the text attribute can only be String, it has only Static|Fn|FnI forms
-unboxText :: ∀ a. AttrBuilder String -> a
-unboxText = 
+unboxText :: ∀ a d. AttrBuilder String d -> a
+unboxText =
   case _ of
     (Static a)   -> unsafeCoerce a
-    (Fn a)       -> unsafeCoerce a
-    (FnI a)      -> unsafeCoerce a
+    (Fn a)       -> unsafeCoerce a  -- Coerces (d -> String) to (Datum_ -> String)
+    (FnI a)      -> unsafeCoerce (mkFn2 a)  -- Coerces and wraps
 
 -- | Instances for the 9 combinations of attributeSetters we need
 -- | ie (Static, Fn, FnI) * (String, Number, Array Number)
-instance toAttrString :: ToAttr String String where
+-- | Now with typed datum parameter d!
+instance toAttrString :: ToAttr String String d where
   toAttr = StringAttr <<< Static
-instance toAttrStringFn :: ToAttr String (Datum_ -> String) where
+instance toAttrStringFn :: ToAttr String (d -> String) d where
   toAttr = StringAttr <<< Fn
-instance toAttrStringFnI :: ToAttr String (Datum_ -> Index_ -> String) where
-  toAttr = StringAttr <<< FnI <<< mkFn2
+instance toAttrStringFnI :: ToAttr String (d -> Index_ -> String) d where
+  toAttr = StringAttr <<< FnI
 
-instance toAttrNumber :: ToAttr Number Number where
+instance toAttrNumber :: ToAttr Number Number d where
   toAttr = NumberAttr <<< Static
-instance toAttrNumberFn :: ToAttr Number (Datum_ -> Number) where
+instance toAttrNumberFn :: ToAttr Number (d -> Number) d where
   toAttr = NumberAttr <<< Fn
-instance toAttrNumberFnI :: ToAttr Number (Datum_ -> Index_ -> Number) where
-  toAttr = NumberAttr <<< FnI <<< mkFn2
+instance toAttrNumberFnI :: ToAttr Number (d -> Index_ -> Number) d where
+  toAttr = NumberAttr <<< FnI
 
-instance toAttrArray :: ToAttr (Array Number) (Array Number) where
+instance toAttrArray :: ToAttr (Array Number) (Array Number) d where
   toAttr = ArrayAttr <<< Static
-instance toAttrArrayFn :: ToAttr (Array Number) (Datum_ -> Array Number) where
+instance toAttrArrayFn :: ToAttr (Array Number) (d -> Array Number) d where
   toAttr = ArrayAttr <<< Fn
-instance toAttrArrayFnI :: ToAttr (Array Number) (Datum_ -> Index_ -> Array Number) where
-  toAttr = ArrayAttr <<< FnI <<< mkFn2
+instance toAttrArrayFnI :: ToAttr (Array Number) (d -> Index_ -> Array Number) d where
+  toAttr = ArrayAttr <<< FnI
