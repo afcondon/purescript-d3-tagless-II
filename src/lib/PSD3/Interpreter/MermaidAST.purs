@@ -158,7 +158,7 @@ instance mermaidTagless :: SelectionM NodeID MermaidASTM where
     pure { enter: enterAppendId, exit: exitRemoveId, update: joinNodeId }
 
 -- | Format a single attribute for display
-formatAttribute :: SelectionAttribute -> String
+formatAttribute :: forall d. SelectionAttribute d -> String
 formatAttribute attr = case attr of
   (AttrT (AttributeSetter label _)) -> label
   (TextT (AttributeSetter _label _)) -> "text"
@@ -171,14 +171,14 @@ formatAttribute attr = case attr of
   (OnT' event _listener) -> "on(" <> show event <> ")"
 
 -- | Format a list of attributes as a comma-separated string
-formatAttributeList :: Array SelectionAttribute -> String
+formatAttributeList :: forall d. Array (SelectionAttribute d) -> String
 formatAttributeList attrs =
   case attrs of
     [] -> ""
     _ -> foldl (\acc attr -> if acc == "" then formatAttribute attr else acc <> ", " <> formatAttribute attr) "" attrs
 
 -- | Add a coalesced attributes node to the diagram
-addAttributesNode :: NodeID -> Array SelectionAttribute -> MermaidASTM Unit
+addAttributesNode :: forall d. NodeID -> Array (SelectionAttribute d) -> MermaidASTM Unit
 addAttributesNode parentId attributes =
   case attributes of
     [] -> pure unit

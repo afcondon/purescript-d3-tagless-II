@@ -36,7 +36,7 @@ type D3SimulationStateRecord = {
   , forceLibrary  :: M.Map Label Force
   -- , forceStatuses :: M.Map Label ForceStatus
   -- TODO perhaps by keeping tick functions here we can run simulation, tick by tick from PureScript
-  , ticks         :: M.Map Label (Step D3Selection_)
+  , ticks         :: M.Map Label (Step D3Selection_ Datum_)
 
   -- this field is used to cache the swizzled links so that links force can be toggled as D3 simply forgets this information if force is deleted
   , "data"        :: { nodes :: Array Datum_ , links :: Array Datum_ } -- REVIEW are we updating this on setNodes and setLinks
@@ -76,10 +76,10 @@ onlyTheseForcesActive :: forall f. Foldable f => Functor f => f Label -> Map Lab
 onlyTheseForcesActive labels = \statusMap -> union updatedMap ((const ForceDisabled) <$> statusMap)
   where updatedMap           = fromFoldable $ (\l -> Tuple l ForceActive) <$> labels
 
-_ticks :: Lens' D3SimulationState_ (M.Map Label (Step D3Selection_))
+_ticks :: Lens' D3SimulationState_ (M.Map Label (Step D3Selection_ Datum_))
 _ticks = _Newtype <<< prop (Proxy :: Proxy "ticks")
 
-_tick :: String -> Lens' D3SimulationState_ (Maybe (Step D3Selection_))
+_tick :: String -> Lens' D3SimulationState_ (Maybe (Step D3Selection_ Datum_))
 _tick label = _Newtype <<< prop (Proxy :: Proxy "ticks") <<< at label
 
 _data :: Lens' D3SimulationState_ { nodes :: Array Datum_ , links :: Array Datum_ }
@@ -111,7 +111,7 @@ _velocityDecay = _Newtype <<< prop (Proxy :: Proxy "velocityDecay")
 
 data SimVariable = Alpha Number | AlphaTarget Number | AlphaMin Number | AlphaDecay Number | VelocityDecay Number
 
-data Step selection = Step selection (Array SelectionAttribute) | StepTransformFFI selection (Datum_ -> String)
+data Step selection d = Step (selection d) (Array (SelectionAttribute d)) | StepTransformFFI (selection d) (Datum_ -> String)
 
 instance showSimVariable :: Show SimVariable where
   show (Alpha n)         = "Alpha: " <> show n

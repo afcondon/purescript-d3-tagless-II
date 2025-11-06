@@ -4,7 +4,7 @@ import PSD3.Data.Node
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import PSD3.Data.Tree (TreeJson_)
-import PSD3.Internal.Types (Element, MouseEvent, Transition, Selector)
+import PSD3.Internal.Types (Datum_, Element, MouseEvent, Transition, Selector)
 import PSD3.Internal.FFI (ComputeKeyFunction_)
 import PSD3.Internal.Selection.Types (Behavior(..), SelectionAttribute(..), OrderingAttribute(..))
 import PSD3.Capabilities.Selection (class SelectionM)
@@ -20,28 +20,28 @@ import Prelude (class Applicative, class Apply, class Bind, class Functor, class
 -- but also serves to validate the ability of the interpreter to run in multiple monads
 
 -- TODO fix interpreter build up of AST, not correct currently as attrs become children (just look at example in browser to see problem)
-data D3GrammarNode = 
+data D3GrammarNode d =
     Empty
   | AttachNode String
   | SelectUnderNode String
   | AppendNode Element
   | FilterNode String
-  | ModifyNode (Array SelectionAttribute)
+  | ModifyNode (Array (SelectionAttribute d))
   -- TODO if datum type can be peeled off the Join type, just store the Join directly
-  | JoinSimpleNode     Element (Array SelectionAttribute)
+  | JoinSimpleNode     Element (Array (SelectionAttribute d))
   | UpdateJoinNode     Element
   | OpenJoinNode (Selector NodeID)
   | JoinSimpleWithKeyFunctionNode Element ComputeKeyFunction_
   | SplitJoinCloseWithKeyFunctionNode Element ComputeKeyFunction_
   -- the next nodes are for nodes that are attributes and transitions and zooms which are all handled differently
   | OnNode (Behavior NodeID) -- TODO make chainable
-  | AttrNode SelectionAttribute -- actually only Attr and Text
+  | AttrNode (SelectionAttribute d) -- actually only Attr and Text
   | OrderNode String
   | OnEventNode MouseEvent
-  | TransitionNode (Array SelectionAttribute) Transition
+  | TransitionNode (Array (SelectionAttribute d)) Transition
   | RemoveNode
 
-instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implementation to get started
+instance showD3GrammarNode :: Show (D3GrammarNode d) where -- super primitive implementation to get started
   show Empty                      = "Empty"
   show RemoveNode                 = "Remove"
   show (AttachNode _)             = "Attach"
@@ -64,7 +64,7 @@ instance showD3GrammarNode :: Show D3GrammarNode where -- super primitive implem
   show (OnNode (Zoom _))          = "Zoom"
   show (OnNode (Drag _))          = "Drag"
 
-showAsSymbol :: D3GrammarNode -> { name :: String, symbol :: String, param1 :: String,              param2 :: String }
+showAsSymbol :: forall d. D3GrammarNode d -> { name :: String, symbol :: String, param1 :: String,              param2 :: String }
 showAsSymbol = 
   case _ of
     Empty                      ->  { name: "Empty"         , symbol: ""    , param1: "",           param2: "" }
@@ -89,10 +89,10 @@ showAsSymbol =
 tag :: String -> String
 tag s = "<" <> s <> ">"
 
-type MetaTreeMap = Map NodeID D3GrammarNode
-data ScriptTree = ScriptTree Int MetaTreeMap (Array (Tuple NodeID NodeID))
+type MetaTreeMap d = Map NodeID (D3GrammarNode d)
+data ScriptTree d = ScriptTree Int (MetaTreeMap d) (Array (Tuple NodeID NodeID))
 
-newtype D3MetaTreeM a = D3MetaTreeM (StateT ScriptTree Effect a)
+newtype D3MetaTreeM a = D3MetaTreeM (StateT (ScriptTree Datum_) Effect a)
 
 -- this is the type that we will give to JS, prune out the empty child arrays and then pass to d3.hierarchy
 newtype D3GrammarNode_ = D3GrammarNode { 
@@ -103,7 +103,7 @@ newtype D3GrammarNode_ = D3GrammarNode {
   , param2   :: String
 }
 
-scriptTreeToJSON :: ScriptTree -> TreeJson_
+scriptTreeToJSON :: forall d. ScriptTree d -> TreeJson_
 scriptTreeToJSON (ScriptTree _ nodeMap links) = pruneEmptyChildren $ go 0
   where
     go :: NodeID -> D3GrammarNode_
@@ -117,11 +117,11 @@ scriptTreeToJSON (ScriptTree _ nodeMap links) = pruneEmptyChildren $ go 0
 
 foreign import pruneEmptyChildren :: D3GrammarNode_ -> TreeJson_
 
-initialMetaTree :: ScriptTree
+initialMetaTree :: ScriptTree Datum_
 initialMetaTree = ScriptTree 0 empty []
 
--- runMetaTree :: D3MetaTreeM MetaTree -> Effect (Tuple MetaTree MetaTree) 
-runMetaTree :: D3MetaTreeM NodeID -> Effect (Tuple NodeID ScriptTree)
+-- runMetaTree :: D3MetaTreeM MetaTree -> Effect (Tuple MetaTree MetaTree)
+runMetaTree :: D3MetaTreeM NodeID -> Effect (Tuple NodeID (ScriptTree Datum_))
 runMetaTree (D3MetaTreeM state) = runStateT state initialMetaTree
 
 derive newtype instance functorD3MetaTreeM     :: Functor               D3MetaTreeM
@@ -129,10 +129,10 @@ derive newtype instance applyD3MetaTreeM       :: Apply                 D3MetaTr
 derive newtype instance applicativeD3MetaTreeM :: Applicative           D3MetaTreeM
 derive newtype instance bindD3MetaTreeM        :: Bind                  D3MetaTreeM 
 derive newtype instance monadD3MetaTreeM       :: Monad                 D3MetaTreeM
-derive newtype instance monadStateD3MetaTreeM  :: MonadState ScriptTree D3MetaTreeM 
+derive newtype instance monadStateD3MetaTreeM  :: MonadState (ScriptTree Datum_) D3MetaTreeM 
 derive newtype instance monadEffD3MetaTreeM    :: MonadEffect           D3MetaTreeM
 
-insertInScriptTree :: NodeID -> D3GrammarNode -> D3MetaTreeM Unit
+insertInScriptTree :: NodeID -> D3GrammarNode Datum_ -> D3MetaTreeM Unit
 -- returns the number of the next node
 insertInScriptTree parentID transition@(TransitionNode chain config) = do
   (ScriptTree id nodeMap links) <- get
@@ -145,7 +145,7 @@ insertInScriptTree parentID newNode = do
   modify_ (\s -> ScriptTree (id + 1) (insert id newNode nodeMap) ((Tuple parentID (id+1)) : links))
   pure unit
 
-insertAttributeInScriptTree :: NodeID -> SelectionAttribute -> D3MetaTreeM Unit
+insertAttributeInScriptTree :: forall d. NodeID -> SelectionAttribute d -> D3MetaTreeM Unit
 insertAttributeInScriptTree parentID = 
   case _ of 
       -- simple attributes are just nodes

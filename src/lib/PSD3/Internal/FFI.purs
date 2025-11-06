@@ -16,84 +16,84 @@ import Prelude (Unit, unit)
 -- | ***************************   FFI signatures for D3js zoom module       *********************************************
 -- | *********************************************************************************************************************
 foreign import data ZoomBehavior_ :: Type  -- the zoom behavior, provided to Event Handler
-foreign import d3AttachZoom_              :: D3Selection_ -> ZoomConfig_        -> D3Selection_
-foreign import d3AttachZoomDefaultExtent_ :: D3Selection_ -> ZoomConfigDefault_ -> D3Selection_
-foreign import showAttachZoomDefaultExtent_ :: forall selection. selection -> ZoomConfigDefault_ -> selection
-foreign import showAttachZoom_              :: forall selection. selection -> ZoomConfig_ -> selection
+foreign import d3AttachZoom_              :: forall d. D3Selection_ d -> ZoomConfig_ d        -> D3Selection_ d
+foreign import d3AttachZoomDefaultExtent_ :: forall d. D3Selection_ d -> ZoomConfigDefault_ d -> D3Selection_ d
+foreign import showAttachZoomDefaultExtent_ :: forall selection d. selection -> ZoomConfigDefault_ d -> selection
+foreign import showAttachZoom_              :: forall selection d. selection -> ZoomConfig_ d -> selection
 
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for Selection & Transition  ********************************************
 -- | *********************************************************************************************************************
 
-foreign import d3SelectAllInDOM_     :: Selector D3Selection_ -> D3Selection_
-foreign import d3SelectFirstInDOM_   :: Selector D3Selection_    -> D3Selection_
-foreign import d3SelectionSelectAll_ :: Selector D3Selection_    -> D3Selection_ -> D3Selection_
-foreign import d3SelectionSelect_    :: Selector D3Selection_    -> D3Selection_ -> D3Selection_
-foreign import d3SelectionIsEmpty_   :: D3Selection_ -> Boolean
-foreign import d3GetSelectionData_   :: D3Selection_ -> Array Datum_
-foreign import d3EnterAndAppend_     :: String      -> D3Selection_ -> D3Selection_
-foreign import d3Append_             :: String      -> D3Selection_ -> D3Selection_
-foreign import d3MergeSelectionWith_ :: D3Selection_ -> D3Selection_ -> D3Selection_
+foreign import d3SelectAllInDOM_     :: forall d. Selector (D3Selection_ d) -> D3Selection_ d
+foreign import d3SelectFirstInDOM_   :: forall d. Selector (D3Selection_ d) -> D3Selection_ d
+foreign import d3SelectionSelectAll_ :: forall d. Selector (D3Selection_ d) -> D3Selection_ d -> D3Selection_ d
+foreign import d3SelectionSelect_    :: forall d. Selector (D3Selection_ d) -> D3Selection_ d -> D3Selection_ d
+foreign import d3SelectionIsEmpty_   :: forall d. D3Selection_ d -> Boolean
+foreign import d3GetSelectionData_   :: forall d. D3Selection_ d -> Array Datum_
+foreign import d3EnterAndAppend_     :: forall d. String -> D3Selection_ d -> D3Selection_ d
+foreign import d3Append_             :: forall d. String -> D3Selection_ d -> D3Selection_ d
+foreign import d3MergeSelectionWith_ :: forall d. D3Selection_ d -> D3Selection_ d -> D3Selection_ d
 
 -- these next two are for getting Enter and Exit selections during an update
-foreign import d3GetEnterSelection_ :: D3Selection_ -> D3Selection_
-foreign import d3GetExitSelection_  :: D3Selection_ -> D3Selection_
+foreign import d3GetEnterSelection_ :: forall d. D3Selection_ d -> D3Selection_ d
+foreign import d3GetExitSelection_  :: forall d. D3Selection_ d -> D3Selection_ d
 
 -- Removes the selected elements from the document. Returns this selection (the
 -- removed elements) which are now detached from the DOM. There is not currently a
 -- dedicated API to add removed elements back to the document; however, you can
 -- pass a function to selection.append or selection.insert to re-add elements.
-foreign import d3RemoveSelection_    :: D3Selection_ -> D3Selection_
+foreign import d3RemoveSelection_    :: forall d. D3Selection_ d -> D3Selection_ d
 
-foreign import d3FilterSelection_    :: D3Selection_ -> Selector D3Selection_   -> D3Selection_
-foreign import d3OrderSelection_     :: D3Selection_ -> D3Selection_
-foreign import d3RaiseSelection_     :: D3Selection_ -> D3Selection_
-foreign import d3LowerSelection_     :: D3Selection_ -> D3Selection_
-foreign import d3SortSelection_      :: forall d. D3Selection_ -> (d -> d -> Int) -> D3Selection_
+foreign import d3FilterSelection_    :: forall d. D3Selection_ d -> Selector (D3Selection_ d) -> D3Selection_ d
+foreign import d3OrderSelection_     :: forall d. D3Selection_ d -> D3Selection_ d
+foreign import d3RaiseSelection_     :: forall d. D3Selection_ d -> D3Selection_ d
+foreign import d3LowerSelection_     :: forall d. D3Selection_ d -> D3Selection_ d
+foreign import d3SortSelection_      :: forall d. D3Selection_ d -> (d -> d -> Int) -> D3Selection_ d
 
 foreign import getIndexFromDatum_    :: Datum_ -> Int
 
-foreign import d3Data_               :: forall d. Array d -> D3Selection_ -> D3Selection_
+foreign import d3Data_               :: forall d. Array d -> D3Selection_ d -> D3Selection_ d
 type ComputeKeyFunction_ = Datum_ -> Index_
 foreign import keyIsID_           :: ComputeKeyFunction_
 foreign import keyIsSourceTarget_ :: ComputeKeyFunction_ -- used for links in simulation
 -- REVIEW the returned D3Selection_ here is the full enter, update, exit type of selection
--- which we haven't really modelled in PureScript (opaque type) but maybe it will turn out that we 
+-- which we haven't really modelled in PureScript (opaque type) but maybe it will turn out that we
 -- needed to all along
-foreign import d3DataWithKeyFunction_ :: forall d. Array d -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
-foreign import d3DataWithFunction_ :: (Datum_ -> Array Datum_) -> ComputeKeyFunction_ -> D3Selection_ -> D3Selection_
+foreign import d3DataWithKeyFunction_ :: forall d. Array d -> ComputeKeyFunction_ -> D3Selection_ d -> D3Selection_ d
+foreign import d3DataWithFunction_ :: forall d. (Datum_ -> Array Datum_) -> ComputeKeyFunction_ -> D3Selection_ d -> D3Selection_ d
 
 -- we'll coerce everything to this type if we can validate attr lambdas against provided data
 -- ... and we'll also just coerce all our setters to one thing for the FFI since JS don't care
 foreign import data D3Attr_ :: Type 
--- NB D3 returns the selection after setting an Attr but we will only capture Selections that are 
+-- NB D3 returns the selection after setting an Attr but we will only capture Selections that are
 -- meaningfully different _as_ selections, we're not chaining them in the same way
 -- foreign import d3GetAttr_ :: String -> D3Selection -> ???? -- solve the ???? as needed later
-foreign import d3AddTransition_ :: D3Selection_ -> Transition -> D3Selection_ -- this is the PS transition record
+foreign import d3AddTransition_ :: forall d. D3Selection_ d -> Transition -> D3Selection_ d -- this is the PS transition record
 
-foreign import d3SetAttr_       :: String -> D3Attr_ -> D3Selection_ -> D3Selection_
-foreign import d3SetText_       :: D3Attr_ -> D3Selection_ -> D3Selection_
-foreign import d3SetProperty_   :: D3Attr_ -> D3Selection_ -> D3Selection_
-foreign import d3SetHTML_       :: D3Attr_ -> D3Selection_ -> D3Selection_
+foreign import d3SetAttr_       :: forall d. String -> D3Attr_ -> D3Selection_ d -> D3Selection_ d
+foreign import d3SetText_       :: forall d. D3Attr_ -> D3Selection_ d -> D3Selection_ d
+foreign import d3SetProperty_   :: forall d. D3Attr_ -> D3Selection_ d -> D3Selection_ d
+foreign import d3SetHTML_       :: forall d. D3Attr_ -> D3Selection_ d -> D3Selection_ d
 
 foreign import emptyD3Data_ :: D3Data_ -- probably just null, could this be monoid too??? ie Last (Maybe D3Data_)
 
 foreign import data D3DragFunction_ :: Type
-foreign import simulationDrag_ :: String -> D3Selection_ -> D3Simulation_ -> D3DragFunction_ -> D3Selection_
+foreign import simulationDrag_ :: forall d. String -> D3Selection_ d -> D3Simulation_ -> D3DragFunction_ -> D3Selection_ d
 foreign import simdrag_  :: D3DragFunction_
 foreign import simdragHorizontal_ :: D3DragFunction_
-foreign import disableDrag_ :: D3Selection_ -> D3Selection_
+foreign import disableDrag_ :: forall d. D3Selection_ d -> D3Selection_ d
 
-foreign import highlightConnectedNodes_ :: D3Selection_ -> Array String -> Unit
-foreign import clearHighlights_ :: D3Selection_ -> Unit
+foreign import highlightConnectedNodes_ :: forall d. D3Selection_ d -> Array String -> Unit
+foreign import clearHighlights_ :: forall d. D3Selection_ d -> Unit
 foreign import unpinAllNodes_ :: D3Simulation_ -> Unit
 foreign import updateBubbleRadii_ :: D3Simulation_ -> (Boolean -> Int -> Number) -> Unit
 foreign import updateNodeExpansion_ :: forall declsData callsData. D3Simulation_ -> (Boolean -> Int -> Number) -> declsData -> callsData -> Datum_ -> Unit
 foreign import unsafeSetField_ :: forall a. String -> a -> Datum_ -> Effect Unit
 
 foreign import expandNodeById_ :: forall declsData callsData. D3Simulation_ -> (Boolean -> Int -> Number) -> declsData -> callsData -> String -> Boolean -> Effect Unit
-foreign import addModuleArrowMarker_ :: D3Selection_ -> Effect Unit
-foreign import drawInterModuleDeclarationLinks_ :: forall declsData callsData. D3Selection_ -> (Boolean -> Int -> Number) -> declsData -> callsData -> Effect Unit
+foreign import addModuleArrowMarker_ :: forall d. D3Selection_ d -> Effect Unit
+foreign import drawInterModuleDeclarationLinks_ :: forall declsData callsData d. D3Selection_ d -> (Boolean -> Int -> Number) -> declsData -> callsData -> Effect Unit
 foreign import filterToConnectedNodes_ :: D3Simulation_ -> (Datum_ -> Index_) -> Array String -> Unit
 
 foreign import selectionOn_         :: forall selection callback. selection -> String -> callback -> selection  
@@ -125,14 +125,15 @@ foreign import initSimulation_         ::                  SimulationVariables -
 foreign import configSimulation_       :: D3Simulation_ -> SimulationVariables -> D3Simulation_
 foreign import readSimulationVariables_ :: D3Simulation_ -> SimulationVariables
 
-foreign import d3PreserveSimulationPositions_ :: 
-  forall d. 
-  D3Selection_ ->
-  Array (D3_SimulationNode d) ->
-  (Datum_ -> Index_) -> 
-  Array (D3_SimulationNode d)
+foreign import d3PreserveSimulationPositions_ ::
+  forall d row.
+  D3Selection_ d ->
+  Array (D3_SimulationNode row) ->
+  (Datum_ -> Index_) ->
+  Array (D3_SimulationNode row)
 foreign import d3PreserveLinkReferences_ ::
-  D3Selection_ ->
+  forall d.
+  D3Selection_ d ->
   Array D3Link_Unswizzled ->
   Array D3Link_Unswizzled
 
@@ -191,8 +192,8 @@ unsetInSimNodeFlag node = do
 -- foreign import addAttrFnToTick_           :: D3Selection_ -> D3Attr_ -> Unit
 foreign import onTick_                :: D3Simulation_ -> String -> (Unit -> Unit) -> Unit
 foreign import disableTick_           :: D3Simulation_ -> String -> Unit
-foreign import defaultNodeTick_       :: String -> D3Simulation_ -> D3Selection_ -> Unit
-foreign import defaultLinkTick_       :: String -> D3Simulation_ -> D3Selection_ -> Unit
+foreign import defaultNodeTick_       :: forall d. String -> D3Simulation_ -> D3Selection_ d -> Unit
+foreign import defaultLinkTick_       :: forall d. String -> D3Simulation_ -> D3Selection_ d -> Unit
 foreign import setAlpha_              :: D3Simulation_ -> Number -> Unit
 foreign import setAlphaMin_           :: D3Simulation_ -> Number -> Unit
 foreign import setAlphaDecay_         :: D3Simulation_ -> Number -> Unit
@@ -370,13 +371,13 @@ foreign import treeSortForPartition_ :: forall d. D3_TreeNode d -> D3_TreeNode d
 -- | *********************************************************************************************************************
 -- | ***************************   FFI signatures for Details Panel manipulation  *************************************
 -- | *********************************************************************************************************************
-foreign import showDetailsPanel_ :: D3Selection_ -> Effect Unit
-foreign import hideDetailsPanel_ :: D3Selection_ -> Effect Unit
-foreign import setDetailsModuleName_ :: D3Selection_ -> String -> Effect Unit
-foreign import populateDetailsList_ :: D3Selection_ -> Array String -> Effect Unit
-foreign import showModuleLabels_ :: D3Selection_ -> Effect Unit
-foreign import hideModuleLabels_ :: D3Selection_ -> Effect Unit
+foreign import showDetailsPanel_ :: forall d. D3Selection_ d -> Effect Unit
+foreign import hideDetailsPanel_ :: forall d. D3Selection_ d -> Effect Unit
+foreign import setDetailsModuleName_ :: forall d. D3Selection_ d -> String -> Effect Unit
+foreign import populateDetailsList_ :: forall d. D3Selection_ d -> Array String -> Effect Unit
+foreign import showModuleLabels_ :: forall d. D3Selection_ d -> Effect Unit
+foreign import hideModuleLabels_ :: forall d. D3Selection_ d -> Effect Unit
 foreign import switchToSpotlightForces_ :: D3Simulation_ -> Effect Unit
 foreign import switchToCompactForces_ :: D3Simulation_ -> Effect Unit
 foreign import resetNodeFilter_ :: D3Simulation_ -> Effect Unit
-foreign import restoreAllNodes_ :: D3Simulation_ -> D3Selection_ -> D3Selection_ -> Array Datum_ -> Array Datum_ -> (Boolean -> Int -> Number) -> (Datum_ -> Index_) -> Effect Unit
+foreign import restoreAllNodes_ :: forall d1 d2. D3Simulation_ -> D3Selection_ d1 -> D3Selection_ d2 -> Array Datum_ -> Array Datum_ -> (Boolean -> Int -> Number) -> (Datum_ -> Index_) -> Effect Unit

@@ -45,24 +45,24 @@ derive instance ordSelectionName :: Ord SelectionName
 -- node_ :: Element -> D3_Node
 -- node_ e = D3_Node e []
 
-data OrderingAttribute = Order | Sort (Datum_ -> Datum_ -> Int) | Raise | Lower
+data OrderingAttribute d = Order | Sort (d -> d -> Int) | Raise | Lower
 
-data SelectionAttribute =  
+data SelectionAttribute d =
     AttrT AttributeSetter
   | TextT AttributeSetter -- we can't narrow it to String here but helper function will do that
   | HTMLT AttributeSetter -- we can't narrow it to String here but helper function will do that
   | PropertyT AttributeSetter -- this might motivate adding a Boolean flavor of Attribute, eg for checkbox "checked"
 
-  | OrderingT OrderingAttribute
+  | OrderingT (OrderingAttribute d)
 
-  | TransitionT (Array SelectionAttribute) Transition -- the array is set situationally
+  | TransitionT (Array (SelectionAttribute d)) Transition -- the array is set situationally
 
   | RemoveT
 
   | OnT MouseEvent Listener_
   | OnT' MouseEvent EffectfulListener_
                 
-instance showSelectionAttribute :: Show SelectionAttribute where
+instance (Show d) => Show (SelectionAttribute d) where
   show (AttrT attr)      = "chainable: attr " <> attributeLabel attr
   show (TextT _)         = "chainable: text"
   show (HTMLT attr)      = "chainable: html" <> attributeLabel attr
@@ -78,14 +78,14 @@ instance showSelectionAttribute :: Show SelectionAttribute where
   show (OrderingT attr)  = "chainable: ordering" <> show attr
 
 
-instance showOrderingAttribute :: Show OrderingAttribute where
+instance showOrderingAttribute :: Show (OrderingAttribute d) where
   show Order    = "Order"
   show Raise    = "Raise"
   show Lower    = "Lower"
   show (Sort _) = "Sort"
 
 
-applySelectionAttributeD3 :: D3Selection_ -> SelectionAttribute -> D3Selection_
+applySelectionAttributeD3 :: forall d. D3Selection_ d -> SelectionAttribute d -> D3Selection_ d
 applySelectionAttributeD3 selection_ (AttrT (AttributeSetter label attr)) = 
   d3SetAttr_ label (unboxAttr attr) selection_
 

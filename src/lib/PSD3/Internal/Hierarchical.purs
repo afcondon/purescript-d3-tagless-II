@@ -55,24 +55,24 @@ radialSeparation  = mkFn2 (\a b -> if (sharesParent_ a b)
                                    then 1.0 
                                    else 2.0 / (hNodeDepth_ a))
 
-horizontalLink :: SelectionAttribute
+horizontalLink :: forall d. SelectionAttribute d
 horizontalLink = AttrT $ AttributeSetter "d" $ toAttr linkHorizontal_
 
 -- version for when the x and y point are already swapped
 -- should be default someday
-horizontalLink' :: SelectionAttribute
+horizontalLink' :: forall d. SelectionAttribute d
 horizontalLink' = AttrT $ AttributeSetter "d" $ toAttr linkHorizontal2_
 
-verticalLink :: SelectionAttribute
+verticalLink :: forall d. SelectionAttribute d
 verticalLink = AttrT $ AttributeSetter "d" $ toAttr linkVertical_
 
-horizontalClusterLink :: Number -> SelectionAttribute
+horizontalClusterLink :: forall d. Number -> SelectionAttribute d
 horizontalClusterLink yOffset = AttrT $ AttributeSetter "d" $ toAttr (linkClusterHorizontal_ yOffset)
 
-verticalClusterLink :: Number -> SelectionAttribute
+verticalClusterLink :: forall d. Number -> SelectionAttribute d
 verticalClusterLink xOffset = AttrT $ AttributeSetter "d" $ toAttr (linkClusterVertical_ xOffset)
 
-radialLink :: (Datum_ -> Number) -> (Datum_ -> Number) -> SelectionAttribute
+radialLink :: forall d. (Datum_ -> Number) -> (Datum_ -> Number) -> SelectionAttribute d
 radialLink angleFn radius_Fn = do
   let radialFn = linkRadial_ angleFn radius_Fn
   AttrT $ AttributeSetter "d" $ toAttr radialFn

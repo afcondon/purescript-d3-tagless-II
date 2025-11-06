@@ -54,8 +54,8 @@ type RenderCallbacks attrs sel m = {
   onLinkExit :: sel -> m Unit,            -- Clean up exiting links
 
   -- Tick function attributes (applied to merged selections)
-  nodeTickAttrs :: attrs -> Array SelectionAttribute,
-  linkTickAttrs :: Array SelectionAttribute
+  nodeTickAttrs :: attrs -> Array (SelectionAttribute d),
+  linkTickAttrs :: Array (SelectionAttribute d)
 }
 
 -- | Fully declarative update configuration

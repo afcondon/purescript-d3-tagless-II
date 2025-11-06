@@ -8,7 +8,7 @@ import PSD3.Capabilities.Selection (class SelectionM)
 import Debug (spy)
 
 -- TODO reuse existing SVG if it's the right one
-removeExistingSVG :: forall m. SelectionM D3Selection_ m => String -> m D3Selection_
+removeExistingSVG :: forall m d. SelectionM D3Selection_ m => String -> m (D3Selection_ d)
 removeExistingSVG rootSelector = do
   let
     root     = d3SelectFirstInDOM_ rootSelector

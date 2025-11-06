@@ -135,7 +135,7 @@ type SimulationConfig selection d =
   , activeForces :: Set Label                               -- Which forces to enable initially
   , config :: SimulationVariables                           -- Simulation parameters (alpha, decay, etc.)
   , keyFn :: Datum_ -> Index_                               -- Key function for data binding
-  , ticks :: Map Label (Step selection)                     -- Tick functions to update DOM on each frame
+  , ticks :: Map Label (Step selection d)                   -- Tick functions to update DOM on each frame
   }
 
 -- | Simplified SimulationM - Single init() call for static simulations.
@@ -310,7 +310,7 @@ class (Monad m, SimulationM selection m) <= SimulationM2 selection m | m -> sele
   -- | ```
   -- |
   -- | Tick functions are identified by label, allowing removal/replacement.
-  addTickFunction    :: Label -> Step selection -> m Unit
+  addTickFunction    :: forall d. Label -> Step selection d -> m Unit
 
   -- | Remove a tick function by its label.
   -- |

@@ -306,7 +306,7 @@ simulationCreateTickFunction label tick@(Step selection chain) = do
       let _ = (applySelectionAttributeD3 (unsafeCoerce selection)) <$> chain
       unit
     _ = onTick_ handle label makeTick  -- actually put this tick function into the simulation
-    (tick' :: Step D3Selection_) = unsafeCoerce tick
+    (tick' :: Step D3Selection_ Datum_) = unsafeCoerce tick
   -- finally, update the State to track this tick function (not actually used for anything at present, tho)
   modifying (_d3Simulation <<< _tick label) (liftA1 $ const tick')
   

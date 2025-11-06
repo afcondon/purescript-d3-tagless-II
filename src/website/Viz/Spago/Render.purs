@@ -23,7 +23,7 @@ import PSD3.Internal.Types (Datum_)
 
 -- | Create a CSS class attribute from tags
 -- | Tags from the tag map are joined with spaces and added as CSS classes
-makeTagClassesAttr :: Maybe (Map.Map NodeID (Set.Set String)) -> SelectionAttribute
+makeTagClassesAttr :: forall d. Maybe (Map.Map NodeID (Set.Set String)) -> SelectionAttribute d
 makeTagClassesAttr Nothing = classed ""
 makeTagClassesAttr (Just tagMap) = classed tagClassesFn
   where

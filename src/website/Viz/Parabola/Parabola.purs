@@ -29,7 +29,7 @@ datum_ =
 
 -- Snippet_Start
 -- Name: ParabolaDraw
-drawWithData :: forall m. SelectionM D3Selection_ m => Model -> Selector D3Selection_-> m D3Selection_
+drawWithData :: forall m d. SelectionM D3Selection_ m => Model -> Selector (D3Selection_ d) -> m (D3Selection_ d)
 drawWithData circleData selector = do
   root        <- attach selector
   svg         <- appendTo root Svg [ viewBox (-10.0) (-100.0) 320.0 160.0, classed "d3svg gup" ]
