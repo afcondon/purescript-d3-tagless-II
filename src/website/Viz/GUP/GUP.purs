@@ -18,15 +18,9 @@ import Prelude (bind, discard, pure, ($), (*), (+), (<<<))
 -- Name: GUP
 type Model = Array Char
 
--- | Accessor record for working with bound data
-datum_ ::
-  { char :: Datum_ -> Char
-  , indexNum :: Index_ -> Number
-  }
-datum_ =
-  { char: coerceDatumToChar
-  , indexNum: coerceIndexToNumber
-  }
+-- PHANTOM TYPE SUCCESS: No more datum_ boilerplate!
+-- After updateJoin, the selections are typed as D3Selection_ Char
+-- So lambdas can use d :: Char directly!
 
 -- | creates the SVG and a <g> within it to hold the letters
 -- | returns a function which can be called repeatedly to generate each sequence of new and exiting letters
@@ -48,17 +42,18 @@ exGeneralUpdatePattern selector = do
     pure newlyEntered
 
   where
-    transition :: SelectionAttribute
+    transition :: forall d. SelectionAttribute d
     transition = transitionWithDuration $ Milliseconds 2000.0
 
-    xFromIndex :: Datum_ -> Index_ -> Number
-    xFromIndex _ i = 50.0 + (datum_.indexNum i * 48.0) -- letters enter at this position, and then must transition to new position on each update
+    -- Typed lambda! After updateJoin, d :: Char and i :: Index_
+    xFromIndex :: Char -> Index_ -> Number
+    xFromIndex _ i = 50.0 + (coerceIndexToNumber i * 48.0)
 
     enter = [ classed  "enter"
             , fill     "green"
             , x        xFromIndex
             , y        0.0
-            , text     (singleton <<< datum_.char)
+            , text     (singleton)  -- d :: Char, so just use singleton directly!
             , fontSize 60.0 ]
           `andThen` (transition `to` [ y 200.0 ])
 

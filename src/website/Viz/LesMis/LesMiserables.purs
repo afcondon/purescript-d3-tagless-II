@@ -28,11 +28,13 @@ import Effect.Class (class MonadEffect, liftEffect)
 import Prelude (class Bind, Unit, bind, discard, negate, pure, unit, ($), (/), (<<<))
 import Utility (getWindowWidthHeight)
 
--- type-safe(ish) accessors for the data that is given to D3
--- we lose the type information in callbacks from the FFI, such as for attributes
--- but since we know what we gave we can coerce it back to the initial type.
+-- PHANTOM TYPE SUCCESS: No more datum_/link_ boilerplate needed!
+-- With phantom types, the compiler infers datum types from selections.
+-- After simpleJoin, lambdas get the correct types automatically.
 -- Snippet_Start
 -- Name: LesMisAccessors
+-- OLD APPROACH (with boilerplate):
+{-
 link_ = {
     source: _.source <<< unboxD3SimLink
   , target: _.target <<< unboxD3SimLink
@@ -41,14 +43,15 @@ link_ = {
 }
 
 datum_ = {
--- direct accessors to fields of the datum (BOILERPLATE)
-    id    : _.id <<< unboxD3SimNode -- NB the id in this case is a String
+    id    : _.id <<< unboxD3SimNode
   , x     : _.x <<< unboxD3SimNode
   , y     : _.y <<< unboxD3SimNode
   , group : _.group <<< unboxD3SimNode
-
   , colorByGroup: d3SchemeCategory10N_ <<< toNumber <<< _.group <<< unboxD3SimNode
 }
+-}
+-- NEW APPROACH: Use typed lambdas directly! No accessor records needed.
+-- The compiler infers the datum type from the selection.
 -- Snippet_End
 
 -- Snippet_Start
@@ -113,17 +116,28 @@ drawSimplified forceLibrary activeForces model selector = do
 
   -- NOW join the simulation-enhanced data to DOM
   nodesSelection <- simpleJoin nodesGroup Circle nodesInSim keyIsID_
-  setAttributes nodesSelection [ radius 5.0, fill datum_.colorByGroup ]
-  linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_
-  setAttributes linksSelection [ strokeWidth (sqrt <<< link_.value), strokeColor link_.color ]
+  -- Typed lambda! After simpleJoin, nodesSelection :: D3Selection_ LesMisSimNode
+  -- So d is inferred as D3_SimulationNode (LesMisNodeData + ...) which has .group field
+  setAttributes nodesSelection [ radius 5.0, fill (\(D3SimNode d) -> d3SchemeCategory10N_ (toNumber d.group)) ]
 
-  -- Add tick functions with the selections (using SimulationM2 for now)
-  addTickFunction "nodes" $ Step nodesSelection [ cx datum_.x, cy datum_.y ]
+  linksSelection <- simpleJoin linksGroup Line linksInSim keyIsID_
+  -- Typed lambda! linksSelection :: D3Selection_ (D3Link_Swizzled ...)
+  -- So d is the swizzled link with .source, .target, .value fields
+  setAttributes linksSelection [
+      strokeWidth (\d -> sqrt d.value),
+      strokeColor (\d -> d3SchemeCategory10N_ (toNumber d.target.group))
+    ]
+
+  -- Add tick functions with typed lambdas
+  addTickFunction "nodes" $ Step nodesSelection [
+      cx (\(D3SimNode d) -> d.x),
+      cy (\(D3SimNode d) -> d.y)
+    ]
   addTickFunction "links" $ Step linksSelection
-      [ x1 (_.x <<< link_.source)
-      , y1 (_.y <<< link_.source)
-      , x2 (_.x <<< link_.target)
-      , y2 (_.y <<< link_.target)
+      [ x1 (\d -> d.source.x)
+      , y1 (\d -> d.source.y)
+      , x2 (\d -> d.target.x)
+      , y2 (\d -> d.target.y)
       ]
 
   -- Add drag interaction for nodes
