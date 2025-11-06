@@ -11,25 +11,25 @@ import Effect.Uncurried (mkEffectFn3)
 import Prelude (class Semigroup, class Show, append, flap, show, ($), (<$>), (<<<), (<>))
 import Unsafe.Coerce (unsafeCoerce)
 
-backgroundColor :: ∀ d a. ToAttr String a => a -> SelectionAttribute d
+backgroundColor :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 backgroundColor = AttrT <<< AttributeSetter "background-color" <<< toAttr
 
-strokeColor :: ∀ d a. ToAttr String a => a -> SelectionAttribute d
+strokeColor :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 strokeColor = AttrT <<< AttributeSetter "stroke" <<< toAttr
 
-strokeOpacity :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+strokeOpacity :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 strokeOpacity = AttrT <<< AttributeSetter "stroke-opacity" <<< toAttr
 
-opacity :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+opacity :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 opacity = AttrT <<< AttributeSetter "opacity" <<< toAttr
 
-strokeWidth :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+strokeWidth :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 strokeWidth = AttrT <<< AttributeSetter "stroke-width" <<< toAttr
 
-fill :: ∀ d a. ToAttr String a => a -> SelectionAttribute d
+fill :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 fill = AttrT <<< AttributeSetter "fill" <<< toAttr
 
-fillOpacity :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+fillOpacity :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 fillOpacity = AttrT <<< AttributeSetter "fill-opacity" <<< toAttr
 
 -- TODO this definitely needs to be Number-with-unit here
@@ -76,25 +76,25 @@ autoBox = AttrT <<< AttributeSetter "viewBox" $ toAttr vb
   where
     vb = \d -> intercalate " " $ show <$> (autoBox_ d)
 
-fontFamily :: ∀ d a. ToAttr String a => a -> SelectionAttribute d
+fontFamily :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 fontFamily = AttrT <<< AttributeSetter "font-family" <<< toAttr
 
-textAnchor :: ∀ d a. ToAttr String a => a -> SelectionAttribute d
+textAnchor :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 textAnchor = AttrT <<< AttributeSetter "text-anchor" <<< toAttr
 
-rotate :: ∀ d a. ToAttr String a => a -> SelectionAttribute d
+rotate :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 rotate = AttrT <<< AttributeSetter "rotate" <<< toAttr
 
-radius :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+radius :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 radius = AttrT <<< AttributeSetter "r" <<< toAttr
 
-fontSize :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+fontSize :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 fontSize = AttrT <<< AttributeSetter "font-size" <<< toAttr
 
-width :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+width :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 width = AttrT <<< AttributeSetter "width" <<< toAttr
 
-height :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+height :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 height = AttrT <<< AttributeSetter "height" <<< toAttr
 
 width100 :: ∀ d. SelectionAttribute d
@@ -103,50 +103,50 @@ width100 = AttrT <<< AttributeSetter "width" $ toAttr "100%"
 height100 :: ∀ d. SelectionAttribute d
 height100 = AttrT <<< AttributeSetter "height" $ toAttr "100%"
 
-x :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+x :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 x = AttrT <<< AttributeSetter "x" <<< toAttr
 
-y :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+y :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 y = AttrT <<< AttributeSetter "y" <<< toAttr
 
 -- yu :: ∀ a. ToAttr NWU a => a -> SelectionAttribute
 -- yu = AttrT <<< AttributeSetter "y" <<< toAttr
 
-x1 :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+x1 :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 x1 = AttrT <<< AttributeSetter "x1" <<< toAttr
 
-y1 :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+y1 :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 y1 = AttrT <<< AttributeSetter "y1" <<< toAttr
 
-x2 :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+x2 :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 x2 = AttrT <<< AttributeSetter "x2" <<< toAttr
 
-y2 :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+y2 :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 y2 = AttrT <<< AttributeSetter "y2" <<< toAttr
 
-dx :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+dx :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 dx = AttrT <<< AttributeSetter "dx" <<< toAttr
 
-dy :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+dy :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 dy = AttrT <<< AttributeSetter "dy" <<< toAttr
 
-cx :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+cx :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 cx = AttrT <<< AttributeSetter "cx" <<< toAttr
 
-cy :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+cy :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 cy = AttrT <<< AttributeSetter "cy" <<< toAttr
 
-text :: ∀ d a. ToAttr String a => a -> SelectionAttribute d
+text :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 text = TextT <<< AttributeSetter "text" <<< toAttr
 
-d :: ∀ d a. ToAttr String a => a -> SelectionAttribute d
+d :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 d = AttrT <<< AttributeSetter "d" <<< toAttr
 
 -- TODO classed here has destructive semantics which D3 doesn't, because in D3 you give a Boolean to indicate whether you're adding or removing the class
-classed :: ∀ d a. ToAttr String a => a -> SelectionAttribute d
+classed :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 classed = AttrT <<< AttributeSetter "class" <<< toAttr
 
-cursor :: ∀ d a. ToAttr String a => a -> SelectionAttribute d
+cursor :: ∀ d a. ToAttr String a d => a -> SelectionAttribute d
 cursor = AttrT <<< AttributeSetter "cursor" <<< toAttr
 
 onMouseEvent :: ∀ d. MouseEvent -> Listener -> SelectionAttribute d
@@ -157,13 +157,13 @@ onMouseEventEffectful event listener = OnT' event (mkEffectFn3 listener)
 
 -- helpers for Forces
 
-originX :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+originX :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 originX = AttrT <<< AttributeSetter "originX" <<< toAttr
 
-originY :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+originY :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 originY = AttrT <<< AttributeSetter "originY" <<< toAttr
 
-strength :: ∀ d a. ToAttr Number a => a -> SelectionAttribute d
+strength :: ∀ d a. ToAttr Number a d => a -> SelectionAttribute d
 strength = AttrT <<< AttributeSetter "strength" <<< toAttr
 
 
