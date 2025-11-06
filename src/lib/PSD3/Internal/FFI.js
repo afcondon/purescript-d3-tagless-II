@@ -114,6 +114,7 @@ export function clearHighlights_(selection) {
 // Unpin all nodes by setting fy to null
 export function unpinAllNodes_(simulation) {
   simulation.nodes().forEach(node => {
+    node.fx = null;
     node.fy = null;
   });
   // Reheat the simulation to see the effect
@@ -835,23 +836,6 @@ export function readSimulationVariables_(simulation) {
     alphaMin: simulation.alphaMin(),
     alphaDecay: simulation.alphaDecay(),
     velocityDecay: simulation.velocityDecay()
-  }
-}
-// we create an object that contains only those fields that we want to override what was in the existing selection's data
-// concretely, if we want update to change fx/fy status then we put that data in here otherwise it will be unchanged
-// no matter what the incoming data object has for fx/fy
-export const getBaseForAssign = (newNodeMap, key) => {
-  let newnode = newNodeMap.get(key)
-  if (newnode) {
-    var updatedCount;
-    if (typeof newnode.updatedCount === 'undefined') {
-      updatedCount = 0;
-    } else {
-      updatedCount = newnode.updatedCount + 1;
-    }
-    return { fx: newnode.fx, fy: newnode.fy, updatedCount: updatedCount }
-  } else {
-    return d
   }
 }
 
