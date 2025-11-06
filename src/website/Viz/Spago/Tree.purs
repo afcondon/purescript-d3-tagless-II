@@ -2,11 +2,12 @@ module D3.Viz.Spago.Tree where
 
 import Prelude
 
-import Data.DependencyGraph (getReachableNodes)
+import PSD3.Data.Graph (buildGraphModel, getLinksFrom)
+import PSD3.Data.Graph.Algorithms (getReachableNodes)
 import PSD3.Data.Tree (TreeType(..), makeD3TreeJSONFromTreeID)
 import PSD3.Internal.Types (PointXY)
 import D3.Viz.Spago.Files (LinkType(..), isP2P_Link)
-import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, TreeFields, setTreeXYExceptLeaves, setTreeXYIncludingLeaves)
+import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, SpagoTreeNode, TreeFields, setTreeXYExceptLeaves, setTreeXYIncludingLeaves, spagoGraphConfig)
 import PSD3.Internal.FFI (descendants_, getHierarchyChildren_, getLayout, hNodeHeight_, hasChildren_, hierarchyFromJSON_, runLayoutFn_, treeSetNodeSize_, treeSortForTree_Spago_)
 import PSD3.Data.Node (D3Link_Unswizzled, D3_SimulationNode(..), D3_TreeNode(..), NodeID)
 import Unsafe.Coerce (unsafeCoerce)
@@ -38,15 +39,16 @@ changeLinkType newLinktype link =
 -- TODO make this generic and extract from Spago example to library
 treeReduction :: NodeID -> SpagoModel -> SpagoModel
 treeReduction rootID model = do
-      let reachable         = getReachableNodes rootID model.graph
+      let reachable         = getReachableNodes spagoGraphConfig rootID model.graphModel
+          reachableNodes    = fromFoldable reachable.nodes  -- Convert Set to Array
           onlyPackageLinks  = filter isP2P_Link model.links
-          onlyTreelinks     = makeTreeLinkTuples (pathsAsLists reachable.closedDepPaths)
-          prunedTreeLinks   = (tupleToLink M2M_Graph ) <$> reachable.redundantLinks
+          onlyTreelinks     = makeTreeLinkTuples (pathsAsLists reachable.paths)
+          prunedTreeLinks   = (tupleToLink M2M_Graph ) <$> reachable.redundantEdges
           unpackLink :: D3Link_Unswizzled -> { source :: NodeID, target :: NodeID }
           unpackLink = unsafeCoerce
           partitionedLinks  = partition (\link -> let l = unpackLink link in (Tuple l.source l.target) `elem` onlyTreelinks) model.links
           treelinks         = (changeLinkType M2M_Tree) <$> partitionedLinks.yes
-          treenodes         = partition (\(D3SimNode n) -> (n.id `elem` reachable.nodes) || n.id == rootID) model.nodes
+          treenodes         = partition (\(D3SimNode n) -> (n.id `elem` reachableNodes) || n.id == rootID) model.nodes
 
           -- layout            = ((getLayout TidyTree) `treeSetSize_` [ 2.0 * pi, 900.0 ]) `treeSetSeparation_` radialSeparation
           numberOfLevels    = (hNodeHeight_ rootTree) + 1.0
@@ -54,7 +56,7 @@ treeReduction rootID model = do
           layout            = (getLayout TidyTree) `treeSetNodeSize_` [ 8.0, 4000.0 / numberOfLevels]
 
           idTree            = buildTree rootID treelinks
-          jsontree          = makeD3TreeJSONFromTreeID idTree model.maps.id2Node
+          jsontree          = makeD3TreeJSONFromTreeID idTree model.graphModel.maps.nodeById
           rootTree          = hierarchyFromJSON_       jsontree
           sortedTree        = treeSortForTree_Spago_    rootTree
           laidOutRoot_      = (runLayoutFn_ layout)    sortedTree
@@ -132,15 +134,35 @@ getTreeDerivedData root =
 buildTree :: NodeID -> Array D3Link_Unswizzled -> Tree NodeID
 buildTree rootID treelinks = do
   let
+    -- Extract unique node IDs from links to build a minimal node array
     unwrap :: D3Link_Unswizzled -> { source :: NodeID, target :: NodeID }
     unwrap = unsafeCoerce
-    linksWhoseSourceIs :: NodeID -> L.List NodeID
-    linksWhoseSourceIs id = L.fromFoldable $ (_.target) <$> (filter (\l -> l.source == id) (unwrap <$> treelinks))
+
+    allNodeIds = S.fromFoldable $
+      treelinks >>= \link ->
+        let l = unwrap link
+        in [l.source, l.target]
+
+    -- Create minimal node records (just IDs) for GraphModel
+    nodes = (\id -> { id }) <$> fromFoldable allNodeIds
+
+    -- Build a temporary GraphModel for O(1) link lookups
+    linkGraphConfig = { getNodeId: _.id
+                      , getLinkSource: \link -> (unsafeCoerce link).source
+                      , getLinkTarget: \link -> (unsafeCoerce link).target
+                      }
+    linkGraph = buildGraphModel linkGraphConfig nodes treelinks
+
+    -- Get children for a node using O(1) lookup
+    getChildren :: NodeID -> L.List NodeID
+    getChildren nodeId =
+      let links = getLinksFrom nodeId linkGraph  -- O(1) map lookup!
+      in L.fromFoldable $ ((unsafeCoerce >>> _.target) <$> links)
 
     go :: NodeID -> Tree NodeID
-    go childID = Node childID (go <$> linksWhoseSourceIs childID)
+    go nodeId = Node nodeId (go <$> getChildren nodeId)
 
-  Node rootID (go <$> (linksWhoseSourceIs rootID))
+  go rootID
 
 path2Tuples :: L.List (Tuple NodeID NodeID) -> L.List NodeID -> L.List (Tuple NodeID NodeID)
 path2Tuples acc Nil     = acc

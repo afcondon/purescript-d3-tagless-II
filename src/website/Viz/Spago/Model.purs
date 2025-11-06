@@ -4,16 +4,16 @@ import Prelude
 
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Types (D3Simulation_, Datum_, PointXY)
-import D3.Viz.Spago.Files (LinkType(..), NodeType(..), SpagoGraphLinkID, SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
+import D3.Viz.Spago.Files (LinkType(..), NodeType(..), SpagoNodeData, SpagoNodeRow, Spago_Raw_JSON_, getGraphJSONData, readSpago_Raw_JSON_)
 import D3.Viz.Spago.Unsafe (unboxD3SimLink, unboxD3SimNode)
 import PSD3.Internal.FFI (getIndexFromDatum_, setInSimNodeFlag)
-import PSD3.Data.Node (D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
+import PSD3.Data.Node (D3Link_Unswizzled, D3TreeRow, D3_FocusXY, D3_Radius, D3_SimulationNode(..), D3_VxyFxy, D3_XY, EmbeddedData, NodeID)
 import PSD3.Internal.Scales.Scales (d3SchemeCategory10N_, d3SchemeSequential10N_)
 import Data.Array (foldl, length, mapWithIndex, partition, (:))
 import Data.Array (null) as A
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.Graph (Graph, fromMap)
-import PSD3.Data.Graph (GraphConfig, buildGraphModel, toDataGraph)
+import PSD3.Data.Graph (GraphConfig, GraphModel, buildGraphModel, toDataGraph)
 import Data.Int (toNumber)
 import Data.Int (floor) as Int
 import Data.List as L
@@ -37,14 +37,15 @@ type SpagoSimNode  = D3_SimulationNode ( SpagoNodeRow  + D3_XY + D3_VxyFxy + D3_
 -- | this is the only data that we're bringing over from the SpagoTreeNode to SpagoSimNode (at the momment)
 type TreeFields = { x :: Number, y :: Number, isTreeLeaf :: Boolean, depth :: Int, childIDs :: Array NodeID }
 
-type SpagoModel = { 
-    links :: Array SpagoGraphLinkID
+type SpagoModel = {
+    links :: Array D3Link_Unswizzled
   , nodes :: Array SpagoSimNode      -- already upgraded to simnode as a result of positioning when building the model
   , graph :: Graph NodeID SpagoNodeData
+  , graphModel :: GraphModel SpagoNodeData D3Link_Unswizzled  -- Generic graph infrastructure
   , tree  :: Maybe (Tuple NodeID SpagoTreeNode)
   , maps  :: { name2ID    :: M.Map String NodeID
              , id2Name    :: M.Map NodeID String
-             , id2Node    :: M.Map NodeID SpagoNodeData
+             -- id2Node removed: use graphModel.maps.nodeById instead
              , id2Package :: M.Map NodeID NodeID
              , id2LOC     :: M.Map NodeID Number
              , id2TreeData :: M.Map NodeID TreeFields
@@ -416,16 +417,19 @@ convertFilesToGraphModel moduleJSON packageJSON lsdepJSON locJSON =
 
 makeSpagoGraphModel :: Spago_Raw_JSON_ -> SpagoModel
 makeSpagoGraphModel json = do
-  let { nodes, links, name2ID, id2Name, id2Node, id2Package, id2LOC, sourceLinksMap } 
+  let { nodes, links, name2ID, id2Name, id2Package, id2LOC, sourceLinksMap }
         = getGraphJSONData json
 
-  { links    : links
+      { graph, graphModel } = buildSpagoGraph nodes
+
+  { links
   , nodes    : nodes <#> upgradeSpagoNodeData sourceLinksMap
-  , graph    : makeGraph nodes
+  , graph
+  , graphModel
   , tree     : Nothing  -- not present in the JSON, has to be calculated, if possible
   , maps     : { name2ID
                , id2Name
-               , id2Node
+               -- id2Node removed: use graphModel.maps.nodeById instead
                , id2Package
                , id2LOC
                , id2TreeData: M.empty
@@ -433,15 +437,20 @@ makeSpagoGraphModel json = do
   }
 
 -- | Configuration for using generic graph infrastructure with Spago data
-spagoGraphConfig :: GraphConfig SpagoNodeData SpagoGraphLinkID
+spagoGraphConfig :: GraphConfig SpagoNodeData D3Link_Unswizzled
 spagoGraphConfig =
   { getNodeId: _.id
   , getLinkSource: \link -> (unsafeCoerce link).source
   , getLinkTarget: \link -> (unsafeCoerce link).target
   }
 
-makeGraph :: Array SpagoNodeData -> Graph NodeID SpagoNodeData
-makeGraph nodes = do
+-- | Build both GraphModel and Data.Graph from node data
+-- | Returns both representations for maximum flexibility
+buildSpagoGraph :: Array SpagoNodeData ->
+  { graph :: Graph NodeID SpagoNodeData
+  , graphModel :: GraphModel SpagoNodeData D3Link_Unswizzled
+  }
+buildSpagoGraph nodes =
   let
     -- Create links array from node dependencies
     -- Each node has a links.targets array that specifies its outgoing edges
@@ -452,8 +461,14 @@ makeGraph nodes = do
     -- Build graph model using generic infrastructure
     graphModel = buildGraphModel spagoGraphConfig nodes links
 
-  -- Convert to Data.Graph format for compatibility with existing code
-  toDataGraph spagoGraphConfig graphModel
+    -- Convert to Data.Graph format for compatibility with existing code
+    graph = toDataGraph spagoGraphConfig graphModel
+  in
+    { graph, graphModel }
+
+-- | Legacy function for compatibility - returns only Data.Graph
+makeGraph :: Array SpagoNodeData -> Graph NodeID SpagoNodeData
+makeGraph nodes = (buildSpagoGraph nodes).graph
 
 
 -- explodePackages :: Event -> D3Simulation_ -> Datum_ -> Unit

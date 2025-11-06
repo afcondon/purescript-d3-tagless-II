@@ -3,7 +3,8 @@ module PSD3.CodeExplorer.State where
 import Prelude
 
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes, clusterSceneAttributes)
-import D3.Viz.Spago.Files (SpagoDataRow, SpagoGraphLinkID, SpagoLinkData)
+import D3.Viz.Spago.Files (SpagoDataRow, SpagoLinkData)
+import PSD3.Data.Node (D3Link_Unswizzled)
 import D3.Viz.Spago.Model (SpagoModel, SpagoSimNode, isPackage)
 import Data.Array (filter, foldl)
 import Data.Lens (Lens', _Just, view)
@@ -102,7 +103,7 @@ _activeForces :: Lens' State (Set Label)
 _activeForces = _scene <<< prop (Proxy :: Proxy "activeForces")
 _chooseNodes :: Lens' State (SpagoSimNode -> Boolean)
 _chooseNodes = _scene <<< prop (Proxy :: Proxy "chooseNodes")
-_linksShown :: Lens' State (SpagoGraphLinkID -> Boolean)
+_linksShown :: Lens' State (D3Link_Unswizzled -> Boolean)
 _linksShown = _scene <<< prop (Proxy :: Proxy "linksShown")
 _linksActive :: Lens' State (Datum_ -> Boolean)
 _linksActive = _scene <<< prop (Proxy :: Proxy "linksActive")
@@ -129,7 +130,7 @@ _modelNodes = _model <<< _Just <<< _nodes
 _modelLinks :: forall p.
      Strong p
   => Choice p
-  => p (Array SpagoGraphLinkID) (Array SpagoGraphLinkID)
+  => p (Array D3Link_Unswizzled) (Array D3Link_Unswizzled)
   -> p State State
 _modelLinks = _model <<< _Just <<< _links
 
@@ -143,7 +144,7 @@ _stagingNodes = _staging <<< _rawdata <<< _nodes
 _stagingLinks :: forall p.
      Strong p
   => Choice p
-  => p (Array SpagoGraphLinkID) (Array SpagoGraphLinkID)
+  => p (Array D3Link_Unswizzled) (Array D3Link_Unswizzled)
   -> p State State
 _stagingLinks = _staging <<< _rawdata <<< _links
 
@@ -178,7 +179,7 @@ applySceneWithTransition = SimState.applySceneWithTransition
 setChooseNodes :: (SpagoSimNode -> Boolean) -> State -> State
 setChooseNodes = SimState.setChooseNodes
 
-setLinksShown :: (SpagoGraphLinkID -> Boolean) -> State -> State
+setLinksShown :: (D3Link_Unswizzled -> Boolean) -> State -> State
 setLinksShown = SimState.setLinksShown
 
 setLinksActive :: (Datum_ -> Boolean) -> State -> State
@@ -208,7 +209,7 @@ getModelNodes state = case state.model of
   Just m -> m.nodes
   Nothing -> []
 
-getModelLinks :: State -> Array SpagoGraphLinkID
+getModelLinks :: State -> Array D3Link_Unswizzled
 getModelLinks state = case state.model of
   Just m -> m.links
   Nothing -> []
@@ -216,7 +217,7 @@ getModelLinks state = case state.model of
 getStagingNodes :: State -> Array SpagoSimNode
 getStagingNodes = SimState.getStagingNodes
 
-getStagingLinks :: State -> Array SpagoGraphLinkID
+getStagingLinks :: State -> Array D3Link_Unswizzled
 getStagingLinks = SimState.getStagingLinks
 
 getStagingLinkFilter :: State -> (Datum_ -> Boolean)
@@ -229,7 +230,7 @@ getStagingLinkFilter = SimState.getStagingLinkFilter
 setStagingNodes :: Array SpagoSimNode -> State -> State
 setStagingNodes = SimState.setStagingNodes
 
-setStagingLinks :: Array SpagoGraphLinkID -> State -> State
+setStagingLinks :: Array D3Link_Unswizzled -> State -> State
 setStagingLinks = SimState.setStagingLinks
 
 setStagingLinkFilter :: (Datum_ -> Boolean) -> State -> State

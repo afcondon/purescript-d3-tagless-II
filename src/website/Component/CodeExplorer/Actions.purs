@@ -3,9 +3,9 @@ module PSD3.CodeExplorer.Actions where
 import Prelude
 
 import D3.Viz.Spago.Draw.Attributes (SpagoSceneAttributes)
-import D3.Viz.Spago.Files (NodeType, SpagoGraphLinkID)
+import D3.Viz.Spago.Files (NodeType)
 import D3.Viz.Spago.Model (SpagoSimNode)
-import PSD3.Data.Node (NodeID)
+import PSD3.Data.Node (D3Link_Unswizzled, NodeID)
 import PSD3.Data.Tree (TreeLayout)
 import PSD3.Internal.Attributes.Instances (Label)
 import PSD3.Internal.Simulation.Types (SimVariable)
@@ -22,7 +22,7 @@ instance showScene :: Show Scene where
   show LayerSwarm = "LayerSwarm"
   show EmptyScene = "EmptyScene"
 data StyleChange = TopLevelCSS String | GraphStyle SpagoSceneAttributes
-data FilterData = LinkShowFilter (SpagoGraphLinkID -> Boolean)
+data FilterData = LinkShowFilter (D3Link_Unswizzled -> Boolean)
                 | LinkForceFilter (Datum_ -> Boolean) -- because this is post- putting in the DOM, it's a filter on the opaque type
                 | NodeFilter (SpagoSimNode -> Boolean)
 data Action
