@@ -101,18 +101,103 @@ derive instance Ord Scene
 
 **File**: `Component/YourViz/State.purs`
 
+#### Simple Visualizations
+
+For simple, single-mode visualizations, define state directly:
+
 ```purescript
 type State =
-  { simulation :: D3SimulationState_           -- Core simulation state
-  , model :: Maybe YourModel                   -- Your data model
-  , staging :: Staging D3Selection_ YourNodeData  -- Filtered data + selections
-  , scene :: SceneConfig YourNodeData YourSceneAttributes  -- Current scene
-  , currentScene :: Scene                      -- For transition matrix lookup
-  , transitionMatrix :: TransitionMatrix       -- Scene choreography
-  , tags :: Map NodeID (Set String)            -- Ad-hoc node metadata
+  { simulation :: D3SimulationState_
+  , model :: Maybe YourModel
+  , staging :: Staging D3Selection_ YourNodeData
+  , scene :: SceneConfig YourNodeData YourSceneAttributes
   -- Add app-specific state
   }
 ```
+
+#### Complex SimulationM2 Visualizations
+
+For complex visualizations combining force-directed and explicit layouts with scene-based transitions, use the generic `SimulationComponentState`:
+
+```purescript
+import PSD3.Component.SimulationState as SimState
+
+-- One-line state specialization!
+type State = SimState.SimulationComponentState
+  Scene                    -- Your scene ADT
+  Action                   -- Your Halogen action type
+  YourNodeData            -- Your simulation node row type
+  YourSceneAttributes     -- Your scene attributes type
+  YourModel               -- Your data model type
+
+-- Type aliases for convenience
+type SceneConfig = Scene.SceneConfig YourNodeData YourSceneAttributes
+type TransitionMatrix = SimState.TransitionMatrix Scene
+```
+
+**What you get for free:**
+- Scene management functions: `updateScene`, `applySceneConfig`, `applySceneWithTransition`
+- Tag system: `tagNodes`, `untagNodes`, `clearAllTags`, `getNodeTags`, `nodeHasTag`
+- Model/staging accessors: `getModelNodes`, `getStagingNodes`, etc.
+- Generic lenses: `_model`, `_staging`, `_scene`, `_nodes`, `_links`, etc.
+- Transition matrix support for declarative scene choreography
+
+**What you need to implement:**
+- `initialScene` function (your default scene configuration)
+- Visualization-specific lenses (optional, for cleaner API)
+- Re-exports of generic functions with specific types (optional)
+
+**Example State module structure:**
+
+```purescript
+module YourViz.State where
+
+import PSD3.Component.SimulationState as SimState
+import PSD3.Simulation.Scene as Scene
+-- ... other imports
+
+-- Specialize the generic state (1 line!)
+type State = SimState.SimulationComponentState Scene Action YourDataRow YourAttributes YourModel
+
+-- Type aliases
+type SceneConfig = Scene.SceneConfig YourDataRow YourAttributes
+type TransitionMatrix = SimState.TransitionMatrix Scene
+
+-- Visualization-specific initialization
+initialScene :: M.Map Label Force -> SceneConfig
+initialScene forceLibrary =
+  { chooseNodes: myDefaultFilter
+  , linksShown: const false
+  , linksActive: const false
+  , activeForces: Set.fromFoldable (M.keys forceLibrary)
+  , cssClass: ""
+  , attributes: myDefaultAttributes
+  , nodeInitializerFunctions: []
+  , transitionConfig: Nothing
+  }
+
+-- Re-export generic functions with specific types (optional, for better error messages)
+applySceneConfig :: SceneConfig -> State -> State
+applySceneConfig = SimState.applySceneConfig
+
+tagNodes :: String -> (YourSimNode -> Boolean) -> Array YourSimNode -> State -> State
+tagNodes = SimState.tagNodes
+
+-- Add visualization-specific helpers as needed
+```
+
+**When to use SimulationComponentState:**
+- ✓ Multiple interactive scenes/views of the same data
+- ✓ Combining force-directed and explicit layouts (grid, tree, pack, etc.)
+- ✓ Complex transition choreography between scenes
+- ✓ Ad-hoc node tagging and filtering
+
+**When NOT to use SimulationComponentState:**
+- Simple, single-view visualizations (use direct state definition)
+- Static visualizations without scene switching
+- Visualizations that don't need simulation state management
+
+See `notes/STATE_REFACTOR_COMPLETE.md` for the full template and detailed documentation.
 
 ### 4. Build Force Library
 
