@@ -35,12 +35,13 @@ drawWithData circleData selector = do
   svg         <- appendTo root Svg [ viewBox (-10.0) (-100.0) 320.0 160.0, classed "d3svg gup" ]
   circleGroup <- appendTo svg  Group []
 
-  circles     <- simpleJoin circleGroup Circle circleData keyIsID_ 
-  setAttributes circles [ strokeColor datum_.color
+  circles     <- simpleJoin circleGroup Circle circleData keyIsID_
+  -- TYPE INFERENCE TEST: Can we use typed lambdas now?
+  setAttributes circles [ strokeColor (\d -> d3SchemePairedN_ ((toNumber $ d) / 100.0))
                         , strokeWidth 3.0
                         , fill "none"
-                        , cx datum_.x
-                        , cy datum_.y
+                        , cx (\_ i -> (index_ToNumber i) * 20.0)
+                        , cy (\d -> 100.0 - (toNumber $ d) / 5.0)
                         , radius 10.0 ]
   pure circles
 -- Snippet_End
