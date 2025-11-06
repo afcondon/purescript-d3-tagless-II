@@ -13,6 +13,7 @@ import Data.Array (foldl, length, mapWithIndex, partition, (:))
 import Data.Array (null) as A
 import Data.FoldableWithIndex (foldlWithIndex)
 import Data.Graph (Graph, fromMap)
+import PSD3.Data.Graph (GraphConfig, buildGraphModel, toDataGraph)
 import Data.Int (toNumber)
 import Data.Int (floor) as Int
 import Data.List as L
@@ -26,6 +27,7 @@ import Data.Number (floor) as Number
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Type.Row (type (+))
+import Unsafe.Coerce (unsafeCoerce)
 import Web.Event.Internal.Types (Event)
 
 
@@ -430,16 +432,28 @@ makeSpagoGraphModel json = do
                }
   }
 
+-- | Configuration for using generic graph infrastructure with Spago data
+spagoGraphConfig :: GraphConfig SpagoNodeData SpagoGraphLinkID
+spagoGraphConfig =
+  { getNodeId: _.id
+  , getLinkSource: \link -> (unsafeCoerce link).source
+  , getLinkTarget: \link -> (unsafeCoerce link).target
+  }
+
 makeGraph :: Array SpagoNodeData -> Graph NodeID SpagoNodeData
 makeGraph nodes = do
   let
-    graphMap = foldl addNode M.empty nodes
-    -- addNode :: M.Map NodeID (Tuple SpagoNodeData (S.Set NodeID)) -> SpagoNodeData -> M.Map NodeID (Tuple SpagoNodeData (S.Set NodeID))
-    addNode acc node = M.insert node.id (Tuple node depends) acc
-      where
-        depends :: L.List Int
-        depends = L.fromFoldable node.links.targets
-  fromMap graphMap
+    -- Create links array from node dependencies
+    -- Each node has a links.targets array that specifies its outgoing edges
+    links = nodes >>= \node ->
+      node.links.targets <#> \target ->
+        unsafeCoerce { source: node.id, target: target, linktype: M2M_Graph, inSim: true }
+
+    -- Build graph model using generic infrastructure
+    graphModel = buildGraphModel spagoGraphConfig nodes links
+
+  -- Convert to Data.Graph format for compatibility with existing code
+  toDataGraph spagoGraphConfig graphModel
 
 
 -- explodePackages :: Event -> D3Simulation_ -> Datum_ -> Unit

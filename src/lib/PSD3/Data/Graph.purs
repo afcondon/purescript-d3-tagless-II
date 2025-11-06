@@ -12,11 +12,15 @@ module PSD3.Data.Graph
   , getLinksTo
   , getAllNodes
   , getAllLinks
+  , toDataGraph
   ) where
 
 import Prelude
 
 import Data.Array (catMaybes, foldl, filter)
+import Data.Graph (Graph)
+import Data.Graph as DG
+import Data.List as L
 import Data.Map (Map)
 import Data.Map as M
 import Data.Maybe (Maybe(..))
@@ -214,3 +218,34 @@ getAllLinks :: forall node link.
   GraphModel node link ->
   Array link
 getAllLinks = _.links
+
+-- | Convert GraphModel to Data.Graph format (from purescript-graphs package)
+-- |
+-- | This enables interoperability with existing code that uses Data.Graph.
+-- | The conversion extracts outgoing link targets for each node.
+-- |
+-- | Example:
+-- | ```purescript
+-- | let graphModel = buildGraphModel config nodes links
+-- | let dataGraph = toDataGraph config graphModel
+-- | -- Now use with Data.Graph functions
+-- | ```
+toDataGraph :: forall node link.
+  GraphConfig node link ->
+  GraphModel node link ->
+  Graph NodeID node
+toDataGraph config model =
+  let
+    -- Build map entries: NodeID -> (Node, List of target IDs)
+    buildEntry node =
+      let
+        nodeId = config.getNodeId node
+        links = getLinksFrom nodeId model
+        targets = L.fromFoldable $ config.getLinkTarget <$> links
+      in
+        Tuple nodeId (Tuple node targets)
+
+    entries = buildEntry <$> model.nodes
+    graphMap = M.fromFoldable entries
+  in
+    DG.fromMap graphMap
