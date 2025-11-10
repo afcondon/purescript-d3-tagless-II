@@ -261,10 +261,10 @@ simulationSetNodes nodes = do
   pure $ unsafeCoerce opaqueNodes
 
 simulationSetLinks :: -- now with 100% more swizzling!!
-  forall d m row.
+  forall d dataRow m row.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ d | row } m =>
-  Array D3Link_Unswizzled -> Array (D3_SimulationNode d) -> (Datum_ -> Index_ ) ->
+  Array D3Link_Unswizzled -> Array (D3_SimulationNode dataRow) -> (Datum_ -> Index_ ) ->
   m (Array D3Link_Swizzled)
 simulationSetLinks links nodes keyFn = do
   handle <- use _handle

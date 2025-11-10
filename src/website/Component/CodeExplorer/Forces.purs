@@ -19,8 +19,8 @@ forceLibrary = initialize [
       , createForce "x"            (RegularForce ForceX)        allNodes [ F.strengthVal 0.05, F.xVal 0.0 ]
       , createForce "y"            (RegularForce ForceY)        allNodes [ F.strengthVal 0.07, F.yVal 0.0 ]
 
-      , createForce "collide1"     (RegularForce ForceCollide)  allNodes [ F.strengthVal 1.0, F.radiusVal datum_.collideRadius ]
-      , createForce "collide2"     (RegularForce ForceCollide)  allNodes [ F.strengthVal 0.7, F.radiusVal datum_.collideRadiusBig ]
+      , createForce "collide1"     (RegularForce ForceCollide)  allNodes [ F.strengthVal 1.0, F.radiusFn (\d _ -> datum_.collideRadius d) ]
+      , createForce "collide2"     (RegularForce ForceCollide)  allNodes [ F.strengthVal 0.7, F.radiusFn (\d _ -> datum_.collideRadiusBig d) ]
       , createForce "charge1"      (RegularForce ForceManyBody) allNodes [ F.strengthVal (-50.0), F.thetaVal 0.9, F.distanceMinVal 1.0, F.distanceMaxVal infinity ]
       , createForce "charge2"      (RegularForce ForceManyBody) allNodes [ F.strengthVal (-100.0), F.thetaVal 0.9, F.distanceMinVal 1.0, F.distanceMaxVal 400.0 ]
       , createForce "chargetree"   (RegularForce ForceManyBody) treeExceptLeaves [ F.strengthVal (-100.0), F.thetaVal 0.9, F.distanceMinVal 1.0, F.distanceMaxVal 400.0 ]

@@ -194,7 +194,7 @@ genericUpdateSimulation { nodes: Just nodesGroup, links: Just linksGroup }
   -- STEP 6: Build internal SimulationUpdate for the update API
   -- Note: We pass pre-filtered and initialized data with no filter predicates
   -- (filtering and initialization already done by library)
-  let internalUpdateConfig :: SimulationUpdate d
+  let internalUpdateConfig :: SimulationUpdate dataRow
       internalUpdateConfig =
         { nodes: Just initializedNodes    -- Filtered and initialized by library
         , links: Just finalLinks          -- Structurally + visually filtered by library (AUTOMATIC!)

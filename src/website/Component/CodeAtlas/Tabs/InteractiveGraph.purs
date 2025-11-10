@@ -278,15 +278,15 @@ initialize graphData = do
   pure { svg, zoomGroup, nodesGroup, linksGroup, moduleNodes, moduleLinks, adjacencyMap }
 
 -- | Update the graph with new filtered data (following Spago pattern)
-updateGraph :: forall row m.
+updateGraph :: forall d row m.
   Bind m =>
   MonadEffect m =>
-  MonadState { simulation :: D3SimulationState_ | row } m =>
+  MonadState { simulation :: D3SimulationState_ d | row } m =>
   SelectionM D3Selection_ m =>
   SimulationM2 D3Selection_ m =>
-  { nodesGroup :: D3Selection_
-  , linksGroup :: D3Selection_
-  , zoomGroup :: D3Selection_
+  { nodesGroup :: D3Selection_ d
+  , linksGroup :: D3Selection_ d
+  , zoomGroup :: D3Selection_ d
   , filteredNodes :: Array ModuleNode
   , filteredLinks :: Array D3Link_Unswizzled
   , adjacencyMap :: Map String (Set String)

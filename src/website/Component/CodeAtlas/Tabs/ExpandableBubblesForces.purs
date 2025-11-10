@@ -16,12 +16,12 @@ forceLibrary :: forall d. Map.Map Label (Force d)
 forceLibrary = initialize
   -- Overview/Compact forces - tight packing for seeing all modules
   [ createForce "manyBody-compact" (RegularForce ForceManyBody) allNodes
-      [ F.strengthValVal (-30.0)  -- Weak repulsion for compact layout
-      , F.distanceMaxValVal 200.0
+      [ F.strengthVal (-30.0)  -- Weak repulsion for compact layout
+      , F.distanceMaxVal 200.0
       ]
   , createForce "collision-compact" (RegularForce ForceCollide) allNodes
-      [ F.radiusValVal 15.0  -- Small fixed radius for compact view
-      , F.strengthValVal 0.7
+      [ F.radiusVal 15.0  -- Small fixed radius for compact view
+      , F.strengthVal 0.7
       ]
 
   -- Spotlight forces - spread out for viewing expanded modules with declarations

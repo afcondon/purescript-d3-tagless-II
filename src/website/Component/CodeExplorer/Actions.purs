@@ -21,7 +21,7 @@ instance showScene :: Show Scene where
   show (ModuleTree layout) = "ModuleTree " <> show layout
   show LayerSwarm = "LayerSwarm"
   show EmptyScene = "EmptyScene"
-data StyleChange = TopLevelCSS String | GraphStyle SpagoSceneAttributes
+data StyleChange d = TopLevelCSS String | GraphStyle (SpagoSceneAttributes d)
 data FilterData = LinkShowFilter (D3Link_Unswizzled -> Boolean)
                 | LinkForceFilter (Datum_ -> Boolean) -- because this is post- putting in the DOM, it's a filter on the opaque type
                 | NodeFilter (SpagoSimNode -> Boolean)
