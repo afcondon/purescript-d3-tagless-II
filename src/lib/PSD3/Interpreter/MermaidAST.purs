@@ -5,7 +5,7 @@ import PSD3.Data.Node (NodeID)
 
 import Control.Monad.State (class MonadState, StateT, get, modify_, runStateT)
 import PSD3.Internal.Attributes.Instances (AttributeSetter(..))
-import PSD3.Internal.Types (Element, Transition)
+import PSD3.Internal.Types (Datum_, Element, Index_, Selector, Transition)
 import PSD3.Internal.FFI (ComputeKeyFunction_)
 import PSD3.Capabilities.Selection (class SelectionM)
 import Data.Array (length, foldl, snoc)
@@ -13,6 +13,7 @@ import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Class (class MonadEffect)
 import Prelude
+import Data.Foldable (class Foldable)
 import Data.String.Common (replaceAll)
 import Data.String.Pattern (Pattern(..), Replacement(..))
 
