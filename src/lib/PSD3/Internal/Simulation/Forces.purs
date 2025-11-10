@@ -14,6 +14,7 @@ import Data.Map (Map, fromFoldable)
 import Data.Maybe (Maybe(..))
 import Data.Newtype (unwrap)
 import Data.Tuple (Tuple(..))
+import Unsafe.Coerce (unsafeCoerce)
 
 
 initialize   :: forall d f. (Foldable f) => (Functor f) => f (Force d) -> Map Label (Force d)
@@ -33,7 +34,7 @@ showType =
     LinkForce      -> "linkForce"
     RegularForce f -> show f
 
-createForce :: forall d. Label -> ForceType -> Maybe ForceFilter -> Array (ChainableF d) -> Force d
+createForce :: forall d. Label -> ForceType -> Maybe (ForceFilter d) -> Array (ChainableF d) -> Force d
 createForce l t f cs = Force {
     "type": t
   , name: l
@@ -43,7 +44,7 @@ createForce l t f cs = Force {
   , force_: createForce_ t
 }
 
-createLinkForce :: forall d. Maybe ForceFilter -> Array (ChainableF d) -> Force d
+createLinkForce :: forall d. Maybe (ForceFilter d) -> Array (ChainableF d) -> Force d
 createLinkForce f cs = Force {
     "type": LinkForce
   , name: linksForceName_
@@ -91,7 +92,7 @@ enableOnlyTheseLabels simulation labels force =
 updateForceInSimulation :: forall d. D3Simulation_ -> Force d -> D3Simulation_
 updateForceInSimulation simulation force = do
     let f = unwrap force
-    let _ = (\a -> setForceAttr f.force_ f.filter a) <$> f.attributes -- side-effecting function that sets force's attributes
+    let _ = (\a -> setForceAttr f.force_ f.filter (unwrap a)) <$> f.attributes -- side-effecting function that sets force's attributes
     case f.status of
       ForceActive -> putForceInSimulation force simulation
       ForceDisabled -> removeForceFromSimulation force simulation
@@ -172,7 +173,7 @@ createRegularForce_ = case _ of
   ForceRadial               -> forceRadial_    unit
 
 -- TODO at present there is no type checking on what forces have which attrs settable, see comment above
-setForceAttr :: forall d. D3ForceHandle_ -> Maybe ForceFilter -> AttributeSetter d -> D3ForceHandle_
+setForceAttr :: forall d. D3ForceHandle_ -> Maybe (ForceFilter d) -> AttributeSetter d -> D3ForceHandle_
 setForceAttr force_ maybeFilter (AttributeSetter label attr) = do
   -- let attr' = unboxAttr attr
   case label of
@@ -195,9 +196,9 @@ setForceAttr force_ maybeFilter (AttributeSetter label attr) = do
     _ -> force_ -- no other force attributes accepted
 
 
-attrFilter :: (Datum_ -> Boolean) -> Number -> Attr Datum_ -> Attr Datum_
+attrFilter :: forall d. (Datum_ -> Boolean) -> Number -> Attr d -> Attr d
 attrFilter filter' default' = do
-  let 
+  let
     addFilterToStatic :: (Datum_ -> Boolean) -> Number -> Number -> (Datum_ -> Number)
     addFilterToStatic filter value default = \d -> if filter d then value else default
 
@@ -205,7 +206,7 @@ attrFilter filter' default' = do
     addFilterToFn filter fn default = \d -> if filter d then fn d else default
 
     -- addFilterToFnI :: (Datum_ -> Index_ -> Boolean) -> IndexedLambda Number -> Number -> IndexedLambda Number
-    -- addFilterToFnI filter fni default = mkFn2 f 
+    -- addFilterToFnI filter fni default = mkFn2 f
     --   where
     --     f d i = if filter d i then runFn2 fni d i else default
   case _ of
@@ -213,8 +214,9 @@ attrFilter filter' default' = do
     (StringAttr (Fn a))     -> StringAttr (Fn a)
     (StringAttr (FnI a))    -> StringAttr (FnI a)
 
-    (NumberAttr (Static a)) -> NumberAttr (Fn (addFilterToStatic filter' a default')) -- turns static setter into dynamic because of filtering
-    (NumberAttr (Fn a))     -> NumberAttr (Fn (addFilterToFn filter' a default'))
+    -- FFI boundary: Functions work with Datum_ at runtime, but need phantom type d for type system
+    (NumberAttr (Static a)) -> NumberAttr (Fn (unsafeCoerce (addFilterToStatic filter' a default'))) -- turns static setter into dynamic because of filtering
+    (NumberAttr (Fn a))     -> NumberAttr (Fn (unsafeCoerce (addFilterToFn filter' (unsafeCoerce a) default')))
     (NumberAttr (FnI a))    -> NumberAttr (FnI a) -- NB doesn't handle filtering of indexed functions at the moment
 
     (ArrayAttr (Static a))  -> ArrayAttr (Static a)

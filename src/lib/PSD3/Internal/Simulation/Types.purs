@@ -129,7 +129,7 @@ newtype Force d = Force {
     "type"     :: ForceType
   , name       :: Label
   , status     :: ForceStatus
-  , filter     :: Maybe ForceFilter
+  , filter     :: Maybe (ForceFilter d)
   , attributes :: Array (ChainableF d)
   , force_     :: D3ForceHandle_
 }
@@ -149,12 +149,12 @@ _force_ = _Newtype <<< prop (Proxy :: Proxy "force_")
 getStatusMap :: forall d. Map Label (Force d) -> Map Label ForceStatus
 getStatusMap forceMap = fromFoldable $ (\f -> Tuple (view _name f) (view _status f)) <$> forceMap
 
-_filter :: forall d p. Profunctor p => Strong p => p (Maybe ForceFilter) (Maybe ForceFilter) -> p (Force d) (Force d)
+_filter :: forall d p. Profunctor p => Strong p => p (Maybe (ForceFilter d)) (Maybe (ForceFilter d)) -> p (Force d) (Force d)
 _filter = _Newtype <<< prop (Proxy :: Proxy "filter")
 
 _filterLabel :: forall d p row.
-     Newtype (Force d) { filter :: Maybe ForceFilter | row }
-  => Newtype (Force d) { filter :: Maybe ForceFilter | row }
+     Newtype (Force d) { filter :: Maybe (ForceFilter d) | row }
+  => Newtype (Force d) { filter :: Maybe (ForceFilter d) | row }
   => Profunctor p
   => Strong p
   => Choice p
@@ -190,17 +190,18 @@ allNodes :: forall t69. Maybe t69
 allNodes = Nothing -- just some sugar so that force declarations are nicer to read, Nothing == No filter == applies to all nodes
 
 -- this filter data type will handle both links and nodes, both considered as opaque type Datum_ and needing coercion
-data ForceFilter = ForceFilter Label (Datum_ -> Boolean)
-instance Show ForceFilter where
+-- Parameterized with d for consistency with Force d, but function still uses Datum_ at runtime
+data ForceFilter d = ForceFilter Label (Datum_ -> Boolean)
+instance Show (ForceFilter d) where
   show (ForceFilter description _) = description
 
-_forceFilterLabel :: Lens' ForceFilter Label
+_forceFilterLabel :: forall d. Lens' (ForceFilter d) Label
 _forceFilterLabel = lens' \(ForceFilter l f) -> Tuple l (\new -> ForceFilter new f)
 
-_forceFilterFilter :: Lens' ForceFilter (Datum_ -> Boolean)
+_forceFilterFilter :: forall d. Lens' (ForceFilter d) (Datum_ -> Boolean)
 _forceFilterFilter = lens' \(ForceFilter l f) -> Tuple f (\new -> ForceFilter l new)
 
-showForceFilter :: Maybe ForceFilter -> String
+showForceFilter :: forall d. Maybe (ForceFilter d) -> String
 showForceFilter (Just (ForceFilter description _)) = description
 showForceFilter Nothing = " (no filter)"
 
