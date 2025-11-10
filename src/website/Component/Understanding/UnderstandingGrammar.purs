@@ -31,7 +31,7 @@ type Slots =
 _docsHeader = Proxy :: Proxy "docsHeader"
 
 -- | General Update Pattern (GUP) example showing enter/update/exit
-gupVisualization :: forall d. MermaidASTM (MermaidSelection d)
+gupVisualization :: MermaidASTM (MermaidSelection NodeID)
 gupVisualization = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg [viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup"]
@@ -63,7 +63,7 @@ gupVisualization = do
   pure newlyEntered
 
 -- Parabola (Three Little Circles with data-driven positioning)
-viz_ParabolaAST :: forall d. MermaidASTM (MermaidSelection d)
+viz_ParabolaAST :: MermaidASTM (MermaidSelection NodeID)
 viz_ParabolaAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg []
@@ -80,7 +80,7 @@ viz_ParabolaAST = do
   pure circles
 
 -- Bubble Chart (circle pack hierarchy)
-viz_BubbleChartAST :: forall d. MermaidASTM (MermaidSelection d)
+viz_BubbleChartAST :: MermaidASTM (MermaidSelection NodeID)
 viz_BubbleChartAST = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg []

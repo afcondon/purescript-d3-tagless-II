@@ -65,7 +65,7 @@ sequenceDiagram
 """
 
 -- | General Update Pattern (GUP) example showing enter/update/exit
-gupVisualization :: forall d. MermaidASTM (MermaidSelection d)
+gupVisualization :: MermaidASTM (MermaidSelection NodeID)
 gupVisualization = do
   root <- D3.attach "div"
   svg <- D3.appendTo root Svg [viewBox 0.0 100.0 800.0 350.0, classed "d3svg gup"]
