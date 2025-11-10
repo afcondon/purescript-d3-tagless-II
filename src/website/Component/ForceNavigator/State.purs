@@ -110,7 +110,7 @@ _simulation = prop (Proxy :: Proxy "simulation")
 _expandedNodes :: Lens' State (Set String)
 _expandedNodes = prop (Proxy :: Proxy "expandedNodes")
 
-_openSelections :: Lens' State (Maybe { nodes :: Maybe D3Selection_, links :: Maybe D3Selection_ })
+_openSelections :: Lens' State (Maybe { nodes :: Maybe (D3Selection_ NavigationSimNode), links :: Maybe (D3Selection_ NavigationSimNode) })
 _openSelections = prop (Proxy :: Proxy "openSelections")
 
 _activeForces :: Lens' State (Set Label)

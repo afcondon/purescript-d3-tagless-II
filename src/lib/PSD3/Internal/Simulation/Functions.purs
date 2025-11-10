@@ -295,7 +295,7 @@ simulationSetLinksFromSelection linkSelection filterFn = do
 
 simulationCreateTickFunction :: forall d selection row m.
   (MonadState { simulation :: D3SimulationState_ d | row } m) =>
-  Label -> Step selection -> m Unit
+  Label -> Step selection d -> m Unit
 simulationCreateTickFunction label tick@(StepTransformFFI selection fn) = pure unit
 simulationCreateTickFunction label tick@(Step selection chain) = do
   handle <- use _handle
