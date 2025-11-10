@@ -248,12 +248,12 @@ simulationMergeNewData nodeSelection nodeKeyFn linkSelection linkKeyFn links nod
   -- swizzledLinkData <- simulationSwizzleLinks updatedLinkData updatedNodeData nodeKeyFn
   -- pure { nodes: updatedNodeData, links: swizzledLinkData }
 
-simulationSetNodes :: 
-  forall d row m.
+simulationSetNodes ::
+  forall d dataRow row m.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ d | row } m =>
-  Array (D3_SimulationNode d) ->
-  m (Array (D3_SimulationNode d))
+  Array (D3_SimulationNode dataRow) ->
+  m (Array (D3_SimulationNode dataRow))
 simulationSetNodes nodes = do
   handle <- use _handle
   let _ = setNodes_ handle nodes
@@ -272,21 +272,21 @@ simulationSetLinks links nodes keyFn = do
   let swizzledLinks = getLinksFromSimulation_ handle
   pure swizzledLinks
 
-simulationSetNodesFromSelection :: 
-  forall row m.
+simulationSetNodesFromSelection ::
+  forall d row m.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ d | row } m =>
-  D3Selection_ -> m Unit
+  D3Selection_ d -> m Unit
 simulationSetNodesFromSelection nodeSelection = do
   handle <- use _handle
   let _ = setNodes_ handle (unsafeCoerce $ d3GetSelectionData_ nodeSelection)
   pure unit
 
-simulationSetLinksFromSelection :: 
-  forall row m.
+simulationSetLinksFromSelection ::
+  forall d row m.
   Bind m =>
   MonadState { simulation :: D3SimulationState_ d | row } m =>
-  D3Selection_ -> (Datum_ -> Boolean) -> m Unit
+  D3Selection_ d -> (Datum_ -> Boolean) -> m Unit
 simulationSetLinksFromSelection linkSelection filterFn = do
   handle <- use _handle
   let _ = setLinks_ handle (unsafeCoerce $ filter filterFn $ d3GetSelectionData_ linkSelection)
