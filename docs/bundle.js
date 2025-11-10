@@ -37179,7 +37179,7 @@
         return unsafeCrashWith2("Node ID " + (show53(id5) + " not found in map"));
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 159, column 26 - line 161, column 76): " + [v.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 156, column 26 - line 158, column 76): " + [v.constructor.name]);
     };
   };
   var secondWalk = function(config) {
@@ -37195,7 +37195,7 @@
             return unsafeGetNode(nodes)(v.parent.value0).m;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 468, column 15 - line 470, column 46): " + [v.parent.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 465, column 15 - line 467, column 46): " + [v.parent.constructor.name]);
         })();
         var newM = v.m + parentM;
         var maxD = toNumber(foldl17(function(acc) {
@@ -37204,8 +37204,8 @@
           };
         })(0)(values(nodes)));
         var finalY = toNumber(v.node.depth) * (config.size.height / (function() {
-          var $63 = maxD === 0;
-          if ($63) {
+          var $62 = maxD === 0;
+          if ($62) {
             return 1;
           }
           ;
@@ -37255,8 +37255,8 @@
     return function(nodeId) {
       var node = unsafeGetNode(nodes)(nodeId);
       var lastIdx = length3(node.children) - 1 | 0;
-      var $68 = lastIdx >= 0;
-      if ($68) {
+      var $67 = lastIdx >= 0;
+      if ($67) {
         return index2(node.children)(lastIdx);
       }
       ;
@@ -37266,8 +37266,8 @@
   var nextLeft = function(nodes) {
     return function(nodeId) {
       var node = unsafeGetNode(nodes)(nodeId);
-      var $69 = length3(node.children) > 0;
-      if ($69) {
+      var $68 = length3(node.children) > 0;
+      if ($68) {
         return index2(node.children)(0);
       }
       ;
@@ -37282,8 +37282,8 @@
           var vimAncestor = unsafeGetNode(nodes)(vim.a);
           var v = unsafeGetNode(nodes)(vId);
           if (vimAncestor.parent instanceof Just && v.parent instanceof Just) {
-            var $72 = vimAncestor.parent.value0 === v.parent.value0;
-            if ($72) {
+            var $71 = vimAncestor.parent.value0 === v.parent.value0;
+            if ($71) {
               return vim.a;
             }
             ;
@@ -37348,24 +37348,24 @@
       return function(bottom4) {
         return function(v) {
           var newRight = (function() {
-            var $84 = v.x > right4.x;
-            if ($84) {
+            var $83 = v.x > right4.x;
+            if ($83) {
               return v;
             }
             ;
             return right4;
           })();
           var newLeft = (function() {
-            var $85 = v.x < left4.x;
-            if ($85) {
+            var $84 = v.x < left4.x;
+            if ($84) {
               return v;
             }
             ;
             return left4;
           })();
           var newBottom = (function() {
-            var $86 = v.depth > bottom4.depth;
-            if ($86) {
+            var $85 = v.depth > bottom4.depth;
+            if ($85) {
               return v;
             }
             ;
@@ -37392,29 +37392,28 @@
       ;
       if (config.nodeSize instanceof Nothing) {
         var extents = findExtents(tree1)(tree1)(tree1)(tree1);
-        var tx = -(extents.left.x + extents.right.x) / 2;
         var s = (function() {
-          var $92 = extents.left.x === extents.right.x;
-          if ($92) {
+          var $91 = extents.left.x === extents.right.x;
+          if ($91) {
             return 1;
           }
           ;
           return config.separation(extents.left)(extents.right) / 2;
         })();
-        var treeWidth = extents.right.x - extents.left.x + 2 * s;
+        var tx = s - extents.left.x;
         var ky = config.size.height / (function() {
-          var $93 = extents.bottom.depth === 0;
-          if ($93) {
+          var $92 = extents.bottom.depth === 0;
+          if ($92) {
             return 1;
           }
           ;
           return toNumber(extents.bottom.depth);
         })();
-        var kx = config.size.width / treeWidth;
+        var kx = config.size.width / (extents.right.x + s + tx);
         return scaleNode(tx)(kx)(ky)(tree1);
       }
       ;
-      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 522, column 3 - line 547, column 33): " + [config.nodeSize.constructor.name]);
+      throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 519, column 3 - line 541, column 33): " + [config.nodeSize.constructor.name]);
     };
   };
   var extractTreeNode = function(nodes) {
@@ -37482,10 +37481,10 @@
                     return;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 290, column 13 - line 300, column 53): " + [v1.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 287, column 13 - line 297, column 53): " + [v1.constructor.name]);
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 287, column 7 - line 300, column 53): " + [shift.constructor.name, change2.constructor.name, i2.constructor.name, ns.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 284, column 7 - line 297, column 53): " + [shift.constructor.name, change2.constructor.name, i2.constructor.name, ns.constructor.name]);
               }
               ;
               while (!$tco_done) {
@@ -37661,8 +37660,8 @@
                                       var sep = config.separation(vimNode.node)(vipNode.node);
                                       var shift = vimNode.z + sim - vipNode.z - sip + sep;
                                       var ns2 = (function() {
-                                        var $113 = shift > 0;
-                                        if ($113) {
+                                        var $112 = shift > 0;
+                                        if ($112) {
                                           var anc = nextAncestor(ns1)(vimNext.value0)(ancestor$prime)(currentAncestor);
                                           return moveSubtree(ns1)(anc)(ancestor$prime)(shift);
                                         }
@@ -37671,16 +37670,16 @@
                                       })();
                                       var som$prime = som + unsafeGetNode(ns2)(vom$prime).m;
                                       var sip$prime = (function() {
-                                        var $114 = shift > 0;
-                                        if ($114) {
+                                        var $113 = shift > 0;
+                                        if ($113) {
                                           return sip + shift;
                                         }
                                         ;
                                         return sip;
                                       })();
                                       var sop$prime = (function() {
-                                        var $115 = shift > 0;
-                                        if ($115) {
+                                        var $114 = shift > 0;
+                                        if ($114) {
                                           return sop + shift;
                                         }
                                         ;
@@ -37747,7 +37746,7 @@
                   return v;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 311, column 22 - line 313, column 23): " + [v.parent.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 308, column 22 - line 310, column 23): " + [v.parent.constructor.name]);
               })();
               var vom = fromMaybe(0)(index2(parentNode3.children)(0));
               var result = walkContours(nodes)(vId)(vId)(wMaybe.value0)(vom)(vId)(v.m)(v.m)(unsafeGetNode(nodes)(wMaybe.value0).m)(unsafeGetNode(nodes)(vom).m)(ancestor);
@@ -37777,14 +37776,14 @@
                     return result.nodes;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 333, column 16 - line 337, column 34): " + [v1.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 330, column 16 - line 334, column 34): " + [v1.constructor.name]);
                 }
                 ;
                 if (result.vim instanceof Nothing) {
                   return result.nodes;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 329, column 18 - line 338, column 28): " + [result.vim.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 326, column 18 - line 335, column 28): " + [result.vim.constructor.name]);
               })();
               var nodes3 = (function() {
                 if (result.vip instanceof Just) {
@@ -37826,19 +37825,19 @@
                     return nodes2;
                   }
                   ;
-                  throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 343, column 16 - line 350, column 34): " + [v1.constructor.name]);
+                  throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 340, column 16 - line 347, column 34): " + [v1.constructor.name]);
                 }
                 ;
                 if (result.vip instanceof Nothing) {
                   return nodes2;
                 }
                 ;
-                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 340, column 18 - line 351, column 28): " + [result.vip.constructor.name]);
+                throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 337, column 18 - line 348, column 28): " + [result.vip.constructor.name]);
               })();
               return nodes3;
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 306, column 3 - line 353, column 16): " + [wMaybe.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 303, column 3 - line 350, column 16): " + [wMaybe.constructor.name]);
           };
         };
       };
@@ -37857,7 +37856,7 @@
             return unsafeGetNode(nodes)(v.parent.value0);
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 196, column 18 - line 198, column 42): " + [v.parent.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 193, column 18 - line 195, column 42): " + [v.parent.constructor.name]);
         })();
         var siblings = (function() {
           if (v.parent instanceof Nothing) {
@@ -37868,18 +37867,18 @@
             return parentNode3.children;
           }
           ;
-          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 199, column 16 - line 201, column 36): " + [v.parent.constructor.name]);
+          throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 196, column 16 - line 198, column 36): " + [v.parent.constructor.name]);
         })();
         var w = (function() {
-          var $134 = v.i > 0;
-          if ($134) {
+          var $133 = v.i > 0;
+          if ($133) {
             return index2(siblings)(v.i - 1 | 0);
           }
           ;
           return Nothing.value;
         })();
-        var $135 = length3(v.children) > 0;
-        if ($135) {
+        var $134 = length3(v.children) > 0;
+        if ($134) {
           var nodes1 = executeShifts(nodes)(nodeId);
           var v1 = unsafeGetNode(nodes1)(nodeId);
           var lastChildId = fromMaybe(0)(index2(v.children)(length3(v.children) - 1 | 0));
@@ -37926,7 +37925,7 @@
               return updateNode(nodes1)(nodeId)(updated2);
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 220, column 18 - line 230, column 48): " + [w.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 217, column 18 - line 227, column 48): " + [w.constructor.name]);
           })();
           var ancestor = fromMaybe(nodeId)(index2(siblings)(0));
           var nodes3 = apportion(config)(nodes2)(nodeId)(w)(ancestor);
@@ -37954,7 +37953,7 @@
               return nodes3;
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 238, column 18 - line 243, column 28): " + [v3.parent.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 235, column 18 - line 240, column 28): " + [v3.parent.constructor.name]);
           })();
           return nodes4;
         }
@@ -38003,7 +38002,7 @@
               return nodes2;
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 262, column 24 - line 267, column 34): " + [v2.parent.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 259, column 24 - line 264, column 34): " + [v2.parent.constructor.name]);
           })();
           return nodes3;
         }
@@ -38035,12 +38034,12 @@
               return nodes1;
             }
             ;
-            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 274, column 24 - line 279, column 34): " + [v1.parent.constructor.name]);
+            throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 271, column 24 - line 276, column 34): " + [v1.parent.constructor.name]);
           })();
           return nodes2;
         }
         ;
-        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 248, column 7 - line 280, column 20): " + [w.constructor.name]);
+        throw new Error("Failed pattern match at PSD3.Layout.Hierarchy.Tree (line 245, column 7 - line 277, column 20): " + [w.constructor.name]);
       };
     };
   };
@@ -38055,37 +38054,12 @@
       };
     };
   };
-  var adjustNode = function(nodes) {
-    return function(id5) {
-      return function(update5) {
-        var node = unsafeGetNode(nodes)(id5);
-        var updated = {
-          a: node.a,
-          c: node.c,
-          children: node.children,
-          i: node.i,
-          node: node.node,
-          nodeId: node.nodeId,
-          parent: node.parent,
-          s: node.s,
-          t: node.t,
-          z: node.z,
-          m: update5.m
-        };
-        return updateNode(nodes)(id5)(updated);
-      };
-    };
-  };
   var tree2 = function(config) {
     return function(root3) {
       var treeRoot = hierarchyToTreeNode(root3);
       var v = buildInternalTree(treeRoot);
       var afterFirstWalk = firstWalkAll(config)(v.nodes)(v.root);
-      var rootNode = unsafeGetNode(afterFirstWalk)(v.root);
-      var adjustedNodes = adjustNode(afterFirstWalk)(v.root)({
-        m: -rootNode.z
-      });
-      var finalNodes = secondWalkAll(config)(adjustedNodes)(v.root);
+      var finalNodes = secondWalkAll(config)(afterFirstWalk)(v.root);
       var resultTree = extractTreeNode(finalNodes)(v.root);
       var scaledTree = scaleToFit(config)(resultTree);
       return scaledTree;

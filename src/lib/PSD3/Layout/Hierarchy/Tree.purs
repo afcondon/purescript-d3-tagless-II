@@ -79,12 +79,9 @@ tree config root =
     -- Step 3: First walk (post-order) - compute preliminary positions
     afterFirstWalk = firstWalkAll config internalNodes rootId
 
-    -- Step 4: Adjust root so tree is centered at x=0
-    rootNode = unsafeGetNode afterFirstWalk rootId
-    adjustedNodes = adjustNode afterFirstWalk rootId { m: -rootNode.z }
-
-    -- Step 5: Second walk (pre-order) - compute final positions
-    finalNodes = secondWalkAll config adjustedNodes rootId
+    -- Step 4: Second walk (pre-order) - compute final positions
+    -- Note: D3 does NOT center the root at x=0 here - it preserves relative positioning
+    finalNodes = secondWalkAll config afterFirstWalk rootId
 
     -- Step 6: Convert back to TreeNode and scale to fit size
     resultTree = extractTreeNode finalNodes rootId
@@ -535,13 +532,10 @@ scaleToFit config tree =
               then 1.0
               else config.separation extents.left extents.right / 2.0
 
-        -- Center the tree: translate so the midpoint of left and right is at center
-        -- This keeps the root centered above its children
-        tx = -(leftNode.x + rightNode.x) / 2.0
-
-        -- Width spans from left to right, accounting for separation margins
-        treeWidth = (rightNode.x - leftNode.x) + 2.0 * s
-        kx = config.size.width / treeWidth
+        -- D3's approach: translate leftmost node to position s (separation margin from left edge)
+        -- This preserves the relative positioning (root centered above children)
+        tx = s - leftNode.x
+        kx = config.size.width / (rightNode.x + s + tx)
         ky = config.size.height / (if bottomNode.depth == 0 then 1.0 else toNumber bottomNode.depth)
 
       in scaleNode tx kx ky tree
